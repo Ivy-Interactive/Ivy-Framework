@@ -5,6 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <PackageId>Ivy</PackageId>
+    <Version>0.1.2.1</Version>
     <Company>Ivy</Company>
     <Description>Build Internal Applications with AI and Pure C#</Description>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
