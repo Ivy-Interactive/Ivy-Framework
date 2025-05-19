@@ -1,4 +1,4 @@
-import React, { CSSProperties } from 'react';
+import React, { CSSProperties, useRef, useEffect, useState } from 'react';
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Icon from '@/components/Icon';
@@ -61,6 +61,24 @@ export const TabsLayoutWidget: React.FC<TabsLayoutWidgetProps> = ({
 
   const tabsLayoutId = id;
 
+  // Refs and state for overflow detection
+  const containerRef = useRef<HTMLDivElement>(null);
+  const tabsListRef = useRef<HTMLDivElement>(null);
+  const [tabsOverflowing, setTabsOverflowing] = useState(false);
+
+  useEffect(() => {
+    function checkOverflow() {
+      if (containerRef.current && tabsListRef.current) {
+        setTabsOverflowing(
+          tabsListRef.current.scrollWidth > containerRef.current.offsetWidth
+        );
+      }
+    }
+    checkOverflow();
+    window.addEventListener('resize', checkOverflow);
+    return () => window.removeEventListener('resize', checkOverflow);
+  }, [React.Children.count(children)]);
+
   const tabWidgets = React.Children.toArray(children).filter((child) => 
     React.isValidElement(child) && 
     (child.type as any)?.displayName === 'TabWidget'
@@ -92,13 +110,15 @@ export const TabsLayoutWidget: React.FC<TabsLayoutWidgetProps> = ({
         'flex flex-col h-full'
       )}>
       <div className="flex-shrink-0">
-        <div className="relative pl-12">
+        <div className="relative pl-12" ref={containerRef}>
           <ScrollArea className="w-full pr-12">
-            <TabsList className={cn(
-              "relative h-auto w-max min-w-full gap-0.5 mt-3 bg-transparent p-0 before:absolute before:inset-x-0 before:bottom-0 before:h-px flex justify-start",
-              variant === "Tabs" && "before:bg-border",
-              variant === "Content" && ""
-              )}>
+            <TabsList
+              ref={tabsListRef}
+              className={cn(
+                "relative h-auto w-max min-w-full gap-0.5 mt-3 bg-transparent p-0 before:absolute before:inset-x-0 before:bottom-0 before:h-px flex justify-start",
+                variant === "Tabs" && "before:bg-border",
+                variant === "Content" && ""
+                )}>
               {tabWidgets.map((tabWidget, index) => {
                 if (React.isValidElement(tabWidget)) {
                   const { title, id, icon, badge  } = tabWidget.props as TabWidgetProps;
@@ -166,33 +186,35 @@ export const TabsLayoutWidget: React.FC<TabsLayoutWidgetProps> = ({
             </TabsList>
             <ScrollBar orientation="horizontal" />
           </ScrollArea>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button
-                className="absolute right-0 top-1/2 -translate-y-1/2 rounded p-2 hover:bg-muted transition"
-                aria-label="Show more tabs"
-                type="button"
-              >
-                <ChevronDown className="w-5 h-5" />
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {tabWidgets.map((tabWidget, index) => {
-                if (React.isValidElement(tabWidget)) {
-                  const { title } = tabWidget.props as TabWidgetProps;
-                  return (
-                    <DropdownMenuItem
-                      key={index}
-                      onClick={() => eventHandler("OnSelect", tabsLayoutId, [index])}
-                    >
-                      {title}
-                    </DropdownMenuItem>
-                  );
-                }
-                return null;
-              })}
-            </DropdownMenuContent>
-          </DropdownMenu>
+          {tabsOverflowing && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  className="absolute right-0 top-1/2 -translate-y-1/2 rounded p-2 hover:bg-muted transition"
+                  aria-label="Show more tabs"
+                  type="button"
+                >
+                  <ChevronDown className="w-5 h-5" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {tabWidgets.map((tabWidget, index) => {
+                  if (React.isValidElement(tabWidget)) {
+                    const { title } = tabWidget.props as TabWidgetProps;
+                    return (
+                      <DropdownMenuItem
+                        key={index}
+                        onClick={() => eventHandler("OnSelect", tabsLayoutId, [index])}
+                      >
+                        {title}
+                      </DropdownMenuItem>
+                    );
+                  }
+                  return null;
+                })}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </div>
       </div>
 
