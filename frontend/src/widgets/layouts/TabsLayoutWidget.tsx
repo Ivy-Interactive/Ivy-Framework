@@ -1,4 +1,4 @@
-import React, { CSSProperties, useRef, useEffect, useState } from 'react';
+import * as React from 'react';
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Icon from '@/components/Icon';
@@ -13,8 +13,9 @@ import {
   DropdownMenuContent,
   DropdownMenuItem
 } from '@/components/ui/dropdown-menu';
-import { DndContext, closestCenter } from '@dnd-kit/core';
-import { SortableContext, useSortable, arrayMove } from '@dnd-kit/sortable';
+import { DndContext, closestCenter, DragOverlay, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { SortableContext, useSortable, arrayMove, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 interface TabWidgetProps {
   children: React.ReactNode[];
@@ -87,30 +88,36 @@ interface SortableDropdownMenuItemProps {
   id: string;
   children: React.ReactNode;
   onClick: () => void;
+  isActive?: boolean;
 }
-function SortableDropdownMenuItem({ id, children, onClick }: SortableDropdownMenuItemProps) {
+function SortableDropdownMenuItem({ id, children, onClick, isActive }: SortableDropdownMenuItemProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
   const style = {
-    transform: transform ? `translate3d(${transform.x}px, 0, 0)` : undefined,
+    transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? 0.5 : 1,
     zIndex: isDragging ? 100 : undefined,
     cursor: 'grab',
+    background: isActive ? 'var(--muted)' : undefined,
+    width: '100%',
+    display: 'block',
   };
   return (
-    <DropdownMenuItem
+    <div
       ref={setNodeRef}
       style={style}
       {...attributes}
       {...listeners}
       onClick={onClick}
+      className="px-3 py-2 hover:bg-muted text-left cursor-pointer select-none"
+      tabIndex={0}
     >
       {children}
-    </DropdownMenuItem>
+    </div>
   );
 }
 
-export const TabsLayoutWidget: React.FC<TabsLayoutWidgetProps> = ({
+export const TabsLayoutWidget = ({
   id,
   children,
   events,
@@ -120,28 +127,24 @@ export const TabsLayoutWidget: React.FC<TabsLayoutWidgetProps> = ({
   height,
   padding,
   variant
-}) => {
+}: TabsLayoutWidgetProps) => {
+  // All hooks must be called before any early return
   const eventHandler = useEventHandler();
   const tabsLayoutId = id;
-
-  // Refs and state for overflow detection
-  const containerRef = useRef<HTMLDivElement>(null);
-  const tabsListRef = useRef<HTMLDivElement>(null);
-  const [tabsOverflowing, setTabsOverflowing] = useState(false);
-
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  const tabsListRef = React.useRef<HTMLDivElement>(null);
+  const [tabsOverflowing, setTabsOverflowing] = React.useState(false);
   // Tab order state
   const tabWidgets = React.Children.toArray(children).filter((child) =>
     React.isValidElement(child) &&
     (child.type as any)?.displayName === 'TabWidget'
   );
-  const [tabOrder, setTabOrder] = useState(tabWidgets.map(tab => (tab as any).props.id));
-
+  const [tabOrder, setTabOrder] = React.useState(tabWidgets.map(tab => (tab as any).props.id));
   // Keep tabOrder in sync with children
-  useEffect(() => {
+  React.useEffect(() => {
     setTabOrder(tabWidgets.map(tab => (tab as any).props.id));
   }, [children]);
-
-  useEffect(() => {
+  React.useEffect(() => {
     function checkOverflow() {
       if (containerRef.current && tabsListRef.current) {
         setTabsOverflowing(
@@ -153,7 +156,16 @@ export const TabsLayoutWidget: React.FC<TabsLayoutWidgetProps> = ({
     window.addEventListener('resize', checkOverflow);
     return () => window.removeEventListener('resize', checkOverflow);
   }, [React.Children.count(children)]);
-
+  // DnD sensors with activation constraint
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8, // require 8px movement before drag starts
+      },
+    })
+  );
+  // Track the currently dragged item for DragOverlay
+  const [activeDragId, setActiveDragId] = React.useState<string | null>(null);
   if(tabWidgets.length === 0) return <div className='remove-parent-padding'></div>;
 
   // Map tabOrder to tabWidgets
@@ -171,7 +183,7 @@ export const TabsLayoutWidget: React.FC<TabsLayoutWidgetProps> = ({
     }
   };
 
-  const styles:CSSProperties = { 
+  const styles:React.CSSProperties = { 
     ...getWidth(width),
     ...getHeight(height),
   };
@@ -197,7 +209,7 @@ export const TabsLayoutWidget: React.FC<TabsLayoutWidgetProps> = ({
       <div className="flex-shrink-0">
         <div className="relative pl-12" ref={containerRef}>
           <ScrollArea className="w-full pr-12" scrollbarPosition="top" horizontalScroll>
-            <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+            <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd} sensors={sensors}>
               <SortableContext items={tabOrder}>
                 <TabsList
                   ref={tabsListRef}
@@ -282,24 +294,42 @@ export const TabsLayoutWidget: React.FC<TabsLayoutWidgetProps> = ({
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-                  <SortableContext items={tabOrder}>
-                    {orderedTabWidgets.map((tabWidget, index) => {
-                      if (React.isValidElement(tabWidget)) {
-                        const { title, id } = tabWidget.props as TabWidgetProps;
+                <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd} sensors={sensors}>
+                  <SortableContext items={tabOrder} strategy={verticalListSortingStrategy}>
+                    <div className="flex flex-col w-48">
+                      {orderedTabWidgets.map((tabWidget, index) => {
+                        if (React.isValidElement(tabWidget)) {
+                          const { title, id } = tabWidget.props as TabWidgetProps;
+                          return (
+                            <SortableDropdownMenuItem
+                              key={id}
+                              id={id}
+                              onClick={() => eventHandler("OnSelect", tabsLayoutId, [tabOrder.indexOf(id)])}
+                              isActive={activeTab === id}
+                            >
+                              {title}
+                            </SortableDropdownMenuItem>
+                          );
+                        }
+                        return null;
+                      })}
+                    </div>
+                  </SortableContext>
+                  <DragOverlay>
+                    {/** Show a visual clone of the dragged item */}
+                    {(() => {
+                      const active = orderedTabWidgets.find(tab => (tab as any)?.props.id === activeTab);
+                      if (active && React.isValidElement(active)) {
+                        const { title } = active.props as TabWidgetProps;
                         return (
-                          <SortableDropdownMenuItem
-                            key={id}
-                            id={id}
-                            onClick={() => eventHandler("OnSelect", tabsLayoutId, [tabOrder.indexOf(id)])}
-                          >
+                          <div className="px-3 py-2 bg-muted rounded shadow text-left cursor-pointer select-none">
                             {title}
-                          </SortableDropdownMenuItem>
+                          </div>
                         );
                       }
                       return null;
-                    })}
-                  </SortableContext>
+                    })()}
+                  </DragOverlay>
                 </DndContext>
               </DropdownMenuContent>
             </DropdownMenu>
