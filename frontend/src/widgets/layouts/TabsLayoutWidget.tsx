@@ -49,7 +49,15 @@ interface TabsLayoutWidgetProps {
 }
 
 // Helper component for sortable tab triggers
-function SortableTabTrigger({ id, index, ...props }) {
+interface SortableTabTriggerProps {
+  id: string;
+  value: string;
+  onClick: () => void;
+  onMouseDown: (e: React.MouseEvent) => void;
+  className?: string;
+  children: React.ReactNode;
+}
+function SortableTabTrigger({ id, value, onClick, onMouseDown, className, children, ...props }: SortableTabTriggerProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
   const style = {
     transform: transform ? `translate3d(${transform.x}px, 0, 0)` : undefined,
@@ -61,10 +69,44 @@ function SortableTabTrigger({ id, index, ...props }) {
     <TabsTrigger
       ref={setNodeRef}
       style={style}
+      value={value}
+      onClick={onClick}
+      onMouseDown={onMouseDown}
+      className={className}
       {...attributes}
       {...listeners}
       {...props}
-    />
+    >
+      {children}
+    </TabsTrigger>
+  );
+}
+
+// Helper component for sortable dropdown menu items
+interface SortableDropdownMenuItemProps {
+  id: string;
+  children: React.ReactNode;
+  onClick: () => void;
+}
+function SortableDropdownMenuItem({ id, children, onClick }: SortableDropdownMenuItemProps) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
+  const style = {
+    transform: transform ? `translate3d(${transform.x}px, 0, 0)` : undefined,
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    zIndex: isDragging ? 100 : undefined,
+    cursor: 'grab',
+  };
+  return (
+    <DropdownMenuItem
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      {...listeners}
+      onClick={onClick}
+    >
+      {children}
+    </DropdownMenuItem>
   );
 }
 
@@ -173,7 +215,7 @@ export const TabsLayoutWidget: React.FC<TabsLayoutWidgetProps> = ({
                           id={id}
                           value={id}
                           onClick={() => eventHandler("OnSelect", tabsLayoutId, [tabOrder.indexOf(id)])}
-                          onMouseDown={(e) => handleMouseDown(e, tabOrder.indexOf(id))}
+                          onMouseDown={(e: React.MouseEvent) => handleMouseDown(e, tabOrder.indexOf(id))}
                           className={cn(
                             "group overflow-hidden rounded-b-none py-2 data-[state=active]:z-10 data-[state=active]:shadow-none",
                             (variant === "Tabs" && index === 0) && "ml-12",
@@ -240,20 +282,25 @@ export const TabsLayoutWidget: React.FC<TabsLayoutWidgetProps> = ({
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                {orderedTabWidgets.map((tabWidget, index) => {
-                  if (React.isValidElement(tabWidget)) {
-                    const { title, id } = tabWidget.props as TabWidgetProps;
-                    return (
-                      <DropdownMenuItem
-                        key={id}
-                        onClick={() => eventHandler("OnSelect", tabsLayoutId, [tabOrder.indexOf(id)])}
-                      >
-                        {title}
-                      </DropdownMenuItem>
-                    );
-                  }
-                  return null;
-                })}
+                <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                  <SortableContext items={tabOrder}>
+                    {orderedTabWidgets.map((tabWidget, index) => {
+                      if (React.isValidElement(tabWidget)) {
+                        const { title, id } = tabWidget.props as TabWidgetProps;
+                        return (
+                          <SortableDropdownMenuItem
+                            key={id}
+                            id={id}
+                            onClick={() => eventHandler("OnSelect", tabsLayoutId, [tabOrder.indexOf(id)])}
+                          >
+                            {title}
+                          </SortableDropdownMenuItem>
+                        );
+                      }
+                      return null;
+                    })}
+                  </SortableContext>
+                </DndContext>
               </DropdownMenuContent>
             </DropdownMenu>
           )}
