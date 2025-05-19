@@ -226,3 +226,13 @@
 :has(DIV.remove-ancestor-padding) {
   padding: 0 !important;
 }
+
+.scrollbar-top[data-orientation="horizontal"] {
+  top: 0 !important;
+  bottom: auto !important;
+}
+
+.invisible-scrollbar {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
