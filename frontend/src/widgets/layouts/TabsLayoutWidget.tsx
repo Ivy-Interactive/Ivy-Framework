@@ -281,6 +281,7 @@ export const TabsLayoutWidget = ({
               </SortableContext>
             </DndContext>
             <ScrollBar orientation="horizontal" className="invisible-scrollbar" />
+            <ScrollBar orientation="horizontal" scrollbarPosition="top" className="invisible-scrollbar" />
           </ScrollArea>
           {tabsOverflowing && (
             <DropdownMenu>

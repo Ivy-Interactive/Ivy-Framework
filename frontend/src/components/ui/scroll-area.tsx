@@ -12,7 +12,7 @@ const ScrollArea = React.forwardRef<
     className={cn("relative overflow-hidden", className)}
     {...props}
   >
-    {scrollbarPosition === "top" && <ScrollBar orientation="horizontal" scrollbarPosition="top" />}
+    {scrollbarPosition === "top" && <ScrollBar orientation="horizontal" scrollbarPosition="top" className="invisible-scrollbar" />}
     <ScrollAreaPrimitive.Viewport
       className="h-full w-full rounded-[inherit] overflow-x-auto"
       {...(horizontalScroll ? {
