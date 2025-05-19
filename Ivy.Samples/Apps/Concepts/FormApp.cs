@@ -10,14 +10,14 @@ public enum Gender
 }
 
 public record UserModel(
-    string Name, string Password, bool IsAwesome, DateTime BirthDate, int Height, int UserId = 123, Gender Gender = Gender.Male, string Json = "{////////////////////////////////////////////////////////////////////////////////////////////////////////////////////}");
+    string Name, string Password, bool IsAwesome, DateTime BirthDate, decimal Height, int UserId = 123, Gender Gender = Gender.Male, string Json = "{////////////////////////////////////////////////////////////////////////////////////////////////////////////////////}");
 
 [App(icon: Icons.Clipboard)]
 public class FormApp : SampleBase
 {
     protected override object? BuildSample()
     {
-        var model = UseState(() => new UserModel("Niels Bosma", "1234156", true, DateTime.Parse("1982-07-17"), 183));
+        var model = UseState(() => new UserModel("Niels Bosma", "1234156", true, DateTime.Parse("1982-07-17"), 183.33m));
 
         FormBuilder<UserModel> BuildForm(IState<UserModel> x) =>
             x.ToForm()
