@@ -2,11 +2,17 @@ import React, { CSSProperties } from 'react';
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Icon from '@/components/Icon';
-import { RotateCw, X } from 'lucide-react';
+import { RotateCw, X, ChevronDown } from 'lucide-react';
 import { useEventHandler } from '@/components/EventHandlerContext';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { getHeight, getPadding, getWidth } from '@/lib/styles';
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem
+} from '@/components/ui/dropdown-menu';
 
 interface TabWidgetProps {
   children: React.ReactNode[];
@@ -86,8 +92,8 @@ export const TabsLayoutWidget: React.FC<TabsLayoutWidgetProps> = ({
         'flex flex-col h-full'
       )}>
       <div className="flex-shrink-0">
-        <div className="relative">
-          <ScrollArea className="w-full">
+        <div className="relative pl-12">
+          <ScrollArea className="w-full pr-12">
             <TabsList className={cn(
               "relative h-auto w-max min-w-full gap-0.5 mt-3 bg-transparent p-0 before:absolute before:inset-x-0 before:bottom-0 before:h-px flex justify-start",
               variant === "Tabs" && "before:bg-border",
@@ -160,6 +166,33 @@ export const TabsLayoutWidget: React.FC<TabsLayoutWidgetProps> = ({
             </TabsList>
             <ScrollBar orientation="horizontal" />
           </ScrollArea>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                className="absolute right-0 top-1/2 -translate-y-1/2 rounded p-2 hover:bg-muted transition"
+                aria-label="Show more tabs"
+                type="button"
+              >
+                <ChevronDown className="w-5 h-5" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {tabWidgets.map((tabWidget, index) => {
+                if (React.isValidElement(tabWidget)) {
+                  const { title } = tabWidget.props as TabWidgetProps;
+                  return (
+                    <DropdownMenuItem
+                      key={index}
+                      onClick={() => eventHandler("OnSelect", tabsLayoutId, [index])}
+                    >
+                      {title}
+                    </DropdownMenuItem>
+                  );
+                }
+                return null;
+              })}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
