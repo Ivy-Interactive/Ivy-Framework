@@ -4,13 +4,16 @@ namespace Ivy.Apps;
 
 public class AppArgs
 {
-    internal AppArgs(string connectionId, string appId, string? argsJson, string host)
+    internal AppArgs(string connectionId, string appId, string? argsJson, string scheme, string host)
     {
         AppId = appId;
         ArgsJson = argsJson;
         ConnectionId = connectionId;
+        Scheme = scheme;
         Host = host;
     }
+
+    public string Scheme { get; set; }
 
     public string Host { get; set; }
     
