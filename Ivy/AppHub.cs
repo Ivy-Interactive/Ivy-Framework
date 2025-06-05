@@ -65,7 +65,8 @@ public class AppHub(
             appArgs = httpContext!.Request.Query["appArgs"].ToString().NullIfEmpty();
         }
 
-        return new AppArgs(connectionId, appId, appArgs ?? server.Args?.Args, httpContext.Request.Host.Value!);
+        HttpRequest request = httpContext.Request;
+        return new AppArgs(connectionId, appId, appArgs ?? server.Args?.Args, request.Scheme, request.Host.Value!);
     }
     
     public override async Task OnConnectedAsync()

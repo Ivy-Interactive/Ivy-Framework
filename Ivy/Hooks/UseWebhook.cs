@@ -34,7 +34,7 @@ public static class UseWebhookExtensions
         
         context.UseEffect(() => webhookController.Register(webhookId.Value, handler), [EffectTrigger.AfterInit()]);
         
-        return new Uri($"{args.Host}/webhook/{webhookId.Value}");
+        return new Uri($"{args.Scheme}://{args.Host}/webhook/{webhookId.Value}");
     }
 }
 
