@@ -51,7 +51,8 @@ public class SupabaseAuthProvider : IAuthProvider
         
         var providerAuthState = await _client.Auth.SignIn(provider, new SignInOptions
         {
-            RedirectTo = callbackUri.ToString()
+            RedirectTo = callbackUri.ToString(),
+            FlowType = Constants.OAuthFlowType.PKCE,
         });
 
         return providerAuthState.Uri;
