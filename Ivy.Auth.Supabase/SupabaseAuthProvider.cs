@@ -13,7 +13,9 @@ public class SupabaseAuthProvider : IAuthProvider
     private readonly global::Supabase.Client _client;
     
     private readonly List<AuthOption> _authOptions = new();
-    
+
+    private string? _pkceCodeVerifier = null;
+
     public SupabaseAuthProvider()
     {
         var configuration = new ConfigurationBuilder()
@@ -30,7 +32,7 @@ public class SupabaseAuthProvider : IAuthProvider
             AutoConnectRealtime = false
         };
         
-         _client = new global::Supabase.Client(url, key, options);
+        _client = new global::Supabase.Client(url, key, options);
     }
 
     public async Task<string?> LoginAsync(string email, string password)
@@ -54,6 +56,7 @@ public class SupabaseAuthProvider : IAuthProvider
             RedirectTo = callbackUri.ToString(),
             FlowType = Constants.OAuthFlowType.PKCE,
         });
+        _pkceCodeVerifier = providerAuthState.PKCEVerifier;
 
         return providerAuthState.Uri;
     }
@@ -61,7 +64,8 @@ public class SupabaseAuthProvider : IAuthProvider
     public string HandleOAuthCallback(HttpRequest request)
     {
         var code = request.Query["code"];
-        return code.ToString();
+        var session = _client.Auth.ExchangeCodeForSession(_pkceCodeVerifier!, code.ToString()).GetAwaiter().GetResult();
+        return session!.AccessToken!;
     }
 
     public async Task LogoutAsync(string _)
