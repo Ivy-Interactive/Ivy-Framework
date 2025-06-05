@@ -91,7 +91,7 @@ public class OAuthFlowView(AuthOption option) : ViewBase
         {
             var token = auth.HandleOAuthCallback(request);
             client.SetJwt(token);
-            return new OkResult();
+            return new RedirectResult("/");
         });
         
         var login = async () =>
