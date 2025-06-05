@@ -124,7 +124,7 @@ public class SupabaseAuthProvider : IAuthProvider
     
     public SupabaseAuthProvider UseApple()
     {
-        _authOptions.Add(new AuthOption(AuthFlow.OAuth, "Apple", nameof(Constants.Provider.Apple).ToLower(), Icons.Microsoft));
+        _authOptions.Add(new AuthOption(AuthFlow.OAuth, "Apple", nameof(Constants.Provider.Apple).ToLower(), Icons.Apple));
         return this;
     }
 }
