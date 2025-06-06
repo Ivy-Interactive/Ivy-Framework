@@ -1,11 +1,10 @@
 ﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 
 namespace Ivy.Auth;
 
 public interface IAuthProvider
 {
-     Task<string?> LoginAsync(string email, string password);
+     Task<AuthToken?> LoginAsync(string email, string password);
 
      Task LogoutAsync(string jwt);
      
@@ -17,5 +16,5 @@ public interface IAuthProvider
      
      Task<Uri> GetOAuthUriAsync(string optionId, Uri callbackUri);
      
-     Task<string> HandleOAuthCallbackAsync(HttpRequest request);
+     Task<AuthToken?> HandleOAuthCallbackAsync(HttpRequest request);
 }
