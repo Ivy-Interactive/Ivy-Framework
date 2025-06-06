@@ -35,10 +35,10 @@ public class BasicAuthProvider : IAuthProvider
         }
     }
     
-    public Task<string?> LoginAsync(string email, string password)
+    public Task<AuthToken?> LoginAsync(string email, string password)
     {
         var found = _users.Any(u => u.user == email && u.password == password);
-        if (!found) return Task.FromResult<string?>(null);
+        if (!found) return Task.FromResult<AuthToken?>(null);
 
         var claims = new[] { new Claim(JwtRegisteredClaimNames.Sub, email) };
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secret));
@@ -50,7 +50,10 @@ public class BasicAuthProvider : IAuthProvider
             expires: DateTime.UtcNow.AddHours(1),
             signingCredentials: creds);
         var jwt = new JwtSecurityTokenHandler().WriteToken(token);
-        return Task.FromResult<string?>(jwt);
+        var authToken = jwt != null
+            ? new AuthToken(jwt)
+            : null;
+        return Task.FromResult(authToken);
     }
 
     public Task LogoutAsync(string jwt)
@@ -63,7 +66,7 @@ public class BasicAuthProvider : IAuthProvider
         throw new NotImplementedException();
     }
 
-    public Task<string> HandleOAuthCallbackAsync(HttpRequest request)
+    public Task<AuthToken?> HandleOAuthCallbackAsync(HttpRequest request)
     {
         throw new NotImplementedException();
     }

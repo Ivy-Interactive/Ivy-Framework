@@ -35,10 +35,10 @@ public class SupabaseAuthProvider : IAuthProvider
         _client = new global::Supabase.Client(url, key, options);
     }
 
-    public async Task<string?> LoginAsync(string email, string password)
+    public async Task<AuthToken?> LoginAsync(string email, string password)
     {
         var session = await _client.Auth.SignIn(email, password);
-        return session?.AccessToken;
+        return MakeAuthToken(session);
     }
     
     public async Task<Uri> GetOAuthUriAsync(string optionId, Uri callbackUri)
@@ -61,11 +61,11 @@ public class SupabaseAuthProvider : IAuthProvider
         return providerAuthState.Uri;
     }
 
-    public async Task<string> HandleOAuthCallbackAsync(HttpRequest request)
+    public async Task<AuthToken?> HandleOAuthCallbackAsync(HttpRequest request)
     {
         var code = request.Query["code"];
         var session = await _client.Auth.ExchangeCodeForSession(_pkceCodeVerifier!, code.ToString());
-        return session!.AccessToken!;
+        return MakeAuthToken(session);
     }
 
     public async Task LogoutAsync(string _)
@@ -131,6 +131,12 @@ public class SupabaseAuthProvider : IAuthProvider
         _authOptions.Add(new AuthOption(AuthFlow.OAuth, "Apple", nameof(Constants.Provider.Apple).ToLower(), Icons.Apple));
         return this;
     }
+
+    private AuthToken? MakeAuthToken(Session? session) =>
+        session?.AccessToken != null
+            ? new AuthToken(session.AccessToken, session.RefreshToken, session.ExpiresAt())
+            : null;
+
 }
 
 // public async Task<bool> ValidateJwtAsync(string jwt)
