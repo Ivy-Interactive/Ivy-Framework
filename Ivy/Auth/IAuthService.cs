@@ -9,7 +9,7 @@ public interface IAuthService
 
     Task<Uri> GetOAuthUriAsync(string optionId, Uri callbackUri);
     
-    string HandleOAuthCallback(HttpRequest request);
+    Task<string> HandleOAuthCallbackAsync(HttpRequest request);
     
     Task LogoutAsync();
     

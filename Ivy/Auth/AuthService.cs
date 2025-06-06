@@ -16,9 +16,9 @@ public class AuthService(IAuthProvider authProvider, string? jwt) : IAuthService
         return authProvider.GetOAuthUriAsync(optionId, callbackUri);
     }
 
-    public string HandleOAuthCallback(HttpRequest request)
+    public Task<string> HandleOAuthCallbackAsync(HttpRequest request)
     { 
-        return authProvider.HandleOAuthCallback(request);
+        return authProvider.HandleOAuthCallbackAsync(request);
     }
 
     public Task LogoutAsync()
@@ -48,4 +48,3 @@ public class AuthService(IAuthProvider authProvider, string? jwt) : IAuthService
         return authProvider.GetAuthOptions();
     }
 }
-
