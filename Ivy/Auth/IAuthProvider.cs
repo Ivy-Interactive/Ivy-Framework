@@ -17,5 +17,5 @@ public interface IAuthProvider
      
      Task<Uri> GetOAuthUriAsync(string optionId, Uri callbackUri);
      
-     string HandleOAuthCallback(HttpRequest request);
+     Task<string> HandleOAuthCallbackAsync(HttpRequest request);
 }

@@ -57,7 +57,7 @@ public class AutheliaAuthProvider : IAuthProvider
         throw new NotImplementedException();
     }
 
-    public string HandleOAuthCallback(HttpRequest request)
+    public Task<string> HandleOAuthCallbackAsync(HttpRequest request)
     {
         throw new NotImplementedException();
     }

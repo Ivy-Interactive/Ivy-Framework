@@ -89,7 +89,7 @@ public class OAuthFlowView(AuthOption option) : ViewBase
         var auth = this.UseService<IAuthService>();
         var callback = this.UseWebhook(async (request) =>
         {
-            var token = auth.HandleOAuthCallback(request);
+            var token = await auth.HandleOAuthCallbackAsync(request);
             client.SetJwt(token);
             return new RedirectResult("/");
         });

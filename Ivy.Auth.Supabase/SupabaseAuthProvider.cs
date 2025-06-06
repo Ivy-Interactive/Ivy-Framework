@@ -61,10 +61,10 @@ public class SupabaseAuthProvider : IAuthProvider
         return providerAuthState.Uri;
     }
 
-    public string HandleOAuthCallback(HttpRequest request)
+    public async Task<string> HandleOAuthCallbackAsync(HttpRequest request)
     {
         var code = request.Query["code"];
-        var session = _client.Auth.ExchangeCodeForSession(_pkceCodeVerifier!, code.ToString()).GetAwaiter().GetResult();
+        var session = await _client.Auth.ExchangeCodeForSession(_pkceCodeVerifier!, code.ToString());
         return session!.AccessToken!;
     }
 
