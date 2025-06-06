@@ -87,7 +87,7 @@ public class OAuthFlowView(AuthOption option) : ViewBase
     {
         var client = this.UseService<IClientProvider>();
         var auth = this.UseService<IAuthService>();
-        var callback = this.UseWebhook((request) =>
+        var callback = this.UseWebhook(async (request) =>
         {
             var token = auth.HandleOAuthCallback(request);
             client.SetJwt(token);
@@ -102,5 +102,3 @@ public class OAuthFlowView(AuthOption option) : ViewBase
         return new Button(option.Name).Secondary().Icon(option.Icon).Width(Size.Full()).HandleClick(login.HandleError(this));
     }
 }
-
-
