@@ -72,7 +72,28 @@ public class SupabaseAuthProvider : IAuthProvider
     {
         await _client.Auth.SignOut();
     }
-    
+
+    public async Task<AuthToken?> RefreshJwtAsync(AuthToken jwt)
+    {
+        if (jwt.ExpiresAt == null || jwt.RefreshToken == null || DateTimeOffset.UtcNow < jwt.ExpiresAt)
+        {
+            // Refresh not needed (or not possible).
+            return jwt;
+        }
+        else
+        {
+            try
+            {
+                var session = await _client.Auth.SignIn(Constants.SignInType.RefreshToken, jwt.RefreshToken);
+                return MakeAuthToken(session);
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+    }
+
     public async Task<bool> ValidateJwtAsync(string jwt)
     {
         try

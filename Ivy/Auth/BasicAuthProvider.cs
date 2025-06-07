@@ -61,6 +61,8 @@ public class BasicAuthProvider : IAuthProvider
         return Task.CompletedTask;
     }
 
+    public Task<AuthToken?> RefreshJwtAsync(AuthToken jwt) => Task.FromResult<AuthToken?>(jwt);
+
     public Task<Uri> GetOAuthUriAsync(string optionId, Uri callbackUri)
     {
         throw new NotImplementedException();
