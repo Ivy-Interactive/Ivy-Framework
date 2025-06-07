@@ -94,10 +94,18 @@ public class AppHub(
             }
             else
             {
-                var validJwt = await authProvider.ValidateJwtAsync(authToken.Jwt);
-                if (!validJwt)
+                authToken = await authProvider.RefreshJwtAsync(authToken);
+                if (string.IsNullOrEmpty(authToken?.Jwt))
                 {
                     appId = AppIds.Auth;
+                }
+                else
+                {
+                    var validJwt = await authProvider.ValidateJwtAsync(authToken.Jwt);
+                    if (!validJwt)
+                    {
+                        appId = AppIds.Auth;
+                    }
                 }
             }
             appServices.AddSingleton<IAuthService>(s => new AuthService(authProvider, authToken));

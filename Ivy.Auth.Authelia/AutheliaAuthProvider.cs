@@ -55,6 +55,8 @@ public class AutheliaAuthProvider : IAuthProvider
         _cookieContainer.Add(new Uri(_baseUrl), expired);
     }
 
+    public Task<AuthToken?> RefreshJwtAsync(AuthToken jwt) => Task.FromResult<AuthToken?>(jwt);
+
     public Task<Uri> GetOAuthUriAsync(string optionId, Uri callbackUri)
     {
         throw new NotImplementedException();
