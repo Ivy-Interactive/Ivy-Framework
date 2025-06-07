@@ -13,7 +13,9 @@ public class SupabaseAuthProvider : IAuthProvider
     private readonly global::Supabase.Client _client;
     
     private readonly List<AuthOption> _authOptions = new();
-    
+
+    private string? _pkceCodeVerifier = null;
+
     public SupabaseAuthProvider()
     {
         var configuration = new ConfigurationBuilder()
@@ -30,13 +32,13 @@ public class SupabaseAuthProvider : IAuthProvider
             AutoConnectRealtime = false
         };
         
-         _client = new global::Supabase.Client(url, key, options);
+        _client = new global::Supabase.Client(url, key, options);
     }
 
-    public async Task<string?> LoginAsync(string email, string password)
+    public async Task<AuthToken?> LoginAsync(string email, string password)
     {
         var session = await _client.Auth.SignIn(email, password);
-        return session?.AccessToken;
+        return MakeAuthToken(session);
     }
     
     public async Task<Uri> GetOAuthUriAsync(string optionId, Uri callbackUri)
@@ -51,23 +53,47 @@ public class SupabaseAuthProvider : IAuthProvider
         
         var providerAuthState = await _client.Auth.SignIn(provider, new SignInOptions
         {
-            RedirectTo = callbackUri.ToString()
+            RedirectTo = callbackUri.ToString(),
+            FlowType = Constants.OAuthFlowType.PKCE,
         });
+        _pkceCodeVerifier = providerAuthState.PKCEVerifier;
 
         return providerAuthState.Uri;
     }
 
-    public string HandleOAuthCallback(HttpRequest request)
+    public async Task<AuthToken?> HandleOAuthCallbackAsync(HttpRequest request)
     {
         var code = request.Query["code"];
-        return code.ToString();
+        var session = await _client.Auth.ExchangeCodeForSession(_pkceCodeVerifier!, code.ToString());
+        return MakeAuthToken(session);
     }
 
     public async Task LogoutAsync(string _)
     {
         await _client.Auth.SignOut();
     }
-    
+
+    public async Task<AuthToken?> RefreshJwtAsync(AuthToken jwt)
+    {
+        if (jwt.ExpiresAt == null || jwt.RefreshToken == null || DateTimeOffset.UtcNow < jwt.ExpiresAt)
+        {
+            // Refresh not needed (or not possible).
+            return jwt;
+        }
+        else
+        {
+            try
+            {
+                var session = await _client.Auth.SignIn(Constants.SignInType.RefreshToken, jwt.RefreshToken);
+                return MakeAuthToken(session);
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+    }
+
     public async Task<bool> ValidateJwtAsync(string jwt)
     {
         try
@@ -123,9 +149,15 @@ public class SupabaseAuthProvider : IAuthProvider
     
     public SupabaseAuthProvider UseApple()
     {
-        _authOptions.Add(new AuthOption(AuthFlow.OAuth, "Apple", nameof(Constants.Provider.Apple).ToLower(), Icons.Microsoft));
+        _authOptions.Add(new AuthOption(AuthFlow.OAuth, "Apple", nameof(Constants.Provider.Apple).ToLower(), Icons.Apple));
         return this;
     }
+
+    private AuthToken? MakeAuthToken(Session? session) =>
+        session?.AccessToken != null
+            ? new AuthToken(session.AccessToken, session.RefreshToken, session.ExpiresAt())
+            : null;
+
 }
 
 // public async Task<bool> ValidateJwtAsync(string jwt)

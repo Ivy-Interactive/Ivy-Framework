@@ -1,3 +1,4 @@
+using System.Text.Json;
 using System.Text.Json.Nodes;
 using Ivy.Apps;
 using Ivy.Auth;
@@ -65,7 +66,8 @@ public class AppHub(
             appArgs = httpContext!.Request.Query["appArgs"].ToString().NullIfEmpty();
         }
 
-        return new AppArgs(connectionId, appId, appArgs ?? server.Args?.Args, httpContext.Request.Host.Value!);
+        HttpRequest request = httpContext.Request;
+        return new AppArgs(connectionId, appId, appArgs ?? server.Args?.Args, request.Scheme, request.Host.Value!);
     }
     
     public override async Task OnConnectedAsync()
@@ -80,19 +82,33 @@ public class AppHub(
         {
             var authProvider = server.Services.BuildServiceProvider().GetService<IAuthProvider>() ?? throw new Exception("IAuthProvider not found");
             var jwt = httpContext.Request.Cookies["jwt"].NullIfEmpty();
-            if(string.IsNullOrEmpty(jwt))
+
+            // TODO: handle deserialization errors
+            var authToken = jwt != null
+                ? JsonSerializer.Deserialize<AuthToken>(jwt)
+                : null;
+
+            if (string.IsNullOrEmpty(authToken?.Jwt))
             {
                 appId = AppIds.Auth;
             }
             else
             {
-                var validJwt = await authProvider.ValidateJwtAsync(jwt!);
-                if (!validJwt)
+                authToken = await authProvider.RefreshJwtAsync(authToken);
+                if (string.IsNullOrEmpty(authToken?.Jwt))
                 {
                     appId = AppIds.Auth;
                 }
+                else
+                {
+                    var validJwt = await authProvider.ValidateJwtAsync(authToken.Jwt);
+                    if (!validJwt)
+                    {
+                        appId = AppIds.Auth;
+                    }
+                }
             }
-            appServices.AddSingleton<IAuthService>(s => new AuthService(authProvider, jwt));
+            appServices.AddSingleton<IAuthService>(s => new AuthService(authProvider, authToken));
         }
         
         var appArgs = GetAppArgs(Context.ConnectionId, appId, httpContext);
@@ -212,7 +228,13 @@ public class AppHub(
                                        throw new Exception("IAuthProvider not found");
 
                     var jwt = Context.GetHttpContext()!.Request.Cookies["jwt"].NullIfEmpty();
-                    if (string.IsNullOrEmpty(jwt) || !await authProvider.ValidateJwtAsync(jwt))
+
+                    // TODO: handle deserialization errors
+                    var authToken = jwt != null
+                        ? JsonSerializer.Deserialize<AuthToken>(jwt)
+                        : null;
+
+                    if (string.IsNullOrEmpty(authToken?.Jwt) || !await authProvider.ValidateJwtAsync(authToken.Jwt))
                     {
                         logger.LogWarning(
                             "Invalid JWT for event from {ConnectionId}. Aborting.",
