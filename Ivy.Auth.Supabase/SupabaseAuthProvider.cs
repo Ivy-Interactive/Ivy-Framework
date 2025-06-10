@@ -86,26 +86,25 @@ public class SupabaseAuthProvider : IAuthProvider
         {
             // Refresh not needed (or not possible).
             Console.WriteLine("Token refresh not required, or not possible. Reasons:");
-            if (jwt.ExpiresAt == null)                 Console.WriteLine($"    - expiry date is null");
-            if (jwt.RefreshToken == null)              Console.WriteLine($"    - refresh token is null");
+            if (jwt.ExpiresAt == null) Console.WriteLine($"    - expiry date is null");
+            if (jwt.RefreshToken == null) Console.WriteLine($"    - refresh token is null");
             if (DateTimeOffset.UtcNow < jwt.ExpiresAt) Console.WriteLine($"    - access token is still valid; {DateTimeOffset.UtcNow} < {jwt.ExpiresAt}");
             return jwt;
         }
-        else
+
+        try
         {
-            try
-            {
-                Console.WriteLine($"attempting to sign in using a refresh token. the old token: {jwt}");
-                var session = await _client.Auth.SignIn(Constants.SignInType.RefreshToken, jwt.RefreshToken);
-                var authToken = MakeAuthToken(session);
-                Console.WriteLine($"    the new token: {authToken}");
-                return authToken;
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine($"    failed to sign in using refresh token: {e}");
-                return null;
-            }
+            Console.WriteLine($"attempting to set session using the existing token. the old token: {jwt}");
+
+            var session = await _client.Auth.SetSession(jwt.Jwt, jwt.RefreshToken);
+            var authToken = MakeAuthToken(session);
+            Console.WriteLine($"    the new token: {jwt}");
+            return authToken;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"    setting session failed with exception: {e}");
+            return null;
         }
     }
 
