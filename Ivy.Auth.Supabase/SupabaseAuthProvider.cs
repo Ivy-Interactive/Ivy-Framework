@@ -38,7 +38,9 @@ public class SupabaseAuthProvider : IAuthProvider
     public async Task<AuthToken?> LoginAsync(string email, string password)
     {
         var session = await _client.Auth.SignIn(email, password);
-        return MakeAuthToken(session);
+        var authToken = MakeAuthToken(session);
+        Console.WriteLine($"signed in with email and password, made auth token: {authToken}");
+        return authToken;
     }
     
     public async Task<Uri> GetOAuthUriAsync(string optionId, Uri callbackUri)
@@ -58,14 +60,19 @@ public class SupabaseAuthProvider : IAuthProvider
         });
         _pkceCodeVerifier = providerAuthState.PKCEVerifier;
 
+        Console.WriteLine($"Got URI for OAuth: {providerAuthState.Uri}");
+
         return providerAuthState.Uri;
     }
 
     public async Task<AuthToken?> HandleOAuthCallbackAsync(HttpRequest request)
     {
         var code = request.Query["code"];
+        Console.WriteLine($"in oauth callback handler. got code {code}");
         var session = await _client.Auth.ExchangeCodeForSession(_pkceCodeVerifier!, code.ToString());
-        return MakeAuthToken(session);
+        var authToken = MakeAuthToken(session);
+        Console.WriteLine($"exchanged code for token: {authToken}");
+        return authToken;
     }
 
     public async Task LogoutAsync(string _)
@@ -78,17 +85,25 @@ public class SupabaseAuthProvider : IAuthProvider
         if (jwt.ExpiresAt == null || jwt.RefreshToken == null || DateTimeOffset.UtcNow < jwt.ExpiresAt)
         {
             // Refresh not needed (or not possible).
+            Console.WriteLine("Token refresh not required, or not possible. Reasons:");
+            if (jwt.ExpiresAt == null)                 Console.WriteLine($"    - expiry date is null");
+            if (jwt.RefreshToken == null)              Console.WriteLine($"    - refresh token is null");
+            if (DateTimeOffset.UtcNow < jwt.ExpiresAt) Console.WriteLine($"    - access token is still valid; {DateTimeOffset.UtcNow} < {jwt.ExpiresAt}");
             return jwt;
         }
         else
         {
             try
             {
+                Console.WriteLine($"attempting to sign in using a refresh token. the old token: {jwt}");
                 var session = await _client.Auth.SignIn(Constants.SignInType.RefreshToken, jwt.RefreshToken);
-                return MakeAuthToken(session);
+                var authToken = MakeAuthToken(session);
+                Console.WriteLine($"    the new token: {authToken}");
+                return authToken;
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                Console.WriteLine($"    failed to sign in using refresh token: {e}");
                 return null;
             }
         }
@@ -98,14 +113,20 @@ public class SupabaseAuthProvider : IAuthProvider
     {
         try
         {
+            Console.WriteLine($"verifying JWT with Supabase: {jwt}");
+
             // Verify the JWT token with Supabase
             var response = await _client.Auth.GetUser(jwt);
-        
+
+            Console.WriteLine($"    validation succeeded? {response != null}");
+
             // If we get a response back, the token is valid
             return response != null;
         }
-        catch (Exception)
+        catch (Exception e)
         {
+            Console.WriteLine($"    validation failed with exception: {e}");
+
             // If any exception occurs during validation, consider the token invalid
             return false;
         }
