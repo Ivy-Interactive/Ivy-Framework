@@ -23,7 +23,7 @@ public class AuthController() : Controller
                 HttpOnly = true,
                 //Secure = true, //todo: enable this in production
                 SameSite = SameSiteMode.Strict,
-                Expires = DateTimeOffset.MaxValue
+                Expires = DateTimeOffset.UtcNow.AddYears(1),
             });
         }
         return Ok();
