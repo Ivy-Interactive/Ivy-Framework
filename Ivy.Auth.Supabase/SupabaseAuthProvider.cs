@@ -28,7 +28,7 @@ public class SupabaseAuthProvider : IAuthProvider
         
         var options = new SupabaseOptions
         {
-            AutoRefreshToken = true,
+            AutoRefreshToken = false,
             AutoConnectRealtime = false
         };
         
