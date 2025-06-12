@@ -102,7 +102,7 @@ public class SupabaseAuthProvider : IAuthProvider
 
             var session = await _client.Auth.SetSession(jwt.Jwt, jwt.RefreshToken);
             var authToken = MakeAuthToken(session);
-            Console.WriteLine($"    the new token: {jwt}");
+            Console.WriteLine($"    the new token: {authToken}");
             return authToken;
         }
         catch (Exception e)

@@ -2,6 +2,7 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using Ivy.Apps;
 using Ivy.Auth;
+using Ivy.Client;
 using Ivy.Core;
 using Ivy.Helpers;
 using Ivy.Hooks;
@@ -78,15 +79,21 @@ public class AppHub(
         var appId = GetAppId(server, httpContext);
         
         var isAuthProtected = server.AuthProviderType != null;
+        AuthToken? authToken = null, oldAuthToken = null;
         if (isAuthProtected)
         {
             var authProvider = server.Services.BuildServiceProvider().GetService<IAuthProvider>() ?? throw new Exception("IAuthProvider not found");
             var jwt = httpContext.Request.Cookies["jwt"].NullIfEmpty();
 
-            // TODO: handle deserialization errors
-            var authToken = jwt != null
-                ? JsonSerializer.Deserialize<AuthToken>(jwt)
-                : null;
+            try
+            {
+                oldAuthToken = authToken = jwt != null
+                    ? JsonSerializer.Deserialize<AuthToken>(jwt)
+                    : null;
+            }
+            catch (Exception)
+            {
+            }
 
             if (string.IsNullOrEmpty(authToken?.Jwt))
             {
@@ -126,7 +133,12 @@ public class AppHub(
         appServices.AddSingleton(appDescriptor);
         appServices.AddSingleton(appArgs);
         appServices.AddTransient<SignalRouter>(_ => new SignalRouter(sessionStore));
-        
+
+        if (authToken != oldAuthToken)
+        {
+            clientProvider.SetJwt(authToken);
+        }
+
         var serviceProvider = new CompositeServiceProvider(appServices, server.Services); 
         
         var app = appDescriptor.CreateApp();
