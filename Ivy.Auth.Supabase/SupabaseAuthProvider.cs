@@ -177,6 +177,12 @@ public class SupabaseAuthProvider : IAuthProvider
         return this;
     }
 
+    public SupabaseAuthProvider UseGithub()
+    {
+        _authOptions.Add(new AuthOption(AuthFlow.OAuth, "GitHub", nameof(Constants.Provider.Github).ToLower(), Icons.Github));
+        return this;
+    }
+
     private AuthToken? MakeAuthToken(Session? session) =>
         session?.AccessToken != null
             ? new AuthToken(session.AccessToken, session.RefreshToken, session.ExpiresAt())
