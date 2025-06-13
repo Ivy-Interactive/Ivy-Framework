@@ -53,8 +53,10 @@ public class SupabaseAuthProvider : IAuthProvider
         {
             "google" => Constants.Provider.Google,
             "apple" => Constants.Provider.Apple,
+            "azure" => Constants.Provider.Azure,
             "github" => Constants.Provider.Github,
             "gitlab" => Constants.Provider.Gitlab,
+            "bitbucket" => Constants.Provider.Bitbucket,
             _ => throw new ArgumentException($"Unknown OAuth provider: {optionId}"),
         };
         
@@ -178,6 +180,12 @@ public class SupabaseAuthProvider : IAuthProvider
         return this;
     }
 
+    public SupabaseAuthProvider UseAzure()
+    {
+        _authOptions.Add(new AuthOption(AuthFlow.OAuth, "Azure", nameof(Constants.Provider.Azure).ToLower(), Icons.Azure));
+        return this;
+    }
+
     public SupabaseAuthProvider UseGithub()
     {
         _authOptions.Add(new AuthOption(AuthFlow.OAuth, "GitHub", nameof(Constants.Provider.Github).ToLower(), Icons.Github));
@@ -187,6 +195,12 @@ public class SupabaseAuthProvider : IAuthProvider
     public SupabaseAuthProvider UseGitlab()
     {
         _authOptions.Add(new AuthOption(AuthFlow.OAuth, "GitLab", nameof(Constants.Provider.Gitlab).ToLower(), Icons.Gitlab));
+        return this;
+    }
+
+    public SupabaseAuthProvider UseBitbucket()
+    {
+        _authOptions.Add(new AuthOption(AuthFlow.OAuth, "Bitbucket", nameof(Constants.Provider.Bitbucket).ToLower(), Icons.Bitbucket));
         return this;
     }
 
