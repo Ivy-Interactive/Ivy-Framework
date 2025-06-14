@@ -53,6 +53,7 @@ public class SupabaseAuthProvider : IAuthProvider
         {
             "google" => Constants.Provider.Google,
             "apple" => Constants.Provider.Apple,
+            "discord" => Constants.Provider.Discord,
             "azure" => Constants.Provider.Azure,
             "github" => Constants.Provider.Github,
             "gitlab" => Constants.Provider.Gitlab,
@@ -64,6 +65,7 @@ public class SupabaseAuthProvider : IAuthProvider
         {
             RedirectTo = callbackUri.ToString(),
             FlowType = Constants.OAuthFlowType.PKCE,
+            Scopes = "email openid",
         });
         _pkceCodeVerifier = providerAuthState.PKCEVerifier;
 
@@ -177,6 +179,12 @@ public class SupabaseAuthProvider : IAuthProvider
     public SupabaseAuthProvider UseApple()
     {
         _authOptions.Add(new AuthOption(AuthFlow.OAuth, "Apple", nameof(Constants.Provider.Apple).ToLower(), Icons.Apple));
+        return this;
+    }
+
+    public SupabaseAuthProvider UseDiscord()
+    {
+        _authOptions.Add(new AuthOption(AuthFlow.OAuth, "Discord", nameof(Constants.Provider.Discord).ToLower(), Icons.Discord));
         return this;
     }
 
