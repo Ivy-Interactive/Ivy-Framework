@@ -1,3 +1,4 @@
+using Ivy.Auth;
 using Ivy.Core;
 using Ivy.Shared;
 
@@ -24,9 +25,9 @@ public static class ClientExtensions
         client.Sender.Send("Redirect", url);
     }
     
-    public static void SetJwt(this IClientProvider client, string? jwt)
+    public static void SetJwt(this IClientProvider client, AuthToken? authToken)
     {
-        client.Sender.Send("SetJwt", jwt);
+        client.Sender.Send("SetJwt", authToken);
     }
     
     public static void SetTheme(this IClientProvider client, Theme theme)

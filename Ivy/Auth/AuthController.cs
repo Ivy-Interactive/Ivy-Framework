@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using System.Text.Json;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Ivy.Auth;
@@ -7,20 +8,22 @@ public class AuthController() : Controller
 {
     [Route("auth/set-jwt")]
     [HttpPatch]
-    public IActionResult SetJwt([FromBody] string? jwt)
+    public IActionResult SetJwt([FromBody] AuthToken? token)
     {
-        if(string.IsNullOrEmpty(jwt))
+        if (string.IsNullOrEmpty(token?.Jwt))
         {
+            Console.WriteLine($"[{DateTimeOffset.Now}] Deleting JWT cookie because passed-in JWT is null.");
             HttpContext.Response.Cookies.Delete("jwt");
         }
         else
         {
-            HttpContext.Response.Cookies.Append("jwt", jwt, new CookieOptions
+            Console.WriteLine($"[{DateTimeOffset.Now}] Adding JWT cookie: {token}.");
+            HttpContext.Response.Cookies.Append("jwt", JsonSerializer.Serialize(token), new CookieOptions
             {
                 HttpOnly = true,
                 //Secure = true, //todo: enable this in production
                 SameSite = SameSiteMode.Strict,
-                Expires = DateTimeOffset.UtcNow.AddHours(1)
+                Expires = DateTimeOffset.UtcNow.AddYears(1),
             });
         }
         return Ok();

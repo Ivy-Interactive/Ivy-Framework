@@ -13,7 +13,9 @@ public class SupabaseAuthProvider : IAuthProvider
     private readonly global::Supabase.Client _client;
     
     private readonly List<AuthOption> _authOptions = new();
-    
+
+    private string? _pkceCodeVerifier = null;
+
     public SupabaseAuthProvider()
     {
         var configuration = new ConfigurationBuilder()
@@ -26,17 +28,23 @@ public class SupabaseAuthProvider : IAuthProvider
         
         var options = new SupabaseOptions
         {
-            AutoRefreshToken = true,
+            AutoRefreshToken = false,
             AutoConnectRealtime = false
         };
         
-         _client = new global::Supabase.Client(url, key, options);
+        _client = new global::Supabase.Client(url, key, options);
+        _client.Auth.AddStateChangedListener((_, state) =>
+        {
+            Console.WriteLine($"[{DateTimeOffset.Now}] Received state change message from Supabase client: {state}");
+        });
     }
 
-    public async Task<string?> LoginAsync(string email, string password)
+    public async Task<AuthToken?> LoginAsync(string email, string password)
     {
         var session = await _client.Auth.SignIn(email, password);
-        return session?.AccessToken;
+        var authToken = MakeAuthToken(session);
+        Console.WriteLine($"[{DateTimeOffset.Now}] signed in with email and password, made auth token: {authToken}");
+        return authToken;
     }
     
     public async Task<Uri> GetOAuthUriAsync(string optionId, Uri callbackUri)
@@ -45,41 +53,97 @@ public class SupabaseAuthProvider : IAuthProvider
         {
             "google" => Constants.Provider.Google,
             "apple" => Constants.Provider.Apple,
+            "discord" => Constants.Provider.Discord,
+            "figma" => Constants.Provider.Figma,
+            "notion" => Constants.Provider.Notion,
+            "azure" => Constants.Provider.Azure,
             "github" => Constants.Provider.Github,
+            "gitlab" => Constants.Provider.Gitlab,
+            "bitbucket" => Constants.Provider.Bitbucket,
             _ => throw new ArgumentException($"Unknown OAuth provider: {optionId}"),
         };
-        
-        var providerAuthState = await _client.Auth.SignIn(provider, new SignInOptions
+
+        var signInOptions = new SignInOptions
         {
-            RedirectTo = callbackUri.ToString()
-        });
+            RedirectTo = callbackUri.ToString(),
+            FlowType = Constants.OAuthFlowType.PKCE,
+        };
+
+        // Set scopes. These are necessary for Discord, but some providers return errors if they're provided.
+        if (provider != Constants.Provider.Gitlab && provider != Constants.Provider.Figma)
+        {
+            signInOptions.Scopes = "email openid";
+        }
+
+        var providerAuthState = await _client.Auth.SignIn(provider, signInOptions);
+        _pkceCodeVerifier = providerAuthState.PKCEVerifier;
+
+        Console.WriteLine($"[{DateTimeOffset.Now}] Got URI for OAuth: {providerAuthState.Uri}");
 
         return providerAuthState.Uri;
     }
 
-    public string HandleOAuthCallback(HttpRequest request)
+    public async Task<AuthToken?> HandleOAuthCallbackAsync(HttpRequest request)
     {
         var code = request.Query["code"];
-        return code.ToString();
+        Console.WriteLine($"[{DateTimeOffset.Now}] in oauth callback handler. got code {code}");
+        var session = await _client.Auth.ExchangeCodeForSession(_pkceCodeVerifier!, code.ToString());
+        var authToken = MakeAuthToken(session);
+        Console.WriteLine($"[{DateTimeOffset.Now}] exchanged code for token: {authToken}");
+        return authToken;
     }
 
     public async Task LogoutAsync(string _)
     {
         await _client.Auth.SignOut();
     }
-    
+
+    public async Task<AuthToken?> RefreshJwtAsync(AuthToken jwt)
+    {
+        if (jwt.ExpiresAt == null || jwt.RefreshToken == null || DateTimeOffset.UtcNow < jwt.ExpiresAt)
+        {
+            // Refresh not needed (or not possible).
+            Console.WriteLine($"[{DateTimeOffset.Now}] Token refresh not required, or not possible. Reasons:");
+            if (jwt.ExpiresAt == null) Console.WriteLine($"    - expiry date is null");
+            if (jwt.RefreshToken == null) Console.WriteLine($"    - refresh token is null");
+            if (DateTimeOffset.UtcNow < jwt.ExpiresAt) Console.WriteLine($"    - access token is still valid; {DateTimeOffset.UtcNow} < {jwt.ExpiresAt}");
+            return jwt;
+        }
+
+        try
+        {
+            Console.WriteLine($"[{DateTimeOffset.Now}] attempting to set session using the existing token. the old token: {jwt}");
+
+            var session = await _client.Auth.SetSession(jwt.Jwt, jwt.RefreshToken);
+            var authToken = MakeAuthToken(session);
+            Console.WriteLine($"    the new token: {authToken}");
+            return authToken;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"    setting session failed with exception: {e}");
+            return null;
+        }
+    }
+
     public async Task<bool> ValidateJwtAsync(string jwt)
     {
         try
         {
+            Console.WriteLine($"[{DateTimeOffset.Now}] verifying JWT with Supabase: {jwt}");
+
             // Verify the JWT token with Supabase
             var response = await _client.Auth.GetUser(jwt);
-        
+
+            Console.WriteLine($"    validation succeeded? {response != null}");
+
             // If we get a response back, the token is valid
             return response != null;
         }
-        catch (Exception)
+        catch (Exception e)
         {
+            Console.WriteLine($"    validation failed with exception: {e}");
+
             // If any exception occurs during validation, consider the token invalid
             return false;
         }
@@ -123,9 +187,57 @@ public class SupabaseAuthProvider : IAuthProvider
     
     public SupabaseAuthProvider UseApple()
     {
-        _authOptions.Add(new AuthOption(AuthFlow.OAuth, "Apple", nameof(Constants.Provider.Apple).ToLower(), Icons.Microsoft));
+        _authOptions.Add(new AuthOption(AuthFlow.OAuth, "Apple", nameof(Constants.Provider.Apple).ToLower(), Icons.Apple));
         return this;
     }
+
+    public SupabaseAuthProvider UseDiscord()
+    {
+        _authOptions.Add(new AuthOption(AuthFlow.OAuth, "Discord", nameof(Constants.Provider.Discord).ToLower(), Icons.Discord));
+        return this;
+    }
+
+    public SupabaseAuthProvider UseFigma()
+    {
+        _authOptions.Add(new AuthOption(AuthFlow.OAuth, "Figma", nameof(Constants.Provider.Figma).ToLower(), Icons.Figma));
+        return this;
+    }
+
+    public SupabaseAuthProvider UseNotion()
+    {
+        _authOptions.Add(new AuthOption(AuthFlow.OAuth, "Notion", nameof(Constants.Provider.Notion).ToLower(), Icons.Notion));
+        return this;
+    }
+
+    public SupabaseAuthProvider UseAzure()
+    {
+        _authOptions.Add(new AuthOption(AuthFlow.OAuth, "Azure", nameof(Constants.Provider.Azure).ToLower(), Icons.Azure));
+        return this;
+    }
+
+    public SupabaseAuthProvider UseGithub()
+    {
+        _authOptions.Add(new AuthOption(AuthFlow.OAuth, "GitHub", nameof(Constants.Provider.Github).ToLower(), Icons.Github));
+        return this;
+    }
+
+    public SupabaseAuthProvider UseGitlab()
+    {
+        _authOptions.Add(new AuthOption(AuthFlow.OAuth, "GitLab", nameof(Constants.Provider.Gitlab).ToLower(), Icons.Gitlab));
+        return this;
+    }
+
+    public SupabaseAuthProvider UseBitbucket()
+    {
+        _authOptions.Add(new AuthOption(AuthFlow.OAuth, "Bitbucket", nameof(Constants.Provider.Bitbucket).ToLower(), Icons.Bitbucket));
+        return this;
+    }
+
+    private AuthToken? MakeAuthToken(Session? session) =>
+        session?.AccessToken != null
+            ? new AuthToken(session.AccessToken, session.RefreshToken, session.ExpiresAt())
+            : null;
+
 }
 
 // public async Task<bool> ValidateJwtAsync(string jwt)
