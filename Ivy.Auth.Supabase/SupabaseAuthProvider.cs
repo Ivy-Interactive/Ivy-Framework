@@ -54,19 +54,28 @@ public class SupabaseAuthProvider : IAuthProvider
             "google" => Constants.Provider.Google,
             "apple" => Constants.Provider.Apple,
             "discord" => Constants.Provider.Discord,
+            "figma" => Constants.Provider.Figma,
+            "notion" => Constants.Provider.Notion,
             "azure" => Constants.Provider.Azure,
             "github" => Constants.Provider.Github,
             "gitlab" => Constants.Provider.Gitlab,
             "bitbucket" => Constants.Provider.Bitbucket,
             _ => throw new ArgumentException($"Unknown OAuth provider: {optionId}"),
         };
-        
-        var providerAuthState = await _client.Auth.SignIn(provider, new SignInOptions
+
+        var signInOptions = new SignInOptions
         {
             RedirectTo = callbackUri.ToString(),
             FlowType = Constants.OAuthFlowType.PKCE,
-            Scopes = "email openid",
-        });
+        };
+
+        // Set scopes. These are necessary for Discord, but some providers return errors if they're provided.
+        if (provider != Constants.Provider.Gitlab && provider != Constants.Provider.Figma)
+        {
+            signInOptions.Scopes = "email openid";
+        }
+
+        var providerAuthState = await _client.Auth.SignIn(provider, signInOptions);
         _pkceCodeVerifier = providerAuthState.PKCEVerifier;
 
         Console.WriteLine($"[{DateTimeOffset.Now}] Got URI for OAuth: {providerAuthState.Uri}");
@@ -185,6 +194,18 @@ public class SupabaseAuthProvider : IAuthProvider
     public SupabaseAuthProvider UseDiscord()
     {
         _authOptions.Add(new AuthOption(AuthFlow.OAuth, "Discord", nameof(Constants.Provider.Discord).ToLower(), Icons.Discord));
+        return this;
+    }
+
+    public SupabaseAuthProvider UseFigma()
+    {
+        _authOptions.Add(new AuthOption(AuthFlow.OAuth, "Figma", nameof(Constants.Provider.Figma).ToLower(), Icons.Figma));
+        return this;
+    }
+
+    public SupabaseAuthProvider UseNotion()
+    {
+        _authOptions.Add(new AuthOption(AuthFlow.OAuth, "Notion", nameof(Constants.Provider.Notion).ToLower(), Icons.Notion));
         return this;
     }
 
