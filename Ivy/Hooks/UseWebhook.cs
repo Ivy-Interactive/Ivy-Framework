@@ -9,24 +9,44 @@ namespace Ivy.Hooks;
 
 public static class UseWebhookExtensions
 {
+    // Synchronous
+
     public static Uri UseWebhook<TView>(this TView view, Func<HttpRequest, IActionResult> handler) where TView : ViewBase =>
         view.Context.UseWebhook(handler);
-    
+
     public static Uri UseWebhook<TView>(this TView view, Action<HttpRequest> handler) where TView : ViewBase =>
-        view.Context.UseWebhook(e =>
-        {
-            handler(e);
-            return new OkResult();
-        });
+        view.Context.UseWebhook(handler);
 
     public static Uri UseWebhook(this IViewContext context, Action<HttpRequest> handler) =>
         context.UseWebhook(e =>
         {
             handler(e);
+            return Task.CompletedTask;
+        });
+
+    public static Uri UseWebhook(this IViewContext context, Func<HttpRequest, IActionResult> handler) =>
+        context.UseWebhook(e => Task.FromResult(handler(e)));
+
+    // Asynchronous
+
+    public static Uri UseWebhook<TView>(this TView view, Func<HttpRequest, Task<IActionResult>> handler) where TView : ViewBase =>
+        view.Context.UseWebhook(handler);
+    
+    public static Uri UseWebhook<TView>(this TView view, Func<HttpRequest, Task> handler) where TView : ViewBase =>
+        view.Context.UseWebhook(async e =>
+        {
+            await handler(e);
             return new OkResult();
         });
 
-    public static Uri UseWebhook(this IViewContext context, Func<HttpRequest, IActionResult> handler)
+    public static Uri UseWebhook(this IViewContext context, Func<HttpRequest, Task> handler) =>
+        context.UseWebhook(async e =>
+        {
+            await handler(e);
+            return new OkResult();
+        });
+
+    public static Uri UseWebhook(this IViewContext context, Func<HttpRequest, Task<IActionResult>> handler)
     {
         var webhookId = context.UseState(() => Guid.NewGuid().ToString(), false);
         var webhookController = context.UseService<IWebhookRegistry>();
@@ -34,31 +54,31 @@ public static class UseWebhookExtensions
         
         context.UseEffect(() => webhookController.Register(webhookId.Value, handler), [EffectTrigger.AfterInit()]);
         
-        return new Uri($"{args.Host}/webhook/{webhookId.Value}");
+        return new Uri($"{args.Scheme}://{args.Host}/webhook/{webhookId.Value}");
     }
 }
 
 public interface IWebhookRegistry
 {
-    IDisposable Register(string id, Func<HttpRequest, IActionResult> handler);
+    IDisposable Register(string id, Func<HttpRequest, Task<IActionResult>> handler);
 }
 
 public class WebhookController : Controller, IWebhookRegistry
 {
-    private static readonly ConcurrentDictionary<string, Func<HttpRequest, IActionResult>> Handlers = new();
+    private static readonly ConcurrentDictionary<string, Func<HttpRequest, Task<IActionResult>>> Handlers = new();
 
     [Route("webhook/{id}")]
     [HttpGet, HttpPost]
-    public IActionResult HandleWebhook(string id)
+    public Task<IActionResult> HandleWebhook(string id)
     {
         if (Handlers.TryGetValue(id, out var handler))
         {
             return handler(Request);
         }
-        return NotFound();
+        return Task.FromResult<IActionResult>(NotFound());
     }
 
-    public IDisposable Register(string id, Func<HttpRequest, IActionResult> handler)
+    public IDisposable Register(string id, Func<HttpRequest, Task<IActionResult>> handler)
     {
         if (!Handlers.TryAdd(id, handler))
             throw new InvalidOperationException($"Handler already registered for id '{id}'");
