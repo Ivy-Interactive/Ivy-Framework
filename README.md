@@ -10,7 +10,7 @@ https://github.com/user-attachments/assets/ba2bf5a5-8dc7-4501-9072-6af7483be4f7
 
 - 🛠️ **CLI**: Init new projects, add data providers, generate apps using AI and deployments.
 - 💡 **Authentication**: Integrations with Supabase, Microsoft Entra, and more.
-- 🗄️ **Databases**: Easy integration with SqlServer, Postgres, Supabase, MariaDB, Mysql, Airtable, Oracle, Google Spanner, Clickhouse, Snowflake and Big Query. 
+- 🗄️ **Databases**: Easy integration with SqlServer, Postgres, Supabase, MariaDB, Mysql, Airtable, Oracle, Google Spanner, Clickhouse, Snowflake and Big Query.
 - 🤖 **LLM Code Agent**: Generate entire backoffice based on your database schema.
 - 🕵️ **Secrets Management**
 - 🚀 **Container Deployment**: Easily deploy to Azure, AWS, or Google Cloud.
@@ -23,7 +23,7 @@ https://github.com/user-attachments/assets/ba2bf5a5-8dc7-4501-9072-6af7483be4f7
 
 ## Current State
 
-Ivy is still early in development and we are working on more robust documentation. We release new versions almost daily.  
+Ivy is still early in development and we are working on more robust documentation. We release new versions almost daily.
 
 ## Inspirations
 
@@ -36,7 +36,7 @@ Ivy is still early in development and we are working on more robust documentatio
 
 ### Quick Start
 
-Make sure you have the .Net 9 SDK installed. 
+Make sure you have the .Net 9 SDK installed.
 
 1. **Install Ivy CLI**:
    ```
@@ -45,8 +45,8 @@ Make sure you have the .Net 9 SDK installed.
 2. **Create a new project**:
    ```
     ivy init
-    ```
-3. **Add a data provider**: 
+   ```
+3. **Add a data provider**:
    ```
    ivy db add
    ```
@@ -56,7 +56,7 @@ Make sure you have the .Net 9 SDK installed.
    ```
 5. **Open** [http://localhost:5000](http://localhost:5000) in your browser.
 
-You can also run `ivy samples` to see all the components that Ivy offers and `ivy docs` for documentation.  
+You can also run `ivy samples` to see all the components that Ivy offers and `ivy docs` for documentation.
 
 ### Developer Build
 
@@ -76,10 +76,10 @@ You can also run `ivy samples` to see all the components that Ivy offers and `iv
    npm install
    npm run build
    npm run dev
-   ```   
-5. **Open** [http://localhost:5000](http://localhost:5173) in your browser.
+   ```
+5. **Open** [http://localhost:5173](http://localhost:5173) in your browser.
 
-Changes in /frontend will be hot-reloaded by Vite and changes in /Ivy.Samples will be hot-reloaded by Ivy. 
+Changes in /frontend will be hot-reloaded by Vite and changes in /Ivy.Samples will be hot-reloaded by Ivy.
 
 ## Contributing
 
@@ -88,5 +88,3 @@ Changes in /frontend will be hot-reloaded by Vite and changes in /Ivy.Samples wi
 3. **Submit** a pull request.
 
 Feel free to file issues and feature requests.
-
-
