@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
-  <Import Project="..\..\Ivy\Directory.Build.props" />
+  
+  <Import Project="..\..\Ivy\Directory.Build.props" Condition="Exists('..\..\Ivy\Directory.Build.props')" />
   
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>

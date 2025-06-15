@@ -25,17 +25,25 @@ public class TableApp: SampleBase
             new {Sku = "1237", Name = "Hat", Price = 5.0, Url = "http://example.com/hat"},
             new {Sku = "1238", Name = "Socks", Price = 2.0, Url = "http://example.com/socks"}
         };
-        
-        return
-            Layout.Vertical()
-                //Low abstraction
-                | new Table(
-                    new TableRow(new TableCell("Name"), new TableCell("Age")).IsHeader(),
-                    new TableRow(new TableCell("Niels"), new TableCell("25")),
-                    new TableRow(new TableCell("John"), new TableCell("30"))
-                )
-                //High abstraction
-                | products.ToTable()
-                ;
+
+        return products.ToTable()
+            .Width(Size.Full())
+            // .Width(e => e.Sku, Size.Fraction(0))
+            // .Width(e => e.Name, Size.Fraction(1 / 3f))
+            // .Width(e => e.Price, Size.Fraction(1 / 3f))
+            // .Width(e => e.Url, Size.Fraction(1 / 3f))
+            ;
+
+        // return
+        //     Layout.Vertical()
+        //         //Low abstraction
+        //         | new Table(
+        //             new TableRow(new TableCell("Name"), new TableCell("Age")).IsHeader(),
+        //             new TableRow(new TableCell("Niels"), new TableCell("25")),
+        //             new TableRow(new TableCell("John"), new TableCell("30"))
+        //         )
+        //         //High abstraction
+        //         | products.ToTable()
+        //         ;
     }
 }

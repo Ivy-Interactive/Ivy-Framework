@@ -1,13 +1,14 @@
 import React from 'react';
 import { TableCell } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
-import { Align, getAlign } from '@/lib/styles';
+import { Align, getAlign, getWidth } from '@/lib/styles';
 
 interface TableCellWidgetProps {
   id: string;
   isHeader?: boolean;
   isFooter?: boolean;
   align: Align;
+  width?: string;
   children?: React.ReactNode;
 }
 
@@ -16,6 +17,7 @@ export const TableCellWidget: React.FC<TableCellWidgetProps> = ({
   isHeader,
   isFooter,
   align,
+  width,
 }) => {
 
     const alignStyles = {
@@ -23,6 +25,10 @@ export const TableCellWidget: React.FC<TableCellWidgetProps> = ({
       ...getAlign('Vertical', align)
     }
 
+    const cellStyles = {
+      ...getWidth(width)
+    }
+  
     return (
       <TableCell 
         className={cn(
@@ -31,7 +37,9 @@ export const TableCellWidget: React.FC<TableCellWidgetProps> = ({
         "text-nowrap",  
         "border",
         "max-w-[400px] overflow-ellipsis overflow-clip"
-        )}>
+        )}
+        style={cellStyles}
+        >
           <div style={alignStyles}>
             {children}
           </div>

@@ -35,6 +35,7 @@ public class Server
     private IContentBuilder? _contentBuilder;
     private bool _useHotReload;
     private bool _useHttpRedirection;
+    private List<Action<WebApplicationBuilder>> _builderMods = new();
     
     public string? DefaultAppId { get; private set; }
     public AppRepository AppRepository { get; } = new();
@@ -156,6 +157,12 @@ public class Server
         DefaultAppId = AppHelpers.GetApp(appType)?.Id;
         return this;
     }
+
+    public Server UseBuilder(Action<WebApplicationBuilder> modify)
+    {
+        _builderMods.Add(modify);
+        return this;
+    }
     
     public async Task RunAsync(CancellationTokenSource? cts = null)
     {
@@ -208,6 +215,11 @@ public class Server
         
         builder.Configuration.AddEnvironmentVariables();
         builder.Configuration.AddUserSecrets(Assembly.GetExecutingAssembly());
+        
+        foreach (var mod in _builderMods)
+        {
+            mod(builder);
+        }
         
         builder.WebHost.UseUrls($"http://*:{_args.Port}");
         

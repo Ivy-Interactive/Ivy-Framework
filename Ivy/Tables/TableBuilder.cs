@@ -39,6 +39,8 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         public bool Removed { get; set; } = removed;
         
         public Align Align { get; set; } = align;
+        
+        public Size? Width { get; set; }
 
         public Func<IEnumerable<TModel>, object>? FooterAggregate { get; set; }
         
@@ -124,6 +126,13 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         return this;
     }
     
+    public TableBuilder<TModel> Width(Expression<Func<TModel, object>> field, Size width)
+    {
+        var hint = GetField(field);
+        hint.Width = width;
+        return this;
+    }
+    
     private TableBuilderColumn GetField(Expression<Func<TModel, object>> field)
     {
         var name = Utils.GetNameFromMemberExpression(field.Body);
@@ -179,10 +188,13 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         return this;
     }
 
-    public TableBuilder<TModel> Remove(Expression<Func<TModel, object>> field)
+    public TableBuilder<TModel> Remove(params IEnumerable<Expression<Func<TModel, object>>> fields)
     {
-        var hint = GetField(field);
-        hint.Removed = true;
+        foreach (var field in fields)
+        {
+            var hint = GetField(field);
+            hint.Removed = true;
+        }
         return this;
     }
 
@@ -270,6 +282,11 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         {
             var cell = new TableCell(content).IsHeader(isHeader).IsFooter(isFooter).Align(column.Align);
 
+            if (isHeader)
+            {
+                cell = cell.Width(column.Width);
+            }
+            
             if (!isHeader && isEmptyColumn[index])
             {
                  if (!Utils.IsEmptyContent(content))

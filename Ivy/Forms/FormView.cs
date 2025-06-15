@@ -144,7 +144,7 @@ public class FormFieldBinding<TModel>(
     public (IFormFieldView, IDisposable) Bind(IState<TModel> model)
     {
         var (fieldState, disposable) = StateHelpers.MemberState(model, selector);
-        var fieldView = new FormFieldView(fieldState, factory, visible, updateSignal, label, description, required, layoutOptions, validators, FormValidationStrategy.OnBlur);
+        var fieldView = new FormFieldView(fieldState, factory, visible, updateSignal, label, description, required, layoutOptions, validators, FormValidationStrategy.OnSubmit);
         return (fieldView, disposable);
     }
 }
