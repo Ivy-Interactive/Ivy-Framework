@@ -27,7 +27,7 @@ public class AutheliaAuthProvider : IAuthProvider
         _httpClient = new HttpClient(handler) { BaseAddress = new Uri(_baseUrl) };
     }
 
-    public async Task<string?> LoginAsync(string username, string password)
+    public async Task<AuthToken?> LoginAsync(string username, string password)
     {
         var payload = new { username, password };
         var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
@@ -36,7 +36,10 @@ public class AutheliaAuthProvider : IAuthProvider
         {
             // Return the "authelia_session" cookie value as our token.
             var cookies = _cookieContainer.GetCookies(new Uri(_baseUrl));
-            return cookies["authelia_session"]?.Value;
+            var session = cookies["authelia_session"]?.Value;
+            return session != null
+                ? new AuthToken(session)
+                : null;
         }
         return null;
     }
@@ -52,12 +55,14 @@ public class AutheliaAuthProvider : IAuthProvider
         _cookieContainer.Add(new Uri(_baseUrl), expired);
     }
 
-    public Task<Uri> GetOAuthUriAsync(string optionId, Uri callbackUri)
+    public Task<AuthToken?> RefreshJwtAsync(AuthToken jwt) => Task.FromResult<AuthToken?>(jwt);
+
+    public Task<Uri> GetOAuthUriAsync(AuthOption option, Uri callbackUri)
     {
         throw new NotImplementedException();
     }
 
-    public string HandleOAuthCallback(HttpRequest request)
+    public Task<AuthToken?> HandleOAuthCallbackAsync(HttpRequest request)
     {
         throw new NotImplementedException();
     }

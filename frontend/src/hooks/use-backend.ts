@@ -17,6 +17,12 @@ type RefreshMessage = {
   removeIvyBranding: boolean
 }
 
+type AuthToken = {
+  jwt: string;
+  refreshToken?: string;
+  expiresAt?: string;
+};
+
 const widgetTreeToXml = (node: WidgetNode) => {
   const tagName = node.type.replace("Ivy.", "");
   const attributes: string[] = [`Id="${escapeXml(node.id)}"`];
@@ -115,7 +121,7 @@ export const useBackend = () => {
       .catch((err) => console.error("SignalR Error:", err));
   }, [connection]);
 
-  const handleSetJwt = useCallback(async (jwt: string|null) => {
+  const handleSetJwt = useCallback(async (jwt: AuthToken|null) => {
     const response = await fetch(`${getIvyHost()}/auth/set-jwt`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },

@@ -4,43 +4,43 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Ivy.Auth;
 
-public class AuthService(IAuthProvider authProvider, string? jwt) : IAuthService
+public class AuthService(IAuthProvider authProvider, AuthToken? token) : IAuthService
 {
-    public async Task<string?> LoginAsync(string email, string password)
+    public async Task<AuthToken?> LoginAsync(string email, string password)
     {
         return await authProvider.LoginAsync(email, password);
     }
 
-    public Task<Uri> GetOAuthUriAsync(string optionId, Uri callbackUri)
+    public Task<Uri> GetOAuthUriAsync(AuthOption option, Uri callbackUri)
     {
-        return authProvider.GetOAuthUriAsync(optionId, callbackUri);
+        return authProvider.GetOAuthUriAsync(option, callbackUri);
     }
 
-    public string HandleOAuthCallback(HttpRequest request)
+    public Task<AuthToken?> HandleOAuthCallbackAsync(HttpRequest request)
     { 
-        return authProvider.HandleOAuthCallback(request);
+        return authProvider.HandleOAuthCallbackAsync(request);
     }
 
     public Task LogoutAsync()
     {
-        if (string.IsNullOrWhiteSpace(jwt))
+        if (string.IsNullOrWhiteSpace(token?.Jwt))
         {
-            return null!;
+            return Task.CompletedTask;
         }
         
-        return authProvider.LogoutAsync(jwt);
+        return authProvider.LogoutAsync(token.Jwt);
     }
 
     public async Task<UserInfo?> GetUserInfoAsync()
     {
-        if (string.IsNullOrWhiteSpace(jwt))
+        if (string.IsNullOrWhiteSpace(token?.Jwt))
         {
             return null!;
         }
         
         //todo: cache this!
         
-        return await authProvider.GetUserInfoAsync(jwt);
+        return await authProvider.GetUserInfoAsync(token.Jwt);
     }
 
     public AuthOption[] GetAuthOptions()
@@ -48,4 +48,3 @@ public class AuthService(IAuthProvider authProvider, string? jwt) : IAuthService
         return authProvider.GetAuthOptions();
     }
 }
-
