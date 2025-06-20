@@ -74,9 +74,10 @@ public abstract record AbstractWidget : IWidget
         foreach (var property in propProperties)
         {
             var value = GetPropertyValue(property);
-            if(value == null) //small optimization to avoid serializing null values 
-                continue;
-            props[Utils.PascalCaseToCamelCase(property.Name)] = JsonNode.Parse(JsonSerializer.Serialize(value, options));
+            // Always include the property, even if null
+            props[Utils.PascalCaseToCamelCase(property.Name)] = value == null
+                ? null
+                : JsonNode.Parse(JsonSerializer.Serialize(value, options));
         }
         json["props"] = props;
         

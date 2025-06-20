@@ -1,13 +1,12 @@
 import React, { useCallback, useMemo } from 'react';
-import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Toggle } from "@/components/ui/toggle";
 import Icon from '@/components/Icon';
 import { useEventHandler } from '@/components/EventHandlerContext';
-import NullableCheckbox from '@/components/NullableCheckbox';
 import { inputStyles } from '@/lib/styles';
 import { cn } from '@/lib/utils';
+import { Checkbox } from '@/components/ui/checkbox';
 
 type VariantType = 'Checkbox' | 'Switch' | 'Toggle';
 
@@ -28,6 +27,7 @@ interface BaseVariantProps {
   label?: string;
   description?: string;
   invalid?: string;
+  nullable?: boolean;
   value: boolean | null;
   disabled: boolean;
 }
@@ -77,23 +77,14 @@ const VariantComponents = {
       onClick={(e) => e.stopPropagation()}
       title={invalid}
     >
-      {nullable ? (
-        <NullableCheckbox
-          id={id}
-          checked={value}
-          onCheckedChange={onCheckedChange}
-          disabled={disabled}
-          className={cn(invalid && inputStyles.invalid)} 
-        />
-      ) : (
-        <Checkbox
-          id={id}
-          checked={!!value}
-          onCheckedChange={checked => onCheckedChange(checked ? true : false)}
-          disabled={disabled}
-          className={cn(invalid && inputStyles.invalid)}
-        />
-      )}
+      <Checkbox
+        id={id}
+        checked={value}
+        onCheckedChange={onCheckedChange}
+        disabled={disabled}
+        nullable={nullable}
+        className={cn(invalid && inputStyles.invalid)}
+      />
       <InputLabel id={id} label={label} description={description} />
     </div>
   )),
