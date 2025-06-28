@@ -1,17 +1,12 @@
 using System.Collections.Immutable;
-using System.Diagnostics;
-using System.Dynamic;
-using System.Reflection;
 using Ivy.Apps;
 using Ivy.Auth;
 using Ivy.Client;
 using Ivy.Core;
-using Ivy.Core.Hooks;
 using Ivy.Helpers;
 using Ivy.Hooks;
 using Ivy.Shared;
 using Ivy.Widgets.Internal;
-using Microsoft.AspNetCore.Authentication;
 
 namespace Ivy.Chrome;
 
