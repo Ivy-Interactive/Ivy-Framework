@@ -11,11 +11,23 @@ public interface IAnyColorInput : IAnyInput
     public string? Placeholder { get; set; }
 }
 
+public enum ColorInputs
+{
+    Picker,
+    Text,
+    PickerText,
+    Palette
+}
+
 public abstract record ColorInputBase : WidgetBase<ColorInputBase>, IAnyColorInput
 {
     [Prop] public bool Disabled { get; set; }
     [Prop] public string? Invalid { get; set; }
     [Prop] public string? Placeholder { get; set; }
+    [Prop] public string? Label { get; set; }
+    [Prop] public string? Description { get; set; }
+    [Prop] public ColorInputs Variant { get; set; }
+    [Prop] public string[]? PaletteOptions { get; set; }
     [Event] public Action<Event<IAnyInput>>? OnBlur { get; set; }
     public Type[] SupportedStateTypes() => [ typeof(string) ];
 } 
@@ -71,5 +83,25 @@ public static class ColorInputExtensions
     public static ColorInputBase Invalid(this ColorInputBase widget, string? invalid)
     {
         return widget with { Invalid = invalid };
+    }
+
+    public static ColorInputBase Label(this ColorInputBase widget, string label)
+    {
+        return widget with { Label = label };
+    }
+
+    public static ColorInputBase Description(this ColorInputBase widget, string description)
+    {
+        return widget with { Description = description };
+    }
+
+    public static ColorInputBase Variant(this ColorInputBase widget, ColorInputs variant)
+    {
+        return widget with { Variant = variant };
+    }
+
+    public static ColorInputBase PaletteOptions(this ColorInputBase widget, string[] options)
+    {
+        return widget with { PaletteOptions = options };
     }
 }
