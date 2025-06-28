@@ -1,13 +1,13 @@
 import React, { useCallback, useMemo } from 'react';
-import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Toggle } from "@/components/ui/toggle";
 import Icon from '@/components/Icon';
 import { useEventHandler } from '@/components/EventHandlerContext';
-import NullableCheckbox from '@/components/NullableCheckbox';
 import { inputStyles } from '@/lib/styles';
 import { cn } from '@/lib/utils';
+import { Checkbox, NullableBoolean } from '@/components/ui/checkbox';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 type VariantType = 'Checkbox' | 'Switch' | 'Toggle';
 
@@ -15,7 +15,7 @@ interface BoolInputWidgetProps {
   id: string;
   label?: string;
   description?: string;
-  value: boolean | null;
+  value: NullableBoolean;
   disabled?: boolean;
   nullable?: boolean;
   invalid?: string;
@@ -28,7 +28,8 @@ interface BaseVariantProps {
   label?: string;
   description?: string;
   invalid?: string;
-  value: boolean | null;
+  nullable?: boolean;
+  value: NullableBoolean;
   disabled: boolean;
 }
 
@@ -51,7 +52,7 @@ const InputLabel: React.FC<{ id: string; label?: string; description?: string }>
     if (!label && !description) return null;
 
     return (
-      <div className="grid gap-1.5 leading-none">
+      <div className="grid gap-1.5 leading-none bg-background">
         {label && <Label htmlFor={id}>{label}</Label>}
         {description && (
           <p className="text-sm text-muted-foreground">{description}</p>
@@ -60,6 +61,23 @@ const InputLabel: React.FC<{ id: string; label?: string; description?: string }>
     );
   }
 );
+
+const withTooltip = (content: React.ReactNode, invalid?: string) => {
+  if (!invalid) return content;
+  
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          {content}
+        </TooltipTrigger>
+        <TooltipContent className="bg-popover text-popover-foreground shadow-md">
+          {invalid}
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+};
 
 const VariantComponents = {
   Checkbox: React.memo(({
@@ -71,32 +89,30 @@ const VariantComponents = {
     nullable,
     invalid,
     onCheckedChange
-  }: CheckboxVariantProps) => (
-    <div
-      className="flex items-start space-x-2"
-      onClick={(e) => e.stopPropagation()}
-      title={invalid}
-    >
-      {nullable ? (
-        <NullableCheckbox
-          id={id}
-          checked={value}
-          onCheckedChange={onCheckedChange}
-          disabled={disabled}
-          className={cn(invalid && inputStyles.invalid)} 
-        />
-      ) : (
-        <Checkbox
-          id={id}
-          checked={!!value}
-          onCheckedChange={checked => onCheckedChange(checked ? true : false)}
-          disabled={disabled}
-          className={cn(invalid && inputStyles.invalid)}
-        />
-      )}
-      <InputLabel id={id} label={label} description={description} />
-    </div>
-  )),
+  }: CheckboxVariantProps) => {
+    const checkboxElement = (
+      <Checkbox
+        id={id}
+        checked={value}
+        onCheckedChange={onCheckedChange}
+        disabled={disabled}
+        nullable={nullable}
+        className={cn(invalid && inputStyles.invalid)}
+      />
+    );
+
+    const content = (
+      <div
+        className="flex items-start space-x-2"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {withTooltip(checkboxElement, invalid)}
+        <InputLabel id={id} label={label} description={description} />
+      </div>
+    );
+
+    return content;
+  }),
 
   Switch: React.memo(({
     id,
@@ -106,12 +122,8 @@ const VariantComponents = {
     disabled,
     invalid,
     onCheckedChange
-  }: SwitchVariantProps) => (
-    <div
-      className="flex items-start space-x-2"
-      onClick={(e) => e.stopPropagation()}
-      title={invalid}
-    >
+  }: SwitchVariantProps) => {
+    const switchElement = (
       <Switch
         id={id}
         checked={!!value}
@@ -119,9 +131,20 @@ const VariantComponents = {
         disabled={disabled}
         className={cn(invalid && inputStyles.invalid)}
       />
-      <InputLabel id={id} label={label} description={description} />
-    </div>
-  )),
+    );
+
+    const content = (
+      <div
+        className="flex items-start space-x-2"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {withTooltip(switchElement, invalid)}
+        <InputLabel id={id} label={label} description={description} />
+      </div>
+    );
+
+    return content;
+  }),
 
   Toggle: React.memo(({
     id,
@@ -132,12 +155,8 @@ const VariantComponents = {
     icon,
     invalid,
     onPressedChange
-  }: ToggleVariantProps) => (
-    <div
-      className="flex items-start space-x-2"
-      onClick={(e) => e.stopPropagation()}
-      title={invalid}
-    >
+  }: ToggleVariantProps) => {
+    const toggleElement = (
       <Toggle
         id={id}
         pressed={!!value}
@@ -148,9 +167,20 @@ const VariantComponents = {
       >
         {icon && <Icon className="h-4 w-4" name={icon} />}
       </Toggle>
-      <InputLabel id={id} label={label} description={description} />
-    </div>
-  ))
+    );
+
+    const content = (
+      <div
+        className="flex items-start space-x-2"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {withTooltip(toggleElement, invalid)}
+        <InputLabel id={id} label={label} description={description} />
+      </div>
+    );
+
+    return content;
+  })
 };
 
 export const BoolInputWidget: React.FC<BoolInputWidgetProps> = ({
@@ -166,6 +196,9 @@ export const BoolInputWidget: React.FC<BoolInputWidgetProps> = ({
 }) => {
   const eventHandler = useEventHandler();
 
+  // Normalize undefined to null when nullable
+  const normalizedValue = nullable && value === undefined ? null : value;
+
   const handleChange = useCallback((newValue: boolean | null) => {
     if (disabled) return;
     eventHandler("OnChange", id, [newValue]);
@@ -178,7 +211,7 @@ export const BoolInputWidget: React.FC<BoolInputWidgetProps> = ({
       id={id}
       label={label}
       description={description}
-      value={value}
+      value={normalizedValue}
       disabled={disabled}
       nullable={nullable}
       icon={icon}

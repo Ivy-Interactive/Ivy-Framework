@@ -47,11 +47,13 @@ public class TypeUtilsTests
         // Assert
         Assert.True(result);
     }
+
+    //todo: it was referenceing the wrong property? 
     
     [Fact]
     public void GetExtensionMethods_ReturnsExpected0() => 
         GetExtensionMethods_ReturnsExpected(
-            typeof(Bar), typeof(BarExtensions), typeof(XYZ).GetProperty(nameof(Bar.Name))!, 
+            typeof(Bar), typeof(BarExtensions), typeof(Bar).GetProperty(nameof(Bar.Name))!, 
             """
             Name(string name)
             Uppercase(string name = "foo")

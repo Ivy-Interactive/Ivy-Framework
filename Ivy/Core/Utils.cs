@@ -21,6 +21,7 @@ public static class Utils
     public static object? ConvertJsonNode(JsonNode? jsonNode, Type valueType)
     {
         if (jsonNode is null) return null;
+        // Get underlying type to handle nullable types properly with Convert.ChangeType
         var t = Nullable.GetUnderlyingType(valueType) ?? valueType;
 
         if (valueType == typeof(object))
@@ -32,12 +33,15 @@ public static class Utils
         {
             if (jsonNode is JsonArray jsonArray)
             {
-                var items = jsonArray.Select(e => ConvertJsonNode(e, itemType)).ToList();
+                var items = jsonArray.Select(e => ConvertJsonNode(e, itemType)).ToArray();
                 if (valueType.IsArray)
                 {
-                    var array = Array.CreateInstance(itemType, items.Count);
-                    for (int i = 0; i < items.Count; i++)
+                    // Create array of the correct type
+                    var array = Array.CreateInstance(itemType, items.Length);
+                    for (int i = 0; i < items.Length; i++)
+                    {
                         array.SetValue(items[i], i);
+                    }
                     return array;
                 }
 
@@ -60,32 +64,37 @@ public static class Utils
         if (t.IsEnum && jsonNode is JsonValue enumVal && enumVal.TryGetValue(out string? enumStr))
             return Enum.Parse(t, enumStr, true);
 
-        if (t == typeof(bool) && jsonNode is JsonValue boolVal0)
+        if (t == typeof(bool) && jsonNode is JsonValue boolVal)
         {
-            if (boolVal0.TryGetValue(out bool b)) return b;
-            if (boolVal0.TryGetValue(out int i)) return i != 0;
-            if (boolVal0.TryGetValue(out long l)) return l != 0;
-            if (boolVal0.TryGetValue(out double d)) return d != 0;
-            if (boolVal0.TryGetValue(out string? s))
+            return boolVal switch
             {
-                if (bool.TryParse(s, out var parsed)) return parsed;
-                if (double.TryParse(s, out var num)) return num != 0;
-            }
+                _ when boolVal.TryGetValue(out bool b) => b,
+                _ when boolVal.TryGetValue(out int i) => i != 0,
+                _ when boolVal.TryGetValue(out long l) => l != 0,
+                _ when boolVal.TryGetValue(out double d) => d != 0,
+                _ when boolVal.TryGetValue(out string? s) => 
+                    bool.TryParse(s, out var parsed) ? parsed : 
+                    double.TryParse(s, out var num) && num != 0,
+                _ => false
+            };
         }
         
         if (t.IsNumeric() && jsonNode is JsonValue boolVal1 && boolVal1.TryGetValue(out bool _))
         {
-            return Convert.ChangeType(boolVal1.GetValue<bool>() ? 1 : 0, valueType);
+            var convertedValue = Convert.ChangeType(boolVal1.GetValue<bool>() ? 1 : 0, t);
+            return convertedValue;
         }
 
         if (IsNumericType(t) && jsonNode is JsonValue numVal)
         {
-            if (numVal.TryGetValue(out string? str))
-                return Convert.ChangeType(str, t);
-            if (numVal.TryGetValue(out double dbl))
-                return Convert.ChangeType(dbl, t);
-            if (numVal.TryGetValue(out long lng))
-                return Convert.ChangeType(lng, t);
+            return numVal switch
+            {
+                _ when numVal.TryGetValue(out string? str) => Convert.ChangeType(str, t),
+                _ when numVal.TryGetValue(out double dbl) => Convert.ChangeType(dbl, t),
+                _ when numVal.TryGetValue(out long lng) => Convert.ChangeType(lng, t),
+                _ when numVal.TryGetValue(out int intVal) => Convert.ChangeType(intVal, t),
+                _ => null
+            };
         }
         
         //todo: maybe make this more generic
@@ -173,17 +182,16 @@ public static class Utils
         if (IsTupleType(targetType) && input is IDictionary dictionary)
         {
             var tupleTypes = targetType.GetGenericArguments();
-            var values = new object?[tupleTypes.Length];
-            for (int i = 0; i < tupleTypes.Length; i++)
-            {
-                var key = "item" + (i + 1);
-                if (!dictionary.Contains(key))
-                    return null;
-                var converted = BestGuessConvert(dictionary[key], tupleTypes[i]);
-                if (converted == null)
-                    return null;
-                values[i] = converted;
-            }
+            var values = Enumerable.Range(1, tupleTypes.Length)
+                .Select(i => new { Index = i - 1, Key = "item" + i })
+                .Select(x => dictionary.Contains(x.Key) 
+                    ? BestGuessConvert(dictionary[x.Key], tupleTypes[x.Index]) 
+                    : null)
+                .ToArray();
+
+            if (values.Any(v => v == null))
+                return null;
+
             return Activator.CreateInstance(targetType, values);
         }
 
@@ -250,39 +258,22 @@ public static class Utils
     
     public static Dictionary<string, object> ToDictionary(this JsonElement element)
     {
-        var dict = new Dictionary<string, object>();
-        foreach (JsonProperty prop in element.EnumerateObject())
-        {
-            dict[prop.Name] = ConvertElement(prop.Value);
-        }
-        return dict;
+        return element.EnumerateObject()
+            .ToDictionary(prop => prop.Name, prop => ConvertElement(prop.Value));
     }
 
     private static object ConvertElement(JsonElement element)
     {
-        switch (element.ValueKind)
+        return element.ValueKind switch
         {
-            case JsonValueKind.Object:
-                return element.ToDictionary();
-            case JsonValueKind.Array:
-                var list = new List<object>();
-                foreach (JsonElement item in element.EnumerateArray())
-                {
-                    list.Add(ConvertElement(item));
-                }
-                return list;
-            case JsonValueKind.String:
-                return element.GetString()!;
-            case JsonValueKind.Number:
-                return element.TryGetInt64(out long l) ? l : element.GetDouble();
-            case JsonValueKind.True:
-            case JsonValueKind.False:
-                return element.GetBoolean();
-            case JsonValueKind.Null:
-                return null!;
-            default:
-                return element.GetRawText();
-        }
+            JsonValueKind.Object => element.ToDictionary(),
+            JsonValueKind.Array => element.EnumerateArray().Select(ConvertElement).ToList(),
+            JsonValueKind.String => element.GetString()!,
+            JsonValueKind.Number => element.TryGetInt64(out long l) ? l : element.GetDouble(),
+            JsonValueKind.True or JsonValueKind.False => element.GetBoolean(),
+            JsonValueKind.Null => null!,
+            _ => element.GetRawText()
+        };
     }
     
     public static string CleanGenericNotation(string typeName)
