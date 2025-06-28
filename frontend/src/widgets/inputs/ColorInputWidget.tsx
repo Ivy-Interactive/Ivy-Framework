@@ -3,7 +3,7 @@ import { useEventHandler } from '@/components/EventHandlerContext';
 import { InvalidIcon } from '@/components/InvalidIcon';
 
 // Types for variants
-export type ColorInputVariant = 'picker' | 'text' | 'picker-text' | 'palette';
+export type ColorInputVariant = 'Picker' | 'Text' | 'PickerText' | 'Palette';
 
 interface ColorInputWidgetProps {
   id: string;
@@ -225,10 +225,10 @@ const PaletteVariant: React.FC<BaseVariantProps> = ({
 };
 
 const VariantComponents = {
-  picker: PickerVariant,
-  text: TextVariant,
-  'picker-text': PickerTextVariant,
-  palette: PaletteVariant,
+  Picker: PickerVariant,
+  Text: TextVariant,
+  PickerText: PickerTextVariant,
+  Palette: PaletteVariant,
 };
 
 export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
