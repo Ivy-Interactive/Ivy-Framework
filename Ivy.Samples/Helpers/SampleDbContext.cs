@@ -78,7 +78,7 @@ public class SampleDbContextFactory : IDbContextFactory<SampleDbContext>
             .Options;
 
         var context = new SampleDbContext(options);
-        
+
         SeedDatabase(context);
 
         return context;
@@ -90,14 +90,14 @@ public class SampleDbContextFactory : IDbContextFactory<SampleDbContext>
         {
             return; // Database has already been seeded
         }
-        
+
         var categories = new Faker<Category>()
             .RuleFor(c => c.Name, f => f.Commerce.Categories(1).First())
             .Generate(10);
-        
+
         context.Categories.AddRange(categories);
         context.SaveChanges();
-        
+
         var products = new Faker<Product>()
             .RuleFor(p => p.Name, f => f.Commerce.ProductName())
             .RuleFor(p => p.Department, f => f.Commerce.Department())

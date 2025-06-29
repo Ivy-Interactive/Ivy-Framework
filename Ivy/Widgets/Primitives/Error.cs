@@ -13,7 +13,7 @@ public record Error : WidgetBase<Error>
     }
 
     [Prop] public string? Title { get; set; }
-    [Prop]  public string? Message { get; set; }
+    [Prop] public string? Message { get; set; }
     [Prop] public string? StackTrace { get; set; }
 }
 

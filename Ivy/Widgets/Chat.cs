@@ -18,9 +18,9 @@ public record Chat : WidgetBase<Chat>
         Width = Size.Full();
         Height = Size.Full();
     }
-    
-    [Event] public Action<Event<Chat,string>> OnSendMessage { get; set; }
-    
+
+    [Event] public Action<Event<Chat, string>> OnSendMessage { get; set; }
+
     [Prop] public string Placeholder { get; set; } = "Type a message...";
 }
 
@@ -39,7 +39,7 @@ public record ChatMessage : WidgetBase<ChatMessage>
     {
         Sender = sender;
     }
-    
+
     [Prop] public ChatSender Sender { get; set; }
 }
 
@@ -53,6 +53,6 @@ public record ChatStatus : WidgetBase<ChatStatus>
     {
         Text = text;
     }
-    
+
     [Prop] public string Text { get; set; }
 }

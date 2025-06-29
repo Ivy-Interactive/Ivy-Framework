@@ -2,12 +2,12 @@
 
 namespace Ivy.Samples.Apps.Widgets.Inputs;
 
-[App(icon:Icons.Code)]
+[App(icon: Icons.Code)]
 public class CodeInputApp : SampleBase
 {
     protected override object? BuildSample()
     {
-        var sampleCode = 
+        var sampleCode =
             """
             Project ecommerce {
               database_type: "PostgreSQL"
@@ -50,7 +50,7 @@ public class CodeInputApp : SampleBase
             Ref: order_items.order_id > orders.id
             Ref: order_items.product_id > products.id
             """;
-        
+
         var code = UseState(sampleCode);
 
         return Layout.Vertical().Width(100)

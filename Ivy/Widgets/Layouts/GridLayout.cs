@@ -41,11 +41,11 @@ public record GridLayout : WidgetBase<GridLayout>
     [Prop] public int Gap { get; set; }
     [Prop] public int Padding { get; set; }
     [Prop] public AutoFlow? AutoFlow { get; set; }
-    
-    [Prop(attached:nameof(GridExtensions.GridColumn))] public int?[] ChildColumn { get; set; } = null!;
-    [Prop(attached:nameof(GridExtensions.GridColumnSpan))] public int?[] ChildColumnSpan { get; set; } = null!;
-    [Prop(attached:nameof(GridExtensions.GridRow))] public int?[] ChildRow { get; set; } = null!;
-    [Prop(attached:nameof(GridExtensions.GridRowSpan))] public int?[] ChildRowSpan { get; set; } = null!;
+
+    [Prop(attached: nameof(GridExtensions.GridColumn))] public int?[] ChildColumn { get; set; } = null!;
+    [Prop(attached: nameof(GridExtensions.GridColumnSpan))] public int?[] ChildColumnSpan { get; set; } = null!;
+    [Prop(attached: nameof(GridExtensions.GridRow))] public int?[] ChildRow { get; set; } = null!;
+    [Prop(attached: nameof(GridExtensions.GridRowSpan))] public int?[] ChildRowSpan { get; set; } = null!;
 }
 
 public static class GridExtensions
@@ -55,19 +55,19 @@ public static class GridExtensions
         child.SetAttachedValue(typeof(GridLayout), nameof(GridColumn), column);
         return child;
     }
-    
+
     public static WidgetBase<T> GridColumnSpan<T>(this WidgetBase<T> child, int columnSpan) where T : WidgetBase<T>
     {
         child.SetAttachedValue(typeof(GridLayout), nameof(GridColumnSpan), columnSpan);
         return child;
-    } 
-    
+    }
+
     public static WidgetBase<T> GridRow<T>(this WidgetBase<T> child, int row) where T : WidgetBase<T>
     {
         child.SetAttachedValue(typeof(GridLayout), nameof(GridRow), row);
         return child;
     }
-    
+
     public static WidgetBase<T> GridRowSpan<T>(this WidgetBase<T> child, int rowSpan) where T : WidgetBase<T>
     {
         child.SetAttachedValue(typeof(GridLayout), nameof(GridRowSpan), rowSpan);

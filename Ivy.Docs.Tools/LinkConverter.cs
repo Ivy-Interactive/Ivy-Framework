@@ -20,7 +20,7 @@ public partial class LinkConverter(string currentFilePath)
 
         return (types, markdown);
     }
-    
+
     private (string? type, string? linkReplacement) ConvertLink(Match match)
     {
         var text = match.Groups[1].Value;
@@ -30,11 +30,11 @@ public partial class LinkConverter(string currentFilePath)
         {
             return (null, null); //do nothing
         }
-        
+
         var path = Utils.GetPathForLink(currentFilePath, link);
         var type = Utils.GetTypeNameFromPath(path);
         var appId = Utils.GetAppIdFromTypeName(type);
-        
+
         return (type, $"[{text}](app://{appId})");
     }
 

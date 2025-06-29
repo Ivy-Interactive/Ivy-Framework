@@ -13,11 +13,11 @@ public class DetailsBuilder<TModel> : ViewBase, IStateless
         public string Label { get; set; } = label;
 
         public bool IsRemoved { get; set; }
-        
+
         public bool IsMultiLine { get; set; }
-        
+
         public IBuilder<TModel> Builder { get; set; } = builder;
-        
+
         public Type? Type => FieldInfo?.FieldType ?? PropertyInfo?.PropertyType;
 
         private FieldInfo? FieldInfo { get; set; } = fieldInfo;
@@ -27,7 +27,7 @@ public class DetailsBuilder<TModel> : ViewBase, IStateless
         public object? GetValue(TModel obj)
         {
             if (obj == null) return null;
-            
+
             if (FieldInfo != null)
             {
                 return FieldInfo.GetValue(obj);
@@ -37,7 +37,7 @@ public class DetailsBuilder<TModel> : ViewBase, IStateless
             {
                 return PropertyInfo.GetValue(obj);
             }
-            
+
             throw new InvalidOperationException("Both FieldInfo and PropertyInfo are null.");
         }
     }
@@ -72,15 +72,15 @@ public class DetailsBuilder<TModel> : ViewBase, IStateless
         {
             _items[field.Name] =
                 new Item(
-                    Utils.SplitPascalCase(field.Name) ?? "", 
+                    Utils.SplitPascalCase(field.Name) ?? "",
                     new DefaultBuilder<TModel>(),
                     field.FieldInfo,
                     field.PropertyInfo
                 );
         }
-        
+
     }
-    
+
     public DetailsBuilder<TModel> RemoveEmpty()
     {
         _removeEmpty = true;
@@ -96,7 +96,7 @@ public class DetailsBuilder<TModel> : ViewBase, IStateless
         }
         return this;
     }
-    
+
     public DetailsBuilder<TModel> MultiLine(params Expression<Func<TModel, object>>[] fields)
     {
         foreach (var expr in fields)
@@ -106,7 +106,7 @@ public class DetailsBuilder<TModel> : ViewBase, IStateless
         }
         return this;
     }
-    
+
     public DetailsBuilder<TModel> Builder(Expression<Func<TModel, object>> field, Func<IBuilderFactory<TModel>, IBuilder<TModel>> builder)
     {
         var column = GetField(field);
@@ -122,7 +122,7 @@ public class DetailsBuilder<TModel> : ViewBase, IStateless
         }
         return this;
     }
-    
+
     private Item GetField<TU>(Expression<Func<TModel, TU>> field)
     {
         var name = Utils.GetNameFromMemberExpression(field.Body);
@@ -132,7 +132,7 @@ public class DetailsBuilder<TModel> : ViewBase, IStateless
     public override object? Build()
     {
         var items = _items.Values.Where(e => !e.IsRemoved).ToArray();
-        
+
         if (_removeEmpty)
         {
             items = items.Where(e => !Utils.IsEmptyContent(e.GetValue(_model))).ToArray();
@@ -153,7 +153,7 @@ public static class DetailsBuilderExtensions
     {
         return new DetailsBuilder<TModel>(model);
     }
-    
+
     public static DetailsBuilder<TModel> ToDetails<TModel>(this IState<TModel> model)
     {
         return new DetailsBuilder<TModel>(model.Value);

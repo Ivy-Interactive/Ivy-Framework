@@ -20,13 +20,13 @@ public enum Languages
     Html,
     Css,
     Json,
-    Dbml  
+    Dbml
 }
 
 public interface IAnyCodeInput : IAnyInput
 {
     public string? Placeholder { get; set; }
-    public CodeInputs Variant { get; set;  }
+    public CodeInputs Variant { get; set; }
 }
 
 public abstract record CodeInputBase : WidgetBase<CodeInputBase>, IAnyCodeInput
@@ -37,20 +37,20 @@ public abstract record CodeInputBase : WidgetBase<CodeInputBase>, IAnyCodeInput
     [Prop] public CodeInputs Variant { get; set; }
     [Prop] public Languages? Language { get; set; } = null;
     [Event] public Action<Event<IAnyInput>>? OnBlur { get; set; }
-    public Type[] SupportedStateTypes() => [ typeof(string) ];
+    public Type[] SupportedStateTypes() => [typeof(string)];
 }
 
 public record CodeInput<TString> : CodeInputBase, IInput<TString>
 {
-    public CodeInput(IAnyState state, string? placeholder = null, bool disabled = false, CodeInputs variant = CodeInputs.Default) 
+    public CodeInput(IAnyState state, string? placeholder = null, bool disabled = false, CodeInputs variant = CodeInputs.Default)
         : this(placeholder, disabled, variant)
     {
         var typedState = state.As<TString>();
         Value = typedState.Value;
         OnChange = e => typedState.Set(e.Value);
     }
-    
-    public CodeInput(TString value, Action<Event<IInput<TString>, TString>>? onChange = null, string? placeholder = null, bool disabled = false, CodeInputs variant = CodeInputs.Default) 
+
+    public CodeInput(TString value, Action<Event<IInput<TString>, TString>>? onChange = null, string? placeholder = null, bool disabled = false, CodeInputs variant = CodeInputs.Default)
         : this(placeholder, disabled, variant)
     {
         OnChange = onChange;
@@ -65,7 +65,7 @@ public record CodeInput<TString> : CodeInputBase, IInput<TString>
         Width = Size.Full();
         Height = Size.Units(25);
     }
-    
+
     [Prop] public TString Value { get; } = default!;
     [Event] public Action<Event<IInput<TString>, TString>>? OnChange { get; }
 }
@@ -79,27 +79,27 @@ public static class CodeInputExtensions
         CodeInputBase input = (CodeInputBase)Activator.CreateInstance(genericType, state, placeholder, disabled, variant)!;
         return input;
     }
-    
+
     public static CodeInputBase Placeholder(this CodeInputBase widget, string placeholder)
     {
         return widget with { Placeholder = placeholder };
     }
-    
+
     public static CodeInputBase Disabled(this CodeInputBase widget, bool disabled = true)
     {
         return widget with { Disabled = disabled };
     }
-    
+
     public static CodeInputBase Variant(this CodeInputBase widget, CodeInputs variant)
     {
         return widget with { Variant = variant };
     }
-    
+
     public static CodeInputBase Invalid(this CodeInputBase widget, string invalid)
     {
         return widget with { Invalid = invalid };
     }
-    
+
     public static CodeInputBase Language(this CodeInputBase widget, Languages language)
     {
         return widget with { Language = language };

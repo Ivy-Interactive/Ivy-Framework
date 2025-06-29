@@ -9,7 +9,7 @@ server.UseHotReload();
 var version = typeof(Server).Assembly.GetName().Version!.ToString();
 var chromeSettings = new ChromeSettings()
     .Header(
-        Layout.Vertical().Padding(2) 
+        Layout.Vertical().Padding(2)
             | new IvyLogo()
             | Text.Muted($"Version {version}")
     )

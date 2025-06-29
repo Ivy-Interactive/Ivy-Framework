@@ -13,10 +13,10 @@ public static class IvyAgentServer
     {
         var currentFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
         var sourceFolder = Path.GetFullPath(Path.Combine(currentFolder, "..", "..", ".."));
-        
+
         //todo: ensure this is a proper Ivy application folder (maybe check for .ivy folder?)
         //todo: ensure ivy cli is installed and available in the PATH
-        
+
         if (!await CheckIfAgentIsRunning(1))
         {
 #if !DEBUG
@@ -30,19 +30,19 @@ public static class IvyAgentServer
             WindowStyle = ProcessWindowStyle.Hidden,
             CreateNoWindow = false
         };
-#endif        
-            
-#if DEBUG
-        var startInfo = new ProcessStartInfo
-        {
-            FileName = "dotnet",
-            Arguments = $"watch --ivy-folder \"{sourceFolder}\" --ivy-port 5001",
-            UseShellExecute = true,
-            CreateNoWindow = false,
-            WorkingDirectory = @"D:\Repos\_Ivy\Ivy\Ivy.Agent\"
-        }; 
 #endif
-            
+
+#if DEBUG
+            var startInfo = new ProcessStartInfo
+            {
+                FileName = "dotnet",
+                Arguments = $"watch --ivy-folder \"{sourceFolder}\" --ivy-port 5001",
+                UseShellExecute = true,
+                CreateNoWindow = false,
+                WorkingDirectory = @"D:\Repos\_Ivy\Ivy\Ivy.Agent\"
+            };
+#endif
+
             var process = Process.Start(startInfo) ??
                 throw new InvalidOperationException("Failed to start the Ivy Agent process");
 
@@ -50,11 +50,11 @@ public static class IvyAgentServer
             {
                 throw new TimeoutException("Ivy Agent failed to start within timeout period.");
             }
-            
+
             //return new ProcessKiller(process.Id); //todo:
             return Disposable.Empty;
         }
-        
+
         return Disposable.Empty;
     }
 
@@ -79,7 +79,7 @@ public static class IvyAgentServer
                 await Task.Delay(delayMs);
             }
         }
-        
+
         return false;
     }
 
@@ -90,11 +90,11 @@ public static class IvyAgentServer
         public void Dispose()
         {
             if (_disposed) return;
-            
+
             try
             {
                 var process = Process.GetProcessById(processId);
-                try 
+                try
                 {
                     if (!process.HasExited)
                     {

@@ -1,6 +1,6 @@
 namespace Ivy.Core.Hooks;
 
-public class ConvertedState<TFrom,TTo>(IState<TFrom> originalState, Func<TFrom, TTo> forward, Func<TTo, TFrom> backward) : IState<TTo>
+public class ConvertedState<TFrom, TTo>(IState<TFrom> originalState, Func<TFrom, TTo> forward, Func<TTo, TFrom> backward) : IState<TTo>
 {
     private class ForwardingObserver(IObserver<TTo> observer, Func<TFrom, TTo> forward) : IObserver<TFrom>
     {

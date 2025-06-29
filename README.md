@@ -76,7 +76,7 @@ You can also run `ivy samples` to see all the components that Ivy offers and `iv
 3. **Build the frontend**:
 
    ```bash
-   cd ../frontend
+   cd frontend
    npm install
    npm run build
    npm run dev

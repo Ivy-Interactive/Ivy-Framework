@@ -9,7 +9,7 @@ namespace Ivy.Builders;
 public class CopyToClipboardBuilder<TModel> : IBuilder<TModel>
 {
     public object? Build(object? value, TModel record)
-    {   
+    {
         if (value == null)
         {
             return null;

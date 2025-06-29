@@ -17,7 +17,7 @@ public class MetricView(
 ) : ViewBase
 {
     private const int Height = 50;
-    
+
     public override object? Build()
     {
         var data = UseState<MetricRecord?>(() => null);
@@ -39,16 +39,16 @@ public class MetricView(
         {
             return new Card().Title(title).Icon(icon).Height(Size.Units(Height)) | new ErrorTeaserView(failed.Value);
         }
-        
+
         if (data.Value is null)
         {
             return new Card(
                 new Skeleton()
             ).Title(title).Icon(icon).Height(Size.Units(Height));
         }
-        
+
         var x = data.Value;
-        
+
         return new Card(
                 Layout.Horizontal().Align(Align.Left).Gap(2)
                     | Text.H3(x.MetricFormatted).NoWrap().Overflow(Overflow.Clip)

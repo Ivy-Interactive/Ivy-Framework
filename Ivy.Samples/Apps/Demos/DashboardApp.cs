@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Ivy.Samples.Apps.Demos;
 
-[App(icon:Icons.ChartArea)]
+[App(icon: Icons.ChartArea)]
 public class DashboardApp : ViewBase
 {
     public override object? Build()
@@ -15,7 +15,7 @@ public class DashboardApp : ViewBase
                                     | new TotalSalesMetricView()
                                     | new TotalSalesMetricView()
                                     )
-            
+
                                  | (Layout.Grid().Columns(3)
                                     | new BrowsersView()
                                     | new MonthlyRevenueTrendView()
@@ -39,9 +39,9 @@ public class MetricView(string title) : ViewBase
     public override object? Build()
     {
         return new Card(
-                (Layout.Horizontal().Align(Align.Left).Gap(2) 
-                 | Text.H3("$84,250") 
-                 | Icons.TrendingUp.ToIcon().Color(Colors.Emerald) 
+                (Layout.Horizontal().Align(Align.Left).Gap(2)
+                 | Text.H3("$84,250")
+                 | Icons.TrendingUp.ToIcon().Color(Colors.Emerald)
                  | Text.Small("21%").Color(Colors.Emerald)),
                 new Progress(21).Goal(800_000.ToString("C0"))
             ).Title(title).Icon(Icons.DollarSign)
@@ -64,7 +64,7 @@ public class MonthlyRevenueTrendView : ViewBase
         };
 
         return new Card().Title("Monthly Revenue Trend").Height("100%")
-                | data.ToLineChart(style:LineChartStyles.Dashboard)
+                | data.ToLineChart(style: LineChartStyles.Dashboard)
                     .Dimension("Month", e => e.Month)
                     .Measure("Total", e => e.Sum(f => f.Desktop + f.Mobile))
                     .TableCalculation(TableCalculations.RunningTotal("Total"))
@@ -87,7 +87,7 @@ public class MonthlyRevenueDistributionView : ViewBase
         };
 
         return new Card().Title("Monthly Revenue Distribution").Height("100%")
-               | data.ToAreaChart(style:AreaChartStyles.Dashboard)
+               | data.ToAreaChart(style: AreaChartStyles.Dashboard)
                    .Dimension("Month", e => e.Month)
                    .Measure("Desktop", e => e.Sum(f => f.Desktop))
                    .Measure("Mobile", e => e.Sum(f => f.Mobile))
@@ -99,7 +99,7 @@ public class BrowsersView : ViewBase
 {
     public override object? Build()
     {
-        var data = new [] {
+        var data = new[] {
             new { Name = "Edge", Value = 15 },
             new { Name = "Chrome", Value = 55 },
             new { Name = "Firefox", Value = 25 },
@@ -116,7 +116,7 @@ public class BrowsersView : ViewBase
             new { Name = "Safari", Value = 20 },
             new { Name = "Others", Value = 15 }
         };
-        
+
         return new Card().Title("Browser Composition") | data.ToPieChart(e => e.Name, e => e.Sum(f => f.Value), PieChartStyles.Dashboard);
     }
 }

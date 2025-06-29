@@ -2,7 +2,7 @@ using Ivy.Shared;
 
 namespace Ivy.Samples.Apps.Widgets.Primitives;
 
-[App(icon:Icons.Star, path:["Widgets", "Primitives"])]
+[App(icon: Icons.Star, path: ["Widgets", "Primitives"])]
 public class IconApp : SampleBase
 {
     protected override object? BuildSample()

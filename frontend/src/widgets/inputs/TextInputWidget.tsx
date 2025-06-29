@@ -1,12 +1,14 @@
 import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { Input } from "@/components/ui/input";
-import { useEventHandler } from '@/components/EventHandlerContext';
 import { EyeIcon, EyeOffIcon, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { getHeight, getWidth, inputStyles } from '@/lib/styles';
 import { InvalidIcon } from '@/components/InvalidIcon';
+import { useFocusable } from '@/hooks/use-focus-management';
+import { useEventHandler } from '@/components/EventHandlerContext';
+import { sidebarMenuRef } from '../layouts/SidebarLayoutWidget';
 
 interface TextInputWidgetProps {
   id: string;
@@ -279,13 +281,31 @@ const SearchVariant: React.FC<{
   isFocused: boolean;
 }> = ({ props, onChange, onBlur, onFocus, inputRef, isFocused }) => {
   const { elementRef, savePosition } = useCursorPosition(props.value, inputRef) as { elementRef: React.RefObject<HTMLInputElement>, savePosition: () => void };
+  const { ref: focusRef } = useFocusable('sidebar-navigation', 0);
+  const shouldFocusMenuRef = useRef(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     savePosition();
     onChange(e);
   };
 
-  const styles:React.CSSProperties = {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Enter') {
+      shouldFocusMenuRef.current = true;
+      e.currentTarget.blur();
+      e.preventDefault();
+    }
+  };
+
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    if (shouldFocusMenuRef.current) {
+      shouldFocusMenuRef.current = false;
+      sidebarMenuRef.current?.focus();
+    }
+    onBlur(e);
+  };
+
+  const styles: React.CSSProperties = {
     ...getWidth(props.width)
   };
 
@@ -293,29 +313,43 @@ const SearchVariant: React.FC<{
 
   return (
     <div className="relative" style={styles}>
+      {/* Search Icon */}
       <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
+
+      {/* Search Input */}
       <Input
-        ref={elementRef}
+        ref={(el) => {
+          // Handle both refs
+          if (el) {
+            (elementRef as React.MutableRefObject<HTMLInputElement | null>).current = el;
+            focusRef(el);
+          }
+        }}
         id={props.id}
         type="search"
         placeholder={props.placeholder}
         value={props.value}
         disabled={props.disabled}
         onChange={handleChange}
-        onBlur={onBlur}
+        onBlur={handleBlur}
         onFocus={onFocus}
+        onKeyDown={handleKeyDown}
         className={cn(
           "pl-8",
-          (props.invalid && inputStyles.invalid),   
-          (props.invalid && "pr-8"),
-          (props.shortcutKey && !isFocused && "pr-16"),
+          props.invalid && inputStyles.invalid,
+          props.invalid && "pr-8",
+          props.shortcutKey && !isFocused && "pr-16"
         )}
       />
+
+      {/* Error Icon */}
       {props.invalid && (
         <div className="absolute right-2.5 top-2.5 h-4 w-4">
           <InvalidIcon message={props.invalid} />
         </div>
       )}
+
+      {/* Shortcut Display */}
       {props.shortcutKey && !isFocused && (
         <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center">
           <kbd className="px-1.5 py-0.5 text-xs font-semibold text-gray-800 bg-gray-100 border border-gray-200 rounded-md">

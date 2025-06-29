@@ -11,7 +11,7 @@ public record ReferenceLine
         Y = y;
         Label = label;
     }
-    
+
     public double? X { get; set; }
     public double? Y { get; set; }
     public string? Label { get; set; }
@@ -24,7 +24,7 @@ public static class ReferenceLineExtensions
     {
         return referenceLine with { Label = label };
     }
-    
+
     public static ReferenceLine StrokeWidth(this ReferenceLine referenceLine, int strokeWidth)
     {
         return referenceLine with { StrokeWidth = strokeWidth };

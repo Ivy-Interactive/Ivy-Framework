@@ -30,6 +30,6 @@ public record ResizeablePanel : WidgetBase<ResizeablePanel>
     {
         DefaultSize = defaultSize;
     }
-    
+
     [Prop] public int? DefaultSize { get; init; }
 }

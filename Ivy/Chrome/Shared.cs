@@ -43,18 +43,18 @@ public static class ChromeSettingsExtensions
 }
 
 [Signal(BroadcastType.Chrome)]
-public class NavigateSignal : AbstractSignal<NavigateArgs,Unit> { }
+public class NavigateSignal : AbstractSignal<NavigateArgs, Unit> { }
 
 public record NavigateArgs(string AppId, object? AppArgs = null)
 {
     public string GetUrl(string? parentId = null)
     {
         var url = $"app.html?appId={this.AppId}";
-        if(parentId != null)
+        if (parentId != null)
         {
             url += $"&parentId={parentId}";
         }
-        if(this.AppArgs != null)
+        if (this.AppArgs != null)
         {
             var jsonArgs = JsonSerializer.Serialize(this.AppArgs);
             var encodedArgs = System.Web.HttpUtility.UrlEncode(jsonArgs);
@@ -73,7 +73,7 @@ public static class NavigateSignalExtensions
         var client = context.UseService<IClientProvider>();
         return new Navigator(signal, repository, client);
     }
-    
+
     public static INavigator UseNavigation(this IView view)
     {
         return view.Context.UseNavigation();

@@ -9,5 +9,5 @@ public record SidebarNews : WidgetBase<SidebarNews>
         FeedUrl = feedUrl;
     }
 
-    [Prop] public string? FeedUrl { get; set; } 
+    [Prop] public string? FeedUrl { get; set; }
 }

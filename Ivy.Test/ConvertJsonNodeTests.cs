@@ -13,7 +13,7 @@ public class ConvertJsonNodeTests
     }
     [Fact] public void StringToEnum() => Test("Value1", typeof(TestEnum), TestEnum.Value1);
     [Fact] public void StringToNullEnum() => Test("Value1", typeof(TestEnum?), TestEnum.Value1);
-    
+
     [Fact] public void IntToInt() => Test(123, typeof(int), 123);
     [Fact] public void IntToNullInt() => Test(123, typeof(int?), 123);
     [Fact] public void DoubleToInt() => Test(123.0, typeof(int), 123);
@@ -29,12 +29,13 @@ public class ConvertJsonNodeTests
     [Fact] public void IntToBoolFalse() => Test(0, typeof(bool), false);
     [Fact] public void BoolToIntFalse() => Test(false, typeof(int), 0);
     [Fact] public void BoolToIntTrue() => Test(true, typeof(int), 1);
-    
-    
-    [Fact] public void DateRangeConversion() => Test(JsonNode.Parse(
+
+
+    [Fact]
+    public void DateRangeConversion() => Test(JsonNode.Parse(
             """
             {"item1" : "2021-01-01", "item2" : "2022-01-01"}
-            """), 
+            """),
         typeof((DateTime, DateTime)), (DateTime.Parse("2021-01-01"), DateTime.Parse("2022-01-01")));
 
     public record FooBar
@@ -42,8 +43,8 @@ public class ConvertJsonNodeTests
         public string Name { get; set; }
         public byte[] Content { get; set; }
     }
- 
-    
+
+
     [Fact]
     public void Foo()
     {
@@ -58,7 +59,7 @@ public class ConvertJsonNodeTests
         var deserializedInput = (FooBar)jsonNode.Deserialize(type, options);
         Console.WriteLine(BitConverter.ToString(deserializedInput.Content));
     }
-    
+
     [Fact]
     public void TestEnumArray()
     {
@@ -69,7 +70,7 @@ public class ConvertJsonNodeTests
         //make sure result is of type TestEnum[]
         Assert.IsType<TestEnum[]>(result);
     }
-    
+
     [Fact]
     public void TestEnumList()
     {
@@ -80,7 +81,7 @@ public class ConvertJsonNodeTests
         //make sure result is of type TestEnum[]
         Assert.IsType<List<TestEnum>>(result);
     }
-    
+
     [Fact]
     public void ConvertFileInput()
     {
@@ -95,14 +96,14 @@ public class ConvertJsonNodeTests
                                   """);
 
         var result = (FileInput)Core.Utils.ConvertJsonNode(json!, typeof(FileInput))!;
-        
+
         Assert.Equal("myfile.txt", result.Name);
         Assert.Equal("text/plain", result.Type);
         Assert.Equal(123, result.Size);
         Assert.Equal(DateTime.Parse("2023-03-14T09:30:00+01:00"), result.LastModified);
         Assert.Equal("Hello", Encoding.UTF8.GetString(result.Content!));
     }
-    
+
     private void Test(JsonNode? input, Type type, object? expectedResult)
     {
         var result = Core.Utils.ConvertJsonNode(input, type);

@@ -13,7 +13,7 @@ namespace Ivy;
 public static class Utils
 {
     public static string? NullIfEmpty(this string? input) => string.IsNullOrWhiteSpace(input) ? null : input;
-    
+
     public static Type? GetCollectionTypeParameter(this Type type)
     {
         if (type == null) return null;
@@ -46,7 +46,7 @@ public static class Utils
 
         return enumerableInterface?.GetGenericArguments()[0];
     }
-    
+
     public static bool IsCollectionType(this Type? type)
     {
         if (type == null) return false;
@@ -75,7 +75,7 @@ public static class Utils
 
         return false;
     }
-    
+
     public static void PrintDetailedException(Exception? ex)
     {
         while (ex != null)
@@ -89,7 +89,7 @@ public static class Utils
             ex = ex.InnerException;
         }
     }
-    
+
     public static bool IsPortInUse(int port)
     {
         try
@@ -104,7 +104,7 @@ public static class Utils
             return true;
         }
     }
-    
+
     public static ExpandoObject[] ToExpando(this IEnumerable<IDictionary<string, object>> records) =>
         records.Select(r => r.ToExpando()).ToArray();
 
@@ -123,14 +123,14 @@ public static class Utils
         }
         return expando;
     }
-    
+
     //todo: this needs a rename
-    public static async Task<List<T>> ToListAsync2<T>( 
+    public static async Task<List<T>> ToListAsync2<T>(
         this IQueryable<T> source,
         CancellationToken cancellationToken = default)
     {
         if (source == null) throw new ArgumentNullException(nameof(source));
-        
+
         if (source is IAsyncEnumerable<T> asyncEnumerable)
         {
             var list = new List<T>();
@@ -140,7 +140,7 @@ public static class Utils
             }
             return list;
         }
-        
+
         return Task.FromResult(source.ToList()).Result;
     }
 
@@ -149,7 +149,7 @@ public static class Utils
         CancellationToken cancellationToken = default)
     {
         if (source == null) throw new ArgumentNullException(nameof(source));
-        
+
         var list = new List<T>();
         await foreach (var item in source.WithCancellation(cancellationToken))
         {
@@ -157,7 +157,7 @@ public static class Utils
         }
         return list.ToArray();
     }
-    
+
     public static Action Before(this Action action, Action before)
     {
         return () =>
@@ -166,7 +166,7 @@ public static class Utils
             action();
         };
     }
-    
+
     public static Action After(this Action action, Action after)
     {
         return () =>
@@ -175,7 +175,7 @@ public static class Utils
             after();
         };
     }
-    
+
     public static string TitleCaseToCamelCase(string titleCase)
     {
         if (string.IsNullOrWhiteSpace(titleCase))
@@ -185,7 +185,7 @@ public static class Utils
 
         return camelCase;
     }
-    
+
     public static string CamelCaseToTitleCase(string camelCase)
     {
         if (string.IsNullOrWhiteSpace(camelCase))
@@ -195,7 +195,7 @@ public static class Utils
 
         return titleCase;
     }
-    
+
     /// <summary>
     /// FooBar => Foo Bar
     /// </summary>
@@ -211,7 +211,7 @@ public static class Utils
             .ToArray();
         return string.Join(" ", words);
     }
-    
+
     /// <summary>
     /// FooBar => foo-bar
     /// </summary>
@@ -221,7 +221,7 @@ public static class Utils
     {
         if (string.IsNullOrWhiteSpace(input))
             return string.Empty;
-        
+
         // if (input.EndsWith("app", StringComparison.InvariantCultureIgnoreCase))
         // {
         //     input = input[..^3];
@@ -232,27 +232,27 @@ public static class Utils
         {
             input = input[1..];
         }
-        
+
         StringBuilder sb = new();
-        
+
         for (int i = 0; i < input.Length; i++)
         {
             if (char.IsUpper(input[i]) && i > 0)
             {
                 sb.Append('-');
             }
-            
+
             sb.Append(char.ToLower(input[i]));
         }
-        
+
         if (hadUnderscore)
         {
             sb.Insert(0, '_');
         }
-        
+
         return sb.ToString();
     }
-    
+
     /// <summary>
     /// FooBarApp => Foo Bar
     /// </summary>
@@ -262,40 +262,40 @@ public static class Utils
     {
         if (string.IsNullOrWhiteSpace(input))
             return string.Empty;
-        
-        if (input.EndsWith("app",  StringComparison.InvariantCultureIgnoreCase))
+
+        if (input.EndsWith("app", StringComparison.InvariantCultureIgnoreCase))
         {
             input = input[..^3];
         }
-        
+
         StringBuilder sb = new();
-        
+
         for (int i = 0; i < input.Length; i++)
         {
             if (char.IsUpper(input[i]) && i > 0)
             {
                 sb.Append(' ');
             }
-            
+
             sb.Append(input[i]);
         }
-        
+
         return sb.ToString();
     }
-    
+
     public static string TrimEnd(this string source, string value)
     {
         if (!source.EndsWith(value))
             return source;
         return source.Remove(source.LastIndexOf(value));
     }
-    
+
     public static bool IsNullable(this Type type)
     {
         if (type == null) { return false; }
         return (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>));
     }
-    
+
     public static int SuggestPrecision(this Type type)
     {
         if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
@@ -313,17 +313,17 @@ public static class Utils
                 return 0;
         }
     }
-    
+
     public static double SuggestStep(this Type type)
     {
         return 1.0;
     }
-    
+
     public static double SuggestMin(this Type type)
     {
         return 0.0;
     }
-    
+
     public static double SuggestMax(this Type type)
     {
         if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
@@ -343,7 +343,7 @@ public static class Utils
                 return int.MaxValue;
         }
     }
-    
+
     public static bool IsDate(this Type type)
     {
         if (type == null) { return false; }
@@ -355,7 +355,7 @@ public static class Utils
 
         return type == typeof(DateTime) || type == typeof(DateTimeOffset);
     }
-    
+
     public static bool IsNumeric(this Type type)
     {
         if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
@@ -394,7 +394,7 @@ public static class Utils
                || type == typeof(TimeSpan)
                || type == typeof(Guid);
     }
-    
+
     public static bool IsObservable(object observable)
     {
         return observable
@@ -405,7 +405,7 @@ public static class Utils
                 i.GetGenericTypeDefinition() == typeof(IObservable<>)
             );
     }
-    
+
     public static string GetNameFromMemberExpression(Expression expression)
     {
         while (true)
@@ -422,7 +422,7 @@ public static class Utils
             throw new ArgumentException("Invalid expression.");
         }
     }
-    
+
     public static bool IsNullableType(this Type type)
     {
         return Nullable.GetUnderlyingType(type) != null;
@@ -441,7 +441,7 @@ public static class Utils
             _ => true
         };
     }
-    
+
     public static string EatRight(this string input, char food)
     {
         return EatRight(input, c => c == food);
@@ -540,7 +540,7 @@ public static class Utils
             }
         }
 
-        return input.Substring(cursor, n-cursor);
+        return input.Substring(cursor, n - cursor);
     }
 
     public static Exception GetInnerMostException(Exception exception)
@@ -549,19 +549,21 @@ public static class Utils
         {
             exception = exception.InnerException;
         }
-        
+
         return exception;
     }
 
     public static void KillProcessUsingPort(int port)
     {
         //Console.WriteLine($"Trying to kill the process using port {port}...");
-        
+
         if (Environment.OSVersion.Platform != PlatformID.Win32NT)
             throw new NotSupportedException("This method is only supported on Windows.");
-        
-        var netstat = new Process {
-            StartInfo = new ProcessStartInfo {
+
+        var netstat = new Process
+        {
+            StartInfo = new ProcessStartInfo
+            {
                 FileName = "netstat",
                 Arguments = "-ano",
                 RedirectStandardOutput = true,
@@ -576,7 +578,8 @@ public static class Utils
         var lines = output.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries);
         var regex = new Regex(@"\s+");
 
-        foreach (var line in lines) {
+        foreach (var line in lines)
+        {
             if (!line.Trim().StartsWith("TCP"))
                 continue;
             var parts = regex.Split(line.Trim());
@@ -590,10 +593,13 @@ public static class Utils
             if (!int.TryParse(localAddress[(colonIndex + 1)..], out int linePort) || linePort != port) continue;
             if (!int.TryParse(pidStr, out int pid)) continue;
             if (pid == 0) continue;
-            try {
+            try
+            {
                 Process.GetProcessById(pid).Kill();
                 //Console.WriteLine($"Killed process {pid} using port {port}");
-            } catch (Exception) {
+            }
+            catch (Exception)
+            {
                 //ignore
             }
         }
@@ -603,7 +609,7 @@ public static class Utils
     {
         if (string.IsNullOrWhiteSpace(localUrl))
             throw new ArgumentNullException(nameof(localUrl));
-        
+
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
             Process.Start(new ProcessStartInfo("cmd", $"/c start {localUrl}") { CreateNoWindow = true });
@@ -629,12 +635,12 @@ public static class Utils
         {
             return string.IsNullOrWhiteSpace(str);
         }
-            
-        if(obj is bool b)
+
+        if (obj is bool b)
         {
             return !b;
         }
-            
+
         return false;
     }
 }

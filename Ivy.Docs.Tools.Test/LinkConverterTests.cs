@@ -13,7 +13,7 @@ public class LinkConverterTests
         Assert.Equal(expectedTypes, types);
         Assert.Equal(expectedMarkdown, markdown);
     }
-    
+
     [Theory]
     [InlineData("01_Onboarding/01_Introduction.md", "[Intro](./02_Installation.md)", "[Intro](app://onboarding/installation-app)", "Onboarding.InstallationApp")]
     [InlineData("01_Onboarding/01_Introduction.md", "[External](https://example.com)", "[External](https://example.com)", null)]
@@ -32,7 +32,7 @@ public class LinkConverterTests
 
         Assert.Equal(expectedMarkdown, markdown);
     }
-    
+
     [Theory]
     [InlineData(
         "01_Onboarding/01_Introduction.md",
@@ -62,8 +62,8 @@ public class LinkConverterTests
         Assert.Equal(expectedMarkdown, markdown);
         Assert.Equal(expectedTypes.ToHashSet(), types);
     }
-    
-    
+
+
     [Theory]
     [InlineData(
         "01_Onboarding/01_Introduction.md",

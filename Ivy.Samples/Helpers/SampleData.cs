@@ -5,7 +5,7 @@ namespace Ivy.Samples.Helpers;
 public class User
 {
     public required string Name { get; init; }
-    public required int Age { get; init; } 
+    public required int Age { get; init; }
     public required string Email { get; init; }
 }
 

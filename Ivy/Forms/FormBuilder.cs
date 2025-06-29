@@ -39,12 +39,12 @@ public class FormBuilderField<TModel>
         Order = int.MaxValue;
         RowKey = Guid.NewGuid();
         Required = required;
-        
-        if(Required)
+
+        if (Required)
         {
             Validators.Add(e => (Utils.IsValidRequired(e), "Required field"));
         }
-        
+
         Visible = _ => true;
     }
 
@@ -88,20 +88,20 @@ public class FormBuilderField<TModel>
 public class FormBuilder<TModel> : ViewBase
 {
     private readonly Dictionary<string, FormBuilderField<TModel>> _fields;
-    
+
     private readonly IState<TModel> _model;
 
     public readonly string SubmitTitle = "Save";
-    
+
     private readonly List<string> _groups = new();
-    
+
     public FormBuilder(IState<TModel> model)
     {
         _model = model;
         _fields = new Dictionary<string, FormBuilderField<TModel>>();
         _Scaffold();
     }
-    
+
     private void _Scaffold()
     {
         var type = _model.GetStateType();
@@ -110,9 +110,9 @@ public class FormBuilder<TModel> : ViewBase
             .GetFields()
             .Select(e => new
             {
-                e.Name, 
-                Type = e.FieldType, 
-                FieldInfo = e, 
+                e.Name,
+                Type = e.FieldType,
+                FieldInfo = e,
                 PropertyInfo = (PropertyInfo)null!,
                 Required = FormHelpers.IsRequired(e)
             })
@@ -120,45 +120,45 @@ public class FormBuilder<TModel> : ViewBase
                 type
                     .GetProperties()
                     .Select(e => new
-                        {
-                            e.Name, 
-                            Type = e.PropertyType, 
-                            FieldInfo = (FieldInfo)null!, 
-                            PropertyInfo = e, 
-                            Required = FormHelpers.IsRequired(e)
-                        }
+                    {
+                        e.Name,
+                        Type = e.PropertyType,
+                        FieldInfo = (FieldInfo)null!,
+                        PropertyInfo = e,
+                        Required = FormHelpers.IsRequired(e)
+                    }
                     )
             )
             .ToList();
-        
+
         var order = fields.Count;
         foreach (var field in fields)
         {
             var label = Utils.SplitPascalCase(field.Name) ?? field.Name;
-            
+
             _fields[field.Name] =
                 new FormBuilderField<TModel>(field.Name, label, order++, ScaffoldEditor(field.Name, field.Type),
                     field.FieldInfo, field.PropertyInfo, field.Required);
         }
     }
 
-    private Func<IAnyState,IAnyInput>? ScaffoldEditor(string name, Type type)
+    private Func<IAnyState, IAnyInput>? ScaffoldEditor(string name, Type type)
     {
-        if(type == typeof(FileInput))
+        if (type == typeof(FileInput))
         {
             return (state) => state.ToFileInput();
         }
-        
+
         if (name.EndsWith("Id") && (type == typeof(Guid) || type == typeof(int) || type == typeof(string)))
         {
             return (state) => state.ToReadOnlyInput();
         }
-        
-        if(name.EndsWith("Email") && type == typeof(string))
+
+        if (name.EndsWith("Email") && type == typeof(string))
         {
             return (state) => state.ToEmailInput();
         }
-        
+
         if (type == typeof(bool) || type == typeof(bool?))
         {
             return (state) => state.ToBoolInput().ScaffoldDefaults(name, type);
@@ -166,20 +166,20 @@ public class FormBuilder<TModel> : ViewBase
 
         if (type == typeof(string))
         {
-            if(name.EndsWith("Password"))
+            if (name.EndsWith("Password"))
             {
                 return (state) => state.ToPasswordInput();
             }
-            
+
             return (state) => state.ToTextInput();
         }
-        
-        if(type.IsEnum)
+
+        if (type.IsEnum)
         {
             return (state) => state.ToSelectInput();
         }
-        
-        if(type.IsCollectionType() && type.GetCollectionTypeParameter() is { IsEnum: true })
+
+        if (type.IsCollectionType() && type.GetCollectionTypeParameter() is { IsEnum: true })
         {
             return (state) => state.ToSelectInput().List();
         }
@@ -188,7 +188,7 @@ public class FormBuilder<TModel> : ViewBase
         {
             return (state) => state.ToNumberInput().ScaffoldDefaults(name, type);
         }
-        
+
         if (type.IsDate())
         {
             return (state) => state.ToDateTimeInput();
@@ -196,21 +196,21 @@ public class FormBuilder<TModel> : ViewBase
 
         return null;
     }
-    
+
     public FormBuilder<TModel> Builder(Expression<Func<TModel, object>> field, Func<IAnyState, IAnyInput> factory)
     {
         var hint = GetField(field);
-        
+
         Func<IAnyState, IAnyInput> ScaffoldWrapper(Func<IAnyState, IAnyInput> inner)
         {
             return (state) =>
             {
                 var input = inner(state);
-                if(input is IAnyBoolInput boolInput)
+                if (input is IAnyBoolInput boolInput)
                 {
                     boolInput.ScaffoldDefaults(hint.Name, hint.Type);
                 }
-                else if(input is IAnyNumberInput numberInput)
+                else if (input is IAnyNumberInput numberInput)
                 {
                     numberInput.ScaffoldDefaults(hint.Name, hint.Type);
                 }
@@ -221,7 +221,7 @@ public class FormBuilder<TModel> : ViewBase
         hint.InputFactory = ScaffoldWrapper(factory);
         return this;
     }
-    
+
     public FormBuilder<TModel> Builder<TU>(Func<IAnyState, IAnyInput> input)
     {
         foreach (var hint in _fields.Values.Where(e => e.Type is TU))
@@ -231,7 +231,7 @@ public class FormBuilder<TModel> : ViewBase
 
         return this;
     }
-    
+
     public FormBuilder<TModel> Description(Expression<Func<TModel, object>> field, string description)
     {
         var hint = GetField(field);
@@ -245,7 +245,7 @@ public class FormBuilder<TModel> : ViewBase
         hint.Label = label;
         return this;
     }
-    
+
     private FormBuilder<TModel> _Place(int col, Guid? row, params Expression<Func<TModel, object>>[] fields)
     {
         int order = _fields.Values
@@ -287,7 +287,7 @@ public class FormBuilder<TModel> : ViewBase
     {
         return _Place(col, row ? Guid.NewGuid() : null, fields);
     }
-    
+
     public FormBuilder<TModel> Group(string group, int column, params Expression<Func<TModel, object>>[] fields)
     {
         int order = 0;
@@ -311,7 +311,7 @@ public class FormBuilder<TModel> : ViewBase
     {
         return Group(group, 0, fields);
     }
-    
+
     public FormBuilder<TModel> Remove(params Expression<Func<TModel, object>>[] fields)
     {
         foreach (var field in fields)
@@ -321,7 +321,7 @@ public class FormBuilder<TModel> : ViewBase
         }
         return this;
     }
-    
+
     public FormBuilder<TModel> Add(Expression<Func<TModel, object>> field)
     {
         var hint = GetField(field);
@@ -337,7 +337,7 @@ public class FormBuilder<TModel> : ViewBase
         }
         return this;
     }
-    
+
     // public EntityEditor<T> Helper(Expression<Func<T, object>> field, Func<Control, object> helper)
     // {
     //     var hint = GetField(field);
@@ -345,7 +345,7 @@ public class FormBuilder<TModel> : ViewBase
     //     return this;
     // }
     //
-    
+
     // public EntityEditor<T> Derived<TU, TV>(Expression<Func<T, TU>> field, Expression<Func<T, TV>> derivedFrom, Func<T, TU> transformer)
     // {
     //     var _derivedFrom = GetField(derivedFrom);
@@ -353,14 +353,14 @@ public class FormBuilder<TModel> : ViewBase
     //     _derivedFrom.Dependencies.Add((_field, x => transformer(x)));
     //     return this;
     // }
-    
+
     public FormBuilder<TModel> Visible(Expression<Func<TModel, object>> field, Func<TModel, bool> predicate)
     {
         var hint = GetField(field);
         hint.Visible = predicate;
         return this;
     }
-    
+
     public FormBuilder<TModel> Disabled(bool disabled, params Expression<Func<TModel, object>>[] fields)
     {
         foreach (var expr in fields)
@@ -370,14 +370,14 @@ public class FormBuilder<TModel> : ViewBase
         }
         return this;
     }
-    
+
     public FormBuilder<TModel> Validate<T>(Expression<Func<TModel, object>> field, Func<T, (bool, string)> validator)
     {
         var hint = GetField(field);
         hint.Validators.Add((o) => validator((T)o!));
         return this;
     }
-    
+
     public FormBuilder<TModel> Required(params Expression<Func<TModel, object>>[] fields)
     {
         foreach (var expr in fields)
@@ -388,13 +388,13 @@ public class FormBuilder<TModel> : ViewBase
         }
         return this;
     }
-    
+
     private FormBuilderField<TModel> GetField<TU>(Expression<Func<TModel, TU>> field)
     {
         var name = Utils.GetNameFromMemberExpression(field.Body);
         return _fields[name];
     }
-    
+
     private Expression<Func<TModel, object>> CreateSelector(string name)
     {
         var parameter = Expression.Parameter(typeof(TModel), "x");
@@ -402,24 +402,24 @@ public class FormBuilder<TModel> : ViewBase
         var converted = Expression.Convert(member, typeof(object));
         return Expression.Lambda<Func<TModel, object>>(converted, parameter);
     }
-    
+
     public (Func<Task<bool>> onSubmit, IView formView, IView validationView, bool loading) UseForm(IViewContext context)
     {
-        var currentModel = context.UseState(() => StateHelpers.DeepClone(_model.Value), buildOnChange:false);
-        
+        var currentModel = context.UseState(() => StateHelpers.DeepClone(_model.Value), buildOnChange: false);
+
         var validationSignal = context.CreateSignal<FormValidateSignal, Unit, bool>();
         var updateSignal = context.CreateSignal<FormUpdateSignal, Unit, Unit>();
         var invalidFields = context.UseState(0);
-        
+
         var fields = _fields
             .Values
             .Where(e => e is { Removed: false, InputFactory: not null })
             .Select(e => new FormFieldBinding<TModel>(
-                CreateSelector(e.Name), 
-                e.InputFactory!, 
+                CreateSelector(e.Name),
+                e.InputFactory!,
                 () => e.Visible(currentModel.Value),
                 updateSignal,
-                e.Label, 
+                e.Label,
                 e.Description,
                 e.Required,
                 new FormFieldLayoutOptions(e.RowKey, e.Column, e.Order, e.Group),
@@ -427,7 +427,7 @@ public class FormBuilder<TModel> : ViewBase
             ))
             .Cast<IFormFieldBinding<TModel>>()
             .ToArray();
-        
+
         async Task<bool> OnSubmit()
         {
             var results = await validationSignal.Send(new Unit());
@@ -439,43 +439,44 @@ public class FormBuilder<TModel> : ViewBase
             }
             invalidFields.Set(results.Count(e => !e));
             return false;
-        };
-        
+        }
+        ;
+
         var bindings = fields.Select(e => e.Bind(currentModel)).ToArray();
         context.TrackDisposable(bindings.Select(e => e.disposable));
-        
+
         var fieldViews = bindings.Select(e => e.fieldView).ToArray();
-        
+
         var formView = new FormView<TModel>(
             fieldViews
         );
-        
+
         var validationView = new WrapperView(Layout.Vertical(
-            (invalidFields.Value > 0 ? 
+            (invalidFields.Value > 0 ?
                 Layout.Horizontal(
                     Text.Muted(InvalidMessage(invalidFields.Value))
                 ).Left().Gap(1)
             : null!)
         ).Grow());
-        
+
         return (OnSubmit, formView, validationView, false);
     }
-    
+
     public override object? Build()
     {
         (Func<Task<bool>> onSubmit, IView formView, IView validationView, bool submitting) = UseForm(this.Context);
-        
+
         async void HandleSubmit() //todo: handle errors
         {
             await onSubmit();
         }
-        
+
         return Layout.Vertical()
                | formView
                | Layout.Horizontal(new Button(SubmitTitle).HandleClick(new Action(HandleSubmit).ToEventHandler<Button>())
                    .Loading(submitting).Disabled(submitting), validationView);
     }
-    
+
     private static string InvalidMessage(int invalidFields)
     {
         return invalidFields == 1 ? "There is 1 invalid field." : $"There are {invalidFields} invalid fields.";

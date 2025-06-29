@@ -63,32 +63,32 @@ public class DashboardLineChartStyle<TSource> : ILineChartStyle<TSource>
 }
 
 public class LineChartBuilder<TSource>(
-    IQueryable<TSource> data, 
-    Dimension<TSource>? dimension = null, 
-    Measure<TSource>[]? measures = null, 
+    IQueryable<TSource> data,
+    Dimension<TSource>? dimension = null,
+    Measure<TSource>[]? measures = null,
     ILineChartStyle<TSource>? style = null,
-    Func<LineChart,LineChart>? polish = null
+    Func<LineChart, LineChart>? polish = null
 )
     : ViewBase
 {
-    private readonly List<Measure<TSource>> _measures = [..measures ?? []];
+    private readonly List<Measure<TSource>> _measures = [.. measures ?? []];
     private readonly List<TableCalculation> _calculations = new();
-    
+
     public override object? Build()
     {
-        if(dimension is null)
+        if (dimension is null)
         {
             throw new InvalidOperationException("A dimension is required.");
         }
-        
-        if(_measures.Count == 0)
+
+        if (_measures.Count == 0)
         {
             throw new InvalidOperationException("At least one measure is required.");
         }
-        
-        var lineChartData = UseState(ImmutableArray.Create<Dictionary<string,object>>);
+
+        var lineChartData = UseState(ImmutableArray.Create<Dictionary<string, object>>);
         var loading = UseState(true);
-        
+
         UseEffect(async () =>
         {
             try
@@ -96,43 +96,43 @@ public class LineChartBuilder<TSource>(
                 var results = await data
                     .ToPivotTable()
                     .Dimension(dimension).Measures(_measures).TableCalculations(_calculations).ExecuteAsync();
-                lineChartData.Set([..results]); 
+                lineChartData.Set([.. results]);
             }
             finally
             {
                 loading.Set(false);
             }
-        }, [ EffectTrigger.AfterInit() ]);
-        
+        }, [EffectTrigger.AfterInit()]);
+
         if (loading.Value)
         {
             return new ChatLoading();
         }
 
         var resolvedDesigner = style ?? LineChartStyleHelpers.GetStyle<TSource>(LineChartStyles.Default);
-        
+
         var scaffolded = resolvedDesigner.Design(
-            lineChartData.Value.ToExpando(), 
-            dimension, 
-            _measures.ToArray(), 
+            lineChartData.Value.ToExpando(),
+            dimension,
+            _measures.ToArray(),
             _calculations.ToArray()
         );
-        
+
         return polish?.Invoke(scaffolded) ?? scaffolded;
     }
-    
+
     public LineChartBuilder<TSource> Dimension(string name, Expression<Func<TSource, object>> selector)
     {
         dimension = new Dimension<TSource>(name, selector);
         return this;
     }
-    
+
     public LineChartBuilder<TSource> Measure(string name, Expression<Func<IQueryable<TSource>, object>> aggregator)
     {
         _measures.Add(new Measure<TSource>(name, aggregator));
         return this;
     }
-    
+
     public LineChartBuilder<TSource> TableCalculation(TableCalculation calculation)
     {
         _calculations.Add(calculation);
@@ -143,26 +143,26 @@ public class LineChartBuilder<TSource>(
 public static class LineChartExtensions
 {
     public static LineChartBuilder<TSource> ToLineChart<TSource>(
-        this IEnumerable<TSource> data, 
-        Expression<Func<TSource, object>>? dimension =  null, 
+        this IEnumerable<TSource> data,
+        Expression<Func<TSource, object>>? dimension = null,
         Expression<Func<IQueryable<TSource>, object>>[]? measures = null,
         LineChartStyles style = LineChartStyles.Default,
-        Func<LineChart,LineChart>? polish = null)
+        Func<LineChart, LineChart>? polish = null)
     {
         return data.AsQueryable().ToLineChart(dimension, measures, style, polish);
     }
-    
+
     [OverloadResolutionPriority(1)]
     public static LineChartBuilder<TSource> ToLineChart<TSource>(
-        this IQueryable<TSource> data, 
-        Expression<Func<TSource, object>>? dimension = null, 
+        this IQueryable<TSource> data,
+        Expression<Func<TSource, object>>? dimension = null,
         Expression<Func<IQueryable<TSource>, object>>[]? measures = null,
         LineChartStyles style = LineChartStyles.Default,
-        Func<LineChart,LineChart>? polish = null)
+        Func<LineChart, LineChart>? polish = null)
     {
-        return new LineChartBuilder<TSource>(data, 
-            dimension != null ? new Dimension<TSource>(ExpressionNameHelper.SuggestName(dimension) ?? "Dimension", dimension) : null, 
-            measures?.Select(m => new Measure<TSource>(ExpressionNameHelper.SuggestName(m) ?? "Measure", m)).ToArray(), 
+        return new LineChartBuilder<TSource>(data,
+            dimension != null ? new Dimension<TSource>(ExpressionNameHelper.SuggestName(dimension) ?? "Dimension", dimension) : null,
+            measures?.Select(m => new Measure<TSource>(ExpressionNameHelper.SuggestName(m) ?? "Measure", m)).ToArray(),
             LineChartStyleHelpers.GetStyle<TSource>(style),
             polish
         );

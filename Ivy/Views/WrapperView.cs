@@ -7,11 +7,11 @@ public class WrapperView(params object[] anything) : ViewBase
 {
     public override object? Build()
     {
-        if(anything.Length == 0)
+        if (anything.Length == 0)
         {
             return null;
         }
-        if(anything.Length == 1)
+        if (anything.Length == 1)
         {
             return anything[0];
         }

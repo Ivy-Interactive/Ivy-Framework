@@ -16,19 +16,20 @@ public class AppArgs
     public string Scheme { get; set; }
 
     public string Host { get; set; }
-    
+
     public string AppId { get; set; }
-    
+
     public string ConnectionId { get; set; }
-    
+
     private string? ArgsJson { get; set; }
-    
+
     public T? GetArgs<T>() where T : class
     {
-        if(ArgsJson == null)
+        if (ArgsJson == null)
         {
             return null;
         }
+
         return JsonSerializer.Deserialize<T>(ArgsJson);
-    } 
+    }
 }

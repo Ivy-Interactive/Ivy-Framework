@@ -4,7 +4,7 @@ public static class IconsHelper
 {
     public static Icons? FromString(string? iconName)
     {
-        if(string.IsNullOrEmpty(iconName)) return null;
+        if (string.IsNullOrEmpty(iconName)) return null;
         if (Enum.TryParse(typeof(Icons), iconName, true, out var icon))
         {
             return (Icons)icon;
@@ -16,7 +16,7 @@ public static class IconsHelper
 public enum Icons
 {
     None,
- 
+
     // Extras:
     Google, //<FaGoogle />
     Azure,  //<VscAzure />
@@ -34,9 +34,9 @@ public enum Icons
     //Slack, //<FaSlack />
     Spotify, //<FaSpotify />
     Notion, //<FaNotion />
-    //Apple, //<FaApple />
-    //Github, //<FaGithub />
-    
+            //Apple, //<FaApple />
+            //Github, //<FaGithub />
+
     // Lucide Icons:
     AArrowDown,
     AArrowUp,

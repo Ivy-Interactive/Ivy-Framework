@@ -8,23 +8,23 @@ namespace Ivy.Core.Helpers;
 
 public static class StateHelpers
 {
-    public static IState<TTo> Convert<TFrom,TTo>(this IState<TFrom?> state, Func<TFrom?, TTo> forward, Func<TTo, TFrom> backward)
+    public static IState<TTo> Convert<TFrom, TTo>(this IState<TFrom?> state, Func<TFrom?, TTo> forward, Func<TTo, TFrom> backward)
     {
         return new ConvertedState<TFrom?, TTo>(state, forward, backward);
     }
-    
+
     public static T DeepClone<T>(T source)
     {
         return source.DeepClone();
     }
-    
+
     public static IState<T> As<T>(this IAnyState state)
     {
         if (state is IState<T> s) return s;
 
         var iStateInterface = state.GetType().GetInterfaces()
             .FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IState<>));
-        
+
         if (iStateInterface == null)
             throw new ArgumentException($"Unable to convert IAnyState to IState<{typeof(T).Name}>.");
 
@@ -61,11 +61,11 @@ public static class StateHelpers
     private static TValue? GetValue<TModel, TValue>(this IState<TModel> model, Expression<Func<TModel, TValue>> selector)
     {
         var memberInfo = GetMemberInfo(selector.Body);
-        if(memberInfo is PropertyInfo property)
+        if (memberInfo is PropertyInfo property)
         {
             return (TValue)property.GetValue(model.Value)!;
         }
-        if(memberInfo is FieldInfo field)
+        if (memberInfo is FieldInfo field)
         {
             return (TValue)field.GetValue(model.Value)!;
         }

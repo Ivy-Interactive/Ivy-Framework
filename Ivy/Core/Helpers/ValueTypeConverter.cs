@@ -21,7 +21,7 @@ public class ValueTupleConverter<T> : JsonConverter<T>
 {
     private readonly FieldInfo[] _fields;
     private readonly Dictionary<string, FieldInfo> _fieldMap;
-    
+
     public ValueTupleConverter(JsonNamingPolicy namingPolicy)
     {
         _fields = typeof(T)

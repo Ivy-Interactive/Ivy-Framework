@@ -15,7 +15,7 @@ public class BasicAuthProvider : IAuthProvider
     private readonly string _secret;
     private readonly string _issuer;
     private readonly string _audience;
-    
+
     public BasicAuthProvider()
     {
         var configuration = new ConfigurationBuilder()
@@ -26,7 +26,7 @@ public class BasicAuthProvider : IAuthProvider
         _secret = configuration["JWT_SECRET"] ?? throw new Exception("JWT_SECRET is required");
         _issuer = configuration["JWT_ISSUER"] ?? "ivy";
         _audience = configuration["JWT_AUDIENCE"] ?? "ivy-app";
-        
+
         var users = configuration.GetSection("USERS").Value ?? throw new Exception("USERS is required");
         foreach (var user in users.Split(';'))
         {
@@ -34,7 +34,7 @@ public class BasicAuthProvider : IAuthProvider
             _users.Add((parts[0], parts[1]));
         }
     }
-    
+
     public Task<AuthToken?> LoginAsync(string email, string password)
     {
         var found = _users.Any(u => u.user == email && u.password == password);

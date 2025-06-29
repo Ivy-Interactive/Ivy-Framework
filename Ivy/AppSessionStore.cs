@@ -17,7 +17,7 @@ public class AppSessionStore
         var parent = Sessions.Values.FirstOrDefault(s => s.ConnectionId == session.ParentId);
         return parent == null ? null : FindChrome(parent!);
     }
-    
+
     public void Dump()
     {
         var rows = Sessions.Values.Select(e => new
@@ -28,7 +28,7 @@ public class AppSessionStore
             e.ParentId,
             e.LastInteraction
         });
-        
+
         var table = new Spectre.Console.Table();
         table.AddColumn("MachineId");
         table.AddColumn("AppId");
@@ -38,9 +38,9 @@ public class AppSessionStore
 
         foreach (var row in rows)
         {
-            table.AddRow(row.MachineId, row.AppId, row.ConnectionId, row.ParentId??"", row.LastInteraction.ToString("HH:mm:ss"));
+            table.AddRow(row.MachineId, row.AppId, row.ConnectionId, row.ParentId ?? "", row.LastInteraction.ToString("HH:mm:ss"));
         }
-        
+
         AnsiConsole.Write(table);
     }
 }

@@ -17,10 +17,10 @@ public class DefaultAuthApp : ViewBase
         var auth = this.UseService<IAuthService>();
 
         var options = auth.GetAuthOptions();
-        
+
         var renderedOptions = new List<object>();
-        
-        if(options.Any(e => e.Flow == AuthFlow.EmailPassword))
+
+        if (options.Any(e => e.Flow == AuthFlow.EmailPassword))
         {
             var emailOption = options.First(e => e.Flow == AuthFlow.EmailPassword);
             renderedOptions.Add(new PasswordEmailFlowView());
@@ -31,7 +31,7 @@ public class DefaultAuthApp : ViewBase
             var oAuthOptions = options.Where(e => e.Flow == AuthFlow.OAuth).ToList();
             renderedOptions.Add(Layout.Vertical() | oAuthOptions.Select(e => new OAuthFlowView(e)));
         }
-        
+
         return
             Layout.Horizontal().Align(Align.Center).Height(Size.Screen())
             | (new Card().Width(100).Title("Login")
@@ -51,7 +51,7 @@ public class PasswordEmailFlowView() : ViewBase
         var loading = this.UseState<bool>();
         var auth = this.UseService<IAuthService>();
         var client = this.UseService<IClientProvider>();
-        
+
         var login = async () =>
         {
             try
@@ -93,7 +93,7 @@ public class OAuthFlowView(AuthOption option) : ViewBase
             client.SetJwt(token);
             return new RedirectResult("/");
         });
-        
+
         var login = async () =>
         {
             client.OpenUrl(await auth.GetOAuthUriAsync(option, callback));

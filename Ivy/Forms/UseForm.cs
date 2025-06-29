@@ -12,13 +12,13 @@ public static class UseFormExtensions
     {
         return context.UseState(factory, buildOnChange: false).Value.UseForm(context);
     }
-    
+
     public static IView ToSheet<TModel>(this FormBuilder<TModel> formBuilder, IState<bool> isOpen, string? title = null, string? description = null, string? submitTitle = null, Size? width = null)
     {
         return new FuncView((context) =>
             {
                 (Func<Task<bool>> onSubmit, IView formView, IView validationView, bool loading) = formBuilder.UseForm(context);
-                
+
                 if (!isOpen.Value) return null; //shouldn't happen
 
                 async void HandleSubmit()
@@ -28,7 +28,7 @@ public static class UseFormExtensions
                         isOpen.Value = false;
                     }
                 }
-                
+
                 var layout = new FooterLayout(
                     Layout.Horizontal().Gap(2)
                         | new Button(submitTitle ?? formBuilder.SubmitTitle).HandleClick(new Action(HandleSubmit).ToEventHandler<Button>())
@@ -37,7 +37,7 @@ public static class UseFormExtensions
                         | validationView,
                     formView
                 );
-                
+
                 return new Sheet(_ =>
                 {
                     isOpen.Value = false;
@@ -45,15 +45,15 @@ public static class UseFormExtensions
             }
         );
     }
-    
+
     public static IView ToDialog<TModel>(this FormBuilder<TModel> formBuilder, IState<bool> isOpen, string? title = null, string? description = null, string? submitTitle = null, Size? width = null)
     {
         return new FuncView((context) =>
             {
                 (Func<Task<bool>> onSubmit, IView formView, IView validationView, bool loading) = formBuilder.UseForm(context);
-                
+
                 if (!isOpen.Value) return null; //shouldn't happen
-                
+
                 async void HandleSubmit()
                 {
                     if (await onSubmit())
@@ -61,7 +61,7 @@ public static class UseFormExtensions
                         isOpen.Value = false;
                     }
                 }
-                
+
                 return new Dialog(
                     _ => isOpen.Set(false),
                     new DialogHeader(title ?? ""),

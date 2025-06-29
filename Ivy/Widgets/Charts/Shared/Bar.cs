@@ -48,12 +48,12 @@ public static class BarExtensions
     {
         return area with { StrokeDashArray = strokeDashArray };
     }
-    
+
     public static Bar Fill(this Bar area, Colors fill)
     {
         return area with { Fill = fill };
     }
-    
+
     public static Bar Name(this Bar area, string name)
     {
         return area with { Name = name };
@@ -68,43 +68,43 @@ public static class BarExtensions
     {
         return area with { Animated = animated };
     }
-    
-    
+
+
     public static Bar LabelList(this Bar bar, params LabelList[] labelList)
     {
-        return bar with { LabelLists = [..bar.LabelLists, ..labelList] };
+        return bar with { LabelLists = [.. bar.LabelLists, .. labelList] };
     }
-    
+
     public static Bar LabelList(this Bar bar, string dataKey)
     {
-        return bar with { LabelLists = [..bar.LabelLists, new LabelList(dataKey)] };
+        return bar with { LabelLists = [.. bar.LabelLists, new LabelList(dataKey)] };
     }
-    
+
     public static Bar StackId(this Bar area, string stackId)
     {
         return area with { StackId = stackId };
     }
-    
+
     public static Bar FillOpacity(this Bar area, double fillOpacity)
     {
         return area with { FillOpacity = fillOpacity };
     }
-    
+
     public static Bar Radius(this Bar area, int radius)
     {
         return area with { Radius = [radius, radius, radius, radius] };
     }
-    
+
     public static Bar Radius(this Bar area, int[] radius)
     {
         return area with { Radius = radius };
     }
-    
+
     public static Bar Radius(this Bar area, int topLeft, int topRight, int bottomRight, int bottomLeft)
     {
         return area with { Radius = [topLeft, topRight, bottomRight, bottomLeft] };
     }
-    
+
     public static Bar Radius(this Bar area, int top, int bottom)
     {
         return area with { Radius = [top, top, bottom, bottom] };

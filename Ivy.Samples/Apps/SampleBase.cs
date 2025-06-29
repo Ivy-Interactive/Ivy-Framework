@@ -13,11 +13,11 @@ public abstract class SampleBase : ViewBase
     }
 
     protected abstract object? BuildSample();
-    
+
     public override object? Build()
     {
         var runtimeType = GetType();
-        
+
         return new Fragment(
             BuildSample(),
             _showCodePosition != null ? FloatingLayerExtensions.Align(new FloatingPanel(new Button("Show Code")
@@ -25,7 +25,7 @@ public abstract class SampleBase : ViewBase
                 .Icon(Icons.Code)
                 .Large()
                 .BorderRadius(BorderRadius.Full)
-                .WithSheet(() => new CodeView(runtimeType), runtimeType.FullName![12..].Replace(".", "/")+".cs", width:Size.Fraction(1/2f))), _showCodePosition.Value) : null
+                .WithSheet(() => new CodeView(runtimeType), runtimeType.FullName![12..].Replace(".", "/") + ".cs", width: Size.Fraction(1 / 2f))), _showCodePosition.Value) : null
         );
     }
 }
@@ -50,7 +50,7 @@ public class CodeView(Type type) : ViewBase
                 code = reader.ReadToEnd();
             }
         }
-        
+
         return new Code(code, "cs");
     }
 }

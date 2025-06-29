@@ -84,7 +84,7 @@ public static class AnimationExtensions
     {
         return new Animation(animation).Content(widget);
     }
-    
+
     public static Animation Duration(this Animation animation, double duration)
     {
         return animation with { Duration = duration };

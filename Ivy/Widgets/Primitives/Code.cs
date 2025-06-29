@@ -6,7 +6,7 @@ namespace Ivy;
 
 public record Code : WidgetBase<Code>
 {
-    public Code(string content, string language = "csharp") 
+    public Code(string content, string language = "csharp")
     {
         Content = content;
         Language = language;
@@ -42,7 +42,7 @@ public static class CodeExtensions
     {
         return code with { ShowCopyButton = showCopyButton };
     }
-    
+
     public static Code ShowBorder(this Code code, bool showBorder = true)
     {
         return code with { ShowBorder = showBorder };

@@ -5,13 +5,13 @@ namespace Ivy.Test;
 public class PivotTableTests
 {
     public record BrowserSessions(string Name, int Value);
-    
+
     public record BrowserSessionsPivot(string Browser, int Sessions);
-    
+
     [Fact]
     public void Test1()
     {
-        var raw = new [] {
+        var raw = new[] {
             new BrowserSessions("Edge", 15),
             new BrowserSessions("Chrome", 55),
             new BrowserSessions("Firefox", 25),

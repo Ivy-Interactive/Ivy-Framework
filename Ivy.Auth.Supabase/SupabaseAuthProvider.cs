@@ -19,7 +19,7 @@ public class SupabaseOAuthException(string? error, string? errorCode, string? er
 public class SupabaseAuthProvider : IAuthProvider
 {
     private readonly global::Supabase.Client _client;
-    
+
     private readonly List<AuthOption> _authOptions = new();
 
     private string? _pkceCodeVerifier = null;
@@ -30,16 +30,16 @@ public class SupabaseAuthProvider : IAuthProvider
             .AddEnvironmentVariables()
             .AddUserSecrets(Assembly.GetEntryAssembly()!)
             .Build();
-        
+
         var url = configuration.GetValue<string>("SUPABASE_URL") ?? throw new Exception("SUPABASE_URL is required");
         var key = configuration.GetValue<string>("SUPABASE_API_KEY") ?? throw new Exception("SUPABASE_API_KEY is required");
-        
+
         var options = new SupabaseOptions
         {
             AutoRefreshToken = false,
             AutoConnectRealtime = false
         };
-        
+
         _client = new global::Supabase.Client(url, key, options);
     }
 
@@ -49,7 +49,7 @@ public class SupabaseAuthProvider : IAuthProvider
         var authToken = MakeAuthToken(session);
         return authToken;
     }
-    
+
     public async Task<Uri> GetOAuthUriAsync(AuthOption option, Uri callbackUri)
     {
         var provider = option.Id switch
@@ -164,11 +164,11 @@ public class SupabaseAuthProvider : IAuthProvider
             return false;
         }
     }
-    
+
     public async Task<UserInfo?> GetUserInfoAsync(string jwt)
     {
         var user = await _client.Auth.GetUser(jwt);
-        
+
         if (user == null)
         {
             return null;
@@ -183,7 +183,7 @@ public class SupabaseAuthProvider : IAuthProvider
             null
         );
     }
-    
+
     public AuthOption[] GetAuthOptions()
     {
         return _authOptions.ToArray();
@@ -194,13 +194,13 @@ public class SupabaseAuthProvider : IAuthProvider
         _authOptions.Add(new AuthOption(AuthFlow.EmailPassword));
         return this;
     }
-    
+
     public SupabaseAuthProvider UseGoogle()
     {
         _authOptions.Add(new AuthOption(AuthFlow.OAuth, "Google", nameof(Constants.Provider.Google).ToLower(), Icons.Google));
         return this;
     }
-    
+
     public SupabaseAuthProvider UseApple()
     {
         _authOptions.Add(new AuthOption(AuthFlow.OAuth, "Apple", nameof(Constants.Provider.Apple).ToLower(), Icons.Apple));

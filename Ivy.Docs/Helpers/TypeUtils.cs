@@ -47,10 +47,10 @@ public static class TypeUtils
     {
         if (Nullable.GetUnderlyingType(type) is { } underlying)
             return GetTypeDescription(underlying, true);
-        
+
         if (_simple.TryGetValue(type, out var keyword))
             return isNullable ? $"{keyword}?" : keyword;
-        
+
         if (type.IsGenericType)
         {
             var typeName = type.Name[..type.Name.IndexOf('`')];
@@ -65,7 +65,7 @@ public static class TypeUtils
     {
         if (Nullable.GetUnderlyingType(type) is { } underlying)
             return GetTypeDescription(underlying, true);
-        
+
         if (_simple.TryGetValue(type, out var keyword))
             return isNullable ? $"{keyword}?" : keyword;
 
@@ -73,15 +73,15 @@ public static class TypeUtils
         {
             var name = type.FullName.EatLeft("Ivy.").EatLeft("Shared.");
             return new Button(name + (isNullable ? "?" : "")).Inline()
-                .WithSheet(() => app, width:Size.Units(150));
+                .WithSheet(() => app, width: Size.Units(150));
         }
 
         if (type.IsEnum)
         {
             return new Button(type.Name + (isNullable ? "?" : "")).Inline()
-                .WithSheet(() => new EnumValuesView(type), width:Size.Units(150));
+                .WithSheet(() => new EnumValuesView(type), width: Size.Units(150));
         }
-        
+
         if (type.IsGenericType)
         {
             var typeName = type.Name[..type.Name.IndexOf('`')];
@@ -122,7 +122,7 @@ public static class TypeUtils
     {
         var assembly = typeof(IWidget).Assembly;
         var type = assembly.GetType(typeName) ?? assembly.GetTypes()
-            .FirstOrDefault(t => t.FullName.StartsWith(typeName+"`") && t.IsGenericTypeDefinition);
+            .FirstOrDefault(t => t.FullName.StartsWith(typeName + "`") && t.IsGenericTypeDefinition);
         return type;
     }
 
@@ -158,7 +158,7 @@ public static class TypeUtils
     {
         return new SupportedTypeRecord(GetTypeDescription(type, false));
     }
-    
+
     public static PropRecord GetPropRecord(PropertyInfo prop, object? defaultValueProvider, Type baseType, Type[] extensionsTypes)
     {
         object GetDefaultValue()
@@ -188,7 +188,7 @@ public static class TypeUtils
             }
             return null;
         }
-        
+
         return new PropRecord(prop.Name, GetPropertyTypeDescription(prop), GetDefaultValue(), GetExtensionMethods());
     }
 
@@ -205,14 +205,14 @@ public static class TypeUtils
             }
             return null;
         }
-        
+
         return new EventRecord(prop.Name, GetPropertyTypeDescription(prop), GetExtensionMethods());
     }
-    
+
     internal static string GetExtensionMethods(PropertyInfo propertyInfo, Type baseType, Type[] extensionsTypes)
     {
         var sb = new StringBuilder();
-        
+
         //In extensionsTypes find all public static methods:
         //1) that are extension methods for baseType
         //2) and either have the same name as the propertyInfo or have an attribute of type RelatedToAttribute with the value of propertyInfo.Name
@@ -224,21 +224,21 @@ public static class TypeUtils
                 m.Name == propertyInfo.Name ||
                 (propertyInfo.Name.StartsWith("On") && m.Name == ("Handle" + propertyInfo.Name[2..])) ||
                 m.GetCustomAttribute<RelatedToAttribute>()?.PropertyName == propertyInfo.Name);
-        
+
         foreach (var method in methods)
         {
             var parameters = method.GetParameters().Skip(1);
             var paramSignatures = parameters.Select(p => $"{GetCSharpTypeName(p.ParameterType)} {p.Name}{(p.IsOptional ? " = " + CSharpLiteralGenerator.ToCSharpLiteral(p.DefaultValue).EatLeft("Ivy.Shared.") : "")}");
             sb.AppendLine($"{method.Name}({string.Join(", ", paramSignatures)})");
         }
-        
+
         return sb.ToString().Trim();
     }
 
     private static bool IsWidgetBaseType(this Type type)
     {
         Type currentType = type.BaseType;
-    
+
         while (currentType != null && currentType != typeof(object))
         {
             // Check if the current type is a generic type
@@ -246,26 +246,26 @@ public static class TypeUtils
             {
                 // Get the generic type definition (without the type arguments)
                 Type genericTypeDef = currentType.GetGenericTypeDefinition();
-            
+
                 // Check if it's WidgetBase<>
                 if (genericTypeDef == typeof(Ivy.WidgetBase<>))
                 {
                     return true;
                 }
             }
-        
+
             // Move up the inheritance chain
             currentType = currentType.BaseType;
         }
-    
+
         return false;
     }
-    
+
     public static SignatureRecord GetSignatureRecord(ConstructorInfo constructor)
     {
         return new SignatureRecord(new Code(GetCSharpSignature(constructor)).ShowCopyButton(false).ShowBorder(false));
     }
-    
+
     public static SignatureRecord GetSignatureRecord(MethodInfo constructor)
     {
         return new SignatureRecord(new Code(GetCSharpSignature(constructor)).ShowCopyButton(false).ShowBorder(false));
@@ -280,19 +280,19 @@ public static class TypeUtils
             var genericArgs = string.Join(", ", type.GetGenericArguments().Select(GetCSharpTypeName));
             typeName = $"{type.Name[..type.Name.IndexOf('`')]}<{genericArgs}>";
         }
-        
+
         var parameters = constructor.GetParameters();
         var paramSignatures = parameters.Select(p => $"{GetCSharpTypeName(p.ParameterType)} {p.Name}{(p.IsOptional ? " = " + CSharpLiteralGenerator.ToCSharpLiteral(p.DefaultValue).EatLeft("Ivy.Shared.") : "")}");
         return $"new {typeName}({string.Join(", ", paramSignatures)})";
     }
-    
+
     private static string GetCSharpSignature(MethodInfo method)
     {
         var parameters = method.GetParameters();
         var paramSignatures = parameters.Select(p => $"{GetCSharpTypeName(p.ParameterType)} {p.Name}{(p.IsOptional ? " = " + CSharpLiteralGenerator.ToCSharpLiteral(p.DefaultValue).EatLeft("Ivy.Shared.") : "")}");
         return $"{method.Name}({string.Join(", ", paramSignatures)})";
     }
-    
+
     private static string GetCSharpTypeName(Type type)
     {
         if (type == typeof(string)) return "string";
@@ -307,14 +307,14 @@ public static class TypeUtils
         if (type == typeof(object)) return "object";
         if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
             return GetCSharpTypeName(type.GetGenericArguments()[0]) + "?";
-        
+
         if (type.IsGenericType)
         {
             var typeName = type.Name[..type.Name.IndexOf('`')];
             var genericArgs = string.Join(", ", type.GetGenericArguments().Select(GetCSharpTypeName));
             return $"{typeName}<{genericArgs}>";
         }
-        
+
         return type.Name;
     }
 }

@@ -2,7 +2,7 @@ using Ivy.Shared;
 
 namespace Ivy.Samples.Apps.Widgets.Primitives;
 
-[App(icon:Icons.AppWindow, path:["Widgets", "Primitives"])]
+[App(icon: Icons.AppWindow, path: ["Widgets", "Primitives"])]
 public class IframeApp : SampleBase
 {
     protected override object? BuildSample()

@@ -7,9 +7,9 @@ public record Expandable : WidgetBase<Expandable>
 {
     public Expandable(object header, object content) : base([new Slot("Header", header), new Slot("Content", content)])
     {
-     
+
     }
-    
+
     [Prop] public bool Disabled { get; set; } = false;
 }
 

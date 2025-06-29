@@ -6,8 +6,8 @@ namespace Ivy.Shared;
 [JsonConverter(typeof(ThicknessJsonConverter))]
 public readonly record struct Thickness(int Left, int Top, int Right, int Bottom)
 {
-    public Thickness(int uniform) : this(uniform, uniform, uniform, uniform) {}
-    public Thickness(int horizontal, int vertical) : this(horizontal, vertical, horizontal, vertical) {}
+    public Thickness(int uniform) : this(uniform, uniform, uniform, uniform) { }
+    public Thickness(int horizontal, int vertical) : this(horizontal, vertical, horizontal, vertical) { }
     public static Thickness Zero => new(0);
     public override string ToString() => $"{Left},{Top},{Right},{Bottom}";
     public static implicit operator string(Thickness thickness)

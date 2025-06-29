@@ -22,6 +22,6 @@ public record ListItem : WidgetBase<ListItem>
     [Prop] public string? Badge { get; set; }
 
     public object? Tag { get; } //not a prop!
-    
+
     [Event] public Action<Event<ListItem>>? OnClick { get; set; }
 }

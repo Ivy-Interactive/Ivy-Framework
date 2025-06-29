@@ -10,10 +10,10 @@ public record TableRow : WidgetBase<TableRow>
     }
 
     [Prop] public bool IsHeader { get; set; }
-    
+
     public static TableRow operator |(TableRow row, TableCell child)
     {
-        return row with { Children = [..row.Children, child] };
+        return row with { Children = [.. row.Children, child] };
     }
 }
 

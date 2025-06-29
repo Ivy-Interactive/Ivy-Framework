@@ -9,7 +9,7 @@ public class DbmlEditorApp : ViewBase
 {
     public override object? Build()
     {
-        var sampleDbml = 
+        var sampleDbml =
             """
             Table users {
               id integer
@@ -28,11 +28,11 @@ public class DbmlEditorApp : ViewBase
             
             Ref: posts.user_id > users.id // many-to-one
             """;
-        
-    var dbml = this.UseState(sampleDbml);
-    return Layout.Horizontal().RemoveParentPadding().Height(Size.Screen())
-           | dbml.ToCodeInput().Width(90).Height(Size.Full()).Language(Languages.Dbml)
-           | new DbmlCanvas(dbml.Value).Width(Size.Grow())
-        ;
+
+        var dbml = this.UseState(sampleDbml);
+        return Layout.Horizontal().RemoveParentPadding().Height(Size.Screen())
+               | dbml.ToCodeInput().Width(90).Height(Size.Full()).Language(Languages.Dbml)
+               | new DbmlCanvas(dbml.Value).Width(Size.Grow())
+            ;
     }
 }

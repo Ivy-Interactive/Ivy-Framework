@@ -6,21 +6,21 @@ namespace Ivy;
 
 public record FloatingPanel : WidgetBase<FloatingPanel>
 {
-    public FloatingPanel(object? child = null, Align align = Align.BottomRight) : base(child != null ? [ child ] : [])
+    public FloatingPanel(object? child = null, Align align = Align.BottomRight) : base(child != null ? [child] : [])
     {
         Align = align;
     }
-    
+
     [Prop] public Align Align { get; set; }
-    
+
     public static FloatingPanel operator |(FloatingPanel widget, object child)
     {
-        if(child is IEnumerable<object> _)
+        if (child is IEnumerable<object> _)
         {
             throw new NotSupportedException("FloatingLayer does not support multiple children.");
         }
-        
-        return widget with { Children = [ child ] };
+
+        return widget with { Children = [child] };
     }
 }
 

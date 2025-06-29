@@ -30,7 +30,7 @@ public class BladeController : IBladeController
         //make sure toIndex is within bounds or do nothing if it is not
         if (toIndex < 0 || toIndex >= Blades.Value.Length) return;
         var blade = new BladeItem(bladeView, toIndex.Value + 1, title, width);
-        ImmutableArray<BladeItem> immutableArray = [..Blades.Value.Take(toIndex.Value + 1).Append(blade)];  
+        ImmutableArray<BladeItem> immutableArray = [.. Blades.Value.Take(toIndex.Value + 1).Append(blade)];
         Blades.Set(immutableArray);
     }
 
@@ -45,7 +45,7 @@ public class BladeController : IBladeController
         toIndex ??= Blades.Value.Length - 2;
         //make sure toIndex is within bounds or do nothing if it is not
         if (toIndex < 0 || toIndex >= Blades.Value.Length) return;
-        Blades.Set([..Blades.Value.Take(toIndex.Value + 1)]);
+        Blades.Set([.. Blades.Value.Take(toIndex.Value + 1)]);
         if (refresh)
         {
             Blades.Value[toIndex.Value].RefreshToken = DateTime.UtcNow.Ticks;
@@ -70,12 +70,12 @@ public class BladeItem(IView view, int index, string? title, Size? width = null)
 
 public static class UseBladesExtensions
 {
-    public static IView UseBlades<TView>(this TView view, Func<IView> rootBlade, string? title = null) where TView : ViewBase => 
+    public static IView UseBlades<TView>(this TView view, Func<IView> rootBlade, string? title = null) where TView : ViewBase =>
         view.Context.UseBlades(rootBlade, title);
-    
+
     public static IView UseBlades(this IViewContext context, Func<IView> rootBlade, string? title = null, Size? width = null)
     {
-        var blades = context.UseState<ImmutableArray<BladeItem>>(() => [ new BladeItem(rootBlade(), 0, title, width) ]);
+        var blades = context.UseState<ImmutableArray<BladeItem>>(() => [new BladeItem(rootBlade(), 0, title, width)]);
         context.CreateContext<IBladeController>(() => new BladeController(blades));
         IView bladeView = new BladesView();
         return bladeView;

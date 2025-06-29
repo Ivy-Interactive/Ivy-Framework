@@ -61,12 +61,12 @@ public class DashboardPieChartStyle<TSource> : IPieChartStyle<TSource>
 }
 
 public class PieChartBuilder<TSource>(
-    IQueryable<TSource> data, 
-    Dimension<TSource> dimension, 
-    Measure<TSource> measure, 
+    IQueryable<TSource> data,
+    Dimension<TSource> dimension,
+    Measure<TSource> measure,
     IPieChartStyle<TSource>? style = null,
     PieChartTotal? total = null,
-    Func<PieChart,PieChart>? polish = null)
+    Func<PieChart, PieChart>? polish = null)
     : ViewBase
 {
     public override object? Build()
@@ -74,7 +74,7 @@ public class PieChartBuilder<TSource>(
         var pieChartData = UseState(ImmutableArray.Create<PieChartData>);
         var loading = UseState(true);
         var exception = UseState<Exception?>((Exception?)null);
-        
+
         UseEffect(async () =>
         {
             try
@@ -83,7 +83,7 @@ public class PieChartBuilder<TSource>(
                     .ToPivotTable()
                     .Dimension(dimension).Measure(measure).Produces<PieChartData>().ExecuteAsync()
                     .ToArrayAsync();
-                pieChartData.Set([..results]);
+                pieChartData.Set([.. results]);
             }
             catch (Exception e)
             {
@@ -93,25 +93,25 @@ public class PieChartBuilder<TSource>(
             {
                 loading.Set(false);
             }
-        }, [ EffectTrigger.AfterInit() ]);
-        
-        if(exception.Value is not null)
+        }, [EffectTrigger.AfterInit()]);
+
+        if (exception.Value is not null)
         {
             return new ErrorTeaserView(exception.Value);
         }
-        
+
         if (loading.Value)
         {
             return new ChatLoading();
         }
-        
+
         var resolvedDesigner = style ?? PieChartStyleHelpers.GetStyle<TSource>(PieChartStyles.Default);
-        
+
         var scaffolded = resolvedDesigner.Design(
            pieChartData.Value.ToArray(),
            total
         );
-        
+
         return polish?.Invoke(scaffolded) ?? scaffolded;
     }
 }
@@ -120,28 +120,28 @@ public class PieChartBuilder<TSource>(
 public static class PieChartExtensions
 {
     public static PieChartBuilder<TSource> ToPieChart<TSource>(
-        this IEnumerable<TSource> data, 
-        Expression<Func<TSource, object>> dimension, 
+        this IEnumerable<TSource> data,
+        Expression<Func<TSource, object>> dimension,
         Expression<Func<IQueryable<TSource>, object>> measure,
         PieChartStyles style = PieChartStyles.Default,
         PieChartTotal? total = null,
-        Func<PieChart,PieChart>? polish = null)
+        Func<PieChart, PieChart>? polish = null)
     {
         return data.AsQueryable().ToPieChart(dimension, measure, style, total, polish);
     }
-    
+
     [OverloadResolutionPriority(1)]
     public static PieChartBuilder<TSource> ToPieChart<TSource>(
-        this IQueryable<TSource> data, 
-        Expression<Func<TSource, object>> dimension, 
+        this IQueryable<TSource> data,
+        Expression<Func<TSource, object>> dimension,
         Expression<Func<IQueryable<TSource>, object>> measure,
         PieChartStyles style = PieChartStyles.Default,
         PieChartTotal? total = null,
-        Func<PieChart,PieChart>? polish = null)
+        Func<PieChart, PieChart>? polish = null)
     {
-        return new PieChartBuilder<TSource>(data, 
-            new Dimension<TSource>(nameof(PieChartData.Dimension), dimension), 
-            new Measure<TSource>(nameof(PieChartData.Measure), measure), 
+        return new PieChartBuilder<TSource>(data,
+            new Dimension<TSource>(nameof(PieChartData.Dimension), dimension),
+            new Measure<TSource>(nameof(PieChartData.Measure), measure),
             PieChartStyleHelpers.GetStyle<TSource>(style),
             total,
             polish

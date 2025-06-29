@@ -24,11 +24,11 @@ public static class JobSchedulerExtensions
             JobState.Cancelled => Icons.X.ToIcon().Small().Color(Colors.Yellow).WithTooltip("Cancelled"),
             _ => Icons.None.ToIcon().Small()
         };
-        
-        Progress? GetProgress() => 
-            (Math.Abs(job.Progress - 1.0) < 0.0001 || job.Progress == 0) ? null 
+
+        Progress? GetProgress() =>
+            (Math.Abs(job.Progress - 1.0) < 0.0001 || job.Progress == 0) ? null
                 : new Progress(Convert.ToInt32(Math.Round(job.Progress * 100.0))).Width(Size.Units(50));
-        
+
         object? GetError() => job.State != JobState.Failed ? null : new ErrorTeaserView(job.CompletionSource.Task.Exception!);
 
         return Layout.Vertical()

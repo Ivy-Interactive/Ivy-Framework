@@ -17,7 +17,7 @@ public class AuthService(IAuthProvider authProvider, AuthToken? token) : IAuthSe
     }
 
     public Task<AuthToken?> HandleOAuthCallbackAsync(HttpRequest request)
-    { 
+    {
         return authProvider.HandleOAuthCallbackAsync(request);
     }
 
@@ -27,7 +27,7 @@ public class AuthService(IAuthProvider authProvider, AuthToken? token) : IAuthSe
         {
             return Task.CompletedTask;
         }
-        
+
         return authProvider.LogoutAsync(token.Jwt);
     }
 
@@ -37,9 +37,9 @@ public class AuthService(IAuthProvider authProvider, AuthToken? token) : IAuthSe
         {
             return null!;
         }
-        
+
         //todo: cache this!
-        
+
         return await authProvider.GetUserInfoAsync(token.Jwt);
     }
 

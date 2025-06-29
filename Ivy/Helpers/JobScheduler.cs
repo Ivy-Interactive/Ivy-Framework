@@ -115,20 +115,21 @@ public class JobBuilder
         _action = action;
         return this;
     }
-    
+
     public JobBuilder WithAction(Func<Task> action)
     {
         _action = (_, _, _, _) => action();
         return this;
     }
-    
+
     public JobBuilder WithAction(Func<CancellationToken, Task> action)
     {
         _action = (_, _, _, token) => action(token);
         return this;
     }
-    
-    public JobBuilder WithAction(Func<Job, Task> action) {
+
+    public JobBuilder WithAction(Func<Job, Task> action)
+    {
         _action = (job, _, _, _) => action(job);
         return this;
     }
@@ -192,7 +193,7 @@ public class JobScheduler(int maxParallelJobs) : IJobScheduler, IObservable<Job>
     {
         parent.Children.Add(child);
         AddJob(child);
-        
+
         // If parent is currently running, add child to pending schedule
         if (parent.State == JobState.Running)
         {
@@ -207,7 +208,7 @@ public class JobScheduler(int maxParallelJobs) : IJobScheduler, IObservable<Job>
     public async Task RunAsync(CancellationToken token = default)
     {
         using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(token, _internalCts.Token);
-        
+
         var completedSignal = new TaskCompletionSource();
         var activeJobCount = 0;
 
@@ -310,7 +311,7 @@ public class JobScheduler(int maxParallelJobs) : IJobScheduler, IObservable<Job>
 
     internal Task ScheduleJob(Job job, CancellationToken token)
     {
-        return Task.Run(async () => 
+        return Task.Run(async () =>
         {
             try
             {
@@ -322,7 +323,7 @@ public class JobScheduler(int maxParallelJobs) : IJobScheduler, IObservable<Job>
                         await depJob.CompletionSource.Task.WaitAsync(token);
                     }
                 }
-                
+
                 await job.ExecuteAsync(this, token);
             }
             catch (OperationCanceledException)

@@ -34,7 +34,7 @@ public class BladesView : ViewBase
 public class BladeView(IView bladeView, int index, long refreshToken, string? title, Size? width, Action<Event<Blade>>? onClose, Action<Event<Blade>>? onRefresh) : ViewBase, IMemoized
 {
     public override object? Build()
-    {   
+    {
         return new Blade(bladeView, index, title, width, onClose, onRefresh).Key($"{index}:{refreshToken}");
     }
 

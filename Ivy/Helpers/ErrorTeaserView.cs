@@ -9,6 +9,6 @@ public class ErrorTeaserView(Exception ex) : ViewBase
     {
         return Layout.Vertical()
                | Text.Muted(ex.Message)
-               | new Button("Read More").Variant(ButtonVariant.Default).WithSheet(() => new ErrorView(ex), width:Size.Half());
+               | new Button("Read More").Variant(ButtonVariant.Default).WithSheet(() => new ErrorView(ex), width: Size.Half());
     }
 }

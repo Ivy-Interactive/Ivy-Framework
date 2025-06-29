@@ -16,7 +16,7 @@ public record FormField : WidgetBase<FormField>
             labelProp.SetValue(input, inputLabel ?? label);
             label = null;
         }
-        
+
         var descriptionProp = input.GetType().GetProperty("Description");
         if (descriptionProp != null && descriptionProp.PropertyType == typeof(string))
         {
@@ -31,11 +31,11 @@ public record FormField : WidgetBase<FormField>
     }
 
     [Prop] public string? Label { get; set; }
-    
-    [Prop] public string? Description { get; set; } 
-    
+
+    [Prop] public string? Description { get; set; }
+
     [Prop] public bool Required { get; set; }
-    
+
     public static FormField operator |(FormField widget, object child)
     {
         throw new NotSupportedException("FormField does not support children.");

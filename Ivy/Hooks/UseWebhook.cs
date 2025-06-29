@@ -31,7 +31,7 @@ public static class UseWebhookExtensions
 
     public static Uri UseWebhook<TView>(this TView view, Func<HttpRequest, Task<IActionResult>> handler) where TView : ViewBase =>
         view.Context.UseWebhook(handler);
-    
+
     public static Uri UseWebhook<TView>(this TView view, Func<HttpRequest, Task> handler) where TView : ViewBase =>
         view.Context.UseWebhook(async e =>
         {
@@ -51,9 +51,9 @@ public static class UseWebhookExtensions
         var webhookId = context.UseState(() => Guid.NewGuid().ToString(), false);
         var webhookController = context.UseService<IWebhookRegistry>();
         var args = context.UseService<AppArgs>();
-        
+
         context.UseEffect(() => webhookController.Register(webhookId.Value, handler), [EffectTrigger.AfterInit()]);
-        
+
         return new Uri($"{args.Scheme}://{args.Host}/webhook/{webhookId.Value}");
     }
 }

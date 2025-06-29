@@ -8,5 +8,5 @@ public static class BladeHelper
             | new Slot("BladeHeader", header)
             | content;
     }
-    
+
 }

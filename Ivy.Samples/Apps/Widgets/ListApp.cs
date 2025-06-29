@@ -2,7 +2,7 @@ using Ivy.Shared;
 
 namespace Ivy.Samples.Apps.Widgets;
 
-[App(icon:Icons.List, path:["Widgets"])]
+[App(icon: Icons.List, path: ["Widgets"])]
 public class ListApp : SampleBase
 {
     protected override object? BuildSample()
@@ -11,35 +11,35 @@ public class ListApp : SampleBase
     }
 }
 
-public class ListBlade: ViewBase
+public class ListBlade : ViewBase
 {
     public override object? Build()
     {
         var products = this.UseMemo(() => SampleData.GetUsers(100), []);
         var searchString = this.UseState("");
         var filteredProducts = this.UseState(products);
-        
+
         var blades = this.UseContext<IBladeController>();
-        
+
         this.UseEffect(() =>
         {
             var filtered = products.Where(p => p.Name.Contains(searchString.Value)).ToArray();
             filteredProducts.Set(filtered);
         }, [searchString]);
-        
+
         var onItemClicked = new Action<Event<ListItem>>(e =>
         {
             var user = (User)e.Sender.Tag!;
-            blades.Push(this, new DetailsBlade(user), user.Name);    
+            blades.Push(this, new DetailsBlade(user), user.Name);
         });
-        
-        ListItem CreateItem(User user) => new(title: user.Name, onClick: onItemClicked, tag: user, subtitle: user.Email, badge:user.Age.ToString());
+
+        ListItem CreateItem(User user) => new(title: user.Name, onClick: onItemClicked, tag: user, subtitle: user.Email, badge: user.Age.ToString());
 
         var items = filteredProducts.Value.Select(CreateItem);
 
-        var onCreate =  new Action<Event<Button>>(e =>
+        var onCreate = new Action<Event<Button>>(e =>
         {
-            
+
         });
 
         return BladeHelper.WithHeader(
@@ -52,7 +52,7 @@ public class ListBlade: ViewBase
     }
 }
 
-public class DetailsBlade(User user): ViewBase
+public class DetailsBlade(User user) : ViewBase
 {
     public override object? Build()
     {

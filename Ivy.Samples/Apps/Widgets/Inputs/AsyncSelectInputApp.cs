@@ -3,13 +3,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Ivy.Samples.Apps.Widgets.Inputs;
 
-[App(icon:Icons.Timer)]
+[App(icon: Icons.Timer)]
 public class AsyncSelectInputApp : SampleBase
 {
     protected override object? BuildSample()
     {
         var guidState = this.UseState(default(Guid?));
-        
+
         var factory = UseService<SampleDbContextFactory>();
 
         async Task<Option<Guid?>[]> QueryCategories(string query)
@@ -23,18 +23,18 @@ public class AsyncSelectInputApp : SampleBase
                 .Select(e => new Option<Guid?>(e.Name, e.Id))
                 .ToArray();
         }
-        
+
         async Task<Option<Guid?>?> LookupCategory(Guid? id)
         {
             if (id == null) return null;
             await using var db = factory.CreateDbContext();
             var category = await db.Categories.FindAsync(id);
-            if(category == null) return null;
+            if (category == null) return null;
             return new Option<Guid?>(category!.Name, category!.Id);
         }
-     
+
         return Layout.Vertical(
-            guidState.ToAsyncSelectInput(QueryCategories, LookupCategory, placeholder:"Select Category")
+            guidState.ToAsyncSelectInput(QueryCategories, LookupCategory, placeholder: "Select Category")
         );
     }
 }

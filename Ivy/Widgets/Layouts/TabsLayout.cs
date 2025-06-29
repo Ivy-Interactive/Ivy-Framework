@@ -22,7 +22,7 @@ public record TabsLayout : WidgetBase<TabsLayout>
         Height = Size.Full();
         RemoveParentPadding = true;
     }
-    
+
     [Prop] public int? SelectedIndex { get; set; }
     [Prop] public TabsVariant Variant { get; set; } = TabsVariant.Content;
     [Prop] public bool RemoveParentPadding { get; set; }
@@ -38,27 +38,27 @@ public static class TabsLayoutExtensions
     {
         return tabsLayout with { Variant = variant };
     }
-    
+
     public static TabsLayout RemoveParentPadding(this TabsLayout tabsLayout, bool removeParentPadding = true)
     {
         return tabsLayout with { RemoveParentPadding = removeParentPadding };
     }
-    
+
     public static TabsLayout Padding(this TabsLayout tabsLayout, Thickness? padding)
     {
         return tabsLayout with { Padding = padding };
     }
-    
+
     public static TabsLayout Padding(this TabsLayout tabsLayout, int padding)
     {
         return tabsLayout with { Padding = new Thickness(padding) };
     }
-    
+
     public static TabsLayout Padding(this TabsLayout tabsLayout, int verticalPadding, int horizontalPadding)
     {
         return tabsLayout with { Padding = new Thickness(horizontalPadding, verticalPadding) };
     }
-    
+
     public static TabsLayout Padding(this TabsLayout tabsLayout, int left, int top, int right, int bottom)
     {
         return tabsLayout with { Padding = new Thickness(left, top, right, bottom) };
@@ -83,7 +83,7 @@ public static class TabExtensions
     {
         return tab with { Icon = icon };
     }
-    
+
     public static Tab Badge(this Tab tab, string badge)
     {
         return tab with { Badge = badge };

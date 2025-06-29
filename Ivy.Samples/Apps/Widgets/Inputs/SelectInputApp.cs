@@ -9,7 +9,7 @@ public enum Color
     Blue
 }
 
-[App(icon:Icons.LassoSelect)]
+[App(icon: Icons.LassoSelect)]
 public class SelectInputApp : SampleBase
 {
     private static readonly Option<Guid>[] GuidOptions =
@@ -19,7 +19,7 @@ public class SelectInputApp : SampleBase
         new("Julia", Guid.NewGuid()),
         new("Olivia", Guid.NewGuid())
     ];
-    
+
     private static readonly IAnyOption[] IntOptions =
     [
         new Option<int>("Niels", 1),
@@ -27,7 +27,7 @@ public class SelectInputApp : SampleBase
         new Option<int>("Julia", 3),
         new Option<int>("Olivia", 4)
     ];
-    
+
     private static readonly IAnyOption[] StringOptions =
     [
         new Option<string>("Niels"),
@@ -41,7 +41,7 @@ public class SelectInputApp : SampleBase
         AllowOverage,
         RemoveBranding
     }
-    
+
     protected override object? BuildSample()
     {
         var enumArrayState = this.UseState<List<Features>>();

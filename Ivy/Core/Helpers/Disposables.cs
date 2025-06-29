@@ -5,7 +5,7 @@ public class Disposables(params IEnumerable<IDisposable> disposables) : IDisposa
     public Disposables() : this([])
     {
     }
-    
+
     private readonly List<IDisposable> _disposables = disposables.ToList();
 
     public void Add(params IDisposable[] disposable)

@@ -11,13 +11,13 @@ public class Product
     public required string Url { get; set; }
 }
 
-[App(icon:Icons.Table, path: ["Widgets"])]
-public class TableApp: SampleBase
+[App(icon: Icons.Table, path: ["Widgets"])]
+public class TableApp : SampleBase
 {
     protected override object? BuildSample()
     {
         //Anonymous type array
-        
+
         var products = new[] {
             new {Sku = "1234", Name = "T-shirt", Price = 10.0, Url = "http://example.com/tshirt"},
             new {Sku = "1235", Name = "Jeans", Price = 20.0, Url = "http://example.com/jeans"},

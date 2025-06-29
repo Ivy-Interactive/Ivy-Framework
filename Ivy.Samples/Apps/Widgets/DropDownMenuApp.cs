@@ -2,7 +2,7 @@
 
 namespace Ivy.Samples.Apps.Widgets;
 
-[App(icon:Icons.Menu)]
+[App(icon: Icons.Menu)]
 public class DropDownMenuApp : SampleBase
 {
     protected override object? BuildSample()

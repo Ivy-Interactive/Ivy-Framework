@@ -10,7 +10,7 @@ public record Avatar : WidgetBase<Avatar>
         Fallback = fallback;
         Image = image;
     }
-    
+
     [Prop] public string Fallback { get; set; }
     [Prop] public string? Image { get; set; }
 }

@@ -5,7 +5,7 @@ namespace Ivy.Core.Hooks;
 public interface IAnyState : IDisposable, IEffectTriggerConvertible
 {
     public IDisposable SubscribeAny(Action action);
-    
+
     public IDisposable SubscribeAny(Action<object?> action);
 
     public Type GetStateType();
@@ -20,7 +20,7 @@ public interface IState<T> : IObservable<T>, IAnyState
         Value = value;
         return Value;
     }
-    
+
     public T Set(Func<T, T> setter)
     {
         Value = setter(Value);
@@ -45,7 +45,7 @@ public class State<T> : IState<T>
         {
             if (Equals(_value, value)) return;
             _value = value;
-            if(!_subject.IsDisposed) _subject.OnNext(_value);
+            if (!_subject.IsDisposed) _subject.OnNext(_value);
         }
     }
 
@@ -54,7 +54,7 @@ public class State<T> : IState<T>
         observer.OnNext(_value);
         return _subject.Subscribe(observer);
     }
-    
+
     public void Dispose()
     {
         _subject.Dispose();
@@ -64,7 +64,7 @@ public class State<T> : IState<T>
     {
         return _subject.Subscribe(_ => action());
     }
-    
+
     public IDisposable SubscribeAny(Action<object?> action)
     {
         return _subject.Subscribe(x => action(x));
@@ -79,7 +79,7 @@ public class State<T> : IState<T>
     {
         return _value?.ToString();
     }
-    
+
     public IEffectTrigger ToTrigger()
     {
         return EffectTrigger.AfterChange(this);

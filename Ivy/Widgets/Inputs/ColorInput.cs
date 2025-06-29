@@ -29,8 +29,8 @@ public abstract record ColorInputBase : WidgetBase<ColorInputBase>, IAnyColorInp
     [Prop] public ColorInputs Variant { get; set; }
     [Prop] public string[]? PaletteOptions { get; set; }
     [Event] public Action<Event<IAnyInput>>? OnBlur { get; set; }
-    public Type[] SupportedStateTypes() => [ typeof(string) ];
-} 
+    public Type[] SupportedStateTypes() => [typeof(string)];
+}
 
 public record ColorInput<TColor> : ColorInputBase, IInput<TColor>
 {
@@ -69,17 +69,17 @@ public static class ColorInputExtensions
         ColorInputBase input = (ColorInputBase)Activator.CreateInstance(genericType, state, placeholder, disabled)!;
         return input;
     }
-    
+
     public static ColorInputBase Disabled(this ColorInputBase widget, bool disabled)
     {
         return widget with { Disabled = disabled };
     }
-    
+
     public static ColorInputBase Placeholder(this ColorInputBase widget, string? placeholder)
     {
         return widget with { Placeholder = placeholder };
     }
-    
+
     public static ColorInputBase Invalid(this ColorInputBase widget, string? invalid)
     {
         return widget with { Invalid = invalid };

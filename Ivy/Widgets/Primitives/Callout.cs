@@ -24,18 +24,18 @@ public record Callout : WidgetBase<Callout>
 
         if (child != null)
             Children = [child!];
-        
+
         Title = title;
         Variant = variant;
         Icon = icon;
     }
 
     [Prop] public string? Title { get; set; }
-    
+
     [Prop] public CalloutVariant Variant { get; set; }
-    
+
     [Prop] public Icons? Icon { get; set; }
-    
+
     public static Callout Info(string? description = null, string? title = null) => new(description, title);
     public static Callout Warning(string? description = null, string? title = null) => new(description, title, CalloutVariant.Warning);
     public static Callout Error(string? description = null, string? title = null) => new(description, title, CalloutVariant.Error);
@@ -48,17 +48,17 @@ public static class CalloutExtensions
     {
         return callout with { Title = title };
     }
-    
+
     public static Callout Description(this Callout callout, string description)
     {
         return callout with { Children = [new Markdown(description)] };
     }
-    
+
     public static Callout Variant(this Callout callout, CalloutVariant variant)
     {
         return callout with { Variant = variant };
     }
-    
+
     public static Callout Icon(this Callout callout, Icons icon)
     {
         return callout with { Icon = icon };

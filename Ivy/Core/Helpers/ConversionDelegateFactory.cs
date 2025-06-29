@@ -112,7 +112,7 @@ public static class ConversionDelegateFactory
     private static Expression CreateEnumConversionExpression(Type toType, Type underlyingType, ParameterExpression param)
     {
         return Expression.Convert(
-            Expression.Call(typeof(Enum), nameof(Enum.Parse), [underlyingType], 
+            Expression.Call(typeof(Enum), nameof(Enum.Parse), [underlyingType],
                 Expression.Convert(param, typeof(string)), Expression.Constant(true)),
             toType);
     }

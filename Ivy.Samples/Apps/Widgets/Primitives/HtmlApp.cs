@@ -2,12 +2,12 @@ using Ivy.Shared;
 
 namespace Ivy.Samples.Apps.Widgets.Primitives;
 
-[App(icon:Icons.CodeXml, path:["Widgets", "Primitives"])]
+[App(icon: Icons.CodeXml, path: ["Widgets", "Primitives"])]
 public class HtmlApp : SampleBase
 {
     protected override object? BuildSample()
     {
-        var content = 
+        var content =
             """
             <h1>Hello World</h1>
             <p>This is <strong>bold</strong> and <em>italic</em> text.</p>

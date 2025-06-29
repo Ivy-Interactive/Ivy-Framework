@@ -5,6 +5,6 @@ public record Form : WidgetBase<Form>
 {
     internal Form(params object[] children) : base(children)
     {
-        
+
     }
 }

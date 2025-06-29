@@ -13,12 +13,12 @@ public static class WidgetExtensions
         Type type = typeof(T);
         return FindDescendant<T>(widget, type, key);
     }
-    
+
     public static T? FindDescendant<T>(this IWidget widget, Type type, string? key = null) where T : IWidget
     {
         if (widget.GetType() == type && (key == null || widget.Key == key))
             return (T)widget;
-        
+
         foreach (var child in widget.Children)
         {
             if (child is IWidget childWidget)
@@ -32,7 +32,7 @@ public static class WidgetExtensions
                 throw new NotSupportedException("This widget tree seems not to be a fully built.");
             }
         }
-        
+
         return default(T);
     }
 }

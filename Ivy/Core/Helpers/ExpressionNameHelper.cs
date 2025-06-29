@@ -4,7 +4,7 @@ namespace Ivy.Core.Helpers;
 
 public class ExpressionNameHelper
 {
-     public static string? SuggestName<T>(Expression<Func<T, object>> expression)
+    public static string? SuggestName<T>(Expression<Func<T, object>> expression)
     {
         // Remove any conversion (e.g. boxing) to get to the “real” body.
         Expression body = RemoveConversion(expression.Body);

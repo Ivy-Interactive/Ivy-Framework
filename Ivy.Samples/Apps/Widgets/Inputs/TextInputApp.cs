@@ -3,17 +3,17 @@ using Ivy.Shared;
 
 namespace Ivy.Samples.Apps.Widgets.Inputs;
 
-[App(icon:Icons.TextCursorInput, path: ["Widgets", "Inputs"])]
+[App(icon: Icons.TextCursorInput, path: ["Widgets", "Inputs"])]
 public class TextInputApp : SampleBase
 {
     protected override object? BuildSample()
     {
         var withoutValue = UseState((string?)null);
         var withValue = UseState("Hello");
-        
+
         var onChangedState = UseState("");
         var onChangeLabel = UseState("");
-        var onBlurState = UseState(""); 
+        var onBlurState = UseState("");
         var onBlurLabel = UseState("");
 
         var stringState = UseState("");
@@ -29,7 +29,7 @@ public class TextInputApp : SampleBase
                              | stringState.ToSearchInput()
                           )
                           | stringState
-                          
+
                           | Text.InlineCode("string?")
                           | (Layout.Vertical()
                              | nullStringState.ToTextInput()
@@ -39,8 +39,8 @@ public class TextInputApp : SampleBase
                           )
                           | nullStringState
             ;
-        
-        
+
+
         return Layout.Vertical()
                | Text.H1("Text Inputs")
                | Text.H2("Variants")
@@ -75,28 +75,28 @@ public class TextInputApp : SampleBase
                   | withValue.ToSearchInput().Disabled()
                   | withValue.ToSearchInput().Invalid("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec eros")
                )
-               
+
                //Data Binding:
-               
+
                | Text.H2("Data Binding")
                | dataBinding
-               
+
                //Events: 
-               
+
                | Text.H2("Events")
                | Text.H3("OnChange")
                | Layout.Horizontal(
                    new TextInput(onChangedState.Value, e =>
                    {
                        onChangedState.Set(e.Value);
-                       onChangeLabel.Set("Changed"); 
+                       onChangeLabel.Set("Changed");
                    }),
-                   onChangeLabel  
+                   onChangeLabel
                 )
                | Text.H3("OnBlur")
                | Layout.Horizontal(
                    onBlurState.ToTextInput().HandleBlur(e => onBlurLabel.Set("Blur")),
-                   onBlurLabel  
+                   onBlurLabel
                )
             ;
     }

@@ -15,32 +15,32 @@ public class TypeUtilsTests
         Type? result = TypeUtils.GetTypeFromName(typeName);
         Assert.Equal(expectedType, result);
     }
-    
+
     public class Foo
     {
         public string Name { get; set; }
         public string? Name2 { get; set; }
     }
-    
+
     [Fact]
     public void IsNullableReference_FooName_ReturnsFalse()
     {
         // Arrange
         var property = typeof(Foo).GetProperty(nameof(Foo.Name))!;
-        
+
         // Act
         bool result = TypeUtils.IsNullableReference(property);
 
         // Assert
         Assert.False(result);
     }
-    
+
     [Fact]
     public void IsNullableReference_FooName2_ReturnsTrue()
     {
         // Arrange
         var property = typeof(Foo).GetProperty(nameof(Foo.Name2))!;
-        
+
         // Act
         bool result = TypeUtils.IsNullableReference(property);
 
@@ -48,31 +48,30 @@ public class TypeUtilsTests
         Assert.True(result);
     }
 
-    //todo: it was referenceing the wrong property? 
-    
+
     [Fact]
-    public void GetExtensionMethods_ReturnsExpected0() => 
+    public void GetExtensionMethods_ReturnsExpected0() =>
         GetExtensionMethods_ReturnsExpected(
-            typeof(Bar), typeof(BarExtensions), typeof(Bar).GetProperty(nameof(Bar.Name))!, 
+            typeof(Bar), typeof(BarExtensions), typeof(Bar).GetProperty(nameof(Bar.Name))!,
             """
             Name(string name)
             Uppercase(string name = "foo")
-            """ 
+            """
             );
-    
+
     [Fact]
-    public void GetExtensionMethods_ReturnsExpected1() => 
+    public void GetExtensionMethods_ReturnsExpected1() =>
         GetExtensionMethods_ReturnsExpected(
-            typeof(XYZ), typeof(WidgetBaseExtensions), typeof(XYZ).GetProperty("Width")!, 
+            typeof(XYZ), typeof(WidgetBaseExtensions), typeof(XYZ).GetProperty("Width")!,
             """
             Width(Size width)
             Width(int units)
             Width(float units)
             Width(double units)
             Width(string percent)
-            """ 
+            """
         );
-    
+
     private void GetExtensionMethods_ReturnsExpected(Type baseType, Type extensionTypes, PropertyInfo propertyInfo, string expectedResult)
     {
         string result = TypeUtils.GetExtensionMethods(propertyInfo, baseType, [extensionTypes]);
@@ -95,7 +94,7 @@ public static class BarExtensions
     {
         return bar with { Name = name };
     }
-    
+
     [RelatedTo(nameof(Bar.Name))]
     public static Bar Uppercase(this Bar bar, string name = "foo")
     {

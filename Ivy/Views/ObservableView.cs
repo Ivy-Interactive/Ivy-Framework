@@ -9,7 +9,7 @@ public class ObservableView<T>(IObservable<T> observable) : ViewBase
     public override object? Build()
     {
         var lastObserved = this.UseState((object?)null);
-        
+
         this.UseEffect(() =>
         {
             return observable.Subscribe(e => lastObserved.Set(e));
@@ -32,7 +32,7 @@ public static class ObservableViewFactory
             );
 
         if (observableType == null) throw new Exception("Not an observable.");
-        
+
         var resultType = observableType.GetGenericArguments()[0];
         var observableViewType = typeof(ObservableView<>).MakeGenericType(resultType);
         var observableViewInstance = Activator

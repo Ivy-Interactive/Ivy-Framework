@@ -9,10 +9,10 @@ public class NumberInputApp : SampleBase
     {
         var nullIntValue = UseState<int?>();
         var intValue = UseState(12345);
-        
+
         var onChangedState = UseState(0);
         var onChangeLabel = UseState("");
-        var onBlurState = UseState(0); 
+        var onBlurState = UseState(0);
         var onBlurLabel = UseState("");
 
         var dataBinding = Layout.Grid().Columns(3)
@@ -23,7 +23,7 @@ public class NumberInputApp : SampleBase
                              | intValue.ToSliderInput()
                           )
                           | intValue
-                          
+
                           | Text.InlineCode("int?")
                           | (Layout.Vertical()
                              | nullIntValue.ToNumberInput()
@@ -31,7 +31,7 @@ public class NumberInputApp : SampleBase
                           )
                           | nullIntValue
             ;
-        
+
         return Layout.Vertical()
                | Text.H1("Number Inputs")
                | Text.H2("Variants")
@@ -40,7 +40,7 @@ public class NumberInputApp : SampleBase
                   | Text.Block("Null")
                   | Text.Block("With Value")
                   | Text.Block("Disabled")
-                  | Text.Block("Invalid (NOT IMPLEMENTED)")
+                  | Text.Block("Invalid")
 
                   | Text.InlineCode("ToNumberInput()")
                   | nullIntValue.ToNumberInput().Placeholder("Placeholder")
@@ -54,28 +54,28 @@ public class NumberInputApp : SampleBase
                   | intValue.ToSliderInput().Disabled()
                   | intValue.ToSliderInput().Invalid("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec eros")
                )
-               
+
                //Data Binding:
-               
+
                | Text.H2("Data Binding")
                | dataBinding
-               
+
                //Events: 
-               
+
                | Text.H2("Events")
                | Text.H3("OnChange")
                | Layout.Horizontal(
                    new NumberInput<int>(onChangedState.Value, e =>
                    {
                        onChangedState.Set(e);
-                       onChangeLabel.Set("Changed"); 
+                       onChangeLabel.Set("Changed");
                    }),
-                   onChangeLabel  
+                   onChangeLabel
                 )
                | Text.H3("OnBlur")
                | Layout.Horizontal(
                    onBlurState.ToNumberInput().HandleBlur(e => onBlurLabel.Set("Blur")),
-                   onBlurLabel  
+                   onBlurLabel
                )
             ;
     }

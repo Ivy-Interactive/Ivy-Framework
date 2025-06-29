@@ -6,7 +6,7 @@ using Ivy.Core.Hooks;
 
 namespace Ivy.Hooks;
 
-public struct Unit {}
+public struct Unit { }
 
 public interface ISignalSender<TInput, TOutput>
 {
@@ -21,20 +21,23 @@ public interface ISignalReceiver<out TInput, in TOutput>
 public abstract class AbstractSignal<TInput, TOutput>() : ISignalSender<TInput, TOutput>
 {
     private readonly ConcurrentDictionary<Guid, Func<TInput, TOutput>> _subscribers = new();
-    
+
     public async Task<TOutput[]> Send(TInput input)
     {
-        var tasks = _subscribers.Values.Select(async callback => {
-            try {
+        var tasks = _subscribers.Values.Select(async callback =>
+        {
+            try
+            {
                 return await Task.Run(() => callback(input));
             }
-            catch (Exception) {
+            catch (Exception)
+            {
                 return default;
             }
         });
         return (await Task.WhenAll(tasks))!;
     }
-    
+
     public IDisposable Receive(Guid receiverId, Func<TInput, TOutput> callback)
     {
         _subscribers.TryRemove(receiverId, out _);
@@ -44,7 +47,7 @@ public abstract class AbstractSignal<TInput, TOutput>() : ISignalSender<TInput, 
             _subscribers.TryRemove(receiverId, out _);
         });
     }
-}  
+}
 
 public class SignalReceiver<TInput, TOutput>(Guid receiverId, AbstractSignal<TInput, TOutput> signal) : ISignalReceiver<TInput, TOutput>
 {
@@ -56,7 +59,7 @@ public class SignalReceiver<TInput, TOutput>(Guid receiverId, AbstractSignal<TIn
 
 public static class UseSignalExtensions
 {
-    public static ISignalSender<TInput,TOutput> CreateSignal<T,TInput,TOutput>(this IViewContext context) where T : AbstractSignal<TInput, TOutput>
+    public static ISignalSender<TInput, TOutput> CreateSignal<T, TInput, TOutput>(this IViewContext context) where T : AbstractSignal<TInput, TOutput>
     {
         var signalType = typeof(T);
         if (signalType.GetBroadcastType() is { } broadcastType)
@@ -67,10 +70,10 @@ public static class UseSignalExtensions
         }
         return context.CreateContext(Activator.CreateInstance<T>);
     }
-    
-    public static ISignalReceiver<TInput,TOutput> UseSignal<T,TInput,TOutput>(this IViewContext view) where T : AbstractSignal<TInput, TOutput>
+
+    public static ISignalReceiver<TInput, TOutput> UseSignal<T, TInput, TOutput>(this IViewContext view) where T : AbstractSignal<TInput, TOutput>
     {
-        var receiverId = view.UseState(Guid.NewGuid, buildOnChange:false);
+        var receiverId = view.UseState(Guid.NewGuid, buildOnChange: false);
         var signalType = typeof(T);
         if (signalType.GetBroadcastType() is not null)
         {
@@ -78,7 +81,7 @@ public static class UseSignalExtensions
             var appArgs = view.UseService<AppArgs>();
             return signalHub.UseSignal<T, TInput, TOutput>(signalType, receiverId.Value, appArgs.ConnectionId);
         }
-        var signal =  view.UseContext<T>();
+        var signal = view.UseContext<T>();
         return new SignalReceiver<TInput, TOutput>(receiverId.Value, signal);
     }
 }
@@ -94,11 +97,11 @@ public enum BroadcastType
 public class SignalAttribute(BroadcastType broadcastTypeType) : Attribute
 {
     public BroadcastType BroadcastType { get; } = broadcastTypeType;
-} 
+}
 
 public static class HubSignalExtensions
 {
-    public static BroadcastType? GetBroadcastType(this Type type) 
+    public static BroadcastType? GetBroadcastType(this Type type)
         => type.GetCustomAttribute<SignalAttribute>()?.BroadcastType;
 }
 
@@ -112,7 +115,7 @@ public class SignalRouter(AppSessionStore sessionStore)
     {
         return new RouterSignalSender<TInput, TOutput, T>(signalType, broadcastType, connectionId, sessionStore);
     }
-    
+
     public ISignalReceiver<TInput, TOutput> UseSignal<T, TInput, TOutput>(
         Type signalType,
         Guid receiverId,
@@ -126,7 +129,7 @@ public class SignalRouter(AppSessionStore sessionStore)
 
     private AppSession GetSession(string connectionId)
     {
-        return sessionStore.Sessions.TryGetValue(connectionId, out var session) ? session 
+        return sessionStore.Sessions.TryGetValue(connectionId, out var session) ? session
             : throw new InvalidOperationException("Session not found.");
     }
 
@@ -164,7 +167,7 @@ public class SignalRouter(AppSessionStore sessionStore)
                 BroadcastType.App =>
                     store.Sessions.Values.Where(s => !s.IsDisposed() && s.AppId == store.Sessions[session.ConnectionId].AppId).ToList(),
                 BroadcastType.Chrome =>
-                    store.FindChrome(session) is {} chrome ? [chrome] : [],                   
+                    store.FindChrome(session) is { } chrome ? [chrome] : [],
                 _ => []
             };
         }

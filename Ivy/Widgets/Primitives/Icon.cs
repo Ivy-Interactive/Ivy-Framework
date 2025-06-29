@@ -22,17 +22,17 @@ public static class IconExtensions
     {
         return new Icon(icon);
     }
-    
+
     public static Icon Color(this Icon icon, Colors? color = null)
     {
         return icon with { Color = color };
     }
-    
+
     public static Icon Small(this Icon icon)
     {
         return icon with { Width = Size.Units(4), Height = Size.Units(4) };
     }
-    
+
     public static Icon Large(this Icon icon)
     {
         return icon with { Width = Size.Units(12), Height = Size.Units(12) };

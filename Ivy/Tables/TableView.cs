@@ -8,7 +8,7 @@ public class TableView<TModel>(IEnumerable<TModel> model, params ITableColumn<TM
     public override object? Build()
     {
         var header = new TableRow(columns.Select(c => c.Build(model).header).ToArray()).IsHeader();
-        var rows = model.Select(m => new TableRow(columns.Select(c => c.Build(new[] {m}).cells[0]).ToArray())).ToArray();
+        var rows = model.Select(m => new TableRow(columns.Select(c => c.Build(new[] { m }).cells[0]).ToArray())).ToArray();
         var joined = new[] { header }.Concat(rows).ToArray();
         return new Table(joined);
     }

@@ -9,7 +9,7 @@ public static class Layout
         return (new LayoutView()).Horizontal(elements.Where(e => e != null).Cast<object>().ToArray())
             .Height(Size.Full());
     }
-    
+
     public static LayoutView Vertical(params IEnumerable<object?> elements)
     {
         return (new LayoutView()).Vertical(elements.Where(e => e != null).Cast<object>().ToArray())
@@ -21,7 +21,7 @@ public static class Layout
         return Horizontal(elements.Where(e => e != null).Cast<object>().ToArray())
             .Height(Size.Screen()).RemoveParentPadding().Align(Align.Center);
     }
-    
+
     public static LayoutView Wrap(params IEnumerable<object?> elements)
     {
         return (new LayoutView()).Wrap(elements.Where(e => e != null).Cast<object>().ToArray());
@@ -44,12 +44,12 @@ public static class LayoutExtensions
     {
         return Layout.Horizontal(anything).Margin(margin);
     }
-    
+
     public static LayoutView WithMargin(this object anything, int marginX, int marginY)
     {
         return Layout.Horizontal(anything).Margin(marginX, marginY);
     }
-    
+
     public static LayoutView WithMargin(this object anything, int left, int top, int right, int bottom)
     {
         return Layout.Horizontal(anything).Margin(left, top, right, bottom);

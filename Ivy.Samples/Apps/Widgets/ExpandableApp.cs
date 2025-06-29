@@ -2,7 +2,7 @@ using Ivy.Shared;
 
 namespace Ivy.Samples.Apps.Widgets;
 
-[App(icon:Icons.ChevronsUpDown)]
+[App(icon: Icons.ChevronsUpDown)]
 public class ExpandableApp : SampleBase
 {
     protected override object? BuildSample()

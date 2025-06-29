@@ -10,22 +10,32 @@ jobs:
     runs-on: windows-latest
 
     steps:
+      - name: Checkout Ivy-Framework
+        uses: actions/checkout@v4
+        with:
+          path: Ivy-Framework
+
+      - name: Check Code Formatting
+        run: dotnet format --verify-no-changes
+        working-directory: Ivy-Framework
+
       - name: Checkout Ivy
         uses: actions/checkout@v4
         with:
           repository: Ivy-Interactive/Ivy
           token: ${{ secrets.IVY_FRAMEWORK_TOKEN }}
           path: Ivy
-
-      - name: Checkout Ivy-Framework
-        uses: actions/checkout@v4
-        with:
-          path: Ivy-Framework
+        continue-on-error: true
 
       - name: Ensure Directory.Build.props is available
         run: |
-          New-Item -ItemType Directory -Path "Ivy-Framework/Ivy" -Force
-          Copy-Item -Path "Ivy/Directory.Build.props" -Destination "Ivy-Framework/Ivy/Directory.Build.props" -Force
+          if (Test-Path "Ivy/Directory.Build.props") {
+            New-Item -ItemType Directory -Path "Ivy-Framework/Ivy" -Force
+            Copy-Item -Path "Ivy/Directory.Build.props" -Destination "Ivy-Framework/Ivy/Directory.Build.props" -Force
+            Write-Host "Directory.Build.props copied successfully"
+          } else {
+            Write-Host "Warning: Ivy repository not available. Build may fail if Directory.Build.props is required."
+          }
         shell: pwsh
 
       - name: Set up .NET
@@ -35,10 +45,20 @@ jobs:
 
       - name: Workload update
         run: dotnet workload update
+        working-directory: Ivy-Framework
 
-      - name: Build Projects
+      - name: Build Solution
+        run: dotnet build --configuration Release
+        working-directory: Ivy-Framework
+
+      - name: Run Tests
+        run: dotnet test --configuration Release --no-build
+        working-directory: Ivy-Framework
+
+      - name: Validate Required Secrets
         run: |
-          dotnet build Ivy-Framework/Ivy/Ivy.csproj --configuration Release 
-          dotnet build Ivy-Framework/Ivy.Database.Generator.Toolkit/Ivy.Database.Generator.Toolkit.csproj --configuration Release
-          dotnet build Ivy-Framework/Ivy.Auth.Supabase/Ivy.Auth.Supabase.csproj --configuration Release
-          dotnet build Ivy-Framework/Ivy.Auth.Authelia/Ivy.Auth.Authelia.csproj --configuration Release
+          if (-not (Test-Path "Ivy/Directory.Build.props")) {
+            Write-Error "Build failed: IVY_FRAMEWORK_TOKEN secret is required but not provided. Please configure the secret in repository settings."
+            exit 1
+          }
+        shell: pwsh

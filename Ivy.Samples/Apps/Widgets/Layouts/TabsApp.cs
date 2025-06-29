@@ -2,7 +2,7 @@ using Ivy.Shared;
 
 namespace Ivy.Samples.Apps.Widgets.Layouts;
 
-[App(icon:Icons.LayoutTemplate, path:["Widgets", "Layouts"])]
+[App(icon: Icons.LayoutTemplate, path: ["Widgets", "Layouts"])]
 public class TabsApp : ViewBase
 {
     public override object? Build()
@@ -14,12 +14,12 @@ public class TabsApp : ViewBase
             new Tab("Orders", "Orders").Icon(Icons.DollarSign).Badge("0"),
             new Tab("Settings", "Settings").Icon(Icons.Settings).Badge("999")
         ]));
-        
+
         void OnTabSelect(Event<TabsLayout, int> @event)
         {
             selectedIndex.Set(@event.Value);
         }
-        
+
         void OnTabClose(Event<TabsLayout, int> @event)
         {
             //[0,1,|2|,3] -> 2
@@ -36,10 +36,10 @@ public class TabsApp : ViewBase
         ).Variant(TabsVariant.Tabs).Width(150);
 
         var addBtn = new Button("Add Tab").HandleClick(() =>
-        {   
+        {
             tabs.Set(tabs.Value.Add(new Tab($"Tab {tabs.Value.Length + 1}", $"Tab {tabs.Value.Length + 1}")));
         });
-        
+
         return new Fragment()
                | new FloatingPanel(addBtn, Align.BottomLeft)
                | tabsLayout

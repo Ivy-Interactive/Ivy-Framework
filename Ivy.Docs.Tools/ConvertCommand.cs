@@ -25,15 +25,15 @@ public class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
     public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
     {
         var pattern = Path.GetFileName(settings.InputFolder);
-        
+
         var inputFolder = Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, Path.GetDirectoryName(settings.InputFolder)!));
         var outputFolder = Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, settings.OutputFolder));
-        
+
         Directory.CreateDirectory(outputFolder);
-        
+
         var projectFile = GetProjectFile(inputFolder);
         var rootNamespace = GetRootNamespace(projectFile);
-        
+
         var tasks = Directory.GetFiles(inputFolder, pattern, SearchOption.AllDirectories).Select(async absoluteInputPath =>
         {
             var (order, name) = Utils.GetOrderFromFileName(absoluteInputPath);
@@ -46,24 +46,24 @@ public class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
             string relativeOutputPath = Utils.GetRelativeFolderWithoutOrder(inputFolder, absoluteInputPath);
 
             string folder = Path.GetFullPath(Path.Combine(outputFolder, relativeOutputPath));
-            
+
             Directory.CreateDirectory(folder);
-            
+
             string ivyOutput = Path.Combine(folder, $"{name}.g.cs");
 
             var namespaceSuffix = relativeOutputPath
                 .Replace(Path.DirectorySeparatorChar, '.')
                 .Replace(Path.AltDirectorySeparatorChar, '.').Trim('.');
-            
+
             //Remove "Generated." from start:
             if (namespaceSuffix.StartsWith("Generated."))
                 namespaceSuffix = namespaceSuffix.Substring("Generated.".Length);
-            
+
             string @namespace = $"{rootNamespace}.Apps.{namespaceSuffix}";
-            
+
             await MarkdownConverter.ConvertAsync(name, relativeInputPath, absoluteInputPath, ivyOutput, @namespace, settings.SkipIfNotChanged, order);
         });
-        
+
         await Task.WhenAll(tasks);
 
         return 0;

@@ -13,7 +13,7 @@ public class EffectTrigger : IEffectTrigger
 
     public static EffectTrigger AfterChange(IAnyState state) =>
         new(EffectTriggerType.AfterChange, state);
-    
+
     public static EffectTrigger AfterInit() =>
         new(EffectTriggerType.AfterInit, null);
 
@@ -62,14 +62,14 @@ public static class EffectExtensions
         {
             return typeof(T);
         }
-    } 
-    
+    }
+
     public static IEffectTrigger ToTrigger<T>(this IObservable<T> observable)
     {
         return EffectTrigger.AfterChange(new ObservableState<T>(observable));
     }
-    
+
     //make a explicit conversion from IObservable to IEffectTriggerConvertible
-    
+
 }
 

@@ -18,7 +18,7 @@ public class WidgetDocsView(string typeName, string? extensionsTypeName, string?
         if (type == null) return Text.Danger($"WidgetDocsView:Unable to find type {typeName}.");
 
         object? defaultValueProvider = TypeUtils.TryToActivate(type);
-        
+
         object? constructorSection = null;
 
         SignatureRecord[] constructors =
@@ -31,14 +31,14 @@ public class WidgetDocsView(string typeName, string? extensionsTypeName, string?
                 .Select(TypeUtils.GetSignatureRecord)
                 .ToList()
         ];
-        
+
         if (constructors.Any())
         {
             constructorSection = Layout.Vertical().Gap(8)
                                  | Text.H3("Constructors")
                                  | constructors.ToTable().Width(Size.Full());
         }
-        
+
         object? supportedTypesSection = null;
         if (defaultValueProvider is IAnyInput anyInput)
         {

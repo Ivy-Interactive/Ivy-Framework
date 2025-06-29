@@ -12,16 +12,16 @@ public record Markdown : WidgetBase<Markdown>
     }
 
     [Prop] public string Content { get; set; }
-    [Event] public Action<Event<Markdown,string>>? OnLinkClick { get; set; }
+    [Event] public Action<Event<Markdown, string>>? OnLinkClick { get; set; }
 }
 
 public static class MarkdownExtensions
 {
-    public static Markdown HandleLinkClick(this Markdown button, Action<Event<Markdown,string>> onLinkClick)
+    public static Markdown HandleLinkClick(this Markdown button, Action<Event<Markdown, string>> onLinkClick)
     {
         return button with { OnLinkClick = onLinkClick };
     }
-    
+
     public static Markdown HandleLinkClick(this Markdown button, Action<string> onLinkClick)
     {
         return button with { OnLinkClick = @event => onLinkClick(@event.Value) };

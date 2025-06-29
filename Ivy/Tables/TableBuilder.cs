@@ -29,7 +29,7 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         public IBuilder<TModel> Builder { get; set; } = builder;
 
         public Type? Type => FieldInfo?.FieldType ?? PropertyInfo?.PropertyType;
-        
+
         public int Order { get; set; } = order;
 
         public string Header { get; set; } = Utils.SplitPascalCase(name) ?? name;
@@ -37,13 +37,13 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         public string? Description { get; set; }
 
         public bool Removed { get; set; } = removed;
-        
+
         public Align Align { get; set; } = align;
-        
+
         public Size? Width { get; set; }
 
         public Func<IEnumerable<TModel>, object>? FooterAggregate { get; set; }
-        
+
         public object? GetValue(TModel obj)
         {
             if (FieldInfo != null)
@@ -53,15 +53,15 @@ public class TableBuilder<TModel> : ViewBase, IStateless
             return PropertyInfo!.GetValue(obj);
         }
     }
-    
+
     private Size? _width;
     private readonly IEnumerable<TModel> _records;
     private readonly Dictionary<string, TableBuilderColumn> _columns;
     private readonly BuilderFactory<TModel> _builderFactory;
-    private bool _removeEmptyColumns = false; 
+    private bool _removeEmptyColumns = false;
     //private Func<TModel, bool> _highlightPredicate;
     private object? _empty;
-    
+
     public TableBuilder(IEnumerable<TModel> records)
     {
         _records = records;
@@ -83,7 +83,7 @@ public class TableBuilder<TModel> : ViewBase, IStateless
                     .Select(e => new { e.Name, Type = e.PropertyType, FieldInfo = (FieldInfo)null!, PropertyInfo = e })
             )
             .ToList();
-        
+
         int order = fields.Count();
         foreach (var field in fields)
         {
@@ -100,7 +100,7 @@ public class TableBuilder<TModel> : ViewBase, IStateless
             {
                 cellAlignment = Shared.Align.Center;
             }
-            
+
             //todo: 
             // if (field.Type == typeof(Controls.Icon) || field.Type == typeof(Controls.EmptyIcon))
             // {
@@ -119,26 +119,26 @@ public class TableBuilder<TModel> : ViewBase, IStateless
                 new TableBuilderColumn(field.Name, order++, cellBuilder, cellAlignment, field.FieldInfo, field.PropertyInfo, removed);
         }
     }
-    
+
     public TableBuilder<TModel> Width(Size width)
     {
         _width = width;
         return this;
     }
-    
+
     public TableBuilder<TModel> Width(Expression<Func<TModel, object>> field, Size width)
     {
         var hint = GetField(field);
         hint.Width = width;
         return this;
     }
-    
+
     private TableBuilderColumn GetField(Expression<Func<TModel, object>> field)
     {
         var name = Utils.GetNameFromMemberExpression(field.Body);
         return _columns[name];
     }
-    
+
     public TableBuilder<TModel> Builder(Expression<Func<TModel, object>> field, Func<IBuilderFactory<TModel>, IBuilder<TModel>> builder)
     {
         var column = GetField(field);
@@ -154,7 +154,7 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         }
         return this;
     }
-    
+
     public TableBuilder<TModel> Description(Expression<Func<TModel, object>> field, string description)
     {
         var column = GetField(field);
@@ -162,7 +162,7 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         return this;
     }
 
-     public TableBuilder<TModel> Header(Expression<Func<TModel, object>> field, string label)
+    public TableBuilder<TModel> Header(Expression<Func<TModel, object>> field, string label)
     {
         var hint = GetField(field);
         hint.Header = label;
@@ -237,7 +237,7 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         hint.FooterAggregate = summaryMethod;
         return this;
     }
-    
+
     public TableBuilder<TModel> Totals(Expression<Func<TModel, object>> field)
     {
         var hint = GetField(field);
@@ -253,13 +253,13 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         _removeEmptyColumns = true;
         return this;
     }
-    
+
     // public TableBuilder<TModel> HighlightRow(Func<T, bool> predicate)
     // {
     //     _highlightRowPredicate = predicate;
     //     return this;
     // }
-    
+
     public TableBuilder<TModel> Empty(object content)
     {
         _empty = content;
@@ -269,15 +269,15 @@ public class TableBuilder<TModel> : ViewBase, IStateless
     public override object? Build()
     {
         if (!_records.Any()) return _empty!;
-        
+
         bool[] isEmptyColumn = Enumerable.Repeat(true, _columns.Values.Count(e => !e.Removed)).ToArray();
-        
+
         Table RenderTable(TableRow[] tableRows)
         {
             var table = new Table(tableRows).Width(_width);
             return table;
         }
-        
+
         TableCell RenderCell(int index, TableBuilderColumn column, object? content, bool isHeader, bool isFooter)
         {
             var cell = new TableCell(content).IsHeader(isHeader).IsFooter(isFooter).Align(column.Align);
@@ -286,33 +286,33 @@ public class TableBuilder<TModel> : ViewBase, IStateless
             {
                 cell = cell.Width(column.Width);
             }
-            
+
             if (!isHeader && isEmptyColumn[index])
             {
-                 if (!Utils.IsEmptyContent(content))
-                 {
-                     isEmptyColumn[index] = false;
-                 }
+                if (!Utils.IsEmptyContent(content))
+                {
+                    isEmptyColumn[index] = false;
+                }
             }
-            
+
             return cell;
         }
-        
+
         TableCell RenderHeader(int index, TableBuilderColumn column, object content)
         {
             var cell = RenderCell(index, column, content, true, false);
             return cell;
         }
-        
+
         TableCell RenderFooter(int index, TableBuilderColumn column, object content)
         {
             var cell = RenderCell(index, column, content, false, true);
             return cell;
         }
-        
+
         var columns = _columns.Values.Where(e => !e.Removed)
             .OrderBy(e => e.Order).ToList();
-        
+
         TableRow RenderRow(TModel e)
         {
             //todo:
@@ -321,34 +321,34 @@ public class TableBuilder<TModel> : ViewBase, IStateless
             var row = new TableRow(
                 columns.Select((f, i) => RenderCell(i, f, f.Builder.Build(f.GetValue(e), e), false, false)).ToArray()
             );
-            
+
             //todo:
             //if (highlight) row.AddClass("highlight");
             //_rowAction?.Invoke(e, row);
-            
+
             return row;
         }
 
         var header = new TableRow(columns.Select((e, i) =>
             RenderHeader(i, e, e.Header == "_" ? "" : e.Header)).ToArray());
-        
+
         var rows = _records.Select(RenderRow);
-        
+
         var joinedRows = new[] { header }.Concat(rows).ToArray();
-        
+
         if (columns.Any(e => e.FooterAggregate != null))
         {
             var footer = new TableRow(columns.Select((e, i) =>
                 RenderFooter(i, e, e.FooterAggregate?.Invoke(_records)!)).ToArray());
             joinedRows = joinedRows.Concat([footer]).ToArray();
         }
-        
+
         if (_removeEmptyColumns && isEmptyColumn.Any(e => e))
         {
             var indexes = isEmptyColumn.Select((e, i) => (e, i)).Where(x => x.e).Select(x => x.i).Reverse().ToArray();
             joinedRows = joinedRows.Select(e => e with { Children = e.Children.Where((_, i) => !indexes.Contains(i)).ToArray() }).ToArray();
         }
-        
+
         return RenderTable(joinedRows);
     }
 }

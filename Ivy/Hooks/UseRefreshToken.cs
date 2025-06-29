@@ -6,11 +6,11 @@ namespace Ivy.Hooks;
 public class RefreshToken(IState<(Guid, object?, bool)> state) : IEffectTriggerConvertible
 {
     public object? ReturnValue => state.Value.Item2;
-    
+
     public Guid Token => state.Value.Item1;
-    
+
     public bool IsRefreshed => state.Value.Item3;
-    
+
     public void Refresh(object? returnValue = null)
     {
         state.Set((Guid.NewGuid(), returnValue, true));

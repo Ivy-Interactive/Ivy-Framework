@@ -17,15 +17,15 @@ public class TreeNode(string id, int index, Path parentPath, TreeNode[] children
     {
         return new TreeNode(widget.Id!, index, path, children, null, widget, null, null, ancestorContext);
     }
-    
+
     public static TreeNode FromView(IView view, int index, Path path, TreeNode? child, IViewContext? context, int? memoizedHashCode, IViewContext? ancestorContext)
     {
         var children = child == null ? Array.Empty<TreeNode>() : [child];
         return new TreeNode(view.Id!, index, path, children, memoizedHashCode, null, view, context, ancestorContext);
     }
-    
+
     //public bool ShouldRebuild { get; set; }
-    
+
     public string Id { get; } = id;
     public int Index { get; } = index;
     public Path ParentPath { get; } = parentPath;
@@ -50,10 +50,10 @@ public class TreeNode(string id, int index, Path parentPath, TreeNode[] children
                     Children = children
                 };
             }
-            
+
             throw new NotSupportedException("Widgets must be of type WidgetBase.");
         }
-        
+
         if (IsView)
         {
             //views always have none or one child
@@ -62,10 +62,10 @@ public class TreeNode(string id, int index, Path parentPath, TreeNode[] children
 
         throw new NotSupportedException("Node must be either an IWidget or an IView.");
     }
-    
+
     public bool IsWidget => Widget != null;
     public bool IsView => View != null;
-    
+
     public void Dispose()
     {
         View?.Dispose();
@@ -77,12 +77,12 @@ public class TreeNode(string id, int index, Path parentPath, TreeNode[] children
         //The top of the tree is always a view
         //A view can only have one child which is either a view or a widget
         //We want get the indices as if the views has been removed and only the widgets remain
-        
+
         var indices = new List<int>() { };
         var path = this.ParentPath.Clone();
-        
+
         var previousSegment = new PathSegment("", null, this.Index, this.IsWidget);
-        
+
         while (path.Count > 0)
         {
             var segment = path.Pop();
@@ -92,7 +92,7 @@ public class TreeNode(string id, int index, Path parentPath, TreeNode[] children
             }
             previousSegment = segment;
         }
-        
+
         indices.Reverse();
         return indices.ToArray();
     }
@@ -116,12 +116,12 @@ public class WidgetTreeChanged(string viewId, int[] indices, JsonNode? patch)
 
 public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
 {
-    private readonly Dictionary<string,TreeNode> _nodes = new();
-    private readonly Dictionary<string,string> _parents = new();
-    
+    private readonly Dictionary<string, TreeNode> _nodes = new();
+    private readonly Dictionary<string, string> _parents = new();
+
     public IView RootView { get; }
     public TreeNode? NodeTree { get; private set; }
-    
+
     private readonly Subject<WidgetTreeChanged[]> _treeChangedSubject = new();
     private readonly Subject<string> _buildRequestedSubject = new();
     private readonly SemaphoreSlim _buildRequestedSemaphore = new(1, 1);
@@ -142,11 +142,11 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
             .Buffer(TimeSpan.FromMilliseconds(100)) //33 = 30fps
             .Select(batch => batch.Distinct().ToArray())
             .Where(batch => batch.Length > 0)
-            .Subscribe(OnNext); 
-        
+            .Subscribe(OnNext);
+
         _disposables.Add(subscription);
     }
-    
+
     public async Task BuildAsync()
     {
         await _buildRequestedSemaphore.WaitAsync();
@@ -165,20 +165,20 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
         {
             try
             {
-                _buildRequestedSemaphore.Release(); 
+                _buildRequestedSemaphore.Release();
             }
             catch (ObjectDisposedException)
             {
                 //ignore
             }
-        } 
+        }
     }
 
     public IWidget GetWidgets()
     {
-        if(NodeTree == null) throw new NotSupportedException("Tree must be built before getting widgets.");
+        if (NodeTree == null) throw new NotSupportedException("Tree must be built before getting widgets.");
         var widgets = NodeTree.GetWidgetTree();
-        if(widgets == null) throw new NotSupportedException("Tree must be non-null.");
+        if (widgets == null) throw new NotSupportedException("Tree must be non-null.");
         return widgets;
     }
 
@@ -193,7 +193,7 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
         // node.ShouldRebuild = true;
         _buildRequestedSubject.OnNext(viewId);
     }
-    
+
     private async Task RefreshRequested(string[] requestedViewIds)
     {
         await _buildRequestedSemaphore.WaitAsync();
@@ -201,7 +201,7 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
         {
             //todo: if the node A is a child of node B, both are request but there's a memoized node 
             //in between, we need to rebuild them both.
-            
+
             // List<string[]> paths = new();
             // foreach (var viewId in requestedViewIds)
             // {
@@ -227,7 +227,7 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
             // }
 
             //var nodesToRebuild = TreeRebuildSolver.FindMinimalRebuildNodes(paths.ToArray());
-            
+
             var nodesToRebuild = requestedViewIds;
 
             List<WidgetTreeChanged> changes = new();
@@ -258,31 +258,31 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
         {
             try
             {
-                _buildRequestedSemaphore.Release(); 
+                _buildRequestedSemaphore.Release();
             }
             catch (ObjectDisposedException)
             {
                 //ignore
             }
-        } 
+        }
     }
-    
+
     private WidgetTreeChanged? _RefreshView(string viewId, bool isHotReload)
     {
-        if(!_nodes.TryGetValue(viewId, out var node))
+        if (!_nodes.TryGetValue(viewId, out var node))
             throw new NotSupportedException($"Node '{viewId}' not found.");
-        
-        if(!node.IsView)
+
+        if (!node.IsView)
             throw new NotSupportedException($"Node '{viewId}' is not a view.");
-        
+
         _parents.TryGetValue(viewId, out var parentId);
 
         var indices = node.GetWidgetTreeIndices();
 
         var previous = node.GetWidgetTree()?.Serialize();
-        
+
         var partial = BuildView(node.View!, node.ParentPath.Clone(), node.Index, parentId, node.AncestorContext, isRefreshingView: true, isHotReload);
-        
+
         if (partial == null) throw new NotSupportedException("View must return an IWidget.");
 
         if (parentId == null)
@@ -291,7 +291,7 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
         }
         else
         {
-            if(_nodes.TryGetValue(parentId, out var parent))
+            if (_nodes.TryGetValue(parentId, out var parent))
             {
                 if (parent.Children.Length <= node.Index)
                 {
@@ -326,12 +326,12 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
     )
     {
         path.Push(view, index);
-        
+
         view.Id = GenerateId(path);
-        
+
         int? memoizedHashCode = null;
         bool memoized = false;
-        
+
         if (view is IMemoized memo)
         {
             memoizedHashCode = CalculateMemoizedHashCode(view.Id, memo.GetMemoValues());
@@ -339,7 +339,7 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
         }
 
         var previousNode = _nodes.GetValueOrDefault(view.Id);
-        
+
         TreeNode? node;
         IViewContext? context = previousNode?.Context;
         if (!memoized || isHotReload || isRefreshingView || previousNode == null || previousNode.MemoizedHashCode != memoizedHashCode)
@@ -387,15 +387,15 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
         }
 
         path.Pop();
-        
+
         _nodes[view.Id] = TreeNode.FromView(view, index, path.Clone(), node, context, memoizedHashCode, ancestorContext);
-        
+
         if (parentId != null)
             _parents[view.Id] = parentId;
-        
+
         if (previousNode != null)
         {
-            if(node == null)
+            if (node == null)
             {
                 DestroyNode(view.Id);
             }
@@ -404,7 +404,7 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
                 DestroyRemovedNodes(previousNode, _nodes[view.Id], isRefreshingView ? view.Id : null);
             }
         }
-        
+
         return _nodes[view.Id];
     }
 
@@ -414,7 +414,7 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
         hash.Add(Utils.StableHash(viewId));
         foreach (var prop in props)
         {
-            if(prop == null) continue;
+            if (prop == null) continue;
             if (prop is string stringProp)
             {
                 hash.Add(Utils.StableHash(stringProp));
@@ -428,7 +428,7 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
                 var json = JsonSerializer.Serialize(prop);
                 hash.Add(Utils.StableHash(json));
             }
-            
+
         }
         return hash.ToHashCode();
     }
@@ -446,7 +446,7 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
         {
             node = BuildView(newView, path.Clone(), index, parentId, ancestorContext, false, isHotReload);
         }
-        
+
         if (formatted is IWidget newWidget)
         {
             node = BuildWidget(newWidget, path.Clone(), index, parentId, ancestorContext, isHotReload);
@@ -454,15 +454,15 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
 
         return node;
     }
-    
+
     private TreeNode BuildWidget(IWidget widget, Path path, int index, string parentId, IViewContext? ancestorContext, bool isHotReload)
     {
         path.Push(widget, index);
-        
+
         widget.Id = GenerateId(path);
-        
+
         var children = new List<TreeNode>();
-        if(widget.Children == null!) widget.Children = [];
+        if (widget.Children == null!) widget.Children = [];
         for (var i = 0; i < widget.Children.Length; i++)
         {
             var child = widget.Children[i];
@@ -472,12 +472,12 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
         }
 
         path.Pop();
-        
+
         var node = TreeNode.FromWidget(widget, index, path.Clone(), children.ToArray(), ancestorContext);
 
         _nodes[widget.Id] = node;
         _parents[widget.Id] = parentId;
-        
+
         return node;
     }
 
@@ -494,19 +494,19 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
         string alphanumericHash = new string(hash.Where(char.IsLetterOrDigit).ToArray());
         return alphanumericHash[..10]; //With 1 million widgets, the collision probability is extremely low (0.0000596%)
     }
-    
+
     public bool TriggerEvent(string widgetId, string eventName, JsonArray args)
     {
         if (!_nodes.TryGetValue(widgetId, out var node))
             throw new NotSupportedException($"Node '{widgetId}' not found.");
-        
-        if(!node.IsWidget)
+
+        if (!node.IsWidget)
             throw new NotSupportedException($"Node '{widgetId}' is not a widget.");
 
         var widget = node.Widget!;
-        
+
         var result = widget.InvokeEvent(eventName, args);
-        
+
         return result;
     }
 
@@ -524,7 +524,7 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
         //Console.WriteLine($"Nodes:{_nodes.Count}");
         //PrintTree(NodeTree, 0);
     }
-    
+
     private void PrintTree(TreeNode? node, int i)
     {
         if (node == null) return;
@@ -539,31 +539,31 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
             PrintTree(child, i + 1);
         }
     }
-    
+
     private void DestroyNode(string nodeId, string? skipViewId = null)
     {
         if (_nodes.TryGetValue(nodeId, out var node))
         {
-            if(nodeId != skipViewId)
+            if (nodeId != skipViewId)
             {
                 node.Dispose();
                 _nodes.Remove(nodeId);
                 _parents.Remove(nodeId);
             }
-            foreach(var child in node.Children)
+            foreach (var child in node.Children)
             {
                 DestroyNode(child.Id);
             }
         }
     }
-    
+
     private void DestroyRemovedNodes(TreeNode previousNode, TreeNode node, string? skipViewId)
     {
         if (previousNode.Id != node.Id)
         {
             throw new NotSupportedException("Node Ids must match.");
         }
-        
+
         // Remove all children in previousNode that are not in node using Id as key
         var previousChildren = previousNode.Children.ToDictionary(x => x.Id);
         var newChildrenIds = node.Children
@@ -588,7 +588,7 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
             }
         }
     }
-        
+
     public IDisposable Subscribe(IObserver<WidgetTreeChanged[]> observer) => _treeChangedSubject.Subscribe(observer);
 
     public void Dispose()

@@ -18,20 +18,20 @@ public record ReadOnlyInput<TValue> : WidgetBase<ReadOnlyInput<TValue>>, IInput<
         Value = typedState.Value;
         OnChange = e => typedState.Set(e.Value);
     }
-    
+
     public ReadOnlyInput(TValue value, Action<Event<IInput<TValue>, TValue>>? onChange = null)
     {
         OnChange = onChange;
         Value = value;
     }
-    
+
     [Prop] public TValue Value { get; }
     [Prop] public bool Disabled { get; set; }
     [Prop] public string? Invalid { get; set; }
     [Prop] public bool ShowCopyButton { get; set; } = true;
     [Event] public Action<Event<IInput<TValue>, TValue>>? OnChange { get; }
     [Event] public Action<Event<IAnyInput>>? OnBlur { get; set; }
-    public Type[] SupportedStateTypes() => [ typeof(object) ];
+    public Type[] SupportedStateTypes() => [typeof(object)];
 }
 
 public static class ReadOnlyInputExtensions

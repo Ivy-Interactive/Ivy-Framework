@@ -8,7 +8,7 @@ namespace Ivy;
 public record Sheet : WidgetBase<Sheet>
 {
     public static Size DefaultWidth => Size.Rem(24);
-    
+
     public Sheet(Action<Event<Sheet>> onClose, object content, string? title = null, string? description = null) : base([new Slot("Content", content)])
     {
         OnClose = onClose;
@@ -18,19 +18,19 @@ public record Sheet : WidgetBase<Sheet>
     }
 
     [Prop] public string? Title { get; }
-    
+
     [Prop] public string? Description { get; }
-    
+
     [Event] public Action<Event<Sheet>> OnClose { get; set; }
-    
+
     public static Sheet operator |(Sheet widget, object child)
     {
-        if(child is IEnumerable<object> _)
+        if (child is IEnumerable<object> _)
         {
             throw new NotSupportedException("Cards does not support multiple children.");
         }
-        
-        return widget with { Children = [ new Slot("Content", child) ] };
+
+        return widget with { Children = [new Slot("Content", child)] };
     }
 }
 

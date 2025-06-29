@@ -13,19 +13,19 @@ public interface IAnyInput
 
 public static class AnyInputExtensions
 {
-    public static IAnyInput Disabled(this IAnyInput input, bool disabled = true) 
+    public static IAnyInput Disabled(this IAnyInput input, bool disabled = true)
     {
         input.Disabled = disabled;
         return input;
     }
-    
-    public static IAnyInput Invalid(this IAnyInput input, string? invalid) 
+
+    public static IAnyInput Invalid(this IAnyInput input, string? invalid)
     {
         input.Invalid = invalid;
         return input;
     }
-    
-    public static IAnyInput HandleBlur(this IAnyInput input, Action<Event<IAnyInput>>? onBlur) 
+
+    public static IAnyInput HandleBlur(this IAnyInput input, Action<Event<IAnyInput>>? onBlur)
     {
         input.OnBlur = onBlur;
         return input;

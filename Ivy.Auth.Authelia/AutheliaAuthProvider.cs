@@ -13,14 +13,14 @@ public class AutheliaAuthProvider : IAuthProvider
     private readonly HttpClient _httpClient;
     private readonly CookieContainer _cookieContainer;
     private readonly string _baseUrl;
-    
+
     public AutheliaAuthProvider()
     {
         var configuration = new ConfigurationBuilder()
             .AddEnvironmentVariables()
             .AddUserSecrets(Assembly.GetEntryAssembly()!)
             .Build();
-        _baseUrl = configuration.GetValue<string>("AUTHELIA_URL") 
+        _baseUrl = configuration.GetValue<string>("AUTHELIA_URL")
             ?? throw new Exception("AUTHELIA_URL is required");
         _cookieContainer = new CookieContainer();
         var handler = new HttpClientHandler { CookieContainer = _cookieContainer };
@@ -43,7 +43,7 @@ public class AutheliaAuthProvider : IAuthProvider
         }
         return null;
     }
-    
+
     public async Task LogoutAsync(string _)
     {
         // Instruct Authelia to log out. Then expire the session cookie.
@@ -75,7 +75,7 @@ public class AutheliaAuthProvider : IAuthProvider
         var response = await _httpClient.SendAsync(request);
         return response.IsSuccessStatusCode;
     }
-    
+
     public async Task<UserInfo?> GetUserInfoAsync(string jwt)
     {
         var request = new HttpRequestMessage(HttpMethod.Get, "/api/user/info");
@@ -89,7 +89,7 @@ public class AutheliaAuthProvider : IAuthProvider
             return null;
         return new UserInfo(user.Id, user.Email, user.DisplayName, null);
     }
-    
+
     public AuthOption[] GetAuthOptions()
     {
         return [new AuthOption(AuthFlow.EmailPassword)];

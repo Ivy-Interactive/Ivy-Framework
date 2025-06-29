@@ -28,7 +28,7 @@ public class LineChartApp : ViewBase
                     .XAxis("Month")
                     .YAxis("Desktop")
                     .Legend()
-            ).Width(1/2f)
+            ).Width(1 / 2f)
             ;
     }
 }

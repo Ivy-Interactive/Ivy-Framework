@@ -15,9 +15,9 @@ public enum DateTimeInputs
 
 public interface IAnyDateTimeInput : IAnyInput
 {
-    public DateTimeInputs Variant { get; set; } 
+    public DateTimeInputs Variant { get; set; }
     public string? Placeholder { get; set; }
-    public string? Format { get; set; } 
+    public string? Format { get; set; }
 }
 
 public abstract record DateTimeInputBase : WidgetBase<DateTimeInputBase>, IAnyDateTimeInput
@@ -28,7 +28,7 @@ public abstract record DateTimeInputBase : WidgetBase<DateTimeInputBase>, IAnyDa
     [Prop] public bool Disabled { get; set; }
     [Prop] public string? Invalid { get; set; }
     [Event] public Action<Event<IAnyInput>>? OnBlur { get; set; }
-    public Type[] SupportedStateTypes() => [ ];
+    public Type[] SupportedStateTypes() => [];
 }
 
 public record DateTimeInput<TDate> : DateTimeInputBase, IInput<TDate>
@@ -39,7 +39,7 @@ public record DateTimeInput<TDate> : DateTimeInputBase, IInput<TDate>
         Value = typedState.Value;
         OnChange = e => typedState.Set(e.Value);
     }
-    
+
     public DateTimeInput(TDate value, Action<Event<IInput<TDate>, TDate>> onChange, string? placeholder = null, bool disabled = false, DateTimeInputs variant = DateTimeInputs.Date) : this(placeholder, disabled, variant)
     {
         OnChange = onChange;
@@ -67,7 +67,7 @@ public static class DateTimeInputExtensions
         DateTimeInputBase input = (DateTimeInputBase)Activator.CreateInstance(genericType, state, placeholder, disabled, variant)!;
         return input;
     }
-    
+
     public static DateTimeInputBase Title(this DateTimeInputBase widget, string title) => widget with { Placeholder = title };
     public static DateTimeInputBase Disabled(this DateTimeInputBase widget, bool disabled = true) => widget with { Disabled = disabled };
     public static DateTimeInputBase Variant(this DateTimeInputBase widget, DateTimeInputs variant) => widget with { Variant = variant };

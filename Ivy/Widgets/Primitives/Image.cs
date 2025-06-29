@@ -13,6 +13,6 @@ public record Image : WidgetBase<Image>
         Height = Size.MinContent();
     }
     //Todo: maintain the aspect ratio of the image, Clippings: Circlar, Square, Rounded
-    
+
     [Prop] public string Src { get; set; }
 }

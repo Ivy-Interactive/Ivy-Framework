@@ -15,9 +15,9 @@ public class Path : Stack<PathSegment>
 {
     public void Push(IView view, int index)
     {
-        Push(new PathSegment(view.GetType().Name!, view.Key, index, false)); 
+        Push(new PathSegment(view.GetType().Name!, view.Key, index, false));
     }
-    
+
     public void Push(IWidget widget, int index)
     {
         Push(new PathSegment(widget.GetType().Name!, widget.Key, index, true));
@@ -34,7 +34,7 @@ public class Path : Stack<PathSegment>
         }
         return clone;
     }
-    
+
     public override string ToString()
     {
         return string.Join(">", this.Select(e => e.ToString()).ToArray());

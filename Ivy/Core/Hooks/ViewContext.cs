@@ -17,7 +17,7 @@ public class ViewContext : IViewContext
     private readonly IServiceContainer _services;
     private readonly HashSet<Type> _registeredService;
     private int _callingIndex = 0;
-    
+
     public ViewContext(Action requestRefresh, IViewContext? ancestorContext, IServiceProvider appServices)
     {
         _requestRefresh = requestRefresh;
@@ -25,7 +25,7 @@ public class ViewContext : IViewContext
         _effectQueue = new EffectQueue();
         _disposables.Add(_effectQueue);
         _appServices = appServices;
-        
+
         var services = new ServiceContainer();
         _registeredService = new HashSet<Type>();
         _disposables.Add(services);
@@ -57,7 +57,7 @@ public class ViewContext : IViewContext
 
     public IState<T> UseState<T>(Func<T> buildInitialValue, bool buildOnChange = true)
     {
-        if(UseStateHook(
+        if (UseStateHook(
             StateHook.Create(
                 _callingIndex++,
                 () => new State<T>(buildInitialValue()),
@@ -67,15 +67,15 @@ public class ViewContext : IViewContext
         {
             return typedState;
         }
-        throw new InvalidOperationException("State type mismatch."); 
+        throw new InvalidOperationException("State type mismatch.");
     }
-    
+
     public void UseEffect(Func<Task> handler, params IEffectTriggerConvertible[] triggers)
     {
         UseEffectHook(
             EffectHook.Create(
                 _callingIndex++,
-                async() =>
+                async () =>
                 {
                     await handler();
                     return Disposable.Empty;
@@ -84,18 +84,18 @@ public class ViewContext : IViewContext
             )
         );
     }
-    
+
     public void UseEffect(Func<Task<IDisposable>> handler, params IEffectTriggerConvertible[] triggers)
     {
         UseEffectHook(
             EffectHook.Create(
                 _callingIndex++,
-                async() => await handler(),
+                async () => await handler(),
                 triggers.Select(e => e.ToTrigger()).ToArray()
             )
         );
     }
-    
+
     public void UseEffect(Func<IDisposable> handler, params IEffectTriggerConvertible[] triggers)
     {
         UseEffectHook(
@@ -106,7 +106,7 @@ public class ViewContext : IViewContext
             )
         );
     }
-    
+
     public void UseEffect(Action handler, params IEffectTriggerConvertible[] triggers)
     {
         UseEffectHook(
@@ -127,7 +127,7 @@ public class ViewContext : IViewContext
         ArgumentNullException.ThrowIfNull(factory);
 
         var type = typeof(T);
-        
+
         if (_registeredService.Contains(type))
         {
             return (T)_services.GetService(type)!;
@@ -136,18 +136,18 @@ public class ViewContext : IViewContext
         T context = factory()!;
         _services.AddService(type, context);
         _registeredService.Add(type);
-        
+
         if (context is IDisposable disposable)
         {
             _disposables.Add(disposable);
         }
-        
+
         return context;
     }
 
     public T UseService<T>()
     {
-        if(_appServices.GetService(typeof(T)) is T service)
+        if (_appServices.GetService(typeof(T)) is T service)
         {
             return service;
         }
@@ -156,7 +156,7 @@ public class ViewContext : IViewContext
 
     public object UseService(Type serviceType)
     {
-        if(_appServices.GetService(serviceType) is {} globalService)
+        if (_appServices.GetService(serviceType) is { } globalService)
         {
             return globalService;
         }
@@ -175,64 +175,64 @@ public class ViewContext : IViewContext
         {
             return existingService;
         }
-        
-        if(_ancestorContext == null)
+
+        if (_ancestorContext == null)
         {
             throw new InvalidOperationException($"Context '{typeof(T).FullName}' not found.");
         }
 
         var service = _ancestorContext.UseContext<T>();
-        
+
         if (service is null)
         {
             throw new InvalidOperationException($"Context '{typeof(T).FullName}' not found.");
         }
-        
+
         return service;
     }
 
     public object UseContext(Type serviceType)
     {
-        if (_services.GetService(serviceType) is {} existingService)
+        if (_services.GetService(serviceType) is { } existingService)
         {
             return existingService;
         }
-        
-        if(_ancestorContext == null)
+
+        if (_ancestorContext == null)
         {
             throw new InvalidOperationException($"Context '{serviceType.FullName}' not found.");
         }
 
         var service = _ancestorContext.UseContext(serviceType);
-        
+
         if (service is null)
         {
             throw new InvalidOperationException($"Context '{serviceType.FullName}' not found.");
         }
-        
+
         return service;
     }
-    
-    private IAnyState UseStateHook(StateHook stateHook) 
+
+    private IAnyState UseStateHook(StateHook stateHook)
     {
         if (_hooks.TryGetValue(stateHook.Identity, out var existingHook))
         {
             return existingHook.State;
         }
-        
+
         var state = stateHook.State;
         _hooks[stateHook.Identity] = stateHook;
-        
-        _disposables.Add(state); 
+
+        _disposables.Add(state);
 
         if (stateHook.RenderOnChange)
         {
             _disposables.Add(state.SubscribeAny(Refresh));
         }
-        
+
         return state;
     }
-    
+
     private void UseEffectHook(EffectHook effect)
     {
         if (!_effects.TryAdd(effect.Identity, effect))
@@ -246,7 +246,7 @@ public class ViewContext : IViewContext
             }
             return;
         }
-    
+
         foreach (var trigger in effect.Triggers)
         {
             switch (trigger.Type)
@@ -265,7 +265,7 @@ public class ViewContext : IViewContext
             }
         }
     }
-    
+
     public void Dispose()
     {
         _disposables.Dispose();

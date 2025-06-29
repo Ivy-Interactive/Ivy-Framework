@@ -4,14 +4,14 @@ using Microsoft.SemanticKernel.ChatCompletion;
 
 namespace Ivy.Samples.Apps.Demos;
 
-[App(icon:Icons.Sparkles)]
+[App(icon: Icons.Sparkles)]
 public class LucideIconAgentApp() : SampleBase(Align.TopRight)
 {
     protected override object? BuildSample()
     {
         var client = UseService<IClientProvider>();
-        
-        var messages = UseState(ImmutableArray.Create<ChatMessage>(new ChatMessage(ChatSender.Assistant, 
+
+        var messages = UseState(ImmutableArray.Create<ChatMessage>(new ChatMessage(ChatSender.Assistant,
             "Hello! I'm the Lucide Icon Agent. I can help you find icons for your app. Please describe your application.")));
 
         async void OnSendMessage(Event<Chat, string> @event)
@@ -19,25 +19,25 @@ public class LucideIconAgentApp() : SampleBase(Align.TopRight)
             messages.Set(messages.Value.Add(new ChatMessage(ChatSender.User, @event.Value)));
             var currentMessages = messages.Value;
             messages.Set(messages.Value.Add(new ChatMessage(ChatSender.Assistant, new ChatStatus("Thinking..."))));
-            
+
             var agent = new LucideIconAgent();
             var suggestion = await agent.SuggestIconAsync(@event.Value);
-            if(suggestion != null)
+            if (suggestion != null)
             {
                 //suggestion is a string with ; separated icon names
                 var icons = suggestion.Split(';');
                 Icons[] iconEnums = icons.Select(icon => Enum.TryParse<Icons>(icon, out var result) ? result : Icons.None)
                     .Where(e => e != Icons.None).ToArray();
-                
+
                 Action<Event<Button>> onIconClick = e =>
                 {
                     client.CopyToClipboard(e.Sender.Icon?.ToString() ?? "");
                     client.Toast($"Copied '{e.Sender.Icon?.ToString()}' to clipboard", "Icon Copied");
                 };
-                
-                var content = Layout.Horizontal().Gap(1) 
+
+                var content = Layout.Horizontal().Gap(1)
                     | iconEnums.Select(e => e.ToButton(onIconClick).WithTooltip(e.ToString()));
-                
+
                 messages.Set(currentMessages.Add(new ChatMessage(ChatSender.Assistant, content)));
             }
             else
@@ -46,7 +46,7 @@ public class LucideIconAgentApp() : SampleBase(Align.TopRight)
             }
         }
 
-        return Layout.Center().Padding(0,10,0,10)
+        return Layout.Center().Padding(0, 10, 0, 10)
             | new Chat(messages.Value.ToArray(), OnSendMessage).Width(Size.Full().Max(200));
     }
 }
@@ -69,7 +69,7 @@ public class LucideIconAgent
         var history = new ChatHistory();
 
         var allIcons = Enum.GetValues<Icons>().Where(e => e != Icons.None);
-        
+
         history.AddSystemMessage(
             $"""
             You are an expert on Lucide React. 
@@ -86,7 +86,7 @@ public class LucideIconAgent
             """
         );
         history.AddUserMessage(appDescription);
-        
+
         var result = await chatCompletionService.GetChatMessageContentAsync(
             history,
             kernel: _kernel);

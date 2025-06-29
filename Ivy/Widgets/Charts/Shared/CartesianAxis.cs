@@ -48,17 +48,17 @@ public static class CartesianAxisExtensions
     {
         return cartesianGrid with { Vertical = vertical };
     }
-    
+
     public static CartesianAxis Fill(this CartesianAxis cartesianGrid, Colors fill)
     {
         return cartesianGrid with { Fill = fill };
     }
-    
+
     public static CartesianAxis FillOpacity(this CartesianAxis cartesianGrid, double fillOpacity)
     {
         return cartesianGrid with { FillOpacity = fillOpacity };
     }
-    
+
     public static CartesianAxis StrokeDashArray(this CartesianAxis cartesianGrid, string strokeDashArray)
     {
         return cartesianGrid with { StrokeDashArray = strokeDashArray };

@@ -21,16 +21,16 @@ public delegate Task<Option<T>?> AsyncSelectLookupDelegate<T>(T id);
 public class AsyncSelectInputView<TValue> : ViewBase, IAnyAsyncSelectInputBase, IInput<TValue>
 {
     public Type[] SupportedStateTypes() => [];
-    
-    public AsyncSelectInputView(IAnyState state, AsyncSelectQueryDelegate<TValue> query, AsyncSelectLookupDelegate<TValue> lookup,  string? placeholder = null, bool disabled = false) 
+
+    public AsyncSelectInputView(IAnyState state, AsyncSelectQueryDelegate<TValue> query, AsyncSelectLookupDelegate<TValue> lookup, string? placeholder = null, bool disabled = false)
         : this(query, lookup, placeholder, disabled)
     {
         var typedState = state.As<TValue>();
         Value = typedState.Value;
         OnChange = e => typedState.Set(e.Value);
     }
-    
-    public AsyncSelectInputView(TValue value, Action<Event<IInput<TValue>, TValue>>? onChange, AsyncSelectQueryDelegate<TValue> query, AsyncSelectLookupDelegate<TValue> lookup, string? placeholder = null, bool disabled = false) 
+
+    public AsyncSelectInputView(TValue value, Action<Event<IInput<TValue>, TValue>>? onChange, AsyncSelectQueryDelegate<TValue> query, AsyncSelectLookupDelegate<TValue> lookup, string? placeholder = null, bool disabled = false)
         : this(query, lookup, placeholder, disabled)
     {
         OnChange = onChange;
@@ -44,7 +44,7 @@ public class AsyncSelectInputView<TValue> : ViewBase, IAnyAsyncSelectInputBase, 
         Placeholder = placeholder;
         Disabled = disabled;
     }
-    
+
     public AsyncSelectQueryDelegate<TValue> Query { get; }
     public AsyncSelectLookupDelegate<TValue> Lookup { get; }
     public TValue Value { get; private set; } = typeof(TValue).IsValueType ? Activator.CreateInstance<TValue>() : default!;
@@ -54,7 +54,7 @@ public class AsyncSelectInputView<TValue> : ViewBase, IAnyAsyncSelectInputBase, 
     public bool Disabled { get; set; }
     public string? Invalid { get; set; }
     public string? Placeholder { get; set; }
-    
+
     public override object? Build()
     {
         IState<string?> displayValue = UseState<string?>((string?)null!);
@@ -62,7 +62,7 @@ public class AsyncSelectInputView<TValue> : ViewBase, IAnyAsyncSelectInputBase, 
         var loading = UseState(false);
         var refreshToken = this.UseRefreshToken();
         var client = UseService<IClientProvider>();
-        
+
         UseEffect(async () =>
         {
             open.Set(false);
@@ -70,10 +70,10 @@ public class AsyncSelectInputView<TValue> : ViewBase, IAnyAsyncSelectInputBase, 
             if (refreshToken.IsRefreshed)
             {
                 Value = (TValue)refreshToken.ReturnValue!;
-                OnChange?.Invoke(new Event<IInput<TValue>, TValue>("OnChange", this, Value)); 
+                OnChange?.Invoke(new Event<IInput<TValue>, TValue>("OnChange", this, Value));
             }
-            
-            if(!(Value?.Equals(typeof(TValue).IsValueType ? Activator.CreateInstance<TValue>() : default!) ?? true))
+
+            if (!(Value?.Equals(typeof(TValue).IsValueType ? Activator.CreateInstance<TValue>() : default!) ?? true))
             {
                 loading.Set(true);
                 try
@@ -90,13 +90,13 @@ public class AsyncSelectInputView<TValue> : ViewBase, IAnyAsyncSelectInputBase, 
                 }
             }
             displayValue.Set((string?)null!);
-        }, [ EffectTrigger.AfterInit(), refreshToken]);
-        
+        }, [EffectTrigger.AfterInit(), refreshToken]);
+
         void OnSelect(Event<AsyncSelectInput> _)
         {
             open.Set(true);
         }
-        
+
         void OnClose(Event<Sheet> _)
         {
             open.Set(false);
@@ -113,7 +113,7 @@ public class AsyncSelectInputView<TValue> : ViewBase, IAnyAsyncSelectInputBase, 
                 Loading = loading.Value
             },
             open.Value ? new Sheet(
-                OnClose, 
+                OnClose,
                 new AsyncSelectListSheet<TValue>(refreshToken, Query),
                 title: Placeholder
                 ) : null
@@ -121,19 +121,19 @@ public class AsyncSelectInputView<TValue> : ViewBase, IAnyAsyncSelectInputBase, 
     }
 }
 
-public class AsyncSelectListSheet<T>(RefreshToken refreshToken, AsyncSelectQueryDelegate<T> query): ViewBase
+public class AsyncSelectListSheet<T>(RefreshToken refreshToken, AsyncSelectQueryDelegate<T> query) : ViewBase
 {
     public override object? Build()
     {
         var onItemClicked = new Action<Event<ListItem>>(e =>
         {
             var option = (Option<T>)e.Sender.Tag!;
-            refreshToken.Refresh(option.TypedValue); 
+            refreshToken.Refresh(option.TypedValue);
         });
-        
-        ListItem CreateItem(Option<T> option) => 
+
+        ListItem CreateItem(Option<T> option) =>
             new(title: option.Label, onClick: onItemClicked, tag: option);
-        
+
         return new FilteredListView<Option<T>>(filter => query(filter), CreateItem);
     }
 }
@@ -141,16 +141,16 @@ public class AsyncSelectListSheet<T>(RefreshToken refreshToken, AsyncSelectQuery
 public static class AsyncSelectInputViewExtensions
 {
     public static IAnyAsyncSelectInputBase ToAsyncSelectInput<TValue>(
-        this IAnyState state, 
-        AsyncSelectQueryDelegate<TValue> query, 
-        AsyncSelectLookupDelegate<TValue> lookup, 
+        this IAnyState state,
+        AsyncSelectQueryDelegate<TValue> query,
+        AsyncSelectLookupDelegate<TValue> lookup,
         string? placeholder = null,
         bool disabled = false
         )
     {
         var type = typeof(TValue);
         Type genericType = typeof(AsyncSelectInputView<>).MakeGenericType(type);
-        
+
         try
         {
             IAnyAsyncSelectInputBase input = (IAnyAsyncSelectInputBase)Activator

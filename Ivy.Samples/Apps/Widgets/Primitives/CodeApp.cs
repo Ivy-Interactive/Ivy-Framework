@@ -2,12 +2,12 @@ using Ivy.Shared;
 
 namespace Ivy.Samples.Apps.Widgets.Primitives;
 
-[App(icon:Icons.Code, path:["Widgets", "Primitives"])]
+[App(icon: Icons.Code, path: ["Widgets", "Primitives"])]
 public class CodeApp : SampleBase
 {
     protected override object? BuildSample()
     {
-        var content = 
+        var content =
             """
             function* fibonacci(): Generator<number, void, unknown> {
                 let a = 0, b = 1;

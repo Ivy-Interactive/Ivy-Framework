@@ -7,7 +7,7 @@ public class BestGuessConvertTests
         Value1,
         Value2
     }
-    
+
     [Fact] public void IntToInt() => Test(123, typeof(int), 123);
     [Fact] public void IntToNullInt() => Test(123, typeof(int?), 123);
     [Fact] public void DoubleToInt() => Test(123.0, typeof(int), 123);
@@ -25,10 +25,11 @@ public class BestGuessConvertTests
     [Fact] public void IntToBoolFalse() => Test(0, typeof(bool), false);
     [Fact] public void BoolToIntFalse() => Test(false, typeof(int), 0);
     [Fact] public void BoolToIntTrue() => Test(true, typeof(int), 1);
-    
-    [Fact] public void DateRangeConversion() => Test(new Dictionary<string, object?> { ["item1"] = "2021-01-01", ["item2"] = "2022-01-01" }, 
+
+    [Fact]
+    public void DateRangeConversion() => Test(new Dictionary<string, object?> { ["item1"] = "2021-01-01", ["item2"] = "2022-01-01" },
         typeof((DateTime, DateTime)), (DateTime.Parse("2021-01-01"), DateTime.Parse("2022-01-01")));
-    
+
     private void Test(object? input, Type type, object? expectedResult)
     {
         var result = Core.Utils.BestGuessConvert(input, type);

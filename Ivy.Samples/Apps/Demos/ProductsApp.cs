@@ -15,43 +15,43 @@ public class ProductsApp : ViewBase
 
 public record ProductListRecord(Guid Id, string Name, string? Department);
 
-public class ProductsListBlade: ViewBase
+public class ProductsListBlade : ViewBase
 {
     public override object? Build()
     {
         //This blade will display a list of products - we choose to include the name and department of the product as these are the most relevant fields for the user.
-        
+
         var blades = this.UseContext<IBladeController>();
         var factory = this.UseService<SampleDbContextFactory>();
         var refreshToken = this.UseRefreshToken();
-        
+
         this.UseEffect(() =>
         {
-            if(refreshToken.ReturnValue is Guid productId)
+            if (refreshToken.ReturnValue is Guid productId)
             {
                 blades.Pop(this, true); // make sure the list has been refreshed
-                blades.Push(this, new ProductDetailsBlade(productId));   
+                blades.Push(this, new ProductDetailsBlade(productId));
             }
-        }, [ refreshToken ]);
-        
+        }, [refreshToken]);
+
         var onItemClicked = new Action<Event<ListItem>>(e =>
         {
             var product = (ProductListRecord)e.Sender.Tag!;
-            blades.Push(this, new ProductDetailsBlade(product.Id), product.Name, width:Size.Units(100)); // by setting the width we avoid jank when different blades are opened   
+            blades.Push(this, new ProductDetailsBlade(product.Id), product.Name, width: Size.Units(100)); // by setting the width we avoid jank when different blades are opened   
         });
-        
-        ListItem CreateItem(ProductListRecord record) => 
+
+        ListItem CreateItem(ProductListRecord record) =>
             new(title: record.Name, onClick: onItemClicked, tag: record, subtitle: record.Department);
-        
+
         var createBtn = Icons.Plus.ToButton(_ =>
         {
             blades.Pop(this); // make sure only the current blade is visible
         }).ToTrigger((isOpen) => new ProductCreateDialog(isOpen, refreshToken));
-        
+
         return new FilteredListView<ProductListRecord>(
-            fetchRecords:(filter) => FetchProducts(factory, filter), 
-            createItem:CreateItem, 
-            toolButtons:createBtn, 
+            fetchRecords: (filter) => FetchProducts(factory, filter),
+            createItem: CreateItem,
+            toolButtons: createBtn,
             onFilterChanged: _ =>
             {
                 blades.Pop(this);
@@ -64,8 +64,8 @@ public class ProductsListBlade: ViewBase
         await using var db = factory.CreateDbContext();
 
         var linq = db.Products.AsQueryable();
-        
-        if(!string.IsNullOrWhiteSpace(filter))
+
+        if (!string.IsNullOrWhiteSpace(filter))
         {
             linq = linq.Where(e => e.Name.Contains(filter) || e.Department.Contains(filter));
         }
@@ -73,7 +73,7 @@ public class ProductsListBlade: ViewBase
         return await linq
             .OrderByDescending(e => e.CreatedAt)
             .Take(50)
-            .Select(e => new ProductListRecord(e.Id, e.Name, e.Category!=null ? e.Category.Name : null))
+            .Select(e => new ProductListRecord(e.Id, e.Name, e.Category != null ? e.Category.Name : null))
             .ToArrayAsync();
     }
 }
@@ -83,23 +83,23 @@ public class ProductDetailsBlade(Guid productId) : ViewBase
     public override object? Build()
     {
         var factory = this.UseService<SampleDbContextFactory>();
-        var blades  = this.UseContext<IBladeController>();
+        var blades = this.UseContext<IBladeController>();
         var refreshToken = this.UseRefreshToken();
         var product = this.UseState<Product?>(() => null!);
 
         this.UseEffect(async () =>
         {
             product.Set((await factory.CreateDbContext().Products.Include(e => e.Category).SingleOrDefaultAsync(e => e.Id == productId))!);
-        }, [ EffectTrigger.AfterInit(), refreshToken]);
-        
+        }, [EffectTrigger.AfterInit(), refreshToken]);
+
         if (product.Value == null) return null;
-        
+
         var _product = product.Value;
-            
+
         var deleteBtn = new Button("Delete", onClick: e =>
             {
                 Delete(factory);
-                blades.Pop(refresh:true);
+                blades.Pop(refresh: true);
             })
             .Variant(ButtonVariant.Destructive)
             .Icon(Icons.Trash)
@@ -113,7 +113,8 @@ public class ProductDetailsBlade(Guid productId) : ViewBase
             .ToTrigger((isOpen) => new ProductEditSheet(isOpen, productId, refreshToken));
 
         return Layout.Vertical() | new Card(
-            content:new {
+            content: new
+            {
                 // We include some of the interesting fields of the entity here
                 _product.Id,
                 _product.Name,
@@ -121,13 +122,13 @@ public class ProductDetailsBlade(Guid productId) : ViewBase
             }.ToDetails()
             .RemoveEmpty() // Removes "empty" fields from the details
             .Builder(e => e.Id, e => e.CopyToClipboard()),
-            footer: 
+            footer:
                 Layout.Horizontal().Gap(2).Width(Size.Full())
                 | deleteBtn
                 | editBtn
             ).Title("Product Details");
     }
-    
+
     private void Delete(SampleDbContextFactory dbFactory)
     {
         using var db = dbFactory.CreateDbContext();
@@ -156,13 +157,13 @@ public class ProductCreateDialog(IState<bool> isOpen, RefreshToken refreshToken)
     {
         var factory = this.UseService<SampleDbContextFactory>();
         var customer = this.UseState(() => new ProductCreateRequest());
-        
+
         this.UseEffect(() =>
         {
             var productId = CreateProduct(factory, customer.Value);
             refreshToken.Refresh(productId);
         }, [customer]);
-        
+
         return customer
             .ToForm()
             //We only specify Builder if we want to customize the input control for the field - ToForm() will scaffold the form based on the properties of the record
@@ -174,9 +175,9 @@ public class ProductCreateDialog(IState<bool> isOpen, RefreshToken refreshToken)
     private Guid CreateProduct(SampleDbContextFactory factory, ProductCreateRequest request)
     {
         using var db = factory.CreateDbContext();
-        
+
         var id = Guid.NewGuid();
-        
+
         db.Products.Add(new Product()
         {
             Id = id,
@@ -187,7 +188,7 @@ public class ProductCreateDialog(IState<bool> isOpen, RefreshToken refreshToken)
             UpdatedAt = DateTime.UtcNow
         });
         db.SaveChanges();
-        
+
         return id;
     }
 }
@@ -248,7 +249,7 @@ public static class ProductHelpers
             if (id == null) return null;
             await using var db = factory.CreateDbContext();
             var category = await db.Categories.FindAsync(id);
-            if(category == null) return null;
+            if (category == null) return null;
             return new Option<Guid?>(category.Name, category.Id);
         };
     }

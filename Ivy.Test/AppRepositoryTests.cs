@@ -34,8 +34,8 @@ namespace Ivy.Test.Apps.Foo.Bar
             return null;
         }
     }
-    
-    [App(order:99, icon:Icons.Flashlight, groupExpanded:true)]
+
+    [App(order: 99, icon: Icons.Flashlight, groupExpanded: true)]
     public class _Index : ViewBase
     {
         public override object? Build()

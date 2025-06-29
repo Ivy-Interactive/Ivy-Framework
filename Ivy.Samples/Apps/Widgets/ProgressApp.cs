@@ -2,7 +2,7 @@ using Ivy.Shared;
 
 namespace Ivy.Samples.Apps.Widgets;
 
-[App(icon:Icons.Gauge, path: ["Widgets"])]
+[App(icon: Icons.Gauge, path: ["Widgets"])]
 public class ProgressApp : SampleBase
 {
     protected override object? BuildSample()

@@ -2,7 +2,7 @@ using Ivy.Shared;
 
 namespace Ivy.Samples.Apps.Tests;
 
-[App(icon:Icons.Code, path:["Tests"], isVisible:true)]
+[App(icon: Icons.Code, path: ["Tests"], isVisible: true)]
 public class TestApp : ViewBase
 {
     public override object? Build()
@@ -65,5 +65,5 @@ public class TestApp : ViewBase
                | left
                | right;
     }
-    
+
 }

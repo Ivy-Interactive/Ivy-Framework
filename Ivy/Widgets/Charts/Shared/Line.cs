@@ -71,12 +71,12 @@ public static class LineExtensions
     {
         return line with { Animated = animated };
     }
-    
+
     public static Line Label(this Line line, Label? label)
     {
         return line with { Label = label };
     }
-    
+
     public static Line Scale(this Line line, Scales scale)
     {
         return line with { Scale = scale };

@@ -15,16 +15,16 @@ internal static class FormFieldViewHelpers
     public static IAnyState UseClonedAnyState(this IViewContext context, IAnyState state, bool renderOnChange = true)
     {
         var type = state.GetStateType();
-        
+
         var methodInfo = typeof(ViewContext)
             .GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
             .FirstOrDefault(m => m is { Name: nameof(ViewContext.UseState), IsGenericMethodDefinition: true }
                                  && m.GetParameters().Length == 2);
-        
+
         var closedMethod = methodInfo!.MakeGenericMethod(type);
-        
-        object? initialValue = ((dynamic)state).Value; 
-        
+
+        object? initialValue = ((dynamic)state).Value;
+
         var result = closedMethod.Invoke(context, [initialValue, renderOnChange]);
         return (IAnyState)result!;
     }
@@ -37,7 +37,7 @@ public class FormUpdateSignal : AbstractSignal<Unit, Unit>;
 public enum FormValidationStrategy
 {
     OnBlur,
-    OnSubmit 
+    OnSubmit
 }
 
 public class FormFieldView(
@@ -57,8 +57,8 @@ public class FormFieldView(
     private bool Validate<T>(T value, IState<string> invalid)
     {
         if (!visible()) return true;
-        
-        if(validators != null)
+
+        if (validators != null)
         {
             var isValid = true;
             var message = string.Empty;
@@ -75,7 +75,7 @@ public class FormFieldView(
         }
         return true;
     }
-    
+
     public override object? Build()
     {
         IAnyState inputState = Context.UseClonedAnyState(bindingState);
@@ -84,7 +84,7 @@ public class FormFieldView(
         var validationReceiver = Context.UseSignal<FormValidateSignal, Unit, bool>();
         var updateReceiver = Context.UseSignal<FormUpdateSignal, Unit, Unit>();
         var visibleState = Context.UseState(visible);
-        
+
         UseEffect(() =>
         {
             return new Disposables(
@@ -100,11 +100,11 @@ public class FormFieldView(
                 })
             );
         });
-        
+
         UseEffect(() =>
         {
             var value = inputState.As<object>().Value;
-            if(blurOnceState.Value)
+            if (blurOnceState.Value)
             {
                 Validate(value, invalidState);
             }
@@ -118,7 +118,7 @@ public class FormFieldView(
         }
 
         var input = inputFactory(inputState).Invalid(invalidState.Value);
-        if(validationStrategy == FormValidationStrategy.OnBlur)
+        if (validationStrategy == FormValidationStrategy.OnBlur)
         {
             input.HandleBlur(OnBlur);
         }
@@ -190,7 +190,7 @@ public class FormView<TModel>(IFormFieldView[] fieldViews) : ViewBase
                                 : new Expandable(f.Key, RenderRows(f.ToArray()))
                         )).Cast<object>().ToArray()
                     .ToArray()));
-        
+
         return new Form(Layout.Horizontal(columns));
     }
 }

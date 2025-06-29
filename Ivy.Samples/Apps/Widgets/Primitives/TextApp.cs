@@ -2,9 +2,9 @@ using Ivy.Shared;
 
 namespace Ivy.Samples.Apps.Widgets.Primitives;
 
-[App(icon:Icons.Text, path: ["Widgets", "Primitives"])]
+[App(icon: Icons.Text, path: ["Widgets", "Primitives"])]
 public class TextApp : SampleBase
-{   
+{
     protected override object? BuildSample()
     {
         return Layout.Vertical(

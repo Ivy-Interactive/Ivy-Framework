@@ -10,7 +10,7 @@ public static class AlertExtensions
     {
         return new WithConfirmView(button, message, title);
     }
-    
+
     public static IView WithPrompt<T>(this Button button, Action<T> handleResult, T? defaultValue = default(T), string? title = null, string? message = null)
     {
         return new WithPromptView<T>(button, handleResult, defaultValue, message, title);
@@ -24,14 +24,14 @@ public class WithPromptView<T>(Button button, Action<T> handleResult, T? default
     public override object? Build()
     {
         if (
-            typeof(T) != typeof(FileInput) 
+            typeof(T) != typeof(FileInput)
             && !Utils.IsSimpleType(typeof(T)))
         {
             throw new NotSupportedException();
         }
 
         var record = this.UseState(() => new PromptValueTypeWrapper<T>(defaultValue));
-        
+
         this.UseEffect(() =>
         {
             if (record.Value.Value != null)
@@ -39,7 +39,7 @@ public class WithPromptView<T>(Button button, Action<T> handleResult, T? default
                 handleResult(record.Value.Value);
             }
         }, record);
-        
+
         return button.ToTrigger((isOpen) => record.ToForm()
             .Label(e => e.Value!, title ?? "Value")
             .ToDialog(isOpen, title: "", description: message));
@@ -51,9 +51,9 @@ public class WithConfirmView(Button button, string message, string? title = null
     public override object? Build()
     {
         var isOpen = this.UseState(false);
-        
+
         var clonedButton = button with { OnClick = _ => { isOpen.Value = true; } };
-        
+
         return new Fragment(
             clonedButton,
             isOpen.Value ? new Dialog(

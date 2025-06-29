@@ -28,7 +28,7 @@ namespace Ivy.Test.Apps.FooBaz.Bar
             throw new NotImplementedException();
         }
     }
-    
+
     [App()]
     public class _Index : ViewBase
     {

@@ -4,14 +4,14 @@ namespace Ivy.Samples.Apps.Concepts;
 
 public record struct LoginData(string Username = "", string Password = "", bool RememberMe = false, bool DidLogin = false);
 
-public class LoginForm (IState<LoginData> login) : SampleBase
+public class LoginForm(IState<LoginData> login) : SampleBase
 {
     protected override object? BuildSample()
     {
         var username = this.UseState(login.Value.Username);
         var password = this.UseState(login.Value.Password);
         var rememberMe = this.UseState(login.Value.RememberMe);
-        
+
         return Layout.Vertical(
             username.ToTextInput(),
             password.ToTextInput().Variant(TextInputs.Password),
@@ -24,13 +24,13 @@ public class LoginForm (IState<LoginData> login) : SampleBase
     }
 }
 
-[App(icon:Icons.Blocks)]
+[App(icon: Icons.Blocks)]
 public class CompositeViewsApp : ViewBase
 {
     public override object? Build()
     {
         var loginData = this.UseState(() => new LoginData());
-        
+
         return Layout.Vertical(
             new LoginForm(loginData),
             (loginData.Value.DidLogin ? Ivy.Helpers.Text.Literal($"Logged in as {loginData.Value.Username}") : "")

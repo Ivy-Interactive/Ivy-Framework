@@ -2,7 +2,7 @@ using Ivy.Shared;
 
 namespace Ivy.Samples.Apps.Widgets.Primitives;
 
-[App(icon:Icons.Pencil)]
+[App(icon: Icons.Pencil)]
 public class BoxApp : SampleBase
 {
     protected override object? BuildSample()

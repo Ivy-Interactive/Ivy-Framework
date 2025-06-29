@@ -12,10 +12,10 @@ public static class ProgressObservable
     {
         var easing = easingFunction ?? LinearEasing;
         double updateInterval = (duration * 1000.0) / 100;
-        
+
         return Observable.Interval(TimeSpan.FromMilliseconds(updateInterval))
             .Take(101)
-            .Select(tick => 
+            .Select(tick =>
             {
                 double t = tick / 100.0;
                 double progress = easing(t) * 100.0;

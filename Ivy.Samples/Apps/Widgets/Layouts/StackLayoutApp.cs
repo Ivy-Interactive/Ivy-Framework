@@ -2,7 +2,7 @@
 
 namespace Ivy.Samples.Apps.Widgets.Layouts;
 
-[App(icon:Icons.Grid3x3)]
+[App(icon: Icons.Grid3x3)]
 public class StackLayoutApp : ViewBase
 {
     public override object? Build()
@@ -12,9 +12,9 @@ public class StackLayoutApp : ViewBase
         var tallestBox = new Box().Width(5).Height(10);
         var wideBox = new Box().Width(7).Height(5);
         var widestBox = new Box().Width(10).Height(5);
-        
+
         var container = new Box().Width(32).Height(32).Color(Colors.Pink).Padding(0).ContentAlign(null);
-        
+
         object AlignHorizontalTest(Align align) =>
             Layout.Vertical(
                 Text.Muted(align.ToString()),
@@ -22,7 +22,7 @@ public class StackLayoutApp : ViewBase
                     Layout.Horizontal().Align(align) | squareBox | tallBox | tallestBox
                 )
             ).Gap(0);
-        
+
         object AlignVerticalTest(Align align) =>
             Layout.Vertical(
                 Text.Muted(align.ToString()),
@@ -54,10 +54,10 @@ public class StackLayoutApp : ViewBase
             | AlignVerticalTest(Align.BottomLeft)
             | AlignVerticalTest(Align.BottomCenter)
             | AlignVerticalTest(Align.BottomRight);
-        
+
         return Layout.Vertical()
                | Text.H1("Stack Layout")
-               
+
                | Callout.Info("The helper functions `Layout.Vertical()` and `Layout.Horizontal()` can be combined with the `|` operator to compose readable layouts.")
 
                | Text.H2("Vertical")
@@ -68,13 +68,13 @@ public class StackLayoutApp : ViewBase
 
                | Text.H2("Gap")
                | new DemoView(_ => Layout.Horizontal().Gap(1) | squareBox | squareBox | squareBox)
-               
+
                | Text.H2("Align")
                | Text.H3("Horizontal")
                | horizontalAlign
                | Text.H3("Vertical")
                | verticalAlign
-               
+
             ;
     }
 }

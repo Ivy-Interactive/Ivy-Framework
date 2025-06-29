@@ -3,7 +3,7 @@ using Ivy.Shared;
 
 namespace Ivy.Samples.Apps.Widgets.Inputs;
 
-[App(icon:Icons.Upload)]
+[App(icon: Icons.Upload)]
 public class FileInputApp : ViewBase
 {
     public override object? Build()

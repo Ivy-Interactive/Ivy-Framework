@@ -14,38 +14,38 @@ public static class AppIds
 public class AppDescriptor : IAppRepositoryNode
 {
     public required string Id { get; init; }
-    
+
     public required string Title { get; set; }
 
     public Icons? Icon { get; set; }
-    
+
     public string? Description { get; init; }
-    
+
     public Type? Type { get; init; }
-    
+
     public required string[] Path { get; init; }
-    
-    public int Order { get; set; } 
+
+    public int Order { get; set; }
 
     public string Url => "app.html?appId=" + Id;
-    
+
     public Func<ViewBase>? ViewFactory { get; init; }
-    
+
     public FuncBuilder? ViewFunc { get; init; }
-    
+
     public required bool IsVisible { get; init; }
-    
+
     public bool IsIndex { get; set; } = false;
 
     public bool IsChrome => Id == AppIds.Chrome;
 
     public required bool RemoveIvyBranding { get; init; }
-    
+
     public bool GroupExpanded { get; set; }
-    
+
     public InternalLink? Next { get; set; }
     public InternalLink? Previous { get; set; }
-    
+
     public string? DocumentSource { get; set; }
 
     public ViewBase CreateApp()
@@ -54,17 +54,17 @@ public class AppDescriptor : IAppRepositoryNode
         {
             return ViewFactory();
         }
-        
+
         if (ViewFunc != null)
         {
             return new FuncView(ViewFunc);
         }
-        
-        if(Type == null)
+
+        if (Type == null)
         {
             throw new InvalidOperationException("App Type is not set.");
         }
-        
+
         return (ViewBase)Activator.CreateInstance(Type)!;
     }
 

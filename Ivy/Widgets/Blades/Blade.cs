@@ -16,10 +16,10 @@ public record Blade : WidgetBase<Blade>
     }
 
     [Prop] public int Index { get; set; }
-    
+
     [Prop] public string? Title { get; set; }
 
     [Event] public Action<Event<Blade>>? OnClose { get; set; }
-    
+
     [Event] public Action<Event<Blade>>? OnRefresh { get; set; }
 }

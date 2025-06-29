@@ -9,14 +9,14 @@ public class AlertView(IState<AlertResult> alertResult, IState<bool> isOpen, Ale
     public override object? Build()
     {
         Button CreateButton(AlertButton button)
-        {   
+        {
             return new Button(button.Label, _ =>
             {
                 alertResult.Set(button.Result);
                 isOpen.Set(false);
-            }, variant:button.Variant);
+            }, variant: button.Variant);
         }
-        
+
         void OnCancel(Event<Dialog> _)
         {
             alertResult.Set(AlertResult.Cancel);

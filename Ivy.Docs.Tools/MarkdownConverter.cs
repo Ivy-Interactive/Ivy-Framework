@@ -24,23 +24,23 @@ public static class MarkdownConverter
     static AppMeta ParseYamlAppMeta(string yaml)
     {
         string withoutDashes = RemoveFirstAndLastLine(yaml);
-        
+
         var deserializer = new DeserializerBuilder()
             .WithNamingConvention(CamelCaseNamingConvention.Instance)
             .Build();
 
         return deserializer.Deserialize<AppMeta>(withoutDashes);
     }
-    
+
     public static async Task ConvertAsync(string name, string relativePath, string absolutePath, string outputFile, string @namespace, bool skipIfNotChanged,
         int? order)
     {
         string className = name + "App";
-        
+
         string markdownContent = await File.ReadAllTextAsync(absolutePath);
 
         string hash = Utils.GetShortHash(markdownContent);
-        
+
         if (File.Exists(outputFile) && skipIfNotChanged)
         {
             var oldHash = FileHashMetadata.ReadHash(outputFile);
@@ -52,19 +52,19 @@ public static class MarkdownConverter
         }
 
         Console.WriteLine("Converting {0} to {1}", absolutePath, outputFile);
-        
+
         var pipeline = new MarkdownPipelineBuilder()
             .UseAdvancedExtensions()
             .UsePreciseSourceLocation()
             .UseYamlFrontMatter()
             .Build();
-        
+
         var document = Markdown.Parse(markdownContent, pipeline);
 
         var documentSource = Utils.GetGitFileUrl(absolutePath);
-        
+
         AppMeta appMeta = new();
-        
+
         var yamlBlock = document.Descendants<YamlFrontMatterBlock>().FirstOrDefault();
         if (yamlBlock != null)
         {
@@ -97,7 +97,7 @@ public static class MarkdownConverter
         codeBuilder.Append(appMeta.Icon != null ? $", icon:Icons.{appMeta.Icon}" : "");
         codeBuilder.Append(appMeta.Title != null ? $", title:\"{appMeta.Title}\"" : "");
         codeBuilder.Append(appMeta.GroupExpanded ? ", groupExpanded:true" : "");
-        codeBuilder.Append(documentSource!=null ? $", documentSource:\"{documentSource}\"" : "");
+        codeBuilder.Append(documentSource != null ? $", documentSource:\"{documentSource}\"" : "");
         codeBuilder.AppendLine(")]");
         codeBuilder.AppendLine($"public class {className}(bool onlyBody = false) : {appMeta.ViewBase}");
         codeBuilder.AppendLine("{");
@@ -106,7 +106,7 @@ public static class MarkdownConverter
         codeBuilder.AppendTab(1).AppendLine("}");
         codeBuilder.AppendTab(1).AppendLine("public override object? Build()");
         codeBuilder.AppendTab(1).AppendLine("{");
-        if(!string.IsNullOrEmpty(appMeta.Prepare))
+        if (!string.IsNullOrEmpty(appMeta.Prepare))
         {
             var prepareLines = appMeta.Prepare.Split('\n');
             foreach (var line in prepareLines)
@@ -114,30 +114,30 @@ public static class MarkdownConverter
                 codeBuilder.AppendTab(2).AppendLine(line.Trim());
             }
         }
-        
+
         if (document.Any(e => e is not YamlFrontMatterBlock))
         {
             codeBuilder.AppendTab(2).AppendLine("var appDescriptor = this.UseService<AppDescriptor>();");
             codeBuilder.AppendTab(2).AppendLine("var onLinkClick = this.UseLinks();");
             codeBuilder.AppendTab(2).AppendLine("var article = new Article().ShowToc(!onlyBody).ShowFooter(!onlyBody).Previous(appDescriptor.Previous).Next(appDescriptor.Next).DocumentSource(appDescriptor.DocumentSource).HandleLinkClick(onLinkClick)");
-            
+
             HandleBlocks(document, codeBuilder, markdownContent, viewBuilder, usedClassNames, referencedApps, linkConverter);
-            
+
             codeBuilder.AppendTab(3).AppendLine(";");
-            
+
             if (referencedApps.Count > 0)
             {
                 codeBuilder.AppendTab(2).AppendLine("// Build errors here indicates that one or more referenced apps don't exist. Check markdown links.");
                 codeBuilder.AppendTab(2).Append("Type[] _ = [").Append(string.Join(", ", referencedApps.Select(e => "typeof(" + e + ")").ToArray())).AppendLine("]; ");
             }
-            
+
             codeBuilder.AppendTab(2).AppendLine("return article;");
         }
         else
         {
             codeBuilder.AppendTab(2).AppendLine("return null;");
         }
-        
+
         codeBuilder.AppendTab().AppendLine("}");
         codeBuilder.AppendTab(0).AppendLine("}");
 
@@ -148,7 +148,7 @@ public static class MarkdownConverter
         {
             await writer.WriteAsync(codeBuilder.ToString());
         }
-        
+
         FileHashMetadata.WriteHash(outputFile, hash);
     }
 
@@ -156,7 +156,7 @@ public static class MarkdownConverter
         StringBuilder viewBuilder, HashSet<string> usedClassNames, HashSet<string> referencedApps, LinkConverter linkConverter)
     {
         var sectionBuilder = new StringBuilder();
-        
+
         void WriteSection()
         {
             if (sectionBuilder.Length > 0)
@@ -167,7 +167,7 @@ public static class MarkdownConverter
                 sectionBuilder.Clear();
             }
         }
-        
+
         foreach (var child in document)
         {
             if (child is HtmlBlock htmlBlock)
@@ -181,7 +181,7 @@ public static class MarkdownConverter
                 WriteSection();
                 HandleCodeBlock(codeBlock, markdownContent, codeBuilder, viewBuilder, usedClassNames);
             }
-            
+
             else if (child is HeadingBlock hBlock)
             {
                 if (hBlock.Inline != null)
@@ -199,14 +199,14 @@ public static class MarkdownConverter
                     sectionBuilder.AppendLine($"{new string('#', hBlock.Level)} {headingText.ToString().Trim()}");
                 }
             }
-            
+
             else if (child is not YamlFrontMatterBlock && child is MarkdownObject mBlock)
             {
                 string rawMarkdown = markdownContent.Substring(mBlock.Span.Start, mBlock.Span.Length).Trim();
                 sectionBuilder.AppendLine().AppendLine(rawMarkdown);
             }
         }
-        
+
         WriteSection();
     }
 
@@ -227,7 +227,7 @@ public static class MarkdownConverter
         {
             HandleWidgetDocsBlock(codeBuilder, xml);
         }
-        else if (xml.Name.LocalName ==  "Details")
+        else if (xml.Name.LocalName == "Details")
         {
             HandleDetailsBlock(codeBuilder, xml);
         }
@@ -258,7 +258,7 @@ public static class MarkdownConverter
         string content = xml.Value.Trim();
         AppendAsMultiLineStringIfNecessary(3, content, codeBuilder, "| new Callout(", $", icon:Icons.{icon})");
     }
-    
+
     private static void HandleEmbedBlock(StringBuilder codeBuilder, XElement xml)
     {
         string url = xml.Attribute("Url")?.Value ?? throw new Exception("Embed block must have an Url attribute.");
@@ -301,12 +301,12 @@ public static class MarkdownConverter
         string language, string arguments, HashSet<string> usedClassNames)
     {
         string insertCode;
-        
+
         if (Utils.IsView(codeContent, out string? className))
         {
             var unusedClassName = GetUnusedClassName(className!, usedClassNames);
-            
-            if(unusedClassName != className)
+
+            if (unusedClassName != className)
             {
                 codeContent = Utils.RenameClass(codeContent, unusedClassName);
                 className = unusedClassName;
@@ -316,48 +316,48 @@ public static class MarkdownConverter
             {
                 usedClassNames.Add(className);
             }
-            
+
             viewBuilder.AppendLine().AppendLine().Append(codeContent);
             insertCode = $"new {className}()";
         }
         else
         {
-            insertCode = codeContent;    
+            insertCode = codeContent;
         }
-        
+
         if (arguments is "demo") // just demo no code
         {
             codeBuilder.AppendTab(3).AppendLine($"| ({insertCode})");
         }
-        else if(arguments is "demo-tabs")
+        else if (arguments is "demo-tabs")
         {
             codeBuilder.AppendTab(3).AppendLine("| Tabs( ");
             codeBuilder.AppendTab(4).AppendLine($"new Tab(\"Demo\", {insertCode}),");
             AppendAsMultiLineStringIfNecessary(4, codeContent, codeBuilder, "new Tab(\"Code\", new Code(", $",\"{language}\"))");
             codeBuilder.AppendTab(3).AppendLine(").Height(Size.Fit()).Padding(0, 8, 0, 0)");
         }
-        else if(arguments is "demo-below")
+        else if (arguments is "demo-below")
         {
             codeBuilder.AppendTab(3).AppendLine("| (Vertical() ");
             AppendAsMultiLineStringIfNecessary(4, codeContent, codeBuilder, "| Code(", $",\"{language}\")");
             codeBuilder.AppendTab(4).AppendLine($"| ({insertCode})");
             codeBuilder.AppendTab(3).AppendLine(")");
         }
-        else if(arguments is "demo-above")
+        else if (arguments is "demo-above")
         {
             codeBuilder.AppendTab(3).AppendLine("| (Vertical() ");
             codeBuilder.AppendTab(4).AppendLine($"| ({insertCode})");
             AppendAsMultiLineStringIfNecessary(4, codeContent, codeBuilder, "| Code(", $",\"{language}\")");
             codeBuilder.AppendTab(3).AppendLine(")");
         }
-        else if(arguments is "demo-right")
+        else if (arguments is "demo-right")
         {
             codeBuilder.AppendTab(3).AppendLine("| (Grid().Columns(2) ");
             AppendAsMultiLineStringIfNecessary(4, codeContent, codeBuilder, "| Code(", $",\"{language}\")");
             codeBuilder.AppendTab(4).AppendLine($"| ({insertCode})");
             codeBuilder.AppendTab(3).AppendLine(")");
         }
-        else if(arguments is "demo-left")
+        else if (arguments is "demo-left")
         {
             codeBuilder.AppendTab(3).AppendLine("| (Grid().Columns(2) ");
             codeBuilder.AppendTab(4).AppendLine($"| ({insertCode})");
@@ -365,7 +365,7 @@ public static class MarkdownConverter
             codeBuilder.AppendTab(5).AppendLine(")");
         }
     }
-    
+
     private static string GetUnusedClassName(string className, HashSet<string> usedClassNames)
     {
         if (usedClassNames.Contains(className))
@@ -386,12 +386,12 @@ public static class MarkdownConverter
         {
             var lines = rawMarkdown.Split('\n');
             sb.AppendTab(tabs).AppendLine(prepend);
-            sb.AppendTab(tabs+1).AppendLine("\"\"\"\"");
+            sb.AppendTab(tabs + 1).AppendLine("\"\"\"\"");
             foreach (var line in lines)
             {
-                sb.AppendTab(tabs+1).AppendLine(line.TrimEnd());
+                sb.AppendTab(tabs + 1).AppendLine(line.TrimEnd());
             }
-            sb.AppendTab(tabs+1).AppendLine($"\"\"\"\"{append}");
+            sb.AppendTab(tabs + 1).AppendLine($"\"\"\"\"{append}");
         }
         else
         {

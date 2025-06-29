@@ -54,7 +54,7 @@ public static class AreaExtensions
     {
         return area with { StrokeDashArray = strokeDashArray };
     }
-    
+
     public static Area Fill(this Area area, Colors fill)
     {
         return area with { Fill = fill };
@@ -79,17 +79,17 @@ public static class AreaExtensions
     {
         return area with { Animated = animated };
     }
-    
+
     public static Area Label(this Area area, Label? label)
     {
         return area with { Label = label };
     }
-    
+
     public static Area StackId(this Area area, string stackId)
     {
         return area with { StackId = stackId };
     }
-    
+
     public static Area FillOpacity(this Area area, double fillOpacity)
     {
         return area with { FillOpacity = fillOpacity };

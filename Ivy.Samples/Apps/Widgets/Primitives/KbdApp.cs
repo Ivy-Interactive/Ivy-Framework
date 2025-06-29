@@ -2,7 +2,7 @@
 
 namespace Ivy.Samples.Apps.Widgets.Primitives;
 
-[App(icon:Icons.Key, path:["Widgets", "Primitives"])]
+[App(icon: Icons.Key, path: ["Widgets", "Primitives"])]
 public class KbdApp : SampleBase
 {
     protected override object? BuildSample()

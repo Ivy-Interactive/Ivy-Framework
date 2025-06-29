@@ -9,7 +9,7 @@ namespace Ivy;
 public interface IAnyDateRangeInput : IAnyInput
 {
     public string? Placeholder { get; set; }
-    public string? Format { get; set; } 
+    public string? Format { get; set; }
 }
 
 public abstract record DateRangeInputBase : WidgetBase<DateRangeInputBase>, IAnyDateRangeInput
@@ -19,7 +19,7 @@ public abstract record DateRangeInputBase : WidgetBase<DateRangeInputBase>, IAny
     [Prop] public bool Disabled { get; set; }
     [Prop] public string? Invalid { get; set; }
     [Event] public Action<Event<IAnyInput>>? OnBlur { get; set; }
-    public Type[] SupportedStateTypes() => [ ];
+    public Type[] SupportedStateTypes() => [];
 }
 
 public record DateRangeInput<TDateRange> : DateRangeInputBase, IInput<TDateRange>
@@ -30,7 +30,7 @@ public record DateRangeInput<TDateRange> : DateRangeInputBase, IInput<TDateRange
         Value = typedState.Value;
         OnChange = e => typedState.Set(e.Value);
     }
-    
+
     public DateRangeInput(TDateRange value, Action<Event<IInput<TDateRange>, TDateRange>> onChange, string? placeholder = null, bool disabled = false) : this(placeholder, disabled)
     {
         OnChange = onChange;
@@ -57,12 +57,12 @@ public static class DateRangeInputExtensions
         {
             throw new Exception("DateRangeInput can only be used with a tuple of two elements");
         }
-        
+
         Type genericType = typeof(DateRangeInput<>).MakeGenericType(type);
         DateRangeInputBase input = (DateRangeInputBase)Activator.CreateInstance(genericType, state, placeholder, disabled)!;
         return input;
     }
-    
+
     public static DateRangeInputBase Disabled(this DateRangeInputBase widget, bool disabled = true)
     {
         return widget with { Disabled = disabled };
@@ -72,12 +72,12 @@ public static class DateRangeInputExtensions
     {
         return widget with { Placeholder = placeholder };
     }
-    
+
     public static DateRangeInputBase Format(this DateRangeInputBase widget, string format)
     {
         return widget with { Format = format };
     }
-    
+
     public static DateRangeInputBase Invalid(this DateRangeInputBase widget, string? invalid)
     {
         return widget with { Invalid = invalid };

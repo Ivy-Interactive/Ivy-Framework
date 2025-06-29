@@ -24,9 +24,9 @@ public class PivotTable<T>
         {
             foreach (var c in calculations)
                 TableCalculations.Add(c);
-        }   
+        }
     }
-    
+
     public async Task<Dictionary<string, object>[]> ExecuteAsync(
         IQueryable<T> data,
         CancellationToken cancellationToken = default)
@@ -35,23 +35,23 @@ public class PivotTable<T>
             throw new InvalidOperationException("At least one dimension is required.");
 
         var result = new List<Dictionary<string, object>>();
-        
+
         if (Dimensions.Count == 1)
         {
             Expression<Func<T, object>> keySelector = Dimensions[0].Selector;
             var grouped = data.GroupBy(keySelector);
             // Convert to list asynchronously
-            var groups = await grouped.ToListAsync2(cancellationToken); 
-            
+            var groups = await grouped.ToListAsync2(cancellationToken);
+
             foreach (var group in groups)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                
+
                 var row = new Dictionary<string, object>
                 {
                     [Dimensions[0].Name] = group.Key
                 };
-                
+
                 foreach (var measure in Measures)
                 {
                     var aggregator = measure.Aggregator.Compile();
@@ -77,16 +77,16 @@ public class PivotTable<T>
             var grouped = data.GroupBy(keySelectorLambda);
             // Convert to list asynchronously
             var groups = await grouped.ToListAsync2(cancellationToken);
-            
+
             foreach (var group in groups)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                
+
                 var row = new Dictionary<string, object>();
                 var key = group.Key;
                 row[Dimensions[0].Name] = key.Item1;
                 row[Dimensions[1].Name] = key.Item2;
-                
+
                 foreach (var measure in Measures)
                 {
                     var aggregator = measure.Aggregator.Compile();
@@ -100,17 +100,17 @@ public class PivotTable<T>
         {
             throw new NotSupportedException("Only 1 or 2 dimensions are supported in this example.");
         }
-        
+
         foreach (var calculation in TableCalculations)
         {
             //var measureNames = calculation.MeasureNames;
             //todo: check if measure names exist
             calculation.Calculation(result);
         }
-        
+
         //sort by first dimension
         result.Sort((a, b) => Comparer.Default.Compare(a[Dimensions[0].Name], b[Dimensions[0].Name]));
-        
+
         return result.ToArray();
     }
 
@@ -135,25 +135,25 @@ public class PivotTableBuilder<TSource>(IQueryable<TSource> data)
     private List<Measure<TSource>> _measures { get; } = new();
     private List<TableCalculation> _calculations { get; } = new();
     private IQueryable<TSource> Data { get; } = data;
-    
+
     public PivotTableBuilder<TSource> Dimension(string name, Expression<Func<TSource, object>> selector)
     {
         _dimensions.Add(new Dimension<TSource>(name, selector));
         return this;
     }
-    
+
     public PivotTableBuilder<TSource> Dimension(Dimension<TSource> dimension)
     {
         _dimensions.Add(dimension);
         return this;
     }
-    
+
     public PivotTableBuilder<TSource> Measure(string name, Expression<Func<IQueryable<TSource>, object>> aggregator)
     {
         _measures.Add(new Measure<TSource>(name, aggregator));
         return this;
     }
-    
+
     public PivotTableBuilder<TSource> Measure(Measure<TSource> measure)
     {
         _measures.Add(measure);
@@ -166,7 +166,7 @@ public class PivotTableBuilder<TSource>(IQueryable<TSource> data)
             _measures.Add(m);
         return this;
     }
-    
+
     public PivotTableBuilder<TSource> TableCalculation(TableCalculation calculation)
     {
         _calculations.Add(calculation);
@@ -179,12 +179,12 @@ public class PivotTableBuilder<TSource>(IQueryable<TSource> data)
             _calculations.Add(c);
         return this;
     }
-    
-    public PivotTableMapper<TSource,TDestination> Produces<TDestination>()
+
+    public PivotTableMapper<TSource, TDestination> Produces<TDestination>()
     {
-        return new PivotTableMapper<TSource,TDestination>(this);
+        return new PivotTableMapper<TSource, TDestination>(this);
     }
-    
+
     public Task<Dictionary<string, object>[]> ExecuteAsync(CancellationToken cancellationToken = default)
     {
         var pivotTable = new PivotTable<TSource>(_dimensions, _measures, _calculations);
@@ -196,24 +196,24 @@ public class PivotTableMapper<TSource, TDestination>(PivotTableBuilder<TSource> 
 {
     public PivotTableBuilder<TSource> Builder { get; } = builder;
 
-    public PivotTableMapper<TSource,TDestination> Dimension(Expression<Func<TSource, object>> from, Expression<Func<TDestination, object>> to)
+    public PivotTableMapper<TSource, TDestination> Dimension(Expression<Func<TSource, object>> from, Expression<Func<TDestination, object>> to)
     {
         Builder.Dimension(to.Body.ToString(), from);
         return this;
     }
-    
-    public PivotTableMapper<TSource,TDestination> Measure(Expression<Func<IQueryable<TSource>, object>> from, Expression<Func<TDestination, object>> to)
+
+    public PivotTableMapper<TSource, TDestination> Measure(Expression<Func<IQueryable<TSource>, object>> from, Expression<Func<TDestination, object>> to)
     {
         Builder.Measure(to.Body.ToString(), from);
         return this;
     }
-    
-    public PivotTableMapper<TSource,TDestination> TableCalculation(TableCalculation calculation)
+
+    public PivotTableMapper<TSource, TDestination> TableCalculation(TableCalculation calculation)
     {
         Builder.TableCalculation(calculation);
         return this;
     }
-    
+
     public async IAsyncEnumerable<TDestination> ExecuteAsync(
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
@@ -225,7 +225,7 @@ public class PivotTableMapper<TSource, TDestination>(PivotTableBuilder<TSource> 
                 .OrderByDescending(c => c.GetParameters().Length)
                 .First();
             var parameters = ctor.GetParameters();
-            
+
             var args = new object?[parameters.Length];
             for (int i = 0; i < parameters.Length; i++)
             {
@@ -246,7 +246,7 @@ public static class PivotTableBuilderExtensions
     {
         return new PivotTableBuilder<TSource>(data.AsQueryable());
     }
-    
+
     [OverloadResolutionPriority(1)]
     public static PivotTableBuilder<TSource> ToPivotTable<TSource>(this IQueryable<TSource> data)
     {

@@ -9,6 +9,6 @@ public record Embed : WidgetBase<Embed>
     {
         Url = url;
     }
-    
+
     [Prop] public string Url { get; set; }
 }

@@ -11,7 +11,7 @@ public class StateHelpersTest
         IState<Guid?> state = new State<Guid?>(Guid.NewGuid());
         var foo = state.As<object>().Value;
     }
-    
+
     // Guid Tests
     [Fact] public void GuidToObject() => CreateConversionDelegateTest(typeof(Guid), typeof(object));
     [Fact] public void ObjectToGuid() => CreateConversionDelegateTest(typeof(object), typeof(Guid));
@@ -96,5 +96,5 @@ public class StateHelpersTest
     {
         _ = ConversionDelegateFactory.CreateConversionDelegate(one, two);
     }
-    
+
 }

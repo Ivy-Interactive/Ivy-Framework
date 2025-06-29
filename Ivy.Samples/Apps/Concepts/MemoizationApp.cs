@@ -3,7 +3,7 @@ using Ivy.Shared;
 
 namespace Ivy.Samples.Apps.Concepts;
 
-[App(icon:Icons.BrainCog)]
+[App(icon: Icons.BrainCog)]
 public class MemoizationApp : SampleBase
 {
     protected override object? BuildSample()
@@ -18,7 +18,7 @@ public class MemoizationApp : SampleBase
             new Separator(),
             Layout.Vertical(
                 list.Value.Select(
-                    (x,i) => new ListItem(x, i,
+                    (x, i) => new ListItem(x, i,
                         () => { list.Set(list.Value.MoveUp(i)); },
                         () => { list.Set(list.Value.MoveDown(i)); }
                     ).Key(x) // key is needed for memoization to work where the items can be edited
@@ -31,7 +31,7 @@ public class MemoizationApp : SampleBase
 public class ListItem(int value, int index, Action moveUp, Action moveDown) : ViewBase, IMemoized
 {
     private int Value { get; } = value;
-    
+
     private int Index { get; } = index;
 
     public object[] GetMemoValues()

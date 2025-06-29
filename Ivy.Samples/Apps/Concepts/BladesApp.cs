@@ -2,7 +2,7 @@ using Ivy.Shared;
 
 namespace Ivy.Samples.Apps.Concepts;
 
-[App(icon:Icons.PanelLeft)]
+[App(icon: Icons.PanelLeft)]
 public class BladesApp : SampleBase
 {
     protected override object? BuildSample()
@@ -17,7 +17,7 @@ public class RootView(string someId) : ViewBase
     {
         var bladeController = this.UseContext<IBladeController>();
         var index = bladeController.GetIndex(this);
-        
+
         void OnClick(Event<Button> @event)
         {
             bladeController.Push(this, new RootView(@event.Sender.Tag?.ToString() ?? "?"), $"Blade {index + 1}");

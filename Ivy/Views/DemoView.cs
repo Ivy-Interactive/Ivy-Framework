@@ -9,14 +9,14 @@ public class DemoView : ViewBase
 {
     private readonly object _content;
     private readonly string? _code;
-    
+
     [OverloadResolutionPriority(1)]
     public DemoView(FuncBuilder content, [CallerArgumentExpression(nameof(content))] string? code = null)
     {
         _content = content;
         _code = FormatExpression(code!);
     }
-    
+
     public DemoView(object content, [CallerArgumentExpression(nameof(content))] string? code = null)
     {
         _content = content;
@@ -30,7 +30,7 @@ public class DemoView : ViewBase
                | Text.Code(_code!, "cs")
             ;
     }
-    
+
     // Remove any "<csidentifier> =>" or "(<csidentifier>) =>" and braces, then rearrange lines.
     // Ensure the last statement has a semicolon.
     public static string FormatExpression(string input)
@@ -76,5 +76,5 @@ public class DemoView : ViewBase
         }
         return sb.ToString().TrimEnd();
     }
-    
+
 }

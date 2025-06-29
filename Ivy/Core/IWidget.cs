@@ -5,11 +5,11 @@ namespace Ivy.Core;
 public interface IWidget
 {
     public string? Id { get; set; }
-    
+
     public string? Key { get; set; }
-    
+
     public object[] Children { get; set; }
-    
+
     public JsonNode Serialize();
 
     public bool InvokeEvent(string eventName, JsonArray args);

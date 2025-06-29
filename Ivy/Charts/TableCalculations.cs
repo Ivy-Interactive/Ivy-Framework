@@ -3,7 +3,7 @@
 public static class TableCalculations
 {
     private static double Convert(object value) => (double?)Core.Utils.BestGuessConvert(value, typeof(double)) ?? 0;
-    
+
     public static TableCalculation PercentOfTotal<T>(string measureName, string name = "PercentOfTotal")
     {
         return new TableCalculation(name, [measureName], rows =>
@@ -14,8 +14,8 @@ public static class TableCalculations
                 row[name] = Convert(row[measureName]) / total;
             }
         });
-    }        
-    
+    }
+
     public static TableCalculation RunningTotal(string measureName, string name = "RunningTotal")
     {
         return new TableCalculation(name, [measureName], rows =>
@@ -28,7 +28,7 @@ public static class TableCalculations
             }
         });
     }
-    
+
     public static TableCalculation DifferenceFromPrevious(string measureName, string name = "DifferenceFromPrevious")
     {
         return new TableCalculation(name, [measureName], rows =>
@@ -58,7 +58,7 @@ public static class TableCalculations
             }
         });
     }
-    
+
     public static TableCalculation MovingAverage(string measureName, int window, string name = "MovingAverage")
     {
         return new TableCalculation(name, [measureName], rows =>
@@ -77,7 +77,7 @@ public static class TableCalculations
             }
         });
     }
-    
+
     public static TableCalculation CumulativeAverage(string measureName, string name = "CumulativeAverage")
     {
         return new TableCalculation(name, [measureName], rows =>
@@ -92,7 +92,7 @@ public static class TableCalculations
             }
         });
     }
-    
+
     public static TableCalculation Rank(string measureName, string name = "Rank")
     {
         return new TableCalculation(name, [measureName], rows =>
@@ -103,7 +103,7 @@ public static class TableCalculations
                 row[name] = rank++;
         });
     }
-    
+
     public static TableCalculation PercentRank(string measureName, string name = "PercentRank")
     {
         return new TableCalculation(name, [measureName], rows =>

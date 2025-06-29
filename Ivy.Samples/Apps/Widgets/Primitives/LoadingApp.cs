@@ -2,7 +2,7 @@
 
 namespace Ivy.Samples.Apps.Widgets.Primitives;
 
-[App(icon:Icons.Loader)]
+[App(icon: Icons.Loader)]
 public class LoadingApp : SampleBase
 {
     protected override object? BuildSample()

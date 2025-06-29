@@ -11,7 +11,7 @@ public record ReferenceDot
         Y = y;
         Label = label;
     }
-    
+
     public double X { get; set; }
     public double Y { get; set; }
     public string? Label { get; set; }

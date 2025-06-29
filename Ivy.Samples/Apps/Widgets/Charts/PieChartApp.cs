@@ -18,7 +18,7 @@ public class PieChartApp : ViewBase
             new { Month = "June", Desktop = 214, Mobile = (int?)0 },
         };
 
-        return new Card().Width(1/2f)
+        return new Card().Width(1 / 2f)
                 | new PieChart(data)
                     .ColorScheme(ColorScheme.Rainbow)
                     .Pie("Mobile", "Month")

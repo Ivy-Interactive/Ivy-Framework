@@ -4,7 +4,7 @@ namespace Ivy.Samples.Apps.Demos;
 
 public record Todo(string Title, bool Done);
 
-[App(icon:Icons.Calendar, path: ["Demos"])]
+[App(icon: Icons.Calendar, path: ["Demos"])]
 public class TodosApp : SampleBase
 {
     protected override object? BuildSample()
@@ -12,12 +12,12 @@ public class TodosApp : SampleBase
         var newTitle = UseState("");
         var todos = UseState(ImmutableArray.Create<Todo>());
         var client = UseService<IClientProvider>();
-        
+
         return Layout.Vertical(
             new Card(
                 Layout.Vertical(
                     Layout.Horizontal(
-                        newTitle.ToTextInput(placeholder:"New todo...").Width(Size.Grow()),
+                        newTitle.ToTextInput(placeholder: "New todo...").Width(Size.Grow()),
                         new Button("Add", onClick: _ =>
                             {
                                 var title = newTitle.Value;
@@ -31,7 +31,7 @@ public class TodosApp : SampleBase
                         todos.Value.Select(todo => new TodoItem(todo,
                             () =>
                             {
-                                todos.Set(todos.Value.Remove(todo)); 
+                                todos.Set(todos.Value.Remove(todo));
                             },
                             () =>
                             {
@@ -43,7 +43,7 @@ public class TodosApp : SampleBase
                         ))
                     )
                 )
-            ).Title("Todos").Width(1/2f)
+            ).Title("Todos").Width(1 / 2f)
         );
     }
 }
@@ -58,7 +58,7 @@ public class TodoItem(Todo todo, Action deleteTodo, Action toggleTodo) : ViewBas
                 {
                     toggleTodo();
                 }),
-                todo.Done ? Text.Muted(todo.Title).StrikeThrough().Width(Size.Grow()) : Text.Literal(todo.Title).Width(Size.Grow()) ,
+                todo.Done ? Text.Muted(todo.Title).StrikeThrough().Width(Size.Grow()) : Text.Literal(todo.Title).Width(Size.Grow()),
                 new Button(null, _ =>
                 {
                     deleteTodo();

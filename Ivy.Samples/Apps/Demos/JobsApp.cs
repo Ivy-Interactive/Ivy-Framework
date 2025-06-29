@@ -3,20 +3,20 @@ using Ivy.Shared;
 
 namespace Ivy.Samples.Apps.Demos;
 
-[App(icon:Icons.Workflow)]
+[App(icon: Icons.Workflow)]
 public class JobsApp : ViewBase
 {
     public override object? Build()
     {
         var scheduler = this.UseStatic(CreateJobs);
         var refreshToken = this.UseRefreshToken();
-        
+
         UseEffect(() => scheduler.Subscribe(_ => refreshToken.Refresh()));
         UseEffect(async () => await scheduler.RunAsync());
 
         return Layout.Horizontal(scheduler.ToView()).Width(100);
     }
-    
+
     private JobScheduler CreateJobs()
     {
         var scheduler = new JobScheduler(maxParallelJobs: 3);
@@ -36,10 +36,10 @@ public class JobsApp : ViewBase
                 return Task.CompletedTask;
             })
             .Build();
-        
+
         //Declare jobA variable
         Job jobA = null!;
-        
+
         // Job A
         jobA = scheduler.CreateJob("Job A")
             .WithAction(async (j, _, progress, token) =>
@@ -83,7 +83,7 @@ public class JobsApp : ViewBase
                 progress.Report(1);
             })
             .Build();
-        
+
         return scheduler;
     }
 }

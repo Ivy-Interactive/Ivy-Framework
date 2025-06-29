@@ -2,7 +2,7 @@
 
 namespace Ivy.Samples.Apps.Concepts;
 
-[App(icon:Icons.Download)]
+[App(icon: Icons.Download)]
 public class AlignApp : ViewBase
 {
     public override object? Build()
@@ -37,6 +37,6 @@ public class AlignApp : ViewBase
         }).SelectMany(e => e).ToArray();
 
         return Layout.Grid().Columns(3)
-               | (object[])[..header, ..values];
+               | (object[])[.. header, .. values];
     }
 }

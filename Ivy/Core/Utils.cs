@@ -17,7 +17,7 @@ public static class Utils
             return hash;
         }
     }
-    
+
     public static object? ConvertJsonNode(JsonNode? jsonNode, Type valueType)
     {
         if (jsonNode is null) return null;
@@ -29,7 +29,7 @@ public static class Utils
             return BestGuessConvert(ConvertJsonNodeToObject(jsonNode), valueType);
         }
 
-        if (valueType.IsCollectionType() && valueType.GetCollectionTypeParameter() is {} itemType)
+        if (valueType.IsCollectionType() && valueType.GetCollectionTypeParameter() is { } itemType)
         {
             if (jsonNode is JsonArray jsonArray)
             {
@@ -72,13 +72,13 @@ public static class Utils
                 _ when boolVal.TryGetValue(out int i) => i != 0,
                 _ when boolVal.TryGetValue(out long l) => l != 0,
                 _ when boolVal.TryGetValue(out double d) => d != 0,
-                _ when boolVal.TryGetValue(out string? s) => 
-                    bool.TryParse(s, out var parsed) ? parsed : 
+                _ when boolVal.TryGetValue(out string? s) =>
+                    bool.TryParse(s, out var parsed) ? parsed :
                     double.TryParse(s, out var num) && num != 0,
                 _ => false
             };
         }
-        
+
         if (t.IsNumeric() && jsonNode is JsonValue boolVal1 && boolVal1.TryGetValue(out bool _))
         {
             var convertedValue = Convert.ChangeType(boolVal1.GetValue<bool>() ? 1 : 0, t);
@@ -96,7 +96,7 @@ public static class Utils
                 _ => null
             };
         }
-        
+
         //todo: maybe make this more generic
         if (IsValueTupleOfTwo(t) && jsonNode is JsonObject obj)
         {
@@ -105,16 +105,16 @@ public static class Utils
             var item2 = obj.ContainsKey("item2") ? ConvertJsonNode(obj["item2"]!, item2Type) : null;
             return Activator.CreateInstance(t, item1, item2);
         }
-        
+
         var options = new JsonSerializerOptions
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
             DictionaryKeyPolicy = JsonNamingPolicy.CamelCase
         };
-        
+
         return jsonNode.Deserialize(valueType, options);
     }
-    
+
     // public class Base64ByteArrayConverter : JsonConverter<byte[]>
     // {
     //     public override byte[] Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
@@ -142,7 +142,7 @@ public static class Utils
             t != typeof(IntPtr) && t != typeof(UIntPtr)) return true;
         return t == typeof(decimal);
     }
-    
+
     private static bool IsValueTupleOfTwo(Type t) =>
         t is { IsValueType: true, IsGenericType: true } && t.GetGenericTypeDefinition() == typeof(ValueTuple<,>);
 
@@ -151,41 +151,41 @@ public static class Utils
         var args = t.GetGenericArguments();
         return (args[0], args[1]);
     }
-    
+
     public static object? BestGuessConvert(object? input, Type targetType)
     {
         if (input == null) return null;
         if (targetType.IsInstanceOfType(input)) return input;
-        
+
         var underlyingType = Nullable.GetUnderlyingType(targetType);
         if (underlyingType != null)
             return BestGuessConvert(input, underlyingType);
-        
+
         if (targetType == typeof(DateTime) && input is string dateString)
         {
             if (DateTime.TryParse(dateString, out var dt)) return dt;
             return null;
         }
-        
+
         if (targetType == typeof(Guid) && input is string guidString)
         {
             if (Guid.TryParse(guidString, out var guid)) return guid;
             return null;
         }
-        
+
         if (targetType.IsEnum && input is string enumString)
         {
             return Enum.Parse(targetType, enumString);
         }
-        
+
         // Handle dictionary to tuple conversion
         if (IsTupleType(targetType) && input is IDictionary dictionary)
         {
             var tupleTypes = targetType.GetGenericArguments();
             var values = Enumerable.Range(1, tupleTypes.Length)
                 .Select(i => new { Index = i - 1, Key = "item" + i })
-                .Select(x => dictionary.Contains(x.Key) 
-                    ? BestGuessConvert(dictionary[x.Key], tupleTypes[x.Index]) 
+                .Select(x => dictionary.Contains(x.Key)
+                    ? BestGuessConvert(dictionary[x.Key], tupleTypes[x.Index])
                     : null)
                 .ToArray();
 
@@ -209,12 +209,12 @@ public static class Utils
 
         return null;
     }
-    
+
     private static bool IsTupleType(Type type)
     {
         return type.IsGenericType && type.FullName?.StartsWith("System.ValueTuple") == true;
     }
-    
+
     public static string PascalCaseToCamelCase(string titleCase)
     {
         if (string.IsNullOrWhiteSpace(titleCase))
@@ -224,12 +224,12 @@ public static class Utils
 
         return camelCase;
     }
-    
+
     public static object?[] ConvertJsonArrayToObjectArray(JsonArray? jsonArray)
     {
         if (jsonArray == null)
             return [];
-        
+
         return jsonArray.Select(e => e != null ? ConvertJsonNodeToObject(e) : null)
             .ToArray();
     }
@@ -255,7 +255,7 @@ public static class Utils
             _ => throw new NotSupportedException()
         };
     }
-    
+
     public static Dictionary<string, object> ToDictionary(this JsonElement element)
     {
         return element.EnumerateObject()
@@ -275,7 +275,7 @@ public static class Utils
             _ => element.GetRawText()
         };
     }
-    
+
     public static string CleanGenericNotation(string typeName)
     {
         // Match pattern: any characters followed by a backtick and numbers

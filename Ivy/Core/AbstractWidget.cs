@@ -8,18 +8,18 @@ namespace Ivy.Core;
 public abstract record AbstractWidget : IWidget
 {
     private string? _id;
-    private readonly Dictionary<(Type,string),object?> _attachedProps = new();
-    
+    private readonly Dictionary<(Type, string), object?> _attachedProps = new();
+
     protected AbstractWidget(params object[] children)
     {
         Children = children;
     }
-    
+
     public void SetAttachedValue(Type parentType, string name, object? value)
     {
         _attachedProps[(parentType, name)] = value;
     }
-    
+
     public object? GetAttachedValue(Type t, string name)
     {
         return _attachedProps.GetValueOrDefault((t, name));
@@ -27,12 +27,13 @@ public abstract record AbstractWidget : IWidget
 
     public string? Id
     {
-        get {
+        get
+        {
             if (_id == null)
             {
                 throw new InvalidOperationException($"Trying to access an uninitialized WidgetBase Id in a {this.GetType().FullName} widget.");
             }
-            return _id; 
+            return _id;
         }
         set => _id = value;
     }
@@ -47,18 +48,18 @@ public abstract record AbstractWidget : IWidget
         {
             throw new InvalidOperationException("Only widgets can be serialized.");
         }
-        
+
         var type = GetType();
-        
+
         var json = new JsonObject
         {
             ["id"] = Id,
             ["type"] = type.Namespace + "." + Utils.CleanGenericNotation(type.Name),
             ["children"] = new JsonArray(Children.Cast<IWidget>().Select(c => c.Serialize()).ToArray())
         };
-        
+
         var propProperties = GetType().GetProperties().Where(p => p.GetCustomAttribute<PropAttribute>() != null);
-        
+
         var options = new JsonSerializerOptions
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -69,20 +70,20 @@ public abstract record AbstractWidget : IWidget
                 new ValueTupleConverterFactory()
             }
         };
-        
+
         var props = new JsonObject();
         foreach (var property in propProperties)
         {
             var value = GetPropertyValue(property);
-            if(value == null) //small optimization to avoid serializing null values 
+            if (value == null) //small optimization to avoid serializing null values 
                 continue;
             props[Utils.PascalCaseToCamelCase(property.Name)] = JsonNode.Parse(JsonSerializer.Serialize(value, options));
         }
         json["props"] = props;
-        
+
         List<string> events = [];
         var eventProperties = GetType().GetProperties().Where(p => p.GetCustomAttribute<EventAttribute>() != null);
-        
+
         foreach (var property in eventProperties)
         {
             //check if the property is not null 
@@ -90,7 +91,7 @@ public abstract record AbstractWidget : IWidget
                 continue;
             events.Add(property.Name);
         }
-        
+
         json["events"] = JsonNode.Parse(JsonSerializer.Serialize(events));
 
         return json;
@@ -103,9 +104,9 @@ public abstract record AbstractWidget : IWidget
         {
             if (!property.PropertyType.IsArray || !property.PropertyType.GetElementType()!.IsGenericType)
                 throw new InvalidOperationException("Attached properties must be arrays of nullable types.");
-            
+
             List<object?> attachedValues = new();
-            foreach(var child in Children)
+            foreach (var child in Children)
             {
                 if (child is not IWidget widget)
                 {
@@ -119,7 +120,7 @@ public abstract record AbstractWidget : IWidget
             }
             return attachedValues.ToArray();
         }
-        
+
         var value = property.GetValue(this);
         return value;
     }
@@ -128,16 +129,16 @@ public abstract record AbstractWidget : IWidget
     {
         var type = GetType();
         var property = type.GetProperty(eventName);
-        
-        if(property == null)
+
+        if (property == null)
             return false;
-        
+
         var eventDelegate = property.GetValue(this);
-        
-        if(eventDelegate == null)
+
+        if (eventDelegate == null)
             return false;
-        
-        if(IsAction(eventDelegate, out Type? eventType))
+
+        if (IsAction(eventDelegate, out Type? eventType))
         {
             if (eventType!.IsGenericType && eventType.GetGenericTypeDefinition() == typeof(Event<>))
             {
@@ -145,7 +146,7 @@ public abstract record AbstractWidget : IWidget
                 ((Delegate)eventDelegate).DynamicInvoke(eventInstance);
                 return true;
             }
-            if(eventType!.IsGenericType && eventType.GetGenericTypeDefinition() == typeof(Event<,>))
+            if (eventType!.IsGenericType && eventType.GetGenericTypeDefinition() == typeof(Event<,>))
             {
                 var genericArguments = eventType.GetGenericArguments();
                 if (genericArguments.Length == 2)
@@ -154,50 +155,50 @@ public abstract record AbstractWidget : IWidget
 
                     var valueType = genericArguments[1];
                     var value = Utils.ConvertJsonNode(args[0], valueType);
-                    
+
                     var eventInstance = Activator.CreateInstance(eventType, eventName, this, value);
                     ((Delegate)eventDelegate).DynamicInvoke(eventInstance);
                     return true;
                 }
             }
         }
-        
+
         return false;
     }
 
     private static bool IsAction(object eventDelegate, out Type? eventType)
     {
         eventType = null;
-        
+
         var delegateType = eventDelegate.GetType();
-        
+
         if (!typeof(Delegate).IsAssignableFrom(delegateType))
             return false;
-        
+
         var invokeMethod = delegateType.GetMethod("Invoke");
-        
+
         var parameters = invokeMethod!.GetParameters();
         if (parameters.Length != 1)
             return false;
 
         eventType = parameters[0].ParameterType;
-        
+
         return true;
     }
-    
+
     public static AbstractWidget operator |(AbstractWidget widget, object child)
     {
         if (child is object[] array)
         {
-            return widget with { Children = [..widget.Children, ..array] };
+            return widget with { Children = [.. widget.Children, .. array] };
         }
-        
-        if(child is IEnumerable<object> enumerable)
+
+        if (child is IEnumerable<object> enumerable)
         {
-            return widget with { Children = [..widget.Children, ..enumerable] };
+            return widget with { Children = [.. widget.Children, .. enumerable] };
         }
-        
-        return widget with { Children = [..widget.Children, child] };
+
+        return widget with { Children = [.. widget.Children, child] };
     }
 }
 

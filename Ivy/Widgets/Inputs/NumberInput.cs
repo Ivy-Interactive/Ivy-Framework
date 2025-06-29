@@ -22,11 +22,11 @@ public enum NumberFormatStyle
 public interface IAnyNumberInput : IAnyInput
 {
     public string? Placeholder { get; set; }
-    public double? Min { get; set; } 
-    public double? Max { get; set; } 
-    public double? Step { get; set; } 
-    public int? Precision { get; set; } 
-    public NumberInputs Variant { get; set;  }
+    public double? Min { get; set; }
+    public double? Max { get; set; }
+    public double? Step { get; set; }
+    public int? Precision { get; set; }
+    public NumberInputs Variant { get; set; }
     public NumberFormatStyle FormatStyle { get; set; }
     public string? Currency { get; set; }
 }
@@ -44,12 +44,12 @@ public abstract record NumberInputBase : WidgetBase<NumberInputBase>, IAnyNumber
     [Prop] public NumberFormatStyle FormatStyle { get; set; }
     [Prop] public string? Currency { get; set; }
     [Event] public Action<Event<IAnyInput>>? OnBlur { get; set; }
-    public Type[] SupportedStateTypes() => [ ];
+    public Type[] SupportedStateTypes() => [];
 }
 
 public record NumberInput<TNumber> : NumberInputBase, IInput<TNumber>, IAnyNumberInput
 {
-    public NumberInput(IAnyState state, string? placeholder = null, bool disabled = false, NumberInputs variant = NumberInputs.Number, NumberFormatStyle formatStyle = NumberFormatStyle.Decimal) 
+    public NumberInput(IAnyState state, string? placeholder = null, bool disabled = false, NumberInputs variant = NumberInputs.Number, NumberFormatStyle formatStyle = NumberFormatStyle.Decimal)
         : this(placeholder, disabled, variant, formatStyle)
     {
         var typedState = state.As<TNumber>();
@@ -57,9 +57,9 @@ public record NumberInput<TNumber> : NumberInputBase, IInput<TNumber>, IAnyNumbe
         OnChange = e => typedState.Set(e.Value);
     }
 
-    public NumberInput(TNumber value, Action<TNumber> state, string? placeholder = null, bool disabled = false, NumberInputs variant = NumberInputs.Number, NumberFormatStyle formatStyle = NumberFormatStyle.Decimal) 
+    public NumberInput(TNumber value, Action<TNumber> state, string? placeholder = null, bool disabled = false, NumberInputs variant = NumberInputs.Number, NumberFormatStyle formatStyle = NumberFormatStyle.Decimal)
         : this(placeholder, disabled, variant, formatStyle)
-    { 
+    {
         OnChange = e => state(e.Value);
         Value = value;
     }
@@ -83,7 +83,7 @@ public static class NumberInputExtensions
     {
         return state.ToNumberInput(placeholder, disabled, NumberInputs.Slider, formatStyle);
     }
-    
+
     public static NumberInputBase ToNumberInput(this IAnyState state, string? placeholder = null, bool disabled = false, NumberInputs variant = NumberInputs.Number, NumberFormatStyle formatStyle = NumberFormatStyle.Decimal)
     {
         var type = state.GetStateType();
@@ -93,7 +93,7 @@ public static class NumberInputExtensions
         return input;
     }
 
-    public static NumberInputBase ToMoneyInput(this IAnyState state, string? placeholder = null, bool disabled = false, NumberInputs variant = NumberInputs.Number, string currency = "USD") 
+    public static NumberInputBase ToMoneyInput(this IAnyState state, string? placeholder = null, bool disabled = false, NumberInputs variant = NumberInputs.Number, string currency = "USD")
         => state.ToNumberInput(placeholder, disabled, variant, NumberFormatStyle.Currency).Currency(currency);
 
     internal static IAnyNumberInput ScaffoldDefaults(this IAnyNumberInput input, string? name, Type type)
@@ -102,17 +102,17 @@ public static class NumberInputExtensions
         input.Step ??= type.SuggestStep();
         input.Min ??= type.SuggestMin();
         input.Max ??= type.SuggestMax();
-        
+
         // Add default currency for Currency style inputs
         if (input.FormatStyle == NumberFormatStyle.Currency && string.IsNullOrEmpty(input.Currency))
         {
             input.Currency = "USD";
         }
-        
+
         return input;
     }
-    
-    public static NumberInputBase Placeholder(this NumberInputBase widget, string placeholder) 
+
+    public static NumberInputBase Placeholder(this NumberInputBase widget, string placeholder)
     {
         return widget with { Placeholder = placeholder };
     }
@@ -136,27 +136,27 @@ public static class NumberInputExtensions
     {
         return widget with { Step = step };
     }
-    
+
     public static NumberInputBase Variant(this NumberInputBase widget, NumberInputs variant)
     {
         return widget with { Variant = variant };
     }
-    
+
     public static NumberInputBase Precision(this NumberInputBase widget, int precision)
     {
         return widget with { Precision = precision };
     }
-    
+
     public static NumberInputBase FormatStyle(this NumberInputBase widget, NumberFormatStyle formatStyle)
     {
         return widget with { FormatStyle = formatStyle };
     }
-    
+
     public static NumberInputBase Currency(this NumberInputBase widget, string currency)
     {
         return widget with { Currency = currency };
     }
-    
+
     public static NumberInputBase Invalid(this NumberInputBase widget, string invalid)
     {
         return widget with { Invalid = invalid };

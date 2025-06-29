@@ -35,7 +35,7 @@ public class FormApp : SampleBase
                 .Builder(m => m.Gender, s => s.ToSelectInput())
                 .Builder(m => m.Json, s => s.ToCodeInput().Language(Languages.Json))
                 .Description(m => m.Name, "Make sure you enter your full name.");
-        
+
         var form0 = Layout.Horizontal(
             new Card(
                     BuildForm(model)

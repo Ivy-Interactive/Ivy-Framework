@@ -8,7 +8,7 @@ public class TaskView<T>(Task<T> task) : ViewBase
     public override object? Build()
     {
         var taskResult = UseState((object?)"Loading...");
-        
+
         UseEffect(async () =>
         {
             await task;

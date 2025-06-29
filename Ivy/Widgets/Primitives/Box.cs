@@ -15,13 +15,13 @@ public record Box : WidgetBase<Box>
     [Prop] public Thickness BorderThickness { get; set; } = new(2);
 
     [Prop] public BorderRadius BorderRadius { get; set; } = BorderRadius.Rounded;
-    
+
     [Prop] public BorderStyle BorderStyle { get; set; } = BorderStyle.Solid;
 
     [Prop] public Thickness Padding { get; set; } = new(2);
-    
+
     [Prop] public Thickness Margin { get; set; } = new(0);
-    
+
     [Prop] public Align? ContentAlign { get; set; } = Align.Center;
 }
 
@@ -38,7 +38,7 @@ public static class BoxExtensions
 
     public static Box Padding(this Box box, int padding) => box with { Padding = new(padding) };
     public static Box Padding(this Box box, Thickness padding) => box with { Padding = padding };
-    
+
     public static Box Margin(this Box box, int margin) => box with { Margin = new(margin) };
     public static Box Margin(this Box box, Thickness margin) => box with { Margin = margin };
 
