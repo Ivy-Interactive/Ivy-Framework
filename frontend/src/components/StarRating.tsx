@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { Star } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cn } from "@/lib/utils";
-import { inputStyles } from '@/lib/styles';
 import { InvalidIcon } from "@/components/InvalidIcon";
 
 interface StarRatingProps {
@@ -53,8 +52,7 @@ export function StarRating({
             className={cn(
               "relative focus-visible:outline-none focus-visible:ring-2",
               "focus-visible:ring-ring focus-visible:ring-offset-2",
-              disabled && "cursor-not-allowed",
-              invalid && inputStyles.invalid
+              disabled && "cursor-not-allowed"
             )}
             onClick={() => handleRating(star)}
             onMouseEnter={() => !disabled && setHover(star)}
