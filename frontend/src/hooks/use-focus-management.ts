@@ -20,43 +20,35 @@ export const useFocusManagement = (groupId: string): FocusManager => {
 
   const focusNext = useCallback(() => {
     const elements = getElements();
-    console.log('🔍 Focus Next - Group:', groupId, 'Elements:', elements.length, elements.map(el => el.id || el.tagName));
     if (elements.length === 0) return;
 
     const activeElement = document.activeElement as HTMLElement;
     const currentIndex = elements.indexOf(activeElement);
-    console.log('🔍 Current active element:', activeElement?.id || activeElement?.tagName, 'Index:', currentIndex);
     
     if (currentIndex === -1 || currentIndex === elements.length - 1) {
       // Focus first element if no current focus or at last element
-      console.log('🔍 Focusing first element:', elements[0]?.id || elements[0]?.tagName);
       elements[0]?.focus();
     } else {
       // Focus next element
-      console.log('🔍 Focusing next element:', elements[currentIndex + 1]?.id || elements[currentIndex + 1]?.tagName);
       elements[currentIndex + 1]?.focus();
     }
-  }, [getElements, groupId]);
+  }, [getElements]);
 
   const focusPrevious = useCallback(() => {
     const elements = getElements();
-    console.log('🔍 Focus Previous - Group:', groupId, 'Elements:', elements.length, elements.map(el => el.id || el.tagName));
     if (elements.length === 0) return;
 
     const activeElement = document.activeElement as HTMLElement;
     const currentIndex = elements.indexOf(activeElement);
-    console.log('🔍 Current active element:', activeElement?.id || activeElement?.tagName, 'Index:', currentIndex);
     
     if (currentIndex === -1 || currentIndex === 0) {
       // Focus last element if no current focus or at first element
-      console.log('🔍 Focusing last element:', elements[elements.length - 1]?.id || elements[elements.length - 1]?.tagName);
       elements[elements.length - 1]?.focus();
     } else {
       // Focus previous element
-      console.log('🔍 Focusing previous element:', elements[currentIndex - 1]?.id || elements[currentIndex - 1]?.tagName);
       elements[currentIndex - 1]?.focus();
     }
-  }, [getElements, groupId]);
+  }, [getElements]);
 
   const focusFirst = useCallback(() => {
     const elements = getElements();
@@ -78,7 +70,6 @@ export const useFocusManagement = (groupId: string): FocusManager => {
       return aPriority - bPriority;
     });
     focusRegistry.set(groupId, elements);
-    console.log('🔍 Registered element:', element.id || element.tagName, 'Priority:', element.getAttribute('data-focus-priority'), 'Group:', groupId, 'Total elements:', elements.length);
   }, [groupId, getElements]);
 
   const unregisterElement = useCallback((element: HTMLElement) => {

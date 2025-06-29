@@ -53,10 +53,6 @@ const Checkbox = React.forwardRef<
       ? baseClass.replace("data-[state=checked]:bg-primary", "")
       : baseClass;
 
-    React.useEffect(() => {
-      console.log("Checkbox initial checked value:", checked);
-    }, [checked]);
-
     return (
       <CheckboxPrimitive.Root
         ref={ref}
