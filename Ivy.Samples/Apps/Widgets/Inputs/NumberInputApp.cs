@@ -15,22 +15,7 @@ public class NumberInputApp : SampleBase
         var onBlurState = UseState(0);
         var onBlurLabel = UseState("");
 
-        var dataBinding = Layout.Grid().Columns(3)
-
-                          | Text.InlineCode("int")
-                          | (Layout.Vertical()
-                             | intValue.ToNumberInput()
-                             | intValue.ToSliderInput()
-                          )
-                          | intValue
-
-                          | Text.InlineCode("int?")
-                          | (Layout.Vertical()
-                             | nullIntValue.ToNumberInput()
-                             | nullIntValue.ToSliderInput()
-                          )
-                          | nullIntValue
-            ;
+        var dataBinding = CreateNumericTypeTests();
 
         return Layout.Vertical()
                | Text.H1("Number Inputs")
@@ -78,5 +63,91 @@ public class NumberInputApp : SampleBase
                    onBlurLabel
                )
             ;
+    }
+
+    private object CreateNumericTypeTests()
+    {
+        var numericTypes = new (string TypeName, object NonNullableState, object NullableState)[]
+        {
+         // Signed integer types
+         ("short", UseState((short)0), UseState((short?)null)),
+         ("int", UseState(0), UseState((int?)null)),
+         ("long", UseState((long)0), UseState((long?)null)),
+         
+         // Unsigned integer types
+         ("byte", UseState((byte)0), UseState((byte?)null)),
+         
+         // Floating-point types
+         ("float", UseState(0.0f), UseState((float?)null)),
+         ("double", UseState(0.0), UseState((double?)null)),
+         ("decimal", UseState((decimal)0), UseState((decimal?)null))
+        };
+
+        var gridItems = new List<object>
+        {
+            Text.InlineCode("Type"),
+            Text.InlineCode("Non-Nullable"),
+            Text.InlineCode("State"),
+            Text.InlineCode("Type"),
+            Text.InlineCode("Nullable"),
+            Text.InlineCode("State")
+        };
+
+        var numericTypeNames = new[] { "double", "decimal", "float", "short", "int", "long", "byte" };
+
+        foreach (var (typeName, nonNullableState, nullableState) in numericTypes)
+        {
+            // Non-nullable columns (first 3)
+            gridItems.Add(Text.InlineCode(typeName));
+            gridItems.Add(CreateNumberInputVariants(nonNullableState));
+
+            var nonNullableAnyState = nonNullableState as IAnyState;
+            object? nonNullableValue = null;
+            if (nonNullableAnyState != null)
+            {
+                var prop = nonNullableAnyState.GetType().GetProperty("Value");
+                nonNullableValue = prop?.GetValue(nonNullableAnyState);
+            }
+            gridItems.Add(FormatStateValue(typeName, nonNullableValue, false));
+
+            // Nullable columns (next 3)
+            gridItems.Add(Text.InlineCode($"{typeName}?"));
+            gridItems.Add(CreateNumberInputVariants(nullableState));
+
+            var anyState = nullableState as IAnyState;
+            object? value = null;
+            if (anyState != null)
+            {
+                var prop = anyState.GetType().GetProperty("Value");
+                value = prop?.GetValue(anyState);
+            }
+            gridItems.Add(FormatStateValue(typeName, value, true));
+        }
+
+        return Layout.Grid().Columns(6) | gridItems.ToArray();
+
+        object FormatStateValue(string typeName, object? value, bool isNullable)
+        {
+            return value switch
+            {
+                null => isNullable ? Text.InlineCode("Null") : Text.InlineCode("0"),
+                _ when numericTypeNames.Contains(typeName) => Text.InlineCode(value.ToString()!),
+                _ => Text.InlineCode(value?.ToString() ?? "null")
+            };
+        }
+    }
+
+    private static object CreateNumberInputVariants(object state)
+    {
+        if (state is not IAnyState anyState)
+            return Text.Block("Not an IAnyState");
+
+        var stateType = anyState.GetStateType();
+        var isNullable = stateType.IsNullableType();
+
+        // For both nullable and non-nullable states, show both number input and slider variants
+        return Layout.Vertical()
+               | anyState.ToNumberInput()
+               | anyState.ToSliderInput();
     }
 }
