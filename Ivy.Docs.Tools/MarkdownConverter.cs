@@ -265,6 +265,23 @@ public static class MarkdownConverter
         codeBuilder.AppendTab(3).AppendLine($"""| new Embed("{url}")""");
     }
 
+    private static string MapLanguageToEnum(string lang)
+    {
+        return lang.ToLowerInvariant() switch
+        {
+            "csharp" or "cs" => "Languages.Csharp",
+            "javascript" or "js" => "Languages.Javascript",
+            "typescript" or "ts" => "Languages.Typescript",
+            "python" => "Languages.Python",
+            "sql" => "Languages.Sql",
+            "html" => "Languages.Html",
+            "css" => "Languages.Css",
+            "json" => "Languages.Json",
+            "dbml" => "Languages.Dbml",
+            _ => "Languages.Csharp"
+        };
+    }
+
     private static void HandleCodeBlock(FencedCodeBlock codeBlock, string markdownContent, StringBuilder codeBuilder,
         StringBuilder viewBuilder, HashSet<string> usedClassNames)
     {
@@ -293,7 +310,7 @@ public static class MarkdownConverter
         }
         else
         {
-            AppendAsMultiLineStringIfNecessary(3, codeContent, codeBuilder, "| Code(", $",\"{language}\")");
+            AppendAsMultiLineStringIfNecessary(3, codeContent, codeBuilder, "| Code(", $",{MapLanguageToEnum(language)})");
         }
     }
 
@@ -333,13 +350,13 @@ public static class MarkdownConverter
         {
             codeBuilder.AppendTab(3).AppendLine("| Tabs( ");
             codeBuilder.AppendTab(4).AppendLine($"new Tab(\"Demo\", {insertCode}),");
-            AppendAsMultiLineStringIfNecessary(4, codeContent, codeBuilder, "new Tab(\"Code\", new Code(", $",\"{language}\"))");
+            AppendAsMultiLineStringIfNecessary(4, codeContent, codeBuilder, "new Tab(\"Code\", new Code(", $",{MapLanguageToEnum(language)}))");
             codeBuilder.AppendTab(3).AppendLine(").Height(Size.Fit()).Padding(0, 8, 0, 0)");
         }
         else if (arguments is "demo-below")
         {
             codeBuilder.AppendTab(3).AppendLine("| (Vertical() ");
-            AppendAsMultiLineStringIfNecessary(4, codeContent, codeBuilder, "| Code(", $",\"{language}\")");
+            AppendAsMultiLineStringIfNecessary(4, codeContent, codeBuilder, "| Code(", $",{MapLanguageToEnum(language)})");
             codeBuilder.AppendTab(4).AppendLine($"| ({insertCode})");
             codeBuilder.AppendTab(3).AppendLine(")");
         }
@@ -347,13 +364,13 @@ public static class MarkdownConverter
         {
             codeBuilder.AppendTab(3).AppendLine("| (Vertical() ");
             codeBuilder.AppendTab(4).AppendLine($"| ({insertCode})");
-            AppendAsMultiLineStringIfNecessary(4, codeContent, codeBuilder, "| Code(", $",\"{language}\")");
+            AppendAsMultiLineStringIfNecessary(4, codeContent, codeBuilder, "| Code(", $",{MapLanguageToEnum(language)})");
             codeBuilder.AppendTab(3).AppendLine(")");
         }
         else if (arguments is "demo-right")
         {
             codeBuilder.AppendTab(3).AppendLine("| (Grid().Columns(2) ");
-            AppendAsMultiLineStringIfNecessary(4, codeContent, codeBuilder, "| Code(", $",\"{language}\")");
+            AppendAsMultiLineStringIfNecessary(4, codeContent, codeBuilder, "| Code(", $",{MapLanguageToEnum(language)})");
             codeBuilder.AppendTab(4).AppendLine($"| ({insertCode})");
             codeBuilder.AppendTab(3).AppendLine(")");
         }
@@ -361,7 +378,7 @@ public static class MarkdownConverter
         {
             codeBuilder.AppendTab(3).AppendLine("| (Grid().Columns(2) ");
             codeBuilder.AppendTab(4).AppendLine($"| ({insertCode})");
-            AppendAsMultiLineStringIfNecessary(4, codeContent, codeBuilder, "| Code(", $",\"{language}\")");
+            AppendAsMultiLineStringIfNecessary(4, codeContent, codeBuilder, "| Code(", $",{MapLanguageToEnum(language)})");
             codeBuilder.AppendTab(5).AppendLine(")");
         }
     }

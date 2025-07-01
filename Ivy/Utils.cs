@@ -321,7 +321,22 @@ public static class Utils
 
     public static double SuggestMin(this Type type)
     {
-        return 0.0;
+        if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
+        {
+            type = type.GetGenericArguments()[0];
+        }
+
+        return Type.GetTypeCode(type) switch
+        {
+            TypeCode.Decimal => Convert.ToDouble(decimal.MinValue),
+            TypeCode.Double => double.MinValue,
+            TypeCode.Single => float.MinValue,
+            TypeCode.Int16 => short.MinValue,
+            TypeCode.Int32 => int.MinValue,
+            TypeCode.Int64 => long.MinValue,
+            TypeCode.Byte => byte.MinValue,
+            _ => 0.0,
+        };
     }
 
     public static double SuggestMax(this Type type)
@@ -331,17 +346,17 @@ public static class Utils
             type = type.GetGenericArguments()[0];
         }
 
-        switch (Type.GetTypeCode(type))
+        return Type.GetTypeCode(type) switch
         {
-            case TypeCode.Decimal:
-                return Convert.ToDouble(decimal.MaxValue);
-            case TypeCode.Double:
-                return double.MaxValue;
-            case TypeCode.Single:
-                return float.MaxValue;
-            default:
-                return int.MaxValue;
-        }
+            TypeCode.Decimal => Convert.ToDouble(decimal.MaxValue),
+            TypeCode.Double => double.MaxValue,
+            TypeCode.Single => float.MaxValue,
+            TypeCode.Int16 => short.MaxValue,
+            TypeCode.Int32 => int.MaxValue,
+            TypeCode.Int64 => long.MaxValue,
+            TypeCode.Byte => byte.MaxValue,
+            _ => int.MaxValue,
+        };
     }
 
     public static bool IsDate(this Type type)

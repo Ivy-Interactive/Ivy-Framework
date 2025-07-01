@@ -26,22 +26,31 @@ export const FeedbackInputWidget: React.FC<FeedbackInputWidgetProps> = ({
   const eventHandler = useEventHandler();
 
   const isBooleanType = useMemo(() => {
+    // If variant is Thumbs and nullable is true, treat as bool?
+    if (variant === 'Thumbs' && nullable) return true;
     return typeof value === 'boolean';
-  }, [value]);
+  }, [value, variant, nullable]);
 
   // Convert value to number for rating components
   const numericValue = useMemo(() => {
-    if (value === null || value === undefined) return 0;
+    if (value === null || value === undefined) return ThumbsEnum.None;
     if (isBooleanType) {
       if (variant === 'Thumbs') {
-        return value ? ThumbsEnum.Up : ThumbsEnum.Down;
+        if (nullable) {
+          // For nullable boolean types: null -> None(0), false -> Down(1), true -> Up(2)
+          return value ? ThumbsEnum.Up : ThumbsEnum.Down;
+        } else {
+          // For non-nullable boolean types: false -> Down(1), true -> Up(2)
+          return value ? ThumbsEnum.Up : ThumbsEnum.Down;
+        }
       }
       return value ? 1 : 0;
     }
     return value as number;
-  }, [value, variant, isBooleanType]);
+  }, [value, variant, isBooleanType, nullable]);
 
   const handleChange = useCallback((e: number) => {
+    
     if(!events.includes("OnChange")) return;
     if(disabled) return;
     
@@ -49,36 +58,43 @@ export const FeedbackInputWidget: React.FC<FeedbackInputWidgetProps> = ({
     let convertedValue: number | boolean | null;
     if (isBooleanType) {
       if (variant === 'Thumbs') {
-        // For boolean types with ThumbsRating
-        if (e === ThumbsEnum.None) {
-          // Deselection - only allow null for nullable types
-          convertedValue = nullable ? null : false;
-        } else if (e === numericValue) {
-          // Clicking the same thumb
-          if (nullable) {
-            // For nullable types, deselect (set to null)
+        if (nullable) {
+          // For nullable boolean types
+          if (e === ThumbsEnum.None) {
             convertedValue = null;
+          } else if (e === ThumbsEnum.Down) {
+            convertedValue = false;
+          } else if (e === ThumbsEnum.Up) {
+            convertedValue = true;
           } else {
-            // For non-nullable types, toggle to the opposite value
-            convertedValue = !value;
+            // Fallback - shouldn't happen
+            convertedValue = e === ThumbsEnum.Up;
           }
         } else {
-          // Clicking different thumb - set new value
-          convertedValue = e === ThumbsEnum.Up;
+          // For non-nullable boolean types
+          if (e === ThumbsEnum.None) {
+            // For non-nullable types, toggle to the opposite value
+            convertedValue = !value;
+          } else if (e === numericValue) {
+            // Clicking the same thumb - toggle to the opposite value
+            convertedValue = !value;
+          } else {
+            // Clicking different thumb - set new value
+            convertedValue = e === ThumbsEnum.Up;
+          }
         }
       } else {
         convertedValue = e === 1;
       }
     } else {
       // Numeric type handling (including nullable numeric types)
-      if (e === 0) {
-        convertedValue = nullable ? null : 0;
+      if (e === ThumbsEnum.None) {
+        convertedValue = nullable ? null : ThumbsEnum.None;
       } else {
         convertedValue = e;
       }
     }
-    
-    eventHandler("OnChange", id, [convertedValue]);
+        eventHandler("OnChange", id, [convertedValue]);
   }, [id, disabled, value, variant, numericValue, events, eventHandler, nullable, isBooleanType]);
 
   if(variant === 'Thumbs') {

@@ -4,9 +4,22 @@ using Ivy.Shared;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+public enum Languages
+{
+    Csharp,
+    Javascript,
+    Typescript,
+    Python,
+    Sql,
+    Html,
+    Css,
+    Json,
+    Dbml
+}
+
 public record Code : WidgetBase<Code>
 {
-    public Code(string content, string language = "csharp")
+    public Code(string content, Languages language = Languages.Csharp)
     {
         Content = content;
         Language = language;
@@ -15,7 +28,7 @@ public record Code : WidgetBase<Code>
     }
 
     [Prop] public string Content { get; set; }
-    [Prop] public string Language { get; set; }
+    [Prop] public Languages Language { get; set; }
     [Prop] public bool ShowLineNumbers { get; set; }
     [Prop] public bool ShowCopyButton { get; set; } = true;
     [Prop] public bool ShowBorder { get; set; } = true;
@@ -28,7 +41,7 @@ public static class CodeExtensions
         return code with { Content = content };
     }
 
-    public static Code Language(this Code code, string language)
+    public static Code Language(this Code code, Languages language)
     {
         return code with { Language = language };
     }

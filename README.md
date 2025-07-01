@@ -62,7 +62,7 @@ Make sure you have the .Net 9 SDK installed.
    dotnet watch
    ```
 
-5. **Open** [http://localhost:5000](http://localhost:5000) in your browser.
+5. **Open** [http://localhost:5010](http://localhost:5010) in your browser.
 
 You can also run `ivy samples` to see all the components that Ivy offers and `ivy docs` for documentation.  
 

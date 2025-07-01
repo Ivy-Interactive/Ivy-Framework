@@ -12,17 +12,6 @@ public enum CodeInputs
     Default
 }
 
-public enum Languages
-{
-    Javascript,
-    Python,
-    Sql,
-    Html,
-    Css,
-    Json,
-    Dbml
-}
-
 public interface IAnyCodeInput : IAnyInput
 {
     public string? Placeholder { get; set; }

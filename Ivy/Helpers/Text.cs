@@ -141,12 +141,12 @@ public static class Text
 
     public static TextBuilder Success(IAnyState state) => Success(state.ToString() ?? "");
 
-    public static TextBuilder Code(string content, string language = "auto")
+    public static TextBuilder Code(string content, Languages language = Languages.Csharp)
     {
-        return new TextBuilder(content, TextVariant.Code, codeLangage: language);
+        return new TextBuilder(content, TextVariant.Code, codeLanguage: language);
     }
 
-    public static TextBuilder Code(IAnyState state, string language = "auto") => Code(state.ToString() ?? "", language);
+    public static TextBuilder Code(IAnyState state, Languages language = Languages.Csharp) => Code(state.ToString() ?? "", language);
 
     public static TextBuilder Markdown(string content)
     {
@@ -184,7 +184,7 @@ public static class Text
     public static TextBuilder Latex(IAnyState state) => Latex(state.ToString() ?? "");
 }
 
-public class TextBuilder(string content, TextVariant variant, string codeLangage = "auto") : ViewBase, IStateless
+public class TextBuilder(string content, TextVariant variant, Languages codeLanguage = Languages.Csharp) : ViewBase, IStateless
 {
     private bool _strikeThrough;
     private Size? _width;
@@ -197,7 +197,7 @@ public class TextBuilder(string content, TextVariant variant, string codeLangage
         switch (variant)
         {
             case TextVariant.Code:
-                return new Code(content, codeLangage);
+                return new Code(content, codeLanguage);
             case TextVariant.Markdown:
                 return new Markdown(content);
             case TextVariant.Json:

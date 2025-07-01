@@ -7,7 +7,7 @@ const injectIvyHost = (mode: string) => {
   name: 'inject-ivy-host-meta',
   transformIndexHtml(html: string) {
     if (mode === 'development') {
-      const metaTag = `<meta name="ivy-host" content="${process.env.IVY_HOST || 'http://localhost:5000'}" />`;
+      const metaTag = `<meta name="ivy-host" content="${process.env.IVY_HOST || 'http://localhost:5010'}" />`;
       return html.replace('</head>', `  ${metaTag}\n</head>`);
     }
     return html;

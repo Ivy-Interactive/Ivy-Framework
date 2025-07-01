@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { cn } from "@/lib/utils";
-import { inputStyles } from '@/lib/styles';
 import { InvalidIcon } from "@/components/InvalidIcon";
 
 interface EmojiRatingProps {
@@ -54,7 +53,6 @@ export function EmojiRating({
               "transition-transform duration-200",
               "hover:scale-125 active:scale-90",
               disabled && "cursor-not-allowed hover:scale-100",
-              invalid && inputStyles.invalid,
               emojiSizes[size]
             )}
             onClick={() => handleRating(index + 1)}

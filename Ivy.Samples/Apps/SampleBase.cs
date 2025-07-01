@@ -51,6 +51,6 @@ public class CodeView(Type type) : ViewBase
             }
         }
 
-        return new Code(code, "cs");
+        return new Code(code, Languages.Csharp);
     }
 }

@@ -15,6 +15,24 @@ interface CodeWidgetProps {
   height?: string;
 }
 
+const languageMap: Record<string, string> = {
+  'Csharp': 'csharp',
+  'Javascript': 'javascript',
+  'Typescript': 'typescript',
+  'Python': 'python',
+  'Sql': 'sql',
+  'Html': 'html',
+  'Css': 'css',
+  'Json': 'json',
+  'Dbml': 'dbml'
+};
+
+const mapLanguageToPrism = (language: string): string => {
+  if(!languageMap[language]) console.warn(`Language ${language} is not specified in the code widget, attempting to use the language name as a fallback.`)
+  
+  return languageMap[language] || language.toLowerCase();
+};
+
 const MemoizedCopyButton = memo(({ textToCopy }: { textToCopy: string }) => (
   <div className="absolute top-2 right-2 z-10">
     <CopyToClipboardButton textToCopy={textToCopy} />
@@ -54,7 +72,7 @@ const CodeWidget: React.FC<CodeWidgetProps> = memo(({
   }, [width, height, isHovered, showBorder]);
 
   const highlighterKey = useMemo(() => 
-    `${id}-${language}-${showLineNumbers}-${showBorder}`, 
+    `${id}-${mapLanguageToPrism(language)}-${showLineNumbers}-${showBorder}`, 
     [id, language, showLineNumbers, showBorder]
   );
 
@@ -66,7 +84,7 @@ const CodeWidget: React.FC<CodeWidgetProps> = memo(({
     >
       {showCopyButton && <MemoizedCopyButton textToCopy={content} />}
       <SyntaxHighlighter 
-        language={language} 
+        language={mapLanguageToPrism(language)} 
         customStyle={styles}
         style={ivyPrismTheme} 
         showLineNumbers={showLineNumbers}

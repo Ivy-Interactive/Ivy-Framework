@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useMemo, useEffect, ChangeEvent, FocusEvent, WheelEvent, MouseEvent as ReactMouseEvent } from 'react';
 import { Input } from '@/components/ui/input';
-import { ChevronUp, ChevronDown } from 'lucide-react';
+import { ChevronUp, ChevronDown, X } from 'lucide-react';
 
 interface NumberInputProps {
   min?: number;
@@ -14,6 +14,7 @@ interface NumberInputProps {
   format?: Intl.NumberFormatOptions;
   allowNegative?: boolean;
   className?: string;
+  nullable?: boolean;
 }
 
 interface DragState {
@@ -41,6 +42,7 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(({
   },
   allowNegative = true,
   className = '',
+  nullable = false,
   ...props
 }, ref) => {
   const [displayValue, setDisplayValue] = useState<string>('');
@@ -250,9 +252,24 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(({
         step={step}
         disabled={disabled}
         placeholder={placeholder}
-        className={`${className} pr-8 ${!isValid ? 'border-red-500' : ''} ${dragState?.isDragging ? 'select-none' : ''}`}
+        className={`${className} pr-14 ${!isValid ? 'border-red-500' : ''} ${dragState?.isDragging ? 'select-none' : ''}`}
         {...props}
       />
+      {nullable && value !== null && !disabled && onChange && (
+        <button
+          type="button"
+          tabIndex={-1}
+          aria-label="Clear"
+          onClick={() => {
+            setDisplayValue('');
+            onChange(null);
+          }}
+          className="absolute right-8 top-1/2 -translate-y-1/2 p-1 rounded hover:bg-gray-100 focus:outline-none"
+          style={{ zIndex: 2 }}
+        >
+          <X className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+        </button>
+      )}
       <div className="absolute right-0 top-0 bottom-0 flex flex-col border-l">
         <button
           type="button"

@@ -21,7 +21,7 @@ public class CodeSamplesView : ViewBase
             """;
             
         return Layout.Vertical()
-            | new Code(fibonacci, "javascript")
+            | new Code(fibonacci, Languages.Javascript)
                 .ShowLineNumbers()
                 .ShowCopyButton();
     }

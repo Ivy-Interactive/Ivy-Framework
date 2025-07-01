@@ -60,7 +60,11 @@ public record DateTimeInput<TDate> : DateTimeInputBase, IInput<TDate>
 
 public static class DateTimeInputExtensions
 {
-    public static DateTimeInputBase ToDateTimeInput(this IAnyState state, string? placeholder = null, bool disabled = false, DateTimeInputs variant = DateTimeInputs.Date)
+    public static DateTimeInputBase ToDateInput(this IAnyState state, string? placeholder = null, bool disabled = false,
+        DateTimeInputs variant = DateTimeInputs.Date)
+        => ToDateTimeInput(state, placeholder, disabled, variant);
+
+    public static DateTimeInputBase ToDateTimeInput(this IAnyState state, string? placeholder = null, bool disabled = false, DateTimeInputs variant = DateTimeInputs.DateTime)
     {
         var type = state.GetStateType();
         Type genericType = typeof(DateTimeInput<>).MakeGenericType(type);

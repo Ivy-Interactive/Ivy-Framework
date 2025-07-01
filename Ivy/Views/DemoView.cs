@@ -27,7 +27,7 @@ public class DemoView : ViewBase
     {
         return Layout.Vertical()
                | _content
-               | Text.Code(_code!, "cs")
+               | Text.Code(_code!, Languages.Csharp)
             ;
     }
 

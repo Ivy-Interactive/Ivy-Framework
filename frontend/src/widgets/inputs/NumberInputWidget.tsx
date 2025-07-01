@@ -147,6 +147,7 @@ const NumberVariant = memo(({
           invalid && inputStyles.invalid,
           invalid && "pr-8"
         )}
+        nullable={nullable}
       />
       {invalid && (
         <div className="absolute right-8 top-2">

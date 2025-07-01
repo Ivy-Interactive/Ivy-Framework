@@ -16,7 +16,7 @@ public class TestApp : ViewBase
                        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.")
                    | Text.Markdown(
                        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.")
-                   | new Code("var x = 1;", "csharp")
+                   | new Code("var x = 1;", Languages.Csharp)
                    | Text.Markdown(
                        """"""
                        * Item 1
