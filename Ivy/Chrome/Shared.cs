@@ -18,11 +18,13 @@ public record ChromeSettings
     public object? Header { get; init; }
     public object? Footer { get; init; }
     public string? DefaultAppId { get; init; }
+    public bool PreventTabDuplicates { get; init; }
     public ChromeNavigation Navigation { get; init; }
 
     public static ChromeSettings Default() => new()
     {
-        Navigation = ChromeNavigation.Tabs
+        Navigation = ChromeNavigation.Tabs,
+        PreventTabDuplicates = false
     };
 }
 
@@ -40,6 +42,7 @@ public static class ChromeSettingsExtensions
     public static ChromeSettings Navigation(this ChromeSettings settings, ChromeNavigation navigation) => settings with { Navigation = navigation };
     public static ChromeSettings UseTabs(this ChromeSettings settings) => settings with { Navigation = ChromeNavigation.Tabs };
     public static ChromeSettings UsePages(this ChromeSettings settings) => settings with { Navigation = ChromeNavigation.Pages };
+    public static ChromeSettings PreventTabDuplicates(this ChromeSettings settings, bool preventDuplicates = true) => settings with { PreventTabDuplicates = preventDuplicates };
 }
 
 [Signal(BroadcastType.Chrome)]

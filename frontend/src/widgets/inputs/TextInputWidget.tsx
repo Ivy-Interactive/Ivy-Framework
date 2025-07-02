@@ -23,28 +23,47 @@ interface TextInputWidgetProps {
   shortcutKey?: string;
 }
 
+// Utility to detect Mac platform
+const isMac = typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.userAgent);
+
 // Parse the shortcut string into components
 const parseShortcut = (shortcutStr?: string) => {
   if (!shortcutStr) return null;
-  
   const parts = shortcutStr.toLowerCase().split('+');
   return {
-    ctrl: parts.includes('ctrl'),
+    ctrl: !isMac && parts.includes('ctrl'),
     shift: parts.includes('shift'),
     alt: parts.includes('alt'),
-    meta: parts.includes('meta') || parts.includes('cmd') || parts.includes('command'),
-    key: parts[parts.length - 1] // The last part is assumed to be the key
+    meta: isMac ? (parts.includes('ctrl') || parts.includes('meta') || parts.includes('cmd') || parts.includes('command')) : false,
+    key: parts[parts.length - 1]
   };
 };
 
-// Format the shortcut for display
-const formatShortcutForDisplay = (shortcutStr?: string) => {
-  if (!shortcutStr) return '';
+// Format the shortcut for display as React nodes
+const formatShortcutForDisplay = (shortcutStr?: string): React.ReactNode[] => {
+  if (!shortcutStr) return [];
+  const parts = shortcutStr.split('+').map(p => p.trim());
+  const result: React.ReactNode[] = [];
   
-  return shortcutStr
-    .split('+')
-    .map(part => part.charAt(0).toUpperCase() + part.slice(1))
-    .join('+');
+  parts.forEach((part, index) => {
+    if (index > 0) {
+      result.push('+');
+    }
+    
+    if (isMac && (part.toLowerCase() === 'ctrl' || part.toLowerCase() === 'cmd' || part.toLowerCase() === 'command' || part.toLowerCase() === 'meta')) {
+      result.push(
+        <span key={`meta-${index}`} style={{ fontSize: '1.5em', lineHeight: 1, verticalAlign: 'middle' }}>
+          ⌘
+        </span>
+      );
+    } else if (!isMac && part.toLowerCase() === 'ctrl') {
+      result.push('Ctrl');
+    } else {
+      result.push(part.charAt(0).toUpperCase() + part.slice(1));
+    }
+  });
+  
+  return result;
 };
 
 const useCursorPosition = (value?: string, externalRef?: React.RefObject<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -117,7 +136,7 @@ const DefaultVariant: React.FC<{
       )}
       {props.shortcutKey && !isFocused && (
         <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center">
-          <kbd className="px-1.5 py-0.5 text-xs font-semibold text-gray-800 bg-gray-100 border border-gray-200 rounded-md">
+          <kbd className="px-1 py-0.5 text-xs font-medium text-gray-800 bg-gray-100 border border-gray-200 rounded-md">
             {shortcutDisplay}
           </kbd>
         </div>
@@ -174,7 +193,7 @@ const TextareaVariant: React.FC<{
       )}
       {props.shortcutKey && !isFocused && (
         <div className="absolute right-2.5 top-2.5 flex items-center">
-          <kbd className="px-1.5 py-0.5 text-xs font-semibold text-gray-800 bg-gray-100 border border-gray-200 rounded-md">
+          <kbd className="px-1 py-0.5 text-xs font-medium text-gray-800 bg-gray-100 border border-gray-200 rounded-md">
             {shortcutDisplay}
           </kbd>
         </div>
@@ -261,7 +280,7 @@ const PasswordVariant: React.FC<{
             <InvalidIcon message={props.invalid} className="ml-2"/>
         )}
         {props.shortcutKey && (
-          <kbd className="ml-2 px-1.5 py-0.5 text-xs font-semibold text-gray-800 bg-gray-100 border border-gray-200 rounded-md">
+          <kbd className="ml-2 px-1 py-0.5 text-xs font-medium text-gray-800 bg-gray-100 border border-gray-200 rounded-md">
             {shortcutDisplay}
           </kbd>
         )}
@@ -352,7 +371,7 @@ const SearchVariant: React.FC<{
       {/* Shortcut Display */}
       {props.shortcutKey && !isFocused && (
         <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center">
-          <kbd className="px-1.5 py-0.5 text-xs font-semibold text-gray-800 bg-gray-100 border border-gray-200 rounded-md">
+          <kbd className="px-1 py-0.5 text-xs font-medium text-gray-800 bg-gray-100 border border-gray-200 rounded-md">
             {shortcutDisplay}
           </kbd>
         </div>
@@ -393,18 +412,19 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
     if (!shortcutObj) return;
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      // Check if the pressed keys match our shortcut
-      const isShortcutPressed = 
-        (shortcutObj.ctrl === event.ctrlKey) &&
-        (shortcutObj.shift === event.shiftKey) &&
-        (shortcutObj.alt === event.altKey) &&
-        (shortcutObj.meta === event.metaKey) &&
+      // Check if the required modifier keys match exactly what was defined in the shortcut
+      const modifierMatch = 
+        (shortcutObj.meta && event.metaKey) ||
+        (shortcutObj.ctrl && event.ctrlKey) ||
+        (!shortcutObj.meta && !shortcutObj.ctrl && !event.metaKey && !event.ctrlKey);
+      
+      const isShortcutPressed =
+        modifierMatch &&
+        (event.shiftKey === shortcutObj.shift) &&
+        (event.altKey === shortcutObj.alt) &&
         (event.key.toLowerCase() === shortcutObj.key.toLowerCase());
-
       if (isShortcutPressed) {
         event.preventDefault();
-        
-        // Focus the input field
         if (inputRef.current) {
           inputRef.current.focus();
           setIsFocused(true);
