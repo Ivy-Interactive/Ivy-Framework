@@ -1,9 +1,7 @@
 import React, { useMemo, useCallback, useState, useEffect } from 'react';
 import { useEventHandler } from '@/components/EventHandlerContext';
 import { InvalidIcon } from '@/components/InvalidIcon';
-
-// Types for variants
-export type ColorInputVariant = 'Picker' | 'Text' | 'PickerText' | 'Palette';
+import { isValidColor, normalizeColor, getColorDisplayValue, ColorInputVariant } from '@/lib/colorUtils';
 
 interface ColorInputWidgetProps {
   id: string;
@@ -68,31 +66,79 @@ const TextVariant: React.FC<BaseVariantProps> = ({
   error,
   disabled,
   onChange,
-}) => (
-  <div className="flex flex-col space-y-1">
-    {label && <label htmlFor={id} className="font-medium">{label}</label>}
-    <div className="relative w-min">
-      <input
-        id={id}
-        type="text"
-        value={value ?? ''}
-        onChange={e => onChange(e.target.value)}
-        disabled={disabled}
-        placeholder="#RRGGBB, rgb(), or name"
-        className="w-32 p-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-        aria-invalid={!!error}
-        autoComplete="off"
-      />
-      {error && (
-        <div className="absolute right-0 top-0 h-4 w-4">
-          <InvalidIcon message={error} />
-        </div>
-      )}
+}) => {
+  const [localValue, setLocalValue] = useState(value ?? '');
+  const [validationError, setValidationError] = useState<string | null>(null);
+
+  // Keep local value in sync with prop
+  useEffect(() => {
+    setLocalValue(value ?? '');
+    setValidationError(null);
+  }, [value]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value;
+    setLocalValue(newValue);
+    
+    // Clear validation error when user starts typing
+    if (validationError) {
+      setValidationError(null);
+    }
+    
+    // If empty, allow it
+    if (!newValue.trim()) {
+      onChange(null);
+      return;
+    }
+    
+    // Validate color
+    if (!isValidColor(newValue)) {
+      setValidationError('Invalid color format. Use #RRGGBB, rgb(r,g,b), or a color name.');
+      onChange(newValue); // Still propagate the value for real-time feedback
+      return;
+    }
+    
+    // Normalize and propagate valid color
+    const normalized = normalizeColor(newValue);
+    onChange(normalized);
+  };
+
+  const handleBlur = () => {
+    if (localValue.trim() && !isValidColor(localValue)) {
+      setValidationError('Invalid color format. Use #RRGGBB, rgb(r,g,b), or a color name.');
+    }
+  };
+
+  const displayValue = getColorDisplayValue(localValue);
+  const hasError = error || validationError;
+
+  return (
+    <div className="flex flex-col space-y-1">
+      {label && <label htmlFor={id} className="font-medium">{label}</label>}
+      <div className="relative w-min">
+        <input
+          id={id}
+          type="text"
+          value={displayValue}
+          onChange={handleChange}
+          onBlur={handleBlur}
+          disabled={disabled}
+          placeholder="#RRGGBB, rgb(), or name"
+          className="w-32 p-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+          aria-invalid={!!hasError}
+          autoComplete="off"
+        />
+        {hasError && (
+          <div className="absolute right-0 top-0 h-4 w-4">
+            <InvalidIcon message={hasError} />
+          </div>
+        )}
+      </div>
+      {description && <span className="text-xs text-gray-500">{description}</span>}
+      {hasError && <span className="text-xs text-red-500">{hasError}</span>}
     </div>
-    {description && <span className="text-xs text-gray-500">{description}</span>}
-    {error && <span className="text-xs text-red-500">{error}</span>}
-  </div>
-);
+  );
+};
 
 const PickerTextVariant: React.FC<BaseVariantProps> = ({
   id,
@@ -105,24 +151,58 @@ const PickerTextVariant: React.FC<BaseVariantProps> = ({
 }) => {
   // Local state for the text input to allow editing invalid/partial values
   const [textValue, setTextValue] = useState(value ?? '');
+  const [validationError, setValidationError] = useState<string | null>(null);
 
   // Keep local text in sync with value prop
   useEffect(() => {
     setTextValue(value ?? '');
+    setValidationError(null);
   }, [value]);
 
   // Handle text input change
   const handleTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     setTextValue(val);
-    onChange(val); // Always propagate up, validation can be handled by parent
+    
+    // Clear validation error when user starts typing
+    if (validationError) {
+      setValidationError(null);
+    }
+    
+    // If empty, allow it
+    if (!val.trim()) {
+      onChange(null);
+      return;
+    }
+    
+    // Validate color
+    if (!isValidColor(val)) {
+      setValidationError('Invalid color format. Use #RRGGBB, rgb(r,g,b), or a color name.');
+      onChange(val); // Still propagate the value for real-time feedback
+      return;
+    }
+    
+    // Normalize and propagate valid color
+    const normalized = normalizeColor(val);
+    onChange(normalized);
   };
 
   // Handle color picker change
   const handlePickerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setTextValue(e.target.value);
-    onChange(e.target.value);
+    const pickerValue = e.target.value;
+    setTextValue(pickerValue);
+    setValidationError(null);
+    onChange(pickerValue);
   };
+
+  const handleTextBlur = () => {
+    if (textValue.trim() && !isValidColor(textValue)) {
+      setValidationError('Invalid color format. Use #RRGGBB, rgb(r,g,b), or a color name.');
+    }
+  };
+
+  const displayValue = getColorDisplayValue(textValue);
+  const hasError = error || validationError;
 
   return (
     <div className="flex flex-col space-y-1">
@@ -136,11 +216,11 @@ const PickerTextVariant: React.FC<BaseVariantProps> = ({
             onChange={handlePickerChange}
             disabled={disabled}
             className="w-10 h-10 p-1 border border-gray-300 rounded-lg cursor-pointer"
-            aria-invalid={!!error}
+            aria-invalid={!!hasError}
           />
-          {error && (
+          {hasError && (
             <div className="absolute right-0 top-0 h-4 w-4">
-              <InvalidIcon message={error} />
+              <InvalidIcon message={hasError} />
             </div>
           )}
         </div>
@@ -148,23 +228,24 @@ const PickerTextVariant: React.FC<BaseVariantProps> = ({
           <input
             id={id + '-text'}
             type="text"
-            value={textValue}
+            value={displayValue}
             onChange={handleTextChange}
+            onBlur={handleTextBlur}
             disabled={disabled}
             placeholder="#RRGGBB, rgb(), or name"
             className="w-32 p-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-            aria-invalid={!!error}
+            aria-invalid={!!hasError}
             autoComplete="off"
           />
-          {error && (
+          {hasError && (
             <div className="absolute right-0 top-0 h-4 w-4">
-              <InvalidIcon message={error} />
+              <InvalidIcon message={hasError} />
             </div>
           )}
         </div>
       </div>
       {description && <span className="text-xs text-gray-500">{description}</span>}
-      {error && <span className="text-xs text-red-500">{error}</span>}
+      {hasError && <span className="text-xs text-red-500">{hasError}</span>}
     </div>
   );
 };
