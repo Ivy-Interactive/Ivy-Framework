@@ -16,7 +16,7 @@ interface CodeWidgetProps {
 }
 
 const languageMap: Record<string, string> = {
-  'Csharp': 'csharp',
+  'Csharp': 'cs',
   'Javascript': 'javascript',
   'Typescript': 'typescript',
   'Python': 'python',
