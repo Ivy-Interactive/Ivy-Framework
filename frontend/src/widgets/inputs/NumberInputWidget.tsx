@@ -84,10 +84,7 @@ const SliderVariant = memo(
     const testId = props.testId;
 
     return (
-      <div
-        className="relative w-full mt-8"
-        {...(testId ? { "data-testid": testId } : {})}
-      >
+      <div className="relative w-full mt-8">
         <Slider
           min={min}
           max={max}

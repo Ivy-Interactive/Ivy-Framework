@@ -283,7 +283,7 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
     }, [value, formatValue, isFocused]);
 
     return (
-      <div className="relative" {...(testId ? { "data-testid": testId } : {})}>
+      <div className="relative">
         <Input
           ref={(node) => {
             inputRef.current = node;
@@ -324,14 +324,12 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
             }}
             className="absolute right-8 top-1/2 -translate-y-1/2 p-1 rounded hover:bg-gray-100 focus:outline-none"
             style={{ zIndex: 2 }}
-            {...(testId ? { "data-testid": testId } : {})}
           >
             <X className="h-4 w-4 text-gray-400 hover:text-gray-600" />
           </button>
         )}
         <div
           className="absolute right-0 top-0 bottom-0 flex flex-col border-l"
-          {...(testId ? { "data-testid": testId } : {})}
         >
           <button
             type="button"
@@ -341,7 +339,6 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
             }
             onClick={() => handleStep(1)}
             className="flex-1 px-1 flex items-center justify-center hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-            {...(testId ? { "data-testid": testId } : {})}
           >
             <ChevronUp className="h-3 w-3" />
           </button>
@@ -353,7 +350,6 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
             }
             onClick={() => handleStep(-1)}
             className="flex-1 px-1 flex items-center justify-center hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed border-t"
-            {...(testId ? { "data-testid": testId } : {})}
           >
             <ChevronDown className="h-3 w-3" />
           </button>
