@@ -9,8 +9,6 @@ public abstract record AbstractWidget : IWidget
 {
     private string? _id;
     private readonly Dictionary<(Type, string), object?> _attachedProps = [];
-    private static readonly bool _isDevelopmentMode = Environment.GetEnvironmentVariable("ENVIRONMENT") == "development";
-
     protected AbstractWidget(params object[] children)
     {
         Children = children;
@@ -80,8 +78,9 @@ public abstract record AbstractWidget : IWidget
                 continue;
 
             // Skip TestId property if not in development mode
-            if (property.Name == "TestId" && !_isDevelopmentMode)
-                continue;
+            //todo: We need a better way to handle this
+            // if (property.Name == "TestId" && !_isDevelopmentMode)
+            //     continue;
 
             props[Utils.PascalCaseToCamelCase(property.Name)] = JsonNode.Parse(JsonSerializer.Serialize(value, options));
         }
