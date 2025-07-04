@@ -21,6 +21,7 @@ interface TextInputWidgetProps {
   width?: string;
   height?: string;
   shortcutKey?: string;
+  testId?: string;
 }
 
 // Utility to detect Mac platform
@@ -128,6 +129,7 @@ const DefaultVariant: React.FC<{
           (props.invalid && "pr-8"),
           (props.shortcutKey && !isFocused && "pr-16"),
         )}
+        {...(props.testId ? { 'data-testid': props.testId } : {})}
       />
       {props.invalid && (
         <div className="absolute right-2.5 top-2.5">
@@ -185,6 +187,7 @@ const TextareaVariant: React.FC<{
           (props.invalid && "pr-8"),
           (props.shortcutKey && !isFocused && "pr-16"),
         )}
+        {...(props.testId ? { 'data-testid': props.testId } : {})}
       />
       {props.invalid && (
         <div className="absolute right-2.5 top-2.5 h-4 w-4">
@@ -259,6 +262,7 @@ const PasswordVariant: React.FC<{
           (hasLastPass && "pr-3"),
           (props.shortcutKey && !hasLastPass && "pr-24")
         )}
+        {...(props.testId ? { 'data-testid': props.testId } : {})}
       />
     
       {!hasLastPass && <div className={cn(
@@ -359,6 +363,7 @@ const SearchVariant: React.FC<{
           props.invalid && "pr-8",
           props.shortcutKey && !isFocused && "pr-16"
         )}
+        {...(props.testId ? { 'data-testid': props.testId } : {})}
       />
 
       {/* Error Icon */}
@@ -390,7 +395,8 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
   width,
   height,
   events,
-  shortcutKey
+  shortcutKey,
+  testId
 }) => {
   const eventHandler = useEventHandler();
   const [localValue, setLocalValue] = useState(value);
@@ -463,8 +469,9 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
     width,  
     height,
     events,
-    shortcutKey
-  }), [id, placeholder, localValue, disabled, invalid, events, width, height, shortcutKey]);
+    shortcutKey,
+    testId
+  }), [id, placeholder, localValue, disabled, invalid, events, width, height, shortcutKey, testId]);
 
   switch (variant) {
     case "Password":
