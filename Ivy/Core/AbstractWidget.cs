@@ -77,6 +77,11 @@ public abstract record AbstractWidget : IWidget
             var value = GetPropertyValue(property);
             if (value == null) //small optimization to avoid serializing null values 
                 continue;
+            
+            // Skip TestId property if not in development mode
+            if (property.Name == "TestId" && !IsDevelopmentMode())
+                continue;
+                
             props[Utils.PascalCaseToCamelCase(property.Name)] = JsonNode.Parse(JsonSerializer.Serialize(value, options));
         }
         json["props"] = props;
@@ -199,6 +204,13 @@ public abstract record AbstractWidget : IWidget
         }
 
         return widget with { Children = [.. widget.Children, child] };
+    }
+
+    private static bool IsDevelopmentMode()
+    {
+        // Check for development environment
+        var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+        return environment == "Development";
     }
 }
 

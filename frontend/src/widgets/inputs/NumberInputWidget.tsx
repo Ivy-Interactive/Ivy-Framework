@@ -30,10 +30,12 @@ interface NumberInputBaseProps {
   nullable?: boolean;
   onValueChange: (value: number | null) => void;
   currency?: string | undefined;
+  testId?: string;
 }
 
 interface NumberInputWidgetProps extends Omit<NumberInputBaseProps, 'onValueChange'> {
   variant?: "Default" | "Slider";
+  testId?: string;
 }
 
 const SliderVariant = memo(({
@@ -72,7 +74,7 @@ const SliderVariant = memo(({
   // For slider, we need a numeric value - use 0 as fallback for null
   const sliderValue = localValue ?? 0;
 
-  const testId = generateTestId({ variant: "Slider", disabled, invalid, ...props });
+  const testId = props.testId || generateTestId({ variant: "Slider", disabled, invalid, ...props });
 
   return (
     <div className="relative w-full mt-8" data-testid={getTestId(`${testId}-container`)}>
@@ -138,7 +140,7 @@ const NumberVariant = memo(({
     }
   }, [onValueChange, nullable]);
 
-  const testId = generateTestId({ variant: "Default", disabled, invalid, nullable, placeholder, formatStyle, currency, min, max, step, precision, ...props });
+  const testId = props.testId || generateTestId({ variant: "Default", disabled, invalid, nullable, placeholder, formatStyle, currency, min, max, step, precision, ...props });
 
   return (
     <div className="relative">
@@ -173,6 +175,7 @@ export const NumberInputWidget = memo(({
   id, 
   variant = "Default",
   nullable = false,
+  testId,
   ...props
 }: NumberInputWidgetProps) => {
   const eventHandler = useEventHandler() as EventHandler;
@@ -192,9 +195,9 @@ export const NumberInputWidget = memo(({
   }, [eventHandler, id, props.min, props.max]);
 
   return variant === "Slider" ? (
-    <SliderVariant id={id} {...props} value={normalizedValue} onValueChange={handleChange} />
+    <SliderVariant id={id} {...props} testId={testId} value={normalizedValue} onValueChange={handleChange} />
   ) : (
-    <NumberVariant id={id} {...props} value={normalizedValue} nullable={nullable} onValueChange={handleChange} />
+    <NumberVariant id={id} {...props} testId={testId} value={normalizedValue} nullable={nullable} onValueChange={handleChange} />
   );
 });
 
