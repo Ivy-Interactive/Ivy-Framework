@@ -12,6 +12,7 @@ import { getHeight, getWidth, inputStyles } from '@/lib/styles';
 import { InvalidIcon } from '@/components/InvalidIcon';
 import "./CodeInputWidget.css";
 import { StreamLanguage } from "@codemirror/language";
+import { cpp } from '@codemirror/lang-cpp';
 
 const dbmlMode = {
   startState: () => ({}),
@@ -65,6 +66,7 @@ interface CodeInputWidgetProps {
 }
 
 const languageExtensions = {
+  Csharp: cpp,
   Javascript: javascript,
   Python: python,
   Sql: sql,
