@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "@codemirror/lang-cpp": "^6.0.3"
+  }
+}
