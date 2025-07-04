@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useMemo, useEffect, ChangeEvent, FocusEvent, WheelEvent, MouseEvent as ReactMouseEvent } from 'react';
 import { Input } from '@/components/ui/input';
 import { ChevronUp, ChevronDown, X } from 'lucide-react';
+import { getTestId } from '@/lib/utils';
 
 interface NumberInputProps {
   min?: number;
@@ -15,6 +16,7 @@ interface NumberInputProps {
   allowNegative?: boolean;
   className?: string;
   nullable?: boolean;
+  'data-testid'?: string;
 }
 
 interface DragState {
@@ -43,6 +45,7 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(({
   allowNegative = true,
   className = '',
   nullable = false,
+  'data-testid': testId,
   ...props
 }, ref) => {
   const [displayValue, setDisplayValue] = useState<string>('');
@@ -228,7 +231,7 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(({
   }, [value, formatValue, isFocused]);
 
   return (
-    <div className="relative">
+    <div className="relative" data-testid={getTestId(testId ? `${testId}-container` : '')}>
       <Input
         ref={(node) => {
           inputRef.current = node;
@@ -253,6 +256,7 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(({
         disabled={disabled}
         placeholder={placeholder}
         className={`${className} pr-14 ${!isValid ? 'border-red-500' : ''} ${dragState?.isDragging ? 'select-none' : ''}`}
+        data-testid={getTestId(testId ? `${testId}-input` : '')}
         {...props}
       />
       {nullable && value !== null && !disabled && onChange && (
@@ -266,17 +270,19 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(({
           }}
           className="absolute right-8 top-1/2 -translate-y-1/2 p-1 rounded hover:bg-gray-100 focus:outline-none"
           style={{ zIndex: 2 }}
+          data-testid={getTestId(testId ? `${testId}-clear` : '')}
         >
           <X className="h-4 w-4 text-gray-400 hover:text-gray-600" />
         </button>
       )}
-      <div className="absolute right-0 top-0 bottom-0 flex flex-col border-l">
+      <div className="absolute right-0 top-0 bottom-0 flex flex-col border-l" data-testid={getTestId(testId ? `${testId}-step-buttons` : '')}>
         <button
           type="button"
           tabIndex={-1}
           disabled={disabled || (max !== undefined && value !== null && value >= max)}
           onClick={() => handleStep(1)}
           className="flex-1 px-1 flex items-center justify-center hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+          data-testid={getTestId(testId ? `${testId}-step-up` : '')}
         >
           <ChevronUp className="h-3 w-3" />
         </button>
@@ -286,6 +292,7 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(({
           disabled={disabled || (min !== undefined && value !== null && value <= min)}
           onClick={() => handleStep(-1)}
           className="flex-1 px-1 flex items-center justify-center hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed border-t"
+          data-testid={getTestId(testId ? `${testId}-step-down` : '')}
         >
           <ChevronDown className="h-3 w-3" />
         </button>

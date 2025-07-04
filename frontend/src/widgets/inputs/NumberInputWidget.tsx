@@ -5,6 +5,7 @@ import { Slider } from '@/components/ui/slider';
 import { cn } from '@/lib/utils';
 import { inputStyles } from '@/lib/styles';
 import { InvalidIcon } from '@/components/InvalidIcon';
+import { generateTestId, getTestId } from '@/lib/utils';
 import React from 'react';
 
 const formatStyleMap = {
@@ -43,6 +44,7 @@ const SliderVariant = memo(({
   disabled = false,
   invalid,
   onValueChange,
+  ...props
 }: NumberInputBaseProps) => {
   // Local state for live feedback (optional, fallback to prop value)
   const [localValue, setLocalValue] = React.useState<number | null>(value);
@@ -70,8 +72,10 @@ const SliderVariant = memo(({
   // For slider, we need a numeric value - use 0 as fallback for null
   const sliderValue = localValue ?? 0;
 
+  const testId = generateTestId({ variant: "Slider", disabled, invalid, ...props });
+
   return (
-    <div className="relative w-full mt-8">
+    <div className="relative w-full mt-8" data-testid={getTestId(`${testId}-container`)}>
       <Slider
         min={min}
         max={max}
@@ -81,6 +85,7 @@ const SliderVariant = memo(({
         onValueChange={handleSliderChange}
         onValueCommit={handleSliderCommit}
         className={cn(invalid && inputStyles.invalid)}
+        data-testid={getTestId(`${testId}-slider`)}
       />
       <span
           className="mt-4 flex w-full items-center justify-between gap-1 text-xs font-sm text-muted-foreground"
@@ -112,7 +117,8 @@ const NumberVariant = memo(({
   invalid,
   nullable = false,
   onValueChange,
-  currency
+  currency,
+  ...props
 }: NumberInputBaseProps) => {
   const formatConfig = useMemo(() => ({
     style: formatStyleMap[formatStyle],
@@ -132,6 +138,8 @@ const NumberVariant = memo(({
     }
   }, [onValueChange, nullable]);
 
+  const testId = generateTestId({ variant: "Default", disabled, invalid, nullable, placeholder, formatStyle, currency, min, max, step, precision, ...props });
+
   return (
     <div className="relative">
       <NumberInput 
@@ -148,6 +156,7 @@ const NumberVariant = memo(({
           invalid && "pr-8"
         )}
         nullable={nullable}
+        data-testid={getTestId(testId)}
       />
       {invalid && (
         <div className="absolute right-8 top-2">

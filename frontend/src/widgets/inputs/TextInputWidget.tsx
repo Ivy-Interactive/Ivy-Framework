@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input";
 import { EyeIcon, EyeOffIcon, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { cn } from '@/lib/utils';
+import { cn, getTestId } from '@/lib/utils';
 import { getHeight, getWidth, inputStyles } from '@/lib/styles';
 import { InvalidIcon } from '@/components/InvalidIcon';
 import { useFocusable } from '@/hooks/use-focus-management';
@@ -359,7 +359,7 @@ const SearchVariant: React.FC<{
           props.invalid && "pr-8",
           props.shortcutKey && !isFocused && "pr-16"
         )}
-        data-testid="sidebar-search"
+        data-testid={getTestId("sidebar-search")}
       />
 
       {/* Error Icon */}
