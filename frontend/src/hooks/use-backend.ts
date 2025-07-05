@@ -94,7 +94,7 @@ export const useBackend = () => {
     console.log("Update", message);
     setWidgetTree(currentTree => {
       if (!currentTree) return null;
-      var newWidgetTree = { ...currentTree };
+      const newWidgetTree = { ...currentTree };
       message.forEach((update) => {
         let parent = newWidgetTree;
         if(update.indices.length === 0) {

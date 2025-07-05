@@ -62,7 +62,7 @@ export function Loading({ }: { }) {
         );
         
         const indicesMutatedThisStep = new Set<number>();
-        let pickableIndices = [...availableForMutationThisStep];
+        const pickableIndices = [...availableForMutationThisStep];
 
         while (indicesMutatedThisStep.size < cellsToMutateCount && pickableIndices.length > 0) {
           const randomIndexInPickable = Math.floor(Math.random() * pickableIndices.length);
