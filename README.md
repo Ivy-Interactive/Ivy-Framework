@@ -93,6 +93,14 @@ You can also run `ivy samples` to see all the components that Ivy offers and `iv
 
 Changes in /frontend will be hot-reloaded by Vite and changes in /Ivy.Samples will be hot-reloaded by Ivy.
 
+### Code Formatting
+
+To format .NET code:
+
+```bash
+dotnet format
+```
+
 ## Contributing
 
 1. **Fork** the repository.

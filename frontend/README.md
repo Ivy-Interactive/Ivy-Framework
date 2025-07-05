@@ -7,6 +7,14 @@ npm run dev
 npm run build
 ```
 
+### Linting
+
+To check code formatting and linting rules:
+
+```bash
+npm run lint
+```
+
 ## Testing
 
 This project uses Playwright for end-to-end testing.
