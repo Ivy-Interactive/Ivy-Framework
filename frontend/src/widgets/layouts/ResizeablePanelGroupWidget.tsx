@@ -40,7 +40,7 @@ export const ResizeablePanelGroupWidget: React.FC<ResizeablePanelGroupWidgetProp
 }) => {
   const panelWidgets = React.Children.toArray(children).filter((child) => 
     React.isValidElement(child) && 
-    (child.type as any)?.displayName === 'ResizeablePanelWidget'
+    (child.type as React.ComponentType<ResizeablePanelWidgetProps>)?.displayName === 'ResizeablePanelWidget'
   );
 
   if (panelWidgets.length === 0) return <div className='remove-ancestor-padding'></div>;
