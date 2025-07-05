@@ -32,13 +32,11 @@ interface NumberInputBaseProps {
   nullable?: boolean;
   onValueChange: (value: number | null) => void;
   currency?: string | undefined;
-  testId?: string;
 }
 
 interface NumberInputWidgetProps
   extends Omit<NumberInputBaseProps, "onValueChange"> {
   variant?: "Default" | "Slider";
-  testId?: string;
 }
 
 const SliderVariant = memo(
@@ -50,7 +48,6 @@ const SliderVariant = memo(
     disabled = false,
     invalid,
     onValueChange,
-    ...props
   }: NumberInputBaseProps) => {
     // Local state for live feedback (optional, fallback to prop value)
     const [localValue, setLocalValue] = React.useState<number | null>(value);
@@ -81,8 +78,6 @@ const SliderVariant = memo(
     // For slider, we need a numeric value - use 0 as fallback for null
     const sliderValue = localValue ?? 0;
 
-    const testId = props.testId;
-
     return (
       <div className="relative w-full mt-8">
         <Slider
@@ -94,7 +89,6 @@ const SliderVariant = memo(
           onValueChange={handleSliderChange}
           onValueCommit={handleSliderCommit}
           className={cn(invalid && inputStyles.invalid)}
-          {...(testId ? { "data-testid": testId } : {})}
         />
         <span
           className="mt-4 flex w-full items-center justify-between gap-1 text-xs font-sm text-muted-foreground"
@@ -129,7 +123,6 @@ const NumberVariant = memo(
     nullable = false,
     onValueChange,
     currency,
-    ...props
   }: NumberInputBaseProps) => {
     const formatConfig = useMemo(
       () => ({
@@ -155,8 +148,6 @@ const NumberVariant = memo(
       [onValueChange, nullable]
     );
 
-    const testId = props.testId;
-
     return (
       <div className="relative">
         <NumberInput
@@ -170,7 +161,6 @@ const NumberVariant = memo(
           onChange={handleNumberChange}
           className={cn(invalid && inputStyles.invalid, invalid && "pr-8")}
           nullable={nullable}
-          {...(testId ? { "data-testid": testId } : {})}
         />
         {invalid && (
           <div className="absolute right-8 top-2">
@@ -189,7 +179,6 @@ export const NumberInputWidget = memo(
     id,
     variant = "Default",
     nullable = false,
-    testId,
     ...props
   }: NumberInputWidgetProps) => {
     const eventHandler = useEventHandler() as EventHandler;
@@ -219,7 +208,6 @@ export const NumberInputWidget = memo(
       <SliderVariant
         id={id}
         {...props}
-        testId={testId}
         value={normalizedValue}
         onValueChange={handleChange}
       />
@@ -227,7 +215,6 @@ export const NumberInputWidget = memo(
       <NumberVariant
         id={id}
         {...props}
-        testId={testId}
         value={normalizedValue}
         nullable={nullable}
         onValueChange={handleChange}

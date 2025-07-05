@@ -24,7 +24,6 @@ interface NumberInputProps {
   allowNegative?: boolean;
   className?: string;
   nullable?: boolean;
-  "data-testid"?: string;
 }
 
 interface DragState {
@@ -55,7 +54,6 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
       allowNegative = true,
       className = "",
       nullable = false,
-      "data-testid": testId,
       ...props
     },
     ref
@@ -310,7 +308,6 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
           className={`${className} pr-14 ${!isValid ? "border-red-500" : ""} ${
             dragState?.isDragging ? "select-none" : ""
           }`}
-          {...(testId ? { "data-testid": testId } : {})}
           {...props}
         />
         {nullable && value !== null && !disabled && onChange && (

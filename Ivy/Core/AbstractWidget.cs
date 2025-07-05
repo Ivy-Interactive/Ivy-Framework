@@ -77,11 +77,6 @@ public abstract record AbstractWidget : IWidget
             if (value == null) //small optimization to avoid serializing null values 
                 continue;
 
-            // Skip TestId property if not in development mode
-            //todo: We need a better way to handle this
-            // if (property.Name == "TestId" && !_isDevelopmentMode)
-            //     continue;
-
             props[Utils.PascalCaseToCamelCase(property.Name)] = JsonNode.Parse(JsonSerializer.Serialize(value, options));
         }
         json["props"] = props;

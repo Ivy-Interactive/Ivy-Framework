@@ -19,13 +19,18 @@ export const renderWidgetTree = (
   node: WidgetNode
 ): React.ReactNode => {
 
-  const Component = widgetMap[node.type] as React.ComponentType<any>;
+  const Component = widgetMap[node.type] as React.ComponentType<Record<string, unknown>>;
 
   if (!Component) {
     return <div>{`Unknown component type: ${node.type}`}</div>
   }
 
-  const props = { ...node.props, id: node.id, events: node.events }
+  const props: Record<string, unknown> = { ...node.props, id: node.id, events: node.events }
+  
+  if ('testId' in props && props.testId) {
+    props['data-testid'] = props.testId;
+    delete props.testId;
+  }
 
   const children = flattenChildren(node.children || []);
 
