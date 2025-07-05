@@ -3,7 +3,7 @@ import React from 'react';
 
 interface XmlWidgetProps {
   id: string;
-  content: any;
+  content: string;
 }
 
 const XmlWidget: React.FC<XmlWidgetProps> = ({ id, content }) => (
