@@ -7,6 +7,9 @@
     "dev": "vite",
     "build": "tsc -b && node --max-old-space-size=4096 ./node_modules/vite/bin/vite.js build",
     "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write \"src/**/*.{ts,tsx,json,css,md}\" \"*.{ts,tsx,json,md}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,json,css,md}\" \"*.{ts,tsx,json,md}\"",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -104,10 +107,12 @@
     "autoprefixer": "^10.4.20",
     "canvas-confetti": "^1.9.3",
     "eslint": "^9.30.1",
+    "eslint-config-prettier": "^10.1.5",
     "eslint-plugin-react-hooks": "^5.0.0",
     "eslint-plugin-react-refresh": "^0.4.14",
     "globals": "^15.11.0",
     "postcss": "^8.4.49",
+    "prettier": "^2.8.8",
     "tailwindcss": "^3.4.15",
     "typescript": "~5.6.2",
     "typescript-eslint": "^8.11.0",
