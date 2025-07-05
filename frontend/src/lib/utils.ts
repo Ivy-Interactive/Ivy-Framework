@@ -49,11 +49,9 @@ export function getIvyHost():string {
   return window.location.origin;
 }
 
-export function camelCase(titleCase: any):any {
+export function camelCase(titleCase: unknown): unknown {
   if (typeof titleCase !== 'string') {
     return titleCase;
   }
   return titleCase.charAt(0).toLowerCase() + titleCase.slice(1);
 }
-
-

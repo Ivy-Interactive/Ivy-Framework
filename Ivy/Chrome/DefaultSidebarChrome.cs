@@ -169,7 +169,7 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
             ).RemoveParentPadding().Variant(TabsVariant.Tabs).Padding(0);
         }
 
-        var searchInput = search.ToSearchInput().ShortcutKey("CTRL+K");
+        var searchInput = search.ToSearchInput().ShortcutKey("CTRL+K").TestId("sidebar-search");
         var sidebarMenu = new SidebarMenu(
             OnMenuSelect,
             menuItems.Value

@@ -359,7 +359,6 @@ const SearchVariant: React.FC<{
           props.invalid && "pr-8",
           props.shortcutKey && !isFocused && "pr-16"
         )}
-        data-testid="sidebar-search"
       />
 
       {/* Error Icon */}

@@ -8,8 +8,7 @@ namespace Ivy.Core;
 public abstract record AbstractWidget : IWidget
 {
     private string? _id;
-    private readonly Dictionary<(Type, string), object?> _attachedProps = new();
-
+    private readonly Dictionary<(Type, string), object?> _attachedProps = [];
     protected AbstractWidget(params object[] children)
     {
         Children = children;
@@ -77,6 +76,7 @@ public abstract record AbstractWidget : IWidget
             var value = GetPropertyValue(property);
             if (value == null) //small optimization to avoid serializing null values 
                 continue;
+
             props[Utils.PascalCaseToCamelCase(property.Name)] = JsonNode.Parse(JsonSerializer.Serialize(value, options));
         }
         json["props"] = props;
@@ -200,5 +200,6 @@ public abstract record AbstractWidget : IWidget
 
         return widget with { Children = [.. widget.Children, child] };
     }
+
 }
 

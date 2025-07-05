@@ -34,25 +34,33 @@ public class NumberInputApp : SampleBase
                   | nullIntValue
                     .ToNumberInput()
                     .Placeholder("Placeholder")
+                    .TestId("number-input-nullable-main")
                   | intValue.ToNumberInput()
+                    .TestId("number-input-int-main")
                   | intValue
                     .ToNumberInput()
                     .Disabled()
+                    .TestId("number-input-int-disabled-main")
                   | intValue
                     .ToNumberInput()
                     .Invalid(loremIpsumString)
+                    .TestId("number-input-int-invalid-main")
 
                   | Text.InlineCode("ToSliderInput()")
                   | nullIntValue
                     .ToSliderInput()
                     .Placeholder("Placeholder")
+                    .TestId("number-input-nullable-slider-main")
                   | intValue.ToSliderInput()
+                    .TestId("number-input-int-slider-main")
                   | intValue
                     .ToSliderInput()
                     .Disabled()
+                    .TestId("number-input-int-disabled-slider-main")
                   | intValue
                     .ToSliderInput()
                     .Invalid(loremIpsumString)
+                    .TestId("number-input-int-invalid-slider-main")
                )
 
                // Data Binding:

@@ -14,6 +14,7 @@ public abstract record WidgetBase<T> : AbstractWidget where T : WidgetBase<T>
     [Prop] public Size? Width { get; set; }
     [Prop] public Size? Height { get; set; }
     [Prop] public bool Visible { get; set; } = true;
+    [Prop] public string? TestId { get; set; }
 }
 
 public static class WidgetBaseExtensions
@@ -125,5 +126,10 @@ public static class WidgetBaseExtensions
     public static T Hide<T>(this T widget) where T : WidgetBase<T>
     {
         return widget with { Visible = false };
+    }
+
+    public static T TestId<T>(this T widget, string testId) where T : WidgetBase<T>
+    {
+        return widget with { TestId = testId };
     }
 }
