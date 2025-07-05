@@ -15,8 +15,7 @@ export const IvyLogoWidget: React.FC<IvyLogoWidgetProps> = ({
   const styles = {
       ...getWidth(width),
       ...getHeight(height),
-      ...getColor
-      (color, 'color', 'background')
+      ...getColor(color, 'color', 'background')
   };
 
   return (
