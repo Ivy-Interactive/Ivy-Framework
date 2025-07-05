@@ -3,7 +3,7 @@ interface SlotWidgetProps {
 }
 
 export const SlotWidget: React.FC<
-  SlotWidgetProps & { children?: React.ReactNode }
+    SlotWidgetProps & { children?: React.ReactNode }
 > = ({ children }) => {
   return <>{children}</>;
 };
