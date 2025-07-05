@@ -1,5 +1,5 @@
-import { getHeight, getWidth } from '@/lib/styles';
-import React, { useEffect, useState } from 'react';
+import { getHeight, getWidth } from "@/lib/styles";
+import React, { useEffect, useState } from "react";
 
 interface IframeWidgetProps {
   id: string;
@@ -9,12 +9,12 @@ interface IframeWidgetProps {
   refreshToken?: number;
 }
 
-export const IframeWidget: React.FC<IframeWidgetProps> = ({ 
-  id, 
-  src, 
-  width, 
+export const IframeWidget: React.FC<IframeWidgetProps> = ({
+  id,
+  src,
+  width,
   height,
-   refreshToken 
+  refreshToken,
 }) => {
   const [iframeKey, setIframeKey] = useState(id);
 
@@ -27,7 +27,5 @@ export const IframeWidget: React.FC<IframeWidgetProps> = ({
     setIframeKey(`${id}-${refreshToken}`);
   }, [refreshToken, id]);
 
-  return (
-    <iframe src={src} key={iframeKey} style={styles} />
-  );
+  return <iframe src={src} key={iframeKey} style={styles} />;
 };

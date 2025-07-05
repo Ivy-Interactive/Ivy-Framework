@@ -1,6 +1,5 @@
-import { useEventHandler } from '@/components/EventHandlerContext';
-import React, { useRef, useState } from 'react';
-
+import { useEventHandler } from "@/components/EventHandlerContext";
+import Icon from "@/components/Icon";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,10 +13,10 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { MenuItem } from '@/types/widgets';
-import Icon from '@/components/Icon';
-import { camelCase } from '@/lib/utils';
+} from "@/components/ui/dropdown-menu";
+import { camelCase } from "@/lib/utils";
+import { MenuItem } from "@/types/widgets";
+import React, { useRef, useState } from "react";
 
 interface DropDownMenuWidgetProps {
   id: string;
@@ -32,7 +31,15 @@ interface DropDownMenuWidgetProps {
   };
 }
 
-export const DropDownMenuWidget: React.FC<DropDownMenuWidgetProps> = ({ slots, id, items, align = "Start", side = "Bottom", sideOffset = 8, alignOffset = 0 }) => {
+export const DropDownMenuWidget: React.FC<DropDownMenuWidgetProps> = ({
+  slots,
+  id,
+  items,
+  align = "Start",
+  side = "Bottom",
+  sideOffset = 8,
+  alignOffset = 0,
+}) => {
   if (!slots?.Trigger) {
     return (
       <div className="text-red-500">
@@ -45,14 +52,14 @@ export const DropDownMenuWidget: React.FC<DropDownMenuWidgetProps> = ({ slots, i
   const [open, setOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
 
-  const onItemClick = (item:MenuItem) => {
-    if(!item.tag) return;
+  const onItemClick = (item: MenuItem) => {
+    if (!item.tag) return;
     eventHandler("OnSelect", id, [item.tag]);
-  } 
+  };
 
   const handleOpenChange = (isOpen: boolean) => {
     setOpen(isOpen);
-    
+
     // When dropdown closes, blur the trigger after a short delay
     // to remove the focus ring
     if (!isOpen) {
@@ -75,12 +82,12 @@ export const DropDownMenuWidget: React.FC<DropDownMenuWidgetProps> = ({ slots, i
           </React.Fragment>
         );
       }
-      
+
       // Handle separator variant
       if (item.variant === "Separator") {
         return <DropdownMenuSeparator key={`separator-${index}`} />;
       }
-  
+
       // Handle checkbox variant
       if (item.variant === "Checkbox") {
         return (
@@ -99,7 +106,7 @@ export const DropDownMenuWidget: React.FC<DropDownMenuWidgetProps> = ({ slots, i
           </DropdownMenuItem>
         );
       }
-  
+
       // Handle radio variant
       if (item.variant === "Radio") {
         return (
@@ -118,7 +125,7 @@ export const DropDownMenuWidget: React.FC<DropDownMenuWidgetProps> = ({ slots, i
           </DropdownMenuItem>
         );
       }
-  
+
       // Handle submenu with children
       if (item.children && item.children.length > 0) {
         return (
@@ -138,7 +145,7 @@ export const DropDownMenuWidget: React.FC<DropDownMenuWidgetProps> = ({ slots, i
           </DropdownMenuSub>
         );
       }
-  
+
       // Default menu item
       return (
         <DropdownMenuItem
@@ -161,7 +168,12 @@ export const DropDownMenuWidget: React.FC<DropDownMenuWidgetProps> = ({ slots, i
       <DropdownMenuTrigger ref={triggerRef} asChild>
         <div>{slots.Trigger}</div>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align={camelCase(align)} side={camelCase(side)} sideOffset={sideOffset} alignOffset={alignOffset} >
+      <DropdownMenuContent
+        align={camelCase(align)}
+        side={camelCase(side)}
+        sideOffset={sideOffset}
+        alignOffset={alignOffset}
+      >
         {slots.Header && <DropdownMenuLabel>{slots.Header}</DropdownMenuLabel>}
         {renderMenuItems(items)}
       </DropdownMenuContent>

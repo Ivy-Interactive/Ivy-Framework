@@ -1,18 +1,18 @@
-import { ThumbsUp, ThumbsDown } from 'lucide-react';
-import { cn } from "@/lib/utils";
-import { inputStyles } from '@/lib/styles';
 import { InvalidIcon } from "@/components/InvalidIcon";
+import { inputStyles } from "@/lib/styles";
+import { cn } from "@/lib/utils";
+import { ThumbsUp, ThumbsDown } from "lucide-react";
 
 export enum ThumbsEnum {
   Down = 1,
   Up = 2,
-  None = 0
+  None = 0,
 }
 
 interface ThumbsRatingProps {
   value?: number;
   onRate?: (rating: number) => void;
-  size?: 'sm' | 'md' | 'lg';
+  size?: "sm" | "md" | "lg";
   className?: string;
   disabled?: boolean;
   invalid?: string;
@@ -21,7 +21,7 @@ interface ThumbsRatingProps {
 const ThumbsRating = ({
   value = ThumbsEnum.None,
   onRate,
-  size = 'sm',
+  size = "sm",
   className,
   disabled = false,
   invalid,
@@ -29,7 +29,7 @@ const ThumbsRating = ({
   const iconSizes = {
     sm: 16,
     md: 24,
-    lg: 32
+    lg: 32,
   };
 
   const handleClick = (rating: number) => {
@@ -39,7 +39,13 @@ const ThumbsRating = ({
 
   return (
     <div className="relative">
-      <div className={cn("flex gap-1 items-center", disabled && "opacity-50", className)}>
+      <div
+        className={cn(
+          "flex gap-1 items-center",
+          disabled && "opacity-50",
+          className
+        )}
+      >
         <button
           onClick={() => handleClick(ThumbsEnum.Down)}
           disabled={disabled}
@@ -49,7 +55,8 @@ const ThumbsRating = ({
             "focus-visible:outline-none focus-visible:ring-2",
             "focus-visible:ring-ring focus-visible:ring-offset-2",
             value === ThumbsEnum.Down && "bg-red-100 dark:bg-red-900/30",
-            disabled && "cursor-not-allowed hover:bg-transparent dark:hover:bg-transparent",
+            disabled &&
+              "cursor-not-allowed hover:bg-transparent dark:hover:bg-transparent",
             invalid && inputStyles.invalid
           )}
         >
@@ -57,7 +64,9 @@ const ThumbsRating = ({
             size={iconSizes[size]}
             className={cn(
               "transition-colors",
-              value === ThumbsEnum.Down ? "text-red-600 dark:text-red-400" : "text-muted-foreground"
+              value === ThumbsEnum.Down
+                ? "text-red-600 dark:text-red-400"
+                : "text-muted-foreground"
             )}
           />
         </button>
@@ -71,7 +80,8 @@ const ThumbsRating = ({
             "focus-visible:outline-none focus-visible:ring-2",
             "focus-visible:ring-ring focus-visible:ring-offset-2",
             value === ThumbsEnum.Up && "bg-green-100 dark:bg-green-900/30",
-            disabled && "cursor-not-allowed hover:bg-transparent dark:hover:bg-transparent",
+            disabled &&
+              "cursor-not-allowed hover:bg-transparent dark:hover:bg-transparent",
             invalid && inputStyles.invalid
           )}
         >
@@ -79,7 +89,9 @@ const ThumbsRating = ({
             size={iconSizes[size]}
             className={cn(
               "transition-colors",
-              value === ThumbsEnum.Up ? "text-green-600 dark:text-green-400" : "text-muted-foreground"
+              value === ThumbsEnum.Up
+                ? "text-green-600 dark:text-green-400"
+                : "text-muted-foreground"
             )}
           />
         </button>

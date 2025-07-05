@@ -1,19 +1,59 @@
-import { XAxisProps, YAxisProps, LineProps, LabelProps, LegendProps, LegendType, TooltipProps, AreaProps, BarProps, PieProps, LabelListProps } from 'recharts';
-import { CurveType } from 'recharts/types/shape/Curve';
-import { camelCase } from '@/lib/utils';
-import DataFormatter from 'excel-style-dataformatter';
+import { camelCase } from "@/lib/utils";
+import DataFormatter from "excel-style-dataformatter";
+import {
+  XAxisProps,
+  YAxisProps,
+  LineProps,
+  LabelProps,
+  LegendProps,
+  LegendType,
+  TooltipProps,
+  AreaProps,
+  BarProps,
+  PieProps,
+  LabelListProps,
+} from "recharts";
+import { CurveType } from "recharts/types/shape/Curve";
 
-export type ColorScheme = 'Default' | 'Rainbow'
+export type ColorScheme = "Default" | "Rainbow";
 
-const defaultColors = ["chart-1","chart-2","chart-3","chart-4","chart-5"];
-const rainbowColors = ["blue", "cyan", "yellow", "red", "orange", "purple", "lime", "indigo", "rose", "green", "pink", "teal", "amber", "violet", "emerald", "fuchsia", "sky"];
+const defaultColors = ["chart-1", "chart-2", "chart-3", "chart-4", "chart-5"];
+const rainbowColors = [
+  "blue",
+  "cyan",
+  "yellow",
+  "red",
+  "orange",
+  "purple",
+  "lime",
+  "indigo",
+  "rose",
+  "green",
+  "pink",
+  "teal",
+  "amber",
+  "violet",
+  "emerald",
+  "fuchsia",
+  "sky",
+];
 
-export const getColorGenerator = (scheme: ColorScheme): [((index: number) => string), JSX.Element | null] => {
+export const getColorGenerator = (
+  scheme: ColorScheme
+): [(index: number) => string, JSX.Element | null] => {
   switch (scheme) {
-    case 'Rainbow':
-      return [(index: number) => "var(--"+rainbowColors[index % rainbowColors.length]+")", null];
+    case "Rainbow":
+      return [
+        (index: number) =>
+          "var(--" + rainbowColors[index % rainbowColors.length] + ")",
+        null,
+      ];
     default:
-      return [(index: number) => "var(--"+defaultColors[index % defaultColors.length]+")", null];
+      return [
+        (index: number) =>
+          "var(--" + defaultColors[index % defaultColors.length] + ")",
+        null,
+      ];
   }
 };
 
@@ -23,14 +63,22 @@ export interface ExtendedXAxisProps extends XAxisProps {
 }
 
 export const generateXAxisProps = (props: ExtendedXAxisProps) => {
-  const { orientation, type, dataKey, scale, domainStart, domainEnd, ...xAxisProps } = props;
+  const {
+    orientation,
+    type,
+    dataKey,
+    scale,
+    domainStart,
+    domainEnd,
+    ...xAxisProps
+  } = props;
   return {
     dataKey: camelCase(dataKey),
-    scale: camelCase(scale) as XAxisProps['scale'],
-    type: camelCase(type) as XAxisProps['type'],
+    scale: camelCase(scale) as XAxisProps["scale"],
+    type: camelCase(type) as XAxisProps["type"],
     domain: [domainStart, domainEnd],
-    orientation: camelCase(orientation) as XAxisProps['orientation'],
-    ...xAxisProps
+    orientation: camelCase(orientation) as XAxisProps["orientation"],
+    ...xAxisProps,
   };
 };
 
@@ -40,25 +88,34 @@ export interface ExtendedYAxisProps extends YAxisProps {
 }
 
 export const generateYAxisProps = (props: ExtendedYAxisProps) => {
-  const { orientation, type, dataKey, scale, domainStart, domainEnd, ...yAxisProps } = props;
+  const {
+    orientation,
+    type,
+    dataKey,
+    scale,
+    domainStart,
+    domainEnd,
+    ...yAxisProps
+  } = props;
   return {
     dataKey: camelCase(dataKey),
-    scale: camelCase(scale) as YAxisProps['scale'],
-    type: camelCase(type) as YAxisProps['type'],
+    scale: camelCase(scale) as YAxisProps["scale"],
+    type: camelCase(type) as YAxisProps["type"],
     domain: [domainStart, domainEnd],
-    orientation: camelCase(orientation) as YAxisProps['orientation'],
-    ...yAxisProps
+    orientation: camelCase(orientation) as YAxisProps["orientation"],
+    ...yAxisProps,
   };
 };
 
 export const generateLegendProps = (legend: LegendProps) => {
-  const { ref, layout, align, verticalAlign, iconType, ...legendProps } = legend;
+  const { ref, layout, align, verticalAlign, iconType, ...legendProps } =
+    legend;
   return {
-    layout: camelCase(layout) as LegendProps['layout'],
-    align: camelCase(align) as LegendProps['align'],
-    verticalAlign: camelCase(verticalAlign) as LegendProps['verticalAlign'],
-    iconType: camelCase(iconType) as LegendProps['iconType'],
-    ...legendProps
+    layout: camelCase(layout) as LegendProps["layout"],
+    align: camelCase(align) as LegendProps["align"],
+    verticalAlign: camelCase(verticalAlign) as LegendProps["verticalAlign"],
+    iconType: camelCase(iconType) as LegendProps["iconType"],
+    ...legendProps,
   };
 };
 
@@ -74,25 +131,39 @@ export interface ExtendedLineProps extends LineProps {
 }
 
 export const generateLineProps = (
-  props: ExtendedLineProps, 
-  index: number, 
+  props: ExtendedLineProps,
+  index: number,
   colorGenerator: (index: number) => string
 ) => {
-  const { ref, animated, legendType, stroke, dataKey, curveType, strokeDashArray, label, ...lineProps } = props;
-  
+  const {
+    ref,
+    animated,
+    legendType,
+    stroke,
+    dataKey,
+    curveType,
+    strokeDashArray,
+    label,
+    ...lineProps
+  } = props;
+
   return {
     dataKey: camelCase(dataKey),
     type: camelCase(curveType) as CurveType,
     legendType: camelCase(legendType) as LegendType,
     isAnimationActive: animated,
-    stroke: (stroke && `var(--${stroke.toLowerCase()})`) || colorGenerator(index),
+    stroke:
+      (stroke && `var(--${stroke.toLowerCase()})`) || colorGenerator(index),
     strokeDasharray: strokeDashArray,
     label: label && {
-      fill: (label.color && `var(--${label.color.toLowerCase()})`) || colorGenerator(index) || undefined,
+      fill:
+        (label.color && `var(--${label.color.toLowerCase()})`) ||
+        colorGenerator(index) ||
+        undefined,
       offset: label.offset,
-      position: camelCase(label.position) as LabelProps['position']
+      position: camelCase(label.position) as LabelProps["position"],
     },
-    ...lineProps
+    ...lineProps,
   };
 };
 
@@ -108,25 +179,45 @@ export interface ExtendedAreaProps extends AreaProps {
 }
 
 export const generateAreaProps = (
-  props: ExtendedAreaProps, 
-  index: number, 
+  props: ExtendedAreaProps,
+  index: number,
   colorGenerator: (index: number) => string
 ) => {
-  const { ref, animated, legendType, stroke, fill, dataKey, curveType, strokeDashArray, label, ...areaProps } = props;
+  const {
+    ref,
+    animated,
+    legendType,
+    stroke,
+    fill,
+    dataKey,
+    curveType,
+    strokeDashArray,
+    label,
+    ...areaProps
+  } = props;
   return {
     dataKey: camelCase(dataKey),
     type: camelCase(curveType) as CurveType,
     legendType: camelCase(legendType) as LegendType,
     isAnimationActive: animated,
-    stroke: (stroke && `var(--${stroke.toLowerCase()})`) || (fill && `var(--${fill.toLowerCase()})`) || colorGenerator(index),
-    fill: (fill && `var(--${fill.toLowerCase()})`) || (stroke && `var(--${stroke.toLowerCase()})`) || colorGenerator(index),
+    stroke:
+      (stroke && `var(--${stroke.toLowerCase()})`) ||
+      (fill && `var(--${fill.toLowerCase()})`) ||
+      colorGenerator(index),
+    fill:
+      (fill && `var(--${fill.toLowerCase()})`) ||
+      (stroke && `var(--${stroke.toLowerCase()})`) ||
+      colorGenerator(index),
     strokeDasharray: strokeDashArray,
     label: label && {
-      fill: (label.color && `var(--${label.color.toLowerCase()})`) || colorGenerator(index) || undefined,
+      fill:
+        (label.color && `var(--${label.color.toLowerCase()})`) ||
+        colorGenerator(index) ||
+        undefined,
       offset: label.offset,
-      position: camelCase(label.position) as LabelProps['position']
+      position: camelCase(label.position) as LabelProps["position"],
     },
-    ...areaProps
+    ...areaProps,
   };
 };
 
@@ -137,19 +228,34 @@ export interface ExtendedBarProps extends BarProps {
 }
 
 export const generateBarProps = (
-  props: ExtendedBarProps, 
-  index: number, 
+  props: ExtendedBarProps,
+  index: number,
   colorGenerator: (index: number) => string
 ) => {
-  const { ref, animated, legendType, stroke, fill, dataKey, strokeDashArray, ...barProps } = props;
+  const {
+    ref,
+    animated,
+    legendType,
+    stroke,
+    fill,
+    dataKey,
+    strokeDashArray,
+    ...barProps
+  } = props;
   return {
     dataKey: camelCase(dataKey),
     legendType: camelCase(legendType) as LegendType,
     isAnimationActive: animated,
-    stroke: (stroke && `var(--${stroke.toLowerCase()})`) || (fill && `var(--${fill.toLowerCase()})`) || colorGenerator(index),
-    fill: (fill && `var(--${fill.toLowerCase()})`) || (stroke && `var(--${stroke.toLowerCase()})`) || colorGenerator(index),
+    stroke:
+      (stroke && `var(--${stroke.toLowerCase()})`) ||
+      (fill && `var(--${fill.toLowerCase()})`) ||
+      colorGenerator(index),
+    fill:
+      (fill && `var(--${fill.toLowerCase()})`) ||
+      (stroke && `var(--${stroke.toLowerCase()})`) ||
+      colorGenerator(index),
     strokeDasharray: strokeDashArray,
-    ...barProps
+    ...barProps,
   };
 };
 
@@ -159,19 +265,31 @@ export interface ExtendedPieProps extends PieProps {
   labelLists?: ExtendedLabelListProps[];
 }
 
-export const generatePieProps = (
-  props: ExtendedPieProps
-) => {
-  const { ref, animated, legendType, stroke, fill, dataKey, nameKey, strokeDashArray, ...pieProps } = props;
+export const generatePieProps = (props: ExtendedPieProps) => {
+  const {
+    ref,
+    animated,
+    legendType,
+    stroke,
+    fill,
+    dataKey,
+    nameKey,
+    strokeDashArray,
+    ...pieProps
+  } = props;
   return {
     dataKey: camelCase(dataKey),
     nameKey: camelCase(nameKey),
     legendType: camelCase(legendType) as LegendType,
     isAnimationActive: animated,
-    stroke: (stroke && `var(--${stroke.toLowerCase()})`) || (fill && `var(--${fill.toLowerCase()})`), 
-    fill: (fill && `var(--${fill.toLowerCase()})`) || (stroke && `var(--${stroke.toLowerCase()})`),
+    stroke:
+      (stroke && `var(--${stroke.toLowerCase()})`) ||
+      (fill && `var(--${fill.toLowerCase()})`),
+    fill:
+      (fill && `var(--${fill.toLowerCase()})`) ||
+      (stroke && `var(--${stroke.toLowerCase()})`),
     strokeDasharray: strokeDashArray,
-    ...pieProps
+    ...pieProps,
   };
 };
 
@@ -179,20 +297,19 @@ export interface FormatterDefinitions {
   numberFormat?: string;
 }
 
-export interface ExtendedLabelListProps extends LabelListProps<any>, FormatterDefinitions {
-}
+export interface ExtendedLabelListProps
+  extends LabelListProps<any>,
+    FormatterDefinitions {}
 
-export const generateLabelListProps = (
-  props: ExtendedLabelListProps
-) => {
+export const generateLabelListProps = (props: ExtendedLabelListProps) => {
   const { ref, fill, position, dataKey, ...labelListProps } = props;
   const formatter = getFormatter(props);
   return {
     dataKey: camelCase(dataKey),
-    position: camelCase(position) as LabelListProps<any>['position'],
-    fill: (fill && `var(--${fill.toLowerCase()})`),
+    position: camelCase(position) as LabelListProps<any>["position"],
+    fill: fill && `var(--${fill.toLowerCase()})`,
     formatter,
-    ...labelListProps
+    ...labelListProps,
   };
 };
 
@@ -200,14 +317,14 @@ export const getFormatter = (defs: FormatterDefinitions) => {
   const { numberFormat } = defs;
   return (value: any) => {
     const dataFormatter = new DataFormatter();
-    if(value === null || value === undefined) {
-      return '';
+    if (value === null || value === undefined) {
+      return "";
     }
 
-    if(typeof value === 'number' && numberFormat) {
-      return dataFormatter.format(value, 'Number', numberFormat).value;
+    if (typeof value === "number" && numberFormat) {
+      return dataFormatter.format(value, "Number", numberFormat).value;
     }
 
     return value.toString();
-  }
-}
+  };
+};

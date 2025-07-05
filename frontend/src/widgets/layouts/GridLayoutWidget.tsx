@@ -1,5 +1,5 @@
-import { getGap, getHeight, getPadding, getWidth } from '@/lib/styles';
-import React from 'react';
+import { getGap, getHeight, getPadding, getWidth } from "@/lib/styles";
+import React from "react";
 
 interface GridLayoutWidgetProps {
   columns?: number;
@@ -10,10 +10,10 @@ interface GridLayoutWidgetProps {
   width?: string;
   height?: string;
   children: React.ReactNode[];
-  childColumn?: (number|undefined)[];
-  childColumnSpan?: (number|undefined)[];
-  childRow?: (number|undefined)[];
-  childRowSpan?: (number|undefined)[];
+  childColumn?: (number | undefined)[];
+  childColumnSpan?: (number | undefined)[];
+  childRow?: (number | undefined)[];
+  childRowSpan?: (number | undefined)[];
   className?: string;
 }
 
@@ -26,22 +26,21 @@ interface GridLayoutCellProps {
   className?: string;
 }
 
-const GridLayoutCell: React.FC<GridLayoutCellProps> = ({ 
+const GridLayoutCell: React.FC<GridLayoutCellProps> = ({
   children,
   column,
   row,
   columnSpan,
   rowSpan,
-  className
+  className,
 }) => {
-
   const styles: React.CSSProperties = {
     ...{
       gridColumn: columnSpan ? `span ${columnSpan}` : undefined,
       gridRow: rowSpan ? `span ${rowSpan}` : undefined,
       gridColumnStart: column,
-      gridRowStart: row
-    }
+      gridRowStart: row,
+    },
   };
 
   return (
@@ -51,8 +50,8 @@ const GridLayoutCell: React.FC<GridLayoutCellProps> = ({
   );
 };
 
-export const GridLayoutWidget: React.FC<GridLayoutWidgetProps> = ({ 
-  children, 
+export const GridLayoutWidget: React.FC<GridLayoutWidgetProps> = ({
+  children,
   columns = 1,
   rows = 1,
   autoFlow = "Row",
@@ -64,12 +63,11 @@ export const GridLayoutWidget: React.FC<GridLayoutWidgetProps> = ({
   childColumnSpan = [],
   childRow = [],
   childRowSpan = [],
-  className = ''
+  className = "",
 }) => {
-
   const styles: React.CSSProperties = {
     ...{
-      display: 'grid',
+      display: "grid",
       gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
       gridTemplateRows: `repeat(${rows}, minmax(0, 1fr))`,
       gridAutoFlow: autoFlow?.toLowerCase(),
@@ -77,7 +75,7 @@ export const GridLayoutWidget: React.FC<GridLayoutWidgetProps> = ({
     ...getPadding(padding),
     ...getGap(gap),
     ...getWidth(width),
-    ...getHeight(height)
+    ...getHeight(height),
   };
 
   return (
@@ -88,7 +86,7 @@ export const GridLayoutWidget: React.FC<GridLayoutWidgetProps> = ({
           columnSpan={childColumnSpan[index]}
           row={childRow[index]}
           rowSpan={childRowSpan[index]}
-          className={React.isValidElement(child) ? child.props.className : ''}
+          className={React.isValidElement(child) ? child.props.className : ""}
         >
           {child}
         </GridLayoutCell>

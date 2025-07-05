@@ -1,23 +1,44 @@
-import React from 'react';
+import React from "react";
 
 interface HtmlRendererProps {
   content: string;
   className?: string;
   allowedTags?: string[];
-  onLinkClick?: (event: React.MouseEvent<HTMLAnchorElement>, href: string) => void;
+  onLinkClick?: (
+    event: React.MouseEvent<HTMLAnchorElement>,
+    href: string
+  ) => void;
 }
 
-const sanitizeHtml = (html: string, allowedTags: string[] = [
-  'p', 'div', 'span', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
-  'ul', 'ol', 'li', 'a', 'strong', 'em', 'b', 'i', 'br'
-]): string => {
-  
-  const temp = document.createElement('div');
+const sanitizeHtml = (
+  html: string,
+  allowedTags: string[] = [
+    "p",
+    "div",
+    "span",
+    "h1",
+    "h2",
+    "h3",
+    "h4",
+    "h5",
+    "h6",
+    "ul",
+    "ol",
+    "li",
+    "a",
+    "strong",
+    "em",
+    "b",
+    "i",
+    "br",
+  ]
+): string => {
+  const temp = document.createElement("div");
   temp.innerHTML = html;
 
   // Remove any script tags and inline event handlers
-  const scripts = temp.getElementsByTagName('script');
-  const elements = temp.getElementsByTagName('*');
+  const scripts = temp.getElementsByTagName("script");
+  const elements = temp.getElementsByTagName("*");
 
   // Remove script tags
   while (scripts[0]) {
@@ -31,7 +52,10 @@ const sanitizeHtml = (html: string, allowedTags: string[] = [
 
     for (let j = attrs.length - 1; j >= 0; j--) {
       const attr = attrs[j];
-      if (attr.name.startsWith('on') || attr.name === 'href' && attr.value.startsWith('javascript:')) {
+      if (
+        attr.name.startsWith("on") ||
+        (attr.name === "href" && attr.value.startsWith("javascript:"))
+      ) {
         element.removeAttribute(attr.name);
       }
     }
@@ -47,9 +71,9 @@ const sanitizeHtml = (html: string, allowedTags: string[] = [
 
 export const HtmlRenderer: React.FC<HtmlRendererProps> = ({
   content,
-  className = '',
+  className = "",
   allowedTags,
-  onLinkClick
+  onLinkClick,
 }) => {
   // Sanitize the HTML content
   const sanitizedContent = sanitizeHtml(content, allowedTags);
@@ -57,16 +81,16 @@ export const HtmlRenderer: React.FC<HtmlRendererProps> = ({
   // Handle link clicks
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
     const target = e.target as HTMLElement;
-    if (target.tagName === 'A' && onLinkClick) {
+    if (target.tagName === "A" && onLinkClick) {
       e.preventDefault();
-      const href = target.getAttribute('href') || '';
+      const href = target.getAttribute("href") || "";
       onLinkClick(e as unknown as React.MouseEvent<HTMLAnchorElement>, href);
     }
   };
 
   return (
     <div className={`${className}`}>
-      <div 
+      <div
         className="prose max-w-none"
         onClick={handleClick}
         dangerouslySetInnerHTML={{ __html: sanitizedContent }}

@@ -1,9 +1,10 @@
-"use client"
-import { useState } from "react"
-import IvyLogo from "./IvyLogo"
+"use client";
+
+import IvyLogo from "./IvyLogo";
+import { useState } from "react";
 
 export default function MadeWithIvy() {
-  const [isHovered, setIsHovered] = useState(false)
+  const [isHovered, setIsHovered] = useState(false);
 
   return (
     <div
@@ -26,7 +27,10 @@ export default function MadeWithIvy() {
           ${isHovered ? "bg-primary-foreground" : "bg-primary"}
         `}
         onClick={() => {
-          window.open("https://github.com/Ivy-Interactive/Ivy-Framework", "_blank")
+          window.open(
+            "https://github.com/Ivy-Interactive/Ivy-Framework",
+            "_blank"
+          );
         }}
       >
         <div
@@ -42,10 +46,10 @@ export default function MadeWithIvy() {
             ${isHovered ? "opacity-100" : "opacity-0"}
           `}
         >
-          <span className="font-mono font-bold text-gray-400">MADE WITH</span>  
-          <IvyLogo className="w-24" />           
+          <span className="font-mono font-bold text-gray-400">MADE WITH</span>
+          <IvyLogo className="w-24" />
         </div>
       </div>
     </div>
-  )
+  );
 }

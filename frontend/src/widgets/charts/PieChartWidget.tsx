@@ -1,13 +1,34 @@
-import React from 'react';
-import { Legend, LegendProps, Pie, PieChart, Cell, LabelList, Label } from 'recharts';
-import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
-import { ColorScheme, ExtendedPieProps, ExtendedTooltipProps, generatePieProps, getColorGenerator, generateLegendProps, generateLabelListProps } from './shared';
-import { getHeight, getWidth } from '@/lib/styles';
+import {
+  ColorScheme,
+  ExtendedPieProps,
+  ExtendedTooltipProps,
+  generatePieProps,
+  getColorGenerator,
+  generateLegendProps,
+  generateLabelListProps,
+} from "./shared";
+import {
+  ChartConfig,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
+import { getHeight, getWidth } from "@/lib/styles";
+import React from "react";
+import {
+  Legend,
+  LegendProps,
+  Pie,
+  PieChart,
+  Cell,
+  LabelList,
+  Label,
+} from "recharts";
 
 interface PieChartTotalProps {
   formattedValue: string;
   label: string;
-} 
+}
 
 interface PieChartWidgetProps {
   id: string;
@@ -29,7 +50,7 @@ const PieChartWidget: React.FC<PieChartWidgetProps> = ({
   tooltip,
   legend,
   colorScheme,
-  total
+  total,
 }) => {
   const styles: React.CSSProperties = {
     ...getWidth(width),
@@ -41,42 +62,39 @@ const PieChartWidget: React.FC<PieChartWidgetProps> = ({
 
   return (
     <ChartContainer config={chartConfig} style={styles}>
-      <PieChart 
+      <PieChart
         margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
-        accessibilityLayer 
-        >
-
+        accessibilityLayer
+      >
         {legend && <Legend {...generateLegendProps(legend)} />}
 
-        { tooltip && <ChartTooltip
-          cursor={false}
-          isAnimationActive={tooltip?.animated}
-          content={<ChartTooltipContent/>}
-        />}
+        {tooltip && (
+          <ChartTooltip
+            cursor={false}
+            isAnimationActive={tooltip?.animated}
+            content={<ChartTooltipContent />}
+          />
+        )}
 
         {pies?.map((props, pieIndex) => (
-          <Pie 
-            data={data} 
-            key={`pie${pieIndex}`} 
-            {...generatePieProps(props)} 
-        
-          >
-            {
-              data.map((_, dataIndex) => (
-                <Cell key={`cell-${dataIndex}`} fill={colorGenerator(dataIndex)}/>
-              ))
-            }
-            
-            {
-              props.labelLists?.map((labelList, labelListIndex) => (
-                <LabelList key={`labelList-${labelListIndex}`} {...generateLabelListProps(labelList)} />
-              ))
-            }                      
+          <Pie data={data} key={`pie${pieIndex}`} {...generatePieProps(props)}>
+            {data.map((_, dataIndex) => (
+              <Cell
+                key={`cell-${dataIndex}`}
+                fill={colorGenerator(dataIndex)}
+              />
+            ))}
 
-            {
-              pieIndex === 0 && total && (
-                <Label
-                  content={({ viewBox }) => {
+            {props.labelLists?.map((labelList, labelListIndex) => (
+              <LabelList
+                key={`labelList-${labelListIndex}`}
+                {...generateLabelListProps(labelList)}
+              />
+            ))}
+
+            {pieIndex === 0 && total && (
+              <Label
+                content={({ viewBox }) => {
                   if (viewBox && "cx" in viewBox && "cy" in viewBox) {
                     return (
                       <text
@@ -100,15 +118,13 @@ const PieChartWidget: React.FC<PieChartWidgetProps> = ({
                           {total.label}
                         </tspan>
                       </text>
-                      )
-                    }
-                  }}
-                />
-              )
-            }
+                    );
+                  }
+                }}
+              />
+            )}
           </Pie>
-        ))}  
-
+        ))}
       </PieChart>
     </ChartContainer>
   );

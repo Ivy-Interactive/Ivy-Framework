@@ -1,15 +1,15 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
 import { MessageLoading } from "@/components/MessageLoading";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import * as React from "react";
 
 interface ChatBubbleProps {
-  variant?: "sent" | "received"
-  layout?: "default" | "ai"
-  className?: string
-  children: React.ReactNode
+  variant?: "sent" | "received";
+  layout?: "default" | "ai";
+  className?: string;
+  children: React.ReactNode;
 }
 
 export function ChatBubble({
@@ -22,19 +22,19 @@ export function ChatBubble({
       className={cn(
         "flex items-start gap-2 mb-4",
         variant === "sent" && "flex-row-reverse",
-        className,
+        className
       )}
     >
       {children}
     </div>
-  )
+  );
 }
 
 interface ChatBubbleMessageProps {
-  variant?: "sent" | "received"
-  isLoading?: boolean
-  className?: string
-  children?: React.ReactNode
+  variant?: "sent" | "received";
+  isLoading?: boolean;
+  className?: string;
+  children?: React.ReactNode;
 }
 
 export function ChatBubbleMessage({
@@ -59,13 +59,13 @@ export function ChatBubbleMessage({
         children
       )}
     </div>
-  )
+  );
 }
 
 interface ChatBubbleActionProps {
-  icon?: React.ReactNode
-  onClick?: () => void
-  className?: string
+  icon?: React.ReactNode;
+  onClick?: () => void;
+  className?: string;
 }
 
 export function ChatBubbleAction({
@@ -82,19 +82,19 @@ export function ChatBubbleAction({
     >
       {icon}
     </Button>
-  )
+  );
 }
 
 export function ChatBubbleActionWrapper({
   className,
   children,
 }: {
-  className?: string
-  children: React.ReactNode
+  className?: string;
+  children: React.ReactNode;
 }) {
   return (
     <div className={cn("flex items-center gap-1 mt-2", className)}>
       {children}
     </div>
-  )
+  );
 }

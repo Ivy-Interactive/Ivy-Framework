@@ -1,5 +1,5 @@
-import React from 'react';
-import { TableRow } from '@/components/ui/table';
+import { TableRow } from "@/components/ui/table";
+import React from "react";
 
 interface TableRowWidgetProps {
   id: string;
@@ -8,11 +8,11 @@ interface TableRowWidgetProps {
   children?: React.ReactNode;
 }
 
-export const TableRowWidget: React.FC<TableRowWidgetProps> = ({ 
+export const TableRowWidget: React.FC<TableRowWidgetProps> = ({
   children,
-  isHeader = false
+  isHeader = false,
 }) => (
-  <TableRow className={`${isHeader ? 'font-medium bg-white' : ''}`}>
+  <TableRow className={`${isHeader ? "font-medium bg-white" : ""}`}>
     {children}
   </TableRow>
 );

@@ -1,5 +1,3 @@
-import React from 'react';
+import React from "react";
 
-export const EmptyWidget: React.FC = () => (
-  <></>
-);
+export const EmptyWidget: React.FC = () => <></>;

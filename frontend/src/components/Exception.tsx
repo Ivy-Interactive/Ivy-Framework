@@ -1,6 +1,6 @@
-import React from 'react';
-import { Button } from './ui/button';
-import { ClipboardCopy } from 'lucide-react';
+import { Button } from "./ui/button";
+import { ClipboardCopy } from "lucide-react";
+import React from "react";
 
 interface ExceptionProps {
   title?: string | null;
@@ -14,10 +14,10 @@ export class Exception extends React.PureComponent<ExceptionProps> {
     const errorDetails = [
       title && `Title: ${title}`,
       message && `Message: ${message}`,
-      stackTrace && `Stack Trace:\n${stackTrace}`
+      stackTrace && `Stack Trace:\n${stackTrace}`,
     ]
       .filter(Boolean)
-      .join('\n\n');
+      .join("\n\n");
 
     navigator.clipboard.writeText(errorDetails);
   };
@@ -36,8 +36,8 @@ export class Exception extends React.PureComponent<ExceptionProps> {
             </details>
           )}
         </div>
-        
-        <Button 
+
+        <Button
           onClick={this.copyToClipboard}
           className="mt-4 flex items-center gap-2"
           variant="secondary"

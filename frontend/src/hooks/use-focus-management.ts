@@ -1,6 +1,6 @@
-import { useCallback, useRef, useEffect } from 'react';
+import { useCallback, useRef, useEffect } from "react";
 
-export type FocusDirection = 'next' | 'previous' | 'first' | 'last';
+export type FocusDirection = "next" | "previous" | "first" | "last";
 
 export interface FocusManager {
   focusNext: () => void;
@@ -24,7 +24,7 @@ export const useFocusManagement = (groupId: string): FocusManager => {
 
     const activeElement = document.activeElement as HTMLElement;
     const currentIndex = elements.indexOf(activeElement);
-    
+
     if (currentIndex === -1 || currentIndex === elements.length - 1) {
       // Focus first element if no current focus or at last element
       elements[0]?.focus();
@@ -40,7 +40,7 @@ export const useFocusManagement = (groupId: string): FocusManager => {
 
     const activeElement = document.activeElement as HTMLElement;
     const currentIndex = elements.indexOf(activeElement);
-    
+
     if (currentIndex === -1 || currentIndex === 0) {
       // Focus last element if no current focus or at first element
       elements[elements.length - 1]?.focus();
@@ -60,26 +60,36 @@ export const useFocusManagement = (groupId: string): FocusManager => {
     elements[elements.length - 1]?.focus();
   }, [getElements]);
 
-  const registerElement = useCallback((element: HTMLElement) => {
-    const elements = getElements();
-    elements.push(element);
-    // Sort by priority (lower numbers = higher priority)
-    elements.sort((a, b) => {
-      const aPriority = parseInt(a.getAttribute('data-focus-priority') || '0');
-      const bPriority = parseInt(b.getAttribute('data-focus-priority') || '0');
-      return aPriority - bPriority;
-    });
-    focusRegistry.set(groupId, elements);
-  }, [groupId, getElements]);
-
-  const unregisterElement = useCallback((element: HTMLElement) => {
-    const elements = getElements();
-    const index = elements.indexOf(element);
-    if (index > -1) {
-      elements.splice(index, 1);
+  const registerElement = useCallback(
+    (element: HTMLElement) => {
+      const elements = getElements();
+      elements.push(element);
+      // Sort by priority (lower numbers = higher priority)
+      elements.sort((a, b) => {
+        const aPriority = parseInt(
+          a.getAttribute("data-focus-priority") || "0"
+        );
+        const bPriority = parseInt(
+          b.getAttribute("data-focus-priority") || "0"
+        );
+        return aPriority - bPriority;
+      });
       focusRegistry.set(groupId, elements);
-    }
-  }, [groupId, getElements]);
+    },
+    [groupId, getElements]
+  );
+
+  const unregisterElement = useCallback(
+    (element: HTMLElement) => {
+      const elements = getElements();
+      const index = elements.indexOf(element);
+      if (index > -1) {
+        elements.splice(index, 1);
+        focusRegistry.set(groupId, elements);
+      }
+    },
+    [groupId, getElements]
+  );
 
   return {
     focusNext,
@@ -87,7 +97,7 @@ export const useFocusManagement = (groupId: string): FocusManager => {
     focusFirst,
     focusLast,
     registerElement,
-    unregisterElement
+    unregisterElement,
   };
 };
 
@@ -95,22 +105,25 @@ export const useFocusManagement = (groupId: string): FocusManager => {
 export const useFocusable = (groupId: string, priority: number = 0) => {
   const focusManager = useFocusManagement(groupId);
   const elementRef = useRef<HTMLElement | null>(null);
-  
-  const ref = useCallback((element: HTMLElement | null) => {
-    // Unregister previous element if it exists
-    if (elementRef.current) {
-      focusManager.unregisterElement(elementRef.current);
-    }
-    
-    // Register new element
-    if (element) {
-      element.setAttribute('data-focus-priority', priority.toString());
-      focusManager.registerElement(element);
-      elementRef.current = element;
-    } else {
-      elementRef.current = null;
-    }
-  }, [focusManager, priority]);
+
+  const ref = useCallback(
+    (element: HTMLElement | null) => {
+      // Unregister previous element if it exists
+      if (elementRef.current) {
+        focusManager.unregisterElement(elementRef.current);
+      }
+
+      // Register new element
+      if (element) {
+        element.setAttribute("data-focus-priority", priority.toString());
+        focusManager.registerElement(element);
+        elementRef.current = element;
+      } else {
+        elementRef.current = null;
+      }
+    },
+    [focusManager, priority]
+  );
 
   // Cleanup on unmount
   useEffect(() => {
@@ -122,4 +135,4 @@ export const useFocusable = (groupId: string, priority: number = 0) => {
   }, [focusManager]);
 
   return { ref, focusManager };
-}; 
+};

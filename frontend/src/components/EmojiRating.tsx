@@ -1,24 +1,24 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { cn } from "@/lib/utils";
 import { InvalidIcon } from "@/components/InvalidIcon";
+import { cn } from "@/lib/utils";
+import { useState } from "react";
 
 interface EmojiRatingProps {
   value: number;
   onRate?: (rating: number) => void;
-  size?: 'sm' | 'md' | 'lg';
+  size?: "sm" | "md" | "lg";
   className?: string;
   disabled?: boolean;
   invalid?: string;
 }
 
-const emojis = ['😢', '😕', '😐', '🙂', '😊'];
+const emojis = ["😢", "😕", "😐", "🙂", "😊"];
 
-export function EmojiRating({ 
+export function EmojiRating({
   value = 0,
   onRate,
-  size = 'md',
+  size = "md",
   className,
   disabled = false,
   invalid,
@@ -31,18 +31,20 @@ export function EmojiRating({
   };
 
   const emojiSizes = {
-    sm: 'text-lg',
-    md: 'text-2xl',
-    lg: 'text-4xl'
+    sm: "text-lg",
+    md: "text-2xl",
+    lg: "text-4xl",
   };
 
   return (
     <div className="relative">
-      <div className={cn(
-        "flex items-center gap-1",
-        disabled && "opacity-50",
-        className
-      )}>
+      <div
+        className={cn(
+          "flex items-center gap-1",
+          disabled && "opacity-50",
+          className
+        )}
+      >
         {emojis.map((emoji, index) => (
           <button
             key={index}
@@ -60,10 +62,12 @@ export function EmojiRating({
             onMouseLeave={() => !disabled && setHover(0)}
             disabled={disabled}
           >
-            <span className={cn(
-              "transition-opacity duration-200",
-              (hover || value) >= index + 1 ? "opacity-100" : "opacity-40"
-            )}>
+            <span
+              className={cn(
+                "transition-opacity duration-200",
+                (hover || value) >= index + 1 ? "opacity-100" : "opacity-40"
+              )}
+            >
               {emoji}
             </span>
           </button>

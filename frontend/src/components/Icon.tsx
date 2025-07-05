@@ -1,37 +1,37 @@
-import { cn } from '@/lib/utils';
-import { Folder, icons } from 'lucide-react';
-import { 
-  FaGoogle, 
-  FaAmazon, 
-  FaMicrosoft, 
-  FaGitlab, 
-  FaBitbucket, 
-  FaDiscord, 
-  FaTwitter, 
-  FaInstagram, 
-  FaFacebook, 
-  FaLinkedin, 
-  FaYoutube, 
-  FaVimeo, 
-  FaSlack, 
-  FaSpotify, 
-  FaApple, 
-  FaGithub 
-} from 'react-icons/fa';
-import { VscAzure } from 'react-icons/vsc';
-import { SiNotion } from 'react-icons/si';
+import { cn } from "@/lib/utils";
+import { Folder, icons } from "lucide-react";
+import {
+  FaGoogle,
+  FaAmazon,
+  FaMicrosoft,
+  FaGitlab,
+  FaBitbucket,
+  FaDiscord,
+  FaTwitter,
+  FaInstagram,
+  FaFacebook,
+  FaLinkedin,
+  FaYoutube,
+  FaVimeo,
+  FaSlack,
+  FaSpotify,
+  FaApple,
+  FaGithub,
+} from "react-icons/fa";
+import { SiNotion } from "react-icons/si";
+import { VscAzure } from "react-icons/vsc";
 
 interface IconProps {
-    name?: string;
-    color?: string;
-    size?: string | number;
-    className?: string;
-    style?: React.CSSProperties;
+  name?: string;
+  color?: string;
+  size?: string | number;
+  className?: string;
+  style?: React.CSSProperties;
 }
 
 const Icon: React.FC<IconProps> = ({ name, color, size, className, style }) => {
-  if(name === 'None') {
-    return <Folder className="invisible" size={size}/>; 
+  if (name === "None") {
+    return <Folder className="invisible" size={size} />;
   }
 
   // Handle react-icons
@@ -58,7 +58,14 @@ const Icon: React.FC<IconProps> = ({ name, color, size, className, style }) => {
 
   if (name && name in reactIcons) {
     const ReactIcon = reactIcons[name];
-    return <ReactIcon style={style} color={color} size={size} className={cn(className)}/>;
+    return (
+      <ReactIcon
+        style={style}
+        color={color}
+        size={size}
+        className={cn(className)}
+      />
+    );
   }
 
   if (!name || !(name in icons)) {
@@ -66,7 +73,14 @@ const Icon: React.FC<IconProps> = ({ name, color, size, className, style }) => {
   }
 
   const LucideIcon = icons[name as keyof typeof icons];
-  return <LucideIcon style={style} color={color} size={size} className={cn(className)}/>;
+  return (
+    <LucideIcon
+      style={style}
+      color={color}
+      size={size}
+      className={cn(className)}
+    />
+  );
 };
 
 export default Icon;

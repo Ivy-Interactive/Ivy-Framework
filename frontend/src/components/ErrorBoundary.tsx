@@ -1,5 +1,5 @@
-import React, { Component, ReactNode } from 'react';
-import { Exception } from './Exception';
+import { Exception } from "./Exception";
+import React, { Component, ReactNode } from "react";
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -29,7 +29,10 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   render() {
     if (this.state.hasError) {
       return (
-        <Exception message={this.state.error?.toString()} stackTrace={this.state.errorInfo?.componentStack}/>
+        <Exception
+          message={this.state.error?.toString()}
+          stackTrace={this.state.errorInfo?.componentStack}
+        />
       );
     }
 

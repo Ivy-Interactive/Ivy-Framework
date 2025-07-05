@@ -1,2 +1,2 @@
-export { BladeContainerWidget } from './BladeContainerWidget';
-export { BladeWidget } from './BladeWidget';
+export { BladeContainerWidget } from "./BladeContainerWidget";
+export { BladeWidget } from "./BladeWidget";

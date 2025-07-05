@@ -1,5 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import { FacebookEmbed, InstagramEmbed, TikTokEmbed, XEmbed, LinkedInEmbed, PinterestEmbed } from 'react-social-media-embed';
+import React, { useEffect, useState } from "react";
+import {
+  FacebookEmbed,
+  InstagramEmbed,
+  TikTokEmbed,
+  XEmbed,
+  LinkedInEmbed,
+  PinterestEmbed,
+} from "react-social-media-embed";
 
 interface EmbedWidgetProps {
   url: string;
@@ -11,7 +18,11 @@ interface YouTubeEmbedProps {
   height?: string | number;
 }
 
-const YouTubeEmbed: React.FC<YouTubeEmbedProps> = ({ url, width = '100%', height = '100%' }) => {
+const YouTubeEmbed: React.FC<YouTubeEmbedProps> = ({
+  url,
+  width = "100%",
+  height = "100%",
+}) => {
   const [videoId, setVideoId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -22,7 +33,7 @@ const YouTubeEmbed: React.FC<YouTubeEmbedProps> = ({ url, width = '100%', height
       if (match) return match[1];
       match = ytUrl.match(/youtube\.com\/embed\/([^?]+)/);
       if (match) return match[1];
-      
+
       return null;
     };
 
@@ -49,31 +60,31 @@ const YouTubeEmbed: React.FC<YouTubeEmbedProps> = ({ url, width = '100%', height
 };
 
 const EmbedWidget: React.FC<EmbedWidgetProps> = ({ url }) => {
-  if (url.includes('facebook.com')) {
+  if (url.includes("facebook.com")) {
     return <FacebookEmbed url={url} />;
   }
-  if (url.includes('instagram.com')) {
+  if (url.includes("instagram.com")) {
     return <InstagramEmbed url={url} />;
   }
-  if (url.includes('tiktok.com')) {
+  if (url.includes("tiktok.com")) {
     return <TikTokEmbed url={url} />;
   }
-  if (url.includes('twitter.com') || url.includes('x.com')) {
+  if (url.includes("twitter.com") || url.includes("x.com")) {
     return <XEmbed url={url} />;
   }
-  if (url.includes('youtube.com') || url.includes('youtu.be')) {
+  if (url.includes("youtube.com") || url.includes("youtu.be")) {
     return (
       <div className="relative w-full pt-[56.25%]">
         <div className="absolute top-0 left-0 w-full h-full">
           <YouTubeEmbed url={url} width="100%" height="100%" />
         </div>
-      </div>  
+      </div>
     );
   }
-  if (url.includes('linkedin.com')) {
+  if (url.includes("linkedin.com")) {
     return <LinkedInEmbed url={url} />;
   }
-  if (url.includes('pinterest.com')) {
+  if (url.includes("pinterest.com")) {
     return <PinterestEmbed url={url} />;
   }
 

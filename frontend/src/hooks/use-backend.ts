@@ -1,21 +1,27 @@
-import { useState, useEffect, useCallback } from 'react';
-import * as signalR from '@microsoft/signalr';
-import { WidgetEventHandlerType, WidgetNode } from '@/types/widgets';
-import { useToast } from '@/hooks/use-toast'
-import { getAppArgs, getAppId, getIvyHost, getMachineId, getParentId } from '@/lib/utils';
-import { applyPatch, Operation } from 'fast-json-patch';
-import { setThemeGlobal } from '@/components/ThemeProvider';
+import { setThemeGlobal } from "@/components/ThemeProvider";
+import { useToast } from "@/hooks/use-toast";
+import {
+  getAppArgs,
+  getAppId,
+  getIvyHost,
+  getMachineId,
+  getParentId,
+} from "@/lib/utils";
+import { WidgetEventHandlerType, WidgetNode } from "@/types/widgets";
+import * as signalR from "@microsoft/signalr";
+import { applyPatch, Operation } from "fast-json-patch";
+import { useState, useEffect, useCallback } from "react";
 
-type UpdateMessage = Array<{ 
-  viewId: string, 
-  indices: number[]; 
-  patch: Operation[] 
+type UpdateMessage = Array<{
+  viewId: string;
+  indices: number[];
+  patch: Operation[];
 }>;
 
 type RefreshMessage = {
-  widgets: WidgetNode,
-  removeIvyBranding: boolean
-}
+  widgets: WidgetNode;
+  removeIvyBranding: boolean;
+};
 
 type AuthToken = {
   jwt: string;
@@ -27,32 +33,34 @@ const widgetTreeToXml = (node: WidgetNode) => {
   const tagName = node.type.replace("Ivy.", "");
   const attributes: string[] = [`Id="${escapeXml(node.id)}"`];
   if (node.props) {
-      for (const [key, value] of Object.entries(node.props)) {
-          // Convert key to PascalCase
-          const pascalCaseKey = key.charAt(0).toUpperCase() + key.slice(1);
-          attributes.push(`${pascalCaseKey}="${escapeXml(String(value))}"`);
-      }
+    for (const [key, value] of Object.entries(node.props)) {
+      // Convert key to PascalCase
+      const pascalCaseKey = key.charAt(0).toUpperCase() + key.slice(1);
+      attributes.push(`${pascalCaseKey}="${escapeXml(String(value))}"`);
+    }
   }
-  let childrenXml = '';
+  let childrenXml = "";
   if (node.children && node.children.length > 0) {
-      childrenXml = node.children.map(child => widgetTreeToXml(child)).join('');
-      return `<${tagName} ${attributes.join(' ')}>${childrenXml}</${tagName}>`;
+    childrenXml = node.children.map((child) => widgetTreeToXml(child)).join("");
+    return `<${tagName} ${attributes.join(" ")}>${childrenXml}</${tagName}>`;
   } else {
-      return `<${tagName} ${attributes.join(' ')} />`;
+    return `<${tagName} ${attributes.join(" ")} />`;
   }
-}
+};
 
 const escapeXml = (str: string) => {
   return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;') 
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&apos;');
-}
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
+};
 
 export const useBackend = () => {
-  const [connection, setConnection] = useState<signalR.HubConnection | null>(null);
+  const [connection, setConnection] = useState<signalR.HubConnection | null>(
+    null
+  );
   const [widgetTree, setWidgetTree] = useState<WidgetNode | null>(null);
   const [disconnected, setDisconnected] = useState(false);
   const [removeIvyBranding, setRemoveIvyBranding] = useState(false);
@@ -71,8 +79,8 @@ export const useBackend = () => {
         if (!xmlString) {
           return;
         }
-        xml = parser.parseFromString(xmlString, 'application/xml');
-        const parserError = xml.querySelector('parsererror');
+        xml = parser.parseFromString(xmlString, "application/xml");
+        const parserError = xml.querySelector("parsererror");
         if (parserError) {
           return;
         }
@@ -92,16 +100,14 @@ export const useBackend = () => {
 
   const handleUpdateMessage = useCallback((message: UpdateMessage) => {
     console.log("Update", message);
-    setWidgetTree(currentTree => {
+    setWidgetTree((currentTree) => {
       if (!currentTree) return null;
       const newWidgetTree = { ...currentTree };
       message.forEach((update) => {
         let parent = newWidgetTree;
-        if(update.indices.length === 0) {
+        if (update.indices.length === 0) {
           applyPatch(newWidgetTree, update.patch);
-        }
-        else
-        {
+        } else {
           update.indices.forEach((index, i) => {
             if (i === update.indices.length - 1) {
               applyPatch(parent.children![index], update.patch);
@@ -117,19 +123,20 @@ export const useBackend = () => {
 
   const handleHotReloadMessage = useCallback(() => {
     console.log("HotReload");
-    connection?.invoke("HotReload")
+    connection
+      ?.invoke("HotReload")
       .catch((err) => console.error("SignalR Error:", err));
   }, [connection]);
 
-  const handleSetJwt = useCallback(async (jwt: AuthToken|null) => {
+  const handleSetJwt = useCallback(async (jwt: AuthToken | null) => {
     const response = await fetch(`${getIvyHost()}/auth/set-jwt`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(jwt),
-      credentials: 'include'
-    });   
+      credentials: "include",
+    });
     if (response.ok) {
-      window.location.reload();  
+      window.location.reload();
     }
   }, []);
 
@@ -144,9 +151,13 @@ export const useBackend = () => {
 
   useEffect(() => {
     const newConnection = new signalR.HubConnectionBuilder()
-        .withUrl(`${getIvyHost()}/messages?appId=${appId ?? ""}&appArgs=${appArgs ?? ""}&machineId=${machineId}&parentId=${parentId ?? ""}`)
-        .withAutomaticReconnect()
-        .build();
+      .withUrl(
+        `${getIvyHost()}/messages?appId=${appId ?? ""}&appArgs=${
+          appArgs ?? ""
+        }&machineId=${machineId}&parentId=${parentId ?? ""}`
+      )
+      .withAutomaticReconnect()
+      .build();
     setConnection(newConnection);
   }, [appId]);
 
@@ -162,8 +173,11 @@ export const useBackend = () => {
             console.log("Toast", message);
             toast(message);
           });
-          connection.on("$SetChatPanelUrl", (chatPanelUrl: string|null) => {
-            window.parent.postMessage({ type: '$SetChatPanelUrl', url: chatPanelUrl }, '*');  
+          connection.on("$SetChatPanelUrl", (chatPanelUrl: string | null) => {
+            window.parent.postMessage(
+              { type: "$SetChatPanelUrl", url: chatPanelUrl },
+              "*"
+            );
           });
           connection.on("SetJwt", handleSetJwt);
           connection.on("SetTheme", handleSetTheme);
@@ -171,7 +185,7 @@ export const useBackend = () => {
             navigator.clipboard.writeText(text);
           });
           connection.on("OpenUrl", (url: string) => {
-            window.open(url, '_blank');
+            window.open(url, "_blank");
           });
           connection.on("HotReload", handleHotReloadMessage);
           connection.onreconnecting(() => {
@@ -201,13 +215,29 @@ export const useBackend = () => {
         connection.off("OpenUrl");
       };
     }
-  }, [connection, handleRefreshMessage, handleUpdateMessage, handleHotReloadMessage, toast]);
+  }, [
+    connection,
+    handleRefreshMessage,
+    handleUpdateMessage,
+    handleHotReloadMessage,
+    toast,
+  ]);
 
-  const eventHandler: WidgetEventHandlerType = useCallback((eventName, widgetId, args) => {
-    console.log("Event", eventName, widgetId, args);
-    connection?.invoke("Event", eventName, widgetId, args)
-      .catch((err) => console.error("SignalR Error:", err));
-  }, [connection]);
+  const eventHandler: WidgetEventHandlerType = useCallback(
+    (eventName, widgetId, args) => {
+      console.log("Event", eventName, widgetId, args);
+      connection
+        ?.invoke("Event", eventName, widgetId, args)
+        .catch((err) => console.error("SignalR Error:", err));
+    },
+    [connection]
+  );
 
-  return { connection, widgetTree, eventHandler, disconnected, removeIvyBranding };
+  return {
+    connection,
+    widgetTree,
+    eventHandler,
+    disconnected,
+    removeIvyBranding,
+  };
 };

@@ -1,8 +1,14 @@
-import { useEventHandler } from '@/components/EventHandlerContext';
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import { getWidth } from '@/lib/styles';
-import { cn } from '@/lib/utils';
-import React from 'react';
+import { useEventHandler } from "@/components/EventHandlerContext";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import { getWidth } from "@/lib/styles";
+import { cn } from "@/lib/utils";
+import React from "react";
 
 interface SheetWidgetProps {
   id: string;
@@ -14,7 +20,13 @@ interface SheetWidgetProps {
   };
 }
 
-export const SheetWidget: React.FC<SheetWidgetProps> = ({ slots, title, description, id, width }) => {
+export const SheetWidget: React.FC<SheetWidgetProps> = ({
+  slots,
+  title,
+  description,
+  id,
+  width,
+}) => {
   if (!slots?.Content) {
     return (
       <div className="text-red-500">
@@ -26,27 +38,24 @@ export const SheetWidget: React.FC<SheetWidgetProps> = ({ slots, title, descript
 
   const styles: React.CSSProperties = {
     ...getWidth(width),
-  }
+  };
 
   return (
-    <Sheet open={true} onOpenChange={_ => eventHandler("OnClose", id, [])}>
+    <Sheet open={true} onOpenChange={(_) => eventHandler("OnClose", id, [])}>
       <SheetContent
-        style={styles} 
-        className={cn(
-          "h-full flex flex-col p-0 gap-0"
-        )}
+        style={styles}
+        className={cn("h-full flex flex-col p-0 gap-0")}
         onOpenAutoFocus={(e) => {
-          e.preventDefault()
-        }}>
+          e.preventDefault();
+        }}
+      >
         {(title || description) && true && (
-        <SheetHeader className="p-4 pb-0">
-          {title && <SheetTitle>{title}</SheetTitle>}
-          {description && <SheetDescription>{description}</SheetDescription>}
-        </SheetHeader>
+          <SheetHeader className="p-4 pb-0">
+            {title && <SheetTitle>{title}</SheetTitle>}
+            {description && <SheetDescription>{description}</SheetDescription>}
+          </SheetHeader>
         )}
-        <div className="flex-1 pb-0 pt-0 pl-4 pr-4 mt-4">
-            {slots.Content}
-        </div>
+        <div className="flex-1 pb-0 pt-0 pl-4 pr-4 mt-4">{slots.Content}</div>
       </SheetContent>
     </Sheet>
   );

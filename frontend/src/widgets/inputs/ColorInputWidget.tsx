@@ -1,5 +1,5 @@
-import { useEventHandler } from '@/components/EventHandlerContext';
-import React from 'react';
+import { useEventHandler } from "@/components/EventHandlerContext";
+import React from "react";
 
 interface ColorInputWidgetProps {
   id: string;
@@ -8,7 +8,7 @@ interface ColorInputWidgetProps {
 
 export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
   id,
-  value
+  value,
 }) => {
   const eventHandler = useEventHandler();
   return (
@@ -23,5 +23,3 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
     </div>
   );
 };
-
-

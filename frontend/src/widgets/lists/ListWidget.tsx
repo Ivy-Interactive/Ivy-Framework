@@ -1,6 +1,6 @@
-import React, { useRef } from "react";
-import { useVirtualizer } from "@tanstack/react-virtual";
 import { cn } from "@/lib/utils";
+import { useVirtualizer } from "@tanstack/react-virtual";
+import React, { useRef } from "react";
 
 type ListWidgetProps = {
   children: React.ReactNode;
@@ -34,7 +34,8 @@ export const ListWidget = ({ children }: ListWidgetProps) => {
               key={virtualRow.key}
               className={cn(
                 "absolute top-0 left-0 w-full flex items-center",
-                index !== rowVirtualizer.getVirtualItems().length - 1 && "border-b border-gray-200"
+                index !== rowVirtualizer.getVirtualItems().length - 1 &&
+                  "border-b border-gray-200"
               )}
               style={{
                 height: `${virtualRow.size}px`,

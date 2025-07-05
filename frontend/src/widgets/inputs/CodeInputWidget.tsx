@@ -1,18 +1,18 @@
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
-import CodeMirror from '@uiw/react-codemirror';
-import { javascript } from '@codemirror/lang-javascript';
-import { python } from '@codemirror/lang-python';
-import { sql } from '@codemirror/lang-sql';
-import { html } from '@codemirror/lang-html';
-import { css } from '@codemirror/lang-css';
-import { json } from '@codemirror/lang-json';
-import { useEventHandler } from '@/components/EventHandlerContext';
-import { cn } from '@/lib/utils';
-import { getHeight, getWidth, inputStyles } from '@/lib/styles';
-import { InvalidIcon } from '@/components/InvalidIcon';
+import { useEventHandler } from "@/components/EventHandlerContext";
+import { InvalidIcon } from "@/components/InvalidIcon";
+import { getHeight, getWidth, inputStyles } from "@/lib/styles";
+import { cn } from "@/lib/utils";
+import { css } from "@codemirror/lang-css";
+import { html } from "@codemirror/lang-html";
+import { javascript } from "@codemirror/lang-javascript";
+import { json } from "@codemirror/lang-json";
+import { python } from "@codemirror/lang-python";
+import { sql } from "@codemirror/lang-sql";
+import CodeMirror from "@uiw/react-codemirror";
+import React, { useState, useCallback, useMemo, useEffect } from "react";
 import "./CodeInputWidget.css";
+import { cpp } from "@codemirror/lang-cpp";
 import { StreamLanguage } from "@codemirror/language";
-import { cpp } from '@codemirror/lang-cpp';
 
 const dbmlMode = {
   startState: () => ({}),
@@ -48,7 +48,7 @@ const dbmlMode = {
 
     stream.next();
     return null;
-  }
+  },
 };
 
 export const dbml = () => StreamLanguage.define(dbmlMode);
@@ -88,24 +88,27 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
   events,
 }) => {
   const eventHandler = useEventHandler();
-  const [localValue, setLocalValue] = useState(value || '');
+  const [localValue, setLocalValue] = useState(value || "");
   const [isFocused, setIsFocused] = useState(false);
 
   // Update local value when server value changes and control is not focused
   useEffect(() => {
     if (!isFocused && value !== localValue) {
-      setLocalValue(value || '');
+      setLocalValue(value || "");
     }
   }, [value, isFocused]);
 
-  const handleChange = useCallback((value: string) => {
-    setLocalValue(value);
-    if (events.includes('OnChange')) eventHandler('OnChange', id, [value]);
-  }, [eventHandler, id, events]);
+  const handleChange = useCallback(
+    (value: string) => {
+      setLocalValue(value);
+      if (events.includes("OnChange")) eventHandler("OnChange", id, [value]);
+    },
+    [eventHandler, id, events]
+  );
 
   const handleBlur = useCallback(() => {
     setIsFocused(false);
-    if (events.includes('OnBlur')) eventHandler('OnBlur', id, []);
+    if (events.includes("OnBlur")) eventHandler("OnBlur", id, []);
   }, [eventHandler, id, events]);
 
   const handleFocus = useCallback(() => {
@@ -114,18 +117,17 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
 
   const styles: React.CSSProperties = {
     ...getWidth(width),
-    ...getHeight(height)
+    ...getHeight(height),
   };
   const extensions = useMemo(() => {
-    const lang = language ? languageExtensions[language as keyof typeof languageExtensions] : undefined;
+    const lang = language
+      ? languageExtensions[language as keyof typeof languageExtensions]
+      : undefined;
     return lang ? [lang()] : [];
   }, [language]);
 
   return (
-    <div 
-      style={styles} 
-      className="relative w-full h-full overflow-hidden"
-    >
+    <div style={styles} className="relative w-full h-full overflow-hidden">
       <CodeMirror
         value={localValue}
         extensions={extensions}
@@ -136,16 +138,16 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
         editable={!disabled}
         data-gramm="false"
         className={cn(
-          'h-full',
-          'border',
+          "h-full",
+          "border",
           invalid && inputStyles.invalid,
-          disabled && 'opacity-50 cursor-not-allowed'
+          disabled && "opacity-50 cursor-not-allowed"
         )}
         height="100%"
         basicSetup={{
           lineNumbers: true,
           highlightActiveLine: true,
-          foldGutter: false
+          foldGutter: false,
         }}
       />
       {invalid && (
@@ -157,4 +159,4 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
   );
 };
 
-export default CodeInputWidget; 
+export default CodeInputWidget;

@@ -1,12 +1,12 @@
-import { useState } from 'react';
-import { ChevronRight, ChevronDown } from 'lucide-react';
+import { ChevronRight, ChevronDown } from "lucide-react";
+import { useState } from "react";
 
 interface XmlRendererProps {
   data: string;
 }
 
 interface XmlNode {
-  type: 'element' | 'text' | 'cdata' | 'comment';
+  type: "element" | "text" | "cdata" | "comment";
   name?: string;
   attributes?: Record<string, string>;
   children?: XmlNode[];
@@ -19,49 +19,50 @@ export const XmlRenderer = ({ data }: XmlRendererProps) => {
   const parseXml = (xmlString: string): XmlNode | null => {
     try {
       const parser = new DOMParser();
-      const xmlDoc = parser.parseFromString(xmlString, 'text/xml');
-      
-      if (xmlDoc.getElementsByTagName('parsererror').length > 0) {
-        throw new Error('Invalid XML');
+      const xmlDoc = parser.parseFromString(xmlString, "text/xml");
+
+      if (xmlDoc.getElementsByTagName("parsererror").length > 0) {
+        throw new Error("Invalid XML");
       }
 
       const convertDomToNode = (domNode: Node): XmlNode | null => {
         if (domNode.nodeType === Node.TEXT_NODE) {
-          const text = domNode.textContent?.trim() || '';
-          return text ? { type: 'text', value: text } : null;
+          const text = domNode.textContent?.trim() || "";
+          return text ? { type: "text", value: text } : null;
         }
 
         if (domNode.nodeType === Node.COMMENT_NODE) {
           return {
-            type: 'comment',
-            value: domNode.textContent || ''
+            type: "comment",
+            value: domNode.textContent || "",
           };
         }
 
         if (domNode.nodeType === Node.CDATA_SECTION_NODE) {
           return {
-            type: 'cdata',
-            value: domNode.textContent || ''
+            type: "cdata",
+            value: domNode.textContent || "",
           };
         }
 
         if (domNode.nodeType === Node.ELEMENT_NODE) {
           const element = domNode as Element;
           const attributes: Record<string, string> = {};
-          
-          element.getAttributeNames().forEach(attr => {
-            attributes[attr] = element.getAttribute(attr) || '';
+
+          element.getAttributeNames().forEach((attr) => {
+            attributes[attr] = element.getAttribute(attr) || "";
           });
 
           const children = Array.from(element.childNodes)
-            .map(child => convertDomToNode(child))
+            .map((child) => convertDomToNode(child))
             .filter((node): node is XmlNode => node !== null);
 
           return {
-            type: 'element',
+            type: "element",
             name: element.tagName,
-            attributes: Object.keys(attributes).length > 0 ? attributes : undefined,
-            children: children.length > 0 ? children : undefined
+            attributes:
+              Object.keys(attributes).length > 0 ? attributes : undefined,
+            children: children.length > 0 ? children : undefined,
           };
         }
 
@@ -86,8 +87,8 @@ export const XmlRenderer = ({ data }: XmlRendererProps) => {
 
   const renderAttributes = (attributes: Record<string, string>) => {
     return Object.entries(attributes).map(([key, value]) => (
-      <span key={key} className='ml-2'>
-        {' '}
+      <span key={key} className="ml-2">
+        {" "}
         <span className="text-purple-600">{key}</span>
         <span className="text-gray-500">=</span>
         <span className="text-green-600">"{value}"</span>
@@ -96,16 +97,18 @@ export const XmlRenderer = ({ data }: XmlRendererProps) => {
   };
 
   const renderNode = (node: XmlNode, path: string): JSX.Element => {
-    if (node.type === 'text') {
+    if (node.type === "text") {
       return <span className="text-gray-800">{node.value}</span>;
     }
 
-    if (node.type === 'comment') {
+    if (node.type === "comment") {
       return <span className="text-gray-500">{`<!--${node.value}-->`}</span>;
     }
 
-    if (node.type === 'cdata') {
-      return <span className="text-gray-600">{`<![CDATA[${node.value}]]>`}</span>;
+    if (node.type === "cdata") {
+      return (
+        <span className="text-gray-600">{`<![CDATA[${node.value}]]>`}</span>
+      );
     }
 
     const hasChildren = node.children && node.children.length > 0;
@@ -113,17 +116,22 @@ export const XmlRenderer = ({ data }: XmlRendererProps) => {
 
     return (
       <div>
-        <div 
-          className={`flex items-center ${hasChildren ? 'cursor-pointer hover:bg-gray-100 rounded' : ''} px-1`}
+        <div
+          className={`flex items-center ${
+            hasChildren ? "cursor-pointer hover:bg-gray-100 rounded" : ""
+          } px-1`}
           onClick={hasChildren ? () => toggleNode(path) : undefined}
         >
-          {hasChildren && (
-            isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />
-          )}
-          <span className="text-gray-500">{'<'}</span>
+          {hasChildren &&
+            (isExpanded ? (
+              <ChevronDown className="h-4 w-4" />
+            ) : (
+              <ChevronRight className="h-4 w-4" />
+            ))}
+          <span className="text-gray-500">{"<"}</span>
           <span className="text-blue-600">{node.name}</span>
           {node.attributes && renderAttributes(node.attributes)}
-          <span className="text-gray-500">{hasChildren ? '>' : ' />'}</span>
+          <span className="text-gray-500">{hasChildren ? ">" : " />"}</span>
         </div>
 
         {hasChildren && isExpanded && (
@@ -138,7 +146,9 @@ export const XmlRenderer = ({ data }: XmlRendererProps) => {
 
         {hasChildren && isExpanded && (
           <div className="text-gray-500 ml-1">
-            {'</'}<span className="text-blue-600">{node.name}</span>{'>'}
+            {"</"}
+            <span className="text-blue-600">{node.name}</span>
+            {">"}
           </div>
         )}
       </div>
@@ -153,9 +163,7 @@ export const XmlRenderer = ({ data }: XmlRendererProps) => {
 
   return (
     <div className="w-full max-w-2xl">
-      <div className="font-mono text-sm">
-        {renderNode(parsedXml, 'root')}
-      </div>
+      <div className="font-mono text-sm">{renderNode(parsedXml, "root")}</div>
     </div>
   );
 };

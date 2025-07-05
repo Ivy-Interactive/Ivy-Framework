@@ -1,31 +1,39 @@
-import React from 'react';
-import { useEventHandler, EventHandler } from '@/components/EventHandlerContext';
-import { 
-  Select, 
-  SelectContent, 
-  SelectGroup, 
-  SelectItem, 
-  SelectLabel, 
-  SelectTrigger, 
-  SelectValue 
-} from '@/components/ui/select';
 import {
-  RadioGroup,
-  RadioGroupItem
-} from "@/components/ui/radio-group";
-import {
-  ToggleGroup,
-  ToggleGroupItem
-} from "@/components/ui/toggle-group";
-import { Label } from "@/components/ui/label";
+  useEventHandler,
+  EventHandler,
+} from "@/components/EventHandlerContext";
+import { InvalidIcon } from "@/components/InvalidIcon";
 import { Checkbox } from "@/components/ui/checkbox";
-import { InvalidIcon } from '@/components/InvalidIcon';
-import { cn } from '@/lib/utils';
-import { inputStyles } from '@/lib/styles';
-import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
-import { X } from 'lucide-react';
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import {
+  Tooltip,
+  TooltipProvider,
+  TooltipTrigger,
+  TooltipContent,
+} from "@/components/ui/tooltip";
+import { inputStyles } from "@/lib/styles";
+import { cn } from "@/lib/utils";
+import { X } from "lucide-react";
+import React from "react";
 
-export type NullableSelectValue = string | number | string[] | number[] | null | undefined;
+export type NullableSelectValue =
+  | string
+  | number
+  | string[]
+  | number[]
+  | null
+  | undefined;
 
 interface Option {
   value: string | number;
@@ -56,24 +64,28 @@ const ToggleVariant: React.FC<SelectInputWidgetProps> = ({
   eventHandler,
   selectMany = false,
   separator = ",",
-  nullable = false
+  nullable = false,
 }) => {
-  const validOptions = options.filter(option => 
-    option.value != null && option.value.toString().trim() !== ''
+  const validOptions = options.filter(
+    (option) => option.value != null && option.value.toString().trim() !== ""
   );
-  
+
   // Handle both single and multiple selection
   let selectedValues: (string | number)[] = [];
   if (selectMany) {
     if (Array.isArray(value)) {
       selectedValues = value;
-    } else if (value != null && value.toString().trim() !== '') {
-      selectedValues = value.toString().split(separator).map(v => v.trim());
+    } else if (value != null && value.toString().trim() !== "") {
+      selectedValues = value
+        .toString()
+        .split(separator)
+        .map((v) => v.trim());
     }
   } else {
-    const stringValue = value != null && value.toString().trim() !== '' 
-      ? value.toString() 
-      : undefined;
+    const stringValue =
+      value != null && value.toString().trim() !== ""
+        ? value.toString()
+        : undefined;
     if (stringValue !== undefined) {
       selectedValues = [stringValue];
     }
@@ -88,7 +100,7 @@ const ToggleVariant: React.FC<SelectInputWidgetProps> = ({
         {selectMany ? (
           <ToggleGroup
             type="multiple"
-            value={selectedValues.map(v => v.toString())}
+            value={selectedValues.map((v) => v.toString())}
             onValueChange={(newValue: string[]) => {
               eventHandler("OnChange", id, [newValue]);
             }}
@@ -108,8 +120,8 @@ const ToggleVariant: React.FC<SelectInputWidgetProps> = ({
                     isInvalid
                       ? `${inputStyles.invalid} !bg-red-50 !border-red-500 !text-red-900`
                       : isSelected
-                        ? "data-[state=on]:bg-emerald-100 data-[state=on]:border-emerald-500 data-[state=on]:text-emerald-900"
-                        : undefined
+                      ? "data-[state=on]:bg-emerald-100 data-[state=on]:border-emerald-500 data-[state=on]:text-emerald-900"
+                      : undefined
                   )}
                 >
                   {option.label}
@@ -153,8 +165,8 @@ const ToggleVariant: React.FC<SelectInputWidgetProps> = ({
                     isInvalid
                       ? `${inputStyles.invalid} !bg-red-50 !border-red-500 !text-red-900`
                       : isSelected
-                        ? "data-[state=on]:bg-emerald-100 data-[state=on]:border-emerald-500 data-[state=on]:text-emerald-900"
-                        : undefined
+                      ? "data-[state=on]:bg-emerald-100 data-[state=on]:border-emerald-500 data-[state=on]:text-emerald-900"
+                      : undefined
                   )}
                 >
                   {option.label}
@@ -201,14 +213,15 @@ const RadioVariant: React.FC<SelectInputWidgetProps> = ({
   invalid,
   options = [],
   eventHandler,
-  nullable = false
+  nullable = false,
 }) => {
-  const validOptions = options.filter(option => 
-    option.value != null && option.value.toString().trim() !== ''
+  const validOptions = options.filter(
+    (option) => option.value != null && option.value.toString().trim() !== ""
   );
-  const stringValue = value != null && value.toString().trim() !== '' 
-    ? value.toString() 
-    : undefined;
+  const stringValue =
+    value != null && value.toString().trim() !== ""
+      ? value.toString()
+      : undefined;
 
   const hasValue = stringValue !== undefined;
 
@@ -223,17 +236,21 @@ const RadioVariant: React.FC<SelectInputWidgetProps> = ({
         >
           {validOptions.map((option) => (
             <div key={option.value} className="flex items-center space-x-2">
-              <RadioGroupItem 
-                value={option.value.toString()} 
+              <RadioGroupItem
+                value={option.value.toString()}
                 id={`${id}-${option.value}`}
                 className={cn(
-                  stringValue === option.value.toString() && invalid ? inputStyles.invalid : undefined
+                  stringValue === option.value.toString() && invalid
+                    ? inputStyles.invalid
+                    : undefined
                 )}
               />
-              <Label 
+              <Label
                 htmlFor={`${id}-${option.value}`}
                 className={cn(
-                  stringValue === option.value.toString() && invalid ? inputStyles.invalid : undefined
+                  stringValue === option.value.toString() && invalid
+                    ? inputStyles.invalid
+                    : undefined
                 )}
               >
                 {option.label}
@@ -278,29 +295,35 @@ const CheckboxVariant: React.FC<SelectInputWidgetProps> = ({
   options = [],
   eventHandler,
   separator = ",",
-  nullable = false
+  nullable = false,
 }) => {
-  const validOptions = options.filter(option => 
-    option.value != null && option.value.toString().trim() !== ''
+  const validOptions = options.filter(
+    (option) => option.value != null && option.value.toString().trim() !== ""
   );
   let selectedValues: (string | number)[] = [];
   if (Array.isArray(value)) {
     selectedValues = value;
-  } else if (value != null && value.toString().trim() !== '') {
-    selectedValues = value.toString().split(separator).map(v => v.trim());
+  } else if (value != null && value.toString().trim() !== "") {
+    selectedValues = value
+      .toString()
+      .split(separator)
+      .map((v) => v.trim());
   }
-  const handleCheckboxChange = (optionValue: string | number, checked: boolean) => {
+  const handleCheckboxChange = (
+    optionValue: string | number,
+    checked: boolean
+  ) => {
     let newValues: (string | number)[];
     if (checked) {
       newValues = [...selectedValues, optionValue];
     } else {
-      newValues = selectedValues.filter(v => v !== optionValue);
+      newValues = selectedValues.filter((v) => v !== optionValue);
     }
     eventHandler("OnChange", id, [newValues]);
   };
-  
+
   const hasValues = selectedValues.length > 0;
-  
+
   const container = (
     <div className="flex items-center gap-2">
       <div className="flex-1">
@@ -314,13 +337,16 @@ const CheckboxVariant: React.FC<SelectInputWidgetProps> = ({
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <Checkbox 
+                        <Checkbox
                           id={`${id}-${option.value}`}
                           checked={isSelected}
-                          onCheckedChange={(checked) => handleCheckboxChange(option.value, checked === true)}
+                          onCheckedChange={(checked) =>
+                            handleCheckboxChange(option.value, checked === true)
+                          }
                           disabled={disabled}
                           className={cn(
-                            inputStyles.invalid + ' !bg-red-50 !border-red-500 !text-red-900'
+                            inputStyles.invalid +
+                              " !bg-red-50 !border-red-500 !text-red-900"
                           )}
                         />
                       </TooltipTrigger>
@@ -330,10 +356,12 @@ const CheckboxVariant: React.FC<SelectInputWidgetProps> = ({
                     </Tooltip>
                   </TooltipProvider>
                 ) : (
-                  <Checkbox 
+                  <Checkbox
                     id={`${id}-${option.value}`}
                     checked={isSelected}
-                    onCheckedChange={(checked) => handleCheckboxChange(option.value, checked === true)}
+                    onCheckedChange={(checked) =>
+                      handleCheckboxChange(option.value, checked === true)
+                    }
                     disabled={disabled}
                     className={cn(
                       isSelected
@@ -342,13 +370,9 @@ const CheckboxVariant: React.FC<SelectInputWidgetProps> = ({
                     )}
                   />
                 )}
-                <Label 
+                <Label
                   htmlFor={`${id}-${option.value}`}
-                  className={cn(
-                    isInvalid
-                      ? inputStyles.invalid
-                      : undefined
-                  )}
+                  className={cn(isInvalid ? inputStyles.invalid : undefined)}
                 >
                   {option.label}
                 </Label>
@@ -373,7 +397,7 @@ const CheckboxVariant: React.FC<SelectInputWidgetProps> = ({
   return container;
 };
 
-const SelectVariant: React.FC<SelectInputWidgetProps> = ({ 
+const SelectVariant: React.FC<SelectInputWidgetProps> = ({
   id,
   placeholder = "",
   value,
@@ -381,40 +405,41 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
   invalid,
   options = [],
   eventHandler,
-  nullable = false
+  nullable = false,
 }) => {
-
-  const validOptions = options.filter(option => 
-    option.value != null && option.value.toString().trim() !== ''
+  const validOptions = options.filter(
+    (option) => option.value != null && option.value.toString().trim() !== ""
   );
 
-  const groupedOptions = validOptions.reduce<Record<string, Option[]>>((acc, option) => {
-    const key = option.group || "default";
-    if (!acc[key]) {
-      acc[key] = [];
-    }
-    acc[key].push(option);
-    return acc;
-  }, {});
+  const groupedOptions = validOptions.reduce<Record<string, Option[]>>(
+    (acc, option) => {
+      const key = option.group || "default";
+      if (!acc[key]) {
+        acc[key] = [];
+      }
+      acc[key].push(option);
+      return acc;
+    },
+    {}
+  );
 
-  const stringValue = value != null && value.toString().trim() !== '' 
-    ? value.toString() 
-    : undefined;
+  const stringValue =
+    value != null && value.toString().trim() !== ""
+      ? value.toString()
+      : undefined;
 
   const hasValue = stringValue !== undefined;
 
   return (
     <div className="flex items-center gap-2">
       <div className="flex-1 relative">
-        <Select 
-          key={`${id}-${stringValue ?? 'null'}`} 
+        <Select
+          key={`${id}-${stringValue ?? "null"}`}
           disabled={disabled}
           value={stringValue}
           onValueChange={(newValue) => eventHandler("OnChange", id, [newValue])}
         >
-          <SelectTrigger className={cn(
-            invalid && inputStyles.invalid
-          )}>
+          <SelectTrigger className={cn(invalid && inputStyles.invalid)}>
             <SelectValue placeholder={placeholder} />
           </SelectTrigger>
           <SelectContent>
@@ -422,8 +447,8 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
               <SelectGroup key={group}>
                 {group !== "default" && <SelectLabel>{group}</SelectLabel>}
                 {options.map((option) => (
-                  <SelectItem 
-                    key={option.value} 
+                  <SelectItem
+                    key={option.value}
                     value={option.value.toString()}
                   >
                     {option.label}
@@ -450,25 +475,27 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
           </button>
         )}
       </div>
-      {invalid && (
-        <InvalidIcon message={invalid} className="flex-shrink-0" />
-      )}
+      {invalid && <InvalidIcon message={invalid} className="flex-shrink-0" />}
     </div>
   );
 };
 
 export const SelectInputWidget: React.FC<SelectInputWidgetProps> = (props) => {
   const eventHandler = useEventHandler();
-  
+
   // Normalize undefined to null when nullable
   const normalizedProps = {
     ...props,
-    value: props.nullable && props.value === undefined ? null : props.value
+    value: props.nullable && props.value === undefined ? null : props.value,
   };
-  
+
   switch (normalizedProps.variant) {
     case "List":
-      return normalizedProps.selectMany ? <CheckboxVariant {...normalizedProps} eventHandler={eventHandler} /> : <RadioVariant {...normalizedProps} eventHandler={eventHandler} />;
+      return normalizedProps.selectMany ? (
+        <CheckboxVariant {...normalizedProps} eventHandler={eventHandler} />
+      ) : (
+        <RadioVariant {...normalizedProps} eventHandler={eventHandler} />
+      );
     case "Toggle":
       return <ToggleVariant {...normalizedProps} eventHandler={eventHandler} />;
     default:

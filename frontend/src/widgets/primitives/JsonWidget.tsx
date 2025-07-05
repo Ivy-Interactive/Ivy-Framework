@@ -1,5 +1,5 @@
-import { JsonRenderer } from '@/components/JsonRenderer';
-import React from 'react';
+import { JsonRenderer } from "@/components/JsonRenderer";
+import React from "react";
 
 interface JsonWidgetProps {
   id: string;
@@ -7,7 +7,7 @@ interface JsonWidgetProps {
 }
 
 const JsonWidget: React.FC<JsonWidgetProps> = ({ id, content }) => (
-    <JsonRenderer data={content} key={id} />
+  <JsonRenderer data={content} key={id} />
 );
 
 export default JsonWidget;

@@ -1,13 +1,13 @@
-import React, { Suspense } from 'react';
-import { WidgetNode } from '@/types/widgets';
-import { widgetMap } from '@/widgets/widgetMap';
+import { WidgetNode } from "@/types/widgets";
+import { widgetMap } from "@/widgets/widgetMap";
+import React, { Suspense } from "react";
 
 const isLazyComponent = (component: React.ComponentType<any>): boolean => {
-  return component && (component as any).$$typeof === Symbol.for('react.lazy');
+  return component && (component as any).$$typeof === Symbol.for("react.lazy");
 };
 
 const flattenChildren = (children: WidgetNode[]): WidgetNode[] => {
-  return children.flatMap(child => {
+  return children.flatMap((child) => {
     if (child.type === "Ivy.Fragment") {
       return flattenChildren(child.children || []);
     }
@@ -15,17 +15,14 @@ const flattenChildren = (children: WidgetNode[]): WidgetNode[] => {
   });
 };
 
-export const renderWidgetTree = (
-  node: WidgetNode
-): React.ReactNode => {
-
+export const renderWidgetTree = (node: WidgetNode): React.ReactNode => {
   const Component = widgetMap[node.type] as React.ComponentType<any>;
 
   if (!Component) {
-    return <div>{`Unknown component type: ${node.type}`}</div>
+    return <div>{`Unknown component type: ${node.type}`}</div>;
   }
 
-  const props = { ...node.props, id: node.id, events: node.events }
+  const props = { ...node.props, id: node.id, events: node.events };
 
   const children = flattenChildren(node.children || []);
 
@@ -33,7 +30,7 @@ export const renderWidgetTree = (
   const slots = children.reduce((acc, child) => {
     if (child.type === "Ivy.Slot") {
       const slotName = child.props.name;
-      acc[slotName] = (child.children || []).map(slotChild => 
+      acc[slotName] = (child.children || []).map((slotChild) =>
         renderWidgetTree(slotChild)
       );
     } else {
@@ -50,9 +47,7 @@ export const renderWidgetTree = (
   );
 
   return isLazyComponent(Component) ? (
-    <Suspense key={node.id}>
-      {content}
-    </Suspense>
+    <Suspense key={node.id}>{content}</Suspense>
   ) : (
     content
   );
@@ -62,5 +57,5 @@ export const loadingState = (): WidgetNode => ({
   type: "$loading",
   id: "loading",
   props: {},
-  events: []
+  events: [],
 });

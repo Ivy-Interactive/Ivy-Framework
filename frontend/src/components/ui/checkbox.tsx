@@ -31,13 +31,21 @@ const Checkbox = React.forwardRef<
     ref
   ) => {
     // Map undefined to null when nullable, then null to 'indeterminate' for Radix
-    const normalizedChecked = nullable && checked === undefined ? null : checked;
+    const normalizedChecked =
+      nullable && checked === undefined ? null : checked;
     const uiChecked =
-      nullable && normalizedChecked === null ? "indeterminate" : !!normalizedChecked;
+      nullable && normalizedChecked === null
+        ? "indeterminate"
+        : !!normalizedChecked;
 
     // Cycle: null -> true -> false -> null (if nullable)
     const handleCheckedChange = (next: boolean) => {
-      console.log("Checkbox clicked, next:", next, "current checked:", normalizedChecked);
+      console.log(
+        "Checkbox clicked, next:",
+        next,
+        "current checked:",
+        normalizedChecked
+      );
       if (nullable) {
         if (normalizedChecked === null) onCheckedChange(true);
         else if (normalizedChecked === true) onCheckedChange(false);

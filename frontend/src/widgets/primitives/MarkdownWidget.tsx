@@ -1,6 +1,6 @@
-import { useEventHandler } from '@/components/EventHandlerContext';
-import MarkdownRenderer from '@/components/MarkdownRenderer';
-import React from 'react';
+import { useEventHandler } from "@/components/EventHandlerContext";
+import MarkdownRenderer from "@/components/MarkdownRenderer";
+import React from "react";
 
 interface MarkdownWidgetProps {
   id: string;
@@ -10,7 +10,11 @@ interface MarkdownWidgetProps {
 const MarkdownWidget: React.FC<MarkdownWidgetProps> = ({ id, content }) => {
   const eventHandler = useEventHandler();
   return (
-    <MarkdownRenderer content={content} key={id} onLinkClick={href => eventHandler("OnLinkClick", id, [href])}/>
+    <MarkdownRenderer
+      content={content}
+      key={id}
+      onLinkClick={(href) => eventHandler("OnLinkClick", id, [href])}
+    />
   );
 };
 

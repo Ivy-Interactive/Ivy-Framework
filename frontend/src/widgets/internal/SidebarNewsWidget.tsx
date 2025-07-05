@@ -1,19 +1,15 @@
-import { cn } from "@/lib/utils"
-import { useEffect, useState } from "react";
-
-import * as React from "react";
 import { Card } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
+import { useEffect, useState } from "react";
+import * as React from "react";
 
 export interface SidebarNewsWidgetProps {
   feedUrl: string;
 }
 
-const BASE_URL = "https://ivy.app/news/"
+const BASE_URL = "https://ivy.app/news/";
 
-const SidebarNewsWidget = ({
-  feedUrl
-}: SidebarNewsWidgetProps) => {
-    
+const SidebarNewsWidget = ({ feedUrl }: SidebarNewsWidgetProps) => {
   const [articles, setArticles] = useState<NewsArticle[]>([]);
 
   useEffect(() => {
@@ -24,15 +20,13 @@ const SidebarNewsWidget = ({
     };
     fetchArticles();
   }, [feedUrl]);
-  
+
   if (articles.length === 0) return null;
 
-  return (
-    <News articles={articles} />
-  );
-}
+  return <News articles={articles} />;
+};
 
-export default SidebarNewsWidget; 
+export default SidebarNewsWidget;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -88,7 +82,7 @@ function News({ articles }: { articles: NewsArticle[] }) {
     return () => clearTimeout(timeout);
   }, [cardCount]);
 
-  if(cards.length === 0 && !hasDismissedNews) return null;
+  if (cards.length === 0 && !hasDismissedNews) return null;
 
   return cards.length || showCompleted ? (
     <div
@@ -96,46 +90,51 @@ function News({ articles }: { articles: NewsArticle[] }) {
       data-active={cardCount !== 0}
     >
       <div className="relative size-full">
-        {[...cards].reverse().map(({ id, href, title, summary, image }, idx) => (
-          <div
-            key={id}
-            className={cn(
-              "absolute left-0 top-0 size-full scale-[var(--scale)] transition-[opacity,transform] duration-200",
-              cardCount - idx > 3
-                ? [
-                    "opacity-0 sm:group-hover:translate-y-[var(--y)] sm:group-hover:opacity-[var(--opacity)]",
-                    "sm:group-has-[*[data-dragging=true]]:translate-y-[var(--y)] sm:group-has-[*[data-dragging=true]]:opacity-[var(--opacity)]",
-                  ]
-                : "translate-y-[var(--y)] opacity-[var(--opacity)]"
-            )}
-            style={
-              {
-                "--y": `-${(cardCount - (idx + 1)) * OFFSET_FACTOR}%`,
-                "--scale": 1 - (cardCount - (idx + 1)) * SCALE_FACTOR,
-                "--opacity":
-                  cardCount - (idx + 1) >= 6
-                    ? 0
-                    : 1 - (cardCount - (idx + 1)) * OPACITY_FACTOR,
-              } as React.CSSProperties
-            }
-            aria-hidden={idx !== cardCount - 1}
-          >
-            <NewsCard
-              title={title}
-              description={summary}
-              image={image}
-              href={href}
-              hideContent={cardCount - idx > 2}
-              active={idx === cardCount - 1}
-              onDismiss={() => {
-                const updated = [id, ...dismissedNews.filter((d) => d !== id)].slice(0, 50)
-                setDismissedNews(updated)
-                setHasDismissedNews(true)
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
-              }}
-            />
-          </div>
-        ))}
+        {[...cards]
+          .reverse()
+          .map(({ id, href, title, summary, image }, idx) => (
+            <div
+              key={id}
+              className={cn(
+                "absolute left-0 top-0 size-full scale-[var(--scale)] transition-[opacity,transform] duration-200",
+                cardCount - idx > 3
+                  ? [
+                      "opacity-0 sm:group-hover:translate-y-[var(--y)] sm:group-hover:opacity-[var(--opacity)]",
+                      "sm:group-has-[*[data-dragging=true]]:translate-y-[var(--y)] sm:group-has-[*[data-dragging=true]]:opacity-[var(--opacity)]",
+                    ]
+                  : "translate-y-[var(--y)] opacity-[var(--opacity)]"
+              )}
+              style={
+                {
+                  "--y": `-${(cardCount - (idx + 1)) * OFFSET_FACTOR}%`,
+                  "--scale": 1 - (cardCount - (idx + 1)) * SCALE_FACTOR,
+                  "--opacity":
+                    cardCount - (idx + 1) >= 6
+                      ? 0
+                      : 1 - (cardCount - (idx + 1)) * OPACITY_FACTOR,
+                } as React.CSSProperties
+              }
+              aria-hidden={idx !== cardCount - 1}
+            >
+              <NewsCard
+                title={title}
+                description={summary}
+                image={image}
+                href={href}
+                hideContent={cardCount - idx > 2}
+                active={idx === cardCount - 1}
+                onDismiss={() => {
+                  const updated = [
+                    id,
+                    ...dismissedNews.filter((d) => d !== id),
+                  ].slice(0, 50);
+                  setDismissedNews(updated);
+                  setHasDismissedNews(true);
+                  localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+                }}
+              />
+            </div>
+          ))}
         <div className="pointer-events-none invisible" aria-hidden>
           <NewsCard title="Title" description="Description" />
         </div>
@@ -174,7 +173,7 @@ function NewsCard({
 }) {
   //const { isMobile } = useMediaQuery();
   const isMobile = false;
-  
+
   const ref = React.useRef<HTMLDivElement>(null);
   const drag = React.useRef<{
     start: number;
@@ -336,4 +335,3 @@ function NewsCard({
     </Card>
   );
 }
-

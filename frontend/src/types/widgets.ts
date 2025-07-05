@@ -7,15 +7,17 @@ export interface WidgetNode {
   children?: WidgetNode[];
   events: string[];
 }
-  
+
 export interface WidgetMap {
-  [key: string]: React.ComponentType<any> | React.LazyExoticComponent<React.ComponentType<any>>;
+  [key: string]:
+    | React.ComponentType<any>
+    | React.LazyExoticComponent<React.ComponentType<any>>;
 }
 
 export type WidgetEventHandlerType = (
-  eventName: string, 
-  widgetId: string, 
-  args: any[] 
+  eventName: string,
+  widgetId: string,
+  args: any[]
 ) => void;
 
 export interface MenuItem {

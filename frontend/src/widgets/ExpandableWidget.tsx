@@ -1,7 +1,11 @@
-import { Button } from '@/components/ui/button';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { ChevronDown, ChevronRight } from 'lucide-react';
-import React from 'react';
+import { Button } from "@/components/ui/button";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import { ChevronDown, ChevronRight } from "lucide-react";
+import React from "react";
 
 interface ExpandableWidgetProps {
   id: string;
@@ -12,11 +16,15 @@ interface ExpandableWidgetProps {
   };
 }
 
-export const ExpandableWidget: React.FC<ExpandableWidgetProps> = ({ id, disabled, slots }) => {
-  const [isOpen, setIsOpen] = React.useState(false)
-  
+export const ExpandableWidget: React.FC<ExpandableWidgetProps> = ({
+  id,
+  disabled,
+  slots,
+}) => {
+  const [isOpen, setIsOpen] = React.useState(false);
+
   if (disabled && isOpen) {
-    setIsOpen(false)
+    setIsOpen(false);
   }
 
   return (
@@ -29,7 +37,7 @@ export const ExpandableWidget: React.FC<ExpandableWidgetProps> = ({ id, disabled
       <div className="flex justify-between space-x-4">
         <CollapsibleTrigger asChild>
           <Button variant="ghost" className="w-full p-0">
-            <div className='ml-2'>{slots?.Header}</div>
+            <div className="ml-2">{slots?.Header}</div>
             {!isOpen && <ChevronRight className="h-4 w-4 ml-auto mr-2" />}
             {isOpen && <ChevronDown className="h-4 w-4 ml-auto mr-2" />}
           </Button>
