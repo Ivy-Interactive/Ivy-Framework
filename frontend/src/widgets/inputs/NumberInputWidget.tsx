@@ -108,7 +108,7 @@ const SliderVariant = memo(
   }
 );
 
-SliderVariant.displayName = "SliderVariant";
+SliderVariant.displayName = 'SliderVariant';
 
 const NumberVariant = memo(
   ({
@@ -177,7 +177,7 @@ const NumberVariant = memo(
   }
 );
 
-NumberVariant.displayName = "NumberVariant";
+NumberVariant.displayName = 'NumberVariant';
 
 export const NumberInputWidget = memo(
   ({

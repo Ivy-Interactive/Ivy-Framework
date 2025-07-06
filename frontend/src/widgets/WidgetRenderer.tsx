@@ -31,8 +31,12 @@ export const renderWidgetTree = (node: WidgetNode): React.ReactNode => {
     return <div>{`Unknown component type: ${node.type}`}</div>;
   }
 
-  const props: Record<string, unknown> = { ...node.props, id: node.id, events: node.events }
-  
+  const props: Record<string, unknown> = {
+    ...node.props,
+    id: node.id,
+    events: node.events,
+  };
+
   if ('testId' in props && props.testId) {
     props['data-testid'] = props.testId;
     delete props.testId;
