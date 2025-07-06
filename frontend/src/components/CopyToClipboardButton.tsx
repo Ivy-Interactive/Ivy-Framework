@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Copy, Check } from 'lucide-react';
 
-const CopyToClipboardButton = ({ textToCopy = "", label = "" }) => {
+const CopyToClipboardButton = ({ textToCopy = '', label = '' }) => {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
@@ -9,8 +9,8 @@ const CopyToClipboardButton = ({ textToCopy = "", label = "" }) => {
       await navigator.clipboard.writeText(textToCopy);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      //ignore
+    } catch (err: unknown) {
+      console.error(err);
     }
   };
 
@@ -25,9 +25,10 @@ const CopyToClipboardButton = ({ textToCopy = "", label = "" }) => {
         py-2 
         rounded-lg
         transition-all duration-200 ease-in-out
-        ${copied 
-          ? 'bg-green-100 text-green-700' 
-          : 'bg-transparent text-gray-700'
+        ${
+          copied
+            ? 'bg-green-100 text-green-700'
+            : 'bg-transparent text-gray-700'
         }
       `}
     >
@@ -49,7 +50,7 @@ const CopyToClipboardButton = ({ textToCopy = "", label = "" }) => {
           <Check size={16} />
         </span>
       </span>
-      {label && <span className='text-xs'>{copied ? 'Copied!' : label}</span>}
+      {label && <span className="text-xs">{copied ? 'Copied!' : label}</span>}
     </button>
   );
 };

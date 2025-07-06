@@ -20,7 +20,7 @@ export const XmlRenderer = ({ data }: XmlRendererProps) => {
     try {
       const parser = new DOMParser();
       const xmlDoc = parser.parseFromString(xmlString, 'text/xml');
-      
+
       if (xmlDoc.getElementsByTagName('parsererror').length > 0) {
         throw new Error('Invalid XML');
       }
@@ -34,21 +34,21 @@ export const XmlRenderer = ({ data }: XmlRendererProps) => {
         if (domNode.nodeType === Node.COMMENT_NODE) {
           return {
             type: 'comment',
-            value: domNode.textContent || ''
+            value: domNode.textContent || '',
           };
         }
 
         if (domNode.nodeType === Node.CDATA_SECTION_NODE) {
           return {
             type: 'cdata',
-            value: domNode.textContent || ''
+            value: domNode.textContent || '',
           };
         }
 
         if (domNode.nodeType === Node.ELEMENT_NODE) {
           const element = domNode as Element;
           const attributes: Record<string, string> = {};
-          
+
           element.getAttributeNames().forEach(attr => {
             attributes[attr] = element.getAttribute(attr) || '';
           });
@@ -60,8 +60,9 @@ export const XmlRenderer = ({ data }: XmlRendererProps) => {
           return {
             type: 'element',
             name: element.tagName,
-            attributes: Object.keys(attributes).length > 0 ? attributes : undefined,
-            children: children.length > 0 ? children : undefined
+            attributes:
+              Object.keys(attributes).length > 0 ? attributes : undefined,
+            children: children.length > 0 ? children : undefined,
           };
         }
 
@@ -70,6 +71,7 @@ export const XmlRenderer = ({ data }: XmlRendererProps) => {
 
       return convertDomToNode(xmlDoc.documentElement);
     } catch (error) {
+      console.error(error);
       return null;
     }
   };
@@ -86,7 +88,7 @@ export const XmlRenderer = ({ data }: XmlRendererProps) => {
 
   const renderAttributes = (attributes: Record<string, string>) => {
     return Object.entries(attributes).map(([key, value]) => (
-      <span key={key} className='ml-2'>
+      <span key={key} className="ml-2">
         {' '}
         <span className="text-purple-600">{key}</span>
         <span className="text-gray-500">=</span>
@@ -95,7 +97,7 @@ export const XmlRenderer = ({ data }: XmlRendererProps) => {
     ));
   };
 
-  const renderNode = (node: XmlNode, path: string): JSX.Element => {
+  const renderNode = (node: XmlNode, path: string): React.ReactElement => {
     if (node.type === 'text') {
       return <span className="text-gray-800">{node.value}</span>;
     }
@@ -105,7 +107,9 @@ export const XmlRenderer = ({ data }: XmlRendererProps) => {
     }
 
     if (node.type === 'cdata') {
-      return <span className="text-gray-600">{`<![CDATA[${node.value}]]>`}</span>;
+      return (
+        <span className="text-gray-600">{`<![CDATA[${node.value}]]>`}</span>
+      );
     }
 
     const hasChildren = node.children && node.children.length > 0;
@@ -113,13 +117,16 @@ export const XmlRenderer = ({ data }: XmlRendererProps) => {
 
     return (
       <div>
-        <div 
+        <div
           className={`flex items-center ${hasChildren ? 'cursor-pointer hover:bg-gray-100 rounded' : ''} px-1`}
           onClick={hasChildren ? () => toggleNode(path) : undefined}
         >
-          {hasChildren && (
-            isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />
-          )}
+          {hasChildren &&
+            (isExpanded ? (
+              <ChevronDown className="h-4 w-4" />
+            ) : (
+              <ChevronRight className="h-4 w-4" />
+            ))}
           <span className="text-gray-500">{'<'}</span>
           <span className="text-blue-600">{node.name}</span>
           {node.attributes && renderAttributes(node.attributes)}
@@ -138,7 +145,9 @@ export const XmlRenderer = ({ data }: XmlRendererProps) => {
 
         {hasChildren && isExpanded && (
           <div className="text-gray-500 ml-1">
-            {'</'}<span className="text-blue-600">{node.name}</span>{'>'}
+            {'</'}
+            <span className="text-blue-600">{node.name}</span>
+            {'>'}
           </div>
         )}
       </div>
@@ -153,9 +162,7 @@ export const XmlRenderer = ({ data }: XmlRendererProps) => {
 
   return (
     <div className="w-full max-w-2xl">
-      <div className="font-mono text-sm">
-        {renderNode(parsedXml, 'root')}
-      </div>
+      <div className="font-mono text-sm">{renderNode(parsedXml, 'root')}</div>
     </div>
   );
 };

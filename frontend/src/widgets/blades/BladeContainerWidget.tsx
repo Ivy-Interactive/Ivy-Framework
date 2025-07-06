@@ -5,8 +5,8 @@ interface BladeContainerWidgetProps {
   children: React.ReactNode;
 }
 
-export const BladeContainerWidget: React.FC<BladeContainerWidgetProps> = ({ 
-  children 
+export const BladeContainerWidget: React.FC<BladeContainerWidgetProps> = ({
+  children,
 }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -15,14 +15,14 @@ export const BladeContainerWidget: React.FC<BladeContainerWidgetProps> = ({
     const container = containerRef.current;
     if (!container || !scrollRef.current) return;
 
-    const resizeObserver = new ResizeObserver((entries) => {
+    const resizeObserver = new ResizeObserver(entries => {
       for (const entry of entries) {
         const containerWidth = entry.target.clientWidth;
         const scrollPosition = containerWidth - scrollRef.current!.clientWidth;
         if (scrollPosition > 0) {
           scrollRef.current!.scrollTo({
             left: scrollPosition,
-            behavior: 'smooth'
+            behavior: 'smooth',
           });
         }
       }
@@ -35,14 +35,15 @@ export const BladeContainerWidget: React.FC<BladeContainerWidgetProps> = ({
 
   return (
     <div className="bg-gray-300 remove-ancestor-padding h-screen w-screen">
-      <ScrollArea 
+      <ScrollArea
         ref={scrollRef}
-        className="h-full w-full overflow-y-hidden" 
-        type='hover'>
+        className="h-full w-full overflow-y-hidden"
+        type="hover"
+      >
         <div className="flex w-max" ref={containerRef}>
-         {children}
+          {children}
         </div>
       </ScrollArea>
     </div>
-  )
-}
+  );
+};

@@ -37,6 +37,15 @@ jobs:
       working-directory: ./frontend
       run: npm ci
     
+    # Frontend code quality checks
+    - name: Check code formatting
+      working-directory: ./frontend
+      run: npm run format:check
+    
+    - name: Check linting
+      working-directory: ./frontend
+      run: npm run lint
+    
     - name: Install Playwright Browsers
       working-directory: ./frontend
       run: npx playwright install --with-deps

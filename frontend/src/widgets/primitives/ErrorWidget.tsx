@@ -7,6 +7,8 @@ interface ErrorWidgetProps {
   stackTrace?: string | null;
 }
 
-export const ErrorWidget: React.FC<ErrorWidgetProps> = ({ title, message, stackTrace }) => (
-    <Exception title={title} message={message} stackTrace={stackTrace} />
-);
+export const ErrorWidget: React.FC<ErrorWidgetProps> = ({
+  title,
+  message,
+  stackTrace,
+}) => <Exception title={title} message={message} stackTrace={stackTrace} />;

@@ -12,37 +12,34 @@ interface TableCellWidgetProps {
   children?: React.ReactNode;
 }
 
-export const TableCellWidget: React.FC<TableCellWidgetProps> = ({ 
+export const TableCellWidget: React.FC<TableCellWidgetProps> = ({
   children,
   isHeader,
   isFooter,
   align,
   width,
 }) => {
+  const alignStyles = {
+    ...getAlign('Horizontal', align),
+    ...getAlign('Vertical', align),
+  };
 
-    const alignStyles = {
-      ...getAlign('Horizontal', align),
-      ...getAlign('Vertical', align)
-    }
+  const cellStyles = {
+    ...getWidth(width),
+  };
 
-    const cellStyles = {
-      ...getWidth(width)
-    }
-  
-    return (
-      <TableCell 
-        className={cn(
+  return (
+    <TableCell
+      className={cn(
         isHeader && 'header-cell bg-gray-100 font-semibold',
         isFooter && 'footer-cell bg-gray-100 font-semibold',
-        "text-nowrap",  
-        "border",
-        "max-w-[400px] overflow-ellipsis overflow-clip"
-        )}
-        style={cellStyles}
-        >
-          <div style={alignStyles}>
-            {children}
-          </div>
-      </TableCell>
-    );
-  };
+        'text-nowrap',
+        'border',
+        'max-w-[400px] overflow-ellipsis overflow-clip'
+      )}
+      style={cellStyles}
+    >
+      <div style={alignStyles}>{children}</div>
+    </TableCell>
+  );
+};

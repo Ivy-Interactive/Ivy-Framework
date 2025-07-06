@@ -10,19 +10,17 @@ interface DialogWidgetProps {
 }
 
 export const DialogWidget: React.FC<DialogWidgetProps> = ({
-  id, 
+  id,
   children,
-  width
+  width,
 }) => {
-    const eventHandler = useEventHandler();
-    const styles = {
-      ...getWidth(width)
-    };
-    return (
-      <Dialog open={true} onOpenChange={_ => eventHandler("OnClose", id, [])}>
-        <DialogContent style={styles}>
-          {children}
-        </DialogContent>
-      </Dialog>
-    );
+  const eventHandler = useEventHandler();
+  const styles = {
+    ...getWidth(width),
   };
+  return (
+    <Dialog open={true} onOpenChange={() => eventHandler('OnClose', id, [])}>
+      <DialogContent style={styles}>{children}</DialogContent>
+    </Dialog>
+  );
+};

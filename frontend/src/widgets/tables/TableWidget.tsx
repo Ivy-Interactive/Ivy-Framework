@@ -8,20 +8,17 @@ interface TableWidgetProps {
   width?: string;
 }
 
-export const TableWidget: React.FC<TableWidgetProps> = ({ 
+export const TableWidget: React.FC<TableWidgetProps> = ({
   children,
-  width
+  width,
 }) => {
-
   const styles = {
-    ...getWidth(width)
+    ...getWidth(width),
   };
-  
+
   return (
     <Table className="text-sm w-fit" style={styles}>
-      <TableBody>
-        {children}
-      </TableBody>
+      <TableBody>{children}</TableBody>
     </Table>
   );
 };

@@ -1,10 +1,14 @@
 import React, { useCallback, useState } from 'react';
-import { DateRange } from "react-day-picker";
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
-import { CalendarIcon } from "lucide-react";
+import { DateRange } from 'react-day-picker';
+import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { cn } from '@/lib/utils';
+import { CalendarIcon } from 'lucide-react';
 import {
   endOfMonth,
   endOfYear,
@@ -14,7 +18,7 @@ import {
   subDays,
   subMonths,
   subYears,
-} from "date-fns";
+} from 'date-fns';
 import { useEventHandler } from '@/components/EventHandlerContext';
 
 interface DateRangeInputWidgetProps {
@@ -31,15 +35,18 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
   id,
   value,
   disabled,
-  events
+  events,
 }) => {
   const eventHandler = useEventHandler();
 
-  const handleChange = useCallback((e:DateRange) => {
-    if(!events.includes("OnChange")) return;
-    if(disabled) return;
-    eventHandler("OnChange", id, [{item1: e.from, item2: e.to}]);
-  }, [id, disabled]);
+  const handleChange = useCallback(
+    (e: DateRange) => {
+      if (!events.includes('OnChange')) return;
+      if (disabled) return;
+      eventHandler('OnChange', id, [{ item1: e.from, item2: e.to }]);
+    },
+    [id, disabled]
+  );
 
   const today = new Date();
 
@@ -47,32 +54,32 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
     from: subDays(today, 1),
     to: subDays(today, 1),
   };
-  
+
   const last7Days = {
     from: subDays(today, 6),
     to: today,
   };
-  
+
   const last30Days = {
     from: subDays(today, 29),
     to: today,
   };
-  
+
   const monthToDate = {
     from: startOfMonth(today),
     to: today,
   };
-  
+
   const lastMonth = {
     from: startOfMonth(subMonths(today, 1)),
     to: endOfMonth(subMonths(today, 1)),
   };
-  
+
   const yearToDate = {
     from: startOfYear(today),
     to: today,
   };
-  
+
   const lastYear = {
     from: startOfYear(subYears(today, 1)),
     to: endOfYear(subYears(today, 1)),
@@ -95,19 +102,19 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
               variant="outline"
               disabled={disabled}
               className={cn(
-                "w-full justify-start text-left font-normal",
-                !date && "text-muted-foreground"
+                'w-full justify-start text-left font-normal',
+                !date && 'text-muted-foreground'
               )}
             >
               <CalendarIcon className="mr-2 h-4 w-4" />
               {date?.from ? (
                 date.to ? (
                   <>
-                    {format(date.from, "LLL dd, y")} -{" "}
-                    {format(date.to, "LLL dd, y")}
+                    {format(date.from, 'LLL dd, y')} -{' '}
+                    {format(date.to, 'LLL dd, y')}
                   </>
                 ) : (
-                  format(date.from, "LLL dd, y")
+                  format(date.from, 'LLL dd, y')
                 )
               ) : (
                 <span>Pick a date range</span>
@@ -130,7 +137,7 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
                             to: today,
                           });
                           setMonth(today);
-                          setIsOpen(false); 
+                          setIsOpen(false);
                         }}
                       >
                         Today
@@ -142,7 +149,7 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
                         onClick={() => {
                           handleChange(yesterday);
                           setMonth(yesterday.to);
-                          setIsOpen(false); 
+                          setIsOpen(false);
                         }}
                       >
                         Yesterday
@@ -154,7 +161,7 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
                         onClick={() => {
                           handleChange(last7Days);
                           setMonth(last7Days.to);
-                          setIsOpen(false); 
+                          setIsOpen(false);
                         }}
                       >
                         Last 7 Days
@@ -166,7 +173,7 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
                         onClick={() => {
                           handleChange(last30Days);
                           setMonth(last30Days.to);
-                          setIsOpen(false); 
+                          setIsOpen(false);
                         }}
                       >
                         Last 30 Days
@@ -178,7 +185,7 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
                         onClick={() => {
                           handleChange(monthToDate);
                           setMonth(monthToDate.to);
-                          setIsOpen(false); 
+                          setIsOpen(false);
                         }}
                       >
                         Month to Date
@@ -190,7 +197,7 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
                         onClick={() => {
                           handleChange(lastMonth);
                           setMonth(lastMonth.to);
-                          setIsOpen(false); 
+                          setIsOpen(false);
                         }}
                       >
                         Last Month
@@ -202,7 +209,7 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
                         onClick={() => {
                           handleChange(yearToDate);
                           setMonth(yearToDate.to);
-                          setIsOpen(false); 
+                          setIsOpen(false);
                         }}
                       >
                         Year to Date
@@ -214,7 +221,7 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
                         onClick={() => {
                           handleChange(lastYear);
                           setMonth(lastYear.to);
-                          setIsOpen(false); 
+                          setIsOpen(false);
                         }}
                       >
                         Last Year
@@ -226,7 +233,7 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
                   <Calendar
                     mode="range"
                     selected={date}
-                    onSelect={(newDate) => {
+                    onSelect={newDate => {
                       if (newDate) {
                         handleChange(newDate);
                       }
@@ -245,5 +252,4 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
       </div>
     </div>
   );
-
 };

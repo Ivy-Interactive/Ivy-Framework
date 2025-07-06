@@ -1,5 +1,6 @@
 export const inputStyles = {
-  invalid: 'bg-red-50 border-red-500 text-red-900 placeholder-red-700 focus:ring-red-500 dark:bg-gray-700 focus:border-red-500 dark:text-red-500 dark:placeholder-red-500 dark:border-red-500',
+  invalid:
+    'bg-destructive border-destructive text-destructive-foreground placeholder-destructive-foreground focus:ring-destructive focus:border-destructive',
 };
 
 export const getWidth = (width?: string): React.CSSProperties => {
@@ -117,58 +118,55 @@ export const getHeight = (height?: string): React.CSSProperties => {
     ..._getWantedHeight(wantedHeight),
     ..._getMinHeight(minHeight),
     ..._getMaxHeight(maxHeight),
-
-  }
-}
+  };
+};
 
 const _getWantedHeight = (height?: string): React.CSSProperties => {
   if (!height) return {};
 
   const [sizeType, value] = height.split(':');
-  
+
   switch (sizeType.toLowerCase()) {
-    case 'units':
-      { 
-        const units = parseFloat(value);
-        return { height: `${units * 0.25}rem` }; 
-      }
-      
+    case 'units': {
+      const units = parseFloat(value);
+      return { height: `${units * 0.25}rem` };
+    }
+
     case 'px':
       return { height: `${value}px` };
-      
+
     case 'rem':
       return { height: `${value}rem` };
-      
-    case 'fraction':
-      { 
-        const fraction = parseFloat(value);
-        return { height: `${fraction * 100}%` }; 
-      }
-      
+
+    case 'fraction': {
+      const fraction = parseFloat(value);
+      return { height: `${fraction * 100}%` };
+    }
+
     case 'full':
       return { height: '100%' };
-      
+
     case 'fit':
       return { height: 'fit-content' };
-      
+
     case 'screen':
       return { height: '100vh' };
-      
+
     case 'mincontent':
       return { height: 'min-content' };
-      
+
     case 'maxcontent':
       return { height: 'max-content' };
-      
+
     case 'auto':
       return { height: 'auto' };
-      
+
     case 'grow':
       return { flexGrow: parseFloat(value) || 1 };
-      
+
     case 'shrink':
       return { flexShrink: parseFloat(value) || 1 };
-      
+
     default:
       console.warn(`Unknown size type: ${sizeType}`);
       return {};
@@ -237,128 +235,149 @@ const _getMaxHeight = (height?: string): React.CSSProperties => {
   }
 };
 
-
 export type BorderStyle = 'None' | 'Solid' | 'Dashed' | 'Dotted';
 
-export const getBorderStyle = (borderStyle: BorderStyle
-):React.CSSProperties => {
+export const getBorderStyle = (
+  borderStyle: BorderStyle
+): React.CSSProperties => {
   return {
-    borderStyle: borderStyle.toLowerCase()
-  }
-}
+    borderStyle: borderStyle.toLowerCase(),
+  };
+};
 
-export const getBorderThickness = (getBorderThickness?: string):React.CSSProperties => {
-  if (!getBorderThickness) return {}
-  
-  if (typeof getBorderThickness === 'string' && getBorderThickness.indexOf(',') > -1) {
-    const [left, top, right, bottom] = getBorderThickness.split(',').map(val => 
-      val ? `${parseFloat(val)}px` : '0'
-    );
-    
+export const getBorderThickness = (
+  getBorderThickness?: string
+): React.CSSProperties => {
+  if (!getBorderThickness) return {};
+
+  if (
+    typeof getBorderThickness === 'string' &&
+    getBorderThickness.indexOf(',') > -1
+  ) {
+    const [left, top, right, bottom] = getBorderThickness
+      .split(',')
+      .map(val => (val ? `${parseFloat(val)}px` : '0'));
+
     return {
       borderWidth: left,
       borderTopWidth: top,
-      borderRightWidth: right,  
-      borderBottomWidth: bottom
+      borderRightWidth: right,
+      borderBottomWidth: bottom,
     };
   }
 
   return {
-    borderWidth: `${parseFloat(getBorderThickness)}px`
-  }
-}
+    borderWidth: `${parseFloat(getBorderThickness)}px`,
+  };
+};
 
 export type BorderRadius = 'None' | 'Rounded' | 'Full';
 
-export const getBorderRadius = (borderRadius?: BorderRadius):React.CSSProperties => {
-  if (!borderRadius) return {}
+export const getBorderRadius = (
+  borderRadius?: BorderRadius
+): React.CSSProperties => {
+  if (!borderRadius) return {};
   return {
-    borderRadius: 
-      borderRadius === 'Rounded' ? '0.5rem' : 
-      borderRadius === 'Full' ? '9999px'
-      : '0'
-  }
-}
+    borderRadius:
+      borderRadius === 'Rounded'
+        ? '0.5rem'
+        : borderRadius === 'Full'
+          ? '9999px'
+          : '0',
+  };
+};
 
-export const getPadding = (padding?: string):React.CSSProperties => {
-  if (!padding) return {}
-  
+export const getPadding = (padding?: string): React.CSSProperties => {
+  if (!padding) return {};
+
   if (typeof padding === 'string' && padding.indexOf(',') > -1) {
-    const [left, top, right, bottom] = padding.split(',').map(val => 
-      val ? `${parseFloat(val) * 0.25}rem` : '0'
-    );
-    
+    const [left, top, right, bottom] = padding
+      .split(',')
+      .map(val => (val ? `${parseFloat(val) * 0.25}rem` : '0'));
+
     return {
       paddingLeft: left,
       paddingTop: top,
       paddingRight: right,
-      paddingBottom: bottom
+      paddingBottom: bottom,
     };
   }
   return {
-    padding: `${parseFloat(padding) * 0.25}rem`
-  }
-}
+    padding: `${parseFloat(padding) * 0.25}rem`,
+  };
+};
 
-export const getMargin = (margin?: string):React.CSSProperties => {
-  if (!margin) return {}
-  
+export const getMargin = (margin?: string): React.CSSProperties => {
+  if (!margin) return {};
+
   if (typeof margin === 'string' && margin.indexOf(',') > -1) {
-    const [left, top, right, bottom] = margin.split(',').map(val => 
-      val ? `${parseFloat(val) * 0.25}rem` : '0'
-    );
-    
+    const [left, top, right, bottom] = margin
+      .split(',')
+      .map(val => (val ? `${parseFloat(val) * 0.25}rem` : '0'));
+
     return {
       marginLeft: left,
       marginTop: top,
       marginRight: right,
-      marginBottom: bottom
+      marginBottom: bottom,
     };
   }
   return {
-    margin: `${parseFloat(margin) * 0.25}rem`
-  }
-}
+    margin: `${parseFloat(margin) * 0.25}rem`,
+  };
+};
 
-export const getGap = (gap?: number):React.CSSProperties => {
-  if (!gap) return {}
+export const getGap = (gap?: number): React.CSSProperties => {
+  if (!gap) return {};
   return {
-    gap: `${gap * 0.25}rem`
-  }
-}
+    gap: `${gap * 0.25}rem`,
+  };
+};
 
 export type Overflow = 'Clip' | 'Ellipsis' | 'Auto';
 
-export const getOverflow = (overflow?: Overflow):React.CSSProperties => {
-  if (!overflow) return {}
+export const getOverflow = (overflow?: Overflow): React.CSSProperties => {
+  if (!overflow) return {};
 
-  if(overflow === 'Clip') {
+  if (overflow === 'Clip') {
     return {
-      overflow: 'hidden'
-    }
+      overflow: 'hidden',
+    };
   }
 
-  if(overflow === 'Ellipsis') {
+  if (overflow === 'Ellipsis') {
     return {
       overflow: 'hidden',
       textOverflow: 'ellipsis',
-      whiteSpace: 'nowrap'
-    }
+      whiteSpace: 'nowrap',
+    };
   }
 
   return {
-    overflow: overflow.toLowerCase()
-  }
-}
+    overflow: overflow.toLowerCase(),
+  };
+};
 
 export type Orientation = 'Horizontal' | 'Vertical';
 
-export type Align = 'TopLeft' | 'TopRight' | 'TopCenter' | 'BottomLeft' | 'BottomRight' | 'BottomCenter' | 'Left' | 'Right' | 'Center' | 'Stretch';
+export type Align =
+  | 'TopLeft'
+  | 'TopRight'
+  | 'TopCenter'
+  | 'BottomLeft'
+  | 'BottomRight'
+  | 'BottomCenter'
+  | 'Left'
+  | 'Right'
+  | 'Center'
+  | 'Stretch';
 
-export const getAlign = (orientation:Orientation, align?: Align):React.CSSProperties => {
-
+export const getAlign = (
+  orientation: Orientation,
+  align?: Align
+): React.CSSProperties => {
   const styles: React.CSSProperties = {
-    display: 'flex'
+    display: 'flex',
   };
 
   styles.flexDirection = orientation === 'Horizontal' ? 'row' : 'column';
@@ -448,17 +467,23 @@ export const getAlign = (orientation:Orientation, align?: Align):React.CSSProper
   }
 
   return styles;
-}
+};
 
-export const getColor = (color?:string, cssProperty:'color'|'backgroundColor'|'borderColor' = 'color',  role:'background'|'foreground' = 'background', percentage: number|undefined = undefined) => {
-  if (!color) return {}
-  const varName = color.toLowerCase() + (role === 'background' ? '' : '-foreground')
-  if(percentage && percentage > -100 && percentage < 100) {
+export const getColor = (
+  color?: string,
+  cssProperty: 'color' | 'backgroundColor' | 'borderColor' = 'color',
+  role: 'background' | 'foreground' = 'background',
+  percentage: number | undefined = undefined
+) => {
+  if (!color) return {};
+  const varName =
+    color.toLowerCase() + (role === 'background' ? '' : '-foreground');
+  if (percentage && percentage > -100 && percentage < 100) {
     return {
-      [cssProperty]: `color-mix(in srgb, var(--${varName}),${percentage > 0 ? 'white' : 'black'} ${Math.abs(percentage)}%)`
-    }
+      [cssProperty]: `color-mix(in srgb, var(--${varName}),${percentage > 0 ? 'white' : 'black'} ${Math.abs(percentage)}%)`,
+    };
   }
   return {
-    [cssProperty]: "var(--"+varName+")"
-  }
-}
+    [cssProperty]: 'var(--' + varName + ')',
+  };
+};

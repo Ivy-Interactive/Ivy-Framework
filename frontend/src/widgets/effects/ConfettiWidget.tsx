@@ -2,19 +2,22 @@ import React, { useEffect, useRef } from 'react';
 import confetti from 'canvas-confetti';
 
 interface ConfettiWidgetProps {
-  children: React.ReactNode,
-  trigger?: 'Auto' | 'Click' | 'Hover'
+  children: React.ReactNode;
+  trigger?: 'Auto' | 'Click' | 'Hover';
 }
 
-const ConfettiWidget: React.FC<ConfettiWidgetProps> = ({ children, trigger = 'Click' }) => {
+const ConfettiWidget: React.FC<ConfettiWidgetProps> = ({
+  children,
+  trigger = 'Click',
+}) => {
   const elementRef = useRef<HTMLDivElement>(null);
-  
+
   const triggerConfetti = (x: number, y: number) => {
-    confetti({ 
-      particleCount: 100, 
-      spread: 70, 
+    confetti({
+      particleCount: 100,
+      spread: 70,
       origin: { x, y },
-      colors: ["#004734", "#006d4c", "#009464", "#00b97d", "#00df97"]
+      colors: ['#004734', '#006d4c', '#009464', '#00b97d', '#00df97'],
     });
   };
 
@@ -44,11 +47,7 @@ const ConfettiWidget: React.FC<ConfettiWidgetProps> = ({ children, trigger = 'Cl
   }, [trigger]);
 
   return (
-    <div 
-      ref={elementRef}
-      onClick={handleClick} 
-      onMouseEnter={handleMouseEnter}
-    >
+    <div ref={elementRef} onClick={handleClick} onMouseEnter={handleMouseEnter}>
       {children}
     </div>
   );

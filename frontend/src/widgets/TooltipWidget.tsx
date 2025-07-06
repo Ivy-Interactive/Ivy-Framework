@@ -1,4 +1,9 @@
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import React from 'react';
 
 interface TooltipWidgetProps {
@@ -20,9 +25,7 @@ export const TooltipWidget: React.FC<TooltipWidgetProps> = ({ slots }) => {
   return (
     <TooltipProvider>
       <Tooltip>
-        <TooltipTrigger>
-          {slots.Trigger}
-        </TooltipTrigger>
+        <TooltipTrigger>{slots.Trigger}</TooltipTrigger>
         <TooltipContent className="bg-popover text-popover-foreground shadow-md">
           {slots.Content}
         </TooltipContent>

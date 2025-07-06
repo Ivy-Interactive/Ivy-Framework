@@ -9,7 +9,7 @@ interface FooterLayoutWidgetProps {
 }
 
 export const FooterLayoutWidget: React.FC<FooterLayoutWidgetProps> = ({
-  slots
+  slots,
 }) => {
   if (!slots?.Footer || !slots?.Content) {
     return (
@@ -23,10 +23,8 @@ export const FooterLayoutWidget: React.FC<FooterLayoutWidgetProps> = ({
     <div className="-ml-4 -mr-4 h-full flex flex-col overflow-hidden">
       <div className="flex-1 min-h-0 relative">
         <div className="absolute inset-0">
-          <ScrollArea className="h-full"> 
-            <div className='p-4'>
-              {slots.Content}
-            </div>
+          <ScrollArea className="h-full">
+            <div className="p-4">{slots.Content}</div>
           </ScrollArea>
         </div>
       </div>

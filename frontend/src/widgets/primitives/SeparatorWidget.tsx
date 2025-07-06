@@ -11,18 +11,21 @@ interface SeparatorWidgetProps {
   width?: string;
 }
 
-export const SeparatorWidget: React.FC<SeparatorWidgetProps> = ({ orientation, text, width, height }) => {
-  
-  const styles = orientation === 'Vertical' 
-    ? getWidth(width)
-    : getHeight(height);
+export const SeparatorWidget: React.FC<SeparatorWidgetProps> = ({
+  orientation,
+  text,
+  width,
+  height,
+}) => {
+  const styles =
+    orientation === 'Vertical' ? getWidth(width) : getHeight(height);
 
-  const separator = <Separator
-    orientation={orientation === 'Vertical' ? 'vertical' : 'horizontal'}
-    className={cn(
-      orientation === 'Vertical' && 'h-full'
-    )} />
-
+  const separator = (
+    <Separator
+      orientation={orientation === 'Vertical' ? 'vertical' : 'horizontal'}
+      className={cn(orientation === 'Vertical' && 'h-full')}
+    />
+  );
 
   if (text) {
     return (
@@ -34,6 +37,10 @@ export const SeparatorWidget: React.FC<SeparatorWidgetProps> = ({ orientation, t
       </div>
     );
   }
-  
-  return <div style={styles} className="flex items-center justify-center">{separator}</div>
+
+  return (
+    <div style={styles} className="flex items-center justify-center">
+      {separator}
+    </div>
+  );
 };

@@ -29,6 +29,7 @@ public interface IAnyNumberInput : IAnyInput
     public NumberInputs Variant { get; set; }
     public NumberFormatStyle FormatStyle { get; set; }
     public string? Currency { get; set; }
+    public bool ShowArrows { get; set; }
 }
 
 public abstract record NumberInputBase : WidgetBase<NumberInputBase>, IAnyNumberInput
@@ -43,8 +44,20 @@ public abstract record NumberInputBase : WidgetBase<NumberInputBase>, IAnyNumber
     [Prop] public NumberInputs Variant { get; set; }
     [Prop] public NumberFormatStyle FormatStyle { get; set; }
     [Prop] public string? Currency { get; set; }
+    [Prop] public bool ShowArrows { get; set; } = false;
     [Event] public Action<Event<IAnyInput>>? OnBlur { get; set; }
-    public Type[] SupportedStateTypes() => [];
+    public Type[] SupportedStateTypes() => [
+        // Signed numeric types
+        typeof(short), typeof(short?),
+        typeof(int), typeof(int?),
+        typeof(long), typeof(long?),
+        typeof(float), typeof(float?),
+        typeof(double), typeof(double?),
+        typeof(decimal), typeof(decimal?),
+
+        // Unsigned integer types
+        typeof(byte), typeof(byte?)
+    ];
 }
 
 public record NumberInput<TNumber> : NumberInputBase, IInput<TNumber>, IAnyNumberInput
@@ -160,5 +173,10 @@ public static class NumberInputExtensions
     public static NumberInputBase Invalid(this NumberInputBase widget, string invalid)
     {
         return widget with { Invalid = invalid };
+    }
+
+    public static NumberInputBase ShowArrows(this NumberInputBase widget, bool showArrows = true)
+    {
+        return widget with { ShowArrows = showArrows };
     }
 }

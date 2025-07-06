@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 export function Kbd({ children }: { children: React.ReactNode }) {
   return (

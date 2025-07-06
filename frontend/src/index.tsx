@@ -1,7 +1,11 @@
-import { StrictMode, useEffect } from 'react'
-import { createRoot } from 'react-dom/client'
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable"
-import './index.css'
+import { StrictMode, useEffect } from 'react';
+import { createRoot } from 'react-dom/client';
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from '@/components/ui/resizable';
+import './index.css';
 import React from 'react';
 
 function App() {
@@ -20,10 +24,7 @@ function App() {
   if (!chatPanelUrl) {
     return (
       <div className="h-screen w-screen">
-        <iframe 
-          src="app.html" 
-          className="w-full h-full border-none"
-        />
+        <iframe src="app.html" className="w-full h-full border-none" />
       </div>
     );
   }
@@ -32,21 +33,15 @@ function App() {
     <ResizablePanelGroup direction="horizontal" className="h-screen v-screen">
       <ResizablePanel defaultSize={75}>
         <div className="h-screen w-full">
-          <iframe 
-            src="app.html" 
-            className="w-full h-full border-none"
-          />
+          <iframe src="app.html" className="w-full h-full border-none" />
         </div>
       </ResizablePanel>
-      
-      <ResizableHandle className="border"/>
-      
+
+      <ResizableHandle className="border" />
+
       <ResizablePanel defaultSize={25} minSize={15}>
         <div className="h-screen w-full">
-          <iframe
-            src={chatPanelUrl}
-            className="w-full h-full border-none"
-          />
+          <iframe src={chatPanelUrl} className="w-full h-full border-none" />
         </div>
       </ResizablePanel>
     </ResizablePanelGroup>
@@ -55,6 +50,6 @@ function App() {
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App/>
-  </StrictMode>,
-)
+    <App />
+  </StrictMode>
+);

@@ -8,13 +8,14 @@ interface SkeletonWidgetProps {
   height: string;
 }
 
-export const SkeletonWidget: React.FC<SkeletonWidgetProps> = ({ width, height }) => {
+export const SkeletonWidget: React.FC<SkeletonWidgetProps> = ({
+  width,
+  height,
+}) => {
   const styles = {
     ...getWidth(width),
-    ...getHeight(height)
-  }
+    ...getHeight(height),
+  };
 
-  return (
-    <Skeleton style={styles} className="rounded-xl bg-slate-100" />
-  );
+  return <Skeleton style={styles} className="rounded-xl bg-slate-100" />;
 };

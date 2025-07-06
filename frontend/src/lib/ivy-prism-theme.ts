@@ -6,7 +6,6 @@ const ivyPrismTheme: Record<string, CSSProperties> = {
     fontSize: '1em',
     background: 'transparent',
     color: '#061109',
-    
   },
   'pre[class*="language-"]': {
     fontFamily: '"IBM Plex Mono", monospace',

@@ -1,5 +1,12 @@
 import Icon from '@/components/Icon';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { getHeight, getWidth } from '@/lib/styles';
 import { cn } from '@/lib/utils';
 import React from 'react';
@@ -24,49 +31,44 @@ export const CardWidget: React.FC<CardWidgetProps> = ({
   icon,
   width,
   height,
-  slots
+  slots,
 }) => {
-
   const styles = {
     ...getWidth(width),
-    ...getHeight(height)
+    ...getHeight(height),
   };
 
-  const footerIsEmpty = slots?.Footer?.length === 0 ||
-  slots?.Footer?.some(node =>
-    React.isValidElement(node) && node.type === EmptyWidget
-  );
+  const footerIsEmpty =
+    slots?.Footer?.length === 0 ||
+    slots?.Footer?.some(
+      node => React.isValidElement(node) && node.type === EmptyWidget
+    );
 
   const headerIsEmpty = !title && !description && !icon;
 
   return (
-    <Card style={styles} className={cn(
-      "flex",
-      "flex-col",
-      "overflow-hidden"
-    )}>
+    <Card style={styles} className={cn('flex', 'flex-col', 'overflow-hidden')}>
       {!headerIsEmpty ? (
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <div className='flex flex-col'>
+          <div className="flex flex-col">
             {title && <CardTitle>{title}</CardTitle>}
-            {description && <CardDescription className='mt-2'>{description}</CardDescription>}
+            {description && (
+              <CardDescription className="mt-2">{description}</CardDescription>
+            )}
           </div>
-          {icon && <Icon name={icon} className="h-5 w-5 text-muted-foreground"/>}
+          {icon && (
+            <Icon name={icon} className="h-5 w-5 text-muted-foreground" />
+          )}
         </CardHeader>
       ) : (
         <></>
       )}
-      <CardContent className={cn(
-        "flex-1",
-        headerIsEmpty && "pt-6"
-      )}>
+      <CardContent className={cn('flex-1', headerIsEmpty && 'pt-6')}>
         {slots?.Content}
       </CardContent>
       {!footerIsEmpty && (
-        <CardFooter className='flex-none'>
-          {slots?.Footer}
-        </CardFooter>)}
+        <CardFooter className="flex-none">{slots?.Footer}</CardFooter>
+      )}
     </Card>
   );
 };
-

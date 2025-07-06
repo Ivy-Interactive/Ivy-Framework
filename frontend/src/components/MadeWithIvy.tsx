@@ -1,9 +1,9 @@
-"use client"
-import { useState } from "react"
-import IvyLogo from "./IvyLogo"
+'use client';
+import { useState } from 'react';
+import IvyLogo from './IvyLogo';
 
 export default function MadeWithIvy() {
-  const [isHovered, setIsHovered] = useState(false)
+  const [isHovered, setIsHovered] = useState(false);
 
   return (
     <div
@@ -22,15 +22,18 @@ export default function MadeWithIvy() {
           ease-in-out 
           origin-bottom-right
           cursor-pointer
-          ${isHovered ? "w-48 h-48" : "w-16 h-16"}
-          ${isHovered ? "bg-primary-foreground" : "bg-primary"}
+          ${isHovered ? 'w-48 h-48' : 'w-16 h-16'}
+          ${isHovered ? 'bg-primary-foreground' : 'bg-primary'}
         `}
         onClick={() => {
-          window.open("https://github.com/Ivy-Interactive/Ivy-Framework", "_blank")
+          window.open(
+            'https://github.com/Ivy-Interactive/Ivy-Framework',
+            '_blank'
+          );
         }}
       >
         <div
-          style={{ color: "var(--primary)" }}
+          style={{ color: 'var(--primary)' }}
           className={`
             flex 
             flex-col
@@ -39,13 +42,13 @@ export default function MadeWithIvy() {
             transition-opacity 
             duration-300
             m-4
-            ${isHovered ? "opacity-100" : "opacity-0"}
+            ${isHovered ? 'opacity-100' : 'opacity-0'}
           `}
         >
-          <span className="font-mono font-bold text-gray-400">MADE WITH</span>  
-          <IvyLogo className="w-24" />           
+          <span className="font-mono font-bold text-gray-400">MADE WITH</span>
+          <IvyLogo className="w-24" />
         </div>
       </div>
     </div>
-  )
+  );
 }

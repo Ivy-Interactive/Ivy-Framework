@@ -9,7 +9,7 @@ public class ColorsApp : ViewBase
     {
         object GenerateColors()
         {
-            Colors[] colors = (Colors[])Enum.GetValues(typeof(Colors));
+            Colors[] colors = Enum.GetValues<Colors>();
             var colorView = Layout.Vertical(
                 colors.Select(color =>
                     new Box(color.ToString())

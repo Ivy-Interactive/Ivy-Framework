@@ -14,7 +14,7 @@ export class Exception extends React.PureComponent<ExceptionProps> {
     const errorDetails = [
       title && `Title: ${title}`,
       message && `Message: ${message}`,
-      stackTrace && `Stack Trace:\n${stackTrace}`
+      stackTrace && `Stack Trace:\n${stackTrace}`,
     ]
       .filter(Boolean)
       .join('\n\n');
@@ -31,13 +31,13 @@ export class Exception extends React.PureComponent<ExceptionProps> {
           {title && <h3>{title}</h3>}
           {message && <p>{message}</p>}
           {stackTrace && (
-            <details className="mt-4" style={{ whiteSpace: "pre-wrap" }} open>
+            <details className="mt-4" style={{ whiteSpace: 'pre-wrap' }} open>
               <pre>{stackTrace}</pre>
             </details>
           )}
         </div>
-        
-        <Button 
+
+        <Button
           onClick={this.copyToClipboard}
           className="mt-4 flex items-center gap-2"
           variant="secondary"

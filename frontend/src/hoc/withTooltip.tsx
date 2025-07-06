@@ -1,22 +1,26 @@
-import { ComponentType } from "react";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { ComponentType } from 'react';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
-type WithTooltipProps<P> = P & JSX.IntrinsicAttributes & {
-  tooltipText?: string;
-  className?: string;
-  style?: React.CSSProperties;
-};
+type WithTooltipProps<P> = P &
+  JSX.IntrinsicAttributes & {
+    tooltipText?: string;
+    className?: string;
+    style?: React.CSSProperties;
+  };
 
-function withTooltip<P extends JSX.IntrinsicAttributes>(Component: ComponentType<P>) {
+function withTooltip<P extends JSX.IntrinsicAttributes>(
+  Component: ComponentType<P>
+) {
   return function TooltipHOC(props: WithTooltipProps<P>) {
     const { tooltipText, className, style, ...restProps } = props;
 
     const componentWithStyles = (
-      <Component 
-        className={className}
-        style={style}
-        {...(restProps as P)} 
-      />
+      <Component className={className} style={style} {...(restProps as P)} />
     );
 
     if (!tooltipText) {
@@ -26,9 +30,7 @@ function withTooltip<P extends JSX.IntrinsicAttributes>(Component: ComponentType
     return (
       <TooltipProvider>
         <Tooltip>
-          <TooltipTrigger>
-            {componentWithStyles}
-          </TooltipTrigger>
+          <TooltipTrigger>{componentWithStyles}</TooltipTrigger>
           <TooltipContent className="bg-popover text-popover-foreground shadow-md">
             {tooltipText}
           </TooltipContent>

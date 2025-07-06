@@ -10,15 +10,18 @@ interface IconWidgetProps {
   height?: string;
 }
 
-export const IconWidget: React.FC<IconWidgetProps> = ({ id, name, color, height, width }) => { 
-
+export const IconWidget: React.FC<IconWidgetProps> = ({
+  id,
+  name,
+  color,
+  height,
+  width,
+}) => {
   const styles = {
-    ...getWidth(width), 
+    ...getWidth(width),
     ...getHeight(height),
-    ...getColor(color, 'color', 'background')
+    ...getColor(color, 'color', 'background'),
   };
 
-  return (
-    <Icon style={styles} name={name} key={id}/>
-  );
+  return <Icon style={styles} name={name} key={id} />;
 };

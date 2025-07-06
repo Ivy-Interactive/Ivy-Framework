@@ -8,9 +8,9 @@ interface TableRowWidgetProps {
   children?: React.ReactNode;
 }
 
-export const TableRowWidget: React.FC<TableRowWidgetProps> = ({ 
+export const TableRowWidget: React.FC<TableRowWidgetProps> = ({
   children,
-  isHeader = false
+  isHeader = false,
 }) => (
   <TableRow className={`${isHeader ? 'font-medium bg-white' : ''}`}>
     {children}

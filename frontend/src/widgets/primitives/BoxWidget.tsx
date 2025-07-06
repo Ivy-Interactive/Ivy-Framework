@@ -1,4 +1,17 @@
-import { Align, BorderRadius, BorderStyle, getAlign, getBorderRadius, getBorderStyle, getBorderThickness, getColor, getHeight, getMargin, getPadding, getWidth } from '@/lib/styles';
+import {
+  Align,
+  BorderRadius,
+  BorderStyle,
+  getAlign,
+  getBorderRadius,
+  getBorderStyle,
+  getBorderThickness,
+  getColor,
+  getHeight,
+  getMargin,
+  getPadding,
+  getWidth,
+} from '@/lib/styles';
 import { cn } from '@/lib/utils';
 import React from 'react';
 
@@ -16,32 +29,37 @@ interface BoxWidgetProps {
   contentAlign: Align;
 }
 
-export const BoxWidget: React.FC<BoxWidgetProps> = ({ 
-  children, width, height, borderStyle, borderRadius, borderThickness, color, padding, margin, contentAlign }) => {
-    const styles = { 
-      ...getBorderStyle(borderStyle), 
-      ...getBorderThickness(borderThickness), 
-      ...getBorderRadius(borderRadius),
-      ...getPadding(padding),
-      ...getMargin(margin),
-      ...getAlign('Vertical', contentAlign),
-      ...getWidth(width),
-      ...getHeight(height),
-      ...getColor(color, 'backgroundColor', 'background'),
-      ...getColor(color, 'borderColor', 'foreground'),
-      ...getColor(color, 'color', 'foreground')
+export const BoxWidget: React.FC<BoxWidgetProps> = ({
+  children,
+  width,
+  height,
+  borderStyle,
+  borderRadius,
+  borderThickness,
+  color,
+  padding,
+  margin,
+  contentAlign,
+}) => {
+  const styles = {
+    ...getBorderStyle(borderStyle),
+    ...getBorderThickness(borderThickness),
+    ...getBorderRadius(borderRadius),
+    ...getPadding(padding),
+    ...getMargin(margin),
+    ...getAlign('Vertical', contentAlign),
+    ...getWidth(width),
+    ...getHeight(height),
+    ...getColor(color, 'backgroundColor', 'background'),
+    ...getColor(color, 'borderColor', 'foreground'),
+    ...getColor(color, 'color', 'foreground'),
   };
 
-    return (
-      <>
-        <div 
-          style={styles}
-          className={cn(
-          "font-mono",
-          "font-bold",
-        )}>
-          {children}
-        </div>
-      </>
-    );
-  };
+  return (
+    <>
+      <div style={styles} className={cn('font-mono', 'font-bold')}>
+        {children}
+      </div>
+    </>
+  );
+};

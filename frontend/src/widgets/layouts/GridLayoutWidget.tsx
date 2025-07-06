@@ -6,14 +6,14 @@ interface GridLayoutWidgetProps {
   rows?: number;
   gap?: number;
   padding?: string;
-  autoFlow?: "Row" | "Column" | "RowDense" | "ColumnDense";
+  autoFlow?: 'Row' | 'Column' | 'RowDense' | 'ColumnDense';
   width?: string;
   height?: string;
   children: React.ReactNode[];
-  childColumn?: (number|undefined)[];
-  childColumnSpan?: (number|undefined)[];
-  childRow?: (number|undefined)[];
-  childRowSpan?: (number|undefined)[];
+  childColumn?: (number | undefined)[];
+  childColumnSpan?: (number | undefined)[];
+  childRow?: (number | undefined)[];
+  childRowSpan?: (number | undefined)[];
   className?: string;
 }
 
@@ -26,22 +26,21 @@ interface GridLayoutCellProps {
   className?: string;
 }
 
-const GridLayoutCell: React.FC<GridLayoutCellProps> = ({ 
+const GridLayoutCell: React.FC<GridLayoutCellProps> = ({
   children,
   column,
   row,
   columnSpan,
   rowSpan,
-  className
+  className,
 }) => {
-
   const styles: React.CSSProperties = {
     ...{
       gridColumn: columnSpan ? `span ${columnSpan}` : undefined,
       gridRow: rowSpan ? `span ${rowSpan}` : undefined,
       gridColumnStart: column,
-      gridRowStart: row
-    }
+      gridRowStart: row,
+    },
   };
 
   return (
@@ -51,11 +50,11 @@ const GridLayoutCell: React.FC<GridLayoutCellProps> = ({
   );
 };
 
-export const GridLayoutWidget: React.FC<GridLayoutWidgetProps> = ({ 
-  children, 
+export const GridLayoutWidget: React.FC<GridLayoutWidgetProps> = ({
+  children,
   columns = 1,
   rows = 1,
-  autoFlow = "Row",
+  autoFlow = 'Row',
   width,
   height,
   gap = 16,
@@ -64,9 +63,8 @@ export const GridLayoutWidget: React.FC<GridLayoutWidgetProps> = ({
   childColumnSpan = [],
   childRow = [],
   childRowSpan = [],
-  className = ''
+  className = '',
 }) => {
-
   const styles: React.CSSProperties = {
     ...{
       display: 'grid',
@@ -77,7 +75,7 @@ export const GridLayoutWidget: React.FC<GridLayoutWidgetProps> = ({
     ...getPadding(padding),
     ...getGap(gap),
     ...getWidth(width),
-    ...getHeight(height)
+    ...getHeight(height),
   };
 
   return (

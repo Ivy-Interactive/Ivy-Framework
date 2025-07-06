@@ -1,5 +1,5 @@
-import Icon from "@/components/Icon";
-import { getHeight, getWidth } from "@/lib/styles";
+import Icon from '@/components/Icon';
+import { getHeight, getWidth } from '@/lib/styles';
 import { cn } from '@/lib/utils';
 import React from 'react';
 
@@ -9,21 +9,21 @@ interface CalloutWidgetProps {
   variant?: 'Info' | 'Success' | 'Warning' | 'Error';
   width?: string;
   height?: string;
-  icon?: string
+  icon?: string;
 }
 
 const backgroundColors = {
-  'Info': 'cyan',
-  'Success': 'primary',
-  'Warning': 'yellow',
-  'Error': 'destructive'
-}
+  Info: 'cyan',
+  Success: 'primary',
+  Warning: 'yellow',
+  Error: 'destructive',
+};
 
 const defaultIcons = {
-  'Info': 'Info',
-  'Success': 'CircleCheck',
-  'Warning': 'CircleAlert',
-  'Error': 'CircleAlert'
+  Info: 'Info',
+  Success: 'CircleCheck',
+  Warning: 'CircleAlert',
+  Error: 'CircleAlert',
 };
 
 export const CalloutWidget: React.FC<CalloutWidgetProps> = ({
@@ -32,13 +32,12 @@ export const CalloutWidget: React.FC<CalloutWidgetProps> = ({
   variant,
   icon,
   width,
-  height
+  height,
 }) => {
-
   const styles: React.CSSProperties = {
     ...getWidth(width),
     ...getHeight(height),
-    backgroundColor: "var(--" + backgroundColors[variant || 'Info'] + "-light)"
+    backgroundColor: 'var(--' + backgroundColors[variant || 'Info'] + '-light)',
   };
 
   if (!icon) {
@@ -46,11 +45,12 @@ export const CalloutWidget: React.FC<CalloutWidgetProps> = ({
   }
 
   return (
-    <div style={styles} className={
-      cn(
-        "flex items-center p-4 text-sm"
-      )} role="alert">
-      {icon && <Icon size="30" name={icon} className="mr-4 opacity-50"/>}
+    <div
+      style={styles}
+      className={cn('flex items-center p-4 text-sm')}
+      role="alert"
+    >
+      {icon && <Icon size="30" name={icon} className="mr-4 opacity-50" />}
       <span className="sr-only">{variant}</span>
       <div className="flex flex-col">
         {title && <div className="font-medium">{title}</div>}

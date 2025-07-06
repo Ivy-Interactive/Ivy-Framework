@@ -23,13 +23,16 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
     this.setState({ error, errorInfo });
-    console.error("Error caught in ErrorBoundary:", error, errorInfo);
+    console.error('Error caught in ErrorBoundary:', error, errorInfo);
   }
 
   render() {
     if (this.state.hasError) {
       return (
-        <Exception message={this.state.error?.toString()} stackTrace={this.state.errorInfo?.componentStack}/>
+        <Exception
+          message={this.state.error?.toString()}
+          stackTrace={this.state.errorInfo?.componentStack}
+        />
       );
     }
 

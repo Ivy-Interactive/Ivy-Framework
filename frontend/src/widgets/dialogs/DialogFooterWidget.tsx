@@ -7,7 +7,5 @@ interface DialogFooterWidgetProps {
 }
 
 export const DialogFooterWidget: React.FC<DialogFooterWidgetProps> = ({
-  children
-}) => (
-  <DialogFooter>{children}</DialogFooter>
-);
+  children,
+}) => <DialogFooter>{children}</DialogFooter>;

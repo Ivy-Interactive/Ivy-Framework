@@ -1,19 +1,19 @@
+import { memo, useCallback, useMemo } from 'react';
 import {
   useEventHandler,
   EventHandler,
-} from "@/components/EventHandlerContext";
-import { InvalidIcon } from "@/components/InvalidIcon";
-import NumberInput from "@/components/NumberInput";
-import { Slider } from "@/components/ui/slider";
-import { inputStyles } from "@/lib/styles";
-import { cn } from "@/lib/utils";
-import { memo, useCallback, useMemo } from "react";
-import React from "react";
+} from '@/components/EventHandlerContext';
+import NumberInput from '@/components/NumberInput';
+import { Slider } from '@/components/ui/slider';
+import { cn } from '@/lib/utils';
+import { inputStyles } from '@/lib/styles';
+import { InvalidIcon } from '@/components/InvalidIcon';
+import React from 'react';
 
 const formatStyleMap = {
-  Decimal: "decimal",
-  Currency: "currency",
-  Percent: "percent",
+  Decimal: 'decimal',
+  Currency: 'currency',
+  Percent: 'percent',
 } as const;
 
 type FormatStyle = keyof typeof formatStyleMap;
@@ -32,11 +32,12 @@ interface NumberInputBaseProps {
   nullable?: boolean;
   onValueChange: (value: number | null) => void;
   currency?: string | undefined;
+  showArrows?: boolean;
 }
 
 interface NumberInputWidgetProps
-  extends Omit<NumberInputBaseProps, "onValueChange"> {
-  variant?: "Default" | "Slider";
+  extends Omit<NumberInputBaseProps, 'onValueChange'> {
+  variant?: 'Default' | 'Slider';
 }
 
 const SliderVariant = memo(
@@ -59,7 +60,7 @@ const SliderVariant = memo(
     // Only update local state on drag
     const handleSliderChange = useCallback((values: number[]) => {
       const newValue = values[0];
-      if (typeof newValue === "number") {
+      if (typeof newValue === 'number') {
         setLocalValue(newValue);
       }
     }, []);
@@ -68,7 +69,7 @@ const SliderVariant = memo(
     const handleSliderCommit = useCallback(
       (values: number[]) => {
         const newValue = values[0];
-        if (typeof newValue === "number") {
+        if (typeof newValue === 'number') {
           onValueChange(newValue);
         }
       },
@@ -111,18 +112,19 @@ SliderVariant.displayName = "SliderVariant";
 
 const NumberVariant = memo(
   ({
-    placeholder = "",
+    placeholder = '',
     value,
     min = 0,
     max = 100,
     step = 1,
-    formatStyle = "Decimal",
+    formatStyle = 'Decimal',
     precision = 2,
     disabled = false,
     invalid,
     nullable = false,
     onValueChange,
     currency,
+    showArrows = false,
   }: NumberInputBaseProps) => {
     const formatConfig = useMemo(
       () => ({
@@ -130,7 +132,7 @@ const NumberVariant = memo(
         minimumFractionDigits: 0,
         maximumFractionDigits: precision,
         useGrouping: true,
-        notation: "standard" as const,
+        notation: 'standard' as const,
         currency: currency || undefined,
       }),
       [currency, formatStyle, precision]
@@ -159,11 +161,14 @@ const NumberVariant = memo(
           value={value}
           disabled={disabled}
           onChange={handleNumberChange}
-          className={cn(invalid && inputStyles.invalid, invalid && "pr-8")}
+          className={cn(invalid && inputStyles.invalid, invalid && 'pr-8')}
           nullable={nullable}
+          showArrows={showArrows}
         />
         {invalid && (
-          <div className="absolute right-8 top-2">
+          <div
+            className={cn('absolute top-2', showArrows ? 'right-8' : 'right-2')}
+          >
             <InvalidIcon message={invalid} />
           </div>
         )}
@@ -177,7 +182,7 @@ NumberVariant.displayName = "NumberVariant";
 export const NumberInputWidget = memo(
   ({
     id,
-    variant = "Default",
+    variant = 'Default',
     nullable = false,
     ...props
   }: NumberInputWidgetProps) => {
@@ -195,16 +200,16 @@ export const NumberInputWidget = memo(
             Math.max(newValue, props.min ?? 0),
             props.max ?? 100
           );
-          eventHandler("OnChange", id, [boundedValue]);
+          eventHandler('OnChange', id, [boundedValue]);
         } else {
           // Pass null directly for nullable inputs
-          eventHandler("OnChange", id, [newValue]);
+          eventHandler('OnChange', id, [newValue]);
         }
       },
       [eventHandler, id, props.min, props.max]
     );
 
-    return variant === "Slider" ? (
+    return variant === 'Slider' ? (
       <SliderVariant
         id={id}
         {...props}
@@ -218,9 +223,10 @@ export const NumberInputWidget = memo(
         value={normalizedValue}
         nullable={nullable}
         onValueChange={handleChange}
+        showArrows={props.showArrows}
       />
     );
   }
 );
 
-NumberInputWidget.displayName = "NumberInputWidget";
+NumberInputWidget.displayName = 'NumberInputWidget';

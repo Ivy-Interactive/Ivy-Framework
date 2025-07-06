@@ -5,10 +5,6 @@ interface FormWidgetProps {
   children?: React.ReactNode;
 }
 
-export const FormWidget: React.FC<FormWidgetProps> = ({
-  children
-}) => (
-  <div>
-    {children}
-  </div>
+export const FormWidget: React.FC<FormWidgetProps> = ({ children }) => (
+  <div>{children}</div>
 );

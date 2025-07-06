@@ -16,14 +16,16 @@ const getImageUrl = (url: string) => {
   return `${getIvyHost()}${url.startsWith('/') ? '' : '/'}${url}`;
 };
 
-export const ImageWidget: React.FC<ImageWidgetProps> = ({ id, src, width, height }) => {
-
+export const ImageWidget: React.FC<ImageWidgetProps> = ({
+  id,
+  src,
+  width,
+  height,
+}) => {
   const styles: React.CSSProperties = {
     ...getWidth(width),
     ...getHeight(height),
   };
 
-  return (
-    <img src={getImageUrl(src)} key={id} style={styles} />
-  );
+  return <img src={getImageUrl(src)} key={id} style={styles} />;
 };

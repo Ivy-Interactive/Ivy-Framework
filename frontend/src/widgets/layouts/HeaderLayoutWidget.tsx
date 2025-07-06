@@ -12,7 +12,7 @@ interface HeaderLayoutWidgetProps {
 
 export const HeaderLayoutWidget: React.FC<HeaderLayoutWidgetProps> = ({
   slots,
-  width
+  width,
 }) => {
   if (!slots?.Header || !slots?.Content) {
     return (
@@ -23,19 +23,18 @@ export const HeaderLayoutWidget: React.FC<HeaderLayoutWidgetProps> = ({
   }
 
   const styles: React.CSSProperties = {
-    ...getWidth(width) 
+    ...getWidth(width),
   };
 
   return (
-    <div className='remove-ancestor-padding h-[calc(100vh-70px)]' style={styles}>
-      <div className='flex flex-col h-full'>
-        <div className='p-2 border-b bg-white'>
-          {slots.Header}
-        </div>
-        <ScrollArea className='flex-grow'>
-          <div className='p-4'>
-            {slots.Content}
-          </div>
+    <div
+      className="remove-ancestor-padding h-[calc(100vh-70px)]"
+      style={styles}
+    >
+      <div className="flex flex-col h-full">
+        <div className="p-2 border-b bg-white">{slots.Header}</div>
+        <ScrollArea className="flex-grow">
+          <div className="p-4">{slots.Content}</div>
         </ScrollArea>
       </div>
     </div>

@@ -13,8 +13,12 @@ const getInitials = (name: string): string => {
   return initials;
 };
 
-export const AvatarWidget: React.FC<AvatarWidgetProps> = ({ image, fallback }) => {
-  const displayFallback = fallback.length === 2 ? fallback : getInitials(fallback);
+export const AvatarWidget: React.FC<AvatarWidgetProps> = ({
+  image,
+  fallback,
+}) => {
+  const displayFallback =
+    fallback.length === 2 ? fallback : getInitials(fallback);
   return (
     <Avatar>
       <AvatarImage src={image} title={fallback} />

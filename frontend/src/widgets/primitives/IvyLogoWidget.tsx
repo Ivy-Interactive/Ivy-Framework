@@ -1,4 +1,3 @@
-
 import IvyLogo from '@/components/IvyLogo';
 import { getColor, getHeight, getWidth } from '@/lib/styles';
 
@@ -8,20 +7,16 @@ interface IvyLogoWidgetProps {
   color?: string;
 }
 
-export const IvyLogoWidget: React.FC<IvyLogoWidgetProps> = ({  
+export const IvyLogoWidget: React.FC<IvyLogoWidgetProps> = ({
   width,
   height,
-  color }) => {
+  color,
+}) => {
   const styles = {
-      ...getWidth(width),
-      ...getHeight(height),
-      ...getColor
-      (color, 'color', 'background')
+    ...getWidth(width),
+    ...getHeight(height),
+    ...getColor(color, 'color', 'background'),
   };
 
-  return (
-      <IvyLogo 
-          style={styles}
-      />
-  );
-}
+  return <IvyLogo style={styles} />;
+};

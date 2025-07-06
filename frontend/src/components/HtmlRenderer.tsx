@@ -4,14 +4,35 @@ interface HtmlRendererProps {
   content: string;
   className?: string;
   allowedTags?: string[];
-  onLinkClick?: (event: React.MouseEvent<HTMLAnchorElement>, href: string) => void;
+  onLinkClick?: (
+    event: React.MouseEvent<HTMLAnchorElement>,
+    href: string
+  ) => void;
 }
 
-const sanitizeHtml = (html: string, allowedTags: string[] = [
-  'p', 'div', 'span', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
-  'ul', 'ol', 'li', 'a', 'strong', 'em', 'b', 'i', 'br'
-]): string => {
-  
+const sanitizeHtml = (
+  html: string,
+  allowedTags: string[] = [
+    'p',
+    'div',
+    'span',
+    'h1',
+    'h2',
+    'h3',
+    'h4',
+    'h5',
+    'h6',
+    'ul',
+    'ol',
+    'li',
+    'a',
+    'strong',
+    'em',
+    'b',
+    'i',
+    'br',
+  ]
+): string => {
   const temp = document.createElement('div');
   temp.innerHTML = html;
 
@@ -31,7 +52,10 @@ const sanitizeHtml = (html: string, allowedTags: string[] = [
 
     for (let j = attrs.length - 1; j >= 0; j--) {
       const attr = attrs[j];
-      if (attr.name.startsWith('on') || attr.name === 'href' && attr.value.startsWith('javascript:')) {
+      if (
+        attr.name.startsWith('on') ||
+        (attr.name === 'href' && attr.value.startsWith('javascript:'))
+      ) {
         element.removeAttribute(attr.name);
       }
     }
@@ -49,7 +73,7 @@ export const HtmlRenderer: React.FC<HtmlRendererProps> = ({
   content,
   className = '',
   allowedTags,
-  onLinkClick
+  onLinkClick,
 }) => {
   // Sanitize the HTML content
   const sanitizedContent = sanitizeHtml(content, allowedTags);
@@ -66,7 +90,7 @@ export const HtmlRenderer: React.FC<HtmlRendererProps> = ({
 
   return (
     <div className={`${className}`}>
-      <div 
+      <div
         className="prose max-w-none"
         onClick={handleClick}
         dangerouslySetInnerHTML={{ __html: sanitizedContent }}

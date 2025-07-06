@@ -7,12 +7,17 @@ interface DialogBodyWidgetProps {
 
 export const DialogBodyWidget: React.FC<DialogBodyWidgetProps> = ({
   id,
-  children
+  children,
 }) => {
   const descriptionId = useId();
-  
+
   return (
-    <section id={id} className="flex-1 min-h-0 flex flex-col overflow-hidden" role="document" aria-describedby={descriptionId}>
+    <section
+      id={id}
+      className="flex-1 min-h-0 flex flex-col overflow-hidden"
+      role="document"
+      aria-describedby={descriptionId}
+    >
       <div className="flex-1 min-h-0 overflow-auto" id={descriptionId}>
         {children}
       </div>

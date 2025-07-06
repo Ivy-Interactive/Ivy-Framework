@@ -1,5 +1,5 @@
 import React, { useCallback, useState, useRef } from 'react';
-import { Input } from "@/components/ui/input";
+import { Input } from '@/components/ui/input';
 import { useEventHandler } from '@/components/EventHandlerContext';
 import { Upload, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -7,13 +7,12 @@ import { cn } from '@/lib/utils';
 import { getWidth } from '@/lib/styles';
 import { InvalidIcon } from '@/components/InvalidIcon';
 
-interface FileInput
-{
-    name: string;
-    size: number;
-    type: string;
-    lastModified: Date;
-    content?: string;
+interface FileInput {
+  name: string;
+  size: number;
+  type: string;
+  lastModified: Date;
+  content?: string;
 }
 
 interface FileInputWidgetProps {
@@ -35,7 +34,7 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
   width,
   events,
   accept,
-  multiple = false
+  multiple = false,
 }) => {
   const handleEvent = useEventHandler();
   const [isDragging, setIsDragging] = useState(false);
@@ -43,41 +42,45 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
 
   const convertFileToUploadFile = async (file: File): Promise<FileInput> => {
     const arrayBuffer = await file.arrayBuffer();
-    const base64 = btoa(
-      String.fromCharCode(...new Uint8Array(arrayBuffer))
-    );
-    
+    const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+
     return {
       name: file.name,
       size: file.size,
       type: file.type,
       lastModified: new Date(file.lastModified),
-      content: base64
+      content: base64,
     };
   };
 
-  const handleChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files) return;
+  const handleChange = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const files = e.target.files;
+      if (!files) return;
 
-    const selectedFiles = multiple 
-      ? await Promise.all(Array.from(files).map(convertFileToUploadFile))
-      : await convertFileToUploadFile(files[0]);
-    
-    handleEvent("OnChange", id, [selectedFiles]);
-  }, [id, events, multiple, handleEvent, convertFileToUploadFile]);
+      const selectedFiles = multiple
+        ? await Promise.all(Array.from(files).map(convertFileToUploadFile))
+        : await convertFileToUploadFile(files[0]);
+
+      handleEvent('OnChange', id, [selectedFiles]);
+    },
+    [id, events, multiple, handleEvent, convertFileToUploadFile]
+  );
 
   const handleClear = useCallback(() => {
-    handleEvent("OnChange", id, [null]);
+    handleEvent('OnChange', id, [null]);
   }, [id, events, handleEvent]);
 
-  const handleDragEnter = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (!disabled) {
-      setIsDragging(true);
-    }
-  }, [disabled]);
+  const handleDragEnter = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (!disabled) {
+        setIsDragging(true);
+      }
+    },
+    [disabled]
+  );
 
   const handleDragLeave = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -90,22 +93,25 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
     e.stopPropagation();
   }, []);
 
-  const handleDrop = useCallback(async (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(false);
+  const handleDrop = useCallback(
+    async (e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setIsDragging(false);
 
-    if (disabled) return;
+      if (disabled) return;
 
-    const files = Array.from(e.dataTransfer.files);
-    if (files.length === 0) return;
+      const files = Array.from(e.dataTransfer.files);
+      if (files.length === 0) return;
 
-    const selectedFiles = multiple 
-      ? await Promise.all(files.map(convertFileToUploadFile))
-      : await convertFileToUploadFile(files[0]);
-    
-    handleEvent("OnChange", id, [selectedFiles]);
-  }, [id, events, multiple, handleEvent, disabled, convertFileToUploadFile]);
+      const selectedFiles = multiple
+        ? await Promise.all(files.map(convertFileToUploadFile))
+        : await convertFileToUploadFile(files[0]);
+
+      handleEvent('OnChange', id, [selectedFiles]);
+    },
+    [id, events, multiple, handleEvent, disabled, convertFileToUploadFile]
+  );
 
   const handleClick = useCallback(() => {
     if (!disabled && inputRef.current) {
@@ -113,26 +119,28 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
     }
   }, [disabled]);
 
-  const displayValue = value 
-    ? (Array.isArray(value) 
-        ? value.map(f => f.name).join(', ') 
-        : value.name) 
+  const displayValue = value
+    ? Array.isArray(value)
+      ? value.map(f => f.name).join(', ')
+      : value.name
     : '';
 
   return (
-    <div 
-      className="relative" 
+    <div
+      className="relative"
       style={{ ...getWidth(width) }}
       onDragEnter={handleDragEnter}
       onDragLeave={handleDragLeave}
       onDragOver={handleDragOver}
       onDrop={handleDrop}
     >
-      <div 
+      <div
         className={cn(
-          "relative rounded-md border-2 border-dashed transition-colors min-h-[100px]",
-          isDragging && !disabled ? "border-primary bg-primary/5" : "border-muted-foreground/25",
-          disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
+          'relative rounded-md border-2 border-dashed transition-colors min-h-[100px]',
+          isDragging && !disabled
+            ? 'border-primary bg-primary/5'
+            : 'border-muted-foreground/25',
+          disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
         )}
         onClick={handleClick}
       >
@@ -151,7 +159,8 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
           <p className="text-sm text-muted-foreground">
             {displayValue || (
               <>
-                Drag and drop your {multiple ? 'files' : 'file'} here or click to select
+                Drag and drop your {multiple ? 'files' : 'file'} here or click
+                to select
                 {/* {accept && (
                   <span className="block mt-1 text-xs">
                     Accepted file types: {accept}
@@ -167,7 +176,7 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
             variant="ghost"
             size="icon"
             className="absolute right-2 top-2 h-6 w-6 z-10"
-            onClick={(e) => {
+            onClick={e => {
               e.stopPropagation();
               handleClear();
             }}
@@ -179,4 +188,4 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
       {invalid && <InvalidIcon message={invalid} />}
     </div>
   );
-}; 
+};

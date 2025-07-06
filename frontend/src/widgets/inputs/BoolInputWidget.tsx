@@ -1,13 +1,18 @@
 import React, { useCallback, useMemo } from 'react';
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { Toggle } from "@/components/ui/toggle";
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import { Toggle } from '@/components/ui/toggle';
 import Icon from '@/components/Icon';
 import { useEventHandler } from '@/components/EventHandlerContext';
 import { inputStyles } from '@/lib/styles';
 import { cn } from '@/lib/utils';
 import { Checkbox, NullableBoolean } from '@/components/ui/checkbox';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 type VariantType = 'Checkbox' | 'Switch' | 'Toggle';
 
@@ -47,30 +52,30 @@ interface ToggleVariantProps extends BaseVariantProps {
   onPressedChange: (pressed: boolean) => void;
 }
 
-const InputLabel: React.FC<{ id: string; label?: string; description?: string }> = React.memo(
-  ({ id, label, description }) => {
-    if (!label && !description) return null;
+const InputLabel: React.FC<{
+  id: string;
+  label?: string;
+  description?: string;
+}> = React.memo(({ id, label, description }) => {
+  if (!label && !description) return null;
 
-    return (
-      <div className="grid gap-1.5 leading-none bg-background">
-        {label && <Label htmlFor={id}>{label}</Label>}
-        {description && (
-          <p className="text-sm text-muted-foreground">{description}</p>
-        )}
-      </div>
-    );
-  }
-);
+  return (
+    <div className="grid gap-1.5 leading-none bg-background">
+      {label && <Label htmlFor={id}>{label}</Label>}
+      {description && (
+        <p className="text-sm text-muted-foreground">{description}</p>
+      )}
+    </div>
+  );
+});
 
 const withTooltip = (content: React.ReactNode, invalid?: string) => {
   if (!invalid) return content;
-  
+
   return (
     <TooltipProvider>
       <Tooltip>
-        <TooltipTrigger asChild>
-          {content}
-        </TooltipTrigger>
+        <TooltipTrigger asChild>{content}</TooltipTrigger>
         <TooltipContent className="bg-popover text-popover-foreground shadow-md">
           {invalid}
         </TooltipContent>
@@ -80,107 +85,113 @@ const withTooltip = (content: React.ReactNode, invalid?: string) => {
 };
 
 const VariantComponents = {
-  Checkbox: React.memo(({
-    id,
-    label,
-    description,
-    value,
-    disabled,
-    nullable,
-    invalid,
-    onCheckedChange
-  }: CheckboxVariantProps) => {
-    const checkboxElement = (
-      <Checkbox
-        id={id}
-        checked={value}
-        onCheckedChange={onCheckedChange}
-        disabled={disabled}
-        nullable={nullable}
-        className={cn(invalid && inputStyles.invalid)}
-      />
-    );
+  Checkbox: React.memo(
+    ({
+      id,
+      label,
+      description,
+      value,
+      disabled,
+      nullable,
+      invalid,
+      onCheckedChange,
+    }: CheckboxVariantProps) => {
+      const checkboxElement = (
+        <Checkbox
+          id={id}
+          checked={value}
+          onCheckedChange={onCheckedChange}
+          disabled={disabled}
+          nullable={nullable}
+          className={cn(invalid && inputStyles.invalid)}
+        />
+      );
 
-    const content = (
-      <div
-        className="flex items-start space-x-2"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {withTooltip(checkboxElement, invalid)}
-        <InputLabel id={id} label={label} description={description} />
-      </div>
-    );
+      const content = (
+        <div
+          className="flex items-start space-x-2"
+          onClick={e => e.stopPropagation()}
+        >
+          {withTooltip(checkboxElement, invalid)}
+          <InputLabel id={id} label={label} description={description} />
+        </div>
+      );
 
-    return content;
-  }),
+      return content;
+    }
+  ),
 
-  Switch: React.memo(({
-    id,
-    label,
-    description,
-    value,
-    disabled,
-    invalid,
-    onCheckedChange
-  }: SwitchVariantProps) => {
-    const switchElement = (
-      <Switch
-        id={id}
-        checked={!!value}
-        onCheckedChange={onCheckedChange}
-        disabled={disabled}
-        className={cn(invalid && inputStyles.invalid)}
-      />
-    );
+  Switch: React.memo(
+    ({
+      id,
+      label,
+      description,
+      value,
+      disabled,
+      invalid,
+      onCheckedChange,
+    }: SwitchVariantProps) => {
+      const switchElement = (
+        <Switch
+          id={id}
+          checked={!!value}
+          onCheckedChange={onCheckedChange}
+          disabled={disabled}
+          className={cn(invalid && inputStyles.invalid)}
+        />
+      );
 
-    const content = (
-      <div
-        className="flex items-start space-x-2"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {withTooltip(switchElement, invalid)}
-        <InputLabel id={id} label={label} description={description} />
-      </div>
-    );
+      const content = (
+        <div
+          className="flex items-start space-x-2"
+          onClick={e => e.stopPropagation()}
+        >
+          {withTooltip(switchElement, invalid)}
+          <InputLabel id={id} label={label} description={description} />
+        </div>
+      );
 
-    return content;
-  }),
+      return content;
+    }
+  ),
 
-  Toggle: React.memo(({
-    id,
-    label,
-    description,
-    value,
-    disabled,
-    icon,
-    invalid,
-    onPressedChange
-  }: ToggleVariantProps) => {
-    const toggleElement = (
-      <Toggle
-        id={id}
-        pressed={!!value}
-        onPressedChange={onPressedChange}
-        disabled={disabled}
-        aria-label={label}
-        className={cn(invalid && inputStyles.invalid)}
-      >
-        {icon && <Icon className="h-4 w-4" name={icon} />}
-      </Toggle>
-    );
+  Toggle: React.memo(
+    ({
+      id,
+      label,
+      description,
+      value,
+      disabled,
+      icon,
+      invalid,
+      onPressedChange,
+    }: ToggleVariantProps) => {
+      const toggleElement = (
+        <Toggle
+          id={id}
+          pressed={!!value}
+          onPressedChange={onPressedChange}
+          disabled={disabled}
+          aria-label={label}
+          className={cn(invalid && inputStyles.invalid)}
+        >
+          {icon && <Icon className="h-4 w-4" name={icon} />}
+        </Toggle>
+      );
 
-    const content = (
-      <div
-        className="flex items-start space-x-2"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {withTooltip(toggleElement, invalid)}
-        <InputLabel id={id} label={label} description={description} />
-      </div>
-    );
+      const content = (
+        <div
+          className="flex items-start space-x-2"
+          onClick={e => e.stopPropagation()}
+        >
+          {withTooltip(toggleElement, invalid)}
+          <InputLabel id={id} label={label} description={description} />
+        </div>
+      );
 
-    return content;
-  })
+      return content;
+    }
+  ),
 };
 
 export const BoolInputWidget: React.FC<BoolInputWidgetProps> = ({
@@ -192,17 +203,20 @@ export const BoolInputWidget: React.FC<BoolInputWidgetProps> = ({
   invalid,
   nullable = false,
   variant,
-  icon
+  icon,
 }) => {
   const eventHandler = useEventHandler();
 
   // Normalize undefined to null when nullable
   const normalizedValue = nullable && value === undefined ? null : value;
 
-  const handleChange = useCallback((newValue: boolean | null) => {
-    if (disabled) return;
-    eventHandler("OnChange", id, [newValue]);
-  }, [disabled, eventHandler, id]);
+  const handleChange = useCallback(
+    (newValue: boolean | null) => {
+      if (disabled) return;
+      eventHandler('OnChange', id, [newValue]);
+    },
+    [disabled, eventHandler, id]
+  );
 
   const VariantComponent = useMemo(() => VariantComponents[variant], [variant]);
 
