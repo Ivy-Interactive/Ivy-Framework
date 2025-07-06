@@ -401,3 +401,6 @@ FodyWeavers.xsd
 
 
 *\bin\Debug\
+
+# Possible Playwright test results
+test-results/
