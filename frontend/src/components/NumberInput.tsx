@@ -1,4 +1,3 @@
-import { InvalidIcon } from '@/components/InvalidIcon';
 import { Input } from '@/components/ui/input';
 import { ChevronUp, ChevronDown, X } from 'lucide-react';
 import React, {
