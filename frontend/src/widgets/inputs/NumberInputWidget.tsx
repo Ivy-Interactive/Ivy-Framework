@@ -194,7 +194,7 @@ export const NumberInputWidget = memo(
     const normalizedValue =
       nullable && props.value === undefined ? null : props.value;
 
-    const handleChange = useCallback(
+      const handleChange = useCallback(
       (newValue: number | null) => {
         // Apply bounds only if value is not null
         if (newValue !== null) {
