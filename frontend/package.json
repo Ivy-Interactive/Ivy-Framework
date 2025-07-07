@@ -128,10 +128,5 @@
     "*.{json,css,md,html}": [
       "prettier --write"
     ]
-  },
-  "husky": {
-  "hooks": {
-    "pre-commit": "npm run lint"
   }
-}
 }
