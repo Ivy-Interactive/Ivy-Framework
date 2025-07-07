@@ -67,8 +67,8 @@ const SliderVariant = memo(
     }, []);
 
     // Only call onValueChange (eventHandler) when drag ends
-      const handleSliderCommit = useCallback(
-      (values: number[]) => {
+    const handleSliderCommit = useCallback(
+        (values: number[]) => {
         const newValue = values[0];
         if (typeof newValue === 'number') {
           onValueChange(newValue);
