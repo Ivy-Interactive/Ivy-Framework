@@ -12,7 +12,7 @@ public class FileInputApp : ViewBase
         return
             Layout.Vertical()
             | file.ToFileInput()
-            | file.ToDetails().Remove(e => e != null ? e.Content : null)
+            | file.ToDetails().Remove(e => e.Content)
             | file.Value?.ToPlainText()
             ;
     }

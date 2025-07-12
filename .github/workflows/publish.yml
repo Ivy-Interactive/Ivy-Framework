@@ -1,7 +1,7 @@
-name: Ivy-Framework PR Build
+name: Ivy-Framework Publish Build (ex PR)
 
 on:
-  pull_request:
+  push:
     branches:
       - main
 
@@ -25,7 +25,6 @@ jobs:
           repository: Ivy-Interactive/Ivy
           token: ${{ secrets.IVY_FRAMEWORK_TOKEN }}
           path: Ivy
-        continue-on-error: true
 
       - name: Ensure Directory.Build.props is available
         run: |
@@ -54,11 +53,3 @@ jobs:
       - name: Run Tests
         run: dotnet test --configuration Release --no-build
         working-directory: Ivy-Framework
-
-      - name: Validate Required Secrets
-        run: |
-          if (-not (Test-Path "Ivy/Directory.Build.props")) {
-            Write-Error "Build failed: IVY_FRAMEWORK_TOKEN secret is required but not provided. Please configure the secret in repository settings."
-            exit 1
-          }
-        shell: pwsh

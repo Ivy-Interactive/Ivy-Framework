@@ -1,0 +1,39 @@
+name: Backend Checks (Linux)
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  backend-checks:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    # Setup .NET
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '9.0.x'
+    
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y attr
+    
+    # Update workloads
+    - name: Update .NET workloads
+      run: dotnet workload update
+    
+    # Check code formatting
+    - name: Check code formatting
+      run: dotnet format --verify-no-changes
+    
+    # Build Ivy.Samples only
+    - name: Build Ivy.Samples
+      run: dotnet build Ivy.Samples/Ivy.Samples.csproj --configuration Release
+    
+    # Run tests
+    - name: Run tests
+      run: dotnet test --configuration Release --no-build --verbosity normal 
