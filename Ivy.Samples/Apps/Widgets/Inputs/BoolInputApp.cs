@@ -23,110 +23,139 @@ public class BoolInputApp : SampleBase
                            .ToBoolInput()
                            .Label("Label")
                            .Description("Description")
+                           .TestId("checkbox-true-state-width-description")
                        | falseState
                            .ToBoolInput()
                            .Label("Label")
                            .Description("Description")
+                           .TestId("checkbox-false-state-width-description")
                        | trueState
                            .ToBoolInput()
                            .Label("Label")
                            .Description("Description")
                            .Disabled()
+                           .TestId("checkbox-true-state-width-description-disabled")
                        | trueState
                            .ToBoolInput()
                            .Label("Label")
                            .Description("Description")
                            .Invalid("Invalid")
+                           .TestId("checkbox-true-state-width-description-invalid")
                        | nullState.ToBoolInput()
                            .Label("Label")
                            .Description("Description")
+                           .TestId("checkbox-null-state-width-description")
                        | null!
                        | trueState
                            .ToBoolInput()
                            .Label("Label")
+                           .TestId("checkbox-true-state-width")
                        | falseState
                            .ToBoolInput()
                            .Label("Label")
+                           .TestId("checkbox-false-state-width")
                        | trueState
                            .ToBoolInput()
                            .Label("Label").Disabled()
+                           .TestId("checkbox-true-state-width-disabled")
                        | trueState
                            .ToBoolInput()
                            .Label("Label").Invalid("Invalid")
+                           .TestId("checkbox-true-state-width-invalid")
                        | nullState
                            .ToBoolInput()
                            .Label("Label")
+                           .TestId("checkbox-null-state-width")
                        | Text.InlineCode("BoolInputs.Switch")
                        | trueState
                            .ToSwitchInput()
                            .Label("Label")
                            .Description("Description")
+                           .TestId("switch-true-state-width-description")
                        | falseState
                            .ToSwitchInput()
                            .Label("Label")
                            .Description("Description")
+                           .TestId("switch-false-state-width-description")
                        | trueState
                            .ToSwitchInput()
                            .Label("Label")
                            .Description("Description")
                            .Disabled()
+                           .TestId("switch-true-state-width-description-disabled")
                        | trueState
                            .ToSwitchInput()
                            .Label("Label")
                            .Description("Description")
                            .Invalid("Invalid")
+                           .TestId("switch-true-state-width-description-invalid")
                        | new Box("N/A")
                        | null!
                        | trueState
                            .ToSwitchInput()
                            .Label("Label")
+                           .TestId("switch-true-state-width")
                        | falseState
                            .ToSwitchInput()
                            .Label("Label")
+                           .TestId("switch-false-state-width")
                        | trueState
                            .ToSwitchInput()
                            .Label("Label")
                            .Disabled()
+                           .TestId("switch-true-state-width-disabled")
                        | trueState
                            .ToSwitchInput()
                            .Label("Label")
                            .Invalid("Invalid")
+                           .TestId("switch-true-state-width-invalid")
                        | new Box("N/A")
                        | Text.InlineCode("BoolInputs.Toggle")
                        | trueState
                            .ToToggleInput(Icons.Magnet)
                            .Label("Label")
                            .Description("Description")
+                           .TestId("toggle-true-state-width-description")
+
+
                        | falseState
                            .ToToggleInput(Icons.Magnet)
                            .Label("Label")
                            .Description("Description")
+                           .TestId("toggle-false-state-width-description")
                        | trueState
                            .ToToggleInput(Icons.Magnet)
                            .Label("Label")
                            .Description("Description")
                            .Disabled()
+                           .TestId("toggle-true-state-width-description-disabled")
                        | trueState
                            .ToToggleInput(Icons.Magnet)
                            .Label("Label")
                            .Description("Description")
                            .Invalid("Invalid")
+                           .TestId("toggle-true-state-width-description-invalid")
                        | new Box("N/A")
                        | null!
                        | trueState
                            .ToToggleInput(Icons.Baby)
                            .Label("Label")
+                           .TestId("toggle-true-state-width")
                        | falseState
                            .ToToggleInput(Icons.Baby)
                            .Label("Label")
+                           .TestId("toggle-false-state-width")
                        | trueState
                            .ToToggleInput(Icons.Baby)
                            .Label("Label").Disabled()
+                           .TestId("toggle-true-state-width-disabled")
                        | trueState
                            .ToToggleInput(Icons.Baby)
                            .Label("Label")
                            .Invalid("Invalid")
+                           .TestId("toggle-true-state-width-invalid")
                        | new Box("N/A")
+
             ;
 
         var dataBinding = CreateNumericTypeTests();

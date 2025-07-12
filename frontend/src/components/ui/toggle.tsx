@@ -29,8 +29,10 @@ const toggleVariants = cva(
 const Toggle = React.forwardRef<
   React.ElementRef<typeof TogglePrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof TogglePrimitive.Root> &
-    VariantProps<typeof toggleVariants>
->(({ className, variant, size, ...props }, ref) => {
+    VariantProps<typeof toggleVariants> & {
+      dataTestId?: string;
+    }
+>(({ className, variant, size, dataTestId, ...props }, ref) => {
   let toggleClass = toggleVariants({ variant, size, className });
   if (className?.includes('bg-red-50')) {
     toggleClass = toggleClass.replace('data-[state=on]:bg-accent', '');
@@ -39,6 +41,7 @@ const Toggle = React.forwardRef<
     <TogglePrimitive.Root
       ref={ref}
       className={cn(toggleClass, className)}
+      data-testid={dataTestId}
       {...props}
     />
   );
