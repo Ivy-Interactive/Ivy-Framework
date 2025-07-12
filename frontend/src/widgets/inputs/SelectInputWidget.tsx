@@ -64,41 +64,32 @@ const convertValuesToOriginalType = (
   options: Option[]
 ): NullableSelectValue => {
   if (stringValues.length === 0) {
-    return originalValue instanceof Array ? [] : null;
+    if (Array.isArray(originalValue)) return [];
+    if (originalValue === null) return null;
+    return [];
   }
 
-  const optionsMap = new Map<string, Option>();
+  // Map from stringified option.value to original value
+  const valueMap = new Map<string, string | number>();
   for (const option of options) {
-    optionsMap.set(option.value.toString(), option);
+    valueMap.set(option.value.toString(), option.value);
   }
 
-  // If original value is an array, preserve the array type
-  if (originalValue instanceof Array) {
-    // Check if original array contains numbers
-    if (originalValue.length > 0 && typeof originalValue[0] === 'number') {
-      return stringValues.map(v => {
-        const option = optionsMap.get(v);
-        return option ? Number(option.value) : Number(v);
-      });
+  if (
+    Array.isArray(originalValue) ||
+    (originalValue === null && stringValues.length > 1)
+  ) {
+    const mapped = stringValues.map(v => valueMap.get(v) ?? v);
+    if (mapped.length > 0 && typeof mapped[0] === 'number') {
+      return mapped as number[];
+    } else {
+      return mapped as string[];
     }
-    // Check if original array contains strings
-    else if (originalValue.length > 0 && typeof originalValue[0] === 'string') {
-      return stringValues.map(v => {
-        const option = optionsMap.get(v);
-        return option ? String(option.value) : v;
-      });
-    }
-    // Default to string array
-    return stringValues;
   }
 
-  // For single values, return the first value with proper type
+  // For single values, return the mapped value or fallback
   const firstValue = stringValues[0];
-  const option = optionsMap.get(firstValue);
-  if (option) {
-    return option.value;
-  }
-  return firstValue;
+  return valueMap.get(firstValue) ?? firstValue;
 };
 
 const useSelectValueHandler = (
@@ -266,7 +257,18 @@ const ToggleVariant: React.FC<SelectInputWidgetProps> = ({
           type="button"
           tabIndex={-1}
           aria-label={selectMany ? 'Clear All' : 'Clear'}
-          onClick={() => eventHandler('OnChange', id, [selectMany ? [] : null])}
+          onClick={() => {
+            // If the original value was ever an array, always send []
+            // If the original value is null, send null (nullable array)
+            // Otherwise, fallback to []
+            if (Array.isArray(value)) {
+              eventHandler('OnChange', id, [[]]);
+            } else if (value === null) {
+              eventHandler('OnChange', id, [null]);
+            } else {
+              eventHandler('OnChange', id, [[]]);
+            }
+          }}
           className="flex-shrink-0 p-1 rounded hover:bg-gray-100 focus:outline-none"
         >
           <X className="h-4 w-4 text-gray-400 hover:text-gray-600" />
@@ -475,7 +477,18 @@ const CheckboxVariant: React.FC<SelectInputWidgetProps> = ({
           type="button"
           tabIndex={-1}
           aria-label="Clear All"
-          onClick={() => eventHandler('OnChange', id, [[]])}
+          onClick={() => {
+            // If the original value was ever an array, always send []
+            // If the original value is null, send null (nullable array)
+            // Otherwise, fallback to []
+            if (Array.isArray(value)) {
+              eventHandler('OnChange', id, [[]]);
+            } else if (value === null) {
+              eventHandler('OnChange', id, [null]);
+            } else {
+              eventHandler('OnChange', id, [[]]);
+            }
+          }}
           className="flex-shrink-0 p-1 rounded hover:bg-gray-100 focus:outline-none"
         >
           <X className="h-4 w-4 text-gray-400 hover:text-gray-600" />
@@ -541,27 +554,40 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
             className={cn('relative', invalid && inputStyles.invalidInput)}
           >
             <SelectValue placeholder={placeholder} />
-            {nullable && hasValue && !disabled && (
-              <button
-                type="button"
-                tabIndex={-1}
-                aria-label="Clear"
-                onClick={e => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  eventHandler('OnChange', id, [null]);
-                }}
-                className="absolute top-1/2 -translate-y-1/2 right-8 z-10 p-1 rounded hover:bg-gray-100 focus:outline-none"
-                style={{ pointerEvents: 'auto' }}
+            {/* Icon stack: x (clear), i (invalid), then dropdown arrow */}
+            {((nullable && hasValue && !disabled) || invalid) && (
+              <div
+                className={cn(
+                  'absolute top-1/2 -translate-y-1/2 flex flex-row items-center gap-1 z-10 right-8'
+                )}
               >
-                <X className="h-4 w-4 text-gray-400 hover:text-gray-600" />
-              </button>
-            )}
-            {invalid && (
-              <div className="absolute top-1/2 -translate-y-1/2 right-8 z-10">
-                <InvalidIcon message={invalid} />
+                {nullable && hasValue && !disabled && (
+                  <span
+                    tabIndex={0}
+                    role="button"
+                    aria-label="Clear"
+                    onClick={e => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      eventHandler('OnChange', id, [null]);
+                    }}
+                    onKeyDown={e => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        eventHandler('OnChange', id, [null]);
+                      }
+                    }}
+                    className="p-1 rounded hover:bg-gray-100 focus:outline-none cursor-pointer"
+                    style={{ pointerEvents: 'auto' }}
+                  >
+                    <X className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+                  </span>
+                )}
+                {invalid && <InvalidIcon message={invalid} />}
               </div>
             )}
+            {/* Dropdown arrow remains at far right (default) */}
           </SelectTrigger>
           <SelectContent>
             {Object.entries(groupedOptions).map(([group, options]) => (
