@@ -543,7 +543,11 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
             <SelectValue placeholder={placeholder} />
             {/* Icon stack: x (clear), i (invalid), then dropdown arrow */}
             {((nullable && hasValue && !disabled) || invalid) && (
-              <span className="absolute top-1/2 -translate-y-1/2 right-8 flex items-center gap-1 z-10 pointer-events-auto">
+              <div
+                className={cn(
+                  'absolute top-1/2 -translate-y-1/2 flex flex-row items-center gap-1 z-10 right-8'
+                )}
+              >
                 {nullable && hasValue && !disabled && (
                   <button
                     type="button"
@@ -561,7 +565,7 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
                   </button>
                 )}
                 {invalid && <InvalidIcon message={invalid} />}
-              </span>
+              </div>
             )}
             {/* Dropdown arrow remains at far right (default) */}
           </SelectTrigger>
