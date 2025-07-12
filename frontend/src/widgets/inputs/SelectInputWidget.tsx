@@ -541,27 +541,29 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
             className={cn('relative', invalid && inputStyles.invalidInput)}
           >
             <SelectValue placeholder={placeholder} />
-            {nullable && hasValue && !disabled && (
-              <button
-                type="button"
-                tabIndex={-1}
-                aria-label="Clear"
-                onClick={e => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  eventHandler('OnChange', id, [null]);
-                }}
-                className="absolute top-1/2 -translate-y-1/2 right-8 z-10 p-1 rounded hover:bg-gray-100 focus:outline-none"
-                style={{ pointerEvents: 'auto' }}
-              >
-                <X className="h-4 w-4 text-gray-400 hover:text-gray-600" />
-              </button>
+            {/* Icon stack: x (clear), i (invalid), then dropdown arrow */}
+            {((nullable && hasValue && !disabled) || invalid) && (
+              <span className="absolute top-1/2 -translate-y-1/2 right-8 flex items-center gap-1 z-10 pointer-events-auto">
+                {nullable && hasValue && !disabled && (
+                  <button
+                    type="button"
+                    tabIndex={-1}
+                    aria-label="Clear"
+                    onClick={e => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      eventHandler('OnChange', id, [null]);
+                    }}
+                    className="p-1 rounded hover:bg-gray-100 focus:outline-none"
+                    style={{ pointerEvents: 'auto' }}
+                  >
+                    <X className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+                  </button>
+                )}
+                {invalid && <InvalidIcon message={invalid} />}
+              </span>
             )}
-            {invalid && (
-              <div className="absolute top-1/2 -translate-y-1/2 right-8 z-10">
-                <InvalidIcon message={invalid} />
-              </div>
-            )}
+            {/* Dropdown arrow remains at far right (default) */}
           </SelectTrigger>
           <SelectContent>
             {Object.entries(groupedOptions).map(([group, options]) => (
