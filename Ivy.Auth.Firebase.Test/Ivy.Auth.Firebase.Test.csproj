@@ -1,0 +1,16 @@
+&lt;Project Sdk="Microsoft.NET.Sdk"&gt;
+
+  &lt;PropertyGroup&gt;
+    &lt;OutputType&gt;Exe&lt;/OutputType&gt;
+    &lt;TargetFramework&gt;net9.0&lt;/TargetFramework&gt;
+    &lt;ImplicitUsings&gt;enable&lt;/ImplicitUsings&gt;
+    &lt;Nullable&gt;enable&lt;/Nullable&gt;
+    &lt;UserSecretsId&gt;f94b1619-62c6-4ecf-af4b-a326a596279f&lt;/UserSecretsId&gt;
+  &lt;/PropertyGroup&gt;
+
+  &lt;ItemGroup&gt;
+    &lt;ProjectReference Include="../Ivy.Auth.Firebase/Ivy.Auth.Firebase.csproj" /&gt;
+    &lt;ProjectReference Include="../Ivy/Ivy.csproj" /&gt;
+  &lt;/ItemGroup&gt;
+
+&lt;/Project&gt;
