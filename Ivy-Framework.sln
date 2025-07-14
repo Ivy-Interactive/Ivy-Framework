@@ -31,6 +31,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ivy.Auth.Supabase.Test", "I
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ivy.Auth.MicrosoftEntra", "Ivy.Auth.MicrosoftEntra\Ivy.Auth.MicrosoftEntra.csproj", "{CDCEEBA2-FF25-43BC-A2E0-6E6C02FDF935}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ivy.Auth.Firebase", "Ivy.Auth.Firebase\Ivy.Auth.Firebase.csproj", "{C42D5E8F-7F3C-4B2E-9A4B-8E1234567890}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ivy.Auth.Firebase.Test", "Ivy.Auth.Firebase.Test\Ivy.Auth.Firebase.Test.csproj", "{D52D5E8F-7F3C-4B2E-9A4B-8E1234567891}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -180,6 +184,14 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+		{C42D5E8F-7F3C-4B2E-9A4B-8E1234567890}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C42D5E8F-7F3C-4B2E-9A4B-8E1234567890}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C42D5E8F-7F3C-4B2E-9A4B-8E1234567890}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C42D5E8F-7F3C-4B2E-9A4B-8E1234567890}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D52D5E8F-7F3C-4B2E-9A4B-8E1234567891}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D52D5E8F-7F3C-4B2E-9A4B-8E1234567891}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D52D5E8F-7F3C-4B2E-9A4B-8E1234567891}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D52D5E8F-7F3C-4B2E-9A4B-8E1234567891}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{3279DCCC-D846-4CB0-B69B-76411D8BB509} = {38A7ABF6-7F6C-45EA-8F6E-E225A2165F73}
@@ -189,5 +201,7 @@ Global
 		{281E3D76-9B00-48A5-8132-D9502B906892} = {DAC40F4C-0DE7-413B-9DAB-7E1D3FC1E960}
 		{B754A44F-61C0-4908-BAA1-B3F726AE22FE} = {38A7ABF6-7F6C-45EA-8F6E-E225A2165F73}
 		{CDCEEBA2-FF25-43BC-A2E0-6E6C02FDF935} = {38A7ABF6-7F6C-45EA-8F6E-E225A2165F73}
+		{C42D5E8F-7F3C-4B2E-9A4B-8E1234567890} = {38A7ABF6-7F6C-45EA-8F6E-E225A2165F73}
+		{D52D5E8F-7F3C-4B2E-9A4B-8E1234567891} = {38A7ABF6-7F6C-45EA-8F6E-E225A2165F73}
 	EndGlobalSection
 EndGlobal
