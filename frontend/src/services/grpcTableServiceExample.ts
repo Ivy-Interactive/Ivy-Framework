@@ -135,8 +135,7 @@ function eventListenerExample() {
   };
 
   // Set up event listeners
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  grpcTableService.on('data', data => {
+  grpcTableService.on('data', () => {
     console.log('Event: Received data');
   });
 
