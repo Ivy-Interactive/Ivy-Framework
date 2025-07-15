@@ -1,45 +1,54 @@
 using System.Reactive.Disposables;
+using Grpc.Core;
+using IvyDataTables.Api.Protos;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Ivy.DataTables;
 
-public class DataTableController(AppSessionStore sessionStore) : Controller
-{
-    [Route("data-table/query/{connectionId}/{sourceId}")]
-    public async Task<IActionResult> Query(string connectionId, string sourceId /*, GRPC STUFF */)
-    {
-        //todo later: verify the jwt token
-        
-        if (sessionStore.Sessions.TryGetValue(connectionId, out var session))
-        {
-            var dataTableService = session.AppServices.GetRequiredService<IDataTableService>();
-            return await dataTableService.Query(sourceId); // => GRPC TABLERESULT
-        }
-        throw new Exception($"DataTable 'data-table/query/{connectionId}/{sourceId}' not found.");
-    }
-}
-
-public class DataTableService(string connectionId) : IDataTableService
+public class DataTableService(string connectionId, ServerArgs serverArgs) : TableService.TableServiceBase, IDataTableService
 {
     private readonly Dictionary<Guid, IQueryable> _queryables = new();
     
-    //should return the arrow table?
-    public Task<IActionResult> Query(string sourceId/*, GRPC TABLEQUERY */)
+    public override Task<TableResult> Query(TableQuery request, ServerCallContext context)
     {
-        if (!_queryables.TryGetValue(Guid.Parse(sourceId), out var queryable))
+        try
         {
-            throw new Exception($"Queryable '{sourceId}' not found.");
+            // Extract sourceId from the request
+            if (string.IsNullOrEmpty(request.SourceId))
+            {
+                throw new RpcException(new Status(StatusCode.InvalidArgument, "SourceId is required in the request."));
+            }
+
+            if (!_queryables.TryGetValue(Guid.Parse(request.SourceId), out var queryable))
+            {
+                throw new RpcException(new Status(StatusCode.NotFound, $"Queryable '{request.SourceId}' not found."));
+            }
+
+            var queryProcessor = new QueryProcessor();
+            var arrowData = queryProcessor.ProcessQuery(queryable, request);
+
+            var tableResult = new TableResult
+            {
+                ArrowIpcStream = Google.Protobuf.ByteString.CopyFrom(arrowData)
+            };
+
+            return Task.FromResult(tableResult);
         }
-        
-        //IQueryable query = queryable; 
-        //todo: add filtering logic to produce the resulting arrow table
-        
-        throw new NotImplementedException();
+        catch (RpcException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            throw new RpcException(new Status(StatusCode.Internal, $"Internal server error: {ex.Message}"));
+        }
     }
     
     public (IDisposable cleanup, DataTableConnection connection) AddQueryable(IQueryable queryable)
     {
+        Console.WriteLine($"Adding queryable with connectionId: {connectionId}");
         var sourceId = Guid.NewGuid();
         _queryables[sourceId] = queryable;
 
@@ -48,8 +57,7 @@ public class DataTableService(string connectionId) : IDataTableService
             _queryables.Remove(sourceId);
         });
 
-        //todo: what is the port and path we're using?
-        var connection = new DataTableConnection(12345, "/path/", connectionId, sourceId.ToString());
+        var connection = new DataTableConnection(serverArgs.Port, "/datatable.TableService/Query/", connectionId, sourceId.ToString());
         
         return (cleanup, connection);
     }
@@ -58,5 +66,5 @@ public class DataTableService(string connectionId) : IDataTableService
 public interface IDataTableService
 {
     (IDisposable cleanup, DataTableConnection connection) AddQueryable(IQueryable queryable);
-    Task<IActionResult> Query(string sourceId /*, GRPC TABLEQUERY */);
+    Task<TableResult> Query(TableQuery request, ServerCallContext context);
 }

@@ -4,7 +4,7 @@ using Ivy.Shared;
 
 namespace Ivy.DataTables;
 
-public class DataTableView(IQueryable queryable, Size? width, Size? height, DataTableColumn[] columns, DataTableConfiguration configuration) : ViewBase, IStateless
+public class DataTableView(IQueryable queryable, Size? width, Size? height, DataTableColumn[] columns, DataTableConfiguration configuration) : ViewBase
 {
     public override object? Build()
     {

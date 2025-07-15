@@ -130,7 +130,7 @@ public class AppHub(
         appServices.AddSingleton(typeof(IContentBuilder), contentBuilder);
         appServices.AddSingleton(typeof(IAppRepository), server.AppRepository);
         appServices.AddSingleton(typeof(IDownloadService), new DownloadService(Context.ConnectionId));
-        appServices.AddSingleton(typeof(IDataTableService), new DataTableService(Context.ConnectionId));
+        appServices.AddSingleton(typeof(IDataTableService), new DataTableService(Context.ConnectionId, server.Args));
         appServices.AddSingleton(typeof(IClientProvider), clientProvider);
         appServices.AddTransient<IWebhookRegistry, WebhookController>();
         appServices.AddSingleton(appDescriptor);
