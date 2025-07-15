@@ -97,4 +97,4 @@ public static class GrpcDataTableExtensions
     {
         return dataTable with { ResizableColumns = resizable };
     }
-} 
+}
