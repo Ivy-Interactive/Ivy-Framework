@@ -58,6 +58,8 @@ const DataTableWidget: React.FC<DataTableWidgetProps> = ({
   const [isStreaming, setIsStreaming] = useState(false);
   const [columnWidths, setColumnWidths] = useState<Record<number, number>>({});
   const [resizingColumn, setResizingColumn] = useState<number | null>(null);
+  const [resizeStartX, setResizeStartX] = useState<number>(0);
+  const [resizeStartWidth, setResizeStartWidth] = useState<number>(0);
   const tableRef = useRef<HTMLDivElement>(null);
 
   const styles = {
@@ -150,23 +152,25 @@ const DataTableWidget: React.FC<DataTableWidgetProps> = ({
       if (!resizableColumns) return;
       e.preventDefault();
       setResizingColumn(columnIndex);
+      setResizeStartX(e.clientX);
+      setResizeStartWidth(columnWidths[columnIndex] || 100);
     },
-    [resizableColumns]
+    [resizableColumns, columnWidths]
   );
 
   const handleResizeMove = useCallback(
     (e: MouseEvent) => {
-      if (resizingColumn === null || !tableRef.current) return;
+      if (resizingColumn === null) return;
 
-      const tableRect = tableRef.current.getBoundingClientRect();
-      const newWidth = e.clientX - tableRect.left;
+      const deltaX = e.clientX - resizeStartX;
+      const newWidth = Math.max(50, resizeStartWidth + deltaX);
 
       setColumnWidths(prev => ({
         ...prev,
-        [resizingColumn]: Math.max(100, newWidth), // Minimum width of 100px
+        [resizingColumn]: newWidth,
       }));
     },
-    [resizingColumn]
+    [resizingColumn, resizeStartX, resizeStartWidth]
   );
 
   const handleResizeEnd = useCallback(() => {
@@ -312,18 +316,19 @@ const DataTableWidget: React.FC<DataTableWidgetProps> = ({
           <div ref={tableRef} className="max-h-[800px] flex flex-col">
             {/* Fixed Header */}
             <div className="bg-background border-b z-10">
-              <table className="w-full caption-bottom text-sm">
+              <table
+                className="w-full caption-bottom text-sm border-collapse"
+                style={{ tableLayout: 'fixed', width: 'max-content' }}
+              >
                 <thead className="[&_tr]:border-b">
                   <tr className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
                     {data.columns.map((column, index) => (
                       <th
                         key={index}
-                        className="h-10 px-2 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px] relative bg-background"
+                        className="h-10 px-2 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px] relative bg-background border-r border-border"
                         style={{
-                          width: columnWidths[index]
-                            ? `${columnWidths[index]}px`
-                            : 'auto',
-                          minWidth: '100px',
+                          width: columnWidths[index] || 150,
+                          minWidth: '50px',
                         }}
                       >
                         <code>{column}</code>
@@ -342,7 +347,10 @@ const DataTableWidget: React.FC<DataTableWidgetProps> = ({
 
             {/* Scrollable Body */}
             <div className="flex-1 overflow-auto">
-              <table className="w-full caption-bottom text-sm">
+              <table
+                className="w-full caption-bottom text-sm border-collapse"
+                style={{ tableLayout: 'fixed', width: 'max-content' }}
+              >
                 <tbody className="[&_tr:last-child]:border-0">
                   {data.rows.map((row, rowIndex) => (
                     <tr
@@ -352,12 +360,10 @@ const DataTableWidget: React.FC<DataTableWidgetProps> = ({
                       {row.map((cell, cellIndex) => (
                         <td
                           key={cellIndex}
-                          className="p-2 align-middle [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px] truncate"
+                          className="p-2 align-middle [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px] truncate border-r border-border"
                           style={{
-                            width: columnWidths[cellIndex]
-                              ? `${columnWidths[cellIndex]}px`
-                              : 'auto',
-                            minWidth: '100px',
+                            width: columnWidths[cellIndex] || 150,
+                            minWidth: '50px',
                           }}
                         >
                           {cell !== null && cell !== undefined
