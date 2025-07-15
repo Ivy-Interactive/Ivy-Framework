@@ -5,18 +5,9 @@ import React, {
   useMemo,
   useRef,
 } from 'react';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-
-import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, RefreshCw, Database, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -318,57 +309,70 @@ const DataTableWidget: React.FC<DataTableWidgetProps> = ({
             </div>
           </div>
         ) : data && data.columns.length > 0 ? (
-          <div ref={tableRef} className="max-h-[800px] overflow-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  {data.columns.map((column, index) => (
-                    <TableHead
-                      key={index}
-                      className="font-medium relative"
-                      style={{
-                        width: columnWidths[index]
-                          ? `${columnWidths[index]}px`
-                          : 'auto',
-                        minWidth: '100px',
-                      }}
-                    >
-                      <code>{column}</code>
-                      {resizableColumns && (
-                        <div
-                          className="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize bg-transparent hover:bg-blue-300"
-                          onMouseDown={e => handleResizeStart(index, e)}
-                        />
-                      )}
-                    </TableHead>
-                  ))}
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {data.rows.map((row, rowIndex) => (
-                  <TableRow key={rowIndex}>
-                    {row.map((cell, cellIndex) => (
-                      <TableCell
-                        key={cellIndex}
-                        className="truncate"
+          <div ref={tableRef} className="max-h-[800px] flex flex-col">
+            {/* Fixed Header */}
+            <div className="bg-background border-b z-10">
+              <table className="w-full caption-bottom text-sm">
+                <thead className="[&_tr]:border-b">
+                  <tr className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
+                    {data.columns.map((column, index) => (
+                      <th
+                        key={index}
+                        className="h-10 px-2 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px] relative bg-background"
                         style={{
-                          width: columnWidths[cellIndex]
-                            ? `${columnWidths[cellIndex]}px`
+                          width: columnWidths[index]
+                            ? `${columnWidths[index]}px`
                             : 'auto',
                           minWidth: '100px',
                         }}
                       >
-                        {cell !== null && cell !== undefined
-                          ? String(cell)
-                          : 'null'}
-                      </TableCell>
+                        <code>{column}</code>
+                        {resizableColumns && (
+                          <div
+                            className="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize bg-transparent hover:bg-blue-300"
+                            onMouseDown={e => handleResizeStart(index, e)}
+                          />
+                        )}
+                      </th>
                     ))}
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                  </tr>
+                </thead>
+              </table>
+            </div>
+
+            {/* Scrollable Body */}
+            <div className="flex-1 overflow-auto">
+              <table className="w-full caption-bottom text-sm">
+                <tbody className="[&_tr:last-child]:border-0">
+                  {data.rows.map((row, rowIndex) => (
+                    <tr
+                      key={rowIndex}
+                      className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+                    >
+                      {row.map((cell, cellIndex) => (
+                        <td
+                          key={cellIndex}
+                          className="p-2 align-middle [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px] truncate"
+                          style={{
+                            width: columnWidths[cellIndex]
+                              ? `${columnWidths[cellIndex]}px`
+                              : 'auto',
+                            minWidth: '100px',
+                          }}
+                        >
+                          {cell !== null && cell !== undefined
+                            ? String(cell)
+                            : 'null'}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
             {data.hasMore && (
-              <div className="p-4 text-center text-sm text-muted-foreground">
+              <div className="p-4 text-center text-sm text-muted-foreground border-t">
                 More data available...
               </div>
             )}
