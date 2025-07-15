@@ -6,7 +6,13 @@ namespace Ivy;
 
 public record DataTable : WidgetBase<DataTable>
 {
-    public DataTable(DataTableConnection connection, Size? width, Size? height, DataTableColumn[] columns) : base()
+    public DataTable(
+        DataTableConnection connection, 
+        Size? width, 
+        Size? height, 
+        DataTableColumn[] columns,
+        DataTableConfiguration configuration
+    )
     {
         Width = width;
         Height = height;
@@ -14,14 +20,12 @@ public record DataTable : WidgetBase<DataTable>
         Columns = columns;
     }
     
-    [Prop] public Size? Width { get; set; }
-    
-    [Prop] public Size? Height { get; set; }
-    
     [Prop] public DataTableColumn[] Columns { get; set; }
     
     [Prop] public DataTableConnection Connection { get; set; }
-    
+
+    [Prop] public DataTableConfiguration Configuration { get; set; }
+
     public static Detail operator |(DataTable widget, object child)
     {
         throw new NotSupportedException("DataTable does not support children.");

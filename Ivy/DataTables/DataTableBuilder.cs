@@ -4,6 +4,7 @@ using System.Reflection;
 using Ivy.Builders;
 using Ivy.Core;
 using Ivy.Core.Hooks;
+using Ivy.Helpers;
 using Ivy.Shared;
 using Microsoft.AspNetCore.Hosting;
 
@@ -14,12 +15,19 @@ public class DataTableBuilder<TModel> : ViewBase, IStateless
     private readonly IQueryable<TModel> _queryable;
     private Size? _width;
     private Size? _height;
-    private readonly Dictionary<string, DataTableColumn> _columns;
+    private readonly Dictionary<string, InternalColumn> _columns;
+    private readonly DataTableConfiguration _configuration = new();
 
+    private class InternalColumn
+    {
+        public required DataTableColumn Column { get; init; }
+        public bool Removed { get; set; }
+    }
+    
     public DataTableBuilder(IQueryable<TModel> queryable)
     {
         _queryable = queryable;
-        _columns = new Dictionary<string, DataTableColumn>();
+        _columns = new Dictionary<string, InternalColumn>();
         _Scaffold();
     }
 
@@ -54,15 +62,17 @@ public class DataTableBuilder<TModel> : ViewBase, IStateless
 
             var removed = field.Name.StartsWith("_") && field.Name.Length > 1;
 
-            _columns[field.Name] =
-                new DataTableColumn()
+            _columns[field.Name] = new InternalColumn()
+            {
+                Column = new DataTableColumn()
                 {
                     Name = field.Name,
                     Header = Utils.SplitPascalCase(field.Name) ?? field.Name,
                     Align = align,
-                    Hidden = removed, //todo: this should be Removed instead
                     Order = order++
-                };
+                },
+                Removed = removed
+            };
         }
     }
 
@@ -81,11 +91,11 @@ public class DataTableBuilder<TModel> : ViewBase, IStateless
     public DataTableBuilder<TModel> Width(Expression<Func<TModel, object>> field, Size width)
     {
         var column = GetColumn(field);
-        column.Width = width;
+        column.Column.Width = width;
         return this;
     }
     
-    private DataTableColumn GetColumn(Expression<Func<TModel, object>> field)
+    private InternalColumn GetColumn(Expression<Func<TModel, object>> field)
     {
         var name = Utils.GetNameFromMemberExpression(field.Body);
         return _columns[name];
@@ -94,14 +104,21 @@ public class DataTableBuilder<TModel> : ViewBase, IStateless
     public DataTableBuilder<TModel> Header(Expression<Func<TModel, object>> field, string label)
     {
         var column = GetColumn(field);
-        column.Header = label;
+        column.Column.Header = label;
         return this;
     }
 
     public DataTableBuilder<TModel> Align(Expression<Func<TModel, object>> field, Align align)
     {
         var column = GetColumn(field);
-        column.Align = align;
+        column.Column.Align = align;
+        return this;
+    }
+    
+    public DataTableBuilder<TModel> Sortable(Expression<Func<TModel, object>> field, bool sortable)
+    {
+        var column = GetColumn(field);
+        column.Column.Sortable = sortable;
         return this;
     }
 
@@ -111,8 +128,8 @@ public class DataTableBuilder<TModel> : ViewBase, IStateless
         foreach (var expr in fields)
         {
             var hint = GetColumn(expr);
-            //hint.Removed = false; //todo
-            hint.Order = order++;
+            hint.Removed = false;
+            hint.Column.Order = order++;
         }
         return this;
     }
@@ -122,13 +139,22 @@ public class DataTableBuilder<TModel> : ViewBase, IStateless
         foreach (var field in fields)
         {
             var hint = GetColumn(field);
-            hint.Hidden = true;
+            hint.Column.Hidden = true;
         }
+        return this;
+    }
+    
+    public DataTableBuilder<TModel> Config(Action<DataTableConfiguration> config)
+    {
+        config(_configuration);
         return this;
     }
 
     public override object? Build()
     {
-        return new DataTableView<TModel>(_queryable, _width, _height, _columns.Values.OrderBy(c => c.Order).ToArray());
+        var columns = _columns.Values.Where(e => !e.Removed).OrderBy(c => c.Column.Order).Select(e => e.Column).ToArray();
+        var removedColumns = _columns.Values.Where(e => e.Removed).Select(c => c.Column.Name).ToArray();
+        var queryable = _queryable.RemoveFields(removedColumns);
+        return new DataTableView(queryable, _width, _height, columns, _configuration);
     }
 }
