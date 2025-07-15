@@ -106,6 +106,9 @@ export class GrpcTableService extends EventEmitter {
       // Serialize the query to protobuf format
       const serializedQuery = this.serializeTableQuery(query);
 
+      // Create gRPC message with proper header
+      const grpcMessage = this.createGrpcMessage(serializedQuery);
+
       const requestUrl = `${serverUrl}/datatable.TableService/Query`;
       console.log('gRPC Table Service - Request URL:', requestUrl);
 
@@ -113,7 +116,7 @@ export class GrpcTableService extends EventEmitter {
       const response = await fetch(requestUrl, {
         method: 'POST',
         headers: grpcHeaders,
-        body: serializedQuery,
+        body: grpcMessage,
       });
 
       console.log('gRPC Table Service - Response status:', response.status);
@@ -161,91 +164,87 @@ export class GrpcTableService extends EventEmitter {
     }
   }
 
+  // Create gRPC message with proper header
+  private createGrpcMessage(data: Uint8Array): Uint8Array {
+    // gRPC message format: [compression-flag][message-length][message-data]
+    const compressionFlag = 0; // 0 = no compression
+    const messageLength = data.length;
+
+    // Create header: 1 byte for compression flag + 4 bytes for message length
+    const header = new Uint8Array(5);
+    header[0] = compressionFlag; // Compression flag (0 = uncompressed)
+
+    // Write message length as big-endian 32-bit integer
+    header[1] = (messageLength >>> 24) & 0xff;
+    header[2] = (messageLength >>> 16) & 0xff;
+    header[3] = (messageLength >>> 8) & 0xff;
+    header[4] = messageLength & 0xff;
+
+    // Combine header and data
+    const result = new Uint8Array(5 + messageLength);
+    result.set(header, 0);
+    result.set(data, 5);
+
+    return result;
+  }
+
   // Serialize TableQuery to protobuf format
   private serializeTableQuery(query: TableQuery): Uint8Array {
     // This is a simplified protobuf serialization
     // In production, you should use the generated protobuf classes
     const encoder = new TextEncoder();
-
-    // Create a simple binary format that mimics protobuf
     const chunks: Uint8Array[] = [];
 
-    // Serialize sort orders
+    // Serialize sort orders (field 1, repeated message)
     if (query.sort && query.sort.length > 0) {
-      query.sort.forEach((sort, index) => {
-        const sortData = encoder.encode(
-          JSON.stringify({
-            column: sort.column,
-            direction: sort.direction === 'ASC' ? 0 : 1,
-          })
-        );
-        chunks.push(new Uint8Array([1, index + 1])); // Field 1, wire type 2 (length-delimited)
-        chunks.push(this.encodeVarint(sortData.length));
-        chunks.push(sortData);
+      query.sort.forEach(sort => {
+        const sortMessage = this.serializeSortOrder(sort);
+        chunks.push(this.encodeField(1, 2, sortMessage)); // Field 1, wire type 2 (length-delimited)
       });
     }
 
-    // Serialize filter
+    // Serialize filter (field 2, message)
     if (query.filter) {
-      const filterData = encoder.encode(
-        JSON.stringify(this.serializeFilter(query.filter))
-      );
-      chunks.push(new Uint8Array([2])); // Field 2
-      chunks.push(this.encodeVarint(filterData.length));
-      chunks.push(filterData);
+      const filterMessage = this.serializeFilter(query.filter);
+      chunks.push(this.encodeField(2, 2, filterMessage)); // Field 2, wire type 2
     }
 
-    // Serialize offset
+    // Serialize offset (field 3, int32)
     if (query.offset !== undefined) {
-      chunks.push(new Uint8Array([3])); // Field 3
-      chunks.push(this.encodeVarint(query.offset));
+      chunks.push(this.encodeField(3, 0, this.encodeVarint(query.offset))); // Field 3, wire type 0
     }
 
-    // Serialize limit
+    // Serialize limit (field 4, int32)
     if (query.limit !== undefined) {
-      chunks.push(new Uint8Array([4])); // Field 4
-      chunks.push(this.encodeVarint(query.limit));
+      chunks.push(this.encodeField(4, 0, this.encodeVarint(query.limit))); // Field 4, wire type 0
     }
 
-    // Serialize select_columns
+    // Serialize select_columns (field 5, repeated string)
     if (query.select_columns && query.select_columns.length > 0) {
-      query.select_columns.forEach((column, index) => {
+      query.select_columns.forEach(column => {
         const columnData = encoder.encode(column);
-        chunks.push(new Uint8Array([5, index + 1])); // Field 5
-        chunks.push(this.encodeVarint(columnData.length));
-        chunks.push(columnData);
+        chunks.push(this.encodeField(5, 2, columnData)); // Field 5, wire type 2
       });
     }
 
-    // Serialize aggregations
+    // Serialize aggregations (field 6, repeated message)
     if (query.aggregations && query.aggregations.length > 0) {
-      query.aggregations.forEach((agg, index) => {
-        const aggData = encoder.encode(
-          JSON.stringify({
-            column: agg.column,
-            function: agg.function,
-          })
-        );
-        chunks.push(new Uint8Array([6, index + 1])); // Field 6
-        chunks.push(this.encodeVarint(aggData.length));
-        chunks.push(aggData);
+      query.aggregations.forEach(agg => {
+        const aggMessage = this.serializeAggregation(agg);
+        chunks.push(this.encodeField(6, 2, aggMessage)); // Field 6, wire type 2
       });
     }
 
-    // Serialize connectionId
+    // Serialize connectionId (field 7, string)
     if (query.connectionId) {
       const connData = encoder.encode(query.connectionId);
-      chunks.push(new Uint8Array([7])); // Field 7
-      chunks.push(this.encodeVarint(connData.length));
-      chunks.push(connData);
+      chunks.push(this.encodeField(7, 2, connData)); // Field 7, wire type 2
     }
 
-    // Serialize sourceId
+    // Serialize sourceId (field 8, string)
     if (query.sourceId) {
       const sourceData = encoder.encode(query.sourceId);
-      chunks.push(new Uint8Array([8])); // Field 8
-      chunks.push(this.encodeVarint(sourceData.length));
-      chunks.push(sourceData);
+      chunks.push(this.encodeField(8, 2, sourceData)); // Field 8, wire type 2
     }
 
     // Combine all chunks
@@ -260,29 +259,132 @@ export class GrpcTableService extends EventEmitter {
     return result;
   }
 
-  private serializeFilter(filter: Filter): Record<string, unknown> {
+  // Encode a protobuf field with proper wire type
+  private encodeField(
+    fieldNumber: number,
+    wireType: number,
+    data: Uint8Array
+  ): Uint8Array {
+    const tag = (fieldNumber << 3) | wireType;
+    const tagBytes = this.encodeVarint(tag);
+    const lengthBytes =
+      wireType === 2 ? this.encodeVarint(data.length) : new Uint8Array(0);
+
+    const result = new Uint8Array(
+      tagBytes.length + lengthBytes.length + data.length
+    );
+    result.set(tagBytes, 0);
+    result.set(lengthBytes, tagBytes.length);
+    result.set(data, tagBytes.length + lengthBytes.length);
+
+    return result;
+  }
+
+  // Serialize SortOrder message
+  private serializeSortOrder(sort: SortOrder): Uint8Array {
+    const encoder = new TextEncoder();
+    const chunks: Uint8Array[] = [];
+
+    // Field 1: column (string)
+    const columnData = encoder.encode(sort.column);
+    chunks.push(this.encodeField(1, 2, columnData));
+
+    // Field 2: direction (enum)
+    const directionValue = sort.direction === 'ASC' ? 0 : 1;
+    chunks.push(this.encodeField(2, 0, this.encodeVarint(directionValue)));
+
+    return this.combineChunks(chunks);
+  }
+
+  // Serialize Aggregation message
+  private serializeAggregation(agg: Aggregation): Uint8Array {
+    const encoder = new TextEncoder();
+    const chunks: Uint8Array[] = [];
+
+    // Field 1: column (string)
+    const columnData = encoder.encode(agg.column);
+    chunks.push(this.encodeField(1, 2, columnData));
+
+    // Field 2: function (string)
+    const functionData = encoder.encode(agg.function);
+    chunks.push(this.encodeField(2, 2, functionData));
+
+    return this.combineChunks(chunks);
+  }
+
+  // Combine multiple Uint8Array chunks into one
+  private combineChunks(chunks: Uint8Array[]): Uint8Array {
+    const totalLength = chunks.reduce((sum, chunk) => sum + chunk.length, 0);
+    const result = new Uint8Array(totalLength);
+    let offset = 0;
+    for (const chunk of chunks) {
+      result.set(chunk, offset);
+      offset += chunk.length;
+    }
+    return result;
+  }
+
+  private serializeFilter(filter: Filter): Uint8Array {
+    const chunks: Uint8Array[] = [];
+
     if (filter.condition) {
-      return {
-        condition: {
-          column: filter.condition.column,
-          function: filter.condition.function,
-          args: filter.condition.args,
-        },
-        negate: filter.negate,
-      };
+      // Field 1: condition (message)
+      const conditionMessage = this.serializeCondition(filter.condition);
+      chunks.push(this.encodeField(1, 2, conditionMessage));
     }
 
     if (filter.group) {
-      return {
-        group: {
-          op: filter.group.op === 'AND' ? 0 : 1,
-          filters: filter.group.filters.map(f => this.serializeFilter(f)),
-        },
-        negate: filter.negate,
-      };
+      // Field 2: group (message)
+      const groupMessage = this.serializeFilterGroup(filter.group);
+      chunks.push(this.encodeField(2, 2, groupMessage));
     }
 
-    return {};
+    if (filter.negate !== undefined) {
+      // Field 3: negate (bool)
+      const negateValue = filter.negate ? 1 : 0;
+      chunks.push(this.encodeField(3, 0, this.encodeVarint(negateValue)));
+    }
+
+    return this.combineChunks(chunks);
+  }
+
+  private serializeCondition(condition: Condition): Uint8Array {
+    const encoder = new TextEncoder();
+    const chunks: Uint8Array[] = [];
+
+    // Field 1: column (string)
+    const columnData = encoder.encode(condition.column);
+    chunks.push(this.encodeField(1, 2, columnData));
+
+    // Field 2: function (string)
+    const functionData = encoder.encode(condition.function);
+    chunks.push(this.encodeField(2, 2, functionData));
+
+    // Field 3: args (repeated Any) - simplified as JSON for now
+    if (condition.args && condition.args.length > 0) {
+      condition.args.forEach(arg => {
+        const argData = encoder.encode(JSON.stringify(arg));
+        chunks.push(this.encodeField(3, 2, argData));
+      });
+    }
+
+    return this.combineChunks(chunks);
+  }
+
+  private serializeFilterGroup(group: FilterGroup): Uint8Array {
+    const chunks: Uint8Array[] = [];
+
+    // Field 1: op (enum)
+    const opValue = group.op === 'AND' ? 0 : 1;
+    chunks.push(this.encodeField(1, 0, this.encodeVarint(opValue)));
+
+    // Field 2: filters (repeated Filter)
+    group.filters.forEach(filter => {
+      const filterMessage = this.serializeFilter(filter);
+      chunks.push(this.encodeField(2, 2, filterMessage));
+    });
+
+    return this.combineChunks(chunks);
   }
 
   private encodeVarint(value: number): Uint8Array {
