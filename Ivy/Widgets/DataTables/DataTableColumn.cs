@@ -9,6 +9,8 @@ public class DataTableColumn
     
     public required string Header { get; set; } 
     
+    public string? Group { get; set; }
+    
     public Size? Width { get; set; }
     
     public bool Hidden { get; set; } = false;
@@ -18,4 +20,6 @@ public class DataTableColumn
     public Align Align { get; set; } = Align.Left;
     
     public int Order { get; set; } = 0;
+    
+    public Icon? Icon { get; set; } = null;
 }
