@@ -25,6 +25,7 @@ public class DataTableApp : SampleBase
                            .ShowQueryInput(true)
                            .ShowRefreshButton(true)
                            .ShowStatus(true)
+                           .ResizableColumns(true)
                    )
                    | new Card(
                        Layout.Vertical()

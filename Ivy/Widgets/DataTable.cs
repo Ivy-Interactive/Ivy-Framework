@@ -22,6 +22,8 @@ public record DataTable : WidgetBase<DataTable>
     [Prop] public string? Title { get; set; }
     
     [Prop] public string? Description { get; set; }
+    
+    [Prop] public bool ResizableColumns { get; set; } = false;
 }
 
 public static class DataTableExtensions
@@ -69,5 +71,10 @@ public static class DataTableExtensions
     public static DataTable Description(this DataTable dataTable, string description)
     {
         return dataTable with { Description = description };
+    }
+    
+    public static DataTable ResizableColumns(this DataTable dataTable, bool resizable = true)
+    {
+        return dataTable with { ResizableColumns = resizable };
     }
 } 

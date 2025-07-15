@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  useRef,
+} from 'react';
 import {
   Table,
   TableBody,
@@ -35,6 +41,7 @@ interface DataTableWidgetProps {
   height?: string;
   title?: string;
   description?: string;
+  resizableColumns?: boolean;
 }
 
 const DataTableWidget: React.FC<DataTableWidgetProps> = ({
@@ -50,6 +57,7 @@ const DataTableWidget: React.FC<DataTableWidgetProps> = ({
   height,
   title,
   description,
+  resizableColumns = false,
 }) => {
   const eventHandler = useEventHandler();
   const [data, setData] = useState<ArrowTableData | null>(null);
@@ -57,6 +65,9 @@ const DataTableWidget: React.FC<DataTableWidgetProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState(initialQuery);
   const [isStreaming, setIsStreaming] = useState(false);
+  const [columnWidths, setColumnWidths] = useState<Record<number, number>>({});
+  const [resizingColumn, setResizingColumn] = useState<number | null>(null);
+  const tableRef = useRef<HTMLDivElement>(null);
 
   const styles = {
     ...getWidth(width),
@@ -141,6 +152,47 @@ const DataTableWidget: React.FC<DataTableWidgetProps> = ({
     },
     [handleRefresh]
   );
+
+  // Column resizing handlers
+  const handleResizeStart = useCallback(
+    (columnIndex: number, e: React.MouseEvent) => {
+      if (!resizableColumns) return;
+      e.preventDefault();
+      setResizingColumn(columnIndex);
+    },
+    [resizableColumns]
+  );
+
+  const handleResizeMove = useCallback(
+    (e: MouseEvent) => {
+      if (resizingColumn === null || !tableRef.current) return;
+
+      const tableRect = tableRef.current.getBoundingClientRect();
+      const newWidth = e.clientX - tableRect.left;
+
+      setColumnWidths(prev => ({
+        ...prev,
+        [resizingColumn]: Math.max(100, newWidth), // Minimum width of 100px
+      }));
+    },
+    [resizingColumn]
+  );
+
+  const handleResizeEnd = useCallback(() => {
+    setResizingColumn(null);
+  }, []);
+
+  useEffect(() => {
+    if (resizingColumn !== null) {
+      document.addEventListener('mousemove', handleResizeMove);
+      document.addEventListener('mouseup', handleResizeEnd);
+
+      return () => {
+        document.removeEventListener('mousemove', handleResizeMove);
+        document.removeEventListener('mouseup', handleResizeEnd);
+      };
+    }
+  }, [resizingColumn, handleResizeMove, handleResizeEnd]);
 
   useEffect(() => {
     if (serverUrl && initialQuery) {
@@ -266,13 +318,28 @@ const DataTableWidget: React.FC<DataTableWidgetProps> = ({
             </div>
           </div>
         ) : data && data.columns.length > 0 ? (
-          <div className="max-h-[800px] overflow-auto">
+          <div ref={tableRef} className="max-h-[800px] overflow-auto">
             <Table>
               <TableHeader>
                 <TableRow>
                   {data.columns.map((column, index) => (
-                    <TableHead key={index} className="font-medium">
+                    <TableHead
+                      key={index}
+                      className="font-medium relative"
+                      style={{
+                        width: columnWidths[index]
+                          ? `${columnWidths[index]}px`
+                          : 'auto',
+                        minWidth: '100px',
+                      }}
+                    >
                       <code>{column}</code>
+                      {resizableColumns && (
+                        <div
+                          className="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize bg-transparent hover:bg-blue-300"
+                          onMouseDown={e => handleResizeStart(index, e)}
+                        />
+                      )}
                     </TableHead>
                   ))}
                 </TableRow>
@@ -283,7 +350,13 @@ const DataTableWidget: React.FC<DataTableWidgetProps> = ({
                     {row.map((cell, cellIndex) => (
                       <TableCell
                         key={cellIndex}
-                        className="max-w-[200px] truncate"
+                        className="truncate"
+                        style={{
+                          width: columnWidths[cellIndex]
+                            ? `${columnWidths[cellIndex]}px`
+                            : 'auto',
+                          minWidth: '100px',
+                        }}
                       >
                         {cell !== null && cell !== undefined
                           ? String(cell)
