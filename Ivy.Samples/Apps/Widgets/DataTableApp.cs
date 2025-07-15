@@ -11,6 +11,7 @@ public class DataTableApp : SampleBase
     protected override object? BuildSample()
     {
         IQueryable<User> users = SampleData.GetUsers(100).AsQueryable();
-        return users.ToDataTable();
+        return users.ToDataTable()
+            .Header(e => e.Name, "First Name");
     }
 }

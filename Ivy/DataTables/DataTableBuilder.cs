@@ -13,6 +13,7 @@ public class DataTableBuilder<TModel> : ViewBase, IStateless
 {
     private readonly IQueryable<TModel> _queryable;
     private Size? _width;
+    private Size? _height;
     private readonly Dictionary<string, DataTableColumn> _columns;
 
     public DataTableBuilder(IQueryable<TModel> queryable)
@@ -71,13 +72,19 @@ public class DataTableBuilder<TModel> : ViewBase, IStateless
         return this;
     }
 
+    public DataTableBuilder<TModel> Height(Size height)
+    {
+        _height = height;
+        return this;
+    }
+    
     public DataTableBuilder<TModel> Width(Expression<Func<TModel, object>> field, Size width)
     {
         var column = GetColumn(field);
         column.Width = width;
         return this;
     }
-
+    
     private DataTableColumn GetColumn(Expression<Func<TModel, object>> field)
     {
         var name = Utils.GetNameFromMemberExpression(field.Body);
@@ -122,6 +129,6 @@ public class DataTableBuilder<TModel> : ViewBase, IStateless
 
     public override object? Build()
     {
-        return new DataTableView<TModel>(_queryable, _width, _columns.Values.OrderBy(c => c.Order).ToArray());
+        return new DataTableView<TModel>(_queryable, _width, _height, _columns.Values.OrderBy(c => c.Order).ToArray());
     }
 }
