@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ScrollArea } from '@/components/ui/scroll-area';
+
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, RefreshCw, Database, AlertCircle } from 'lucide-react';
@@ -266,7 +266,7 @@ const DataTableWidget: React.FC<DataTableWidgetProps> = ({
             </div>
           </div>
         ) : data && data.columns.length > 0 ? (
-          <ScrollArea className="h-full">
+          <div className="max-h-[800px] overflow-auto">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -299,7 +299,7 @@ const DataTableWidget: React.FC<DataTableWidgetProps> = ({
                 More data available...
               </div>
             )}
-          </ScrollArea>
+          </div>
         ) : (
           <div className="flex items-center justify-center h-full text-muted-foreground">
             No data available
