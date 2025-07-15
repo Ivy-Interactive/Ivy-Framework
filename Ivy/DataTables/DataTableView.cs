@@ -8,7 +8,8 @@ public class DataTableView<TModel>(IQueryable<TModel> queryable, Size? width, Si
 {
     public override object? Build()
     {
-        var queryUrl = this.UseDataTable(queryable);
-        return new DataTable(queryUrl.Value!, width, height, columns);
+        var connection = this.UseDataTable(queryable);
+        if (connection == null) return null;
+        return new DataTable(connection, width, height, columns);
     }
 }

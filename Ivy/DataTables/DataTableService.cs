@@ -38,7 +38,7 @@ public class DataTableService(string connectionId) : IDataTableService
         throw new NotImplementedException();
     }
     
-    public (IDisposable cleanup, string url) AddQueryable(IQueryable queryable)
+    public (IDisposable cleanup, DataTableConnection connection) AddQueryable(IQueryable queryable)
     {
         var sourceId = Guid.NewGuid();
         _queryables[sourceId] = queryable;
@@ -48,12 +48,15 @@ public class DataTableService(string connectionId) : IDataTableService
             _queryables.Remove(sourceId);
         });
 
-        return (cleanup, $"/data-table/query/{connectionId}/{sourceId}");
+        //todo: what is the port and path we're using?
+        var connection = new DataTableConnection(12345, "/path/", connectionId, sourceId.ToString());
+        
+        return (cleanup, connection);
     }
 }
 
 public interface IDataTableService
 {
-    (IDisposable cleanup, string url) AddQueryable(IQueryable queryable);
+    (IDisposable cleanup, DataTableConnection connection) AddQueryable(IQueryable queryable);
     Task<IActionResult> Query(string sourceId /*, GRPC TABLEQUERY */);
 }

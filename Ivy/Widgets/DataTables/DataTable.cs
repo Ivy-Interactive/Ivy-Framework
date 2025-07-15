@@ -6,11 +6,11 @@ namespace Ivy;
 
 public record DataTable : WidgetBase<DataTable>
 {
-    public DataTable(string queryUrl, Size? width, Size? height, DataTableColumn[] columns) : base()
+    public DataTable(DataTableConnection connection, Size? width, Size? height, DataTableColumn[] columns) : base()
     {
         Width = width;
         Height = height;
-        QueryUrl = queryUrl;
+        Connection = connection;
         Columns = columns;
     }
     
@@ -18,9 +18,9 @@ public record DataTable : WidgetBase<DataTable>
     
     [Prop] public Size? Height { get; set; }
     
-    [Prop] public string? QueryUrl { get; set; }
+    [Prop] public DataTableColumn[] Columns { get; set; }
     
-    [Prop] public DataTableColumn[]? Columns { get; set; }
+    [Prop] public DataTableConnection Connection { get; set; }
     
     public static Detail operator |(DataTable widget, object child)
     {
