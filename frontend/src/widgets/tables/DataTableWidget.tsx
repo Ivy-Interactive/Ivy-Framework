@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, RefreshCw, Database, AlertCircle } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn, getIvyHost } from '@/lib/utils';
 import { getWidth, getHeight } from '@/lib/styles';
 import { useEventHandler } from '@/components/EventHandlerContext';
 import {
@@ -121,10 +121,13 @@ const DataTableWidget: React.FC<DataTableWidgetProps> = ({
 
     try {
       // Connect directly to the gRPC service using the connection info
-      const serverUrl = `http://localhost:${connection.port}`;
+      const backendUrl = new URL(getIvyHost());
+      const serverUrl = `${backendUrl.protocol}//${backendUrl.hostname}:${connection.port}`;
       const query: TableQuery = {
         limit: 100,
         offset: 0,
+        connectionId: connection.connectionId,
+        sourceId: connection.sourceId,
         // Use the sourceId from the connection to identify the data source
         // The backend gRPC service should use this to return the correct data
       };
@@ -133,10 +136,16 @@ const DataTableWidget: React.FC<DataTableWidgetProps> = ({
         serverUrl,
         query,
         onData: (tableResult: TableResult) => {
-          if (tableResult.table) {
-            const newData = convertArrowTableToDataTableData(tableResult.table);
-            setData(newData);
-            eventHandler('OnDataReceived', id, [newData]);
+          if (tableResult.arrow_ipc_stream) {
+            try {
+              const table = arrow.tableFromIPC(tableResult.arrow_ipc_stream);
+              const newData = convertArrowTableToDataTableData(table);
+              setData(newData);
+              eventHandler('OnDataReceived', id, [newData]);
+            } catch (error) {
+              console.error('Failed to parse Arrow IPC stream:', error);
+              setError('Failed to parse data from server');
+            }
           }
         },
         onError: (err: Error) => {
@@ -150,10 +159,16 @@ const DataTableWidget: React.FC<DataTableWidgetProps> = ({
       });
 
       // Handle the result if no onData callback was provided
-      if (result.table) {
-        const newData = convertArrowTableToDataTableData(result.table);
-        setData(newData);
-        eventHandler('OnDataReceived', id, [newData]);
+      if (result.arrow_ipc_stream) {
+        try {
+          const table = arrow.tableFromIPC(result.arrow_ipc_stream);
+          const newData = convertArrowTableToDataTableData(table);
+          setData(newData);
+          eventHandler('OnDataReceived', id, [newData]);
+        } catch (error) {
+          console.error('Failed to parse Arrow IPC stream:', error);
+          setError('Failed to parse data from server');
+        }
       }
     } catch (err) {
       const errorMessage =

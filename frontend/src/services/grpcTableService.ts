@@ -25,7 +25,7 @@ class EventEmitter {
   }
 }
 
-// Type definitions matching your proto file
+// Type definitions matching the proto file exactly
 export interface SortOrder {
   column: string;
   direction: 'ASC' | 'DESC';
@@ -58,12 +58,14 @@ export interface TableQuery {
   filter?: Filter;
   offset?: number;
   limit?: number;
-  selectColumns?: string[];
+  select_columns?: string[]; // Match proto field name
   aggregations?: Aggregation[];
+  connectionId?: string; // Match proto field name
+  sourceId?: string; // Match proto field name
 }
 
 export interface TableResult {
-  arrowIpcStream: Uint8Array;
+  arrow_ipc_stream: Uint8Array; // Match proto field name
   table?: arrow.Table; // Parsed Arrow table
 }
 
@@ -85,7 +87,7 @@ export class GrpcTableService extends EventEmitter {
   }
 
   async queryTable(options: GrpcTableStreamOptions): Promise<TableResult> {
-    const { query, onData, onError, onComplete } = options;
+    const { serverUrl, query, onData, onError, onComplete } = options;
 
     try {
       this.isConnected = true;
@@ -93,7 +95,7 @@ export class GrpcTableService extends EventEmitter {
       // For browser compatibility, we'll use HTTP POST with protobuf
       // You'll need to implement a gRPC-Web gateway or use a library like grpc-web
       const response = await fetch(
-        `${this.serverUrl}/datatable.TableService/Query`,
+        `${serverUrl}/datatable.TableService/Query`,
         {
           method: 'POST',
           headers: {
@@ -150,11 +152,13 @@ export class GrpcTableService extends EventEmitter {
       filter: this.serializeFilter(query.filter),
       offset: query.offset,
       limit: query.limit,
-      selectColumns: query.selectColumns,
+      select_columns: query.select_columns, // Match proto field name
       aggregations: query.aggregations?.map(a => ({
         column: a.column,
         function: a.function,
       })),
+      connectionId: query.connectionId, // Match proto field name
+      sourceId: query.sourceId, // Match proto field name
     };
 
     // For now, we'll use JSON as a placeholder
@@ -208,7 +212,7 @@ export class GrpcTableService extends EventEmitter {
     }
 
     return {
-      arrowIpcStream: uint8Array,
+      arrow_ipc_stream: uint8Array, // Match proto field name
       table,
     };
   }
@@ -222,9 +226,5 @@ export class GrpcTableService extends EventEmitter {
   }
 }
 
-// Create a singleton instance
-export const grpcTableService = new GrpcTableService(
-  process.env.NODE_ENV === 'development'
-    ? 'http://localhost:50051'
-    : window.location.origin
-);
+// Create a singleton instance that will be configured dynamically
+export const grpcTableService = new GrpcTableService('');
