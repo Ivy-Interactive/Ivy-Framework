@@ -4,6 +4,7 @@ using Ivy.Apps;
 using Ivy.Auth;
 using Ivy.Client;
 using Ivy.Core;
+using Ivy.DataTables;
 using Ivy.Helpers;
 using Ivy.Hooks;
 using Ivy.Services;
@@ -129,6 +130,7 @@ public class AppHub(
         appServices.AddSingleton(typeof(IContentBuilder), contentBuilder);
         appServices.AddSingleton(typeof(IAppRepository), server.AppRepository);
         appServices.AddSingleton(typeof(IDownloadService), new DownloadService(Context.ConnectionId));
+        appServices.AddSingleton(typeof(IDataTableService), new DataTableService(Context.ConnectionId));
         appServices.AddSingleton(typeof(IClientProvider), clientProvider);
         appServices.AddTransient<IWebhookRegistry, WebhookController>();
         appServices.AddSingleton(appDescriptor);

@@ -22,14 +22,14 @@ public class DataTableController(AppSessionStore sessionStore) : Controller
 
 public class DataTableService(string connectionId) : IDataTableService
 {
-    private readonly Dictionary<Guid, IQueryable> _sources = new();
+    private readonly Dictionary<Guid, IQueryable> _queryables = new();
     
     //should return the arrow table?
     public Task<IActionResult> Query(string sourceId/*, GRPC TABLEQUERY */)
     {
-        if (!_sources.TryGetValue(Guid.Parse(sourceId), out var queryable))
+        if (!_queryables.TryGetValue(Guid.Parse(sourceId), out var queryable))
         {
-            throw new Exception($"Source '{sourceId}' not found.");
+            throw new Exception($"Queryable '{sourceId}' not found.");
         }
         
         //IQueryable query = queryable; 
@@ -38,14 +38,14 @@ public class DataTableService(string connectionId) : IDataTableService
         throw new NotImplementedException();
     }
     
-    public (IDisposable cleanup, string url) AddSource(IQueryable source)
+    public (IDisposable cleanup, string url) AddQueryable(IQueryable queryable)
     {
         var sourceId = Guid.NewGuid();
-        _sources[sourceId] = source;
+        _queryables[sourceId] = queryable;
 
         var cleanup = Disposable.Create(() =>
         {
-            _sources.Remove(sourceId);
+            _queryables.Remove(sourceId);
         });
 
         return (cleanup, $"/data-table/query/{connectionId}/{sourceId}");
@@ -54,5 +54,6 @@ public class DataTableService(string connectionId) : IDataTableService
 
 public interface IDataTableService
 {
+    (IDisposable cleanup, string url) AddQueryable(IQueryable queryable);
     Task<IActionResult> Query(string sourceId /*, GRPC TABLEQUERY */);
 }

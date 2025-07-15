@@ -1,27 +1,23 @@
 using Ivy.Core;
 using Ivy.Core.Hooks;
-using Ivy.Hooks;
 
 namespace Ivy.DataTables;
 
 public static class UseDataTableExtensions
 {
-    // public static IState<string?> UseDownload<TView>(this TView view, Func<byte[]> factory, string mimeType, string fileName) where TView : ViewBase =>
-    //     view.Context.UseDownload(() => Task.FromResult(factory()), mimeType, fileName);
-    //
-    // public static IState<string?> UseDownload<TView>(this TView view, Func<Task<byte[]>> factory, string mimeType, string fileName) where TView : ViewBase =>
-    //     view.Context.UseDownload(factory, mimeType, fileName);
-    //
-    // public static IState<string?> UseDownload(this IViewContext context, Func<Task<byte[]>> factory, string mimeType, string fileName)
-    // {
-    //     var url = context.UseState<string?>();
-    //     var downloadService = context.UseService<IDownloadService>();
-    //     context.UseEffect(() =>
-    //     {
-    //         var (cleanup, downloadUrl) = downloadService.AddDownload(factory, mimeType, fileName);
-    //         url.Set(downloadUrl);
-    //         return cleanup;
-    //     });
-    //     return url;
-    // }
+    public static IState<string?> UseDataTable<TView>(this TView view, IQueryable queryable) where TView : ViewBase =>
+        view.Context.UseDataTable(queryable);
+    
+    public static IState<string?> UseDataTable(this IViewContext context, IQueryable queryable)
+    {
+        var url = context.UseState<string?>();
+        var dataTableService = context.UseService<IDataTableService>();
+        context.UseEffect(() =>
+        {
+            var (cleanup, queryUrl) = dataTableService.AddQueryable(queryable);
+            url.Set(queryUrl);
+            return cleanup;
+        });
+        return url;
+    }
 }
