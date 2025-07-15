@@ -1,0 +1,46 @@
+# Claude Development Instructions for Ivy Framework
+
+This file contains specific instructions for Claude when working on the Ivy Framework project.
+
+## Code Formatting and Linting
+
+### Backend (C#)
+- **Always run `dotnet format` before committing any C# code changes**
+- Run this command in the root directory or specific project directories
+- This ensures C# code follows the project's ruleset and formatting standards
+
+### Frontend (TypeScript/React)
+- **Always run linting commands in the `frontend/` directory before committing**
+- Use `npm run lint:fix` to automatically fix ESLint issues
+- Use `npm run format` to format code with Prettier
+- Both commands should be run from the `frontend/` directory
+
+## Development Workflow
+
+### Prerequisites
+- .NET 9 SDK
+- Node.js 22.12+ & npm
+- Vite 7
+
+### Testing
+- Run all tests: `dotnet test`
+- Run specific test project: `dotnet test Ivy.Test`
+- Run frontend tests: `cd frontend && npx playwright test`
+
+### Key Commands to Remember
+1. **Backend formatting**: `dotnet format`
+2. **Frontend linting**: `cd frontend && npm run lint:fix`
+3. **Frontend formatting**: `cd frontend && npm run format`
+4. **Run all tests**: `dotnet test`
+5. **Frontend tests**: `cd frontend && npx playwright test`
+
+## Important Notes
+- The project uses pre-commit hooks that automatically run linting and formatting
+- Always ensure code passes all tests before committing
+- Follow the development setup in the main README.md for building and running the application
+- Use meaningful commit messages following the format: `feat:`, `fix:`, `docs:`, etc.
+
+## Documentation
+- Check the main README.md for detailed development setup instructions
+- Refer to CONTRIBUTING.md for full contribution guidelines
+- Keep documentation up to date with code changes
