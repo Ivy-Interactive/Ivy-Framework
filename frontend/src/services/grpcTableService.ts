@@ -413,10 +413,18 @@ export class GrpcTableService extends EventEmitter {
         .join(' ')
     );
 
+    // Parse gRPC message to extract the protobuf data
+    const arrowData = this.parseGrpcMessage(uint8Array);
+
+    console.log(
+      'gRPC Table Service - Extracted Arrow data size:',
+      arrowData.length
+    );
+
     // Parse the Arrow IPC stream
     let table: arrow.Table | undefined;
     try {
-      table = arrow.tableFromIPC(uint8Array);
+      table = arrow.tableFromIPC(arrowData);
       console.log('gRPC Table Service - Successfully parsed Arrow table:', {
         numRows: table.numRows,
         numCols: table.numCols,
@@ -427,9 +435,105 @@ export class GrpcTableService extends EventEmitter {
     }
 
     return {
-      arrow_ipc_stream: uint8Array,
+      arrow_ipc_stream: arrowData,
       table,
     };
+  }
+
+  // Parse gRPC message format: [compression-flag][message-length][message-data]
+  private parseGrpcMessage(data: Uint8Array): Uint8Array {
+    if (data.length < 5) {
+      throw new Error('Invalid gRPC message: too short');
+    }
+
+    // Read compression flag (1 byte)
+    const compressionFlag = data[0];
+    console.log('gRPC Table Service - Compression flag:', compressionFlag);
+
+    // Read message length (4 bytes, big-endian)
+    const messageLength =
+      (data[1] << 24) | (data[2] << 16) | (data[3] << 8) | data[4];
+    console.log('gRPC Table Service - Message length:', messageLength);
+
+    // Extract the message data
+    const messageData = data.slice(5, 5 + messageLength);
+    console.log('gRPC Table Service - Message data size:', messageData.length);
+
+    // Parse the protobuf message to extract the Arrow data
+    return this.parseTableResultProtobuf(messageData);
+  }
+
+  // Parse TableResult protobuf message to extract arrow_ipc_stream field
+  private parseTableResultProtobuf(data: Uint8Array): Uint8Array {
+    let offset = 0;
+
+    while (offset < data.length) {
+      // Read field tag
+      const tag = this.decodeVarint(data, offset);
+      offset += this.getVarintLength(tag);
+
+      const fieldNumber = tag >> 3;
+      const wireType = tag & 0x07;
+
+      console.log(
+        `gRPC Table Service - Field ${fieldNumber}, wire type ${wireType}`
+      );
+
+      if (fieldNumber === 1 && wireType === 2) {
+        // arrow_ipc_stream field
+        // Read length-delimited data
+        const length = this.decodeVarint(data, offset);
+        offset += this.getVarintLength(length);
+
+        // Extract the Arrow data
+        const arrowData = data.slice(offset, offset + length);
+        console.log(
+          'gRPC Table Service - Extracted Arrow IPC stream size:',
+          arrowData.length
+        );
+        return arrowData;
+      } else if (wireType === 0) {
+        // varint
+        offset += this.getVarintLength(this.decodeVarint(data, offset));
+      } else if (wireType === 2) {
+        // length-delimited
+        const length = this.decodeVarint(data, offset);
+        offset += this.getVarintLength(length);
+        offset += length;
+      } else {
+        throw new Error(`Unsupported wire type: ${wireType}`);
+      }
+    }
+
+    throw new Error('Arrow IPC stream field not found in protobuf message');
+  }
+
+  private decodeVarint(data: Uint8Array, offset: number): number {
+    let result = 0;
+    let shift = 0;
+
+    while (offset < data.length) {
+      const byte = data[offset];
+      result |= (byte & 0x7f) << shift;
+      offset++;
+
+      if ((byte & 0x80) === 0) {
+        break;
+      }
+
+      shift += 7;
+    }
+
+    return result;
+  }
+
+  private getVarintLength(value: number): number {
+    let length = 1;
+    while (value >= 0x80) {
+      value >>>= 7;
+      length++;
+    }
+    return length;
   }
 
   isStreaming(): boolean {
