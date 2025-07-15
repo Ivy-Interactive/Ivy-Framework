@@ -120,10 +120,13 @@ const DataTableWidget: React.FC<DataTableWidgetProps> = ({
     setIsStreaming(true);
 
     try {
-      const serverUrl = `http://localhost:${connection.port}${connection.path}`;
+      // Connect directly to the gRPC service using the connection info
+      const serverUrl = `http://localhost:${connection.port}`;
       const query: TableQuery = {
         limit: 100,
         offset: 0,
+        // Use the sourceId from the connection to identify the data source
+        // The backend gRPC service should use this to return the correct data
       };
 
       const result = await grpcTableService.queryTable({
