@@ -41,7 +41,7 @@ public class QueryProcessor
             var skipMethod = typeof(Queryable).GetMethods()
                 .FirstOrDefault(m => m.Name == "Skip" && m.GetParameters().Length == 2)?
                 .MakeGenericMethod(queryable.ElementType);
-            
+
             if (skipMethod != null)
             {
                 processedQuery = (IQueryable)skipMethod.Invoke(null, new object[] { processedQuery, query.Offset })!;
@@ -53,7 +53,7 @@ public class QueryProcessor
             var takeMethod = typeof(Queryable).GetMethods()
                 .FirstOrDefault(m => m.Name == "Take" && m.GetParameters().Length == 2)?
                 .MakeGenericMethod(queryable.ElementType);
-            
+
             if (takeMethod != null)
             {
                 processedQuery = (IQueryable)takeMethod.Invoke(null, new object[] { processedQuery, query.Limit })!;
@@ -78,7 +78,7 @@ public class QueryProcessor
         var firstSort = sortOrdersList.First();
         var elementType = query.ElementType;
         var propertyInfo = elementType.GetProperty(firstSort.Column);
-        
+
         if (propertyInfo == null)
             return query;
 
@@ -86,7 +86,7 @@ public class QueryProcessor
         var property = System.Linq.Expressions.Expression.Property(parameter, propertyInfo);
         var lambda = System.Linq.Expressions.Expression.Lambda(property, parameter);
 
-        var methodName = firstSort.Direction == SortDirection.Asc ? "OrderBy" : "OrderByDescending";
+        var methodName = firstSort.Direction == IvyDataTables.Api.Protos.SortDirection.Asc ? "OrderBy" : "OrderByDescending";
         var method = typeof(Queryable).GetMethods()
             .FirstOrDefault(m => m.Name == methodName && m.GetParameters().Length == 2)?
             .MakeGenericMethod(elementType, propertyInfo.PropertyType);
@@ -107,7 +107,7 @@ public class QueryProcessor
         }
 
         var properties = elementType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
-        
+
         // Filter properties if selectColumns is specified
         if (selectColumns.Any())
         {
@@ -161,21 +161,21 @@ public class QueryProcessor
 
         return underlyingType switch
         {
-            SystemType t when t == typeof(int) => 
+            SystemType t when t == typeof(int) =>
                 CreateInt32Array(values),
-            SystemType t when t == typeof(long) => 
+            SystemType t when t == typeof(long) =>
                 CreateInt64Array(values),
-            SystemType t when t == typeof(double) => 
+            SystemType t when t == typeof(double) =>
                 CreateDoubleArray(values),
-            SystemType t when t == typeof(float) => 
+            SystemType t when t == typeof(float) =>
                 CreateFloatArray(values),
-            SystemType t when t == typeof(bool) => 
+            SystemType t when t == typeof(bool) =>
                 CreateBooleanArray(values),
-            SystemType t when t == typeof(DateTime) => 
+            SystemType t when t == typeof(DateTime) =>
                 CreateTimestampArray(values),
-            SystemType t when t == typeof(decimal) => 
+            SystemType t when t == typeof(decimal) =>
                 CreateDecimalArray(values),
-            SystemType t when t == typeof(string) => 
+            SystemType t when t == typeof(string) =>
                 CreateStringArray(values),
             _ => CreateStringArray(values)
         };

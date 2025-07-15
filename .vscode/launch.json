@@ -1,0 +1,140 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Launch Ivy.Samples",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build-samples",
+      "program": "${workspaceFolder}/Ivy.Samples/bin/Debug/net9.0/Ivy.Samples.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}/Ivy.Samples",
+      "console": "integratedTerminal",
+      "stopAtEntry": false,
+      "serverReadyAction": {
+        "action": "openExternally",
+        "pattern": "\\bIvy is running on (https?://\\S+)",
+        "uriFormat": "%s"
+      },
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    },
+    {
+      "name": "Launch Ivy.Samples (No Browser)",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build-samples",
+      "program": "${workspaceFolder}/Ivy.Samples/bin/Debug/net9.0/Ivy.Samples.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}/Ivy.Samples",
+      "console": "integratedTerminal",
+      "stopAtEntry": false,
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    },
+    {
+      "name": "Launch Ivy.Samples with Custom Port",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build-samples",
+      "program": "${workspaceFolder}/Ivy.Samples/bin/Debug/net9.0/Ivy.Samples.dll",
+      "args": [
+        "--port",
+        "5011"
+      ],
+      "cwd": "${workspaceFolder}/Ivy.Samples",
+      "console": "integratedTerminal",
+      "stopAtEntry": false,
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    },
+    {
+      "name": "Attach to Ivy.Samples Process",
+      "type": "coreclr",
+      "request": "attach",
+      "processName": "Ivy.Samples"
+    },
+    {
+      "name": "Launch Ivy.Test",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build-test",
+      "program": "${workspaceFolder}/Ivy.Test/bin/Debug/net9.0/Ivy.Test.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}/Ivy.Test",
+      "console": "integratedTerminal",
+      "stopAtEntry": false,
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    },
+    {
+      "name": "Launch Ivy.Docs",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build-docs",
+      "program": "${workspaceFolder}/Ivy.Docs/bin/Debug/net9.0/Ivy.Docs.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}/Ivy.Docs",
+      "console": "integratedTerminal",
+      "stopAtEntry": false,
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    },
+    {
+      "name": "Debug gRPC DataTable Service",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build-samples",
+      "program": "${workspaceFolder}/Ivy.Samples/bin/Debug/net9.0/Ivy.Samples.dll",
+      "args": [
+        "--verbose"
+      ],
+      "cwd": "${workspaceFolder}/Ivy.Samples",
+      "console": "integratedTerminal",
+      "stopAtEntry": false,
+      "serverReadyAction": {
+        "action": "openExternally",
+        "pattern": "\\bIvy is running on (https?://\\S+)",
+        "uriFormat": "%s"
+      },
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ASPNETCORE_LOGGING__LOGLEVEL__GRPC": "Debug",
+        "ASPNETCORE_LOGGING__LOGLEVEL__IVY": "Debug"
+      },
+      "sourceFileMap": {
+        "/Users/johan.svanborg/dev/dotnet/Ivy-Framework": "${workspaceFolder}"
+      }
+    },
+    {
+      "name": "Launch with Frontend Dev Server",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build-samples",
+      "program": "${workspaceFolder}/Ivy.Samples/bin/Debug/net9.0/Ivy.Samples.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}/Ivy.Samples",
+      "console": "integratedTerminal",
+      "stopAtEntry": false,
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "postDebugTask": "start-frontend-dev"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Launch Full Stack (Backend + Frontend)",
+      "configurations": [
+        "Launch Ivy.Samples (No Browser)"
+      ],
+      "preLaunchTask": "start-frontend-dev",
+      "stopAll": true
+    }
+  ]
+}

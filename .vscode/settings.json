@@ -1,0 +1,41 @@
+{
+    "dotnet.defaultSolution": "Ivy-Framework.sln",
+    "omnisharp.enableMsBuildLoadProjectsOnDemand": false,
+    "omnisharp.enableRoslynAnalyzers": true,
+    "omnisharp.enableImportCompletion": true,
+    "omnisharp.analyzeOpenDocumentsOnly": false,
+    "csharp.semanticHighlighting.enabled": true,
+    "csharp.format.enable": true,
+    "csharp.inlayHints.enableInlayHintsForImplicitVariableTypes": true,
+    "csharp.inlayHints.enableInlayHintsForImplicitObjectCreation": true,
+    "csharp.inlayHints.enableInlayHintsForLambdaParameterTypes": true,
+    "csharp.inlayHints.enableInlayHintsForTypes": true,
+    "editor.formatOnSave": true,
+    "editor.formatOnType": true,
+    "files.exclude": {
+        "**/bin": true,
+        "**/obj": true,
+        "**/*.user": true
+    },
+    "search.exclude": {
+        "**/bin": true,
+        "**/obj": true,
+        "**/*.user": true
+    },
+    "files.associations": {
+        "*.csproj": "xml",
+        "*.props": "xml",
+        "*.targets": "xml"
+    },
+    "typescript.preferences.includePackageJsonAutoImports": "on",
+    "typescript.suggest.autoImports": true,
+    "typescript.updateImportsOnFileMove.enabled": "always",
+    "editor.codeActionsOnSave": {
+        "source.fixAll": "explicit",
+        "source.organizeImports": "explicit"
+    },
+    "debug.console.fontSize": 12,
+    "debug.console.fontFamily": "Menlo, Monaco, 'Courier New', monospace",
+    "terminal.integrated.fontSize": 12,
+    "terminal.integrated.fontFamily": "Menlo, Monaco, 'Courier New', monospace"
+}

@@ -7,10 +7,8 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Ivy.DataTables;
 
-public class DataTableService(string connectionId, ServerArgs serverArgs) : TableService.TableServiceBase, IDataTableService
+public class DataTableService(IQueryableRegistry queryableRegistry) : TableService.TableServiceBase
 {
-    private readonly Dictionary<Guid, IQueryable> _queryables = new();
-    
     public override Task<TableResult> Query(TableQuery request, ServerCallContext context)
     {
         try
@@ -21,7 +19,8 @@ public class DataTableService(string connectionId, ServerArgs serverArgs) : Tabl
                 throw new RpcException(new Status(StatusCode.InvalidArgument, "SourceId is required in the request."));
             }
 
-            if (!_queryables.TryGetValue(Guid.Parse(request.SourceId), out var queryable))
+            var queryable = queryableRegistry.GetQueryable(request.SourceId);
+            if (queryable == null)
             {
                 throw new RpcException(new Status(StatusCode.NotFound, $"Queryable '{request.SourceId}' not found."));
             }
@@ -45,26 +44,4 @@ public class DataTableService(string connectionId, ServerArgs serverArgs) : Tabl
             throw new RpcException(new Status(StatusCode.Internal, $"Internal server error: {ex.Message}"));
         }
     }
-    
-    public (IDisposable cleanup, DataTableConnection connection) AddQueryable(IQueryable queryable)
-    {
-        Console.WriteLine($"Adding queryable with connectionId: {connectionId}");
-        var sourceId = Guid.NewGuid();
-        _queryables[sourceId] = queryable;
-
-        var cleanup = Disposable.Create(() =>
-        {
-            _queryables.Remove(sourceId);
-        });
-
-        var connection = new DataTableConnection(serverArgs.Port, "/datatable.TableService/Query/", connectionId, sourceId.ToString());
-        
-        return (cleanup, connection);
-    }
-}
-
-public interface IDataTableService
-{
-    (IDisposable cleanup, DataTableConnection connection) AddQueryable(IQueryable queryable);
-    Task<TableResult> Query(TableQuery request, ServerCallContext context);
 }

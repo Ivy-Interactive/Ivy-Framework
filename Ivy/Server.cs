@@ -6,6 +6,7 @@ using Ivy.Auth;
 using Ivy.Chrome;
 using Ivy.Connections;
 using Ivy.Core;
+using Ivy.DataTables;
 using Ivy.Hooks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -233,6 +234,7 @@ public class Server
             .AddApplicationPart(Assembly.Load("Ivy"))
             .AddControllersAsServices();
         builder.Services.AddGrpc();
+        builder.Services.AddSingleton<IQueryableRegistry, QueryableRegistry>();
         builder.Services.AddSingleton<IContentBuilder>(_contentBuilder ?? new DefaultContentBuilder());
         builder.Services.AddSingleton(sessionStore);
         builder.Services.AddSingleton<IConfiguration>(builder.Configuration);

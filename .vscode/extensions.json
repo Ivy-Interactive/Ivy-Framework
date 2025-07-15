@@ -1,0 +1,22 @@
+{
+    "recommendations": [
+        "ms-dotnettools.csharp",
+        "ms-dotnettools.vscode-dotnet-runtime",
+        "ms-vscode.vscode-json",
+        "ms-vscode.vscode-typescript-next",
+        "bradlc.vscode-tailwindcss",
+        "formulahendry.auto-rename-tag",
+        "christian-kohler.path-intellisense",
+        "ms-vscode.vscode-typescript-next",
+        "ms-dotnettools.blazorwasm-companion",
+        "jmrog.vscode-nuget-package-manager",
+        "fernandoescolar.vscode-solution-explorer",
+        "kreativ-software.csharpextensions",
+        "formulahendry.dotnet-test-explorer",
+        "ms-vscode.test-adapter-converter",
+        "hbenl.vscode-test-explorer",
+        "alexkrechik.cucumberautocomplete",
+        "humao.rest-client",
+        "ms-vscode.vscode-typescript-next"
+    ]
+}
