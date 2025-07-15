@@ -103,6 +103,7 @@ export const widgetMap = {
   'Ivy.Table': Tables.TableWidget,
   'Ivy.TableRow': Tables.TableRowWidget,
   'Ivy.TableCell': Tables.TableCellWidget,
+  'Ivy.DataTable': React.lazy(() => import('@/widgets/DataTableWidget')),
 
   // Lists
   'Ivy.List': Lists.ListWidget,
