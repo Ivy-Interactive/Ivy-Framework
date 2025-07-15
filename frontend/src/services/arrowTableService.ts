@@ -1,4 +1,26 @@
-import { EventEmitter } from 'events';
+// Browser-compatible EventEmitter implementation
+class EventEmitter {
+  private events: Record<string, ((...args: unknown[]) => void)[]> = {};
+
+  on(event: string, listener: (...args: unknown[]) => void): void {
+    if (!this.events[event]) {
+      this.events[event] = [];
+    }
+    this.events[event].push(listener);
+  }
+
+  emit(event: string, ...args: unknown[]): void {
+    if (this.events[event]) {
+      this.events[event].forEach(listener => listener(...args));
+    }
+  }
+
+  off(event: string, listener: (...args: unknown[]) => void): void {
+    if (this.events[event]) {
+      this.events[event] = this.events[event].filter(l => l !== listener);
+    }
+  }
+}
 
 export interface ArrowTableData {
   columns: string[];
