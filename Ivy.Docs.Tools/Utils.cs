@@ -63,6 +63,7 @@ public static class Utils
         {
             ns = ns[(Array.IndexOf(ns, "Apps") + 1)..];
         }
+
         return string.Join("/", ns.Select(Utils.TitleCaseToFriendlyUrl));
     }
 
@@ -122,16 +123,15 @@ public static class Utils
             .Where(p => !string.IsNullOrWhiteSpace(p))
             .ToArray();
 
-        // Use Path.Combine for cross-platform compatibility, then normalize to expected format
+        // Use Path.Combine for cross-platform compatibility
         var result = Path.Combine(parts);
 
         // Handle the case where result is "." (current directory)
         if (result == "." || string.IsNullOrEmpty(result))
             return "";
 
-        // Normalize path separators to match expected test format (backslashes for Windows-style paths)
-        // This ensures tests pass on both Windows and Unix systems
-        return result.Replace(Path.DirectorySeparatorChar, '\\').Replace(Path.AltDirectorySeparatorChar, '\\');
+        // Return OS specific path
+        return result;
     }
 
     private static string NormalizePath(string path)
@@ -230,6 +230,7 @@ public static class Utils
         {
             return (order, string.Join("_", parts.Skip(1)));
         }
+
         return (null, nameWithoutExtension);
     }
 
@@ -394,7 +395,8 @@ public static class Utils
         using var sha256 = SHA256.Create();
         byte[] hash = sha256.ComputeHash(Encoding.UTF8.GetBytes(input));
         string base64 = System.Convert.ToBase64String(hash);
-        return new string(base64.Replace("+", "-").Replace("/", "_").ToLower().Where(char.IsLetterOrDigit).ToArray())[..length];
+        return new string(base64.Replace("+", "-").Replace("/", "_").ToLower().Where(char.IsLetterOrDigit).ToArray())
+            [..length];
     }
 
     public static string EatRight(this string input, char food)
@@ -417,10 +419,12 @@ public static class Utils
                 break;
             }
         }
+
         return input.Substring(0, i + 1);
     }
 
-    public static string EatRight(this string input, string food, StringComparison stringComparison = StringComparison.CurrentCulture)
+    public static string EatRight(this string input, string food,
+        StringComparison stringComparison = StringComparison.CurrentCulture)
     {
         if (string.IsNullOrEmpty(input) || string.IsNullOrEmpty(food)) return input;
 

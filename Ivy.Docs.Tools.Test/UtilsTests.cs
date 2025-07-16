@@ -1,20 +1,22 @@
-﻿namespace Ivy.Docs.Tools.Test;
+namespace Ivy.Docs.Tools.Test;
 
 public class UtilsTests
 {
+    public static IEnumerable<object[]> RelativeFolderWithoutOrderTestData() =>
+    [
+        [@"C:\Foo\Bar\Input\", @"C:\Foo\Bar\Input\01_Baz\03_Fizz\Goo\Qux.md", Path.Combine("Baz", "Fizz", "Goo")],
+        [@"C:\Data\", @"C:\Data\Baz\Fizz\Qux.md", Path.Combine("Baz", "Fizz")],
+        [@"C:\Root\", @"C:\Root\001_Alpha\Beta\Qux.md", Path.Combine("Alpha", "Beta")],
+        [@"C:\Test\", @"C:\Test\Qux.md", ""],
+        [@"C:\Test\", @"C:\Test\01_Baz\Qux.md", "Baz"],
+        [@"C:\Test\", @"C:\Test\Baz\Qux.md", "Baz"],
+        [@"/mnt/data/input/", @"/mnt/data/input/01_Baz/03_Fizz/Goo/Qux.md", Path.Combine("Baz", "Fizz", "Goo")],
+    ];
+
     [Theory]
-    [InlineData(@"C:\Foo\Bar\Input\", @"C:\Foo\Bar\Input\01_Baz\03_Fizz\Goo\Qux.md", @"Baz\Fizz\Goo")]
-    [InlineData(@"C:\Data\", @"C:\Data\Baz\Fizz\Qux.md", @"Baz\Fizz")]
-    [InlineData(@"C:\Root\", @"C:\Root\001_Alpha\Beta\Qux.md", @"Alpha\Beta")]
-    [InlineData(@"C:\Test\", @"C:\Test\Qux.md", @"")]
-    [InlineData(@"C:\Test\", @"C:\Test\01_Baz\Qux.md", @"Baz")]
-    [InlineData(@"C:\Test\", @"C:\Test\Baz\Qux.md", @"Baz")]
-    [InlineData(@"/mnt/data/input/", @"/mnt/data/input/01_Baz/03_Fizz/Goo/Qux.md", @"Baz\Fizz\Goo")]
-    public void GetRelativeFolderWithoutOrder_ReturnsExpected(string inputFolder, string inputFile, string expected)
-    {
-        var result = Utils.GetRelativeFolderWithoutOrder(inputFolder, inputFile);
-        Assert.Equal(expected, result);
-    }
+    [MemberData(nameof(RelativeFolderWithoutOrderTestData))]
+    public void GetRelativeFolderWithoutOrder_ReturnsExpected(string inputFolder, string inputFile, string expected) =>
+        Assert.Equal(expected, Utils.GetRelativeFolderWithoutOrder(inputFolder, inputFile));
 
     [Theory]
     [InlineData(@"01_Onboarding/01_Introduction.md", @"02_Installation.md", @"01_Onboarding/02_Installation.md")]
@@ -43,4 +45,3 @@ public class UtilsTests
         Assert.Equal(expectedAppId, result);
     }
 }
-
