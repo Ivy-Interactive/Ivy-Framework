@@ -11,6 +11,8 @@ public static class Program
             config.SetApplicationName("Ivy.Docs.Tools");
             config.AddCommand<ConvertCommand>("convert")
                 .WithDescription("Converts markdown files to Ivy C# App.");
+            config.AddCommand<IndexCommand>("index")
+                .WithDescription("Generates prompting questions for each markdown file in the documentation.");
             config.PropagateExceptions();
         });
 

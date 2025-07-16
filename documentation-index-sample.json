@@ -1,0 +1,172 @@
+{
+  "documentation": [
+    {
+      "filePath": "02_Widgets/01_Common/Button.md",
+      "title": "Button",
+      "category": "Common Widgets",
+      "questions": [
+        "How do I use Button?",
+        "What is Button?",
+        "How do I create a Button?",
+        "How do I style a Button?",
+        "Can I customize Button?",
+        "What are the properties of Button?",
+        "How do I handle Button events?",
+        "What events does Button support?",
+        "How do I disable Button?",
+        "How do I manage Button state?",
+        "Do you have examples of Button?",
+        "Show me how to use Button",
+        "Can I customize Button?",
+        "Tell me about Button?",
+        "What types of Button are available?"
+      ]
+    },
+    {
+      "filePath": "02_Widgets/02_Inputs/Text.md",
+      "title": "TextInput",
+      "category": "Input Widgets",
+      "questions": [
+        "How do I use TextInput?",
+        "What is TextInput?",
+        "How do I create a TextInput?",
+        "How do I style a TextInput?",
+        "Can I customize TextInput?",
+        "What are the properties of TextInput?",
+        "How do I handle TextInput events?",
+        "What events does TextInput support?",
+        "What types of TextInput are available?",
+        "How do I change TextInput variants?",
+        "How do I disable TextInput?",
+        "How do I manage TextInput state?",
+        "How do I use TextInput in forms?",
+        "How do I validate TextInput?",
+        "Show me how to use TextInput"
+      ]
+    },
+    {
+      "filePath": "02_Widgets/06_Charts/BarChart.md",
+      "title": "BarChart",
+      "category": "Chart Widgets",
+      "questions": [
+        "How do I use BarChart?",
+        "What is BarChart?",
+        "How do I create a BarChart?",
+        "How do I style a BarChart?",
+        "Can I customize BarChart?",
+        "What are the properties of BarChart?",
+        "How do I bind data to BarChart?",
+        "How do I use BarChart with data?",
+        "How do I theme BarChart?",
+        "How do I change BarChart colors?",
+        "Do you have examples of BarChart?",
+        "Show me how to use BarChart",
+        "Can I customize BarChart?",
+        "Tell me about BarChart?",
+        "What types of BarChart are available?"
+      ]
+    },
+    {
+      "filePath": "01_Onboarding/01_GettingStarted/01_Introduction.md",
+      "title": "Introduction",
+      "category": "Getting Started",
+      "questions": [
+        "How do I use Introduction?",
+        "What is Introduction?",
+        "How do I get started with Introduction?",
+        "What do I need to know about Introduction?",
+        "How do I setup Introduction?",
+        "How do I install Introduction?",
+        "How do I setup Introduction?",
+        "Do you have examples of Introduction?",
+        "Show me how to use Introduction",
+        "Can I use Introduction?",
+        "Tell me about Introduction?",
+        "How do I get started with Introduction?",
+        "What do I need to know about Introduction?",
+        "How do I setup Introduction?"
+      ]
+    },
+    {
+      "filePath": "01_Onboarding/02_Concepts/State.md",
+      "title": "State",
+      "category": "Concepts",
+      "questions": [
+        "How do I use State?",
+        "What is State?",
+        "How does State work?",
+        "When should I use State?",
+        "What are the benefits of State?",
+        "How do I implement State?",
+        "Do you have examples of State?",
+        "Show me how to use State",
+        "Can I use State?",
+        "Tell me about State?",
+        "How does State work?",
+        "When should I use State?",
+        "What are the benefits of State?",
+        "How do I implement State?"
+      ]
+    },
+    {
+      "filePath": "01_Onboarding/03_CLI/02_Init.md",
+      "title": "Init",
+      "category": "CLI",
+      "questions": [
+        "How do I use Init?",
+        "What is Init?",
+        "How do I use the Init command?",
+        "What does the Init command do?",
+        "What are the options for Init?",
+        "How do I install Init?",
+        "How do I setup Init?",
+        "Do you have examples of Init?",
+        "Show me how to use Init",
+        "Can I use Init?",
+        "Tell me about Init?",
+        "How do I use the Init command?",
+        "What does the Init command do?",
+        "What are the options for Init?"
+      ]
+    },
+    {
+      "filePath": "03_ApiReference/IvyShared/Colors.md",
+      "title": "Colors",
+      "category": "API Reference",
+      "questions": [
+        "How do I use Colors?",
+        "What is Colors?",
+        "How do I theme Colors?",
+        "How do I change Colors colors?",
+        "Do you have examples of Colors?",
+        "Show me how to use Colors",
+        "Can I use Colors?",
+        "Tell me about Colors?",
+        "How do I theme Colors?",
+        "How do I change Colors colors?",
+        "Do you have examples of Colors?",
+        "Show me how to use Colors",
+        "Can I use Colors?",
+        "Tell me about Colors?"
+      ]
+    }
+  ],
+  "summary": {
+    "totalDocuments": 92,
+    "categories": {
+      "Common Widgets": 12,
+      "Input Widgets": 12,
+      "Primitive Widgets": 19,
+      "Layout Widgets": 8,
+      "Effect Widgets": 2,
+      "Chart Widgets": 4,
+      "Advanced Widgets": 2,
+      "Getting Started": 6,
+      "Concepts": 16,
+      "CLI": 5,
+      "API Reference": 6
+    },
+    "totalQuestions": 1380,
+    "averageQuestionsPerDocument": 15
+  }
+}
