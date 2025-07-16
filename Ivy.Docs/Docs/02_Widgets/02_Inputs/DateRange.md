@@ -6,9 +6,17 @@ The DateRangeInput widget allows users to select a range of dates. It provides a
 
 Here's a simple example of a DateRangeInput that allows users to select a date range:
 
-```csharp
-var dateRangeState = this.UseState(() => (from: DateTime.Today.AddDays(-7), to: DateTime.Today));
-dateRangeState.ToDateRangeInput()
+```csharp demo-below
+public class DateRangeBasicDemo : ViewBase
+{    
+    public override object? Build()
+    {    
+        var dateRangeState = this.UseState(() => (from: DateTime.Today.AddDays(-7), to: DateTime.Today));
+        return Layout.Vertical()
+                | dateRangeState.ToDateRangeInput();
+    }    
+}        
+        
 ```
 
 ## Supported Types
