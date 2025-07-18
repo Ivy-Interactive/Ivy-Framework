@@ -1,15 +1,27 @@
 # FileInput
 
-The FileInput widget allows users to upload files. It provides a file selector interface with options for file type filtering, size limitations, and support for single or multiple file selections.
+The `FileInput` widget allows users to upload files. It provides a file selector interface with options for file type filtering, size limitations, and support for single or multiple file selections.
 
 ## Basic Usage
 
 Here's a simple example of a FileInput that allows users to select files:
 
-```csharp
-var fileState = this.UseState((FileInput?)null);
-new FileInput(fileState, placeholder: "Select a file", accept: ".txt,.pdf")
-    .OnChange(e => Console.WriteLine($"File selected: {e.Value?.Name}"));
+```csharp demo-below
+public class BasicFileUsageDemo : ViewBase 
+{
+    public override object? Build()
+    {    
+        var fileState = UseState((FileInput?)null);
+        var uploadedStatus = UseState(fileState.Value?.Name); 
+        return Layout.Vertical()
+                | Text.Large("Upload your resume")
+                | fileState.ToFileInput()
+                           .Placeholder("Select a file")
+                           .Accept(".pdf,.txt")
+                           
+                | Text.Small(uploadedStatus);
+    }
+}
 ```
 
 ```csharp 
