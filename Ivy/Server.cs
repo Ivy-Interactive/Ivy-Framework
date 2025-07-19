@@ -346,16 +346,16 @@ public static class WebApplicationExtensions
             {
                 using var reader = new StreamReader(stream);
                 var html = await reader.ReadToEndAsync();
-                
+
                 //Inject IVY_LICENSE:
                 var configuration = app.Services.GetRequiredService<IConfiguration>();
                 var ivyLicense = configuration["IVY_LICENSE"] ?? "";
-                if(!string.IsNullOrEmpty(ivyLicense))
+                if (!string.IsNullOrEmpty(ivyLicense))
                 {
                     var ivyLicenseTag = $"<meta name=\"ivy-license\" content=\"{ivyLicense}\" />";
                     html = html.Replace("</head>", $"  {ivyLicenseTag}\n</head>");
                 }
-                
+
                 context.Response.ContentType = "text/html";
                 var bytes = Encoding.UTF8.GetBytes(html);
                 await context.Response.Body.WriteAsync(bytes);
