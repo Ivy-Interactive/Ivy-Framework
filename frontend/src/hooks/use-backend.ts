@@ -22,6 +22,7 @@ type UpdateMessage = Array<{
 type RefreshMessage = {
   widgets: WidgetNode;
   removeIvyBranding: boolean;
+  lazyLoadWholeTree?: boolean;
 };
 
 type AuthToken = {
@@ -65,6 +66,7 @@ export const useBackend = () => {
   const [widgetTree, setWidgetTree] = useState<WidgetNode | null>(null);
   const [disconnected, setDisconnected] = useState(false);
   const [removeIvyBranding, setRemoveIvyBranding] = useState(false);
+  const [lazyLoadWholeTree, setLazyLoadWholeTree] = useState<boolean>(false);
   const { toast } = useToast();
   const appId = getAppId();
   const appArgs = getAppArgs();
@@ -103,6 +105,7 @@ export const useBackend = () => {
     logger.debug('Processing Refresh message', { message });
     setRemoveIvyBranding(message.removeIvyBranding);
     setWidgetTree(message.widgets);
+    setLazyLoadWholeTree(!!message.lazyLoadWholeTree);
   }, []);
 
   const handleUpdateMessage = useCallback((message: UpdateMessage) => {
@@ -304,5 +307,6 @@ export const useBackend = () => {
     eventHandler,
     disconnected,
     removeIvyBranding,
+    lazyLoadWholeTree,
   };
 };

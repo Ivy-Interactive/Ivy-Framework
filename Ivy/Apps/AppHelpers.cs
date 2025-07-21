@@ -66,7 +66,8 @@ public static class AppHelpers
                 RemoveIvyBranding = appAttribute.RemoveIvyBranding,
                 Order = appAttribute.Order,
                 GroupExpanded = appAttribute.GroupExpanded,
-                DocumentSource = appAttribute.DocumentSource
+                DocumentSource = appAttribute.DocumentSource,
+                LazyLoadWholeTree = appAttribute.DocumentSource != null
             };
         }
         throw new InvalidOperationException($"Type '{type.FullName}' is missing the [App] attribute.");

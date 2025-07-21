@@ -9,6 +9,7 @@ import { EventHandlerProvider } from './components/EventHandlerContext';
 import { TextShimmer } from './components/TextShimmer';
 import MadeWithIvy from './components/MadeWithIvy';
 import { ThemeProvider } from './components/ThemeProvider';
+import React, { Suspense } from 'react';
 
 function ConnectionModal() {
   return (
@@ -41,8 +42,13 @@ function ConnectionModal() {
 }
 
 function App() {
-  const { widgetTree, eventHandler, disconnected, removeIvyBranding } =
-    useBackend();
+  const {
+    widgetTree,
+    eventHandler,
+    disconnected,
+    removeIvyBranding,
+    lazyLoadWholeTree,
+  } = useBackend();
 
   return (
     <ThemeProvider defaultTheme="light" storageKey="ivy-ui-theme">
@@ -50,7 +56,13 @@ function App() {
         <EventHandlerProvider eventHandler={eventHandler}>
           <>
             {!removeIvyBranding && <MadeWithIvy />}
-            {renderWidgetTree(widgetTree || loadingState())}
+            {lazyLoadWholeTree ? (
+              <Suspense fallback={<div>Loading...</div>}>
+                {renderWidgetTree(widgetTree || loadingState(), false)}
+              </Suspense>
+            ) : (
+              renderWidgetTree(widgetTree || loadingState(), true)
+            )}
             <Toaster />
             {disconnected && <ConnectionModal />}
           </>

@@ -49,6 +49,8 @@ public class AppDescriptor : IAppRepositoryNode
 
     public string? DocumentSource { get; set; }
 
+    public bool LazyLoadWholeTree { get; set; } = false;
+
     public ViewBase CreateApp()
     {
         if (ViewFactory != null)

@@ -22,7 +22,10 @@ const flattenChildren = (children: WidgetNode[]): WidgetNode[] => {
   });
 };
 
-export const renderWidgetTree = (node: WidgetNode): React.ReactNode => {
+export const renderWidgetTree = (
+  node: WidgetNode,
+  suspensePerWidget: boolean = true
+): React.ReactNode => {
   const Component = widgetMap[
     node.type as keyof typeof widgetMap
   ] as React.ComponentType<Record<string, unknown>>;
@@ -50,11 +53,11 @@ export const renderWidgetTree = (node: WidgetNode): React.ReactNode => {
       if (child.type === 'Ivy.Slot') {
         const slotName = child.props.name as string;
         acc[slotName] = (child.children || []).map(slotChild =>
-          renderWidgetTree(slotChild)
+          renderWidgetTree(slotChild, suspensePerWidget)
         );
       } else {
         acc.default = acc.default || [];
-        acc.default.push(renderWidgetTree(child));
+        acc.default.push(renderWidgetTree(child, suspensePerWidget));
       }
       return acc;
     },
@@ -67,11 +70,11 @@ export const renderWidgetTree = (node: WidgetNode): React.ReactNode => {
     </Component>
   );
 
-  return isLazyComponent(Component) ? (
-    <Suspense key={node.id}>{content}</Suspense>
-  ) : (
-    content
-  );
+  if (suspensePerWidget && isLazyComponent(Component)) {
+    return <Suspense key={node.id}>{content}</Suspense>;
+  } else {
+    return content;
+  }
 };
 
 export const loadingState = (): WidgetNode => ({

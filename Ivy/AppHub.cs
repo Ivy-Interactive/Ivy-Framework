@@ -173,6 +173,9 @@ public class AppHub(
 
         await base.OnConnectedAsync();
 
+        // TODO: need to check this logic, sus try catch.
+        // lazy load whole tree applied everywhere here, but concept is correct I think
+
         try
         {
             await widgetTree.BuildAsync();
@@ -180,7 +183,8 @@ public class AppHub(
             await Clients.Caller.SendAsync("Refresh", new
             {
                 Widgets = widgetTree.GetWidgets().Serialize(),
-                appDescriptor.RemoveIvyBranding
+                appDescriptor.RemoveIvyBranding,
+                appDescriptor.LazyLoadWholeTree
             });
         }
         catch (Exception e)
@@ -190,7 +194,8 @@ public class AppHub(
             await Clients.Caller.SendAsync("Refresh", new
             {
                 Widgets = tree.GetWidgets().Serialize(),
-                appDescriptor.RemoveIvyBranding
+                appDescriptor.RemoveIvyBranding,
+                appDescriptor.LazyLoadWholeTree
             });
         }
     }
