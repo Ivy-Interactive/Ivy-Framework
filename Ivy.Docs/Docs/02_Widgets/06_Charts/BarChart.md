@@ -105,7 +105,7 @@ here is done for the `Blueberry` column.
 
 ## Negative values
 
-Barchart handles negative and double values. The following shows 
+BarChart handles negative and double values. The following example shows how to work with such data.
 
 ```csharp demo-below
 public class TiobeIndexDemo : ViewBase
