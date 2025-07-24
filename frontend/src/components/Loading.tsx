@@ -169,7 +169,7 @@ export function Loading() {
   }, [isPaused, performStep]); // STEP_INTERVAL_MS is a const, not needed here if defined outside component scope
 
   return (
-    <div className="grid grid-cols-5 gap-0 w-fit">
+    <div className="grid grid-cols-5 gap-0.5 w-fit">
       {current.map((item, index) => {
         const [shapeIndex, colorIndex, rotation] = item;
         const shape = SHAPES[shapeIndex];
