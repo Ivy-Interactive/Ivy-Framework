@@ -25,6 +25,8 @@ public class BarChartBasic : ViewBase
     }
 }    
 ```
+Although it will be shown in this document how to draw bar charts using 
+the `BarChart` type, the recommended way to easily draw Bar Charts is using `ToBarChart` function. 
 
 ## Changing Colors
 
