@@ -105,6 +105,7 @@ here is done for the `Blueberry` column.
 
 
 
+
 <WidgetDocs Type="Ivy.BarChart" ExtensionTypes="Ivy.BarChartExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Charts/BarChart.cs"/> 
 
 ## More Examples
