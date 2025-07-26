@@ -21,7 +21,7 @@ public class FirebaseAuthProvider : IAuthProvider
 {
     private readonly FirebaseAuthClient _authClient;
     private readonly FirebaseAuth _firebaseAuth;
-    private readonly List&lt;AuthOption&gt; _authOptions = new();
+    private readonly List<AuthOption> _authOptions = new();
 
     public FirebaseAuthProvider()
     {
@@ -30,10 +30,10 @@ public class FirebaseAuthProvider : IAuthProvider
             .AddUserSecrets(Assembly.GetEntryAssembly()!)
             .Build();
 
-        var apiKey = configuration.GetValue&lt;string&gt;("FIREBASE_API_KEY") ?? throw new Exception("FIREBASE_API_KEY is required");
-        var authDomain = configuration.GetValue&lt;string&gt;("FIREBASE_AUTH_DOMAIN") ?? throw new Exception("FIREBASE_AUTH_DOMAIN is required");
-        var projectId = configuration.GetValue&lt;string&gt;("FIREBASE_PROJECT_ID") ?? throw new Exception("FIREBASE_PROJECT_ID is required");
-        var serviceAccountKey = configuration.GetValue&lt;string&gt;("FIREBASE_SERVICE_ACCOUNT_KEY");
+        var apiKey = configuration.GetValue<string>("FIREBASE_API_KEY") ?? throw new Exception("FIREBASE_API_KEY is required");
+        var authDomain = configuration.GetValue<string>("FIREBASE_AUTH_DOMAIN") ?? throw new Exception("FIREBASE_AUTH_DOMAIN is required");
+        var projectId = configuration.GetValue<string>("FIREBASE_PROJECT_ID") ?? throw new Exception("FIREBASE_PROJECT_ID is required");
+        var serviceAccountKey = configuration.GetValue<string>("FIREBASE_SERVICE_ACCOUNT_KEY");
 
         // Initialize Firebase client SDK for authentication
         var config = new FirebaseConfig
@@ -60,7 +60,7 @@ public class FirebaseAuthProvider : IAuthProvider
         _firebaseAuth = FirebaseAuth.DefaultInstance;
     }
 
-    public async Task&lt;AuthToken?&gt; LoginAsync(string email, string password)
+    public async Task<AuthToken?> LoginAsync(string email, string password)
     {
         try
         {
@@ -73,35 +73,35 @@ public class FirebaseAuthProvider : IAuthProvider
         }
     }
 
-    public async Task&lt;Uri&gt; GetOAuthUriAsync(AuthOption option, Uri callbackUri)
+    public async Task<Uri> GetOAuthUriAsync(AuthOption option, Uri callbackUri)
     {
         var provider = option.Id switch
         {
-            "google" =&gt; "google.com",
-            "facebook" =&gt; "facebook.com",
-            "twitter" =&gt; "twitter.com",
-            "github" =&gt; "github.com",
-            "microsoft" =&gt; "microsoft.com",
-            "apple" =&gt; "apple.com",
-            _ =&gt; throw new ArgumentException($"Unknown OAuth provider: {option.Id}"),
+            "google" => "google.com",
+            "facebook" => "facebook.com",
+            "twitter" => "twitter.com",
+            "github" => "github.com",
+            "microsoft" => "microsoft.com",
+            "apple" => "apple.com",
+            _ => throw new ArgumentException($"Unknown OAuth provider: {option.Id}"),
         };
 
         // Firebase OAuth flow requires client-side implementation
         // This is a simplified approach - in a real implementation, you'd use the Firebase Auth SDK
         var redirectUri = callbackUri.ToString();
         var authUrl = $"https://{_authClient.Config.AuthDomain}/v1/authorize?provider={provider}&amp;redirect_uri={redirectUri}";
-        
+
         return new Uri(authUrl);
     }
 
-    public async Task&lt;AuthToken?&gt; HandleOAuthCallbackAsync(HttpRequest request)
+    public async Task<AuthToken?> HandleOAuthCallbackAsync(HttpRequest request)
     {
         var code = request.Query["code"];
         var error = request.Query["error"];
         var errorCode = request.Query["error_code"];
         var errorDescription = request.Query["error_description"];
 
-        if (error.Count &gt; 0 || errorCode.Count &gt; 0 || errorDescription.Count &gt; 0)
+        if (error.Count > 0 || errorCode.Count > 0 || errorDescription.Count > 0)
         {
             throw new FirebaseOAuthException(error, errorCode, errorDescription);
         }
@@ -129,9 +129,9 @@ public class FirebaseAuthProvider : IAuthProvider
         }
     }
 
-    public async Task&lt;AuthToken?&gt; RefreshJwtAsync(AuthToken jwt)
+    public async Task<AuthToken?> RefreshJwtAsync(AuthToken jwt)
     {
-        if (jwt.ExpiresAt == null || jwt.RefreshToken == null || DateTimeOffset.UtcNow &lt; jwt.ExpiresAt)
+        if (jwt.ExpiresAt == null || jwt.RefreshToken == null || DateTimeOffset.UtcNow < jwt.ExpiresAt)
         {
             // Refresh not needed (or not possible).
             return jwt;
@@ -153,7 +153,7 @@ public class FirebaseAuthProvider : IAuthProvider
         return null;
     }
 
-    public async Task&lt;bool&gt; ValidateJwtAsync(string jwt)
+    public async Task<bool> ValidateJwtAsync(string jwt)
     {
         try
         {
@@ -166,7 +166,7 @@ public class FirebaseAuthProvider : IAuthProvider
         }
     }
 
-    public async Task&lt;UserInfo?&gt; GetUserInfoAsync(string jwt)
+    public async Task<UserInfo?> GetUserInfoAsync(string jwt)
     {
         try
         {
@@ -233,7 +233,7 @@ public class FirebaseAuthProvider : IAuthProvider
         return this;
     }
 
-    private AuthToken? MakeAuthToken(FirebaseUser? user) =&gt;
+    private AuthToken? MakeAuthToken(FirebaseUser? user) =>
         user?.FirebaseToken != null
             ? new AuthToken(user.FirebaseToken, user.RefreshToken, DateTimeOffset.FromUnixTimeSeconds(user.ExpiresIn))
             : null;
