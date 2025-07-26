@@ -1,40 +1,40 @@
-&lt;Project Sdk="Microsoft.NET.Sdk"&gt;
-  
-  &lt;Import Project="../../Ivy/Directory.Build.props" Condition="Exists('../../Ivy/Directory.Build.props')" /&gt;
-  
-  &lt;PropertyGroup&gt;
-    &lt;TargetFramework&gt;net9.0&lt;/TargetFramework&gt;
-    &lt;ImplicitUsings&gt;enable&lt;/ImplicitUsings&gt;
-    &lt;Nullable&gt;enable&lt;/Nullable&gt;
-    &lt;PackageId&gt;Ivy.Auth.Firebase&lt;/PackageId&gt;
-    &lt;Company&gt;Ivy&lt;/Company&gt;
-    &lt;Description&gt;Build Internal Applications with AI and Pure C#&lt;/Description&gt;
-    &lt;PackageLicenseExpression&gt;Apache-2.0&lt;/PackageLicenseExpression&gt;
-    &lt;PackageProjectUrl&gt;https://github.com/Ivy-Interactive/Ivy&lt;/PackageProjectUrl&gt;
-    &lt;RepositoryUrl&gt;https://github.com/Ivy-Interactive/Ivy&lt;/RepositoryUrl&gt;
-    &lt;RepositoryType&gt;git&lt;/RepositoryType&gt;
-    &lt;PackageReadmeFile&gt;README.md&lt;/PackageReadmeFile&gt;
-  &lt;/PropertyGroup&gt;
+<Project Sdk="Microsoft.NET.Sdk">
 
-  &lt;ItemGroup&gt;
-    &lt;ProjectReference Include="../Ivy/Ivy.csproj" /&gt;
-  &lt;/ItemGroup&gt;
+  <Import Project="../../Ivy/Directory.Build.props" Condition="Exists('../../Ivy/Directory.Build.props')" />
 
-  &lt;PropertyGroup&gt;
-    &lt;CI Condition="'$(GITHUB_ACTIONS)' == 'true'"&gt;true&lt;/CI&gt;
-  &lt;/PropertyGroup&gt;
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <PackageId>Ivy.Auth.Firebase</PackageId>
+    <Company>Ivy</Company>
+    <Description>Build Internal Applications with AI and Pure C#</Description>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/Ivy-Interactive/Ivy</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Ivy-Interactive/Ivy</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
 
-  &lt;PropertyGroup Condition="'$(CI)' == 'true'"&gt;
-    &lt;DebugType&gt;none&lt;/DebugType&gt;
-  &lt;/PropertyGroup&gt;
+  <ItemGroup>
+    <ProjectReference Include="../Ivy/Ivy.csproj" />
+  </ItemGroup>
 
-  &lt;ItemGroup&gt;
-    &lt;None Update="README.md" Pack="true" PackagePath=""/&gt;
-  &lt;/ItemGroup&gt;
+  <PropertyGroup>
+    <CI Condition="'$(GITHUB_ACTIONS)' == 'true'">true</CI>
+  </PropertyGroup>
 
-  &lt;ItemGroup&gt;
-    &lt;PackageReference Include="FirebaseAdmin" Version="3.2.0" /&gt;
-    &lt;PackageReference Include="FirebaseAuthentication.net" Version="4.1.0" /&gt;
-  &lt;/ItemGroup&gt;
+  <PropertyGroup Condition="'$(CI)' == 'true'">
+    <DebugType>none</DebugType>
+  </PropertyGroup>
 
-&lt;/Project&gt;
+  <ItemGroup>
+    <None Update="README.md" Pack="true" PackagePath="" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FirebaseAdmin" Version="3.3.0" />
+    <PackageReference Include="Google.Apis.Auth" Version="1.70.0" />
+  </ItemGroup>
+
+</Project>
