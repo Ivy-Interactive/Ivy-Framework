@@ -179,6 +179,8 @@ export function Loading() {
           <div key={index} className="w-7 h-7">
             {shape && (
               <svg
+                width="30"
+                height="30"
                 viewBox="0 0 28 28"
                 style={{
                   transform: `rotate(${rotation * 90}deg)`,
