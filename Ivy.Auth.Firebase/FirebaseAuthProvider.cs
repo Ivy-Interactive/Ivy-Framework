@@ -1,27 +1,31 @@
 using System.Reflection;
+using System.Net.Http.Json;
+using System.Text.Json.Serialization;
+using FirebaseAdmin;
+using FirebaseAdmin.Auth;
+using Google.Apis.Auth.OAuth2;
+using Ivy.Hooks;
 using Ivy.Shared;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
-using FirebaseAdmin;
-using FirebaseAdmin.Auth;
-using FirebaseAuthentication.net;
-using Google.Apis.Auth.OAuth2;
 
 namespace Ivy.Auth.Firebase;
 
-public class FirebaseOAuthException(string? error, string? errorCode, string? errorDescription)
-    : Exception($"Firebase error: '{error}', code '{errorCode}' - {errorDescription}")
+public class FirebaseOAuthException(string? error, string? errorDescription)
+    : Exception($"Firebase error: '{error}' - {errorDescription}")
 {
     public string? Error { get; } = error;
-    public string? ErrorCode { get; } = errorCode;
     public string? ErrorDescription { get; } = errorDescription;
 }
 
 public class FirebaseAuthProvider : IAuthProvider
 {
-    private readonly FirebaseAuthClient _authClient;
-    private readonly FirebaseAuth _firebaseAuth;
-    private readonly List&lt;AuthOption&gt; _authOptions = new();
+    private readonly HttpClient _httpClient = new();
+    private readonly string _apiKey;
+    private readonly string _authDomain;
+    private readonly string _projectId;
+    private readonly List<AuthOption> _authOptions = new();
+    private FirebaseAuth? _firebaseAuth;
 
     public FirebaseAuthProvider()
     {
@@ -30,135 +34,219 @@ public class FirebaseAuthProvider : IAuthProvider
             .AddUserSecrets(Assembly.GetEntryAssembly()!)
             .Build();
 
-        var apiKey = configuration.GetValue&lt;string&gt;("FIREBASE_API_KEY") ?? throw new Exception("FIREBASE_API_KEY is required");
-        var authDomain = configuration.GetValue&lt;string&gt;("FIREBASE_AUTH_DOMAIN") ?? throw new Exception("FIREBASE_AUTH_DOMAIN is required");
-        var projectId = configuration.GetValue&lt;string&gt;("FIREBASE_PROJECT_ID") ?? throw new Exception("FIREBASE_PROJECT_ID is required");
-        var serviceAccountKey = configuration.GetValue&lt;string&gt;("FIREBASE_SERVICE_ACCOUNT_KEY");
+        _apiKey = configuration.GetValue<string>("FIREBASE_API_KEY") ?? throw new Exception("FIREBASE_API_KEY is required");
+        _authDomain = configuration.GetValue<string>("FIREBASE_AUTH_DOMAIN") ?? throw new Exception("FIREBASE_AUTH_DOMAIN is required");
+        _projectId = configuration.GetValue<string>("FIREBASE_PROJECT_ID") ?? throw new Exception("FIREBASE_PROJECT_ID is required");
+        var serviceAccountKey = configuration.GetValue<string>("FIREBASE_SERVICE_ACCOUNT_KEY");
 
-        // Initialize Firebase client SDK for authentication
-        var config = new FirebaseConfig
+        // Initialize FirebaseAdmin if serviceAccountKey is provided
+        if (!string.IsNullOrEmpty(serviceAccountKey))
         {
-            ApiKey = apiKey,
-            AuthDomain = authDomain,
-            ProjectId = projectId
-        };
-
-        _authClient = new FirebaseAuthClient(config);
-
-        // Initialize Firebase Admin SDK for user management
-        if (FirebaseApp.DefaultInstance == null)
-        {
-            FirebaseApp.Create(new AppOptions()
+            try
             {
-                Credential = !string.IsNullOrEmpty(serviceAccountKey)
-                    ? GoogleCredential.FromJson(serviceAccountKey)
-                    : GoogleCredential.GetApplicationDefault(),
-                ProjectId = projectId
-            });
-        }
+                var credential = GoogleCredential.FromJson(serviceAccountKey);
+                var options = new AppOptions
+                {
+                    Credential = credential,
+                    ProjectId = _projectId
+                };
 
-        _firebaseAuth = FirebaseAuth.DefaultInstance;
+                var app = FirebaseApp.Create(options);
+                _firebaseAuth = FirebaseAuth.GetAuth(app);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Failed to initialize Firebase Admin SDK: {ex.Message}");
+            }
+        }
     }
 
-    public async Task&lt;AuthToken?&gt; LoginAsync(string email, string password)
+    public async Task<AuthToken?> LoginAsync(string email, string password)
     {
+        var requestData = new
+        {
+            email,
+            password,
+            returnSecureToken = true
+        };
+
+        var response = await _httpClient.PostAsJsonAsync(
+            $"https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key={_apiKey}",
+            requestData
+        );
+
+        if (!response.IsSuccessStatusCode)
+        {
+            var error = await response.Content.ReadFromJsonAsync<FirebaseErrorResponse>();
+            throw new FirebaseOAuthException(error?.Error?.Message, error?.Error?.Message);
+        }
+
+        var result = await response.Content.ReadFromJsonAsync<FirebaseSignInResponse>();
+        if (result == null)
+        {
+            return null;
+        }
+
+        var expiresAt = DateTimeOffset.UtcNow.AddSeconds(int.Parse(result.ExpiresIn));
+        return new AuthToken(result.IdToken, result.RefreshToken, expiresAt);
+    }
+
+    public Task<Uri> GetOAuthUriAsync(AuthOption option, WebhookEndpoint callback)
+    {
+        var providerId = option.Id switch
+        {
+            "google" => "google.com",
+            "facebook" => "facebook.com",
+            "twitter" => "twitter.com",
+            "github" => "github.com",
+            "microsoft" => "microsoft.com",
+            "apple" => "apple.com",
+            _ => throw new ArgumentException($"Unknown OAuth provider: {option.Id}")
+        };
+
+        var callbackUrl = callback.GetUri().ToString();
+
+        // Firebase requires setting up OAuth redirect in the Firebase console
+        // We're creating a URL that will direct to Firebase's OAuth flow
+        var authUrl = $"https://{_authDomain}/__/auth/handler?" +
+            $"apiKey={_apiKey}&" +
+            $"providerId={providerId}&" +
+            $"redirectUrl={Uri.EscapeDataString(callbackUrl)}&" +
+            $"state={callback.Id}";
+
+        return Task.FromResult(new Uri(authUrl));
+    }
+
+    public async Task<AuthToken?> HandleOAuthCallbackAsync(HttpRequest request)
+    {
+        var idToken = request.Query["id_token"].ToString();
+        var error = request.Query["error"].ToString();
+        var errorDescription = request.Query["error_description"].ToString();
+
+        if (error.Length > 0 || errorDescription.Length > 0)
+        {
+            throw new FirebaseOAuthException(error, errorDescription);
+        }
+
+        if (string.IsNullOrEmpty(idToken))
+        {
+            throw new Exception("Received no ID token from Firebase.");
+        }
+
         try
         {
-            var user = await _authClient.SignInWithEmailAndPasswordAsync(email, password);
-            return MakeAuthToken(user);
+            // Get the user's profile to verify the token is valid
+            var userInfo = await GetUserInfoAsync(idToken);
+            if (userInfo == null)
+            {
+                throw new Exception("Failed to get user info with provided token");
+            }
+
+            // Exchange the ID token for a full token response with refresh token
+            // This ensures we have proper token management and refresh capabilities
+            var exchangeResponse = await _httpClient.PostAsJsonAsync(
+                $"https://securetoken.googleapis.com/v1/token?key={_apiKey}",
+                new { grant_type = "authorization_code", code = idToken }
+            );
+
+            if (exchangeResponse.IsSuccessStatusCode)
+            {
+                var tokenResult = await exchangeResponse.Content.ReadFromJsonAsync<FirebaseRefreshResponse>();
+                if (tokenResult != null)
+                {
+                    var expiresAt = DateTimeOffset.UtcNow.AddSeconds(int.Parse(tokenResult.ExpiresIn));
+                    return new AuthToken(tokenResult.IdToken, tokenResult.RefreshToken, expiresAt);
+                }
+            }
+
+            // If token exchange isn't supported or fails, return the ID token without refresh capability
+            return new AuthToken(idToken);
         }
-        catch (FirebaseAuthException ex)
+        catch (Exception ex)
         {
-            throw new FirebaseOAuthException(ex.Reason.ToString(), ex.ErrorCode, ex.Message);
+            throw new Exception($"Failed to process OAuth callback: {ex.Message}");
         }
-    }
-
-    public async Task&lt;Uri&gt; GetOAuthUriAsync(AuthOption option, Uri callbackUri)
-    {
-        var provider = option.Id switch
-        {
-            "google" =&gt; "google.com",
-            "facebook" =&gt; "facebook.com",
-            "twitter" =&gt; "twitter.com",
-            "github" =&gt; "github.com",
-            "microsoft" =&gt; "microsoft.com",
-            "apple" =&gt; "apple.com",
-            _ =&gt; throw new ArgumentException($"Unknown OAuth provider: {option.Id}"),
-        };
-
-        // Firebase OAuth flow requires client-side implementation
-        // This is a simplified approach - in a real implementation, you'd use the Firebase Auth SDK
-        var redirectUri = callbackUri.ToString();
-        var authUrl = $"https://{_authClient.Config.AuthDomain}/v1/authorize?provider={provider}&amp;redirect_uri={redirectUri}";
-        
-        return new Uri(authUrl);
-    }
-
-    public async Task&lt;AuthToken?&gt; HandleOAuthCallbackAsync(HttpRequest request)
-    {
-        var code = request.Query["code"];
-        var error = request.Query["error"];
-        var errorCode = request.Query["error_code"];
-        var errorDescription = request.Query["error_description"];
-
-        if (error.Count &gt; 0 || errorCode.Count &gt; 0 || errorDescription.Count &gt; 0)
-        {
-            throw new FirebaseOAuthException(error, errorCode, errorDescription);
-        }
-        else if (code.Count == 0)
-        {
-            throw new Exception("Received no recognized query parameters from Firebase.");
-        }
-
-        // Note: In a real implementation, you'd exchange the code for tokens
-        // This is a simplified version
-        throw new NotImplementedException("OAuth callback handling requires additional Firebase OAuth implementation.");
     }
 
     public async Task LogoutAsync(string jwt)
     {
-        try
+        if (_firebaseAuth != null)
         {
-            // Revoke the refresh token to log out the user
-            var decodedToken = await _firebaseAuth.VerifyIdTokenAsync(jwt);
-            await _firebaseAuth.RevokeRefreshTokensAsync(decodedToken.Uid);
+            try
+            {
+                // Validate the JWT to get the user ID
+                var decodedToken = await _firebaseAuth.VerifyIdTokenAsync(jwt);
+                if (decodedToken != null)
+                {
+                    // Revoke all refresh tokens for the user
+                    await _firebaseAuth.RevokeRefreshTokensAsync(decodedToken.Uid);
+                }
+            }
+            catch (Exception)
+            {
+                // Logout failures are typically not critical
+            }
         }
-        catch (Exception)
-        {
-            // Ignore errors during logout
-        }
+
+        await Task.CompletedTask;
     }
 
-    public async Task&lt;AuthToken?&gt; RefreshJwtAsync(AuthToken jwt)
+    public async Task<AuthToken?> RefreshJwtAsync(AuthToken jwt)
     {
-        if (jwt.ExpiresAt == null || jwt.RefreshToken == null || DateTimeOffset.UtcNow &lt; jwt.ExpiresAt)
+        if (jwt.ExpiresAt == null || jwt.RefreshToken == null || DateTimeOffset.UtcNow < jwt.ExpiresAt)
         {
-            // Refresh not needed (or not possible).
             return jwt;
         }
 
         try
         {
-            var user = await _authClient.GetLinkedAccountsAsync(jwt.RefreshToken);
-            if (user?.FirebaseToken != null)
+            var requestData = new
             {
-                return MakeAuthToken(user);
+                grant_type = "refresh_token",
+                refresh_token = jwt.RefreshToken
+            };
+
+            var response = await _httpClient.PostAsJsonAsync(
+                $"https://securetoken.googleapis.com/v1/token?key={_apiKey}",
+                requestData
+            );
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return null;
             }
+
+            var result = await response.Content.ReadFromJsonAsync<FirebaseRefreshResponse>();
+            if (result == null)
+            {
+                return null;
+            }
+
+            var expiresAt = DateTimeOffset.UtcNow.AddSeconds(int.Parse(result.ExpiresIn));
+            return new AuthToken(result.IdToken, result.RefreshToken, expiresAt);
         }
         catch (Exception)
         {
-            // Refresh failed
+            return null;
         }
-
-        return null;
     }
 
-    public async Task&lt;bool&gt; ValidateJwtAsync(string jwt)
+    public async Task<bool> ValidateJwtAsync(string jwt)
     {
         try
         {
-            var decodedToken = await _firebaseAuth.VerifyIdTokenAsync(jwt);
-            return decodedToken != null;
+            if (_firebaseAuth != null)
+            {
+                // Use FirebaseAuth server-side validation if available
+                var decodedToken = await _firebaseAuth.VerifyIdTokenAsync(jwt);
+                return decodedToken != null;
+            }
+            else
+            {
+                // Fall back to requesting user info which will fail with invalid token
+                var userInfo = await GetUserInfoAsync(jwt);
+                return userInfo != null;
+            }
         }
         catch (Exception)
         {
@@ -166,19 +254,50 @@ public class FirebaseAuthProvider : IAuthProvider
         }
     }
 
-    public async Task&lt;UserInfo?&gt; GetUserInfoAsync(string jwt)
+    public async Task<UserInfo?> GetUserInfoAsync(string jwt)
     {
         try
         {
-            var decodedToken = await _firebaseAuth.VerifyIdTokenAsync(jwt);
-            var userRecord = await _firebaseAuth.GetUserAsync(decodedToken.Uid);
+            if (_firebaseAuth != null)
+            {
+                // Server-side verification with FirebaseAdmin SDK
+                var decodedToken = await _firebaseAuth.VerifyIdTokenAsync(jwt);
+                var firebaseUser = await _firebaseAuth.GetUserAsync(decodedToken.Uid);
 
-            return new UserInfo(
-                userRecord.Uid,
-                userRecord.Email,
-                userRecord.DisplayName ?? string.Empty,
-                userRecord.PhotoUrl
-            );
+                return new UserInfo(
+                    firebaseUser.Uid,
+                    firebaseUser.Email ?? string.Empty,
+                    firebaseUser.DisplayName,
+                    firebaseUser.PhotoUrl
+                );
+            }
+            else
+            {
+                // Client-side verification with Firebase REST API
+                var response = await _httpClient.PostAsJsonAsync(
+                    $"https://identitytoolkit.googleapis.com/v1/accounts:lookup?key={_apiKey}",
+                    new { idToken = jwt }
+                );
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    return null;
+                }
+
+                var result = await response.Content.ReadFromJsonAsync<FirebaseUserLookupResponse>();
+                if (result?.Users == null || result.Users.Length == 0)
+                {
+                    return null;
+                }
+
+                var user = result.Users[0];
+                return new UserInfo(
+                    user.LocalId,
+                    user.Email,
+                    user.DisplayName,
+                    user.PhotoUrl
+                );
+            }
         }
         catch (Exception)
         {
@@ -232,9 +351,72 @@ public class FirebaseAuthProvider : IAuthProvider
         _authOptions.Add(new AuthOption(AuthFlow.OAuth, "Apple", "apple", Icons.Apple));
         return this;
     }
+}
 
-    private AuthToken? MakeAuthToken(FirebaseUser? user) =&gt;
-        user?.FirebaseToken != null
-            ? new AuthToken(user.FirebaseToken, user.RefreshToken, DateTimeOffset.FromUnixTimeSeconds(user.ExpiresIn))
-            : null;
+// Response models for Firebase API responses
+
+public class FirebaseErrorResponse
+{
+    [JsonPropertyName("error")]
+    public FirebaseError? Error { get; set; }
+
+    public class FirebaseError
+    {
+        [JsonPropertyName("code")]
+        public int Code { get; set; }
+
+        [JsonPropertyName("message")]
+        public string? Message { get; set; }
+    }
+}
+
+public class FirebaseSignInResponse
+{
+    [JsonPropertyName("idToken")]
+    public string IdToken { get; set; } = "";
+
+    [JsonPropertyName("email")]
+    public string Email { get; set; } = "";
+
+    [JsonPropertyName("refreshToken")]
+    public string RefreshToken { get; set; } = "";
+
+    [JsonPropertyName("expiresIn")]
+    public string ExpiresIn { get; set; } = "";
+
+    [JsonPropertyName("localId")]
+    public string LocalId { get; set; } = "";
+}
+
+public class FirebaseRefreshResponse
+{
+    [JsonPropertyName("id_token")]
+    public string IdToken { get; set; } = "";
+
+    [JsonPropertyName("refresh_token")]
+    public string RefreshToken { get; set; } = "";
+
+    [JsonPropertyName("expires_in")]
+    public string ExpiresIn { get; set; } = "";
+}
+
+public class FirebaseUserLookupResponse
+{
+    [JsonPropertyName("users")]
+    public FirebaseUser[]? Users { get; set; }
+
+    public class FirebaseUser
+    {
+        [JsonPropertyName("localId")]
+        public string LocalId { get; set; } = "";
+
+        [JsonPropertyName("email")]
+        public string Email { get; set; } = "";
+
+        [JsonPropertyName("displayName")]
+        public string? DisplayName { get; set; }
+
+        [JsonPropertyName("photoUrl")]
+        public string? PhotoUrl { get; set; }
+    }
 }
