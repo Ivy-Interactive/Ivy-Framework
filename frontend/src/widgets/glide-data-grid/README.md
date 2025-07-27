@@ -2,6 +2,10 @@
 
 A high-performance, feature-rich data grid component built on top of `@glideapps/glide-data-grid` for the Ivy Framework.
 
+## Non-Monolithic Architecture
+
+This widget follows a **non-monolithic approach** with clear separation of concerns, making it maintainable, testable, and reusable. Each piece has a focused responsibility and can be composed together or used independently.
+
 ## Features
 
 - ✅ **Virtual Scrolling** - Handle thousands of rows efficiently
@@ -116,36 +120,49 @@ function MyAdvancedGrid() {
 | `onCellEdited` | `(cell: Item, newValue: EditableGridCell)` | Fired when a cell is edited |
 | `onColumnResize` | `(column: GridColumn, newSize: number)` | Fired when a column is resized |
 
-## Architecture
+## Folder Structure
 
-The component follows a clean, modular architecture with separation of concerns:
+The widget is organized into focused, single-purpose modules following the non-monolithic principle:
 
-### **Hooks** (`hooks/`)
-- **`useDataTableFetch`** - Focused data fetching and connection management
-- **`useGlideColumns`** - Column configuration and memoization
-- **`useGridSelection`** - Selection state management
-- **`useColumnResizing`** - Column width management
-- **`useCellFormatting`** - Cell content formatting
+```
+glide-data-grid/
+├── GlideDataGridWidget.tsx    # Main widget component
+├── index.ts                   # Public exports
+├── README.md                  # This documentation
+├── components/                # UI Components (focused, reusable)
+│   ├── ConnectionAlert.tsx    # Connection error display
+│   ├── ErrorAlert.tsx         # General error display
+│   ├── GridHeader.tsx         # Grid title and controls
+│   ├── LoadingSpinner.tsx     # Loading state indicator
+│   └── StatusBadge.tsx        # Connection status display
+├── hooks/                     # Business Logic Hooks (single responsibility)
+│   ├── useCellFormatting.ts   # Cell content formatting logic
+│   ├── useColumnResizing.ts   # Column width management
+│   ├── useDataTableFetch.ts   # Data fetching and connection management
+│   └── useGridSelection.ts    # Selection state management
+├── styles/                    # Styling (centralized, themeable)
+│   ├── classNames.ts          # CSS class definitions
+│   ├── glideTheme.ts          # Grid theme configuration
+│   └── index.ts               # Style exports
+├── types/                     # Type Definitions (strongly typed)
+│   └── index.ts               # TypeScript interfaces and types
+└── utils/                     # Pure Functions (testable, reusable)
+    ├── arrowDataTransforms.ts # Apache Arrow data conversion
+    ├── cellTypeMapping.ts     # Cell type detection and formatting
+    ├── glideGridColumns.ts    # Column configuration helpers
+    └── gridDimensions.ts      # Size calculation utilities
+```
 
-### **Components** (`components/`)
-- **`GridHeader`** - Header with title, description, status, and refresh button
-- **`StatusBadge`** - Connection and data status indicator
-- **`LoadingSpinner`** - Loading state display
-- **`ErrorAlert`** - Error message display
-- **`ConnectionAlert`** - Connection configuration error display
+## Architecture Principles
 
-### **Utils** (`utils/`)
-- **`arrowDataTransforms`** - Apache Arrow to grid data conversion
-- **`cellTypeMapping`** - Cell type detection and formatting
-- **`glideGridColumns`** - Glide column configuration
-- **`gridDimensions`** - Grid size calculation helpers
+This **non-monolithic architecture** provides:
 
-### **Styles** (`styles/`)
-- **`glideTheme`** - Predefined themes matching Ivy design system
-- **`classNames`** - Centralized className definitions
-
-### **Types** (`types/`)
-- Complete TypeScript type definitions for all interfaces and props
+1. **Single Responsibility**: Each file/module has one clear purpose
+2. **Composability**: Components and hooks can be mixed and matched
+3. **Testability**: Pure functions and focused hooks are easy to test
+4. **Maintainability**: Changes are isolated to specific concerns
+5. **Reusability**: Individual pieces can be used in other contexts
+6. **Type Safety**: Complete TypeScript coverage across all modules
 
 ## Performance
 
