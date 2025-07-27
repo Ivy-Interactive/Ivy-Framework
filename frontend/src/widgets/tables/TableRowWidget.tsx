@@ -12,7 +12,7 @@ export const TableRowWidget: React.FC<TableRowWidgetProps> = ({
   children,
   isHeader = false,
 }) => (
-  <TableRow className={`${isHeader ? 'font-medium bg-white' : ''}`}>
+  <TableRow className={`${isHeader ? 'font-medium bg-background' : ''}`}>
     {children}
   </TableRow>
 );

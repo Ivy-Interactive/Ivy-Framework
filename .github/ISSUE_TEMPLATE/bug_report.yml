@@ -1,0 +1,78 @@
+name: Bug Report
+description: Report a bug to help us improve Ivy Framework
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report!
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Clear description of the problem
+      placeholder: Describe what went wrong...
+
+  - type: textarea
+    id: steps-to-reproduce
+    attributes:
+      label: Steps to Reproduce
+      description: Detailed steps to recreate the issue
+      placeholder: |
+        1. Go to '...'
+        2. Click on '...'
+        3. Scroll down to '...'
+        4. See error
+
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected Behavior
+      description: What you expected to happen
+      placeholder: Describe what you expected to happen...
+
+  - type: textarea
+    id: actual-behavior
+    attributes:
+      label: Actual Behavior
+      description: What actually happened
+      placeholder: Describe what actually happened...
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: System information
+      placeholder: |
+        - OS: [e.g. Windows 11, macOS 14, Ubuntu 22.04]
+        - .NET Version: [e.g. 9.0.0]
+        - Node.js Version: [e.g. 22.12.0]
+        - Browser: [e.g. Chrome 131, Firefox 132]
+        - Ivy Framework Version: [e.g. 1.0.0]
+
+  - type: textarea
+    id: code-samples
+    attributes:
+      label: Code Samples
+      description: Minimal code to reproduce the issue
+      placeholder: |
+        ```csharp
+        // Your code here
+        ```
+      render: csharp
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots
+      description: If applicable, add screenshots to help explain your problem
+      placeholder: Drag and drop screenshots here or click to upload
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Add any other context about the problem here
+      placeholder: Any additional information that might be helpful...

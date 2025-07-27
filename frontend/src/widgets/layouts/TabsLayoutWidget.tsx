@@ -1,196 +1,34 @@
 import * as React from 'react';
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Icon from '@/components/Icon';
-import { RotateCw, X, ChevronDown } from 'lucide-react';
-import { useEventHandler } from '@/components/EventHandlerContext';
-import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
-import { getHeight, getPadding, getWidth } from '@/lib/styles';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
-  DropdownMenuTrigger,
   DropdownMenuContent,
+  DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { cn } from '@/lib/utils';
+import { getPadding } from '@/lib/styles';
 import {
   DndContext,
   closestCenter,
-  DragOverlay,
+  KeyboardSensor,
   PointerSensor,
   useSensor,
   useSensors,
 } from '@dnd-kit/core';
 import {
-  SortableContext,
-  useSortable,
   arrayMove,
-  verticalListSortingStrategy,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Button } from '@/components/ui/button';
-
-// Constants for width calculations
-const SIDEBAR_EXPANDED_WIDTH = 256; // 16rem
-const SIDEBAR_ICON_MODE_WIDTH = 64; // 3rem (48px) + 1rem (16px) padding
-const TABS_HORIZONTAL_PADDING = 144; // Container padding (48px each side) + dropdown button space (48px)
-const TABS_EXTRA_PADDING = 96; // Space reserved for dropdown button and other UI elements
-
-// Hook to calculate available width considering sidebar state
-function useAvailableWidth() {
-  const [availableWidth, setAvailableWidth] = React.useState<number>(0);
-
-  React.useLayoutEffect(() => {
-    const calculateAvailableWidth = () => {
-      const viewportWidth = window.innerWidth;
-
-      // Get the sidebar element to check its state
-      const sidebarWrapper = document
-        .querySelector('[data-sidebar="sidebar"]')
-        ?.closest('.group\\/sidebar-wrapper');
-      if (!sidebarWrapper) {
-        setAvailableWidth(viewportWidth);
-        return;
-      }
-
-      // Check if sidebar is collapsed (offcanvas mode)
-      const isCollapsed = sidebarWrapper.querySelector(
-        '[data-collapsible="offcanvas"]'
-      );
-      if (isCollapsed) {
-        setAvailableWidth(viewportWidth);
-        return;
-      }
-
-      // Check if sidebar is in icon mode
-      const isIconMode = sidebarWrapper.querySelector(
-        '[data-collapsible="icon"]'
-      );
-      if (isIconMode) {
-        // Icon mode: subtract icon width + padding
-        setAvailableWidth(viewportWidth - SIDEBAR_ICON_MODE_WIDTH);
-        return;
-      }
-
-      // Expanded mode: subtract full sidebar width
-      setAvailableWidth(viewportWidth - SIDEBAR_EXPANDED_WIDTH);
-    };
-
-    // Calculate initially
-    calculateAvailableWidth();
-
-    // Recalculate on window resize and sidebar state changes
-    const handleResize = () => calculateAvailableWidth();
-    const handleSidebarToggle = () => {
-      // Use setTimeout to ensure DOM has updated
-      setTimeout(calculateAvailableWidth, 100);
-    };
-
-    window.addEventListener('resize', handleResize);
-    window.addEventListener('sidemenu-toggle', handleSidebarToggle);
-    window.addEventListener('sidebar-toggle', handleSidebarToggle);
-    window.addEventListener('navigation-toggle', handleSidebarToggle);
-
-    // Also listen for CSS transitions to catch sidebar state changes
-    const sidebarElements = document.querySelectorAll(
-      '[data-sidebar="sidebar"]'
-    );
-    sidebarElements.forEach(element => {
-      element.addEventListener('transitionend', handleSidebarToggle);
-    });
-
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      window.removeEventListener('sidemenu-toggle', handleSidebarToggle);
-      window.removeEventListener('sidebar-toggle', handleSidebarToggle);
-      window.removeEventListener('navigation-toggle', handleSidebarToggle);
-      sidebarElements.forEach(element => {
-        element.removeEventListener('transitionend', handleSidebarToggle);
-      });
-    };
-  }, []);
-
-  return availableWidth;
-}
-
-// Custom hook to handle tabs overflow calculation
-function useTabsOverflow(
-  tabsListRef: React.RefObject<HTMLDivElement | null>,
-  containerRef: React.RefObject<HTMLDivElement | null>,
-  availableWidth: number,
-  tabOrder: string[]
-) {
-  const [tabsOverflowing, setTabsOverflowing] = React.useState(false);
-  const availableWidthRef = React.useRef(availableWidth);
-
-  // Keep ref in sync with availableWidth
-  React.useEffect(() => {
-    availableWidthRef.current = availableWidth;
-  }, [availableWidth]);
-
-  // Calculate overflow function
-  const calculateOverflow = React.useCallback(() => {
-    if (tabsListRef.current) {
-      const effectiveWidth =
-        availableWidthRef.current > 0
-          ? availableWidthRef.current - TABS_HORIZONTAL_PADDING
-          : containerRef.current?.getBoundingClientRect().width || 0;
-      const tabsListWidth = tabsListRef.current.getBoundingClientRect().width;
-      setTabsOverflowing(tabsListWidth + TABS_EXTRA_PADDING > effectiveWidth);
-    }
-  }, [tabsListRef, containerRef]);
-
-  // Calculate overflow with delay for DOM updates
-  const calculateOverflowWithDelay = React.useCallback(
-    (delay: number = 0) => {
-      if (delay > 0) {
-        setTimeout(calculateOverflow, delay);
-      } else {
-        calculateOverflow();
-      }
-    },
-    [calculateOverflow]
-  );
-
-  // Handle overflow detection on tab order or available width changes
-  React.useLayoutEffect(() => {
-    calculateOverflow();
-  }, [tabOrder, availableWidth, calculateOverflow]);
-
-  // Recalculate overflow on window resize and sidemenu toggle
-  React.useEffect(() => {
-    const recalculateOverflow = () => {
-      calculateOverflowWithDelay(100);
-    };
-
-    // Listen for window resize
-    window.addEventListener('resize', recalculateOverflow);
-
-    // Listen for sidemenu toggle events (common event names)
-    window.addEventListener('sidemenu-toggle', recalculateOverflow);
-    window.addEventListener('sidebar-toggle', recalculateOverflow);
-    window.addEventListener('navigation-toggle', recalculateOverflow);
-
-    return () => {
-      window.removeEventListener('resize', recalculateOverflow);
-      window.removeEventListener('sidemenu-toggle', recalculateOverflow);
-      window.removeEventListener('sidebar-toggle', recalculateOverflow);
-      window.removeEventListener('navigation-toggle', recalculateOverflow);
-    };
-  }, [calculateOverflowWithDelay]);
-
-  // Recalculate overflow when component mounts and after DOM updates
-  React.useLayoutEffect(() => {
-    // Initial calculation
-    calculateOverflow();
-
-    // Recalculate after a short delay to ensure DOM is fully rendered
-    const timeoutId = setTimeout(calculateOverflow, 50);
-
-    return () => clearTimeout(timeoutId);
-  }, [calculateOverflow]);
-
-  return { tabsOverflowing };
-}
+import { ChevronDown, X } from 'lucide-react';
+import { useEventHandler } from '@/components/EventHandlerContext';
+import { Badge } from '@/components/ui/badge';
+import { RotateCw } from 'lucide-react';
+import { useDebounce } from '@/hooks/use-debounce';
 
 interface TabWidgetProps {
   children: React.ReactNode[];
@@ -213,8 +51,6 @@ interface TabsLayoutWidgetProps {
   selectedIndex: number;
   children: React.ReactElement<TabWidgetProps>[];
   events: string[];
-  width?: string;
-  height?: string;
   padding?: string;
 }
 
@@ -309,7 +145,7 @@ function SortableDropdownMenuItem({
       <span className="truncate text-left">{children}</span>
       <button
         type="button"
-        className="ml-auto opacity-60 p-1 hover:opacity-100 invisible group-hover:visible"
+        className="ml-auto opacity-60 p-1 hover:opacity-100 invisible group-hover:visible cursor-pointer"
         onClick={e => {
           e.stopPropagation();
           window.dispatchEvent(
@@ -329,10 +165,8 @@ export const TabsLayoutWidget = ({
   events,
   selectedIndex,
   removeParentPadding,
-  width,
-  height,
+  variant = 'Tabs',
   padding,
-  variant,
 }: TabsLayoutWidgetProps) => {
   const tabWidgets = React.Children.toArray(children).filter(
     child =>
@@ -341,28 +175,12 @@ export const TabsLayoutWidget = ({
         'TabWidget'
   );
 
-  const eventHandler = useEventHandler();
-  const containerRef = React.useRef<HTMLDivElement>(null);
-  const tabsListRef = React.useRef<HTMLDivElement>(null);
+  // Shared state and logic
   const [dropdownOpen, setDropdownOpen] = React.useState(false);
-  const availableWidth = useAvailableWidth();
-  const availableWidthRef = React.useRef(availableWidth);
-
-  // Keep ref in sync with availableWidth
-  React.useEffect(() => {
-    availableWidthRef.current = availableWidth;
-  }, [availableWidth]);
-
-  // Tab management
-  const tabIds = React.useMemo(
-    () =>
-      tabWidgets.map(
-        tab => (tab as React.ReactElement<TabWidgetProps>).props.id
-      ),
-    [tabWidgets]
+  const [isOverflowing, setIsOverflowing] = React.useState(false);
+  const [tabOrder, setTabOrder] = React.useState<string[]>(() =>
+    tabWidgets.map(tab => (tab as React.ReactElement<TabWidgetProps>).props.id)
   );
-  const prevTabIdsRef = React.useRef<string[]>(tabIds);
-  const [tabOrder, setTabOrder] = React.useState<string[]>(() => tabIds);
   const [activeTabId, setActiveTabId] = React.useState<string | null>(
     () => tabOrder[selectedIndex] ?? tabOrder[0] ?? null
   );
@@ -370,6 +188,64 @@ export const TabsLayoutWidget = ({
     () => new Set()
   );
   const activeTabIdRef = React.useRef<string | null>(activeTabId);
+  const eventHandler = useEventHandler();
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  const tabsListRef = React.useRef<HTMLDivElement>(null);
+
+  // Restore animated underline logic for 'Content' variant
+  const [activeIndex, setActiveIndex] = React.useState(selectedIndex ?? 0);
+  const [activeStyle, setActiveStyle] = React.useState({
+    left: '0px',
+    width: '0px',
+  });
+  const tabRefs = React.useRef<(HTMLDivElement | null)[]>([]);
+
+  React.useEffect(() => {
+    if (variant !== 'Content') return;
+    const activeElement = tabRefs.current[activeIndex];
+    if (activeElement) {
+      const { offsetLeft, offsetWidth } = activeElement;
+      setActiveStyle({
+        left: `${offsetLeft}px`,
+        width: `${offsetWidth}px`,
+      });
+    }
+  }, [activeIndex, tabOrder, tabWidgets, variant]);
+
+  React.useEffect(() => {
+    if (variant !== 'Content') return;
+    requestAnimationFrame(() => {
+      const firstElement = tabRefs.current[0];
+      if (firstElement) {
+        const { offsetLeft, offsetWidth } = firstElement;
+        setActiveStyle({
+          left: `${offsetLeft}px`,
+          width: `${offsetWidth}px`,
+        });
+      }
+    });
+  }, [variant]);
+
+  const checkOverflow = React.useCallback(() => {
+    const tabsList = tabsListRef.current;
+    if (tabsList) {
+      setIsOverflowing(tabsList.scrollWidth > tabsList.clientWidth + 1); // +1 for rounding
+    }
+  }, []);
+
+  const debouncedCheckOverflow = useDebounce(checkOverflow, 100);
+
+  React.useEffect(() => {
+    checkOverflow();
+    window.addEventListener('resize', debouncedCheckOverflow);
+    return () => {
+      window.removeEventListener('resize', debouncedCheckOverflow);
+    };
+  }, [checkOverflow, debouncedCheckOverflow]);
+
+  React.useEffect(() => {
+    checkOverflow();
+  }, [tabOrder.length, checkOverflow]);
 
   // Keep ref in sync with state
   React.useEffect(() => {
@@ -378,22 +254,25 @@ export const TabsLayoutWidget = ({
 
   // Sync tab order on add/remove
   React.useEffect(() => {
-    const prev = prevTabIdsRef.current;
-    const added = tabIds.filter(id => !prev.includes(id));
-    const removed = prev.filter(id => !tabIds.includes(id));
+    const prev = tabOrder;
+    const added = tabWidgets
+      .map(tab => (tab as React.ReactElement<TabWidgetProps>).props.id)
+      .filter(id => !prev.includes(id));
+    const removed = prev.filter(
+      id =>
+        !tabWidgets
+          .map(tab => (tab as React.ReactElement<TabWidgetProps>).props.id)
+          .includes(id)
+    );
 
     if (added.length || removed.length) {
-      setTabOrder(tabIds);
-      prevTabIdsRef.current = tabIds;
+      setTabOrder(
+        tabWidgets.map(
+          tab => (tab as React.ReactElement<TabWidgetProps>).props.id
+        )
+      );
     }
-  }, [tabIds]);
-
-  const { tabsOverflowing } = useTabsOverflow(
-    tabsListRef,
-    containerRef,
-    availableWidth,
-    tabOrder
-  );
+  }, [tabWidgets]);
 
   // Load active tab
   React.useEffect(() => {
@@ -487,7 +366,10 @@ export const TabsLayoutWidget = ({
   }, [tabOrder, eventHandler, id]);
 
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 8 } })
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
   );
   const showClose = events.includes('OnClose');
   const showRefresh = events.includes('OnRefresh');
@@ -524,7 +406,7 @@ export const TabsLayoutWidget = ({
                 e.stopPropagation();
                 eventHandler('OnRefresh', id, [tabOrder.indexOf(tabId)]);
               }}
-              className="opacity-60 p-1 rounded-full hover:bg-gray-200 hover:opacity-100 transition-colors"
+              className="opacity-60 p-1 rounded-full hover:bg-accent hover:opacity-100 transition-colors cursor-pointer"
             >
               <RotateCw className="w-3 h-3" />
             </a>
@@ -535,7 +417,7 @@ export const TabsLayoutWidget = ({
                 e.stopPropagation();
                 eventHandler('OnClose', id, [tabOrder.indexOf(tabId)]);
               }}
-              className="opacity-60 p-1 rounded-full hover:bg-gray-200 hover:opacity-100 transition-colors"
+              className="opacity-60 p-1 rounded-full hover:bg-accent hover:opacity-100 transition-colors cursor-pointer"
             >
               <X className="w-3 h-3" />
             </a>
@@ -545,10 +427,93 @@ export const TabsLayoutWidget = ({
     );
   };
 
+  // Custom tab bar for 'Content' variant
+  if (variant === 'Content') {
+    // Modern, animated, borderless tab bar implementation
+    return (
+      <div
+        className={cn(
+          'flex flex-col h-full',
+          removeParentPadding && 'remove-parent-padding'
+        )}
+      >
+        <div className="relative">
+          {/* Hover Highlight */}
+          <div
+            className="absolute h-[30px] transition-all duration-300 ease-out bg-[#0e0f1114] dark:bg-[#ffffff1a] rounded-[6px] flex items-center"
+            style={{
+              opacity: activeIndex !== null ? 1 : 0,
+              pointerEvents: 'none',
+            }}
+          />
+          {/* Active Indicator */}
+          <div
+            className="absolute bottom-[-6px] h-[2px] bg-[#0e0f11] dark:bg-white transition-all duration-300 ease-out"
+            style={activeStyle}
+          />
+          {/* Tabs */}
+          <div className="relative flex space-x-[6px] items-center">
+            {orderedTabWidgets.map((tabWidget, index) => {
+              if (!React.isValidElement(tabWidget)) return null;
+              const props = tabWidget.props as Partial<TabWidgetProps>;
+              if (!props.id) return null;
+              const { title, id } = props;
+              return (
+                <div
+                  key={id}
+                  ref={el => {
+                    tabRefs.current[index] = el;
+                  }}
+                  className={cn(
+                    'px-3 py-2 cursor-pointer transition-colors duration-300 h-[30px]',
+                    index === activeIndex
+                      ? 'text-[#0e0e10] dark:text-white'
+                      : 'text-[#0e0f1199] dark:text-[#ffffff99]'
+                  )}
+                  onClick={() => {
+                    setActiveIndex(index);
+                    setActiveTabId(tabOrder[index]);
+                    eventHandler('OnSelect', id, [index]);
+                  }}
+                >
+                  <div className="text-sm font-medium leading-5 whitespace-nowrap flex items-center justify-center h-full">
+                    {title}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+        <div className="flex-1 overflow-hidden">
+          {orderedTabWidgets.map(tabWidget => {
+            if (!React.isValidElement(tabWidget)) return null;
+            const props = tabWidget.props as Partial<TabWidgetProps>;
+            if (!props.id) return null;
+            const { id } = props;
+            if (!loadedTabs.has(id)) return null;
+            const paddingStyle = getPadding(padding);
+            return (
+              <div
+                key={id}
+                className={cn(
+                  'h-full overflow-auto',
+                  activeTabId === id ? 'block' : 'hidden',
+                  'border-none'
+                )}
+                style={paddingStyle}
+              >
+                {tabWidget}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <Tabs
       value={activeTabId ?? undefined}
-      style={{ ...getWidth(width), ...getHeight(height) }}
       className={cn(
         removeParentPadding && 'remove-parent-padding',
         'flex flex-col h-full'
@@ -556,60 +521,56 @@ export const TabsLayoutWidget = ({
     >
       <div className="flex-shrink-0">
         <div
-          className="relative pl-12 pr-12 before:absolute before:inset-x-0 before:bottom-0 before:h-px before:bg-border before:z-0"
+          className="relative pl-12 pr-12 before:absolute before:inset-x-0 before:bottom-0 before:h-px before:bg-border before:z-0 overflow-hidden"
           ref={containerRef}
-          style={{ width: availableWidth > 0 ? `${availableWidth}px` : '100%' }}
         >
-          <ScrollArea className="w-full">
-            <DndContext
-              collisionDetection={closestCenter}
-              onDragEnd={handleDragEnd}
-              sensors={sensors}
-            >
-              <SortableContext items={tabOrder}>
-                <TabsList
-                  ref={tabsListRef}
-                  className="relative h-auto w-max min-w-full gap-0.5 mt-3 bg-transparent p-0 flex justify-start"
-                >
-                  {orderedTabWidgets.map(tabWidget => {
-                    if (!React.isValidElement(tabWidget)) return null;
-                    const props = tabWidget.props as Partial<TabWidgetProps> & {
-                      key?: string;
-                    };
-                    if (!props.id) return null;
-                    const { id, key } = props;
+          <DndContext
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+            sensors={sensors}
+          >
+            <SortableContext items={tabOrder}>
+              <TabsList
+                ref={tabsListRef}
+                className="relative h-auto w-full gap-0.5 mt-3 bg-transparent p-0 flex justify-start flex-nowrap overflow-x-auto scrollbar-hide"
+                style={{
+                  msOverflowStyle: 'none',
+                  scrollbarWidth: 'none',
+                }}
+              >
+                {orderedTabWidgets.map(tabWidget => {
+                  if (!React.isValidElement(tabWidget)) return null;
+                  const props = tabWidget.props as Partial<TabWidgetProps>;
+                  if (!props.id) return null;
+                  const { id } = props;
 
-                    return (
-                      <SortableTabTrigger
-                        key={key ?? id}
-                        id={id}
-                        value={id}
-                        onClick={() => handleTabSelect(id)}
-                        onMouseDown={(e: React.MouseEvent) =>
-                          handleMouseDown(e, tabOrder.indexOf(id))
-                        }
-                        className={cn(
-                          'group overflow-hidden rounded-b-none py-2 data-[state=active]:z-10 data-[state=active]:shadow-none border-x border-t border-border',
-                          variant === 'Tabs' &&
-                            'data-[state=active]:bg-background',
-                          variant === 'Content' &&
-                            'border-b-2 border-b-transparent data-[state=active]:border-b-primary data-[state=active]:bg-background/50'
-                        )}
-                      >
-                        {renderTabContent(tabWidget)}
-                      </SortableTabTrigger>
-                    );
-                  })}
-                </TabsList>
-              </SortableContext>
-            </DndContext>
-            <ScrollBar
-              orientation="horizontal"
-              className="invisible-scrollbar"
-            />
-          </ScrollArea>
+                  return (
+                    <SortableTabTrigger
+                      key={id}
+                      id={id}
+                      value={id}
+                      onClick={() => handleTabSelect(id)}
+                      onMouseDown={(e: React.MouseEvent) =>
+                        handleMouseDown(e, tabOrder.indexOf(id))
+                      }
+                      className={cn(
+                        'group overflow-hidden rounded-b-none py-2 data-[state=active]:z-10 data-[state=active]:shadow-none border-x border-t border-border flex-shrink-0',
+                        variant === 'Tabs' &&
+                          'data-[state=active]:bg-background',
+                        (variant as string) === 'Content' &&
+                          'border-b-2 border-b-transparent data-[state=active]:border-b-primary data-[state=active]:bg-background/50'
+                      )}
+                    >
+                      {renderTabContent(tabWidget)}
+                    </SortableTabTrigger>
+                  );
+                })}
+              </TabsList>
+            </SortableContext>
+          </DndContext>
 
-          {tabsOverflowing && (
+          {/* Only render dropdown if overflowing */}
+          {isOverflowing && (
             <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
               <DropdownMenuTrigger asChild>
                 <Button
@@ -627,10 +588,7 @@ export const TabsLayoutWidget = ({
                   onDragEnd={handleDragEnd}
                   sensors={sensors}
                 >
-                  <SortableContext
-                    items={tabOrder}
-                    strategy={verticalListSortingStrategy}
-                  >
+                  <SortableContext items={tabOrder}>
                     <div className="flex flex-col w-48">
                       {orderedTabWidgets.map(tabWidget => {
                         if (!React.isValidElement(tabWidget)) return null;
@@ -654,24 +612,6 @@ export const TabsLayoutWidget = ({
                       })}
                     </div>
                   </SortableContext>
-                  <DragOverlay>
-                    {(() => {
-                      const active = orderedTabWidgets.find(
-                        tab =>
-                          (tab as React.ReactElement<TabWidgetProps>)?.props
-                            .id === activeTabId
-                      );
-                      if (active && React.isValidElement(active)) {
-                        const { title } = active.props as TabWidgetProps;
-                        return (
-                          <div className="px-3 py-2 bg-muted rounded shadow text-left cursor-pointer select-none">
-                            {title}
-                          </div>
-                        );
-                      }
-                      return null;
-                    })()}
-                  </DragOverlay>
                 </DndContext>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -682,22 +622,23 @@ export const TabsLayoutWidget = ({
       <div className="flex-1 overflow-hidden">
         {orderedTabWidgets.map(tabWidget => {
           if (!React.isValidElement(tabWidget)) return null;
-          const props = tabWidget.props as Partial<TabWidgetProps> & {
-            key?: string;
-          };
+          const props = tabWidget.props as Partial<TabWidgetProps>;
           if (!props.id) return null;
-          const { id, key } = props;
+          const { id } = props;
 
           if (!loadedTabs.has(id)) return null;
 
+          const paddingStyle = getPadding(padding);
+
           return (
             <div
-              key={key ?? id}
+              key={id}
               className={cn(
                 'h-full overflow-auto',
-                activeTabId === id ? 'block' : 'hidden'
+                activeTabId === id ? 'block' : 'hidden',
+                (variant as string) === 'Content' && 'border-none'
               )}
-              style={getPadding(padding)}
+              style={paddingStyle}
             >
               {tabWidget}
             </div>

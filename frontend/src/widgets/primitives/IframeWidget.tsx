@@ -21,6 +21,7 @@ export const IframeWidget: React.FC<IframeWidgetProps> = ({
   const styles: React.CSSProperties = {
     ...getWidth(width),
     ...getHeight(height),
+    maxWidth: '100%',
   };
 
   useEffect(() => {

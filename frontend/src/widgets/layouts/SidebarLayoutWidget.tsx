@@ -96,7 +96,6 @@ const flattenMenuItems = (
   return flat;
 };
 
-// Separate component for collapsible menu items to properly manage state
 const CollapsibleMenuItem: React.FC<{
   item: MenuItem;
   eventHandler: WidgetEventHandlerType;
@@ -354,9 +353,17 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
       style={{ outline: 'none' }}
       data-sidebar-menu-widget
     >
-      {searchActive
-        ? renderMenuItemsWithHighlight(items, 0, flatIdxRef)
-        : renderMenuItems(items, eventHandler, id, 0)}
+      {searchActive ? (
+        flatItems.length > 0 ? (
+          renderMenuItemsWithHighlight(items, 0, flatIdxRef)
+        ) : (
+          <div className="flex items-center justify-center p-4 text-sm text-muted-foreground">
+            No results found
+          </div>
+        )
+      ) : (
+        renderMenuItems(items, eventHandler, id, 0)
+      )}
     </div>
   );
 };

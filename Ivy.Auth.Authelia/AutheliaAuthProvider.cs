@@ -2,6 +2,7 @@
 using System.Reflection;
 using System.Text;
 using System.Text.Json;
+using Ivy.Hooks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -57,7 +58,7 @@ public class AutheliaAuthProvider : IAuthProvider
 
     public Task<AuthToken?> RefreshJwtAsync(AuthToken jwt) => Task.FromResult<AuthToken?>(jwt);
 
-    public Task<Uri> GetOAuthUriAsync(AuthOption option, Uri callbackUri)
+    public Task<Uri> GetOAuthUriAsync(AuthOption option, WebhookEndpoint callback)
     {
         throw new NotImplementedException();
     }

@@ -8,7 +8,7 @@ import React, {
   useCallback,
 } from 'react';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import ivyPrismTheme from '@/lib/ivy-prism-theme';
+import { createPrismTheme } from '@/lib/ivy-prism-theme';
 
 interface CodeWidgetProps {
   id: string;
@@ -87,6 +87,9 @@ const CodeWidget: React.FC<CodeWidgetProps> = memo(
       [id, language, showLineNumbers, showBorder]
     );
 
+    // Create dynamic theme that adapts to current CSS variables
+    const dynamicTheme = useMemo(() => createPrismTheme(), []);
+
     return (
       <div
         className="relative"
@@ -97,7 +100,7 @@ const CodeWidget: React.FC<CodeWidgetProps> = memo(
         <SyntaxHighlighter
           language={mapLanguageToPrism(language)}
           customStyle={styles}
-          style={ivyPrismTheme}
+          style={dynamicTheme}
           showLineNumbers={showLineNumbers}
           wrapLines={true}
           key={highlighterKey}

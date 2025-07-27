@@ -120,7 +120,7 @@ export const DatabaseSchemaNode = ({
 }: DatabaseSchemaNodeProps) => {
   return (
     <div
-      className={`rounded-md border bg-white shadow-sm ${selected ? 'border-blue-500' : 'border-gray-200'} ${className}`}
+      className={`rounded-md border bg-background shadow-sm ${selected ? 'border-primary' : 'border-border'} ${className}`}
     >
       {children}
     </div>
@@ -131,7 +131,7 @@ export const DatabaseSchemaNodeHeader = ({
   children,
 }: DatabaseSchemaNodeHeaderProps) => {
   return (
-    <div className="border-b border-gray-200 px-4 py-2 font-semibold">
+    <div className="border-b border-border px-4 py-2 font-semibold">
       {children}
     </div>
   );
@@ -175,7 +175,9 @@ export const LabeledHandle = ({
         data-type={type}
         data-position={position}
       >
-        <div className={`text-sm text-gray-600 ${labelClassName}`}>{title}</div>
+        <div className={`text-sm text-muted-foreground ${labelClassName}`}>
+          {title}
+        </div>
       </div>
     </div>
   );
@@ -194,7 +196,7 @@ const DbmlTableNode: React.FC<DbmlTableNodeProps> = ({ data, selected }) => {
                 position={Position.Left}
                 id={`${field.name}-left`}
                 style={{
-                  background: '#6366f1',
+                  background: 'var(--primary)',
                   width: 8,
                   height: 8,
                 }}
@@ -208,13 +210,13 @@ const DbmlTableNode: React.FC<DbmlTableNodeProps> = ({ data, selected }) => {
                   </span>
                 )}
                 <span
-                  className={`font-medium ${field.pk ? 'text-amber-700' : ''}`}
+                  className={`font-medium ${field.pk ? 'text-primary' : ''}`}
                 >
                   {field.name}
                 </span>
               </div>
             </DatabaseSchemaTableCell>
-            <DatabaseSchemaTableCell className="text-gray-500 ml-2">
+            <DatabaseSchemaTableCell className="text-muted-foreground ml-2">
               {field.type}
               {field.nullable ? '?' : ''}
             </DatabaseSchemaTableCell>
@@ -224,7 +226,7 @@ const DbmlTableNode: React.FC<DbmlTableNodeProps> = ({ data, selected }) => {
                 position={Position.Right}
                 id={`${field.name}-right`}
                 style={{
-                  background: '#6366f1',
+                  background: 'var(--primary)',
                   width: 8,
                   height: 8,
                 }}
@@ -389,14 +391,14 @@ export const DbmlCanvasWidget: React.FC<DbmlCanvasWidgetProps> = ({
           sourceHandle: `${ref.endpoints[0].fieldNames[0]}-right`,
           targetHandle: `${ref.endpoints[1].fieldNames[0]}-left`,
           type: 'smoothstep',
-          style: { stroke: '#6366f1' },
+          style: { stroke: 'var(--primary)' },
           markerEnd: {
             type: MarkerType.ArrowClosed,
-            color: '#6366f1',
+            color: 'var(--primary)',
           },
           label: `${ref.endpoints[0].fieldNames[0]} → ${ref.endpoints[1].fieldNames[0]}`,
-          labelStyle: { fill: '#4F46E5', fontWeight: 500 },
-          labelBgStyle: { fill: 'rgba(255, 255, 255, 0.8)' },
+          labelStyle: { fill: 'var(--primary)', fontWeight: 500 },
+          labelBgStyle: { fill: 'var(--background)' },
         })
       );
 
@@ -456,15 +458,15 @@ export const DbmlCanvasWidget: React.FC<DbmlCanvasWidgetProps> = ({
 
   if (error) {
     return (
-      <div className="m-4 p-4 bg-red-50 border border-red-200 rounded-md h-fit w-full">
-        <h3 className="text-red-800 font-medium mb-2">DBML Parse Error</h3>
+      <div className="m-4 p-4 bg-destructive/10 border border-destructive/20 rounded-md h-fit w-full">
+        <h3 className="text-destructive font-medium mb-2">DBML Parse Error</h3>
 
-        <div className="text-red-600 text-sm mb-3">{error.message}</div>
+        <div className="text-destructive/80 text-sm mb-3">{error.message}</div>
 
         {error.location && (
           <div className="mb-3 text-sm">
-            <div className="font-medium text-red-700">Location:</div>
-            <div className="text-red-600">
+            <div className="font-medium text-destructive">Location:</div>
+            <div className="text-destructive/80">
               Line {error.location.start?.line}, Column{' '}
               {error.location.start?.col}
             </div>
@@ -473,10 +475,10 @@ export const DbmlCanvasWidget: React.FC<DbmlCanvasWidgetProps> = ({
 
         {error.snippet && (
           <div className="mb-2">
-            <div className="font-medium text-red-700 text-sm mb-1">
+            <div className="font-medium text-destructive text-sm mb-1">
               Context:
             </div>
-            <pre className="bg-red-100 p-2 rounded text-red-800 text-sm font-mono whitespace-pre overflow-x-auto">
+            <pre className="bg-destructive/10 p-2 rounded text-destructive text-sm font-mono whitespace-pre overflow-x-auto">
               {error.snippet}
             </pre>
           </div>
@@ -498,16 +500,19 @@ export const DbmlCanvasWidget: React.FC<DbmlCanvasWidgetProps> = ({
         maxZoom={1.5}
         defaultEdgeOptions={{
           type: 'smoothstep',
-          style: { stroke: '#6366f1' },
+          style: { stroke: 'var(--primary)' },
           markerEnd: {
             type: MarkerType.ArrowClosed,
-            color: '#6366f1',
+            color: 'var(--primary)',
           },
         }}
       >
-        <Background color="#6366f1" gap={16} size={1} />
+        <Background color="var(--primary)" gap={16} size={1} />
         <Controls />
-        <MiniMap nodeColor="#6366f1" maskColor="rgba(99, 102, 241, 0.1)" />
+        <MiniMap
+          nodeColor="var(--primary)"
+          maskColor="rgba(var(--primary-rgb), 0.1)"
+        />
       </ReactFlow>
     </div>
   );

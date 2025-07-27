@@ -53,7 +53,7 @@ export function EmojiRating({
               'relative focus-visible:outline-none focus-visible:ring-2',
               'focus-visible:ring-ring focus-visible:ring-offset-2',
               'transition-transform duration-200',
-              'hover:scale-125 active:scale-90',
+              'hover:scale-125 active:scale-90 cursor-pointer',
               disabled && 'cursor-not-allowed hover:scale-100',
               emojiSizes[size]
             )}

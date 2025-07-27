@@ -1,0 +1,37 @@
+name: Backend Checks (Linux)
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+jobs:
+  backend-checks:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    # Install required packages
+    - name: Install required packages
+      run: sudo apt-get update && sudo apt-get install -y attr
+    
+    # Setup .NET
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '9.0.x'
+      
+    # Update workloads
+    - name: Update .NET workloads
+      run: dotnet workload update
+    
+    # Check code formatting
+    - name: Check code formatting
+      run: dotnet format --verify-no-changes
+    
+    # Build solution
+    - name: Build solution
+      run: dotnet build --configuration Release
+    
+    # Run tests
+    - name: Run tests
+      run: dotnet test --configuration Release --no-build --verbosity normal 

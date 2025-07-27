@@ -90,6 +90,12 @@ public static class SelectInputExtensions
             }
         }
 
+        // Set a default placeholder for multi-selects if not provided
+        if (selectMany && string.IsNullOrWhiteSpace(placeholder))
+        {
+            placeholder = "Select options...";
+        }
+
         SelectInputBase input = (SelectInputBase)Activator.CreateInstance(genericType, state, options, placeholder, disabled, variant, selectMany)!;
         return input;
     }

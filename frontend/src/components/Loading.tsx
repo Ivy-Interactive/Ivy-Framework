@@ -176,7 +176,7 @@ export function Loading() {
         const color = COLORS[colorIndex] || COLORS[0];
 
         return (
-          <div key={index} className="w-6 h-6">
+          <div key={index} className="w-7 h-7">
             {shape && (
               <svg
                 viewBox="0 0 28 28"

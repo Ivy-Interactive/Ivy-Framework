@@ -32,7 +32,7 @@ export const ExpandableWidget: React.FC<ExpandableWidgetProps> = ({
       key={id}
       open={isOpen}
       onOpenChange={setIsOpen}
-      className="w-full space-y-2 rounded-md border border-gray-200 p-2 shadow-sm"
+      className="w-full rounded-md border border-gray-200 p-2 shadow-sm"
     >
       <div className="flex justify-between space-x-4">
         <CollapsibleTrigger asChild>

@@ -143,7 +143,7 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
             disabled={disabled}
             data-testid={dataTestId}
             className={cn(
-              'w-full justify-start text-left font-normal',
+              'w-full justify-start text-left font-normal cursor-pointer',
               !date && 'text-muted-foreground',
               invalid && 'border-destructive focus-visible:ring-destructive',
               showClear && invalid
@@ -177,7 +177,7 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="w-full justify-start"
+                      className="w-full justify-start cursor-pointer"
                       onClick={() => {
                         handleChange({
                           from: today,
@@ -192,7 +192,7 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="w-full justify-start"
+                      className="w-full justify-start cursor-pointer"
                       onClick={() => {
                         handleChange(yesterday);
                         setMonth(yesterday.to);
@@ -204,7 +204,7 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="w-full justify-start"
+                      className="w-full justify-start cursor-pointer"
                       onClick={() => {
                         handleChange(last7Days);
                         setMonth(last7Days.to);
@@ -216,7 +216,7 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="w-full justify-start"
+                      className="w-full justify-start cursor-pointer"
                       onClick={() => {
                         handleChange(last30Days);
                         setMonth(last30Days.to);
@@ -228,7 +228,7 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="w-full justify-start"
+                      className="w-full justify-start cursor-pointer"
                       onClick={() => {
                         handleChange(monthToDate);
                         setMonth(monthToDate.to);
@@ -240,7 +240,7 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="w-full justify-start"
+                      className="w-full justify-start cursor-pointer"
                       onClick={() => {
                         handleChange(lastMonth);
                         setMonth(lastMonth.to);
@@ -252,7 +252,7 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="w-full justify-start"
+                      className="w-full justify-start cursor-pointer"
                       onClick={() => {
                         handleChange(yearToDate);
                         setMonth(yearToDate.to);
@@ -264,7 +264,7 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="w-full justify-start"
+                      className="w-full justify-start cursor-pointer"
                       onClick={() => {
                         handleChange(lastYear);
                         setMonth(lastYear.to);
@@ -305,9 +305,9 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
               tabIndex={-1}
               aria-label="Clear"
               onClick={handleClear}
-              className="p-1 rounded hover:bg-gray-100 focus:outline-none"
+              className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
             >
-              <X className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+              <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
             </button>
           )}
           {invalid && <InvalidIcon message={invalid} />}

@@ -166,18 +166,21 @@ const DefaultVariant: React.FC<{
         )}
         data-testid={props['data-testid']}
       />
-      {props.invalid && (
-        <div className="absolute right-2.5 top-2.5">
-          <InvalidIcon message={props.invalid} />
-        </div>
-      )}
-      {props.shortcutKey && !isFocused && (
-        <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center">
-          <kbd className="px-1 py-0.5 text-xs font-medium text-gray-800 bg-gray-100 border border-gray-200 rounded-md">
-            {shortcutDisplay}
-          </kbd>
-        </div>
-      )}
+      {/* Icons container: shortcut (if any), then invalid (if any) */}
+      <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none h-6">
+        {props.shortcutKey && !isFocused && (
+          <div className="pointer-events-auto flex items-center h-6">
+            <kbd className="px-1 py-0.5 text-xs font-medium text-foreground bg-muted border border-border rounded-md">
+              {shortcutDisplay}
+            </kbd>
+          </div>
+        )}
+        {props.invalid && (
+          <div className="pointer-events-auto flex items-center h-6">
+            <InvalidIcon message={props.invalid} />
+          </div>
+        )}
+      </div>
     </div>
   );
 };
@@ -225,18 +228,21 @@ const TextareaVariant: React.FC<{
         )}
         data-testid={props['data-testid']}
       />
-      {props.invalid && (
-        <div className="absolute right-2.5 top-2.5 h-4 w-4">
-          <InvalidIcon message={props.invalid} />
-        </div>
-      )}
-      {props.shortcutKey && !isFocused && (
-        <div className="absolute right-2.5 top-2.5 flex items-center">
-          <kbd className="px-1 py-0.5 text-xs font-medium text-gray-800 bg-gray-100 border border-gray-200 rounded-md">
-            {shortcutDisplay}
-          </kbd>
-        </div>
-      )}
+      {/* Icons container: shortcut (if any), then invalid (if any) */}
+      <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none h-6">
+        {props.shortcutKey && !isFocused && (
+          <div className="pointer-events-auto flex items-center h-6">
+            <kbd className="px-1 py-0.5 text-xs font-medium text-gray-800 bg-gray-100 border border-gray-200 rounded-md">
+              {shortcutDisplay}
+            </kbd>
+          </div>
+        )}
+        {props.invalid && (
+          <div className="pointer-events-auto flex items-center h-6">
+            <InvalidIcon message={props.invalid} />
+          </div>
+        )}
+      </div>
     </div>
   );
 };
@@ -308,33 +314,35 @@ const PasswordVariant: React.FC<{
         )}
         data-testid={props['data-testid']}
       />
-
+      {/* Icons container: password toggle, shortcut (if any), then invalid (if any) */}
       {!hasLastPass && (
-        <div
-          className={cn(
-            'absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center'
-          )}
-        >
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            className="hover:bg-transparent p-0 m-0 h-4 w-4"
-            onClick={togglePassword}
-          >
-            {showPassword ? (
-              <EyeOffIcon className="h-4 w-4" />
-            ) : (
-              <EyeIcon className="h-4 w-4" />
-            )}
-          </Button>
-          {props.invalid && (
-            <InvalidIcon message={props.invalid} className="ml-2" />
-          )}
+        <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none h-6">
+          <div className="pointer-events-auto flex items-center h-6">
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="hover:bg-transparent p-0 m-0 h-4 w-4 cursor-pointer"
+              onClick={togglePassword}
+            >
+              {showPassword ? (
+                <EyeOffIcon className="h-4 w-4" />
+              ) : (
+                <EyeIcon className="h-4 w-4" />
+              )}
+            </Button>
+          </div>
           {props.shortcutKey && (
-            <kbd className="ml-2 px-1 py-0.5 text-xs font-medium text-gray-800 bg-gray-100 border border-gray-200 rounded-md">
-              {shortcutDisplay}
-            </kbd>
+            <div className="pointer-events-auto flex items-center h-6">
+              <kbd className="ml-2 px-1 py-0.5 text-xs font-medium text-foreground bg-muted border border-border rounded-md">
+                {shortcutDisplay}
+              </kbd>
+            </div>
+          )}
+          {props.invalid && (
+            <div className="pointer-events-auto flex items-center h-6 ml-2">
+              <InvalidIcon message={props.invalid} />
+            </div>
           )}
         </div>
       )}
@@ -399,7 +407,7 @@ const SearchVariant: React.FC<{
   return (
     <div className="relative w-full select-none" style={styles}>
       {/* Search Icon */}
-      <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
+      <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
 
       {/* Search Input */}
       <Input
@@ -423,7 +431,7 @@ const SearchVariant: React.FC<{
         onKeyDown={handleKeyDown}
         autoComplete="off"
         className={cn(
-          'w-full pl-8',
+          'w-full pl-8 cursor-pointer',
           props.invalid && inputStyles.invalidInput,
           props.invalid && 'pr-8',
           hasValue && 'pr-8',
@@ -433,35 +441,33 @@ const SearchVariant: React.FC<{
         )}
         data-testid={props['data-testid']}
       />
-
-      {/* Clear Button */}
-      {hasValue && !props.disabled && (
-        <button
-          type="button"
-          tabIndex={-1}
-          aria-label="Clear search"
-          onClick={handleClear}
-          className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 rounded hover:bg-gray-100 focus:outline-none"
-        >
-          <X className="h-4 w-4 text-gray-400 hover:text-gray-600" />
-        </button>
-      )}
-
-      {/* Error Icon */}
-      {props.invalid && (
-        <div className="absolute right-2.5 top-2.5 h-4 w-4">
-          <InvalidIcon message={props.invalid} />
-        </div>
-      )}
-
-      {/* Shortcut Display */}
-      {props.shortcutKey && !isFocused && (
-        <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center">
-          <kbd className="px-1 py-0.5 text-xs font-medium text-gray-800 bg-gray-100 border border-gray-200 rounded-md">
-            {shortcutDisplay}
-          </kbd>
-        </div>
-      )}
+      {/* Icons container: clear (if any), shortcut (if any), then invalid (if any) */}
+      <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none z-10 h-6">
+        {hasValue && !props.disabled && (
+          <button
+            type="button"
+            tabIndex={-1}
+            aria-label="Clear search"
+            onClick={handleClear}
+            className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer pointer-events-auto flex items-center h-6"
+            style={{ pointerEvents: 'auto' }}
+          >
+            <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+          </button>
+        )}
+        {props.shortcutKey && !isFocused && (
+          <div className="pointer-events-auto flex items-center h-6">
+            <kbd className="px-1 py-0.5 text-xs font-medium text-foreground bg-muted border border-border rounded-md">
+              {shortcutDisplay}
+            </kbd>
+          </div>
+        )}
+        {props.invalid && (
+          <div className="pointer-events-auto flex items-center h-6">
+            <InvalidIcon message={props.invalid} />
+          </div>
+        )}
+      </div>
     </div>
   );
 };

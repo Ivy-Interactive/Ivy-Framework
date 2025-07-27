@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using Ivy.Forms;
+using Ivy.Views.Forms;
 
 namespace Ivy.Test;
 

@@ -11,7 +11,6 @@ public class AppAttribute(
     string[]? path = null!,
     bool isVisible = true,
     int order = 0,
-    bool removeIvyBranding = false,
     bool groupExpanded = false,
     string? documentSource = null
 )
@@ -30,8 +29,6 @@ public class AppAttribute(
     public bool IsVisible { get; set; } = isVisible;
 
     public int Order { get; set; } = order;
-
-    public bool RemoveIvyBranding { get; set; } = removeIvyBranding;
 
     public bool GroupExpanded { get; set; } = groupExpanded;
 

@@ -129,9 +129,9 @@ public static class Utils
         if (result == "." || string.IsNullOrEmpty(result))
             return "";
 
-        // Normalize path separators to match expected test format (backslashes for Windows-style paths)
-        // This ensures tests pass on both Windows and Unix systems
-        return result.Replace(Path.DirectorySeparatorChar, '\\').Replace(Path.AltDirectorySeparatorChar, '\\');
+        // Normalize path separators to forward slashes for consistent namespace generation
+        // This ensures proper C# namespace syntax
+        return result.Replace(Path.DirectorySeparatorChar, '/').Replace(Path.AltDirectorySeparatorChar, '/');
     }
 
     private static string NormalizePath(string path)

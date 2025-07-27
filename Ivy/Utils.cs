@@ -5,6 +5,7 @@ using System.Linq.Expressions;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -16,8 +17,6 @@ public static class Utils
 
     public static Type? GetCollectionTypeParameter(this Type type)
     {
-        if (type == null) return null;
-
         // Handle arrays
         if (type.IsArray)
         {
@@ -426,6 +425,8 @@ public static class Utils
                || type == typeof(Guid);
     }
 
+
+
     public static bool IsObservable(object observable)
     {
         return observable
@@ -673,5 +674,14 @@ public static class Utils
         }
 
         return false;
+    }
+
+    public static string GetShortHash(string input, int length = 8)
+    {
+        using var sha256 = SHA256.Create();
+        byte[] hash = sha256.ComputeHash(Encoding.UTF8.GetBytes(input));
+        string base64 = System.Convert.ToBase64String(hash);
+        string filtered = new string(base64.ToLower().Where(char.IsLetterOrDigit).ToArray());
+        return filtered.Length >= length ? filtered[..length] : filtered.PadRight(length, '0');
     }
 }

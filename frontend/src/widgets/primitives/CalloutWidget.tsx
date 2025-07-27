@@ -13,10 +13,10 @@ interface CalloutWidgetProps {
 }
 
 const backgroundColors = {
-  Info: 'cyan',
-  Success: 'primary',
-  Warning: 'yellow',
-  Error: 'destructive',
+  Info: 'bg-cyan/10 border-cyan/20',
+  Success: 'bg-primary/10 border-primary/20',
+  Warning: 'bg-yellow/10 border-yellow/20',
+  Error: 'bg-destructive/10 border-destructive/20',
 };
 
 const defaultIcons = {
@@ -37,24 +37,30 @@ export const CalloutWidget: React.FC<CalloutWidgetProps> = ({
   const styles: React.CSSProperties = {
     ...getWidth(width),
     ...getHeight(height),
-    backgroundColor: 'var(--' + backgroundColors[variant || 'Info'] + '-light)',
   };
 
   if (!icon) {
     icon = defaultIcons[variant || 'Info'];
   }
 
+  const variantKey = variant || 'Info';
+  const bgClasses = backgroundColors[variantKey];
+
   return (
     <div
       style={styles}
-      className={cn('flex items-center p-4 text-sm')}
+      className={cn(
+        'flex items-center p-4 text-sm rounded-lg border',
+        bgClasses,
+        'text-foreground'
+      )}
       role="alert"
     >
-      {icon && <Icon size="30" name={icon} className="mr-4 opacity-50" />}
+      {icon && <Icon size="30" name={icon} className="mr-4 opacity-70" />}
       <span className="sr-only">{variant}</span>
       <div className="flex flex-col">
         {title && <div className="font-medium">{title}</div>}
-        {children && <div className="opacity-50">{children}</div>}
+        {children && <div className="opacity-80">{children}</div>}
       </div>
     </div>
   );

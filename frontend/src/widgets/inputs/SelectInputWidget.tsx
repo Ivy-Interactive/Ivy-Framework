@@ -27,6 +27,11 @@ import {
 } from '@/components/ui/tooltip';
 import { X } from 'lucide-react';
 import { useCallback } from 'react';
+import { logger } from '@/lib/logger';
+import {
+  MultipleSelector,
+  Option as MultiSelectOption,
+} from '@/components/ui/multiselect';
 
 export type NullableSelectValue =
   | string
@@ -61,9 +66,26 @@ interface SelectInputWidgetProps {
 const convertValuesToOriginalType = (
   stringValues: string[],
   originalValue: NullableSelectValue,
-  options: Option[]
+  options: Option[],
+  selectMany: boolean = false
 ): NullableSelectValue => {
   if (stringValues.length === 0) {
+    // For nullable types, we need to determine the expected array type from options
+    if (originalValue === null || originalValue === undefined) {
+      if (selectMany) {
+        // For nullable collection types, determine the expected array type from options
+        if (options.length > 0) {
+          const firstOption = options[0];
+          if (typeof firstOption.value === 'number') {
+            return [];
+          } else if (typeof firstOption.value === 'string') {
+            return [];
+          }
+        }
+        return [];
+      }
+      return null;
+    }
     return originalValue instanceof Array ? [] : null;
   }
 
@@ -92,6 +114,26 @@ const convertValuesToOriginalType = (
     return stringValues;
   }
 
+  // For nullable collection types where originalValue is null, determine type from options
+  if ((originalValue === null || originalValue === undefined) && selectMany) {
+    if (options.length > 0) {
+      const firstOption = options[0];
+      if (typeof firstOption.value === 'number') {
+        return stringValues.map(v => {
+          const option = optionsMap.get(v);
+          return option ? Number(option.value) : Number(v);
+        });
+      } else if (typeof firstOption.value === 'string') {
+        return stringValues.map(v => {
+          const option = optionsMap.get(v);
+          return option ? String(option.value) : v;
+        });
+      }
+    }
+    // Default to string array if we can't determine the type
+    return stringValues;
+  }
+
   // For single values, return the first value with proper type
   const firstValue = stringValues[0];
   const option = optionsMap.get(firstValue);
@@ -105,19 +147,36 @@ const useSelectValueHandler = (
   id: string,
   value: NullableSelectValue,
   options: Option[],
-  eventHandler: EventHandler
+  eventHandler: EventHandler,
+  selectMany: boolean = false
 ) => {
   return useCallback(
     (newValue: string | string[]) => {
+      logger.debug('Select input value change', {
+        id,
+        currentValue: value,
+        newValue,
+        optionsCount: options.length,
+      });
+
       const stringArray = Array.isArray(newValue) ? newValue : [newValue];
       const convertedValue = convertValuesToOriginalType(
         stringArray,
         value,
-        options
+        options,
+        selectMany
       );
+
+      logger.debug('Select input converted value', {
+        id,
+        originalValue: value,
+        stringArray,
+        convertedValue,
+      });
+
       eventHandler('OnChange', id, [convertedValue]);
     },
-    [id, value, options, eventHandler]
+    [id, value, options, eventHandler, selectMany]
   );
 };
 
@@ -164,7 +223,8 @@ const ToggleVariant: React.FC<SelectInputWidgetProps> = ({
     id,
     value,
     validOptions,
-    eventHandler
+    eventHandler,
+    selectMany
   );
 
   // Outer container
@@ -191,9 +251,9 @@ const ToggleVariant: React.FC<SelectInputWidgetProps> = ({
                   className={cn(
                     'px-3 py-2',
                     isInvalid
-                      ? `${inputStyles.invalidInput} !bg-red-50 !border-red-500 !text-red-900`
+                      ? `${inputStyles.invalidInput} !bg-destructive/10 !border-destructive !text-destructive`
                       : isSelected
-                        ? 'data-[state=on]:bg-emerald-100 data-[state=on]:border-emerald-500 data-[state=on]:text-emerald-900'
+                        ? 'data-[state=on]:bg-primary data-[state=on]:border-primary data-[state=on]:text-primary-foreground'
                         : undefined
                   )}
                 >
@@ -235,9 +295,9 @@ const ToggleVariant: React.FC<SelectInputWidgetProps> = ({
                   className={cn(
                     'px-3 py-2',
                     isInvalid
-                      ? `${inputStyles.invalidInput} !bg-red-50 !border-red-500 !text-red-900`
+                      ? `${inputStyles.invalidInput} !bg-destructive/10 !border-destructive !text-destructive`
                       : isSelected
-                        ? 'data-[state=on]:bg-emerald-100 data-[state=on]:border-emerald-500 data-[state=on]:text-emerald-900'
+                        ? 'data-[state=on]:bg-primary data-[state=on]:border-primary data-[state=on]:text-primary-foreground'
                         : undefined
                   )}
                 >
@@ -266,10 +326,17 @@ const ToggleVariant: React.FC<SelectInputWidgetProps> = ({
           type="button"
           tabIndex={-1}
           aria-label={selectMany ? 'Clear All' : 'Clear'}
-          onClick={() => eventHandler('OnChange', id, [selectMany ? [] : null])}
-          className="flex-shrink-0 p-1 rounded hover:bg-gray-100 focus:outline-none"
+          onClick={() => {
+            logger.debug('Select input clear button clicked (ToggleVariant)', {
+              id,
+              selectMany,
+              clearValue: selectMany ? [] : null,
+            });
+            eventHandler('OnChange', id, [selectMany ? [] : null]);
+          }}
+          className="flex-shrink-0 p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
         >
-          <X className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+          <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
         </button>
       )}
     </div>
@@ -302,7 +369,8 @@ const RadioVariant: React.FC<SelectInputWidgetProps> = ({
     id,
     value,
     validOptions,
-    eventHandler
+    eventHandler,
+    false // Always single select for RadioVariant
   );
 
   const container = (
@@ -321,6 +389,10 @@ const RadioVariant: React.FC<SelectInputWidgetProps> = ({
                 value={option.value.toString()}
                 id={`${id}-${option.value}`}
                 className={cn(
+                  'border-input text-input',
+                  stringValue === option.value.toString() && !invalid
+                    ? 'border-primary text-primary'
+                    : undefined,
                   stringValue === option.value.toString() && invalid
                     ? inputStyles.invalidInput
                     : undefined
@@ -345,10 +417,13 @@ const RadioVariant: React.FC<SelectInputWidgetProps> = ({
           type="button"
           tabIndex={-1}
           aria-label="Clear"
-          onClick={() => eventHandler('OnChange', id, [null])}
-          className="flex-shrink-0 p-1 rounded hover:bg-gray-100 focus:outline-none"
+          onClick={() => {
+            logger.debug('Select input clear button clicked', { id });
+            eventHandler('OnChange', id, [null]);
+          }}
+          className="flex-shrink-0 p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
         >
-          <X className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+          <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
         </button>
       )}
     </div>
@@ -393,6 +468,13 @@ const CheckboxVariant: React.FC<SelectInputWidgetProps> = ({
   }
   const handleCheckboxChange = useCallback(
     (optionValue: string | number, checked: boolean) => {
+      logger.debug('Select input checkbox change', {
+        id,
+        optionValue,
+        checked,
+        currentSelectedValues: selectedValues,
+      });
+
       let newValues: (string | number)[];
       if (checked) {
         newValues = [...selectedValues, optionValue];
@@ -402,8 +484,16 @@ const CheckboxVariant: React.FC<SelectInputWidgetProps> = ({
       const convertedValue = convertValuesToOriginalType(
         newValues.map(v => v.toString()),
         value,
-        validOptions
+        validOptions,
+        true // Always multi-select for CheckboxVariant
       );
+
+      logger.debug('Select input checkbox converted value', {
+        id,
+        newValues,
+        convertedValue,
+      });
+
       eventHandler('OnChange', id, [convertedValue]);
     },
     [selectedValues, value, validOptions, eventHandler, id]
@@ -451,8 +541,9 @@ const CheckboxVariant: React.FC<SelectInputWidgetProps> = ({
                     }
                     disabled={disabled}
                     className={cn(
+                      'data-[state=unchecked]:bg-transparent data-[state=unchecked]:border-border',
                       isSelected
-                        ? 'data-[state=checked]:bg-emerald-100 data-[state=checked]:border-emerald-500 data-[state=checked]:text-emerald-900'
+                        ? 'data-[state=checked]:bg-primary data-[state=checked]:border-primary data-[state=checked]:text-primary-foreground'
                         : undefined
                     )}
                   />
@@ -475,7 +566,13 @@ const CheckboxVariant: React.FC<SelectInputWidgetProps> = ({
           type="button"
           tabIndex={-1}
           aria-label="Clear All"
-          onClick={() => eventHandler('OnChange', id, [[]])}
+          onClick={() => {
+            logger.debug(
+              'Select input clear button clicked (CheckboxVariant)',
+              { id }
+            );
+            eventHandler('OnChange', id, [[]]);
+          }}
           className="flex-shrink-0 p-1 rounded hover:bg-gray-100 focus:outline-none"
         >
           <X className="h-4 w-4 text-gray-400 hover:text-gray-600" />
@@ -495,12 +592,98 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
   options = [],
   eventHandler,
   nullable = false,
+  selectMany = false,
   'data-testid': dataTestId,
 }) => {
   const validOptions = options.filter(
     option => option.value != null && option.value.toString().trim() !== ''
   );
 
+  const handleValueChange = useSelectValueHandler(
+    id,
+    value,
+    validOptions,
+    eventHandler,
+    selectMany
+  );
+
+  // Handle multiselect case
+  if (selectMany) {
+    // Convert current value to array format for multiselect
+    let selectedValues: (string | number)[] = [];
+    if (Array.isArray(value)) {
+      selectedValues = value;
+    } else if (value != null && value.toString().trim() !== '') {
+      selectedValues = value
+        .toString()
+        .split(',')
+        .map(v => v.trim());
+    }
+
+    // Convert options to MultiSelectOption format
+    const multiSelectOptions: MultiSelectOption[] = validOptions.map(
+      option => ({
+        label: option.label,
+        value: option.value.toString(),
+        disable: false,
+      })
+    );
+
+    // Convert selected values to MultiSelectOption format
+    const selectedMultiSelectOptions: MultiSelectOption[] = selectedValues.map(
+      val => {
+        const option = validOptions.find(
+          opt => opt.value.toString() === val.toString()
+        );
+        return {
+          label: option?.label || val.toString(),
+          value: val.toString(),
+          disable: false,
+        };
+      }
+    );
+
+    const handleMultiSelectChange = (
+      newSelectedOptions: MultiSelectOption[]
+    ) => {
+      const newValues = newSelectedOptions.map(opt => opt.value);
+      const convertedValue = convertValuesToOriginalType(
+        newValues,
+        value,
+        validOptions,
+        selectMany
+      );
+      eventHandler('OnChange', id, [convertedValue]);
+    };
+
+    return (
+      <div className="flex items-center gap-2 w-full">
+        <div className="flex-1 relative w-full">
+          <MultipleSelector
+            value={selectedMultiSelectOptions}
+            defaultOptions={multiSelectOptions}
+            onValueChange={handleMultiSelectChange}
+            placeholder={placeholder}
+            disabled={disabled}
+            className="w-full"
+            invalid={!!invalid}
+            hideClearAllButton={!nullable}
+            hidePlaceholderWhenSelected
+            emptyIndicator={
+              <p className="text-center text-sm">No results found</p>
+            }
+          />
+          {invalid && (
+            <div className="absolute right-2 top-1/2 -translate-y-1/2">
+              <InvalidIcon message={invalid} />
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // Original single select logic
   const groupedOptions = validOptions.reduce<Record<string, Option[]>>(
     (acc, option) => {
       const key = option.group || 'default';
@@ -520,13 +703,6 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
 
   const hasValue = stringValue !== undefined;
 
-  const handleValueChange = useSelectValueHandler(
-    id,
-    value,
-    validOptions,
-    eventHandler
-  );
-
   return (
     <div className="flex items-center gap-2 w-full">
       <div className="flex-1 relative w-full">
@@ -541,28 +717,48 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
             className={cn('relative', invalid && inputStyles.invalidInput)}
           >
             <SelectValue placeholder={placeholder} />
-            {nullable && hasValue && !disabled && (
-              <button
-                type="button"
-                tabIndex={-1}
-                aria-label="Clear"
-                onClick={e => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  eventHandler('OnChange', id, [null]);
-                }}
-                className="absolute top-1/2 -translate-y-1/2 right-8 z-10 p-1 rounded hover:bg-gray-100 focus:outline-none"
-                style={{ pointerEvents: 'auto' }}
-              >
-                <X className="h-4 w-4 text-gray-400 hover:text-gray-600" />
-              </button>
-            )}
-            {invalid && (
-              <div className="absolute top-1/2 -translate-y-1/2 right-8 z-10">
-                <InvalidIcon message={invalid} />
-              </div>
-            )}
           </SelectTrigger>
+          {/* Right-side icon container */}
+          {(nullable && hasValue && !disabled) || invalid ? (
+            <div
+              className="absolute top-1/2 -translate-y-1/2 flex items-center gap-1 right-8"
+              style={{ zIndex: 2 }}
+            >
+              {/* Clear (X) button */}
+              {nullable && hasValue && !disabled && (
+                <span
+                  role="button"
+                  tabIndex={-1}
+                  aria-label="Clear"
+                  onClick={e => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    logger.debug(
+                      'Select input clear button clicked (SelectVariant)',
+                      { id }
+                    );
+                    eventHandler('OnChange', id, [null]);
+                  }}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      eventHandler('OnChange', id, [null]);
+                    }
+                  }}
+                  className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
+                >
+                  <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+                </span>
+              )}
+              {/* Invalid icon */}
+              {invalid && (
+                <span className="flex items-center">
+                  <InvalidIcon message={invalid} />
+                </span>
+              )}
+            </div>
+          ) : null}
           <SelectContent>
             {Object.entries(groupedOptions).map(([group, options]) => (
               <SelectGroup key={group}>

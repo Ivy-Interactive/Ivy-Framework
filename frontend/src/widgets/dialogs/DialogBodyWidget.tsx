@@ -14,11 +14,11 @@ export const DialogBodyWidget: React.FC<DialogBodyWidgetProps> = ({
   return (
     <section
       id={id}
-      className="flex-1 min-h-0 flex flex-col overflow-hidden"
+      className="flex-1 min-h-0 flex flex-col overflow-auto p-4"
       role="document"
       aria-describedby={descriptionId}
     >
-      <div className="flex-1 min-h-0 overflow-auto" id={descriptionId}>
+      <div className="flex-1 min-h-0" id={descriptionId}>
         {children}
       </div>
     </section>

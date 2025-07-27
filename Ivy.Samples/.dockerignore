@@ -1,0 +1,14 @@
+﻿**/bin/
+**/obj/
+**/.vs/
+**/.vscode/
+**/.git/
+**/.idea/
+**/node_modules/
+**/.DS_Store
+*.user
+*.suo
+*.nupkg
+*.db
+*.log
+.env

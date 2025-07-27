@@ -14,7 +14,6 @@ export interface TerminalWidgetProps {
 }
 
 const TerminalWidget = ({ lines, title, showHeader }: TerminalWidgetProps) => {
-  const promptColor = 'text-green-400';
   const commandColor = 'text-white';
   const outputColor = 'text-gray-300';
 
@@ -43,14 +42,17 @@ const TerminalWidget = ({ lines, title, showHeader }: TerminalWidgetProps) => {
             key={index}
             className={cn('whitespace-pre-wrap', index > 0 ? 'mt-1' : '')}
           >
-            {line.isCommand ? (
-              <div className="flex">
-                <span className={promptColor}>{line.prompt || '$'} </span>
-                <span className={commandColor}>{line.content}</span>
-              </div>
-            ) : (
-              <div className={outputColor}>{line.content}</div>
-            )}
+            <div className="flex pl-2">
+              {line.isCommand && (
+                <span className="text-primary select-none pointer-events-none mr-2">
+                  {'> '}
+                </span>
+              )}
+              {!line.isCommand && <div style={{ paddingLeft: '25px' }}></div>}
+              <span className={line.isCommand ? commandColor : outputColor}>
+                {line.content}
+              </span>
+            </div>
           </div>
         ))}
       </div>

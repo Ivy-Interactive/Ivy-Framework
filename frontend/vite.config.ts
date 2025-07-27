@@ -3,13 +3,13 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 
-const injectIvyHost = (mode: string) => {
+const injectMeta = (mode: string) => {
   return {
-    name: 'inject-ivy-host-meta',
+    name: 'inject-ivy-meta',
     transformIndexHtml(html: string) {
       if (mode === 'development') {
-        const metaTag = `<meta name="ivy-host" content="${process.env.IVY_HOST || 'http://localhost:5010'}" />`;
-        return html.replace('</head>', `  ${metaTag}\n</head>`);
+        const ivyHostTag = `<meta name="ivy-host" content="${process.env.IVY_HOST || 'http://localhost:5010'}" />`;
+        return html.replace('</head>', `  ${ivyHostTag}\n</head>`);
       }
       return html;
     },
@@ -17,7 +17,7 @@ const injectIvyHost = (mode: string) => {
 };
 
 export default defineConfig(({ mode }) => ({
-  plugins: [react(), tailwindcss(), injectIvyHost(mode)],
+  plugins: [react(), tailwindcss(), injectMeta(mode)],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
@@ -29,7 +29,6 @@ export default defineConfig(({ mode }) => ({
     rollupOptions: {
       input: {
         main: path.resolve(__dirname, 'index.html'),
-        app: path.resolve(__dirname, 'app.html'),
       },
       output: {
         entryFileNames: 'assets/[name].[hash].js',

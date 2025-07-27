@@ -47,48 +47,58 @@ public static class FileHashMetadata
                     throw new Exception("Failed to write extended attribute: " + proc.StandardError.ReadToEnd());
             }
         }
-        catch (Exception e)
+        catch (Exception)
         {
-            Console.WriteLine("Failed to write hash. Exception: " + e);
+            // ignore
+            //Console.WriteLine("Failed to write hash. Exception: " + e);
         }
     }
 
     public static string? ReadHash(string filePath)
     {
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        try
         {
-            var adsPath = filePath + ":" + StreamName;
-            return File.Exists(adsPath) ? File.ReadAllText(adsPath).Trim() : null;
-        }
-        else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-        {
-            var psi = new ProcessStartInfo
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                FileName = "xattr",
-                Arguments = $"-p {AttributeName} \"{filePath}\"",
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false
-            };
-            using var proc = Process.Start(psi) ?? throw new Exception("Failed to start process");
-            var output = proc.StandardOutput.ReadToEnd().Trim();
-            proc.WaitForExit();
-            return proc.ExitCode == 0 ? output : null;
-        }
-        else // Linux
-        {
-            var psi = new ProcessStartInfo
+                var adsPath = filePath + ":" + StreamName;
+                return File.Exists(adsPath) ? File.ReadAllText(adsPath).Trim() : null;
+            }
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
-                FileName = "getfattr",
-                Arguments = $"-n {AttributeName} --only-values \"{filePath}\"",
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false
-            };
-            using var proc = Process.Start(psi) ?? throw new Exception("Failed to start process");
-            var output = proc.StandardOutput.ReadToEnd().Trim();
-            proc.WaitForExit();
-            return proc.ExitCode == 0 ? output : null;
+                var psi = new ProcessStartInfo
+                {
+                    FileName = "xattr",
+                    Arguments = $"-p {AttributeName} \"{filePath}\"",
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false
+                };
+                using var proc = Process.Start(psi) ?? throw new Exception("Failed to start process");
+                var output = proc.StandardOutput.ReadToEnd().Trim();
+                proc.WaitForExit();
+                return proc.ExitCode == 0 ? output : null;
+            }
+            else // Linux
+            {
+                var psi = new ProcessStartInfo
+                {
+                    FileName = "getfattr",
+                    Arguments = $"-n {AttributeName} --only-values \"{filePath}\"",
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false
+                };
+                using var proc = Process.Start(psi) ?? throw new Exception("Failed to start process");
+                var output = proc.StandardOutput.ReadToEnd().Trim();
+                proc.WaitForExit();
+                return proc.ExitCode == 0 ? output : null;
+            }
+        }
+        catch (Exception)
+        {
+            //ignore
+            return null;
         }
     }
 }

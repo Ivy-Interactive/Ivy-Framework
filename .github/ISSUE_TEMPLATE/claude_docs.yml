@@ -1,0 +1,46 @@
+name: Claude Documentation Request
+description: Request Claude bot to generate documentation for a .cs file
+title: "[DEV-AI]: Generate documentation for "
+labels: ["documentation", "claude"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This issue will ping Claude bot to generate documentation for a .cs file.
+
+  - type: textarea
+    id: claude-instruction
+    attributes:
+      label: Claude Instruction
+      description: The instruction to send to Claude bot
+      value: |
+        Hey @claude! Write a documentation for ... .cs file in md format. See how it is done for others in Ivy.Docs folder.
+        Usually for the .cs file, we also have an implementation in ...App.cs in Ivy.Samples that covers the edge cases
+        for testing purposes. 
+
+        I want you to cover base use cases, while including both code and rendered examples.
+      render: markdown
+
+  - type: textarea
+    id: specific-requirements
+    attributes:
+      label: Specific Requirements
+      description: Any specific requirements for the documentation
+      placeholder: |
+        Any specific requirements or preferences:
+        - Particular sections that must be included
+        - Code examples that should be featured
+        - Special formatting or structure requirements
+        - Integration with existing documentation
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Any additional context that might help Claude generate better documentation
+      placeholder: |
+        Additional context that might be helpful:
+        - Related widgets or components
+        - Common use cases
+        - Known limitations or gotchas
+        - Integration patterns 

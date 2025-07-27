@@ -31,10 +31,10 @@ export const TableCellWidget: React.FC<TableCellWidgetProps> = ({
   return (
     <TableCell
       className={cn(
-        isHeader && 'header-cell bg-gray-100 font-semibold',
-        isFooter && 'footer-cell bg-gray-100 font-semibold',
+        isHeader && 'header-cell bg-muted font-semibold',
+        isFooter && 'footer-cell bg-muted font-semibold',
         'text-nowrap',
-        'border',
+        'border-border',
         'max-w-[400px] overflow-ellipsis overflow-clip'
       )}
       style={cellStyles}

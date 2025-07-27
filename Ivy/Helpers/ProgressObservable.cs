@@ -8,7 +8,7 @@ public static class ProgressObservable
 
     private static double LinearEasing(double t) => t;
 
-    public static IObservable<int> Create(double duration = 10, EasingFunction easingFunction = null)
+    public static IObservable<int> Create(double duration = 10, EasingFunction? easingFunction = null)
     {
         var easing = easingFunction ?? LinearEasing;
         double updateInterval = (duration * 1000.0) / 100;

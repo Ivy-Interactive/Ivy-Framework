@@ -9,6 +9,8 @@
     <Nullable>enable</Nullable>
     <RootNamespace>Ivy.Docs</RootNamespace>
     <NoWarn>CS8618;CS8603;CS8602;CS8604;CS8669;CS9113</NoWarn>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <EnableDefaultEmbeddedResourceItems>false</EnableDefaultEmbeddedResourceItems>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -25,11 +27,18 @@
     <RuntimeIdentifiers>win-x64;osx-x64</RuntimeIdentifiers>
   </PropertyGroup>
   
-  <ItemGroup>
+  <ItemGroup Condition="'$(UseNuGetPackage)' != 'true'">
     <ProjectReference Include="../Ivy/Ivy.csproj" />
   </ItemGroup>
 
+  <ItemGroup Condition="'$(UseNuGetPackage)' == 'true'">
+    <PackageReference Include="Ivy" Version="$(IvyPackageVersion)" />
+  </ItemGroup>
+
   <ItemGroup>
+    <Compile Include="Program.cs" />
+    <Compile Include="GlobalUsings.cs" />
+    <Compile Include="Helpers/**/*.cs" />
     <EmbeddedResource Include="Assets/**/*" />
   </ItemGroup>
 
@@ -45,7 +54,7 @@
   <Target Name="TransformMarkdown" BeforeTargets="CoreCompile">
     <Exec Command="dotnet run --project ../Ivy.Docs.Tools/Ivy.Docs.Tools.csproj -- convert $(MSBuildProjectDirectory)/Docs/*.md $(MSBuildProjectDirectory)/Generated --skip-if-not-changed" />
     <ItemGroup>
-      <Compile Include="Generated/*.g.cs" />
+      <Compile Include="Generated/**/*.g.cs" />
     </ItemGroup>
   </Target>
   
@@ -57,8 +66,6 @@
     <InternalsVisibleTo Include="Ivy.Docs.Test" />
   </ItemGroup>
   
-  <ItemGroup>
-    <Compile Remove="Samples/**/*.*" />
-  </ItemGroup>
+
   
 </Project>

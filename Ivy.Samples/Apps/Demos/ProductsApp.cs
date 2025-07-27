@@ -1,5 +1,7 @@
 ﻿using Ivy.Hooks;
 using Ivy.Shared;
+using Ivy.Views.Blades;
+using Ivy.Views.Forms;
 using Microsoft.EntityFrameworkCore;
 
 namespace Ivy.Samples.Apps.Demos;

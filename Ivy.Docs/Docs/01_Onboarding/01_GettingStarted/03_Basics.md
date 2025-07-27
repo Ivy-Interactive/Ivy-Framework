@@ -14,7 +14,7 @@ First, make sure you have [installed](./02_Installation.md) Ivy on your developm
 Using the CLI we can easily create a new project.
 
 ```terminal
-> ivy init -n YourAppNamespace
+>ivy init -n YourAppNamespace
 ```
                
 ## Views and Widgets

@@ -24,6 +24,8 @@ interface FileInputWidgetProps {
   width?: string;
   accept?: string;
   multiple?: boolean;
+  maxFiles?: number;
+  placeholder?: string;
 }
 
 export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
@@ -35,6 +37,8 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
   events,
   accept,
   multiple = false,
+  maxFiles,
+  placeholder,
 }) => {
   const handleEvent = useEventHandler();
   const [isDragging, setIsDragging] = useState(false);
@@ -58,13 +62,25 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
       const files = e.target.files;
       if (!files) return;
 
+      // Check max files limit
+      if (maxFiles && files.length > maxFiles) {
+        // Only take the first maxFiles files
+        const limitedFiles = Array.from(files).slice(0, maxFiles);
+        const selectedFiles = multiple
+          ? await Promise.all(limitedFiles.map(convertFileToUploadFile))
+          : await convertFileToUploadFile(limitedFiles[0]);
+
+        handleEvent('OnChange', id, [selectedFiles]);
+        return;
+      }
+
       const selectedFiles = multiple
         ? await Promise.all(Array.from(files).map(convertFileToUploadFile))
         : await convertFileToUploadFile(files[0]);
 
       handleEvent('OnChange', id, [selectedFiles]);
     },
-    [id, events, multiple, handleEvent, convertFileToUploadFile]
+    [id, events, multiple, handleEvent, convertFileToUploadFile, maxFiles]
   );
 
   const handleClear = useCallback(() => {
@@ -104,13 +120,33 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
       const files = Array.from(e.dataTransfer.files);
       if (files.length === 0) return;
 
+      // Check max files limit
+      if (maxFiles && files.length > maxFiles) {
+        // Only take the first maxFiles files
+        const limitedFiles = files.slice(0, maxFiles);
+        const selectedFiles = multiple
+          ? await Promise.all(limitedFiles.map(convertFileToUploadFile))
+          : await convertFileToUploadFile(limitedFiles[0]);
+
+        handleEvent('OnChange', id, [selectedFiles]);
+        return;
+      }
+
       const selectedFiles = multiple
         ? await Promise.all(files.map(convertFileToUploadFile))
         : await convertFileToUploadFile(files[0]);
 
       handleEvent('OnChange', id, [selectedFiles]);
     },
-    [id, events, multiple, handleEvent, disabled, convertFileToUploadFile]
+    [
+      id,
+      events,
+      multiple,
+      handleEvent,
+      disabled,
+      convertFileToUploadFile,
+      maxFiles,
+    ]
   );
 
   const handleClick = useCallback(() => {
@@ -134,6 +170,12 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
       onDragOver={handleDragOver}
       onDrop={handleDrop}
     >
+      {/* Invalid icon in top right corner, above input */}
+      {invalid && (
+        <div className="absolute top-2 right-2 z-20 pointer-events-none">
+          <InvalidIcon message={invalid} />
+        </div>
+      )}
       <div
         className={cn(
           'relative rounded-md border-2 border-dashed transition-colors min-h-[100px]',
@@ -155,19 +197,11 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
           className="hidden"
         />
         <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center">
-          <Upload className="h-6 w-6 mb-2 text-muted-foreground" />
+          <Upload className="h-6 w-6 mb-2 text-primary" />
           <p className="text-sm text-muted-foreground">
-            {displayValue || (
-              <>
-                Drag and drop your {multiple ? 'files' : 'file'} here or click
-                to select
-                {/* {accept && (
-                  <span className="block mt-1 text-xs">
-                    Accepted file types: {accept}
-                  </span>
-                )} */}
-              </>
-            )}
+            {displayValue ||
+              placeholder ||
+              `Drag and drop your ${multiple ? 'files' : 'file'} here or click to select`}
           </p>
         </div>
         {value && !disabled && (
@@ -185,7 +219,6 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
           </Button>
         )}
       </div>
-      {invalid && <InvalidIcon message={invalid} />}
     </div>
   );
 };

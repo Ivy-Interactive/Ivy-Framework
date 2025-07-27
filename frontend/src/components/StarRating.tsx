@@ -55,6 +55,7 @@ export function StarRating({
               className={cn(
                 'relative focus-visible:outline-none focus-visible:ring-2',
                 'focus-visible:ring-ring focus-visible:ring-offset-2',
+                'cursor-pointer',
                 disabled && 'cursor-not-allowed'
               )}
               onClick={() => handleRating(star)}
@@ -67,9 +68,7 @@ export function StarRating({
               <motion.div
                 className={cn(
                   'transition-colors duration-300',
-                  (hover || value) >= star
-                    ? 'text-primary'
-                    : 'text-muted-foreground'
+                  (hover || value) >= star ? 'text-primary' : 'text-border'
                 )}
                 initial={{ scale: 1 }}
                 animate={{

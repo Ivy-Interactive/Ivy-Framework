@@ -38,8 +38,46 @@ public abstract record FileInputBase : WidgetBase<FileInputBase>, IAnyFileInput
     [Prop] public FileInputs Variant { get; set; }
     [Prop] public string? Accept { get; set; }
     [Prop] public bool Multiple { get; set; }
+    [Prop] public int? MaxFiles { get; set; }
     [Event] public Action<Event<IAnyInput>>? OnBlur { get; set; }
     public Type[] SupportedStateTypes() => [];
+
+    /// <summary>
+    /// Validates the current value and returns a validation result
+    /// </summary>
+    /// <param name="value">The current value to validate</param>
+    /// <returns>Validation result</returns>
+    public ValidationResult ValidateValue(object? value)
+    {
+        if (value == null) return ValidationResult.Success();
+
+        if (value is FileInput file)
+        {
+            return FileInputValidation.ValidateFileType(file, Accept);
+        }
+        else if (value is IEnumerable<FileInput> files)
+        {
+            var filesList = files.ToList();
+
+            // Validate file count first if MaxFiles is set
+            if (MaxFiles.HasValue)
+            {
+                var countValidation = FileInputValidation.ValidateFileCount(filesList, MaxFiles);
+                if (!countValidation.IsValid)
+                {
+                    return countValidation;
+                }
+            }
+
+            // Then validate file types if Accept is set
+            if (!string.IsNullOrWhiteSpace(Accept))
+            {
+                return FileInputValidation.ValidateFileTypes(filesList, Accept);
+            }
+        }
+
+        return ValidationResult.Success();
+    }
 }
 
 public record FileInput<TValue> : FileInputBase, IInput<TValue>, IAnyFileInput
@@ -49,7 +87,24 @@ public record FileInput<TValue> : FileInputBase, IInput<TValue>, IAnyFileInput
     {
         var typedState = state.As<TValue>();
         Value = typedState.Value;
-        OnChange = e => typedState.Set(e.Value);
+        OnChange = e =>
+        {
+            typedState.Set(e.Value);
+
+            // Auto-validate if Accept or MaxFiles is set
+            if (!string.IsNullOrWhiteSpace(Accept) || MaxFiles.HasValue)
+            {
+                var validation = ValidateValue(e.Value);
+                if (!validation.IsValid)
+                {
+                    Invalid = validation.ErrorMessage;
+                }
+                else
+                {
+                    Invalid = null;
+                }
+            }
+        };
     }
 
     public FileInput(TValue value, Action<Event<IInput<TValue>, TValue>>? onChange, string? placeholder = null, bool disabled = false, FileInputs variant = FileInputs.Drop)
@@ -93,10 +148,10 @@ public static class FileInputExtensions
         var type = state.GetStateType();
 
         //Check that type is FileInput, FileInput? or IEnumerable<FileInput>
-        var isValid = type == typeof(FileInput)
-                      || (type.IsGenericType &&
+        var isCollection = type.IsGenericType &&
                           type.GetGenericTypeDefinition() == typeof(IEnumerable<>) &&
-                          type.GetGenericArguments()[0] == typeof(FileInput));
+                          type.GetGenericArguments()[0] == typeof(FileInput);
+        var isValid = type == typeof(FileInput) || isCollection;
 
         if (!isValid)
         {
@@ -106,10 +161,8 @@ public static class FileInputExtensions
         Type genericType = typeof(FileInput<>).MakeGenericType(type);
         FileInputBase input = (FileInputBase)Activator.CreateInstance(genericType, state, placeholder, disabled, variant)!;
 
-        if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IEnumerable<>))
-        {
-            input = input.Multiple();
-        }
+        // Set Multiple based on type
+        input = input with { Multiple = isCollection };
 
         return input;
     }
@@ -139,8 +192,46 @@ public static class FileInputExtensions
         return widget with { Accept = accept };
     }
 
-    public static FileInputBase Multiple(this FileInputBase widget, bool multiple = true)
+    public static FileInputBase MaxFiles(this FileInputBase widget, int maxFiles)
     {
-        return widget with { Multiple = multiple };
+        if (widget.Multiple != true)
+        {
+            throw new InvalidOperationException("MaxFiles can only be set on a multi-file input (IEnumerable<FileInput>). Use a collection state type for multiple files.");
+        }
+        return widget with { MaxFiles = maxFiles };
     }
+
+    /// <summary>
+    /// Validates a single file against the widget's accept pattern
+    /// </summary>
+    /// <param name="widget">The file input widget</param>
+    /// <param name="file">The file to validate</param>
+    /// <returns>Validation result</returns>
+    public static ValidationResult ValidateFile(this FileInputBase widget, FileInput file)
+    {
+        return FileInputValidation.ValidateFileType(file, widget.Accept);
+    }
+
+    /// <summary>
+    /// Validates multiple files against the widget's accept pattern and max files limit
+    /// </summary>
+    /// <param name="widget">The file input widget</param>
+    /// <param name="files">The files to validate</param>
+    /// <returns>Validation result</returns>
+    public static ValidationResult ValidateFiles(this FileInputBase widget, IEnumerable<FileInput> files)
+    {
+        var filesList = files.ToList();
+
+        // Validate file count first
+        var countValidation = FileInputValidation.ValidateFileCount(filesList, widget.MaxFiles);
+        if (!countValidation.IsValid)
+        {
+            return countValidation;
+        }
+
+        // Then validate file types
+        return FileInputValidation.ValidateFileTypes(filesList, widget.Accept);
+    }
+
+
 }

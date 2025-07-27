@@ -11,42 +11,42 @@ public static class UseWebhookExtensions
 {
     // Synchronous
 
-    public static Uri UseWebhook<TView>(this TView view, Func<HttpRequest, IActionResult> handler) where TView : ViewBase =>
+    public static WebhookEndpoint UseWebhook<TView>(this TView view, Func<HttpRequest, IActionResult> handler) where TView : ViewBase =>
         view.Context.UseWebhook(handler);
 
-    public static Uri UseWebhook<TView>(this TView view, Action<HttpRequest> handler) where TView : ViewBase =>
+    public static WebhookEndpoint UseWebhook<TView>(this TView view, Action<HttpRequest> handler) where TView : ViewBase =>
         view.Context.UseWebhook(handler);
 
-    public static Uri UseWebhook(this IViewContext context, Action<HttpRequest> handler) =>
+    public static WebhookEndpoint UseWebhook(this IViewContext context, Action<HttpRequest> handler) =>
         context.UseWebhook(e =>
         {
             handler(e);
             return Task.CompletedTask;
         });
 
-    public static Uri UseWebhook(this IViewContext context, Func<HttpRequest, IActionResult> handler) =>
+    public static WebhookEndpoint UseWebhook(this IViewContext context, Func<HttpRequest, IActionResult> handler) =>
         context.UseWebhook(e => Task.FromResult(handler(e)));
 
     // Asynchronous
 
-    public static Uri UseWebhook<TView>(this TView view, Func<HttpRequest, Task<IActionResult>> handler) where TView : ViewBase =>
+    public static WebhookEndpoint UseWebhook<TView>(this TView view, Func<HttpRequest, Task<IActionResult>> handler) where TView : ViewBase =>
         view.Context.UseWebhook(handler);
 
-    public static Uri UseWebhook<TView>(this TView view, Func<HttpRequest, Task> handler) where TView : ViewBase =>
+    public static WebhookEndpoint UseWebhook<TView>(this TView view, Func<HttpRequest, Task> handler) where TView : ViewBase =>
         view.Context.UseWebhook(async e =>
         {
             await handler(e);
             return new OkResult();
         });
 
-    public static Uri UseWebhook(this IViewContext context, Func<HttpRequest, Task> handler) =>
+    public static WebhookEndpoint UseWebhook(this IViewContext context, Func<HttpRequest, Task> handler) =>
         context.UseWebhook(async e =>
         {
             await handler(e);
             return new OkResult();
         });
 
-    public static Uri UseWebhook(this IViewContext context, Func<HttpRequest, Task<IActionResult>> handler)
+    public static WebhookEndpoint UseWebhook(this IViewContext context, Func<HttpRequest, Task<IActionResult>> handler)
     {
         var webhookId = context.UseState(() => Guid.NewGuid().ToString(), false);
         var webhookController = context.UseService<IWebhookRegistry>();
@@ -54,8 +54,15 @@ public static class UseWebhookExtensions
 
         context.UseEffect(() => webhookController.Register(webhookId.Value, handler), [EffectTrigger.AfterInit()]);
 
-        return new Uri($"{args.Scheme}://{args.Host}/webhook/{webhookId.Value}");
+        return new WebhookEndpoint($"{args.Scheme}://{args.Host}/webhook", webhookId.Value);
     }
+}
+
+public record WebhookEndpoint(string BaseUrl, string Id)
+{
+    public Uri GetUri(bool includeIdInPath = true) => includeIdInPath
+        ? new Uri($"{BaseUrl}/{Id}")
+        : new Uri(BaseUrl);
 }
 
 public interface IWebhookRegistry
@@ -69,8 +76,24 @@ public class WebhookController : Controller, IWebhookRegistry
 
     [Route("webhook/{id}")]
     [HttpGet, HttpPost]
-    public Task<IActionResult> HandleWebhook(string id)
+    public Task<IActionResult> HandleWebhookWithIdInPath(string id)
     {
+        if (Handlers.TryGetValue(id, out var handler))
+        {
+            return handler(Request);
+        }
+        return Task.FromResult<IActionResult>(NotFound());
+    }
+
+    [Route("webhook")]
+    [HttpGet, HttpPost]
+    public Task<IActionResult> HandleWebhookWithIdInStateQueryParameter([FromQuery(Name = "state")] string? id)
+    {
+        if (string.IsNullOrEmpty(id))
+        {
+            return Task.FromResult<IActionResult>(BadRequest("The 'state' query parameter is required."));
+        }
+
         if (Handlers.TryGetValue(id, out var handler))
         {
             return handler(Request);

@@ -52,8 +52,8 @@ public class ViewContext : IViewContext
         _callingIndex = 0;
     }
 
-    public IState<T> UseState<T>(T initialValue, bool buildOnChange = true) =>
-        UseState(() => initialValue, buildOnChange);
+    public IState<T> UseState<T>(T? initialValue = default, bool buildOnChange = true) =>
+        UseState(() => initialValue!, buildOnChange);
 
     public IState<T> UseState<T>(Func<T> buildInitialValue, bool buildOnChange = true)
     {

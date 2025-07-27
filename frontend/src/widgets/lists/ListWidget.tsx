@@ -35,7 +35,7 @@ export const ListWidget = ({ children }: ListWidgetProps) => {
               className={cn(
                 'absolute top-0 left-0 w-full flex items-center',
                 index !== rowVirtualizer.getVirtualItems().length - 1 &&
-                  'border-b border-gray-200'
+                  'border-b border-border'
               )}
               style={{
                 height: `${virtualRow.size}px`,

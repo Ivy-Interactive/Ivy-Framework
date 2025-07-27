@@ -404,3 +404,5 @@ FodyWeavers.xsd
 
 # Possible Playwright test results in root folder
 test-results/
+/Ivy/.claude/settings.local.json
+/Ivy.Samples/.claude/settings.local.json

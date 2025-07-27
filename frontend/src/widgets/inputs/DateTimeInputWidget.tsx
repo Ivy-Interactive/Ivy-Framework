@@ -67,9 +67,9 @@ const DateVariant: React.FC<DateVariantProps> = ({
   const date = value ? new Date(value) : undefined;
   const showClear = nullable && !disabled && value != null && value !== '';
 
-  const handleClear = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleClear = (e?: React.MouseEvent) => {
+    e?.preventDefault();
+    e?.stopPropagation();
     onDateChange(undefined);
   };
 
@@ -89,9 +89,10 @@ const DateVariant: React.FC<DateVariantProps> = ({
             disabled={disabled}
             variant="outline"
             className={cn(
-              'w-full justify-start text-left font-normal pr-20', // pr-20 for clear+icon
+              'w-full justify-start text-left font-normal pr-20 cursor-pointer', // pr-20 for clear+icon
               !date && 'text-muted-foreground',
-              invalid && inputStyles.invalidInput
+              invalid && inputStyles.invalidInput,
+              disabled && 'cursor-not-allowed'
             )}
             data-testid={dataTestId}
           >
@@ -105,16 +106,23 @@ const DateVariant: React.FC<DateVariantProps> = ({
             {(showClear || invalid) && (
               <span className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 pointer-events-auto">
                 {showClear && (
-                  <button
-                    type="button"
+                  <span
+                    role="button"
                     tabIndex={-1}
                     aria-label="Clear"
-                    onClick={handleClear}
-                    className="p-1 rounded hover:bg-gray-100 focus:outline-none"
+                    onClick={e => handleClear(e)}
+                    onKeyDown={e => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleClear();
+                      }
+                    }}
+                    className="p-1 rounded hover:bg-gray-100 focus:outline-none cursor-pointer"
                     style={{ pointerEvents: 'auto' }}
                   >
                     <X className="h-4 w-4 text-gray-400 hover:text-gray-600" />
-                  </button>
+                  </span>
                 )}
                 {invalid && <InvalidIcon message={invalid} />}
               </span>
@@ -149,9 +157,9 @@ const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
   const date = value ? new Date(value) : undefined;
   const showClear = nullable && !disabled && value != null && value !== '';
 
-  const handleClear = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleClear = (e?: React.MouseEvent) => {
+    e?.preventDefault();
+    e?.stopPropagation();
     onDateChange(undefined);
   };
 
@@ -163,15 +171,20 @@ const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
     return '00:00:00';
   });
 
-  // Update local time when date changes
+  // Track if user is actively editing the time input
+  const [isEditingTime, setIsEditingTime] = useState(false);
+
+  // Update local time when date changes, but only if user is not actively editing
   React.useEffect(() => {
-    if (date) {
-      const newTimeValue = format(date, formatProp || 'HH:mm:ss');
-      setLocalTimeValue(newTimeValue);
-    } else {
-      setLocalTimeValue('00:00:00');
+    if (!isEditingTime) {
+      if (date) {
+        const newTimeValue = format(date, formatProp || 'HH:mm:ss');
+        setLocalTimeValue(newTimeValue);
+      } else {
+        setLocalTimeValue('00:00:00');
+      }
     }
-  }, [date, formatProp]);
+  }, [date, formatProp, isEditingTime]);
 
   const handleDateSelect = useCallback(
     (selectedDate: Date | undefined) => {
@@ -197,11 +210,13 @@ const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const newTimeValue = e.target.value;
       setLocalTimeValue(newTimeValue);
+      setIsEditingTime(true);
     },
     []
   );
 
   const handleTimeBlur = useCallback(() => {
+    setIsEditingTime(false);
     // When time input loses focus, update the parent
     if (date && localTimeValue) {
       const [hours, minutes, seconds] = localTimeValue.split(':').map(Number);
@@ -222,6 +237,7 @@ const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
     (e: React.KeyboardEvent<HTMLInputElement>) => {
       // When user presses Enter, update the parent
       if (e.key === 'Enter') {
+        setIsEditingTime(false);
         if (date && localTimeValue) {
           const [hours, minutes, seconds] = localTimeValue
             .split(':')
@@ -244,6 +260,10 @@ const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
     [date, localTimeValue, onDateChange, onTimeChange]
   );
 
+  const handleTimeFocus = useCallback(() => {
+    setIsEditingTime(true);
+  }, []);
+
   return (
     <div className="relative flex items-center gap-2">
       <Popover open={open} onOpenChange={setOpen}>
@@ -252,9 +272,10 @@ const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
             disabled={disabled}
             variant="outline"
             className={cn(
-              'w-full justify-start text-left font-normal pr-20', // pr-20 for clear+icon
+              'w-full justify-start text-left font-normal pr-20 cursor-pointer', // pr-20 for clear+icon
               !date && 'text-muted-foreground',
-              invalid && inputStyles.invalidInput
+              invalid && inputStyles.invalidInput,
+              disabled && 'cursor-not-allowed'
             )}
             data-testid={dataTestId}
           >
@@ -273,10 +294,10 @@ const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
                     tabIndex={-1}
                     aria-label="Clear"
                     onClick={handleClear}
-                    className="p-1 rounded hover:bg-gray-100 focus:outline-none"
+                    className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
                     style={{ pointerEvents: 'auto' }}
                   >
-                    <X className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+                    <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
                   </button>
                 )}
                 {invalid && <InvalidIcon message={invalid} />}
@@ -299,6 +320,7 @@ const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
                 step="1"
                 value={localTimeValue}
                 onChange={handleTimeChange}
+                onFocus={handleTimeFocus}
                 onBlur={handleTimeBlur}
                 onKeyDown={handleTimeKeyDown}
                 disabled={disabled}
@@ -416,8 +438,9 @@ const TimeVariant: React.FC<TimeVariantProps> = ({
           disabled={disabled}
           placeholder={placeholder || 'Select time'}
           className={cn(
-            'bg-background appearance-none [&::-webkit-calendar-picker-indicator]:hidden pr-20', // pr-20 for clear+icon
-            invalid && inputStyles.invalidInput
+            'bg-background appearance-none [&::-webkit-calendar-picker-indicator]:hidden pr-20 cursor-pointer', // pr-20 for clear+icon
+            invalid && inputStyles.invalidInput,
+            disabled && 'cursor-not-allowed'
           )}
         />
         {(showClear || invalid) && (
@@ -428,10 +451,10 @@ const TimeVariant: React.FC<TimeVariantProps> = ({
                 tabIndex={-1}
                 aria-label="Clear"
                 onClick={handleClear}
-                className="p-1 rounded hover:bg-gray-100 focus:outline-none"
+                className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
                 style={{ pointerEvents: 'auto' }}
               >
-                <X className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+                <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
               </button>
             )}
             {invalid && <InvalidIcon message={invalid} />}

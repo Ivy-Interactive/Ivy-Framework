@@ -6,10 +6,12 @@ namespace Ivy.Samples.Apps;
 public abstract class SampleBase : ViewBase
 {
     private readonly Align? _showCodePosition;
+    private readonly Thickness? _showCodeOffset;
 
-    protected SampleBase(Align? showCodePosition = Align.BottomLeft)
+    protected SampleBase(Align? showCodePosition = Align.BottomRight, Thickness? showCodeOffset = null)
     {
         _showCodePosition = showCodePosition;
+        _showCodeOffset = showCodeOffset ?? new Thickness(0, 0, 15, 2);
     }
 
     protected abstract object? BuildSample();
@@ -20,12 +22,15 @@ public abstract class SampleBase : ViewBase
 
         return new Fragment(
             BuildSample(),
-            _showCodePosition != null ? FloatingLayerExtensions.Align(new FloatingPanel(new Button("Show Code")
+            _showCodePosition != null ? new FloatingPanel(new Button("Show Code")
                 .Variant(ButtonVariant.Outline)
                 .Icon(Icons.Code)
                 .Large()
                 .BorderRadius(BorderRadius.Full)
-                .WithSheet(() => new CodeView(runtimeType), runtimeType.FullName![12..].Replace(".", "/") + ".cs", width: Size.Fraction(1 / 2f))), _showCodePosition.Value) : null
+                .WithSheet(() => new CodeView(runtimeType), runtimeType.FullName![12..].Replace(".", "/") + ".cs", width: Size.Fraction(1 / 2f)))
+                .Align(_showCodePosition.Value)
+                .Offset(_showCodeOffset)
+                : null
         );
     }
 }

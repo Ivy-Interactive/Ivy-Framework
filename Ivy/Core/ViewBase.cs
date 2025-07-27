@@ -90,8 +90,8 @@ public abstract class ViewBase() : IView, IViewContextOwner
     protected object UseService(Type type)
         => this.Context.UseService(type);
 
-    protected IState<T> UseState<T>(T initialValue = default(T), bool buildOnChange = true) =>
-        this.Context.UseState(initialValue, buildOnChange);
+    protected IState<T> UseState<T>(T? initialValue = default(T?), bool buildOnChange = true) =>
+        this.Context.UseState(initialValue!, buildOnChange);
 
     protected IState<T> UseState<T>(Func<T> buildInitialValue, bool buildOnChange = true) =>
         this.Context.UseState(buildInitialValue, buildOnChange);

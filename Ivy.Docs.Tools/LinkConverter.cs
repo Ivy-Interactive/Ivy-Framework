@@ -26,7 +26,8 @@ public partial class LinkConverter(string currentFilePath)
         var text = match.Groups[1].Value;
         var link = match.Groups[2].Value;
 
-        if (link.StartsWith("app://") || link.StartsWith("http://") || link.StartsWith("https://"))
+        if (link.StartsWith("app://") || link.StartsWith("http://") || link.StartsWith("https://") ||
+            link.StartsWith("mailto:") || link.StartsWith("tel:") || link.StartsWith("#"))
         {
             return (null, null); //do nothing
         }

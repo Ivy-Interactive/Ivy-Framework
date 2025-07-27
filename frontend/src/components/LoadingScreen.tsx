@@ -13,7 +13,7 @@ export const LoadingScreen = () => {
   }, []);
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-white/80 z-50">
+    <div className="flex items-center justify-center h-screen -p-4 -m-4">
       {showAnimation && <Loading />}
     </div>
   );

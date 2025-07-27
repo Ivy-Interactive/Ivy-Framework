@@ -2,6 +2,7 @@
 using System.Reflection;
 using System.Security.Claims;
 using System.Text;
+using Ivy.Hooks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -63,7 +64,7 @@ public class BasicAuthProvider : IAuthProvider
 
     public Task<AuthToken?> RefreshJwtAsync(AuthToken jwt) => Task.FromResult<AuthToken?>(jwt);
 
-    public Task<Uri> GetOAuthUriAsync(AuthOption option, Uri callbackUri)
+    public Task<Uri> GetOAuthUriAsync(AuthOption option, WebhookEndpoint callback)
     {
         throw new NotImplementedException();
     }

@@ -63,7 +63,6 @@ public static class AppHelpers
                 Path = path,
                 IsVisible = !type.Name.StartsWith("_") && appAttribute.IsVisible,
                 IsIndex = type.Name is "_Index" or "_IndexApp",
-                RemoveIvyBranding = appAttribute.RemoveIvyBranding,
                 Order = appAttribute.Order,
                 GroupExpanded = appAttribute.GroupExpanded,
                 DocumentSource = appAttribute.DocumentSource

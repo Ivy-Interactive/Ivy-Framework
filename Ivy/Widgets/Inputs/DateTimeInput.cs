@@ -203,7 +203,6 @@ public static class DateTimeInputExtensions
         return input;
     }
 
-    public static DateTimeInputBase Title(this DateTimeInputBase widget, string title) => widget with { Placeholder = title };
     public static DateTimeInputBase Disabled(this DateTimeInputBase widget, bool disabled = true) => widget with { Disabled = disabled };
     public static DateTimeInputBase Variant(this DateTimeInputBase widget, DateTimeInputs variant) => widget with { Variant = variant };
     public static DateTimeInputBase Placeholder(this DateTimeInputBase widget, string placeholder) => widget with { Placeholder = placeholder };

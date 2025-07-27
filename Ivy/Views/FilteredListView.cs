@@ -1,9 +1,9 @@
 ﻿using System.Reactive.Linq;
-using Ivy.Blades;
 using Ivy.Core;
 using Ivy.Core.Hooks;
 using Ivy.Helpers;
 using Ivy.Shared;
+using Ivy.Views.Blades;
 
 namespace Ivy.Views;
 

@@ -8,7 +8,7 @@ import {
 } from '@/components/ui/sheet';
 import { getWidth } from '@/lib/styles';
 import { cn } from '@/lib/utils';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 interface SheetWidgetProps {
   id: string;
@@ -28,10 +28,22 @@ export const SheetWidget: React.FC<SheetWidgetProps> = ({
   width,
 }) => {
   const eventHandler = useEventHandler();
+  const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    // Set sheet to open state when component mounts
+    setIsOpen(true);
+  }, []);
+
+  const handleClose = () => {
+    setIsOpen(false);
+    // Delay the event handler to allow animation to complete
+    setTimeout(() => eventHandler('OnClose', id, []), 300);
+  };
 
   if (!slots?.Content) {
     return (
-      <div className="text-red-500">
+      <div className="text-destructive">
         Error: Sheet requires both Trigger and Content slots.
       </div>
     );
@@ -42,10 +54,13 @@ export const SheetWidget: React.FC<SheetWidgetProps> = ({
   };
 
   return (
-    <Sheet open={true} onOpenChange={() => eventHandler('OnClose', id, [])}>
+    <Sheet open={isOpen} onOpenChange={handleClose}>
       <SheetContent
         style={styles}
-        className={cn('h-full flex flex-col p-0 gap-0')}
+        className={cn(
+          'h-full flex flex-col p-0 gap-0',
+          isOpen ? 'sheet-animate-enter' : 'sheet-animate-exit'
+        )}
         onOpenAutoFocus={e => {
           e.preventDefault();
         }}

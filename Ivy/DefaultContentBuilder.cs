@@ -7,8 +7,8 @@ using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
 using Ivy.Helpers;
 using Ivy.Shared;
-using Ivy.Tables;
 using Ivy.Views;
+using Ivy.Views.Tables;
 
 namespace Ivy;
 

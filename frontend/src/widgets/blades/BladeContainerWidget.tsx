@@ -34,13 +34,13 @@ export const BladeContainerWidget: React.FC<BladeContainerWidgetProps> = ({
   }, []);
 
   return (
-    <div className="bg-gray-300 remove-ancestor-padding h-screen w-screen">
+    <div className="bg-gray-300 remove-ancestor-padding h-full">
       <ScrollArea
         ref={scrollRef}
         className="h-full w-full overflow-y-hidden"
         type="hover"
       >
-        <div className="flex w-max" ref={containerRef}>
+        <div className="flex w-max h-full" ref={containerRef}>
           {children}
         </div>
       </ScrollArea>

@@ -39,14 +39,11 @@ import {
 } from './shared';
 import { getHeight, getWidth } from '@/lib/styles';
 import { StackOffsetType } from 'recharts/types/util/types';
-
-interface BarChartData {
-  [key: string]: string | number;
-}
+import { camelCase } from 'lodash';
 
 interface BarChartWidgetProps {
   id: string;
-  data: BarChartData[];
+  data: Record<string, unknown>[];
   width?: string;
   height?: string;
   bars?: ExtendedBarProps[];
@@ -100,7 +97,7 @@ const BarChartWidget: React.FC<BarChartWidgetProps> = ({
     <ChartContainer config={chartConfig} style={styles} className="mt-4">
       <BarChart
         margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
-        layout={layout}
+        layout={camelCase(layout) as 'horizontal' | 'vertical'}
         accessibilityLayer
         data={data}
         stackOffset={stackOffset}

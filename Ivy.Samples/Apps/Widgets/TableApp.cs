@@ -1,5 +1,5 @@
 using Ivy.Shared;
-using Ivy.Tables;
+using Ivy.Views.Tables;
 
 namespace Ivy.Samples.Apps.Widgets;
 

@@ -309,7 +309,7 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
           placeholder={placeholder}
           className={`${className} ${showArrows ? 'pr-14' : ''} ${
             !isValid ? 'border-red-500' : ''
-          } ${dragState?.isDragging ? 'select-none' : ''}`}
+          } ${dragState?.isDragging ? 'select-none' : ''} cursor-pointer`}
           data-testid={dataTestId}
           {...props}
         />
@@ -343,9 +343,9 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
                   setDisplayValue('');
                   onChange(null);
                 }}
-                className="p-1 rounded hover:bg-gray-100 focus:outline-none"
+                className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
               >
-                <X className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+                <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
               </button>
             )}
           </div>
@@ -360,7 +360,7 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
                 (max !== undefined && value !== null && value >= max)
               }
               onClick={() => handleStep(1)}
-              className="flex-1 px-1 flex items-center justify-center hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 px-1 flex items-center justify-center hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             >
               <ChevronUp className="h-3 w-3" />
             </button>
@@ -372,7 +372,7 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
                 (min !== undefined && value !== null && value <= min)
               }
               onClick={() => handleStep(-1)}
-              className="flex-1 px-1 flex items-center justify-center hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed border-t"
+              className="flex-1 px-1 flex items-center justify-center hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed border-t cursor-pointer"
             >
               <ChevronDown className="h-3 w-3" />
             </button>

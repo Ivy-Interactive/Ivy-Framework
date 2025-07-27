@@ -11,18 +11,27 @@ export interface SidebarNewsWidgetProps {
 const BASE_URL = 'https://ivy.app/news/';
 
 const SidebarNewsWidget = ({ feedUrl }: SidebarNewsWidgetProps) => {
-  const [articles, setArticles] = useState<NewsArticle[]>([]);
+  const [articles, setArticles] = useState<NewsArticle[] | null>(null);
 
   useEffect(() => {
     const fetchArticles = async () => {
-      const response = await fetch(BASE_URL + 'news.json');
-      const data = await response.json();
-      setArticles(data);
+      try {
+        const response = await fetch(BASE_URL + 'news.json');
+        const data = await response.json();
+        if (Array.isArray(data) && data.length > 0) {
+          setArticles(data);
+        } else {
+          setArticles([]);
+        }
+      } catch (error) {
+        console.error('Failed to fetch news:', error);
+        setArticles([]);
+      }
     };
     fetchArticles();
   }, [feedUrl]);
 
-  if (articles.length === 0) return null;
+  if (!articles || articles.length === 0) return null;
 
   return <News articles={articles} />;
 };
@@ -45,36 +54,50 @@ const OPACITY_FACTOR = 0.1;
 const STORAGE_KEY = 'dismissed-news';
 
 function News({ articles }: { articles: NewsArticle[] }) {
-  const [dismissedNews, setDismissedNews] = React.useState<string[]>([]);
+  const [dismissedNews, setDismissedNews] = React.useState<string[] | null>(
+    null
+  );
+  const cleanupDoneRef = React.useRef(false);
 
   useEffect(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
         setDismissedNews(JSON.parse(stored));
+      } else {
+        setDismissedNews([]);
       }
     } catch {
-      // ignore parse errors
+      setDismissedNews([]);
     }
   }, []);
 
   useEffect(() => {
-    setDismissedNews(prev => {
+    if (dismissedNews !== null && !cleanupDoneRef.current) {
       const validIds = new Set(articles.map(a => a.id));
-      const filtered = prev.filter(id => validIds.has(id));
-      if (filtered.length !== prev.length) {
+      const filtered = dismissedNews.filter(id => validIds.has(id));
+      if (filtered.length !== dismissedNews.length) {
+        setDismissedNews(filtered);
         localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered));
       }
-      return filtered;
-    });
-  }, [articles]);
-
-  const cards = articles.filter(({ id }) => !dismissedNews.includes(id));
-  const cardCount = cards.length;
+      cleanupDoneRef.current = true;
+    }
+  }, [articles, dismissedNews]);
 
   const [hasDismissedNews, setHasDismissedNews] = React.useState(false);
+  const [showCompleted, setShowCompleted] = React.useState(false);
 
-  const [showCompleted, setShowCompleted] = React.useState(cardCount > 0);
+  const cards =
+    dismissedNews === null
+      ? []
+      : articles.filter(({ id }) => !dismissedNews.includes(id));
+  const cardCount = cards.length;
+
+  React.useEffect(() => {
+    if (dismissedNews !== null && cardCount > 0) {
+      setShowCompleted(true);
+    }
+  }, [dismissedNews, cardCount]);
 
   React.useEffect(() => {
     let timeout: NodeJS.Timeout | undefined = undefined;
@@ -83,9 +106,11 @@ function News({ articles }: { articles: NewsArticle[] }) {
     return () => clearTimeout(timeout);
   }, [cardCount]);
 
+  if (dismissedNews === null) return null;
   if (cards.length === 0 && !hasDismissedNews) return null;
+  if (cards.length === 0 && showCompleted) return null;
 
-  return cards.length || showCompleted ? (
+  return cards.length > 0 ? (
     <div
       className="group overflow-hidden px-3 pb-3 pt-8"
       data-active={cardCount !== 0}
@@ -125,13 +150,15 @@ function News({ articles }: { articles: NewsArticle[] }) {
                 hideContent={cardCount - idx > 2}
                 active={idx === cardCount - 1}
                 onDismiss={() => {
-                  const updated = [
-                    id,
-                    ...dismissedNews.filter(d => d !== id),
-                  ].slice(0, 50);
-                  setDismissedNews(updated);
-                  setHasDismissedNews(true);
-                  localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+                  if (dismissedNews) {
+                    const updated = [
+                      id,
+                      ...dismissedNews.filter(d => d !== id),
+                    ].slice(0, 50);
+                    setDismissedNews(updated);
+                    setHasDismissedNews(true);
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+                  }
                 }}
               />
             </div>

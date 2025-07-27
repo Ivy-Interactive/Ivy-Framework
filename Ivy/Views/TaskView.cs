@@ -12,7 +12,7 @@ public class TaskView<T>(Task<T> task) : ViewBase
         UseEffect(async () =>
         {
             await task;
-            taskResult.Set(task.Result);
+            taskResult.Set(task.Result!);
         });
 
         return taskResult.Value;

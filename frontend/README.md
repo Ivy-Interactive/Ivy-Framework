@@ -9,9 +9,80 @@ npm run dev
 npm run build
 ```
 
+## Developer Logging
+
+The frontend includes a comprehensive logging system for debugging and development purposes. Detailed logging can be controlled via browser console commands.
+
+### Console Commands
+
+Open the browser console (F12 → Console tab) and use these commands:
+
+```javascript
+// Check current developer options
+getDeveloperOptions();
+// Returns: { showDetailedLogging: false }
+
+// Toggle detailed logging on/off
+toggleDeveloperLogging();
+// Returns: true (if enabled) or false (if disabled)
+// Also logs: "Developer logging enabled" or "Developer logging disabled"
+```
+
+### What Gets Logged
+
+When detailed logging is enabled, you'll see debug messages for:
+
+- **Select Input Interactions**: Value changes, conversions, clear operations
+- **SignalR Communication**: Message processing, updates, events
+- **Widget Tree Operations**: XML conversion, patches, updates
+- **Authentication**: JWT operations, theme changes
+- **Error Handling**: Connection issues, parsing errors
+
+### Log Levels
+
+- **Debug**: Detailed information (controlled by `showDetailedLogging`)
+- **Info**: General information (always visible)
+- **Warn**: Warning messages (always visible)
+- **Error**: Error messages (always visible)
+
+### Persistence
+
+Developer options are stored in localStorage and persist across:
+
+- Page refreshes
+- Browser sessions
+- Browser restarts
+
+### Example Usage
+
+```javascript
+// Enable detailed logging
+toggleDeveloperLogging();
+// Interact with select inputs, forms, etc.
+// See detailed debug messages in console
+
+// Disable detailed logging
+toggleDeveloperLogging();
+// Only info, warn, and error messages will appear
+```
+
 ## Code Quality
 
-This project uses ESLint and Prettier for code quality and formatting, with automatic pre-commit hooks.
+The frontend project uses ESLint and Prettier for code quality and formatting, with automatic pre-commit hooks. It is also responsible for handling `dotnet format` precommit hook for the BE.
+
+### Pre-commit Hooks
+
+We use a Husky npm package to setup precommit hooks for both the FE and the BE.
+
+To get the auto-linting for staged files, you need to have run `npm run install` in `./frontend` at least once. Ideally, you would not then need to run any formatting or lint commands as it will be done for you. In case you want to manually run them, you still can.
+
+If you have Prettier and ESLint, you can configure your IDE to respect the repositories styling guidelines and easily format your code.
+
+If there are issues that auto-linting and formatting can't be resolved, your commit will be blocked from being pushed. If you really need to push, you can specify checks behavior per commit (not recommended):
+
+```bash
+git commit --no-verify -m "Commit message"
+```
 
 ### Code Formatting
 
@@ -40,16 +111,6 @@ Automatically fix linting issues:
 ```bash
 npm run lint:fix
 ```
-
-### Pre-commit Hooks
-
-The project uses Git pre-commit hooks to automatically:
-
-- Run ESLint with auto-fix on staged files
-- Format staged files with Prettier
-- Block commits if any issues remain
-
-The pre-commit hook is configured at the repository root and automatically detects the frontend directory.
 
 ### Configuration Files
 

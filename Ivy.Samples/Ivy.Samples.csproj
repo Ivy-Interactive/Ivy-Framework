@@ -22,14 +22,17 @@
     <DebugType>none</DebugType>
   </PropertyGroup>
 
+  <ItemGroup Condition="'$(UseNuGetPackage)' != 'true'">
+    <ProjectReference Include="../Ivy/Ivy.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(UseNuGetPackage)' == 'true'">
+    <PackageReference Include="Ivy" Version="$(IvyPackageVersion)" />
+  </ItemGroup>
+
   <PropertyGroup Condition="'$(PublishDir)' != ''">
     <RuntimeIdentifiers>win-x64;osx-x64</RuntimeIdentifiers>
   </PropertyGroup>
-  
-  <ItemGroup>
-    <ProjectReference Include="../Ivy.Auth.Supabase/Ivy.Auth.Supabase.csproj" />
-    <ProjectReference Include="../Ivy/Ivy.csproj" />
-  </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="Assets/**/*" />

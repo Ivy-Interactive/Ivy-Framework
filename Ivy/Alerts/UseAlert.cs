@@ -34,7 +34,7 @@ public static class UseAlertExtensions
             }
         }, [alertResult, alertCallback]);
 
-        var view = isOpen.Value ? new AlertView(alertResult, isOpen, alertOptions.Value) : null;
+        var view = isOpen.Value && alertOptions.Value != null ? new AlertView(alertResult, isOpen, alertOptions.Value) : null;
 
         var showAlert = new ShowAlertDelegate((message, callback, title, buttonSet) =>
         {

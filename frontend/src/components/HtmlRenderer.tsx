@@ -1,4 +1,6 @@
 import React from 'react';
+import { ivyTagClassMap } from '@/lib/utils';
+import CopyToClipboardButton from './CopyToClipboardButton';
 
 interface HtmlRendererProps {
   content: string;
@@ -31,6 +33,16 @@ const sanitizeHtml = (
     'b',
     'i',
     'br',
+    'img',
+    'table',
+    'thead',
+    'tbody',
+    'tr',
+    'th',
+    'td',
+    'blockquote',
+    'pre',
+    'code',
   ]
 ): string => {
   const temp = document.createElement('div');
@@ -69,32 +81,91 @@ const sanitizeHtml = (
   return temp.innerHTML;
 };
 
-export const HtmlRenderer: React.FC<HtmlRendererProps> = ({
+function domToReact(node: ChildNode): React.ReactNode {
+  if (node.nodeType === Node.TEXT_NODE) {
+    return node.textContent;
+  }
+  if (node.nodeType !== Node.ELEMENT_NODE) {
+    return null;
+  }
+  const el = node as HTMLElement;
+  const tag = el.tagName.toLowerCase();
+  const className = ivyTagClassMap[tag] || undefined;
+  const children = Array.from(el.childNodes).map(domToReact);
+  const props: Record<string, unknown> = { className };
+
+  // Special handling for different tags
+  if (tag === 'a') {
+    props.href = el.getAttribute('href');
+    props.target = el.getAttribute('target') || undefined;
+    props.rel = el.getAttribute('rel') || undefined;
+    props.onClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+      if (
+        props.href &&
+        typeof props.href === 'string' &&
+        props.href.startsWith('javascript:')
+      ) {
+        e.preventDefault();
+        return;
+      }
+    };
+  } else if (tag === 'img') {
+    props.src = el.getAttribute('src');
+    props.alt = el.getAttribute('alt') || '';
+    props.loading = 'lazy';
+    props.className =
+      'w-32 h-20 bg-gray-300 flex items-center justify-center text-gray-600 text-sm rounded';
+  } else if (tag === 'code') {
+    // Handle code blocks with copy button like in MarkdownRenderer
+    const content = el.textContent || '';
+    return (
+      <div className="relative">
+        <div className="absolute top-2 right-2 z-10">
+          <CopyToClipboardButton textToCopy={content} />
+        </div>
+        <pre className="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto">
+          <code className="text-sm font-mono">{content}</code>
+        </pre>
+      </div>
+    );
+  } else if (tag === 'pre') {
+    // Handle pre tags by just passing through children
+    return <>{children}</>;
+  } else if (tag === 'blockquote') {
+    props.className = 'border-l-4 border-gray-300 pl-4 italic text-gray-600';
+  } else if (tag === 'table') {
+    props.className = 'w-full border-collapse border border-gray-300 my-4';
+  } else if (tag === 'thead') {
+    props.className = 'bg-gray-100';
+  } else if (tag === 'tr') {
+    props.className = 'border border-gray-300';
+  } else if (tag === 'th') {
+    props.className = 'border border-gray-300 p-3 text-left font-semibold';
+  } else if (tag === 'td') {
+    props.className = 'border border-gray-300 p-3';
+  }
+
+  return React.createElement(tag, props, ...children);
+}
+
+export const HtmlRenderer: React.FC<Omit<HtmlRendererProps, 'onLinkClick'>> = ({
   content,
-  className = '',
   allowedTags,
-  onLinkClick,
 }) => {
   // Sanitize the HTML content
   const sanitizedContent = sanitizeHtml(content, allowedTags);
 
-  // Handle link clicks
-  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    const target = e.target as HTMLElement;
-    if (target.tagName === 'A' && onLinkClick) {
-      e.preventDefault();
-      const href = target.getAttribute('href') || '';
-      onLinkClick(e as unknown as React.MouseEvent<HTMLAnchorElement>, href);
-    }
-  };
+  // Parse the sanitized HTML into a DOM tree
+  const temp = document.createElement('div');
+  temp.innerHTML = sanitizedContent;
+  const nodes = Array.from(temp.childNodes);
 
+  // Render as React elements with Ivy classes
   return (
-    <div className={`${className}`}>
-      <div
-        className="prose max-w-none"
-        onClick={handleClick}
-        dangerouslySetInnerHTML={{ __html: sanitizedContent }}
-      />
-    </div>
+    <>
+      {nodes.map((node, i) => (
+        <React.Fragment key={i}>{domToReact(node)}</React.Fragment>
+      ))}
+    </>
   );
 };

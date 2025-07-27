@@ -49,46 +49,85 @@ public class CodeInputApp : SampleBase
             </html>
             """);
 
-        var variants = Layout.Grid().Columns(7)
+        var firstGrid = Layout.Grid().Columns(4)
                | null!
-               | Text.Block("Default")
-               | Text.Block("Disabled")
-               | Text.Block("Invalid")
-               | Text.Block("With Placeholder")
-               | Text.Block("Empty State")
-               | Text.Block("With Copy Button")
+               | Text.InlineCode("Default")
+               | Text.InlineCode("Disabled")
+               | Text.InlineCode("Invalid")
 
                | Text.InlineCode("C#")
                | csharpCode.ToCodeInput().Language(Languages.Csharp)
                | csharpCode.ToCodeInput().Language(Languages.Csharp).Disabled()
                | csharpCode.ToCodeInput().Language(Languages.Csharp).Invalid("Invalid code")
-               | csharpCode.ToCodeInput().Language(Languages.Csharp).Placeholder("Enter C# code here...")
-               | UseState("").ToCodeInput().Language(Languages.Csharp).Placeholder("Enter C# code here...")
-               | csharpCode.ToCodeInput().Language(Languages.Csharp).ShowCopyButton()
 
                | Text.InlineCode("JSON")
                | jsonCode.ToCodeInput().Language(Languages.Json)
                | jsonCode.ToCodeInput().Language(Languages.Json).Disabled()
                | jsonCode.ToCodeInput().Language(Languages.Json).Invalid("Invalid JSON")
-               | jsonCode.ToCodeInput().Language(Languages.Json).Placeholder("Enter JSON here...")
-               | UseState("").ToCodeInput().Language(Languages.Json).Placeholder("Enter JSON here...")
-               | jsonCode.ToCodeInput().Language(Languages.Json).ShowCopyButton()
 
                | Text.InlineCode("SQL")
                | sqlCode.ToCodeInput().Language(Languages.Sql)
                | sqlCode.ToCodeInput().Language(Languages.Sql).Disabled()
                | sqlCode.ToCodeInput().Language(Languages.Sql).Invalid("Invalid SQL")
-               | sqlCode.ToCodeInput().Language(Languages.Sql).Placeholder("Enter SQL query here...")
-               | UseState("").ToCodeInput().Language(Languages.Sql).Placeholder("Enter SQL query here...")
-               | sqlCode.ToCodeInput().Language(Languages.Sql).ShowCopyButton()
 
                | Text.InlineCode("HTML")
                | htmlCode.ToCodeInput().Language(Languages.Html)
                | htmlCode.ToCodeInput().Language(Languages.Html).Disabled()
                | htmlCode.ToCodeInput().Language(Languages.Html).Invalid("Invalid HTML")
+            ;
+
+        var secondGrid = Layout.Grid().Columns(4)
+               | null!
+               | Text.InlineCode("With Placeholder")
+               | Text.InlineCode("Empty State")
+               | Text.InlineCode("With Copy Button")
+
+               | Text.InlineCode("C#")
+               | csharpCode.ToCodeInput().Language(Languages.Csharp).Placeholder("Enter C# code here...")
+               | UseState("").ToCodeInput().Language(Languages.Csharp).Placeholder("Enter C# code here...")
+               | csharpCode.ToCodeInput().Language(Languages.Csharp).ShowCopyButton()
+
+               | Text.InlineCode("JSON")
+               | jsonCode.ToCodeInput().Language(Languages.Json).Placeholder("Enter JSON here...")
+               | UseState("").ToCodeInput().Language(Languages.Json).Placeholder("Enter JSON here...")
+               | jsonCode.ToCodeInput().Language(Languages.Json).ShowCopyButton()
+
+               | Text.InlineCode("SQL")
+               | sqlCode.ToCodeInput().Language(Languages.Sql).Placeholder("Enter SQL query here...")
+               | UseState("").ToCodeInput().Language(Languages.Sql).Placeholder("Enter SQL query here...")
+               | sqlCode.ToCodeInput().Language(Languages.Sql).ShowCopyButton()
+
+               | Text.InlineCode("HTML")
                | htmlCode.ToCodeInput().Language(Languages.Html).Placeholder("Enter HTML here...")
                | UseState("").ToCodeInput().Language(Languages.Html).Placeholder("Enter HTML here...")
                | htmlCode.ToCodeInput().Language(Languages.Html).ShowCopyButton()
+            ;
+
+        var thirdGrid = Layout.Grid().Columns(4)
+               | null!
+               | Text.InlineCode("Invalid + Copy")
+               | null!
+               | null!
+
+               | Text.InlineCode("C#")
+               | csharpCode.ToCodeInput().Language(Languages.Csharp).Invalid("Invalid code").ShowCopyButton()
+               | null!
+               | null!
+
+               | Text.InlineCode("JSON")
+               | jsonCode.ToCodeInput().Language(Languages.Json).Invalid("Invalid JSON").ShowCopyButton()
+               | null!
+               | null!
+
+               | Text.InlineCode("SQL")
+               | sqlCode.ToCodeInput().Language(Languages.Sql).Invalid("Invalid SQL").ShowCopyButton()
+               | null!
+               | null!
+
+               | Text.InlineCode("HTML")
+               | htmlCode.ToCodeInput().Language(Languages.Html).Invalid("Invalid HTML").ShowCopyButton()
+               | null!
+               | null!
             ;
 
         var dataBinding = CreateStringTypeTests();
@@ -96,7 +135,9 @@ public class CodeInputApp : SampleBase
         return Layout.Vertical()
                | Text.H1("CodeInput")
                | Text.H2("Variants")
-               | variants
+               | firstGrid
+               | secondGrid
+               | thirdGrid
                | Text.H2("Data Binding")
                | dataBinding
                ;

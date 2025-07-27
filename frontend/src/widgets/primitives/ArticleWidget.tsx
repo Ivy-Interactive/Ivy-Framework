@@ -39,10 +39,10 @@ export const ArticleWidget: React.FC<ArticleWidgetProps> = ({
   }, []);
 
   return (
-    <div className="flex flex-col gap-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative mt-8 ">
-      <div className="flex gap-8 flex-grow">
+    <div className="flex flex-col gap-2 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative mt-8 ">
+      <div className="flex gap-2 flex-grow">
         <article ref={articleRef} className="w-[48rem]">
-          <div className="flex flex-col gap-8 flex-grow min-h-[calc(100vh+8rem)]">
+          <div className="flex flex-col gap-2 flex-grow min-h-[calc(100vh+8rem)]">
             {children}
           </div>
           {showFooter && (
@@ -103,9 +103,26 @@ export const ArticleWidget: React.FC<ArticleWidgetProps> = ({
             </footer>
           )}
         </article>
-        {showToc && contentLoaded && (
-          <div className="hidden lg:block">
-            <TableOfContents className="sticky top-8" articleRef={articleRef} />
+        {showToc && (
+          <div className="hidden lg:block w-64">
+            {contentLoaded ? (
+              <TableOfContents
+                className="sticky top-8"
+                articleRef={articleRef}
+              />
+            ) : (
+              <div className="sticky top-8 w-64 relative">
+                <div className="font-medium mb-4">Table of Contents</div>
+                <ScrollArea>
+                  <div className="space-y-2">
+                    <div className="h-4 bg-muted rounded animate-pulse w-full"></div>
+                    <div className="h-4 bg-muted rounded animate-pulse w-full"></div>
+                    <div className="h-4 bg-muted rounded animate-pulse w-full"></div>
+                    <div className="h-4 bg-muted rounded animate-pulse w-full"></div>
+                  </div>
+                </ScrollArea>
+              </div>
+            )}
           </div>
         )}
       </div>

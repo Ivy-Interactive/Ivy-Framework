@@ -1,5 +1,5 @@
 ﻿using System.Reflection;
-using Ivy.Tables;
+using Ivy.Views.Tables;
 using Newtonsoft.Json;
 
 namespace Ivy.Docs.Helpers;
@@ -11,7 +11,7 @@ public class WidgetDocsView(string typeName, string? extensionsTypeName, string?
         var type = TypeUtils.GetTypeFromName(typeName);
         Type[] extensionTypes =
         [
-            ..extensionsTypeName.Split(';').Select(TypeUtils.GetTypeFromName).ToArray()!,
+            ..extensionsTypeName?.Split(';').Select(TypeUtils.GetTypeFromName).Where(t => t != null).ToArray() ?? [],
             typeof(WidgetBaseExtensions)
         ];
 
@@ -34,7 +34,7 @@ public class WidgetDocsView(string typeName, string? extensionsTypeName, string?
 
         if (constructors.Any())
         {
-            constructorSection = Layout.Vertical().Gap(8)
+            constructorSection = Layout.Vertical().Gap(2)
                                  | Text.H3("Constructors")
                                  | constructors.ToTable().Width(Size.Full());
         }
@@ -47,18 +47,31 @@ public class WidgetDocsView(string typeName, string? extensionsTypeName, string?
             if (grouped.Any())
             {
                 var tableRows = new List<object[]>();
-                string? lastGroup = null;
-                foreach (var row in grouped)
+                var groupedByGroup = grouped.GroupBy(g => g.Group).ToList();
+
+                foreach (var group in groupedByGroup)
                 {
-                    var groupCell = row.Group != lastGroup ? (object)Text.InlineCode(row.Group) : null;
+                    var typesInGroup = group.ToList();
+                    var nonNullableTypes = typesInGroup.Where(t => t.NonNullable != null).Select(t => t.NonNullable).ToList();
+                    var nullableTypes = typesInGroup.Where(t => t.Nullable != null).Select(t => t.Nullable).ToList();
+
+                    // Create a vertical layout for the types in each column
+                    var nonNullableLayout = nonNullableTypes.Count != 0
+                        ? Layout.Vertical().Gap(2) | nonNullableTypes.ToArray()
+                        : (object)"-";
+
+                    var nullableLayout = nullableTypes.Count != 0
+                        ? Layout.Vertical().Gap(2) | nullableTypes.ToArray()
+                        : (object)"-";
+
                     tableRows.Add(
                     [
-                        groupCell!,
-                        row.NonNullable ?? Text.InlineCode("-"),
-                        row.Nullable ?? Text.InlineCode("-")
+                        group.Key,
+                        nonNullableLayout,
+                        nullableLayout
                     ]);
-                    lastGroup = row.Group;
                 }
+
                 var headerRow = new TableRow(
                     new TableCell("Group").IsHeader(),
                     new TableCell("Type").IsHeader(),
@@ -69,7 +82,7 @@ public class WidgetDocsView(string typeName, string? extensionsTypeName, string?
                     new TableCell(row[1]),
                     new TableCell(row[2])
                 ));
-                supportedTypesSection = Layout.Vertical().Gap(8)
+                supportedTypesSection = Layout.Vertical().Gap(2)
                     | Text.H3("Supported Types")
                     | new Table(
                         new[] { headerRow }.Concat(dataRows).ToArray()
@@ -81,9 +94,10 @@ public class WidgetDocsView(string typeName, string? extensionsTypeName, string?
         var properties = type.GetProperties()
             .Where(p => p.GetCustomAttribute<PropAttribute>() != null)
             .Select(e => TypeUtils.GetPropRecord(e, defaultValueProvider, type, extensionTypes))
+            .Where(e => e.Name != "TestId")
             .OrderBy(e => e.Name);
 
-        var propertySection = Layout.Vertical().Gap(8)
+        var propertySection = Layout.Vertical().Gap(2)
                               | Text.H3("Properties")
                               | properties.ToTable().Width(Size.Full())
             ;
@@ -98,7 +112,7 @@ public class WidgetDocsView(string typeName, string? extensionsTypeName, string?
 
         if (events.Any())
         {
-            eventSection = Layout.Vertical().Gap(8)
+            eventSection = Layout.Vertical().Gap(2)
                            | Text.H3("Events")
                            | events.ToTable().Width(Size.Full())
                 ;
@@ -106,7 +120,7 @@ public class WidgetDocsView(string typeName, string? extensionsTypeName, string?
 
         string? fileName = sourceUrl != null ? System.IO.Path.GetFileName(sourceUrl) : null;
 
-        return Layout.Vertical().Gap(8)
+        return Layout.Vertical().Gap(2)
                | Text.H2("API")
                | (fileName != null
                    ? (Layout.Horizontal().Align(Align.Left).Gap(0) | Icons.Github.ToIcon() |

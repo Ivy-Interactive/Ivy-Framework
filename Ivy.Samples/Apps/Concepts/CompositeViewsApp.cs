@@ -31,9 +31,11 @@ public class CompositeViewsApp : ViewBase
     {
         var loginData = this.UseState(() => new LoginData());
 
-        return Layout.Vertical(
-            new LoginForm(loginData),
-            (loginData.Value.DidLogin ? Ivy.Helpers.Text.Literal($"Logged in as {loginData.Value.Username}") : "")
-        );
+        return new Card(
+            Layout.Vertical(
+                new LoginForm(loginData),
+                (loginData.Value.DidLogin ? Text.Literal($"Logged in as {loginData.Value.Username}") : "")
+            )
+        ).Title("Composite Views Demo");
     }
 }

@@ -116,16 +116,21 @@ This project and everyone participating in it is governed by our [Code of Conduc
 Before submitting your code, ensure it follows the project's linting and formatting rules:
 
 #### Backend (C#)
+
 - Use `dotnet format` to format C# code according to the project's ruleset
 - Run this command in the root directory or specific project directories
 
 #### Frontend (TypeScript/React)
+
 - Use `npm run lint:fix` to automatically fix ESLint issues
 - Use `npm run format` to format code with Prettier
 - These commands should be run from the `frontend/` directory
 
 #### Pre-commit Hooks
-The project uses pre-commit hooks that will automatically run linting and formatting on staged files. Make sure your code passes these checks before committing.
+
+The project uses pre-commit hooks that will automatically run linting and formatting on staged files. Make sure your code passes these checks before committing. More details how pre-commit hooks are being set up can be found in `./frontend/README.md`
+
+TL;DR, if you have run `npm install` in the `./frontend`, most likely all pre-commit hooks will be working for you, that cover linting and formatting for Ivy-Framework.
 
 ### C# Guidelines
 
@@ -226,4 +231,4 @@ When reporting an issue, include:
 - **GitHub Discussions** - For questions and general discussion
 - **Documentation** - Check the [Ivy.Docs](Ivy.Docs/) for guides and examples
 
-Thank you for contributing to Ivy Framework! Your contributions help make Ivy better for everyone. 
+Thank you for contributing to Ivy Framework! Your contributions help make Ivy better for everyone.

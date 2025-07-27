@@ -173,6 +173,60 @@ public class DateTimeInputApp : SampleBase
                 .TestId("datetime-input-timeonly-nullable-binding")
             | Text.InlineCode(nullableTimeState.Value?.ToString("HH:mm:ss") ?? "null");
 
+        // Placeholder examples
+        var placeholderExamplesGrid = Layout.Grid().Columns(3)
+            | Text.InlineCode("Variant")
+            | Text.InlineCode("Placeholder Text")
+            | Text.InlineCode("Input")
+
+            | Text.InlineCode("Date")
+            | Text.InlineCode("Birthday")
+            | nullableDateState
+                .ToDateTimeInput()
+                .Variant(DateTimeInputs.Date)
+                .Placeholder("Birthday")
+                .TestId("datetime-input-placeholder-birthday")
+
+            | Text.InlineCode("Date")
+            | Text.InlineCode("When did you start?")
+            | nullableDateState
+                .ToDateTimeInput()
+                .Variant(DateTimeInputs.Date)
+                .Placeholder("When did you start?")
+                .TestId("datetime-input-placeholder-start-date")
+
+            | Text.InlineCode("DateTime")
+            | Text.InlineCode("Meeting time")
+            | nullableDateState
+                .ToDateTimeInput()
+                .Variant(DateTimeInputs.DateTime)
+                .Placeholder("Meeting time")
+                .TestId("datetime-input-placeholder-meeting")
+
+            | Text.InlineCode("DateTime")
+            | Text.InlineCode("Deadline")
+            | nullableDateState
+                .ToDateTimeInput()
+                .Variant(DateTimeInputs.DateTime)
+                .Placeholder("Deadline")
+                .TestId("datetime-input-placeholder-deadline")
+
+            | Text.InlineCode("Time")
+            | Text.InlineCode("Start time")
+            | nullableTimeState
+                .ToDateTimeInput()
+                .Variant(DateTimeInputs.Time)
+                .Placeholder("Start time")
+                .TestId("datetime-input-placeholder-start-time")
+
+            | Text.InlineCode("Time")
+            | Text.InlineCode("Lunch break")
+            | nullableTimeState
+                .ToDateTimeInput()
+                .Variant(DateTimeInputs.Time)
+                .Placeholder("Lunch break")
+                .TestId("datetime-input-placeholder-lunch-time");
+
         // Current values section
         var currentValues = Layout.Vertical()
             | Text.H3("Current Values")
@@ -192,6 +246,8 @@ public class DateTimeInputApp : SampleBase
             | variantsGrid
             | Text.H2("Data Binding")
             | dataBindingGrid
+            | Text.H2("Placeholder Examples")
+            | placeholderExamplesGrid
             | currentValues;
     }
 }

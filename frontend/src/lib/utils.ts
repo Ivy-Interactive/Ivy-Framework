@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { textBlockClassMap } from './textBlockClassMap';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -60,3 +61,6 @@ export function camelCase(titleCase: unknown): unknown {
   }
   return titleCase.charAt(0).toLowerCase() + titleCase.slice(1);
 }
+
+// Shared Ivy tag-to-class map for headings, paragraphs, lists, tables, etc.
+export const ivyTagClassMap = textBlockClassMap;

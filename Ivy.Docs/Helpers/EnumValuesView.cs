@@ -21,7 +21,7 @@ public class EnumValuesView(Type type) : ViewBase
             client.CopyToClipboard(value);
             client.Toast($"{value} copied to clipboard.");
         }
-        return Layout.Vertical().Gap(8)
+        return Layout.Vertical().Gap(2)
                | Text.H1(type.Name)
                | new List(enumValues.Select(e => new ListItem(e, onClick: CopyToClipboard)))
             ;

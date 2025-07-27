@@ -28,7 +28,7 @@ export const FooterLayoutWidget: React.FC<FooterLayoutWidgetProps> = ({
           </ScrollArea>
         </div>
       </div>
-      <div className="flex-none p-4 border-t w-full bg-white">
+      <div className="flex-none p-4 border-t w-full bg-background">
         {slots.Footer}
       </div>
     </div>

@@ -367,9 +367,10 @@ public static class TypeUtils
             // Pair nullable/non-nullable enums/other
             if (!result.Any(r => r.NonNullable?.ToString() == GetTypeDescription(baseType, false).ToString()))
             {
+                var nullableType = typeof(Nullable<>).MakeGenericType(baseType);
                 result.Add((group,
                     typeSet.Contains(baseType) ? GetTypeDescription(baseType, false) : null!,
-                    typeSet.Contains(typeof(Nullable<>).MakeGenericType(baseType)) ? GetTypeDescription(baseType, true) : null!));
+                    typeSet.Contains(nullableType) ? GetTypeDescription(nullableType, true) : null!));
             }
         }
         return result;

@@ -12,7 +12,7 @@ public class ObservableView<T>(IObservable<T> observable) : ViewBase
 
         this.UseEffect(() =>
         {
-            return observable.Subscribe(e => lastObserved.Set(e));
+            return observable.Subscribe(e => lastObserved.Set(e!));
         });
 
         return lastObserved.Value;

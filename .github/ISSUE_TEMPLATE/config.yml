@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: GitHub Discussions
+    url: https://github.com/Ivy-Interactive/Ivy-Framework/discussions
+    about: Ask questions and discuss ideas with the community
+  - name: Documentation
+    url: https://github.com/Ivy-Interactive/Ivy-Framework/tree/main/Ivy.Docs
+    about: Check the documentation for guides and examples

@@ -18,4 +18,4 @@ action<Event<Button>> onClick = e =>
 };
 ```
 
-<WidgetDocs Type="Ivy.Blade" ExtensionTypes="Ivy.Blades.UseBladesExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Blades/UseBlades.cs"/>
+<WidgetDocs Type="Ivy.Blade" ExtensionTypes="Ivy.Views.Blades.UseBladesExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Blades/UseBlades.cs"/>

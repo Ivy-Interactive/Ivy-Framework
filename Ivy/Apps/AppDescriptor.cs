@@ -1,6 +1,7 @@
 using Ivy.Core;
 using Ivy.Core.Hooks;
 using Ivy.Shared;
+using Ivy.Views;
 
 namespace Ivy.Apps;
 
@@ -27,7 +28,7 @@ public class AppDescriptor : IAppRepositoryNode
 
     public int Order { get; set; }
 
-    public string Url => "app.html?appId=" + Id;
+    public string Url => "index.html?appId=" + Id;
 
     public Func<ViewBase>? ViewFactory { get; init; }
 
@@ -38,8 +39,6 @@ public class AppDescriptor : IAppRepositoryNode
     public bool IsIndex { get; set; } = false;
 
     public bool IsChrome => Id == AppIds.Chrome;
-
-    public required bool RemoveIvyBranding { get; init; }
 
     public bool GroupExpanded { get; set; }
 

@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using Ivy.Hooks;
 using Ivy.Shared;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -50,7 +51,7 @@ public class SupabaseAuthProvider : IAuthProvider
         return authToken;
     }
 
-    public async Task<Uri> GetOAuthUriAsync(AuthOption option, Uri callbackUri)
+    public async Task<Uri> GetOAuthUriAsync(AuthOption option, WebhookEndpoint callback)
     {
         var provider = option.Id switch
         {
@@ -70,7 +71,7 @@ public class SupabaseAuthProvider : IAuthProvider
 
         var signInOptions = new SignInOptions
         {
-            RedirectTo = callbackUri.ToString(),
+            RedirectTo = callback.GetUri().ToString(),
             FlowType = Constants.OAuthFlowType.PKCE,
         };
 
@@ -170,6 +171,11 @@ public class SupabaseAuthProvider : IAuthProvider
         var user = await _client.Auth.GetUser(jwt);
 
         if (user == null)
+        {
+            return null;
+        }
+
+        if (user.Id == null || user.Email == null)
         {
             return null;
         }

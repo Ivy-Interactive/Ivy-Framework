@@ -1,5 +1,6 @@
 ﻿using Ivy.Charts;
 using Ivy.Shared;
+using Ivy.Views.Charts;
 using Microsoft.EntityFrameworkCore;
 
 namespace Ivy.Samples.Apps.Demos;
@@ -117,6 +118,6 @@ public class BrowsersView : ViewBase
             new { Name = "Others", Value = 15 }
         };
 
-        return new Card().Title("Browser Composition") | data.ToPieChart(e => e.Name, e => e.Sum(f => f.Value), PieChartStyles.Dashboard);
+        return new Card().Title("Browser Composition").Height("100%") | data.ToPieChart(e => e.Name, e => e.Sum(f => f.Value), PieChartStyles.Dashboard);
     }
 }

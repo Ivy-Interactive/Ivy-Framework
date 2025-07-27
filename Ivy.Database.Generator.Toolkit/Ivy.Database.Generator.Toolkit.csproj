@@ -42,8 +42,4 @@
     <PackageReference Include="Spectre.Console.Cli" Version="0.50.0" />
   </ItemGroup>
   
-  <ItemGroup>
-    <ProjectReference Include="../../Ivy/Ivy.Console/Ivy.Console.csproj" />
-  </ItemGroup>
-  
 </Project>

@@ -34,9 +34,4 @@ public static class ClientExtensions
     {
         client.Sender.Send("SetTheme", theme.ToString());
     }
-
-    internal static void SetChatPanelUrl(this IClientProvider client, string url)
-    {
-        client.Sender.Send("$SetChatPanelUrl", url);
-    }
 }

@@ -88,8 +88,8 @@ public static class MarkdownConverter
         codeBuilder.AppendLine("using Ivy.Apps;");
         codeBuilder.AppendLine("using Ivy.Shared;");
         codeBuilder.AppendLine("using Ivy.Core;");
-        codeBuilder.AppendLine("using static Ivy.Helpers.Layout;");
-        codeBuilder.AppendLine("using static Ivy.Helpers.Text;");
+        codeBuilder.AppendLine("using static Ivy.Views.Layout;");
+        codeBuilder.AppendLine("using static Ivy.Views.Text;");
         codeBuilder.AppendLine();
         codeBuilder.AppendLine($"namespace {@namespace};");
         codeBuilder.AppendLine();
@@ -351,7 +351,7 @@ public static class MarkdownConverter
             codeBuilder.AppendTab(3).AppendLine("| Tabs( ");
             codeBuilder.AppendTab(4).AppendLine($"new Tab(\"Demo\", {insertCode}),");
             AppendAsMultiLineStringIfNecessary(4, codeContent, codeBuilder, "new Tab(\"Code\", new Code(", $",{MapLanguageToEnum(language)}))");
-            codeBuilder.AppendTab(3).AppendLine(").Height(Size.Fit()).Padding(0, 8, 0, 0)");
+            codeBuilder.AppendTab(3).AppendLine(").Height(Size.Fit()).Padding(0, 8, 0, 0).Variant(TabsVariant.Content)");
         }
         else if (arguments is "demo-below")
         {

@@ -1,0 +1,81 @@
+name: Feature Request
+description: Suggest an idea for Ivy Framework
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to suggest a new feature!
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What the feature should do
+      placeholder: Describe the feature you'd like to see...
+
+  - type: textarea
+    id: use-case
+    attributes:
+      label: Use Case
+      description: Why this feature is needed
+      placeholder: |
+        Explain the problem this feature would solve or the value it would provide:
+        - What is the current limitation?
+        - How would this feature help users?
+        - What is the impact of not having this feature?
+
+  - type: textarea
+    id: proposed-solution
+    attributes:
+      label: Proposed Solution
+      description: How it could be implemented
+      placeholder: |
+        Describe how you think this feature should work:
+        - What would the API look like?
+        - How would users interact with it?
+        - Any technical considerations?
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: Other ways to achieve the goal
+      placeholder: |
+        Have you considered any alternative solutions or workarounds?
+        - What other approaches could solve this problem?
+        - Why is your proposed solution better?
+
+  - type: textarea
+    id: impact
+    attributes:
+      label: Impact
+      description: Who would benefit from this feature
+      placeholder: |
+        Who would benefit from this feature?
+        - What types of users/developers would use this?
+        - How frequently would this feature be used?
+        - Would this be a breaking change?
+
+  - type: textarea
+    id: code-examples
+    attributes:
+      label: Code Examples
+      description: Show how the feature might work
+      placeholder: |
+        ```csharp
+        // Example of how the feature might be used
+        ```
+      render: csharp
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Add any other context about the feature request here
+      placeholder: |
+        Any additional information that might be helpful:
+        - Links to related issues or discussions
+        - Screenshots or mockups
+        - References to similar features in other frameworks

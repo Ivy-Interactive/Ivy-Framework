@@ -1,13 +1,27 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import IvyLogo from './IvyLogo';
 
 export default function MadeWithIvy() {
   const [isHovered, setIsHovered] = useState(false);
+  const [shouldShow, setShouldShow] = useState(false);
+
+  useEffect(() => {
+    const checkWindowSize = () => {
+      setShouldShow(window.innerWidth >= 600 && window.innerHeight >= 600);
+    };
+
+    checkWindowSize();
+    window.addEventListener('resize', checkWindowSize);
+
+    return () => window.removeEventListener('resize', checkWindowSize);
+  }, []);
+
+  if (!shouldShow) return null;
 
   return (
     <div
-      className="bg-primary fixed bottom-0 right-0 z-50 overflow-hidden rounded-tl-full "
+      className="bg-primary fixed bottom-0 right-0 z-100 overflow-hidden rounded-tl-full "
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >

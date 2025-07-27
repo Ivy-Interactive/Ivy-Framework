@@ -69,6 +69,7 @@
     "excel-style-dataformatter": "^2.0.1",
     "fast-json-patch": "^3.1.1",
     "framer-motion": "^12.23.0",
+    "jose": "^6.0.12",
     "google-protobuf": "^3.21.4",
     "grpc-web": "^1.5.0",
     "katex": "^0.16.22",
@@ -131,6 +132,9 @@
     ],
     "*.{json,css,md,html}": [
       "prettier --write"
+    ],
+    "*.cs": [
+      "dotnet format"
     ]
   }
 }

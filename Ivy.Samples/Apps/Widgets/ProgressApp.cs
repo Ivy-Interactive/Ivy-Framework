@@ -9,7 +9,7 @@ public class ProgressApp : SampleBase
     {
         var progress = this.UseState((int?)50);
         return Layout.Vertical(
-            Ivy.Helpers.Text.H1("Progress"),
+            Text.H1("Progress"),
             new Progress(progress.Value),
             Layout.Horizontal(
                 new Button("+1", _ => progress.Set(progress.Value + 1)),

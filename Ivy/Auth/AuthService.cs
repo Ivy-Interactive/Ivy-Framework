@@ -1,4 +1,5 @@
-﻿using Ivy.Shared;
+﻿using Ivy.Hooks;
+using Ivy.Shared;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,9 +12,9 @@ public class AuthService(IAuthProvider authProvider, AuthToken? token) : IAuthSe
         return await authProvider.LoginAsync(email, password);
     }
 
-    public Task<Uri> GetOAuthUriAsync(AuthOption option, Uri callbackUri)
+    public Task<Uri> GetOAuthUriAsync(AuthOption option, WebhookEndpoint callback)
     {
-        return authProvider.GetOAuthUriAsync(option, callbackUri);
+        return authProvider.GetOAuthUriAsync(option, callback);
     }
 
     public Task<AuthToken?> HandleOAuthCallbackAsync(HttpRequest request)

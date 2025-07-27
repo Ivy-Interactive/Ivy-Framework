@@ -1,4 +1,5 @@
 ﻿using Ivy.Charts;
+using Ivy.Views.Charts;
 
 namespace Ivy.Test;
 
