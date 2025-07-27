@@ -6,4 +6,9 @@ public static class TableExtensions
     {
         return new DataTableBuilder<TModel>(queryable);
     }
+    
+    public static GlideDataGridBuilder<TModel> ToGlideDataGrid<TModel>(this IQueryable<TModel> queryable)
+    {
+        return new GlideDataGridBuilder<TModel>(queryable);
+    }
 }

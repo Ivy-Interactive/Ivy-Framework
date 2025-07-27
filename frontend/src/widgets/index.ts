@@ -13,3 +13,6 @@ export {
   ChatStatusWidget,
 } from './ChatWidget';
 export { DropDownMenuWidget } from './DropDownMenuWidget';
+
+// Glide Data Grid
+export { GlideDataGridWidget } from './glide-data-grid';
