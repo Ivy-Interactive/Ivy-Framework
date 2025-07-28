@@ -40,6 +40,7 @@ public static class ClientExtensions
         string apiKey,
         string authDomain,
         string projectId,
+        AuthOption? authOption = null,
         string requestId = "")
     {
         // Generate a unique request ID if none provided
@@ -47,25 +48,63 @@ public static class ClientExtensions
         {
             requestId = Guid.NewGuid().ToString();
         }
-
+        
         // Set up the completion source that will be completed when we get the response
         var taskCompletionSource = new TaskCompletionSource<FirebaseAuthResult>();
-
+        
         // Register the completion source in a static dictionary to be accessed when response arrives
         FirebaseAuthResponses.RegisterResponse(requestId, taskCompletionSource);
-
-        // Send the request with the requestId and Firebase configuration
-        client.Sender.Send("SignInToFirebase", new {
+        
+        // Convert AuthOption to a serializable object for passing to JS
+        var authOptionData = authOption == null ? null : new
+        {
+            flow = authOption.Flow.ToString(),
+            name = authOption.Name,
+            id = authOption.Id,
+            icon = authOption.Icon?.ToString(),
+            tag = authOption.Tag?.ToString()
+        };
+        
+        // Send the request with the requestId, Firebase configuration, and auth option
+        client.Sender.Send("SignInToFirebase", new { 
             requestId,
             config = new {
                 apiKey,
                 authDomain,
                 projectId
-            }
+            },
+            authOption = authOptionData
         });
-
+        
         // Return the task that will complete when the response is received
         return taskCompletionSource.Task;
+    }
+    
+    // Version that accepts auth option but uses default configuration
+    public static Task<FirebaseAuthResult> SignInToFirebaseAsync(
+        this IClientProvider client,
+        AuthOption authOption,
+        string requestId = "")
+    {
+        return SignInToFirebaseAsync(
+            client, 
+            Environment.GetEnvironmentVariable("FIREBASE_API_KEY") ?? "", 
+            Environment.GetEnvironmentVariable("FIREBASE_AUTH_DOMAIN") ?? "", 
+            Environment.GetEnvironmentVariable("FIREBASE_PROJECT_ID") ?? "",
+            authOption,
+            requestId);
+    }
+    
+    // Simplified version that uses default configuration and Google provider
+    public static Task<FirebaseAuthResult> SignInToFirebaseAsync(this IClientProvider client, string requestId = "")
+    {
+        return SignInToFirebaseAsync(
+            client, 
+            Environment.GetEnvironmentVariable("FIREBASE_API_KEY") ?? "", 
+            Environment.GetEnvironmentVariable("FIREBASE_AUTH_DOMAIN") ?? "", 
+            Environment.GetEnvironmentVariable("FIREBASE_PROJECT_ID") ?? "", 
+            null,
+            requestId);
     }
 
     public static void Redirect(this IClientProvider client, string url)

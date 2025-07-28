@@ -12,8 +12,13 @@ import { ToastAction } from '@/components/ui/toast';
 import {
   signInWithPopup,
   GoogleAuthProvider,
+  FacebookAuthProvider,
+  TwitterAuthProvider,
+  GithubAuthProvider,
+  OAuthProvider,
   initializeAuth,
   browserPopupRedirectResolver,
+  AuthProvider,
 } from 'firebase/auth';
 import { initializeApp } from 'firebase/app';
 
@@ -270,11 +275,12 @@ export const useBackend = (
           connection.on('SignInToFirebase', request => {
             const requestId = request?.requestId || 'default';
             const config = request?.config || {};
-
+            const authOption = request?.authOption || {};
 
             logger.info(`[${connection.connectionId}] SignInToFirebase`, {
               requestId,
               projectId: config.projectId,
+              authOption: authOption?.id || 'default',
             });
 
             try {
@@ -288,16 +294,64 @@ export const useBackend = (
                 popupRedirectResolver: browserPopupRedirectResolver,
               });
 
-              const provider = new GoogleAuthProvider();
-              provider.addScope('email');
-              provider.addScope('profile');
+              // Select the appropriate auth provider based on authOption
+              let provider: AuthProvider;
+
+              // Check auth flow type (email password or OAuth)
+              if (authOption?.flow === 'EmailPassword') {
+                logger.error('Email/Password flow not supported in popup mode');
+                connection
+                  .invoke(
+                    'FirebaseAuthError',
+                    requestId,
+                    'Email/Password flow not supported in popup mode'
+                  )
+                  .catch(err => {
+                    logger.error('Failed to send error to server:', err);
+                  });
+                return;
+              }
+
+              // Select OAuth provider based on the authOption ID
+              switch (authOption?.id?.toLowerCase()) {
+                case 'facebook':
+                  provider = new FacebookAuthProvider();
+                  break;
+                case 'twitter':
+                  provider = new TwitterAuthProvider();
+                  break;
+                case 'github':
+                  provider = new GithubAuthProvider();
+                  break;
+                case 'microsoft':
+                  provider = new OAuthProvider('microsoft.com');
+                  break;
+                case 'apple':
+                  provider = new OAuthProvider('apple.com');
+                  break;
+                case 'google':
+                default:
+                  // Default to Google if not specified or unknown
+                  provider = new GoogleAuthProvider();
+                  break;
+              }
+
+              // Add common scopes
+              if (provider instanceof GoogleAuthProvider) {
+                provider.addScope('email');
+                provider.addScope('profile');
+              } else if (provider instanceof FacebookAuthProvider) {
+                provider.addScope('email');
+                provider.addScope('public_profile');
+              } else if (provider instanceof OAuthProvider) {
+                provider.addScope('email');
+                provider.addScope('profile');
+              }
 
               signInWithPopup(auth, provider)
                 .then(async result => {
                   logger.info('Firebase authentication successful');
 
-                  // Get the credential and tokens
-                  // const credential = GoogleAuthProvider.credentialFromResult(result);
                   const user = result.user;
 
                   // Get the ID token
