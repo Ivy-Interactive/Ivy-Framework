@@ -24,7 +24,7 @@ public class FirebaseAuthProvider : IAuthProvider
     private readonly string _apiKey;
     private readonly string _authDomain;
     private readonly string _projectId;
-    private readonly List<AuthOption> _authOptions = new();
+    private readonly List<AuthOption> _authOptions = [];
     private FirebaseAuth? _firebaseAuth;
 
     public FirebaseAuthProvider()
@@ -37,28 +37,24 @@ public class FirebaseAuthProvider : IAuthProvider
         _apiKey = configuration.GetValue<string>("FIREBASE_API_KEY") ?? throw new Exception("FIREBASE_API_KEY is required");
         _authDomain = configuration.GetValue<string>("FIREBASE_AUTH_DOMAIN") ?? throw new Exception("FIREBASE_AUTH_DOMAIN is required");
         _projectId = configuration.GetValue<string>("FIREBASE_PROJECT_ID") ?? throw new Exception("FIREBASE_PROJECT_ID is required");
-        var serviceAccountKey = configuration.GetValue<string>("FIREBASE_SERVICE_ACCOUNT_KEY");
+        var serviceAccountKey = configuration.GetValue<string>("FIREBASE_SERVICE_ACCOUNT_KEY") ?? throw new Exception("FIREBASE_SERVICE_ACCOUNT_KEY is required");
 
-        // Initialize FirebaseAdmin if serviceAccountKey is provided
-        if (!string.IsNullOrEmpty(serviceAccountKey))
+        // Initialize FirebaseAdmin
+        FirebaseApp app = FirebaseApp.DefaultInstance;
+        if (app == null)
         {
-            try
+            // Create new app if DefaultInstance returned null
+            var credential = GoogleCredential.FromJson(serviceAccountKey);
+            var options = new AppOptions
             {
-                var credential = GoogleCredential.FromJson(serviceAccountKey);
-                var options = new AppOptions
-                {
-                    Credential = credential,
-                    ProjectId = _projectId
-                };
+                Credential = credential,
+                ProjectId = _projectId
+            };
 
-                var app = FirebaseApp.Create(options);
-                _firebaseAuth = FirebaseAuth.GetAuth(app);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Failed to initialize Firebase Admin SDK: {ex.Message}");
-            }
+            app = FirebaseApp.Create(options);
         }
+
+        _firebaseAuth = FirebaseAuth.GetAuth(app);
     }
 
     public async Task<AuthToken?> LoginAsync(string email, string password)
