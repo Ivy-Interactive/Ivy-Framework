@@ -289,7 +289,7 @@ public class AppHub(
             exceptionHandler.HandleException(e);
         }
     }
-    
+
     /// <summary>
     /// Handles Firebase authentication result sent from the client
     /// </summary>
@@ -298,7 +298,7 @@ public class AppHub(
         try
         {
             logger.LogInformation($"FirebaseAuthResult received for requestId: {requestId}");
-            
+
             // Process the received authentication result
             FirebaseAuthResponses.ProcessResponse(requestId, result);
         }
@@ -308,7 +308,7 @@ public class AppHub(
             FirebaseAuthResponses.ProcessError(requestId, $"Server error: {e.Message}");
         }
     }
-    
+
     /// <summary>
     /// Handles Firebase authentication errors sent from the client
     /// </summary>
@@ -317,7 +317,7 @@ public class AppHub(
         try
         {
             logger.LogWarning($"FirebaseAuthError received for requestId: {requestId}: {errorMessage} ({errorCode})");
-            
+
             // Process the received authentication error
             FirebaseAuthResponses.ProcessError(requestId, errorMessage, errorCode);
         }
