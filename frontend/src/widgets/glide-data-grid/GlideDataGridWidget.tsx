@@ -2,6 +2,7 @@ import { useEventHandler } from '@/components/EventHandlerContext';
 import { getHeight, getWidth } from '@/lib/styles';
 import React, { useMemo } from 'react';
 import { GridContainer } from './components/GridContainer';
+import { GridEditor } from './components/GridEditor';
 import { GridHeader } from './components/GridHeader';
 import { GlideDataGridProvider } from './GlideDataGridProvider';
 import { useGlideDataGrid } from './hooks/useGlideDataGrid';
@@ -30,7 +31,7 @@ import type {
  * All child components are composable and can be used independently within the provider.
  */
 
-function GlideDataGridLayout() {
+function GlideDataGridLayout({ children }: { children: React.ReactNode }) {
   const { props } = useGlideDataGrid();
   const { width, height } = props;
 
@@ -44,8 +45,7 @@ function GlideDataGridLayout() {
 
   return (
     <div style={styles} className={classNames.container.main}>
-      <GridHeader />
-      <GridContainer />
+      {children}
     </div>
   );
 }
@@ -80,7 +80,12 @@ const GlideDataGridWidget: React.FC<GlideDataGridProps> = props => {
 
   return (
     <GlideDataGridProvider {...configuration}>
-      <GlideDataGridLayout />
+      <GlideDataGridLayout>
+        <GridHeader />
+        <GridContainer>
+          <GridEditor />
+        </GridContainer>
+      </GlideDataGridLayout>
     </GlideDataGridProvider>
   );
 };
