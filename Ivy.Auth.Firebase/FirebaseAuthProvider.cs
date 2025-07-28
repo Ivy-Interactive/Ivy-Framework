@@ -116,7 +116,8 @@ public class FirebaseAuthProvider : IAuthProvider
         var result = await client.SignInToFirebaseAsync(
             _apiKey,
             _authDomain,
-            _projectId
+            _projectId,
+            option
         );
 
         if (!result.Success)
