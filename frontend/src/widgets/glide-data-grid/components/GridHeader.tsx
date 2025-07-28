@@ -1,30 +1,18 @@
 import { Button } from '@/components/ui/button';
 import { RefreshCw } from 'lucide-react';
+import { useGlideDataGrid } from '../hooks/useGlideDataGrid';
 import { classNames } from '../styles';
-import { DataTableData } from '../types';
 import { StatusBadge } from './StatusBadge';
 
-interface GridHeaderProps {
-  title?: string;
-  description?: string;
-  showStatus: boolean;
-  showRefreshButton: boolean;
-  loading: boolean;
-  isStreaming: boolean;
-  data: DataTableData | null;
-  onRefresh: () => void;
-}
+export function GridHeader() {
+  const { props, loading, refresh } = useGlideDataGrid();
+  const {
+    title,
+    description,
+    showStatus = true,
+    showRefreshButton = true,
+  } = props;
 
-export function GridHeader({
-  title,
-  description,
-  showStatus,
-  showRefreshButton,
-  loading,
-  isStreaming,
-  data,
-  onRefresh,
-}: GridHeaderProps) {
   if (!title && !description && !showStatus && !showRefreshButton) {
     return null;
   }
@@ -38,18 +26,12 @@ export function GridHeader({
         )}
       </div>
       <div className={classNames.header.actions}>
-        {showStatus && (
-          <StatusBadge
-            loading={loading}
-            isStreaming={isStreaming}
-            data={data}
-          />
-        )}
+        {showStatus && <StatusBadge />}
         {showRefreshButton && (
           <Button
             variant="outline"
             size="sm"
-            onClick={onRefresh}
+            onClick={refresh}
             disabled={loading}
             className={classNames.button.refresh}
           >

@@ -1,15 +1,10 @@
 import { Badge } from '@/components/ui/badge';
 import { Database, Loader2 } from 'lucide-react';
+import { useGlideDataGrid } from '../hooks/useGlideDataGrid';
 import { classNames } from '../styles';
-import { DataTableData } from '../types';
 
-interface StatusBadgeProps {
-  loading: boolean;
-  isStreaming: boolean;
-  data: DataTableData | null;
-}
-
-export function StatusBadge({ loading, isStreaming, data }: StatusBadgeProps) {
+export function StatusBadge() {
+  const { loading, isStreaming, data } = useGlideDataGrid();
   if (loading) {
     return (
       <Badge variant="secondary" className={classNames.badge.container}>
