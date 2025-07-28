@@ -8,6 +8,10 @@ using Ivy.Hooks;
 using Ivy.Shared;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
+using Firebase.Auth;
+using Firebase.Auth.Providers;
+using Ivy.Core;
+using Ivy.Client;
 
 namespace Ivy.Auth.Firebase;
 
@@ -26,6 +30,7 @@ public class FirebaseAuthProvider : IAuthProvider
     private readonly string _projectId;
     private readonly List<AuthOption> _authOptions = [];
     private FirebaseAuth? _firebaseAuth;
+    private readonly FirebaseAuthClient _authClient;
 
     public FirebaseAuthProvider()
     {
@@ -55,6 +60,23 @@ public class FirebaseAuthProvider : IAuthProvider
         }
 
         _firebaseAuth = FirebaseAuth.GetAuth(app);
+
+        var authClientConfig = new FirebaseAuthConfig()
+        {
+            ApiKey = _apiKey,
+            AuthDomain = _authDomain,
+            Providers =
+            [
+                new EmailProvider(),
+                new GoogleProvider(),
+                new TwitterProvider(),
+                new GithubProvider(),
+                new MicrosoftProvider(),
+                new AppleProvider()
+            ],
+        };
+
+        _authClient = new FirebaseAuthClient(authClientConfig);
     }
 
     public async Task<AuthToken?> LoginAsync(string email, string password)
@@ -87,8 +109,45 @@ public class FirebaseAuthProvider : IAuthProvider
         return new AuthToken(result.IdToken, result.RefreshToken, expiresAt);
     }
 
-    public Task<Uri> GetOAuthUriAsync(AuthOption option, WebhookEndpoint callback)
+    public bool ShouldUseUnifiedOAuthFlow() => true;
+
+    public async Task<AuthToken?> LoginAsync(IClientProvider client, AuthOption option)
     {
+        var result = await client.SignInToFirebaseAsync(
+            _apiKey,
+            _authDomain,
+            _projectId
+        );
+
+        if (!result.Success)
+        {
+            throw new FirebaseOAuthException(result.ErrorCode, result.ErrorMessage);
+        }
+
+        return new AuthToken(result.IdToken!, result.RefreshToken, result.ExpiresAt);
+    }
+
+    public async Task<Uri> GetOAuthUriAsync(AuthOption option, WebhookEndpoint callback)
+    {
+
+        // var provider = option.Id switch
+        // {
+        //     "google" => FirebaseProviderType.Google,
+        //     "facebook" => FirebaseProviderType.Facebook,
+        //     "twitter" => FirebaseProviderType.Twitter,
+        //     "github" => FirebaseProviderType.Github,
+        //     "microsoft" => FirebaseProviderType.Microsoft,
+        //     "apple" => FirebaseProviderType.Apple,
+        //     _ => throw new ArgumentException($"Unknown OAuth provider: {option.Id}")
+        // };
+
+        // await _authClient.SignInWithRedirectAsync(provider, redirectUri =>
+        // {
+        //     Console.WriteLine($"go here I guess: {redirectUri}");
+        //     throw new Exception("asdjhasflad");
+        //     return Task.FromResult("haha");
+        // });
+
         var providerId = option.Id switch
         {
             "google" => "google.com",
@@ -100,17 +159,20 @@ public class FirebaseAuthProvider : IAuthProvider
             _ => throw new ArgumentException($"Unknown OAuth provider: {option.Id}")
         };
 
-        var callbackUrl = callback.GetUri().ToString();
+        var callbackUrl = callback.GetUri(includeIdInPath: false).ToString();
 
         // Firebase requires setting up OAuth redirect in the Firebase console
         // We're creating a URL that will direct to Firebase's OAuth flow
         var authUrl = $"https://{_authDomain}/__/auth/handler?" +
             $"apiKey={_apiKey}&" +
+            // $"appName=%5BDEFAULT%5D&" +
+            "authType=signInViaRedirect&" +
             $"providerId={providerId}&" +
             $"redirectUrl={Uri.EscapeDataString(callbackUrl)}&" +
+            $"scopes=openid,email,profile&" +
             $"state={callback.Id}";
 
-        return Task.FromResult(new Uri(authUrl));
+        return new Uri(authUrl);
     }
 
     public async Task<AuthToken?> HandleOAuthCallbackAsync(HttpRequest request)

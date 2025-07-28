@@ -309,6 +309,44 @@ public class AppHub(
             return null;
         }
     }
+
+    /// <summary>
+    /// Handles Firebase authentication result sent from the client
+    /// </summary>
+    public void FirebaseAuthResult(string requestId, FirebaseAuthResult result)
+    {
+        try
+        {
+            logger.LogInformation($"FirebaseAuthResult received for requestId: {requestId}");
+
+            // Process the received authentication result
+            FirebaseAuthResponses.ProcessResponse(requestId, result);
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Failed to process Firebase authentication result.");
+            FirebaseAuthResponses.ProcessError(requestId, $"Server error: {e.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Handles Firebase authentication errors sent from the client
+    /// </summary>
+    public void FirebaseAuthError(string requestId, string errorMessage, string? errorCode = null)
+    {
+        try
+        {
+            logger.LogWarning($"FirebaseAuthError received for requestId: {requestId}: {errorMessage} ({errorCode})");
+
+            // Process the received authentication error
+            FirebaseAuthResponses.ProcessError(requestId, errorMessage, errorCode);
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Failed to process Firebase authentication error.");
+            FirebaseAuthResponses.ProcessError(requestId, $"Server error: {e.Message}");
+        }
+    }
 }
 
 public class ClientSender(IClientNotifier clientNotifier, string connectionId) : IClientSender

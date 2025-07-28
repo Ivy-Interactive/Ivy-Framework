@@ -9,6 +9,13 @@ import { applyPatch, Operation } from 'fast-json-patch';
 import { setThemeGlobal } from '@/components/ThemeProvider';
 import { cloneDeep } from 'lodash';
 import { ToastAction } from '@/components/ui/toast';
+import {
+  signInWithPopup,
+  GoogleAuthProvider,
+  initializeAuth,
+  browserPopupRedirectResolver,
+} from 'firebase/auth';
+import { initializeApp } from 'firebase/app';
 
 type UpdateMessage = Array<{
   viewId: string;
@@ -260,6 +267,98 @@ export const useBackend = (
             window.open(url, '_blank');
           });
 
+          connection.on('SignInToFirebase', request => {
+            const requestId = request?.requestId || 'default';
+            const config = request?.config || {};
+
+
+            logger.info(`[${connection.connectionId}] SignInToFirebase`, {
+              requestId,
+              projectId: config.projectId,
+            });
+
+            try {
+              const app = initializeApp({
+                apiKey: config.apiKey,
+                authDomain: config.authDomain,
+                projectId: config.projectId,
+              });
+
+              const auth = initializeAuth(app, {
+                popupRedirectResolver: browserPopupRedirectResolver,
+              });
+
+              const provider = new GoogleAuthProvider();
+              provider.addScope('email');
+              provider.addScope('profile');
+
+              signInWithPopup(auth, provider)
+                .then(async result => {
+                  logger.info('Firebase authentication successful');
+
+                  // Get the credential and tokens
+                  // const credential = GoogleAuthProvider.credentialFromResult(result);
+                  const user = result.user;
+
+                  // Get the ID token
+                  const idToken = await user.getIdToken();
+
+                  // Send the authentication result back to the server
+                  connection
+                    .invoke('FirebaseAuthResult', requestId, {
+                      success: true,
+                      idToken: idToken,
+                      refreshToken: user.refreshToken,
+                      uid: user.uid,
+                      email: user.email,
+                      displayName: user.displayName,
+                      photoUrl: user.photoURL,
+                      expiresAt: new Date(
+                        Date.now() + 3600 * 1000
+                      ).toISOString(), // Approximate expiry time (1 hour)
+                    })
+                    .catch(err => {
+                      logger.error(
+                        'Failed to send authentication result to server:',
+                        err
+                      );
+                    });
+
+                  logger.info('Firebase authentication result sent to server');
+                })
+                .catch(error => {
+                  logger.error('Firebase authentication error:', error);
+
+                  // Send the error back to the server
+                  connection
+                    .invoke(
+                      'FirebaseAuthError',
+                      requestId,
+                      error.message,
+                      error.code
+                    )
+                    .catch(err => {
+                      logger.error(
+                        'Failed to send authentication error to server:',
+                        err
+                      );
+                    });
+                });
+            } catch (error) {
+              logger.error('Firebase initialization error:', error);
+
+              // Send the error back to the server
+              connection
+                .invoke('FirebaseAuthError', requestId, String(error))
+                .catch(err => {
+                  logger.error(
+                    'Failed to send authentication error to server:',
+                    err
+                  );
+                });
+            }
+          });
+
           connection.on('HotReload', () => {
             logger.debug(`[${connection.connectionId}] HotReload`);
             handleHotReloadMessage();
@@ -294,6 +393,7 @@ export const useBackend = (
         connection.off('SetJwt');
         connection.off('SetTheme');
         connection.off('OpenUrl');
+        connection.off('SignInToFirebase');
         connection.off('reconnecting');
         connection.off('reconnected');
         connection.off('close');
