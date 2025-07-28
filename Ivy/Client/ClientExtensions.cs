@@ -1,3 +1,5 @@
+using System;
+using System.Threading.Tasks;
 using Ivy.Auth;
 using Ivy.Core;
 using Ivy.Shared;
@@ -31,6 +33,39 @@ public static class ClientExtensions
     public static void OpenUrl(this IClientProvider client, Uri uri)
     {
         client.Sender.Send("OpenUrl", uri.ToString());
+    }
+
+    public static Task<FirebaseAuthResult> SignInToFirebaseAsync(
+        this IClientProvider client,
+        string apiKey,
+        string authDomain,
+        string projectId,
+        string requestId = "")
+    {
+        // Generate a unique request ID if none provided
+        if (string.IsNullOrEmpty(requestId))
+        {
+            requestId = Guid.NewGuid().ToString();
+        }
+
+        // Set up the completion source that will be completed when we get the response
+        var taskCompletionSource = new TaskCompletionSource<FirebaseAuthResult>();
+
+        // Register the completion source in a static dictionary to be accessed when response arrives
+        FirebaseAuthResponses.RegisterResponse(requestId, taskCompletionSource);
+
+        // Send the request with the requestId and Firebase configuration
+        client.Sender.Send("SignInToFirebase", new {
+            requestId,
+            config = new {
+                apiKey,
+                authDomain,
+                projectId
+            }
+        });
+
+        // Return the task that will complete when the response is received
+        return taskCompletionSource.Task;
     }
 
     public static void Redirect(this IClientProvider client, string url)
