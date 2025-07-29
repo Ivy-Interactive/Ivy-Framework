@@ -12,7 +12,6 @@ import { ToastAction } from '@/components/ui/toast';
 import {
   signInWithPopup,
   GoogleAuthProvider,
-  FacebookAuthProvider,
   TwitterAuthProvider,
   GithubAuthProvider,
   OAuthProvider,
@@ -314,9 +313,6 @@ export const useBackend = (
 
               // Select OAuth provider based on the authOption ID
               switch (authOption?.id?.toLowerCase()) {
-                case 'facebook':
-                  provider = new FacebookAuthProvider();
-                  break;
                 case 'twitter':
                   provider = new TwitterAuthProvider();
                   break;
@@ -340,9 +336,6 @@ export const useBackend = (
               if (provider instanceof GoogleAuthProvider) {
                 provider.addScope('email');
                 provider.addScope('profile');
-              } else if (provider instanceof FacebookAuthProvider) {
-                provider.addScope('email');
-                provider.addScope('public_profile');
               } else if (provider instanceof OAuthProvider) {
                 provider.addScope('email');
                 if (provider.providerId == 'apple.com') {
