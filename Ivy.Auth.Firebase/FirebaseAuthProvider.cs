@@ -128,102 +128,11 @@ public class FirebaseAuthProvider : IAuthProvider
         return result.Token;
     }
 
-    public async Task<Uri> GetOAuthUriAsync(AuthOption option, WebhookEndpoint callback)
-    {
+    public Task<Uri> GetOAuthUriAsync(AuthOption option, WebhookEndpoint callback)
+        => throw new InvalidOperationException("GetOAuthUriAsync() should not be called on FirebaseAuthProvider. Use LoginAsync() instead.");
 
-        // var provider = option.Id switch
-        // {
-        //     "google" => FirebaseProviderType.Google,
-        //     "twitter" => FirebaseProviderType.Twitter,
-        //     "github" => FirebaseProviderType.Github,
-        //     "microsoft" => FirebaseProviderType.Microsoft,
-        //     "apple" => FirebaseProviderType.Apple,
-        //     _ => throw new ArgumentException($"Unknown OAuth provider: {option.Id}")
-        // };
-
-        // await _authClient.SignInWithRedirectAsync(provider, redirectUri =>
-        // {
-        //     Console.WriteLine($"go here I guess: {redirectUri}");
-        //     throw new Exception("asdjhasflad");
-        //     return Task.FromResult("haha");
-        // });
-
-        var providerId = option.Id switch
-        {
-            "google" => "google.com",
-            "twitter" => "twitter.com",
-            "github" => "github.com",
-            "microsoft" => "microsoft.com",
-            "apple" => "apple.com",
-            _ => throw new ArgumentException($"Unknown OAuth provider: {option.Id}")
-        };
-
-        var callbackUrl = callback.GetUri(includeIdInPath: false).ToString();
-
-        // Firebase requires setting up OAuth redirect in the Firebase console
-        // We're creating a URL that will direct to Firebase's OAuth flow
-        var authUrl = $"https://{_authDomain}/__/auth/handler?" +
-            $"apiKey={_apiKey}&" +
-            // $"appName=%5BDEFAULT%5D&" +
-            "authType=signInViaRedirect&" +
-            $"providerId={providerId}&" +
-            $"redirectUrl={Uri.EscapeDataString(callbackUrl)}&" +
-            $"scopes=openid,email,profile&" +
-            $"state={callback.Id}";
-
-        return new Uri(authUrl);
-    }
-
-    public async Task<AuthToken?> HandleOAuthCallbackAsync(HttpRequest request)
-    {
-        var idToken = request.Query["id_token"].ToString();
-        var error = request.Query["error"].ToString();
-        var errorDescription = request.Query["error_description"].ToString();
-
-        if (error.Length > 0 || errorDescription.Length > 0)
-        {
-            throw new FirebaseOAuthException(error, errorDescription);
-        }
-
-        if (string.IsNullOrEmpty(idToken))
-        {
-            throw new Exception("Received no ID token from Firebase.");
-        }
-
-        try
-        {
-            // Get the user's profile to verify the token is valid
-            var userInfo = await GetUserInfoAsync(idToken);
-            if (userInfo == null)
-            {
-                throw new Exception("Failed to get user info with provided token");
-            }
-
-            // Exchange the ID token for a full token response with refresh token
-            // This ensures we have proper token management and refresh capabilities
-            var exchangeResponse = await _httpClient.PostAsJsonAsync(
-                $"https://securetoken.googleapis.com/v1/token?key={_apiKey}",
-                new { grant_type = "authorization_code", code = idToken }
-            );
-
-            if (exchangeResponse.IsSuccessStatusCode)
-            {
-                var tokenResult = await exchangeResponse.Content.ReadFromJsonAsync<FirebaseRefreshResponse>();
-                if (tokenResult != null)
-                {
-                    var expiresAt = DateTimeOffset.UtcNow.AddSeconds(int.Parse(tokenResult.ExpiresIn));
-                    return new AuthToken(tokenResult.IdToken, tokenResult.RefreshToken, expiresAt);
-                }
-            }
-
-            // If token exchange isn't supported or fails, return the ID token without refresh capability
-            return new AuthToken(idToken);
-        }
-        catch (Exception ex)
-        {
-            throw new Exception($"Failed to process OAuth callback: {ex.Message}");
-        }
-    }
+    public Task<AuthToken?> HandleOAuthCallbackAsync(HttpRequest request)
+        => throw new InvalidOperationException("HandleOAuthCallbackAsync() should not be called on FirebaseAuthProvider. Use LoginAsync() instead.");
 
     public async Task LogoutAsync(string jwt)
     {
