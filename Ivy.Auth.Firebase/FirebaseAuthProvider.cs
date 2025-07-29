@@ -134,7 +134,6 @@ public class FirebaseAuthProvider : IAuthProvider
         // var provider = option.Id switch
         // {
         //     "google" => FirebaseProviderType.Google,
-        //     "facebook" => FirebaseProviderType.Facebook,
         //     "twitter" => FirebaseProviderType.Twitter,
         //     "github" => FirebaseProviderType.Github,
         //     "microsoft" => FirebaseProviderType.Microsoft,
@@ -152,7 +151,6 @@ public class FirebaseAuthProvider : IAuthProvider
         var providerId = option.Id switch
         {
             "google" => "google.com",
-            "facebook" => "facebook.com",
             "twitter" => "twitter.com",
             "github" => "github.com",
             "microsoft" => "microsoft.com",
@@ -378,12 +376,6 @@ public class FirebaseAuthProvider : IAuthProvider
     public FirebaseAuthProvider UseGoogle()
     {
         _authOptions.Add(new AuthOption(AuthFlow.OAuth, "Google", "google", Icons.Google));
-        return this;
-    }
-
-    public FirebaseAuthProvider UseFacebook()
-    {
-        _authOptions.Add(new AuthOption(AuthFlow.OAuth, "Facebook", "facebook", Icons.Facebook));
         return this;
     }
 
