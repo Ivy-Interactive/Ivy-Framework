@@ -345,7 +345,11 @@ export const useBackend = (
                 provider.addScope('public_profile');
               } else if (provider instanceof OAuthProvider) {
                 provider.addScope('email');
-                provider.addScope('profile');
+                if (provider.providerId == 'apple.com') {
+                  provider.addScope('name');
+                } else {
+                  provider.addScope('profile');
+                }
               }
 
               signInWithPopup(auth, provider)
