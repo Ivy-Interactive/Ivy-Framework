@@ -305,46 +305,39 @@ public class AppHub(
         }
         catch (Exception e)
         {
+            logger.LogInformation($"FirebaseAuthResult received for requestId: {requestId}");
+
+            // Process the received authentication result
+            AuthResponses.ProcessResponse(requestId, result);
+        }
+        catch (Exception e)
+        {
             logger.LogWarning(e, "Failed to deserialize AuthToken from JWT.");
             return null;
         }
     }
 
-    /// <summary>
-    /// Handles Firebase authentication result sent from the client
-    /// </summary>
-    public void FirebaseAuthResult(string requestId, FirebaseAuthResult result)
+    public void AuthResult(string requestId, AuthenticationResult result)
     {
         try
         {
-            logger.LogInformation($"FirebaseAuthResult received for requestId: {requestId}");
+            if (result.Success)
+            {
+                logger.LogInformation("Authentication successful for requestId: {RequestId}", requestId);
+            }
+            else
+            {
+                logger.LogWarning("Authentication failed for requestId: {RequestId}: {ErrorMessage} ({ErrorCode})",
+                    requestId, result.ErrorMessage ?? "Unknown error", result.ErrorCode ?? "none");
+            }
 
             // Process the received authentication result
-            FirebaseAuthResponses.ProcessResponse(requestId, result);
+            AuthResponses.ProcessResponse(requestId, result);
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Failed to process Firebase authentication result.");
-            FirebaseAuthResponses.ProcessError(requestId, $"Server error: {e.Message}");
-        }
-    }
-
-    /// <summary>
-    /// Handles Firebase authentication errors sent from the client
-    /// </summary>
-    public void FirebaseAuthError(string requestId, string errorMessage, string? errorCode = null)
-    {
-        try
-        {
-            logger.LogWarning($"FirebaseAuthError received for requestId: {requestId}: {errorMessage} ({errorCode})");
-
-            // Process the received authentication error
-            FirebaseAuthResponses.ProcessError(requestId, errorMessage, errorCode);
-        }
-        catch (Exception e)
-        {
-            logger.LogError(e, "Failed to process Firebase authentication error.");
-            FirebaseAuthResponses.ProcessError(requestId, $"Server error: {e.Message}");
+            logger.LogError(e, "Failed to process authentication result.");
+            AuthResponses.ProcessError(requestId, $"Server error: {e.Message}");
         }
     }
 }

@@ -28,7 +28,7 @@ type ErrorMessage = {
   stackTrace?: string;
 };
 
-type AuthToken = {
+export type AuthToken = {
   jwt: string;
   refreshToken?: string;
   expiresAt?: string;
@@ -266,7 +266,7 @@ export const useBackend = (
             const config = request?.config || {};
             const authOption = request?.authOption || {};
 
-            logger.info(`[${connection.connectionId}] SignInToFirebase`, {
+            logger.debug(`[${connection.connectionId}] SignInToFirebase`, {
               requestId,
               projectId: config.projectId,
               authOption: authOption?.id || 'default',
@@ -275,47 +275,20 @@ export const useBackend = (
             try {
               const result = await signInWithFirebase(config, authOption);
 
-              if (result.success) {
-                logger.info('Firebase authentication successful');
-
-                // Send the authentication result back to the server
-                connection
-                  .invoke('FirebaseAuthResult', requestId, result)
-                  .catch(err => {
-                    logger.error(
-                      'Failed to send authentication result to server:',
-                      err
-                    );
-                  });
-
-                logger.info('Firebase authentication result sent to server');
-              } else {
+              connection.invoke('AuthResult', requestId, result).catch(err => {
                 logger.error(
-                  'Firebase authentication error:',
-                  result.errorMessage
+                  'Failed to send authentication result to server:',
+                  err
                 );
-
-                // Send the error back to the server
-                connection
-                  .invoke(
-                    'FirebaseAuthError',
-                    requestId,
-                    result.errorMessage || 'Unknown error',
-                    result.errorCode
-                  )
-                  .catch(err => {
-                    logger.error(
-                      'Failed to send authentication error to server:',
-                      err
-                    );
-                  });
-              }
+              });
             } catch (error) {
-              logger.error('Firebase authentication error:', error);
-
               // Send the error back to the server
               connection
-                .invoke('FirebaseAuthError', requestId, String(error))
+                .invoke('AuthResult', requestId, {
+                  success: false,
+                  errorMessage: String(error),
+                  errorCode: undefined,
+                })
                 .catch(err => {
                   logger.error(
                     'Failed to send authentication error to server:',

@@ -125,7 +125,7 @@ public class FirebaseAuthProvider : IAuthProvider
             throw new FirebaseOAuthException(result.ErrorCode, result.ErrorMessage);
         }
 
-        return new AuthToken(result.IdToken!, result.RefreshToken, result.ExpiresAt);
+        return result.Token;
     }
 
     public async Task<Uri> GetOAuthUriAsync(AuthOption option, WebhookEndpoint callback)

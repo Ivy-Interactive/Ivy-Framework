@@ -10,6 +10,7 @@ import {
   AuthProvider,
 } from 'firebase/auth';
 import { logger } from '@/lib/logger';
+import { AuthToken } from '@/hooks/use-backend';
 
 export type FirebaseConfig = {
   apiKey: string;
@@ -25,15 +26,9 @@ export type AuthOptionData = {
   tag?: string;
 };
 
-export type FirebaseAuthResult = {
+export type AuthenticationResult = {
   success: boolean;
-  idToken?: string;
-  refreshToken?: string;
-  uid?: string;
-  email?: string;
-  displayName?: string;
-  photoUrl?: string;
-  expiresAt?: string;
+  token?: AuthToken;
   errorMessage?: string;
   errorCode?: string;
 };
@@ -48,7 +43,7 @@ export type FirebaseAuthResult = {
 export async function signInWithFirebase(
   config: FirebaseConfig,
   authOption?: AuthOptionData | null
-): Promise<FirebaseAuthResult> {
+): Promise<AuthenticationResult> {
   try {
     // Initialize Firebase app
     const app = initializeApp({
@@ -117,16 +112,13 @@ export async function signInWithFirebase(
 
     logger.info('Firebase authentication successful');
 
-    // Return authentication result
     return {
       success: true,
-      idToken,
-      refreshToken: user.refreshToken,
-      uid: user.uid,
-      email: user.email || undefined,
-      displayName: user.displayName || undefined,
-      photoUrl: user.photoURL || undefined,
-      expiresAt: new Date(Date.now() + 3600 * 1000).toISOString(), // Approximate expiry time (1 hour)
+      token: {
+        jwt: idToken,
+        refreshToken: user.refreshToken,
+        expiresAt: new Date(Date.now() + 3600 * 1000).toISOString(), // Approximate expiry time (1 hour)
+      },
     };
   } catch (error: unknown) {
     if (error instanceof FirebaseError) {

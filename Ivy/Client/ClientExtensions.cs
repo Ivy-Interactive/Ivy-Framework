@@ -35,7 +35,7 @@ public static class ClientExtensions
         client.Sender.Send("OpenUrl", uri.ToString());
     }
 
-    public static Task<FirebaseAuthResult> SignInToFirebaseAsync(
+    public static Task<AuthenticationResult> SignInToFirebaseAsync(
         this IClientProvider client,
         string apiKey,
         string authDomain,
@@ -50,10 +50,10 @@ public static class ClientExtensions
         }
 
         // Set up the completion source that will be completed when we get the response
-        var taskCompletionSource = new TaskCompletionSource<FirebaseAuthResult>();
+        var taskCompletionSource = new TaskCompletionSource<AuthenticationResult>();
 
-        // Register the completion source in a static dictionary to be accessed when response arrives
-        FirebaseAuthResponses.RegisterResponse(requestId, taskCompletionSource);
+        // Register the completion source so it can be completed when we get the response
+        AuthResponses.RegisterResponse(requestId, taskCompletionSource);
 
         // Convert AuthOption to a serializable object for passing to JS
         var authOptionData = authOption == null ? null : new
@@ -83,7 +83,7 @@ public static class ClientExtensions
     }
 
     // Version that accepts auth option but uses default configuration
-    public static Task<FirebaseAuthResult> SignInToFirebaseAsync(
+    public static Task<AuthenticationResult> SignInToFirebaseAsync(
         this IClientProvider client,
         AuthOption authOption,
         string requestId = "")
@@ -98,7 +98,7 @@ public static class ClientExtensions
     }
 
     // Simplified version that uses default configuration and Google provider
-    public static Task<FirebaseAuthResult> SignInToFirebaseAsync(this IClientProvider client, string requestId = "")
+    public static Task<AuthenticationResult> SignInToFirebaseAsync(this IClientProvider client, string requestId = "")
     {
         return SignInToFirebaseAsync(
             client,
