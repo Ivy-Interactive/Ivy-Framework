@@ -9,17 +9,7 @@ import { applyPatch, Operation } from 'fast-json-patch';
 import { setThemeGlobal } from '@/components/ThemeProvider';
 import { cloneDeep } from 'lodash';
 import { ToastAction } from '@/components/ui/toast';
-import {
-  signInWithPopup,
-  GoogleAuthProvider,
-  TwitterAuthProvider,
-  GithubAuthProvider,
-  OAuthProvider,
-  initializeAuth,
-  browserPopupRedirectResolver,
-  AuthProvider,
-} from 'firebase/auth';
-import { initializeApp } from 'firebase/app';
+import { signInWithFirebase } from './use-firebase-auth';
 
 type UpdateMessage = Array<{
   viewId: string;
@@ -271,7 +261,7 @@ export const useBackend = (
             window.open(url, '_blank');
           });
 
-          connection.on('SignInToFirebase', request => {
+          connection.on('SignInToFirebase', async request => {
             const requestId = request?.requestId || 'default';
             const config = request?.config || {};
             const authOption = request?.authOption || {};
@@ -283,120 +273,45 @@ export const useBackend = (
             });
 
             try {
-              const app = initializeApp({
-                apiKey: config.apiKey,
-                authDomain: config.authDomain,
-                projectId: config.projectId,
-              });
+              const result = await signInWithFirebase(config, authOption);
 
-              const auth = initializeAuth(app, {
-                popupRedirectResolver: browserPopupRedirectResolver,
-              });
+              if (result.success) {
+                logger.info('Firebase authentication successful');
 
-              // Select the appropriate auth provider based on authOption
-              let provider: AuthProvider;
+                // Send the authentication result back to the server
+                connection
+                  .invoke('FirebaseAuthResult', requestId, result)
+                  .catch(err => {
+                    logger.error(
+                      'Failed to send authentication result to server:',
+                      err
+                    );
+                  });
 
-              // Check auth flow type (email password or OAuth)
-              if (authOption?.flow === 'EmailPassword') {
-                logger.error('Email/Password flow not supported in popup mode');
+                logger.info('Firebase authentication result sent to server');
+              } else {
+                logger.error(
+                  'Firebase authentication error:',
+                  result.errorMessage
+                );
+
+                // Send the error back to the server
                 connection
                   .invoke(
                     'FirebaseAuthError',
                     requestId,
-                    'Email/Password flow not supported in popup mode'
+                    result.errorMessage || 'Unknown error',
+                    result.errorCode
                   )
                   .catch(err => {
-                    logger.error('Failed to send error to server:', err);
+                    logger.error(
+                      'Failed to send authentication error to server:',
+                      err
+                    );
                   });
-                return;
               }
-
-              // Select OAuth provider based on the authOption ID
-              switch (authOption?.id?.toLowerCase()) {
-                case 'twitter':
-                  provider = new TwitterAuthProvider();
-                  break;
-                case 'github':
-                  provider = new GithubAuthProvider();
-                  break;
-                case 'microsoft':
-                  provider = new OAuthProvider('microsoft.com');
-                  break;
-                case 'apple':
-                  provider = new OAuthProvider('apple.com');
-                  break;
-                case 'google':
-                default:
-                  // Default to Google if not specified or unknown
-                  provider = new GoogleAuthProvider();
-                  break;
-              }
-
-              // Add common scopes
-              if (provider instanceof GoogleAuthProvider) {
-                provider.addScope('email');
-                provider.addScope('profile');
-              } else if (provider instanceof OAuthProvider) {
-                provider.addScope('email');
-                if (provider.providerId == 'apple.com') {
-                  provider.addScope('name');
-                } else {
-                  provider.addScope('profile');
-                }
-              }
-
-              signInWithPopup(auth, provider)
-                .then(async result => {
-                  logger.info('Firebase authentication successful');
-
-                  const user = result.user;
-
-                  // Get the ID token
-                  const idToken = await user.getIdToken();
-
-                  // Send the authentication result back to the server
-                  connection
-                    .invoke('FirebaseAuthResult', requestId, {
-                      success: true,
-                      idToken: idToken,
-                      refreshToken: user.refreshToken,
-                      uid: user.uid,
-                      email: user.email,
-                      displayName: user.displayName,
-                      photoUrl: user.photoURL,
-                      expiresAt: new Date(
-                        Date.now() + 3600 * 1000
-                      ).toISOString(), // Approximate expiry time (1 hour)
-                    })
-                    .catch(err => {
-                      logger.error(
-                        'Failed to send authentication result to server:',
-                        err
-                      );
-                    });
-
-                  logger.info('Firebase authentication result sent to server');
-                })
-                .catch(error => {
-                  logger.error('Firebase authentication error:', error);
-
-                  // Send the error back to the server
-                  connection
-                    .invoke(
-                      'FirebaseAuthError',
-                      requestId,
-                      error.message,
-                      error.code
-                    )
-                    .catch(err => {
-                      logger.error(
-                        'Failed to send authentication error to server:',
-                        err
-                      );
-                    });
-                });
             } catch (error) {
-              logger.error('Firebase initialization error:', error);
+              logger.error('Firebase authentication error:', error);
 
               // Send the error back to the server
               connection
