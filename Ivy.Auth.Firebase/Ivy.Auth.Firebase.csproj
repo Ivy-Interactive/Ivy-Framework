@@ -34,7 +34,6 @@
 
   <ItemGroup>
     <PackageReference Include="FirebaseAdmin" Version="3.3.0" />
-    <PackageReference Include="FirebaseAuthentication.net" Version="4.1.0" />
     <PackageReference Include="Google.Apis.Auth" Version="1.70.0" />
   </ItemGroup>
 

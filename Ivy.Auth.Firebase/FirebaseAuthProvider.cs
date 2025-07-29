@@ -8,8 +8,6 @@ using Ivy.Hooks;
 using Ivy.Shared;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
-using Firebase.Auth;
-using Firebase.Auth.Providers;
 using Ivy.Core;
 using Ivy.Client;
 
@@ -30,7 +28,6 @@ public class FirebaseAuthProvider : IAuthProvider
     private readonly string _projectId;
     private readonly List<AuthOption> _authOptions = [];
     private FirebaseAuth? _firebaseAuth;
-    private readonly FirebaseAuthClient _authClient;
 
     public FirebaseAuthProvider()
     {
@@ -60,23 +57,6 @@ public class FirebaseAuthProvider : IAuthProvider
         }
 
         _firebaseAuth = FirebaseAuth.GetAuth(app);
-
-        var authClientConfig = new FirebaseAuthConfig()
-        {
-            ApiKey = _apiKey,
-            AuthDomain = _authDomain,
-            Providers =
-            [
-                new EmailProvider(),
-                new GoogleProvider(),
-                new TwitterProvider(),
-                new GithubProvider(),
-                new MicrosoftProvider(),
-                new AppleProvider()
-            ],
-        };
-
-        _authClient = new FirebaseAuthClient(authClientConfig);
     }
 
     public async Task<AuthToken?> LoginAsync(string email, string password)
