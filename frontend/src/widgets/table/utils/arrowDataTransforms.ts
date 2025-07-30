@@ -2,7 +2,8 @@ import * as arrow from 'apache-arrow';
 import { DataTableColumn, DataTableData, DataTableRow } from '../types';
 
 export function convertArrowTableToDataTableData(
-  table: arrow.Table
+  table: arrow.Table,
+  requestedPageSize?: number
 ): DataTableData {
   const columns: DataTableColumn[] = table.schema.fields.map(field => ({
     name: field.name,
@@ -22,10 +23,14 @@ export function convertArrowTableToDataTableData(
     rows.push({ values });
   }
 
+  const hasMore = requestedPageSize
+    ? table.numRows >= requestedPageSize
+    : false;
+
   return {
     columns,
     rows,
     totalRows: table.numRows,
-    hasMore: false,
+    hasMore,
   };
 }
