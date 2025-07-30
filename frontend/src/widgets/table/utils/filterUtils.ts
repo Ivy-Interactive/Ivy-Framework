@@ -8,18 +8,43 @@ export const createContainsFilter = (
     throw new Error('At least one column is required for filtering');
   }
 
-  // For now, let's try with just the first column to debug
-  // TODO: Support multiple columns once we confirm the function works
-  const condition: Condition = {
-    column: columns[0],
-    function: 'contains',
-    args: [searchTerm],
+  if (columns.length === 1) {
+    // Single column filter
+    const condition: Condition = {
+      column: columns[0],
+      function: 'contains',
+      args: [searchTerm],
+    };
+
+    console.log('Creating single column filter condition:', condition);
+
+    return {
+      condition,
+    };
+  }
+
+  // Multiple columns filter with OR logic - search term should match ANY column
+  const filters: Filter[] = columns.map(column => ({
+    condition: {
+      column,
+      function: 'contains',
+      args: [searchTerm],
+    },
+  }));
+
+  const group: FilterGroup = {
+    op: 'OR',
+    filters,
   };
 
-  console.log('Creating filter condition:', condition);
+  console.log('Creating multi-column filter with OR logic:', {
+    searchTerm,
+    columns,
+    group,
+  });
 
   return {
-    condition,
+    group,
   };
 };
 
