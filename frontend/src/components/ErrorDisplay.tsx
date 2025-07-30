@@ -34,7 +34,7 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
   };
 
   return (
-    <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4 shadow-lg">
+    <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4 shadow-lg max-w-2xl">
       <div className="flex items-start justify-between mb-4">
         <div className="flex-1">
           <h3 className="text-lg font-semibold text-destructive mb-2">
