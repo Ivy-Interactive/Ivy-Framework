@@ -263,30 +263,61 @@ public class QueryProcessor
             
             Console.WriteLine($"BuildContainsExpression: Search value: '{searchValue}'");
 
-            var containsMethod = typeof(string).GetMethod("Contains", new[] { typeof(string) });
+            // Use case-insensitive Contains method
+            var containsMethod = typeof(string).GetMethod("Contains", new[] { typeof(string), typeof(StringComparison) });
             if (containsMethod == null) 
             {
-                Console.WriteLine($"BuildContainsExpression: Could not find Contains method");
+                Console.WriteLine($"BuildContainsExpression: Could not find Contains method with StringComparison");
                 return null;
             }
 
             var searchValueExpression = System.Linq.Expressions.Expression.Constant(searchValue);
+            var comparisonExpression = System.Linq.Expressions.Expression.Constant(StringComparison.OrdinalIgnoreCase);
             
             // Handle nullable properties
             if (property.Type == typeof(string))
             {
-                Console.WriteLine($"BuildContainsExpression: Creating string contains expression");
-                return System.Linq.Expressions.Expression.Call(property, containsMethod, searchValueExpression);
+                Console.WriteLine($"BuildContainsExpression: Creating case-insensitive string contains expression");
+                
+                // Need to handle null strings - use null-conditional approach
+                var nullCheck = System.Linq.Expressions.Expression.NotEqual(
+                    property, 
+                    System.Linq.Expressions.Expression.Constant(null, typeof(string))
+                );
+                
+                var containsCall = System.Linq.Expressions.Expression.Call(
+                    property, 
+                    containsMethod, 
+                    searchValueExpression, 
+                    comparisonExpression
+                );
+                
+                // Combine null check with contains: property != null && property.Contains(searchValue, OrdinalIgnoreCase)
+                return System.Linq.Expressions.Expression.AndAlso(nullCheck, containsCall);
             }
             else
             {
                 Console.WriteLine($"BuildContainsExpression: Converting non-string property to string first");
-                // Convert to string first
+                // Convert to string first, then apply case-insensitive contains
                 var toStringMethod = property.Type.GetMethod("ToString", System.Type.EmptyTypes);
                 if (toStringMethod != null)
                 {
                     var toStringCall = System.Linq.Expressions.Expression.Call(property, toStringMethod);
-                    return System.Linq.Expressions.Expression.Call(toStringCall, containsMethod, searchValueExpression);
+                    
+                    // Check for null after ToString (though ToString rarely returns null)
+                    var nullCheck = System.Linq.Expressions.Expression.NotEqual(
+                        toStringCall, 
+                        System.Linq.Expressions.Expression.Constant(null, typeof(string))
+                    );
+                    
+                    var containsCall = System.Linq.Expressions.Expression.Call(
+                        toStringCall, 
+                        containsMethod, 
+                        searchValueExpression, 
+                        comparisonExpression
+                    );
+                    
+                    return System.Linq.Expressions.Expression.AndAlso(nullCheck, containsCall);
                 }
                 else
                 {
@@ -348,11 +379,26 @@ public class QueryProcessor
         var searchValue = ExtractStringValue(arg);
         if (searchValue == null) return null;
 
-        var startsWithMethod = typeof(string).GetMethod("StartsWith", new[] { typeof(string) });
+        var startsWithMethod = typeof(string).GetMethod("StartsWith", new[] { typeof(string), typeof(StringComparison) });
         if (startsWithMethod == null) return null;
 
         var searchValueExpression = System.Linq.Expressions.Expression.Constant(searchValue);
-        return System.Linq.Expressions.Expression.Call(property, startsWithMethod, searchValueExpression);
+        var comparisonExpression = System.Linq.Expressions.Expression.Constant(StringComparison.OrdinalIgnoreCase);
+        
+        // Handle null strings
+        var nullCheck = System.Linq.Expressions.Expression.NotEqual(
+            property, 
+            System.Linq.Expressions.Expression.Constant(null, typeof(string))
+        );
+        
+        var startsWithCall = System.Linq.Expressions.Expression.Call(
+            property, 
+            startsWithMethod, 
+            searchValueExpression, 
+            comparisonExpression
+        );
+        
+        return System.Linq.Expressions.Expression.AndAlso(nullCheck, startsWithCall);
     }
 
     private System.Linq.Expressions.Expression? BuildEndsWithExpression(System.Linq.Expressions.MemberExpression property, IEnumerable<Google.Protobuf.WellKnownTypes.Any> args)
@@ -363,11 +409,26 @@ public class QueryProcessor
         var searchValue = ExtractStringValue(arg);
         if (searchValue == null) return null;
 
-        var endsWithMethod = typeof(string).GetMethod("EndsWith", new[] { typeof(string) });
+        var endsWithMethod = typeof(string).GetMethod("EndsWith", new[] { typeof(string), typeof(StringComparison) });
         if (endsWithMethod == null) return null;
 
         var searchValueExpression = System.Linq.Expressions.Expression.Constant(searchValue);
-        return System.Linq.Expressions.Expression.Call(property, endsWithMethod, searchValueExpression);
+        var comparisonExpression = System.Linq.Expressions.Expression.Constant(StringComparison.OrdinalIgnoreCase);
+        
+        // Handle null strings
+        var nullCheck = System.Linq.Expressions.Expression.NotEqual(
+            property, 
+            System.Linq.Expressions.Expression.Constant(null, typeof(string))
+        );
+        
+        var endsWithCall = System.Linq.Expressions.Expression.Call(
+            property, 
+            endsWithMethod, 
+            searchValueExpression, 
+            comparisonExpression
+        );
+        
+        return System.Linq.Expressions.Expression.AndAlso(nullCheck, endsWithCall);
     }
 
     private string? ExtractStringValue(Google.Protobuf.WellKnownTypes.Any arg)
