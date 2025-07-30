@@ -3,7 +3,7 @@ using System.Collections.Concurrent;
 
 namespace Ivy.Auth;
 
-public record AuthenticationResult
+public record AuthResult
 {
     public bool Success { get; set; }
 
@@ -16,9 +16,9 @@ public record AuthenticationResult
 
 public static class AuthResponses
 {
-    private static readonly ConcurrentDictionary<string, TaskCompletionSource<AuthenticationResult>> _pendingResponses = new();
+    private static readonly ConcurrentDictionary<string, TaskCompletionSource<AuthResult>> _pendingResponses = new();
 
-    public static void RegisterResponse(string requestId, TaskCompletionSource<AuthenticationResult> taskCompletionSource)
+    public static void RegisterResponse(string requestId, TaskCompletionSource<AuthResult> taskCompletionSource)
     {
         _pendingResponses.TryAdd(requestId, taskCompletionSource);
 
@@ -32,7 +32,7 @@ public static class AuthResponses
         });
     }
 
-    public static void ProcessResponse(string requestId, AuthenticationResult result)
+    public static void ProcessResponse(string requestId, AuthResult result)
     {
         if (_pendingResponses.TryRemove(requestId, out var taskCompletionSource))
         {
@@ -44,7 +44,7 @@ public static class AuthResponses
     {
         if (_pendingResponses.TryRemove(requestId, out var taskCompletionSource))
         {
-            var result = new AuthenticationResult
+            var result = new AuthResult
             {
                 Success = false,
                 ErrorMessage = errorMessage,

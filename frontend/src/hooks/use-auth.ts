@@ -10,7 +10,6 @@ import {
   AuthProvider,
 } from 'firebase/auth';
 import { logger } from '@/lib/logger';
-import { AuthToken } from '@/hooks/use-backend';
 
 export type FirebaseConfig = {
   apiKey: string;
@@ -26,7 +25,14 @@ export type AuthOptionData = {
   tag?: string;
 };
 
-export type AuthenticationResult = {
+export type AuthToken = {
+  jwt: string;
+  refreshToken?: string;
+  expiresAt?: string;
+  tag?: unknown;
+};
+
+export type AuthResult = {
   success: boolean;
   token?: AuthToken;
   errorMessage?: string;
@@ -43,7 +49,7 @@ export type AuthenticationResult = {
 export async function signInWithFirebase(
   config: FirebaseConfig,
   authOption?: AuthOptionData | null
-): Promise<AuthenticationResult> {
+): Promise<AuthResult> {
   try {
     // Initialize Firebase app
     const app = initializeApp({

@@ -9,7 +9,7 @@ import { applyPatch, Operation } from 'fast-json-patch';
 import { setThemeGlobal } from '@/components/ThemeProvider';
 import { cloneDeep } from 'lodash';
 import { ToastAction } from '@/components/ui/toast';
-import { signInWithFirebase } from './use-firebase-auth';
+import { AuthToken, signInWithFirebase } from './use-auth';
 
 type UpdateMessage = Array<{
   viewId: string;
@@ -26,13 +26,6 @@ type ErrorMessage = {
   type: string;
   description: string;
   stackTrace?: string;
-};
-
-export type AuthToken = {
-  jwt: string;
-  refreshToken?: string;
-  expiresAt?: string;
-  tag?: unknown;
 };
 
 const widgetTreeToXml = (node: WidgetNode) => {
