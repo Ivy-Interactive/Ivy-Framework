@@ -16,7 +16,7 @@ const backgroundColors = {
   Info: 'bg-cyan/10 border-cyan/20',
   Success: 'bg-primary/10 border-primary/20',
   Warning: 'bg-yellow/10 border-yellow/20',
-  Error: 'bg-destructive/10 border-destructive/20',
+  Error: 'border-destructive',
 };
 
 const defaultIcons = {

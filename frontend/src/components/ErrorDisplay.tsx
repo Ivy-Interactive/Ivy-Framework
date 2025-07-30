@@ -34,14 +34,14 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
   };
 
   return (
-    <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4 shadow-lg max-w-full sm:max-w-md md:max-w-lg lg:max-w-2xl">
+    <div className="border border-destructive rounded-lg p-4 shadow-lg max-w-full sm:max-w-md md:max-w-lg lg:max-w-2xl">
       <div className="flex items-start justify-between mb-4">
         <div className="flex-1">
-          <h3 className="text-lg font-semibold text-destructive mb-2">
+          <h3 className="text-lg font-semibold text-destructive-foreground mb-2">
             {title || 'Exception'}
           </h3>
           {message && (
-            <p className="text-sm text-foreground/90 leading-relaxed">
+            <p className="text-sm text-destructive-foreground/90 leading-relaxed">
               {message}
             </p>
           )}
@@ -51,7 +51,7 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
             variant="ghost"
             size="sm"
             onClick={onDismiss}
-            className="h-8 w-8 p-0 ml-2 text-foreground/50 hover:text-foreground hover:bg-destructive/20 transition-colors cursor-pointer"
+            className="h-8 w-8 p-0 ml-2 text-destructive-foreground/50 hover:text-destructive-foreground hover:bg-destructive-foreground/20 transition-colors cursor-pointer"
           >
             <X className="h-4 w-4" />
           </Button>
@@ -60,10 +60,10 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
 
       {stackTrace && (
         <div className="mb-4">
-          <h4 className="text-sm font-medium mb-2 text-foreground">
+          <h4 className="text-sm font-medium mb-2 text-destructive-foreground">
             Stack Trace
           </h4>
-          <div className="bg-muted/50 border border-border rounded-md overflow-hidden">
+          <div className="bg-destructive-foreground/10 border border-destructive-foreground/20 rounded-md overflow-hidden">
             <SyntaxHighlighter
               language="csharp"
               style={createPrismTheme()}
