@@ -23,6 +23,8 @@ export interface GlideDataGridContextValue {
   // Actions
   refresh: () => void;
   refetchWithFilters: (filters?: Filter) => void;
+  clearFilters: () => void;
+  currentFilters?: Filter;
 
   // Grid state
   gridSelection: GridSelection;

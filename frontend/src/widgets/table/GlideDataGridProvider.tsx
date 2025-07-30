@@ -41,6 +41,8 @@ export const GlideDataGridProvider: React.FC<
     isStreaming,
     refresh,
     refetchWithFilters,
+    clearFilters,
+    currentFilters,
   } = useDataTableFetch(connection, {
     pageSize,
     onDataReceived,
@@ -84,6 +86,8 @@ export const GlideDataGridProvider: React.FC<
         isStreaming,
         refresh,
         refetchWithFilters,
+        clearFilters,
+        currentFilters,
         gridSelection,
         setGridSelection,
         columnWidths,

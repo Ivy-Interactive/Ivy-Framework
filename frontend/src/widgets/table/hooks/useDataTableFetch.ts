@@ -20,6 +20,8 @@ export interface UseDataTableFetchReturn {
   isStreaming: boolean;
   refresh: () => void;
   refetchWithFilters: (filters?: Filter) => void;
+  clearFilters: () => void;
+  currentFilters?: Filter;
 }
 
 export function useDataTableFetch(
@@ -38,6 +40,9 @@ export function useDataTableFetch(
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isStreaming, setIsStreaming] = useState(false);
+  const [currentFilters, setCurrentFilters] = useState<Filter | undefined>(
+    undefined
+  );
 
   // Use refs to store callback functions to avoid recreating fetchData on every render
   const callbacksRef = useRef({ onDataReceived, onError, onStreamComplete });
@@ -117,13 +122,13 @@ export function useDataTableFetch(
     [connection, pageSize]
   );
 
-  // Refresh function
+  // Refresh function - now preserves current filters
   const refresh = useCallback(() => {
     if (isStreaming) {
       grpcTableService.disconnect();
     }
-    fetchData();
-  }, [fetchData, isStreaming]);
+    fetchData(currentFilters);
+  }, [fetchData, isStreaming, currentFilters]);
 
   // Refetch with filters function
   const refetchWithFilters = useCallback(
@@ -131,10 +136,20 @@ export function useDataTableFetch(
       if (isStreaming) {
         grpcTableService.disconnect();
       }
+      setCurrentFilters(filters);
       fetchData(filters);
     },
     [fetchData, isStreaming]
   );
+
+  // Clear filters function
+  const clearFilters = useCallback(() => {
+    if (isStreaming) {
+      grpcTableService.disconnect();
+    }
+    setCurrentFilters(undefined);
+    fetchData();
+  }, [fetchData, isStreaming]);
 
   // Auto-fetch on mount and connection changes
   useEffect(() => {
@@ -160,5 +175,7 @@ export function useDataTableFetch(
     isStreaming,
     refresh,
     refetchWithFilters,
+    clearFilters,
+    currentFilters,
   };
 }
