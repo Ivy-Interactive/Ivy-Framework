@@ -118,12 +118,34 @@ export async function signInWithFirebase(
 
     logger.info('Firebase authentication successful');
 
+    // Compute default expiry date (one hour from now)
+    let expiresAt = new Date(Date.now() + 3600_000);
+
+    // Decode the JWT token to get the real expiry date, if possible
+    const tokenParts = idToken.split('.');
+    if (tokenParts.length === 3) {
+      try {
+        // Base64 decode JWT payload
+        const payload = JSON.parse(
+          atob(tokenParts[1].replace(/-/g, '+').replace(/_/g, '/'))
+        );
+
+        // Get expiry time from the 'exp' claim (seconds since epoch)
+        if (payload.exp) {
+          expiresAt = new Date(payload.exp * 1000);
+        }
+      } catch (e) {
+        logger.warn('Failed to decode JWT token:', e);
+      }
+    }
+
+    // Fallback to approximate expiry if decoding fails
     return {
       success: true,
       token: {
         jwt: idToken,
         refreshToken: user.refreshToken,
-        expiresAt: new Date(Date.now() + 3600 * 1000).toISOString(), // Approximate expiry time (1 hour)
+        expiresAt: expiresAt.toISOString(),
       },
     };
   } catch (error: unknown) {
