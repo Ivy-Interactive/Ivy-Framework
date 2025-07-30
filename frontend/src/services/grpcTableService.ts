@@ -190,6 +190,8 @@ export class GrpcTableService extends EventEmitter {
 
   // Serialize TableQuery to protobuf format
   private serializeTableQuery(query: TableQuery): Uint8Array {
+    console.log('serializeTableQuery: Starting serialization', query);
+
     // This is a simplified protobuf serialization
     // In production, you should use the generated protobuf classes
     const encoder = new TextEncoder();
@@ -197,6 +199,7 @@ export class GrpcTableService extends EventEmitter {
 
     // Serialize sort orders (field 1, repeated message)
     if (query.sort && query.sort.length > 0) {
+      console.log('serializeTableQuery: Serializing sort orders', query.sort);
       query.sort.forEach(sort => {
         const sortMessage = this.serializeSortOrder(sort);
         chunks.push(this.encodeField(1, 2, sortMessage)); // Field 1, wire type 2 (length-delimited)
@@ -205,8 +208,21 @@ export class GrpcTableService extends EventEmitter {
 
     // Serialize filter (field 2, message)
     if (query.filter) {
-      const filterMessage = this.serializeFilter(query.filter);
-      chunks.push(this.encodeField(2, 2, filterMessage)); // Field 2, wire type 2
+      console.log('serializeTableQuery: Serializing filter', query.filter);
+      try {
+        const filterMessage = this.serializeFilter(query.filter);
+        console.log(
+          'serializeTableQuery: Filter serialized successfully, length:',
+          filterMessage.length
+        );
+        chunks.push(this.encodeField(2, 2, filterMessage)); // Field 2, wire type 2
+      } catch (error) {
+        console.error(
+          'serializeTableQuery: Filter serialization failed:',
+          error
+        );
+        throw error;
+      }
     }
 
     // Serialize offset (field 3, int32)
@@ -325,50 +341,87 @@ export class GrpcTableService extends EventEmitter {
   }
 
   private serializeFilter(filter: Filter): Uint8Array {
+    console.log('serializeFilter: Serializing filter', filter);
     const chunks: Uint8Array[] = [];
 
     if (filter.condition) {
+      console.log('serializeFilter: Serializing condition', filter.condition);
       // Field 1: condition (message)
       const conditionMessage = this.serializeCondition(filter.condition);
+      console.log(
+        'serializeFilter: Condition serialized, length:',
+        conditionMessage.length
+      );
       chunks.push(this.encodeField(1, 2, conditionMessage));
     }
 
     if (filter.group) {
+      console.log('serializeFilter: Serializing group', filter.group);
       // Field 2: group (message)
       const groupMessage = this.serializeFilterGroup(filter.group);
+      console.log(
+        'serializeFilter: Group serialized, length:',
+        groupMessage.length
+      );
       chunks.push(this.encodeField(2, 2, groupMessage));
     }
 
     if (filter.negate !== undefined) {
+      console.log('serializeFilter: Serializing negate', filter.negate);
       // Field 3: negate (bool)
       const negateValue = filter.negate ? 1 : 0;
       chunks.push(this.encodeField(3, 0, this.encodeVarint(negateValue)));
     }
 
-    return this.combineChunks(chunks);
+    const result = this.combineChunks(chunks);
+    console.log(
+      'serializeFilter: Filter serialization complete, total length:',
+      result.length
+    );
+    return result;
   }
 
   private serializeCondition(condition: Condition): Uint8Array {
+    console.log('serializeCondition: Serializing condition', condition);
     const encoder = new TextEncoder();
     const chunks: Uint8Array[] = [];
 
     // Field 1: column (string)
     const columnData = encoder.encode(condition.column);
+    console.log('serializeCondition: Column data length:', columnData.length);
     chunks.push(this.encodeField(1, 2, columnData));
 
     // Field 2: function (string)
     const functionData = encoder.encode(condition.function);
+    console.log(
+      'serializeCondition: Function data length:',
+      functionData.length
+    );
     chunks.push(this.encodeField(2, 2, functionData));
 
-    // Field 3: args (repeated Any) - simplified as JSON for now
+    // Field 3: args (repeated Any) - need to encode as proper protobuf Any messages
     if (condition.args && condition.args.length > 0) {
-      condition.args.forEach(arg => {
-        const argData = encoder.encode(JSON.stringify(arg));
-        chunks.push(this.encodeField(3, 2, argData));
+      console.log('serializeCondition: Serializing args', condition.args);
+      condition.args.forEach((arg, index) => {
+        const jsonArg = JSON.stringify(arg);
+        console.log(`serializeCondition: Arg ${index}: ${jsonArg}`);
+
+        // Create a proper protobuf Any message
+        const anyMessage = this.serializeAnyValue(arg);
+        console.log(
+          `serializeCondition: Arg ${index} Any message length:`,
+          anyMessage.length
+        );
+        chunks.push(this.encodeField(3, 2, anyMessage));
       });
     }
 
-    return this.combineChunks(chunks);
+    const result = this.combineChunks(chunks);
+    console.log(
+      'serializeCondition: Condition serialization complete, total length:',
+      result.length
+    );
+    return result;
   }
 
   private serializeFilterGroup(group: FilterGroup): Uint8Array {
@@ -385,6 +438,31 @@ export class GrpcTableService extends EventEmitter {
     });
 
     return this.combineChunks(chunks);
+  }
+
+  // Serialize a value as a protobuf Any message
+  private serializeAnyValue(value: unknown): Uint8Array {
+    console.log('serializeAnyValue: Serializing value', value);
+
+    const encoder = new TextEncoder();
+    const chunks: Uint8Array[] = [];
+
+    // Field 1: type_url (string) - we'll use a generic type for JSON values
+    const typeUrl = 'type.googleapis.com/google.protobuf.StringValue';
+    const typeUrlData = encoder.encode(typeUrl);
+    chunks.push(this.encodeField(1, 2, typeUrlData));
+
+    // Field 2: value (bytes) - JSON-encoded value
+    const jsonValue = JSON.stringify(value);
+    const valueData = encoder.encode(jsonValue);
+    chunks.push(this.encodeField(2, 2, valueData));
+
+    const result = this.combineChunks(chunks);
+    console.log(
+      'serializeAnyValue: Any value serialized, length:',
+      result.length
+    );
+    return result;
   }
 
   private encodeVarint(value: number): Uint8Array {

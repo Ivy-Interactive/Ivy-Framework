@@ -27,7 +27,19 @@ public class QueryProcessor
 {
     public byte[] ProcessQuery(IQueryable queryable, TableQuery query)
     {
-        var processedQuery = queryable;
+        try
+        {
+            Console.WriteLine($"QueryProcessor: Processing query with filter: {query.Filter != null}");
+            
+            var processedQuery = queryable;
+
+            // Apply filtering
+            if (query.Filter != null)
+            {
+                Console.WriteLine($"QueryProcessor: Applying filter");
+                processedQuery = ApplyFilter(processedQuery, query.Filter);
+                Console.WriteLine($"QueryProcessor: Filter applied successfully");
+            }
 
         // Apply sorting
         if (query.Sort.Any())
@@ -60,11 +72,24 @@ public class QueryProcessor
             }
         }
 
-        // Execute query and get results
-        var results = processedQuery.Cast<object>().ToList();
+            // Execute query and get results
+            Console.WriteLine($"QueryProcessor: Executing query");
+            var results = processedQuery.Cast<object>().ToList();
+            Console.WriteLine($"QueryProcessor: Query executed, got {results.Count} results");
 
-        // Convert to Arrow table
-        return ConvertToArrowTable(results, query.SelectColumns, queryable.ElementType);
+            // Convert to Arrow table
+            Console.WriteLine($"QueryProcessor: Converting to Arrow table");
+            var arrowData = ConvertToArrowTable(results, query.SelectColumns, queryable.ElementType);
+            Console.WriteLine($"QueryProcessor: Arrow conversion complete, {arrowData.Length} bytes");
+            
+            return arrowData;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"QueryProcessor Error: {ex.Message}");
+            Console.WriteLine($"QueryProcessor Stack Trace: {ex.StackTrace}");
+            throw;
+        }
     }
 
     private IQueryable ApplySort(IQueryable query, IEnumerable<SortOrder> sortOrders)
@@ -99,13 +124,309 @@ public class QueryProcessor
         return query;
     }
 
-    private byte[] ConvertToArrowTable(List<object> data, IEnumerable<string> selectColumns, SystemType elementType)
+    private IQueryable ApplyFilter(IQueryable query, Filter filter)
     {
-        if (!data.Any())
+        try
         {
-            return System.Array.Empty<byte>();
+            Console.WriteLine($"ApplyFilter: Starting filter application for type {query.ElementType.Name}");
+            
+            var elementType = query.ElementType;
+            var parameter = System.Linq.Expressions.Expression.Parameter(elementType, "x");
+            
+            Console.WriteLine($"ApplyFilter: Building filter expression");
+            var predicate = BuildFilterExpression(filter, parameter, elementType);
+            
+            if (predicate == null)
+            {
+                Console.WriteLine($"ApplyFilter: No predicate generated, returning original query");
+                return query;
+            }
+
+            Console.WriteLine($"ApplyFilter: Creating lambda expression");
+            var lambda = System.Linq.Expressions.Expression.Lambda(predicate, parameter);
+            
+            Console.WriteLine($"ApplyFilter: Getting Where method");
+            var whereMethod = typeof(Queryable).GetMethods()
+                .FirstOrDefault(m => m.Name == "Where" && m.GetParameters().Length == 2)?
+                .MakeGenericMethod(elementType);
+
+            if (whereMethod != null)
+            {
+                Console.WriteLine($"ApplyFilter: Invoking Where method");
+                query = (IQueryable)whereMethod.Invoke(null, new object[] { query, lambda })!;
+                Console.WriteLine($"ApplyFilter: Filter applied successfully");
+            }
+            else
+            {
+                Console.WriteLine($"ApplyFilter: Could not find Where method");
+            }
+
+            return query;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"ApplyFilter Error: {ex.Message}");
+            Console.WriteLine($"ApplyFilter Stack Trace: {ex.StackTrace}");
+            throw;
+        }
+    }
+
+    private System.Linq.Expressions.Expression? BuildFilterExpression(Filter filter, System.Linq.Expressions.ParameterExpression parameter, SystemType elementType)
+    {
+        System.Linq.Expressions.Expression? expression = null;
+
+        if (filter.Condition != null)
+        {
+            expression = BuildConditionExpression(filter.Condition, parameter, elementType);
+        }
+        else if (filter.Group != null)
+        {
+            expression = BuildGroupExpression(filter.Group, parameter, elementType);
         }
 
+        // Apply negation if specified
+        if (expression != null && filter.Negate)
+        {
+            expression = System.Linq.Expressions.Expression.Not(expression);
+        }
+
+        return expression;
+    }
+
+    private System.Linq.Expressions.Expression? BuildConditionExpression(Condition condition, System.Linq.Expressions.ParameterExpression parameter, SystemType elementType)
+    {
+        var propertyInfo = elementType.GetProperty(condition.Column);
+        if (propertyInfo == null)
+            return null;
+
+        var property = System.Linq.Expressions.Expression.Property(parameter, propertyInfo);
+
+        return condition.Function.ToLowerInvariant() switch
+        {
+            "contains" => BuildContainsExpression(property, condition.Args),
+            "equals" => BuildEqualsExpression(property, condition.Args),
+            "greaterthan" => BuildGreaterThanExpression(property, condition.Args),
+            "lessthan" => BuildLessThanExpression(property, condition.Args),
+            "startswith" => BuildStartsWithExpression(property, condition.Args),
+            "endswith" => BuildEndsWithExpression(property, condition.Args),
+            _ => null
+        };
+    }
+
+    private System.Linq.Expressions.Expression? BuildGroupExpression(FilterGroup group, System.Linq.Expressions.ParameterExpression parameter, SystemType elementType)
+    {
+        var expressions = new List<System.Linq.Expressions.Expression>();
+
+        foreach (var childFilter in group.Filters)
+        {
+            var childExpression = BuildFilterExpression(childFilter, parameter, elementType);
+            if (childExpression != null)
+                expressions.Add(childExpression);
+        }
+
+        if (!expressions.Any())
+            return null;
+
+        // Combine expressions with AND or OR
+        var result = expressions.First();
+        for (int i = 1; i < expressions.Count; i++)
+        {
+            result = group.Op == FilterGroup.Types.LogicalOperator.And
+                ? System.Linq.Expressions.Expression.AndAlso(result, expressions[i])
+                : System.Linq.Expressions.Expression.OrElse(result, expressions[i]);
+        }
+
+        return result;
+    }
+
+    private System.Linq.Expressions.Expression? BuildContainsExpression(System.Linq.Expressions.MemberExpression property, IEnumerable<Google.Protobuf.WellKnownTypes.Any> args)
+    {
+        try
+        {
+            Console.WriteLine($"BuildContainsExpression: Building contains for property {property.Member.Name} of type {property.Type}");
+            
+            var arg = args.FirstOrDefault();
+            if (arg == null) 
+            {
+                Console.WriteLine($"BuildContainsExpression: No arguments provided");
+                return null;
+            }
+
+            // Extract the string value from the protobuf Any
+            Console.WriteLine($"BuildContainsExpression: Extracting string value from protobuf Any");
+            var searchValue = ExtractStringValue(arg);
+            if (searchValue == null) 
+            {
+                Console.WriteLine($"BuildContainsExpression: Failed to extract search value");
+                return null;
+            }
+            
+            Console.WriteLine($"BuildContainsExpression: Search value: '{searchValue}'");
+
+            var containsMethod = typeof(string).GetMethod("Contains", new[] { typeof(string) });
+            if (containsMethod == null) 
+            {
+                Console.WriteLine($"BuildContainsExpression: Could not find Contains method");
+                return null;
+            }
+
+            var searchValueExpression = System.Linq.Expressions.Expression.Constant(searchValue);
+            
+            // Handle nullable properties
+            if (property.Type == typeof(string))
+            {
+                Console.WriteLine($"BuildContainsExpression: Creating string contains expression");
+                return System.Linq.Expressions.Expression.Call(property, containsMethod, searchValueExpression);
+            }
+            else
+            {
+                Console.WriteLine($"BuildContainsExpression: Converting non-string property to string first");
+                // Convert to string first
+                var toStringMethod = property.Type.GetMethod("ToString", System.Type.EmptyTypes);
+                if (toStringMethod != null)
+                {
+                    var toStringCall = System.Linq.Expressions.Expression.Call(property, toStringMethod);
+                    return System.Linq.Expressions.Expression.Call(toStringCall, containsMethod, searchValueExpression);
+                }
+                else
+                {
+                    Console.WriteLine($"BuildContainsExpression: Could not find ToString method for type {property.Type}");
+                }
+            }
+
+            return null;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"BuildContainsExpression Error: {ex.Message}");
+            Console.WriteLine($"BuildContainsExpression Stack Trace: {ex.StackTrace}");
+            throw;
+        }
+    }
+
+    private System.Linq.Expressions.Expression? BuildEqualsExpression(System.Linq.Expressions.MemberExpression property, IEnumerable<Google.Protobuf.WellKnownTypes.Any> args)
+    {
+        var arg = args.FirstOrDefault();
+        if (arg == null) return null;
+
+        var value = ExtractTypedValue(arg, property.Type);
+        if (value == null) return null;
+
+        var valueExpression = System.Linq.Expressions.Expression.Constant(value);
+        return System.Linq.Expressions.Expression.Equal(property, valueExpression);
+    }
+
+    private System.Linq.Expressions.Expression? BuildGreaterThanExpression(System.Linq.Expressions.MemberExpression property, IEnumerable<Google.Protobuf.WellKnownTypes.Any> args)
+    {
+        var arg = args.FirstOrDefault();
+        if (arg == null) return null;
+
+        var value = ExtractTypedValue(arg, property.Type);
+        if (value == null) return null;
+
+        var valueExpression = System.Linq.Expressions.Expression.Constant(value);
+        return System.Linq.Expressions.Expression.GreaterThan(property, valueExpression);
+    }
+
+    private System.Linq.Expressions.Expression? BuildLessThanExpression(System.Linq.Expressions.MemberExpression property, IEnumerable<Google.Protobuf.WellKnownTypes.Any> args)
+    {
+        var arg = args.FirstOrDefault();
+        if (arg == null) return null;
+
+        var value = ExtractTypedValue(arg, property.Type);
+        if (value == null) return null;
+
+        var valueExpression = System.Linq.Expressions.Expression.Constant(value);
+        return System.Linq.Expressions.Expression.LessThan(property, valueExpression);
+    }
+
+    private System.Linq.Expressions.Expression? BuildStartsWithExpression(System.Linq.Expressions.MemberExpression property, IEnumerable<Google.Protobuf.WellKnownTypes.Any> args)
+    {
+        var arg = args.FirstOrDefault();
+        if (arg == null) return null;
+
+        var searchValue = ExtractStringValue(arg);
+        if (searchValue == null) return null;
+
+        var startsWithMethod = typeof(string).GetMethod("StartsWith", new[] { typeof(string) });
+        if (startsWithMethod == null) return null;
+
+        var searchValueExpression = System.Linq.Expressions.Expression.Constant(searchValue);
+        return System.Linq.Expressions.Expression.Call(property, startsWithMethod, searchValueExpression);
+    }
+
+    private System.Linq.Expressions.Expression? BuildEndsWithExpression(System.Linq.Expressions.MemberExpression property, IEnumerable<Google.Protobuf.WellKnownTypes.Any> args)
+    {
+        var arg = args.FirstOrDefault();
+        if (arg == null) return null;
+
+        var searchValue = ExtractStringValue(arg);
+        if (searchValue == null) return null;
+
+        var endsWithMethod = typeof(string).GetMethod("EndsWith", new[] { typeof(string) });
+        if (endsWithMethod == null) return null;
+
+        var searchValueExpression = System.Linq.Expressions.Expression.Constant(searchValue);
+        return System.Linq.Expressions.Expression.Call(property, endsWithMethod, searchValueExpression);
+    }
+
+    private string? ExtractStringValue(Google.Protobuf.WellKnownTypes.Any arg)
+    {
+        try
+        {
+            Console.WriteLine($"ExtractStringValue: Extracting from Any with TypeUrl: {arg.TypeUrl}");
+            
+            // The frontend sends JSON-serialized strings, so we need to deserialize
+            var jsonValue = arg.Value.ToStringUtf8();
+            Console.WriteLine($"ExtractStringValue: Raw value: '{jsonValue}'");
+            
+            var result = System.Text.Json.JsonSerializer.Deserialize<string>(jsonValue);
+            Console.WriteLine($"ExtractStringValue: Deserialized value: '{result}'");
+            
+            return result;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"ExtractStringValue: JSON deserialization failed: {ex.Message}");
+            
+            // Fallback: try to use the value directly
+            var fallback = arg.Value.ToStringUtf8().Trim('"');
+            Console.WriteLine($"ExtractStringValue: Using fallback value: '{fallback}'");
+            
+            return fallback;
+        }
+    }
+
+    private object? ExtractTypedValue(Google.Protobuf.WellKnownTypes.Any arg, SystemType targetType)
+    {
+        try
+        {
+            var jsonValue = arg.Value.ToStringUtf8();
+            var underlyingType = Nullable.GetUnderlyingType(targetType) ?? targetType;
+
+            return underlyingType switch
+            {
+                SystemType t when t == typeof(string) => System.Text.Json.JsonSerializer.Deserialize<string>(jsonValue),
+                SystemType t when t == typeof(int) => System.Text.Json.JsonSerializer.Deserialize<int>(jsonValue),
+                SystemType t when t == typeof(long) => System.Text.Json.JsonSerializer.Deserialize<long>(jsonValue),
+                SystemType t when t == typeof(double) => System.Text.Json.JsonSerializer.Deserialize<double>(jsonValue),
+                SystemType t when t == typeof(float) => System.Text.Json.JsonSerializer.Deserialize<float>(jsonValue),
+                SystemType t when t == typeof(bool) => System.Text.Json.JsonSerializer.Deserialize<bool>(jsonValue),
+                SystemType t when t == typeof(DateTime) => System.Text.Json.JsonSerializer.Deserialize<DateTime>(jsonValue),
+                SystemType t when t == typeof(decimal) => System.Text.Json.JsonSerializer.Deserialize<decimal>(jsonValue),
+                _ => System.Text.Json.JsonSerializer.Deserialize<string>(jsonValue)
+            };
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private byte[] ConvertToArrowTable(List<object> data, IEnumerable<string> selectColumns, SystemType elementType)
+    {
+        Console.WriteLine($"ConvertToArrowTable: Converting {data.Count} items to Arrow table");
+        
         var properties = elementType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
 
         // Filter properties if selectColumns is specified
@@ -117,11 +438,21 @@ public class QueryProcessor
         var fields = new List<ArrowField>();
         var arrays = new List<IArrowArray>();
 
+        // Create schema and empty arrays even when there's no data
         foreach (var prop in properties)
         {
             var arrowType = GetArrowType(prop.PropertyType);
             fields.Add(new ArrowField(prop.Name, arrowType, nullable: true));
-            arrays.Add(CreateArrowArray(prop, data));
+            
+            // Create empty array if no data, otherwise create array with data
+            if (!data.Any())
+            {
+                arrays.Add(CreateEmptyArrowArray(arrowType));
+            }
+            else
+            {
+                arrays.Add(CreateArrowArray(prop, data));
+            }
         }
 
         var schema = new Schema(fields, null);
@@ -132,8 +463,27 @@ public class QueryProcessor
         writer.WriteRecordBatch(recordBatch);
         writer.WriteEnd();
 
-        return stream.ToArray();
+        var result = stream.ToArray();
+        Console.WriteLine($"ConvertToArrowTable: Created Arrow table with {result.Length} bytes");
+        return result;
     }
+
+    private IArrowArray CreateEmptyArrowArray(IArrowType arrowType)
+    {
+        return arrowType switch
+        {
+            Int32Type => new Int32Array.Builder().Build(),
+            Int64Type => new Int64Array.Builder().Build(),
+            DoubleType => new DoubleArray.Builder().Build(),
+            FloatType => new FloatArray.Builder().Build(),
+            BooleanType => new BooleanArray.Builder().Build(),
+            TimestampType => new TimestampArray.Builder().Build(),
+            Decimal128Type => new Decimal128Array.Builder((Decimal128Type)arrowType).Build(),
+            StringType => new StringArray.Builder().Build(),
+            _ => new StringArray.Builder().Build()
+        };
+    }
+
 
     private IArrowType GetArrowType(SystemType type)
     {
