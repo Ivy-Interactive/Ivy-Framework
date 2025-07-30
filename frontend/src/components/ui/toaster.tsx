@@ -22,7 +22,7 @@ export function Toaster() {
         variant,
         ...props
       }) {
-        const isError = variant === 'destructive' || title === 'Failed';
+        const isError = variant === 'destructive';
 
         return (
           <Toast
