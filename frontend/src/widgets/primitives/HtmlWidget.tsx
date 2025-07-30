@@ -32,6 +32,14 @@ export const HtmlWidget: React.FC<HtmlWidgetProps> = ({ id, content }) => (
       'pre',
       'code',
       'blockquote',
+      'hr',
+      'table',
+      'thead',
+      'tbody',
+      'tr',
+      'th',
+      'td',
+      'img',
     ]}
   />
 );

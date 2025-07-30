@@ -50,7 +50,7 @@ export const CalloutWidget: React.FC<CalloutWidgetProps> = ({
     <div
       style={styles}
       className={cn(
-        'flex items-center p-4 text-sm rounded-lg border',
+        'flex items-center p-4 text-large-body rounded-lg border',
         bgClasses,
         'text-foreground'
       )}

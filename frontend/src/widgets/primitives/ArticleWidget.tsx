@@ -60,8 +60,8 @@ export const ArticleWidget: React.FC<ArticleWidgetProps> = ({
                         href={'app://' + previous.appId}
                         className="group flex flex-col gap-2 hover:text-primary transition-colors"
                       >
-                        <div className="text-sm">← Previous</div>
-                        <div className="font-medium text-muted-foreground">
+                        <div className="text-body">← Previous</div>
+                        <div className="text-body text-muted-foreground">
                           {previous.title}
                         </div>
                       </a>
@@ -78,8 +78,8 @@ export const ArticleWidget: React.FC<ArticleWidgetProps> = ({
                         href={'app://' + next.appId}
                         className="group flex flex-col text-right gap-2 hover:text-primary transition-colors"
                       >
-                        <div className="text-sm">Next →</div>
-                        <div className="font-medium text-muted-foreground">
+                        <div className="text-body">Next →</div>
+                        <div className="text-body text-muted-foreground">
                           {next.title}
                         </div>
                       </a>
@@ -92,7 +92,7 @@ export const ArticleWidget: React.FC<ArticleWidgetProps> = ({
                       href={documentSource}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="group flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors"
+                      className="group flex items-center gap-2 text-body text-muted-foreground hover:text-primary transition-colors"
                     >
                       <Github className="w-4 h-4" />
                       Edit this document
@@ -112,7 +112,7 @@ export const ArticleWidget: React.FC<ArticleWidgetProps> = ({
               />
             ) : (
               <div className="sticky top-8 w-64 relative">
-                <div className="font-medium mb-4">Table of Contents</div>
+                <div className="text-body mb-4">Table of Contents</div>
                 <ScrollArea>
                   <div className="space-y-2">
                     <div className="h-4 bg-muted rounded animate-pulse w-full"></div>
@@ -191,7 +191,7 @@ const TableOfContents = ({
 
   return (
     <div className={cn('w-64 relative', className)}>
-      <div className="font-medium mb-4">Table of Contents</div>
+      <div className="text-body mb-4">Table of Contents</div>
       <ScrollArea>
         <nav className="relative">
           {headings.map(heading => (
@@ -202,7 +202,7 @@ const TableOfContents = ({
                 'block text-sm py-1 hover:text-primary transition-colors',
                 heading.level === 1 ? 'pl-0' : `pl-${(heading.level - 1) * 4}`,
                 activeId === heading.id
-                  ? 'text-primary font-medium'
+                  ? 'text-primary'
                   : 'text-muted-foreground'
               )}
               onClick={e => {

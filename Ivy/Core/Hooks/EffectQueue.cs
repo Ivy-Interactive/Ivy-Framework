@@ -1,10 +1,11 @@
+using Ivy.Core.Exceptions;
 using Ivy.Core.Helpers;
 
 namespace Ivy.Core.Hooks;
 
-public class EffectQueue : IDisposable
+public class EffectQueue(IExceptionHandler exceptionHandler) : IDisposable
 {
-    private readonly object _syncLock = new();
+    private readonly Lock _syncLock = new();
     private readonly Disposables _disposables = new();
     private readonly Queue<(EffectHook Effect, EffectPriority Priority)> _queue = new();
     private bool _isProcessing;
@@ -94,8 +95,7 @@ public class EffectQueue : IDisposable
             }
             catch (Exception ex)
             {
-                //todo:should write to a logger
-                Console.WriteLine($"Effect error: {ex}");
+                exceptionHandler.HandleException(new EffectException(effect, ex));
             }
         }
     }

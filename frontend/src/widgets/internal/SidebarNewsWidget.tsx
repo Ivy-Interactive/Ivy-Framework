@@ -111,10 +111,7 @@ function News({ articles }: { articles: NewsArticle[] }) {
   if (cards.length === 0 && showCompleted) return null;
 
   return cards.length > 0 ? (
-    <div
-      className="group overflow-hidden px-3 pb-3 pt-8"
-      data-active={cardCount !== 0}
-    >
+    <div className="group overflow-hidden px-2" data-active={cardCount !== 0}>
       <div className="relative size-full">
         {[...cards]
           .reverse()
@@ -172,7 +169,7 @@ function News({ articles }: { articles: NewsArticle[] }) {
             style={{ '--offset': '10px' } as React.CSSProperties}
           >
             <div className="animate-fade-in absolute inset-0 rounded-lg border border-neutral-300 [animation-delay:2.3s] [animation-direction:reverse] [animation-duration:0.2s]" />
-            <span className="animate-fade-in text-xs font-medium text-muted-foreground [animation-delay:2.3s] [animation-direction:reverse] [animation-duration:0.2s]">
+            <span className="animate-fade-in text-small-label font-medium text-muted-foreground [animation-delay:2.3s] [animation-direction:reverse] [animation-duration:0.2s]">
               You're all caught up!
             </span>
           </div>
@@ -306,7 +303,7 @@ function NewsCard({
       ref={ref}
       className={cn(
         'bg-gradient-to-br from-background to-muted',
-        'relative select-none gap-2 p-3 text-[0.8125rem]',
+        'relative select-none gap-2 p-2 text-[0.8125rem]',
         'translate-x-[calc(var(--dx)*1px)] rotate-[calc(var(--dx)*0.05deg)] opacity-[calc(1-max(var(--dx),-1*var(--dx))/var(--w)/2)]',
         'transition-shadow data-[dragging=true]:shadow-md'
       )}
@@ -319,11 +316,11 @@ function NewsCard({
           <span className="line-clamp-1 font-medium text-foreground">
             {title}
           </span>
-          <p className="line-clamp-2 h-10 leading-5 text-muted-foreground">
+          <p className="line-clamp-2 h-8 leading-4 text-muted-foreground">
             {description}
           </p>
         </div>
-        <div className="relative mt-3 aspect-[16/9] w-full shrink-0 overflow-hidden rounded border bg-muted">
+        <div className="relative mt-2 aspect-[16/10] w-full shrink-0 overflow-hidden rounded border bg-muted">
           {image && (
             <a href={href} target="_blank" rel="noopener noreferrer">
               <img
@@ -341,7 +338,7 @@ function NewsCard({
             'sm:group-has-[*[data-dragging=true]]:h-7 sm:group-has-[*[data-dragging=true]]:opacity-100 sm:group-hover:group-data-[active=true]:h-7 sm:group-hover:group-data-[active=true]:opacity-100'
           )}
         >
-          <div className="flex items-center justify-between pt-3 text-xs">
+          <div className="flex items-center justify-between pt-3 text-small-label">
             <a
               href={href}
               target="_blank"

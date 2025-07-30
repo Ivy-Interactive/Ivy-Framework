@@ -55,7 +55,9 @@ const CopyToClipboardButton: React.FC<CopyToClipboardButtonProps> = ({
           <Check size={16} />
         </span>
       </span>
-      {label && <span className="text-xs">{copied ? 'Copied!' : label}</span>}
+      {label && (
+        <span className="text-small-label">{copied ? 'Copied!' : label}</span>
+      )}
     </button>
   );
 };

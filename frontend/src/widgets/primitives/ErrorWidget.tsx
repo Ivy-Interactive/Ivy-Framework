@@ -1,4 +1,4 @@
-import { Exception } from '@/components/Exception';
+import { ErrorDisplay } from '@/components/ErrorDisplay';
 import React from 'react';
 
 interface ErrorWidgetProps {
@@ -11,4 +11,4 @@ export const ErrorWidget: React.FC<ErrorWidgetProps> = ({
   title,
   message,
   stackTrace,
-}) => <Exception title={title} message={message} stackTrace={stackTrace} />;
+}) => <ErrorDisplay title={title} message={message} stackTrace={stackTrace} />;

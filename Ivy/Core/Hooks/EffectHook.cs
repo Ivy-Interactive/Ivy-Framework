@@ -10,7 +10,7 @@ public class EffectHook(int identity, Func<Task<IDisposable>> handler, IEffectTr
 
     public static EffectHook Create(int identity, Func<Task<IDisposable>> effect, IEffectTrigger[] triggers)
     {
-        //if no triggers are provided we assume that the effect should be triggered after rendering the first time
+        //if no triggers are provided, we assume that the effect should be triggered after rendering the first time
         if (triggers.Length == 0)
         {
             triggers = [EffectTrigger.AfterInit()];

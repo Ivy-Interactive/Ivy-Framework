@@ -25,9 +25,9 @@ public static class BuilderFactoryExtensions
         return new NumberBuilder<TModel>();
     }
 
-    public static IBuilder<TModel> Link<TModel>(this IBuilderFactory<TModel> factory)
+    public static IBuilder<TModel> Link<TModel>(this IBuilderFactory<TModel> factory, string? url = null)
     {
-        return new LinkBuilder<TModel>();
+        return new LinkBuilder<TModel>(url);
     }
 
     public static IBuilder<TModel> CopyToClipboard<TModel>(this IBuilderFactory<TModel> factory)

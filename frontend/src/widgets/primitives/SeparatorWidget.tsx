@@ -31,7 +31,7 @@ export const SeparatorWidget: React.FC<SeparatorWidgetProps> = ({
     return (
       <div className="relative flex items-center justify-center">
         {separator}
-        <span className="absolute px-2 text-xs text-muted-foreground bg-background">
+        <span className="absolute px-2 text-small-label text-muted-foreground bg-background">
           {text}
         </span>
       </div>

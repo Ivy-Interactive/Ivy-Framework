@@ -95,18 +95,21 @@ const variantMap: VariantMap = {
     </code>
   ),
   Lead: ({ children, className, style }) => (
-    <p className={cn('text-xl text-muted-foreground', className)} style={style}>
+    <p className={cn(textBlockClassMap.Lead, className)} style={style}>
       {children}
     </p>
   ),
   Large: ({ children, className, style }) => (
-    <div className={cn('text-lg font-semibold', className)} style={style}>
+    <div
+      className={cn('text-semi-lead font-semibold', className)}
+      style={style}
+    >
       {children}
     </div>
   ),
   Small: ({ children, className, style }) => (
     <div
-      className={cn('text-sm font-medium leading-none', className)}
+      className={cn('text-large-body font-medium leading-none', className)}
       style={style}
     >
       {children}
@@ -114,7 +117,7 @@ const variantMap: VariantMap = {
   ),
   Muted: ({ children, className, style }) => (
     <div
-      className={cn('text-sm text-muted-foreground', className)}
+      className={cn('text-large-body text-muted-foreground', className)}
       style={style}
     >
       {children}
@@ -122,26 +125,35 @@ const variantMap: VariantMap = {
   ),
   Danger: ({ children, className, style }) => (
     <div
-      className={cn('text-destructive font-semibold', className)}
+      className={cn(
+        'text-large-body text-destructive font-semibold',
+        className
+      )}
       style={style}
     >
       {children}
     </div>
   ),
   Warning: ({ children, className, style }) => (
-    <div className={cn('text-amber font-semibold', className)} style={style}>
+    <div
+      className={cn('text-large-body text-amber font-semibold', className)}
+      style={style}
+    >
       {children}
     </div>
   ),
   Success: ({ children, className, style }) => (
-    <div className={cn('text-green font-semibold', className)} style={style}>
+    <div
+      className={cn('text-large-body text-green font-semibold', className)}
+      style={style}
+    >
       {children}
     </div>
   ),
   Label: ({ children, className, style }) => (
     <div
       className={cn(
-        'text-sm font-medium leading-none flex items-center',
+        'text-large-label font-medium leading-none flex items-center',
         className
       )}
       style={style}

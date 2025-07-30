@@ -27,7 +27,8 @@ public class TableApp : SampleBase
         };
 
         return products.ToTable()
-            .Width(Size.Full())
+                .RemoveHeader()
+                .Width(Size.Full())
             // .Width(e => e.Sku, Size.Fraction(0))
             // .Width(e => e.Name, Size.Fraction(1 / 3f))
             // .Width(e => e.Price, Size.Fraction(1 / 3f))

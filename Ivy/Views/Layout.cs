@@ -20,7 +20,7 @@ public static class Layout
     public static LayoutView Center(params IEnumerable<object?> elements)
     {
         return Horizontal(elements.Where(e => e != null).Cast<object>().ToArray())
-            .Height(Size.Screen()).RemoveParentPadding().Align(Align.Center);
+            .RemoveParentPadding().Align(Align.Center);
     }
 
     public static LayoutView Wrap(params IEnumerable<object?> elements)

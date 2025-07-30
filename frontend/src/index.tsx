@@ -4,6 +4,7 @@ import './index.css';
 import { renderWidgetTree, loadingState } from '@/widgets/WidgetRenderer';
 import { useBackend } from '@/hooks/use-backend';
 import { Toaster } from '@/components/ui/toaster';
+import { ErrorSheet } from '@/components/ErrorSheet';
 import ErrorBoundary from './components/ErrorBoundary';
 import { EventHandlerProvider } from './components/EventHandlerContext';
 import { TextShimmer } from './components/TextShimmer';
@@ -44,6 +45,7 @@ function App() {
           <>
             {!removeBranding && <MadeWithIvy />}
             {renderWidgetTree(widgetTree || loadingState())}
+            <ErrorSheet />
             <Toaster />
             {disconnected && <ConnectionModal />}
           </>

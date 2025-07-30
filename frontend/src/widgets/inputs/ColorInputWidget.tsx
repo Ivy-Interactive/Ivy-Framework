@@ -202,7 +202,7 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
             disabled={disabled}
             className={`w-10 h-10 p-1 rounded-lg border ${
               disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
-            } ${invalid ? inputStyles.invalidInput : 'border-gray-300'}`}
+            } ${invalid ? inputStyles.invalidInput : 'border-border'}`}
           />
         </div>
       </div>
@@ -220,7 +220,7 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
           disabled={disabled}
           className={`w-10 h-10 p-1 rounded-lg border ${
             disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
-          } ${invalid ? inputStyles.invalidInput : 'border-gray-300'}`}
+          } ${invalid ? inputStyles.invalidInput : 'border-border'}`}
         />
       </div>
       <div className="relative">

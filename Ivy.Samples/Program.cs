@@ -1,3 +1,5 @@
+using Ivy.Samples.Apps.Demos;
+
 CultureInfo.DefaultThreadCurrentCulture = CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("en-US");
 var server = new Server();
 server.UseHotReload();
@@ -12,6 +14,7 @@ var chromeSettings = new ChromeSettings()
             | new IvyLogo()
             | Text.Muted($"Version {version}")
     )
+    .DefaultApp<HelloApp>()
     .UseTabs(preventDuplicates: true);
 server.UseChrome(() => new DefaultSidebarChrome(chromeSettings));
 server.Services.AddSingleton<SampleDbContextFactory>();

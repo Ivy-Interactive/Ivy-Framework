@@ -87,7 +87,6 @@ const CodeWidget: React.FC<CodeWidgetProps> = memo(
       [id, language, showLineNumbers, showBorder]
     );
 
-    // Create dynamic theme that adapts to current CSS variables
     const dynamicTheme = useMemo(() => createPrismTheme(), []);
 
     return (

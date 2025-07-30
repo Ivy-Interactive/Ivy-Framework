@@ -25,6 +25,8 @@
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
+    "@fontsource-variable/inter": "^5.2.6",
+    "@fontsource/ibm-plex-mono": "^5.2.6",
     "@fontsource/inter": "^5.2.6",
     "@glideapps/glide-data-grid": "^6.0.3",
     "@grpc/proto-loader": "^0.7.15",

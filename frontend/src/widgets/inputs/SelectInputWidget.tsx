@@ -249,7 +249,7 @@ const ToggleVariant: React.FC<SelectInputWidgetProps> = ({
                   value={option.value.toString()}
                   aria-label={option.label}
                   className={cn(
-                    'px-3 py-2',
+                    'px-3 py-2 hover:text-foreground',
                     isInvalid
                       ? `${inputStyles.invalidInput} !bg-destructive/10 !border-destructive !text-destructive`
                       : isSelected
@@ -293,7 +293,7 @@ const ToggleVariant: React.FC<SelectInputWidgetProps> = ({
                   value={option.value.toString()}
                   aria-label={option.label}
                   className={cn(
-                    'px-3 py-2',
+                    'px-3 py-2 hover:text-foreground',
                     isInvalid
                       ? `${inputStyles.invalidInput} !bg-destructive/10 !border-destructive !text-destructive`
                       : isSelected
@@ -573,9 +573,9 @@ const CheckboxVariant: React.FC<SelectInputWidgetProps> = ({
             );
             eventHandler('OnChange', id, [[]]);
           }}
-          className="flex-shrink-0 p-1 rounded hover:bg-gray-100 focus:outline-none"
+          className="flex-shrink-0 p-1 rounded hover:bg-accent focus:outline-none"
         >
-          <X className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+          <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
         </button>
       )}
     </div>
@@ -670,7 +670,7 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
             hideClearAllButton={!nullable}
             hidePlaceholderWhenSelected
             emptyIndicator={
-              <p className="text-center text-sm">No results found</p>
+              <p className="text-center text-large-body">No results found</p>
             }
           />
           {invalid && (

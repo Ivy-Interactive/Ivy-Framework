@@ -175,7 +175,9 @@ export const LabeledHandle = ({
         data-type={type}
         data-position={position}
       >
-        <div className={`text-sm text-muted-foreground ${labelClassName}`}>
+        <div
+          className={`text-large-body text-muted-foreground ${labelClassName}`}
+        >
           {title}
         </div>
       </div>
@@ -461,7 +463,9 @@ export const DbmlCanvasWidget: React.FC<DbmlCanvasWidgetProps> = ({
       <div className="m-4 p-4 bg-destructive/10 border border-destructive/20 rounded-md h-fit w-full">
         <h3 className="text-destructive font-medium mb-2">DBML Parse Error</h3>
 
-        <div className="text-destructive/80 text-sm mb-3">{error.message}</div>
+        <div className="text-destructive/80 text-large-body mb-3">
+          {error.message}
+        </div>
 
         {error.location && (
           <div className="mb-3 text-sm">

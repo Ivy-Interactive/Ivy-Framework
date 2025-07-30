@@ -273,6 +273,6 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
                 settings.Footer,
                 footer
             )
-        );
+        ).MainAppSidebar(true);
     }
 }

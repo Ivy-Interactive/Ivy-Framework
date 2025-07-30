@@ -1,3 +1,6 @@
+@import '@fontsource-variable/inter';
+@import '@fontsource/ibm-plex-mono/400.css';
+@import '@fontsource/ibm-plex-mono/500.css';
 @import 'tailwindcss';
 
 @theme {
@@ -147,9 +150,56 @@
     --destructive-foreground: #000000;
     --destructive-light: #efc5c9;
     --destructive-dark: #5d3235;
-    --font-sans: Inter, sans-serif;
-    --font-serif: Inter, sans-serif;
-    --font-mono: IBM Plex Mono, monospace;
+
+    /* Typography System - Inter Variable Font Family */
+    --font-sans:
+      'Inter Variable', 'Inter', ui-sans-serif, system-ui, sans-serif,
+      'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
+      'Noto Color Emoji';
+    --font-serif:
+      'Inter Variable', 'Inter', ui-serif, Georgia, Cambria, 'Times New Roman',
+      Times, serif;
+    --font-mono:
+      'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+      'Liberation Mono', 'Courier New', monospace;
+
+    /* Typography Sizes from the images */
+    --font-size-60: 60px;
+    --font-size-40: 40px;
+    --font-size-30: 30px;
+    --font-size-25: 25px;
+    --font-size-20: 20px;
+    --font-size-15: 15px;
+    --font-size-12: 12px;
+    --font-size-10: 10px;
+    --font-size-8: 8px;
+    --font-size-5: 5px;
+
+    /* Line Heights from the images */
+    --line-height-60: 60px;
+    --line-height-41: 41px;
+    --line-height-32: 32px;
+    --line-height-27: 27px;
+    --line-height-22: 22px;
+    --line-height-24: 24px;
+    --line-height-15: 15px;
+    --line-height-14: 14px;
+    --line-height-13: 13px;
+    --line-height-16: 16px;
+    --line-height-12: 12px;
+
+    /* Letter Spacing from the images */
+    --letter-spacing-neg-5: -5%;
+    --letter-spacing-neg-4: -4%;
+    --letter-spacing-neg-3: -3%;
+    --letter-spacing-neg-2: -2%;
+    --letter-spacing-0: 0%;
+    --letter-spacing-1: 1%;
+    --letter-spacing-2: 2%;
+    --letter-spacing-4: 4%;
+    --letter-spacing-8: 8%;
+    --letter-spacing-14: 14%;
+
     --radius: 0.5rem;
     --shadow-2xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
     --shadow-xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
@@ -200,9 +250,16 @@
     --sidebar-accent-foreground: oklch(0.97 0 286.38);
     --sidebar-border: oklch(0.27 0.01 286.03);
     --sidebar-ring: oklch(0.87 0.01 286.29);
-    --font-sans: Inter, sans-serif;
-    --font-serif: Inter, sans-serif;
-    --font-mono: IBM Plex Mono, monospace;
+    --font-sans:
+      'Inter Variable', 'Inter', ui-sans-serif, system-ui, sans-serif,
+      'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
+      'Noto Color Emoji';
+    --font-serif:
+      'Inter Variable', 'Inter', ui-serif, Georgia, Cambria, 'Times New Roman',
+      Times, serif;
+    --font-mono:
+      'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+      'Liberation Mono', 'Courier New', monospace;
     --radius: 0.5rem;
     --shadow-2xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
     --shadow-xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
@@ -317,6 +374,101 @@
 
   [data-sidebar='sidebar'] svg[fill='currentColor'] {
     color: var(--primary);
+  }
+}
+
+/* Typography System Classes */
+@layer utilities {
+  /* Display Typography - Large Headlines (Medium weight for headers) */
+  .text-display-60 {
+    font-family: 'Inter Display', 'Inter Variable', var(--font-sans);
+    font-weight: 500;
+    font-size: 60px;
+    line-height: 60px;
+    letter-spacing: -5%;
+  }
+
+  .text-display-40 {
+    font-family: 'Inter Display', 'Inter Variable', var(--font-sans);
+    font-weight: 500;
+    font-size: 40px;
+    line-height: 41px;
+    letter-spacing: -4%;
+  }
+
+  .text-display-30 {
+    font-family: 'Inter Display', 'Inter Variable', var(--font-sans);
+    font-weight: 500;
+    font-size: 30px;
+    line-height: 32px;
+    letter-spacing: -3%;
+  }
+
+  .text-display-25 {
+    font-family: 'Inter Display', 'Inter Variable', var(--font-sans);
+    font-weight: 500;
+    font-size: 25px;
+    line-height: 27px;
+    letter-spacing: -2%;
+  }
+
+  /* Lead Typography - Prominent Text (Medium weight for lead text) */
+  .text-lead {
+    font-family: 'Inter Variable', var(--font-sans);
+    font-weight: 500;
+    font-size: 20px;
+    line-height: 28px;
+    letter-spacing: -2%;
+  }
+
+  .text-semi-lead {
+    font-family: 'Inter Variable', var(--font-sans);
+    font-weight: 500;
+    font-size: 15px;
+    line-height: 24px;
+    letter-spacing: 0%;
+  }
+
+  /* Body Typography - Main Content (Regular weight for body text) */
+  .text-large-body {
+    font-family: 'Inter Variable', var(--font-sans);
+    font-weight: 400;
+    font-size: 18px;
+    line-height: 26px;
+    letter-spacing: 1%;
+  }
+
+  .text-body {
+    font-family: 'Inter Variable', var(--font-sans);
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 24px;
+    letter-spacing: 2%;
+  }
+
+  /* Label Typography - UI Elements (Regular weight for labels) */
+  .text-descriptive {
+    font-family: 'Inter Variable', var(--font-sans);
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 20px;
+    letter-spacing: 4%;
+  }
+
+  .text-large-label {
+    font-family: 'Inter Variable', var(--font-sans);
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 22px;
+    letter-spacing: 8%;
+  }
+
+  .text-small-label {
+    font-family: 'Inter Variable', var(--font-sans);
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 18px;
+    letter-spacing: 14%;
   }
 }
 
@@ -554,4 +706,89 @@
     scrollbar-width: thin;
     scrollbar-color: var(--border) transparent;
   }
+}
+
+/* Browser autocomplete/history styling */
+@layer base {
+  /* Webkit browsers autocomplete styling */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px var(--background) inset !important;
+    -webkit-text-fill-color: var(--foreground) !important;
+    transition: background-color 5000s ease-in-out 0s;
+  }
+
+  /* Autocomplete dropdown styling */
+  input::-webkit-calendar-picker-indicator {
+    filter: var(--foreground-filter);
+  }
+
+  /* Datalist autocomplete styling */
+  datalist {
+    background: var(--background);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--foreground);
+  }
+
+  /* Firefox autocomplete styling */
+  input:-moz-autofill {
+    background-color: var(--background) !important;
+    color: var(--foreground) !important;
+  }
+
+  /* Edge autocomplete styling */
+  input:-ms-input-placeholder {
+    color: var(--muted-foreground);
+  }
+
+  /* Autocomplete dropdown suggestions styling */
+  input::-webkit-list-button {
+    background: var(--background);
+    color: var(--foreground);
+  }
+
+  /* Style autocomplete suggestions */
+  input::-webkit-datetime-edit {
+    color: var(--foreground);
+  }
+
+  /* Ensure autocomplete dropdowns use theme colors */
+}
+
+/* Additional autocomplete styling for better theme support */
+@layer components {
+  /* Override browser default autocomplete styling */
+  input[list]::-webkit-calendar-picker-indicator {
+    display: none;
+  }
+
+  /* Custom styling for autocomplete dropdowns */
+  input[list] {
+    background: var(--background);
+    color: var(--foreground);
+  }
+
+  /* Ensure autocomplete suggestions are visible in dark mode */
+  input[list] option {
+    background: var(--background);
+    color: var(--foreground);
+    padding: 0.5rem;
+  }
+
+  input[list] option:hover {
+    background: var(--accent);
+    color: var(--accent-foreground);
+  }
+}
+
+/* CSS variable for filter to invert colors in dark mode */
+:root {
+  --foreground-filter: none;
+}
+
+.dark {
+  --foreground-filter: invert(1);
 }

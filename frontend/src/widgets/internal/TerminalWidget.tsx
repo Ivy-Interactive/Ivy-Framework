@@ -1,5 +1,4 @@
 import { cn } from '@/lib/utils';
-import { Circle } from 'lucide-react';
 
 export interface TerminalLine {
   content: string;
@@ -15,7 +14,7 @@ export interface TerminalWidgetProps {
 
 const TerminalWidget = ({ lines, title, showHeader }: TerminalWidgetProps) => {
   const commandColor = 'text-white';
-  const outputColor = 'text-gray-300';
+  const outputColor = 'text-muted-foreground';
 
   return (
     <div
@@ -25,18 +24,17 @@ const TerminalWidget = ({ lines, title, showHeader }: TerminalWidgetProps) => {
     >
       {showHeader && (
         <div className="bg-zinc-800 px-4 py-2 flex items-center">
-          <div className="flex items-center gap-1.5">
-            <Circle className="h-3 w-3 fill-red-500 text-red-500" />
-            <Circle className="h-3 w-3 fill-yellow-500 text-yellow-500" />
-            <Circle className="h-3 w-3 fill-green-500 text-green-500" />
-          </div>
-          <div className="text-zinc-400 text-sm font-medium flex-1 text-center">
+          <div className="text-zinc-400 text-large-body font-medium flex-1 text-center">
             {title}
           </div>
-          <div className="w-[70px]"></div>
+          <div className="flex gap-1">
+            <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+            <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+            <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+          </div>
         </div>
       )}
-      <div className="bg-zinc-900 p-4 font-mono text-sm overflow-x-auto">
+      <div className="bg-zinc-900 p-4 font-mono text-body overflow-x-auto">
         {lines.map((line, index) => (
           <div
             key={index}

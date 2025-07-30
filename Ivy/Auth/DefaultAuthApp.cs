@@ -64,7 +64,7 @@ public class PasswordEmailFlowView(IState<string?> errorMessage) : ViewBase
                 loading.Set(true);
                 var token = await auth.LoginAsync(user.Value, password.Value);
 
-                Console.WriteLine(token);
+                //Console.WriteLine(token);
 
                 if (token != null)
                 {

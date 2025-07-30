@@ -19,16 +19,16 @@ export const BadgeWidget: React.FC<BadgeWidgetProps> = ({
   variant = 'default',
   size = 'Default',
 }) => {
-  let badgeClasses = 'text-sm px-2.5 py-0.5';
+  let badgeClasses = 'text-descriptive px-2.5 py-0.5';
   let iconClasses = 'h-3 w-3';
 
   switch (size) {
     case 'Small':
-      badgeClasses = 'text-xs px-2 py-0.5';
+      badgeClasses = 'text-small-label px-2 py-0.5';
       iconClasses = 'h-2.5 w-2.5';
       break;
     case 'Large':
-      badgeClasses = 'text-base px-3 py-1';
+      badgeClasses = 'text-lead px-3 py-1';
       iconClasses = 'h-4 w-4';
       break;
     default:

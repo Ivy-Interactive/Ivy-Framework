@@ -13,7 +13,7 @@ async function setupDateTimeInputPage(page: Page): Promise<void> {
   await searchInput.press('Enter');
 
   const firstResult = page
-    .locator('[data-sidebar="menu-item"], [data-sidebar="menu-sub-item"]')
+    .locator('button')
     .filter({ hasText: /date.*time.*input/i })
     .first();
 

@@ -24,13 +24,27 @@ public class RootView(string someId) : ViewBase
             bladeController.Push(this, new RootView(@event.Sender.Tag?.ToString() ?? "?"), $"Blade {index + 1}");
         }
 
+        void OnClickWithError(Event<Button> @event)
+        {
+            bladeController.Push(this, new BladeWithError(), "Blade With Error");
+        }
+
         return Layout.Vertical(
             $"This is blade {index}",
             DateTime.Now.Ticks,
             someId,
             new Button("Push A", OnClick).Tag("A"),
             new Button("Push B", OnClick).Tag("B"),
-            new Button("Push C", OnClick).Tag("C")
+            new Button("Push C", OnClick).Tag("C"),
+            new Button("Blade With Error", OnClickWithError)
         );
+    }
+}
+
+public class BladeWithError : ViewBase
+{
+    public override object? Build()
+    {
+        throw new InvalidOperationException("This is a test error in a blade.");
     }
 }

@@ -4,7 +4,7 @@ public interface IViewContext : IDisposable
 {
     void TrackDisposable(IDisposable disposable);
 
-    public void TrackDisposable(IEnumerable<IDisposable> disposables);
+    void TrackDisposable(IEnumerable<IDisposable> disposables);
 
     void Reset();
 

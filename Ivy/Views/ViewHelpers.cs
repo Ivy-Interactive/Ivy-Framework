@@ -12,6 +12,7 @@ public static class ViewHelpers
             | widget;
     }
 
+    [Obsolete("Not needed anymore.")]
     public static Action HandleError(this Action action, IView view)
     {
         var client = view.Context.UseService<IClientProvider>();
@@ -31,6 +32,7 @@ public static class ViewHelpers
         };
     }
 
+    [Obsolete("Not needed anymore.")]
     public static Action<T> HandleError<T>(this Action<T> action, IView view)
     {
         var client = view.Context.UseService<IClientProvider>();
@@ -50,6 +52,7 @@ public static class ViewHelpers
         };
     }
 
+    [Obsolete("Not needed anymore.")]
     public static Action<T> HandleError<T>(this Func<T, Task> action, IView view)
     {
         var client = view.Context.UseService<IClientProvider>();
@@ -69,6 +72,7 @@ public static class ViewHelpers
         };
     }
 
+    [Obsolete("Not needed anymore.")]
     public static Action HandleError(this Func<Task> action, IView view)
     {
         var client = view.Context.UseService<IClientProvider>();

@@ -2,11 +2,13 @@ import { useState, useEffect, useCallback } from 'react';
 import * as signalR from '@microsoft/signalr';
 import { WidgetEventHandlerType, WidgetNode } from '@/types/widgets';
 import { useToast } from '@/hooks/use-toast';
+import { showError } from '@/hooks/use-error-sheet';
 import { getIvyHost, getMachineId } from '@/lib/utils';
 import { logger } from '@/lib/logger';
 import { applyPatch, Operation } from 'fast-json-patch';
 import { setThemeGlobal } from '@/components/ThemeProvider';
 import { cloneDeep } from 'lodash';
+import { ToastAction } from '@/components/ui/toast';
 
 type UpdateMessage = Array<{
   viewId: string;
@@ -16,6 +18,13 @@ type UpdateMessage = Array<{
 
 type RefreshMessage = {
   widgets: WidgetNode;
+};
+
+type ErrorMessage = {
+  title: string;
+  type: string;
+  description: string;
+  stackTrace?: string;
 };
 
 type AuthToken = {
@@ -90,8 +99,7 @@ export const useBackend = (
   const connectionId = connection?.connectionId;
 
   useEffect(() => {
-    //todo: this should only be done if its a production build
-    if (widgetTree) {
+    if (import.meta.env.DEV && widgetTree) {
       const parser = new DOMParser();
       let xml;
       try {
@@ -165,6 +173,31 @@ export const useBackend = (
     }
   }, []);
 
+  const handleError = useCallback(
+    (error: ErrorMessage) => {
+      toast({
+        title: error.title,
+        description: error.description,
+        variant: 'destructive',
+        action: (
+          <ToastAction
+            altText="View error details"
+            onClick={() => {
+              showError({
+                title: error.title,
+                message: error.description,
+                stackTrace: error.stackTrace,
+              });
+            }}
+          >
+            Details
+          </ToastAction>
+        ),
+      });
+    },
+    [toast]
+  );
+
   useEffect(() => {
     const newConnection = new signalR.HubConnectionBuilder()
       .withUrl(
@@ -197,6 +230,11 @@ export const useBackend = (
             toast(message);
           });
 
+          connection.on('Error', message => {
+            logger.debug(`[${connection.connectionId}] Error`, message);
+            handleError(message);
+          });
+
           connection.on('SetJwt', jwt => {
             logger.debug(`[${connection.connectionId}] SetJwt`);
             handleSetJwt(jwt);
@@ -221,14 +259,17 @@ export const useBackend = (
             logger.debug(`[${connection.connectionId}] HotReload`);
             handleHotReloadMessage();
           });
+
           connection.onreconnecting(() => {
             logger.warn(`[${connection.connectionId}] Reconnecting`);
             setDisconnected(true);
           });
+
           connection.onreconnected(() => {
             logger.info(`[${connection.connectionId}] Reconnected`);
             setDisconnected(false);
           });
+
           connection.onclose(() => {
             logger.warn(`[${connection.connectionId}] Closed`);
             setDisconnected(true);
@@ -242,6 +283,7 @@ export const useBackend = (
         connection.off('Refresh');
         connection.off('Update');
         connection.off('Toast');
+        connection.off('Error');
         connection.off('CopyToClipboard');
         connection.off('HotReload');
         connection.off('SetJwt');
@@ -260,6 +302,7 @@ export const useBackend = (
     toast,
     handleSetJwt,
     handleSetTheme,
+    handleError,
   ]);
 
   const eventHandler: WidgetEventHandlerType = useCallback(

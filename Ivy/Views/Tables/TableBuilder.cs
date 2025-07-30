@@ -73,6 +73,7 @@ public class TableBuilder<TModel> : ViewBase, IStateless
     private readonly Dictionary<string, TableBuilderColumn> _columns;
     private readonly BuilderFactory<TModel> _builderFactory;
     private bool _removeEmptyColumns = false;
+    private bool _removeHeader;
     //private Func<TModel, bool> _highlightPredicate;
     private object? _empty;
 
@@ -262,6 +263,12 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         return Totals(field, FooterAggregate);
     }
 
+    public TableBuilder<TModel> RemoveHeader()
+    {
+        _removeHeader = true;
+        return this;
+    }
+
     public TableBuilder<TModel> RemoveEmptyColumns()
     {
         _removeEmptyColumns = true;
@@ -343,12 +350,14 @@ public class TableBuilder<TModel> : ViewBase, IStateless
             return row;
         }
 
-        var header = new TableRow(columns.Select((e, i) =>
-            RenderHeader(i, e, e.Header == "_" ? "" : e.Header)).ToArray());
+        var header = !_removeHeader
+            ? new TableRow(columns.Select((e, i) =>
+                RenderHeader(i, e, e.Header == "_" ? "" : e.Header)).ToArray())
+            : null;
 
         var rows = _records.Select(RenderRow);
 
-        var joinedRows = new[] { header }.Concat(rows).ToArray();
+        var joinedRows = header != null ? new[] { header }.Concat(rows).ToArray() : rows.ToArray();
 
         if (columns.Any(e => e.FooterAggregate != null))
         {

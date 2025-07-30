@@ -11,7 +11,7 @@ public class ProductsApp : ViewBase
 {
     public override object? Build()
     {
-        return this.UseBlades(() => new ProductsListBlade(), "Search");
+        return this.UseBlades(() => new ProductsListBlade(), "Search", Size.Units(75));
     }
 }
 

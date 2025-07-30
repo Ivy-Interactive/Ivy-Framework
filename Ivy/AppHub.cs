@@ -4,6 +4,7 @@ using Ivy.Apps;
 using Ivy.Auth;
 using Ivy.Client;
 using Ivy.Core;
+using Ivy.Core.Exceptions;
 using Ivy.DataTables;
 using Ivy.Helpers;
 using Ivy.Hooks;
@@ -129,6 +130,13 @@ public class AppHub(
 
         var clientProvider = new ClientProvider(new ClientSender(clientNotifier, Context.ConnectionId));
 
+        if (server.Services.All(sd => sd.ServiceType != typeof(IExceptionHandler)))
+        {
+            appServices.AddSingleton<IExceptionHandler>(_ => new ExceptionHandlerPipeline()
+                .Use(new ConsoleExceptionHandler()).Use(new ClientExceptionHandler(clientProvider))
+                .Build());
+        }
+
         appServices.AddSingleton(typeof(IContentBuilder), contentBuilder);
         appServices.AddSingleton(typeof(IAppRepository), server.AppRepository);
         appServices.AddSingleton(typeof(IDownloadService), new DownloadService(Context.ConnectionId));
@@ -137,9 +145,10 @@ public class AppHub(
             server.Args,
             Context.ConnectionId));
         appServices.AddSingleton(typeof(IClientProvider), clientProvider);
-        appServices.AddTransient<IWebhookRegistry, WebhookController>();
         appServices.AddSingleton(appDescriptor);
         appServices.AddSingleton(appArgs);
+
+        appServices.AddTransient<IWebhookRegistry, WebhookController>();
         appServices.AddTransient<SignalRouter>(_ => new SignalRouter(sessionStore));
 
         if (authToken != oldAuthToken)
@@ -169,8 +178,15 @@ public class AppHub(
 
         async void OnWidgetTreeChanged(WidgetTreeChanged[] changes)
         {
-            logger.LogDebug($"> Update");
-            await clientNotifier.NotifyClientAsync(appState.ConnectionId, "Update", changes);
+            try
+            {
+                logger.LogDebug($"> Update");
+                await clientNotifier.NotifyClientAsync(appState.ConnectionId, "Update", changes);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
         }
 
         appState.TrackDisposable(widgetTree.Subscribe(OnWidgetTreeChanged));
@@ -199,7 +215,7 @@ public class AppHub(
         }
     }
 
-    public override Task OnDisconnectedAsync(System.Exception? exception)
+    public override Task OnDisconnectedAsync(Exception? exception)
     {
         if (sessionStore.Sessions.TryRemove(Context.ConnectionId, out var appState))
         {
@@ -232,11 +248,15 @@ public class AppHub(
 
     public async Task Event(string eventName, string widgetId, JsonArray? args)
     {
+        logger.LogInformation($"Event: {eventName} {widgetId} {args}");
+        if (!sessionStore.Sessions.TryGetValue(Context.ConnectionId, out var appSession))
+        {
+            logger.LogWarning($"Event: {eventName} {widgetId} [AppSession Not Found]");
+            return;
+        }
+
         try
         {
-            logger.LogInformation($"Event: {eventName} {widgetId} {args}");
-            var appSession = sessionStore.Sessions[Context.ConnectionId];
-
             if (server.AuthProviderType != null)
             {
                 if (appSession.AppId != AppIds.Auth)
@@ -271,7 +291,8 @@ public class AppHub(
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Event trigger failed.");
+            var exceptionHandler = appSession.AppServices.GetService<IExceptionHandler>()!;
+            exceptionHandler.HandleException(e);
         }
     }
 }

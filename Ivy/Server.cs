@@ -213,10 +213,10 @@ public class Server
             }
             else
             {
-                Console.WriteLine($"\u001b[31mPort {_args.Port} is already in use on this machine.\u001b[0m");
+                Console.WriteLine($@"[31mPort {_args.Port} is already in use on this machine.[0m");
 
                 Console.WriteLine(
-                    "Specify a different port using '--port <number>' or '--i-kill-for-this-port' to just take it.");
+                    @"Specify a different port using '--port <number>' or '--i-kill-for-this-port' to just take it.");
 
                 return;
             }
@@ -312,7 +312,7 @@ public class Server
             var localUrl = $"http://localhost:{port}";
             if (!_args.Silent)
             {
-                Console.WriteLine($"Ivy is running on {localUrl}. Press Ctrl+C to stop.");
+                Console.WriteLine($@"Ivy is running on {localUrl}. Press Ctrl+C to stop.");
             }
             if (_args.Browse)
             {
@@ -327,7 +327,7 @@ public class Server
         }
         catch (IOException)
         {
-            Console.WriteLine($"Failed to start Ivy server. Is the port already in use?");
+            Console.WriteLine($@"Failed to start Ivy server. Is the port already in use?");
         }
     }
 

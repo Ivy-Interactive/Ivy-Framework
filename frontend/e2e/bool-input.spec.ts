@@ -17,7 +17,7 @@ async function setupBoolInputPage(page: Page): Promise<void> {
   await searchInput.press('Enter');
 
   const firstResult = page
-    .locator('[data-sidebar="menu-item"], [data-sidebar="menu-sub-item"]')
+    .locator('button')
     .filter({ hasText: /Bool Input/i })
     .first();
   await firstResult.click();

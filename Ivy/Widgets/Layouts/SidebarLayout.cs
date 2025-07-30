@@ -11,9 +11,24 @@ public record SidebarLayout : WidgetBase<SidebarLayout>
     {
     }
 
+    /// <summary>
+    /// If true, the sidebar will be the main app's sidebar.
+    /// This controls the sidebar's behavior when the app is embedded in a page.
+    /// This creates a toggle button in the top right corner of the sidebar.
+    /// </summary>
+    [Prop] public bool MainAppSidebar { get; set; } = false;
+
     public static SidebarLayout operator |(SidebarLayout widget, object child)
     {
         throw new NotSupportedException("SidebarLayout does not support children.");
+    }
+}
+
+public static class SidebarLayoutExtensions
+{
+    public static SidebarLayout MainAppSidebar(this SidebarLayout sidebar, bool isMainApp = true)
+    {
+        return sidebar with { MainAppSidebar = isMainApp };
     }
 }
 

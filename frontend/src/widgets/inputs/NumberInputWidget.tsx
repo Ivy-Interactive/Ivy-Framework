@@ -148,7 +148,7 @@ const SliderVariant = memo(
           data-testid={dataTestId}
         />
         <span
-          className="flex w-full items-center justify-between gap-1 text-xs font-sm text-muted-foreground"
+          className="flex w-full items-center justify-between gap-1 text-small-label font-sm text-muted-foreground"
           aria-hidden="true"
         >
           <span>{min}</span>

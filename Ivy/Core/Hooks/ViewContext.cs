@@ -1,6 +1,7 @@
 using System.ComponentModel.Design;
 using System.Reactive.Disposables;
 using Ivy.Apps;
+using Ivy.Core.Exceptions;
 using Ivy.Core.Helpers;
 
 namespace Ivy.Core.Hooks;
@@ -8,31 +9,32 @@ namespace Ivy.Core.Hooks;
 public class ViewContext : IViewContext
 {
     private readonly Action _requestRefresh;
-    private readonly IViewContext? _ancestorContext;
+    private readonly IViewContext? _ancestor;
     private readonly IServiceProvider _appServices;
     private readonly Disposables _disposables = new();
     private readonly Dictionary<int, StateHook> _hooks = new();
     private readonly Dictionary<int, EffectHook> _effects = new();
     private readonly EffectQueue _effectQueue;
     private readonly IServiceContainer _services;
-    private readonly HashSet<Type> _registeredService;
-    private int _callingIndex = 0;
+    private readonly HashSet<Type> _registeredServices;
+    private int _callingIndex;
 
-    public ViewContext(Action requestRefresh, IViewContext? ancestorContext, IServiceProvider appServices)
+    public ViewContext(Action requestRefresh, IViewContext? ancestor, IServiceProvider appServices)
     {
+        var effectHandler = (appServices.GetService(typeof(IExceptionHandler)) as IExceptionHandler)!;
         _requestRefresh = requestRefresh;
-        _ancestorContext = ancestorContext;
-        _effectQueue = new EffectQueue();
+        _ancestor = ancestor;
+        _effectQueue = new EffectQueue(effectHandler);
         _disposables.Add(_effectQueue);
         _appServices = appServices;
 
         var services = new ServiceContainer();
-        _registeredService = new HashSet<Type>();
+        _registeredServices = [];
         _disposables.Add(services);
         _services = services;
     }
 
-    public void Refresh()
+    private void Refresh()
     {
         _requestRefresh();
     }
@@ -128,14 +130,14 @@ public class ViewContext : IViewContext
 
         var type = typeof(T);
 
-        if (_registeredService.Contains(type))
+        if (_registeredServices.Contains(type))
         {
             return (T)_services.GetService(type)!;
         }
 
         T context = factory()!;
         _services.AddService(type, context);
-        _registeredService.Add(type);
+        _registeredServices.Add(type);
 
         if (context is IDisposable disposable)
         {
@@ -176,12 +178,12 @@ public class ViewContext : IViewContext
             return existingService;
         }
 
-        if (_ancestorContext == null)
+        if (_ancestor == null)
         {
             throw new InvalidOperationException($"Context '{typeof(T).FullName}' not found.");
         }
 
-        var service = _ancestorContext.UseContext<T>();
+        var service = _ancestor.UseContext<T>();
 
         if (service is null)
         {
@@ -198,12 +200,12 @@ public class ViewContext : IViewContext
             return existingService;
         }
 
-        if (_ancestorContext == null)
+        if (_ancestor == null)
         {
             throw new InvalidOperationException($"Context '{serviceType.FullName}' not found.");
         }
 
-        var service = _ancestorContext.UseContext(serviceType);
+        var service = _ancestor.UseContext(serviceType);
 
         if (service is null)
         {

@@ -80,11 +80,16 @@ public static class Utils
     {
         while (ex != null)
         {
-            Console.WriteLine($"Exception Type:\n{ex.GetType().FullName}");
-            Console.WriteLine($"Message:\n{ex.Message}");
-            Console.WriteLine($"Source:\n{ex.Source}");
-            Console.WriteLine($"Target Site:\n {ex.TargetSite}");
-            Console.WriteLine($"Stack Trace:\n{ex.StackTrace}");
+            Console.WriteLine($@"Exception Type:
+{ex.GetType().FullName}");
+            Console.WriteLine($@"Message:
+{ex.Message}");
+            Console.WriteLine($@"Source:
+{ex.Source}");
+            Console.WriteLine($@"Target Site:
+ {ex.TargetSite}");
+            Console.WriteLine($@"Stack Trace:
+{ex.StackTrace}");
             Console.WriteLine(new string('-', 80));
             ex = ex.InnerException;
         }

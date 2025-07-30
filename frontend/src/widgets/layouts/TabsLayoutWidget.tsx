@@ -138,7 +138,7 @@ function SortableDropdownMenuItem({
       {...listeners}
       onClick={onClick}
       className={cn(
-        'group w-full flex items-center px-2 py-1.5 text-sm cursor-pointer select-none rounded-sm transition-colors hover:bg-accent',
+        'group w-full flex items-center px-2 py-1.5 text-large-body cursor-pointer select-none rounded-sm transition-colors hover:bg-accent',
         isActive && 'bg-accent text-accent-foreground'
       )}
     >
@@ -255,22 +255,14 @@ export const TabsLayoutWidget = ({
   // Sync tab order on add/remove
   React.useEffect(() => {
     const prev = tabOrder;
-    const added = tabWidgets
-      .map(tab => (tab as React.ReactElement<TabWidgetProps>).props.id)
-      .filter(id => !prev.includes(id));
-    const removed = prev.filter(
-      id =>
-        !tabWidgets
-          .map(tab => (tab as React.ReactElement<TabWidgetProps>).props.id)
-          .includes(id)
+    const currentTabIds = tabWidgets.map(
+      tab => (tab as React.ReactElement<TabWidgetProps>).props.id
     );
+    const added = currentTabIds.filter(id => !prev.includes(id));
+    const removed = prev.filter(id => !currentTabIds.includes(id));
 
     if (added.length || removed.length) {
-      setTabOrder(
-        tabWidgets.map(
-          tab => (tab as React.ReactElement<TabWidgetProps>).props.id
-        )
-      );
+      setTabOrder(currentTabIds);
     }
   }, [tabWidgets]);
 
@@ -290,7 +282,12 @@ export const TabsLayoutWidget = ({
       const newTargetTabId = tabOrder[selectedIndex];
       // Only update state if the target tab ID is actually different from the current active one.
       if (newTargetTabId !== activeTabIdRef.current) {
-        setActiveTabId(newTargetTabId);
+        // Small delay to handle race condition between tabOrder and selectedIndex updates
+        const timeoutId = setTimeout(() => {
+          setActiveTabId(newTargetTabId);
+        }, 10);
+
+        return () => clearTimeout(timeoutId);
       }
     }
     // If selectedIndex is null or out of bounds, but we have a valid activeTabId that still exists,
@@ -440,7 +437,7 @@ export const TabsLayoutWidget = ({
         <div className="relative">
           {/* Hover Highlight */}
           <div
-            className="absolute h-[30px] transition-all duration-300 ease-out bg-[#0e0f1114] dark:bg-[#ffffff1a] rounded-[6px] flex items-center"
+            className="absolute h-[26px] transition-all duration-300 ease-out bg-accent/20 rounded-[6px] flex items-center"
             style={{
               opacity: activeIndex !== null ? 1 : 0,
               pointerEvents: 'none',
@@ -448,7 +445,7 @@ export const TabsLayoutWidget = ({
           />
           {/* Active Indicator */}
           <div
-            className="absolute bottom-[-6px] h-[2px] bg-[#0e0f11] dark:bg-white transition-all duration-300 ease-out"
+            className="absolute bottom-[-6px] h-[2px] bg-foreground transition-all duration-300 ease-out"
             style={activeStyle}
           />
           {/* Tabs */}
@@ -465,10 +462,10 @@ export const TabsLayoutWidget = ({
                     tabRefs.current[index] = el;
                   }}
                   className={cn(
-                    'px-3 py-2 cursor-pointer transition-colors duration-300 h-[30px]',
+                    'px-3 py-1.5 cursor-pointer transition-colors duration-300 h-[26px]',
                     index === activeIndex
-                      ? 'text-[#0e0e10] dark:text-white'
-                      : 'text-[#0e0f1199] dark:text-[#ffffff99]'
+                      ? 'text-foreground'
+                      : 'text-muted-foreground'
                   )}
                   onClick={() => {
                     setActiveIndex(index);
@@ -476,7 +473,7 @@ export const TabsLayoutWidget = ({
                     eventHandler('OnSelect', id, [index]);
                   }}
                 >
-                  <div className="text-sm font-medium leading-5 whitespace-nowrap flex items-center justify-center h-full">
+                  <div className="text-sm font-medium leading-4 whitespace-nowrap flex items-center justify-center h-full">
                     {title}
                   </div>
                 </div>
