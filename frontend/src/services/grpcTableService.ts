@@ -93,7 +93,7 @@ export class GrpcTableService extends EventEmitter {
       this.isConnected = true;
 
       // Debug: Log the server URL being used
-      console.log('gRPC Table Service - Connecting to:', serverUrl);
+      console.log('gRPC Table Service - Connecting to:', this.serverUrl);
       console.log('gRPC Table Service - Query:', query);
 
       // Create gRPC-Web request with proper headers
