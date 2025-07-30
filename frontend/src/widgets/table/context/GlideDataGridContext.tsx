@@ -6,6 +6,7 @@ import type {
   Item,
 } from '@glideapps/glide-data-grid';
 import { createContext } from 'react';
+import type { Filter } from '@/services/grpcTableService';
 import type { DataTableData, GlideDataGridProps } from '../types';
 
 export interface GlideDataGridContextValue {
@@ -21,6 +22,7 @@ export interface GlideDataGridContextValue {
 
   // Actions
   refresh: () => void;
+  refetchWithFilters: (filters?: Filter) => void;
 
   // Grid state
   gridSelection: GridSelection;

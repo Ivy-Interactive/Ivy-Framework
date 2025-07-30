@@ -2,7 +2,6 @@ import { Button } from '@/components/ui/button';
 import { RefreshCw } from 'lucide-react';
 import { useGlideDataGrid } from '../hooks/useGlideDataGrid';
 import { classNames } from '../styles';
-import { filterDataTableData } from '../utils/dataFilter';
 import { FilterInput } from './FilterInput';
 import { StatusBadge } from './StatusBadge';
 
@@ -28,7 +27,7 @@ export function GridHeader() {
         )}
       </div>
       <div className={classNames.header.actions}>
-        <FilterInput onFilter={filterDataTableData} />
+        <FilterInput />
         {showStatus && <StatusBadge />}
         {showRefreshButton && (
           <Button

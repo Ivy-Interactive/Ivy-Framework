@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { getIvyHost } from '@/lib/utils';
 import {
+  Filter,
   grpcTableService,
   TableQuery,
   TableResult,
@@ -18,6 +19,7 @@ export interface UseDataTableFetchReturn {
   error: string | null;
   isStreaming: boolean;
   refresh: () => void;
+  refetchWithFilters: (filters?: Filter) => void;
 }
 
 export function useDataTableFetch(
@@ -42,74 +44,78 @@ export function useDataTableFetch(
   callbacksRef.current = { onDataReceived, onError, onStreamComplete };
 
   // Data fetching function
-  const fetchData = useCallback(async () => {
-    if (!connection.port || !connection.path) {
-      setError('Connection configuration is required');
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-    setIsStreaming(true);
-
-    try {
-      const backendUrl = new URL(getIvyHost());
-      const serverUrl = `${backendUrl.protocol}//${backendUrl.hostname}:${connection.port}`;
-
-      const query: TableQuery = {
-        limit: pageSize,
-        offset: 0,
-        connectionId: connection.connectionId,
-        sourceId: connection.sourceId,
-      };
-
-      const result = await grpcTableService.queryTable({
-        serverUrl,
-        query,
-        onData: (tableResult: TableResult) => {
-          if (tableResult.arrow_ipc_stream) {
-            try {
-              const table = arrow.tableFromIPC(tableResult.arrow_ipc_stream);
-              const newData = convertArrowTableToDataTableData(table);
-              setData(newData);
-              callbacksRef.current.onDataReceived?.(newData);
-            } catch (error) {
-              console.error('Failed to parse Arrow IPC stream:', error);
-              setError('Failed to parse data from server');
-            }
-          }
-        },
-        onError: (err: Error) => {
-          setError(err.message);
-          callbacksRef.current.onError?.(err.message);
-        },
-        onComplete: () => {
-          setIsStreaming(false);
-          callbacksRef.current.onStreamComplete?.();
-        },
-      });
-
-      // Handle direct result if no streaming callback was triggered
-      if (result.arrow_ipc_stream) {
-        try {
-          const table = arrow.tableFromIPC(result.arrow_ipc_stream);
-          const newData = convertArrowTableToDataTableData(table);
-          setData(newData);
-          callbacksRef.current.onDataReceived?.(newData);
-        } catch (error) {
-          console.error('Failed to parse Arrow IPC stream:', error);
-          setError('Failed to parse data from server');
-        }
+  const fetchData = useCallback(
+    async (filters?: Filter) => {
+      if (!connection.port || !connection.path) {
+        setError('Connection configuration is required');
+        return;
       }
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : 'Failed to connect to stream';
-      setError(errorMessage);
-      callbacksRef.current.onError?.(errorMessage);
-    } finally {
-      setLoading(false);
-    }
-  }, [connection, pageSize]);
+
+      setLoading(true);
+      setError(null);
+      setIsStreaming(true);
+
+      try {
+        const backendUrl = new URL(getIvyHost());
+        const serverUrl = `${backendUrl.protocol}//${backendUrl.hostname}:${connection.port}`;
+
+        const query: TableQuery = {
+          limit: pageSize,
+          offset: 0,
+          connectionId: connection.connectionId,
+          sourceId: connection.sourceId,
+          filter: filters,
+        };
+
+        const result = await grpcTableService.queryTable({
+          serverUrl,
+          query,
+          onData: (tableResult: TableResult) => {
+            if (tableResult.arrow_ipc_stream) {
+              try {
+                const table = arrow.tableFromIPC(tableResult.arrow_ipc_stream);
+                const newData = convertArrowTableToDataTableData(table);
+                setData(newData);
+                callbacksRef.current.onDataReceived?.(newData);
+              } catch (error) {
+                console.error('Failed to parse Arrow IPC stream:', error);
+                setError('Failed to parse data from server');
+              }
+            }
+          },
+          onError: (err: Error) => {
+            setError(err.message);
+            callbacksRef.current.onError?.(err.message);
+          },
+          onComplete: () => {
+            setIsStreaming(false);
+            callbacksRef.current.onStreamComplete?.();
+          },
+        });
+
+        // Handle direct result if no streaming callback was triggered
+        if (result.arrow_ipc_stream) {
+          try {
+            const table = arrow.tableFromIPC(result.arrow_ipc_stream);
+            const newData = convertArrowTableToDataTableData(table);
+            setData(newData);
+            callbacksRef.current.onDataReceived?.(newData);
+          } catch (error) {
+            console.error('Failed to parse Arrow IPC stream:', error);
+            setError('Failed to parse data from server');
+          }
+        }
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : 'Failed to connect to stream';
+        setError(errorMessage);
+        callbacksRef.current.onError?.(errorMessage);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [connection, pageSize]
+  );
 
   // Refresh function
   const refresh = useCallback(() => {
@@ -118,6 +124,17 @@ export function useDataTableFetch(
     }
     fetchData();
   }, [fetchData, isStreaming]);
+
+  // Refetch with filters function
+  const refetchWithFilters = useCallback(
+    (filters?: Filter) => {
+      if (isStreaming) {
+        grpcTableService.disconnect();
+      }
+      fetchData(filters);
+    },
+    [fetchData, isStreaming]
+  );
 
   // Auto-fetch on mount and connection changes
   useEffect(() => {
@@ -142,5 +159,6 @@ export function useDataTableFetch(
     error,
     isStreaming,
     refresh,
+    refetchWithFilters,
   };
 }
