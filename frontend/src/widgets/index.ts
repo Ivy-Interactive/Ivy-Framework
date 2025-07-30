@@ -1,18 +1,15 @@
-export { ButtonWidget } from './ButtonWidget';
-export { ProgressWidget } from './ProgressWidget';
-export { TooltipWidget } from './TooltipWidget';
-export { SlotWidget } from './SlotWidget';
-export { CardWidget } from './CardWidget';
-export { SheetWidget } from './SheetWidget';
 export { BadgeWidget } from './BadgeWidget';
-export { ExpandableWidget } from './ExpandableWidget';
+export { ButtonWidget } from './ButtonWidget';
+export { CardWidget } from './CardWidget';
 export {
-  ChatWidget,
   ChatLoadingWidget,
   ChatMessageWidget,
   ChatStatusWidget,
+  ChatWidget,
 } from './ChatWidget';
 export { DropDownMenuWidget } from './DropDownMenuWidget';
-
-// Glide Data Grid
-export { GlideDataGridWidget } from './glide-data-grid';
+export { ExpandableWidget } from './ExpandableWidget';
+export { ProgressWidget } from './ProgressWidget';
+export { SheetWidget } from './SheetWidget';
+export { SlotWidget } from './SlotWidget';
+export { TooltipWidget } from './TooltipWidget';
