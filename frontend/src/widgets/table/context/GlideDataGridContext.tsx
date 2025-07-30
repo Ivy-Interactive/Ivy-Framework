@@ -13,6 +13,7 @@ export interface GlideDataGridContextValue {
   props: GlideDataGridProps;
 
   // Data state
+  setData: (data: DataTableData | null) => void;
   data: DataTableData | null;
   loading: boolean;
   error: string | null;

@@ -33,15 +33,13 @@ export const GlideDataGridProvider: React.FC<
   const isValidConnection = !!(connection.port && connection.path);
 
   // Data fetching
-  const { data, loading, error, isStreaming, refresh } = useDataTableFetch(
-    connection,
-    {
+  const { setData, data, loading, error, isStreaming, refresh } =
+    useDataTableFetch(connection, {
       pageSize,
       onDataReceived,
       onError,
       onStreamComplete,
-    }
-  );
+    });
 
   // Column management
   const { columnWidths, onManualResize } = useColumnResizing();
@@ -72,6 +70,7 @@ export const GlideDataGridProvider: React.FC<
     <GlideDataGridContext.Provider
       value={{
         props,
+        setData,
         data,
         loading,
         error,

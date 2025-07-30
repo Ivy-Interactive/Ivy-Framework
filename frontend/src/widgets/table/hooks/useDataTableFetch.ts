@@ -12,6 +12,7 @@ import { DataTableConnection, DataTableData } from '../types';
 import { convertArrowTableToDataTableData } from '../utils/arrowDataTransforms';
 
 export interface UseDataTableFetchReturn {
+  setData: (data: DataTableData | null) => void;
   data: DataTableData | null;
   loading: boolean;
   error: string | null;
@@ -135,6 +136,7 @@ export function useDataTableFetch(
   }, [isStreaming]);
 
   return {
+    setData,
     data,
     loading,
     error,
