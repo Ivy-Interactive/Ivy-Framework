@@ -51,7 +51,6 @@ export async function signInWithFirebase(
   authOption?: AuthOptionData | null
 ): Promise<AuthResult> {
   try {
-    // Initialize Firebase app
     const app = initializeApp({
       apiKey: config.apiKey,
       authDomain: config.authDomain,
@@ -62,10 +61,7 @@ export async function signInWithFirebase(
       popupRedirectResolver: browserPopupRedirectResolver,
     });
 
-    // Select the appropriate auth provider based on authOption
-    let provider: AuthProvider;
-
-    // Check auth flow type (email password or OAuth)
+    // Ensure we are not trying to perform email/password auth
     if (authOption?.flow === 'EmailPassword') {
       const errorMsg = 'Email/Password flow not supported in popup mode';
       logger.error(errorMsg);
@@ -75,7 +71,8 @@ export async function signInWithFirebase(
       };
     }
 
-    // Select OAuth provider based on the authOption ID
+    // Select the appropriate auth provider based on authOption
+    let provider: AuthProvider;
     switch (authOption?.id?.toLowerCase()) {
       case 'twitter':
         provider = new TwitterAuthProvider();
@@ -96,7 +93,7 @@ export async function signInWithFirebase(
         break;
     }
 
-    // Add common scopes
+    // Add scopes
     if (provider instanceof GoogleAuthProvider) {
       provider.addScope('email');
       provider.addScope('profile');
@@ -109,11 +106,9 @@ export async function signInWithFirebase(
       }
     }
 
-    // Sign in with popup
     const result = await signInWithPopup(auth, provider);
     const user = result.user;
 
-    // Get the ID token
     const idToken = await user.getIdToken();
 
     logger.info('Firebase authentication successful');
@@ -139,7 +134,6 @@ export async function signInWithFirebase(
       }
     }
 
-    // Fallback to approximate expiry if decoding fails
     return {
       success: true,
       token: {
