@@ -290,7 +290,7 @@ public class AppHub(
         }
     }
 
-    public void AuthResult(string requestId, AuthenticationResult result)
+    public void AuthResult(string requestId, AuthResult result)
     {
         try
         {
