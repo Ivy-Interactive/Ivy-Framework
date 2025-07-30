@@ -27,7 +27,7 @@ public class FirebaseAuthProvider : IAuthProvider
     private readonly string _authDomain;
     private readonly string _projectId;
     private readonly List<AuthOption> _authOptions = [];
-    private FirebaseAuth? _firebaseAuth;
+    private readonly FirebaseAuth _firebaseAuth;
 
     public FirebaseAuthProvider()
     {
@@ -116,22 +116,19 @@ public class FirebaseAuthProvider : IAuthProvider
 
     public async Task LogoutAsync(string jwt)
     {
-        if (_firebaseAuth != null)
+        try
         {
-            try
+            // Validate the JWT to get the user ID
+            var decodedToken = await _firebaseAuth.VerifyIdTokenAsync(jwt);
+            if (decodedToken != null)
             {
-                // Validate the JWT to get the user ID
-                var decodedToken = await _firebaseAuth.VerifyIdTokenAsync(jwt);
-                if (decodedToken != null)
-                {
-                    // Revoke all refresh tokens for the user
-                    await _firebaseAuth.RevokeRefreshTokensAsync(decodedToken.Uid);
-                }
+                // Revoke all refresh tokens for the user
+                await _firebaseAuth.RevokeRefreshTokensAsync(decodedToken.Uid);
             }
-            catch (Exception)
-            {
-                // Logout failures are typically not critical
-            }
+        }
+        catch (Exception)
+        {
+            // Logout failures are typically not critical
         }
 
         await Task.CompletedTask;
@@ -181,18 +178,8 @@ public class FirebaseAuthProvider : IAuthProvider
     {
         try
         {
-            if (_firebaseAuth != null)
-            {
-                // Use FirebaseAuth server-side validation if available
-                var decodedToken = await _firebaseAuth.VerifyIdTokenAsync(jwt);
-                return decodedToken != null;
-            }
-            else
-            {
-                // Fall back to requesting user info which will fail with invalid token
-                var userInfo = await GetUserInfoAsync(jwt);
-                return userInfo != null;
-            }
+            var decodedToken = await _firebaseAuth.VerifyIdTokenAsync(jwt);
+            return decodedToken != null;
         }
         catch (Exception)
         {
@@ -204,46 +191,16 @@ public class FirebaseAuthProvider : IAuthProvider
     {
         try
         {
-            if (_firebaseAuth != null)
-            {
-                // Server-side verification with FirebaseAdmin SDK
-                var decodedToken = await _firebaseAuth.VerifyIdTokenAsync(jwt);
-                var firebaseUser = await _firebaseAuth.GetUserAsync(decodedToken.Uid);
+            // Server-side verification with FirebaseAdmin SDK
+            var decodedToken = await _firebaseAuth.VerifyIdTokenAsync(jwt);
+            var firebaseUser = await _firebaseAuth.GetUserAsync(decodedToken.Uid);
 
-                return new UserInfo(
-                    firebaseUser.Uid,
-                    firebaseUser.Email ?? string.Empty,
-                    firebaseUser.DisplayName,
-                    firebaseUser.PhotoUrl
-                );
-            }
-            else
-            {
-                // Client-side verification with Firebase REST API
-                var response = await _httpClient.PostAsJsonAsync(
-                    $"https://identitytoolkit.googleapis.com/v1/accounts:lookup?key={_apiKey}",
-                    new { idToken = jwt }
-                );
-
-                if (!response.IsSuccessStatusCode)
-                {
-                    return null;
-                }
-
-                var result = await response.Content.ReadFromJsonAsync<FirebaseUserLookupResponse>();
-                if (result?.Users == null || result.Users.Length == 0)
-                {
-                    return null;
-                }
-
-                var user = result.Users[0];
-                return new UserInfo(
-                    user.LocalId,
-                    user.Email,
-                    user.DisplayName,
-                    user.PhotoUrl
-                );
-            }
+            return new UserInfo(
+                firebaseUser.Uid,
+                firebaseUser.Email ?? string.Empty,
+                firebaseUser.DisplayName,
+                firebaseUser.PhotoUrl
+            );
         }
         catch (Exception)
         {
@@ -338,25 +295,4 @@ public class FirebaseRefreshResponse
 
     [JsonPropertyName("expires_in")]
     public string ExpiresIn { get; set; } = "";
-}
-
-public class FirebaseUserLookupResponse
-{
-    [JsonPropertyName("users")]
-    public FirebaseUser[]? Users { get; set; }
-
-    public class FirebaseUser
-    {
-        [JsonPropertyName("localId")]
-        public string LocalId { get; set; } = "";
-
-        [JsonPropertyName("email")]
-        public string Email { get; set; } = "";
-
-        [JsonPropertyName("displayName")]
-        public string? DisplayName { get; set; }
-
-        [JsonPropertyName("photoUrl")]
-        public string? PhotoUrl { get; set; }
-    }
 }
