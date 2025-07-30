@@ -51,7 +51,7 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
             variant="ghost"
             size="sm"
             onClick={onDismiss}
-            className="h-8 w-8 p-0 hover:bg-destructive/20 ml-2"
+            className="h-8 w-8 p-0 ml-2 text-foreground/50 hover:text-foreground hover:bg-destructive/20 transition-colors cursor-pointer"
           >
             <X className="h-4 w-4" />
           </Button>
@@ -84,7 +84,7 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
 
       <Button
         onClick={copyToClipboard}
-        className="flex items-center gap-2"
+        className="flex items-center gap-2 cursor-pointer"
         variant="outline"
         size="sm"
       >
