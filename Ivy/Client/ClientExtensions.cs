@@ -82,33 +82,6 @@ public static class ClientExtensions
         return taskCompletionSource.Task;
     }
 
-    // Version that accepts auth option but uses default configuration
-    public static Task<AuthResult> SignInToFirebaseAsync(
-        this IClientProvider client,
-        AuthOption authOption,
-        string requestId = "")
-    {
-        return SignInToFirebaseAsync(
-            client,
-            Environment.GetEnvironmentVariable("FIREBASE_API_KEY") ?? "",
-            Environment.GetEnvironmentVariable("FIREBASE_AUTH_DOMAIN") ?? "",
-            Environment.GetEnvironmentVariable("FIREBASE_PROJECT_ID") ?? "",
-            authOption,
-            requestId);
-    }
-
-    // Simplified version that uses default configuration and Google provider
-    public static Task<AuthResult> SignInToFirebaseAsync(this IClientProvider client, string requestId = "")
-    {
-        return SignInToFirebaseAsync(
-            client,
-            Environment.GetEnvironmentVariable("FIREBASE_API_KEY") ?? "",
-            Environment.GetEnvironmentVariable("FIREBASE_AUTH_DOMAIN") ?? "",
-            Environment.GetEnvironmentVariable("FIREBASE_PROJECT_ID") ?? "",
-            null,
-            requestId);
-    }
-
     public static void Redirect(this IClientProvider client, string url)
     {
         client.Sender.Send("Redirect", url);
