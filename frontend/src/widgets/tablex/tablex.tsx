@@ -1,5 +1,9 @@
 import { getIvyHost } from '@/lib/utils';
-import { grpcTableService, TableQuery } from '@/services/grpcTableService';
+import {
+  grpcTableService,
+  TableQuery,
+  Filter,
+} from '@/services/grpcTableService';
 import DataEditor, {
   DataEditorRef,
   EditableGridCell,
@@ -12,6 +16,9 @@ import DataEditor, {
 import '@glideapps/glide-data-grid/dist/index.css';
 import * as arrow from 'apache-arrow';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { Filter as FilterIcon } from 'lucide-react';
+import { FilterBuilder } from './FilterBuilder';
+import { FilterChip } from './FilterChip';
 
 // Types
 interface DataRow {
@@ -80,7 +87,8 @@ function convertArrowTableToData(
 const fetchTableData = async (
   connection: DataTableConnection,
   startIndex: number,
-  count: number
+  count: number,
+  filter?: Filter | null
 ): Promise<{ columns: DataColumn[]; rows: DataRow[]; hasMore: boolean }> => {
   const backendUrl = new URL(getIvyHost());
   const serverUrl = `${backendUrl.protocol}//${backendUrl.hostname}:${connection.port}`;
@@ -90,6 +98,7 @@ const fetchTableData = async (
     offset: startIndex,
     connectionId: connection.connectionId,
     sourceId: connection.sourceId,
+    ...(filter && { filter }), // Include filter if present
   };
 
   try {
@@ -135,6 +144,8 @@ export const InfiniteScrollGlideGrid: React.FC<
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [activeFilter, setActiveFilter] = useState<Filter | null>(null);
+  const [showFilterBuilder, setShowFilterBuilder] = useState(false);
   const loadingRef = useRef(false);
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const gridRef = useRef<DataEditorRef>(null);
@@ -153,7 +164,12 @@ export const InfiniteScrollGlideGrid: React.FC<
       setError(null);
 
       try {
-        const result = await fetchTableData(connection, 0, batchSize);
+        const result = await fetchTableData(
+          connection,
+          0,
+          batchSize,
+          activeFilter
+        );
         setColumns(result.columns);
         setData(result.rows);
         setVisibleRows(result.rows.length);
@@ -174,7 +190,7 @@ export const InfiniteScrollGlideGrid: React.FC<
       }
     };
     loadInitialData();
-  }, [connection]);
+  }, [connection, activeFilter]);
 
   // Load more data
   const loadMoreData = useCallback(async () => {
@@ -184,7 +200,12 @@ export const InfiniteScrollGlideGrid: React.FC<
     setIsLoading(true);
 
     try {
-      const result = await fetchTableData(connection, data.length, batchSize);
+      const result = await fetchTableData(
+        connection,
+        data.length,
+        batchSize,
+        activeFilter
+      );
 
       if (result.rows.length > 0) {
         setData(prev => [...prev, ...result.rows]);
@@ -200,7 +221,7 @@ export const InfiniteScrollGlideGrid: React.FC<
       setIsLoading(false);
       loadingRef.current = false;
     }
-  }, [connection, data.length, hasMore]);
+  }, [connection, data.length, hasMore, activeFilter]);
 
   // Handle scroll events
   const handleVisibleRegionChanged = useCallback(
@@ -385,6 +406,24 @@ export const InfiniteScrollGlideGrid: React.FC<
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">Dynamic Data Grid with gRPC</h1>
 
+      <div className="mb-4 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowFilterBuilder(true)}
+            className="flex items-center gap-2 px-3 py-2 border rounded hover:bg-gray-50"
+          >
+            <FilterIcon size={16} />
+            <span>Filter</span>
+          </button>
+          {activeFilter && (
+            <FilterChip
+              filter={activeFilter}
+              onRemove={() => setActiveFilter(null)}
+            />
+          )}
+        </div>
+      </div>
+
       <div className="mb-2 text-sm text-gray-600 flex items-center gap-4">
         <span>Showing {visibleRows} rows</span>
         {columns.length > 0 && <span>{columns.length} columns</span>}
@@ -434,6 +473,21 @@ export const InfiniteScrollGlideGrid: React.FC<
           ? 'Click any cell to edit. Drag column borders to resize.'
           : 'Data fetched from gRPC service. Grid grows dynamically as you scroll.'}
       </div>
+
+      {showFilterBuilder && columns.length > 0 && (
+        <FilterBuilder
+          columns={columns}
+          onApply={filter => {
+            setActiveFilter(filter);
+            // Reset data when filter changes
+            setData([]);
+            setVisibleRows(0);
+            setHasMore(true);
+          }}
+          onClose={() => setShowFilterBuilder(false)}
+          existingFilter={activeFilter}
+        />
+      )}
     </div>
   );
 };
