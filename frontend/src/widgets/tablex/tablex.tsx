@@ -1,3 +1,5 @@
+import { getIvyHost } from '@/lib/utils';
+import { grpcTableService, TableQuery } from '@/services/grpcTableService';
 import DataEditor, {
   GridCell,
   GridCellKind,
@@ -6,57 +8,105 @@ import DataEditor, {
   Theme,
 } from '@glideapps/glide-data-grid';
 import '@glideapps/glide-data-grid/dist/index.css';
+import * as arrow from 'apache-arrow';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 // Types
-interface User {
-  id: number;
-  name: string;
-  email: string;
-  role: string;
-  status: 'active' | 'inactive';
+interface DataRow {
+  values: (string | number | boolean | null)[];
 }
 
-// Mock data generator
-const generateMockUser = (index: number): User => ({
-  id: index,
-  name: `User ${index}`,
-  email: `user${index}@example.com`,
-  role: ['Admin', 'User', 'Manager', 'Developer'][index % 4],
-  status: index % 3 === 0 ? 'inactive' : 'active',
-});
+interface DataColumn {
+  name: string;
+  type: string;
+  width: number;
+}
 
-// Simulate API fetch with delay
-const fetchUsers = async (
-  startIndex: number,
-  count: number
-): Promise<{ users: User[]; hasMore: boolean }> => {
-  await new Promise(resolve => setTimeout(resolve, 500));
-  const maxRecords = 500; // Total available records on "server"
+interface DataTableConnection {
+  port: number;
+  path: string;
+  connectionId: string;
+  sourceId: string;
+}
 
-  if (startIndex >= maxRecords) {
-    return { users: [], hasMore: false };
+interface InfiniteScrollGlideGridProps {
+  connection: DataTableConnection;
+}
+
+// Helper function to convert Arrow table to our data format
+function convertArrowTableToData(
+  table: arrow.Table,
+  requestedCount: number
+): {
+  columns: DataColumn[];
+  rows: DataRow[];
+  hasMore: boolean;
+} {
+  const columns: DataColumn[] = table.schema.fields.map(field => ({
+    name: field.name,
+    type: field.type.toString(),
+    width: 150, // Default width, can be made configurable
+  }));
+
+  const rows: DataRow[] = [];
+  for (let i = 0; i < table.numRows; i++) {
+    const values: (string | number | boolean | null)[] = [];
+    for (let j = 0; j < table.numCols; j++) {
+      const column = table.getChildAt(j);
+      if (column) {
+        const value = column.get(i);
+        values.push(value);
+      }
+    }
+    rows.push({ values });
   }
 
-  const actualCount = Math.min(count, maxRecords - startIndex);
-  const users = Array.from({ length: actualCount }, (_, i) =>
-    generateMockUser(startIndex + i)
-  );
+  // If we received exactly the requested amount, there might be more
+  // If we received less, we've reached the end
+  const hasMore = table.numRows === requestedCount;
 
   return {
-    users,
-    hasMore: startIndex + actualCount < maxRecords,
+    columns,
+    rows,
+    hasMore,
   };
+}
+
+// Fetch data using grpcTableService
+const fetchTableData = async (
+  connection: DataTableConnection,
+  startIndex: number,
+  count: number
+): Promise<{ columns: DataColumn[]; rows: DataRow[]; hasMore: boolean }> => {
+  const backendUrl = new URL(getIvyHost());
+  const serverUrl = `${backendUrl.protocol}//${backendUrl.hostname}:${connection.port}`;
+
+  const query: TableQuery = {
+    limit: count,
+    offset: startIndex,
+    connectionId: connection.connectionId,
+    sourceId: connection.sourceId,
+  };
+
+  try {
+    const result = await grpcTableService.queryTable({
+      serverUrl,
+      query,
+    });
+
+    if (result.arrow_ipc_stream) {
+      const table = arrow.tableFromIPC(result.arrow_ipc_stream);
+      return convertArrowTableToData(table, count);
+    }
+
+    return { columns: [], rows: [], hasMore: false };
+  } catch (error) {
+    console.error('Failed to fetch table data:', error);
+    throw error;
+  }
 };
 
-// Column definitions
-const columns: GridColumn[] = [
-  { title: 'ID', width: 80 },
-  { title: 'Name', width: 150 },
-  { title: 'Email', width: 250 },
-  { title: 'Role', width: 120 },
-  { title: 'Status', width: 100 },
-];
+// This will be dynamically set based on the data
 
 // Custom theme
 const theme: Partial<Theme> = {
@@ -73,28 +123,47 @@ const theme: Partial<Theme> = {
   cellVerticalPadding: 3,
 };
 
-export const InfiniteScrollGlideGrid: React.FC = () => {
-  const [users, setUsers] = useState<User[]>([]);
+export const InfiniteScrollGlideGrid: React.FC<
+  InfiniteScrollGlideGridProps
+> = ({ connection }) => {
+  const [data, setData] = useState<DataRow[]>([]);
+  const [columns, setColumns] = useState<DataColumn[]>([]);
   const [visibleRows, setVisibleRows] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const loadingRef = useRef(false);
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const batchSize = 50;
+  const batchSize = 20;
   const scrollThreshold = 10; // Load more when within 10 rows of the bottom
 
   // Load initial data
   useEffect(() => {
     const loadInitialData = async () => {
+      if (!connection.port || !connection.path) {
+        setError('Connection configuration is required');
+        return;
+      }
+
       setIsLoading(true);
-      const result = await fetchUsers(0, batchSize);
-      setUsers(result.users);
-      setVisibleRows(result.users.length);
-      setHasMore(result.hasMore);
-      setIsLoading(false);
+      setError(null);
+
+      try {
+        const result = await fetchTableData(connection, 0, batchSize);
+        setColumns(result.columns);
+        setData(result.rows);
+        setVisibleRows(result.rows.length);
+        setHasMore(result.hasMore);
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : 'Failed to load data';
+        setError(errorMessage);
+      } finally {
+        setIsLoading(false);
+      }
     };
     loadInitialData();
-  }, []);
+  }, [connection]);
 
   // Load more data
   const loadMoreData = useCallback(async () => {
@@ -103,17 +172,24 @@ export const InfiniteScrollGlideGrid: React.FC = () => {
     loadingRef.current = true;
     setIsLoading(true);
 
-    const result = await fetchUsers(users.length, batchSize);
+    try {
+      const result = await fetchTableData(connection, data.length, batchSize);
 
-    if (result.users.length > 0) {
-      setUsers(prev => [...prev, ...result.users]);
-      setVisibleRows(prev => prev + result.users.length);
+      if (result.rows.length > 0) {
+        setData(prev => [...prev, ...result.rows]);
+        setVisibleRows(prev => prev + result.rows.length);
+      }
+
+      setHasMore(result.hasMore);
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : 'Failed to load more data';
+      setError(errorMessage);
+    } finally {
+      setIsLoading(false);
+      loadingRef.current = false;
     }
-
-    setHasMore(result.hasMore);
-    setIsLoading(false);
-    loadingRef.current = false;
-  }, [users.length, hasMore]);
+  }, [connection, data.length, hasMore]);
 
   // Handle scroll events
   const handleVisibleRegionChanged = useCallback(
@@ -142,7 +218,7 @@ export const InfiniteScrollGlideGrid: React.FC = () => {
       const [col, row] = cell;
 
       // Safety check
-      if (row >= users.length) {
+      if (row >= data.length || col >= columns.length) {
         return {
           kind: GridCellKind.Text,
           data: '',
@@ -152,64 +228,50 @@ export const InfiniteScrollGlideGrid: React.FC = () => {
         };
       }
 
-      const user = users[row];
+      const rowData = data[row];
+      const cellValue = rowData.values[col];
+      const columnType = columns[col].type;
 
-      switch (col) {
-        case 0:
-          return {
-            kind: GridCellKind.Number,
-            data: user.id,
-            displayData: user.id.toString(),
-            allowOverlay: false,
-            readonly: true,
-          };
-        case 1:
-          return {
-            kind: GridCellKind.Text,
-            data: user.name,
-            displayData: user.name,
-            allowOverlay: false,
-            readonly: true,
-          };
-        case 2:
-          return {
-            kind: GridCellKind.Text,
-            data: user.email,
-            displayData: user.email,
-            allowOverlay: false,
-            readonly: true,
-          };
-        case 3:
-          return {
-            kind: GridCellKind.Text,
-            data: user.role,
-            displayData: user.role,
-            allowOverlay: false,
-            readonly: true,
-          };
-        case 4:
-          return {
-            kind: GridCellKind.Text,
-            data: user.status,
-            displayData: user.status,
-            allowOverlay: false,
-            readonly: true,
-            themeOverride: {
-              textDark: user.status === 'active' ? '#059669' : '#dc2626',
-              bgCell: user.status === 'active' ? '#d1fae5' : '#fee2e2',
-            },
-          };
-        default:
-          return {
-            kind: GridCellKind.Text,
-            data: '',
-            displayData: '',
-            allowOverlay: false,
-            readonly: true,
-          };
+      // Handle null/undefined values
+      if (cellValue === null || cellValue === undefined) {
+        return {
+          kind: GridCellKind.Text,
+          data: '',
+          displayData: 'null',
+          allowOverlay: false,
+          readonly: true,
+          style: 'faded',
+        };
+      }
+
+      // Determine cell type based on Arrow data type and value
+      if (typeof cellValue === 'number' && columnType.includes('int')) {
+        return {
+          kind: GridCellKind.Number,
+          data: cellValue,
+          displayData: cellValue.toString(),
+          allowOverlay: false,
+          readonly: true,
+        };
+      } else if (typeof cellValue === 'boolean') {
+        return {
+          kind: GridCellKind.Boolean,
+          data: cellValue,
+          allowOverlay: false,
+          readonly: true,
+        };
+      } else {
+        // Default to text for strings and other types
+        return {
+          kind: GridCellKind.Text,
+          data: String(cellValue),
+          displayData: String(cellValue),
+          allowOverlay: false,
+          readonly: true,
+        };
       }
     },
-    [users]
+    [data, columns]
   );
 
   // Handle cell edits (not used in this example but required by the component)
@@ -217,45 +279,71 @@ export const InfiniteScrollGlideGrid: React.FC = () => {
     // This is a read-only grid, so we don't handle edits
   }, []);
 
+  // Convert our columns to GridColumn format
+  const gridColumns: GridColumn[] = columns.map(col => ({
+    title: col.name,
+    width: col.width,
+  }));
+
+  if (error) {
+    return (
+      <div className="p-4">
+        <div className="text-red-600 mb-4">Error: {error}</div>
+        <button
+          onClick={() => window.location.reload()}
+          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">
-        Infinite Scroll with Glide Data Grid
-      </h1>
+      <h1 className="text-2xl font-bold mb-4">Dynamic Data Grid with gRPC</h1>
 
       <div className="mb-2 text-sm text-gray-600 flex items-center gap-4">
         <span>Showing {visibleRows} rows</span>
+        {columns.length > 0 && <span>{columns.length} columns</span>}
         {isLoading && (
           <span className="flex items-center">
             <div className="animate-spin h-4 w-4 border-2 border-gray-500 border-t-transparent rounded-full mr-2"></div>
             Loading more...
           </span>
         )}
-        {!hasMore && <span className="text-gray-500">All data loaded</span>}
+        {!hasMore && visibleRows > 0 && (
+          <span className="text-gray-500">All data loaded</span>
+        )}
       </div>
 
-      <div style={{ height: '600px', width: '100%' }}>
-        <DataEditor
-          columns={columns}
-          rows={visibleRows}
-          getCellContent={getCellContent}
-          onCellEdited={onCellEdited}
-          onVisibleRegionChanged={handleVisibleRegionChanged}
-          smoothScrollX={true}
-          smoothScrollY={true}
-          theme={theme}
-          rowHeight={36}
-          headerHeight={36}
-          freezeColumns={1}
-          getCellsForSelection={true}
-          keybindings={{ search: false }}
-          rightElement={<div className="pr-2" />}
-        />
-      </div>
+      {gridColumns.length > 0 ? (
+        <div style={{ height: '600px', width: '100%' }}>
+          <DataEditor
+            columns={gridColumns}
+            rows={visibleRows}
+            getCellContent={getCellContent}
+            onCellEdited={onCellEdited}
+            onVisibleRegionChanged={handleVisibleRegionChanged}
+            smoothScrollX={true}
+            smoothScrollY={true}
+            theme={theme}
+            rowHeight={36}
+            headerHeight={36}
+            freezeColumns={1}
+            getCellsForSelection={true}
+            keybindings={{ search: false }}
+            rightElement={<div className="pr-2" />}
+          />
+        </div>
+      ) : (
+        <div className="flex items-center justify-center h-64 text-gray-500">
+          {isLoading ? 'Loading data...' : 'No data available'}
+        </div>
+      )}
 
       <div className="mt-4 text-sm text-gray-500">
-        The grid dynamically grows as you scroll. Only loaded rows are rendered
-        in the DOM.
+        Data fetched from gRPC service. Grid grows dynamically as you scroll.
       </div>
     </div>
   );
