@@ -104,7 +104,7 @@ export const widgetMap = {
   'Ivy.Table': Tables.TableWidget,
   'Ivy.TableRow': Tables.TableRowWidget,
   'Ivy.TableCell': Tables.TableCellWidget,
-  'Ivy.DataTable': Tables.GlideDataGridWidget,
+  'Ivy.DataTable': Tables.InfiniteScrollGlideGrid,
 
   // Lists
   'Ivy.List': Lists.ListWidget,
