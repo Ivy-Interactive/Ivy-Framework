@@ -1,6 +1,8 @@
 import { getIvyHost } from '@/lib/utils';
 import { grpcTableService, TableQuery } from '@/services/grpcTableService';
 import DataEditor, {
+  DataEditorRef,
+  EditableGridCell,
   GridCell,
   GridCellKind,
   GridColumn,
@@ -31,6 +33,8 @@ interface DataTableConnection {
 
 interface InfiniteScrollGlideGridProps {
   connection: DataTableConnection;
+  editable?: boolean; // Allow component to be configurable
+  onCellUpdate?: (row: number, col: number, value: unknown) => void; // Callback for cell updates
 }
 
 // Helper function to convert Arrow table to our data format
@@ -106,8 +110,6 @@ const fetchTableData = async (
   }
 };
 
-// This will be dynamically set based on the data
-
 // Custom theme
 const theme: Partial<Theme> = {
   bgCell: '#fff',
@@ -125,15 +127,17 @@ const theme: Partial<Theme> = {
 
 export const InfiniteScrollGlideGrid: React.FC<
   InfiniteScrollGlideGridProps
-> = ({ connection }) => {
+> = ({ connection, editable = false, onCellUpdate }) => {
   const [data, setData] = useState<DataRow[]>([]);
   const [columns, setColumns] = useState<DataColumn[]>([]);
+  const [columnWidths, setColumnWidths] = useState<Record<string, number>>({});
   const [visibleRows, setVisibleRows] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const loadingRef = useRef(false);
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const gridRef = useRef<DataEditorRef>(null);
   const batchSize = 20;
   const scrollThreshold = 10; // Load more when within 10 rows of the bottom
 
@@ -154,6 +158,13 @@ export const InfiniteScrollGlideGrid: React.FC<
         setData(result.rows);
         setVisibleRows(result.rows.length);
         setHasMore(result.hasMore);
+
+        // Initialize column widths
+        const widths: Record<string, number> = {};
+        result.columns.forEach((col, index) => {
+          widths[index.toString()] = col.width;
+        });
+        setColumnWidths(widths);
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : 'Failed to load data';
@@ -238,8 +249,8 @@ export const InfiniteScrollGlideGrid: React.FC<
           kind: GridCellKind.Text,
           data: '',
           displayData: 'null',
-          allowOverlay: false,
-          readonly: true,
+          allowOverlay: editable,
+          readonly: !editable,
           style: 'faded',
         };
       }
@@ -250,15 +261,15 @@ export const InfiniteScrollGlideGrid: React.FC<
           kind: GridCellKind.Number,
           data: cellValue,
           displayData: cellValue.toString(),
-          allowOverlay: false,
-          readonly: true,
+          allowOverlay: editable,
+          readonly: !editable,
         };
       } else if (typeof cellValue === 'boolean') {
         return {
           kind: GridCellKind.Boolean,
           data: cellValue,
           allowOverlay: false,
-          readonly: true,
+          readonly: !editable,
         };
       } else {
         // Default to text for strings and other types
@@ -266,24 +277,95 @@ export const InfiniteScrollGlideGrid: React.FC<
           kind: GridCellKind.Text,
           data: String(cellValue),
           displayData: String(cellValue),
-          allowOverlay: false,
-          readonly: true,
+          allowOverlay: editable,
+          readonly: !editable,
         };
       }
     },
-    [data, columns]
+    [data, columns, editable]
   );
 
-  // Handle cell edits (not used in this example but required by the component)
-  const onCellEdited = useCallback(() => {
-    // This is a read-only grid, so we don't handle edits
-  }, []);
+  // Handle cell edits
+  const handleCellEdited = useCallback(
+    (cell: Item, newValue: EditableGridCell) => {
+      if (!editable) return;
 
-  // Convert our columns to GridColumn format
-  const gridColumns: GridColumn[] = columns.map(col => ({
+      const [col, row] = cell;
+
+      // Update local data
+      setData(prevData => {
+        const newData = [...prevData];
+        const rowData = { ...newData[row] };
+        const values = [...rowData.values];
+
+        // Extract the actual value based on cell type
+        let actualValue: string | number | boolean | null;
+        switch (newValue.kind) {
+          case GridCellKind.Text:
+            actualValue = newValue.data;
+            break;
+          case GridCellKind.Number:
+            actualValue = newValue.data ?? 0; // Default to 0 for numbers
+            break;
+          case GridCellKind.Boolean:
+            actualValue = newValue.data ?? false; // Default to false for booleans
+            break;
+          default:
+            actualValue = null; // Fallback for unknown cell types
+        }
+
+        values[col] = actualValue;
+        rowData.values = values;
+        newData[row] = rowData;
+
+        return newData;
+      });
+
+      // Call the update callback if provided
+      if (onCellUpdate) {
+        // Extract the actual value based on cell type
+        let value: unknown;
+        switch (newValue.kind) {
+          case GridCellKind.Text:
+            value = newValue.data;
+            break;
+          case GridCellKind.Number:
+            value = newValue.data;
+            break;
+          case GridCellKind.Boolean:
+            value = newValue.data;
+            break;
+          default:
+            value = newValue.data;
+        }
+
+        onCellUpdate(row, col, value);
+      }
+    },
+    [editable, onCellUpdate]
+  );
+
+  // Convert our columns to GridColumn format with current widths
+  const gridColumns: GridColumn[] = columns.map((col, index) => ({
     title: col.name,
-    width: col.width,
+    width: columnWidths[index.toString()] || col.width,
   }));
+
+  // Handle column resize
+  const handleColumnResize = useCallback(
+    (column: GridColumn, newSize: number) => {
+      const columnIndex = gridColumns.findIndex(
+        col => col.title === column.title
+      );
+      if (columnIndex !== -1) {
+        setColumnWidths(prev => ({
+          ...prev,
+          [columnIndex.toString()]: newSize,
+        }));
+      }
+    },
+    [gridColumns]
+  );
 
   if (error) {
     return (
@@ -306,6 +388,7 @@ export const InfiniteScrollGlideGrid: React.FC<
       <div className="mb-2 text-sm text-gray-600 flex items-center gap-4">
         <span>Showing {visibleRows} rows</span>
         {columns.length > 0 && <span>{columns.length} columns</span>}
+        {editable && <span className="text-blue-600">✏️ Editable</span>}
         {isLoading && (
           <span className="flex items-center">
             <div className="animate-spin h-4 w-4 border-2 border-gray-500 border-t-transparent rounded-full mr-2"></div>
@@ -320,10 +403,12 @@ export const InfiniteScrollGlideGrid: React.FC<
       {gridColumns.length > 0 ? (
         <div style={{ height: '600px', width: '100%' }}>
           <DataEditor
+            ref={gridRef}
             columns={gridColumns}
             rows={visibleRows}
             getCellContent={getCellContent}
-            onCellEdited={onCellEdited}
+            onCellEdited={handleCellEdited}
+            onColumnResize={handleColumnResize}
             onVisibleRegionChanged={handleVisibleRegionChanged}
             smoothScrollX={true}
             smoothScrollY={true}
@@ -334,6 +419,8 @@ export const InfiniteScrollGlideGrid: React.FC<
             getCellsForSelection={true}
             keybindings={{ search: false }}
             rightElement={<div className="pr-2" />}
+            columnSelect="single"
+            rangeSelect="rect"
           />
         </div>
       ) : (
@@ -343,7 +430,9 @@ export const InfiniteScrollGlideGrid: React.FC<
       )}
 
       <div className="mt-4 text-sm text-gray-500">
-        Data fetched from gRPC service. Grid grows dynamically as you scroll.
+        {editable
+          ? 'Click any cell to edit. Drag column borders to resize.'
+          : 'Data fetched from gRPC service. Grid grows dynamically as you scroll.'}
       </div>
     </div>
   );
