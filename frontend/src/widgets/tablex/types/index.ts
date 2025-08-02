@@ -15,7 +15,7 @@ export interface DataTableConnection {
   sourceId: string;
 }
 
-export interface InfiniteScrollGlideGridProps {
+export interface TableProps {
   connection: DataTableConnection;
   editable?: boolean;
   onCellUpdate?: (row: number, col: number, value: unknown) => void;

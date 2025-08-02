@@ -5,27 +5,18 @@ import DataEditor, {
   GridColumn,
   Item,
 } from '@glideapps/glide-data-grid';
-import '@glideapps/glide-data-grid/dist/index.css';
 import React, { useCallback, useRef } from 'react';
+import { useTable } from '../context/TableContext';
+import { tableStyles } from '../styles';
+import { tableTheme } from '../styles/theme';
 
-// Local imports
-import { TableProvider, useTable } from './context/TableContext';
-import { ErrorDisplay } from './parts/ErrorDisplay';
-import { Footer } from './parts/Footer';
-import { Header } from './parts/Header';
-import { LoadingDisplay } from './parts/LoadingDisplay';
-import { tableStyles } from './styles';
-import { tableTheme } from './styles/theme';
-import { InfiniteScrollGlideGridProps } from './types';
-
-const InfiniteScrollGlideGridContent: React.FC = () => {
+export const TableEditor: React.FC = () => {
   const {
     data,
     columns,
     columnWidths,
     visibleRows,
     hasMore,
-    error,
     editable,
     loadMoreData,
     handleColumnResize,
@@ -124,53 +115,31 @@ const InfiniteScrollGlideGridContent: React.FC = () => {
     width: columnWidths[index.toString()] || col.width,
   }));
 
-  if (error) {
-    return <ErrorDisplay />;
+  if (gridColumns.length === 0) {
+    return null;
   }
 
   return (
-    <div className={tableStyles.container}>
-      <Header />
-
-      {gridColumns.length > 0 ? (
-        <div style={tableStyles.gridContainer}>
-          <DataEditor
-            ref={gridRef}
-            columns={gridColumns}
-            rows={visibleRows}
-            getCellContent={getCellContent}
-            onColumnResize={handleColumnResize}
-            onVisibleRegionChanged={handleVisibleRegionChanged}
-            smoothScrollX={true}
-            smoothScrollY={true}
-            theme={tableTheme}
-            rowHeight={36}
-            headerHeight={36}
-            freezeColumns={1}
-            getCellsForSelection={true}
-            keybindings={{ search: false }}
-            rightElement={<div className={tableStyles.rightPadding} />}
-            columnSelect="single"
-            rangeSelect="rect"
-          />
-        </div>
-      ) : (
-        <LoadingDisplay />
-      )}
-
-      <Footer />
+    <div style={tableStyles.gridContainer}>
+      <DataEditor
+        ref={gridRef}
+        columns={gridColumns}
+        rows={visibleRows}
+        getCellContent={getCellContent}
+        onColumnResize={handleColumnResize}
+        onVisibleRegionChanged={handleVisibleRegionChanged}
+        smoothScrollX={true}
+        smoothScrollY={true}
+        theme={tableTheme}
+        rowHeight={36}
+        headerHeight={36}
+        freezeColumns={1}
+        getCellsForSelection={true}
+        keybindings={{ search: false }}
+        rightElement={<div className={tableStyles.rightPadding} />}
+        columnSelect="single"
+        rangeSelect="rect"
+      />
     </div>
   );
 };
-
-export const InfiniteScrollGlideGrid: React.FC<
-  InfiniteScrollGlideGridProps
-> = ({ connection, editable = false }) => {
-  return (
-    <TableProvider connection={connection} editable={editable}>
-      <InfiniteScrollGlideGridContent />
-    </TableProvider>
-  );
-};
-
-export default InfiniteScrollGlideGrid;
