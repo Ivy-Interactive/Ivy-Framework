@@ -85,18 +85,9 @@ public class AppHub(
         if (isAuthProtected)
         {
             var authProvider = server.Services.BuildServiceProvider().GetService<IAuthProvider>() ?? throw new Exception("IAuthProvider not found");
-            var jwt = httpContext.Request.Cookies["jwt"].NullIfEmpty();
+            authProvider.SetHttpContext(httpContext);
 
-            try
-            {
-                oldAuthToken = authToken = jwt != null
-                    ? JsonSerializer.Deserialize<AuthToken>(jwt)
-                    : null;
-            }
-            catch (Exception e)
-            {
-                logger.LogWarning(e, "Failed to deserialize AuthToken from JWT.");
-            }
+            oldAuthToken = authToken = GetAuthToken(httpContext);
 
             if (string.IsNullOrEmpty(authToken?.Jwt))
             {
@@ -259,12 +250,7 @@ public class AppHub(
                                            .GetService<IAuthProvider>() ??
                                        throw new Exception("IAuthProvider not found");
 
-                    var jwt = Context.GetHttpContext()!.Request.Cookies["jwt"].NullIfEmpty();
-
-                    // TODO: handle deserialization errors
-                    var authToken = jwt != null
-                        ? JsonSerializer.Deserialize<AuthToken>(jwt)
-                        : null;
+                    var authToken = GetAuthToken(Context.GetHttpContext()!);
 
                     if (string.IsNullOrEmpty(authToken?.Jwt) || !await authProvider.ValidateJwtAsync(authToken.Jwt))
                     {
@@ -287,6 +273,40 @@ public class AppHub(
         {
             var exceptionHandler = appSession.AppServices.GetService<IExceptionHandler>()!;
             exceptionHandler.HandleException(e);
+        }
+    }
+
+    private AuthToken? GetAuthToken(HttpContext httpContext)
+    {
+        var cookies = httpContext.Request.Cookies;
+        var jwt = cookies["jwt"].NullIfEmpty();
+        if (jwt == null)
+        {
+            return null;
+        }
+
+        try
+        {
+            var token = JsonSerializer.Deserialize<AuthToken>(jwt);
+            if (token == null)
+            {
+                return null;
+            }
+
+            if (token.RefreshToken == null)
+            {
+                var refreshToken = cookies["jwt_ext_refresh_token"].NullIfEmpty();
+                return token with { RefreshToken = refreshToken };
+            }
+            else
+            {
+                return token;
+            }
+        }
+        catch (Exception e)
+        {
+            logger.LogWarning(e, "Failed to deserialize AuthToken from JWT.");
+            return null;
         }
     }
 }

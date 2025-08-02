@@ -31,6 +31,7 @@ type AuthToken = {
   jwt: string;
   refreshToken?: string;
   expiresAt?: string;
+  tag?: unknown;
 };
 
 const widgetTreeToXml = (node: WidgetNode) => {
