@@ -56,7 +56,13 @@ export const TableProvider: React.FC<TableProviderProps> = ({
   const [activeSort, setActiveSort] = useState<SortOrder[] | null>(null);
 
   const loadingRef = useRef(false);
+  const currentRowCountRef = useRef(0);
   const batchSize = 20;
+
+  // Reset row count when connection changes
+  useEffect(() => {
+    currentRowCountRef.current = 0;
+  }, [connection]);
 
   // Load initial data
   useEffect(() => {
@@ -70,16 +76,24 @@ export const TableProvider: React.FC<TableProviderProps> = ({
       setError(null);
 
       try {
+        // When sorting, preserve the current number of rows
+        // When first loading or changing connection, use batchSize
+        const rowsToFetch =
+          currentRowCountRef.current > 0
+            ? currentRowCountRef.current
+            : batchSize;
+
         const result = await fetchTableData(
           connection,
           0,
-          batchSize,
+          rowsToFetch,
           activeFilter,
           activeSort
         );
         setColumns(result.columns);
         setData(result.rows);
         setVisibleRows(result.rows.length);
+        currentRowCountRef.current = result.rows.length;
         setHasMore(result.hasMore);
 
         // Initialize column widths
@@ -118,6 +132,7 @@ export const TableProvider: React.FC<TableProviderProps> = ({
       if (result.rows.length > 0) {
         setData(prev => [...prev, ...result.rows]);
         setVisibleRows(prev => prev + result.rows.length);
+        currentRowCountRef.current += result.rows.length;
       }
 
       setHasMore(result.hasMore);
