@@ -1,8 +1,11 @@
 import { Theme } from '@glideapps/glide-data-grid';
 
+// TODO: Update theme to match design system
+// Currently can't use css variables due to @glideapps/glide-data-grid limitations
+// We could create design system provider that injects these styles
 export const tableTheme: Partial<Theme> = {
   bgCell: '#fff',
-  bgHeader: '#f9fafb',
+  bgHeader: '#fff',
   bgHeaderHasFocus: '#f3f4f6',
   bgHeaderHovered: '#e5e7eb',
   textDark: '#111827',

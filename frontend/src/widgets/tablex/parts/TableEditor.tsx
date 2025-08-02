@@ -3,7 +3,6 @@ import DataEditor, {
   GridCell,
   GridCellKind,
   GridColumn,
-  GridColumnMenuIcon,
   Item,
 } from '@glideapps/glide-data-grid';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
@@ -11,7 +10,13 @@ import { useTable } from '../context/TableContext';
 import { tableStyles } from '../styles';
 import { tableTheme } from '../styles/theme';
 
-export const TableEditor: React.FC = () => {
+interface TableEditorProps {
+  hasOptions?: boolean;
+}
+
+export const TableEditor: React.FC<TableEditorProps> = ({
+  hasOptions = false,
+}) => {
   const {
     data,
     columns,
@@ -19,7 +24,6 @@ export const TableEditor: React.FC = () => {
     visibleRows,
     hasMore,
     editable,
-    activeSort,
     loadMoreData,
     handleColumnResize,
     handleSort,
@@ -132,15 +136,6 @@ export const TableEditor: React.FC = () => {
   );
 
   // Get sort icon for a column
-  const getSortIcon = (columnName: string): GridColumnMenuIcon => {
-    const sortInfo = activeSort?.find(sort => sort.column === columnName);
-    if (!sortInfo) {
-      return GridColumnMenuIcon.Triangle; // Default unsorted icon
-    }
-    return sortInfo.direction === 'ASC'
-      ? GridColumnMenuIcon.Triangle
-      : GridColumnMenuIcon.Triangle;
-  };
 
   // Handle column header click for sorting
   const handleHeaderMenuClick = useCallback(
@@ -156,7 +151,6 @@ export const TableEditor: React.FC = () => {
   // Convert our columns to GridColumn format with current widths
   const gridColumns: GridColumn[] = columns.map((col, index) => {
     const baseWidth = columnWidths[index.toString()] || col.width;
-    const sortIcon = getSortIcon(col.name);
 
     // Make the last column fill the remaining space
     if (index === columns.length - 1 && containerWidth > 0) {
@@ -172,16 +166,12 @@ export const TableEditor: React.FC = () => {
       return {
         title: col.name,
         width: Math.max(baseWidth, remainingWidth),
-        menuIcon: sortIcon,
-        hasMenu: true,
       };
     }
 
     return {
       title: col.name,
       width: baseWidth,
-      menuIcon: sortIcon,
-      hasMenu: true,
     };
   });
 
@@ -189,8 +179,12 @@ export const TableEditor: React.FC = () => {
     return null;
   }
 
+  const containerStyle = hasOptions
+    ? tableStyles.gridContainerWithOptions
+    : tableStyles.gridContainer;
+
   return (
-    <div ref={containerRef} style={tableStyles.gridContainer}>
+    <div ref={containerRef} style={containerStyle}>
       <DataEditor
         ref={gridRef}
         columns={gridColumns}
@@ -202,7 +196,7 @@ export const TableEditor: React.FC = () => {
         smoothScrollX={true}
         smoothScrollY={true}
         theme={tableTheme}
-        rowHeight={44}
+        rowHeight={38}
         headerHeight={44}
         freezeColumns={1}
         getCellsForSelection={true}

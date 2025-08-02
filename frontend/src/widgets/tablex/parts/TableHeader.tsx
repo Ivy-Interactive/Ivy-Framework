@@ -1,14 +1,11 @@
 import React from 'react';
-import { tableStyles } from '../styles';
 import { useTable } from '../context/TableContext';
+import { tableStyles } from '../styles';
 
 export const Header: React.FC = () => {
   const { visibleRows, columns, editable, isLoading, hasMore } = useTable();
   return (
     <>
-      <h1 className={tableStyles.heading.primary}>
-        Dynamic Data Grid with gRPC
-      </h1>
       <div className={tableStyles.text.info}>
         <span>Showing {visibleRows} rows</span>
         {columns.length > 0 && <span>{columns.length} columns</span>}

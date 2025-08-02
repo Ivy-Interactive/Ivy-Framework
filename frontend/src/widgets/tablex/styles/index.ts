@@ -1,4 +1,4 @@
-// Base styling tokens
+// Base styling tokens using CSS variables
 const spacing = {
   xs: 'p-2',
   sm: 'p-4',
@@ -35,19 +35,19 @@ const spacing = {
 
 const typography = {
   size: {
-    sm: 'text-sm',
-    base: 'text-base',
-    xl: 'text-2xl',
+    sm: 'text-descriptive', // 12px from index.css
+    base: 'text-semi-lead', // 15px from index.css
+    xl: 'text-display-25', // 25px from index.css
   },
   weight: {
     bold: 'font-bold',
   },
   color: {
-    primary: 'text-gray-600',
-    secondary: 'text-gray-500',
-    error: 'text-red-600',
-    accent: 'text-blue-600',
-    white: 'text-white',
+    primary: 'text-[color:var(--primary-foreground)]',
+    secondary: 'text-[color:var(--muted-foreground)]',
+    error: 'text-[color:var(--destructive)]',
+    accent: 'text-[color:var(--primary)]',
+    white: 'text-[color:var(--background)]',
   },
 } as const;
 
@@ -73,13 +73,14 @@ const layout = {
 
 const components = {
   button: {
-    primary: `${spacing.padding.x.sm} ${spacing.padding.y.xs} bg-blue-500 ${typography.color.white} rounded hover:bg-blue-600`,
+    primary: `${spacing.padding.x.sm} ${spacing.padding.y.xs} bg-[color:var(--primary)] ${typography.color.white} rounded hover:bg-[color:var(--primary)]/90`,
+    secondary: `inline-flex items-center px-3 py-1.5 border border-[color:var(--border)] shadow-sm ${typography.size.sm} font-medium rounded ${typography.color.primary} bg-[color:var(--background)] hover:bg-[color:var(--muted)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[color:var(--ring)]`,
   },
   spinner: {
-    sm: `animate-spin h-4 w-4 border-2 border-gray-500 border-t-transparent rounded-full`,
+    sm: `animate-spin h-4 w-4 border-2 border-[color:var(--muted-foreground)] border-t-transparent rounded-full`,
   },
   container: {
-    bordered: 'border border-gray-300 rounded-lg overflow-hidden',
+    bordered: 'border border-[color:var(--border)] rounded-lg overflow-hidden',
   },
 } as const;
 
@@ -89,9 +90,26 @@ export const tableStyles = {
   container: spacing.sm,
   gridContainer: {
     ...layout.dimensions.fixed.grid,
-    border: '1px solid #e5e7eb',
-    borderRadius: '0.5rem',
+    border: '1px solid var(--border)',
+    borderRadius: 'var(--radius)',
     overflow: 'hidden',
+  },
+  gridContainerWithOptions: {
+    ...layout.dimensions.fixed.grid,
+    border: '1px solid var(--border)',
+    borderTop: 'none',
+    borderRadius: '0 0 var(--radius) var(--radius)',
+    overflow: 'hidden',
+  },
+  optionsContainer: {
+    width: '100%',
+    border: '1px solid var(--border)',
+    borderBottom: 'none',
+    borderRadius: 'var(--radius) var(--radius) 0 0',
+    backgroundColor: 'var(--muted)',
+    borderBottomColor: 'var(--border)',
+    borderBottomWidth: '1px',
+    borderBottomStyle: 'solid',
   },
 
   // Typography
@@ -99,17 +117,23 @@ export const tableStyles = {
     primary: `${typography.size.xl} ${typography.weight.bold} ${spacing.margin.bottom.sm}`,
   },
   text: {
-    info: `${spacing.margin.bottom.xs} ${typography.size.sm} ${typography.color.primary} ${layout.flex.row} ${spacing.gap.md}`,
+    info: `${typography.size.sm} ${typography.color.primary} ${layout.flex.row} ${spacing.gap.md}`,
     footer: `${spacing.margin.top.sm} ${typography.size.sm} ${typography.color.secondary}`,
     error: `${typography.color.error} ${spacing.margin.bottom.sm}`,
     muted: typography.color.secondary,
     accent: typography.color.accent,
+    optionsHeader: `${typography.size.sm} font-medium ${typography.color.primary}`,
   },
 
   // Layout utilities
   flex: {
     center: `${layout.flex.center} ${layout.dimensions.fixed.sm} ${typography.color.secondary}`,
     row: layout.flex.row,
+  },
+  options: {
+    container: `${layout.flex.row} justify-between ${spacing.padding.x.sm} py-3`,
+    leftSection: `${layout.flex.row} ${spacing.gap.md}`,
+    rightSection: `${layout.flex.row} gap-2`,
   },
 
   // Components
@@ -119,6 +143,7 @@ export const tableStyles = {
   },
   button: {
     primary: components.button.primary,
+    secondary: components.button.secondary,
   },
 
   // Spacing utilities

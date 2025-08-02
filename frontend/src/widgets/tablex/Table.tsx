@@ -7,7 +7,7 @@ import { ErrorDisplay } from './parts/ErrorDisplay';
 import { LoadingDisplay } from './parts/LoadingDisplay';
 import { TableEditor } from './parts/TableEditor';
 import { Footer } from './parts/TableFooter';
-import { Header } from './parts/TableHeader';
+import { TableOptions } from './parts/TableOptions';
 import { tableStyles } from './styles';
 import { TableProps } from './types';
 
@@ -21,8 +21,17 @@ const TableLayout: React.FC = () => {
 
   return (
     <div className={tableStyles.container}>
-      <Header />
-      {showTableEditor ? <TableEditor /> : <LoadingDisplay />}
+      <h1 className={tableStyles.heading.primary}>
+        Dynamic Data Grid with gRPC
+      </h1>
+      {showTableEditor ? (
+        <>
+          <TableOptions />
+          <TableEditor hasOptions={true} />
+        </>
+      ) : (
+        <LoadingDisplay />
+      )}
       <Footer />
     </div>
   );
