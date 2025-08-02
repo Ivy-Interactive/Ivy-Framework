@@ -1,4 +1,3 @@
-import { Filter } from '@/services/grpcTableService';
 import DataEditor, {
   DataEditorRef,
   GridCell,
@@ -7,105 +6,34 @@ import DataEditor, {
   Item,
 } from '@glideapps/glide-data-grid';
 import '@glideapps/glide-data-grid/dist/index.css';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useRef } from 'react';
 
 // Local imports
+import { TableProvider, useTable } from './context/TableContext';
 import { ErrorDisplay } from './parts/ErrorDisplay';
 import { Footer } from './parts/Footer';
 import { Header } from './parts/Header';
 import { LoadingDisplay } from './parts/LoadingDisplay';
 import { tableStyles } from './styles';
 import { tableTheme } from './styles/theme';
-import { DataColumn, DataRow, InfiniteScrollGlideGridProps } from './types';
-import { fetchTableData } from './utils';
+import { InfiniteScrollGlideGridProps } from './types';
 
-export const InfiniteScrollGlideGrid: React.FC<
-  InfiniteScrollGlideGridProps
-> = ({ connection, editable = false }) => {
-  const [data, setData] = useState<DataRow[]>([]);
-  const [columns, setColumns] = useState<DataColumn[]>([]);
-  const [columnWidths, setColumnWidths] = useState<Record<string, number>>({});
-  const [visibleRows, setVisibleRows] = useState(0);
-  const [isLoading, setIsLoading] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [activeFilter] = useState<Filter | null>(null);
-  const loadingRef = useRef(false);
+const InfiniteScrollGlideGridContent: React.FC = () => {
+  const {
+    data,
+    columns,
+    columnWidths,
+    visibleRows,
+    hasMore,
+    error,
+    editable,
+    loadMoreData,
+    handleColumnResize,
+  } = useTable();
+
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const gridRef = useRef<DataEditorRef>(null);
-  const batchSize = 20;
   const scrollThreshold = 10;
-
-  // Load initial data
-  useEffect(() => {
-    const loadInitialData = async () => {
-      if (!connection.port || !connection.path) {
-        setError('Connection configuration is required');
-        return;
-      }
-
-      setIsLoading(true);
-      setError(null);
-
-      try {
-        const result = await fetchTableData(
-          connection,
-          0,
-          batchSize,
-          activeFilter
-        );
-        setColumns(result.columns);
-        setData(result.rows);
-        setVisibleRows(result.rows.length);
-        setHasMore(result.hasMore);
-
-        // Initialize column widths
-        const widths: Record<string, number> = {};
-        result.columns.forEach((col, index) => {
-          widths[index.toString()] = col.width;
-        });
-        setColumnWidths(widths);
-      } catch (err) {
-        const errorMessage =
-          err instanceof Error ? err.message : 'Failed to load data';
-        setError(errorMessage);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    loadInitialData();
-  }, [connection, activeFilter]);
-
-  // Load more data
-  const loadMoreData = useCallback(async () => {
-    if (loadingRef.current || !hasMore) return;
-
-    loadingRef.current = true;
-    setIsLoading(true);
-
-    try {
-      const result = await fetchTableData(
-        connection,
-        data.length,
-        batchSize,
-        activeFilter
-      );
-
-      if (result.rows.length > 0) {
-        setData(prev => [...prev, ...result.rows]);
-        setVisibleRows(prev => prev + result.rows.length);
-      }
-
-      setHasMore(result.hasMore);
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : 'Failed to load more data';
-      setError(errorMessage);
-    } finally {
-      setIsLoading(false);
-      loadingRef.current = false;
-    }
-  }, [connection, data.length, hasMore, activeFilter]);
 
   // Handle scroll events
   const handleVisibleRegionChanged = useCallback(
@@ -120,7 +48,7 @@ export const InfiniteScrollGlideGrid: React.FC<
         const bottomRow = range.y + range.height;
         const shouldLoadMore = bottomRow >= visibleRows - scrollThreshold;
 
-        if (shouldLoadMore && hasMore && !loadingRef.current) {
+        if (shouldLoadMore && hasMore) {
           loadMoreData();
         }
       }, 100);
@@ -196,35 +124,13 @@ export const InfiniteScrollGlideGrid: React.FC<
     width: columnWidths[index.toString()] || col.width,
   }));
 
-  // Handle column resize
-  const handleColumnResize = useCallback(
-    (column: GridColumn, newSize: number) => {
-      const columnIndex = gridColumns.findIndex(
-        col => col.title === column.title
-      );
-      if (columnIndex !== -1) {
-        setColumnWidths(prev => ({
-          ...prev,
-          [columnIndex.toString()]: newSize,
-        }));
-      }
-    },
-    [gridColumns]
-  );
-
   if (error) {
-    return <ErrorDisplay error={error} />;
+    return <ErrorDisplay />;
   }
 
   return (
     <div className={tableStyles.container}>
-      <Header
-        visibleRows={visibleRows}
-        columnsLength={columns.length}
-        editable={editable}
-        isLoading={isLoading}
-        hasMore={hasMore}
-      />
+      <Header />
 
       {gridColumns.length > 0 ? (
         <div style={tableStyles.gridContainer}>
@@ -249,11 +155,21 @@ export const InfiniteScrollGlideGrid: React.FC<
           />
         </div>
       ) : (
-        <LoadingDisplay isLoading={isLoading} />
+        <LoadingDisplay />
       )}
 
-      <Footer editable={editable} />
+      <Footer />
     </div>
+  );
+};
+
+export const InfiniteScrollGlideGrid: React.FC<
+  InfiniteScrollGlideGridProps
+> = ({ connection, editable = false }) => {
+  return (
+    <TableProvider connection={connection} editable={editable}>
+      <InfiniteScrollGlideGridContent />
+    </TableProvider>
   );
 };
 

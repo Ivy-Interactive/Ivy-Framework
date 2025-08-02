@@ -1,11 +1,9 @@
 import React from 'react';
 import { tableStyles } from '../styles';
+import { useTable } from '../context/TableContext';
 
-interface ErrorDisplayProps {
-  error: string;
-}
-
-export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({ error }) => {
+export const ErrorDisplay: React.FC = () => {
+  const { error } = useTable();
   return (
     <div className={tableStyles.errorContainer}>
       <div className={tableStyles.errorText}>Error: {error}</div>

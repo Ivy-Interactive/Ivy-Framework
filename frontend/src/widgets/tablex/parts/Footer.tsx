@@ -1,11 +1,9 @@
 import React from 'react';
 import { tableStyles } from '../styles';
+import { useTable } from '../context/TableContext';
 
-interface FooterProps {
-  editable: boolean;
-}
-
-export const Footer: React.FC<FooterProps> = ({ editable }) => {
+export const Footer: React.FC = () => {
+  const { editable } = useTable();
   return (
     <div className={tableStyles.footerText}>
       {editable
