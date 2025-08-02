@@ -161,20 +161,14 @@ export const TableProvider: React.FC<TableProviderProps> = ({
       if (existingSort) {
         // Toggle direction: ASC -> DESC -> remove sort
         if (existingSort.direction === 'ASC') {
-          return prevSort!.map(sort =>
-            sort.column === columnName
-              ? { ...sort, direction: 'DESC' as const }
-              : sort
-          );
+          return [{ column: columnName, direction: 'DESC' as const }];
         } else {
-          // Remove this column from sort
-          const filtered = prevSort!.filter(sort => sort.column !== columnName);
-          return filtered.length > 0 ? filtered : null;
+          // Remove sort entirely
+          return null;
         }
       } else {
-        // Add new sort (ASC by default)
-        const newSort: SortOrder = { column: columnName, direction: 'ASC' };
-        return prevSort ? [...prevSort, newSort] : [newSort];
+        // Replace current sort with new column (ASC by default)
+        return [{ column: columnName, direction: 'ASC' }];
       }
     });
   }, []);

@@ -207,7 +207,7 @@ export const TableEditor: React.FC = () => {
         freezeColumns={1}
         getCellsForSelection={true}
         keybindings={{ search: false }}
-        columnSelect="single"
+        columnSelect="none"
         rangeSelect="rect"
         width={containerWidth}
       />
