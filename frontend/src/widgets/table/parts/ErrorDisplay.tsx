@@ -1,6 +1,6 @@
 import React from 'react';
-import { tableStyles } from '../styles';
 import { useTable } from '../context/TableContext';
+import { tableStyles } from '../styles/style';
 
 export const ErrorDisplay: React.FC = () => {
   const { error } = useTable();

@@ -8,8 +8,8 @@ import { LoadingDisplay } from './parts/LoadingDisplay';
 import { TableEditor } from './parts/TableEditor';
 import { Footer } from './parts/TableFooter';
 import { TableOptions } from './parts/TableOptions';
-import { tableStyles } from './styles';
-import { TableProps } from './types';
+import { tableStyles } from './styles/style';
+import { TableProps } from './types/types';
 
 const TableLayout: React.FC = () => {
   const { error, columns } = useTable();

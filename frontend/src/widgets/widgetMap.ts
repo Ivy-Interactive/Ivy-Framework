@@ -8,7 +8,7 @@ import * as Inputs from '@/widgets/inputs';
 import * as Layouts from '@/widgets/layouts';
 import * as Lists from '@/widgets/lists';
 import * as Primitives from '@/widgets/primitives';
-import * as Tables from '@/widgets/tables';
+import * as Tables from '@/widgets/table/';
 import React from 'react';
 
 export const widgetMap = {
@@ -101,9 +101,6 @@ export const widgetMap = {
   'Ivy.Blade': Blades.BladeWidget,
 
   // Tables
-  'Ivy.Table': Tables.TableWidget,
-  'Ivy.TableRow': Tables.TableRowWidget,
-  'Ivy.TableCell': Tables.TableCellWidget,
   'Ivy.DataTable': Tables.Table,
 
   // Lists

@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTable } from '../context/TableContext';
-import { Header } from '../parts/TableHeader';
-import { tableStyles } from '../styles';
+import { tableStyles } from '../styles/style';
+import { Header } from './TableHeader';
 
 export const TableOptions: React.FC = () => {
   const { columns } = useTable();

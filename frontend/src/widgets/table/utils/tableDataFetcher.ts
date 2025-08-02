@@ -1,48 +1,13 @@
 import { getIvyHost } from '@/lib/utils';
 import {
   Filter,
-  grpcTableService,
   SortOrder,
   TableQuery,
+  grpcTableService,
 } from '@/services/grpcTableService';
 import * as arrow from 'apache-arrow';
-import { DataColumn, DataRow, DataTableConnection } from '../types';
-
-export function convertArrowTableToData(
-  table: arrow.Table,
-  requestedCount: number
-): {
-  columns: DataColumn[];
-  rows: DataRow[];
-  hasMore: boolean;
-} {
-  const columns: DataColumn[] = table.schema.fields.map(field => ({
-    name: field.name,
-    type: field.type.toString(),
-    width: 150,
-  }));
-
-  const rows: DataRow[] = [];
-  for (let i = 0; i < table.numRows; i++) {
-    const values: (string | number | boolean | null)[] = [];
-    for (let j = 0; j < table.numCols; j++) {
-      const column = table.getChildAt(j);
-      if (column) {
-        const value = column.get(i);
-        values.push(value);
-      }
-    }
-    rows.push({ values });
-  }
-
-  const hasMore = table.numRows === requestedCount;
-
-  return {
-    columns,
-    rows,
-    hasMore,
-  };
-}
+import { DataColumn, DataRow, DataTableConnection } from '../types/types';
+import { convertArrowTableToData } from './tableDataMapper';
 
 export const fetchTableData = async (
   connection: DataTableConnection,

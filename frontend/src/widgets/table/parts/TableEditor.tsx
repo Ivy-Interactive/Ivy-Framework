@@ -7,7 +7,7 @@ import DataEditor, {
 } from '@glideapps/glide-data-grid';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useTable } from '../context/TableContext';
-import { tableStyles } from '../styles';
+import { tableStyles } from '../styles/style';
 import { tableTheme } from '../styles/theme';
 
 interface TableEditorProps {

@@ -1,16 +1,21 @@
 import * as arrow from 'apache-arrow';
-import { DataTableColumn, DataTableData, DataTableRow } from '../types';
+import { DataColumn, DataRow } from '../types/types';
 
-export function convertArrowTableToDataTableData(
+export function convertArrowTableToData(
   table: arrow.Table,
-  requestedPageSize?: number
-): DataTableData {
-  const columns: DataTableColumn[] = table.schema.fields.map(field => ({
+  requestedCount: number
+): {
+  columns: DataColumn[];
+  rows: DataRow[];
+  hasMore: boolean;
+} {
+  const columns: DataColumn[] = table.schema.fields.map(field => ({
     name: field.name,
     type: field.type.toString(),
+    width: 150,
   }));
 
-  const rows: DataTableRow[] = [];
+  const rows: DataRow[] = [];
   for (let i = 0; i < table.numRows; i++) {
     const values: (string | number | boolean | null)[] = [];
     for (let j = 0; j < table.numCols; j++) {
@@ -23,14 +28,11 @@ export function convertArrowTableToDataTableData(
     rows.push({ values });
   }
 
-  const hasMore = requestedPageSize
-    ? table.numRows >= requestedPageSize
-    : false;
+  const hasMore = table.numRows === requestedCount;
 
   return {
     columns,
     rows,
-    totalRows: table.numRows,
     hasMore,
   };
 }

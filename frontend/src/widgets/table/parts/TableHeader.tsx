@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTable } from '../context/TableContext';
-import { tableStyles } from '../styles';
+import { tableStyles } from '../styles/style';
 
 export const Header: React.FC = () => {
   const { visibleRows, columns, editable, isLoading, hasMore } = useTable();

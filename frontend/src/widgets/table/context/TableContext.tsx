@@ -8,8 +8,8 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { DataColumn, DataRow, DataTableConnection } from '../types';
-import { fetchTableData } from '../utils';
+import { DataColumn, DataRow, DataTableConnection } from '../types/types';
+import { fetchTableData } from '../utils/tableDataFetcher';
 
 interface TableContextType {
   // State
