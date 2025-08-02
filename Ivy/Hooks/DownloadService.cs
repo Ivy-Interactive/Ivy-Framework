@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Ivy.Services;
+namespace Ivy.Hooks;
 
 public class DownloadController(AppSessionStore sessionStore) : Controller
 {

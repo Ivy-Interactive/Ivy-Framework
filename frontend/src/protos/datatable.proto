@@ -1,0 +1,65 @@
+syntax = "proto3";
+
+package datatable;
+
+import "google/protobuf/any.proto";
+
+option csharp_namespace = "IvyDataTables.Api.Protos";
+
+service TableService {
+  rpc Query(TableQuery) returns (TableResult);
+}
+
+message TableQuery {
+  repeated SortOrder sort = 1;
+  Filter filter = 2;
+  int32 offset = 3;
+  int32 limit = 4;
+  repeated string select_columns = 5; // Columns to include in the result
+  repeated Aggregation aggregations = 6; // Aggregations to perform
+  string connectionId = 7; // Ivy related stuff
+  string sourceId = 8; // Ivy related stuff
+}
+
+message SortOrder {
+  string column = 1;
+  SortDirection direction = 2;
+}
+
+enum SortDirection {
+  ASC = 0;
+  DESC = 1;
+}
+
+// Recursive filter structure
+message Filter {
+  oneof node {
+    Condition condition = 1;
+    FilterGroup group = 2;
+  }
+  bool negate = 3;
+}
+
+message Condition {
+  string column = 1;
+  string function = 2; // e.g. "equals", "greaterThan", "inSet", "contains"
+  repeated google.protobuf.Any args = 3;
+}
+
+message FilterGroup {
+  enum LogicalOperator {
+    AND = 0;
+    OR = 1;
+  }
+  LogicalOperator op = 1;
+  repeated Filter filters = 2;
+}
+
+message Aggregation {
+  string column = 1;
+  string function = 2; // e.g. "sum", "avg", "min", "max", "count"
+}
+
+message TableResult {
+  bytes arrow_ipc_stream = 1; // Arrow Table serialized as IPC stream
+}
