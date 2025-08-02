@@ -19,8 +19,10 @@ export const TableEditor: React.FC = () => {
     visibleRows,
     hasMore,
     editable,
+    activeSort,
     loadMoreData,
     handleColumnResize,
+    handleSort,
   } = useTable();
 
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -129,9 +131,32 @@ export const TableEditor: React.FC = () => {
     [data, columns, editable]
   );
 
+  // Get sort icon for a column
+  const getSortIcon = (columnName: string): GridColumnMenuIcon => {
+    const sortInfo = activeSort?.find(sort => sort.column === columnName);
+    if (!sortInfo) {
+      return GridColumnMenuIcon.Triangle; // Default unsorted icon
+    }
+    return sortInfo.direction === 'ASC'
+      ? GridColumnMenuIcon.Triangle
+      : GridColumnMenuIcon.Triangle;
+  };
+
+  // Handle column header click for sorting
+  const handleHeaderMenuClick = useCallback(
+    (col: number) => {
+      const columnName = columns[col]?.name;
+      if (columnName) {
+        handleSort(columnName);
+      }
+    },
+    [columns, handleSort]
+  );
+
   // Convert our columns to GridColumn format with current widths
   const gridColumns: GridColumn[] = columns.map((col, index) => {
     const baseWidth = columnWidths[index.toString()] || col.width;
+    const sortIcon = getSortIcon(col.name);
 
     // Make the last column fill the remaining space
     if (index === columns.length - 1 && containerWidth > 0) {
@@ -147,16 +172,16 @@ export const TableEditor: React.FC = () => {
       return {
         title: col.name,
         width: Math.max(baseWidth, remainingWidth),
-        menuIcon: GridColumnMenuIcon.Dots, // This adds a sort icon to the header
-        hasMenu: true, // This enables the header menu/sort functionality
+        menuIcon: sortIcon,
+        hasMenu: true,
       };
     }
 
     return {
       title: col.name,
       width: baseWidth,
-      menuIcon: GridColumnMenuIcon.Dots, // This adds a sort icon to the header
-      hasMenu: true, // This enables the header menu/sort functionality
+      menuIcon: sortIcon,
+      hasMenu: true,
     };
   });
 
@@ -173,6 +198,7 @@ export const TableEditor: React.FC = () => {
         getCellContent={getCellContent}
         onColumnResize={handleColumnResize}
         onVisibleRegionChanged={handleVisibleRegionChanged}
+        onHeaderClicked={handleHeaderMenuClick}
         smoothScrollX={true}
         smoothScrollY={true}
         theme={tableTheme}

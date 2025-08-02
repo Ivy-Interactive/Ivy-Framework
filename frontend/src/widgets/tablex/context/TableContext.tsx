@@ -1,4 +1,4 @@
-import { Filter } from '@/services/grpcTableService';
+import { Filter, SortOrder } from '@/services/grpcTableService';
 import { GridColumn } from '@glideapps/glide-data-grid';
 import React, {
   createContext,
@@ -23,10 +23,12 @@ interface TableContextType {
   editable: boolean;
   connection: DataTableConnection;
   activeFilter: Filter | null;
+  activeSort: SortOrder[] | null;
 
   // Methods
   loadMoreData: () => Promise<void>;
   handleColumnResize: (column: GridColumn, newSize: number) => void;
+  handleSort: (columnName: string) => void;
   setError: (error: string | null) => void;
 }
 
@@ -51,6 +53,7 @@ export const TableProvider: React.FC<TableProviderProps> = ({
   const [hasMore, setHasMore] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeFilter] = useState<Filter | null>(null);
+  const [activeSort, setActiveSort] = useState<SortOrder[] | null>(null);
 
   const loadingRef = useRef(false);
   const batchSize = 20;
@@ -71,7 +74,8 @@ export const TableProvider: React.FC<TableProviderProps> = ({
           connection,
           0,
           batchSize,
-          activeFilter
+          activeFilter,
+          activeSort
         );
         setColumns(result.columns);
         setData(result.rows);
@@ -93,7 +97,7 @@ export const TableProvider: React.FC<TableProviderProps> = ({
       }
     };
     loadInitialData();
-  }, [connection, activeFilter]);
+  }, [connection, activeFilter, activeSort]);
 
   // Load more data
   const loadMoreData = useCallback(async () => {
@@ -107,7 +111,8 @@ export const TableProvider: React.FC<TableProviderProps> = ({
         connection,
         data.length,
         batchSize,
-        activeFilter
+        activeFilter,
+        activeSort
       );
 
       if (result.rows.length > 0) {
@@ -124,7 +129,7 @@ export const TableProvider: React.FC<TableProviderProps> = ({
       setIsLoading(false);
       loadingRef.current = false;
     }
-  }, [connection, data.length, hasMore, activeFilter]);
+  }, [connection, data.length, hasMore, activeFilter, activeSort]);
 
   // Handle column resize
   const handleColumnResize = useCallback(
@@ -147,6 +152,33 @@ export const TableProvider: React.FC<TableProviderProps> = ({
     [columns, columnWidths]
   );
 
+  // Handle sort
+  const handleSort = useCallback((columnName: string) => {
+    setActiveSort(prevSort => {
+      // Check if we're already sorting by this column
+      const existingSort = prevSort?.find(sort => sort.column === columnName);
+
+      if (existingSort) {
+        // Toggle direction: ASC -> DESC -> remove sort
+        if (existingSort.direction === 'ASC') {
+          return prevSort!.map(sort =>
+            sort.column === columnName
+              ? { ...sort, direction: 'DESC' as const }
+              : sort
+          );
+        } else {
+          // Remove this column from sort
+          const filtered = prevSort!.filter(sort => sort.column !== columnName);
+          return filtered.length > 0 ? filtered : null;
+        }
+      } else {
+        // Add new sort (ASC by default)
+        const newSort: SortOrder = { column: columnName, direction: 'ASC' };
+        return prevSort ? [...prevSort, newSort] : [newSort];
+      }
+    });
+  }, []);
+
   const value: TableContextType = {
     data,
     columns,
@@ -158,8 +190,10 @@ export const TableProvider: React.FC<TableProviderProps> = ({
     editable,
     connection,
     activeFilter,
+    activeSort,
     loadMoreData,
     handleColumnResize,
+    handleSort,
     setError,
   };
 

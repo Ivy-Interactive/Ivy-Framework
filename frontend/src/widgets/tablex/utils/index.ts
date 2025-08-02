@@ -2,6 +2,7 @@ import { getIvyHost } from '@/lib/utils';
 import {
   Filter,
   grpcTableService,
+  SortOrder,
   TableQuery,
 } from '@/services/grpcTableService';
 import * as arrow from 'apache-arrow';
@@ -47,7 +48,8 @@ export const fetchTableData = async (
   connection: DataTableConnection,
   startIndex: number,
   count: number,
-  filter?: Filter | null
+  filter?: Filter | null,
+  sort?: SortOrder[] | null
 ): Promise<{ columns: DataColumn[]; rows: DataRow[]; hasMore: boolean }> => {
   const backendUrl = new URL(getIvyHost());
   const serverUrl = `${backendUrl.protocol}//${backendUrl.hostname}:${connection.port}`;
@@ -58,6 +60,7 @@ export const fetchTableData = async (
     connectionId: connection.connectionId,
     sourceId: connection.sourceId,
     ...(filter && { filter }),
+    ...(sort && { sort }),
   };
 
   try {
