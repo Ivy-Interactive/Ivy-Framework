@@ -1,142 +1,27 @@
-import { getIvyHost } from '@/lib/utils';
-import {
-  grpcTableService,
-  TableQuery,
-  Filter,
-} from '@/services/grpcTableService';
+import { Filter } from '@/services/grpcTableService';
 import DataEditor, {
   DataEditorRef,
-  EditableGridCell,
   GridCell,
   GridCellKind,
   GridColumn,
   Item,
-  Theme,
 } from '@glideapps/glide-data-grid';
 import '@glideapps/glide-data-grid/dist/index.css';
-import * as arrow from 'apache-arrow';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Filter as FilterIcon } from 'lucide-react';
-import { FilterBuilder } from './FilterBuilder';
-import { FilterChip } from './FilterChip';
 
-// Types
-interface DataRow {
-  values: (string | number | boolean | null)[];
-}
-
-interface DataColumn {
-  name: string;
-  type: string;
-  width: number;
-}
-
-interface DataTableConnection {
-  port: number;
-  path: string;
-  connectionId: string;
-  sourceId: string;
-}
-
-interface InfiniteScrollGlideGridProps {
-  connection: DataTableConnection;
-  editable?: boolean; // Allow component to be configurable
-  onCellUpdate?: (row: number, col: number, value: unknown) => void; // Callback for cell updates
-}
-
-// Helper function to convert Arrow table to our data format
-function convertArrowTableToData(
-  table: arrow.Table,
-  requestedCount: number
-): {
-  columns: DataColumn[];
-  rows: DataRow[];
-  hasMore: boolean;
-} {
-  const columns: DataColumn[] = table.schema.fields.map(field => ({
-    name: field.name,
-    type: field.type.toString(),
-    width: 150, // Default width, can be made configurable
-  }));
-
-  const rows: DataRow[] = [];
-  for (let i = 0; i < table.numRows; i++) {
-    const values: (string | number | boolean | null)[] = [];
-    for (let j = 0; j < table.numCols; j++) {
-      const column = table.getChildAt(j);
-      if (column) {
-        const value = column.get(i);
-        values.push(value);
-      }
-    }
-    rows.push({ values });
-  }
-
-  // If we received exactly the requested amount, there might be more
-  // If we received less, we've reached the end
-  const hasMore = table.numRows === requestedCount;
-
-  return {
-    columns,
-    rows,
-    hasMore,
-  };
-}
-
-// Fetch data using grpcTableService
-const fetchTableData = async (
-  connection: DataTableConnection,
-  startIndex: number,
-  count: number,
-  filter?: Filter | null
-): Promise<{ columns: DataColumn[]; rows: DataRow[]; hasMore: boolean }> => {
-  const backendUrl = new URL(getIvyHost());
-  const serverUrl = `${backendUrl.protocol}//${backendUrl.hostname}:${connection.port}`;
-
-  const query: TableQuery = {
-    limit: count,
-    offset: startIndex,
-    connectionId: connection.connectionId,
-    sourceId: connection.sourceId,
-    ...(filter && { filter }), // Include filter if present
-  };
-
-  try {
-    const result = await grpcTableService.queryTable({
-      serverUrl,
-      query,
-    });
-
-    if (result.arrow_ipc_stream) {
-      const table = arrow.tableFromIPC(result.arrow_ipc_stream);
-      return convertArrowTableToData(table, count);
-    }
-
-    return { columns: [], rows: [], hasMore: false };
-  } catch (error) {
-    console.error('Failed to fetch table data:', error);
-    throw error;
-  }
-};
-
-// Custom theme
-const theme: Partial<Theme> = {
-  bgCell: '#fff',
-  bgHeader: '#f9fafb',
-  bgHeaderHasFocus: '#f3f4f6',
-  bgHeaderHovered: '#e5e7eb',
-  textDark: '#111827',
-  textMedium: '#6b7280',
-  textLight: '#9ca3af',
-  borderColor: '#e5e7eb',
-  linkColor: '#e5e7eb',
-  cellHorizontalPadding: 8,
-  cellVerticalPadding: 3,
-};
+// Local imports
+import { ErrorDisplay } from './parts/ErrorDisplay';
+import { Footer } from './parts/Footer';
+import { Header } from './parts/Header';
+import { LoadingDisplay } from './parts/LoadingDisplay';
+import { tableStyles } from './styles';
+import { tableTheme } from './styles/theme';
+import { DataColumn, DataRow, InfiniteScrollGlideGridProps } from './types';
+import { fetchTableData } from './utils';
 
 export const InfiniteScrollGlideGrid: React.FC<
   InfiniteScrollGlideGridProps
-> = ({ connection, editable = false, onCellUpdate }) => {
+> = ({ connection, editable = false }) => {
   const [data, setData] = useState<DataRow[]>([]);
   const [columns, setColumns] = useState<DataColumn[]>([]);
   const [columnWidths, setColumnWidths] = useState<Record<string, number>>({});
@@ -144,13 +29,12 @@ export const InfiniteScrollGlideGrid: React.FC<
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeFilter, setActiveFilter] = useState<Filter | null>(null);
-  const [showFilterBuilder, setShowFilterBuilder] = useState(false);
+  const [activeFilter] = useState<Filter | null>(null);
   const loadingRef = useRef(false);
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const gridRef = useRef<DataEditorRef>(null);
   const batchSize = 20;
-  const scrollThreshold = 10; // Load more when within 10 rows of the bottom
+  const scrollThreshold = 10;
 
   // Load initial data
   useEffect(() => {
@@ -306,66 +190,6 @@ export const InfiniteScrollGlideGrid: React.FC<
     [data, columns, editable]
   );
 
-  // Handle cell edits
-  const handleCellEdited = useCallback(
-    (cell: Item, newValue: EditableGridCell) => {
-      if (!editable) return;
-
-      const [col, row] = cell;
-
-      // Update local data
-      setData(prevData => {
-        const newData = [...prevData];
-        const rowData = { ...newData[row] };
-        const values = [...rowData.values];
-
-        // Extract the actual value based on cell type
-        let actualValue: string | number | boolean | null;
-        switch (newValue.kind) {
-          case GridCellKind.Text:
-            actualValue = newValue.data;
-            break;
-          case GridCellKind.Number:
-            actualValue = newValue.data ?? 0; // Default to 0 for numbers
-            break;
-          case GridCellKind.Boolean:
-            actualValue = newValue.data ?? false; // Default to false for booleans
-            break;
-          default:
-            actualValue = null; // Fallback for unknown cell types
-        }
-
-        values[col] = actualValue;
-        rowData.values = values;
-        newData[row] = rowData;
-
-        return newData;
-      });
-
-      // Call the update callback if provided
-      if (onCellUpdate) {
-        // Extract the actual value based on cell type
-        let value: unknown;
-        switch (newValue.kind) {
-          case GridCellKind.Text:
-            value = newValue.data;
-            break;
-          case GridCellKind.Number:
-            value = newValue.data;
-            break;
-          case GridCellKind.Boolean:
-            value = newValue.data;
-            break;
-          default:
-            value = newValue.data;
-        }
-
-        onCellUpdate(row, col, value);
-      }
-    },
-    [editable, onCellUpdate]
-  );
-
   // Convert our columns to GridColumn format with current widths
   const gridColumns: GridColumn[] = columns.map((col, index) => ({
     title: col.name,
@@ -389,105 +213,46 @@ export const InfiniteScrollGlideGrid: React.FC<
   );
 
   if (error) {
-    return (
-      <div className="p-4">
-        <div className="text-red-600 mb-4">Error: {error}</div>
-        <button
-          onClick={() => window.location.reload()}
-          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-        >
-          Retry
-        </button>
-      </div>
-    );
+    return <ErrorDisplay error={error} />;
   }
 
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">Dynamic Data Grid with gRPC</h1>
-
-      <div className="mb-4 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setShowFilterBuilder(true)}
-            className="flex items-center gap-2 px-3 py-2 border rounded hover:bg-gray-50"
-          >
-            <FilterIcon size={16} />
-            <span>Filter</span>
-          </button>
-          {activeFilter && (
-            <FilterChip
-              filter={activeFilter}
-              onRemove={() => setActiveFilter(null)}
-            />
-          )}
-        </div>
-      </div>
-
-      <div className="mb-2 text-sm text-gray-600 flex items-center gap-4">
-        <span>Showing {visibleRows} rows</span>
-        {columns.length > 0 && <span>{columns.length} columns</span>}
-        {editable && <span className="text-blue-600">✏️ Editable</span>}
-        {isLoading && (
-          <span className="flex items-center">
-            <div className="animate-spin h-4 w-4 border-2 border-gray-500 border-t-transparent rounded-full mr-2"></div>
-            Loading more...
-          </span>
-        )}
-        {!hasMore && visibleRows > 0 && (
-          <span className="text-gray-500">All data loaded</span>
-        )}
-      </div>
+    <div className={tableStyles.container}>
+      <Header
+        visibleRows={visibleRows}
+        columnsLength={columns.length}
+        editable={editable}
+        isLoading={isLoading}
+        hasMore={hasMore}
+      />
 
       {gridColumns.length > 0 ? (
-        <div style={{ height: '600px', width: '100%' }}>
+        <div style={tableStyles.gridContainer}>
           <DataEditor
             ref={gridRef}
             columns={gridColumns}
             rows={visibleRows}
             getCellContent={getCellContent}
-            onCellEdited={handleCellEdited}
             onColumnResize={handleColumnResize}
             onVisibleRegionChanged={handleVisibleRegionChanged}
             smoothScrollX={true}
             smoothScrollY={true}
-            theme={theme}
+            theme={tableTheme}
             rowHeight={36}
             headerHeight={36}
             freezeColumns={1}
             getCellsForSelection={true}
             keybindings={{ search: false }}
-            rightElement={<div className="pr-2" />}
+            rightElement={<div className={tableStyles.rightPadding} />}
             columnSelect="single"
             rangeSelect="rect"
           />
         </div>
       ) : (
-        <div className="flex items-center justify-center h-64 text-gray-500">
-          {isLoading ? 'Loading data...' : 'No data available'}
-        </div>
+        <LoadingDisplay isLoading={isLoading} />
       )}
 
-      <div className="mt-4 text-sm text-gray-500">
-        {editable
-          ? 'Click any cell to edit. Drag column borders to resize.'
-          : 'Data fetched from gRPC service. Grid grows dynamically as you scroll.'}
-      </div>
-
-      {showFilterBuilder && columns.length > 0 && (
-        <FilterBuilder
-          columns={columns}
-          onApply={filter => {
-            setActiveFilter(filter);
-            // Reset data when filter changes
-            setData([]);
-            setVisibleRows(0);
-            setHasMore(true);
-          }}
-          onClose={() => setShowFilterBuilder(false)}
-          existingFilter={activeFilter}
-        />
-      )}
+      <Footer editable={editable} />
     </div>
   );
 };
