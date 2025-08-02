@@ -59,9 +59,10 @@ export const TableProvider: React.FC<TableProviderProps> = ({
   const currentRowCountRef = useRef(0);
   const batchSize = 20;
 
-  // Reset row count when connection changes
+  // Reset row count and column widths when connection changes
   useEffect(() => {
     currentRowCountRef.current = 0;
+    setColumnWidths({});
   }, [connection]);
 
   // Load initial data
@@ -96,12 +97,20 @@ export const TableProvider: React.FC<TableProviderProps> = ({
         currentRowCountRef.current = result.rows.length;
         setHasMore(result.hasMore);
 
-        // Initialize column widths
-        const widths: Record<string, number> = {};
-        result.columns.forEach((col, index) => {
-          widths[index.toString()] = col.width;
+        // Initialize column widths only if not already set (first load)
+        setColumnWidths(prevWidths => {
+          // If we already have column widths, preserve them
+          if (Object.keys(prevWidths).length > 0) {
+            return prevWidths;
+          }
+
+          // First time loading, initialize with default widths
+          const widths: Record<string, number> = {};
+          result.columns.forEach((col, index) => {
+            widths[index.toString()] = col.width;
+          });
+          return widths;
         });
-        setColumnWidths(widths);
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : 'Failed to load data';
