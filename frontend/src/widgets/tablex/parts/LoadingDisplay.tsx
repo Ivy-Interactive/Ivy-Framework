@@ -5,7 +5,7 @@ import { useTable } from '../context/TableContext';
 export const LoadingDisplay: React.FC = () => {
   const { isLoading } = useTable();
   return (
-    <div className={tableStyles.noDataContainer}>
+    <div className={tableStyles.flex.center}>
       {isLoading ? 'Loading data...' : 'No data available'}
     </div>
   );
