@@ -10,6 +10,6 @@ export const tableTheme: Partial<Theme> = {
   textLight: '#9ca3af',
   borderColor: '#e5e7eb',
   linkColor: '#e5e7eb',
-  cellHorizontalPadding: 8,
-  cellVerticalPadding: 3,
+  cellHorizontalPadding: 16,
+  cellVerticalPadding: 8,
 };

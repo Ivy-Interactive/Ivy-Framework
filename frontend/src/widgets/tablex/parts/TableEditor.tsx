@@ -3,9 +3,10 @@ import DataEditor, {
   GridCell,
   GridCellKind,
   GridColumn,
+  GridColumnMenuIcon,
   Item,
 } from '@glideapps/glide-data-grid';
-import React, { useCallback, useRef, useState, useEffect } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useTable } from '../context/TableContext';
 import { tableStyles } from '../styles';
 import { tableTheme } from '../styles/theme';
@@ -146,12 +147,16 @@ export const TableEditor: React.FC = () => {
       return {
         title: col.name,
         width: Math.max(baseWidth, remainingWidth),
+        menuIcon: GridColumnMenuIcon.Dots, // This adds a sort icon to the header
+        hasMenu: true, // This enables the header menu/sort functionality
       };
     }
 
     return {
       title: col.name,
       width: baseWidth,
+      menuIcon: GridColumnMenuIcon.Dots, // This adds a sort icon to the header
+      hasMenu: true, // This enables the header menu/sort functionality
     };
   });
 
@@ -171,8 +176,8 @@ export const TableEditor: React.FC = () => {
         smoothScrollX={true}
         smoothScrollY={true}
         theme={tableTheme}
-        rowHeight={36}
-        headerHeight={36}
+        rowHeight={44}
+        headerHeight={44}
         freezeColumns={1}
         getCellsForSelection={true}
         keybindings={{ search: false }}
