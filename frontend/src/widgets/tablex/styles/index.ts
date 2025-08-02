@@ -78,13 +78,21 @@ const components = {
   spinner: {
     sm: `animate-spin h-4 w-4 border-2 border-gray-500 border-t-transparent rounded-full`,
   },
+  container: {
+    bordered: 'border border-gray-300 rounded-lg overflow-hidden',
+  },
 } as const;
 
 // Composed styles for table
 export const tableStyles = {
   // Layout containers
   container: spacing.sm,
-  gridContainer: layout.dimensions.fixed.grid,
+  gridContainer: {
+    ...layout.dimensions.fixed.grid,
+    border: '1px solid #e5e7eb',
+    borderRadius: '0.5rem',
+    overflow: 'hidden',
+  },
 
   // Typography
   heading: {

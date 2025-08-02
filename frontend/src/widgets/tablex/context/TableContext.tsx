@@ -1,14 +1,14 @@
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useCallback,
-  useRef,
-  useEffect,
-} from 'react';
 import { Filter } from '@/services/grpcTableService';
 import { GridColumn } from '@glideapps/glide-data-grid';
-import { DataRow, DataColumn, DataTableConnection } from '../types';
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
+import { DataColumn, DataRow, DataTableConnection } from '../types';
 import { fetchTableData } from '../utils';
 
 interface TableContextType {
