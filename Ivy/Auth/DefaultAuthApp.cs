@@ -112,7 +112,15 @@ public class OAuthFlowView(AuthOption option, IState<string?> errorMessage) : Vi
         {
             try
             {
-                client.OpenUrl(await auth.GetOAuthUriAsync(option, callback));
+                if (auth.ShouldUseUnifiedOAuthFlow())
+                {
+                    var token = await auth.LoginAsync(client, option);
+                    client.SetJwt(token);
+                }
+                else
+                {
+                    client.OpenUrl(await auth.GetOAuthUriAsync(option, callback));
+                }
             }
             catch (Exception e)
             {
