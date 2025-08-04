@@ -88,7 +88,7 @@ Ready to try Ivy? The fastest way to get started is:
 
 ```terminal
 >dotnet tool install -g Ivy.Cli
->ivy init --namespace MyCompany.InternalApp
+>ivy init
 >dotnet watch
 ```
 
