@@ -21,6 +21,6 @@ This will install Ivy globally on your machine. You can now use the `ivy` comman
 Use the Ivy CLI to scaffold a new project:
 
 ```terminal
->ivy init --namespace Acme.InternalApp
+>ivy init
 >dotnet watch
 ```

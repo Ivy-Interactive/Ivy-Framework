@@ -15,7 +15,7 @@ Let's create a new todo application step by step.
 Using the Ivy CLI we can create a new project.
 
 ```terminal
->ivy init --namespace Todos
+>ivy init
 ```
 
 ### 2. Create the Todo Model
