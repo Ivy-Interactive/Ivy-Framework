@@ -9,27 +9,58 @@ The TabsLayout widget creates a tabbed interface that allows users to switch bet
 
 ## Basic Usage
 
-### Simple Static Tabs
-
-Create a basic tabs layout with static content:
+Use the TabView helper te create simple tabs:
 
 ```csharp demo-tabs
-new TabsLayout(null, null, null, null, 0,
-    new Tab("Customers", "Customer management interface"),
-    new Tab("Orders", "Order processing system"),
-    new Tab("Settings", "Application configuration")
+Layout.Tabs(
+    new Tab("Profile", "User profile information"),
+    new Tab("Security", "Security settings"),
+    new Tab("Preferences", "User preferences")
 )
 ```
 
-### With Event Handlers
+This creates a basic tabs layout with three tabs.
 
-This example demonstrates how to use all the available parameters. Each parameter serves a specific purpose:
+### TabView with Customization
+
+This example shows how to combine multiple TabView features including icons, badges, variant selection, and size control:
+
+```csharp demo-tabs
+Layout.Tabs(
+    new Tab("Customers", "Customer list").Icon(Icons.User).Badge("10"),
+    new Tab("Orders", "Order management").Icon(Icons.DollarSign).Badge("0"),
+    new Tab("Settings", "Configuration").Icon(Icons.Settings).Badge("999")
+)
+.Variant(TabsVariant.Tabs)
+.Width(200)
+.Height(200)
+.Padding(8)
+.RemoveParentPadding()
+```
+
+This demonstrates the fluent API of TabView, allowing you to chain multiple configuration methods for a complete tab setup with visual indicators and precise layout control.
+
+## TabsLayout usage
+
+The first parameter is the selected tab index (0), and the remaining parameters are the Tab objects.
+
+```csharp demo-tabs
+new TabsLayout(null, null, null, null, 0,
+    new Tab("Overview", "This is the overview content"),
+    new Tab("Details", "This is the details content"),
+    new Tab("Settings", "This is the settings content")
+)
+```
+
+## With Event Handlers
 
 - `onSelect`: Handles tab selection events
 - `onClose`: Adds close functionality to tabs
 - `onRefresh`: Adds refresh buttons to tabs
 - `onReorder`: Enables drag-and-drop tab reordering
 - `selectedIndex`: Sets the initially selected tab
+
+This example shows how to handle all available events. The event handlers receive the tab index and can perform custom actions like logging, state updates, or API calls.
 
 ```csharp demo-tabs
 new TabsLayout(
@@ -38,41 +69,37 @@ new TabsLayout(
     onRefresh: (e) => Console.WriteLine($"Refreshed: {e.Value}"),
     onReorder: null,
     selectedIndex: 0,
-    new Tab("Tab 1", "First tab content"),
-    new Tab("Tab 2", "Second tab content"),
-    new Tab("Tab 3", "Third tab content")
-).Variant(TabsVariant.Tabs)
+    new Tab("Tab 1", "Content 1"),
+    new Tab("Tab 2", "Content 2"),
+    new Tab("Tab 3", "Content 3")
+)
 ```
 
-## Tab Variants
+## Tabs Variant
 
-### Default Tabs Variant
-
-The default variant provides a traditional browser-like tab interface:
+The Tabs variant displays tabs as clickable buttons with an underline indicator for the active tab, providing a more traditional tab interface.
 
 ```csharp demo-tabs
 new TabsLayout(null, null, null, null, 0,
-    new Tab("Profile", "User profile information"),
-    new Tab("Security", "Security settings"),
-    new Tab("Preferences", "User preferences")
+    new Tab("First", "First tab content"),
+    new Tab("Second", "Second tab content"),
+    new Tab("Third", "Third tab content")
 ).Variant(TabsVariant.Tabs)
 ```
 
-### Content Tabs Variant
+## Content Variant
 
-The content variant offers smooth animations and modern styling:
+The Content variant emphasizes the content area with subtle tab indicators, ideal for content-heavy applications where the focus should be on the displayed information.
 
 ```csharp demo-tabs
 new TabsLayout(null, null, null, null, 0,
-    new Tab("Overview", "Dashboard overview"),
-    new Tab("Analytics", "Data analytics"),
-    new Tab("Reports", "Generated reports")
+    new Tab("Overview", "Overview content here"),
+    new Tab("Details", "Detailed information here"),
+    new Tab("Settings", "Configuration options here")
 ).Variant(TabsVariant.Content)
 ```
 
-## Tab Features
-
-### Icons and Badges
+## With Icons and Badges
 
 Enhance tabs with icons and badges for better visual representation:
 
@@ -84,47 +111,9 @@ new TabsLayout(null, null, null, null, 0,
 ).Variant(TabsVariant.Tabs)
 ```
 
-### Padding Control
+### Tab Keys for Refresh
 
-Customize padding around the tabs layout:
-
-```csharp demo-tabs
-Layout.Vertical()
-    | Text.Block("Default Padding")
-    | new TabsLayout(null, null, null, null, 0,
-        new Tab("Tab 1", "Content 1"),
-        new Tab("Tab 2", "Content 2")
-    ).Variant(TabsVariant.Tabs)
-    | Text.Block("Custom Padding (16px)")
-    | new TabsLayout(null, null, null, null, 0,
-        new Tab("Tab 1", "Content 1"),
-        new Tab("Tab 2", "Content 2")
-    ).Variant(TabsVariant.Tabs).Padding(16)
-    | Text.Block("No Parent Padding. Using default affects the tab content area only. RemoveParentPadding removes external spacing from the parent container.")
-    | new TabsLayout(null, null, null, null, 0,
-        new Tab("Tab 1", "Content 1"),
-        new Tab("Tab 2", "Content 2")
-    ).Variant(TabsVariant.Tabs).RemoveParentPadding()
-```
-
-### Tab Refresh
-
-Enable refresh functionality for individual tabs:
-
-```csharp demo-tabs
-new TabsLayout(
-    onSelect: (e) => Console.WriteLine($"Selected: {e.Value}"),
-    onClose: null,
-    onRefresh: (e) => Console.WriteLine($"Refreshed: {e.Value}"),
-    onReorder: null,
-    selectedIndex: 0,
-    new Tab("Data", "Current data"),
-    new Tab("Logs", "System logs"),
-    new Tab("Status", "System status")
-).Variant(TabsVariant.Tabs)
-```
-
-Use keys to force tab re-rendering when content changes:
+Use the Key extension method to force tab re-rendering when content changes:
 
 ```csharp demo-tabs
 new TabsLayout(
@@ -139,22 +128,70 @@ new TabsLayout(
 ).Variant(TabsVariant.Tabs)
 ```
 
-### Tab Reordering
+### Advanced Padding Control
 
-Enable drag-and-drop reordering of tabs:
+Customize padding with various overloads:
 
 ```csharp demo-tabs
-new TabsLayout(
-    onSelect: (e) => Console.WriteLine($"Selected: {e.Value}"),
-    onClose: null,
-    onRefresh: null,
-    onReorder: (e) => Console.WriteLine($"Reordered: {string.Join(",", e.Value)}"),
-    selectedIndex: 0,
-    new Tab("First", "First tab content"),
-    new Tab("Second", "Second tab content"),
-    new Tab("Third", "Third tab content")
-).Variant(TabsVariant.Tabs)
+Layout.Vertical()
+    | Text.Block("Default Padding (4px)")
+    | new TabsLayout(null, null, null, null, 0,
+        new Tab("Tab 1", "Content 1"),
+        new Tab("Tab 2", "Content 2")
+    ).Variant(TabsVariant.Tabs)
+    | Text.Block("Uniform Padding (16px)")
+    | new TabsLayout(null, null, null, null, 0,
+        new Tab("Tab 1", "Content with uniform padding"),
+        new Tab("Tab 2", "Content with uniform padding")
+    ).Padding(16)
+    | Text.Block("Horizontal/Vertical Padding (20px/8px)")
+    | new TabsLayout(null, null, null, null, 0,
+        new Tab("Tab 1", "Content with different horizontal/vertical padding"),
+        new Tab("Tab 2", "Content with different horizontal/vertical padding")
+    ).Padding(20, 8)
+    | Text.Block("Custom Padding (Left: 12, Top: 8, Right: 12, Bottom: 16)")
+    | new TabsLayout(null, null, null, null, 0,
+        new Tab("Tab 1", "Content with custom padding on all sides"),
+        new Tab("Tab 2", "Content with custom padding on all sides")
+    ).Padding(12, 8, 12, 16)
 ```
+
+Different padding overloads allow fine-grained control over spacing. Uniform padding is simplest, while custom padding gives precise control over each side.
+
+## Size and Dimensions
+
+Control the TabsLayout dimensions:
+
+```csharp demo-tabs
+Layout.Vertical()
+    | Text.Block("Fixed Width (300px)")
+    | new TabsLayout(null, null, null, null, 0,
+        new Tab("Tab 1", "Content 1"),
+        new Tab("Tab 2", "Content 2")
+    ).Variant(TabsVariant.Tabs).Width(300)
+    | Text.Block("Fixed Height (200px)")
+    | new TabsLayout(null, null, null, null, 0,
+        new Tab("Tab 1", "Content 1"),
+        new Tab("Tab 2", "Content 2")
+    ).Variant(TabsVariant.Tabs).Height(200)
+    | Text.Block("Using TabView with Size Control")
+    | Layout.Tabs(
+        new Tab("Tab 1", "Content 1"),
+        new Tab("Tab 2", "Content 2")
+    ).Variant(TabsVariant.Tabs).Size(250).Grow()
+```
+
+Width and Height methods control the layout dimensions. TabView provides additional size control methods like Size() and Grow() for more flexible sizing options.
+
+## Default Values
+
+TabsLayout has the following default values:
+
+- `Variant`: `TabsVariant.Content`
+- `RemoveParentPadding`: `true`
+- `Padding`: `new Thickness(4)` (16px)
+- `Width`: `Size.Full()`
+- `Height`: `Size.Full()`
 
 ## Constructor Parameters
 
@@ -174,12 +211,33 @@ Each Tab object supports the following properties:
 - `Title`: The display text for the tab
 - `Icon`: Optional icon to display alongside the tab title
 - `Badge`: Optional badge to display on the tab
-- `Key`: Optional key for forcing re-renders (used in refresh scenarios)
 
-## Extension Methods
+## Tab Extension Methods
+
+Enhance Tab objects with these extension methods:
+
+- `Icon(Icons?)`: Add an icon to the tab
+- `Badge(string)`: Add a badge to the tab
+- `Key(object)`: Set a unique key for forcing re-renders
+
+## TabsLayout Extension Methods
 
 Customize the TabsLayout behavior with these extension methods:
 
 - `Variant(TabsVariant)`: Set tabs or content variant
-- `Padding(int)`: Set padding around the layout
+- `Padding(int)`: Set uniform padding around the layout
+- `Padding(int, int)`: Set vertical and horizontal padding
+- `Padding(int, int, int, int)`: Set left, top, right, bottom padding
+- `Padding(Thickness?)`: Set padding using Thickness object
 - `RemoveParentPadding()`: Remove parent container padding
+
+## TabView Extension Methods
+
+The TabView helper provides additional methods for size control:
+
+- `Width(Size)`: Set the width of the layout
+- `Height(Size)`: Set the height of the layout
+- `Size(Size)`: Set both width and height
+- `Size(int)`: Set both width and height using units
+- `Size(float)`: Set both width and height using fraction
+- `Grow()`: Make the layout grow to fill available space
