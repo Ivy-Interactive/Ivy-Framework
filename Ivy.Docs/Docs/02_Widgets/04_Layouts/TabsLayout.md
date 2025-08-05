@@ -11,6 +11,16 @@ The TabsLayout widget creates a tabbed interface that allows users to switch bet
 
 ### Simple Static Tabs
 
+There is a recomended way to create tabs layout. 
+When create new tab, you need to give five parametres before creation of the new tab.
+
+- `onSelect`: Event handler for tab selection
+- `onClose`: Event handler for tab closing (optional)
+- `onRefresh`: Event handler for tab refresh (optional)
+- `onReorder`: Event handler for tab reordering (optional)
+- `selectedIndex`: The initially selected tab index (0-based)
+- `tabs`: Variable number of Tab objects
+
 ```csharp demo-tabs
 new TabsLayout(null, null, null, null, 0,
     new Tab("Customers", "Customer management interface"),
@@ -20,6 +30,14 @@ new TabsLayout(null, null, null, null, 0,
 ```
 
 ### With Event Handlers
+
+Here is a demo with parametres are being used. 
+Every parameter has an implementation what it should do.
+`onSelect` gives an opportunity to work with selected tab.
+`onClose` is for adding a close symbol on the tab.
+`onRefresh` adds a refresh button near the tab name and can give posibilities to work with button.
+`onReorder` enables reorder tabs in the specific way with grabing them between themselves. 
+`selectedIndex` determines start selected tab.  
 
 ```csharp demo-tabs
 new TabsLayout(
@@ -34,24 +52,12 @@ new TabsLayout(
 ).Variant(TabsVariant.Tabs)
 ```
 
-### Closable Tabs
-
-```csharp demo-tabs
-new TabsLayout(
-    onSelect: (e) => Console.WriteLine($"Selected: {e.Value}"),
-    onClose: (e) => Console.WriteLine($"Closed: {e.Value}"),
-    onRefresh: null,
-    onReorder: null,
-    selectedIndex: 0,
-    new Tab("Tab 1", "First tab content"),
-    new Tab("Tab 2", "Second tab content"),
-    new Tab("Tab 3", "Third tab content")
-).Variant(TabsVariant.Tabs)
-```
-
 ## Tab Variants
 
-### Tabs Variant (Default)
+### Default Tabs Variant
+
+In the base usage, tabs variant is `TabsVariant.Tabs`, which organise tabs as default. 
+This way of tab using is more familiar for tabs in browser. 
 
 ```csharp demo-tabs
 new TabsLayout(null, null, null, null, 0,
@@ -61,7 +67,10 @@ new TabsLayout(null, null, null, null, 0,
 ).Variant(TabsVariant.Tabs)
 ```
 
-### Content Variant
+### Content Tabs Variant
+
+With `TabsVariant.Content` you can get animations when click on other tab. 
+This way of tabs creation is more like using some apps. 
 
 ```csharp demo-tabs
 new TabsLayout(null, null, null, null, 0,
@@ -75,6 +84,8 @@ new TabsLayout(null, null, null, null, 0,
 
 ### Icons and Badges
 
+You can create custom tabs and add items near tabs names and badges.
+
 ```csharp demo-tabs
 new TabsLayout(null, null, null, null, 0,
     new Tab("Customers", "Customer list").Icon(Icons.User).Badge("10"),
@@ -85,6 +96,7 @@ new TabsLayout(null, null, null, null, 0,
 
 ### Tab Refresh
 
+You also can activate `onRefresh` state to enable refreshing of the tab. The important thing is that you decide what refresh button should do by your own. 
 ```csharp demo-tabs
 new TabsLayout(
     onSelect: (e) => Console.WriteLine($"Selected: {e.Value}"),
@@ -95,21 +107,6 @@ new TabsLayout(
     new Tab("Data", "Current data"),
     new Tab("Logs", "System logs"),
     new Tab("Status", "System status")
-).Variant(TabsVariant.Tabs)
-```
-
-### Tab Reordering
-
-```csharp demo-tabs
-new TabsLayout(
-    onSelect: (e) => Console.WriteLine($"Selected: {e.Value}"),
-    onClose: null,
-    onRefresh: null,
-    onReorder: (e) => Console.WriteLine($"Reordered: {string.Join(",", e.Value)}"),
-    selectedIndex: 0,
-    new Tab("First", "First tab content"),
-    new Tab("Second", "Second tab content"),
-    new Tab("Third", "Third tab content")
 ).Variant(TabsVariant.Tabs)
 ```
 
