@@ -276,9 +276,6 @@ export const useBackend = (
                 },
               });
               window.dispatchEvent(navigationEvent);
-
-              // Update browser history with the clean URL
-              window.history.pushState(null, '', url);
             } else {
               // Handle legacy query parameter URLs
               // Use the current location as base to handle deployment subdirectories correctly
