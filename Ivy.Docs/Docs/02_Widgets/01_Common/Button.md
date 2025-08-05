@@ -62,13 +62,13 @@ Layout.Grid().Columns(3)
 ```csharp demo-tabs
 Layout.Grid().Columns(3)
     | new Button("Small").Small()
-    | new Button("Default")
+    | new Button("Medium")
     | new Button("Large").Large()
     | new Button("Small").Secondary().Small()
-    | new Button("Default").Secondary()
+    | new Button("Medium").Secondary()
     | new Button("Large").Secondary().Large()
     | new Button("Small").Destructive().Small()
-    | new Button("Default").Destructive()
+    | new Button("Medium").Destructive()
     | new Button("Large").Destructive().Large()
 ```
 

@@ -41,7 +41,7 @@ public record Button : WidgetBase<Button>
     [Prop] public string? Tooltip { get; set; }
     [Prop] public bool Loading { get; set; }
     [Prop] public BorderRadius BorderRadius { get; set; } = BorderRadius.Rounded;
-    [Prop] public Sizes Size { get; set; } = Sizes.Default;
+    [Prop] public Sizes Size { get; set; } = Sizes.Medium;
     [Event] public Action<Event<Button>>? OnClick { get; set; }
 
     public object? Tag { get; set; } //not a prop!

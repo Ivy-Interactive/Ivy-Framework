@@ -27,7 +27,7 @@ public record Badge : WidgetBase<Badge>
 
     [Prop] public Icons? Icon { get; set; }
 
-    [Prop] public Sizes Size { get; set; } = Sizes.Default;
+    [Prop] public Sizes Size { get; set; } = Sizes.Medium;
 
     [Prop] public Align IconPosition { get; set; } = Align.Left;
 
