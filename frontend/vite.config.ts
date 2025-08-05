@@ -54,6 +54,7 @@ const injectMeta = (mode: string) => {
 };
 
 export default defineConfig(({ mode }) => ({
+  base: '/',
   plugins: [react(), tailwindcss(), injectMeta(mode)],
   resolve: {
     alias: {

@@ -9,7 +9,9 @@ export interface RouteInfo {
 
 export function parseRouteFromPath(pathname: string): RouteInfo {
   // Remove leading slash and split by '/'
-  const path = pathname.replace(/^\/+/, '').split('/');
+  // Handle both localhost and deployment paths correctly
+  const cleanPath = pathname.replace(/^\/+/, '');
+  const path = cleanPath.split('/');
 
   // If no path or just empty, return main app with default
   if (path.length === 0 || (path.length === 1 && path[0] === '')) {

@@ -276,9 +276,14 @@ export const useBackend = (
                 },
               });
               window.dispatchEvent(navigationEvent);
+
+              // Update browser history with the clean URL
+              window.history.pushState(null, '', url);
             } else {
               // Handle legacy query parameter URLs
-              const urlObj = new URL(url, window.location.origin);
+              // Use the current location as base to handle deployment subdirectories correctly
+              const baseUrl = window.location.href.split('?')[0];
+              const urlObj = new URL(url, baseUrl);
               const appId = urlObj.searchParams.get('appId');
               const appArgs = urlObj.searchParams.get('appArgs');
               const parentId = urlObj.searchParams.get('parentId');
