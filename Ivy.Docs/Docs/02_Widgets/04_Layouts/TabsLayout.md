@@ -11,15 +11,7 @@ The TabsLayout widget creates a tabbed interface that allows users to switch bet
 
 ### Simple Static Tabs
 
-There is a recomended way to create tabs layout. 
-When create new tab, you need to give five parametres before creation of the new tab.
-
-- `onSelect`: Event handler for tab selection
-- `onClose`: Event handler for tab closing (optional)
-- `onRefresh`: Event handler for tab refresh (optional)
-- `onReorder`: Event handler for tab reordering (optional)
-- `selectedIndex`: The initially selected tab index (0-based)
-- `tabs`: Variable number of Tab objects
+Create a basic tabs layout with static content:
 
 ```csharp demo-tabs
 new TabsLayout(null, null, null, null, 0,
@@ -31,13 +23,13 @@ new TabsLayout(null, null, null, null, 0,
 
 ### With Event Handlers
 
-Here is a demo with parametres are being used. 
-Every parameter has an implementation what it should do.
-`onSelect` gives an opportunity to work with selected tab.
-`onClose` is for adding a close symbol on the tab.
-`onRefresh` adds a refresh button near the tab name and can give posibilities to work with button.
-`onReorder` enables reorder tabs in the specific way with grabing them between themselves. 
-`selectedIndex` determines start selected tab.  
+This example demonstrates how to use all the available parameters. Each parameter serves a specific purpose:
+
+- `onSelect`: Handles tab selection events
+- `onClose`: Adds close functionality to tabs
+- `onRefresh`: Adds refresh buttons to tabs
+- `onReorder`: Enables drag-and-drop tab reordering
+- `selectedIndex`: Sets the initially selected tab
 
 ```csharp demo-tabs
 new TabsLayout(
@@ -56,8 +48,7 @@ new TabsLayout(
 
 ### Default Tabs Variant
 
-In the base usage, tabs variant is `TabsVariant.Tabs`, which organise tabs as default. 
-This way of tab using is more familiar for tabs in browser. 
+The default variant provides a traditional browser-like tab interface:
 
 ```csharp demo-tabs
 new TabsLayout(null, null, null, null, 0,
@@ -69,8 +60,7 @@ new TabsLayout(null, null, null, null, 0,
 
 ### Content Tabs Variant
 
-With `TabsVariant.Content` you can get animations when click on other tab. 
-This way of tabs creation is more like using some apps. 
+The content variant offers smooth animations and modern styling:
 
 ```csharp demo-tabs
 new TabsLayout(null, null, null, null, 0,
@@ -84,7 +74,7 @@ new TabsLayout(null, null, null, null, 0,
 
 ### Icons and Badges
 
-You can create custom tabs and add items near tabs names and badges.
+Enhance tabs with icons and badges for better visual representation:
 
 ```csharp demo-tabs
 new TabsLayout(null, null, null, null, 0,
@@ -94,9 +84,33 @@ new TabsLayout(null, null, null, null, 0,
 ).Variant(TabsVariant.Tabs)
 ```
 
+### Padding Control
+
+Customize padding around the tabs layout:
+
+```csharp demo-tabs
+Layout.Vertical()
+    | Text.Block("Default Padding")
+    | new TabsLayout(null, null, null, null, 0,
+        new Tab("Tab 1", "Content 1"),
+        new Tab("Tab 2", "Content 2")
+    ).Variant(TabsVariant.Tabs)
+    | Text.Block("Custom Padding (16px)")
+    | new TabsLayout(null, null, null, null, 0,
+        new Tab("Tab 1", "Content 1"),
+        new Tab("Tab 2", "Content 2")
+    ).Variant(TabsVariant.Tabs).Padding(16)
+    | Text.Block("No Parent Padding. Using default affects the tab content area only. RemoveParentPadding removes external spacing from the parent container.")
+    | new TabsLayout(null, null, null, null, 0,
+        new Tab("Tab 1", "Content 1"),
+        new Tab("Tab 2", "Content 2")
+    ).Variant(TabsVariant.Tabs).RemoveParentPadding()
+```
+
 ### Tab Refresh
 
-You also can activate `onRefresh` state to enable refreshing of the tab. The important thing is that you decide what refresh button should do by your own. 
+Enable refresh functionality for individual tabs:
+
 ```csharp demo-tabs
 new TabsLayout(
     onSelect: (e) => Console.WriteLine($"Selected: {e.Value}"),
@@ -110,7 +124,41 @@ new TabsLayout(
 ).Variant(TabsVariant.Tabs)
 ```
 
+Use keys to force tab re-rendering when content changes:
+
+```csharp demo-tabs
+new TabsLayout(
+    onSelect: (e) => Console.WriteLine($"Selected: {e.Value}"),
+    onClose: null,
+    onRefresh: (e) => Console.WriteLine($"Refreshed: {e.Value}"),
+    onReorder: null,
+    selectedIndex: 0,
+    new Tab("Data", "Current data").Key("data-tab-1"),
+    new Tab("Logs", "System logs").Key("logs-tab-1"),
+    new Tab("Status", "System status").Key("status-tab-1")
+).Variant(TabsVariant.Tabs)
+```
+
+### Tab Reordering
+
+Enable drag-and-drop reordering of tabs:
+
+```csharp demo-tabs
+new TabsLayout(
+    onSelect: (e) => Console.WriteLine($"Selected: {e.Value}"),
+    onClose: null,
+    onRefresh: null,
+    onReorder: (e) => Console.WriteLine($"Reordered: {string.Join(",", e.Value)}"),
+    selectedIndex: 0,
+    new Tab("First", "First tab content"),
+    new Tab("Second", "Second tab content"),
+    new Tab("Third", "Third tab content")
+).Variant(TabsVariant.Tabs)
+```
+
 ## Constructor Parameters
+
+The TabsLayout constructor accepts the following parameters:
 
 - `onSelect`: Event handler for tab selection
 - `onClose`: Event handler for tab closing (optional)
@@ -121,12 +169,16 @@ new TabsLayout(
 
 ## Tab Properties
 
+Each Tab object supports the following properties:
+
 - `Title`: The display text for the tab
 - `Icon`: Optional icon to display alongside the tab title
 - `Badge`: Optional badge to display on the tab
 - `Key`: Optional key for forcing re-renders (used in refresh scenarios)
 
 ## Extension Methods
+
+Customize the TabsLayout behavior with these extension methods:
 
 - `Variant(TabsVariant)`: Set tabs or content variant
 - `Padding(int)`: Set padding around the layout
