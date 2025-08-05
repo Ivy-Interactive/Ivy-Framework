@@ -277,10 +277,7 @@ export const useBackend = (
               });
               window.dispatchEvent(navigationEvent);
             } else {
-              // Handle legacy query parameter URLs
-              // Use the current location as base to handle deployment subdirectories correctly
-              const baseUrl = window.location.href.split('?')[0];
-              const urlObj = new URL(url, baseUrl);
+              const urlObj = new URL(url, window.location.origin);
               const appId = urlObj.searchParams.get('appId');
               const appArgs = urlObj.searchParams.get('appArgs');
               const parentId = urlObj.searchParams.get('parentId');
