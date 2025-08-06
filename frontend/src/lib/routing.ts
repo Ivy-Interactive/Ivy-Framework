@@ -11,10 +11,10 @@ export function parseRouteFromPath(pathname: string): RouteInfo {
   // Remove leading slash and split by '/'
   const path = pathname.replace(/^\/+/, '').split('/');
 
-  // If no path or just empty, return main app with default
+  // If no path or just empty, let the backend decide the default app
   if (path.length === 0 || (path.length === 1 && path[0] === '')) {
     return {
-      appId: '$chrome', // Always load the main Chrome app
+      appId: null, // Let backend determine default app
       appArgs: null,
       parentId: null,
       isMainApp: true,
@@ -60,5 +60,16 @@ export function getCurrentRoute(): RouteInfo {
   }
 
   // Use path-based routing (main app mode)
-  return getRouteFromUrl();
+  const route = getRouteFromUrl();
+
+  if (route.appId === null) {
+    return {
+      appId: null,
+      appArgs: null,
+      parentId: null,
+      isMainApp: true,
+    };
+  }
+
+  return route;
 }

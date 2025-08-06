@@ -26,19 +26,24 @@ public class AppHub(
 {
     public static string GetAppId(Server server, HttpContext httpContext)
     {
-        string? appId = server.DefaultAppId;
-
+        // First check if appId is provided in query parameters
         if (httpContext!.Request.Query.ContainsKey("appId"))
         {
-            appId = httpContext!.Request.Query["appId"].ToString();
+            var queryAppId = httpContext!.Request.Query["appId"].ToString();
+            if (!string.IsNullOrEmpty(queryAppId))
+            {
+                return queryAppId;
+            }
         }
 
-        if (string.IsNullOrEmpty(appId))
+        // If no query parameter, use the server's default app ID
+        if (!string.IsNullOrEmpty(server.DefaultAppId))
         {
-            appId = server.DefaultAppId ?? server.AppRepository.GetAppOrDefault(null).Id;
+            return server.DefaultAppId;
         }
 
-        return appId;
+        // Fallback to the first available app
+        return server.AppRepository.GetAppOrDefault(null).Id;
     }
 
     public static string GetMachineId(HttpContext httpContext)
