@@ -30,5 +30,4 @@ var authProvider = new Auth0AuthProvider()
 - GitHub OAuth
 - LinkedIn OAuth
 - Twitter OAuth
-- Facebook OAuth
 - Microsoft OAuth

@@ -309,6 +309,30 @@ public class AppHub(
             return null;
         }
     }
+
+    public void AuthResult(string requestId, AuthResult result)
+    {
+        try
+        {
+            if (result.Success)
+            {
+                logger.LogInformation("Authentication successful for requestId: {RequestId}", requestId);
+            }
+            else
+            {
+                logger.LogWarning("Authentication failed for requestId: {RequestId}: {ErrorMessage} ({ErrorCode})",
+                    requestId, result.ErrorMessage ?? "Unknown error", result.ErrorCode ?? "none");
+            }
+
+            // Process the received authentication result
+            AuthResponses.ProcessResponse(requestId, result);
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Failed to process authentication result.");
+            AuthResponses.ProcessError(requestId, $"Server error: {e.Message}");
+        }
+    }
 }
 
 public class ClientSender(IClientNotifier clientNotifier, string connectionId) : IClientSender

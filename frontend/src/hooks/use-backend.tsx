@@ -9,6 +9,7 @@ import { applyPatch, Operation } from 'fast-json-patch';
 import { setThemeGlobal } from '@/components/ThemeProvider';
 import { cloneDeep } from 'lodash';
 import { ToastAction } from '@/components/ui/toast';
+import { AuthToken, signInWithFirebase } from './use-auth';
 
 type UpdateMessage = Array<{
   viewId: string;
@@ -25,13 +26,6 @@ type ErrorMessage = {
   type: string;
   description: string;
   stackTrace?: string;
-};
-
-type AuthToken = {
-  jwt: string;
-  refreshToken?: string;
-  expiresAt?: string;
-  tag?: unknown;
 };
 
 const widgetTreeToXml = (node: WidgetNode) => {
@@ -260,6 +254,43 @@ export const useBackend = (
             window.open(url, '_blank');
           });
 
+          connection.on('SignInToFirebase', async request => {
+            const requestId = request?.requestId || 'default';
+            const config = request?.config || {};
+            const authOption = request?.authOption || {};
+
+            logger.debug(`[${connection.connectionId}] SignInToFirebase`, {
+              requestId,
+              projectId: config.projectId,
+              authOption: authOption?.id || 'default',
+            });
+
+            try {
+              const result = await signInWithFirebase(config, authOption);
+
+              connection.invoke('AuthResult', requestId, result).catch(err => {
+                logger.error(
+                  'Failed to send authentication result to server:',
+                  err
+                );
+              });
+            } catch (error) {
+              // Send the error back to the server
+              connection
+                .invoke('AuthResult', requestId, {
+                  success: false,
+                  errorMessage: String(error),
+                  errorCode: undefined,
+                })
+                .catch(err => {
+                  logger.error(
+                    'Failed to send authentication error to server:',
+                    err
+                  );
+                });
+            }
+          });
+
           connection.on('HotReload', () => {
             logger.debug(`[${connection.connectionId}] HotReload`);
             handleHotReloadMessage();
@@ -294,6 +325,7 @@ export const useBackend = (
         connection.off('SetJwt');
         connection.off('SetTheme');
         connection.off('OpenUrl');
+        connection.off('SignInToFirebase');
         connection.off('reconnecting');
         connection.off('reconnected');
         connection.off('close');

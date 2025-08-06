@@ -1,5 +1,8 @@
-﻿using Ivy.Hooks;
+﻿using Ivy.Client;
+using Ivy.Core;
+using Ivy.Hooks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Ivy.Auth;
 
@@ -16,6 +19,10 @@ public interface IAuthProvider
     Task<UserInfo?> GetUserInfoAsync(string jwt);
 
     AuthOption[] GetAuthOptions();
+
+    public bool ShouldUseUnifiedOAuthFlow() => false;
+
+    Task<AuthToken?> LoginAsync(IClientProvider client, AuthOption option) => throw new InvalidOperationException("unified OAuth flow is not implemented for this provider");
 
     Task<Uri> GetOAuthUriAsync(AuthOption option, WebhookEndpoint callback);
 
