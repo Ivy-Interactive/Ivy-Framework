@@ -305,54 +305,6 @@ public class AppHub(
         }
         catch (Exception e)
         {
-            logger.LogInformation($"FirebaseAuthResult received for requestId: {requestId}");
-
-            // Process the received authentication result
-            AuthResponses.ProcessResponse(requestId, result);
-        }
-        catch (Exception e)
-        {
-            logger.LogWarning(e, "Failed to deserialize AuthToken from JWT.");
-            return null;
-        }
-    }
-
-    private AuthToken? GetAuthToken(HttpContext httpContext)
-    {
-        var cookies = httpContext.Request.Cookies;
-        var jwt = cookies["jwt"].NullIfEmpty();
-        if (jwt == null)
-        {
-            return null;
-        }
-
-        try
-        {
-            var token = JsonSerializer.Deserialize<AuthToken>(jwt);
-            if (token == null)
-            {
-                return null;
-            }
-
-            if (token.RefreshToken == null)
-            {
-                var refreshToken = cookies["jwt_ext_refresh_token"].NullIfEmpty();
-                return token with { RefreshToken = refreshToken };
-            }
-            else
-            {
-                return token;
-            }
-        }
-        catch (Exception e)
-        {
-            logger.LogInformation($"FirebaseAuthResult received for requestId: {requestId}");
-
-            // Process the received authentication result
-            AuthResponses.ProcessResponse(requestId, result);
-        }
-        catch (Exception e)
-        {
             logger.LogWarning(e, "Failed to deserialize AuthToken from JWT.");
             return null;
         }
