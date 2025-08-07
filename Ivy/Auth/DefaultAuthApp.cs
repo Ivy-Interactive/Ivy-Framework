@@ -88,7 +88,7 @@ public class PasswordEmailFlowView(IState<string?> errorMessage) : ViewBase
          | user.ToTextInput().Disabled(loading.Value)
          | Text.Label("Password:")
          | password.ToPasswordInput().Disabled(loading.Value)
-         | new Button("Login").Width(Size.Full()).HandleClick(login.HandleError(this)).Loading(loading.Value).Disabled(loading.Value)
+         | new Button("Login").Width(Size.Full()).HandleClick(_ => login()).Loading(loading.Value).Disabled(loading.Value)
          | result
          ;
     }
@@ -120,6 +120,6 @@ public class OAuthFlowView(AuthOption option, IState<string?> errorMessage) : Vi
             }
         };
 
-        return new Button(option.Name).Secondary().Icon(option.Icon).Width(Size.Full()).HandleClick(login.HandleError(this));
+        return new Button(option.Name).Secondary().Icon(option.Icon).Width(Size.Full()).HandleClick(_ => login());
     }
 }
