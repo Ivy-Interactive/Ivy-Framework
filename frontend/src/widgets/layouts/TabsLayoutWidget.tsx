@@ -637,10 +637,10 @@ export const TabsLayoutWidget = ({
                     tabRefs.current[index] = el;
                   }}
                   className={cn(
-                    'px-3 py-1.5 cursor-pointer transition-colors duration-300 h-[26px]',
+                    'px-3 py-1.5 cursor-pointer transition-colors duration-300 h-[26px] border-x border-t border-border rounded-t-md',
                     index === activeIndex
-                      ? 'text-foreground'
-                      : 'text-muted-foreground'
+                      ? 'text-foreground bg-background border-b-transparent'
+                      : 'text-muted-foreground bg-muted/50 border-b-border'
                   )}
                   onClick={() => {
                     // Mark as user-initiated for Content variant
@@ -658,7 +658,7 @@ export const TabsLayoutWidget = ({
             })}
           </div>
         </div>
-        <div className="flex-1 overflow-hidden">
+        <div className="flex-1 overflow-hidden border border-border rounded-b-md bg-background">
           {orderedTabWidgets.map(tabWidget => {
             if (!React.isValidElement(tabWidget)) return null;
             const props = tabWidget.props as Partial<TabWidgetProps>;
