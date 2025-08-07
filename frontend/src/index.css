@@ -1,6 +1,5 @@
-@import '@fontsource-variable/inter';
-@import '@fontsource/ibm-plex-mono/400.css';
-@import '@fontsource/ibm-plex-mono/500.css';
+@import '@fontsource-variable/geist';
+@import '@fontsource-variable/geist-mono';
 @import 'tailwindcss';
 
 @theme {
@@ -151,16 +150,16 @@
     --destructive-light: #efc5c9;
     --destructive-dark: #5d3235;
 
-    /* Typography System - Inter Variable Font Family */
+    /* Typography System - Geist Variable Font Family */
     --font-sans:
-      'Inter Variable', 'Inter', ui-sans-serif, system-ui, sans-serif,
+      'GeistVF', 'Geist Variable', 'Geist', ui-sans-serif, system-ui, sans-serif,
       'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
       'Noto Color Emoji';
     --font-serif:
-      'Inter Variable', 'Inter', ui-serif, Georgia, Cambria, 'Times New Roman',
+      'GeistVF', 'Geist Variable', 'Geist', ui-serif, Georgia, Cambria, 'Times New Roman',
       Times, serif;
     --font-mono:
-      'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+      'GeistMonoVF', 'Geist Mono Variable', 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
       'Liberation Mono', 'Courier New', monospace;
 
     /* Typography Sizes from the images */
@@ -251,14 +250,14 @@
     --sidebar-border: oklch(0.27 0.01 286.03);
     --sidebar-ring: oklch(0.87 0.01 286.29);
     --font-sans:
-      'Inter Variable', 'Inter', ui-sans-serif, system-ui, sans-serif,
+      'GeistVF', 'Geist Variable', 'Geist', ui-sans-serif, system-ui, sans-serif,
       'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
       'Noto Color Emoji';
     --font-serif:
-      'Inter Variable', 'Inter', ui-serif, Georgia, Cambria, 'Times New Roman',
+      'GeistVF', 'Geist Variable', 'Geist', ui-serif, Georgia, Cambria, 'Times New Roman',
       Times, serif;
     --font-mono:
-      'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+      'GeistMonoVF', 'Geist Mono Variable', 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
       'Liberation Mono', 'Courier New', monospace;
     --radius: 0.5rem;
     --shadow-2xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
@@ -381,7 +380,7 @@
 @layer utilities {
   /* Display Typography - Large Headlines (Medium weight for headers) */
   .text-display-60 {
-    font-family: 'Inter Display', 'Inter Variable', var(--font-sans);
+    font-family: 'GeistVF', 'Geist Variable', var(--font-sans);
     font-weight: 500;
     font-size: 60px;
     line-height: 60px;
@@ -389,7 +388,7 @@
   }
 
   .text-display-40 {
-    font-family: 'Inter Display', 'Inter Variable', var(--font-sans);
+    font-family: 'GeistVF', 'Geist Variable', var(--font-sans);
     font-weight: 500;
     font-size: 40px;
     line-height: 41px;
@@ -397,7 +396,7 @@
   }
 
   .text-display-30 {
-    font-family: 'Inter Display', 'Inter Variable', var(--font-sans);
+    font-family: 'GeistVF', 'Geist Variable', var(--font-sans);
     font-weight: 500;
     font-size: 30px;
     line-height: 32px;
@@ -405,7 +404,7 @@
   }
 
   .text-display-25 {
-    font-family: 'Inter Display', 'Inter Variable', var(--font-sans);
+    font-family: 'GeistVF', 'Geist Variable', var(--font-sans);
     font-weight: 500;
     font-size: 25px;
     line-height: 27px;
@@ -414,7 +413,7 @@
 
   /* Lead Typography - Prominent Text (Medium weight for lead text) */
   .text-lead {
-    font-family: 'Inter Variable', var(--font-sans);
+    font-family: 'GeistVF', var(--font-sans);
     font-weight: 500;
     font-size: 20px;
     line-height: 28px;
@@ -422,7 +421,7 @@
   }
 
   .text-semi-lead {
-    font-family: 'Inter Variable', var(--font-sans);
+    font-family: 'GeistVF', var(--font-sans);
     font-weight: 500;
     font-size: 15px;
     line-height: 24px;
@@ -431,7 +430,7 @@
 
   /* Body Typography - Main Content (Regular weight for body text) */
   .text-large-body {
-    font-family: 'Inter Variable', var(--font-sans);
+    font-family: 'GeistVF', var(--font-sans);
     font-weight: 400;
     font-size: 14px;
     line-height: 22px;
@@ -439,7 +438,7 @@
   }
 
   .text-body {
-    font-family: 'Inter Variable', var(--font-sans);
+    font-family: 'GeistVF', var(--font-sans);
     font-weight: 400;
     font-size: 14px;
     line-height: 22px;
@@ -448,7 +447,7 @@
 
   /* Label Typography - UI Elements (Regular weight for labels) */
   .text-descriptive {
-    font-family: 'Inter Variable', var(--font-sans);
+    font-family: 'GeistVF', var(--font-sans);
     font-weight: 400;
     font-size: 12px;
     line-height: 18px;
@@ -456,7 +455,7 @@
   }
 
   .text-large-label {
-    font-family: 'Inter Variable', var(--font-sans);
+    font-family: 'GeistVF', var(--font-sans);
     font-weight: 400;
     font-size: 14px;
     line-height: 22px;
@@ -464,7 +463,7 @@
   }
 
   .text-small-label {
-    font-family: 'Inter Variable', var(--font-sans);
+    font-family: 'GeistVF', var(--font-sans);
     font-weight: 400;
     font-size: 12px;
     line-height: 18px;
@@ -473,7 +472,7 @@
 
   /* Badge-specific typography classes that don't interfere with colors */
   .badge-text-primary {
-    font-family: 'Inter Variable', var(--font-sans);
+    font-family: 'GeistVF', var(--font-sans);
     font-weight: 400;
     font-size: 12px;
     line-height: 18px;
@@ -481,7 +480,7 @@
   }
 
   .badge-text-small {
-    font-family: 'Inter Variable', var(--font-sans);
+    font-family: 'GeistVF', var(--font-sans);
     font-weight: 400;
     font-size: 10px;
     line-height: 14px;
@@ -489,7 +488,7 @@
   }
 
   .badge-text-large {
-    font-family: 'Inter Variable', var(--font-sans);
+    font-family: 'GeistVF', var(--font-sans);
     font-weight: 500;
     font-size: 20px;
     line-height: 28px;
