@@ -87,23 +87,6 @@ Layout.Grid().Columns(3)
     | new Button("Full").Destructive().BorderRadius(BorderRadius.Full)
 ```
 
-### Custom Colors
-
-```csharp demo-tabs
-Layout.Grid().Columns(4)
-    | new Button("Blue").Foreground(Colors.Blue)
-    | new Button("Green").Foreground(Colors.Green)
-    | new Button("Purple").Foreground(Colors.Purple)
-    | new Button("Orange").Foreground(Colors.Orange)
-    | new Button("Blue").Secondary().Foreground(Colors.Blue)
-    | new Button("Green").Secondary().Foreground(Colors.Green)
-    | new Button("Purple").Secondary().Foreground(Colors.Purple)
-    | new Button("Orange").Secondary().Foreground(Colors.Orange)
-    | new Button("Blue").Destructive().Foreground(Colors.Blue)
-    | new Button("Green").Destructive().Foreground(Colors.Green)
-    | new Button("Purple").Destructive().Foreground(Colors.Purple)
-    | new Button("Orange").Destructive().Foreground(Colors.Orange)
-```
 
 ### Icons
 
