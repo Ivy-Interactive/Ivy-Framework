@@ -12,7 +12,6 @@ import {
   getPadding,
   getWidth,
 } from '@/lib/styles';
-import { cn } from '@/lib/utils';
 import React from 'react';
 
 interface BoxWidgetProps {
@@ -57,9 +56,7 @@ export const BoxWidget: React.FC<BoxWidgetProps> = ({
 
   return (
     <>
-      <div style={styles} className={cn('font-mono', 'font-bold')}>
-        {children}
-      </div>
+      <div style={styles}>{children}</div>
     </>
   );
 };

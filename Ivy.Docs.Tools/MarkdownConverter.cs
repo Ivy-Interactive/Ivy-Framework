@@ -344,12 +344,12 @@ public static class MarkdownConverter
 
         if (arguments is "demo") // just demo no code
         {
-            codeBuilder.AppendTab(3).AppendLine($"| ({insertCode})");
+            codeBuilder.AppendTab(3).AppendLine($"| new Box({insertCode}) {{ Id = \"demo-content\" }}.Color(Colors.Secondary).BorderRadius(BorderRadius.Rounded).Padding(4)");
         }
         else if (arguments is "demo-tabs")
         {
             codeBuilder.AppendTab(3).AppendLine("| Tabs( ");
-            codeBuilder.AppendTab(4).AppendLine($"new Tab(\"Demo\", {insertCode}),");
+            codeBuilder.AppendTab(4).AppendLine($"new Tab(\"Demo\", new Box({insertCode}) {{ Id = \"demo-content\" }}.Color(Colors.Secondary).BorderRadius(BorderRadius.Rounded).Padding(4)),");
             AppendAsMultiLineStringIfNecessary(4, codeContent, codeBuilder, "new Tab(\"Code\", new Code(", $",{MapLanguageToEnum(language)}))");
             codeBuilder.AppendTab(3).AppendLine(").Height(Size.Fit()).Padding(0, 8, 0, 0).Variant(TabsVariant.Content)");
         }
@@ -357,13 +357,13 @@ public static class MarkdownConverter
         {
             codeBuilder.AppendTab(3).AppendLine("| (Vertical() ");
             AppendAsMultiLineStringIfNecessary(4, codeContent, codeBuilder, "| Code(", $",{MapLanguageToEnum(language)})");
-            codeBuilder.AppendTab(4).AppendLine($"| ({insertCode})");
+            codeBuilder.AppendTab(4).AppendLine($"| new Box({insertCode}) {{ Id = \"demo-content\" }}.Color(Colors.Secondary).BorderRadius(BorderRadius.Rounded).Padding(4)");
             codeBuilder.AppendTab(3).AppendLine(")");
         }
         else if (arguments is "demo-above")
         {
             codeBuilder.AppendTab(3).AppendLine("| (Vertical() ");
-            codeBuilder.AppendTab(4).AppendLine($"| ({insertCode})");
+            codeBuilder.AppendTab(4).AppendLine($"| new Box({insertCode}) {{ Id = \"demo-content\" }}.Color(Colors.Secondary).BorderRadius(BorderRadius.Rounded).Padding(4)");
             AppendAsMultiLineStringIfNecessary(4, codeContent, codeBuilder, "| Code(", $",{MapLanguageToEnum(language)})");
             codeBuilder.AppendTab(3).AppendLine(")");
         }
@@ -371,15 +371,15 @@ public static class MarkdownConverter
         {
             codeBuilder.AppendTab(3).AppendLine("| (Grid().Columns(2) ");
             AppendAsMultiLineStringIfNecessary(4, codeContent, codeBuilder, "| Code(", $",{MapLanguageToEnum(language)})");
-            codeBuilder.AppendTab(4).AppendLine($"| ({insertCode})");
+            codeBuilder.AppendTab(4).AppendLine($"| new Box({insertCode}) {{ Id = \"demo-content\" }}.Color(Colors.Secondary).BorderRadius(BorderRadius.Rounded).Padding(4)");
             codeBuilder.AppendTab(3).AppendLine(")");
         }
         else if (arguments is "demo-left")
         {
             codeBuilder.AppendTab(3).AppendLine("| (Grid().Columns(2) ");
-            codeBuilder.AppendTab(4).AppendLine($"| ({insertCode})");
+            codeBuilder.AppendTab(4).AppendLine($"| new Box({insertCode}) {{ Id = \"demo-content\" }}.Color(Colors.Secondary).BorderRadius(BorderRadius.Rounded).Padding(4)");
             AppendAsMultiLineStringIfNecessary(4, codeContent, codeBuilder, "| Code(", $",{MapLanguageToEnum(language)})");
-            codeBuilder.AppendTab(5).AppendLine(")");
+            codeBuilder.AppendTab(3).AppendLine(")");
         }
     }
 

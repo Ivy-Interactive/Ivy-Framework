@@ -38,18 +38,8 @@ interface TabWidgetProps {
   icon?: string;
 }
 
-export const TabWidget: React.FC<TabWidgetProps> = ({ children, title }) => {
-  const isDemoTab = title === 'Demo';
-  return (
-    <div
-      className={cn(
-        'h-full',
-        isDemoTab && 'border border-border rounded-md p-4'
-      )}
-    >
-      {children}
-    </div>
-  );
+export const TabWidget: React.FC<TabWidgetProps> = ({ children }) => {
+  return <div className="h-full">{children}</div>;
 };
 
 TabWidget.displayName = 'TabWidget';
