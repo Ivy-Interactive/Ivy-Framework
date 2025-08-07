@@ -3,7 +3,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { InternalLink } from '@/types/widgets';
 import { Github } from 'lucide-react';
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useLayoutEffect } from 'react';
 
 interface ArticleWidgetProps {
   id: string;
@@ -28,15 +28,34 @@ export const ArticleWidget: React.FC<ArticleWidgetProps> = ({
   const [contentLoaded, setContentLoaded] = useState(false);
   const articleRef = useRef<HTMLElement>(null);
 
-  // Set content as loaded after initial render
-  useEffect(() => {
-    // Small delay to ensure any Suspense boundaries have resolved
-    const timer = setTimeout(() => {
-      setContentLoaded(true);
-    }, 1000);
+  // Set content as loaded when DOM is ready and content has rendered
+  useLayoutEffect(() => {
+    // Check if content is already visible and DOM is ready
+    if (articleRef.current) {
+      // Use requestAnimationFrame to ensure the content has been painted
+      const checkContentReady = () => {
+        const article = articleRef.current;
+        if (article && article.children.length > 0) {
+          // Check if any heading elements are present to ensure content is rendered
+          const hasHeadings =
+            article.querySelectorAll('h1, h2, h3, h4, h5, h6').length > 0;
+          const hasContent = article.textContent?.trim().length || 0 > 0;
 
-    return () => clearTimeout(timer);
-  }, []);
+          if (hasHeadings || hasContent) {
+            setContentLoaded(true);
+          } else {
+            // If no content yet, try again in next frame
+            requestAnimationFrame(checkContentReady);
+          }
+        } else {
+          // If article not ready yet, try again in next frame
+          requestAnimationFrame(checkContentReady);
+        }
+      };
+
+      requestAnimationFrame(checkContentReady);
+    }
+  }, [children]); // Re-run when children change
 
   return (
     <div className="flex flex-col gap-2 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative mt-8 ">
