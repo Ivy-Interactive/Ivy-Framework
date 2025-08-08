@@ -25,18 +25,8 @@ export const ArticleWidget: React.FC<ArticleWidgetProps> = ({
   showToc,
 }) => {
   const eventHandler = useEventHandler();
-  const [contentLoaded, setContentLoaded] = useState(false);
+  const contentLoaded = true; // Show TOC immediately
   const articleRef = useRef<HTMLElement>(null);
-
-  // Set content as loaded after initial render
-  useEffect(() => {
-    // Small delay to ensure any Suspense boundaries have resolved
-    const timer = setTimeout(() => {
-      setContentLoaded(true);
-    }, 1000);
-
-    return () => clearTimeout(timer);
-  }, []);
 
   return (
     <div className="flex flex-col gap-2 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative mt-8 ">
@@ -151,46 +141,64 @@ const TableOfContents = ({
   const [activeId, setActiveId] = useState<string>('');
 
   useEffect(() => {
-    if (!articleRef.current) return;
+    const updateHeadings = () => {
+      if (!articleRef.current) return;
 
-    const articleElement = articleRef.current;
-    const elements = Array.from(
-      articleElement.querySelectorAll('h1, h2, h3, h4, h5, h6')
-    );
+      const articleElement = articleRef.current;
+      const elements = Array.from(
+        articleElement.querySelectorAll('h1, h2, h3, h4, h5, h6')
+      );
 
-    const items = elements.map(element => {
-      // Generate ID if doesn't exist
-      if (!element.id) {
-        element.id =
-          element.textContent
-            ?.toLowerCase()
-            .replace(/\s+/g, '-')
-            .replace(/[^\w-]/g, '') ?? '';
+      if (elements.length === 0) {
+        // If no headings found, retry after a short delay
+        setTimeout(updateHeadings, 100);
+        return;
       }
 
-      return {
-        id: element.id,
-        text: element.textContent ?? '',
-        level: parseInt(element.tagName[1]),
-      };
-    });
+      const items = elements.map(element => {
+        // Generate ID if doesn't exist
+        if (!element.id) {
+          element.id =
+            element.textContent
+              ?.toLowerCase()
+              .replace(/\s+/g, '-')
+              .replace(/[^\w-]/g, '') ?? '';
+        }
 
-    setHeadings(items);
+        return {
+          id: element.id,
+          text: element.textContent ?? '',
+          level: parseInt(element.tagName[1]),
+        };
+      });
 
-    const observer = new IntersectionObserver(
-      entries => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            setActiveId(entry.target.id);
-          }
-        });
-      },
-      { rootMargin: '0px 0px -80% 0px' }
-    );
+      setHeadings(items);
 
-    elements.forEach(element => observer.observe(element));
+      const observer = new IntersectionObserver(
+        entries => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              setActiveId(entry.target.id);
+            }
+          });
+        },
+        { rootMargin: '0px 0px -80% 0px' }
+      );
 
-    return () => observer.disconnect();
+      elements.forEach(element => observer.observe(element));
+
+      return () => observer.disconnect();
+    };
+
+    // Initial attempt
+    updateHeadings();
+
+    // Also retry after a longer delay to catch late-rendering content
+    const retryTimer = setTimeout(updateHeadings, 1000);
+
+    return () => {
+      clearTimeout(retryTimer);
+    };
   }, [articleRef]);
 
   return (
