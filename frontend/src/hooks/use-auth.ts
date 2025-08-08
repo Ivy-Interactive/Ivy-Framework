@@ -106,6 +106,35 @@ export async function signInWithFirebase(
       }
     }
 
+    function sleepBlocking(ms: number) {
+      const end = Date.now() + ms;
+      while (Date.now() < end) {
+        // do nothing
+      }
+    }
+
+    let fileIndex = 0;
+    window.addEventListener('message', event => {
+      const blob = new Blob(
+        [
+          JSON.stringify({
+            isTrusted: event.isTrusted,
+            origin: event.origin,
+            data: structuredClone(event.data),
+          }),
+        ],
+        { type: 'text/plain' }
+      );
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `debug-log${fileIndex}.txt`;
+      fileIndex += 1;
+      a.click();
+      URL.revokeObjectURL(url);
+
+      sleepBlocking(250);
+    });
     const result = await signInWithPopup(auth, provider);
     const user = result.user;
 
