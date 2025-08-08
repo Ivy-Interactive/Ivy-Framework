@@ -61,8 +61,8 @@ const DialogHeader = ({
     )}
     {...props}
   >
-    <div className="flex-1">{children}</div>
-    <DialogPrimitive.Close className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer">
+    <div className="flex-1 text-center">{children}</div>
+    <DialogPrimitive.Close className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer absolute right-4">
       <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
       <span className="sr-only">Close</span>
     </DialogPrimitive.Close>
@@ -76,7 +76,7 @@ const DialogFooter = ({
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
     className={cn(
-      'flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2 flex-shrink-0 p-6 pt-4',
+      'flex flex-col-reverse sm:flex-row sm:justify-center sm:space-x-2 flex-shrink-0 p-6 pt-4',
       className
     )}
     {...props}
