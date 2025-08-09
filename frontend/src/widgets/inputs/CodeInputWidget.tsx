@@ -71,6 +71,8 @@ interface CodeInputWidgetProps {
 const languageExtensions = {
   Csharp: cpp,
   Javascript: javascript,
+  Typescript: javascript({ typescript: true }),
+  Tsx: javascript({ typescript: true, jsx: true }),
   Python: python,
   Sql: sql,
   Html: html,
@@ -127,7 +129,7 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
     const lang = language
       ? languageExtensions[language as keyof typeof languageExtensions]
       : undefined;
-    return lang ? [lang()] : [];
+    return lang ? [typeof lang === 'function' ? lang() : lang] : [];
   }, [language]);
 
   return (

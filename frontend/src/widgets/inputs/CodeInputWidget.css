@@ -59,10 +59,19 @@
   color: var(--primary);
 }
 .ͼe {
-  color: var(--red);
+  color: var(--primary);
 }
 
 .ͼc {
+  color: var(--cyan);
+}
+.ͼg {
+  color: var(--cyan);
+}
+.ͼf {
+  color: var(--primary);
+}
+.ͼl {
   color: var(--cyan);
 }
 
@@ -348,6 +357,84 @@
 }
 
 .cm-token.cm-formatting-quote-close {
+  color: var(--muted-foreground) !important;
+}
+
+/* TypeScript specific syntax highlighting */
+.cm-token.cm-typeName {
+  color: var(--cyan) !important;
+}
+
+.cm-token.cm-interfaceName {
+  color: var(--cyan) !important;
+}
+
+.cm-token.cm-namespace {
+  color: var(--cyan) !important;
+}
+
+.cm-token.cm-enumName {
+  color: var(--cyan) !important;
+}
+
+.cm-token.cm-enumMember {
+  color: var(--cyan) !important;
+}
+
+.cm-token.cm-typeParam {
+  color: var(--cyan) !important;
+}
+
+.cm-token.cm-function {
+  color: var(--cyan) !important;
+}
+
+.cm-token.cm-macroName {
+  color: var(--purple) !important;
+}
+
+.cm-token.cm-variableName {
+  color: var(--foreground) !important;
+}
+
+.cm-token.cm-labelName {
+  color: var(--foreground) !important;
+}
+
+.cm-token.cm-propertyName {
+  color: var(--foreground) !important;
+}
+
+.cm-token.cm-escape {
+  color: var(--red) !important;
+}
+
+.cm-token.cm-string2 {
+  color: var(--primary) !important;
+}
+
+.cm-token.cm-comment2 {
+  color: var(--muted-foreground) !important;
+  font-style: italic !important;
+}
+
+.cm-token.cm-self {
+  color: var(--purple) !important;
+}
+
+.cm-token.cm-null {
+  color: var(--purple) !important;
+}
+
+.cm-token.cm-bool {
+  color: var(--purple) !important;
+}
+
+.cm-token.cm-regExp {
+  color: var(--primary) !important;
+}
+
+.cm-token.cm-formatting {
   color: var(--muted-foreground) !important;
 }
 
