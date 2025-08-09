@@ -53,21 +53,68 @@ const DialogHeader = ({
   className,
   children,
   ...props
-}: React.HTMLAttributes<HTMLDivElement>) => (
-  <div
-    className={cn(
-      'sticky top-0 z-10 bg-background p-4 flex-shrink-0 flex items-center justify-between',
-      className
-    )}
-    {...props}
-  >
-    <div className="flex-1 text-center">{children}</div>
-    <DialogPrimitive.Close className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer absolute right-4">
-      <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
-      <span className="sr-only">Close</span>
-    </DialogPrimitive.Close>
-  </div>
-);
+}: React.HTMLAttributes<HTMLDivElement>) => {
+  // Helper function to check if children contain meaningful title content
+  const hasMeaningfulTitle = React.useMemo(() => {
+    let hasTitle = false;
+
+    React.Children.forEach(children, child => {
+      if (typeof child === 'string') {
+        if (child.trim().length > 0) {
+          hasTitle = true;
+        }
+      } else if (typeof child === 'number') {
+        hasTitle = true;
+      } else if (React.isValidElement(child)) {
+        // Check if it's a DialogTitle component
+        if (child.type === DialogTitle) {
+          hasTitle = true;
+        } else if (
+          child.props &&
+          typeof child.props === 'object' &&
+          'children' in child.props
+        ) {
+          // Recursively check children
+          React.Children.forEach(
+            (child.props as { children: React.ReactNode }).children,
+            grandChild => {
+              if (
+                typeof grandChild === 'string' &&
+                grandChild.trim().length > 0
+              ) {
+                hasTitle = true;
+              } else if (
+                React.isValidElement(grandChild) &&
+                grandChild.type === DialogTitle
+              ) {
+                hasTitle = true;
+              }
+            }
+          );
+        }
+      }
+    });
+
+    return hasTitle;
+  }, [children]);
+
+  return (
+    <div
+      className={cn(
+        'sticky top-0 z-10 bg-background pt-2 px-4 pb-0 flex-shrink-0 flex flex-col items-center',
+        className
+      )}
+      {...props}
+    >
+      <div className="flex-1 text-center mb-2">{children}</div>
+      {hasMeaningfulTitle && <div className="w-full h-px bg-border mb-2"></div>}
+      <DialogPrimitive.Close className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer absolute right-4 top-2">
+        <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+        <span className="sr-only">Close</span>
+      </DialogPrimitive.Close>
+    </div>
+  );
+};
 DialogHeader.displayName = 'DialogHeader';
 
 const DialogFooter = ({
@@ -76,7 +123,7 @@ const DialogFooter = ({
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
     className={cn(
-      'flex flex-col-reverse sm:flex-row sm:justify-center sm:space-x-2 flex-shrink-0 p-6 pt-4',
+      'flex flex-col-reverse sm:flex-row sm:justify-center sm:space-x-2 flex-shrink-0 px-6 pt-2 pb-4',
       className
     )}
     {...props}
