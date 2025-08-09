@@ -53,21 +53,86 @@ const DialogHeader = ({
   className,
   children,
   ...props
-}: React.HTMLAttributes<HTMLDivElement>) => (
-  <div
-    className={cn(
-      'sticky top-0 z-10 bg-background border-b border-border p-4 flex-shrink-0 flex items-center justify-between',
-      className
-    )}
-    {...props}
-  >
-    <div className="flex-1">{children}</div>
-    <DialogPrimitive.Close className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer">
-      <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
-      <span className="sr-only">Close</span>
-    </DialogPrimitive.Close>
-  </div>
-);
+}: React.HTMLAttributes<HTMLDivElement>) => {
+  // Helper function to check if children contain meaningful title content
+  const hasMeaningfulTitle = React.useMemo(() => {
+    let hasTitle = false;
+
+    React.Children.forEach(children, child => {
+      if (typeof child === 'string') {
+        if (child.trim().length > 0) {
+          hasTitle = true;
+        }
+      } else if (typeof child === 'number') {
+        hasTitle = true;
+      } else if (React.isValidElement(child)) {
+        // Check if it's a DialogTitle component by checking the displayName
+        if (
+          child.type &&
+          (child.type as { displayName?: string }).displayName === 'DialogTitle'
+        ) {
+          // Check if DialogTitle has meaningful content
+          if (
+            child.props &&
+            typeof child.props === 'object' &&
+            'children' in child.props
+          ) {
+            const titleChildren = (child.props as { children: React.ReactNode })
+              .children;
+            if (typeof titleChildren === 'string') {
+              if (titleChildren.trim().length > 0) {
+                hasTitle = true;
+              }
+            } else if (typeof titleChildren === 'number') {
+              hasTitle = true;
+            } else if (React.isValidElement(titleChildren)) {
+              hasTitle = true;
+            } else if (Array.isArray(titleChildren)) {
+              // Check array of children
+              React.Children.forEach(titleChildren, grandChild => {
+                if (
+                  typeof grandChild === 'string' &&
+                  grandChild.trim().length > 0
+                ) {
+                  hasTitle = true;
+                } else if (
+                  typeof grandChild === 'number' ||
+                  React.isValidElement(grandChild)
+                ) {
+                  hasTitle = true;
+                }
+              });
+            }
+          }
+        }
+      }
+    });
+
+    return hasTitle;
+  }, [children]);
+
+  return (
+    <div
+      className={cn(
+        'sticky top-0 z-10 bg-background flex-shrink-0 flex flex-row items-center',
+        className
+      )}
+      {...props}
+    >
+      <div className="flex-1"></div>
+      <div className="flex-1 text-center">{children}</div>
+      <div className="flex-1 flex justify-end">
+        <DialogPrimitive.Close className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer">
+          <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+          <span className="sr-only">Close</span>
+        </DialogPrimitive.Close>
+      </div>
+      {hasMeaningfulTitle && (
+        <div className="absolute bottom-0 left-0 right-0 h-px bg-border"></div>
+      )}
+    </div>
+  );
+};
 DialogHeader.displayName = 'DialogHeader';
 
 const DialogFooter = ({
@@ -76,7 +141,7 @@ const DialogFooter = ({
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
     className={cn(
-      'flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2 flex-shrink-0 p-6 pt-4',
+      'flex flex-col-reverse sm:flex-row sm:justify-center sm:space-x-2 flex-shrink-0 px-6 pb-6',
       className
     )}
     {...props}
