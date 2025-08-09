@@ -101,17 +101,22 @@ const DialogHeader = ({
   return (
     <div
       className={cn(
-        'sticky top-0 z-10 bg-background pt-2 px-4 pb-0 flex-shrink-0 flex flex-col items-center',
+        'sticky top-0 z-10 bg-background pt-2 px-4 pb-0 flex-shrink-0 flex flex-row items-center',
         className
       )}
       {...props}
     >
-      <div className="flex-1 text-center mb-2">{children}</div>
-      {hasMeaningfulTitle && <div className="w-full h-px bg-border mb-2"></div>}
-      <DialogPrimitive.Close className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer absolute right-4 top-2">
-        <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
-        <span className="sr-only">Close</span>
-      </DialogPrimitive.Close>
+      <div className="flex-1"></div>
+      <div className="flex-1 text-center">{children}</div>
+      <div className="flex-1 flex justify-end">
+        <DialogPrimitive.Close className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer">
+          <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+          <span className="sr-only">Close</span>
+        </DialogPrimitive.Close>
+      </div>
+      {hasMeaningfulTitle && (
+        <div className="absolute bottom-0 left-0 right-0 h-px bg-border"></div>
+      )}
     </div>
   );
 };
