@@ -66,31 +66,44 @@ const DialogHeader = ({
       } else if (typeof child === 'number') {
         hasTitle = true;
       } else if (React.isValidElement(child)) {
-        // Check if it's a DialogTitle component
-        if (child.type === DialogTitle) {
-          hasTitle = true;
-        } else if (
-          child.props &&
-          typeof child.props === 'object' &&
-          'children' in child.props
+        // Check if it's a DialogTitle component by checking the displayName
+        if (
+          child.type &&
+          (child.type as { displayName?: string }).displayName === 'DialogTitle'
         ) {
-          // Recursively check children
-          React.Children.forEach(
-            (child.props as { children: React.ReactNode }).children,
-            grandChild => {
-              if (
-                typeof grandChild === 'string' &&
-                grandChild.trim().length > 0
-              ) {
-                hasTitle = true;
-              } else if (
-                React.isValidElement(grandChild) &&
-                grandChild.type === DialogTitle
-              ) {
+          // Check if DialogTitle has meaningful content
+          if (
+            child.props &&
+            typeof child.props === 'object' &&
+            'children' in child.props
+          ) {
+            const titleChildren = (child.props as { children: React.ReactNode })
+              .children;
+            if (typeof titleChildren === 'string') {
+              if (titleChildren.trim().length > 0) {
                 hasTitle = true;
               }
+            } else if (typeof titleChildren === 'number') {
+              hasTitle = true;
+            } else if (React.isValidElement(titleChildren)) {
+              hasTitle = true;
+            } else if (Array.isArray(titleChildren)) {
+              // Check array of children
+              React.Children.forEach(titleChildren, grandChild => {
+                if (
+                  typeof grandChild === 'string' &&
+                  grandChild.trim().length > 0
+                ) {
+                  hasTitle = true;
+                } else if (
+                  typeof grandChild === 'number' ||
+                  React.isValidElement(grandChild)
+                ) {
+                  hasTitle = true;
+                }
+              });
             }
-          );
+          }
         }
       }
     });
