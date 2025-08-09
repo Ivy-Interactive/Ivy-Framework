@@ -10,6 +10,19 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
+    # Setup Node.js and build frontend (embedded into Ivy)
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '22.x'
+
+    - name: Install frontend deps
+      working-directory: ./frontend
+      run: npm ci
+
+    - name: Build frontend
+      working-directory: ./frontend
+      run: npm run build
+
     # Setup .NET
     - name: Setup .NET
       uses: actions/setup-dotnet@v4

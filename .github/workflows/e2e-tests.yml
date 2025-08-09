@@ -11,13 +11,26 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
-    # Setup .NET
+    # Setup Node.js (for building frontend and running Playwright tests)
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '22.x'
+    
+    - name: Install frontend dependencies
+      working-directory: ./frontend
+      run: npm ci
+
+    - name: Build frontend
+      working-directory: ./frontend
+      run: npm run build
+
+    # Setup .NET (after frontend build so embedded resources exist)
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: '9.0.x'
     
-    # Build and start backend server
+    # Build and start backend server (embeds frontend bundle)
     - name: Build backend
       run: dotnet build Ivy.Samples/Ivy.Samples.csproj
     
@@ -27,15 +40,6 @@ jobs:
         echo $! > backend.pid
         # Wait for server to be ready
         timeout 30 bash -c 'until curl -f http://localhost:5010/ > /dev/null 2>&1; do sleep 1; done'
-    
-    # Setup Node.js and frontend
-    - uses: actions/setup-node@v4
-      with:
-        node-version: lts/*
-    
-    - name: Install dependencies
-      working-directory: ./frontend
-      run: npm ci
     
     - name: Install Playwright Browsers
       working-directory: ./frontend
