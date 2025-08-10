@@ -25,11 +25,10 @@ export const ArticleWidget: React.FC<ArticleWidgetProps> = ({
   showToc,
 }) => {
   const eventHandler = useEventHandler();
-  const contentLoaded = true; // Show TOC immediately
   const articleRef = useRef<HTMLElement>(null);
 
   return (
-    <div className="flex flex-col gap-2 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative mt-8 ">
+    <div className="flex flex-col gap-2 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative mt-8">
       <div className="flex gap-8 flex-grow">
         <article ref={articleRef} className="w-[48rem]">
           <div className="flex flex-col gap-2 flex-grow min-h-[calc(100vh+8rem)]">
@@ -51,13 +50,13 @@ export const ArticleWidget: React.FC<ArticleWidgetProps> = ({
                         className="group flex flex-col gap-2 hover:text-primary transition-colors"
                       >
                         <div className="text-body">← Previous</div>
-                        <div className="text-body text-muted-foreground">
+                        <div className="text-sm text-muted-foreground">
                           {previous.title}
                         </div>
                       </a>
                     )}
                   </div>
-                  <div className="flex-1 flex justify-end">
+                  <div className="flex-1 text-right">
                     {next && (
                       <a
                         onClick={() =>
@@ -66,10 +65,10 @@ export const ArticleWidget: React.FC<ArticleWidgetProps> = ({
                           ])
                         }
                         href={'app://' + next.appId}
-                        className="group flex flex-col text-right gap-2 hover:text-primary transition-colors"
+                        className="group flex flex-col gap-2 hover:text-primary transition-colors"
                       >
                         <div className="text-body">Next →</div>
-                        <div className="text-body text-muted-foreground">
+                        <div className="text-sm text-muted-foreground">
                           {next.title}
                         </div>
                       </a>
@@ -77,48 +76,16 @@ export const ArticleWidget: React.FC<ArticleWidgetProps> = ({
                   </div>
                 </div>
                 {documentSource && (
-                  <div className="flex justify-center">
-                    <a
-                      href={documentSource}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="group flex items-center gap-2 text-body text-muted-foreground hover:text-primary transition-colors"
-                    >
-                      <Github className="w-4 h-4" />
-                      Edit this document
-                    </a>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Github className="w-4 h-4" />
+                    <span>Source: {documentSource}</span>
                   </div>
                 )}
               </div>
             </footer>
           )}
         </article>
-        {showToc && (
-          <div className="hidden lg:block w-64">
-            {contentLoaded ? (
-              <TableOfContents
-                className="sticky top-8"
-                articleRef={articleRef}
-              />
-            ) : (
-              <div className="sticky top-8 w-64 relative">
-                <div className="text-body mb-4">Table of Contents</div>
-                <ScrollArea>
-                  <div className="space-y-2">
-                    <div className="h-3 bg-muted rounded animate-pulse w-3/4"></div>
-                    <div className="h-3 bg-muted rounded animate-pulse w-full"></div>
-                    <div className="h-3 bg-muted rounded animate-pulse w-5/6"></div>
-                    <div className="h-3 bg-muted rounded animate-pulse w-2/3"></div>
-                    <div className="h-3 bg-muted rounded animate-pulse w-4/5"></div>
-                    <div className="h-3 bg-muted rounded animate-pulse w-1/2"></div>
-                    <div className="h-3 bg-muted rounded animate-pulse w-3/4"></div>
-                    <div className="h-3 bg-muted rounded animate-pulse w-full"></div>
-                  </div>
-                </ScrollArea>
-              </div>
-            )}
-          </div>
-        )}
+        {showToc && <TableOfContents articleRef={articleRef} />}
       </div>
     </div>
   );
@@ -141,6 +108,8 @@ const TableOfContents = ({
   const [activeId, setActiveId] = useState<string>('');
 
   useEffect(() => {
+    if (!articleRef.current) return;
+
     const updateHeadings = () => {
       if (!articleRef.current) return;
 
