@@ -882,6 +882,12 @@
     outline: none !important;
     box-shadow: none !important;
   }
+
+  /* Ensure Radix portals inherit dark theme */
+  .dark [data-radix-dialog-overlay],
+  .dark [data-radix-dialog-content] {
+    color-scheme: dark;
+  }
 }
 
 /* CSS variable for filter to invert colors in dark mode */
