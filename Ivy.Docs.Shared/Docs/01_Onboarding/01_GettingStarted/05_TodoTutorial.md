@@ -20,7 +20,7 @@ Using the Ivy CLI we can create a new project.
 
 ### 2. Create the Todo Model
 
-Then let's create a record `Todo.cs` to represent our todo items:
+Then let's create a record `Todo.cs` in the root of your project to represent our todo items:
 
 ```csharp
 public record Todo(string Title, bool Done);
@@ -93,7 +93,7 @@ return new Card().Title("Todos").Description("What do you want to get done today
 
 ### 6. Create the TodoItem Component
 
-Create a new class `TodoItem.cs` for the todo item view:
+Create a new class `TodoItem.cs` in the root of your project for the todo item view:
 
 ```csharp
 public class TodoItem(Todo todo, Action deleteTodo, Action toggleTodo) : ViewBase
