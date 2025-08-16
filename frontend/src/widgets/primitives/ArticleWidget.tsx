@@ -34,11 +34,30 @@ export const ArticleWidget: React.FC<ArticleWidgetProps> = ({
 
   // Extract Contributors widget from children
   const contributorsWidget = React.Children.toArray(children).find(
-    (child: React.ReactNode) =>
-      React.isValidElement(child) &&
-      ((child.type as { name?: string })?.name === 'ContributorsWidget' ||
-        (child.props as { type?: string })?.type === 'Ivy.Contributors')
+    (child: React.ReactNode) => {
+      if (!React.isValidElement(child)) return false;
+
+      const typeName = (child.type as { name?: string })?.name;
+      const propsType = (child.props as { type?: string })?.type;
+
+      console.log('ArticleWidget - Checking child:', {
+        typeName,
+        propsType,
+        childType: typeof child.type,
+        childProps: child.props
+      });
+
+      return (
+        typeName === 'ContributorsWidget' ||
+        propsType === 'Ivy.Contributors' ||
+        typeName === 'Contributors'
+      );
+    }
   );
+
+  console.log('ArticleWidget - Contributors widget found:', !!contributorsWidget);
+  console.log('ArticleWidget - showContributors:', showContributors);
+  console.log('ArticleWidget - Total children count:', React.Children.count(children));
 
   // Filter out Contributors widget from main content
   const mainContent = React.Children.toArray(children).filter(
@@ -46,7 +65,8 @@ export const ArticleWidget: React.FC<ArticleWidgetProps> = ({
       !(
         React.isValidElement(child) &&
         ((child.type as { name?: string })?.name === 'ContributorsWidget' ||
-          (child.props as { type?: string })?.type === 'Ivy.Contributors')
+          (child.props as { type?: string })?.type === 'Ivy.Contributors' ||
+          (child.type as { name?: string })?.name === 'Contributors')
       )
   );
 
@@ -232,6 +252,31 @@ export const ArticleWidget: React.FC<ArticleWidgetProps> = ({
                   />
                   {/* Show contributors after TOC */}
                   {showContributors && contributorsWidget && contributorsWidget}
+                  {/* Debug: Show if contributors are expected but not found */}
+                  {showContributors && !contributorsWidget && (
+                    <div className="mt-6 p-4 border border-yellow-300 bg-yellow-50 rounded">
+                      <div className="text-sm text-yellow-800">
+                        Contributors widget expected but not found in children.
+                        <br />
+                        showContributors: {String(showContributors)}
+                        <br />
+                        documentSource: {documentSource || 'none'}
+                        <br />
+                        <strong>Possible causes:</strong>
+                        <br />
+                        1. GitHub service not registered in DocsServer
+                        <br />
+                        2. GitHub API rate limit or network issue
+                        <br />
+                        3. ContributorsView returning null
+                        <br />
+                        <em>
+                          Check server console for "GitHub service not
+                          available" message
+                        </em>
+                      </div>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="w-64">
@@ -239,6 +284,8 @@ export const ArticleWidget: React.FC<ArticleWidgetProps> = ({
                   <div className="text-sm text-muted-foreground">
                     No headings found
                   </div>
+                  {/* Show contributors even when no TOC */}
+                  {showContributors && contributorsWidget && contributorsWidget}
                 </div>
               )}
             </div>

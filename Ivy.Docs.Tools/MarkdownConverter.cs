@@ -210,8 +210,9 @@ public static class MarkdownConverter
         WriteSection();
 
         // Add Contributors widget at the end if we have a document source
-        var markdownFileName = Path.GetFileName(relativePath);
-        codeBuilder.AppendTab(3).AppendLine($"| ContributorsExtensions.CreateContributorsView(\"{markdownFileName}\", maxContributors: 5, showOnMobile: false)");
+        // Use the relative path from the Docs directory (e.g., "Docs/01_Onboarding/01_GettingStarted/01_Introduction.md")
+        var docsRelativePath = relativePath.Replace('\\', '/');
+        codeBuilder.AppendTab(3).AppendLine($"| ContributorsExtensions.CreateContributorsView(\"{docsRelativePath}\", maxContributors: 5, showOnMobile: false)");
     }
 
     private static void HandleHtmlBlock(string markdownContent, HtmlBlock htmlBlock, StringBuilder codeBuilder)
