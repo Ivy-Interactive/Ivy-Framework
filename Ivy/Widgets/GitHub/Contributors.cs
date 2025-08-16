@@ -26,6 +26,13 @@ public class ContributorsView : ViewBase
         }
 
         var gitHubService = UseService<IGitHubService>();
+        if (gitHubService == null)
+        {
+            // GitHub service not available, don't show contributors
+            Console.WriteLine("GitHub service not available, don't show contributors");
+            return null;
+        }
+
         var contributors = UseState<List<Contributor>>(new List<Contributor>());
         var isLoading = UseState(true);
         var hasError = UseState(false);
@@ -53,6 +60,7 @@ public class ContributorsView : ViewBase
         }, []);
 
         return new Contributors
+
         {
             ContributorsData = contributors.Value,
             IsLoading = isLoading.Value,

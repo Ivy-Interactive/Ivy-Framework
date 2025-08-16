@@ -119,9 +119,9 @@ public static class MarkdownConverter
         {
             codeBuilder.AppendTab(2).AppendLine("var appDescriptor = this.UseService<AppDescriptor>();");
             codeBuilder.AppendTab(2).AppendLine("var onLinkClick = this.UseLinks();");
-            codeBuilder.AppendTab(2).AppendLine("var article = new Article().ShowToc(!onlyBody).ShowFooter(!onlyBody).Previous(appDescriptor.Previous).Next(appDescriptor.Next).DocumentSource(appDescriptor.DocumentSource).HandleLinkClick(onLinkClick)");
+            codeBuilder.AppendTab(2).AppendLine("var article = new Article().ShowToc(!onlyBody).ShowFooter(!onlyBody).Previous(appDescriptor.Previous).Next(appDescriptor.Next).DocumentSource(appDescriptor.DocumentSource).ShowContributors(true).HandleLinkClick(onLinkClick)");
 
-            HandleBlocks(document, codeBuilder, markdownContent, viewBuilder, usedClassNames, referencedApps, linkConverter);
+            HandleBlocks(document, codeBuilder, markdownContent, viewBuilder, usedClassNames, referencedApps, linkConverter, relativePath);
 
             codeBuilder.AppendTab(3).AppendLine(";");
 
@@ -153,7 +153,7 @@ public static class MarkdownConverter
     }
 
     private static void HandleBlocks(MarkdownDocument document, StringBuilder codeBuilder, string markdownContent,
-        StringBuilder viewBuilder, HashSet<string> usedClassNames, HashSet<string> referencedApps, LinkConverter linkConverter)
+        StringBuilder viewBuilder, HashSet<string> usedClassNames, HashSet<string> referencedApps, LinkConverter linkConverter, string relativePath)
     {
         var sectionBuilder = new StringBuilder();
 
@@ -208,6 +208,10 @@ public static class MarkdownConverter
         }
 
         WriteSection();
+
+        // Add Contributors widget at the end if we have a document source
+        var markdownFileName = Path.GetFileName(relativePath);
+        codeBuilder.AppendTab(3).AppendLine($"| ContributorsExtensions.CreateContributorsView(\"{markdownFileName}\", maxContributors: 5, showOnMobile: false)");
     }
 
     private static void HandleHtmlBlock(string markdownContent, HtmlBlock htmlBlock, StringBuilder codeBuilder)

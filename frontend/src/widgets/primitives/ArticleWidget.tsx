@@ -32,6 +32,24 @@ export const ArticleWidget: React.FC<ArticleWidgetProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Extract Contributors widget from children
+  const contributorsWidget = React.Children.toArray(children).find(
+    (child: React.ReactNode) =>
+      React.isValidElement(child) &&
+      ((child.type as { name?: string })?.name === 'ContributorsWidget' ||
+        (child.props as { type?: string })?.type === 'Ivy.Contributors')
+  );
+
+  // Filter out Contributors widget from main content
+  const mainContent = React.Children.toArray(children).filter(
+    (child: React.ReactNode) =>
+      !(
+        React.isValidElement(child) &&
+        ((child.type as { name?: string })?.name === 'ContributorsWidget' ||
+          (child.props as { type?: string })?.type === 'Ivy.Contributors')
+      )
+  );
+
   // Extract headings and manage loading state
   useEffect(() => {
     // Clear any existing timeout
@@ -128,7 +146,7 @@ export const ArticleWidget: React.FC<ArticleWidgetProps> = ({
       <div className="flex gap-8 flex-grow">
         <article ref={articleRef} className="w-[48rem]">
           <div className="flex flex-col gap-4 flex-grow min-h-[calc(100vh+8rem)]">
-            {children}
+            {mainContent}
           </div>
           {showFooter && (
             <footer className="border-t py-8 mt-20">
@@ -212,12 +230,8 @@ export const ArticleWidget: React.FC<ArticleWidgetProps> = ({
                     articleRef={articleRef}
                     tocItems={tocItems}
                   />
-                  {/* Show contributors after TOC - placeholder for now */}
-                  {showContributors && documentSource && (
-                    <div className="mt-6">
-                      {/* Contributors will be rendered by the backend as part of article children */}
-                    </div>
-                  )}
+                  {/* Show contributors after TOC */}
+                  {showContributors && contributorsWidget && contributorsWidget}
                 </div>
               ) : (
                 <div className="w-64">

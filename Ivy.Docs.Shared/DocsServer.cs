@@ -1,4 +1,5 @@
 ﻿using Ivy.Chrome;
+using Ivy.Services;
 
 namespace Ivy.Docs.Shared;
 
@@ -10,6 +11,12 @@ public static class DocsServer
         var server = new Server(args);
         server.AddAppsFromAssembly(typeof(DocsServer).Assembly);
         server.UseHotReload();
+
+        // Register GitHub services for documentation contributors functionality
+        server.Services.AddDistributedMemoryCache();
+        server.Services.AddHttpClient();
+        server.Services.AddSingleton<ICacheService, CacheService>();
+        server.Services.AddSingleton<IGitHubService, GitHubService>();
 
         var version = typeof(Server).Assembly.GetName().Version!.ToString().EatRight(".0");
         server.SetMetaTitle($"Ivy Docs {version}");
