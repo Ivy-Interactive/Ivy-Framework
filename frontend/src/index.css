@@ -1,7 +1,70 @@
-@import '@fontsource-variable/inter';
-@import '@fontsource/ibm-plex-mono/400.css';
-@import '@fontsource/ibm-plex-mono/500.css';
 @import 'tailwindcss';
+
+/* Geist Sans Font Family */
+@font-face {
+  font-family: 'Geist';
+  src: url('/fonts/Geist/webfonts/Geist-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Geist';
+  src: url('/fonts/Geist/webfonts/Geist-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Geist';
+  src: url('/fonts/Geist/webfonts/Geist-SemiBold.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Geist';
+  src: url('/fonts/Geist/webfonts/Geist-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Geist Mono Font Family */
+@font-face {
+  font-family: 'Geist Mono';
+  src: url('/fonts/GeistMono/webfonts/GeistMono-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Geist Mono';
+  src: url('/fonts/GeistMono/webfonts/GeistMono-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Geist Mono';
+  src: url('/fonts/GeistMono/webfonts/GeistMono-SemiBold.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Geist Mono';
+  src: url('/fonts/GeistMono/webfonts/GeistMono-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
 
 @theme {
   --color-scheme: light;
@@ -9,24 +72,24 @@
 
 @layer base {
   :root {
-    --background: oklch(1 0 0);
-    --foreground: oklch(0 0 0);
+    --background: #ffffff;
+    --foreground: #000000;
     --card: oklch(1 0 0);
     --card-foreground: oklch(0.26 0 0);
     --popover: oklch(1 0 0);
     --popover-foreground: oklch(0.26 0 0);
     --primary: #00cc92;
-    --primary-foreground: oklch(0 0 0);
-    --secondary: oklch(0.92 0.01 164.93);
+    --primary-foreground: #000000;
+    --secondary: #dfe7e3;
     --secondary-foreground: oklch(0 0 0);
-    --muted: oklch(0.98 0 0);
-    --muted-foreground: oklch(0.65 0 0);
-    --accent: oklch(0.98 0 0);
+    --muted: #f8f8f8;
+    --muted-foreground: #8f8f8f;
+    --accent: #f8f8f8;
     --accent-foreground: oklch(0.33 0 0);
     --destructive: oklch(0.69 0.2 23.69);
     --destructive-foreground: oklch(0 0 0);
-    --border: oklch(0.94 0 0);
-    --input: oklch(0.94 0 0);
+    --border: #d1d5db;
+    --input: #d1d5db;
     --ring: oklch(0.77 0 0);
     --chart-1: oklch(0.75 0.16 164.07);
     --chart-2: oklch(0.69 0.2 23.69);
@@ -37,10 +100,11 @@
     --sidebar-foreground: oklch(0.26 0 0);
     --sidebar-primary: #00cc92;
     --sidebar-primary-foreground: oklch(0.99 0 0);
-    --sidebar-accent: oklch(0.98 0 0);
+    --sidebar-accent: #f4f6f6;
     --sidebar-accent-foreground: oklch(0.33 0 0);
-    --sidebar-border: oklch(0.94 0 0);
+    --sidebar-border: #d1d5db;
     --sidebar-ring: oklch(0.77 0 0);
+
     /* Custom color palette with variants */
     --black: #000000;
     --black-foreground: #ffffff;
@@ -151,17 +215,10 @@
     --destructive-light: #efc5c9;
     --destructive-dark: #5d3235;
 
-    /* Typography System - Inter Variable Font Family */
-    --font-sans:
-      'Inter Variable', 'Inter', ui-sans-serif, system-ui, sans-serif,
-      'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
-      'Noto Color Emoji';
-    --font-serif:
-      'Inter Variable', 'Inter', ui-serif, Georgia, Cambria, 'Times New Roman',
-      Times, serif;
-    --font-mono:
-      'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
-      'Liberation Mono', 'Courier New', monospace;
+    /* Typography System - Geist Only */
+    --font-sans: 'Geist';
+    --font-serif: 'Geist';
+    --font-mono: 'Geist Mono';
 
     /* Typography Sizes from the images */
     --font-size-60: 60px;
@@ -218,48 +275,44 @@
     --spacing: 0.27rem;
   }
   .dark {
-    --background: oklch(0.14 0 285.82);
-    --foreground: oklch(0.98 0 0);
-    --card: oklch(0.14 0 285.82);
-    --card-foreground: oklch(0.98 0 0);
-    --popover: oklch(0.14 0 285.82);
-    --popover-foreground: oklch(0.98 0 0);
+    /* Global dark background color per spec */
+    --background: #000000;
+    --foreground: #f8f8f8;
+    --card: #171717;
+    --card-foreground: #f8f8f8;
+    --popover: var(--background);
+    --popover-foreground: #f8f8f8;
     --primary: #00cc92;
-    --primary-foreground: oklch(0.21 0.01 285.88);
-    --secondary: oklch(0.27 0.01 286.03);
-    --secondary-foreground: oklch(0.98 0 0);
-    --muted: oklch(0.27 0.01 286.03);
+    --primary-foreground: #18181d;
+    --secondary: #26262b;
+    --secondary-foreground: #f8f8f8;
+    --muted: #26262b;
     --muted-foreground: oklch(0.71 0.01 286.07);
-    --accent: oklch(0.27 0.01 286.03);
-    --accent-foreground: oklch(0.98 0 0);
+    --accent: #26262b;
+    --accent-foreground: #f8f8f8;
     --destructive: oklch(0.4 0.13 25.72);
     --destructive-foreground: oklch(0.97 0.01 17.38);
-    --border: oklch(0.27 0.01 286.03);
-    --input: oklch(0.27 0.01 286.03);
+    --border: #404045;
+    --input: #404045;
     --ring: oklch(0.87 0.01 286.29);
     --chart-1: oklch(0.53 0.19 262.13);
     --chart-2: oklch(0.7 0.13 165.46);
     --chart-3: oklch(0.72 0.15 60.63);
     --chart-4: oklch(0.62 0.2 312.73);
     --chart-5: oklch(0.61 0.21 6.39);
-    --sidebar: oklch(0.21 0.01 285.88);
+    --sidebar: #18181d;
     --sidebar-foreground: oklch(0.97 0 286.38);
     --sidebar-primary: oklch(0.49 0.22 264.39);
     --sidebar-primary-foreground: oklch(1 0 0);
-    --sidebar-accent: oklch(0.27 0.01 286.03);
+    --sidebar-accent: #26262b;
     --sidebar-accent-foreground: oklch(0.97 0 286.38);
-    --sidebar-border: oklch(0.27 0.01 286.03);
+    --sidebar-border: #26262b;
     --sidebar-ring: oklch(0.87 0.01 286.29);
-    --font-sans:
-      'Inter Variable', 'Inter', ui-sans-serif, system-ui, sans-serif,
-      'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
-      'Noto Color Emoji';
-    --font-serif:
-      'Inter Variable', 'Inter', ui-serif, Georgia, Cambria, 'Times New Roman',
-      Times, serif;
-    --font-mono:
-      'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
-      'Liberation Mono', 'Courier New', monospace;
+
+    /* Keep docs palette consistent in dark mode */
+    --font-sans: 'Geist';
+    --font-serif: 'Geist';
+    --font-mono: 'Geist Mono';
     --radius: 0.5rem;
     --shadow-2xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
     --shadow-xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
@@ -295,6 +348,11 @@
     --color-border: var(--border);
     --color-input: var(--input);
     --color-ring: var(--ring);
+
+    --text-body: 14px;
+    --text-large-body: 14px;
+    --text-large-label: 14px;
+    --text-small-label: 12px;
     --color-chart-1: var(--chart-1);
     --color-chart-2: var(--chart-2);
     --color-chart-3: var(--chart-3);
@@ -364,7 +422,7 @@
     --tracking-widest: calc(var(--tracking-normal) + 0.1em);
   }
   body {
-    letter-spacing: var(--tracking-normal);
+    font-family: var(--font-sans);
   }
 
   /* Ensure sidebar icons and logo use primary brand color */
@@ -377,98 +435,129 @@
   }
 }
 
-/* Typography System Classes */
+/* shadcn/ui Typography System */
 @layer utilities {
-  /* Display Typography - Large Headlines (Medium weight for headers) */
-  .text-display-60 {
-    font-family: 'Inter Display', 'Inter Variable', var(--font-sans);
-    font-weight: 500;
-    font-size: 60px;
-    line-height: 60px;
-    letter-spacing: -5%;
+  /* shadcn h1 - Large headings */
+  .typography-h1 {
+    @apply scroll-m-20 text-4xl font-extrabold tracking-tight;
   }
 
-  .text-display-40 {
-    font-family: 'Inter Display', 'Inter Variable', var(--font-sans);
-    font-weight: 500;
-    font-size: 40px;
-    line-height: 41px;
-    letter-spacing: -4%;
+  /* shadcn h2 - Section headings */
+  .typography-h2 {
+    @apply scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight first:mt-0;
   }
 
-  .text-display-30 {
-    font-family: 'Inter Display', 'Inter Variable', var(--font-sans);
-    font-weight: 500;
-    font-size: 30px;
-    line-height: 32px;
-    letter-spacing: -3%;
+  /* shadcn h3 - Subsection headings */
+  .typography-h3 {
+    @apply scroll-m-20 text-2xl font-semibold tracking-tight;
   }
 
-  .text-display-25 {
-    font-family: 'Inter Display', 'Inter Variable', var(--font-sans);
-    font-weight: 500;
-    font-size: 25px;
-    line-height: 27px;
-    letter-spacing: -2%;
+  /* shadcn h4 - Minor headings */
+  .typography-h4 {
+    @apply scroll-m-20 text-xl font-semibold tracking-tight;
   }
 
-  /* Lead Typography - Prominent Text (Medium weight for lead text) */
-  .text-lead {
-    font-family: 'Inter Variable', var(--font-sans);
+  /* shadcn p - Body text */
+  .typography-p {
+    @apply leading-7 [&:not(:first-child)]:mt-6;
+  }
+
+  /* shadcn blockquote */
+  .typography-blockquote {
+    @apply mt-6 border-l-2 pl-6 italic;
+  }
+
+  /* shadcn table */
+  .typography-table {
+    @apply w-full;
+  }
+
+  .typography-table thead {
+    @apply [&_tr]:border-b;
+  }
+
+  .typography-table tbody {
+    @apply [&_tr:last-child]:border-0;
+  }
+
+  .typography-table th {
+    @apply border px-4 py-2 text-left font-bold [&[align=center]]:text-center [&[align=right]]:text-right;
+  }
+
+  .typography-table td {
+    @apply border px-4 py-2 text-left [&[align=center]]:text-center [&[align=right]]:text-right;
+  }
+
+  /* shadcn list */
+  .typography-list {
+    @apply my-6 ml-6 list-disc [&>li]:mt-2;
+  }
+
+  /* shadcn inline code */
+  .typography-inline-code {
+    @apply relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold;
+  }
+
+  /* shadcn lead */
+  .typography-lead {
+    @apply text-xl text-muted-foreground;
+  }
+
+  /* shadcn large */
+  .typography-large {
+    @apply text-lg font-semibold;
+  }
+
+  /* shadcn small */
+  .typography-small {
+    @apply text-sm font-medium leading-none;
+  }
+
+  /* shadcn muted */
+  .typography-muted {
+    @apply text-sm text-muted-foreground;
+  }
+
+  /* Custom text utilities for forms */
+  .text-body {
+    font-size: var(--text-body);
+  }
+
+  .text-large-body {
+    font-size: var(--text-large-body);
+  }
+
+  .text-large-label {
+    font-size: var(--text-large-label);
+  }
+
+  .text-small-label {
+    font-size: var(--text-small-label);
+  }
+
+  /* Badge-specific typography classes that don't interfere with colors */
+  .badge-text-primary {
+    font-family: var(--font-mono);
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 18px;
+    letter-spacing: 4%;
+  }
+
+  .badge-text-small {
+    font-family: var(--font-mono);
+    font-weight: 400;
+    font-size: 10px;
+    line-height: 14px;
+    letter-spacing: 6%;
+  }
+
+  .badge-text-large {
+    font-family: var(--font-mono);
     font-weight: 500;
     font-size: 20px;
     line-height: 28px;
     letter-spacing: -2%;
-  }
-
-  .text-semi-lead {
-    font-family: 'Inter Variable', var(--font-sans);
-    font-weight: 500;
-    font-size: 15px;
-    line-height: 24px;
-    letter-spacing: 0%;
-  }
-
-  /* Body Typography - Main Content (Regular weight for body text) */
-  .text-large-body {
-    font-family: 'Inter Variable', var(--font-sans);
-    font-weight: 400;
-    font-size: 18px;
-    line-height: 26px;
-    letter-spacing: 1%;
-  }
-
-  .text-body {
-    font-family: 'Inter Variable', var(--font-sans);
-    font-weight: 400;
-    font-size: 16px;
-    line-height: 24px;
-    letter-spacing: 2%;
-  }
-
-  /* Label Typography - UI Elements (Regular weight for labels) */
-  .text-descriptive {
-    font-family: 'Inter Variable', var(--font-sans);
-    font-weight: 400;
-    font-size: 12px;
-    line-height: 20px;
-    letter-spacing: 4%;
-  }
-
-  .text-large-label {
-    font-family: 'Inter Variable', var(--font-sans);
-    font-weight: 400;
-    font-size: 14px;
-    line-height: 22px;
-    letter-spacing: 8%;
-  }
-
-  .text-small-label {
-    font-family: 'Inter Variable', var(--font-sans);
-    font-weight: 400;
-    font-size: 12px;
-    line-height: 18px;
-    letter-spacing: 14%;
   }
 }
 
@@ -781,6 +870,22 @@
   input[list] option:hover {
     background: var(--accent);
     color: var(--accent-foreground);
+  }
+
+  /* Prevent dialog from getting focus rings when elements inside are focused */
+  [data-radix-dialog-content] {
+    outline: none !important;
+    box-shadow: none !important;
+  }
+
+  [data-radix-dialog-content]:focus {
+    outline: none !important;
+    box-shadow: none !important;
+  }
+
+  [data-radix-dialog-content]:focus-within {
+    outline: none !important;
+    box-shadow: none !important;
   }
 }
 

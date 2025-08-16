@@ -1,7 +1,7 @@
 import { cn } from '@/lib/utils';
 import { useEffect, useState } from 'react';
-
 import * as React from 'react';
+import { hasLicensedFeature } from '@/lib/license';
 import { Card } from '@/components/ui/card';
 
 export interface SidebarNewsWidgetProps {
@@ -11,7 +11,12 @@ export interface SidebarNewsWidgetProps {
 const BASE_URL = 'https://ivy.app/news/';
 
 const SidebarNewsWidget = ({ feedUrl }: SidebarNewsWidgetProps) => {
+  const [removeBranding, setRemoveBranding] = useState(true);
   const [articles, setArticles] = useState<NewsArticle[] | null>(null);
+
+  useEffect(() => {
+    hasLicensedFeature('RemoveBranding').then(setRemoveBranding);
+  }, []);
 
   useEffect(() => {
     const fetchArticles = async () => {
@@ -30,6 +35,8 @@ const SidebarNewsWidget = ({ feedUrl }: SidebarNewsWidgetProps) => {
     };
     fetchArticles();
   }, [feedUrl]);
+
+  if (removeBranding) return null;
 
   if (!articles || articles.length === 0) return null;
 
@@ -51,7 +58,7 @@ interface NewsArticle {
 const OFFSET_FACTOR = 4;
 const SCALE_FACTOR = 0.03;
 const OPACITY_FACTOR = 0.1;
-const STORAGE_KEY = 'dismissed-news';
+const STORAGE_KEY = 'ivy-dismissed-news';
 
 function News({ articles }: { articles: NewsArticle[] }) {
   const [dismissedNews, setDismissedNews] = React.useState<string[] | null>(
@@ -350,7 +357,7 @@ function NewsCard({
             <button
               type="button"
               onClick={dismiss}
-              className="text-muted-foreground hover:text-foreground transition-colors duration-75"
+              className="text-muted-foreground hover:text-foreground transition-colors duration-75 cursor-pointer"
             >
               Dismiss
             </button>

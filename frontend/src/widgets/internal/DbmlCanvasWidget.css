@@ -1,0 +1,224 @@
+/* DBML Canvas Widget Theme Styling */
+
+/* ReactFlow Controls Theme Styling */
+.react-flow__controls {
+  background-color: var(--background) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 4px !important;
+  box-shadow: var(--shadow-sm) !important;
+  padding: 4px !important;
+}
+
+.react-flow__controls-button {
+  background-color: var(--background) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 4px !important;
+  color: var(--foreground) !important;
+  width: 32px !important;
+  height: 32px !important;
+  margin: 2px !important;
+  transition: all 0.2s ease !important;
+}
+
+.react-flow__controls-button:hover {
+  background-color: var(--accent) !important;
+  color: var(--accent-foreground) !important;
+  border-color: var(--ring) !important;
+}
+
+.react-flow__controls-button:active,
+.react-flow__controls-button:focus {
+  background-color: var(--primary) !important;
+  color: var(--primary-foreground) !important;
+  border-color: var(--ring) !important;
+  outline: 2px solid var(--ring) !important;
+  outline-offset: 2px !important;
+}
+
+.react-flow__controls-button svg {
+  fill: currentColor !important;
+  width: 16px !important;
+  height: 16px !important;
+}
+
+/* ReactFlow MiniMap styling */
+.react-flow__minimap {
+  background-color: var(--background) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 4px !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+/* ReactFlow Background styling */
+.react-flow__background {
+  background-color: var(--background) !important;
+}
+
+/* ReactFlow Edge styling */
+.react-flow__edge-path {
+  stroke: var(--primary) !important;
+}
+
+.react-flow__edge-text {
+  fill: var(--foreground) !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+}
+
+.react-flow__edge-textbg {
+  fill: var(--background) !important;
+  stroke: var(--border) !important;
+  stroke-width: 1px !important;
+}
+
+/* ReactFlow Node selection styling */
+.react-flow__node.selected {
+  box-shadow: 0 0 0 2px var(--ring) !important;
+}
+
+.react-flow__node:hover {
+  box-shadow: 0 0 0 1px var(--border) !important;
+}
+
+/* ReactFlow Handle styling */
+.react-flow__handle {
+  background-color: var(--primary) !important;
+  border: 2px solid var(--background) !important;
+  width: 8px !important;
+  height: 8px !important;
+}
+
+.react-flow__handle:hover {
+  background-color: var(--ring) !important;
+}
+
+/* ReactFlow Attribution (if visible) */
+.react-flow__attribution {
+  background-color: var(--muted) !important;
+  color: var(--muted-foreground) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 4px !important;
+}
+
+/* CodeMirror scrollbar styling for DBML editor */
+.cm-scroller::-webkit-scrollbar {
+  width: 8px !important;
+  height: 8px !important;
+}
+
+.cm-scroller::-webkit-scrollbar-track {
+  background: var(--muted) !important;
+}
+
+.cm-scroller::-webkit-scrollbar-thumb {
+  background: var(--border) !important;
+  border-radius: 4px !important;
+}
+
+.cm-scroller::-webkit-scrollbar-thumb:hover {
+  background: var(--muted-foreground) !important;
+}
+
+.cm-scroller::-webkit-scrollbar-corner {
+  background: var(--muted) !important;
+}
+
+/* Firefox scrollbar styling for CodeMirror */
+.cm-scroller {
+  scrollbar-width: thin !important;
+  scrollbar-color: var(--border) var(--muted) !important;
+}
+
+/* CodeMirror panels and bottom elements */
+.cm-panels {
+  background-color: var(--muted) !important;
+  border-top: 1px solid var(--border) !important;
+  color: var(--foreground) !important;
+}
+
+.cm-panels.cm-panels-top {
+  border-bottom: 1px solid var(--border) !important;
+  border-top: none !important;
+}
+
+.cm-panels.cm-panels-bottom {
+  border-top: 1px solid var(--border) !important;
+  border-bottom: none !important;
+}
+
+/* CodeMirror search panels */
+.cm-search {
+  background-color: var(--background) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--foreground) !important;
+}
+
+.cm-search input {
+  background-color: var(--background) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--foreground) !important;
+}
+
+.cm-search button {
+  background-color: var(--muted) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--foreground) !important;
+}
+
+.cm-search button:hover {
+  background-color: var(--accent) !important;
+}
+
+/* CodeMirror tooltip */
+.cm-tooltip {
+  background-color: var(--popover) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--popover-foreground) !important;
+}
+
+/* CodeMirror autocomplete */
+.cm-completionInfo {
+  background-color: var(--popover) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--popover-foreground) !important;
+}
+
+.cm-completionDetail {
+  color: var(--muted-foreground) !important;
+}
+
+/* CodeMirror lint markers */
+.cm-lintRange {
+  background-color: var(--destructive) !important;
+  color: var(--destructive-foreground) !important;
+}
+
+.cm-lintRange.cm-lintRange-error {
+  background-color: var(--destructive) !important;
+}
+
+.cm-lintRange.cm-lintRange-warning {
+  background-color: var(--amber) !important;
+}
+
+.cm-lintRange.cm-lintRange-info {
+  background-color: var(--cyan) !important;
+}
+
+/* CodeMirror fold markers */
+.cm-foldPlaceholder {
+  background-color: var(--muted) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--muted-foreground) !important;
+}
+
+/* CodeMirror matching brackets */
+.cm-matchingBracket {
+  background-color: var(--accent) !important;
+  color: var(--accent-foreground) !important;
+}
+
+.cm-nonmatchingBracket {
+  background-color: var(--destructive) !important;
+  color: var(--destructive-foreground) !important;
+}

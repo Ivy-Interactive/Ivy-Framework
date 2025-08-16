@@ -32,7 +32,7 @@ export const HeaderLayoutWidget: React.FC<HeaderLayoutWidgetProps> = ({
       style={styles}
     >
       <div className="flex flex-col h-full">
-        <div className="p-2 border-b bg-white">{slots.Header}</div>
+        <div className="p-2 border-b bg-background">{slots.Header}</div>
         <ScrollArea className="flex-grow">
           <div className="p-4">{slots.Content}</div>
         </ScrollArea>

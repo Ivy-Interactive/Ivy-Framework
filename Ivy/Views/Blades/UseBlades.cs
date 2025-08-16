@@ -17,7 +17,12 @@ public interface IBladeController
 
 public class BladeController : IBladeController
 {
-    internal BladeController(IState<ImmutableArray<BladeItem>> blades)
+    public BladeController()
+    {
+        Blades = new State<ImmutableArray<BladeItem>>([]);
+    }
+
+    public BladeController(IState<ImmutableArray<BladeItem>> blades)
     {
         Blades = blades;
     }

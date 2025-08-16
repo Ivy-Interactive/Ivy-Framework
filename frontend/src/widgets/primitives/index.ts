@@ -10,7 +10,6 @@ export { SkeletonWidget } from './SkeletonWidget';
 export { IconWidget } from './IconWidget';
 export { BoxWidget } from './BoxWidget';
 export { CalloutWidget } from './CalloutWidget';
-export { ArticleWidget } from './ArticleWidget';
 export { KbdWidget } from './KbdWidget';
 export { EmptyWidget } from './EmptyWidget';
 export { AvatarWidget } from './AvatarWidget';

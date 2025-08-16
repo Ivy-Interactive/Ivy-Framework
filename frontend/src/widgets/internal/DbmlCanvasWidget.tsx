@@ -17,6 +17,7 @@ import dagre from 'dagre';
 import 'reactflow/dist/style.css';
 import { Parser } from '@dbml/core';
 import { getWidth, getHeight } from '@/lib/styles';
+import './DbmlCanvasWidget.css';
 
 interface DbmlCanvasWidgetProps {
   id: string;
@@ -512,10 +513,30 @@ export const DbmlCanvasWidget: React.FC<DbmlCanvasWidgetProps> = ({
         }}
       >
         <Background color="var(--primary)" gap={16} size={1} />
-        <Controls />
+        <Controls
+          style={{
+            backgroundColor: 'var(--background)',
+            border: '1px solid var(--border)',
+            borderRadius: '4px',
+            boxShadow: 'var(--shadow-sm)',
+          }}
+          showZoom={true}
+          showFitView={true}
+          showInteractive={true}
+        />
         <MiniMap
           nodeColor="var(--primary)"
-          maskColor="rgba(var(--primary-rgb), 0.1)"
+          nodeStrokeColor="var(--border)"
+          nodeStrokeWidth={1}
+          nodeBorderRadius={4}
+          maskColor="var(--accent)"
+          maskStrokeColor="var(--border)"
+          maskStrokeWidth={1}
+          style={{
+            backgroundColor: 'var(--background)',
+            border: '1px solid var(--border)',
+            borderRadius: '4px',
+          }}
         />
       </ReactFlow>
     </div>

@@ -17,7 +17,7 @@ export const TableWidget: React.FC<TableWidgetProps> = ({
   };
 
   return (
-    <Table className="text-sm w-fit" style={styles}>
+    <Table className="text-sm w-full" style={styles}>
       <TableBody>{children}</TableBody>
     </Table>
   );

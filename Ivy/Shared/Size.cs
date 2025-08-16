@@ -10,6 +10,7 @@ public enum SizeType
     Px,
     Rem,
     Fraction,
+    FractionGap,
     Full,
     Fit,
     Screen,
@@ -123,6 +124,11 @@ public record Size
     public static Size Third()
     {
         return Fraction(0.333f);
+    }
+
+    public static Size FractionGap(float value)
+    {
+        return new Size(SizeType.FractionGap, value);
     }
 
     public static implicit operator string(Size size)

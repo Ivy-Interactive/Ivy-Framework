@@ -21,7 +21,8 @@ type TextBlockVariant =
   | 'Danger'
   | 'Warning'
   | 'Success'
-  | 'Label';
+  | 'Label'
+  | 'Strong';
 
 interface TextBlockWidgetProps {
   content: string;
@@ -67,7 +68,7 @@ const variantMap: VariantMap = {
     </h4>
   ),
   Block: ({ children, className, style }) => (
-    <div className={cn('flex items-center', className)} style={style}>
+    <div className={cn('flex items-center text-sm', className)} style={style}>
       {children}
     </div>
   ),
@@ -160,6 +161,11 @@ const variantMap: VariantMap = {
     >
       {children}
     </div>
+  ),
+  Strong: ({ children, className, style }) => (
+    <strong className={cn('font-semibold', className)} style={style}>
+      {children}
+    </strong>
   ),
 };
 

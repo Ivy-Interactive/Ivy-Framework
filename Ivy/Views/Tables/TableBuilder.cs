@@ -111,22 +111,17 @@ public class TableBuilder<TModel> : ViewBase, IStateless
                 cellAlignment = Shared.Align.Right;
             }
 
-            if (field.Type == typeof(bool))
+            else if (field.Type == typeof(bool))
             {
                 cellAlignment = Shared.Align.Center;
             }
 
-            //todo: 
-            // if (field.Type == typeof(Controls.Icon) || field.Type == typeof(Controls.EmptyIcon))
-            // {
-            //     cellAlignment = CellAlignment.Center;
-            // }
-
-            //todo:
-            //if (field.Type.IsDate())
-            //{
-            //    cellRenderer = _rendererFactory.Date();
-            //}
+            else if (
+                (field.Name.EndsWith("url", StringComparison.OrdinalIgnoreCase) || field.Name.EndsWith("link", StringComparison.OrdinalIgnoreCase))
+                    && (field.Type == typeof(string) || field.Type == typeof(Uri)))
+            {
+                cellBuilder = _builderFactory.Link();
+            }
 
             var removed = field.Name.StartsWith("_") && field.Name.Length > 1;
 
@@ -161,6 +156,13 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         return this;
     }
 
+    /// <summary>
+    /// Sets the builder for all columns of a specific type.
+    /// This is useful for applying a common builder to multiple columns that share the same type.
+    /// </summary>
+    /// <param name="builder"></param>
+    /// <typeparam name="TU"></typeparam>
+    /// <returns></returns>
     public TableBuilder<TModel> Builder<TU>(Func<IBuilderFactory<TModel>, IBuilder<TModel>> builder)
     {
         foreach (var column in _columns.Values.Where(e => e.Type is TU))

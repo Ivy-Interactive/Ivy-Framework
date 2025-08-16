@@ -15,10 +15,18 @@ function getIvyLicense(): string | null {
   );
 }
 
+function getIvyLicensePublicKey(): string | null {
+  return (
+    document
+      .querySelector('meta[name="ivy-license-public-key"]')
+      ?.getAttribute('content') ?? null
+  );
+}
+
 let licensePayload: JWTPayload | null = null;
 let keyPromise: Promise<CryptoKey> | null = null;
 
-async function getPublicKey(): Promise<CryptoKey> {
+async function getPublicKey(publicKeyPem: string): Promise<CryptoKey> {
   if (!keyPromise) {
     keyPromise = crypto.subtle.importKey(
       'spki',
@@ -33,16 +41,23 @@ async function getPublicKey(): Promise<CryptoKey> {
 
 export async function hasLicensedFeature(hasFeature: string): Promise<boolean> {
   try {
-    if (publicKeyPem.includes('IVY_LICENSE_PUBLIC_KEY')) return false;
+    let _publicKeyPem = publicKeyPem;
+    if (publicKeyPem.includes('IVY_LICENSE_PUBLIC_KEY')) {
+      const publicKey = getIvyLicensePublicKey(); //in dev the public key is in a meta tag
+      if (!publicKey) return false;
+      _publicKeyPem = publicKey;
+    }
+
     if (!licensePayload) {
       const token = getIvyLicense();
       if (!token) return false;
-      const key = await getPublicKey();
+      const key = await getPublicKey(_publicKeyPem);
       const { payload } = await jwtVerify(token, key);
       licensePayload = payload;
     }
 
     const features = licensePayload.features;
+
     if (typeof features === 'string') {
       return features
         .split(',')

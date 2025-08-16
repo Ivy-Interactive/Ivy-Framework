@@ -1,6 +1,6 @@
 namespace Ivy.Builders;
 
-public class LinkBuilder<TModel>(string? url = null) : IBuilder<TModel>
+public class LinkBuilder<TModel>(string? url = null, string? label = null) : IBuilder<TModel>
 {
     public object? Build(object? value, TModel record)
     {
@@ -11,6 +11,6 @@ public class LinkBuilder<TModel>(string? url = null) : IBuilder<TModel>
 
         var actualUrl = url ?? value.ToString() ?? string.Empty;
 
-        return new Button(url, variant: ButtonVariant.Link).Url(actualUrl);
+        return new Button(label ?? actualUrl, variant: ButtonVariant.Inline).Url(actualUrl);
     }
 }

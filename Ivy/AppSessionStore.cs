@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using Ivy.Apps;
+using Ivy.Tui;
 
 namespace Ivy;
 
@@ -19,28 +20,27 @@ public class AppSessionStore
 
     public void Dump()
     {
-        // We need to redo this to use something that isn't as heavy as Spectre.Console.Table
-        // var rows = Sessions.Values.Select(e => new
-        // {
-        //     e.MachineId,
-        //     e.AppId,
-        //     e.ConnectionId,
-        //     e.ParentId,
-        //     e.LastInteraction
-        // });
-        //
-        // var table = new Spectre.Console.Table();
-        // table.AddColumn("MachineId");
-        // table.AddColumn("AppId");
-        // table.AddColumn("ConnectionId");
-        // table.AddColumn("ParentId");
-        // table.AddColumn("LastInteraction");
-        //
-        // foreach (var row in rows)
-        // {
-        //     table.AddRow(row.MachineId, row.AppId, row.ConnectionId, row.ParentId ?? "", row.LastInteraction.ToString("HH:mm:ss"));
-        // }
-        //
-        // AnsiConsole.Write(table);
+        var rows = Sessions.Values.Select(e => new
+        {
+            e.MachineId,
+            e.AppId,
+            e.ConnectionId,
+            e.ParentId,
+            e.LastInteraction
+        });
+
+        var table = new AnsiTable();
+        table.AddColumn("MachineId");
+        table.AddColumn("AppId");
+        table.AddColumn("ConnectionId");
+        table.AddColumn("ParentId");
+        table.AddColumn("LastInteraction");
+
+        foreach (var row in rows)
+        {
+            table.AddRow(row.MachineId, row.AppId, row.ConnectionId, row.ParentId ?? "", row.LastInteraction.ToString("HH:mm:ss"));
+        }
+
+        AnsiConsole.Write(table);
     }
 }

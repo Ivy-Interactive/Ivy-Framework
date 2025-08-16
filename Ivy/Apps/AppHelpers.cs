@@ -6,10 +6,10 @@ namespace Ivy.Apps;
 
 public static class AppHelpers
 {
-    public static AppDescriptor[] GetApps()
+    public static AppDescriptor[] GetApps(Assembly? assembly = null)
     {
         var apps = new List<AppDescriptor>();
-        var assembly = Assembly.GetEntryAssembly();
+        assembly ??= Assembly.GetEntryAssembly();
         if (assembly == null)
             throw new InvalidOperationException("Entry assembly not found.");
         foreach (var type in assembly.GetTypes())

@@ -1,0 +1,488 @@
+.cm-editor {
+  height: 100% !important;
+  max-height: 100% !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow: auto !important;
+  box-sizing: border-box !important;
+  font-family: var(--font-mono) !important;
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+  background-color: var(--background) !important;
+  color: var(--foreground) !important;
+}
+
+.cm-scroller {
+  height: 100% !important;
+  overflow: auto !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+.cm-gutters {
+  height: 100%;
+  background-color: var(--muted) !important;
+  border-right: 1px solid var(--border) !important;
+  color: var(--muted-foreground) !important;
+}
+
+.cm-focused {
+  outline: none !important;
+  border-color: var(--ring) !important;
+}
+
+.cm-content {
+  padding: 10px;
+  word-wrap: break-word !important;
+  white-space: pre-wrap !important;
+  width: fit-content !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  color: var(--foreground) !important;
+}
+
+.cm-line {
+  white-space: pre-wrap !important;
+  word-break: break-word !important;
+  max-width: 100% !important;
+}
+
+/* These class names are super weird but we found them in html and they fixed the issue */
+
+.ͼb {
+  color: var(--purple);
+}
+.ͼi {
+  color: var(--primary);
+}
+.ͼd {
+  color: var(--primary);
+}
+.ͼe {
+  color: var(--primary);
+}
+
+.ͼc {
+  color: var(--cyan);
+}
+.ͼg {
+  color: var(--cyan);
+}
+.ͼf {
+  color: var(--primary);
+}
+.ͼl {
+  color: var(--cyan);
+}
+
+/* CodeMirror syntax highlighting - using CSS variables for theme support */
+.cm-token.cm-keyword {
+  color: var(--purple) !important;
+}
+
+.cm-token.cm-operator {
+  color: var(--foreground) !important;
+}
+
+.cm-token.cm-string {
+  color: var(--primary) !important;
+}
+
+.cm-token.cm-string-2 {
+  color: var(--primary) !important;
+}
+
+.cm-token.cm-number {
+  color: var(--foreground) !important;
+}
+
+.cm-token.cm-comment {
+  color: var(--muted-foreground) !important;
+  font-style: italic !important;
+}
+
+.cm-token.cm-variable {
+  color: var(--cyan) !important;
+}
+
+.cm-token.cm-variable-2 {
+  color: var(--cyan) !important;
+}
+
+.cm-token.cm-def {
+  color: var(--cyan) !important;
+}
+
+.cm-token.cm-property {
+  color: var(--cyan) !important;
+}
+
+.cm-token.cm-attribute {
+  color: var(--cyan) !important;
+}
+
+.cm-token.cm-builtin {
+  color: var(--cyan) !important;
+}
+
+.cm-token.cm-type {
+  color: var(--cyan) !important;
+}
+
+.cm-token.cm-atom {
+  color: var(--cyan) !important;
+}
+
+.cm-token.cm-tag {
+  color: var(--cyan) !important;
+}
+
+.cm-token.cm-bracket {
+  color: var(--foreground) !important;
+}
+
+.cm-token.cm-punctuation {
+  color: var(--foreground) !important;
+}
+
+.cm-token.cm-meta {
+  color: var(--muted-foreground) !important;
+}
+
+.cm-token.cm-header {
+  color: var(--purple) !important;
+}
+
+.cm-token.cm-qualifier {
+  color: var(--purple) !important;
+}
+
+.cm-token.cm-quote {
+  color: var(--primary) !important;
+}
+
+.cm-token.cm-link {
+  color: var(--primary) !important;
+}
+
+.cm-token.cm-url {
+  color: var(--primary) !important;
+}
+
+.cm-token.cm-formatting {
+  color: var(--muted-foreground) !important;
+}
+
+.cm-token.cm-formatting-link {
+  color: var(--muted-foreground) !important;
+}
+
+.cm-token.cm-formatting-list {
+  color: var(--muted-foreground) !important;
+}
+
+.cm-token.cm-formatting-quote {
+  color: var(--muted-foreground) !important;
+}
+
+.cm-token.cm-formatting-strong {
+  color: var(--purple) !important;
+  font-weight: bold !important;
+}
+
+.cm-token.cm-formatting-em {
+  color: var(--purple) !important;
+  font-style: italic !important;
+}
+
+.cm-token.cm-formatting-strikethrough {
+  color: var(--muted-foreground) !important;
+  text-decoration: line-through !important;
+}
+
+.cm-token.cm-formatting-code {
+  color: var(--primary) !important;
+}
+
+.cm-token.cm-formatting-code-block {
+  color: var(--primary) !important;
+}
+
+.cm-token.cm-formatting-header {
+  color: var(--purple) !important;
+}
+
+.cm-token.cm-formatting-header-1 {
+  color: var(--purple) !important;
+}
+
+.cm-token.cm-formatting-header-2 {
+  color: var(--purple) !important;
+}
+
+.cm-token.cm-formatting-header-3 {
+  color: var(--purple) !important;
+}
+
+.cm-token.cm-formatting-header-4 {
+  color: var(--purple) !important;
+}
+
+.cm-token.cm-formatting-header-5 {
+  color: var(--purple) !important;
+}
+
+.cm-token.cm-formatting-header-6 {
+  color: var(--purple) !important;
+}
+
+.cm-token.cm-formatting-hr {
+  color: var(--muted-foreground) !important;
+}
+
+.cm-token.cm-formatting-image {
+  color: var(--primary) !important;
+}
+
+.cm-token.cm-formatting-image-marker {
+  color: var(--primary) !important;
+}
+
+.cm-token.cm-formatting-link-string {
+  color: var(--primary) !important;
+}
+
+.cm-token.cm-formatting-link-marker {
+  color: var(--primary) !important;
+}
+
+.cm-token.cm-formatting-list-ul {
+  color: var(--muted-foreground) !important;
+}
+
+.cm-token.cm-formatting-list-ol {
+  color: var(--muted-foreground) !important;
+}
+
+.cm-token.cm-formatting-quote-open {
+  color: var(--muted-foreground) !important;
+}
+
+.cm-token.cm-formatting-quote-close {
+  color: var(--muted-foreground) !important;
+}
+
+.cm-token.cm-formatting-strong-open {
+  color: var(--muted-foreground) !important;
+}
+
+.cm-token.cm-formatting-strong-close {
+  color: var(--muted-foreground) !important;
+}
+
+.cm-token.cm-formatting-em-open {
+  color: var(--muted-foreground) !important;
+}
+
+.cm-token.cm-formatting-em-close {
+  color: var(--muted-foreground) !important;
+}
+
+.cm-token.cm-formatting-strikethrough-open {
+  color: var(--muted-foreground) !important;
+}
+
+.cm-token.cm-formatting-strikethrough-close {
+  color: var(--muted-foreground) !important;
+}
+
+.cm-token.cm-formatting-code-open {
+  color: var(--muted-foreground) !important;
+}
+
+.cm-token.cm-formatting-code-close {
+  color: var(--muted-foreground) !important;
+}
+
+.cm-token.cm-formatting-code-block-open {
+  color: var(--muted-foreground) !important;
+}
+
+.cm-token.cm-formatting-code-block-close {
+  color: var(--muted-foreground) !important;
+}
+
+.cm-token.cm-formatting-header-open {
+  color: var(--muted-foreground) !important;
+}
+
+.cm-token.cm-formatting-header-close {
+  color: var(--muted-foreground) !important;
+}
+
+.cm-token.cm-formatting-hr-open {
+  color: var(--muted-foreground) !important;
+}
+
+.cm-token.cm-formatting-hr-close {
+  color: var(--muted-foreground) !important;
+}
+
+.cm-token.cm-formatting-image-open {
+  color: var(--muted-foreground) !important;
+}
+
+.cm-token.cm-formatting-image-close {
+  color: var(--muted-foreground) !important;
+}
+
+.cm-token.cm-formatting-link-open {
+  color: var(--muted-foreground) !important;
+}
+
+.cm-token.cm-formatting-link-close {
+  color: var(--muted-foreground) !important;
+}
+
+.cm-token.cm-formatting-list-open {
+  color: var(--muted-foreground) !important;
+}
+
+.cm-token.cm-formatting-list-close {
+  color: var(--muted-foreground) !important;
+}
+
+.cm-token.cm-formatting-quote-open {
+  color: var(--muted-foreground) !important;
+}
+
+.cm-token.cm-formatting-quote-close {
+  color: var(--muted-foreground) !important;
+}
+
+/* TypeScript specific syntax highlighting */
+.cm-token.cm-typeName {
+  color: var(--cyan) !important;
+}
+
+.cm-token.cm-interfaceName {
+  color: var(--cyan) !important;
+}
+
+.cm-token.cm-namespace {
+  color: var(--cyan) !important;
+}
+
+.cm-token.cm-enumName {
+  color: var(--cyan) !important;
+}
+
+.cm-token.cm-enumMember {
+  color: var(--cyan) !important;
+}
+
+.cm-token.cm-typeParam {
+  color: var(--cyan) !important;
+}
+
+.cm-token.cm-function {
+  color: var(--cyan) !important;
+}
+
+.cm-token.cm-macroName {
+  color: var(--purple) !important;
+}
+
+.cm-token.cm-variableName {
+  color: var(--foreground) !important;
+}
+
+.cm-token.cm-labelName {
+  color: var(--foreground) !important;
+}
+
+.cm-token.cm-propertyName {
+  color: var(--foreground) !important;
+}
+
+.cm-token.cm-escape {
+  color: var(--red) !important;
+}
+
+.cm-token.cm-string2 {
+  color: var(--primary) !important;
+}
+
+.cm-token.cm-comment2 {
+  color: var(--muted-foreground) !important;
+  font-style: italic !important;
+}
+
+.cm-token.cm-self {
+  color: var(--purple) !important;
+}
+
+.cm-token.cm-null {
+  color: var(--purple) !important;
+}
+
+.cm-token.cm-bool {
+  color: var(--purple) !important;
+}
+
+.cm-token.cm-regExp {
+  color: var(--primary) !important;
+}
+
+.cm-token.cm-formatting {
+  color: var(--muted-foreground) !important;
+}
+
+/* Active line highlighting */
+.cm-activeLine {
+  background-color: var(--accent) !important;
+}
+
+.cm-activeLineGutter {
+  background-color: var(--accent) !important;
+}
+
+/* Selection */
+.cm-selectionBackground {
+  background-color: var(--accent) !important;
+}
+
+.cm-selectionMatch {
+  background-color: var(--accent) !important;
+}
+
+/* Cursor */
+.cm-cursor {
+  border-left-color: var(--foreground) !important;
+}
+
+/* Line numbers */
+.cm-gutterElement {
+  color: var(--muted-foreground) !important;
+}
+
+.cm-activeLineGutter .cm-gutterElement {
+  color: var(--foreground) !important;
+  font-weight: bold !important;
+}
+
+.w-tc-editor {
+  height: 100% !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  box-sizing: border-box !important;
+}
+
+.w-tc-editor-text {
+  flex: 1 !important;
+  overflow: auto !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}

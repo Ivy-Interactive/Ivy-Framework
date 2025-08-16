@@ -1,0 +1,50 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../Ivy/Directory.Build.props" Condition="Exists('../../Ivy/Directory.Build.props')" />
+  
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Ivy.Docs.Shared</RootNamespace>
+    <NoWarn>CS8618;CS8603;CS8602;CS8604;CS8669;CS9113;NETSDK1187</NoWarn>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <EnableDefaultEmbeddedResourceItems>false</EnableDefaultEmbeddedResourceItems>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(IvyPackageVersion)' != ''">
+    <PackageReference Include="Ivy" Version="$(IvyPackageVersion)" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(IvyPackageVersion)' == ''">
+    <ProjectReference Include="../Ivy/Ivy.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Assets/**/*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Docs/*.md" />
+    <Compile Include="**/*.cs" Exclude="obj/**/*.cs;bin/**/*.cs;Generated/**/*.cs" />
+  </ItemGroup>
+
+  <Target Name="TransformMarkdown" BeforeTargets="CoreCompile">
+    <Exec Command="dotnet run --project ../Ivy.Docs.Tools/Ivy.Docs.Tools.csproj -- convert $(MSBuildProjectDirectory)/Docs/*.md $(MSBuildProjectDirectory)/Generated --skip-if-not-changed" />
+    <ItemGroup>
+      <Compile Include="Generated/**/*.g.cs" />
+    </ItemGroup>
+  </Target>
+
+  <ItemGroup>
+    <Watch Remove="Docs/**/*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Ivy.Docs.Test" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Generated\" />
+  </ItemGroup>
+  
+</Project>

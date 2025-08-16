@@ -2,7 +2,7 @@
 
 public enum Sizes
 {
-    Default,
+    Medium,
     Small,
     Large
 }

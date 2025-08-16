@@ -1,0 +1,45 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  
+  <Import Project="../../Ivy/Directory.Build.props" Condition="Exists('../../Ivy/Directory.Build.props')" />
+  
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <NoWarn>CS8618;CS8603</NoWarn>
+    <UserSecretsId>7a9ec095-f521-43d6-852a-1ae71e38a08e</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(IvyPackageVersion)' != ''">
+    <PackageReference Include="Ivy" Version="$(IvyPackageVersion)" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(IvyPackageVersion)' == ''">
+    <ProjectReference Include="../Ivy/Ivy.csproj" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <EmbeddedResource Include="Assets/**/*" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <EmbeddedResource Include="Apps/**/*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Bogus" Version="35.6.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.4" />
+    <PackageReference Include="Microsoft.SemanticKernel" Version="1.45.0" />
+    <PackageReference Include="SixLabors.ImageSharp" Version="3.1.11" />
+  </ItemGroup>
+
+<!--  <ItemGroup>-->
+<!--    <ProjectReference Include="..\Ivy.Analyser\Ivy.Analyser.csproj">-->
+<!--      <PrivateAssets>all</PrivateAssets>-->
+<!--      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>-->
+<!--      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>-->
+<!--      <OutputItemType>Analyzer</OutputItemType>-->
+<!--    </ProjectReference>-->
+<!--  </ItemGroup>-->
+
+</Project>

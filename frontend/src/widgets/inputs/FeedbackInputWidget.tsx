@@ -1,7 +1,7 @@
 import { EmojiRating } from '@/components/EmojiRating';
-import { useEventHandler } from '@/components/EventHandlerContext';
+import { useEventHandler } from '@/components/event-handler';
 import { StarRating } from '@/components/StarRating';
-import ThumbsRating, { ThumbsEnum } from '@/components/ThumbsRating';
+import { ThumbsEnum, ThumbsRating } from '@/components/ui/thumbs-rating';
 import React, { useCallback, useMemo } from 'react';
 
 interface FeedbackInputWidgetProps {

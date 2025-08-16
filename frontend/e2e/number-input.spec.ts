@@ -86,32 +86,6 @@ test.describe('Number Input Tests', () => {
       await invalidInput.fill('999');
       await expect(invalidInput).toHaveValue('999');
     });
-
-    test('should test arrows number input interactions', async ({ page }) => {
-      const arrowsInput = page.getByTestId('number-input-int-arrows-main');
-      await expect(arrowsInput).toBeVisible();
-
-      // Test typing a value
-      await arrowsInput.clear();
-      await arrowsInput.fill('10');
-      await expect(arrowsInput).toHaveValue('10');
-
-      // Test that arrows are visible (the input should have the pr-14 class for right padding)
-      await expect(arrowsInput).toHaveClass(/pr-14/);
-
-      // Test increment/decrement buttons exist (they are inside the input container)
-      const incrementButton = arrowsInput
-        .locator('..')
-        .getByRole('button')
-        .first();
-      const decrementButton = arrowsInput
-        .locator('..')
-        .getByRole('button')
-        .last();
-
-      await expect(incrementButton).toBeVisible();
-      await expect(decrementButton).toBeVisible();
-    });
   });
 
   test.describe('Slider Number Input Variants', () => {

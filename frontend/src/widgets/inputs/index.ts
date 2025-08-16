@@ -9,3 +9,4 @@ export { FeedbackInputWidget } from './FeedbackInputWidget';
 export { AsyncSelectInputWidget } from './AsyncSelectInputWidget';
 export { DateRangeInputWidget } from './DateRangeInputWidget';
 export { FileInputWidget } from './FileInputWidget';
+export { CodeInputWidget } from './code';

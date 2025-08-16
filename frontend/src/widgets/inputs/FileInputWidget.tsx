@@ -1,6 +1,6 @@
 import React, { useCallback, useState, useRef } from 'react';
 import { Input } from '@/components/ui/input';
-import { useEventHandler } from '@/components/EventHandlerContext';
+import { useEventHandler } from '@/components/event-handler';
 import { Upload, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -34,7 +34,6 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
   disabled,
   invalid,
   width,
-  events,
   accept,
   multiple = false,
   maxFiles,
@@ -44,18 +43,21 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
   const [isDragging, setIsDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const convertFileToUploadFile = async (file: File): Promise<FileInput> => {
-    const arrayBuffer = await file.arrayBuffer();
-    const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+  const convertFileToUploadFile = useCallback(
+    async (file: File): Promise<FileInput> => {
+      const arrayBuffer = await file.arrayBuffer();
+      const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
 
-    return {
-      name: file.name,
-      size: file.size,
-      type: file.type,
-      lastModified: new Date(file.lastModified),
-      content: base64,
-    };
-  };
+      return {
+        name: file.name,
+        size: file.size,
+        type: file.type,
+        lastModified: new Date(file.lastModified),
+        content: base64,
+      };
+    },
+    []
+  );
 
   const handleChange = useCallback(
     async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -80,12 +82,12 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
 
       handleEvent('OnChange', id, [selectedFiles]);
     },
-    [id, events, multiple, handleEvent, convertFileToUploadFile, maxFiles]
+    [id, multiple, handleEvent, convertFileToUploadFile, maxFiles]
   );
 
   const handleClear = useCallback(() => {
     handleEvent('OnChange', id, [null]);
-  }, [id, events, handleEvent]);
+  }, [id, handleEvent]);
 
   const handleDragEnter = useCallback(
     (e: React.DragEvent) => {
@@ -138,15 +140,7 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
 
       handleEvent('OnChange', id, [selectedFiles]);
     },
-    [
-      id,
-      events,
-      multiple,
-      handleEvent,
-      disabled,
-      convertFileToUploadFile,
-      maxFiles,
-    ]
+    [id, multiple, handleEvent, disabled, convertFileToUploadFile, maxFiles]
   );
 
   const handleClick = useCallback(() => {

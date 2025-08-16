@@ -35,11 +35,11 @@ This project and everyone participating in it is governed by our [Code of Conduc
 
 - [.NET 9 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/9.0)
 - [Node.js 22.12+ & npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm)
-- [Vite 7](https://vitejs.dev/)
 
 ### Setup Steps
 
 1. **Clone your fork:**
+
    ```bash
    git clone https://github.com/YOUR_USERNAME/Ivy-Framework.git
    cd Ivy-Framework
@@ -79,14 +79,16 @@ This project and everyone participating in it is governed by our [Code of Conduc
 ## Pull Request Process
 
 1. **Create a descriptive branch name:**
-   ```
+
+   ```text
    feature/add-new-widget
    fix/button-styling-issue
    docs/update-getting-started
    ```
 
 2. **Write a clear commit message:**
-   ```
+
+   ```text
    feat: add new BadgeWidget component
    fix: resolve button hover state issue
    docs: update installation instructions

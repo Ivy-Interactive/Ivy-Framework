@@ -34,7 +34,6 @@ export const widgetMap = {
   'Ivy.Box': Primitives.BoxWidget,
   'Ivy.Embed': React.lazy(() => import('@/widgets/primitives/EmbedWidget')),
   'Ivy.Callout': Primitives.CalloutWidget,
-  'Ivy.Article': Primitives.ArticleWidget,
   'Ivy.Kbd': Primitives.KbdWidget,
   'Ivy.Empty': Primitives.EmptyWidget,
   'Ivy.Avatar': Primitives.AvatarWidget,
@@ -44,6 +43,7 @@ export const widgetMap = {
   'Ivy.AppHost': Primitives.AppHostWidget,
 
   // Widgets
+  'Ivy.Article': Widgets.ArticleWidget,
   'Ivy.Button': Widgets.ButtonWidget,
   'Ivy.Progress': Widgets.ProgressWidget,
   'Ivy.Tooltip': Widgets.TooltipWidget,
@@ -84,7 +84,9 @@ export const widgetMap = {
   'Ivy.AsyncSelectInput': Inputs.AsyncSelectInputWidget,
   'Ivy.DateRangeInput': Inputs.DateRangeInputWidget,
   'Ivy.FileInput': Inputs.FileInputWidget,
-  'Ivy.CodeInput': React.lazy(() => import('@/widgets/inputs/CodeInputWidget')),
+  'Ivy.CodeInput': React.lazy(
+    () => import('@/widgets/inputs/code/CodeInputWidget')
+  ),
 
   // Forms
   'Ivy.Form': Forms.FormWidget,
@@ -127,6 +129,7 @@ export const widgetMap = {
   ),
 
   // Internal
+  'Ivy.DemoBox': React.lazy(() => import('@/widgets/internal/DemoBoxWidget')),
   'Ivy.Widgets.Internal.DbmlCanvas': React.lazy(
     () => import('@/widgets/internal/DbmlCanvasWidget')
   ),

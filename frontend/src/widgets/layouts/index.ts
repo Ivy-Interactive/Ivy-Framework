@@ -4,7 +4,7 @@ export { GridLayoutWidget } from './GridLayoutWidget';
 export { HeaderLayoutWidget } from './HeaderLayoutWidget';
 export { FooterLayoutWidget } from './FooterLayoutWidget';
 export { TabsLayoutWidget, TabWidget } from './TabsLayoutWidget';
-export { SidebarLayoutWidget, SidebarMenuWidget } from './SidebarLayoutWidget';
+export { SidebarLayoutWidget, SidebarMenuWidget } from './sidebar';
 export {
   ResizeablePanelWidget,
   ResizeablePanelGroupWidget,

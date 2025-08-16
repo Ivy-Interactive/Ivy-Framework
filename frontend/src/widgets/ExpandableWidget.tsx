@@ -43,7 +43,7 @@ export const ExpandableWidget: React.FC<ExpandableWidgetProps> = ({
           </Button>
         </CollapsibleTrigger>
       </div>
-      <CollapsibleContent className="space-y-2 p-2">
+      <CollapsibleContent className="space-y-4 p-2">
         {slots?.Content}
       </CollapsibleContent>
     </Collapsible>

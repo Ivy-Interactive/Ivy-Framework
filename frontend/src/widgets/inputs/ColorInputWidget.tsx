@@ -1,9 +1,10 @@
-import { useEventHandler } from '@/components/EventHandlerContext';
+import { useEventHandler } from '@/components/event-handler';
 import { InvalidIcon } from '@/components/InvalidIcon';
 import { inputStyles } from '@/lib/styles';
 import { Input } from '@/components/ui/input';
 import { X } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
+import { logger } from '@/lib/logger';
 
 interface ColorInputWidgetProps {
   id: string;
@@ -107,6 +108,11 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
     return undefined;
   };
 
+  /**
+   * Converts various color formats to hex.
+   * Supported formats: hex (#rrggbb), rgb(), named colors
+   * Unsupported formats: oklch() - returns fallback color (#000000)
+   */
   const convertToHex = (colorValue: string): string => {
     if (!colorValue) return '';
     if (colorValue.startsWith('#')) {
@@ -119,15 +125,11 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
       const b = parseInt(rgbMatch[3]);
       return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
     }
-    const oklchMatch = colorValue.match(
-      /oklch\(([^,]+),\s*([^,]+),\s*([^)]+)\)/
-    );
-    if (oklchMatch) {
-      // TODO: Replace this placeholder with a real OKLCH → HEX conversion.
-      const hash = Math.abs(
-        colorValue.split('').reduce((a, b) => a + b.charCodeAt(0), 0)
-      );
-      return `#${(hash % 0xffffff).toString(16).padStart(6, '0')}`;
+    // More comprehensive OKLCH detection
+    const isOklch = /^oklch\s*\(/i.test(colorValue.trim());
+    if (isOklch) {
+      logger.warn(`OKLCH color format not supported: ${colorValue}`);
+      return '#000000'; // Default fallback
     }
     // Use theme color if available
     const lowerValue = colorValue.toLowerCase();

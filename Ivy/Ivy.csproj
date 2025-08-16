@@ -33,6 +33,7 @@
     <EmbeddedResource Update="Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <Culture>neutral</Culture>
     </EmbeddedResource>
   </ItemGroup>
 
@@ -48,7 +49,6 @@
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.4" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.2.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.5" />
-    <!--<PackageReference Include="Spectre.Console" Version="0.50.0" />-->
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.8.0" />
     <PackageReference Include="System.Reactive" Version="6.0.1" />
     <PackageReference Include="DeepCloner" Version="0.10.4" />

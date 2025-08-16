@@ -29,7 +29,6 @@ public interface IAnyNumberInput : IAnyInput
     public NumberInputs Variant { get; set; }
     public NumberFormatStyle FormatStyle { get; set; }
     public string? Currency { get; set; }
-    public bool ShowArrows { get; set; }
     public string? TargetType { get; set; }
 }
 
@@ -45,7 +44,6 @@ public abstract record NumberInputBase : WidgetBase<NumberInputBase>, IAnyNumber
     [Prop] public NumberInputs Variant { get; set; }
     [Prop] public NumberFormatStyle FormatStyle { get; set; }
     [Prop] public string? Currency { get; set; }
-    [Prop] public bool ShowArrows { get; set; } = false;
     [Prop] public string? TargetType { get; set; }
     [Event] public Action<Event<IAnyInput>>? OnBlur { get; set; }
     public Type[] SupportedStateTypes() => [
@@ -189,8 +187,4 @@ public static class NumberInputExtensions
         return widget with { Invalid = invalid };
     }
 
-    public static NumberInputBase ShowArrows(this NumberInputBase widget, bool showArrows = true)
-    {
-        return widget with { ShowArrows = showArrows };
-    }
 }

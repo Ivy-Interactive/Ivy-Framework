@@ -20,4 +20,8 @@ public interface IAuthProvider
     Task<Uri> GetOAuthUriAsync(AuthOption option, WebhookEndpoint callback);
 
     Task<AuthToken?> HandleOAuthCallbackAsync(HttpRequest request);
+
+    void SetHttpContext(HttpContext context)
+    {
+    }
 }

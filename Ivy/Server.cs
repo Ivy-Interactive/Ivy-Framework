@@ -21,10 +21,11 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Ivy;
 
-public class ServerArgs
+public record ServerArgs
 {
     public const int DefaultPort = 5010;
     public int Port { get; set; } = DefaultPort;
@@ -36,6 +37,7 @@ public class ServerArgs
     public bool Silent { get; set; } = false;
     public string? MetaTitle { get; set; } = null;
     public string? MetaDescription { get; set; } = null;
+    public Assembly? AssetAssembly { get; set; } = null;
 }
 
 public class Server
@@ -43,7 +45,7 @@ public class Server
     private IContentBuilder? _contentBuilder;
     private bool _useHotReload;
     private bool _useHttpRedirection;
-    private List<Action<WebApplicationBuilder>> _builderMods = new();
+    private readonly List<Action<WebApplicationBuilder>> _builderMods = new();
 
     public string? DefaultAppId { get; private set; }
     public AppRepository AppRepository { get; } = new();
@@ -58,8 +60,19 @@ public class Server
         _args = args ?? IvyServerUtils.GetArgs();
         if (int.TryParse(Environment.GetEnvironmentVariable("PORT"), out int parsedPort))
         {
-            _args.Port = parsedPort;
+            _args = _args with { Port = parsedPort };
         }
+
+        if (bool.TryParse(Environment.GetEnvironmentVariable("VERBOSE"), out bool parsedVerbose))
+        {
+            _args = _args with { Verbose = parsedVerbose };
+        }
+
+        _args = _args with
+        {
+            AssetAssembly = _args.AssetAssembly ?? Assembly.GetCallingAssembly(),
+        };
+
         Services.AddSingleton(_args);
     }
 
@@ -88,9 +101,23 @@ public class Server
         AppRepository.AddFactory(() => [appDescriptor]);
     }
 
-    public void AddAppsFromAssembly()
+    public void AddAppsFromAssembly(Assembly? assembly = null)
     {
-        AppRepository.AddFactory(AppHelpers.GetApps);
+        AppRepository.AddFactory(() => AppHelpers.GetApps(assembly));
+    }
+
+    public void AddConnectionsFromAssembly()
+    {
+        var assembly = Assembly.GetEntryAssembly();
+
+        var connections = assembly!.GetTypes()
+            .Where(t => t.IsClass && typeof(IConnection).IsAssignableFrom(t));
+
+        foreach (var type in connections)
+        {
+            var connection = (IConnection)Activator.CreateInstance(type)!;
+            connection.RegisterServices(this.Services);
+        }
     }
 
     public AppDescriptor GetApp(string id)
@@ -159,7 +186,7 @@ public class Server
 
     public Server UseDefaultApp(Type appType)
     {
-        DefaultAppId = AppHelpers.GetApp(appType)?.Id;
+        DefaultAppId = AppHelpers.GetApp(appType).Id;
         return this;
     }
 
@@ -232,7 +259,10 @@ public class Server
         var builder = WebApplication.CreateBuilder();
 
         builder.Configuration.AddEnvironmentVariables();
-        builder.Configuration.AddUserSecrets(Assembly.GetExecutingAssembly());
+        if (Assembly.GetEntryAssembly() is { } entryAssembly)
+        {
+            builder.Configuration.AddUserSecrets(entryAssembly);
+        }
 
         foreach (var mod in _builderMods)
         {
@@ -284,6 +314,8 @@ public class Server
             app.UseHttpsRedirection();
         }
 
+        var logger = _args.Verbose ? app.Services.GetRequiredService<ILogger<Server>>() : new NullLogger<Server>();
+
         app.UseRouting();
         app.UseCors();
         app.UseGrpcWeb();
@@ -302,8 +334,8 @@ public class Server
             };
         }
 
-        app.UseFrontend(_args);
-        app.UseAssets("Assets");
+        app.UseFrontend(_args, logger);
+        app.UseAssets(_args, logger, "Assets");
 
         app.Lifetime.ApplicationStarted.Register(() =>
         {
@@ -330,34 +362,20 @@ public class Server
             Console.WriteLine($@"Failed to start Ivy server. Is the port already in use?");
         }
     }
-
-    public void AddConnectionsFromAssembly()
-    {
-        var assembly = Assembly.GetEntryAssembly();
-
-        var connections = assembly!.GetTypes()
-            .Where(t => t.IsClass && typeof(IConnection).IsAssignableFrom(t));
-
-        foreach (var type in connections)
-        {
-            var connection = (IConnection)Activator.CreateInstance(type)!;
-            connection.RegisterServices(this.Services);
-        }
-    }
 }
 
 public static class WebApplicationExtensions
 {
-    public static WebApplication UseFrontend(this WebApplication app, ServerArgs serverArgs)
+    public static WebApplication UseFrontend(this WebApplication app, ServerArgs serverArgs, ILogger<Server> logger)
     {
-        var assembly = Assembly.GetExecutingAssembly()!;
+        var assembly = typeof(WebApplicationExtensions).Assembly;
         var embeddedProvider = new EmbeddedFileProvider(
             assembly,
             $"{assembly.GetName().Name}"
         );
+        var resourceName = $"{assembly.GetName().Name}.index.html";
         app.MapGet("/", async context =>
         {
-            var resourceName = $"{assembly.GetName().Name}.index.html";
             await using var stream = assembly.GetManifestResourceStream(resourceName);
             if (stream != null)
             {
@@ -372,6 +390,15 @@ public static class WebApplicationExtensions
                     var ivyLicenseTag = $"<meta name=\"ivy-license\" content=\"{ivyLicense}\" />";
                     html = html.Replace("</head>", $"  {ivyLicenseTag}\n</head>");
                 }
+#if DEBUG
+                var ivyLicensePublicKey = configuration["IVY_LICENSE_PUBLIC_KEY"] ?? "";
+                if (!string.IsNullOrEmpty(ivyLicensePublicKey))
+                {
+                    var ivyLicensePublicKeyTag =
+                        $"<meta name=\"ivy-license-public-key\" content=\"{ivyLicensePublicKey}\" />";
+                    html = html.Replace("</head>", $"  {ivyLicensePublicKeyTag}\n</head>");
+                }
+#endif
 
                 //Inject Meta Title and Description
                 if (!string.IsNullOrEmpty(serverArgs.MetaDescription))
@@ -379,6 +406,7 @@ public static class WebApplicationExtensions
                     var metaDescriptionTag = $"<meta name=\"description\" content=\"{serverArgs.MetaDescription}\" />";
                     html = html.Replace("</head>", $"  {metaDescriptionTag}\n</head>");
                 }
+
                 if (!string.IsNullOrEmpty(serverArgs.MetaTitle))
                 {
                     var metaTitleTag = $"<title>{serverArgs.MetaTitle}</title>";
@@ -386,8 +414,15 @@ public static class WebApplicationExtensions
                 }
 
                 context.Response.ContentType = "text/html";
+                context.Response.StatusCode = 200;
                 var bytes = Encoding.UTF8.GetBytes(html);
                 await context.Response.Body.WriteAsync(bytes);
+            }
+            else
+            {
+                context.Response.StatusCode = 500;
+                context.Response.ContentType = "text/plain";
+                await context.Response.WriteAsync($"Error: {resourceName} not found.");
             }
         });
 
@@ -396,9 +431,12 @@ public static class WebApplicationExtensions
         return app;
     }
 
-    public static WebApplication UseAssets(this WebApplication app, string folder)
+    public static WebApplication UseAssets(this WebApplication app, ServerArgs args, ILogger<Server> logger,
+        string folder)
     {
-        var assembly = Assembly.GetEntryAssembly()!;
+        var assembly = args.AssetAssembly ?? Assembly.GetEntryAssembly()!;
+
+        logger.LogDebug("Using {Assembly} for assets.", assembly.FullName);
 
         var embeddedProvider = new EmbeddedFileProvider(
             assembly,

@@ -51,9 +51,12 @@ const MultipleSelector = React.forwardRef<
     const [open, setOpen] = React.useState(false);
     const [inputValue, setInputValue] = React.useState('');
 
-    const handleUnselect = (option: Option) => {
-      onValueChange?.(value.filter(item => item.value !== option.value));
-    };
+    const handleUnselect = React.useCallback(
+      (option: Option) => {
+        onValueChange?.(value.filter(item => item.value !== option.value));
+      },
+      [onValueChange, value]
+    );
 
     const handleKeyDown = React.useCallback(
       (e: React.KeyboardEvent<HTMLDivElement>) => {
@@ -70,7 +73,7 @@ const MultipleSelector = React.forwardRef<
           }
         }
       },
-      [value]
+      [value, handleUnselect]
     );
 
     const selectables = defaultOptions.filter(

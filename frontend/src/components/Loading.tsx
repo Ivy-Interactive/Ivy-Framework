@@ -176,15 +176,17 @@ export function Loading() {
         const color = COLORS[colorIndex] || COLORS[0];
 
         return (
-          <div key={index} className="w-7 h-7">
+          <div key={index} className="w-7 h-7" style={{ margin: '-0.5px' }}>
             {shape && (
               <svg
                 viewBox="0 0 28 28"
+                className="w-full h-full"
                 style={{
                   transform: `rotate(${rotation * 90}deg)`,
                   transitionProperty: 'transform',
                   transitionDuration: '0.2s',
                   transitionTimingFunction: 'ease-in-out',
+                  display: 'block',
                 }}
               >
                 <path

@@ -12,7 +12,7 @@ namespace Ivy;
 
 public enum ButtonVariant
 {
-    Default,
+    Primary,
     Destructive,
     Outline,
     Secondary,
@@ -23,7 +23,7 @@ public enum ButtonVariant
 
 public record Button : WidgetBase<Button>
 {
-    public Button(string? title = null, Action<Event<Button>>? onClick = null, ButtonVariant variant = ButtonVariant.Default, Icons icon = Icons.None)
+    public Button(string? title = null, Action<Event<Button>>? onClick = null, ButtonVariant variant = ButtonVariant.Primary, Icons icon = Icons.None)
     {
         Title = title;
         Variant = variant;
@@ -41,7 +41,7 @@ public record Button : WidgetBase<Button>
     [Prop] public string? Tooltip { get; set; }
     [Prop] public bool Loading { get; set; }
     [Prop] public BorderRadius BorderRadius { get; set; } = BorderRadius.Rounded;
-    [Prop] public Sizes Size { get; set; } = Sizes.Default;
+    [Prop] public Sizes Size { get; set; } = Sizes.Medium;
     [Event] public Action<Event<Button>>? OnClick { get; set; }
 
     public object? Tag { get; set; } //not a prop!
@@ -54,7 +54,7 @@ public record Button : WidgetBase<Button>
 
 public static class ButtonExtensions
 {
-    public static Button ToButton(this Icons icon, Action<Event<Button>>? onClick = null, ButtonVariant variant = ButtonVariant.Outline)
+    public static Button ToButton(this Icons icon, Action<Event<Button>>? onClick = null, ButtonVariant variant = ButtonVariant.Primary)
     {
         return new Button(null, onClick, icon: icon, variant: variant);
     }
@@ -138,6 +138,12 @@ public static class ButtonExtensions
     public static Button Content(this Button button, object child)
     {
         return button with { Children = [child] };
+    }
+
+    [RelatedTo(nameof(Button.Variant))]
+    public static Button Primary(this Button button)
+    {
+        return button.Variant(ButtonVariant.Primary);
     }
 
     [RelatedTo(nameof(Button.Variant))]

@@ -7,7 +7,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <PackageId>Ivy.Auth.Auth0</PackageId>
-    <Company>Ivy</Company>
+    <Company>Ivy Interactive</Company>
     <Description>Build Internal Applications with AI and Pure C#</Description>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/Ivy-Interactive/Ivy</PackageProjectUrl>

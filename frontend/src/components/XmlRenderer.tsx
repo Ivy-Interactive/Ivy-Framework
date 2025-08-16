@@ -90,25 +90,27 @@ export const XmlRenderer = ({ data }: XmlRendererProps) => {
     return Object.entries(attributes).map(([key, value]) => (
       <span key={key} className="ml-2">
         {' '}
-        <span className="text-purple-600">{key}</span>
-        <span className="text-gray-500">=</span>
-        <span className="text-green-600">"{value}"</span>
+        <span className="text-violet">{key}</span>
+        <span className="text-muted-foreground">=</span>
+        <span className="text-primary">"{value}"</span>
       </span>
     ));
   };
 
   const renderNode = (node: XmlNode, path: string): React.ReactElement => {
     if (node.type === 'text') {
-      return <span className="text-gray-800">{node.value}</span>;
+      return <span className="text-foreground">{node.value}</span>;
     }
 
     if (node.type === 'comment') {
-      return <span className="text-gray-500">{`<!--${node.value}-->`}</span>;
+      return (
+        <span className="text-muted-foreground">{`<!--${node.value}-->`}</span>
+      );
     }
 
     if (node.type === 'cdata') {
       return (
-        <span className="text-gray-600">{`<![CDATA[${node.value}]]>`}</span>
+        <span className="text-muted-foreground">{`<![CDATA[${node.value}]]>`}</span>
       );
     }
 
@@ -118,7 +120,7 @@ export const XmlRenderer = ({ data }: XmlRendererProps) => {
     return (
       <div>
         <div
-          className={`flex items-center ${hasChildren ? 'cursor-pointer hover:bg-gray-100 rounded' : ''} px-1`}
+          className={`flex items-center ${hasChildren ? 'cursor-pointer hover:bg-accent rounded transition-colors' : ''} px-1`}
           onClick={hasChildren ? () => toggleNode(path) : undefined}
         >
           {hasChildren &&
@@ -127,14 +129,16 @@ export const XmlRenderer = ({ data }: XmlRendererProps) => {
             ) : (
               <ChevronRight className="h-4 w-4" />
             ))}
-          <span className="text-gray-500">{'<'}</span>
-          <span className="text-blue-600">{node.name}</span>
+          <span className="text-muted-foreground">{'<'}</span>
+          <span className="text-blue">{node.name}</span>
           {node.attributes && renderAttributes(node.attributes)}
-          <span className="text-gray-500">{hasChildren ? '>' : ' />'}</span>
+          <span className="text-muted-foreground">
+            {hasChildren ? '>' : ' />'}
+          </span>
         </div>
 
         {hasChildren && isExpanded && (
-          <div className="ml-4 border-l border-gray-200">
+          <div className="ml-4 border-l border-border">
             {node.children?.map((child, index) => (
               <div key={index} className="py-1 ml-2">
                 {renderNode(child, `${path}.${index}`)}
@@ -144,9 +148,9 @@ export const XmlRenderer = ({ data }: XmlRendererProps) => {
         )}
 
         {hasChildren && isExpanded && (
-          <div className="text-gray-500 ml-1">
+          <div className="text-muted-foreground ml-1">
             {'</'}
-            <span className="text-blue-600">{node.name}</span>
+            <span className="text-blue">{node.name}</span>
             {'>'}
           </div>
         )}
@@ -157,7 +161,7 @@ export const XmlRenderer = ({ data }: XmlRendererProps) => {
   const parsedXml = parseXml(data);
 
   if (!parsedXml) {
-    return <div className="text-red-600">Invalid XML string</div>;
+    return <div className="text-destructive">Invalid XML string</div>;
   }
 
   return (

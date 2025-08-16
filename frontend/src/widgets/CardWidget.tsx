@@ -49,7 +49,7 @@ export const CardWidget: React.FC<CardWidgetProps> = ({
   return (
     <Card style={styles} className={cn('flex', 'flex-col', 'overflow-hidden')}>
       {!headerIsEmpty ? (
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardHeader className="flex flex-row items-center justify-between gap-4">
           <div className="flex flex-col">
             {title && <CardTitle>{title}</CardTitle>}
             {description && (

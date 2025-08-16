@@ -12,11 +12,12 @@ public enum TabsVariant
 
 public record TabsLayout : WidgetBase<TabsLayout>
 {
-    public TabsLayout(Action<Event<TabsLayout, int>>? onSelect, Action<Event<TabsLayout, int>>? onClose, Action<Event<TabsLayout, int>>? onRefresh, int? selectedIndex, params Tab[] tabs) : base(tabs.Cast<object>().ToArray())
+    public TabsLayout(Action<Event<TabsLayout, int>>? onSelect, Action<Event<TabsLayout, int>>? onClose, Action<Event<TabsLayout, int>>? onRefresh, Action<Event<TabsLayout, int[]>>? onReorder, int? selectedIndex, params Tab[] tabs) : base(tabs.Cast<object>().ToArray())
     {
         OnSelect = onSelect;
         OnClose = onClose;
         OnRefresh = onRefresh;
+        OnReorder = onReorder;
         SelectedIndex = selectedIndex;
         Width = Size.Full();
         Height = Size.Full();
@@ -30,6 +31,7 @@ public record TabsLayout : WidgetBase<TabsLayout>
     [Event] public Action<Event<TabsLayout, int>>? OnSelect { get; set; }
     [Event] public Action<Event<TabsLayout, int>>? OnClose { get; set; }
     [Event] public Action<Event<TabsLayout, int>>? OnRefresh { get; set; }
+    [Event] public Action<Event<TabsLayout, int[]>>? OnReorder { get; set; }
 }
 
 public static class TabsLayoutExtensions

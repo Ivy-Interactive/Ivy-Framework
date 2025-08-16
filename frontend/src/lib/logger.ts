@@ -41,7 +41,7 @@ export const setDeveloperOptions = (options: {
     // Update cached state
     developerOptions = newOptions;
 
-    console.log('Developer options updated:', newOptions);
+    console.info('Developer options updated:', newOptions);
   } catch (error) {
     console.warn('Failed to save developer options to localStorage:', error);
   }
@@ -56,7 +56,7 @@ export const getCurrentDeveloperOptions = () => {
 export const toggleDeveloperLogging = () => {
   const newValue = !developerOptions.showDetailedLogging;
   setDeveloperOptions({ showDetailedLogging: newValue });
-  console.log(`Developer logging ${newValue ? 'enabled' : 'disabled'}`);
+  console.info(`Developer logging ${newValue ? 'enabled' : 'disabled'}`);
   return newValue;
 };
 
@@ -90,7 +90,7 @@ class Logger {
    */
   debug(...args: unknown[]): void {
     if (developerOptions.showDetailedLogging) {
-      console.log(`[${this.formatTime()}]`, ...args);
+      console.info(`[${this.formatTime()}]`, ...args);
     }
   }
 

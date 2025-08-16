@@ -18,6 +18,11 @@ public record SidebarLayout : WidgetBase<SidebarLayout>
     /// </summary>
     [Prop] public bool MainAppSidebar { get; set; } = false;
 
+    /// <summary>
+    /// Controls the padding for the main content area. Default is 2.
+    /// </summary>
+    [Prop] public int MainContentPadding { get; set; } = 2;
+
     public static SidebarLayout operator |(SidebarLayout widget, object child)
     {
         throw new NotSupportedException("SidebarLayout does not support children.");
@@ -29,6 +34,11 @@ public static class SidebarLayoutExtensions
     public static SidebarLayout MainAppSidebar(this SidebarLayout sidebar, bool isMainApp = true)
     {
         return sidebar with { MainAppSidebar = isMainApp };
+    }
+
+    public static SidebarLayout Padding(this SidebarLayout sidebar, int padding)
+    {
+        return sidebar with { MainContentPadding = padding };
     }
 }
 

@@ -9,16 +9,19 @@ ARG IVY_PACKAGE_VERSION
 RUN test -n "$IVY_PACKAGE_VERSION" || (echo "IVY_PACKAGE_VERSION build-arg is required" && exit 1)
 WORKDIR /src
 COPY ["Ivy.Samples/Ivy.Samples.csproj", "Ivy.Samples/"]
-RUN dotnet restore "Ivy.Samples/Ivy.Samples.csproj" -p:UseNuGetPackage=true -p:IvyPackageVersion=$IVY_PACKAGE_VERSION
+COPY ["Ivy.Samples.Shared/Ivy.Samples.Shared.csproj", "Ivy.Samples.Shared/"]
+RUN dotnet restore "Ivy.Samples.Shared/Ivy.Samples.Shared.csproj" -p:IvyPackageVersion=$IVY_PACKAGE_VERSION
+RUN dotnet restore "Ivy.Samples/Ivy.Samples.csproj" -p:IvyPackageVersion=$IVY_PACKAGE_VERSION
 COPY . .
-WORKDIR "/src/Ivy.Samples"
-RUN dotnet build "./Ivy.Samples.csproj" -c $BUILD_CONFIGURATION -o /app/build -p:UseNuGetPackage=true -p:IvyPackageVersion=$IVY_PACKAGE_VERSION
+#WORKDIR "/src/Ivy.Samples"
+#RUN dotnet build "Ivy.Samples.csproj" -c $BUILD_CONFIGURATION -o /app/build -p:IvyPackageVersion=$IVY_PACKAGE_VERSION
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
 ARG IVY_PACKAGE_VERSION
 RUN test -n "$IVY_PACKAGE_VERSION" || (echo "IVY_PACKAGE_VERSION build-arg is required" && exit 1)
-RUN dotnet publish "./Ivy.Samples.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false -p:UseNuGetPackage=true -p:IvyPackageVersion=$IVY_PACKAGE_VERSION
+WORKDIR "/src/Ivy.Samples"
+RUN dotnet publish "./Ivy.Samples.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false /p:IvyPackageVersion=$IVY_PACKAGE_VERSION -v:diag
 
 FROM base AS final
 WORKDIR /app

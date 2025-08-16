@@ -6,7 +6,7 @@ namespace Ivy;
 
 public enum BadgeVariant
 {
-    Default,
+    Primary,
     Destructive,
     Outline,
     Secondary
@@ -14,7 +14,7 @@ public enum BadgeVariant
 
 public record Badge : WidgetBase<Badge>
 {
-    public Badge(string? title = null, BadgeVariant variant = BadgeVariant.Default, Icons icon = Icons.None)
+    public Badge(string? title = null, BadgeVariant variant = BadgeVariant.Primary, Icons icon = Icons.None)
     {
         Title = title;
         Variant = variant;
@@ -27,7 +27,7 @@ public record Badge : WidgetBase<Badge>
 
     [Prop] public Icons? Icon { get; set; }
 
-    [Prop] public Sizes Size { get; set; } = Sizes.Default;
+    [Prop] public Sizes Size { get; set; } = Sizes.Medium;
 
     [Prop] public Align IconPosition { get; set; } = Align.Left;
 
@@ -85,8 +85,8 @@ public static class BadgeExtensions
     }
 
     [RelatedTo(nameof(Badge.Variant))]
-    public static Badge Default(this Badge badge)
+    public static Badge Primary(this Badge badge)
     {
-        return badge with { Variant = BadgeVariant.Default };
+        return badge with { Variant = BadgeVariant.Primary };
     }
 }

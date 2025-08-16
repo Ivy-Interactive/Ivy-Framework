@@ -15,7 +15,7 @@ export const ReadOnlyInputWidget: React.FC<ReadOnlyInputWidgetProps> = ({
   return (
     <div
       key={id}
-      className="text-large-body text-muted-foreground flex flex-row items-center w-full"
+      className="text-body text-muted-foreground flex flex-row items-center w-full"
     >
       <div className="flex-1">
         {value && value}

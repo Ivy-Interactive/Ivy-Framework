@@ -27,6 +27,7 @@ interface BoxWidgetProps {
   width?: string;
   height?: string;
   contentAlign: Align;
+  className?: string;
 }
 
 export const BoxWidget: React.FC<BoxWidgetProps> = ({
@@ -40,16 +41,18 @@ export const BoxWidget: React.FC<BoxWidgetProps> = ({
   padding,
   margin,
   contentAlign,
+  className,
 }) => {
-  const styles = {
-    ...getBorderStyle(borderStyle),
-    ...getBorderThickness(borderThickness),
-    ...getBorderRadius(borderRadius),
+  const styles: React.CSSProperties = {
+    // Layout and spacing should always apply
     ...getPadding(padding),
     ...getMargin(margin),
     ...getAlign('Vertical', contentAlign),
     ...getWidth(width),
     ...getHeight(height),
+    ...getBorderStyle(borderStyle),
+    ...getBorderThickness(borderThickness),
+    ...getBorderRadius(borderRadius),
     ...getColor(color, 'backgroundColor', 'background'),
     ...getColor(color, 'borderColor', 'foreground'),
     ...getColor(color, 'color', 'foreground'),
@@ -57,7 +60,7 @@ export const BoxWidget: React.FC<BoxWidgetProps> = ({
 
   return (
     <>
-      <div style={styles} className={cn('font-mono', 'font-bold')}>
+      <div style={styles} className={cn(className)}>
         {children}
       </div>
     </>

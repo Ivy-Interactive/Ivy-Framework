@@ -44,7 +44,7 @@ public static class AlertOptionHelpers
     }
 }
 
-public class AlertButton(string label, AlertResult result, ButtonVariant variant = ButtonVariant.Default)
+public class AlertButton(string label, AlertResult result, ButtonVariant variant = ButtonVariant.Primary)
 {
     public string Label { get; init; } = label;
     public AlertResult Result { get; init; } = result;

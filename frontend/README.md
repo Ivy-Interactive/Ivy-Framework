@@ -53,19 +53,6 @@ Developer options are stored in localStorage and persist across:
 - Browser sessions
 - Browser restarts
 
-### Example Usage
-
-```javascript
-// Enable detailed logging
-toggleDeveloperLogging();
-// Interact with select inputs, forms, etc.
-// See detailed debug messages in console
-
-// Disable detailed logging
-toggleDeveloperLogging();
-// Only info, warn, and error messages will appear
-```
-
 ## Code Quality
 
 The frontend project uses ESLint and Prettier for code quality and formatting, with automatic pre-commit hooks. It is also responsible for handling `dotnet format` precommit hook for the BE.

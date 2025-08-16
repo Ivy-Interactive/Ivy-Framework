@@ -11,7 +11,7 @@ import {
 import { format } from 'date-fns';
 import { Calendar as CalendarIcon, Clock, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useEventHandler } from '@/components/EventHandlerContext';
+import { useEventHandler } from '@/components/event-handler';
 import { inputStyles } from '@/lib/styles';
 import { InvalidIcon } from '@/components/InvalidIcon';
 
@@ -89,7 +89,7 @@ const DateVariant: React.FC<DateVariantProps> = ({
             disabled={disabled}
             variant="outline"
             className={cn(
-              'w-full justify-start text-left font-normal pr-20 cursor-pointer hover:bg-transparent', // pr-20 for clear+icon, remove hover effect
+              'w-full justify-start text-left font-normal pr-20 cursor-pointer bg-transparent', // pr-20 for clear+icon, bg-transparent to match other inputs
               !date && 'text-muted-foreground',
               invalid && inputStyles.invalidInput,
               disabled && 'cursor-not-allowed'
@@ -154,7 +154,7 @@ const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
   'data-testid': dataTestId,
 }) => {
   const [open, setOpen] = useState(false);
-  const date = value ? new Date(value) : undefined;
+  const date = useMemo(() => (value ? new Date(value) : undefined), [value]);
   const showClear = nullable && !disabled && value != null && value !== '';
 
   const handleClear = (e?: React.MouseEvent) => {
@@ -272,7 +272,7 @@ const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
             disabled={disabled}
             variant="outline"
             className={cn(
-              'w-full justify-start text-left font-normal pr-20 cursor-pointer hover:bg-transparent', // pr-20 for clear+icon, remove hover effect
+              'w-full justify-start text-left font-normal pr-20 cursor-pointer bg-transparent', // pr-20 for clear+icon, bg-transparent to match other inputs
               !date && 'text-muted-foreground',
               invalid && inputStyles.invalidInput,
               disabled && 'cursor-not-allowed'

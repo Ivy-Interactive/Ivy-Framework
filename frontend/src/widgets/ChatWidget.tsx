@@ -1,7 +1,7 @@
 import { ChatBubble, ChatBubbleMessage } from '@/components/ChatBubble';
 import { ChatInput } from '@/components/ChatInput';
 import { ChatMessageList } from '@/components/ChatMessageList';
-import { useEventHandler } from '@/components/EventHandlerContext';
+import { useEventHandler } from '@/components/event-handler';
 import { MessageLoading } from '@/components/MessageLoading';
 import { Button } from '@/components/ui/button';
 import { CornerDownLeft } from 'lucide-react';

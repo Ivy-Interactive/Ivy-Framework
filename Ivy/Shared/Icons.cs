@@ -13,6 +13,10 @@ public static class IconsHelper
     }
 }
 
+/// <summary>
+/// Icons used in Ivy applications. Based on Lucide icons.
+/// Frequently used icons are: Search, Menu, Home, Settings, User, Lock, Eye, Bell, Trash, Upload, Download, ChevronRight, ChevronDown, Mail, Calendar
+/// </summary>
 public enum Icons
 {
     None,
@@ -22,20 +26,11 @@ public enum Icons
     Azure,  //<VscAzure />
     Amazon, //<FaAmazon />
     Microsoft, //<FaMicrosoft />
-    //Gitlab, //<FaGitlab />
     Bitbucket, //<FaBitbucket />
     Discord, //<FaDiscord />
-    //Twitter, //<FaTwitter />
-    //Instagram, //<FaInstagram />
-    //Facebook, //<FaFacebook />
-    //Linkedin, //<FaLinkedin />
-    //Youtube, //<FaYoutube />
     Vimeo, //<FaVimeo />
-    //Slack, //<FaSlack />
     Spotify, //<FaSpotify />
     Notion, //<FaNotion />
-            //Apple, //<FaApple />
-            //Github, //<FaGithub />
 
     // Lucide Icons:
     AArrowDown,

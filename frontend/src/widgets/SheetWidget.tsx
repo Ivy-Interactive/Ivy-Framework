@@ -1,4 +1,4 @@
-import { useEventHandler } from '@/components/EventHandlerContext';
+import { useEventHandler } from '@/components/event-handler';
 import {
   Sheet,
   SheetContent,
@@ -71,7 +71,9 @@ export const SheetWidget: React.FC<SheetWidgetProps> = ({
             {description && <SheetDescription>{description}</SheetDescription>}
           </SheetHeader>
         )}
-        <div className="flex-1 pb-0 pt-0 pl-4 pr-4 mt-4">{slots.Content}</div>
+        <div className="flex-1 pb-0 pt-0 pl-4 pr-4 mt-4 overflow-y-auto">
+          {slots.Content}
+        </div>
       </SheetContent>
     </Sheet>
   );

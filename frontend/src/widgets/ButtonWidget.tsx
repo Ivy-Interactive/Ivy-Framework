@@ -2,7 +2,7 @@ import React, { useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/Icon';
 import { cn, getIvyHost, camelCase } from '@/lib/utils';
-import { useEventHandler } from '@/components/EventHandlerContext';
+import { useEventHandler } from '@/components/event-handler';
 import withTooltip from '@/hoc/withTooltip';
 import { Loader2 } from 'lucide-react';
 import {
@@ -19,7 +19,7 @@ interface ButtonWidgetProps {
   iconPosition?: 'Left' | 'Right';
   size?: 'Default' | 'Small' | 'Large';
   variant?:
-    | 'Default'
+    | 'Primary'
     | 'Inline'
     | 'Destructive'
     | 'Outline'
@@ -100,7 +100,7 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
       return;
     }
     eventHandler('OnClick', id, []);
-  }, [id, disabled, url]);
+  }, [id, disabled, url, eventHandler]);
 
   const hasChildren = !!children;
 
@@ -110,7 +110,7 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
       size={buttonSize}
       onClick={handleClick}
       variant={
-        camelCase(variant) as
+        (variant === 'Primary' ? 'default' : camelCase(variant)) as
           | 'default'
           | 'destructive'
           | 'outline'

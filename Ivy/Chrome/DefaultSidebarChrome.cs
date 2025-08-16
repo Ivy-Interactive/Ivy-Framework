@@ -166,6 +166,25 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
             selectedIndex.Set(@event.Value);
         }
 
+        void OnTabReorder(Event<TabsLayout, int[]> @event)
+        {
+            var newOrder = @event.Value;
+            // Reorder tabs according to the new indices
+            var reorderedTabs = newOrder.Select(index => tabs.Value[index]).ToArray();
+            tabs.Set([.. reorderedTabs]);
+
+            // Update selected index to match the new position of the currently selected tab
+            if (selectedIndex.Value.HasValue)
+            {
+                var oldSelectedIndex = selectedIndex.Value.Value;
+                var newSelectedIndex = Array.IndexOf(newOrder, oldSelectedIndex);
+                if (newSelectedIndex >= 0)
+                {
+                    selectedIndex.Set(newSelectedIndex);
+                }
+            }
+        }
+
         object? body;
 
         if (settings.Navigation == ChromeNavigation.Pages)
@@ -174,7 +193,7 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
         }
         else
         {
-            body = new TabsLayout(OnTabSelect, OnTabClose, OnTabRefresh, selectedIndex.Value,
+            body = new TabsLayout(OnTabSelect, OnTabClose, OnTabRefresh, OnTabReorder, selectedIndex.Value,
                 tabs.Value.ToArray().Select(e => e.ToTab()).ToArray()
             ).RemoveParentPadding().Variant(TabsVariant.Tabs).Padding(0);
         }
@@ -213,7 +232,7 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
                            | (user.Value.FullName != null
                                ? Text.Muted(user.Value.FullName!).Overflow(Overflow.Ellipsis)
                                : null!)
-                           | Text.Small(user.Value.Email).Overflow(Overflow.Ellipsis))
+                           | Text.Label(user.Value.Email).Overflow(Overflow.Ellipsis))
                         .Grow()
                         .Size(Size.Full().Min(0))
                         | Icons.ChevronsUpDown

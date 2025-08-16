@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import * as signalR from '@microsoft/signalr';
 import { WidgetEventHandlerType, WidgetNode } from '@/types/widgets';
 import { useToast } from '@/hooks/use-toast';
@@ -6,9 +6,9 @@ import { showError } from '@/hooks/use-error-sheet';
 import { getIvyHost, getMachineId } from '@/lib/utils';
 import { logger } from '@/lib/logger';
 import { applyPatch, Operation } from 'fast-json-patch';
-import { setThemeGlobal } from '@/components/ThemeProvider';
 import { cloneDeep } from 'lodash';
 import { ToastAction } from '@/components/ui/toast';
+import { setThemeGlobal } from '@/components/theme-provider';
 
 type UpdateMessage = Array<{
   viewId: string;
@@ -22,7 +22,6 @@ type RefreshMessage = {
 
 type ErrorMessage = {
   title: string;
-  type: string;
   description: string;
   stackTrace?: string;
 };
@@ -31,6 +30,7 @@ type AuthToken = {
   jwt: string;
   refreshToken?: string;
   expiresAt?: string;
+  tag?: unknown;
 };
 
 const widgetTreeToXml = (node: WidgetNode) => {
@@ -68,14 +68,50 @@ function applyUpdateMessage(
 
   message.forEach(update => {
     let parent = newTree;
+
+    if (!parent) {
+      logger.error('No parent found in applyUpdateMessage', { message });
+      return;
+    }
+
     if (update.indices.length === 0) {
       applyPatch(parent, update.patch);
     } else {
       update.indices.forEach((index, i) => {
         if (i === update.indices.length - 1) {
-          applyPatch(parent.children![index], update.patch);
+          if (!parent.children) {
+            logger.error('No children found in parent', { parent });
+            return;
+          }
+          applyPatch(parent.children[index], update.patch);
         } else {
-          parent = parent.children![index];
+          if (!parent) {
+            logger.error('No parent found in applyUpdateMessage', { message });
+            return;
+          }
+          if (!parent.children) {
+            logger.error('No children found in parent', { parent });
+            return;
+          }
+          if (index >= parent.children.length) {
+            logger.error('Index out of bounds', {
+              index,
+              childrenLength: parent.children.length,
+              parent,
+            });
+            return;
+          }
+          const nextParent = parent.children[index];
+          if (!nextParent) {
+            logger.error('Child at index is null/undefined', {
+              index,
+              childrenLength: parent.children.length,
+              parentType: parent.type,
+              parentId: parent.id,
+            });
+            return;
+          }
+          parent = nextParent;
         }
       });
     }
@@ -97,6 +133,7 @@ export const useBackend = (
   const { toast } = useToast();
   const machineId = getMachineId();
   const connectionId = connection?.connectionId;
+  const connectionRef = useRef<signalR.HubConnection | null>(null);
 
   useEffect(() => {
     if (import.meta.env.DEV && widgetTree) {
@@ -120,7 +157,7 @@ export const useBackend = (
       }
       logger.debug(`[${connectionId}]`, xml);
     }
-  }, [widgetTree]);
+  }, [widgetTree, connectionId]);
 
   const handleRefreshMessage = useCallback((message: RefreshMessage) => {
     setWidgetTree(message.widgets);
@@ -143,28 +180,22 @@ export const useBackend = (
     });
   }, [connection]);
 
-  const handleSetJwt = useCallback(async (jwt: AuthToken | null) => {
-    logger.debug('Processing SetJwt request', { hasJwt: !!jwt });
-    const response = await fetch(`${getIvyHost()}/auth/set-jwt`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(jwt),
-      credentials: 'include',
-    });
-    if (response.ok) {
-      logger.info('JWT set successfully, reloading page');
-      window.location.reload();
-    } else {
-      logger.error('Failed to set JWT', {
-        status: response.status,
-        statusText: response.statusText,
-      });
-    }
-  }, []);
+  const handleSetJwt = useCallback(
+    (token: AuthToken) => {
+      const storageKey = `ivy-token-${appId}`;
+      if (token.jwt) {
+        localStorage.setItem(storageKey, JSON.stringify(token));
+        logger.debug('JWT token stored');
+      } else {
+        localStorage.removeItem(storageKey);
+        logger.debug('JWT token removed');
+      }
+    },
+    [appId]
+  );
 
   const handleSetTheme = useCallback((theme: string) => {
-    logger.debug('Processing SetTheme request', { theme });
-    const normalizedTheme = theme.toLowerCase();
+    const normalizedTheme = theme?.toLowerCase();
     if (['dark', 'light', 'system'].includes(normalizedTheme)) {
       logger.info('Setting theme globally', { theme: normalizedTheme });
       setThemeGlobal(normalizedTheme as 'dark' | 'light' | 'system');
@@ -199,21 +230,67 @@ export const useBackend = (
   );
 
   useEffect(() => {
-    const newConnection = new signalR.HubConnectionBuilder()
-      .withUrl(
-        `${getIvyHost()}/messages?appId=${appId ?? ''}&appArgs=${appArgs ?? ''}&machineId=${machineId}&parentId=${parentId ?? ''}`
-      )
-      .withAutomaticReconnect()
-      .build();
-    setConnection(newConnection);
+    let cancelled = false;
+
+    const setupConnection = async () => {
+      // Stop previous connection if it exists and wait for it to finish
+      if (connectionRef.current) {
+        try {
+          await connectionRef.current.stop();
+          logger.debug('Previous connection stopped successfully');
+        } catch (err) {
+          logger.warn('Error stopping previous SignalR connection:', err);
+        }
+      }
+
+      // Check if effect was cancelled during cleanup
+      if (cancelled) return;
+
+      const newConnection = new signalR.HubConnectionBuilder()
+        .withUrl(
+          `${getIvyHost()}/messages?appId=${appId ?? ''}&appArgs=${appArgs ?? ''}&machineId=${machineId}&parentId=${parentId ?? ''}`
+        )
+        .withAutomaticReconnect()
+        .build();
+
+      connectionRef.current = newConnection;
+
+      // Check again if effect was cancelled
+      if (cancelled) {
+        newConnection.stop().catch(() => {});
+        return;
+      }
+
+      setConnection(newConnection);
+    };
+
+    setupConnection();
+
+    // Cleanup function for component unmount
+    return () => {
+      cancelled = true;
+      if (connectionRef.current) {
+        connectionRef.current.stop().catch(err => {
+          logger.warn('Error stopping SignalR connection during cleanup:', err);
+        });
+        connectionRef.current = null;
+      }
+    };
   }, [appArgs, appId, machineId, parentId]);
 
   useEffect(() => {
-    if (connection) {
+    if (
+      connection &&
+      connection.state === signalR.HubConnectionState.Disconnected
+    ) {
       connection
         .start()
         .then(() => {
-          logger.info('SignalR connection established');
+          logger.info('✅ WebSocket connection established for:', {
+            appId,
+            parentId,
+            connectionId: connection.connectionId,
+          });
 
           connection.on('Refresh', message => {
             logger.debug(`[${connection.connectionId}] Refresh`, message);
@@ -303,6 +380,8 @@ export const useBackend = (
     handleSetJwt,
     handleSetTheme,
     handleError,
+    appId,
+    parentId,
   ]);
 
   const eventHandler: WidgetEventHandlerType = useCallback(
@@ -319,7 +398,7 @@ export const useBackend = (
         logger.error('SignalR Error when sending event:', err);
       });
     },
-    [connection]
+    [connection, connectionId]
   );
 
   return {

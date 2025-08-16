@@ -33,9 +33,8 @@ export const TableCellWidget: React.FC<TableCellWidgetProps> = ({
       className={cn(
         isHeader && 'header-cell bg-muted font-semibold',
         isFooter && 'footer-cell bg-muted font-semibold',
-        'text-nowrap',
         'border-border',
-        'max-w-[400px] overflow-ellipsis overflow-clip'
+        'min-w-0'
       )}
       style={cellStyles}
     >

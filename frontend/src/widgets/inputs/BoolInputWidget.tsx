@@ -3,7 +3,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Toggle } from '@/components/ui/toggle';
 import Icon from '@/components/Icon';
-import { useEventHandler } from '@/components/EventHandlerContext';
+import { useEventHandler } from '@/components/event-handler';
 import { inputStyles } from '@/lib/styles';
 import { cn } from '@/lib/utils';
 import { Checkbox, NullableBoolean } from '@/components/ui/checkbox';

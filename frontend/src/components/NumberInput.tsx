@@ -1,6 +1,4 @@
-import { InvalidIcon } from '@/components/InvalidIcon';
 import { Input } from '@/components/ui/input';
-import { ChevronUp, ChevronDown, X } from 'lucide-react';
 import React, {
   useState,
   useCallback,
@@ -24,8 +22,7 @@ interface NumberInputProps {
   format?: Intl.NumberFormatOptions;
   allowNegative?: boolean;
   className?: string;
-  nullable?: boolean;
-  showArrows?: boolean;
+
   'data-testid'?: string;
 }
 
@@ -56,8 +53,6 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
       },
       allowNegative = true,
       className = '',
-      nullable = false,
-      showArrows = false,
       'data-testid': dataTestId,
       ...props
     },
@@ -307,77 +302,12 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
           step={step}
           disabled={disabled}
           placeholder={placeholder}
-          className={`${className} ${showArrows ? 'pr-14' : ''} ${
+          className={`${className} ${
             !isValid ? 'border-red-500' : ''
           } ${dragState?.isDragging ? 'select-none' : ''} cursor-pointer`}
           data-testid={dataTestId}
           {...props}
         />
-        {/* Right-side icon container */}
-        {(nullable && value !== null && !disabled && onChange) || !isValid ? (
-          <div
-            className={`absolute top-1/2 -translate-y-1/2 flex items-center gap-1 ${
-              showArrows ? 'right-14' : 'right-2'
-            }`}
-            style={{ zIndex: 2 }}
-          >
-            {/* Invalid icon */}
-            {!isValid && (
-              <span className="flex items-center">
-                <InvalidIcon
-                  message={
-                    typeof placeholder === 'string'
-                      ? placeholder
-                      : 'Invalid value'
-                  }
-                />
-              </span>
-            )}
-            {/* Clear (X) button */}
-            {nullable && value !== null && !disabled && onChange && (
-              <button
-                type="button"
-                tabIndex={-1}
-                aria-label="Clear"
-                onClick={() => {
-                  setDisplayValue('');
-                  onChange(null);
-                }}
-                className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
-              >
-                <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
-              </button>
-            )}
-          </div>
-        ) : null}
-        {showArrows && (
-          <div className="absolute right-0 top-0 bottom-0 flex flex-col border-l">
-            <button
-              type="button"
-              tabIndex={-1}
-              disabled={
-                disabled ||
-                (max !== undefined && value !== null && value >= max)
-              }
-              onClick={() => handleStep(1)}
-              className="flex-1 px-1 flex items-center justify-center hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-            >
-              <ChevronUp className="h-3 w-3" />
-            </button>
-            <button
-              type="button"
-              tabIndex={-1}
-              disabled={
-                disabled ||
-                (min !== undefined && value !== null && value <= min)
-              }
-              onClick={() => handleStep(-1)}
-              className="flex-1 px-1 flex items-center justify-center hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed border-t cursor-pointer"
-            >
-              <ChevronDown className="h-3 w-3" />
-            </button>
-          </div>
-        )}
       </div>
     );
   }

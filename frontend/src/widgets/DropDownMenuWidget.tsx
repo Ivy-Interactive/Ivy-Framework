@@ -1,4 +1,4 @@
-import { useEventHandler } from '@/components/EventHandlerContext';
+import { useEventHandler } from '@/components/event-handler';
 import React, { useRef, useState } from 'react';
 
 import {

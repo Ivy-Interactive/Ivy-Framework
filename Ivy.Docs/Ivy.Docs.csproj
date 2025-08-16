@@ -9,63 +9,10 @@
     <Nullable>enable</Nullable>
     <RootNamespace>Ivy.Docs</RootNamespace>
     <NoWarn>CS8618;CS8603;CS8602;CS8604;CS8669;CS9113</NoWarn>
-    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
-    <EnableDefaultEmbeddedResourceItems>false</EnableDefaultEmbeddedResourceItems>
-  </PropertyGroup>
-
-  <PropertyGroup>
-    <CI Condition="'$(GITHUB_ACTIONS)' == 'true'">true</CI>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(CI)' == 'true'">
-    <PublishSingleFile>true</PublishSingleFile>
-    <SelfContained>false</SelfContained>
-    <DebugType>none</DebugType>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(PublishDir)' != ''">
-    <RuntimeIdentifiers>win-x64;osx-x64</RuntimeIdentifiers>
   </PropertyGroup>
   
-  <ItemGroup Condition="'$(UseNuGetPackage)' != 'true'">
-    <ProjectReference Include="../Ivy/Ivy.csproj" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(UseNuGetPackage)' == 'true'">
-    <PackageReference Include="Ivy" Version="$(IvyPackageVersion)" />
-  </ItemGroup>
-
   <ItemGroup>
-    <Compile Include="Program.cs" />
-    <Compile Include="GlobalUsings.cs" />
-    <Compile Include="Helpers/**/*.cs" />
-    <EmbeddedResource Include="Assets/**/*" />
+    <ProjectReference Include="..\Ivy.Docs.Shared\Ivy.Docs.Shared.csproj" />
   </ItemGroup>
-
-  <ItemGroup>
-    <None Include="Docs/*.md" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Generated/" />
-    <Folder Include="Samples/Todo/" />
-  </ItemGroup>
-
-  <Target Name="TransformMarkdown" BeforeTargets="CoreCompile">
-    <Exec Command="dotnet run --project ../Ivy.Docs.Tools/Ivy.Docs.Tools.csproj -- convert $(MSBuildProjectDirectory)/Docs/*.md $(MSBuildProjectDirectory)/Generated --skip-if-not-changed" />
-    <ItemGroup>
-      <Compile Include="Generated/**/*.g.cs" />
-    </ItemGroup>
-  </Target>
-  
-  <ItemGroup>
-    <Watch Remove="Docs/**/*" />
-  </ItemGroup>
-  
-  <ItemGroup>
-    <InternalsVisibleTo Include="Ivy.Docs.Test" />
-  </ItemGroup>
-  
-
   
 </Project>
