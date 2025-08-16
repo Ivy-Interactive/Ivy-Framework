@@ -13,6 +13,7 @@ interface ArticleWidgetProps {
   previous: InternalLink;
   next: InternalLink;
   documentSource?: string;
+  showContributors?: boolean;
 }
 
 export const ArticleWidget: React.FC<ArticleWidgetProps> = ({
@@ -23,6 +24,7 @@ export const ArticleWidget: React.FC<ArticleWidgetProps> = ({
   documentSource,
   showFooter,
   showToc,
+  showContributors = true,
 }) => {
   const eventHandler = useEventHandler();
   const articleRef = useRef<HTMLElement>(null);
@@ -188,34 +190,44 @@ export const ArticleWidget: React.FC<ArticleWidgetProps> = ({
         </article>
         {showToc && (
           <div className="hidden lg:block w-64">
-            {isLoading ? (
-              <div className="sticky top-8 w-64">
-                <div className="text-body mb-4">Table of Contents</div>
-                <ScrollArea>
-                  <div className="flex flex-col gap-4">
-                    <div className="h-3 bg-muted rounded animate-pulse w-3/4"></div>
-                    <div className="h-3 bg-muted rounded animate-pulse w-full"></div>
-                    <div className="h-3 bg-muted rounded animate-pulse w-5/6"></div>
-                    <div className="h-3 bg-muted rounded animate-pulse w-2/3"></div>
-                    <div className="h-3 bg-muted rounded animate-pulse w-4/5"></div>
-                    <div className="h-3 bg-muted rounded animate-pulse w-1/2"></div>
-                  </div>
-                </ScrollArea>
-              </div>
-            ) : tocItems.length > 0 ? (
-              <TableOfContents
-                className="sticky top-8"
-                articleRef={articleRef}
-                tocItems={tocItems}
-              />
-            ) : (
-              <div className="sticky top-8 w-64">
-                <div className="text-body mb-4">Table of Contents</div>
-                <div className="text-sm text-muted-foreground">
-                  No headings found
+            <div className="sticky top-8">
+              {isLoading ? (
+                <div className="w-64">
+                  <div className="text-body mb-4">Table of Contents</div>
+                  <ScrollArea>
+                    <div className="flex flex-col gap-4">
+                      <div className="h-3 bg-muted rounded animate-pulse w-3/4"></div>
+                      <div className="h-3 bg-muted rounded animate-pulse w-full"></div>
+                      <div className="h-3 bg-muted rounded animate-pulse w-5/6"></div>
+                      <div className="h-3 bg-muted rounded animate-pulse w-2/3"></div>
+                      <div className="h-3 bg-muted rounded animate-pulse w-4/5"></div>
+                      <div className="h-3 bg-muted rounded animate-pulse w-1/2"></div>
+                    </div>
+                  </ScrollArea>
                 </div>
-              </div>
-            )}
+              ) : tocItems.length > 0 ? (
+                <div>
+                  <TableOfContents
+                    className=""
+                    articleRef={articleRef}
+                    tocItems={tocItems}
+                  />
+                  {/* Show contributors after TOC - placeholder for now */}
+                  {showContributors && documentSource && (
+                    <div className="mt-6">
+                      {/* Contributors will be rendered by the backend as part of article children */}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="w-64">
+                  <div className="text-body mb-4">Table of Contents</div>
+                  <div className="text-sm text-muted-foreground">
+                    No headings found
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>

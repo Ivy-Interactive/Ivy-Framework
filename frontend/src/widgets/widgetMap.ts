@@ -8,6 +8,7 @@ import * as Blades from '@/widgets/blades';
 import * as Lists from '@/widgets/lists';
 import * as Details from '@/widgets/details';
 import * as Primitives from '@/widgets/primitives';
+import * as GitHub from '@/widgets/github';
 import React from 'react';
 import { LoadingScreen } from '@/components/LoadingScreen';
 
@@ -42,6 +43,9 @@ export const widgetMap = {
   'Ivy.Spacer': Primitives.SpacerWidget,
   'Ivy.Loading': Primitives.LoadingWidget,
   'Ivy.AppHost': Primitives.AppHostWidget,
+
+  // GitHub
+  'Ivy.Contributors': GitHub.ContributorsWidget,
 
   // Widgets
   'Ivy.Button': Widgets.ButtonWidget,

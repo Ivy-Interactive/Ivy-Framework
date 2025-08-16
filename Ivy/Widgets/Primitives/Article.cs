@@ -21,6 +21,8 @@ public record Article : WidgetBase<Article>
 
     [Prop] public string? DocumentSource { get; set; }
 
+    [Prop] public bool ShowContributors { get; set; } = true;
+
     [Event] public Action<Event<Article, string>>? OnLinkClick { get; set; }
 }
 
@@ -31,6 +33,7 @@ public static class ArticleExtensions
     public static Article Previous(this Article article, InternalLink? navigateBack) => article with { Previous = navigateBack };
     public static Article Next(this Article article, InternalLink? navigateForward) => article with { Next = navigateForward };
     public static Article DocumentSource(this Article article, string? documentSource) => article with { DocumentSource = documentSource };
+    public static Article ShowContributors(this Article article, bool showContributors = true) => article with { ShowContributors = showContributors };
     public static Article HandleLinkClick(this Article article, Action<Event<Article, string>> onLinkClick) => article with { OnLinkClick = onLinkClick };
     public static Article HandleLinkClick(this Article article, Action<string> onLinkClick) => article with { OnLinkClick = @event => onLinkClick(@event.Value) };
 }

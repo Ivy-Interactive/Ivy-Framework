@@ -280,6 +280,12 @@ public class Server
         builder.Services.AddSingleton(sessionStore);
         builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
 
+        // Add caching and GitHub services
+        builder.Services.AddDistributedMemoryCache();
+        builder.Services.AddHttpClient<Ivy.Services.IGitHubService, Ivy.Services.GitHubService>();
+        builder.Services.AddSingleton<Ivy.Services.ICacheService, Ivy.Services.CacheService>();
+        builder.Services.AddSingleton<Ivy.Services.IGitHubService, Ivy.Services.GitHubService>();
+
         builder.Services.AddCors(options =>
         {
             options.AddDefaultPolicy(policy =>
