@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Linq;
+using System.Text.Json;
 using Ivy.Apps;
 using Ivy.Client;
 using Ivy.Core;
@@ -56,17 +57,29 @@ public record NavigateArgs(string AppId, object? AppArgs = null)
 
     public string GetUrl(string? parentId = null)
     {
-        var url = $"index.html?appId={this.AppId}";
+        // Use path-based URL for better user experience
+        var url = $"/{this.AppId}";
+
+        // Build query parameters if needed
+        var queryParams = new List<string>();
+
         if (parentId != null)
         {
-            url += $"&parentId={parentId}";
+            queryParams.Add($"parentId={parentId}");
         }
+
         if (this.AppArgs != null)
         {
             var jsonArgs = JsonSerializer.Serialize(this.AppArgs);
             var encodedArgs = System.Web.HttpUtility.UrlEncode(jsonArgs);
-            url += $"&appArgs={encodedArgs}";
+            queryParams.Add($"appArgs={encodedArgs}");
         }
+
+        if (queryParams.Any())
+        {
+            url += "?" + string.Join("&", queryParams);
+        }
+
         return url;
     }
 }
