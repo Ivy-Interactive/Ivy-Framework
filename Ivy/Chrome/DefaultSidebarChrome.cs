@@ -69,8 +69,6 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
             if (settings.Navigation == ChromeNavigation.Pages)
             {
                 currentApp.Set(navigateArgs.ToAppHost(args.ConnectionId));
-                // Update browser URL for page navigation
-                client.Redirect(navigateArgs.GetUrl());
             }
             else
             {
@@ -93,8 +91,6 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
                     if (existingTabIndex >= 0)
                     {
                         selectedIndex.Set(existingTabIndex);
-                        // Update browser URL when switching to existing tab
-                        client.Redirect(navigateArgs.GetUrl());
                         return;
                     }
                 }
@@ -102,9 +98,6 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
                 var newTabs = tabs.Value.Add(new TabState(tabId, app.Id, app.Title, appHost, app.Icon, Guid.NewGuid().ToString()));
                 tabs.Set(newTabs);
                 selectedIndex.Set(newTabs.Length - 1);
-
-                // Update browser URL when new tab is opened
-                client.Redirect(navigateArgs.GetUrl());
             }
         }
 
@@ -139,14 +132,6 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
         void OnTabSelect(Event<TabsLayout, int> @event)
         {
             selectedIndex.Set(@event.Value);
-
-            // Update browser URL when tab is selected
-            if (@event.Value < tabs.Value.Length)
-            {
-                var tab = tabs.Value[@event.Value];
-                var navigateArgs = new NavigateArgs(tab.AppId);
-                client.Redirect(navigateArgs.GetUrl());
-            }
         }
 
         void OnTabClose(Event<TabsLayout, int> @event)
