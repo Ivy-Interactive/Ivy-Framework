@@ -8,8 +8,16 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { useToast } from '@/hooks/use-toast';
-import { Copy, Download, ChevronDown, ExternalLink } from 'lucide-react';
+import {
+  Copy,
+  Download,
+  ChevronDown,
+  ExternalLink,
+  MessageSquare,
+} from 'lucide-react';
 import React from 'react';
+// getIvyHost not needed - we use production docs URL
+import { logger } from '@/lib/logger';
 
 interface DocumentToolsProps {
   articleRef: React.RefObject<HTMLElement | null>;
@@ -23,6 +31,111 @@ export const DocumentTools: React.FC<DocumentToolsProps> = ({
   title = 'document',
 }) => {
   const { toast } = useToast();
+
+  // Function to convert documentSource path to appId (same logic as Ivy.Docs.Tools)
+  const getAppIdFromDocumentSource = (documentSource: string): string => {
+    // Extract the path from GitHub URL if it's a GitHub URL
+    let filePath = documentSource;
+    if (documentSource.includes('github.com')) {
+      // Extract path from GitHub URL
+      // Example: https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy.Docs.Shared/Docs/01_Onboarding/01_GettingStarted/01_Introduction.md
+      const match = documentSource.match(/\/Docs\/(.+)$/);
+      if (match) {
+        filePath = match[1]; // Gets "01_Onboarding/01_GettingStarted/01_Introduction.md"
+      }
+    }
+
+    // Remove .md extension and split path
+    const pathWithoutExtension = filePath.replace(/\.md$/, '');
+    const parts = pathWithoutExtension
+      .split(/[/\\]/)
+      .map(part => part.replace(/^\d+_/, '')) // Remove number prefixes like "01_"
+      .filter(part => part.length > 0);
+
+    // Convert to TypeName format: join with dots and add "App" suffix
+    const typeName =
+      parts.slice(0, -1).join('.') + '.' + parts[parts.length - 1] + 'App';
+
+    // Convert TypeName to appId format
+    const namespaceParts = typeName.split('.');
+    let appIdParts = namespaceParts;
+
+    // Remove "Apps" namespace if present
+    const appsIndex = appIdParts.indexOf('Apps');
+    if (appsIndex !== -1) {
+      appIdParts = appIdParts.slice(appsIndex + 1);
+    }
+
+    // Convert each part from TitleCase to friendly-url format
+    const convertToFriendlyUrl = (input: string): string => {
+      if (!input) return '';
+
+      let result = '';
+      for (let i = 0; i < input.length; i++) {
+        if (input[i] >= 'A' && input[i] <= 'Z' && i > 0) {
+          result += '-';
+        }
+        result += input[i].toLowerCase();
+      }
+      return result;
+    };
+
+    return appIdParts.map(convertToFriendlyUrl).join('/');
+  };
+
+  // Function to generate dedicated page URL (like ctrl+right click)
+  const generateDedicatedPageUrl = (): string => {
+    // Always use the production docs URL for ChatGPT sharing
+    const docsHost = 'https://docs.ivy.app';
+
+    if (!documentSource) {
+      throw new Error(
+        'No documentSource provided to generate dedicated page URL'
+      );
+    }
+
+    // Convert documentSource to appId using the same logic as the backend
+    const appId = getAppIdFromDocumentSource(documentSource);
+
+    logger.info('URL generation debug:', {
+      documentSource,
+      appId,
+      docsHost,
+      currentUrl: window.location.href,
+    });
+
+    const url = `${docsHost}/index.html?appId=${appId}`;
+    return url;
+  };
+
+  // Function to open current page in ChatGPT
+  const openInChatGPT = () => {
+    logger.info('openInChatGPT called');
+    try {
+      const dedicatedPageUrl = generateDedicatedPageUrl();
+      logger.info('Generated URL:', dedicatedPageUrl);
+      const chatGptPrompt = `Please analyze this Ivy Framework documentation page: ${dedicatedPageUrl}`;
+      const chatGptUrl = `https://chatgpt.com/?q=${encodeURIComponent(chatGptPrompt)}`;
+      logger.info('ChatGPT URL:', chatGptUrl);
+
+      window.open(chatGptUrl, '_blank');
+
+      toast({
+        title: 'Opening in ChatGPT',
+        description: 'Opening the dedicated page link in ChatGPT...',
+      });
+    } catch (error) {
+      logger.error('Error in openInChatGPT:', error);
+      toast({
+        title: 'Failed to Open in ChatGPT',
+        description:
+          error instanceof Error
+            ? error.message
+            : 'Failed to generate page URL',
+        variant: 'destructive',
+      });
+    }
+  };
 
   // Function to load all tabs by clicking through them
   const loadAllTabs = async (): Promise<void> => {
@@ -541,8 +654,13 @@ export const DocumentTools: React.FC<DocumentToolsProps> = ({
               Download as Markdown
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem disabled>
-              <ExternalLink className="w-4 h-4 mr-2" />
+            <DropdownMenuItem
+              onClick={e => {
+                logger.info('ChatGPT menu item clicked', e);
+                openInChatGPT();
+              }}
+            >
+              <MessageSquare className="w-4 h-4 mr-2" />
               Open in ChatGPT
             </DropdownMenuItem>
             <DropdownMenuItem disabled>
