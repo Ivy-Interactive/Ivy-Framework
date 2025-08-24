@@ -6,16 +6,16 @@ export const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          'bg-primary text-primary-foreground shadow hover:brightness-90',
+          'bg-primary text-primary-foreground shadow hover:not(:disabled):brightness-90',
         destructive:
-          'bg-destructive text-destructive-foreground shadow-sm hover:brightness-90',
+          'bg-destructive text-destructive-foreground shadow-sm hover:not(:disabled):brightness-90',
         outline:
-          'border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground',
+          'border border-input bg-background shadow-sm hover:not(:disabled):bg-accent hover:not(:disabled):text-accent-foreground',
         secondary:
-          'bg-secondary text-secondary-foreground shadow-sm hover:brightness-90',
-        ghost: 'hover:bg-accent',
-        link: 'text-primary underline-offset-4 hover:underline brightness-50 hover:brightness-100',
-        inline: 'text-primary underline hover:no-underline !p-0 !h-auto',
+          'bg-secondary text-secondary-foreground shadow-sm hover:not(:disabled):brightness-90',
+        ghost: 'hover:not(:disabled):bg-accent',
+        link: 'text-primary underline-offset-4 hover:not(:disabled):underline brightness-50 hover:not(:disabled):brightness-100',
+        inline: 'text-primary underline hover:not(:disabled):no-underline !p-0 !h-auto',
       },
       size: {
         default: 'h-9 px-4 py-2',
