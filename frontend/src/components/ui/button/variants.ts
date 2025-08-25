@@ -15,7 +15,8 @@ export const buttonVariants = cva(
           'bg-secondary text-secondary-foreground shadow-sm hover:not(:disabled):brightness-90',
         ghost: 'hover:not(:disabled):bg-accent',
         link: 'text-primary underline-offset-4 hover:not(:disabled):underline brightness-50 hover:not(:disabled):brightness-100',
-        inline: 'text-primary underline hover:not(:disabled):no-underline !p-0 !h-auto',
+        inline:
+          'text-primary underline hover:not(:disabled):no-underline !p-0 !h-auto',
       },
       size: {
         default: 'h-9 px-4 py-2',
