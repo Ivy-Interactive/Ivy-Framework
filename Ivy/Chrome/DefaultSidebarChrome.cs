@@ -121,12 +121,13 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
             }
         }
 
-        void OnCtrlRightClickSelect(Event<SidebarMenu, object> @event)
+        ValueTask OnCtrlRightClickSelect(Event<SidebarMenu, object> @event)
         {
             if (@event.Value is string appId)
             {
                 client.OpenUrl(new NavigateArgs(appId).GetUrl());
             }
+            return ValueTask.CompletedTask;
         }
 
         void OnTabSelect(Event<TabsLayout, int> @event)

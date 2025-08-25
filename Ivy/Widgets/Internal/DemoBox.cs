@@ -10,7 +10,7 @@ namespace Ivy;
 /// making it ideal for creating example layouts, testing design patterns, and building demonstration interfaces.
 /// 
 /// DemoBox is designed as a lightweight alternative to the full Box widget, providing essential styling
-/// properties while maintaining simplicity for demonstration scenarios.
+/// properties while maintaining simplicity for demonstration scenarios. This widget is not intended for production use.
 /// </summary>
 public record DemoBox : WidgetBase<DemoBox>
 {

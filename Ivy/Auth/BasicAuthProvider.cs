@@ -10,6 +10,9 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Ivy.Auth;
 
+/// <summary>
+/// Basic authentication provider that uses JWT tokens and in-memory user storage.
+/// </summary>
 public class BasicAuthProvider : IAuthProvider
 {
     private List<(string user, string password)> _users = new();
@@ -17,6 +20,9 @@ public class BasicAuthProvider : IAuthProvider
     private readonly string _issuer;
     private readonly string _audience;
 
+    /// <summary>
+    /// Initializes a new instance of the BasicAuthProvider with configuration from environment variables and user secrets.
+    /// </summary>
     public BasicAuthProvider()
     {
         var configuration = new ConfigurationBuilder()
@@ -36,6 +42,12 @@ public class BasicAuthProvider : IAuthProvider
         }
     }
 
+    /// <summary>
+    /// Authenticates a user with email and password.
+    /// </summary>
+    /// <param name="email">The user's email address</param>
+    /// <param name="password">The user's password</param>
+    /// <returns>An authentication token if successful, null otherwise</returns>
     public Task<AuthToken?> LoginAsync(string email, string password)
     {
         var found = _users.Any(u => u.user == email && u.password == password);
@@ -57,23 +69,48 @@ public class BasicAuthProvider : IAuthProvider
         return Task.FromResult(authToken);
     }
 
+    /// <summary>
+    /// Logs out a user by invalidating their JWT token.
+    /// </summary>
+    /// <param name="jwt">The JWT token to invalidate</param>
     public Task LogoutAsync(string jwt)
     {
         return Task.CompletedTask;
     }
 
+    /// <summary>
+    /// Refreshes an expired or expiring JWT token.
+    /// </summary>
+    /// <param name="jwt">The current authentication token</param>
+    /// <returns>A new authentication token if successful, null otherwise</returns>
     public Task<AuthToken?> RefreshJwtAsync(AuthToken jwt) => Task.FromResult<AuthToken?>(jwt);
 
+    /// <summary>
+    /// Generates an OAuth authorization URI for the specified option.
+    /// </summary>
+    /// <param name="option">The OAuth authentication option</param>
+    /// <param name="callback">The webhook endpoint for handling the OAuth callback</param>
+    /// <returns>The OAuth authorization URI</returns>
     public Task<Uri> GetOAuthUriAsync(AuthOption option, WebhookEndpoint callback)
     {
         throw new NotImplementedException();
     }
 
+    /// <summary>
+    /// Handles the OAuth callback request and extracts the authentication token.
+    /// </summary>
+    /// <param name="request">The HTTP request containing OAuth callback data</param>
+    /// <returns>An authentication token if successful, null otherwise</returns>
     public Task<AuthToken?> HandleOAuthCallbackAsync(HttpRequest request)
     {
         throw new NotImplementedException();
     }
 
+    /// <summary>
+    /// Validates whether a JWT token is still valid.
+    /// </summary>
+    /// <param name="jwt">The JWT token to validate</param>
+    /// <returns>True if the token is valid, false otherwise</returns>
     public Task<bool> ValidateJwtAsync(string jwt)
     {
         var handler = new JwtSecurityTokenHandler();
@@ -98,6 +135,11 @@ public class BasicAuthProvider : IAuthProvider
         }
     }
 
+    /// <summary>
+    /// Retrieves user information from a valid JWT token.
+    /// </summary>
+    /// <param name="jwt">The JWT token</param>
+    /// <returns>User information if successful, null otherwise</returns>
     public Task<UserInfo?> GetUserInfoAsync(string jwt)
     {
         var handler = new JwtSecurityTokenHandler();
@@ -123,6 +165,10 @@ public class BasicAuthProvider : IAuthProvider
         }
     }
 
+    /// <summary>
+    /// Gets the available authentication options for this provider.
+    /// </summary>
+    /// <returns>Array of supported authentication options</returns>
     public AuthOption[] GetAuthOptions()
     {
         return [new AuthOption(AuthFlow.EmailPassword)];

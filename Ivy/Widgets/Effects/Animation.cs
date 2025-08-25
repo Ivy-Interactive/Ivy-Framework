@@ -102,8 +102,7 @@ public enum AnimationEasing
 }
 
 /// <summary>
-/// Defines when an animation should be triggered or activated.
-/// Controls the user interaction or automatic behavior that starts the animation.
+/// Defines when an animation should be triggered.
 /// </summary>
 public enum AnimationTrigger
 {
@@ -116,85 +115,72 @@ public enum AnimationTrigger
 }
 
 /// <summary>
-/// Widget that applies visual animations to its child content. Animations enhance user experience
-/// by providing smooth transitions, visual feedback, and engaging effects that guide user attention
-/// and create polished interface interactions.
+/// Widget that applies visual animations to its child content.
 /// </summary>
 public record Animation : WidgetBase<Animation>
 {
     /// <summary>
-    /// Initializes a new instance of the Animation class with the specified animation type.
+    /// Initializes a new instance of the Animation class.
     /// </summary>
-    /// <param name="animation">The type of animation effect to apply to the child content.</param>
+    /// <param name="animation">The type of animation effect.</param>
     public Animation(AnimationType animation)
     {
         Type = animation;
     }
 
     /// <summary>
-    /// Gets or sets the type of animation effect to apply.
+    /// Gets or sets the type of animation effect.
     /// </summary>
-    /// <value>The animation type that determines the visual effect behavior.</value>
     [Prop] public AnimationType Type { get; set; }
 
     /// <summary>
     /// Gets or sets the duration of the animation in seconds.
     /// </summary>
-    /// <value>The animation duration in seconds. Default is 0.5 seconds.</value>
     [Prop] public double Duration { get; set; } = 0.5;
 
     /// <summary>
     /// Gets or sets the delay before the animation starts in seconds.
     /// </summary>
-    /// <value>The delay in seconds before the animation begins. Default is 0 (no delay).</value>
     [Prop] public double Delay { get; set; }
 
     /// <summary>
-    /// Gets or sets the direction for directional animations such as slides and shakes.
+    /// Gets or sets the direction for directional animations.
     /// </summary>
-    /// <value>The direction of movement, or null if the animation doesn't use direction.</value>
     [Prop] public AnimationDirection? Direction { get; set; }
 
     /// <summary>
     /// Gets or sets the distance for movement-based animations in pixels.
     /// </summary>
-    /// <value>The distance in pixels for slide, shake, and other movement animations. Default is 100 pixels.</value>
     [Prop] public double Distance { get; set; } = 100;
 
     /// <summary>
     /// Gets or sets the easing function that controls animation acceleration and deceleration.
     /// </summary>
-    /// <value>The easing function to apply, or null to use the default. Default is Linear.</value>
     [Prop] public AnimationEasing? Easing { get; set; } = AnimationEasing.Linear;
 
     /// <summary>
     /// Gets or sets the number of times the animation should repeat.
     /// </summary>
-    /// <value>The repeat count, or null for no repetition (play once). Default is null.</value>
     [Prop] public int? Repeat { get; set; } = null;
 
     /// <summary>
     /// Gets or sets the delay between animation repetitions in seconds.
     /// </summary>
-    /// <value>The delay in seconds between each repeat cycle. Default is 0 (no delay between repeats).</value>
     [Prop] public double RepeatDelay { get; set; }
 
     /// <summary>
     /// Gets or sets the intensity or magnitude of the animation effect.
     /// </summary>
-    /// <value>The intensity multiplier where 1.0 is normal intensity. Higher values increase effect magnitude. Default is 1.0.</value>
     [Prop] public double Intensity { get; set; } = 1;
 
     /// <summary>
     /// Gets or sets when the animation should be triggered.
     /// </summary>
-    /// <value>The trigger condition that starts the animation. Default is Auto (starts immediately).</value>
     [Prop] public AnimationTrigger Trigger { get; set; } = AnimationTrigger.Auto;
 }
 
 /// <summary>
 /// Provides extension methods for creating and configuring Animation widgets with fluent syntax.
-/// These methods enable easy application of animations to widgets and convenient configuration of animation properties.
 /// </summary>
 public static class AnimationExtensions
 {

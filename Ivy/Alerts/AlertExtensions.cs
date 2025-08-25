@@ -52,7 +52,14 @@ public class WithConfirmView(Button button, string message, string? title = null
     {
         var isOpen = this.UseState(false);
 
-        var clonedButton = button with { OnClick = _ => { isOpen.Value = true; } };
+        var clonedButton = button with
+        {
+            OnClick = _ =>
+            {
+                isOpen.Value = true;
+                return ValueTask.CompletedTask;
+            }
+        };
 
         return new Fragment(
             clonedButton,

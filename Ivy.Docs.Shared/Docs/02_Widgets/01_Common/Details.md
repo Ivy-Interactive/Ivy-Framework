@@ -10,14 +10,20 @@ Display structured label-value pairs from models with automatic formatting using
 
 The simplest way to create details is by calling `ToDetails()` on any object:
 
-```csharp demo-tabs
+```csharp demo-below
 new { Name = "John Doe", Email = "john@example.com", Age = 30 }
     .ToDetails()
 ```
 
-## Automatic Field Removal
+### Automatic Field Removal
 
-Remove empty or null fields using the `RemoveEmpty()` method:
+Remove empty or null fields using the `RemoveEmpty()` method. This removes fields that are:
+
+- `null` values
+- Empty or whitespace strings
+- `false` boolean values
+
+Use this when you want to hide fields that don't have meaningful values, keeping your details clean and focused:
 
 ```csharp demo-tabs
 new { FirstName = "John", LastName = "Doe", Age = 30, MiddleName = "" }
@@ -25,39 +31,74 @@ new { FirstName = "John", LastName = "Doe", Age = 30, MiddleName = "" }
     .RemoveEmpty()
 ```
 
-## Custom Field Removal
+### Custom Field Removal
 
-Selectively remove specific fields using the `Remove()` method:
+Selectively remove specific fields using the `Remove()` method. This is useful when you want to hide sensitive information like IDs or internal fields from the user interface:
 
 ```csharp demo-tabs
 new { Id = 123, Name = "John Doe", Email = "john@example.com" }
     .ToDetails()
-    .Remove(u => u.Id)
+    .Remove(x => x.Id)
 ```
 
-## Multi-Line Fields
+### Multi-Line Fields
 
-Mark specific fields as multi-line for better text display:
+Mark specific fields as multi-line for better text display. This is perfect for long descriptions, notes, or any text content that would benefit from wrapping across multiple lines:
 
 ```csharp demo-tabs
 new { Name = "Widget", Description = "Long description text" }
     .ToDetails()
-    .MultiLine(p => p.Description)
+    .MultiLine(x => x.Description)
+```
+
+## Custom Builders
+
+Override the default rendering for specific fields using custom builders. This allows you to customize how individual fields are displayed and add interactive functionality.
+
+### Copy to Clipboard
+
+Make values copyable to clipboard. This is especially useful for IDs, email addresses, or any text that users might want to copy for use elsewhere:
+
+```csharp demo-tabs
+new { Id = "ABC-123", Name = "John Doe" }
+    .ToDetails()
+    .Builder(x => x.Id, b => b.CopyToClipboard())
+```
+
+### Links
+
+Convert values to clickable links. Automatically transform URLs, email addresses, or any text into clickable links that users can interact with:
+
+```csharp demo-tabs
+new { Name = "John Doe", Website = "https://example.com" }
+    .ToDetails()
+    .Builder(x => x.Website, b => b.Link())
+```
+
+### Text Formatting
+
+Control how text values are displayed. Use this when you want to ensure consistent text formatting or apply specific styling to text fields:
+
+```csharp demo-tabs
+new { Name = "John Doe", Description = "Long description" }
+    .ToDetails()
+    .Builder(x => x.Description, b => b.Text())
 ```
 
 ## Nested Objects
 
-Details automatically handle nested objects by converting them to their own detail views:
+Details automatically handle nested objects by converting them to their own detail views. This creates a hierarchical display that's perfect for complex data structures with parent-child relationships:
 
 ```csharp demo-tabs
-new { Name = "John", Address = new { Street = "123 Main St", City = "Anytown" }
-    .ToDetails() }
-    .ToDetails()
+new { 
+    Name = "John", 
+    Address = new { Street = "123 Main St", City = "Anytown" }.ToDetails() 
+}.ToDetails()
 ```
 
 ## Working with State
 
-Details work seamlessly with reactive state:
+Details work seamlessly with reactive state. When the underlying data changes, the details automatically update to reflect the new values, making it perfect for dynamic, interactive interfaces:
 
 ```csharp demo-tabs
 UseState(() => new { Name = "John Doe", Age = 30 })
@@ -65,17 +106,3 @@ UseState(() => new { Name = "John Doe", Age = 30 })
 ```
 
 <WidgetDocs Type="Ivy.Details" ExtensionTypes="Ivy.Builders.DetailsBuilderExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Builders/DetailsBuilder.cs"/>
-
-## Examples
-
-### Product Details
-
-```csharp demo-tabs
-new { Name = "Widget", Price = 99.99m, IsAvailable = true, Description = "High-quality widget with advanced features" }.ToDetails().MultiLine(p => p.Description).RemoveEmpty()
-```
-
-### User Profile
-
-```csharp demo-tabs
-new { Username = "johndoe", FullName = "John Doe", IsVerified = true, Email = "john@example.com" }.ToDetails().MultiLine(u => u.FullName).RemoveEmpty()
-```

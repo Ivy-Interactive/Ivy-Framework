@@ -1,4 +1,6 @@
-﻿using Ivy.Core;
+﻿using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using Ivy.Core;
 using Ivy.Shared;
 
 // ReSharper disable once CheckNamespace
@@ -41,7 +43,8 @@ public record Chat : WidgetBase<Chat>
     /// submits a new message. This handler receives the chat event context and
     /// the message text, allowing you to process the message and update the
     /// conversation accordingly.</param>
-    public Chat(ChatMessage[] messages, Action<Event<Chat, string>> onSendMessage) : base(messages.Cast<object>().ToArray())
+    [OverloadResolutionPriority(1)]
+    public Chat(ChatMessage[] messages, Func<Event<Chat, string>, ValueTask> onSendMessage) : base(messages.Cast<object>().ToArray())
     {
         OnSendMessage = onSendMessage;
         Width = Size.Full();
@@ -58,7 +61,7 @@ public record Chat : WidgetBase<Chat>
     /// user input, generating appropriate responses, and managing any business
     /// logic related to the chat conversation.
     /// </summary>
-    [Event] public Action<Event<Chat, string>> OnSendMessage { get; set; }
+    [Event] public Func<Event<Chat, string>, ValueTask> OnSendMessage { get; set; }
 
     /// <summary>
     /// Gets or sets the placeholder text displayed in the message input field.
@@ -72,6 +75,17 @@ public record Chat : WidgetBase<Chat>
     /// Default is "Type a message...".
     /// </summary>
     [Prop] public string Placeholder { get; set; } = "Type a message...";
+
+    /// <summary>
+    /// Compatibility constructor for Action-based event handlers.
+    /// Automatically wraps Action delegates in ValueTask-returning functions for backward compatibility.
+    /// </summary>
+    /// <param name="messages">Array of ChatMessage objects representing the conversation history to display.</param>
+    /// <param name="onSendMessage">Action-based event handler that is called when the user submits a new message.</param>
+    public Chat(ChatMessage[] messages, Action<Event<Chat, string>> onSendMessage)
+        : this(messages, e => { onSendMessage(e); return ValueTask.CompletedTask; })
+    {
+    }
 }
 
 /// <summary>

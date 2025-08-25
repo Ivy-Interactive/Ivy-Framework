@@ -1,4 +1,6 @@
-﻿using Ivy.Shared;
+﻿using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using Ivy.Shared;
 using Ivy.Core;
 using Ivy.Core.Docs;
 
@@ -66,10 +68,43 @@ public record DropDownMenu : WidgetBase<DropDownMenu>
     /// buttons, text, or custom elements.</param>
     /// <param name="items">Variable number of MenuItem collections that define
     /// the menu structure, content, and behavior for the dropdown interface.</param>
-    public DropDownMenu(Action<Event<DropDownMenu, object>> onSelect, object trigger, params IEnumerable<MenuItem> items) : base([new Slot("Trigger", trigger)])
+    [OverloadResolutionPriority(1)]
+    public DropDownMenu(Func<Event<DropDownMenu, object>, ValueTask> onSelect, object trigger, params IEnumerable<MenuItem> items) : base([new Slot("Trigger", trigger)])
     {
         OnSelect = onSelect;
         Items = items.ToArray();
+    }
+
+    /// <summary>
+    /// Provides a default selection handler that automatically processes menu item
+    /// selections using their built-in select handlers. This method creates a
+    /// standard event handler that delegates selection processing to individual
+    /// menu items, simplifying common dropdown menu implementations.
+    /// 
+    /// The default handler automatically invokes the select handler of the chosen
+    /// menu item, enabling menu items to manage their own selection behavior
+    /// without requiring custom event handling logic.
+    /// </summary>
+    /// <returns>A default event handler that processes menu item selections automatically.</returns>
+    public static Func<Event<DropDownMenu, object>, ValueTask> DefaultSelectHandler()
+    {
+        return (@evt) =>
+        {
+            @evt.Sender.Items.GetSelectHandler(@evt.Value)?.Invoke();
+            return ValueTask.CompletedTask;
+        };
+    }
+
+    /// <summary>
+    /// Compatibility constructor for Action-based event handlers.
+    /// Automatically wraps Action delegates in ValueTask-returning functions for backward compatibility.
+    /// </summary>
+    /// <param name="onSelect">Action-based event handler that is called when a menu item is selected.</param>
+    /// <param name="trigger">The element that triggers the dropdown menu to appear when clicked or activated.</param>
+    /// <param name="items">Variable number of MenuItem collections that define the menu structure.</param>
+    public DropDownMenu(Action<Event<DropDownMenu, object>> onSelect, object trigger, params IEnumerable<MenuItem> items)
+        : this(e => { onSelect(e); return ValueTask.CompletedTask; }, trigger, items)
+    {
     }
 
     /// <summary>
@@ -133,7 +168,7 @@ public record DropDownMenu : WidgetBase<DropDownMenu>
     /// This event handler receives the dropdown event context and the selected item
     /// value, enabling you to process user selections and perform appropriate actions.
     /// </summary>
-    [Event] public Action<Event<DropDownMenu, object>> OnSelect { get; set; }
+    [Event] public Func<Event<DropDownMenu, object>, ValueTask> OnSelect { get; set; }
 
     /// <summary>
     /// Operator overload that allows adding MenuItem objects to the dropdown menu
@@ -156,22 +191,6 @@ public record DropDownMenu : WidgetBase<DropDownMenu>
         }
 
         throw new NotSupportedException("DropDownMenu does not support children other then MenuItem.");
-    }
-
-    /// <summary>
-    /// Provides a default selection handler that automatically processes menu item
-    /// selections using their built-in select handlers. This method creates a
-    /// standard event handler that delegates selection processing to individual
-    /// menu items, simplifying common dropdown menu implementations.
-    /// 
-    /// The default handler automatically invokes the select handler of the chosen
-    /// menu item, enabling menu items to manage their own selection behavior
-    /// without requiring custom event handling logic.
-    /// </summary>
-    /// <returns>A default event handler that processes menu item selections automatically.</returns>
-    public static Action<Event<DropDownMenu, object>> DefaultSelectHandler()
-    {
-        return (@evt) => @evt.Sender.Items.GetSelectHandler(@evt.Value)?.Invoke();
     }
 }
 
@@ -337,8 +356,35 @@ public static class DropDownMenuExtensions
     /// <param name="dropDownMenu">The DropDownMenu to configure.</param>
     /// <param name="onSelect">The event handler to call when a menu item is selected.</param>
     /// <returns>A new DropDownMenu instance with the updated selection handler.</returns>
-    public static DropDownMenu HandleSelect(this DropDownMenu dropDownMenu, Action<Event<DropDownMenu, object>> onSelect)
+    [OverloadResolutionPriority(1)]
+    public static DropDownMenu HandleSelect(this DropDownMenu dropDownMenu, Func<Event<DropDownMenu, object>, ValueTask> onSelect)
     {
         return dropDownMenu with { OnSelect = onSelect };
+    }
+
+    /// <summary>
+    /// Sets the event handler for menu item selection with an Action-based handler.
+    /// This compatibility overload allows using traditional synchronous Action delegates
+    /// while automatically wrapping them for async compatibility.
+    /// </summary>
+    /// <param name="dropDownMenu">The DropDownMenu to configure.</param>
+    /// <param name="onSelect">The Action-based event handler to call when a menu item is selected.</param>
+    /// <returns>A new DropDownMenu instance with the updated selection handler.</returns>
+    public static DropDownMenu HandleSelect(this DropDownMenu dropDownMenu, Action<Event<DropDownMenu, object>> onSelect)
+    {
+        return dropDownMenu with { OnSelect = onSelect.ToValueTask() };
+    }
+
+    /// <summary>
+    /// Sets the event handler for menu item selection with a simplified handler that receives only the selected value.
+    /// This convenience overload allows handling selections without the full event context,
+    /// useful when you only need to process the selected item value.
+    /// </summary>
+    /// <param name="dropDownMenu">The DropDownMenu to configure.</param>
+    /// <param name="onSelect">The simplified handler that receives only the selected item value.</param>
+    /// <returns>A new DropDownMenu instance with the updated selection handler.</returns>
+    public static DropDownMenu HandleSelect(this DropDownMenu dropDownMenu, Action<object> onSelect)
+    {
+        return dropDownMenu with { OnSelect = @event => { onSelect(@event.Value); return ValueTask.CompletedTask; } };
     }
 }

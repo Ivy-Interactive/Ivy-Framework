@@ -5,32 +5,23 @@ namespace Ivy;
 
 /// <summary>
 /// Represents a footer layout widget that creates a layout with a fixed footer at the bottom
-/// and scrollable content above it.
-/// 
-/// The FooterLayout widget uses a two-slot system: a "Footer" slot that remains fixed at the bottom
+/// and scrollable content above it. The FooterLayout widget uses a two-slot system: a "Footer" slot that remains fixed at the bottom
 /// of the view, and a "Content" slot that can scroll freely above it.
 /// </summary>
 public record FooterLayout : WidgetBase<FooterLayout>
 {
     /// <summary>
     /// Initializes a new instance of the FooterLayout class with the specified footer and content.
-    /// The footer will be positioned at the bottom of the view and remain fixed, while the content
-    /// will be displayed above it with independent scrolling capabilities.
     /// </summary>
     /// <param name="footer">The content to display in the fixed footer area at the bottom of the view.</param>
-    /// <param name="content">The main content to display above the footer. This content can be
-    /// any length and will scroll independently while the footer remains fixed at the bottom.</param>
+    /// <param name="content">The main content to display above the footer. This content can be any length and will scroll independently while the footer remains fixed at the bottom.</param>
     public FooterLayout(object footer, object content) : base([new Slot("Footer", footer), new Slot("Content", content)])
     {
     }
 
     /// <summary>
-    /// Operator overload that prevents adding children to the FooterLayout using the pipe operator.
-    /// FooterLayout uses a predefined two-slot system (Footer and Content) and does not support
-    /// additional children beyond the initial footer and content parameters.
-    /// 
-    /// This restriction ensures that the layout maintains its intended structure with a fixed
-    /// footer and scrollable content area, preventing accidental modification of the layout structure.
+    /// Operator overload that prevents adding children to the FooterLayout using the pipe operator. 
+    /// FooterLayout uses a predefined two-slot system (Footer and Content) and does not support additional children beyond the initial footer and content parameters. 
     /// </summary>
     /// <param name="widget">The FooterLayout widget.</param>
     /// <param name="child">The child content to add (not supported).</param>

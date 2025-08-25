@@ -1,3 +1,5 @@
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using Ivy.Core;
 using Ivy.Shared;
 
@@ -19,7 +21,8 @@ public record Blade : WidgetBase<Blade>
     /// <param name="width">The width of the blade. If null, defaults to auto-sizing with a minimum of 80 units.</param>
     /// <param name="onClose">Optional event handler called when the blade is closed by the user.</param>
     /// <param name="onRefresh">Optional event handler called when the blade content should be refreshed.</param>
-    public Blade(IView bladeView, int index, string? title, Size? width, Action<Event<Blade>>? onClose, Action<Event<Blade>>? onRefresh) : base([bladeView])
+    [OverloadResolutionPriority(1)]
+    public Blade(IView bladeView, int index, string? title, Size? width, Func<Event<Blade>, ValueTask>? onClose, Func<Event<Blade>, ValueTask>? onRefresh) : base([bladeView])
     {
         Index = index;
         Title = title;
@@ -47,12 +50,31 @@ public record Blade : WidgetBase<Blade>
     /// This event is typically triggered by clicking a close button or using keyboard shortcuts.
     /// </summary>
     /// <value>An action that receives a <see cref="Event{T}"/> with this blade as the source.</value>
-    [Event] public Action<Event<Blade>>? OnClose { get; set; }
+    [Event] public Func<Event<Blade>, ValueTask>? OnClose { get; set; }
 
     /// <summary>
     /// Gets or sets the event handler called when the blade content should be refreshed.
     /// This event is typically triggered by user action or programmatic refresh requests.
     /// </summary>
     /// <value>An action that receives a <see cref="Event{T}"/> with this blade as the source.</value>
-    [Event] public Action<Event<Blade>>? OnRefresh { get; set; }
+    [Event] public Func<Event<Blade>, ValueTask>? OnRefresh { get; set; }
+
+    /// <summary>
+    /// Compatibility constructor for Action-based event handlers.
+    /// Automatically wraps Action delegates in ValueTask-returning functions for backward compatibility.
+    /// </summary>
+    /// <param name="bladeView">The view to be displayed within this blade.</param>
+    /// <param name="index">The zero-based index position of this blade in the blade stack.</param>
+    /// <param name="title">The optional title to display in the blade header.</param>
+    /// <param name="width">The width of the blade.</param>
+    /// <param name="onClose">Optional Action-based event handler called when the blade is closed.</param>
+    /// <param name="onRefresh">Optional Action-based event handler called when the blade content should be refreshed.</param>
+    public Blade(IView bladeView, int index, string? title, Size? width, Action<Event<Blade>>? onClose, Action<Event<Blade>>? onRefresh)
+        : this(bladeView, index, title, width,
+               onClose != null ? e => { onClose(e); return ValueTask.CompletedTask; }
+    : null,
+               onRefresh != null ? e => { onRefresh(e); return ValueTask.CompletedTask; }
+    : null)
+    {
+    }
 }

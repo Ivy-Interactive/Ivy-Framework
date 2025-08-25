@@ -1,4 +1,5 @@
 using System.Reactive;
+using System.Runtime.CompilerServices;
 using Ivy.Apps;
 using Ivy.Charts;
 using Ivy.Core;
@@ -61,12 +62,29 @@ public record Button : WidgetBase<Button>
     /// <param name="icon">The icon to display alongside or instead of the title text.
     /// This enhances visual meaning and can be positioned on either side of the text.
     /// Default is <see cref="Icons.None"/>.</param>
-    public Button(string? title = null, Action<Event<Button>>? onClick = null, ButtonVariant variant = ButtonVariant.Primary, Icons icon = Icons.None)
+    [OverloadResolutionPriority(1)]
+    public Button(string? title = null, Func<Event<Button>, ValueTask>? onClick = null, ButtonVariant variant = ButtonVariant.Primary, Icons icon = Icons.None)
     {
         Title = title;
         Variant = variant;
         Icon = icon;
         OnClick = onClick;
+    }
+
+    public Button(string? title = null, Action<Event<Button>>? onClick = null, ButtonVariant variant = ButtonVariant.Primary, Icons icon = Icons.None)
+    {
+        Title = title;
+        Variant = variant;
+        Icon = icon;
+        OnClick = onClick?.ToValueTask();
+    }
+
+    public Button(string? title = null, Action? onClick = null, ButtonVariant variant = ButtonVariant.Primary, Icons icon = Icons.None)
+    {
+        Title = title;
+        Variant = variant;
+        Icon = icon;
+        OnClick = onClick == null ? null : (_ => { onClick(); return ValueTask.CompletedTask; });
     }
 
     /// <summary>
@@ -212,7 +230,7 @@ public record Button : WidgetBase<Button>
     /// used to implement complex interaction logic or state management.
     /// Default is null (no click handler).
     /// </summary>
-    [Event] public Action<Event<Button>>? OnClick { get; set; }
+    [Event] public Func<Event<Button>, ValueTask>? OnClick { get; set; }
 
     /// <summary>
     /// Gets or sets a custom tag object associated with the button.
@@ -257,9 +275,15 @@ public static class ButtonExtensions
     /// <param name="onClick">Optional event handler for button click events.</param>
     /// <param name="variant">The visual style variant for the button. Default is <see cref="ButtonVariant.Primary"/>.</param>
     /// <returns>A new Button instance configured with the specified icon and settings.</returns>
-    public static Button ToButton(this Icons icon, Action<Event<Button>>? onClick = null, ButtonVariant variant = ButtonVariant.Primary)
+    [OverloadResolutionPriority(1)]
+    public static Button ToButton(this Icons icon, Func<Event<Button>, ValueTask>? onClick = null, ButtonVariant variant = ButtonVariant.Primary)
     {
         return new Button(null, onClick, icon: icon, variant: variant);
+    }
+
+    public static Button ToButton(this Icons icon, Action<Event<Button>>? onClick = null, ButtonVariant variant = ButtonVariant.Primary)
+    {
+        return new Button(null, onClick?.ToValueTask(), icon: icon, variant: variant);
     }
 
     /// <summary>
@@ -279,11 +303,14 @@ public static class ButtonExtensions
                 var isOpen = context.UseState(false);
                 var clonedTrigger = trigger with
                 {
-                    OnClick = @event =>
-                {
-                    trigger.OnClick?.Invoke(@event);
-                    isOpen.Value = true;
-                }
+                    OnClick = async @event =>
+                    {
+                        if (trigger.OnClick != null)
+                        {
+                            await trigger.OnClick(@event);
+                        }
+                        isOpen.Value = true;
+                    }
                 };
                 return new Fragment(
                     clonedTrigger,
@@ -413,9 +440,14 @@ public static class ButtonExtensions
     /// <param name="button">The Button to configure.</param>
     /// <param name="onClick">The event handler to call when the button is clicked.</param>
     /// <returns>A new Button instance with the updated click handler.</returns>
-    public static Button HandleClick(this Button button, Action<Event<Button>> onClick)
+    public static Button HandleClick(this Button button, Func<Event<Button>, ValueTask> onClick)
     {
         return button with { OnClick = onClick };
+    }
+
+    public static Button HandleClick(this Button button, Action<Event<Button>> onClick)
+    {
+        return button with { OnClick = onClick.ToValueTask() };
     }
 
     /// <summary>
@@ -427,6 +459,11 @@ public static class ButtonExtensions
     /// <param name="onClick">The simple action to perform when the button is clicked.</param>
     /// <returns>A new Button instance with the updated click handler.</returns>
     public static Button HandleClick(this Button button, Action onClick)
+    {
+        return button with { OnClick = _ => { onClick(); return ValueTask.CompletedTask; } };
+    }
+
+    public static Button HandleClick(this Button button, Func<ValueTask> onClick)
     {
         return button with { OnClick = _ => onClick() };
     }

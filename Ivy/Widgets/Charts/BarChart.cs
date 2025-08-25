@@ -6,17 +6,15 @@ using Ivy.Shared;
 namespace Ivy;
 
 /// <summary>
-/// Represents a bar chart widget that displays quantitative data using rectangular bars of varying heights or widths.
-/// This widget provides comprehensive configuration options for styling, axes, legends,
-/// tooltips, reference elements, and bar-specific layout controls.
+/// Represents a bar chart widget.
 /// </summary>
 public record BarChart : WidgetBase<BarChart>
 {
     /// <summary>
-    /// Initializes a new instance of the BarChart class with the specified data and bar configurations.
+    /// Initializes a new instance of the BarChart class.
     /// </summary>
-    /// <param name="data">The data source containing the values to be displayed in the bar chart.</param>
-    /// <param name="bars">Variable number of Bar configurations defining the data series to display.</param>
+    /// <param name="data">The data source.</param>
+    /// <param name="bars">Variable number of Bar configurations.</param>
     public BarChart(object data, params Bar[] bars)
     {
         Data = data;
@@ -26,125 +24,92 @@ public record BarChart : WidgetBase<BarChart>
     }
 
     /// <summary>
-    /// Gets or sets the data source containing the values to be displayed in the bar chart.
-    /// This can be any enumerable collection of objects with properties that match the data keys.
+    /// Gets or sets the data source.
     /// </summary>
     [Prop] public object Data { get; init; }
 
     /// <summary>
-    /// Gets or sets the layout orientation for the bar chart.
-    /// Horizontal layout displays bars side by side, while vertical layout stacks bars vertically.
-    /// Default is <see cref="Layouts.Horizontal"/>.
+    /// Gets or sets the layout orientation.
     /// </summary>
     [Prop] public Layouts Layout { get; init; } = Layouts.Horizontal;
 
     /// <summary>
-    /// Gets or sets the color scheme used for the bar chart.
-    /// This determines the palette of colors used for different data series.
-    /// Default is <see cref="ColorScheme.Default"/>.
+    /// Gets or sets the color scheme.
     /// </summary>
     [Prop] public ColorScheme ColorScheme { get; init; } = ColorScheme.Default;
 
     /// <summary>
-    /// Gets or sets the array of Bar configurations defining the data series to display.
-    /// Each Bar represents a separate data series with its own styling and behavior.
+    /// Gets or sets the array of Bar configurations.
     /// </summary>
     [Prop] public Bar[] Bars { get; init; }
 
     /// <summary>
-    /// Gets or sets the Cartesian grid configuration for the bar chart.
-    /// This controls the appearance and behavior of grid lines that help with data reading.
-    /// Default is null (no grid displayed).
+    /// Gets or sets the Cartesian grid configuration.
     /// </summary>
     [Prop] public CartesianGrid? CartesianGrid { get; init; }
 
     /// <summary>
-    /// Gets or sets the tooltip configuration for the bar chart.
-    /// This controls the interactive information display when hovering over chart elements.
-    /// Default is null (no tooltip displayed).
+    /// Gets or sets the tooltip configuration.
     /// </summary>
     [Prop] public Ivy.Charts.Tooltip? Tooltip { get; init; }
 
     /// <summary>
-    /// Gets or sets the legend configuration for the bar chart.
-    /// This controls the display of series identifiers and color mappings.
-    /// Default is null (no legend displayed).
+    /// Gets or sets the legend configuration.
     /// </summary>
     [Prop] public Legend? Legend { get; init; } = null;
 
     /// <summary>
-    /// Gets or sets the array of X-axis configurations for the bar chart.
-    /// Multiple X-axes can be configured for complex chart layouts.
-    /// Default is an empty array (no custom X-axes).
+    /// Gets or sets the array of X-axis configurations.
     /// </summary>
     [Prop] public XAxis[] XAxis { get; init; } = [];
 
     /// <summary>
-    /// Gets or sets the array of Y-axis configurations for the bar chart.
-    /// Multiple Y-axes can be configured for complex chart layouts.
-    /// Default is an empty array (no custom Y-axes).
+    /// Gets or sets the array of Y-axis configurations.
     /// </summary>
     [Prop] public YAxis[] YAxis { get; init; } = [];
 
     /// <summary>
-    /// Gets or sets the array of reference area configurations for highlighting specific regions.
-    /// Reference areas provide visual context and can mark zones of interest or thresholds.
-    /// Default is an empty array (no reference areas).
+    /// Gets or sets the array of reference area configurations.
     /// </summary>
     [Prop] public ReferenceArea[] ReferenceAreas { get; init; } = [];
 
     /// <summary>
-    /// Gets or sets the array of reference dot configurations for marking specific data points.
-    /// Reference dots can highlight individual values or important data points.
-    /// Default is an empty array (no reference dots).
+    /// Gets or sets the array of reference dot configurations.
     /// </summary>
     [Prop] public ReferenceDot[] ReferenceDots { get; init; } = [];
 
     /// <summary>
-    /// Gets or sets the array of reference line configurations for marking thresholds or boundaries.
-    /// Reference lines can indicate target values, averages, or other important reference points.
-    /// Default is an empty array (no reference lines).
+    /// Gets or sets the array of reference line configurations.
     /// </summary>
     [Prop] public ReferenceLine[] ReferenceLines { get; init; } = [];
 
     /// <summary>
-    /// Gets or sets the stack offset type for the bar chart.
-    /// This determines how multiple bars are positioned relative to each other when stacking.
-    /// Default is <see cref="StackOffsetTypes.None"/>.
+    /// Gets or sets the stack offset type.
     /// </summary>
     [Prop] public StackOffsetTypes StackOffset { get; init; } = StackOffsetTypes.None;
 
     /// <summary>
-    /// Gets or sets the gap between bars within the same category in pixels.
-    /// This controls the spacing between bars that represent different data series for the same category.
-    /// Default is 4 pixels.
+    /// Gets or sets the gap between bars within the same category.
     /// </summary>
     [Prop] public int BarGap { get; init; } = 4;
 
     /// <summary>
-    /// Gets or sets the gap between bar categories as a percentage or fixed value.
-    /// This controls the spacing between different categories on the chart.
-    /// Default is "10%" (10% of the available space).
+    /// Gets or sets the gap between bar categories.
     /// </summary>
     [Prop] public object? BarCategoryGap { get; init; } = "10%";
 
     /// <summary>
-    /// Gets or sets the maximum size (width or height) that any individual bar can have in pixels.
-    /// This prevents bars from becoming too wide or tall, maintaining chart readability.
-    /// Default is null (no maximum size limit).
+    /// Gets or sets the maximum size.
     /// </summary>
     [Prop] public int? MaxBarSize { get; init; } = null;
 
     /// <summary>
     /// Gets or sets whether the stacking order of bars should be reversed.
-    /// When true, the first bar in the data will appear at the bottom of the stack instead of the top.
-    /// Default is false (normal stacking order).
     /// </summary>
     [Prop] public bool ReverseStackOrder { get; init; } = false;
 
     /// <summary>
     /// Operator overload that prevents BarChart from accepting child widgets.
-    /// Bar charts are self-contained and do not support child widget composition.
     /// </summary>
     /// <param name="widget">The BarChart widget.</param>
     /// <param name="child">The child widget (not supported).</param>
@@ -157,13 +122,12 @@ public record BarChart : WidgetBase<BarChart>
 }
 
 /// <summary>
-/// Extension methods for the BarChart class that provide a fluent API for easy configuration.
-/// Each method returns a new BarChart instance with the updated configuration, following the immutable pattern.
+/// Extension methods for the BarChart class.
 /// </summary>
 public static class BarChartExtensions
 {
     /// <summary>
-    /// Sets the layout orientation for the bar chart.
+    /// Sets the layout orientation.
     /// </summary>
     /// <param name="chart">The BarChart to configure.</param>
     /// <param name="layout">The layout orientation to use.</param>
@@ -174,8 +138,7 @@ public static class BarChartExtensions
     }
 
     /// <summary>
-    /// Sets the bar chart layout to horizontal orientation.
-    /// Horizontal bars are useful for category names that are long or when you have many categories.
+    /// Sets the layout to horizontal.
     /// </summary>
     /// <param name="chart">The BarChart to configure.</param>
     /// <returns>A new BarChart instance with horizontal layout.</returns>
@@ -185,8 +148,7 @@ public static class BarChartExtensions
     }
 
     /// <summary>
-    /// Sets the bar chart layout to vertical orientation.
-    /// Vertical bars are the traditional bar chart style and work well for most use cases.
+    /// Sets the layout to vertical.
     /// </summary>
     /// <param name="chart">The BarChart to configure.</param>
     /// <returns>A new BarChart instance with vertical layout.</returns>
@@ -196,7 +158,7 @@ public static class BarChartExtensions
     }
 
     /// <summary>
-    /// Adds a single Bar configuration to the existing bar list, preserving any existing bars.
+    /// Adds a single Bar configuration to the existing bar list.
     /// </summary>
     /// <param name="chart">The BarChart to configure.</param>
     /// <param name="bar">The Bar configuration to add.</param>
@@ -219,7 +181,6 @@ public static class BarChartExtensions
 
     /// <summary>
     /// Adds a simple bar configuration for the specified data key to the existing bar list.
-    /// This creates a basic bar with optional stacking and naming.
     /// </summary>
     /// <param name="chart">The BarChart to configure.</param>
     /// <param name="dataKey">The data property key to create a bar for.</param>
@@ -232,7 +193,7 @@ public static class BarChartExtensions
     }
 
     /// <summary>
-    /// Sets the Cartesian grid configuration for the bar chart.
+    /// Sets the Cartesian grid configuration.
     /// </summary>
     /// <param name="chart">The BarChart to configure.</param>
     /// <param name="cartesianGrid">The CartesianGrid configuration to use.</param>
@@ -243,7 +204,7 @@ public static class BarChartExtensions
     }
 
     /// <summary>
-    /// Enables the Cartesian grid with default configuration for the bar chart.
+    /// Enables the Cartesian grid.
     /// </summary>
     /// <param name="chart">The BarChart to configure.</param>
     /// <returns>A new BarChart instance with default Cartesian grid enabled.</returns>
@@ -253,7 +214,7 @@ public static class BarChartExtensions
     }
 
     /// <summary>
-    /// Adds an X-axis configuration to the existing X-axis list, preserving any existing X-axes.
+    /// Adds an X-axis configuration to the existing X-axis list.
     /// </summary>
     /// <param name="chart">The BarChart to configure.</param>
     /// <param name="xAxis">The XAxis configuration to add.</param>
@@ -265,7 +226,6 @@ public static class BarChartExtensions
 
     /// <summary>
     /// Adds a simple X-axis configuration for the specified data key to the existing X-axis list.
-    /// This creates a basic X-axis that represents the specified data property.
     /// </summary>
     /// <param name="chart">The BarChart to configure.</param>
     /// <param name="dataKey">The data property key to create an X-axis for.</param>
@@ -276,7 +236,7 @@ public static class BarChartExtensions
     }
 
     /// <summary>
-    /// Adds a Y-axis configuration to the existing Y-axis list, preserving any existing Y-axes.
+    /// Adds a Y-axis configuration to the existing Y-axis list.
     /// </summary>
     /// <param name="chart">The BarChart to configure.</param>
     /// <param name="yAxis">The YAxis configuration to add.</param>
@@ -288,7 +248,6 @@ public static class BarChartExtensions
 
     /// <summary>
     /// Adds a simple Y-axis configuration for the specified data key to the existing Y-axis list.
-    /// This creates a basic Y-axis that represents the specified data property.
     /// </summary>
     /// <param name="chart">The BarChart to configure.</param>
     /// <param name="dataKey">The data property key to create a Y-axis for.</param>
@@ -300,7 +259,6 @@ public static class BarChartExtensions
 
     /// <summary>
     /// Adds a default Y-axis configuration to the existing Y-axis list.
-    /// This creates a basic Y-axis with default settings.
     /// </summary>
     /// <param name="chart">The BarChart to configure.</param>
     /// <returns>A new BarChart instance with the additional default Y-axis configuration.</returns>
@@ -310,7 +268,7 @@ public static class BarChartExtensions
     }
 
     /// <summary>
-    /// Sets the tooltip configuration for the bar chart.
+    /// Sets the tooltip configuration.
     /// </summary>
     /// <param name="chart">The BarChart to configure.</param>
     /// <param name="tooltip">The Tooltip configuration to use, or null to disable tooltips.</param>
@@ -321,7 +279,7 @@ public static class BarChartExtensions
     }
 
     /// <summary>
-    /// Enables the tooltip with default configuration for the bar chart.
+    /// Enables the tooltip.
     /// </summary>
     /// <param name="chart">The BarChart to configure.</param>
     /// <returns>A new BarChart instance with default tooltip enabled.</returns>
@@ -331,7 +289,7 @@ public static class BarChartExtensions
     }
 
     /// <summary>
-    /// Sets the legend configuration for the bar chart.
+    /// Sets the legend configuration.
     /// </summary>
     /// <param name="chart">The BarChart to configure.</param>
     /// <param name="legend">The Legend configuration to use.</param>
@@ -342,7 +300,7 @@ public static class BarChartExtensions
     }
 
     /// <summary>
-    /// Enables the legend with default configuration for the bar chart.
+    /// Enables the legend.
     /// </summary>
     /// <param name="chart">The BarChart to configure.</param>
     /// <returns>A new BarChart instance with default legend enabled.</returns>
@@ -352,7 +310,7 @@ public static class BarChartExtensions
     }
 
     /// <summary>
-    /// Adds a reference area configuration to the existing reference area list, preserving any existing areas.
+    /// Adds a reference area configuration to the existing reference area list.
     /// </summary>
     /// <param name="chart">The BarChart to configure.</param>
     /// <param name="referenceArea">The ReferenceArea configuration to add.</param>
@@ -364,7 +322,6 @@ public static class BarChartExtensions
 
     /// <summary>
     /// Adds a simple reference area configuration with the specified coordinates to the existing list.
-    /// This creates a basic reference area that highlights a rectangular region on the chart.
     /// </summary>
     /// <param name="chart">The BarChart to configure.</param>
     /// <param name="x1">The leftmost X coordinate of the reference area.</param>
@@ -379,7 +336,7 @@ public static class BarChartExtensions
     }
 
     /// <summary>
-    /// Adds a reference dot configuration to the existing reference dot list, preserving any existing dots.
+    /// Adds a reference dot configuration to the existing reference dot list.
     /// </summary>
     /// <param name="chart">The BarChart to configure.</param>
     /// <param name="referenceDot">The ReferenceDot configuration to add.</param>
@@ -391,7 +348,6 @@ public static class BarChartExtensions
 
     /// <summary>
     /// Adds a simple reference dot configuration with the specified coordinates to the existing list.
-    /// This creates a basic reference dot that marks a specific point on the chart.
     /// </summary>
     /// <param name="chart">The BarChart to configure.</param>
     /// <param name="x">The X coordinate of the reference dot.</param>
@@ -404,7 +360,7 @@ public static class BarChartExtensions
     }
 
     /// <summary>
-    /// Adds a reference line configuration to the existing reference line list, preserving any existing lines.
+    /// Adds a reference line configuration to the existing reference line list.
     /// </summary>
     /// <param name="chart">The BarChart to configure.</param>
     /// <param name="referenceLine">The ReferenceLine configuration to add.</param>
@@ -416,7 +372,6 @@ public static class BarChartExtensions
 
     /// <summary>
     /// Adds a simple reference line configuration with the specified coordinates to the existing list.
-    /// This creates a basic reference line that marks a threshold or boundary on the chart.
     /// </summary>
     /// <param name="chart">The BarChart to configure.</param>
     /// <param name="x">The X coordinate for a vertical reference line, or null for a horizontal line.</param>
@@ -429,7 +384,7 @@ public static class BarChartExtensions
     }
 
     /// <summary>
-    /// Sets the color scheme used for the bar chart.
+    /// Sets the color scheme.
     /// </summary>
     /// <param name="chart">The BarChart to configure.</param>
     /// <param name="colorScheme">The color scheme to use for the chart.</param>
@@ -440,7 +395,7 @@ public static class BarChartExtensions
     }
 
     /// <summary>
-    /// Sets the stack offset type for the bar chart.
+    /// Sets the stack offset type.
     /// </summary>
     /// <param name="chart">The BarChart to configure.</param>
     /// <param name="stackOffset">The stack offset type to use for positioning multiple bars.</param>
@@ -451,7 +406,7 @@ public static class BarChartExtensions
     }
 
     /// <summary>
-    /// Sets the gap between bars within the same category in pixels.
+    /// Sets the gap between bars within the same category.
     /// </summary>
     /// <param name="chart">The BarChart to configure.</param>
     /// <param name="barGap">The gap between bars in pixels.</param>
@@ -462,7 +417,7 @@ public static class BarChartExtensions
     }
 
     /// <summary>
-    /// Sets the gap between bar categories using an integer value in pixels.
+    /// Sets the gap between bar categories.
     /// </summary>
     /// <param name="chart">The BarChart to configure.</param>
     /// <param name="barCategoryGap">The gap between categories in pixels.</param>
@@ -473,7 +428,7 @@ public static class BarChartExtensions
     }
 
     /// <summary>
-    /// Sets the gap between bar categories using a string value (percentage or CSS units).
+    /// Sets the gap between bar categories.
     /// </summary>
     /// <param name="chart">The BarChart to configure.</param>
     /// <param name="barCategoryGap">The gap between categories as a string (e.g., "10%", "20px").</param>
@@ -484,7 +439,7 @@ public static class BarChartExtensions
     }
 
     /// <summary>
-    /// Sets the maximum size (width or height) that any individual bar can have in pixels.
+    /// Sets the maximum size.
     /// </summary>
     /// <param name="chart">The BarChart to configure.</param>
     /// <param name="maxBarSize">The maximum bar size in pixels.</param>
@@ -498,7 +453,7 @@ public static class BarChartExtensions
     /// Sets whether the stacking order of bars should be reversed.
     /// </summary>
     /// <param name="chart">The BarChart to configure.</param>
-    /// <param name="reverseStackOrder">True to reverse the stacking order, false for normal order. Default is true.</param>
+    /// <param name="reverseStackOrder">True to reverse the stacking order.</param>
     /// <returns>A new BarChart instance with the updated reverse stack order configuration.</returns>
     public static BarChart ReverseStackOrder(this BarChart chart, bool reverseStackOrder = true)
     {

@@ -9,11 +9,24 @@ public class ExceptionHandlingApp : ViewBase
     {
         UseEffect(() => throw new Exception("This is an unhandled exception."));
 
-        var button = new Button("Click me to throw an exception")
+        var button1 = new Button("Click me to throw an exception")
         {
             OnClick = _ => throw new Exception("This is an unhandled exception from a Button click.")
         };
 
-        return button;
+        var button2 = new Button("Click me to throw an exception (async)")
+        {
+            OnClick = async _ =>
+            {
+                await Task.Delay(1000);
+                throw new Exception("This is an unhandled exception from a Button click.");
+            }
+        };
+
+        return Layout.Vertical()
+            | button1
+            | button2
+            ;
+
     }
 }

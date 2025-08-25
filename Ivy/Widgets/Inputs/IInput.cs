@@ -12,12 +12,10 @@ namespace Ivy.Widgets.Inputs;
 public interface IInput<T> : IAnyInput
 {
     /// <summary>Gets the current value of the input control.</summary>
-    /// <value>The current input value of type T.</value>
     [Prop] public T Value { get; }
 
     /// <summary>Gets the event handler called when the input value changes.</summary>
-    /// <value>The change event handler that receives the input control and the new value, or null if no handler is set.</value>
-    [Event] public Action<Event<IInput<T>, T>>? OnChange { get; }
+    [Event] public Func<Event<IInput<T>, T>, ValueTask>? OnChange { get; }
 
     /// <summary>
     /// Operator overload that prevents adding child elements to input controls.
@@ -25,7 +23,6 @@ public interface IInput<T> : IAnyInput
     /// </summary>
     /// <param name="input">The input control.</param>
     /// <param name="child">The attempted child element.</param>
-    /// <returns>Never returns as this operation is not supported.</returns>
     /// <exception cref="NotSupportedException">Always thrown as input controls do not support child elements.</exception>
     public static IInput<T> operator |(IInput<T> input, object child)
     {

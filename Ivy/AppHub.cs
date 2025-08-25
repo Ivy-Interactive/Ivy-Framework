@@ -255,9 +255,7 @@ public class AppHub(
 
                     if (string.IsNullOrEmpty(authToken?.Jwt) || !await authProvider.ValidateJwtAsync(authToken.Jwt))
                     {
-                        logger.LogWarning(
-                            "Invalid JWT for event from {ConnectionId}. Aborting.",
-                            Context.ConnectionId);
+                        logger.LogWarning("Invalid JWT for event from {ConnectionId}. Aborting.", Context.ConnectionId);
                         Context.Abort();
                         return;
                     }
@@ -299,10 +297,8 @@ public class AppHub(
                 var refreshToken = cookies["jwt_ext_refresh_token"].NullIfEmpty();
                 return token with { RefreshToken = refreshToken };
             }
-            else
-            {
-                return token;
-            }
+
+            return token;
         }
         catch (Exception e)
         {

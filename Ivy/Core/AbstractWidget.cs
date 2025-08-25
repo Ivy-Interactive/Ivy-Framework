@@ -194,27 +194,38 @@ public abstract record AbstractWidget : IWidget
         if (eventDelegate == null)
             return false;
 
-        if (IsAction(eventDelegate, out Type? eventType))
+        if (IsFunc(eventDelegate, out Type? eventType, out Type? returnType))
         {
-            if (eventType!.IsGenericType && eventType.GetGenericTypeDefinition() == typeof(Event<>))
+            if (returnType == typeof(ValueTask))
             {
-                var eventInstance = Activator.CreateInstance(eventType, eventName, this);
-                ((Delegate)eventDelegate).DynamicInvoke(eventInstance);
-                return true;
-            }
-            if (eventType!.IsGenericType && eventType.GetGenericTypeDefinition() == typeof(Event<,>))
-            {
-                var genericArguments = eventType.GetGenericArguments();
-                if (genericArguments.Length == 2)
+                if (eventType!.IsGenericType && eventType.GetGenericTypeDefinition() == typeof(Event<>))
                 {
-                    if (args.Count() != 1) return false;
-
-                    var valueType = genericArguments[1];
-                    var value = Utils.ConvertJsonNode(args[0], valueType);
-
-                    var eventInstance = Activator.CreateInstance(eventType, eventName, this, value);
-                    ((Delegate)eventDelegate).DynamicInvoke(eventInstance);
+                    var eventInstance = Activator.CreateInstance(eventType, eventName, this);
+                    var result = ((Delegate)eventDelegate).DynamicInvoke(eventInstance);
+                    if (result is ValueTask valueTask)
+                    {
+                        valueTask.AsTask().GetAwaiter().GetResult();
+                    }
                     return true;
+                }
+                if (eventType!.IsGenericType && eventType.GetGenericTypeDefinition() == typeof(Event<,>))
+                {
+                    var genericArguments = eventType.GetGenericArguments();
+                    if (genericArguments.Length == 2)
+                    {
+                        if (args.Count() != 1) return false;
+
+                        var valueType = genericArguments[1];
+                        var value = Utils.ConvertJsonNode(args[0], valueType);
+
+                        var eventInstance = Activator.CreateInstance(eventType, eventName, this, value);
+                        var result = ((Delegate)eventDelegate).DynamicInvoke(eventInstance);
+                        if (result is ValueTask valueTask)
+                        {
+                            valueTask.AsTask().GetAwaiter().GetResult();
+                        }
+                        return true;
+                    }
                 }
             }
         }
@@ -223,14 +234,16 @@ public abstract record AbstractWidget : IWidget
     }
 
     /// <summary>
-    /// Determines if the given object is a valid action delegate and extracts the event type.
+    /// Determines if the given object is a valid Func delegate and extracts the event type and return type.
     /// </summary>
     /// <param name="eventDelegate">The delegate to check.</param>
     /// <param name="eventType">When this method returns, contains the event type if the delegate is valid.</param>
-    /// <returns>true if the delegate is a valid action with a single parameter; otherwise, false.</returns>
-    private static bool IsAction(object eventDelegate, out Type? eventType)
+    /// <param name="returnType">When this method returns, contains the return type of the delegate.</param>
+    /// <returns>true if the delegate is a valid Func with a single parameter; otherwise, false.</returns>
+    private static bool IsFunc(object eventDelegate, out Type? eventType, out Type? returnType)
     {
         eventType = null;
+        returnType = null;
 
         var delegateType = eventDelegate.GetType();
 
@@ -244,6 +257,7 @@ public abstract record AbstractWidget : IWidget
             return false;
 
         eventType = parameters[0].ParameterType;
+        returnType = invokeMethod.ReturnType;
 
         return true;
     }

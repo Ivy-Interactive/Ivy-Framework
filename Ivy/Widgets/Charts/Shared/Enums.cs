@@ -59,8 +59,7 @@ public enum Positions
 }
 
 /// <summary>
-/// Defines the layout orientation for charts and chart elements. Layout determines how chart components
-/// are arranged and oriented relative to each other.
+/// Defines the layout orientation for charts and chart elements.
 /// </summary>
 public enum Layouts
 {
@@ -71,8 +70,7 @@ public enum Layouts
 }
 
 /// <summary>
-/// Defines the types of curves used to connect data points in line and area charts. Different curve types
-/// create different visual effects and are suitable for different types of data visualization.
+/// Defines the types of curves used to connect data points in line and area charts.
 /// </summary>
 public enum CurveTypes
 {
@@ -109,8 +107,7 @@ public enum CurveTypes
 }
 
 /// <summary>
-/// Defines the visual representation types for chart legends. Legend types determine how series
-/// are displayed in the chart legend, affecting both appearance and user understanding.
+/// Defines the visual representation types for chart legends.
 /// </summary>
 public enum LegendTypes
 {
@@ -139,8 +136,7 @@ public enum LegendTypes
 }
 
 /// <summary>
-/// Defines the scale types available for chart axes and data transformations. Different scales
-/// are used to transform data values for appropriate visualization based on data characteristics.
+/// Defines the scale types available for chart axes and data transformations.
 /// </summary>
 public enum Scales
 {
@@ -177,8 +173,7 @@ public enum Scales
 }
 
 /// <summary>
-/// Defines the stacking behavior for chart series. Stack offset types determine how multiple
-/// series are combined when stacking is enabled, affecting the visual representation of data.
+/// Defines the stacking behavior for chart series.
 /// </summary>
 public enum StackOffsetTypes
 {

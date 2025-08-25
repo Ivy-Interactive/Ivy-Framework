@@ -4,15 +4,12 @@
 namespace Ivy.Charts;
 
 /// <summary>
-/// Represents a label configuration for chart elements, providing control over the positioning, rotation,
-/// and styling of labels that display values on or near chart components. Labels are commonly used to
-/// show data values, percentages, or other contextual information directly on charts for better readability.
+/// Represents a label configuration for chart elements.
 /// </summary>
 public record Label
 {
     /// <summary>
     /// Initializes a new instance of the Label class with default values.
-    /// The default configuration provides a label with a 5-pixel offset and no specific positioning or styling.
     /// </summary>
     public Label()
     {
@@ -20,45 +17,36 @@ public record Label
 
     /// <summary>
     /// Gets or sets the offset distance of the label from its associated chart element in pixels.
-    /// This determines how far the label is positioned from the data point, line, or area it represents.
     /// Default is 5 pixels.
     /// </summary>
     public double Offset { get; set; } = 5;
 
     /// <summary>
     /// Gets or sets the rotation angle of the label text in degrees. Positive values rotate clockwise.
-    /// This is useful for fitting labels in tight spaces or creating angled text for better readability.
     /// Default is null (no rotation).
     /// </summary>
     public double? Angle { get; set; } = null;
 
     /// <summary>
     /// Gets or sets the position of the label relative to its associated chart element.
-    /// This determines where the label appears in relation to the data point, line, or area.
     /// <see cref="Positions"/> is an enum that contains all the available positioning options.
-    /// Default is null (automatic positioning).
     /// </summary>
     public Positions? Position { get; set; } = null;
 
     /// <summary>
-    /// Gets or sets the color of the label text. If null, a default color from the chart's
-    /// color scheme will be used, typically matching the associated data series.
+    /// Gets or sets the color of the label text.
     /// <see cref="Colors"/> is an enum that contains all the available colors for the chart.
-    /// Default is null.
     /// </summary>
     public Colors? Color { get; set; } = null;
 }
 
 /// <summary>
 /// Extension methods for the Label class that provide a fluent API for easy configuration.
-/// These methods allow you to chain multiple configuration calls for better readability and maintainability.
-/// Each method returns a new Label instance with the updated configuration, following the immutable pattern.
 /// </summary>
 public static class LabelExtensions
 {
     /// <summary>
     /// Sets the offset distance of the label from its associated chart element in pixels.
-    /// This determines how far the label is positioned from the data point, line, or area it represents.
     /// </summary>
     /// <param name="label">The Label to configure.</param>
     /// <param name="offset">The offset distance in pixels.</param>
@@ -70,7 +58,6 @@ public static class LabelExtensions
 
     /// <summary>
     /// Sets the rotation angle of the label text in degrees. Positive values rotate clockwise.
-    /// This is useful for fitting labels in tight spaces or creating angled text for better readability.
     /// </summary>
     /// <param name="label">The Label to configure.</param>
     /// <param name="angle">The rotation angle in degrees.</param>
@@ -82,7 +69,6 @@ public static class LabelExtensions
 
     /// <summary>
     /// Sets the position of the label relative to its associated chart element.
-    /// This determines where the label appears in relation to the data point, line, or area.
     /// </summary>
     /// <param name="label">The Label to configure.</param>
     /// <param name="position">The position for the label.</param>
@@ -93,8 +79,7 @@ public static class LabelExtensions
     }
 
     /// <summary>
-    /// Sets the color of the label text. This color will be applied to the label text,
-    /// allowing you to customize the appearance to match your design requirements.
+    /// Sets the color of the label text.
     /// </summary>
     /// <param name="label">The Label to configure.</param>
     /// <param name="color">The color to use for the label text.</param>

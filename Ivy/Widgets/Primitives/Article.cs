@@ -1,6 +1,8 @@
 ﻿using Ivy.Core;
 using Ivy.Core.Docs;
 using Ivy.Shared;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy;
@@ -77,7 +79,7 @@ public record Article : WidgetBase<Article>
     /// Enables custom handling of link clicks within the article content, such as internal navigation,
     /// external link processing, or analytics tracking. The event provides both the article context and the clicked link.
     /// </remarks>
-    [Event] public Action<Event<Article, string>>? OnLinkClick { get; set; }
+    [Event] public Func<Event<Article, string>, ValueTask>? OnLinkClick { get; set; }
 }
 
 /// <summary>
@@ -134,7 +136,11 @@ public static class ArticleExtensions
     /// <param name="article">The article to configure.</param>
     /// <param name="onLinkClick">The event handler that receives the full event context with article and link URL.</param>
     /// <returns>The article with the specified link click event handler.</returns>
-    public static Article HandleLinkClick(this Article article, Action<Event<Article, string>> onLinkClick) => article with { OnLinkClick = onLinkClick };
+    [OverloadResolutionPriority(1)]
+    public static Article HandleLinkClick(this Article article, Func<Event<Article, string>, ValueTask> onLinkClick) => article with { OnLinkClick = onLinkClick };
+
+    // Overload for Action<Event<Article, string>>
+    public static Article HandleLinkClick(this Article article, Action<Event<Article, string>> onLinkClick) => article with { OnLinkClick = onLinkClick.ToValueTask() };
 
     /// <summary>
     /// Sets a simplified event handler for link clicks within the article content.
@@ -143,5 +149,5 @@ public static class ArticleExtensions
     /// <param name="article">The article to configure.</param>
     /// <param name="onLinkClick">The simplified event handler that receives only the clicked link URL.</param>
     /// <returns>The article with the specified simplified link click event handler.</returns>
-    public static Article HandleLinkClick(this Article article, Action<string> onLinkClick) => article with { OnLinkClick = @event => onLinkClick(@event.Value) };
+    public static Article HandleLinkClick(this Article article, Action<string> onLinkClick) => article with { OnLinkClick = @event => { onLinkClick(@event.Value); return ValueTask.CompletedTask; } };
 }

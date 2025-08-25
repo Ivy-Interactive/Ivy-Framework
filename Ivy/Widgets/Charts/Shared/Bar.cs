@@ -5,8 +5,6 @@ namespace Ivy.Charts;
 
 /// <summary>
 /// Represents a bar chart configuration with customizable styling, positioning, and behavior options.
-/// Bar charts are used to compare values across categories and can be configured with various visual properties
-/// including colors, borders, labels, and stacking behavior.
 /// </summary>
 public record Bar
 {
@@ -258,7 +256,6 @@ public static class BarExtensions
 
     /// <summary>
     /// Sets the corner radii using an array of four values for [topLeft, topRight, bottomRight, bottomLeft].
-    /// This allows for asymmetric corner rounding.
     /// </summary>
     /// <param name="area">The bar to configure.</param>
     /// <param name="radius">An array of four radius values in pixels.</param>
@@ -284,7 +281,6 @@ public static class BarExtensions
 
     /// <summary>
     /// Sets the corner radii using two values for horizontal and vertical symmetry.
-    /// Top corners use the first value, bottom corners use the second value.
     /// </summary>
     /// <param name="area">The bar to configure.</param>
     /// <param name="top">The radius for the top corners (topLeft and topRight) in pixels.</param>

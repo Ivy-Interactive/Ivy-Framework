@@ -4,10 +4,7 @@
 namespace Ivy.Charts;
 
 /// <summary>
-/// Represents a reference dot configuration for charts, providing a single point marker that can be used
-/// to highlight specific data points, mark important values, or provide visual reference for data analysis.
-/// Reference dots are useful for pinpointing exact locations, marking thresholds, or highlighting individual
-/// data points that require special attention in chart visualizations.
+/// Represents a reference dot configuration.
 /// </summary>
 public record ReferenceDot
 {
@@ -25,35 +22,28 @@ public record ReferenceDot
     }
 
     /// <summary>
-    /// Gets or sets the X coordinate of the reference dot.
-    /// This defines the horizontal position of the reference point on the chart.
+    /// Gets or sets the X coordinate.
     /// </summary>
     public double X { get; set; }
 
     /// <summary>
-    /// Gets or sets the Y coordinate of the reference dot.
-    /// This defines the vertical position of the reference point on the chart.
+    /// Gets or sets the Y coordinate.
     /// </summary>
     public double Y { get; set; }
 
     /// <summary>
-    /// Gets or sets the optional text label to display on or near the reference dot.
-    /// This label can provide context, explanation, or identification for the marked point.
-    /// Default is null (no label displayed).
+    /// Gets or sets the optional text label.
     /// </summary>
     public string? Label { get; set; }
 }
 
 /// <summary>
-/// Extension methods for the ReferenceDot class that provide a fluent API for easy configuration.
-/// These methods allow you to chain multiple configuration calls for better readability and maintainability.
-/// Each method returns a new ReferenceDot instance with the updated configuration, following the immutable pattern.
+/// Extension methods for the ReferenceDot class.
 /// </summary>
 public static class ReferenceDotExtensions
 {
     /// <summary>
-    /// Sets the text label to display on or near the reference dot.
-    /// This label can provide context, explanation, or identification for the marked point.
+    /// Sets the text label.
     /// </summary>
     /// <param name="referenceDot">The ReferenceDot to configure.</param>
     /// <param name="label">The text label to display.</param>

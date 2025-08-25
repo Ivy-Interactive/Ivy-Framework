@@ -19,7 +19,6 @@ public static class InputExtensions
     /// <param name="state">The state object to bind the input control to.</param>
     /// <param name="placeholder">Optional placeholder text displayed when the input is empty.</param>
     /// <param name="disabled">Whether the input should be disabled initially.</param>
-    /// <returns>An appropriate input control instance bound to the provided state.</returns>
     /// <exception cref="InvalidOperationException">Thrown when no suitable input control exists for the specified type.</exception>
     /// <remarks>
     /// <para>Supported type mappings:</para>

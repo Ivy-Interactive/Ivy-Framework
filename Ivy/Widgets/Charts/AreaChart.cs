@@ -6,15 +6,15 @@ using Ivy.Shared;
 namespace Ivy;
 
 /// <summary>
-/// Represents an area chart widget that displays quantitative data over time or categories with filled areas.
+/// Represents an area chart widget.
 /// </summary>
 public record AreaChart : WidgetBase<AreaChart>
 {
     /// <summary>
-    /// Initializes a new instance of the AreaChart class with the specified data and area configurations.
+    /// Initializes a new instance of the AreaChart class.
     /// </summary>
-    /// <param name="data">The data source containing the values to be displayed in the area chart.</param>
-    /// <param name="areas">Variable number of Area configurations defining the data series to display.</param>
+    /// <param name="data">The data source.</param>
+    /// <param name="areas">Variable number of Area configurations.</param>
     public AreaChart(object data, params Area[] areas)
     {
         Data = data;
@@ -24,97 +24,73 @@ public record AreaChart : WidgetBase<AreaChart>
     }
 
     /// <summary>
-    /// Gets or sets the data source containing the values to be displayed in the area chart.
-    /// This can be any enumerable collection of objects with properties that match the data keys.
+    /// Gets or sets the data source.
     /// </summary>
     [Prop] public object Data { get; init; }
 
     /// <summary>
-    /// Gets or sets the layout orientation for the area chart.
+    /// Gets or sets the layout orientation.
     /// Note: This property is not currently implemented on the frontend.
-    /// Default is <see cref="Layouts.Vertical"/>.
     /// </summary>
     [Prop] public Layouts Layout { get; init; } = Layouts.Vertical; //todo: not implemented on the frontend
 
     /// <summary>
-    /// Gets or sets the color scheme used for the area chart.
-    /// This determines the palette of colors used for different data series.
-    /// Default is <see cref="ColorScheme.Default"/>.
+    /// Gets or sets the color scheme.
     /// </summary>
     [Prop] public ColorScheme ColorScheme { get; init; } = ColorScheme.Default;
 
     /// <summary>
-    /// Gets or sets the array of Area configurations defining the data series to display.
-    /// Each Area represents a separate data series with its own styling and behavior.
+    /// Gets or sets the array of Area configurations.
     /// </summary>
     [Prop] public Area[] Areas { get; init; }
 
     /// <summary>
-    /// Gets or sets the Cartesian grid configuration for the area chart.
-    /// This controls the appearance and behavior of grid lines that help with data reading.
-    /// Default is null (no grid displayed).
+    /// Gets or sets the Cartesian grid configuration.
     /// </summary>
     [Prop] public CartesianGrid? CartesianGrid { get; init; }
 
     /// <summary>
-    /// Gets or sets the tooltip configuration for the area chart.
-    /// This controls the interactive information display when hovering over chart elements.
-    /// Default is null (no tooltip displayed).
+    /// Gets or sets the tooltip configuration.
     /// </summary>
     [Prop] public Ivy.Charts.Tooltip? Tooltip { get; init; }
 
     /// <summary>
-    /// Gets or sets the legend configuration for the area chart.
-    /// This controls the display of series identifiers and color mappings.
-    /// Default is null (no legend displayed).
+    /// Gets or sets the legend configuration.
     /// </summary>
     [Prop] public Legend? Legend { get; init; } = null;
 
     /// <summary>
-    /// Gets or sets the array of X-axis configurations for the area chart.
-    /// Multiple X-axes can be configured for complex chart layouts.
-    /// Default is an empty array (no custom X-axes).
+    /// Gets or sets the array of X-axis configurations.
     /// </summary>
     [Prop] public XAxis[] XAxis { get; init; } = [];
 
     /// <summary>
-    /// Gets or sets the array of Y-axis configurations for the area chart.
-    /// Multiple Y-axes can be configured for complex chart layouts.
-    /// Default is an empty array (no custom Y-axes).
+    /// Gets or sets the array of Y-axis configurations.
     /// </summary>
     [Prop] public YAxis[] YAxis { get; init; } = [];
 
     /// <summary>
-    /// Gets or sets the array of reference area configurations for highlighting specific regions.
-    /// Reference areas provide visual context and can mark zones of interest or thresholds.
-    /// Default is an empty array (no reference areas).
+    /// Gets or sets the array of reference area configurations.
     /// </summary>
     [Prop] public ReferenceArea[] ReferenceAreas { get; init; } = [];
 
     /// <summary>
-    /// Gets or sets the array of reference dot configurations for marking specific data points.
-    /// Reference dots can highlight individual values or important data points.
-    /// Default is an empty array (no reference dots).
+    /// Gets or sets the array of reference dot configurations.
     /// </summary>
     [Prop] public ReferenceDot[] ReferenceDots { get; init; } = [];
 
     /// <summary>
-    /// Gets or sets the array of reference line configurations for marking thresholds or boundaries.
-    /// Reference lines can indicate target values, averages, or other important reference points.
-    /// Default is an empty array (no reference lines).
+    /// Gets or sets the array of reference line configurations.
     /// </summary>
     [Prop] public ReferenceLine[] ReferenceLines { get; init; } = [];
 
     /// <summary>
-    /// Gets or sets the stack offset type for the area chart.
-    /// This determines how multiple areas are positioned relative to each other when stacking.
-    /// Default is <see cref="StackOffsetTypes.None"/>.
+    /// Gets or sets the stack offset type.
     /// </summary>
     [Prop] public StackOffsetTypes StackOffset { get; init; } = StackOffsetTypes.None;
 
     /// <summary>
     /// Operator overload that prevents AreaChart from accepting child widgets.
-    /// Area charts are self-contained and do not support child widget composition.
     /// </summary>
     /// <param name="widget">The AreaChart widget.</param>
     /// <param name="child">The child widget (not supported).</param>
@@ -127,14 +103,12 @@ public record AreaChart : WidgetBase<AreaChart>
 }
 
 /// <summary>
-/// Extension methods for the AreaChart class that provide a fluent API for easy configuration.
-/// These methods allow you to chain multiple configuration calls for better readability and maintainability.
-/// Each method returns a new AreaChart instance with the updated configuration, following the immutable pattern.
+/// Extension methods for the AreaChart class.
 /// </summary>
 public static class AreaChartExtensions
 {
     /// <summary>
-    /// Sets the layout orientation for the area chart.
+    /// Sets the layout orientation.
     /// </summary>
     /// <param name="chart">The AreaChart to configure.</param>
     /// <param name="layout">The layout orientation to use.</param>
@@ -145,7 +119,7 @@ public static class AreaChartExtensions
     }
 
     /// <summary>
-    /// Sets the area chart layout to horizontal orientation.
+    /// Sets the layout orientation to horizontal.
     /// </summary>
     /// <param name="chart">The AreaChart to configure.</param>
     /// <returns>A new AreaChart instance with horizontal layout.</returns>
@@ -155,7 +129,7 @@ public static class AreaChartExtensions
     }
 
     /// <summary>
-    /// Sets the area chart layout to vertical orientation.
+    /// Sets the layout orientation to vertical.
     /// </summary>
     /// <param name="chart">The AreaChart to configure.</param>
     /// <returns>A new AreaChart instance with vertical layout.</returns>
@@ -165,7 +139,7 @@ public static class AreaChartExtensions
     }
 
     /// <summary>
-    /// Adds one or more Area configurations to the existing area list, preserving any existing areas.
+    /// Adds one or more Area configurations to the existing area list.
     /// </summary>
     /// <param name="chart">The AreaChart to configure.</param>
     /// <param name="area">Variable number of Area configurations to add.</param>
@@ -177,7 +151,6 @@ public static class AreaChartExtensions
 
     /// <summary>
     /// Adds a simple area configuration for the specified data key to the existing area list.
-    /// This creates a basic area with optional stacking and naming.
     /// </summary>
     /// <param name="chart">The AreaChart to configure.</param>
     /// <param name="dataKey">The data property key to create an area for.</param>
@@ -190,7 +163,7 @@ public static class AreaChartExtensions
     }
 
     /// <summary>
-    /// Sets the Cartesian grid configuration for the area chart.
+    /// Sets the Cartesian grid configuration.
     /// </summary>
     /// <param name="chart">The AreaChart to configure.</param>
     /// <param name="cartesianGrid">The CartesianGrid configuration to use.</param>
@@ -201,7 +174,7 @@ public static class AreaChartExtensions
     }
 
     /// <summary>
-    /// Enables the Cartesian grid with default configuration for the area chart.
+    /// Enables the Cartesian grid.
     /// </summary>
     /// <param name="chart">The AreaChart to configure.</param>
     /// <returns>A new AreaChart instance with default Cartesian grid enabled.</returns>
@@ -211,7 +184,7 @@ public static class AreaChartExtensions
     }
 
     /// <summary>
-    /// Adds an X-axis configuration to the existing X-axis list, preserving any existing X-axes.
+    /// Adds an X-axis configuration to the existing X-axis list.
     /// </summary>
     /// <param name="chart">The AreaChart to configure.</param>
     /// <param name="xAxis">The XAxis configuration to add.</param>
@@ -223,7 +196,6 @@ public static class AreaChartExtensions
 
     /// <summary>
     /// Adds a simple X-axis configuration for the specified data key to the existing X-axis list.
-    /// This creates a basic X-axis that represents the specified data property.
     /// </summary>
     /// <param name="chart">The AreaChart to configure.</param>
     /// <param name="dataKey">The data property key to create an X-axis for.</param>
@@ -234,7 +206,7 @@ public static class AreaChartExtensions
     }
 
     /// <summary>
-    /// Adds a Y-axis configuration to the existing Y-axis list, preserving any existing Y-axes.
+    /// Adds a Y-axis configuration to the existing Y-axis list.
     /// </summary>
     /// <param name="chart">The AreaChart to configure.</param>
     /// <param name="yAxis">The YAxis configuration to add.</param>
@@ -246,7 +218,6 @@ public static class AreaChartExtensions
 
     /// <summary>
     /// Adds a simple Y-axis configuration for the specified data key to the existing Y-axis list.
-    /// This creates a basic Y-axis that represents the specified data property.
     /// </summary>
     /// <param name="chart">The AreaChart to configure.</param>
     /// <param name="dataKey">The data property key to create a Y-axis for.</param>
@@ -257,7 +228,7 @@ public static class AreaChartExtensions
     }
 
     /// <summary>
-    /// Sets the tooltip configuration for the area chart.
+    /// Sets the tooltip configuration.
     /// </summary>
     /// <param name="chart">The AreaChart to configure.</param>
     /// <param name="tooltip">The Tooltip configuration to use, or null to disable tooltips.</param>
@@ -268,7 +239,7 @@ public static class AreaChartExtensions
     }
 
     /// <summary>
-    /// Enables the tooltip with default configuration for the area chart.
+    /// Enables the tooltip.
     /// </summary>
     /// <param name="chart">The AreaChart to configure.</param>
     /// <returns>A new AreaChart instance with default tooltip enabled.</returns>
@@ -278,7 +249,7 @@ public static class AreaChartExtensions
     }
 
     /// <summary>
-    /// Sets the legend configuration for the area chart.
+    /// Sets the legend configuration.
     /// </summary>
     /// <param name="chart">The AreaChart to configure.</param>
     /// <param name="legend">The Legend configuration to use.</param>
@@ -289,7 +260,7 @@ public static class AreaChartExtensions
     }
 
     /// <summary>
-    /// Enables the legend with default configuration for the area chart.
+    /// Enables the legend.
     /// </summary>
     /// <param name="chart">The AreaChart to configure.</param>
     /// <returns>A new AreaChart instance with default legend enabled.</returns>
@@ -299,7 +270,7 @@ public static class AreaChartExtensions
     }
 
     /// <summary>
-    /// Adds a reference area configuration to the existing reference area list, preserving any existing areas.
+    /// Adds a reference area configuration to the existing reference area list.
     /// </summary>
     /// <param name="chart">The AreaChart to configure.</param>
     /// <param name="referenceArea">The ReferenceArea configuration to add.</param>
@@ -311,7 +282,6 @@ public static class AreaChartExtensions
 
     /// <summary>
     /// Adds a simple reference area configuration with the specified coordinates to the existing list.
-    /// This creates a basic reference area that highlights a rectangular region on the chart.
     /// </summary>
     /// <param name="chart">The AreaChart to configure.</param>
     /// <param name="x1">The leftmost X coordinate of the reference area.</param>
@@ -326,7 +296,7 @@ public static class AreaChartExtensions
     }
 
     /// <summary>
-    /// Adds a reference dot configuration to the existing reference dot list, preserving any existing dots.
+    /// Adds a reference dot configuration to the existing reference dot list.
     /// </summary>
     /// <param name="chart">The AreaChart to configure.</param>
     /// <param name="referenceDot">The ReferenceDot configuration to add.</param>
@@ -338,7 +308,6 @@ public static class AreaChartExtensions
 
     /// <summary>
     /// Adds a simple reference dot configuration with the specified coordinates to the existing list.
-    /// This creates a basic reference dot that marks a specific point on the chart.
     /// </summary>
     /// <param name="chart">The AreaChart to configure.</param>
     /// <param name="x">The X coordinate of the reference dot.</param>
@@ -351,7 +320,7 @@ public static class AreaChartExtensions
     }
 
     /// <summary>
-    /// Adds a reference line configuration to the existing reference line list, preserving any existing lines.
+    /// Adds a reference line configuration to the existing reference line list.
     /// </summary>
     /// <param name="chart">The AreaChart to configure.</param>
     /// <param name="referenceLine">The ReferenceLine configuration to add.</param>
@@ -363,7 +332,6 @@ public static class AreaChartExtensions
 
     /// <summary>
     /// Adds a simple reference line configuration with the specified coordinates to the existing list.
-    /// This creates a basic reference line that marks a threshold or boundary on the chart.
     /// </summary>
     /// <param name="chart">The AreaChart to configure.</param>
     /// <param name="x">The X coordinate for a vertical reference line, or null for a horizontal line.</param>
@@ -376,7 +344,7 @@ public static class AreaChartExtensions
     }
 
     /// <summary>
-    /// Sets the color scheme used for the area chart.
+    /// Sets the color scheme.
     /// </summary>
     /// <param name="chart">The AreaChart to configure.</param>
     /// <param name="colorScheme">The color scheme to use for the chart.</param>
@@ -387,7 +355,7 @@ public static class AreaChartExtensions
     }
 
     /// <summary>
-    /// Sets the stack offset type for the area chart.
+    /// Sets the stack offset type.
     /// </summary>
     /// <param name="chart">The AreaChart to configure.</param>
     /// <param name="stackOffset">The stack offset type to use for positioning multiple areas.</param>

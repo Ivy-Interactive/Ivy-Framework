@@ -6,17 +6,15 @@ using Ivy.Shared;
 namespace Ivy;
 
 /// <summary>
-/// Represents a line chart widget that displays quantitative data over time or categories using connected line segments.
-/// This widget provides comprehensive configuration options for styling, axes, legends,
-/// tooltips, and reference elements.
+/// Represents a line chart widget.
 /// </summary>
 public record LineChart : WidgetBase<LineChart>
 {
     /// <summary>
-    /// Initializes a new instance of the LineChart class with the specified data and line configurations.
+    /// Initializes a new instance of the LineChart class.
     /// </summary>
-    /// <param name="data">The data source containing the values to be displayed in the line chart.</param>
-    /// <param name="lines">Variable number of Line configurations defining the data series to display.</param>
+    /// <param name="data">The data source.</param>
+    /// <param name="lines">Variable number of Line configurations.</param>
     public LineChart(object data, params Line[] lines)
     {
         Data = data;
@@ -44,89 +42,67 @@ public record LineChart : WidgetBase<LineChart>
     }
 
     /// <summary>
-    /// Gets or sets the data source containing the values to be displayed in the line chart.
-    /// This can be any enumerable collection of objects with properties that match the data keys.
+    /// Gets or sets the data source.
     /// </summary>
     [Prop] public object Data { get; init; }
 
     /// <summary>
-    /// Gets or sets the layout orientation for the line chart.
-    /// Default is <see cref="Layouts.Vertical"/>.
+    /// Gets or sets the layout orientation.
     /// </summary>
     [Prop] public Layouts Layout { get; init; } = Layouts.Vertical; //todo: not implemented on the frontend
 
     /// <summary>
-    /// Gets or sets the color scheme used for the line chart.
-    /// This determines the palette of colors used for different data series.
-    /// Default is <see cref="ColorScheme.Default"/>.
+    /// Gets or sets the color scheme.
     /// </summary>
     [Prop] public ColorScheme ColorScheme { get; init; } = ColorScheme.Default;
 
     /// <summary>
-    /// Gets or sets the array of Line configurations defining the data series to display.
-    /// Each Line represents a separate data series with its own styling and behavior.
+    /// Gets or sets the array of Line configurations.
     /// </summary>
     [Prop] public Line[] Lines { get; init; }
 
     /// <summary>
-    /// Gets or sets the Cartesian grid configuration for the line chart.
-    /// This controls the appearance and behavior of grid lines that help with data reading.
-    /// Default is null (no grid displayed).
+    /// Gets or sets the Cartesian grid configuration.
     /// </summary>
     [Prop] public CartesianGrid? CartesianGrid { get; init; }
 
     /// <summary>
-    /// Gets or sets the tooltip configuration for the line chart.
-    /// This controls the interactive information display when hovering over chart elements.
-    /// Default is null (no tooltip displayed).
+    /// Gets or sets the tooltip configuration.
     /// </summary>
     [Prop] public Ivy.Charts.Tooltip? Tooltip { get; init; }
 
     /// <summary>
-    /// Gets or sets the legend configuration for the line chart.
-    /// This controls the display of series identifiers and color mappings.
-    /// Default is null (no legend displayed).
+    /// Gets or sets the legend configuration.
     /// </summary>
     [Prop] public Legend? Legend { get; init; } = null;
 
     /// <summary>
-    /// Gets or sets the array of X-axis configurations for the line chart.
-    /// Multiple X-axes can be configured for complex chart layouts.
-    /// Default is an empty array (no custom X-axes).
+    /// Gets or sets the array of X-axis configurations.
     /// </summary>
     [Prop] public XAxis[] XAxis { get; init; } = [];
 
     /// <summary>
-    /// Gets or sets the array of Y-axis configurations for the line chart.
-    /// Multiple Y-axes can be configured for complex chart layouts.
-    /// Default is an empty array (no custom Y-axes).
+    /// Gets or sets the array of Y-axis configurations.
     /// </summary>
     [Prop] public YAxis[] YAxis { get; init; } = [];
 
     /// <summary>
-    /// Gets or sets the array of reference area configurations for highlighting specific regions.
-    /// Reference areas provide visual context and can mark zones of interest or thresholds.
-    /// Default is an empty array (no reference areas).
+    /// Gets or sets the array of reference area configurations.
     /// </summary>
     [Prop] public ReferenceArea[] ReferenceAreas { get; init; } = [];
 
     /// <summary>
-    /// Gets or sets the array of reference dot configurations for marking specific data points.
-    /// Reference dots can highlight individual values or important data points.
-    /// Default is an empty array (no reference dots).
+    /// Gets or sets the array of reference dot configurations.
     /// </summary>
     [Prop] public ReferenceDot[] ReferenceDots { get; init; } = [];
 
     /// <summary>
-    /// Gets or sets the array of reference line configurations for marking thresholds or boundaries.
-    /// Reference lines can indicate target values, averages, or other important reference points.
-    /// Default is an empty array (no reference lines).
+    /// Gets or sets the array of reference line configurations.
     /// </summary>
     [Prop] public ReferenceLine[] ReferenceLines { get; init; } = [];
 
     /// <summary>
     /// Operator overload that prevents LineChart from accepting child widgets.
-    /// Line charts are self-contained and do not support child widget composition.
     /// </summary>
     /// <param name="widget">The LineChart widget.</param>
     /// <param name="child">The child widget (not supported).</param>
@@ -139,16 +115,15 @@ public record LineChart : WidgetBase<LineChart>
 }
 
 /// <summary>
-/// Extension methods for the LineChart class that provide a fluent API for easy configuration.
-/// Each method returns a new LineChart instance with the updated configuration, following the immutable pattern.
+/// Extension methods for the LineChart class.
 /// </summary>
 public static class LineChartExtensions
 {
     /// <summary>
-    /// Sets the layout orientation for the line chart.
+    /// Sets the layout orientation.
     /// </summary>
     /// <param name="chart">The LineChart to configure.</param>
-    /// <param name="layout">The layout orientation to use.</param>
+    /// <param name="layout">The layout orientation.</param>
     /// <returns>A new LineChart instance with the updated layout.</returns>
     public static LineChart Layout(this LineChart chart, Layouts layout)
     {
@@ -156,30 +131,30 @@ public static class LineChartExtensions
     }
 
     /// <summary>
-    /// Sets the line chart layout to horizontal orientation.
+    /// Sets the layout to horizontal.
     /// </summary>
     /// <param name="chart">The LineChart to configure.</param>
-    /// <returns>A new LineChart instance with horizontal layout.</returns>
+    /// <returns>A new LineChart instance with horizontal layout.</returns> //todo: not implemented on the frontend
     public static LineChart Horizontal(this LineChart chart)
     {
         return chart with { Layout = Layouts.Horizontal };
     }
 
     /// <summary>
-    /// Sets the line chart layout to vertical orientation.
+    /// Sets the layout to vertical.
     /// </summary>
     /// <param name="chart">The LineChart to configure.</param>
-    /// <returns>A new LineChart instance with vertical layout.</returns>
+    /// <returns>A new LineChart instance with vertical layout.</returns> //todo: not implemented on the frontend
     public static LineChart Vertical(this LineChart chart)
     {
         return chart with { Layout = Layouts.Vertical };
     }
 
     /// <summary>
-    /// Adds one or more Line configurations to the existing line list, preserving any existing lines.
+    /// Adds one or more Line configurations.
     /// </summary>
     /// <param name="chart">The LineChart to configure.</param>
-    /// <param name="lines">Variable number of Line configurations to add.</param>
+    /// <param name="lines">Variable number of Line configurations.</param>
     /// <returns>A new LineChart instance with the additional line configurations.</returns>
     public static LineChart Line(this LineChart chart, params Line[] lines)
     {
@@ -187,12 +162,11 @@ public static class LineChartExtensions
     }
 
     /// <summary>
-    /// Adds a simple line configuration for the specified data key to the existing line list.
-    /// This creates a basic line with optional naming.
+    /// Adds a simple line configuration.
     /// </summary>
     /// <param name="chart">The LineChart to configure.</param>
     /// <param name="dataKey">The data property key to create a line for.</param>
-    /// <param name="name">Optional display name for the line. If not provided, will be auto-generated from dataKey.</param>
+    /// <param name="name">Optional display name for the line.</param>
     /// <returns>A new LineChart instance with the additional line configuration.</returns>
     public static LineChart Line(this LineChart chart, string dataKey, string? name = null)
     {
@@ -200,7 +174,7 @@ public static class LineChartExtensions
     }
 
     /// <summary>
-    /// Sets the Cartesian grid configuration for the line chart.
+    /// Sets the Cartesian grid configuration.
     /// </summary>
     /// <param name="chart">The LineChart to configure.</param>
     /// <param name="cartesianGrid">The CartesianGrid configuration to use.</param>
@@ -211,7 +185,7 @@ public static class LineChartExtensions
     }
 
     /// <summary>
-    /// Enables the Cartesian grid with default configuration for the line chart.
+    /// Enables the Cartesian grid.
     /// </summary>
     /// <param name="chart">The LineChart to configure.</param>
     /// <returns>A new LineChart instance with default Cartesian grid enabled.</returns>
@@ -221,7 +195,7 @@ public static class LineChartExtensions
     }
 
     /// <summary>
-    /// Adds an X-axis configuration to the existing X-axis list, preserving any existing X-axes.
+    /// Adds an X-axis configuration.
     /// </summary>
     /// <param name="chart">The LineChart to configure.</param>
     /// <param name="xAxis">The XAxis configuration to add.</param>
@@ -232,8 +206,7 @@ public static class LineChartExtensions
     }
 
     /// <summary>
-    /// Adds a simple X-axis configuration for the specified data key to the existing X-axis list.
-    /// This creates a basic X-axis that represents the specified data property.
+    /// Adds a simple X-axis configuration.
     /// </summary>
     /// <param name="chart">The LineChart to configure.</param>
     /// <param name="dataKey">The data property key to create an X-axis for.</param>
@@ -244,7 +217,7 @@ public static class LineChartExtensions
     }
 
     /// <summary>
-    /// Adds a Y-axis configuration to the existing Y-axis list, preserving any existing Y-axes.
+    /// Adds a Y-axis configuration.
     /// </summary>
     /// <param name="chart">The LineChart to configure.</param>
     /// <param name="yAxis">The YAxis configuration to add.</param>
@@ -255,8 +228,7 @@ public static class LineChartExtensions
     }
 
     /// <summary>
-    /// Adds a simple Y-axis configuration for the specified data key to the existing Y-axis list.
-    /// This creates a basic Y-axis that represents the specified data property.
+    /// Adds a simple Y-axis configuration.
     /// </summary>
     /// <param name="chart">The LineChart to configure.</param>
     /// <param name="dataKey">The data property key to create a Y-axis for.</param>
@@ -267,8 +239,7 @@ public static class LineChartExtensions
     }
 
     /// <summary>
-    /// Adds a default Y-axis configuration to the existing Y-axis list.
-    /// This creates a basic Y-axis with default settings.
+    /// Adds a default Y-axis configuration.
     /// </summary>
     /// <param name="chart">The LineChart to configure.</param>
     /// <returns>A new LineChart instance with the additional default Y-axis configuration.</returns>
@@ -278,7 +249,7 @@ public static class LineChartExtensions
     }
 
     /// <summary>
-    /// Sets the tooltip configuration for the line chart.
+    /// Sets the tooltip configuration.
     /// </summary>
     /// <param name="chart">The LineChart to configure.</param>
     /// <param name="tooltip">The Tooltip configuration to use, or null to disable tooltips.</param>
@@ -289,7 +260,7 @@ public static class LineChartExtensions
     }
 
     /// <summary>
-    /// Enables the tooltip with default configuration for the line chart.
+    /// Enables the tooltip.
     /// </summary>
     /// <param name="chart">The LineChart to configure.</param>
     /// <returns>A new LineChart instance with default tooltip enabled.</returns>
@@ -299,7 +270,7 @@ public static class LineChartExtensions
     }
 
     /// <summary>
-    /// Sets the legend configuration for the line chart.
+    /// Sets the legend configuration.
     /// </summary>
     /// <param name="chart">The LineChart to configure.</param>
     /// <param name="legend">The Legend configuration to use.</param>
@@ -310,7 +281,7 @@ public static class LineChartExtensions
     }
 
     /// <summary>
-    /// Enables the legend with default configuration for the line chart.
+    /// Enables the legend.
     /// </summary>
     /// <param name="chart">The LineChart to configure.</param>
     /// <returns>A new LineChart instance with default legend enabled.</returns>
@@ -320,7 +291,7 @@ public static class LineChartExtensions
     }
 
     /// <summary>
-    /// Adds a reference area configuration to the existing reference area list, preserving any existing areas.
+    /// Adds a reference area configuration.
     /// </summary>
     /// <param name="chart">The LineChart to configure.</param>
     /// <param name="referenceArea">The ReferenceArea configuration to add.</param>
@@ -331,8 +302,7 @@ public static class LineChartExtensions
     }
 
     /// <summary>
-    /// Adds a simple reference area configuration with the specified coordinates to the existing list.
-    /// This creates a basic reference area that highlights a rectangular region on the chart.
+    /// Adds a simple reference area configuration.
     /// </summary>
     /// <param name="chart">The LineChart to configure.</param>
     /// <param name="x1">The leftmost X coordinate of the reference area.</param>
@@ -347,7 +317,7 @@ public static class LineChartExtensions
     }
 
     /// <summary>
-    /// Adds a reference dot configuration to the existing reference dot list, preserving any existing dots.
+    /// Adds a reference dot configuration.
     /// </summary>
     /// <param name="chart">The LineChart to configure.</param>
     /// <param name="referenceDot">The ReferenceDot configuration to add.</param>
@@ -358,8 +328,7 @@ public static class LineChartExtensions
     }
 
     /// <summary>
-    /// Adds a simple reference dot configuration with the specified coordinates to the existing list.
-    /// This creates a basic reference dot that marks a specific point on the chart.
+    /// Adds a simple reference dot configuration.
     /// </summary>
     /// <param name="chart">The LineChart to configure.</param>
     /// <param name="x">The X coordinate of the reference dot.</param>
@@ -372,7 +341,7 @@ public static class LineChartExtensions
     }
 
     /// <summary>
-    /// Adds a reference line configuration to the existing reference line list, preserving any existing lines.
+    /// Adds a reference line configuration.
     /// </summary>
     /// <param name="chart">The LineChart to configure.</param>
     /// <param name="referenceLine">The ReferenceLine configuration to add.</param>
@@ -383,8 +352,7 @@ public static class LineChartExtensions
     }
 
     /// <summary>
-    /// Adds a simple reference line configuration with the specified coordinates to the existing list.
-    /// This creates a basic reference line that marks a threshold or boundary on the chart.
+    /// Adds a simple reference line configuration.
     /// </summary>
     /// <param name="chart">The LineChart to configure.</param>
     /// <param name="x">The X coordinate for a vertical reference line, or null for a horizontal line.</param>
@@ -397,7 +365,7 @@ public static class LineChartExtensions
     }
 
     /// <summary>
-    /// Sets the color scheme used for the line chart.
+    /// Sets the color scheme.
     /// </summary>
     /// <param name="chart">The LineChart to configure.</param>
     /// <param name="colorScheme">The color scheme to use for the chart.</param>

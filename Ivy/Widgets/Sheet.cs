@@ -1,6 +1,8 @@
 using Ivy.Core;
 using Ivy.Core.Hooks;
 using Ivy.Shared;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy;
@@ -45,9 +47,28 @@ public record Sheet : WidgetBase<Sheet>
     /// <param name="description">Optional description text displayed below the title.
     /// This provides additional context and explanation about the sheet's content
     /// or purpose, enhancing user understanding.</param>
-    public Sheet(Action<Event<Sheet>> onClose, object content, string? title = null, string? description = null) : base([new Slot("Content", content)])
+    [OverloadResolutionPriority(1)]
+    public Sheet(Func<Event<Sheet>, ValueTask>? onClose, object content, string? title = null, string? description = null) : base([new Slot("Content", content)])
     {
         OnClose = onClose;
+        Title = title;
+        Description = description;
+        Width = DefaultWidth;
+    }
+
+    // Overload for Action<Event<Sheet>>
+    public Sheet(Action<Event<Sheet>>? onClose, object content, string? title = null, string? description = null) : base([new Slot("Content", content)])
+    {
+        OnClose = onClose?.ToValueTask();
+        Title = title;
+        Description = description;
+        Width = DefaultWidth;
+    }
+
+    // Overload for simple Action (no parameters)
+    public Sheet(Action? onClose, object content, string? title = null, string? description = null) : base([new Slot("Content", content)])
+    {
+        OnClose = onClose == null ? null : (_ => { onClose(); return ValueTask.CompletedTask; });
         Title = title;
         Description = description;
         Width = DefaultWidth;
@@ -87,7 +108,7 @@ public record Sheet : WidgetBase<Sheet>
     /// This handler enables you to manage the sheet's lifecycle and application
     /// state appropriately.
     /// </summary>
-    [Event] public Action<Event<Sheet>> OnClose { get; set; }
+    [Event] public Func<Event<Sheet>, ValueTask>? OnClose { get; set; }
 
     /// <summary>
     /// Operator overload that allows adding a single child to the Sheet using the pipe operator.
@@ -167,12 +188,20 @@ public class WithSheetView(Button trigger, Func<object> contentFactory, string? 
     public override object? Build()
     {
         var isOpen = this.UseState(false);
-        var clonedTrigger = trigger with { OnClick = _ => { isOpen.Value = true; } };
+        var clonedTrigger = trigger with
+        {
+            OnClick = _ =>
+            {
+                isOpen.Value = true;
+                return ValueTask.CompletedTask;
+            }
+        };
         return new Fragment(
             clonedTrigger,
             isOpen.Value ? new Sheet(_ =>
             {
                 isOpen.Value = false;
+                return ValueTask.CompletedTask;
             }, contentFactory(), title, description).Width(width ?? Sheet.DefaultWidth) : null
         );
     }

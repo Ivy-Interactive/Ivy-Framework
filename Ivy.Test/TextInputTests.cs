@@ -212,7 +212,11 @@ public class TextInputTests
         var textInput = new TextInput();
         bool onBlurCalled = false;
 
-        textInput.OnBlur = e => onBlurCalled = true;
+        textInput.OnBlur = e =>
+        {
+            onBlurCalled = true;
+            return ValueTask.CompletedTask;
+        };
 
         Assert.NotNull(textInput.OnBlur);
 

@@ -5,71 +5,54 @@ using Ivy.Shared;
 namespace Ivy.Charts;
 
 /// <summary>
-/// Represents a Cartesian axis configuration for charts, providing control over the positioning, sizing, and styling
-/// of chart axes. This class allows you to customize the appearance and behavior of both horizontal and vertical axes
-/// in your charts, including their position, dimensions, and visual styling.
+/// Represents a Cartesian axis configuration for charts, providing control over the positioning, sizing, and styling of chart axes.
+/// This class allows you to customize the appearance and behavior of both horizontal and vertical axes in your charts, including their position, dimensions, and visual styling.
 /// </summary>
 public record CartesianAxis
 {
     /// <summary>
-    /// Gets or sets the X-coordinate position of the axis in pixels. This determines the horizontal position
-    /// where the axis will be rendered on the chart.
-    /// Default is null (automatic positioning).
+    /// Gets or sets the X-coordinate position of the axis in pixels.
     /// </summary>
     public double? X { get; set; } = null;
 
     /// <summary>
-    /// Gets or sets the Y-coordinate position of the axis in pixels. This determines the vertical position
-    /// where the axis will be rendered on the chart.
-    /// Default is null (automatic positioning).
+    /// Gets or sets the Y-coordinate position of the axis in pixels.
     /// </summary>
     public double? Y { get; set; } = null;
 
     /// <summary>
-    /// Gets or sets the width of the axis in pixels. This controls the horizontal extent of the axis rendering.
-    /// Default is null (automatic sizing based on chart dimensions).
+    /// Gets or sets the width of the axis in pixels.
     /// </summary>
     public double? Width { get; set; } = null;
 
     /// <summary>
-    /// Gets or sets the height of the axis in pixels. This controls the vertical extent of the axis rendering.
-    /// Default is null (automatic sizing based on chart dimensions).
+    /// Gets or sets the height of the axis in pixels.
     /// </summary>
     public double? Height { get; set; } = null;
 
     /// <summary>
-    /// Gets or sets whether horizontal grid lines are displayed. When true, horizontal lines extend across
-    /// the chart to help with value reading and visual alignment.
-    /// Default is true.
+    /// Gets or sets whether horizontal grid lines are displayed.
     /// </summary>
     public bool Horizontal { get; set; } = true;
 
     /// <summary>
-    /// Gets or sets whether vertical grid lines are displayed. When true, vertical lines extend up and down
-    /// the chart to help with value reading and visual alignment.
-    /// Default is true.
+    /// Gets or sets whether vertical grid lines are displayed.
     /// </summary>
     public bool Vertical { get; set; } = true;
 
     /// <summary>
-    /// Gets or sets the fill color for the axis grid lines. If null, a default color from the chart's
-    /// color scheme will be used.
+    /// Gets or sets the fill color for the axis grid lines.
     /// <see cref="Colors"/> is an enum that contains all the available colors for the chart.
-    /// Default is null.
     /// </summary>
     public Colors? Fill { get; set; } = null;
 
     /// <summary>
-    /// Gets or sets the opacity of the fill color for the axis grid lines. Value ranges from 0.0 (transparent)
-    /// to 1.0 (opaque). This allows you to create subtle grid lines that don't interfere with the main chart content.
-    /// Default is null.
+    /// Gets or sets the opacity of the fill color for the axis grid lines.
     /// </summary>
     public double? FillOpacity { get; set; } = null;
 
     /// <summary>
     /// Gets or sets the dash pattern for the axis grid lines, creating dashed or dotted patterns.
-    /// Examples include "5,5" for dashed lines, "10,5,5,5" for dash-dot patterns, or "1,1" for dotted lines.
-    /// Default is null (solid lines).
     /// </summary>
     public string? StrokeDashArray { get; set; }
 }
@@ -82,8 +65,7 @@ public record CartesianAxis
 public static class CartesianAxisExtensions
 {
     /// <summary>
-    /// Sets the X-coordinate position of the axis in pixels. This determines the horizontal position
-    /// where the axis will be rendered on the chart.
+    /// Sets the X-coordinate position of the axis in pixels.
     /// </summary>
     /// <param name="cartesianGrid">The CartesianAxis to configure.</param>
     /// <param name="x">The X-coordinate position in pixels.</param>
@@ -94,8 +76,7 @@ public static class CartesianAxisExtensions
     }
 
     /// <summary>
-    /// Sets the Y-coordinate position of the axis in pixels. This determines the vertical position
-    /// where the axis will be rendered on the chart.
+    /// Sets the Y-coordinate position of the axis in pixels.
     /// </summary>
     /// <param name="cartesianGrid">The CartesianAxis to configure.</param>
     /// <param name="y">The Y-coordinate position in pixels.</param>
@@ -106,7 +87,7 @@ public static class CartesianAxisExtensions
     }
 
     /// <summary>
-    /// Sets the width of the axis in pixels. This controls the horizontal extent of the axis rendering.
+    /// Sets the width of the axis in pixels.
     /// </summary>
     /// <param name="cartesianGrid">The CartesianAxis to configure.</param>
     /// <param name="width">The width of the axis in pixels.</param>
@@ -117,7 +98,7 @@ public static class CartesianAxisExtensions
     }
 
     /// <summary>
-    /// Sets the height of the axis in pixels. This controls the vertical extent of the axis rendering.
+    /// Sets the height of the axis in pixels.
     /// </summary>
     /// <param name="cartesianGrid">The CartesianAxis to configure.</param>
     /// <param name="height">The height of the axis in pixels.</param>
@@ -128,8 +109,7 @@ public static class CartesianAxisExtensions
     }
 
     /// <summary>
-    /// Sets whether horizontal grid lines are displayed. When true, horizontal lines extend across
-    /// the chart to help with value reading and visual alignment.
+    /// Sets whether horizontal grid lines are displayed.
     /// </summary>
     /// <param name="cartesianGrid">The CartesianAxis to configure.</param>
     /// <param name="horizontal">True to show horizontal grid lines, false to hide them.</param>
@@ -140,8 +120,7 @@ public static class CartesianAxisExtensions
     }
 
     /// <summary>
-    /// Sets whether vertical grid lines are displayed. When true, vertical lines extend up and down
-    /// the chart to help with value reading and visual alignment.
+    /// Sets whether vertical grid lines are displayed.
     /// </summary>
     /// <param name="cartesianGrid">The CartesianAxis to configure.</param>
     /// <param name="vertical">True to show vertical grid lines, false to hide them.</param>
@@ -152,8 +131,7 @@ public static class CartesianAxisExtensions
     }
 
     /// <summary>
-    /// Sets the fill color for the axis grid lines. This color will be applied to all grid lines
-    /// rendered by this axis configuration.
+    /// Sets the fill color for the axis grid lines.
     /// </summary>
     /// <param name="cartesianGrid">The CartesianAxis to configure.</param>
     /// <param name="fill">The color to use for the grid lines.</param>
@@ -164,8 +142,7 @@ public static class CartesianAxisExtensions
     }
 
     /// <summary>
-    /// Sets the opacity of the fill color for the axis grid lines. This allows you to create subtle
-    /// grid lines that don't interfere with the main chart content.
+    /// Sets the opacity of the fill color for the axis grid lines.
     /// </summary>
     /// <param name="cartesianGrid">The CartesianAxis to configure.</param>
     /// <param name="fillOpacity">The opacity value ranging from 0.0 (transparent) to 1.0 (opaque).</param>
@@ -177,8 +154,6 @@ public static class CartesianAxisExtensions
 
     /// <summary>
     /// Sets the dash pattern for the axis grid lines, creating dashed or dotted patterns.
-    /// This is useful for creating different visual styles for grid lines to distinguish them
-    /// from other chart elements.
     /// </summary>
     /// <param name="cartesianGrid">The CartesianAxis to configure.</param>
     /// <param name="strokeDashArray">The dash pattern (e.g., "5,5" for dashed lines, "10,5,5,5" for dash-dot pattern).</param>

@@ -17,11 +17,8 @@ public record Details : WidgetBase<Details>
     /// view of structured data such as object properties or database records.
     /// </summary>
     /// <param name="items">
-    /// A collection of <see cref="Detail"/> widgets to be displayed in this Details container.
-    /// Each Detail typically represents a property or field from an object, containing a label
-    /// (property name) and a formatted value. The Details container will render these items
-    /// in a structured, vertically-aligned list format that's easy to read and scan.
-    /// Common sources include DetailsBuilder output from the ToDetails() extension method.
+    /// A collection of <see cref="Detail"/> widgets.
+    /// Each Detail typically represents a property or field from an object, containing a label and a formatted value.
     /// </param>
     public Details(IEnumerable<Detail> items) : base(items.Cast<object>().ToArray())
     {

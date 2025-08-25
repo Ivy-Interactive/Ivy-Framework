@@ -4,16 +4,12 @@
 namespace Ivy.Charts;
 
 /// <summary>
-/// Represents a label list configuration for chart elements, providing comprehensive control over the positioning,
-/// rotation, styling, and formatting of multiple labels that display values on or near chart components.
-/// LabelList is more feature-rich than the basic Label class and is commonly used for displaying data values,
-/// percentages, or other contextual information directly on charts with advanced formatting options.
+/// Represents a label list configuration for chart elements.
 /// </summary>
 public record LabelList
 {
     /// <summary>
     /// Initializes a new instance of the LabelList class with the specified data key.
-    /// The data key identifies which data property the labels will display values from.
     /// </summary>
     /// <param name="dataKey">The key that identifies the data property to display in the labels.</param>
     public LabelList(string dataKey)
@@ -23,80 +19,59 @@ public record LabelList
 
     /// <summary>
     /// Gets or sets the key that identifies the data property to display in the labels.
-    /// This key should match a property name in your data objects.
     /// </summary>
     public string DataKey { get; set; }
 
     /// <summary>
     /// Gets or sets the offset distance of the labels from their associated chart element in pixels.
-    /// This determines how far the labels are positioned from the data points, lines, or areas they represent.
     /// Default is 5 pixels.
     /// </summary>
     public double Offset { get; set; } = 5;
 
     /// <summary>
     /// Gets or sets the rotation angle of the label text in degrees. Positive values rotate clockwise.
-    /// This is useful for fitting labels in tight spaces or creating angled text for better readability.
     /// Default is null (no rotation).
     /// </summary>
     public double? Angle { get; set; } = null;
 
     /// <summary>
     /// Gets or sets the position of the labels relative to their associated chart element.
-    /// This determines where the labels appear in relation to the data points, lines, or areas.
-    /// <see cref="Positions"/> is an enum that contains all the available positioning options.
-    /// Default is <see cref="Positions.Outside"/>.
     /// </summary>
     public Positions? Position { get; set; } = Positions.Outside;
 
     /// <summary>
-    /// Gets or sets the fill color of the label text. This color will be applied to the label text,
-    /// allowing you to customize the appearance to match your design requirements.
-    /// <see cref="Colors"/> is an enum that contains all the available colors for the chart.
-    /// Default is <see cref="Colors.Black"/>.
+    /// Gets or sets the fill color of the label text.
     /// </summary>
     public Colors? Fill { get; set; } = Colors.Black;
 
     /// <summary>
-    /// Gets or sets the opacity of the fill color for the label text. Value ranges from 0.0 (transparent)
-    /// to 1.0 (opaque). This allows you to create subtle labels that don't interfere with the main chart content.
-    /// Default is null.
+    /// Gets or sets the opacity of the fill color for the label text. Value ranges from 0.0 to 1.0.
     /// </summary>
     public double? FillOpacity { get; set; } = null;
 
     /// <summary>
-    /// Gets or sets the font size of the label text in pixels. This controls the size of the text displayed
-    /// in the labels, allowing you to adjust readability and visual hierarchy.
-    /// Default is null (inherits from chart default).
+    /// Gets or sets the font size of the label text in pixels.
     /// </summary>
     public int? FontSize { get; set; } = null;
 
     /// <summary>
-    /// Gets or sets the font family for the label text. This allows you to specify custom fonts
-    /// to match your design requirements or brand guidelines.
-    /// Default is null (inherits from chart default).
+    /// Gets or sets the font family for the label text.
     /// </summary>
     public string? FontFamily { get; set; } = null;
 
     /// <summary>
-    /// Gets or sets the number format string for the label values. This allows you to control how
-    /// numerical values are displayed, including decimal places, currency symbols, and percentage formatting.
-    /// Examples: "0.0%" for percentages, "$0.00" for currency, "0.0" for one decimal place.
-    /// Default is null (no special formatting).
+    /// Gets or sets the number format string for the label values.
     /// </summary>
     public string? NumberFormat { get; set; } = null;
 }
 
 /// <summary>
-/// Extension methods for the LabelList class that provide a fluent API for easy configuration.
-/// These methods allow you to chain multiple configuration calls for better readability and maintainability.
-/// Each method returns a new LabelList instance with the updated configuration, following the immutable pattern.
+/// Extension methods for the LabelList class.
 /// </summary>
 public static class LabelListExtensions
 {
     /// <summary>
     /// Sets the offset distance of the labels from their associated chart element in pixels.
-    /// This determines how far the labels are positioned from the data points, lines, or areas they represent.
     /// </summary>
     /// <param name="label">The LabelList to configure.</param>
     /// <param name="offset">The offset distance in pixels.</param>
@@ -108,7 +83,6 @@ public static class LabelListExtensions
 
     /// <summary>
     /// Sets the rotation angle of the label text in degrees. Positive values rotate clockwise.
-    /// This is useful for fitting labels in tight spaces or creating angled text for better readability.
     /// </summary>
     /// <param name="label">The LabelList to configure.</param>
     /// <param name="angle">The rotation angle in degrees.</param>
@@ -120,7 +94,6 @@ public static class LabelListExtensions
 
     /// <summary>
     /// Sets the position of the labels relative to their associated chart element.
-    /// This determines where the labels appear in relation to the data points, lines, or areas.
     /// </summary>
     /// <param name="label">The LabelList to configure.</param>
     /// <param name="position">The position for the labels.</param>
@@ -131,8 +104,7 @@ public static class LabelListExtensions
     }
 
     /// <summary>
-    /// Sets the fill color of the label text. This color will be applied to the label text,
-    /// allowing you to customize the appearance to match your design requirements.
+    /// Sets the fill color of the label text.
     /// </summary>
     /// <param name="label">The LabelList to configure.</param>
     /// <param name="color">The color to use for the label text.</param>
@@ -143,8 +115,7 @@ public static class LabelListExtensions
     }
 
     /// <summary>
-    /// Sets the opacity of the fill color for the label text. This allows you to create subtle
-    /// labels that don't interfere with the main chart content while still providing clear information.
+    /// Sets the opacity of the fill color for the label text.
     /// </summary>
     /// <param name="label">The LabelList to configure.</param>
     /// <param name="fillOpacity">The opacity value ranging from 0.0 (transparent) to 1.0 (opaque).</param>
@@ -155,8 +126,7 @@ public static class LabelListExtensions
     }
 
     /// <summary>
-    /// Sets the font size of the label text in pixels. This controls the size of the text displayed
-    /// in the labels, allowing you to adjust readability and visual hierarchy.
+    /// Sets the font size of the label text in pixels.
     /// </summary>
     /// <param name="label">The LabelList to configure.</param>
     /// <param name="fontSize">The font size in pixels.</param>
@@ -167,8 +137,7 @@ public static class LabelListExtensions
     }
 
     /// <summary>
-    /// Sets the font family for the label text. This allows you to specify custom fonts
-    /// to match your design requirements or brand guidelines.
+    /// Sets the font family for the label text.
     /// </summary>
     /// <param name="label">The LabelList to configure.</param>
     /// <param name="fontFamily">The font family name (e.g., "Arial", "Helvetica", "Times New Roman").</param>
@@ -179,8 +148,7 @@ public static class LabelListExtensions
     }
 
     /// <summary>
-    /// Sets the number format string for the label values. This allows you to control how
-    /// numerical values are displayed, including decimal places, currency symbols, and percentage formatting.
+    /// Sets the number format string for the label values.
     /// </summary>
     /// <param name="label">The LabelList to configure.</param>
     /// <param name="format">The number format string (e.g., "0.0%" for percentages, "$0.00" for currency).</param>

@@ -226,23 +226,19 @@ public class SidebarMenuAdvancedExample : ViewBase
         };
 
         var menu = new SidebarMenu(
-            onSelect: evt => {
+            onSelect: evt =>
+            {
                 selectedItem.Value = evt.Value?.ToString() ?? "";
                 client.Toast($"Selected: {evt.Value}");
             },
             items: menuItems
-        ) {
-            OnCtrlRightClickSelect = evt => {
-                client.Toast($"Right-clicked: {evt.Value} (Ctrl+Right-click for special actions)");
-            }
-        };
+        );
 
         return new SidebarLayout(
             mainContent: new Card(
                 Layout.Vertical().Gap(2)
                     | Text.H2("Documentation")
                     | Text.P($"Currently viewing: {(string.IsNullOrEmpty(selectedItem.Value) ? "None" : selectedItem.Value)}")
-                    | Text.Small("Use Ctrl+Right-click on menu items for additional actions.")
             ).Title("Content Area"),
             sidebarContent: menu,
             sidebarHeader: Text.H3("Documentation Menu")

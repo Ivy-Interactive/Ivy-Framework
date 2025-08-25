@@ -1,4 +1,5 @@
 using System.Reactive.Disposables;
+using System.Runtime.CompilerServices;
 using System.Text.Json;
 using Ivy.Apps;
 using Ivy.Client;
@@ -182,6 +183,7 @@ public abstract class ViewBase() : IView, IViewContextOwner
     /// </summary>
     /// <param name="handler">The async effect handler.</param>
     /// <param name="triggers">Triggers that determine when the effect executes.</param>
+    [OverloadResolutionPriority(1)]
     protected void UseEffect(Func<Task> handler, params IEffectTriggerConvertible[] triggers) =>
         this.Context.UseEffect(handler, triggers);
 
