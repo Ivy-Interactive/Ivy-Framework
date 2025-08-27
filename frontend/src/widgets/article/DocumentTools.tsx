@@ -8,7 +8,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { useToast } from '@/hooks/use-toast';
-import { Copy, Download, ChevronDown, ExternalLink } from 'lucide-react';
+import { Copy, Download, ChevronDown } from 'lucide-react';
 import React from 'react';
 
 interface DocumentToolsProps {
@@ -539,15 +539,6 @@ export const DocumentTools: React.FC<DocumentToolsProps> = ({
             <DropdownMenuItem onClick={saveAsMarkdown}>
               <Download className="w-4 h-4 mr-2" />
               Download as Markdown
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem disabled>
-              <ExternalLink className="w-4 h-4 mr-2" />
-              Open in ChatGPT
-            </DropdownMenuItem>
-            <DropdownMenuItem disabled>
-              <ExternalLink className="w-4 h-4 mr-2" />
-              Open in Claude
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
