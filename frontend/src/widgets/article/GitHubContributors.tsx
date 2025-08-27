@@ -24,10 +24,10 @@ interface GitHubContributorsProps {
 
 // Ivy team members with their roles
 const IVY_TEAM_MEMBERS: Record<string, string> = {
-  ArtemKhvorostianyi: 'Engineer',
+  ArtemKivorostianyI: 'Engineer',
   rorychatt: 'Founding Engineer',
   nielsbosma: 'CEO',
-  zachwolfe: 'Software Developer',
+  zachwofe: 'Software Developer',
   // Add more team members as needed
 };
 
