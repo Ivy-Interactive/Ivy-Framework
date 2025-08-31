@@ -15,15 +15,16 @@ Before using Microsoft Entra with Ivy, you'll need to register an application an
 ### Step 1: Register Your Application
 
 1. **Sign in** to the [Microsoft Entra admin center](https://entra.microsoft.com)
-2. **Navigate** to **Identity > Applications > App registrations**
+2. **Navigate** to **Entra ID > App registrations** in the sidebar: ![App registrations in Entra sidebar](assets/entra_app_registrations.webp "App registrations in Entra sidebar")
 3. **Click "New registration"**
 4. **Fill in the details**:
    - **Name**: Your application name (e.g., "My Ivy App")
    - **Supported account types**: Choose based on your needs:
-     - **Single tenant**: Only your organization
-     - **Multitenant**: Any organization
-     - **Multitenant + personal**: Any organization + personal Microsoft accounts
-   - **Redirect URI**: Select "Web" and enter `http://localhost:5010/webhook` (replace with your app's URL)
+     - **Accounts in this organizational directory only (Single tenant)**: Only users in your organization can sign in.
+     - **Accounts in any organizational directory (Multitenant)**: Users in any organization's Entra ID can sign in.
+     - **Accounts in any organizational directory (Multitenant) and personal Microsoft accounts**: Both organizational accounts and consumer Microsoft accounts (e.g., Skype, Xbox) can sign in.
+     - **Personal Microsoft accounts only**: Only consumer Microsoft accounts can sign in.
+   - **Redirect URI**: Select "Web" and enter `http://localhost:5010/webhook`. Replace the base URL (`http://localhost:5010`) with your application's URL.
 5. **Click "Register"**
 
 ### Step 2: Get Your Configuration Values
@@ -33,15 +34,20 @@ From your app registration **Overview** page, copy these values:
 - **Application (client) ID**: This is your **Client ID**
 - **Directory (tenant) ID**: This is your **Tenant ID**
 
+![Entra client and tenant IDs](assets/entra_client_and_tenant_ids.webp "Entra client and tenant IDs")
+
 ### Step 3: Create a Client Secret
 
 1. **Go to "Certificates & secrets"** in your app registration
 2. **Click "New client secret"**
 3. **Add a description** (e.g., "Ivy App Secret")
-4. **Choose an expiration** (6 months, 12 months, or 24 months)
+4. **Choose an expiration** (e.g., 6 months, 12 months, or 24 months)
 5. **Click "Add"**
-6. **Copy the secret Value** immediately (this is your **Client Secret**)
-   - ⚠️ **Important**: The secret value is only shown once. Copy it now!
+6. **Copy the secret Value** (this is your **Client Secret**). Note that only **Value** is needed, not **Secret ID**.
+
+![Newly-created Entra client secret](assets/entra_client_secret.webp "Newly-created Entra client secret")
+
+> ⚠️ **Warning:** This secret value will only be shown once, so copy it before leaving the page.
 
 ### Step 4: Configure Authentication
 
@@ -50,17 +56,20 @@ From your app registration **Overview** page, copy these values:
 3. **Under "Implicit grant and hybrid flows"**, check **"ID tokens"**
 4. **Click "Save"**
 
-### Step 5: Set API Permissions (Optional)
+![ID tokens enabled](assets/entra_id_tokens_enabled.webp "ID tokens enabled")
 
-If you need to access Microsoft Graph or other APIs:
+### Step 5: Set API Permissions
 
-1. **Go to "API permissions"**
-2. **Click "Add a permission"**
-3. **Choose "Microsoft Graph"**
-4. **Select "Delegated permissions"**
-5. **Add permissions** like `User.Read`, `Mail.Read`, etc.
-6. **Click "Add permissions"**
-7. **Grant admin consent** if required (click "Grant admin consent")
+First, check for the `User.Read` permission, required by Ivy:
+1. **Go to "API permissions"** in your app registration
+2. **Verify that `User.Read` is shown and enabled under "Microsoft Graph"**
+
+If `User.Read` is not enabled:
+1. **Click "Add a permission"**
+2. **Choose "Microsoft Graph"**
+3. **Select "Delegated permissions"**
+4. **Search for and enable `User.Read`**
+5. **Click "Add permissions"**
 
 ## Adding Authentication
 
@@ -82,7 +91,9 @@ Your credentials will be stored securely in .NET user secrets. Ivy then finishes
 2. Adds `server.UseAuth<MicrosoftEntraAuthProvider>(c => c.UseMicrosoftEntra());` to your `Program.cs`.
 3. Adds `Ivy.Auth.MicrosoftEntra` to your global usings.
 
-### Connection String Format
+### Advanced Configuration
+
+#### Connection Strings
 
 To skip the interactive prompts, you can provide configuration via a connection string parameter:
 
@@ -90,21 +101,23 @@ To skip the interactive prompts, you can provide configuration via a connection 
 >ivy auth add --provider MicrosoftEntra --connection-string "MICROSOFT_ENTRA_TENANT_ID=your-tenant-id;MICROSOFT_ENTRA_CLIENT_ID=your-client-id;MICROSOFT_ENTRA_CLIENT_SECRET=your-client-secret"
 ```
 
-The connection string uses the following parameters:
+For a list of all connection string parameters, see **Configuration Parameters** below.
+
+#### Manual Configuration
+
+When deploying an Ivy project without using `ivy deploy`, your local .NET user secrets are not automatically transferred. In that case, you can configure Entra Auth by setting environment variables or .NET user secrets. See **Configuration Parameters** below.
+
+> **Note:** If configuration is present in both .NET user secrets and environment variables, Ivy will use the values in **.NET user secrets over environment variables**.
+
+For more information, see [Authentication Overview](Overview.md).
+
+#### Configuration Parameters
+
+The following parameters are supported via connection string, environment variables, or .NET user secrets:
 
 - **MICROSOFT_ENTRA_TENANT_ID**: Required. Your Microsoft Entra tenant ID.
 - **MICROSOFT_ENTRA_CLIENT_ID**: Required. Your application's client ID.
 - **MICROSOFT_ENTRA_CLIENT_SECRET**: Required. Your application's client secret.
-
-### Advanced Configuration
-
-The following parameters can be manually set via .NET user secrets or environment variables:
-
-- **MICROSOFT_ENTRA_TENANT_ID**: Your Microsoft Entra tenant ID. Set by `ivy auth add`.
-- **MICROSOFT_ENTRA_CLIENT_ID**: Your application's client ID. Set by `ivy auth add`.
-- **MICROSOFT_ENTRA_CLIENT_SECRET**: Your application's client secret. Set by `ivy auth add`.
-
-If configuration is present in both .NET user secrets and environment variables, Ivy will use the values in .NET user secrets. For more information, see [Authentication Overview](Overview.md).
 
 ## Authentication Flow
 
@@ -117,18 +130,12 @@ If configuration is present in both .NET user secrets and environment variables,
 
 ## Microsoft Entra-Specific Features
 
-Key features of the Microsoft Entra provider:
-
-- **Enterprise SSO**: Single sign-on with existing Microsoft 365 and Azure accounts
-- **Conditional Access**: Fine-grained access policies based on user, location, device, and risk
-- **Microsoft Graph Integration**: Access to Microsoft 365 data and services
-- **Azure Integration**: Seamless integration with Azure services and managed identities
+- **Enterprise Authentication**: OAuth2-based authentication with Microsoft accounts
+- **Microsoft Identity Integration**: Uses Microsoft's identity platform for user authentication
 
 ## Security Best Practices
 
 - **Always use HTTPS** in production environments
-- **Store secrets securely** in Azure Key Vault or user secrets
-- **Configure appropriate token lifetimes** for your security requirements
 - **Monitor sign-in logs** in Microsoft Entra admin center
 - **Use managed identities** when running on Azure
 - **Implement proper logout** to clear sessions
@@ -153,8 +160,6 @@ Key features of the Microsoft Entra provider:
 - Ensure the application has appropriate permissions granted
 
 **Token Issues**
-- Verify audience and issuer claims match your configuration
-- Check that system clocks are synchronized
 - Ensure refresh tokens are working properly for seamless session management
 
 ## Related Documentation
@@ -162,3 +167,6 @@ Key features of the Microsoft Entra provider:
 - [Authentication Overview](Overview.md)
 - [Auth0 Provider](Auth0.md)
 - [Supabase Provider](Supabase.md)
+- [Microsoft Entra ID Documentation](https://learn.microsoft.com/en-us/entra/identity/)
+- [Register an application in Microsoft Entra ID](https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app)
+- [Microsoft identity platform app types and authentication flows](https://learn.microsoft.com/en-us/entra/identity-platform/authentication-flows-app-scenarios)
