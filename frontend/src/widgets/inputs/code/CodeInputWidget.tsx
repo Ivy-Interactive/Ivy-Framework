@@ -20,6 +20,9 @@ import CopyToClipboardButton from '@/components/CopyToClipboardButton';
 import { cpp } from '@codemirror/lang-cpp';
 import { dbml } from './dbml-language';
 import { createIvyCodeTheme } from './theme';
+import { Extension } from '@codemirror/state';
+import { EditorView, Decoration, DecorationSet } from '@codemirror/view';
+import { StateField, StateEffect, RangeSetBuilder } from '@codemirror/state';
 
 interface CodeInputWidgetProps {
   id: string;
@@ -96,6 +99,72 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
     ...getWidth(width),
     ...getHeight(height),
   };
+  // Create selection extension logic
+  const createSelectionExtension = useCallback((): Extension => {
+    // Effect to add selection decorations
+    const addSelection = StateEffect.define<{ from: number; to: number }>();
+    const clearSelections = StateEffect.define();
+
+    // Decoration for selected text
+    const selectionMark = Decoration.mark({
+      class: 'ivy-selection-highlight',
+      attributes: { 'data-selection': 'true' },
+    });
+
+    // State field to track selections
+    const selectionField = StateField.define<DecorationSet>({
+      create() {
+        return Decoration.none;
+      },
+      update(selections, tr) {
+        const builder = new RangeSetBuilder<Decoration>();
+
+        // Clear existing selections
+        selections.between(0, tr.newDoc.length, () => {});
+
+        // Add new selections from the transaction
+        for (const effect of tr.effects) {
+          if (effect.is(addSelection)) {
+            builder.add(effect.value.from, effect.value.to, selectionMark);
+          } else if (effect.is(clearSelections)) {
+            return Decoration.none;
+          }
+        }
+
+        return builder.finish();
+      },
+      provide: f => EditorView.decorations.from(f),
+    });
+
+    // Extension to handle selection changes
+    const selectionHandler = EditorView.updateListener.of(update => {
+      if (update.selectionSet) {
+        const { from, to } = update.state.selection.main;
+
+        // Clear previous selections
+        update.view.dispatch({
+          effects: clearSelections.of(null),
+        });
+
+        // Add new selection if there is one
+        if (from !== to) {
+          update.view.dispatch({
+            effects: addSelection.of({ from, to }),
+          });
+        }
+      }
+    });
+
+    return [selectionField, selectionHandler];
+  }, []);
+
+  // Create theme and selection extension once and reuse them
+  const themeExtension = useMemo(() => createIvyCodeTheme(), []);
+  const selectionExtension = useMemo(
+    () => createSelectionExtension(),
+    [createSelectionExtension]
+  );
+
   const extensions = useMemo(() => {
     const lang = language
       ? languageExtensions[language as keyof typeof languageExtensions]
@@ -103,8 +172,8 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
     const langExtension = lang
       ? [typeof lang === 'function' ? lang() : lang]
       : [];
-    return [...langExtension, createIvyCodeTheme()];
-  }, [language]);
+    return [...langExtension, themeExtension, selectionExtension];
+  }, [language, themeExtension, selectionExtension]);
 
   return (
     <div style={styles} className="relative w-full h-full overflow-hidden">
