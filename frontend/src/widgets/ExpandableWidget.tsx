@@ -52,7 +52,7 @@ export const ExpandableWidget: React.FC<ExpandableWidgetProps> = ({
           </Button>
         </CollapsibleTrigger>
       </div>
-      <CollapsibleContent className="overflow-hidden transition-all data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
+      <CollapsibleContent className="overflow-hidden transition-all data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
         <div className="space-y-4 p-2">{slots?.Content}</div>
       </CollapsibleContent>
     </Collapsible>

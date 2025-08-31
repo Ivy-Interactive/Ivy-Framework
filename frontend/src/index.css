@@ -745,8 +745,6 @@
 }
 
 @theme inline {
-  --animate-collapsible-down: accordion-down 0.1s ease-out;
-  --animate-collapsible-up: accordion-up 0.1s ease-out;
   --animate-accordion-down: accordion-down 0.1s ease-out;
   --animate-accordion-up: accordion-up 0.1s ease-out;
 }
