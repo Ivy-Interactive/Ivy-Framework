@@ -74,6 +74,10 @@ export function createIvyCodeTheme(): Extension {
       backgroundColor: 'var(--input) !important',
       color: 'var(--input-accent) !important',
     },
+    '.cm-selectionMatch': {
+      backgroundColor: 'var(--input) !important',
+      color: 'var(--input-accent) !important',
+    },
     '.cm-cursor': {
       borderLeftColor: 'var(--foreground)',
     },
