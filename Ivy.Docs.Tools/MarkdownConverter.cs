@@ -154,7 +154,7 @@ public static class MarkdownConverter
     }
 
     private static void HandleBlocks(MarkdownDocument document, StringBuilder codeBuilder, string markdownContent,
-        StringBuilder viewBuilder, HashSet<string> usedClassNames, HashSet<string> referencedApps, LinkConverter linkConverter)
+        StringBuilder viewBuilder, HashSet<string> usedClassNames, HashSet<string> referencedApps, LinkConverter linkConverter, bool isNestedContent = false, int baseIndentLevel = 3)
     {
         var sectionBuilder = new StringBuilder();
 
@@ -164,9 +164,20 @@ public static class MarkdownConverter
             {
                 var (types, convertedMarkdown) = linkConverter.Convert(sectionBuilder.ToString().Trim());
                 referencedApps.UnionWith(types);
-                AppendAsMultiLineStringIfNecessary(3, convertedMarkdown, codeBuilder, "| new Markdown(", ").HandleLinkClick(onLinkClick)");
+                AppendAsMultiLineStringIfNecessary(baseIndentLevel, convertedMarkdown, codeBuilder,
+                    isNestedContent ? ", new Markdown(" : "| new Markdown(",
+                    ").HandleLinkClick(onLinkClick)");
                 sectionBuilder.Clear();
             }
+        }
+
+        // Pre-process to find and handle Details blocks manually since Markdig doesn't parse them correctly
+        var detailsMatches = System.Text.RegularExpressions.Regex.Matches(markdownContent, @"<Details>[\s\S]*?</Details>");
+        var processedDetailsRanges = new List<(int start, int end)>();
+
+        foreach (System.Text.RegularExpressions.Match match in detailsMatches)
+        {
+            processedDetailsRanges.Add((match.Index, match.Index + match.Length));
         }
 
         foreach (var child in document)
@@ -174,18 +185,56 @@ public static class MarkdownConverter
             if (child is HtmlBlock htmlBlock)
             {
                 WriteSection();
-                HandleHtmlBlock(markdownContent, htmlBlock, codeBuilder);
+
+                string htmlContent = markdownContent.Substring(htmlBlock.Span.Start, htmlBlock.Span.Length).Trim();
+
+                // Check if this is a Details block that was incompletely parsed
+                if (htmlContent.StartsWith("<Details>") && !htmlContent.EndsWith("</Details>"))
+                {
+                    // Find the complete Details block
+                    var detailsMatch = detailsMatches.Cast<System.Text.RegularExpressions.Match>()
+                        .FirstOrDefault(m => m.Index == htmlBlock.Span.Start);
+
+                    if (detailsMatch != null)
+                    {
+                        // Handle the complete Details block directly
+                        HandleDetailsBlockDirect(codeBuilder, detailsMatch.Value, viewBuilder, usedClassNames);
+                        continue;
+                    }
+                }
+
+                // Skip if this HTML block is inside a Details block (but not the Details tag itself)
+                bool isInsideDetailsBlock = processedDetailsRanges.Any(range =>
+                    htmlBlock.Span.Start > range.start && htmlBlock.Span.Start < range.end);
+
+                if (isInsideDetailsBlock)
+                {
+                    continue;
+                }
+
+                HandleHtmlBlock(markdownContent, htmlBlock, codeBuilder, viewBuilder, usedClassNames);
             }
 
             else if (child is FencedCodeBlock codeBlock)
             {
-                WriteSection();
-                HandleCodeBlock(codeBlock, markdownContent, codeBuilder, viewBuilder, usedClassNames);
+                // Skip if this code block is inside a Details block
+                bool isInsideDetailsBlock = processedDetailsRanges.Any(range =>
+                    codeBlock.Span.Start >= range.start && codeBlock.Span.Start < range.end);
+
+                if (!isInsideDetailsBlock)
+                {
+                    WriteSection();
+                    HandleCodeBlock(codeBlock, markdownContent, codeBuilder, viewBuilder, usedClassNames, isNestedContent, baseIndentLevel);
+                }
             }
 
             else if (child is HeadingBlock hBlock)
             {
-                if (hBlock.Inline != null)
+                // Skip if this heading is inside a Details block
+                bool isInsideDetailsBlock = processedDetailsRanges.Any(range =>
+                    hBlock.Span.Start >= range.start && hBlock.Span.Start < range.end);
+
+                if (!isInsideDetailsBlock && hBlock.Inline != null)
                 {
                     var headingText = new StringBuilder();
                     foreach (var inline in hBlock.Inline.Descendants())
@@ -203,18 +252,56 @@ public static class MarkdownConverter
 
             else if (child is not YamlFrontMatterBlock && child is MarkdownObject mBlock)
             {
-                string rawMarkdown = markdownContent.Substring(mBlock.Span.Start, mBlock.Span.Length).Trim();
-                sectionBuilder.AppendLine().AppendLine(rawMarkdown);
+                // Skip if this block is inside a Details block
+                bool isInsideDetailsBlock = processedDetailsRanges.Any(range =>
+                    mBlock.Span.Start >= range.start && mBlock.Span.Start < range.end);
+
+                if (!isInsideDetailsBlock)
+                {
+                    string rawMarkdown = markdownContent.Substring(mBlock.Span.Start, mBlock.Span.Length).Trim();
+                    sectionBuilder.AppendLine().AppendLine(rawMarkdown);
+                }
             }
         }
 
-        WriteSection();
+        // Only write final section if there's actual content
+        if (sectionBuilder.Length > 0 && !string.IsNullOrWhiteSpace(sectionBuilder.ToString()))
+        {
+            WriteSection();
+        }
     }
 
-    private static void HandleHtmlBlock(string markdownContent, HtmlBlock htmlBlock, StringBuilder codeBuilder)
+    private static void HandleHtmlBlock(string markdownContent, HtmlBlock htmlBlock, StringBuilder codeBuilder, StringBuilder viewBuilder, HashSet<string> usedClassNames)
     {
         string htmlContent = markdownContent.Substring(htmlBlock.Span.Start, htmlBlock.Span.Length).Trim();
-        var xml = XElement.Parse(htmlContent);
+
+        // Check if it's a Details block first (before XML parsing since it may contain markdown)
+        // Note: Must be case-sensitive to distinguish from HTML <details> element
+        if (htmlContent.StartsWith("<Details>"))
+        {
+            HandleDetailsBlock(codeBuilder, null, markdownContent, htmlBlock, viewBuilder, usedClassNames);
+            return;
+        }
+
+        // Skip standard HTML elements that aren't our custom blocks
+        if (htmlContent.StartsWith("<details>", StringComparison.OrdinalIgnoreCase) ||
+            htmlContent.StartsWith("</", StringComparison.OrdinalIgnoreCase))
+        {
+            // This is a standard HTML element or closing tag, skip it
+            return;
+        }
+
+        XElement xml;
+        try
+        {
+            xml = XElement.Parse(htmlContent);
+        }
+        catch (System.Xml.XmlException)
+        {
+            // If it's not valid XML, skip it (probably a standard HTML element)
+            Console.WriteLine($"Skipping non-XML HTML block: {htmlContent.Substring(0, Math.Min(50, htmlContent.Length))}...");
+            return;
+        }
 
         if (xml.Name.LocalName == "Callout")
         {
@@ -228,10 +315,6 @@ public static class MarkdownConverter
         {
             HandleWidgetDocsBlock(codeBuilder, xml);
         }
-        else if (xml.Name.LocalName == "Details")
-        {
-            HandleDetailsBlock(codeBuilder, xml);
-        }
         else if (xml.Name.LocalName == "Ingress")
         {
             HandleIngressBlock(codeBuilder, xml);
@@ -242,11 +325,93 @@ public static class MarkdownConverter
         }
     }
 
-    private static void HandleDetailsBlock(StringBuilder codeBuilder, XElement xml)
+    private static void HandleDetailsBlock(StringBuilder codeBuilder, XElement? xml, string markdownContent, HtmlBlock htmlBlock, StringBuilder viewBuilder, HashSet<string> usedClassNames)
     {
-        string summary = xml.Element("Summary")?.Value ?? throw new Exception("Details block must have a Summary element.");
-        string content = xml.Element("Body")?.Value.Trim() ?? throw new Exception("Details block must have a Body element.");
-        AppendAsMultiLineStringIfNecessary(3, content, codeBuilder, $"""| new Expandable("{summary}", new Markdown(""", ").HandleLinkClick(onLinkClick))");
+        // Get the raw HTML content
+        string htmlContent = markdownContent.Substring(htmlBlock.Span.Start, htmlBlock.Span.Length);
+        HandleDetailsBlockDirect(codeBuilder, htmlContent, viewBuilder, usedClassNames);
+    }
+
+    private static void HandleDetailsBlockDirect(StringBuilder codeBuilder, string htmlContent, StringBuilder viewBuilder, HashSet<string> usedClassNames)
+    {
+        // Extract Summary content
+        var summaryStartMatch = System.Text.RegularExpressions.Regex.Match(htmlContent, @"<Summary[^>]*>");
+        if (!summaryStartMatch.Success)
+            throw new Exception("Details block must have a Summary element.");
+
+        int summaryContentStart = summaryStartMatch.Index + summaryStartMatch.Length;
+        int summaryEnd = htmlContent.IndexOf("</Summary>", summaryContentStart);
+        if (summaryEnd < 0)
+            throw new Exception("Details block must have a closing </Summary> tag.");
+
+        string summary = htmlContent.Substring(summaryContentStart, summaryEnd - summaryContentStart).Trim();
+
+        // Find Body opening tag (could be <Body> or <Body attribute="value"> etc.)
+        var bodyStartMatch = System.Text.RegularExpressions.Regex.Match(htmlContent, @"<Body[^>]*>");
+        if (!bodyStartMatch.Success)
+            throw new Exception("Details block must have a Body element.");
+
+        int bodyContentStart = bodyStartMatch.Index + bodyStartMatch.Length;
+
+        // Find closing </Body> tag
+        int bodyEnd = htmlContent.LastIndexOf("</Body>");
+        if (bodyEnd < 0)
+            throw new Exception("Details block must have a closing </Body> tag.");
+
+        string bodyContent = htmlContent.Substring(bodyContentStart, bodyEnd - bodyContentStart).Trim();
+
+        // Process the body content through the full markdown pipeline
+        var pipeline = new MarkdownPipelineBuilder()
+            .UseAdvancedExtensions()
+            .UsePreciseSourceLocation()
+            .Build();
+
+        var bodyDocument = Markdown.Parse(bodyContent, pipeline);
+
+        // Create a temporary builder for the body content
+        var bodyCodeBuilder = new StringBuilder();
+        var bodyReferencedApps = new HashSet<string>();
+        var bodyLinkConverter = new LinkConverter("");
+
+        // Process the body through HandleBlocks
+        HandleBlocks(bodyDocument, bodyCodeBuilder, bodyContent, viewBuilder, usedClassNames, bodyReferencedApps, bodyLinkConverter, false, 4);
+
+        // Get the generated body content
+        var bodyOutput = bodyCodeBuilder.ToString().TrimEnd();
+
+        if (!string.IsNullOrWhiteSpace(bodyOutput))
+        {
+            // Check if we have content that needs to be wrapped in Vertical()
+            var lines = bodyOutput.Split('\n');
+            var hasMultipleItems = lines.Count(l => l.TrimStart().StartsWith("| ")) > 1;
+
+            if (hasMultipleItems)
+            {
+                // Multiple items - wrap in Vertical()
+                codeBuilder.AppendTab(3).AppendLine($"""| new Expandable("{summary}",""");
+                codeBuilder.AppendTab(4).AppendLine("Vertical()");
+                codeBuilder.Append(bodyOutput);
+                codeBuilder.AppendLine();
+                codeBuilder.AppendTab(3).AppendLine(");");
+            }
+            else
+            {
+                // Single item - use directly without Vertical()
+                // Remove the leading pipe from the single item
+                var singleItemContent = bodyOutput.TrimStart();
+                if (singleItemContent.StartsWith("| "))
+                {
+                    singleItemContent = singleItemContent.Substring(2);
+                }
+                codeBuilder.AppendTab(3).AppendLine($"""| new Expandable("{summary}",""");
+                codeBuilder.AppendTab(4).AppendLine(singleItemContent);
+                codeBuilder.AppendTab(3).AppendLine(");");
+            }
+        }
+        else
+        {
+            codeBuilder.AppendTab(3).AppendLine($"""| new Expandable("{summary}", new Markdown("No content"));""");
+        }
     }
 
     private static void HandleWidgetDocsBlock(StringBuilder codeBuilder, XElement xml)
@@ -299,28 +464,28 @@ public static class MarkdownConverter
     }
 
     private static void HandleCodeBlock(FencedCodeBlock codeBlock, string markdownContent, StringBuilder codeBuilder,
-StringBuilder viewBuilder, HashSet<string> usedClassNames)
+StringBuilder viewBuilder, HashSet<string> usedClassNames, bool isNestedContent = false, int baseIndentLevel = 3)
     {
         string language = codeBlock.Info ?? "csharp";
         string codeContent = markdownContent.Substring(codeBlock.Span.Start, codeBlock.Span.Length).Trim();
         codeContent = RemoveFirstAndLastLine(codeContent);
         if (language == "csharp" && (codeBlock.Arguments?.Trim().StartsWith("demo", StringComparison.InvariantCultureIgnoreCase) ?? false))
         {
-            HandleDemoCodeBlock(codeBuilder, viewBuilder, codeContent, language, codeBlock.Arguments.Trim().ToLower(), usedClassNames);
+            HandleDemoCodeBlock(codeBuilder, viewBuilder, codeContent, language, codeBlock.Arguments.Trim().ToLower(), usedClassNames, isNestedContent, baseIndentLevel);
         }
         else if (language == "terminal")
         {
             var lines = codeContent.Split('\n');
-            codeBuilder.AppendTab(3).AppendLine("| new Terminal() ");
+            codeBuilder.AppendTab(baseIndentLevel).AppendLine((isNestedContent ? ", " : "| ") + "new Terminal() ");
             foreach (var line in lines)
             {
                 if (line.StartsWith('>'))
                 {
-                    codeBuilder.AppendTab(4).AppendLine($".AddCommand({FormatLiteral(line.TrimStart('>').Trim())})");
+                    codeBuilder.AppendTab(baseIndentLevel + 1).AppendLine($".AddCommand({FormatLiteral(line.TrimStart('>').Trim())})");
                 }
                 else
                 {
-                    codeBuilder.AppendTab(4).AppendLine($".AddOutput({FormatLiteral(line.Trim())})");
+                    codeBuilder.AppendTab(baseIndentLevel + 1).AppendLine($".AddOutput({FormatLiteral(line.Trim())})");
                 }
             }
         }
@@ -328,16 +493,20 @@ StringBuilder viewBuilder, HashSet<string> usedClassNames)
         {
             // Handle Mermaid diagrams by wrapping them in Markdown widget with proper syntax
             string mermaidBlock = $"```mermaid\n{codeContent}\n```";
-            AppendAsMultiLineStringIfNecessary(3, mermaidBlock, codeBuilder, "| new Markdown(", ").HandleLinkClick(onLinkClick)");
+            AppendAsMultiLineStringIfNecessary(baseIndentLevel, mermaidBlock, codeBuilder,
+                isNestedContent ? ", new Markdown(" : "| new Markdown(",
+                ").HandleLinkClick(onLinkClick)");
         }
         else
         {
-            AppendAsMultiLineStringIfNecessary(3, codeContent, codeBuilder, "| Code(", $",{MapLanguageToEnum(language)})");
+            AppendAsMultiLineStringIfNecessary(baseIndentLevel, codeContent, codeBuilder,
+                isNestedContent ? ", Code(" : "| Code(",
+                $",{MapLanguageToEnum(language)})");
         }
     }
 
     private static void HandleDemoCodeBlock(StringBuilder codeBuilder, StringBuilder viewBuilder, string codeContent,
-        string language, string arguments, HashSet<string> usedClassNames)
+        string language, string arguments, HashSet<string> usedClassNames, bool isNestedContent = false, int baseIndentLevel = 3)
     {
         // Local helpers to reduce duplication and improve readability
         static string ParseDemoArgs(string args)
@@ -347,36 +516,36 @@ StringBuilder viewBuilder, HashSet<string> usedClassNames)
             return layout;
         }
 
-        static void AppendDemoContent(StringBuilder cb, int tabs, string insert)
+        void AppendDemoContent(StringBuilder cb, int tabs, string insert)
         {
-            cb.AppendTab(tabs).AppendLine($"| new DemoBox().Content({insert})");
+            cb.AppendTab(tabs).AppendLine($"{(isNestedContent ? ", " : "| ")}new DemoBox().Content({insert})");
         }
 
-        static void AppendTabbedDemo(StringBuilder cb, string code, string insert, string lang)
+        void AppendTabbedDemo(StringBuilder cb, string code, string insert, string lang)
         {
-            cb.AppendTab(3).AppendLine("| Tabs( ");
-            cb.AppendTab(4).AppendLine($"new Tab(\"Demo\", new DemoBox().Content({insert})),");
-            AppendAsMultiLineStringIfNecessary(4, code, cb, "new Tab(\"Code\", new Code(", $",{MapLanguageToEnum(lang)}))")
+            cb.AppendTab(baseIndentLevel).AppendLine((isNestedContent ? ", " : "| ") + "Tabs( ");
+            cb.AppendTab(baseIndentLevel + 1).AppendLine($"new Tab(\"Demo\", new DemoBox().Content({insert})),");
+            AppendAsMultiLineStringIfNecessary(baseIndentLevel + 1, code, cb, "new Tab(\"Code\", new Code(", $",{MapLanguageToEnum(lang)}))")
                 ;
-            cb.AppendTab(3).AppendLine(").Height(Size.Fit()).Padding(0, 8, 0, 0).Variant(TabsVariant.Content)");
+            cb.AppendTab(baseIndentLevel).AppendLine(").Height(Size.Fit()).Padding(0, 8, 0, 0).Variant(TabsVariant.Content)");
         }
 
-        static void AppendVerticalDemo(StringBuilder cb, string code, string insert, string lang, bool demoBelow)
+        void AppendVerticalDemo(StringBuilder cb, string code, string insert, string lang, bool demoBelow)
         {
-            cb.AppendTab(3).AppendLine("| (Vertical() ");
-            if (!demoBelow) AppendDemoContent(cb, 4, insert);
-            AppendAsMultiLineStringIfNecessary(4, code, cb, "| Code(", $",{MapLanguageToEnum(lang)})");
-            if (demoBelow) AppendDemoContent(cb, 4, insert);
-            cb.AppendTab(3).AppendLine(")");
+            cb.AppendTab(baseIndentLevel).AppendLine((isNestedContent ? ", " : "| ") + "(Vertical() ");
+            if (!demoBelow) AppendDemoContent(cb, baseIndentLevel + 1, insert);
+            AppendAsMultiLineStringIfNecessary(baseIndentLevel + 1, code, cb, "| Code(", $",{MapLanguageToEnum(lang)})");
+            if (demoBelow) AppendDemoContent(cb, baseIndentLevel + 1, insert);
+            cb.AppendTab(baseIndentLevel).AppendLine(")");
         }
 
-        static void AppendGridDemo(StringBuilder cb, string code, string insert, string lang, bool demoRight)
+        void AppendGridDemo(StringBuilder cb, string code, string insert, string lang, bool demoRight)
         {
-            cb.AppendTab(3).AppendLine("| (Grid().Columns(2) ");
-            if (!demoRight) AppendDemoContent(cb, 4, insert);
-            AppendAsMultiLineStringIfNecessary(4, code, cb, "| Code(", $",{MapLanguageToEnum(lang)})");
-            if (demoRight) AppendDemoContent(cb, 4, insert);
-            cb.AppendTab(3).AppendLine(")");
+            cb.AppendTab(baseIndentLevel).AppendLine((isNestedContent ? ", " : "| ") + "(Grid().Columns(2) ");
+            if (!demoRight) AppendDemoContent(cb, baseIndentLevel + 1, insert);
+            AppendAsMultiLineStringIfNecessary(baseIndentLevel + 1, code, cb, "| Code(", $",{MapLanguageToEnum(lang)})");
+            if (demoRight) AppendDemoContent(cb, baseIndentLevel + 1, insert);
+            cb.AppendTab(baseIndentLevel).AppendLine(")");
         }
 
         // Build insert code and include view class when needed
@@ -406,7 +575,7 @@ StringBuilder viewBuilder, HashSet<string> usedClassNames)
         switch (layout)
         {
             case "demo":
-                AppendDemoContent(codeBuilder, 3, insertCode);
+                AppendDemoContent(codeBuilder, baseIndentLevel, insertCode);
                 break;
             case "demo-tabs":
                 AppendTabbedDemo(codeBuilder, codeContent, insertCode, language);
@@ -425,7 +594,7 @@ StringBuilder viewBuilder, HashSet<string> usedClassNames)
                 break;
             default:
                 // Fallback to simple demo
-                AppendDemoContent(codeBuilder, 3, insertCode);
+                AppendDemoContent(codeBuilder, baseIndentLevel, insertCode);
                 break;
         }
     }

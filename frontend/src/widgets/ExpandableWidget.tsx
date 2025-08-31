@@ -38,7 +38,7 @@ export const ExpandableWidget: React.FC<ExpandableWidgetProps> = ({
       data-disabled={disabled}
     >
       <div className="flex justify-between items-center space-x-4">
-        <div className="flex-1 min-w-0">{slots?.Header}</div>
+        <div className="flex-1 ml-2 min-w-0">{slots?.Header}</div>
         <CollapsibleTrigger asChild disabled={disabled}>
           <Button
             variant="ghost"
