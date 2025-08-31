@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using Microsoft.CodeAnalysis.CSharp;
 using Markdig;
@@ -10,8 +11,13 @@ using YamlDotNet.Serialization.NamingConventions;
 
 namespace Ivy.Docs.Tools;
 
-public static class MarkdownConverter
+public static partial class MarkdownConverter
 {
+    // Compiled regex patterns for better performance
+    private static readonly Regex DetailsBlockRegex = DetailsRegex();
+    private static readonly Regex SummaryStartRegex = SummaryRegex();
+    private static readonly Regex BodyStartRegex = BodyRegex();
+
     public class AppMeta
     {
         public string? Icon { get; set; }
@@ -80,8 +86,8 @@ public static class MarkdownConverter
 
         StringBuilder codeBuilder = new();
         StringBuilder viewBuilder = new();
-        HashSet<string> usedClassNames = new();
-        HashSet<string> referencedApps = new();
+        HashSet<string> usedClassNames = [];
+        HashSet<string> referencedApps = [];
         var linkConverter = new LinkConverter(relativePath);
 
         codeBuilder.AppendLine("using System;");
@@ -172,10 +178,10 @@ public static class MarkdownConverter
         }
 
         // Pre-process to find and handle Details blocks manually since Markdig doesn't parse them correctly
-        var detailsMatches = System.Text.RegularExpressions.Regex.Matches(markdownContent, @"<Details>[\s\S]*?</Details>");
+        var detailsMatches = DetailsBlockRegex.Matches(markdownContent);
         var processedDetailsRanges = new List<(int start, int end)>();
 
-        foreach (System.Text.RegularExpressions.Match match in detailsMatches)
+        foreach (Match match in detailsMatches)
         {
             processedDetailsRanges.Add((match.Index, match.Index + match.Length));
         }
@@ -192,7 +198,7 @@ public static class MarkdownConverter
                 if (htmlContent.StartsWith("<Details>") && !htmlContent.EndsWith("</Details>"))
                 {
                     // Find the complete Details block
-                    var detailsMatch = detailsMatches.Cast<System.Text.RegularExpressions.Match>()
+                    var detailsMatch = detailsMatches.Cast<Match>()
                         .FirstOrDefault(m => m.Index == htmlBlock.Span.Start);
 
                     if (detailsMatch != null)
@@ -299,7 +305,7 @@ public static class MarkdownConverter
         catch (System.Xml.XmlException)
         {
             // If it's not valid XML, skip it (probably a standard HTML element)
-            Console.WriteLine($"Skipping non-XML HTML block: {htmlContent.Substring(0, Math.Min(50, htmlContent.Length))}...");
+            Console.WriteLine($"Skipping non-XML HTML block: {htmlContent[..Math.Min(50, htmlContent.Length)]}...");
             return;
         }
 
@@ -335,30 +341,30 @@ public static class MarkdownConverter
     private static void HandleDetailsBlockDirect(StringBuilder codeBuilder, string htmlContent, StringBuilder viewBuilder, HashSet<string> usedClassNames)
     {
         // Extract Summary content
-        var summaryStartMatch = System.Text.RegularExpressions.Regex.Match(htmlContent, @"<Summary[^>]*>");
+        var summaryStartMatch = SummaryStartRegex.Match(htmlContent);
         if (!summaryStartMatch.Success)
-            throw new Exception("Details block must have a Summary element.");
+            throw new Exception($"Details block missing <Summary> tag. Block starts with: {htmlContent.Substring(0, Math.Min(50, htmlContent.Length))}...");
 
         int summaryContentStart = summaryStartMatch.Index + summaryStartMatch.Length;
         int summaryEnd = htmlContent.IndexOf("</Summary>", summaryContentStart);
         if (summaryEnd < 0)
-            throw new Exception("Details block must have a closing </Summary> tag.");
+            throw new Exception($"Details block missing closing </Summary> tag at position {summaryContentStart}. Content after <Summary>: {htmlContent.Substring(summaryContentStart, Math.Min(50, htmlContent.Length - summaryContentStart))}...");
 
-        string summary = htmlContent.Substring(summaryContentStart, summaryEnd - summaryContentStart).Trim();
+        string summary = htmlContent[summaryContentStart..summaryEnd].Trim();
 
         // Find Body opening tag (could be <Body> or <Body attribute="value"> etc.)
-        var bodyStartMatch = System.Text.RegularExpressions.Regex.Match(htmlContent, @"<Body[^>]*>");
+        var bodyStartMatch = BodyStartRegex.Match(htmlContent);
         if (!bodyStartMatch.Success)
-            throw new Exception("Details block must have a Body element.");
+            throw new Exception($"Details block missing <Body> tag. Block content: {htmlContent.Substring(0, Math.Min(100, htmlContent.Length))}...");
 
         int bodyContentStart = bodyStartMatch.Index + bodyStartMatch.Length;
 
         // Find closing </Body> tag
         int bodyEnd = htmlContent.LastIndexOf("</Body>");
         if (bodyEnd < 0)
-            throw new Exception("Details block must have a closing </Body> tag.");
+            throw new Exception($"Details block missing closing </Body> tag. Body content starts at position {bodyContentStart}. Content: {htmlContent.Substring(bodyContentStart, Math.Min(50, htmlContent.Length - bodyContentStart))}...");
 
-        string bodyContent = htmlContent.Substring(bodyContentStart, bodyEnd - bodyContentStart).Trim();
+        string bodyContent = htmlContent[bodyContentStart..bodyEnd].Trim();
 
         // Process the body content through the full markdown pipeline
         var pipeline = new MarkdownPipelineBuilder()
@@ -401,7 +407,7 @@ public static class MarkdownConverter
                 var singleItemContent = bodyOutput.TrimStart();
                 if (singleItemContent.StartsWith("| "))
                 {
-                    singleItemContent = singleItemContent.Substring(2);
+                    singleItemContent = singleItemContent[2..];
                 }
                 codeBuilder.AppendTab(3).AppendLine($"""| new Expandable("{summary}",""");
                 codeBuilder.AppendTab(4).AppendLine(singleItemContent);
@@ -636,6 +642,12 @@ StringBuilder viewBuilder, HashSet<string> usedClassNames, bool isNestedContent 
 
     private static string RemoveFirstAndLastLine(string input) => string.Join(Environment.NewLine,
         input.Split('\n').Skip(1).SkipLast(1).Select(e => e.TrimEnd('\r')));
+    [GeneratedRegex(@"<Details>[\s\S]*?</Details>", RegexOptions.Compiled)]
+    private static partial Regex DetailsRegex();
+    [GeneratedRegex(@"<Summary[^>]*>", RegexOptions.Compiled)]
+    private static partial Regex SummaryRegex();
+    [GeneratedRegex(@"<Body[^>]*>", RegexOptions.Compiled)]
+    private static partial Regex BodyRegex();
 }
 
 public static class StringBuilderExtensions
