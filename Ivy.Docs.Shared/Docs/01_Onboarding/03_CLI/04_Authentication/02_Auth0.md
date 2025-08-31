@@ -8,266 +8,151 @@ Secure your Ivy application with Auth0's universal authentication platform suppo
 
 Auth0 is a universal authentication and authorization platform that provides secure authentication for applications. It supports multiple identity providers, social logins, multi-factor authentication, and enterprise integrations.
 
-## Setup
+## Getting Your Auth0 Configuration
 
-### Adding Auth0 Authentication
+Before using Auth0 with Ivy, you'll need to create an Auth0 application and obtain your configuration values:
+
+### Step 1: Create an Auth0 Account and Application
+
+1. **Sign up** at [Auth0](https://auth0.com) if you don't have an account
+2. **Go to the Auth0 Dashboard** and navigate to **Applications**
+3. **Click "Create Application"**
+4. **Choose "Regular Web Applications"** as the application type
+5. **Click "Create"**
+
+### Step 2: Configure Your Application
+
+In your application settings:
+
+1. **Set Allowed Callback URLs**: `http://localhost:5010/webhook` (replace with your app's URL)
+2. **Set Allowed Logout URLs**: `http://localhost:5010/` (replace with your app's URL)
+3. **Set Allowed Web Origins**: `http://localhost:5010` (replace with your app's URL)
+4. **Save Changes**
+
+### Step 3: Get Your Configuration Values
+
+From your Auth0 application settings page, copy these values:
+
+- **Domain**: Found at the top (e.g., `your-app.us.auth0.com`)
+- **Client ID**: Found in the Basic Information section
+- **Client Secret**: Found in the Basic Information section (click "Show" to reveal)
+
+### Step 4: Create an API (For Audience)
+
+1. **Go to APIs** in the Auth0 Dashboard
+2. **Click "Create API"**
+3. **Enter a name** (e.g., "My Ivy App API")
+4. **Set an identifier** (e.g., `https://your-app.com/api`)
+5. **Click "Create"**
+6. **Copy the Identifier** - this is your **Audience** value
+
+## Adding Authentication
+
+To set up Auth0 Authentication with Ivy, run the following command and choose `Auth0` when asked to select an auth provider:
 
 ```terminal
->ivy auth add --provider Auth0
+>ivy auth add
 ```
 
-### Interactive Setup
+You will be prompted to provide the following Auth0 configuration:
 
-When using interactive mode, Ivy will guide you through:
+- **Auth0 Domain**: Your Auth0 tenant domain (e.g., `your-project.auth0.com`)
+- **Client ID**: Your Auth0 application's client ID
+- **Client Secret**: Your Auth0 application's client secret
+- **Audience**: API identifier for securing API access
 
-1. **Auth0 Domain**: Your Auth0 tenant domain (e.g., `your-project.auth0.com`)
-2. **Client ID**: Your Auth0 application's client ID
-3. **Client Secret**: Your Auth0 application's client secret
-4. **Audience**: API identifier (optional, for API authentication)
+Your credentials will be stored securely in .NET user secrets. Ivy then finishes configuring your application automatically:
 
-## Auth0 Application Setup
+1. Adds the `Ivy.Auth.Auth0` package to your project.
+2. Adds `server.UseAuth<Auth0AuthProvider>(c => c.UseEmailPassword().UseGoogle().UseApple());` to your `Program.cs`.
+3. Adds `Ivy.Auth.Auth0` to your global usings.
 
-Before configuring Ivy, set up your application in the Auth0 Dashboard:
+### Connection String Format
 
-### Step 1: Create Application
+To skip the interactive prompts, you can provide configuration via a connection string parameter:
 
-1. **Log into Auth0 Dashboard** at https://manage.auth0.com
-2. **Navigate to Applications**
-3. **Create Application** and select "Regular Web Applications"
-4. **Configure Application Settings**:
-   - **Allowed Callback URLs**: `https://your-app.com/callback`
-   - **Allowed Logout URLs**: `https://your-app.com`
-   - **Allowed Web Origins**: `https://your-app.com`
-
-### Step 2: Get Configuration Values
-
-In your Auth0 application settings, note:
-- **Domain**: `your-project.auth0.com`
-- **Client ID**: Found in the application details
-- **Client Secret**: Found in the application details
-
-## Connection String Format
-
-```text
-Domain=your-domain.auth0.com;ClientId=your-client-id;ClientSecret=your-client-secret
+```terminal
+>ivy auth add --provider Auth0 --connection-string "AUTH0_DOMAIN=your-domain.auth0.com;AUTH0_CLIENT_ID=your-client-id;AUTH0_CLIENT_SECRET=your-client-secret"
 ```
 
-### With API Audience (for API authentication)
+The connection string uses the following parameters:
 
-```text
-Domain=your-domain.auth0.com;ClientId=your-client-id;ClientSecret=your-client-secret;Audience=https://your-api.com
-```
+- **AUTH0_DOMAIN**: Required. Your Auth0 tenant domain.
+- **AUTH0_CLIENT_ID**: Required. Your Auth0 application's client ID.
+- **AUTH0_CLIENT_SECRET**: Required. Your Auth0 application's client secret.
+- **AUTH0_AUDIENCE**: Required. API identifier for securing API access.
 
-## Configuration
+### Advanced Configuration
 
-### Ivy Integration
+The following parameters can be manually set via .NET user secrets or environment variables:
 
-Ivy automatically configures Auth0 authentication in your `Program.cs`:
+- **AUTH0_DOMAIN**: Your Auth0 tenant domain. Set by `ivy auth add`.
+- **AUTH0_CLIENT_ID**: Your Auth0 application's client ID. Set by `ivy auth add`.
+- **AUTH0_CLIENT_SECRET**: Your Auth0 application's client secret. Set by `ivy auth add`.
+- **AUTH0_AUDIENCE**: API identifier for API authentication. Set by `ivy auth add`.
 
-```csharp
-server.UseAuth<Auth0AuthProvider>(c => c.UseEmailPassword().UseGoogle().UseApple());
-```
-
-### Available Authentication Methods
-
-Configure which authentication methods to enable:
-
-**Email/Password Authentication**
-```csharp
-server.UseAuth<Auth0AuthProvider>(c => c.UseEmailPassword());
-```
-
-**Social Logins**
-```csharp
-server.UseAuth<Auth0AuthProvider>(c =>
-    c.UseGoogle()
-     .UseApple()
-     .UseFacebook()
-     .UseTwitter()
-);
-```
-
-**Enterprise Connections**
-```csharp
-server.UseAuth<Auth0AuthProvider>(c =>
-    c.UseMicrosoftEntra()
-     .UseActiveDirectory()
-     .UseSAML()
-);
-```
+If configuration is present in both .NET user secrets and environment variables, Ivy will use the values in .NET user secrets. For more information, see [Authentication Overview](Overview.md).
 
 ## Authentication Flow
 
-### OAuth2 / OpenID Connect Flow
+### Email/Password Flow
+1. User enters email and password directly in your Ivy application
+2. Ivy sends credentials to Auth0 for validation
+3. Auth0 validates credentials and returns access tokens
+4. User is authenticated and can access protected resources
 
-1. **User clicks "Login"** in your Ivy application
-2. **Redirect to Auth0** with appropriate parameters
-3. **User authenticates** with chosen method (email/password, social, etc.)
-4. **Auth0 redirects back** to your application with authorization code
-5. **Ivy exchanges code** for access and ID tokens
-6. **User is authenticated** and can access protected resources
+### Social Login Flow
+1. User clicks a social login button in your application
+2. User is redirected to the social provider (Google, Apple, etc.)
+3. User authenticates with the social provider
+4. Provider redirects back to Auth0, then to your application
+5. Ivy receives and processes the authentication tokens
 
-## Advanced Configuration
+## Auth0-Specific Features
 
-### Custom Domains
+Key features of the Auth0 provider:
 
-If using Auth0 Custom Domains:
-
-```text
-Domain=login.yourdomain.com;ClientId=your-client-id;ClientSecret=your-client-secret
-```
-
-### Multi-Factor Authentication
-
-Enable MFA in Auth0 Dashboard:
-1. **Go to Security > Multi-factor Auth**
-2. **Choose MFA providers** (SMS, Email, Authenticator apps)
-3. **Configure policies** for when MFA is required
-
-### Social Connections
-
-Configure social identity providers in Auth0 Dashboard:
-
-1. **Go to Authentication > Social**
-2. **Choose providers** (Google, Facebook, Apple, etc.)
-3. **Configure each provider** with their respective credentials
+- **Dual Authentication Modes**: Both direct email/password forms and social login redirects
+- **Social Connections**: Support for Google, Apple, GitHub, Twitter, and Microsoft
+- **Enterprise SSO**: SAML, Active Directory, and other enterprise integrations
+- **Multi-Factor Authentication**: SMS, email, authenticator apps, and biometrics
+- **User Management**: Built-in user management dashboard and APIs
 
 ## Security Best Practices
 
-- **Use HTTPS** in production environments
-- **Store secrets securely** in User Secrets or environment variables
-- **Enable MFA** for sensitive applications
-- **Configure proper scopes** to limit access
-- **Use refresh tokens** for long-lived sessions
+- **Always use HTTPS** in production environments
+- **Store secrets securely** in user secrets or environment variables
+- **Enable MFA** for sensitive applications through Auth0 Dashboard
+- **Configure proper scopes** and audience claims for API access
 - **Monitor authentication logs** in Auth0 Dashboard
-- **Implement proper logout** to clear sessions
-
-## User Management
-
-### Accessing User Information
-
-```csharp
-public class UserProfileApp : AppBase
-{
-    public async override Task<IView> BuildAsync()
-    {
-        var user = await GetCurrentUserAsync();
-
-        return Card(
-            Text($"Welcome, {user.Name}!"),
-            Text($"Email: {user.Email}"),
-            user.IsEmailVerified
-                ? Badge("Verified", Colors.Green)
-                : Badge("Unverified", Colors.Orange),
-            Button("Logout", LogoutAsync)
-        );
-    }
-}
-```
-
-### User Roles and Permissions
-
-Configure roles in Auth0 and access them in Ivy:
-
-```csharp
-public class AdminApp : AppBase
-{
-    public async override Task<IView> BuildAsync()
-    {
-        var user = await GetCurrentUserAsync();
-
-        if (!user.HasRole("admin"))
-        {
-            return Error("Access denied. Admin role required.");
-        }
-
-        return AdminDashboard();
-    }
-}
-```
+- **Rotate client secrets** periodically
 
 ## Troubleshooting
 
 ### Common Issues
 
 **Invalid Client Credentials**
-- Verify Client ID and Client Secret are correct
+- Verify Client ID and Client Secret are correct and match your Auth0 application
 - Check that credentials haven't been regenerated in Auth0 Dashboard
 - Ensure connection string format is correct
 
 **Callback URL Mismatch**
-- Verify Allowed Callback URLs in Auth0 Dashboard
-- Check that the callback URL matches your application URL
+- Verify Allowed Callback URLs in Auth0 Dashboard include your application's callback URL
+- Check that the callback URL matches your application URL exactly
 - Ensure HTTPS is used in production
 
-**CORS Issues**
-- Configure Allowed Web Origins in Auth0 Dashboard
-- Verify your application domain is included
-- Check browser developer tools for CORS errors
+**Authentication Failed**
+- Check that your Auth0 application is properly configured
+- Verify social connections are enabled and configured in Auth0 Dashboard
+- Ensure users exist and are not blocked in Auth0 Dashboard
 
-**Token Validation Errors**
-- Verify the audience claim if using API authentication
-- Check that token hasn't expired
-- Ensure clock synchronization between servers
-
-### Performance Optimization
-
-**Token Caching**
-- Implement proper token caching to reduce Auth0 API calls
-- Use refresh tokens for session management
-- Cache user profile information appropriately
-
-**Connection Pooling**
-- Configure HTTP client properly for Auth0 API calls
-- Implement retry policies for network issues
-
-## Migration from Other Providers
-
-Auth0 supports importing users from other systems:
-
-1. **Export users** from current system
-2. **Use Auth0 User Import** feature
-3. **Test authentication flows** thoroughly
-4. **Update application configuration** to use Auth0
-
-## Example Implementation
-
-```csharp
-public class LoginApp : AppBase
-{
-    public override Task<IView> BuildAsync()
-    {
-        return Task.FromResult<IView>(
-            Card(
-                Text("Welcome to Our Application"),
-                Button("Login with Email", () => LoginWithEmail()),
-                Button("Login with Google", () => LoginWithGoogle()),
-                Button("Login with Apple", () => LoginWithApple())
-            )
-        );
-    }
-
-    private async Task LoginWithEmail()
-    {
-        // Ivy handles the Auth0 redirect automatically
-        await LoginAsync("email");
-    }
-
-    private async Task LoginWithGoogle()
-    {
-        await LoginAsync("google");
-    }
-
-    private async Task LoginWithApple()
-    {
-        await LoginAsync("apple");
-    }
-}
-```
+**Token Issues**
+- Verify audience and issuer claims if using API authentication
+- Check clock synchronization between servers
+- Ensure refresh tokens are working properly for seamless session management
 
 ## Related Documentation
 
-- [Authentication Overview](01_Overview.md)
+- [Authentication Overview](Overview.md)
 - [Supabase Authentication](Supabase.md)
 - [Microsoft Entra Provider](MicrosoftEntra.md)
-- [User Management](../../02_Concepts/Services.md)
