@@ -27,29 +27,34 @@ Your credentials will be stored securely in .NET user secrets, along with an aut
 1. Adds `server.UseAuth<BasicAuthProvider>()` to your `Program.cs`.
 2. Adds `Ivy.Auth` to your global usings.
 
-### Connection String Format
+### Advanced Configuration
 
-To skip the interactive prompts, you can provide credentials via a connection string parameter:
+#### Connection Strings
+
+To skip the interactive prompts, you can provide configuration via a connection string parameter:
 
 ```terminal
 >ivy auth add --provider Basic --connection-string "USERS=\"user1:password1;user2:password2\""
 ```
 
-The connection string uses the following parameters:
+For a list of all connection string parameters, see **Configuration Parameters** below.
+
+#### Manual Configuration
+
+When deploying an Ivy project without using `ivy deploy`, your local .NET user secrets are not automatically transferred. In that case, you can configure basic auth by setting environment variables or .NET user secrets. See **Configuration Parameters** below.
+
+> **Note:** If configuration is present in both .NET user secrets and environment variables, Ivy will use the values in **.NET user secrets over environment variables**.
+
+For more information, see [Authentication Overview](Overview.md).
+
+#### Configuration Parameters
+
+The following parameters are supported via connection string, environment variables, or .NET user secrets:
 
 - **USERS**: Required. A semicolon-separated list of `username:password` pairs.
-- **JWT_SECRET**: Optional. A custom secret key for token generation. If not provided, one will be generated automatically.
-
-### Advanced Configuration
-
-The following parameters can be manually set via .NET user secrets or environment variables:
-
-- **USERS**: A semicolon-separated list of `username:password` pairs. Set by `ivy auth add`.
-- **JWT_SECRET**: A custom secret key for token generation. Set by `ivy auth add`.
-- **JWT_ISSUER**: Used as the issuer of generated tokens. Default value: `ivy`.
-- **JWT_AUDIENCE**: Used as the audience of generated tokens. Default value: `ivy-app`.
-
-If configuration is present in both .NET user secrets and environment variables, Ivy will use the values in .NET user secrets. For more information, see [Authentication Overview](Overview.md).
+- **JWT_SECRET**: Optional. A custom secret key for token generation. Must be at least 128 bits (or 16 bytes) long. If not provided, one will be generated automatically.
+- **JWT_ISSUER**: Optional. Used as the issuer of generated tokens. Default value: `ivy`.
+- **JWT_AUDIENCE**: Optional. Used as the audience of generated tokens. Default value: `ivy-app`.
 
 ## Authentication Flow
 
