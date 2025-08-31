@@ -6,7 +6,7 @@ Secure your Ivy application with Auth0's universal authentication platform suppo
 
 ## Overview
 
-Auth0 is a universal authentication and authorization platform that provides secure authentication for applications. It supports multiple identity providers, social logins, multi-factor authentication, and enterprise integrations.
+Auth0 is a universal authentication and authorization platform that provides secure authentication for applications. It supports multiple identity providers, social logins, and enterprise integrations.
 
 ## Getting Your Auth0 Configuration
 
@@ -115,14 +115,12 @@ Key features of the Auth0 provider:
 - **Dual Authentication Modes**: Both direct email/password forms and social login redirects
 - **Social Connections**: Support for Google, Apple, GitHub, Twitter, and Microsoft
 - **Enterprise SSO**: SAML, Active Directory, and other enterprise integrations
-- **Multi-Factor Authentication**: SMS, email, authenticator apps, and biometrics
 - **User Management**: Built-in user management dashboard and APIs
 
 ## Security Best Practices
 
 - **Always use HTTPS** in production environments
 - **Store secrets securely** in user secrets or environment variables
-- **Enable MFA** for sensitive applications through Auth0 Dashboard
 - **Configure proper scopes** and audience claims for API access
 - **Monitor authentication logs** in Auth0 Dashboard
 - **Rotate client secrets** periodically

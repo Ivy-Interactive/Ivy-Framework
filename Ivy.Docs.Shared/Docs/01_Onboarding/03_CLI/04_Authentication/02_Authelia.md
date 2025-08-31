@@ -1,12 +1,12 @@
 # Authelia Authentication Provider
 
 <Ingress>
-Secure your Ivy application with Authelia's self-hosted identity provider supporting LDAP, MFA, and forward auth.
+Secure your Ivy application with Authelia's self-hosted identity provider supporting LDAP and forward auth.
 </Ingress>
 
 ## Overview
 
-Authelia is an open-source authentication and authorization server providing comprehensive identity verification and access control features. It offers multi-factor authentication, single sign-on, and supports various authentication backends including LDAP and file-based users, making it ideal for self-hosted environments.
+Authelia is an open-source authentication and authorization server providing comprehensive identity verification and access control features. It offers single sign-on and supports various authentication backends including LDAP and file-based users, making it ideal for self-hosted environments.
 
 ## Setting Up Your Authelia Server
 
@@ -152,7 +152,6 @@ If configuration is present in both .NET user secrets and environment variables,
 1. User provides credentials directly in your Ivy application
 2. Ivy sends credentials to your Authelia instance for validation
 3. Authelia validates credentials against configured backend (file-based users, LDAP, etc.)
-4. Multi-factor authentication validation if configured and required
 5. If valid, Authelia returns a session token
 6. Ivy uses the session token for subsequent authenticated requests
 
@@ -161,7 +160,6 @@ If configuration is present in both .NET user secrets and environment variables,
 Key features of the Authelia provider:
 
 - **Self-hosted Control**: Complete control over your authentication infrastructure
-- **Multi-factor Authentication**: TOTP, WebAuthn, Duo, and push notifications
 - **Multiple Backends**: Supports file-based users, LDAP, Active Directory integration on the Authelia server
 - **Direct Integration**: Ivy communicates directly with Authelia's API for credential validation
 - **Granular Access Control**: Fine-grained rules based on users, groups, and resources
@@ -170,7 +168,6 @@ Key features of the Authelia provider:
 
 - **Always use HTTPS** for all Authelia communications
 - **Generate strong secrets** for JWT and session encryption keys
-- **Enable MFA** for sensitive applications through Authelia configuration
 - **Use secure password hashing** (argon2id recommended)
 - **Configure rate limiting** to prevent brute force attacks
 - **Monitor authentication logs** for suspicious activity
@@ -195,10 +192,6 @@ Key features of the Authelia provider:
 - Verify password hashing matches Authelia's configuration
 - Ensure authentication backend (file, LDAP) is properly configured
 
-**MFA Issues**
-- Verify TOTP configuration settings in Authelia
-- Check time synchronization between servers and client devices
-- Ensure MFA policies are correctly configured for your domain
 
 ## Related Documentation
 

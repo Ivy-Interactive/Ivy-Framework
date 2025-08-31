@@ -6,7 +6,7 @@ Secure your Ivy application with Microsoft Entra ID for enterprise identity and 
 
 ## Overview
 
-Microsoft Entra ID (formerly Azure Active Directory) is Microsoft's cloud-based identity and access management service. It provides secure authentication for enterprise applications, supports single sign-on (SSO), multi-factor authentication, and integrates seamlessly with Microsoft 365 and Azure services.
+Microsoft Entra ID (formerly Azure Active Directory) is Microsoft's cloud-based identity and access management service. It provides secure authentication for enterprise applications, supports single sign-on (SSO), and integrates seamlessly with Microsoft 365 and Azure services.
 
 ## Getting Your Microsoft Entra Configuration
 
@@ -121,7 +121,6 @@ Key features of the Microsoft Entra provider:
 
 - **Enterprise SSO**: Single sign-on with existing Microsoft 365 and Azure accounts
 - **Conditional Access**: Fine-grained access policies based on user, location, device, and risk
-- **Multi-Factor Authentication**: Built-in MFA support through conditional access policies
 - **Microsoft Graph Integration**: Access to Microsoft 365 data and services
 - **Azure Integration**: Seamless integration with Azure services and managed identities
 
@@ -129,7 +128,6 @@ Key features of the Microsoft Entra provider:
 
 - **Always use HTTPS** in production environments
 - **Store secrets securely** in Azure Key Vault or user secrets
-- **Enable MFA** through conditional access policies
 - **Configure appropriate token lifetimes** for your security requirements
 - **Monitor sign-in logs** in Microsoft Entra admin center
 - **Use managed identities** when running on Azure

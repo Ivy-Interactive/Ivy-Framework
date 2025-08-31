@@ -123,10 +123,10 @@ If configuration is present in both .NET user secrets and environment variables,
 
 Ivy supports the following authentication providers. Click on any provider for detailed setup instructions:
 
-- **[Auth0](Auth0.md)** - Universal authentication with social logins, MFA, and enterprise integrations
+- **[Auth0](Auth0.md)** - Universal authentication with social logins and enterprise integrations
 - **[Supabase](Supabase.md)** - Email/password, magic links, social auth, and Row Level Security integration
 - **[Microsoft Entra](MicrosoftEntra.md)** - Enterprise SSO, conditional access, and Microsoft Graph integration
-- **[Authelia](Authelia.md)** - Self-hosted identity provider with LDAP, MFA, and forward auth
+- **[Authelia](Authelia.md)** - Self-hosted identity provider with LDAP and forward auth
 - **[Basic Auth](BasicAuth.md)** - Simple username/password authentication for development and internal tools
 
 ## Examples
