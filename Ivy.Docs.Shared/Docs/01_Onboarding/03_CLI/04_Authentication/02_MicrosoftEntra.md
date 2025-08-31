@@ -15,7 +15,7 @@ Before using Microsoft Entra with Ivy, you'll need to register an application an
 ### Step 1: Register Your Application
 
 1. **Sign in** to the [Microsoft Entra admin center](https://entra.microsoft.com)
-2. **Navigate** to **Entra ID > App registrations** in the sidebar: ![App registrations in Entra sidebar](assets/entra_app_registrations.webp "App registrations in Entra sidebar")
+2. **Navigate** to **Entra ID > App registrations** in the sidebar
 3. **Click "New registration"**
 4. **Fill in the details**:
    - **Name**: Your application name (e.g., "My Ivy App")
