@@ -4,7 +4,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
-import { ChevronDown, ChevronRight } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import React from 'react';
 
 interface ExpandableWidgetProps {
@@ -44,13 +44,16 @@ export const ExpandableWidget: React.FC<ExpandableWidgetProps> = ({
             variant="ghost"
             className="p-0 h-9 w-9 shrink-0 hover:bg-accent"
           >
-            {!isOpen && <ChevronRight className="h-4 w-4" />}
-            {isOpen && <ChevronDown className="h-4 w-4" />}
+            <ChevronRight
+              className={`h-4 w-4 transition-transform duration-200 ease-in-out ${
+                isOpen ? 'rotate-90' : 'rotate-0'
+              }`}
+            />
           </Button>
         </CollapsibleTrigger>
       </div>
-      <CollapsibleContent className="space-y-4 p-2">
-        {slots?.Content}
+      <CollapsibleContent className="overflow-hidden transition-all data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
+        <div className="space-y-4 p-2">{slots?.Content}</div>
       </CollapsibleContent>
     </Collapsible>
   );
