@@ -152,8 +152,8 @@ If configuration is present in both .NET user secrets and environment variables,
 1. User provides credentials directly in your Ivy application
 2. Ivy sends credentials to your Authelia instance for validation
 3. Authelia validates credentials against configured backend (file-based users, LDAP, etc.)
-5. If valid, Authelia returns a session token
-6. Ivy uses the session token for subsequent authenticated requests
+4. If valid, Authelia returns a session token
+5. Ivy uses the session token for subsequent authenticated requests
 
 ## Authelia-Specific Features
 
