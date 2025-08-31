@@ -131,6 +131,7 @@ export const DocumentTools: React.FC<DocumentToolsProps> = ({
       'div[class*="api"]', // Divs with "api" in class
       'section[class*="api"]', // Sections with "api" in class
       '[data-testid*="api"]', // Elements with "api" in test ID
+      'div.rounded-lg.overflow-hidden.border.border-border.shadow-md', // Terminal elements
     ];
 
     // Find all elements that might contain API content
@@ -211,6 +212,24 @@ export const DocumentTools: React.FC<DocumentToolsProps> = ({
               processedElements.add(element);
               // Mark child code elements as processed
               if (codeElement) processedElements.add(codeElement);
+            }
+            break;
+
+          case 'div':
+            // Handle terminal elements with specific classes
+            if (
+              element.matches(
+                'div.rounded-lg.overflow-hidden.border.border-border.shadow-md'
+              ) &&
+              !processedElements.has(element)
+            ) {
+              const terminalContent = extractTerminalContent(element);
+              if (terminalContent) {
+                apiContent += `\`\`\`terminal\n${terminalContent}\n\`\`\`\n\n`;
+                processedElements.add(element);
+                // Mark all child elements as processed to avoid duplication
+                markChildrenAsProcessed(element, processedElements);
+              }
             }
             break;
 
@@ -418,6 +437,48 @@ export const DocumentTools: React.FC<DocumentToolsProps> = ({
     });
 
     return listMarkdown + '\n';
+  };
+
+  // Helper function to extract terminal content
+  const extractTerminalContent = (terminalElement: Element): string => {
+    let terminalContent = '';
+
+    // Look for terminal lines within the terminal element
+    const terminalLines = terminalElement.querySelectorAll(
+      'div[class*="whitespace-pre-wrap"]'
+    );
+
+    if (terminalLines.length > 0) {
+      // Process each terminal line
+      terminalLines.forEach((line, index) => {
+        if (index > 0) terminalContent += '\n';
+
+        // Check if this is a command line (has the '>' prompt)
+        const promptElement = line.querySelector('span[class*="text-primary"]');
+        const contentElement = line.querySelector('span[class*="text-sm"]');
+
+        if (promptElement && contentElement) {
+          const promptText = promptElement.textContent?.trim() || '';
+          const contentText = contentElement.textContent?.trim() || '';
+
+          if (promptText === '>') {
+            // This is a command line
+            terminalContent += `> ${contentText}`;
+          } else {
+            // This is output
+            terminalContent += contentText;
+          }
+        } else {
+          // Fallback: just get the text content
+          terminalContent += line.textContent?.trim() || '';
+        }
+      });
+    } else {
+      // Fallback: get all text content from the terminal
+      terminalContent = terminalElement.textContent?.trim() || '';
+    }
+
+    return terminalContent;
   };
 
   const generateFileName = (): string => {
