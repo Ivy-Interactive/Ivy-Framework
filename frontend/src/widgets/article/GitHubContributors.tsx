@@ -28,6 +28,8 @@ interface GitHubCommit {
 
 interface GitHubContributorsProps {
   documentSource?: string;
+  onLoadingChange?: (isLoading: boolean) => void;
+  show?: boolean;
 }
 
 // Ivy team members with their roles
@@ -65,13 +67,15 @@ const getCommitsUrl = (githubUrl: string): string => {
 
 export const GitHubContributors: React.FC<GitHubContributorsProps> = ({
   documentSource,
+  onLoadingChange,
+  show = true,
 }) => {
   const [contributors, setContributors] = useState<Contributor[]>([]);
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!documentSource) {
+      onLoadingChange?.(false);
       return;
     }
 
@@ -99,10 +103,11 @@ export const GitHubContributors: React.FC<GitHubContributorsProps> = ({
 
     const apiUrl = getApiUrl(documentSource);
     if (!apiUrl) {
+      onLoadingChange?.(false);
       return;
     }
 
-    setLoading(true);
+    onLoadingChange?.(true);
     setError(null);
 
     fetch(apiUrl)
@@ -162,11 +167,11 @@ export const GitHubContributors: React.FC<GitHubContributorsProps> = ({
         }
       })
       .finally(() => {
-        setLoading(false);
+        onLoadingChange?.(false);
       });
-  }, [documentSource]);
+  }, [documentSource, onLoadingChange]);
 
-  if (!documentSource || loading) return null;
+  if (!documentSource || !show) return null;
 
   // Don't render anything if we have no contributors and no error (likely rate limited)
   if (!error && contributors.length === 0) return null;
