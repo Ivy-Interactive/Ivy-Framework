@@ -10,11 +10,13 @@ export type TocItem = {
 interface TableOfContentsProps {
   articleRef: React.RefObject<HTMLElement | null>;
   show?: boolean;
+  onLoadingChange?: (isLoading: boolean) => void;
 }
 
 export const TableOfContents: React.FC<TableOfContentsProps> = ({
   articleRef,
   show = true,
+  onLoadingChange,
 }) => {
   const [tocItems, setTocItems] = useState<TocItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -33,12 +35,14 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
     if (!show) {
       setTocItems([]);
       setIsLoading(false);
+      onLoadingChange?.(false);
       return;
     }
 
     // Reset states when starting fresh
     setTocItems([]);
     setIsLoading(true);
+    onLoadingChange?.(true);
 
     const startTime = Date.now();
     const minLoadingTime = 500; // 0.5 seconds minimum loading time for smooth transition
@@ -58,6 +62,7 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
           const remainingTime = Math.max(0, minLoadingTime - elapsedTime);
           timeoutRef.current = setTimeout(() => {
             setIsLoading(false);
+            onLoadingChange?.(false);
           }, remainingTime);
         }
         return;
@@ -100,6 +105,7 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
       // Show TOC content after minimum loading time has passed
       timeoutRef.current = setTimeout(() => {
         setIsLoading(false);
+        onLoadingChange?.(false);
       }, remainingTime);
     };
 
@@ -115,7 +121,7 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
         clearTimeout(manualScrollTimeoutRef.current);
       }
     };
-  }, [show, articleRef]);
+  }, [show, articleRef, onLoadingChange]);
 
   // Handle active heading highlighting and auto-scroll
   useEffect(() => {
