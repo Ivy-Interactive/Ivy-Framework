@@ -99,26 +99,7 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
     ...getWidth(width),
     ...getHeight(height),
   };
-  // Create selection extension logic
-  /**
-   * Creates a CodeMirror extension for handling custom text selections with decorations.
-   *
-   * This extension provides visual feedback for selected text ranges by:
-   * - Managing selection state through StateEffects
-   * - Creating custom decorations for selected text
-   * - Handling selection updates and clearing
-   * - Validating selection ranges for safety
-   *
-   * The extension consists of two main components:
-   * 1. A StateField that manages decoration state
-   * 2. An update listener that responds to selection changes
-   *
-   * @returns {Extension} A CodeMirror extension containing selection field and handler
-   *
-   * @example
-   * const selectionExt = createSelectionExtension();
-   * // Use in CodeMirror extensions array
-   */
+
   const createSelectionExtension = useCallback((): Extension => {
     // Effect to add selection decorations
     const addSelection = StateEffect.define<{ from: number; to: number }>();
