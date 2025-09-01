@@ -71,12 +71,12 @@ export function createIvyCodeTheme(): Extension {
     },
     // Custom selection highlighting
     '.ivy-selection-highlight': {
-      backgroundColor: 'var(--input) !important',
-      color: 'var(--input-accent) !important',
+      backgroundColor: 'var(--input)',
+      color: 'var(--input-accent)',
     },
     '.cm-selectionMatch': {
-      backgroundColor: 'var(--input) !important',
-      color: 'var(--input-accent) !important',
+      backgroundColor: 'var(--input)',
+      color: 'var(--input-accent)',
     },
     '.cm-cursor': {
       borderLeftColor: 'var(--foreground)',

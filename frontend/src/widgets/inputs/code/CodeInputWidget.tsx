@@ -100,6 +100,25 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
     ...getHeight(height),
   };
   // Create selection extension logic
+  /**
+   * Creates a CodeMirror extension for handling custom text selections with decorations.
+   *
+   * This extension provides visual feedback for selected text ranges by:
+   * - Managing selection state through StateEffects
+   * - Creating custom decorations for selected text
+   * - Handling selection updates and clearing
+   * - Validating selection ranges for safety
+   *
+   * The extension consists of two main components:
+   * 1. A StateField that manages decoration state
+   * 2. An update listener that responds to selection changes
+   *
+   * @returns {Extension} A CodeMirror extension containing selection field and handler
+   *
+   * @example
+   * const selectionExt = createSelectionExtension();
+   * // Use in CodeMirror extensions array
+   */
   const createSelectionExtension = useCallback((): Extension => {
     // Effect to add selection decorations
     const addSelection = StateEffect.define<{ from: number; to: number }>();
@@ -116,22 +135,32 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
       create() {
         return Decoration.none;
       },
-      update(selections, tr) {
+      update(_selections, tr) {
         const builder = new RangeSetBuilder<Decoration>();
 
-        // Clear existing selections
-        selections.between(0, tr.newDoc.length, () => {});
+        // Check what effects we have
+        const hasClearEffect = tr.effects.some(e => e.is(clearSelections));
+        const hasAddEffect = tr.effects.some(e => e.is(addSelection));
 
-        // Add new selections from the transaction
+        // Build decorations for add effects
         for (const effect of tr.effects) {
           if (effect.is(addSelection)) {
-            builder.add(effect.value.from, effect.value.to, selectionMark);
-          } else if (effect.is(clearSelections)) {
-            return Decoration.none;
+            const { from, to } = effect.value;
+
+            // Validate range bounds
+            if (from < 0 || to < 0 || from > to || to > tr.newDoc.length) {
+              continue;
+            }
+
+            builder.add(from, to, selectionMark);
           }
         }
 
-        return builder.finish();
+        // If we have a clear effect but no add effect, return empty decorations
+        // If we have an add effect, return the built decorations (even if clear is also present)
+        return hasClearEffect && !hasAddEffect
+          ? Decoration.none
+          : builder.finish();
       },
       provide: f => EditorView.decorations.from(f),
     });
@@ -141,17 +170,11 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
       if (update.selectionSet) {
         const { from, to } = update.state.selection.main;
 
-        // Clear previous selections
-        update.view.dispatch({
-          effects: clearSelections.of(null),
-        });
-
-        // Add new selection if there is one
+        const effects: StateEffect<unknown>[] = [clearSelections.of(null)];
         if (from !== to) {
-          update.view.dispatch({
-            effects: addSelection.of({ from, to }),
-          });
+          effects.push(addSelection.of({ from, to }));
         }
+        update.view.dispatch({ effects });
       }
     });
 
