@@ -159,7 +159,7 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
       activeElement.scrollIntoView({
         behavior: 'smooth',
         block: 'nearest',
-        inline: 'nearest',
+        // Removed inline: 'nearest' to prevent horizontal scrolling
       });
     }
   }, [activeId, isManualScrolling]);
