@@ -211,7 +211,7 @@ export const TabsLayoutWidget = ({
     left: '0px',
     width: '0px',
   });
-  const hasRenderedRef = React.useRef(false);
+  const [isInitialRender, setIsInitialRender] = React.useState(true);
 
   // Update refs when they change
   React.useEffect(() => {
@@ -235,25 +235,15 @@ export const TabsLayoutWidget = ({
         left: `${offsetLeft}px`,
         width: `${offsetWidth}px`,
       });
-    }
-  }, [activeIndex, tabOrder, variant]);
 
-  React.useEffect(() => {
-    if (variant !== 'Content') return;
-    requestAnimationFrame(() => {
-      const firstElement = tabRefs.current[activeIndex];
-      if (firstElement) {
-        const { offsetLeft, offsetWidth } = firstElement;
-        setActiveStyle({
-          left: `${offsetLeft}px`,
-          width: `${offsetWidth}px`,
+      // After first position update, enable animations
+      if (isInitialRender) {
+        requestAnimationFrame(() => {
+          setIsInitialRender(false);
         });
-        // Mark that we've rendered after setting initial position
-        hasRenderedRef.current = true;
       }
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Empty dependency array is intentional - we only want this to run once on mount
+    }
+  }, [activeIndex, tabOrder, variant, isInitialRender]);
 
   // Calculate which tabs fit and which don't - preserving order
   const calculateVisibleTabs = React.useCallback(() => {
@@ -753,7 +743,7 @@ export const TabsLayoutWidget = ({
           <div
             className={cn(
               'absolute bottom-[-6px] h-[2px] bg-foreground',
-              hasRenderedRef.current && 'transition-all duration-300 ease-out'
+              !isInitialRender && 'transition-all duration-300 ease-out'
             )}
             style={activeStyle}
           />
