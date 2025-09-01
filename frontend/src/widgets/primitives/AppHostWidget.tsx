@@ -20,10 +20,11 @@ export const AppHostWidget: React.FC<AppHostWidgetProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (containerRef.current) {
+    // Reset scroll when we have new content to render (not just when appId changes)
+    if (containerRef.current && widgetTree) {
       containerRef.current.scrollTop = 0;
     }
-  }, [appId]);
+  }, [widgetTree]);
 
   return (
     <div ref={containerRef} className="w-full h-full p-4 overflow-y-auto">
