@@ -18,6 +18,10 @@ const TerminalWidget = ({ lines, title, showHeader }: TerminalWidgetProps) => {
 
   return (
     <div
+      role="application"
+      aria-label={title || 'Terminal'}
+      aria-roledescription="terminal"
+      data-terminal="true"
       className={cn(
         'rounded-lg overflow-hidden border border-border shadow-md'
       )}
@@ -38,6 +42,8 @@ const TerminalWidget = ({ lines, title, showHeader }: TerminalWidgetProps) => {
         {lines.map((line, index) => (
           <div
             key={index}
+            role="log"
+            aria-label={line.isCommand ? 'Command' : 'Output'}
             className={cn('whitespace-pre-wrap', index > 0 ? 'mt-1' : '')}
           >
             <div className="flex">

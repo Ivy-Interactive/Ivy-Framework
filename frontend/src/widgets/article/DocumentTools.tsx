@@ -131,7 +131,7 @@ export const DocumentTools: React.FC<DocumentToolsProps> = ({
       'div[class*="api"]', // Divs with "api" in class
       'section[class*="api"]', // Sections with "api" in class
       '[data-testid*="api"]', // Elements with "api" in test ID
-      'div.rounded-lg.overflow-hidden.border.border-border.shadow-md', // Terminal elements
+      '[role="application"][aria-roledescription="terminal"]', // Terminal elements
     ];
 
     // Find all elements that might contain API content
@@ -216,11 +216,10 @@ export const DocumentTools: React.FC<DocumentToolsProps> = ({
             break;
 
           case 'div':
-            // Handle terminal elements with specific classes
+            // Handle terminal elements with ARIA role
             if (
-              element.matches(
-                'div.rounded-lg.overflow-hidden.border.border-border.shadow-md'
-              ) &&
+              element.getAttribute('role') === 'application' &&
+              element.getAttribute('aria-roledescription') === 'terminal' &&
               !processedElements.has(element)
             ) {
               const terminalContent = extractTerminalContent(element);
@@ -439,13 +438,13 @@ export const DocumentTools: React.FC<DocumentToolsProps> = ({
     return listMarkdown + '\n';
   };
 
-  // Helper function to extract terminal content
+  // Helper function to extract terminal content using proper ARIA roles
   const extractTerminalContent = (terminalElement: Element): string => {
     let terminalContent = '';
 
-    // Look for terminal lines within the terminal element
-    const terminalLines = terminalElement.querySelectorAll(
-      'div[class*="whitespace-pre-wrap"]'
+    // Look for terminal lines using the role="log" attribute
+    const terminalLines = Array.from(
+      terminalElement.querySelectorAll('[role="log"]')
     );
 
     if (terminalLines.length > 0) {
@@ -453,24 +452,33 @@ export const DocumentTools: React.FC<DocumentToolsProps> = ({
       terminalLines.forEach((line, index) => {
         if (index > 0) terminalContent += '\n';
 
-        // Check if this is a command line (has the '>' prompt)
-        const promptElement = line.querySelector('span[class*="text-primary"]');
+        // Check if this is a command line using the aria-label
+        const ariaLabel = line.getAttribute('aria-label');
+        const isCommand = ariaLabel === 'Command';
+
+        // Look for the content span that contains the actual text
         const contentElement = line.querySelector('span[class*="text-sm"]');
 
-        if (promptElement && contentElement) {
-          const promptText = promptElement.textContent?.trim() || '';
+        if (contentElement) {
           const contentText = contentElement.textContent?.trim() || '';
 
-          if (promptText === '>') {
-            // This is a command line
+          if (isCommand) {
+            // This is a command line - add the prompt
             terminalContent += `> ${contentText}`;
           } else {
             // This is output
             terminalContent += contentText;
           }
         } else {
-          // Fallback: just get the text content
-          terminalContent += line.textContent?.trim() || '';
+          // Fallback: get text from the entire line
+          const fallbackText = line.textContent?.trim() || '';
+          if (fallbackText) {
+            if (isCommand) {
+              terminalContent += `> ${fallbackText}`;
+            } else {
+              terminalContent += fallbackText;
+            }
+          }
         }
       });
     } else {
