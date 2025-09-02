@@ -117,8 +117,11 @@ public class MultipleElementsView : ViewBase
 
 ## Examples
 
-### Dynamic Content Generation
-
+<Details>
+<Summary>
+Dynamic Content Generation
+</Summary>
+<Body>
 Fragment can be used to dynamically generate content based on data:
 
 ```csharp demo-tabs
@@ -164,3 +167,6 @@ public class DynamicContentView : ViewBase
     }
 }
 ```
+
+</Body>
+</Details>
