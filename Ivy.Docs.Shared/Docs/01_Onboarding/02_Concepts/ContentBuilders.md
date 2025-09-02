@@ -97,9 +97,13 @@ Ivy provides a `BuilderFactory` that offers convenient methods for creating comm
 
 ## Examples
 
-Here's a simple example showing how different types of content are automatically formatted:
+<Details>
+<Summary>
+Different types of content are automatically formatted:
+</Summary>
+<Body>
 
-```csharp demo-tabs 
+```csharp demo-tabs
 public class ContentBuilderDemo : ViewBase
 {
     public override object? Build()
@@ -118,4 +122,6 @@ public class ContentBuilderDemo : ViewBase
 }
 ```
 
+</Body>
+</Details>
 Each item in this layout will be automatically formatted by the appropriate content builder, resulting in a clean and consistent visual representation.
