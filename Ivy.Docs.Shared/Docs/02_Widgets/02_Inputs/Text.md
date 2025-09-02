@@ -395,9 +395,11 @@ public class BasicFilter : ViewBase
 
 ## Examples
 
-The following demo shows how to use style like `Invalid` in form validations.
-
-#### Validate Email Demo
+<Details>
+<Summary>
+Validate Email Demo
+</Summary>
+<Body>
 
 In this example, if the email format is wrong, the input is invalidated and a message is shown.
 
@@ -441,8 +443,14 @@ public class EmailValidationDemo : ViewBase
 }
 ```
 
-#### Conditional Enabling/Disabling of Text Inputs
+</Body>
+</Details>
 
+<Details>
+<Summary>
+Conditional Enabling/Disabling of Text Inputs
+</Summary>
+<Body>
 In this demo, password field is enabled only when the username field has a value.
 
 ```csharp demo-tabs
@@ -455,7 +463,7 @@ public class LoginForm : ViewBase
         var passwordState = UseState("");         
         
         return Layout.Vertical()
-            | Text.H2("Login")
+            | Text.Label("Login")
             | Layout.Vertical()
                 | Text.Label("Username")
                 | usernameState.ToTextInput()
@@ -471,3 +479,6 @@ public class LoginForm : ViewBase
     }     
 }
 ```
+
+</Body>
+</Details>
