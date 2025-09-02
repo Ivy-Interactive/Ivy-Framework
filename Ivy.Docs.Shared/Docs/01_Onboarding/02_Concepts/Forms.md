@@ -544,8 +544,11 @@ Avoid manually creating form layouts. Always use `.ToForm()` on your state objec
 
 ## Examples
 
-### Forms with Data Tables
-
+<Details>
+<Summary>
+Forms with Data Tables
+</Summary>
+<Body>
 Combine forms with data tables for CRUD operations.
 
 ```csharp demo-tabs
@@ -673,8 +676,14 @@ public class CrudFormExample : ViewBase
 }
 ```
 
-### Forms with Real-time Updates
+</Body>
+</Details>
 
+<Details>
+<Summary>
+Forms with Real-time Updates
+</Summary>
+<Body>
 Forms automatically update state, enabling real-time UI updates.
 
 ```csharp demo-tabs
@@ -721,3 +730,6 @@ public class RealTimeFormExample : ViewBase
     }
 }
 ```
+
+</Body>
+</Details>
