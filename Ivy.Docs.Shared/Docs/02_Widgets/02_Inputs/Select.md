@@ -337,8 +337,11 @@ Use Select for single choice dropdowns, List for multiple selection with checkbo
 
 ## Examples
 
-### Ordering System
-
+<Details>
+<Summary>
+Ordering System
+</Summary>
+<Body>
 A comprehensive example showing different SelectInput variants in a real-world scenario:
 
 ```csharp demo-tabs
@@ -430,3 +433,6 @@ public class CoffeeShopDemo: ViewBase
     }
 }
 ```
+
+</Body>
+</Details>
