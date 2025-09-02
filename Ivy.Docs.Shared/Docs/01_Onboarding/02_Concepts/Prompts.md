@@ -177,7 +177,11 @@ public class CustomPromptView : ViewBase
 
 ## Examples
 
-### Confirmation with Custom Options
+<Details>
+<Summary>
+Confirmation with Custom Options
+</Summary>
+<Body>
 
 ```csharp demo-tabs
 public record DeleteOptions
@@ -240,3 +244,6 @@ public class DeleteWithOptionsView : ViewBase
     }
 }
 ```
+
+</Body>
+</Details>
