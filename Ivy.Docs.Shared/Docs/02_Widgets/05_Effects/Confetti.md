@@ -48,8 +48,11 @@ Layout.Vertical().Gap(10)
 
 ## Examples
 
-### Integration with Other Widgets
-
+<Details>
+<Summary>
+Integration with Other Widgets
+</Summary>
+<Body>
 Confetti works seamlessly with all Ivy widgets, allowing you to add celebratory effects to any interface element.
 
 ```csharp demo-tabs ivy-bg
@@ -60,3 +63,6 @@ Layout.Vertical().Gap(10)
     | Text.Block("Message").WithConfetti(AnimationTrigger.Hover)
     | new Badge("Success").WithConfetti(AnimationTrigger.Hover)
 ```
+
+</Body>
+</Details>
