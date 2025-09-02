@@ -25,7 +25,7 @@ new Button("Hover Me").WithTooltip("Hello World!");
 
 Tooltips are perfect for displaying validation errors or helpful hints on form inputs:
 
-```csharp demo-tabs 
+```csharp demo-tabs
 Layout.Vertical()
     | new TextInput(placeholder: "Enter email").WithTooltip("Enter a valid email address")
     | new TextInput(placeholder: "Enter password").WithTooltip("Password must be at least 8 characters long")
@@ -36,7 +36,7 @@ Layout.Vertical()
 
 Use tooltips to explain the meaning of icons, especially in toolbars or navigation:
 
-```csharp demo-tabs 
+```csharp demo-tabs
 Layout.Horizontal()
     | new Button(null, icon: Icons.Save).WithTooltip("Save changes")
     | new Button(null, icon: Icons.Download).WithTooltip("Download file")
@@ -48,7 +48,7 @@ Layout.Horizontal()
 
 Provide additional context for status badges and indicators:
 
-```csharp demo-tabs 
+```csharp demo-tabs
 Layout.Horizontal()
     | new Badge("Online", icon: Icons.Circle).WithTooltip("User is currently active")
     | new Badge("Away", icon: Icons.Circle).WithTooltip("User is away from keyboard")
@@ -60,7 +60,7 @@ Layout.Horizontal()
 
 Tooltips can contain rich content, not just simple text:
 
-```csharp demo-below 
+```csharp demo-below
 new Button("Advanced Tooltip")
     .WithTooltip("This tooltip contains multiple lines of text and can be quite detailed to provide comprehensive information to the user.")
 ```
@@ -69,7 +69,7 @@ new Button("Advanced Tooltip")
 
 Tooltips work with any interactive element:
 
-```csharp demo-tabs 
+```csharp demo-tabs
 Layout.Horizontal()
     | new Button("Button").WithTooltip("Click to perform action")
     | new Badge("Badge").WithTooltip("This is a status indicator")
@@ -79,11 +79,14 @@ Layout.Horizontal()
 
 ## Examples
 
-### Tooltips with Icons
-
+<Details>
+<Summary>
+Tooltips with Icons
+</Summary>
+<Body>
 Combine tooltips with icons for better visual communication:
 
-```csharp demo-tabs 
+```csharp demo-tabs
 Layout.Horizontal()
     | new Button("Save", icon: Icons.Save).WithTooltip("Save your current work")
     | new Button("Delete", icon: Icons.Trash).WithTooltip("Permanently delete this item")
@@ -91,11 +94,17 @@ Layout.Horizontal()
     | new Button("Export", icon: Icons.Download).WithTooltip("Export data to file")
 ```
 
-### Tooltips on Different Widget Types
+</Body>
+</Details>
 
+<Details>
+<Summary>
+Tooltips on Different Widget Types
+</Summary>
+<Body>
 See how tooltips work across various widget types:
 
-```csharp demo-tabs 
+```csharp demo-tabs
 Layout.Grid().Columns(2)
     | new Button("Primary").WithTooltip("Primary action button")
     | new Button("Secondary").Secondary().WithTooltip("Secondary action button")
@@ -105,11 +114,17 @@ Layout.Grid().Columns(2)
     | Text.Literal("Important Text").WithTooltip("This text requires attention")
 ```
 
-### Form Field Help
+</Body>
+</Details>
 
+<Details>
+<Summary>
+Form Field Help
+</Summary>
+<Body>
 Provide contextual help for form fields:
 
-```csharp demo-below 
+```csharp demo-below
 Layout.Vertical()
     | new TextInput(placeholder: "Enter username").WithTooltip("Choose a unique username that will be visible to other users")
     | new TextInput(placeholder: "Enter email").WithTooltip("We'll use this email for account verification and notifications")
@@ -117,11 +132,17 @@ Layout.Vertical()
     | new BoolInput("Newsletter").WithTooltip("Receive updates about new features and improvements")
 ```
 
-### Navigation Help
+</Body>
+</Details>
 
+<Details>
+<Summary>
+Navigation Help
+</Summary>
+<Body>
 Help users understand navigation elements:
 
-```csharp demo-below 
+```csharp demo-below
 Layout.Horizontal()
     | new Button("Dashboard", icon: Icons.House).WithTooltip("View your main dashboard")
     | new Button("Projects", icon: Icons.Folder).WithTooltip("Manage your projects")
@@ -130,13 +151,15 @@ Layout.Horizontal()
     | new Button("Help", icon: Icons.Info).WithTooltip("Get help and support")
 ```
 
+</Body>
+</Details>
 ## Best Practices
 
 ### Keep Tooltips Concise
 
 Tooltips should provide quick, helpful information without being overwhelming:
 
-```csharp demo-tabs 
+```csharp demo-tabs
 Layout.Horizontal()
     | new Button("Good").WithTooltip("Clear and concise")
     | new Button("Too Long").WithTooltip("This tooltip is unnecessarily long and verbose, providing more information than the user needs at this moment, which can be distracting and counterproductive to the user experience")
@@ -146,7 +169,7 @@ Layout.Horizontal()
 
 Maintain consistent terminology and tone across your tooltips:
 
-```csharp demo-tabs 
+```csharp demo-tabs
 Layout.Horizontal()
     | new Button("Save").WithTooltip("Save changes")
     | new Button("Cancel").WithTooltip("Cancel changes")
@@ -158,7 +181,7 @@ Layout.Horizontal()
 
 When possible, tell users what will happen when they interact with an element:
 
-```csharp demo-tabs 
+```csharp demo-tabs
 Layout.Horizontal()
     | new Button("Delete").WithTooltip("Permanently delete this item (cannot be undone)")
     | new Button("Archive").WithTooltip("Move to archive (can be restored later)")
@@ -170,7 +193,7 @@ Layout.Horizontal()
 
 Tooltips enhance accessibility by providing additional context for screen readers and keyboard navigation:
 
-```csharp demo-below 
+```csharp demo-below
 Layout.Vertical()
     | Text.Literal("Accessible content").WithTooltip("This tooltip provides additional context for assistive technologies")
     | new Button("Accessible button").WithTooltip("This button performs a specific action that is described in the tooltip")
