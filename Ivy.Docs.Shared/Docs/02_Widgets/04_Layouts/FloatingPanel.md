@@ -320,8 +320,11 @@ Ensure floating panels don't interfere with content readability and provide clea
 
 ## Examples
 
-### Back to Top Button
-
+<Details>
+<Summary>
+Back to Top Button
+</Summary>
+<Body>
 A common use case for floating panels - a "back to top" button:
 
 ```csharp demo-tabs
@@ -349,8 +352,14 @@ public class BackToTopView : ViewBase
 }
 ```
 
-### Floating Search Bar
+</Body>
+</Details>
 
+<Details>
+<Summary>
+Floating Search Bar
+</Summary>
+<Body>
 A floating search bar that stays accessible:
 
 ```csharp demo-tabs
@@ -380,8 +389,14 @@ public class FloatingSearchView : ViewBase
 }
 ```
 
-### Multi-Panel Layout
+</Body>
+</Details>
 
+<Details>
+<Summary>
+Multi-Panel Layout
+</Summary>
+<Body>
 Demonstrate multiple floating panels working together:
 
 ```csharp demo-tabs
@@ -435,3 +450,6 @@ public class MultiPanelView : ViewBase
     }
 }
 ```
+
+</Body>
+</Details>
