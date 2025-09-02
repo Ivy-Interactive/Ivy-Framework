@@ -152,7 +152,11 @@ public class ValidatedUploadView : ViewBase
 
 ## Examples
 
-### Image Upload with Preview
+<Details>
+<Summary>
+Image Upload with Preview
+</Summary>
+<Body>
 
 ```csharp demo-below
 public class ImageUploadView : ViewBase
@@ -186,9 +190,17 @@ public class ImageUploadView : ViewBase
         );
     }
 }
+
 ```
 
-### Multiple File Upload with List
+</Body>
+</Details>
+
+<Details>
+<Summary>
+Multiple File Upload with List
+</Summary>
+<Body>
 
 ```csharp demo-below
 public class MultiFileUploadView : ViewBase
@@ -221,3 +233,6 @@ public class MultiFileUploadView : ViewBase
     }
 }
 ```
+
+</Body>
+</Details>
