@@ -252,10 +252,13 @@ public class CodeInputWithValidation : ViewBase
 
 <WidgetDocs Type="Ivy.CodeInput" ExtensionTypes="Ivy.CodeInputExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Inputs/CodeInput.cs"/>
 
-## Advanced Example
+## Examples
 
-### DBML Editor with Live Preview
-
+<Details>
+<Summary>
+DBML Editor with Live Preview
+</Summary>
+<Body>
 ```csharp demo-tabs
 public class DBMLEditorDemo : ViewBase
 {
@@ -277,3 +280,6 @@ public class DBMLEditorDemo : ViewBase
    }
 }
 ```
+
+</Body>
+</Details>
