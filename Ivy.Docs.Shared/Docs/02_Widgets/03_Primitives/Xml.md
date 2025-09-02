@@ -85,8 +85,11 @@ public class XObjectXmlExample : ViewBase
 
 ## Examples
 
-### Interactive XML Editor
-
+<Details>
+<Summary>
+Interactive XML Editor
+</Summary>
+<Body>
 This example shows how to create an interactive XML editor with real-time preview.
 
 ```csharp demo-tabs
@@ -130,7 +133,7 @@ public class InteractiveXmlEditor : ViewBase
         });
         
         return Layout.Vertical().Gap(4)
-            | Text.H3("XML Editor")
+            | Text.Label("XML Editor")
             | xmlContent.ToTextAreaInput(placeholder: "Enter XML content here...")
                 .Height(Size.Units(50))
             | (isValid.Value 
@@ -140,3 +143,6 @@ public class InteractiveXmlEditor : ViewBase
     }
 }
 ```
+
+</Body>
+</Details>
