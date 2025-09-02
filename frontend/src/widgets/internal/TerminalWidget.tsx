@@ -18,10 +18,7 @@ const TerminalWidget = ({ lines, title, showHeader }: TerminalWidgetProps) => {
 
   return (
     <div
-      role="application"
-      aria-label={title || 'Terminal'}
-      aria-roledescription="terminal"
-      data-terminal="true"
+      role="terminal"
       className={cn(
         'rounded-lg overflow-hidden border border-border shadow-md'
       )}
@@ -59,6 +56,7 @@ const TerminalWidget = ({ lines, title, showHeader }: TerminalWidgetProps) => {
                 )}
               </div>
               <span
+                role="terminal-text"
                 className={cn(
                   'text-sm',
                   line.isCommand ? commandColor : outputColor

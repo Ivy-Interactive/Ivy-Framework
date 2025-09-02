@@ -131,7 +131,7 @@ export const DocumentTools: React.FC<DocumentToolsProps> = ({
       'div[class*="api"]', // Divs with "api" in class
       'section[class*="api"]', // Sections with "api" in class
       '[data-testid*="api"]', // Elements with "api" in test ID
-      '[role="application"][aria-roledescription="terminal"]', // Terminal elements
+      '[role="terminal"]', // Terminal elements
     ];
 
     // Find all elements that might contain API content
@@ -216,10 +216,9 @@ export const DocumentTools: React.FC<DocumentToolsProps> = ({
             break;
 
           case 'div':
-            // Handle terminal elements with ARIA role
+            // Handle terminal elements
             if (
-              element.getAttribute('role') === 'application' &&
-              element.getAttribute('aria-roledescription') === 'terminal' &&
+              element.getAttribute('role') === 'terminal' &&
               !processedElements.has(element)
             ) {
               const terminalContent = extractTerminalContent(element);
@@ -456,8 +455,8 @@ export const DocumentTools: React.FC<DocumentToolsProps> = ({
         const ariaLabel = line.getAttribute('aria-label');
         const isCommand = ariaLabel === 'Command';
 
-        // Look for the content span that contains the actual text
-        const contentElement = line.querySelector('span[class*="text-sm"]');
+        // Look for the content element using role
+        const contentElement = line.querySelector('[role="terminal-text"]');
 
         if (contentElement) {
           const contentText = contentElement.textContent?.trim() || '';
