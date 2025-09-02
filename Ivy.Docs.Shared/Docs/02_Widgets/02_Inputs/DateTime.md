@@ -186,6 +186,9 @@ public class DisabledDateTimeDemo : ViewBase
 ## Examples
 
 <Details>
+<Summary>
+DateTime Input with Validation and Disabled States
+</Summary>
 <Body>
 
 ```csharp demo-tabs
@@ -226,4 +229,4 @@ public class LibraryBookReturnDemo : ViewBase
 ```
 
 </Body>
-<Details>
+</Details>
