@@ -272,8 +272,11 @@ public class EffectErrorView : ViewBase
 
 ## Examples
 
-### Data Loading with Error Handling
-
+<Details>
+<Summary>
+Data Loading with Error Handling
+</Summary>
+<Body>
 Handle errors gracefully in data loading scenarios:
 
 ```csharp demo-tabs
@@ -325,8 +328,14 @@ public class DataLoadingView : ViewBase
 }
 ```
 
-### Error with Recovery Actions
+</Body>
+</Details>
 
+<Details>
+<Summary>
+Error with Recovery Actions
+</Summary>
+<Body>
 Combine error display with actionable recovery options:
 
 ```csharp demo-tabs
@@ -385,3 +394,6 @@ public class ErrorRecoveryExamplesView : ViewBase
     }
 }
 ```
+
+</Body>
+</Details>
