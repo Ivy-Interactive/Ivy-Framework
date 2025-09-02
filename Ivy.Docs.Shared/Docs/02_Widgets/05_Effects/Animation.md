@@ -338,7 +338,12 @@ Layout.Wrap().Gap(4).Align(Align.Center)
 
 ## Examples
 
-Interactive buttons with various animation effects. Click any button to see the animation:
+<Details>
+<Summary>
+Interactive buttons with various animation effects.
+</Summary>
+<Body>
+Click any button to see the animation:
 
 ```csharp demo-tabs
 Layout.Wrap().Gap(3).Align(Align.Center)
@@ -400,8 +405,14 @@ Layout.Wrap().Gap(3).Align(Align.Center)
         .Intensity(0.8)
 ```
 
-### Media & Directional Examples
+</Body>
+</Details>
 
+<Details>
+<Summary>
+Media & Directional Examples
+</Summary>
+<Body>
 Click any icon to see media controls and directional animations:
 
 ```csharp demo-tabs
@@ -467,3 +478,6 @@ Layout.Wrap().Gap(4).Align(Align.Center)
         .Trigger(AnimationTrigger.Click)
         .Duration(0.7)
 ```
+
+</Body>
+</Details>
