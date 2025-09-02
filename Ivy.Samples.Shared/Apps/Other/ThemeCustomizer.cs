@@ -1,3 +1,4 @@
+using Ivy.Client;
 using Ivy.Core;
 using Ivy.Shared;
 using Ivy.Themes;
@@ -32,10 +33,12 @@ public class ThemeCustomizer : SampleBase
             {
                 // Apply theme directly to the service
                 themeService.SetTheme(currentTheme.Value);
-                client.Toast("Theme applied! Refreshing page...", "Success");
 
-                // Refresh the page to see the new theme
-                client.Redirect("/");
+                // Generate and apply the CSS to the frontend immediately
+                var css = themeService.GenerateThemeCss();
+                client.ApplyThemeCss(css);
+
+                client.Toast("Theme applied successfully!", "Success");
             }
             catch (Exception ex)
             {
@@ -48,8 +51,8 @@ public class ThemeCustomizer : SampleBase
             | Text.Block("Customize and apply themes dynamically to your Ivy application.")
             | new Card(
                 Layout.Vertical()
-                    | Text.Block("🎨 Live Theme Preview")
-                    | Text.Small("Select a preset and click 'Apply Theme' to see changes immediately!")
+                    | Text.Block("🎨 Live Theme Application")
+                    | Text.Small("Select a preset and click 'Apply Selected Theme' to see changes instantly - no page refresh needed!")
             ).BorderColor(Colors.Primary)
 
             // Preset selector
@@ -134,7 +137,7 @@ public class ThemeCustomizer : SampleBase
             | new Card(
                 Layout.Vertical()
                     | Text.H3("Dynamic Theme Application")
-                    | Text.Block("Click 'Apply Theme Live' to instantly apply the selected theme without restarting the server!")
+                    | Text.Block("Click 'Apply Selected Theme' to instantly apply the theme with live CSS updates - no server restart required!")
                     | Text.H3("Server Configuration")
                     | Text.Block("You can also configure themes at server startup:")
                     | new Code(@"var server = new Server()
@@ -194,7 +197,22 @@ var server = new Server()
             Accent = ""{colors.Accent}"",
             AccentForeground = ""{colors.AccentForeground}"",
             Card = ""{colors.Card}"",
-            CardForeground = ""{colors.CardForeground}""
+            CardForeground = ""{colors.CardForeground}"",
+            Popover = ""{colors.Popover}"",
+            PopoverForeground = ""{colors.PopoverForeground}"",
+            Chart1 = ""{colors.Chart1}"",
+            Chart2 = ""{colors.Chart2}"",
+            Chart3 = ""{colors.Chart3}"",
+            Chart4 = ""{colors.Chart4}"",
+            Chart5 = ""{colors.Chart5}"",
+            Sidebar = ""{colors.Sidebar}"",
+            SidebarForeground = ""{colors.SidebarForeground}"",
+            SidebarPrimary = ""{colors.SidebarPrimary}"",
+            SidebarPrimaryForeground = ""{colors.SidebarPrimaryForeground}"",
+            SidebarAccent = ""{colors.SidebarAccent}"",
+            SidebarAccentForeground = ""{colors.SidebarAccentForeground}"",
+            SidebarBorder = ""{colors.SidebarBorder}"",
+            SidebarRing = ""{colors.SidebarRing}""
         }};
     }});";
     }

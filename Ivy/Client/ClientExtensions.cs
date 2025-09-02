@@ -48,6 +48,11 @@ public static class ClientExtensions
         client.Sender.Send("SetTheme", theme.ToString());
     }
 
+    public static void ApplyThemeCss(this IClientProvider client, string css)
+    {
+        client.Sender.Send("ApplyThemeCss", css);
+    }
+
     public static void Toast(this IClientProvider client, string description, string? title = null)
     {
         client.Sender.Send("Toast", new ToasterMessage { Description = description, Title = title });

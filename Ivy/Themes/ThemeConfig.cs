@@ -52,6 +52,27 @@ public class ThemeColors
     public string? Card { get; set; }
     public string? CardForeground { get; set; }
 
+    // Popover colors
+    public string? Popover { get; set; }
+    public string? PopoverForeground { get; set; }
+
+    // Chart colors
+    public string? Chart1 { get; set; }
+    public string? Chart2 { get; set; }
+    public string? Chart3 { get; set; }
+    public string? Chart4 { get; set; }
+    public string? Chart5 { get; set; }
+
+    // Sidebar colors
+    public string? Sidebar { get; set; }
+    public string? SidebarForeground { get; set; }
+    public string? SidebarPrimary { get; set; }
+    public string? SidebarPrimaryForeground { get; set; }
+    public string? SidebarAccent { get; set; }
+    public string? SidebarAccentForeground { get; set; }
+    public string? SidebarBorder { get; set; }
+    public string? SidebarRing { get; set; }
+
     public static ThemeColors Default => new()
     {
         Primary = "#00cc92",
@@ -76,6 +97,23 @@ public class ThemeColors
         Accent = "#f8f8f8",
         AccentForeground = "#333333",
         Card = "#ffffff",
-        CardForeground = "#262626"
+        CardForeground = "#262626",
+
+        // Extended colors to match frontend CSS variables
+        Popover = "#ffffff",
+        PopoverForeground = "#000000",
+        Chart1 = "#0077BE",
+        Chart2 = "#DC143C",
+        Chart3 = "#70AD47",
+        Chart4 = "#FFC000",
+        Chart5 = "#5B9BD5",
+        Sidebar = "#f8f8f8",
+        SidebarForeground = "#000000",
+        SidebarPrimary = "#00cc92",
+        SidebarPrimaryForeground = "#ffffff",
+        SidebarAccent = "#f4f6f6",
+        SidebarAccentForeground = "#333333",
+        SidebarBorder = "#d1d5db",
+        SidebarRing = "#777777"
     };
 }

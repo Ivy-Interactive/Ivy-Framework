@@ -319,6 +319,24 @@ export const useBackend = (
             window.open(url, '_blank');
           });
 
+          connection.on('ApplyThemeCss', (css: string) => {
+            logger.debug(`[${connection.connectionId}] ApplyThemeCss`);
+
+            // Remove existing custom theme style if any
+            const existingStyle = document.getElementById('ivy-custom-theme');
+            if (existingStyle) {
+              existingStyle.remove();
+            }
+
+            // Create and inject the new style element
+            const styleElement = document.createElement('style');
+            styleElement.id = 'ivy-custom-theme';
+            styleElement.innerHTML = css
+              .replace('<style id="ivy-custom-theme">', '')
+              .replace('</style>', '');
+            document.head.appendChild(styleElement);
+          });
+
           connection.on('HotReload', () => {
             logger.debug(`[${connection.connectionId}] HotReload`);
             handleHotReloadMessage();
@@ -353,6 +371,7 @@ export const useBackend = (
         connection.off('SetJwt');
         connection.off('SetTheme');
         connection.off('OpenUrl');
+        connection.off('ApplyThemeCss');
         connection.off('reconnecting');
         connection.off('reconnected');
         connection.off('close');
