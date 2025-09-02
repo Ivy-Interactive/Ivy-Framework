@@ -196,8 +196,11 @@ public class SearchableListDemo : ViewBase
 
 ## Examples
 
-### Custom Item Rendering
-
+<Details>
+<Summary>
+Custom Item Rendering
+</Summary>
+<Body>
 Use the `items` parameter to create complex list items with custom layouts:
 
 ```csharp demo-tabs
@@ -228,8 +231,14 @@ public class CustomItemDemo : ViewBase
 }
 ```
 
-### Simple Dynamic List
+</Body>
+</Details>
 
+<Details>
+<Summary>
+Simple Dynamic List
+</Summary>
+<Body>
 A basic example showing how to add and remove list items:
 
 ```csharp demo-tabs
@@ -265,8 +274,14 @@ public class SimpleListDemo : ViewBase
 }
 ```
 
-### List with Time Rendering
+</Body>
+</Details>
 
+<Details>
+<Summary>
+List with Time Rendering
+</Summary>
+<Body>
 Show when each item was created:
 
 ```csharp demo-tabs
@@ -301,3 +316,6 @@ public class TimeListDemo : ViewBase
     }
 }
 ```
+
+</Body>
+</Details>
