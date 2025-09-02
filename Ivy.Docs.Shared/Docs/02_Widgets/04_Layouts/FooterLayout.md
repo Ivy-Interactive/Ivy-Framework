@@ -108,8 +108,11 @@ Use FooterLayout for multi-step forms, long questionnaires, and data entry inter
 
 ## Examples
 
-### Complex Footer with Multiple Elements
-
+<Details>
+<Summary>
+Complex Footer with Multiple Elements
+</Summary>
+<Body>
 Create sophisticated footers with various components:
 
 ```csharp demo-tabs
@@ -141,3 +144,6 @@ public class ComplexFooterExample : ViewBase
     }
 }
 ```
+
+</Body>
+</Details>
