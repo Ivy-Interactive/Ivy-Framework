@@ -15,7 +15,7 @@ The `ColorInput` widget provides a color picker interface for selecting color va
 
 Here's a simple example of a `ColorInput` that updates a state with the selected color:
 
-```csharp demo-below 
+```csharp demo-below
 public class ColorDemo : ViewBase
 {
     public override object? Build()
@@ -55,7 +55,7 @@ should be used.
 
 The following code shows all these three variants in action.
 
-```csharp demo-below 
+```csharp demo-below
 public class ColorDemo : ViewBase
 {
     public override object? Build()
@@ -92,7 +92,7 @@ ColorInput can handle change events using the `onChange` parameter.
 The following demo shows how the `Picker` variant can be used with a code
 block so that
 
-```csharp demo-below 
+```csharp demo-below
 public class ColorChangedDemo : ViewBase
 {
 
@@ -125,7 +125,7 @@ public class ColorChangedDemo : ViewBase
 
 To render a disabled `ColorInput` the function `Disabled` should be used.  
 
-```csharp demo-below 
+```csharp demo-below
 public class DisabledColorInput : ViewBase
 {
     public override object? Build()
@@ -140,7 +140,7 @@ public class DisabledColorInput : ViewBase
 To represent that there is something wrong with a `ColorInput` the `Invalid` function
 should be used.
 
-```csharp demo-below 
+```csharp demo-below
 public class InvalidStyleDemo : ViewBase
 { 
     public override object? Build()
@@ -151,15 +151,17 @@ public class InvalidStyleDemo : ViewBase
 
 ```
 
-
 <WidgetDocs Type="Ivy.ColorInput" ExtensionTypes="Ivy.ColorInputExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Inputs/ColorInput.cs"/>
 
 ## Examples
 
-The following example shows how `ColorPicker` control can be used in a developer tool setting that
-generates CSS blocks.
+<Details>
+<Summary>
+ColorPicker control can be used in a developer tool setting that generates CSS blocks.
+</Summary>
+<Body>
 
-```csharp demo-tabs 
+```csharp demo-tabs
 public class CSSColorDemo : ViewBase
 {
     public override object? Build()
@@ -173,7 +175,7 @@ public class CSSColorDemo : ViewBase
                             background-color: [BG_COLOR];
                             border: 1px solid [BORDER];
                       }
-        """; 
+        """;
         var genCode = UseState("");
         genCode.Set(template.Replace("[COLOR]",color.Value)
                             .Replace("[BG_COLOR]",bgColor.Value)
@@ -201,3 +203,6 @@ public class CSSColorDemo : ViewBase
     }
 }
 ```
+
+</Body>
+</Details>
