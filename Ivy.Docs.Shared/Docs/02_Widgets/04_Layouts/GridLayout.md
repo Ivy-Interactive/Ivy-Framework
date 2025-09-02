@@ -164,7 +164,11 @@ new GridLayout(
 
 ## Examples
 
-### Responsive Card Grid
+<Details>
+<Summary>
+Responsive Card Grid
+</Summary>
+<Body>
 
 ```csharp demo
 Layout.Grid()
@@ -184,7 +188,14 @@ Layout.Grid()
       ).GridColumnSpan(2)
 ```
 
-### Dashboard Layout
+</Body>
+</Details>
+
+<Details>
+<Summary>
+Dashboard Layout
+</Summary>
+<Body>
 
 ```csharp demo
 Layout.Grid()
@@ -197,6 +208,8 @@ Layout.Grid()
     | new Card("Sidebar").GridColumn(4).GridRow(2).GridRowSpan(2)
 ```
 
+</Body>
+</Details>
 ## AutoFlow Options
 
 The `AutoFlow` enum provides different ways to automatically place grid items:
