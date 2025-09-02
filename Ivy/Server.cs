@@ -347,6 +347,12 @@ public class Server
             Services.AddSingleton<IThemeService, ThemeService>();
         }
 
+        // Register all services from this server's Services collection
+        foreach (var service in Services)
+        {
+            builder.Services.Add(service);
+        }
+
         builder.Services.AddCors(options =>
         {
             options.AddDefaultPolicy(policy =>

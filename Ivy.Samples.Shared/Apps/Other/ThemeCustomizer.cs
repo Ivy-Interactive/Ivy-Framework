@@ -1,4 +1,3 @@
-using System.Text.Json;
 using Ivy.Core;
 using Ivy.Shared;
 using Ivy.Themes;
@@ -12,9 +11,11 @@ public class ThemeCustomizer : SampleBase
     protected override object? BuildSample()
     {
         var selectedPreset = UseState("default");
+        var currentTheme = UseState(ThemeConfig.Default);
         var showJson = UseState(false);
         var showCode = UseState(false);
         var client = UseService<IClientProvider>();
+        var themeService = UseService<IThemeService>();
 
         var presets = new Dictionary<string, ThemeConfig>
         {
@@ -25,32 +26,69 @@ public class ThemeCustomizer : SampleBase
             ["midnight"] = GetMidnightTheme()
         };
 
-        var currentTheme = presets[selectedPreset.Value];
+        void ApplyTheme()
+        {
+            try
+            {
+                // Apply theme directly to the service
+                themeService.SetTheme(currentTheme.Value);
+                client.Toast("Theme applied! Refreshing page...", "Success");
+
+                // Refresh the page to see the new theme
+                client.Redirect("/");
+            }
+            catch (Exception ex)
+            {
+                client.Toast($"Error: {ex.Message}", "Error");
+            }
+        }
 
         return Layout.Vertical()
             | Text.H1("Theme Customizer")
-            | Text.Block("Explore different theme configurations for your Ivy application.")
-            | Text.Small("Note: To apply a theme, configure it in your server startup code and restart the application.")
+            | Text.Block("Customize and apply themes dynamically to your Ivy application.")
+            | new Card(
+                Layout.Vertical()
+                    | Text.Block("🎨 Live Theme Preview")
+                    | Text.Small("Select a preset and click 'Apply Theme' to see changes immediately!")
+            ).BorderColor(Colors.Primary)
 
             // Preset selector
             | Text.H2("Theme Presets")
-            | Text.Block("Select Theme")
-            | selectedPreset.ToSelectInput(
-                presets.Select(kv => new Option<string>(kv.Value.Name, kv.Key))
+            | Layout.Horizontal(
+                Text.Block("Select Theme"),
+                selectedPreset.ToSelectInput(
+                    presets.Select(kv => new Option<string>(kv.Value.Name, kv.Key))
+                )
             )
 
-            // Theme preview
-            | Text.H2("Theme Configuration")
+            // Apply button
+            | new Button("Apply Selected Theme")
+            {
+                OnClick = _ =>
+                {
+                    // Update current theme from selected preset first
+                    if (presets.TryGetValue(selectedPreset.Value, out var theme))
+                    {
+                        currentTheme.Set(theme);
+                    }
+                    ApplyTheme();
+                    return ValueTask.CompletedTask;
+                },
+                Icon = Icons.Sparkles
+            }
+
+            // Theme preview with actual colors
+            | Text.H2("Color Preview")
             | new Card(
                 Layout.Grid().Columns(2)
-                    | RenderColorPreview("Primary", currentTheme.Colors.Primary, currentTheme.Colors.PrimaryForeground)
-                    | RenderColorPreview("Secondary", currentTheme.Colors.Secondary, currentTheme.Colors.SecondaryForeground)
-                    | RenderColorPreview("Success", currentTheme.Colors.Success, currentTheme.Colors.SuccessForeground)
-                    | RenderColorPreview("Destructive", currentTheme.Colors.Destructive, currentTheme.Colors.DestructiveForeground)
-                    | RenderColorPreview("Warning", currentTheme.Colors.Warning, currentTheme.Colors.WarningForeground)
-                    | RenderColorPreview("Info", currentTheme.Colors.Info, currentTheme.Colors.InfoForeground)
-                    | RenderColorPreview("Muted", currentTheme.Colors.Muted, currentTheme.Colors.MutedForeground)
-                    | RenderColorPreview("Accent", currentTheme.Colors.Accent, currentTheme.Colors.AccentForeground)
+                    | RenderColorPreview("Primary", currentTheme.Value.Colors.Primary, currentTheme.Value.Colors.PrimaryForeground)
+                    | RenderColorPreview("Secondary", currentTheme.Value.Colors.Secondary, currentTheme.Value.Colors.SecondaryForeground)
+                    | RenderColorPreview("Success", currentTheme.Value.Colors.Success, currentTheme.Value.Colors.SuccessForeground)
+                    | RenderColorPreview("Destructive", currentTheme.Value.Colors.Destructive, currentTheme.Value.Colors.DestructiveForeground)
+                    | RenderColorPreview("Warning", currentTheme.Value.Colors.Warning, currentTheme.Value.Colors.WarningForeground)
+                    | RenderColorPreview("Info", currentTheme.Value.Colors.Info, currentTheme.Value.Colors.InfoForeground)
+                    | RenderColorPreview("Muted", currentTheme.Value.Colors.Muted, currentTheme.Value.Colors.MutedForeground)
+                    | RenderColorPreview("Accent", currentTheme.Value.Colors.Accent, currentTheme.Value.Colors.AccentForeground)
             ).Title("Color Palette")
 
             // Export options
@@ -74,53 +112,54 @@ public class ThemeCustomizer : SampleBase
                         return ValueTask.CompletedTask;
                     }
                 }.Variant(ButtonVariant.Secondary),
-                new Button("Copy to Clipboard")
-                {
-                    OnClick = _ =>
-                    {
-                        var content = showCode.Value
-                            ? GenerateCSharpCode(currentTheme)
-                            : JsonSerializer.Serialize(currentTheme, new JsonSerializerOptions { WriteIndented = true });
-                        client.CopyToClipboard(content);
-                        client.Toast("Theme configuration copied to clipboard!");
-                        return ValueTask.CompletedTask;
-                    }
-                }.Variant(ButtonVariant.Outline)
+                                new Button("Copy to Clipboard")
+                                {
+                                    OnClick = _ =>
+                                    {
+                                        var content = showCode.Value
+                                            ? GenerateCSharpCode(currentTheme.Value)
+                                            : System.Text.Json.JsonSerializer.Serialize(currentTheme.Value, new System.Text.Json.JsonSerializerOptions { WriteIndented = true });
+                                        client.CopyToClipboard(content);
+                                        client.Toast("Theme configuration copied to clipboard!");
+                                        return ValueTask.CompletedTask;
+                                    }
+                                }.Variant(ButtonVariant.Outline)
             )
 
-            | (showCode.Value ? new Code(GenerateCSharpCode(currentTheme), Languages.Csharp) : null)
-            | (showJson.Value ? new Code(JsonSerializer.Serialize(currentTheme, new JsonSerializerOptions { WriteIndented = true }), Languages.Json) : null)
+            | (showCode.Value ? new Code(GenerateCSharpCode(currentTheme.Value), Languages.Csharp) : null)
+            | (showJson.Value ? new Code(System.Text.Json.JsonSerializer.Serialize(currentTheme.Value, new System.Text.Json.JsonSerializerOptions { WriteIndented = true }), Languages.Json) : null)
 
             // Usage instructions
-            | Text.H2("How to Use")
-            | Text.Block("To apply a theme to your Ivy application:")
-            | Layout.Vertical()
-                | Text.Block("1. Copy the configuration code above")
-                | Text.Block("2. Add it to your server startup:")
-                | new Code(@"var server = new Server()
+            | Text.H2("Usage")
+            | new Card(
+                Layout.Vertical()
+                    | Text.H3("Dynamic Theme Application")
+                    | Text.Block("Click 'Apply Theme Live' to instantly apply the selected theme without restarting the server!")
+                    | Text.H3("Server Configuration")
+                    | Text.Block("You can also configure themes at server startup:")
+                    | new Code(@"var server = new Server()
     .UseTheme(theme => 
     {
         // Your theme configuration here
     });", Languages.Csharp)
-                | Text.Block("3. Restart your application to see the changes")
+            )
         ;
     }
 
     private object RenderColorPreview(string label, string? bgColor, string? fgColor)
     {
+        var bg = bgColor ?? "#000000";
+        var fg = fgColor ?? "#FFFFFF";
+
         return Layout.Vertical()
             | Text.Small(label)
             | Layout.Horizontal(
-                // Color swatch - using DemoBox as a simple container
-                new DemoBox(Text.Block("Aa"))
-                {
-                    Padding = new Thickness(15, 10),
-                    BorderRadius = BorderRadius.Rounded,
-                    BorderThickness = new Thickness(1)
-                },
+                // Color swatch showing actual colors
+                new Html($@"<div style='background-color: {bg}; color: {fg}; padding: 20px 30px; border-radius: 8px; text-align: center; font-weight: bold; font-size: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); width: 80px;'>Aa</div>")
+                    .Width(Size.Px(140)),
                 Layout.Vertical()
-                    | Text.InlineCode(bgColor ?? "#000000")
-                    | Text.InlineCode(fgColor ?? "#FFFFFF")
+                    | Text.InlineCode(bg)
+                    | Text.InlineCode(fg)
             );
     }
 
@@ -284,4 +323,6 @@ var server = new Server()
             CardForeground = "#E5E5E5"
         }
     };
+
+
 }
