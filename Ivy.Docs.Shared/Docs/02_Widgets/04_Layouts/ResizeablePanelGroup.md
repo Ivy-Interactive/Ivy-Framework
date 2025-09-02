@@ -275,8 +275,11 @@ public class NestedLayoutView : ViewBase
 
 ## Examples
 
-### Multi-Directional Resizing
-
+<Details>
+<Summary>
+Multi-Directional Resizing
+</Summary>
+<Body>
 Demonstrate both horizontal and vertical resizing in a complex nested layout:
 
 ```csharp demo-tabs
@@ -342,3 +345,6 @@ public class MultiDirectionalResizingView : ViewBase
     }
 }
 ```
+
+</Body>
+</Details>
