@@ -321,6 +321,10 @@ public static partial class MarkdownConverter
         {
             HandleWidgetDocsBlock(codeBuilder, xml);
         }
+        else if (xml.Name.LocalName == "Details")
+        {
+            HandleDetailsBlock(codeBuilder, xml, markdownContent, htmlBlock, viewBuilder, usedClassNames);
+        }
         else if (xml.Name.LocalName == "Ingress")
         {
             HandleIngressBlock(codeBuilder, xml);
@@ -398,7 +402,7 @@ public static partial class MarkdownConverter
                 codeBuilder.AppendTab(4).AppendLine("Vertical()");
                 codeBuilder.Append(bodyOutput);
                 codeBuilder.AppendLine();
-                codeBuilder.AppendTab(3).AppendLine(");");
+                codeBuilder.AppendTab(3).AppendLine(")");
             }
             else
             {
@@ -411,12 +415,12 @@ public static partial class MarkdownConverter
                 }
                 codeBuilder.AppendTab(3).AppendLine($"""| new Expandable("{summary}",""");
                 codeBuilder.AppendTab(4).AppendLine(singleItemContent);
-                codeBuilder.AppendTab(3).AppendLine(");");
+                codeBuilder.AppendTab(3).AppendLine(")");
             }
         }
         else
         {
-            codeBuilder.AppendTab(3).AppendLine($"""| new Expandable("{summary}", new Markdown("No content"));""");
+            codeBuilder.AppendTab(3).AppendLine($"""| new Expandable("{summary}", new Markdown("No content"))""");
         }
     }
 

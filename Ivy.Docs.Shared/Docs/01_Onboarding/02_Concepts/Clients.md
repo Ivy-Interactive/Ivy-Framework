@@ -56,9 +56,13 @@ client.UploadFiles(async files => {
 
 ## Examples
 
-### Form Submission with Toast Feedback
+<Details>
+<Summary>
+Form Submission with Toast Feedback
+</Summary>
+<Body>
 
-```csharp demo-tabs 
+```csharp demo-tabs
 public class FormSubmissionApp : ViewBase
 {
     public override object? Build()
@@ -89,9 +93,16 @@ public class FormSubmissionApp : ViewBase
 }
 ```
 
-### File Operations Simulation
+</Body>
+</Details>
 
-```csharp demo-tabs 
+<Details>
+<Summary>
+File Operations Simulation
+</Summary>
+<Body>
+
+```csharp demo-tabs
 public class FileOperationsApp : ViewBase
 {
     public override object? Build()
@@ -149,9 +160,16 @@ public class FileOperationsApp : ViewBase
 }
 ```
 
-### Navigation and URL Management
+</Body>
+</Details>
 
-```csharp demo-tabs 
+<Details>
+<Summary>
+Navigation and URL Management
+</Summary>
+<Body>
+
+```csharp demo-tabs
 public class NavigationApp : ViewBase
 {
     public override object? Build()
@@ -184,6 +202,9 @@ public class NavigationApp : ViewBase
     }
 }
 ```
+
+</Body>
+</Details>
 
 ## See Also
 

@@ -59,7 +59,9 @@ public class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
             if (namespaceSuffix.StartsWith("Generated."))
                 namespaceSuffix = namespaceSuffix.Substring("Generated.".Length);
 
-            string @namespace = $"{rootNamespace}.Apps.{namespaceSuffix}";
+            string @namespace = string.IsNullOrEmpty(namespaceSuffix)
+                ? $"{rootNamespace}.Apps"
+                : $"{rootNamespace}.Apps.{namespaceSuffix}";
 
             await MarkdownConverter.ConvertAsync(name, relativeInputPath, absoluteInputPath, ivyOutput, @namespace, settings.SkipIfNotChanged, order);
         });
