@@ -101,8 +101,11 @@ Layout.Grid().Columns(2).Gap(2)
 
 ## Examples
 
-### Form Sections
-
+<Details>
+<Summary>
+Form Sections
+</Summary>
+<Body>
 Organize forms into logical, collapsible sections.
 
 ```csharp demo-tabs
@@ -125,3 +128,6 @@ public class SimpleFormExample : ViewBase
     }
 }
 ```
+
+</Body>
+</Details>
