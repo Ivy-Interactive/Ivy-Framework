@@ -230,10 +230,11 @@ All values captured are integers; either 1 or 0.
 
 ## Examples
 
-This is a set of few examples showing how to use `BoolInput`s in several situations.
-
-### Round trip example
-
+<Details>
+<Summary>
+Round trip example
+</Summary>
+<Body>
 The following example shows a demo of how `Switch` variant can be used in a possible situation where it makes sense
 to do so.
 
@@ -269,3 +270,6 @@ public class SimpleFlightBooking : ViewBase
     }
 }
 ```
+
+</Body>
+</Details>
