@@ -200,8 +200,11 @@ public class NavigationSheetContent : ViewBase
 
 ## Examples
 
-### Conditional Rendering
-
+<Details>
+<Summary>
+Conditional Rendering
+</Summary>
+<Body>
 The following demonstrates how to conditionally render different content within a sheet based on state or user actions.
 
 ```csharp demo-tabs
@@ -269,3 +272,6 @@ public class ConditionalSheetExample : ViewBase
     }
 }
 ```
+
+</Body>
+</Details>
