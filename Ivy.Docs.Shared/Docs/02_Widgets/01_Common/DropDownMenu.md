@@ -227,7 +227,11 @@ new DropDownMenu(@evt => {
 
 ## Examples
 
-### Complex using
+<Details>
+<Summary>
+Complex using
+</Summary>
+<Body>
 
 Here's a comprehensive example combining multiple features:
 
@@ -271,3 +275,6 @@ Layout.Horizontal().Gap(2).Center()
         MenuItem.Default("Support").Tag("support"))
         .Header(Text.Muted("Application Settings"))
 ```
+
+</Body>
+</Details>
