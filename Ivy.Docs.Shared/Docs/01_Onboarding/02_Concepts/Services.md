@@ -148,7 +148,11 @@ public class LoggingServiceMiddleware : IServiceMiddleware
 
 ## Examples
 
-### Authentication Service
+<Details>
+<Summary>
+Authentication Service
+</Summary>
+<Body>
 
 ```csharp
 public interface IAuthService
@@ -197,7 +201,14 @@ public class AuthService : IAuthService
 }
 ```
 
-### Caching Service
+</Body>
+</Details>
+
+<Details>
+<Summary>
+Caching Service
+</Summary>
+<Body>
 
 ```csharp
 public interface ICacheService
@@ -267,3 +278,6 @@ public class CacheService : ICacheService
     }
 }
 ```
+
+</Body>
+</Details>
