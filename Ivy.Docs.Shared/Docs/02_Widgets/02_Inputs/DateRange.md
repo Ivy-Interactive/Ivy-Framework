@@ -45,7 +45,7 @@ The `DateRangeInput`can be customized with various states:
 To render a date time range in the disabled state the `Disabled` function
 should be used.
 
-```csharp demo-below 
+```csharp demo-below
 public class DisabledDateRange : ViewBase
 {   
     public override object? Build()
@@ -62,7 +62,7 @@ public class DisabledDateRange : ViewBase
 To render a `DateTimeRange` in the invalid state the `Invalid` function
 should be used.
 
-```csharp demo-below 
+```csharp demo-below
 public class InvalidDateRangeDemo : ViewBase 
 {    
     public override object? Build()
@@ -79,7 +79,7 @@ public class InvalidDateRangeDemo : ViewBase
 Sometimes it is necessary to render a date time with possible nullable from and to dates.
 The following demo shows how this can be done.
 
-```csharp demo-below 
+```csharp demo-below
 public class NullableDateRangeDemo : ViewBase
 {
     public override object? Build()
@@ -101,7 +101,7 @@ public class NullableDateRangeDemo : ViewBase
 
 A friendly placeholder text can be used to give users a clue about what the data range depicts.
 
-```csharp demo-below 
+```csharp demo-below
 public class DateRangePlaceHolderDemo : ViewBase 
 {   
     public override object? Build()
@@ -118,7 +118,7 @@ public class DateRangePlaceHolderDemo : ViewBase
 
 To change the format of selected dates the `Format` function needs to be used.
 
-```csharp demo-below 
+```csharp demo-below
 public class FormatDateRangeDemo : ViewBase
 {
     public override object? Build()
@@ -136,15 +136,19 @@ public class FormatDateRangeDemo : ViewBase
 
 ## Examples
 
-### Complete Example with All Features
+<Details>
+<Summary>
+Complete Example with All Features
+</Summary>
+<Body>
 
-```csharp demo-tabs 
+```csharp demo-tabs
 public class DateRangeRealisticDemo : ViewBase
 {
     public override object? Build()
     {
       var leaveRangeState = this.UseState(() =>
-            (from: DateOnly.FromDateTime(DateTime.Today.AddDays(-7)), 
+            (from: DateOnly.FromDateTime(DateTime.Today.AddDays(-7)),
             to: DateOnly.FromDateTime(DateTime.Today)));
 
         var toDateTime = new DateTime(leaveRangeState.Value.Item2.Year,
@@ -172,8 +176,11 @@ public class DateRangeRealisticDemo : ViewBase
             invalidLeave.Set(string.Empty);
                             
         return Layout.Vertical()
-                | H3("Select Leave Range")
+                | P("Select Leave Range")
                 | leaveRangeState.ToDateRangeInput().Invalid(invalidLeave.Value);
     }    
-}    
+}
 ```
+
+</Body>
+</Details>
