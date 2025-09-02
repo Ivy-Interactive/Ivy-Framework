@@ -228,8 +228,11 @@ For more colors, look at the [Ivy Colors page](../../03_ApiReference/IvyShared/C
 
 ## Examples
 
-### Status Dashboard
-
+<Details>
+<Summary>
+Status Dashboard
+</Summary>
+<Body>
 Create a dashboard with status indicators using different colors and styles. This example demonstrates how to use boxes for displaying system status information with appropriate visual cues.
 
 ```csharp demo-tabs
@@ -259,8 +262,14 @@ public class StatusDashboardView : ViewBase
 }
 ```
 
-### Card Layout
+</Body>
+</Details>
 
+<Details>
+<Summary>
+Card Layout
+</Summary>
+<Body>
 Build card-based layouts with consistent styling for displaying structured information. This example shows how to create professional-looking cards with proper spacing, borders, and content organization.
 
 ```csharp demo-tabs
@@ -275,7 +284,7 @@ public class CardLayoutView : ViewBase
                 .BorderThickness(1)
                 .Padding(12)
                 .Content(
-                    Text.H3("User Profile"),
+                    Text.Label("User Profile"),
                     Text.P("John Doe"),
                     Text.P("Software Developer")
                 )
@@ -285,10 +294,13 @@ public class CardLayoutView : ViewBase
                 .BorderThickness(1)
                 .Padding(12)
                 .Content(
-                    Text.H3("Statistics"),
+                    Text.Label("Statistics"),
                     Text.P("Projects: 15"),
                     Text.P("Experience: 5 years")
                 );
     }
 }
 ```
+
+</Body>
+</Details>
