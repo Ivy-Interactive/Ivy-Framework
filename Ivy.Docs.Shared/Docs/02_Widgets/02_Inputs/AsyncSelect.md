@@ -373,8 +373,11 @@ AsyncSelectInput automatically handles loading states and provides a smooth user
 
 ## Examples
 
-### Real-world Search Scenario
-
+<Details>
+<Summary>
+Real-world Search Scenario
+</Summary>
+<Body>
 A comprehensive example showing AsyncSelectInput for user search functionality:
 
 ```csharp demo-tabs
@@ -454,6 +457,9 @@ public class UserSearchDemo : ViewBase
     }
 }
 ```
+
+</Body>
+</Details>
 
 <Callout Type="tip">
 Use AsyncSelectInput for foreign key relationships, large datasets, and when you need to provide search functionality. It's perfect for scenarios where the full list of options would be too large to load upfront.
