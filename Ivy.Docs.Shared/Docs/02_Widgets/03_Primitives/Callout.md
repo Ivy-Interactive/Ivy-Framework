@@ -206,8 +206,11 @@ public class FormCalloutView : ViewBase
 
 ## Examples
 
-### Dashboard Notifications
-
+<Details>
+<Summary>
+Dashboard Notifications
+</Summary>
+<Body>
 Create informative dashboard notifications with callouts:
 
 ```csharp demo-tabs
@@ -226,8 +229,14 @@ public class DashboardCalloutView : ViewBase
 }
 ```
 
-### Custom Icons
+</Body>
+</Details>
 
+<Details>
+<Summary>
+Custom Icons
+</Summary>
+<Body>
 Override the default variant icons with custom ones for more specific messaging:
 
 ```csharp demo-tabs
@@ -245,3 +254,6 @@ public class CustomIconCalloutView : ViewBase
     }
 }
 ```
+
+</Body>
+</Details>
