@@ -33,7 +33,11 @@ public class BasicAreaChart : ViewBase
 
 ## Examples
 
-### COVID-19 Cases and Deaths in numbers
+<Details>
+<Summary>
+COVID-19 Cases and Deaths in numbers
+</Summary>
+<Body>
 
 ```csharp demo-below
     
@@ -66,8 +70,14 @@ public class Covid19Demo : ViewBase
 }
 ```
 
-### Migrations to Europe
+</Body>
+</Details>
 
+<Details>
+<Summary>
+Migrations to Europe
+</Summary>
+<Body>
 In the previous example, solid colors have been used. However, the colors can be transparent
 and the opacity can be controlled using the function `FillOpacity`. In the following example
 `Fill` (Used to fill an area with a color) and `FillOpacity` are used to show area charts
@@ -121,3 +131,6 @@ public class ImmigrationToEurope : ViewBase
     }
 }
 ```
+
+</Body>
+</Details>
