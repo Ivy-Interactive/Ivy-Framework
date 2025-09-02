@@ -141,8 +141,11 @@ public class FormSpacerView : ViewBase
 
 ## Examples
 
-### Dashboard Grid with Spacing
-
+<Details>
+<Summary>
+Dashboard Grid with Spacing
+</Summary>
+<Body>
 Create responsive dashboard layouts with proper spacing:
 
 ```csharp demo-tabs
@@ -185,3 +188,6 @@ public class DashboardSpacerView : ViewBase
     }
 }
 ```
+
+</Body>
+</Details>
