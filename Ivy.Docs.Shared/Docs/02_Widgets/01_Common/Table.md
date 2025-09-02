@@ -304,10 +304,10 @@ public class TableIntegrationExample : ViewBase
             | new Card(
                 Layout.Vertical()
                     | products.Value.ToTable().Width(Size.Full())
-                    | Layout.Horizontal().Gap(2)
+                    | (Layout.Horizontal().Gap(2)
                         | new Button("Add Product", addProduct).Variant(ButtonVariant.Secondary)
-                        | new Button("Clear All", clearProducts).Variant(ButtonVariant.Destructive)
-                        | Text.Block($"Total Products: {products.Value.Length}")
+                        | new Button("Clear All", clearProducts).Variant(ButtonVariant.Destructive))
+                    | Text.Block($"Total Products: {products.Value.Length}")
             ).Title("Product List").Width(Size.Full());
     }
 }
