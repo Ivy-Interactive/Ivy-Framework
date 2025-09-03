@@ -23,6 +23,44 @@ export const DocumentTools: React.FC<DocumentToolsProps> = ({
 }) => {
   const { toast } = useToast();
 
+  // Function to expand all data-state="closed" elements
+  const expandDetailsElements = async (): Promise<void> => {
+    if (!articleRef.current) return;
+
+    // Find all elements with data-state="closed"
+    const closedElements = articleRef.current.querySelectorAll(
+      '[data-state="closed"]'
+    );
+
+    if (closedElements.length === 0) return;
+
+    // Change data-state from "closed" to "open" and try to click to expand
+    for (const element of Array.from(closedElements)) {
+      try {
+        // First, change the data-state attribute
+        element.setAttribute('data-state', 'open');
+
+        // Then try to click the element to trigger expansion
+        if (element instanceof HTMLElement) {
+          element.click();
+        }
+
+        // Also try clicking any child elements that might be the actual trigger
+        const clickableChild = element.querySelector(
+          '[role="button"], button, .trigger, .toggle'
+        );
+        if (clickableChild instanceof HTMLElement) {
+          clickableChild.click();
+        }
+      } catch (error) {
+        console.warn('Failed to expand data-state element:', error);
+      }
+    }
+
+    // Wait for content to load
+    await new Promise(resolve => setTimeout(resolve, 200));
+  };
+
   // Function to load all tabs by clicking through them
   const loadAllTabs = async (): Promise<void> => {
     if (!articleRef.current) return;
@@ -59,11 +97,13 @@ export const DocumentTools: React.FC<DocumentToolsProps> = ({
       // Show loading state
       toast({
         title: 'Loading Content...',
-        description:
-          'Loading all tabs and extracting API sections from page...',
+        description: 'Expanding sections and loading all tabs...',
       });
 
-      // First, click through all unloaded tabs to ensure content is loaded
+      // First, expand all data-state="closed" elements
+      await expandDetailsElements();
+
+      // Then, click through all unloaded tabs to ensure content is loaded
       await loadAllTabs();
 
       // Extract API sections from the rendered page
@@ -533,10 +573,13 @@ export const DocumentTools: React.FC<DocumentToolsProps> = ({
       // Show loading state
       toast({
         title: 'Preparing Download...',
-        description: 'Loading all tabs and extracting API sections...',
+        description: 'Expanding sections and loading all tabs...',
       });
 
-      // First, click through all unloaded tabs to ensure content is loaded
+      // First, expand all data-state="closed" elements
+      await expandDetailsElements();
+
+      // Then, click through all unloaded tabs to ensure content is loaded
       await loadAllTabs();
 
       // Extract the same content that gets copied
