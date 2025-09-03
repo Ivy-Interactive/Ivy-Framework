@@ -16,13 +16,12 @@ public class AsyncSelectInputApp : SampleBase
         async Task<Option<Guid?>[]> QueryCategories(string query)
         {
             await using var db = factory.CreateDbContext();
-            return (await db.Categories
+            return [.. (await db.Categories
                     .Where(e => e.Name.Contains(query))
                     .Select(e => new { e.Id, e.Name })
                     .Take(50)
                     .ToArrayAsync())
-                .Select(e => new Option<Guid?>(e.Name, e.Id))
-                .ToArray();
+                .Select(e => new Option<Guid?>(e.Name, e.Id))];
         }
 
         async Task<Option<Guid?>?> LookupCategory(Guid? id)
