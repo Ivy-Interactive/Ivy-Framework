@@ -57,7 +57,6 @@ public class AsyncSelectInputView<TValue> : ViewBase, IAnyAsyncSelectInputBase, 
     /// <param name="lookup">Delegate for looking up option by value.</param>
     /// <param name="placeholder">Optional placeholder text.</param>
     /// <param name="disabled">Whether the input should be disabled initially.</param>
-    [OverloadResolutionPriority(1)]
     public AsyncSelectInputView(IAnyState state, AsyncSelectQueryDelegate<TValue> query, AsyncSelectLookupDelegate<TValue> lookup, string? placeholder = null, bool disabled = false)
         : this(query, lookup, placeholder, disabled)
     {
@@ -75,6 +74,7 @@ public class AsyncSelectInputView<TValue> : ViewBase, IAnyAsyncSelectInputBase, 
     /// <param name="lookup">Delegate for looking up option by value.</param>
     /// <param name="placeholder">Optional placeholder text.</param>
     /// <param name="disabled">Whether the input should be disabled initially.</param>
+    [OverloadResolutionPriority(1)]
     public AsyncSelectInputView(TValue value, Func<Event<IInput<TValue>, TValue>, ValueTask>? onChange, AsyncSelectQueryDelegate<TValue> query, AsyncSelectLookupDelegate<TValue> lookup, string? placeholder = null, bool disabled = false)
         : this(query, lookup, placeholder, disabled)
     {
