@@ -17,9 +17,9 @@ public class LinksApp : SampleBase
             return args.ToDetails();
         }
 
-        return new Button("Go").HandleClick(() =>
+        return new Button("Go to Hidden App").HandleClick(() =>
         {
-            navigator.Navigate(typeof(LinksApp), new LinksAppArgs("Niels", 123));
+            navigator.Navigate("app://hidden/hidden-args-app", new Hidden.HiddenArgsAppArgs("Niels", 123));
         });
 
     }
