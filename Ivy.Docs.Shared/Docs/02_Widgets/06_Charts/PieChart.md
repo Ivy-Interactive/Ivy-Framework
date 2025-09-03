@@ -82,7 +82,7 @@ public class BrowserStatsPie : ViewBase
         var yearInput = year.ToSelectInput(years.ToOptions())
                                    .Width(15);
         return Layout.Vertical()
-            | H3("Browser Market share")
+            | Label("Browser Market share")
             | Text.Html("<i>Select the year to see shares of the browsers.</i>")
             | Text.Large("Select Year")
             | yearInput
@@ -104,7 +104,7 @@ can be seen in this example, these values can be altered to create a custom donu
 `Tooltip` makes sure that the labels show up on mouse hover. The `Animated` function makes a nice animation
 when users hover on that specific part of the pie chart.
 
-## Drill down chart
+### Drill down chart
 
 The following example shows how these combinations of charts can be used in a realistic example
 for showing how populated some countries are.
