@@ -127,9 +127,9 @@ public class SidebarMenuExample : ViewBase
                 | new TextInput(placeholder: "Search...", variant: TextInputs.Search),
             sidebarFooter: Layout.Horizontal().Gap(2)
                 | new Avatar("JD").Size(20)
-                | Layout.Vertical()
-                    | Text.Small("John Doe").NoWrap()
-                    | Text.Small("john@example.com").Color(Colors.Gray)
+                | (Layout.Vertical()
+                    | Text.Small("John Doe")
+                    | Text.Small("john@example.com").Color(Colors.Gray))
         );
     }
 }
