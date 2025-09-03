@@ -40,7 +40,7 @@ public class SidebarWithHeaderFooterExample : ViewBase
         return new SidebarLayout(
             mainContent: new Card(
                 Layout.Vertical().Gap(2)
-                    | Text.H2("Welcome to the App")
+                    | Text.Large("Welcome to the App")
                     | Text.P("This is the main content area with a sidebar navigation.")
                     | new Button("Action Button")
                         .Variant(ButtonVariant.Primary)
@@ -52,7 +52,7 @@ public class SidebarWithHeaderFooterExample : ViewBase
                 | new Button("Settings").Variant(ButtonVariant.Ghost)
                 | new Button("Help").Variant(ButtonVariant.Ghost),
             sidebarHeader: Layout.Vertical().Gap(1)
-                | Text.H3("Navigation")
+                | Text.Lead("Navigation")
                 | new Separator(),
             sidebarFooter: Layout.Vertical().Gap(1)
                 | new Separator()
@@ -125,7 +125,7 @@ public class SidebarMenuExample : ViewBase
             mainContent: RenderContent(),
             sidebarContent: sidebarMenu,
             sidebarHeader: Layout.Vertical().Gap(2)
-                | Text.H3("My App")
+                | Text.Lead("My App")
                 | new TextInput(placeholder: "Search...", variant: TextInputs.Search),
             sidebarFooter: Layout.Horizontal().Gap(2)
                 | new Avatar("JD").Size(20)
@@ -156,7 +156,7 @@ public class MainAppSidebarExample : ViewBase
             mainContent: Layout.Vertical().Gap(4)
                 | new Card(
                     Layout.Vertical().Gap(2)
-                        | Text.H1("Main Application")
+                        | Text.Large("Main Application")
                         | Text.P("This sidebar is configured as the main app sidebar with toggle functionality.")
                         | new Button("Test Action").HandleClick(_ => client.Toast("Action performed!"))
                 ).Title("Welcome")
@@ -169,7 +169,7 @@ public class MainAppSidebarExample : ViewBase
                 | new Button("Team").Variant(ButtonVariant.Ghost).HandleClick(_ => client.Toast("Team"))
                 | new Button("Calendar").Variant(ButtonVariant.Ghost).HandleClick(_ => client.Toast("Calendar")),
             sidebarHeader: Layout.Vertical().Gap(2)
-                | Text.H3("Workspace")
+                | Text.Lead("Workspace")
                 | new TextInput(placeholder: "Search...", variant: TextInputs.Search)
         ); 
     }
@@ -237,11 +237,11 @@ public class SidebarMenuAdvancedExample : ViewBase
         return new SidebarLayout(
             mainContent: new Card(
                 Layout.Vertical().Gap(2)
-                    | Text.H2("Documentation")
+                    | Text.Large("Documentation")
                     | Text.P($"Currently viewing: {(string.IsNullOrEmpty(selectedItem.Value) ? "None" : selectedItem.Value)}")
             ).Title("Content Area"),
             sidebarContent: menu,
-            sidebarHeader: Text.H3("Documentation Menu")
+            sidebarHeader: Text.Lead("Documentation Menu")
         );
     }
 }
