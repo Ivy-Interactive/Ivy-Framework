@@ -52,10 +52,8 @@ public class SidebarWithHeaderFooterExample : ViewBase
                 | new Button("Settings").Variant(ButtonVariant.Ghost)
                 | new Button("Help").Variant(ButtonVariant.Ghost),
             sidebarHeader: Layout.Vertical().Gap(1)
-                | Text.Lead("Navigation")
-                | new Separator(),
+                | Text.Lead("Navigation"),
             sidebarFooter: Layout.Vertical().Gap(1)
-                | new Separator()
                 | Text.Small("Version 1.0.0").Color(Colors.Gray)
         );
     }
