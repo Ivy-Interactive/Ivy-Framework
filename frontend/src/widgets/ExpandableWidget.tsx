@@ -36,6 +36,7 @@ export const ExpandableWidget: React.FC<ExpandableWidgetProps> = ({
       onOpenChange={setIsOpen}
       className="w-full rounded-md border border-border p-2 shadow-sm data-[disabled=true]:cursor-not-allowed data-[disabled=true]:opacity-50"
       data-disabled={disabled}
+      role="details"
     >
       <div className="flex justify-between items-center space-x-4">
         <div className="flex-1 ml-2 min-w-0">{slots?.Header}</div>
