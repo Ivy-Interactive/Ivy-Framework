@@ -200,9 +200,10 @@ public class AsyncSelectInputView<TValue> : ViewBase, IAnyAsyncSelectInputBase, 
             displayValue.Set((string?)null!);
         }, [EffectTrigger.AfterInit(), refreshToken]);
 
-        void OnSelect(Event<AsyncSelectInput> _)
+        ValueTask HandleSelect(Event<AsyncSelectInput> _)
         {
             open.Set(true);
+            return ValueTask.CompletedTask;
         }
 
         void OnClose(Event<Sheet> _)
@@ -217,7 +218,7 @@ public class AsyncSelectInputView<TValue> : ViewBase, IAnyAsyncSelectInputBase, 
                 Disabled = Disabled,
                 Invalid = Invalid,
                 DisplayValue = displayValue.Value,
-                OnSelect = OnSelect,
+                OnSelect = HandleSelect,
                 Loading = loading.Value
             },
             open.Value ? new Sheet(
@@ -367,5 +368,5 @@ internal record AsyncSelectInput : WidgetBase<AsyncSelectInput>
     [Prop] public bool Loading { get; init; }
 
     /// <summary>Gets the event handler called when the user triggers option selection.</summary>
-    [Event] public Action<Event<AsyncSelectInput>>? OnSelect { get; init; }
+    [Event] public Func<Event<AsyncSelectInput>, ValueTask>? OnSelect { get; init; }
 }
