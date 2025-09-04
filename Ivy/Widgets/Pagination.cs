@@ -6,9 +6,7 @@ namespace Ivy;
 /// <summary>
 /// A pagination control that allows users to navigate through pages of content.
 /// It displays page numbers, next/previous buttons, and handles user interactions
-/// to change the current page. The control can be customized with properties such
-/// as the current page, total number of pages, and the number of sibling and boundary
-/// pages to display. It also supports disabling the control to prevent user interaction.
+/// to change the current page.
 /// </summary>
 public record Pagination : WidgetBase<Pagination>
 {
@@ -70,10 +68,9 @@ public record Pagination : WidgetBase<Pagination>
     [Prop] public int? Boundaries { get; set; }
 
     /// <summary>
-    /// Gets or sets whether the pagination widget is disabled and cannot
-    /// be interacted with. This property controls the interactive state
-    /// of the widget, preventing users from changing the current page
-    /// when true.
+    /// Gets or sets whether the pagination widget is disabled and cannot be 
+    /// interacted with. This property controls the interactive state of the 
+    /// widget, preventing users from changing the current page when true.
     /// </summary>
     [Prop] public bool Disabled { get; set; } = false;
 
@@ -82,21 +79,14 @@ public record Pagination : WidgetBase<Pagination>
 }
 
 /// <summary>
-/// Provides extension methods for the Pagination widget that enable a fluent API
-/// for configuring pagination behavior and appearance. These methods allow you
-/// to easily set properties and configure the widget for optimal presentation
-/// and functionality.
+/// Provides extension methods for the Pagination widget.
 /// </summary>
 public static class PaginationExtensions
 {
     /// <summary>
-    /// Sets the number of siblings of the pagination widget.
-    /// 
-    /// The siblings control how many page numbers are displayed
-    /// adjacent to the current page.
+    /// Sets the Siblings property of the pagination widget.
     /// </summary>
-    /// <param name="widget">The Pagination widget to configure.</param>
-    /// <param name="siblings">The number of siblings. Defaults to 1.</param>
+    /// <param name="siblings">The number of siblings to show.</param>
     /// <returns>The Pagination instance for method chaining.</returns>
     public static Pagination Siblings(this Pagination widget, int siblings)
     {
@@ -105,13 +95,9 @@ public static class PaginationExtensions
     }
 
     /// <summary>
-    /// Sets the number of boundaries of the pagination widget.
-    /// 
-    /// The boundaries control how many page numbers are displayed
-    /// at the beginning and end of the pagination control.
+    /// Sets the Boundaries property of the pagination widget.
     /// </summary>
-    /// <param name="widget">The Pagination widget to configure.</param>
-    /// <param name="boundaries">The number of boundaries. Defaults to 1.</param>
+    /// <param name="boundaries">The number of boundaries to show.</param>
     /// <returns>The Pagination instance for method chaining.</returns>
     public static Pagination Boundaries(this Pagination widget, int boundaries)
     {
@@ -121,15 +107,11 @@ public static class PaginationExtensions
 
     /// <summary>
     /// Sets the disabled state of the pagination widget.
-    /// This method allows you to control whether the widget can be
-    /// interacted with, enabling you to lock the pagination in its
-    /// current state based on application logic or user permissions.
     /// 
     /// When disabled, the page cannot be changed and buttons will be
-    /// greyed out, maintaining its current state until re-enabled.
+    /// greyed out.
     /// </summary>
-    /// <param name="widget">The Pagination widget to configure.</param>
-    /// <param name="disabled">Whether the widget should be disabled (true) or enabled (false).</param>
+    /// <param name="disabled">Whether the widget should be disabled.</param>
     /// <returns>The Pagination instance for method chaining.</returns>
     public static Pagination Disabled(this Pagination widget, bool disabled)
     {
