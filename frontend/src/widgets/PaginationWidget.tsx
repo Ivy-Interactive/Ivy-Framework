@@ -82,11 +82,11 @@ export const PaginationWidget: React.FC<PaginationWidgetProps> = ({
                         disabled ? 'pointer-events-none opacity-50' : undefined
                       }
                       onClick={
-                        p - 1 == page
+                        p - 1 === page
                           ? undefined
                           : () => eventHandler('OnChange', id, [p - 1])
                       }
-                      isActive={p - 1 == page}
+                      isActive={p - 1 === page}
                     >
                       {p - 1}
                     </PaginationLink>
@@ -103,11 +103,11 @@ export const PaginationWidget: React.FC<PaginationWidgetProps> = ({
                     disabled ? 'pointer-events-none opacity-50' : undefined
                   }
                   onClick={
-                    p == page
+                    p === page
                       ? undefined
                       : () => eventHandler('OnChange', id, [p])
                   }
-                  isActive={p == page}
+                  isActive={p === page}
                 >
                   {p}
                 </PaginationLink>
