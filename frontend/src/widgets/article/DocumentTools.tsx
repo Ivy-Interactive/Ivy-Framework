@@ -58,31 +58,35 @@ export const DocumentTools: React.FC<DocumentToolsProps> = ({
   const expandDetailsElements = async (): Promise<void> => {
     if (!articleRef.current) return;
 
-    // Find all elements with role="details" (details elements)
     const detailsElements =
       articleRef.current.querySelectorAll('[role="details"]');
-
     if (detailsElements.length === 0) return;
 
-    // For each details element, check if it's closed and expand it
     for (const element of Array.from(detailsElements)) {
       try {
-        // Check if this element has data-state="closed"
-        if (element.getAttribute('data-state') === 'closed') {
-          // Change data-state from "closed" to "open"
-          element.setAttribute('data-state', 'open');
+        // Check if element is closed
+        const isClosed =
+          element.getAttribute('data-state') === 'closed' ||
+          element.getAttribute('aria-expanded') === 'false';
 
-          // Then try to click the element to trigger expansion
-          if (element instanceof HTMLElement) {
-            element.click();
-          }
+        if (isClosed) {
+          // Dispatch expand event
+          const expandEvent = new CustomEvent('expand', {
+            bubbles: true,
+            cancelable: true,
+            detail: { element },
+          });
+          element.dispatchEvent(expandEvent);
 
-          // Also try clicking any child elements that might be the actual trigger
-          const clickableChild = element.querySelector(
-            '[role="button"], button, .trigger, .toggle'
-          );
-          if (clickableChild instanceof HTMLElement) {
-            clickableChild.click();
+          // If not cancelled, try to click trigger
+          if (!expandEvent.defaultPrevented) {
+            const trigger =
+              element.querySelector(
+                '[role="button"], button, .trigger, summary'
+              ) || element;
+            if (trigger instanceof HTMLElement) {
+              trigger.click();
+            }
           }
         }
       } catch (error) {
