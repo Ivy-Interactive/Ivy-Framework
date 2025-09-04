@@ -20,11 +20,6 @@ public static class BuilderFactoryExtensions
         return new TextBuilder<TModel>();
     }
 
-    public static IBuilder<TModel> Number<TModel>(this IBuilderFactory<TModel> factory)
-    {
-        return new NumberBuilder<TModel>();
-    }
-
     public static IBuilder<TModel> Link<TModel>(this IBuilderFactory<TModel> factory, string? url = null, string? label = null)
     {
         return new LinkBuilder<TModel>(url, label);
