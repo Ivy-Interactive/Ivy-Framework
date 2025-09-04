@@ -57,6 +57,7 @@ export const widgetMap = {
   'Ivy.ChatLoading': Widgets.ChatLoadingWidget,
   'Ivy.ChatStatus': Widgets.ChatStatusWidget,
   'Ivy.DropDownMenu': Widgets.DropDownMenuWidget,
+  'Ivy.Pagination': Widgets.PaginationWidget,
 
   // Layouts
   'Ivy.StackLayout': Layouts.StackLayoutWidget,
