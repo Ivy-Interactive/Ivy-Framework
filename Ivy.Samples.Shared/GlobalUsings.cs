@@ -1,9 +1,7 @@
 ﻿global using System.Collections.Immutable;
 global using System.Reactive.Linq;
-global using Ivy.Alerts;
 global using Ivy.Auth;
 global using Ivy.Apps;
-global using Ivy.Builders;
 global using Ivy.Client;
 global using Ivy.Core;
 global using Ivy.Core.Hooks;

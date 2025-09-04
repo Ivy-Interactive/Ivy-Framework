@@ -1,6 +1,4 @@
-using Ivy.Views;
-
-namespace Ivy.Builders;
+namespace Ivy.Views.Builders;
 
 public class TextBuilder<TModel> : IBuilder<TModel>
 {

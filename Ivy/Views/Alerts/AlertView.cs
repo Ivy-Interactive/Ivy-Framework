@@ -1,9 +1,7 @@
 using Ivy.Core;
 using Ivy.Core.Hooks;
-using Ivy.Helpers;
-using Ivy.Views;
 
-namespace Ivy.Alerts;
+namespace Ivy.Views.Alerts;
 
 public class AlertView(IState<AlertResult> alertResult, IState<bool> isOpen, AlertOptions options) : ViewBase
 {

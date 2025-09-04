@@ -1,4 +1,6 @@
-namespace Ivy.Alerts;
+using Ivy.Widgets;
+
+namespace Ivy.Views.Alerts;
 
 public class AlertOptions
 {

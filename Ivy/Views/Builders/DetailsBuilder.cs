@@ -3,7 +3,7 @@ using System.Reflection;
 using Ivy.Core;
 using Ivy.Core.Hooks;
 
-namespace Ivy.Builders;
+namespace Ivy.Views.Builders;
 
 public class DetailsBuilder<TModel> : ViewBase, IStateless
 {

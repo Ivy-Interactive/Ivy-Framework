@@ -1,4 +1,4 @@
-namespace Ivy.Builders;
+namespace Ivy.Views.Builders;
 
 public interface IBuilder<in TModel>
 {

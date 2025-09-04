@@ -1,5 +1,5 @@
 using System.Linq.Expressions;
-using Ivy.Builders;
+using Ivy.Views.Builders;
 
 namespace Ivy.Views.Tables;
 

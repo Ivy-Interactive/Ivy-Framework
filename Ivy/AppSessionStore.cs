@@ -1,6 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using Ivy.Apps;
-using Ivy.Tui;
+using Ivy.Helpers.Tui;
 
 namespace Ivy;
 

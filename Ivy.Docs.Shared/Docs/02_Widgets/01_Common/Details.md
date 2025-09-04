@@ -105,4 +105,4 @@ UseState(() => new { Name = "John Doe", Age = 30 })
     .ToDetails()
 ```
 
-<WidgetDocs Type="Ivy.Details" ExtensionTypes="Ivy.Builders.DetailsBuilderExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Builders/DetailsBuilder.cs"/>
+<WidgetDocs Type="Ivy.Details" ExtensionTypes="Ivy.Views.Builders.DetailsBuilderExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Views/Builders/DetailsBuilder.cs"/>

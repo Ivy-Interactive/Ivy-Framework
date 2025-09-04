@@ -1,4 +1,4 @@
-namespace Ivy.Builders;
+namespace Ivy.Views.Builders;
 
 public class LinkBuilder<TModel>(string? url = null, string? label = null) : IBuilder<TModel>
 {

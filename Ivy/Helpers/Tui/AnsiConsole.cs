@@ -1,6 +1,6 @@
 using System.Runtime.InteropServices;
 
-namespace Ivy.Tui
+namespace Ivy.Helpers.Tui
 {
     public static class AnsiConsole
     {

@@ -2,7 +2,7 @@
 using Ivy.Core;
 using Ivy.Views.Forms;
 
-namespace Ivy.Alerts;
+namespace Ivy.Views.Alerts;
 
 public static class AlertExtensions
 {

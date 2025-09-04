@@ -1,8 +1,9 @@
 using Ivy.Client;
 using Ivy.Core;
 using Ivy.Core.Hooks;
+using Ivy.Views.Alerts;
 
-namespace Ivy.Alerts;
+namespace Ivy.Views.Alerts;
 
 public delegate void ShowAlertDelegate(string message, Action<AlertResult> callback, string? title = null, AlertButtonSet buttonSet = AlertButtonSet.OkCancel);
 
