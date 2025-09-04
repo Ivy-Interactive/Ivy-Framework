@@ -11,6 +11,8 @@ global using Ivy.Views;
 global using Ivy.Views.Forms;
 global using Ivy.Shared;
 global using Ivy.Charts;
+global using Ivy.Views.Alerts;
+global using Ivy.Views.Builders;
 global using Ivy.Views.Charts;
 global using Ivy.Widgets.Inputs;
 global using Microsoft.Extensions.DependencyInjection;
