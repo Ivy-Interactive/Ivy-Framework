@@ -46,7 +46,18 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
   const convertFileToUploadFile = useCallback(
     async (file: File): Promise<FileInput> => {
       const arrayBuffer = await file.arrayBuffer();
-      const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+
+      // Convert to base64 using modern FileReader API (avoids legacy btoa)
+      const base64 = await new Promise<string>(resolve => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const result = reader.result as string;
+          // Remove the data URL prefix (e.g., "data:image/png;base64,")
+          const base64Data = result.split(',')[1];
+          resolve(base64Data);
+        };
+        reader.readAsDataURL(new Blob([arrayBuffer]));
+      });
 
       return {
         name: file.name,
