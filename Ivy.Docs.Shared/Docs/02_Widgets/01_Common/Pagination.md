@@ -28,6 +28,8 @@ public class BasicPaginationApp : ViewBase
 
 ## Siblings
 
+Siblings control the number of pages visible adjacent to the current page.
+
 ```csharp demo-tabs 
 public class SiblingsPaginationApp : ViewBase
 {
@@ -35,16 +37,16 @@ public class SiblingsPaginationApp : ViewBase
         var page = UseState(5);
 
         return Layout.Vertical()
-            | new Pagination(page.Value, 20, newPage => page.Set(newPage.Value)).Siblings(0)
             | new Pagination(page.Value, 20, newPage => page.Set(newPage.Value)).Siblings(1)
-            | new Pagination(page.Value, 20, newPage => page.Set(newPage.Value)).Siblings(2)
-            | new Pagination(page.Value, 20, newPage => page.Set(newPage.Value)).Siblings(3);
+            | new Pagination(page.Value, 20, newPage => page.Set(newPage.Value)).Siblings(2);
     }
 }
 ```
 
 ## Boundaries
 
+Boundaries control the number of pages visible at the start and end of the range of pages.
+
 ```csharp demo-tabs 
 public class SiblingsPaginationApp : ViewBase
 {
@@ -52,21 +54,8 @@ public class SiblingsPaginationApp : ViewBase
         var page = UseState(5);
 
         return Layout.Vertical()
-            | new Pagination(page.Value, 20, newPage => page.Set(newPage.Value)).Boundaries(0)
             | new Pagination(page.Value, 20, newPage => page.Set(newPage.Value)).Boundaries(1)
-            | new Pagination(page.Value, 20, newPage => page.Set(newPage.Value)).Boundaries(2)
-            | new Pagination(page.Value, 20, newPage => page.Set(newPage.Value)).Boundaries(3);
-    }
-}
-```
-
-## Disabled
-
-```csharp demo-tabs
-public class DisabledPaginationApp : ViewBase
-{
-    public override object? Build() {
-        return new Pagination(5, 10, _ => {}, true);
+            | new Pagination(page.Value, 20, newPage => page.Set(newPage.Value)).Boundaries(2);
     }
 }
 ```
