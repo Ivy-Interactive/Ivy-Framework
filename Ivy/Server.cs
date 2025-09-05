@@ -229,7 +229,6 @@ public class Server
     /// Configures the server to use a custom theme configuration with a builder pattern.
     /// </summary>
     /// <param name="configureTheme">An action delegate to configure the theme properties.</param>
->
     public Server UseTheme(Action<Theme> configureTheme)
     {
         var theme = new Theme();
