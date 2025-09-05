@@ -80,6 +80,9 @@ public abstract record FileInputBase : WidgetBase<FileInputBase>, IAnyFileInput
     /// <summary>Gets or sets the maximum number of files that can be selected (only applicable when Multiple is true).</summary>
     [Prop] public int? MaxFiles { get; set; }
 
+    /// <summary>Gets or sets the upload URL for automatic file uploads.</summary>
+    [Prop] public string? UploadUrl { get; set; }
+
     /// <summary>Gets or sets the event handler called when the input loses focus.</summary>
     [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
 
@@ -271,6 +274,21 @@ public static class FileInputExtensions
         return input;
     }
 
+    /// <summary>
+    /// Creates a file input that automatically uploads files to the specified upload URL.
+    /// </summary>
+    /// <param name="state">The state to bind the file input to.</param>
+    /// <param name="uploadUrl">The upload URL state from UseUpload hook.</param>
+    /// <param name="placeholder">Optional placeholder text displayed when no files are selected.</param>
+    /// <param name="disabled">Whether the input should be disabled initially.</param>
+    /// <param name="variant">The visual variant of the file input.</param>
+    public static FileInputBase ToFileInput(this IAnyState state, IState<string?> uploadUrl, string? placeholder = null, bool disabled = false, FileInputs variant = FileInputs.Drop)
+    {
+        var input = state.ToFileInput(placeholder, disabled, variant);
+        input = input with { UploadUrl = uploadUrl.Value };
+        return input;
+    }
+
     /// <summary>Sets the placeholder text for the file input.</summary>
     /// <param name="widget">The file input to configure.</param>
     /// <param name="title">The placeholder text to display when no files are selected.</param>
@@ -323,6 +341,14 @@ public static class FileInputExtensions
             throw new InvalidOperationException("MaxFiles can only be set on a multi-file input (IEnumerable<FileInput>). Use a collection state type for multiple files.");
         }
         return widget with { MaxFiles = maxFiles };
+    }
+
+    /// <summary>Sets the upload URL for automatic file uploads.</summary>
+    /// <param name="widget">The file input to configure.</param>
+    /// <param name="uploadUrl">The upload URL where files should be automatically uploaded.</param>
+    public static FileInputBase UploadUrl(this FileInputBase widget, string? uploadUrl)
+    {
+        return widget with { UploadUrl = uploadUrl };
     }
 
     /// <summary>

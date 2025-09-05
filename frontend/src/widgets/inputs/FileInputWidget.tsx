@@ -26,6 +26,7 @@ interface FileInputWidgetProps {
   multiple?: boolean;
   maxFiles?: number;
   placeholder?: string;
+  uploadUrl?: string;
 }
 
 export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
@@ -38,13 +39,41 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
   multiple = false,
   maxFiles,
   placeholder,
+  uploadUrl,
 }) => {
   const handleEvent = useEventHandler();
   const [isDragging, setIsDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  const uploadFile = useCallback(
+    async (file: File): Promise<void> => {
+      if (!uploadUrl) return;
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      try {
+        const response = await fetch(uploadUrl, {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (!response.ok) {
+          throw new Error(`Upload failed: ${response.statusText}`);
+        }
+      } catch (error) {
+        console.error('File upload error:', error);
+      }
+    },
+    [uploadUrl]
+  );
+
   const convertFileToUploadFile = useCallback(
     async (file: File): Promise<FileInput> => {
+      if (uploadUrl) {
+        await uploadFile(file);
+      }
+
       // Ivy FileInput should only contain metadata, not file content
       return {
         name: file.name,
@@ -54,7 +83,7 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
         // Don't include content - it's handled by UploadService
       };
     },
-    []
+    [uploadFile, uploadUrl]
   );
 
   const handleChange = useCallback(
