@@ -154,15 +154,36 @@ public class ThemeCustomizer : SampleBase
         var bg = bgColor ?? "#000000";
         var fg = fgColor ?? "#FFFFFF";
 
+        // Map label to appropriate predefined color
+        var previewColor = label switch
+        {
+            "Primary" => Colors.Primary,
+            "Secondary" => Colors.Secondary,
+            "Success" => Colors.Green,
+            "Destructive" => Colors.Red,
+            "Warning" => Colors.Orange,
+            "Info" => Colors.Blue,
+            "Muted" => Colors.Gray,
+            "Accent" => Colors.Purple,
+            _ => Colors.Primary
+        };
+
         return Layout.Vertical()
             | Text.Small(label)
             | Layout.Horizontal(
-                // Color swatch showing actual colors
-                new Html($@"<div style='background-color: {bg}; color: {fg}; padding: 20px 30px; border-radius: 8px; text-align: center; font-weight: bold; font-size: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); width: 80px;'>Aa</div>")
-                    .Width(Size.Px(140)),
+                // Color preview box using appropriate predefined color
+                new Box("Preview")
+                    .Width(Size.Px(100))
+                    .Height(Size.Px(60))
+                    .Color(previewColor)
+                    .BorderRadius(BorderRadius.Rounded)
+                    .Padding(3)
+                    .ContentAlign(Align.Center),
                 Layout.Vertical()
-                    | Text.InlineCode(bg)
-                    | Text.InlineCode(fg)
+                    | Text.Small("Background:")
+                    | UseState(bg).ToColorInput().Variant(ColorInputs.TextAndPicker).Disabled()
+                    | Text.Small("Foreground:")
+                    | UseState(fg).ToColorInput().Variant(ColorInputs.TextAndPicker).Disabled()
             );
     }
 
