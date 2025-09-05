@@ -49,11 +49,22 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
     async (file: File): Promise<void> => {
       if (!uploadUrl) return;
 
+      // Get the correct host from meta tag or use relative URL
+      const getUploadUrl = () => {
+        const ivyHostMeta = document.querySelector('meta[name="ivy-host"]');
+        if (ivyHostMeta) {
+          const host = ivyHostMeta.getAttribute('content');
+          return host + uploadUrl;
+        }
+        // If no meta tag, use relative URL (should work in production)
+        return uploadUrl;
+      };
+
       const formData = new FormData();
       formData.append('file', file);
 
       try {
-        const response = await fetch(uploadUrl, {
+        const response = await fetch(getUploadUrl(), {
           method: 'POST',
           body: formData,
         });
@@ -70,6 +81,10 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
 
   const convertFileToUploadFile = useCallback(
     async (file: File): Promise<FileInput> => {
+      if (!file) {
+        throw new Error('File is required');
+      }
+
       if (uploadUrl) {
         await uploadFile(file);
       }
