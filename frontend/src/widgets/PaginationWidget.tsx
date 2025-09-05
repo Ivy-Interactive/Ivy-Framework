@@ -32,20 +32,26 @@ export const PaginationWidget: React.FC<PaginationWidgetProps> = ({
 
   const showPages: number[] = [];
   for (let p = 0; p < numPages; p++) {
-    if (
-      p < boundaries ||
-      p >= numPages - boundaries ||
-      (page &&
-        Math.abs(
-          Math.max(
-            Math.min(page, numPages - boundaries - 1 - siblings),
-            boundaries + 2 + siblings
-          ) -
-            p -
-            1
-        ) <= siblings)
-    ) {
+    if (p < boundaries || p >= numPages - boundaries) {
+      // This is a boundary
       showPages.push(p + 1);
+    } else if (typeof page === 'number') {
+      // The page "p" should be shown if Math.abs(p - (page - 1)) <= siblings. But to prevent the
+      // component from shrinking when the page is near the start or the end, we need to clamp the
+      // (page - 1) part.
+      let leftClamp = boundaries + siblings;
+      let rightClamp = numPages - 1 - boundaries - siblings;
+      if (boundaries) {
+        leftClamp += 1;
+        rightClamp -= 1;
+      }
+      if (
+        Math.abs(p - Math.min(Math.max(page - 1, leftClamp), rightClamp)) <=
+        siblings
+      ) {
+        // This is a sibling
+        showPages.push(p + 1);
+      }
     }
   }
 
