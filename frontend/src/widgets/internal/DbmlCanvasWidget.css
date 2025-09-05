@@ -54,7 +54,7 @@
   background-color: var(--background) !important;
 }
 
-/* ReactFlow Edge styling - Simple connection line color */
+/* ReactFlow Edge styling */
 .react-flow__edge-path {
   stroke: var(--foreground) !important;
 }
