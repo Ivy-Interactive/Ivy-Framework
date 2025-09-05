@@ -43,14 +43,14 @@ public static class ClientExtensions
         client.Sender.Send("SetJwt", authToken);
     }
 
-    public static void SetTheme(this IClientProvider client, Theme theme)
+    public static void SetTheme(this IClientProvider client, ThemeMode theme)
     {
         client.Sender.Send("SetTheme", theme.ToString());
     }
 
-    public static void ApplyThemeCss(this IClientProvider client, string css)
+    public static void ApplyTheme(this IClientProvider client, string css)
     {
-        client.Sender.Send("ApplyThemeCss", css);
+        client.Sender.Send("ApplyTheme", css);
     }
 
     public static void Toast(this IClientProvider client, string description, string? title = null)

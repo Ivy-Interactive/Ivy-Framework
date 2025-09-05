@@ -212,7 +212,7 @@ public class Server
         return this;
     }
 
-    public Server UseTheme(ThemeConfig theme)
+    public Server UseTheme(Theme theme)
     {
         var themeService = new ThemeService();
         themeService.SetTheme(theme);
@@ -220,9 +220,9 @@ public class Server
         return this;
     }
 
-    public Server UseTheme(Action<ThemeConfig> configureTheme)
+    public Server UseTheme(Action<Theme> configureTheme)
     {
-        var theme = new ThemeConfig();
+        var theme = new Theme();
         configureTheme(theme);
         var themeService = new ThemeService();
         themeService.SetTheme(theme);

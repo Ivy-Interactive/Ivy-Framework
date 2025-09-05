@@ -3,7 +3,7 @@
 /// <summary>
 /// Specifies the visual theme mode for the application interface.
 /// </summary>
-public enum Theme
+public enum ThemeMode
 {
     /// <summary>Light theme with bright backgrounds and dark text.</summary>
     Light,

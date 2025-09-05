@@ -3,7 +3,7 @@ namespace Ivy.Themes;
 /// <summary>
 /// Represents a theme configuration that can be applied to the frontend
 /// </summary>
-public class ThemeConfig
+public class Theme
 {
     public string Name { get; set; } = "Default";
     public ThemeColorScheme Colors { get; set; } = new();
@@ -11,7 +11,7 @@ public class ThemeConfig
     public string? FontSize { get; set; }
     public string? BorderRadius { get; set; }
 
-    public static ThemeConfig Default => new()
+    public static Theme Default => new()
     {
         Name = "Default",
         Colors = ThemeColorScheme.Default

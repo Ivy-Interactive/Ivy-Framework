@@ -7,21 +7,21 @@ namespace Ivy.Themes;
 /// </summary>
 public interface IThemeService
 {
-    ThemeConfig CurrentTheme { get; }
-    void SetTheme(ThemeConfig theme);
+    Theme CurrentTheme { get; }
+    void SetTheme(Theme theme);
     string GenerateThemeCss();
     string GenerateThemeMetaTag();
 }
 
 public class ThemeService : IThemeService
 {
-    private ThemeConfig _currentTheme = ThemeConfig.Default;
+    private Theme _currentTheme = Theme.Default;
 
-    public ThemeConfig CurrentTheme => _currentTheme;
+    public Theme CurrentTheme => _currentTheme;
 
-    public void SetTheme(ThemeConfig theme)
+    public void SetTheme(Theme theme)
     {
-        _currentTheme = theme ?? ThemeConfig.Default;
+        _currentTheme = theme ?? Theme.Default;
     }
 
     /// <summary>

@@ -12,15 +12,15 @@ public class ThemeCustomizer : SampleBase
     protected override object? BuildSample()
     {
         var selectedPreset = UseState("default");
-        var currentTheme = UseState(ThemeConfig.Default);
+        var currentTheme = UseState(Theme.Default);
         var showJson = UseState(false);
         var showCode = UseState(false);
         var client = UseService<IClientProvider>();
         var themeService = UseService<IThemeService>();
 
-        var presets = new Dictionary<string, ThemeConfig>
+        var presets = new Dictionary<string, Theme>
         {
-            ["default"] = ThemeConfig.Default,
+            ["default"] = Theme.Default,
             ["ocean"] = GetOceanTheme(),
             ["forest"] = GetForestTheme(),
             ["sunset"] = GetSunsetTheme(),
@@ -36,7 +36,7 @@ public class ThemeCustomizer : SampleBase
 
                 // Generate and apply the CSS to the frontend immediately
                 var css = themeService.GenerateThemeCss();
-                client.ApplyThemeCss(css);
+                client.ApplyTheme(css);
 
                 client.Toast("Theme applied successfully!", "Success");
             }
@@ -202,7 +202,7 @@ public class ThemeCustomizer : SampleBase
             );
     }
 
-    private string GenerateCSharpCode(ThemeConfig theme)
+    private string GenerateCSharpCode(Theme theme)
     {
         var lightColors = theme.Colors.Light;
         var darkColors = theme.Colors.Dark;
@@ -299,7 +299,7 @@ var server = new Server()
     }
 
     // Theme presets
-    private static ThemeConfig GetOceanTheme() => new()
+    private static Theme GetOceanTheme() => new()
     {
         Name = "Ocean",
         Colors = new ThemeColorScheme
@@ -359,7 +359,7 @@ var server = new Server()
         }
     };
 
-    private static ThemeConfig GetForestTheme() => new()
+    private static Theme GetForestTheme() => new()
     {
         Name = "Forest",
         Colors = new ThemeColorScheme
@@ -419,7 +419,7 @@ var server = new Server()
         }
     };
 
-    private static ThemeConfig GetSunsetTheme() => new()
+    private static Theme GetSunsetTheme() => new()
     {
         Name = "Sunset",
         Colors = new ThemeColorScheme
@@ -479,7 +479,7 @@ var server = new Server()
         }
     };
 
-    private static ThemeConfig GetMidnightTheme() => new()
+    private static Theme GetMidnightTheme() => new()
     {
         Name = "Midnight",
         Colors = new ThemeColorScheme

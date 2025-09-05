@@ -319,8 +319,8 @@ export const useBackend = (
             window.open(url, '_blank');
           });
 
-          connection.on('ApplyThemeCss', (css: string) => {
-            logger.debug(`[${connection.connectionId}] ApplyThemeCss`);
+          connection.on('ApplyTheme', (css: string) => {
+            logger.debug(`[${connection.connectionId}] ApplyTheme`);
 
             // Remove existing custom theme style if any
             const existingStyle = document.getElementById('ivy-custom-theme');
@@ -371,7 +371,7 @@ export const useBackend = (
         connection.off('SetJwt');
         connection.off('SetTheme');
         connection.off('OpenUrl');
-        connection.off('ApplyThemeCss');
+        connection.off('ApplyTheme');
         connection.off('reconnecting');
         connection.off('reconnected');
         connection.off('close');
