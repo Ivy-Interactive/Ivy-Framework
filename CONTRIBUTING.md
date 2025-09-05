@@ -344,7 +344,7 @@ When reporting an issue, include:
 - **GitHub Issues** - For bugs and feature requests
 - **GitHub Discussions** - For questions and general discussion
 - **Join our Discord** - https://discord.gg/sSwGzZAYb6
-- **Join our Slack** - If you want, we can invite you to a dedicated Slack channel for your project.
+- **Join our Slack** - If you want, we can invite you to a dedicated Slack channel for Ivy Framework development.
 - **Documentation** - Check the [Ivy.Docs](Ivy.Docs/) for guides and examples
 
 Thank you for contributing to Ivy Framework! Your contributions help make Ivy better for everyone.
