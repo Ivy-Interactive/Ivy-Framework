@@ -54,6 +54,40 @@ export const DocumentTools: React.FC<DocumentToolsProps> = ({
     await new Promise(resolve => setTimeout(resolve, 200));
   };
 
+  // Function to wait for actual expansion completion
+  const waitForExpansion = async (
+    element: Element,
+    timeout = 3000
+  ): Promise<boolean> => {
+    const startTime = Date.now();
+
+    while (Date.now() - startTime < timeout) {
+      // Check multiple expansion indicators
+      const isExpanded =
+        element.getAttribute('data-state') === 'open' ||
+        element.getAttribute('aria-expanded') === 'true' ||
+        // Also check if CollapsibleContent is visible
+        element.querySelector('[data-state="open"]') !== null;
+
+      if (isExpanded) {
+        // Additional verification: ensure content is actually rendered
+        const content = element.querySelector(
+          '[class*="CollapsibleContent"], [data-state="open"]'
+        );
+        if (content && (content as HTMLElement).offsetHeight > 0) {
+          // Wait a tiny bit more for animations to complete
+          await new Promise(resolve => setTimeout(resolve, 50));
+          return true;
+        }
+      }
+
+      // Short polling interval - check every 50ms
+      await new Promise(resolve => setTimeout(resolve, 50));
+    }
+
+    return false;
+  };
+
   // Function to expand all details elements
   const expandDetailsElements = async (): Promise<void> => {
     if (!articleRef.current) return;
@@ -86,6 +120,14 @@ export const DocumentTools: React.FC<DocumentToolsProps> = ({
               ) || element;
             if (trigger instanceof HTMLElement) {
               trigger.click();
+
+              const expanded = await waitForExpansion(element, 3000);
+              if (!expanded) {
+                console.warn(
+                  'Failed to expand details element after 3s:',
+                  element
+                );
+              }
             }
           }
         }
@@ -93,9 +135,6 @@ export const DocumentTools: React.FC<DocumentToolsProps> = ({
         console.warn('Failed to expand details element:', error);
       }
     }
-
-    // Wait for content to load
-    await new Promise(resolve => setTimeout(resolve, 200));
   };
 
   const copyTextContent = async () => {
