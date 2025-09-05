@@ -15,36 +15,38 @@ Before using Auth0 with Ivy, you'll need to create an Auth0 application and obta
 ### Step 1: Create an Auth0 Account and Application
 
 1. **Sign up** at [Auth0](https://auth0.com) if you don't have an account
-2. **Go to the Auth0 Dashboard** and navigate to **Applications**
+2. **Go to** the [Auth0 Dashboard](https://manage.auth0.com/dashboard) and navigate to **Applications**: ![Auth0 Applications Option in Sidebar](assets/auth0_applications.webp "Auth0 Applications Option in Sidebar")
 3. **Click "Create Application"**
 4. **Choose "Regular Web Applications"** as the application type
-5. **Click "Create"**
+5. **Click "Create"**: ![Auth0 Create Application Panel](assets/auth0_create_application.webp "Auth0 Create Application Panel")
 
 ### Step 2: Configure Your Application
 
 In your application settings:
 
-1. **Set Allowed Callback URLs**: `http://localhost:5010/webhook` (replace with your app's URL)
-2. **Set Allowed Logout URLs**: `http://localhost:5010/` (replace with your app's URL)
-3. **Set Allowed Web Origins**: `http://localhost:5010` (replace with your app's URL)
-4. **Save Changes**
+1. **Set Allowed Callback URLs** to `http://localhost:5010/webhook`, replacing the base URL (`http://localhost:5010`) with your application's URL: ![Auth0 Allowed Callback URLs](assets/auth0_callback.webp "Auth0 Allowed Callback URLs")
+4. **Click "Save"**
 
 ### Step 3: Get Your Configuration Values
 
-From your Auth0 application settings page, copy these values:
+In your application settings, copy these values from the Basic Information section:
 
-- **Domain**: Found at the top (e.g., `your-app.us.auth0.com`)
-- **Client ID**: Found in the Basic Information section
-- **Client Secret**: Found in the Basic Information section (click "Show" to reveal)
+- **Domain**
+- **Client ID**
+- **Client Secret**
 
-### Step 4: Create an API (For Audience)
+![Auth0 Basic Information](assets/auth0_basic_information.webp "Auth0 Basic Information")
+
+### Step 4: Create an API
 
 1. **Go to APIs** in the Auth0 Dashboard
 2. **Click "Create API"**
-3. **Enter a name** (e.g., "My Ivy App API")
-4. **Set an identifier** (e.g., `https://your-app.com/api`)
+3. **Enter a name** (e.g., "My API")
+4. **Set an identifier** (e.g., `https://my-application.com/api`)
 5. **Click "Create"**
 6. **Copy the Identifier** - this is your **Audience** value
+
+![Auth0 Create API](assets/auth0_create_api.webp "Auth0 Create API")
 
 ## Adding Authentication
 
