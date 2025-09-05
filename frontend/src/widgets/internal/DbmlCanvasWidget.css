@@ -54,8 +54,12 @@
   background-color: var(--background) !important;
 }
 
-/* ReactFlow Edge styling */
+/* ReactFlow Edge styling - Simple connection line color */
 .react-flow__edge-path {
+  stroke: var(--black) !important;
+}
+
+.dark .react-flow__edge-path {
   stroke: var(--primary) !important;
 }
 
@@ -64,7 +68,6 @@
   font-size: 12px !important;
   font-weight: 500 !important;
 }
-
 .react-flow__edge-textbg {
   fill: var(--background) !important;
   stroke: var(--border) !important;

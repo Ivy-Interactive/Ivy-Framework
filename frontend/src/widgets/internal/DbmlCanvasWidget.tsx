@@ -17,6 +17,7 @@ import dagre from 'dagre';
 import 'reactflow/dist/style.css';
 import { Parser } from '@dbml/core';
 import { getWidth, getHeight } from '@/lib/styles';
+import { useTheme } from '@/components/theme-provider/hooks';
 import './DbmlCanvasWidget.css';
 
 interface DbmlCanvasWidgetProps {
@@ -301,6 +302,11 @@ export const DbmlCanvasWidget: React.FC<DbmlCanvasWidgetProps> = ({
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [error, setError] = useState<DbmlError | null>(null);
+  const { theme } = useTheme();
+
+  const getConnectionLineColor = () => {
+    return theme === 'dark' ? 'var(--primary)' : 'var(--black)';
+  };
 
   const parseDbml = useCallback(() => {
     try {
@@ -394,13 +400,13 @@ export const DbmlCanvasWidget: React.FC<DbmlCanvasWidgetProps> = ({
           sourceHandle: `${ref.endpoints[0].fieldNames[0]}-right`,
           targetHandle: `${ref.endpoints[1].fieldNames[0]}-left`,
           type: 'smoothstep',
-          style: { stroke: 'var(--primary)' },
+          style: { stroke: getConnectionLineColor() },
           markerEnd: {
             type: MarkerType.ArrowClosed,
-            color: 'var(--primary)',
+            color: getConnectionLineColor(),
           },
           label: `${ref.endpoints[0].fieldNames[0]} → ${ref.endpoints[1].fieldNames[0]}`,
-          labelStyle: { fill: 'var(--primary)', fontWeight: 500 },
+          labelStyle: { fill: getConnectionLineColor(), fontWeight: 500 },
           labelBgStyle: { fill: 'var(--background)' },
         })
       );
@@ -448,7 +454,7 @@ export const DbmlCanvasWidget: React.FC<DbmlCanvasWidgetProps> = ({
 
       setError(errorInfo);
     }
-  }, [dbml, setNodes, setEdges]);
+  }, [dbml, setNodes, setEdges, theme]);
 
   useEffect(() => {
     parseDbml();
@@ -493,7 +499,7 @@ export const DbmlCanvasWidget: React.FC<DbmlCanvasWidgetProps> = ({
   }
 
   return (
-    <div style={styles}>
+    <div style={styles} className="dbml-canvas-widget">
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -505,10 +511,10 @@ export const DbmlCanvasWidget: React.FC<DbmlCanvasWidgetProps> = ({
         maxZoom={1.5}
         defaultEdgeOptions={{
           type: 'smoothstep',
-          style: { stroke: 'var(--primary)' },
+          style: { stroke: getConnectionLineColor() },
           markerEnd: {
             type: MarkerType.ArrowClosed,
-            color: 'var(--primary)',
+            color: getConnectionLineColor(),
           },
         }}
       >
