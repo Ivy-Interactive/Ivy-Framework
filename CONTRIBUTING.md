@@ -15,8 +15,6 @@ Thank you for your interest in contributing to Ivy Framework! This document prov
 - [Documentation](#documentation)
 - [Reporting Issues](#reporting-issues)
 - [Feature Requests](#feature-requests)
-- [Contributors Welcome Program](#contributors-welcome-program)
-- [How to Create a Widget Guide](#how-to-create-a-widget-guide)
 
 ## Code of Conduct
 
