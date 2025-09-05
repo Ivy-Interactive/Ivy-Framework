@@ -56,7 +56,7 @@
 
 /* ReactFlow Edge styling - Simple connection line color */
 .react-flow__edge-path {
-  stroke: var(--black) !important;
+  stroke: var(--foreground) !important;
 }
 
 .dark .react-flow__edge-path {
@@ -85,10 +85,14 @@
 
 /* ReactFlow Handle styling */
 .react-flow__handle {
-  background-color: var(--primary) !important;
+  background-color: var(--foreground) !important;
   border: 2px solid var(--background) !important;
   width: 8px !important;
   height: 8px !important;
+}
+
+.dark .react-flow__handle {
+  background-color: var(--primary) !important;
 }
 
 .react-flow__handle:hover {

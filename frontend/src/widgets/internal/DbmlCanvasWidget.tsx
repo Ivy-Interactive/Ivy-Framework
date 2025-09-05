@@ -305,7 +305,7 @@ export const DbmlCanvasWidget: React.FC<DbmlCanvasWidgetProps> = ({
   const { theme } = useTheme();
 
   const getConnectionLineColor = () => {
-    return theme === 'dark' ? 'var(--primary)' : 'var(--black)';
+    return theme === 'dark' ? 'var(--primary)' : 'var(--foreground)';
   };
 
   const parseDbml = useCallback(() => {
