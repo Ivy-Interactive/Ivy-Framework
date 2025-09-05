@@ -6,7 +6,7 @@ namespace Ivy.Themes;
 public class ThemeConfig
 {
     public string Name { get; set; } = "Default";
-    public ThemeColors Colors { get; set; } = new();
+    public ThemeColorScheme Colors { get; set; } = new();
     public string? FontFamily { get; set; }
     public string? FontSize { get; set; }
     public string? BorderRadius { get; set; }
@@ -14,7 +14,22 @@ public class ThemeConfig
     public static ThemeConfig Default => new()
     {
         Name = "Default",
-        Colors = ThemeColors.Default
+        Colors = ThemeColorScheme.Default
+    };
+}
+
+/// <summary>
+/// Represents the color scheme for a theme, supporting both light and dark variants
+/// </summary>
+public class ThemeColorScheme
+{
+    public ThemeColors Light { get; set; } = new();
+    public ThemeColors Dark { get; set; } = new();
+
+    public static ThemeColorScheme Default => new()
+    {
+        Light = ThemeColors.DefaultLight,
+        Dark = ThemeColors.DefaultDark
     };
 }
 
@@ -73,7 +88,7 @@ public class ThemeColors
     public string? SidebarBorder { get; set; }
     public string? SidebarRing { get; set; }
 
-    public static ThemeColors Default => new()
+    public static ThemeColors DefaultLight => new()
     {
         Primary = "#00cc92",
         PrimaryForeground = "#000000",
@@ -114,6 +129,50 @@ public class ThemeColors
         SidebarAccent = "#f4f6f6",
         SidebarAccentForeground = "#333333",
         SidebarBorder = "#d1d5db",
+        SidebarRing = "#777777"
+    };
+
+    public static ThemeColors DefaultDark => new()
+    {
+        Primary = "#00cc92",
+        PrimaryForeground = "#18181d",
+        Secondary = "#26262b",
+        SecondaryForeground = "#f8f8f8",
+        Background = "#000000",
+        Foreground = "#f8f8f8",
+        Destructive = "#dd5860",
+        DestructiveForeground = "#f8f8f8",
+        Success = "#86d26f",
+        SuccessForeground = "#000000",
+        Warning = "#deb145",
+        WarningForeground = "#000000",
+        Info = "#4469c0",
+        InfoForeground = "#ffffff",
+        Border = "#262626",
+        Input = "#262626",
+        Ring = "#777777",
+        Muted = "#1a1a1a",
+        MutedForeground = "#8f8f8f",
+        Accent = "#1a1a1a",
+        AccentForeground = "#f8f8f8",
+        Card = "#171717",
+        CardForeground = "#f8f8f8",
+
+        // Extended colors to match frontend CSS variables
+        Popover = "#000000",
+        PopoverForeground = "#f8f8f8",
+        Chart1 = "#0077BE",
+        Chart2 = "#DC143C",
+        Chart3 = "#70AD47",
+        Chart4 = "#FFC000",
+        Chart5 = "#5B9BD5",
+        Sidebar = "#0a0a0a",
+        SidebarForeground = "#f8f8f8",
+        SidebarPrimary = "#00cc92",
+        SidebarPrimaryForeground = "#000000",
+        SidebarAccent = "#1a1a1a",
+        SidebarAccentForeground = "#f8f8f8",
+        SidebarBorder = "#262626",
         SidebarRing = "#777777"
     };
 }

@@ -82,17 +82,32 @@ public class ThemeCustomizer : SampleBase
 
             // Theme preview with actual colors
             | Text.H2("Color Preview")
-            | new Card(
-                Layout.Grid().Columns(2)
-                    | RenderColorPreview("Primary", currentTheme.Value.Colors.Primary, currentTheme.Value.Colors.PrimaryForeground)
-                    | RenderColorPreview("Secondary", currentTheme.Value.Colors.Secondary, currentTheme.Value.Colors.SecondaryForeground)
-                    | RenderColorPreview("Success", currentTheme.Value.Colors.Success, currentTheme.Value.Colors.SuccessForeground)
-                    | RenderColorPreview("Destructive", currentTheme.Value.Colors.Destructive, currentTheme.Value.Colors.DestructiveForeground)
-                    | RenderColorPreview("Warning", currentTheme.Value.Colors.Warning, currentTheme.Value.Colors.WarningForeground)
-                    | RenderColorPreview("Info", currentTheme.Value.Colors.Info, currentTheme.Value.Colors.InfoForeground)
-                    | RenderColorPreview("Muted", currentTheme.Value.Colors.Muted, currentTheme.Value.Colors.MutedForeground)
-                    | RenderColorPreview("Accent", currentTheme.Value.Colors.Accent, currentTheme.Value.Colors.AccentForeground)
-            ).Title("Color Palette")
+            | Layout.Horizontal(
+                // Light theme colors
+                new Card(
+                    Layout.Grid().Columns(1)
+                        | RenderColorPreview("Primary", currentTheme.Value.Colors.Light.Primary, currentTheme.Value.Colors.Light.PrimaryForeground)
+                        | RenderColorPreview("Secondary", currentTheme.Value.Colors.Light.Secondary, currentTheme.Value.Colors.Light.SecondaryForeground)
+                        | RenderColorPreview("Success", currentTheme.Value.Colors.Light.Success, currentTheme.Value.Colors.Light.SuccessForeground)
+                        | RenderColorPreview("Destructive", currentTheme.Value.Colors.Light.Destructive, currentTheme.Value.Colors.Light.DestructiveForeground)
+                        | RenderColorPreview("Warning", currentTheme.Value.Colors.Light.Warning, currentTheme.Value.Colors.Light.WarningForeground)
+                        | RenderColorPreview("Info", currentTheme.Value.Colors.Light.Info, currentTheme.Value.Colors.Light.InfoForeground)
+                        | RenderColorPreview("Muted", currentTheme.Value.Colors.Light.Muted, currentTheme.Value.Colors.Light.MutedForeground)
+                        | RenderColorPreview("Accent", currentTheme.Value.Colors.Light.Accent, currentTheme.Value.Colors.Light.AccentForeground)
+                ).Title("Light Theme"),
+                // Dark theme colors  
+                new Card(
+                    Layout.Grid().Columns(1)
+                        | RenderColorPreview("Primary", currentTheme.Value.Colors.Dark.Primary, currentTheme.Value.Colors.Dark.PrimaryForeground)
+                        | RenderColorPreview("Secondary", currentTheme.Value.Colors.Dark.Secondary, currentTheme.Value.Colors.Dark.SecondaryForeground)
+                        | RenderColorPreview("Success", currentTheme.Value.Colors.Dark.Success, currentTheme.Value.Colors.Dark.SuccessForeground)
+                        | RenderColorPreview("Destructive", currentTheme.Value.Colors.Dark.Destructive, currentTheme.Value.Colors.Dark.DestructiveForeground)
+                        | RenderColorPreview("Warning", currentTheme.Value.Colors.Dark.Warning, currentTheme.Value.Colors.Dark.WarningForeground)
+                        | RenderColorPreview("Info", currentTheme.Value.Colors.Dark.Info, currentTheme.Value.Colors.Dark.InfoForeground)
+                        | RenderColorPreview("Muted", currentTheme.Value.Colors.Dark.Muted, currentTheme.Value.Colors.Dark.MutedForeground)
+                        | RenderColorPreview("Accent", currentTheme.Value.Colors.Dark.Accent, currentTheme.Value.Colors.Dark.AccentForeground)
+                ).Title("Dark Theme")
+            )
 
             // Export options
             | Text.H2("Export Options")
@@ -189,51 +204,96 @@ public class ThemeCustomizer : SampleBase
 
     private string GenerateCSharpCode(ThemeConfig theme)
     {
-        var colors = theme.Colors;
+        var lightColors = theme.Colors.Light;
+        var darkColors = theme.Colors.Dark;
         return $@"// Add this to your server configuration:
 var server = new Server()
     .UseTheme(theme => {{
         theme.Name = ""{theme.Name}"";
-        theme.Colors = new ThemeColors
+        theme.Colors = new ThemeColorScheme
         {{
-            Primary = ""{colors.Primary}"",
-            PrimaryForeground = ""{colors.PrimaryForeground}"",
-            Secondary = ""{colors.Secondary}"",
-            SecondaryForeground = ""{colors.SecondaryForeground}"",
-            Background = ""{colors.Background}"",
-            Foreground = ""{colors.Foreground}"",
-            Destructive = ""{colors.Destructive}"",
-            DestructiveForeground = ""{colors.DestructiveForeground}"",
-            Success = ""{colors.Success}"",
-            SuccessForeground = ""{colors.SuccessForeground}"",
-            Warning = ""{colors.Warning}"",
-            WarningForeground = ""{colors.WarningForeground}"",
-            Info = ""{colors.Info}"",
-            InfoForeground = ""{colors.InfoForeground}"",
-            Border = ""{colors.Border}"",
-            Input = ""{colors.Input}"",
-            Ring = ""{colors.Ring}"",
-            Muted = ""{colors.Muted}"",
-            MutedForeground = ""{colors.MutedForeground}"",
-            Accent = ""{colors.Accent}"",
-            AccentForeground = ""{colors.AccentForeground}"",
-            Card = ""{colors.Card}"",
-            CardForeground = ""{colors.CardForeground}"",
-            Popover = ""{colors.Popover}"",
-            PopoverForeground = ""{colors.PopoverForeground}"",
-            Chart1 = ""{colors.Chart1}"",
-            Chart2 = ""{colors.Chart2}"",
-            Chart3 = ""{colors.Chart3}"",
-            Chart4 = ""{colors.Chart4}"",
-            Chart5 = ""{colors.Chart5}"",
-            Sidebar = ""{colors.Sidebar}"",
-            SidebarForeground = ""{colors.SidebarForeground}"",
-            SidebarPrimary = ""{colors.SidebarPrimary}"",
-            SidebarPrimaryForeground = ""{colors.SidebarPrimaryForeground}"",
-            SidebarAccent = ""{colors.SidebarAccent}"",
-            SidebarAccentForeground = ""{colors.SidebarAccentForeground}"",
-            SidebarBorder = ""{colors.SidebarBorder}"",
-            SidebarRing = ""{colors.SidebarRing}""
+            Light = new ThemeColors
+            {{
+                Primary = ""{lightColors.Primary}"",
+                PrimaryForeground = ""{lightColors.PrimaryForeground}"",
+                Secondary = ""{lightColors.Secondary}"",
+                SecondaryForeground = ""{lightColors.SecondaryForeground}"",
+                Background = ""{lightColors.Background}"",
+                Foreground = ""{lightColors.Foreground}"",
+                Destructive = ""{lightColors.Destructive}"",
+                DestructiveForeground = ""{lightColors.DestructiveForeground}"",
+                Success = ""{lightColors.Success}"",
+                SuccessForeground = ""{lightColors.SuccessForeground}"",
+                Warning = ""{lightColors.Warning}"",
+                WarningForeground = ""{lightColors.WarningForeground}"",
+                Info = ""{lightColors.Info}"",
+                InfoForeground = ""{lightColors.InfoForeground}"",
+                Border = ""{lightColors.Border}"",
+                Input = ""{lightColors.Input}"",
+                Ring = ""{lightColors.Ring}"",
+                Muted = ""{lightColors.Muted}"",
+                MutedForeground = ""{lightColors.MutedForeground}"",
+                Accent = ""{lightColors.Accent}"",
+                AccentForeground = ""{lightColors.AccentForeground}"",
+                Card = ""{lightColors.Card}"",
+                CardForeground = ""{lightColors.CardForeground}"",
+                Popover = ""{lightColors.Popover}"",
+                PopoverForeground = ""{lightColors.PopoverForeground}"",
+                Chart1 = ""{lightColors.Chart1}"",
+                Chart2 = ""{lightColors.Chart2}"",
+                Chart3 = ""{lightColors.Chart3}"",
+                Chart4 = ""{lightColors.Chart4}"",
+                Chart5 = ""{lightColors.Chart5}"",
+                Sidebar = ""{lightColors.Sidebar}"",
+                SidebarForeground = ""{lightColors.SidebarForeground}"",
+                SidebarPrimary = ""{lightColors.SidebarPrimary}"",
+                SidebarPrimaryForeground = ""{lightColors.SidebarPrimaryForeground}"",
+                SidebarAccent = ""{lightColors.SidebarAccent}"",
+                SidebarAccentForeground = ""{lightColors.SidebarAccentForeground}"",
+                SidebarBorder = ""{lightColors.SidebarBorder}"",
+                SidebarRing = ""{lightColors.SidebarRing}""
+            }},
+            Dark = new ThemeColors
+            {{
+                Primary = ""{darkColors.Primary}"",
+                PrimaryForeground = ""{darkColors.PrimaryForeground}"",
+                Secondary = ""{darkColors.Secondary}"",
+                SecondaryForeground = ""{darkColors.SecondaryForeground}"",
+                Background = ""{darkColors.Background}"",
+                Foreground = ""{darkColors.Foreground}"",
+                Destructive = ""{darkColors.Destructive}"",
+                DestructiveForeground = ""{darkColors.DestructiveForeground}"",
+                Success = ""{darkColors.Success}"",
+                SuccessForeground = ""{darkColors.SuccessForeground}"",
+                Warning = ""{darkColors.Warning}"",
+                WarningForeground = ""{darkColors.WarningForeground}"",
+                Info = ""{darkColors.Info}"",
+                InfoForeground = ""{darkColors.InfoForeground}"",
+                Border = ""{darkColors.Border}"",
+                Input = ""{darkColors.Input}"",
+                Ring = ""{darkColors.Ring}"",
+                Muted = ""{darkColors.Muted}"",
+                MutedForeground = ""{darkColors.MutedForeground}"",
+                Accent = ""{darkColors.Accent}"",
+                AccentForeground = ""{darkColors.AccentForeground}"",
+                Card = ""{darkColors.Card}"",
+                CardForeground = ""{darkColors.CardForeground}"",
+                Popover = ""{darkColors.Popover}"",
+                PopoverForeground = ""{darkColors.PopoverForeground}"",
+                Chart1 = ""{darkColors.Chart1}"",
+                Chart2 = ""{darkColors.Chart2}"",
+                Chart3 = ""{darkColors.Chart3}"",
+                Chart4 = ""{darkColors.Chart4}"",
+                Chart5 = ""{darkColors.Chart5}"",
+                Sidebar = ""{darkColors.Sidebar}"",
+                SidebarForeground = ""{darkColors.SidebarForeground}"",
+                SidebarPrimary = ""{darkColors.SidebarPrimary}"",
+                SidebarPrimaryForeground = ""{darkColors.SidebarPrimaryForeground}"",
+                SidebarAccent = ""{darkColors.SidebarAccent}"",
+                SidebarAccentForeground = ""{darkColors.SidebarAccentForeground}"",
+                SidebarBorder = ""{darkColors.SidebarBorder}"",
+                SidebarRing = ""{darkColors.SidebarRing}""
+            }}
         }};
     }});";
     }
@@ -242,124 +302,240 @@ var server = new Server()
     private static ThemeConfig GetOceanTheme() => new()
     {
         Name = "Ocean",
-        Colors = new ThemeColors
+        Colors = new ThemeColorScheme
         {
-            Primary = "#0077BE",
-            PrimaryForeground = "#FFFFFF",
-            Secondary = "#5B9BD5",
-            SecondaryForeground = "#FFFFFF",
-            Background = "#F0F8FF",
-            Foreground = "#1A1A1A",
-            Destructive = "#DC143C",
-            DestructiveForeground = "#FFFFFF",
-            Success = "#20B2AA",
-            SuccessForeground = "#FFFFFF",
-            Warning = "#FFD700",
-            WarningForeground = "#1A1A1A",
-            Info = "#4682B4",
-            InfoForeground = "#FFFFFF",
-            Border = "#B0C4DE",
-            Input = "#E6F2FF",
-            Ring = "#0077BE",
-            Muted = "#E0E8F0",
-            MutedForeground = "#5A6A7A",
-            Accent = "#87CEEB",
-            AccentForeground = "#1A1A1A",
-            Card = "#FFFFFF",
-            CardForeground = "#1A1A1A"
+            Light = new ThemeColors
+            {
+                Primary = "#0077BE",
+                PrimaryForeground = "#FFFFFF",
+                Secondary = "#5B9BD5",
+                SecondaryForeground = "#FFFFFF",
+                Background = "#F0F8FF",
+                Foreground = "#1A1A1A",
+                Destructive = "#DC143C",
+                DestructiveForeground = "#FFFFFF",
+                Success = "#20B2AA",
+                SuccessForeground = "#FFFFFF",
+                Warning = "#FFD700",
+                WarningForeground = "#1A1A1A",
+                Info = "#4682B4",
+                InfoForeground = "#FFFFFF",
+                Border = "#B0C4DE",
+                Input = "#E6F2FF",
+                Ring = "#0077BE",
+                Muted = "#E0E8F0",
+                MutedForeground = "#5A6A7A",
+                Accent = "#87CEEB",
+                AccentForeground = "#1A1A1A",
+                Card = "#FFFFFF",
+                CardForeground = "#1A1A1A"
+            },
+            Dark = new ThemeColors
+            {
+                Primary = "#4A9EFF",
+                PrimaryForeground = "#001122",
+                Secondary = "#2D4F70",
+                SecondaryForeground = "#E8F4FD",
+                Background = "#001122",
+                Foreground = "#E8F4FD",
+                Destructive = "#FF6B7D",
+                DestructiveForeground = "#FFFFFF",
+                Success = "#4ECDC4",
+                SuccessForeground = "#001122",
+                Warning = "#FFE066",
+                WarningForeground = "#001122",
+                Info = "#87CEEB",
+                InfoForeground = "#001122",
+                Border = "#1A3A5C",
+                Input = "#0F2A4A",
+                Ring = "#4A9EFF",
+                Muted = "#0F2A4A",
+                MutedForeground = "#8BB3D9",
+                Accent = "#1A3A5C",
+                AccentForeground = "#E8F4FD",
+                Card = "#0F2A4A",
+                CardForeground = "#E8F4FD"
+            }
         }
     };
 
     private static ThemeConfig GetForestTheme() => new()
     {
         Name = "Forest",
-        Colors = new ThemeColors
+        Colors = new ThemeColorScheme
         {
-            Primary = "#228B22",
-            PrimaryForeground = "#FFFFFF",
-            Secondary = "#8FBC8F",
-            SecondaryForeground = "#1A1A1A",
-            Background = "#F0FFF0",
-            Foreground = "#1A1A1A",
-            Destructive = "#B22222",
-            DestructiveForeground = "#FFFFFF",
-            Success = "#32CD32",
-            SuccessForeground = "#FFFFFF",
-            Warning = "#FFA500",
-            WarningForeground = "#1A1A1A",
-            Info = "#4169E1",
-            InfoForeground = "#FFFFFF",
-            Border = "#90EE90",
-            Input = "#E8F5E8",
-            Ring = "#228B22",
-            Muted = "#E0F0E0",
-            MutedForeground = "#4A5A4A",
-            Accent = "#98FB98",
-            AccentForeground = "#1A1A1A",
-            Card = "#FFFFFF",
-            CardForeground = "#1A1A1A"
+            Light = new ThemeColors
+            {
+                Primary = "#228B22",
+                PrimaryForeground = "#FFFFFF",
+                Secondary = "#8FBC8F",
+                SecondaryForeground = "#1A1A1A",
+                Background = "#F0FFF0",
+                Foreground = "#1A1A1A",
+                Destructive = "#B22222",
+                DestructiveForeground = "#FFFFFF",
+                Success = "#32CD32",
+                SuccessForeground = "#FFFFFF",
+                Warning = "#FFA500",
+                WarningForeground = "#1A1A1A",
+                Info = "#4169E1",
+                InfoForeground = "#FFFFFF",
+                Border = "#90EE90",
+                Input = "#E8F5E8",
+                Ring = "#228B22",
+                Muted = "#E0F0E0",
+                MutedForeground = "#4A5A4A",
+                Accent = "#98FB98",
+                AccentForeground = "#1A1A1A",
+                Card = "#FFFFFF",
+                CardForeground = "#1A1A1A"
+            },
+            Dark = new ThemeColors
+            {
+                Primary = "#4AFF4A",
+                PrimaryForeground = "#001100",
+                Secondary = "#2D4A2D",
+                SecondaryForeground = "#E8FFE8",
+                Background = "#001100",
+                Foreground = "#E8FFE8",
+                Destructive = "#FF4444",
+                DestructiveForeground = "#FFFFFF",
+                Success = "#66FF66",
+                SuccessForeground = "#001100",
+                Warning = "#FFB84D",
+                WarningForeground = "#001100",
+                Info = "#6A9BFF",
+                InfoForeground = "#001100",
+                Border = "#1A3A1A",
+                Input = "#0F2A0F",
+                Ring = "#4AFF4A",
+                Muted = "#0F2A0F",
+                MutedForeground = "#8BC98B",
+                Accent = "#1A3A1A",
+                AccentForeground = "#E8FFE8",
+                Card = "#0F2A0F",
+                CardForeground = "#E8FFE8"
+            }
         }
     };
 
     private static ThemeConfig GetSunsetTheme() => new()
     {
         Name = "Sunset",
-        Colors = new ThemeColors
+        Colors = new ThemeColorScheme
         {
-            Primary = "#FF6347",
-            PrimaryForeground = "#FFFFFF",
-            Secondary = "#FFB6C1",
-            SecondaryForeground = "#1A1A1A",
-            Background = "#FFF5EE",
-            Foreground = "#1A1A1A",
-            Destructive = "#DC143C",
-            DestructiveForeground = "#FFFFFF",
-            Success = "#90EE90",
-            SuccessForeground = "#1A1A1A",
-            Warning = "#FFD700",
-            WarningForeground = "#1A1A1A",
-            Info = "#87CEEB",
-            InfoForeground = "#1A1A1A",
-            Border = "#FFE4E1",
-            Input = "#FFF0E6",
-            Ring = "#FF6347",
-            Muted = "#FFDAB9",
-            MutedForeground = "#8B4513",
-            Accent = "#FFA07A",
-            AccentForeground = "#1A1A1A",
-            Card = "#FFFFFF",
-            CardForeground = "#1A1A1A"
+            Light = new ThemeColors
+            {
+                Primary = "#FF6347",
+                PrimaryForeground = "#FFFFFF",
+                Secondary = "#FFB6C1",
+                SecondaryForeground = "#1A1A1A",
+                Background = "#FFF5EE",
+                Foreground = "#1A1A1A",
+                Destructive = "#DC143C",
+                DestructiveForeground = "#FFFFFF",
+                Success = "#90EE90",
+                SuccessForeground = "#1A1A1A",
+                Warning = "#FFD700",
+                WarningForeground = "#1A1A1A",
+                Info = "#87CEEB",
+                InfoForeground = "#1A1A1A",
+                Border = "#FFE4E1",
+                Input = "#FFF0E6",
+                Ring = "#FF6347",
+                Muted = "#FFDAB9",
+                MutedForeground = "#8B4513",
+                Accent = "#FFA07A",
+                AccentForeground = "#1A1A1A",
+                Card = "#FFFFFF",
+                CardForeground = "#1A1A1A"
+            },
+            Dark = new ThemeColors
+            {
+                Primary = "#FF8A65",
+                PrimaryForeground = "#2A1100",
+                Secondary = "#8D4A47",
+                SecondaryForeground = "#FFE8E1",
+                Background = "#2A1100",
+                Foreground = "#FFE8E1",
+                Destructive = "#FF5252",
+                DestructiveForeground = "#FFFFFF",
+                Success = "#81C784",
+                SuccessForeground = "#2A1100",
+                Warning = "#FFB74D",
+                WarningForeground = "#2A1100",
+                Info = "#64B5F6",
+                InfoForeground = "#2A1100",
+                Border = "#5D2A1A",
+                Input = "#3D1F0F",
+                Ring = "#FF8A65",
+                Muted = "#3D1F0F",
+                MutedForeground = "#C19A8A",
+                Accent = "#5D2A1A",
+                AccentForeground = "#FFE8E1",
+                Card = "#3D1F0F",
+                CardForeground = "#FFE8E1"
+            }
         }
     };
 
     private static ThemeConfig GetMidnightTheme() => new()
     {
         Name = "Midnight",
-        Colors = new ThemeColors
+        Colors = new ThemeColorScheme
         {
-            Primary = "#7C3AED",
-            PrimaryForeground = "#FFFFFF",
-            Secondary = "#4C1D95",
-            SecondaryForeground = "#FFFFFF",
-            Background = "#0F0F23",
-            Foreground = "#E5E5E5",
-            Destructive = "#EF4444",
-            DestructiveForeground = "#FFFFFF",
-            Success = "#10B981",
-            SuccessForeground = "#FFFFFF",
-            Warning = "#F59E0B",
-            WarningForeground = "#000000",
-            Info = "#3B82F6",
-            InfoForeground = "#FFFFFF",
-            Border = "#374151",
-            Input = "#1F2937",
-            Ring = "#7C3AED",
-            Muted = "#1F2937",
-            MutedForeground = "#9CA3AF",
-            Accent = "#6366F1",
-            AccentForeground = "#FFFFFF",
-            Card = "#1A1A2E",
-            CardForeground = "#E5E5E5"
+            Light = new ThemeColors
+            {
+                Primary = "#7C3AED",
+                PrimaryForeground = "#FFFFFF",
+                Secondary = "#DDD6FE",
+                SecondaryForeground = "#1A1A1A",
+                Background = "#FAFAFA",
+                Foreground = "#1A1A1A",
+                Destructive = "#EF4444",
+                DestructiveForeground = "#FFFFFF",
+                Success = "#10B981",
+                SuccessForeground = "#FFFFFF",
+                Warning = "#F59E0B",
+                WarningForeground = "#000000",
+                Info = "#3B82F6",
+                InfoForeground = "#FFFFFF",
+                Border = "#E5E7EB",
+                Input = "#F3F4F6",
+                Ring = "#7C3AED",
+                Muted = "#F9FAFB",
+                MutedForeground = "#6B7280",
+                Accent = "#F3F0FF",
+                AccentForeground = "#1A1A1A",
+                Card = "#FFFFFF",
+                CardForeground = "#1A1A1A"
+            },
+            Dark = new ThemeColors
+            {
+                Primary = "#A78BFA",
+                PrimaryForeground = "#1A1A2E",
+                Secondary = "#4C1D95",
+                SecondaryForeground = "#E5E5E5",
+                Background = "#0F0F23",
+                Foreground = "#E5E5E5",
+                Destructive = "#EF4444",
+                DestructiveForeground = "#FFFFFF",
+                Success = "#10B981",
+                SuccessForeground = "#FFFFFF",
+                Warning = "#F59E0B",
+                WarningForeground = "#000000",
+                Info = "#3B82F6",
+                InfoForeground = "#FFFFFF",
+                Border = "#374151",
+                Input = "#1F2937",
+                Ring = "#A78BFA",
+                Muted = "#1F2937",
+                MutedForeground = "#9CA3AF",
+                Accent = "#6366F1",
+                AccentForeground = "#FFFFFF",
+                Card = "#1A1A2E",
+                CardForeground = "#E5E5E5"
+            }
         }
     };
 
