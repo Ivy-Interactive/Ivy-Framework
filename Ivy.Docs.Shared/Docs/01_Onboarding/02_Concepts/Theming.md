@@ -77,19 +77,97 @@ graph LR
 
 ### Server Configuration (Experimental)
 
-The `UseTheme()` method is available for server-level theme configuration, though it's not currently used in production:
+The `UseTheme()` method is available for server-level theme configuration
 
 ```csharp
-// Note: This is experimental functionality
 var server = new Server()
-    .UseTheme(theme => 
-    {
-        theme.Name = "Corporate";
-        theme.FontFamily = "Inter, sans-serif";
-        theme.BorderRadius = "8px";
-        
-        theme.Colors.Light.Primary = "#007acc";
-        theme.Colors.Dark.Primary = "#0099ff";
+    .UseTheme(theme => {
+        theme.Name = "Ocean";
+        theme.Colors = new ThemeColorScheme
+        {
+            Light = new ThemeColors
+            {
+                Primary = "#0077BE",
+                PrimaryForeground = "#FFFFFF",
+                Secondary = "#5B9BD5",
+                SecondaryForeground = "#FFFFFF",
+                Background = "#F0F8FF",
+                Foreground = "#1A1A1A",
+                Destructive = "#DC143C",
+                DestructiveForeground = "#FFFFFF",
+                Success = "#20B2AA",
+                SuccessForeground = "#FFFFFF",
+                Warning = "#FFD700",
+                WarningForeground = "#1A1A1A",
+                Info = "#4682B4",
+                InfoForeground = "#FFFFFF",
+                Border = "#B0C4DE",
+                Input = "#E6F2FF",
+                Ring = "#0077BE",
+                Muted = "#E0E8F0",
+                MutedForeground = "#5A6A7A",
+                Accent = "#87CEEB",
+                AccentForeground = "#1A1A1A",
+                Card = "#FFFFFF",
+                CardForeground = "#1A1A1A",
+                Popover = "#FFFFFF",
+                PopoverForeground = "#1A1A1A",
+                Chart1 = "#0077BE",
+                Chart2 = "#DC143C",
+                Chart3 = "#20B2AA",
+                Chart4 = "#FFD700",
+                Chart5 = "#4682B4",
+                Sidebar = "#E0E8F0",
+                SidebarForeground = "#1A1A1A",
+                SidebarPrimary = "#0077BE",
+                SidebarPrimaryForeground = "#FFFFFF",
+                SidebarAccent = "#87CEEB",
+                SidebarAccentForeground = "#1A1A1A",
+                SidebarBorder = "#B0C4DE",
+                SidebarRing = "#0077BE"
+            },
+            Dark = new ThemeColors
+            {
+                Primary = "#4A9EFF",
+                PrimaryForeground = "#001122",
+                Secondary = "#2D4F70",
+                SecondaryForeground = "#E8F4FD",
+                Background = "#001122",
+                Foreground = "#E8F4FD",
+                Destructive = "#FF6B7D",
+                DestructiveForeground = "#FFFFFF",
+                Success = "#4ECDC4",
+                SuccessForeground = "#001122",
+                Warning = "#FFE066",
+                WarningForeground = "#001122",
+                Info = "#87CEEB",
+                InfoForeground = "#001122",
+                Border = "#1A3A5C",
+                Input = "#0F2A4A",
+                Ring = "#4A9EFF",
+                Muted = "#0F2A4A",
+                MutedForeground = "#8BB3D9",
+                Accent = "#1A3A5C",
+                AccentForeground = "#E8F4FD",
+                Card = "#0F2A4A",
+                CardForeground = "#E8F4FD",
+                Popover = "#001122",
+                PopoverForeground = "#E8F4FD",
+                Chart1 = "#4A9EFF",
+                Chart2 = "#FF6B7D",
+                Chart3 = "#4ECDC4",
+                Chart4 = "#FFE066",
+                Chart5 = "#87CEEB",
+                Sidebar = "#0F2A4A",
+                SidebarForeground = "#E8F4FD",
+                SidebarPrimary = "#4A9EFF",
+                SidebarPrimaryForeground = "#001122",
+                SidebarAccent = "#1A3A5C",
+                SidebarAccentForeground = "#E8F4FD",
+                SidebarBorder = "#1A3A5C",
+                SidebarRing = "#4A9EFF"
+            }
+        };
     });
 ```
 
