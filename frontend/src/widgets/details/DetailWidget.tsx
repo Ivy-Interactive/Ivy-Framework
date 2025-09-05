@@ -15,7 +15,10 @@ export const DetailWidget: React.FC<DetailWidgetProps> = ({
   multiLine,
 }) => {
   return (
-    <div className={cn('border-b flex', multiLine && 'flex-col')} key={id}>
+    <div
+      className={cn('border-b flex items-center', multiLine && 'flex-col')}
+      key={id}
+    >
       <div className="p-3 pl-0 align-middle text-body font-bold">{label}</div>
       <div
         className={cn(
