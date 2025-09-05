@@ -37,6 +37,11 @@ public record ServerArgs
     public string? MetaTitle { get; set; } = null;
     public string? MetaDescription { get; set; } = null;
     public Assembly? AssetAssembly { get; set; } = null;
+#if DEBUG
+    public bool FindAvailablePort { get; set; } = true;
+#else
+    public bool FindAvailablePort { get; set; } = false;
+#endif
 }
 
 public class Server
@@ -51,8 +56,7 @@ public class Server
     public IServiceCollection Services { get; } = new ServiceCollection();
     public Type? AuthProviderType { get; private set; } = null;
     public ServerArgs Args => _args;
-
-    private readonly ServerArgs _args;
+    private ServerArgs _args;
 
     public Server(ServerArgs? args = null)
     {
@@ -250,6 +254,29 @@ public class Server
             if (_args.IKillForThisPort)
             {
                 Utils.KillProcessUsingPort(_args.Port);
+            }
+            else if (_args.FindAvailablePort)
+            {
+                var originalPort = _args.Port;
+                var maxAttempts = 100;
+                var attemptCount = 0;
+
+                while (Utils.IsPortInUse(_args.Port) && attemptCount < maxAttempts)
+                {
+                    _args = _args with { Port = _args.Port + 1 };
+                    attemptCount++;
+                }
+
+                if (attemptCount >= maxAttempts)
+                {
+                    Console.WriteLine($@"[31mCould not find an available port after checking {maxAttempts} ports starting from {originalPort}.[0m");
+                    return;
+                }
+
+                if (_args.Port != originalPort)
+                {
+                    Console.WriteLine($@"[33mPort {originalPort} is in use. Using port {_args.Port} instead.[0m");
+                }
             }
             else
             {
@@ -520,7 +547,7 @@ public static class IvyServerUtils
         var parser = new ArgsParser();
         var args = Environment.GetCommandLineArgs().Skip(1).ToArray();
         var parsedArgs = parser.Parse(args);
-        return new ServerArgs()
+        var serverArgs = new ServerArgs()
         {
             Port = parser.GetValue(parsedArgs, "port", ServerArgs.DefaultPort),
             Verbose = parser.GetValue(parsedArgs, "verbose", false),
@@ -530,5 +557,11 @@ public static class IvyServerUtils
             DefaultAppId = parser.GetValue<string?>(parsedArgs, "app", null),
             Silent = parser.GetValue(parsedArgs, "silent", false)
         };
+#if DEBUG
+        serverArgs = serverArgs with { FindAvailablePort = parser.GetValue(parsedArgs, "find-available-port", true) };
+#else
+        serverArgs = serverArgs with { FindAvailablePort = parser.GetValue(parsedArgs, "find-available-port", false) };
+#endif
+        return serverArgs;
     }
 }
