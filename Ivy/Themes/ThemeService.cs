@@ -3,30 +3,53 @@ using System.Text;
 namespace Ivy.Themes;
 
 /// <summary>
-/// Service for managing and applying themes
+/// Service for managing and applying custom theme configurations.
 /// </summary>
 public interface IThemeService
 {
+    /// <summary>
+    /// Gets the currently active theme configuration.
+    /// </summary>
     Theme CurrentTheme { get; }
+
+    /// <summary>
+    /// Sets the active theme configuration.
+    /// </summary>
+    /// <param name="theme">The theme configuration to apply. If null, defaults to the default theme.</param>
     void SetTheme(Theme theme);
+
+    /// <summary>
+    /// Generates CSS content with custom properties (variables) based on the current theme configuration.
+    /// The generated CSS includes both light and dark theme variants.
+    /// </summary>
+    /// <returns>A complete CSS style block with theme variables that can be injected into a page.</returns>
     string GenerateThemeCss();
+
+    /// <summary>
+    /// Generates an HTML meta tag containing the current theme configuration as JSON.
+    /// This allows the frontend to access theme information for client-side operations.
+    /// </summary>
+    /// <returns>An HTML meta tag with the theme configuration encoded as JSON.</returns>
     string GenerateThemeMetaTag();
 }
 
+/// <summary>
+/// Default implementation of <see cref="IThemeService"/> for managing theme configurations.
+/// </summary>
 public class ThemeService : IThemeService
 {
     private Theme _currentTheme = Theme.Default;
 
+    /// <inheritdoc />
     public Theme CurrentTheme => _currentTheme;
 
+    /// <inheritdoc />
     public void SetTheme(Theme theme)
     {
         _currentTheme = theme ?? Theme.Default;
     }
 
-    /// <summary>
-    /// Generates CSS variables for the theme that will be injected into the page
-    /// </summary>
+    /// <inheritdoc />
     public string GenerateThemeCss()
     {
         var sb = new StringBuilder();
@@ -47,9 +70,7 @@ public class ThemeService : IThemeService
         return sb.ToString();
     }
 
-    /// <summary>
-    /// Generates a meta tag containing the theme configuration for frontend access
-    /// </summary>
+    /// <inheritdoc />
     public string GenerateThemeMetaTag()
     {
         var themeJson = System.Text.Json.JsonSerializer.Serialize(_currentTheme);

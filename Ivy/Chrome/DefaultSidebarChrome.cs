@@ -216,9 +216,9 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
             MenuItem.Default("Theme")
                 .Icon(Icons.SunMoon)
                 .Children(
-                    MenuItem.Checkbox("Light").Icon(Icons.Sun).HandleSelect(() => client.SetTheme(Theme.Light)),
-                    MenuItem.Checkbox("Dark").Icon(Icons.Moon).HandleSelect(() => client.SetTheme(Theme.Dark)),
-                    MenuItem.Checkbox("System").Icon(Icons.SunMoon).HandleSelect(() => client.SetTheme(Theme.System))
+                    MenuItem.Checkbox("Light").Icon(Icons.Sun).HandleSelect(() => client.SetThemeMode(ThemeMode.Light)),
+                    MenuItem.Checkbox("Dark").Icon(Icons.Moon).HandleSelect(() => client.SetThemeMode(ThemeMode.Dark)),
+                    MenuItem.Checkbox("System").Icon(Icons.SunMoon).HandleSelect(() => client.SetThemeMode(ThemeMode.System))
                 )
         };
 

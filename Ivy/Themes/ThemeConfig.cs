@@ -1,16 +1,42 @@
 namespace Ivy.Themes;
 
 /// <summary>
-/// Represents a theme configuration that can be applied to the frontend
+/// Represents a complete theme configuration that can be applied to the frontend.
+/// Includes color schemes for both light and dark modes, typography, and styling properties.
 /// </summary>
 public class Theme
 {
+    /// <summary>
+    /// Gets or sets the display name of the theme.
+    /// </summary>
     public string Name { get; set; } = "Default";
+
+    /// <summary>
+    /// Gets or sets the color scheme configuration containing both light and dark theme colors.
+    /// </summary>
     public ThemeColorScheme Colors { get; set; } = new();
+
+    /// <summary>
+    /// Gets or sets the font family to use throughout the application.
+    /// Should be a valid CSS font-family value (e.g., "Inter, sans-serif").
+    /// </summary>
     public string? FontFamily { get; set; }
+
+    /// <summary>
+    /// Gets or sets the base font size for the application.
+    /// Should be a valid CSS font-size value (e.g., "14px", "1rem").
+    /// </summary>
     public string? FontSize { get; set; }
+
+    /// <summary>
+    /// Gets or sets the border radius value used throughout the application.
+    /// Should be a valid CSS border-radius value (e.g., "8px", "0.5rem").
+    /// </summary>
     public string? BorderRadius { get; set; }
 
+    /// <summary>
+    /// Gets the default theme configuration with standard Ivy styling.
+    /// </summary>
     public static Theme Default => new()
     {
         Name = "Default",
