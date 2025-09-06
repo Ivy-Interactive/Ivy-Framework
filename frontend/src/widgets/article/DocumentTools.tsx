@@ -242,6 +242,20 @@ export const DocumentTools: React.FC<DocumentToolsProps> = ({
 
       // Check if this element is part of an API section
       if (isApiSection(element)) {
+        // Handle expandable details - extract header first
+        if (element.getAttribute('role') === 'details') {
+          const summaryElement = element.querySelector('[role="summary"]');
+          if (summaryElement && !processedElements.has(summaryElement)) {
+            const summaryText = summaryElement.textContent?.trim();
+            if (summaryText) {
+              apiContent += `### ${summaryText}\n\n`;
+              processedElements.add(summaryElement);
+            }
+          }
+          // The content will be processed by other selectors
+          return;
+        }
+
         switch (tagName) {
           case 'h1':
           case 'h2':
