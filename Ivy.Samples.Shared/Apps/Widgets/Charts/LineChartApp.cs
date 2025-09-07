@@ -16,6 +16,12 @@ public class LineChartApp : ViewBase
             | new LineChart3View()
             | new LineChart4View()
             | new LineChart5View()
+            | new LineChart6View()
+            | new LineChart7View()
+            | new LineChart8View()
+            | new LineChart9View()
+            | new LineChart10View()
+            | new LineChart11View()
         ;
     }
 }
@@ -155,6 +161,133 @@ public class LineChart5View : ViewBase
                 .Measure("Temperature", e => e.Sum(f => f.Temperature))
                 .Measure("Humidity", e => e.Sum(f => f.Humidity))
                 .Measure("Pressure", e => e.Sum(f => f.Pressure))
+        ;
+    }
+}
+
+public class LineChart6View : ViewBase
+{
+    public override object? Build()
+    {
+        var data = new[]
+        {
+            new { Period = "Start", Value = 0, Negative = -1000, Large = 999999999 },
+            new { Period = "Mid", Value = 50, Negative = -500, Large = 500000000 },
+            new { Period = "End", Value = 100, Negative = 0, Large = 1 },
+        };
+
+        return new Card().Title("Extreme Values Test (Zero, Negative, Very Large)")
+            | data.ToLineChart(style: LineChartStyles.Default)
+                .Dimension("Period", e => e.Period)
+                .Measure("Normal", e => e.Sum(f => f.Value))
+                .Measure("Negative", e => e.Sum(f => f.Negative))
+                .Measure("Very Large", e => e.Sum(f => f.Large))
+        ;
+    }
+}
+
+public class LineChart7View : ViewBase
+{
+    public override object? Build()
+    {
+        var data = new[]
+        {
+            new { Day = "Mon", Sales = 100, Marketing = 0, Support = 50 },
+            new { Day = "Tue", Sales = 0, Marketing = 75, Support = 0 },
+            new { Day = "Wed", Sales = 150, Marketing = 0, Support = 0 },
+            new { Day = "Thu", Sales = 0, Marketing = 0, Support = 200 },
+            new { Day = "Fri", Sales = 200, Marketing = 100, Support = 0 },
+        };
+
+        return new Card().Title("Sparse Data Test (Many Zero Values)")
+            | data.ToLineChart(style: LineChartStyles.Dashboard)
+                .Dimension("Day", e => e.Day)
+                .Measure("Sales", e => e.Sum(f => f.Sales))
+                .Measure("Marketing", e => e.Sum(f => f.Marketing))
+                .Measure("Support", e => e.Sum(f => f.Support))
+        ;
+    }
+}
+
+public class LineChart8View : ViewBase
+{
+    public override object? Build()
+    {
+        var data = new[]
+        {
+            new { Point = "Single", Value = 42 },
+        };
+
+        return new Card().Title("Single Data Point Test")
+            | data.ToLineChart(style: LineChartStyles.Custom)
+                .Dimension("Point", e => e.Point)
+                .Measure("Value", e => e.Sum(f => f.Value))
+        ;
+    }
+}
+
+public class LineChart9View : ViewBase
+{
+    public override object? Build()
+    {
+        var data = new[]
+        {
+            new { Label = "Very Long Label Name That Might Cause Issues", Value = 100 },
+            new { Label = "Another Extremely Long Label That Could Break Layout", Value = 200 },
+            new { Label = "Short", Value = 50 },
+            new { Label = "Special Chars: !@#$%^&*()", Value = 75 },
+            new { Label = "Unicode: 中文 🚀 αβγ", Value = 125 },
+        };
+
+        return new Card().Title("Long Labels & Special Characters Test")
+            | data.ToLineChart(style: LineChartStyles.Default)
+                .Dimension("Label", e => e.Label)
+                .Measure("Value", e => e.Sum(f => f.Value))
+        ;
+    }
+}
+
+public class LineChart10View : ViewBase
+{
+    public override object? Build()
+    {
+        var data = new[]
+        {
+            new { Time = "T1", Flat = 100, Identical = 50, Same = 50 },
+            new { Time = "T2", Flat = 100, Identical = 50, Same = 50 },
+            new { Time = "T3", Flat = 100, Identical = 50, Same = 50 },
+            new { Time = "T4", Flat = 100, Identical = 50, Same = 50 },
+            new { Time = "T5", Flat = 100, Identical = 50, Same = 50 },
+        };
+
+        return new Card().Title("Flat Lines Test (Identical Values)")
+            | data.ToLineChart(style: LineChartStyles.Dashboard)
+                .Dimension("Time", e => e.Time)
+                .Measure("Flat Line", e => e.Sum(f => f.Flat))
+                .Measure("Identical", e => e.Sum(f => f.Identical))
+                .Measure("Same Value", e => e.Sum(f => f.Same))
+        ;
+    }
+}
+
+public class LineChart11View : ViewBase
+{
+    public override object? Build()
+    {
+        var data = new[]
+        {
+            new { Scale = "Micro", Tiny = 0.001, Small = 1, Medium = 1000, Large = 1000000 },
+            new { Scale = "Small", Tiny = 0.01, Small = 10, Medium = 10000, Large = 10000000 },
+            new { Scale = "Large", Tiny = 0.1, Small = 100, Medium = 100000, Large = 100000000 },
+        };
+
+        return new Card().Title("Mixed Scales Test (Very Different Ranges)")
+            | data.ToLineChart(style: LineChartStyles.Custom)
+                .Dimension("Scale", e => e.Scale)
+                .Measure("Tiny (0.001-0.1)", e => e.Sum(f => f.Tiny))
+                .Measure("Small (1-100)", e => e.Sum(f => f.Small))
+                .Measure("Medium (1K-100K)", e => e.Sum(f => f.Medium))
+                .Measure("Large (1M-100M)", e => e.Sum(f => f.Large))
         ;
     }
 }
