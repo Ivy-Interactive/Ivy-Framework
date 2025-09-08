@@ -202,11 +202,11 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
       {/* Main Content - Always takes full remaining width */}
       <div
         className={cn(
-          `relative h-full overflow-auto`,
+          `relative h-full min-h-0`,
           !mainAppSidebar ? `p-${mainContentPadding}` : ''
         )}
       >
-        {slots?.MainContent}
+        <div className="h-full overflow-auto">{slots?.MainContent}</div>
       </div>
     </div>
   );
