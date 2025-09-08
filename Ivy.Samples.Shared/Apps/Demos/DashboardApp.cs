@@ -12,6 +12,12 @@ public class DashboardApp : ViewBase
     {
         return Layout.Vertical() | (Layout.Grid().Columns(4)
                                     | new TotalSalesMetricView()
+                                    | new LongNumberMetricView()
+                                    | new HighPercentageMetricView()
+                                    | new TotalCommentsPerAuthorMetricView()
+                                    )
+                                 | (Layout.Grid().Columns(4)
+                                    | new VeryLongTitleMetricView()
                                     | new TotalSalesMetricView()
                                     | new TotalSalesMetricView()
                                     | new TotalSalesMetricView()
@@ -119,5 +125,65 @@ public class BrowsersView : ViewBase
         };
 
         return new Card().Title("Browser Composition").Height("100%") | data.ToPieChart(e => e.Name, e => e.Sum(f => f.Value), PieChartStyles.Dashboard);
+    }
+}
+
+public class LongNumberMetricView : ViewBase
+{
+    public override object? Build()
+    {
+        return new Card(
+                (Layout.Horizontal().Align(Align.Left).Gap(2)
+                 | Text.H3("$123,456,789.99")
+                 | Icons.TrendingUp.ToIcon().Color(Colors.Emerald)
+                 | Text.Small("1,234.5%").Color(Colors.Emerald)),
+                new Progress(85).Goal("$100,000,000")
+            ).Title("Very Long Revenue Number").Icon(Icons.DollarSign)
+            ;
+    }
+}
+
+public class HighPercentageMetricView : ViewBase
+{
+    public override object? Build()
+    {
+        return new Card(
+                (Layout.Horizontal().Align(Align.Left).Gap(2)
+                 | Text.H3("1,012.50%")
+                 | Icons.TrendingUp.ToIcon().Color(Colors.Emerald)
+                 | Text.Small("38.1%").Color(Colors.Emerald)),
+                new Progress(125).Goal("806.67%")
+            ).Title("Post Engagement Rate").Icon(Icons.Activity)
+            ;
+    }
+}
+
+public class VeryLongTitleMetricView : ViewBase
+{
+    public override object? Build()
+    {
+        return new Card(
+                (Layout.Horizontal().Align(Align.Left).Gap(2)
+                 | Text.H3("2.25")
+                 | Icons.TrendingUp.ToIcon().Color(Colors.Emerald)
+                 | Text.Small("38.1%").Color(Colors.Emerald)),
+                new Progress(90).Goal("2.50")
+            ).Title("Total Comments per Author in This Period").Icon(Icons.MessageCircle)
+            ;
+    }
+}
+
+public class TotalCommentsPerAuthorMetricView : ViewBase
+{
+    public override object? Build()
+    {
+        return new Card(
+                (Layout.Horizontal().Align(Align.Left).Gap(2)
+                 | Text.H3("2.25")
+                 | Icons.TrendingUp.ToIcon().Color(Colors.Emerald)
+                 | Text.Small("38.1%").Color(Colors.Emerald)),
+                new Progress(90).Goal("2.50")
+            ).Title("Total Comments per Author").Icon(Icons.UserCheck)
+            ;
     }
 }
