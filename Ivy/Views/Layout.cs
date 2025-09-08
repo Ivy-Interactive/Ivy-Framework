@@ -15,11 +15,11 @@ public static class Layout
     /// </summary>
     /// <param name="elements">Variable number of element collections to arrange
     /// horizontally. Null elements are automatically filtered out.</param>
-    /// <returns>A LayoutView configured for horizontal arrangement.</returns>
+    /// <returns>A LayoutView configured for horizontal arrangement with a full height.</returns>
     public static LayoutView Horizontal(params IEnumerable<object?> elements)
     {
         return (new LayoutView()).Horizontal(elements.Where(e => e != null).Cast<object>().ToArray())
-        .Height(Size.Full());
+            .Height(Size.Full());
     }
 
     /// <summary>
