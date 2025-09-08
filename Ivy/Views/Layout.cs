@@ -18,7 +18,8 @@ public static class Layout
     /// <returns>A LayoutView configured for horizontal arrangement.</returns>
     public static LayoutView Horizontal(params IEnumerable<object?> elements)
     {
-        return (new LayoutView()).Horizontal(elements.Where(e => e != null).Cast<object>().ToArray());
+        return (new LayoutView()).Horizontal(elements.Where(e => e != null).Cast<object>().ToArray())
+        .Height(Size.Full());
     }
 
     /// <summary>
