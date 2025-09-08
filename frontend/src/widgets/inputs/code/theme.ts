@@ -35,7 +35,7 @@ export function createIvyCodeTheme(): Extension {
       wordWrap: 'break-word',
       whiteSpace: 'pre-wrap',
       width: 'fit-content',
-      maxWidth: '100%',
+      maxWidth: 'calc(min(90vw, 100% - 2rem))',
       boxSizing: 'border-box',
       color: 'var(--foreground)',
       backgroundColor: 'var(--background)',
