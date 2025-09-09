@@ -268,8 +268,7 @@ public class FormBuilder<TModel> : ViewBase
             {
                 var input = state.ToBoolInput();
                 // Only apply scaffold defaults if no custom label was set
-                var field = _fields.Values.FirstOrDefault(f => f.Name == name);
-                if (field != null && field.Label != Utils.SplitPascalCase(name))
+                if (_fields.TryGetValue(name, out var field) && HasCustomLabel(field.Label, name))
                 {
                     // Custom label was set, don't override it
                     input.Label = field.Label;
@@ -338,7 +337,7 @@ public class FormBuilder<TModel> : ViewBase
                 if (input is IAnyBoolInput boolInput)
                 {
                     // Only apply scaffold defaults if no custom label was set
-                    if (hint.Label != Utils.SplitPascalCase(hint.Name))
+                    if (HasCustomLabel(hint.Label, hint.Name))
                     {
                         // Custom label was set, don't override it
                         boolInput.Label = hint.Label;
@@ -648,6 +647,9 @@ public class FormBuilder<TModel> : ViewBase
         }
         return this;
     }
+
+    private static bool HasCustomLabel(string label, string name)
+        => label != Utils.SplitPascalCase(name);
 
     private FormBuilderField<TModel> GetField<TU>(Expression<Func<TModel, TU>> field)
     {
