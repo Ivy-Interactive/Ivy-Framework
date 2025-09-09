@@ -15,7 +15,7 @@ The `Card` widget is a versatile container used to group related content and act
 
 Here's a simple example of a card containing text and a button that shows a toast message when clicked.
 
-```csharp demo-below 
+```csharp demo-below
 new Card(
     "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec nunc",
     new Button("Sign Me Up", _ => client.Toast("You have signed up!"))
