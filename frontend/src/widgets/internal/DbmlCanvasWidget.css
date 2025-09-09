@@ -74,29 +74,33 @@
   stroke-width: 1px !important;
 }
 
-/* ReactFlow Node base styling */
+/* ReactFlow Node base styling - remove box-shadow from container */
 .react-flow__node {
-  box-shadow: 0 0 0 1px var(--border) !important;
-  border-radius: 4px !important;
-  transition: all 0.2s ease !important;
+  transition: all 0.1s ease !important;
 }
 
-/* ReactFlow Node hover styling */
-.react-flow__node:hover {
-  box-shadow: 0 0 0 1px var(--ring) !important;
-  border-radius: 4px !important;
+/* DatabaseSchemaNode styling - apply hover/selection to the actual table */
+.react-flow__node .rounded-md {
+  transition: all 0.1s ease !important;
+  border-width: 2px !important;
 }
 
-/* ReactFlow Node selection styling */
-.react-flow__node.selected {
-  box-shadow: 0 0 0 1px var(--primary-light) !important;
-  border-radius: 4px !important;
+/* ReactFlow Node hover styling - target the DatabaseSchemaNode */
+.react-flow__node:hover .rounded-md {
+  border-color: var(--ring) !important;
+  border-width: 2px !important;
 }
 
-/* ReactFlow Node hover + selection styling */
-.react-flow__node.selected:hover {
-  box-shadow: 0 0 0 1px var(--primary) !important;
-  border-radius: 4px !important;
+/* ReactFlow Node selection styling - target the DatabaseSchemaNode */
+.react-flow__node.selected .rounded-md {
+  border-color: var(--primary) !important;
+  border-width: 2px !important;
+}
+
+/* ReactFlow Node hover + selection styling - target the DatabaseSchemaNode */
+.react-flow__node.selected:hover .rounded-md {
+  border-color: var(--ring) !important;
+  border-width: 2px !important;
 }
 
 /* ReactFlow Handle styling */
