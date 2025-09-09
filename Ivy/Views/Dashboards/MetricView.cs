@@ -46,9 +46,9 @@ public class MetricView(
         {
             return new Card(
                 Layout.Vertical().Gap(2)
-                | (Layout.Horizontal().Align(Align.Left).Gap(2)
+                | (Layout.Horizontal().Gap(2)
                    | Text.Small(title).NoWrap().Overflow(Overflow.Ellipsis).Color(Colors.Gray)
-                   | new Spacer()
+                   | new Spacer().Width(Size.Grow())
                    | (icon?.ToIcon().Color(Colors.Gray)))
                 | new ErrorTeaserView(failed.Value)
             ).Height(Size.Units(Height));
@@ -58,9 +58,9 @@ public class MetricView(
         {
             return new Card(
                 Layout.Vertical().Gap(2)
-                | (Layout.Horizontal().Align(Align.Left).Gap(2)
+                | (Layout.Horizontal().Gap(2)
                    | Text.Small(title).NoWrap().Overflow(Overflow.Ellipsis).Color(Colors.Gray)
-                   | new Spacer()
+                   | new Spacer().Width(Size.Grow())
                    | (icon?.ToIcon().Color(Colors.Gray)))
                 | new Skeleton()
             ).Height(Size.Units(Height));
@@ -70,9 +70,9 @@ public class MetricView(
 
         return new Card(
                 Layout.Vertical().Gap(2)
-                | (Layout.Horizontal().Align(Align.Left).Gap(2)
+                | (Layout.Horizontal().Gap(2)
                    | Text.Small(title).NoWrap().Overflow(Overflow.Ellipsis).Color(Colors.Gray)
-                   | new Spacer()
+                   | new Spacer().Width(Size.Grow())
                    | (icon?.ToIcon().Color(Colors.Gray)))
                 | (Layout.Horizontal().Align(Align.Left).Gap(2)
                     | Text.H4(x.MetricFormatted).NoWrap().Overflow(Overflow.Clip)
