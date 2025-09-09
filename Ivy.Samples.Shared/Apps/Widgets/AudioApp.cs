@@ -15,7 +15,7 @@ public class AudioApp : SampleBase
         // Audio player with custom settings
         var customAudio = new Audio("https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3")
             .Loop(true)
-            .Preload("auto");
+            .Preload(AudioPreload.Auto);
 
         // Muted audio player (useful for autoplay scenarios)
         var mutedAudio = new Audio("https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3")

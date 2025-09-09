@@ -10,7 +10,7 @@ interface AudioWidgetProps {
   autoplay?: boolean;
   loop?: boolean;
   muted?: boolean;
-  preload?: 'none' | 'metadata' | 'auto';
+  preload?: 'None' | 'Metadata' | 'Auto';
   controls?: boolean;
 }
 
@@ -34,7 +34,7 @@ export const AudioWidget: React.FC<AudioWidgetProps> = ({
   autoplay = false,
   loop = false,
   muted = false,
-  preload = 'metadata',
+  preload = 'Metadata',
   controls = true,
 }) => {
   const styles: React.CSSProperties = {
@@ -62,7 +62,7 @@ export const AudioWidget: React.FC<AudioWidgetProps> = ({
       autoPlay={autoplay}
       loop={loop}
       muted={muted}
-      preload={preload}
+      preload={preload.toLowerCase() as 'none' | 'metadata' | 'auto'}
       controls={controls}
       className="w-full"
     >

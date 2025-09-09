@@ -4,6 +4,17 @@ using Ivy.Shared;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+/// <summary>Defines the preload strategy for audio content.</summary>
+public enum AudioPreload
+{
+    /// <summary>No audio data is preloaded.</summary>
+    None,
+    /// <summary>Only audio metadata (duration, dimensions) is loaded.</summary>
+    Metadata,
+    /// <summary>The entire audio file is preloaded.</summary>
+    Auto
+}
+
 /// <summary>A widget for playing audio content with browser controls. Supports common audio formats (MP3, WAV, OGG, AAC, M4A).</summary>
 public record Audio : WidgetBase<Audio>
 {
@@ -28,8 +39,8 @@ public record Audio : WidgetBase<Audio>
     /// <summary>Gets or sets whether the audio should be muted by default. Default is false.</summary>
     [Prop] public bool Muted { get; set; } = false;
 
-    /// <summary>Gets or sets the preload strategy: "none", "metadata", or "auto". Default is "metadata".</summary>
-    [Prop] public string Preload { get; set; } = "metadata";
+    /// <summary>Gets or sets the preload strategy. Default is Metadata.</summary>
+    [Prop] public AudioPreload Preload { get; set; } = AudioPreload.Metadata;
 
     /// <summary>Gets or sets whether the browser's default audio controls should be displayed. Default is true.</summary>
     [Prop] public bool Controls { get; set; } = true;
@@ -63,7 +74,7 @@ public static class AudioExtensions
     }
 
     /// <summary>Sets the preload strategy for the audio.</summary>
-    public static Audio Preload(this Audio audio, string preload)
+    public static Audio Preload(this Audio audio, AudioPreload preload)
     {
         return audio with { Preload = preload };
     }

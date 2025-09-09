@@ -17,7 +17,7 @@ public class AudioWidgetTests
         Assert.False(audio.Autoplay);
         Assert.False(audio.Loop);
         Assert.False(audio.Muted);
-        Assert.Equal("metadata", audio.Preload);
+        Assert.Equal(AudioPreload.Metadata, audio.Preload);
         Assert.True(audio.Controls);
     }
 
@@ -29,7 +29,7 @@ public class AudioWidgetTests
             .Autoplay(true)
             .Loop(true)
             .Muted(true)
-            .Preload("auto")
+            .Preload(AudioPreload.Auto)
             .Controls(false);
 
         // Assert
@@ -37,7 +37,7 @@ public class AudioWidgetTests
         Assert.True(audio.Autoplay);
         Assert.True(audio.Loop);
         Assert.True(audio.Muted);
-        Assert.Equal("auto", audio.Preload);
+        Assert.Equal(AudioPreload.Auto, audio.Preload);
         Assert.False(audio.Controls);
     }
 
@@ -62,11 +62,11 @@ public class AudioWidgetTests
         var audio = new Audio("test.mp3");
 
         // Act
-        var updatedAudio = audio.Preload("none");
+        var updatedAudio = audio.Preload(AudioPreload.None);
 
         // Assert
-        Assert.Equal("none", updatedAudio.Preload);
-        Assert.Equal("metadata", audio.Preload); // Original should be unchanged
+        Assert.Equal(AudioPreload.None, updatedAudio.Preload);
+        Assert.Equal(AudioPreload.Metadata, audio.Preload); // Original should be unchanged
     }
 
     [Theory]
