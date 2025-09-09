@@ -74,19 +74,35 @@
   stroke-width: 1px !important;
 }
 
-/* ReactFlow Node selection styling */
-.react-flow__node.selected {
-  box-shadow: 0 0 0 2px var(--ring) !important;
+/* ReactFlow Node base styling */
+.react-flow__node {
+  box-shadow: 0 0 0 1px var(--border) !important;
+  border-radius: 4px !important;
+  transition: all 0.2s ease !important;
 }
 
+/* ReactFlow Node hover styling */
 .react-flow__node:hover {
-  box-shadow: 0 0 0 1px var(--border) !important;
+  box-shadow: 0 0 0 1px var(--ring) !important;
+  border-radius: 4px !important;
+}
+
+/* ReactFlow Node selection styling */
+.react-flow__node.selected {
+  box-shadow: 0 0 0 1px var(--primary-light) !important;
+  border-radius: 4px !important;
+}
+
+/* ReactFlow Node hover + selection styling */
+.react-flow__node.selected:hover {
+  box-shadow: 0 0 0 1px var(--primary) !important;
+  border-radius: 4px !important;
 }
 
 /* ReactFlow Handle styling */
 .react-flow__handle {
   background-color: var(--foreground) !important;
-  border: 2px solid var(--background) !important;
+  border: 2px solid var(--border) !important;
   width: 8px !important;
   height: 8px !important;
 }
