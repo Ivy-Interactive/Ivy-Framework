@@ -15,6 +15,12 @@ Do not manually create form layouts. Always use `.ToForm()` on your state object
 
 ## Basic Usage
 
+To use Forms functionality, `Ivy.Views.Forms` package is used:
+
+```csharp
+using Ivy.Views.Forms;
+```
+
 The simplest way to create a form is to call `.ToForm()` on a state object. The FormBuilder automatically scaffolds appropriate input fields based on your model's property types.
 
 ```csharp demo-tabs
