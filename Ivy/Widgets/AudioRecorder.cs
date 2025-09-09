@@ -14,7 +14,7 @@ public record AudioRecorder : WidgetBase<AudioRecorder>
     /// Initializes a new instance with basic configuration.
     /// </summary>
     /// <param name="placeholder">Optional placeholder text displayed when no audio is recording.</param>
-    /// <param name="mimeType">The mime type of the recorded audio data (e.g., "audio/webm" or "audio/mp3").</param>
+    /// <param name="mimeType">The mime type of the recorded audio data (e.g., "audio/webm").</param>
     /// <param name="chunkInterval">The chunk size, in milliseconds, for continuous chunked uploads. If null, audio will be uploaded once recording stops.</param>
     /// <param name="uploadUrl">The upload URL for automatic audio file uploads.</param>
     /// <param name="disabled">Whether the widget should be disabled initially.</param>
@@ -78,7 +78,7 @@ public static class AudioRecorderExtensions
 
     /// <summary>Sets the mime type used for recorded audio.</summary>
     /// <param name="widget">The audio recorder to configure.</param>
-    /// <param name="mimeType">Mime type to use (e.g., "audio/webm", "audio/mp3").</param>
+    /// <param name="mimeType">Mime type to use (e.g., "audio/webm").</param>
     public static AudioRecorder MimeType(this AudioRecorder widget, string mimeType)
     {
         return widget with { MimeType = mimeType };
