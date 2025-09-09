@@ -22,7 +22,8 @@ Using the Ivy CLI we can create a new project.
 
 ### 2. Create the Todo Model
 
-Then let's create a record `Todo.cs` to represent our todo items:
+Create a new file `TodosApp.cs` in the `Apps` folder.
+Declare a record `Todo.cs` to represent our todo items:
 
 ```csharp
 public record Todo(string Title, bool Done);
@@ -30,7 +31,7 @@ public record Todo(string Title, bool Done);
 
 ### 3. Create the Main App Class
 
-Create a new class `TodosApp.cs` in the `Apps` folder  that inherits from `ViewBase`:
+Create a new class `TodosApp` in the file that inherits from `ViewBase`:
 
 ```csharp
 [App(icon: Icons.Calendar)]
@@ -131,4 +132,4 @@ Now let's run the project.
 >dotnet watch
 ```
 
-You can find the full source code for the project at <https://github.com/Ivy-Interactive/Ivy-Framework/tree/main/Ivy.Docs/Samples/Todo>.
+You can find the source code for the app at <https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy.Samples.Shared/Apps/Demos/TodosApp.cs>.
