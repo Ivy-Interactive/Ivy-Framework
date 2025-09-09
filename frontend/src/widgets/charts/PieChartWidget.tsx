@@ -67,7 +67,7 @@ const PieChartWidget: React.FC<PieChartWidgetProps> = ({
   return (
     <ChartContainer config={chartConfig} style={styles}>
       <PieChart
-        margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
+        margin={{ top: 10, right: 10, bottom: 10, left: 10 }}
         accessibilityLayer
       >
         {legend && <Legend {...generateLegendProps(legend)} />}
