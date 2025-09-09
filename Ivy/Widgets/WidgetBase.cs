@@ -109,8 +109,7 @@ public static class WidgetBaseExtensions
     /// <returns>The widget with the height set.</returns>
     public static T Height<T>(this T widget, Size? height) where T : WidgetBase<T>
     {
-        widget.Height = height;
-        return widget;
+        return widget with { Height = height };
     }
 
     /// <summary>
