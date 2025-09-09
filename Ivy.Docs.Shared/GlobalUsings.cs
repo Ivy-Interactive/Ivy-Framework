@@ -22,6 +22,7 @@ global using Ivy;
 global using Ivy.Widgets.Internal;
 global using Ivy.Views.Tables;
 global using Ivy.Views.Blades;
+global using Ivy.Views.Dashboards;
 global using Ivy.Docs.Shared.Helpers;
 
 namespace Ivy.Docs.Shared;
