@@ -22,10 +22,9 @@ Before using Auth0 with Ivy, you'll need to create an Auth0 application and obta
 
 ### Step 2: Configure Your Application
 
-In your application settings:
-
-1. **Set Allowed Callback URLs** to `http://localhost:5010/webhook`, replacing the base URL (`http://localhost:5010`) with your application's URL: ![Auth0 Allowed Callback URLs](assets/auth0_callback.webp "Auth0 Allowed Callback URLs")
-4. **Click "Save"**
+1. Navigate to your application's **Settings** tab: ![Auth0 Settings Tab](assets/auth0_application_settings_tab.webp "Auth0 Settings Tab")
+2. **Set Allowed Callback URLs** to `http://localhost:5010/webhook`, replacing the base URL (`http://localhost:5010`) with your application's URL: ![Auth0 Allowed Callback URLs](assets/auth0_callback.webp "Auth0 Allowed Callback URLs")
+3. **Click "Save"**
 
 ### Step 3: Get Your Configuration Values
 
@@ -43,8 +42,9 @@ In your application settings, copy these values from the Basic Information secti
 2. **Click "Create API"**
 3. **Enter a name** (e.g., "My API")
 4. **Set an identifier** (e.g., `https://my-application.com/api`)
-5. **Click "Create"**
-6. **Copy the Identifier** - this is your **Audience** value
+5. **Set "JSON Web Token (JWT) Profile" to "Auth0" and "JSON Web Token (JWT) Signing Algorithm" to "RS256"**
+6. **Click "Create"**
+7. **Copy the Identifier** - this is your **Audience** value
 
 ![Auth0 Create API](assets/auth0_create_api.webp "Auth0 Create API")
 
