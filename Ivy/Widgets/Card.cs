@@ -4,9 +4,7 @@ using Ivy.Shared;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
-/// <summary>
-/// A structured container for organizing related content with optional title, description, and icon.
-/// </summary>
+/// <summary>A structured container for organizing related content with optional title, description, and icon.</summary>
 public record Card : WidgetBase<Card>
 {
     /// <summary>
@@ -58,15 +56,12 @@ public record Card : WidgetBase<Card>
     }
 }
 
-/// <summary>
-/// Extension methods for configuring Card widget properties.
-/// </summary>
+/// <summary>Extension methods for configuring Card widget properties. </summary>
 public static class CardExtensions
 {
     /// <summary>Sets the title text for the card.</summary>
     /// <param name="card">The Card to configure.</param>
     /// <param name="title">The title text to display at the top of the card.</param>
-    /// <returns>A new Card instance with the updated title.</returns>
     public static Card Title(this Card card, string title)
     {
         return card with { Title = title };
@@ -75,7 +70,6 @@ public static class CardExtensions
     /// <summary>Sets the description text for the card.</summary>
     /// <param name="card">The Card to configure.</param>
     /// <param name="description">The description text to display below the title.</param>
-    /// <returns>A new Card instance with the updated description.</returns>
     public static Card Description(this Card card, string description)
     {
         return card with { Description = description };
@@ -84,7 +78,6 @@ public static class CardExtensions
     /// <summary>Sets the icon for the card.</summary>
     /// <param name="card">The Card to configure.</param>
     /// <param name="icon">The icon to display alongside the title and description.</param>
-    /// <returns>A new Card instance with the updated icon.</returns>
     public static Card Icon(this Card card, Icons? icon)
     {
         return card with { Icon = icon };
@@ -93,30 +86,25 @@ public static class CardExtensions
     /// <summary>Sets the border thickness for the card using an integer value.</summary>
     /// <param name="card">The Card to configure.</param>
     /// <param name="thickness">The uniform border thickness to apply to all sides.</param>
-    /// <returns>A new Card instance with the updated border thickness.</returns>
     public static Card BorderThickness(this Card card, int thickness) => card with { BorderThickness = new(thickness) };
 
     /// <summary>Sets the border thickness for the card using a Thickness object.</summary>
     /// <param name="card">The Card to configure.</param>
     /// <param name="thickness">The Thickness object defining border thickness for each side.</param>
-    /// <returns>A new Card instance with the updated border thickness.</returns>
     public static Card BorderThickness(this Card card, Thickness thickness) => card with { BorderThickness = thickness };
 
     /// <summary>Sets the border radius for the card's corners.</summary>
     /// <param name="card">The Card to configure.</param>
     /// <param name="radius">The border radius to apply to the card's corners.</param>
-    /// <returns>A new Card instance with the updated border radius.</returns>
     public static Card BorderRadius(this Card card, BorderRadius radius) => card with { BorderRadius = radius };
 
     /// <summary>Sets the visual style of the card's border.</summary>
     /// <param name="card">The Card to configure.</param>
     /// <param name="style">The border style to apply to the card.</param>
-    /// <returns>A new Card instance with the updated border style.</returns>
     public static Card BorderStyle(this Card card, BorderStyle style) => card with { BorderStyle = style };
 
     /// <summary>Sets the color of the card's border.</summary>
     /// <param name="card">The Card to configure.</param>
     /// <param name="color">The color to apply to the card's border.</param>
-    /// <returns>A new Card instance with the updated border color.</returns>
     public static Card BorderColor(this Card card, Colors color) => card with { BorderColor = color };
 }
