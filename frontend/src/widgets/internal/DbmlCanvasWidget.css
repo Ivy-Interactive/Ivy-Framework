@@ -99,7 +99,7 @@
 
 /* ReactFlow Node hover + selection styling - target the DatabaseSchemaNode */
 .react-flow__node.selected:hover .rounded-md {
-  border-color: var(--ring) !important;
+  border-color: var(--primary-dark) !important;
   border-width: 2px !important;
 }
 
