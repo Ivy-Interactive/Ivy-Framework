@@ -264,7 +264,23 @@ public class FormBuilder<TModel> : ViewBase
 
         if (nonNullableType == typeof(bool))
         {
-            return (state) => state.ToBoolInput().ScaffoldDefaults(name, type);
+            return (state) =>
+            {
+                var input = state.ToBoolInput();
+                // Only apply scaffold defaults if no custom label was set
+                var field = _fields.Values.FirstOrDefault(f => f.Name == name);
+                if (field != null && field.Label != Utils.SplitPascalCase(name))
+                {
+                    // Custom label was set, don't override it
+                    input.Label = field.Label;
+                }
+                else
+                {
+                    // Use scaffold defaults
+                    input.ScaffoldDefaults(name, type);
+                }
+                return input;
+            };
         }
 
         if (nonNullableType == typeof(string))
@@ -321,7 +337,17 @@ public class FormBuilder<TModel> : ViewBase
                 var input = inner(state);
                 if (input is IAnyBoolInput boolInput)
                 {
-                    boolInput.ScaffoldDefaults(hint.Name, hint.Type);
+                    // Only apply scaffold defaults if no custom label was set
+                    if (hint.Label != Utils.SplitPascalCase(hint.Name))
+                    {
+                        // Custom label was set, don't override it
+                        boolInput.Label = hint.Label;
+                    }
+                    else
+                    {
+                        // Use scaffold defaults
+                        boolInput.ScaffoldDefaults(hint.Name, hint.Type);
+                    }
                 }
                 else if (input is IAnyNumberInput numberInput)
                 {
