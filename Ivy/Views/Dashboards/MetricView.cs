@@ -3,47 +3,28 @@ using Ivy.Shared;
 
 namespace Ivy.Views.Dashboards;
 
-/// <summary>
-/// Represents the data structure for a dashboard metric containing the formatted value, trend information, and goal progress.
-/// </summary>
-/// <param name="MetricFormatted">The formatted string representation of the metric value (e.g., "$1,234.56", "98.5%").</param>
-/// <param name="TrendComparedToPreviousPeriod">Optional percentage change compared to the previous period as a decimal (e.g., 0.15 for 15% increase, -0.05 for 5% decrease).</param>
-/// <param name="GoalAchieved">Optional progress toward goal as a decimal from 0 to 1 (e.g., 0.75 for 75% of goal achieved).</param>
-/// <param name="GoalFormatted">Optional formatted string representation of the goal target (e.g., "Target: $10,000").</param>
+/// <summary>Dashboard metric data with formatted value, trend, and goal progress.</summary>
+/// <param name="MetricFormatted">Formatted metric value.</param>
+/// <param name="TrendComparedToPreviousPeriod">Optional trend percentage as decimal.</param>
+/// <param name="GoalAchieved">Optional goal progress from 0 to 1.</param>
+/// <param name="GoalFormatted">Optional formatted goal target.</param>
 public record MetricRecord(
     string MetricFormatted,
     double? TrendComparedToPreviousPeriod,
     double? GoalAchieved,
     string? GoalFormatted);
 
-/// <summary>
-/// A dashboard view component that displays a key performance indicator (KPI) with asynchronous data loading, trend visualization, and goal progress tracking.
-/// </summary>
-/// <remarks>
-/// Provides a standardized way to display business metrics in dashboard layouts with automatic loading states,
-/// error handling, trend indicators, and progress visualization. The component fetches data asynchronously
-/// and displays appropriate loading, error, or success states with consistent styling and layout.
-/// </remarks>
+/// <summary>Dashboard KPI component with async data loading, trends, and goal tracking.</summary>
 public class MetricView(
     string title,
     Icons? icon,
     Func<Task<MetricRecord>> metricData
 ) : ViewBase
 {
-    /// <summary>
-    /// The fixed height in units for all metric view cards to ensure consistent dashboard layout.
-    /// </summary>
+    /// <summary>Fixed height for consistent dashboard layout.</summary>
     private const int Height = 50;
 
-    /// <summary>
-    /// Builds the metric view component with asynchronous data loading, error handling, and responsive state management.
-    /// </summary>
-    /// <returns>
-    /// A Card widget containing the metric display with one of the following states:
-    /// - Loading: Skeleton placeholder while data is being fetched
-    /// - Error: Error teaser view if data loading fails
-    /// - Success: Formatted metric with optional trend indicators and goal progress
-    /// </returns>
+    /// <summary>Builds the metric view with loading, error, or success states.</summary>
     public override object? Build()
     {
         var data = UseState<MetricRecord?>(() => null);
