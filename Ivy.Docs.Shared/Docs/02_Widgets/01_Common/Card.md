@@ -39,4 +39,23 @@ new Card(
  .Width(Size.Units(100))
 ```
 
+## Dashboard Metrics
+
+For dashboard applications, Ivy provides the specialized `MetricView` component that extends Card functionality with KPI-specific features like trend indicators and goal tracking.
+
+```csharp demo-below
+new MetricView(
+    "Revenue", 
+    Icons.DollarSign,
+    async () => new MetricRecord(
+        "$125,430", 
+        0.12, // 12% increase
+        0.85, // 85% of goal
+        "Target: $150,000"
+    )
+).Width(Size.Units(80))
+```
+
+The `MetricView` automatically handles loading states, error handling, and displays trend arrows with color-coded indicators for performance tracking.
+
 <WidgetDocs Type="Ivy.Card" ExtensionTypes="Ivy.CardExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Card.cs"/>
