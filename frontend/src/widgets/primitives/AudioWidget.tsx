@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { getHeight, getWidth } from '@/lib/styles';
 import { getIvyHost } from '@/lib/utils';
 
@@ -10,7 +10,7 @@ interface AudioWidgetProps {
   autoplay?: boolean;
   loop?: boolean;
   muted?: boolean;
-  preload?: 'None' | 'Metadata' | 'Auto';
+  preload?: 'none' | 'metadata' | 'auto';
   controls?: boolean;
 }
 
@@ -34,9 +34,11 @@ export const AudioWidget: React.FC<AudioWidgetProps> = ({
   autoplay = false,
   loop = false,
   muted = false,
-  preload = 'Metadata',
+  preload = 'metadata',
   controls = true,
 }) => {
+  const [hasError, setHasError] = useState(false);
+
   const styles: React.CSSProperties = {
     ...getWidth(width),
     ...getHeight(height),
@@ -48,8 +50,24 @@ export const AudioWidget: React.FC<AudioWidgetProps> = ({
         key={id}
         style={styles}
         className="flex items-center justify-center bg-muted text-muted-foreground rounded border-2 border-dashed border-muted-foreground/25 p-4"
+        role="alert"
+        aria-label="Audio player error"
       >
         <span className="text-sm">No audio source provided</span>
+      </div>
+    );
+  }
+
+  if (hasError) {
+    return (
+      <div
+        key={id}
+        style={styles}
+        className="flex items-center justify-center bg-destructive/10 text-destructive rounded border-2 border-dashed border-destructive/25 p-4"
+        role="alert"
+        aria-label="Audio loading error"
+      >
+        <span className="text-sm">Failed to load audio file</span>
       </div>
     );
   }
@@ -62,9 +80,12 @@ export const AudioWidget: React.FC<AudioWidgetProps> = ({
       autoPlay={autoplay}
       loop={loop}
       muted={muted}
-      preload={preload.toLowerCase() as 'none' | 'metadata' | 'auto'}
+      preload={preload}
       controls={controls}
       className="w-full"
+      onError={() => setHasError(true)}
+      aria-label="Audio player"
+      role="application"
     >
       Your browser does not support the audio element.
     </audio>

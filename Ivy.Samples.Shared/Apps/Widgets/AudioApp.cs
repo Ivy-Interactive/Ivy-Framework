@@ -84,7 +84,7 @@ public class AudioApp : SampleBase
                        // Audio with custom settings
                        var customAudio = new Audio("path/to/audio.mp3")
                            .Loop(true)
-                           .Preload("auto")
+                           .Preload(AudioPreload.Auto)
                            .Muted(true);
                        
                        // Custom sized audio

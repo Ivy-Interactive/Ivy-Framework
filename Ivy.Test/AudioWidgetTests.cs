@@ -128,4 +128,5 @@ public class AudioWidgetTests
         // Assert
         Assert.Equal(controlsValue, updatedAudio.Controls);
     }
+
 }
