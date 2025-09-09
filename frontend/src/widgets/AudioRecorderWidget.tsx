@@ -8,7 +8,7 @@ import { logger } from '@/lib/logger';
 interface AudioRecorderWidgetProps {
   label?: string;
   recordingLabel?: string;
-  mimeType: string
+  mimeType: string;
   disabled: boolean;
   events: string[];
   width?: string;
