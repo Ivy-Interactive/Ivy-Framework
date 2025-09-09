@@ -118,7 +118,7 @@ const variantMap: VariantMap = {
   ),
   Muted: ({ children, className, style }) => (
     <div
-      className={cn('text-large-body text-muted-foreground', className)}
+      className={cn('text-sm text-muted-foreground', className)}
       style={style}
     >
       {children}
