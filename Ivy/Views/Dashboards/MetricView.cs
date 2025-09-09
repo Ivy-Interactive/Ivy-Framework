@@ -22,7 +22,7 @@ public class MetricView(
 ) : ViewBase
 {
     /// <summary>Fixed height for consistent dashboard layout.</summary>
-    private const int Height = 50;
+    private const int Height = 55;
 
     /// <summary>Builds the metric view with loading, error, or success states.</summary>
     public override object? Build()
@@ -44,20 +44,37 @@ public class MetricView(
 
         if (failed.Value is not null)
         {
-            return new Card().Title(title).Icon(icon).Height(Size.Units(Height)) | new ErrorTeaserView(failed.Value);
+            return new Card(
+                Layout.Vertical().Gap(2)
+                | (Layout.Horizontal().Align(Align.Left).Gap(2)
+                   | Text.Small(title).NoWrap().Overflow(Overflow.Ellipsis).Color(Colors.Gray)
+                   | new Spacer()
+                   | (icon?.ToIcon().Color(Colors.Gray)))
+                | new ErrorTeaserView(failed.Value)
+            ).Height(Size.Units(Height));
         }
 
         if (data.Value is null)
         {
             return new Card(
-                new Skeleton()
-            ).Title(title).Icon(icon).Height(Size.Units(Height));
+                Layout.Vertical().Gap(2)
+                | (Layout.Horizontal().Align(Align.Left).Gap(2)
+                   | Text.Small(title).NoWrap().Overflow(Overflow.Ellipsis).Color(Colors.Gray)
+                   | new Spacer()
+                   | (icon?.ToIcon().Color(Colors.Gray)))
+                | new Skeleton()
+            ).Height(Size.Units(Height));
         }
 
         var x = data.Value;
 
         return new Card(
-                Layout.Horizontal().Align(Align.Left).Gap(2)
+                Layout.Vertical().Gap(2)
+                | (Layout.Horizontal().Align(Align.Left).Gap(2)
+                   | Text.Small(title).NoWrap().Overflow(Overflow.Ellipsis).Color(Colors.Gray)
+                   | new Spacer()
+                   | (icon?.ToIcon().Color(Colors.Gray)))
+                | (Layout.Horizontal().Align(Align.Left).Gap(2)
                     | Text.H4(x.MetricFormatted).NoWrap().Overflow(Overflow.Clip)
                     | (x.TrendComparedToPreviousPeriod != null
                         ? x.TrendComparedToPreviousPeriod >= 0
@@ -68,9 +85,9 @@ public class MetricView(
                         ? x.TrendComparedToPreviousPeriod >= 0
                             ? Text.Small(x.TrendComparedToPreviousPeriod.Value.ToString("P1")).Color(Colors.Primary)
                             : Text.Small(x.TrendComparedToPreviousPeriod.Value.ToString("P1")).Color(Colors.Red)
-                        : null),
-                x.GoalAchieved != null ? new Progress((int)Math.Round(x.GoalAchieved.Value * 100.0)).ColorVariant(Progress.ColorVariants.EmeraldGradient).Goal(x.GoalFormatted) : null
-            ).Title(title).Icon(icon).Height(Size.Units(Height))
+                        : null))
+                | (x.GoalAchieved != null ? new Progress((int)Math.Round(x.GoalAchieved.Value * 100.0)).ColorVariant(Progress.ColorVariants.EmeraldGradient).Goal(x.GoalFormatted) : null)
+            ).Height(Size.Units(Height))
             ;
     }
 }
