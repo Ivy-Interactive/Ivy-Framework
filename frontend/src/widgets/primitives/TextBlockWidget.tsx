@@ -69,7 +69,21 @@ const variantMap: VariantMap = {
   ),
   Block: ({ children, className, style }) => (
     <div className={cn('flex items-center text-sm', className)} style={style}>
-      {children}
+      <span
+        className="overflow-hidden text-ellipsis"
+        title={undefined}
+        onMouseEnter={e => {
+          const el = e.currentTarget;
+          if (el.scrollWidth > el.clientWidth) {
+            el.title = typeof children === 'string' ? children : '';
+          }
+        }}
+        onMouseLeave={e => {
+          e.currentTarget.title = '';
+        }}
+      >
+        {children}
+      </span>
     </div>
   ),
   P: ({ children, className, style }) => (

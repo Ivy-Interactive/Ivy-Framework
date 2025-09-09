@@ -19,9 +19,9 @@ export const DetailWidget: React.FC<DetailWidgetProps> = ({
       <div className="p-3 pl-0 align-middle text-body font-bold">{label}</div>
       <div
         className={cn(
-          'align-middle text-body text-right ml-auto p-3 pl-2 pr-0',
+          'align-middle text-body text-right ml-auto p-3 pl-2 pr-0 min-w-0',
           multiLine && 'max-w-[500px]',
-          !multiLine && 'max-w-[300px]'
+          !multiLine && 'whitespace-nowrap max-w-[300px]'
         )}
       >
         {children}
