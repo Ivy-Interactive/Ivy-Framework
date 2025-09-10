@@ -48,6 +48,67 @@ In your application settings, copy these values from the Basic Information secti
 
 ![Auth0 Create API](assets/auth0_create_api.webp "Auth0 Create API")
 
+### Step 5: Enable Authentication Options
+
+You'll need to enable the specific authentication options you want to use in your Auth0 tenant:
+
+#### Email and Password
+1. **Go to Authentication > Database** in the Auth0 Dashboard: ![Auth0 Database](assets/auth0_database.webp "Auth0 Database")
+2. **Click on the "Username-Password-Authentication" connection**: ![Auth0 Database Connections](assets/auth0_database_connections.webp "Auth0 Database Connections")
+3. **Go to the "Applications" tab and ensure that the connection is enabled on your application**: ![Auth0 Connection Enabled](assets/auth0_connection_enabled.webp "Auth0 Connection Enabled")
+4. **Go to the "Settings" tab and enable "Disable Sign Ups"** if you want to control user registration manually
+5. **Go to the "Authentication Methods" tab and configure your password policy** as needed for your security requirements
+6. **Enable the Password Grant**: In your Auth0 application, go to the **Settings** tab, scroll down to **Advanced Settings**, click **Grant Types**, and ensure the **Password** grant type is checked: ![Auth0 Password Grant](assets/auth0_password_grant.webp "Auth0 Password Grant")
+
+##### Adding Users for Email and Password Authentication
+
+Once you've enabled the "Username-Password-Authentication" connection, you'll need to add users. The simplest way to do this is in the Auth0 Dashboard:
+1. **Go to User Management > Users** in the Auth0 Dashboard
+2. **Click "Create User"**, then click **"Create via UI"** in the dropdown that will appear
+3. **Select the "Username-Password-Authentication" connection**
+4. **Enter the user's email address**
+5. **Set the user's password**
+6. **Click "Create"**
+
+For more information about user creation and management, see Auth0's [Manage Users documentation](https://auth0.com/docs/manage-users).
+
+#### Google
+1. **Go to Authentication > Social** in the Auth0 Dashboard
+2. **Click the Google toggle** to enable it
+3. **Enter your Google Client ID and Secret** (from Google Cloud Console)
+4. **Configure allowed scopes** (email, profile are recommended)
+5. **Save the configuration**
+
+#### GitHub
+1. **Go to Authentication > Social** in the Auth0 Dashboard
+2. **Click the GitHub toggle** to enable it
+3. **Enter your GitHub Client ID and Secret** (from GitHub Developer Settings)
+4. **Configure allowed scopes** (user:email, read:user are recommended)
+5. **Save the configuration**
+
+#### Microsoft
+1. **Go to Authentication > Social** in the Auth0 Dashboard
+2. **Click the Microsoft toggle** to enable it
+3. **Enter your Microsoft Application ID and Secret** (from Azure Portal)
+4. **Configure allowed scopes** (openid, email, profile are recommended)
+5. **Save the configuration**
+
+#### Apple
+1. **Go to Authentication > Social** in the Auth0 Dashboard
+2. **Click the Apple toggle** to enable it
+3. **Enter your Apple Team ID, Key ID, and Private Key** (from Apple Developer Portal)
+4. **Configure allowed scopes** (email, name are recommended)
+5. **Save the configuration**
+
+#### Twitter
+1. **Go to Authentication > Social** in the Auth0 Dashboard
+2. **Click the Twitter toggle** to enable it
+3. **Enter your Twitter API Key and Secret** (from Twitter Developer Portal)
+4. **Configure allowed permissions** (read access is required)
+5. **Save the configuration**
+
+**Note:** Each social provider requires additional setup in their respective developer consoles. Refer to Auth0's documentation for detailed setup instructions for each provider.
+
 ## Adding Authentication
 
 To set up Auth0 Authentication with Ivy, run the following command and choose `Auth0` when asked to select an auth provider:
@@ -63,10 +124,20 @@ You will be prompted to provide the following Auth0 configuration:
 - **Client Secret**: Your Auth0 application's client secret
 - **Audience**: API identifier for securing API access
 
-Your credentials will be stored securely in .NET user secrets. Ivy then finishes configuring your application automatically:
+Your credentials will be stored securely in .NET user secrets. You will then be prompted to choose one or more authentication options to support, from the following list:
+- **E-mail and password**
+- **Google**
+- **GitHub**
+- **Microsoft**
+- **Apple**
+- **Twitter**
+
+> **Note**: All options selected must also be enabled in your Auth0 Dashboard to work.
+
+Ivy then finishes configuring your application automatically:
 
 1. Adds the `Ivy.Auth.Auth0` package to your project.
-2. Adds `server.UseAuth<Auth0AuthProvider>(c => c.UseEmailPassword().UseGoogle().UseApple());` to your `Program.cs`.
+2. Dynamically generates and adds the appropriate `UseAuth<Auth0AuthProvider>()` call to your `Program.cs` based on your selected options (e.g., if you select Email/Password and Google, it generates: `server.UseAuth<Auth0AuthProvider>(c => c.UseEmailPassword().UseGoogle());`).
 3. Adds `Ivy.Auth.Auth0` to your global usings.
 
 ### Connection String Format
