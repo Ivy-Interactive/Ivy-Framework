@@ -284,7 +284,7 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
         return new SidebarLayout(
             body ?? null!,
             sidebarMenu,
-            Layout.Vertical()
+            Layout.Vertical().Gap(2)
                 | settings.Header
                 | searchInput
             ,
