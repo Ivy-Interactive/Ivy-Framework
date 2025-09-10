@@ -19,7 +19,7 @@ export const DetailWidget: React.FC<DetailWidgetProps> = ({
       className={cn(
         'border-b flex',
         multiLine && 'flex-col',
-        !multiLine && 'whitespace-nowrap'
+        !multiLine && 'items-center'
       )}
       key={id}
     >
@@ -34,7 +34,7 @@ export const DetailWidget: React.FC<DetailWidgetProps> = ({
         className={cn(
           'align-middle text-body',
           multiLine ? 'text-left pb-3' : 'text-right ml-auto p-3 pl-2 pr-0',
-          !multiLine && 'min-w-0'
+          !multiLine && 'whitespace-nowrap min-w-0'
         )}
       >
         {children}

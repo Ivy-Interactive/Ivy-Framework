@@ -74,32 +74,40 @@ const variantMap: VariantMap = {
     </h4>
   ),
   Block: ({ children, className, style }) => {
-    const [tooltipText, setTooltipText] = React.useState<string>();
-
+    const spanRef = React.useRef<HTMLSpanElement>(null);
+    const [isTruncated, setIsTruncated] = React.useState(false);
+    const [showTooltip, setShowTooltip] = React.useState(false);
+    React.useEffect(() => {
+      const checkTruncation = () => {
+        const el = spanRef.current;
+        if (el) {
+          setIsTruncated(el.scrollWidth > el.clientWidth);
+        }
+      };
+      checkTruncation();
+      // Optionally, listen for window resize to re-check truncation
+      window.addEventListener('resize', checkTruncation);
+      return () => {
+        window.removeEventListener('resize', checkTruncation);
+      };
+    }, [children, style]);
     return (
       <div className={cn('flex items-center text-sm', className)} style={style}>
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
               <span
+                ref={spanRef}
                 className="overflow-hidden text-ellipsis"
-                onMouseEnter={e => {
-                  const el = e.currentTarget;
-                  const isTruncated = el.scrollWidth > el.clientWidth;
-                  setTooltipText(
-                    isTruncated && typeof children === 'string'
-                      ? children
-                      : undefined
-                  );
-                }}
-                onMouseLeave={() => setTooltipText(undefined)}
+                onMouseEnter={() => setShowTooltip(true)}
+                onMouseLeave={() => setShowTooltip(false)}
               >
                 {children}
               </span>
             </TooltipTrigger>
-            {tooltipText && (
+            {showTooltip && isTruncated && typeof children === 'string' && (
               <TooltipContent className="bg-popover text-popover-foreground shadow-md">
-                {tooltipText}
+                {children}
               </TooltipContent>
             )}
           </Tooltip>
