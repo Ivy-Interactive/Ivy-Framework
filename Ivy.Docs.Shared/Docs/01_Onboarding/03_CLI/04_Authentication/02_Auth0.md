@@ -92,10 +92,11 @@ Otherwise, create and configure the connection:
 1. **Go to Authentication > Social** in the Auth0 Dashboard
 2. **Click "Create Connection"**
 3. **Select "GitHub" from the list of social providers**
-4. **Enter your GitHub Client ID and Secret** (from GitHub Developer Settings)
-5. **Configure scopes** ("Email address" is recommended)
-6. **Click "Create"**
-7. **Enable the connection** for your application in the "Applications" tab
+4. **Click "Continue"**
+5. **Enter your GitHub Client ID and Secret** (from GitHub Developer Settings)
+6. **Configure scopes** ("Email address" is recommended)
+7. **Click "Create"**
+8. **Enable the connection** for your application in the "Applications" tab
 
 > **Note**: For testing GitHub authentication, you may use [Auth0 Development Keys](https://auth0.com/docs/authenticate/identity-providers/social-identity-providers/devkeys) by leaving Client ID and Client Secret blank. These keys are not to be used for production.
 
@@ -103,28 +104,31 @@ Otherwise, create and configure the connection:
 1. **Go to Authentication > Social** in the Auth0 Dashboard
 2. **Click "Create Connection"**
 3. **Select "Microsoft Account" from the list of social providers**
-4. **Enter your Microsoft Application ID and Secret** (from Azure Portal)
-5. **Configure allowed scopes** (openid, email, profile are recommended)
-6. **Click "Create"**
-7. **Enable the connection** for your application in the "Applications" tab
+4. **Click "Continue"**
+5. **Enter your Microsoft Application ID and Secret** (from Azure Portal)
+6. **Configure allowed scopes** (openid, email, profile are recommended)
+7. **Click "Create"**
+8. **Enable the connection** for your application in the "Applications" tab
 
 #### Apple
 1. **Go to Authentication > Social** in the Auth0 Dashboard
 2. **Click "Create Connection"**
 3. **Select "Apple" from the list of social providers**
-4. **Enter your Apple Team ID, Key ID, and Private Key** (from Apple Developer Portal)
-5. **Configure allowed scopes** (email, name are recommended)
-6. **Click "Create"**
-7. **Enable the connection** for your application in the "Applications" tab
+4. **Click "Continue"**
+5. **Enter your Apple Team ID, Key ID, and Private Key** (from Apple Developer Portal)
+6. **Configure allowed scopes** (email, name are recommended)
+7. **Click "Create"**
+8. **Enable the connection** for your application in the "Applications" tab
 
 #### Twitter
 1. **Go to Authentication > Social** in the Auth0 Dashboard
 2. **Click "Create Connection"**
 3. **Select "Twitter" from the list of social providers**
-4. **Enter your Twitter API Key and Secret** (from Twitter Developer Portal)
-5. **Configure allowed permissions** (read access is required)
-6. **Click "Create"**
-7. **Enable the connection** for your application in the "Applications" tab
+4. **Click "Continue"**
+5. **Enter your Twitter API Key and Secret** (from Twitter Developer Portal)
+6. **Configure allowed permissions** (read access is required)
+7. **Click "Create"**
+8. **Enable the connection** for your application in the "Applications" tab
 
 **Note:** Each social provider requires additional setup in their respective developer consoles. Refer to Auth0's documentation for detailed setup instructions for each provider.
 
