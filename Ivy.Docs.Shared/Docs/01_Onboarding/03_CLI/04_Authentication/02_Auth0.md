@@ -64,7 +64,7 @@ You'll need to enable the specific authentication options you want to use in you
 
 Once you've enabled the "Username-Password-Authentication" connection, you'll need to add users. The simplest way to do this is in the Auth0 Dashboard:
 1. **Go to User Management > Users** in the Auth0 Dashboard
-2. **Click "Create User"**, then click **"Create via UI"** in the dropdown that will appear
+2. **Click "Create User"**, then click **"Create via UI"** in the dropdown that appears
 3. **Select the "Username-Password-Authentication" connection**
 4. **Enter the user's email address**
 5. **Set the user's password**
@@ -73,39 +73,56 @@ Once you've enabled the "Username-Password-Authentication" connection, you'll ne
 For more information about user creation and management, see Auth0's [Manage Users documentation](https://auth0.com/docs/manage-users).
 
 #### Google
-1. **Go to Authentication > Social** in the Auth0 Dashboard
-2. **Click the Google toggle** to enable it
-3. **Enter your Google Client ID and Secret** (from Google Cloud Console)
-4. **Configure allowed scopes** (email, profile are recommended)
-5. **Save the configuration**
+First, go to Authentication > Social in the Auth0 Dashboard. If "google-oauth2" is already listed, configure it:
+1. **Enter your Google Client ID and Client Secret** (from Google Cloud Console)
+2. **Enable "Offline Access"** if you want to allow users to remain logged in for an extended period of time
+4. **Enable the connection** for your application in the "Applications" tab
+
+Otherwise, create and configure the connection:
+1. **Click "Create Connection"**
+2. **Select "Google / Gmail" from the list of social providers**
+3. **Click "Continue"**
+1. **Enter your Google Client ID and Client Secret** (from Google Cloud Console)
+2. **Enable "Offline Access"** if you want to allow users to remain logged in for an extended period of time
+4. **Enable the connection** for your application in the "Applications" tab
+
+> **Note**: For testing Google authentication, you may use [Auth0 Development Keys](https://auth0.com/docs/authenticate/identity-providers/social-identity-providers/devkeys) by leaving Client ID and Client Secret blank. These keys are not to be used for production.
 
 #### GitHub
 1. **Go to Authentication > Social** in the Auth0 Dashboard
-2. **Click the GitHub toggle** to enable it
-3. **Enter your GitHub Client ID and Secret** (from GitHub Developer Settings)
-4. **Configure allowed scopes** (user:email, read:user are recommended)
-5. **Save the configuration**
+2. **Click "Create Connection"**
+3. **Select "GitHub" from the list of social providers**
+4. **Enter your GitHub Client ID and Secret** (from GitHub Developer Settings)
+5. **Configure allowed scopes** (user:email, read:user are recommended)
+6. **Click "Create"**
+7. **Enable the connection** for your application in the "Applications" tab
 
 #### Microsoft
 1. **Go to Authentication > Social** in the Auth0 Dashboard
-2. **Click the Microsoft toggle** to enable it
-3. **Enter your Microsoft Application ID and Secret** (from Azure Portal)
-4. **Configure allowed scopes** (openid, email, profile are recommended)
-5. **Save the configuration**
+2. **Click "Create Connection"**
+3. **Select "Microsoft Account" from the list of social providers**
+4. **Enter your Microsoft Application ID and Secret** (from Azure Portal)
+5. **Configure allowed scopes** (openid, email, profile are recommended)
+6. **Click "Create"**
+7. **Enable the connection** for your application in the "Applications" tab
 
 #### Apple
 1. **Go to Authentication > Social** in the Auth0 Dashboard
-2. **Click the Apple toggle** to enable it
-3. **Enter your Apple Team ID, Key ID, and Private Key** (from Apple Developer Portal)
-4. **Configure allowed scopes** (email, name are recommended)
-5. **Save the configuration**
+2. **Click "Create Connection"**
+3. **Select "Apple" from the list of social providers**
+4. **Enter your Apple Team ID, Key ID, and Private Key** (from Apple Developer Portal)
+5. **Configure allowed scopes** (email, name are recommended)
+6. **Click "Create"**
+7. **Enable the connection** for your application in the "Applications" tab
 
 #### Twitter
 1. **Go to Authentication > Social** in the Auth0 Dashboard
-2. **Click the Twitter toggle** to enable it
-3. **Enter your Twitter API Key and Secret** (from Twitter Developer Portal)
-4. **Configure allowed permissions** (read access is required)
-5. **Save the configuration**
+2. **Click "Create Connection"**
+3. **Select "Twitter" from the list of social providers**
+4. **Enter your Twitter API Key and Secret** (from Twitter Developer Portal)
+5. **Configure allowed permissions** (read access is required)
+6. **Click "Create"**
+7. **Enable the connection** for your application in the "Applications" tab
 
 **Note:** Each social provider requires additional setup in their respective developer consoles. Refer to Auth0's documentation for detailed setup instructions for each provider.
 
