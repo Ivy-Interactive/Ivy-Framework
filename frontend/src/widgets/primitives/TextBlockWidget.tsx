@@ -74,9 +74,7 @@ const variantMap: VariantMap = {
     </h4>
   ),
   Block: ({ children, className, style }) => {
-    const [tooltipText, setTooltipText] = React.useState<string | undefined>(
-      undefined
-    );
+    const [tooltipText, setTooltipText] = React.useState<string>();
 
     return (
       <div className={cn('flex items-center text-sm', className)} style={style}>
