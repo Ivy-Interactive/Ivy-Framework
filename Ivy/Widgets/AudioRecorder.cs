@@ -52,17 +52,17 @@ public record AudioRecorder : WidgetBase<AudioRecorder>
 /// </summary>
 public static class AudioRecorderExtensions
 {
-    /// <summary>Sets the label text for the audio recorder.</summary>
+    /// <summary>Sets the label text to display when no audio is recording.</summary>
     /// <param name="widget">The audio recorder to configure.</param>
-    /// <param name="label">The label text to display when no audio is recording.</param>
+    /// <param name="label">The label text.</param>
     public static AudioRecorder Label(this AudioRecorder widget, string label)
     {
         return widget with { Label = label };
     }
 
-    /// <summary>Sets the placeholder text for the audio recorder.</summary>
+    /// <summary>Sets the label text to display when audio is recording.</summary>
     /// <param name="widget">The audio recorder to configure.</param>
-    /// <param name="label">The label text to display when audio is recording.</param>
+    /// <param name="label">The label text.</param>
     public static AudioRecorder RecordingLabel(this AudioRecorder widget, string label)
     {
         return widget with { RecordingLabel = label };
@@ -84,7 +84,7 @@ public static class AudioRecorderExtensions
         return widget with { MimeType = mimeType };
     }
 
-    /// <summary>Sets the mime type used for recorded audio.</summary>
+    /// <summary>Sets the chunk size, in milliseconds, for continuous chunked uploads.</summary>
     /// <param name="widget">The audio recorder to configure.</param>
     /// <param name="chunkInterval">Chunk size to use, in milliseconds. If null, audio will only be uploaded when recording stops.</param>
     public static AudioRecorder ChunkInterval(this AudioRecorder widget, int? chunkInterval)
