@@ -106,9 +106,13 @@ Otherwise, create and configure the connection:
 3. **Select "Microsoft Account" from the list of social providers**
 4. **Click "Continue"**
 5. **Enter your Microsoft Application ID and Secret** (from Azure Portal)
-6. **Configure allowed scopes** (openid, email, profile are recommended)
-7. **Click "Create"**
-8. **Enable the connection** for your application in the "Applications" tab
+6. **Enable "Offline Access"** if you want to allow users to remain logged in for an extended period of time
+8. **Click "Create"**
+9. **Enable the connection** for your application in the "Applications" tab
+
+> **Note**: [Auth0 Development Keys](https://auth0.com/docs/authenticate/identity-providers/social-identity-providers/devkeys) can not be used for Microsoft authentication.
+
+For more information on setting up Microsoft authentication, see [Auth0's Documentation](https://marketplace.auth0.com/integrations/microsoft-account-social-connection).
 
 #### Apple
 1. **Go to Authentication > Social** in the Auth0 Dashboard
