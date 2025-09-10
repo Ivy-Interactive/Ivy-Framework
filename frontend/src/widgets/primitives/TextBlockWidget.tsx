@@ -2,6 +2,12 @@ import { getColor, getOverflow, getWidth, Overflow } from '@/lib/styles';
 import { cn } from '@/lib/utils';
 import React from 'react';
 import { textBlockClassMap } from '../../lib/textBlockClassMap';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 type TextBlockVariant =
   | 'Literal'
@@ -67,25 +73,42 @@ const variantMap: VariantMap = {
       {children}
     </h4>
   ),
-  Block: ({ children, className, style }) => (
-    <div className={cn('flex items-center text-sm', className)} style={style}>
-      <span
-        className="overflow-hidden text-ellipsis"
-        title={undefined}
-        onMouseEnter={e => {
-          const el = e.currentTarget;
-          if (el.scrollWidth > el.clientWidth) {
-            el.title = typeof children === 'string' ? children : '';
-          }
-        }}
-        onMouseLeave={e => {
-          e.currentTarget.title = '';
-        }}
-      >
-        {children}
-      </span>
-    </div>
-  ),
+  Block: ({ children, className, style }) => {
+    const [tooltipText, setTooltipText] = React.useState<string | undefined>(
+      undefined
+    );
+
+    return (
+      <div className={cn('flex items-center text-sm', className)} style={style}>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span
+                className="overflow-hidden text-ellipsis"
+                onMouseEnter={e => {
+                  const el = e.currentTarget;
+                  const isTruncated = el.scrollWidth > el.clientWidth;
+                  setTooltipText(
+                    isTruncated && typeof children === 'string'
+                      ? children
+                      : undefined
+                  );
+                }}
+                onMouseLeave={() => setTooltipText(undefined)}
+              >
+                {children}
+              </span>
+            </TooltipTrigger>
+            {tooltipText && (
+              <TooltipContent className="bg-popover text-popover-foreground shadow-md">
+                {tooltipText}
+              </TooltipContent>
+            )}
+          </Tooltip>
+        </TooltipProvider>
+      </div>
+    );
+  },
   P: ({ children, className, style }) => (
     <p className={cn(textBlockClassMap.P, className)} style={style}>
       {children}
