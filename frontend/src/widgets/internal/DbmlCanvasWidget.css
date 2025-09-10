@@ -81,26 +81,26 @@
 
 /* DatabaseSchemaNode styling - apply hover/selection to the actual table */
 .react-flow__node .rounded-md {
-  transition: all 0.1s ease !important;
-  border-width: 2px !important;
+  transition: all 0.1s ease;
+  border-width: 2px;
 }
 
 /* ReactFlow Node hover styling - target the DatabaseSchemaNode */
 .react-flow__node:hover .rounded-md {
-  border-color: var(--ring) !important;
-  border-width: 2px !important;
+  border-color: var(--muted-foreground);
+  border-width: 2px;
 }
 
 /* ReactFlow Node selection styling - target the DatabaseSchemaNode */
 .react-flow__node.selected .rounded-md {
-  border-color: var(--primary) !important;
-  border-width: 2px !important;
+  border-color: var(--primary);
+  border-width: 2px;
 }
 
 /* ReactFlow Node hover + selection styling - target the DatabaseSchemaNode */
 .react-flow__node.selected:hover .rounded-md {
-  border-color: var(--primary-dark) !important;
-  border-width: 2px !important;
+  border-color: var(--primary-dark);
+  border-width: 2px;
 }
 
 /* ReactFlow Handle styling */
