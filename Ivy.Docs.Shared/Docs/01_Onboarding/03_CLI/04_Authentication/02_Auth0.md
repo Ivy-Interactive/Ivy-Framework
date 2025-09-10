@@ -82,9 +82,9 @@ Otherwise, create and configure the connection:
 1. **Click "Create Connection"**
 2. **Select "Google / Gmail" from the list of social providers**
 3. **Click "Continue"**
-1. **Enter your Google Client ID and Client Secret** (from Google Cloud Console)
-2. **Enable "Offline Access"** if you want to allow users to remain logged in for an extended period of time
-4. **Enable the connection** for your application in the "Applications" tab
+4. **Enter your Google Client ID and Client Secret** (from Google Cloud Console)
+5. **Enable "Offline Access"** if you want to allow users to remain logged in for an extended period of time
+6. **Enable the connection** for your application in the "Applications" tab
 
 > **Note**: For testing Google authentication, you may use [Auth0 Development Keys](https://auth0.com/docs/authenticate/identity-providers/social-identity-providers/devkeys) by leaving Client ID and Client Secret blank. These keys are not to be used for production.
 
@@ -93,9 +93,11 @@ Otherwise, create and configure the connection:
 2. **Click "Create Connection"**
 3. **Select "GitHub" from the list of social providers**
 4. **Enter your GitHub Client ID and Secret** (from GitHub Developer Settings)
-5. **Configure allowed scopes** (user:email, read:user are recommended)
+5. **Configure scopes** ("Email address" is recommended)
 6. **Click "Create"**
 7. **Enable the connection** for your application in the "Applications" tab
+
+> **Note**: For testing GitHub authentication, you may use [Auth0 Development Keys](https://auth0.com/docs/authenticate/identity-providers/social-identity-providers/devkeys) by leaving Client ID and Client Secret blank. These keys are not to be used for production.
 
 #### Microsoft
 1. **Go to Authentication > Social** in the Auth0 Dashboard
