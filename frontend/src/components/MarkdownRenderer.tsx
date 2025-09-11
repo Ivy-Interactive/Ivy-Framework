@@ -353,7 +353,31 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
               target={isExternalLink ? '_blank' : undefined}
               rel={isExternalLink ? 'noopener noreferrer' : undefined}
               onClick={
-                isAnchorLink ? undefined : e => href && handleLinkClick(href, e)
+                isAnchorLink
+                  ? e => {
+                      e.preventDefault();
+                      const targetId = href?.substring(1);
+                      if (targetId) {
+                        // Small delay to ensure content is rendered
+                        requestAnimationFrame(() => {
+                          const targetElement =
+                            document.getElementById(targetId);
+                          if (targetElement) {
+                            targetElement.scrollIntoView({
+                              behavior: 'smooth',
+                              block: 'start',
+                            });
+                            // Update URL hash
+                            window.history.replaceState(
+                              null,
+                              '',
+                              `#${targetId}`
+                            );
+                          }
+                        });
+                      }
+                    }
+                  : e => href && handleLinkClick(href, e)
               }
             >
               {children}
