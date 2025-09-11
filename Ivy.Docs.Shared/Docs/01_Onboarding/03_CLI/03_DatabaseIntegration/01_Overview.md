@@ -30,8 +30,6 @@ When you run this command without specifying options, Ivy will guide you through
 
 Available providers: `SqlServer`, `Postgres`, `MySql`, `MariaDb`, `Sqlite`, `Supabase`, `Airtable`, `Oracle`, `Spanner`, `ClickHouse`, `Snowflake`
 
-For detailed information about each provider, see the [Supported Database Providers](#supported-database-providers) section below.
-
 `--name <CONNECTION_NAME>` or `-n <CONNECTION_NAME>` - Specify the connection name in PascalCase:
 
 ```terminal

@@ -11,7 +11,6 @@ Auth0 is a universal authentication and authorization platform that provides sec
 ## Getting Your Auth0 Configuration
 
 Before using Auth0 with Ivy, you'll need to create an Auth0 application and obtain your configuration values:
-For detailed information about each provider, see the [Related Documentation](#related-documentation) section below.
 
 ### Step 1: Create an Auth0 Account and Application
 
@@ -277,5 +276,3 @@ Key features of the Auth0 provider:
 - [Authentication Overview](Overview.md)
 - [Supabase Authentication](Supabase.md)
 - [Microsoft Entra Provider](MicrosoftEntra.md)
-
-[Overview](#overview)
