@@ -26,7 +26,7 @@ public class TableApp : SampleBase
             new {Sku = "1235", Foo = true, Name = "Jeans", Price = 20.0, Url = "http://example.com/jeans"},
             new {Sku = "1236", Foo = true, Name = "Sneakers", Price = 30.0, Url = "http://example.com/sneakers"},
             new {Sku = "1237", Foo = true, Name = "Hat", Price = 5.0, Url = "http://example.com/hat"},
-            new {Sku = "1238", Foo = true, Name = "Multiline Example Multiline Example Multiline Example Multiline Example Multiline Example", Price = 2.0, Url = "http://example.com/socks"}
+            new {Sku = "1238", Foo = true, Name = "Multiline Example Multiline Example Multiline Example Multiline Example Multiline Example Multiline Example Multiline Example Multiline Example Multiline Example Multiline Example Multiline Example", Price = 2.0, Url = "http://example.com/socks"}
         };
 
         return products

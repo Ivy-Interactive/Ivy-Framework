@@ -41,8 +41,9 @@ export const TableCellWidget: React.FC<TableCellWidgetProps> = ({
     >
       <div
         className={cn(
-          'align-middle text-body min-w-0',
-          multiLine && 'break-all'
+          'align-middle text-body',
+          multiLine && 'break-all',
+          !multiLine && 'whitespace-nowrap min-w-0'
         )}
         style={alignStyles}
       >
