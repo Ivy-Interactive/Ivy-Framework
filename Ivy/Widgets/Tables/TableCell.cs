@@ -63,6 +63,15 @@ public record TableCell : WidgetBase<TableCell>
     /// Default is the default alignment behavior for the current context.
     /// </summary>
     [Prop] public Align Align { get; set; }
+
+    /// <summary>
+    /// Gets or sets whether the cell content should be displayed in multi-line format.
+    /// When true, the content is rendered with line breaks and expanded spacing,
+    /// allowing for better display of longer text content within the cell.
+    /// When false, the content is displayed in a compact, single-line format.
+    /// Default is false (single-line format).
+    /// </summary>
+    [Prop] public bool MultiLine { get; set; }
 }
 
 /// <summary>
@@ -110,5 +119,18 @@ public static class TableCellExtensions
     public static TableCell Align(this TableCell cell, Align align)
     {
         return cell with { Align = align };
+    }
+
+    /// <summary>
+    /// Sets whether the cell content should be displayed in multi-line format.
+    /// This method allows you to control how content is displayed within the cell,
+    /// enabling better display of longer text content with line breaks.
+    /// </summary>
+    /// <param name="cell">The TableCell to configure.</param>
+    /// <param name="multiLine">Whether the cell content should be displayed in multi-line format.</param>
+    /// <returns>A new TableCell instance with the updated multi-line setting.</returns>
+    public static TableCell MultiLine(this TableCell cell, bool multiLine = true)
+    {
+        return cell with { MultiLine = multiLine };
     }
 }

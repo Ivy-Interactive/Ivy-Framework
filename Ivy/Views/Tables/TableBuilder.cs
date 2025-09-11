@@ -35,6 +35,7 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         public string Header { get; set; } = Utils.SplitPascalCase(name) ?? name;
         public string? Description { get; set; }
         public bool Removed { get; set; } = removed;
+        public bool IsMultiLine { get; set; }
         public Align Align { get; set; } = align;
         public Size? Width { get; set; }
         public Func<IEnumerable<TModel>, object>? FooterAggregate { get; set; }
@@ -236,6 +237,17 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         return this;
     }
 
+    public TableBuilder<TModel> MultiLine(params Expression<Func<TModel, object>>[] fields)
+    {
+        foreach (var field in fields)
+        {
+            var hint = GetField(field);
+            hint.IsMultiLine = true;
+        }
+        return this;
+    }
+
+
     /// <summary>Adds a previously removed column back to the table.</summary>
     /// <param name="field">Expression identifying the column to add back.</param>
     public TableBuilder<TModel> Add(Expression<Func<TModel, object>> field)
@@ -330,6 +342,11 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         {
             var cell = new TableCell(content).IsHeader(isHeader).IsFooter(isFooter).Align(column.Align);
 
+            if (column.IsMultiLine)
+            {
+                cell = cell.MultiLine(true);
+            }
+
             if (isHeader)
             {
                 cell = cell.Width(column.Width);
@@ -362,6 +379,7 @@ public class TableBuilder<TModel> : ViewBase, IStateless
             .OrderBy(e => e.Order).ToList();
 
         TableRow RenderRow(TModel e)
+
         {
             var row = new TableRow(
                 columns.Select((f, i) => RenderCell(i, f, f.Builder.Build(f.GetValue(e), e), false, false)).ToArray()

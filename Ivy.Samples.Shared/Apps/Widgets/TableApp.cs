@@ -26,13 +26,16 @@ public class TableApp : SampleBase
             new {Sku = "1235", Foo = true, Name = "Jeans", Price = 20.0, Url = "http://example.com/jeans"},
             new {Sku = "1236", Foo = true, Name = "Sneakers", Price = 30.0, Url = "http://example.com/sneakers"},
             new {Sku = "1237", Foo = true, Name = "Hat", Price = 5.0, Url = "http://example.com/hat"},
-            new {Sku = "1238", Foo = true, Name = "Socks", Price = 2.0, Url = "http://example.com/socks"}
+            new {Sku = "1238", Foo = true, Name = "Multiline Example Multiline Example Multiline Example Multiline Example Multiline Example", Price = 2.0, Url = "http://example.com/socks"}
         };
 
         return products
                 .ToTable()
                 .Builder(e => e.Url, e => e.Link())
                 .Width(Size.Full())
+                .MultiLine(e => e.Name)
+            // .Width(e => e.Name, Size.Units(100));
+            // Enable multi-line display for description column
             // .Width(e => e.Sku, Size.Fraction(0))
             // .Width(e => e.Name, Size.Fraction(1 / 3f))
             // .Width(e => e.Price, Size.Fraction(1 / 3f))
