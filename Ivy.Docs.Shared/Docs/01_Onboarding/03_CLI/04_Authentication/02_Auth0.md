@@ -76,7 +76,7 @@ For more information about user creation and management, see Auth0's [Manage Use
 First, go to Authentication > Social in the Auth0 Dashboard. If "google-oauth2" is already listed, configure it:
 1. **Enter your Google Client ID and Client Secret** (from Google Cloud Console)
 2. **Enable "Offline Access"** if you want to allow users to remain logged in for an extended period of time
-4. **Enable the connection** for your application in the "Applications" tab
+3. **Enable the connection** for your application in the "Applications" tab
 
 Otherwise, create and configure the connection:
 1. **Click "Create Connection"**
@@ -111,8 +111,8 @@ For more information on setting up GitHub authentication, see Auth0's [GitHub do
 4. **Click "Continue"**
 5. **Enter your Microsoft Application ID and Secret** (from Azure Portal)
 6. **Enable "Offline Access"** if you want to allow users to remain logged in for an extended period of time
-8. **Click "Create"**
-9. **Enable the connection** for your application in the "Applications" tab
+7. **Click "Create"**
+8. **Enable the connection** for your application in the "Applications" tab
 
 > **Note**: [Auth0 Development Keys](https://auth0.com/docs/authenticate/identity-providers/social-identity-providers/devkeys) can not be used for Microsoft authentication.
 
@@ -138,8 +138,8 @@ For more information on setting up Apple authentication, see Auth0's [Apple docu
 3. **Select "Twitter" from the list of social providers**
 4. **Click "Continue"**
 5. **Enter your Twitter API Key and Secret** (from Twitter Developer Portal)
-7. **Click "Create"**
-8. **Enable the connection** for your application in the "Applications" tab
+6. **Click "Create"**
+7. **Enable the connection** for your application in the "Applications" tab
 
 > **Note**: For testing Twitter/X authentication, you may use [Auth0 Development Keys](https://auth0.com/docs/authenticate/identity-providers/social-identity-providers/devkeys) by leaving API Key and Secret blank. These development keys are not to be used for production.
 
