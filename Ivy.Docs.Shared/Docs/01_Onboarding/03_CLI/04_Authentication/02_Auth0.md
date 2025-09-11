@@ -88,6 +88,8 @@ Otherwise, create and configure the connection:
 
 > **Note**: For testing Google authentication, you may use [Auth0 Development Keys](https://auth0.com/docs/authenticate/identity-providers/social-identity-providers/devkeys) by leaving Client ID and Client Secret blank. These keys are not to be used for production.
 
+For more information on setting up Google authentication, see Auth0's [Google documentation](https://marketplace.auth0.com/integrations/google-social-connection).
+
 #### GitHub
 1. **Go to Authentication > Social** in the Auth0 Dashboard
 2. **Click "Create Connection"**
@@ -99,6 +101,8 @@ Otherwise, create and configure the connection:
 8. **Enable the connection** for your application in the "Applications" tab
 
 > **Note**: For testing GitHub authentication, you may use [Auth0 Development Keys](https://auth0.com/docs/authenticate/identity-providers/social-identity-providers/devkeys) by leaving Client ID and Client Secret blank. These keys are not to be used for production.
+
+For more information on setting up GitHub authentication, see Auth0's [GitHub documentation](https://marketplace.auth0.com/integrations/github-social-connection).
 
 #### Microsoft
 1. **Go to Authentication > Social** in the Auth0 Dashboard
@@ -112,29 +116,34 @@ Otherwise, create and configure the connection:
 
 > **Note**: [Auth0 Development Keys](https://auth0.com/docs/authenticate/identity-providers/social-identity-providers/devkeys) can not be used for Microsoft authentication.
 
-For more information on setting up Microsoft authentication, see [Auth0's Documentation](https://marketplace.auth0.com/integrations/microsoft-account-social-connection).
+For more information on setting up Microsoft authentication, see Auth0's [Microsoft documentation](https://marketplace.auth0.com/integrations/microsoft-account-social-connection).
 
 #### Apple
 1. **Go to Authentication > Social** in the Auth0 Dashboard
 2. **Click "Create Connection"**
 3. **Select "Apple" from the list of social providers**
 4. **Click "Continue"**
-5. **Enter your Apple Team ID, Key ID, and Private Key** (from Apple Developer Portal)
+5. **Enter your Client ID, Client Secret Signing Key, Apple Team ID, and Key ID** (from Apple Developer Portal)
 6. **Configure allowed scopes** (email, name are recommended)
 7. **Click "Create"**
 8. **Enable the connection** for your application in the "Applications" tab
 
-#### Twitter
+> **Note**: For testing Apple authentication, you may use [Auth0 Development Keys](https://auth0.com/docs/authenticate/identity-providers/social-identity-providers/devkeys) by leaving Client ID, Client Secret Signing Key, Apple Team ID, and Key ID blank. These development keys are not to be used for production.
+
+For more information on setting up Apple authentication, see Auth0's [Apple documentation](https://marketplace.auth0.com/integrations/apple-social-connection).
+
+#### Twitter/X
 1. **Go to Authentication > Social** in the Auth0 Dashboard
 2. **Click "Create Connection"**
 3. **Select "Twitter" from the list of social providers**
 4. **Click "Continue"**
 5. **Enter your Twitter API Key and Secret** (from Twitter Developer Portal)
-6. **Configure allowed permissions** (read access is required)
 7. **Click "Create"**
 8. **Enable the connection** for your application in the "Applications" tab
 
-**Note:** Each social provider requires additional setup in their respective developer consoles. Refer to Auth0's documentation for detailed setup instructions for each provider.
+> **Note**: For testing Twitter/X authentication, you may use [Auth0 Development Keys](https://auth0.com/docs/authenticate/identity-providers/social-identity-providers/devkeys) by leaving API Key and Secret blank. These development keys are not to be used for production.
+
+For more information on setting up Twitter/X authentication, see Auth0's [Twitter documentation](https://marketplace.auth0.com/integrations/twitter-social-connection).
 
 ## Adding Authentication
 
@@ -199,7 +208,7 @@ If configuration is present in both .NET user secrets and environment variables,
 1. User enters email and password directly in your Ivy application
 2. Ivy sends credentials to Auth0 for validation
 3. Auth0 validates credentials and returns access tokens
-4. User is authenticated and can access protected resources
+4. User is authenticated and can access your Ivy application
 
 ### Social Login Flow
 1. User clicks a social login button in your application
@@ -212,15 +221,13 @@ If configuration is present in both .NET user secrets and environment variables,
 
 Key features of the Auth0 provider:
 
-- **Dual Authentication Modes**: Both direct email/password forms and social login redirects
+- **Two Authentication Modes**: Both direct email/password forms and social login redirects
 - **Social Connections**: Support for Google, Apple, GitHub, Twitter, and Microsoft
-- **Enterprise SSO**: SAML, Active Directory, and other enterprise integrations
 - **User Management**: Built-in user management dashboard and APIs
 
 ## Security Best Practices
 
 - **Always use HTTPS** in production environments
-- **Store secrets securely** in user secrets or environment variables
 - **Configure proper scopes** and audience claims for API access
 - **Monitor authentication logs** in Auth0 Dashboard
 - **Rotate client secrets** periodically
@@ -230,9 +237,9 @@ Key features of the Auth0 provider:
 ### Common Issues
 
 **Invalid Client Credentials**
-- Verify Client ID and Client Secret are correct and match your Auth0 application
+- Verify Client ID, Client Secret and other required values are correct in your Auth0 configuration
 - Check that credentials haven't been regenerated in Auth0 Dashboard
-- Ensure connection string format is correct
+- If using connection strings, ensure the format is correct
 
 **Callback URL Mismatch**
 - Verify Allowed Callback URLs in Auth0 Dashboard include your application's callback URL
@@ -245,8 +252,7 @@ Key features of the Auth0 provider:
 - Ensure users exist and are not blocked in Auth0 Dashboard
 
 **Token Issues**
-- Verify audience and issuer claims if using API authentication
-- Check clock synchronization between servers
+- Verify audience and issuer claims
 - Ensure refresh tokens are working properly for seamless session management
 
 ## Related Documentation
