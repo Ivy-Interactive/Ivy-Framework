@@ -21,9 +21,8 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
   const [tocItems, setTocItems] = useState<TocItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [activeId, setActiveId] = useState<string>('');
-  const [isManualScrolling, setIsManualScrolling] = useState(false);
+  const [lastNavigationTime, setLastNavigationTime] = useState(0);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const manualScrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Extract headings and manage loading state
   useEffect(() => {
@@ -80,13 +79,15 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
       }
 
       const items = elements.map(element => {
-        // Generate ID if doesn't exist
+        // Don't override IDs that already exist (from rehype-slug)
+        // Only generate ID if doesn't exist and use the same algorithm as rehype-slug
         if (!element.id) {
           element.id =
             element.textContent
               ?.toLowerCase()
+              .trim()
               .replace(/\s+/g, '-')
-              .replace(/[^\w-]/g, '') ?? '';
+              .replace(/[^\w\u00C0-\u024F\u1E00-\u1EFF-]/g, '') ?? '';
         }
 
         return {
@@ -117,13 +118,30 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
-      if (manualScrollTimeoutRef.current) {
-        clearTimeout(manualScrollTimeoutRef.current);
-      }
     };
   }, [show, articleRef, onLoadingChange]);
 
-  // Handle active heading highlighting and auto-scroll
+  // Track navigation events to prevent auto-scroll interference
+  useEffect(() => {
+    const handleClick = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      const link = target.closest('a');
+
+      if (
+        link &&
+        (link.getAttribute('href')?.startsWith('#') ||
+          link.closest('[data-toc-link]'))
+      ) {
+        // User clicked a navigation link - record the time
+        setLastNavigationTime(Date.now());
+      }
+    };
+
+    document.addEventListener('click', handleClick);
+    return () => document.removeEventListener('click', handleClick);
+  }, []);
+
+  // Handle active heading highlighting
   useEffect(() => {
     if (!articleRef.current || tocItems.length === 0) return;
 
@@ -150,18 +168,36 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
     return () => observer.disconnect();
   }, [tocItems, articleRef]);
 
-  // Auto-scroll TOC to show active heading (but not during manual scrolling)
+  // Smart TOC auto-scroll - only when user hasn't navigated recently
   useEffect(() => {
-    if (!activeId || isManualScrolling) return;
+    if (!activeId) return;
 
-    const activeElement = document.querySelector(`a[href="#${activeId}"]`);
-    if (activeElement) {
-      activeElement.scrollIntoView({
-        behavior: 'smooth',
-        block: 'nearest',
-      });
+    // Don't auto-scroll if user has navigated within the last 3 seconds
+    const timeSinceNavigation = Date.now() - lastNavigationTime;
+    if (timeSinceNavigation < 3000) return;
+
+    // Find the TOC link for the active heading
+    const tocContainer = document.querySelector('[data-toc-container]');
+    const activeElement = tocContainer?.querySelector(`a[href="#${activeId}"]`);
+
+    if (activeElement && tocContainer) {
+      // Check if the active element is already visible in the TOC
+      const containerRect = tocContainer.getBoundingClientRect();
+      const elementRect = activeElement.getBoundingClientRect();
+
+      const isVisible =
+        elementRect.top >= containerRect.top &&
+        elementRect.bottom <= containerRect.bottom;
+
+      // Only scroll if the active element is not visible
+      if (!isVisible) {
+        activeElement.scrollIntoView({
+          behavior: 'smooth',
+          block: 'nearest',
+        });
+      }
     }
-  }, [activeId, isManualScrolling]);
+  }, [activeId, lastNavigationTime]);
 
   if (!show) return null;
 
@@ -187,7 +223,10 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
   }
 
   return (
-    <div className="flex-1 min-h-48 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
+    <div
+      className="flex-1 min-h-48 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent"
+      data-toc-container
+    >
       <nav className="relative pr-2">
         {tocItems.map(heading => (
           <a
@@ -203,23 +242,13 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
             onClick={e => {
               e.preventDefault();
 
-              // Set manual scrolling mode to prevent TOC auto-scroll interference
-              setIsManualScrolling(true);
-
-              // Clear any existing timeout
-              if (manualScrollTimeoutRef.current) {
-                clearTimeout(manualScrollTimeoutRef.current);
-              }
+              // Record navigation time to prevent auto-scroll interference
+              setLastNavigationTime(Date.now());
 
               // Scroll to the target element
               document.getElementById(heading.id)?.scrollIntoView({
                 behavior: 'smooth',
               });
-
-              // Re-enable auto-scroll after scrolling is likely complete
-              manualScrollTimeoutRef.current = setTimeout(() => {
-                setIsManualScrolling(false);
-              }, 1000);
             }}
           >
             {heading.text}
