@@ -86,7 +86,7 @@ Otherwise, create and configure the connection:
 5. **Enable "Offline Access"** if you want to allow users to remain logged in for an extended period of time
 6. **Enable the connection** for your application in the "Applications" tab
 
-> **Note**: For testing Google authentication, you may use [Auth0 Development Keys](https://auth0.com/docs/authenticate/identity-providers/social-identity-providers/devkeys) by leaving Client ID and Client Secret blank. These keys are not to be used for production.
+> **Note**: For testing Google authentication, you can use [Auth0 Development Keys](https://auth0.com/docs/authenticate/identity-providers/social-identity-providers/devkeys) by leaving Client ID and Client Secret blank. These keys are not to be used for production.
 
 For more information on setting up Google authentication, see Auth0's [Google documentation](https://marketplace.auth0.com/integrations/google-social-connection).
 
@@ -100,7 +100,7 @@ For more information on setting up Google authentication, see Auth0's [Google do
 7. **Click "Create"**
 8. **Enable the connection** for your application in the "Applications" tab
 
-> **Note**: For testing GitHub authentication, you may use [Auth0 Development Keys](https://auth0.com/docs/authenticate/identity-providers/social-identity-providers/devkeys) by leaving Client ID and Client Secret blank. These keys are not to be used for production.
+> **Note**: For testing GitHub authentication, you can use [Auth0 Development Keys](https://auth0.com/docs/authenticate/identity-providers/social-identity-providers/devkeys) by leaving Client ID and Client Secret blank. These keys are not to be used for production.
 
 For more information on setting up GitHub authentication, see Auth0's [GitHub documentation](https://marketplace.auth0.com/integrations/github-social-connection).
 
@@ -128,7 +128,7 @@ For more information on setting up Microsoft authentication, see Auth0's [Micros
 7. **Click "Create"**
 8. **Enable the connection** for your application in the "Applications" tab
 
-> **Note**: For testing Apple authentication, you may use [Auth0 Development Keys](https://auth0.com/docs/authenticate/identity-providers/social-identity-providers/devkeys) by leaving Client ID, Client Secret Signing Key, Apple Team ID, and Key ID blank. These development keys are not to be used for production.
+> **Note**: For testing Apple authentication, you can use [Auth0 Development Keys](https://auth0.com/docs/authenticate/identity-providers/social-identity-providers/devkeys) by leaving Client ID, Client Secret Signing Key, Apple Team ID, and Key ID blank. These development keys are not to be used for production.
 
 For more information on setting up Apple authentication, see Auth0's [Apple documentation](https://marketplace.auth0.com/integrations/apple-social-connection).
 
@@ -141,7 +141,7 @@ For more information on setting up Apple authentication, see Auth0's [Apple docu
 6. **Click "Create"**
 7. **Enable the connection** for your application in the "Applications" tab
 
-> **Note**: For testing Twitter/X authentication, you may use [Auth0 Development Keys](https://auth0.com/docs/authenticate/identity-providers/social-identity-providers/devkeys) by leaving API Key and Secret blank. These development keys are not to be used for production.
+> **Note**: For testing Twitter/X authentication, you can use [Auth0 Development Keys](https://auth0.com/docs/authenticate/identity-providers/social-identity-providers/devkeys) by leaving API Key and Secret blank. These development keys are not to be used for production.
 
 For more information on setting up Twitter/X authentication, see Auth0's [Twitter documentation](https://marketplace.auth0.com/integrations/twitter-social-connection).
 
