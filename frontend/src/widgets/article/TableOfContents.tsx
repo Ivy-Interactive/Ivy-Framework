@@ -11,12 +11,18 @@ interface TableOfContentsProps {
   articleRef: React.RefObject<HTMLElement | null>;
   show?: boolean;
   onLoadingChange?: (isLoading: boolean) => void;
+  /** Delay in milliseconds before attempting to extract headings (default: 50ms) */
+  extractionDelay?: number;
+  /** Maximum number of retry attempts for heading extraction (default: 15) */
+  maxExtractionRetries?: number;
 }
 
 export const TableOfContents: React.FC<TableOfContentsProps> = ({
   articleRef,
   show = true,
   onLoadingChange,
+  extractionDelay = 50,
+  maxExtractionRetries = 15,
 }) => {
   const [tocItems, setTocItems] = useState<TocItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -47,17 +53,19 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
     const startTime = Date.now();
     const minLoadingTime = 500; // 0.5 seconds minimum loading time for smooth transition
     let retryCount = 0;
-    const maxRetries = 15; // Try for up to 1.5 seconds (15 * 100ms)
 
     const extractHeadings = () => {
       const articleElement = articleRef.current;
       if (!articleElement) {
         // If article ref is not available yet, try again after a short delay
-        if (retryCount < maxRetries) {
+        if (retryCount < maxExtractionRetries) {
           retryCount++;
           timeoutRef.current = setTimeout(extractHeadings, 100);
         } else {
           // Stop loading if max retries reached, respecting minimum loading time
+          console.warn(
+            'TableOfContents: Failed to find article element after maximum retries'
+          );
           const elapsedTime = Date.now() - startTime;
           const remainingTime = Math.max(0, minLoadingTime - elapsedTime);
           timeoutRef.current = setTimeout(() => {
@@ -73,7 +81,7 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
       );
 
       // If no headings found but content might still be loading, retry
-      if (elements.length === 0 && retryCount < maxRetries) {
+      if (elements.length === 0 && retryCount < maxExtractionRetries) {
         retryCount++;
         timeoutRef.current = setTimeout(extractHeadings, 100);
         return;
@@ -111,8 +119,8 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
       }, remainingTime);
     };
 
-    // Small delay to ensure content is rendered
-    timeoutRef.current = setTimeout(extractHeadings, 50);
+    // Configurable delay to ensure content is rendered
+    timeoutRef.current = setTimeout(extractHeadings, extractionDelay);
 
     // Cleanup function
     return () => {
@@ -120,7 +128,13 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
         clearTimeout(timeoutRef.current);
       }
     };
-  }, [show, articleRef, onLoadingChange]);
+  }, [
+    show,
+    articleRef,
+    onLoadingChange,
+    extractionDelay,
+    maxExtractionRetries,
+  ]);
 
   // Track navigation events to manage auto-scroll behavior
   useEffect(() => {
@@ -139,10 +153,17 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
           // Re-enable auto-scroll after 3 seconds
           setTimeout(() => setAllowTocAutoScroll(true), 3000);
         } else if (targetId) {
-          // Regular section link clicked - immediately set the active ID and enable TOC auto-scroll
-          setActiveId(targetId);
-          setAllowTocAutoScroll(true);
-          setLastNavigationTime(Date.now());
+          // Regular section link clicked - verify target exists before setting active
+          const targetElement = document.getElementById(targetId);
+          if (targetElement) {
+            setActiveId(targetId);
+            setAllowTocAutoScroll(true);
+            setLastNavigationTime(Date.now());
+          } else {
+            console.warn(
+              `TableOfContents: Target element with id "${targetId}" not found`
+            );
+          }
         }
       }
     };
@@ -189,9 +210,20 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
 
     // Find the TOC link for the active heading
     const tocContainer = document.querySelector('[data-toc-container]');
-    const activeElement = tocContainer?.querySelector(`a[href="#${activeId}"]`);
+    if (!tocContainer) {
+      console.warn('TableOfContents: TOC container not found for auto-scroll');
+      return;
+    }
 
-    if (activeElement && tocContainer) {
+    const activeElement = tocContainer.querySelector(`a[href="#${activeId}"]`);
+    if (!activeElement) {
+      console.warn(
+        `TableOfContents: TOC link for "${activeId}" not found for auto-scroll`
+      );
+      return;
+    }
+
+    try {
       // Check if the active element is already visible in the TOC
       const containerRect = tocContainer.getBoundingClientRect();
       const elementRect = activeElement.getBoundingClientRect();
@@ -207,6 +239,8 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
           block: 'nearest',
         });
       }
+    } catch (error) {
+      console.error('TableOfContents: Error during auto-scroll:', error);
     }
   }, [activeId, allowTocAutoScroll]);
 
@@ -257,10 +291,17 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
               // Record navigation time to prevent auto-scroll interference
               setLastNavigationTime(Date.now());
 
-              // Scroll to the target element
-              document.getElementById(heading.id)?.scrollIntoView({
-                behavior: 'smooth',
-              });
+              // Scroll to the target element with error handling
+              const targetElement = document.getElementById(heading.id);
+              if (targetElement) {
+                targetElement.scrollIntoView({
+                  behavior: 'smooth',
+                });
+              } else {
+                console.warn(
+                  `TableOfContents: Target element with id "${heading.id}" not found for TOC navigation`
+                );
+              }
             }}
           >
             {heading.text}
