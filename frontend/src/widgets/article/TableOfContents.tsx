@@ -22,6 +22,7 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [activeId, setActiveId] = useState<string>('');
   const [lastNavigationTime, setLastNavigationTime] = useState(0);
+  const [allowTocAutoScroll, setAllowTocAutoScroll] = useState(true);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Extract headings and manage loading state
@@ -121,19 +122,28 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
     };
   }, [show, articleRef, onLoadingChange]);
 
-  // Track navigation events to prevent auto-scroll interference
+  // Track navigation events to manage auto-scroll behavior
   useEffect(() => {
     const handleClick = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
       const link = target.closest('a');
 
-      if (
-        link &&
-        (link.getAttribute('href')?.startsWith('#') ||
-          link.closest('[data-toc-link]'))
-      ) {
-        // User clicked a navigation link - record the time
-        setLastNavigationTime(Date.now());
+      if (link && link.getAttribute('href')?.startsWith('#')) {
+        const targetId = link.getAttribute('href')?.substring(1);
+        const isTocLink = link.closest('[data-toc-container]');
+
+        if (isTocLink) {
+          // TOC link clicked - prevent auto-scroll interference
+          setLastNavigationTime(Date.now());
+          setAllowTocAutoScroll(false);
+          // Re-enable auto-scroll after 3 seconds
+          setTimeout(() => setAllowTocAutoScroll(true), 3000);
+        } else if (targetId) {
+          // Regular section link clicked - immediately set the active ID and enable TOC auto-scroll
+          setActiveId(targetId);
+          setAllowTocAutoScroll(true);
+          setLastNavigationTime(Date.now());
+        }
       }
     };
 
@@ -154,11 +164,16 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
 
     const observer = new IntersectionObserver(
       entries => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            setActiveId(entry.target.id);
-          }
-        });
+        // Only update active ID from intersection observer if user hasn't navigated recently
+        const timeSinceNavigation = Date.now() - lastNavigationTime;
+        if (timeSinceNavigation > 1000) {
+          // Wait 1 second after navigation before intersection observer takes over
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              setActiveId(entry.target.id);
+            }
+          });
+        }
       },
       { rootMargin: '0px 0px -80% 0px' }
     );
@@ -166,15 +181,11 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
     elements.forEach(element => observer.observe(element));
 
     return () => observer.disconnect();
-  }, [tocItems, articleRef]);
+  }, [tocItems, articleRef, lastNavigationTime]);
 
-  // Smart TOC auto-scroll - only when user hasn't navigated recently
+  // Smart TOC auto-scroll - only when allowed
   useEffect(() => {
-    if (!activeId) return;
-
-    // Don't auto-scroll if user has navigated within the last 3 seconds
-    const timeSinceNavigation = Date.now() - lastNavigationTime;
-    if (timeSinceNavigation < 3000) return;
+    if (!activeId || !allowTocAutoScroll) return;
 
     // Find the TOC link for the active heading
     const tocContainer = document.querySelector('[data-toc-container]');
@@ -197,7 +208,7 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
         });
       }
     }
-  }, [activeId, lastNavigationTime]);
+  }, [activeId, allowTocAutoScroll]);
 
   if (!show) return null;
 
@@ -232,6 +243,7 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
           <a
             key={heading.id}
             href={`#${heading.id}`}
+            data-toc-link
             className={cn(
               'block text-sm py-1 hover:text-foreground transition-colors',
               heading.level === 1 ? 'pl-0' : `pl-${(heading.level - 1) * 4}`,
