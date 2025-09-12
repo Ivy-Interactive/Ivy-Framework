@@ -1,6 +1,6 @@
 using Ivy.Shared;
 
-namespace Ivy.Samples.Shared.Apps.Widgets;
+namespace Ivy.Samples.Shared.Apps.Widgets.Inputs;
 
 [App(icon: Icons.Mic, path: ["Widgets"])]
 public class AudioRecorderApp() : SampleBase
