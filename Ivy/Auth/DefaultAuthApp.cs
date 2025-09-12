@@ -101,9 +101,9 @@ public class PasswordEmailFlowView(IState<string?> errorMessage) : ViewBase
 
         return Layout.Vertical()
          | Text.Label("User:")
-         | user.ToTextInput().Disabled(loading.Value)
+         | user.ToTextInput().Disabled(loading.Value).HandleKeyDown(key => { if (key == "Enter") Login(); })
          | Text.Label("Password:")
-         | password.ToPasswordInput().Disabled(loading.Value)
+         | password.ToPasswordInput().Disabled(loading.Value).HandleKeyDown(key => { if (key == "Enter") Login(); })
          | new Button("Login").Width(Size.Full()).HandleClick(Login).Loading(loading.Value).Disabled(loading.Value)
          | result
          ;

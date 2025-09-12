@@ -130,9 +130,19 @@ const DefaultVariant: React.FC<{
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onBlur: (e: React.FocusEvent<HTMLInputElement>) => void;
   onFocus: (e: React.FocusEvent<HTMLInputElement>) => void;
+  onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   inputRef?: React.RefObject<HTMLInputElement | HTMLTextAreaElement | null>;
   isFocused: boolean;
-}> = ({ type, props, onChange, onBlur, onFocus, inputRef, isFocused }) => {
+}> = ({
+  type,
+  props,
+  onChange,
+  onBlur,
+  onFocus,
+  onKeyDown,
+  inputRef,
+  isFocused,
+}) => {
   const { elementRef, savePosition } = useCursorPosition(props.value, inputRef);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -158,6 +168,7 @@ const DefaultVariant: React.FC<{
         onChange={handleChange}
         onBlur={onBlur}
         onFocus={onFocus}
+        onKeyDown={onKeyDown}
         className={cn(
           'w-full',
           props.invalid && inputStyles.invalidInput,
@@ -190,10 +201,11 @@ const TextareaVariant: React.FC<{
   onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   onBlur: (e: React.FocusEvent<HTMLTextAreaElement>) => void;
   onFocus: (e: React.FocusEvent<HTMLTextAreaElement>) => void;
+  onKeyDown: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
   width?: string;
   inputRef?: React.RefObject<HTMLInputElement | HTMLTextAreaElement | null>;
   isFocused: boolean;
-}> = ({ props, onChange, onBlur, onFocus, inputRef, isFocused }) => {
+}> = ({ props, onChange, onBlur, onFocus, onKeyDown, inputRef, isFocused }) => {
   const { elementRef, savePosition } = useCursorPosition(props.value, inputRef);
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -220,6 +232,7 @@ const TextareaVariant: React.FC<{
         onChange={handleChange}
         onBlur={onBlur}
         onFocus={onFocus}
+        onKeyDown={onKeyDown}
         className={cn(
           'w-full',
           props.invalid && inputStyles.invalidInput,
@@ -252,9 +265,10 @@ const PasswordVariant: React.FC<{
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onBlur: (e: React.FocusEvent<HTMLInputElement>) => void;
   onFocus: (e: React.FocusEvent<HTMLInputElement>) => void;
+  onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   width?: string;
   inputRef?: React.RefObject<HTMLInputElement | HTMLTextAreaElement | null>;
-}> = ({ props, onChange, onBlur, onFocus, inputRef }) => {
+}> = ({ props, onChange, onBlur, onFocus, onKeyDown, inputRef }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [hasLastPass, setHasLastPass] = useState(false);
   const { elementRef: elementRefGeneric, savePosition } = useCursorPosition(
@@ -305,6 +319,7 @@ const PasswordVariant: React.FC<{
         onChange={handleChange}
         onBlur={onBlur}
         onFocus={onFocus}
+        onKeyDown={onKeyDown}
         className={cn(
           'w-full',
           props.invalid && inputStyles.invalidInput,
@@ -355,10 +370,11 @@ const SearchVariant: React.FC<{
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onBlur: (e: React.FocusEvent<HTMLInputElement>) => void;
   onFocus: (e: React.FocusEvent<HTMLInputElement>) => void;
+  onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   width?: string;
   inputRef?: React.RefObject<HTMLInputElement | HTMLTextAreaElement | null>;
   isFocused: boolean;
-}> = ({ props, onChange, onBlur, onFocus, inputRef, isFocused }) => {
+}> = ({ props, onChange, onBlur, onFocus, onKeyDown, inputRef, isFocused }) => {
   const { elementRef, savePosition } = useCursorPosition(
     props.value,
     inputRef
@@ -376,6 +392,10 @@ const SearchVariant: React.FC<{
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    // Call the parent onKeyDown handler first
+    onKeyDown(e);
+
+    // Then handle search-specific behavior
     if (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Enter') {
       shouldFocusMenuRef.current = true;
       e.currentTarget.blur();
@@ -554,6 +574,15 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
     if (events.includes('OnFocus')) eventHandler('OnFocus', id, []);
   }, [eventHandler, id, events]);
 
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      if (events.includes('OnKeyDown')) {
+        eventHandler('OnKeyDown', id, [e.key]);
+      }
+    },
+    [eventHandler, id, events]
+  );
+
   const commonProps = useMemo(
     () => ({
       id,
@@ -589,6 +618,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
           onChange={handleChange}
           onBlur={handleBlur}
           onFocus={handleFocus}
+          onKeyDown={handleKeyDown}
           inputRef={inputRef}
         />
       );
@@ -599,6 +629,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
           onChange={handleChange}
           onBlur={handleBlur}
           onFocus={handleFocus}
+          onKeyDown={handleKeyDown}
           inputRef={inputRef}
           isFocused={isFocused}
         />
@@ -610,6 +641,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
           onChange={handleChange}
           onBlur={handleBlur}
           onFocus={handleFocus}
+          onKeyDown={handleKeyDown}
           inputRef={inputRef}
           isFocused={isFocused}
         />
@@ -624,6 +656,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
           onChange={handleChange}
           onBlur={handleBlur}
           onFocus={handleFocus}
+          onKeyDown={handleKeyDown}
           inputRef={inputRef}
           isFocused={isFocused}
         />

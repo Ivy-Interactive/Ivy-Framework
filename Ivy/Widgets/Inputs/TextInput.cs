@@ -64,6 +64,9 @@ public abstract record TextInputBase : WidgetBase<TextInputBase>, IAnyTextInput
     /// <summary>Gets or sets the event handler called when the input loses focus.</summary>
     [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
 
+    /// <summary>Gets or sets the event handler called when a key is pressed down.</summary>
+    [Event] public Func<Event<IAnyInput, string>, ValueTask>? OnKeyDown { get; set; }
+
     /// <summary>
     /// Returns the types that this text input can bind to and work with.
     /// </summary>
@@ -301,5 +304,36 @@ public static class TextInputExtensions
     public static TextInputBase HandleBlur(this TextInputBase widget, Action onBlur)
     {
         return widget.HandleBlur(_ => { onBlur(); return ValueTask.CompletedTask; });
+    }
+
+    /// <summary>
+    /// Sets the key down event handler for the text input.
+    /// </summary>
+    /// <param name="widget">The text input to configure.</param>
+    /// <param name="onKeyDown">The event handler to call when a key is pressed down.</param>
+    [OverloadResolutionPriority(1)]
+    public static TextInputBase HandleKeyDown(this TextInputBase widget, Func<Event<IAnyInput, string>, ValueTask> onKeyDown)
+    {
+        return widget with { OnKeyDown = onKeyDown };
+    }
+
+    /// <summary>
+    /// Sets the key down event handler for the text input.
+    /// </summary>
+    /// <param name="widget">The text input to configure.</param>
+    /// <param name="onKeyDown">The event handler to call when a key is pressed down.</param>
+    public static TextInputBase HandleKeyDown(this TextInputBase widget, Action<Event<IAnyInput, string>> onKeyDown)
+    {
+        return widget.HandleKeyDown(onKeyDown.ToValueTask());
+    }
+
+    /// <summary>
+    /// Sets a simple key down event handler for the text input.
+    /// </summary>
+    /// <param name="widget">The text input to configure.</param>
+    /// <param name="onKeyDown">The simple action to perform when a key is pressed down.</param>
+    public static TextInputBase HandleKeyDown(this TextInputBase widget, Action<string> onKeyDown)
+    {
+        return widget.HandleKeyDown((e) => { onKeyDown(e.Value); return ValueTask.CompletedTask; });
     }
 }
