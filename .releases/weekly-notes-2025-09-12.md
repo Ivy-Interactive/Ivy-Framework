@@ -13,13 +13,12 @@ The `ivy db generate` command now supports a `--skip-debug` flag that allows you
 ivy db generate --skip-debug
 ```
 
-This option is particularly useful in CI/CD environments or when you're confident your generated code doesn't need immediate debugging.
-
 #### Enhanced Entity Framework Support
 
 The database generator now automatically includes essential Entity Framework global using directives in generated projects. This means you no longer need to manually add common EF Core namespaces to your database models and configurations.
 
 The following namespaces are now automatically available in all generated database files:
+
 - `System.ComponentModel.DataAnnotations` - for data annotations like `[Key]`, `[Required]`
 - `System.ComponentModel.DataAnnotations.Schema` - for schema attributes like `[Table]`, `[Column]`
 - `Microsoft.EntityFrameworkCore` - core EF functionality
@@ -70,7 +69,7 @@ var args = new DatabaseGeneratorArgs(
 
 ### Cleaner Version Display
 
-The `ivy --version` command now displays cleaner version numbers by removing unnecessary trailing ".0" from the output. For example, version "1.2.3.0" will now display as "1.2.3", making the version information more concise and readable.
+The `ivy --version` command now displays cleaner version numbers by removing unnecessary trailing ".0" from the output.
 
 ### Docker Support in Project Templates
 
@@ -106,6 +105,7 @@ ivy app remove --all
 ```
 
 The command intelligently identifies and removes all related files for an app, including:
+
 - The main app file (e.g., `MyApp.cs`)
 - All associated view files in the Views directory (e.g., `MyApp.HomeView.cs`, `MyApp.AboutView.cs`)
 
@@ -126,8 +126,6 @@ export IVY_FIX_USE_CLAUDE_CODE=true
 ivy fix
 ```
 
-When Claude Code is enabled, the `fix` command will automatically invoke Claude Code with the prompt "Fix the .NET build errors in this folder" and skip the permission prompts for a streamlined debugging experience. This integration is particularly useful for developers who already have Claude Code installed and prefer its debugging capabilities for resolving complex build errors.
-
 ### Telemetry Upload for Fix Command
 
 The `ivy fix` command now supports optional telemetry upload to help improve the debugging experience. When enabled, the command will upload an anonymized snapshot of your project (excluding `.git`, `bin`, and `obj` folders) for analysis. This helps the Ivy team understand common build issues and improve the fix command's effectiveness.
@@ -139,12 +137,6 @@ To enable telemetry upload, set the environment variable:
 export IVY_FIX_UPLOAD_TELEMETRY=true
 ivy fix
 ```
-
-The telemetry upload:
-- Only includes source code files (excludes build artifacts and git history)
-- Has a 50MB size limit to prevent excessive uploads
-- Is completely optional and disabled by default
-- Uploads are associated with your account for better support
 
 You can manage this setting using the new debug commands:
 
@@ -178,25 +170,11 @@ The Sliplane deployment provider offers several key features:
 - **Environment Variables**: Automatically transfers your .NET user secrets as secure environment variables in Sliplane
 - **Auto-Deploy**: Option to enable automatic deployments on future commits to your selected branch
 
-During deployment, the CLI will:
-1. Verify your project is in a public GitHub repository
-2. Prompt for your Sliplane API credentials (stored securely for future use)  
-3. Let you select or create a Sliplane project
-4. Choose a deployment server from your available Sliplane servers
-5. Configure branch selection and auto-deploy preferences
-6. Deploy your application and provide the service URL
-
-**Subdirectory Support**: The Sliplane deployment provider now automatically detects when you're deploying from a subdirectory within your Git repository. This is particularly useful for monorepo setups where your Ivy application lives in a subfolder. The CLI will automatically adjust the Docker context and Dockerfile path to ensure your deployment works correctly from any location within your repository structure.
-
-This integration streamlines the deployment process for Ivy applications, making it easier to get your apps running in production quickly.
-
 ## Chart Widget Improvements
 
 ### Consistent Chart Margins
 
-All chart types (Line, Bar, Area, and Pie charts) now have consistent margin handling with improved visibility. The chart margins have been adjusted from zero to 10 pixels on all sides across all chart widgets, ensuring that chart elements, labels, and data points are no longer cut off at the edges. This improvement provides a uniform appearance across different chart types and enhances readability, especially when displaying data points at the extremes of the chart area.
-
-Additionally, the unnecessary top margin styling (`mt-4` class) has been removed from Bar and Area charts, creating cleaner and more consistent spacing across all chart components.
+All chart types (Line, Bar, Area, and Pie charts) now have consistent margin handling with improved visibility. The chart margins have been adjusted from zero to 10 pixels on all sides across all chart widgets, ensuring that chart elements, labels, and data points are no longer cut off at the edges.
 
 ## Database Generation Toolkit Enhancements
 
@@ -205,6 +183,7 @@ Additionally, the unnecessary top margin styling (`mt-4` class) has been removed
 The Database Generator Toolkit now includes powerful `EnumMetadata` utilities that provide enhanced enum handling capabilities for database models and serialization scenarios. This new feature makes working with enums in Entity Framework and API serialization much more robust.
 
 The new `EnumMetadata<TEnum>` class provides:
+
 - Automatic extraction of `DisplayAttribute` metadata including names, descriptions, and display order
 - Support for resource-based localization through `ResourceType`
 - Built-in serialization/deserialization helpers for consistent enum string representations
@@ -246,6 +225,7 @@ string displayName = EnumMetadata.ToString(UserRole.Admin); // "Administrator"
 ```
 
 This enhancement is particularly useful for:
+
 - Creating dropdown lists with properly localized display names
 - Serializing enums to consistent string values in APIs
 - Maintaining enum ordering in UI components
@@ -255,7 +235,7 @@ This enhancement is particularly useful for:
 
 ### Table Widget Multiline Support
 
-The Table widget now supports multiline display for cell content, making it easier to display longer text within table cells without truncation. This feature is particularly useful for columns containing descriptions, addresses, or other lengthy text that benefits from wrapping.
+The Table widget now supports multiline display for cell content, making it easier to display longer text within table cells without truncation.
 
 You can enable multiline display for specific columns using the `MultiLine()` method on the TableBuilder:
 
@@ -272,25 +252,23 @@ var table = products.ToTable()
 ```
 
 When multiline is enabled for a column:
+
 - Cell content displays with word wrapping instead of being truncated
 - Text breaks naturally at word boundaries using `break-all` CSS for better handling of very long text
 - The cell height automatically adjusts to accommodate the content
 - Other cells in the row maintain their standard single-line format with proper `whitespace-nowrap` to prevent unintended wrapping
 
 The multiline implementation has been improved to better handle edge cases:
+
 - Multiline cells now use `break-all` to ensure even extremely long words or URLs wrap properly
 - Single-line cells explicitly use `whitespace-nowrap` for cleaner display
 - The `min-w-0` class is now only applied to single-line cells to prevent layout issues
-
-This feature works seamlessly with other table configurations like custom widths, alignment, and cell builders.
 
 ### Details Widget Improvements
 
 #### Multiline Support
 
 The Details widget now supports multiline display for long text values with improved layout behavior. When multiline mode is enabled, the widget switches to a vertical layout where labels appear above their values, providing better readability for lengthy content.
-
-The multiline layout has been further refined with better alignment - single-line fields now properly center-align their content vertically, while multiline fields maintain their vertical layout structure. Additionally, the whitespace handling for single-line values has been improved to ensure text doesn't wrap unexpectedly when space is limited.
 
 The new `MultiLine()` method allows you to specify which fields should use multiline display:
 
@@ -313,18 +291,11 @@ return new Card(details);
 ```
 
 The multiline fields will:
+
 - Display in a vertical layout with labels above values
 - Provide left-aligned text for better readability of long content
 - Remove maximum width constraints for multiline values
 - Maintain proper spacing and alignment with other detail fields
-
-Regular (non-multiline) fields continue to display in the traditional horizontal layout with right-aligned values and proper text truncation. This dual-mode approach ensures optimal display for both short and long content within the same Details widget.
-
-This is particularly useful when displaying:
-- Long names or titles
-- Descriptions and biographical information
-- Addresses or multi-part data
-- Any field that might contain extensive text
 
 #### Label Overflow Handling
 
@@ -334,50 +305,31 @@ The Details widget now properly handles overflow for long label text. Labels in 
 
 ### Resizable Panel Handle Enhancement
 
-The resizable panel handles now feature a cleaner, more subtle appearance with hover-activated visibility. The resize handles remain hidden until you hover over them, reducing visual clutter while maintaining full functionality. This creates a cleaner interface, especially when working with multiple resizable panels in your application.
+The resizable panel handles now feature a cleaner, more subtle appearance with hover-activated visibility. The resize handles remain hidden until you hover over them, reducing visual clutter while maintaining full functionality.
 
 ### Header Layout Widget Improvements
 
-The Header Layout widget now properly fills the available height of its container. Previously, the widget would only take up the minimum height needed for its content, which could leave unwanted gaps in layouts. With this fix, the Header Layout widget now expands to fill the full height of its parent container, ensuring consistent and predictable layout behavior in your applications.
-
-Additionally, the scroll handling has been improved by adding proper overflow control to the content area, preventing any unwanted scrollbar issues and ensuring smooth scrolling behavior within the widget's content section.
+The Header Layout widget now properly fills the available height of its container. Resolved several scroll issues.
 
 ### Footer Layout Border Fix
 
-The Footer Layout widget now displays its top border correctly across the full width of the footer. Previously, the border could appear with gaps due to padding interactions. The layout has been restructured to ensure the border extends edge-to-edge while maintaining proper padding for the footer content itself. This provides a cleaner visual separation between the main content area and the footer section.
+The Footer Layout widget now displays its top border correctly across the full width of the footer.
 
 ### Code Input Widget Scrollbar Fix
 
-The Code input widget now properly sizes itself to prevent unnecessary horizontal scrollbars from appearing. The maximum width calculation has been improved to better account for viewport constraints and padding, using `calc(min(90vw, 100% - 2rem))` instead of just `100%`. This ensures that code input fields fit properly within their containers without triggering unwanted scrollbars, particularly on smaller screens or when the widget is placed in constrained layouts.
+The Code input widget now properly sizes itself to prevent unnecessary horizontal scrollbars from appearing.
 
 ### Muted Text Typography Update
 
-Muted text elements now use a smaller, more subtle font size for better visual hierarchy. The Muted text variant has been updated to use `text-sm` (small text) instead of `text-large-body`, making secondary information less prominent while maintaining readability. This change affects all widgets that use muted text styling, such as helper text, descriptions, and secondary labels throughout your Ivy applications.
+Muted text elements now use a smaller, more subtle font size for better visual hierarchy.
 
 ### Improved Tooltip Component for Text Overflow
 
 TextBlock widgets now use a proper React tooltip component instead of the native browser tooltip for displaying truncated text. This enhancement provides a more polished and consistent user experience across the framework.
 
 The new tooltip implementation:
-- Uses the framework's standard `Tooltip` component from the UI library for consistent styling
-- Provides theme-aware tooltips that match your application's color scheme (using `bg-popover` and `text-popover-foreground` classes)
-- Adds subtle shadow effects for better visual separation from the content
-- Only shows tooltips when text is actually truncated, reducing unnecessary UI noise
-- Maintains smooth hover interactions with proper mouse event handling
-- Improved truncation detection that checks on mount and window resize for more reliable tooltip display
-- Better performance with useRef and useEffect hooks for efficient DOM measurements
 
-```csharp
-// Text that overflows will automatically show a styled tooltip on hover
-var textBlock = new TextBlock("This is a very long text that will be truncated...")
-    .Variant(TextBlockVariant.Block);
-```
-
-This improvement is particularly useful for:
-- Table cells with potentially long content
-- Detail widgets displaying lengthy values
-- Any confined space where text might overflow
-- Maintaining consistent tooltip styling across your entire application
+- `Text.Block` if overflown now displays a tooltip, used in Details and Tables.
 
 ## New Audio Widgets
 
@@ -410,6 +362,7 @@ var hiddenAudio = new Audio("notification.mp3")
 ```
 
 Key features:
+
 - **Browser Controls**: Shows standard audio controls by default (play/pause, volume, seek bar)
 - **Autoplay Support**: Can start playing automatically when loaded (works best when muted)
 - **Loop Playback**: Option to continuously repeat the audio
@@ -457,6 +410,7 @@ var disabledRecorder = new AudioRecorder("Recording disabled", disabled: true);
 ```
 
 Key features:
+
 - **Real-time Upload**: Automatically uploads audio to specified endpoints
 - **Chunked Streaming**: Optional chunked uploads for long recordings with configurable intervals
 - **Visual Feedback**: Shows volume levels during recording with animated background
@@ -470,7 +424,7 @@ The widget provides a clean, button-based interface with visual indicators for r
 
 ### Custom Label Preservation for Boolean Inputs
 
-The FormBuilder now correctly preserves custom labels for boolean inputs. Previously, when you set a custom label for a boolean field, it would get overridden by the default scaffolding that converts the property name to a human-readable format. This has been fixed to respect your custom labels while still applying defaults when no custom label is specified.
+The FormBuilder now correctly preserves custom labels for boolean inputs.
 
 ```csharp
 // Before: Custom label would be ignored and replaced with "Is Active"
@@ -483,8 +437,6 @@ var form = new FormBuilder<UserModel>()
     .Field(x => x.IsActive, field => field
         .Label("User Account Status")); // Now correctly shows "User Account Status"
 ```
-
-This fix ensures that when you explicitly set a label for boolean fields (checkboxes, switches), your custom text is displayed instead of the auto-generated label from the property name. Fields without custom labels continue to receive sensible defaults based on the property name.
 
 ## Breaking Changes
 
@@ -509,4 +461,4 @@ These improvements make working with database diagrams more intuitive, with clea
 
 ### Enhanced API Documentation Copying
 
-The framework's documentation system now properly handles copying of expandable sections in API documentation. When you copy API content that includes collapsible/expandable sections, the header text of these sections is now correctly included in the copied content with proper markdown formatting. This improvement makes it easier to share API documentation snippets while preserving the structure and context of expandable sections.
+The framework's documentation system now properly handles copying of expandable sections in API documentation. When you copy API content that includes collapsible/expandable sections, the header text of these sections is now correctly included in the copied content with proper markdown formatting.
