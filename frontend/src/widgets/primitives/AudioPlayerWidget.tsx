@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { getHeight, getWidth } from '@/lib/styles';
 import { getIvyHost } from '@/lib/utils';
 
-interface AudioWidgetProps {
+interface AudioPlayerWidgetProps {
   id: string;
   src: string | undefined | null;
   width?: string;
@@ -26,7 +26,7 @@ const getAudioUrl = (url: string): string => {
   return `${getIvyHost()}${url.startsWith('/') ? '' : '/'}${url}`;
 };
 
-export const AudioWidget: React.FC<AudioWidgetProps> = ({
+export const AudioPlayerWidget: React.FC<AudioPlayerWidgetProps> = ({
   id,
   src,
   width,

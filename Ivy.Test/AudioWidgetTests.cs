@@ -2,7 +2,7 @@ using Ivy.Shared;
 
 namespace Ivy.Test;
 
-public class AudioWidgetTests
+public class AudioPlayerWidgetTests
 {
     [Fact]
     public void Audio_Constructor_SetsDefaultProperties()

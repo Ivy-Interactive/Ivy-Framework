@@ -41,7 +41,7 @@ export const widgetMap = {
   'Ivy.Spacer': Primitives.SpacerWidget,
   'Ivy.Loading': Primitives.LoadingWidget,
   'Ivy.AppHost': Primitives.AppHostWidget,
-  'Ivy.Audio': Primitives.AudioWidget,
+  'Ivy.Audio': Primitives.AudioPlayerWidget,
 
   // Widgets
   'Ivy.Article': Widgets.ArticleWidget,

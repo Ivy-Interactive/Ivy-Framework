@@ -17,4 +17,4 @@ export { IvyLogoWidget } from './IvyLogoWidget';
 export { SpacerWidget } from './SpacerWidget';
 export { LoadingWidget } from './LoadingWidget';
 export { AppHostWidget } from './AppHostWidget';
-export { AudioWidget } from './AudioWidget';
+export { AudioPlayerWidget } from './AudioPlayerWidget';
