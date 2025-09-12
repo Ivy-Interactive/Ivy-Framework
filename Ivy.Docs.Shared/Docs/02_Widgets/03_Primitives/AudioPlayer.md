@@ -48,4 +48,4 @@ Layout.Vertical().Gap(4)
     .Preload(AudioPreload.Auto)
 ```
 
-<WidgetDocs Type="Ivy.Audio" ExtensionTypes="Ivy.AudioExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Primitives/AudioPlayer.cs"/>
+<WidgetDocs Type="Ivy.Audio" ExtensionTypes="Ivy.AudioExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Primitives/Audio.cs"/>
