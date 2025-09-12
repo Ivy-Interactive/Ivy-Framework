@@ -4,7 +4,7 @@
 Enable audio recording with a flexible interface for capturing user audio input.
 </Ingress>
 
-The `AudioRecorder` widget allows users to record audio using their microphone. It provides an audio recording interface with options for audio formats, audio upload endpoint, and upload chunking. This widget is for recording audio, not playing it. For audio playback functionality, see the [Audio Player](/docs/widgets/primitives/audioplayer) widget.
+The `AudioRecorder` widget allows users to record audio using their microphone. It provides an audio recording interface with options for audio formats, audio upload endpoint, and upload chunking. This widget is for recording audio, not playing it. For audio playback functionality, see the Audio widget in the Primitives section.
 
 ## Basic Usage
 
