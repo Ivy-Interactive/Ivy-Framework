@@ -35,7 +35,7 @@ public class TableApp : SampleBase
                 .Width(Size.Full())
                 .MultiLine(e => e.Name)
             // .Width(e => e.Name, Size.Units(100));
-            // Enable multi-line display for description column
+            // Enable multi-line display for Name column
             // .Width(e => e.Sku, Size.Fraction(0))
             // .Width(e => e.Name, Size.Fraction(1 / 3f))
             // .Width(e => e.Price, Size.Fraction(1 / 3f))
