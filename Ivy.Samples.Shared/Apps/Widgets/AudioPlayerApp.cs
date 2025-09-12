@@ -35,35 +35,30 @@ public class AudioPlayerApp : SampleBase
 
         return Layout.Vertical()
                | Text.H2("Audio Player Widget Examples")
-               | Text.P("Demonstrates various configurations of the Audio widget for playing audio content. This widget is for audio playback, not recording.")
-                   .Color(Colors.Secondary)
+               | Text.P("Demonstrates various configurations of the Audio widget for playing audio content. This widget is for audio playback, not recording. The audio player is theme-aware and adapts to light/dark themes.")
                | Layout.Vertical().Gap(6)
                    | (new Card(
                        Layout.Vertical().Gap(4)
                        | Text.H4("Basic Audio Player")
                        | Text.Small("Default audio player with standard browser controls.")
-                           .Color(Colors.Secondary)
                        | basicAudio
                    ).Title("Basic Usage"))
                    | (new Card(
                        Layout.Vertical().Gap(4)
                        | Text.H4("Looping Audio with Preload")
                        | Text.Small("Audio player configured to loop continuously with auto preload.")
-                           .Color(Colors.Secondary)
                        | customAudio
                    ).Title("Custom Configuration"))
                    | (new Card(
                        Layout.Vertical().Gap(4)
                        | Text.H4("Muted Autoplay Audio")
                        | Text.Small("Muted audio that starts playing automatically and loops. Muted autoplay is more likely to be allowed by browsers.")
-                           .Color(Colors.Secondary)
                        | mutedAudio
                    ).Title("Autoplay Example"))
                    | (new Card(
                        Layout.Vertical().Gap(4)
                        | Text.H4("Audio Without Controls")
                        | Text.Small("Audio element without browser controls for programmatic control scenarios.")
-                           .Color(Colors.Secondary)
                        | noControlsAudio
                        | new Button("Toggle Play/Pause", _ => client.Toast("In a real app, this would control the audio programmatically"))
                            .Variant(ButtonVariant.Outline)
@@ -72,9 +67,15 @@ public class AudioPlayerApp : SampleBase
                        Layout.Vertical().Gap(4)
                        | Text.H4("Custom Sized Audio Player")
                        | Text.Small("Audio player with custom width and height dimensions.")
-                           .Color(Colors.Secondary)
                        | customSizedAudio
                    ).Title("Custom Sizing"))
+                   | (new Card(
+                       Layout.Vertical().Gap(4)
+                       | Text.H4("Theme Awareness")
+                       | Text.Small("The audio player automatically adapts to your current theme (light/dark mode). The controls, background, and text colors adjust accordingly.")
+                       | basicAudio
+                       | Text.Small("Try switching between light and dark themes to see the audio player adapt!")
+                   ).Title("Theme Integration"))
                | Layout.Vertical().Gap(4)
                    | Text.H3("Usage Examples")
                    | new Code("""
