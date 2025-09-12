@@ -27,9 +27,9 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
   const [tocItems, setTocItems] = useState<TocItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [activeId, setActiveId] = useState<string>('');
-  const [lastNavigationTime, setLastNavigationTime] = useState(0);
-  const [allowTocAutoScroll, setAllowTocAutoScroll] = useState(true);
+  const [isUserNavigating, setIsUserNavigating] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const navigationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Extract headings and manage loading state
   useEffect(() => {
@@ -127,6 +127,9 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
+      if (navigationTimeoutRef.current) {
+        clearTimeout(navigationTimeoutRef.current);
+      }
     };
   }, [
     show,
@@ -136,7 +139,7 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
     maxExtractionRetries,
   ]);
 
-  // Track navigation events to manage auto-scroll behavior
+  // Track navigation events to immediately set active state
   useEffect(() => {
     const handleClick = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
@@ -146,19 +149,27 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
         const targetId = link.getAttribute('href')?.substring(1);
         const isTocLink = link.closest('[data-toc-container]');
 
-        if (isTocLink) {
-          // TOC link clicked - prevent auto-scroll interference
-          setLastNavigationTime(Date.now());
-          setAllowTocAutoScroll(false);
-          // Re-enable auto-scroll after 3 seconds
-          setTimeout(() => setAllowTocAutoScroll(true), 3000);
-        } else if (targetId) {
-          // Regular section link clicked - verify target exists before setting active
+        if (targetId && !isTocLink) {
+          // This is a regular section link (not from TOC)
+          // Verify target exists before setting active
           const targetElement = document.getElementById(targetId);
           if (targetElement) {
+            // Clear any existing navigation timeout
+            if (navigationTimeoutRef.current) {
+              clearTimeout(navigationTimeoutRef.current);
+            }
+
+            // Set as active immediately and mark as user navigating
             setActiveId(targetId);
-            setAllowTocAutoScroll(true);
-            setLastNavigationTime(Date.now());
+            setIsUserNavigating(true);
+
+            // Reset navigation state after scroll completes
+            navigationTimeoutRef.current = setTimeout(() => {
+              setIsUserNavigating(false);
+            }, 1000);
+
+            // Let the browser handle the default scroll behavior for regular links
+            // Don't prevent default - let the browser scroll naturally
           } else {
             console.warn(
               `TableOfContents: Target element with id "${targetId}" not found`
@@ -185,10 +196,8 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
 
     const observer = new IntersectionObserver(
       entries => {
-        // Only update active ID from intersection observer if user hasn't navigated recently
-        const timeSinceNavigation = Date.now() - lastNavigationTime;
-        if (timeSinceNavigation > 1000) {
-          // Wait 1 second after navigation before intersection observer takes over
+        // Don't update active ID if user is currently navigating
+        if (!isUserNavigating) {
           entries.forEach(entry => {
             if (entry.isIntersecting) {
               setActiveId(entry.target.id);
@@ -202,11 +211,11 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
     elements.forEach(element => observer.observe(element));
 
     return () => observer.disconnect();
-  }, [tocItems, articleRef, lastNavigationTime]);
+  }, [tocItems, articleRef, isUserNavigating]);
 
-  // Smart TOC auto-scroll - only when allowed
+  // Smart TOC auto-scroll - scroll TOC to show active item
   useEffect(() => {
-    if (!activeId || !allowTocAutoScroll) return;
+    if (!activeId) return;
 
     // Find the TOC link for the active heading
     const tocContainer = document.querySelector('[data-toc-container]');
@@ -242,7 +251,7 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
     } catch (error) {
       console.error('TableOfContents: Error during auto-scroll:', error);
     }
-  }, [activeId, allowTocAutoScroll]);
+  }, [activeId]);
 
   if (!show) return null;
 
@@ -288,8 +297,19 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
             onClick={e => {
               e.preventDefault();
 
-              // Record navigation time to prevent auto-scroll interference
-              setLastNavigationTime(Date.now());
+              // Clear any existing navigation timeout
+              if (navigationTimeoutRef.current) {
+                clearTimeout(navigationTimeoutRef.current);
+              }
+
+              // Set as active immediately and mark as user navigating
+              setActiveId(heading.id);
+              setIsUserNavigating(true);
+
+              // Reset navigation state after scroll completes
+              navigationTimeoutRef.current = setTimeout(() => {
+                setIsUserNavigating(false);
+              }, 1000);
 
               // Scroll to the target element with error handling
               const targetElement = document.getElementById(heading.id);
