@@ -90,7 +90,7 @@ export const widgetMap = {
     () => import('@/widgets/inputs/code/CodeInputWidget')
   ),
   'Ivy.AudioRecorder': React.lazy(
-    () => import('@/widgets/AudioRecorderWidget')
+    () => import('@/widgets/inputs/AudioRecorderWidget')
   ),
 
   // Forms
