@@ -169,26 +169,21 @@ public class AreaChart6View : ViewBase
     {
         var data = new[]
         {
-            new { Month = "Jan", High = 15, Low = 5, Average = 10 },
-            new { Month = "Feb", High = 18, Low = 7, Average = 12 },
-            new { Month = "Mar", High = 22, Low = 10, Average = 16 },
-            new { Month = "Apr", High = 25, Low = 12, Average = 18 },
-            new { Month = "May", High = 28, Low = 15, Average = 21 },
-            new { Month = "Jun", High = 32, Low = 18, Average = 25 },
-            new { Month = "Jul", High = 35, Low = 20, Average = 27 },
-            new { Month = "Aug", High = 33, Low = 19, Average = 26 },
-            new { Month = "Sep", High = 29, Low = 16, Average = 22 },
-            new { Month = "Oct", High = 24, Low = 12, Average = 18 },
-            new { Month = "Nov", High = 19, Low = 8, Average = 13 },
-            new { Month = "Dec", High = 16, Low = 6, Average = 11 },
+            new { Week = "Week 1", CPU = 45, Memory = 60, Disk = 30, Network = 25 },
+            new { Week = "Week 2", CPU = 52, Memory = 65, Disk = 35, Network = 30 },
+            new { Week = "Week 3", CPU = 48, Memory = 58, Disk = 32, Network = 28 },
+            new { Week = "Week 4", CPU = 55, Memory = 70, Disk = 40, Network = 35 },
+            new { Week = "Week 5", CPU = 60, Memory = 75, Disk = 45, Network = 40 },
+            new { Week = "Week 6", CPU = 58, Memory = 72, Disk = 42, Network = 38 },
         };
 
-        return new Card().Title("Temperature Trends (°C)")
+        return new Card().Title("System Performance Metrics")
             | data.ToAreaChart()
-                .Dimension("Month", e => e.Month)
-                .Measure("High", e => e.Sum(f => f.High))
-                .Measure("Average", e => e.Sum(f => f.Average))
-                .Measure("Low", e => e.Sum(f => f.Low))
+                .Dimension("Week", e => e.Week)
+                .Measure("CPU Usage (%)", e => e.Sum(f => f.CPU))
+                .Measure("Memory Usage (%)", e => e.Sum(f => f.Memory))
+                .Measure("Disk Usage (%)", e => e.Sum(f => f.Disk))
+                .Measure("Network Usage (%)", e => e.Sum(f => f.Network))
         ;
     }
 }
@@ -199,21 +194,27 @@ public class AreaChart7View : ViewBase
     {
         var data = new[]
         {
-            new { Quarter = "Q1 2023", CompanyA = 35, CompanyB = 28, CompanyC = 22, Others = 15 },
-            new { Quarter = "Q2 2023", CompanyA = 38, CompanyB = 25, CompanyC = 24, Others = 13 },
-            new { Quarter = "Q3 2023", CompanyA = 42, CompanyB = 23, CompanyC = 26, Others = 9 },
-            new { Quarter = "Q4 2023", CompanyA = 45, CompanyB = 20, CompanyC = 28, Others = 7 },
-            new { Quarter = "Q1 2024", CompanyA = 48, CompanyB = 18, CompanyC = 30, Others = 4 },
-            new { Quarter = "Q2 2024", CompanyA = 50, CompanyB = 16, CompanyC = 32, Others = 2 },
+            new { Month = "Jan", Temperature = 15, Humidity = 45, Pressure = 1013, WindSpeed = 12 },
+            new { Month = "Feb", Temperature = 18, Humidity = 50, Pressure = 1015, WindSpeed = 15 },
+            new { Month = "Mar", Temperature = 22, Humidity = 55, Pressure = 1012, WindSpeed = 18 },
+            new { Month = "Apr", Temperature = 25, Humidity = 60, Pressure = 1010, WindSpeed = 20 },
+            new { Month = "May", Temperature = 28, Humidity = 65, Pressure = 1008, WindSpeed = 22 },
+            new { Month = "Jun", Temperature = 32, Humidity = 70, Pressure = 1005, WindSpeed = 25 },
+            new { Month = "Jul", Temperature = 35, Humidity = 75, Pressure = 1003, WindSpeed = 28 },
+            new { Month = "Aug", Temperature = 33, Humidity = 72, Pressure = 1006, WindSpeed = 26 },
+            new { Month = "Sep", Temperature = 29, Humidity = 68, Pressure = 1009, WindSpeed = 23 },
+            new { Month = "Oct", Temperature = 24, Humidity = 62, Pressure = 1011, WindSpeed = 19 },
+            new { Month = "Nov", Temperature = 19, Humidity = 55, Pressure = 1014, WindSpeed = 16 },
+            new { Month = "Dec", Temperature = 16, Humidity = 48, Pressure = 1016, WindSpeed = 13 },
         };
 
-        return new Card().Title("Market Share Analysis (%)")
+        return new Card().Title("Weather Data Trends (Annual)")
             | data.ToAreaChart()
-                .Dimension("Quarter", e => e.Quarter)
-                .Measure("CompanyA", e => e.Sum(f => f.CompanyA))
-                .Measure("CompanyB", e => e.Sum(f => f.CompanyB))
-                .Measure("CompanyC", e => e.Sum(f => f.CompanyC))
-                .Measure("Others", e => e.Sum(f => f.Others))
+                .Dimension("Month", e => e.Month)
+                .Measure("Temperature (°C)", e => e.Sum(f => f.Temperature))
+                .Measure("Humidity (%)", e => e.Sum(f => f.Humidity))
+                .Measure("Pressure (hPa)", e => e.Sum(f => f.Pressure))
+                .Measure("Wind Speed (km/h)", e => e.Sum(f => f.WindSpeed))
         ;
     }
 }
