@@ -13,6 +13,9 @@ public class AudioRecorderApp() : SampleBase
     {
         return Layout.Vertical()
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 1dfa0995 (conflicts resolved)
                | Text.H1("Audio Recorder Widget Examples")
                | Text.P("Demonstrates the AudioRecorder widget for capturing audio input. This widget is for recording audio, not playing it. The recorder interface is theme-aware and adapts to light/dark themes.")
                | Layout.Vertical().Gap(6)
@@ -28,6 +31,7 @@ public class AudioRecorderApp() : SampleBase
                        | Text.Small("Audio recorder in disabled state.")
                        | new AudioRecorder("Start recording", "Recording audio...", disabled: true)
                    ).Title("Disabled State"));
+<<<<<<< HEAD
 =======
                | Text.H1("Audio recorder")
                | new AudioRecorder("Start recording", "Recording audio...")
@@ -35,5 +39,7 @@ public class AudioRecorderApp() : SampleBase
                | Text.H2("Disabled")
                | new AudioRecorder("Start recording", "Recording audio...", disabled: true);
 >>>>>>> 9bfa842a (changed folder structuring and naming convention (#813))
+=======
+>>>>>>> 1dfa0995 (conflicts resolved)
     }
 }
