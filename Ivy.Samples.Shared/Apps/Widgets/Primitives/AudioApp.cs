@@ -74,6 +74,7 @@ public class AudioApp : SampleBase
                        | Text.Small("Audio player with custom width and height dimensions.")
                        | customSizedAudio
                    ).Title("Custom Sizing"))
+<<<<<<< HEAD
                    | (new Card(
                        Layout.Vertical().Gap(4)
                        | Text.H4("Theme Awareness")
@@ -98,5 +99,7 @@ public class AudioApp : SampleBase
                            .Width(Size.Fraction(0.5f))
                            .Height(Size.Units(12));
                        """, Languages.Csharp);
+=======
+>>>>>>> 048f8f6c (removed sample section)
     }
 }
