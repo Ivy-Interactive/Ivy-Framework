@@ -34,25 +34,31 @@ Your configuration will be stored securely in .NET user secrets. Ivy then finish
 2. Adds `server.UseAuth<AutheliaAuthProvider>();` to your `Program.cs`.
 3. Adds `Ivy.Auth.Authelia` to your global usings.
 
-### Connection String Format
+### Advanced Configuration
 
-To skip the interactive prompts, you can provide configuration via a connection string parameter:
+#### Connection Strings
+
+To skip the interactive prompts, you can provide configuration via a connection string:
 
 ```terminal
 >ivy auth add --provider Authelia --connection-string "AUTHELIA_URL=https://auth.yourdomain.com"
 ```
 
-The connection string uses the following parameters:
+For a list of connection string parameters, see **Configuration Parameters** below.
 
-- **AUTHELIA_URL**: Required. The base URL of your Authelia instance.
+#### Manual Configuration
 
-### Advanced Configuration
-
-The following parameter can be manually set via .NET user secrets or environment variables:
-
-- **AUTHELIA_URL**: The base URL of your Authelia instance. Set by `ivy auth add`.
+When deploying an Ivy project without using `ivy deploy`, your local .NET user secrets are not automatically transferred. In that case, you can configure Authelia auth by setting environment variables or .NET user secrets. See **Configuration Parameters** below.
 
 > **Note:** If configuration is present in both .NET user secrets and environment variables, Ivy will use the values in **.NET user secrets over environment variables**.
+
+For more information, see [Authentication Overview](Overview.md).
+
+#### Configuration Parameters
+
+The following parameters are supported via connection string, environment variables, or .NET user secrets:
+
+- **AUTHELIA_URL**: Required. The base URL of your Authelia instance.
 
 ## Authentication Flow
 
@@ -98,7 +104,6 @@ Key features of the Authelia provider:
 - Check user credentials exist in your configured authentication backend
 - Verify password hashing matches Authelia's configuration
 - Ensure authentication backend (file, LDAP) is properly configured
-
 
 ## Related Documentation
 
