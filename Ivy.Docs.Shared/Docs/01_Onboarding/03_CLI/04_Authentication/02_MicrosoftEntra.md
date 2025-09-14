@@ -95,13 +95,13 @@ Your credentials will be stored securely in .NET user secrets. Ivy then finishes
 
 #### Connection Strings
 
-To skip the interactive prompts, you can provide configuration via a connection string parameter:
+To skip the interactive prompts, you can provide configuration via a connection string:
 
 ```terminal
 >ivy auth add --provider MicrosoftEntra --connection-string "MICROSOFT_ENTRA_TENANT_ID=your-tenant-id;MICROSOFT_ENTRA_CLIENT_ID=your-client-id;MICROSOFT_ENTRA_CLIENT_SECRET=your-client-secret"
 ```
 
-For a list of all connection string parameters, see **Configuration Parameters** below.
+For a list of connection string parameters, see **Configuration Parameters** below.
 
 #### Manual Configuration
 

@@ -186,31 +186,34 @@ Ivy then finishes configuring your application automatically:
 2. Dynamically generates and adds the appropriate `UseAuth<Auth0AuthProvider>()` call to your `Program.cs` based on your selected options (e.g., if you select Email/Password and Google, it generates: `server.UseAuth<Auth0AuthProvider>(c => c.UseEmailPassword().UseGoogle());`).
 3. Adds `Ivy.Auth.Auth0` to your global usings.
 
-### Connection String Format
+### Advanced Configuration
 
-To skip the interactive prompts, you can provide configuration via a connection string parameter:
+#### Connection Strings
+
+To skip the interactive prompts, you can provide configuration via a connection string:
 
 ```terminal
 >ivy auth add --provider Auth0 --connection-string "AUTH0_DOMAIN=your-domain.auth0.com;AUTH0_CLIENT_ID=your-client-id;AUTH0_CLIENT_SECRET=your-client-secret"
 ```
 
-The connection string uses the following parameters:
+For a list of connection string parameters, see **Configuration Parameters** below.
+
+#### Manual Configuration
+
+When deploying an Ivy project without using `ivy deploy`, your local .NET user secrets are not automatically transferred. In that case, you can configure basic auth by setting environment variables or .NET user secrets. See **Configuration Parameters** below.
+
+> **Note:** If configuration is present in both .NET user secrets and environment variables, Ivy will use the values in **.NET user secrets over environment variables**.
+
+For more information, see [Authentication Overview](Overview.md).
+
+#### Configuration Parameters
+
+The following parameters are supported via connection string, environment variables, or .NET user secrets:
 
 - **AUTH0_DOMAIN**: Required. Your Auth0 tenant domain.
 - **AUTH0_CLIENT_ID**: Required. Your Auth0 application's client ID.
 - **AUTH0_CLIENT_SECRET**: Required. Your Auth0 application's client secret.
 - **AUTH0_AUDIENCE**: Required. API identifier for securing API access.
-
-### Advanced Configuration
-
-The following parameters can be manually set via .NET user secrets or environment variables:
-
-- **AUTH0_DOMAIN**: Your Auth0 tenant domain. Set by `ivy auth add`.
-- **AUTH0_CLIENT_ID**: Your Auth0 application's client ID. Set by `ivy auth add`.
-- **AUTH0_CLIENT_SECRET**: Your Auth0 application's client secret. Set by `ivy auth add`.
-- **AUTH0_AUDIENCE**: API identifier for API authentication. Set by `ivy auth add`.
-
-If configuration is present in both .NET user secrets and environment variables, Ivy will use the values in .NET user secrets. For more information, see [Authentication Overview](Overview.md).
 
 ## Authentication Flow
 

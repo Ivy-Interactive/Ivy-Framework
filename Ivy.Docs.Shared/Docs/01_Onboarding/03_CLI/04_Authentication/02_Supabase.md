@@ -74,27 +74,32 @@ Your credentials will be stored securely in .NET user secrets. Ivy then finishes
 2. Adds `server.UseAuth<SupabaseAuthProvider>(c => c.UseEmailPassword().UseGoogle().UseApple());` to your `Program.cs`.
 3. Adds `Ivy.Auth.Supabase` to your global usings.
 
-### Connection String Format
+### Advanced Configuration
 
-To skip the interactive prompts, you can provide configuration via a connection string parameter:
+#### Connection Strings
+
+To skip the interactive prompts, you can provide configuration via a connection string:
 
 ```terminal
 >ivy auth add --provider Supabase --connection-string "SUPABASE_URL=https://your-project.supabase.co;SUPABASE_API_KEY=your-anon-key"
 ```
 
-The connection string uses the following parameters:
+For a list of connection string parameters, see **Configuration Parameters** below.
+
+#### Manual Configuration
+
+When deploying an Ivy project without using `ivy deploy`, your local .NET user secrets are not automatically transferred. In that case, you can configure basic auth by setting environment variables or .NET user secrets. See **Configuration Parameters** below.
+
+> **Note:** If configuration is present in both .NET user secrets and environment variables, Ivy will use the values in **.NET user secrets over environment variables**.
+
+For more information, see [Authentication Overview](Overview.md).
+
+#### Configuration Parameters
+
+The following parameters are supported via connection string, environment variables, or .NET user secrets:
 
 - **SUPABASE_URL**: Required. Your Supabase project URL.
 - **SUPABASE_API_KEY**: Required. Your Supabase project's anonymous key.
-
-### Advanced Configuration
-
-The following parameters can be manually set via .NET user secrets or environment variables:
-
-- **SUPABASE_URL**: Your Supabase project URL. Set by `ivy auth add`.
-- **SUPABASE_API_KEY**: Your Supabase project's anonymous key. Set by `ivy auth add`.
-
-If configuration is present in both .NET user secrets and environment variables, Ivy will use the values in .NET user secrets. For more information, see [Authentication Overview](Overview.md).
 
 ## Authentication Flow
 

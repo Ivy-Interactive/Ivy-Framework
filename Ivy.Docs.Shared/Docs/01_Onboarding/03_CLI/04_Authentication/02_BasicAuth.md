@@ -31,13 +31,13 @@ Your credentials will be stored securely in .NET user secrets, along with an aut
 
 #### Connection Strings
 
-To skip the interactive prompts, you can provide configuration via a connection string parameter:
+To skip the interactive prompts, you can provide configuration via a connection string:
 
 ```terminal
 >ivy auth add --provider Basic --connection-string "USERS=\"user1:password1;user2:password2\""
 ```
 
-For a list of all connection string parameters, see **Configuration Parameters** below.
+For a list of connection string parameters, see **Configuration Parameters** below.
 
 #### Manual Configuration
 
