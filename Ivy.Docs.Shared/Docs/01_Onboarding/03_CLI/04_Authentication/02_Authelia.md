@@ -44,11 +44,11 @@ To skip the interactive prompts, you can provide configuration via a connection 
 >ivy auth add --provider Authelia --connection-string "AUTHELIA_URL=https://auth.yourdomain.com"
 ```
 
-For a list of connection string parameters, see **Configuration Parameters** below.
+For a list of connection string parameters, see [Configuration Parameters](#configuration-parameters) below.
 
 #### Manual Configuration
 
-When deploying an Ivy project without using `ivy deploy`, your local .NET user secrets are not automatically transferred. In that case, you can configure Authelia auth by setting environment variables or .NET user secrets. See **Configuration Parameters** below.
+When deploying an Ivy project without using `ivy deploy`, your local .NET user secrets are not automatically transferred. In that case, you can configure Authelia auth by setting environment variables or .NET user secrets. See [Configuration Parameters](#configuration-parameters) below.
 
 > **Note:** If configuration is present in both .NET user secrets and environment variables, Ivy will use the values in **.NET user secrets over environment variables**.
 

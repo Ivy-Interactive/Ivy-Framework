@@ -101,11 +101,11 @@ To skip the interactive prompts, you can provide configuration via a connection 
 >ivy auth add --provider MicrosoftEntra --connection-string "MICROSOFT_ENTRA_TENANT_ID=your-tenant-id;MICROSOFT_ENTRA_CLIENT_ID=your-client-id;MICROSOFT_ENTRA_CLIENT_SECRET=your-client-secret"
 ```
 
-For a list of connection string parameters, see **Configuration Parameters** below.
+For a list of connection string parameters, see [Configuration Parameters](#configuration-parameters) below.
 
 #### Manual Configuration
 
-When deploying an Ivy project without using `ivy deploy`, your local .NET user secrets are not automatically transferred. In that case, you can configure Entra Auth by setting environment variables or .NET user secrets. See **Configuration Parameters** below.
+When deploying an Ivy project without using `ivy deploy`, your local .NET user secrets are not automatically transferred. In that case, you can configure Entra Auth by setting environment variables or .NET user secrets. See [Configuration Parameters](#configuration-parameters) below.
 
 > **Note:** If configuration is present in both .NET user secrets and environment variables, Ivy will use the values in **.NET user secrets over environment variables**.
 

@@ -37,11 +37,11 @@ To skip the interactive prompts, you can provide configuration via a connection 
 >ivy auth add --provider Basic --connection-string "USERS=\"user1:password1;user2:password2\""
 ```
 
-For a list of connection string parameters, see **Configuration Parameters** below.
+For a list of connection string parameters, see [Configuration Parameters](#configuration-parameters) below.
 
 #### Manual Configuration
 
-When deploying an Ivy project without using `ivy deploy`, your local .NET user secrets are not automatically transferred. In that case, you can configure basic auth by setting environment variables or .NET user secrets. See **Configuration Parameters** below.
+When deploying an Ivy project without using `ivy deploy`, your local .NET user secrets are not automatically transferred. In that case, you can configure basic auth by setting environment variables or .NET user secrets. See [Configuration Parameters](#configuration-parameters) below.
 
 > **Note:** If configuration is present in both .NET user secrets and environment variables, Ivy will use the values in **.NET user secrets over environment variables**.
 
