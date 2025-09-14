@@ -68,7 +68,7 @@ Before making any changes to your `Program.cs`, Ivy checks whether an authentica
 - If you selected a **different provider** than what is already configured, Ivy will ask you to confirm before overwriting the existing configuration.
 - If you selected the **same provider**, Ivy reuses the existing configuration as defaults for your new setup.
 
-> **Note**: Only one authentication provider can be active at a time. However, some providers (such as Auth0 or Supabase) support multiple login methods (like Google, GitHub, or username/password), so you can still offer users a variety of login options.
+> **Note:** Only one authentication provider can be active at a time. However, some providers (such as Auth0 or Supabase) support multiple login methods (like Google, GitHub, or username/password), so you can still offer users a variety of login options.
 
 ### Security and Secrets Management
 

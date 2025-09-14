@@ -26,7 +26,7 @@ To set up Authelia Authentication with Ivy, run the following command and choose
 
 You will be prompted to provide your Authelia server URL (e.g., `https://127.0.0.1:9091` or `https://auth.yourdomain.com`).
 
-> **Note**: Authelia requires the use of HTTPS, even for local testing.
+> **Note:** Authelia requires the use of HTTPS, even for local testing.
 
 Your configuration will be stored securely in .NET user secrets. Ivy then finishes configuring your application automatically:
 
