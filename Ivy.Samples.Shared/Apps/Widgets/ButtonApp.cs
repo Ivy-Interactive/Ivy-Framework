@@ -51,12 +51,14 @@ public class ButtonApp() : SampleBase
                | Text.H2("States")
                | (Layout.Wrap().Gap(16)
                   | Variants.Select((variant, idx) =>
-                    Layout.Vertical()
-                    .Width(Size.MinContent())
-               | Text.Block(VariantNames[idx])
-               | new Button("Button With Icon", eventHandler, variant: variant, icon: Icons.MessageSquareX)
-               | new Button("Button With Icon", eventHandler, variant: variant, icon: Icons.MessageSquareX).Icon(Icons.MessageSquareX, Align.Right)
-                ).ToArray())
+                      Layout.Vertical()
+                      .Width(Size.MinContent())
+                 | Text.Block(VariantNames[idx])
+                 | new Button(VariantNames[idx], eventHandler, variant: variant)                     // Normal
+                 | new Button(VariantNames[idx], eventHandler, variant: variant).Disabled()          // Disabled
+                 | new Button(VariantNames[idx], eventHandler, variant: variant).Loading()           // Loading
+                  ).ToArray()
+)
 
                | Text.H2("Sizes")
                | (Layout.Grid().Columns(Variants.Length)
