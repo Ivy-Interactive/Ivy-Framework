@@ -27,12 +27,18 @@ public enum ButtonVariant
     Outline,
     /// <summary>Secondary button style with reduced visual emphasis, typically used for supporting actions or less prominent interactions.</summary>
     Secondary,
+    /// <summary>Success button style with positive action colors, typically used for confirming actions or indicating success.</summary>
+    Success,
+    /// <summary>Warning button style with cautionary colors, typically used for alerting users to potential issues or important notices.</summary>
+    Warning,
+    /// <summary>Info button style with informational colors, typically used for providing additional context or guidance.</summary>
+    Info,
     /// <summary>Ghost button style with minimal visual styling, typically used for subtle actions or tertiary interactions.</summary>
     Ghost,
     /// <summary>Link button style that appears as a clickable link, typically used for navigation or external references.</summary>
     Link,
     /// <summary>Inline button style that integrates seamlessly with text content, typically used for embedded actions within text.</summary>
-    Inline
+    Inline,
 }
 
 /// <summary>
