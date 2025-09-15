@@ -1,6 +1,4 @@
 using Ivy.Helpers;
-using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -9,7 +7,6 @@ using Ivy.Auth;
 using Ivy.Chrome;
 using Ivy.Connections;
 using Ivy.Core;
-using Ivy.Hooks;
 using Ivy.Themes;
 using Ivy.Views;
 using Microsoft.AspNetCore.Builder;
@@ -250,17 +247,23 @@ public class Server
             cts.Cancel();
         };
 
+        if (!_args.Verbose)
+        {
+            // In production mode, prevent termination from unhandled exceptions
+            AppDomain.CurrentDomain.SetData("HACK_SKIP_THROW_UNOBSERVED_TASK_EXCEPTIONS", true);
+        }
+
         // Handle unobserved task exceptions to prevent process termination
         TaskScheduler.UnobservedTaskException += (sender, e) =>
         {
-            Console.WriteLine($"[ERROR] Unobserved task exception: {e.Exception}");
+            Console.WriteLine($"[CRITICAL] Unobserved Task Exception: {e.Exception}");
             e.SetObserved(); // Prevents process termination
         };
 
         AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
         {
             var ex = (Exception)e.ExceptionObject;
-            Console.WriteLine($"[CRITICAL] Unhandled domain exception - IsTerminating: {e.IsTerminating}");
+            Console.WriteLine($"[CRITICAL] Unhandled Domain Exception - IsTerminating: {e.IsTerminating}");
             Console.WriteLine($"[CRITICAL] Exception: {ex}");
         };
 
@@ -339,7 +342,10 @@ public class Server
 
         builder.WebHost.UseUrls($"http://*:{_args.Port}");
 
-        builder.Services.AddSignalR();
+        builder.Services.AddSignalR(options =>
+        {
+            options.EnableDetailedErrors = _args.Verbose;
+        });
         builder.Services.AddSingleton(this);
         builder.Services.AddSingleton<IClientNotifier, ClientNotifier>();
         builder.Services.AddControllers()

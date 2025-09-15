@@ -9,8 +9,15 @@ public interface IClientNotifier
 
 public class ClientNotifier(IHubContext<AppHub> hubContext) : IClientNotifier
 {
-    public Task NotifyClientAsync(string connectionId, string method, object? message)
+    public async Task NotifyClientAsync(string connectionId, string method, object? message)
     {
-        return hubContext.Clients.Client(connectionId).SendAsync(method, message);
+        try
+        {
+            await hubContext.Clients.Client(connectionId).SendAsync(method, message);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[CRITICAL] Failed to notify client {connectionId} with method {method}: {ex.Message}");
+        }
     }
 }

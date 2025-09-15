@@ -173,7 +173,7 @@ public class AppHub(
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(e);
+                    logger.LogError(e, "{ConnectionId}", appState.ConnectionId);
                 }
             }
 
@@ -205,18 +205,55 @@ public class AppHub(
         catch (Exception ex)
         {
             logger.LogError(ex, "Failed to connect client {ConnectionId}", Context.ConnectionId);
-            // Just print and ignore as requested
+
+            // Try to notify the client about the error
+            try
+            {
+                await Clients.Caller.SendAsync("Error", new
+                {
+                    message = "Failed to establish connection",
+                    error = ex.Message
+                });
+            }
+            catch
+            {
+                // If we can't even send an error message, just log and continue
+                logger.LogError("Could not send error message to client {ConnectionId}", Context.ConnectionId);
+            }
         }
     }
 
-    public override Task OnDisconnectedAsync(Exception? exception)
+    public override async Task OnDisconnectedAsync(Exception? exception)
     {
-        if (sessionStore.Sessions.TryRemove(Context.ConnectionId, out var appState))
+        try
         {
-            appState.Dispose();
-        }
+            if (exception != null)
+            {
+                logger.LogWarning(exception, "Client {ConnectionId} disconnected with error", Context.ConnectionId);
+            }
+            else
+            {
+                logger.LogInformation("Client {ConnectionId} disconnected normally", Context.ConnectionId);
+            }
 
-        return base.OnDisconnectedAsync(exception);
+            if (sessionStore.Sessions.TryRemove(Context.ConnectionId, out var appState))
+            {
+                try
+                {
+                    appState.Dispose();
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "Error disposing app state for {ConnectionId}", Context.ConnectionId);
+                }
+            }
+
+            await base.OnDisconnectedAsync(exception);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error during disconnection for {ConnectionId}", Context.ConnectionId);
+        }
     }
 
     public void HotReload()
@@ -320,7 +357,18 @@ public class ClientSender(IClientNotifier clientNotifier, string connectionId) :
 {
     public void Send(string method, object? data)
     {
-        _ = clientNotifier.NotifyClientAsync(connectionId, method, data);
+        // Fire and forget, but handle exceptions to prevent crashes
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                await clientNotifier.NotifyClientAsync(connectionId, method, data);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[ERROR] Failed to send {method} to client {connectionId}: {ex.Message}");
+            }
+        });
     }
 }
 
