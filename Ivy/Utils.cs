@@ -381,14 +381,14 @@ public static class Utils
 
     public static bool IsDate(this Type type)
     {
-        if (type == null) { return false; }
+        //if (type == null) { return false; }
 
         if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
         {
             type = type.GetGenericArguments()[0];
         }
 
-        return type == typeof(DateTime) || type == typeof(DateTimeOffset);
+        return type == typeof(DateTime) || type == typeof(DateTimeOffset) || type == typeof(DateOnly);
     }
 
     public static bool IsNumeric(this Type type)
@@ -513,7 +513,7 @@ public static class Utils
             {
                 if (input.Substring(cursor - food.Length, food.Length).Equals(food, stringComparison))
                 {
-                    cursor = cursor - food.Length;
+                    cursor -= food.Length;
                 }
                 else
                 {
@@ -526,7 +526,7 @@ public static class Utils
             }
         }
 
-        return input.Substring(0, cursor);
+        return input[..cursor];
     }
 
     public static string EatLeft(this string input, char food)
@@ -549,7 +549,7 @@ public static class Utils
                 break;
             }
         }
-        return input.Substring(i);
+        return input[i..];
     }
 
     public static string EatLeft(this string input, string food, StringComparison stringComparison = StringComparison.CurrentCulture)
@@ -564,7 +564,7 @@ public static class Utils
             {
                 if (input.Substring(cursor, food.Length).Equals(food, stringComparison))
                 {
-                    cursor = cursor + food.Length;
+                    cursor += food.Length;
                 }
                 else
                 {
@@ -592,8 +592,6 @@ public static class Utils
 
     public static void KillProcessUsingPort(int port)
     {
-        //Console.WriteLine($"Trying to kill the process using port {port}...");
-
         if (Environment.OSVersion.Platform != PlatformID.Win32NT)
             throw new NotSupportedException("This method is only supported on Windows.");
 
@@ -688,5 +686,18 @@ public static class Utils
         string base64 = System.Convert.ToBase64String(hash);
         string filtered = new string(base64.ToLower().Where(char.IsLetterOrDigit).ToArray());
         return filtered.Length >= length ? filtered[..length] : filtered.PadRight(length, '0');
+    }
+
+    public static string LabelFor(string name, Type? type)
+    {
+        if (type != null)
+        {
+            if (type.IsDate() && Regex.IsMatch(name, @"[a-z]At$"))
+            {
+                //remove the 'At' suffix for date fields
+                name = name[..^2];
+            }
+        }
+        return SplitPascalCase(name) ?? name;
     }
 }

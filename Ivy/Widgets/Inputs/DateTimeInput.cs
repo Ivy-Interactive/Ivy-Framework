@@ -307,9 +307,10 @@ public static class DateTimeInputExtensions
     /// <param name="type">The property type for additional context.</param>
     internal static IAnyDateTimeInput ScaffoldDefaults(this IAnyDateTimeInput input, string? name, Type type)
     {
-        if (string.IsNullOrEmpty(input.Placeholder))
+        if (string.IsNullOrEmpty(input.Placeholder)
+            && !string.IsNullOrEmpty(name))
         {
-            input.Placeholder = Utils.SplitPascalCase(name) ?? name;
+            input.Placeholder = Utils.LabelFor(name, type);
         }
 
         return input;

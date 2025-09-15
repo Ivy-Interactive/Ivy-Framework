@@ -32,7 +32,7 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         public IBuilder<TModel> Builder { get; set; } = builder;
         public Type? Type => FieldInfo?.FieldType ?? PropertyInfo?.PropertyType;
         public int Order { get; set; } = order;
-        public string Header { get; set; } = Utils.SplitPascalCase(name) ?? name;
+        public string Header { get; set; } = Utils.LabelFor(name, fieldInfo?.FieldType ?? propertyInfo?.PropertyType);
         public string? Description { get; set; }
         public bool Removed { get; set; } = removed;
         public bool IsMultiLine { get; set; }

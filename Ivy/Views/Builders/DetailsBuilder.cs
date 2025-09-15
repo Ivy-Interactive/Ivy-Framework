@@ -70,9 +70,10 @@ public class DetailsBuilder<TModel> : ViewBase, IStateless
 
         foreach (var field in fields)
         {
+            var label = Utils.LabelFor(field.Name, field.Type);
             _items[field.Name] =
                 new Item(
-                    Utils.SplitPascalCase(field.Name) ?? "",
+                    label,
                     new DefaultBuilder<TModel>(),
                     field.FieldInfo,
                     field.PropertyInfo

@@ -205,16 +205,14 @@ public class FormBuilder<TModel> : ViewBase
                         FieldInfo = (FieldInfo)null!,
                         PropertyInfo = e,
                         Required = FormHelpers.IsRequired(e)
-                    }
-                    )
+                    })
             )
             .ToList();
 
         var order = fields.Count;
         foreach (var field in fields)
         {
-            var label = Utils.SplitPascalCase(field.Name) ?? field.Name;
-
+            var label = Utils.LabelFor(field.Name, field.Type);
             _fields[field.Name] =
                 new FormBuilderField<TModel>(field.Name, label, order++, ScaffoldEditor(field.Name, field.Type),
                     field.FieldInfo, field.PropertyInfo, field.Required);
@@ -648,6 +646,7 @@ public class FormBuilder<TModel> : ViewBase
         return this;
     }
 
+    //todo: this looks like a hack that should be fixed properly
     private static bool HasCustomLabel(string label, string name)
         => label != Utils.SplitPascalCase(name);
 
