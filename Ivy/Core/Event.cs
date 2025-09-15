@@ -42,6 +42,7 @@ public static class EventExtensions
     /// <typeparam name="TSender">The type of the event sender.</typeparam>
     /// <param name="handler">The action handler to convert, or null if no handler is needed.</param>
     /// <returns>An event handler that invokes the original action when called.</returns>
+    [Obsolete("Use ValueTasks pattern instead.")]
     public static Action<Event<TSender>> ToEventHandler<TSender>(this Action? handler)
     {
         return _ => handler?.Invoke();
@@ -54,6 +55,7 @@ public static class EventExtensions
     /// <typeparam name="TValue">The type of the event value.</typeparam>
     /// <param name="handler">The value-based action handler to convert.</param>
     /// <returns>An event handler that extracts the value and invokes the original action.</returns>
+    [Obsolete("Use ValueTasks pattern instead.")]
     public static Action<Event<TSender, TValue>> ToEventHandler<TSender, TValue>(this Action<TValue> handler)
     {
         return e => handler(e.Value);
