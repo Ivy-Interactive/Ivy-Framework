@@ -1539,6 +1539,7 @@ public enum Icons
     VenetianMask,
     Vibrate,
     VibrateOff,
+    Video,
     VideoOff,
     Videotape,
     View,
