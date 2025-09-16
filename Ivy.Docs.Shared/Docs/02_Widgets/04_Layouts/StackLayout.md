@@ -68,36 +68,6 @@ public class AdvancedStackLayoutExample : ViewBase
 }
 ```
 
-## Complex Layouts
-
-Combine multiple stacks for sophisticated layouts:
-
-```csharp demo-tabs
-public class ComplexLayoutExample : ViewBase
-{
-    public override object? Build()
-    {
-        var client = UseService<IClientProvider>();
-        var name = UseState("John Doe");
-        var email = UseState("john@example.com");
-        
-        return Layout.Vertical()
-            | new Card(
-                Layout.Vertical()
-                    | Layout.Horizontal().Align(Align.Center)
-                        | new Box("JD").Width(64).Height(64).Color(Colors.Blue)
-                        | Layout.Vertical().Padding(16)
-                            | Text.H3(name)
-                            | Text.Small(email).Color(Colors.Gray)
-                    | Layout.Horizontal().Align(Align.Right).Gap(8)
-                        | new Button("Edit", _ => client.Toast("Edit clicked"))
-                        | new Button("Delete", _ => client.Toast("Delete clicked"))
-                            .Variant(ButtonVariant.Destructive)
-            ).Title("User Profile");
-    }
-}
-```
-
 <Callout type="info">
 StackLayout is the foundation for most other layout widgets. Understanding its properties will help you master more complex layout systems.
 </Callout>
