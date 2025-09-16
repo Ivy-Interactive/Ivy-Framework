@@ -22,75 +22,26 @@ public class BasicStackExample : ViewBase
 }
 ```
 
-## Orientation
-
-Control the direction in which elements are arranged:
-
-```csharp demo-tabs
-public class OrientationExample : ViewBase
-{
-    public override object? Build()
-    {
-        var box = new Box().Width(4);
-        
-        return Layout.Vertical()
-            | Text.H2("Vertical Orientation (Default)")
-            | new StackLayout([box, box, box], Orientation.Vertical)
-            | Text.H2("Horizontal Orientation")
-            | new StackLayout([box, box, box], Orientation.Horizontal);
-    }
-}
-```
-
-## Gap Control
-
-Set the spacing between child elements:
-
-```csharp demo-tabs
-public class GapExample : ViewBase
-{
-    public override object? Build()
-    {
-        var box = new Box().Width(4);
-        
-        return Layout.Vertical()
-            | Text.H2("No Gap")
-            | new StackLayout([box, box, box], Orientation.Horizontal, gap: 0)
-            | Text.H2("Default Gap (4px)")
-            | new StackLayout([box, box, box], Orientation.Horizontal)
-            | Text.H2("Large Gap (8px)")
-            | new StackLayout([box, box, box], Orientation.Horizontal, gap: 8);
-    }
-}
-```
-
 ## Alignment
 
-Control how children are positioned within the stack:
+The `StackLayout` widget arranges child elements in a linear sequence with configurable orientation, spacing, alignment, and padding. This example demonstrates the core features:
 
 ```csharp demo-tabs
-public class AlignmentExample : ViewBase
+public class StackLayoutExample : ViewBase
 {
     public override object? Build()
     {
-        var smallBox = new Box().Width(3).Height(3).Color(Colors.Red);
-        var largeBox = new Box().Width(6).Height(6).Color(Colors.Blue);
+        var box1 = new Box().Width(2).Height(2);
+        var box2 = new Box().Width(2).Height(2);
+        var box3 = new Box().Width(2).Height(2);
         
-        return Layout.Vertical()
-            | Text.H2("Horizontal Stack Alignment")
-            | new Box(Layout.Horizontal().Align(Align.Left) | smallBox | largeBox)
-                .Width(20).Height(12).Color(Colors.Gray).Padding(0)
-            | new Box(Layout.Horizontal().Align(Align.Center) | smallBox | largeBox)
-                .Width(20).Height(12).Color(Colors.Gray).Padding(0)
-            | new Box(Layout.Horizontal().Align(Align.Right) | smallBox | largeBox)
-                .Width(20).Height(12).Color(Colors.Gray).Padding(0)
-            | Text.H2("Vertical Stack Alignment")
-            | new Box(Layout.Vertical().Align(Align.TopLeft) | smallBox | largeBox)
-                .Width(20).Height(12).Color(Colors.Gray).Padding(0)
-            | new Box(Layout.Vertical().Align(Align.Center) | smallBox | largeBox)
-                .Width(20).Height(12).Color(Colors.Gray).Padding(0)
-            | new Box(Layout.Vertical().Align(Align.BottomRight) | smallBox | largeBox)
-                .Width(20).Height(12).Color(Colors.Gray).Padding(0);
+        return new StackLayout([
+            Text.H2("StackLayout Features"),
+            Text.Label("Orientation.Horizontal, gap(2), padding(1)"),
+            new StackLayout([box1, box2, box3], Orientation.Horizontal, gap: 2, padding: new Thickness(1)),
+            Text.Label("Orientation.Vertical, gap(1), Align.Center, padding(2)"),
+            new StackLayout([box1, box2, box3], Orientation.Vertical, gap: 1, align: Align.Center, padding: new Thickness(2))
+        ], gap: 4);
     }
 }
 ```
