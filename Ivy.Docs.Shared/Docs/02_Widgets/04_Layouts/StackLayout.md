@@ -8,20 +8,16 @@ The `StackLayout` widget is the core building block for most layout compositions
 
 ## Basic Usage
 
-Create simple vertical and horizontal stacks using the helper methods:
+Create simple stack using the helper methods:
 
 ```csharp demo-tabs
 public class BasicStackExample : ViewBase
 {
     public override object? Build()
-    {
-        var squareBox = new Box().Width(5).Height(5);
-        
-        return Layout.Vertical()
-            | Text.H2("Vertical Stack")
-            | Layout.Vertical() | squareBox | squareBox | squareBox
-            | Text.H2("Horizontal Stack") 
-            | (Layout.Horizontal() | squareBox | squareBox | squareBox);
+    {   
+        return new StackLayout([
+            Text.H2("Stack"), 
+            Text.Label("Creation of a simple Stack Layout")]);
     }
 }
 ```
@@ -35,7 +31,7 @@ public class OrientationExample : ViewBase
 {
     public override object? Build()
     {
-        var box = new Box().Width(4).Height(4).Color(Colors.Green);
+        var box = new Box().Width(4);
         
         return Layout.Vertical()
             | Text.H2("Vertical Orientation (Default)")
@@ -55,17 +51,15 @@ public class GapExample : ViewBase
 {
     public override object? Build()
     {
-        var box = new Box().Width(4).Height(4).Color(Colors.Orange);
+        var box = new Box().Width(4);
         
         return Layout.Vertical()
             | Text.H2("No Gap")
-            | Layout.Horizontal().Gap(0) | box | box | box
-            | Text.H2("Small Gap (2px)")
-            | Layout.Horizontal().Gap(2) | box | box | box
+            | new StackLayout([box, box, box], Orientation.Horizontal, gap: 0)
             | Text.H2("Default Gap (4px)")
-            | Layout.Horizontal().Gap(4) | box | box | box
+            | new StackLayout([box, box, box], Orientation.Horizontal)
             | Text.H2("Large Gap (8px)")
-            | Layout.Horizontal().Gap(8) | box | box | box;
+            | new StackLayout([box, box, box], Orientation.Horizontal, gap: 8);
     }
 }
 ```
