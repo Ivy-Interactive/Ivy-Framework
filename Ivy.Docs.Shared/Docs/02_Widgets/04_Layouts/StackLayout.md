@@ -195,40 +195,6 @@ public class ComplexLayoutExample : ViewBase
 }
 ```
 
-## Form Layouts
-
-Create well-structured forms with proper spacing:
-
-```csharp demo-tabs
-public class FormLayoutExample : ViewBase
-{
-    public override object? Build()
-    {
-        var client = UseService<IClientProvider>();
-        var firstName = UseState("");
-        var lastName = UseState("");
-        var email = UseState("");
-        
-        return Layout.Vertical()
-            | new Card(
-                Layout.Vertical().Gap(16)
-                    | Layout.Horizontal().Gap(8)
-                        | new TextInput(firstName, "First Name")
-                        | new TextInput(lastName, "Last Name")
-                    | new TextInput(email, "Email Address")
-                    | Layout.Horizontal().Align(Align.Right).Gap(8)
-                        | new Button("Cancel", _ => client.Toast("Cancelled"))
-                        | new Button("Submit", _ => client.Toast("Submitted"))
-                            .Variant(ButtonVariant.Primary)
-            ).Title("Contact Form");
-    }
-}
-```
-
-<Callout type="tip">
-Use `Layout.Vertical()` and `Layout.Horizontal()` helper methods for cleaner, more readable code. They automatically set appropriate sizing and can be chained with the `|` operator.
-</Callout>
-
 <Callout type="info">
 StackLayout is the foundation for most other layout widgets. Understanding its properties will help you master more complex layout systems.
 </Callout>
@@ -255,30 +221,6 @@ public class NavigationExample : ViewBase
                 | new Button("About", _ => client.Toast("About"))
                 | new Button("Contact", _ => client.Toast("Contact"))
         ], Orientation.Horizontal, padding: new Thickness(16), background: Colors.Blue);
-    }
-}
-```
-
-### Card Grid
-
-Arrange cards in a responsive grid using vertical stacks:
-
-```csharp demo-tabs
-public class CardGridExample : ViewBase
-{
-    public override object? Build()
-    {
-        var client = UseService<IClientProvider>();
-        
-        return Layout.Vertical()
-            | Text.H2("Product Grid")
-            | Layout.Horizontal().Gap(16)
-                | Layout.Vertical().Gap(8)
-                    | new Card(Text.P("Description 1")).Title("Product 1")
-                    | new Card(Text.P("Description 2")).Title("Product 2")
-                | Layout.Vertical().Gap(8)
-                    | new Card(Text.P("Description 3")).Title("Product 3")
-                    | new Card(Text.P("Description 4")).Title("Product 4");
     }
 }
 ```
