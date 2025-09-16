@@ -76,8 +76,11 @@ StackLayout is the foundation for most other layout widgets. Understanding its p
 
 ## Examples
 
-### Navigation Bar
-
+<Details>
+<Summary>
+Navigation Bar
+</Summary>
+<Body>
 Create a horizontal navigation bar with proper alignment:
 
 ```csharp demo-tabs
@@ -88,12 +91,30 @@ public class NavigationExample : ViewBase
         var client = UseService<IClientProvider>();
         
         return new StackLayout([
-            Text.H3("MyApp").Color(Colors.White),
-            Layout.Horizontal().Align(Align.Right).Gap(16)
-                | new Button("Home", _ => client.Toast("Home"))
-                | new Button("About", _ => client.Toast("About"))
-                | new Button("Contact", _ => client.Toast("Contact"))
-        ], Orientation.Horizontal, padding: new Thickness(16), background: Colors.Blue);
+            // Navigation buttons
+            new StackLayout([
+                new Button("Home", _ => client.Toast("Home")),
+                new Button("About", _ => client.Toast("About")),
+                new Button("Contact", _ => client.Toast("Contact")),
+                new Button("Settings", _ => client.Toast("Settings"))
+            ], Orientation.Horizontal, gap: 8, align: Align.Center),
+
+             // App title and user info
+            new StackLayout([
+                Text.H3("MyApp"),
+                Text.Small("Welcome back!")
+            ], Orientation.Vertical, align: Align.Left),
+            
+            // User actions
+            new StackLayout([
+                new Button("Profile", _ => client.Toast("Profile")),
+                new Button("Logout", _ => client.Toast("Logout"))
+            ], Orientation.Horizontal, gap: 4, align: Align.Right)
+            
+        ], Orientation.Vertical, gap: 16, padding: new Thickness(12), align: Align.Center);
     }
 }
 ```
+
+</Body>
+</Details>
