@@ -46,66 +46,24 @@ public class StackLayoutExample : ViewBase
 }
 ```
 
-## Padding and Margins
+## Advanced Features
 
-Add internal and external spacing:
+Complete example showing padding, margins, background colors, and parent padding control:
 
 ```csharp demo-tabs
-public class SpacingExample : ViewBase
+public class AdvancedStackLayoutExample : ViewBase
 {
     public override object? Build()
     {
-        var box = new Box().Width(4).Height(4).Color(Colors.Purple);
+        var box = new Box().Width(2).Height(2);
         
-        return Layout.Vertical()
-            | Text.H2("With Padding")
-            | new StackLayout([box, box], Orientation.Horizontal, padding: new Thickness(8), background: Colors.Gray)
-            | Text.H2("With Margin")
-            | new StackLayout([box, box], Orientation.Horizontal, margin: new Thickness(8), background: Colors.Gray)
-            | Text.H2("Combined")
-            | new StackLayout([box, box], Orientation.Horizontal, 
-                padding: new Thickness(4), margin: new Thickness(8), background: Colors.Gray);
-    }
-}
-```
-
-## Background Colors
-
-Add visual distinction to your stacks:
-
-```csharp demo-tabs
-public class BackgroundExample : ViewBase
-{
-    public override object? Build()
-    {
-        var box = new Box().Width(4).Height(4).Color(Colors.White);
-        
-        return Layout.Vertical()
-            | Text.H2("Colored Backgrounds")
-            | Layout.Horizontal()
-                | new StackLayout([box, box], Orientation.Horizontal, background: Colors.Blue)
-                | new StackLayout([box, box], Orientation.Horizontal, background: Colors.Green)
-                | new StackLayout([box, box], Orientation.Horizontal, background: Colors.Red);
-    }
-}
-```
-
-## Remove Parent Padding
-
-Extend stacks to fill the full available space:
-
-```csharp demo-tabs
-public class ParentPaddingExample : ViewBase
-{
-    public override object? Build()
-    {
-        var box = new Box().Width(4).Height(4).Color(Colors.Yellow);
-        
-        return Layout.Vertical().Padding(16)
-            | Text.H2("Normal Stack (Respects Parent Padding)")
-            | new StackLayout([box, box], Orientation.Horizontal, background: Colors.Gray)
-            | Text.H2("Removed Parent Padding (Full Width)")
-            | new StackLayout([box, box], Orientation.Horizontal, removeParentPadding: true, background: Colors.Gray);
+        return new StackLayout([
+            Text.H2("Advanced StackLayout Features"),
+            Text.Label("With Margin (external spacing)"),
+            new StackLayout([box, box], Orientation.Horizontal, margin: new Thickness(4)),
+            Text.Label("Remove Parent Padding, Backgroung color"),
+            new StackLayout([box, box], Orientation.Horizontal, removeParentPadding: true, background: Colors.Gray)
+        ], gap: 2, padding: new Thickness(8));
     }
 }
 ```
