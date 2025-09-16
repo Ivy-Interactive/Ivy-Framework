@@ -50,7 +50,7 @@ public class ToolbarExample : ViewBase
                     .Variant(ButtonVariant.Primary)
                     .HandleClick(_ => client.Toast("Add item clicked"))
                 | new Button("Filter")
-                    .Icon(Icons.Filter)
+                    .Icon(Icons.Search)
                     .Variant(ButtonVariant.Outline)
                     .HandleClick(_ => client.Toast("Filter clicked"))
                 | new Button("Export")

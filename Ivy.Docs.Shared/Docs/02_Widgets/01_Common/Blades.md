@@ -206,7 +206,7 @@ public class SearchableListView : ViewBase
         return BladeHelper.WithHeader(
             Layout.Horizontal(
                 searchTerm.ToTextInput().Placeholder("Search products..."),
-                new Button(icon: Icons.Filter, variant: ButtonVariant.Outline)
+                new Button(icon: Icons.Search, variant: ButtonVariant.Outline)
             ).Gap(1),
             filteredProducts.Any() 
                 ? new List(items) 

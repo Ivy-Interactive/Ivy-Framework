@@ -87,7 +87,7 @@ public class SidebarMenuExample : ViewBase
                 MenuItem.Default("Preferences")
                     .Icon(Icons.Settings).Tag("preferences")
             ),
-            MenuItem.Default("Help").Icon(Icons.CircleHelp).Tag("help")
+            MenuItem.Default("Help").Icon(Icons.CircleQuestionMark).Tag("help")
         };
 
         var sidebarMenu = new SidebarMenu(

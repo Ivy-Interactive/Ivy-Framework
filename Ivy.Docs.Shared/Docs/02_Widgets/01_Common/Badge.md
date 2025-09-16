@@ -154,7 +154,7 @@ Layout.Wrap()
     | new Badge("Marketing", icon:Icons.TrendingUp)
     | new Badge("Development", icon:Icons.Code)
     | new Badge("Analytics", icon:Icons.ChartBar)
-    | new Badge("Support", icon:Icons.CircleHelp)
+    | new Badge("Support", icon:Icons.CircleQuestionMark)
 ```
 
 ### Priority Levels
