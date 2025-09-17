@@ -834,165 +834,35 @@
   }
 }
 
-/* Browser autocomplete/history styling */
+/* Browser autocomplete styling for dark theme support */
 @layer base {
-  /* Webkit browsers autocomplete styling - general */
+  /* Fix autofill styling in dark theme */
   input:-webkit-autofill,
   input:-webkit-autofill:hover,
   input:-webkit-autofill:focus,
   input:-webkit-autofill:active {
     -webkit-box-shadow: 0 0 0 30px var(--background) inset !important;
     -webkit-text-fill-color: var(--foreground) !important;
-    transition: background-color 5000s ease-in-out 0s;
   }
 
-  /* Webkit browsers autocomplete styling - for cards */
+  /* Fix autofill styling for card backgrounds */
   .bg-card input:-webkit-autofill,
   .bg-card input:-webkit-autofill:hover,
   .bg-card input:-webkit-autofill:focus,
-  .bg-card input:-webkit-autofill:active,
-  [class*='bg-card'] input:-webkit-autofill,
-  [class*='bg-card'] input:-webkit-autofill:hover,
-  [class*='bg-card'] input:-webkit-autofill:focus,
-  [class*='bg-card'] input:-webkit-autofill:active {
+  .bg-card input:-webkit-autofill:active {
     -webkit-box-shadow: 0 0 0 30px var(--card) inset !important;
     -webkit-text-fill-color: var(--card-foreground) !important;
-    transition: background-color 5000s ease-in-out 0s;
   }
 
-  /* Autocomplete dropdown styling */
-  input::-webkit-calendar-picker-indicator {
-    filter: var(--foreground-filter);
-  }
-
-  /* Datalist autocomplete styling */
-  datalist {
-    background: var(--background);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    color: var(--foreground);
-  }
-
-  /* Firefox autocomplete styling - general */
+  /* Firefox autofill styling */
   input:-moz-autofill {
     background-color: var(--background) !important;
     color: var(--foreground) !important;
   }
 
-  /* Firefox autocomplete styling - for cards */
-  .bg-card input:-moz-autofill,
-  [class*='bg-card'] input:-moz-autofill {
+  .bg-card input:-moz-autofill {
     background-color: var(--card) !important;
     color: var(--card-foreground) !important;
-  }
-
-  /* Edge autocomplete styling */
-  input:-ms-input-placeholder {
-    color: var(--muted-foreground);
-  }
-
-  /* Autocomplete dropdown suggestions styling */
-  input::-webkit-list-button {
-    background: var(--background);
-    color: var(--foreground);
-  }
-
-  /* Style autocomplete suggestions */
-  input::-webkit-datetime-edit {
-    color: var(--foreground);
-  }
-
-  /* Ensure autocomplete dropdowns use theme colors */
-}
-
-/* Additional autocomplete styling for better theme support */
-@layer components {
-  /* Override browser default autocomplete styling */
-  input[list]::-webkit-calendar-picker-indicator {
-    display: none;
-  }
-
-  /* Custom styling for autocomplete dropdowns */
-  input[list] {
-    background: var(--background);
-    color: var(--foreground);
-  }
-
-  /* Ensure autocomplete suggestions are visible in dark mode */
-  input[list] option {
-    background: var(--background);
-    color: var(--foreground);
-    padding: 0.5rem;
-  }
-
-  input[list] option:hover {
-    background: var(--accent);
-    color: var(--accent-foreground);
-  }
-
-  /* Additional autofill fixes for forms in cards */
-  .bg-card input,
-  [class*='bg-card'] input {
-    background-color: transparent !important;
-  }
-
-  /* Force autofill background to match card background */
-  .bg-card input:-webkit-autofill,
-  .bg-card input:-webkit-autofill:hover,
-  .bg-card input:-webkit-autofill:focus,
-  .bg-card input:-webkit-autofill:active {
-    background-color: var(--card) !important;
-    background-image: none !important;
-  }
-
-  /* Handle autofill in forms specifically */
-  form input:-webkit-autofill,
-  form input:-webkit-autofill:hover,
-  form input:-webkit-autofill:focus,
-  form input:-webkit-autofill:active {
-    background-color: var(--background) !important;
-    background-image: none !important;
-  }
-
-  .bg-card form input:-webkit-autofill,
-  .bg-card form input:-webkit-autofill:hover,
-  .bg-card form input:-webkit-autofill:focus,
-  .bg-card form input:-webkit-autofill:active {
-    background-color: var(--card) !important;
-    background-image: none !important;
-  }
-
-  /* Nuclear option: prevent any autofill background color changes */
-  input:-webkit-autofill,
-  input:-webkit-autofill:hover,
-  input:-webkit-autofill:focus,
-  input:-webkit-autofill:active,
-  input:-moz-autofill {
-    background-color: transparent !important;
-    background-image: none !important;
-    -webkit-background-clip: text !important;
-    background-clip: text !important;
-  }
-
-  /* Restore proper background for non-autofilled inputs */
-  input:not(:-webkit-autofill):not(:-moz-autofill) {
-    background-color: transparent !important;
-  }
-
-  /* Prevent dialog from getting focus rings when elements inside are focused */
-  [data-radix-dialog-content] {
-    outline: none !important;
-    box-shadow: none !important;
-  }
-
-  [data-radix-dialog-content]:focus {
-    outline: none !important;
-    box-shadow: none !important;
-  }
-
-  [data-radix-dialog-content]:focus-within {
-    outline: none !important;
-    box-shadow: none !important;
   }
 }
 
