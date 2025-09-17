@@ -9,25 +9,8 @@ const observedInputs = new WeakMap<
   Set<HTMLInputElement | HTMLTextAreaElement>
 >();
 
-// Performance monitoring (can be removed in production)
-let observerCreationCount = 0;
-let inputRegistrationCount = 0;
-
-// Simple logger that can be easily disabled
-const logger = {
-  info: (message: string) => {
-    // Logging disabled by default - uncomment next line to enable during development
-    // console.log(message);
-    void message; // Suppress unused parameter warning
-  },
-};
-
 function getGlobalResizeObserver(): ResizeObserver {
   if (!globalResizeObserver) {
-    observerCreationCount++;
-    logger.info(
-      `🔍 Created global ResizeObserver (${observerCreationCount} total observers)`
-    );
     globalResizeObserver = new ResizeObserver(entries => {
       for (const entry of entries) {
         const container = entry.target as HTMLElement;
@@ -45,10 +28,6 @@ function getGlobalResizeObserver(): ResizeObserver {
 
 function getGlobalMutationObserver(): MutationObserver {
   if (!globalMutationObserver) {
-    observerCreationCount++;
-    logger.info(
-      `🔍 Created global MutationObserver (${observerCreationCount} total observers)`
-    );
     globalMutationObserver = new MutationObserver(mutations => {
       for (const mutation of mutations) {
         if (
@@ -113,10 +92,6 @@ export function useAutofillStyling(
     }
 
     observedInputs.get(containerElement)!.add(input);
-    inputRegistrationCount++;
-    logger.info(
-      `📝 Registered input ${inputRegistrationCount} (${observedInputs.get(containerElement)!.size} inputs in this container)`
-    );
 
     return () => {
       const inputs = observedInputs.get(containerElement);
