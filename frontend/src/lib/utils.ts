@@ -64,3 +64,41 @@ export function camelCase(titleCase: unknown): unknown {
 
 // Shared Ivy tag-to-class map for headings, paragraphs, lists, tables, etc.
 export const ivyTagClassMap = textBlockClassMap;
+
+/**
+ * Sets CSS custom properties for autofill styling based on the computed background color
+ * of the given element. This ensures autofill text is visible in dark themes.
+ *
+ * @param element - The element to get the background color from
+ * @param inputElement - The input element to apply the styling to (optional, defaults to element)
+ */
+function isTransparentColor(color: string): boolean {
+  return !color || color === 'rgba(0, 0, 0, 0)' || color === 'transparent';
+}
+
+function findBackgroundColor(element: HTMLElement): string | null {
+  let current = element;
+  while (current && current !== document.body) {
+    const bg = window.getComputedStyle(current).backgroundColor;
+    if (!isTransparentColor(bg)) return bg;
+    current = current.parentElement!;
+  }
+  return null;
+}
+
+export function setAutofillStyling(
+  element: HTMLElement,
+  inputElement?: HTMLInputElement | HTMLTextAreaElement
+): void {
+  const backgroundColor = findBackgroundColor(element);
+  const color = window.getComputedStyle(element).color;
+
+  const targetElement = inputElement || element;
+
+  if (backgroundColor) {
+    targetElement.style.setProperty('--input-bg', backgroundColor);
+    if (!isTransparentColor(color)) {
+      targetElement.style.setProperty('--input-fg', color);
+    }
+  }
+}

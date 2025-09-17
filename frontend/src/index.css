@@ -836,33 +836,13 @@
 
 /* Browser autocomplete styling for dark theme support */
 @layer base {
-  /* Fix autofill styling in dark theme */
+  /* Generic autofill styling that adapts to any background */
   input:-webkit-autofill,
   input:-webkit-autofill:hover,
   input:-webkit-autofill:focus,
   input:-webkit-autofill:active {
-    -webkit-box-shadow: 0 0 0 30px var(--background) inset !important;
-    -webkit-text-fill-color: var(--foreground) !important;
-  }
-
-  /* Fix autofill styling for card backgrounds */
-  .bg-card input:-webkit-autofill,
-  .bg-card input:-webkit-autofill:hover,
-  .bg-card input:-webkit-autofill:focus,
-  .bg-card input:-webkit-autofill:active {
-    -webkit-box-shadow: 0 0 0 30px var(--card) inset !important;
-    -webkit-text-fill-color: var(--card-foreground) !important;
-  }
-
-  /* Firefox autofill styling */
-  input:-moz-autofill {
-    background-color: var(--background) !important;
-    color: var(--foreground) !important;
-  }
-
-  .bg-card input:-moz-autofill {
-    background-color: var(--card) !important;
-    color: var(--card-foreground) !important;
+    -webkit-box-shadow: 0 0 0 30px var(--input-bg, var(--background)) inset !important;
+    -webkit-text-fill-color: var(--input-fg, var(--foreground)) !important;
   }
 }
 
