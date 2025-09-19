@@ -25,6 +25,7 @@ interface DropDownMenuWidgetProps {
   align?: 'Start' | 'Center' | 'End';
   side?: 'Top' | 'Right' | 'Bottom' | 'Left';
   sideOffset?: number;
+  subSideOffset?: number;
   alignOffset?: number;
   slots?: {
     Trigger?: React.ReactNode[];
@@ -38,8 +39,9 @@ export const DropDownMenuWidget: React.FC<DropDownMenuWidgetProps> = ({
   items,
   align = 'Start',
   side = 'Bottom',
-  sideOffset = 8,
-  alignOffset = 0,
+  sideOffset,
+  subSideOffset,
+  alignOffset,
 }) => {
   const eventHandler = useEventHandler();
   const [open, setOpen] = useState(false);
@@ -139,7 +141,7 @@ export const DropDownMenuWidget: React.FC<DropDownMenuWidgetProps> = ({
               )}
             </DropdownMenuSubTrigger>
             <DropdownMenuPortal>
-              <DropdownMenuSubContent>
+              <DropdownMenuSubContent sideOffset={subSideOffset}>
                 {renderMenuItems(item.children)}
               </DropdownMenuSubContent>
             </DropdownMenuPortal>
