@@ -20,7 +20,7 @@ public static class SamplesServer
                 | new IvyLogo()
                 | Text.Muted($"Version {version}")
             )
-            .DefaultApp<HelloApp>()
+            .DefaultApp<HelloIvyApp>()
             .UseTabs(preventDuplicates: true);
 
         server.UseChrome(() => new DefaultSidebarChrome(chromeSettings));
