@@ -1,4 +1,4 @@
-﻿using System.Collections.Immutable;
+using System.Collections.Immutable;
 using System.Dynamic;
 using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
@@ -85,7 +85,11 @@ public class DefaultLineChartStyle<TSource> : ILineChartStyle<TSource>
                 .YAxis(new YAxis())
                 .XAxis(dimension.Name)
                 .Tooltip(new Ivy.Charts.Tooltip().Animated(true))
-                .Legend()
+                .Legend(new Legend()
+                    .Layout(Legend.Layouts.Horizontal)
+                    .Align(Legend.Alignments.Center)
+                    .VerticalAlign(Legend.VerticalAlignments.Bottom)
+                )
             ;
     }
 }
@@ -141,7 +145,11 @@ public class CustomLineChartStyle<TSource> : ILineChartStyle<TSource>
                 .XAxis(new XAxis(dimension.Name).TickLine(true).AxisLine(true).MinTickGap(10))
                 .YAxis(new YAxis().TickLine(true).AxisLine(true))
                 .Tooltip(new Ivy.Charts.Tooltip().Animated(true))
-                .Legend()
+                .Legend(new Legend()
+                    .Layout(Legend.Layouts.Horizontal)
+                    .Align(Legend.Alignments.Center)
+                    .VerticalAlign(Legend.VerticalAlignments.Bottom)
+                )
             ;
     }
 }

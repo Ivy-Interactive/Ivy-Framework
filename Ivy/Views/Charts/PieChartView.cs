@@ -1,4 +1,4 @@
-﻿using System.Collections.Immutable;
+using System.Collections.Immutable;
 using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
 using Ivy.Charts;
@@ -83,7 +83,11 @@ public class DefaultPieChartStyle<TSource> : IPieChartStyle<TSource>
         return new PieChart(data)
             .Pie(nameof(PieChartData.Measure), nameof(PieChartData.Dimension))
             .Tooltip(new Ivy.Charts.Tooltip().Animated(true))
-            .Legend();
+            .Legend(new Legend()
+                .Layout(Legend.Layouts.Horizontal)
+                .Align(Legend.Alignments.Center)
+                .VerticalAlign(Legend.VerticalAlignments.Bottom)
+            );
     }
 }
 
@@ -107,7 +111,12 @@ public class DashboardPieChartStyle<TSource> : IPieChartStyle<TSource>
                 )
                 .Total(total)
                 .ColorScheme(ColorScheme.Default)
-                .Legend(new Legend().IconType(Legend.IconTypes.Rect))
+                .Legend(new Legend()
+                    .IconType(Legend.IconTypes.Rect)
+                    .Layout(Legend.Layouts.Horizontal)
+                    .Align(Legend.Alignments.Center)
+                    .VerticalAlign(Legend.VerticalAlignments.Bottom)
+                )
                 .Tooltip(new Ivy.Charts.Tooltip().Animated(true))
             ;
     }
@@ -135,7 +144,11 @@ public class DonutPieChartStyle<TSource> : IPieChartStyle<TSource>
                 )
                 .ColorScheme(ColorScheme.Rainbow)
                 .Tooltip(new Ivy.Charts.Tooltip().Animated(true))
-                .Legend();
+                .Legend(new Legend()
+                    .Layout(Legend.Layouts.Horizontal)
+                    .Align(Legend.Alignments.Center)
+                    .VerticalAlign(Legend.VerticalAlignments.Bottom)
+                );
     }
 }
 

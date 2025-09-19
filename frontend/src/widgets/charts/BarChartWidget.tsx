@@ -14,13 +14,14 @@ import {
   Bar,
   BarChart,
   LabelList,
-  Legend,
 } from 'recharts';
 import {
   ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
+  ChartLegend,
+  ChartLegendContent,
 } from '@/components/ui/chart';
 import {
   ColorScheme,
@@ -116,9 +117,12 @@ const BarChartWidget: React.FC<BarChartWidgetProps> = ({
           <YAxis key={`yaxis${index}`} {...generateYAxisProps(props)} />
         ))}
 
-        {legend && <Legend {...generateLegendProps(legend)} />}
-
-        {/* {legend && <ChartLegend {...generateLegendProps(legend)} content={<ChartLegendContent />} />}         */}
+        {legend && (
+          <ChartLegend
+            {...generateLegendProps(legend)}
+            content={<ChartLegendContent splitThreshold={6} />}
+          />
+        )}
 
         {/* eslint-disable-next-line @typescript-eslint/no-unused-vars */}
         {referenceAreas?.map(({ ref, ...props }, index) => (

@@ -1,4 +1,4 @@
-﻿using System.Collections.Immutable;
+using System.Collections.Immutable;
 using System.Dynamic;
 using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
@@ -81,7 +81,11 @@ public class DefaultBarChartStyle<TSource> : IBarChartStyle<TSource>
             .XAxis(new XAxis(dimension.Name).TickLine(false).AxisLine(false).MinTickGap(10))
             .CartesianGrid(new CartesianGrid().Horizontal())
             .Tooltip(new Ivy.Charts.Tooltip().Animated(true))
-            .Legend()
+            .Legend(new Legend()
+                .Layout(Legend.Layouts.Horizontal)
+                .Align(Legend.Alignments.Center)
+                .VerticalAlign(Legend.VerticalAlignments.Bottom)
+            )
         ;
     }
 }

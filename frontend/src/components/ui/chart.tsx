@@ -275,10 +275,18 @@ const ChartLegendContent = React.forwardRef<
     verticalAlign?: string;
     hideIcon?: boolean;
     nameKey?: string;
+    splitThreshold?: number;
   }
 >(
   (
-    { className, hideIcon = false, payload, verticalAlign = 'bottom', nameKey },
+    {
+      className,
+      hideIcon = false,
+      payload,
+      verticalAlign = 'bottom',
+      nameKey,
+      splitThreshold = 6,
+    },
     ref
   ) => {
     const { config } = useChart();
@@ -287,40 +295,63 @@ const ChartLegendContent = React.forwardRef<
       return null;
     }
 
+    const items = payload;
+    const many = items.length > splitThreshold;
+    const half = many ? Math.ceil(items.length / 2) : items.length;
+
+    const renderItem = (item: Payload<number, string>) => {
+      const key = `${nameKey || item.dataKey || 'value'}`;
+      const itemConfig = getPayloadConfigFromPayload(config, item, key);
+      const labelText =
+        (itemConfig?.label as string | undefined) ||
+        (typeof item.value === 'string' ? item.value : undefined) ||
+        (item.dataKey ? String(item.dataKey) : 'value');
+
+      return (
+        <div
+          key={`${String(item.dataKey)}-${String(item.value)}`}
+          className={cn(
+            'flex items-center gap-1.5 [&>svg]:h-3 [&>svg]:w-3 [&>svg]:text-muted-foreground'
+          )}
+        >
+          {itemConfig?.icon && !hideIcon ? (
+            <itemConfig.icon />
+          ) : (
+            <div
+              className="h-2 w-2 shrink-0 rounded-[2px]"
+              style={{
+                backgroundColor: item.color || `var(--color-${key})`,
+              }}
+            />
+          )}
+          <span className="text-muted-foreground">{labelText}</span>
+        </div>
+      );
+    };
+
     return (
       <div
         ref={ref}
         className={cn(
-          'flex items-center justify-center gap-4',
+          'w-full flex flex-col',
           verticalAlign === 'top' ? 'pb-3' : 'pt-3',
           className
         )}
       >
-        {payload.map(item => {
-          const key = `${nameKey || item.dataKey || 'value'}`;
-          const itemConfig = getPayloadConfigFromPayload(config, item, key);
-
-          return (
-            <div
-              key={item.value}
-              className={cn(
-                'flex items-center gap-1.5 [&>svg]:h-3 [&>svg]:w-3 [&>svg]:text-muted-foreground'
-              )}
-            >
-              {itemConfig?.icon && !hideIcon ? (
-                <itemConfig.icon />
-              ) : (
-                <div
-                  className="h-2 w-2 shrink-0 rounded-[2px]"
-                  style={{
-                    backgroundColor: item.color || `var(--color-${key})`,
-                  }}
-                />
-              )}
-              {itemConfig?.label}
+        {!many ? (
+          <div className="flex w-full items-center justify-center gap-4 flex-nowrap overflow-x-auto">
+            {items.map(renderItem)}
+          </div>
+        ) : (
+          <div className="flex w-full flex-col gap-2">
+            <div className="flex w-full items-center justify-start gap-4 flex-nowrap overflow-x-auto">
+              {items.slice(0, half).map(renderItem)}
             </div>
-          );
-        })}
+            <div className="flex w-full items-center justify-end gap-4 flex-nowrap overflow-x-auto">
+              {items.slice(half).map(renderItem)}
+            </div>
+          </div>
+        )}
       </div>
     );
   }
