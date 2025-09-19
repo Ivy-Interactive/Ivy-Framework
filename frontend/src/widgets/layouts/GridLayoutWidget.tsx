@@ -15,6 +15,8 @@ interface GridLayoutWidgetProps {
   childRow?: (number | undefined)[];
   childRowSpan?: (number | undefined)[];
   className?: string;
+  /** Optional minimum column width in pixels used to auto-resize columns responsively. Defaults to 280. */
+  minColumnWidthPx?: number;
 }
 
 interface GridLayoutCellProps {
@@ -67,11 +69,51 @@ export const GridLayoutWidget: React.FC<GridLayoutWidgetProps> = ({
   childRow = [],
   childRowSpan = [],
   className = '',
+  minColumnWidthPx = 280,
 }) => {
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  const [calculatedColumns, setCalculatedColumns] = React.useState(columns);
+
+  React.useEffect(() => {
+    // Recalculate when props change
+    setCalculatedColumns(columns);
+  }, [columns]);
+
+  React.useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const observer = new ResizeObserver(entries => {
+      const entry = entries[0];
+      if (!entry) return;
+      const width = entry.contentRect.width;
+      if (!width || width <= 0) return;
+
+      // Account for padding and gaps roughly: assume horizontal padding from computed style
+      const styles = getComputedStyle(el);
+      const paddingLeft = parseFloat(styles.paddingLeft || '0');
+      const paddingRight = parseFloat(styles.paddingRight || '0');
+      const gapX = gap; // gap is symmetrical for grid
+      const available = Math.max(0, width - paddingLeft - paddingRight);
+      const minWidth = Math.max(120, minColumnWidthPx); // sanity lower bound
+      const maxCols = Math.max(
+        1,
+        Math.floor((available + gapX) / (minWidth + gapX))
+      );
+      const next = Math.min(columns, maxCols);
+      if (next !== calculatedColumns) {
+        setCalculatedColumns(next);
+      }
+    });
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [columns, gap, minColumnWidthPx, calculatedColumns]);
+
   const styles: React.CSSProperties = {
     ...{
       display: 'grid',
-      gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
+      gridTemplateColumns: `repeat(${calculatedColumns}, minmax(0, 1fr))`,
       gridTemplateRows: `repeat(${rows}, minmax(0, 1fr))`,
       gridAutoFlow: autoFlow?.toLowerCase(),
     },
@@ -82,7 +124,11 @@ export const GridLayoutWidget: React.FC<GridLayoutWidgetProps> = ({
   };
 
   return (
-    <div style={styles} className={`place-items-center ${className}`}>
+    <div
+      ref={containerRef}
+      style={styles}
+      className={`place-items-center ${className}`}
+    >
       {React.Children.map(children, (child, index) => (
         <GridLayoutCell
           column={childColumn[index]}
