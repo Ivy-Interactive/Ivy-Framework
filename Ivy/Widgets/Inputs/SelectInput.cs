@@ -26,6 +26,12 @@ public enum SelectInputs
 /// </summary>
 public interface IAnySelectInput : IAnyInput
 {
+    /// <summary>Gets or sets the label text displayed alongside the select input.</summary>
+    public string? Label { get; set; }
+
+    /// <summary>Gets or sets the description or help text for the select input.</summary>
+    public string? Description { get; set; }
+
     /// <summary>Gets or sets the placeholder text displayed when no option is selected.</summary>
     public string? Placeholder { get; set; }
 
@@ -43,6 +49,12 @@ public abstract record SelectInputBase : WidgetBase<SelectInputBase>, IAnySelect
 
     /// <summary>Gets or sets the validation error message.</summary>
     [Prop] public string? Invalid { get; set; }
+
+    /// <summary>Gets or sets the label text displayed alongside the input.</summary>
+    [Prop] public string? Label { get; set; }
+
+    /// <summary>Gets or sets the description or help text for the input.</summary>
+    [Prop] public string? Description { get; set; }
 
     /// <summary>Gets or sets the placeholder text displayed when no option is selected.</summary>
     [Prop] public string? Placeholder { get; set; }
@@ -291,4 +303,14 @@ public static class SelectInputExtensions
     {
         return widget.HandleBlur(_ => { onBlur(); return ValueTask.CompletedTask; });
     }
+
+    /// <summary>Sets the label text for the select input.</summary>
+    /// <param name="widget">The select input to configure.</param>
+    /// <param name="label">The label text to display alongside the input.</param>
+    public static SelectInputBase Label(this SelectInputBase widget, string label) => widget with { Label = label };
+
+    /// <summary>Sets the description text for the select input.</summary>
+    /// <param name="widget">The select input to configure.</param>
+    /// <param name="description">The description or help text to display for the input.</param>
+    public static SelectInputBase Description(this SelectInputBase widget, string description) => widget with { Description = description };
 }

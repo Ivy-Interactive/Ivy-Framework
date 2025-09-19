@@ -34,6 +34,12 @@ public enum TextInputs
 /// </summary>
 public interface IAnyTextInput : IAnyInput
 {
+    /// <summary>Gets or sets the label text displayed alongside the text input.</summary>
+    public string? Label { get; set; }
+
+    /// <summary>Gets or sets the description or help text for the text input.</summary>
+    public string? Description { get; set; }
+
     /// <summary>Gets or sets the placeholder text displayed when the input is empty.</summary>
     public string? Placeholder { get; set; }
 
@@ -51,6 +57,12 @@ public abstract record TextInputBase : WidgetBase<TextInputBase>, IAnyTextInput
 
     /// <summary>Gets or sets the validation error message.</summary>
     [Prop] public string? Invalid { get; set; }
+
+    /// <summary>Gets or sets the label text displayed alongside the input.</summary>
+    [Prop] public string? Label { get; set; }
+
+    /// <summary>Gets or sets the description or help text for the input.</summary>
+    [Prop] public string? Description { get; set; }
 
     /// <summary>Gets or sets the placeholder text displayed when the input is empty.</summary>
     [Prop] public string? Placeholder { get; set; }
@@ -307,4 +319,14 @@ public static class TextInputExtensions
     {
         return widget.HandleBlur(_ => { onBlur(); return ValueTask.CompletedTask; });
     }
+
+    /// <summary>Sets the label text for the text input.</summary>
+    /// <param name="widget">The text input to configure.</param>
+    /// <param name="label">The label text to display alongside the input.</param>
+    public static TextInputBase Label(this TextInputBase widget, string label) => widget with { Label = label };
+
+    /// <summary>Sets the description text for the text input.</summary>
+    /// <param name="widget">The text input to configure.</param>
+    /// <param name="description">The description or help text to display for the input.</param>
+    public static TextInputBase Description(this TextInputBase widget, string description) => widget with { Description = description };
 }

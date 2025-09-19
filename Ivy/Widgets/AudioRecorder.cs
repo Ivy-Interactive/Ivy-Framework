@@ -32,6 +32,9 @@ public record AudioRecorder : WidgetBase<AudioRecorder>
     /// <summary>Gets or sets the label text displayed when audio is recording.</summary>
     [Prop] public string? RecordingLabel { get; set; }
 
+    /// <summary>Gets or sets the description text displayed alongside the audio recorder.</summary>
+    [Prop] public string? Description { get; set; }
+
     /// <summary>Gets or sets the mime type used for recorded audio.</summary>
     [Prop] public string MimeType { get; set; }
 
@@ -59,6 +62,14 @@ public static class AudioRecorderExtensions
     public static AudioRecorder RecordingLabel(this AudioRecorder widget, string label)
     {
         return widget with { RecordingLabel = label };
+    }
+
+    /// <summary>Sets the description text to display alongside the audio recorder.</summary>
+    /// <param name="widget">The audio recorder to configure.</param>
+    /// <param name="description">The description text.</param>
+    public static AudioRecorder Description(this AudioRecorder widget, string description)
+    {
+        return widget with { Description = description };
     }
 
     /// <summary>Sets the disabled state of the audio recorder.</summary>

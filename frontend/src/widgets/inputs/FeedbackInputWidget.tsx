@@ -6,6 +6,8 @@ import React, { useCallback, useMemo } from 'react';
 
 interface FeedbackInputWidgetProps {
   id: string;
+  label?: string;
+  description?: string;
   value: number | boolean | null;
   variant: 'Thumbs' | 'Emojis' | 'Stars';
   disabled: boolean;
@@ -16,6 +18,8 @@ interface FeedbackInputWidgetProps {
 
 export const FeedbackInputWidget: React.FC<FeedbackInputWidgetProps> = ({
   id,
+  label,
+  description,
   value,
   variant,
   disabled,
@@ -98,6 +102,8 @@ export const FeedbackInputWidget: React.FC<FeedbackInputWidgetProps> = ({
     },
     [
       id,
+      label,
+      description,
       disabled,
       value,
       variant,
@@ -112,6 +118,8 @@ export const FeedbackInputWidget: React.FC<FeedbackInputWidgetProps> = ({
   if (variant === 'Thumbs') {
     return (
       <ThumbsRating
+        label={label}
+        description={description}
         disabled={disabled}
         value={numericValue}
         onRate={handleChange}
@@ -123,6 +131,8 @@ export const FeedbackInputWidget: React.FC<FeedbackInputWidgetProps> = ({
   if (variant === 'Emojis') {
     return (
       <EmojiRating
+        label={label}
+        description={description}
         disabled={disabled}
         value={numericValue}
         onRate={handleChange}
@@ -134,6 +144,8 @@ export const FeedbackInputWidget: React.FC<FeedbackInputWidgetProps> = ({
   if (variant === 'Stars') {
     return (
       <StarRating
+        label={label}
+        description={description}
         disabled={disabled}
         value={numericValue}
         onRate={handleChange}

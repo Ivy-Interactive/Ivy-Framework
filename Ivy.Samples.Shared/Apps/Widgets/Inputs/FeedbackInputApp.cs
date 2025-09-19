@@ -78,7 +78,6 @@ public class FeedbackInputApp : SampleBase
                | variants
                | Text.H2("Data Binding")
                | dataBinding
-
             ;
 
     }

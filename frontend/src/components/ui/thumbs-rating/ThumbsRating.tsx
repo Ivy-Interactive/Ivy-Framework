@@ -10,6 +10,8 @@ interface ThumbsRatingProps {
   className?: string;
   disabled?: boolean;
   invalid?: string;
+  label?: string;
+  description?: string;
 }
 
 const ThumbsRating = ({
@@ -19,6 +21,8 @@ const ThumbsRating = ({
   className,
   disabled = false,
   invalid,
+  label,
+  description,
 }: ThumbsRatingProps) => {
   const iconSizes = {
     sm: 16,
@@ -31,7 +35,7 @@ const ThumbsRating = ({
     onRate?.(value === rating ? ThumbsEnum.None : rating);
   };
 
-  return (
+  const thumbsElement = (
     <div className="flex items-center gap-2">
       <div
         className={cn(
@@ -97,6 +101,26 @@ const ThumbsRating = ({
         </button>
       </div>
       {invalid && <InvalidIcon message={invalid} />}
+    </div>
+  );
+
+  // If no label or description, return just the thumbs
+  if (!label && !description) {
+    return thumbsElement;
+  }
+
+  // Otherwise, wrap with label and description structure
+  return (
+    <div className="flex flex-col gap-2 flex-1 min-w-0">
+      {label && (
+        <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+          {label}
+        </label>
+      )}
+      {thumbsElement}
+      {description && (
+        <p className="text-sm text-muted-foreground">{description}</p>
+      )}
     </div>
   );
 };

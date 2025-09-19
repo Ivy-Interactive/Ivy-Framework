@@ -26,6 +26,8 @@ import { InvalidIcon } from '@/components/InvalidIcon';
 
 interface DateRangeInputWidgetProps {
   id: string;
+  label?: string;
+  description?: string;
   value: {
     item1: string;
     item2: string;
@@ -41,6 +43,8 @@ interface DateRangeInputWidgetProps {
 
 export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
   id,
+  label,
+  description,
   value,
   disabled = false,
   placeholder = 'Pick a date range',
@@ -134,7 +138,7 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
   // Show clear button if nullable, not disabled, and has a value
   const showClear = nullable && !disabled && (date?.from || date?.to);
 
-  return (
+  const dateRangeElement = (
     <div className="relative w-full select-none">
       <Popover open={isOpen} onOpenChange={setIsOpen}>
         <PopoverTrigger asChild>
@@ -312,6 +316,24 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
           )}
           {invalid && <InvalidIcon message={invalid} />}
         </div>
+      )}
+    </div>
+  );
+  // If no label or description, return just the date range input
+  if (!label && !description) {
+    return dateRangeElement;
+  }
+
+  return (
+    <div className="flex flex-col gap-2 flex-1 min-w-0">
+      {label && (
+        <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+          {label}
+        </label>
+      )}
+      {dateRangeElement}
+      {description && (
+        <p className="text-sm text-muted-foreground">{description}</p>
       )}
     </div>
   );

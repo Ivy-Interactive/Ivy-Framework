@@ -23,6 +23,12 @@ public enum CodeInputs
 /// </summary>
 public interface IAnyCodeInput : IAnyInput
 {
+    /// <summary>Gets or sets the label text displayed alongside the code input.</summary>
+    public string? Label { get; set; }
+
+    /// <summary>Gets or sets the description text displayed alongside the code input.</summary>
+    public string? Description { get; set; }
+
     /// <summary>Gets or sets the placeholder text.</summary>
     public string? Placeholder { get; set; }
 
@@ -35,6 +41,12 @@ public interface IAnyCodeInput : IAnyInput
 /// </summary>
 public abstract record CodeInputBase : WidgetBase<CodeInputBase>, IAnyCodeInput
 {
+    /// <summary>Gets or sets the label text displayed alongside the code input.</summary>
+    [Prop] public string? Label { get; set; }
+
+    /// <summary>Gets or sets the description text displayed alongside the code input.</summary>
+    [Prop] public string? Description { get; set; }
+
     /// <summary>Gets or sets whether the input is disabled.</summary>
     [Prop] public bool Disabled { get; set; }
 
@@ -241,5 +253,21 @@ public static class CodeInputExtensions
     public static CodeInputBase HandleBlur(this CodeInputBase widget, Action onBlur)
     {
         return widget.HandleBlur(_ => { onBlur(); return ValueTask.CompletedTask; });
+    }
+
+    /// <summary>Sets the label text for the code input.</summary>
+    /// <param name="widget">The code input to configure.</param>
+    /// <param name="label">The label text to display.</param>
+    public static CodeInputBase Label(this CodeInputBase widget, string label)
+    {
+        return widget with { Label = label };
+    }
+
+    /// <summary>Sets the description text for the code input.</summary>
+    /// <param name="widget">The code input to configure.</param>
+    /// <param name="description">The description text to display.</param>
+    public static CodeInputBase Description(this CodeInputBase widget, string description)
+    {
+        return widget with { Description = description };
     }
 }

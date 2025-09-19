@@ -27,6 +27,10 @@ public enum FeedbackInputs
 /// </summary>
 public interface IAnyFeedbackInput : IAnyInput
 {
+    /// <summary> Gets or sets the label text displayed alongside the feedback input. </summary>
+    public string? Label { get; set; }
+    /// <summary>Gets or sets the description text displayed alongside the feedback input.</summary>
+    public string? Description { get; set; }
     /// <summary>Gets or sets the placeholder text displayed when the feedback input is empty.</summary>
     public string? Placeholder { get; set; }
 
@@ -44,6 +48,11 @@ public abstract record FeedbackInputBase : WidgetBase<FeedbackInputBase>, IAnyFe
 
     /// <summary>Gets or sets the validation error message.</summary>
     [Prop] public string? Invalid { get; set; }
+
+    /// <summary>Gets or sets the label text displayed alongside the feedback input.</summary>
+    [Prop] public string? Label { get; set; }
+    /// <summary>Gets or sets the description text displayed alongside the feedback input.</summary>
+    [Prop] public string? Description { get; set; }
 
     /// <summary>Gets or sets the placeholder text displayed when the input is empty.</summary>
     [Prop] public string? Placeholder { get; set; }
@@ -215,4 +224,14 @@ public static class FeedbackInputExtensions
     {
         return widget.HandleBlur(_ => { onBlur(); return ValueTask.CompletedTask; });
     }
+
+    /// <summary>Sets the label text for the feedback input.</summary>
+    /// <param name="widget">The feedback input to configure.</param>
+    /// <param name="label">The label text to display alongside the input.</param>
+    public static FeedbackInputBase Label(this FeedbackInputBase widget, string label) => widget with { Label = label };
+
+    /// <summary>Sets the description text for the feedback input.</summary>
+    /// <param name="widget">The feedback input to configure.</param>
+    /// <param name="description">The description or help text to display for the input.</param>
+    public static FeedbackInputBase Description(this FeedbackInputBase widget, string description) => widget with { Description = description };
 }

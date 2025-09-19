@@ -6,6 +6,8 @@ import { InvalidIcon } from '@/components/InvalidIcon';
 
 interface AsyncSelectInputWidgetProps {
   id: string;
+  label?: string;
+  description?: string;
   placeholder?: string;
   displayValue?: string;
   disabled: boolean;
@@ -15,6 +17,8 @@ interface AsyncSelectInputWidgetProps {
 
 export const AsyncSelectInputWidget: React.FC<AsyncSelectInputWidgetProps> = ({
   id,
+  label,
+  description,
   placeholder,
   displayValue,
   disabled,
@@ -26,7 +30,7 @@ export const AsyncSelectInputWidget: React.FC<AsyncSelectInputWidgetProps> = ({
     eventHandler('OnSelect', id, []);
   };
 
-  return (
+  const asyncSelectElement = (
     <div className="relative">
       <button
         type="button"
@@ -55,6 +59,26 @@ export const AsyncSelectInputWidget: React.FC<AsyncSelectInputWidgetProps> = ({
         <div className="absolute right-11 top-2.5 h-4 w-4">
           <InvalidIcon message={invalid} />
         </div>
+      )}
+    </div>
+  );
+
+  // If no label or description, return just the async select input
+  if (!label && !description) {
+    return asyncSelectElement;
+  }
+
+  // Otherwise, wrap with label and description structure
+  return (
+    <div className="flex flex-col gap-2 flex-1 min-w-0">
+      {label && (
+        <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+          {label}
+        </label>
+      )}
+      {asyncSelectElement}
+      {description && (
+        <p className="text-sm text-muted-foreground">{description}</p>
       )}
     </div>
   );

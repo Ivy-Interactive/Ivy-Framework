@@ -13,6 +13,12 @@ namespace Ivy;
 /// </summary>
 public interface IAnyDateRangeInput : IAnyInput
 {
+    /// <summary>Gets or sets the label text displayed alongside the date range input.</summary>
+    public string? Label { get; set; }
+
+    /// <summary>Gets or sets the description text displayed alongside the date range input.</summary>
+    public string? Description { get; set; }
+
     /// <summary>Gets or sets the placeholder text displayed when the date range input is empty.</summary>
     public string? Placeholder { get; set; }
 
@@ -25,6 +31,12 @@ public interface IAnyDateRangeInput : IAnyInput
 /// </summary>
 public abstract record DateRangeInputBase : WidgetBase<DateRangeInputBase>, IAnyDateRangeInput
 {
+    /// <summary>Gets or sets the label text displayed alongside the date range input.</summary>
+    [Prop] public string? Label { get; set; }
+
+    /// <summary>Gets or sets the description text displayed alongside the date range input.</summary>
+    [Prop] public string? Description { get; set; }
+
     /// <summary>Gets or sets the placeholder text displayed when the input is empty.</summary>
     [Prop] public string? Placeholder { get; set; }
 
@@ -218,5 +230,21 @@ public static class DateRangeInputExtensions
     public static DateRangeInputBase HandleBlur(this DateRangeInputBase widget, Action onBlur)
     {
         return widget.HandleBlur(_ => { onBlur(); return ValueTask.CompletedTask; });
+    }
+
+    /// <summary>Sets the label text for the date range input.</summary>
+    /// <param name="widget">The date range input to configure.</param>
+    /// <param name="label">The label text to display alongside the input.</param>
+    public static DateRangeInputBase Label(this DateRangeInputBase widget, string label)
+    {
+        return widget with { Label = label };
+    }
+
+    /// <summary>Sets the description text for the date range input.</summary>
+    /// <param name="widget">The date range input to configure.</param>
+    /// <param name="description">The description text to display alongside the input.</param>
+    public static DateRangeInputBase Description(this DateRangeInputBase widget, string description)
+    {
+        return widget with { Description = description };
     }
 }

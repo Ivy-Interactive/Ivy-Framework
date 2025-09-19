@@ -46,6 +46,12 @@ public enum FileInputs
 /// </summary>
 public interface IAnyFileInput : IAnyInput
 {
+    /// <summary>Gets or sets the label text displayed alongside the file input.</summary>
+    public string? Label { get; set; }
+
+    /// <summary>Gets or sets the description text displayed alongside the file input.</summary>
+    public string? Description { get; set; }
+
     /// <summary>Gets or sets the placeholder text displayed when no files are selected.</summary>
     public string? Placeholder { get; set; }
 
@@ -59,6 +65,12 @@ public interface IAnyFileInput : IAnyInput
 /// </summary>
 public abstract record FileInputBase : WidgetBase<FileInputBase>, IAnyFileInput
 {
+    /// <summary>Gets or sets the label text displayed alongside the file input.</summary>
+    [Prop] public string? Label { get; set; }
+
+    /// <summary>Gets or sets the description text displayed alongside the file input.</summary>
+    [Prop] public string? Description { get; set; }
+
     /// <summary>Gets or sets whether the input is disabled.</summary>
     [Prop] public bool Disabled { get; set; }
 
@@ -411,5 +423,21 @@ public static class FileInputExtensions
     public static FileInputBase HandleBlur(this FileInputBase widget, Action onBlur)
     {
         return widget.HandleBlur(_ => { onBlur(); return ValueTask.CompletedTask; });
+    }
+
+    /// <summary>Sets the label text for the file input.</summary>
+    /// <param name="widget">The file input to configure.</param>
+    /// <param name="label">The label text to display alongside the input.</param>
+    public static FileInputBase Label(this FileInputBase widget, string label)
+    {
+        return widget with { Label = label };
+    }
+
+    /// <summary>Sets the description text for the file input.</summary>
+    /// <param name="widget">The file input to configure.</param>
+    /// <param name="description">The description text to display alongside the input.</param>
+    public static FileInputBase Description(this FileInputBase widget, string description)
+    {
+        return widget with { Description = description };
     }
 }

@@ -46,6 +46,8 @@ interface Option {
 
 interface SelectInputWidgetProps {
   id: string;
+  label?: string;
+  description?: string;
   placeholder?: string;
   value?: NullableSelectValue;
   variant?: 'Select' | 'List' | 'Toggle';
@@ -224,6 +226,8 @@ const ToggleOptionItem: React.FC<{
 
 const ToggleVariant: React.FC<SelectInputWidgetProps> = ({
   id,
+  label,
+  description,
   value,
   disabled = false,
   invalid,
@@ -275,7 +279,7 @@ const ToggleVariant: React.FC<SelectInputWidgetProps> = ({
     selectMany
   );
 
-  const container = (
+  const toggleElement = (
     <div
       className={cn(
         'relative border border-input bg-transparent rounded-md shadow-sm px-3 py-2 focus-within:ring-1 focus-within:ring-ring',
@@ -363,11 +367,31 @@ const ToggleVariant: React.FC<SelectInputWidgetProps> = ({
     </div>
   );
 
-  return container;
+  // If no label or description, return just the toggle
+  if (!label && !description) {
+    return toggleElement;
+  }
+
+  // Otherwise, wrap with label and description structure
+  return (
+    <div className="flex flex-col gap-2 flex-1 min-w-0">
+      {label && (
+        <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+          {label}
+        </label>
+      )}
+      {toggleElement}
+      {description && (
+        <p className="text-sm text-muted-foreground">{description}</p>
+      )}
+    </div>
+  );
 };
 
 const RadioVariant: React.FC<SelectInputWidgetProps> = ({
   id,
+  label,
+  description,
   value,
   disabled = false,
   invalid,
@@ -394,7 +418,7 @@ const RadioVariant: React.FC<SelectInputWidgetProps> = ({
     false // Always single select for RadioVariant
   );
 
-  const container = (
+  const radioElement = (
     <div
       className={cn(
         'relative border border-input bg-transparent rounded-md shadow-sm px-3 py-2 focus-within:ring-1 focus-within:ring-ring',
@@ -467,11 +491,31 @@ const RadioVariant: React.FC<SelectInputWidgetProps> = ({
     </div>
   );
 
-  return container;
+  // If no label or description, return just the radio
+  if (!label && !description) {
+    return radioElement;
+  }
+
+  // Otherwise, wrap with label and description structure
+  return (
+    <div className="flex flex-col gap-2 flex-1 min-w-0">
+      {label && (
+        <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+          {label}
+        </label>
+      )}
+      {radioElement}
+      {description && (
+        <p className="text-sm text-muted-foreground">{description}</p>
+      )}
+    </div>
+  );
 };
 
 const CheckboxVariant: React.FC<SelectInputWidgetProps> = ({
   id,
+  label,
+  description,
   value,
   disabled = false,
   invalid,
@@ -549,7 +593,7 @@ const CheckboxVariant: React.FC<SelectInputWidgetProps> = ({
 
   const hasValues = selectedValues.length > 0;
 
-  const container = (
+  const checkboxElement = (
     <div
       className={cn(
         'relative w-full border border-input bg-transparent rounded-md shadow-sm px-3 py-2 focus-within:ring-1 focus-within:ring-ring',
@@ -656,11 +700,32 @@ const CheckboxVariant: React.FC<SelectInputWidgetProps> = ({
       </div>
     </div>
   );
-  return container;
+
+  // If no label or description, return just the checkbox
+  if (!label && !description) {
+    return checkboxElement;
+  }
+
+  // Otherwise, wrap with label and description structure
+  return (
+    <div className="flex flex-col gap-2 flex-1 min-w-0">
+      {label && (
+        <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+          {label}
+        </label>
+      )}
+      {checkboxElement}
+      {description && (
+        <p className="text-sm text-muted-foreground">{description}</p>
+      )}
+    </div>
+  );
 };
 
 const SelectVariant: React.FC<SelectInputWidgetProps> = ({
   id,
+  label,
+  description,
   placeholder = '',
   value,
   disabled = false,
@@ -748,7 +813,7 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
       eventHandler('OnChange', id, [convertedValue]);
     };
 
-    return (
+    const selectElement = (
       <div className="flex items-center gap-2 w-full">
         <div className="flex-1 relative w-full">
           <MultipleSelector
@@ -773,6 +838,26 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
         </div>
       </div>
     );
+
+    // If no label or description, return just the select
+    if (!label && !description) {
+      return selectElement;
+    }
+
+    // Otherwise, wrap with label and description structure
+    return (
+      <div className="flex flex-col gap-2 flex-1 min-w-0">
+        {label && (
+          <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+            {label}
+          </label>
+        )}
+        {selectElement}
+        {description && (
+          <p className="text-sm text-muted-foreground">{description}</p>
+        )}
+      </div>
+    );
   }
 
   // Original single select logic
@@ -795,7 +880,7 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
 
   const hasValue = stringValue !== undefined;
 
-  return (
+  const selectElement = (
     <div className="flex items-center gap-2 w-full">
       <div className="flex-1 relative w-full">
         <Select
@@ -868,6 +953,26 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
           </SelectContent>
         </Select>
       </div>
+    </div>
+  );
+
+  // If no label or description, return just the select
+  if (!label && !description) {
+    return selectElement;
+  }
+
+  // Otherwise, wrap with label and description structure
+  return (
+    <div className="flex flex-col gap-2 flex-1 min-w-0">
+      {label && (
+        <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+          {label}
+        </label>
+      )}
+      {selectElement}
+      {description && (
+        <p className="text-sm text-muted-foreground">{description}</p>
+      )}
     </div>
   );
 };

@@ -11,6 +11,8 @@ interface EmojiRatingProps {
   className?: string;
   disabled?: boolean;
   invalid?: string;
+  label?: string;
+  description?: string;
 }
 
 const emojis = ['😢', '😕', '😐', '🙂', '😊'];
@@ -22,6 +24,8 @@ export function EmojiRating({
   className,
   disabled = false,
   invalid,
+  label,
+  description,
 }: EmojiRatingProps) {
   const [hover, setHover] = useState(0);
 
@@ -36,7 +40,7 @@ export function EmojiRating({
     lg: 'text-4xl',
   };
 
-  return (
+  const emojiElement = (
     <div className="flex items-center gap-2">
       <div
         className={cn(
@@ -76,6 +80,26 @@ export function EmojiRating({
         ))}
       </div>
       {invalid && <InvalidIcon message={invalid} />}
+    </div>
+  );
+
+  // If no label or description, return just the emojis
+  if (!label && !description) {
+    return emojiElement;
+  }
+
+  // Otherwise, wrap with label and description structure
+  return (
+    <div className="flex flex-col gap-2 flex-1 min-w-0">
+      {label && (
+        <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+          {label}
+        </label>
+      )}
+      {emojiElement}
+      {description && (
+        <p className="text-sm text-muted-foreground">{description}</p>
+      )}
     </div>
   );
 }

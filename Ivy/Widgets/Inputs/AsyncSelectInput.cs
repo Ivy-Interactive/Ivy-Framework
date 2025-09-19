@@ -17,6 +17,15 @@ namespace Ivy;
 public interface IAnyAsyncSelectInputBase : IAnyInput
 {
     /// <summary>
+    /// Gets or sets the label text displayed alongside the async select input.
+    /// </summary>
+    public string? Label { get; set; }
+
+    /// <summary>
+    /// Gets or sets the description text displayed alongside the async select input.
+    /// </summary>
+    public string? Description { get; set; }
+    /// <summary>
     /// Gets or sets the placeholder text.
     /// </summary>
     public string? Placeholder { get; set; }
@@ -44,6 +53,15 @@ public delegate Task<Option<T>?> AsyncSelectLookupDelegate<T>(T id);
 /// <typeparam name="TValue">The type of the selected value.</typeparam>
 public class AsyncSelectInputView<TValue> : ViewBase, IAnyAsyncSelectInputBase, IInput<TValue>
 {
+    /// <summary>
+    /// Gets or sets the label text displayed alongside the async select input.
+    /// </summary>
+    public string? Label { get; set; }
+
+    /// <summary>
+    /// Gets or sets the description text displayed alongside the async select input.
+    /// </summary>
+    public string? Description { get; set; }
     /// <summary>
     /// Returns an empty array.
     /// </summary>
@@ -218,7 +236,9 @@ public class AsyncSelectInputView<TValue> : ViewBase, IAnyAsyncSelectInputBase, 
                 Invalid = Invalid,
                 DisplayValue = displayValue.Value,
                 OnSelect = HandleSelect,
-                Loading = loading.Value
+                Loading = loading.Value,
+                Label = Label,
+                Description = Description
             },
             open.Value ? new Sheet(
                 OnClose,
@@ -294,55 +314,53 @@ public static class AsyncSelectInputViewExtensions
     }
 
 
-    /// <summary>
-    /// Sets the blur event handler for the async select input.
-    /// </summary>
-    /// <param name="widget">The async select input to configure.</param>
-    /// <param name="onBlur">The event handler to call when the input loses focus.</param>
-    /// <returns>A new async select input.</returns>
+    /// <summary>Sets the blur event handler.</summary>
+    /// <param name="widget">The widget to configure.</param>
+    /// <param name="onBlur">The blur event handler.</param>
+    /// <returns>The configured widget.</returns>
     [OverloadResolutionPriority(1)]
     public static IAnyAsyncSelectInputBase HandleBlur(this IAnyAsyncSelectInputBase widget, Func<Event<IAnyInput>, ValueTask> onBlur)
     {
-        if (widget is AsyncSelectInputView<object> typedWidget)
-        {
-            typedWidget.OnBlur = onBlur;
-            return typedWidget;
-        }
-
-        var widgetType = widget.GetType();
-        if (widgetType.IsGenericType && widgetType.GetGenericTypeDefinition() == typeof(AsyncSelectInputView<>))
-        {
-            var onBlurProperty = widgetType.GetProperty("OnBlur");
-            if (onBlurProperty != null)
-            {
-                onBlurProperty.SetValue(widget, onBlur);
-                return widget;
-            }
-        }
-
-        throw new InvalidOperationException("Unable to set blur handler on async select input");
+        widget.OnBlur = onBlur;
+        return widget;
     }
 
-    /// <summary>
-    /// Sets the blur event handler for the async select input.
-    /// </summary>
-    /// <param name="widget">The async select input to configure.</param>
-    /// <param name="onBlur">The event handler to call when the input loses focus.</param>
-    /// <returns>A new async select input.</returns>
+    /// <summary>Sets the blur event handler.</summary>
+    /// <param name="widget">The widget to configure.</param>
+    /// <param name="onBlur">The blur event handler.</param>
+    /// <returns>The configured widget.</returns>
     public static IAnyAsyncSelectInputBase HandleBlur(this IAnyAsyncSelectInputBase widget, Action<Event<IAnyInput>> onBlur)
     {
         return widget.HandleBlur(onBlur.ToValueTask());
     }
 
-    /// <summary>
-    /// Sets a simple blur event handler for the async select input.
-    /// </summary>
-    /// <param name="widget">The async select input to configure.</param>
-    /// <param name="onBlur">The simple action to perform when the input loses focus.</param>
-    /// <returns>A new async select input.</returns>
+    /// <summary>Sets a simple blur event handler.</summary>
+    /// <param name="widget">The widget to configure.</param>
+    /// <param name="onBlur">The action to perform on blur.</param>
+    /// <returns>The configured widget.</returns>
     public static IAnyAsyncSelectInputBase HandleBlur(this IAnyAsyncSelectInputBase widget, Action onBlur)
     {
         return widget.HandleBlur(_ => { onBlur(); return ValueTask.CompletedTask; });
+    }
+
+    /// <summary>Sets the label text.</summary>
+    /// <param name="widget">The widget to configure.</param>
+    /// <param name="label">The label text.</param>
+    /// <returns>The configured widget.</returns>
+    public static IAnyAsyncSelectInputBase Label(this IAnyAsyncSelectInputBase widget, string label)
+    {
+        widget.Label = label;
+        return widget;
+    }
+
+    /// <summary>Sets the description text.</summary>
+    /// <param name="widget">The widget to configure.</param>
+    /// <param name="description">The description text.</param>
+    /// <returns>The configured widget.</returns>
+    public static IAnyAsyncSelectInputBase Description(this IAnyAsyncSelectInputBase widget, string description)
+    {
+        widget.Description = description;
+        return widget;
     }
 }
 
@@ -368,4 +386,10 @@ internal record AsyncSelectInput : WidgetBase<AsyncSelectInput>
 
     /// <summary>Gets the event handler called when the user triggers option selection.</summary>
     [Event] public Func<Event<AsyncSelectInput>, ValueTask>? OnSelect { get; init; }
+
+    /// <summary>Gets or sets the label text displayed alongside the async select input.</summary>
+    [Prop] public string? Label { get; init; }
+
+    /// <summary>Gets or sets the description text displayed alongside the async select input.</summary>
+    [Prop] public string? Description { get; init; }
 }

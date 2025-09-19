@@ -8,6 +8,8 @@ import { logger } from '@/lib/logger';
 
 interface ColorInputWidgetProps {
   id: string;
+  label?: string;
+  description?: string;
   value: string | null;
   disabled?: boolean;
   invalid?: string;
@@ -50,6 +52,8 @@ const enumColorsToCssVar: Record<string, string> = {
 
 export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
   id,
+  label,
+  description,
   value,
   disabled = false,
   invalid,
@@ -151,9 +155,81 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
   };
 
   // --- Variant rendering logic ---
-  if (variant === 'Text') {
+  const renderVariant = () => {
+    if (variant === 'Text') {
+      return (
+        <div className="flex items-center space-x-2">
+          <div className="relative">
+            <Input
+              type="text"
+              value={inputValue}
+              onChange={handleInputChange}
+              onBlur={handleInputBlur}
+              onKeyDown={handleInputKeyDown}
+              placeholder={placeholder || 'Enter color'}
+              disabled={disabled}
+              className={`${invalid ? inputStyles.invalidInput + ' pr-8' : ''}`}
+            />
+            {(invalid || (nullable && value !== null && !disabled)) && (
+              <div
+                className="absolute top-1/2 -translate-y-1/2 flex items-center gap-1 right-2"
+                style={{ zIndex: 2 }}
+              >
+                {invalid && (
+                  <span className="flex items-center">
+                    <InvalidIcon message={invalid} />
+                  </span>
+                )}
+                {nullable && value !== null && !disabled && (
+                  <button
+                    type="button"
+                    tabIndex={-1}
+                    aria-label="Clear"
+                    onClick={handleClear}
+                    className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
+                  >
+                    <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    if (variant === 'Picker') {
+      return (
+        <div className="flex items-center space-x-2">
+          <div className="relative">
+            <input
+              type="color"
+              value={getDisplayColor()}
+              onChange={handleColorChange}
+              disabled={disabled}
+              className={`w-10 h-10 p-1 rounded-lg border ${
+                disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+              } ${invalid ? inputStyles.invalidInput : 'border-border'}`}
+            />
+          </div>
+        </div>
+      );
+    }
+
+    // Default: TextAndPicker
     return (
       <div className="flex items-center space-x-2">
+        <div className="relative">
+          <input
+            type="color"
+            value={getDisplayColor()}
+            onChange={handleColorChange}
+            disabled={disabled}
+            className={`w-10 h-10 p-1 rounded-lg border ${
+              disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+            } ${invalid ? inputStyles.invalidInput : 'border-border'}`}
+          />
+        </div>
         <div className="relative">
           <Input
             type="text"
@@ -191,75 +267,27 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
         </div>
       </div>
     );
+  };
+
+  const colorInputElement = renderVariant();
+
+  // If no label or description, return just the color input
+  if (!label && !description) {
+    return colorInputElement;
   }
 
-  if (variant === 'Picker') {
-    return (
-      <div className="flex items-center space-x-2">
-        <div className="relative">
-          <input
-            type="color"
-            value={getDisplayColor()}
-            onChange={handleColorChange}
-            disabled={disabled}
-            className={`w-10 h-10 p-1 rounded-lg border ${
-              disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
-            } ${invalid ? inputStyles.invalidInput : 'border-border'}`}
-          />
-        </div>
-      </div>
-    );
-  }
-
-  // Default: TextAndPicker
+  // Otherwise, wrap with label and description structure
   return (
-    <div className="flex items-center space-x-2">
-      <div className="relative">
-        <input
-          type="color"
-          value={getDisplayColor()}
-          onChange={handleColorChange}
-          disabled={disabled}
-          className={`w-10 h-10 p-1 rounded-lg border ${
-            disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
-          } ${invalid ? inputStyles.invalidInput : 'border-border'}`}
-        />
-      </div>
-      <div className="relative">
-        <Input
-          type="text"
-          value={inputValue}
-          onChange={handleInputChange}
-          onBlur={handleInputBlur}
-          onKeyDown={handleInputKeyDown}
-          placeholder={placeholder || 'Enter color'}
-          disabled={disabled}
-          className={`${invalid ? inputStyles.invalidInput + ' pr-8' : ''}`}
-        />
-        {(invalid || (nullable && value !== null && !disabled)) && (
-          <div
-            className="absolute top-1/2 -translate-y-1/2 flex items-center gap-1 right-2"
-            style={{ zIndex: 2 }}
-          >
-            {invalid && (
-              <span className="flex items-center">
-                <InvalidIcon message={invalid} />
-              </span>
-            )}
-            {nullable && value !== null && !disabled && (
-              <button
-                type="button"
-                tabIndex={-1}
-                aria-label="Clear"
-                onClick={handleClear}
-                className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
-              >
-                <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
-              </button>
-            )}
-          </div>
-        )}
-      </div>
+    <div className="flex flex-col gap-2 flex-1 min-w-0">
+      {label && (
+        <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+          {label}
+        </label>
+      )}
+      {colorInputElement}
+      {description && (
+        <p className="text-sm text-muted-foreground">{description}</p>
+      )}
     </div>
   );
 };

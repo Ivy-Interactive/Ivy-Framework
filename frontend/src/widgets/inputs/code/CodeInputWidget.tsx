@@ -26,6 +26,8 @@ import { StateField, StateEffect, RangeSetBuilder } from '@codemirror/state';
 
 interface CodeInputWidgetProps {
   id: string;
+  label?: string;
+  description?: string;
   placeholder?: string;
   value?: string;
   language?: string;
@@ -53,6 +55,8 @@ const languageExtensions = {
 
 export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
   id,
+  label,
+  description,
   placeholder,
   value,
   language,
@@ -179,7 +183,7 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
     return [...langExtension, themeExtension, selectionExtension];
   }, [language, themeExtension, selectionExtension]);
 
-  return (
+  const codeInputElement = (
     <div style={styles} className="relative w-full h-full overflow-hidden">
       {showCopyButton && (
         <div className="absolute top-2 right-2 z-10 rounded-md hover:bg-accent transition-colors duration-200">
@@ -220,6 +224,26 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
         >
           <InvalidIcon message={invalid} />
         </div>
+      )}
+    </div>
+  );
+
+  // If no label or description, return just the code input
+  if (!label && !description) {
+    return codeInputElement;
+  }
+
+  // Otherwise, wrap with label and description structure
+  return (
+    <div className="flex flex-col gap-2 flex-1 min-w-0">
+      {label && (
+        <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+          {label}
+        </label>
+      )}
+      {codeInputElement}
+      {description && (
+        <p className="text-sm text-muted-foreground">{description}</p>
       )}
     </div>
   );

@@ -27,6 +27,12 @@ public enum ColorInputs
 /// </summary>
 public interface IAnyColorInput : IAnyInput
 {
+    /// <summary>Gets or sets the label text displayed alongside the color input.</summary>
+    public string? Label { get; set; }
+
+    /// <summary>Gets or sets the description text displayed alongside the color input.</summary>
+    public string? Description { get; set; }
+
     /// <summary>Gets or sets the placeholder text displayed when the color input is empty.</summary>
     public string? Placeholder { get; set; }
 
@@ -39,6 +45,12 @@ public interface IAnyColorInput : IAnyInput
 /// </summary>
 public abstract record ColorInputBase : WidgetBase<ColorInputBase>, IAnyColorInput
 {
+    /// <summary>Gets or sets the label text displayed alongside the color input.</summary>
+    [Prop] public string? Label { get; set; }
+
+    /// <summary>Gets or sets the description text displayed alongside the color input.</summary>
+    [Prop] public string? Description { get; set; }
+
     /// <summary>Gets or sets whether the input is disabled.</summary>
     [Prop] public bool Disabled { get; set; }
 
@@ -279,5 +291,21 @@ public static class ColorInputExtensions
     public static ColorInputBase HandleBlur(this ColorInputBase widget, Action onBlur)
     {
         return widget.HandleBlur(_ => { onBlur(); return ValueTask.CompletedTask; });
+    }
+
+    /// <summary>Sets the label text for the color input.</summary>
+    /// <param name="widget">The color input to configure.</param>
+    /// <param name="label">The label text to display.</param>
+    public static ColorInputBase Label(this ColorInputBase widget, string label)
+    {
+        return widget with { Label = label };
+    }
+
+    /// <summary>Sets the description text for the color input.</summary>
+    /// <param name="widget">The color input to configure.</param>
+    /// <param name="description">The description text to display.</param>
+    public static ColorInputBase Description(this ColorInputBase widget, string description)
+    {
+        return widget with { Description = description };
     }
 }

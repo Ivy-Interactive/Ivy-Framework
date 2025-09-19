@@ -27,6 +27,12 @@ public enum DateTimeInputs
 /// </summary>
 public interface IAnyDateTimeInput : IAnyInput
 {
+    /// <summary>Gets or sets the label text displayed alongside the date/time input.</summary>
+    public string? Label { get; set; }
+
+    /// <summary>Gets or sets the description text displayed alongside the date/time input.</summary>
+    public string? Description { get; set; }
+
     /// <summary>Gets or sets the visual variant of the date/time input.</summary>
     public DateTimeInputs Variant { get; set; }
 
@@ -42,6 +48,12 @@ public interface IAnyDateTimeInput : IAnyInput
 /// </summary>
 public abstract record DateTimeInputBase : WidgetBase<DateTimeInputBase>, IAnyDateTimeInput
 {
+    /// <summary>Gets or sets the label text displayed alongside the date/time input.</summary>
+    [Prop] public string? Label { get; set; }
+
+    /// <summary>Gets or sets the description text displayed alongside the date/time input.</summary>
+    [Prop] public string? Description { get; set; }
+
     /// <summary>Gets or sets the visual variant of the date/time input.</summary>
     [Prop] public DateTimeInputs Variant { get; set; }
 
@@ -372,4 +384,14 @@ public static class DateTimeInputExtensions
     {
         return widget.HandleBlur(_ => { onBlur(); return ValueTask.CompletedTask; });
     }
+
+    /// <summary>Sets the label text for the date/time input.</summary>
+    /// <param name="widget">The date/time input to configure.</param>
+    /// <param name="label">The label text to display alongside the input.</param>
+    public static DateTimeInputBase Label(this DateTimeInputBase widget, string label) => widget with { Label = label };
+
+    /// <summary>Sets the description text for the date/time input.</summary>
+    /// <param name="widget">The date/time input to configure.</param>
+    /// <param name="description">The description text to display alongside the input.</param>
+    public static DateTimeInputBase Description(this DateTimeInputBase widget, string description) => widget with { Description = description };
 }

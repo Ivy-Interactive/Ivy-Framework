@@ -39,6 +39,12 @@ public enum NumberFormatStyle
 /// </summary>
 public interface IAnyNumberInput : IAnyInput
 {
+    /// <summary>Gets or sets the label text displayed alongside the number input.</summary>
+    public string? Label { get; set; }
+
+    /// <summary>Gets or sets the description text displayed alongside the number input.</summary>
+    public string? Description { get; set; }
+
     /// <summary>Gets or sets the placeholder text displayed when the input is empty.</summary>
     public string? Placeholder { get; set; }
 
@@ -77,6 +83,10 @@ public abstract record NumberInputBase : WidgetBase<NumberInputBase>, IAnyNumber
 {
     /// <summary>Gets or sets whether the input is disabled.</summary>
     [Prop] public bool Disabled { get; set; }
+    /// <summary>Gets or sets the label text displayed alongside the number input.</summary>
+    [Prop] public string? Label { get; set; }
+    /// <summary>Gets or sets the description text displayed alongside the number input.</summary>
+    [Prop] public string? Description { get; set; }
 
     /// <summary>Gets or sets the validation error message.</summary>
     [Prop] public string? Invalid { get; set; }
@@ -437,5 +447,21 @@ public static class NumberInputExtensions
     public static NumberInputBase HandleBlur(this NumberInputBase widget, Action onBlur)
     {
         return widget.HandleBlur(_ => { onBlur(); return ValueTask.CompletedTask; });
+    }
+
+    /// <summary>Sets the label text for the number input.</summary>
+    /// <param name="widget">The number input to configure.</param>
+    /// <param name="label">The label text to display alongside the input.</param>
+    public static NumberInputBase Label(this NumberInputBase widget, string label)
+    {
+        return widget with { Label = label };
+    }
+
+    /// <summary>Sets the description text for the number input.</summary>
+    /// <param name="widget">The number input to configure.</param>
+    /// <param name="description">The description text to display alongside the input.</param>
+    public static NumberInputBase Description(this NumberInputBase widget, string description)
+    {
+        return widget with { Description = description };
     }
 }
