@@ -95,7 +95,7 @@ const BarChartWidget: React.FC<BarChartWidgetProps> = ({
   const [colorGenerator] = getColorGenerator(colorScheme);
 
   return (
-    <ChartContainer config={chartConfig} style={styles}>
+    <ChartContainer config={chartConfig} style={styles} className="w-full">
       <BarChart
         margin={{ top: 10, right: 10, bottom: 10, left: 10 }}
         layout={camelCase(layout) as 'horizontal' | 'vertical'}

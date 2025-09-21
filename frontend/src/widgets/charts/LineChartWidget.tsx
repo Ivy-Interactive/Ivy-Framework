@@ -79,7 +79,11 @@ const LineChartWidget: React.FC<LineChartWidgetProps> = ({
   const [colorGenerator] = getColorGenerator(colorScheme);
 
   return (
-    <ChartContainer config={chartConfig} style={styles}>
+    <ChartContainer
+      config={chartConfig}
+      style={styles}
+      className="w-full max-w-[800px]"
+    >
       <LineChart
         margin={{ top: 10, right: 10, bottom: 10, left: 10 }}
         accessibilityLayer

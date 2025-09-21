@@ -84,7 +84,7 @@ const AreaChartWidget: React.FC<AreaChartWidgetProps> = ({
   const [colorGenerator, svgDefs] = getColorGenerator(colorScheme);
 
   return (
-    <ChartContainer config={chartConfig} style={styles}>
+    <ChartContainer config={chartConfig} style={styles} className="w-full">
       <AreaChart
         margin={{ top: 10, right: 10, bottom: 10, left: 10 }}
         accessibilityLayer

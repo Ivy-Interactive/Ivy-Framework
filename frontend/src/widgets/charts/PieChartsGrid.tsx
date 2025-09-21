@@ -34,9 +34,11 @@ const PieChartsGrid: React.FC<PieChartsGridProps> = ({
   className = '',
 }) => {
   return (
-    <div className={`pie-charts-grid ${className}`}>
+    <div className={`pie-charts-grid flex flex-wrap -mx-2 ${className}`}>
       {charts.map((chartProps, index) => (
-        <PieChartWidget key={chartProps.id || index} {...chartProps} />
+        <div key={chartProps.id || index} className="w-full lg:w-1/2 px-2 mb-4">
+          <PieChartWidget {...chartProps} />
+        </div>
       ))}
     </div>
   );

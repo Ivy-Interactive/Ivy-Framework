@@ -70,6 +70,7 @@ export const GridLayoutWidget: React.FC<GridLayoutWidgetProps> = ({
 }) => {
   const styles: React.CSSProperties = {
     display: 'grid',
+    gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
     gridTemplateRows: `repeat(${rows}, minmax(0, 1fr))`,
     gridAutoFlow: autoFlow?.toLowerCase() || 'row',
     ...getPadding(padding),
@@ -78,14 +79,8 @@ export const GridLayoutWidget: React.FC<GridLayoutWidgetProps> = ({
     ...getHeight(height),
   };
 
-  // Add responsive CSS class for mobile-first approach
-  const responsiveClass = columns > 1 ? 'responsive-grid-2col' : '';
-
   return (
-    <div
-      style={styles}
-      className={`place-items-center ${responsiveClass} ${className}`}
-    >
+    <div style={styles} className={`place-items-center ${className}`}>
       {React.Children.map(children, (child, index) => (
         <GridLayoutCell
           column={childColumn[index]}
