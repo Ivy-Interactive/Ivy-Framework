@@ -11,22 +11,75 @@ public class DbmlEditorApp : ViewBase
     {
         var sampleDbml =
             """
-            Table users {
-              id integer
-              username varchar
-              role varchar
-              created_at timestamp
+            Enum order_status {
+                pending
+                shipped
+                delivered
+                cancelled
             }
-            
-            Table posts {
-              id integer [primary key]
-              title varchar
-              body text [note: 'Content of the post']
-              user_id integer
-              created_at timestamp
+
+            Table customer {
+                id int [pk, increment, not null]
+                name varchar [not null]
+                email varchar [not null, unique]
+                address text
+                created_at timestamp [not null]
+                updated_at timestamp [not null]
             }
-            
-            Ref: posts.user_id > users.id // many-to-one
+
+            Table product_category {
+                id int [pk, increment, not null]
+                name varchar [not null, unique]
+                description text
+                created_at timestamp [not null]
+                updated_at timestamp [not null]
+            }
+
+            Table product {
+                id int [pk, increment, not null]
+                name varchar [not null]
+                description text
+                price decimal [not null]
+                category_id int [not null]
+                created_at timestamp [not null]
+                updated_at timestamp [not null]
+            }
+
+            Table "order" {
+                id int [pk, increment, not null]
+                customer_id int [not null]
+                status order_status [not null]
+                total_amount decimal [not null]
+                created_at timestamp [not null]
+                updated_at timestamp [not null]
+            }
+
+            Table order_line {
+                id int [pk, increment, not null]
+                order_id int [not null]
+                product_id int [not null]
+                quantity int [not null]
+                unit_price decimal [not null]
+                created_at timestamp [not null]
+                updated_at timestamp [not null]
+            }
+
+            Table review {
+                id int [pk, increment, not null]
+                product_id int [not null]
+                customer_id int [not null]
+                rating int [not null]
+                comment text
+                created_at timestamp [not null]
+                updated_at timestamp [not null]
+            }
+
+            Ref: product.category_id > product_category.id
+            Ref: "order".customer_id > customer.id
+            Ref: order_line.order_id > "order".id
+            Ref: order_line.product_id > product.id
+            Ref: review.product_id > product.id
+            Ref: review.customer_id > customer.id
             """;
 
         var dbml = this.UseState(sampleDbml);
