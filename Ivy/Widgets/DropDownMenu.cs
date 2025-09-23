@@ -70,7 +70,7 @@ public record DropDownMenu : WidgetBase<DropDownMenu>
     /// <summary>Side where dropdown appears relative to trigger. Default is <see cref="SideOptions.Bottom"/>.</summary>
     [Prop] public SideOptions Side { get; set; } = SideOptions.Bottom;
 
-    /// <summary>Offset distance from trigger in side direction. Default is 8 pixels.</summary>
+    /// <summary>Offset distance from trigger in side direction. Default is 4 pixels.</summary>
     [Prop] public int SideOffset { get; set; } = 4;
 
     /// <summary>Offset distance for submenu positioning. Default is 8 pixels.</summary>
