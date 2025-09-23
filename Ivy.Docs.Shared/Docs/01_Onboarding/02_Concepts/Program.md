@@ -85,7 +85,7 @@ server.AddApp(new AppDescriptor
 {
     Id = "my-app",
     Title = "My Application",
-    ViewFunc = () => new MyView(),
+    ViewFunc = (context) => new MyView(),
     Path = ["Apps", "MyApp"],
     IsVisible = true
 });
