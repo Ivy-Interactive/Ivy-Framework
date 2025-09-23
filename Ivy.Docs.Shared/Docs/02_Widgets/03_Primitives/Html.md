@@ -20,8 +20,6 @@ public class BasicHtmlView : ViewBase
 }
 ```
 
-**Rendered Result:**
-> Hello, **World**!
 
 ## Content Examples
 
@@ -46,16 +44,6 @@ public class TextFormattingView : ViewBase
     }
 }
 ```
-
-**Rendered Result:**
-
-> # Main Heading
->
-> ## Subheading
->
-> This paragraph contains **bold text**, *italic text*, and **bold using b tag**, plus *italic using i tag*.
->
-> You can also use <span style="color: blue;">colored text</span> and <span style="text-decoration: underline;">underlined text</span>.
 
 ### Lists and Structure
 
@@ -97,26 +85,7 @@ public class ListsView : ViewBase
 }
 ```
 
-**Rendered Result:**
 
-> ### Unordered List
->
-> - First item
-> - Second item with **bold text**
-> - Third item with *italic text*
->
-> ### Ordered List
->
-> 1. Step one
-> 2. Step two
-> 3. Step three
->
-> ### Nested Lists
->
-> - Parent item
->   - Child item 1
->   - Child item 2
-> - Another parent item
 
 ### Links and Navigation
 
@@ -137,10 +106,6 @@ public class LinksView : ViewBase
 }
 ```
 
-**Rendered Result:**
-> Visit [Ivy Framework](https://github.com/Ivy-Interactive/Ivy-Framework) on GitHub.
->
-> You can also link to internal sections or email addresses.
 
 ### Tables
 
@@ -179,14 +144,6 @@ public class TablesView : ViewBase
     }
 }
 ```
-
-**Rendered Result:**
->
-> | Feature | Status | Description |
-> |---------|--------|-------------|
-> | HTML Rendering | ✓ Supported | Safe HTML rendering with sanitization |
-> | Custom Styling | ✓ Supported | Inline styles are preserved |
-> | JavaScript | ✗ Blocked | Scripts are removed for security |
 
 ## Complex Layout Example
 
@@ -230,26 +187,8 @@ public class ComplexLayoutView : ViewBase
 }
 ```
 
-**Rendered Result:**
 
-> # HTML Widget Demo
->
-> <div style="background-color: var(--muted); padding: 20px; border-radius: 8px; border-left: 4px solid var(--primary);">
->   <h2 style="color: var(--primary); margin-top: 0;">Product Features</h2>
->   <p style="font-size: 16px; color: var(--muted-foreground);">Discover what makes our product special:</p>
->
-> **Performance**: Lightning-fast rendering with optimized algorithms.
-> **Security**: Built-in HTML sanitization protects against XSS attacks.
->
-> **Quick Stats**
->
-> - **Rendering Speed:** 99.9% faster
-> - **Memory Usage:** 50% less
-> - **Security Score:** A+
->
-> </div>
 
-```
 
 ## Security Features
 
@@ -290,13 +229,6 @@ public class SecurityDemoView : ViewBase
     }
 }
 ```
-
-**Rendered Result (after sanitization):**
-> Safe content
->
-> Click me
->
-> Blocked link
 
 ## Best Practices & Use Cases
 
