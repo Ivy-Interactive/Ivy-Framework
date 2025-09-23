@@ -6,6 +6,12 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { getWidth } from '@/lib/styles';
 import { InvalidIcon } from '@/components/InvalidIcon';
+import { Sizes } from '@/types/sizes';
+import {
+  fileInputVariants,
+  uploadIconVariants,
+  textVariants,
+} from '@/components/ui/input/file-input-variants';
 
 interface FileInput {
   name: string;
@@ -27,6 +33,7 @@ interface FileInputWidgetProps {
   maxFiles?: number;
   placeholder?: string;
   uploadUrl?: string;
+  size?: Sizes;
 }
 
 export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
@@ -40,6 +47,7 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
   maxFiles,
   placeholder,
   uploadUrl,
+  size = Sizes.Medium,
 }) => {
   const handleEvent = useEventHandler();
   const [isDragging, setIsDragging] = useState(false);
@@ -214,7 +222,7 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
       )}
       <div
         className={cn(
-          'relative rounded-md border-2 border-dashed transition-colors min-h-[100px]',
+          fileInputVariants({ size }),
           isDragging && !disabled
             ? 'border-primary bg-primary/5'
             : 'border-muted-foreground/25',
@@ -232,9 +240,9 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
           disabled={disabled}
           className="hidden"
         />
-        <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center">
-          <Upload className="h-6 w-6 mb-2 text-primary" />
-          <p className="text-sm text-muted-foreground">
+        <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+          <Upload className={uploadIconVariants({ size })} />
+          <p className={textVariants({ size })}>
             {displayValue ||
               placeholder ||
               `Drag and drop your ${multiple ? 'files' : 'file'} here or click to select`}

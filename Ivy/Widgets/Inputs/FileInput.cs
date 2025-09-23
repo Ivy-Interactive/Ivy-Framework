@@ -83,6 +83,9 @@ public abstract record FileInputBase : WidgetBase<FileInputBase>, IAnyFileInput
     /// <summary>Gets or sets the upload URL for automatic file uploads.</summary>
     [Prop] public string? UploadUrl { get; set; }
 
+    /// <summary>Gets or sets the size of the file input.</summary>
+    [Prop] public Sizes Size { get; set; }
+
     /// <summary>Gets or sets the event handler called when the input loses focus.</summary>
     [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
 
@@ -210,8 +213,9 @@ public record FileInput<TValue> : FileInputBase, IInput<TValue>, IAnyFileInput
         Placeholder = placeholder;
         Variant = variant;
         Disabled = disabled;
-        Width = Size.Full();
-        Height = Size.Units(50);
+        Size = Sizes.Medium;
+        Width = Ivy.Shared.Size.Full();
+        Height = Ivy.Shared.Size.Units(50);
     }
 
     /// <summary>Gets the current file value.</summary>
@@ -349,6 +353,28 @@ public static class FileInputExtensions
     public static FileInputBase UploadUrl(this FileInputBase widget, string? uploadUrl)
     {
         return widget with { UploadUrl = uploadUrl };
+    }
+
+    /// <summary>Sets the size of the file input.</summary>
+    /// <param name="widget">The file input to configure.</param>
+    /// <param name="size">The size of the file input.</param>
+    public static FileInputBase Size(this FileInputBase widget, Sizes size)
+    {
+        return widget with { Size = size };
+    }
+
+    /// <summary>Sets the file input size to small for compact layouts.</summary>
+    /// <param name="widget">The file input to configure.</param>
+    public static FileInputBase Small(this FileInputBase widget)
+    {
+        return widget with { Size = Sizes.Small };
+    }
+
+    /// <summary>Sets the file input size to large for prominent display.</summary>
+    /// <param name="widget">The file input to configure.</param>
+    public static FileInputBase Large(this FileInputBase widget)
+    {
+        return widget with { Size = Sizes.Large };
     }
 
     /// <summary>

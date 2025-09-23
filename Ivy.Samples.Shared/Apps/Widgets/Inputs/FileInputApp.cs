@@ -29,6 +29,7 @@ public class FileInputApp : SampleBase
         var textFiles = UseState<IEnumerable<FileInput>?>(() => null);
         var pdfFiles = UseState<IEnumerable<FileInput>?>(() => null);
         var imageFiles = UseState<IEnumerable<FileInput>?>(() => null);
+        var singleSizeFile = UseState<FileInput?>(() => null);
 
         var onChangedState = UseState<FileInput?>(() => null);
         var onChangeLabel = UseState("");
@@ -64,6 +65,21 @@ public class FileInputApp : SampleBase
 
         return Layout.Vertical()
                | Text.H1("File Inputs")
+
+               // Size Variants:
+               | Text.H2("Size Variants")
+               | (Layout.Grid().Columns(4)
+                  | null!
+                  | Text.InlineCode("Small")
+                  | Text.InlineCode("Medium")
+                  | Text.InlineCode("Large")
+
+                  | Text.InlineCode("Single File")
+                  | singleSizeFile.ToFileInput().Small().Placeholder("Small file input")
+                  | singleSizeFile.ToFileInput().Placeholder("Medium file input")
+                  | singleSizeFile.ToFileInput().Large().Placeholder("Large file input")
+               )
+
                | Text.H2("Variants")
                | (Layout.Grid().Columns(6)
                   | null!
