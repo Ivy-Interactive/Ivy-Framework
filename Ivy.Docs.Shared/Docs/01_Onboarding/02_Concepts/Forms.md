@@ -349,10 +349,10 @@ public class FormSubmissionExample : ViewBase
         
         return Layout.Vertical()
             | formView
-            | Layout.Horizontal()
+            | (Layout.Horizontal()
                 | new Button("Send Message").HandleClick(_ => HandleSubmit())
                     .Loading(loading).Disabled(loading)
-                | validationView;
+                | validationView);
     }
 }
 ```
@@ -390,10 +390,10 @@ public class FormStatesExample : ViewBase
         
         return Layout.Vertical()
             | formView
-            | Layout.Horizontal()
+            | (Layout.Horizontal()
                 | new Button("Create Order").HandleClick(_ => HandleSubmit())
                     .Loading(loading).Disabled(loading)
-                | validationView
+                | validationView)
             | Text.Block($"Total: ${order.Value.Quantity * order.Value.UnitPrice:F2}");
     }
 }
