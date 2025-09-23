@@ -76,13 +76,22 @@
 
 /* ReactFlow Node base styling - remove box-shadow from container */
 .react-flow__node {
-  transition: all 0.1s ease !important;
+  /* Disable transitions during drag to prevent slow-motion effect */
+  transition: none !important;
 }
 
-/* DatabaseSchemaNode styling - apply hover/selection to the actual table */
+/* Only apply transitions to border changes, not position/transform */
 .react-flow__node .rounded-md {
-  transition: all 0.1s ease;
+  transition:
+    border-color 0.1s ease,
+    border-width 0.1s ease;
   border-width: 2px;
+}
+
+/* Ensure dragging nodes don't have transitions */
+.react-flow__node.dragging,
+.react-flow__node.dragging .rounded-md {
+  transition: none !important;
 }
 
 /* ReactFlow Node hover styling - target the DatabaseSchemaNode */
