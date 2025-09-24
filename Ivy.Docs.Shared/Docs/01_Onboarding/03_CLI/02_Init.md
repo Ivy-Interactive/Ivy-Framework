@@ -197,6 +197,10 @@ After initializing your project:
 >ivy init --verbose --namespace MyProject
 ```
 
+<Callout Type="Tip">
+ The CLI plays a success sound when operations complete. Use `--silent` to disable audio notifications.
+</Callout>
+
 ### Troubleshooting
 
 **Permission Issues** - If you encounter permission issues, ensure you have write access to the current directory.
