@@ -35,9 +35,9 @@ export const uploadIconVariants = cva('text-primary', {
 export const textVariants = cva('text-muted-foreground', {
   variants: {
     size: {
-      Small: 'text-xs',
-      Medium: 'text-sm',
-      Large: 'text-base',
+      Small: 'text-xs px-2',
+      Medium: 'text-sm px-3',
+      Large: 'text-base px-4',
     },
   },
   defaultVariants: {

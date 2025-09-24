@@ -1,5 +1,6 @@
 ﻿using Ivy.Shared;
 using Ivy.Views.Builders;
+using Ivy.Views.Forms;
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Inputs;
 
@@ -82,8 +83,8 @@ public class FileInputApp : SampleBase
 
                   | Text.InlineCode("Multiple Files")
                   | multipleSizeFiles.ToFileInput().Small()
-                  | multipleSizeFiles.ToFileInput().Invalid("Please select valid files")
-                  | multipleSizeFiles.ToFileInput().Large().Disabled()
+                  | multipleSizeFiles.ToFileInput()
+                  | multipleSizeFiles.ToFileInput().Large()
                )
 
                | Text.H2("Variants")
@@ -225,6 +226,37 @@ public class FileInputApp : SampleBase
                   | Text.Block("Multiple files with count and type validation")
                   | validatedFiles.ToFileInput().MaxFiles(3).Accept("image/*").Placeholder("Select up to 3 image files")
                )
+
+               // File Upload Form with Different Sizes:
+               | Text.H2("File Upload Form with Different Sizes")
+               | new SizingExample()
             ;
+    }
+}
+
+public class SizingExample : ViewBase
+{
+    public record FileModel(FileInput? ProfilePhoto, FileInput? Document, FileInput? Certificate);
+
+    public override object? Build()
+    {
+        var fileModel = UseState(() => new FileModel(null, null, null));
+
+        return Layout.Vertical()
+            | new Card(
+                fileModel.ToForm()
+                    .Builder(m => m.ProfilePhoto, s => s.ToFileInput().Large().Accept("image/*"))
+                    .Builder(m => m.Document, s => s.ToFileInput().Accept(".pdf,.doc,.docx"))
+                    .Builder(m => m.Certificate, s => s.ToFileInput().Small().Accept(".pdf"))
+                    .Label(m => m.ProfilePhoto, "Profile Photo")
+                    .Label(m => m.Document, "Document")
+                    .Label(m => m.Certificate, "Certificate")
+                    .Description(m => m.ProfilePhoto, "Upload your profile picture")
+                    .Description(m => m.Document, "Upload your resume or document")
+                    .Description(m => m.Certificate, "Upload certificate (optional)")
+                    .Required(m => m.ProfilePhoto, m => m.Document)
+            )
+            .Width(Size.Full())
+            .Title("File Upload Form with Different Sizes");
     }
 }
