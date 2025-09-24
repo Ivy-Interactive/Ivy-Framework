@@ -36,6 +36,32 @@ public class FeedbackInputApp : SampleBase
                | twoState.ToFeedbackInput().Variant(FeedbackInputs.Thumbs).Invalid("Invalid feedback")
             ;
 
+        var sizeState = UseState(3);
+        var sizeBoolState = UseState(true);
+        var sizeIntState = UseState(2);
+
+        var sizeExamples = Layout.Grid().Columns(4)
+                          | Text.InlineCode("Variant")
+                          | Text.InlineCode("Small")
+                          | Text.InlineCode("Default")
+                          | Text.InlineCode("Large")
+
+                          | Text.InlineCode("Stars")
+                          | sizeState.ToFeedbackInput().Variant(FeedbackInputs.Stars).Small()
+                          | sizeState.ToFeedbackInput().Variant(FeedbackInputs.Stars)
+                          | sizeState.ToFeedbackInput().Variant(FeedbackInputs.Stars).Large()
+
+                          | Text.InlineCode("Emojis")
+                          | sizeIntState.ToFeedbackInput().Variant(FeedbackInputs.Emojis).Small()
+                          | sizeIntState.ToFeedbackInput().Variant(FeedbackInputs.Emojis)
+                          | sizeIntState.ToFeedbackInput().Variant(FeedbackInputs.Emojis).Large()
+
+                          | Text.InlineCode("Thumbs")
+                          | sizeBoolState.ToFeedbackInput().Variant(FeedbackInputs.Thumbs).Small()
+                          | sizeBoolState.ToFeedbackInput().Variant(FeedbackInputs.Thumbs)
+                          | sizeBoolState.ToFeedbackInput().Variant(FeedbackInputs.Thumbs).Large()
+        ;
+
         var intState = UseState(0);
         var nullableIntState = UseState((int?)null);
         var floatState = UseState(0.0f);
@@ -76,6 +102,8 @@ public class FeedbackInputApp : SampleBase
                | Text.H1("Feedback Inputs")
                | Text.H2("Variants")
                | variants
+               | Text.H2("Size Examples")
+               | sizeExamples
                | Text.H2("Data Binding")
                | dataBinding
 
