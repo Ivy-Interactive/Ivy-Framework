@@ -188,8 +188,6 @@ public class ComplexLayoutView : ViewBase
 ```
 
 
-
-
 ## Security Features
 
 The Html widget includes robust security measures to protect against malicious content:
