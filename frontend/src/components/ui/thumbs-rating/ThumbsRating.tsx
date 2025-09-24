@@ -2,11 +2,12 @@ import { ThumbsUp, ThumbsDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { InvalidIcon } from '@/components/InvalidIcon';
 import { ThumbsEnum } from './types';
+import { Sizes } from '@/types/sizes';
 
 interface ThumbsRatingProps {
   value?: number;
   onRate?: (rating: number) => void;
-  size?: 'sm' | 'md' | 'lg';
+  size?: Sizes;
   className?: string;
   disabled?: boolean;
   invalid?: string;
@@ -15,15 +16,15 @@ interface ThumbsRatingProps {
 const ThumbsRating = ({
   value = ThumbsEnum.None,
   onRate,
-  size = 'sm',
+  size = Sizes.Medium,
   className,
   disabled = false,
   invalid,
 }: ThumbsRatingProps) => {
   const iconSizes = {
-    sm: 16,
-    md: 24,
-    lg: 32,
+    Small: 16,
+    Medium: 24,
+    Large: 32,
   };
 
   const handleClick = (rating: number) => {

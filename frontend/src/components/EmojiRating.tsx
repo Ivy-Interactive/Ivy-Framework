@@ -3,11 +3,12 @@
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { InvalidIcon } from '@/components/InvalidIcon';
+import { Sizes } from '@/types/sizes';
 
 interface EmojiRatingProps {
   value: number;
   onRate?: (rating: number) => void;
-  size?: 'sm' | 'md' | 'lg';
+  size?: Sizes;
   className?: string;
   disabled?: boolean;
   invalid?: string;
@@ -18,7 +19,7 @@ const emojis = ['😢', '😕', '😐', '🙂', '😊'];
 export function EmojiRating({
   value = 0,
   onRate,
-  size = 'md',
+  size = Sizes.Medium,
   className,
   disabled = false,
   invalid,
@@ -31,9 +32,9 @@ export function EmojiRating({
   };
 
   const emojiSizes = {
-    sm: 'text-lg',
-    md: 'text-2xl',
-    lg: 'text-4xl',
+    Small: 'text-lg',
+    Medium: 'text-2xl',
+    Large: 'text-4xl',
   };
 
   return (

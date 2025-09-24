@@ -3,6 +3,7 @@ import { useEventHandler } from '@/components/event-handler';
 import { StarRating } from '@/components/StarRating';
 import { ThumbsEnum, ThumbsRating } from '@/components/ui/thumbs-rating';
 import React, { useCallback, useMemo } from 'react';
+import { Sizes } from '@/types/sizes';
 
 interface FeedbackInputWidgetProps {
   id: string;
@@ -12,6 +13,7 @@ interface FeedbackInputWidgetProps {
   invalid?: string;
   events: string[];
   nullable?: boolean;
+  size?: Sizes;
 }
 
 export const FeedbackInputWidget: React.FC<FeedbackInputWidgetProps> = ({
@@ -22,6 +24,7 @@ export const FeedbackInputWidget: React.FC<FeedbackInputWidgetProps> = ({
   invalid,
   events,
   nullable = false,
+  size = Sizes.Medium,
 }) => {
   const eventHandler = useEventHandler();
 
@@ -116,6 +119,7 @@ export const FeedbackInputWidget: React.FC<FeedbackInputWidgetProps> = ({
         value={numericValue}
         onRate={handleChange}
         invalid={invalid}
+        size={size}
       />
     );
   }
@@ -127,6 +131,7 @@ export const FeedbackInputWidget: React.FC<FeedbackInputWidgetProps> = ({
         value={numericValue}
         onRate={handleChange}
         invalid={invalid}
+        size={size}
       />
     );
   }
@@ -138,6 +143,7 @@ export const FeedbackInputWidget: React.FC<FeedbackInputWidgetProps> = ({
         value={numericValue}
         onRate={handleChange}
         invalid={invalid}
+        size={size}
       />
     );
   }
