@@ -20,6 +20,7 @@ import CopyToClipboardButton from './CopyToClipboardButton';
 import { createPrismTheme } from '@/lib/ivy-prism-theme';
 import { textBlockClassMap, textContainerClass } from '@/lib/textBlockClassMap';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import { parseEmojis } from './custom-emojis/emojiFunctions';
 
 const SyntaxHighlighter = lazy(() =>
   import('react-syntax-highlighter').then(mod => ({ default: mod.Prism }))
@@ -415,7 +416,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
         rehypePlugins={plugins.rehypePlugins}
         urlTransform={urlTransform}
       >
-        {content}
+        {parseEmojis(content, 18)}
       </ReactMarkdown>
     </div>
   );
