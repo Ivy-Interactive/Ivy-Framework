@@ -416,7 +416,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
         rehypePlugins={plugins.rehypePlugins}
         urlTransform={urlTransform}
       >
-        {parseEmojis(content, 18)}
+        {parseEmojis(content, 16)}
       </ReactMarkdown>
     </div>
   );

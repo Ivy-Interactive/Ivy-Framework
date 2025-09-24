@@ -17,7 +17,7 @@ public class HelloApp : ViewBase
                    | Text.Block("Welcome to the fantastic world of Ivy. Let's build something amazing together!")
                    | nameState.ToInput(placeholder: "What is your name?")
                    | new Separator()
-                   | Text.Markdown("You'd be a hero to us if you could ⭐ us on [Github](https://github.com/Ivy-Interactive/Ivy-Framework)")
+                   | Text.Markdown("You'd be a hero to us if you could :ivy-branded-star: us on [Github](https://github.com/Ivy-Interactive/Ivy-Framework)")
                  )
                  .Width(Size.Units(120).Max(500)));
     }
