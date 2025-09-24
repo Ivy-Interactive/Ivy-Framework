@@ -834,82 +834,19 @@
   }
 }
 
-/* Browser autocomplete/history styling */
+/* Remove autofill background color */
 @layer base {
-  /* Webkit browsers autocomplete styling */
   input:-webkit-autofill,
   input:-webkit-autofill:hover,
   input:-webkit-autofill:focus,
   input:-webkit-autofill:active {
-    -webkit-box-shadow: 0 0 0 30px var(--background) inset !important;
+    -webkit-box-shadow: 0 0 0 1000px var(--background) inset !important;
     -webkit-text-fill-color: var(--foreground) !important;
-    transition: background-color 5000s ease-in-out 0s;
   }
-
-  /* Autocomplete dropdown styling */
-  input::-webkit-calendar-picker-indicator {
-    filter: var(--foreground-filter);
-  }
-
-  /* Datalist autocomplete styling */
-  datalist {
-    background: var(--background);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    color: var(--foreground);
-  }
-
-  /* Firefox autocomplete styling */
-  input:-moz-autofill {
-    background-color: var(--background) !important;
-    color: var(--foreground) !important;
-  }
-
-  /* Edge autocomplete styling */
-  input:-ms-input-placeholder {
-    color: var(--muted-foreground);
-  }
-
-  /* Autocomplete dropdown suggestions styling */
-  input::-webkit-list-button {
-    background: var(--background);
-    color: var(--foreground);
-  }
-
-  /* Style autocomplete suggestions */
-  input::-webkit-datetime-edit {
-    color: var(--foreground);
-  }
-
-  /* Ensure autocomplete dropdowns use theme colors */
 }
 
-/* Additional autocomplete styling for better theme support */
+/* Prevent dialog from getting focus rings when elements inside are focused */
 @layer components {
-  /* Override browser default autocomplete styling */
-  input[list]::-webkit-calendar-picker-indicator {
-    display: none;
-  }
-
-  /* Custom styling for autocomplete dropdowns */
-  input[list] {
-    background: var(--background);
-    color: var(--foreground);
-  }
-
-  /* Ensure autocomplete suggestions are visible in dark mode */
-  input[list] option {
-    background: var(--background);
-    color: var(--foreground);
-    padding: 0.5rem;
-  }
-
-  input[list] option:hover {
-    background: var(--accent);
-    color: var(--accent-foreground);
-  }
-
-  /* Prevent dialog from getting focus rings when elements inside are focused */
   [data-radix-dialog-content] {
     outline: none !important;
     box-shadow: none !important;
@@ -924,13 +861,4 @@
     outline: none !important;
     box-shadow: none !important;
   }
-}
-
-/* CSS variable for filter to invert colors in dark mode */
-:root {
-  --foreground-filter: none;
-}
-
-.dark {
-  --foreground-filter: invert(1);
 }
