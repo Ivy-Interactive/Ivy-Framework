@@ -3,7 +3,9 @@ import { emojiMap } from './emojiMap';
 export function parseEmojis(text: string, size: number = 24): string {
   const pattern = new RegExp(
     '(' +
-      Object.keys(emojiMap).map(k => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')) +
+      Object.keys(emojiMap)
+        .map(k => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+        .join('|') +
       ')',
     'g'
   );
