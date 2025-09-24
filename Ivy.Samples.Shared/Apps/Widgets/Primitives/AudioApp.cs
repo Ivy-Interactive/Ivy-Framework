@@ -36,34 +36,29 @@ public class AudioApp : SampleBase
         return Layout.Vertical()
             | Text.H2("Audio Widget Examples")
             | Text.P("Demonstrates various configurations of the Audio widget for playing audio content.")
-                .Color(Colors.Secondary)
             | Layout.Vertical().Gap(6)
                 | (new Card(
                     Layout.Vertical().Gap(4)
                     | Text.H4("Basic Audio Player")
-                    | Text.Small("Default audio player with standard browser controls.")
-                        .Color(Colors.Secondary)
+                    | Text.P("Default audio player with standard browser controls.")
                     | basicAudio
                 ).Title("Basic Usage"))
                 | (new Card(
                     Layout.Vertical().Gap(4)
                     | Text.H4("Looping Audio with Preload")
-                    | Text.Small("Audio player configured to loop continuously with auto preload.")
-                        .Color(Colors.Secondary)
+                    | Text.P("Audio player configured to loop continuously with auto preload.")
                     | customAudio
                 ).Title("Custom Configuration"))
                 | (new Card(
                     Layout.Vertical().Gap(4)
                     | Text.H4("Muted Autoplay Audio")
-                    | Text.Small("Muted audio that starts playing automatically and loops. Muted autoplay is more likely to be allowed by browsers.")
-                        .Color(Colors.Secondary)
+                    | Text.P("Muted audio that starts playing automatically and loops. Muted autoplay is more likely to be allowed by browsers.")
                     | mutedAudio
                 ).Title("Autoplay Example"))
                 | (new Card(
                     Layout.Vertical().Gap(4)
                     | Text.H4("Audio Without Controls")
-                    | Text.Small("Audio element without browser controls for programmatic control scenarios.")
-                        .Color(Colors.Secondary)
+                    | Text.P("Audio element without browser controls for programmatic control scenarios.")
                     | noControlsAudio
                     | new Button("Toggle Play/Pause", _ => client.Toast("In a real app, this would control the audio programmatically"))
                         .Variant(ButtonVariant.Outline)
@@ -71,8 +66,7 @@ public class AudioApp : SampleBase
                 | (new Card(
                     Layout.Vertical().Gap(4)
                     | Text.H4("Custom Sized Audio Player")
-                    | Text.Small("Audio player with custom width and height dimensions.")
-                        .Color(Colors.Secondary)
+                    | Text.P("Audio player with custom width and height dimensions.")
                     | customSizedAudio
                 ).Title("Custom Sizing"))
             | Layout.Vertical().Gap(4)
