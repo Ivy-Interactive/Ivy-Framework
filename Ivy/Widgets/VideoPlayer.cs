@@ -15,6 +15,7 @@ public record VideoPlayer : WidgetBase<VideoPlayer>
     /// <param name="controls">Whether playback controls should be displayed.</param>
     /// <param name="muted">Whether the video should be muted by default.</param>
     /// <param name="loop">Whether the video should loop continuously.</param>
+    /// <param name="poster">URL of an image to display before the video starts or while loading.</param>
     public VideoPlayer(
         string? source = null,
         bool autoplay = false,
