@@ -68,7 +68,7 @@ public class ConfigurationService : IHaveSecrets
 
 ## Database Connections with Built-in Secrets Declaration
 
-Database connections automatically declare their required secrets when generated through the Ivy CLI. This integration ensures that your database connection strings are automatically included in secrets validation.
+Database connection classes automatically declare their required secrets when generated through the Ivy CLI. This integration ensures that your database connection strings are automatically included in secrets validation.
 
 ### Generated Connection Classes
 
