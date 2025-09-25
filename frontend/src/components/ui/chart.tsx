@@ -311,7 +311,7 @@ const ChartLegendContent = React.forwardRef<
         <div
           key={`${String(item.dataKey)}-${String(item.value)}`}
           className={cn(
-            'flex items-center gap-1.5 [&>svg]:h-3 [&>svg]:w-3 [&>svg]:text-muted-foreground'
+            'flex items-center gap-1.5 py-1 px-1 flex-none [&>svg]:h-3 [&>svg]:w-3 [&>svg]:text-muted-foreground'
           )}
         >
           {itemConfig?.icon && !hideIcon ? (
@@ -324,7 +324,9 @@ const ChartLegendContent = React.forwardRef<
               }}
             />
           )}
-          <span className="text-muted-foreground">{labelText}</span>
+          <span className="text-muted-foreground whitespace-nowrap leading-normal">
+            {labelText}
+          </span>
         </div>
       );
     };
@@ -339,16 +341,18 @@ const ChartLegendContent = React.forwardRef<
         )}
       >
         {!many ? (
-          <div className="flex w-full items-center justify-center gap-4 flex-nowrap overflow-x-auto">
+          <div className="flex w-full items-center justify-center gap-x-4 gap-y-2 flex-wrap">
             {items.map(renderItem)}
           </div>
         ) : (
-          <div className="flex w-full flex-col gap-2">
-            <div className="flex w-full items-center justify-start gap-4 flex-nowrap overflow-x-auto">
-              {items.slice(0, half).map(renderItem)}
-            </div>
-            <div className="flex w-full items-center justify-end gap-4 flex-nowrap overflow-x-auto">
-              {items.slice(half).map(renderItem)}
+          <div className="w-full overflow-x-auto">
+            <div className="flex w-max flex-col gap-2">
+              <div className="flex items-center justify-start gap-x-4 flex-nowrap">
+                {items.slice(0, half).map(renderItem)}
+              </div>
+              <div className="flex items-center justify-start gap-x-4 flex-nowrap">
+                {items.slice(half).map(renderItem)}
+              </div>
             </div>
           </div>
         )}
