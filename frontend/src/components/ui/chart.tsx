@@ -1,5 +1,9 @@
 import * as React from 'react';
-import * as RechartsPrimitive from 'recharts';
+import {
+  ResponsiveContainer,
+  Tooltip as RechartsTooltip,
+  Legend as RechartsLegend,
+} from 'recharts';
 import type { Payload } from 'recharts/types/component/DefaultTooltipContent';
 
 import { cn } from '@/lib/utils';
@@ -37,9 +41,7 @@ const ChartContainer = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<'div'> & {
     config: ChartConfig;
-    children: React.ComponentProps<
-      typeof RechartsPrimitive.ResponsiveContainer
-    >['children'];
+    children: React.ComponentProps<typeof ResponsiveContainer>['children'];
   }
 >(({ id, className, children, config, ...props }, ref) => {
   const uniqueId = React.useId();
@@ -62,9 +64,9 @@ const ChartContainer = React.forwardRef<
         {...props}
       >
         <ChartStyle id={chartId} config={config} />
-        <RechartsPrimitive.ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width="100%" height="100%">
           {children}
-        </RechartsPrimitive.ResponsiveContainer>
+        </ResponsiveContainer>
       </div>
     </ChartContext.Provider>
   );
@@ -72,20 +74,16 @@ const ChartContainer = React.forwardRef<
 ChartContainer.displayName = 'Chart';
 
 const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
-  const colorConfig = Object.entries(config).filter(
-    ([, config]) => config.theme || config.color
+  const colorConfig = React.useMemo(
+    () => Object.entries(config).filter(([, cfg]) => cfg.theme || cfg.color),
+    [config]
   );
 
-  if (!colorConfig.length) {
-    return null;
-  }
-
-  return (
-    <style
-      dangerouslySetInnerHTML={{
-        __html: Object.entries(THEMES)
-          .map(
-            ([theme, prefix]) => `
+  const css = React.useMemo(() => {
+    if (!colorConfig.length) return '';
+    return Object.entries(THEMES)
+      .map(
+        ([theme, prefix]) => `
 ${prefix} [data-chart=${id}] {
 ${colorConfig
   .map(([key, itemConfig]) => {
@@ -94,21 +92,24 @@ ${colorConfig
       itemConfig.color;
     return color ? `  --color-${key}: ${color};` : null;
   })
+  .filter(Boolean)
   .join('\n')}
 }
 `
-          )
-          .join('\n'),
-      }}
-    />
-  );
+      )
+      .join('\n');
+  }, [colorConfig, id]);
+
+  if (!css) return null;
+
+  return <style dangerouslySetInnerHTML={{ __html: css }} />;
 };
 
-const ChartTooltip = RechartsPrimitive.Tooltip;
+const ChartTooltip = RechartsTooltip;
 
 const ChartTooltipContent = React.forwardRef<
   HTMLDivElement,
-  React.ComponentProps<typeof RechartsPrimitive.Tooltip> &
+  React.ComponentProps<typeof RechartsTooltip> &
     React.ComponentProps<'div'> & {
       active?: boolean;
       payload?: Payload<number, string>[];
@@ -266,7 +267,7 @@ const ChartTooltipContent = React.forwardRef<
 );
 ChartTooltipContent.displayName = 'ChartTooltip';
 
-const ChartLegend = RechartsPrimitive.Legend;
+const ChartLegend = RechartsLegend;
 
 const ChartLegendContent = React.forwardRef<
   HTMLDivElement,
