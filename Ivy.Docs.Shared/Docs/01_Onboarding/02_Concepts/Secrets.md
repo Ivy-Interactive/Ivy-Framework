@@ -1,4 +1,4 @@
-# Secrets Management
+# Secrets
 
 <Ingress>
 The Ivy Framework provides a comprehensive secrets management foundation that enables compile-time tracking of required application secrets, ensuring all necessary configuration is in place before deployment.
