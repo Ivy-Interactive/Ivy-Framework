@@ -39,8 +39,6 @@ export const DropDownMenuWidget: React.FC<DropDownMenuWidgetProps> = ({
   side = 'Bottom',
   alignOffset,
 }) => {
-  // Default padding values for consistent spacing
-  const sideOffset = 8;
   const eventHandler = useEventHandler();
   const [open, setOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -139,7 +137,7 @@ export const DropDownMenuWidget: React.FC<DropDownMenuWidgetProps> = ({
               )}
             </DropdownMenuSubTrigger>
             <DropdownMenuPortal>
-              <DropdownMenuSubContent sideOffset={sideOffset}>
+              <DropdownMenuSubContent className="m-2">
                 {renderMenuItems(item.children)}
               </DropdownMenuSubContent>
             </DropdownMenuPortal>
@@ -174,7 +172,7 @@ export const DropDownMenuWidget: React.FC<DropDownMenuWidgetProps> = ({
         side={
           camelCase(side) as 'top' | 'right' | 'bottom' | 'left' | undefined
         }
-        sideOffset={sideOffset}
+        className="m-2"
         alignOffset={alignOffset}
       >
         {slots.Header && <DropdownMenuLabel>{slots.Header}</DropdownMenuLabel>}
