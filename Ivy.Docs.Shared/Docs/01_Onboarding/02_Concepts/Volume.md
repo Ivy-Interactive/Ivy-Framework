@@ -68,8 +68,13 @@ Where:
 - `{YourAppName}` is automatically derived from your application's assembly name
 - `{pathParts}` are the path parts you provide to `GetAbsolutePath`
 
-### Using Volumes in Services
+## Examples
 
+<Details>
+<Summary>
+Using Volumes in Services
+</Summary>
+<Body>
 Inject and use the volume in your services:
 
 ```csharp
@@ -92,8 +97,14 @@ public class FileService(IVolume volume)
 }
 ```
 
-### Using Volumes in Views
+</Body>
+</Details>
 
+<Details>
+<Summary>
+Using Volumes in Views
+</Summary>
+<Body>
 Access volumes through dependency injection in your views:
 
 ```csharp
@@ -136,3 +147,6 @@ public class DataManagementView : ViewBase
     }
 }
 ```
+
+</Body>
+</Details>
