@@ -11,7 +11,11 @@ interface ImageWidgetProps {
 
 const getImageUrl = (url: string | undefined | null) => {
   if (!url) return '';
-  if (url.startsWith('http://') || url.startsWith('https://')) {
+  if (
+    url.startsWith('http://') ||
+    url.startsWith('https://') ||
+    url.startsWith('data:')
+  ) {
     return url;
   }
   return `${getIvyHost()}${url.startsWith('/') ? '' : '/'}${url}`;
