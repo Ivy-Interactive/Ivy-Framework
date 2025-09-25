@@ -94,7 +94,7 @@ public class DatabaseGenerator
                     }
                 }
             }
-            await dbContext.Database.EnsureCreatedAsync();
+            await dbContext.Database.MigrateAsync();
         }, "Creating Tables", verbose);
 
         if (!seedDatabase && !yesToAll)
