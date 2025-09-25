@@ -24,8 +24,6 @@ interface DropDownMenuWidgetProps {
   items: MenuItem[];
   align?: 'Start' | 'Center' | 'End';
   side?: 'Top' | 'Right' | 'Bottom' | 'Left';
-  sideOffset?: number;
-  subSideOffset?: number;
   alignOffset?: number;
   slots?: {
     Trigger?: React.ReactNode[];
@@ -39,10 +37,10 @@ export const DropDownMenuWidget: React.FC<DropDownMenuWidgetProps> = ({
   items,
   align = 'Start',
   side = 'Bottom',
-  sideOffset,
-  subSideOffset,
   alignOffset,
 }) => {
+  // Default padding values for consistent spacing
+  const sideOffset = 8;
   const eventHandler = useEventHandler();
   const [open, setOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -141,7 +139,7 @@ export const DropDownMenuWidget: React.FC<DropDownMenuWidgetProps> = ({
               )}
             </DropdownMenuSubTrigger>
             <DropdownMenuPortal>
-              <DropdownMenuSubContent sideOffset={subSideOffset}>
+              <DropdownMenuSubContent sideOffset={sideOffset}>
                 {renderMenuItems(item.children)}
               </DropdownMenuSubContent>
             </DropdownMenuPortal>

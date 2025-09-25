@@ -70,12 +70,6 @@ public record DropDownMenu : WidgetBase<DropDownMenu>
     /// <summary>Side where dropdown appears relative to trigger. Default is <see cref="SideOptions.Bottom"/>.</summary>
     [Prop] public SideOptions Side { get; set; } = SideOptions.Bottom;
 
-    /// <summary>Offset distance from trigger in side direction. Default is 4 pixels.</summary>
-    [Prop] public int SideOffset { get; set; } = 4;
-
-    /// <summary>Offset distance for submenu positioning. Default is 8 pixels.</summary>
-    [Prop] public int SubSideOffset { get; set; } = 8;
-
     /// <summary>Alignment relative to trigger. Default is <see cref="AlignOptions.Start"/>.</summary>
     [Prop] public AlignOptions Align { get; set; } = AlignOptions.Start;
 
@@ -128,18 +122,6 @@ public static class DropDownMenuExtensions
     public static DropDownMenu Side(this DropDownMenu dropDownMenu, DropDownMenu.SideOptions side)
     {
         return dropDownMenu with { Side = side };
-    }
-
-    /// <summary>Sets side offset for positioning.</summary>
-    public static DropDownMenu SideOffset(this DropDownMenu dropDownMenu, int offset)
-    {
-        return dropDownMenu with { SideOffset = offset };
-    }
-
-    /// <summary>Sets submenu side offset for positioning.</summary>
-    public static DropDownMenu SubSideOffset(this DropDownMenu dropDownMenu, int offset)
-    {
-        return dropDownMenu with { SubSideOffset = offset };
     }
 
     /// <summary>Sets dropdown to appear above trigger.</summary>
