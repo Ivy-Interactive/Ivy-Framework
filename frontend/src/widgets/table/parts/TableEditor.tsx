@@ -25,10 +25,19 @@ export const TableEditor: React.FC<TableEditorProps> = ({
     isLoading,
     hasMore,
     editable,
+    config,
     loadMoreData,
     handleColumnResize,
     handleSort,
   } = useTable();
+
+  const {
+    allowColumnReordering,
+    allowColumnResizing,
+    allowCopySelection,
+    allowSorting,
+    freezeColumns,
+  } = config;
 
   const gridRef = useRef<DataEditorRef>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -129,12 +138,15 @@ export const TableEditor: React.FC<TableEditorProps> = ({
   // Handle column header click for sorting
   const handleHeaderMenuClick = useCallback(
     (col: number) => {
+      // Only handle sorting if it's enabled
+      if (!allowSorting) return;
+
       const columnName = columns[col]?.name;
       if (columnName) {
         handleSort(columnName);
       }
     },
-    [columns, handleSort]
+    [columns, handleSort, allowSorting]
   );
 
   // Convert our columns to GridColumn format with current widths
@@ -179,20 +191,22 @@ export const TableEditor: React.FC<TableEditorProps> = ({
         columns={gridColumns}
         rows={visibleRows}
         getCellContent={getCellContent}
-        onColumnResize={handleColumnResize}
+        onColumnResize={allowColumnResizing ? handleColumnResize : undefined}
         onVisibleRegionChanged={handleVisibleRegionChanged}
-        onHeaderClicked={handleHeaderMenuClick}
+        onHeaderClicked={allowSorting ? handleHeaderMenuClick : undefined}
         smoothScrollX={true}
         smoothScrollY={true}
         theme={tableTheme}
         rowHeight={38}
         headerHeight={32}
-        freezeColumns={1}
-        getCellsForSelection={true}
+        freezeColumns={freezeColumns ?? 0}
+        getCellsForSelection={(allowCopySelection ?? true) ? true : undefined}
         keybindings={{ search: false }}
         columnSelect="none"
         rangeSelect="rect"
         width={containerWidth}
+        // TODO: inmplement handler for onColumnMoved
+        onColumnMoved={allowColumnReordering ? () => {} : undefined}
       />
     </div>
   );

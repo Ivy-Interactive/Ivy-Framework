@@ -8,7 +8,12 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { DataColumn, DataRow, DataTableConnection } from '../types/types';
+import {
+  DataColumn,
+  DataRow,
+  DataTableConfiguration,
+  DataTableConnection,
+} from '../types/types';
 import { fetchTableData } from '../utils/tableDataFetcher';
 
 interface TableContextType {
@@ -22,6 +27,7 @@ interface TableContextType {
   error: string | null;
   editable: boolean;
   connection: DataTableConnection;
+  config: DataTableConfiguration;
   activeFilter: Filter | null;
   activeSort: SortOrder[] | null;
 
@@ -37,12 +43,14 @@ const TableContext = createContext<TableContextType | undefined>(undefined);
 interface TableProviderProps {
   children: React.ReactNode;
   connection: DataTableConnection;
+  config: DataTableConfiguration;
   editable?: boolean;
 }
 
 export const TableProvider: React.FC<TableProviderProps> = ({
   children,
   connection,
+  config,
   editable = false,
 }) => {
   const [data, setData] = useState<DataRow[]>([]);
@@ -58,6 +66,8 @@ export const TableProvider: React.FC<TableProviderProps> = ({
   const loadingRef = useRef(false);
   const currentRowCountRef = useRef(0);
   const batchSize = 20;
+
+  const { allowColumnResizing, allowSorting } = config;
 
   // Reset row count and column widths when connection changes
   useEffect(() => {
@@ -158,6 +168,9 @@ export const TableProvider: React.FC<TableProviderProps> = ({
   // Handle column resize
   const handleColumnResize = useCallback(
     (column: GridColumn, newSize: number) => {
+      // Check if column resizing is allowed
+      if (!allowColumnResizing) return;
+
       const gridColumns: GridColumn[] = columns.map((col, index) => ({
         title: col.name,
         width: columnWidths[index.toString()] || col.width,
@@ -173,29 +186,35 @@ export const TableProvider: React.FC<TableProviderProps> = ({
         }));
       }
     },
-    [columns, columnWidths]
+    [columns, columnWidths, allowColumnResizing]
   );
 
   // Handle sort
-  const handleSort = useCallback((columnName: string) => {
-    setActiveSort(prevSort => {
-      // Check if we're already sorting by this column
-      const existingSort = prevSort?.find(sort => sort.column === columnName);
+  const handleSort = useCallback(
+    (columnName: string) => {
+      // Check if sorting is allowed
+      if (!allowSorting) return;
 
-      if (existingSort) {
-        // Toggle direction: ASC -> DESC -> remove sort
-        if (existingSort.direction === 'ASC') {
-          return [{ column: columnName, direction: 'DESC' as const }];
+      setActiveSort(prevSort => {
+        // Check if we're already sorting by this column
+        const existingSort = prevSort?.find(sort => sort.column === columnName);
+
+        if (existingSort) {
+          // Toggle direction: ASC -> DESC -> remove sort
+          if (existingSort.direction === 'ASC') {
+            return [{ column: columnName, direction: 'DESC' as const }];
+          } else {
+            // Remove sort entirely
+            return null;
+          }
         } else {
-          // Remove sort entirely
-          return null;
+          // Replace current sort with new column (ASC by default)
+          return [{ column: columnName, direction: 'ASC' }];
         }
-      } else {
-        // Replace current sort with new column (ASC by default)
-        return [{ column: columnName, direction: 'ASC' }];
-      }
-    });
-  }, []);
+      });
+    },
+    [allowSorting]
+  );
 
   const value: TableContextType = {
     data,
@@ -207,6 +226,7 @@ export const TableProvider: React.FC<TableProviderProps> = ({
     error,
     editable,
     connection,
+    config,
     activeFilter,
     activeSort,
     loadMoreData,
