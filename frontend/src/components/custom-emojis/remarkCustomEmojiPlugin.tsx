@@ -1,15 +1,16 @@
 import { emojiMap } from './emojiMap';
+import { Node, Parent, Text } from 'unist';
 import { visit } from 'unist-util-visit';
 
 export function remarkCustomEmojiPlugin() {
-  return tree => {
-    visit(tree, 'text', (node, index, parent) => {
+  return (tree: Node) => {
+    visit(tree, 'text', (node: Text, index: number, parent: Parent) => {
       if (!parent || !node.value) return;
 
       const parts = node.value.split(/(:[a-zA-Z0-9-_]+:)/g);
       if (parts.length === 1) return;
 
-      const newNodes = parts.map(part => {
+      const newNodes = parts.map((part: string) => {
         if (emojiMap[part]) {
           return {
             type: 'emoji',
@@ -28,7 +29,7 @@ export function remarkCustomEmojiPlugin() {
   };
 }
 
-export function CustomEmoji({ name }) {
+export function CustomEmoji({ name }: { name: string }) {
   const { src } = emojiMap[name];
   return (
     <img

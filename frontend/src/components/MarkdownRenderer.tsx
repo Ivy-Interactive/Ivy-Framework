@@ -7,7 +7,7 @@ import React, {
   useState,
 } from 'react';
 import ErrorBoundary from './ErrorBoundary';
-import ReactMarkdown, { defaultUrlTransform } from 'react-markdown';
+import ReactMarkdown, { defaultUrlTransform, Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkGemoji from 'remark-gemoji';
 import remarkMath from 'remark-math';
@@ -402,6 +402,15 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
     [staticComponents, codeComponent, linkComponent]
   );
 
+  type MarkdownComponents = Components & {
+    emoji?: React.FC<{ name: string }>;
+  };
+
+  const componentsParams: MarkdownComponents = {
+    ...(components as React.ComponentProps<typeof ReactMarkdown>['components']),
+    emoji: ({ name }: { name: string }) => <CustomEmoji name={name} />,
+  };
+
   const urlTransform = useCallback((url: string) => {
     if (url.startsWith('app://')) {
       return url;
@@ -413,10 +422,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
     <div className={textContainerClass}>
       <ReactMarkdown
         components={{
-          ...(components as React.ComponentProps<
-            typeof ReactMarkdown
-          >['components']),
-          emoji: ({ name }) => <CustomEmoji name={name as string} />,
+          ...componentsParams,
         }}
         remarkPlugins={plugins.remarkPlugins}
         rehypePlugins={plugins.rehypePlugins}
