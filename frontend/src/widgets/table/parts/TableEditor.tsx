@@ -154,7 +154,7 @@ export const TableEditor: React.FC<TableEditorProps> = ({
       const remainingWidth = containerWidth - totalWidthOfOtherColumns;
       return {
         title: col.name,
-        width: Math.max(baseWidth, remainingWidth),
+        width: Math.max(baseWidth, remainingWidth) - 10,
       };
     }
 
