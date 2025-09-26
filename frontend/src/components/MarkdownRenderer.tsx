@@ -401,13 +401,16 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
     }),
     [staticComponents, codeComponent, linkComponent]
   );
-
+  // This is usefull to declare emoji as a new type of valid markdown component
   type MarkdownComponents = Components & {
     emoji?: React.FC<{ name: string }>;
   };
 
+  // add the components that use memo and the ones that don't in a single variable of the extended type we just created
   const componentsParams: MarkdownComponents = {
     ...(components as React.ComponentProps<typeof ReactMarkdown>['components']),
+
+    // ReactMarkdown will execute this when he finds an image node with hName emoji
     emoji: ({ name }: { name: string }) => <CustomEmoji name={name} />,
   };
 
