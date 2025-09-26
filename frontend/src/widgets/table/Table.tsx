@@ -23,7 +23,6 @@ const TableLayout: React.FC<TableLayoutProps> = ({ children }) => {
 
   return (
     <div className={tableStyles.table.container}>
-      <h1 className={tableStyles.table.heading}>Dynamic Data Grid with gRPC</h1>
       {showTableEditor ? children : <Loading />}
     </div>
   );

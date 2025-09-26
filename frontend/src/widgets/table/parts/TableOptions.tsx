@@ -1,11 +1,20 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useTable } from '../context/TableContext';
 import { tableStyles } from '../styles/style';
 import { Header } from './TableHeader';
 import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 export const TableOptions: React.FC = () => {
   const { columns } = useTable();
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   if (columns.length === 0) {
     return null;
@@ -20,7 +29,7 @@ export const TableOptions: React.FC = () => {
           </div>
 
           <div className={tableStyles.tableOptions.rightSection}>
-            <Button variant="default">
+            <Button variant="default" onClick={() => setIsFilterOpen(true)}>
               <svg
                 className="w-4 h-4 mr-2"
                 fill="none"
@@ -39,6 +48,22 @@ export const TableOptions: React.FC = () => {
           </div>
         </div>
       </div>
+      <Dialog open={isFilterOpen} onOpenChange={setIsFilterOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Filter options</DialogTitle>
+            <DialogDescription>
+              Configure filters for the current table.{` `}
+              This feature is coming soon.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="secondary" onClick={() => setIsFilterOpen(false)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* TableFilter would go here when filter functionality is implemented */}
     </>

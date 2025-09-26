@@ -13,7 +13,7 @@ export const tableStyles = {
       border: '1px solid var(--border)',
       borderBottom: 'none',
       borderRadius: 'var(--radius) var(--radius) 0 0',
-      backgroundColor: 'var(--muted)',
+
       borderBottomColor: 'var(--border)',
       borderBottomWidth: '1px',
       borderBottomStyle: 'solid',
@@ -25,9 +25,8 @@ export const tableStyles = {
 
   // TableHeader component
   tableHeader: {
-    container:
-      'text-descriptive text-[color:var(--primary-foreground)] flex items-center gap-4',
-    text: 'text-descriptive text-[color:var(--primary-foreground)]',
+    container: 'text-descriptive flex items-center gap-4',
+    text: 'text-descriptive text-[color:var(--secondary)]',
     accent: 'text-[color:var(--primary)]',
     muted: 'text-[color:var(--muted-foreground)]',
     spinner: {
