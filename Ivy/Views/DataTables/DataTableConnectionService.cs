@@ -1,6 +1,6 @@
 using System.Reactive.Disposables;
 
-namespace Ivy.DataTables;
+namespace Ivy.Views.DataTables;
 
 public interface IDataTableService
 {

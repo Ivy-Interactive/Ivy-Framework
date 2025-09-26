@@ -1,7 +1,7 @@
 using Ivy.Core;
 using Ivy.Core.Hooks;
 
-namespace Ivy.DataTables;
+namespace Ivy.Views.DataTables;
 
 public static class UseDataTableExtensions
 {

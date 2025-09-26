@@ -5,7 +5,7 @@ using Ivy.Core.Hooks;
 using Ivy.Helpers;
 using Ivy.Shared;
 
-namespace Ivy.DataTables;
+namespace Ivy.Views.DataTables;
 
 public class DataTableBuilder<TModel> : ViewBase, IStateless
 {
