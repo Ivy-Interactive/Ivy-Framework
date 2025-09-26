@@ -277,6 +277,7 @@ public class QueryProcessor(ILogger<QueryProcessor>? logger = null, IDistributed
         return condition.Function.ToLowerInvariant() switch
         {
             "contains" => BuildContainsExpression(property, condition.Args),
+            "notcontains" => BuildNotContainsExpression(property, condition.Args),
             "equals" => BuildEqualsExpression(property, condition.Args),
             "notequals" => BuildNotEqualsExpression(property, condition.Args),
             "greaterthan" => BuildGreaterThanExpression(property, condition.Args),
@@ -285,6 +286,11 @@ public class QueryProcessor(ILogger<QueryProcessor>? logger = null, IDistributed
             "lessthanorequal" => BuildLessThanOrEqualExpression(property, condition.Args),
             "startswith" => BuildStartsWithExpression(property, condition.Args),
             "endswith" => BuildEndsWithExpression(property, condition.Args),
+            "blank" => BuildBlankExpression(property),
+            "notblank" => BuildNotBlankExpression(property),
+            "inrange" => BuildInRangeExpression(property, condition.Args),
+            "before" => BuildLessThanExpression(property, condition.Args),
+            "after" => BuildGreaterThanExpression(property, condition.Args),
             _ => throw new NotSupportedException($"Filter function '{condition.Function}' is not supported")
         };
     }
@@ -439,7 +445,7 @@ public class QueryProcessor(ILogger<QueryProcessor>? logger = null, IDistributed
         var value = ExtractTypedValue(arg, property.Type);
         if (value == null) return null;
 
-        var valueExpression = System.Linq.Expressions.Expression.Constant(value);
+        var valueExpression = System.Linq.Expressions.Expression.Constant(value, property.Type);
         return System.Linq.Expressions.Expression.GreaterThan(property, valueExpression);
     }
 
@@ -451,7 +457,7 @@ public class QueryProcessor(ILogger<QueryProcessor>? logger = null, IDistributed
         var value = ExtractTypedValue(arg, property.Type);
         if (value == null) return null;
 
-        var valueExpression = System.Linq.Expressions.Expression.Constant(value);
+        var valueExpression = System.Linq.Expressions.Expression.Constant(value, property.Type);
         return System.Linq.Expressions.Expression.LessThan(property, valueExpression);
     }
 
@@ -544,7 +550,7 @@ public class QueryProcessor(ILogger<QueryProcessor>? logger = null, IDistributed
         var value = ExtractTypedValue(arg, property.Type);
         if (value == null) return null;
 
-        var valueExpression = System.Linq.Expressions.Expression.Constant(value);
+        var valueExpression = System.Linq.Expressions.Expression.Constant(value, property.Type);
         return System.Linq.Expressions.Expression.GreaterThanOrEqual(property, valueExpression);
     }
 
@@ -556,8 +562,108 @@ public class QueryProcessor(ILogger<QueryProcessor>? logger = null, IDistributed
         var value = ExtractTypedValue(arg, property.Type);
         if (value == null) return null;
 
-        var valueExpression = System.Linq.Expressions.Expression.Constant(value);
+        var valueExpression = System.Linq.Expressions.Expression.Constant(value, property.Type);
         return System.Linq.Expressions.Expression.LessThanOrEqual(property, valueExpression);
+    }
+
+    private System.Linq.Expressions.Expression? BuildNotContainsExpression(System.Linq.Expressions.MemberExpression property, IEnumerable<Google.Protobuf.WellKnownTypes.Any> args)
+    {
+        // Build the contains expression and negate it
+        var containsExpression = BuildContainsExpression(property, args);
+        return containsExpression != null
+            ? System.Linq.Expressions.Expression.Not(containsExpression)
+            : null;
+    }
+
+    private System.Linq.Expressions.Expression? BuildBlankExpression(System.Linq.Expressions.MemberExpression property)
+    {
+        try
+        {
+            logger?.LogDebug("Building blank expression for property {PropertyName} of type {PropertyType}", property.Member.Name, property.Type);
+
+            var underlyingType = Nullable.GetUnderlyingType(property.Type);
+
+            if (property.Type == typeof(string))
+            {
+                // For strings: property == null || property == ""
+                var nullCheck = System.Linq.Expressions.Expression.Equal(
+                    property,
+                    System.Linq.Expressions.Expression.Constant(null, typeof(string))
+                );
+
+                var emptyCheck = System.Linq.Expressions.Expression.Equal(
+                    property,
+                    System.Linq.Expressions.Expression.Constant(string.Empty)
+                );
+
+                return System.Linq.Expressions.Expression.OrElse(nullCheck, emptyCheck);
+            }
+            else if (underlyingType != null)
+            {
+                // For nullable types: property == null
+                return System.Linq.Expressions.Expression.Equal(
+                    property,
+                    System.Linq.Expressions.Expression.Constant(null, property.Type)
+                );
+            }
+            else
+            {
+                // For non-nullable value types, "blank" doesn't make sense, but we'll return false
+                return System.Linq.Expressions.Expression.Constant(false);
+            }
+        }
+        catch (Exception ex)
+        {
+            logger?.LogError(ex, "Error building blank expression");
+            throw;
+        }
+    }
+
+    private System.Linq.Expressions.Expression? BuildNotBlankExpression(System.Linq.Expressions.MemberExpression property)
+    {
+        // Build the blank expression and negate it
+        var blankExpression = BuildBlankExpression(property);
+        return blankExpression != null
+            ? System.Linq.Expressions.Expression.Not(blankExpression)
+            : null;
+    }
+
+    private System.Linq.Expressions.Expression? BuildInRangeExpression(System.Linq.Expressions.MemberExpression property, IEnumerable<Google.Protobuf.WellKnownTypes.Any> args)
+    {
+        try
+        {
+            logger?.LogDebug("Building in-range expression for property {PropertyName} of type {PropertyType}", property.Member.Name, property.Type);
+
+            var argsList = args.ToList();
+            if (argsList.Count < 2)
+            {
+                logger?.LogWarning("InRange requires 2 arguments, got {Count}", argsList.Count);
+                return null;
+            }
+
+            var lowerBound = ExtractTypedValue(argsList[0], property.Type);
+            var upperBound = ExtractTypedValue(argsList[1], property.Type);
+
+            if (lowerBound == null || upperBound == null)
+            {
+                logger?.LogWarning("Failed to extract range bounds");
+                return null;
+            }
+
+            // Create inclusive range: property >= lowerBound && property <= upperBound
+            var lowerExpression = System.Linq.Expressions.Expression.Constant(lowerBound, property.Type);
+            var upperExpression = System.Linq.Expressions.Expression.Constant(upperBound, property.Type);
+
+            var greaterThanOrEqual = System.Linq.Expressions.Expression.GreaterThanOrEqual(property, lowerExpression);
+            var lessThanOrEqual = System.Linq.Expressions.Expression.LessThanOrEqual(property, upperExpression);
+
+            return System.Linq.Expressions.Expression.AndAlso(greaterThanOrEqual, lessThanOrEqual);
+        }
+        catch (Exception ex)
+        {
+            logger?.LogError(ex, "Error building in-range expression");
+            throw;
+        }
     }
 
     private string? ExtractStringValue(Google.Protobuf.WellKnownTypes.Any arg)
@@ -631,7 +737,7 @@ public class QueryProcessor(ILogger<QueryProcessor>? logger = null, IDistributed
             {
                 var value = arg.Unpack<Google.Protobuf.WellKnownTypes.DoubleValue>().Value;
                 if (underlyingType == typeof(decimal))
-                    return Convert.ToDecimal(value);
+                    return (decimal)value;  // Direct cast instead of Convert.ToDecimal
                 if (underlyingType == typeof(float))
                     return Convert.ToSingle(value);
                 return Convert.ChangeType(value, underlyingType);
@@ -658,7 +764,7 @@ public class QueryProcessor(ILogger<QueryProcessor>? logger = null, IDistributed
                 SystemType t when t == typeof(float) => System.Text.Json.JsonSerializer.Deserialize<float>(jsonValue),
                 SystemType t when t == typeof(bool) => System.Text.Json.JsonSerializer.Deserialize<bool>(jsonValue),
                 SystemType t when t == typeof(DateTime) => System.Text.Json.JsonSerializer.Deserialize<DateTime>(jsonValue),
-                SystemType t when t == typeof(decimal) => System.Text.Json.JsonSerializer.Deserialize<decimal>(jsonValue),
+                SystemType t when t == typeof(decimal) => (decimal)System.Text.Json.JsonSerializer.Deserialize<double>(jsonValue),
                 _ => System.Text.Json.JsonSerializer.Deserialize<string>(jsonValue)
             };
         }

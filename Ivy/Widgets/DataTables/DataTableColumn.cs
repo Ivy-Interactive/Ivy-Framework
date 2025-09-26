@@ -7,7 +7,7 @@ public class DataTableColumn
 {
     public required string Name { get; set; }
     public required string Header { get; set; }
-    public required DataTypeHint DataTypeHint { get; set; }
+    public required ColType ColType { get; set; }
     public string? Group { get; set; }
     public Size? Width { get; set; }
     public bool Hidden { get; set; } = false;
@@ -28,11 +28,11 @@ public enum SortDirection
     None
 }
 
-public enum DataTypeHint
+public enum ColType
 {
     Number,
-    String,
-    Bool,
+    Text,
+    Boolean,
     Date,
     DateTime
 }

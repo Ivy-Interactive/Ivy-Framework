@@ -31,51 +31,51 @@ public class DataTableBuilder<TModel> : ViewBase, IStateless
     /// <summary>
     /// Determines the appropriate DataTypeHint based on the .NET type
     /// </summary>
-    private static Ivy.DataTypeHint GetDataTypeHint(Type type)
+    private static Ivy.ColType GetDataTypeHint(Type type)
     {
         var underlyingType = Nullable.GetUnderlyingType(type) ?? type;
 
         // String types
         if (underlyingType == typeof(string) || underlyingType == typeof(char))
-            return Ivy.DataTypeHint.String;
+            return Ivy.ColType.Text;
 
         // Numeric types - integers
         if (underlyingType == typeof(int) || underlyingType == typeof(long) ||
             underlyingType == typeof(short) || underlyingType == typeof(byte) ||
             underlyingType == typeof(uint) || underlyingType == typeof(ulong) ||
             underlyingType == typeof(ushort) || underlyingType == typeof(sbyte))
-            return Ivy.DataTypeHint.Number;
+            return Ivy.ColType.Number;
 
         // Numeric types - floating point
         if (underlyingType == typeof(decimal) || underlyingType == typeof(double) ||
             underlyingType == typeof(float))
-            return Ivy.DataTypeHint.Number;
+            return Ivy.ColType.Number;
 
         // Boolean
         if (underlyingType == typeof(bool))
-            return Ivy.DataTypeHint.Bool;
+            return Ivy.ColType.Boolean;
 
         // Date and time types
         if (underlyingType == typeof(DateTime) || underlyingType == typeof(DateTimeOffset))
-            return Ivy.DataTypeHint.DateTime;
+            return Ivy.ColType.DateTime;
 
         if (underlyingType == typeof(DateOnly))
-            return Ivy.DataTypeHint.Date;
+            return Ivy.ColType.Date;
 
         // TimeSpan should be treated as String since there's no Time hint
         if (underlyingType == typeof(TimeSpan) || underlyingType == typeof(TimeOnly))
-            return Ivy.DataTypeHint.String;
+            return Ivy.ColType.Text;
 
         // Other common types that should be treated as strings
         if (underlyingType == typeof(Guid) || underlyingType.IsEnum)
-            return Ivy.DataTypeHint.String;
+            return Ivy.ColType.Text;
 
         // Arrays and collections should be treated as strings (will likely be JSON serialized)
         if (underlyingType.IsArray || typeof(System.Collections.IEnumerable).IsAssignableFrom(underlyingType))
-            return Ivy.DataTypeHint.String;
+            return Ivy.ColType.Text;
 
         // Default fallback for unknown types
-        return Ivy.DataTypeHint.String;
+        return Ivy.ColType.Text;
     }
 
     private void _Scaffold()
@@ -115,7 +115,7 @@ public class DataTableBuilder<TModel> : ViewBase, IStateless
                 {
                     Name = field.Name,
                     Header = Utils.LabelFor(field.Name, field.Type) ?? field.Name,
-                    DataTypeHint = GetDataTypeHint(field.Type),
+                    ColType = GetDataTypeHint(field.Type),
                     Align = align,
                     Order = order++
                 },
@@ -212,10 +212,10 @@ public class DataTableBuilder<TModel> : ViewBase, IStateless
         return this;
     }
 
-    public DataTableBuilder<TModel> DataTypeHint(Expression<Func<TModel, object>> field, Ivy.DataTypeHint dataTypeHint)
+    public DataTableBuilder<TModel> DataTypeHint(Expression<Func<TModel, object>> field, Ivy.ColType colType)
     {
         var column = GetColumn(field);
-        column.Column.DataTypeHint = dataTypeHint;
+        column.Column.ColType = colType;
         return this;
     }
 
