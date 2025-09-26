@@ -1,11 +1,7 @@
-using System.Reactive.Disposables;
 using Grpc.Core;
 using IvyDataTables.Api.Protos;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.DependencyInjection;
 
-namespace Ivy.DataTables;
+namespace Ivy.Views.DataTables;
 
 public class DataTableService(IQueryableRegistry queryableRegistry) : TableService.TableServiceBase
 {

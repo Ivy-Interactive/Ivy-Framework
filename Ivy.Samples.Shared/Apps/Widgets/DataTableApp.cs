@@ -1,6 +1,6 @@
-using Ivy.DataTables;
 using Ivy.Samples.Shared.Apps;
 using Ivy.Shared;
+using Ivy.Views.DataTables;
 
 namespace Ivy.Samples.Apps.Widgets;
 

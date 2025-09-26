@@ -7,9 +7,9 @@ using Ivy.Auth;
 using Ivy.Chrome;
 using Ivy.Connections;
 using Ivy.Core;
-using Ivy.DataTables;
 using Ivy.Themes;
 using Ivy.Views;
+using Ivy.Views.DataTables;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http; //do not remove - used in RELEASE
@@ -436,7 +436,7 @@ public class Server
         app.MapControllers();
         app.MapHub<AppHub>("/messages");
         app.MapHealthChecks("/health");
-        app.MapGrpcService<Ivy.DataTables.DataTableService>().EnableGrpcWeb();
+        app.MapGrpcService<DataTableService>().EnableGrpcWeb();
 
         if (_useHotReload)
         {

@@ -1,4 +1,4 @@
-namespace Ivy.DataTables;
+namespace Ivy.Views.DataTables;
 
 public static class TableExtensions
 {

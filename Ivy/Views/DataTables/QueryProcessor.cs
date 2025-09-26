@@ -1,14 +1,12 @@
 using System.Reflection;
 using Apache.Arrow;
-using Apache.Arrow.Memory;
-using Apache.Arrow.Types;
 using Apache.Arrow.Ipc;
-using Google.Protobuf.WellKnownTypes;
+using Apache.Arrow.Types;
+using IvyDataTables.Api.Protos;
 using ArrowField = Apache.Arrow.Field;
 using SystemType = System.Type;
-using IvyDataTables.Api.Protos;
 
-namespace Ivy.DataTables;
+namespace Ivy.Views.DataTables;
 
 /// <summary>
 /// Processes table queries by applying sorting and pagination to IQueryable data sources,

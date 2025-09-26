@@ -1,8 +1,7 @@
 using Ivy.Core;
-using Ivy.Core.Hooks;
 using Ivy.Shared;
 
-namespace Ivy.DataTables;
+namespace Ivy.Views.DataTables;
 
 public class DataTableView(IQueryable queryable, Size? width, Size? height, DataTableColumn[] columns, DataTableConfiguration configuration) : ViewBase
 {
