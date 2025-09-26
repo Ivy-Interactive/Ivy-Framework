@@ -130,9 +130,38 @@ public class CodeInputApp : SampleBase
                | null!
             ;
 
+        var sizeGrid = Layout.Grid().Columns(4)
+               | null!
+               | Text.InlineCode("Small")
+               | Text.InlineCode("Medium")
+               | Text.InlineCode("Large")
+
+               | Text.InlineCode("C#")
+               | csharpCode.ToCodeInput().Language(Languages.Csharp).Small()
+               | csharpCode.ToCodeInput().Language(Languages.Csharp)
+               | csharpCode.ToCodeInput().Language(Languages.Csharp).Large()
+
+               | Text.InlineCode("JSON")
+               | jsonCode.ToCodeInput().Language(Languages.Json).Small()
+               | jsonCode.ToCodeInput().Language(Languages.Json)
+               | jsonCode.ToCodeInput().Language(Languages.Json).Large()
+
+               | Text.InlineCode("SQL")
+               | sqlCode.ToCodeInput().Language(Languages.Sql).Small()
+               | sqlCode.ToCodeInput().Language(Languages.Sql)
+               | sqlCode.ToCodeInput().Language(Languages.Sql).Large()
+
+               | Text.InlineCode("HTML")
+               | htmlCode.ToCodeInput().Language(Languages.Html).Small()
+               | htmlCode.ToCodeInput().Language(Languages.Html)
+               | htmlCode.ToCodeInput().Language(Languages.Html).Large()
+            ;
+
         var dataBinding = CreateStringTypeTests();
 
         return Layout.Vertical()
+               | Text.H2("Sizes")
+               | sizeGrid
                | Text.H1("CodeInput")
                | Text.H2("Variants")
                | firstGrid

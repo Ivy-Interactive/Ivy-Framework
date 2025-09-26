@@ -24,6 +24,7 @@ import { createIvyCodeTheme } from './theme';
 import { Extension } from '@codemirror/state';
 import { EditorView, Decoration, DecorationSet } from '@codemirror/view';
 import { StateField, StateEffect, RangeSetBuilder } from '@codemirror/state';
+import { Sizes } from '@/types/sizes';
 
 interface CodeInputWidgetProps {
   id: string;
@@ -36,6 +37,7 @@ interface CodeInputWidgetProps {
   events: string[];
   width?: string;
   height?: string;
+  size?: Sizes;
 }
 
 const languageExtensions = {
@@ -63,6 +65,7 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
   showCopyButton = false,
   width,
   height,
+  size = Sizes.Medium,
   events,
 }) => {
   const eventHandler = useEventHandler();
@@ -165,7 +168,7 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
   }, []);
 
   // Create theme and selection extension once and reuse them
-  const themeExtension = useMemo(() => createIvyCodeTheme(), []);
+  const themeExtension = useMemo(() => createIvyCodeTheme(size), [size]);
   const selectionExtension = useMemo(
     () => createSelectionExtension(),
     [createSelectionExtension]
