@@ -1,4 +1,5 @@
 using System.Reactive.Disposables;
+using Microsoft.Extensions.Logging;
 
 namespace Ivy.Views.DataTables;
 
@@ -7,11 +8,11 @@ public interface IDataTableService
     (IDisposable cleanup, DataTableConnection connection) AddQueryable(IQueryable queryable);
 }
 
-public class DataTableConnectionService(IQueryableRegistry queryableRegistry, ServerArgs serverArgs, string connectionId) : IDataTableService
+public class DataTableConnectionService(IQueryableRegistry queryableRegistry, ServerArgs serverArgs, string connectionId, ILogger<DataTableConnectionService>? logger = null) : IDataTableService
 {
     public (IDisposable cleanup, DataTableConnection connection) AddQueryable(IQueryable queryable)
     {
-        Console.WriteLine($"Adding queryable with connectionId: {connectionId}");
+        logger?.LogInformation("Adding queryable with connectionId: {ConnectionId}", connectionId);
         var sourceId = queryableRegistry.RegisterQueryable(queryable);
 
         var cleanup = Disposable.Create(() =>

@@ -3,6 +3,7 @@ using Apache.Arrow;
 using Apache.Arrow.Ipc;
 using Apache.Arrow.Types;
 using IvyDataTables.Api.Protos;
+using Microsoft.Extensions.Logging;
 using ArrowField = Apache.Arrow.Field;
 using SystemType = System.Type;
 
@@ -21,22 +22,22 @@ namespace Ivy.Views.DataTables;
 /// The processor works with any IQueryable&lt;T&gt; data source and returns serialized Arrow data
 /// that can be efficiently transmitted and processed by client applications.
 /// </remarks>
-public class QueryProcessor
+public class QueryProcessor(ILogger<QueryProcessor>? logger = null)
 {
     public byte[] ProcessQuery(IQueryable queryable, TableQuery query)
     {
         try
         {
-            Console.WriteLine($"QueryProcessor: Processing query with filter: {query.Filter != null}");
+            logger?.LogInformation("Processing query with filter: {HasFilter}", query.Filter != null);
 
             var processedQuery = queryable;
 
             // Apply filtering
             if (query.Filter != null)
             {
-                Console.WriteLine($"QueryProcessor: Applying filter");
+                logger?.LogDebug("Applying filter");
                 processedQuery = ApplyFilter(processedQuery, query.Filter);
-                Console.WriteLine($"QueryProcessor: Filter applied successfully");
+                logger?.LogDebug("Filter applied successfully");
             }
 
             // Apply sorting
@@ -71,21 +72,20 @@ public class QueryProcessor
             }
 
             // Execute query and get results
-            Console.WriteLine($"QueryProcessor: Executing query");
+            logger?.LogDebug("Executing query");
             var results = processedQuery.Cast<object>().ToList();
-            Console.WriteLine($"QueryProcessor: Query executed, got {results.Count} results");
+            logger?.LogInformation("Query executed, got {ResultCount} results", results.Count);
 
             // Convert to Arrow table
-            Console.WriteLine($"QueryProcessor: Converting to Arrow table");
+            logger?.LogDebug("Converting to Arrow table");
             var arrowData = ConvertToArrowTable(results, query.SelectColumns, queryable.ElementType);
-            Console.WriteLine($"QueryProcessor: Arrow conversion complete, {arrowData.Length} bytes");
+            logger?.LogInformation("Arrow conversion complete, {ByteCount} bytes", arrowData.Length);
 
             return arrowData;
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"QueryProcessor Error: {ex.Message}");
-            Console.WriteLine($"QueryProcessor Stack Trace: {ex.StackTrace}");
+            logger?.LogError(ex, "Error processing query");
             throw;
         }
     }
@@ -126,45 +126,44 @@ public class QueryProcessor
     {
         try
         {
-            Console.WriteLine($"ApplyFilter: Starting filter application for type {query.ElementType.Name}");
+            logger?.LogDebug("Starting filter application for type {ElementType}", query.ElementType.Name);
 
             var elementType = query.ElementType;
             var parameter = System.Linq.Expressions.Expression.Parameter(elementType, "x");
 
-            Console.WriteLine($"ApplyFilter: Building filter expression");
+            logger?.LogDebug("Building filter expression");
             var predicate = BuildFilterExpression(filter, parameter, elementType);
 
             if (predicate == null)
             {
-                Console.WriteLine($"ApplyFilter: No predicate generated, returning original query");
+                logger?.LogDebug("No predicate generated, returning original query");
                 return query;
             }
 
-            Console.WriteLine($"ApplyFilter: Creating lambda expression");
+            logger?.LogDebug("Creating lambda expression");
             var lambda = System.Linq.Expressions.Expression.Lambda(predicate, parameter);
 
-            Console.WriteLine($"ApplyFilter: Getting Where method");
+            logger?.LogDebug("Getting Where method");
             var whereMethod = typeof(Queryable).GetMethods()
                 .FirstOrDefault(m => m.Name == "Where" && m.GetParameters().Length == 2)?
                 .MakeGenericMethod(elementType);
 
             if (whereMethod != null)
             {
-                Console.WriteLine($"ApplyFilter: Invoking Where method");
+                logger?.LogDebug("Invoking Where method");
                 query = (IQueryable)whereMethod.Invoke(null, new object[] { query, lambda })!;
-                Console.WriteLine($"ApplyFilter: Filter applied successfully");
+                logger?.LogDebug("Filter applied successfully");
             }
             else
             {
-                Console.WriteLine($"ApplyFilter: Could not find Where method");
+                logger?.LogWarning("Could not find Where method");
             }
 
             return query;
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"ApplyFilter Error: {ex.Message}");
-            Console.WriteLine($"ApplyFilter Stack Trace: {ex.StackTrace}");
+            logger?.LogError(ex, "Error applying filter");
             throw;
         }
     }
@@ -241,31 +240,31 @@ public class QueryProcessor
     {
         try
         {
-            Console.WriteLine($"BuildContainsExpression: Building contains for property {property.Member.Name} of type {property.Type}");
+            logger?.LogDebug("Building contains expression for property {PropertyName} of type {PropertyType}", property.Member.Name, property.Type);
 
             var arg = args.FirstOrDefault();
             if (arg == null)
             {
-                Console.WriteLine($"BuildContainsExpression: No arguments provided");
+                logger?.LogDebug("No arguments provided for contains expression");
                 return null;
             }
 
             // Extract the string value from the protobuf Any
-            Console.WriteLine($"BuildContainsExpression: Extracting string value from protobuf Any");
+            logger?.LogDebug("Extracting string value from protobuf Any");
             var searchValue = ExtractStringValue(arg);
             if (searchValue == null)
             {
-                Console.WriteLine($"BuildContainsExpression: Failed to extract search value");
+                logger?.LogWarning("Failed to extract search value for contains expression");
                 return null;
             }
 
-            Console.WriteLine($"BuildContainsExpression: Search value: '{searchValue}'");
+            logger?.LogDebug("Search value: '{SearchValue}'", searchValue);
 
             // Use case-insensitive Contains method
             var containsMethod = typeof(string).GetMethod("Contains", new[] { typeof(string), typeof(StringComparison) });
             if (containsMethod == null)
             {
-                Console.WriteLine($"BuildContainsExpression: Could not find Contains method with StringComparison");
+                logger?.LogWarning("Could not find Contains method with StringComparison");
                 return null;
             }
 
@@ -275,7 +274,7 @@ public class QueryProcessor
             // Handle nullable properties
             if (property.Type == typeof(string))
             {
-                Console.WriteLine($"BuildContainsExpression: Creating case-insensitive string contains expression");
+                logger?.LogDebug("Creating case-insensitive string contains expression");
 
                 // Need to handle null strings - use null-conditional approach
                 var nullCheck = System.Linq.Expressions.Expression.NotEqual(
@@ -295,7 +294,7 @@ public class QueryProcessor
             }
             else
             {
-                Console.WriteLine($"BuildContainsExpression: Converting non-string property to string first");
+                logger?.LogDebug("Converting non-string property to string first");
                 // Convert to string first, then apply case-insensitive contains
                 var toStringMethod = property.Type.GetMethod("ToString", System.Type.EmptyTypes);
                 if (toStringMethod != null)
@@ -319,7 +318,7 @@ public class QueryProcessor
                 }
                 else
                 {
-                    Console.WriteLine($"BuildContainsExpression: Could not find ToString method for type {property.Type}");
+                    logger?.LogWarning("Could not find ToString method for type {PropertyType}", property.Type);
                 }
             }
 
@@ -327,8 +326,7 @@ public class QueryProcessor
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"BuildContainsExpression Error: {ex.Message}");
-            Console.WriteLine($"BuildContainsExpression Stack Trace: {ex.StackTrace}");
+            logger?.LogError(ex, "Error building contains expression");
             throw;
         }
     }
@@ -433,24 +431,24 @@ public class QueryProcessor
     {
         try
         {
-            Console.WriteLine($"ExtractStringValue: Extracting from Any with TypeUrl: {arg.TypeUrl}");
+            logger?.LogDebug("Extracting string value from Any with TypeUrl: {TypeUrl}", arg.TypeUrl);
 
             // The frontend sends JSON-serialized strings, so we need to deserialize
             var jsonValue = arg.Value.ToStringUtf8();
-            Console.WriteLine($"ExtractStringValue: Raw value: '{jsonValue}'");
+            logger?.LogDebug("Raw value: '{JsonValue}'", jsonValue);
 
             var result = System.Text.Json.JsonSerializer.Deserialize<string>(jsonValue);
-            Console.WriteLine($"ExtractStringValue: Deserialized value: '{result}'");
+            logger?.LogDebug("Deserialized value: '{Result}'", result);
 
             return result;
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"ExtractStringValue: JSON deserialization failed: {ex.Message}");
+            logger?.LogDebug("JSON deserialization failed: {Message}", ex.Message);
 
             // Fallback: try to use the value directly
             var fallback = arg.Value.ToStringUtf8().Trim('"');
-            Console.WriteLine($"ExtractStringValue: Using fallback value: '{fallback}'");
+            logger?.LogDebug("Using fallback value: '{Fallback}'", fallback);
 
             return fallback;
         }
@@ -484,7 +482,7 @@ public class QueryProcessor
 
     private byte[] ConvertToArrowTable(List<object> data, IEnumerable<string> selectColumns, SystemType elementType)
     {
-        Console.WriteLine($"ConvertToArrowTable: Converting {data.Count} items to Arrow table");
+        logger?.LogDebug("Converting {DataCount} items to Arrow table", data.Count);
 
         var properties = elementType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
 
@@ -523,7 +521,7 @@ public class QueryProcessor
         writer.WriteEnd();
 
         var result = stream.ToArray();
-        Console.WriteLine($"ConvertToArrowTable: Created Arrow table with {result.Length} bytes");
+        logger?.LogDebug("Created Arrow table with {ByteCount} bytes", result.Length);
         return result;
     }
 
