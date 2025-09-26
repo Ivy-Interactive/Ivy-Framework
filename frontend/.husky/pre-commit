@@ -8,6 +8,6 @@ if [ -n "$CS_STAGED_FILES" ]; then
   echo "$CS_STAGED_FILES" | xargs git add
 fi
 
-#ts and js files are handled well by lint-staged
+# TS and JS files are handled well by lint-staged
 cd frontend
 npx lint-staged
