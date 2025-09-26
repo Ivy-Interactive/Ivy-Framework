@@ -15,10 +15,7 @@ public class DataTableConnectionService(IQueryableRegistry queryableRegistry, Se
         logger?.LogInformation("Adding queryable with connectionId: {ConnectionId}", connectionId);
         var sourceId = queryableRegistry.RegisterQueryable(queryable);
 
-        var cleanup = Disposable.Create(() =>
-        {
-            queryableRegistry.AddCleanup(sourceId, Disposable.Empty);
-        });
+        var cleanup = queryableRegistry.AddCleanup(sourceId, Disposable.Empty);
 
         var connection = new DataTableConnection(serverArgs.Port, "/datatable.TableService/Query/", connectionId, sourceId);
 
