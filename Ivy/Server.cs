@@ -498,7 +498,7 @@ public static class WebApplicationExtensions
                 using var reader = new StreamReader(stream);
                 var html = await reader.ReadToEndAsync();
 
-                //Inject IVY_LICENSE:
+                //Inject Ivy license:
                 var configuration = app.Services.GetRequiredService<IConfiguration>();
                 var ivyLicense = configuration["Ivy:License"] ?? "";
                 if (!string.IsNullOrEmpty(ivyLicense))
