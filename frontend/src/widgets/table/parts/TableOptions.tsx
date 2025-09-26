@@ -3,14 +3,8 @@ import { useTable } from '../context/TableContext';
 import { tableStyles } from '../styles/style';
 import { Header } from './TableHeader';
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Separator } from '@/components/ui/separator';
 
 export const TableOptions: React.FC = () => {
   const { columns } = useTable();
@@ -49,19 +43,41 @@ export const TableOptions: React.FC = () => {
         </div>
       </div>
       <Dialog open={isFilterOpen} onOpenChange={setIsFilterOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Filter options</DialogTitle>
-            <DialogDescription>
-              Configure filters for the current table.{` `}
-              This feature is coming soon.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="secondary" onClick={() => setIsFilterOpen(false)}>
-              Close
+        <DialogContent className="bg-white p-4 rounded-lg max-w-[512px] flex flex-col gap-4">
+          <div className="flex items-center justify-between">
+            <h2>Filter</h2>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsFilterOpen(false)}
+            >
+              <svg
+                className="w-[9.251px] h-[9.251px]"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
             </Button>
-          </DialogFooter>
+          </div>
+          <Separator />
+          {/* TODO This needs to be an input*/}
+          <div className="bg-white border  rounded-lg p-3 ]">
+            <div className="text-sm ">Filter expression will appear here</div>
+          </div>
+          <Separator />
+          <div className="flex items-center justify-between">
+            <Button variant="outline" onClick={() => setIsFilterOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={() => setIsFilterOpen(false)}>Apply filter</Button>
+          </div>
         </DialogContent>
       </Dialog>
 

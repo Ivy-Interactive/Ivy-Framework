@@ -12,7 +12,7 @@ export const tableTheme: Partial<Theme> = {
   textMedium: '#6b7280',
   textLight: '#9ca3af',
   borderColor: 'transparent',
-  horizontalBorderColor: '#e5e7eb',
+  horizontalBorderColor: '#d1d5db',
   linkColor: '#e5e7eb',
   cellHorizontalPadding: 16,
   cellVerticalPadding: 8,
