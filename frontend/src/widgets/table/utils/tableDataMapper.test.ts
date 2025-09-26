@@ -29,7 +29,7 @@ describe('tableDataMapper', () => {
       mockColumn2.get.mockReturnValueOnce('Alice').mockReturnValueOnce('Bob');
       mockColumn3.get.mockReturnValueOnce(true).mockReturnValueOnce(false);
 
-      (mockTable.getChildAt as vi.MockedFunction<typeof mockTable.getChildAt>)
+      (mockTable.getChildAt as ReturnType<typeof vi.fn>)
         .mockReturnValueOnce(mockColumn1)
         .mockReturnValueOnce(mockColumn2)
         .mockReturnValueOnce(mockColumn3)
@@ -166,7 +166,7 @@ describe('tableDataMapper', () => {
       mockColumns[2].get.mockReturnValue('test');
       mockColumns[3].get.mockReturnValue(true);
 
-      (mockTable.getChildAt as vi.MockedFunction<typeof mockTable.getChildAt>)
+      (mockTable.getChildAt as ReturnType<typeof vi.fn>)
         .mockReturnValueOnce(mockColumns[0])
         .mockReturnValueOnce(mockColumns[1])
         .mockReturnValueOnce(mockColumns[2])

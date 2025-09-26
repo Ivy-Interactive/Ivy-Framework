@@ -154,7 +154,7 @@ export const TableEditor: React.FC<TableEditorProps> = ({
       const remainingWidth = containerWidth - totalWidthOfOtherColumns;
       return {
         title: col.name,
-        width: Math.max(baseWidth, remainingWidth),
+        width: Math.max(baseWidth, remainingWidth) - 10,
       };
     }
 
@@ -186,7 +186,7 @@ export const TableEditor: React.FC<TableEditorProps> = ({
         smoothScrollY={true}
         theme={tableTheme}
         rowHeight={38}
-        headerHeight={44}
+        headerHeight={32}
         freezeColumns={1}
         getCellsForSelection={true}
         keybindings={{ search: false }}

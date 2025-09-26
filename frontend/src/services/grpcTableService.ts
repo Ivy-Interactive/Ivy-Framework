@@ -54,26 +54,44 @@ export interface Aggregation {
   function: string; // e.g. "sum", "avg", "min", "max", "count"
 }
 
-export interface TableQuery {
+export interface DataTableQuery {
   sort?: SortOrder[];
   filter?: Filter;
   offset?: number;
   limit?: number;
-  select_columns?: string[]; // Match proto field name
+  select_columns?: string[];
   aggregations?: Aggregation[];
-  connectionId?: string; // Match proto field name
-  sourceId?: string; // Match proto field name
+  connectionId?: string;
+  sourceId?: string;
 }
 
-export interface TableResult {
-  arrow_ipc_stream: Uint8Array; // Match proto field name
-  table?: arrow.Table; // Parsed Arrow table
+// Alias for backward compatibility with tests
+export type TableQuery = DataTableQuery;
+
+export interface DataTableResult {
+  arrow_ipc_stream: Uint8Array;
+  offset: number;
+  row_count: number;
+  total_rows: number;
+  table?: arrow.Table;
+}
+
+export interface DataTableDistinctQuery {
+  column: string;
+  search?: string;
+  limit?: number;
+  connectionId: string;
+  sourceId: string;
+}
+
+export interface DataTableDistinctResult {
+  values: string[];
 }
 
 export interface GrpcTableStreamOptions {
   serverUrl: string;
-  query: TableQuery;
-  onData?: (data: TableResult) => void;
+  query: DataTableQuery;
+  onData?: (data: DataTableResult) => void;
   onError?: (error: Error) => void;
   onComplete?: () => void;
 }
@@ -87,7 +105,7 @@ export class GrpcTableService extends EventEmitter {
     this.serverUrl = serverUrl;
   }
 
-  async queryTable(options: GrpcTableStreamOptions): Promise<TableResult> {
+  async queryTable(options: GrpcTableStreamOptions): Promise<DataTableResult> {
     const { serverUrl, query, onData, onError, onComplete } = options;
 
     try {
@@ -105,12 +123,12 @@ export class GrpcTableService extends EventEmitter {
       };
 
       // Serialize the query to protobuf format
-      const serializedQuery = this.serializeTableQuery(query);
+      const serializedQuery = this.serializeDataTableQuery(query);
 
       // Create gRPC message with proper header
       const grpcMessage = this.createGrpcMessage(serializedQuery);
 
-      const requestUrl = `${serverUrl}/datatable.TableService/Query`;
+      const requestUrl = `${serverUrl}/datatable.DataTableService/Query`;
       logger.debug('gRPC Table Service - Request URL:', requestUrl);
 
       // Make the gRPC-Web request
@@ -189,9 +207,14 @@ export class GrpcTableService extends EventEmitter {
     return result;
   }
 
-  // Serialize TableQuery to protobuf format
+  // Alias for backward compatibility with tests
   private serializeTableQuery(query: TableQuery): Uint8Array {
-    logger.debug('serializeTableQuery: Starting serialization', query);
+    return this.serializeDataTableQuery(query);
+  }
+
+  // Serialize DataTableQuery to protobuf format
+  private serializeDataTableQuery(query: DataTableQuery): Uint8Array {
+    logger.debug('serializeDataTableQuery: Starting serialization', query);
 
     // This is a simplified protobuf serialization
     // In production, you should use the generated protobuf classes
@@ -200,7 +223,10 @@ export class GrpcTableService extends EventEmitter {
 
     // Serialize sort orders (field 1, repeated message)
     if (query.sort && query.sort.length > 0) {
-      logger.debug('serializeTableQuery: Serializing sort orders', query.sort);
+      logger.debug(
+        'serializeDataTableQuery: Serializing sort orders',
+        query.sort
+      );
       query.sort.forEach(sort => {
         const sortMessage = this.serializeSortOrder(sort);
         chunks.push(this.encodeField(1, 2, sortMessage)); // Field 1, wire type 2 (length-delimited)
@@ -209,17 +235,17 @@ export class GrpcTableService extends EventEmitter {
 
     // Serialize filter (field 2, message)
     if (query.filter) {
-      logger.debug('serializeTableQuery: Serializing filter', query.filter);
+      logger.debug('serializeDataTableQuery: Serializing filter', query.filter);
       try {
         const filterMessage = this.serializeFilter(query.filter);
         logger.debug(
-          'serializeTableQuery: Filter serialized successfully, length:',
+          'serializeDataTableQuery: Filter serialized successfully, length:',
           filterMessage.length
         );
         chunks.push(this.encodeField(2, 2, filterMessage)); // Field 2, wire type 2
       } catch (error) {
         logger.error(
-          'serializeTableQuery: Filter serialization failed:',
+          'serializeDataTableQuery: Filter serialization failed:',
           error
         );
         throw error;
@@ -477,7 +503,9 @@ export class GrpcTableService extends EventEmitter {
   }
 
   // Parse gRPC-Web response
-  private async parseGrpcResponse(response: Response): Promise<TableResult> {
+  private async parseGrpcResponse(
+    response: Response
+  ): Promise<DataTableResult> {
     const buffer = await response.arrayBuffer();
     const uint8Array = new Uint8Array(buffer);
 
@@ -492,29 +520,53 @@ export class GrpcTableService extends EventEmitter {
         .join(' ')
     );
 
-    // Parse gRPC message to extract the protobuf data
-    const arrowData = this.parseGrpcMessage(uint8Array);
+    // Parse the full DataTableResult to get all fields (including arrow data)
+    const fullResult = this.parseDataTableResult(uint8Array);
 
-    logger.debug(
-      'gRPC Table Service - Extracted Arrow data size:',
-      arrowData.length
-    );
+    logger.debug('Parsed DataTableResult fields:', {
+      has_arrow_stream: !!fullResult.arrow_ipc_stream,
+      arrow_stream_size: fullResult.arrow_ipc_stream?.length || 0,
+      offset: fullResult.offset,
+      row_count: fullResult.row_count,
+      total_rows: fullResult.total_rows,
+    });
 
-    // Parse the Arrow IPC stream
+    // If we didn't get the arrow stream from fullResult, fall back to the old method
+    if (!fullResult.arrow_ipc_stream) {
+      logger.warn(
+        'No arrow stream found in DataTableResult, trying fallback method'
+      );
+      try {
+        const fallbackArrowData = this.parseGrpcMessage(uint8Array);
+        logger.debug('Fallback arrow data size:', fallbackArrowData.length);
+        if (fallbackArrowData.length > 0) {
+          fullResult.arrow_ipc_stream = fallbackArrowData;
+        }
+      } catch (error) {
+        logger.error('Fallback parsing also failed:', error);
+      }
+    }
+
+    // Parse the Arrow IPC stream if we have it
     let table: arrow.Table | undefined;
-    try {
-      table = arrow.tableFromIPC(arrowData);
-      logger.info('gRPC Table Service - Successfully parsed Arrow table:', {
-        numRows: table.numRows,
-        numCols: table.numCols,
-        schema: table.schema.fields.map((f: arrow.Field) => f.name),
-      });
-    } catch (error) {
-      logger.warn('Failed to parse Arrow IPC stream:', error);
+    if (fullResult.arrow_ipc_stream) {
+      try {
+        table = arrow.tableFromIPC(fullResult.arrow_ipc_stream);
+        logger.info('gRPC Table Service - Successfully parsed Arrow table:', {
+          numRows: table.numRows,
+          numCols: table.numCols,
+          schema: table.schema.fields.map((f: arrow.Field) => f.name),
+        });
+      } catch (error) {
+        logger.warn('Failed to parse Arrow IPC stream:', error);
+      }
     }
 
     return {
-      arrow_ipc_stream: arrowData,
+      arrow_ipc_stream: fullResult.arrow_ipc_stream || new Uint8Array(0),
+      offset: fullResult.offset || 0,
+      row_count: fullResult.row_count || 0,
+      total_rows: fullResult.total_rows || 0,
       table,
     };
   }
@@ -542,8 +594,127 @@ export class GrpcTableService extends EventEmitter {
     return this.parseTableResultProtobuf(messageData);
   }
 
-  // Parse TableResult protobuf message to extract arrow_ipc_stream field
+  // Parse DataTableResult to get all fields
+  private parseDataTableResult(grpcData: Uint8Array): Partial<DataTableResult> {
+    const result: Partial<DataTableResult> = {};
+
+    // Extract protobuf message from gRPC wrapper manually
+    if (grpcData.length < 5) return result;
+
+    const messageLength =
+      (grpcData[1] << 24) |
+      (grpcData[2] << 16) |
+      (grpcData[3] << 8) |
+      grpcData[4];
+    const messageData = grpcData.slice(5, 5 + messageLength);
+    let offset = 0;
+
+    while (offset < messageData.length) {
+      // Debug: show raw bytes at current offset
+      if (offset < 10) {
+        logger.debug(
+          `Raw bytes at offset ${offset}:`,
+          Array.from(messageData.slice(offset, offset + 8))
+            .map(b => `0x${b.toString(16).padStart(2, '0')}`)
+            .join(' ')
+        );
+      }
+
+      // Read field tag
+      const tag = this.decodeVarint(messageData, offset);
+      offset += this.getVarintLength(tag);
+
+      const fieldNumber = tag >>> 3;
+      const wireType = tag & 0x7;
+
+      if (fieldNumber > 1000) {
+        logger.error(
+          `Invalid field number ${fieldNumber} suggests corrupted data. Tag: 0x${tag.toString(16)}`
+        );
+        break;
+      }
+
+      switch (fieldNumber) {
+        case 1: // arrow_ipc_stream (bytes)
+          if (wireType === 2) {
+            const length = this.decodeVarint(messageData, offset);
+            offset += this.getVarintLength(length);
+            result.arrow_ipc_stream = messageData.slice(
+              offset,
+              offset + length
+            );
+            offset += length;
+          }
+          break;
+        case 2: // offset (int32)
+          if (wireType === 0) {
+            result.offset = this.decodeVarint(messageData, offset);
+            offset += this.getVarintLength(result.offset);
+          }
+          break;
+        case 3: // row_count (int32)
+          if (wireType === 0) {
+            result.row_count = this.decodeVarint(messageData, offset);
+            offset += this.getVarintLength(result.row_count);
+          }
+          break;
+        case 4: // total_rows (int32)
+          if (wireType === 0) {
+            result.total_rows = this.decodeVarint(messageData, offset);
+            offset += this.getVarintLength(result.total_rows);
+          }
+          break;
+        default:
+          // Log unknown fields for debugging
+          logger.warn(
+            `Unknown field ${fieldNumber} with wire type ${wireType} at offset ${offset}`
+          );
+          offset = this.skipField(messageData, offset, wireType);
+          break;
+      }
+    }
+
+    return result;
+  }
+
+  // Helper method to skip unknown fields
+  private skipField(
+    data: Uint8Array,
+    offset: number,
+    wireType: number
+  ): number {
+    switch (wireType) {
+      case 0: {
+        // varint
+        const value = this.decodeVarint(data, offset);
+        return offset + this.getVarintLength(value);
+      }
+      case 1: // 64-bit
+        return offset + 8;
+      case 2: {
+        // length-delimited
+        const length = this.decodeVarint(data, offset);
+        return offset + this.getVarintLength(length) + length;
+      }
+      case 3: // start group (deprecated)
+      case 4: // end group (deprecated)
+        logger.warn(`Deprecated wire type ${wireType} encountered`);
+        return data.length; // Skip to end
+      case 5: // 32-bit
+        return offset + 4;
+      default:
+        logger.warn(`Unknown wire type: ${wireType}`);
+        return data.length; // Skip to end
+    }
+  }
+
+  // Alias for backward compatibility with tests
   private parseTableResultProtobuf(data: Uint8Array): Uint8Array {
+    return this.parseDataTableResultProtobuf(data);
+  }
+
+  // Parse DataTableResult protobuf message to extract arrow_ipc_stream field
+  private parseDataTableResultProtobuf(data: Uint8Array): Uint8Array {
     let offset = 0;
 
     while (offset < data.length) {
@@ -571,16 +742,9 @@ export class GrpcTableService extends EventEmitter {
           arrowData.length
         );
         return arrowData;
-      } else if (wireType === 0) {
-        // varint
-        offset += this.getVarintLength(this.decodeVarint(data, offset));
-      } else if (wireType === 2) {
-        // length-delimited
-        const length = this.decodeVarint(data, offset);
-        offset += this.getVarintLength(length);
-        offset += length;
       } else {
-        throw new Error(`Unsupported wire type: ${wireType}`);
+        // Skip other fields
+        offset = this.skipField(data, offset, wireType);
       }
     }
 

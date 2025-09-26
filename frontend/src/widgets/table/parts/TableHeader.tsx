@@ -7,8 +7,17 @@ export const Header: React.FC = () => {
   return (
     <>
       <div className={tableStyles.tableHeader.container}>
-        <span>Showing {visibleRows} rows</span>
-        {columns.length > 0 && <span>{columns.length} columns</span>}
+        <h1>
+          <b>Dynamic Data Grid with gRPC</b>
+        </h1>
+        <span className={tableStyles.tableHeader.text}>
+          Showing {visibleRows} rows
+        </span>
+        {columns.length > 0 && (
+          <span className={tableStyles.tableHeader.text}>
+            {columns.length} columns
+          </span>
+        )}
         {editable && (
           <span className={tableStyles.tableHeader.accent}>✏️ Editable</span>
         )}
