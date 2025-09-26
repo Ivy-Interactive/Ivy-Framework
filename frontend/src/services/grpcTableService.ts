@@ -207,11 +207,6 @@ export class GrpcTableService extends EventEmitter {
     return result;
   }
 
-  // Alias for backward compatibility with tests
-  private serializeTableQuery(query: TableQuery): Uint8Array {
-    return this.serializeDataTableQuery(query);
-  }
-
   // Serialize DataTableQuery to protobuf format
   private serializeDataTableQuery(query: DataTableQuery): Uint8Array {
     logger.debug('serializeDataTableQuery: Starting serialization', query);
