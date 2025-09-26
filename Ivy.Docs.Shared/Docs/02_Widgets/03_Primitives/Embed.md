@@ -27,7 +27,7 @@ public class ResourcesView : ViewBase
             | Text.H3("GitHub File")
             | new Embed("https://github.com/Ivy-Interactive/Ivy-Framework")
             | Text.H3("Reddit Post")
-            | new Embed("https://www.reddit.com/r/programming/comments/example")
+            | new Embed("https://www.reddit.com/r/cats/comments/1nr7fbs/show_them/")
             | Text.H3("Twitter Tweet")
             | new Embed("https://twitter.com/username/status/1234567890");
     }
