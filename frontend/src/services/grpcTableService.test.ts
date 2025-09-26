@@ -639,6 +639,9 @@ describe('GrpcTableService', () => {
       expect(result).toEqual({
         arrow_ipc_stream: mockArrowData,
         table: mockTable,
+        offset: 0,
+        row_count: 0,
+        total_rows: 0,
       });
 
       expect(mockArrow.tableFromIPC).toHaveBeenCalledWith(mockArrowData);
@@ -667,6 +670,9 @@ describe('GrpcTableService', () => {
       expect(result).toEqual({
         arrow_ipc_stream: mockArrowData,
         table: undefined,
+        offset: 0,
+        row_count: 0,
+        total_rows: 0,
       });
 
       expect(mockLogger.warn).toHaveBeenCalledWith(

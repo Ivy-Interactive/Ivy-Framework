@@ -65,6 +65,9 @@ export interface DataTableQuery {
   sourceId?: string;
 }
 
+// Alias for backward compatibility with tests
+export type TableQuery = DataTableQuery;
+
 export interface DataTableResult {
   arrow_ipc_stream: Uint8Array;
   offset: number;
@@ -202,6 +205,11 @@ export class GrpcTableService extends EventEmitter {
     result.set(data, 5);
 
     return result;
+  }
+
+  // Alias for backward compatibility with tests
+  private serializeTableQuery(query: TableQuery): Uint8Array {
+    return this.serializeDataTableQuery(query);
   }
 
   // Serialize DataTableQuery to protobuf format
@@ -583,7 +591,7 @@ export class GrpcTableService extends EventEmitter {
     logger.debug('gRPC Table Service - Message data size:', messageData.length);
 
     // Parse the protobuf message to extract the Arrow data
-    return this.parseDataTableResultProtobuf(messageData);
+    return this.parseTableResultProtobuf(messageData);
   }
 
   // Parse DataTableResult to get all fields
@@ -698,6 +706,11 @@ export class GrpcTableService extends EventEmitter {
         logger.warn(`Unknown wire type: ${wireType}`);
         return data.length; // Skip to end
     }
+  }
+
+  // Alias for backward compatibility with tests
+  private parseTableResultProtobuf(data: Uint8Array): Uint8Array {
+    return this.parseDataTableResultProtobuf(data);
   }
 
   // Parse DataTableResult protobuf message to extract arrow_ipc_stream field
