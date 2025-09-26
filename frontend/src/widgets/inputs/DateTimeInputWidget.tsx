@@ -14,6 +14,12 @@ import { cn } from '@/lib/utils';
 import { useEventHandler } from '@/components/event-handler';
 import { inputStyles } from '@/lib/styles';
 import { InvalidIcon } from '@/components/InvalidIcon';
+import { Sizes } from '@/types/sizes';
+import {
+  dateTimeInputVariants,
+  dateTimeInputIconVariants,
+  dateTimeInputTextVariants,
+} from '@/components/ui/input/date-time-input-variants';
 
 type VariantType = 'Date' | 'DateTime' | 'Time';
 
@@ -26,6 +32,7 @@ interface DateTimeInputWidgetProps {
   nullable?: boolean;
   invalid?: string;
   format?: string;
+  size?: Sizes;
   'data-testid'?: string;
 }
 
@@ -37,6 +44,7 @@ interface BaseVariantProps {
   nullable?: boolean;
   invalid?: string;
   format?: string;
+  size?: Sizes;
   'data-testid'?: string;
 }
 
@@ -61,6 +69,7 @@ const DateVariant: React.FC<DateVariantProps> = ({
   invalid,
   onDateChange,
   format: formatProp,
+  size = Sizes.Medium,
   'data-testid': dataTestId,
 }) => {
   const [open, setOpen] = useState(false);
@@ -89,14 +98,16 @@ const DateVariant: React.FC<DateVariantProps> = ({
             disabled={disabled}
             variant="outline"
             className={cn(
-              'w-full justify-start text-left font-normal pr-20 cursor-pointer bg-transparent', // pr-20 for clear+icon, bg-transparent to match other inputs
+              dateTimeInputVariants({ size }),
               !date && 'text-muted-foreground',
               invalid && inputStyles.invalidInput,
               disabled && 'cursor-not-allowed'
             )}
             data-testid={dataTestId}
           >
-            <CalendarIcon className="mr-2 h-4 w-4" />
+            <CalendarIcon
+              className={cn('mr-2', dateTimeInputIconVariants({ size }))}
+            />
             {date ? (
               format(date, formatProp || 'yyyy-MM-dd')
             ) : (
@@ -121,7 +132,12 @@ const DateVariant: React.FC<DateVariantProps> = ({
                     className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
                     style={{ pointerEvents: 'auto' }}
                   >
-                    <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+                    <X
+                      className={cn(
+                        dateTimeInputIconVariants({ size }),
+                        'text-muted-foreground hover:text-foreground'
+                      )}
+                    />
                   </span>
                 )}
                 {invalid && <InvalidIcon message={invalid} />}
@@ -151,6 +167,7 @@ const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
   onDateChange,
   onTimeChange,
   format: formatProp,
+  size = Sizes.Medium,
   'data-testid': dataTestId,
 }) => {
   const [open, setOpen] = useState(false);
@@ -272,14 +289,16 @@ const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
             disabled={disabled}
             variant="outline"
             className={cn(
-              'w-full justify-start text-left font-normal pr-20 cursor-pointer bg-transparent', // pr-20 for clear+icon, bg-transparent to match other inputs
+              dateTimeInputVariants({ size }),
               !date && 'text-muted-foreground',
               invalid && inputStyles.invalidInput,
               disabled && 'cursor-not-allowed'
             )}
             data-testid={dataTestId}
           >
-            <CalendarIcon className="mr-2 h-4 w-4" />
+            <CalendarIcon
+              className={cn('mr-2', dateTimeInputIconVariants({ size }))}
+            />
             {date ? (
               format(date, formatProp || 'yyyy-MM-dd')
             ) : (
@@ -297,7 +316,12 @@ const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
                     className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
                     style={{ pointerEvents: 'auto' }}
                   >
-                    <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+                    <X
+                      className={cn(
+                        dateTimeInputIconVariants({ size }),
+                        'text-muted-foreground hover:text-foreground'
+                      )}
+                    />
                   </button>
                 )}
                 {invalid && <InvalidIcon message={invalid} />}
@@ -314,7 +338,12 @@ const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
               initialFocus
             />
             <div className="flex items-center gap-2">
-              <Clock className="h-4 w-4 text-muted-foreground" />
+              <Clock
+                className={cn(
+                  dateTimeInputIconVariants({ size }),
+                  'text-muted-foreground'
+                )}
+              />
               <Input
                 type="time"
                 step="1"
@@ -326,6 +355,7 @@ const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
                 disabled={disabled}
                 className={cn(
                   'bg-background appearance-none [&::-webkit-calendar-picker-indicator]:hidden',
+                  dateTimeInputTextVariants({ size }),
                   invalid && inputStyles.invalidInput
                 )}
                 data-testid={dataTestId ? `${dataTestId}-time` : undefined}
@@ -345,6 +375,7 @@ const TimeVariant: React.FC<TimeVariantProps> = ({
   nullable,
   invalid,
   onTimeChange,
+  size = Sizes.Medium,
   'data-testid': dataTestId,
 }) => {
   // Use local state for the input value to make it uncontrolled
@@ -426,7 +457,12 @@ const TimeVariant: React.FC<TimeVariantProps> = ({
 
   return (
     <div className="relative flex items-center gap-2" data-testid={dataTestId}>
-      <Clock className="h-4 w-4 text-muted-foreground" />
+      <Clock
+        className={cn(
+          dateTimeInputIconVariants({ size }),
+          'text-muted-foreground'
+        )}
+      />
       <div className="relative w-full">
         <Input
           type="time"
@@ -439,6 +475,7 @@ const TimeVariant: React.FC<TimeVariantProps> = ({
           placeholder={placeholder || 'Select time'}
           className={cn(
             'bg-background appearance-none [&::-webkit-calendar-picker-indicator]:hidden pr-20 cursor-pointer', // pr-20 for clear+icon
+            dateTimeInputTextVariants({ size }),
             invalid && inputStyles.invalidInput,
             disabled && 'cursor-not-allowed'
           )}
@@ -454,7 +491,12 @@ const TimeVariant: React.FC<TimeVariantProps> = ({
                 className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
                 style={{ pointerEvents: 'auto' }}
               >
-                <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+                <X
+                  className={cn(
+                    dateTimeInputIconVariants({ size }),
+                    'text-muted-foreground hover:text-foreground'
+                  )}
+                />
               </button>
             )}
             {invalid && <InvalidIcon message={invalid} />}
@@ -480,6 +522,7 @@ export const DateTimeInputWidget: React.FC<DateTimeInputWidgetProps> = ({
   nullable = false,
   invalid,
   format: formatProp,
+  size = Sizes.Medium,
   'data-testid': dataTestId,
 }) => {
   const eventHandler = useEventHandler();
@@ -526,6 +569,7 @@ export const DateTimeInputWidget: React.FC<DateTimeInputWidgetProps> = ({
       nullable={nullable}
       invalid={invalid}
       format={formatProp}
+      size={size}
       onDateChange={handleDateChange}
       onTimeChange={handleTimeChange}
       data-testid={dataTestId}

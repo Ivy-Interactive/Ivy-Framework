@@ -22,6 +22,73 @@ public class DateTimeInputApp : SampleBase
         var nullableTimeState = UseState<TimeOnly?>(() => null);
         var nullableDateOnlyState = UseState<DateOnly?>(() => null);
 
+        // Size examples
+        var sizeExamplesGrid = Layout.Grid().Columns(4)
+            | Text.InlineCode("Size")
+            | Text.InlineCode("Date Input")
+            | Text.InlineCode("DateTime Input")
+            | Text.InlineCode("Time Input")
+
+            | Text.InlineCode("Small")
+            | dateState
+                .ToDateTimeInput()
+                .Variant(DateTimeInputs.Date)
+                .Small()
+                .Placeholder("Small date")
+                .TestId("datetime-input-date-small")
+            | dateTimeState
+                .ToDateTimeInput()
+                .Variant(DateTimeInputs.DateTime)
+                .Small()
+                .Placeholder("Small datetime")
+                .TestId("datetime-input-datetime-small")
+            | timeState
+                .ToDateTimeInput()
+                .Variant(DateTimeInputs.Time)
+                .Small()
+                .Placeholder("Small time")
+                .TestId("datetime-input-time-small")
+
+            | Text.InlineCode("Medium")
+            | dateState
+                .ToDateTimeInput()
+                .Variant(DateTimeInputs.Date)
+                .Size(Sizes.Medium)
+                .Placeholder("Medium date")
+                .TestId("datetime-input-date-medium")
+            | dateTimeState
+                .ToDateTimeInput()
+                .Variant(DateTimeInputs.DateTime)
+                .Size(Sizes.Medium)
+                .Placeholder("Medium datetime")
+                .TestId("datetime-input-datetime-medium")
+            | timeState
+                .ToDateTimeInput()
+                .Variant(DateTimeInputs.Time)
+                .Size(Sizes.Medium)
+                .Placeholder("Medium time")
+                .TestId("datetime-input-time-medium")
+
+            | Text.InlineCode("Large")
+            | dateState
+                .ToDateTimeInput()
+                .Variant(DateTimeInputs.Date)
+                .Large()
+                .Placeholder("Large date")
+                .TestId("datetime-input-date-large")
+            | dateTimeState
+                .ToDateTimeInput()
+                .Variant(DateTimeInputs.DateTime)
+                .Large()
+                .Placeholder("Large datetime")
+                .TestId("datetime-input-datetime-large")
+            | timeState
+                .ToDateTimeInput()
+                .Variant(DateTimeInputs.Time)
+                .Large()
+                .Placeholder("Large time")
+                .TestId("datetime-input-time-large");
+
         // Variants grid
         var variantsGrid = Layout.Grid().Columns(6)
             | null!
@@ -242,6 +309,8 @@ public class DateTimeInputApp : SampleBase
 
         return Layout.Vertical()
             | Text.H1("DateTimeInput")
+            | Text.H2("Size Examples")
+            | sizeExamplesGrid
             | Text.H2("Variants")
             | variantsGrid
             | Text.H2("Data Binding")

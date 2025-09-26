@@ -1,8 +1,10 @@
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Ivy.Core;
+using Ivy.Core.Docs;
 using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
+using Ivy.Shared;
 using Ivy.Widgets.Inputs;
 
 // ReSharper disable once CheckNamespace
@@ -50,6 +52,9 @@ public abstract record DateTimeInputBase : WidgetBase<DateTimeInputBase>, IAnyDa
 
     /// <summary>Gets or sets the date/time format string for displaying and parsing values.</summary>
     [Prop] public string? Format { get; set; }
+
+    /// <summary>Gets or sets the size of the date/time input.</summary>
+    [Prop] public Sizes Size { get; set; }
 
     /// <summary>Gets or sets whether the input is disabled.</summary>
     [Prop] public bool Disabled { get; set; }
@@ -371,5 +376,31 @@ public static class DateTimeInputExtensions
     public static DateTimeInputBase HandleBlur(this DateTimeInputBase widget, Action onBlur)
     {
         return widget.HandleBlur(_ => { onBlur(); return ValueTask.CompletedTask; });
+    }
+
+    /// <summary>Sets the size of the date/time input.</summary>
+    /// <param name="widget">The date/time input to configure.</param>
+    /// <param name="size">The size of the date/time input.</param>
+    public static DateTimeInputBase Size(this DateTimeInputBase widget, Sizes size)
+    {
+        return widget with { Size = size };
+    }
+
+    /// <summary>Sets the date/time input size to large for prominent display.</summary>
+    /// <param name="widget">The date/time input to configure.</param>
+    /// <returns>A new DateTimeInputBase instance with large size applied.</returns>
+    [RelatedTo(nameof(DateTimeInputBase.Size))]
+    public static DateTimeInputBase Large(this DateTimeInputBase widget)
+    {
+        return widget.Size(Sizes.Large);
+    }
+
+    /// <summary>Sets the date/time input size to small for compact display.</summary>
+    /// <param name="widget">The date/time input to configure.</param>
+    /// <returns>A new DateTimeInputBase instance with small size applied.</returns>
+    [RelatedTo(nameof(DateTimeInputBase.Size))]
+    public static DateTimeInputBase Small(this DateTimeInputBase widget)
+    {
+        return widget.Size(Sizes.Small);
     }
 }
