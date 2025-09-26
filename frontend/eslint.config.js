@@ -26,6 +26,14 @@ export default tseslint.config(
         { allowConstantExport: true },
       ],
       'prettier/prettier': 'error',
+      'no-restricted-properties': [
+        'error',
+        {
+          object: 'console',
+          property: 'log',
+          message: 'console log is not allowed. Use logger.info instead.',
+        },
+      ],
     },
   }
 );

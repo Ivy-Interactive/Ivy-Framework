@@ -7,7 +7,7 @@ public static class UseDataTableExtensions
 {
     public static DataTableConnection? UseDataTable<TView>(this TView view, IQueryable queryable) where TView : ViewBase =>
         view.Context.UseDataTable(queryable);
-    
+
     public static DataTableConnection? UseDataTable(this IViewContext context, IQueryable queryable)
     {
         var connection = context.UseState<DataTableConnection?>();

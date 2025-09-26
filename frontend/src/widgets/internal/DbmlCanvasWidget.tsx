@@ -17,6 +17,8 @@ import dagre from 'dagre';
 import 'reactflow/dist/style.css';
 import { Parser } from '@dbml/core';
 import { getWidth, getHeight } from '@/lib/styles';
+import { useTheme } from '@/components/theme-provider/hooks';
+import './DbmlCanvasWidget.css';
 
 interface DbmlCanvasWidgetProps {
   id: string;
@@ -245,6 +247,40 @@ const nodeTypes: NodeTypes = {
   tableNode: DbmlTableNode,
 };
 
+const calculateNodeDimensions = (tableData: DbmlTableData) => {
+  // Base dimensions
+  const minWidth = 200;
+  const minHeight = 120;
+  const fieldHeight = 28; // Height per field row
+  const headerHeight = 40; // Height for table header
+  const padding = 16; // Padding inside the table
+
+  // Calculate width based on content (table name and field names/types)
+  const tableName = tableData.label;
+  const longestField = tableData.fields.reduce((longest, field) => {
+    const fieldText = `${field.name} ${field.type}${field.nullable ? '?' : ''}`;
+    return fieldText.length > longest.length ? fieldText : longest;
+  }, '');
+
+  // Estimate width based on character count (rough approximation)
+  const estimatedWidth = Math.max(
+    tableName.length * 8 + 60, // Table name width + padding for PK icon
+    longestField.length * 7 + 60, // Longest field width + padding
+    minWidth
+  );
+
+  // Calculate height based on number of fields
+  const calculatedHeight = Math.max(
+    headerHeight + tableData.fields.length * fieldHeight + padding,
+    minHeight
+  );
+
+  return {
+    width: Math.min(estimatedWidth, 350), // Cap max width at 350px
+    height: calculatedHeight,
+  };
+};
+
 const getLayoutedElements = (
   nodes: Node[],
   edges: Edge[],
@@ -253,20 +289,62 @@ const getLayoutedElements = (
   const dagreGraph = new dagre.graphlib.Graph();
   dagreGraph.setDefaultEdgeLabel(() => ({}));
 
-  const nodeWidth = 250;
-  const nodeHeight = 200;
+  // Create a map to store node dimensions
+  const nodeDimensions = new Map<string, { width: number; height: number }>();
 
-  // Configure the direction and node spacing
-  dagreGraph.setGraph({
-    rankdir: direction,
-    nodesep: 80,
-    ranksep: 100,
-    edgesep: 80,
+  // Calculate dimensions for each node based on its content
+  nodes.forEach(node => {
+    if (node.data && node.type === 'tableNode') {
+      const dimensions = calculateNodeDimensions(node.data as DbmlTableData);
+      nodeDimensions.set(node.id, dimensions);
+    } else {
+      // Fallback dimensions for non-table nodes
+      nodeDimensions.set(node.id, { width: 250, height: 200 });
+    }
   });
 
-  // Add nodes to dagre
+  // Determine optimal layout direction based on node count and relationships
+  let optimalDirection = direction;
+  if (nodes.length > 6) {
+    // For larger schemas, use top-bottom layout for better vertical space usage
+    optimalDirection = 'TB';
+  } else if (nodes.length <= 3) {
+    // For smaller schemas, left-right works well
+    optimalDirection = 'LR';
+  }
+
+  // Calculate dynamic spacing based on average node size
+  const avgWidth =
+    Array.from(nodeDimensions.values()).reduce(
+      (sum, dim) => sum + dim.width,
+      0
+    ) / nodeDimensions.size;
+  const avgHeight =
+    Array.from(nodeDimensions.values()).reduce(
+      (sum, dim) => sum + dim.height,
+      0
+    ) / nodeDimensions.size;
+
+  const dynamicNodeSep = Math.max(80, avgWidth * 0.3);
+  const dynamicRankSep = Math.max(100, avgHeight * 0.5);
+
+  // Configure the direction and dynamic node spacing
+  dagreGraph.setGraph({
+    rankdir: optimalDirection,
+    nodesep: dynamicNodeSep,
+    ranksep: dynamicRankSep,
+    edgesep: Math.max(60, avgWidth * 0.2),
+    marginx: 40,
+    marginy: 40,
+  });
+
+  // Add nodes to dagre with their calculated dimensions
   nodes.forEach(node => {
-    dagreGraph.setNode(node.id, { width: nodeWidth, height: nodeHeight });
+    const dimensions = nodeDimensions.get(node.id) || {
+      width: 250,
+      height: 200,
+    };
+    dagreGraph.setNode(node.id, dimensions);
   });
 
   // Add edges to dagre
@@ -280,11 +358,22 @@ const getLayoutedElements = (
   // Get the positioned nodes from dagre
   const layoutedNodes = nodes.map(node => {
     const nodeWithPosition = dagreGraph.node(node.id);
+    const dimensions = nodeDimensions.get(node.id) || {
+      width: 250,
+      height: 200,
+    };
+
     return {
       ...node,
       position: {
-        x: nodeWithPosition.x - nodeWidth / 2,
-        y: nodeWithPosition.y - nodeHeight / 2,
+        x: nodeWithPosition.x - dimensions.width / 2,
+        y: nodeWithPosition.y - dimensions.height / 2,
+      },
+      // Store the calculated dimensions in the node for rendering
+      style: {
+        ...node.style,
+        width: dimensions.width,
+        height: dimensions.height,
       },
     };
   });
@@ -300,6 +389,11 @@ export const DbmlCanvasWidget: React.FC<DbmlCanvasWidgetProps> = ({
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [error, setError] = useState<DbmlError | null>(null);
+  const { theme } = useTheme();
+
+  const getConnectionLineColor = () => {
+    return theme === 'dark' ? 'var(--primary)' : 'var(--foreground)';
+  };
 
   const parseDbml = useCallback(() => {
     try {
@@ -393,23 +487,23 @@ export const DbmlCanvasWidget: React.FC<DbmlCanvasWidgetProps> = ({
           sourceHandle: `${ref.endpoints[0].fieldNames[0]}-right`,
           targetHandle: `${ref.endpoints[1].fieldNames[0]}-left`,
           type: 'smoothstep',
-          style: { stroke: 'var(--primary)' },
+          style: { stroke: getConnectionLineColor() },
           markerEnd: {
             type: MarkerType.ArrowClosed,
-            color: 'var(--primary)',
+            color: getConnectionLineColor(),
           },
           label: `${ref.endpoints[0].fieldNames[0]} → ${ref.endpoints[1].fieldNames[0]}`,
-          labelStyle: { fill: 'var(--primary)', fontWeight: 500 },
+          labelStyle: { fill: getConnectionLineColor(), fontWeight: 500 },
           labelBgStyle: { fill: 'var(--background)' },
         })
       );
 
-      // Apply automatic layout
+      // Apply automatic layout with dynamic direction selection
       const { nodes: layoutedNodes, edges: layoutedEdges } =
         getLayoutedElements(
           initialNodes,
           initialEdges,
-          'LR' // Left to Right layout
+          'TB' // Default direction - will be optimized automatically
         );
 
       setNodes(layoutedNodes);
@@ -447,7 +541,7 @@ export const DbmlCanvasWidget: React.FC<DbmlCanvasWidgetProps> = ({
 
       setError(errorInfo);
     }
-  }, [dbml, setNodes, setEdges]);
+  }, [dbml, setNodes, setEdges, theme]);
 
   useEffect(() => {
     parseDbml();
@@ -492,7 +586,7 @@ export const DbmlCanvasWidget: React.FC<DbmlCanvasWidgetProps> = ({
   }
 
   return (
-    <div style={styles}>
+    <div style={styles} className="dbml-canvas-widget">
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -504,18 +598,38 @@ export const DbmlCanvasWidget: React.FC<DbmlCanvasWidgetProps> = ({
         maxZoom={1.5}
         defaultEdgeOptions={{
           type: 'smoothstep',
-          style: { stroke: 'var(--primary)' },
+          style: { stroke: getConnectionLineColor() },
           markerEnd: {
             type: MarkerType.ArrowClosed,
-            color: 'var(--primary)',
+            color: getConnectionLineColor(),
           },
         }}
       >
         <Background color="var(--primary)" gap={16} size={1} />
-        <Controls />
+        <Controls
+          style={{
+            backgroundColor: 'var(--background)',
+            border: '1px solid var(--border)',
+            borderRadius: '4px',
+            boxShadow: 'var(--shadow-sm)',
+          }}
+          showZoom={true}
+          showFitView={true}
+          showInteractive={true}
+        />
         <MiniMap
           nodeColor="var(--primary)"
-          maskColor="rgba(var(--primary-rgb), 0.1)"
+          nodeStrokeColor="var(--border)"
+          nodeStrokeWidth={1}
+          nodeBorderRadius={4}
+          maskColor="var(--accent)"
+          maskStrokeColor="var(--border)"
+          maskStrokeWidth={1}
+          style={{
+            backgroundColor: 'var(--background)',
+            border: '1px solid var(--border)',
+            borderRadius: '4px',
+          }}
         />
       </ReactFlow>
     </div>

@@ -34,7 +34,7 @@ public class QueryableRegistry : IQueryableRegistry
         {
             compositeDisposable.Add(cleanup);
         }
-        
+
         return Disposable.Create(() =>
         {
             if (_cleanups.TryRemove(sourceId, out var toCleanup))

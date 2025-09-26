@@ -13,8 +13,8 @@ import { cn } from '@/lib/utils';
 import { getHeight, getWidth, inputStyles } from '@/lib/styles';
 import { InvalidIcon } from '@/components/InvalidIcon';
 import { useFocusable } from '@/hooks/use-focus-management';
-import { useEventHandler } from '@/components/EventHandlerContext';
-import { sidebarMenuRef } from '../layouts/SidebarLayoutWidget';
+import { useEventHandler } from '@/components/event-handler';
+import { sidebarMenuRef } from '../layouts/sidebar';
 
 interface TextInputWidgetProps {
   id: string;
@@ -81,7 +81,7 @@ const formatShortcutForDisplay = (shortcutStr?: string): React.ReactNode[] => {
       result.push(
         <span
           key={`meta-${index}`}
-          style={{ fontSize: '1.5em', lineHeight: 1, verticalAlign: 'middle' }}
+          className="inline-flex items-center justify-center"
         >
           ⌘
         </span>
@@ -456,8 +456,8 @@ const SearchVariant: React.FC<{
           </button>
         )}
         {props.shortcutKey && !isFocused && (
-          <div className="pointer-events-auto flex items-center h-6">
-            <kbd className="px-1 py-0.5 text-small-label font-medium text-foreground bg-muted border border-border rounded-md">
+          <div className="pointer-events-auto flex items-center h-4">
+            <kbd className="badge-text-primary text-foreground bg-muted border border-border rounded-sm px-1 py-0.25">
               {shortcutDisplay}
             </kbd>
           </div>

@@ -34,7 +34,7 @@ export const BladeContainerWidget: React.FC<BladeContainerWidgetProps> = ({
   }, []);
 
   return (
-    <div className="bg-gray-300 remove-ancestor-padding h-full">
+    <div className="bg-sidebar remove-ancestor-padding h-full">
       <ScrollArea
         ref={scrollRef}
         className="h-full w-full overflow-y-hidden"

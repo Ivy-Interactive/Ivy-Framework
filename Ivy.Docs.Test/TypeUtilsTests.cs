@@ -1,7 +1,7 @@
 using System.Reflection;
 using Ivy.Core;
 using Ivy.Core.Docs;
-using Ivy.Docs.Helpers;
+using Ivy.Docs.Shared.Helpers;
 
 namespace Ivy.Docs.Test;
 

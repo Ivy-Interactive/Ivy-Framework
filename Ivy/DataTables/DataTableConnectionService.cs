@@ -20,7 +20,7 @@ public class DataTableConnectionService(IQueryableRegistry queryableRegistry, Se
         });
 
         var connection = new DataTableConnection(serverArgs.Port, "/datatable.TableService/Query/", connectionId, sourceId);
-        
+
         return (cleanup, connection);
     }
 }

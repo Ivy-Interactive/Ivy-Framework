@@ -1,0 +1,28 @@
+﻿global using System.Collections.Immutable;
+global using System.Reactive.Linq;
+global using Ivy.Auth;
+global using Ivy.Apps;
+global using Ivy.Client;
+global using Ivy.Core;
+global using Ivy.Core.Hooks;
+global using Ivy.Hooks;
+global using Ivy.Helpers;
+global using Ivy.Views;
+global using Ivy.Views.Forms;
+global using Ivy.Shared;
+global using Ivy.Charts;
+global using Ivy.Views.Alerts;
+global using Ivy.Views.Builders;
+global using Ivy.Views.Charts;
+global using Ivy.Widgets.Inputs;
+global using Microsoft.Extensions.DependencyInjection;
+global using System.ComponentModel.DataAnnotations;
+global using System.Globalization;
+global using Ivy;
+global using Ivy.Widgets.Internal;
+global using Ivy.Views.Tables;
+global using Ivy.Views.Blades;
+global using Ivy.Views.Dashboards;
+global using Ivy.Docs.Shared.Helpers;
+
+namespace Ivy.Docs.Shared;

@@ -1,4 +1,4 @@
-import { useEventHandler } from '@/components/EventHandlerContext';
+import { useEventHandler } from '@/components/event-handler';
 import React, { useRef, useState } from 'react';
 
 import {
@@ -24,7 +24,6 @@ interface DropDownMenuWidgetProps {
   items: MenuItem[];
   align?: 'Start' | 'Center' | 'End';
   side?: 'Top' | 'Right' | 'Bottom' | 'Left';
-  sideOffset?: number;
   alignOffset?: number;
   slots?: {
     Trigger?: React.ReactNode[];
@@ -38,8 +37,7 @@ export const DropDownMenuWidget: React.FC<DropDownMenuWidgetProps> = ({
   items,
   align = 'Start',
   side = 'Bottom',
-  sideOffset = 8,
-  alignOffset = 0,
+  alignOffset,
 }) => {
   const eventHandler = useEventHandler();
   const [open, setOpen] = useState(false);
@@ -139,7 +137,7 @@ export const DropDownMenuWidget: React.FC<DropDownMenuWidgetProps> = ({
               )}
             </DropdownMenuSubTrigger>
             <DropdownMenuPortal>
-              <DropdownMenuSubContent>
+              <DropdownMenuSubContent className="m-2">
                 {renderMenuItems(item.children)}
               </DropdownMenuSubContent>
             </DropdownMenuPortal>
@@ -174,7 +172,7 @@ export const DropDownMenuWidget: React.FC<DropDownMenuWidgetProps> = ({
         side={
           camelCase(side) as 'top' | 'right' | 'bottom' | 'left' | undefined
         }
-        sideOffset={sideOffset}
+        className="m-2"
         alignOffset={alignOffset}
       >
         {slots.Header && <DropdownMenuLabel>{slots.Header}</DropdownMenuLabel>}

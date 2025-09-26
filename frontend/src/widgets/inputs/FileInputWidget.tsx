@@ -1,11 +1,17 @@
 import React, { useCallback, useState, useRef } from 'react';
 import { Input } from '@/components/ui/input';
-import { useEventHandler } from '@/components/EventHandlerContext';
+import { useEventHandler } from '@/components/event-handler';
 import { Upload, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { getWidth } from '@/lib/styles';
 import { InvalidIcon } from '@/components/InvalidIcon';
+import { Sizes } from '@/types/sizes';
+import {
+  fileInputVariants,
+  uploadIconVariants,
+  textVariants,
+} from '@/components/ui/input/file-input-variants';
 
 interface FileInput {
   name: string;
@@ -26,6 +32,8 @@ interface FileInputWidgetProps {
   multiple?: boolean;
   maxFiles?: number;
   placeholder?: string;
+  uploadUrl?: string;
+  size?: Sizes;
 }
 
 export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
@@ -34,28 +42,72 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
   disabled,
   invalid,
   width,
-  events,
   accept,
   multiple = false,
   maxFiles,
   placeholder,
+  uploadUrl,
+  size = Sizes.Medium,
 }) => {
   const handleEvent = useEventHandler();
   const [isDragging, setIsDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const convertFileToUploadFile = async (file: File): Promise<FileInput> => {
-    const arrayBuffer = await file.arrayBuffer();
-    const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+  const uploadFile = useCallback(
+    async (file: File): Promise<void> => {
+      if (!uploadUrl) return;
 
-    return {
-      name: file.name,
-      size: file.size,
-      type: file.type,
-      lastModified: new Date(file.lastModified),
-      content: base64,
-    };
-  };
+      // Get the correct host from meta tag or use relative URL
+      const getUploadUrl = () => {
+        const ivyHostMeta = document.querySelector('meta[name="ivy-host"]');
+        if (ivyHostMeta) {
+          const host = ivyHostMeta.getAttribute('content');
+          return host + uploadUrl;
+        }
+        // If no meta tag, use relative URL (should work in production)
+        return uploadUrl;
+      };
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      try {
+        const response = await fetch(getUploadUrl(), {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (!response.ok) {
+          throw new Error(`Upload failed: ${response.statusText}`);
+        }
+      } catch (error) {
+        console.error('File upload error:', error);
+      }
+    },
+    [uploadUrl]
+  );
+
+  const convertFileToUploadFile = useCallback(
+    async (file: File): Promise<FileInput> => {
+      if (!file) {
+        throw new Error('File is required');
+      }
+
+      if (uploadUrl) {
+        await uploadFile(file);
+      }
+
+      // Ivy FileInput should only contain metadata, not file content
+      return {
+        name: file.name,
+        size: file.size,
+        type: file.type,
+        lastModified: new Date(file.lastModified),
+        // Don't include content - it's handled by UploadService
+      };
+    },
+    [uploadFile, uploadUrl]
+  );
 
   const handleChange = useCallback(
     async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -80,12 +132,12 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
 
       handleEvent('OnChange', id, [selectedFiles]);
     },
-    [id, events, multiple, handleEvent, convertFileToUploadFile, maxFiles]
+    [id, multiple, handleEvent, convertFileToUploadFile, maxFiles]
   );
 
   const handleClear = useCallback(() => {
     handleEvent('OnChange', id, [null]);
-  }, [id, events, handleEvent]);
+  }, [id, handleEvent]);
 
   const handleDragEnter = useCallback(
     (e: React.DragEvent) => {
@@ -138,15 +190,7 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
 
       handleEvent('OnChange', id, [selectedFiles]);
     },
-    [
-      id,
-      events,
-      multiple,
-      handleEvent,
-      disabled,
-      convertFileToUploadFile,
-      maxFiles,
-    ]
+    [id, multiple, handleEvent, disabled, convertFileToUploadFile, maxFiles]
   );
 
   const handleClick = useCallback(() => {
@@ -178,7 +222,7 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
       )}
       <div
         className={cn(
-          'relative rounded-md border-2 border-dashed transition-colors min-h-[100px]',
+          fileInputVariants({ size }),
           isDragging && !disabled
             ? 'border-primary bg-primary/5'
             : 'border-muted-foreground/25',
@@ -196,9 +240,9 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
           disabled={disabled}
           className="hidden"
         />
-        <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center">
-          <Upload className="h-6 w-6 mb-2 text-primary" />
-          <p className="text-sm text-muted-foreground">
+        <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+          <Upload className={uploadIconVariants({ size })} />
+          <p className={textVariants({ size })}>
             {displayValue ||
               placeholder ||
               `Drag and drop your ${multiple ? 'files' : 'file'} here or click to select`}

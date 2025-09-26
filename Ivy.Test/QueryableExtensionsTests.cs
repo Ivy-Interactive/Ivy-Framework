@@ -31,9 +31,9 @@ public class QueryableExtensionsTests
     {
         var data = GetTestData().AsQueryable();
         var fieldsToRemove = new[] { "Description" };
-        
+
         var result = data.RemoveFields(fieldsToRemove).Cast<TestModel>().ToList();
-        
+
         Assert.Equal(3, result.Count);
         foreach (var item in result)
         {
@@ -49,9 +49,9 @@ public class QueryableExtensionsTests
     {
         var data = GetTestData().AsQueryable();
         var fieldsToRemove = new[] { "Description", "Value", "IsActive" };
-        
+
         var result = data.RemoveFields(fieldsToRemove).Cast<TestModel>().ToList();
-        
+
         Assert.Equal(3, result.Count);
         foreach (var item in result)
         {
@@ -68,9 +68,9 @@ public class QueryableExtensionsTests
     {
         var data = GetTestData().AsQueryable();
         var fieldsToRemove = new[] { "NonExistentField", "Description" };
-        
+
         var result = data.RemoveFields(fieldsToRemove).Cast<TestModel>().ToList();
-        
+
         Assert.Equal(3, result.Count);
         foreach (var item in result)
         {
@@ -86,9 +86,9 @@ public class QueryableExtensionsTests
     {
         var data = GetTestData().AsQueryable();
         var fieldsToRemove = new string[] { };
-        
+
         var result = data.RemoveFields(fieldsToRemove).Cast<TestModel>().ToList();
-        
+
         Assert.Equal(3, result.Count);
         Assert.Equal(1, result[0].Id);
         Assert.Equal("Item1", result[0].Name);
@@ -102,9 +102,9 @@ public class QueryableExtensionsTests
     {
         var data = GetTestData().AsQueryable();
         var fieldsToRemove = new[] { "Id", "Name", "Description", "Value", "IsActive" };
-        
+
         var result = data.RemoveFields(fieldsToRemove).Cast<TestModel>().ToList();
-        
+
         Assert.Equal(3, result.Count);
         foreach (var item in result)
         {

@@ -1,6 +1,4 @@
 using Ivy.Helpers;
-using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -10,7 +8,7 @@ using Ivy.Chrome;
 using Ivy.Connections;
 using Ivy.Core;
 using Ivy.DataTables;
-using Ivy.Hooks;
+using Ivy.Themes;
 using Ivy.Views;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -21,10 +19,11 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Ivy;
 
-public class ServerArgs
+public record ServerArgs
 {
     public const int DefaultPort = 5010;
     public int Port { get; set; } = DefaultPort;
@@ -34,8 +33,15 @@ public class ServerArgs
     public string? Args { get; set; } = null;
     public string? DefaultAppId { get; set; } = null;
     public bool Silent { get; set; } = false;
+    public bool Describe { get; set; } = false;
     public string? MetaTitle { get; set; } = null;
     public string? MetaDescription { get; set; } = null;
+    public Assembly? AssetAssembly { get; set; } = null;
+#if DEBUG
+    public bool FindAvailablePort { get; set; } = true;
+#else
+    public bool FindAvailablePort { get; set; } = false;
+#endif
 }
 
 public class Server
@@ -43,23 +49,33 @@ public class Server
     private IContentBuilder? _contentBuilder;
     private bool _useHotReload;
     private bool _useHttpRedirection;
-    private List<Action<WebApplicationBuilder>> _builderMods = new();
+    private readonly List<Action<WebApplicationBuilder>> _builderMods = new();
 
     public string? DefaultAppId { get; private set; }
     public AppRepository AppRepository { get; } = new();
     public IServiceCollection Services { get; } = new ServiceCollection();
     public Type? AuthProviderType { get; private set; } = null;
     public ServerArgs Args => _args;
-
-    private readonly ServerArgs _args;
+    private ServerArgs _args;
 
     public Server(ServerArgs? args = null)
     {
         _args = args ?? IvyServerUtils.GetArgs();
         if (int.TryParse(Environment.GetEnvironmentVariable("PORT"), out int parsedPort))
         {
-            _args.Port = parsedPort;
+            _args = _args with { Port = parsedPort };
         }
+
+        if (bool.TryParse(Environment.GetEnvironmentVariable("VERBOSE"), out bool parsedVerbose))
+        {
+            _args = _args with { Verbose = parsedVerbose };
+        }
+
+        _args = _args with
+        {
+            AssetAssembly = _args.AssetAssembly ?? Assembly.GetCallingAssembly(),
+        };
+
         Services.AddSingleton(_args);
     }
 
@@ -88,9 +104,23 @@ public class Server
         AppRepository.AddFactory(() => [appDescriptor]);
     }
 
-    public void AddAppsFromAssembly()
+    public void AddAppsFromAssembly(Assembly? assembly = null)
     {
-        AppRepository.AddFactory(AppHelpers.GetApps);
+        AppRepository.AddFactory(() => AppHelpers.GetApps(assembly));
+    }
+
+    public void AddConnectionsFromAssembly()
+    {
+        var assembly = Assembly.GetEntryAssembly();
+
+        var connections = assembly!.GetTypes()
+            .Where(t => t.IsClass && typeof(IConnection).IsAssignableFrom(t));
+
+        foreach (var type in connections)
+        {
+            var connection = (IConnection)Activator.CreateInstance(type)!;
+            connection.RegisterServices(this.Services);
+        }
     }
 
     public AppDescriptor GetApp(string id)
@@ -159,7 +189,7 @@ public class Server
 
     public Server UseDefaultApp(Type appType)
     {
-        DefaultAppId = AppHelpers.GetApp(appType)?.Id;
+        DefaultAppId = AppHelpers.GetApp(appType).Id;
         return this;
     }
 
@@ -181,6 +211,33 @@ public class Server
         return this;
     }
 
+    /// <summary>
+    /// Configures the server to use a custom theme configuration.
+    /// This will register a theme service with the specified theme and make it available throughout the application.
+    /// </summary>
+    /// <param name="theme">The theme configuration to use for the application.</param>
+    public Server UseTheme(Theme theme)
+    {
+        var themeService = new ThemeService();
+        themeService.SetTheme(theme);
+        Services.AddSingleton<IThemeService>(themeService);
+        return this;
+    }
+
+    /// <summary>
+    /// Configures the server to use a custom theme configuration with a builder pattern.
+    /// </summary>
+    /// <param name="configureTheme">An action delegate to configure the theme properties.</param>
+    public Server UseTheme(Action<Theme> configureTheme)
+    {
+        var theme = new Theme();
+        configureTheme(theme);
+        var themeService = new ThemeService();
+        themeService.SetTheme(theme);
+        Services.AddSingleton<IThemeService>(themeService);
+        return this;
+    }
+
     public async Task RunAsync(CancellationTokenSource? cts = null)
     {
         var sessionStore = new AppSessionStore();
@@ -190,6 +247,26 @@ public class Server
         {
             e.Cancel = true;
             cts.Cancel();
+        };
+
+        if (!_args.Verbose)
+        {
+            // In production mode, prevent termination from unhandled exceptions
+            AppDomain.CurrentDomain.SetData("HACK_SKIP_THROW_UNOBSERVED_TASK_EXCEPTIONS", true);
+        }
+
+        // Handle unobserved task exceptions to prevent process termination
+        TaskScheduler.UnobservedTaskException += (sender, e) =>
+        {
+            Console.WriteLine($@"[CRITICAL] Unobserved Task Exception: {e.Exception}");
+            e.SetObserved(); // Prevents process termination
+        };
+
+        AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
+        {
+            var ex = (Exception)e.ExceptionObject;
+            Console.WriteLine($@"[CRITICAL] Unhandled Domain Exception - IsTerminating: {e.IsTerminating}");
+            Console.WriteLine($@"[CRITICAL] Exception: {ex}");
         };
 
 #if (DEBUG)
@@ -210,6 +287,29 @@ public class Server
             if (_args.IKillForThisPort)
             {
                 Utils.KillProcessUsingPort(_args.Port);
+            }
+            else if (_args.FindAvailablePort)
+            {
+                var originalPort = _args.Port;
+                var maxAttempts = 100;
+                var attemptCount = 0;
+
+                while (Utils.IsPortInUse(_args.Port) && attemptCount < maxAttempts)
+                {
+                    _args = _args with { Port = _args.Port + 1 };
+                    attemptCount++;
+                }
+
+                if (attemptCount >= maxAttempts)
+                {
+                    Console.WriteLine($@"[31mCould not find an available port after checking {maxAttempts} ports starting from {originalPort}.[0m");
+                    return;
+                }
+
+                if (_args.Port != originalPort)
+                {
+                    Console.WriteLine($@"[33mPort {originalPort} is in use. Using port {_args.Port} instead.[0m");
+                }
             }
             else
             {
@@ -232,7 +332,10 @@ public class Server
         var builder = WebApplication.CreateBuilder();
 
         builder.Configuration.AddEnvironmentVariables();
-        builder.Configuration.AddUserSecrets(Assembly.GetExecutingAssembly());
+        if (Assembly.GetEntryAssembly() is { } entryAssembly)
+        {
+            builder.Configuration.AddUserSecrets(entryAssembly);
+        }
 
         foreach (var mod in _builderMods)
         {
@@ -241,7 +344,10 @@ public class Server
 
         builder.WebHost.UseUrls($"http://*:{_args.Port}");
 
-        builder.Services.AddSignalR();
+        builder.Services.AddSignalR(options =>
+        {
+            options.EnableDetailedErrors = _args.Verbose;
+        });
         builder.Services.AddSingleton(this);
         builder.Services.AddSingleton<IClientNotifier, ClientNotifier>();
         builder.Services.AddControllers()
@@ -249,9 +355,22 @@ public class Server
             .AddControllersAsServices();
         builder.Services.AddGrpc();
         builder.Services.AddSingleton<IQueryableRegistry, QueryableRegistry>();
-        builder.Services.AddSingleton<IContentBuilder>(_contentBuilder ?? new DefaultContentBuilder());
+        builder.Services.AddSingleton(_contentBuilder ?? new DefaultContentBuilder());
         builder.Services.AddSingleton(sessionStore);
         builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
+        builder.Services.AddHealthChecks();
+
+        // Register theme service if not already registered
+        if (Services.All(s => s.ServiceType != typeof(IThemeService)))
+        {
+            Services.AddSingleton<IThemeService, ThemeService>();
+        }
+
+        // Register all services from this server's Services collection
+        foreach (var service in Services)
+        {
+            builder.Services.Add(service);
+        }
 
         builder.Services.AddCors(options =>
         {
@@ -279,10 +398,36 @@ public class Server
 
         var app = builder.Build();
 
+        app.UseExceptionHandler(error =>
+        {
+            error.Run(async context =>
+            {
+                context.Response.StatusCode = 500;
+                context.Response.ContentType = "application/json";
+                var errorFeature = context.Features.Get<Microsoft.AspNetCore.Diagnostics.IExceptionHandlerFeature>();
+                if (errorFeature != null)
+                {
+                    var ex = errorFeature.Error;
+
+                    var logger = app.Services.GetRequiredService<ILogger<Server>>();
+                    logger.LogError(ex, "An unhandled exception occurred.");
+
+                    var result = System.Text.Json.JsonSerializer.Serialize(new
+                    {
+                        error = ex.Message,
+                        detail = ex.StackTrace
+                    });
+                    await context.Response.WriteAsync(result);
+                }
+            });
+        });
+
         if (_useHttpRedirection)
         {
             app.UseHttpsRedirection();
         }
+
+        var logger = _args.Verbose ? app.Services.GetRequiredService<ILogger<Server>>() : new NullLogger<Server>();
 
         app.UseRouting();
         app.UseCors();
@@ -290,6 +435,7 @@ public class Server
 
         app.MapControllers();
         app.MapHub<AppHub>("/messages");
+        app.MapHealthChecks("/health");
         app.MapGrpcService<Ivy.DataTables.DataTableService>().EnableGrpcWeb();
 
         if (_useHotReload)
@@ -302,8 +448,8 @@ public class Server
             };
         }
 
-        app.UseFrontend(_args);
-        app.UseAssets("Assets");
+        app.UseFrontend(_args, logger);
+        app.UseAssets(_args, logger, "Assets");
 
         app.Lifetime.ApplicationStarted.Register(() =>
         {
@@ -320,6 +466,13 @@ public class Server
             }
         });
 
+        if (_args.Describe)
+        {
+            var description = ServerDescription.Gather(this, app.Services);
+            Console.WriteLine(description.ToYaml());
+            return;
+        }
+
         try
         {
             await app.StartAsync(cts.Token);
@@ -330,34 +483,20 @@ public class Server
             Console.WriteLine($@"Failed to start Ivy server. Is the port already in use?");
         }
     }
-
-    public void AddConnectionsFromAssembly()
-    {
-        var assembly = Assembly.GetEntryAssembly();
-
-        var connections = assembly!.GetTypes()
-            .Where(t => t.IsClass && typeof(IConnection).IsAssignableFrom(t));
-
-        foreach (var type in connections)
-        {
-            var connection = (IConnection)Activator.CreateInstance(type)!;
-            connection.RegisterServices(this.Services);
-        }
-    }
 }
 
 public static class WebApplicationExtensions
 {
-    public static WebApplication UseFrontend(this WebApplication app, ServerArgs serverArgs)
+    public static WebApplication UseFrontend(this WebApplication app, ServerArgs serverArgs, ILogger<Server> logger)
     {
-        var assembly = Assembly.GetExecutingAssembly()!;
+        var assembly = typeof(WebApplicationExtensions).Assembly;
         var embeddedProvider = new EmbeddedFileProvider(
             assembly,
             $"{assembly.GetName().Name}"
         );
+        var resourceName = $"{assembly.GetName().Name}.index.html";
         app.MapGet("/", async context =>
         {
-            var resourceName = $"{assembly.GetName().Name}.index.html";
             await using var stream = assembly.GetManifestResourceStream(resourceName);
             if (stream != null)
             {
@@ -366,12 +505,21 @@ public static class WebApplicationExtensions
 
                 //Inject IVY_LICENSE:
                 var configuration = app.Services.GetRequiredService<IConfiguration>();
-                var ivyLicense = configuration["IVY_LICENSE"] ?? "";
+                var ivyLicense = configuration["Ivy:License"] ?? "";
                 if (!string.IsNullOrEmpty(ivyLicense))
                 {
                     var ivyLicenseTag = $"<meta name=\"ivy-license\" content=\"{ivyLicense}\" />";
                     html = html.Replace("</head>", $"  {ivyLicenseTag}\n</head>");
                 }
+#if DEBUG
+                var ivyLicensePublicKey = configuration["Ivy:LicensePublicKey"] ?? "";
+                if (!string.IsNullOrEmpty(ivyLicensePublicKey))
+                {
+                    var ivyLicensePublicKeyTag =
+                        $"<meta name=\"ivy-license-public-key\" content=\"{ivyLicensePublicKey}\" />";
+                    html = html.Replace("</head>", $"  {ivyLicensePublicKeyTag}\n</head>");
+                }
+#endif
 
                 //Inject Meta Title and Description
                 if (!string.IsNullOrEmpty(serverArgs.MetaDescription))
@@ -379,15 +527,32 @@ public static class WebApplicationExtensions
                     var metaDescriptionTag = $"<meta name=\"description\" content=\"{serverArgs.MetaDescription}\" />";
                     html = html.Replace("</head>", $"  {metaDescriptionTag}\n</head>");
                 }
+
                 if (!string.IsNullOrEmpty(serverArgs.MetaTitle))
                 {
                     var metaTitleTag = $"<title>{serverArgs.MetaTitle}</title>";
                     html = Regex.Replace(html, "<title>.*?</title>", metaTitleTag, RegexOptions.Singleline);
                 }
 
+                // Inject theme configuration
+                var themeService = app.Services.GetService<IThemeService>();
+                if (themeService != null)
+                {
+                    var themeCss = themeService.GenerateThemeCss();
+                    var themeMetaTag = themeService.GenerateThemeMetaTag();
+                    html = html.Replace("</head>", $"  {themeMetaTag}\n  {themeCss}\n</head>");
+                }
+
                 context.Response.ContentType = "text/html";
+                context.Response.StatusCode = 200;
                 var bytes = Encoding.UTF8.GetBytes(html);
                 await context.Response.Body.WriteAsync(bytes);
+            }
+            else
+            {
+                context.Response.StatusCode = 500;
+                context.Response.ContentType = "text/plain";
+                await context.Response.WriteAsync($"Error: {resourceName} not found.");
             }
         });
 
@@ -396,9 +561,12 @@ public static class WebApplicationExtensions
         return app;
     }
 
-    public static WebApplication UseAssets(this WebApplication app, string folder)
+    public static WebApplication UseAssets(this WebApplication app, ServerArgs args, ILogger<Server> logger,
+        string folder)
     {
-        var assembly = Assembly.GetEntryAssembly()!;
+        var assembly = args.AssetAssembly ?? Assembly.GetEntryAssembly()!;
+
+        logger.LogDebug("Using {Assembly} for assets.", assembly.FullName);
 
         var embeddedProvider = new EmbeddedFileProvider(
             assembly,
@@ -447,7 +615,7 @@ public static class IvyServerUtils
         var parser = new ArgsParser();
         var args = Environment.GetCommandLineArgs().Skip(1).ToArray();
         var parsedArgs = parser.Parse(args);
-        return new ServerArgs()
+        var serverArgs = new ServerArgs()
         {
             Port = parser.GetValue(parsedArgs, "port", ServerArgs.DefaultPort),
             Verbose = parser.GetValue(parsedArgs, "verbose", false),
@@ -455,7 +623,14 @@ public static class IvyServerUtils
             Browse = parser.GetValue(parsedArgs, "browse", false),
             Args = parser.GetValue<string?>(parsedArgs, "args", null),
             DefaultAppId = parser.GetValue<string?>(parsedArgs, "app", null),
-            Silent = parser.GetValue(parsedArgs, "silent", false)
+            Silent = parser.GetValue(parsedArgs, "silent", false),
+            Describe = parser.GetValue(parsedArgs, "describe", false)
         };
+#if DEBUG
+        serverArgs = serverArgs with { FindAvailablePort = parser.GetValue(parsedArgs, "find-available-port", true) };
+#else
+        serverArgs = serverArgs with { FindAvailablePort = parser.GetValue(parsedArgs, "find-available-port", false) };
+#endif
+        return serverArgs;
     }
 }

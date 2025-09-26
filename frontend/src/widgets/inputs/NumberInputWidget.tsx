@@ -1,14 +1,13 @@
 import { memo, useCallback, useMemo } from 'react';
-import {
-  useEventHandler,
-  EventHandler,
-} from '@/components/EventHandlerContext';
+import { useEventHandler, EventHandler } from '@/components/event-handler';
 import NumberInput from '@/components/NumberInput';
 import { Slider } from '@/components/ui/slider';
 import { cn } from '@/lib/utils';
 import { inputStyles } from '@/lib/styles';
 import { InvalidIcon } from '@/components/InvalidIcon';
+import { X } from 'lucide-react';
 import React from 'react';
+import { Sizes } from '@/types/sizes';
 
 const formatStyleMap = {
   Decimal: 'decimal',
@@ -28,9 +27,9 @@ const TYPE_LIMITS = {
   uint: { min: 0, max: 4294967295 },
   long: { min: Number.MIN_SAFE_INTEGER, max: Number.MAX_SAFE_INTEGER },
   ulong: { min: 0, max: Number.MAX_SAFE_INTEGER },
-  float: { min: -999999999999.99, max: 999999999999.99 }, // Practical limits for float
-  double: { min: -999999999999.99, max: 999999999999.99 }, // Practical limits for double
-  decimal: { min: -999999999999.99, max: 999999999999.99 }, // Practical limits for decimal
+  float: { min: -999999999999.99, max: 999999999999.99 },
+  double: { min: -999999999999.99, max: 999999999999.99 },
+  decimal: { min: -999999999999.99, max: 999999999999.99 },
 } as const;
 
 interface NumberInputBaseProps {
@@ -47,10 +46,10 @@ interface NumberInputBaseProps {
   nullable?: boolean;
   onValueChange: (value: number | null) => void;
   currency?: string | undefined;
-  showArrows?: boolean;
   'data-testid'?: string;
   // Add type information for validation
   targetType?: string;
+  size?: Sizes;
 }
 
 interface NumberInputWidgetProps
@@ -92,6 +91,19 @@ const validateAndCapValue = (
   return cappedValue;
 };
 
+// Size variants for text styling
+const sizeVariants: Record<string, { text: string }> = {
+  Small: {
+    text: 'text-xs',
+  },
+  Medium: {
+    text: 'text-sm font-normal',
+  },
+  Large: {
+    text: 'text-ml font-medium',
+  },
+};
+
 const SliderVariant = memo(
   ({
     value,
@@ -101,6 +113,7 @@ const SliderVariant = memo(
     disabled = false,
     invalid,
     currency,
+    size = Sizes.Medium,
     onValueChange,
     'data-testid': dataTestId,
   }: NumberInputBaseProps) => {
@@ -142,13 +155,17 @@ const SliderVariant = memo(
           value={[sliderValue]}
           disabled={disabled}
           currency={currency}
+          size={size}
           onValueChange={handleSliderChange}
           onValueCommit={handleSliderCommit}
           className={cn(invalid && inputStyles.invalidInput)}
           data-testid={dataTestId}
         />
         <span
-          className="flex w-full items-center justify-between gap-1 text-small-label font-sm text-muted-foreground"
+          className={cn(
+            'flex w-full items-center justify-between gap-1',
+            sizeVariants[String(size)].text
+          )}
           aria-hidden="true"
         >
           <span>{min}</span>
@@ -180,7 +197,7 @@ const NumberVariant = memo(
     nullable = false,
     onValueChange,
     currency,
-    showArrows = false,
+    size = Sizes.Medium,
     'data-testid': dataTestId,
   }: NumberInputBaseProps) => {
     const formatConfig = useMemo(
@@ -217,20 +234,32 @@ const NumberVariant = memo(
           placeholder={placeholder}
           value={value}
           disabled={disabled}
+          size={size}
           onChange={handleNumberChange}
-          className={cn(invalid && inputStyles.invalidInput, invalid && 'pr-8')}
-          nullable={nullable}
-          showArrows={showArrows}
+          className={cn(
+            invalid && inputStyles.invalidInput,
+            // Add padding for icon container
+            ((nullable && value !== null && !disabled) || invalid) && 'pr-12'
+          )}
           data-testid={dataTestId}
         />
-        {invalid && (
-          <div
-            className={cn(
-              'absolute top-5.25 -translate-y-1/2',
-              showArrows ? 'right-8' : 'right-2'
+        {/* Icon container - flex row aligned to right */}
+        {((nullable && value !== null && !disabled) || invalid) && (
+          <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-row items-center gap-1">
+            {/* Clear (X) button - leftmost */}
+            {nullable && value !== null && !disabled && (
+              <button
+                type="button"
+                tabIndex={-1}
+                aria-label="Clear"
+                onClick={() => onValueChange(null)}
+                className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
+              >
+                <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+              </button>
             )}
-          >
-            <InvalidIcon message={invalid} />
+            {/* Invalid icon - rightmost */}
+            {invalid && <InvalidIcon message={invalid} />}
           </div>
         )}
       </div>
@@ -292,7 +321,6 @@ export const NumberInputWidget = memo(
         value={normalizedValue}
         nullable={nullable}
         onValueChange={handleChange}
-        showArrows={props.showArrows}
       />
     );
   }

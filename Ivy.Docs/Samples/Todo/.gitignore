@@ -1,5 +1,0 @@
-bin/
-obj/
-*.sln.iml
-.idea/**/*
-**/.idea/*

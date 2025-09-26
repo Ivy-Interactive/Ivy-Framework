@@ -6,7 +6,7 @@
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <NoWarn>NU1608;</NoWarn>
+    <NoWarn>NU1608;CS1591</NoWarn>
     <PackageId>Ivy.Database.Generator.Toolkit</PackageId>
     <Company>Ivy</Company>
     <Description>Build Internal Applications with AI and Pure C#</Description>
@@ -15,6 +15,7 @@
     <RepositoryUrl>https://github.com/Ivy-Interactive/Ivy</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>

@@ -13,6 +13,10 @@ const isLazyComponent = (
   );
 };
 
+const isChartComponent = (nodeType: string): boolean => {
+  return nodeType.startsWith('Ivy.') && nodeType.includes('Chart');
+};
+
 const flattenChildren = (children: WidgetNode[]): WidgetNode[] => {
   return children.flatMap(child => {
     if (child.type === 'Ivy.Fragment') {
@@ -67,6 +71,24 @@ export const renderWidgetTree = (node: WidgetNode): React.ReactNode => {
     </Component>
   );
 
+  // For chart components, provide a specific fallback
+  if (isLazyComponent(Component) && isChartComponent(node.type)) {
+    return (
+      <Suspense
+        fallback={
+          <div className="flex items-center justify-center p-8 text-muted-foreground">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            <span className="ml-2">Loading chart...</span>
+          </div>
+        }
+        key={node.id}
+      >
+        {content}
+      </Suspense>
+    );
+  }
+
+  // For other lazy components, use original behavior
   return isLazyComponent(Component) ? (
     <Suspense key={node.id}>{content}</Suspense>
   ) : (

@@ -34,7 +34,6 @@ export const widgetMap = {
   'Ivy.Box': Primitives.BoxWidget,
   'Ivy.Embed': React.lazy(() => import('@/widgets/primitives/EmbedWidget')),
   'Ivy.Callout': Primitives.CalloutWidget,
-  'Ivy.Article': Primitives.ArticleWidget,
   'Ivy.Kbd': Primitives.KbdWidget,
   'Ivy.Empty': Primitives.EmptyWidget,
   'Ivy.Avatar': Primitives.AvatarWidget,
@@ -42,8 +41,11 @@ export const widgetMap = {
   'Ivy.Spacer': Primitives.SpacerWidget,
   'Ivy.Loading': Primitives.LoadingWidget,
   'Ivy.AppHost': Primitives.AppHostWidget,
+  'Ivy.Audio': Primitives.AudioPlayerWidget,
+  'Ivy.VideoPlayer': Primitives.VideoPlayerWidget,
 
   // Widgets
+  'Ivy.Article': Widgets.ArticleWidget,
   'Ivy.Button': Widgets.ButtonWidget,
   'Ivy.Progress': Widgets.ProgressWidget,
   'Ivy.Tooltip': Widgets.TooltipWidget,
@@ -57,6 +59,7 @@ export const widgetMap = {
   'Ivy.ChatLoading': Widgets.ChatLoadingWidget,
   'Ivy.ChatStatus': Widgets.ChatStatusWidget,
   'Ivy.DropDownMenu': Widgets.DropDownMenuWidget,
+  'Ivy.Pagination': Widgets.PaginationWidget,
 
   // Layouts
   'Ivy.StackLayout': Layouts.StackLayoutWidget,
@@ -84,7 +87,12 @@ export const widgetMap = {
   'Ivy.AsyncSelectInput': Inputs.AsyncSelectInputWidget,
   'Ivy.DateRangeInput': Inputs.DateRangeInputWidget,
   'Ivy.FileInput': Inputs.FileInputWidget,
-  'Ivy.CodeInput': React.lazy(() => import('@/widgets/inputs/CodeInputWidget')),
+  'Ivy.CodeInput': React.lazy(
+    () => import('@/widgets/inputs/code/CodeInputWidget')
+  ),
+  'Ivy.AudioRecorder': React.lazy(
+    () => import('@/widgets/inputs/AudioRecorderWidget')
+  ),
 
   // Forms
   'Ivy.Form': Forms.FormWidget,
@@ -124,6 +132,7 @@ export const widgetMap = {
   ),
 
   // Internal
+  'Ivy.DemoBox': React.lazy(() => import('@/widgets/internal/DemoBoxWidget')),
   'Ivy.Widgets.Internal.DbmlCanvas': React.lazy(
     () => import('@/widgets/internal/DbmlCanvasWidget')
   ),

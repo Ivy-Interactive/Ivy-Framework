@@ -1,13 +1,5 @@
 import React from 'react';
-import {
-  Legend,
-  LegendProps,
-  Pie,
-  PieChart,
-  Cell,
-  LabelList,
-  Label,
-} from 'recharts';
+import { Legend, LegendProps, Pie, PieChart, Cell, LabelList } from 'recharts';
 import {
   ChartConfig,
   ChartContainer,
@@ -65,72 +57,54 @@ const PieChartWidget: React.FC<PieChartWidgetProps> = ({
   const [colorGenerator] = getColorGenerator(colorScheme);
 
   return (
-    <ChartContainer config={chartConfig} style={styles}>
-      <PieChart
-        margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
-        accessibilityLayer
-      >
-        {legend && <Legend {...generateLegendProps(legend)} />}
+    <div style={styles}>
+      {total && (
+        <div className="text-center">
+          <div className="text-xl font-bold text-foreground">
+            {total.formattedValue}
+          </div>
+          <div className="text-sm text-muted-foreground">{total.label}</div>
+        </div>
+      )}
+      <ChartContainer config={chartConfig}>
+        <PieChart
+          margin={{ top: 10, right: 10, bottom: 10, left: 10 }}
+          accessibilityLayer
+        >
+          {legend && <Legend {...generateLegendProps(legend)} />}
 
-        {tooltip && (
-          <ChartTooltip
-            cursor={false}
-            isAnimationActive={tooltip?.animated}
-            content={<ChartTooltipContent />}
-          />
-        )}
+          {tooltip && (
+            <ChartTooltip
+              cursor={false}
+              isAnimationActive={tooltip?.animated}
+              content={<ChartTooltipContent />}
+            />
+          )}
 
-        {pies?.map((props, pieIndex) => (
-          <Pie data={data} key={`pie${pieIndex}`} {...generatePieProps(props)}>
-            {data.map((_, dataIndex) => (
-              <Cell
-                key={`cell-${dataIndex}`}
-                fill={colorGenerator(dataIndex)}
-              />
-            ))}
+          {pies?.map((props, pieIndex) => (
+            <Pie
+              data={data}
+              key={`pie${pieIndex}`}
+              {...generatePieProps(props)}
+            >
+              {data.map((_, dataIndex) => (
+                <Cell
+                  key={`cell-${dataIndex}`}
+                  fill={colorGenerator(dataIndex)}
+                />
+              ))}
 
-            {props.labelLists?.map((labelList, labelListIndex) => (
-              <LabelList
-                key={`labelList-${labelListIndex}`}
-                {...generateLabelListProps(labelList)}
-              />
-            ))}
-
-            {pieIndex === 0 && total && (
-              <Label
-                content={({ viewBox }) => {
-                  if (viewBox && 'cx' in viewBox && 'cy' in viewBox) {
-                    return (
-                      <text
-                        x={viewBox.cx}
-                        y={viewBox.cy}
-                        textAnchor="middle"
-                        dominantBaseline="middle"
-                      >
-                        <tspan
-                          x={viewBox.cx}
-                          y={viewBox.cy}
-                          className="fill-foreground text-3xl font-bold"
-                        >
-                          {total.formattedValue}
-                        </tspan>
-                        <tspan
-                          x={viewBox.cx}
-                          y={(viewBox.cy || 0) + 24}
-                          className="fill-muted-foreground"
-                        >
-                          {total.label}
-                        </tspan>
-                      </text>
-                    );
-                  }
-                }}
-              />
-            )}
-          </Pie>
-        ))}
-      </PieChart>
-    </ChartContainer>
+              {props.labelLists?.map((labelList, labelListIndex) => (
+                <LabelList
+                  key={`labelList-${labelListIndex}`}
+                  {...generateLabelListProps(labelList)}
+                />
+              ))}
+            </Pie>
+          ))}
+        </PieChart>
+      </ChartContainer>
+    </div>
   );
 };
 

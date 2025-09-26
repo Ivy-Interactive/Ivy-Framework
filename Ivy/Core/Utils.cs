@@ -17,6 +17,13 @@ public static class Utils
         }
     }
 
+    public static Func<T, ValueTask> ToValueTask<T>(this Action<T> action)
+        => t =>
+        {
+            action(t);
+            return ValueTask.CompletedTask;
+        };
+
     public static object? ConvertJsonNode(JsonNode? jsonNode, Type valueType)
     {
         if (jsonNode is null) return null;

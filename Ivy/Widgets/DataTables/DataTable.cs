@@ -7,9 +7,9 @@ namespace Ivy;
 public record DataTable : WidgetBase<DataTable>
 {
     public DataTable(
-        DataTableConnection connection, 
-        Size? width, 
-        Size? height, 
+        DataTableConnection connection,
+        Size? width,
+        Size? height,
         DataTableColumn[] columns,
         DataTableConfiguration configuration
     )
@@ -19,9 +19,9 @@ public record DataTable : WidgetBase<DataTable>
         Connection = connection;
         Columns = columns;
     }
-    
+
     [Prop] public DataTableColumn[] Columns { get; set; }
-    
+
     [Prop] public DataTableConnection Connection { get; set; }
 
     [Prop] public DataTableConfiguration Configuration { get; set; }

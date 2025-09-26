@@ -12,11 +12,27 @@ interface CalloutWidgetProps {
   icon?: string;
 }
 
-const backgroundColors = {
-  Info: 'bg-cyan/10 border-cyan/20',
-  Success: 'bg-primary/10 border-primary/20',
-  Warning: 'bg-yellow/10 border-yellow/20',
-  Error: 'bg-destructive/10 border-destructive/20',
+const calloutVariants = {
+  Info: {
+    container:
+      'border-cyan/20 bg-cyan/5 text-cyan-foreground dark:border-cyan/30 dark:bg-cyan/10',
+    icon: '',
+  },
+  Success: {
+    container:
+      'border-emerald/20 bg-emerald/5 text-emerald-foreground dark:border-emerald/30 dark:bg-emerald/10',
+    icon: 'text-emerald dark:text-emerald-light',
+  },
+  Warning: {
+    container:
+      'border-amber/20 bg-amber/5 text-amber-foreground dark:border-amber/30 dark:bg-amber/10',
+    icon: 'text-amber dark:text-amber-light',
+  },
+  Error: {
+    container:
+      'border-destructive/20 bg-destructive/5 text-destructive-foreground dark:border-destructive/30 dark:bg-destructive/10',
+    icon: 'text-destructive dark:text-destructive-light',
+  },
 };
 
 const defaultIcons = {
@@ -44,23 +60,30 @@ export const CalloutWidget: React.FC<CalloutWidgetProps> = ({
   }
 
   const variantKey = variant || 'Info';
-  const bgClasses = backgroundColors[variantKey];
+  const variantStyles = calloutVariants[variantKey];
 
   return (
     <div
       style={styles}
       className={cn(
-        'flex items-center p-4 text-large-body rounded-lg border',
-        bgClasses,
-        'text-foreground'
+        'flex items-center p-4 text-large-body rounded-lg border transition-colors',
+        variantStyles.container
       )}
       role="alert"
     >
-      {icon && <Icon size="30" name={icon} className="mr-4 opacity-70" />}
+      {icon && (
+        <Icon
+          size="30"
+          name={icon}
+          className={cn('mr-4 shrink-0', variantStyles.icon)}
+        />
+      )}
       <span className="sr-only">{variant}</span>
-      <div className="flex flex-col">
-        {title && <div className="font-medium">{title}</div>}
-        {children && <div className="opacity-80">{children}</div>}
+      <div className="flex flex-col min-w-0 flex-1">
+        {title && <div className="font-medium leading-none mb-1">{title}</div>}
+        {children && (
+          <div className="text-sm opacity-90 leading-relaxed">{children}</div>
+        )}
       </div>
     </div>
   );

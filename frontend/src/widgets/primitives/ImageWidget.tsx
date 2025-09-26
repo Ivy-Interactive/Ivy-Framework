@@ -4,13 +4,18 @@ import React from 'react';
 
 interface ImageWidgetProps {
   id: string;
-  src: string;
+  src: string | undefined | null;
   width?: string;
   height?: string;
 }
 
-const getImageUrl = (url: string) => {
-  if (url.startsWith('http://') || url.startsWith('https://')) {
+const getImageUrl = (url: string | undefined | null) => {
+  if (!url) return '';
+  if (
+    url.startsWith('http://') ||
+    url.startsWith('https://') ||
+    url.startsWith('data:')
+  ) {
     return url;
   }
   return `${getIvyHost()}${url.startsWith('/') ? '' : '/'}${url}`;
@@ -26,6 +31,6 @@ export const ImageWidget: React.FC<ImageWidgetProps> = ({
     ...getWidth(width),
     ...getHeight(height),
   };
-
+  if (!src) return '';
   return <img src={getImageUrl(src)} key={id} style={styles} />;
 };

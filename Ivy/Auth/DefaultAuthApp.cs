@@ -11,9 +11,16 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Ivy.Auth;
 
+/// <summary>
+/// Default authentication application that provides login UI for various auth flows.
+/// </summary>
 [App()]
 public class DefaultAuthApp : ViewBase
 {
+    /// <summary>
+    /// Builds the authentication UI based on available auth options.
+    /// </summary>
+    /// <returns>The authentication UI layout</returns>
     public override object Build()
     {
         var auth = this.UseService<IAuthService>();
@@ -46,8 +53,16 @@ public class DefaultAuthApp : ViewBase
     }
 }
 
+/// <summary>
+/// View component for email/password authentication flow.
+/// </summary>
+/// <param name="errorMessage">State for displaying error messages</param>
 public class PasswordEmailFlowView(IState<string?> errorMessage) : ViewBase
 {
+    /// <summary>
+    /// Builds the email/password login form.
+    /// </summary>
+    /// <returns>The login form UI</returns>
     public override object Build()
     {
         var user = this.UseState<string>("");
@@ -57,14 +72,12 @@ public class PasswordEmailFlowView(IState<string?> errorMessage) : ViewBase
         var auth = this.UseService<IAuthService>();
         var client = this.UseService<IClientProvider>();
 
-        var login = async () =>
+        async ValueTask Login()
         {
             try
             {
                 loading.Set(true);
                 var token = await auth.LoginAsync(user.Value, password.Value);
-
-                //Console.WriteLine(token);
 
                 if (token != null)
                 {
@@ -83,22 +96,32 @@ public class PasswordEmailFlowView(IState<string?> errorMessage) : ViewBase
             {
                 loading.Set(false);
             }
-        };
+        }
+        ;
 
         return Layout.Vertical()
          | Text.Label("User:")
          | user.ToTextInput().Disabled(loading.Value)
          | Text.Label("Password:")
          | password.ToPasswordInput().Disabled(loading.Value)
-         | new Button("Login").Width(Size.Full()).HandleClick(login.HandleError(this)).Loading(loading.Value).Disabled(loading.Value)
+         | new Button("Login").Width(Size.Full()).HandleClick(Login).Loading(loading.Value).Disabled(loading.Value)
          | result
          ;
     }
 }
 
 
+/// <summary>
+/// View component for OAuth authentication flow.
+/// </summary>
+/// <param name="option">The OAuth authentication option</param>
+/// <param name="errorMessage">State for displaying error messages</param>
 public class OAuthFlowView(AuthOption option, IState<string?> errorMessage) : ViewBase
 {
+    /// <summary>
+    /// Builds the OAuth authentication button.
+    /// </summary>
+    /// <returns>The OAuth login button UI</returns>
     public override object? Build()
     {
         var client = this.UseService<IClientProvider>();
@@ -110,7 +133,7 @@ public class OAuthFlowView(AuthOption option, IState<string?> errorMessage) : Vi
             return new RedirectResult("/");
         });
 
-        var login = async () =>
+        async ValueTask Login()
         {
             try
             {
@@ -120,8 +143,8 @@ public class OAuthFlowView(AuthOption option, IState<string?> errorMessage) : Vi
             {
                 errorMessage.Set(e.Message);
             }
-        };
+        }
 
-        return new Button(option.Name).Secondary().Icon(option.Icon).Width(Size.Full()).HandleClick(login.HandleError(this));
+        return new Button(option.Name).Secondary().Icon(option.Icon).Width(Size.Full()).HandleClick(Login);
     }
 }

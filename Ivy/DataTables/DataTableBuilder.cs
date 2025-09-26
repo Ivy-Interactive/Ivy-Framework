@@ -23,7 +23,7 @@ public class DataTableBuilder<TModel> : ViewBase, IStateless
         public required DataTableColumn Column { get; init; }
         public bool Removed { get; set; }
     }
-    
+
     public DataTableBuilder(IQueryable<TModel> queryable)
     {
         _queryable = queryable;
@@ -87,14 +87,14 @@ public class DataTableBuilder<TModel> : ViewBase, IStateless
         _height = height;
         return this;
     }
-    
+
     public DataTableBuilder<TModel> Width(Expression<Func<TModel, object>> field, Size width)
     {
         var column = GetColumn(field);
         column.Column.Width = width;
         return this;
     }
-    
+
     private InternalColumn GetColumn(Expression<Func<TModel, object>> field)
     {
         var name = Utils.GetNameFromMemberExpression(field.Body);
@@ -114,7 +114,7 @@ public class DataTableBuilder<TModel> : ViewBase, IStateless
         column.Column.Align = align;
         return this;
     }
-    
+
     public DataTableBuilder<TModel> Sortable(Expression<Func<TModel, object>> field, bool sortable)
     {
         var column = GetColumn(field);
@@ -143,7 +143,7 @@ public class DataTableBuilder<TModel> : ViewBase, IStateless
         }
         return this;
     }
-    
+
     public DataTableBuilder<TModel> Config(Action<DataTableConfiguration> config)
     {
         config(_configuration);

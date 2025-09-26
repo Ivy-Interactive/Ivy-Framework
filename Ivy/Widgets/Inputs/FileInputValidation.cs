@@ -9,7 +9,6 @@ public static class FileInputValidation
     /// </summary>
     /// <param name="files">The files to validate</param>
     /// <param name="maxFiles">Maximum number of files allowed</param>
-    /// <returns>Validation result with error message if validation fails</returns>
     public static ValidationResult ValidateFileCount(IEnumerable<FileInput> files, int? maxFiles)
     {
         if (maxFiles == null) return ValidationResult.Success();
@@ -28,7 +27,6 @@ public static class FileInputValidation
     /// </summary>
     /// <param name="files">The files to validate</param>
     /// <param name="accept">The accept pattern (e.g., ".txt,.pdf" or "image/*")</param>
-    /// <returns>Validation result with error message if validation fails</returns>
     public static ValidationResult ValidateFileTypes(IEnumerable<FileInput> files, string? accept)
     {
         if (string.IsNullOrWhiteSpace(accept)) return ValidationResult.Success();
@@ -58,7 +56,6 @@ public static class FileInputValidation
     /// </summary>
     /// <param name="file">The file to validate</param>
     /// <param name="accept">The accept pattern</param>
-    /// <returns>Validation result with error message if validation fails</returns>
     public static ValidationResult ValidateFileType(FileInput file, string? accept)
     {
         if (string.IsNullOrWhiteSpace(accept)) return ValidationResult.Success();

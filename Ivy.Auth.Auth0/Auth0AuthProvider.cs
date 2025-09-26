@@ -31,10 +31,10 @@ public class Auth0AuthProvider : IAuthProvider
             .AddUserSecrets(Assembly.GetEntryAssembly()!)
             .Build();
 
-        _domain = configuration.GetValue<string>("AUTH0_DOMAIN") ?? throw new Exception("AUTH0_DOMAIN is required");
-        _clientId = configuration.GetValue<string>("AUTH0_CLIENT_ID") ?? throw new Exception("AUTH0_CLIENT_ID is required");
-        _clientSecret = configuration.GetValue<string>("AUTH0_CLIENT_SECRET") ?? throw new Exception("AUTH0_CLIENT_SECRET is required");
-        _audience = configuration.GetValue<string>("AUTH0_AUDIENCE") ?? "";
+        _domain = configuration.GetValue<string>("Auth0:Domain") ?? throw new Exception("Auth0:Domain is required");
+        _clientId = configuration.GetValue<string>("Auth0:ClientId") ?? throw new Exception("Auth0:ClientId is required");
+        _clientSecret = configuration.GetValue<string>("Auth0:ClientSecret") ?? throw new Exception("Auth0:ClientSecret is required");
+        _audience = configuration.GetValue<string>("Auth0:Audience") ?? "";
 
         _authClient = new AuthenticationApiClient(_domain);
     }

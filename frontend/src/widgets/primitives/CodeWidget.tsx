@@ -1,14 +1,10 @@
 import CopyToClipboardButton from '@/components/CopyToClipboardButton';
 import { getHeight, getWidth } from '@/lib/styles';
-import React, {
-  CSSProperties,
-  useState,
-  useMemo,
-  memo,
-  useCallback,
-} from 'react';
+import React, { CSSProperties, useMemo, memo } from 'react';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { createPrismTheme } from '@/lib/ivy-prism-theme';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import { cn } from '@/lib/utils';
 
 interface CodeWidgetProps {
   id: string;
@@ -31,15 +27,17 @@ const languageMap: Record<string, string> = {
   Css: 'css',
   Json: 'json',
   Dbml: 'sql',
+  Text: 'text',
 };
 
-const mapLanguageToPrism = (language: string): string => {
+const mapLanguageToPrism = (language: string): string | undefined => {
   if (!languageMap[language])
     console.warn(
       `Language ${language} is not specified in the code widget, attempting to use the language name as a fallback.`
     );
 
-  return languageMap[language] || language.toLowerCase();
+  const result = languageMap[language] || language.toLowerCase();
+  return result === 'text' ? undefined : result;
 };
 
 const MemoizedCopyButton = memo(({ textToCopy }: { textToCopy: string }) => (
@@ -59,17 +57,11 @@ const CodeWidget: React.FC<CodeWidgetProps> = memo(
     width,
     height,
   }) => {
-    const [isHovered, setIsHovered] = useState(false);
-
-    const handleMouseEnter = useCallback(() => setIsHovered(true), []);
-    const handleMouseLeave = useCallback(() => setIsHovered(false), []);
-
     const styles = useMemo<CSSProperties>(() => {
       const baseStyles: CSSProperties = {
         ...getWidth(width),
         ...getHeight(height),
         margin: 0,
-        overflow: isHovered ? 'auto' : 'hidden',
       };
 
       if (!showBorder) {
@@ -79,7 +71,7 @@ const CodeWidget: React.FC<CodeWidgetProps> = memo(
       }
 
       return baseStyles;
-    }, [width, height, isHovered, showBorder]);
+    }, [width, height, showBorder]);
 
     const highlighterKey = useMemo(
       () =>
@@ -90,22 +82,26 @@ const CodeWidget: React.FC<CodeWidgetProps> = memo(
     const dynamicTheme = useMemo(() => createPrismTheme(), []);
 
     return (
-      <div
-        className="relative"
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-      >
+      <div className="relative">
         {showCopyButton && <MemoizedCopyButton textToCopy={content} />}
-        <SyntaxHighlighter
-          language={mapLanguageToPrism(language)}
-          customStyle={styles}
-          style={dynamicTheme}
-          showLineNumbers={showLineNumbers}
-          wrapLines={true}
-          key={highlighterKey}
+        <ScrollArea
+          className={cn(
+            'w-full h-full',
+            showBorder && 'border border-border rounded-md'
+          )}
         >
-          {content}
-        </SyntaxHighlighter>
+          <SyntaxHighlighter
+            language={mapLanguageToPrism(language)}
+            customStyle={styles}
+            style={dynamicTheme}
+            showLineNumbers={showLineNumbers}
+            wrapLines={true}
+            key={highlighterKey}
+          >
+            {content}
+          </SyntaxHighlighter>
+          <ScrollBar orientation="horizontal" />
+        </ScrollArea>
       </div>
     );
   }

@@ -1,7 +1,7 @@
 name: Feature Request
 description: Suggest an idea for Ivy Framework
-title: "[Feature]: "
 labels: ["enhancement"]
+type: feature
 body:
   - type: markdown
     attributes:

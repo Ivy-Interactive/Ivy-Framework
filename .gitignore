@@ -394,6 +394,9 @@ FodyWeavers.xsd
 *.msm
 *.msp
 
+# macOS
+.DS_Store
+
 # JetBrains Rider
 *.sln.iml
 .idea/**/*
@@ -406,3 +409,4 @@ FodyWeavers.xsd
 test-results/
 /Ivy/.claude/settings.local.json
 /Ivy.Samples/.claude/settings.local.json
+/.releases/Commits/*
