@@ -35,7 +35,9 @@ public class ResourcesView : ViewBase
             | Text.H3("LinkedIn")
             | new Embed("https://www.linkedin.com/posts/ivy-interactive_ai-dotnet-opensource-activity-7377309652004331520-YjqC?utm_source=share&utm_medium=member_desktop&rcm=ACoAAFd2BW0BpNAXf_IY-1TO5Br9SnDmmmYsuXk")
             | Text.H3("Pinterest")
-            | new Embed("https://pin.it/i/3jntlkhhj/");
+            | new Embed("https://pin.it/i/3jntlkhhj/")
+            | Text.H3("TikTok")
+            | new Embed("https://www.tiktok.com/@ivan.wllb/video/7550352363689741590?q=programming&t=1758927009747");
     }
 }
 ```
