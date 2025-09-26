@@ -31,7 +31,9 @@ public class ResourcesView : ViewBase
             | Text.H3("Twitter Tweet")
             | new Embed("https://twitter.com/username/status/1234567890")
             | Text.H3("Instagram")
-            | new Embed("https://www.instagram.com/p/DPBZl8zDGiA/");
+            | new Embed("https://www.instagram.com/p/DPBZl8zDGiA/")
+            | Text.H3("LinkedIn")
+            | new Embed("https://www.linkedin.com/posts/ivy-interactive_ai-dotnet-opensource-activity-7377309652004331520-YjqC?utm_source=share&utm_medium=member_desktop&rcm=ACoAAFd2BW0BpNAXf_IY-1TO5Br9SnDmmmYsuXk");
     }
 }
 ```

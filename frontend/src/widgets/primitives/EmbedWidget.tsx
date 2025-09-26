@@ -453,15 +453,71 @@ const TikTokEmbed: React.FC<TikTokEmbedProps> = ({ url }) => {
 };
 
 const LinkedInEmbed: React.FC<LinkedInEmbedProps> = ({ url }) => {
+  const [postId, setPostId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const extractPostId = (linkedinUrl: string): string | null => {
+      // LinkedIn post URL: https://www.linkedin.com/posts/activity-1234567890-abcdefgh/
+      let match = linkedinUrl.match(/linkedin\.com\/posts\/activity-(\d+)/);
+      if (match) return match[1];
+
+      // LinkedIn post URL: https://www.linkedin.com/feed/update/urn:li:activity:1234567890/
+      match = linkedinUrl.match(
+        /linkedin\.com\/feed\/update\/urn:li:activity:(\d+)/
+      );
+      if (match) return match[1];
+
+      // LinkedIn post URL: https://www.linkedin.com/posts/username-activity-1234567890/
+      match = linkedinUrl.match(/linkedin\.com\/posts\/[^/]+-activity-(\d+)/);
+      if (match) return match[1];
+
+      // Any LinkedIn URL that contains "posts" or "feed"
+      match = linkedinUrl.match(/linkedin\.com\/(posts|feed)/);
+      if (match) return 'linkedin-post';
+
+      return null;
+    };
+
+    setPostId(extractPostId(url));
+  }, [url]);
+
+  if (!postId) {
+    return <div>Invalid LinkedIn URL.</div>;
+  }
+
   return (
     <div className="linkedin-embed">
-      <iframe
-        src={`https://www.linkedin.com/embed/feed/update/${url}`}
-        width="550"
-        height="400"
-        frameBorder="0"
-        allowFullScreen
-        title="LinkedIn Post"
+      <div
+        className="linkedin-embed-container"
+        data-linkedin-url={url}
+        style={{
+          width: '100%',
+          maxWidth: '550px',
+          margin: '0 auto',
+        }}
+      >
+        {/* LinkedIn Official Embed - Using the correct iframe format */}
+        <iframe
+          src={`https://www.linkedin.com/embed/feed/update/urn:li:activity:${postId}`}
+          height="600"
+          width="100%"
+          frameBorder="0"
+          allowFullScreen
+          title="Embedded post"
+          style={{
+            border: 'none',
+            borderRadius: '8px',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+            maxWidth: '504px',
+          }}
+        />
+      </div>
+
+      {/* LinkedIn Embed Script */}
+      <script
+        src="https://platform.linkedin.com/in.js"
+        type="text/javascript"
+        async
       />
     </div>
   );
