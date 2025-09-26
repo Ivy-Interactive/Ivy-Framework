@@ -29,7 +29,9 @@ public class ResourcesView : ViewBase
             | Text.H3("Reddit Post")
             | new Embed("https://www.reddit.com/r/cats/comments/1nr7fbs/show_them/")
             | Text.H3("Twitter Tweet")
-            | new Embed("https://twitter.com/username/status/1234567890");
+            | new Embed("https://twitter.com/username/status/1234567890")
+            | Text.H3("Instagram")
+            | new Embed("https://www.instagram.com/p/DPBZl8zDGiA/");
     }
 }
 ```
