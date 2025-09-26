@@ -110,7 +110,7 @@ export class GrpcTableService extends EventEmitter {
       // Create gRPC message with proper header
       const grpcMessage = this.createGrpcMessage(serializedQuery);
 
-      const requestUrl = `${serverUrl}/datatable.TableService/Query`;
+      const requestUrl = `${serverUrl}/datatable.DataTableService/Query`;
       logger.debug('gRPC Table Service - Request URL:', requestUrl);
 
       // Make the gRPC-Web request
