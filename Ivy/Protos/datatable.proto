@@ -4,13 +4,13 @@ package datatable;
 
 import "google/protobuf/any.proto";
 
-option csharp_namespace = "IvyDataTables.Api.Protos";
+option csharp_namespace = "Ivy.Protos.DataTable";
 
-service TableService {
-  rpc Query(TableQuery) returns (TableResult);
+service DataTableService {
+  rpc Query(DataTableQuery) returns (DataTableResult);
 }
 
-message TableQuery {
+message DataTableQuery {
   repeated SortOrder sort = 1;
   Filter filter = 2;
   int32 offset = 3;
@@ -60,6 +60,6 @@ message Aggregation {
   string function = 2; // e.g. "sum", "avg", "min", "max", "count"
 }
 
-message TableResult {
+message DataTableResult {
   bytes arrow_ipc_stream = 1; // Arrow Table serialized as IPC stream
 }

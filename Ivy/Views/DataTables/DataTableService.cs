@@ -1,11 +1,11 @@
 using Grpc.Core;
-using IvyDataTables.Api.Protos;
+using Ivy.Protos.DataTable;
 
 namespace Ivy.Views.DataTables;
 
-public class DataTableService(IQueryableRegistry queryableRegistry) : TableService.TableServiceBase
+public class TableService(IQueryableRegistry queryableRegistry) : DataTableService.DataTableServiceBase
 {
-    public override Task<TableResult> Query(TableQuery request, ServerCallContext context)
+    public override Task<DataTableResult> Query(DataTableQuery request, ServerCallContext context)
     {
         try
         {
@@ -23,7 +23,7 @@ public class DataTableService(IQueryableRegistry queryableRegistry) : TableServi
             var queryProcessor = new QueryProcessor();
             var arrowData = queryProcessor.ProcessQuery(queryable, request);
 
-            var tableResult = new TableResult
+            var tableResult = new DataTableResult
             {
                 ArrowIpcStream = Google.Protobuf.ByteString.CopyFrom(arrowData)
             };

@@ -436,7 +436,7 @@ public class Server
         app.MapControllers();
         app.MapHub<AppHub>("/messages");
         app.MapHealthChecks("/health");
-        app.MapGrpcService<DataTableService>().EnableGrpcWeb();
+        app.MapGrpcService<TableService>().EnableGrpcWeb();
 
         if (_useHotReload)
         {

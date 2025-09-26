@@ -2,7 +2,7 @@ using System.Reflection;
 using Apache.Arrow;
 using Apache.Arrow.Ipc;
 using Apache.Arrow.Types;
-using IvyDataTables.Api.Protos;
+using Ivy.Protos.DataTable;
 using Microsoft.Extensions.Logging;
 using ArrowField = Apache.Arrow.Field;
 using SystemType = System.Type;
@@ -24,7 +24,7 @@ namespace Ivy.Views.DataTables;
 /// </remarks>
 public class QueryProcessor(ILogger<QueryProcessor>? logger = null)
 {
-    public byte[] ProcessQuery(IQueryable queryable, TableQuery query)
+    public byte[] ProcessQuery(IQueryable queryable, DataTableQuery query)
     {
         try
         {
@@ -109,7 +109,7 @@ public class QueryProcessor(ILogger<QueryProcessor>? logger = null)
         var property = System.Linq.Expressions.Expression.Property(parameter, propertyInfo);
         var lambda = System.Linq.Expressions.Expression.Lambda(property, parameter);
 
-        var methodName = firstSort.Direction == IvyDataTables.Api.Protos.SortDirection.Asc ? "OrderBy" : "OrderByDescending";
+        var methodName = firstSort.Direction == Ivy.Protos.DataTable.SortDirection.Asc ? "OrderBy" : "OrderByDescending";
         var method = typeof(Queryable).GetMethods()
             .FirstOrDefault(m => m.Name == methodName && m.GetParameters().Length == 2)?
             .MakeGenericMethod(elementType, propertyInfo.PropertyType);
@@ -498,17 +498,17 @@ public class QueryProcessor(ILogger<QueryProcessor>? logger = null)
         // Create schema and empty arrays even when there's no data
         foreach (var prop in properties)
         {
-            var arrowType = GetArrowType(prop.PropertyType);
+            var arrowType = QueryHelpers.GetArrowType(prop.PropertyType);
             fields.Add(new ArrowField(prop.Name, arrowType, nullable: true));
 
             // Create empty array if no data, otherwise create array with data
             if (!data.Any())
             {
-                arrays.Add(CreateEmptyArrowArray(arrowType));
+                arrays.Add(QueryHelpers.CreateEmptyArrowArray(arrowType));
             }
             else
             {
-                arrays.Add(CreateArrowArray(prop, data));
+                arrays.Add(QueryHelpers.CreateArrowArray(prop, data));
             }
         }
 
@@ -525,172 +525,4 @@ public class QueryProcessor(ILogger<QueryProcessor>? logger = null)
         return result;
     }
 
-    private IArrowArray CreateEmptyArrowArray(IArrowType arrowType)
-    {
-        return arrowType switch
-        {
-            Int32Type => new Int32Array.Builder().Build(),
-            Int64Type => new Int64Array.Builder().Build(),
-            DoubleType => new DoubleArray.Builder().Build(),
-            FloatType => new FloatArray.Builder().Build(),
-            BooleanType => new BooleanArray.Builder().Build(),
-            TimestampType => new TimestampArray.Builder().Build(),
-            Decimal128Type => new Decimal128Array.Builder((Decimal128Type)arrowType).Build(),
-            StringType => new StringArray.Builder().Build(),
-            _ => new StringArray.Builder().Build()
-        };
-    }
-
-
-    private IArrowType GetArrowType(SystemType type)
-    {
-        var underlyingType = Nullable.GetUnderlyingType(type) ?? type;
-
-        return underlyingType switch
-        {
-            SystemType t when t == typeof(int) => Int32Type.Default,
-            SystemType t when t == typeof(long) => Int64Type.Default,
-            SystemType t when t == typeof(decimal) => new Decimal128Type(18, 2),
-            SystemType t when t == typeof(double) => DoubleType.Default,
-            SystemType t when t == typeof(float) => FloatType.Default,
-            SystemType t when t == typeof(bool) => BooleanType.Default,
-            SystemType t when t == typeof(DateTime) => TimestampType.Default,
-            SystemType t when t == typeof(string) => StringType.Default,
-            _ => StringType.Default
-        };
-    }
-
-    private IArrowArray CreateArrowArray(PropertyInfo property, List<object> data)
-    {
-        var values = data.Select(item => property.GetValue(item)).ToList();
-        var type = property.PropertyType;
-        var underlyingType = Nullable.GetUnderlyingType(type) ?? type;
-
-        return underlyingType switch
-        {
-            SystemType t when t == typeof(int) =>
-                CreateInt32Array(values),
-            SystemType t when t == typeof(long) =>
-                CreateInt64Array(values),
-            SystemType t when t == typeof(double) =>
-                CreateDoubleArray(values),
-            SystemType t when t == typeof(float) =>
-                CreateFloatArray(values),
-            SystemType t when t == typeof(bool) =>
-                CreateBooleanArray(values),
-            SystemType t when t == typeof(DateTime) =>
-                CreateTimestampArray(values),
-            SystemType t when t == typeof(decimal) =>
-                CreateDecimalArray(values),
-            SystemType t when t == typeof(string) =>
-                CreateStringArray(values),
-            _ => CreateStringArray(values)
-        };
-    }
-
-    private IArrowArray CreateInt32Array(List<object?> values)
-    {
-        var builder = new Int32Array.Builder();
-        foreach (var value in values)
-        {
-            if (value is int intValue)
-                builder.Append(intValue);
-            else
-                builder.AppendNull();
-        }
-        return builder.Build();
-    }
-
-    private IArrowArray CreateInt64Array(List<object?> values)
-    {
-        var builder = new Int64Array.Builder();
-        foreach (var value in values)
-        {
-            if (value is long longValue)
-                builder.Append(longValue);
-            else
-                builder.AppendNull();
-        }
-        return builder.Build();
-    }
-
-    private IArrowArray CreateDoubleArray(List<object?> values)
-    {
-        var builder = new DoubleArray.Builder();
-        foreach (var value in values)
-        {
-            if (value is double doubleValue)
-                builder.Append(doubleValue);
-            else
-                builder.AppendNull();
-        }
-        return builder.Build();
-    }
-
-    private IArrowArray CreateFloatArray(List<object?> values)
-    {
-        var builder = new FloatArray.Builder();
-        foreach (var value in values)
-        {
-            if (value is float floatValue)
-                builder.Append(floatValue);
-            else
-                builder.AppendNull();
-        }
-        return builder.Build();
-    }
-
-    private IArrowArray CreateBooleanArray(List<object?> values)
-    {
-        var builder = new BooleanArray.Builder();
-        foreach (var value in values)
-        {
-            if (value is bool boolValue)
-                builder.Append(boolValue);
-            else
-                builder.AppendNull();
-        }
-        return builder.Build();
-    }
-
-    private IArrowArray CreateTimestampArray(List<object?> values)
-    {
-        var builder = new TimestampArray.Builder();
-        foreach (var value in values)
-        {
-            if (value is DateTime dateTimeValue)
-                builder.Append(new DateTimeOffset(dateTimeValue));
-            else
-                builder.AppendNull();
-        }
-        return builder.Build();
-    }
-
-    private IArrowArray CreateDecimalArray(List<object?> values)
-    {
-        var builder = new Decimal128Array.Builder(new Decimal128Type(18, 2));
-        foreach (var value in values)
-        {
-            if (value is decimal decimalValue)
-                builder.Append(decimalValue);
-            else
-                builder.AppendNull();
-        }
-        return builder.Build();
-    }
-
-    private IArrowArray CreateStringArray(List<object?> values)
-    {
-        var builder = new StringArray.Builder();
-        foreach (var value in values)
-        {
-            if (value is string stringValue)
-                builder.Append(stringValue);
-            else if (value != null)
-                builder.Append(value.ToString());
-            else
-                builder.AppendNull();
-        }
-        return builder.Build();
-    }
 }
