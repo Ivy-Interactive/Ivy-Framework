@@ -3,9 +3,13 @@ using Ivy.Protos.DataTable;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 
+//todo: Check for JWT
+//todo: We need the Widget 
+
 namespace Ivy.Views.DataTables;
 
-public class TableService(IQueryableRegistry queryableRegistry, ILogger<TableService>? logger = null, IDistributedCache? cache = null) : DataTableService.DataTableServiceBase
+public class TableService(IQueryableRegistry queryableRegistry, ILogger<TableService>? logger = null, IDistributedCache? cache = null)
+    : DataTableService.DataTableServiceBase
 {
     public override Task<DataTableResult> Query(DataTableQuery request, ServerCallContext context)
     {

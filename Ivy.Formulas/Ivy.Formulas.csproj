@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <OutputType>library</OutputType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Antlr4.Runtime.Standard" Version="4.13.1" />
+    <PackageReference Include="Antlr4BuildTasks" Version="12.10.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Antlr4 Include="Formulas.g4">
+      <Generator>MSBuild:Compile</Generator>
+      <CustomToolNamespace>Ivy.Formulas.Parser</CustomToolNamespace>
+    </Antlr4>
+  </ItemGroup>
+
+</Project>
