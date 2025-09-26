@@ -16,7 +16,7 @@ The Embed widget supports a wide range of social media and content platforms:
 - **GitHub** - Repositories, issues, pull requests, gists, and files (using emgithub.com)
 - **Reddit** - Posts and comments
 
-```csharp demo-tabs 
+```csharp demo-tabs
 public class ResourcesView : ViewBase
 {
     public override object? Build()
@@ -24,8 +24,10 @@ public class ResourcesView : ViewBase
         return Layout.Vertical()
             | Text.H3("YouTube Video")
             | new Embed("https://www.youtube.com/watch?v=dQw4w9WgXcQ")
-            | Text.H3("GitHub File")
+            | Text.H3("GitHub Repo")
             | new Embed("https://github.com/Ivy-Interactive/Ivy-Framework")
+            | Text.H3("GitHub File")
+            | new Embed("https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/README.md")
             | Text.H3("Reddit Post")
             | new Embed("https://www.reddit.com/r/cats/comments/1nr7fbs/show_them/")
             | Text.H3("Twitter Tweet")
