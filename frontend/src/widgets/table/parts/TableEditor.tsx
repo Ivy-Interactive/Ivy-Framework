@@ -22,6 +22,7 @@ export const TableEditor: React.FC<TableEditorProps> = ({
     columns,
     columnWidths,
     visibleRows,
+    isLoading,
     hasMore,
     editable,
     loadMoreData,
@@ -29,7 +30,6 @@ export const TableEditor: React.FC<TableEditorProps> = ({
     handleSort,
   } = useTable();
 
-  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const gridRef = useRef<DataEditorRef>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState<number>(0);
@@ -55,22 +55,13 @@ export const TableEditor: React.FC<TableEditorProps> = ({
   // Handle scroll events
   const handleVisibleRegionChanged = useCallback(
     (range: { x: number; y: number; width: number; height: number }) => {
-      // Clear any existing timeout
-      if (scrollTimeoutRef.current) {
-        clearTimeout(scrollTimeoutRef.current);
+      const bottomRow = range.y + range.height;
+      const shouldLoadMore = bottomRow >= visibleRows - scrollThreshold;
+      if (!isLoading && shouldLoadMore && hasMore) {
+        loadMoreData();
       }
-
-      // Debounce the scroll check
-      scrollTimeoutRef.current = setTimeout(() => {
-        const bottomRow = range.y + range.height;
-        const shouldLoadMore = bottomRow >= visibleRows - scrollThreshold;
-
-        if (shouldLoadMore && hasMore) {
-          loadMoreData();
-        }
-      }, 100);
     },
-    [visibleRows, hasMore, loadMoreData]
+    [visibleRows, hasMore, loadMoreData, isLoading]
   );
 
   // Get cell content
@@ -134,8 +125,6 @@ export const TableEditor: React.FC<TableEditorProps> = ({
     },
     [data, columns, editable]
   );
-
-  // Get sort icon for a column
 
   // Handle column header click for sorting
   const handleHeaderMenuClick = useCallback(

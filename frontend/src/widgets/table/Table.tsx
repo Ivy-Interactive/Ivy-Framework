@@ -3,7 +3,7 @@ import React from 'react';
 
 // Local imports
 import { TableProvider, useTable } from './context/TableContext';
-import { ErrorDisplay } from './parts/ErrorDisplay';
+import { ErrorDisplay } from '@/components/ErrorDisplay';
 import { LoadingDisplay } from './parts/LoadingDisplay';
 import { TableEditor } from './parts/TableEditor';
 import { Footer } from './parts/TableFooter';
@@ -16,7 +16,7 @@ const TableLayout: React.FC = () => {
   const showTableEditor = columns.length > 0;
 
   if (error) {
-    return <ErrorDisplay />;
+    return <ErrorDisplay title="Table Error" message={error} />;
   }
 
   return (
