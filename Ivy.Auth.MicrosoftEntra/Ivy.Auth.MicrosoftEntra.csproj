@@ -6,6 +6,7 @@
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <NoWarn>CS1591</NoWarn>
     <PackageId>Ivy.Auth.MicrosoftEntra</PackageId>
     <Company>Ivy</Company>
     <Description>Build Internal Applications with AI and Pure C#</Description>
@@ -14,6 +15,7 @@
     <RepositoryUrl>https://github.com/Ivy-Interactive/Ivy</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>

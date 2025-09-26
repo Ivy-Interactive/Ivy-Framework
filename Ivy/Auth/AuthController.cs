@@ -4,8 +4,16 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Ivy.Auth;
 
+/// <summary>
+/// Controller for handling authentication-related HTTP requests.
+/// </summary>
 public class AuthController() : Controller
 {
+    /// <summary>
+    /// Sets or clears the JWT authentication token in HTTP cookies.
+    /// </summary>
+    /// <param name="token">The authentication token to set, or null to clear</param>
+    /// <returns>OK result indicating the operation completed</returns>
     [Route("auth/set-jwt")]
     [HttpPatch]
     public IActionResult SetJwt([FromBody] AuthToken? token)

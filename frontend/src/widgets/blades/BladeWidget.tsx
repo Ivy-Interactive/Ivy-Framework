@@ -70,7 +70,11 @@ export function BladeWidget({
         </div>
       </div>
       <div className="bg-background h-full">
-        <ScrollArea type="hover" className="blade-container h-full">
+        {/* radix scrollarea breaks the nested containers widths*/}
+        <ScrollArea
+          type="hover"
+          className="blade-container h-full [&>div>div[style]]:!block"
+        >
           <div className="p-4">{children}</div>
         </ScrollArea>
       </div>

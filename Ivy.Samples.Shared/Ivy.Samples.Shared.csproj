@@ -6,7 +6,7 @@
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <NoWarn>CS8618;CS8603</NoWarn>
+    <NoWarn>CS1591;CS8618;CS8603</NoWarn>
     <UserSecretsId>7a9ec095-f521-43d6-852a-1ae71e38a08e</UserSecretsId>
   </PropertyGroup>
 

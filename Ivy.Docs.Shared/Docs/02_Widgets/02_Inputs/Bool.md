@@ -16,8 +16,7 @@ public class BoolInputDemo : ViewBase
     public override object? Build()
     {
         var state = this.UseState(false);
-        return Layout.Horizontal()
-               | new BoolInput(state).Label("Accept Terms");
+        return new BoolInput(state).Label("Accept Terms");
     }
 }
 ```
@@ -127,7 +126,7 @@ public class BoolInputDemo : ViewBase
         var roundTrip = UseState(false);
         
         return Layout.Vertical()
-               | Layout.Horizontal()
+               | (Layout.Horizontal()
                  | new BoolInput(read.Value, e => 
                  {
                     if(e.Value)
@@ -136,7 +135,7 @@ public class BoolInputDemo : ViewBase
                        readMessage.Set("");
                     read.Set(e.Value);
                  }, variant: BoolInputs.Switch).Label("Readonly")
-                 | Text.Block(readMessage)
+                 | Text.Block(readMessage))
               | new BoolInput(write, variant: BoolInputs.Switch)
                    .Label("Can write")
                    .Disabled(read.Value)
@@ -164,10 +163,10 @@ public class SingleToggleDemo : ViewBase
     {        
         var isFavorite = UseState(false);        
         return Layout.Vertical()            
-                | Layout.Horizontal()
+                | (Layout.Horizontal()
                     |  isFavorite.ToToggleInput(isFavorite.Value ? Icons.Heart : Icons.HeartOff)
                                  .Label(isFavorite.Value ? "Remove from Favorites" : "Add to Favorites")
-                    | Text.Block(isFavorite.Value ? "❤️ Favorited!" : "🤍 Not favourite!")            
+                    | Text.Block(isFavorite.Value ? "❤️ Favorited!" : "🤍 Not favourite!"))            
                 | Text.Small(isFavorite.Value 
                     ? "This article has been added to your favorites." 
                     : "Click the heart to save this article.");
@@ -212,15 +211,15 @@ public class BoolInputVariants2 : ViewBase
         var boolVal2 = UseState(1);
         var boolVal3 = UseState(0);
         return Layout.Vertical()
-                | Layout.Horizontal()
+                | (Layout.Horizontal()
                    | boolVal1.ToBoolInput().Label("Legacy")
-                   | Text.Block($"value of Legacy is set to {boolVal1.Value.ToString()}")
-                | Layout.Horizontal()
+                   | Text.Block($"value of Legacy is set to {boolVal1.Value.ToString()}"))
+                | (Layout.Horizontal()
                    | boolVal2.ToSwitchInput().Label("Legacy2")
-                   | Text.Block($"value of Legacy2 is set to {boolVal2.Value.ToString()}") 
-                | Layout.Horizontal()
+                   | Text.Block($"value of Legacy2 is set to {boolVal2.Value.ToString()}")) 
+                | (Layout.Horizontal()
                    | boolVal3.ToToggleInput(Icons.MoonStar).Label("Dark")
-                   | Text.Block($"value of Dark is set to {boolVal3.Value.ToString()}");
+                   | Text.Block($"value of Dark is set to {boolVal3.Value.ToString()}"));
     }
 }
 ```
@@ -231,10 +230,11 @@ All values captured are integers; either 1 or 0.
 
 ## Examples
 
-This is a set of few examples showing how to use `BoolInput`s in several situations.
-
-### Round trip example
-
+<Details>
+<Summary>
+Round trip example
+</Summary>
+<Body>
 The following example shows a demo of how `Switch` variant can be used in a possible situation where it makes sense
 to do so.
 
@@ -252,11 +252,11 @@ public class SimpleFlightBooking : ViewBase
                 // Round Trip Switch
                 | isRoundTrip.ToSwitchInput().Label("Round Trip")
                 // Departure Date (always visible)
-                | Layout.Vertical()
+                | (Layout.Vertical()
                    | Text.Label("Departure Date:")
                    | departureDate.ToDateTimeInput()
                                   .Variant(DateTimeInputs.Date)
-                                  .Placeholder("Select departure date")
+                                  .Placeholder("Select departure date"))
                 // Return Date (only visible when round trip is on)
                 | (Layout.Vertical()
                        | Text.Label("Return Date:")
@@ -270,3 +270,6 @@ public class SimpleFlightBooking : ViewBase
     }
 }
 ```
+
+</Body>
+</Details>

@@ -7,7 +7,16 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { getHeight, getWidth } from '@/lib/styles';
+import {
+  getHeight,
+  getWidth,
+  getBorderRadius,
+  getBorderStyle,
+  getBorderThickness,
+  getColor,
+  BorderRadius,
+  BorderStyle,
+} from '@/lib/styles';
 import { cn } from '@/lib/utils';
 import React from 'react';
 import { EmptyWidget } from './primitives/EmptyWidget';
@@ -19,6 +28,10 @@ interface CardWidgetProps {
   icon?: string;
   width?: string;
   height?: string;
+  borderThickness?: string;
+  borderRadius?: BorderRadius;
+  borderStyle?: BorderStyle;
+  borderColor?: string;
   slots?: {
     Content?: React.ReactNode[];
     Footer?: React.ReactNode[];
@@ -31,11 +44,19 @@ export const CardWidget: React.FC<CardWidgetProps> = ({
   icon,
   width,
   height,
+  borderThickness,
+  borderRadius,
+  borderStyle,
+  borderColor,
   slots,
 }) => {
   const styles = {
     ...getWidth(width),
     ...getHeight(height),
+    ...(borderStyle && getBorderStyle(borderStyle)),
+    ...(borderThickness && getBorderThickness(borderThickness)),
+    ...(borderRadius && getBorderRadius(borderRadius)),
+    ...(borderColor && getColor(borderColor, 'borderColor', 'background')),
   };
 
   const footerIsEmpty =

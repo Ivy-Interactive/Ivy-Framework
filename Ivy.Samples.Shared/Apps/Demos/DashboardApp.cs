@@ -1,6 +1,7 @@
 ﻿using Ivy.Charts;
 using Ivy.Shared;
 using Ivy.Views.Charts;
+using Ivy.Views.Dashboards;
 using Microsoft.EntityFrameworkCore;
 
 namespace Ivy.Samples.Shared.Apps.Demos;
@@ -11,41 +12,43 @@ public class DashboardApp : ViewBase
     public override object? Build()
     {
         return Layout.Vertical() | (Layout.Grid().Columns(4)
-                                    | new TotalSalesMetricView()
-                                    | new TotalSalesMetricView()
-                                    | new TotalSalesMetricView()
-                                    | new TotalSalesMetricView()
+                                    | new MetricView("Total Sales", Icons.DollarSign, () => Task.FromResult(new MetricRecord("$84,250", 0.21, 0.21, "$800,000")))
+                                    | new MetricView("Very Long Revenue Number", Icons.DollarSign, () => Task.FromResult(new MetricRecord("$123,456,789.99", 12.345, 0.85, "$100,000,000")))
+                                    | new MetricView("Post Engagement Rate", Icons.Activity, () => Task.FromResult(new MetricRecord("1,012.50%", 0.381, 1.25, "806.67%")))
+                                    | new MetricView("Total Comments per Author", Icons.UserCheck, () => Task.FromResult(new MetricRecord("2.25", 0.381, 0.90, "2.50")))
+                                    )
+                                 | (Layout.Grid().Columns(4)
+                                    | new MetricView("Total Comments per Author in This Period", Icons.MessageCircle, () => Task.FromResult(new MetricRecord("2.25", 0.381, 0.90, "2.50")))
+                                    | new MetricView("User Engagement", Icons.Users, () => Task.FromResult(new MetricRecord("1,247", 0.125, 0.75, "1,500 users")))
+                                    | new MetricView("Task Progress", Icons.Check, () => Task.FromResult(new MetricRecord("87%", null, 0.87, "100% completion")))
+                                    | new MetricView("System Health", Icons.Activity, () => Task.FromResult(new MetricRecord("99.9%", null, 0.99, "100% uptime")))
                                     )
 
-                                 | (Layout.Grid().Columns(3)
+                                 | (Layout.Grid().Columns(4)
                                     | new BrowsersView()
                                     | new MonthlyRevenueTrendView()
                                     | new MonthlyRevenueDistributionView()
+                                    | new DonutChartWithCustomLabelsView()
                                     )
 
-            ;
-    }
-}
+                                 | (Layout.Grid().Columns(4)
+                                    | new MetricView("Revenue Growth", Icons.TrendingUp, () => Task.FromResult(new MetricRecord("$45,230", 0.183, 0.65, "$70,000 target")))
+                                    | new MetricView("Social Engagement", Icons.Star, () => Task.FromResult(new MetricRecord("2,847", null, null, null)))
+                                    | new MetricView("Progress Variations", Icons.Star, () => Task.FromResult(new MetricRecord("70%", null, 0.70, "100%")))
+                                    | new MetricView("Layout Testing", Icons.LayoutDashboard, () => Task.FromResult(new MetricRecord("4.8", null, 0.96, "5.0 rating")))
+                                    )
 
-public class TotalSalesMetricView : ViewBase
-{
-    public override object? Build()
-    {
-        return new MetricView("Total Sales");
-    }
-}
+                                 | (Layout.Grid().Columns(2)
+                                    | new MetricView("Download Analytics", Icons.Download, () => Task.FromResult(new MetricRecord("2,090", 0.25, 0.78, "2,500 total")))
+                                    | new MetricView("Global Distribution", Icons.Globe, () => Task.FromResult(new MetricRecord("47", null, 0.85, "50 countries")))
+                                    )
 
-public class MetricView(string title) : ViewBase
-{
-    public override object? Build()
-    {
-        return new Card(
-                (Layout.Horizontal().Align(Align.Left).Gap(2)
-                 | Text.H3("$84,250")
-                 | Icons.TrendingUp.ToIcon().Color(Colors.Emerald)
-                 | Text.Small("21%").Color(Colors.Emerald)),
-                new Progress(21).Goal(800_000.ToString("C0"))
-            ).Title(title).Icon(Icons.DollarSign)
+                                 | (Layout.Grid().Columns(3)
+                                    | new MetricView("Text Spacing Demo", Icons.Type, () => Task.FromResult(new MetricRecord("Compact", null, 0.60, "Tight spacing")))
+                                    | new MetricView("Zero Spacing", Icons.Zap, () => Task.FromResult(new MetricRecord("Dense", null, 0.75, "Dense layout")))
+                                    | new MetricView("Spacing Control", Icons.Settings, () => Task.FromResult(new MetricRecord("Custom", null, 0.90, "Custom control")))
+                                    )
+
             ;
     }
 }
@@ -119,5 +122,52 @@ public class BrowsersView : ViewBase
         };
 
         return new Card().Title("Browser Composition").Height("100%") | data.ToPieChart(e => e.Name, e => e.Sum(f => f.Value), PieChartStyles.Dashboard);
+    }
+}
+
+public class DonutChartWithCustomLabelsView : ViewBase
+{
+    public override object? Build()
+    {
+        var data = new[]
+        {
+            new PieChartData("Revenue", 1250000),
+            new PieChartData("Marketing", 450000),
+            new PieChartData("Operations", 320000),
+            new PieChartData("R&D", 280000),
+            new PieChartData("Admin", 150000),
+            new PieChartData("Sales", 380000),
+            new PieChartData("Customer Support", 220000),
+            new PieChartData("IT Infrastructure", 180000),
+            new PieChartData("Legal", 95000),
+            new PieChartData("HR", 120000),
+            new PieChartData("Finance", 160000),
+            new PieChartData("Quality Assurance", 140000)
+        };
+
+        var totalValue = data.Sum(d => d.Measure);
+
+        return new Card().Title("Donut Chart with Custom Labels").Height("100%")
+            | new PieChart(data)
+                .Pie(new Pie(nameof(PieChartData.Measure), nameof(PieChartData.Dimension))
+                    .InnerRadius("40%")
+                    .OuterRadius("90%")
+                    .Animated(true)
+                    .LabelList(new LabelList(nameof(PieChartData.Measure))
+                        .Position(Positions.Outside)
+                        .Fill(Colors.Blue)
+                        .FontSize(11)
+                        .NumberFormat("$0,0"))
+                    .LabelList(new LabelList(nameof(PieChartData.Dimension))
+                        .Position(Positions.Inside)
+                        .Fill(Colors.White)
+                        .FontSize(9)
+                        .FontFamily("Arial"))
+                )
+                .ColorScheme(ColorScheme.Default)
+                .Tooltip(new Ivy.Charts.Tooltip().Animated(true))
+                .Legend(new Legend().IconType(Legend.IconTypes.Rect))
+                .Total(totalValue, "Total Budget")
+        ;
     }
 }

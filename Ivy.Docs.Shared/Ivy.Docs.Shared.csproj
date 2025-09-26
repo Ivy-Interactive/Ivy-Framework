@@ -6,7 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <RootNamespace>Ivy.Docs.Shared</RootNamespace>
-    <NoWarn>CS8618;CS8603;CS8602;CS8604;CS8669;CS9113;NETSDK1187</NoWarn>
+    <NoWarn>CS1591;CS8618;CS8603;CS8602;CS8604;CS8669;CS9113;NETSDK1187</NoWarn>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
     <EnableDefaultEmbeddedResourceItems>false</EnableDefaultEmbeddedResourceItems>
   </PropertyGroup>

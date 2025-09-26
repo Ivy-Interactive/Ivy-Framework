@@ -7,8 +7,8 @@
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <NoWarn>CS1591;CS8618;CS8603;CS8602;CS8604;CS8669;CS9113</NoWarn>
     <RootNamespace>Ivy.Docs</RootNamespace>
-    <NoWarn>CS8618;CS8603;CS8602;CS8604;CS8669;CS9113</NoWarn>
   </PropertyGroup>
   
   <ItemGroup>

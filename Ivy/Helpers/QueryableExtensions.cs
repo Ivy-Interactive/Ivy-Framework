@@ -9,7 +9,7 @@ public static class QueryableExtensions
     {
         var type = typeof(TModel);
         var parameter = Expression.Parameter(type, "x");
-    
+
         var availableMembers = type.GetProperties()
             .Cast<MemberInfo>()
             .Union(type.GetFields().Cast<MemberInfo>())

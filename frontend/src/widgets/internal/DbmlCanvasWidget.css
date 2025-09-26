@@ -56,6 +56,10 @@
 
 /* ReactFlow Edge styling */
 .react-flow__edge-path {
+  stroke: var(--foreground) !important;
+}
+
+.dark .react-flow__edge-path {
   stroke: var(--primary) !important;
 }
 
@@ -64,28 +68,60 @@
   font-size: 12px !important;
   font-weight: 500 !important;
 }
-
 .react-flow__edge-textbg {
   fill: var(--background) !important;
   stroke: var(--border) !important;
   stroke-width: 1px !important;
 }
 
-/* ReactFlow Node selection styling */
-.react-flow__node.selected {
-  box-shadow: 0 0 0 2px var(--ring) !important;
+/* ReactFlow Node base styling - remove box-shadow from container */
+.react-flow__node {
+  /* Disable transitions during drag to prevent slow-motion effect */
+  transition: none !important;
 }
 
-.react-flow__node:hover {
-  box-shadow: 0 0 0 1px var(--border) !important;
+/* Only apply transitions to border changes, not position/transform */
+.react-flow__node .rounded-md {
+  transition:
+    border-color 0.1s ease,
+    border-width 0.1s ease;
+  border-width: 2px;
+}
+
+/* Ensure dragging nodes don't have transitions */
+.react-flow__node.dragging,
+.react-flow__node.dragging .rounded-md {
+  transition: none !important;
+}
+
+/* ReactFlow Node hover styling - target the DatabaseSchemaNode */
+.react-flow__node:hover .rounded-md {
+  border-color: var(--muted-foreground);
+  border-width: 2px;
+}
+
+/* ReactFlow Node selection styling - target the DatabaseSchemaNode */
+.react-flow__node.selected .rounded-md {
+  border-color: var(--primary);
+  border-width: 2px;
+}
+
+/* ReactFlow Node hover + selection styling - target the DatabaseSchemaNode */
+.react-flow__node.selected:hover .rounded-md {
+  border-color: var(--primary-dark);
+  border-width: 2px;
 }
 
 /* ReactFlow Handle styling */
 .react-flow__handle {
-  background-color: var(--primary) !important;
-  border: 2px solid var(--background) !important;
+  background-color: var(--foreground) !important;
+  border: 2px solid var(--border) !important;
   width: 8px !important;
   height: 8px !important;
+}
+
+.dark .react-flow__handle {
+  background-color: var(--primary) !important;
 }
 
 .react-flow__handle:hover {

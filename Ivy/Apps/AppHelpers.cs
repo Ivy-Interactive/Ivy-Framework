@@ -1,5 +1,4 @@
 using System.Reflection;
-using Ivy.Alerts;
 using Ivy.Shared;
 
 namespace Ivy.Apps;

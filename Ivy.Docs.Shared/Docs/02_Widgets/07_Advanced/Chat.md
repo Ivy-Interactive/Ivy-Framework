@@ -48,7 +48,7 @@ public class LoadingChatDemo : ViewBase
             new ChatMessage(ChatSender.Assistant, "I'm an AI assistant! Ask me anything and I'll respond with a loading state.")
         ));
 
-        async void OnSendMessage(Event<Chat, string> @event)
+        async ValueTask OnSendMessage(Event<Chat, string> @event)
         {
             var currentMessages = messages.Value;
             messages.Set(currentMessages.Add(new ChatMessage(ChatSender.User, @event.Value)));

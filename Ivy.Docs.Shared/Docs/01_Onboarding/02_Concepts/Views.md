@@ -15,18 +15,8 @@ Views are the fundamental building blocks of Ivy apps. They are similar to React
 
 Here's a simple view that displays a greeting:
 
-```csharp demo-below 
-public class GreetingView : ViewBase
-{
-    public override object? Build()
-    {
-        return Text.P("Hello, World!");
-    }
-}
-```
-
-```csharp demo-tabs 
-Text.P("Hello from a View!")
+```csharp demo-below
+Text.P("Hello, World!")
 ```
 
 ### The ViewBase Class
@@ -50,7 +40,7 @@ The `Build()` method is the heart of every view. It can return:
 - Collections (arrays, lists)
 - `null` (to render nothing)
 
-```csharp demo-tabs 
+```csharp demo-tabs
 public class FlexibleContentView : ViewBase
 {
     public override object? Build()
@@ -69,7 +59,7 @@ public class FlexibleContentView : ViewBase
 
 Views use React-like hooks for state management. The most common hook is `UseState()`:
 
-```csharp demo-tabs 
+```csharp demo-tabs
 public class CounterView : ViewBase
 {
     public override object? Build()
@@ -142,7 +132,7 @@ public class TimerView : ViewBase
 
 Views can be composed together to create complex UIs:
 
-```csharp demo-below 
+```csharp demo-below
 Layout.Vertical()
     | Text.H2("Team Members")
     | new Card(
@@ -191,7 +181,7 @@ The `[App]` attribute supports several properties:
 
 ### Conditional Rendering
 
-```csharp demo-tabs 
+```csharp demo-tabs
 public class ConditionalView : ViewBase
 {
     public override object? Build()
@@ -210,7 +200,7 @@ public class ConditionalView : ViewBase
 
 ### Dynamic Lists
 
-```csharp demo-tabs 
+```csharp demo-tabs
 public class TodoApp : ViewBase
 {
     public override object? Build()
@@ -221,7 +211,7 @@ public class TodoApp : ViewBase
         return Layout.Vertical()
             | new Card(
                 Layout.Vertical()
-                    | Layout.Horizontal()
+                    | (Layout.Horizontal()
                         | newTodo.ToTextInput(placeholder: "Add a todo...").Width(Size.Grow())
                         | new Button("Add", onClick: _ => {
                             if (!string.IsNullOrWhiteSpace(newTodo.Value))
@@ -229,7 +219,7 @@ public class TodoApp : ViewBase
                                 todos.Set([..todos.Value, newTodo.Value]);
                                 newTodo.Set("");
                             }
-                        }).Icon(Icons.Plus)
+                        }).Icon(Icons.Plus))
                     | todos.Value.Select((todo, index) => 
                         Layout.Horizontal()
                             | Text.Literal(todo).Width(Size.Grow())
@@ -246,14 +236,13 @@ public class TodoApp : ViewBase
 
 ### Simple User Profile Example
 
-```csharp demo-tabs 
+```csharp demo-tabs
 new Card(
     Layout.Vertical()
-        | Layout.Horizontal()
             | new Avatar("John Doe", "JD")
-            | Layout.Vertical()
-                | Text.P("John Doe")
-                | Text.Small("42 posts")
+        | (Layout.Horizontal()
+            | Text.P("John Doe")
+            | Text.P("42 posts"))
         | new Button("Follow")
             .Variant(ButtonVariant.Primary)
             .Width(Size.Full())

@@ -68,7 +68,7 @@ client.DownloadFile(
 
 Proper error handling is essential for downloads:
 
-```csharp demo-below 
+```csharp demo-below
 public class DownloadView : ViewBase
 {
         public override object? Build()
@@ -106,9 +106,13 @@ public class DownloadView : ViewBase
 
 ## Examples
 
-### CSV Export
+<Details>
+<Summary>
+CSV Export
+</Summary>
+<Body>
 
-```csharp demo-below 
+```csharp demo-below
 public class DataExportView : ViewBase
 {
         public override object? Build()
@@ -128,9 +132,16 @@ public class DataExportView : ViewBase
 }
 ```
 
-### Large File Download with Progress
+</Body>
+</Details>
 
-```csharp demo-below 
+<Details>
+<Summary>
+Large File Download with Progress
+</Summary>
+<Body>
+
+```csharp demo-below
 public class LargeFileView : ViewBase
 {
     public override object? Build()
@@ -154,3 +165,6 @@ public class LargeFileView : ViewBase
     }
 }
 ```
+
+</Body>
+</Details>

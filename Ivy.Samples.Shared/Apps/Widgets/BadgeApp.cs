@@ -9,14 +9,20 @@ public class BadgeApp : SampleBase
         BadgeVariant.Primary,
         BadgeVariant.Destructive,
         BadgeVariant.Secondary,
-        BadgeVariant.Outline
+        BadgeVariant.Outline,
+        BadgeVariant.Success,
+        BadgeVariant.Warning,
+        BadgeVariant.Info
     ];
 
     private static readonly string[] VariantNames = [
         "Primary",
         "Destructive",
         "Secondary",
-        "Outline"
+        "Outline",
+        "Success",
+        "Warning",
+        "Info"
     ];
 
     protected override object? BuildSample()
@@ -78,7 +84,10 @@ public class BadgeApp : SampleBase
                    new Badge(icon: Icons.Bell),
                    new Badge(icon: Icons.Heart, variant: BadgeVariant.Destructive),
                    new Badge(icon: Icons.Star, variant: BadgeVariant.Outline),
-                   new Badge(icon: Icons.Check, variant: BadgeVariant.Secondary)
+                   new Badge(icon: Icons.Check, variant: BadgeVariant.Secondary),
+                   new Badge(icon: Icons.CircleCheck, variant: BadgeVariant.Success),
+                   new Badge(icon: Icons.CircleAlert, variant: BadgeVariant.Warning),
+                   new Badge(icon: Icons.Info, variant: BadgeVariant.Info)
                )
             ;
     }

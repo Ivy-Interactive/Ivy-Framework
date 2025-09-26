@@ -27,15 +27,17 @@ const languageMap: Record<string, string> = {
   Css: 'css',
   Json: 'json',
   Dbml: 'sql',
+  Text: 'text',
 };
 
-const mapLanguageToPrism = (language: string): string => {
+const mapLanguageToPrism = (language: string): string | undefined => {
   if (!languageMap[language])
     console.warn(
       `Language ${language} is not specified in the code widget, attempting to use the language name as a fallback.`
     );
 
-  return languageMap[language] || language.toLowerCase();
+  const result = languageMap[language] || language.toLowerCase();
+  return result === 'text' ? undefined : result;
 };
 
 const MemoizedCopyButton = memo(({ textToCopy }: { textToCopy: string }) => (

@@ -29,6 +29,9 @@ Layout.Horizontal()
     | new Badge("Destructive", variant:BadgeVariant.Destructive)
     | new Badge("Outline", variant:BadgeVariant.Outline)
     | new Badge("Secondary", variant:BadgeVariant.Secondary)
+    | new Badge("Success", variant:BadgeVariant.Success)
+    | new Badge("Warning", variant:BadgeVariant.Warning)
+    | new Badge("Info", variant:BadgeVariant.Info)
 ```
 
 ### Using Extension Methods
@@ -154,7 +157,7 @@ Layout.Wrap()
     | new Badge("Marketing", icon:Icons.TrendingUp)
     | new Badge("Development", icon:Icons.Code)
     | new Badge("Analytics", icon:Icons.ChartBar)
-    | new Badge("Support", icon:Icons.CircleHelp)
+    | new Badge("Support", icon:Icons.CircleQuestionMark)
 ```
 
 ### Priority Levels

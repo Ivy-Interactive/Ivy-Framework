@@ -1,190 +1,230 @@
 # Signals
 
 <Ingress>
-Signals enable reactive state management and side effect handling in Ivy applications.
+Signals enable inter-component communication in Ivy applications, allowing components to send and receive messages across the component tree.
+They follow a publisher-subscriber pattern where components can send messages through signals and other components can listen for and respond to those messages.
 </Ingress>
-
-## Overview
-
-Signals are lightweight, reactive primitives that can be used to track and react to state changes. They are particularly useful for handling asynchronous operations and real-time updates.
 
 ## Basic Usage
 
-```csharp
+First, define a signal by creating a class that inherits from `AbstractSignal<TInput, TOutput>`:
+
+```csharp demo-below
+public class CounterSignal : AbstractSignal<int, string> { }
+
 public class SignalExample : ViewBase
 {
     public override object? Build()
     {
-        var count = UseSignal(0);
-        
-        return Layout.Horizontal(
-            new Button("Increment", onClick: _ => count.Set(count.Value + 1)),
-            count
+        var signal = Context.CreateSignal<CounterSignal, int, string>();
+        var output = UseState("");
+
+        async ValueTask OnClick(Event<Button> _)
+        {
+            var results = await signal.Send(1);
+            output.Set(string.Join(", ", results));
+        }
+
+        return Layout.Vertical(
+            new Button("Send Signal", OnClick),
+            new ChildReceiver(),
+            output
         );
+    }
+}
+
+public class ChildReceiver : ViewBase
+{
+    public override object? Build()
+    {
+        var signal = Context.UseSignal<CounterSignal, int, string>();
+        var counter = UseState(0);
+
+        UseEffect(() => signal.Receive(input =>
+        {
+            counter.Set(counter.Value + input);
+            return $"Child received: {input}, total: {counter.Value}";
+        }));
+
+        return new Card($"Counter: {counter.Value}");
     }
 }
 ```
 
-## Signal Types
+## Signal Communication Patterns
 
-### Value Signals
+### One-to-Many Communication
 
-```csharp
-var value = UseSignal(42);
-```
+This example demonstrates the one-to-many pattern where one sender broadcasts a message that multiple receivers all receive simultaneously.
 
-### Async Signals
+```csharp demo-tabs
+public class BroadcastSignal : AbstractSignal<string, Unit> { }
 
-```csharp
-var data = UseSignal(async () => await api.GetData());
-```
-
-### Computed Signals
-
-```csharp
-var doubled = UseSignal(() => count.Value * 2);
-```
-
-## Signal Effects
-
-Signals can trigger effects when their values change:
-
-```csharp
-public class SignalEffectExample : ViewBase
+public class OneToManyDemo : ViewBase
 {
     public override object? Build()
     {
-        var searchTerm = UseSignal("");
-        var results = UseSignal(Array.Empty<Result>());
+        var signal = Context.CreateSignal<BroadcastSignal, string, Unit>();
+        var message = UseState("");
+        var receiver1Message = UseState("");
+        var receiver2Message = UseState("");
+        var receiver3Message = UseState("");
         
-        UseEffect(async () => {
-            if (string.IsNullOrEmpty(searchTerm.Value))
+        async ValueTask BroadcastMessage(Event<Button> _)
+        {
+            if (!string.IsNullOrWhiteSpace(message.Value))
             {
-                results.Set(Array.Empty<Result>());
-                return;
+                await signal.Send(message.Value);
+                message.Set("");
             }
-            
-            var searchResults = await api.Search(searchTerm.Value);
-            results.Set(searchResults);
-        }, searchTerm);
+        }
+        
+        // Set up signal receiver
+        var receiver = Context.UseSignal<BroadcastSignal, string, Unit>();
+        
+        // Process incoming messages
+        UseEffect(() => receiver.Receive(message =>
+        {
+            // Each receiver processes the same message differently
+            receiver1Message.Set($"Logged: {message}");
+            receiver2Message.Set($"Analyzed: {message.Length} characters");
+            receiver3Message.Set($"Stats: {message.Split(' ').Length} words");
+            return new Unit();
+        }));
         
         return Layout.Vertical(
-            new TextInput("Search", value: searchTerm.Value, onChange: v => searchTerm.Set(v)),
-            results
+            Layout.Horizontal(
+                message.ToTextInput("Broadcast Message"),
+                new Button("Send", BroadcastMessage)
+            ),
+            Layout.Horizontal(
+                new Card(Text.Block(receiver1Message.Value)),
+                new Card(Text.Block(receiver2Message.Value)),
+                new Card(Text.Block(receiver3Message.Value))
+            )
         );
     }
 }
 ```
 
-## Signal Composition
+### Request-Response Pattern
 
-Signals can be composed to create more complex reactive flows:
+This example demonstrates the request-response pattern where a requester sends a query and receives specific responses from providers. Unlike one-to-many broadcasting, this pattern expects specific data back from each provider.
 
-```csharp
-public class SignalCompositionExample : ViewBase
+```csharp demo-tabs
+public class DataRequestSignal : AbstractSignal<string, string[]> { }
+
+public class RequestResponseDemo : ViewBase
 {
     public override object? Build()
     {
-        var firstName = UseSignal("");
-        var lastName = UseSignal("");
+        var signal = Context.CreateSignal<DataRequestSignal, string, string[]>();
+        var query = UseState<string>("");
+        var results = UseState<string[]>(() => Array.Empty<string>());
+        var isSearching = UseState<bool>(false);
         
-        var fullName = UseSignal(() => $"{firstName.Value} {lastName.Value}".Trim());
-        var isValid = UseSignal(() => !string.IsNullOrEmpty(fullName.Value));
-        
-        return Layout.Vertical(
-            new TextInput("First Name", value: firstName.Value, onChange: v => firstName.Set(v)),
-            new TextInput("Last Name", value: lastName.Value, onChange: v => lastName.Set(v)),
-            fullName,
-            new Button("Submit").Disabled(!isValid.Value)
-        );
-    }
-}
-```
-
-## Signal Operators
-
-Signals support various operators for transformation and combination:
-
-### Map
-
-```csharp
-var upperCase = searchTerm.Map(s => s.ToUpper());
-```
-
-### Filter
-
-```csharp
-var nonEmpty = searchTerm.Filter(s => !string.IsNullOrEmpty(s));
-```
-
-### Combine
-
-```csharp
-var combined = Signal.Combine(firstName, lastName, (f, l) => $"{f} {l}");
-```
-
-## Best Practices
-
-1. **Single Responsibility**: Each signal should track one piece of state.
-2. **Computed Values**: Use computed signals for derived state.
-3. **Async Operations**: Use async signals for data fetching.
-4. **Cleanup**: Return cleanup functions from effects when needed.
-5. **Performance**: Use appropriate operators to optimize signal updates.
-
-## Examples
-
-### Real-time Search with Debounce
-
-```csharp
-public class SearchExample : ViewBase
-{
-    public override object? Build()
-    {
-        var searchTerm = UseSignal("");
-        var results = UseSignal(Array.Empty<Result>());
-        
-        UseEffect(async () => {
-            if (string.IsNullOrEmpty(searchTerm.Value))
+        async ValueTask SearchData(Event<Button> _)
+        {
+            if (!string.IsNullOrWhiteSpace(query.Value))
             {
-                results.Set(Array.Empty<Result>());
-                return;
+                isSearching.Set(true);
+                
+                // Send request via signal and get responses from all providers
+                var responses = await signal.Send(query.Value);
+                var allResults = responses.SelectMany(r => r).ToArray();
+                
+                results.Set(allResults);
+                query.Set("");
+                isSearching.Set(false);
             }
-            
-            await Task.Delay(300); // Debounce
-            var searchResults = await api.Search(searchTerm.Value);
-            results.Set(searchResults);
-        }, searchTerm.Throttle(TimeSpan.FromMilliseconds(300)));
+        }
         
         return Layout.Vertical(
-            new TextInput("Search", value: searchTerm.Value, onChange: v => searchTerm.Set(v)),
-            results
+            Text.Block("Try searching for: John, Jane, Laptop, Smartphone, Tablet"),
+            Layout.Horizontal(
+                query.ToTextInput("Search"),
+                new Button("Search", SearchData)
+            ),
+            Text.Block(isSearching.Value ? "Searching..." : $"Found {results.Value.Length} results"),
+            results.Value.Select(r => Text.Block(r)),
+            Layout.Horizontal(
+                new DataProvider("User Database", new[] { "John Doe", "Jane Smith", "Bob Johnson" }),
+                new DataProvider("Product Catalog", new[] { "Laptop", "Smartphone", "Tablet" })
+            )
+        );
+    }
+}
+
+public class DataProvider : ViewBase
+{
+    private readonly string _providerName;
+    private readonly string[] _dataSource;
+    
+    public DataProvider(string providerName, string[] dataSource)
+    {
+        _providerName = providerName;
+        _dataSource = dataSource;
+    }
+    
+    public override object? Build()
+    {
+        var signal = Context.UseSignal<DataRequestSignal, string, string[]>();
+        var processedQueries = UseState<int>(0);
+        var lastQuery = UseState<string>("");
+        
+        UseEffect(() => signal.Receive(query =>
+        {
+            processedQueries.Set(processedQueries.Value + 1);
+            lastQuery.Set(query);
+            
+            // Process the query and return results
+            var matchingResults = _dataSource
+                .Where(item => item.Contains(query, StringComparison.OrdinalIgnoreCase))
+                .Select(item => $"[{_providerName}] {item}")
+                .ToArray();
+                
+            return matchingResults;
+        }));
+        
+        return new Card(
+            Layout.Vertical(
+                Text.Block(_providerName),
+                Text.Block($"Data source: {string.Join(", ", _dataSource)}"),
+                Text.Block($"Processed: {processedQueries.Value} queries"),
+                Text.Block($"Last query: {lastQuery.Value}")
+            )
         );
     }
 }
 ```
 
-### Form Validation with Signals
+## Broadcast Types
+
+Signals can be configured to broadcast across different scopes:
+
+### App-Level Broadcasting
 
 ```csharp
-public class ValidationExample : ViewBase
-{
-    public override object? Build()
-    {
-        var email = UseSignal("");
-        var password = UseSignal("");
-        
-        var isEmailValid = email.Map(e => e.Contains("@"));
-        var isPasswordValid = password.Map(p => p.Length >= 8);
-        
-        var canSubmit = Signal.Combine(isEmailValid, isPasswordValid, (e, p) => e && p);
-        
-        return Layout.Vertical(
-            new TextInput("Email", value: email.Value, onChange: v => email.Set(v)),
-            new TextInput("Password", value: password.Value, onChange: v => password.Set(v)),
-            new Button("Submit").Disabled(!canSubmit.Value)
-        );
-    }
-}
+[Signal(BroadcastType.App)]
+public class AppNotificationSignal : AbstractSignal<string, Unit> { }
+
+[Signal(BroadcastType.Server)]
+public class ServerEventSignal : AbstractSignal<ServerEvent, Unit> { }
+
+[Signal(BroadcastType.Machine)]
+public class SystemSignal : AbstractSignal<SystemEvent, Unit> { }
+```
+
+```mermaid
+graph TB
+    Sender[Signal Sender]
+    App[App-Level]
+    Server[Server-Level]
+    Machine[Machine-Level]
+    
+    Sender --> App
+    Sender --> Server
+    Sender --> Machine
 ```
 
 ## See Also

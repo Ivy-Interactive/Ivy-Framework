@@ -409,7 +409,6 @@ export const getAlign = (
   if (orientation === 'Horizontal') {
     styles.flexWrap = 'nowrap';
     styles.width = '100%';
-    styles.minWidth = '100%';
     // Default to flex-start for horizontal layouts so fractional widths work properly
     if (!align) {
       styles.justifyContent = 'flex-start';

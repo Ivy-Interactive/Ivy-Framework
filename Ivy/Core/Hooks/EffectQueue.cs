@@ -3,6 +3,11 @@ using Ivy.Core.Helpers;
 
 namespace Ivy.Core.Hooks;
 
+/// <summary>
+/// Manages the execution of effects in priority order with deduplication and exception handling.
+/// Processes effects asynchronously while maintaining thread safety and proper cleanup.
+/// </summary>
+/// <param name="exceptionHandler">Handler for exceptions that occur during effect execution.</param>
 public class EffectQueue(IExceptionHandler exceptionHandler) : IDisposable
 {
     private readonly Lock _syncLock = new();
@@ -10,6 +15,11 @@ public class EffectQueue(IExceptionHandler exceptionHandler) : IDisposable
     private readonly Queue<(EffectHook Effect, EffectPriority Priority)> _queue = new();
     private bool _isProcessing;
 
+    /// <summary>
+    /// Adds an effect to the queue for execution at the specified priority level.
+    /// </summary>
+    /// <param name="effect">The effect to enqueue for execution.</param>
+    /// <param name="priority">The priority level that determines execution order.</param>
     public void Enqueue(EffectHook effect, EffectPriority priority)
     {
         lock (_syncLock)
@@ -21,6 +31,9 @@ public class EffectQueue(IExceptionHandler exceptionHandler) : IDisposable
         ProcessQueueAsync().ConfigureAwait(false);
     }
 
+    /// <summary>
+    /// Processes all queued effects in priority order, ensuring only one processing cycle runs at a time.
+    /// </summary>
     private async Task ProcessQueueAsync()
     {
         if (_isProcessing)
@@ -43,7 +56,7 @@ public class EffectQueue(IExceptionHandler exceptionHandler) : IDisposable
                         break;
                 }
 
-                // Process each priority level
+                // Process each priority level in order
                 await ProcessEffectsForPriority(EffectPriority.StateChange);
                 await ProcessEffectsForPriority(EffectPriority.AfterRender);
                 await ProcessEffectsForPriority(EffectPriority.AfterInit);
@@ -55,6 +68,10 @@ public class EffectQueue(IExceptionHandler exceptionHandler) : IDisposable
         }
     }
 
+    /// <summary>
+    /// Processes all effects for a specific priority level, deduplicating by effect identity.
+    /// </summary>
+    /// <param name="targetPriority">The priority level to process.</param>
     private async Task ProcessEffectsForPriority(EffectPriority targetPriority)
     {
         List<(EffectHook Effect, EffectPriority Priority)> effectsToProcess;
@@ -67,7 +84,7 @@ public class EffectQueue(IExceptionHandler exceptionHandler) : IDisposable
                 .Where(x => x.Priority == targetPriority)
                 .ToList();
 
-            // Get only most recent effect per identity
+            // Get only most recent effect per identity to avoid duplicate execution
             var uniqueEffects = effectsToProcess
                 .GroupBy(x => x.Effect.Identity)
                 .Select(g => g.Last())
@@ -100,6 +117,9 @@ public class EffectQueue(IExceptionHandler exceptionHandler) : IDisposable
         }
     }
 
+    /// <summary>
+    /// Disposes the effect queue, clearing all pending effects and disposing tracked resources.
+    /// </summary>
     public void Dispose()
     {
         lock (_syncLock)

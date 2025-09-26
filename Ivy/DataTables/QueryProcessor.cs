@@ -30,7 +30,7 @@ public class QueryProcessor
         try
         {
             Console.WriteLine($"QueryProcessor: Processing query with filter: {query.Filter != null}");
-            
+
             var processedQuery = queryable;
 
             // Apply filtering
@@ -41,36 +41,36 @@ public class QueryProcessor
                 Console.WriteLine($"QueryProcessor: Filter applied successfully");
             }
 
-        // Apply sorting
-        if (query.Sort.Any())
-        {
-            processedQuery = ApplySort(processedQuery, query.Sort);
-        }
-
-        // Apply pagination
-        if (query.Offset > 0)
-        {
-            var skipMethod = typeof(Queryable).GetMethods()
-                .FirstOrDefault(m => m.Name == "Skip" && m.GetParameters().Length == 2)?
-                .MakeGenericMethod(queryable.ElementType);
-
-            if (skipMethod != null)
+            // Apply sorting
+            if (query.Sort.Any())
             {
-                processedQuery = (IQueryable)skipMethod.Invoke(null, new object[] { processedQuery, query.Offset })!;
+                processedQuery = ApplySort(processedQuery, query.Sort);
             }
-        }
 
-        if (query.Limit > 0)
-        {
-            var takeMethod = typeof(Queryable).GetMethods()
-                .FirstOrDefault(m => m.Name == "Take" && m.GetParameters().Length == 2)?
-                .MakeGenericMethod(queryable.ElementType);
-
-            if (takeMethod != null)
+            // Apply pagination
+            if (query.Offset > 0)
             {
-                processedQuery = (IQueryable)takeMethod.Invoke(null, new object[] { processedQuery, query.Limit })!;
+                var skipMethod = typeof(Queryable).GetMethods()
+                    .FirstOrDefault(m => m.Name == "Skip" && m.GetParameters().Length == 2)?
+                    .MakeGenericMethod(queryable.ElementType);
+
+                if (skipMethod != null)
+                {
+                    processedQuery = (IQueryable)skipMethod.Invoke(null, new object[] { processedQuery, query.Offset })!;
+                }
             }
-        }
+
+            if (query.Limit > 0)
+            {
+                var takeMethod = typeof(Queryable).GetMethods()
+                    .FirstOrDefault(m => m.Name == "Take" && m.GetParameters().Length == 2)?
+                    .MakeGenericMethod(queryable.ElementType);
+
+                if (takeMethod != null)
+                {
+                    processedQuery = (IQueryable)takeMethod.Invoke(null, new object[] { processedQuery, query.Limit })!;
+                }
+            }
 
             // Execute query and get results
             Console.WriteLine($"QueryProcessor: Executing query");
@@ -81,7 +81,7 @@ public class QueryProcessor
             Console.WriteLine($"QueryProcessor: Converting to Arrow table");
             var arrowData = ConvertToArrowTable(results, query.SelectColumns, queryable.ElementType);
             Console.WriteLine($"QueryProcessor: Arrow conversion complete, {arrowData.Length} bytes");
-            
+
             return arrowData;
         }
         catch (Exception ex)
@@ -129,13 +129,13 @@ public class QueryProcessor
         try
         {
             Console.WriteLine($"ApplyFilter: Starting filter application for type {query.ElementType.Name}");
-            
+
             var elementType = query.ElementType;
             var parameter = System.Linq.Expressions.Expression.Parameter(elementType, "x");
-            
+
             Console.WriteLine($"ApplyFilter: Building filter expression");
             var predicate = BuildFilterExpression(filter, parameter, elementType);
-            
+
             if (predicate == null)
             {
                 Console.WriteLine($"ApplyFilter: No predicate generated, returning original query");
@@ -144,7 +144,7 @@ public class QueryProcessor
 
             Console.WriteLine($"ApplyFilter: Creating lambda expression");
             var lambda = System.Linq.Expressions.Expression.Lambda(predicate, parameter);
-            
+
             Console.WriteLine($"ApplyFilter: Getting Where method");
             var whereMethod = typeof(Queryable).GetMethods()
                 .FirstOrDefault(m => m.Name == "Where" && m.GetParameters().Length == 2)?
@@ -244,9 +244,9 @@ public class QueryProcessor
         try
         {
             Console.WriteLine($"BuildContainsExpression: Building contains for property {property.Member.Name} of type {property.Type}");
-            
+
             var arg = args.FirstOrDefault();
-            if (arg == null) 
+            if (arg == null)
             {
                 Console.WriteLine($"BuildContainsExpression: No arguments provided");
                 return null;
@@ -255,17 +255,17 @@ public class QueryProcessor
             // Extract the string value from the protobuf Any
             Console.WriteLine($"BuildContainsExpression: Extracting string value from protobuf Any");
             var searchValue = ExtractStringValue(arg);
-            if (searchValue == null) 
+            if (searchValue == null)
             {
                 Console.WriteLine($"BuildContainsExpression: Failed to extract search value");
                 return null;
             }
-            
+
             Console.WriteLine($"BuildContainsExpression: Search value: '{searchValue}'");
 
             // Use case-insensitive Contains method
             var containsMethod = typeof(string).GetMethod("Contains", new[] { typeof(string), typeof(StringComparison) });
-            if (containsMethod == null) 
+            if (containsMethod == null)
             {
                 Console.WriteLine($"BuildContainsExpression: Could not find Contains method with StringComparison");
                 return null;
@@ -273,25 +273,25 @@ public class QueryProcessor
 
             var searchValueExpression = System.Linq.Expressions.Expression.Constant(searchValue);
             var comparisonExpression = System.Linq.Expressions.Expression.Constant(StringComparison.OrdinalIgnoreCase);
-            
+
             // Handle nullable properties
             if (property.Type == typeof(string))
             {
                 Console.WriteLine($"BuildContainsExpression: Creating case-insensitive string contains expression");
-                
+
                 // Need to handle null strings - use null-conditional approach
                 var nullCheck = System.Linq.Expressions.Expression.NotEqual(
-                    property, 
+                    property,
                     System.Linq.Expressions.Expression.Constant(null, typeof(string))
                 );
-                
+
                 var containsCall = System.Linq.Expressions.Expression.Call(
-                    property, 
-                    containsMethod, 
-                    searchValueExpression, 
+                    property,
+                    containsMethod,
+                    searchValueExpression,
                     comparisonExpression
                 );
-                
+
                 // Combine null check with contains: property != null && property.Contains(searchValue, OrdinalIgnoreCase)
                 return System.Linq.Expressions.Expression.AndAlso(nullCheck, containsCall);
             }
@@ -303,20 +303,20 @@ public class QueryProcessor
                 if (toStringMethod != null)
                 {
                     var toStringCall = System.Linq.Expressions.Expression.Call(property, toStringMethod);
-                    
+
                     // Check for null after ToString (though ToString rarely returns null)
                     var nullCheck = System.Linq.Expressions.Expression.NotEqual(
-                        toStringCall, 
+                        toStringCall,
                         System.Linq.Expressions.Expression.Constant(null, typeof(string))
                     );
-                    
+
                     var containsCall = System.Linq.Expressions.Expression.Call(
-                        toStringCall, 
-                        containsMethod, 
-                        searchValueExpression, 
+                        toStringCall,
+                        containsMethod,
+                        searchValueExpression,
                         comparisonExpression
                     );
-                    
+
                     return System.Linq.Expressions.Expression.AndAlso(nullCheck, containsCall);
                 }
                 else
@@ -384,20 +384,20 @@ public class QueryProcessor
 
         var searchValueExpression = System.Linq.Expressions.Expression.Constant(searchValue);
         var comparisonExpression = System.Linq.Expressions.Expression.Constant(StringComparison.OrdinalIgnoreCase);
-        
+
         // Handle null strings
         var nullCheck = System.Linq.Expressions.Expression.NotEqual(
-            property, 
+            property,
             System.Linq.Expressions.Expression.Constant(null, typeof(string))
         );
-        
+
         var startsWithCall = System.Linq.Expressions.Expression.Call(
-            property, 
-            startsWithMethod, 
-            searchValueExpression, 
+            property,
+            startsWithMethod,
+            searchValueExpression,
             comparisonExpression
         );
-        
+
         return System.Linq.Expressions.Expression.AndAlso(nullCheck, startsWithCall);
     }
 
@@ -414,20 +414,20 @@ public class QueryProcessor
 
         var searchValueExpression = System.Linq.Expressions.Expression.Constant(searchValue);
         var comparisonExpression = System.Linq.Expressions.Expression.Constant(StringComparison.OrdinalIgnoreCase);
-        
+
         // Handle null strings
         var nullCheck = System.Linq.Expressions.Expression.NotEqual(
-            property, 
+            property,
             System.Linq.Expressions.Expression.Constant(null, typeof(string))
         );
-        
+
         var endsWithCall = System.Linq.Expressions.Expression.Call(
-            property, 
-            endsWithMethod, 
-            searchValueExpression, 
+            property,
+            endsWithMethod,
+            searchValueExpression,
             comparisonExpression
         );
-        
+
         return System.Linq.Expressions.Expression.AndAlso(nullCheck, endsWithCall);
     }
 
@@ -436,24 +436,24 @@ public class QueryProcessor
         try
         {
             Console.WriteLine($"ExtractStringValue: Extracting from Any with TypeUrl: {arg.TypeUrl}");
-            
+
             // The frontend sends JSON-serialized strings, so we need to deserialize
             var jsonValue = arg.Value.ToStringUtf8();
             Console.WriteLine($"ExtractStringValue: Raw value: '{jsonValue}'");
-            
+
             var result = System.Text.Json.JsonSerializer.Deserialize<string>(jsonValue);
             Console.WriteLine($"ExtractStringValue: Deserialized value: '{result}'");
-            
+
             return result;
         }
         catch (Exception ex)
         {
             Console.WriteLine($"ExtractStringValue: JSON deserialization failed: {ex.Message}");
-            
+
             // Fallback: try to use the value directly
             var fallback = arg.Value.ToStringUtf8().Trim('"');
             Console.WriteLine($"ExtractStringValue: Using fallback value: '{fallback}'");
-            
+
             return fallback;
         }
     }
@@ -487,7 +487,7 @@ public class QueryProcessor
     private byte[] ConvertToArrowTable(List<object> data, IEnumerable<string> selectColumns, SystemType elementType)
     {
         Console.WriteLine($"ConvertToArrowTable: Converting {data.Count} items to Arrow table");
-        
+
         var properties = elementType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
 
         // Filter properties if selectColumns is specified
@@ -504,7 +504,7 @@ public class QueryProcessor
         {
             var arrowType = GetArrowType(prop.PropertyType);
             fields.Add(new ArrowField(prop.Name, arrowType, nullable: true));
-            
+
             // Create empty array if no data, otherwise create array with data
             if (!data.Any())
             {

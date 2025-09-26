@@ -41,6 +41,8 @@ export const widgetMap = {
   'Ivy.Spacer': Primitives.SpacerWidget,
   'Ivy.Loading': Primitives.LoadingWidget,
   'Ivy.AppHost': Primitives.AppHostWidget,
+  'Ivy.Audio': Primitives.AudioPlayerWidget,
+  'Ivy.VideoPlayer': Primitives.VideoPlayerWidget,
 
   // Widgets
   'Ivy.Article': Widgets.ArticleWidget,
@@ -57,6 +59,7 @@ export const widgetMap = {
   'Ivy.ChatLoading': Widgets.ChatLoadingWidget,
   'Ivy.ChatStatus': Widgets.ChatStatusWidget,
   'Ivy.DropDownMenu': Widgets.DropDownMenuWidget,
+  'Ivy.Pagination': Widgets.PaginationWidget,
 
   // Layouts
   'Ivy.StackLayout': Layouts.StackLayoutWidget,
@@ -86,6 +89,9 @@ export const widgetMap = {
   'Ivy.FileInput': Inputs.FileInputWidget,
   'Ivy.CodeInput': React.lazy(
     () => import('@/widgets/inputs/code/CodeInputWidget')
+  ),
+  'Ivy.AudioRecorder': React.lazy(
+    () => import('@/widgets/inputs/AudioRecorderWidget')
   ),
 
   // Forms

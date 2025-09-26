@@ -11,7 +11,7 @@ The `Table` widget is a layout container designed to render data in a tabular fo
 There is a recommended way to create tables from data arrays.
 The `ToTable()` extension method automatically converts collections into formatted tables.
 
-```csharp demo-tabs 
+```csharp demo-tabs
 public class BasicRowTable : ViewBase
 {
     public class Product
@@ -42,6 +42,10 @@ public class BasicRowTable : ViewBase
 
 **Width(p => p.ColumnName, Size.Units())** – sets the column width
 
+**Width(p => p.ColumnName, Size.Fraction())** – sets the column width as a fraction (percentage) of available space
+
+Long text in cells automatically gets truncated with ellipsis (...) and shows full content in tooltips on hover
+
 **Header(p => p.ColumnName)** is used to show custom header text of the table
 
 **Align(p => p.ColumnName)** - right alignment for selected column
@@ -54,7 +58,7 @@ public class BasicRowTable : ViewBase
 
 **Empty(new Card(""))** shows content when the table is empty.
 
-```csharp demo-tabs 
+```csharp demo-tabs
 public class CustomBuilderTable : ViewBase
 {
     public override object? Build()
@@ -67,6 +71,9 @@ public class CustomBuilderTable : ViewBase
         return products.ToTable()
             .Width(Size.Full())
             .Width(p => p.Price, Size.Units(100))
+            .Width(p => p.Sku, Size.Fraction(0.15f))
+            .Width(p => p.Name, Size.Fraction(0.3f))
+            .Width(p => p.Url, Size.Fraction(0.55f))
             .Header(p => p.Price, "Unit Price")
             .Align(p => p.Price, Align.Right)
             .Order(p => p.Name, p => p.Price, p => p.Sku)
@@ -82,7 +89,7 @@ public class CustomBuilderTable : ViewBase
 The `Clear()` method hides all columns, allowing you to selectively show only the columns you need.
 Use `Add()` to show specific columns in the order you want them to appear.
 
-```csharp demo-tabs 
+```csharp demo-tabs
 public class ColumnManagementTable : ViewBase
 {
     public override object? Build()
@@ -111,7 +118,7 @@ public class ColumnManagementTable : ViewBase
 The `Totals()` method supports custom aggregation functions.
 You can use LINQ methods like `Count()`, `Average()`, `Sum()`, `Max()`, and `Min()` to create sophisticated calculations for your data.
 
-```csharp demo-tabs 
+```csharp demo-tabs
 public class AdvancedAggregationsTable : ViewBase
 {
     public override object? Build()
@@ -140,7 +147,7 @@ public class AdvancedAggregationsTable : ViewBase
 
 The `RemoveEmptyColumns()` method automatically hides columns that contain no data (empty strings, null values, or zero values). This is useful for dynamic data where some columns might be empty across all rows.
 
-```csharp demo-tabs 
+```csharp demo-tabs
 public class EmptyColumnsTable : ViewBase
 {
     public override object? Build()
@@ -164,7 +171,7 @@ public class EmptyColumnsTable : ViewBase
 
 The `Reset()` method restores all column settings to their default values. This is useful when you want to start fresh with a new configuration or when building dynamic table configurations.
 
-```csharp demo-tabs 
+```csharp demo-tabs
 public class ResetTableExample : ViewBase
 {
     public override object? Build()
@@ -190,7 +197,7 @@ public class ResetTableExample : ViewBase
 
 It's also possible to create manual tables with headers and other methods using rows and cells:
 
-```csharp demo-tabs 
+```csharp demo-tabs
 public class ManualTableDemo : ViewBase
 {
     public override object? Build()
@@ -221,12 +228,18 @@ public class CustomBuildersTable : ViewBase
     public override object? Build()
     {
         var products = new[] {
-            new {Sku = "1234", Name = "T-shirt", Price = 10, Url = "http://example.com/tshirt", Description = "Comfortable cotton shirt"},
-            new {Sku = "1235", Name = "Jeans", Price = 20, Url = "http://example.com/jeans", Description = "Blue denim jeans"}
+            new {Sku = "1234", Name = "T-shirt", Price = 10, Url = "http://example.com/tshirt", Description = "High quality cotton T-shirt with a comfortable fit and durable construction. Perfect for everyday wear and available in multiple colors."},
+            new {Sku = "1235", Name = "Jeans", Price = 20, Url = "http://example.com/jeans", Description = "Classic denim jeans with a modern cut and premium stitching. Features include reinforced pockets, comfortable waistband, and fade-resistant fabric."}
         };
 
         return products.ToTable()
             .Width(Size.Full())
+            .Width(p => p.Sku, Size.Fraction(0.15f))          // 15% for SKU
+            .Width(p => p.Name, Size.Fraction(0.25f))         // 25% for Name
+            .Width(p => p.Price, Size.Fraction(0.15f))        // 15% for Price
+            .Width(p => p.Url, Size.Fraction(0.2f))           // 20% for URL
+            .Width(p => p.Description, Size.Fraction(0.25f))  // 25% for Description
+            .MultiLine(p => p.Description)                    // Enable multiline for the Description column
             .Builder(p => p.Url, f => f.Link())               // Link builder
             .Builder(p => p.Description, f => f.Text())       // Text builder
             .Builder(p => p.Sku, f => f.CopyToClipboard())    // Copy to clipboard
@@ -304,10 +317,10 @@ public class TableIntegrationExample : ViewBase
             | new Card(
                 Layout.Vertical()
                     | products.Value.ToTable().Width(Size.Full())
-                    | Layout.Horizontal().Gap(2)
+                    | (Layout.Horizontal().Gap(2)
                         | new Button("Add Product", addProduct).Variant(ButtonVariant.Secondary)
-                        | new Button("Clear All", clearProducts).Variant(ButtonVariant.Destructive)
-                        | Text.Block($"Total Products: {products.Value.Length}")
+                        | new Button("Clear All", clearProducts).Variant(ButtonVariant.Destructive))
+                    | Text.Block($"Total Products: {products.Value.Length}")
             ).Title("Product List").Width(Size.Full());
     }
 }

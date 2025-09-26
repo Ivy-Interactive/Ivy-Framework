@@ -144,5 +144,3 @@ new Box("Content")
     .Margin(new Thickness(4))
     .BorderThickness(new Thickness(8))
 ```
-
-<WidgetDocs Type="Ivy.Shared.Thickness" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Shared/Thickness.cs"/>

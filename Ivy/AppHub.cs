@@ -77,144 +77,189 @@ public class AppHub(
 
     public override async Task OnConnectedAsync()
     {
-        var appServices = new ServiceCollection();
-
-        var httpContext = Context.GetHttpContext()!;
-        var appId = GetAppId(server, httpContext);
-
-        var isAuthProtected = server.AuthProviderType != null;
-        AuthToken? authToken = null, oldAuthToken = null;
-        if (isAuthProtected)
+        try
         {
-            var authProvider = server.Services.BuildServiceProvider().GetService<IAuthProvider>() ?? throw new Exception("IAuthProvider not found");
-            authProvider.SetHttpContext(httpContext);
+            var appServices = new ServiceCollection();
 
-            oldAuthToken = authToken = GetAuthToken(httpContext);
+            var httpContext = Context.GetHttpContext()!;
+            var appId = GetAppId(server, httpContext);
 
-            if (string.IsNullOrEmpty(authToken?.Jwt))
+            var isAuthProtected = server.AuthProviderType != null;
+            AuthToken? authToken = null, oldAuthToken = null;
+            if (isAuthProtected)
             {
-                appId = AppIds.Auth;
-            }
-            else
-            {
-                authToken = await authProvider.RefreshJwtAsync(authToken);
+                var authProvider = server.Services.BuildServiceProvider().GetService<IAuthProvider>() ?? throw new Exception("IAuthProvider not found");
+                authProvider.SetHttpContext(httpContext);
+
+                oldAuthToken = authToken = GetAuthToken(httpContext);
+
                 if (string.IsNullOrEmpty(authToken?.Jwt))
                 {
                     appId = AppIds.Auth;
                 }
                 else
                 {
-                    var validJwt = await authProvider.ValidateJwtAsync(authToken.Jwt);
-                    if (!validJwt)
+                    authToken = await authProvider.RefreshJwtAsync(authToken);
+                    if (string.IsNullOrEmpty(authToken?.Jwt))
                     {
                         appId = AppIds.Auth;
                     }
+                    else
+                    {
+                        var validJwt = await authProvider.ValidateJwtAsync(authToken.Jwt);
+                        if (!validJwt)
+                        {
+                            appId = AppIds.Auth;
+                        }
+                    }
+                }
+                appServices.AddSingleton<IAuthService>(s => new AuthService(authProvider, authToken));
+            }
+
+            var appArgs = GetAppArgs(Context.ConnectionId, appId, httpContext);
+            var appDescriptor = server.GetApp(appId);
+
+            logger.LogInformation($"Connected: {Context.ConnectionId} [{appId}]");
+
+            var clientProvider = new ClientProvider(new ClientSender(clientNotifier, Context.ConnectionId));
+
+            if (server.Services.All(sd => sd.ServiceType != typeof(IExceptionHandler)))
+            {
+                appServices.AddSingleton<IExceptionHandler>(_ => new ExceptionHandlerPipeline()
+                    .Use(new ConsoleExceptionHandler()).Use(new ClientExceptionHandler(clientProvider))
+                    .Build());
+            }
+
+            appServices.AddSingleton(typeof(IContentBuilder), contentBuilder);
+            appServices.AddSingleton(typeof(IAppRepository), server.AppRepository);
+            appServices.AddSingleton(typeof(IDownloadService), new DownloadService(Context.ConnectionId));
+            appServices.AddSingleton(typeof(IDataTableService), new DataTableConnectionService(
+                queryableRegistry,
+                server.Args,
+                Context.ConnectionId));
+            appServices.AddSingleton(typeof(IUploadService), new UploadService(Context.ConnectionId));
+            appServices.AddSingleton(typeof(IClientProvider), clientProvider);
+            appServices.AddSingleton(appDescriptor);
+            appServices.AddSingleton(appArgs);
+
+            appServices.AddTransient<IWebhookRegistry, WebhookController>();
+            appServices.AddTransient<SignalRouter>(_ => new SignalRouter(sessionStore));
+
+            if (authToken != oldAuthToken)
+            {
+                clientProvider.SetJwt(authToken);
+            }
+
+            var serviceProvider = new CompositeServiceProvider(appServices, server.Services);
+
+            var app = appDescriptor.CreateApp();
+
+            var widgetTree = new WidgetTree(app, contentBuilder, serviceProvider);
+
+            var appState = new AppSession
+            {
+                AppId = appId,
+                MachineId = GetMachineId(httpContext),
+                ParentId = GetParentId(httpContext),
+                AppDescriptor = appDescriptor,
+                App = app,
+                ConnectionId = Context.ConnectionId,
+                WidgetTree = widgetTree,
+                ContentBuilder = contentBuilder,
+                AppServices = serviceProvider,
+                LastInteraction = DateTime.UtcNow
+            };
+
+            async void OnWidgetTreeChanged(WidgetTreeChanged[] changes)
+            {
+                try
+                {
+                    logger.LogDebug($"> Update");
+                    await clientNotifier.NotifyClientAsync(appState.ConnectionId, "Update", changes);
+                }
+                catch (Exception e)
+                {
+                    logger.LogError(e, "{ConnectionId}", appState.ConnectionId);
                 }
             }
-            appServices.AddSingleton<IAuthService>(s => new AuthService(authProvider, authToken));
-        }
 
-        var appArgs = GetAppArgs(Context.ConnectionId, appId, httpContext);
-        var appDescriptor = server.GetApp(appId);
+            appState.TrackDisposable(widgetTree.Subscribe(OnWidgetTreeChanged));
 
-        logger.LogInformation($"Connected: {Context.ConnectionId} [{appId}]");
+            sessionStore.Sessions[Context.ConnectionId] = appState;
 
-        var clientProvider = new ClientProvider(new ClientSender(clientNotifier, Context.ConnectionId));
+            await base.OnConnectedAsync();
 
-        if (server.Services.All(sd => sd.ServiceType != typeof(IExceptionHandler)))
-        {
-            appServices.AddSingleton<IExceptionHandler>(_ => new ExceptionHandlerPipeline()
-                .Use(new ConsoleExceptionHandler()).Use(new ClientExceptionHandler(clientProvider))
-                .Build());
-        }
-
-        appServices.AddSingleton(typeof(IContentBuilder), contentBuilder);
-        appServices.AddSingleton(typeof(IAppRepository), server.AppRepository);
-        appServices.AddSingleton(typeof(IDownloadService), new DownloadService(Context.ConnectionId));
-        appServices.AddSingleton(typeof(IDataTableService), new DataTableConnectionService(
-            queryableRegistry,
-            server.Args,
-            Context.ConnectionId));
-        appServices.AddSingleton(typeof(IUploadService), new UploadService(Context.ConnectionId));
-        appServices.AddSingleton(typeof(IClientProvider), clientProvider);
-        appServices.AddSingleton(appDescriptor);
-        appServices.AddSingleton(appArgs);
-
-        appServices.AddTransient<IWebhookRegistry, WebhookController>();
-        appServices.AddTransient<SignalRouter>(_ => new SignalRouter(sessionStore));
-
-        if (authToken != oldAuthToken)
-        {
-            clientProvider.SetJwt(authToken);
-        }
-
-        var serviceProvider = new CompositeServiceProvider(appServices, server.Services);
-
-        var app = appDescriptor.CreateApp();
-
-        var widgetTree = new WidgetTree(app, contentBuilder, serviceProvider);
-
-        var appState = new AppSession
-        {
-            AppId = appId,
-            MachineId = GetMachineId(httpContext),
-            ParentId = GetParentId(httpContext),
-            AppDescriptor = appDescriptor,
-            App = app,
-            ConnectionId = Context.ConnectionId,
-            WidgetTree = widgetTree,
-            ContentBuilder = contentBuilder,
-            AppServices = serviceProvider,
-            LastInteraction = DateTime.UtcNow
-        };
-
-        async void OnWidgetTreeChanged(WidgetTreeChanged[] changes)
-        {
             try
             {
-                logger.LogDebug($"> Update");
-                await clientNotifier.NotifyClientAsync(appState.ConnectionId, "Update", changes);
+                await widgetTree.BuildAsync();
+                logger.LogInformation($"Refresh: {Context.ConnectionId} [{appId}]");
+                await Clients.Caller.SendAsync("Refresh", new
+                {
+                    Widgets = widgetTree.GetWidgets().Serialize()
+                });
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                var tree = new WidgetTree(new ErrorView(e), contentBuilder, serviceProvider);
+                await tree.BuildAsync();
+                await Clients.Caller.SendAsync("Refresh", new
+                {
+                    Widgets = tree.GetWidgets().Serialize()
+                });
             }
         }
-
-        appState.TrackDisposable(widgetTree.Subscribe(OnWidgetTreeChanged));
-
-        sessionStore.Sessions[Context.ConnectionId] = appState;
-
-        await base.OnConnectedAsync();
-
-        try
+        catch (Exception ex)
         {
-            await widgetTree.BuildAsync();
-            logger.LogInformation($"Refresh: {Context.ConnectionId} [{appId}]");
-            await Clients.Caller.SendAsync("Refresh", new
+            logger.LogError(ex, "Failed to connect client {ConnectionId}", Context.ConnectionId);
+
+            // Try to notify the client about the error
+            try
             {
-                Widgets = widgetTree.GetWidgets().Serialize()
-            });
-        }
-        catch (Exception e)
-        {
-            var tree = new WidgetTree(new ErrorView(e), contentBuilder, serviceProvider);
-            await tree.BuildAsync();
-            await Clients.Caller.SendAsync("Refresh", new
+                await Clients.Caller.SendAsync("Error", new
+                {
+                    message = "Failed to establish connection",
+                    error = ex.Message
+                });
+            }
+            catch
             {
-                Widgets = tree.GetWidgets().Serialize()
-            });
+                // If we can't even send an error message, just log and continue
+                logger.LogError("Could not send error message to client {ConnectionId}", Context.ConnectionId);
+            }
         }
     }
 
-    public override Task OnDisconnectedAsync(Exception? exception)
+    public override async Task OnDisconnectedAsync(Exception? exception)
     {
-        if (sessionStore.Sessions.TryRemove(Context.ConnectionId, out var appState))
+        try
         {
-            appState.Dispose();
-        }
+            if (exception != null)
+            {
+                logger.LogWarning(exception, "Client {ConnectionId} disconnected with error", Context.ConnectionId);
+            }
+            else
+            {
+                logger.LogInformation("Client {ConnectionId} disconnected normally", Context.ConnectionId);
+            }
 
-        return base.OnDisconnectedAsync(exception);
+            if (sessionStore.Sessions.TryRemove(Context.ConnectionId, out var appState))
+            {
+                try
+                {
+                    appState.Dispose();
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "Error disposing app state for {ConnectionId}", Context.ConnectionId);
+                }
+            }
+
+            await base.OnDisconnectedAsync(exception);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error during disconnection for {ConnectionId}", Context.ConnectionId);
+        }
     }
 
     public void HotReload()
@@ -261,9 +306,7 @@ public class AppHub(
 
                     if (string.IsNullOrEmpty(authToken?.Jwt) || !await authProvider.ValidateJwtAsync(authToken.Jwt))
                     {
-                        logger.LogWarning(
-                            "Invalid JWT for event from {ConnectionId}. Aborting.",
-                            Context.ConnectionId);
+                        logger.LogWarning("Invalid JWT for event from {ConnectionId}. Aborting.", Context.ConnectionId);
                         Context.Abort();
                         return;
                     }
@@ -305,10 +348,8 @@ public class AppHub(
                 var refreshToken = cookies["jwt_ext_refresh_token"].NullIfEmpty();
                 return token with { RefreshToken = refreshToken };
             }
-            else
-            {
-                return token;
-            }
+
+            return token;
         }
         catch (Exception e)
         {
@@ -322,7 +363,18 @@ public class ClientSender(IClientNotifier clientNotifier, string connectionId) :
 {
     public void Send(string method, object? data)
     {
-        _ = clientNotifier.NotifyClientAsync(connectionId, method, data);
+        // Fire and forget, but handle exceptions to prevent crashes
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                await clientNotifier.NotifyClientAsync(connectionId, method, data);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[ERROR] Failed to send {method} to client {connectionId}: {ex.Message}");
+            }
+        });
     }
 }
 

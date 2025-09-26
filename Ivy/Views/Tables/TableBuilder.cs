@@ -1,15 +1,22 @@
 using System.Collections;
 using System.Linq.Expressions;
 using System.Reflection;
-using Ivy.Builders;
 using Ivy.Core;
 using Ivy.Core.Hooks;
 using Ivy.Shared;
+using Ivy.Views.Builders;
 
 namespace Ivy.Views.Tables;
 
+/// <summary>
+/// Fluent builder for creating tables from data collections with automatic column scaffolding.
+/// </summary>
+/// <typeparam name="TModel">The type of data objects in the table rows.</typeparam>
 public class TableBuilder<TModel> : ViewBase, IStateless
 {
+    /// <summary>
+    /// Internal column configuration with metadata and rendering options.
+    /// </summary>
     private class TableBuilderColumn(
         string name,
         int order,
@@ -20,29 +27,20 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         bool removed)
     {
         public string Name { get; set; } = name;
-
         private FieldInfo? FieldInfo { get; set; } = fieldInfo;
-
         private PropertyInfo? PropertyInfo { get; set; } = propertyInfo;
-
         public IBuilder<TModel> Builder { get; set; } = builder;
-
         public Type? Type => FieldInfo?.FieldType ?? PropertyInfo?.PropertyType;
-
         public int Order { get; set; } = order;
-
-        public string Header { get; set; } = Utils.SplitPascalCase(name) ?? name;
-
+        public string Header { get; set; } = Utils.LabelFor(name, fieldInfo?.FieldType ?? propertyInfo?.PropertyType);
         public string? Description { get; set; }
-
         public bool Removed { get; set; } = removed;
-
+        public bool IsMultiLine { get; set; }
         public Align Align { get; set; } = align;
-
         public Size? Width { get; set; }
-
         public Func<IEnumerable<TModel>, object>? FooterAggregate { get; set; }
 
+        /// <summary>Gets the value of this column from a model object using reflection.</summary>
         public object? GetValue(TModel obj)
         {
             if (obj == null) return null;
@@ -74,9 +72,12 @@ public class TableBuilder<TModel> : ViewBase, IStateless
     private readonly BuilderFactory<TModel> _builderFactory;
     private bool _removeEmptyColumns = false;
     private bool _removeHeader;
-    //private Func<TModel, bool> _highlightPredicate;
     private object? _empty;
 
+    /// <summary>
+    /// Creates a table builder with automatic column scaffolding from the model type.
+    /// </summary>
+    /// <param name="records">The data records to display in the table.</param>
     public TableBuilder(IEnumerable<TModel> records)
     {
         _records = records;
@@ -85,6 +86,9 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         _Scaffold();
     }
 
+    /// <summary>
+    /// Automatically discovers columns from model properties and fields with intelligent defaults.
+    /// </summary>
     private void _Scaffold()
     {
         var type = typeof(TModel);
@@ -130,12 +134,17 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         }
     }
 
+    /// <summary>Sets the overall table width.</summary>
+    /// <param name="width">The width to set for the entire table.</param>
     public TableBuilder<TModel> Width(Size width)
     {
         _width = width;
         return this;
     }
 
+    /// <summary>Sets the width of a specific column.</summary>
+    /// <param name="field">Expression identifying the column to set width for.</param>
+    /// <param name="width">The width to set for the column.</param>
     public TableBuilder<TModel> Width(Expression<Func<TModel, object>> field, Size width)
     {
         var hint = GetField(field);
@@ -143,12 +152,17 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         return this;
     }
 
+    /// <summary>Gets the column configuration for a field expression.</summary>
+    /// <param name="field">Expression identifying the field to get configuration for.</param>
     private TableBuilderColumn GetField(Expression<Func<TModel, object>> field)
     {
         var name = Utils.GetNameFromMemberExpression(field.Body);
         return _columns[name];
     }
 
+    /// <summary>Sets a custom builder for rendering a specific column's data.</summary>
+    /// <param name="field">Expression identifying the column to configure.</param>
+    /// <param name="builder">Factory function to create the column builder.</param>
     public TableBuilder<TModel> Builder(Expression<Func<TModel, object>> field, Func<IBuilderFactory<TModel>, IBuilder<TModel>> builder)
     {
         var column = GetField(field);
@@ -156,13 +170,8 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         return this;
     }
 
-    /// <summary>
-    /// Sets the builder for all columns of a specific type.
-    /// This is useful for applying a common builder to multiple columns that share the same type.
-    /// </summary>
-    /// <param name="builder"></param>
-    /// <typeparam name="TU"></typeparam>
-    /// <returns></returns>
+    /// <summary>Sets the builder for all columns of a specific type.</summary>
+    /// <param name="builder">Factory function to create the builder for all matching columns.</param>
     public TableBuilder<TModel> Builder<TU>(Func<IBuilderFactory<TModel>, IBuilder<TModel>> builder)
     {
         foreach (var column in _columns.Values.Where(e => e.Type is TU))
@@ -172,6 +181,9 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         return this;
     }
 
+    /// <summary>Sets the description for a column.</summary>
+    /// <param name="field">Expression identifying the column to set description for.</param>
+    /// <param name="description">The description text for the column.</param>
     public TableBuilder<TModel> Description(Expression<Func<TModel, object>> field, string description)
     {
         var column = GetField(field);
@@ -179,6 +191,9 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         return this;
     }
 
+    /// <summary>Sets a custom header text for a column.</summary>
+    /// <param name="field">Expression identifying the column to set header for.</param>
+    /// <param name="label">The header text to display.</param>
     public TableBuilder<TModel> Header(Expression<Func<TModel, object>> field, string label)
     {
         var hint = GetField(field);
@@ -186,6 +201,9 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         return this;
     }
 
+    /// <summary>Sets the text alignment for a column.</summary>
+    /// <param name="field">Expression identifying the column to set alignment for.</param>
+    /// <param name="align">The text alignment to apply.</param>
     public TableBuilder<TModel> Align(Expression<Func<TModel, object>> field, Align align)
     {
         var hint = GetField(field);
@@ -193,6 +211,8 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         return this;
     }
 
+    /// <summary>Sets the display order of columns.</summary>
+    /// <param name="fields">Expressions identifying the columns in desired order.</param>
     public TableBuilder<TModel> Order(params Expression<Func<TModel, object>>[] fields)
     {
         int order = 0;
@@ -205,6 +225,8 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         return this;
     }
 
+    /// <summary>Removes columns from the table.</summary>
+    /// <param name="fields">Expressions identifying the columns to remove.</param>
     public TableBuilder<TModel> Remove(params IEnumerable<Expression<Func<TModel, object>>> fields)
     {
         foreach (var field in fields)
@@ -215,6 +237,19 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         return this;
     }
 
+    public TableBuilder<TModel> MultiLine(params Expression<Func<TModel, object>>[] fields)
+    {
+        foreach (var field in fields)
+        {
+            var hint = GetField(field);
+            hint.IsMultiLine = true;
+        }
+        return this;
+    }
+
+
+    /// <summary>Adds a previously removed column back to the table.</summary>
+    /// <param name="field">Expression identifying the column to add back.</param>
     public TableBuilder<TModel> Add(Expression<Func<TModel, object>> field)
     {
         var hint = GetField(field);
@@ -222,6 +257,7 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         return this;
     }
 
+    /// <summary>Removes all columns from the table.</summary>
     public TableBuilder<TModel> Clear()
     {
         foreach (var field in _columns.Values)
@@ -231,6 +267,7 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         return this;
     }
 
+    /// <summary>Resets all columns to default settings.</summary>
     public TableBuilder<TModel> Reset()
     {
         foreach (var field in _columns.Values)
@@ -242,12 +279,9 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         return this;
     }
 
-    // public TableBuilder<TModel> Row(Action<T, TableRow> rowAction)
-    // {
-    //     _rowAction = rowAction;
-    //     return this;
-    // }
-
+    /// <summary>Adds a footer with custom aggregate calculation for a column.</summary>
+    /// <param name="field">Expression identifying the column to add footer to.</param>
+    /// <param name="summaryMethod">Function to calculate the footer value from all records.</param>
     public TableBuilder<TModel> Totals(Expression<Func<TModel, object>> field, Func<IEnumerable<TModel>, object> summaryMethod)
     {
         var hint = GetField(field);
@@ -255,6 +289,8 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         return this;
     }
 
+    /// <summary>Adds a footer with automatic sum calculation for a column.</summary>
+    /// <param name="field">Expression identifying the column to add sum footer to.</param>
     public TableBuilder<TModel> Totals(Expression<Func<TModel, object>> field)
     {
         var hint = GetField(field);
@@ -265,30 +301,31 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         return Totals(field, FooterAggregate);
     }
 
+    /// <summary>Removes the table header row.</summary>
     public TableBuilder<TModel> RemoveHeader()
     {
         _removeHeader = true;
         return this;
     }
 
+    /// <summary>Automatically removes columns that contain only empty values.</summary>
     public TableBuilder<TModel> RemoveEmptyColumns()
     {
         _removeEmptyColumns = true;
         return this;
     }
 
-    // public TableBuilder<TModel> HighlightRow(Func<T, bool> predicate)
-    // {
-    //     _highlightRowPredicate = predicate;
-    //     return this;
-    // }
-
+    /// <summary>Sets content to display when the table has no data.</summary>
+    /// <param name="content">The content to display for empty tables.</param>
     public TableBuilder<TModel> Empty(object content)
     {
         _empty = content;
         return this;
     }
 
+    /// <summary>
+    /// Builds the complete table with headers, data rows, and optional footers.
+    /// </summary>
     public override object? Build()
     {
         if (!_records.Any()) return _empty!;
@@ -304,6 +341,11 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         TableCell RenderCell(int index, TableBuilderColumn column, object? content, bool isHeader, bool isFooter)
         {
             var cell = new TableCell(content).IsHeader(isHeader).IsFooter(isFooter).Align(column.Align);
+
+            if (column.IsMultiLine)
+            {
+                cell = cell.MultiLine(true);
+            }
 
             if (isHeader)
             {
@@ -337,17 +379,11 @@ public class TableBuilder<TModel> : ViewBase, IStateless
             .OrderBy(e => e.Order).ToList();
 
         TableRow RenderRow(TModel e)
-        {
-            //todo:
-            //bool highlight = _highlightRowPredicate?.Invoke(e) ?? false;
 
+        {
             var row = new TableRow(
                 columns.Select((f, i) => RenderCell(i, f, f.Builder.Build(f.GetValue(e), e), false, false)).ToArray()
             );
-
-            //todo:
-            //if (highlight) row.AddClass("highlight");
-            //_rowAction?.Invoke(e, row);
 
             return row;
         }
@@ -378,8 +414,15 @@ public class TableBuilder<TModel> : ViewBase, IStateless
     }
 }
 
+/// <summary>
+/// Factory for creating table builders from generic collections.
+/// </summary>
 public static class TableBuilderFactory
 {
+    /// <summary>
+    /// Creates a table view from any enumerable collection with automatic type detection.
+    /// </summary>
+    /// <param name="enumerable">The collection to create a table from.</param>
     public static ViewBase FromEnumerable(IEnumerable enumerable)
     {
         var enumerableType = enumerable.GetType()

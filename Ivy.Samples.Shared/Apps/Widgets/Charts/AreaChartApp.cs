@@ -17,6 +17,8 @@ public class AreaChartApp : ViewBase
             | new AreaChart3View()
             | new AreaChart4View()
             | new AreaChart5View()
+            | new AreaChart6View()
+            | new AreaChart7View()
         ;
     }
 }
@@ -157,6 +159,61 @@ public class AreaChart5View : ViewBase
                 .Measure("Users", e => e.Sum(f => f.Users))
                 .Measure("Sessions", e => e.Sum(f => f.Sessions))
                 .Measure("Conversions", e => e.Sum(f => f.Conversions))
+        ;
+    }
+}
+
+public class AreaChart6View : ViewBase
+{
+    public override object? Build()
+    {
+        var data = new[]
+        {
+            new { Month = "Jan", High = 15, Low = 5, Average = 10 },
+            new { Month = "Feb", High = 18, Low = 7, Average = 12 },
+            new { Month = "Mar", High = 22, Low = 10, Average = 16 },
+            new { Month = "Apr", High = 25, Low = 12, Average = 18 },
+            new { Month = "May", High = 28, Low = 15, Average = 21 },
+            new { Month = "Jun", High = 32, Low = 18, Average = 25 },
+            new { Month = "Jul", High = 35, Low = 20, Average = 27 },
+            new { Month = "Aug", High = 33, Low = 19, Average = 26 },
+            new { Month = "Sep", High = 29, Low = 16, Average = 22 },
+            new { Month = "Oct", High = 24, Low = 12, Average = 18 },
+            new { Month = "Nov", High = 19, Low = 8, Average = 13 },
+            new { Month = "Dec", High = 16, Low = 6, Average = 11 },
+        };
+
+        return new Card().Title("Temperature Trends (°C)")
+            | data.ToAreaChart()
+                .Dimension("Month", e => e.Month)
+                .Measure("High", e => e.Sum(f => f.High))
+                .Measure("Average", e => e.Sum(f => f.Average))
+                .Measure("Low", e => e.Sum(f => f.Low))
+        ;
+    }
+}
+
+public class AreaChart7View : ViewBase
+{
+    public override object? Build()
+    {
+        var data = new[]
+        {
+            new { Quarter = "Q1 2023", CompanyA = 35, CompanyB = 28, CompanyC = 22, Others = 15 },
+            new { Quarter = "Q2 2023", CompanyA = 38, CompanyB = 25, CompanyC = 24, Others = 13 },
+            new { Quarter = "Q3 2023", CompanyA = 42, CompanyB = 23, CompanyC = 26, Others = 9 },
+            new { Quarter = "Q4 2023", CompanyA = 45, CompanyB = 20, CompanyC = 28, Others = 7 },
+            new { Quarter = "Q1 2024", CompanyA = 48, CompanyB = 18, CompanyC = 30, Others = 4 },
+            new { Quarter = "Q2 2024", CompanyA = 50, CompanyB = 16, CompanyC = 32, Others = 2 },
+        };
+
+        return new Card().Title("Market Share Analysis (%)")
+            | data.ToAreaChart()
+                .Dimension("Quarter", e => e.Quarter)
+                .Measure("CompanyA", e => e.Sum(f => f.CompanyA))
+                .Measure("CompanyB", e => e.Sum(f => f.CompanyB))
+                .Measure("CompanyC", e => e.Sum(f => f.CompanyC))
+                .Measure("Others", e => e.Sum(f => f.Others))
         ;
     }
 }

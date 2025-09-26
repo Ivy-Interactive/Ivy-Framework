@@ -89,10 +89,13 @@ Ivy ships with a comprehensive set of strongly-typed widgets:
 
 | Category | Examples |
 |----------|----------|
-| Layouts | `Card`, `Layout.Vertical()`, `GridLayout`, `TabsLayout`, `SidebarLayout`... |
+| Common | `Button`, `Badge`, `Progress`, `Table`, `Card`, `Tooltip`, `Expandable`... |
 | Inputs | `TextInput`, `NumberInput`, `BoolInput`, `DateTimeInput`, `FileInput`... |
-| Display | `Button`, `Badge`, `Progress`, `Table`, `Chart`, `Tooltip`... |
-| Primitives | `Text`, `Icon`, `Image`, `Markdown`, `Json`, `Code`... |
+| Primitives | `Text`, `Icon`, `Image`, `Markdown`, `Json`, `Code`, `Avatar`... |
+| Layouts | `Layout.Vertical()`, `GridLayout`, `TabsLayout`, `SidebarLayout`... |
+| Effects | `Animation`, `Confetti`... |
+| Charts | `LineChart`, `BarChart`, `PieChart`, `AreaChart`... |
+| Advanced | `Sheet`, `Chat`... |
 
 ### 4. Real-time Communication
 

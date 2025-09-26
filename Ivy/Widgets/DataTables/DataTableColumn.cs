@@ -6,7 +6,7 @@ namespace Ivy;
 public class DataTableColumn
 {
     public required string Name { get; set; }
-    public required string Header { get; set; } 
+    public required string Header { get; set; }
     public string? Group { get; set; }
     public Size? Width { get; set; }
     public bool Hidden { get; set; } = false;

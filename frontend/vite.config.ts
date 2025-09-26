@@ -1,6 +1,6 @@
 import path from 'path';
 import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
+import react from '@vitejs/plugin-react-swc';
 import tailwindcss from '@tailwindcss/vite';
 
 function transferMeta(htmlServer: string, htmlLocal: string): string {

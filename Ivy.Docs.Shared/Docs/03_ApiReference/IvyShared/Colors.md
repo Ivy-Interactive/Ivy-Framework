@@ -1,14 +1,14 @@
 ﻿# Colors
 
-Ivy provides predefined colors with light/dark theme support. 
+Ivy provides predefined colors with light/dark theme support.
 
-The system includes neutral (Black, White, grayscale), chromatic (Red to Rose spectrum), and semantic (Primary, Secondary, Destructive) colors. 
+The system includes neutral (Black, White, grayscale), chromatic (Red to Rose spectrum), and semantic (Primary, Secondary, Destructive, Success, Warning, Info) colors.
 
 All colors meet WCAG accessibility standards and automatically adapt to light/dark themes.
 
 ### All Colors
 
-```csharp demo-tabs 
+```csharp demo-tabs
 public class AllColorsView : ViewBase
 {
     public override object? Build()
@@ -30,7 +30,7 @@ public class AllColorsView : ViewBase
 
 ### Neutral Colors
 
-```csharp demo-tabs 
+```csharp demo-tabs
 public class NeutralColorsView : ViewBase
 {
     public override object? Build()
@@ -52,7 +52,7 @@ public class NeutralColorsView : ViewBase
 
 ### Chromatic Colors
 
-```csharp demo-tabs 
+```csharp demo-tabs
 public class ChromaticColorsView : ViewBase
 {
     public override object? Build()
@@ -78,12 +78,12 @@ public class ChromaticColorsView : ViewBase
 
 ### Semantic Colors
 
-```csharp demo-tabs 
+```csharp demo-tabs
 public class SemanticColorsView : ViewBase
 {
     public override object? Build()
     {
-        var semanticColors = new Colors[] { Colors.Primary, Colors.Secondary, Colors.Destructive };
+        var semanticColors = new Colors[] { Colors.Primary, Colors.Secondary, Colors.Destructive, Colors.Success, Colors.Warning, Colors.Info };
         
         return Layout.Vertical(
             semanticColors.Select(color =>
@@ -104,7 +104,7 @@ public class SemanticColorsView : ViewBase
 
 This example demonstrates how colors appear on both light and dark backgrounds:
 
-```csharp demo-tabs 
+```csharp demo-tabs
 public class ColorsOnBackgroundsView : ViewBase
 {
     public override object? Build()
@@ -145,16 +145,16 @@ public class ColorsOnBackgroundsView : ViewBase
 
 #### Status Indicators
 
-```csharp demo-tabs 
+```csharp demo-tabs
 public class StatusIndicatorsView : ViewBase
 {
     public override object? Build()
     {
         return Layout.Vertical(
-            new Box("Success").Color(Colors.Green).Padding(5).BorderRadius(BorderRadius.Rounded),
-            new Box("Warning").Color(Colors.Amber).Padding(5).BorderRadius(BorderRadius.Rounded),
+            new Box("Success").Color(Colors.Success).Padding(5).BorderRadius(BorderRadius.Rounded),
+            new Box("Warning").Color(Colors.Warning).Padding(5).BorderRadius(BorderRadius.Rounded),
             new Box("Error").Color(Colors.Destructive).Padding(5).BorderRadius(BorderRadius.Rounded),
-            new Box("Info").Color(Colors.Blue).Padding(5).BorderRadius(BorderRadius.Rounded)
+            new Box("Info").Color(Colors.Info).Padding(5).BorderRadius(BorderRadius.Rounded)
         ).Gap(5);
     }
 }
@@ -162,7 +162,7 @@ public class StatusIndicatorsView : ViewBase
 
 #### Button Colors
 
-```csharp demo-tabs 
+```csharp demo-tabs
 public class ButtonColorsView : ViewBase
 {
     public override object? Build()
@@ -178,7 +178,7 @@ public class ButtonColorsView : ViewBase
 
 ## Best Practices
 
-1. **Use semantic colors** for consistent UI patterns (Primary, Secondary, Destructive)
+1. **Use semantic colors** for consistent UI patterns (Primary, Secondary, Destructive, Success, Warning, Info)
 2. **Test on both backgrounds** to ensure proper contrast and readability
 3. **Consider color meaning** - use red/destructive for errors, green for success
 4. **Maintain consistency** - stick to a chosen color scheme throughout your project

@@ -2,7 +2,7 @@
 
 Ivy use the [Lucide](https://lucide.dev/icons/) icon library.
 
-```csharp demo-tabs 
+```csharp demo-tabs
 public class SearchIconsView : ViewBase
 {
     public override object? Build()
@@ -21,9 +21,14 @@ public class SearchIconsView : ViewBase
         
         var searchInput = searchState.ToSearchInput().Placeholder("Type a icon name");
         
-        var icons  = iconsState.Value.Select(e => Layout.Horizontal()
-            | e.ToIcon()
-            | Text.InlineCode("Icons." + e.ToString())
+        var icons  = iconsState.Value.Select(e => Layout.Horizontal().Gap(2)
+            | new Button(null, @event =>
+            {
+                var iconCode = "Icons." + e.ToString();
+                client.CopyToClipboard(iconCode);
+                client.Toast($"Copied '{iconCode}' to clipboard", "Icon Code Copied");
+            }, ButtonVariant.Ghost, e).Small().WithTooltip($"Click to copy {e.ToString()}")
+            | Text.Label("Icons." + e.ToString())
             );
 
         return Layout.Vertical()

@@ -46,12 +46,21 @@ export const BadgeWidget: React.FC<BadgeWidgetProps> = ({
         return 'outline';
       case 'Secondary':
         return 'secondary';
+      case 'Success':
+        return 'success';
+      case 'Warning':
+        return 'warning';
+      case 'Info':
+        return 'info';
       default:
         return camelCase(variant) as
           | 'primary'
           | 'destructive'
           | 'outline'
-          | 'secondary';
+          | 'secondary'
+          | 'success'
+          | 'warning'
+          | 'info';
     }
   };
 

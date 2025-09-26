@@ -56,7 +56,18 @@ Deploy anywhere - AWS, Azure, GCP, or your own infrastructure. No vendor lock-in
 
 ## Core Features
 
-### Framework Architecture
+### Full-Stack C# Development
+
+```mermaid
+graph LR
+    A[C# Views] --> B[Widget Tree]
+    B --> C[SignalR Hub]
+    C --> D[React Frontend]
+    D --> E[User Events]
+    E --> C
+    C --> A
+    
+```
 
 - Full-stack C# development with no separate API layer needed
 - React-like declarative UI patterns using C# syntax
@@ -65,6 +76,17 @@ Deploy anywhere - AWS, Azure, GCP, or your own infrastructure. No vendor lock-in
 
 ### Real-Time & Interactive
 
+```mermaid
+graph LR
+    A[User Input] --> B[C# Handler]
+    B --> C[State Change]
+    C --> D[Auto Re-render]
+    D --> E[UI Update]
+    
+    F[Hot Reload] --> G[State Preserved]
+    
+```
+
 - WebSocket-based UI updates (similar to Streamlit)
 - Hot reloading with state preservation during development
 - Any .NET object can be rendered using ContentBuilder pipelines
@@ -72,12 +94,31 @@ Deploy anywhere - AWS, Azure, GCP, or your own infrastructure. No vendor lock-in
 
 ### Modern Frontend Integration
 
+```mermaid
+graph LR
+    A[Ivy Widgets] --> B[React + Shadcn]
+    B --> C[TailwindCSS]
+    
+    D[External Components] --> E[NuGet Packages]
+    E --> A
+    
+    F[Dark Mode] -->  G[Theming System]
+    G --> A
+    H[Custom Chromes] --> A
+    
+```
+
 - Widgets rendered using React + Shadcn + TailwindCSS
 - Import external React components as Ivy widgets via NuGet
 - Built-in dark mode and theming support
 - Customizable application "chromes" (also built in Ivy)
 
 ### Enterprise Ready
+
+```mermaid
+graph LR
+    A[Security] --- B[Data] --- C[Architecture]
+```
 
 - Authentication & authorization providers with RBAC
 - Entity Framework Core integration
@@ -87,6 +128,17 @@ Deploy anywhere - AWS, Azure, GCP, or your own infrastructure. No vendor lock-in
 - Flexible routing system
 
 ### Development & Deployment
+
+```mermaid
+graph LR
+    A[Your Code] --> B[ivy init]
+    B --> C[ivy run]
+    C --> H[Docker-first deployment]
+    
+    F[Rich CLI] --> B
+    G[Unit Tests] --> A
+    
+```
 
 - One-command container deployment to any cloud provider
 - Rich CLI tooling for project scaffolding and deployment
@@ -103,7 +155,13 @@ Ready to try Ivy? The fastest way to get started is:
 >dotnet watch
 ```
 
+You can install Ivy with a simple command, check its version to verify if it installed correctly and initialize your first project.
+
 That's it! You'll have a running Ivy application with hot reloading enabled.
+
+<Callout Type="tip">
+If you want to use Ivy agent features, you will need an Ivy account https://ivy.app/auth/sign-up
+</Callout>
 
 ## What's Next
 

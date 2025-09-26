@@ -22,6 +22,11 @@ Get started with Ivy CLI in just a few commands:
 >ivy deploy
 ```
 
+<Callout Type="tip">
+If you're using a specific operating system, read the instructions in your terminal after installing Ivy.Console.
+You can always see all available commands by using `ivy --help`.
+</Callout>
+
 ## Key Features
 
 ### 🗄️ Database Support
@@ -86,6 +91,6 @@ Most Ivy commands require authentication. Use `ivy login` to authenticate with y
 For detailed information on each feature, see the specific documentation files:
 
 - [Init.md](Init.md) - Project initialization guide
-- [Db.md](Db.md) - Database integration guide
-- [Auth.md](Auth.md) - Authentication setup guide
+- [DatabaseIntegration/01_Overview.md](DatabaseIntegration/01_Overview.md) - Database integration guide
+- [Authentication/01_Overview.md](Authentication/01_Overview.md) - Authentication setup guide
 - [Deploy.md](Deploy.md) - Deployment guide

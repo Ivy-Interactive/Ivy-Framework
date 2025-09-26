@@ -1,11 +1,14 @@
 namespace Ivy.Core.Hooks;
 
+/// <summary>
+/// Specifies the execution priority for effects in the effect queue processing pipeline.
+/// </summary>
 public enum EffectPriority
 {
-    // Effects that happen immediately after state changes
+    /// <summary>Effects that execute immediately after state changes.</summary>
     StateChange,
-    // Effects that run after virtual DOM is updated
+    /// <summary>Effects that execute after the virtual DOM is updated.</summary>
     AfterRender,
-    // Effects that run during initialization
+    /// <summary>Effects that execute during component initialization.</summary>
     AfterInit
 }

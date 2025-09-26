@@ -88,6 +88,12 @@
     --accent-foreground: oklch(0.33 0 0);
     --destructive: oklch(0.69 0.2 23.69);
     --destructive-foreground: oklch(0 0 0);
+    --success: #86d26f;
+    --success-foreground: #000000;
+    --warning: #deb145;
+    --warning-foreground: #000000;
+    --info: #4469c0;
+    --info-foreground: #ffffff;
     --border: #d1d5db;
     --input: #d1d5db;
     --ring: oklch(0.77 0 0);
@@ -292,6 +298,12 @@
     --accent-foreground: #f8f8f8;
     --destructive: oklch(0.4 0.13 25.72);
     --destructive-foreground: oklch(0.97 0.01 17.38);
+    --success: #86d26f;
+    --success-foreground: #000000;
+    --warning: #deb145;
+    --warning-foreground: #000000;
+    --info: #4469c0;
+    --info-foreground: #ffffff;
     --border: #404045;
     --input: #404045;
     --ring: oklch(0.87 0.01 286.29);
@@ -345,6 +357,12 @@
     --color-accent-foreground: var(--accent-foreground);
     --color-destructive: var(--destructive);
     --color-destructive-foreground: var(--destructive-foreground);
+    --color-success: var(--success);
+    --color-success-foreground: var(--success-foreground);
+    --color-warning: var(--warning);
+    --color-warning-foreground: var(--warning-foreground);
+    --color-info: var(--info);
+    --color-info-foreground: var(--info-foreground);
     --color-border: var(--border);
     --color-input: var(--input);
     --color-ring: var(--ring);
@@ -564,18 +582,28 @@
 @keyframes accordion-down {
   from {
     height: 0;
+    opacity: 0;
   }
   to {
-    height: var(--radix-accordion-content-height);
+    height: var(
+      --radix-accordion-content-height,
+      var(--radix-collapsible-content-height)
+    );
+    opacity: 1;
   }
 }
 
 @keyframes accordion-up {
   from {
-    height: var(--radix-accordion-content-height);
+    height: var(
+      --radix-accordion-content-height,
+      var(--radix-collapsible-content-height)
+    );
+    opacity: 1;
   }
   to {
     height: 0;
+    opacity: 0;
   }
 }
 
@@ -735,28 +763,37 @@
 }
 
 @theme inline {
-  --animate-accordion-down: accordion-down 0.2s ease-out;
-  --animate-accordion-up: accordion-up 0.2s ease-out;
+  --animate-accordion-down: accordion-down 0.1s ease-out;
+  --animate-accordion-up: accordion-up 0.1s ease-out;
 }
 
 @layer base {
   * {
     @apply border-border;
   }
+  html,
+  body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+  }
   body {
     @apply bg-background text-foreground;
   }
-}
 
-#root {
-  @apply p-4;
+  #root {
+    height: 100vh;
+    width: 100vw;
+    overflow: auto;
+  }
 }
 
 :has(> .remove-parent-padding) {
   padding: 0px !important;
 }
 
-:has(DIV.remove-ancestor-padding) {
+:has(> DIV.remove-ancestor-padding) {
   padding: 0 !important;
 }
 
@@ -797,82 +834,19 @@
   }
 }
 
-/* Browser autocomplete/history styling */
+/* Remove autofill background color */
 @layer base {
-  /* Webkit browsers autocomplete styling */
   input:-webkit-autofill,
   input:-webkit-autofill:hover,
   input:-webkit-autofill:focus,
   input:-webkit-autofill:active {
-    -webkit-box-shadow: 0 0 0 30px var(--background) inset !important;
+    -webkit-box-shadow: 0 0 0 1000px var(--background) inset !important;
     -webkit-text-fill-color: var(--foreground) !important;
-    transition: background-color 5000s ease-in-out 0s;
   }
-
-  /* Autocomplete dropdown styling */
-  input::-webkit-calendar-picker-indicator {
-    filter: var(--foreground-filter);
-  }
-
-  /* Datalist autocomplete styling */
-  datalist {
-    background: var(--background);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    color: var(--foreground);
-  }
-
-  /* Firefox autocomplete styling */
-  input:-moz-autofill {
-    background-color: var(--background) !important;
-    color: var(--foreground) !important;
-  }
-
-  /* Edge autocomplete styling */
-  input:-ms-input-placeholder {
-    color: var(--muted-foreground);
-  }
-
-  /* Autocomplete dropdown suggestions styling */
-  input::-webkit-list-button {
-    background: var(--background);
-    color: var(--foreground);
-  }
-
-  /* Style autocomplete suggestions */
-  input::-webkit-datetime-edit {
-    color: var(--foreground);
-  }
-
-  /* Ensure autocomplete dropdowns use theme colors */
 }
 
-/* Additional autocomplete styling for better theme support */
+/* Prevent dialog from getting focus rings when elements inside are focused */
 @layer components {
-  /* Override browser default autocomplete styling */
-  input[list]::-webkit-calendar-picker-indicator {
-    display: none;
-  }
-
-  /* Custom styling for autocomplete dropdowns */
-  input[list] {
-    background: var(--background);
-    color: var(--foreground);
-  }
-
-  /* Ensure autocomplete suggestions are visible in dark mode */
-  input[list] option {
-    background: var(--background);
-    color: var(--foreground);
-    padding: 0.5rem;
-  }
-
-  input[list] option:hover {
-    background: var(--accent);
-    color: var(--accent-foreground);
-  }
-
-  /* Prevent dialog from getting focus rings when elements inside are focused */
   [data-radix-dialog-content] {
     outline: none !important;
     box-shadow: none !important;
@@ -887,13 +861,4 @@
     outline: none !important;
     box-shadow: none !important;
   }
-}
-
-/* CSS variable for filter to invert colors in dark mode */
-:root {
-  --foreground-filter: none;
-}
-
-.dark {
-  --foreground-filter: invert(1);
 }

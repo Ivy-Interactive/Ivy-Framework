@@ -13,6 +13,7 @@ import remarkGemoji from 'remark-gemoji';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import rehypeRaw from 'rehype-raw';
+import rehypeSlug from 'rehype-slug';
 import 'katex/dist/katex.min.css';
 import { cn, getIvyHost } from '@/lib/utils';
 import CopyToClipboardButton from './CopyToClipboardButton';
@@ -197,7 +198,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
     if (contentFeatures.hasMath)
       remarkPlugins.push(remarkMath as typeof remarkGfm);
 
-    const rehypePlugins = [rehypeRaw];
+    const rehypePlugins = [rehypeRaw, rehypeSlug];
     if (contentFeatures.hasMath)
       rehypePlugins.push(rehypeKatex as unknown as typeof rehypeRaw);
 
@@ -207,7 +208,9 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
   const handleLinkClick = useCallback(
     (href: string, event: React.MouseEvent<HTMLAnchorElement>) => {
       const isExternalLink = href?.match(/^(https?:\/\/|mailto:|tel:)/i);
-      if (!isExternalLink && onLinkClick && href) {
+      const isAnchorLink = href?.startsWith('#');
+
+      if (!isExternalLink && !isAnchorLink && onLinkClick && href) {
         event.preventDefault();
         onLinkClick(href);
       }
@@ -340,6 +343,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
           ...props
         }: React.AnchorHTMLAttributes<HTMLAnchorElement>) => {
           const isExternalLink = href?.match(/^(https?:\/\/|mailto:|tel:)/i);
+          const isAnchorLink = href?.startsWith('#');
 
           return (
             <a
@@ -348,7 +352,33 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
               href={href || '#'}
               target={isExternalLink ? '_blank' : undefined}
               rel={isExternalLink ? 'noopener noreferrer' : undefined}
-              onClick={e => href && handleLinkClick(href, e)}
+              onClick={
+                isAnchorLink
+                  ? e => {
+                      e.preventDefault();
+                      const targetId = href?.substring(1);
+                      if (targetId) {
+                        // Small delay to ensure content is rendered
+                        requestAnimationFrame(() => {
+                          const targetElement =
+                            document.getElementById(targetId);
+                          if (targetElement) {
+                            targetElement.scrollIntoView({
+                              behavior: 'smooth',
+                              block: 'start',
+                            });
+                            // Update URL hash
+                            window.history.replaceState(
+                              null,
+                              '',
+                              `#${targetId}`
+                            );
+                          }
+                        });
+                      }
+                    }
+                  : e => href && handleLinkClick(href, e)
+              }
             >
               {children}
             </a>

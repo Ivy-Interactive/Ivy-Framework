@@ -36,7 +36,7 @@ var uploadUrl = this.UseUpload(
 The most common way to handle uploads is using the FileInput component:
 
 ```csharp demo-below
-public class UploadView : ViewBase
+public class FileUploadView : ViewBase
 {
     public override object? Build()
     {
@@ -60,7 +60,7 @@ public class UploadView : ViewBase
             uploadUrl.Value != null
                 ? Text.Inline($"Upload URL: {uploadUrl.Value}")
                 : null,
-            files.ToFileInput("Choose Files").Accept(".pdf,.doc,.docx")
+            files.ToFileInput(uploadUrl, "Choose Files").Accept(".pdf,.doc,.docx")
         );
     }
 }
@@ -97,7 +97,7 @@ public class UploadWithProgressView : ViewBase
             isUploading.Value
                 ? new Progress(progress.Value)
                 : null,
-            files.ToFileInput("Upload Files")
+            files.ToFileInput(uploadUrl, "Upload Files")
         );
     }
 }
@@ -133,7 +133,7 @@ public class ValidatedUploadView : ViewBase
             error.Value != null
                 ? new Callout(error.Value, variant: CalloutVariant.Error)
                 : null,
-            files.ToFileInput("Upload Image").Accept(".jpg,.jpeg,.png")
+            files.ToFileInput(uploadUrl, "Upload Image").Accept(".jpg,.jpeg,.png")
         );
     }
 }
@@ -152,7 +152,11 @@ public class ValidatedUploadView : ViewBase
 
 ## Examples
 
-### Image Upload with Preview
+<Details>
+<Summary>
+Image Upload with Preview
+</Summary>
+<Body>
 
 ```csharp demo-below
 public class ImageUploadView : ViewBase
@@ -182,13 +186,21 @@ public class ImageUploadView : ViewBase
             preview.Value != null
                 ? new Image(preview.Value)
                 : null,
-            files.ToFileInput("Upload Image").Accept("image/*")
+            files.ToFileInput(uploadUrl, "Upload Image").Accept("image/*")
         );
     }
 }
+
 ```
 
-### Multiple File Upload with List
+</Body>
+</Details>
+
+<Details>
+<Summary>
+Multiple File Upload with List
+</Summary>
+<Body>
 
 ```csharp demo-below
 public class MultiFileUploadView : ViewBase
@@ -213,7 +225,7 @@ public class MultiFileUploadView : ViewBase
         );
 
         return Layout.Vertical(
-            newFiles.ToFileInput("Upload Files"),
+            newFiles.ToFileInput(uploadUrl, "Upload Files"),
             new List(
                 files.Value.Select(f => Text.Inline(f.Name))
             )
@@ -221,3 +233,6 @@ public class MultiFileUploadView : ViewBase
     }
 }
 ```
+
+</Body>
+</Details>

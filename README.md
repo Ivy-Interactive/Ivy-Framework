@@ -69,14 +69,14 @@ If you want to work on the framework itself, you need to set up the following:
    **Windows (PowerShell):**
 
    ```powershell
-   cd Ivy.Docs
+   cd Ivy.Docs.Shared
    .\Regenerate.ps1
    ```
 
    **Mac/Linux (Bash):**
 
    ```bash
-   cd Ivy.Docs
+   cd Ivy.Docs.Shared
    sh ./Regenerate.sh
    ```
 

@@ -127,7 +127,7 @@ public class ToastExceptionDemo : ViewBase
 }
 ```
 
-## Real-World Examples
+## Examples
 
 ### Form Submission with Feedback
 

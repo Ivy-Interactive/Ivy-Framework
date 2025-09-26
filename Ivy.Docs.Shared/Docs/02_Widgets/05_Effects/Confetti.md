@@ -44,24 +44,15 @@ Layout.Vertical().Gap(10)
             .WithConfetti(AnimationTrigger.Click)))
 ```
 
-### Interactive Elements
-
-Shows various interactive widgets with different confetti triggers, demonstrating the flexibility of the confetti system.
-
-```csharp demo-tabs ivy-bg
-Layout.Vertical().Gap(10)
-    | Text.Block("Interactive elements with confetti:")
-    | new Button("Click me").WithConfetti(AnimationTrigger.Click)
-    | new Card("Hover me").WithConfetti(AnimationTrigger.Hover)
-    | new Badge("Auto confetti").WithConfetti(AnimationTrigger.Auto)
-```
-
 <WidgetDocs Type="Ivy.Confetti" ExtensionTypes="Ivy.ConfettiExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Effects/Confetti.cs"/>
 
-## Advanced Examples
+## Examples
 
-### Integration with Other Widgets
-
+<Details>
+<Summary>
+Integration with Other Widgets
+</Summary>
+<Body>
 Confetti works seamlessly with all Ivy widgets, allowing you to add celebratory effects to any interface element.
 
 ```csharp demo-tabs ivy-bg
@@ -72,3 +63,6 @@ Layout.Vertical().Gap(10)
     | Text.Block("Message").WithConfetti(AnimationTrigger.Hover)
     | new Badge("Success").WithConfetti(AnimationTrigger.Hover)
 ```
+
+</Body>
+</Details>

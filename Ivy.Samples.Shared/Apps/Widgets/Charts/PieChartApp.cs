@@ -17,6 +17,7 @@ public class PieChartApp : ViewBase
             | new PieChart4View()
             | new PieChart5View()
             | new PieChart6View()
+            | new DonutChartWithCustomLabelsView()
         ;
     }
 }
@@ -187,6 +188,52 @@ public class PieChart6View : ViewBase
                     e => e.Sum(f => f.Users),
                     PieChartStyles.Donut
                 )
+        ;
+    }
+}
+public class DonutChartWithCustomLabelsView : ViewBase
+{
+    public override object? Build()
+    {
+        var data = new[]
+        {
+            new PieChartData("Revenue", 1250000),
+            new PieChartData("Marketing", 450000),
+            new PieChartData("Operations", 320000),
+            new PieChartData("R&D", 280000),
+            new PieChartData("Admin", 150000),
+            new PieChartData("Sales", 380000),
+            new PieChartData("Customer Support", 220000),
+            new PieChartData("IT Infrastructure", 180000),
+            new PieChartData("Legal", 95000),
+            new PieChartData("HR", 120000),
+            new PieChartData("Finance", 160000),
+            new PieChartData("Quality Assurance", 140000)
+        };
+
+        var totalValue = data.Sum(d => d.Measure);
+
+        return new Card().Title("Donut Chart with Custom Labels")
+            | new PieChart(data)
+                .Pie(new Pie(nameof(PieChartData.Measure), nameof(PieChartData.Dimension))
+                    .InnerRadius("40%")
+                    .OuterRadius("90%")
+                    .Animated(true)
+                    .LabelList(new LabelList(nameof(PieChartData.Measure))
+                        .Position(Positions.Outside)
+                        .Fill(Colors.Blue)
+                        .FontSize(11)
+                        .NumberFormat("$0,0"))
+                    .LabelList(new LabelList(nameof(PieChartData.Dimension))
+                        .Position(Positions.Inside)
+                        .Fill(Colors.White)
+                        .FontSize(9)
+                        .FontFamily("Arial"))
+                )
+                .ColorScheme(ColorScheme.Default)
+                .Tooltip(new Ivy.Charts.Tooltip().Animated(true))
+                .Legend(new Legend().IconType(Legend.IconTypes.Rect))
+                .Total(totalValue, "Total Budget")
         ;
     }
 }

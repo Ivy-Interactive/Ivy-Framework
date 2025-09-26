@@ -121,12 +121,13 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
             }
         }
 
-        void OnCtrlRightClickSelect(Event<SidebarMenu, object> @event)
+        ValueTask OnCtrlRightClickSelect(Event<SidebarMenu, object> @event)
         {
             if (@event.Value is string appId)
             {
                 client.OpenUrl(new NavigateArgs(appId).GetUrl());
             }
+            return ValueTask.CompletedTask;
         }
 
         void OnTabSelect(Event<TabsLayout, int> @event)
@@ -215,9 +216,9 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
             MenuItem.Default("Theme")
                 .Icon(Icons.SunMoon)
                 .Children(
-                    MenuItem.Checkbox("Light").Icon(Icons.Sun).HandleSelect(() => client.SetTheme(Theme.Light)),
-                    MenuItem.Checkbox("Dark").Icon(Icons.Moon).HandleSelect(() => client.SetTheme(Theme.Dark)),
-                    MenuItem.Checkbox("System").Icon(Icons.SunMoon).HandleSelect(() => client.SetTheme(Theme.System))
+                    MenuItem.Checkbox("Light").Icon(Icons.Sun).HandleSelect(() => client.SetThemeMode(ThemeMode.Light)),
+                    MenuItem.Checkbox("Dark").Icon(Icons.Moon).HandleSelect(() => client.SetThemeMode(ThemeMode.Dark)),
+                    MenuItem.Checkbox("System").Icon(Icons.SunMoon).HandleSelect(() => client.SetThemeMode(ThemeMode.System))
                 )
         };
 
@@ -243,7 +244,7 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
                     trigger)
                 .Top();
 
-            var onLogout = new Action(async void () =>
+            var onLogout = new Action(async () =>
             {
                 try
                 {
@@ -283,7 +284,7 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
         return new SidebarLayout(
             body ?? null!,
             sidebarMenu,
-            Layout.Vertical()
+            Layout.Vertical().Gap(2)
                 | settings.Header
                 | searchInput
             ,

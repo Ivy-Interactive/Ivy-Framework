@@ -33,34 +33,34 @@ public class ProfileDetailView : ViewBase
             
             | Layout.Vertical().Gap(2)
                 | Text.H2("Personal Information")
-                | Layout.Horizontal().Gap(2)
+                | (Layout.Horizontal().Gap(2)
                     | Text.Strong("Name:")
-                    | Text.Inline(user.Name)
-                | Layout.Horizontal().Gap(2)
+                    | Text.Inline(user.Name))
+                | (Layout.Horizontal().Gap(2)
                     | Text.Strong("Email:")
-                    | Text.Inline(user.Email)
+                    | Text.Inline(user.Email))
             
             | new Separator()
             
             | Layout.Vertical().Gap(2)
                 | Text.H2("Work Information")
-                | Layout.Horizontal().Gap(2)
+                | (Layout.Horizontal().Gap(2)
                     | Text.Strong("Role:")
-                    | Text.Inline(user.Role)
-                | Layout.Horizontal().Gap(2)
+                    | Text.Inline(user.Role))
+                | (Layout.Horizontal().Gap(2)
                     | Text.Strong("Department:")
-                    | Text.Inline(user.Department)
-                | Layout.Horizontal().Gap(2)
+                    | Text.Inline(user.Department))
+                | (Layout.Horizontal().Gap(2)
                     | Text.Strong("Join Date:")
-                    | Text.Inline(user.JoinDate.ToShortDateString())
+                    | Text.Inline(user.JoinDate.ToShortDateString()))
             
             | new Separator()
             
             | Layout.Vertical().Gap(2)
                 | Text.H2("Skills")
-                | Layout.Horizontal().Gap(2).Wrap(true)
+                | (Layout.Horizontal().Gap(2).Wrap(true)
                     | user.Skills.Select(skill => 
-                        new Badge(skill).Variant(BadgeVariant.Secondary))
+                        new Badge(skill).Variant(BadgeVariant.Secondary)))
             
             | new Separator()
             

@@ -22,6 +22,7 @@ type RefreshMessage = {
 
 type ErrorMessage = {
   title: string;
+  type: string;
   description: string;
   stackTrace?: string;
 };
@@ -133,7 +134,7 @@ export const useBackend = (
   const { toast } = useToast();
   const machineId = getMachineId();
   const connectionId = connection?.connectionId;
-  const connectionRef = useRef<signalR.HubConnection | null>(null);
+  const currentConnectionRef = useRef<signalR.HubConnection | null>(null);
 
   useEffect(() => {
     if (import.meta.env.DEV && widgetTree) {
@@ -180,22 +181,28 @@ export const useBackend = (
     });
   }, [connection]);
 
-  const handleSetJwt = useCallback(
-    (token: AuthToken) => {
-      const storageKey = `ivy-token-${appId}`;
-      if (token.jwt) {
-        localStorage.setItem(storageKey, JSON.stringify(token));
-        logger.debug('JWT token stored');
-      } else {
-        localStorage.removeItem(storageKey);
-        logger.debug('JWT token removed');
-      }
-    },
-    [appId]
-  );
+  const handleSetJwt = useCallback(async (jwt: AuthToken | null) => {
+    logger.debug('Processing SetJwt request', { hasJwt: !!jwt });
+    const response = await fetch(`${getIvyHost()}/auth/set-jwt`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(jwt),
+      credentials: 'include',
+    });
+    if (response.ok) {
+      logger.info('JWT set successfully, reloading page');
+      window.location.reload();
+    } else {
+      logger.error('Failed to set JWT', {
+        status: response.status,
+        statusText: response.statusText,
+      });
+    }
+  }, []);
 
   const handleSetTheme = useCallback((theme: string) => {
-    const normalizedTheme = theme?.toLowerCase();
+    logger.debug('Processing SetTheme request', { theme });
+    const normalizedTheme = theme.toLowerCase();
     if (['dark', 'light', 'system'].includes(normalizedTheme)) {
       logger.info('Setting theme globally', { theme: normalizedTheme });
       setThemeGlobal(normalizedTheme as 'dark' | 'light' | 'system');
@@ -230,50 +237,30 @@ export const useBackend = (
   );
 
   useEffect(() => {
-    let cancelled = false;
+    // Clean up the previous connection before creating a new one
+    if (currentConnectionRef.current) {
+      currentConnectionRef.current.stop().catch(err => {
+        logger.warn('Error stopping previous SignalR connection:', err);
+      });
+    }
 
-    const setupConnection = async () => {
-      // Stop previous connection if it exists and wait for it to finish
-      if (connectionRef.current) {
-        try {
-          await connectionRef.current.stop();
-          logger.debug('Previous connection stopped successfully');
-        } catch (err) {
-          logger.warn('Error stopping previous SignalR connection:', err);
-        }
-      }
+    const newConnection = new signalR.HubConnectionBuilder()
+      .withUrl(
+        `${getIvyHost()}/messages?appId=${appId ?? ''}&appArgs=${appArgs ?? ''}&machineId=${machineId}&parentId=${parentId ?? ''}`
+      )
+      .withAutomaticReconnect()
+      .build();
 
-      // Check if effect was cancelled during cleanup
-      if (cancelled) return;
+    currentConnectionRef.current = newConnection;
+    setConnection(newConnection);
 
-      const newConnection = new signalR.HubConnectionBuilder()
-        .withUrl(
-          `${getIvyHost()}/messages?appId=${appId ?? ''}&appArgs=${appArgs ?? ''}&machineId=${machineId}&parentId=${parentId ?? ''}`
-        )
-        .withAutomaticReconnect()
-        .build();
-
-      connectionRef.current = newConnection;
-
-      // Check again if effect was cancelled
-      if (cancelled) {
-        newConnection.stop().catch(() => {});
-        return;
-      }
-
-      setConnection(newConnection);
-    };
-
-    setupConnection();
-
-    // Cleanup function for component unmount
     return () => {
-      cancelled = true;
-      if (connectionRef.current) {
-        connectionRef.current.stop().catch(err => {
-          logger.warn('Error stopping SignalR connection during cleanup:', err);
+      // Clean up on component unmount
+      if (currentConnectionRef.current === newConnection) {
+        newConnection.stop().catch(err => {
+          logger.warn('Error stopping SignalR connection during unmount:', err);
         });
-        connectionRef.current = null;
+        currentConnectionRef.current = null;
       }
     };
   }, [appArgs, appId, machineId, parentId]);
@@ -332,6 +319,24 @@ export const useBackend = (
             window.open(url, '_blank');
           });
 
+          connection.on('ApplyTheme', (css: string) => {
+            logger.debug(`[${connection.connectionId}] ApplyTheme`);
+
+            // Remove existing custom theme style if any
+            const existingStyle = document.getElementById('ivy-custom-theme');
+            if (existingStyle) {
+              existingStyle.remove();
+            }
+
+            // Create and inject the new style element
+            const styleElement = document.createElement('style');
+            styleElement.id = 'ivy-custom-theme';
+            styleElement.innerHTML = css
+              .replace('<style id="ivy-custom-theme">', '')
+              .replace('</style>', '');
+            document.head.appendChild(styleElement);
+          });
+
           connection.on('HotReload', () => {
             logger.debug(`[${connection.connectionId}] HotReload`);
             handleHotReloadMessage();
@@ -366,9 +371,20 @@ export const useBackend = (
         connection.off('SetJwt');
         connection.off('SetTheme');
         connection.off('OpenUrl');
+        connection.off('ApplyTheme');
         connection.off('reconnecting');
         connection.off('reconnected');
         connection.off('close');
+
+        // Stop and dispose the connection when the component unmounts or connection changes
+        if (connection.state !== signalR.HubConnectionState.Disconnected) {
+          connection.stop().catch(err => {
+            logger.warn(
+              'Error stopping SignalR connection during cleanup:',
+              err
+            );
+          });
+        }
       };
     }
   }, [

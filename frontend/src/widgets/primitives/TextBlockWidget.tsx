@@ -2,6 +2,12 @@ import { getColor, getOverflow, getWidth, Overflow } from '@/lib/styles';
 import { cn } from '@/lib/utils';
 import React from 'react';
 import { textBlockClassMap } from '../../lib/textBlockClassMap';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 type TextBlockVariant =
   | 'Literal'
@@ -67,11 +73,51 @@ const variantMap: VariantMap = {
       {children}
     </h4>
   ),
-  Block: ({ children, className, style }) => (
-    <div className={cn('flex items-center text-sm', className)} style={style}>
-      {children}
-    </div>
-  ),
+  Block: ({ children, className, style }) => {
+    const spanRef = React.useRef<HTMLSpanElement>(null);
+    const [isTruncated, setIsTruncated] = React.useState(false);
+    const [showTooltip, setShowTooltip] = React.useState(false);
+    React.useEffect(() => {
+      const checkTruncation = () => {
+        const el = spanRef.current;
+        if (el) {
+          setIsTruncated(el.scrollWidth > el.clientWidth);
+        }
+      };
+      checkTruncation();
+      // Optionally, listen for window resize to re-check truncation
+      window.addEventListener('resize', checkTruncation);
+      return () => {
+        window.removeEventListener('resize', checkTruncation);
+      };
+    }, [children, style]);
+    return (
+      <div
+        className={cn('flex items-center text-sm min-w-0', className)}
+        style={style}
+      >
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span
+                ref={spanRef}
+                className="overflow-hidden text-ellipsis"
+                onMouseEnter={() => setShowTooltip(true)}
+                onMouseLeave={() => setShowTooltip(false)}
+              >
+                {children}
+              </span>
+            </TooltipTrigger>
+            {showTooltip && isTruncated && typeof children === 'string' && (
+              <TooltipContent className="bg-popover text-popover-foreground shadow-md">
+                {children}
+              </TooltipContent>
+            )}
+          </Tooltip>
+        </TooltipProvider>
+      </div>
+    );
+  },
   P: ({ children, className, style }) => (
     <p className={cn(textBlockClassMap.P, className)} style={style}>
       {children}
@@ -118,7 +164,7 @@ const variantMap: VariantMap = {
   ),
   Muted: ({ children, className, style }) => (
     <div
-      className={cn('text-large-body text-muted-foreground', className)}
+      className={cn('text-sm text-muted-foreground', className)}
       style={style}
     >
       {children}

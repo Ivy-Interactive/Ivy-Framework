@@ -102,10 +102,13 @@ Layout.Vertical()
 
 <WidgetDocs Type="Ivy.WrapLayout" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Layouts/WrapLayout.cs"/>
 
-## Advanced Examples
+## Examples
 
-### Responsive Technology Tags
-
+<Details>
+<Summary>
+Responsive Technology Tags
+</Summary>
+<Body>
 Create a responsive tag list with varying sizes that demonstrates natural wrapping:
 
 ```csharp demo-tabs ivy-bg
@@ -126,8 +129,14 @@ new WrapLayout([
 ], gap: 2)
 ```
 
-### Select & Slider Controls
+</Body>
+</Details>
 
+<Details>
+<Summary>
+Select & Slider Controls
+</Summary>
+<Body>
 Badge size selector with pixel-based gap slider:
 
 ```csharp demo-tabs
@@ -220,8 +229,14 @@ public class SelectSliderControlDemo : ViewBase
 }
 ```
 
-### Button Group
+</Body>
+</Details>
 
+<Details>
+<Summary>
+Button Group
+</Summary>
+<Body>
 Create responsive button groups:
 
 ```csharp demo-tabs ivy-bg
@@ -235,8 +250,14 @@ new WrapLayout([
 ], gap: 2)
 ```
 
-### Card Grid
+</Body>
+</Details>
 
+<Details>
+<Summary>
+Card Grid
+</Summary>
+<Body>
 Create a responsive grid of cards:
 
 ```csharp demo-tabs ivy-bg
@@ -245,3 +266,6 @@ new WrapLayout([
     new Card().Title("Project Beta").Description("Testing phase")
 ], gap: 4)
 ```
+
+</Body>
+</Details>

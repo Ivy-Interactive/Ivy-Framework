@@ -90,7 +90,7 @@ export const XmlRenderer = ({ data }: XmlRendererProps) => {
     return Object.entries(attributes).map(([key, value]) => (
       <span key={key} className="ml-2">
         {' '}
-        <span className="text-violet">{key}</span>
+        <span className="text-purple">{key}</span>
         <span className="text-muted-foreground">=</span>
         <span className="text-primary">"{value}"</span>
       </span>
@@ -130,7 +130,7 @@ export const XmlRenderer = ({ data }: XmlRendererProps) => {
               <ChevronRight className="h-4 w-4" />
             ))}
           <span className="text-muted-foreground">{'<'}</span>
-          <span className="text-blue">{node.name}</span>
+          <span className="text-cyan">{node.name}</span>
           {node.attributes && renderAttributes(node.attributes)}
           <span className="text-muted-foreground">
             {hasChildren ? '>' : ' />'}
@@ -150,7 +150,7 @@ export const XmlRenderer = ({ data }: XmlRendererProps) => {
         {hasChildren && isExpanded && (
           <div className="text-muted-foreground ml-1">
             {'</'}
-            <span className="text-blue">{node.name}</span>
+            <span className="text-cyan">{node.name}</span>
             {'>'}
           </div>
         )}

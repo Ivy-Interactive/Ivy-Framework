@@ -7,6 +7,7 @@ import { inputStyles } from '@/lib/styles';
 import { InvalidIcon } from '@/components/InvalidIcon';
 import { X } from 'lucide-react';
 import React from 'react';
+import { Sizes } from '@/types/sizes';
 
 const formatStyleMap = {
   Decimal: 'decimal',
@@ -48,6 +49,7 @@ interface NumberInputBaseProps {
   'data-testid'?: string;
   // Add type information for validation
   targetType?: string;
+  size?: Sizes;
 }
 
 interface NumberInputWidgetProps
@@ -89,6 +91,19 @@ const validateAndCapValue = (
   return cappedValue;
 };
 
+// Size variants for text styling
+const sizeVariants: Record<string, { text: string }> = {
+  Small: {
+    text: 'text-xs',
+  },
+  Medium: {
+    text: 'text-sm font-normal',
+  },
+  Large: {
+    text: 'text-ml font-medium',
+  },
+};
+
 const SliderVariant = memo(
   ({
     value,
@@ -98,6 +113,7 @@ const SliderVariant = memo(
     disabled = false,
     invalid,
     currency,
+    size = Sizes.Medium,
     onValueChange,
     'data-testid': dataTestId,
   }: NumberInputBaseProps) => {
@@ -139,13 +155,17 @@ const SliderVariant = memo(
           value={[sliderValue]}
           disabled={disabled}
           currency={currency}
+          size={size}
           onValueChange={handleSliderChange}
           onValueCommit={handleSliderCommit}
           className={cn(invalid && inputStyles.invalidInput)}
           data-testid={dataTestId}
         />
         <span
-          className="flex w-full items-center justify-between gap-1 text-small-label font-sm text-muted-foreground"
+          className={cn(
+            'flex w-full items-center justify-between gap-1',
+            sizeVariants[String(size)].text
+          )}
           aria-hidden="true"
         >
           <span>{min}</span>
@@ -177,6 +197,7 @@ const NumberVariant = memo(
     nullable = false,
     onValueChange,
     currency,
+    size = Sizes.Medium,
     'data-testid': dataTestId,
   }: NumberInputBaseProps) => {
     const formatConfig = useMemo(
@@ -213,6 +234,7 @@ const NumberVariant = memo(
           placeholder={placeholder}
           value={value}
           disabled={disabled}
+          size={size}
           onChange={handleNumberChange}
           className={cn(
             invalid && inputStyles.invalidInput,

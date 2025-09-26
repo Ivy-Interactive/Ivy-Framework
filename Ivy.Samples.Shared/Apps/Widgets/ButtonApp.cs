@@ -9,18 +9,24 @@ public class ButtonApp() : SampleBase
         ButtonVariant.Primary,
         ButtonVariant.Destructive,
         ButtonVariant.Secondary,
+        ButtonVariant.Success,
+        ButtonVariant.Warning,
+        ButtonVariant.Info,
         ButtonVariant.Outline,
         ButtonVariant.Ghost,
-        ButtonVariant.Link
+        ButtonVariant.Link,
     ];
 
     private static readonly string[] VariantNames = [
         "Primary",
         "Destructive",
         "Secondary",
+        "Success",
+        "Warning",
+        "Info",
         "Outline",
         "Ghost",
-        "Link"
+        "Link",
     ];
 
     protected override object? BuildSample()
@@ -43,18 +49,16 @@ public class ButtonApp() : SampleBase
                | createButtonRow(variant => new Button(VariantNames[Array.IndexOf(Variants, variant)], eventHandler, variant: variant))
 
                | Text.H2("States")
-               | (Layout.Grid().Columns(Variants.Length)
-                  | VariantNames.Select(name => Text.Block(name)).ToArray()
-
-                  // Normal state
-                  | Variants.Select(variant => new Button(VariantNames[Array.IndexOf(Variants, variant)], eventHandler, variant: variant)).ToArray()
-
-                  // Disabled state
-                  | Variants.Select(variant => new Button(VariantNames[Array.IndexOf(Variants, variant)], eventHandler, variant: variant).Disabled()).ToArray()
-
-                  // Loading state
-                  | Variants.Select(variant => new Button(VariantNames[Array.IndexOf(Variants, variant)], eventHandler, variant: variant).Loading()).ToArray()
-               )
+               | (Layout.Wrap().Gap(16)
+                  | Variants.Select((variant, idx) =>
+                      Layout.Vertical()
+                      .Width(Size.MinContent())
+                 | Text.Block(VariantNames[idx])
+                 | new Button(VariantNames[idx], eventHandler, variant: variant)                     // Normal
+                 | new Button(VariantNames[idx], eventHandler, variant: variant).Disabled()          // Disabled
+                 | new Button(VariantNames[idx], eventHandler, variant: variant).Loading()           // Loading
+                  ).ToArray()
+)
 
                | Text.H2("Sizes")
                | (Layout.Grid().Columns(Variants.Length)
@@ -71,15 +75,16 @@ public class ButtonApp() : SampleBase
                )
 
                | Text.H2("With Icons")
-               | (Layout.Grid().Columns(Variants.Length)
-                  | VariantNames.Select(name => Text.Block(name)).ToArray()
+               | (Layout.Wrap().Gap(16)
+                  | Variants.Select((variant, idx) =>
+                    Layout.Vertical()
+                    .Width(Size.MinContent())
+               | Text.Block(VariantNames[idx])
+               | new Button("Button With Icon", eventHandler, variant: variant, icon: Icons.MessageSquareX)
+               | new Button("Button With Icon", eventHandler, variant: variant, icon: Icons.MessageSquareX).Icon(Icons.MessageSquareX, Align.Right)
+                ).ToArray()
+)
 
-                  // Icon Left
-                  | Variants.Select(variant => new Button("Button With Icon", eventHandler, variant: variant, icon: Icons.MessageSquareX)).ToArray()
-
-                  // Icon Right
-                  | Variants.Select(variant => new Button("Button With Icon", eventHandler, variant: variant, icon: Icons.MessageSquareX).Icon(Icons.MessageSquareX, Align.Right)).ToArray()
-               )
 
                | Text.H2("Styling")
                | (Layout.Grid().Columns(Variants.Length)

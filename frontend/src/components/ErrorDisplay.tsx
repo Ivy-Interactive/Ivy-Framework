@@ -55,7 +55,7 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
             <SyntaxHighlighter
               language="csharp"
               style={createPrismTheme()}
-              wrapLongLines={false}
+              wrapLongLines={true}
               showLineNumbers={false}
             >
               {stackTrace}

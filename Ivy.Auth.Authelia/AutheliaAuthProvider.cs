@@ -21,8 +21,8 @@ public class AutheliaAuthProvider : IAuthProvider
             .AddEnvironmentVariables()
             .AddUserSecrets(Assembly.GetEntryAssembly()!)
             .Build();
-        _baseUrl = configuration.GetValue<string>("AUTHELIA_URL")
-            ?? throw new Exception("AUTHELIA_URL is required");
+        _baseUrl = configuration.GetValue<string>("Authelia:Url")
+            ?? throw new Exception("Authelia:Url is required");
         _cookieContainer = new CookieContainer();
         var handler = new HttpClientHandler { CookieContainer = _cookieContainer };
         _httpClient = new HttpClient(handler) { BaseAddress = new Uri(_baseUrl) };

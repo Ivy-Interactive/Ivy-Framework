@@ -40,7 +40,7 @@ The result from `Build` is usually another view or a widget. Widgets are the sma
 
 Now let's make it a little more interesting by returning a button widget that shows a toast when clicked.
 
-```csharp demo-below 
+```csharp demo-below
 public class CounterApp : ViewBase
 {
     public override object? Build()
@@ -54,6 +54,8 @@ public class CounterApp : ViewBase
 <Callout Icon="Info">
 These pages are implemented in Ivy so try to click on the button above. You should get a toast with the text "Hello!"
 </Callout>
+
+In this example, you can see how to use an Ivy Button. For more details, check out the [Button implementation](../../02_Widgets/01_Common/Button.md).
 
 ## State Management
 
@@ -74,7 +76,7 @@ public class CounterApp : ViewBase
 }
 ```
 
-```csharp demo 
+```csharp demo
 public class CounterApp : ViewBase
 {
     public override object? Build()
@@ -87,3 +89,5 @@ public class CounterApp : ViewBase
     }
 }
 ```
+
+You can learn more about layouts [here](../../02_Widgets/04_Layouts/SidebarLayout.md).

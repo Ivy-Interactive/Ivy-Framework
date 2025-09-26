@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 
 interface Contributor {
   login: string;
+  name?: string;
   avatar_url: string;
   html_url: string;
   contributions: number;
@@ -16,10 +17,19 @@ interface GitHubCommit {
     avatar_url: string;
     html_url: string;
   } | null;
+  commit: {
+    author: {
+      name: string;
+      email: string;
+      date: string;
+    };
+  };
 }
 
 interface GitHubContributorsProps {
   documentSource?: string;
+  onLoadingChange?: (isLoading: boolean) => void;
+  show?: boolean;
 }
 
 // Ivy team members with their roles
@@ -27,7 +37,7 @@ const IVY_TEAM_MEMBERS: Record<string, string> = {
   ArtemKhvorostianyi: 'Engineer',
   rorychatt: 'Founding Engineer',
   nielsbosma: 'CEO',
-  zachwolfe: 'Engineer',
+  zachwolfe: 'Software Developer',
   // Add more team members as needed
 };
 
@@ -57,13 +67,17 @@ const getCommitsUrl = (githubUrl: string): string => {
 
 export const GitHubContributors: React.FC<GitHubContributorsProps> = ({
   documentSource,
+  onLoadingChange,
+  show = true,
 }) => {
   const [contributors, setContributors] = useState<Contributor[]>([]);
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!documentSource) return;
+    if (!documentSource) {
+      onLoadingChange?.(false);
+      return;
+    }
 
     // Extract repo and file path from GitHub URL
     const getApiUrl = (githubUrl: string): string | null => {
@@ -88,9 +102,12 @@ export const GitHubContributors: React.FC<GitHubContributorsProps> = ({
     };
 
     const apiUrl = getApiUrl(documentSource);
-    if (!apiUrl) return;
+    if (!apiUrl) {
+      onLoadingChange?.(false);
+      return;
+    }
 
-    setLoading(true);
+    onLoadingChange?.(true);
     setError(null);
 
     fetch(apiUrl)
@@ -121,6 +138,7 @@ export const GitHubContributors: React.FC<GitHubContributorsProps> = ({
               const isIvyMember = login in IVY_TEAM_MEMBERS;
               contributorMap.set(login, {
                 login: commit.author.login,
+                name: commit.commit.author.name,
                 avatar_url: commit.author.avatar_url,
                 html_url: commit.author.html_url,
                 contributions: 1,
@@ -141,67 +159,47 @@ export const GitHubContributors: React.FC<GitHubContributorsProps> = ({
       })
       .catch(err => {
         console.error('Failed to fetch contributors:', err);
-        setError(err.message || 'Failed to load contributors');
+        // Don't show error for rate limiting - just hide the component
+        if (err.message && err.message.includes('rate limit exceeded')) {
+          setError(null);
+        } else {
+          setError(err.message || 'Failed to load contributors');
+        }
       })
       .finally(() => {
-        setLoading(false);
+        onLoadingChange?.(false);
       });
-  }, [documentSource]);
+  }, [documentSource, onLoadingChange]);
 
-  if (!documentSource) return null;
+  if (!documentSource || !show) return null;
+
+  // Don't render anything if we have no contributors and no error (likely rate limited)
+  if (!error && contributors.length === 0) return null;
 
   const displayedContributors = contributors.slice(0, 3);
   const remainingCount = contributors.length - 3;
   const hasMoreContributors = remainingCount > 0;
 
   return (
-    <div className="mt-4">
+    <div>
       <div className="text-body mb-4 flex items-center gap-2">
         <Users className="w-4 h-4" />
         Contributors
       </div>
 
-      {loading && (
-        <div className="flex-shrink-0 min-h-40">
-          <div className="p-4">
-            <div className="flex flex-col gap-3">
-              {[...Array(3)].map((_, i) => (
-                <div key={i} className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-muted rounded-full animate-pulse"></div>
-                  <div className="flex-1">
-                    <div className="h-4 bg-muted rounded animate-pulse w-1/2 mb-1"></div>
-                    <div className="h-3 bg-muted rounded animate-pulse w-3/4"></div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
       {error && (
         <div className="flex-shrink-0 min-h-40">
-          <div className="p-4">
+          <div className="pr-2">
             <div className="text-sm text-muted-foreground">{error}</div>
           </div>
         </div>
       )}
 
-      {!loading && !error && contributors.length === 0 && (
-        <div className="flex-shrink-0 min-h-40">
-          <div className="p-4">
-            <div className="text-sm text-muted-foreground">
-              No contributors found
-            </div>
-          </div>
-        </div>
-      )}
-
-      {!loading && !error && contributors.length > 0 && (
+      {!error && contributors.length > 0 && (
         <div className="flex-shrink-0 min-h-40 overflow-hidden">
-          {/* Contributors list with scrollable area */}
-          <div className="h-full overflow-y-auto">
-            <div className="p-4 space-y-3">
+          {/* Contributors list*/}
+          <div className="h-full pr-2">
+            <div className="space-y-3">
               {displayedContributors.map(contributor => (
                 <a
                   key={contributor.login}
@@ -217,7 +215,7 @@ export const GitHubContributors: React.FC<GitHubContributorsProps> = ({
                   />
                   <div className="flex-1 min-w-0">
                     <div className="text-sm font-medium truncate group-hover:text-primary transition-colors">
-                      {contributor.login}
+                      {contributor.name || contributor.login}
                     </div>
                     <div className="text-xs text-muted-foreground">
                       {contributor.role}
@@ -231,7 +229,7 @@ export const GitHubContributors: React.FC<GitHubContributorsProps> = ({
 
           {/* "and X more" link */}
           {hasMoreContributors && (
-            <div className="px-4 pb-4">
+            <div className="pr-2 pt-4">
               <a
                 href={getCommitsUrl(documentSource)}
                 target="_blank"

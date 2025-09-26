@@ -13,7 +13,7 @@ altered via the `PieChartStyles` enum.
 
 The following example shows how to create a Pie and a Donut chart easily.
 
-```csharp demo-tabs 
+```csharp demo-tabs
 public class PieChartDemo : ViewBase
 {
     public override object? Build()
@@ -46,54 +46,55 @@ public class PieChartDemo : ViewBase
 }
 ```
 
-### Browser Market Share
+### Donut Chart with Custom Labels
 
-The following example shows how to use `PieChart` type to create a more fine controlled pie chart.
-The color scheme of the Pie can be changed using `ColorScheme` enum. The legend can be placed
-in any corner using `Alignment` and `VerticalAlignment` enums.
+The following example demonstrates the enhanced pie chart label customization feature with multiple label layers.
+This donut chart shows budget allocation data with currency-formatted values outside the chart and department names inside.
+The example showcases independent positioning, styling, and formatting for each label layer, making complex data presentations more readable and professional.
 
-```csharp demo-tabs 
-public class BrowserStatsPie : ViewBase
+```csharp demo-tabs
+public class DonutChartWithCustomLabelsView : ViewBase
 {
     public override object? Build()
     {
-        var years = new string[]{"2019","2025"};
-        var year = this.UseState(years[0]);
+        var data = new[]
+        {
+            new PieChartData("Revenue", 1250000),
+            new PieChartData("Marketing", 450000),
+            new PieChartData("Operations", 320000),
+            new PieChartData("R&D", 280000),
+            new PieChartData("Admin", 150000),
+            new PieChartData("Sales", 380000),
+            new PieChartData("Customer Support", 220000),
+            new PieChartData("IT Infrastructure", 180000),
+            new PieChartData("Legal", 95000),
+            new PieChartData("HR", 120000),
+            new PieChartData("Finance", 160000),
+            new PieChartData("Quality Assurance", 140000)
+        };
 
-        var map = new Dictionary<string,object>();
-        var browserSharesYear1 = new []
-        {
-             //Rounded
-            new { Browser = "Chrome", Company = "Google", Share = 30},
-            new { Browser = "Safari", Company = "Apple", Share = 16},
-            new { Browser = "Edge", Company= "Microsoft", Share = 52},
-            new { Browser = "Firefox", Company= "Mozilla", Share = 2}
-        };
-        var browserSharesYear2 = new []
-        {
-            //Rounded
-            new { Browser = "Chrome", Company = "Google", Share = 70},
-            new { Browser = "Safari", Company = "Apple", Share = 16},
-            new { Browser = "Edge", Company = "Microsoft", Share = 12},
-            new { Browser = "Firefox", Company = "Mozilla", Share = 2}
-        };
-        map.Add("2019", browserSharesYear1);
-        map.Add("2025", browserSharesYear2);
-        var yearInput = year.ToSelectInput(years.ToOptions())
-                                   .Width(15);
-        return Layout.Vertical()
-            | H3("Browser Market share")
-            | Text.Html("<i>Select the year to see shares of the browsers.</i>")
-            | Text.Large("Select Year")
-            | yearInput
-            | new PieChart(map[year.Value])
-                 .Pie(new Pie("Share","Browser")
-                         .OuterRadius(150)
-                         .InnerRadius(90))
-                 .Tooltip(new Ivy.Charts.Tooltip().Animated(true))
-                 .Legend(new Legend()
-                             .Align(Ivy.Charts.Legend.Alignments.Right)
-                             .VerticalAlign(Ivy.Charts.Legend.VerticalAlignments.Bottom));
+        var totalValue = data.Sum(d => d.Measure);
+
+        return new PieChart(data)
+            .Pie(new Pie(nameof(PieChartData.Measure), nameof(PieChartData.Dimension))
+                .InnerRadius("40%")
+                .OuterRadius("90%")
+                .Animated(true)
+                .LabelList(new LabelList(nameof(PieChartData.Measure))
+                    .Position(Positions.Outside)
+                    .Fill(Colors.Blue)
+                    .FontSize(11)
+                    .NumberFormat("$0,0"))
+                .LabelList(new LabelList(nameof(PieChartData.Dimension))
+                    .Position(Positions.Inside)
+                    .Fill(Colors.White)
+                    .FontSize(9)
+                    .FontFamily("Arial"))
+            )
+            .ColorScheme(ColorScheme.Default)
+            .Tooltip(new Ivy.Charts.Tooltip().Animated(true))
+            .Legend(new Legend().IconType(Legend.IconTypes.Rect))
+            .Total(totalValue, "Total Budget");
     }
 }
 ```
@@ -104,12 +105,12 @@ can be seen in this example, these values can be altered to create a custom donu
 `Tooltip` makes sure that the labels show up on mouse hover. The `Animated` function makes a nice animation
 when users hover on that specific part of the pie chart.
 
-## Drill down chart
+### Drill down chart
 
 The following example shows how these combinations of charts can be used in a realistic example
 for showing how populated some countries are.
 
-```csharp demo-tabs 
+```csharp demo-tabs
 
 public class DrillDownDemo : ViewBase
 {

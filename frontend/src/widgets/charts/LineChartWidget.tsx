@@ -78,9 +78,9 @@ const LineChartWidget: React.FC<LineChartWidgetProps> = ({
   const [colorGenerator] = getColorGenerator(colorScheme);
 
   return (
-    <ChartContainer config={chartConfig} style={styles} className="mt-4">
+    <ChartContainer config={chartConfig} style={styles}>
       <LineChart
-        margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
+        margin={{ top: 10, right: 10, bottom: 10, left: 10 }}
         accessibilityLayer
         data={data}
       >

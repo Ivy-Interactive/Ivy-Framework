@@ -1,7 +1,7 @@
 import { TableOfContents } from '@/widgets/article/TableOfContents';
 import { GitHubContributors } from '@/widgets/article/GitHubContributors';
 import { DocumentTools } from '@/widgets/article/DocumentTools';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface ArticleSidebarProps {
   articleRef: React.RefObject<HTMLElement | null>;
@@ -16,8 +16,18 @@ export const ArticleSidebar: React.FC<ArticleSidebarProps> = ({
   documentSource,
   title,
 }) => {
-  // Only show sidebar if TOC, contributors, or tools should be displayed
-  if (!showToc && !documentSource) return null;
+  const [tocLoading, setTocLoading] = useState(true);
+  const [contributorsLoading, setContributorsLoading] = useState(true);
+  const [showContributors, setShowContributors] = useState(false);
+
+  // Only show contributors when TOC is ready too
+  useEffect(() => {
+    if (!tocLoading && !contributorsLoading) {
+      setShowContributors(true);
+    }
+  }, [tocLoading, contributorsLoading]);
+  // Only show sidebar if TOC should be displayed
+  if (!showToc) return null;
 
   return (
     <div className="hidden lg:block w-64">
@@ -28,8 +38,16 @@ export const ArticleSidebar: React.FC<ArticleSidebarProps> = ({
           title={title}
         />
         <div className="flex-1 flex flex-col gap-4 min-h-0">
-          <TableOfContents articleRef={articleRef} show={showToc} />
-          <GitHubContributors documentSource={documentSource} />
+          <TableOfContents
+            articleRef={articleRef}
+            show={showToc}
+            onLoadingChange={setTocLoading}
+          />
+          <GitHubContributors
+            documentSource={documentSource}
+            onLoadingChange={setContributorsLoading}
+            show={showContributors}
+          />
         </div>
       </div>
     </div>

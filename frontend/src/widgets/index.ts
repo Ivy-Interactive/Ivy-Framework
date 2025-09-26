@@ -6,7 +6,7 @@ export {
   ChatLoadingWidget,
   ChatMessageWidget,
   ChatStatusWidget,
-  ChatWidget
+  ChatWidget,
 } from './ChatWidget';
 export { DropDownMenuWidget } from './DropDownMenuWidget';
 export { ExpandableWidget } from './ExpandableWidget';
@@ -15,3 +15,4 @@ export { SheetWidget } from './SheetWidget';
 export { SlotWidget } from './SlotWidget';
 export { TooltipWidget } from './TooltipWidget';
 
+export { PaginationWidget } from './PaginationWidget';

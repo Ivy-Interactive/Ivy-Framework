@@ -170,6 +170,14 @@ public class LongSidebarTestApp : SampleBase
             Text.P("egg"),
             Text.P("egg"),
             Text.P("egg"),
+            Text.P("egg"),
+            Text.P("egg"),
+            Text.P("egg"),
+            Text.P("egg"),
+            Text.P("egg"),
+            Text.P("egg"),
+            Text.P("egg"),
+            Text.P("egg"),
             Text.P("egg")
         ).Gap(6);
 

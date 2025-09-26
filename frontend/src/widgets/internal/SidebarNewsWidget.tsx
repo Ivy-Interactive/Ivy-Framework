@@ -320,9 +320,16 @@ function NewsCard({
     >
       <div className={cn(hideContent && 'invisible')}>
         <div className="flex flex-col gap-1">
-          <span className="line-clamp-1 font-medium text-foreground">
-            {title}
-          </span>
+          <a
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Open article titled '{title}' in new tab"
+          >
+            <span className="line-clamp-1 font-medium text-foreground hover:text-primary transition-colors duration-75">
+              {title}
+            </span>
+          </a>
           <p className="line-clamp-2 h-8 leading-4 text-muted-foreground">
             {description}
           </p>

@@ -211,6 +211,7 @@ export const TabsLayoutWidget = ({
     left: '0px',
     width: '0px',
   });
+  const [isInitialRender, setIsInitialRender] = React.useState(true);
 
   // Update refs when they change
   React.useEffect(() => {
@@ -234,22 +235,15 @@ export const TabsLayoutWidget = ({
         left: `${offsetLeft}px`,
         width: `${offsetWidth}px`,
       });
-    }
-  }, [activeIndex, tabOrder, variant]);
 
-  React.useEffect(() => {
-    if (variant !== 'Content') return;
-    requestAnimationFrame(() => {
-      const firstElement = tabRefs.current[0];
-      if (firstElement) {
-        const { offsetLeft, offsetWidth } = firstElement;
-        setActiveStyle({
-          left: `${offsetLeft}px`,
-          width: `${offsetWidth}px`,
+      // After first position update, enable animations
+      if (isInitialRender) {
+        requestAnimationFrame(() => {
+          setIsInitialRender(false);
         });
       }
-    });
-  }, [variant]);
+    }
+  }, [activeIndex, tabOrder, variant, isInitialRender]);
 
   // Calculate which tabs fit and which don't - preserving order
   const calculateVisibleTabs = React.useCallback(() => {
@@ -747,7 +741,10 @@ export const TabsLayoutWidget = ({
           />
           {/* Active Indicator */}
           <div
-            className="absolute bottom-[-6px] h-[2px] bg-foreground transition-all duration-300 ease-out"
+            className={cn(
+              'absolute bottom-[-6px] h-[2px] bg-foreground',
+              !isInitialRender && 'transition-all duration-300 ease-out'
+            )}
             style={activeStyle}
           />
           {/* Tabs */}

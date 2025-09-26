@@ -54,7 +54,7 @@ export const BoxWidget: React.FC<BoxWidgetProps> = ({
     ...getBorderThickness(borderThickness),
     ...getBorderRadius(borderRadius),
     ...getColor(color, 'backgroundColor', 'background'),
-    ...getColor(color, 'borderColor', 'foreground'),
+    ...getColor(color, 'borderColor', 'background'),
     ...getColor(color, 'color', 'foreground'),
   };
 

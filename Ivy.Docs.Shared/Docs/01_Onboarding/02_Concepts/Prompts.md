@@ -1,61 +1,44 @@
 # Prompts
 
 <Ingress>
-Interact with users and gather input using Ivy's prompt system.
+Interact with users and gather input using Ivy's alert and dialog system.
 </Ingress>
 
 ## Overview
 
-The prompt system in Ivy supports:
+The alert system in Ivy supports:
 
 - Confirmation dialogs
-- Text input prompts
-- File selection prompts
-- Custom prompts
-- Prompt chaining
-- Async prompt handling
+- Custom alert buttons
+- Dialog-based prompts
+- Form-based input collection
+- Alert chaining
 
 ## Basic Usage
 
-Here's a simple example of showing a confirmation prompt:
+Here's a simple example of showing a confirmation alert:
 
-```csharp
-var client = this.UseService<IClientProvider>();
-var result = await client.Prompt.ConfirmAsync(
-    "Delete Item",
-    "Are you sure you want to delete this item?"
-);
-if (result)
-{
-    await DeleteItem();
-}
-```
-
-### Confirmation Prompts
-
-Get user confirmation for important actions:
-
-```csharp
-public class DeleteView : ViewBase
+```csharp demo-tabs
+public class BasicPromptView : ViewBase
 {
     public override object? Build()
     {
+        var (alertView, showAlert) = this.UseAlert();
         var client = this.UseService<IClientProvider>();
         
-        return new Button(
-            "Delete",
-            variant: ButtonVariant.Destructive,
-            onClick: async _ => {
-                var confirmed = await client.Prompt.ConfirmAsync(
-                    "Delete Item",
-                    "This action cannot be undone. Are you sure?"
-                );
-                
-                if (confirmed)
+        return Layout.Vertical(
+            new Button("Delete Item", onClick: _ =>
+            {
+                showAlert("Are you sure you want to delete this item?", result =>
                 {
-                    await DeleteItem();
-                }
-            }
+                    if (result == AlertResult.Ok)
+                    {
+                        // Item would be deleted here
+                        client.Toast("Item deleted!", "Success");
+                    }
+                }, "Delete Item");
+            }),
+            alertView
         );
     }
 }
@@ -63,29 +46,41 @@ public class DeleteView : ViewBase
 
 ### Text Input Prompts
 
-Collect text input from users:
+Collect text input from users using dialogs with forms:
 
-```csharp
+```csharp demo-tabs
+public record RenameRequest
+{
+    public string Name { get; set; } = "Current Item Name";
+}
+
 public class RenameView : ViewBase
 {
     public override object? Build()
     {
         var client = this.UseService<IClientProvider>();
+        var isOpen = this.UseState(false);
+        var renameData = this.UseState(new RenameRequest());
         
-        return new Button(
-            "Rename",
-            onClick: async _ => {
-                var newName = await client.Prompt.TextAsync(
-                    "Rename Item",
-                    "Enter new name:",
-                    defaultValue: currentName
-                );
-                
-                if (newName != null)
-                {
-                    await RenameItem(newName);
-                }
+        this.UseEffect(() => {
+            if (!isOpen.Value && !string.IsNullOrEmpty(renameData.Value.Name))
+            {
+                // Item would be renamed here
+                client.Toast($"Renamed to: {renameData.Value.Name}", "Success");
             }
+        }, [isOpen]);
+        
+        return Layout.Vertical(
+            new Button(
+                "Rename",
+                onClick: _ => isOpen.Set(true)
+            ),
+            isOpen.Value ? renameData.ToForm()
+                .Label(e => e.Name, "Enter new name:")
+                .ToDialog(isOpen, 
+                    title: "Rename Item", 
+                    submitTitle: "Rename"
+                ) : null
         );
     }
 }
@@ -93,29 +88,42 @@ public class RenameView : ViewBase
 
 ### File Selection Prompts
 
-Handle file selection through prompts:
+Handle file selection through dialogs with file inputs:
 
-```csharp
+```csharp demo-tabs
+public record UploadRequest
+{
+    public IEnumerable<FileInput> Files { get; set; } = Array.Empty<FileInput>();
+}
+
 public class UploadView : ViewBase
 {
     public override object? Build()
     {
         var client = this.UseService<IClientProvider>();
+        var isOpen = this.UseState(false);
+        var uploadData = this.UseState(new UploadRequest());
         
-        return new Button(
-            "Upload File",
-            onClick: async _ => {
-                var files = await client.Prompt.FilesAsync(
-                    "Select Files",
-                    multiple: true,
-                    accept: ".pdf,.doc,.docx"
-                );
-                
-                if (files?.Length > 0)
-                {
-                    await UploadFiles(files);
-                }
+        this.UseEffect(() => {
+            if (!isOpen.Value && uploadData.Value.Files.Any())
+            {
+                // Files would be uploaded here
+                client.Toast($"Selected {uploadData.Value.Files.Count()} file(s)", "Success");
             }
+        }, [isOpen]);
+        
+        return Layout.Vertical(
+            new Button(
+                "Upload File",
+                onClick: _ => isOpen.Set(true)
+            ),
+            isOpen.Value ? uploadData.ToForm()
+                .Builder(e => e.Files, e => e.ToFileInput().Accept(".pdf,.doc,.docx"))
+                .Label(e => e.Files, "Select Files:")
+                .ToDialog(isOpen, 
+                    title: "Upload Files", 
+                    submitTitle: "Upload"
+                ) : null
         );
     }
 }
@@ -123,173 +131,119 @@ public class UploadView : ViewBase
 
 ### Custom Prompts
 
-Create custom prompts for specific needs:
+Create custom dialogs with multiple inputs:
 
-```csharp
+```csharp demo-tabs
+public record CustomOptions
+{
+    public bool Option1 { get; set; }
+    public bool Option2 { get; set; }
+    public string CustomText { get; set; } = "";
+}
+
 public class CustomPromptView : ViewBase
 {
     public override object? Build()
     {
         var client = this.UseService<IClientProvider>();
+        var isOpen = this.UseState(false);
+        var options = this.UseState(new CustomOptions());
         
-        return new Button(
-            "Custom Prompt",
-            onClick: async _ => {
-                var result = await client.Prompt.CustomAsync(
-                    "Select Options",
-                    new CustomPromptOptions
-                    {
-                        Content = new VerticalLayout(
-                            Text.Inline("Choose your options:"),
-                            new Checkbox("Option 1"),
-                            new Checkbox("Option 2"),
-                            new TextInput("Custom text")
-                        ),
-                        Buttons = new[]
-                        {
-                            new PromptButton("Cancel", PromptButtonType.Cancel),
-                            new PromptButton("Save", PromptButtonType.Confirm)
-                        }
-                    }
-                );
-                
-                if (result.Confirmed)
-                {
-                    await SaveOptions(result.Data);
-                }
+        this.UseEffect(() => {
+            if (!isOpen.Value && (options.Value.Option1 || options.Value.Option2 || !string.IsNullOrEmpty(options.Value.CustomText)))
+            {
+                // Options would be saved here
+                client.Toast("Options saved!", "Success");
             }
+        }, [isOpen]);
+        
+        return Layout.Vertical(
+            new Button(
+                "Custom Prompt",
+                onClick: _ => isOpen.Set(true)
+            ),
+            isOpen.Value ? options.ToForm()
+                .Builder(e => e.Option1, e => e.ToBoolInput("Option 1"))
+                .Builder(e => e.Option2, e => e.ToBoolInput("Option 2"))
+                .Builder(e => e.CustomText, e => e.ToTextInput("Custom text"))
+                .ToDialog(isOpen, 
+                    title: "Select Options", 
+                    submitTitle: "Save"
+                ) : null
         );
     }
 }
 ```
-
-### Prompt Chaining
-
-Chain multiple prompts together:
-
-```csharp
-public class MultiStepView : ViewBase
-{
-    public override object? Build()
-    {
-        var client = this.UseService<IClientProvider>();
-        
-        return new Button(
-            "Start Process",
-            onClick: async _ => {
-                // Step 1: Confirmation
-                var confirmed = await client.Prompt.ConfirmAsync(
-                    "Start Process",
-                    "Begin the multi-step process?"
-                );
-                
-                if (!confirmed) return;
-                
-                // Step 2: Text Input
-                var name = await client.Prompt.TextAsync(
-                    "Enter Name",
-                    "What is your name?"
-                );
-                
-                if (name == null) return;
-                
-                // Step 3: File Selection
-                var files = await client.Prompt.FilesAsync(
-                    "Select Files",
-                    multiple: true
-                );
-                
-                if (files?.Length > 0)
-                {
-                    await ProcessFiles(name, files);
-                }
-            }
-        );
-    }
-}
-```
-
-### Best Practices
-
-1. **Clear Messages**: Use clear and concise prompt messages
-2. **Default Values**: Provide sensible default values when appropriate
-3. **Validation**: Implement input validation for text prompts
-4. **Error Handling**: Handle prompt cancellation and errors gracefully
-5. **User Experience**: Keep prompts focused and avoid asking too many questions
-6. **Accessibility**: Ensure prompts are accessible to screen readers
-7. **Consistency**: Maintain consistent prompt styling across your project
 
 ## Examples
 
-### Form Validation with Prompts
+<Details>
+<Summary>
+Confirmation with Custom Options
+</Summary>
+<Body>
 
-```csharp
-public class FormView : ViewBase
+```csharp demo-tabs
+public record DeleteOptions
 {
-    public override object? Build()
-    {
-        var client = this.UseService<IClientProvider>();
-        var formData = UseState(new FormData());
-        
-        return new Form(
-            onSubmit: async () => {
-                if (string.IsNullOrEmpty(formData.Value.Name))
-                {
-                    var name = await client.Prompt.TextAsync(
-                        "Missing Name",
-                        "Please enter your name:"
-                    );
-                    
-                    if (name == null) return;
-                    formData.Set(v => v.Name = name);
-                }
-                
-                await SubmitForm(formData.Value);
-            }
-        )
-        | new TextInput("Name", value: formData.Value.Name, onChange: v => formData.Set(v))
-        | new Button("Submit");
-    }
+    public bool DeleteAssociatedFiles { get; set; }
+    public bool ArchiveInsteadOfDelete { get; set; }
+    public string ReasonForDeletion { get; set; } = "";
 }
-```
 
-### Confirmation with Custom Options
-
-```csharp
 public class DeleteWithOptionsView : ViewBase
 {
     public override object? Build()
     {
+        var (alertView, showAlert) = this.UseAlert();
         var client = this.UseService<IClientProvider>();
+        var isOptionsOpen = this.UseState(false);
+        var deleteOptions = this.UseState(new DeleteOptions());
         
-        return new Button(
-            "Delete with Options",
-            variant: ButtonVariant.Destructive,
-            onClick: async _ => {
-                var result = await client.Prompt.CustomAsync(
-                    "Delete Options",
-                    new CustomPromptOptions
-                    {
-                        Content = new VerticalLayout(
-                            Text.Inline("Choose deletion options:"),
-                            new Checkbox("Delete associated files"),
-                            new Checkbox("Archive instead of delete"),
-                            new TextInput("Reason for deletion")
-                        ),
-                        Buttons = new[]
-                        {
-                            new PromptButton("Cancel", PromptButtonType.Cancel),
-                            new PromptButton("Delete", PromptButtonType.Destructive)
-                        }
-                    }
-                );
-                
-                if (result.Confirmed)
-                {
-                    await DeleteWithOptions(result.Data);
-                }
+        this.UseEffect(() => {
+            if (!isOptionsOpen.Value && (deleteOptions.Value.DeleteAssociatedFiles || deleteOptions.Value.ArchiveInsteadOfDelete || !string.IsNullOrEmpty(deleteOptions.Value.ReasonForDeletion)))
+            {
+                // Deletion with options would be performed here
+                client.Toast("Item deleted with custom options", "Success");
             }
+        }, [isOptionsOpen]);
+        
+        return Layout.Vertical(
+            new Button(
+                "Delete with Options",
+                variant: ButtonVariant.Destructive,
+                onClick: _ => {
+                    showAlert(
+                        "This will permanently delete the item. Do you want to configure deletion options?",
+                        result => {
+                            if (result == AlertResult.Yes)
+                            {
+                                isOptionsOpen.Set(true);
+                            }
+                            else if (result == AlertResult.No)
+                            {
+                                // Simple delete without options
+                                client.Toast("Item deleted", "Success");
+                            }
+                        },
+                        "Delete Options",
+                        AlertButtonSet.YesNoCancel
+                    );
+                }
+            ),
+            alertView,
+            isOptionsOpen.Value ? deleteOptions.ToForm()
+                .Builder(e => e.DeleteAssociatedFiles, e => e.ToBoolInput("Delete associated files"))
+                .Builder(e => e.ArchiveInsteadOfDelete, e => e.ToBoolInput("Archive instead of delete"))
+                .Builder(e => e.ReasonForDeletion, e => e.ToTextInput("Reason for deletion"))
+                .ToDialog(isOptionsOpen, 
+                    title: "Delete Options", 
+                    submitTitle: "Delete"
+                ) : null
         );
     }
 }
 ```
+
+</Body>
+</Details>

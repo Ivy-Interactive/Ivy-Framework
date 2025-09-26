@@ -8,7 +8,7 @@ create sizes in pixels, rems, fractions or special values such as `Full` or
 
 The most common way to use Size is with widgets to set their dimensions:
 
-```csharp demo-tabs 
+```csharp demo-tabs
 Layout.Horizontal()
     | new Box()
         .Width(Size.Px(100))
@@ -26,7 +26,7 @@ This example shows mixing different size types - pixels for width, rem units for
 
 Use `Size.Px()` for precise pixel-based sizing:
 
-```csharp demo-tabs 
+```csharp demo-tabs
 Layout.Horizontal()
     | new Box("150px wide")
         .Width(Size.Px(150))
@@ -45,7 +45,7 @@ Pixel sizing provides exact control over element dimensions. Each box has a fixe
 
 Use `Size.Units()` for framework-specific unit sizing:
 
-```csharp demo-tabs 
+```csharp demo-tabs
 Layout.Horizontal()
     | new Box("40 units wide")
         .Width(Size.Units(40))
@@ -66,7 +66,7 @@ Use `Size.Fraction()` for percentage-based sizing (0.0 to 1.0).
 
 Fractional sizing creates responsive layouts that adapt to available space. The boxes take up 25%, 50%, and 75% of the container width respectively.
 
-```csharp demo-tabs 
+```csharp demo-tabs
 Layout.Horizontal()
     | new Box("20%")
         .Width(Size.Fraction(0.20f))
@@ -85,7 +85,7 @@ Use `Size.Rem()` for responsive sizing based on root font size.
 
 Rem units scale with the user's font size preferences, making layouts more accessible. Each box is sized relative to the root font size, maintaining proportional relationships.
 
-```csharp demo-tabs 
+```csharp demo-tabs
 Layout.Horizontal()
     | new Box("10rem wide")
         .Width(Size.Rem(10))
@@ -106,7 +106,7 @@ Use `Size.Full()` to take up all available space:
 
 Full sizing expands elements to fill their container completely. The first box takes full width, the second takes full height, demonstrating how elements can expand in different dimensions.
 
-```csharp demo-tabs 
+```csharp demo-tabs
 Layout.Vertical()
     | new Box("Full width")
         .Width(Size.Full())
@@ -141,7 +141,7 @@ Use `Size.Fit()` to size to fit content:
 
 Fit sizing is similar to auto but with more precise control over how content is measured and sized.
 
-```csharp demo-tabs 
+```csharp demo-tabs
 Layout.Horizontal()
     | new Box("Fit")
         .Width(Size.Fit())
@@ -160,7 +160,7 @@ Layout.Horizontal()
 
 This creates a responsive 3-column grid where each column takes exactly one-third of the available width, automatically adjusting to different screen sizes.
 
-```csharp demo-tabs 
+```csharp demo-tabs
 Layout.Horizontal()
     | new Box("1/3")
         .Width(Size.Fraction(1/3f))
@@ -177,7 +177,7 @@ Layout.Horizontal()
 
 This demonstrates combining different sizing strategies in a single layout - fixed pixel width, flexible fractional width, and auto-sizing based on content.
 
-```csharp demo-tabs 
+```csharp demo-tabs
 Layout.Horizontal()
     | new Box("Fixed")
         .Width(Size.Px(150))
@@ -194,7 +194,7 @@ Layout.Horizontal()
 
 This shows how cards can use different sizing strategies - one that fills the entire width, one that takes half the width, and one with a fixed width in framework units.
 
-```csharp demo-tabs 
+```csharp demo-tabs
 Layout.Vertical()
     | new Card("Full width card")
         .Width(Size.Full())
@@ -236,7 +236,7 @@ Layout.Vertical()
 
 These special size values provide content-aware and screen-aware sizing options for advanced layout scenarios.
 
-```csharp demo-tabs 
+```csharp demo-tabs
 Layout.Vertical()
     | new Box("Min content")
         .Width(Size.MinContent())
@@ -249,13 +249,16 @@ Layout.Vertical()
         .Height(Size.Units(20))
 ```
 
-## Practical Examples
+## Examples
 
-### Form Layout
-
+<Details>
+<Summary>
+Form Layout
+</Summary>
+<Body>
 This demonstrates a typical form layout with a full-width header, a horizontal row with fixed-width label and flexible input field, and an auto-sized submit button.
 
-```csharp demo-tabs 
+```csharp demo-tabs
 Layout.Vertical()
     | new Box("Full width form")
         .Width(Size.Full())
@@ -272,11 +275,17 @@ Layout.Vertical()
         .Height(Size.Units(20))
 ```
 
-### Dashboard Layout
+</Body>
+</Details>
 
+<Details>
+<Summary>
+Dashboard Layout
+</Summary>
+<Body>
 This shows a dashboard grid layout where all cards take full width within their grid cells, with different heights for different content types.
 
-```csharp demo-tabs 
+```csharp demo-tabs
 Layout.Grid().Columns(2)
     | new Card("Metric 1")
         .Width(Size.Full())
@@ -292,11 +301,17 @@ Layout.Grid().Columns(2)
         .Height(Size.Units(30))
 ```
 
-### Responsive Sidebar
+</Body>
+</Details>
 
+<Details>
+<Summary>
+Responsive Sidebar
+</Summary>
+<Body>
 This demonstrates a classic sidebar layout with a fixed-width sidebar and a flexible main content area that takes up the remaining space.
 
-```csharp demo-tabs 
+```csharp demo-tabs
 Layout.Horizontal()
     | new Box("Sidebar")
         .Width(Size.Units(250))
@@ -305,3 +320,6 @@ Layout.Horizontal()
         .Width(Size.Fraction(1f))
         .Height(Size.Full())
 ```
+
+</Body>
+</Details>

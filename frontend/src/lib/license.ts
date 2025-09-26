@@ -60,7 +60,7 @@ export async function hasLicensedFeature(hasFeature: string): Promise<boolean> {
 
     if (typeof features === 'string') {
       return features
-        .split(',')
+        .split(';')
         .map(s => s.trim())
         .includes(hasFeature);
     }

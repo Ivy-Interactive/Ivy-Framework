@@ -6,7 +6,8 @@ namespace Ivy.Database.Generator.Toolkit;
 
 public class DatabaseGenerator
 {
-    public async Task<int> GenerateAsync(Type dataContextType, Type dataSeederType, bool verbose, bool yesToAll, string? projectDirectory, string? connectionString, DatabaseProvider? providerChoice)
+    public async Task<int> GenerateAsync(Type dataContextType, Type dataSeederType, bool verbose, bool yesToAll, bool deleteDatabase, bool seedDatabase, string? projectDirectory, 
+        string? connectionString, DatabaseProvider? providerChoice)
     {
         providerChoice ??= AnsiConsole.Prompt(
             new SelectionPrompt<DatabaseProvider>()
@@ -31,7 +32,7 @@ public class DatabaseGenerator
             ).Trim();
         }
 
-        if (!yesToAll)
+        if (!deleteDatabase && !yesToAll)
         {
             var continuePrompt = AnsiConsole.Prompt(
                 new ConfirmationPrompt("This will delete and recreate the database. Are you sure you want to continue?")
@@ -45,6 +46,7 @@ public class DatabaseGenerator
                 AnsiConsole.MarkupLine("[red]Aborted![/]");
                 return 1;
             }
+            deleteDatabase = true;
         }
         
         var dbContext = (DbContext)databaseProvider.GetType().GetMethod("GetDbContext")!.MakeGenericMethod(dataContextType).Invoke(databaseProvider,
@@ -52,11 +54,50 @@ public class DatabaseGenerator
         
         await Utils.WithSpinner(async () =>
         {
-            await dbContext.Database.EnsureDeletedAsync();
-            await dbContext.Database.EnsureCreatedAsync();
+            if (deleteDatabase)
+            {
+                await dbContext.Database.EnsureDeletedAsync();
+            }
+            else
+            {
+                // Check if the database exists and has tables
+                if (await dbContext.Database.CanConnectAsync())
+                {
+                    // Try to check if any entity sets have data
+                    bool hasData = false;
+                    foreach (var entityType in dbContext.Model.GetEntityTypes())
+                    {
+                        var clrType = entityType.ClrType;
+                        var setMethod = dbContext.GetType().GetMethod("Set", Type.EmptyTypes)?.MakeGenericMethod(clrType);
+                        if (setMethod != null)
+                        {
+                            dynamic? dbSet = setMethod.Invoke(dbContext, null);
+                            try
+                            {
+                                // Try to count records - will fail if table doesn't exist
+                                if (await dbSet?.AnyAsync()!)
+                                {
+                                    hasData = true;
+                                    break;
+                                }
+                            }
+                            catch
+                            {
+                                // Table doesn't exist, which is fine
+                            }
+                        }
+                    }
+                    
+                    if (hasData)
+                    {
+                        throw new InvalidOperationException("Database is not empty.");
+                    }
+                }
+            }
+            await dbContext.Database.MigrateAsync();
         }, "Creating Tables", verbose);
 
-        if (!yesToAll)
+        if (!seedDatabase && !yesToAll)
         {
             var seedPrompt = AnsiConsole.Prompt(
                 new ConfirmationPrompt("Seed database with bogus data?")
@@ -69,14 +110,18 @@ public class DatabaseGenerator
             {
                 return 0;
             }
+            seedDatabase = true;
         }
-        
-        var seeder = (IDataSeeder)Activator.CreateInstance(dataSeederType, dbContext)!;
-        
-        await Utils.WithSpinner(async () =>
+
+        if (seedDatabase)
         {
-            await seeder.SeedAsync();
-        }, "Seeding", verbose);
+            var seeder = (IDataSeeder)Activator.CreateInstance(dataSeederType, dbContext)!;
+        
+            await Utils.WithSpinner(async () =>
+            {
+                await seeder.SeedAsync();
+            }, "Seeding", verbose);
+        }
         
         AnsiConsole.MarkupLine($"[green]Done![/]");
 
