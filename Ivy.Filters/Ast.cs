@@ -1,7 +1,7 @@
-namespace Ivy.Formulas;
+namespace Ivy.Filters;
 
 /// <summary>
-/// Base class for all AST nodes in the advanced filter formula
+/// Base class for all AST nodes in the advanced filter filter
 /// </summary>
 public abstract record Node;
 

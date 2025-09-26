@@ -1,7 +1,7 @@
-using Ivy.Formulas;
+using Ivy.Filters;
 using Antlr4.Runtime;
 
-namespace Ivy.Formulas.Tests;
+namespace Ivy.Filters.Tests;
 
 public class DiagnosticsTests
 {
@@ -26,10 +26,10 @@ public class DiagnosticsTests
     }
 
     [Fact]
-    public void FormulaErrorListener_SyntaxError_ShouldAddDiagnostic()
+    public void FilterErrorListener_SyntaxError_ShouldAddDiagnostic()
     {
         // Arrange
-        var errorListener = new FormulaErrorListener();
+        var errorListener = new FilterErrorListener();
         var mockToken = new CommonToken(1, "test");
 
         // Act
@@ -52,10 +52,10 @@ public class DiagnosticsTests
     }
 
     [Fact]
-    public void FormulaErrorListener_LexerSyntaxError_ShouldAddDiagnostic()
+    public void FilterErrorListener_LexerSyntaxError_ShouldAddDiagnostic()
     {
         // Arrange
-        var errorListener = new FormulaErrorListener();
+        var errorListener = new FilterErrorListener();
 
         // Act
         errorListener.SyntaxError(
@@ -77,10 +77,10 @@ public class DiagnosticsTests
     }
 
     [Fact]
-    public void FormulaErrorListener_AddSemanticError_ShouldAddDiagnostic()
+    public void FilterErrorListener_AddSemanticError_ShouldAddDiagnostic()
     {
         // Arrange
-        var errorListener = new FormulaErrorListener();
+        var errorListener = new FilterErrorListener();
         var token = new CommonToken(1, "test") { Line = 3, Column = 15 };
 
         // Act
@@ -96,10 +96,10 @@ public class DiagnosticsTests
     }
 
     [Fact]
-    public void FormulaErrorListener_AddWarning_ShouldAddWarningDiagnostic()
+    public void FilterErrorListener_AddWarning_ShouldAddWarningDiagnostic()
     {
         // Arrange
-        var errorListener = new FormulaErrorListener();
+        var errorListener = new FilterErrorListener();
 
         // Act
         errorListener.AddWarning("This is a warning");
@@ -114,10 +114,10 @@ public class DiagnosticsTests
     }
 
     [Fact]
-    public void FormulaErrorListener_Clear_ShouldRemoveAllDiagnostics()
+    public void FilterErrorListener_Clear_ShouldRemoveAllDiagnostics()
     {
         // Arrange
-        var errorListener = new FormulaErrorListener();
+        var errorListener = new FilterErrorListener();
         errorListener.AddSemanticError("Error 1");
         errorListener.AddWarning("Warning 1");
 
@@ -129,10 +129,10 @@ public class DiagnosticsTests
     }
 
     [Fact]
-    public void FormulaErrorListener_MultipleDiagnostics_ShouldTrackAll()
+    public void FilterErrorListener_MultipleDiagnostics_ShouldTrackAll()
     {
         // Arrange
-        var errorListener = new FormulaErrorListener();
+        var errorListener = new FilterErrorListener();
 
         // Act
         errorListener.AddSemanticError("Error 1");
@@ -159,10 +159,10 @@ public class DiagnosticsTests
     }
 
     [Fact]
-    public void FormulaErrorListener_Diagnostics_ShouldBeReadOnly()
+    public void FilterErrorListener_Diagnostics_ShouldBeReadOnly()
     {
         // Arrange
-        var errorListener = new FormulaErrorListener();
+        var errorListener = new FilterErrorListener();
 
         // Act
         var diagnostics = errorListener.Diagnostics;

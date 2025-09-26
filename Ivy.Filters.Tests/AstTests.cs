@@ -1,6 +1,6 @@
-using Ivy.Formulas;
+using Ivy.Filters;
 
-namespace Ivy.Formulas.Tests;
+namespace Ivy.Filters.Tests;
 
 public class AstTests
 {

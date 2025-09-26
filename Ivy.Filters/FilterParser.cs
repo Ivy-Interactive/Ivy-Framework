@@ -1,60 +1,60 @@
 using Antlr4.Runtime;
 
-namespace Ivy.Formulas;
+namespace Ivy.Filters;
 
 /// <summary>
-/// Main entry point for parsing advanced filter formulas
+/// Main entry point for parsing advanced filter filters
 /// </summary>
-public class FormulaParser
+public class FilterParser
 {
     private readonly IDictionary<string, FieldMeta> _fieldsByDisplayName;
 
     /// <summary>
-    /// Creates a new formula parser with the specified column metadata
+    /// Creates a new filter parser with the specified column metadata
     /// </summary>
     /// <param name="fields">Available columns mapped by their display names</param>
-    public FormulaParser(IEnumerable<FieldMeta> fields)
+    public FilterParser(IEnumerable<FieldMeta> fields)
     {
         _fieldsByDisplayName = fields.ToDictionary(c => c.DisplayName, StringComparer.OrdinalIgnoreCase);
     }
 
     /// <summary>
-    /// Parses a formula string into an AST and filter model
+    /// Parses a filter string into an AST and filter model
     /// </summary>
-    /// <param name="formula">The formula text to parse</param>
+    /// <param name="filter">The filter text to parse</param>
     /// <returns>Parse result containing AST, model, and diagnostics</returns>
-    public FormulaParseResult Parse(string formula)
+    public FilterParseResult Parse(string filter)
     {
-        var errorListener = new FormulaErrorListener();
+        var errorListener = new FilterErrorListener();
 
         try
         {
-            var inputStream = new AntlrInputStream(formula);
-            var lexer = new FormulasLexer(inputStream);
+            var inputStream = new AntlrInputStream(filter);
+            var lexer = new FiltersLexer(inputStream);
             lexer.RemoveErrorListeners();
             lexer.AddErrorListener(errorListener);
 
             var tokenStream = new CommonTokenStream(lexer);
-            var parser = new FormulasParser(tokenStream);
+            var parser = new FiltersParser(tokenStream);
             parser.RemoveErrorListeners();
             parser.AddErrorListener(errorListener);
             
-            var parseTree = parser.formula();
+            var parseTree = parser.filter();
             
             if (errorListener.Diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error))
             {
-                return new FormulaParseResult
+                return new FilterParseResult
                 {
                     Diagnostics = errorListener.Diagnostics
                 };
             }
             
-            var visitor = new FormulaAstVisitor(_fieldsByDisplayName, errorListener);
+            var visitor = new FilterAstVisitor(_fieldsByDisplayName, errorListener);
             var ast = visitor.Visit(parseTree);
             
             if (errorListener.Diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error))
             {
-                return new FormulaParseResult
+                return new FilterParseResult
                 {
                     Ast = ast,
                     Diagnostics = errorListener.Diagnostics
@@ -64,7 +64,7 @@ public class FormulaParser
             var converter = new FilterConverter();
             var model = converter.ConvertToModel(ast);
 
-            return new FormulaParseResult
+            return new FilterParseResult
             {
                 Ast = ast,
                 Model = model,
@@ -76,7 +76,7 @@ public class FormulaParser
             // Handle unexpected parsing errors
             errorListener.AddSemanticError($"Unexpected error during parsing: {ex.Message}");
 
-            return new FormulaParseResult
+            return new FilterParseResult
             {
                 Diagnostics = errorListener.Diagnostics
             };
@@ -84,13 +84,13 @@ public class FormulaParser
     }
 
     /// <summary>
-    /// Quick validation method that returns true if the formula is syntactically and semantically valid
+    /// Quick validation method that returns true if the filter is syntactically and semantically valid
     /// </summary>
-    /// <param name="formula">The formula to validate</param>
+    /// <param name="filter">The filter to validate</param>
     /// <returns>True if valid, false otherwise</returns>
-    public bool IsValid(string formula)
+    public bool IsValid(string filter)
     {
-        var result = Parse(formula);
+        var result = Parse(filter);
         return !result.HasErrors;
     }
 

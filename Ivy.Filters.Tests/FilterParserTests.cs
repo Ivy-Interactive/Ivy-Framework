@@ -1,13 +1,13 @@
-using Ivy.Formulas;
+using Ivy.Filters;
 
-namespace Ivy.Formulas.Tests;
+namespace Ivy.Filters.Tests;
 
-public class FormulaParserTests
+public class FilterParserTests
 {
-    private readonly FormulaParser _parser;
+    private readonly FilterParser _parser;
     private readonly FieldMeta[] _testColumns;
 
-    public FormulaParserTests()
+    public FilterParserTests()
     {
         // Set up test columns as specified in the PRD
         _testColumns = new[]
@@ -23,20 +23,20 @@ public class FormulaParserTests
             new FieldMeta("IsActive", "isActive", FieldType.Boolean)
         };
 
-        _parser = new FormulaParser(_testColumns);
+        _parser = new FilterParser(_testColumns);
     }
 
     [Theory]
     [InlineData("[Age] > 23")]
     [InlineData("[Country] blank")]
     [InlineData("[Name] not blank")]
-    public void Parse_ValidBasicFormulas_ShouldSucceed(string formula)
+    public void Parse_ValidBasicFilters_ShouldSucceed(string filter)
     {
         // Act
-        var result = _parser.Parse(formula);
+        var result = _parser.Parse(filter);
 
         // Assert
-        Assert.False(result.HasErrors, $"Formula '{formula}' should parse successfully. Errors: {string.Join(", ", result.Diagnostics.Select(d => d.Message))}");
+        Assert.False(result.HasErrors, $"Filter '{filter}' should parse successfully. Errors: {string.Join(", ", result.Diagnostics.Select(d => d.Message))}");
         Assert.NotNull(result.Ast);
         Assert.NotNull(result.Model);
     }
@@ -46,13 +46,13 @@ public class FormulaParserTests
     [InlineData("[Name] contains \"test\"")]
     [InlineData("[Country] starts with \"US\"")]
     [InlineData("[Sport] not contains \"ball\"")]
-    public void Parse_ValidTextOperations_ShouldSucceed(string formula)
+    public void Parse_ValidTextOperations_ShouldSucceed(string filter)
     {
         // Act
-        var result = _parser.Parse(formula);
+        var result = _parser.Parse(filter);
 
         // Assert
-        Assert.False(result.HasErrors, $"Formula '{formula}' should parse successfully. Errors: {string.Join(", ", result.Diagnostics.Select(d => d.Message))}");
+        Assert.False(result.HasErrors, $"Filter '{filter}' should parse successfully. Errors: {string.Join(", ", result.Diagnostics.Select(d => d.Message))}");
         Assert.NotNull(result.Ast);
         Assert.IsType<Leaf>(result.Ast);
 
@@ -68,13 +68,13 @@ public class FormulaParserTests
     [InlineData("[Price] <= 500")]
     [InlineData("[Age] greater than 18")]
     [InlineData("[Price] less than or equal 1000")]
-    public void Parse_ValidNumberComparisons_ShouldSucceed(string formula)
+    public void Parse_ValidNumberComparisons_ShouldSucceed(string filter)
     {
         // Act
-        var result = _parser.Parse(formula);
+        var result = _parser.Parse(filter);
 
         // Assert
-        Assert.False(result.HasErrors, $"Formula '{formula}' should parse successfully. Errors: {string.Join(", ", result.Diagnostics.Select(d => d.Message))}");
+        Assert.False(result.HasErrors, $"Filter '{filter}' should parse successfully. Errors: {string.Join(", ", result.Diagnostics.Select(d => d.Message))}");
         Assert.NotNull(result.Ast);
         Assert.IsType<Leaf>(result.Ast);
 
@@ -86,13 +86,13 @@ public class FormulaParserTests
     [InlineData("[Price] in range 10 AND 100")]
     [InlineData("[Age] inRange 18 AND 65")]
     [InlineData("[Start Date] in range \"2024-01-01\" AND \"2024-12-31\"")]
-    public void Parse_ValidRangeOperations_ShouldSucceed(string formula)
+    public void Parse_ValidRangeOperations_ShouldSucceed(string filter)
     {
         // Act
-        var result = _parser.Parse(formula);
+        var result = _parser.Parse(filter);
 
         // Assert
-        Assert.False(result.HasErrors, $"Formula '{formula}' should parse successfully. Errors: {string.Join(", ", result.Diagnostics.Select(d => d.Message))}");
+        Assert.False(result.HasErrors, $"Filter '{filter}' should parse successfully. Errors: {string.Join(", ", result.Diagnostics.Select(d => d.Message))}");
         Assert.NotNull(result.Ast);
         Assert.IsType<Leaf>(result.Ast);
 
@@ -107,13 +107,13 @@ public class FormulaParserTests
     [InlineData("[Sport] contains \"ball\" OR [Price] < 50")]
     [InlineData("([Age] >= 18 AND [Age] <= 65) AND [Country] blank")]
     [InlineData("[Name] not blank OR ([Sport] ends with \"ing\" AND [Price] > 0)")]
-    public void Parse_ValidLogicalOperations_ShouldSucceed(string formula)
+    public void Parse_ValidLogicalOperations_ShouldSucceed(string filter)
     {
         // Act
-        var result = _parser.Parse(formula);
+        var result = _parser.Parse(filter);
 
         // Assert
-        Assert.False(result.HasErrors, $"Formula '{formula}' should parse successfully. Errors: {string.Join(", ", result.Diagnostics.Select(d => d.Message))}");
+        Assert.False(result.HasErrors, $"Filter '{filter}' should parse successfully. Errors: {string.Join(", ", result.Diagnostics.Select(d => d.Message))}");
         Assert.NotNull(result.Ast);
 
         // Should be a logical operation (And/Or)
@@ -123,28 +123,28 @@ public class FormulaParserTests
     [Theory]
     [InlineData("NOT [Country] blank")]
     [InlineData("NOT ([Age] > 25 AND [Sport] contains \"ball\")")]
-    public void Parse_ValidNegationOperations_ShouldSucceed(string formula)
+    public void Parse_ValidNegationOperations_ShouldSucceed(string filter)
     {
         // Act
-        var result = _parser.Parse(formula);
+        var result = _parser.Parse(filter);
 
         // Assert
-        Assert.False(result.HasErrors, $"Formula '{formula}' should parse successfully. Errors: {string.Join(", ", result.Diagnostics.Select(d => d.Message))}");
+        Assert.False(result.HasErrors, $"Filter '{filter}' should parse successfully. Errors: {string.Join(", ", result.Diagnostics.Select(d => d.Message))}");
         Assert.NotNull(result.Ast);
         Assert.IsType<Not>(result.Ast);
     }
 
     [Fact]
-    public void Parse_ComplexNestedFormula_ShouldSucceed()
+    public void Parse_ComplexNestedFilter_ShouldSucceed()
     {
         // Arrange
-        var formula = "([Age] > 23 OR [Sport] ends with \"ing\") AND [Country] contains \"united\"";
+        var filter = "([Age] > 23 OR [Sport] ends with \"ing\") AND [Country] contains \"united\"";
 
         // Act
-        var result = _parser.Parse(formula);
+        var result = _parser.Parse(filter);
 
         // Assert
-        Assert.False(result.HasErrors, $"Complex formula should parse successfully. Errors: {string.Join(", ", result.Diagnostics.Select(d => d.Message))}");
+        Assert.False(result.HasErrors, $"Complex filter should parse successfully. Errors: {string.Join(", ", result.Diagnostics.Select(d => d.Message))}");
         Assert.NotNull(result.Ast);
         Assert.IsType<And>(result.Ast);
 
@@ -157,13 +157,13 @@ public class FormulaParserTests
     [InlineData("[Age] contains \"12\"", "text operation on number column")]
     [InlineData("[Sport] > \"test\"", "comparison operation on text column")]
     [InlineData("[Country] in range \"A\" AND \"Z\"", "range operation on text column")]
-    public void Parse_InvalidSemanticFormulas_ShouldFail(string formula, string reason)
+    public void Parse_InvalidSemanticFilters_ShouldFail(string filter, string reason)
     {
         // Act
-        var result = _parser.Parse(formula);
+        var result = _parser.Parse(filter);
 
         // Assert
-        Assert.True(result.HasErrors, $"Formula '{formula}' should fail semantic validation ({reason})");
+        Assert.True(result.HasErrors, $"Filter '{filter}' should fail semantic validation ({reason})");
         Assert.Contains(result.Diagnostics, d => d.Severity == DiagnosticSeverity.Error);
     }
 
@@ -171,13 +171,13 @@ public class FormulaParserTests
     [InlineData("[UnknownColumn] = 5", "unknown column")]
     [InlineData("[Price] in range 10 AND", "missing range operand")]
     [InlineData("[Age] equals", "missing operand")]
-    public void Parse_InvalidSemanticFormulas_WithSpecificErrors_ShouldFail(string formula, string expectedErrorType)
+    public void Parse_InvalidSemanticFilters_WithSpecificErrors_ShouldFail(string filter, string expectedErrorType)
     {
         // Act
-        var result = _parser.Parse(formula);
+        var result = _parser.Parse(filter);
 
         // Assert
-        Assert.True(result.HasErrors, $"Formula '{formula}' should fail ({expectedErrorType})");
+        Assert.True(result.HasErrors, $"Filter '{filter}' should fail ({expectedErrorType})");
         Assert.NotEmpty(result.Diagnostics.Where(d => d.Severity == DiagnosticSeverity.Error));
     }
 
@@ -186,13 +186,13 @@ public class FormulaParserTests
     [InlineData("\"unterminated string", "unterminated string literal")]
     [InlineData("([Age] = 25 OR )", "incomplete logical expression")]
     [InlineData("[Age] = = 25", "double equals")]
-    public void Parse_InvalidSyntaxFormulas_ShouldFail(string formula, string reason)
+    public void Parse_InvalidSyntaxFilters_ShouldFail(string filter, string reason)
     {
         // Act
-        var result = _parser.Parse(formula);
+        var result = _parser.Parse(filter);
 
         // Assert
-        Assert.True(result.HasErrors, $"Formula '{formula}' should fail syntax validation ({reason})");
+        Assert.True(result.HasErrors, $"Filter '{filter}' should fail syntax validation ({reason})");
         Assert.Contains(result.Diagnostics, d => d.Severity == DiagnosticSeverity.Error);
     }
 
@@ -200,13 +200,13 @@ public class FormulaParserTests
     public void Parse_EscapedStringLiterals_ShouldHandleCorrectly()
     {
         // Arrange
-        var formula = "[Name] contains \"test\\\"quote\"";
+        var filter = "[Name] contains \"test\\\"quote\"";
 
         // Act
-        var result = _parser.Parse(formula);
+        var result = _parser.Parse(filter);
 
         // Assert
-        Assert.False(result.HasErrors, "Formula with escaped quotes should parse successfully");
+        Assert.False(result.HasErrors, "Filter with escaped quotes should parse successfully");
         Assert.NotNull(result.Ast);
         Assert.IsType<Leaf>(result.Ast);
 
@@ -218,10 +218,10 @@ public class FormulaParserTests
     public void Parse_ColumnsWithSpaces_ShouldWork()
     {
         // Arrange
-        var formula = "[Start Date] > \"2024-01-01\"";
+        var filter = "[Start Date] > \"2024-01-01\"";
 
         // Act
-        var result = _parser.Parse(formula);
+        var result = _parser.Parse(filter);
 
         // Assert
         Assert.False(result.HasErrors, "Columns with spaces should work");
@@ -234,14 +234,14 @@ public class FormulaParserTests
     }
 
     [Fact]
-    public void IsValid_ValidFormula_ReturnsTrue()
+    public void IsValid_ValidFilter_ReturnsTrue()
     {
         // Act & Assert
         Assert.True(_parser.IsValid("[Age] > 25"));
     }
 
     [Fact]
-    public void IsValid_InvalidFormula_ReturnsFalse()
+    public void IsValid_InvalidFilter_ReturnsFalse()
     {
         // Act & Assert
         Assert.False(_parser.IsValid("[Age > 25")); // Missing closing bracket
@@ -266,19 +266,19 @@ public class FormulaParserTests
     public void Parse_ColumnNameCaseSensitivity_ShouldBeHandledCorrectly(string columnName, bool shouldSucceed)
     {
         // Arrange
-        var formula = $"[{columnName}] > 25";
+        var filter = $"[{columnName}] > 25";
 
         // Act
-        var result = _parser.Parse(formula);
+        var result = _parser.Parse(filter);
 
         // Assert
         if (shouldSucceed)
         {
-            Assert.False(result.HasErrors, $"Formula with column '{columnName}' should succeed");
+            Assert.False(result.HasErrors, $"Filter with column '{columnName}' should succeed");
         }
         else
         {
-            Assert.True(result.HasErrors, $"Formula with column '{columnName}' should fail");
+            Assert.True(result.HasErrors, $"Filter with column '{columnName}' should fail");
         }
     }
 }

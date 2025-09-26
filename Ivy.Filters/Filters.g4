@@ -1,7 +1,7 @@
-// Formulas.g4
+// Filters.g4
 // ANTLR 4 grammar for grid–style Advanced Filter formulas
 
-grammar Formulas;
+grammar Filters;
 
 // --------------------
 // Parser rules

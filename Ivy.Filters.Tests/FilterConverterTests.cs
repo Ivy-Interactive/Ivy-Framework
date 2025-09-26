@@ -1,7 +1,7 @@
-using Ivy.Formulas;
+using Ivy.Filters;
 using System.Text.Json;
 
-namespace Ivy.Formulas.Tests;
+namespace Ivy.Filters.Tests;
 
 public class FilterConverterTests
 {
@@ -22,8 +22,8 @@ public class FilterConverterTests
         var result = _converter.ConvertToModel(leaf);
 
         // Assert
-        Assert.IsType<FieldFormulaModel>(result);
-        var columnFilter = (FieldFormulaModel)result;
+        Assert.IsType<FieldFilterModel>(result);
+        var columnFilter = (FieldFilterModel)result;
 
         Assert.Equal("number", columnFilter.FilterType);
         Assert.Equal("age", columnFilter.ColId);
@@ -42,8 +42,8 @@ public class FilterConverterTests
         var result = _converter.ConvertToModel(leaf);
 
         // Assert
-        Assert.IsType<FieldFormulaModel>(result);
-        var columnFilter = (FieldFormulaModel)result;
+        Assert.IsType<FieldFilterModel>(result);
+        var columnFilter = (FieldFilterModel)result;
 
         Assert.Equal("number", columnFilter.FilterType);
         Assert.Equal("price", columnFilter.ColId);
@@ -67,8 +67,8 @@ public class FilterConverterTests
         var result = _converter.ConvertToModel(leaf);
 
         // Assert
-        Assert.IsType<FieldFormulaModel>(result);
-        var columnFilter = (FieldFormulaModel)result;
+        Assert.IsType<FieldFilterModel>(result);
+        var columnFilter = (FieldFilterModel)result;
         Assert.Equal(expectedFilterType, columnFilter.FilterType);
     }
 
@@ -95,8 +95,8 @@ public class FilterConverterTests
         var result = _converter.ConvertToModel(leaf);
 
         // Assert
-        Assert.IsType<FieldFormulaModel>(result);
-        var columnFilter = (FieldFormulaModel)result;
+        Assert.IsType<FieldFilterModel>(result);
+        var columnFilter = (FieldFilterModel)result;
         Assert.Equal(expectedType, columnFilter.Type);
     }
 
@@ -112,13 +112,13 @@ public class FilterConverterTests
         var result = _converter.ConvertToModel(and);
 
         // Assert
-        Assert.IsType<GroupFormulaModel>(result);
-        var joinFilter = (GroupFormulaModel)result;
+        Assert.IsType<GroupFilterModel>(result);
+        var joinFilter = (GroupFilterModel)result;
 
         Assert.Equal("join", joinFilter.FilterType);
         Assert.Equal("AND", joinFilter.Type);
         Assert.Equal(2, joinFilter.Conditions.Count);
-        Assert.All(joinFilter.Conditions, condition => Assert.IsType<FieldFormulaModel>(condition));
+        Assert.All(joinFilter.Conditions, condition => Assert.IsType<FieldFilterModel>(condition));
     }
 
     [Fact]
@@ -133,8 +133,8 @@ public class FilterConverterTests
         var result = _converter.ConvertToModel(or);
 
         // Assert
-        Assert.IsType<GroupFormulaModel>(result);
-        var joinFilter = (GroupFormulaModel)result;
+        Assert.IsType<GroupFilterModel>(result);
+        var joinFilter = (GroupFilterModel)result;
 
         Assert.Equal("join", joinFilter.FilterType);
         Assert.Equal("OR", joinFilter.Type);
@@ -152,8 +152,8 @@ public class FilterConverterTests
         var result = _converter.ConvertToModel(not);
 
         // Assert
-        Assert.IsType<FieldFormulaModel>(result);
-        var columnFilter = (FieldFormulaModel)result;
+        Assert.IsType<FieldFilterModel>(result);
+        var columnFilter = (FieldFilterModel)result;
 
         Assert.Equal("text", columnFilter.FilterType);
         Assert.Equal("name", columnFilter.ColId);
@@ -172,8 +172,8 @@ public class FilterConverterTests
         var result = _converter.ConvertToModel(not);
 
         // Assert
-        Assert.IsType<GroupFormulaModel>(result);
-        var joinFilter = (GroupFormulaModel)result;
+        Assert.IsType<GroupFilterModel>(result);
+        var joinFilter = (GroupFilterModel)result;
 
         Assert.Equal("join", joinFilter.FilterType);
         Assert.Equal("AND", joinFilter.Type);
@@ -194,20 +194,20 @@ public class FilterConverterTests
         var result = _converter.ConvertToModel(finalAnd);
 
         // Assert
-        Assert.IsType<GroupFormulaModel>(result);
-        var rootJoin = (GroupFormulaModel)result;
+        Assert.IsType<GroupFilterModel>(result);
+        var rootJoin = (GroupFilterModel)result;
 
         Assert.Equal("AND", rootJoin.Type);
         Assert.Equal(2, rootJoin.Conditions.Count);
 
         // First condition should be the OR join
-        Assert.IsType<GroupFormulaModel>(rootJoin.Conditions[0]);
-        var orJoin = (GroupFormulaModel)rootJoin.Conditions[0];
+        Assert.IsType<GroupFilterModel>(rootJoin.Conditions[0]);
+        var orJoin = (GroupFilterModel)rootJoin.Conditions[0];
         Assert.Equal("OR", orJoin.Type);
         Assert.Equal(2, orJoin.Conditions.Count);
 
         // Second condition should be the country filter
-        Assert.IsType<FieldFormulaModel>(rootJoin.Conditions[1]);
+        Assert.IsType<FieldFilterModel>(rootJoin.Conditions[1]);
     }
 
     [Fact]
@@ -253,7 +253,7 @@ public class FilterConverterTests
         var result = _converter.ConvertToModel(not);
 
         // Assert
-        if (result is FieldFormulaModel columnFilter)
+        if (result is FieldFilterModel columnFilter)
         {
             // The operator was successfully negated
             var expectedOperatorString = expectedNegated switch

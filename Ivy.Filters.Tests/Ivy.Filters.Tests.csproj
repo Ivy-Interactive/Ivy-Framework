@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Ivy.Formulas\Ivy.Formulas.csproj" />
+    <ProjectReference Include="..\Ivy.Filters\Ivy.Filters.csproj" />
   </ItemGroup>
 
 </Project>

@@ -2,27 +2,27 @@ using System.Globalization;
 using System.Text;
 using Antlr4.Runtime.Tree;
 
-namespace Ivy.Formulas;
+namespace Ivy.Filters;
 
 /// <summary>
 /// Visitor that builds an AST from the ANTLR parse tree and performs semantic validation
 /// </summary>
-public class FormulaAstVisitor(
+public class FilterAstVisitor(
     IDictionary<string, FieldMeta> fieldsByDisplayName,
-    FormulaErrorListener errorListener)
-    : FormulasBaseVisitor<Node>
+    FilterErrorListener errorListener)
+    : FiltersBaseVisitor<Node>
 {
-    public override Node VisitFormula(FormulasParser.FormulaContext context)
+    public override Node VisitFilter(FiltersParser.FilterContext context)
     {
         return Visit(context.expr());
     }
 
-    public override Node VisitExpr(FormulasParser.ExprContext context)
+    public override Node VisitExpr(FiltersParser.ExprContext context)
     {
         return Visit(context.orExpr());
     }
 
-    public override Node VisitOrExpr(FormulasParser.OrExprContext context)
+    public override Node VisitOrExpr(FiltersParser.OrExprContext context)
     {
         var left = Visit(context.andExpr(0));
 
@@ -35,7 +35,7 @@ public class FormulaAstVisitor(
         return left;
     }
 
-    public override Node VisitAndExpr(FormulasParser.AndExprContext context)
+    public override Node VisitAndExpr(FiltersParser.AndExprContext context)
     {
         var left = Visit(context.unaryExpr(0));
 
@@ -48,7 +48,7 @@ public class FormulaAstVisitor(
         return left;
     }
 
-    public override Node VisitUnaryExpr(FormulasParser.UnaryExprContext context)
+    public override Node VisitUnaryExpr(FiltersParser.UnaryExprContext context)
     {
         if (context.NOT() != null && context.unaryExpr() != null)
         {
@@ -65,12 +65,12 @@ public class FormulaAstVisitor(
         return CreateErrorNode();
     }
 
-    public override Node VisitGroup(FormulasParser.GroupContext context)
+    public override Node VisitGroup(FiltersParser.GroupContext context)
     {
         return Visit(context.expr());
     }
 
-    public override Node VisitComparison(FormulasParser.ComparisonContext context)
+    public override Node VisitComparison(FiltersParser.ComparisonContext context)
     {
         var fieldRef = context.fieldRef();
         var field = ResolveField(fieldRef);
@@ -90,7 +90,7 @@ public class FormulaAstVisitor(
         return new Leaf(field.DisplayName, field.ColId, field.Type, op, operand);
     }
 
-    public override Node VisitTextOperation(FormulasParser.TextOperationContext context)
+    public override Node VisitTextOperation(FiltersParser.TextOperationContext context)
     {
         var fieldRef = context.fieldRef();
         var field = ResolveField(fieldRef);
@@ -124,7 +124,7 @@ public class FormulaAstVisitor(
         return new Leaf(field.DisplayName, field.ColId, field.Type, op, stringValue);
     }
 
-    public override Node VisitRangeOperation(FormulasParser.RangeOperationContext context)
+    public override Node VisitRangeOperation(FiltersParser.RangeOperationContext context)
     {
         var fieldRef = context.fieldRef();
         var field = ResolveField(fieldRef);
@@ -154,7 +154,7 @@ public class FormulaAstVisitor(
         return new Leaf(field.DisplayName, field.ColId, field.Type, Op.InRange, operand1, operand2);
     }
 
-    public override Node VisitExistenceOperation(FormulasParser.ExistenceOperationContext context)
+    public override Node VisitExistenceOperation(FiltersParser.ExistenceOperationContext context)
     {
         var fieldRef = context.fieldRef();
         var field = ResolveField(fieldRef);
@@ -165,7 +165,7 @@ public class FormulaAstVisitor(
         return new Leaf(field.DisplayName, field.ColId, field.Type, op);
     }
 
-    private FieldMeta? ResolveField(FormulasParser.FieldRefContext fieldRef)
+    private FieldMeta? ResolveField(FiltersParser.FieldRefContext fieldRef)
     {
         // Extract field name from FIELD token which includes the brackets
         var fieldToken = fieldRef.FIELD().GetText();
@@ -182,7 +182,7 @@ public class FormulaAstVisitor(
         return field;
     }
 
-    private Op NormalizeComparisonOperator(FormulasParser.CompOpContext compOp)
+    private Op NormalizeComparisonOperator(FiltersParser.CompOpContext compOp)
     {
         var text = compOp.GetText().ToLowerInvariant().Replace(" ", "");
 
@@ -198,7 +198,7 @@ public class FormulaAstVisitor(
         };
     }
 
-    private Op NormalizeTextOperator(FormulasParser.TextOpContext textOp)
+    private Op NormalizeTextOperator(FiltersParser.TextOpContext textOp)
     {
         var tokens = new List<string>();
         for (int i = 0; i < textOp.ChildCount; i++)
@@ -221,7 +221,7 @@ public class FormulaAstVisitor(
         };
     }
 
-    private object? ExtractOperandValue(FormulasParser.OperandContext operand, FieldType fieldType)
+    private object? ExtractOperandValue(FiltersParser.OperandContext operand, FieldType fieldType)
     {
         if (operand.number() != null)
         {
@@ -256,7 +256,7 @@ public class FormulaAstVisitor(
         return null;
     }
 
-    private object? ExtractNumberValue(FormulasParser.NumberContext number, FieldType fieldType)
+    private object? ExtractNumberValue(FiltersParser.NumberContext number, FieldType fieldType)
     {
         var text = number.GetText();
 
@@ -272,7 +272,7 @@ public class FormulaAstVisitor(
         return text;
     }
 
-    private string ExtractStringValue(FormulasParser.StringLiteralContext stringLiteral)
+    private string ExtractStringValue(FiltersParser.StringLiteralContext stringLiteral)
     {
         var text = stringLiteral.GetText();
 

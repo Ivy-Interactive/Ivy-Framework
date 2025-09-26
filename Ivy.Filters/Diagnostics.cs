@@ -1,9 +1,9 @@
 using Antlr4.Runtime;
 
-namespace Ivy.Formulas;
+namespace Ivy.Filters;
 
 /// <summary>
-/// Severity levels for formula diagnostics
+/// Severity levels for filter diagnostics
 /// </summary>
 public enum DiagnosticSeverity
 {
@@ -13,7 +13,7 @@ public enum DiagnosticSeverity
 }
 
 /// <summary>
-/// Represents a diagnostic issue found during formula parsing or validation
+/// Represents a diagnostic issue found during filter parsing or validation
 /// </summary>
 /// <param name="Severity">The severity level of the diagnostic</param>
 /// <param name="Message">Human-readable description of the issue</param>
@@ -31,7 +31,7 @@ public record Diagnostic(
 /// <summary>
 /// Custom error listener for ANTLR parser that collects syntax errors
 /// </summary>
-public class FormulaErrorListener : BaseErrorListener, IAntlrErrorListener<int>
+public class FilterErrorListener : BaseErrorListener, IAntlrErrorListener<int>
 {
     private readonly List<Diagnostic> _diagnostics = new();
 

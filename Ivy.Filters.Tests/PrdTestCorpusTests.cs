@@ -1,13 +1,13 @@
-using Ivy.Formulas;
+using Ivy.Filters;
 
-namespace Ivy.Formulas.Tests;
+namespace Ivy.Filters.Tests;
 
 /// <summary>
 /// Tests based on the exact test corpus from the PRD specification
 /// </summary>
 public class PrdTestCorpusTests
 {
-    private readonly FormulaParser _parser;
+    private readonly FilterParser _parser;
 
     public PrdTestCorpusTests()
     {
@@ -24,7 +24,7 @@ public class PrdTestCorpusTests
             new FieldMeta("X", "x", FieldType.Text)
         };
 
-        _parser = new FormulaParser(columns);
+        _parser = new FilterParser(columns);
     }
 
     [Theory]
@@ -35,14 +35,14 @@ public class PrdTestCorpusTests
     [InlineData("[Start Date] inRange \"2024-01-01\" AND \"2024-12-31\"")]
     [InlineData("[Country] blank")]
     [InlineData("[Name] not contains \"x\\\"y\"")] // escaped quote
-    public void Parse_PrdValidFormulas_ShouldSucceed(string formula)
+    public void Parse_PrdValidFilters_ShouldSucceed(string filter)
     {
         // Act
-        var result = _parser.Parse(formula);
+        var result = _parser.Parse(filter);
 
         // Assert
         Assert.False(result.HasErrors,
-            $"PRD valid formula '{formula}' should parse successfully. " +
+            $"PRD valid filter '{filter}' should parse successfully. " +
             $"Errors: {string.Join(", ", result.Diagnostics.Select(d => $"{d.Severity}: {d.Message}"))}");
 
         Assert.NotNull(result.Ast);
@@ -53,14 +53,14 @@ public class PrdTestCorpusTests
     [InlineData("[Age] contains \"12\"", "contains on Number column")]
     [InlineData("[Date] > \"yesterday\"", "invalid date format")]
     [InlineData("[Price] in range 10 AND", "missing second operand")] // Note: This may need grammar fix
-    public void Parse_PrdInvalidSemanticFormulas_ShouldFail(string formula, string expectedErrorType)
+    public void Parse_PrdInvalidSemanticFilters_ShouldFail(string filter, string expectedErrorType)
     {
         // Act
-        var result = _parser.Parse(formula);
+        var result = _parser.Parse(filter);
 
         // Assert
         Assert.True(result.HasErrors,
-            $"PRD invalid semantic formula '{formula}' should fail validation ({expectedErrorType})");
+            $"PRD invalid semantic filter '{filter}' should fail validation ({expectedErrorType})");
 
         Assert.Contains(result.Diagnostics, d => d.Severity == DiagnosticSeverity.Error);
     }
@@ -69,14 +69,14 @@ public class PrdTestCorpusTests
     [InlineData("[Age > 23", "missing ]")]
     [InlineData("\"abc", "unterminated string")]
     [InlineData("([A] = 1 OR )", "dangling join")] // Note: [A] column doesn't exist, so will fail semantically too
-    public void Parse_PrdInvalidSyntaxFormulas_ShouldFail(string formula, string expectedErrorType)
+    public void Parse_PrdInvalidSyntaxFilters_ShouldFail(string filter, string expectedErrorType)
     {
         // Act
-        var result = _parser.Parse(formula);
+        var result = _parser.Parse(filter);
 
         // Assert
         Assert.True(result.HasErrors,
-            $"PRD invalid syntax formula '{formula}' should fail parsing ({expectedErrorType})");
+            $"PRD invalid syntax filter '{filter}' should fail parsing ({expectedErrorType})");
 
         Assert.Contains(result.Diagnostics, d => d.Severity == DiagnosticSeverity.Error);
     }
@@ -85,10 +85,10 @@ public class PrdTestCorpusTests
     public void Parse_PrdEscapedQuoteExample_ShouldHandleCorrectly()
     {
         // Arrange - This is the exact example from the PRD
-        var formula = "[Name] not contains \"x\\\"y\"";
+        var filter = "[Name] not contains \"x\\\"y\"";
 
         // Act
-        var result = _parser.Parse(formula);
+        var result = _parser.Parse(filter);
 
         // Assert
         if (result.HasErrors)
@@ -111,10 +111,10 @@ public class PrdTestCorpusTests
     public void Parse_PrdComplexNestedExample_ShouldHandleCorrectly()
     {
         // Arrange - This is the complex example from the PRD
-        var formula = "([Age] > 23 OR [Sport] ends with \"ing\") AND [Country] contains \"united\"";
+        var filter = "([Age] > 23 OR [Sport] ends with \"ing\") AND [Country] contains \"united\"";
 
         // Act
-        var result = _parser.Parse(formula);
+        var result = _parser.Parse(filter);
 
         // Assert
         if (result.HasErrors)
@@ -138,16 +138,16 @@ public class PrdTestCorpusTests
     public void Parse_PrdRangeExamples_ShouldHandleInRangeVariants()
     {
         // Test both "in range" and "inRange" variants from the PRD
-        var formulas = new[]
+        var filters = new[]
         {
             "[Price] in range 10 AND 20",
             "[Start Date] inRange \"2024-01-01\" AND \"2024-12-31\""
         };
 
-        foreach (var formula in formulas)
+        foreach (var filter in filters)
         {
             // Act
-            var result = _parser.Parse(formula);
+            var result = _parser.Parse(filter);
 
             // Assert (may currently fail due to grammar issues)
             if (!result.HasErrors)
@@ -169,10 +169,10 @@ public class PrdTestCorpusTests
     public void Parse_ColumnNameCasing_ShouldFollowPrdSpecification(string columnName)
     {
         // Arrange
-        var formula = $"[{columnName}] blank";
+        var filter = $"[{columnName}] blank";
 
         // Act
-        var result = _parser.Parse(formula);
+        var result = _parser.Parse(filter);
 
         // Assert based on PRD specification
         // The PRD doesn't explicitly specify case sensitivity, but our implementation uses case-insensitive matching

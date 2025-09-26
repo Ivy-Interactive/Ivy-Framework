@@ -1,11 +1,11 @@
 using System.Text.Json.Serialization;
 
-namespace Ivy.Formulas;
+namespace Ivy.Filters;
 
 /// <summary>
 /// Represents the filter model structure for grid filtering
 /// </summary>
-public abstract record FormulaModel
+public abstract record FilterModel
 {
     [JsonPropertyName("filterType")]
     public abstract string FilterType { get; }
@@ -14,7 +14,7 @@ public abstract record FormulaModel
 /// <summary>
 /// Join filter model for combining multiple conditions with AND/OR
 /// </summary>
-public record GroupFormulaModel : FormulaModel
+public record GroupFilterModel : FilterModel
 {
     [JsonPropertyName("filterType")]
     public override string FilterType => "join";
@@ -23,13 +23,13 @@ public record GroupFormulaModel : FormulaModel
     public required string Type { get; init; } // "AND" or "OR"
 
     [JsonPropertyName("conditions")]
-    public required List<FormulaModel> Conditions { get; init; }
+    public required List<FilterModel> Conditions { get; init; }
 }
 
 /// <summary>
 /// Field filter model for leaf conditions
 /// </summary>
-public record FieldFormulaModel : FormulaModel
+public record FieldFilterModel : FilterModel
 {
     [JsonPropertyName("filterType")]
     public override string FilterType { get; }
@@ -46,19 +46,19 @@ public record FieldFormulaModel : FormulaModel
     [JsonPropertyName("filterTo")]
     public object? FilterTo { get; init; }
 
-    public FieldFormulaModel(string filterType)
+    public FieldFilterModel(string filterType)
     {
         FilterType = filterType;
     }
 }
 
 /// <summary>
-/// Result of parsing a formula, containing the AST and any diagnostics
+/// Result of parsing a filter, containing the AST and any diagnostics
 /// </summary>
-public record FormulaParseResult
+public record FilterParseResult
 {
     public Node? Ast { get; init; }
-    public FormulaModel? Model { get; init; }
+    public FilterModel? Model { get; init; }
     public IReadOnlyList<Diagnostic> Diagnostics { get; init; } = [];
     public bool HasErrors => Diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error);
 }

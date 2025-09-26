@@ -13,9 +13,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Antlr4 Include="Formulas.g4">
+    <Antlr4 Include="Filters.g4">
       <Generator>MSBuild:Compile</Generator>
-      <CustomToolNamespace>Ivy.Formulas.Parser</CustomToolNamespace>
+      <CustomToolNamespace>Ivy.Filters.Parser</CustomToolNamespace>
     </Antlr4>
   </ItemGroup>
 

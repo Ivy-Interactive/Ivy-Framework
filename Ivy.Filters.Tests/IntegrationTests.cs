@@ -1,14 +1,14 @@
-using Ivy.Formulas;
+using Ivy.Filters;
 using System.Text.Json;
 
-namespace Ivy.Formulas.Tests;
+namespace Ivy.Filters.Tests;
 
 /// <summary>
-/// Integration tests that test the full pipeline from formula string to grid model
+/// Integration tests that test the full pipeline from filter string to grid model
 /// </summary>
 public class IntegrationTests
 {
-    private readonly FormulaParser _parser;
+    private readonly FilterParser _parser;
 
     public IntegrationTests()
     {
@@ -21,24 +21,24 @@ public class IntegrationTests
             new FieldMeta("Category", "category", FieldType.Text)
         };
 
-        _parser = new FormulaParser(columns);
+        _parser = new FilterParser(columns);
     }
 
     [Fact]
     public void EndToEnd_SimpleTextFilter_ShouldProduceCorrectGridModel()
     {
         // Arrange
-        var formula = "[Customer Name] contains \"Smith\"";
+        var filter = "[Customer Name] contains \"Smith\"";
 
         // Act
-        var result = _parser.Parse(formula);
+        var result = _parser.Parse(filter);
 
         // Assert
         Assert.False(result.HasErrors);
         Assert.NotNull(result.Model);
 
         var options = new JsonSerializerOptions { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
-        var json = JsonSerializer.Serialize(result.Model, result.Model?.GetType() ?? typeof(FormulaModel), options);
+        var json = JsonSerializer.Serialize(result.Model, result.Model?.GetType() ?? typeof(FilterModel), options);
 
         Assert.Contains("\"filterType\": \"text\"", json);
         Assert.Contains("\"colId\": \"customerName\"", json);
@@ -50,10 +50,10 @@ public class IntegrationTests
     public void EndToEnd_NumberRangeFilter_ShouldProduceCorrectGridModel()
     {
         // Arrange
-        var formula = "[Order Total] in range 100 AND 1000";
+        var filter = "[Order Total] in range 100 AND 1000";
 
         // Act
-        var result = _parser.Parse(formula);
+        var result = _parser.Parse(filter);
 
         // Assert
         if (!result.HasErrors) // May fail due to current grammar limitations
@@ -61,7 +61,7 @@ public class IntegrationTests
             Assert.NotNull(result.Model);
 
             var options = new JsonSerializerOptions { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
-        var json = JsonSerializer.Serialize(result.Model, result.Model?.GetType() ?? typeof(FormulaModel), options);
+        var json = JsonSerializer.Serialize(result.Model, result.Model?.GetType() ?? typeof(FilterModel), options);
 
             Assert.Contains("\"filterType\": \"number\"", json);
             Assert.Contains("\"colId\": \"orderTotal\"", json);
@@ -75,29 +75,29 @@ public class IntegrationTests
     public void EndToEnd_ComplexLogicalFilter_ShouldProduceNestedGridModel()
     {
         // Arrange
-        var formula = "[Order Total] > 500 AND [Category] = \"Electronics\"";
+        var filter = "[Order Total] > 500 AND [Category] = \"Electronics\"";
 
         // Act
-        var result = _parser.Parse(formula);
+        var result = _parser.Parse(filter);
 
         // Assert
         Assert.False(result.HasErrors);
         Assert.NotNull(result.Model);
-        Assert.IsType<GroupFormulaModel>(result.Model);
+        Assert.IsType<GroupFilterModel>(result.Model);
 
-        var joinModel = (GroupFormulaModel)result.Model;
+        var joinModel = (GroupFilterModel)result.Model;
         Assert.Equal("join", joinModel.FilterType);
         Assert.Equal("AND", joinModel.Type);
         Assert.Equal(2, joinModel.Conditions.Count);
 
         // First condition: Order Total > 500
-        var firstCondition = (FieldFormulaModel)joinModel.Conditions[0];
+        var firstCondition = (FieldFilterModel)joinModel.Conditions[0];
         Assert.Equal("number", firstCondition.FilterType);
         Assert.Equal("orderTotal", firstCondition.ColId);
         Assert.Equal("greaterThan", firstCondition.Type);
 
         // Second condition: Category = "Electronics"
-        var secondCondition = (FieldFormulaModel)joinModel.Conditions[1];
+        var secondCondition = (FieldFilterModel)joinModel.Conditions[1];
         Assert.Equal("text", secondCondition.FilterType);
         Assert.Equal("category", secondCondition.ColId);
         Assert.Equal("equals", secondCondition.Type);
@@ -107,17 +107,17 @@ public class IntegrationTests
     public void EndToEnd_BooleanFilter_ShouldProduceCorrectGridModel()
     {
         // Arrange
-        var formula = "[Is Premium] = true";
+        var filter = "[Is Premium] = true";
 
         // Act
-        var result = _parser.Parse(formula);
+        var result = _parser.Parse(filter);
 
         // Assert
         Assert.False(result.HasErrors);
         Assert.NotNull(result.Model);
 
         var options = new JsonSerializerOptions { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
-        var json = JsonSerializer.Serialize(result.Model, result.Model?.GetType() ?? typeof(FormulaModel), options);
+        var json = JsonSerializer.Serialize(result.Model, result.Model?.GetType() ?? typeof(FilterModel), options);
 
         Assert.Contains("\"filterType\": \"boolean\"", json);
         Assert.Contains("\"colId\": \"isPremium\"", json);
@@ -128,10 +128,10 @@ public class IntegrationTests
     public void EndToEnd_NegationFilter_ShouldHandleCorrectly()
     {
         // Arrange
-        var formula = "NOT [Customer Name] contains \"Test\"";
+        var filter = "NOT [Customer Name] contains \"Test\"";
 
         // Act
-        var result = _parser.Parse(formula);
+        var result = _parser.Parse(filter);
 
         // Assert
         Assert.False(result.HasErrors);
@@ -139,7 +139,7 @@ public class IntegrationTests
 
         // Should either flip to "notContains" or create a negated structure
         var options = new JsonSerializerOptions { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
-        var json = JsonSerializer.Serialize(result.Model, result.Model?.GetType() ?? typeof(FormulaModel), options);
+        var json = JsonSerializer.Serialize(result.Model, result.Model?.GetType() ?? typeof(FilterModel), options);
 
         // Should contain either the flipped operator or a join structure
         Assert.True(
@@ -152,34 +152,34 @@ public class IntegrationTests
     public void EndToEnd_MultipleColumnsWithSpaces_ShouldWork()
     {
         // Arrange
-        var formula = "[Customer Name] blank OR [Order Date] not blank";
+        var filter = "[Customer Name] blank OR [Order Date] not blank";
 
         // Act
-        var result = _parser.Parse(formula);
+        var result = _parser.Parse(filter);
 
         // Assert
         Assert.False(result.HasErrors);
         Assert.NotNull(result.Model);
-        Assert.IsType<GroupFormulaModel>(result.Model);
+        Assert.IsType<GroupFilterModel>(result.Model);
 
-        var joinModel = (GroupFormulaModel)result.Model;
+        var joinModel = (GroupFilterModel)result.Model;
         Assert.Equal("OR", joinModel.Type);
         Assert.Equal(2, joinModel.Conditions.Count);
 
         // Verify both conditions reference columns with spaces
-        var conditions = joinModel.Conditions.Cast<FieldFormulaModel>().ToList();
+        var conditions = joinModel.Conditions.Cast<FieldFilterModel>().ToList();
         Assert.Contains(conditions, c => c.ColId == "customerName");
         Assert.Contains(conditions, c => c.ColId == "orderDate");
     }
 
     [Fact]
-    public void EndToEnd_InvalidFormula_ShouldProvideUsefulDiagnostics()
+    public void EndToEnd_InvalidFilter_ShouldProvideUsefulDiagnostics()
     {
         // Arrange
-        var formula = "[Nonexistent Column] = \"value\"";
+        var filter = "[Nonexistent Column] = \"value\"";
 
         // Act
-        var result = _parser.Parse(formula);
+        var result = _parser.Parse(filter);
 
         // Assert
         Assert.True(result.HasErrors);
@@ -193,10 +193,10 @@ public class IntegrationTests
     public void EndToEnd_TypeMismatch_ShouldProvideSpecificError()
     {
         // Arrange
-        var formula = "[Order Total] contains \"text\""; // Number column with text operation
+        var filter = "[Order Total] contains \"text\""; // Number column with text operation
 
         // Act
-        var result = _parser.Parse(formula);
+        var result = _parser.Parse(filter);
 
         // Assert
         Assert.True(result.HasErrors);
@@ -216,19 +216,19 @@ public class IntegrationTests
     [InlineData("[Order Total] >= 100")]
     [InlineData("[Order Date] > \"2024-01-01\"")]
     [InlineData("[Is Premium] blank")]
-    public void EndToEnd_VariousDataTypes_ShouldAllWork(string formula)
+    public void EndToEnd_VariousDataTypes_ShouldAllWork(string filter)
     {
         // Act
-        var result = _parser.Parse(formula);
+        var result = _parser.Parse(filter);
 
         // Assert
         Assert.False(result.HasErrors,
-            $"Formula '{formula}' should work. Errors: {string.Join(", ", result.Diagnostics.Select(d => d.Message))}");
+            $"Filter '{filter}' should work. Errors: {string.Join(", ", result.Diagnostics.Select(d => d.Message))}");
         Assert.NotNull(result.Model);
 
         // Should be serializable to JSON
         var options = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
-        var json = JsonSerializer.Serialize(result.Model, result.Model?.GetType() ?? typeof(FormulaModel), options);
+        var json = JsonSerializer.Serialize(result.Model, result.Model?.GetType() ?? typeof(FilterModel), options);
         Assert.NotEmpty(json);
     }
 
@@ -240,11 +240,11 @@ public class IntegrationTests
             .Select(i => new FieldMeta($"Column {i}", $"col{i}", FieldType.Text))
             .ToArray();
 
-        var largeParser = new FormulaParser(manyColumns);
-        var formula = "[Column 50] contains \"test\"";
+        var largeParser = new FilterParser(manyColumns);
+        var filter = "[Column 50] contains \"test\"";
 
         // Act
-        var result = largeParser.Parse(formula);
+        var result = largeParser.Parse(filter);
 
         // Assert
         Assert.False(result.HasErrors);

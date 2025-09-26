@@ -1,4 +1,4 @@
-namespace Ivy.Formulas;
+namespace Ivy.Filters;
 
 /// <summary>
 /// Converts AST nodes to grid-compatible filter models
@@ -8,17 +8,17 @@ public class FilterConverter
     /// <summary>
     /// Converts an AST node to a grid filter model
     /// </summary>
-    public FormulaModel ConvertToModel(Node node)
+    public FilterModel ConvertToModel(Node node)
     {
         return node switch
         {
-            And and => new GroupFormulaModel
+            And and => new GroupFilterModel
             {
                 Type = "AND",
                 Conditions = [ConvertToModel(and.Left), ConvertToModel(and.Right)]
             },
 
-            Or or => new GroupFormulaModel
+            Or or => new GroupFilterModel
             {
                 Type = "OR",
                 Conditions = [ConvertToModel(or.Left), ConvertToModel(or.Right)]
@@ -32,7 +32,7 @@ public class FilterConverter
         };
     }
 
-    private FormulaModel ConvertNegation(Node inner)
+    private FilterModel ConvertNegation(Node inner)
     {
         // For NOT operations, we try to flip the operator when possible
         // Otherwise, we wrap in a negated join structure
@@ -46,14 +46,14 @@ public class FilterConverter
             }
         }
         
-        return new GroupFormulaModel
+        return new GroupFilterModel
         {
             Type = "AND", 
             Conditions = [ConvertToModel(inner)]
         };
     }
 
-    private FieldFormulaModel ConvertLeaf(Leaf leaf)
+    private FieldFilterModel ConvertLeaf(Leaf leaf)
     {
         var filterType = leaf.Type switch
         {
@@ -83,7 +83,7 @@ public class FilterConverter
             _ => "equals"
         };
 
-        var result = new FieldFormulaModel(filterType)
+        var result = new FieldFilterModel(filterType)
         {
             ColId = leaf.FieldId,
             Type = operationType,
