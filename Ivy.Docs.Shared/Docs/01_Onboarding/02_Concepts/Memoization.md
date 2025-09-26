@@ -91,7 +91,7 @@ public class ExpensiveCalculationView : ViewBase
             // Simulate expensive calculation
             Thread.Sleep(1000);
             return input.Value * input.Value;
-        }, input); // Only recompute when input changes
+        }, input.Value); // Only recompute when input changes
         
         return Layout.Vertical(
             Text.Inline("Number", value: input.Value, onChange: v => input.Set(v)),
