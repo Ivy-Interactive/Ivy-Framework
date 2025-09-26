@@ -26,6 +26,8 @@ public class ResourcesView : ViewBase
             | new Embed("https://www.youtube.com/watch?v=dQw4w9WgXcQ")
             | Text.H3("GitHub Repo")
             | new Embed("https://github.com/Ivy-Interactive/Ivy-Framework")
+            | Text.H3("GitHub Issue")
+            | new Embed("https://github.com/Ivy-Interactive/Ivy-Framework/issues/935")
             | Text.H3("GitHub File")
             | new Embed("https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/README.md")
             | Text.H3("Reddit Post")
