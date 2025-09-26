@@ -39,7 +39,7 @@ public class FilterParser
             parser.RemoveErrorListeners();
             parser.AddErrorListener(errorListener);
             
-            var parseTree = parser.filter();
+            var parseTree = parser.formula();
             
             if (errorListener.Diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error))
             {

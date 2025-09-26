@@ -12,7 +12,7 @@ public class FilterAstVisitor(
     FilterErrorListener errorListener)
     : FiltersBaseVisitor<Node>
 {
-    public override Node VisitFilter(FiltersParser.FilterContext context)
+    public override Node VisitFormula(FiltersParser.FormulaContext context)
     {
         return Visit(context.expr());
     }
