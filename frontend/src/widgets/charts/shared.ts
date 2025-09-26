@@ -259,6 +259,7 @@ export interface ExtendedPieProps extends PieProps {
   animated: boolean;
   strokeDashArray?: string;
   labelLists?: ExtendedLabelListProps[];
+  showTotal?: boolean;
 }
 
 export const generatePieProps = (props: ExtendedPieProps) => {

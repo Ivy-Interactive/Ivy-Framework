@@ -307,9 +307,11 @@ const ChartLegendContent = React.forwardRef<
         (typeof item.value === 'string' ? item.value : undefined) ||
         (item.dataKey ? String(item.dataKey) : 'value');
 
+      const elementKey = `${String(item.dataKey)}-${String(item.value)}`;
+
       return (
         <div
-          key={`${String(item.dataKey)}-${String(item.value)}`}
+          key={elementKey}
           className={cn(
             'flex items-center gap-1.5 py-1 px-1 flex-none [&>svg]:h-3 [&>svg]:w-3 [&>svg]:text-muted-foreground'
           )}

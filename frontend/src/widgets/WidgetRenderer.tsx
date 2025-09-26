@@ -26,8 +26,6 @@ const flattenChildren = (children: WidgetNode[]): WidgetNode[] => {
   });
 };
 
-//
-
 export const renderWidgetTree = (node: WidgetNode): React.ReactNode => {
   const Component = widgetMap[
     node.type as keyof typeof widgetMap
