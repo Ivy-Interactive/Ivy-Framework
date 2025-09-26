@@ -169,8 +169,8 @@ export const TableEditor: React.FC<TableEditorProps> = ({
   }
 
   const containerStyle = hasOptions
-    ? tableStyles.gridContainerWithOptions
-    : tableStyles.gridContainer;
+    ? tableStyles.tableEditor.gridContainerWithOptions
+    : tableStyles.tableEditor.gridContainer;
 
   return (
     <div ref={containerRef} style={containerStyle}>

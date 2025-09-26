@@ -13,13 +13,13 @@ export const TableOptions: React.FC = () => {
 
   return (
     <>
-      <div style={tableStyles.optionsContainer}>
-        <div className={tableStyles.options.container}>
-          <div className={tableStyles.options.leftSection}>
+      <div style={tableStyles.tableOptions.container}>
+        <div className={tableStyles.tableOptions.inner}>
+          <div className={tableStyles.tableOptions.leftSection}>
             <Header />
           </div>
 
-          <div className={tableStyles.options.rightSection}>
+          <div className={tableStyles.tableOptions.rightSection}>
             <Button variant="default">
               <svg
                 className="w-4 h-4 mr-2"

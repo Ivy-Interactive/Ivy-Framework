@@ -6,20 +6,20 @@ export const Header: React.FC = () => {
   const { visibleRows, columns, editable, isLoading, hasMore } = useTable();
   return (
     <>
-      <div className={tableStyles.text.info}>
+      <div className={tableStyles.tableHeader.container}>
         <span>Showing {visibleRows} rows</span>
         {columns.length > 0 && <span>{columns.length} columns</span>}
         {editable && (
-          <span className={tableStyles.text.accent}>✏️ Editable</span>
+          <span className={tableStyles.tableHeader.accent}>✏️ Editable</span>
         )}
         {isLoading && (
-          <span className={tableStyles.spinner.container}>
-            <div className={tableStyles.spinner.element}></div>
+          <span className={tableStyles.tableHeader.spinner.container}>
+            <div className={tableStyles.tableHeader.spinner.element}></div>
             Loading more...
           </span>
         )}
         {!hasMore && visibleRows > 0 && (
-          <span className={tableStyles.text.muted}>All data loaded</span>
+          <span className={tableStyles.tableHeader.muted}>All data loaded</span>
         )}
       </div>
     </>
