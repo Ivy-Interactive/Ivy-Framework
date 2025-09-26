@@ -45,7 +45,9 @@ public class ResourcesView : ViewBase
             | Text.H3("Pinterest")
             | new Embed("https://pin.it/i/3jntlkhhj/")
             | Text.H3("TikTok")
-            | new Embed("https://www.tiktok.com/@ivan.wllb/video/7550352363689741590?q=programming&t=1758927009747");
+            | new Embed("https://www.tiktok.com/@ivan.wllb/video/7550352363689741590?q=programming&t=1758927009747")
+            | Text.H3("FaceBook")
+            | new Embed("https://www.facebook.com/share/p/173pZv92Sw/");
     }
 }
 ```
