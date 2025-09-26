@@ -46,6 +46,13 @@ This project and everyone participating in it is governed by our [Code of Conduc
   dotnet tool install -g Ivy.Console --prerelease
   ```
 
+- **ARM Mac Users**: [Rosetta 2](https://support.apple.com/en-us/HT211861) is required for the Google Protocol Buffers package to work properly:
+  
+  ```bash
+  # Install Rosetta 2 if not already installed
+  /usr/sbin/softwareupdate --install-rosetta --agree-to-license
+  ```
+
 ### Setup Steps
 
 1. **Clone your fork:**
