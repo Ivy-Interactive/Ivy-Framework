@@ -192,7 +192,20 @@ public static class QueryHelpers
 
     public static IArrowArray CreateDecimalArray(List<object?> values)
     {
-        var builder = new Decimal128Array.Builder(new Decimal128Type(18, 2));
+        // Determine the maximum scale needed
+        int maxScale = 2; // Default minimum scale
+        foreach (var value in values)
+        {
+            if (value is decimal decimalValue)
+            {
+                var scale = BitConverter.GetBytes(decimal.GetBits(decimalValue)[3])[2];
+                if (scale > maxScale)
+                    maxScale = scale;
+            }
+        }
+
+        // Use precision of 29 (max for decimal) and the detected scale
+        var builder = new Decimal128Array.Builder(new Decimal128Type(29, maxScale));
         foreach (var value in values)
         {
             if (value is decimal decimalValue)

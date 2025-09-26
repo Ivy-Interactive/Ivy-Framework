@@ -113,27 +113,40 @@ public class QueryProcessor(ILogger<QueryProcessor>? logger = null)
         if (!sortOrdersList.Any())
             return query;
 
-        // For now, we'll handle only the first sort column
-        // In a full implementation, you'd want to support multiple columns
-        var firstSort = sortOrdersList.First();
         var elementType = query.ElementType;
-        var propertyInfo = elementType.GetProperty(firstSort.Column);
-
-        if (propertyInfo == null)
-            return query;
-
         var parameter = System.Linq.Expressions.Expression.Parameter(elementType, "x");
-        var property = System.Linq.Expressions.Expression.Property(parameter, propertyInfo);
-        var lambda = System.Linq.Expressions.Expression.Lambda(property, parameter);
 
-        var methodName = firstSort.Direction == Ivy.Protos.DataTable.SortDirection.Asc ? "OrderBy" : "OrderByDescending";
-        var method = typeof(Queryable).GetMethods()
-            .FirstOrDefault(m => m.Name == methodName && m.GetParameters().Length == 2)?
-            .MakeGenericMethod(elementType, propertyInfo.PropertyType);
-
-        if (method != null)
+        for (int i = 0; i < sortOrdersList.Count; i++)
         {
-            query = (IQueryable)method.Invoke(null, new object[] { query, lambda })!;
+            var sortOrder = sortOrdersList[i];
+            var propertyInfo = elementType.GetProperty(sortOrder.Column);
+
+            if (propertyInfo == null)
+                continue;
+
+            var property = System.Linq.Expressions.Expression.Property(parameter, propertyInfo);
+            var lambda = System.Linq.Expressions.Expression.Lambda(property, parameter);
+
+            // For the first sort, use OrderBy/OrderByDescending
+            // For subsequent sorts, use ThenBy/ThenByDescending
+            string methodName;
+            if (i == 0)
+            {
+                methodName = sortOrder.Direction == Ivy.Protos.DataTable.SortDirection.Asc ? "OrderBy" : "OrderByDescending";
+            }
+            else
+            {
+                methodName = sortOrder.Direction == Ivy.Protos.DataTable.SortDirection.Asc ? "ThenBy" : "ThenByDescending";
+            }
+
+            var method = typeof(Queryable).GetMethods()
+                .FirstOrDefault(m => m.Name == methodName && m.GetParameters().Length == 2)?
+                .MakeGenericMethod(elementType, propertyInfo.PropertyType);
+
+            if (method != null)
+            {
+                query = (IQueryable)method.Invoke(null, new object[] { query, lambda })!;
+            }
         }
 
         return query;
@@ -450,6 +463,14 @@ public class QueryProcessor(ILogger<QueryProcessor>? logger = null)
         {
             logger?.LogDebug("Extracting string value from Any with TypeUrl: {TypeUrl}", arg.TypeUrl);
 
+            // Check if it's a protobuf StringValue
+            if (arg.Is(Google.Protobuf.WellKnownTypes.StringValue.Descriptor))
+            {
+                var stringValue = arg.Unpack<Google.Protobuf.WellKnownTypes.StringValue>();
+                logger?.LogDebug("Unpacked StringValue: '{Result}'", stringValue.Value);
+                return stringValue.Value;
+            }
+
             // The frontend sends JSON-serialized strings, so we need to deserialize
             var jsonValue = arg.Value.ToStringUtf8();
             logger?.LogDebug("Raw value: '{JsonValue}'", jsonValue);
@@ -475,9 +496,46 @@ public class QueryProcessor(ILogger<QueryProcessor>? logger = null)
     {
         try
         {
-            var jsonValue = arg.Value.ToStringUtf8();
             var underlyingType = Nullable.GetUnderlyingType(targetType) ?? targetType;
 
+            // Try to unpack as protobuf well-known types first
+            if (arg.Is(Google.Protobuf.WellKnownTypes.StringValue.Descriptor))
+            {
+                var value = arg.Unpack<Google.Protobuf.WellKnownTypes.StringValue>().Value;
+                if (underlyingType == typeof(string)) return value;
+                // Try to convert string to target type
+                return Convert.ChangeType(value, underlyingType);
+            }
+            if (arg.Is(Google.Protobuf.WellKnownTypes.Int32Value.Descriptor))
+            {
+                var value = arg.Unpack<Google.Protobuf.WellKnownTypes.Int32Value>().Value;
+                return Convert.ChangeType(value, underlyingType);
+            }
+            if (arg.Is(Google.Protobuf.WellKnownTypes.Int64Value.Descriptor))
+            {
+                var value = arg.Unpack<Google.Protobuf.WellKnownTypes.Int64Value>().Value;
+                return Convert.ChangeType(value, underlyingType);
+            }
+            if (arg.Is(Google.Protobuf.WellKnownTypes.DoubleValue.Descriptor))
+            {
+                var value = arg.Unpack<Google.Protobuf.WellKnownTypes.DoubleValue>().Value;
+                if (underlyingType == typeof(decimal))
+                    return Convert.ToDecimal(value);
+                return Convert.ChangeType(value, underlyingType);
+            }
+            if (arg.Is(Google.Protobuf.WellKnownTypes.FloatValue.Descriptor))
+            {
+                var value = arg.Unpack<Google.Protobuf.WellKnownTypes.FloatValue>().Value;
+                return Convert.ChangeType(value, underlyingType);
+            }
+            if (arg.Is(Google.Protobuf.WellKnownTypes.BoolValue.Descriptor))
+            {
+                var value = arg.Unpack<Google.Protobuf.WellKnownTypes.BoolValue>().Value;
+                return Convert.ChangeType(value, underlyingType);
+            }
+
+            // Fall back to JSON deserialization
+            var jsonValue = arg.Value.ToStringUtf8();
             return underlyingType switch
             {
                 SystemType t when t == typeof(string) => System.Text.Json.JsonSerializer.Deserialize<string>(jsonValue),
@@ -491,8 +549,9 @@ public class QueryProcessor(ILogger<QueryProcessor>? logger = null)
                 _ => System.Text.Json.JsonSerializer.Deserialize<string>(jsonValue)
             };
         }
-        catch
+        catch (Exception ex)
         {
+            logger?.LogError(ex, "Error extracting typed value for type {TargetType}", targetType);
             return null;
         }
     }

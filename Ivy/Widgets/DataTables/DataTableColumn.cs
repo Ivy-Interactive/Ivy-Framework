@@ -7,11 +7,13 @@ public class DataTableColumn
 {
     public required string Name { get; set; }
     public required string Header { get; set; }
+    //todo: public required string DataType { get; set; }
     public string? Group { get; set; }
     public Size? Width { get; set; }
     public bool Hidden { get; set; } = false;
     public bool Sortable { get; set; } = true;
     public SortDirection SortDirection { get; set; } = SortDirection.None;
+    public bool Filterable { get; set; } = true;
     public Align Align { get; set; } = Align.Left;
     public int Order { get; set; } = 0;
     public Icon? Icon { get; set; } = null;
@@ -26,6 +28,13 @@ public enum SortDirection
     None
 }
 
+public enum DataType
+{
+    Number,
+    String,
+    Bool
+}
+
 public interface IDataTableColumnRenderer
 {
     public bool IsEditable { get; }
@@ -38,7 +47,7 @@ public class TextDisplayRenderer : IDataTableColumnRenderer
 
 public class NumberDisplayRenderer : IDataTableColumnRenderer
 {
-    public string Format { get; set; } = "N2"; // Default format for numbers - should be based on Excel formatting?
+    public string Format { get; set; } = "N2"; // Default format for numbers - should be based on Excel formatting!
     public bool IsEditable => false;
 }
 
