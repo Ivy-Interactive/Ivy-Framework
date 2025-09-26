@@ -2,6 +2,7 @@ import React from 'react';
 import { useTable } from '../context/TableContext';
 import { tableStyles } from '../styles/style';
 import { Header } from './TableHeader';
+import { Button } from '@/components/ui/button';
 
 export const TableOptions: React.FC = () => {
   const { columns } = useTable();
@@ -12,14 +13,14 @@ export const TableOptions: React.FC = () => {
 
   return (
     <>
-      <div style={tableStyles.optionsContainer}>
-        <div className={tableStyles.options.container}>
-          <div className={tableStyles.options.leftSection}>
+      <div style={tableStyles.tableOptions.container}>
+        <div className={tableStyles.tableOptions.inner}>
+          <div className={tableStyles.tableOptions.leftSection}>
             <Header />
           </div>
 
-          <div className={tableStyles.options.rightSection}>
-            <button className={tableStyles.button.secondary}>
+          <div className={tableStyles.tableOptions.rightSection}>
+            <Button variant="default">
               <svg
                 className="w-4 h-4 mr-2"
                 fill="none"
@@ -34,24 +35,7 @@ export const TableOptions: React.FC = () => {
                 />
               </svg>
               Filter
-            </button>
-
-            <button className={tableStyles.button.secondary}>
-              <svg
-                className="w-4 h-4 mr-2"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4"
-                />
-              </svg>
-              Options
-            </button>
+            </Button>
           </div>
         </div>
       </div>

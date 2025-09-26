@@ -9,11 +9,13 @@ export function convertArrowTableToData(
   rows: DataRow[];
   hasMore: boolean;
 } {
-  const columns: DataColumn[] = table.schema.fields.map(field => ({
-    name: field.name,
-    type: field.type.toString(),
-    width: 150,
-  }));
+  const columns: DataColumn[] = table.schema.fields.map(
+    (field: arrow.Field) => ({
+      name: field.name,
+      type: field.type.toString(),
+      width: 150,
+    })
+  );
 
   const rows: DataRow[] = [];
   for (let i = 0; i < table.numRows; i++) {

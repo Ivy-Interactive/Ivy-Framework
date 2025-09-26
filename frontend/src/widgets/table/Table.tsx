@@ -1,38 +1,30 @@
 import '@glideapps/glide-data-grid/dist/index.css';
 import React from 'react';
-
-// Local imports
 import { TableProvider, useTable } from './context/TableContext';
-import { ErrorDisplay } from './parts/ErrorDisplay';
-import { LoadingDisplay } from './parts/LoadingDisplay';
+import { ErrorDisplay } from '@/components/ErrorDisplay';
+import { Loading } from '@/components/Loading';
 import { TableEditor } from './parts/TableEditor';
 import { Footer } from './parts/TableFooter';
 import { TableOptions } from './parts/TableOptions';
 import { tableStyles } from './styles/style';
 import { TableProps } from './types/types';
 
-const TableLayout: React.FC = () => {
+interface TableLayoutProps {
+  children?: React.ReactNode;
+}
+
+const TableLayout: React.FC<TableLayoutProps> = ({ children }) => {
   const { error, columns } = useTable();
   const showTableEditor = columns.length > 0;
 
   if (error) {
-    return <ErrorDisplay />;
+    return <ErrorDisplay title="Table Error" message={error} />;
   }
 
   return (
-    <div className={tableStyles.container}>
-      <h1 className={tableStyles.heading.primary}>
-        Dynamic Data Grid with gRPC
-      </h1>
-      {showTableEditor ? (
-        <>
-          <TableOptions />
-          <TableEditor hasOptions={true} />
-        </>
-      ) : (
-        <LoadingDisplay />
-      )}
-      <Footer />
+    <div className={tableStyles.table.container}>
+      <h1 className={tableStyles.table.heading}>Dynamic Data Grid with gRPC</h1>
+      {showTableEditor ? children : <Loading />}
     </div>
   );
 };
@@ -43,7 +35,13 @@ export const Table: React.FC<TableProps> = ({
 }) => {
   return (
     <TableProvider connection={connection} editable={editable}>
-      <TableLayout />
+      <TableLayout>
+        <>
+          <TableOptions />
+          <TableEditor hasOptions={true} />
+        </>
+      </TableLayout>
+      <Footer />
     </TableProvider>
   );
 };
