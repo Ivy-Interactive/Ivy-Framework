@@ -9,7 +9,6 @@ public class DataTableService(IQueryableRegistry queryableRegistry) : TableServi
     {
         try
         {
-            // Extract sourceId from the request
             if (string.IsNullOrEmpty(request.SourceId))
             {
                 throw new RpcException(new Status(StatusCode.InvalidArgument, "SourceId is required in the request."));

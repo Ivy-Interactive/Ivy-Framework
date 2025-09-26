@@ -25,7 +25,7 @@ public class QueryableRegistry : IQueryableRegistry
 
     public IQueryable? GetQueryable(string sourceId)
     {
-        return _queryables.TryGetValue(sourceId, out var queryable) ? queryable : null;
+        return _queryables.GetValueOrDefault(sourceId);
     }
 
     public IDisposable AddCleanup(string sourceId, IDisposable cleanup)
