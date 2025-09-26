@@ -64,7 +64,7 @@ public class DataTableBuilder<TModel> : ViewBase, IStateless
                 Column = new DataTableColumn()
                 {
                     Name = field.Name,
-                    Header = Utils.SplitPascalCase(field.Name) ?? field.Name,
+                    Header = Utils.LabelFor(field.Name, field.Type) ?? field.Name,
                     Align = align,
                     Order = order++
                 },
@@ -118,6 +118,56 @@ public class DataTableBuilder<TModel> : ViewBase, IStateless
         column.Column.Sortable = sortable;
         return this;
     }
+
+    public DataTableBuilder<TModel> Filterable(Expression<Func<TModel, object>> field, bool filterable)
+    {
+        var column = GetColumn(field);
+        column.Column.Filterable = filterable;
+        return this;
+    }
+
+    public DataTableBuilder<TModel> Icon(Expression<Func<TModel, object>> field, Icon icon)
+    {
+        var column = GetColumn(field);
+        column.Column.Icon = icon;
+        return this;
+    }
+
+    public DataTableBuilder<TModel> Help(Expression<Func<TModel, object>> field, string help)
+    {
+        var column = GetColumn(field);
+        column.Column.Help = help;
+        return this;
+    }
+
+    public DataTableBuilder<TModel> Group(Expression<Func<TModel, object>> field, string group)
+    {
+        var column = GetColumn(field);
+        column.Column.Group = group;
+        return this;
+    }
+
+    public DataTableBuilder<TModel> SortDirection(Expression<Func<TModel, object>> field, SortDirection direction)
+    {
+        var column = GetColumn(field);
+        column.Column.SortDirection = direction;
+        return this;
+    }
+
+    public DataTableBuilder<TModel> Renderer(Expression<Func<TModel, object>> field, IDataTableColumnRenderer renderer)
+    {
+        var column = GetColumn(field);
+        column.Column.Renderer = renderer;
+        return this;
+    }
+
+    // DataType support - ready for when DataType property is uncommented in DataTableColumn
+    // public DataTableBuilder<TModel> DataType(Expression<Func<TModel, object>> field, DataType dataType)
+    // {
+    //     var column = GetColumn(field);
+    //     // column.Column.DataType = dataType; // Uncomment when DataType property is added
+    //     return this;
+    // }
 
     public DataTableBuilder<TModel> Order(params Expression<Func<TModel, object>>[] fields)
     {
