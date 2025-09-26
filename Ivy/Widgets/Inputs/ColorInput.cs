@@ -32,6 +32,9 @@ public interface IAnyColorInput : IAnyInput
 
     /// <summary>Gets or sets the visual variant of the color input.</summary>
     public ColorInputs Variant { get; set; }
+
+    /// <summary>Gets or sets the size of the color input.</summary>
+    public Sizes Size { get; set; }
 }
 
 /// <summary>
@@ -53,6 +56,9 @@ public abstract record ColorInputBase : WidgetBase<ColorInputBase>, IAnyColorInp
 
     /// <summary>Gets or sets the visual variant of the color input.</summary>
     [Prop] public ColorInputs Variant { get; set; } = ColorInputs.TextAndPicker;
+
+    /// <summary>Gets or sets the size of the color input.</summary>
+    [Prop] public Sizes Size { get; set; }
 
     /// <summary>Gets or sets the event handler called when the input loses focus.</summary>
     [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
@@ -247,6 +253,30 @@ public static class ColorInputExtensions
     public static ColorInputBase Variant(this ColorInputBase widget, ColorInputs variant)
     {
         return widget with { Variant = variant };
+    }
+
+    /// <summary>Sets the size of the color input.</summary>
+    /// <param name="widget">The color input to configure.</param>
+    /// <param name="size">The size of the color input.</param>
+    public static ColorInputBase Size(this ColorInputBase widget, Sizes size)
+    {
+        return widget with { Size = size };
+    }
+
+    /// <summary>Sets the color input size to large for prominent display.</summary>
+    /// <param name="widget">The color input to configure.</param>
+    /// <returns>A new ColorInputBase instance with large size applied.</returns>
+    public static ColorInputBase Large(this ColorInputBase widget)
+    {
+        return widget.Size(Sizes.Large);
+    }
+
+    /// <summary>Sets the color input size to small for compact display.</summary>
+    /// <param name="widget">The color input to configure.</param>
+    /// <returns>A new ColorInputBase instance with small size applied.</returns>
+    public static ColorInputBase Small(this ColorInputBase widget)
+    {
+        return widget.Size(Sizes.Small);
     }
 
 

@@ -5,7 +5,11 @@ import { Input } from '@/components/ui/input';
 import { X } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 import { logger } from '@/lib/logger';
-
+import {
+  colorInputVariants,
+  colorInputPickerVariants,
+} from '@/components/ui/input/color-input-variants';
+import { Sizes } from '@/types/sizes';
 interface ColorInputWidgetProps {
   id: string;
   value: string | null;
@@ -15,6 +19,7 @@ interface ColorInputWidgetProps {
   nullable?: boolean;
   events?: string[];
   variant?: 'Text' | 'Picker' | 'TextAndPicker';
+  size?: Sizes;
 }
 
 // Hoisted color map for backend Colors enum
@@ -57,6 +62,7 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
   nullable = false,
   events = [],
   variant = 'TextAndPicker',
+  size = Sizes.Medium,
 }) => {
   const eventHandler = useEventHandler();
   const [displayValue, setDisplayValue] = useState(value ?? '');
@@ -163,7 +169,7 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
             onKeyDown={handleInputKeyDown}
             placeholder={placeholder || 'Enter color'}
             disabled={disabled}
-            className={`${invalid ? inputStyles.invalidInput + ' pr-8' : ''}`}
+            className={`${colorInputVariants({ size })} ${invalid ? inputStyles.invalidInput + ' pr-8' : ''}`}
           />
           {(invalid || (nullable && value !== null && !disabled)) && (
             <div
@@ -202,7 +208,7 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
             value={getDisplayColor()}
             onChange={handleColorChange}
             disabled={disabled}
-            className={`w-10 h-10 p-1 rounded-lg border ${
+            className={`${colorInputPickerVariants({ size })} p-1 rounded-lg border ${
               disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
             } ${invalid ? inputStyles.invalidInput : 'border-border'}`}
           />
@@ -220,7 +226,7 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
           value={getDisplayColor()}
           onChange={handleColorChange}
           disabled={disabled}
-          className={`w-10 h-10 p-1 rounded-lg border ${
+          className={`${colorInputPickerVariants({ size })} p-1 rounded-lg border ${
             disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
           } ${invalid ? inputStyles.invalidInput : 'border-border'}`}
         />
@@ -234,7 +240,7 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
           onKeyDown={handleInputKeyDown}
           placeholder={placeholder || 'Enter color'}
           disabled={disabled}
-          className={`${invalid ? inputStyles.invalidInput + ' pr-8' : ''}`}
+          className={`${colorInputVariants({ size })} ${invalid ? inputStyles.invalidInput + ' pr-8' : ''}`}
         />
         {(invalid || (nullable && value !== null && !disabled)) && (
           <div
