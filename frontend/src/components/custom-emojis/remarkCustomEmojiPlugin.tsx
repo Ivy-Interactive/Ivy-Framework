@@ -1,5 +1,5 @@
 import { emojiMap } from './emojiMap';
-import { Node, Parent, Text } from 'unist';
+import { RootContent, Node, Parent, Text, Image } from 'mdast';
 import { visit } from 'unist-util-visit';
 
 export function remarkCustomEmojiPlugin() {
@@ -10,18 +10,21 @@ export function remarkCustomEmojiPlugin() {
       const parts = node.value.split(/(:[a-zA-Z0-9-_]+:)/g);
       if (parts.length === 1) return;
 
-      const newNodes = parts.map((part: string) => {
+      const newNodes: RootContent[] = parts.map<RootContent>(part => {
         if (emojiMap[part]) {
-          return {
-            type: 'emoji',
-            name: part,
+          const imgNode: Image = {
+            type: 'image',
+            url: emojiMap[part].src,
+            alt: part,
             data: {
               hName: 'emoji',
               hProperties: { name: part },
             },
           };
+          return imgNode;
         }
-        return { type: 'text', value: part };
+        const textNode: Text = { type: 'text', value: part };
+        return textNode;
       });
 
       parent.children.splice(index, 1, ...newNodes);
