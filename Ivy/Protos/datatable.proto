@@ -62,4 +62,7 @@ message Aggregation {
 
 message DataTableResult {
   bytes arrow_ipc_stream = 1; // Arrow Table serialized as IPC stream
+  int32 offset = 2;
+  int32 row_count = 3;
+  int32 total_rows = 4;
 }

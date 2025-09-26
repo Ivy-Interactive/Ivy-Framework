@@ -1,13 +1,20 @@
 using System.Reflection;
 using Apache.Arrow;
 using Apache.Arrow.Ipc;
-using Apache.Arrow.Types;
 using Ivy.Protos.DataTable;
 using Microsoft.Extensions.Logging;
 using ArrowField = Apache.Arrow.Field;
 using SystemType = System.Type;
 
 namespace Ivy.Views.DataTables;
+
+public class QueryResult
+{
+    public byte[] ArrowData { get; set; } = [];
+    public int Offset { get; set; }
+    public int RowCount { get; set; }
+    public int TotalRows { get; set; }
+}
 
 /// <summary>
 /// Processes table queries by applying sorting and pagination to IQueryable data sources,
@@ -24,7 +31,7 @@ namespace Ivy.Views.DataTables;
 /// </remarks>
 public class QueryProcessor(ILogger<QueryProcessor>? logger = null)
 {
-    public byte[] ProcessQuery(IQueryable queryable, DataTableQuery query)
+    public QueryResult ProcessQuery(IQueryable queryable, DataTableQuery query)
     {
         try
         {
@@ -45,6 +52,10 @@ public class QueryProcessor(ILogger<QueryProcessor>? logger = null)
             {
                 processedQuery = ApplySort(processedQuery, query.Sort);
             }
+
+            // Get total count before pagination
+            var totalRows = processedQuery.Cast<object>().Count();
+            logger?.LogDebug("Total rows before pagination: {TotalRows}", totalRows);
 
             // Apply pagination
             if (query.Offset > 0)
@@ -81,7 +92,13 @@ public class QueryProcessor(ILogger<QueryProcessor>? logger = null)
             var arrowData = ConvertToArrowTable(results, query.SelectColumns, queryable.ElementType);
             logger?.LogInformation("Arrow conversion complete, {ByteCount} bytes", arrowData.Length);
 
-            return arrowData;
+            return new QueryResult
+            {
+                ArrowData = arrowData,
+                Offset = query.Offset,
+                RowCount = results.Count,
+                TotalRows = totalRows
+            };
         }
         catch (Exception ex)
         {

@@ -21,11 +21,14 @@ public class TableService(IQueryableRegistry queryableRegistry) : DataTableServi
             }
 
             var queryProcessor = new QueryProcessor();
-            var arrowData = queryProcessor.ProcessQuery(queryable, request);
+            var queryResult = queryProcessor.ProcessQuery(queryable, request);
 
             var tableResult = new DataTableResult
             {
-                ArrowIpcStream = Google.Protobuf.ByteString.CopyFrom(arrowData)
+                ArrowIpcStream = Google.Protobuf.ByteString.CopyFrom(queryResult.ArrowData),
+                Offset = queryResult.Offset,
+                RowCount = queryResult.RowCount,
+                TotalRows = queryResult.TotalRows
             };
 
             return Task.FromResult(tableResult);
