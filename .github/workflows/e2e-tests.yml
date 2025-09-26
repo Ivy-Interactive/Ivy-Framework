@@ -24,6 +24,10 @@ jobs:
       working-directory: ./frontend
       run: npm run build
     
+    - name: Run unit tests
+      working-directory: ./frontend
+      run: npm run test
+    
     # Setup .NET and build backend (now with frontend assets available)
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
