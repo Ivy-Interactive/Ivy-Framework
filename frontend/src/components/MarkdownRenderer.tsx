@@ -20,7 +20,10 @@ import CopyToClipboardButton from './CopyToClipboardButton';
 import { createPrismTheme } from '@/lib/ivy-prism-theme';
 import { textBlockClassMap, textContainerClass } from '@/lib/textBlockClassMap';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
-import { parseEmojis } from './custom-emojis/emojiFunctions';
+import {
+  CustomEmoji,
+  remarkCustomEmojiPlugin,
+} from './custom-emojis/remarkCustomEmojiPlugin';
 
 const SyntaxHighlighter = lazy(() =>
   import('react-syntax-highlighter').then(mod => ({ default: mod.Prism }))
@@ -195,7 +198,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
   );
 
   const plugins = useMemo(() => {
-    const remarkPlugins = [remarkGfm, remarkGemoji];
+    const remarkPlugins = [remarkGfm, remarkGemoji, remarkCustomEmojiPlugin];
     if (contentFeatures.hasMath)
       remarkPlugins.push(remarkMath as typeof remarkGfm);
 
@@ -409,14 +412,17 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
   return (
     <div className={textContainerClass}>
       <ReactMarkdown
-        components={
-          components as React.ComponentProps<typeof ReactMarkdown>['components']
-        }
+        components={{
+          ...(components as React.ComponentProps<
+            typeof ReactMarkdown
+          >['components']),
+          emoji: ({ name }) => <CustomEmoji name={name as string} />,
+        }}
         remarkPlugins={plugins.remarkPlugins}
         rehypePlugins={plugins.rehypePlugins}
         urlTransform={urlTransform}
       >
-        {parseEmojis(content, 16)}
+        {content}
       </ReactMarkdown>
     </div>
   );
