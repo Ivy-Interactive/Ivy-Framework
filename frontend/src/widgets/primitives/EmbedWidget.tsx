@@ -526,8 +526,32 @@ const LinkedInEmbed: React.FC<LinkedInEmbedProps> = ({ url }) => {
 const PinterestEmbed: React.FC<PinterestEmbedProps> = ({ url }) => {
   return (
     <div className="pinterest-embed">
-      <a data-pin-do="embedPin" data-pin-width="medium" href={url}>
-        View on Pinterest
+      <a
+        data-pin-do="embedPin"
+        data-pin-width="medium"
+        href={url}
+        style={{
+          display: 'flex',
+          width: '345px',
+          height: '714px',
+          border: '1px solid #ddd',
+          borderRadius: '8px',
+          backgroundColor: '#f8f9fa',
+          alignItems: 'center',
+          justifyContent: 'center',
+          textDecoration: 'none',
+          color: '#333',
+        }}
+      >
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: '24px', marginBottom: '8px' }}>📌</div>
+          <div style={{ fontSize: '14px', fontWeight: 'bold' }}>
+            Pinterest Pin
+          </div>
+          <div style={{ fontSize: '12px', marginTop: '4px' }}>
+            Click to view on Pinterest
+          </div>
+        </div>
       </a>
       <script async defer src="//assets.pinterest.com/js/pinit.js"></script>
     </div>
@@ -801,7 +825,7 @@ const EmbedWidget: React.FC<EmbedWidgetProps> = ({ url }) => {
   if (url.includes('linkedin.com')) {
     return <LinkedInEmbed url={url} />;
   }
-  if (url.includes('pinterest.com')) {
+  if (url.includes('pinterest.com') || url.includes('pin.it')) {
     return <PinterestEmbed url={url} />;
   }
   if (url.includes('github.com') || url.includes('gist.github.com')) {
