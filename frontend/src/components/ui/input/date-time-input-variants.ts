@@ -29,7 +29,7 @@ export const dateTimeInputIconVariants = cva('', {
   },
 });
 
-export const dateTimeInputTextVariants = cva('font-normal', {
+export const dateTimeInputTextVariants = cva(' ', {
   variants: {
     size: {
       Small: 'text-xs',
