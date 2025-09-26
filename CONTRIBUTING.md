@@ -124,6 +124,7 @@ When contributing a new widget to Ivy Framework, your submission **must** includ
 ### 5. Testing Requirements
 
 - **C# unit tests** in `Ivy.Test/` covering widget functionality
+- **Frontend unit tests** using Vitest in `frontend/src/` with `.test.ts` extension
 - **Frontend E2E tests** using Playwright in `frontend/e2e/`
 - **Edge case testing** including null values, empty states, and error conditions
 - **Accessibility testing** ensuring proper keyboard navigation and screen reader support
@@ -150,7 +151,8 @@ Before submitting your widget PR, ensure you have:
 
 - [ ] Backend C# widget class with full XML documentation
 - [ ] Frontend React component with TypeScript interfaces
-- [ ] Comprehensive unit tests (C#) and E2E tests (Playwright)
+- [ ] Comprehensive unit tests (C#) and frontend unit tests (Vitest)
+- [ ] E2E tests (Playwright) for user interactions
 - [ ] Screenshots showing different widget states
 - [ ] Usage examples in documentation
 - [ ] No new external dependencies added
@@ -275,13 +277,17 @@ TL;DR, if you have run `npm install` in the `./frontend`, most likely all pre-co
 ### Running Tests
 
 ```bash
-# Run all tests
+# Run all backend tests
 dotnet test
 
 # Run specific test project
 dotnet test Ivy.Test
 
-# Run frontend tests
+# Run frontend unit tests
+cd frontend
+npm run test
+
+# Run frontend E2E tests
 cd frontend
 npx playwright test
 ```

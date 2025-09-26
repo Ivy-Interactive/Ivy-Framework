@@ -108,7 +108,19 @@ npm run lint:fix
 
 ## Testing
 
-This project uses Playwright for end-to-end testing.
+This project uses Vitest for unit testing and Playwright for end-to-end testing.
+
+### Unit Testing with Vitest
+
+Run unit tests:
+
+```bash
+npm run test
+```
+
+Unit tests are configured to run only on files ending with `.test.ts`. Place your unit test files alongside your source code with the `.test.ts` extension.
+
+### End-to-End Testing with Playwright
 
 ### Prerequisites
 
@@ -182,7 +194,8 @@ Tests are automatically run in GitHub Actions on push to main/master branches an
 
 1. Code formatting checks (`npm run format:check`)
 2. Linting checks (`npm run lint`)
-3. Playwright end-to-end tests
+3. Unit tests (`npm run test`)
+4. Playwright end-to-end tests
 
 ## Available Scripts
 
@@ -191,6 +204,7 @@ Tests are automatically run in GitHub Actions on push to main/master branches an
 | `npm run dev`          | Start development server              |
 | `npm run build`        | Build for production                  |
 | `npm run preview`      | Preview production build              |
+| `npm run test`         | Run unit tests with Vitest            |
 | `npm run lint`         | Check for linting issues              |
 | `npm run lint:fix`     | Fix linting issues automatically      |
 | `npm run format`       | Format all files with Prettier        |
