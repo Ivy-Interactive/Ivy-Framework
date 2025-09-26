@@ -8,7 +8,7 @@ option csharp_namespace = "Ivy.Protos.DataTable";
 
 service DataTableService {
   rpc Query(DataTableQuery) returns (DataTableResult);
-  rpc Distinct(DataTableDistinctQuery) returns (DataTableDistinctResult);
+  rpc Values(DataTableValuesQuery) returns (DataTableValuesResult);
 }
 
 message DataTableQuery {
@@ -68,7 +68,7 @@ message DataTableResult {
   int32 total_rows = 4;
 }
 
-message DataTableDistinctQuery {
+message DataTableValuesQuery {
   string column = 1;
   string search = 2;
   int32 limit = 3;
@@ -76,6 +76,6 @@ message DataTableDistinctQuery {
   string sourceId = 5; 
 }
 
-message DataTableDistinctResult {
+message DataTableValuesResult {
   repeated string values = 1;
 }
