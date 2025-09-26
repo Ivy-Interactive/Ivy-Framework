@@ -183,9 +183,26 @@ public static class QueryHelpers
         foreach (var value in values)
         {
             if (value is DateTime dateTimeValue)
-                builder.Append(new DateTimeOffset(dateTimeValue));
+            {
+                // Handle DateTime properly - check if it's within valid range
+                if (dateTimeValue >= DateTimeOffset.MinValue.DateTime &&
+                    dateTimeValue <= DateTimeOffset.MaxValue.DateTime)
+                {
+                    // If DateTime.Kind is Unspecified, treat as local
+                    if (dateTimeValue.Kind == DateTimeKind.Unspecified)
+                        dateTimeValue = DateTime.SpecifyKind(dateTimeValue, DateTimeKind.Local);
+
+                    builder.Append(new DateTimeOffset(dateTimeValue));
+                }
+                else
+                {
+                    builder.AppendNull();
+                }
+            }
             else
+            {
                 builder.AppendNull();
+            }
         }
         return builder.Build();
     }

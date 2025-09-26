@@ -70,16 +70,14 @@ public class QueryProcessor(ILogger<QueryProcessor>? logger = null)
                 }
             }
 
-            if (query.Limit > 0)
-            {
-                var takeMethod = typeof(Queryable).GetMethods()
-                    .FirstOrDefault(m => m.Name == "Take" && m.GetParameters().Length == 2)?
-                    .MakeGenericMethod(queryable.ElementType);
+            // Apply limit - always apply if specified, even if 0
+            var takeMethod = typeof(Queryable).GetMethods()
+                .FirstOrDefault(m => m.Name == "Take" && m.GetParameters().Length == 2)?
+                .MakeGenericMethod(queryable.ElementType);
 
-                if (takeMethod != null)
-                {
-                    processedQuery = (IQueryable)takeMethod.Invoke(null, new object[] { processedQuery, query.Limit })!;
-                }
+            if (takeMethod != null)
+            {
+                processedQuery = (IQueryable)takeMethod.Invoke(null, new object[] { processedQuery, query.Limit })!;
             }
 
             // Execute query and get results
@@ -224,7 +222,7 @@ public class QueryProcessor(ILogger<QueryProcessor>? logger = null)
     {
         var propertyInfo = elementType.GetProperty(condition.Column);
         if (propertyInfo == null)
-            return null;
+            throw new InvalidOperationException($"Column '{condition.Column}' not found in type {elementType.Name}");
 
         var property = System.Linq.Expressions.Expression.Property(parameter, propertyInfo);
 
@@ -232,11 +230,14 @@ public class QueryProcessor(ILogger<QueryProcessor>? logger = null)
         {
             "contains" => BuildContainsExpression(property, condition.Args),
             "equals" => BuildEqualsExpression(property, condition.Args),
+            "notequals" => BuildNotEqualsExpression(property, condition.Args),
             "greaterthan" => BuildGreaterThanExpression(property, condition.Args),
+            "greaterthanorequal" => BuildGreaterThanOrEqualExpression(property, condition.Args),
             "lessthan" => BuildLessThanExpression(property, condition.Args),
+            "lessthanorequal" => BuildLessThanOrEqualExpression(property, condition.Args),
             "startswith" => BuildStartsWithExpression(property, condition.Args),
             "endswith" => BuildEndsWithExpression(property, condition.Args),
-            _ => null
+            _ => throw new NotSupportedException($"Filter function '{condition.Function}' is not supported")
         };
     }
 
@@ -367,9 +368,18 @@ public class QueryProcessor(ILogger<QueryProcessor>? logger = null)
         if (arg == null) return null;
 
         var value = ExtractTypedValue(arg, property.Type);
-        if (value == null) return null;
 
-        var valueExpression = System.Linq.Expressions.Expression.Constant(value);
+        // Handle null comparison
+        if (value == null || (value is string str && string.IsNullOrEmpty(str)))
+        {
+            // For null/empty string, return property == null
+            return System.Linq.Expressions.Expression.Equal(
+                property,
+                System.Linq.Expressions.Expression.Constant(null, property.Type)
+            );
+        }
+
+        var valueExpression = System.Linq.Expressions.Expression.Constant(value, property.Type);
         return System.Linq.Expressions.Expression.Equal(property, valueExpression);
     }
 
@@ -457,6 +467,51 @@ public class QueryProcessor(ILogger<QueryProcessor>? logger = null)
         return System.Linq.Expressions.Expression.AndAlso(nullCheck, endsWithCall);
     }
 
+    private System.Linq.Expressions.Expression? BuildNotEqualsExpression(System.Linq.Expressions.MemberExpression property, IEnumerable<Google.Protobuf.WellKnownTypes.Any> args)
+    {
+        var arg = args.FirstOrDefault();
+        if (arg == null) return null;
+
+        var value = ExtractTypedValue(arg, property.Type);
+
+        // Handle null comparison for "not equals"
+        if (value == null || (value is string str && string.IsNullOrEmpty(str)))
+        {
+            // For null/empty string, return property != null
+            return System.Linq.Expressions.Expression.NotEqual(
+                property,
+                System.Linq.Expressions.Expression.Constant(null, property.Type)
+            );
+        }
+
+        var valueExpression = System.Linq.Expressions.Expression.Constant(value, property.Type);
+        return System.Linq.Expressions.Expression.NotEqual(property, valueExpression);
+    }
+
+    private System.Linq.Expressions.Expression? BuildGreaterThanOrEqualExpression(System.Linq.Expressions.MemberExpression property, IEnumerable<Google.Protobuf.WellKnownTypes.Any> args)
+    {
+        var arg = args.FirstOrDefault();
+        if (arg == null) return null;
+
+        var value = ExtractTypedValue(arg, property.Type);
+        if (value == null) return null;
+
+        var valueExpression = System.Linq.Expressions.Expression.Constant(value);
+        return System.Linq.Expressions.Expression.GreaterThanOrEqual(property, valueExpression);
+    }
+
+    private System.Linq.Expressions.Expression? BuildLessThanOrEqualExpression(System.Linq.Expressions.MemberExpression property, IEnumerable<Google.Protobuf.WellKnownTypes.Any> args)
+    {
+        var arg = args.FirstOrDefault();
+        if (arg == null) return null;
+
+        var value = ExtractTypedValue(arg, property.Type);
+        if (value == null) return null;
+
+        var valueExpression = System.Linq.Expressions.Expression.Constant(value);
+        return System.Linq.Expressions.Expression.LessThanOrEqual(property, valueExpression);
+    }
+
     private string? ExtractStringValue(Google.Protobuf.WellKnownTypes.Any arg)
     {
         try
@@ -503,6 +558,14 @@ public class QueryProcessor(ILogger<QueryProcessor>? logger = null)
             {
                 var value = arg.Unpack<Google.Protobuf.WellKnownTypes.StringValue>().Value;
                 if (underlyingType == typeof(string)) return value;
+
+                // Handle DateTime specially
+                if (underlyingType == typeof(DateTime))
+                {
+                    if (DateTime.TryParse(value, out var dateTime))
+                        return dateTime;
+                }
+
                 // Try to convert string to target type
                 return Convert.ChangeType(value, underlyingType);
             }
@@ -521,6 +584,8 @@ public class QueryProcessor(ILogger<QueryProcessor>? logger = null)
                 var value = arg.Unpack<Google.Protobuf.WellKnownTypes.DoubleValue>().Value;
                 if (underlyingType == typeof(decimal))
                     return Convert.ToDecimal(value);
+                if (underlyingType == typeof(float))
+                    return Convert.ToSingle(value);
                 return Convert.ChangeType(value, underlyingType);
             }
             if (arg.Is(Google.Protobuf.WellKnownTypes.FloatValue.Descriptor))

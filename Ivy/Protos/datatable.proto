@@ -8,6 +8,7 @@ option csharp_namespace = "Ivy.Protos.DataTable";
 
 service DataTableService {
   rpc Query(DataTableQuery) returns (DataTableResult);
+  rpc Distinct(DataTableDistinctQuery) returns (DataTableDistinctResult);
 }
 
 message DataTableQuery {
@@ -15,10 +16,10 @@ message DataTableQuery {
   Filter filter = 2;
   int32 offset = 3;
   int32 limit = 4;
-  repeated string select_columns = 5; // Columns to include in the result
-  repeated Aggregation aggregations = 6; // Aggregations to perform
-  string connectionId = 7; // Ivy related stuff
-  string sourceId = 8; // Ivy related stuff
+  repeated string select_columns = 5; 
+  repeated Aggregation aggregations = 6; 
+  string connectionId = 7; 
+  string sourceId = 8;
 }
 
 message SortOrder {
@@ -65,4 +66,16 @@ message DataTableResult {
   int32 offset = 2;
   int32 row_count = 3;
   int32 total_rows = 4;
+}
+
+message DataTableDistinctQuery {
+  string column = 1;
+  string search = 2;
+  int32 limit = 3;
+  string connectionId = 4;
+  string sourceId = 5; 
+}
+
+message DataTableDistinctResult {
+  repeated string values = 1;
 }

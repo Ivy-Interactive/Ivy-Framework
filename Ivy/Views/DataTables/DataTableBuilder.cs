@@ -28,6 +28,56 @@ public class DataTableBuilder<TModel> : ViewBase, IStateless
         _Scaffold();
     }
 
+    /// <summary>
+    /// Determines the appropriate DataTypeHint based on the .NET type
+    /// </summary>
+    private static Ivy.DataTypeHint GetDataTypeHint(Type type)
+    {
+        var underlyingType = Nullable.GetUnderlyingType(type) ?? type;
+
+        // String types
+        if (underlyingType == typeof(string) || underlyingType == typeof(char))
+            return Ivy.DataTypeHint.String;
+
+        // Numeric types - integers
+        if (underlyingType == typeof(int) || underlyingType == typeof(long) ||
+            underlyingType == typeof(short) || underlyingType == typeof(byte) ||
+            underlyingType == typeof(uint) || underlyingType == typeof(ulong) ||
+            underlyingType == typeof(ushort) || underlyingType == typeof(sbyte))
+            return Ivy.DataTypeHint.Number;
+
+        // Numeric types - floating point
+        if (underlyingType == typeof(decimal) || underlyingType == typeof(double) ||
+            underlyingType == typeof(float))
+            return Ivy.DataTypeHint.Number;
+
+        // Boolean
+        if (underlyingType == typeof(bool))
+            return Ivy.DataTypeHint.Bool;
+
+        // Date and time types
+        if (underlyingType == typeof(DateTime) || underlyingType == typeof(DateTimeOffset))
+            return Ivy.DataTypeHint.DateTime;
+
+        if (underlyingType == typeof(DateOnly))
+            return Ivy.DataTypeHint.Date;
+
+        // TimeSpan should be treated as String since there's no Time hint
+        if (underlyingType == typeof(TimeSpan) || underlyingType == typeof(TimeOnly))
+            return Ivy.DataTypeHint.String;
+
+        // Other common types that should be treated as strings
+        if (underlyingType == typeof(Guid) || underlyingType.IsEnum)
+            return Ivy.DataTypeHint.String;
+
+        // Arrays and collections should be treated as strings (will likely be JSON serialized)
+        if (underlyingType.IsArray || typeof(System.Collections.IEnumerable).IsAssignableFrom(underlyingType))
+            return Ivy.DataTypeHint.String;
+
+        // Default fallback for unknown types
+        return Ivy.DataTypeHint.String;
+    }
+
     private void _Scaffold()
     {
         var type = typeof(TModel);
@@ -65,6 +115,7 @@ public class DataTableBuilder<TModel> : ViewBase, IStateless
                 {
                     Name = field.Name,
                     Header = Utils.LabelFor(field.Name, field.Type) ?? field.Name,
+                    DataTypeHint = GetDataTypeHint(field.Type),
                     Align = align,
                     Order = order++
                 },
@@ -161,13 +212,12 @@ public class DataTableBuilder<TModel> : ViewBase, IStateless
         return this;
     }
 
-    // DataType support - ready for when DataType property is uncommented in DataTableColumn
-    // public DataTableBuilder<TModel> DataType(Expression<Func<TModel, object>> field, DataType dataType)
-    // {
-    //     var column = GetColumn(field);
-    //     // column.Column.DataType = dataType; // Uncomment when DataType property is added
-    //     return this;
-    // }
+    public DataTableBuilder<TModel> DataTypeHint(Expression<Func<TModel, object>> field, Ivy.DataTypeHint dataTypeHint)
+    {
+        var column = GetColumn(field);
+        column.Column.DataTypeHint = dataTypeHint;
+        return this;
+    }
 
     public DataTableBuilder<TModel> Order(params Expression<Func<TModel, object>>[] fields)
     {

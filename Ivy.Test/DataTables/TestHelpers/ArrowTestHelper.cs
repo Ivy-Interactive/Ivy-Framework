@@ -82,10 +82,19 @@ public static class ArrowTestHelper
             BooleanArray boolArray => boolArray.GetValue(index),
             StringArray stringArray => stringArray.GetString(index),
             TimestampArray timestampArray => timestampArray.GetTimestamp(index)?.DateTime,
-            Decimal128Array decimalArray => decimalArray.GetValue(index),
+            Decimal128Array decimalArray => GetDecimalValue(decimalArray, index),
             BinaryArray binaryArray => binaryArray.GetBytes(index).ToArray(),
             _ => throw new NotSupportedException($"Array type {array.GetType().Name} not supported")
         };
+    }
+
+    private static decimal? GetDecimalValue(Decimal128Array array, int index)
+    {
+        var sqlDecimal = array.GetValue(index);
+        if (!sqlDecimal.HasValue) return null;
+
+        // SqlDecimal can be explicitly cast to decimal
+        return (decimal)sqlDecimal.Value;
     }
 
     /// <summary>

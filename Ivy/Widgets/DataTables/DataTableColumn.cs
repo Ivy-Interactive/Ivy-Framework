@@ -7,7 +7,7 @@ public class DataTableColumn
 {
     public required string Name { get; set; }
     public required string Header { get; set; }
-    //todo: public required string DataType { get; set; }
+    public required DataTypeHint DataTypeHint { get; set; }
     public string? Group { get; set; }
     public Size? Width { get; set; }
     public bool Hidden { get; set; } = false;
@@ -28,11 +28,13 @@ public enum SortDirection
     None
 }
 
-public enum DataType
+public enum DataTypeHint
 {
     Number,
     String,
-    Bool
+    Bool,
+    Date,
+    DateTime
 }
 
 public interface IDataTableColumnRenderer
