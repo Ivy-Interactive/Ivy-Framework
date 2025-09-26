@@ -1,15 +1,13 @@
 import '@glideapps/glide-data-grid/dist/index.css';
 import React from 'react';
-
-// Local imports
 import { TableProvider, useTable } from './context/TableContext';
 import { ErrorDisplay } from '@/components/ErrorDisplay';
+import { Loading } from '@/components/Loading';
 import { TableEditor } from './parts/TableEditor';
 import { Footer } from './parts/TableFooter';
 import { TableOptions } from './parts/TableOptions';
 import { tableStyles } from './styles/style';
 import { TableProps } from './types/types';
-import { Loading } from '@/components/Loading';
 
 interface TableLayoutProps {
   children?: React.ReactNode;
