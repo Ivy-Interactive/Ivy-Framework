@@ -151,6 +151,7 @@ const DateVariant: React.FC<DateVariantProps> = ({
             selected={date}
             onSelect={handleSelect}
             initialFocus
+            size={size}
           />
         </PopoverContent>
       </Popover>
@@ -336,6 +337,7 @@ const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
               selected={date}
               onSelect={handleDateSelect}
               initialFocus
+              size={size}
             />
             <div className="flex items-center gap-2">
               <Clock
