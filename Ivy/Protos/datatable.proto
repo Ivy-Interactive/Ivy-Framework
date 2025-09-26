@@ -9,6 +9,7 @@ option csharp_namespace = "Ivy.Protos.DataTable";
 service DataTableService {
   rpc Query(DataTableQuery) returns (DataTableResult);
   rpc Values(DataTableValuesQuery) returns (DataTableValuesResult);
+  rpc ParseFilter(DataTableFilterParserRequest) returns (DataTableFilterParserResponse);
 }
 
 message DataTableQuery {
@@ -78,4 +79,15 @@ message DataTableValuesQuery {
 
 message DataTableValuesResult {
   repeated string values = 1;
+  int32 total_values = 2;
+}
+
+message DataTableFilterParserRequest {
+  string filter_expression = 1; // e.g. "age > 30 AND (status = 'active' OR status = 'pending')"
+  string connectionId = 2;
+  string sourceId = 3; 
+}
+
+message DataTableFilterParserResponse {
+  Filter filter = 1;
 }

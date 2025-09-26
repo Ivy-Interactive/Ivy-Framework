@@ -1,7 +1,10 @@
 using System.Reflection;
+using System.Security.Cryptography;
+using System.Text;
 using Apache.Arrow;
 using Apache.Arrow.Ipc;
 using Ivy.Protos.DataTable;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using ArrowField = Apache.Arrow.Field;
 using SystemType = System.Type;
@@ -14,6 +17,12 @@ public class QueryResult
     public int Offset { get; set; }
     public int RowCount { get; set; }
     public int TotalRows { get; set; }
+}
+
+public class ValuesResult
+{
+    public List<string> Values { get; set; } = new();
+    public int TotalValues { get; set; }
 }
 
 /// <summary>
@@ -29,13 +38,30 @@ public class QueryResult
 /// The processor works with any IQueryable&lt;T&gt; data source and returns serialized Arrow data
 /// that can be efficiently transmitted and processed by client applications.
 /// </remarks>
-public class QueryProcessor(ILogger<QueryProcessor>? logger = null)
+public class QueryProcessor(ILogger<QueryProcessor>? logger = null, IDistributedCache? cache = null)
 {
     public QueryResult ProcessQuery(IQueryable queryable, DataTableQuery query)
     {
         try
         {
             logger?.LogInformation("Processing query with filter: {HasFilter}", query.Filter != null);
+
+            // Generate cache key if caching is enabled
+            string? cacheKey = null;
+            if (cache != null)
+            {
+                cacheKey = GenerateCacheKey("Query", queryable.ElementType.FullName, query);
+                logger?.LogDebug("Generated cache key: {CacheKey}", cacheKey);
+
+                // Try to get from cache
+                var cachedData = cache.Get(cacheKey);
+                if (cachedData != null)
+                {
+                    logger?.LogInformation("Cache hit for query");
+                    return DeserializeQueryResult(cachedData);
+                }
+                logger?.LogDebug("Cache miss for query");
+            }
 
             var processedQuery = queryable;
 
@@ -90,13 +116,35 @@ public class QueryProcessor(ILogger<QueryProcessor>? logger = null)
             var arrowData = ConvertToArrowTable(results, query.SelectColumns, queryable.ElementType);
             logger?.LogInformation("Arrow conversion complete, {ByteCount} bytes", arrowData.Length);
 
-            return new QueryResult
+            var result = new QueryResult
             {
                 ArrowData = arrowData,
                 Offset = query.Offset,
                 RowCount = results.Count,
                 TotalRows = totalRows
             };
+
+            // Store in cache if enabled
+            if (cache != null && cacheKey != null)
+            {
+                try
+                {
+                    var serialized = SerializeQueryResult(result);
+                    var cacheOptions = new DistributedCacheEntryOptions
+                    {
+                        SlidingExpiration = TimeSpan.FromMinutes(5),
+                        AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(30)
+                    };
+                    cache.Set(cacheKey, serialized, cacheOptions);
+                    logger?.LogDebug("Stored query result in cache");
+                }
+                catch (Exception cacheEx)
+                {
+                    logger?.LogWarning(cacheEx, "Failed to cache query result");
+                }
+            }
+
+            return result;
         }
         catch (Exception ex)
         {
@@ -179,7 +227,7 @@ public class QueryProcessor(ILogger<QueryProcessor>? logger = null)
             if (whereMethod != null)
             {
                 logger?.LogDebug("Invoking Where method");
-                query = (IQueryable)whereMethod.Invoke(null, new object[] { query, lambda })!;
+                query = (IQueryable)whereMethod.Invoke(null, [query, lambda])!;
                 logger?.LogDebug("Filter applied successfully");
             }
             else
@@ -666,4 +714,244 @@ public class QueryProcessor(ILogger<QueryProcessor>? logger = null)
         return result;
     }
 
+    public ValuesResult ProcessValues(IQueryable queryable, DataTableValuesQuery query)
+    {
+        try
+        {
+            logger?.LogInformation("Processing values query for column: {Column}", query.Column);
+
+            // Generate cache key if caching is enabled
+            string? cacheKey = null;
+            if (cache != null)
+            {
+                cacheKey = GenerateCacheKey("Values", queryable.ElementType.FullName, query);
+                logger?.LogDebug("Generated cache key: {CacheKey}", cacheKey);
+
+                // Try to get from cache
+                var cachedData = cache.Get(cacheKey);
+                if (cachedData != null)
+                {
+                    logger?.LogInformation("Cache hit for values query");
+                    return DeserializeValuesResult(cachedData);
+                }
+                logger?.LogDebug("Cache miss for values query");
+            }
+
+            if (string.IsNullOrEmpty(query.Column))
+            {
+                throw new ArgumentException("Column name is required for values query");
+            }
+
+            var elementType = queryable.ElementType;
+            var propertyInfo = elementType.GetProperty(query.Column);
+
+            if (propertyInfo == null)
+            {
+                throw new InvalidOperationException($"Column '{query.Column}' not found in type {elementType.Name}");
+            }
+
+            // Project to the specific column
+            var parameter = System.Linq.Expressions.Expression.Parameter(elementType, "x");
+            var property = System.Linq.Expressions.Expression.Property(parameter, propertyInfo);
+            var lambda = System.Linq.Expressions.Expression.Lambda(property, parameter);
+
+            // Use Select to project to the column
+            var selectMethod = typeof(Queryable).GetMethods()
+                .FirstOrDefault(m => m.Name == "Select" && m.GetParameters().Length == 2)?
+                .MakeGenericMethod(elementType, propertyInfo.PropertyType);
+
+            if (selectMethod == null)
+            {
+                throw new InvalidOperationException("Could not find Select method");
+            }
+
+            var projectedQuery = (IQueryable)selectMethod.Invoke(null, new object[] { queryable, lambda })!;
+
+            // Get distinct values
+            var distinctMethod = typeof(Queryable).GetMethods()
+                .FirstOrDefault(m => m.Name == "Distinct" && m.GetParameters().Length == 1)?
+                .MakeGenericMethod(propertyInfo.PropertyType);
+
+            if (distinctMethod != null)
+            {
+                projectedQuery = (IQueryable)distinctMethod.Invoke(null, new object[] { projectedQuery })!;
+            }
+
+            // Apply search filter if provided
+            if (!string.IsNullOrEmpty(query.Search))
+            {
+                // Convert to string and filter
+                var toStringMethod = propertyInfo.PropertyType.GetMethod("ToString", System.Type.EmptyTypes);
+                if (toStringMethod != null || propertyInfo.PropertyType == typeof(string))
+                {
+                    var searchParameter = System.Linq.Expressions.Expression.Parameter(propertyInfo.PropertyType, "v");
+                    System.Linq.Expressions.Expression searchExpression;
+
+                    if (propertyInfo.PropertyType == typeof(string))
+                    {
+                        // For string properties, use Contains directly
+                        var containsMethod = typeof(string).GetMethod("Contains", new[] { typeof(string), typeof(StringComparison) });
+                        searchExpression = System.Linq.Expressions.Expression.Call(
+                            searchParameter,
+                            containsMethod!,
+                            System.Linq.Expressions.Expression.Constant(query.Search),
+                            System.Linq.Expressions.Expression.Constant(StringComparison.OrdinalIgnoreCase)
+                        );
+                    }
+                    else
+                    {
+                        // For non-string properties, convert to string first
+                        var toStringCall = System.Linq.Expressions.Expression.Call(searchParameter, toStringMethod!);
+                        var containsMethod = typeof(string).GetMethod("Contains", new[] { typeof(string), typeof(StringComparison) });
+                        searchExpression = System.Linq.Expressions.Expression.Call(
+                            toStringCall,
+                            containsMethod!,
+                            System.Linq.Expressions.Expression.Constant(query.Search),
+                            System.Linq.Expressions.Expression.Constant(StringComparison.OrdinalIgnoreCase)
+                        );
+                    }
+
+                    var searchLambda = System.Linq.Expressions.Expression.Lambda(searchExpression, searchParameter);
+
+                    var whereMethod = typeof(Queryable).GetMethods()
+                        .FirstOrDefault(m => m.Name == "Where" && m.GetParameters().Length == 2)?
+                        .MakeGenericMethod(propertyInfo.PropertyType);
+
+                    if (whereMethod != null)
+                    {
+                        projectedQuery = (IQueryable)whereMethod.Invoke(null, new object[] { projectedQuery, searchLambda })!;
+                    }
+                }
+            }
+
+            // Order by the column value
+            var orderByMethod = typeof(Queryable).GetMethods()
+                .FirstOrDefault(m => m.Name == "OrderBy" && m.GetParameters().Length == 2)?
+                .MakeGenericMethod(propertyInfo.PropertyType, propertyInfo.PropertyType);
+
+            if (orderByMethod != null)
+            {
+                var orderParameter = System.Linq.Expressions.Expression.Parameter(propertyInfo.PropertyType, "v");
+                var orderLambda = System.Linq.Expressions.Expression.Lambda(orderParameter, orderParameter);
+                projectedQuery = (IQueryable)orderByMethod.Invoke(null, new object[] { projectedQuery, orderLambda })!;
+            }
+
+            // Get total count before limiting
+            var totalValues = projectedQuery.Cast<object>().Count();
+
+            // Apply limit
+            if (query.Limit > 0)
+            {
+                var takeMethod = typeof(Queryable).GetMethods()
+                    .FirstOrDefault(m => m.Name == "Take" && m.GetParameters().Length == 2)?
+                    .MakeGenericMethod(propertyInfo.PropertyType);
+
+                if (takeMethod != null)
+                {
+                    projectedQuery = (IQueryable)takeMethod.Invoke(null, new object[] { projectedQuery, query.Limit })!;
+                }
+            }
+
+            // Execute query and convert to strings
+            var values = projectedQuery.Cast<object>()
+                .Where(v => v != null)
+                .Select(v => v.ToString()!)
+                .ToList();
+
+            logger?.LogInformation("Values query executed, got {ValueCount} values out of {TotalValues} total", values.Count, totalValues);
+
+            var result = new ValuesResult
+            {
+                Values = values,
+                TotalValues = totalValues
+            };
+
+            // Store in cache if enabled
+            if (cache != null && cacheKey != null)
+            {
+                try
+                {
+                    var serialized = SerializeValuesResult(result);
+                    var cacheOptions = new DistributedCacheEntryOptions
+                    {
+                        SlidingExpiration = TimeSpan.FromMinutes(5),
+                        AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(30)
+                    };
+                    cache.Set(cacheKey, serialized, cacheOptions);
+                    logger?.LogDebug("Stored values result in cache");
+                }
+                catch (Exception cacheEx)
+                {
+                    logger?.LogWarning(cacheEx, "Failed to cache values result");
+                }
+            }
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            logger?.LogError(ex, "Error processing values query");
+            throw;
+        }
+    }
+
+    private string GenerateCacheKey(string prefix, string? typeName, object query)
+    {
+        using var sha256 = SHA256.Create();
+
+        // Extract SourceId from the query object
+        string sourceId = "";
+        if (query is DataTableQuery dtQuery)
+        {
+            sourceId = dtQuery.SourceId ?? "";
+        }
+        else if (query is DataTableValuesQuery valQuery)
+        {
+            sourceId = valQuery.SourceId ?? "";
+        }
+
+        var jsonQuery = System.Text.Json.JsonSerializer.Serialize(query);
+        var input = $"{prefix}:{sourceId}:{typeName}:{jsonQuery}";
+        var hashBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(input));
+        return $"DataTable:{prefix}:{sourceId}:{Convert.ToBase64String(hashBytes)}";
+    }
+
+    private byte[] SerializeQueryResult(QueryResult result)
+    {
+        using var stream = new MemoryStream();
+        using var writer = new BinaryWriter(stream);
+        writer.Write(result.Offset);
+        writer.Write(result.RowCount);
+        writer.Write(result.TotalRows);
+        writer.Write(result.ArrowData.Length);
+        writer.Write(result.ArrowData);
+        return stream.ToArray();
+    }
+
+    private QueryResult DeserializeQueryResult(byte[] data)
+    {
+        using var stream = new MemoryStream(data);
+        using var reader = new BinaryReader(stream);
+        var result = new QueryResult
+        {
+            Offset = reader.ReadInt32(),
+            RowCount = reader.ReadInt32(),
+            TotalRows = reader.ReadInt32()
+        };
+        var arrowDataLength = reader.ReadInt32();
+        result.ArrowData = reader.ReadBytes(arrowDataLength);
+        return result;
+    }
+
+    private byte[] SerializeValuesResult(ValuesResult result)
+    {
+        var json = System.Text.Json.JsonSerializer.Serialize(result);
+        return Encoding.UTF8.GetBytes(json);
+    }
+
+    private ValuesResult DeserializeValuesResult(byte[] data)
+    {
+        var json = Encoding.UTF8.GetString(data);
+        return System.Text.Json.JsonSerializer.Deserialize<ValuesResult>(json) ?? new ValuesResult();
+    }
 }
