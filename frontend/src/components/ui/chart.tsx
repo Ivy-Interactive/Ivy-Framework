@@ -303,7 +303,9 @@ const ChartLegendContent = React.forwardRef<
       const key = `${nameKey || item.dataKey || 'value'}`;
       const itemConfig = getPayloadConfigFromPayload(config, item, key);
       const labelText =
-        (itemConfig?.label as string | undefined) ||
+        (typeof itemConfig?.label === 'string'
+          ? itemConfig.label
+          : undefined) ||
         (typeof item.value === 'string' ? item.value : undefined) ||
         (item.dataKey ? String(item.dataKey) : 'value');
 
