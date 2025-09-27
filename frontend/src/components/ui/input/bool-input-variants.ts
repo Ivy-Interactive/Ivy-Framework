@@ -7,23 +7,6 @@ export const boolInputSizeVariants = {
   Large: 'text-base',
 };
 
-// Checkbox size variants
-export const checkboxSizeVariants = cva(
-  'peer h-4 w-4 shrink-0 rounded-sm border border-primary ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
-  {
-    variants: {
-      size: {
-        Small: 'h-3 w-3',
-        Medium: 'h-4 w-4',
-        Large: 'h-5 w-5',
-      },
-    },
-    defaultVariants: {
-      size: 'Medium',
-    },
-  }
-);
-
 // Toggle size variants
 export const toggleSizeVariants = cva(
   'inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',

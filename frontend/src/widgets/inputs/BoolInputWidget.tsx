@@ -15,7 +15,6 @@ import {
 } from '@/components/ui/tooltip';
 import { Sizes } from '@/types/sizes';
 import {
-  checkboxSizeVariants,
   toggleSizeVariants,
   labelSizeVariants,
   descriptionSizeVariants,
@@ -121,11 +120,9 @@ const VariantComponents = {
           onCheckedChange={onCheckedChange}
           disabled={disabled}
           nullable={nullable}
-          className={cn(
-            checkboxSizeVariants({ size }),
-            invalid && inputStyles.invalid
-          )}
+          className={cn(invalid && inputStyles.invalid)}
           data-testid={dataTestId}
+          size={size}
         />
       );
 
