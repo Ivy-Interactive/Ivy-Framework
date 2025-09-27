@@ -99,6 +99,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.32.0",
+    "@swc/helpers": "^0.5.17",
     "@playwright/test": "^1.54.2",
     "@types/canvas-confetti": "^1.9.0",
     "@types/dagre": "^0.7.53",
@@ -137,5 +138,8 @@
     "*.cs": [
       "dotnet format"
     ]
+  },
+  "overrides": {
+    "@swc/helpers": "^0.5.17"
   }
 }
