@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
@@ -68,7 +69,7 @@ public static class Utils
         }
 
         if (t.IsEnum && jsonNode is JsonValue enumVal && enumVal.TryGetValue(out string? enumStr))
-            return Enum.Parse(t, enumStr, true);
+            return ParseEnumWithDescription(t, enumStr);
 
         if (t == typeof(bool) && jsonNode is JsonValue boolVal)
         {
@@ -233,7 +234,7 @@ public static class Utils
 
         if (targetType.IsEnum && input is string enumString)
         {
-            return Enum.Parse(targetType, enumString);
+            return ParseEnumWithDescription(targetType, enumString);
         }
 
         // Handle dictionary to tuple conversion
@@ -338,5 +339,33 @@ public static class Utils
     {
         // Match pattern: any characters followed by a backtick and numbers
         return System.Text.RegularExpressions.Regex.Replace(typeName, @"`[\d]+", string.Empty);
+    }
+
+    private static object ParseEnumWithDescription(Type enumType, string enumString)
+    {
+        // First try direct enum parsing (fastest path)
+        if (Enum.TryParse(enumType, enumString, true, out var directResult))
+        {
+            return directResult;
+        }
+
+        // If direct parsing fails, check Description attributes
+        foreach (var value in Enum.GetValues(enumType))
+        {
+            var fieldInfo = enumType.GetField(value.ToString()!);
+            if (fieldInfo != null)
+            {
+                var descriptionAttribute = fieldInfo.GetCustomAttribute<System.ComponentModel.DescriptionAttribute>();
+                if (descriptionAttribute != null &&
+                    string.Equals(enumString, descriptionAttribute.Description, StringComparison.OrdinalIgnoreCase))
+                {
+                    return value;
+                }
+            }
+        }
+
+        // If neither enum name nor description matches, throw exception
+        throw new ArgumentException($"Invalid value '{enumString}' for enum {enumType.Name}. " +
+                                  $"Value must be either an enum member name or a valid Description attribute value.");
     }
 }
