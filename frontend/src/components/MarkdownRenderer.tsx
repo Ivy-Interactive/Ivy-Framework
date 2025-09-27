@@ -401,7 +401,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
     }),
     [staticComponents, codeComponent, linkComponent]
   );
-  // This is usefull to declare emoji as a new type of valid markdown component
+  // This is useful to declare emoji as a new type of valid markdown component
   type MarkdownComponents = Components & {
     emoji?: React.FC<{ name: string }>;
   };
