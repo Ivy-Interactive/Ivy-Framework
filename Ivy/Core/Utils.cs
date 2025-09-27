@@ -1,4 +1,5 @@
 using System.Collections;
+using System.ComponentModel;
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -349,18 +350,15 @@ public static class Utils
             return directResult;
         }
 
-        // If direct parsing fails, check Description attributes
-        foreach (var value in Enum.GetValues(enumType))
+        // If direct parsing fails, check Description attributes using GetFields for better performance
+        var fields = enumType.GetFields(BindingFlags.Static | BindingFlags.Public);
+        foreach (var field in fields)
         {
-            var fieldInfo = enumType.GetField(value.ToString()!);
-            if (fieldInfo != null)
+            var descriptionAttribute = field.GetCustomAttribute<DescriptionAttribute>();
+            if (descriptionAttribute != null &&
+                string.Equals(enumString, descriptionAttribute.Description, StringComparison.OrdinalIgnoreCase))
             {
-                var descriptionAttribute = fieldInfo.GetCustomAttribute<System.ComponentModel.DescriptionAttribute>();
-                if (descriptionAttribute != null &&
-                    string.Equals(enumString, descriptionAttribute.Description, StringComparison.OrdinalIgnoreCase))
-                {
-                    return value;
-                }
+                return Enum.Parse(enumType, field.Name);
             }
         }
 
