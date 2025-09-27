@@ -58,7 +58,7 @@ public abstract record ColorInputBase : WidgetBase<ColorInputBase>, IAnyColorInp
     [Prop] public ColorInputs Variant { get; set; } = ColorInputs.TextAndPicker;
 
     /// <summary>Gets or sets the size of the color input.</summary>
-    [Prop] public Sizes Size { get; set; }
+    [Prop] public Sizes Size { get; set; } = Sizes.Medium;
 
     /// <summary>Gets or sets the event handler called when the input loses focus.</summary>
     [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
