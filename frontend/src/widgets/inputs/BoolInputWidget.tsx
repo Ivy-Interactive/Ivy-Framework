@@ -16,7 +16,6 @@ import {
 import { Sizes } from '@/types/sizes';
 import {
   checkboxSizeVariants,
-  switchSizeVariants,
   toggleSizeVariants,
   labelSizeVariants,
   descriptionSizeVariants,
@@ -167,10 +166,8 @@ const VariantComponents = {
           checked={!!value}
           onCheckedChange={onCheckedChange}
           disabled={disabled}
-          className={cn(
-            switchSizeVariants({ size }),
-            invalid && inputStyles.invalid
-          )}
+          size={size}
+          className={cn(invalid && inputStyles.invalid)}
           data-testid={dataTestId}
         />
       );
