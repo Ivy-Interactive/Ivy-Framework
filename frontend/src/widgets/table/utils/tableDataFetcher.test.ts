@@ -44,7 +44,12 @@ describe('tableDataFetcher', () => {
   describe('fetchTableData', () => {
     it('should fetch table data successfully', async () => {
       const mockArrowTable = {} as arrow.Table;
-      const mockResult = { arrow_ipc_stream: new Uint8Array([1, 2, 3]) };
+      const mockResult = {
+        arrow_ipc_stream: new Uint8Array([1, 2, 3]),
+        offset: 0,
+        row_count: 2,
+        total_rows: 100,
+      };
 
       mockGrpcTableService.queryTable.mockResolvedValue(mockResult);
       mockArrow.tableFromIPC.mockReturnValue(mockArrowTable);
@@ -90,7 +95,12 @@ describe('tableDataFetcher', () => {
         },
       };
 
-      const mockResult = { arrow_ipc_stream: new Uint8Array([1, 2, 3]) };
+      const mockResult = {
+        arrow_ipc_stream: new Uint8Array([1, 2, 3]),
+        offset: 0,
+        row_count: 2,
+        total_rows: 100,
+      };
       mockGrpcTableService.queryTable.mockResolvedValue(mockResult);
       mockArrow.tableFromIPC.mockReturnValue({} as arrow.Table);
       mockConvertArrowTableToData.mockReturnValue({
@@ -116,7 +126,12 @@ describe('tableDataFetcher', () => {
     it('should include sort in query when provided', async () => {
       const mockSort: SortOrder[] = [{ column: 'name', direction: 'ASC' }];
 
-      const mockResult = { arrow_ipc_stream: new Uint8Array([1, 2, 3]) };
+      const mockResult = {
+        arrow_ipc_stream: new Uint8Array([1, 2, 3]),
+        offset: 0,
+        row_count: 2,
+        total_rows: 100,
+      };
       mockGrpcTableService.queryTable.mockResolvedValue(mockResult);
       mockArrow.tableFromIPC.mockReturnValue({} as arrow.Table);
       mockConvertArrowTableToData.mockReturnValue({
@@ -149,7 +164,12 @@ describe('tableDataFetcher', () => {
       };
       const mockSort: SortOrder[] = [{ column: 'id', direction: 'DESC' }];
 
-      const mockResult = { arrow_ipc_stream: new Uint8Array([1, 2, 3]) };
+      const mockResult = {
+        arrow_ipc_stream: new Uint8Array([1, 2, 3]),
+        offset: 0,
+        row_count: 2,
+        total_rows: 100,
+      };
       mockGrpcTableService.queryTable.mockResolvedValue(mockResult);
       mockArrow.tableFromIPC.mockReturnValue({} as arrow.Table);
       mockConvertArrowTableToData.mockReturnValue({
@@ -177,6 +197,9 @@ describe('tableDataFetcher', () => {
       // Create a mock result where arrow_ipc_stream is undefined (falsy)
       const mockResult = {
         arrow_ipc_stream: undefined as unknown as Uint8Array,
+        offset: 0,
+        row_count: 0,
+        total_rows: 0,
       };
       mockGrpcTableService.queryTable.mockResolvedValue(mockResult);
 
@@ -195,7 +218,12 @@ describe('tableDataFetcher', () => {
     it('should handle different host URLs correctly', async () => {
       mockGetIvyHost.mockReturnValue('http://example.com:9000/path');
 
-      const mockResult = { arrow_ipc_stream: new Uint8Array([1, 2, 3]) };
+      const mockResult = {
+        arrow_ipc_stream: new Uint8Array([1, 2, 3]),
+        offset: 0,
+        row_count: 2,
+        total_rows: 100,
+      };
       mockGrpcTableService.queryTable.mockResolvedValue(mockResult);
       mockArrow.tableFromIPC.mockReturnValue({} as arrow.Table);
       mockConvertArrowTableToData.mockReturnValue({
@@ -238,7 +266,12 @@ describe('tableDataFetcher', () => {
         port: 9999,
       };
 
-      const mockResult = { arrow_ipc_stream: new Uint8Array([1, 2, 3]) };
+      const mockResult = {
+        arrow_ipc_stream: new Uint8Array([1, 2, 3]),
+        offset: 0,
+        row_count: 2,
+        total_rows: 100,
+      };
       mockGrpcTableService.queryTable.mockResolvedValue(mockResult);
       mockArrow.tableFromIPC.mockReturnValue({} as arrow.Table);
       mockConvertArrowTableToData.mockReturnValue({
@@ -256,7 +289,12 @@ describe('tableDataFetcher', () => {
     });
 
     it('should handle null filter and sort parameters', async () => {
-      const mockResult = { arrow_ipc_stream: new Uint8Array([1, 2, 3]) };
+      const mockResult = {
+        arrow_ipc_stream: new Uint8Array([1, 2, 3]),
+        offset: 0,
+        row_count: 2,
+        total_rows: 100,
+      };
       mockGrpcTableService.queryTable.mockResolvedValue(mockResult);
       mockArrow.tableFromIPC.mockReturnValue({} as arrow.Table);
       mockConvertArrowTableToData.mockReturnValue({

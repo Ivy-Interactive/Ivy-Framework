@@ -30,14 +30,34 @@ const TableLayout: React.FC<TableLayoutProps> = ({ children }) => {
 
 export const Table: React.FC<TableProps> = ({
   connection,
+  config = {},
   editable = false,
 }) => {
+  // Apply default configuration values
+  const finalConfig = {
+    allowSearch: config.allowSearch ?? true,
+    filterType: config.filterType,
+    freezeColumns: config.freezeColumns ?? null,
+    allowSorting: config.allowSorting ?? true,
+    allowFiltering: config.allowFiltering ?? true,
+    allowColumnReordering: config.allowColumnReordering ?? true,
+    allowColumnResizing: config.allowColumnResizing ?? true,
+    allowCopySelection: config.allowCopySelection ?? true,
+    selectionMode: config.selectionMode,
+    showIndexColumn: config.showIndexColumn ?? false,
+    showGroups: config.showGroups ?? false,
+  };
+
   return (
-    <TableProvider connection={connection} editable={editable}>
+    <TableProvider
+      connection={connection}
+      config={finalConfig}
+      editable={editable}
+    >
       <TableLayout>
         <>
-          <TableOptions />
-          <TableEditor hasOptions={true} />
+          {finalConfig.allowFiltering && <TableOptions />}
+          <TableEditor hasOptions={finalConfig.allowFiltering} />
         </>
       </TableLayout>
       <Footer />
