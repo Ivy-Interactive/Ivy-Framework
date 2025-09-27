@@ -108,4 +108,8 @@ export default defineConfig(({ mode }) => ({
       },
     },
   },
+  test: {
+    include: ['**/*.test.ts'],
+    exclude: ['**/e2e/**', '**/node_modules/**', '**/dist/**'],
+  },
 }));
