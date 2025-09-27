@@ -15,7 +15,6 @@ import {
 } from '@/components/ui/tooltip';
 import { Sizes } from '@/types/sizes';
 import {
-  toggleSizeVariants,
   labelSizeVariants,
   descriptionSizeVariants,
 } from '@/components/ui/input/bool-input-variants';
@@ -208,24 +207,11 @@ const VariantComponents = {
           onPressedChange={onPressedChange}
           disabled={disabled}
           aria-label={label}
-          className={cn(
-            toggleSizeVariants({ size }),
-            invalid && inputStyles.invalid
-          )}
+          className={cn(invalid && inputStyles.invalid)}
+          size={size}
           data-testid={dataTestId}
         >
-          {icon && (
-            <Icon
-              className={
-                size === Sizes.Small
-                  ? 'h-3 w-3'
-                  : size === Sizes.Large
-                    ? 'h-5 w-5'
-                    : 'h-4 w-4'
-              }
-              name={icon}
-            />
-          )}
+          {icon && <Icon name={icon} />}
         </Toggle>
       );
 
@@ -262,7 +248,11 @@ export const BoolInputWidget: React.FC<BoolInputWidgetProps> = ({
   size = Sizes.Medium,
   'data-testid': dataTestId,
 }) => {
-  const eventHandler = useEventHandler();
+  const eventHandler = useEventHandler() as (
+    event: string,
+    id: string,
+    args: unknown[]
+  ) => void;
 
   // Normalize undefined to null when nullable
   const normalizedValue = nullable && value === undefined ? null : value;
