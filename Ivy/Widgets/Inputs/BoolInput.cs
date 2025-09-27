@@ -65,6 +65,9 @@ public abstract record BoolInputBase : WidgetBase<BoolInputBase>, IAnyBoolInput
     /// <summary>Gets or sets the icon displayed with the input.</summary>
     [Prop] public Icons Icon { get; set; }
 
+    /// <summary>Gets or sets the size of the boolean input.</summary>
+    [Prop] public Sizes Size { get; set; } = Sizes.Medium;
+
     /// <summary>Gets or sets the event handler called when the input loses focus.</summary>
     [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
 
@@ -409,6 +412,24 @@ public static class BoolInputExtensions
     /// <param name="description">The description or help text to display.</param>
     public static BoolInputBase Description(this BoolInputBase widget, string description) =>
         widget with { Description = description };
+
+    /// <summary>Sets the size of the boolean input.</summary>
+    /// <param name="widget">The boolean input to configure.</param>
+    /// <param name="size">The size of the boolean input.</param>
+    public static BoolInputBase Size(this BoolInputBase widget, Sizes size) =>
+        widget with { Size = size };
+
+    /// <summary>Sets the boolean input size to large for prominent display.</summary>
+    /// <param name="widget">The boolean input to configure.</param>
+    /// <returns>A new BoolInputBase instance with large size applied.</returns>
+    public static BoolInputBase Large(this BoolInputBase widget) =>
+        widget.Size(Sizes.Large);
+
+    /// <summary>Sets the boolean input size to small for compact display.</summary>
+    /// <param name="widget">The boolean input to configure.</param>
+    /// <returns>A new BoolInputBase instance with small size applied.</returns>
+    public static BoolInputBase Small(this BoolInputBase widget) =>
+        widget.Size(Sizes.Small);
 
     /// <summary>Sets the validation error message.</summary>
     /// <param name="widget">The boolean input to configure.</param>
