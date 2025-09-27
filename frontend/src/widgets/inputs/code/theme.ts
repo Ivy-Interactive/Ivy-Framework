@@ -13,12 +13,11 @@ export function createIvyCodeTheme(size: Sizes = Sizes.Medium): Extension {
   const getFontSize = (size: Sizes) => {
     switch (size) {
       case Sizes.Small:
-        return '0.75rem';
+        return '12px';
       case Sizes.Large:
-        return '1.0rem';
-      case Sizes.Medium:
+        return '16px';
       default:
-        return '0.875rem';
+        return '14px';
     }
   };
 
