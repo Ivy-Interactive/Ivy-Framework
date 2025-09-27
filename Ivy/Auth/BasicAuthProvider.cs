@@ -15,8 +15,7 @@ namespace Ivy.Auth;
 /// </summary>
 public class BasicAuthProvider : IAuthProvider
 {
-    private List<(string user, string password)> _users = new();
-    private readonly Dictionary<string, (string email, DateTimeOffset expiresAt)> _refreshTokens = new();
+    private readonly List<(string user, string password)> _users = [];
     private readonly string _secret;
     private readonly string _issuer;
     private readonly string _audience;
@@ -54,7 +53,14 @@ public class BasicAuthProvider : IAuthProvider
         var found = _users.Any(u => u.user == email && u.password == password);
         if (!found) return Task.FromResult<AuthToken?>(null);
 
-        var expiresAt = DateTime.UtcNow.AddHours(1);
+        var now = DateTimeOffset.UtcNow;
+        var authToken = CreateToken(email, now, now.ToUnixTimeSeconds());
+        return Task.FromResult<AuthToken?>(authToken);
+    }
+
+    private AuthToken CreateToken(string email, DateTimeOffset now, long authTime)
+    {
+        var expiresAt = now.AddMinutes(15);
         var claims = new[] { new Claim(JwtRegisteredClaimNames.Sub, email) };
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secret));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -62,19 +68,34 @@ public class BasicAuthProvider : IAuthProvider
             issuer: _issuer,
             audience: _audience,
             claims: claims,
-            expires: expiresAt,
+            expires: expiresAt.UtcDateTime,
             signingCredentials: creds);
         var jwt = new JwtSecurityTokenHandler().WriteToken(token);
 
-        // Generate refresh token
-        var refreshToken = GenerateRefreshToken();
-        var refreshExpiresAt = DateTimeOffset.UtcNow.AddDays(30); // Refresh tokens expire in 30 days
-        _refreshTokens[refreshToken] = (email, refreshExpiresAt);
+        var maxAgeSeconds = (long)TimeSpan.FromDays(365).TotalSeconds;
+        var rtExpiresAt = now.AddHours(24);
 
-        var authToken = jwt != null
-            ? new AuthToken(jwt, refreshToken, new DateTimeOffset(expiresAt))
-            : null;
-        return Task.FromResult(authToken);
+        var rtClaims = new[]
+        {
+            new Claim(JwtRegisteredClaimNames.Sub, email),
+            new Claim("sid", Guid.NewGuid().ToString("n")),
+            new Claim("auth_time", authTime.ToString()),
+            new Claim("max_age", maxAgeSeconds.ToString())
+        };
+
+        var rtKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secret));
+        var rtCreds = new SigningCredentials(rtKey, SecurityAlgorithms.HmacSha256);
+        var refreshJwt = new JwtSecurityToken(
+            issuer: _issuer,
+            audience: "oauth2/token",
+            claims: rtClaims,
+            notBefore: now.UtcDateTime,
+            expires: rtExpiresAt.UtcDateTime,
+            signingCredentials: rtCreds
+        );
+        var refreshToken = new JwtSecurityTokenHandler().WriteToken(refreshJwt);
+
+        return new AuthToken(jwt, refreshToken, expiresAt);
     }
 
     /// <summary>
@@ -83,10 +104,7 @@ public class BasicAuthProvider : IAuthProvider
     /// <param name="jwt">The JWT token to invalidate</param>
     public Task LogoutAsync(string jwt)
     {
-        // Remove all refresh tokens for this user (in a real implementation, 
-        // you might want to maintain a mapping of JWT to refresh token)
-        // For now, we clean up expired tokens
-        CleanupExpiredRefreshTokens();
+        // No server-side state to invalidate
         return Task.CompletedTask;
     }
 
@@ -97,54 +115,57 @@ public class BasicAuthProvider : IAuthProvider
     /// <returns>A new authentication token if successful, null otherwise</returns>
     public Task<AuthToken?> RefreshJwtAsync(AuthToken jwt)
     {
-        // Clean up expired refresh tokens first
-        CleanupExpiredRefreshTokens();
-
-        // Check if refresh token is provided and valid
+        // Check that refresh token is provided
         if (string.IsNullOrEmpty(jwt.RefreshToken))
         {
             return Task.FromResult<AuthToken?>(null);
         }
 
-        if (!_refreshTokens.TryGetValue(jwt.RefreshToken, out var refreshTokenData))
+        if (ValidateJwt(jwt.Jwt))
         {
-            return Task.FromResult<AuthToken?>(null);
+            // No need to refresh if current JWT is still valid
+            return Task.FromResult<AuthToken?>(jwt);
         }
 
-        // Check if refresh token is expired
-        if (DateTimeOffset.UtcNow >= refreshTokenData.expiresAt)
+        // Validate refresh token
+        var rtKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secret));
+        var handler = new JwtSecurityTokenHandler();
+        try
         {
-            _refreshTokens.Remove(jwt.RefreshToken);
+            var principal = handler.ValidateToken(jwt.RefreshToken, new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+
+                ValidIssuer = _issuer,
+                ValidateAudience = true,
+
+                ValidAudience = "oauth2/token",
+                ValidateLifetime = true,
+
+                ClockSkew = TimeSpan.FromSeconds(60),
+                ValidateIssuerSigningKey = true,
+
+                IssuerSigningKey = rtKey
+            }, out _);
+
+            var authTime = long.Parse(principal.FindFirst("auth_time")!.Value);
+            var maxAge = long.Parse(principal.FindFirst("max_age")!.Value);
+            var nowUnix = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            if (nowUnix > authTime + maxAge)
+            {
+                // Refresh token expired due to max_age
+                return Task.FromResult<AuthToken?>(null);
+            }
+
+            var email = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value!;
+            var token = CreateToken(email, DateTimeOffset.UtcNow, authTime);
+            return Task.FromResult<AuthToken?>(token);
+        }
+        catch
+        {
+            // Invalid refresh token
             return Task.FromResult<AuthToken?>(null);
         }
-
-        // Generate new JWT token
-        var email = refreshTokenData.email;
-        var expiresAt = DateTime.UtcNow.AddHours(1);
-        var claims = new[] { new Claim(JwtRegisteredClaimNames.Sub, email) };
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secret));
-        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-        var token = new JwtSecurityToken(
-            issuer: _issuer,
-            audience: _audience,
-            claims: claims,
-            expires: expiresAt,
-            signingCredentials: creds);
-        var newJwt = new JwtSecurityTokenHandler().WriteToken(token);
-
-        // Generate new refresh token
-        var newRefreshToken = GenerateRefreshToken();
-        var newRefreshExpiresAt = DateTimeOffset.UtcNow.AddDays(30);
-
-        // Remove old refresh token and add new one
-        _refreshTokens.Remove(jwt.RefreshToken);
-        _refreshTokens[newRefreshToken] = (email, newRefreshExpiresAt);
-
-        var authToken = newJwt != null
-            ? new AuthToken(newJwt, newRefreshToken, new DateTimeOffset(expiresAt))
-            : null;
-
-        return Task.FromResult(authToken);
     }
 
     /// <summary>
@@ -174,11 +195,19 @@ public class BasicAuthProvider : IAuthProvider
     /// <param name="jwt">The JWT token to validate</param>
     /// <returns>True if the token is valid, false otherwise</returns>
     public Task<bool> ValidateJwtAsync(string jwt)
+        => Task.FromResult(ValidateJwt(jwt));
+
+    /// <summary>
+    /// Validates whether a JWT token is still valid.
+    /// </summary>
+    /// <param name="jwt">The JWT token to validate</param>
+    /// <returns>True if the token is valid, false otherwise</returns>
+    private bool ValidateJwt(string jwt)
     {
         var handler = new JwtSecurityTokenHandler();
         try
         {
-            handler.ValidateToken(jwt, new TokenValidationParameters
+            var principal = handler.ValidateToken(jwt, new TokenValidationParameters
             {
                 ValidateIssuer = true,
                 ValidIssuer = _issuer,
@@ -189,11 +218,12 @@ public class BasicAuthProvider : IAuthProvider
                 ValidateLifetime = true,
                 ClockSkew = TimeSpan.Zero
             }, out _);
-            return Task.FromResult(true);
+
+            return true;
         }
         catch
         {
-            return Task.FromResult(false);
+            return false;
         }
     }
 
@@ -234,35 +264,5 @@ public class BasicAuthProvider : IAuthProvider
     public AuthOption[] GetAuthOptions()
     {
         return [new AuthOption(AuthFlow.EmailPassword)];
-    }
-
-    /// <summary>
-    /// Generates a cryptographically secure refresh token.
-    /// </summary>
-    /// <returns>A new refresh token</returns>
-    private string GenerateRefreshToken()
-    {
-        var randomBytes = new byte[32];
-        using (var rng = System.Security.Cryptography.RandomNumberGenerator.Create())
-        {
-            rng.GetBytes(randomBytes);
-        }
-        return Convert.ToBase64String(randomBytes);
-    }
-
-    /// <summary>
-    /// Removes expired refresh tokens from memory.
-    /// </summary>
-    private void CleanupExpiredRefreshTokens()
-    {
-        var expiredTokens = _refreshTokens
-            .Where(kvp => DateTimeOffset.UtcNow >= kvp.Value.expiresAt)
-            .Select(kvp => kvp.Key)
-            .ToList();
-
-        foreach (var token in expiredTokens)
-        {
-            _refreshTokens.Remove(token);
-        }
     }
 }
