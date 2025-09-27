@@ -1,5 +1,6 @@
 #pragma warning disable IVYHOOK001
 
+using System.ComponentModel;
 using Ivy.Shared;
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Inputs;
@@ -39,12 +40,34 @@ public class SelectInputApp : SampleBase
         Yellow
     }
 
+    /// <summary>
+    /// Enum with Description attributes that contain underscores - demonstrates switch input issues
+    /// </summary>
+    private enum DatabaseNamingConvention
+    {
+        [Description("PascalCase")]
+        PascalCase,
+
+        [Description("camelCase")]
+        CamelCase,
+
+        [Description("snake_case")]  // This underscore causes problems with switch inputs!
+        SnakeCase,
+
+        [Description("kebab-case")]
+        KebabCase,
+
+        [Description("UPPER_SNAKE_CASE")]  // Multiple underscores - even worse!
+        UpperSnakeCase
+    }
+
     protected override object? BuildSample()
     {
         var variants = CreateVariantsSection();
         var multiSelectVariants = CreateMultiSelectVariantsSection();
         var dataBinding = CreateDataBindingTests();
         var nullableTest = CreateNullableTestSection();
+        var enumUnderscoreTest = CreateEnumUnderscoreTestSection();
 
         return Layout.Vertical()
                | Text.H2("Sizes")
@@ -58,6 +81,8 @@ public class SelectInputApp : SampleBase
                | multiSelectVariants
                | Text.H2("Data Binding")
                | dataBinding
+               | Text.H2("Enum Description Issues")
+               | enumUnderscoreTest
                ;
     }
 
@@ -426,6 +451,38 @@ public class SelectInputApp : SampleBase
                 : Text.InlineCode($"[{list.Count} items]"),
             _ => Text.InlineCode(value.ToString()!)
         };
+    }
+
+    private object CreateEnumUnderscoreTestSection()
+    {
+        var namingConventionState = UseState(DatabaseNamingConvention.PascalCase);
+        var colorState = UseState(Colors.Red);
+        var namingOptions = typeof(DatabaseNamingConvention).ToOptions();
+        var colorOptions = typeof(Colors).ToOptions();
+
+        return Layout.Grid().Columns(4)
+               | Text.InlineCode("Enum")
+               | Text.InlineCode("Select")
+               | Text.InlineCode("List")
+               | Text.InlineCode("Toggle")
+
+               | Text.InlineCode("Colors (Works)")
+               | colorState.ToSelectInput(colorOptions)
+               | colorState
+                    .ToSelectInput(colorOptions)
+                    .Variant(SelectInputs.List)
+               | colorState
+                    .ToSelectInput(colorOptions)
+                    .Variant(SelectInputs.Toggle)
+
+               | Text.InlineCode("DatabaseNamingConvention (Issue)")
+               | namingConventionState.ToSelectInput(namingOptions)
+               | namingConventionState
+                    .ToSelectInput(namingOptions)
+                    .Variant(SelectInputs.List)
+               | namingConventionState
+                    .ToSelectInput(namingOptions)
+                    .Variant(SelectInputs.Toggle);
     }
 }
 
