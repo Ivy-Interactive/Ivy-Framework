@@ -2,12 +2,7 @@ import React from 'react';
 import PieChartWidget from './PieChartWidget';
 import { LegendProps } from 'recharts';
 import { ExtendedPieProps, ExtendedTooltipProps, ColorScheme } from './shared';
-
-interface PieChartTotalProps {
-  formattedValue: string;
-  label: string;
-}
-
+import { PieChartTotalProps } from './utils';
 interface PieChartData {
   [key: string]: string | number;
 }
