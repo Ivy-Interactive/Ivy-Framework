@@ -3,6 +3,30 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/ivy.svg" />
+    <script>
+      (function () {
+        try {
+          var link = document.querySelector('link[rel="icon"]');
+          if (!link) {
+            link = document.createElement('link');
+            link.setAttribute('rel', 'icon');
+            document.head.appendChild(link);
+          }
+          fetch('/favicon.ico', { method: 'HEAD' })
+            .then(function (res) {
+              if (res && res.ok) {
+                link.setAttribute('href', '/favicon.ico');
+                link.setAttribute('type', 'image/x-icon');
+              }
+            })
+            .catch(function () {
+              /* ignore */
+            });
+        } catch (e) {
+          /* ignore */
+        }
+      })();
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Ivy</title>
   </head>
