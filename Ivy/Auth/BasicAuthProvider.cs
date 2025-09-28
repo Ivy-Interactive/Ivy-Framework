@@ -134,14 +134,14 @@ public class BasicAuthProvider : IAuthProvider
 
         if (principal.FindFirst("auth_time")?.Value is not { } authTimeString ||
             principal.FindFirst("max_age")?.Value is not { } maxAgeString ||
+            !long.TryParse(authTimeString, out var authTime) ||
+            !long.TryParse(maxAgeString, out var maxAge) ||
             principal.FindFirst(ClaimTypes.NameIdentifier)?.Value is not { } email)
         {
-            // Missing required claims
+            // Missing or invalid required claims
             return Task.FromResult<AuthToken?>(null);
         }
 
-        var authTime = long.Parse(authTimeString);
-        var maxAge = long.Parse(maxAgeString);
         var now = DateTimeOffset.UtcNow;
         if (now.ToUnixTimeSeconds() > authTime + maxAge)
         {
@@ -199,13 +199,13 @@ public class BasicAuthProvider : IAuthProvider
     /// <returns>User information if successful, null otherwise</returns>
     public Task<UserInfo?> GetUserInfoAsync(string jwt)
     {
-        if (ValidateToken(jwt, _audience) is not { } principal)
+        if (ValidateToken(jwt, _audience) is not { } principal ||
+            principal.FindFirst(ClaimTypes.NameIdentifier)?.Value is not { } email)
         {
             return Task.FromResult<UserInfo?>(null);
         }
 
-        var email = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        return Task.FromResult<UserInfo?>(new UserInfo(email!, email!, null, null));
+        return Task.FromResult<UserInfo?>(new UserInfo(email, email, null, null));
     }
 
     /// <summary>
