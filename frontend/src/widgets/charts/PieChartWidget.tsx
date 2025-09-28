@@ -112,7 +112,7 @@ const PieChartWidget: React.FC<PieChartWidgetProps> = ({
               {props.labelLists
                 ?.filter(ll => {
                   // For donuts, drop inside labels; keep outside only.
-                  const pos = (ll.position as unknown as string) || '';
+                  const pos = ll.position || '';
                   return !isDonut || pos.toString().toLowerCase() !== 'inside';
                 })
                 .map((labelList, labelListIndex) => (
