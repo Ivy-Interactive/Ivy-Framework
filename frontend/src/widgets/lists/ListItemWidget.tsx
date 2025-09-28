@@ -26,9 +26,9 @@ export const ListItemWidget: React.FC<ListItemWidgetProps> = ({
       className="pl-4 pr-4 w-full h-full flex-left flex items-center rounded-none hover:bg-accent focus:bg-accent focus:outline-none cursor-pointer min-w-0"
     >
       <div className="flex flex-col items-start text-body w-full flex-1 min-w-0">
-        <span className="w-full whitespace-normal break-all">{title}</span>
+        <span className="w-full whitespace-normal break-words">{title}</span>
         {subtitle && (
-          <span className="text-sm text-muted-foreground w-full whitespace-normal break-all">
+          <span className="text-sm text-muted-foreground w-full whitespace-normal break-words">
             {subtitle}
           </span>
         )}
