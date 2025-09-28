@@ -142,7 +142,7 @@ public class BasicAuthProvider : IAuthProvider
                 ValidAudience = "oauth2/token",
                 ValidateLifetime = true,
 
-                ClockSkew = TimeSpan.FromSeconds(60),
+                ClockSkew = TimeSpan.FromSeconds(30),
                 ValidateIssuerSigningKey = true,
 
                 IssuerSigningKey = rtKey
@@ -216,7 +216,7 @@ public class BasicAuthProvider : IAuthProvider
                 ValidateIssuerSigningKey = true,
                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secret)),
                 ValidateLifetime = true,
-                ClockSkew = TimeSpan.Zero
+                ClockSkew = TimeSpan.FromSeconds(30),
             }, out _);
 
             return true;
@@ -246,7 +246,7 @@ public class BasicAuthProvider : IAuthProvider
                 ValidateIssuerSigningKey = true,
                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secret)),
                 ValidateLifetime = true,
-                ClockSkew = TimeSpan.Zero
+                ClockSkew = TimeSpan.FromSeconds(30),
             }, out _);
             var email = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             return Task.FromResult<UserInfo?>(new UserInfo(email!, email!, null, null));
