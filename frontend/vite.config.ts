@@ -73,9 +73,6 @@ export default defineConfig(({ mode }) => ({
       input: {
         main: path.resolve(__dirname, 'index.html'),
       },
-      external: () => {
-        return false;
-      },
       output: {
         entryFileNames: 'assets/[name].[hash].js',
         chunkFileNames: 'assets/[name].[hash].js',
@@ -83,13 +80,8 @@ export default defineConfig(({ mode }) => ({
         // Fine-grained vendor chunking to keep initial payloads small and improve caching
         manualChunks(id) {
           if (id.includes('node_modules')) {
-            if (
-              id.includes('react') &&
-              !id.includes('recharts') &&
-              !id.includes('@radix-ui')
-            )
+            if (id.includes('react') && !id.includes('recharts'))
               return 'vendor-react';
-            if (id.includes('@radix-ui')) return 'vendor-react';
             if (
               id.includes('codemirror') ||
               id.includes('@uiw/react-codemirror')
