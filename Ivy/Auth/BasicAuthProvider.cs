@@ -127,50 +127,30 @@ public class BasicAuthProvider : IAuthProvider
         }
 
         // Validate refresh token
-        var handler = new JwtSecurityTokenHandler();
-        try
+        if (ValidateToken(jwt.RefreshToken, "oauth2/token") is not { } principal)
         {
-            var principal = handler.ValidateToken(jwt.RefreshToken, new TokenValidationParameters
-            {
-                ValidateIssuer = true,
-
-                ValidIssuer = _issuer,
-                ValidateAudience = true,
-
-                ValidAudience = "oauth2/token",
-                ValidateLifetime = true,
-
-                ClockSkew = TimeSpan.FromSeconds(30),
-                ValidateIssuerSigningKey = true,
-
-                IssuerSigningKey = _signingKey
-            }, out _);
-
-            if (principal.FindFirst("auth_time")?.Value is not { } authTimeString ||
-                principal.FindFirst("max_age")?.Value is not { } maxAgeString ||
-                principal.FindFirst(ClaimTypes.NameIdentifier)?.Value is not { } email)
-            {
-                // Missing required claims
-                return Task.FromResult<AuthToken?>(null);
-            }
-
-            var authTime = long.Parse(authTimeString);
-            var maxAge = long.Parse(maxAgeString);
-            var now = DateTimeOffset.UtcNow;
-            if (now.ToUnixTimeSeconds() > authTime + maxAge)
-            {
-                // Refresh token expired due to max_age
-                return Task.FromResult<AuthToken?>(null);
-            }
-
-            var token = CreateToken(email, now, authTime);
-            return Task.FromResult<AuthToken?>(token);
-        }
-        catch
-        {
-            // Invalid refresh token
             return Task.FromResult<AuthToken?>(null);
         }
+
+        if (principal.FindFirst("auth_time")?.Value is not { } authTimeString ||
+            principal.FindFirst("max_age")?.Value is not { } maxAgeString ||
+            principal.FindFirst(ClaimTypes.NameIdentifier)?.Value is not { } email)
+        {
+            // Missing required claims
+            return Task.FromResult<AuthToken?>(null);
+        }
+
+        var authTime = long.Parse(authTimeString);
+        var maxAge = long.Parse(maxAgeString);
+        var now = DateTimeOffset.UtcNow;
+        if (now.ToUnixTimeSeconds() > authTime + maxAge)
+        {
+            // Refresh token expired due to max_age
+            return Task.FromResult<AuthToken?>(null);
+        }
+
+        var token = CreateToken(email, now, authTime);
+        return Task.FromResult<AuthToken?>(token);
     }
 
     /// <summary>
@@ -209,27 +189,7 @@ public class BasicAuthProvider : IAuthProvider
     /// <returns>True if the token is valid, false otherwise</returns>
     private bool ValidateJwt(string jwt)
     {
-        var handler = new JwtSecurityTokenHandler();
-        try
-        {
-            var principal = handler.ValidateToken(jwt, new TokenValidationParameters
-            {
-                ValidateIssuer = true,
-                ValidIssuer = _issuer,
-                ValidateAudience = true,
-                ValidAudience = _audience,
-                ValidateIssuerSigningKey = true,
-                IssuerSigningKey = _signingKey,
-                ValidateLifetime = true,
-                ClockSkew = TimeSpan.FromSeconds(30),
-            }, out _);
-
-            return true;
-        }
-        catch
-        {
-            return false;
-        }
+        return ValidateToken(jwt, _audience) != null;
     }
 
     /// <summary>
@@ -239,27 +199,13 @@ public class BasicAuthProvider : IAuthProvider
     /// <returns>User information if successful, null otherwise</returns>
     public Task<UserInfo?> GetUserInfoAsync(string jwt)
     {
-        var handler = new JwtSecurityTokenHandler();
-        try
-        {
-            var principal = handler.ValidateToken(jwt, new TokenValidationParameters
-            {
-                ValidateIssuer = true,
-                ValidIssuer = _issuer,
-                ValidateAudience = true,
-                ValidAudience = _audience,
-                ValidateIssuerSigningKey = true,
-                IssuerSigningKey = _signingKey,
-                ValidateLifetime = true,
-                ClockSkew = TimeSpan.FromSeconds(30),
-            }, out _);
-            var email = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            return Task.FromResult<UserInfo?>(new UserInfo(email!, email!, null, null));
-        }
-        catch
+        if (ValidateToken(jwt, _audience) is not { } principal)
         {
             return Task.FromResult<UserInfo?>(null);
         }
+
+        var email = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        return Task.FromResult<UserInfo?>(new UserInfo(email!, email!, null, null));
     }
 
     /// <summary>
@@ -269,5 +215,28 @@ public class BasicAuthProvider : IAuthProvider
     public AuthOption[] GetAuthOptions()
     {
         return [new AuthOption(AuthFlow.EmailPassword)];
+    }
+
+    private ClaimsPrincipal? ValidateToken(string jwt, string audience)
+    {
+        var handler = new JwtSecurityTokenHandler();
+        try
+        {
+            return handler.ValidateToken(jwt, new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidIssuer = _issuer,
+                ValidateAudience = true,
+                ValidAudience = audience,
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = _signingKey,
+                ValidateLifetime = true,
+                ClockSkew = TimeSpan.FromSeconds(30),
+            }, out _);
+        }
+        catch
+        {
+            return null;
+        }
     }
 }
