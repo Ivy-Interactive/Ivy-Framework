@@ -45,25 +45,25 @@ public class BasicAuthProvider : IAuthProvider
     }
 
     /// <summary>
-    /// Authenticates a user with email and password.
+    /// Authenticates a user with username and password.
     /// </summary>
-    /// <param name="email">The user's email address</param>
+    /// <param name="user">The user's username</param>
     /// <param name="password">The user's password</param>
     /// <returns>An authentication token if successful, null otherwise</returns>
-    public Task<AuthToken?> LoginAsync(string email, string password)
+    public Task<AuthToken?> LoginAsync(string user, string password)
     {
-        var found = _users.Any(u => u.user == email && u.password == password);
+        var found = _users.Any(u => u.user == user && u.password == password);
         if (!found) return Task.FromResult<AuthToken?>(null);
 
         var now = DateTimeOffset.UtcNow;
-        var authToken = CreateToken(email, now, now.ToUnixTimeSeconds());
+        var authToken = CreateToken(user, now, now.ToUnixTimeSeconds());
         return Task.FromResult<AuthToken?>(authToken);
     }
 
-    private AuthToken CreateToken(string email, DateTimeOffset now, long authTime)
+    private AuthToken CreateToken(string user, DateTimeOffset now, long authTime)
     {
         var expiresAt = now.AddMinutes(15);
-        var claims = new[] { new Claim(JwtRegisteredClaimNames.Sub, email) };
+        var claims = new[] { new Claim(JwtRegisteredClaimNames.Sub, user) };
         var creds = new SigningCredentials(_signingKey, SecurityAlgorithms.HmacSha256);
         var token = new JwtSecurityToken(
             issuer: _issuer,
@@ -78,7 +78,7 @@ public class BasicAuthProvider : IAuthProvider
 
         var rtClaims = new[]
         {
-            new Claim(JwtRegisteredClaimNames.Sub, email),
+            new Claim(JwtRegisteredClaimNames.Sub, user),
             new Claim("sid", Guid.NewGuid().ToString("n")),
             new Claim("auth_time", authTime.ToString()),
             new Claim("max_age", maxAgeSeconds.ToString())
@@ -136,7 +136,7 @@ public class BasicAuthProvider : IAuthProvider
             principal.FindFirst("max_age")?.Value is not { } maxAgeString ||
             !long.TryParse(authTimeString, out var authTime) ||
             !long.TryParse(maxAgeString, out var maxAge) ||
-            principal.FindFirst(ClaimTypes.NameIdentifier)?.Value is not { } email)
+            principal.FindFirst(ClaimTypes.NameIdentifier)?.Value is not { } user)
         {
             // Missing or invalid required claims
             return Task.FromResult<AuthToken?>(null);
@@ -149,7 +149,7 @@ public class BasicAuthProvider : IAuthProvider
             return Task.FromResult<AuthToken?>(null);
         }
 
-        var token = CreateToken(email, now, authTime);
+        var token = CreateToken(user, now, authTime);
         return Task.FromResult<AuthToken?>(token);
     }
 
@@ -200,12 +200,12 @@ public class BasicAuthProvider : IAuthProvider
     public Task<UserInfo?> GetUserInfoAsync(string jwt)
     {
         if (ValidateToken(jwt, _audience) is not { } principal ||
-            principal.FindFirst(ClaimTypes.NameIdentifier)?.Value is not { } email)
+            principal.FindFirst(ClaimTypes.NameIdentifier)?.Value is not { } user)
         {
             return Task.FromResult<UserInfo?>(null);
         }
 
-        return Task.FromResult<UserInfo?>(new UserInfo(email, email, null, null));
+        return Task.FromResult<UserInfo?>(new UserInfo(user, user, null, null));
     }
 
     /// <summary>
