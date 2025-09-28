@@ -16,9 +16,9 @@ namespace Ivy.Auth;
 public class BasicAuthProvider : IAuthProvider
 {
     private readonly List<(string user, string password)> _users = [];
-    private readonly string _secret;
     private readonly string _issuer;
     private readonly string _audience;
+    private readonly SymmetricSecurityKey _signingKey;
 
     /// <summary>
     /// Initializes a new instance of the BasicAuthProvider with configuration from environment variables and user secrets.
@@ -30,7 +30,7 @@ public class BasicAuthProvider : IAuthProvider
             .AddUserSecrets(Assembly.GetEntryAssembly()!)
             .Build();
 
-        _secret = configuration["BasicAuth:JwtSecret"] ?? throw new Exception("BasicAuth:JwtSecret is required");
+        var secret = configuration["BasicAuth:JwtSecret"] ?? throw new Exception("BasicAuth:JwtSecret is required");
         _issuer = configuration["BasicAuth:JwtIssuer"] ?? "ivy";
         _audience = configuration["BasicAuth:JwtAudience"] ?? "ivy-app";
 
@@ -40,6 +40,8 @@ public class BasicAuthProvider : IAuthProvider
             var parts = user.Split(':');
             _users.Add((parts[0], parts[1]));
         }
+
+        _signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret));
     }
 
     /// <summary>
@@ -62,8 +64,7 @@ public class BasicAuthProvider : IAuthProvider
     {
         var expiresAt = now.AddMinutes(15);
         var claims = new[] { new Claim(JwtRegisteredClaimNames.Sub, email) };
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secret));
-        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+        var creds = new SigningCredentials(_signingKey, SecurityAlgorithms.HmacSha256);
         var token = new JwtSecurityToken(
             issuer: _issuer,
             audience: _audience,
@@ -83,15 +84,13 @@ public class BasicAuthProvider : IAuthProvider
             new Claim("max_age", maxAgeSeconds.ToString())
         };
 
-        var rtKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secret));
-        var rtCreds = new SigningCredentials(rtKey, SecurityAlgorithms.HmacSha256);
         var refreshJwt = new JwtSecurityToken(
             issuer: _issuer,
             audience: "oauth2/token",
             claims: rtClaims,
             notBefore: now.UtcDateTime,
             expires: rtExpiresAt.UtcDateTime,
-            signingCredentials: rtCreds
+            signingCredentials: creds
         );
         var refreshToken = new JwtSecurityTokenHandler().WriteToken(refreshJwt);
 
@@ -128,7 +127,6 @@ public class BasicAuthProvider : IAuthProvider
         }
 
         // Validate refresh token
-        var rtKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secret));
         var handler = new JwtSecurityTokenHandler();
         try
         {
@@ -145,7 +143,7 @@ public class BasicAuthProvider : IAuthProvider
                 ClockSkew = TimeSpan.FromSeconds(30),
                 ValidateIssuerSigningKey = true,
 
-                IssuerSigningKey = rtKey
+                IssuerSigningKey = _signingKey
             }, out _);
 
             if (principal.FindFirst("auth_time")?.Value is not { } authTimeString ||
@@ -221,7 +219,7 @@ public class BasicAuthProvider : IAuthProvider
                 ValidateAudience = true,
                 ValidAudience = _audience,
                 ValidateIssuerSigningKey = true,
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secret)),
+                IssuerSigningKey = _signingKey,
                 ValidateLifetime = true,
                 ClockSkew = TimeSpan.FromSeconds(30),
             }, out _);
@@ -251,7 +249,7 @@ public class BasicAuthProvider : IAuthProvider
                 ValidateAudience = true,
                 ValidAudience = _audience,
                 ValidateIssuerSigningKey = true,
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secret)),
+                IssuerSigningKey = _signingKey,
                 ValidateLifetime = true,
                 ClockSkew = TimeSpan.FromSeconds(30),
             }, out _);
