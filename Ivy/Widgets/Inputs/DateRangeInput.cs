@@ -225,24 +225,18 @@ public static class DateRangeInputExtensions
     }
 
     /// <summary>Sets the size of the date range input.</summary>
-    /// <param name="widget">The date range input to configure.</param>
-    /// <param name="size">The size of the date range input.</param>
     public static DateRangeInputBase Size(this DateRangeInputBase widget, Sizes size)
     {
         return widget with { Size = size };
     }
 
     /// <summary>Sets the date range input size to large for prominent display.</summary>
-    /// <param name="widget">The date range input to configure.</param>
-    /// <returns>A new DateRangeInputBase instance with large size applied.</returns>
     public static DateRangeInputBase Large(this DateRangeInputBase widget)
     {
         return widget.Size(Sizes.Large);
     }
 
     /// <summary>Sets the date range input size to small for compact display.</summary>
-    /// <param name="widget">The date range input to configure.</param>
-    /// <returns>A new DateRangeInputBase instance with small size applied.</returns>
     public static DateRangeInputBase Small(this DateRangeInputBase widget)
     {
         return widget.Size(Sizes.Small);
