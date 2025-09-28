@@ -148,17 +148,24 @@ public class BasicAuthProvider : IAuthProvider
                 IssuerSigningKey = rtKey
             }, out _);
 
-            var authTime = long.Parse(principal.FindFirst("auth_time")!.Value);
-            var maxAge = long.Parse(principal.FindFirst("max_age")!.Value);
-            var nowUnix = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-            if (nowUnix > authTime + maxAge)
+            if (principal.FindFirst("auth_time")?.Value is not { } authTimeString ||
+                principal.FindFirst("max_age")?.Value is not { } maxAgeString ||
+                principal.FindFirst(ClaimTypes.NameIdentifier)?.Value is not { } email)
+            {
+                // Missing required claims
+                return Task.FromResult<AuthToken?>(null);
+            }
+
+            var authTime = long.Parse(authTimeString);
+            var maxAge = long.Parse(maxAgeString);
+            var now = DateTimeOffset.UtcNow;
+            if (now.ToUnixTimeSeconds() > authTime + maxAge)
             {
                 // Refresh token expired due to max_age
                 return Task.FromResult<AuthToken?>(null);
             }
 
-            var email = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value!;
-            var token = CreateToken(email, DateTimeOffset.UtcNow, authTime);
+            var token = CreateToken(email, now, authTime);
             return Task.FromResult<AuthToken?>(token);
         }
         catch
