@@ -117,7 +117,7 @@ public class ProductDetailsBlade(Guid productId) : ViewBase
             .Width(Size.Grow())
             .ToTrigger((isOpen) => new ProductEditSheet(isOpen, productId, refreshToken));
 
-        return Layout.Vertical() | new Card(
+        var productCard = new Card(
             content: new
             {
                 // We include some of the interesting fields of the entity here
@@ -132,6 +132,15 @@ public class ProductDetailsBlade(Guid productId) : ViewBase
                 | deleteBtn
                 | editBtn
             ).Title("Product Details");
+
+        return Layout.Vertical().Gap(4) | new object[]
+        {
+            productCard,
+            productCard,
+            productCard,
+            productCard,
+            productCard
+        };
     }
 
     private void Delete(SampleDbContextFactory dbFactory)
