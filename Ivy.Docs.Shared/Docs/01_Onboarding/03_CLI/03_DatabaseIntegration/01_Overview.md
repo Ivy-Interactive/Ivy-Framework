@@ -296,6 +296,27 @@ You can add multiple database connections to a single project:
 >ivy db add --provider ClickHouse --name AnalyticsDb
 ```
 
+## Default schema
+
+The ivy db add command includes a `--use-default-schema` parameter that automatically uses the database's default schema without prompting.
+
+```terminal
+>ivy db add --provider postgres --connection-string "..." --name MyDb --use-default-schema
+
+```
+
+The default schemas for each database provider are:
+
+- `PostgreSQL/Supabase` – public
+- `SQL Server` – dbo
+- `Oracle` – Uses the connected username as the default schema
+- `ClickHouse` – default
+- `Snowflake` – PUBLIC
+
+<Callout Type="Warning">
+You cannot use both --schema and --use-default-schema parameters together. Choose one based on whether you want to specify a custom schema or use the database default.
+</Callout>
+
 ## Related Commands
 
 - `ivy init` - Initialize a new Ivy project
