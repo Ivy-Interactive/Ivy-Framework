@@ -4,6 +4,43 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { getWidth } from '@/lib/styles';
 import { logger } from '@/lib/logger';
+import { Sizes } from '@/types/sizes';
+import { cva } from 'class-variance-authority';
+
+// Size variants for AudioRecorderWidget
+const audioRecorderVariants = cva(
+  'relative rounded-md border-2 border-dashed transition-colors border-muted-foreground/25 p-4 w-30',
+  {
+    variants: {
+      size: {
+        Small: 'p-2',
+        Medium: 'p-4',
+        Large: 'p-6',
+      },
+    },
+    defaultVariants: {
+      size: 'Medium',
+    },
+  }
+);
+
+const buttonSizeVariants = {
+  Small: 'h-4 w-4',
+  Medium: 'h-6 w-6',
+  Large: 'h-8 w-8',
+};
+
+const iconSizeVariants = {
+  Small: 'h-4 w-4',
+  Medium: 'h-6 w-6',
+  Large: 'h-8 w-8',
+};
+
+const textSizeVariants = {
+  Small: 'text-xs',
+  Medium: 'text-sm',
+  Large: 'text-base',
+};
 
 interface AudioRecorderWidgetProps {
   label?: string;
@@ -14,6 +51,7 @@ interface AudioRecorderWidgetProps {
   width?: string;
   uploadUrl: string;
   chunkInterval: number;
+  size?: Sizes;
 }
 
 export const AudioRecorderWidget: React.FC<AudioRecorderWidgetProps> = ({
@@ -24,6 +62,7 @@ export const AudioRecorderWidget: React.FC<AudioRecorderWidgetProps> = ({
   width,
   uploadUrl,
   chunkInterval,
+  size = Sizes.Medium,
 }) => {
   const uploadChunk = useCallback(
     async (chunk: Blob): Promise<void> => {
@@ -140,7 +179,7 @@ export const AudioRecorderWidget: React.FC<AudioRecorderWidgetProps> = ({
     <div className="relative" style={{ ...getWidth(width) }}>
       <div
         className={cn(
-          'relative rounded-md border-2 border-dashed transition-colors border-muted-foreground/25 p-4 w-30',
+          audioRecorderVariants({ size }),
           disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
         )}
         onClick={
@@ -170,25 +209,39 @@ export const AudioRecorderWidget: React.FC<AudioRecorderWidgetProps> = ({
           type="button"
           variant="ghost"
           size="icon"
-          className="mt-2 h-6 w-fit z-10 mx-auto block"
+          className={cn(
+            'mt-2 w-fit z-10 mx-auto block',
+            buttonSizeVariants[size]
+          )}
         >
           {recording ? (
-            <Square className="h-4 w-4" />
+            <Square className={iconSizeVariants[size]} />
           ) : (
-            <Mic className="h-4 w-4" />
+            <Mic className={iconSizeVariants[size]} />
           )}
         </Button>
         <SecondsCounter
           start={recordingStartedAt}
           stopped={recordingStoppedAt}
+          size={size}
         />
         {(label || recordingLabel) && (
-          <p className="text-sm text-center mt-1 text-muted-foreground">
+          <p
+            className={cn(
+              'text-center mt-1 text-muted-foreground',
+              textSizeVariants[size]
+            )}
+          >
             {recording ? recordingLabel : label}
           </p>
         )}
         {error && (
-          <p className="text-sm text-muted-foreground text-center">
+          <p
+            className={cn(
+              'text-muted-foreground text-center',
+              textSizeVariants[size]
+            )}
+          >
             Failed to record. Check your settings.
           </p>
         )}
@@ -200,6 +253,7 @@ export const AudioRecorderWidget: React.FC<AudioRecorderWidgetProps> = ({
 function SecondsCounter(props: {
   start: number | null;
   stopped: number | null;
+  size: Sizes;
 }) {
   const [seconds, setSeconds] = useState(0);
   useEffect(() => {
@@ -220,7 +274,7 @@ function SecondsCounter(props: {
     };
   }, [props.start, props.stopped]);
   return (
-    <p className="text-center">
+    <p className={cn('text-center', textSizeVariants[props.size])}>
       {Math.floor(seconds / 60)
         .toString()
         .padStart(2, '0')}
