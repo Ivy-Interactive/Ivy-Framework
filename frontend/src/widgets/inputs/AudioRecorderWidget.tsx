@@ -178,7 +178,7 @@ export const AudioRecorderWidget: React.FC<AudioRecorderWidgetProps> = ({
           type="button"
           variant="ghost"
           size="icon"
-          className={cn('mt-2 w-fit z-10 mx-auto block')}
+          className={'mt-2 h-6 w-fit z-10 mx-auto block'}
         >
           {recording ? <Square /> : <Mic />}
         </Button>
