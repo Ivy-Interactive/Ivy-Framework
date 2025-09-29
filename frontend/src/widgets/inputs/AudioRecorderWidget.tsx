@@ -5,42 +5,11 @@ import { cn } from '@/lib/utils';
 import { getWidth } from '@/lib/styles';
 import { logger } from '@/lib/logger';
 import { Sizes } from '@/types/sizes';
-import { cva } from 'class-variance-authority';
-
-// Size variants for AudioRecorderWidget
-const audioRecorderVariants = cva(
-  'relative rounded-md border-2 border-dashed transition-colors border-muted-foreground/25 p-4 w-30',
-  {
-    variants: {
-      size: {
-        Small: 'p-2',
-        Medium: 'p-4',
-        Large: 'p-6',
-      },
-    },
-    defaultVariants: {
-      size: 'Medium',
-    },
-  }
-);
-
-const buttonSizeVariants = {
-  Small: 'h-4 w-4',
-  Medium: 'h-6 w-6',
-  Large: 'h-8 w-8',
-};
-
-const iconSizeVariants = {
-  Small: 'h-4 w-4',
-  Medium: 'h-6 w-6',
-  Large: 'h-8 w-8',
-};
-
-const textSizeVariants = {
-  Small: 'text-xs',
-  Medium: 'text-sm',
-  Large: 'text-base',
-};
+import {
+  audioRecorderVariants,
+  textSizeVariants,
+  timerSizeVariants,
+} from '@/components/ui/input/audio-recorder-variants';
 
 interface AudioRecorderWidgetProps {
   label?: string;
@@ -209,16 +178,9 @@ export const AudioRecorderWidget: React.FC<AudioRecorderWidgetProps> = ({
           type="button"
           variant="ghost"
           size="icon"
-          className={cn(
-            'mt-2 w-fit z-10 mx-auto block',
-            buttonSizeVariants[size]
-          )}
+          className={cn('mt-2 w-fit z-10 mx-auto block')}
         >
-          {recording ? (
-            <Square className={iconSizeVariants[size]} />
-          ) : (
-            <Mic className={iconSizeVariants[size]} />
-          )}
+          {recording ? <Square /> : <Mic />}
         </Button>
         <SecondsCounter
           start={recordingStartedAt}
@@ -229,7 +191,7 @@ export const AudioRecorderWidget: React.FC<AudioRecorderWidgetProps> = ({
           <p
             className={cn(
               'text-center mt-1 text-muted-foreground',
-              textSizeVariants[size]
+              textSizeVariants({ size })
             )}
           >
             {recording ? recordingLabel : label}
@@ -239,7 +201,7 @@ export const AudioRecorderWidget: React.FC<AudioRecorderWidgetProps> = ({
           <p
             className={cn(
               'text-muted-foreground text-center',
-              textSizeVariants[size]
+              textSizeVariants({ size })
             )}
           >
             Failed to record. Check your settings.
@@ -274,7 +236,7 @@ function SecondsCounter(props: {
     };
   }, [props.start, props.stopped]);
   return (
-    <p className={cn('text-center', textSizeVariants[props.size])}>
+    <p className={cn('text-center', timerSizeVariants({ size: props.size }))}>
       {Math.floor(seconds / 60)
         .toString()
         .padStart(2, '0')}

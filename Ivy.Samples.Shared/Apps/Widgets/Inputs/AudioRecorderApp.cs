@@ -43,11 +43,6 @@ public class AudioRecorderApp() : SampleBase
                | new AudioRecorder("Start recording", "Recording audio...")
                | new AudioRecorder("Start recording", "Recording audio...").Large()
 
-               | Text.InlineCode("With Custom Labels")
-               | new AudioRecorder("Tap to record", "Recording...").Small()
-               | new AudioRecorder("Tap to record", "Recording...")
-               | new AudioRecorder("Tap to record", "Recording...").Large()
-
                | Text.InlineCode("Disabled State")
                | new AudioRecorder("Start recording", "Recording audio...", disabled: true).Small()
                | new AudioRecorder("Start recording", "Recording audio...", disabled: true)
