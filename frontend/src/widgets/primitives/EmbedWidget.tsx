@@ -1,5 +1,45 @@
 import React, { useEffect, useState } from 'react';
 
+// URL validation and sanitization utilities
+const isValidUrl = (url: string): boolean => {
+  try {
+    const urlObj = new URL(url);
+    // Only allow http and https protocols
+    return ['http:', 'https:'].includes(urlObj.protocol);
+  } catch {
+    return false;
+  }
+};
+
+const sanitizeUrl = (url: string): string | null => {
+  if (!isValidUrl(url)) {
+    return null;
+  }
+
+  try {
+    const urlObj = new URL(url);
+    // Remove potentially dangerous URL components
+    urlObj.search = '';
+    urlObj.hash = '';
+    return urlObj.toString();
+  } catch {
+    return null;
+  }
+};
+
+const sanitizeId = (id: string): string => {
+  // Remove any non-alphanumeric characters except hyphens and underscores
+  return id.replace(/[^a-zA-Z0-9\-_]/g, '');
+};
+
+const sanitizeText = (text: string): string => {
+  // Remove potentially dangerous characters and limit length
+  return text
+    .replace(/[<>"'&]/g, '')
+    .substring(0, 1000)
+    .trim();
+};
+
 interface EmbedWidgetProps {
   url: string;
 }
@@ -52,11 +92,11 @@ const YouTubeEmbed: React.FC<YouTubeEmbedProps> = ({
   useEffect(() => {
     const extractVideoId = (ytUrl: string): string | null => {
       let match = ytUrl.match(/youtube\.com\/watch\?v=([^&]+)/);
-      if (match) return match[1];
+      if (match) return sanitizeId(match[1]);
       match = ytUrl.match(/youtu\.be\/([^?]+)/);
-      if (match) return match[1];
+      if (match) return sanitizeId(match[1]);
       match = ytUrl.match(/youtube\.com\/embed\/([^?]+)/);
-      if (match) return match[1];
+      if (match) return sanitizeId(match[1]);
 
       return null;
     };
@@ -89,7 +129,7 @@ const TwitterEmbed: React.FC<TwitterEmbedProps> = ({ url }) => {
   useEffect(() => {
     const extractTweetId = (twitterUrl: string): string | null => {
       const match = twitterUrl.match(/twitter\.com\/\w+\/status\/(\d+)/);
-      return match ? match[1] : null;
+      return match ? sanitizeId(match[1]) : null;
     };
 
     setTweetId(extractTweetId(url));
@@ -99,10 +139,15 @@ const TwitterEmbed: React.FC<TwitterEmbedProps> = ({ url }) => {
     return <div>Invalid Twitter/X URL.</div>;
   }
 
+  const sanitizedUrl = sanitizeUrl(url);
+  if (!sanitizedUrl) {
+    return <div>Invalid Twitter/X URL.</div>;
+  }
+
   return (
     <div className="twitter-embed">
       <blockquote className="twitter-tweet" data-theme="light" data-dnt="true">
-        <a href={url}></a>
+        <a href={sanitizedUrl}></a>
       </blockquote>
       <script
         async
@@ -118,12 +163,17 @@ const FacebookEmbed: React.FC<FacebookEmbedProps> = ({ url }) => {
     // Extract page name from various Facebook URL formats
     const match = facebookUrl.match(/facebook\.com\/([^/?]+)/);
     if (match) {
-      return match[1];
+      return sanitizeText(match[1]);
     }
     return 'Facebook';
   };
 
   const pageName = extractPageName(url);
+  const sanitizedUrl = sanitizeUrl(url);
+
+  if (!sanitizedUrl) {
+    return <div>Invalid Facebook URL.</div>;
+  }
 
   // Show fallback card immediately since Facebook embeds are frequently blocked
   return (
@@ -142,7 +192,7 @@ const FacebookEmbed: React.FC<FacebookEmbedProps> = ({ url }) => {
           </span>
         </div>
         <a
-          href={url}
+          href={sanitizedUrl}
           target="_blank"
           rel="noopener noreferrer"
           className="text-sm text-blue-600 hover:text-blue-800"
@@ -172,7 +222,7 @@ const FacebookEmbed: React.FC<FacebookEmbedProps> = ({ url }) => {
             settings.
           </div>
           <a
-            href={url}
+            href={sanitizedUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
@@ -191,7 +241,7 @@ const InstagramEmbed: React.FC<InstagramEmbedProps> = ({ url }) => {
   useEffect(() => {
     const extractPostId = (instagramUrl: string): string | null => {
       const match = instagramUrl.match(/instagram\.com\/p\/([^/]+)/);
-      return match ? match[1] : null;
+      return match ? sanitizeId(match[1]) : null;
     };
 
     setPostId(extractPostId(url));
@@ -201,15 +251,20 @@ const InstagramEmbed: React.FC<InstagramEmbedProps> = ({ url }) => {
     return <div>Invalid Instagram URL.</div>;
   }
 
+  const sanitizedUrl = sanitizeUrl(url);
+  if (!sanitizedUrl) {
+    return <div>Invalid Instagram URL.</div>;
+  }
+
   return (
     <div className="instagram-embed">
       <blockquote
         className="instagram-media"
         data-instgrm-captioned
-        data-instgrm-permalink={url}
+        data-instgrm-permalink={sanitizedUrl}
         data-instgrm-version="14"
       >
-        <a href={url} target="_blank" rel="noopener noreferrer">
+        <a href={sanitizedUrl} target="_blank" rel="noopener noreferrer">
           Loading Instagram post...
         </a>
       </blockquote>
@@ -224,7 +279,7 @@ const TikTokEmbed: React.FC<TikTokEmbedProps> = ({ url }) => {
   useEffect(() => {
     const extractVideoId = (tiktokUrl: string): string | null => {
       const match = tiktokUrl.match(/tiktok\.com\/@[\w.-]+\/video\/(\d+)/);
-      return match ? match[1] : null;
+      return match ? sanitizeId(match[1]) : null;
     };
 
     setVideoId(extractVideoId(url));
@@ -234,9 +289,18 @@ const TikTokEmbed: React.FC<TikTokEmbedProps> = ({ url }) => {
     return <div>Invalid TikTok URL.</div>;
   }
 
+  const sanitizedUrl = sanitizeUrl(url);
+  if (!sanitizedUrl) {
+    return <div>Invalid TikTok URL.</div>;
+  }
+
   return (
     <div className="tiktok-embed">
-      <blockquote className="tiktok-embed" cite={url} data-video-id={videoId}>
+      <blockquote
+        className="tiktok-embed"
+        cite={sanitizedUrl}
+        data-video-id={videoId}
+      >
         <section></section>
       </blockquote>
       <script async src="https://www.tiktok.com/embed.js"></script>
@@ -251,17 +315,17 @@ const LinkedInEmbed: React.FC<LinkedInEmbedProps> = ({ url }) => {
     const extractPostId = (linkedinUrl: string): string | null => {
       // LinkedIn post URL: https://www.linkedin.com/posts/activity-1234567890-abcdefgh/
       let match = linkedinUrl.match(/linkedin\.com\/posts\/activity-(\d+)/);
-      if (match) return match[1];
+      if (match) return sanitizeId(match[1]);
 
       // LinkedIn post URL: https://www.linkedin.com/feed/update/urn:li:activity:1234567890/
       match = linkedinUrl.match(
         /linkedin\.com\/feed\/update\/urn:li:activity:(\d+)/
       );
-      if (match) return match[1];
+      if (match) return sanitizeId(match[1]);
 
       // LinkedIn post URL: https://www.linkedin.com/posts/username-activity-1234567890/
       match = linkedinUrl.match(/linkedin\.com\/posts\/[^/]+-activity-(\d+)/);
-      if (match) return match[1];
+      if (match) return sanitizeId(match[1]);
 
       // Any LinkedIn URL that contains "posts" or "feed"
       match = linkedinUrl.match(/linkedin\.com\/(posts|feed)/);
@@ -277,11 +341,16 @@ const LinkedInEmbed: React.FC<LinkedInEmbedProps> = ({ url }) => {
     return <div>Invalid LinkedIn URL.</div>;
   }
 
+  const sanitizedUrl = sanitizeUrl(url);
+  if (!sanitizedUrl) {
+    return <div>Invalid LinkedIn URL.</div>;
+  }
+
   return (
     <div className="linkedin-embed">
       <div
         className="linkedin-embed-container"
-        data-linkedin-url={url}
+        data-linkedin-url={sanitizedUrl}
         style={{
           width: '100%',
           maxWidth: '550px',
@@ -316,12 +385,18 @@ const LinkedInEmbed: React.FC<LinkedInEmbedProps> = ({ url }) => {
 };
 
 const PinterestEmbed: React.FC<PinterestEmbedProps> = ({ url }) => {
+  const sanitizedUrl = sanitizeUrl(url);
+
+  if (!sanitizedUrl) {
+    return <div>Invalid Pinterest URL.</div>;
+  }
+
   return (
     <div className="pinterest-embed">
       <a
         data-pin-do="embedPin"
         data-pin-width="medium"
-        href={url}
+        href={sanitizedUrl}
         style={{
           display: 'flex',
           width: '345px',
@@ -411,8 +486,8 @@ const GitHubEmbed: React.FC<GitHubEmbedProps> = ({ url }) => {
       if (match) {
         return {
           type: 'repository' as const,
-          owner: match[1],
-          repo: match[2],
+          owner: sanitizeId(match[1]),
+          repo: sanitizeId(match[2]),
         };
       }
 
@@ -423,8 +498,8 @@ const GitHubEmbed: React.FC<GitHubEmbedProps> = ({ url }) => {
       if (match) {
         return {
           type: 'file' as const,
-          owner: match[1],
-          repo: match[2],
+          owner: sanitizeId(match[1]),
+          repo: sanitizeId(match[2]),
         };
       }
 
@@ -433,9 +508,9 @@ const GitHubEmbed: React.FC<GitHubEmbedProps> = ({ url }) => {
       if (match) {
         return {
           type: 'issue' as const,
-          owner: match[1],
-          repo: match[2],
-          number: match[3],
+          owner: sanitizeId(match[1]),
+          repo: sanitizeId(match[2]),
+          number: sanitizeId(match[3]),
         };
       }
 
@@ -446,8 +521,8 @@ const GitHubEmbed: React.FC<GitHubEmbedProps> = ({ url }) => {
       if (match) {
         return {
           type: 'issues' as const,
-          owner: match[1],
-          repo: match[2],
+          owner: sanitizeId(match[1]),
+          repo: sanitizeId(match[2]),
         };
       }
 
@@ -456,9 +531,9 @@ const GitHubEmbed: React.FC<GitHubEmbedProps> = ({ url }) => {
       if (match) {
         return {
           type: 'pull' as const,
-          owner: match[1],
-          repo: match[2],
-          number: match[3],
+          owner: sanitizeId(match[1]),
+          repo: sanitizeId(match[2]),
+          number: sanitizeId(match[3]),
         };
       }
 
@@ -467,8 +542,8 @@ const GitHubEmbed: React.FC<GitHubEmbedProps> = ({ url }) => {
       if (match) {
         return {
           type: 'pulls' as const,
-          owner: match[1],
-          repo: match[2],
+          owner: sanitizeId(match[1]),
+          repo: sanitizeId(match[2]),
         };
       }
 
@@ -477,8 +552,8 @@ const GitHubEmbed: React.FC<GitHubEmbedProps> = ({ url }) => {
       if (match) {
         return {
           type: 'gist' as const,
-          owner: match[1],
-          gistId: match[2],
+          owner: sanitizeId(match[1]),
+          gistId: sanitizeId(match[2]),
         };
       }
 
@@ -487,8 +562,8 @@ const GitHubEmbed: React.FC<GitHubEmbedProps> = ({ url }) => {
       if (match) {
         return {
           type: 'repository' as const,
-          owner: match[1],
-          repo: match[2],
+          owner: sanitizeId(match[1]),
+          repo: sanitizeId(match[2]),
         };
       }
 
@@ -1296,7 +1371,7 @@ const RedditEmbed: React.FC<RedditEmbedProps> = ({ url }) => {
     const extractPostId = (redditUrl: string): string | null => {
       // Reddit post URL: https://www.reddit.com/r/subreddit/comments/postId/title/
       const match = redditUrl.match(/reddit\.com\/r\/[^/]+\/comments\/([^/]+)/);
-      return match ? match[1] : null;
+      return match ? sanitizeId(match[1]) : null;
     };
 
     setPostId(extractPostId(url));
@@ -1306,10 +1381,15 @@ const RedditEmbed: React.FC<RedditEmbedProps> = ({ url }) => {
     return <div>Invalid Reddit URL.</div>;
   }
 
+  const sanitizedUrl = sanitizeUrl(url);
+  if (!sanitizedUrl) {
+    return <div>Invalid Reddit URL.</div>;
+  }
+
   return (
     <div className="redditwrapper">
       <blockquote className="reddit-card">
-        <a href={url}>Reddit Post</a>
+        <a href={sanitizedUrl}>Reddit Post</a>
       </blockquote>
       <script
         src="https://embed.redditmedia.com/widgets/platform.js"
@@ -1320,6 +1400,11 @@ const RedditEmbed: React.FC<RedditEmbedProps> = ({ url }) => {
 };
 
 const EmbedWidget: React.FC<EmbedWidgetProps> = ({ url }) => {
+  // Validate URL at the entry point
+  if (!isValidUrl(url)) {
+    return <div>Invalid URL provided.</div>;
+  }
+
   if (url.includes('facebook.com')) {
     return <FacebookEmbed url={url} />;
   }
