@@ -4,9 +4,9 @@ import { cva } from 'class-variance-authority';
 export const textInputSizeVariants = cva('w-full', {
   variants: {
     size: {
-      Small: 'text-xs px-2',
-      Medium: 'text-sm px-3',
-      Large: 'text-base px-4',
+      Small: 'text-xs px-2 h-7',
+      Medium: 'text-sm px-3 h-9',
+      Large: 'text-base px-4 h-11',
     },
   },
   defaultVariants: {
@@ -18,9 +18,9 @@ export const textInputSizeVariants = cva('w-full', {
 export const searchIconVariants = cva('absolute text-muted-foreground', {
   variants: {
     size: {
-      Small: 'left-3 top-3 h-3 w-3',
+      Small: 'left-3 top-2 h-3 w-3',
       Medium: 'left-2.5 top-2.5 h-4 w-4',
-      Large: 'left-2 top-2 h-5 w-5',
+      Large: 'left-2 top-3 h-5 w-5',
     },
   },
   defaultVariants: {
@@ -44,3 +44,17 @@ export const xIconVariants = cva(
     },
   }
 );
+
+// Size variants for eye icons (password toggle)
+export const eyeIconVariants = cva('', {
+  variants: {
+    size: {
+      Small: 'h-3 w-3',
+      Medium: 'h-4 w-4',
+      Large: 'h-5 w-5',
+    },
+  },
+  defaultVariants: {
+    size: 'Medium',
+  },
+});

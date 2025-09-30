@@ -7,7 +7,6 @@ import React, {
 } from 'react';
 import { Input } from '@/components/ui/input';
 import { EyeIcon, EyeOffIcon, Search, X } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { getHeight, getWidth, inputStyles } from '@/lib/styles';
@@ -20,6 +19,7 @@ import {
   textInputSizeVariants,
   searchIconVariants,
   xIconVariants,
+  eyeIconVariants,
 } from '@/components/ui/input/text-input-variants';
 
 interface TextInputWidgetProps {
@@ -347,19 +347,17 @@ const PasswordVariant: React.FC<{
       {!hasLastPass && (
         <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none h-6">
           <div className="pointer-events-auto flex items-center h-6">
-            <Button
+            <button
               type="button"
-              variant="ghost"
-              size="sm"
-              className="hover:bg-transparent p-0 m-0 h-4 w-4 cursor-pointer"
+              className={eyeIconVariants({ size })}
               onClick={togglePassword}
             >
               {showPassword ? (
-                <EyeOffIcon className="h-4 w-4" />
+                <EyeOffIcon className={eyeIconVariants({ size })} />
               ) : (
-                <EyeIcon className="h-4 w-4" />
+                <EyeIcon className={eyeIconVariants({ size })} />
               )}
-            </Button>
+            </button>
           </div>
           {props.shortcutKey && (
             <div className="pointer-events-auto flex items-center h-6">
