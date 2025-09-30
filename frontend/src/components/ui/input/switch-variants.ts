@@ -5,9 +5,9 @@ export const switchVariants = cva(
   {
     variants: {
       size: {
-        Small: 'h-4 w-8',
+        Small: 'h-4 w-7',
         Medium: 'h-5 w-9',
-        Large: 'h-6 w-10',
+        Large: 'h-6 w-11',
       },
     },
     defaultVariants: {
@@ -17,13 +17,13 @@ export const switchVariants = cva(
 );
 
 export const switchThumbVariants = cva(
-  'pointer-events-none block rounded-full bg-background shadow-lg ring-0 transition-transform data-[state=checked]:translate-x-4 data-[state=unchecked]:translate-x-0',
+  'pointer-events-none block rounded-full bg-background shadow-lg ring-0 transition-transform data-[state=unchecked]:translate-x-0',
   {
     variants: {
       size: {
-        Small: 'h-3 w-3',
-        Medium: 'h-4 w-4',
-        Large: 'h-5 w-5',
+        Small: 'h-3 w-3 data-[state=checked]:translate-x-3',
+        Medium: 'h-4 w-4 data-[state=checked]:translate-x-4',
+        Large: 'h-5 w-5 data-[state=checked]:translate-x-5',
       },
     },
     defaultVariants: {
