@@ -6,15 +6,15 @@ Ivy - The ultimate framework for building internal tools with LLM code generatio
 
 **[Sign up for our waitlist](https://ivy.app/join-waitlist) to be among the first to get access.**
 
-[Documentation](https://docs.ivy.app) | [Samples](https://samples.ivy.app)
+[Documentation](https://docs.ivy.app) | [Samples](https://samples.ivy.app) | [Current Sprint](https://github.com/orgs/Ivy-Interactive/projects/8) | [Roadmap](https://github.com/orgs/Ivy-Interactive/projects/7) | [Examples](https://github.com/Ivy-Interactive/Ivy-Examples)
 
 [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=Ivy-Interactive%2FIvy-Devcontainer&machine=standardLinux32gb&devcontainer_path=.devcontainer%2Fdevcontainer.json&location=EuropeWest)
 
 <https://github.com/user-attachments/assets/ba2bf5a5-8dc7-4501-9072-6af7483be4f7>
 
-![3g829iF9gmsQUX](https://github.com/user-attachments/assets/c475d90f-4cca-4e46-8a8e-4ee3f2545751)
-
 The code should be familiar to React developers. Views → Components, Build → Render, Widgets → Element. 
+
+![3g829iF9gmsQUX](https://github.com/user-attachments/assets/c475d90f-4cca-4e46-8a8e-4ee3f2545751)
 
 ## Features
 
