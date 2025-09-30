@@ -6,9 +6,9 @@ export const audioRecorderVariants = cva(
   {
     variants: {
       size: {
-        Small: 'p-3 w-25 border-2',
-        Medium: 'p-4 w-30 border-2',
-        Large: 'p-5 w-35 border-3',
+        Small: 'p-3 w-24 border-2',
+        Medium: 'p-4 w-28 border-2',
+        Large: 'p-5 w-36 border-3',
       },
     },
     defaultVariants: {
