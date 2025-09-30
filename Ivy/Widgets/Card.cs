@@ -4,6 +4,17 @@ using Ivy.Shared;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+/// <summary>Card style variants applied on cursor hover.</summary>
+public enum CardHoverVariant
+{
+    /// <summary>No styling applied on hover.</summary>
+    None,
+    /// <summary>Applies "cursor: pointer".</summary>
+    Pointer,
+    /// <summary>Applies "cursor: pointer" and adds a minor translate effect on hover.</summary>
+    PointerAndTranslate,
+}
+
 /// <summary>A structured container for organizing related content with optional title, description, and icon.</summary>
 public record Card : WidgetBase<Card>
 {
@@ -37,6 +48,12 @@ public record Card : WidgetBase<Card>
 
     /// <summary>Gets or sets the color of the card's border.</summary>
     [Prop] public Colors? BorderColor { get; set; }
+
+    /// <summary>Style variant to apply on cursor hover. Default is <see cref="CardHoverVariant.None"/> when no click listener is applied, and <see cref="CardHoverVariant.PointerAndTranslate"/> when a click listener is applied.</summary>
+    [Prop] public CardHoverVariant HoverVariant { get; set; }
+
+    /// <summary>Event handler called when card is clicked. Default is null.</summary>
+    [Event] public Func<Event<Card>, ValueTask>? OnClick { get; set; }
 
     /// <summary>
     /// Adds content to the card's main content area using the pipe operator.
@@ -107,4 +124,62 @@ public static class CardExtensions
     /// <param name="card">The Card to configure.</param>
     /// <param name="color">The color to apply to the card's border.</param>
     public static Card BorderColor(this Card card, Colors color) => card with { BorderColor = color };
+
+    /// <summary>Sets the style variant to apply on cursor hover.</summary>
+    /// <param name="card">Card to configure.</param>
+    /// <param name="variant">Style variants to apply on cursor hover.</param>
+    /// <returns>New Card instance with updated hover variant.</returns>
+    public static Card Hover(this Card card, CardHoverVariant variant)
+    {
+        return card with { HoverVariant = variant };
+    }
+
+    private static CardHoverVariant HoverVariantWithClick(this Card card)
+    {
+        return card.HoverVariant == CardHoverVariant.None ? CardHoverVariant.PointerAndTranslate : card.HoverVariant;
+    }
+
+    /// <summary>Sets the click event handler for the card.</summary>
+    /// <param name="card">The Card to configure.</param>
+    /// <param name="onClick">Event handler to call when clicked.</param>
+    /// <returns>New Card instance with updated click handler.</returns>
+    public static Card HandleClick(this Card card, Func<Event<Card>, ValueTask> onClick)
+    {
+        return card with
+        {
+            HoverVariant = card.HoverVariantWithClick(),
+            OnClick = onClick
+        };
+    }
+
+    public static Card HandleClick(this Card card, Action<Event<Card>> onClick)
+    {
+        return card with
+        {
+            HoverVariant = card.HoverVariantWithClick(),
+            OnClick = onClick.ToValueTask()
+        };
+    }
+
+    /// <summary>Sets a simple click event handler for the card.</summary>
+    /// <param name="card">The Card to configure.</param>
+    /// <param name="onClick">Simple action to perform when clicked.</param>
+    /// <returns>New Card instance with updated click handler.</returns>
+    public static Card HandleClick(this Card card, Action onClick)
+    {
+        return card with
+        {
+            HoverVariant = card.HoverVariantWithClick(),
+            OnClick = _ => { onClick(); return ValueTask.CompletedTask; }
+        };
+    }
+
+    public static Card HandleClick(this Card card, Func<ValueTask> onClick)
+    {
+        return card with
+        {
+            HoverVariant = card.HoverVariantWithClick(),
+            OnClick = _ => onClick()
+        };
+    }
 }
