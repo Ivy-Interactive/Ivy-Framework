@@ -4,13 +4,12 @@ using Ivy.Core;
 using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
 using Ivy.Widgets.Inputs;
+using Ivy.Shared;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
-/// <summary>
-/// Defines the visual and functional variants available for text input controls.
-/// </summary>
+/// <summary> Defines the visual and functional variants available for text input controls. </summary>
 public enum TextInputs
 {
     /// <summary>Standard single-line text input for general text entry.</summary>
@@ -29,9 +28,7 @@ public enum TextInputs
     Search
 }
 
-/// <summary>
-/// Interface for text input controls that extends IAnyInput with text-specific properties.
-/// </summary>
+/// <summary> Interface for text input controls that extends IAnyInput with text-specific properties. </summary>
 public interface IAnyTextInput : IAnyInput
 {
     /// <summary>Gets or sets the placeholder text displayed when the input is empty.</summary>
@@ -41,9 +38,7 @@ public interface IAnyTextInput : IAnyInput
     public TextInputs Variant { get; set; }
 }
 
-/// <summary>
-/// Abstract base class for text input controls that provides common text input functionality.
-/// </summary>
+/// <summary> Abstract base class for text input controls that provides common text input functionality. </summary>
 public abstract record TextInputBase : WidgetBase<TextInputBase>, IAnyTextInput
 {
     /// <summary>Gets or sets whether the input is disabled.</summary>
@@ -61,24 +56,21 @@ public abstract record TextInputBase : WidgetBase<TextInputBase>, IAnyTextInput
     /// <summary>Gets or sets the keyboard shortcut key for focusing this input.</summary>
     [Prop] public string? ShortcutKey { get; set; }
 
+    /// <summary>Gets or sets the size of the text input.</summary>
+    [Prop] public Sizes Size { get; set; }
+
     /// <summary>Gets or sets the event handler called when the input loses focus.</summary>
     [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
 
-    /// <summary>
-    /// Returns the types that this text input can bind to and work with.
-    /// </summary>
+    /// <summary> Returns the types that this text input can bind to and work with. </summary>
     public Type[] SupportedStateTypes() => [];
 }
 
-/// <summary>
-/// Generic text input control that provides type-safe text entry functionality for string-like types.
-/// </summary>
+/// <summary> Generic text input control that provides type-safe text entry functionality for string-like types. </summary>
 /// <typeparam name="TString">The type of the text value (typically string or string-convertible types).</typeparam>
 public record TextInput<TString> : TextInputBase, IInput<TString>
 {
-    /// <summary>
-    /// Initializes a new text input bound to a state object for automatic value synchronization.
-    /// </summary>
+    /// <summary> Initializes a new text input bound to a state object for automatic value synchronization. </summary>
     /// <param name="state">The state object to bind the text input to.</param>
     /// <param name="placeholder">Optional placeholder text displayed when the input is empty.</param>
     /// <param name="disabled">Whether the input should be disabled initially.</param>
@@ -115,9 +107,7 @@ public record TextInput<TString> : TextInputBase, IInput<TString>
         Value = value;
     }
 
-    /// <summary>
-    /// Initializes a new text input with basic configuration.
-    /// </summary>
+    /// <summary> Initializes a new text input with basic configuration. </summary>
     public TextInput(string? placeholder = null, bool disabled = false, TextInputs variant = TextInputs.Text)
     {
         Placeholder = placeholder;
@@ -171,9 +161,7 @@ public record TextInput : TextInput<string>
     {
     }
 
-    /// <summary>
-    /// Initializes a new string text input with basic configuration.
-    /// </summary>
+    /// <summary> Initializes a new string text input with basic configuration. </summary>
     /// <param name="placeholder">Optional placeholder text displayed when the input is empty.</param>
     /// <param name="disabled">Whether the input should be disabled initially.</param>
     /// <param name="variant">The visual and functional variant of the text input.</param>
@@ -183,14 +171,10 @@ public record TextInput : TextInput<string>
     }
 }
 
-/// <summary>
-/// Provides extension methods for creating and configuring text input controls with fluent syntax.
-/// </summary>
+/// <summary> Provides extension methods for creating and configuring text input controls with fluent syntax. </summary>
 public static class TextInputExtensions
 {
-    /// <summary>
-    /// Creates a text input from a state object with automatic type detection.
-    /// </summary>
+    /// <summary> Creates a text input from a state object with automatic type detection. </summary>
     /// <param name="state">The state object to bind to.</param>
     /// <param name="placeholder">Optional placeholder text displayed when the input is empty.</param>
     /// <param name="disabled">Whether the input should be disabled initially.</param>
@@ -203,49 +187,37 @@ public static class TextInputExtensions
         return input;
     }
 
-    /// <summary>
-    /// Creates a multi-line textarea input from a state object.
-    /// </summary>
+    /// <summary> Creates a multi-line textarea input from a state object. </summary>
     /// <param name="state">The state object to bind to.</param>
     /// <param name="placeholder">Optional placeholder text displayed when the input is empty.</param>
     /// <param name="disabled">Whether the input should be disabled initially.</param>
     public static TextInputBase ToTextAreaInput(this IAnyState state, string? placeholder = null, bool disabled = false) => state.ToTextInput(placeholder, disabled, TextInputs.Textarea);
 
-    /// <summary>
-    /// Creates a search input from a state object.
-    /// </summary>
+    /// <summary> Creates a search input from a state object. </summary>
     /// <param name="state">The state object to bind to.</param>
     /// <param name="placeholder">Optional placeholder text displayed when the input is empty.</param>
     /// <param name="disabled">Whether the input should be disabled initially.</param>
     public static TextInputBase ToSearchInput(this IAnyState state, string? placeholder = null, bool disabled = false) => state.ToTextInput(placeholder, disabled, TextInputs.Search);
 
-    /// <summary>
-    /// Creates a password input from a state object.
-    /// </summary>
+    /// <summary> Creates a password input from a state object. </summary>
     /// <param name="state">The state object to bind to.</param>
     /// <param name="placeholder">Optional placeholder text displayed when the input is empty.</param>
     /// <param name="disabled">Whether the input should be disabled initially.</param>
     public static TextInputBase ToPasswordInput(this IAnyState state, string? placeholder = null, bool disabled = false) => state.ToTextInput(placeholder, disabled, TextInputs.Password);
 
-    /// <summary>
-    /// Creates an email input from a state object.
-    /// </summary>
+    /// <summary> Creates an email input from a state object. </summary>
     /// <param name="state">The state object to bind to.</param>
     /// <param name="placeholder">Optional placeholder text displayed when the input is empty.</param>
     /// <param name="disabled">Whether the input should be disabled initially.</param>
     public static TextInputBase ToEmailInput(this IAnyState state, string? placeholder = null, bool disabled = false) => state.ToTextInput(placeholder, disabled, TextInputs.Email);
 
-    /// <summary>
-    /// Creates a URL input from a state object.
-    /// </summary>
+    /// <summary> Creates a URL input from a state object.</summary>
     /// <param name="state">The state object to bind to.</param>
     /// <param name="placeholder">Optional placeholder text displayed when the input is empty.</param>
     /// <param name="disabled">Whether the input should be disabled initially.</param>
     public static TextInputBase ToUrlInput(this IAnyState state, string? placeholder = null, bool disabled = false) => state.ToTextInput(placeholder, disabled, TextInputs.Url);
 
-    /// <summary>
-    /// Creates a telephone input from a state object.
-    /// </summary>
+    /// <summary> Creates a telephone input from a state object. </summary>
     /// <param name="state">The state object to bind to.</param>
     /// <param name="placeholder">Optional placeholder text displayed when the input is empty.</param>
     /// <param name="disabled">Whether the input should be disabled initially.</param>
@@ -276,10 +248,16 @@ public static class TextInputExtensions
     /// <param name="shortcutKey">The keyboard shortcut key combination for focusing this input.</param>
     public static TextInputBase ShortcutKey(this TextInputBase widget, string shortcutKey) => widget with { ShortcutKey = shortcutKey };
 
+    /// <summary>Sets the size of the text input.</summary>
+    public static TextInputBase Size(this TextInputBase widget, Sizes size) => widget with { Size = size };
 
-    /// <summary>
-    /// Sets the blur event handler for the text input.
-    /// </summary>
+    /// <summary>Sets the text input size to large for prominent display.</summary>
+    public static TextInputBase Large(this TextInputBase widget) => widget.Size(Sizes.Large);
+
+    /// <summary>Sets the text input size to small for compact display.</summary>
+    public static TextInputBase Small(this TextInputBase widget) => widget.Size(Sizes.Small);
+
+    /// <summary> Sets the blur event handler for the text input. </summary>
     /// <param name="widget">The text input to configure.</param>
     /// <param name="onBlur">The event handler to call when the input loses focus.</param>
     [OverloadResolutionPriority(1)]
@@ -288,9 +266,7 @@ public static class TextInputExtensions
         return widget with { OnBlur = onBlur };
     }
 
-    /// <summary>
-    /// Sets the blur event handler for the text input.
-    /// </summary>
+    /// <summary> Sets the blur event handler for the text input. </summary>
     /// <param name="widget">The text input to configure.</param>
     /// <param name="onBlur">The event handler to call when the input loses focus.</param>
     public static TextInputBase HandleBlur(this TextInputBase widget, Action<Event<IAnyInput>> onBlur)
@@ -298,9 +274,7 @@ public static class TextInputExtensions
         return widget.HandleBlur(onBlur.ToValueTask());
     }
 
-    /// <summary>
-    /// Sets a simple blur event handler for the text input.
-    /// </summary>
+    /// <summary> Sets a simple blur event handler for the text input. </summary>
     /// <param name="widget">The text input to configure.</param>
     /// <param name="onBlur">The simple action to perform when the input loses focus.</param>
     public static TextInputBase HandleBlur(this TextInputBase widget, Action onBlur)

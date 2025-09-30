@@ -15,6 +15,22 @@ import { InvalidIcon } from '@/components/InvalidIcon';
 import { useFocusable } from '@/hooks/use-focus-management';
 import { useEventHandler } from '@/components/event-handler';
 import { sidebarMenuRef } from '../layouts/sidebar';
+import { Sizes } from '@/types/sizes';
+import { cva } from 'class-variance-authority';
+
+// Size variants for TextInputWidget
+const textInputSizeVariants = cva('w-full', {
+  variants: {
+    size: {
+      Small: 'text-xs px-2',
+      Medium: 'text-sm px-3',
+      Large: 'text-base px-4',
+    },
+  },
+  defaultVariants: {
+    size: 'Medium',
+  },
+});
 
 interface TextInputWidgetProps {
   id: string;
@@ -34,6 +50,7 @@ interface TextInputWidgetProps {
   width?: string;
   height?: string;
   shortcutKey?: string;
+  size?: Sizes;
   'data-testid'?: string;
 }
 
@@ -132,7 +149,17 @@ const DefaultVariant: React.FC<{
   onFocus: (e: React.FocusEvent<HTMLInputElement>) => void;
   inputRef?: React.RefObject<HTMLInputElement | HTMLTextAreaElement | null>;
   isFocused: boolean;
-}> = ({ type, props, onChange, onBlur, onFocus, inputRef, isFocused }) => {
+  size?: Sizes;
+}> = ({
+  type,
+  props,
+  onChange,
+  onBlur,
+  onFocus,
+  inputRef,
+  isFocused,
+  size = Sizes.Medium,
+}) => {
   const { elementRef, savePosition } = useCursorPosition(props.value, inputRef);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -160,6 +187,7 @@ const DefaultVariant: React.FC<{
         onFocus={onFocus}
         className={cn(
           'w-full text-ellipsis',
+          textInputSizeVariants({ size }),
           props.invalid && inputStyles.invalidInput,
           props.invalid && 'pr-8',
           props.shortcutKey && !isFocused && 'pr-16'
@@ -193,7 +221,16 @@ const TextareaVariant: React.FC<{
   width?: string;
   inputRef?: React.RefObject<HTMLInputElement | HTMLTextAreaElement | null>;
   isFocused: boolean;
-}> = ({ props, onChange, onBlur, onFocus, inputRef, isFocused }) => {
+  size?: Sizes;
+}> = ({
+  props,
+  onChange,
+  onBlur,
+  onFocus,
+  inputRef,
+  isFocused,
+  size = Sizes.Medium,
+}) => {
   const { elementRef, savePosition } = useCursorPosition(props.value, inputRef);
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -221,7 +258,7 @@ const TextareaVariant: React.FC<{
         onBlur={onBlur}
         onFocus={onFocus}
         className={cn(
-          'w-full',
+          textInputSizeVariants({ size }),
           props.invalid && inputStyles.invalidInput,
           props.invalid && 'pr-8',
           props.shortcutKey && !isFocused && 'pr-16'
@@ -254,7 +291,8 @@ const PasswordVariant: React.FC<{
   onFocus: (e: React.FocusEvent<HTMLInputElement>) => void;
   width?: string;
   inputRef?: React.RefObject<HTMLInputElement | HTMLTextAreaElement | null>;
-}> = ({ props, onChange, onBlur, onFocus, inputRef }) => {
+  size?: Sizes;
+}> = ({ props, onChange, onBlur, onFocus, inputRef, size = Sizes.Medium }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [hasLastPass, setHasLastPass] = useState(false);
   const { elementRef: elementRefGeneric, savePosition } = useCursorPosition(
@@ -307,6 +345,7 @@ const PasswordVariant: React.FC<{
         onFocus={onFocus}
         className={cn(
           'w-full text-ellipsis',
+          textInputSizeVariants({ size }),
           props.invalid && inputStyles.invalidInput,
           props.invalid ? 'pr-14' : 'pr-8',
           hasLastPass && 'pr-3',
@@ -358,7 +397,16 @@ const SearchVariant: React.FC<{
   width?: string;
   inputRef?: React.RefObject<HTMLInputElement | HTMLTextAreaElement | null>;
   isFocused: boolean;
-}> = ({ props, onChange, onBlur, onFocus, inputRef, isFocused }) => {
+  size?: Sizes;
+}> = ({
+  props,
+  onChange,
+  onBlur,
+  onFocus,
+  inputRef,
+  isFocused,
+  size = Sizes.Medium,
+}) => {
   const { elementRef, savePosition } = useCursorPosition(
     props.value,
     inputRef
@@ -432,6 +480,7 @@ const SearchVariant: React.FC<{
         autoComplete="off"
         className={cn(
           'w-full pl-8 cursor-pointer text-ellipsis',
+          textInputSizeVariants({ size }),
           props.invalid && inputStyles.invalidInput,
           props.invalid && 'pr-8',
           hasValue && 'pr-8',
@@ -483,6 +532,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
   height,
   events,
   shortcutKey,
+  size,
   'data-testid': dataTestId,
 }) => {
   const eventHandler = useEventHandler();
@@ -565,6 +615,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
       height,
       events,
       shortcutKey,
+      size,
       'data-testid': dataTestId,
     }),
     [
@@ -577,6 +628,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
       width,
       height,
       shortcutKey,
+      size,
       dataTestId,
     ]
   );
@@ -590,6 +642,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
           onBlur={handleBlur}
           onFocus={handleFocus}
           inputRef={inputRef}
+          size={size}
         />
       );
     case 'Textarea':
@@ -601,6 +654,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
           onFocus={handleFocus}
           inputRef={inputRef}
           isFocused={isFocused}
+          size={size}
         />
       );
     case 'Search':
@@ -612,6 +666,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
           onFocus={handleFocus}
           inputRef={inputRef}
           isFocused={isFocused}
+          size={size}
         />
       );
     default:
@@ -626,6 +681,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
           onFocus={handleFocus}
           inputRef={inputRef}
           isFocused={isFocused}
+          size={size}
         />
       );
   }
