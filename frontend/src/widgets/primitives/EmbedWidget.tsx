@@ -1308,35 +1308,13 @@ const RedditEmbed: React.FC<RedditEmbedProps> = ({ url }) => {
 
   return (
     <div className="redditwrapper">
-      <blockquote className="reddit-card" data-card-created={Date.now()}>
+      <blockquote className="reddit-card">
         <a href={url}>Reddit Post</a>
       </blockquote>
       <script
         src="https://embed.redditmedia.com/widgets/platform.js"
         async
       ></script>
-      <style
-        dangerouslySetInnerHTML={{
-          __html: `
-            .redditwrapper {
-              background: #fff;
-              position: relative;
-            }
-            .redditwrapper iframe {
-              border: 0;
-              position: relative;
-              z-index: 2;
-            }
-            .redditwrapper a {
-              color: rgba(0, 0, 0, 0);
-              position: absolute;
-              left: 0;
-              top: 0;
-              z-index: 0;
-            }
-          `,
-        }}
-      />
     </div>
   );
 };
