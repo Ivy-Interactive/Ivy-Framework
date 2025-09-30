@@ -44,3 +44,17 @@ export const timerSizeVariants = cva('', {
     size: 'Medium',
   },
 });
+
+// Size variants for icons
+export const iconSizeVariants = cva('', {
+  variants: {
+    size: {
+      Small: '!size-4',
+      Medium: '!size-5',
+      Large: '!size-6',
+    },
+  },
+  defaultVariants: {
+    size: 'Medium',
+  },
+});

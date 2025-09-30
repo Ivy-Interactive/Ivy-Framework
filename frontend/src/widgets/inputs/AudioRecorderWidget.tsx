@@ -9,6 +9,7 @@ import {
   audioRecorderVariants,
   textSizeVariants,
   timerSizeVariants,
+  iconSizeVariants,
 } from '@/components/ui/input/audio-recorder-variants';
 
 interface AudioRecorderWidgetProps {
@@ -180,7 +181,11 @@ export const AudioRecorderWidget: React.FC<AudioRecorderWidgetProps> = ({
           size="icon"
           className={'mt-2 h-6 w-fit z-10 mx-auto block'}
         >
-          {recording ? <Square /> : <Mic />}
+          {recording ? (
+            <Square className={iconSizeVariants({ size })} />
+          ) : (
+            <Mic className={iconSizeVariants({ size })} />
+          )}
         </Button>
         <SecondsCounter
           start={recordingStartedAt}
