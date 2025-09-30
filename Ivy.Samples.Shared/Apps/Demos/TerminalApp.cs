@@ -13,6 +13,11 @@ public class TerminalApp : ViewBase
                    .AddCommand("echo Hello, world!")
                    .AddOutput("Hello, world!")
                    .Title("Your first Ivy app!")
+                | new Terminal()
+                   .AddCommand("ivy db add --provider postgres --connection-string \"...\" --name MyDb --use-default-schema!")
+                   .AddOutput("Hello, world!")
+                   .Title("Your first Ivy app!")
+
             ;
     }
 }
