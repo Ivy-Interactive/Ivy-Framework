@@ -16,21 +16,11 @@ import { useFocusable } from '@/hooks/use-focus-management';
 import { useEventHandler } from '@/components/event-handler';
 import { sidebarMenuRef } from '../layouts/sidebar';
 import { Sizes } from '@/types/sizes';
-import { cva } from 'class-variance-authority';
-
-// Size variants for TextInputWidget
-const textInputSizeVariants = cva('w-full', {
-  variants: {
-    size: {
-      Small: 'text-xs px-2',
-      Medium: 'text-sm px-3',
-      Large: 'text-base px-4',
-    },
-  },
-  defaultVariants: {
-    size: 'Medium',
-  },
-});
+import {
+  textInputSizeVariants,
+  searchIconVariants,
+  xIconVariants,
+} from '@/components/ui/input/text-input-variants';
 
 interface TextInputWidgetProps {
   id: string;
@@ -455,7 +445,7 @@ const SearchVariant: React.FC<{
   return (
     <div className="relative w-full select-none" style={styles}>
       {/* Search Icon */}
-      <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+      <Search className={searchIconVariants({ size })} />
 
       {/* Search Input */}
       <Input
@@ -501,7 +491,7 @@ const SearchVariant: React.FC<{
             className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer pointer-events-auto flex items-center h-6"
             style={{ pointerEvents: 'auto' }}
           >
-            <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+            <X className={xIconVariants({ size })} />
           </button>
         )}
         {props.shortcutKey && !isFocused && (
