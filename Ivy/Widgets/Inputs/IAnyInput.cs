@@ -1,6 +1,7 @@
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Ivy.Core;
+using Ivy.Shared;
 
 namespace Ivy.Widgets.Inputs;
 
@@ -12,6 +13,9 @@ public interface IAnyInput
 
     /// <summary> Gets or sets the validation error message for this input control. </summary>
     [Prop] public string? Invalid { get; set; }
+
+    /// <summary> Gets or sets the size of the input control. </summary>
+    [Prop] public Sizes Size { get; set; }
 
     /// <summary> Gets or sets the event handler called when the input control loses focus. </summary>
     [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
@@ -41,6 +45,15 @@ public static class AnyInputExtensions
         return input;
     }
 
+    /// <summary> Sets the size of the input control. </summary>
+    /// <param name="input">The input control to configure.</param>
+    /// <param name="size">The size of the input control.</param>
+    public static IAnyInput Size(this IAnyInput input, Sizes size)
+    {
+        input.Size = size;
+        return input;
+    }
+
     /// <summary> Sets the blur event handler for the input control. </summary>
     /// <param name="input">The input control to configure.</param>
     /// <param name="onBlur">The event handler to call when the input loses focus, or null to remove the handler.</param>
@@ -66,6 +79,22 @@ public static class AnyInputExtensions
     public static IAnyInput HandleBlur(this IAnyInput input, Action onBlur)
     {
         input.OnBlur = _ => { onBlur(); return ValueTask.CompletedTask; };
+        return input;
+    }
+
+    /// <summary> Sets the input control size to small for compact display. </summary>
+    /// <param name="input">The input control to configure.</param>
+    public static IAnyInput Small(this IAnyInput input)
+    {
+        input.Size = Sizes.Small;
+        return input;
+    }
+
+    /// <summary> Sets the input control size to large for prominent display. </summary>
+    /// <param name="input">The input control to configure.</param>
+    public static IAnyInput Large(this IAnyInput input)
+    {
+        input.Size = Sizes.Large;
         return input;
     }
 }

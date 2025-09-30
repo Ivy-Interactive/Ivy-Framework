@@ -4,6 +4,7 @@ using Ivy.Core;
 using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
 using Ivy.Widgets.Inputs;
+using Ivy.Shared;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy;
@@ -51,6 +52,9 @@ public abstract record TextInputBase : WidgetBase<TextInputBase>, IAnyTextInput
 
     /// <summary>Gets or sets the validation error message.</summary>
     [Prop] public string? Invalid { get; set; }
+
+    /// <summary>Gets or sets the size of the text input.</summary>
+    [Prop] public Sizes Size { get; set; }
 
     /// <summary>Gets or sets the placeholder text displayed when the input is empty.</summary>
     [Prop] public string? Placeholder { get; set; }

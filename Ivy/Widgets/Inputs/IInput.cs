@@ -14,6 +14,7 @@ public interface IInput<T> : IAnyInput
     /// <summary>Gets the current value of the input control.</summary>
     [Prop] public T Value { get; }
 
+
     /// <summary>Gets the event handler called when the input value changes.</summary>
     [Event] public Func<Event<IInput<T>, T>, ValueTask>? OnChange { get; }
 

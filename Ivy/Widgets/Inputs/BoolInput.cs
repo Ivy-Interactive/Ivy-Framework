@@ -53,6 +53,9 @@ public abstract record BoolInputBase : WidgetBase<BoolInputBase>, IAnyBoolInput
     /// <summary>Gets or sets the validation error message.</summary>
     [Prop] public string? Invalid { get; set; }
 
+    /// <summary>Gets or sets the size of the boolean input.</summary>
+    [Prop] public Sizes Size { get; set; }
+
     /// <summary>Gets or sets the label text displayed alongside the input.</summary>
     [Prop] public string? Label { get; set; }
 
