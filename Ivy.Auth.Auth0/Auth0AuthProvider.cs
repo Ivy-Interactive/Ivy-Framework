@@ -1,10 +1,15 @@
-﻿using System.Reflection;
+﻿using System.IdentityModel.Tokens.Jwt;
+using System.Reflection;
+using System.Security.Claims;
 using Auth0.AuthenticationApi;
 using Auth0.AuthenticationApi.Models;
 using Ivy.Hooks;
 using Ivy.Shared;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Protocols;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Ivy.Auth.Auth0;
 
@@ -24,6 +29,8 @@ public class Auth0AuthProvider : IAuthProvider
     private readonly string _audience;
     private readonly List<AuthOption> _authOptions = new();
 
+    private readonly ConfigurationManager<OpenIdConnectConfiguration> _configurationManager;
+
     public Auth0AuthProvider()
     {
         var configuration = new ConfigurationBuilder()
@@ -37,6 +44,15 @@ public class Auth0AuthProvider : IAuthProvider
         _audience = configuration.GetValue<string>("Auth0:Audience") ?? "";
 
         _authClient = new AuthenticationApiClient(_domain);
+
+        // Setup OpenID configuration manager for JWKS
+        var authority = $"https://{_domain}/";
+        var documentRetriever = new HttpDocumentRetriever { RequireHttps = true };
+        _configurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(
+            $"{authority}.well-known/openid-configuration",
+            new OpenIdConnectConfigurationRetriever(),
+            documentRetriever
+        );
     }
 
     public async Task<AuthToken?> LoginAsync(string email, string password)
@@ -160,40 +176,52 @@ public class Auth0AuthProvider : IAuthProvider
         }
     }
 
-    public async Task<bool> ValidateJwtAsync(string jwt)
+    private async Task<ClaimsPrincipal?> VerifyToken(string jwt)
     {
         try
         {
-            var userInfo = await _authClient.GetUserInfoAsync(jwt);
-            return userInfo != null;
-        }
-        catch (Exception)
-        {
-            return false;
-        }
-    }
+            var discoveryDocument = await _configurationManager.GetConfigurationAsync(CancellationToken.None);
+            var signingKeys = discoveryDocument.SigningKeys;
 
-    public async Task<UserInfo?> GetUserInfoAsync(string jwt)
-    {
-        try
-        {
-            var userInfo = await _authClient.GetUserInfoAsync(jwt);
-            if (userInfo == null)
+            var tokenValidationParameters = new TokenValidationParameters
             {
-                return null;
-            }
+                ValidateIssuer = true,
+                ValidIssuer = $"https://{_domain}/",
+                ValidateAudience = true,
+                ValidAudience = _audience,
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKeys = signingKeys,
+                ValidateLifetime = true,
+            };
 
-            return new UserInfo(
-                userInfo.UserId,
-                userInfo.Email,
-                userInfo.FullName,
-                userInfo.Picture
-            );
+            var handler = new JwtSecurityTokenHandler();
+            return handler.ValidateToken(jwt, tokenValidationParameters, out SecurityToken validatedToken);
         }
         catch (Exception)
         {
             return null;
         }
+    }
+
+    public async Task<bool> ValidateJwtAsync(string jwt)
+    {
+        var claims = await VerifyToken(jwt);
+        return claims is not null;
+    }
+
+    public async Task<UserInfo?> GetUserInfoAsync(string jwt)
+    {
+        var claims = await VerifyToken(jwt);
+        if (claims is null)
+        {
+            return null;
+        }
+        return new UserInfo(
+            claims.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "",
+            claims.FindFirst(ClaimTypes.Email)?.Value ?? "",
+            claims.FindFirst(ClaimTypes.Name)?.Value ?? "",
+            claims.FindFirst("avatar")?.Value ?? ""
+        );
     }
 
     public AuthOption[] GetAuthOptions()
