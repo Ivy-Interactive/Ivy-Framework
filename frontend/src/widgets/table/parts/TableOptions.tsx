@@ -5,10 +5,12 @@ import { Header } from './TableHeader';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
+import { FilterInput } from './FilterInput';
 
 export const TableOptions: React.FC = () => {
   const { columns } = useTable();
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [filterTokens, setFilterTokens] = useState<string[]>([]);
 
   if (columns.length === 0) {
     return null;
@@ -67,10 +69,15 @@ export const TableOptions: React.FC = () => {
             </Button>
           </div>
           <Separator />
-          {/* TODO This needs to be an input*/}
-          <div className="bg-white border  rounded-lg p-3 ]">
-            <div className="text-sm ">Filter expression will appear here</div>
-          </div>
+          <FilterInput
+            columns={columns.map(col => col.name)}
+            onTokensSaved={setFilterTokens}
+          />
+          {filterTokens.length > 0 && (
+            <div className="text-sm text-gray-600 mt-2">
+              Saved tokens: {filterTokens.join(', ')}
+            </div>
+          )}
           <Separator />
           <div className="flex items-center justify-between">
             <Button variant="outline" onClick={() => setIsFilterOpen(false)}>

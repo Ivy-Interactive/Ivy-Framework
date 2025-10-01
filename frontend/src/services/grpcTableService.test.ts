@@ -25,7 +25,7 @@ global.fetch = mockFetch;
 // Type definitions for accessing private methods in tests
 interface GrpcTableServicePrivate {
   createGrpcMessage(data: Uint8Array): Uint8Array;
-  serializeTableQuery(query: TableQuery): Uint8Array;
+  serializeDataTableQuery(query: TableQuery): Uint8Array;
   encodeVarint(value: number): Uint8Array;
   decodeVarint(data: Uint8Array, offset: number): number;
   getVarintLength(value: number): number;
@@ -485,7 +485,7 @@ describe('GrpcTableService', () => {
 
       const result = (
         service as unknown as GrpcTableServicePrivate
-      ).serializeTableQuery(query);
+      ).serializeDataTableQuery(query);
 
       expect(result).toBeInstanceOf(Uint8Array);
       expect(result.length).toBeGreaterThan(0);
@@ -517,7 +517,7 @@ describe('GrpcTableService', () => {
 
       const result = (
         service as unknown as GrpcTableServicePrivate
-      ).serializeTableQuery(query);
+      ).serializeDataTableQuery(query);
 
       expect(result).toBeInstanceOf(Uint8Array);
       expect(result.length).toBeGreaterThan(0);
