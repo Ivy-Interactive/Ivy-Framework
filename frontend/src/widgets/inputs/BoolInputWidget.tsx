@@ -248,11 +248,7 @@ export const BoolInputWidget: React.FC<BoolInputWidgetProps> = ({
   size = Sizes.Medium,
   'data-testid': dataTestId,
 }) => {
-  const eventHandler = useEventHandler() as (
-    event: string,
-    id: string,
-    args: unknown[]
-  ) => void;
+  const eventHandler = useEventHandler();
 
   // Normalize undefined to null when nullable
   const normalizedValue = nullable && value === undefined ? null : value;

@@ -238,6 +238,18 @@ public class BoolInputApp : SampleBase
         }
 
         return Layout.Grid().Columns(6) | gridItems.ToArray();
+
+        object FormatStateValue(string typeName, object? value, bool isNullable)
+        {
+
+            return value switch
+            {
+                null => isNullable ? Text.InlineCode("Null") : Text.InlineCode("0"),
+                bool b => Text.InlineCode(b.ToString()),
+                _ when numericTypeNames.Contains(typeName) => Text.InlineCode(value.ToString()!),
+                _ => Text.InlineCode(value?.ToString() ?? "null")
+            };
+        }
     }
 
     private object CreateSizesSection()
@@ -290,19 +302,6 @@ public class BoolInputApp : SampleBase
                    .ToToggleInput(Icons.Star)
                    .Label("Label")
                    .Large();
-    }
-
-    private static object FormatStateValue(string typeName, object? value, bool isNullable)
-    {
-        var numericTypeNames = new[] { "double", "decimal", "float", "short", "int", "long", "byte" };
-
-        return value switch
-        {
-            null => isNullable ? Text.InlineCode("Null") : Text.InlineCode("0"),
-            bool b => Text.InlineCode(b.ToString()),
-            _ when numericTypeNames.Contains(typeName) => Text.InlineCode(value.ToString()!),
-            _ => Text.InlineCode(value?.ToString() ?? "null")
-        };
     }
 
     private static object CreateBoolInputVariants(object state)
