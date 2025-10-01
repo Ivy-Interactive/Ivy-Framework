@@ -130,25 +130,6 @@ You can also use environment variables for connection strings (with the exceptio
 export ConnectionStrings__MY_DATABASE_CONNECTION_STRING="Host=localhost;Database=mydb;Username=user;Password=pass"
 ```
 
-### Entity Framework Migrations
-
-The generated DesignFactory allows you to use standard EF Core migration commands:
-
-```terminal
->dotnet ef migrations add InitialCreate
->dotnet ef database update
-```
-
-When you generate a new database project, the generator will automatically run:
-
-```terminal
->dotnet ef migrations add InitialCreate
-```
-
-<Callout Type="Warning">
-The migration is created with the connection string you provided during generation, ensuring it uses the correct database context.
-</Callout>
-
 ### Connection Structure
 
 Each database connection has its own a folder structure:
