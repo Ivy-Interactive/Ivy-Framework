@@ -32,8 +32,10 @@ export const DetailWidget: React.FC<DetailWidgetProps> = ({
       </div>
       <div
         className={cn(
-          'align-middle text-body min-w-0 whitespace-normal break-words',
-          multiLine ? 'text-left pb-3' : 'text-right ml-auto p-3 pl-2 pr-0'
+          'align-middle text-body min-w-0',
+          multiLine
+            ? 'whitespace-normal break-words text-left pb-3'
+            : 'truncate text-right ml-auto p-3 pl-2 pr-0'
         )}
       >
         {children}
