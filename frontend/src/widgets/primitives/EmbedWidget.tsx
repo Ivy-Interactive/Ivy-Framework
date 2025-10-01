@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import Icon from '@/components/Icon';
 
 // URL validation and sanitization utilities
 const isValidUrl = (url: string): boolean => {
@@ -180,13 +181,7 @@ const FacebookEmbed: React.FC<FacebookEmbedProps> = ({ url }) => {
     <div className="facebook-embed border rounded-lg p-4 bg-card shadow-sm">
       <div className="flex items-center space-x-3">
         <div className="flex-shrink-0">
-          <svg
-            className="w-8 h-8 text-info"
-            fill="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-          </svg>
+          <Icon name="Facebook" size={32} className="text-info" />
         </div>
         <div className="flex-1 min-w-0">
           <h3 className="text-lg font-semibold text-card-foreground truncate">
@@ -366,35 +361,28 @@ const PinterestEmbed: React.FC<PinterestEmbedProps> = ({ url }) => {
   }
 
   return (
-    <div className="pinterest-embed">
-      <a
-        data-pin-do="embedPin"
-        data-pin-width="medium"
-        href={sanitizedUrl}
-        style={{
-          display: 'flex',
-          width: '345px',
-          height: '714px',
-          border: '1px solid #ddd',
-          borderRadius: '8px',
-          backgroundColor: '#f8f9fa',
-          alignItems: 'center',
-          justifyContent: 'center',
-          textDecoration: 'none',
-          color: '#333',
-        }}
-      >
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: '24px', marginBottom: '8px' }}>📌</div>
-          <div style={{ fontSize: '14px', fontWeight: 'bold' }}>
-            Pinterest Pin
-          </div>
-          <div style={{ fontSize: '12px', marginTop: '4px' }}>
-            Click to view on Pinterest
-          </div>
+    <div className="pinterest-embed border rounded-lg p-4 bg-card shadow-sm">
+      <div className="flex items-center space-x-3">
+        <div className="flex-shrink-0">
+          <Icon name="Pinterest" size={32} className="text-destructive" />
         </div>
-      </a>
-      <script async defer src="//assets.pinterest.com/js/pinit.js"></script>
+        <div className="flex-1 min-w-0">
+          <h3 className="text-lg font-semibold text-card-foreground truncate">
+            Pinterest Pin
+          </h3>
+          <p className="text-sm text-muted-foreground">View pin on Pinterest</p>
+        </div>
+        <div className="flex-shrink-0">
+          <a
+            href={sanitizedUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center px-3 py-2 border shadow-sm text-sm font-medium rounded-md text-card-foreground bg-card hover:bg-accent focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+          >
+            View on Pinterest
+          </a>
+        </div>
+      </div>
     </div>
   );
 };
