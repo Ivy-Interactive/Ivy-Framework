@@ -316,30 +316,14 @@ const LinkedInEmbed: React.FC<LinkedInEmbedProps> = ({ url }) => {
   }
 
   return (
-    <div className="linkedin-embed">
-      <div
-        className="linkedin-embed-container"
-        data-linkedin-url={sanitizedUrl}
-        style={{
-          width: '100%',
-          maxWidth: '550px',
-          margin: '0 auto',
-        }}
-      >
-        {/* LinkedIn Official Embed - Using the correct iframe format */}
+    <div className="linkedin-embed w-full">
+      <div className="linkedin-embed-container w-full max-w-2xl mx-auto">
+        {/* LinkedIn Official Embed - Using responsive iframe */}
         <iframe
           src={`https://www.linkedin.com/embed/feed/update/urn:li:activity:${postId}`}
-          height="600"
-          width="100%"
-          frameBorder="0"
+          className="w-full h-96 sm:h-[500px] md:h-[600px] border-0 rounded-lg shadow-md"
           allowFullScreen
-          title="Embedded post"
-          style={{
-            border: 'none',
-            borderRadius: '8px',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-            maxWidth: '504px',
-          }}
+          title="Embedded LinkedIn post"
         />
       </div>
 
