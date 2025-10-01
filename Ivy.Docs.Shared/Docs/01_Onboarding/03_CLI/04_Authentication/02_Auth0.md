@@ -164,8 +164,8 @@ To allow the Ivy application to properly display the users email, name and avata
 4. **Add the following code:**
 ```javascript
 exports.onExecutePostLogin = async (event, api) => {
-    api.accessToken.setCustomClaim('http://schemas.xmlsoap.org/ws/2005/05/identity/claims/email', event.user.email);
-    api.accessToken.setCustomClaim('http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name', event.user.name);
+    api.accessToken.setCustomClaim('email', event.user.email);
+    api.accessToken.setCustomClaim('name', event.user.name);
     api.accessToken.setCustomClaim('avatar', event.user.picture);
 };
 ```

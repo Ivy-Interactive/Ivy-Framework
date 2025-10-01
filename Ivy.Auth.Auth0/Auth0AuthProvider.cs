@@ -194,7 +194,10 @@ public class Auth0AuthProvider : IAuthProvider
                 ValidateLifetime = true,
             };
 
-            var handler = new JwtSecurityTokenHandler();
+            var handler = new JwtSecurityTokenHandler
+            {
+                InboundClaimTypeMap = new Dictionary<string, string>()
+            };
             return handler.ValidateToken(jwt, tokenValidationParameters, out SecurityToken validatedToken);
         }
         catch (Exception)
@@ -217,9 +220,9 @@ public class Auth0AuthProvider : IAuthProvider
             return null;
         }
         return new UserInfo(
-            claims.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "",
-            claims.FindFirst(ClaimTypes.Email)?.Value ?? "",
-            claims.FindFirst(ClaimTypes.Name)?.Value ?? "",
+            claims.FindFirst("sub")?.Value ?? "",
+            claims.FindFirst("email")?.Value ?? "",
+            claims.FindFirst("name")?.Value ?? "",
             claims.FindFirst("avatar")?.Value ?? ""
         );
     }
