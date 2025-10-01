@@ -226,9 +226,9 @@ const InstagramEmbed: React.FC<InstagramEmbedProps> = ({ url }) => {
   }
 
   return (
-    <div className="instagram-embed">
+    <div className="instagram-embed w-full">
       <blockquote
-        className="instagram-media"
+        className="instagram-media w-full"
         data-instgrm-captioned
         data-instgrm-permalink={sanitizedUrl}
         data-instgrm-version="14"
