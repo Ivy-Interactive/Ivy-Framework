@@ -11,6 +11,39 @@ declare global {
   }
 }
 
+// Script loading utilities
+const loadedScripts = new Set<string>();
+
+const loadScript = (src: string): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    // Check if script is already loaded
+    if (loadedScripts.has(src)) {
+      resolve();
+      return;
+    }
+
+    // Check if script already exists in DOM
+    const existingScript = document.querySelector(`script[src="${src}"]`);
+    if (existingScript) {
+      loadedScripts.add(src);
+      resolve();
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.src = src;
+    script.async = true;
+    script.onload = () => {
+      loadedScripts.add(src);
+      resolve();
+    };
+    script.onerror = () => {
+      reject(new Error(`Failed to load script: ${src}`));
+    };
+    document.head.appendChild(script);
+  });
+};
+
 // URL validation and sanitization utilities
 const isValidUrl = (url: string): boolean => {
   try {
@@ -232,6 +265,7 @@ const FacebookEmbed: React.FC<FacebookEmbedProps> = ({ url }) => {
 
 const InstagramEmbed: React.FC<InstagramEmbedProps> = ({ url }) => {
   const [postId, setPostId] = useState<string | null>(null);
+  const [scriptLoaded, setScriptLoaded] = useState(false);
 
   useEffect(() => {
     const extractPostId = (instagramUrl: string): string | null => {
@@ -241,6 +275,16 @@ const InstagramEmbed: React.FC<InstagramEmbedProps> = ({ url }) => {
 
     setPostId(extractPostId(url));
   }, [url]);
+
+  useEffect(() => {
+    if (postId) {
+      loadScript('//www.instagram.com/embed.js')
+        .then(() => setScriptLoaded(true))
+        .catch(error =>
+          console.error('Failed to load Instagram script:', error)
+        );
+    }
+  }, [postId]);
 
   if (!postId) {
     return <div>Invalid Instagram URL.</div>;
@@ -260,16 +304,16 @@ const InstagramEmbed: React.FC<InstagramEmbedProps> = ({ url }) => {
         data-instgrm-version="14"
       >
         <a href={sanitizedUrl} target="_blank" rel="noopener noreferrer">
-          Loading Instagram post...
+          {scriptLoaded ? 'Loading Instagram post...' : 'Loading script...'}
         </a>
       </blockquote>
-      <script async src="//www.instagram.com/embed.js"></script>
     </div>
   );
 };
 
 const TikTokEmbed: React.FC<TikTokEmbedProps> = ({ url }) => {
   const [videoId, setVideoId] = useState<string | null>(null);
+  const [scriptLoaded, setScriptLoaded] = useState(false);
 
   useEffect(() => {
     const extractVideoId = (tiktokUrl: string): string | null => {
@@ -279,6 +323,14 @@ const TikTokEmbed: React.FC<TikTokEmbedProps> = ({ url }) => {
 
     setVideoId(extractVideoId(url));
   }, [url]);
+
+  useEffect(() => {
+    if (videoId) {
+      loadScript('https://www.tiktok.com/embed.js')
+        .then(() => setScriptLoaded(true))
+        .catch(error => console.error('Failed to load TikTok script:', error));
+    }
+  }, [videoId]);
 
   if (!videoId) {
     return <div>Invalid TikTok URL.</div>;
@@ -296,9 +348,10 @@ const TikTokEmbed: React.FC<TikTokEmbedProps> = ({ url }) => {
         cite={sanitizedUrl}
         data-video-id={videoId}
       >
-        <section></section>
+        <section>
+          {scriptLoaded ? 'Loading TikTok video...' : 'Loading script...'}
+        </section>
       </blockquote>
-      <script async src="https://www.tiktok.com/embed.js"></script>
     </div>
   );
 };
@@ -332,6 +385,18 @@ const LinkedInEmbed: React.FC<LinkedInEmbedProps> = ({ url }) => {
     setPostId(extractPostId(url));
   }, [url]);
 
+  useEffect(() => {
+    if (postId) {
+      loadScript('https://platform.linkedin.com/in.js')
+        .then(() => {
+          // LinkedIn script loaded successfully
+        })
+        .catch(error =>
+          console.error('Failed to load LinkedIn script:', error)
+        );
+    }
+  }, [postId]);
+
   if (!postId) {
     return <div>Invalid LinkedIn URL.</div>;
   }
@@ -352,13 +417,6 @@ const LinkedInEmbed: React.FC<LinkedInEmbedProps> = ({ url }) => {
           title="Embedded LinkedIn post"
         />
       </div>
-
-      {/* LinkedIn Embed Script */}
-      <script
-        src="https://platform.linkedin.com/in.js"
-        type="text/javascript"
-        async
-      />
     </div>
   );
 };
@@ -527,6 +585,7 @@ const GitHubEmbed: React.FC<GitHubEmbedProps> = ({ url }) => {
 
 const RedditEmbed: React.FC<RedditEmbedProps> = ({ url }) => {
   const [postId, setPostId] = useState<string | null>(null);
+  const [scriptLoaded, setScriptLoaded] = useState(false);
 
   useEffect(() => {
     const extractPostId = (redditUrl: string): string | null => {
@@ -537,6 +596,14 @@ const RedditEmbed: React.FC<RedditEmbedProps> = ({ url }) => {
 
     setPostId(extractPostId(url));
   }, [url]);
+
+  useEffect(() => {
+    if (postId) {
+      loadScript('https://embed.redditmedia.com/widgets/platform.js')
+        .then(() => setScriptLoaded(true))
+        .catch(error => console.error('Failed to load Reddit script:', error));
+    }
+  }, [postId]);
 
   if (!postId) {
     return <div>Invalid Reddit URL.</div>;
@@ -550,12 +617,10 @@ const RedditEmbed: React.FC<RedditEmbedProps> = ({ url }) => {
   return (
     <div className="redditwrapper">
       <blockquote className="reddit-card">
-        <a href={sanitizedUrl}>Reddit Post</a>
+        <a href={sanitizedUrl}>
+          {scriptLoaded ? 'Loading Reddit post...' : 'Loading script...'}
+        </a>
       </blockquote>
-      <script
-        src="https://embed.redditmedia.com/widgets/platform.js"
-        async
-      ></script>
     </div>
   );
 };
