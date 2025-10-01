@@ -1,4 +1,10 @@
-import React, { useRef, useEffect, useState, useCallback } from 'react';
+import React, {
+  useRef,
+  useEffect,
+  useState,
+  useMemo,
+  useCallback,
+} from 'react';
 
 interface FilterInputProps {
   columns: string[];
@@ -16,11 +22,20 @@ export const FilterInput: React.FC<FilterInputProps> = ({
   );
   const inputRef = useRef<HTMLDivElement>(null);
 
+  const OPERATORS = useMemo(() => ['=', '!=', '<', '>', '<=', '>='], []);
+
   const isMatchingColumn = useCallback(
     (word: string): boolean => {
       return columns.some(col => col.toLowerCase() === word.toLowerCase());
     },
     [columns]
+  );
+
+  const isOperator = useCallback(
+    (word: string): boolean => {
+      return OPERATORS.includes(word);
+    },
+    [OPERATORS]
   );
 
   const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
@@ -38,8 +53,48 @@ export const FilterInput: React.FC<FilterInputProps> = ({
     // Build a set of currently saved tokens for quick lookup
     const savedTokenSet = new Set(Array.from(tokenPositions.values()));
 
+    // Check if the current word (last word being typed) matches
+    const currentWord = words[words.length - 1];
+    if (
+      currentWord &&
+      (isMatchingColumn(currentWord) || isOperator(currentWord)) &&
+      !savedTokenSet.has(currentWord)
+    ) {
+      // Auto-save and add space
+      e.preventDefault();
+      const newText = text + ' ';
+      if (inputRef.current) {
+        inputRef.current.textContent = newText;
+      }
+      setInputValue(newText);
+
+      const newTokens = [...savedTokens, currentWord];
+      setSavedTokens(newTokens);
+
+      const newPositions = new Map(tokenPositions);
+      newPositions.set(words.length - 1, currentWord);
+      setTokenPositions(newPositions);
+
+      onTokensSaved(newTokens);
+
+      // Move cursor to end
+      const range = document.createRange();
+      const selection = window.getSelection();
+      range.selectNodeContents(inputRef.current as Node);
+      range.collapse(false);
+      selection?.removeAllRanges();
+      selection?.addRange(range);
+
+      renderStyledText(newText);
+      return;
+    }
+
     words.forEach((word, index) => {
-      if (word && isMatchingColumn(word) && savedTokenSet.has(word)) {
+      if (
+        word &&
+        (isMatchingColumn(word) || isOperator(word)) &&
+        savedTokenSet.has(word)
+      ) {
         // This matching word was previously saved, keep it
         newTokenPositions.set(index, word);
         newSavedTokens.push(word);
@@ -61,26 +116,9 @@ export const FilterInput: React.FC<FilterInputProps> = ({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    // Prevent manual spaces
     if (e.key === ' ') {
-      // Get the current word being typed
-      const text = inputRef.current?.textContent || '';
-      const words = text.split(/\s+/).filter(w => w);
-      const currentWordIndex = words.length - 1;
-      const currentWord = words[currentWordIndex];
-
-      // If the current word matches a column, save it
-      if (currentWord && isMatchingColumn(currentWord)) {
-        const newTokenPositions = new Map(tokenPositions);
-        newTokenPositions.set(currentWordIndex, currentWord);
-        setTokenPositions(newTokenPositions);
-
-        const newTokens = [...savedTokens, currentWord];
-        setSavedTokens(newTokens);
-        onTokensSaved(newTokens);
-      }
-
-      // Let the space be added naturally by not preventing default
-      // The handleInput will take care of re-rendering with styling
+      e.preventDefault();
     }
   };
 
@@ -110,8 +148,13 @@ export const FilterInput: React.FC<FilterInputProps> = ({
             // It's whitespace, preserve it
             return part;
           }
-          const isMatch = part && isMatchingColumn(part);
-          const style = isMatch ? 'color: rgb(59, 130, 246);' : '';
+          const isColumn = part && isMatchingColumn(part);
+          const isOp = part && isOperator(part);
+          const style = isColumn
+            ? 'color: rgb(59, 130, 246);'
+            : isOp
+              ? 'color: rgb(168, 85, 247);'
+              : '';
           return part ? `<span style="${style}">${part}</span>` : '';
         })
         .join('');
@@ -171,7 +214,7 @@ export const FilterInput: React.FC<FilterInputProps> = ({
         console.error(e);
       }
     },
-    [isMatchingColumn]
+    [isMatchingColumn, isOperator, inputRef]
   );
 
   useEffect(() => {
