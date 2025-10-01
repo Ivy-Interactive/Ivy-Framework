@@ -24,6 +24,7 @@ import { EmptyWidget } from './primitives/EmptyWidget';
 
 interface CardWidgetProps {
   id: string;
+  events: string[];
   title?: string;
   description?: string;
   icon?: string;
@@ -42,6 +43,7 @@ interface CardWidgetProps {
 
 export const CardWidget: React.FC<CardWidgetProps> = ({
   id,
+  events,
   title,
   description,
   icon,
@@ -74,7 +76,7 @@ export const CardWidget: React.FC<CardWidgetProps> = ({
   const headerIsEmpty = !title && !description && !icon;
 
   const handleClick = useCallback(() => {
-    eventHandler('OnClick', id, []);
+    if (events.includes('OnClick')) eventHandler('OnClick', id, []);
   }, [id, eventHandler]);
 
   const hoverClass =
