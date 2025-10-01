@@ -1,6 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import Icon from '@/components/Icon';
 
+declare global {
+  interface Window {
+    twttr?: {
+      widgets: {
+        load: () => void;
+      };
+    };
+  }
+}
+
 // URL validation and sanitization utilities
 const isValidUrl = (url: string): boolean => {
   try {
@@ -129,7 +139,10 @@ const TwitterEmbed: React.FC<TwitterEmbedProps> = ({ url }) => {
 
   useEffect(() => {
     const extractTweetId = (twitterUrl: string): string | null => {
-      const match = twitterUrl.match(/twitter\.com\/\w+\/status\/(\d+)/);
+      // Support both twitter.com and x.com URLs, with or without @ prefix
+      const match = twitterUrl.match(
+        /(?:twitter\.com|x\.com)\/\w+\/status\/(\d+)/
+      );
       return match ? sanitizeId(match[1]) : null;
     };
 
@@ -146,15 +159,28 @@ const TwitterEmbed: React.FC<TwitterEmbedProps> = ({ url }) => {
   }
 
   return (
-    <div className="twitter-embed">
-      <blockquote className="twitter-tweet" data-theme="light" data-dnt="true">
-        <a href={sanitizedUrl}></a>
-      </blockquote>
-      <script
-        async
-        src="https://platform.twitter.com/widgets.js"
-        charSet="utf-8"
-      ></script>
+    <div className="twitter-embed border rounded-lg p-4 bg-card shadow-sm">
+      <div className="flex items-center space-x-3">
+        <div className="flex-shrink-0">
+          <Icon name="Twitter" size={32} className="text-info" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <h3 className="text-lg font-semibold text-card-foreground truncate">
+            Twitter Tweet
+          </h3>
+          <p className="text-sm text-muted-foreground">View tweet on Twitter</p>
+        </div>
+        <div className="flex-shrink-0">
+          <a
+            href={sanitizedUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center px-3 py-2 border shadow-sm text-sm font-medium rounded-md text-card-foreground bg-card hover:bg-accent focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+          >
+            View on Twitter
+          </a>
+        </div>
+      </div>
     </div>
   );
 };
