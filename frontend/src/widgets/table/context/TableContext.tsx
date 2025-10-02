@@ -35,6 +35,7 @@ interface TableContextType {
   loadMoreData: () => Promise<void>;
   handleColumnResize: (column: GridColumn, newSize: number) => void;
   handleSort: (columnName: string) => void;
+  setActiveFilter: (filter: Filter | null) => void;
   setError: (error: string | null) => void;
 }
 
@@ -60,7 +61,7 @@ export const TableProvider: React.FC<TableProviderProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeFilter] = useState<Filter | null>(null);
+  const [activeFilter, setActiveFilter] = useState<Filter | null>(null);
   const [activeSort, setActiveSort] = useState<SortOrder[] | null>(null);
 
   const loadingRef = useRef(false);
@@ -232,6 +233,7 @@ export const TableProvider: React.FC<TableProviderProps> = ({
     loadMoreData,
     handleColumnResize,
     handleSort,
+    setActiveFilter,
     setError,
   };
 

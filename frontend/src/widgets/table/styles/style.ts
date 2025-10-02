@@ -22,11 +22,15 @@ export const tableStyles = {
     leftSection: 'flex items-center gap-4',
     rightSection: 'flex items-center gap-2',
     dialog: {
-      content: 'bg-white p-4 rounded-lg max-w-[512px] flex flex-col gap-4',
+      content: 'bg-white p-6 rounded-lg max-w-[600px] flex flex-col gap-4',
       header: 'flex items-center justify-between',
       footer: 'flex items-center justify-between',
       filterIcon: 'w-4 h-4 mr-2',
       closeIcon: 'w-[9.251px] h-[9.251px]',
+      inputError: 'border-red-500 focus-visible:ring-red-500',
+      errorText: 'text-sm text-red-500 mt-1',
+      helpText: 'text-xs text-muted-foreground mt-2',
+      examplesList: 'list-disc list-inside space-y-1 mt-1',
     },
   },
 

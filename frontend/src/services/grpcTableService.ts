@@ -464,24 +464,85 @@ export class GrpcTableService extends EventEmitter {
 
   // Serialize a value as a protobuf Any message
   private serializeAnyValue(value: unknown): Uint8Array {
-    logger.debug('serializeAnyValue: Serializing value', value);
+    logger.debug(
+      'serializeAnyValue: Serializing value',
+      value,
+      'type:',
+      typeof value
+    );
 
     const encoder = new TextEncoder();
     const chunks: Uint8Array[] = [];
 
-    // Field 1: type_url (string) - we'll use a generic type for JSON values
-    const typeUrl = 'type.googleapis.com/google.protobuf.StringValue';
+    let typeUrl: string;
+    let valueBytes: Uint8Array;
+
+    // Determine the appropriate protobuf type based on JavaScript type
+    if (typeof value === 'number') {
+      if (Number.isInteger(value)) {
+        // Integer value
+        typeUrl = 'type.googleapis.com/google.protobuf.Int64Value';
+        const valueChunks: Uint8Array[] = [];
+        // Field 1 in Int64Value is the value itself (varint for small numbers)
+        valueChunks.push(this.encodeField(1, 0, this.encodeVarint(value)));
+        valueBytes = this.combineChunks(valueChunks);
+      } else {
+        // Double value
+        typeUrl = 'type.googleapis.com/google.protobuf.DoubleValue';
+        const valueChunks: Uint8Array[] = [];
+        // Field 1 in DoubleValue is the value itself (fixed64)
+        const buffer = new ArrayBuffer(8);
+        const view = new DataView(buffer);
+        view.setFloat64(0, value, true); // little-endian
+        const doubleBytes = new Uint8Array(buffer);
+        valueChunks.push(this.encodeField(1, 1, doubleBytes));
+        valueBytes = this.combineChunks(valueChunks);
+      }
+    } else if (typeof value === 'boolean') {
+      // Boolean value
+      typeUrl = 'type.googleapis.com/google.protobuf.BoolValue';
+      const valueChunks: Uint8Array[] = [];
+      // Field 1 in BoolValue is the value itself (varint: 0 or 1)
+      valueChunks.push(
+        this.encodeField(1, 0, this.encodeVarint(value ? 1 : 0))
+      );
+      valueBytes = this.combineChunks(valueChunks);
+    } else if (value === null || value === undefined) {
+      // Null value - use empty message
+      typeUrl = 'type.googleapis.com/google.protobuf.Value';
+      valueBytes = new Uint8Array(0);
+    } else if (Array.isArray(value)) {
+      // Array value - serialize as ListValue
+      typeUrl = 'type.googleapis.com/google.protobuf.ListValue';
+      const listChunks: Uint8Array[] = [];
+      // Field 1 in ListValue is repeated Value
+      value.forEach(item => {
+        const itemAny = this.serializeAnyValue(item);
+        listChunks.push(this.encodeField(1, 2, itemAny));
+      });
+      valueBytes = this.combineChunks(listChunks);
+    } else {
+      // String or other value - serialize as StringValue
+      typeUrl = 'type.googleapis.com/google.protobuf.StringValue';
+      const valueChunks: Uint8Array[] = [];
+      // Field 1 in StringValue is the value itself (string)
+      const stringData = encoder.encode(String(value));
+      valueChunks.push(this.encodeField(1, 2, stringData));
+      valueBytes = this.combineChunks(valueChunks);
+    }
+
+    // Field 1: type_url (string)
     const typeUrlData = encoder.encode(typeUrl);
     chunks.push(this.encodeField(1, 2, typeUrlData));
 
-    // Field 2: value (bytes) - JSON-encoded value
-    const jsonValue = JSON.stringify(value);
-    const valueData = encoder.encode(jsonValue);
-    chunks.push(this.encodeField(2, 2, valueData));
+    // Field 2: value (bytes)
+    chunks.push(this.encodeField(2, 2, valueBytes));
 
     const result = this.combineChunks(chunks);
     logger.debug(
-      'serializeAnyValue: Any value serialized, length:',
+      'serializeAnyValue: Any value serialized as',
+      typeUrl,
+      'length:',
       result.length
     );
     return result;
