@@ -91,7 +91,7 @@ export const TableEditor: React.FC<TableEditorProps> = ({
 
       const rowData = data[row];
       const cellValue = rowData.values[col];
-      const columnType = columns[col].type;
+      const columnType = columns[col].type.toLowerCase();
 
       // Handle null/undefined values
       if (cellValue === null || cellValue === undefined) {
@@ -106,31 +106,85 @@ export const TableEditor: React.FC<TableEditorProps> = ({
       }
 
       // Determine cell type based on Arrow data type and value
-      if (typeof cellValue === 'number' && columnType.includes('int')) {
-        return {
-          kind: GridCellKind.Number,
-          data: cellValue,
-          displayData: cellValue.toString(),
-          allowOverlay: editable,
-          readonly: !editable,
-        };
-      } else if (typeof cellValue === 'boolean') {
+      // Handle Date and DateTime types (check before numbers since timestamps are numbers)
+      if (columnType.includes('date') || columnType.includes('timestamp')) {
+        // Arrow can encode dates as milliseconds (number) or ISO strings
+        let dateValue: Date | null = null;
+
+        if (typeof cellValue === 'number') {
+          dateValue = new Date(cellValue);
+        } else if (typeof cellValue === 'string') {
+          dateValue = new Date(cellValue);
+        }
+
+        // Check if it's a valid date
+        if (dateValue && !isNaN(dateValue.getTime())) {
+          // Format based on whether it includes time component
+          const hasTime =
+            columnType.includes('datetime') ||
+            columnType.includes('timestamp') ||
+            dateValue.getHours() !== 0 ||
+            dateValue.getMinutes() !== 0 ||
+            dateValue.getSeconds() !== 0;
+
+          const displayData = hasTime
+            ? dateValue.toLocaleString()
+            : dateValue.toLocaleDateString();
+
+          return {
+            kind: GridCellKind.Text,
+            data: displayData,
+            displayData,
+            allowOverlay: editable,
+            readonly: !editable,
+          };
+        }
+      }
+
+      // Handle numeric types (int, uint, float, double, decimal, etc.)
+      if (typeof cellValue === 'number') {
+        // Check if column type indicates a numeric type
+        const isNumericType =
+          columnType.includes('int') ||
+          columnType.includes('float') ||
+          columnType.includes('double') ||
+          columnType.includes('decimal') ||
+          columnType.includes('number');
+
+        if (isNumericType) {
+          // Format floating point numbers with appropriate decimals
+          const displayData = Number.isInteger(cellValue)
+            ? cellValue.toString()
+            : cellValue.toFixed(2);
+
+          return {
+            kind: GridCellKind.Number,
+            data: cellValue,
+            displayData,
+            allowOverlay: editable,
+            readonly: !editable,
+          };
+        }
+      }
+
+      // Handle boolean types
+      if (typeof cellValue === 'boolean') {
         return {
           kind: GridCellKind.Boolean,
           data: cellValue,
           allowOverlay: false,
           readonly: !editable,
         };
-      } else {
-        // Default to text for strings and other types
-        return {
-          kind: GridCellKind.Text,
-          data: String(cellValue),
-          displayData: String(cellValue),
-          allowOverlay: editable,
-          readonly: !editable,
-        };
       }
+
+      // Default to text for strings and other types
+      return {
+        kind: GridCellKind.Text,
+        data: String(cellValue),
+        displayData: String(cellValue),
+        allowOverlay: editable,
+        readonly: !editable,
+      };
     },
     [data, columns, editable]
   );
