@@ -43,8 +43,7 @@ public class JsonEnumConverter : JsonConverterFactory
 
         public override void Write(Utf8JsonWriter writer, TEnum value, JsonSerializerOptions options)
         {
-            string description = GetEnumDescription(value);
-            writer.WriteStringValue(description);
+            writer.WriteStringValue(value.ToString());
         }
 
         private string GetEnumDescription(TEnum value)

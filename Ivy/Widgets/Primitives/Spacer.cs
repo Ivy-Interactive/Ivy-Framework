@@ -1,13 +1,7 @@
 ﻿// ReSharper disable once CheckNamespace
 namespace Ivy;
 
-/// <summary>
-/// An invisible widget that creates empty space between layout elements.
-/// </summary>
-/// <remarks>
-/// Creates flexible spacing for fine-tuned control over alignment and visual balance.
-/// Commonly used with custom width or height to create specific spacing amounts.
-/// </remarks>
+/// <summary>Invisible widget that creates empty space. Use with custom width/height for spacing control.</summary>
 public record Spacer : WidgetBase<Spacer>
 {
 }

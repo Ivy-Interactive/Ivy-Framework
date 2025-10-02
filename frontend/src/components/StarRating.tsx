@@ -5,12 +5,13 @@ import { Star } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { InvalidIcon } from '@/components/InvalidIcon';
+import { Sizes } from '@/types/sizes';
 
 interface StarRatingProps {
   totalStars?: number;
   value: number;
   onRate?: (rating: number) => void;
-  size?: 'sm' | 'md' | 'lg';
+  size?: Sizes;
   className?: string;
   disabled?: boolean;
   invalid?: string;
@@ -20,7 +21,7 @@ export function StarRating({
   totalStars = 5,
   value = 0,
   onRate,
-  size = 'md',
+  size = Sizes.Medium,
   className,
   disabled = false,
   invalid,
@@ -33,9 +34,9 @@ export function StarRating({
   };
 
   const starSizes = {
-    sm: 'h-4 w-4',
-    md: 'h-6 w-6',
-    lg: 'h-8 w-8',
+    Small: 'h-4 w-4',
+    Medium: 'h-6 w-6',
+    Large: 'h-8 w-8',
   };
 
   return (

@@ -4,6 +4,7 @@ using Ivy.Core;
 using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
 using Ivy.Widgets.Inputs;
+using Ivy.Shared;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy;
@@ -30,6 +31,9 @@ public abstract record DateRangeInputBase : WidgetBase<DateRangeInputBase>, IAny
 
     /// <summary>Gets or sets the date format string for displaying and parsing dates.</summary>
     [Prop] public string? Format { get; set; }
+
+    /// <summary>Gets or sets the size of the date range input.</summary>
+    [Prop] public Sizes Size { get; set; } = Sizes.Medium;
 
     /// <summary>Gets or sets whether the input is disabled.</summary>
     [Prop] public bool Disabled { get; set; }
@@ -218,5 +222,23 @@ public static class DateRangeInputExtensions
     public static DateRangeInputBase HandleBlur(this DateRangeInputBase widget, Action onBlur)
     {
         return widget.HandleBlur(_ => { onBlur(); return ValueTask.CompletedTask; });
+    }
+
+    /// <summary>Sets the size of the date range input.</summary>
+    public static DateRangeInputBase Size(this DateRangeInputBase widget, Sizes size)
+    {
+        return widget with { Size = size };
+    }
+
+    /// <summary>Sets the date range input size to large for prominent display.</summary>
+    public static DateRangeInputBase Large(this DateRangeInputBase widget)
+    {
+        return widget.Size(Sizes.Large);
+    }
+
+    /// <summary>Sets the date range input size to small for compact display.</summary>
+    public static DateRangeInputBase Small(this DateRangeInputBase widget)
+    {
+        return widget.Size(Sizes.Small);
     }
 }

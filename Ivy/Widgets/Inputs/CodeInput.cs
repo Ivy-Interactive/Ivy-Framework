@@ -53,6 +53,9 @@ public abstract record CodeInputBase : WidgetBase<CodeInputBase>, IAnyCodeInput
     /// <summary>Gets or sets whether to display a copy button for the code content.</summary>
     [Prop] public bool ShowCopyButton { get; set; } = false;
 
+    /// <summary>Gets or sets the size of the code input (Medium, Small, Large).</summary>
+    [Prop] public Sizes Size { get; set; }
+
     /// <summary>Gets or sets the event handler called when the input loses focus.</summary>
     [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
 
@@ -126,8 +129,9 @@ public record CodeInput<TString> : CodeInputBase, IInput<TString>
         Placeholder = placeholder;
         Variant = variant;
         Disabled = disabled;
-        Width = Size.Full();
-        Height = Size.Units(25);
+        Size = Sizes.Medium;
+        Width = Ivy.Shared.Size.Full();
+        Height = Ivy.Shared.Size.Units(25);
     }
 
     /// <summary>Gets the current code content.</summary>
@@ -204,6 +208,30 @@ public static class CodeInputExtensions
     public static CodeInputBase ShowCopyButton(this CodeInputBase widget, bool showCopyButton = true)
     {
         return widget with { ShowCopyButton = showCopyButton };
+    }
+
+    /// <summary>Sets the size of the code input.</summary>
+    /// <param name="widget">The code input to configure.</param>
+    /// <param name="size">The size to apply to the input.</param>
+    public static CodeInputBase Size(this CodeInputBase widget, Sizes size)
+    {
+        return widget with { Size = size };
+    }
+
+    /// <summary>Sets the code input size to large for prominent display.</summary>
+    /// <param name="widget">The code input to configure.</param>
+    /// <returns>A new CodeInputBase instance with large size applied.</returns>
+    public static CodeInputBase Large(this CodeInputBase widget)
+    {
+        return widget.Size(Sizes.Large);
+    }
+
+    /// <summary>Sets the code input size to small for compact display.</summary>
+    /// <param name="widget">The code input to configure.</param>
+    /// <returns>A new CodeInputBase instance with small size applied.</returns>
+    public static CodeInputBase Small(this CodeInputBase widget)
+    {
+        return widget.Size(Sizes.Small);
     }
 
 

@@ -7,7 +7,7 @@ import React, {
   useState,
 } from 'react';
 import ErrorBoundary from './ErrorBoundary';
-import ReactMarkdown, { defaultUrlTransform } from 'react-markdown';
+import ReactMarkdown, { defaultUrlTransform, Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkGemoji from 'remark-gemoji';
 import remarkMath from 'remark-math';
@@ -20,6 +20,10 @@ import CopyToClipboardButton from './CopyToClipboardButton';
 import { createPrismTheme } from '@/lib/ivy-prism-theme';
 import { textBlockClassMap, textContainerClass } from '@/lib/textBlockClassMap';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import {
+  CustomEmoji,
+  remarkCustomEmojiPlugin,
+} from './custom-emojis/remarkCustomEmojiPlugin';
 
 const SyntaxHighlighter = lazy(() =>
   import('react-syntax-highlighter').then(mod => ({ default: mod.Prism }))
@@ -194,7 +198,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
   );
 
   const plugins = useMemo(() => {
-    const remarkPlugins = [remarkGfm, remarkGemoji];
+    const remarkPlugins = [remarkGfm, remarkGemoji, remarkCustomEmojiPlugin];
     if (contentFeatures.hasMath)
       remarkPlugins.push(remarkMath as typeof remarkGfm);
 
@@ -397,6 +401,18 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
     }),
     [staticComponents, codeComponent, linkComponent]
   );
+  // This is useful to declare emoji as a new type of valid markdown component
+  type MarkdownComponents = Components & {
+    emoji?: React.FC<{ name: string }>;
+  };
+
+  // add the components that use memo and the ones that don't in a single variable of the extended type we just created
+  const componentsParams: MarkdownComponents = {
+    ...(components as React.ComponentProps<typeof ReactMarkdown>['components']),
+
+    // ReactMarkdown will execute this when he finds an image node with hName emoji
+    emoji: ({ name }: { name: string }) => <CustomEmoji name={name} />,
+  };
 
   const urlTransform = useCallback((url: string) => {
     if (url.startsWith('app://')) {
@@ -408,9 +424,9 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
   return (
     <div className={textContainerClass}>
       <ReactMarkdown
-        components={
-          components as React.ComponentProps<typeof ReactMarkdown>['components']
-        }
+        components={{
+          ...componentsParams,
+        }}
         remarkPlugins={plugins.remarkPlugins}
         rehypePlugins={plugins.rehypePlugins}
         urlTransform={urlTransform}

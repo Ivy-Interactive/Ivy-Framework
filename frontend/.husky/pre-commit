@@ -1,5 +1,13 @@
-#!/bin/sh
-dotnet format
-git add .
+# Get the list of staged files that are cs files
+CS_STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.cs$' || true)
+
+if [ -n "$CS_STAGED_FILES" ]; then
+  # Only do the dotnet format on .cs staged files to save time
+  echo "$CS_STAGED_FILES" | xargs dotnet format --include
+  # Add back the cs files we just formatted to the staged files
+  echo "$CS_STAGED_FILES" | xargs git add
+fi
+
+# TS and JS files are handled well by lint-staged
 cd frontend
 npx lint-staged

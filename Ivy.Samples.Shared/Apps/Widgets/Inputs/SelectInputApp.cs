@@ -1,5 +1,6 @@
 #pragma warning disable IVYHOOK001
 
+using System.ComponentModel;
 using Ivy.Shared;
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Inputs;
@@ -58,6 +59,8 @@ public class SelectInputApp : SampleBase
                | multiSelectVariants
                | Text.H2("Data Binding")
                | dataBinding
+               | Text.H2("Label/Value Edge Cases")
+               | CreateLabelValueEdgeCasesSection()
                ;
     }
 
@@ -413,6 +416,58 @@ public class SelectInputApp : SampleBase
                | nonNullableColorState
                     .ToSelectInput(colorOptions)
                     .Variant(SelectInputs.Toggle);
+    }
+
+    private enum DatabaseNamingConvention
+    {
+        [Description("PascalCase")]
+        PascalCase,
+        [Description("camelCase")]
+        CamelCase,
+        [Description("snake_case")]
+        SnakeCase,
+    }
+
+    private object CreateLabelValueEdgeCasesSection()
+    {
+        var namingConventionOptions = typeof(DatabaseNamingConvention).ToOptions();
+
+        var singleSelectState = UseState(DatabaseNamingConvention.PascalCase);
+        var multiSelectState = UseState<DatabaseNamingConvention[]>([DatabaseNamingConvention.PascalCase, DatabaseNamingConvention.SnakeCase]);
+
+        return Layout.Grid().Columns(4)
+               | Text.InlineCode("Description")
+               | Text.InlineCode("Select")
+               | Text.InlineCode("List")
+               | Text.InlineCode("Toggle")
+
+               | Text.InlineCode("Single Select")
+               | singleSelectState.ToSelectInput(namingConventionOptions)
+               | singleSelectState
+                    .ToSelectInput(namingConventionOptions)
+                    .Variant(SelectInputs.List)
+               | singleSelectState
+                    .ToSelectInput(namingConventionOptions)
+                    .Variant(SelectInputs.Toggle)
+
+               | Text.InlineCode("Multi Select")
+               | multiSelectState.ToSelectInput(namingConventionOptions)
+               | multiSelectState
+                    .ToSelectInput(namingConventionOptions)
+                    .Variant(SelectInputs.List)
+               | multiSelectState
+                    .ToSelectInput(namingConventionOptions)
+                    .Variant(SelectInputs.Toggle)
+
+               | Text.InlineCode("Current Single Value")
+               | Text.InlineCode($"'{singleSelectState.Value}'")
+               | Text.Block("Check browser console for any fallback warnings")
+               | Text.Block("Values should match enum value, not description")
+
+               | Text.InlineCode("Current Multi Values")
+               | Text.InlineCode($"[{string.Join(", ", multiSelectState.Value)}]")
+               | Text.Block("Frontend should send actual enum values to backend")
+               | Text.Block("Not descriptions, even if they contain underscores");
     }
 
     private static object FormatStateValue(string typeName, object? value, bool isNullable)

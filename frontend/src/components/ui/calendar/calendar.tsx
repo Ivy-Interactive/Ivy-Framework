@@ -8,6 +8,14 @@ import { DayButton, DayPicker, getDefaultClassNames } from 'react-day-picker';
 
 import { cn } from '@/lib/utils';
 import { Button, buttonVariants } from '@/components/ui/button';
+import {
+  calendarVariants,
+  calendarButtonVariants,
+  calendarCaptionVariants,
+  calendarWeekdayVariants,
+  calendarDayVariants,
+} from './calendar-variants';
+import { Sizes } from '@/types/sizes';
 
 export function Calendar({
   className,
@@ -17,9 +25,11 @@ export function Calendar({
   buttonVariant = 'ghost',
   formatters,
   components,
+  size = Sizes.Medium,
   ...props
 }: React.ComponentProps<typeof DayPicker> & {
   buttonVariant?: React.ComponentProps<typeof Button>['variant'];
+  size?: Sizes;
 }) {
   const defaultClassNames = getDefaultClassNames();
 
@@ -27,7 +37,7 @@ export function Calendar({
     <DayPicker
       showOutsideDays={showOutsideDays}
       className={cn(
-        'bg-background group/calendar p-3 [--cell-size:--spacing(8)] [[data-slot=card-content]_&]:bg-transparent [[data-slot=popover-content]_&]:bg-transparent',
+        calendarVariants({ size }),
         String.raw`rtl:**:[.rdp-button\_next>svg]:rotate-180`,
         String.raw`rtl:**:[.rdp-button\_previous>svg]:rotate-180`,
         className
@@ -51,16 +61,16 @@ export function Calendar({
         ),
         button_previous: cn(
           buttonVariants({ variant: buttonVariant }),
-          'size-(--cell-size) aria-disabled:opacity-50 p-0 select-none',
+          calendarButtonVariants({ size }),
           defaultClassNames.button_previous
         ),
         button_next: cn(
           buttonVariants({ variant: buttonVariant }),
-          'size-(--cell-size) aria-disabled:opacity-50 p-0 select-none',
+          calendarButtonVariants({ size }),
           defaultClassNames.button_next
         ),
         month_caption: cn(
-          'flex items-center justify-center h-(--cell-size) w-full px-(--cell-size)',
+          calendarCaptionVariants({ size }),
           defaultClassNames.month_caption
         ),
         dropdowns: cn(
@@ -82,7 +92,7 @@ export function Calendar({
         table: 'w-full border-collapse',
         weekdays: cn('flex', defaultClassNames.weekdays),
         weekday: cn(
-          'text-muted-foreground rounded-md flex-1 font-normal text-[0.8rem] select-none',
+          calendarWeekdayVariants({ size }),
           defaultClassNames.weekday
         ),
         week: cn('flex w-full mt-2', defaultClassNames.week),
@@ -150,7 +160,7 @@ export function Calendar({
             <ChevronDownIcon className={cn('size-4', className)} {...props} />
           );
         },
-        DayButton: CalendarDayButton,
+        DayButton: props => <CalendarDayButton {...props} size={size} />,
         WeekNumber: ({ children, ...props }) => {
           return (
             <td {...props}>
@@ -171,8 +181,11 @@ function CalendarDayButton({
   className,
   day,
   modifiers,
+  size = Sizes.Medium,
   ...props
-}: React.ComponentProps<typeof DayButton>) {
+}: React.ComponentProps<typeof DayButton> & {
+  size?: Sizes;
+}) {
   const defaultClassNames = getDefaultClassNames();
 
   const ref = React.useRef<HTMLButtonElement>(null);
@@ -196,7 +209,7 @@ function CalendarDayButton({
       data-range-end={modifiers.range_end}
       data-range-middle={modifiers.range_middle}
       className={cn(
-        'data-[selected-single=true]:bg-primary data-[selected-single=true]:text-primary-foreground data-[range-middle=true]:bg-accent data-[range-middle=true]:text-accent-foreground data-[range-start=true]:bg-primary data-[range-start=true]:text-primary-foreground data-[range-end=true]:bg-primary data-[range-end=true]:text-primary-foreground group-data-[focused=true]/day:border-ring group-data-[focused=true]/day:ring-ring/50 dark:hover:text-accent-foreground flex aspect-square size-auto w-full min-w-(--cell-size) flex-col gap-1 leading-none font-normal group-data-[focused=true]/day:relative group-data-[focused=true]/day:z-10 group-data-[focused=true]/day:ring-[3px] data-[range-end=true]:rounded-md data-[range-end=true]:rounded-r-md data-[range-middle=true]:rounded-none data-[range-start=true]:rounded-md data-[range-start=true]:rounded-l-md [&>span]:text-xs [&>span]:opacity-70',
+        calendarDayVariants({ size }),
         defaultClassNames.day,
         className
       )}

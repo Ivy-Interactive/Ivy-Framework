@@ -32,11 +32,21 @@ public class CardApp : SampleBase
          .BorderColor(Colors.Red)
          .BorderRadius(BorderRadius.Rounded);
 
+        var card4 = new Card(
+           "This card demonstrates OnClick handlers."
+       ).Title("OnClick test")
+        .Description("Click me!")
+        .HandleClick(_ =>
+        {
+            client.Toast("Clicked!");
+        });
+
         return Layout.Vertical()
-               | (Layout.Grid().Columns(3)
+               | (Layout.Grid().Columns(4)
                   | card1
                   | card2
                   | card3
+                  | card4
                   )
                | (Layout.Grid().Columns(4)
                   | new TotalSalesMetricView()

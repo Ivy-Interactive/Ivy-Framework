@@ -13,6 +13,8 @@ public class ColorInputApp : SampleBase
         var nonGenericConstructor = CreateNonGenericConstructorSection();
 
         return Layout.Vertical()
+               | Text.H2("Size Variants")
+               | CreateSizeVariantsSection()
                | Text.H1("ColorInput")
                | Text.H2("Non-Generic Constructor")
                | nonGenericConstructor
@@ -219,6 +221,40 @@ public class ColorInputApp : SampleBase
             Colors c => Text.InlineCode(c.ToString()),
             _ => Text.InlineCode(value?.ToString() ?? "null")
         };
+    }
+
+    private object CreateSizeVariantsSection()
+    {
+        var smallTextState = UseState("#ff6b6b");
+        var mediumTextState = UseState("#4ecdc4");
+        var largeTextState = UseState("#45b7d1");
+        var smallPickerState = UseState("#96ceb4");
+        var mediumPickerState = UseState("#feca57");
+        var largePickerState = UseState("#ff9ff3");
+        var smallBothState = UseState("#54a0ff");
+        var mediumBothState = UseState("#5f27cd");
+        var largeBothState = UseState("#00d2d3");
+
+        return Layout.Grid().Columns(4)
+            | Text.InlineCode("Size")
+            | Text.InlineCode("Text Only")
+            | Text.InlineCode("Picker Only")
+            | Text.InlineCode("Text and Picker")
+
+            | Text.InlineCode("Small")
+            | smallTextState.ToColorInput().Variant(ColorInputs.Text).Size(Sizes.Small)
+            | smallPickerState.ToColorInput().Variant(ColorInputs.Picker).Size(Sizes.Small)
+            | smallBothState.ToColorInput().Variant(ColorInputs.TextAndPicker).Size(Sizes.Small)
+
+            | Text.InlineCode("Medium")
+            | mediumTextState.ToColorInput().Variant(ColorInputs.Text).Size(Sizes.Medium)
+            | mediumPickerState.ToColorInput().Variant(ColorInputs.Picker).Size(Sizes.Medium)
+            | mediumBothState.ToColorInput().Variant(ColorInputs.TextAndPicker).Size(Sizes.Medium)
+
+            | Text.InlineCode("Large")
+            | largeTextState.ToColorInput().Variant(ColorInputs.Text).Size(Sizes.Large)
+            | largePickerState.ToColorInput().Variant(ColorInputs.Picker).Size(Sizes.Large)
+            | largeBothState.ToColorInput().Variant(ColorInputs.TextAndPicker).Size(Sizes.Large);
     }
 
     private static string ConvertToHex(string? colorValue)

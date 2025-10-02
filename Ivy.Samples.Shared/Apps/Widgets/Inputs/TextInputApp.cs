@@ -43,6 +43,8 @@ public class TextInputApp : SampleBase
 
         return Layout.Vertical()
                | Text.H1("Text Inputs")
+               | Text.H2("Sizes")
+               | CreateSizesSection()
                | Text.H2("Variants")
                | (Layout.Grid().Columns(5)
                   | null!
@@ -99,5 +101,39 @@ public class TextInputApp : SampleBase
                    onBlurLabel
                )
             ;
+    }
+
+    private object CreateSizesSection()
+    {
+        var textState = UseState("Hello");
+        var passwordState = UseState("Hello");
+        var textareaState = UseState("Hello");
+        var searchState = UseState("Hello");
+
+        return Layout.Grid().Columns(4)
+               | Text.InlineCode("Description")
+               | Text.InlineCode("Small")
+               | Text.InlineCode("Medium")
+               | Text.InlineCode("Large")
+
+               | Text.InlineCode("TextInputs.Text")
+               | textState.ToTextInput().Small()
+               | textState.ToTextInput()
+               | textState.ToTextInput().Large()
+
+               | Text.InlineCode("TextInputs.Password")
+               | passwordState.ToPasswordInput().Small()
+               | passwordState.ToPasswordInput()
+               | passwordState.ToPasswordInput().Large()
+
+               | Text.InlineCode("TextInputs.TextArea")
+               | textareaState.ToTextAreaInput().Small()
+               | textareaState.ToTextAreaInput()
+               | textareaState.ToTextAreaInput().Large()
+
+               | Text.InlineCode("TextInputs.Search")
+               | searchState.ToSearchInput().Small()
+               | searchState.ToSearchInput()
+               | searchState.ToSearchInput().Large();
     }
 }

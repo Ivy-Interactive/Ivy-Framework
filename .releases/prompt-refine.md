@@ -1,4 +1,4 @@
-﻿Read D:\Repos\_Ivy\Ivy-Framework\.releases\weekly-notes-2025-09-19.md
+﻿Read D:\Repos\_Ivy\Ivy-Framework\.releases\weekly-notes-2025-09-28.md
 
 This is a weekly summary of changes made to the Ivy Framework.
 Ivy is an open source framework for building apps in pure .Net and C#.

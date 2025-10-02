@@ -23,6 +23,12 @@ import {
 } from 'date-fns';
 import { useEventHandler } from '@/components/event-handler';
 import { InvalidIcon } from '@/components/InvalidIcon';
+import { Sizes } from '@/types/sizes';
+import {
+  dateRangeInputVariants,
+  dateRangeInputIconVariants,
+  dateRangeInputTextVariants,
+} from '@/components/ui/input/date-range-input-variants';
 
 interface DateRangeInputWidgetProps {
   id: string;
@@ -35,6 +41,7 @@ interface DateRangeInputWidgetProps {
   format?: string;
   invalid?: string;
   nullable?: boolean;
+  size?: Sizes;
   events: string[];
   'data-testid'?: string;
 }
@@ -47,6 +54,7 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
   format: formatProp,
   invalid,
   nullable = false,
+  size = Sizes.Medium,
   events,
   'data-testid': dataTestId,
 }) => {
@@ -143,7 +151,7 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
             disabled={disabled}
             data-testid={dataTestId}
             className={cn(
-              'w-full justify-start text-left font-normal cursor-pointer bg-transparent', // bg-transparent to match other inputs
+              dateRangeInputVariants({ size }),
               !date && 'text-muted-foreground',
               invalid && 'border-destructive focus-visible:ring-destructive',
               showClear && invalid
@@ -153,18 +161,29 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
                   : ''
             )}
           >
-            <CalendarIcon className="mr-2 h-4 w-4" />
+            <CalendarIcon
+              className={cn('mr-2', dateRangeInputIconVariants({ size }))}
+            />
             {date?.from ? (
               date.to ? (
-                <>
+                <span className={dateRangeInputTextVariants({ size })}>
                   {format(date.from, displayFormat)} -{' '}
                   {format(date.to, displayFormat)}
-                </>
+                </span>
               ) : (
-                format(date.from, displayFormat)
+                <span className={dateRangeInputTextVariants({ size })}>
+                  {format(date.from, displayFormat)}
+                </span>
               )
             ) : (
-              <span>{placeholder}</span>
+              <span
+                className={cn(
+                  dateRangeInputTextVariants({ size }),
+                  'text-muted-foreground'
+                )}
+              >
+                {placeholder}
+              </span>
             )}
           </Button>
         </PopoverTrigger>
@@ -177,7 +196,10 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="w-full justify-start cursor-pointer"
+                      className={cn(
+                        'w-full justify-start cursor-pointer',
+                        dateRangeInputTextVariants({ size })
+                      )}
                       onClick={() => {
                         handleChange({
                           from: today,
@@ -192,7 +214,10 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="w-full justify-start cursor-pointer"
+                      className={cn(
+                        'w-full justify-start cursor-pointer',
+                        dateRangeInputTextVariants({ size })
+                      )}
                       onClick={() => {
                         handleChange(yesterday);
                         setMonth(yesterday.to);
@@ -204,7 +229,10 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="w-full justify-start cursor-pointer"
+                      className={cn(
+                        'w-full justify-start cursor-pointer',
+                        dateRangeInputTextVariants({ size })
+                      )}
                       onClick={() => {
                         handleChange(last7Days);
                         setMonth(last7Days.to);
@@ -216,7 +244,10 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="w-full justify-start cursor-pointer"
+                      className={cn(
+                        'w-full justify-start cursor-pointer',
+                        dateRangeInputTextVariants({ size })
+                      )}
                       onClick={() => {
                         handleChange(last30Days);
                         setMonth(last30Days.to);
@@ -228,7 +259,10 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="w-full justify-start cursor-pointer"
+                      className={cn(
+                        'w-full justify-start cursor-pointer',
+                        dateRangeInputTextVariants({ size })
+                      )}
                       onClick={() => {
                         handleChange(monthToDate);
                         setMonth(monthToDate.to);
@@ -240,7 +274,10 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="w-full justify-start cursor-pointer"
+                      className={cn(
+                        'w-full justify-start cursor-pointer',
+                        dateRangeInputTextVariants({ size })
+                      )}
                       onClick={() => {
                         handleChange(lastMonth);
                         setMonth(lastMonth.to);
@@ -252,7 +289,10 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="w-full justify-start cursor-pointer"
+                      className={cn(
+                        'w-full justify-start cursor-pointer',
+                        dateRangeInputTextVariants({ size })
+                      )}
                       onClick={() => {
                         handleChange(yearToDate);
                         setMonth(yearToDate.to);
@@ -264,7 +304,10 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="w-full justify-start cursor-pointer"
+                      className={cn(
+                        'w-full justify-start cursor-pointer',
+                        dateRangeInputTextVariants({ size })
+                      )}
                       onClick={() => {
                         handleChange(lastYear);
                         setMonth(lastYear.to);
@@ -290,6 +333,7 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
                   numberOfMonths={2}
                   className="p-2 bg-background"
                   disabled={[{ after: today }]}
+                  size={size}
                 />
               </div>
             </div>
@@ -307,7 +351,12 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
               onClick={handleClear}
               className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
             >
-              <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+              <X
+                className={cn(
+                  dateRangeInputIconVariants({ size }),
+                  'text-muted-foreground hover:text-foreground'
+                )}
+              />
             </button>
           )}
           {invalid && <InvalidIcon message={invalid} />}

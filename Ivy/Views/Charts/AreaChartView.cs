@@ -1,4 +1,4 @@
-﻿using System.Collections.Immutable;
+using System.Collections.Immutable;
 using System.Dynamic;
 using System.Linq.Expressions;
 using System.Runtime.CompilerServices;

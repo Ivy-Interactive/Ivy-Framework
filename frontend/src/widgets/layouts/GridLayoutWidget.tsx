@@ -69,12 +69,10 @@ export const GridLayoutWidget: React.FC<GridLayoutWidgetProps> = ({
   className = '',
 }) => {
   const styles: React.CSSProperties = {
-    ...{
-      display: 'grid',
-      gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
-      gridTemplateRows: `repeat(${rows}, minmax(0, 1fr))`,
-      gridAutoFlow: autoFlow?.toLowerCase(),
-    },
+    display: 'grid',
+    gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
+    gridTemplateRows: `repeat(${rows}, minmax(0, 1fr))`,
+    gridAutoFlow: autoFlow?.toLowerCase() || 'row',
     ...getPadding(padding),
     ...getGap(gap),
     ...getWidth(width),

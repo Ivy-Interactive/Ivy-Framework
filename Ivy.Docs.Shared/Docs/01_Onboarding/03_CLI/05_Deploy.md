@@ -117,25 +117,40 @@ When you run `ivy deploy` without specifying options, Ivy will guide you through
 **Docker Configuration** - Ivy automatically generates a `Dockerfile` for your project:
 
 ```dockerfile
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+# Base runtime image
+FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
 WORKDIR /app
 EXPOSE 80
-EXPOSE 443
 
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+# Build stage
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
+
+# Copy and restore
 COPY ["YourProject.csproj", "./"]
 RUN dotnet restore "YourProject.csproj"
+
+# Copy everything and build
 COPY . .
-RUN dotnet build "YourProject.csproj" -c Release -o /app/build
+RUN dotnet build "YourProject.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
+# Publish stage
 FROM build AS publish
-RUN dotnet publish "YourProject.csproj" -c Release -o /app/publish
+ARG BUILD_CONFIGURATION=Release
+RUN dotnet publish "YourProject.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=true
 
+# Final runtime image
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "YourProject.dll"]
+
+# Set environment variables
+ENV PORT=80
+ENV ASPNETCORE_URLS="http://+:80"
+
+# Run the executable
+ENTRYPOINT ["dotnet","./YourProject.dll"]
 ```
 
 **Environment Configuration** - Ivy configures environment variables for your deployed application:

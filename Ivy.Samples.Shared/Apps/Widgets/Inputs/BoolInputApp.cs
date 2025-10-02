@@ -160,8 +160,12 @@ public class BoolInputApp : SampleBase
 
         var dataBinding = CreateNumericTypeTests();
 
+        var sizes = CreateSizesSection();
+
         return Layout.Vertical()
                | Text.H1("BoolInput")
+               | Text.H2("Sizes")
+               | sizes
                | Text.H2("Variants")
                | variants
                | Text.H2("Data Binding")
@@ -237,6 +241,7 @@ public class BoolInputApp : SampleBase
 
         object FormatStateValue(string typeName, object? value, bool isNullable)
         {
+
             return value switch
             {
                 null => isNullable ? Text.InlineCode("Null") : Text.InlineCode("0"),
@@ -245,6 +250,58 @@ public class BoolInputApp : SampleBase
                 _ => Text.InlineCode(value?.ToString() ?? "null")
             };
         }
+    }
+
+    private object CreateSizesSection()
+    {
+        var trueState = UseState(true);
+        var falseState = UseState(false);
+        var nullState = UseState((bool?)null);
+
+        return Layout.Grid().Columns(4)
+               | Text.InlineCode("Description")
+               | Text.InlineCode("Small")
+               | Text.InlineCode("Medium")
+               | Text.InlineCode("Large")
+
+               | Text.InlineCode("BoolInputs.Checkbox")
+               | trueState
+                   .ToBoolInput()
+                   .Label("Label")
+                   .Small()
+               | trueState
+                   .ToBoolInput()
+                   .Label("Label")
+               | trueState
+                   .ToBoolInput()
+                   .Label("Label")
+                   .Large()
+
+               | Text.InlineCode("BoolInputs.Switch")
+               | trueState
+                   .ToSwitchInput()
+                   .Label("Label")
+                   .Small()
+               | trueState
+                   .ToSwitchInput()
+                   .Label("Label")
+               | trueState
+                   .ToSwitchInput()
+                   .Label("Label")
+                   .Large()
+
+               | Text.InlineCode("BoolInputs.Toggle")
+               | trueState
+                   .ToToggleInput(Icons.Star)
+                   .Label("Label")
+                   .Small()
+               | trueState
+                   .ToToggleInput(Icons.Star)
+                   .Label("Label")
+               | trueState
+                   .ToToggleInput(Icons.Star)
+                   .Label("Label")
+                   .Large();
     }
 
     private static object CreateBoolInputVariants(object state)

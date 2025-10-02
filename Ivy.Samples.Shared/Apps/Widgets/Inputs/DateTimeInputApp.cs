@@ -21,6 +21,75 @@ public class DateTimeInputApp : SampleBase
         var stringState = UseState(DateTime.Now.ToString("O"));
         var nullableTimeState = UseState<TimeOnly?>(() => null);
         var nullableDateOnlyState = UseState<DateOnly?>(() => null);
+        var dateTimeOffsetState = UseState(DateTimeOffset.Now);
+        var nullableDateTimeOffsetState = UseState<DateTimeOffset?>(() => null);
+
+        // Size examples
+        var sizeExamplesGrid = Layout.Grid().Columns(4)
+            | Text.InlineCode("Size")
+            | Text.InlineCode("Date Input")
+            | Text.InlineCode("DateTime Input")
+            | Text.InlineCode("Time Input")
+
+            | Text.InlineCode("Small")
+            | dateState
+                .ToDateTimeInput()
+                .Variant(DateTimeInputs.Date)
+                .Small()
+                .Placeholder("Small date")
+                .TestId("datetime-input-date-small")
+            | dateTimeState
+                .ToDateTimeInput()
+                .Variant(DateTimeInputs.DateTime)
+                .Small()
+                .Placeholder("Small datetime")
+                .TestId("datetime-input-datetime-small")
+            | timeState
+                .ToDateTimeInput()
+                .Variant(DateTimeInputs.Time)
+                .Small()
+                .Placeholder("Small time")
+                .TestId("datetime-input-time-small")
+
+            | Text.InlineCode("Medium")
+            | dateState
+                .ToDateTimeInput()
+                .Variant(DateTimeInputs.Date)
+                .Size(Sizes.Medium)
+                .Placeholder("Medium date")
+                .TestId("datetime-input-date-medium")
+            | dateTimeState
+                .ToDateTimeInput()
+                .Variant(DateTimeInputs.DateTime)
+                .Size(Sizes.Medium)
+                .Placeholder("Medium datetime")
+                .TestId("datetime-input-datetime-medium")
+            | timeState
+                .ToDateTimeInput()
+                .Variant(DateTimeInputs.Time)
+                .Size(Sizes.Medium)
+                .Placeholder("Medium time")
+                .TestId("datetime-input-time-medium")
+
+            | Text.InlineCode("Large")
+            | dateState
+                .ToDateTimeInput()
+                .Variant(DateTimeInputs.Date)
+                .Large()
+                .Placeholder("Large date")
+                .TestId("datetime-input-date-large")
+            | dateTimeState
+                .ToDateTimeInput()
+                .Variant(DateTimeInputs.DateTime)
+                .Large()
+                .Placeholder("Large datetime")
+                .TestId("datetime-input-datetime-large")
+            | timeState
+                .ToDateTimeInput()
+                .Variant(DateTimeInputs.Time)
+                .Large()
+                .Placeholder("Large time")
+                .TestId("datetime-input-time-large");
 
         // Variants grid
         var variantsGrid = Layout.Grid().Columns(6)
@@ -171,7 +240,18 @@ public class DateTimeInputApp : SampleBase
                 .ToDateTimeInput()
                 .Variant(DateTimeInputs.Time)
                 .TestId("datetime-input-timeonly-nullable-binding")
-            | Text.InlineCode(nullableTimeState.Value?.ToString("HH:mm:ss") ?? "null");
+            | Text.InlineCode(nullableTimeState.Value?.ToString("HH:mm:ss") ?? "null")
+
+            | Text.InlineCode("DateTimeOffset")
+            | dateTimeOffsetState.ToDateTimeInput().Variant(DateTimeInputs.DateTime).TestId("datetime-input-datetimeoffset-binding")
+            | Text.InlineCode($"{dateTimeOffsetState.Value:yyyy-MM-dd HH:mm:ss zzz}")
+
+            | Text.InlineCode("DateTimeOffset?")
+            | nullableDateTimeOffsetState
+                .ToDateTimeInput()
+                .Variant(DateTimeInputs.DateTime)
+                .TestId("datetime-input-datetimeoffset-nullable-binding")
+            | Text.InlineCode(nullableDateTimeOffsetState.Value?.ToString("yyyy-MM-dd HH:mm:ss zzz") ?? "null");
 
         // Placeholder examples
         var placeholderExamplesGrid = Layout.Grid().Columns(3)
@@ -238,10 +318,14 @@ public class DateTimeInputApp : SampleBase
             | Text.Block($"TimeOnly: {timeOnlyState.Value:HH:mm:ss}")
             | Text.Block($"string: {stringState.Value}")
             | Text.Block($"Nullable DateOnly: {nullableDateOnlyState.Value?.ToString("yyyy-MM-dd") ?? "null"}")
-            | Text.Block($"Nullable TimeOnly: {nullableTimeState.Value?.ToString("HH:mm:ss") ?? "null"}");
+            | Text.Block($"Nullable TimeOnly: {nullableTimeState.Value?.ToString("HH:mm:ss") ?? "null"}")
+            | Text.Block($"DateTimeOffset: {dateTimeOffsetState.Value:yyyy-MM-dd HH:mm:ss zzz}")
+            | Text.Block($"Nullable DateTimeOffset: {nullableDateTimeOffsetState.Value?.ToString("yyyy-MM-dd HH:mm:ss zzz") ?? "null"}");
 
         return Layout.Vertical()
             | Text.H1("DateTimeInput")
+            | Text.H2("Size Examples")
+            | sizeExamplesGrid
             | Text.H2("Variants")
             | variantsGrid
             | Text.H2("Data Binding")

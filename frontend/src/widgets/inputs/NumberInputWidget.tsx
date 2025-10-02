@@ -168,8 +168,12 @@ const SliderVariant = memo(
           )}
           aria-hidden="true"
         >
-          <span>{min}</span>
-          <span>{max}</span>
+          {min !== undefined && max !== undefined && (
+            <>
+              <span>{min}</span>
+              <span>{max}</span>
+            </>
+          )}
         </span>
         {invalid && (
           <div className="absolute right-2.5 translate-y-1/2 -top-1.5">
@@ -187,8 +191,8 @@ const NumberVariant = memo(
   ({
     placeholder = '',
     value,
-    min = 0,
-    max = 100,
+    min,
+    max,
     step = 1,
     formatStyle = 'Decimal',
     precision = 2,
@@ -286,11 +290,14 @@ export const NumberInputWidget = memo(
       (newValue: number | null) => {
         // Apply bounds only if value is not null
         if (newValue !== null) {
-          // First apply component-level bounds (min/max props)
-          const boundedValue = Math.min(
-            Math.max(newValue, props.min ?? 0),
-            props.max ?? 100
-          );
+          // First apply component-level bounds (min/max props) only when provided
+          let boundedValue = newValue;
+          if (props.min !== undefined) {
+            boundedValue = Math.max(boundedValue, props.min);
+          }
+          if (props.max !== undefined) {
+            boundedValue = Math.min(boundedValue, props.max);
+          }
 
           // Then apply type-level validation to prevent overflow
           const validatedValue = validateAndCapValue(

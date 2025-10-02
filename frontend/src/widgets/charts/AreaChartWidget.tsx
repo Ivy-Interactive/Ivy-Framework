@@ -3,7 +3,6 @@ import {
   CartesianGrid,
   XAxis,
   YAxis,
-  Legend,
   ReferenceArea,
   ReferenceLine,
   ReferenceDot,
@@ -36,6 +35,7 @@ import {
   generateLegendProps,
 } from './shared';
 import { getHeight, getWidth } from '@/lib/styles';
+import { ChartLegend, ChartLegendContent } from '@/components/ui/chart';
 import { StackOffsetType } from 'recharts/types/util/types';
 
 interface AreaChartData {
@@ -84,7 +84,7 @@ const AreaChartWidget: React.FC<AreaChartWidgetProps> = ({
   const [colorGenerator, svgDefs] = getColorGenerator(colorScheme);
 
   return (
-    <ChartContainer config={chartConfig} style={styles}>
+    <ChartContainer config={chartConfig} style={styles} className="w-full">
       <AreaChart
         margin={{ top: 10, right: 10, bottom: 10, left: 10 }}
         accessibilityLayer
@@ -103,7 +103,15 @@ const AreaChartWidget: React.FC<AreaChartWidgetProps> = ({
           <YAxis key={`yaxis${index}`} {...generateYAxisProps(props)} />
         ))}
 
-        {legend && <Legend {...generateLegendProps(legend)} />}
+        {legend && (
+          <ChartLegend
+            {...generateLegendProps(legend)}
+            verticalAlign="bottom"
+            align="center"
+            layout="horizontal"
+            content={<ChartLegendContent splitThreshold={6} />}
+          />
+        )}
 
         {/* eslint-disable-next-line @typescript-eslint/no-unused-vars */}
         {referenceAreas?.map(({ ref, ...props }, index) => (

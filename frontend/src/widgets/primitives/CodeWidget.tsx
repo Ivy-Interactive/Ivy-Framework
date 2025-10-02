@@ -1,7 +1,9 @@
 import CopyToClipboardButton from '@/components/CopyToClipboardButton';
 import { getHeight, getWidth } from '@/lib/styles';
-import React, { CSSProperties, useMemo, memo } from 'react';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import React, { CSSProperties, useMemo, memo, lazy, Suspense } from 'react';
+const SyntaxHighlighter = lazy(() =>
+  import('react-syntax-highlighter').then(mod => ({ default: mod.Prism }))
+);
 import { createPrismTheme } from '@/lib/ivy-prism-theme';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
@@ -90,16 +92,27 @@ const CodeWidget: React.FC<CodeWidgetProps> = memo(
             showBorder && 'border border-border rounded-md'
           )}
         >
-          <SyntaxHighlighter
-            language={mapLanguageToPrism(language)}
-            customStyle={styles}
-            style={dynamicTheme}
-            showLineNumbers={showLineNumbers}
-            wrapLines={true}
-            key={highlighterKey}
+          <Suspense
+            fallback={
+              <pre
+                className="p-4 bg-muted rounded-md font-mono text-sm"
+                style={styles}
+              >
+                {content}
+              </pre>
+            }
           >
-            {content}
-          </SyntaxHighlighter>
+            <SyntaxHighlighter
+              language={mapLanguageToPrism(language)}
+              customStyle={styles}
+              style={dynamicTheme}
+              showLineNumbers={showLineNumbers}
+              wrapLines={true}
+              key={highlighterKey}
+            >
+              {content}
+            </SyntaxHighlighter>
+          </Suspense>
           <ScrollBar orientation="horizontal" />
         </ScrollArea>
       </div>

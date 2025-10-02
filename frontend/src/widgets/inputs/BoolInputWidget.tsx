@@ -13,6 +13,11 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { Sizes } from '@/types/sizes';
+import {
+  labelSizeVariants,
+  descriptionSizeVariants,
+} from '@/components/ui/input/bool-input-variants';
 
 type VariantType = 'Checkbox' | 'Switch' | 'Toggle';
 
@@ -26,6 +31,7 @@ interface BoolInputWidgetProps {
   invalid?: string;
   variant: VariantType;
   icon?: string;
+  size?: Sizes;
   'data-testid'?: string;
 }
 
@@ -37,6 +43,7 @@ interface BaseVariantProps {
   nullable?: boolean;
   value: NullableBoolean;
   disabled: boolean;
+  size?: Sizes;
   'data-testid'?: string;
 }
 
@@ -58,14 +65,19 @@ const InputLabel: React.FC<{
   id: string;
   label?: string;
   description?: string;
-}> = React.memo(({ id, label, description }) => {
+  size?: Sizes;
+}> = React.memo(({ id, label, description, size = Sizes.Medium }) => {
   if (!label && !description) return null;
 
   return (
     <div>
-      {label && <Label htmlFor={id}>{label}</Label>}
+      {label && (
+        <Label htmlFor={id} className={labelSizeVariants({ size })}>
+          {label}
+        </Label>
+      )}
       {description && (
-        <p className="text-sm text-muted-foreground">{description}</p>
+        <p className={descriptionSizeVariants({ size })}>{description}</p>
       )}
     </div>
   );
@@ -96,6 +108,7 @@ const VariantComponents = {
       disabled,
       nullable,
       invalid,
+      size = Sizes.Medium,
       onCheckedChange,
       'data-testid': dataTestId,
     }: CheckboxVariantProps) => {
@@ -108,6 +121,7 @@ const VariantComponents = {
           nullable={nullable}
           className={cn(invalid && inputStyles.invalid)}
           data-testid={dataTestId}
+          size={size}
         />
       );
 
@@ -117,7 +131,12 @@ const VariantComponents = {
           onClick={e => e.stopPropagation()}
         >
           {withTooltip(checkboxElement, invalid)}
-          <InputLabel id={id} label={label} description={description} />
+          <InputLabel
+            id={id}
+            label={label}
+            description={description}
+            size={size}
+          />
         </div>
       );
 
@@ -133,6 +152,7 @@ const VariantComponents = {
       value,
       disabled,
       invalid,
+      size = Sizes.Medium,
       onCheckedChange,
       'data-testid': dataTestId,
     }: SwitchVariantProps) => {
@@ -142,6 +162,7 @@ const VariantComponents = {
           checked={!!value}
           onCheckedChange={onCheckedChange}
           disabled={disabled}
+          size={size}
           className={cn(invalid && inputStyles.invalid)}
           data-testid={dataTestId}
         />
@@ -153,7 +174,12 @@ const VariantComponents = {
           onClick={e => e.stopPropagation()}
         >
           {withTooltip(switchElement, invalid)}
-          <InputLabel id={id} label={label} description={description} />
+          <InputLabel
+            id={id}
+            label={label}
+            description={description}
+            size={size}
+          />
         </div>
       );
 
@@ -170,6 +196,7 @@ const VariantComponents = {
       disabled,
       icon,
       invalid,
+      size = Sizes.Medium,
       onPressedChange,
       'data-testid': dataTestId,
     }: ToggleVariantProps) => {
@@ -181,9 +208,10 @@ const VariantComponents = {
           disabled={disabled}
           aria-label={label}
           className={cn(invalid && inputStyles.invalid)}
+          size={size}
           data-testid={dataTestId}
         >
-          {icon && <Icon className="h-4 w-4" name={icon} />}
+          {icon && <Icon name={icon} />}
         </Toggle>
       );
 
@@ -193,7 +221,12 @@ const VariantComponents = {
           onClick={e => e.stopPropagation()}
         >
           {withTooltip(toggleElement, invalid)}
-          <InputLabel id={id} label={label} description={description} />
+          <InputLabel
+            id={id}
+            label={label}
+            description={description}
+            size={size}
+          />
         </div>
       );
 
@@ -212,6 +245,7 @@ export const BoolInputWidget: React.FC<BoolInputWidgetProps> = ({
   nullable = false,
   variant,
   icon,
+  size = Sizes.Medium,
   'data-testid': dataTestId,
 }) => {
   const eventHandler = useEventHandler();
@@ -239,6 +273,7 @@ export const BoolInputWidget: React.FC<BoolInputWidgetProps> = ({
       nullable={nullable}
       icon={icon}
       invalid={invalid}
+      size={size}
       onCheckedChange={handleChange}
       onPressedChange={handleChange}
       data-testid={dataTestId}

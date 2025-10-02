@@ -1,4 +1,4 @@
-﻿using Ivy.Charts;
+using Ivy.Charts;
 using Ivy.Shared;
 using Ivy.Views.Charts;
 
@@ -17,7 +17,11 @@ public class PieChartApp : ViewBase
             | new PieChart4View()
             | new PieChart5View()
             | new PieChart6View()
-            | new DonutChartWithCustomLabelsView()
+            | new PieChart7View()
+            | new PieChart8View()
+            | new PieChart9View()
+            | new PieChart10View()
+            | new PieChart11View()
         ;
     }
 }
@@ -191,49 +195,131 @@ public class PieChart6View : ViewBase
         ;
     }
 }
-public class DonutChartWithCustomLabelsView : ViewBase
+
+public class PieChart7View : ViewBase
 {
     public override object? Build()
     {
         var data = new[]
         {
-            new PieChartData("Revenue", 1250000),
-            new PieChartData("Marketing", 450000),
-            new PieChartData("Operations", 320000),
-            new PieChartData("R&D", 280000),
-            new PieChartData("Admin", 150000),
-            new PieChartData("Sales", 380000),
-            new PieChartData("Customer Support", 220000),
-            new PieChartData("IT Infrastructure", 180000),
-            new PieChartData("Legal", 95000),
-            new PieChartData("HR", 120000),
-            new PieChartData("Finance", 160000),
-            new PieChartData("Quality Assurance", 140000)
+            new { Department = "Engineering", Budget = 450000 },
+            new { Department = "Marketing", Budget = 180000 },
+            new { Department = "Sales", Budget = 220000 },
+            new { Department = "HR", Budget = 120000 },
+            new { Department = "Finance", Budget = 80000 },
+            new { Department = "Operations", Budget = 150000 },
         };
 
-        var totalValue = data.Sum(d => d.Measure);
-
-        return new Card().Title("Donut Chart with Custom Labels")
-            | new PieChart(data)
-                .Pie(new Pie(nameof(PieChartData.Measure), nameof(PieChartData.Dimension))
-                    .InnerRadius("40%")
-                    .OuterRadius("90%")
-                    .Animated(true)
-                    .LabelList(new LabelList(nameof(PieChartData.Measure))
-                        .Position(Positions.Outside)
-                        .Fill(Colors.Blue)
-                        .FontSize(11)
-                        .NumberFormat("$0,0"))
-                    .LabelList(new LabelList(nameof(PieChartData.Dimension))
-                        .Position(Positions.Inside)
-                        .Fill(Colors.White)
-                        .FontSize(9)
-                        .FontFamily("Arial"))
+        return new Card().Title("Department Budget Allocation")
+            | data.ToPieChart
+                (
+                    e => e.Department,
+                    e => e.Sum(f => f.Budget),
+                    PieChartStyles.Default
                 )
-                .ColorScheme(ColorScheme.Default)
-                .Tooltip(new Ivy.Charts.Tooltip().Animated(true))
-                .Legend(new Legend().IconType(Legend.IconTypes.Rect))
-                .Total(totalValue, "Total Budget")
+        ;
+    }
+}
+
+public class PieChart8View : ViewBase
+{
+    public override object? Build()
+    {
+        var data = new[]
+        {
+            new { Status = "Completed", Tasks = 85 },
+            new { Status = "In Progress", Tasks = 45 },
+            new { Status = "Pending", Tasks = 25 },
+            new { Status = "Blocked", Tasks = 10 },
+            new { Status = "Cancelled", Tasks = 5 },
+        };
+
+        return new Card().Title("Project Task Status")
+            | data.ToPieChart
+                (
+                    e => e.Status,
+                    e => e.Sum(f => f.Tasks),
+                    PieChartStyles.Dashboard
+                )
+        ;
+    }
+}
+
+public class PieChart9View : ViewBase
+{
+    public override object? Build()
+    {
+        var data = new[]
+        {
+            new { Technology = "React", Developers = 45, Percentage = 30.0 },
+            new { Technology = "Angular", Developers = 30, Percentage = 20.0 },
+            new { Technology = "Vue.js", Developers = 25, Percentage = 16.7 },
+            new { Technology = "Svelte", Developers = 20, Percentage = 13.3 },
+            new { Technology = "Ember", Developers = 15, Percentage = 10.0 },
+            new { Technology = "Backbone", Developers = 10, Percentage = 6.7 },
+            new { Technology = "Other", Developers = 5, Percentage = 3.3 }
+        };
+
+        return new Card().Title("Frontend Framework Adoption")
+            | data.ToPieChart
+                (
+                    e => e.Technology,
+                    e => e.Sum(f => f.Developers),
+                    PieChartStyles.Default
+                )
+        ;
+    }
+}
+
+public class PieChart10View : ViewBase
+{
+    public override object? Build()
+    {
+        var data = new[]
+        {
+            new { Category = "Food & Dining", Amount = 2500, Color = "#FF6B6B" },
+            new { Category = "Transportation", Amount = 1800, Color = "#4ECDC4" },
+            new { Category = "Entertainment", Amount = 1200, Color = "#45B7D1" },
+            new { Category = "Shopping", Amount = 2200, Color = "#96CEB4" },
+            new { Category = "Utilities", Amount = 800, Color = "#FFEAA7" },
+            new { Category = "Healthcare", Amount = 600, Color = "#DDA0DD" },
+            new { Category = "Education", Amount = 1500, Color = "#98D8C8" },
+            new { Category = "Travel", Amount = 3000, Color = "#F7DC6F" },
+            new { Category = "Savings", Amount = 2000, Color = "#BB8FCE" }
+        };
+
+        return new Card().Title("Monthly Expense Breakdown")
+            | data.ToPieChart
+                (
+                    e => e.Category,
+                    e => e.Sum(f => f.Amount),
+                    PieChartStyles.Donut
+                )
+        ;
+    }
+}
+
+public class PieChart11View : ViewBase
+{
+    public override object? Build()
+    {
+        var data = new[]
+        {
+            new { AgeGroup = "18-24", Users = 1200, Growth = 15.2 },
+            new { AgeGroup = "25-34", Users = 3500, Growth = 22.8 },
+            new { AgeGroup = "35-44", Users = 2800, Growth = 18.5 },
+            new { AgeGroup = "45-54", Users = 1900, Growth = 12.3 },
+            new { AgeGroup = "55-64", Users = 1200, Growth = 8.7 },
+            new { AgeGroup = "65+", Users = 800, Growth = 5.2 }
+        };
+
+        return new Card().Title("User Demographics by Age Group")
+            | data.ToPieChart
+                (
+                    e => e.AgeGroup,
+                    e => e.Sum(f => f.Users),
+                    PieChartStyles.Dashboard
+                )
         ;
     }
 }

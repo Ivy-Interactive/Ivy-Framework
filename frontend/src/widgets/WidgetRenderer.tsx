@@ -48,7 +48,7 @@ export const renderWidgetTree = (node: WidgetNode): React.ReactNode => {
 
   const children = flattenChildren(node.children || []);
 
-  // Process children, grouping by Slot widgets
+  // Process children, grouping by Slot widgets (original behavior)
   const slots = children.reduce(
     (acc, child) => {
       if (child.type === 'Ivy.Slot') {

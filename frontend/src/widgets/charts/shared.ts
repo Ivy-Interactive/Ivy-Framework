@@ -122,7 +122,7 @@ export interface ExtendedLabelProps extends LabelProps {
   color?: string;
 }
 
-export interface ExtendedLineProps extends LineProps {
+export interface ExtendedLineProps extends Omit<LineProps, 'label'> {
   animated: boolean;
   curveType: CurveType;
   strokeDashArray?: string;
@@ -259,6 +259,7 @@ export interface ExtendedPieProps extends PieProps {
   animated: boolean;
   strokeDashArray?: string;
   labelLists?: ExtendedLabelListProps[];
+  showTotal?: boolean;
 }
 
 export const generatePieProps = (props: ExtendedPieProps) => {
@@ -293,17 +294,17 @@ export interface FormatterDefinitions {
 }
 
 export interface ExtendedLabelListProps
-  extends LabelListProps<Record<string, unknown>>,
-    FormatterDefinitions {}
+  extends Omit<LabelListProps, 'position'>,
+    FormatterDefinitions {
+  position?: string;
+}
 
 export const generateLabelListProps = (props: ExtendedLabelListProps) => {
   const { fill, position, dataKey, ...labelListProps } = props;
   const formatter = getFormatter(props);
   return {
     dataKey: camelCase(dataKey) as string,
-    position: camelCase(position) as LabelListProps<
-      Record<string, unknown>
-    >['position'],
+    position: camelCase(position) as LabelListProps['position'],
     fill: fill && `var(--${fill.toLowerCase()})`,
     formatter,
     ...labelListProps,

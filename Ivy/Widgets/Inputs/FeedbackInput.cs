@@ -5,6 +5,7 @@ using Ivy.Core;
 using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
 using Ivy.Widgets.Inputs;
+using Ivy.Shared;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy;
@@ -50,6 +51,9 @@ public abstract record FeedbackInputBase : WidgetBase<FeedbackInputBase>, IAnyFe
 
     /// <summary>Gets or sets the visual variant of the feedback input.</summary>
     [Prop] public FeedbackInputs Variant { get; set; }
+
+    /// <summary>Gets or sets the size of the feedback input.</summary>
+    [Prop] public Sizes Size { get; set; }
 
     /// <summary>Gets or sets the event handler called when the input loses focus.</summary>
     [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
@@ -183,6 +187,20 @@ public static class FeedbackInputExtensions
     /// <param name="invalid">The validation error message to display.</param>
     public static FeedbackInputBase Invalid(this FeedbackInputBase widget, string invalid) => widget with { Invalid = invalid };
 
+    /// <summary>Sets the size of the feedback input.</summary>
+    /// <param name="widget">The feedback input to configure.</param>
+    /// <param name="size">The size of the feedback input.</param>
+    public static FeedbackInputBase Size(this FeedbackInputBase widget, Sizes size) => widget with { Size = size };
+
+    /// <summary>Sets the feedback input size to large for prominent display.</summary>
+    /// <param name="widget">The feedback input to configure.</param>
+    /// <returns>A new FeedbackInputBase instance with large size applied.</returns>
+    public static FeedbackInputBase Large(this FeedbackInputBase widget) => widget.Size(Sizes.Large);
+
+    /// <summary>Sets the feedback input size to small for compact display.</summary>
+    /// <param name="widget">The feedback input to configure.</param>
+    /// <returns>A new FeedbackInputBase instance with small size applied.</returns>
+    public static FeedbackInputBase Small(this FeedbackInputBase widget) => widget.Size(Sizes.Small);
 
     /// <summary>
     /// Sets the blur event handler for the feedback input.

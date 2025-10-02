@@ -69,7 +69,7 @@ export function BladeWidget({
           )}
         </div>
       </div>
-      <div className="bg-background h-full">
+      <div className="bg-background flex-1 min-h-0">
         {/* radix scrollarea breaks the nested containers widths*/}
         <ScrollArea
           type="hover"
