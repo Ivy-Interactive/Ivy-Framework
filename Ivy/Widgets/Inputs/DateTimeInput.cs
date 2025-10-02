@@ -242,8 +242,15 @@ public static class DateTimeInputExtensions
                 dateValue is DateTime dt ? dt :
                 dateValue is string s ? DateTime.Parse(s) :
                 (DateTime?)DateTime.Now,
-            _ when stateType == typeof(DateTimeOffset) => dateValue ?? DateTimeOffset.Now,
-            _ when stateType == typeof(DateTimeOffset?) => dateValue,
+            _ when stateType == typeof(DateTimeOffset) =>
+                dateValue is DateTimeOffset dto ? dto :
+                dateValue is string s ? DateTimeOffset.Parse(s) :
+                DateTimeOffset.Now,
+            _ when stateType == typeof(DateTimeOffset?) =>
+                dateValue is null ? null :
+                dateValue is DateTimeOffset dto ? dto :
+                dateValue is string s ? DateTimeOffset.Parse(s) :
+                (DateTimeOffset?)DateTimeOffset.Now,
             _ when stateType == typeof(DateOnly) =>
                 dateValue is DateOnly d ? d :
                 dateValue is string s ? DateOnly.FromDateTime(DateTime.Parse(s)) :
