@@ -301,13 +301,16 @@ const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
             data-testid={dataTestId}
           >
             <CalendarIcon
-              className={cn('mr-2', dateTimeInputIconVariants({ size }))}
+              className={cn(
+                'mr-2 flex-shrink-0',
+                dateTimeInputIconVariants({ size })
+              )}
             />
-            {date ? (
-              format(date, formatProp || 'yyyy-MM-dd')
-            ) : (
-              <span>{placeholder || 'Pick a date & time'}</span>
-            )}
+            <span className={cn('truncate', (showClear || invalid) && 'pr-10')}>
+              {date
+                ? format(date, formatProp || 'yyyy-MM-dd')
+                : placeholder || 'Pick a date & time'}
+            </span>
             {/* Icons absolutely positioned inside the button */}
             {(showClear || invalid) && (
               <span className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 pointer-events-auto">
