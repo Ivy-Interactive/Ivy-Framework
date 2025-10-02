@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, lazy, Suspense } from 'react';
 import Icon from '@/components/Icon';
 
 declare global {
@@ -10,6 +10,47 @@ declare global {
     };
   }
 }
+
+// Lazy load embed components for better performance
+const TwitterEmbed = lazy(() =>
+  Promise.resolve({ default: TwitterEmbedComponent })
+);
+const FacebookEmbed = lazy(() =>
+  Promise.resolve({ default: FacebookEmbedComponent })
+);
+const InstagramEmbed = lazy(() =>
+  Promise.resolve({ default: InstagramEmbedComponent })
+);
+const TikTokEmbed = lazy(() =>
+  Promise.resolve({ default: TikTokEmbedComponent })
+);
+const LinkedInEmbed = lazy(() =>
+  Promise.resolve({ default: LinkedInEmbedComponent })
+);
+const PinterestEmbed = lazy(() =>
+  Promise.resolve({ default: PinterestEmbedComponent })
+);
+const GitHubEmbed = lazy(() =>
+  Promise.resolve({ default: GitHubEmbedComponent })
+);
+const RedditEmbed = lazy(() =>
+  Promise.resolve({ default: RedditEmbedComponent })
+);
+
+// Loading fallback component
+const EmbedLoadingFallback: React.FC = () => (
+  <div className="embed-loading border rounded-lg p-4 bg-card shadow-sm">
+    <div className="flex items-center space-x-3">
+      <div className="flex-shrink-0">
+        <div className="w-8 h-8 bg-muted animate-pulse rounded"></div>
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="h-4 bg-muted animate-pulse rounded w-1/3 mb-2"></div>
+        <div className="h-3 bg-muted animate-pulse rounded w-1/2"></div>
+      </div>
+    </div>
+  </div>
+);
 
 // Script loading utilities
 const loadedScripts = new Set<string>();
@@ -167,7 +208,7 @@ const YouTubeEmbed: React.FC<YouTubeEmbedProps> = ({
   );
 };
 
-const TwitterEmbed: React.FC<TwitterEmbedProps> = ({ url }) => {
+const TwitterEmbedComponent: React.FC<TwitterEmbedProps> = ({ url }) => {
   const [tweetId, setTweetId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -218,7 +259,7 @@ const TwitterEmbed: React.FC<TwitterEmbedProps> = ({ url }) => {
   );
 };
 
-const FacebookEmbed: React.FC<FacebookEmbedProps> = ({ url }) => {
+const FacebookEmbedComponent: React.FC<FacebookEmbedProps> = ({ url }) => {
   const extractPageName = (facebookUrl: string): string => {
     // Extract page name from various Facebook URL formats
     const match = facebookUrl.match(/facebook\.com\/([^/?]+)/);
@@ -263,7 +304,7 @@ const FacebookEmbed: React.FC<FacebookEmbedProps> = ({ url }) => {
   );
 };
 
-const InstagramEmbed: React.FC<InstagramEmbedProps> = ({ url }) => {
+const InstagramEmbedComponent: React.FC<InstagramEmbedProps> = ({ url }) => {
   const [postId, setPostId] = useState<string | null>(null);
   const [scriptLoaded, setScriptLoaded] = useState(false);
 
@@ -311,7 +352,7 @@ const InstagramEmbed: React.FC<InstagramEmbedProps> = ({ url }) => {
   );
 };
 
-const TikTokEmbed: React.FC<TikTokEmbedProps> = ({ url }) => {
+const TikTokEmbedComponent: React.FC<TikTokEmbedProps> = ({ url }) => {
   const [videoId, setVideoId] = useState<string | null>(null);
   const [scriptLoaded, setScriptLoaded] = useState(false);
 
@@ -356,7 +397,7 @@ const TikTokEmbed: React.FC<TikTokEmbedProps> = ({ url }) => {
   );
 };
 
-const LinkedInEmbed: React.FC<LinkedInEmbedProps> = ({ url }) => {
+const LinkedInEmbedComponent: React.FC<LinkedInEmbedProps> = ({ url }) => {
   const [postId, setPostId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -421,7 +462,7 @@ const LinkedInEmbed: React.FC<LinkedInEmbedProps> = ({ url }) => {
   );
 };
 
-const PinterestEmbed: React.FC<PinterestEmbedProps> = ({ url }) => {
+const PinterestEmbedComponent: React.FC<PinterestEmbedProps> = ({ url }) => {
   const sanitizedUrl = sanitizeUrl(url);
 
   if (!sanitizedUrl) {
@@ -455,7 +496,7 @@ const PinterestEmbed: React.FC<PinterestEmbedProps> = ({ url }) => {
   );
 };
 
-const GitHubEmbed: React.FC<GitHubEmbedProps> = ({ url }) => {
+const GitHubEmbedComponent: React.FC<GitHubEmbedProps> = ({ url }) => {
   const [repoInfo, setRepoInfo] = useState<{
     owner?: string;
     repo?: string;
@@ -583,7 +624,7 @@ const GitHubEmbed: React.FC<GitHubEmbedProps> = ({ url }) => {
   );
 };
 
-const RedditEmbed: React.FC<RedditEmbedProps> = ({ url }) => {
+const RedditEmbedComponent: React.FC<RedditEmbedProps> = ({ url }) => {
   const [postId, setPostId] = useState<string | null>(null);
   const [scriptLoaded, setScriptLoaded] = useState(false);
 
@@ -631,18 +672,7 @@ const EmbedWidget: React.FC<EmbedWidgetProps> = ({ url }) => {
     return <div>Invalid URL provided.</div>;
   }
 
-  if (url.includes('facebook.com')) {
-    return <FacebookEmbed url={url} />;
-  }
-  if (url.includes('instagram.com')) {
-    return <InstagramEmbed url={url} />;
-  }
-  if (url.includes('tiktok.com')) {
-    return <TikTokEmbed url={url} />;
-  }
-  if (url.includes('twitter.com') || url.includes('x.com')) {
-    return <TwitterEmbed url={url} />;
-  }
+  // YouTube embed doesn't need lazy loading as it's lightweight
   if (url.includes('youtube.com') || url.includes('youtu.be')) {
     return (
       <div className="relative w-full pt-[56.25%]">
@@ -652,17 +682,63 @@ const EmbedWidget: React.FC<EmbedWidgetProps> = ({ url }) => {
       </div>
     );
   }
+
+  // Lazy load other embed components
+  if (url.includes('facebook.com')) {
+    return (
+      <Suspense fallback={<EmbedLoadingFallback />}>
+        <FacebookEmbed url={url} />
+      </Suspense>
+    );
+  }
+  if (url.includes('instagram.com')) {
+    return (
+      <Suspense fallback={<EmbedLoadingFallback />}>
+        <InstagramEmbed url={url} />
+      </Suspense>
+    );
+  }
+  if (url.includes('tiktok.com')) {
+    return (
+      <Suspense fallback={<EmbedLoadingFallback />}>
+        <TikTokEmbed url={url} />
+      </Suspense>
+    );
+  }
+  if (url.includes('twitter.com') || url.includes('x.com')) {
+    return (
+      <Suspense fallback={<EmbedLoadingFallback />}>
+        <TwitterEmbed url={url} />
+      </Suspense>
+    );
+  }
   if (url.includes('linkedin.com')) {
-    return <LinkedInEmbed url={url} />;
+    return (
+      <Suspense fallback={<EmbedLoadingFallback />}>
+        <LinkedInEmbed url={url} />
+      </Suspense>
+    );
   }
   if (url.includes('pinterest.com') || url.includes('pin.it')) {
-    return <PinterestEmbed url={url} />;
+    return (
+      <Suspense fallback={<EmbedLoadingFallback />}>
+        <PinterestEmbed url={url} />
+      </Suspense>
+    );
   }
   if (url.includes('github.com') || url.includes('gist.github.com')) {
-    return <GitHubEmbed url={url} />;
+    return (
+      <Suspense fallback={<EmbedLoadingFallback />}>
+        <GitHubEmbed url={url} />
+      </Suspense>
+    );
   }
   if (url.includes('reddit.com')) {
-    return <RedditEmbed url={url} />;
+    return (
+      <Suspense fallback={<EmbedLoadingFallback />}>
+        <RedditEmbed url={url} />
+      </Suspense>
+    );
   }
 
   return <p>The provided URL is not supported for embedding.</p>;
