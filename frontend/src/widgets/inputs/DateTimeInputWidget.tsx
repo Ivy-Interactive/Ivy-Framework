@@ -99,7 +99,6 @@ const DateVariant: React.FC<DateVariantProps> = ({
             variant="outline"
             className={cn(
               dateTimeInputVariants({ size }),
-              !date && 'text-muted-foreground',
               invalid && inputStyles.invalidInput,
               disabled && 'cursor-not-allowed'
             )}
@@ -294,7 +293,6 @@ const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
             variant="outline"
             className={cn(
               dateTimeInputVariants({ size }),
-              !date && 'text-muted-foreground',
               invalid && inputStyles.invalidInput,
               disabled && 'cursor-not-allowed'
             )}
