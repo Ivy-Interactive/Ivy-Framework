@@ -141,7 +141,7 @@ export const AudioRecorderWidget: React.FC<AudioRecorderWidgetProps> = ({
       onCancel();
       setRecordingStoppedAt(Date.now());
     };
-  }, [recording, chunkInterval, uploadChunk]);
+  }, [recording, chunkInterval, uploadChunk, mimeType]);
 
   const volumePercent = recording ? Math.min(volume / 255, 1) * 100 : 0;
 
