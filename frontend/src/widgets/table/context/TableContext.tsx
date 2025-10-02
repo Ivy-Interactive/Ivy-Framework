@@ -76,6 +76,11 @@ export const TableProvider: React.FC<TableProviderProps> = ({
     setColumnWidths({});
   }, [connection]);
 
+  // Reset currentRowCountRef when filter or sort changes
+  useEffect(() => {
+    currentRowCountRef.current = 0;
+  }, [activeFilter, activeSort]);
+
   // Load initial data
   useEffect(() => {
     const loadInitialData = async () => {
@@ -88,8 +93,8 @@ export const TableProvider: React.FC<TableProviderProps> = ({
       setError(null);
 
       try {
-        // When sorting, preserve the current number of rows
-        // When first loading or changing connection, use batchSize
+        // When sorting/filtering changes, currentRowCountRef is reset to 0
+        // so we always start fresh with batchSize rows
         const rowsToFetch =
           currentRowCountRef.current > 0
             ? currentRowCountRef.current
