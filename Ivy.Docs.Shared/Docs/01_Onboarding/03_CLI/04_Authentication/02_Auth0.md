@@ -164,9 +164,16 @@ To allow the Ivy application to properly display the users email, name and avata
 4. **Add the following code:**
 ```javascript
 exports.onExecutePostLogin = async (event, api) => {
-    api.accessToken.setCustomClaim('email', event.user.email);
-    api.accessToken.setCustomClaim('name', event.user.name);
-    api.accessToken.setCustomClaim('avatar', event.user.picture);
+    // Choose a claims namespace - typically your own domain
+    let namespace = "https://your-domain.com/";
+
+    if (namespace && !namespace.endsWith('/')) {
+        namespace += '/';
+    }
+
+    api.accessToken.setCustomClaim(namespace + 'email', event.user.email);
+    api.accessToken.setCustomClaim(namespace + 'name', event.user.name);
+    api.accessToken.setCustomClaim(namespace + 'avatar', event.user.picture);
 };
 ```
 5. **Click Deploy**
@@ -190,6 +197,7 @@ You will be prompted to provide the following Auth0 configuration:
 - **Client ID**: Your Auth0 application's client ID
 - **Client Secret**: Your Auth0 application's client secret
 - **Audience**: API identifier for securing API access
+- **Namespace**: Namespace used for custom JWT claims, as chosen earlier on this page
 
 Your credentials will be stored securely in .NET user secrets. You will then be prompted to choose one or more authentication options to support, from the following list:
 
@@ -215,7 +223,7 @@ Ivy then finishes configuring your application automatically:
 To skip the interactive prompts, you can provide configuration via a connection string:
 
 ```terminal
->ivy auth add --provider Auth0 --connection-string "Auth0:Domain=your-domain.auth0.com;Auth0:ClientId=your-client-id;Auth0:ClientSecret=your-client-secret"
+>ivy auth add --provider Auth0 --connection-string "Auth0:Domain=your-domain.auth0.com;Auth0:ClientId=your-client-id;Auth0:ClientSecret=your-client-secret;Auth0:Namespace=https://your-domain.com/"
 ```
 
 For a list of connection string parameters, see [Configuration Parameters](#configuration-parameters) below.
@@ -236,6 +244,7 @@ The following parameters are supported via connection string, environment variab
 - **Auth0:ClientId**: Required. Your Auth0 application's client ID.
 - **Auth0:ClientSecret**: Required. Your Auth0 application's client secret.
 - **Auth0:Audience**: Required. API identifier for securing API access.
+- **Auth0:Namespace**: Optional. Your JWT claims namespace, as chosen earlier in this guide.
 
 ## Authentication Flow
 

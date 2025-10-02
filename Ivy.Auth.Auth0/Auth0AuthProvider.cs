@@ -27,6 +27,7 @@ public class Auth0AuthProvider : IAuthProvider
     private readonly string _clientId;
     private readonly string _clientSecret;
     private readonly string _audience;
+    private readonly string _namespace;
     private readonly List<AuthOption> _authOptions = new();
 
     private readonly ConfigurationManager<OpenIdConnectConfiguration> _configurationManager;
@@ -42,6 +43,7 @@ public class Auth0AuthProvider : IAuthProvider
         _clientId = configuration.GetValue<string>("Auth0:ClientId") ?? throw new Exception("Auth0:ClientId is required");
         _clientSecret = configuration.GetValue<string>("Auth0:ClientSecret") ?? throw new Exception("Auth0:ClientSecret is required");
         _audience = configuration.GetValue<string>("Auth0:Audience") ?? "";
+        _namespace = configuration.GetValue<string>("Auth0:Namespace") ?? "";
 
         _authClient = new AuthenticationApiClient(_domain);
 
@@ -221,9 +223,9 @@ public class Auth0AuthProvider : IAuthProvider
         }
         return new UserInfo(
             claims.FindFirst("sub")?.Value ?? "",
-            claims.FindFirst("email")?.Value ?? "",
-            claims.FindFirst("name")?.Value ?? "",
-            claims.FindFirst("avatar")?.Value ?? ""
+            claims.FindFirst(_namespace + "email")?.Value ?? "",
+            claims.FindFirst(_namespace + "name")?.Value ?? "",
+            claims.FindFirst(_namespace + "avatar")?.Value ?? ""
         );
     }
 
