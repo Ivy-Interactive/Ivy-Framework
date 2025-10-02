@@ -1,6 +1,8 @@
 models:
   - gpt-4o
-
+  - gpt-oss-120b
+  - claude-sonnet-4-5-20250929
+  
 suites:
   - name: general
     fields:

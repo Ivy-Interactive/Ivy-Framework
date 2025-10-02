@@ -306,15 +306,21 @@ Output: [Name] not contains "test"
 
 Example 7:
 Input: "Age is not blank and greater than 18"
-Output: [Age] not blank AND [Age] > 18
+Output: [Age] is not blank AND [Age] > 18
+
+**CRITICAL: Output Format**
+- **YOUR RESPONSE MUST BE ONLY THE FILTER EXPRESSION - NOTHING ELSE**
+- **DO NOT include any explanations, reasoning, or commentary**
+- **DO NOT say "I need to convert..." or "Looking at the fields..." or any other preamble**
+- **ONLY output the final filter expression itself**
+- Example of CORRECT response: [Age] > 30 AND [Country] = "USA"
+- Example of WRONG response: I need to convert this filter. Looking at the fields, I can see there's an Age field. [Age] > 30 AND [Country] = "USA"
 
 **Important Instructions:**
 - Field names in the output MUST use the DisplayName exactly as shown in the available fields
 - Use [DisplayName] in your filter expression, not [ColId]
 - When you have a valid filter expression, call the parse_filter tool to validate it
 - If it's impossible to create a filter with the available fields, call the fail tool with a reason
-- Your response should be ONLY the filter expression, nothing else
-- Do NOT include explanations, just the filter expression itself
 
 **CRITICAL: Be Forgiving with Human Input Errors:**
 - Users often make typos and spelling mistakes - be intelligent about mapping these to real fields
@@ -365,6 +371,24 @@ Output: [Age] not blank AND [Age] > 18
         {
             var lines = text.Split('\n');
             text = string.Join('\n', lines.Skip(1).TakeWhile(l => !l.Trim().Equals("```")));
+        }
+
+        // Handle multi-line responses where AI includes explanation before the filter
+        // Filter expressions typically start with '[', '(', or 'NOT'
+        var allLines = text.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+        if (allLines.Length > 1)
+        {
+            // Find lines that look like filter expressions
+            var filterLines = allLines
+                .Select(l => l.Trim())
+                .Where(l => l.StartsWith('[') || l.StartsWith('(') || l.StartsWith("NOT", StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+            // If we found filter-like lines, use the last one (most likely to be the actual filter)
+            if (filterLines.Count > 0)
+            {
+                text = filterLines.Last();
+            }
         }
 
         return text.Trim();

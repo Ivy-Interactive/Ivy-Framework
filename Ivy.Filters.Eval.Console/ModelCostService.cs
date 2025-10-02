@@ -68,18 +68,7 @@ public class ModelCostService
             return inputCost + outputCost;
         }
 
-        // Fallback costs for common models (OpenAI pricing as of Dec 2024)
-        return modelName.ToLowerInvariant() switch
-        {
-            "gpt-4o" => (inputTokens * 0.0000025m) + (outputTokens * 0.00001m),
-            "gpt-4o-mini" => (inputTokens * 0.00000015m) + (outputTokens * 0.0000006m),
-            "gpt-4-turbo" => (inputTokens * 0.00001m) + (outputTokens * 0.00003m),
-            "gpt-3.5-turbo" => (inputTokens * 0.0000005m) + (outputTokens * 0.0000015m),
-            _ when modelName.Contains("claude-3-5-sonnet") => (inputTokens * 0.000003m) + (outputTokens * 0.000015m),
-            _ when modelName.Contains("claude-3-opus") => (inputTokens * 0.000015m) + (outputTokens * 0.000075m),
-            _ when modelName.Contains("claude-3-haiku") => (inputTokens * 0.00000025m) + (outputTokens * 0.00000125m),
-            _ => 0m // Unknown model
-        };
+        throw new Exception($"Model '{modelName}' not found in cost data.");
     }
 
     private class LiteLLMResponse
