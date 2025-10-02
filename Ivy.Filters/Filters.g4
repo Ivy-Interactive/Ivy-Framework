@@ -30,7 +30,6 @@ unaryExpr
 
 primary
   : group
-  | rangeOperation  // Must come before comparison to match "in range" first
   | comparison
   | textOperation
   | existenceOperation
@@ -51,16 +50,10 @@ textOperation
   | fieldRef NOT textOp stringLiteral
   ;
 
-// Range operations
-rangeOperation
-  : fieldRef IN RANGE operand AND operand
-  | fieldRef INRANGE operand AND operand
-  ;
-
 // Existence operations
 existenceOperation
-  : fieldRef BLANK
-  | fieldRef NOT BLANK
+  : fieldRef IS BLANK
+  | fieldRef IS NOT BLANK
   ;
 
 // Field reference - uses special field token
@@ -130,13 +123,11 @@ STRING
   ;
 
 // Keywords (case-insensitive) - Order matters! Longer tokens first
-INRANGE  : [Ii][Nn][Rr][Aa][Nn][Gg][Ee] ;
 CONTAINS : [Cc][Oo][Nn][Tt][Aa][Ii][Nn][Ss] ;
 GREATER  : [Gg][Rr][Ee][Aa][Tt][Ee][Rr] ;
 STARTS   : [Ss][Tt][Aa][Rr][Tt][Ss] ;
 EQUALS   : [Ee][Qq][Uu][Aa][Ll][Ss] ;
 EQUAL    : [Ee][Qq][Uu][Aa][Ll] ;
-RANGE    : [Rr][Aa][Nn][Gg][Ee] ;
 BLANK    : [Bb][Ll][Aa][Nn][Kk] ;
 LESS     : [Ll][Ee][Ss][Ss] ;
 THAN     : [Tt][Hh][Aa][Nn] ;
@@ -144,7 +135,7 @@ ENDS     : [Ee][Nn][Dd][Ss] ;
 WITH     : [Ww][Ii][Tt][Hh] ;
 NOT      : [Nn][Oo][Tt] ;
 OR       : [Oo][Rr] ;
-IN       : [Ii][Nn] ;
+IS       : [Ii][Ss] ;
 
 // Logical AND
 AND      : [Aa][Nn][Dd] ;

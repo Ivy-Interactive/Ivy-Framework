@@ -20,21 +20,6 @@ public class AstTests
     }
 
     [Fact]
-    public void Leaf_WithTwoOperands_ShouldSetBothValues()
-    {
-        // Arrange & Act
-        var leaf = new Leaf("Price", "price", FieldType.Number, Op.InRange, 10, 100);
-
-        // Assert
-        Assert.Equal("Price", leaf.FieldDisplay);
-        Assert.Equal("price", leaf.FieldId);
-        Assert.Equal(FieldType.Number, leaf.Type);
-        Assert.Equal(Op.InRange, leaf.Op);
-        Assert.Equal(10, leaf.A);
-        Assert.Equal(100, leaf.B);
-    }
-
-    [Fact]
     public void And_Creation_ShouldSetLeftAndRight()
     {
         // Arrange
@@ -100,7 +85,6 @@ public class AstTests
     [InlineData(Op.GreaterThanOrEqual)]
     [InlineData(Op.LessThan)]
     [InlineData(Op.LessThanOrEqual)]
-    [InlineData(Op.InRange)]
     [InlineData(Op.Blank)]
     [InlineData(Op.NotBlank)]
     public void Op_EnumValues_ShouldAllBeSupported(Op op)

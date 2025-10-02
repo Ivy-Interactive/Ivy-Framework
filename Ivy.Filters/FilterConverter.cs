@@ -77,7 +77,6 @@ public class FilterConverter
             Op.GreaterThanOrEqual => "greaterThanOrEqual",
             Op.LessThan => "lessThan",
             Op.LessThanOrEqual => "lessThanOrEqual",
-            Op.InRange => "inRange",
             Op.Blank => "blank",
             Op.NotBlank => "notBlank",
             _ => "equals"
@@ -89,12 +88,6 @@ public class FilterConverter
             Type = operationType,
             Filter = leaf.A
         };
-
-        // For range operations, set both filter and filterTo
-        if (leaf is { Op: Op.InRange, B: not null })
-        {
-            result = result with { FilterTo = leaf.B };
-        }
 
         return result;
     }
@@ -117,7 +110,6 @@ public class FilterConverter
             // These don't have direct negations
             Op.StartsWith => null,
             Op.EndsWith => null,
-            Op.InRange => null,
 
             _ => null
         };

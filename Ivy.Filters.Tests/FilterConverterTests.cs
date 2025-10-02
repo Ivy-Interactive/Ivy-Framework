@@ -32,26 +32,6 @@ public class FilterConverterTests
         Assert.Null(columnFilter.FilterTo);
     }
 
-    [Fact]
-    public void ConvertToGridModel_RangeOperation_ShouldSetBothFilterAndFilterTo()
-    {
-        // Arrange
-        var leaf = new Leaf("Price", "price", FieldType.Number, Op.InRange, 10, 100);
-
-        // Act
-        var result = _converter.ConvertToModel(leaf);
-
-        // Assert
-        Assert.IsType<FieldFilterModel>(result);
-        var columnFilter = (FieldFilterModel)result;
-
-        Assert.Equal("number", columnFilter.FilterType);
-        Assert.Equal("price", columnFilter.ColId);
-        Assert.Equal("inRange", columnFilter.Type);
-        Assert.Equal(10, columnFilter.Filter);
-        Assert.Equal(100, columnFilter.FilterTo);
-    }
-
     [Theory]
     [InlineData(FieldType.Text, "text")]
     [InlineData(FieldType.Number, "number")]
@@ -83,7 +63,6 @@ public class FilterConverterTests
     [InlineData(Op.GreaterThanOrEqual, "greaterThanOrEqual")]
     [InlineData(Op.LessThan, "lessThan")]
     [InlineData(Op.LessThanOrEqual, "lessThanOrEqual")]
-    [InlineData(Op.InRange, "inRange")]
     [InlineData(Op.Blank, "blank")]
     [InlineData(Op.NotBlank, "notBlank")]
     public void ConvertToGridModel_DifferentOperators_ShouldMapCorrectly(Op op, string expectedType)

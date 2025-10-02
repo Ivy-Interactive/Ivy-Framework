@@ -29,10 +29,10 @@ public record GroupFilterModel : FilterModel
 /// <summary>
 /// Field filter model for leaf conditions
 /// </summary>
-public record FieldFilterModel : FilterModel
+public record FieldFilterModel(string FilterType) : FilterModel
 {
     [JsonPropertyName("filterType")]
-    public override string FilterType { get; }
+    public override string FilterType { get; } = FilterType;
 
     [JsonPropertyName("colId")]
     public required string ColId { get; init; }
@@ -45,11 +45,6 @@ public record FieldFilterModel : FilterModel
 
     [JsonPropertyName("filterTo")]
     public object? FilterTo { get; init; }
-
-    public FieldFilterModel(string filterType)
-    {
-        FilterType = filterType;
-    }
 }
 
 /// <summary>
@@ -61,4 +56,16 @@ public record FilterParseResult
     public FilterModel? Model { get; init; }
     public IReadOnlyList<Diagnostic> Diagnostics { get; init; } = [];
     public bool HasErrors => Diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error);
+    public UsageInfo? Usage { get; init; }
+    public int Iterations { get; init; }
+}
+
+/// <summary>
+/// Token usage information for cost tracking
+/// </summary>
+public record UsageInfo
+{
+    public long InputTokens { get; init; }
+    public long OutputTokens { get; init; }
+    public long TotalTokens { get; init; }
 }

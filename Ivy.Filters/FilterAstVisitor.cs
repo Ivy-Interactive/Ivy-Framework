@@ -124,36 +124,6 @@ public class FilterAstVisitor(
         return new Leaf(field.DisplayName, field.ColId, field.Type, op, stringValue);
     }
 
-    public override Node VisitRangeOperation(FiltersParser.RangeOperationContext context)
-    {
-        var fieldRef = context.fieldRef();
-        var field = ResolveField(fieldRef);
-        if (field == null) return CreateErrorNode();
-
-        // Range operations are not valid for text fields
-        if (field.Type == FieldType.Text)
-        {
-            errorListener.AddSemanticError(
-                $"Range operation cannot be used on text fields",
-                fieldRef.Start);
-            return CreateErrorNode();
-        }
-
-        var operands = context.operand();
-        if (operands.Length != 2)
-        {
-            errorListener.AddSemanticError(
-                "Range operation requires exactly two operands",
-                context.Start);
-            return CreateErrorNode();
-        }
-
-        var operand1 = ExtractOperandValue(operands[0], field.Type);
-        var operand2 = ExtractOperandValue(operands[1], field.Type);
-
-        return new Leaf(field.DisplayName, field.ColId, field.Type, Op.InRange, operand1, operand2);
-    }
-
     public override Node VisitExistenceOperation(FiltersParser.ExistenceOperationContext context)
     {
         var fieldRef = context.fieldRef();
@@ -320,7 +290,6 @@ public class FilterAstVisitor(
             Op.Equals or Op.NotEqual => true, // Valid for all types
             Op.GreaterThan or Op.GreaterThanOrEqual or Op.LessThan or Op.LessThanOrEqual =>
                 fieldType is FieldType.Number or FieldType.Date or FieldType.DateTime,
-            Op.InRange => fieldType is FieldType.Number or FieldType.Date or FieldType.DateTime,
             Op.Blank or Op.NotBlank => true, // Valid for all types
             _ => false
         };

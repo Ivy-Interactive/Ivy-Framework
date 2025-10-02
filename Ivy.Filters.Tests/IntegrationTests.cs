@@ -152,7 +152,7 @@ public class IntegrationTests
     public void EndToEnd_MultipleColumnsWithSpaces_ShouldWork()
     {
         // Arrange
-        var filter = "[Customer Name] blank OR [Order Date] not blank";
+        var filter = "[Customer Name] is blank OR [Order Date] is not blank";
 
         // Act
         var result = _parser.Parse(filter);
@@ -215,7 +215,7 @@ public class IntegrationTests
     [InlineData("[Customer Name] = \"John Doe\"")]
     [InlineData("[Order Total] >= 100")]
     [InlineData("[Order Date] > \"2024-01-01\"")]
-    [InlineData("[Is Premium] blank")]
+    [InlineData("[Is Premium] is blank")]
     public void EndToEnd_VariousDataTypes_ShouldAllWork(string filter)
     {
         // Act

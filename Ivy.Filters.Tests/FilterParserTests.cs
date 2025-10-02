@@ -28,8 +28,8 @@ public class FilterParserTests
 
     [Theory]
     [InlineData("[Age] > 23")]
-    [InlineData("[Country] blank")]
-    [InlineData("[Name] not blank")]
+    [InlineData("[Country] is blank")]
+    [InlineData("[Name] is not blank")]
     public void Parse_ValidBasicFilters_ShouldSucceed(string filter)
     {
         // Act
@@ -83,30 +83,10 @@ public class FilterParserTests
     }
 
     [Theory]
-    [InlineData("[Price] in range 10 AND 100")]
-    [InlineData("[Age] inRange 18 AND 65")]
-    [InlineData("[Start Date] in range \"2024-01-01\" AND \"2024-12-31\"")]
-    public void Parse_ValidRangeOperations_ShouldSucceed(string filter)
-    {
-        // Act
-        var result = _parser.Parse(filter);
-
-        // Assert
-        Assert.False(result.HasErrors, $"Filter '{filter}' should parse successfully. Errors: {string.Join(", ", result.Diagnostics.Select(d => d.Message))}");
-        Assert.NotNull(result.Ast);
-        Assert.IsType<Leaf>(result.Ast);
-
-        var leaf = (Leaf)result.Ast;
-        Assert.Equal(Op.InRange, leaf.Op);
-        Assert.NotNull(leaf.A);
-        Assert.NotNull(leaf.B);
-    }
-
-    [Theory]
     [InlineData("[Age] > 25 AND [Country] = \"USA\"")]
     [InlineData("[Sport] contains \"ball\" OR [Price] < 50")]
-    [InlineData("([Age] >= 18 AND [Age] <= 65) AND [Country] blank")]
-    [InlineData("[Name] not blank OR ([Sport] ends with \"ing\" AND [Price] > 0)")]
+    [InlineData("([Age] >= 18 AND [Age] <= 65) AND [Country] is blank")]
+    [InlineData("[Name] is not blank OR ([Sport] ends with \"ing\" AND [Price] > 0)")]
     public void Parse_ValidLogicalOperations_ShouldSucceed(string filter)
     {
         // Act
@@ -121,7 +101,7 @@ public class FilterParserTests
     }
 
     [Theory]
-    [InlineData("NOT [Country] blank")]
+    [InlineData("NOT [Country] is blank")]
     [InlineData("NOT ([Age] > 25 AND [Sport] contains \"ball\")")]
     public void Parse_ValidNegationOperations_ShouldSucceed(string filter)
     {

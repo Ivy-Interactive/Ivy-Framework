@@ -39,9 +39,6 @@ public enum Op
     LessThan,
     LessThanOrEqual,
 
-    // Range operations
-    InRange,
-
     // Existence operations
     Blank,
     NotBlank
@@ -72,7 +69,7 @@ public record FieldMeta(string DisplayName, string ColId, FieldType Type);
 /// <param name="Type">The data type of the column</param>
 /// <param name="Op">The normalized operator to apply</param>
 /// <param name="A">First operand (or only operand for single-operand operations)</param>
-/// <param name="B">Second operand (used for range operations like InRange)</param>
+/// <param name="B">Second operand (reserved for future use)</param>
 public record Leaf(
     string FieldDisplay,
     string FieldId,
