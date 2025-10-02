@@ -312,9 +312,12 @@ Output: [Age] is not blank AND [Age] > 18
 - **YOUR RESPONSE MUST BE ONLY THE FILTER EXPRESSION - NOTHING ELSE**
 - **DO NOT include any explanations, reasoning, or commentary**
 - **DO NOT say "I need to convert..." or "Looking at the fields..." or any other preamble**
+- **DO NOT wrap the expression in extra brackets or add trailing ']'**
 - **ONLY output the final filter expression itself**
 - Example of CORRECT response: [Age] > 30 AND [Country] = "USA"
 - Example of WRONG response: I need to convert this filter. Looking at the fields, I can see there's an Age field. [Age] > 30 AND [Country] = "USA"
+- Example of WRONG response: [Status] != "inactive"]
+- Example of CORRECT response: [Status] != "inactive"
 
 **Important Instructions:**
 - Field names in the output MUST use the DisplayName exactly as shown in the available fields
@@ -391,7 +394,21 @@ Output: [Age] is not blank AND [Age] > 18
             }
         }
 
-        return text.Trim();
+        text = text.Trim();
+
+        // Remove trailing unbalanced brackets - AI sometimes adds extra ']' at end
+        // Count opening and closing brackets
+        int openSquare = text.Count(c => c == '[');
+        int closeSquare = text.Count(c => c == ']');
+
+        // If there are more closing brackets than opening, remove trailing ']'
+        while (closeSquare > openSquare && text.EndsWith(']'))
+        {
+            text = text[..^1].TrimEnd();
+            closeSquare--;
+        }
+
+        return text;
     }
 
 }
