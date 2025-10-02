@@ -35,10 +35,14 @@ export const DetailWidget: React.FC<DetailWidgetProps> = ({
           'align-middle text-body min-w-0',
           multiLine
             ? 'whitespace-normal break-words text-left pb-3'
-            : 'truncate text-right ml-auto p-3 pl-2 pr-0'
+            : 'truncate text-left p-3 pl-2 pr-0 flex-1'
         )}
       >
-        {children}
+        {multiLine ? (
+          children
+        ) : (
+          <span className="block w-full truncate">{children}</span>
+        )}
       </div>
     </div>
   );

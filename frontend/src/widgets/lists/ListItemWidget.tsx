@@ -25,10 +25,10 @@ export const ListItemWidget: React.FC<ListItemWidgetProps> = ({
       onClick={() => eventHandler('OnClick', id, [])}
       className="pl-4 pr-4 w-full h-full flex-left flex items-center rounded-none hover:bg-accent focus:bg-accent focus:outline-none cursor-pointer min-w-0"
     >
-      <div className="flex flex-col items-start text-body w-full flex-1 min-w-0">
-        <span className="w-full whitespace-normal break-words">{title}</span>
+      <div className="flex flex-col items-start text-body w-full flex-1 min-w-0 text-left">
+        <span className="block w-full truncate text-left">{title}</span>
         {subtitle && (
-          <span className="text-sm text-muted-foreground w-full whitespace-normal break-words">
+          <span className="block text-sm text-muted-foreground w-full truncate text-left">
             {subtitle}
           </span>
         )}
