@@ -4,11 +4,19 @@ import DataEditor, {
   GridCellKind,
   GridColumn,
   Item,
+  CustomRenderer,
 } from '@glideapps/glide-data-grid';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useMemo,
+} from 'react';
 import { useTable } from '../context/TableContext';
 import { tableStyles } from '../styles/style';
 import { tableTheme } from '../styles/theme';
+import { loadIconImage, getCachedIcon } from '../utils/iconRenderer';
 
 interface TableEditorProps {
   hasOptions?: boolean;
@@ -177,6 +185,29 @@ export const TableEditor: React.FC<TableEditorProps> = ({
         };
       }
 
+      // Handle icon types - detect by checking if value looks like a Lucide icon name
+      // Icons are PascalCase strings that match known icon names
+      const isProbablyIcon =
+        typeof cellValue === 'string' &&
+        /^[A-Z][a-zA-Z0-9]*$/.test(cellValue) &&
+        cellValue.length > 2 &&
+        // Only treat as icon if it's likely to be an icon value (not regular text)
+        // This heuristic works because Lucide icons are all PascalCase without spaces
+        !cellValue.includes(' ');
+
+      if (isProbablyIcon) {
+        return {
+          kind: GridCellKind.Custom,
+          allowOverlay: false,
+          readonly: true,
+          copyData: String(cellValue),
+          data: {
+            kind: 'icon-cell',
+            iconName: String(cellValue),
+          },
+        };
+      }
+
       // Default to text for strings and other types
       return {
         kind: GridCellKind.Text,
@@ -230,6 +261,54 @@ export const TableEditor: React.FC<TableEditorProps> = ({
     };
   });
 
+  // Custom cell renderer for icons
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const iconCellRenderer: CustomRenderer<any> = useMemo(
+    () => ({
+      kind: GridCellKind.Custom,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      isMatch: (cell: any): cell is any =>
+        cell.kind === GridCellKind.Custom && cell.data?.kind === 'icon-cell',
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      draw: (args: any, cell: any) => {
+        const { ctx, rect, theme } = args;
+        const iconName = cell.data?.iconName;
+
+        if (!iconName) return true;
+
+        // Check if the icon is already cached
+        const iconImage = getCachedIcon(iconName);
+
+        if (iconImage) {
+          // Draw the icon centered in the cell
+          const iconSize = 20;
+          const x = rect.x + (rect.width - iconSize) / 2;
+          const y = rect.y + (rect.height - iconSize) / 2;
+          ctx.drawImage(iconImage, x, y, iconSize, iconSize);
+        } else {
+          // If icon is not loaded yet, draw a placeholder and trigger loading
+          ctx.fillStyle = theme.textMedium;
+          ctx.beginPath();
+          ctx.arc(
+            rect.x + rect.width / 2,
+            rect.y + rect.height / 2,
+            6,
+            0,
+            2 * Math.PI
+          );
+          ctx.fill();
+
+          // Trigger icon loading in the background
+          // Note: The grid will automatically redraw on next frame or scroll
+          loadIconImage(iconName);
+        }
+
+        return true;
+      },
+    }),
+    []
+  );
+
   if (gridColumns.length === 0) {
     return null;
   }
@@ -245,6 +324,7 @@ export const TableEditor: React.FC<TableEditorProps> = ({
         columns={gridColumns}
         rows={visibleRows}
         getCellContent={getCellContent}
+        customRenderers={[iconCellRenderer]}
         onColumnResize={allowColumnResizing ? handleColumnResize : undefined}
         onVisibleRegionChanged={handleVisibleRegionChanged}
         onHeaderClicked={allowSorting ? handleHeaderMenuClick : undefined}

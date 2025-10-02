@@ -34,7 +34,8 @@ public enum ColType
     Text,
     Boolean,
     Date,
-    DateTime
+    DateTime,
+    Icon
 }
 
 public interface IDataTableColumnRenderer

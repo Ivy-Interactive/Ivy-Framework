@@ -35,6 +35,10 @@ public class DataTableBuilder<TModel> : ViewBase, IStateless
     {
         var underlyingType = Nullable.GetUnderlyingType(type) ?? type;
 
+        // Icon types
+        if (underlyingType == typeof(Icons))
+            return Ivy.ColType.Icon;
+
         // String types
         if (underlyingType == typeof(string) || underlyingType == typeof(char))
             return Ivy.ColType.Text;
