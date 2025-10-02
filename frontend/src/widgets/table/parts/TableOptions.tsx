@@ -26,7 +26,7 @@ export const TableOptions: React.FC = () => {
           <div className={tableStyles.tableOptions.rightSection}>
             <Button variant="default" onClick={() => setIsFilterOpen(true)}>
               <svg
-                className="w-4 h-4 mr-2"
+                className={tableStyles.tableOptions.dialog.filterIcon}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -44,8 +44,8 @@ export const TableOptions: React.FC = () => {
         </div>
       </div>
       <Dialog open={isFilterOpen} onOpenChange={setIsFilterOpen}>
-        <DialogContent className="bg-white p-4 rounded-lg max-w-[512px] flex flex-col gap-4">
-          <div className="flex items-center justify-between">
+        <DialogContent className={tableStyles.tableOptions.dialog.content}>
+          <div className={tableStyles.tableOptions.dialog.header}>
             <h2>Filter</h2>
             <Button
               variant="ghost"
@@ -53,7 +53,7 @@ export const TableOptions: React.FC = () => {
               onClick={() => setIsFilterOpen(false)}
             >
               <svg
-                className="w-[9.251px] h-[9.251px]"
+                className={tableStyles.tableOptions.dialog.closeIcon}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -70,7 +70,7 @@ export const TableOptions: React.FC = () => {
           <Separator />
           <Input />
           <Separator />
-          <div className="flex items-center justify-between">
+          <div className={tableStyles.tableOptions.dialog.footer}>
             <Button variant="outline" onClick={() => setIsFilterOpen(false)}>
               Cancel
             </Button>

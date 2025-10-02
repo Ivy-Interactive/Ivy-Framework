@@ -21,6 +21,13 @@ export const tableStyles = {
     inner: 'flex items-center justify-between px-4 py-3',
     leftSection: 'flex items-center gap-4',
     rightSection: 'flex items-center gap-2',
+    dialog: {
+      content: 'bg-white p-4 rounded-lg max-w-[512px] flex flex-col gap-4',
+      header: 'flex items-center justify-between',
+      footer: 'flex items-center justify-between',
+      filterIcon: 'w-4 h-4 mr-2',
+      closeIcon: 'w-[9.251px] h-[9.251px]',
+    },
   },
 
   // TableHeader component
