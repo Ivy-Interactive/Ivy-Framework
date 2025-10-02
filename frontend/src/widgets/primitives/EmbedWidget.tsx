@@ -1,4 +1,12 @@
-import React, { useEffect, useState, lazy, Suspense } from 'react';
+import React, {
+  useEffect,
+  useState,
+  lazy,
+  Suspense,
+  Component,
+  ErrorInfo,
+  ReactNode,
+} from 'react';
 import Icon from '@/components/Icon';
 
 declare global {
@@ -36,6 +44,88 @@ const GitHubEmbed = lazy(() =>
 const RedditEmbed = lazy(() =>
   Promise.resolve({ default: RedditEmbedComponent })
 );
+
+// Error Boundary for embed components
+interface ErrorBoundaryState {
+  hasError: boolean;
+  error?: Error;
+}
+
+interface ErrorBoundaryProps {
+  children: ReactNode;
+  fallback: ReactNode;
+}
+
+class EmbedErrorBoundary extends Component<
+  ErrorBoundaryProps,
+  ErrorBoundaryState
+> {
+  constructor(props: ErrorBoundaryProps) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    // Log error for debugging (in development)
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Embed Error Boundary caught an error:', error, errorInfo);
+    }
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback;
+    }
+
+    return this.props.children;
+  }
+}
+
+// Error fallback component
+interface EmbedErrorFallbackProps {
+  url: string;
+  platform?: string;
+}
+
+const EmbedErrorFallback: React.FC<EmbedErrorFallbackProps> = ({
+  url,
+  platform,
+}) => {
+  return (
+    <div className="embed-error border rounded-lg p-4 bg-card shadow-sm">
+      <div className="flex items-center space-x-3">
+        <div className="flex-1 min-w-0">
+          <h3 className="text-lg font-semibold text-card-foreground truncate">
+            {platform === 'Unsupported'
+              ? 'Unsupported URL'
+              : platform
+                ? `${platform} Embed Error`
+                : 'Embed Error'}
+          </h3>
+          <p className="text-sm text-muted-foreground">
+            {platform === 'Unsupported'
+              ? 'This URL is not supported for embedding. Please visit the link directly.'
+              : 'Failed to load embed. Please try again or visit the link directly.'}
+          </p>
+        </div>
+        <div className="flex-shrink-0">
+          <a
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center px-3 py-2 border shadow-sm text-sm font-medium rounded-md text-card-foreground bg-card hover:bg-accent focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+          >
+            View Original
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 // Reusable embed card component
 interface EmbedCardProps {
@@ -245,7 +335,7 @@ const YouTubeEmbed: React.FC<YouTubeEmbedProps> = ({
   }, [url]);
 
   if (!videoId) {
-    return <div>Invalid YouTube URL.</div>;
+    return <EmbedErrorFallback url={url} platform="YouTube" />;
   }
 
   const embedUrl = `https://www.youtube.com/embed/${videoId}`;
@@ -279,7 +369,7 @@ const TwitterEmbedComponent: React.FC<TwitterEmbedProps> = ({ url }) => {
   }, [url]);
 
   if (!tweetId) {
-    return <div>Invalid Twitter/X URL.</div>;
+    return <EmbedErrorFallback url={url} platform="Twitter" />;
   }
 
   return (
@@ -344,12 +434,12 @@ const InstagramEmbedComponent: React.FC<InstagramEmbedProps> = ({ url }) => {
   }, [postId]);
 
   if (!postId) {
-    return <div>Invalid Instagram URL.</div>;
+    return <EmbedErrorFallback url={url} platform="Instagram" />;
   }
 
   const sanitizedUrl = sanitizeUrl(url);
   if (!sanitizedUrl) {
-    return <div>Invalid Instagram URL.</div>;
+    return <EmbedErrorFallback url={url} platform="Instagram" />;
   }
 
   return (
@@ -390,12 +480,12 @@ const TikTokEmbedComponent: React.FC<TikTokEmbedProps> = ({ url }) => {
   }, [videoId]);
 
   if (!videoId) {
-    return <div>Invalid TikTok URL.</div>;
+    return <EmbedErrorFallback url={url} platform="TikTok" />;
   }
 
   const sanitizedUrl = sanitizeUrl(url);
   if (!sanitizedUrl) {
-    return <div>Invalid TikTok URL.</div>;
+    return <EmbedErrorFallback url={url} platform="TikTok" />;
   }
 
   return (
@@ -455,12 +545,12 @@ const LinkedInEmbedComponent: React.FC<LinkedInEmbedProps> = ({ url }) => {
   }, [postId]);
 
   if (!postId) {
-    return <div>Invalid LinkedIn URL.</div>;
+    return <EmbedErrorFallback url={url} platform="LinkedIn" />;
   }
 
   const sanitizedUrl = sanitizeUrl(url);
   if (!sanitizedUrl) {
-    return <div>Invalid LinkedIn URL.</div>;
+    return <EmbedErrorFallback url={url} platform="LinkedIn" />;
   }
 
   return (
@@ -553,12 +643,12 @@ const GitHubEmbedComponent: React.FC<GitHubEmbedProps> = ({ url }) => {
   }, [url]);
 
   if (!repoInfo) {
-    return <div>Invalid GitHub URL.</div>;
+    return <EmbedErrorFallback url={url} platform="GitHub" />;
   }
 
   const sanitizedUrl = sanitizeUrl(url);
   if (!sanitizedUrl) {
-    return <div>Invalid GitHub URL.</div>;
+    return <EmbedErrorFallback url={url} platform="GitHub" />;
   }
 
   const getTitle = () => {
@@ -636,12 +726,12 @@ const RedditEmbedComponent: React.FC<RedditEmbedProps> = ({ url }) => {
   }, [postId]);
 
   if (!postId) {
-    return <div>Invalid Reddit URL.</div>;
+    return <EmbedErrorFallback url={url} platform="Reddit" />;
   }
 
   const sanitizedUrl = sanitizeUrl(url);
   if (!sanitizedUrl) {
-    return <div>Invalid Reddit URL.</div>;
+    return <EmbedErrorFallback url={url} platform="Reddit" />;
   }
 
   return (
@@ -658,79 +748,115 @@ const RedditEmbedComponent: React.FC<RedditEmbedProps> = ({ url }) => {
 const EmbedWidget: React.FC<EmbedWidgetProps> = ({ url }) => {
   // Validate URL at the entry point
   if (!isValidUrl(url)) {
-    return <div>Invalid URL provided.</div>;
+    return <EmbedErrorFallback url={url} platform="Unsupported" />;
   }
 
   // YouTube embed doesn't need lazy loading as it's lightweight
   if (url.includes('youtube.com') || url.includes('youtu.be')) {
     return (
-      <div className="relative w-full pt-[56.25%]">
-        <div className="absolute top-0 left-0 w-full h-full">
-          <YouTubeEmbed url={url} width="100%" height="100%" />
+      <EmbedErrorBoundary
+        fallback={<EmbedErrorFallback url={url} platform="YouTube" />}
+      >
+        <div className="relative w-full pt-[56.25%]">
+          <div className="absolute top-0 left-0 w-full h-full">
+            <YouTubeEmbed url={url} width="100%" height="100%" />
+          </div>
         </div>
-      </div>
+      </EmbedErrorBoundary>
     );
   }
 
-  // Lazy load other embed components
+  // Lazy load other embed components with error boundaries
   if (url.includes('facebook.com')) {
     return (
-      <Suspense fallback={<EmbedLoadingFallback />}>
-        <FacebookEmbed url={url} />
-      </Suspense>
+      <EmbedErrorBoundary
+        fallback={<EmbedErrorFallback url={url} platform="Facebook" />}
+      >
+        <Suspense fallback={<EmbedLoadingFallback />}>
+          <FacebookEmbed url={url} />
+        </Suspense>
+      </EmbedErrorBoundary>
     );
   }
   if (url.includes('instagram.com')) {
     return (
-      <Suspense fallback={<EmbedLoadingFallback />}>
-        <InstagramEmbed url={url} />
-      </Suspense>
+      <EmbedErrorBoundary
+        fallback={<EmbedErrorFallback url={url} platform="Instagram" />}
+      >
+        <Suspense fallback={<EmbedLoadingFallback />}>
+          <InstagramEmbed url={url} />
+        </Suspense>
+      </EmbedErrorBoundary>
     );
   }
   if (url.includes('tiktok.com')) {
     return (
-      <Suspense fallback={<EmbedLoadingFallback />}>
-        <TikTokEmbed url={url} />
-      </Suspense>
+      <EmbedErrorBoundary
+        fallback={<EmbedErrorFallback url={url} platform="TikTok" />}
+      >
+        <Suspense fallback={<EmbedLoadingFallback />}>
+          <TikTokEmbed url={url} />
+        </Suspense>
+      </EmbedErrorBoundary>
     );
   }
   if (url.includes('twitter.com') || url.includes('x.com')) {
     return (
-      <Suspense fallback={<EmbedLoadingFallback />}>
-        <TwitterEmbed url={url} />
-      </Suspense>
+      <EmbedErrorBoundary
+        fallback={<EmbedErrorFallback url={url} platform="Twitter" />}
+      >
+        <Suspense fallback={<EmbedLoadingFallback />}>
+          <TwitterEmbed url={url} />
+        </Suspense>
+      </EmbedErrorBoundary>
     );
   }
   if (url.includes('linkedin.com')) {
     return (
-      <Suspense fallback={<EmbedLoadingFallback />}>
-        <LinkedInEmbed url={url} />
-      </Suspense>
+      <EmbedErrorBoundary
+        fallback={<EmbedErrorFallback url={url} platform="LinkedIn" />}
+      >
+        <Suspense fallback={<EmbedLoadingFallback />}>
+          <LinkedInEmbed url={url} />
+        </Suspense>
+      </EmbedErrorBoundary>
     );
   }
   if (url.includes('pinterest.com') || url.includes('pin.it')) {
     return (
-      <Suspense fallback={<EmbedLoadingFallback />}>
-        <PinterestEmbed url={url} />
-      </Suspense>
+      <EmbedErrorBoundary
+        fallback={<EmbedErrorFallback url={url} platform="Pinterest" />}
+      >
+        <Suspense fallback={<EmbedLoadingFallback />}>
+          <PinterestEmbed url={url} />
+        </Suspense>
+      </EmbedErrorBoundary>
     );
   }
   if (url.includes('github.com') || url.includes('gist.github.com')) {
     return (
-      <Suspense fallback={<EmbedLoadingFallback />}>
-        <GitHubEmbed url={url} />
-      </Suspense>
+      <EmbedErrorBoundary
+        fallback={<EmbedErrorFallback url={url} platform="GitHub" />}
+      >
+        <Suspense fallback={<EmbedLoadingFallback />}>
+          <GitHubEmbed url={url} />
+        </Suspense>
+      </EmbedErrorBoundary>
     );
   }
   if (url.includes('reddit.com')) {
     return (
-      <Suspense fallback={<EmbedLoadingFallback />}>
-        <RedditEmbed url={url} />
-      </Suspense>
+      <EmbedErrorBoundary
+        fallback={<EmbedErrorFallback url={url} platform="Reddit" />}
+      >
+        <Suspense fallback={<EmbedLoadingFallback />}>
+          <RedditEmbed url={url} />
+        </Suspense>
+      </EmbedErrorBoundary>
     );
   }
 
-  return <p>The provided URL is not supported for embedding.</p>;
+  return <EmbedErrorFallback url={url} platform="Unsupported" />;
 };
 
 export default EmbedWidget;
