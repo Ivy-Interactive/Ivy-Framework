@@ -13,12 +13,11 @@ export const tableStyles = {
       border: '1px solid var(--border)',
       borderBottom: 'none',
       borderRadius: 'var(--radius) var(--radius) 0 0',
-
       borderBottomColor: 'var(--border)',
       borderBottomWidth: '1px',
       borderBottomStyle: 'solid',
     },
-    inner: 'flex items-center justify-between px-4 py-3',
+    inner: 'flex items-center gap-4 px-3 py-3',
     leftSection: 'flex items-center gap-4',
     rightSection: 'flex items-center gap-2',
     dialog: {
@@ -32,24 +31,6 @@ export const tableStyles = {
       helpText: 'text-xs text-muted-foreground mt-2',
       examplesList: 'list-disc list-inside space-y-1 mt-1',
     },
-  },
-
-  // TableHeader component
-  tableHeader: {
-    container: 'text-descriptive flex items-center gap-4',
-    text: 'text-descriptive text-[color:var(--secondary)]',
-    accent: 'text-[color:var(--primary)]',
-    muted: 'text-[color:var(--muted-foreground)]',
-    spinner: {
-      container: 'flex items-center',
-      element:
-        'animate-spin h-4 w-4 border-2 border-[color:var(--muted-foreground)] border-t-transparent rounded-full mr-2',
-    },
-  },
-
-  // TableFooter component
-  tableFooter: {
-    container: 'mt-4 text-descriptive text-[color:var(--muted-foreground)]',
   },
 
   // TableEditor component
