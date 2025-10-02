@@ -5,13 +5,11 @@ import { Header } from './TableHeader';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
-import { FilterInput, Token, Query } from './FilterInput';
+import { Input } from '@/components/ui/input';
 
 export const TableOptions: React.FC = () => {
   const { columns } = useTable();
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [filterTokens, setFilterTokens] = useState<Token[]>([]);
-  const [filterQueries, setFilterQueries] = useState<Query[]>([]);
 
   if (columns.length === 0) {
     return null;
@@ -70,28 +68,7 @@ export const TableOptions: React.FC = () => {
             </Button>
           </div>
           <Separator />
-          <FilterInput
-            columns={columns.map(col => col.name)}
-            onTokensSaved={setFilterTokens}
-            onQueriesSaved={setFilterQueries}
-          />
-          {/* Temporary debug display */}
-          {filterTokens.length > 0 && (
-            <div className="text-sm text-gray-600 mt-2">
-              <div>
-                <strong>Tokens:</strong>{' '}
-                {filterTokens.map(t => `${t.value} (${t.type})`).join(', ')}
-              </div>
-              {filterQueries.length > 0 && (
-                <div className="mt-2">
-                  <strong>Queries:</strong>{' '}
-                  {filterQueries
-                    .map(q => `${q.column} ${q.operator} ${q.value}`)
-                    .join(', ')}
-                </div>
-              )}
-            </div>
-          )}
+          <Input />
           <Separator />
           <div className="flex items-center justify-between">
             <Button variant="outline" onClick={() => setIsFilterOpen(false)}>
