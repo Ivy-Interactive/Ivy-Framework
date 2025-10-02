@@ -31,7 +31,7 @@ export interface DataTableConfiguration {
 
 export interface TableProps {
   connection: DataTableConnection;
-  config: DataTableConfiguration;
+  config?: DataTableConfiguration;
   editable?: boolean;
   onCellUpdate?: (row: number, col: number, value: unknown) => void;
 }
