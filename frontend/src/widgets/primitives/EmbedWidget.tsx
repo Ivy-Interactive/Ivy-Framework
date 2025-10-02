@@ -37,6 +37,61 @@ const RedditEmbed = lazy(() =>
   Promise.resolve({ default: RedditEmbedComponent })
 );
 
+// Reusable embed card component
+interface EmbedCardProps {
+  platform: string;
+  iconName: string;
+  iconColor: string;
+  title: string;
+  description: string;
+  url: string;
+  linkText: string;
+}
+
+const EmbedCard: React.FC<EmbedCardProps> = ({
+  platform,
+  iconName,
+  iconColor,
+  title,
+  description,
+  url,
+  linkText,
+}) => {
+  const sanitizedUrl = sanitizeUrl(url);
+
+  if (!sanitizedUrl) {
+    return <div>Invalid {platform} URL.</div>;
+  }
+
+  return (
+    <div
+      className={`${platform.toLowerCase()}-embed border rounded-lg p-4 bg-card shadow-sm`}
+    >
+      <div className="flex items-center space-x-3">
+        <div className="flex-shrink-0">
+          <Icon name={iconName} size={32} className={iconColor} />
+        </div>
+        <div className="flex-1 min-w-0">
+          <h3 className="text-lg font-semibold text-card-foreground truncate">
+            {title}
+          </h3>
+          <p className="text-sm text-muted-foreground">{description}</p>
+        </div>
+        <div className="flex-shrink-0">
+          <a
+            href={sanitizedUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center px-3 py-2 border shadow-sm text-sm font-medium rounded-md text-card-foreground bg-card hover:bg-accent focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+          >
+            {linkText}
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // Loading fallback component
 const EmbedLoadingFallback: React.FC = () => (
   <div className="embed-loading border rounded-lg p-4 bg-card shadow-sm">
@@ -227,35 +282,16 @@ const TwitterEmbedComponent: React.FC<TwitterEmbedProps> = ({ url }) => {
     return <div>Invalid Twitter/X URL.</div>;
   }
 
-  const sanitizedUrl = sanitizeUrl(url);
-  if (!sanitizedUrl) {
-    return <div>Invalid Twitter/X URL.</div>;
-  }
-
   return (
-    <div className="twitter-embed border rounded-lg p-4 bg-card shadow-sm">
-      <div className="flex items-center space-x-3">
-        <div className="flex-shrink-0">
-          <Icon name="Twitter" size={32} className="text-info" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <h3 className="text-lg font-semibold text-card-foreground truncate">
-            Twitter Tweet
-          </h3>
-          <p className="text-sm text-muted-foreground">View tweet on Twitter</p>
-        </div>
-        <div className="flex-shrink-0">
-          <a
-            href={sanitizedUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center px-3 py-2 border shadow-sm text-sm font-medium rounded-md text-card-foreground bg-card hover:bg-accent focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
-          >
-            View on Twitter
-          </a>
-        </div>
-      </div>
-    </div>
+    <EmbedCard
+      platform="Twitter"
+      iconName="Twitter"
+      iconColor="text-info"
+      title="Twitter Tweet"
+      description="View tweet on Twitter"
+      url={url}
+      linkText="View on Twitter"
+    />
   );
 };
 
@@ -270,37 +306,17 @@ const FacebookEmbedComponent: React.FC<FacebookEmbedProps> = ({ url }) => {
   };
 
   const pageName = extractPageName(url);
-  const sanitizedUrl = sanitizeUrl(url);
 
-  if (!sanitizedUrl) {
-    return <div>Invalid Facebook URL.</div>;
-  }
-
-  // Show compact card similar to GitHub repository style
   return (
-    <div className="facebook-embed border rounded-lg p-4 bg-card shadow-sm">
-      <div className="flex items-center space-x-3">
-        <div className="flex-shrink-0">
-          <Icon name="Facebook" size={32} className="text-info" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <h3 className="text-lg font-semibold text-card-foreground truncate">
-            {pageName}
-          </h3>
-          <p className="text-sm text-muted-foreground">View post on Facebook</p>
-        </div>
-        <div className="flex-shrink-0">
-          <a
-            href={sanitizedUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center px-3 py-2 border shadow-sm text-sm font-medium rounded-md text-card-foreground bg-card hover:bg-accent focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
-          >
-            View on Facebook
-          </a>
-        </div>
-      </div>
-    </div>
+    <EmbedCard
+      platform="Facebook"
+      iconName="Facebook"
+      iconColor="text-info"
+      title={pageName}
+      description="View post on Facebook"
+      url={url}
+      linkText="View on Facebook"
+    />
   );
 };
 
@@ -463,36 +479,16 @@ const LinkedInEmbedComponent: React.FC<LinkedInEmbedProps> = ({ url }) => {
 };
 
 const PinterestEmbedComponent: React.FC<PinterestEmbedProps> = ({ url }) => {
-  const sanitizedUrl = sanitizeUrl(url);
-
-  if (!sanitizedUrl) {
-    return <div>Invalid Pinterest URL.</div>;
-  }
-
   return (
-    <div className="pinterest-embed border rounded-lg p-4 bg-card shadow-sm">
-      <div className="flex items-center space-x-3">
-        <div className="flex-shrink-0">
-          <Icon name="Pinterest" size={32} className="text-destructive" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <h3 className="text-lg font-semibold text-card-foreground truncate">
-            Pinterest Pin
-          </h3>
-          <p className="text-sm text-muted-foreground">View pin on Pinterest</p>
-        </div>
-        <div className="flex-shrink-0">
-          <a
-            href={sanitizedUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center px-3 py-2 border shadow-sm text-sm font-medium rounded-md text-card-foreground bg-card hover:bg-accent focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
-          >
-            View on Pinterest
-          </a>
-        </div>
-      </div>
-    </div>
+    <EmbedCard
+      platform="Pinterest"
+      iconName="Pinterest"
+      iconColor="text-destructive"
+      title="Pinterest Pin"
+      description="View pin on Pinterest"
+      url={url}
+      linkText="View on Pinterest"
+    />
   );
 };
 
@@ -591,36 +587,29 @@ const GitHubEmbedComponent: React.FC<GitHubEmbedProps> = ({ url }) => {
     return 'View repository on GitHub';
   };
 
+  const getLinkText = () => {
+    if (repoInfo.type === 'issue') {
+      return 'View Issue';
+    }
+    if (repoInfo.type === 'pull') {
+      return 'View Pull Request';
+    }
+    if (repoInfo.type === 'gist') {
+      return 'View Gist';
+    }
+    return 'View Repository';
+  };
+
   return (
-    <div className="github-embed border rounded-lg p-4 bg-card shadow-sm">
-      <div className="flex items-center space-x-3">
-        <div className="flex-shrink-0">
-          <Icon name="Github" size={32} className="text-card-foreground" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <h3 className="text-lg font-semibold text-card-foreground truncate">
-            {getTitle()}
-          </h3>
-          <p className="text-sm text-muted-foreground">{getDescription()}</p>
-        </div>
-        <div className="flex-shrink-0">
-          <a
-            href={sanitizedUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center px-3 py-2 border shadow-sm text-sm font-medium rounded-md text-card-foreground bg-card hover:bg-accent focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
-          >
-            {repoInfo.type === 'issue'
-              ? 'View Issue'
-              : repoInfo.type === 'pull'
-                ? 'View Pull Request'
-                : repoInfo.type === 'gist'
-                  ? 'View Gist'
-                  : 'View Repository'}
-          </a>
-        </div>
-      </div>
-    </div>
+    <EmbedCard
+      platform="GitHub"
+      iconName="Github"
+      iconColor="text-card-foreground"
+      title={getTitle()}
+      description={getDescription()}
+      url={url}
+      linkText={getLinkText()}
+    />
   );
 };
 
