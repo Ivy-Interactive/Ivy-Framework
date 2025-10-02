@@ -5,7 +5,6 @@ import { TableProvider, useTable } from './context/TableContext';
 import { ErrorDisplay } from '@/components/ErrorDisplay';
 import { Loading } from '@/components/Loading';
 import { TableEditor } from './parts/TableEditor';
-import { Footer } from './parts/TableFooter';
 import { TableOptions } from './parts/TableOptions';
 import { tableStyles } from './styles/style';
 import { TableProps } from './types/types';
@@ -61,7 +60,6 @@ export const Table: React.FC<TableProps> = ({
           <TableEditor hasOptions={finalConfig.allowFiltering} />
         </>
       </TableLayout>
-      <Footer />
     </TableProvider>
   );
 };

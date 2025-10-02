@@ -12,7 +12,8 @@
     "format:check": "prettier --check .",
     "preview": "vite preview",
     "prepare": "cd .. && husky frontend/.husky",
-    "test": "vitest"
+    "test": "vitest",
+    "generate:parser": "antlr-ng -Dlanguage=TypeScript -o src/widgets/table/grammar/generated -v -- src/widgets/table/grammar/FilterQuery.g4 && cd src/widgets/table/grammar/generated && for file in FilterQueryLexer.ts FilterQueryParser.ts FilterQueryListener.ts; do sed -i '' '1i\\\n// eslint-disable-next-line @typescript-eslint/ban-ts-comment\\\n// @ts-nocheck\\\n/* eslint-disable */\n' \"$file\"; done"
   },
   "dependencies": {
     "@codemirror/lang-cpp": "^6.0.3",
@@ -119,6 +120,7 @@
     "@types/react-dom": "^19.1.7",
     "@types/react-syntax-highlighter": "^15.5.13",
     "@vitejs/plugin-react-swc": "^4.1.0",
+    "antlr-ng": "^1.0.10",
     "antlr4ng": "^3.0.16",
     "canvas-confetti": "^1.9.3",
     "eslint": "^9.32.0",

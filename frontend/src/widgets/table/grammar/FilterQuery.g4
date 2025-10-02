@@ -88,7 +88,7 @@ IDENTIFIER
     ;
 
 QUOTED_IDENTIFIER
-    : '[' ~[]]+ ']'
+    : '[' ~[\]]+ ']'
     | '`' ~[`]+ '`'
     ;
 
