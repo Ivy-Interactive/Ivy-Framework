@@ -425,7 +425,7 @@ const InstagramEmbedComponent: React.FC<InstagramEmbedProps> = ({ url }) => {
 
   useEffect(() => {
     if (postId) {
-      loadScript('//www.instagram.com/embed.js')
+      loadScript('https://www.instagram.com/embed.js')
         .then(() => setScriptLoaded(true))
         .catch(error =>
           console.error('Failed to load Instagram script:', error)
