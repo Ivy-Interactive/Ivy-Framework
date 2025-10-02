@@ -16,7 +16,7 @@ public record Field : WidgetBase<Field>
     /// <param name="input">Input control.</param>
     /// <param name="label">Optional label text.</param>
     /// <param name="description">Optional description.</param>
-    /// <param name="required">Whether field field is required.</param>
+    /// <param name="required">Whether field is required.</param>
     public Field(IAnyInput input, string? label = null, string? description = null, bool required = false) : base([input])
     {
         var labelProp = input.GetType().GetProperty("Label");
@@ -47,17 +47,17 @@ public record Field : WidgetBase<Field>
     /// <summary>Description or help text displayed for field.</summary>
     [Prop] public string? Description { get; set; }
 
-    /// <summary>Whether field is required for field submission. Default is false.</summary>
+    /// <summary>Whether field is required. Default is false.</summary>
     [Prop] public bool Required { get; set; }
 
-    /// <summary>Prevents adding children to FieldField widgets using pipe operator.</summary>
+    /// <summary>Prevents adding children to Field widgets using pipe operator.</summary>
     /// <param name="widget">Field widget.</param>
     /// <param name="child">Child object attempting to be added.</param>
     /// <returns>Always throws NotSupportedException.</returns>
     /// <exception cref="NotSupportedException">Field widgets wrap single input control.</exception>
     public static Field operator |(Field widget, object child)
     {
-        throw new NotSupportedException("FieldField does not support children.");
+        throw new NotSupportedException("Field does not support children.");
     }
 }
 
