@@ -47,7 +47,7 @@ public static class QueryHelpers
             SystemType t when t == typeof(uint) => UInt32Type.Default,
             SystemType t when t == typeof(long) => Int64Type.Default,
             SystemType t when t == typeof(ulong) => UInt64Type.Default,
-            SystemType t when t == typeof(decimal) => new Decimal128Type(18, 2),
+            SystemType t when t == typeof(decimal) => new Decimal128Type(38, 28),
             SystemType t when t == typeof(double) => DoubleType.Default,
             SystemType t when t == typeof(float) => FloatType.Default,
             SystemType t when t == typeof(bool) => BooleanType.Default,
@@ -62,7 +62,7 @@ public static class QueryHelpers
         };
     }
 
-    public static IArrowArray CreateArrowArray(PropertyInfo property, List<object> data)
+    public static IArrowArray CreateArrowArray(PropertyInfo property, List<object> data, IArrowType? arrowType = null)
     {
         var values = data.Select(property.GetValue).ToList();
         var type = property.PropertyType;
@@ -99,7 +99,7 @@ public static class QueryHelpers
             SystemType t when t == typeof(TimeSpan) =>
                 CreateTimeSpanArray(values),
             SystemType t when t == typeof(decimal) =>
-                CreateDecimalArray(values),
+                CreateDecimalArray(values, arrowType as Decimal128Type),
             SystemType t when t == typeof(char) =>
                 CreateCharArray(values),
             SystemType t when t == typeof(Guid) =>
@@ -207,22 +207,25 @@ public static class QueryHelpers
         return builder.Build();
     }
 
-    public static IArrowArray CreateDecimalArray(List<object?> values)
+    public static IArrowArray CreateDecimalArray(List<object?> values, Decimal128Type? decimalType = null)
     {
-        // Determine the maximum scale needed
-        int maxScale = 2; // Default minimum scale
-        foreach (var value in values)
+        // If no type is provided, determine the scale dynamically
+        if (decimalType == null)
         {
-            if (value is decimal decimalValue)
+            int maxScale = 28; // Default scale matching GetArrowType
+            foreach (var value in values)
             {
-                var scale = BitConverter.GetBytes(decimal.GetBits(decimalValue)[3])[2];
-                if (scale > maxScale)
-                    maxScale = scale;
+                if (value is decimal decimalValue)
+                {
+                    var scale = BitConverter.GetBytes(decimal.GetBits(decimalValue)[3])[2];
+                    if (scale > maxScale)
+                        maxScale = scale;
+                }
             }
+            decimalType = new Decimal128Type(38, maxScale);
         }
 
-        // Use precision of 29 (max for decimal) and the detected scale
-        var builder = new Decimal128Array.Builder(new Decimal128Type(29, maxScale));
+        var builder = new Decimal128Array.Builder(decimalType);
         foreach (var value in values)
         {
             if (value is decimal decimalValue)
