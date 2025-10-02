@@ -107,7 +107,7 @@ const DateVariant: React.FC<DateVariantProps> = ({
           >
             <CalendarIcon
               className={cn(
-                'mr-2 flex-shrink-0',
+                'mr-3 flex-shrink-0',
                 dateTimeInputIconVariants({ size })
               )}
             />
@@ -302,7 +302,7 @@ const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
           >
             <CalendarIcon
               className={cn(
-                'mr-2 flex-shrink-0',
+                'mr-3 flex-shrink-0',
                 dateTimeInputIconVariants({ size })
               )}
             />
@@ -464,14 +464,15 @@ const TimeVariant: React.FC<TimeVariantProps> = ({
   );
 
   return (
-    <div className="relative flex items-center gap-2" data-testid={dataTestId}>
+    <div className="relative flex items-center" data-testid={dataTestId}>
       <Clock
         className={cn(
+          'mr-3 flex-shrink-0',
           dateTimeInputIconVariants({ size }),
           'text-muted-foreground'
         )}
       />
-      <div className="relative w-full">
+      <div className="relative flex-1">
         <Input
           type="time"
           step="1"
@@ -482,8 +483,9 @@ const TimeVariant: React.FC<TimeVariantProps> = ({
           disabled={disabled}
           placeholder={placeholder || 'Select time'}
           className={cn(
-            'bg-background appearance-none [&::-webkit-calendar-picker-indicator]:hidden pr-20 cursor-pointer', // pr-20 for clear+icon
+            'bg-background appearance-none [&::-webkit-calendar-picker-indicator]:hidden cursor-pointer w-full',
             dateTimeInputTextVariants({ size }),
+            (showClear || invalid) && 'pr-20',
             invalid && inputStyles.invalidInput,
             disabled && 'cursor-not-allowed'
           )}
