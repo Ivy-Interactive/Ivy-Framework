@@ -123,9 +123,16 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
       className={cn(
         buttonSize !== 'icon' && 'w-min',
         hasChildren &&
-          'p-2 h-auto items-start justify-start text-left inline-block'
+          'p-2 h-auto items-start justify-start text-left inline-block',
+        (variant === 'Link' || variant === 'Inline') &&
+          'min-w-0 max-w-full overflow-hidden'
       )}
-      tooltipText={tooltip}
+      tooltipText={
+        tooltip ||
+        ((variant === 'Link' || variant === 'Inline') && title
+          ? title
+          : undefined)
+      }
     >
       {!hasChildren && (
         <>
@@ -139,7 +146,11 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
               )}
             </>
           )}
-          {title}
+          {variant === 'Link' || variant === 'Inline' ? (
+            <span className="truncate">{title}</span>
+          ) : (
+            title
+          )}
           {iconPosition == 'Right' && (
             <>
               {loading && (
