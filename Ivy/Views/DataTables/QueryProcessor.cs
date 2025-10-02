@@ -737,7 +737,7 @@ public class QueryProcessor(ILogger<QueryProcessor>? logger = null, IDistributed
             {
                 var value = arg.Unpack<Google.Protobuf.WellKnownTypes.DoubleValue>().Value;
                 if (underlyingType == typeof(decimal))
-                    return (decimal)value;  // Direct cast instead of Convert.ToDecimal
+                    return Convert.ToDecimal(value);  // Use Convert.ToDecimal for proper conversion
                 if (underlyingType == typeof(float))
                     return Convert.ToSingle(value);
                 return Convert.ChangeType(value, underlyingType);
@@ -764,7 +764,7 @@ public class QueryProcessor(ILogger<QueryProcessor>? logger = null, IDistributed
                 SystemType t when t == typeof(float) => System.Text.Json.JsonSerializer.Deserialize<float>(jsonValue),
                 SystemType t when t == typeof(bool) => System.Text.Json.JsonSerializer.Deserialize<bool>(jsonValue),
                 SystemType t when t == typeof(DateTime) => System.Text.Json.JsonSerializer.Deserialize<DateTime>(jsonValue),
-                SystemType t when t == typeof(decimal) => (decimal)System.Text.Json.JsonSerializer.Deserialize<double>(jsonValue),
+                SystemType t when t == typeof(decimal) => System.Text.Json.JsonSerializer.Deserialize<decimal>(jsonValue),
                 _ => System.Text.Json.JsonSerializer.Deserialize<string>(jsonValue)
             };
         }
@@ -803,7 +803,7 @@ public class QueryProcessor(ILogger<QueryProcessor>? logger = null, IDistributed
             }
             else
             {
-                arrays.Add(QueryHelpers.CreateArrowArray(prop, data));
+                arrays.Add(QueryHelpers.CreateArrowArray(prop, data, arrowType));
             }
         }
 
