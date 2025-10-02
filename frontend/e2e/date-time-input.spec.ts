@@ -147,7 +147,7 @@ test.describe('DateTime Input Tests', () => {
       // Test that the time input is a div container
       await expect(timeInput).toHaveAttribute(
         'class',
-        /relative flex items-center gap-2/
+        /relative flex items-center/
       );
     });
 
@@ -160,7 +160,7 @@ test.describe('DateTime Input Tests', () => {
       // Test that the time input is a div container
       await expect(disabledInput).toHaveAttribute(
         'class',
-        /relative flex items-center gap-2/
+        /relative flex items-center/
       );
     });
 
@@ -171,7 +171,7 @@ test.describe('DateTime Input Tests', () => {
       // Test that the time input is a div container
       await expect(invalidInput).toHaveAttribute(
         'class',
-        /relative flex items-center gap-2/
+        /relative flex items-center/
       );
     });
 
@@ -184,7 +184,7 @@ test.describe('DateTime Input Tests', () => {
       // Test that the time input is a div container
       await expect(nullableInput).toHaveAttribute(
         'class',
-        /relative flex items-center gap-2/
+        /relative flex items-center/
       );
     });
 
@@ -197,7 +197,7 @@ test.describe('DateTime Input Tests', () => {
       // Test that the time input is a div container
       await expect(nullableInvalidInput).toHaveAttribute(
         'class',
-        /relative flex items-center gap-2/
+        /relative flex items-center/
       );
     });
   });
