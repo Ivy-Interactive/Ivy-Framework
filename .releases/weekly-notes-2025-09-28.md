@@ -1,8 +1,6 @@
 ﻿> [!NOTE]
 > We usually release on Fridays every week. Sign up on [https://ivy.app/](https://ivy.app/auth/sign-up) to get release notes directly to your inbox.
 
-# Release v1.0.113
-
 ## Protected Namespace Validation
 
 The `ivy init` command now prevents you from accidentally using reserved namespaces that could conflict with the framework itself or its dependencies. The protected namespaces have been significantly expanded to include not just Ivy-specific namespaces, but also common .NET libraries and third-party packages used by the framework.
@@ -184,7 +182,7 @@ new PieChart(data)
 
 ### Enhanced Chart Legend Layout
 
-The chart legend for donut and pie charts now has improved scrolling behavior when displaying many items. 
+The chart legend for donut and pie charts now has improved scrolling behavior when displaying many items.
 
 ### Terminal Widget Window Controls
 
@@ -223,3 +221,58 @@ Additionally, the build now:
 - Removes console statements and debuggers in production builds
 - Aliases `lodash` to `lodash-es` for better tree-shaking
 - Disables source maps in production for smaller bundle sizes
+
+## What's Changed
+* Revert "(ui/ux): (tabs): better align toggle button" by @rorychatt in https://github.com/Ivy-Interactive/Ivy-Framework/pull/888
+* (sidebar): remove borders around main content by @rorychatt in https://github.com/Ivy-Interactive/Ivy-Framework/pull/889
+* (inputs): resolve font size inconsistency between text input and text area by @rorychatt in https://github.com/Ivy-Interactive/Ivy-Framework/pull/890
+* chore: remove bg for currently active line by @rorychatt in https://github.com/Ivy-Interactive/Ivy-Framework/pull/892
+* (feat): implement Size for Select Input type by @ArtemLazarchuk in https://github.com/Ivy-Interactive/Ivy-Framework/pull/864
+* [Feature]: VideoWidget by @id-pm in https://github.com/Ivy-Interactive/Ivy-Framework/pull/865
+* (blade): smaller min default width; resolve issues for cards with details inside of min width blades by @rorychatt in https://github.com/Ivy-Interactive/Ivy-Framework/pull/894
+* (codex): use react swc by @rorychatt in https://github.com/Ivy-Interactive/Ivy-Framework/pull/872
+* [Docs] Sync docs with release v1.0.106 by @ArtemKhvorostianyi in https://github.com/Ivy-Interactive/Ivy-Framework/pull/895
+* Add Language.Markdown support to CodeInputWidget by @nielsbosma in https://github.com/Ivy-Interactive/Ivy-Framework/pull/898
+* Allow custom submit title in toForm() method by @ShogunFire in https://github.com/Ivy-Interactive/Ivy-Framework/pull/901
+* Unwrap `AggregateException`s in `Error{Teaser}View` by @zachwolfe in https://github.com/Ivy-Interactive/Ivy-Framework/pull/904
+* [Docs]: sync docs with Release v1.0.112 by @ArtemKhvorostianyi in https://github.com/Ivy-Interactive/Ivy-Framework/pull/905
+* Fix: Take into account the width for all variants of the select input by @ShogunFire in https://github.com/Ivy-Interactive/Ivy-Framework/pull/903
+* [Program]: test program docs by @ArtemKhvorostianyi in https://github.com/Ivy-Interactive/Ivy-Framework/pull/913
+* (dbml): improve DBML editor table layout algorithm by @nielsbosma in https://github.com/Ivy-Interactive/Ivy-Framework/pull/902
+* (html): removing the Rendered result part and fix security formating by @ShogunFire in https://github.com/Ivy-Interactive/Ivy-Framework/pull/915
+* [Docs]: fix missing brackets in horizontal layout usage in forms by @ArtemKhvorostianyi in https://github.com/Ivy-Interactive/Ivy-Framework/pull/917
+* [Docs]: add --silent flag to Ivy Init docs (missed from release sync) by @ArtemKhvorostianyi in https://github.com/Ivy-Interactive/Ivy-Framework/pull/923
+* (audio): remove color from fonts and use regular Text.P by @rorychatt in https://github.com/Ivy-Interactive/Ivy-Framework/pull/930
+* (video): add missing XML documentation for poster parameter by @rorychatt in https://github.com/Ivy-Interactive/Ivy-Framework/pull/929
+* (image) Fix Image frontend to allow data uri src by @ShogunFire in https://github.com/Ivy-Interactive/Ivy-Framework/pull/934
+* (feat): implement Size for File Input type by @ArtemLazarchuk in https://github.com/Ivy-Interactive/Ivy-Framework/pull/916
+* [Docs]: implement Secret docs in new Concept section by @ArtemKhvorostianyi in https://github.com/Ivy-Interactive/Ivy-Framework/pull/925
+* [Docs]: fix Secrets doc placement in sidebar with apps by @ArtemKhvorostianyi in https://github.com/Ivy-Interactive/Ivy-Framework/pull/936
+* (forms): better auto-fill colors by @rorychatt in https://github.com/Ivy-Interactive/Ivy-Framework/pull/928
+* [DropDownMenu]: fix sub content (nested menu) overlaying of main content by @ArtemKhvorostianyi in https://github.com/Ivy-Interactive/Ivy-Framework/pull/906
+* (fix): Use `MigrateAsync()` instead of `EnsureCreatedAsync()` by @zachwolfe in https://github.com/Ivy-Interactive/Ivy-Framework/pull/940
+* (codex): fe unit tests support and workflows by @rorychatt in https://github.com/Ivy-Interactive/Ivy-Framework/pull/943
+* (docs): Fix incorrect Dockerfile in deployment docs by @zachwolfe in https://github.com/Ivy-Interactive/Ivy-Framework/pull/949
+* (docs): Add docs for `ivy remove-branding` by @zachwolfe in https://github.com/Ivy-Interactive/Ivy-Framework/pull/947
+* (emoji): add a custom emojis functionality in the markup renderer.  by @ShogunFire in https://github.com/Ivy-Interactive/Ivy-Framework/pull/918
+* (feat): implement Size for Feedback Input type  by @ArtemLazarchuk in https://github.com/Ivy-Interactive/Ivy-Framework/pull/931
+* [Docs]: implement Volume docs by @ArtemKhvorostianyi in https://github.com/Ivy-Interactive/Ivy-Framework/pull/937
+* (git) Fix: In the precommit script, remove git add . by @ShogunFire in https://github.com/Ivy-Interactive/Ivy-Framework/pull/938
+* (feat): Implement Size for DateTime Input type by @ArtemLazarchuk in https://github.com/Ivy-Interactive/Ivy-Framework/pull/945
+* Reverse order of TerminalWidget stoplight buttons by @zachwolfe in https://github.com/Ivy-Interactive/Ivy-Framework/pull/948
+* Add 2 new area charts, enhance pie charts with 3 additional examples, and fix chart label responsiveness by @Jeelislive in https://github.com/Ivy-Interactive/Ivy-Framework/pull/822
+* (feat): fix bug on latest vite with missing packages on Linux by @rorychatt in https://github.com/Ivy-Interactive/Ivy-Framework/pull/951
+* (docs): fix UseMemo dependency array example by @rorychatt in https://github.com/Ivy-Interactive/Ivy-Framework/pull/952
+* (feat): Implement Size for Code Input type by @ArtemLazarchuk in https://github.com/Ivy-Interactive/Ivy-Framework/pull/955
+* (fe): FE load performance: split heavy vendor chunks, lazy-load Prism, and polish Vite config Fixes : (#935) by @Jeelislive in https://github.com/Ivy-Interactive/Ivy-Framework/pull/956
+* (feat): implement Size for Color Input type by @ArtemLazarchuk in https://github.com/Ivy-Interactive/Ivy-Framework/pull/946
+* (rechart): fix support for react 19 by @rorychatt in https://github.com/Ivy-Interactive/Ivy-Framework/pull/965
+* (blade): scroll fix for radix scrollarea with nested elements by @rorychatt in https://github.com/Ivy-Interactive/Ivy-Framework/pull/966
+* (select): resolve value mismatch  by @rorychatt in https://github.com/Ivy-Interactive/Ivy-Framework/pull/967
+* feat: Add refresh token support for Basic Auth by @zachwolfe in https://github.com/Ivy-Interactive/Ivy-Framework/pull/950
+
+## New Contributors
+* @id-pm made their first contribution in https://github.com/Ivy-Interactive/Ivy-Framework/pull/865
+* @ShogunFire made their first contribution in https://github.com/Ivy-Interactive/Ivy-Framework/pull/901
+
+**Full Changelog**: https://github.com/Ivy-Interactive/Ivy-Framework/compare/v1.0.112...v1.0.114
