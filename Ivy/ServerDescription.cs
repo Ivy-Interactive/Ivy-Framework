@@ -132,28 +132,37 @@ public class ServerDescription
             foreach (var service in serviceCollection)
             {
                 string? descriptionYaml = null;
+                string? implementationTypeName = service.ImplementationType?.FullName ?? service.ImplementationType?.Name;
 
-                // Check if the implementation type implements IDescribableService
-                if (service.ImplementationType != null && typeof(IDescribableService).IsAssignableFrom(service.ImplementationType))
+                // Try to get the actual instance to determine implementation type and description
+                try
                 {
-                    try
+                    var instance = serviceProvider.GetService(service.ServiceType);
+                    if (instance != null)
                     {
-                        var instance = serviceProvider.GetService(service.ServiceType);
+                        // Get the actual implementation type from the instance
+                        var actualType = instance.GetType();
+                        if (implementationTypeName == null)
+                        {
+                            implementationTypeName = actualType.FullName ?? actualType.Name;
+                        }
+
+                        // Check if it implements IDescribableService
                         if (instance is IDescribableService describable)
                         {
                             descriptionYaml = describable.ToYaml();
                         }
                     }
-                    catch
-                    {
-                        // If we can't get the instance, skip the description
-                    }
+                }
+                catch
+                {
+                    // If we can't get the instance, continue with what we have
                 }
 
                 var serviceDesc = new ServiceDescription
                 {
                     ServiceType = service.ServiceType.FullName ?? service.ServiceType.Name,
-                    ImplementationType = service.ImplementationType?.FullName ?? service.ImplementationType?.Name,
+                    ImplementationType = implementationTypeName,
                     Lifetime = service.Lifetime.ToString(),
                     Description = descriptionYaml
                 };

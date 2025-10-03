@@ -25,7 +25,7 @@ public class FolderVolume(string? mountPath = null) : IVolume, IDescribableServi
     }
     public string ToYaml()
     {
-        return "mountPath: " + mountPath;
+        return "mountPath:" + mountPath;
     }
 }
 
@@ -33,7 +33,7 @@ public static class VolumeExtensions
 {
     public static Server UseVolume(this Server server, IVolume volume)
     {
-        server.Services.AddSingleton(volume);
+        server.Services.AddSingleton<IVolume>(volume);
         return server;
     }
 }
