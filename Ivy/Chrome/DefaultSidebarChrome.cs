@@ -1,4 +1,3 @@
-using System.Collections.Immutable;
 using Ivy.Apps;
 using Ivy.Auth;
 using Ivy.Client;
@@ -7,6 +6,8 @@ using Ivy.Hooks;
 using Ivy.Shared;
 using Ivy.Views;
 using Ivy.Widgets.Internal;
+using System.Collections.Immutable;
+using System.Linq;
 
 namespace Ivy.Chrome;
 
@@ -16,6 +17,16 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
     private record TabState(string Id, string AppId, string Title, AppHost AppHost, Icons? Icon, string RefreshToken)
     {
         public Tab ToTab() => new Tab(Title, AppHost).Icon(Icon).Key(Utils.GetShortHash(Id + RefreshToken));
+    }
+    private bool itemMatchSearch(MenuItem item, string searchString)
+    {
+        bool matchSearch = (item.Label ?? "").Contains(searchString, StringComparison.OrdinalIgnoreCase);
+        for (int i = 0; !matchSearch && item.SearchTags != null && i < item.SearchTags.Length; i++)
+        {
+            var tag = item.SearchTags[i];
+            matchSearch = tag.Contains(searchString, StringComparison.OrdinalIgnoreCase);
+        }
+        return matchSearch;
     }
 
     public override object? Build()
@@ -49,8 +60,7 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
             }
             else
             {
-                var result = appRepository.GetMenuItems().Flatten().Where(e =>
-                    (e.Label ?? "").StartsWith(search.Value, StringComparison.OrdinalIgnoreCase)).ToArray();
+                var result = appRepository.GetMenuItems().Flatten().Where(item => itemMatchSearch(item, search.Value)).ToArray();
 
                 if (result.Length > 0)
                 {
