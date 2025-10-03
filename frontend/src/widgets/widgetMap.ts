@@ -97,7 +97,6 @@ export const widgetMap = {
 
   // Forms
   'Ivy.Form': Forms.FormWidget,
-  'Ivy.FormField': Forms.FormFieldWidget,
 
   // Dialogs
   'Ivy.Dialog': Dialogs.DialogWidget,

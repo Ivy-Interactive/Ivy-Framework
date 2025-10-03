@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Ivy.Samples.Shared.Apps.Demos;
 
-[App(icon: Icons.TextSelect, title: "Field Input ")]
+[App(icon: Icons.TextSelect, title: "Field Input ", path: ["Widgets", "Inputs"])]
 public class FieldApp : SampleBase
 {
     protected override object? BuildSample()
@@ -23,8 +23,7 @@ public class FieldApp : SampleBase
         return Layout.Vertical().Center()
             | (new Card(
                 Layout.Vertical().Gap(6).Padding(2)
-                | Text.H2("Field Widget Demo")
-                | Text.Block("This demo shows edge cases with Field and .WithField()")
+                | Text.H2("Field")
 
                 // Explicit Field
                 | new Field(
