@@ -305,7 +305,7 @@ export const generateLabelListProps = (props: ExtendedLabelListProps) => {
   return {
     dataKey: camelCase(dataKey) as string,
     position: camelCase(position) as LabelListProps['position'],
-    fill: fill && `var(--${fill.toLowerCase()})`,
+    fill: fill && `var(--muted-foreground)`,
     formatter,
     ...labelListProps,
   };
