@@ -12,6 +12,7 @@ namespace Ivy.Auth;
 /// <param name="token">The current authentication token</param>
 public class AuthService(IAuthProvider authProvider, AuthToken? token) : IAuthService
 {
+    private AuthToken? _token = token;
     /// <summary>
     /// Authenticates a user with email and password.
     /// </summary>
@@ -20,7 +21,9 @@ public class AuthService(IAuthProvider authProvider, AuthToken? token) : IAuthSe
     /// <returns>An authentication token if successful, null otherwise</returns>
     public async Task<AuthToken?> LoginAsync(string email, string password)
     {
-        return await authProvider.LoginAsync(email, password);
+        var token = await authProvider.LoginAsync(email, password);
+        _token = token;
+        return token;
     }
 
     /// <summary>
@@ -39,22 +42,25 @@ public class AuthService(IAuthProvider authProvider, AuthToken? token) : IAuthSe
     /// </summary>
     /// <param name="request">The HTTP request containing OAuth callback data</param>
     /// <returns>An authentication token if successful, null otherwise</returns>
-    public Task<AuthToken?> HandleOAuthCallbackAsync(HttpRequest request)
+    public async Task<AuthToken?> HandleOAuthCallbackAsync(HttpRequest request)
     {
-        return authProvider.HandleOAuthCallbackAsync(request);
+        var token = await authProvider.HandleOAuthCallbackAsync(request);
+        _token = token;
+        return token;
     }
 
     /// <summary>
     /// Logs out the current user.
     /// </summary>
-    public Task LogoutAsync()
+    public async Task LogoutAsync()
     {
-        if (string.IsNullOrWhiteSpace(token?.Jwt))
+        if (string.IsNullOrWhiteSpace(_token?.Jwt))
         {
-            return Task.CompletedTask;
+            return;
         }
 
-        return authProvider.LogoutAsync(token.Jwt);
+        await authProvider.LogoutAsync(_token.Jwt);
+        _token = null;
     }
 
     /// <summary>
@@ -63,14 +69,14 @@ public class AuthService(IAuthProvider authProvider, AuthToken? token) : IAuthSe
     /// <returns>User information if authenticated, null otherwise</returns>
     public async Task<UserInfo?> GetUserInfoAsync()
     {
-        if (string.IsNullOrWhiteSpace(token?.Jwt))
+        if (string.IsNullOrWhiteSpace(_token?.Jwt))
         {
             return null!;
         }
 
         //todo: cache this!
 
-        return await authProvider.GetUserInfoAsync(token.Jwt);
+        return await authProvider.GetUserInfoAsync(_token.Jwt);
     }
 
     /// <summary>

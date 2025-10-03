@@ -99,20 +99,22 @@ const DateVariant: React.FC<DateVariantProps> = ({
             variant="outline"
             className={cn(
               dateTimeInputVariants({ size }),
-              !date && 'text-muted-foreground',
               invalid && inputStyles.invalidInput,
               disabled && 'cursor-not-allowed'
             )}
             data-testid={dataTestId}
           >
             <CalendarIcon
-              className={cn('mr-2', dateTimeInputIconVariants({ size }))}
+              className={cn(
+                'mr-3 flex-shrink-0',
+                dateTimeInputIconVariants({ size })
+              )}
             />
-            {date ? (
-              format(date, formatProp || 'yyyy-MM-dd')
-            ) : (
-              <span>{placeholder || 'Pick a date'}</span>
-            )}
+            <span className={cn('truncate', (showClear || invalid) && 'pr-10')}>
+              {date
+                ? format(date, formatProp || 'yyyy-MM-dd')
+                : placeholder || 'Pick a date'}
+            </span>
             {/* Icons absolutely positioned inside the button */}
             {(showClear || invalid) && (
               <span className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 pointer-events-auto">
@@ -291,20 +293,22 @@ const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
             variant="outline"
             className={cn(
               dateTimeInputVariants({ size }),
-              !date && 'text-muted-foreground',
               invalid && inputStyles.invalidInput,
               disabled && 'cursor-not-allowed'
             )}
             data-testid={dataTestId}
           >
             <CalendarIcon
-              className={cn('mr-2', dateTimeInputIconVariants({ size }))}
+              className={cn(
+                'mr-3 flex-shrink-0',
+                dateTimeInputIconVariants({ size })
+              )}
             />
-            {date ? (
-              format(date, formatProp || 'yyyy-MM-dd')
-            ) : (
-              <span>{placeholder || 'Pick a date & time'}</span>
-            )}
+            <span className={cn('truncate', (showClear || invalid) && 'pr-10')}>
+              {date
+                ? format(date, formatProp || 'yyyy-MM-dd')
+                : placeholder || 'Pick a date & time'}
+            </span>
             {/* Icons absolutely positioned inside the button */}
             {(showClear || invalid) && (
               <span className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 pointer-events-auto">
@@ -458,14 +462,15 @@ const TimeVariant: React.FC<TimeVariantProps> = ({
   );
 
   return (
-    <div className="relative flex items-center gap-2" data-testid={dataTestId}>
+    <div className="relative flex items-center" data-testid={dataTestId}>
       <Clock
         className={cn(
+          'mr-3 flex-shrink-0',
           dateTimeInputIconVariants({ size }),
           'text-muted-foreground'
         )}
       />
-      <div className="relative w-full">
+      <div className="relative flex-1">
         <Input
           type="time"
           step="1"
@@ -476,8 +481,9 @@ const TimeVariant: React.FC<TimeVariantProps> = ({
           disabled={disabled}
           placeholder={placeholder || 'Select time'}
           className={cn(
-            'bg-background appearance-none [&::-webkit-calendar-picker-indicator]:hidden pr-20 cursor-pointer', // pr-20 for clear+icon
+            'bg-background appearance-none [&::-webkit-calendar-picker-indicator]:hidden cursor-pointer w-full',
             dateTimeInputTextVariants({ size }),
+            (showClear || invalid) && 'pr-20',
             invalid && inputStyles.invalidInput,
             disabled && 'cursor-not-allowed'
           )}

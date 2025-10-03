@@ -17,6 +17,7 @@ import {
   FaSpotify,
   FaApple,
   FaGithub,
+  FaPinterest,
 } from 'react-icons/fa';
 import { IconType } from 'react-icons';
 import { VscAzure } from 'react-icons/vsc';
@@ -55,6 +56,7 @@ const Icon: React.FC<IconProps> = ({ name, color, size, className, style }) => {
     Notion: SiNotion,
     Apple: FaApple,
     Github: FaGithub,
+    Pinterest: FaPinterest,
   };
 
   if (name && name in reactIcons) {

@@ -7,8 +7,38 @@ public class EmbedApp : SampleBase
 {
     protected override object? BuildSample()
     {
-        return Layout.Vertical()
-               | new Embed("https://www.youtube.com/watch?v=rhxQoDlt2AU")
+        return Layout.Horizontal(
+            new Card(
+                Layout.Vertical()
+                    | Text.H4("YouTube Video")
+                    | new Embed("https://www.youtube.com/watch?v=rhxQoDlt2AU")
+                    | Text.H4("Instagram Post")
+                    | new Embed("https://www.instagram.com/p/CSGnc0GlZ7R/?img_index=1")
+                    | Text.H4("LinkedIn Post")
+                    | new Embed("https://www.linkedin.com/posts/ivy-interactive_ai-dotnet-opensource-activity-7377309652004331520-YjqC")
+                    | Text.H4("Reddit Post")
+                    | new Embed("https://www.reddit.com/r/cats/comments/1nr7fbs/show_them/")
+                    | Text.H4("Twitter Tweet")
+                    | new Embed("https://publish.twitter.com/?url=https://twitter.com/_devJNS/status/1969643853691949555#")
+                    | Text.H4("TikTok Video")
+                    | new Embed("https://www.tiktok.com/@ivan.wllb/video/7550352363689741590")
+            ).Width(Size.Fraction(0.5f)).Height(Size.Fit()),
+            new Card(
+                Layout.Vertical()
+                    | Text.H4("Pinterest Pin")
+                    | new Embed("https://pin.it/i/4yA1hkh77/")
+                    | Text.H4("Facebook post")
+                    | new Embed("https://www.facebook.com/share/p/1NRYEoLAnJ/")
+                    | Text.H4("Repository")
+                    | new Embed("https://github.com/Ivy-Interactive/Ivy-Framework")
+                    | Text.H4("Issue")
+                    | new Embed("https://github.com/Ivy-Interactive/Ivy-Framework/issues/935")
+                    | Text.H4("Pull Request")
+                    | new Embed("https://github.com/Ivy-Interactive/Ivy-Framework/pull/123")
+                    | Text.H4("Gist")
+                    | new Embed("https://gist.github.com/username/gistid")
+            ).Width(Size.Fraction(0.5f))).Height(Size.Fit())
             ;
+
     }
 }

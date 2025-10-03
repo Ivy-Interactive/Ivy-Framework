@@ -21,6 +21,8 @@ public class DateTimeInputApp : SampleBase
         var stringState = UseState(DateTime.Now.ToString("O"));
         var nullableTimeState = UseState<TimeOnly?>(() => null);
         var nullableDateOnlyState = UseState<DateOnly?>(() => null);
+        var dateTimeOffsetState = UseState(DateTimeOffset.Now);
+        var nullableDateTimeOffsetState = UseState<DateTimeOffset?>(() => null);
 
         // Size examples
         var sizeExamplesGrid = Layout.Grid().Columns(4)
@@ -238,7 +240,18 @@ public class DateTimeInputApp : SampleBase
                 .ToDateTimeInput()
                 .Variant(DateTimeInputs.Time)
                 .TestId("datetime-input-timeonly-nullable-binding")
-            | Text.InlineCode(nullableTimeState.Value?.ToString("HH:mm:ss") ?? "null");
+            | Text.InlineCode(nullableTimeState.Value?.ToString("HH:mm:ss") ?? "null")
+
+            | Text.InlineCode("DateTimeOffset")
+            | dateTimeOffsetState.ToDateTimeInput().Variant(DateTimeInputs.DateTime).TestId("datetime-input-datetimeoffset-binding")
+            | Text.InlineCode($"{dateTimeOffsetState.Value:yyyy-MM-dd HH:mm:ss zzz}")
+
+            | Text.InlineCode("DateTimeOffset?")
+            | nullableDateTimeOffsetState
+                .ToDateTimeInput()
+                .Variant(DateTimeInputs.DateTime)
+                .TestId("datetime-input-datetimeoffset-nullable-binding")
+            | Text.InlineCode(nullableDateTimeOffsetState.Value?.ToString("yyyy-MM-dd HH:mm:ss zzz") ?? "null");
 
         // Placeholder examples
         var placeholderExamplesGrid = Layout.Grid().Columns(3)
@@ -305,7 +318,9 @@ public class DateTimeInputApp : SampleBase
             | Text.Block($"TimeOnly: {timeOnlyState.Value:HH:mm:ss}")
             | Text.Block($"string: {stringState.Value}")
             | Text.Block($"Nullable DateOnly: {nullableDateOnlyState.Value?.ToString("yyyy-MM-dd") ?? "null"}")
-            | Text.Block($"Nullable TimeOnly: {nullableTimeState.Value?.ToString("HH:mm:ss") ?? "null"}");
+            | Text.Block($"Nullable TimeOnly: {nullableTimeState.Value?.ToString("HH:mm:ss") ?? "null"}")
+            | Text.Block($"DateTimeOffset: {dateTimeOffsetState.Value:yyyy-MM-dd HH:mm:ss zzz}")
+            | Text.Block($"Nullable DateTimeOffset: {nullableDateTimeOffsetState.Value?.ToString("yyyy-MM-dd HH:mm:ss zzz") ?? "null"}");
 
         return Layout.Vertical()
             | Text.H1("DateTimeInput")

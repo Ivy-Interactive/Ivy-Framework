@@ -22,6 +22,19 @@ new Card(
 ).Title("Card App").Description("This is a card app.").Width(Size.Units(100))
 ```
 
+## Click Listener
+
+HandleClick attaches an event listener and makes the card clickable.
+
+```csharp demo-below
+new Card(
+    "This card is clickable."
+).Title("Clickable Card")
+ .Description("Demonstrating click and mouse hover.")
+ .HandleClick(_ => {})
+ .Width(Size.Units(100))
+```
+
 ## Border Customization
 
 Cards support the same border functionality as Box widgets, allowing you to customize the appearance while maintaining the default card styling when no border properties are specified.

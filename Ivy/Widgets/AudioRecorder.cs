@@ -1,4 +1,5 @@
 using Ivy.Core;
+using Ivy.Shared;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy;
@@ -40,6 +41,9 @@ public record AudioRecorder : WidgetBase<AudioRecorder>
 
     /// <summary>Gets or sets the upload URL for automatic audio file uploads.</summary>
     [Prop] public string? UploadUrl { get; set; }
+
+    /// <summary>Gets or sets the size of the audio recorder.</summary>
+    [Prop] public Sizes Size { get; set; } = Sizes.Medium;
 }
 
 /// <summary>Extension methods for configuring audio recorders.</summary>
@@ -91,5 +95,23 @@ public static class AudioRecorderExtensions
     public static AudioRecorder UploadUrl(this AudioRecorder widget, string? uploadUrl)
     {
         return widget with { UploadUrl = uploadUrl };
+    }
+
+    /// <summary>Sets the size of the audio recorder.</summary>
+    public static AudioRecorder Size(this AudioRecorder widget, Sizes size)
+    {
+        return widget with { Size = size };
+    }
+
+    /// <summary>Sets the audio recorder size to large for prominent display.</summary>
+    public static AudioRecorder Large(this AudioRecorder widget)
+    {
+        return widget.Size(Sizes.Large);
+    }
+
+    /// <summary>Sets the audio recorder size to small for compact display.</summary>
+    public static AudioRecorder Small(this AudioRecorder widget)
+    {
+        return widget.Size(Sizes.Small);
     }
 }
