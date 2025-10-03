@@ -4,9 +4,9 @@ using System.Security.Claims;
 using System.Text;
 using Ivy.Hooks;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using Isopoh.Cryptography.Argon2;
 
 namespace Ivy.Auth;
 
@@ -15,9 +15,10 @@ namespace Ivy.Auth;
 /// </summary>
 public class BasicAuthProvider : IAuthProvider
 {
-    private readonly List<(string user, string password)> _users = [];
+    private readonly List<(string user, string hash)> _users = [];
     private readonly string _issuer;
     private readonly string _audience;
+    private readonly byte[] _hashSecret;
     private readonly SymmetricSecurityKey _signingKey;
 
     private static string TokenUseClaim => "https://ivy.app/claims/token_use";
@@ -32,7 +33,8 @@ public class BasicAuthProvider : IAuthProvider
             .AddUserSecrets(Assembly.GetEntryAssembly()!)
             .Build();
 
-        var secret = configuration["BasicAuth:JwtSecret"] ?? throw new Exception("BasicAuth:JwtSecret is required");
+        var hashSecret = configuration["BasicAuth:HashSecret"] ?? throw new Exception("BasicAuth:HashSecret is required");
+        var jwtSecret = configuration["BasicAuth:JwtSecret"] ?? throw new Exception("BasicAuth:JwtSecret is required");
         _issuer = configuration["BasicAuth:JwtIssuer"] ?? "ivy";
         _audience = configuration["BasicAuth:JwtAudience"] ?? "ivy-app";
 
@@ -45,8 +47,17 @@ public class BasicAuthProvider : IAuthProvider
 
         try
         {
-            var secretBytes = Convert.FromBase64String(secret);
-            _signingKey = new SymmetricSecurityKey(secretBytes);
+            _hashSecret = Convert.FromBase64String(hashSecret);
+        }
+        catch (FormatException)
+        {
+            throw new Exception("BasicAuth:HashSecret is not a valid base64 string");
+        }
+
+        try
+        {
+            var jwtSecretBytes = Convert.FromBase64String(jwtSecret);
+            _signingKey = new SymmetricSecurityKey(jwtSecretBytes);
         }
         catch (FormatException)
         {
@@ -62,12 +73,21 @@ public class BasicAuthProvider : IAuthProvider
     /// <returns>An authentication token if successful, null otherwise</returns>
     public Task<AuthToken?> LoginAsync(string user, string password)
     {
-        var found = _users.Any(u => u.user == user && u.password == password);
+        var found = _users.Any(u => u.user == user && PasswordMatches(user, password, u.hash));
         if (!found) return Task.FromResult<AuthToken?>(null);
 
         var now = DateTimeOffset.UtcNow;
         var authToken = CreateToken(user, now, now.ToUnixTimeSeconds());
         return Task.FromResult<AuthToken?>(authToken);
+    }
+
+    private bool PasswordMatches(string username, string password, string hash)
+    {
+        return Argon2.Verify(hash, new Argon2Config
+        {
+            Password = Encoding.UTF8.GetBytes(password),
+            Secret = _hashSecret,
+        });
     }
 
     private AuthToken CreateToken(string user, DateTimeOffset now, long authTime)
