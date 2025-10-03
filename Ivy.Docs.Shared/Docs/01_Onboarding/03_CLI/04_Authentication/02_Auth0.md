@@ -164,8 +164,8 @@ To allow the Ivy application to properly display the users email, name and avata
 4. **Add the following code:**
 ```javascript
 exports.onExecutePostLogin = async (event, api) => {
-    // Choose a claims namespace - typically your own domain
-    let namespace = "https://your-domain.com/";
+    // You can change this if you want - but then also update the "Auth0:Namespace" configuration in your Ivy project
+    let namespace = "https://ivy.app/";
 
     if (namespace && !namespace.endsWith('/')) {
         namespace += '/';
@@ -197,7 +197,6 @@ You will be prompted to provide the following Auth0 configuration:
 - **Client ID**: Your Auth0 application's client ID
 - **Client Secret**: Your Auth0 application's client secret
 - **Audience**: API identifier for securing API access
-- **Namespace**: Namespace used for custom JWT claims, as chosen earlier on this page
 
 Your credentials will be stored securely in .NET user secrets. You will then be prompted to choose one or more authentication options to support, from the following list:
 
@@ -244,7 +243,7 @@ The following parameters are supported via connection string, environment variab
 - **Auth0:ClientId**: Required. Your Auth0 application's client ID.
 - **Auth0:ClientSecret**: Required. Your Auth0 application's client secret.
 - **Auth0:Audience**: Required. API identifier for securing API access.
-- **Auth0:Namespace**: Optional. Your JWT claims namespace, as chosen earlier in this guide.
+- **Auth0:Namespace**: Optional. Your JWT claims namespace, as chosen earlier in this guide. If left empty "https://ivy.app/" will be used.
 
 ## Authentication Flow
 

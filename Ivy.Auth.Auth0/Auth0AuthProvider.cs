@@ -43,7 +43,7 @@ public class Auth0AuthProvider : IAuthProvider
         _clientId = configuration.GetValue<string>("Auth0:ClientId") ?? throw new Exception("Auth0:ClientId is required");
         _clientSecret = configuration.GetValue<string>("Auth0:ClientSecret") ?? throw new Exception("Auth0:ClientSecret is required");
         _audience = configuration.GetValue<string>("Auth0:Audience") ?? "";
-        _namespace = configuration.GetValue<string>("Auth0:Namespace") ?? "";
+        _namespace = configuration.GetValue<string>("Auth0:Namespace") ?? "https://ivy.app/";
 
         _authClient = new AuthenticationApiClient(_domain);
 
@@ -220,6 +220,10 @@ public class Auth0AuthProvider : IAuthProvider
         if (claims is null)
         {
             return null;
+        }
+        foreach (var claim in claims.Claims)
+        {
+            Console.WriteLine(claim.ToString());
         }
         return new UserInfo(
             claims.FindFirst("sub")?.Value ?? "",
