@@ -1,6 +1,7 @@
 import React from 'react';
 
 interface FieldWidgetProps {
+  id: string;
   label: string;
   description?: string;
   required: boolean;

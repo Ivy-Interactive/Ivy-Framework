@@ -82,6 +82,11 @@ public static class FieldExtensions
     /// <param name="field">The field to configure.</param>
     public static Field Required(this Field field) => field with { Required = true };
 
+    /// <summary>
+    /// Wraps the specified input control in a <see cref="Field"/> widget.
+    /// </summary>
+    /// <param name="input">The input control to wrap.</param>
+    /// <returns>A <see cref="Field"/> widget containing the input control.</returns>
     public static Field WithField(this IAnyInput input) => new Field(input);
 
 }
