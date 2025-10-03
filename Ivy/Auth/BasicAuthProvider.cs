@@ -43,7 +43,15 @@ public class BasicAuthProvider : IAuthProvider
             _users.Add((parts[0], parts[1]));
         }
 
-        _signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret));
+        try
+        {
+            var secretBytes = Convert.FromBase64String(secret);
+            _signingKey = new SymmetricSecurityKey(secretBytes);
+        }
+        catch (FormatException)
+        {
+            throw new Exception("BasicAuth:JwtSecret is not a valid base64 string");
+        }
     }
 
     /// <summary>
