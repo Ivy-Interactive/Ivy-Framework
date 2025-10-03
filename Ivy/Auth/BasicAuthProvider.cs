@@ -4,9 +4,9 @@ using System.Security.Claims;
 using System.Text;
 using Ivy.Hooks;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using Isopoh.Cryptography.Argon2;
 
 namespace Ivy.Auth;
 
@@ -15,10 +15,13 @@ namespace Ivy.Auth;
 /// </summary>
 public class BasicAuthProvider : IAuthProvider
 {
-    private readonly List<(string user, string password)> _users = [];
+    private readonly List<(string user, string hash)> _users = [];
     private readonly string _issuer;
     private readonly string _audience;
+    private readonly byte[] _hashSecret;
     private readonly SymmetricSecurityKey _signingKey;
+
+    private static string TokenUseClaim => "https://ivy.app/claims/token_use";
 
     /// <summary>
     /// Initializes a new instance of the BasicAuthProvider with configuration from environment variables and user secrets.
@@ -30,7 +33,8 @@ public class BasicAuthProvider : IAuthProvider
             .AddUserSecrets(Assembly.GetEntryAssembly()!)
             .Build();
 
-        var secret = configuration["BasicAuth:JwtSecret"] ?? throw new Exception("BasicAuth:JwtSecret is required");
+        var hashSecret = configuration["BasicAuth:HashSecret"] ?? throw new Exception("BasicAuth:HashSecret is required");
+        var jwtSecret = configuration["BasicAuth:JwtSecret"] ?? throw new Exception("BasicAuth:JwtSecret is required");
         _issuer = configuration["BasicAuth:JwtIssuer"] ?? "ivy";
         _audience = configuration["BasicAuth:JwtAudience"] ?? "ivy-app";
 
@@ -41,7 +45,24 @@ public class BasicAuthProvider : IAuthProvider
             _users.Add((parts[0], parts[1]));
         }
 
-        _signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret));
+        try
+        {
+            _hashSecret = Convert.FromBase64String(hashSecret);
+        }
+        catch (FormatException)
+        {
+            throw new Exception("BasicAuth:HashSecret is not a valid base64 string");
+        }
+
+        try
+        {
+            var jwtSecretBytes = Convert.FromBase64String(jwtSecret);
+            _signingKey = new SymmetricSecurityKey(jwtSecretBytes);
+        }
+        catch (FormatException)
+        {
+            throw new Exception("BasicAuth:JwtSecret is not a valid base64 string");
+        }
     }
 
     /// <summary>
@@ -52,7 +73,7 @@ public class BasicAuthProvider : IAuthProvider
     /// <returns>An authentication token if successful, null otherwise</returns>
     public Task<AuthToken?> LoginAsync(string user, string password)
     {
-        var found = _users.Any(u => u.user == user && u.password == password);
+        var found = _users.Any(u => u.user == user && PasswordMatches(user, password, u.hash));
         if (!found) return Task.FromResult<AuthToken?>(null);
 
         var now = DateTimeOffset.UtcNow;
@@ -60,10 +81,22 @@ public class BasicAuthProvider : IAuthProvider
         return Task.FromResult<AuthToken?>(authToken);
     }
 
+    private bool PasswordMatches(string username, string password, string hash)
+    {
+        return Argon2.Verify(hash, new Argon2Config
+        {
+            Password = Encoding.UTF8.GetBytes(password),
+            Secret = _hashSecret,
+        });
+    }
+
     private AuthToken CreateToken(string user, DateTimeOffset now, long authTime)
     {
         var expiresAt = now.AddMinutes(15);
-        var claims = new[] { new Claim(JwtRegisteredClaimNames.Sub, user) };
+        var claims = new[] {
+            new Claim(JwtRegisteredClaimNames.Sub, user),
+            new Claim(TokenUseClaim, "access"),
+        };
         var creds = new SigningCredentials(_signingKey, SecurityAlgorithms.HmacSha256);
         var token = new JwtSecurityToken(
             issuer: _issuer,
@@ -79,6 +112,7 @@ public class BasicAuthProvider : IAuthProvider
         var rtClaims = new[]
         {
             new Claim(JwtRegisteredClaimNames.Sub, user),
+            new Claim(TokenUseClaim, "refresh"),
             new Claim("sid", Guid.NewGuid().ToString("n")),
             new Claim("auth_time", authTime.ToString()),
             new Claim("max_age", maxAgeSeconds.ToString())
@@ -127,7 +161,7 @@ public class BasicAuthProvider : IAuthProvider
         }
 
         // Validate refresh token
-        if (ValidateToken(jwt.RefreshToken, "oauth2/token") is not { } principal)
+        if (ValidateToken(jwt.RefreshToken, "oauth2/token", "refresh") is not { } principal)
         {
             return Task.FromResult<AuthToken?>(null);
         }
@@ -189,7 +223,7 @@ public class BasicAuthProvider : IAuthProvider
     /// <returns>True if the token is valid, false otherwise</returns>
     private bool ValidateJwt(string jwt)
     {
-        return ValidateToken(jwt, _audience) != null;
+        return ValidateToken(jwt, _audience, "access") != null;
     }
 
     /// <summary>
@@ -199,7 +233,7 @@ public class BasicAuthProvider : IAuthProvider
     /// <returns>User information if successful, null otherwise</returns>
     public Task<UserInfo?> GetUserInfoAsync(string jwt)
     {
-        if (ValidateToken(jwt, _audience) is not { } principal ||
+        if (ValidateToken(jwt, _audience, "access") is not { } principal ||
             principal.FindFirst(ClaimTypes.NameIdentifier)?.Value is not { } user)
         {
             return Task.FromResult<UserInfo?>(null);
@@ -217,12 +251,12 @@ public class BasicAuthProvider : IAuthProvider
         return [new AuthOption(AuthFlow.EmailPassword)];
     }
 
-    private ClaimsPrincipal? ValidateToken(string jwt, string audience)
+    private ClaimsPrincipal? ValidateToken(string jwt, string audience, string tokenUse)
     {
         var handler = new JwtSecurityTokenHandler();
         try
         {
-            return handler.ValidateToken(jwt, new TokenValidationParameters
+            var claims = handler.ValidateToken(jwt, new TokenValidationParameters
             {
                 ValidateIssuer = true,
                 ValidIssuer = _issuer,
@@ -233,6 +267,11 @@ public class BasicAuthProvider : IAuthProvider
                 ValidateLifetime = true,
                 ClockSkew = TimeSpan.FromSeconds(30),
             }, out _);
+            if (claims.FindFirst(TokenUseClaim)?.Value != tokenUse)
+            {
+                return null;
+            }
+            return claims;
         }
         catch
         {
