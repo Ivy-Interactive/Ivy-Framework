@@ -131,11 +131,31 @@ public class ServerDescription
             // First add services from server's Services collection
             foreach (var service in serviceCollection)
             {
+                string? descriptionYaml = null;
+
+                // Check if the implementation type implements IDescribableService
+                if (service.ImplementationType != null && typeof(IDescribableService).IsAssignableFrom(service.ImplementationType))
+                {
+                    try
+                    {
+                        var instance = serviceProvider.GetService(service.ServiceType);
+                        if (instance is IDescribableService describable)
+                        {
+                            descriptionYaml = describable.ToYaml();
+                        }
+                    }
+                    catch
+                    {
+                        // If we can't get the instance, skip the description
+                    }
+                }
+
                 var serviceDesc = new ServiceDescription
                 {
                     ServiceType = service.ServiceType.FullName ?? service.ServiceType.Name,
                     ImplementationType = service.ImplementationType?.FullName ?? service.ImplementationType?.Name,
-                    Lifetime = service.Lifetime.ToString()
+                    Lifetime = service.Lifetime.ToString(),
+                    Description = descriptionYaml
                 };
                 description.Services.Add(serviceDesc);
             }
@@ -187,4 +207,7 @@ public class ServiceDescription
 
     [YamlMember(Alias = "lifetime")]
     public string Lifetime { get; set; } = string.Empty;
+
+    [YamlMember(Alias = "description")]
+    public string? Description { get; set; }
 }

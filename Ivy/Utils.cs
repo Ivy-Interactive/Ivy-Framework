@@ -13,6 +13,18 @@ namespace Ivy;
 
 public static class Utils
 {
+    public static bool IsProduction()
+    {
+        var env = Environment.GetEnvironmentVariable("IVY_ENVIRONMENT");
+        return string.Equals(env, "Production", StringComparison.OrdinalIgnoreCase);
+    }
+
+    public static bool IsDevelopment()
+    {
+        var env = Environment.GetEnvironmentVariable("IVY_ENVIRONMENT");
+        return string.Equals(env, "Development", StringComparison.OrdinalIgnoreCase) || string.IsNullOrWhiteSpace(env);
+    }
+
     public static string? NullIfEmpty(this string? input) => string.IsNullOrWhiteSpace(input) ? null : input;
 
     public static Type? GetCollectionTypeParameter(this Type type)
