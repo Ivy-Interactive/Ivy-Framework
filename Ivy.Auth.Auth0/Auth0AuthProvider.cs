@@ -221,10 +221,6 @@ public class Auth0AuthProvider : IAuthProvider
         {
             return null;
         }
-        foreach (var claim in claims.Claims)
-        {
-            Console.WriteLine(claim.ToString());
-        }
         return new UserInfo(
             claims.FindFirst("sub")?.Value ?? "",
             claims.FindFirst(_namespace + "email")?.Value ?? "",
