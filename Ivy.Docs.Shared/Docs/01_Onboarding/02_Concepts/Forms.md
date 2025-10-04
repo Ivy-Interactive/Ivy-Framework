@@ -399,6 +399,53 @@ public class FormStatesExample : ViewBase
 }
 ```
 
+### Form Re-rendering
+
+Demonstrates how to update form state and trigger re-renders:
+
+```csharp demo-tabs
+public class SimpleFormWithResetExample : ViewBase
+{
+    public record MyModel(string Name, string Email, int Age);
+
+    public override object? Build()
+    {
+        // Create the state for your model
+        var model = UseState(() => new MyModel("", "", 0));
+        
+        // Create a form from the state
+        var form = model.ToForm()
+            .Label(m => m.Name, "Full Name")
+            .Label(m => m.Email, "Email Address")
+            .Label(m => m.Age, "Age");
+        
+        // To update the model and trigger re-render, you MUST use Set()
+        UseEffect(async () =>
+        {
+            // Example: Load data after 2 seconds
+            await Task.Delay(2000);
+            // CORRECT: This will trigger form re-render
+            model.Set(new MyModel("John Doe", "john@example.com", 30));
+        });
+        
+        return Layout.Vertical()
+            | form
+            | (Layout.Horizontal()
+                | new Button("Update Model", _ => {
+                    model.Set(new MyModel("Jane Doe", "jane@example.com", 25));
+                })
+                | new Button("Reset Form", _ => {
+                    model.Set(new MyModel("", "", 0));
+                }))
+            | Text.Block($"Current: {model.Value.Name} ({model.Value.Email}) - Age: {model.Value.Age}");
+    }
+}
+```
+
+<Callout Type="warning">
+This example works because it uses the form's internal state management. The form maintains its own copy of the data until submission, so programmatic updates using `.Set()` will be reflected in the form fields.
+</Callout>
+
 ## Advanced Features
 
 ### Conditional Fields
