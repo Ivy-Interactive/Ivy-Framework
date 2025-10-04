@@ -1,9 +1,10 @@
-﻿using System.Text.Json;
-using Ivy.Apps;
+﻿using Ivy.Apps;
 using Ivy.Client;
 using Ivy.Core;
 using Ivy.Core.Hooks;
 using Ivy.Hooks;
+using Ivy.NavigationBacon;
+using System.Text.Json;
 
 namespace Ivy.Chrome;
 
@@ -71,6 +72,7 @@ public record NavigateArgs(string AppId, object? AppArgs = null)
     }
 }
 
+
 public static class NavigateSignalExtensions
 {
     public static INavigator UseNavigation(this IViewContext context)
@@ -88,6 +90,8 @@ public static class NavigateSignalExtensions
 
     private class Navigator(ISignalSender<NavigateArgs, Unit> signal, IAppRepository repository, IClientProvider client) : INavigator
     {
+
+
         public void Navigate(Type type, object? appArgs = null)
         {
             var appId = repository.GetApp(type)?.Id ??
@@ -107,6 +111,20 @@ public static class NavigateSignalExtensions
                 signal.Send(new NavigateArgs(appId, appArgs));
             }
         }
+
+        public bool HasNavigationBeaconFor<T>()
+        {
+            return NavigationBeaconLookup.HasBeaconFor<T>();
+        }
+
+        public void NavigateToBeacon<T>(T Entity)
+        {
+            var args = NavigationBeaconLookup.GetNavigationArgsFor(Entity);
+            if (args != null)
+            {
+                signal.Send(args);
+            }
+        }
     }
 }
 
@@ -114,6 +132,10 @@ public interface INavigator
 {
     public void Navigate(Type type, object? appArgs = null);
     public void Navigate(string uri, object? appArgs = null);
+
+    public bool HasNavigationBeaconFor<T>();
+    public void NavigateToBeacon<T>(T Entity);
+
 }
 
 

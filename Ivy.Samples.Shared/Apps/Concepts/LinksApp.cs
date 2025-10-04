@@ -5,6 +5,8 @@ namespace Ivy.Samples.Shared.Apps.Concepts;
 
 public record LinksAppArgs(string Foo, int Bar);
 
+public record TestBeacon(string id, string Name);
+
 [App(icon: Icons.PanelLeft)]
 public class LinksApp : SampleBase
 {
@@ -18,10 +20,22 @@ public class LinksApp : SampleBase
             return args.ToDetails();
         }
 
-        return new Button("Go to Hidden App").HandleClick(() =>
+        var navigationBeaconButton = new object();
+        if (navigator.HasNavigationBeaconFor<TestBeacon>())
         {
-            navigator.Navigate("app://hidden/hidden-args-app", new Hidden.HiddenArgsAppArgs("Niels", 123));
-        });
+            var testBeacon = new TestBeacon("2", "");
+            navigationBeaconButton = new Button("Go to Navigation Beacon App").HandleClick(() =>
+            {
+                navigator.NavigateToBeacon(testBeacon);
+            });
+        }
+
+        return Layout.Vertical()
+            | new Button("Go to Hidden App").HandleClick(() =>
+                    {
+                        navigator.Navigate("app://hidden/hidden-args-app", new Hidden.HiddenArgsAppArgs("Niels", 123));
+                    })
+            | navigationBeaconButton;
 
     }
 }
