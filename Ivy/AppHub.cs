@@ -73,6 +73,41 @@ public class AppHub(
         return new AppArgs(connectionId, appId, appArgs ?? server.Args?.Args, request.Scheme, request.Host.Value!);
     }
 
+    private async Task<(IAuthProvider?, AuthToken?)> HandleAuth(HttpContext httpContext, IClientProvider clientProvider)
+    {
+        if (server.AuthProviderType == null)
+        {
+            return (null, null);
+        }
+
+        AuthToken? authToken, oldAuthToken;
+        var authProvider = server.Services.BuildServiceProvider().GetService<IAuthProvider>() ?? throw new Exception("IAuthProvider not found");
+        authProvider.SetHttpContext(httpContext);
+
+        // TODO: new auth tokens will not be picked up here until the next connection; we should save them in-memory per connection as well.
+        oldAuthToken = authToken = GetAuthToken(httpContext);
+
+        if (!string.IsNullOrEmpty(authToken?.Jwt))
+        {
+            authToken = await authProvider.RefreshJwtAsync(authToken);
+            if (!string.IsNullOrEmpty(authToken?.Jwt))
+            {
+                var validJwt = await authProvider.ValidateJwtAsync(authToken.Jwt);
+                if (!validJwt)
+                {
+                    authToken = null;
+                }
+            }
+        }
+
+        if (authToken != oldAuthToken)
+        {
+            clientProvider.SetJwt(authToken);
+        }
+
+        return (authProvider, authToken);
+    }
+
     public override async Task OnConnectedAsync()
     {
         try
@@ -81,43 +116,6 @@ public class AppHub(
 
             var httpContext = Context.GetHttpContext()!;
             var appId = GetAppId(server, httpContext);
-
-            var isAuthProtected = server.AuthProviderType != null;
-            AuthToken? authToken = null, oldAuthToken = null;
-            if (isAuthProtected)
-            {
-                var authProvider = server.Services.BuildServiceProvider().GetService<IAuthProvider>() ?? throw new Exception("IAuthProvider not found");
-                authProvider.SetHttpContext(httpContext);
-
-                oldAuthToken = authToken = GetAuthToken(httpContext);
-
-                if (string.IsNullOrEmpty(authToken?.Jwt))
-                {
-                    appId = AppIds.Auth;
-                }
-                else
-                {
-                    authToken = await authProvider.RefreshJwtAsync(authToken);
-                    if (string.IsNullOrEmpty(authToken?.Jwt))
-                    {
-                        appId = AppIds.Auth;
-                    }
-                    else
-                    {
-                        var validJwt = await authProvider.ValidateJwtAsync(authToken.Jwt);
-                        if (!validJwt)
-                        {
-                            appId = AppIds.Auth;
-                        }
-                    }
-                }
-                appServices.AddSingleton<IAuthService>(s => new AuthService(authProvider, authToken));
-            }
-
-            var appArgs = GetAppArgs(Context.ConnectionId, appId, httpContext);
-            var appDescriptor = server.GetApp(appId);
-
-            logger.LogInformation($"Connected: {Context.ConnectionId} [{appId}]");
 
             var clientProvider = new ClientProvider(new ClientSender(clientNotifier, Context.ConnectionId));
 
@@ -133,16 +131,27 @@ public class AppHub(
             appServices.AddSingleton(typeof(IDownloadService), new DownloadService(Context.ConnectionId));
             appServices.AddSingleton(typeof(IUploadService), new UploadService(Context.ConnectionId));
             appServices.AddSingleton(typeof(IClientProvider), clientProvider);
-            appServices.AddSingleton(appDescriptor);
+
+            if (server.AuthProviderType != null)
+            {
+                var (authProvider, authToken) = await HandleAuth(httpContext, clientProvider);
+                if (authToken == null)
+                {
+                    appId = AppIds.Auth;
+                }
+                appServices.AddSingleton<IAuthService>(s => new AuthService(authProvider!, authToken));
+            }
+
+            var appArgs = GetAppArgs(Context.ConnectionId, appId, httpContext);
+            var appDescriptor = server.GetApp(appId);
+
+            logger.LogInformation($"Connected: {Context.ConnectionId} [{appId}]");
+
             appServices.AddSingleton(appArgs);
+            appServices.AddSingleton(appDescriptor);
 
             appServices.AddTransient<IWebhookRegistry, WebhookController>();
             appServices.AddTransient<SignalRouter>(_ => new SignalRouter(sessionStore));
-
-            if (authToken != oldAuthToken)
-            {
-                clientProvider.SetJwt(authToken);
-            }
 
             var serviceProvider = new CompositeServiceProvider(appServices, server.Services);
 
@@ -180,6 +189,31 @@ public class AppHub(
             appState.TrackDisposable(widgetTree.Subscribe(OnWidgetTreeChanged));
 
             sessionStore.Sessions[Context.ConnectionId] = appState;
+
+            // if (isAuthProtected && appId != AppIds.Auth)
+            // {
+            //     appState.AuthRefreshTimer = new Timer(async _ =>
+            //     {
+            //         // TODO: validate the JWT and refresh if needed.
+            //         try
+            //         {
+            //             if (sessionStore.Sessions.TryGetValue(Context.ConnectionId, out var currentSession) && server.AuthProviderType != null && authToken != null && !string.IsNullOrEmpty(authToken.RefreshToken))
+            //             {
+            //                 var newToken = await authProvider.RefreshJwtAsync(authToken);
+            //                 if (newToken != null && newToken != authToken)
+            //                 {
+            //                     authToken = newToken;
+            //                     clientProvider.SetJwt(authToken);
+            //                     logger.LogInformation("Refreshed JWT for {ConnectionId}", Context.ConnectionId);
+            //                 }
+            //             }
+            //         }
+            //         catch (Exception e)
+            //         {
+            //             logger.LogError(e, "Error refreshing JWT for {ConnectionId}", Context.ConnectionId);
+            //         }
+            //     }, null, TimeSpan.FromMinutes(5), TimeSpan.FromMinutes(5));
+            // }
 
             await base.OnConnectedAsync();
 
@@ -292,6 +326,7 @@ public class AppHub(
             {
                 if (appSession.AppId != AppIds.Auth)
                 {
+                    Console.WriteLine($"Event Auth Check: {appSession.AppId}");
                     var authProvider = server.Services.BuildServiceProvider()
                                            .GetService<IAuthProvider>() ??
                                        throw new Exception("IAuthProvider not found");
