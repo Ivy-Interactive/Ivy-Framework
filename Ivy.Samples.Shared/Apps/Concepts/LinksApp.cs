@@ -20,7 +20,7 @@ public class LinksApp : SampleBase
             return args.ToDetails();
         }
 
-        var navigationBeaconButton = new object();
+        object? navigationBeaconButton = null;
         if (navigator.HasNavigationBeaconFor<TestBeacon>())
         {
             var testBeacon = new TestBeacon("2", "");
