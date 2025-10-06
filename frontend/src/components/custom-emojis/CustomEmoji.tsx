@@ -1,10 +1,17 @@
+import { memo } from 'react';
 import { emojiMap } from './emojiMap';
 
-export function CustomEmoji({ name }: { name: string }) {
-  const { src } = emojiMap[name];
+export const CustomEmoji = memo(({ name }: { name: string }) => {
+  // Check if emoji exists in map
+  const emoji = emojiMap[name];
+  if (!emoji || !emoji.src) {
+    return <span>{name}</span>;
+  }
+
+  // Render valid emoji
   return (
     <img
-      src={src}
+      src={emoji.src}
       alt={name}
       style={{
         width: '18px',
@@ -14,4 +21,4 @@ export function CustomEmoji({ name }: { name: string }) {
       }}
     />
   );
-}
+});
