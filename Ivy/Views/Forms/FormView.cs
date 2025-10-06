@@ -144,7 +144,7 @@ public class FormFieldView(
             input.HandleBlur(OnBlur);
         }
 
-        return visibleState.Value ? new FormField(input, label, description, required) : null;
+        return visibleState.Value ? new Field(input, label, description, required) : null;
     }
 }
 

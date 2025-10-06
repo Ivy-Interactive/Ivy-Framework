@@ -1,6 +1,6 @@
 import React from 'react';
 
-interface FormFieldWidgetProps {
+interface FieldWidgetProps {
   id: string;
   label: string;
   description?: string;
@@ -8,7 +8,7 @@ interface FormFieldWidgetProps {
   children?: React.ReactNode;
 }
 
-export const FormFieldWidget: React.FC<FormFieldWidgetProps> = ({
+export const FieldWidget: React.FC<FieldWidgetProps> = ({
   label,
   description,
   required,
