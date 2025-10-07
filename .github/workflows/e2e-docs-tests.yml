@@ -47,6 +47,8 @@ jobs:
     - name: Run Playwright tests for Docs
       working-directory: ./frontend
       run: npx playwright test e2e/docs
+      env:
+        PLAYWRIGHT_BASE_URL: http://localhost:5010
     
     # Cleanup backend server
     - name: Stop backend server
