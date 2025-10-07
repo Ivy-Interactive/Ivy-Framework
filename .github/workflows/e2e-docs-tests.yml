@@ -46,7 +46,7 @@ jobs:
     
     - name: Run Playwright tests for Docs
       working-directory: ./frontend
-      run: npx playwright test e2e/docs
+      run: npm run e2e:docs
       env:
         PLAYWRIGHT_BASE_URL: http://localhost:5010
     

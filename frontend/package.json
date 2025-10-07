@@ -12,7 +12,10 @@
     "format:check": "prettier --check .",
     "preview": "vite preview",
     "prepare": "cd .. && husky frontend/.husky",
-    "test": "vitest"
+    "test": "vitest",
+    "e2e": "playwright test",
+    "e2e:docs": "playwright test e2e/docs",
+    "e2e:samples": "playwright test e2e/samples"
   },
   "dependencies": {
     "@codemirror/lang-cpp": "^6.0.3",
