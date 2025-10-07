@@ -16,13 +16,14 @@ export function remarkCustomEmojiPlugin() {
       const parts = node.value.split(/(:[a-zA-Z0-9-_]+:)/g);
       if (parts.length === 1) return;
 
-      // For each known emojis, create an image node with hName emoji and a property name that contains the emoji-name
+      // For each emoji pattern, create an image node with hName emoji and a property name that contains the emoji-name
       const newNodes: RootContent[] = parts.map<RootContent>(part => {
-        if (emojiMap[part]) {
+        // Check if this part looks like an emoji pattern (:name:)
+        if (part.startsWith(':') && part.endsWith(':')) {
           const imgNode: Image = {
             type: 'image',
-            url: emojiMap[part].src, // This is actually not used
-            alt: part, // This is actually not used
+            url: emojiMap[part]?.src || '', // Use empty string if not found
+            alt: part,
             data: {
               hName: 'emoji',
               hProperties: { name: part },
@@ -37,20 +38,4 @@ export function remarkCustomEmojiPlugin() {
       parent.children.splice(index, 1, ...newNodes);
     });
   };
-}
-
-export function CustomEmoji({ name }: { name: string }) {
-  const { src } = emojiMap[name];
-  return (
-    <img
-      src={src}
-      alt={name}
-      style={{
-        width: '18px',
-        height: '18px',
-        verticalAlign: 'text-top',
-        display: 'inline-block',
-      }}
-    />
-  );
 }

@@ -391,9 +391,9 @@ export const DbmlCanvasWidget: React.FC<DbmlCanvasWidgetProps> = ({
   const [error, setError] = useState<DbmlError | null>(null);
   const { theme } = useTheme();
 
-  const getConnectionLineColor = () => {
+  const getConnectionLineColor = useCallback(() => {
     return theme === 'dark' ? 'var(--primary)' : 'var(--foreground)';
-  };
+  }, [theme]);
 
   const parseDbml = useCallback(() => {
     try {
@@ -541,7 +541,7 @@ export const DbmlCanvasWidget: React.FC<DbmlCanvasWidgetProps> = ({
 
       setError(errorInfo);
     }
-  }, [dbml, setNodes, setEdges, theme]);
+  }, [dbml, setNodes, setEdges, getConnectionLineColor]);
 
   useEffect(() => {
     parseDbml();

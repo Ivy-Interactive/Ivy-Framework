@@ -20,10 +20,8 @@ import CopyToClipboardButton from './CopyToClipboardButton';
 import { createPrismTheme } from '@/lib/ivy-prism-theme';
 import { textBlockClassMap, textContainerClass } from '@/lib/textBlockClassMap';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
-import {
-  CustomEmoji,
-  remarkCustomEmojiPlugin,
-} from './custom-emojis/remarkCustomEmojiPlugin';
+import { CustomEmoji } from './custom-emojis/CustomEmoji';
+import { remarkCustomEmojiPlugin } from './custom-emojis/remarkCustomEmojiPlugin';
 
 const SyntaxHighlighter = lazy(() =>
   import('react-syntax-highlighter').then(mod => ({ default: mod.Prism }))
