@@ -76,7 +76,7 @@ Key features of the Basic Auth provider:
 
 ## JWT Refresh Tokens
 
-The `BasicAuthProvider` uses JWT-based refresh tokens for improved security. Access tokens expire after **15 minutes**, while refresh tokens are valid for **24 hours** (with a 365-day maximum age). This reduces vulnerability windows while maintaining user convenience through automatic session extension.
+The `BasicAuthProvider` uses JWT-based refresh tokens for improved security. Access tokens expire after **15 minutes**, while refresh tokens are valid for **24 hours** and allow users to stay logged in for up to **365 days** as long as they are refreshed before expiring. This reduces vulnerability windows while maintaining user convenience through automatic session extension.
 
 ```csharp
 var authProvider = UseService<IAuthProvider>();
@@ -114,8 +114,8 @@ var newToken = await authProvider.RefreshJwtAsync(authToken);
 
 **Token Issues**
 
-- Access tokens have a limited lifetime (15 minutes); however, refresh tokens automatically extend the session for up to 24 hours without requiring re-authentication.
-- After 24 hours of inactivity, or 365 days from initial login, users will need to log in again with their credentials.
+- Access tokens have a limited lifetime (15 minutes); however, refresh tokens (valid for 24 hours) automatically extend the session without requiring re-authentication.
+- If a refresh token expires (24 hours of inactivity), or 365 days have passed since initial login, users will need to log in again with their credentials.
 
 ## Related Documentation
 
