@@ -1,4 +1,4 @@
-name: E2E Tests
+name: E2E Samples Tests
 on:
   push:
     branches: [ main, master ]
@@ -24,10 +24,6 @@ jobs:
       working-directory: ./frontend
       run: npm run build
     
-    - name: Run unit tests
-      working-directory: ./frontend
-      run: npm run test
-    
     # Setup .NET and build backend (now with frontend assets available)
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
@@ -48,9 +44,9 @@ jobs:
       working-directory: ./frontend
       run: npx playwright install --with-deps
     
-    - name: Run Playwright tests
+    - name: Run Playwright tests for Samples
       working-directory: ./frontend
-      run: npx playwright test
+      run: npx playwright test e2e/samples
     
     # Cleanup backend server
     - name: Stop backend server
@@ -64,6 +60,6 @@ jobs:
     - uses: actions/upload-artifact@v4
       if: ${{ !cancelled() }}
       with:
-        name: playwright-report
+        name: playwright-report-samples
         path: frontend/playwright-report/
-        retention-days: 30 
+        retention-days: 30
