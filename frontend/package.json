@@ -12,7 +12,10 @@
     "format:check": "prettier --check .",
     "preview": "vite preview",
     "prepare": "cd .. && husky frontend/.husky",
-    "test": "vitest"
+    "test": "vitest",
+    "e2e": "playwright test",
+    "e2e:docs": "playwright test e2e/docs",
+    "e2e:samples": "playwright test e2e/samples"
   },
   "dependencies": {
     "@codemirror/lang-cpp": "^6.0.3",
@@ -101,7 +104,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.32.0",
-    "@playwright/test": "^1.54.2",
+    "@playwright/test": "^1.56.0",
     "@swc/helpers": "^0.5.17",
     "@types/canvas-confetti": "^1.9.0",
     "@types/dagre": "^0.7.53",

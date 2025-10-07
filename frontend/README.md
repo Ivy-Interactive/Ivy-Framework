@@ -144,43 +144,59 @@ npx playwright install --with-deps
 
 ### Running Tests
 
-Run all tests:
+Run all e2e tests:
 
 ```bash
-npx playwright test
+npm run e2e
+```
+
+Run only Ivy.Docs e2e tests:
+
+```bash
+npm run e2e:docs
+```
+
+Run only Ivy.Samples e2e tests:
+
+```bash
+npm run e2e:samples
 ```
 
 Run tests in a specific browser:
 
 ```bash
-npx playwright test --project=chromium
-npx playwright test --project=firefox
-npx playwright test --project=webkit
+npm run e2e -- --project=chromium
+npm run e2e -- --project=firefox
+npm run e2e -- --project=webkit
 ```
 
 Run tests in headed mode (to see the browser):
 
 ```bash
-npx playwright test --headed
+npm run e2e -- --headed
 ```
 
 Run tests in debug mode:
 
 ```bash
-npx playwright test --debug
+npm run e2e -- --debug
 ```
 
 Run a specific test file:
 
 ```bash
-npx playwright test example.spec.ts
+npm run e2e -- example.spec.ts
 ```
+
+**Note**: We use npm scripts instead of `npx playwright test` to ensure consistent usage of the locally installed Playwright version and avoid version conflicts.
 
 ### Test Reports
 
 View the HTML test report:
 
 ```bash
+npm run e2e -- --reporter=html
+# Then open the report
 npx playwright show-report
 ```
 
@@ -205,6 +221,9 @@ Tests are automatically run in GitHub Actions on push to main/master branches an
 | `npm run build`        | Build for production                  |
 | `npm run preview`      | Preview production build              |
 | `npm run test`         | Run unit tests with Vitest            |
+| `npm run e2e`          | Run all end-to-end tests              |
+| `npm run e2e:docs`     | Run Ivy.Docs end-to-end tests         |
+| `npm run e2e:samples`  | Run Ivy.Samples end-to-end tests      |
 | `npm run lint`         | Check for linting issues              |
 | `npm run lint:fix`     | Fix linting issues automatically      |
 | `npm run format`       | Format all files with Prettier        |

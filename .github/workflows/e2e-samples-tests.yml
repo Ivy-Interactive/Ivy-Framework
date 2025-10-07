@@ -1,0 +1,67 @@
+name: E2E Samples Tests
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+jobs:
+  test:
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    # Setup Node.js and frontend first
+    - uses: actions/setup-node@v4
+      with:
+        node-version: lts/*
+    
+    - name: Install frontend dependencies
+      working-directory: ./frontend
+      run: npm ci
+    
+    - name: Build frontend
+      working-directory: ./frontend
+      run: npm run build
+    
+    # Setup .NET and build backend (now with frontend assets available)
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '9.0.x'
+    
+    - name: Build backend
+      run: dotnet build Ivy.Samples/Ivy.Samples.csproj
+    
+    - name: Start backend server
+      run: |
+        dotnet run --project Ivy.Samples/Ivy.Samples.csproj -- --port 5010 --silent &
+        echo $! > backend.pid
+        # Wait for server to be ready
+        timeout 30 bash -c 'until curl -f http://localhost:5010/ > /dev/null 2>&1; do sleep 1; done'
+    
+    - name: Install Playwright Browsers
+      working-directory: ./frontend
+      run: npx playwright install --with-deps
+    
+    - name: Run Playwright tests for Samples
+      working-directory: ./frontend
+      run: npm run e2e:samples
+      env:
+        PLAYWRIGHT_BASE_URL: http://localhost:5010
+    
+    # Cleanup backend server
+    - name: Stop backend server
+      if: always()
+      run: |
+        if [ -f backend.pid ]; then
+          kill $(cat backend.pid) || true
+          rm backend.pid
+        fi
+    
+    - uses: actions/upload-artifact@v4
+      if: ${{ !cancelled() }}
+      with:
+        name: playwright-report-samples
+        path: frontend/playwright-report/
+        retention-days: 30
