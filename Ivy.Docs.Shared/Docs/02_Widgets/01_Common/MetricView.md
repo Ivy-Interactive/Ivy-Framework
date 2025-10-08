@@ -39,7 +39,7 @@ Trend Arrows: Green up arrow for positive trends, red down arrow for negative tr
 ```csharp demo-tabs
 new MetricView(
     "Stock Price", 
-    Icons.TrendingDown, 
+    Icons.CircleDollarSign, 
     () => Task.FromResult(new MetricRecord(
         "$42.30",
         -0.15,          // 15% decrease (negative trend)
@@ -61,7 +61,7 @@ MetricRecord takes four parameters: MetricFormatted (string) for the value, Tren
 Layout.Grid().Columns(2)
     | new MetricView("Total Sales", Icons.DollarSign, 
         () => Task.FromResult(new MetricRecord("$84,250", 0.21, 0.21, "$800,000")))
-    | new MetricView("Post Engagement", Icons.Activity, 
+    | new MetricView("Post Engagement", Icons.Heart, 
         () => Task.FromResult(new MetricRecord("1,012.50%", 0.381, 1.25, "806.67%")))
     | new MetricView("User Comments", Icons.UserCheck, 
         () => Task.FromResult(new MetricRecord("2.25", 0.381, 0.90, "2.50")))
@@ -257,7 +257,7 @@ public class SaaSDashboard : ViewBase
                 | new MetricView("MRR", Icons.DollarSign, () => Task.FromResult(new MetricRecord("Loading...", null, null, null)))
                 | new MetricView("Active Users", Icons.Users, () => Task.FromResult(new MetricRecord("Loading...", null, null, null)))
                 | new MetricView("Churn Rate", Icons.UserMinus, () => Task.FromResult(new MetricRecord("Loading...", null, null, null)))
-                | new MetricView("Customer LTV", Icons.TrendingUp, () => Task.FromResult(new MetricRecord("Loading...", null, null, null)));
+                | new MetricView("Customer LTV", Icons.Gem, () => Task.FromResult(new MetricRecord("Loading...", null, null, null)));
         }
         
         var m = metrics.Value;
@@ -287,7 +287,7 @@ public class SaaSDashboard : ViewBase
                         1 - (m.ChurnRate / 5.0), // Lower is better
                         "Target: <2%"
                     )))
-                | new MetricView("Customer LTV", Icons.TrendingUp, 
+                | new MetricView("Customer LTV", Icons.Gem, 
                     () => Task.FromResult(new MetricRecord(
                         m.LTV.ToString("C0"),
                         (double)((m.LTV - m.PreviousLTV) / m.PreviousLTV),
