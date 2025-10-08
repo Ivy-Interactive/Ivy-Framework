@@ -21,10 +21,12 @@ import CopyToClipboardButton from '@/components/CopyToClipboardButton';
 import { cpp } from '@codemirror/lang-cpp';
 import { dbml } from './dbml-language';
 import { createIvyCodeTheme } from './theme';
-import { Extension } from '@codemirror/state';
-import { EditorView, Decoration, DecorationSet } from '@codemirror/view';
-import { StateField, StateEffect, RangeSetBuilder } from '@codemirror/state';
 import { Sizes } from '@/types/sizes';
+import { Extension } from '@codemirror/state';
+import { EditorView, keymap } from '@codemirror/view';
+import { lineNumbers, highlightActiveLine } from '@codemirror/view';
+import { defaultKeymap, history, historyKeymap } from '@codemirror/commands';
+import { bracketMatching, indentOnInput } from '@codemirror/language';
 
 interface CodeInputWidgetProps {
   id: string;
@@ -105,74 +107,74 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
     ...getHeight(height),
   };
 
-  const createSelectionExtension = useCallback((): Extension => {
-    // Effect to add selection decorations
-    const addSelection = StateEffect.define<{ from: number; to: number }>();
-    const clearSelections = StateEffect.define();
+  // Create theme extension once and reuse it
+  const themeExtension = useMemo(() => createIvyCodeTheme(size), [size]);
 
-    // Decoration for selected text
-    const selectionMark = Decoration.mark({
-      class: 'ivy-selection-highlight',
-      attributes: { 'data-selection': 'true' },
-    });
-
-    // State field to track selections
-    const selectionField = StateField.define<DecorationSet>({
-      create() {
-        return Decoration.none;
-      },
-      update(_selections, tr) {
-        const builder = new RangeSetBuilder<Decoration>();
-
-        // Check what effects we have
-        const hasClearEffect = tr.effects.some(e => e.is(clearSelections));
-        const hasAddEffect = tr.effects.some(e => e.is(addSelection));
-
-        // Build decorations for add effects
-        for (const effect of tr.effects) {
-          if (effect.is(addSelection)) {
-            const { from, to } = effect.value;
-
-            // Validate range bounds
-            if (from < 0 || to < 0 || from > to || to > tr.newDoc.length) {
-              continue;
-            }
-
-            builder.add(from, to, selectionMark);
-          }
-        }
-
-        // If we have a clear effect but no add effect, return empty decorations
-        // If we have an add effect, return the built decorations (even if clear is also present)
-        return hasClearEffect && !hasAddEffect
-          ? Decoration.none
-          : builder.finish();
-      },
-      provide: f => EditorView.decorations.from(f),
-    });
-
-    // Extension to handle selection changes
-    const selectionHandler = EditorView.updateListener.of(update => {
-      if (update.selectionSet) {
-        const { from, to } = update.state.selection.main;
-
-        const effects: StateEffect<unknown>[] = [clearSelections.of(null)];
-        if (from !== to) {
-          effects.push(addSelection.of({ from, to }));
-        }
-        update.view.dispatch({ effects });
-      }
-    });
-
-    return [selectionField, selectionHandler];
+  // Custom basic setup without search/selection matching features
+  const customBasicSetup = useMemo((): Extension => {
+    return [
+      lineNumbers(),
+      highlightActiveLine(),
+      // No foldGutter to avoid any potential issues
+      // No searchKeymap to prevent selection matching
+      history(),
+      indentOnInput(),
+      bracketMatching(),
+      keymap.of([
+        ...defaultKeymap,
+        ...historyKeymap,
+        // Explicitly exclude searchKeymap and lintKeymap
+      ]),
+    ];
   }, []);
 
-  // Create theme and selection extension once and reuse them
-  const themeExtension = useMemo(() => createIvyCodeTheme(size), [size]);
-  const selectionExtension = useMemo(
-    () => createSelectionExtension(),
-    [createSelectionExtension]
-  );
+  // Extension to disable multiple selection behavior and selection matching
+  const disableMultipleSelectionExtension = useMemo((): Extension => {
+    return [
+      // Disable all search and selection matching keymaps
+      keymap.of([]), // Empty keymap to override default search keymaps
+      // Disable specific problematic commands
+      keymap.of([
+        {
+          key: 'Ctrl-d',
+          run: () => false, // Disable select next occurrence
+        },
+        {
+          key: 'Ctrl-Shift-l',
+          run: () => false, // Disable select all occurrences
+        },
+        {
+          key: 'Ctrl-f',
+          run: () => false, // Disable search
+        },
+        {
+          key: 'Ctrl-g',
+          run: () => false, // Disable find next
+        },
+        {
+          key: 'Ctrl-Shift-g',
+          run: () => false, // Disable find previous
+        },
+      ]),
+      // Override mouse behavior to prevent multiple selections
+      EditorView.domEventHandlers({
+        mousedown: event => {
+          // If Ctrl/Cmd is held, prevent the default behavior
+          if (event.ctrlKey || event.metaKey) {
+            event.preventDefault();
+            return false;
+          }
+        },
+      }),
+      // Disable selection matching completely
+      EditorView.theme({
+        '.cm-selectionMatch': {
+          backgroundColor: 'transparent !important',
+          color: 'inherit !important',
+        },
+      }),
+    ];
+  }, []);
 
   const extensions = useMemo(() => {
     const lang = language
@@ -181,8 +183,18 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
     const langExtension = lang
       ? [typeof lang === 'function' ? lang() : lang]
       : [];
-    return [...langExtension, themeExtension, selectionExtension];
-  }, [language, themeExtension, selectionExtension]);
+    return [
+      ...langExtension,
+      customBasicSetup,
+      themeExtension,
+      disableMultipleSelectionExtension,
+    ];
+  }, [
+    language,
+    customBasicSetup,
+    themeExtension,
+    disableMultipleSelectionExtension,
+  ]);
 
   return (
     <div style={styles} className="relative w-full h-full overflow-hidden">
@@ -210,11 +222,7 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
           disabled && 'opacity-50 cursor-not-allowed'
         )}
         height="100%"
-        basicSetup={{
-          lineNumbers: true,
-          highlightActiveLine: true,
-          foldGutter: false,
-        }}
+        basicSetup={false}
       />
       {invalid && (
         <div
