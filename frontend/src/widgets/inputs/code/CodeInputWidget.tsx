@@ -22,11 +22,13 @@ import { cpp } from '@codemirror/lang-cpp';
 import { dbml } from './dbml-language';
 import { createIvyCodeTheme } from './theme';
 import { Sizes } from '@/types/sizes';
-import { Extension } from '@codemirror/state';
-import { EditorView, keymap } from '@codemirror/view';
-import { lineNumbers, highlightActiveLine } from '@codemirror/view';
-import { defaultKeymap, history, historyKeymap } from '@codemirror/commands';
-import { bracketMatching, indentOnInput } from '@codemirror/language';
+import {
+  keymap,
+  EditorView,
+  lineNumbers,
+  highlightActiveLine,
+} from '@codemirror/view';
+import { history } from '@codemirror/commands';
 
 interface CodeInputWidgetProps {
   id: string;
@@ -110,68 +112,18 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
   // Create theme extension once and reuse it
   const themeExtension = useMemo(() => createIvyCodeTheme(size), [size]);
 
-  // Custom basic setup without search/selection matching features
-  const customBasicSetup = useMemo((): Extension => {
+  // Minimal setup without search features
+  const minimalSetup = useMemo(() => {
     return [
       lineNumbers(),
       highlightActiveLine(),
-      // No foldGutter to avoid any potential issues
-      // No searchKeymap to prevent selection matching
       history(),
-      indentOnInput(),
-      bracketMatching(),
       keymap.of([
-        ...defaultKeymap,
-        ...historyKeymap,
-        // Explicitly exclude searchKeymap and lintKeymap
+        { key: 'Ctrl-d', run: () => false },
+        { key: 'Ctrl-Shift-l', run: () => false },
       ]),
-    ];
-  }, []);
-
-  // Extension to disable multiple selection behavior and selection matching
-  const disableMultipleSelectionExtension = useMemo((): Extension => {
-    return [
-      // Disable all search and selection matching keymaps
-      keymap.of([]), // Empty keymap to override default search keymaps
-      // Disable specific problematic commands
-      keymap.of([
-        {
-          key: 'Ctrl-d',
-          run: () => false, // Disable select next occurrence
-        },
-        {
-          key: 'Ctrl-Shift-l',
-          run: () => false, // Disable select all occurrences
-        },
-        {
-          key: 'Ctrl-f',
-          run: () => false, // Disable search
-        },
-        {
-          key: 'Ctrl-g',
-          run: () => false, // Disable find next
-        },
-        {
-          key: 'Ctrl-Shift-g',
-          run: () => false, // Disable find previous
-        },
-      ]),
-      // Override mouse behavior to prevent multiple selections
-      EditorView.domEventHandlers({
-        mousedown: event => {
-          // If Ctrl/Cmd is held, prevent the default behavior
-          if (event.ctrlKey || event.metaKey) {
-            event.preventDefault();
-            return false;
-          }
-        },
-      }),
-      // Disable selection matching completely
       EditorView.theme({
-        '.cm-selectionMatch': {
-          backgroundColor: 'transparent !important',
-          color: 'inherit !important',
-        },
+        '.cm-selectionMatch': { backgroundColor: 'transparent' },
       }),
     ];
   }, []);
@@ -183,18 +135,8 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
     const langExtension = lang
       ? [typeof lang === 'function' ? lang() : lang]
       : [];
-    return [
-      ...langExtension,
-      customBasicSetup,
-      themeExtension,
-      disableMultipleSelectionExtension,
-    ];
-  }, [
-    language,
-    customBasicSetup,
-    themeExtension,
-    disableMultipleSelectionExtension,
-  ]);
+    return [...langExtension, minimalSetup, themeExtension];
+  }, [language, minimalSetup, themeExtension]);
 
   return (
     <div style={styles} className="relative w-full h-full overflow-hidden">
