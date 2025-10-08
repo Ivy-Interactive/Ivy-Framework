@@ -122,9 +122,7 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
         { key: 'Ctrl-d', run: () => false },
         { key: 'Ctrl-Shift-l', run: () => false },
       ]),
-      EditorView.theme({
-        '.cm-selectionMatch': { backgroundColor: 'transparent' },
-      }),
+      EditorView.theme({}),
     ];
   }, []);
 

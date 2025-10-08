@@ -83,11 +83,7 @@ export function createIvyCodeTheme(size: Sizes = Sizes.Medium): Extension {
       fontWeight: 'bold',
     },
     // Custom selection highlighting
-    '.ivy-selection-highlight': {
-      backgroundColor: 'var(--input)',
-      color: 'var(--input-accent)',
-    },
-    '.cm-selectionMatch': {
+    '.cm-content ::selection': {
       backgroundColor: 'var(--input)',
       color: 'var(--input-accent)',
     },
