@@ -1,4 +1,5 @@
 ﻿using Ivy.Chrome;
+using Ivy.NavigationBeacon;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,7 +32,7 @@ namespace Ivy.NavigationBacon
                     // Find the static factory method
                     var method = type.GetMethod(attr.FactoryMethodName, BindingFlags.Public | BindingFlags.Static);
                     if (method == null)
-                        throw new InvalidOperationException($"Factory method {attr.FactoryMethodName} not found on {type.Name}");
+                        throw new InvalidOperationException($"Factory method {attr.FactoryMethodName} not found on {type.FullName}");
 
                     var beacon = method.Invoke(null, null);
                     if (beacon != null)

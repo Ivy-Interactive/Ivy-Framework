@@ -1,4 +1,4 @@
-﻿using Ivy.NavigationBacon;
+﻿using Ivy.NavigationBeacon;
 using Ivy.Samples.Shared.Apps.Concepts;
 using System;
 using System.Collections.Generic;

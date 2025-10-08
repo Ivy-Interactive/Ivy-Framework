@@ -4,6 +4,7 @@ using Ivy.Core;
 using Ivy.Core.Hooks;
 using Ivy.Hooks;
 using Ivy.NavigationBacon;
+using Ivy.NavigationBeacon;
 using System.Text.Json;
 
 namespace Ivy.Chrome;
