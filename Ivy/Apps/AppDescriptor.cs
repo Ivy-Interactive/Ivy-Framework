@@ -47,7 +47,7 @@ public class AppDescriptor : IAppRepositoryNode
 
     public string? DocumentSource { get; set; }
 
-    public string[]? SearchTags { get; set; }
+    public string[]? SearchHints { get; set; }
 
     public ViewBase CreateApp()
     {
@@ -71,6 +71,6 @@ public class AppDescriptor : IAppRepositoryNode
 
     public MenuItem GetMenuItem()
     {
-        return new MenuItem(Title, null, Icon, Id, SearchTags: SearchTags);
+        return new MenuItem(Title, null, Icon, Id, SearchHints: SearchHints);
     }
 }

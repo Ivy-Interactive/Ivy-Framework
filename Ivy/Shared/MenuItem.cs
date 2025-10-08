@@ -31,7 +31,7 @@ public enum MenuItemVariant
 /// <param name="Shortcut">Keyboard shortcut text to display.</param>
 /// <param name="Expanded">Whether child items are expanded in hierarchical menus.</param>
 /// <param name="OnSelect">Event handler called when item is selected.</param>
-/// <param name="SearchTags">Tags used for the search functionality.</param>
+/// <param name="SearchHints">Tags used for the search functionality.</param>
 public record MenuItem(
     string? Label = null,
     MenuItem[]? Children = null,
@@ -43,7 +43,7 @@ public record MenuItem(
     string? Shortcut = null,
     bool Expanded = false,
     Action<MenuItem>? OnSelect = null,
-    string[]? SearchTags = null)
+    string[]? SearchHints = null)
 {
 
     /// <summary>Creates a separator menu item for visual grouping.</summary>
@@ -181,8 +181,8 @@ public static class MenuItemExtensions
     }
 
     /// <summary>Sets the search tags for this app</summary>
-    public static MenuItem SearchTags(this MenuItem menuItem, string[] searchTags)
+    public static MenuItem SearchHints(this MenuItem menuItem, string[] searchHints)
     {
-        return menuItem with { SearchTags = searchTags };
+        return menuItem with { SearchHints = searchHints };
     }
 }

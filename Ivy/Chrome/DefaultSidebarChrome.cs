@@ -21,10 +21,9 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
     private bool itemMatchSearch(MenuItem item, string searchString)
     {
         bool matchSearch = (item.Label ?? "").Contains(searchString, StringComparison.OrdinalIgnoreCase);
-        for (int i = 0; !matchSearch && item.SearchTags != null && i < item.SearchTags.Length; i++)
+        if (!matchSearch)
         {
-            var tag = item.SearchTags[i];
-            matchSearch = tag.Contains(searchString, StringComparison.OrdinalIgnoreCase);
+            matchSearch = item.SearchHints?.Any(tag => tag.Contains(searchString, StringComparison.OrdinalIgnoreCase)) == true;
         }
         return matchSearch;
     }

@@ -65,7 +65,7 @@ public static class AppHelpers
                 Order = appAttribute.Order,
                 GroupExpanded = appAttribute.GroupExpanded,
                 DocumentSource = appAttribute.DocumentSource,
-                SearchTags = appAttribute.SearchTags,
+                SearchHints = appAttribute.SearchHints,
             };
         }
         throw new InvalidOperationException($"Type '{type.FullName}' is missing the [App] attribute.");

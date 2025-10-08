@@ -13,7 +13,7 @@ public class AppAttribute(
     int order = 0,
     bool groupExpanded = false,
     string? documentSource = null,
-    string[]? searchTags = null
+    string[]? searchHints = null
 )
     : System.Attribute
 {
@@ -35,5 +35,5 @@ public class AppAttribute(
 
     public string? DocumentSource { get; set; } = documentSource;
 
-    public string[]? SearchTags { get; set; } = searchTags;
+    public string[]? SearchHints { get; set; } = searchHints;
 }
