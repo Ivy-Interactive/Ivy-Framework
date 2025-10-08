@@ -84,7 +84,7 @@ export function createIvyCodeTheme(size: Sizes = Sizes.Medium): Extension {
     },
     // Custom selection highlighting
     '.cm-content ::selection': {
-      backgroundColor: 'var(--input)',
+      backgroundColor: 'color-mix(in srgb, var(--input) 50%, transparent)',
       color: 'var(--input-accent)',
     },
     '.cm-cursor': {
