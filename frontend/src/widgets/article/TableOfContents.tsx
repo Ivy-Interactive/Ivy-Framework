@@ -76,9 +76,17 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
         return;
       }
 
-      const elements = Array.from(
+      // Get all headings, but exclude those inside example boxes (divs with border class)
+      const allHeadings = Array.from(
         articleElement.querySelectorAll('h1, h2, h3, h4, h5, h6')
       );
+
+      // Filter out headings that are inside example boxes
+      const elements = allHeadings.filter(heading => {
+        // Check if the heading is inside a div with border class (example box)
+        const isInsideExampleBox = heading.closest('div.border');
+        return !isInsideExampleBox;
+      });
 
       // If no headings found but content might still be loading, retry
       if (elements.length === 0 && retryCount < maxExtractionRetries) {
@@ -189,10 +197,17 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
 
     const articleElement = articleRef.current;
 
-    // Find all heading elements in the DOM
-    const elements = Array.from(
+    // Find all heading elements in the DOM, excluding those inside example boxes
+    const allHeadings = Array.from(
       articleElement.querySelectorAll('h1, h2, h3, h4, h5, h6')
     );
+
+    // Filter out headings that are inside example boxes
+    const elements = allHeadings.filter(heading => {
+      // Check if the heading is inside a div with border class (example box)
+      const isInsideExampleBox = heading.closest('div.border');
+      return !isInsideExampleBox;
+    });
 
     const observer = new IntersectionObserver(
       entries => {
