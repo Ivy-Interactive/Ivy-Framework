@@ -74,6 +74,22 @@ Key features of the Basic Auth provider:
 - **Token-based Security**: Stateless authentication using secure tokens
 - **Multiple Users**: Support for multiple user credentials
 
+## JWT Refresh Tokens
+
+The `BasicAuthProvider` uses JWT-based refresh tokens for improved security. Access tokens expire after **15 minutes**, while refresh tokens are valid for **24 hours** and allow users to stay logged in for up to **365 days** as long as they are refreshed before expiring. This reduces vulnerability windows while maintaining user convenience through automatic session extension.
+
+```csharp
+var authProvider = UseService<IAuthProvider>();
+
+// Login returns both access and refresh tokens
+var authToken = await authProvider.LoginAsync(email, password);
+// authToken.Jwt - Access token (15 min expiry)
+// authToken.RefreshToken - Refresh token (24 hour expiry, 365 day max age)
+
+// When access token expires, refresh automatically
+var newToken = await authProvider.RefreshJwtAsync(authToken);
+```
+
 ## Security Best Practices
 
 - **Always use HTTPS** in production environments
@@ -86,16 +102,20 @@ Key features of the Basic Auth provider:
 ### Common Issues
 
 **Authentication Failed**
+
 - Verify user credentials are correctly formatted (`user:password;user2:password2`)
 - Check that the correct username and password are being submitted
 - Ensure credentials are properly stored in user secrets
 
 **Missing Configuration**
+
 - Verify the Basic Auth provider is properly configured in your `Program.cs`
 - Check that user secrets or environment variables are set and accessible to your application
 
 **Token Issues**
-- Tokens have a limited lifetime (1 hour after generation); users will need to login again after their token expires.
+
+- Access tokens have a limited lifetime (15 minutes); however, refresh tokens (valid for 24 hours) automatically extend the session without requiring re-authentication.
+- If a refresh token expires (24 hours of inactivity), or 365 days have passed since initial login, users will need to log in again with their credentials.
 
 ## Related Documentation
 
