@@ -28,62 +28,11 @@ new MetricView(
 )
 ```
 
-## Metric Without Trend
-
-You can omit the trend indicator by passing `null` for the `TrendComparedToPreviousPeriod` parameter.
-
-```csharp demo-below
-new MetricView(
-    "Social Engagement", 
-    Icons.Star, 
-    () => Task.FromResult(new MetricRecord(
-        "2,847",        // Current value
-        null,           // No trend indicator
-        null,           // No goal progress
-        null            // No goal target
-    ))
-)
-```
-
-## Progress Tracking Only
-
-Display goal progress without trend comparison for metrics focused on completion or achievement.
-
-```csharp demo-below
-new MetricView(
-    "Task Progress", 
-    Icons.Check, 
-    () => Task.FromResult(new MetricRecord(
-        "87%",          // Current progress
-        null,           // No trend comparison
-        0.87,           // 87% complete
-        "100% completion"
-    ))
-)
-```
-
-## Large Numbers and Formatting
-
-The MetricView handles long numbers gracefully with appropriate text overflow handling.
-
-```csharp demo-below
-new MetricView(
-    "Very Long Revenue Number", 
-    Icons.DollarSign, 
-    () => Task.FromResult(new MetricRecord(
-        "$123,456,789.99", 
-        12.345,         // 1234.5% increase
-        0.85,           // 85% of goal
-        "$100,000,000"
-    ))
-)
-```
-
 ## Negative Trends
 
 Negative trend values automatically display with a downward arrow and destructive color styling.
 
-```csharp demo-below
+```csharp demo-tabs
 new MetricView(
     "Stock Price", 
     Icons.TrendingDown, 
@@ -100,8 +49,8 @@ new MetricView(
 
 Combine multiple MetricViews in a grid layout to create comprehensive dashboards.
 
-```csharp demo-below
-Layout.Grid().Columns(4)
+```csharp demo-tabs
+Layout.Grid().Columns(2)
     | new MetricView("Total Sales", Icons.DollarSign, 
         () => Task.FromResult(new MetricRecord("$84,250", 0.21, 0.21, "$800,000")))
     | new MetricView("Post Engagement", Icons.Activity, 
@@ -116,7 +65,7 @@ Layout.Grid().Columns(4)
 
 The MetricView automatically handles async data loading with a skeleton loader. This is useful when fetching metrics from databases or APIs.
 
-```csharp demo-below
+```csharp demo-tabs
 new MetricView(
     "Database Query", 
     Icons.Database, 
@@ -131,7 +80,7 @@ new MetricView(
 
 When the async data loading fails, the MetricView automatically displays an error state.
 
-```csharp demo-below
+```csharp demo-tabs
 new MetricView(
     "Failed Metric", 
     Icons.TriangleAlert, 
