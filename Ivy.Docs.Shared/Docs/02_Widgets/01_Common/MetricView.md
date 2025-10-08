@@ -28,9 +28,13 @@ new MetricView(
 )
 ```
 
-## Negative Trends
+### Negative Trends
 
 Negative trend values automatically display with a downward arrow and destructive color styling.
+
+<Callout Type="Info">
+Trend Arrows: Green up arrow for positive trends, red down arrow for negative trends
+</Callout>
 
 ```csharp demo-tabs
 new MetricView(
@@ -45,9 +49,13 @@ new MetricView(
 )
 ```
 
-## Dashboard Grid Layout
+### Using MetricView in Layouts
 
-Combine multiple MetricViews in a grid layout to create comprehensive dashboards.
+Combine multiple MetricViews in grid layouts to create comprehensive dashboards.
+
+<Callout Type="Info">
+MetricRecord takes four parameters: MetricFormatted (string) for the value, TrendComparedToPreviousPeriod (decimal, e.g. 0.21 for 21%) for trend arrows, GoalAchieved (0 to 1) for progress bars, and GoalFormatted (string) for goal text. All except MetricFormatted are optional.
+</Callout>
 
 ```csharp demo-tabs
 Layout.Grid().Columns(2)
@@ -61,7 +69,7 @@ Layout.Grid().Columns(2)
         () => Task.FromResult(new MetricRecord("99.9%", null, 0.99, "100% uptime")))
 ```
 
-## Async Data Loading
+### Async Data Loading
 
 The MetricView automatically handles async data loading with a skeleton loader. This is useful when fetching metrics from databases or APIs.
 
@@ -76,7 +84,7 @@ new MetricView(
 )
 ```
 
-## Error Handling
+### Error Handling
 
 When the async data loading fails, the MetricView automatically displays an error state.
 
@@ -90,24 +98,5 @@ new MetricView(
     }
 )
 ```
-
-## MetricRecord Parameters
-
-The `MetricRecord` is a record type with the following parameters:
-
-- **MetricFormatted** (`string`): The formatted metric value to display (e.g., "$84,250", "1,012.50%", "2.25")
-- **TrendComparedToPreviousPeriod** (`double?`): Optional trend percentage as a decimal (e.g., 0.21 for 21% increase, -0.15 for 15% decrease). When provided, displays a colored arrow and percentage.
-- **GoalAchieved** (`double?`): Optional goal progress from 0 to 1 (e.g., 0.85 for 85% of goal). Displays a progress bar when provided.
-- **GoalFormatted** (`string?`): Optional formatted goal target text (e.g., "$800,000", "100% uptime"). Displayed alongside the progress bar.
-
-## Visual Indicators
-
-The MetricView provides automatic visual feedback:
-
-- **Trend Arrows**: Green up arrow for positive trends, red down arrow for negative trends
-- **Progress Bar**: Emerald gradient progress bar showing goal achievement percentage
-- **Loading State**: Animated skeleton loader during async data fetching
-- **Error State**: Error message display when data loading fails
-- **Fixed Height**: Consistent 55-unit height for uniform dashboard layouts
 
 <WidgetDocs Type="Ivy.Views.Dashboards.MetricView" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Views/Dashboards/MetricView.cs"/>
