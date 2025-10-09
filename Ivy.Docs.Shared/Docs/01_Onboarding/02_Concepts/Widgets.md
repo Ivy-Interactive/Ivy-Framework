@@ -101,15 +101,16 @@ public class CommonWidgetsDemo : ViewBase
                     .ToDetails()
             ).Title("Details").Description("Label-value pairs").Height(Size.Units(70))
             | new Card(
-                new DropDownMenu(_ => { }, 
-                    new Button("Menu"),
-                    MenuItem.Default("Profile"),
-                    MenuItem.Default("Settings"),
-                    MenuItem.Separator(),
-                    MenuItem.Default("Logout"))
+                Layout.Vertical().Align(Align.Center)
+                    | new DropDownMenu(_ => { }, 
+                        new Button("Menu"),
+                        MenuItem.Default("Profile"),
+                        MenuItem.Default("Settings"),
+                        MenuItem.Separator(),
+                        MenuItem.Default("Logout"))
             ).Title("DropDownMenu").Description("Action menus").Height(Size.Units(40))
             | new Card(
-                Layout.Horizontal().Gap(2)
+                Layout.Horizontal().Align(Align.Center).Gap(2)
                     | new Button("Hover", icon: Icons.Info).WithTooltip("This is a tooltip")
                     | new Button("Help", icon: Icons.CircleQuestionMark).WithTooltip("Get help here")
             ).Title("Tooltip").Description("Contextual information").Height(Size.Units(40));
@@ -143,7 +144,7 @@ public class InputWidgetsDemo : ViewBase
         var colorState = UseState("#00cc92");
         var codeState = UseState("var x = 10;");
         var fileState = UseState((FileInput?)null);
-        var feedbackState = UseState(0);
+        var feedbackState = UseState(4);
         var selectState = UseState("");
         var asyncSelectState = UseState((string?)null);
         
@@ -172,8 +173,8 @@ public class InputWidgetsDemo : ViewBase
             ).Title("TextInput").Description("Text input variants").Height(Size.Units(80))
             | new Card(
                 Layout.Vertical().Gap(2)
-                    | new NumberInput<int>(numberState).Placeholder("Enter number")
                     | new NumberInput<double>(numberState).Min(0).Max(100).Variant(NumberInputs.Slider)
+                    | new NumberInput<int>(numberState).Placeholder("Enter number")
                     | new NumberInput<decimal>(numberState).FormatStyle(NumberFormatStyle.Currency).Currency("USD").Placeholder("$0.00")
                     | new NumberInput<double>(numberState).FormatStyle(NumberFormatStyle.Percent).Placeholder("0%")
             ).Title("NumberInput").Description("Number and slider").Height(Size.Units(80))
@@ -239,7 +240,8 @@ public class PrimitiveWidgetsDemo : ViewBase
                     | Text.Lead("Lead text")
             ).Title("Text").Description("Text variants").Height(Size.Units(75))
             | new Card(
-                new Image("https://api.images.cat/150/150")
+                Layout.Vertical().Align(Align.Center)
+                    | new Image("https://api.images.cat/150/150")
             ).Title("Image").Description("Image display").Height(Size.Units(75))
             | new Card(
                 Layout.Horizontal().Gap(4)
@@ -247,12 +249,18 @@ public class PrimitiveWidgetsDemo : ViewBase
                     | new Icon(Icons.Star, Colors.Yellow)
                     | new Icon(Icons.Check, Colors.Green)
                     | new Icon(Icons.Settings, Colors.Blue)
+                    | new Icon(Icons.Bell, Colors.Orange)
+                    | new Icon(Icons.Mail, Colors.Purple)
+                    | new Icon(Icons.User, Colors.Cyan)
             ).Title("Icon").Description("Vector icons").Height(Size.Units(40))
             | new Card(
                 Layout.Horizontal().Gap(2)
                     | new Avatar("John Doe")
                     | new Avatar("JD", "https://api.images.cat/150/150?1")
                     | new Avatar("AB")
+                    | new Avatar("Mary Smith")
+                    | new Avatar("TC", "https://api.images.cat/150/150?2")
+                    | new Avatar("XY")
             ).Title("Avatar").Description("User avatars").Height(Size.Units(40))
             | new Card(
                 Layout.Vertical().Gap(2)
@@ -284,10 +292,10 @@ public class PrimitiveWidgetsDemo : ViewBase
             ).Title("Markdown").Description("Markdown rendering").Height(Size.Units(60))
             | new Card(
                 Text.Json("{ \"name\": \"value\", \"count\": 42 }")
-            ).Title("Json").Description("JSON display").Height(Size.Units(60))
+            ).Title("Json").Description("JSON display").Height(Size.Units(50))
             | new Card(
                 Text.Xml("<root><item>Value</item></root>")
-            ).Title("Xml").Description("XML display").Height(Size.Units(60))
+            ).Title("Xml").Description("XML display").Height(Size.Units(50))
             | new Card(
                 Text.Html("<div><strong>Bold</strong> text and <em>italic</em> text</div>")
             ).Title("Html").Description("HTML rendering").Height(Size.Units(40))
@@ -358,15 +366,14 @@ public class LayoutWidgetsDemo : ViewBase
         var verticalLayouts = Layout.Grid().Columns(2).Gap(4).Width(Size.Full())
             | new Card(
                 Layout.Horizontal().Gap(2)
-                    | new Badge("Item 1")
-                    | new Badge("Item 2")
-                    | new Badge("Item 3")
+                    | new Box("Item 1").Width(Size.Fraction(1/3f))
+                    | new Box("Item 2").Width(Size.Fraction(1/3f))
+                    | new Box("Item 3").Width(Size.Fraction(1/3f))
             ).Title("Horizontal").Description("Horizontal flow").Height(Size.Units(50))
             | new Card(
                 Layout.Vertical().Gap(2)
-                    | new Badge("Item 1")
-                    | new Badge("Item 2")
-                    | new Badge("Item 3")
+                    | new Box("Item 1").Width(Size.Full())
+                    | new Box("Item 2").Width(Size.Full())
             ).Title("Vertical").Description("Vertical stack").Height(Size.Units(50))
             | new Card(
                 Layout.Wrap().Gap(2)
@@ -477,7 +484,7 @@ public class EffectWidgetsDemo : ViewBase
     {
         return Layout.Grid().Columns(2).Gap(4).Width(Size.Full())
             | new Card(
-                Layout.Horizontal().Gap(2)
+                Layout.Horizontal().Align(Align.Center).Gap(2)
                     | new Button("Click Confetti").WithConfetti(AnimationTrigger.Click)
                     | new Button("Hover Confetti").WithConfetti(AnimationTrigger.Hover)
             ).Title("Confetti").Description("Celebration effects").Height(Size.Units(40))
@@ -487,6 +494,10 @@ public class EffectWidgetsDemo : ViewBase
                     | Icons.Bell.ToIcon().Color(Colors.Orange).WithAnimation(AnimationType.Shake).Trigger(AnimationTrigger.Click)
                     | Icons.Star.ToIcon().Color(Colors.Yellow).WithAnimation(AnimationType.Bounce).Trigger(AnimationTrigger.Click)
                     | Icons.LoaderCircle.ToIcon().Color(Colors.Blue).WithAnimation(AnimationType.Rotate).Trigger(AnimationTrigger.Click)
+                    | Icons.Zap.ToIcon().Color(Colors.Purple).WithAnimation(AnimationType.Pulse).Trigger(AnimationTrigger.Click)
+                    | Icons.TrendingUp.ToIcon().Color(Colors.Green).WithAnimation(AnimationType.Bounce).Trigger(AnimationTrigger.Click)
+                    | Icons.Sparkles.ToIcon().Color(Colors.Pink).WithAnimation(AnimationType.Rotate).Trigger(AnimationTrigger.Click)
+                    | Icons.CircleAlert.ToIcon().Color(Colors.Destructive).WithAnimation(AnimationType.Shake).Trigger(AnimationTrigger.Click)
             ).Title("Animation").Description("Click icons to animate").Height(Size.Units(40));
     }
 }
