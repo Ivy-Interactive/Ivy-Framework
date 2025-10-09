@@ -13,10 +13,37 @@ const GitHubEmbed: React.FC<GitHubEmbedProps> = ({ url }) => {
     repo?: string;
     type?: string;
     number?: string;
+    ref?: string;
   } | null>(null);
 
   useEffect(() => {
     const parseGitHubUrl = (githubUrl: string) => {
+      // Codespace: https://github.com/codespaces/new?repo=owner%2Frepo&ref=branch
+      if (githubUrl.includes('github.com/codespaces/new')) {
+        try {
+          const urlObj = new URL(githubUrl);
+          const repoParam = urlObj.searchParams.get('repo');
+          const refParam = urlObj.searchParams.get('ref');
+
+          if (repoParam) {
+            // repo param is URL encoded like "owner%2Frepo"
+            const decodedRepo = decodeURIComponent(repoParam);
+            const [owner, repo] = decodedRepo.split('/');
+
+            if (owner && repo) {
+              return {
+                owner: sanitizeId(owner),
+                repo: sanitizeId(repo),
+                type: 'codespace',
+                ref: refParam || 'main',
+              };
+            }
+          }
+        } catch {
+          // Invalid URL, fall through
+        }
+      }
+
       // Issue: https://github.com/owner/repo/issues/123
       let match = githubUrl.match(
         /github\.com\/([^/]+)\/([^/]+)\/issues\/(\d+)/
@@ -73,6 +100,9 @@ const GitHubEmbed: React.FC<GitHubEmbedProps> = ({ url }) => {
   }
 
   const getTitle = () => {
+    if (repoInfo.type === 'codespace') {
+      return `${repoInfo.owner}/${repoInfo.repo}`;
+    }
     if (repoInfo.type === 'gist') {
       return `${repoInfo.owner}/gist`;
     }
@@ -86,6 +116,9 @@ const GitHubEmbed: React.FC<GitHubEmbedProps> = ({ url }) => {
   };
 
   const getDescription = () => {
+    if (repoInfo.type === 'codespace') {
+      return `Open in GitHub Codespaces${repoInfo.ref ? ` (${repoInfo.ref})` : ''}`;
+    }
     if (repoInfo.type === 'gist') {
       return 'View gist on GitHub';
     }
@@ -99,6 +132,9 @@ const GitHubEmbed: React.FC<GitHubEmbedProps> = ({ url }) => {
   };
 
   const getLinkText = () => {
+    if (repoInfo.type === 'codespace') {
+      return 'Open in Codespaces';
+    }
     if (repoInfo.type === 'issue') {
       return 'View Issue';
     }
