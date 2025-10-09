@@ -413,11 +413,19 @@ public class EffectWidgetsDemo : ViewBase
 {
     public override object? Build()
     {
-        return Layout.Grid().Columns(4)
-            | new Button("Click for Confetti!").WithConfetti(AnimationTrigger.Click)
-            | new Card("Hover me").WithConfetti(AnimationTrigger.Hover)
-            | new Badge("Celebrate!").WithConfetti(AnimationTrigger.Click)
-            | Text.H3("Auto Confetti").WithConfetti(AnimationTrigger.Auto);
+        return Layout.Grid().Columns(2).Gap(4).Width(Size.Full())
+            | new Card(
+                Layout.Horizontal().Gap(2)
+                    | new Button("Click Confetti").WithConfetti(AnimationTrigger.Click)
+                    | new Button("Hover Confetti").WithConfetti(AnimationTrigger.Hover)
+            ).Title("Confetti").Description("Celebration effects").Height(Size.Units(40))
+            | new Card(
+                Layout.Horizontal().Gap(4)
+                    | Icons.Heart.ToIcon().Color(Colors.Red).WithAnimation(AnimationType.Pulse).Trigger(AnimationTrigger.Click)
+                    | Icons.Bell.ToIcon().Color(Colors.Orange).WithAnimation(AnimationType.Shake).Trigger(AnimationTrigger.Click)
+                    | Icons.Star.ToIcon().Color(Colors.Yellow).WithAnimation(AnimationType.Bounce).Trigger(AnimationTrigger.Click)
+                    | Icons.LoaderCircle.ToIcon().Color(Colors.Blue).WithAnimation(AnimationType.Rotate).Trigger(AnimationTrigger.Click)
+            ).Title("Animation").Description("Click icons to animate").Height(Size.Units(40));
     }
 }
 ```
