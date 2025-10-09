@@ -19,35 +19,31 @@ const GitHubEmbed: React.FC<GitHubEmbedProps> = ({ url }) => {
   useEffect(() => {
     const parseGitHubUrl = (githubUrl: string) => {
       // Codespace: https://github.com/codespaces/new?repo=owner%2Frepo&ref=branch
-      if (githubUrl.includes('github.com/codespaces/new')) {
+      let match = githubUrl.match(
+        /github\.com\/codespaces\/new\?.*repo=([^&]+)(?:&ref=([^&]+))?/
+      );
+      if (match) {
         try {
-          const urlObj = new URL(githubUrl);
-          const repoParam = urlObj.searchParams.get('repo');
-          const refParam = urlObj.searchParams.get('ref');
+          const repoParam = match[1];
+          const refParam = match[2];
+          const decodedRepo = decodeURIComponent(repoParam);
+          const [owner, repo] = decodedRepo.split('/');
 
-          if (repoParam) {
-            // repo param is URL encoded like "owner%2Frepo"
-            const decodedRepo = decodeURIComponent(repoParam);
-            const [owner, repo] = decodedRepo.split('/');
-
-            if (owner && repo) {
-              return {
-                owner: sanitizeId(owner),
-                repo: sanitizeId(repo),
-                type: 'codespace',
-                ref: refParam || 'main',
-              };
-            }
+          if (owner && repo) {
+            return {
+              owner: sanitizeId(owner),
+              repo: sanitizeId(repo),
+              type: 'codespace',
+              ref: refParam ? sanitizeId(refParam) : 'main',
+            };
           }
         } catch {
-          // Invalid URL, fall through
+          return null;
         }
       }
 
       // Issue: https://github.com/owner/repo/issues/123
-      let match = githubUrl.match(
-        /github\.com\/([^/]+)\/([^/]+)\/issues\/(\d+)/
-      );
+      match = githubUrl.match(/github\.com\/([^/]+)\/([^/]+)\/issues\/(\d+)/);
       if (match) {
         return {
           owner: sanitizeId(match[1]),

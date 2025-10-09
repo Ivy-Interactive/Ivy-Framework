@@ -16,7 +16,7 @@ public class SidebarEmbedTestApp : SampleBase
                 | new Embed("https://github.com/Ivy-Interactive/Ivy-Framework/issues/935")
                 | new Embed("https://github.com/Ivy-Interactive/Ivy-Framework/pull/123")
                 | new Embed("https://gist.github.com/username/gistid")
-                | new Embed("https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=Ivy-Interactive%2FIvy-Examples&machine=standardLinux32gb&devcontainer_path=.devcontainer%2Fqrcoder%2Fdevcontainer.json&location=EuropeWest")
+                | new Embed("https://github.com/coux32gb&devcontainer_path=.devcontainer%2Fqrcoder%2Fdevcontainer.json&location=EuropeWest")
                 | new Embed("https://pin.it/i/4yA1hkh77/")
                 | new Embed("https://www.facebook.com/share/p/1NRYEoLAnJ/"),
 
@@ -26,7 +26,7 @@ public class SidebarEmbedTestApp : SampleBase
                 | new Embed("https://github.com/Ivy-Interactive/Ivy-Framework/issues/935")
                 | new Embed("https://github.com/Ivy-Interactive/Ivy-Framework/pull/123")
                 | new Embed("https://gist.github.com/username/gistid")
-                | new Embed("https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=Ivy-Interactive%2FIvy-Examples&machine=standardLinux32gb&devcontainer_path=.devcontainer%2Fqrcoder%2Fdevcontainer.json&location=EuropeWest")
+                | new Embed("https://github.com/codf=main&repo=Ivy-Interactive%2FIvy-Examples&machine=standardLinux32gb&devcontainer_path=.devcontainer%2Fqrcoder%2Fdevcontainer.json&location=EuropeWest")
                 | new Embed("https://pin.it/i/4yA1hkh77/")
                 | new Embed("https://www.facebook.com/share/p/1NRYEoLAnJ/"),
 
