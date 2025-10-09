@@ -6,6 +6,8 @@ Ivy - The ultimate framework for building internal tools with LLM code generatio
 
 **[Sign up for our waitlist](https://ivy.app/join-waitlist) to be among the first to get access.**
 
+**[Book a 1-on-1 session](https://calendly.com/mikael-ivy/30min) to get personalized onboarding for free.**
+
 [Documentation](https://docs.ivy.app) | [Samples](https://samples.ivy.app) | [Current Sprint](https://github.com/orgs/Ivy-Interactive/projects/8) | [Roadmap](https://github.com/orgs/Ivy-Interactive/projects/7) | [Examples](https://github.com/Ivy-Interactive/Ivy-Examples)
 
 [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=Ivy-Interactive%2FIvy-Devcontainer&machine=standardLinux32gb&devcontainer_path=.devcontainer%2Fdevcontainer.json&location=EuropeWest)
