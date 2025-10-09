@@ -329,26 +329,88 @@ public class LayoutWidgetsDemo : ViewBase
 {
     public override object? Build()
     {
-        return Layout.Vertical()
-            | Text.H4("Grid Layout")
-            | Layout.Grid().Columns(4)
-                | new Card("1")
-                | new Card("2")
-                | new Card("3")
-                | new Card("4")
-            | Text.H4("Horizontal Layout")
-            | Layout.Horizontal()
-                | new Badge("Item 1")
-                | new Badge("Item 2")
-                | new Badge("Item 3")
-                | new Badge("Item 4")
-            | Text.H4("Wrap Layout")
-            | Layout.Wrap()
-                | new Button("Button 1")
-                | new Button("Button 2")
-                | new Button("Button 3")
-                | new Button("Button 4")
-                | new Button("Button 5");
+        var showPanel = UseState(false);
+        var gridLayouts = Layout.Vertical().Gap(4).Width(Size.Full())
+            | new Card(
+                Layout.Grid().Columns(2).Width(Size.Full()).Gap(2)
+                    | new Box("1").Width(Size.Full())
+                    | new Box("2").Width(Size.Full())
+                    | new Box("3").Width(Size.Full())
+                    | new Box("4").Width(Size.Full())
+            ).Title("GridLayout").Description("2D grid arrangement").Height(Size.Units(50))
+            | new Card(
+                new HeaderLayout(
+                    header: new Card("Fixed Header Area").Title("Header"),
+                    content: Layout.Vertical().Gap(2)
+                        | Text.P("More scrollable content")
+                )
+            ).Title("Header").Description("Fixed header").Height(Size.Units(60))
+            | new Card(
+                new FooterLayout(
+                    footer: Layout.Horizontal().Gap(2)
+                        | new Button("Cancel").Secondary()
+                        | new Button("Save"),
+                    content: Layout.Vertical().Gap(2)
+                        | Text.P("Footer stays at bottom")
+                )
+            ).Title("Footer").Description("Fixed footer").Height(Size.Units(60));
+        
+        var verticalLayouts = Layout.Grid().Columns(2).Gap(4).Width(Size.Full())
+            | new Card(
+                Layout.Horizontal().Gap(2)
+                    | new Badge("Item 1")
+                    | new Badge("Item 2")
+                    | new Badge("Item 3")
+            ).Title("Horizontal").Description("Horizontal flow").Height(Size.Units(50))
+            | new Card(
+                Layout.Vertical().Gap(2)
+                    | new Badge("Item 1")
+                    | new Badge("Item 2")
+                    | new Badge("Item 3")
+            ).Title("Vertical").Description("Vertical stack").Height(Size.Units(50))
+            | new Card(
+                Layout.Wrap().Gap(2)
+                    | new Badge("Item 1")
+                    | new Badge("Item 2")
+                    | new Badge("Item 3")
+                    | new Badge("Item 4")
+                    | new Badge("Item 5")
+                    | new Badge("Item 6")
+                    | new Badge("Item 7")
+            ).Title("Wrap").Description("Auto-wrapping layout").Height(Size.Units(50))
+            | new Card(
+                Layout.Tabs(
+                    new Tab("Tab 1", new Badge("Content 1")),
+                    new Tab("Tab 2", new Badge("Content 2")),
+                    new Tab("Tab 3", new Badge("Content 3"))
+                )
+            ).Title("TabsLayout").Description("Tabbed interface").Height(Size.Units(50))
+            | new Card(
+                Layout.Vertical().Gap(4)
+                | new Card(
+                    Layout.Horizontal().Gap(2).Align(Align.Center)
+                        | new Button("Show Panel", onClick: _ => showPanel.Set(true))
+                        | new Button("Hide Panel", onClick: _ => showPanel.Set(false))
+                ).Width(Size.Full())
+                | (showPanel.Value ? new FloatingPanel(
+                    new Button("Floating Action")
+                        .Icon(Icons.Plus)
+                        .Large()
+                        .BorderRadius(BorderRadius.Full)
+                ) : null)
+            ).Title("FloatingPanel").Description("Fixed position overlay").Height(Size.Units(60))
+            | new Card(
+                new ResizeablePanelGroup(
+                    new ResizeablePanel(40,
+                        new Card("Left")),
+                    new ResizeablePanel(60,
+                        new Card("Right"))
+                )
+            ).Title("ResizeablePanelGroup").Description("Resizable panels").Height(Size.Units(60));
+        
+        return Layout.Vertical().Gap(4)
+            | verticalLayouts
+            | gridLayouts;
     }
 }
 ```
