@@ -131,26 +131,84 @@ graph BT
 ```csharp demo-tabs
 public class InputWidgetsDemo : ViewBase
 {
+    private static readonly string[] Categories = { "Electronics", "Clothing", "Books", "Home & Garden", "Sports" };
+    
     public override object? Build()
     {
         var textState = UseState("");
         var numberState = UseState(0);
         var boolState = UseState(false);
         var dateState = UseState(DateTime.Now);
+        var dateRangeState = UseState<(DateOnly?, DateOnly?)>((null, null));
+        var colorState = UseState("#00cc92");
+        var codeState = UseState("var x = 10;");
+        var fileState = UseState((FileInput?)null);
+        var feedbackState = UseState(0);
+        var selectState = UseState("");
+        var asyncSelectState = UseState((string?)null);
         
-        return Layout.Grid().Columns(4)
-            | new TextInput(textState).Placeholder("Enter text...")
-            | new TextInput(textState).Variant(TextInputs.Password).Placeholder("Password")
-            | new TextInput(textState).Variant(TextInputs.Search).Placeholder("Search...")
-            | new TextInput(textState).Variant(TextInputs.Email).Placeholder("Email")
-            | new NumberInput<int>(numberState).Placeholder("Number")
-            | new NumberInput<double>(numberState).Min(0).Max(100).Variant(NumberInputs.Slider)
-            | new BoolInput(boolState).Label("Accept terms")
-            | new DateTimeInput<DateTime>(dateState)
-            | new TextInput(textState).Variant(TextInputs.Textarea).Placeholder("Description...")
-            | new TextInput(textState).Variant(TextInputs.Tel).Placeholder("+1-123-4567")
-            | new TextInput(textState).Variant(TextInputs.Url).Placeholder("https://")
-            | new ReadOnlyInput<string>("Read-only value");
+        var selectedCategory = this.UseState<string?>(default(string?));
+
+        Task<Option<string>[]> QueryCategories(string query)
+        {
+            return Task.FromResult(Categories
+                .Where(c => c.Contains(query, StringComparison.OrdinalIgnoreCase))
+                .Select(c => new Option<string>(c))
+                .ToArray());
+        }
+
+        Task<Option<string>?> LookupCategory(string? category)
+        {
+            return Task.FromResult(category != null ? new Option<string>(category) : null);
+        }
+        
+        return Layout.Grid().Columns(2).Gap(4).Width(Size.Full())
+            | new Card(
+                Layout.Vertical().Gap(2)
+                    | new TextInput(textState).Placeholder("Enter text...")
+                    | new TextInput(textState).Variant(TextInputs.Password).Placeholder("Password")
+                    | new TextInput(textState).Variant(TextInputs.Email).Placeholder("Email")
+                    | new TextInput(textState).Variant(TextInputs.Search).Placeholder("Search...")
+            ).Title("TextInput").Description("Text input variants").Height(Size.Units(80))
+            | new Card(
+                Layout.Vertical().Gap(2)
+                    | new NumberInput<int>(numberState).Placeholder("Enter number")
+                    | new NumberInput<double>(numberState).Min(0).Max(100).Variant(NumberInputs.Slider)
+                    | new NumberInput<decimal>(numberState).FormatStyle(NumberFormatStyle.Currency).Currency("USD").Placeholder("$0.00")
+                    | new NumberInput<double>(numberState).FormatStyle(NumberFormatStyle.Percent).Placeholder("0%")
+            ).Title("NumberInput").Description("Number and slider").Height(Size.Units(80))
+            | new Card(
+                Layout.Vertical().Gap(2)
+                    | new BoolInput(boolState).Label("Accept terms and conditions")
+                    | boolState.ToSwitchInput().Label("Enable notifications")
+            ).Title("BoolInput").Description("Checkbox input").Height(Size.Units(60))
+            | new Card(
+                fileState.ToFileInput().Placeholder("Upload file")
+            ).Title("FileInput").Description("File upload").Height(Size.Units(60))
+            | new Card(
+                dateRangeState.ToDateRangeInput().Placeholder("Select date range")
+            ).Title("DateRange").Description("Date range picker").Height(Size.Units(40))
+            | new Card(
+                new DateTimeInput<DateTime>(dateState).Placeholder("Select date")
+            ).Title("DateTimeInput").Description("Date and time picker").Height(Size.Units(40))
+            | new Card(
+                new FeedbackInput<int>(feedbackState).Variant(FeedbackInputs.Stars)
+            ).Title("Feedback").Description("Star rating").Height(Size.Units(40))
+            | new Card(
+                colorState.ToColorInput().Variant(ColorInputs.Picker)
+            ).Title("Color").Description("Color picker").Height(Size.Units(40))
+            | new Card(
+                codeState.ToCodeInput().Language(Languages.Javascript).Height(Size.Units(15))
+            ).Title("Code").Description("Code editor").Height(Size.Units(50))
+            | new Card(
+                selectState.ToSelectInput(new[] { "Option 1", "Option 2", "Option 3" }.ToOptions()).Placeholder("Select option")
+            ).Title("Select").Description("Dropdown select").Height(Size.Units(50))
+            | new Card(
+                new ReadOnlyInput<string>("Read-only value")
+            ).Title("ReadOnly").Description("Read-only display").Height(Size.Units(40))
+            | new Card(
+                selectedCategory.ToAsyncSelectInput(QueryCategories, LookupCategory, "Search categories...")
+            ).Title("AsyncSelect").Description("Async dropdown").Height(Size.Units(40));
     }
 }
 ```
