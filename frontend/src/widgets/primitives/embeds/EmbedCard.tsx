@@ -87,10 +87,10 @@ const EmbedCard: React.FC<EmbedCardProps> = ({
             href={sanitizedUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-3 w-full px-4 py-3 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition-all duration-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white"
+            className="flex items-center gap-3 w-full px-4 py-3 bg-card hover:bg-accent text-card-foreground rounded-lg transition-all duration-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white"
           >
             <div className="flex-shrink-0">
-              <Icon name={iconName} size={20} className="text-white" />
+              <Icon name={iconName} size={20} className={iconColor} />
             </div>
             <span className="text-sm font-medium flex-1 text-left truncate">
               {linkText}

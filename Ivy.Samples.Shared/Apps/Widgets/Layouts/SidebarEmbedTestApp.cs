@@ -17,7 +17,8 @@ public class SidebarEmbedTestApp : SampleBase
                 | new Embed("https://github.com/Ivy-Interactive/Ivy-Framework/pull/123")
                 | new Embed("https://gist.github.com/username/gistid")
                 | new Embed("https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=Ivy-Interactive%2FIvy-Examples&machine=standardLinux32gb&devcontainer_path=.devcontainer%2Fqrcoder%2Fdevcontainer.json&location=EuropeWest")
-                | new Embed("https://github.com/tailwindlabs/tailwindcss"),
+                | new Embed("https://pin.it/i/4yA1hkh77/")
+                | new Embed("https://www.facebook.com/share/p/1NRYEoLAnJ/"),
 
             // SidebarContent
             Layout.Vertical()
@@ -26,9 +27,8 @@ public class SidebarEmbedTestApp : SampleBase
                 | new Embed("https://github.com/Ivy-Interactive/Ivy-Framework/pull/123")
                 | new Embed("https://gist.github.com/username/gistid")
                 | new Embed("https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=Ivy-Interactive%2FIvy-Examples&machine=standardLinux32gb&devcontainer_path=.devcontainer%2Fqrcoder%2Fdevcontainer.json&location=EuropeWest")
-                | new Embed("https://github.com/tailwindlabs/tailwindcss")
-                | new Embed("https://github.com/vitejs/vite")
-                | new Embed("https://github.com/shadcn-ui/ui"),
+                | new Embed("https://pin.it/i/4yA1hkh77/")
+                | new Embed("https://www.facebook.com/share/p/1NRYEoLAnJ/"),
 
             // SidebarHeader
             Text.H4("GitHub Repositories"),
