@@ -157,43 +157,19 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
         }`}
       >
         {hasContent(slots?.SidebarHeader) && (
-          <div className="flex flex-col shrink-0 p-2 space-y-4 min-w-0">
-            <div className="w-full max-w-full overflow-hidden">
-              {slots?.SidebarHeader}
-            </div>
+          <div className="flex flex-col shrink-0 p-2 space-y-4 w-full min-w-0 overflow-hidden bg-transparent">
+            {slots?.SidebarHeader}
           </div>
         )}
         {slots?.SidebarContent && (
-          <div className="flex-1 overflow-hidden min-w-0">
+          <div className="flex-1 overflow-hidden min-w-0 bg-transparent">
             <ScrollArea className="h-full w-full">
-              <div
-                className="p-2 overflow-hidden"
-                style={{
-                  width: '100%',
-                  maxWidth: '240px', // 256px sidebar - 16px padding
-                  minWidth: 0,
-                  boxSizing: 'border-box',
-                }}
-              >
-                <div
-                  className="space-y-2"
-                  style={{
-                    width: '100%',
-                    maxWidth: '100%',
-                    minWidth: 0,
-                    overflow: 'hidden',
-                  }}
-                >
+              <div className="p-2 w-full max-w-[240px] min-w-0 overflow-hidden bg-transparent">
+                <div className="space-y-2 w-full min-w-0 overflow-hidden bg-transparent">
                   {slots.SidebarContent?.map((child, index) => (
                     <div
                       key={index}
-                      style={{
-                        width: '100%',
-                        maxWidth: '100%',
-                        minWidth: 0,
-                        overflow: 'hidden',
-                        boxSizing: 'border-box',
-                      }}
+                      className="w-full min-w-0 overflow-hidden bg-transparent"
                     >
                       {child}
                     </div>
@@ -204,8 +180,8 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
           </div>
         )}
         {hasContent(slots?.SidebarFooter) && (
-          <div className="flex flex-col shrink-0 min-w-0">
-            <div className="flex flex-col px-4 py-3 gap-4 min-h-0 w-full max-w-full overflow-hidden">
+          <div className="flex flex-col shrink-0 w-full min-w-0 overflow-hidden bg-transparent">
+            <div className="flex flex-col px-4 py-3 gap-4 min-h-0 bg-transparent">
               {slots?.SidebarFooter}
             </div>
           </div>

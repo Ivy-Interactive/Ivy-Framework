@@ -17,19 +17,7 @@ const RedditEmbed = lazy(() => import('./embeds/RedditEmbed'));
 // Wrapper component to ensure proper containment
 const EmbedContainer: React.FC<{ children: React.ReactNode }> = ({
   children,
-}) => (
-  <div
-    style={{
-      width: '100%',
-      maxWidth: '100%',
-      minWidth: 0,
-      overflow: 'hidden',
-      boxSizing: 'border-box',
-    }}
-  >
-    {children}
-  </div>
-);
+}) => <div className="w-full min-w-0 overflow-hidden">{children}</div>;
 
 // Main EmbedWidget component
 interface EmbedWidgetProps {
