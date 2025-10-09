@@ -53,23 +53,66 @@ public class CommonWidgetsDemo : ViewBase
     public override object? Build()
     {
         var client = this.UseService<IClientProvider>();
-        return Layout.Grid().Columns(4)
-            | new Button("Click Me", onClick: _ => client.Toast("Hello!"))
-            | new Button("Save").Icon(Icons.Save)
-            | new Button("Destructive").Destructive()
-            | new Button("Secondary").Secondary()
-            | new Badge("Primary")
-            | new Badge("Success").Icon(Icons.Check)
-            | new Badge("Warning", variant: BadgeVariant.Warning)
-            | new Badge("Outline").Outline()
-            | new Progress(75)
-            | new Progress(50).Goal("Task completion")
-            | new Progress(90).ColorVariant(Progress.ColorVariants.EmeraldGradient)
-            | new Progress(35).Goal("Upload...")
-            | new Card("Card with content")
-            | new Card("Clickable Card").HandleClick(_ => client.Toast("Clicked!"))
-            | new Card("Card with Button", new Button("Action"))
-            | new Card("Simple Card").Title("Title");
+        return Layout.Grid().Columns(2).Gap(4)
+            | new Card(
+                Layout.Horizontal().Gap(2)
+                    | new Button("Click Me", onClick: _ => client.Toast("Hello!"))
+                    | new Button("Destructive").Destructive()
+                    | new Button("Secondary").Secondary()
+            ).Title("Buttons").Description("Interactive button variants").Height(Size.Units(40))
+            | new Card(
+                Layout.Wrap().Gap(2)
+                    | new Badge("Primary")
+                    | new Badge("Success").Icon(Icons.Check)
+                    | new Badge("Outline").Outline()
+            ).Title("Badges").Description("Status and label badges").Height(Size.Units(40))
+            | new Card(
+                Layout.Vertical().Gap(2)
+                    | new Progress(50).Goal("Task completion")
+                    | new Progress(75).ColorVariant(Progress.ColorVariants.EmeraldGradient)
+                    | new Progress(90)
+            ).Title("Progress").Description("Task completion indicators").Height(Size.Units(50))
+            | new Card(
+                Layout.Vertical().Gap(2)
+                    | new Card("Clickable Card").HandleClick(_ => client.Toast("Clicked!"))
+            ).Title("Cards").Description("Content containers").Height(Size.Units(50))
+            | new Card(
+                new[] {
+                    new { Name = "Apple", Price = 1.20 },
+                    new { Name = "Banana", Price = 0.80 },
+                    new { Name = "Cherry", Price = 2.50 }
+                }.ToTable()
+            ).Title("Table").Description("Structured data display").Height(Size.Units(70))
+            | new Card(
+                Layout.Vertical().Gap(2)
+                    | new Expandable("Click to expand", "Hidden content appears here")
+                    | new Expandable("Another section", "More expandable content")
+            ).Title("Expandable").Description("Collapsible sections").Height(Size.Units(70))
+            | new Card(
+                new List(new[]
+                {
+                    new ListItem("First item", icon: Icons.Circle),
+                    new ListItem("Second item", icon: Icons.Circle),
+                    new ListItem("Third item", icon: Icons.Circle)
+                })
+            ).Title("List").Description("Vertical item lists").Height(Size.Units(70))
+            | new Card(
+                new { Name = "John Doe", Email = "john@example.com", Role = "Admin" }
+                    .ToDetails()
+            ).Title("Details").Description("Label-value pairs").Height(Size.Units(70))
+            | new Card(
+                new DropDownMenu(_ => { }, 
+                    new Button("Menu"),
+                    MenuItem.Default("Profile"),
+                    MenuItem.Default("Settings"),
+                    MenuItem.Separator(),
+                    MenuItem.Default("Logout"))
+            ).Title("DropDownMenu").Description("Action menus").Height(Size.Units(40))
+            | new Card(
+                Layout.Horizontal().Gap(2)
+                    | new Button("Hover", icon: Icons.Info).WithTooltip("This is a tooltip")
+                    | new Button("Help", icon: Icons.CircleQuestionMark).WithTooltip("Get help here")
+            ).Title("Tooltip").Description("Contextual information").Height(Size.Units(40));
     }
 }
 ```
