@@ -433,3 +433,38 @@ public class EffectWidgetsDemo : ViewBase
 ### Advanced
 
 In the Advanced section, we introduce our specialized implementations for working with sheets and chat functionality. These advanced widgets provide sophisticated features for complex user interface requirements.
+
+```csharp demo-tabs
+public class AdvancedWidgetsDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var messages = UseState(ImmutableArray.Create<ChatMessage>(
+            new ChatMessage(ChatSender.Assistant, "Hello! I'm a demo chat bot.")
+        ));
+        
+        void OnSendMessage(Event<Chat, string> @event)
+        {
+            var currentMessages = messages.Value;
+            messages.Set(currentMessages.Add(new ChatMessage(ChatSender.User, @event.Value)));
+            messages.Set(currentMessages.Add(new ChatMessage(ChatSender.Assistant, $"You said: {@event.Value}")));
+        }
+        
+        return Layout.Vertical().Gap(4).Width(Size.Full())
+            | new Card(
+                new Button("Open Sheet").WithSheet(
+                    () => Layout.Vertical()
+                        | Text.H3("Sheet Content")
+                        | Text.P("This is content inside a sheet")
+                        | new Button("Close"),
+                    title: "Demo Sheet",
+                    description: "Sheet demonstration"
+                )
+            ).Title("Sheet").Description("Side panel overlay").Height(Size.Units(40))
+            | new Card(
+                new Chat(messages.Value.ToArray(), OnSendMessage)
+                    .Height(Size.Units(30))
+            ).Title("Chat").Description("Conversation interface").Height(Size.Units(70));
+    }
+}
+```
