@@ -12,7 +12,8 @@ public class AppAttribute(
     bool isVisible = true,
     int order = 0,
     bool groupExpanded = false,
-    string? documentSource = null
+    string? documentSource = null,
+    string[]? searchHints = null
 )
     : System.Attribute
 {
@@ -33,4 +34,6 @@ public class AppAttribute(
     public bool GroupExpanded { get; set; } = groupExpanded;
 
     public string? DocumentSource { get; set; } = documentSource;
+
+    public string[]? SearchHints { get; set; } = searchHints;
 }

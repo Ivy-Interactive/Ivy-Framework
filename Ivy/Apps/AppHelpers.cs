@@ -64,7 +64,8 @@ public static class AppHelpers
                 IsIndex = type.Name is "_Index" or "_IndexApp",
                 Order = appAttribute.Order,
                 GroupExpanded = appAttribute.GroupExpanded,
-                DocumentSource = appAttribute.DocumentSource
+                DocumentSource = appAttribute.DocumentSource,
+                SearchHints = appAttribute.SearchHints,
             };
         }
         throw new InvalidOperationException($"Type '{type.FullName}' is missing the [App] attribute.");
