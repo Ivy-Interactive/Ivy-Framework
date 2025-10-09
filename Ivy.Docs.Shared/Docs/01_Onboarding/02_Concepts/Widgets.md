@@ -229,23 +229,71 @@ public class PrimitiveWidgetsDemo : ViewBase
 {
     public override object? Build()
     {
-        return Layout.Grid().Columns(4)
-            | Text.H1("Heading 1")
-            | Text.H2("Heading 2")
-            | Text.H3("Heading 3")
-            | Text.P("Paragraph text")
-            | new Icon(Icons.Heart)
-            | new Icon(Icons.Star, Colors.Yellow)
-            | new Icon(Icons.Check, Colors.Green)
-            | new Icon(Icons.CircleAlert, Colors.Red)
-            | new Avatar("John Doe")
-            | new Avatar("JD", "https://via.placeholder.com/150")
-            | new Avatar("User")
-            | new Avatar("AB")
-            | Callout.Info("Info message")
-            | Callout.Warning("Warning")
-            | Callout.Success("Success")
-            | Callout.Error("Error");
+        return Layout.Grid().Columns(2).Gap(4).Width(Size.Full())
+            | new Card(
+                Layout.Vertical().Gap(2)
+                    | Text.H3("Heading 3")
+                    | Text.P("Paragraph text")
+                    | Text.Label("Label text")
+                    | Text.Large("Large text")
+                    | Text.Lead("Lead text")
+            ).Title("Text").Description("Text variants").Height(Size.Units(75))
+            | new Card(
+                new Image("https://api.images.cat/150/150")
+            ).Title("Image").Description("Image display").Height(Size.Units(75))
+            | new Card(
+                Layout.Horizontal().Gap(4)
+                    | new Icon(Icons.Heart, Colors.Red)
+                    | new Icon(Icons.Star, Colors.Yellow)
+                    | new Icon(Icons.Check, Colors.Green)
+                    | new Icon(Icons.Settings, Colors.Blue)
+            ).Title("Icon").Description("Vector icons").Height(Size.Units(40))
+            | new Card(
+                Layout.Horizontal().Gap(2)
+                    | new Avatar("John Doe")
+                    | new Avatar("JD", "https://api.images.cat/150/150?1")
+                    | new Avatar("AB")
+            ).Title("Avatar").Description("User avatars").Height(Size.Units(40))
+            | new Card(
+                Layout.Vertical().Gap(2)
+                    | Callout.Info("Info message")
+                    | Callout.Warning("Warning message")
+            ).Title("Callout").Description("Alert messages").Height(Size.Units(70))
+            | new Card(
+                Layout.Vertical().Gap(2)
+                    | new Box("Solid border").BorderStyle(BorderStyle.Solid)
+                    | new Box("Full radius").BorderRadius(BorderRadius.Full)
+            ).Title("Box").Description("Content container").Height(Size.Units(70))
+            | new Card(
+                Layout.Vertical().Gap(2)
+                    | Text.P("Content above")
+                    | new Separator()
+                    | Text.P("Content below")
+            ).Title("Separator").Description("Visual divider").Height(Size.Units(50))
+            | new Card(
+                Layout.Vertical()
+                    | Text.P("Top content")
+                    | new Spacer().Height(Size.Units(4))
+                    | Text.P("Bottom content")
+            ).Title("Spacer").Description("Empty space").Height(Size.Units(50))
+            | new Card(
+                Text.Code("var x = 10;\nconsole.log(x);", Languages.Javascript)
+            ).Title("Code").Description("Syntax highlighting").Height(Size.Units(60))
+            | new Card(
+                new Markdown("**Bold** and *italic* text\n\n- Item 1\n- Item 2")
+            ).Title("Markdown").Description("Markdown rendering").Height(Size.Units(60))
+            | new Card(
+                Text.Json("{ \"name\": \"value\", \"count\": 42 }")
+            ).Title("Json").Description("JSON display").Height(Size.Units(60))
+            | new Card(
+                Text.Xml("<root><item>Value</item></root>")
+            ).Title("Xml").Description("XML display").Height(Size.Units(60))
+            | new Card(
+                Text.Html("<div><strong>Bold</strong> text and <em>italic</em> text</div>")
+            ).Title("Html").Description("HTML rendering").Height(Size.Units(40))
+            | new Card(
+                new Error("An error occurred")
+            ).Title("Error").Description("Error display").Height(Size.Units(40));
     }
 }
 ```
