@@ -14,6 +14,23 @@ const PinterestEmbed = lazy(() => import('./embeds/PinterestEmbed'));
 const GitHubEmbed = lazy(() => import('./embeds/GitHubEmbed'));
 const RedditEmbed = lazy(() => import('./embeds/RedditEmbed'));
 
+// Wrapper component to ensure proper containment
+const EmbedContainer: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => (
+  <div
+    style={{
+      width: '100%',
+      maxWidth: '100%',
+      minWidth: 0,
+      overflow: 'hidden',
+      boxSizing: 'border-box',
+    }}
+  >
+    {children}
+  </div>
+);
+
 // Main EmbedWidget component
 interface EmbedWidgetProps {
   url: string;
@@ -22,34 +39,56 @@ interface EmbedWidgetProps {
 const EmbedWidget: React.FC<EmbedWidgetProps> = ({ url }) => {
   // Validate URL at the entry point
   if (!isValidUrl(url)) {
-    return <EmbedErrorFallback url={url} platform="Unsupported" />;
+    return (
+      <EmbedContainer>
+        <EmbedErrorFallback url={url} platform="Unsupported" />
+      </EmbedContainer>
+    );
   }
 
   // YouTube embed doesn't need lazy loading as it's lightweight
   if (url.includes('youtube.com') || url.includes('youtu.be')) {
     return (
-      <EmbedErrorBoundary
-        fallback={<EmbedErrorFallback url={url} platform="YouTube" />}
+      <div
+        style={{
+          width: '100%',
+          maxWidth: '100%',
+          minWidth: 0,
+          overflow: 'hidden',
+        }}
       >
-        <div className="relative w-full pt-[56.25%]">
-          <div className="absolute top-0 left-0 w-full h-full">
-            <YouTubeEmbed url={url} width="100%" height="100%" />
+        <EmbedErrorBoundary
+          fallback={<EmbedErrorFallback url={url} platform="YouTube" />}
+        >
+          <div className="relative w-full max-w-full pt-[56.25%] overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-full">
+              <YouTubeEmbed url={url} width="100%" height="100%" />
+            </div>
           </div>
-        </div>
-      </EmbedErrorBoundary>
+        </EmbedErrorBoundary>
+      </div>
     );
   }
 
   // Lazy load other embed components with error boundaries
   if (url.includes('facebook.com')) {
     return (
-      <EmbedErrorBoundary
-        fallback={<EmbedErrorFallback url={url} platform="Facebook" />}
+      <div
+        style={{
+          width: '100%',
+          maxWidth: '100%',
+          minWidth: 0,
+          overflow: 'hidden',
+        }}
       >
-        <Suspense fallback={<EmbedLoadingFallback />}>
-          <FacebookEmbed url={url} />
-        </Suspense>
-      </EmbedErrorBoundary>
+        <EmbedErrorBoundary
+          fallback={<EmbedErrorFallback url={url} platform="Facebook" />}
+        >
+          <Suspense fallback={<EmbedLoadingFallback />}>
+            <FacebookEmbed url={url} />
+          </Suspense>
+        </EmbedErrorBoundary>
+      </div>
     );
   }
   if (url.includes('instagram.com')) {
@@ -130,7 +169,11 @@ const EmbedWidget: React.FC<EmbedWidgetProps> = ({ url }) => {
     );
   }
 
-  return <EmbedErrorFallback url={url} platform="Unsupported" />;
+  return (
+    <EmbedContainer>
+      <EmbedErrorFallback url={url} platform="Unsupported" />
+    </EmbedContainer>
+  );
 };
 
 export default EmbedWidget;
