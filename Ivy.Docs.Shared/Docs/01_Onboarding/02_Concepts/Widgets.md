@@ -378,20 +378,28 @@ public class ChartWidgetsDemo : ViewBase
             new { Month = "Apr", Desktop = 186, Mobile = 100 }
         };
         
-        return Layout.Grid().Columns(2)
-            | data.ToLineChart()
-                .Dimension("Month", e => e.Month)
-                .Measure("Desktop", e => e.Sum(f => f.Desktop))
-                .Measure("Mobile", e => e.Sum(f => f.Mobile))
-            | data.ToBarChart()
-                .Dimension("Month", e => e.Month)
-                .Measure("Desktop", e => e.Sum(f => f.Desktop))
-            | data.ToAreaChart()
-                .Dimension("Month", e => e.Month)
-                .Measure("Desktop", e => e.Sum(f => f.Desktop))
-            | data.ToPieChart(
-                e => e.Month,
-                e => e.Sum(f => f.Desktop));
+        return Layout.Grid().Columns(2).Gap(4).Width(Size.Full())
+            | new Card(
+                data.ToLineChart()
+                    .Dimension("Month", e => e.Month)
+                    .Measure("Desktop", e => e.Sum(f => f.Desktop))
+                    .Measure("Mobile", e => e.Sum(f => f.Mobile))
+            ).Title("LineChart").Description("Trend visualization").Height(Size.Units(100))
+            | new Card(
+                data.ToBarChart()
+                    .Dimension("Month", e => e.Month)
+                    .Measure("Desktop", e => e.Sum(f => f.Desktop))
+            ).Title("BarChart").Description("Bar comparison").Height(Size.Units(100))
+            | new Card(
+                data.ToAreaChart()
+                    .Dimension("Month", e => e.Month)
+                    .Measure("Desktop", e => e.Sum(f => f.Desktop))
+            ).Title("AreaChart").Description("Area under curve").Height(Size.Units(120))
+            | new Card(
+                data.ToPieChart(
+                    e => e.Month,
+                    e => e.Sum(f => f.Desktop))
+            ).Title("PieChart").Description("Part-to-whole").Height(Size.Units(120));
     }
 }
 ```
