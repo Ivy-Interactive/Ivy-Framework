@@ -22,7 +22,7 @@ You will be prompted to provide user credentials in the following format:
 user1:password1; user2:password2; ...
 ```
 
-Your credentials will be stored securely in .NET user secrets, along with an automatically-generated secret key that is used for token generation. Ivy then finishes configuring your application automatically:
+Your provided passwords will be hashed, salted and peppered using the argon2id algorithm, and stored securely in .NET user secrets, along with some necessary automatically-generated secret values. Ivy then finishes configuring your application automatically:
 
 1. Adds `server.UseAuth<BasicAuthProvider>()` to your `Program.cs`.
 2. Adds `Ivy.Auth` to your global usings.
@@ -51,8 +51,9 @@ For more information, see [Authentication Overview](Overview.md).
 
 The following parameters are supported via connection string, environment variables, or .NET user secrets:
 
-- **USERS**: Required. A semicolon-separated list of `username:password` pairs.
-- **JwtSecret**: Optional. A custom secret key for token generation. Must be at least 128 bits (or 16 bytes) long. If not provided, one will be generated automatically.
+- **Users**: Required. A semicolon-separated list of `username:password` pairs.
+- **HashSecret**: Optional. A custom secret pepper value for verifying hashed passwords. Must be a base64-encoded string that represents at least 256 bits (or 32 bytes) of information. If not provided, a cryptographically secure pseudorandom value will be generated automatically.
+- **JwtSecret**: Optional. A custom secret key for token generation. Must be a base64-encoded string that represents at least 256 bits (or 32 bytes) of information. If not provided, a cryptographically secure pseudorandom key will be generated automatically.
 - **JwtIssuer**: Optional. Used as the issuer of generated tokens. Default value: `ivy`.
 - **JwtAudience**: Optional. Used as the audience of generated tokens. Default value: `ivy-app`.
 
@@ -73,6 +74,22 @@ Key features of the Basic Auth provider:
 - **Token-based Security**: Stateless authentication using secure tokens
 - **Multiple Users**: Support for multiple user credentials
 
+## JWT Refresh Tokens
+
+The `BasicAuthProvider` uses JWT-based refresh tokens for improved security. Access tokens expire after **15 minutes**, while refresh tokens are valid for **24 hours** and allow users to stay logged in for up to **365 days** as long as they are refreshed before expiring. This reduces vulnerability windows while maintaining user convenience through automatic session extension.
+
+```csharp
+var authProvider = UseService<IAuthProvider>();
+
+// Login returns both access and refresh tokens
+var authToken = await authProvider.LoginAsync(email, password);
+// authToken.Jwt - Access token (15 min expiry)
+// authToken.RefreshToken - Refresh token (24 hour expiry, 365 day max age)
+
+// When access token expires, refresh automatically
+var newToken = await authProvider.RefreshJwtAsync(authToken);
+```
+
 ## Security Best Practices
 
 - **Always use HTTPS** in production environments
@@ -85,16 +102,20 @@ Key features of the Basic Auth provider:
 ### Common Issues
 
 **Authentication Failed**
+
 - Verify user credentials are correctly formatted (`user:password;user2:password2`)
 - Check that the correct username and password are being submitted
 - Ensure credentials are properly stored in user secrets
 
 **Missing Configuration**
+
 - Verify the Basic Auth provider is properly configured in your `Program.cs`
 - Check that user secrets or environment variables are set and accessible to your application
 
 **Token Issues**
-- Tokens have a limited lifetime (1 hour after generation); users will need to login again after their token expires.
+
+- Access tokens have a limited lifetime (15 minutes); however, refresh tokens (valid for 24 hours) automatically extend the session without requiring re-authentication.
+- If a refresh token expires (24 hours of inactivity), or 365 days have passed since initial login, users will need to log in again with their credentials.
 
 ## Related Documentation
 

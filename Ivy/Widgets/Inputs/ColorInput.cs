@@ -32,9 +32,6 @@ public interface IAnyColorInput : IAnyInput
 
     /// <summary>Gets or sets the visual variant of the color input.</summary>
     public ColorInputs Variant { get; set; }
-
-    /// <summary>Gets or sets the size of the color input.</summary>
-    public Sizes Size { get; set; }
 }
 
 /// <summary>

@@ -131,11 +131,40 @@ public class ServerDescription
             // First add services from server's Services collection
             foreach (var service in serviceCollection)
             {
+                string? descriptionYaml = null;
+                string? implementationTypeName = service.ImplementationType?.FullName ?? service.ImplementationType?.Name;
+
+                // Try to get the actual instance to determine implementation type and description
+                try
+                {
+                    var instance = serviceProvider.GetService(service.ServiceType);
+                    if (instance != null)
+                    {
+                        // Get the actual implementation type from the instance
+                        var actualType = instance.GetType();
+                        if (implementationTypeName == null)
+                        {
+                            implementationTypeName = actualType.FullName ?? actualType.Name;
+                        }
+
+                        // Check if it implements IDescribableService
+                        if (instance is IDescribableService describable)
+                        {
+                            descriptionYaml = describable.ToYaml();
+                        }
+                    }
+                }
+                catch
+                {
+                    // If we can't get the instance, continue with what we have
+                }
+
                 var serviceDesc = new ServiceDescription
                 {
                     ServiceType = service.ServiceType.FullName ?? service.ServiceType.Name,
-                    ImplementationType = service.ImplementationType?.FullName ?? service.ImplementationType?.Name,
-                    Lifetime = service.Lifetime.ToString()
+                    ImplementationType = implementationTypeName,
+                    Lifetime = service.Lifetime.ToString(),
+                    Description = descriptionYaml
                 };
                 description.Services.Add(serviceDesc);
             }
@@ -187,4 +216,7 @@ public class ServiceDescription
 
     [YamlMember(Alias = "lifetime")]
     public string Lifetime { get; set; } = string.Empty;
+
+    [YamlMember(Alias = "description")]
+    public string? Description { get; set; }
 }

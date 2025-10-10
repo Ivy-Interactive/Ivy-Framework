@@ -18,13 +18,16 @@ public record Error : WidgetBase<Error>
     }
 
     /// <summary>Error title/summary.</summary>
-    [Prop] public string? Title { get; set; }
+    [Prop]
+    public string? Title { get; set; }
 
     /// <summary>Detailed error message.</summary>
-    [Prop] public string? Message { get; set; }
+    [Prop]
+    public string? Message { get; set; }
 
     /// <summary>Stack trace for debugging.</summary>
-    [Prop] public string? StackTrace { get; set; }
+    [Prop]
+    public string? StackTrace { get; set; }
 }
 
 /// <summary>Extension methods for Error widget configuration.</summary>

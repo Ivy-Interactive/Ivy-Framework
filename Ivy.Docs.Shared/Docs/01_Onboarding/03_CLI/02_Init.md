@@ -214,11 +214,16 @@ After initializing your project:
 
 **Git Issues** - If Git is not installed or configured, Ivy will still create the project but may skip some Git-related operations.
 
-**Build Errors** - If you encounter build errors, you can use the `ivy fix` command to automatically resolve common issues:
-To use the default AI debugging mode, run:
+**Build Errors** - If you encounter build errors, you can use the `ivy fix` command to automatically resolve common issues. The default timeout is 360 seconds (6 minutes).
 
 ```terminal
 >ivy fix
+```
+
+Use the `--timeout` option to specify a custom timeout in seconds:
+
+```terminal
+>ivy fix --timeout 600
 ```
 
 Use **Claude Code** for debugging:
@@ -252,7 +257,21 @@ Telemetry Upload Details: When telemetry upload is enabled, the `ivy fix` comman
 >ivy debug disable-ivy-fix-upload-telemetry
 ```
 
-### App Removal Command
+### Creating Apps
+
+Create new apps using AI assistance. The default timeout is 360 seconds (6 minutes).
+
+```terminal
+>ivy app create MyApp
+```
+
+Use the `--timeout` option to specify a custom timeout in seconds:
+
+```terminal
+>ivy app create MyApp --timeout 600
+```
+
+### Removing Apps
 
 **Remove a specific app by name**
 

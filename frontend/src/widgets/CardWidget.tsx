@@ -77,7 +77,7 @@ export const CardWidget: React.FC<CardWidgetProps> = ({
 
   const handleClick = useCallback(() => {
     if (events.includes('OnClick')) eventHandler('OnClick', id, []);
-  }, [id, eventHandler]);
+  }, [id, eventHandler, events]);
 
   const hoverClass =
     hoverVariant === 'None'

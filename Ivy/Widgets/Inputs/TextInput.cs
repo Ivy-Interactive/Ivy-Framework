@@ -57,7 +57,7 @@ public abstract record TextInputBase : WidgetBase<TextInputBase>, IAnyTextInput
     [Prop] public string? ShortcutKey { get; set; }
 
     /// <summary>Gets or sets the size of the text input.</summary>
-    [Prop] public Sizes Size { get; set; }
+    [Prop] public Sizes Size { get; set; } = Sizes.Medium;
 
     /// <summary>Gets or sets the event handler called when the input loses focus.</summary>
     [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }

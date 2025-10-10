@@ -29,6 +29,7 @@ public class Job(string title, Func<Job, IJobScheduler, IProgress<double>, Cance
     public List<Job> Children { get; } = new();
     public TaskCompletionSource<bool> CompletionSource { get; } = new();
     public double Progress { get; private set; }
+    public bool ContinueOnChildFailure { get; internal set; }
     private readonly List<Job> _pendingChildrenToSchedule = new();
 
     public void AddChildToSchedule(Job child)
@@ -66,8 +67,18 @@ public class Job(string title, Func<Job, IJobScheduler, IProgress<double>, Cance
                 jobScheduler?.ScheduleJob(child, token);
             }
 
-            foreach (var child in Children)
-                await child.CompletionSource.Task.WaitAsync(token);
+            if (ContinueOnChildFailure)
+            {
+                // Wait for all children to complete, but don't fail if they fail
+                await Task.WhenAll(Children.Select(child =>
+                    child.CompletionSource.Task.ContinueWith(_ => Task.CompletedTask, token)));
+            }
+            else
+            {
+                // Wait for all children and fail if any fail
+                foreach (var child in Children)
+                    await child.CompletionSource.Task.WaitAsync(token);
+            }
 
             Progress = 1.0;
             State = JobState.Finished;
@@ -82,7 +93,14 @@ public class Job(string title, Func<Job, IJobScheduler, IProgress<double>, Cance
         {
             State = JobState.Failed;
             CompletionSource.TrySetException(ex);
-            scheduler.CancelAll();
+
+            // Only cancel all jobs if this job's parent doesn't want to continue on child failure
+            var jobScheduler = scheduler as JobScheduler;
+            var parent = jobScheduler?.FindParent(this);
+            if (parent?.ContinueOnChildFailure != true)
+            {
+                scheduler.CancelAll();
+            }
         }
 
         scheduler.NotifyJobUpdated(this);
@@ -95,6 +113,7 @@ public class JobBuilder
     private readonly List<Job> _dependencies = new();
     private Func<Job, IJobScheduler, IProgress<double>, CancellationToken, Task>? _action;
     private readonly JobScheduler _scheduler;
+    private bool _continueOnChildFailure;
 
     private JobBuilder(string title, JobScheduler scheduler)
     {
@@ -140,6 +159,12 @@ public class JobBuilder
         return this;
     }
 
+    public JobBuilder WithContinueOnChildFailure(bool continueOnChildFailure = true)
+    {
+        _continueOnChildFailure = continueOnChildFailure;
+        return this;
+    }
+
     public JobBuilder Then(string nextTitle, Func<Job, IJobScheduler, IProgress<double>, CancellationToken, Task> nextAction)
     {
         var previousJob = Build();
@@ -159,7 +184,10 @@ public class JobBuilder
         if (_action == null)
             throw new InvalidOperationException("Action must be set for the job.");
 
-        var job = new Job(_title, _action);
+        var job = new Job(_title, _action)
+        {
+            ContinueOnChildFailure = _continueOnChildFailure
+        };
         foreach (var dep in _dependencies)
             job.DependsOn.Add(dep.Id);
 
@@ -340,6 +368,14 @@ public class JobScheduler(int maxParallelJobs) : IJobScheduler, IObservable<Job>
         lock (_lock)
         {
             return _jobs.Count > 0 && _jobs.Values.All(job => job.State == JobState.Finished);
+        }
+    }
+
+    internal Job? FindParent(Job child)
+    {
+        lock (_lock)
+        {
+            return _jobs.Values.FirstOrDefault(j => j.Children.Contains(child));
         }
     }
 }

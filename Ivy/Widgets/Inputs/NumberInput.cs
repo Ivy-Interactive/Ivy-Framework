@@ -65,9 +65,6 @@ public interface IAnyNumberInput : IAnyInput
 
     /// <summary>Gets or sets the target type name for frontend validation and formatting.</summary>
     public string? TargetType { get; set; }
-
-    /// <summary>Gets or sets the size of the number input(Medium, Small, Large)</summary>
-    [Prop] public Sizes Size { get; set; }
 }
 
 /// <summary>

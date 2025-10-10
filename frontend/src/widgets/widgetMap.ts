@@ -76,6 +76,7 @@ export const widgetMap = {
   'Ivy.FloatingPanel': Layouts.FloatingPanelWidget,
 
   // Inputs
+  'Ivy.Field': Inputs.FieldWidget,
   'Ivy.TextInput': Inputs.TextInputWidget,
   'Ivy.BoolInput': Inputs.BoolInputWidget,
   'Ivy.DateTimeInput': Inputs.DateTimeInputWidget,
@@ -96,7 +97,6 @@ export const widgetMap = {
 
   // Forms
   'Ivy.Form': Forms.FormWidget,
-  'Ivy.FormField': Forms.FormFieldWidget,
 
   // Dialogs
   'Ivy.Dialog': Dialogs.DialogWidget,

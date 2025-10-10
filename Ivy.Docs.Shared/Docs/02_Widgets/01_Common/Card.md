@@ -31,7 +31,7 @@ new Card(
     "This card is clickable."
 ).Title("Clickable Card")
  .Description("Demonstrating click and mouse hover.")
- .HandleClick(_ => {})
+ .HandleClick(_ => client.Toast("Card clicked!"))
  .Width(Size.Units(100))
 ```
 
@@ -69,6 +69,6 @@ new MetricView(
 )
 ```
 
-The `MetricView` automatically handles loading states, error handling, and displays trend arrows with color-coded indicators for performance tracking.
+The `MetricView` automatically handles loading states, error handling, and displays trend arrows with color-coded indicators for performance tracking. See the [MetricView documentation](MetricView.md) for more details.
 
 <WidgetDocs Type="Ivy.Card" ExtensionTypes="Ivy.CardExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Card.cs"/>

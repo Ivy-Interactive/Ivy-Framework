@@ -154,6 +154,35 @@ For more information on setting up Apple authentication, see Auth0's [Apple docu
 
 For more information on setting up Twitter/X authentication, see Auth0's [Twitter documentation](https://marketplace.auth0.com/integrations/twitter-social-connection).
 
+### Step 6: Add claims to JWT
+
+To allow the Ivy application to properly display the users email, name and avatar, these need to be added to the JWT. In Auth0, this is done using an action.
+
+1. **Go to Actions > Library** in the Auth0 Dashboard
+2. **Click "Create Action" > "Create Custom Action"**
+3. **Give it a name like "Add user claims to JWT" and choose "Login / Post Login" as the trigger.**
+4. **Add the following code:**
+```javascript
+exports.onExecutePostLogin = async (event, api) => {
+    // You can change this if you want - but then also update the "Auth0:Namespace" configuration in your Ivy project
+    let namespace = "https://ivy.app/";
+
+    if (namespace && !namespace.endsWith('/')) {
+        namespace += '/';
+    }
+
+    api.accessToken.setCustomClaim(namespace + 'email', event.user.email);
+    api.accessToken.setCustomClaim(namespace + 'name', event.user.name);
+    api.accessToken.setCustomClaim(namespace + 'avatar', event.user.picture);
+};
+```
+5. **Click Deploy**
+6. **Go to Actions > Triggers** in the Auth0 Dashboard
+7. **Click "post-login"**
+8. **Add your action** by dragging it from the right-hand panel between "Start" and "Complete".
+
+The user information email, name and picture will now be added to the JWT and consumed by Ivy in the `GetUserInfoAsync` function.
+
 ## Adding Authentication
 
 To set up Auth0 Authentication with Ivy, run the following command and choose `Auth0` when asked to select an auth provider:
@@ -193,7 +222,7 @@ Ivy then finishes configuring your application automatically:
 To skip the interactive prompts, you can provide configuration via a connection string:
 
 ```terminal
->ivy auth add --provider Auth0 --connection-string "Auth0:Domain=your-domain.auth0.com;Auth0:ClientId=your-client-id;Auth0:ClientSecret=your-client-secret"
+>ivy auth add --provider Auth0 --connection-string "Auth0:Domain=your-domain.auth0.com;Auth0:ClientId=your-client-id;Auth0:ClientSecret=your-client-secret;Auth0:Namespace=https://your-domain.com/"
 ```
 
 For a list of connection string parameters, see [Configuration Parameters](#configuration-parameters) below.
@@ -214,6 +243,7 @@ The following parameters are supported via connection string, environment variab
 - **Auth0:ClientId**: Required. Your Auth0 application's client ID.
 - **Auth0:ClientSecret**: Required. Your Auth0 application's client secret.
 - **Auth0:Audience**: Required. API identifier for securing API access.
+- **Auth0:Namespace**: Optional. Your JWT claims namespace, as chosen earlier in this guide. If left empty "https://ivy.app/" will be used.
 
 ## Authentication Flow
 

@@ -47,6 +47,29 @@ public class Program
 }
 ```
 
+### Service Descriptions
+
+Services can provide custom descriptions by implementing the `IDescribableService` interface. Use `ServerDescriptionReader` to read environment-specific service descriptions from your application.
+
+```csharp
+// Implement IDescribableService for custom service descriptions
+public class MyService : IMyService, IDescribableService
+{
+    public string ToYaml()
+    {
+        return "Custom service description in YAML format";
+    }
+}
+
+// Read service descriptions with environment context
+var description = await ServerDescriptionReader.ReadAsync(
+    projectDirectory,
+    environment: "PRODUCTION"
+);
+```
+
+The `ServiceDescription` class includes an optional `Description` property for better documentation of your services.
+
 ### Service Interfaces
 
 Define service interfaces for better abstraction:

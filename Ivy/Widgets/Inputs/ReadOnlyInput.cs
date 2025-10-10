@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Ivy.Core;
 using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
+using Ivy.Shared;
 using Ivy.Widgets.Inputs;
 
 // ReSharper disable once CheckNamespace
@@ -58,6 +59,9 @@ public record ReadOnlyInput<TValue> : WidgetBase<ReadOnlyInput<TValue>>, IInput<
 
     /// <summary>Gets or sets the validation error message to display.</summary>
     [Prop] public string? Invalid { get; set; }
+
+    /// <summary>Gets or sets the size of the read-only input.</summary>
+    [Prop] public Sizes Size { get; set; }
 
     /// <summary>Gets or sets whether to show a copy button for the displayed value.</summary>
     [Prop] public bool ShowCopyButton { get; set; } = true;
