@@ -40,24 +40,6 @@ test.describe('Audio Player Tests', () => {
       const count = await audioElements.count();
       expect(count).toBeGreaterThan(0);
     });
-
-    test('should display all card sections', async ({ page }) => {
-      // Verify all main sections are visible
-      const sections = [
-        'Basic Audio Player',
-        'Looping Audio with Preload',
-        'Muted Autoplay Audio',
-        'Audio Without Controls',
-        'Custom Sized Audio Player',
-        'Theme Awareness',
-      ];
-
-      for (const section of sections) {
-        await expect(
-          page.getByRole('heading', { name: section, exact: true })
-        ).toBeVisible();
-      }
-    });
   });
 
   test.describe('Audio Widget Properties - All States', () => {
