@@ -56,7 +56,13 @@ export const Table: React.FC<TableProps> = ({
     >
       <TableLayout>
         <>
-          {finalConfig.allowFiltering && <TableOptions />}
+          <TableOptions
+            hasOptions={{
+              allowFiltering: finalConfig.allowFiltering,
+              allowMetadata: false,
+            }}
+          />
+
           <TableEditor hasOptions={finalConfig.allowFiltering} />
         </>
       </TableLayout>

@@ -368,7 +368,6 @@ export const TableEditor: React.FC<TableEditorProps> = ({
         rangeSelect={selectionProps.rangeSelect}
         width={containerWidth}
         rowMarkers={showIndexColumn ? 'number' : 'none'}
-        rowMarkerStartIndex={showIndexColumn ? 1 : undefined}
         onColumnMoved={allowColumnReordering ? handleColumnReorder : undefined}
         groupHeaderHeight={showGroups ? 36 : undefined}
       />

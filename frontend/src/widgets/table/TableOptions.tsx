@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useTable } from './TableContext';
 import { tableStyles } from './styles/style';
 import { Label } from '@/components/ui/label';
@@ -13,8 +13,11 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 import { Menu } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
 
-export const TableOptions: React.FC = () => {
+export const TableOptions: React.FC<{
+  hasOptions: { allowFiltering: boolean; allowMetadata: boolean };
+}> = ({ hasOptions }) => {
   const {
     visibleRows,
     columns,
@@ -23,21 +26,12 @@ export const TableOptions: React.FC = () => {
     activeFilter,
     setActiveFilter,
   } = useTable();
+
+  const { allowFiltering, allowMetadata } = hasOptions;
+
   const [query, setQuery] = useState<string>('');
   const [pendingFilter, setPendingFilter] = useState<Filter | null>(null);
-  const [isSmallScreen, setIsSmallScreen] = useState(false);
-
-  // Check screen size
-  useEffect(() => {
-    const checkScreenSize = () => {
-      setIsSmallScreen(window.innerWidth < 900);
-    };
-
-    checkScreenSize();
-    window.addEventListener('resize', checkScreenSize);
-
-    return () => window.removeEventListener('resize', checkScreenSize);
-  }, []);
+  const isSmallScreen = useIsMobile(1200);
 
   if (columns.length === 0) {
     return null;
@@ -117,35 +111,34 @@ export const TableOptions: React.FC = () => {
     </div>
   );
 
-  if (isSmallScreen) {
-    return (
-      <div style={tableStyles.tableOptions.container}>
-        <div className={tableStyles.tableOptions.inner}>
-          {queryEditorContent}
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="outline" size="sm">
-                <Menu className="h-4 w-4 mr-2" />
-                Table Info
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right">
-              <SheetHeader>
-                <SheetTitle>Table Information</SheetTitle>
-              </SheetHeader>
-              <div className="mt-4 space-y-4">{metadataContent}</div>
-            </SheetContent>
-          </Sheet>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div style={tableStyles.tableOptions.container}>
       <div className={tableStyles.tableOptions.inner}>
-        {queryEditorContent}
-        {metadataContent}
+        {allowFiltering && queryEditorContent}
+        {allowMetadata ? (
+          isSmallScreen ? (
+            <>
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    <Menu className="h-4 w-4 mr-2" />
+                    Table Info
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="right">
+                  <SheetHeader>
+                    <SheetTitle>Table Information</SheetTitle>
+                  </SheetHeader>
+                  <div className="mt-4 space-y-4">
+                    {allowMetadata && metadataContent}
+                  </div>
+                </SheetContent>
+              </Sheet>
+            </>
+          ) : (
+            metadataContent
+          )
+        ) : null}
       </div>
     </div>
   );
