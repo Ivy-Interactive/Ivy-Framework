@@ -271,17 +271,17 @@ test.describe('Audio Player Tests', () => {
 
   test.describe('All Audio Widget Methods Coverage', () => {
     test('should verify all preload strategies', async ({ page }) => {
-      // Test Metadata (default)
+      // Test metadata (default)
       const basicAudio = page.getByTestId('audio-basic');
       const basicPreload = await basicAudio.getAttribute('preload');
-      expect(basicPreload).toBe('Metadata');
+      expect(basicPreload).toBe('metadata');
 
-      // Test Auto
+      // Test auto
       const loopingAudio = page.getByTestId('audio-looping');
       const autoPreload = await loopingAudio.getAttribute('preload');
-      expect(autoPreload).toBe('Auto');
+      expect(autoPreload).toBe('auto');
 
-      // Note: None preload is not shown in the sample app
+      // Note: none preload is not shown in the sample app
       // but it's a valid value according to Audio.cs
     });
 

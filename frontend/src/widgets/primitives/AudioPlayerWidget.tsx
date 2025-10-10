@@ -41,6 +41,12 @@ export const AudioPlayerWidget: React.FC<AudioPlayerWidgetProps> = ({
 }) => {
   const [hasError, setHasError] = useState(false);
 
+  // Normalize preload to lowercase for HTML5 compliance
+  const normalizedPreload = preload?.toLowerCase() as
+    | 'none'
+    | 'metadata'
+    | 'auto';
+
   const styles: React.CSSProperties = {
     ...getWidth(width),
     ...getHeight(height),
@@ -82,7 +88,7 @@ export const AudioPlayerWidget: React.FC<AudioPlayerWidgetProps> = ({
       autoPlay={autoplay}
       loop={loop}
       muted={muted}
-      preload={preload}
+      preload={normalizedPreload}
       controls={controls}
       className="w-full"
       onError={() => setHasError(true)}
