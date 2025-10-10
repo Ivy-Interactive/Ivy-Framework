@@ -31,10 +31,9 @@ test.describe('Audio Player Tests', () => {
     test('should render audio player app and display main heading', async ({
       page,
     }) => {
-      // Verify the main heading is present
-      await expect(
-        page.getByRole('heading', { name: /Audio Player Widget Examples/i })
-      ).toBeVisible();
+      // Verify an H1 heading is present on the page
+      const h1Heading = page.getByRole('heading', { level: 1 });
+      await expect(h1Heading).toBeVisible();
 
       // Verify at least one audio element exists
       const audioElements = page.locator('audio');

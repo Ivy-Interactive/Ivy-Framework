@@ -44,7 +44,7 @@ public class AudioPlayerApp : SampleBase
             .TestId("audio-theme");
 
         return Layout.Vertical()
-               | Text.H2("Audio Player Widget Examples")
+               | Text.H1("Audio Player Widget Examples")
                | Text.P("Demonstrates various configurations of the Audio widget for playing audio content. This widget is for audio playback, not recording. The audio player is theme-aware and adapts to light/dark themes.")
                | Layout.Vertical().Gap(6)
                    | (new Card(
