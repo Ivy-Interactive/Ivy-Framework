@@ -92,7 +92,7 @@ test.describe('Audio Player Tests', () => {
 
       // Verify preload is auto
       const preload = await loopingAudio.getAttribute('preload');
-      expect(preload).toBe('Auto');
+      expect(preload).toBe('auto');
 
       // Verify it has controls
       await expect(loopingAudio).toHaveAttribute('controls', '');
