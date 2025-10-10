@@ -337,6 +337,203 @@ test.describe('Audio Player Tests', () => {
     });
   });
 
+  test.describe('Interactive Controls Tests', () => {
+    test('should test mute button functionality', async ({ page }) => {
+      const basicAudio = page.getByTestId('audio-basic');
+      await expect(basicAudio).toBeVisible();
+
+      // Wait for audio to be ready
+      await basicAudio.waitFor({ state: 'attached' });
+
+      // Test initial muted state (should be false by default)
+      const isInitiallyMuted = await basicAudio.evaluate(
+        (audio: HTMLAudioElement) => audio.muted
+      );
+      expect(isInitiallyMuted).toBe(false);
+
+      // Test muting the audio
+      await basicAudio.evaluate((audio: HTMLAudioElement) => {
+        audio.muted = true;
+      });
+
+      const isMuted = await basicAudio.evaluate(
+        (audio: HTMLAudioElement) => audio.muted
+      );
+      expect(isMuted).toBe(true);
+
+      // Test unmuting the audio
+      await basicAudio.evaluate((audio: HTMLAudioElement) => {
+        audio.muted = false;
+      });
+
+      const isUnmuted = await basicAudio.evaluate(
+        (audio: HTMLAudioElement) => audio.muted
+      );
+      expect(isUnmuted).toBe(false);
+    });
+
+    test('should test playback speed controls', async ({ page }) => {
+      const basicAudio = page.getByTestId('audio-basic');
+      await expect(basicAudio).toBeVisible();
+
+      // Wait for audio to be ready
+      await basicAudio.waitFor({ state: 'attached' });
+
+      // Test default playback rate (should be 1.0)
+      const defaultRate = await basicAudio.evaluate(
+        (audio: HTMLAudioElement) => audio.playbackRate
+      );
+      expect(defaultRate).toBe(1.0);
+
+      // Test changing playback speed to 0.5x (slow)
+      await basicAudio.evaluate((audio: HTMLAudioElement) => {
+        audio.playbackRate = 0.5;
+      });
+
+      const slowRate = await basicAudio.evaluate(
+        (audio: HTMLAudioElement) => audio.playbackRate
+      );
+      expect(slowRate).toBe(0.5);
+
+      // Test changing playback speed to 1.5x (fast)
+      await basicAudio.evaluate((audio: HTMLAudioElement) => {
+        audio.playbackRate = 1.5;
+      });
+
+      const fastRate = await basicAudio.evaluate(
+        (audio: HTMLAudioElement) => audio.playbackRate
+      );
+      expect(fastRate).toBe(1.5);
+
+      // Test changing playback speed to 2x (very fast)
+      await basicAudio.evaluate((audio: HTMLAudioElement) => {
+        audio.playbackRate = 2.0;
+      });
+
+      const veryFastRate = await basicAudio.evaluate(
+        (audio: HTMLAudioElement) => audio.playbackRate
+      );
+      expect(veryFastRate).toBe(2.0);
+
+      // Reset to normal speed
+      await basicAudio.evaluate((audio: HTMLAudioElement) => {
+        audio.playbackRate = 1.0;
+      });
+    });
+
+    test('should test audio controls visibility and functionality', async ({
+      page,
+    }) => {
+      const basicAudio = page.getByTestId('audio-basic');
+      await expect(basicAudio).toBeVisible();
+
+      // Verify controls are present
+      await expect(basicAudio).toHaveAttribute('controls', '');
+
+      // Test that the audio element has the necessary properties for controls
+      const hasControls = await basicAudio.evaluate(
+        (audio: HTMLAudioElement) => audio.controls
+      );
+      expect(hasControls).toBe(true);
+
+      // Test that the audio element can be interacted with
+      const canPlay = await basicAudio.evaluate(
+        (audio: HTMLAudioElement) => audio.readyState >= 1 // HAVE_METADATA
+      );
+      expect(canPlay).toBe(true);
+    });
+
+    test('should test audio download functionality', async ({ page }) => {
+      const basicAudio = page.getByTestId('audio-basic');
+      await expect(basicAudio).toBeVisible();
+
+      // Get the audio source URL
+      const src = await basicAudio.getAttribute('src');
+      expect(src).toBeTruthy();
+      expect(src).toContain('.mp3');
+
+      // Test that the audio source is accessible for download
+      const response = await page.request.get(src!);
+      expect(response.status()).toBe(200);
+      expect(response.headers()['content-type']).toContain('audio');
+
+      // Verify the audio element has the correct source
+      const audioSrc = await basicAudio.evaluate(
+        (audio: HTMLAudioElement) => audio.src
+      );
+      expect(audioSrc).toBe(src);
+    });
+
+    test('should test audio volume controls', async ({ page }) => {
+      const basicAudio = page.getByTestId('audio-basic');
+      await expect(basicAudio).toBeVisible();
+
+      // Test default volume (should be 1.0)
+      const defaultVolume = await basicAudio.evaluate(
+        (audio: HTMLAudioElement) => audio.volume
+      );
+      expect(defaultVolume).toBe(1.0);
+
+      // Test setting volume to 0.5
+      await basicAudio.evaluate((audio: HTMLAudioElement) => {
+        audio.volume = 0.5;
+      });
+
+      const halfVolume = await basicAudio.evaluate(
+        (audio: HTMLAudioElement) => audio.volume
+      );
+      expect(halfVolume).toBe(0.5);
+
+      // Test setting volume to 0 (mute via volume)
+      await basicAudio.evaluate((audio: HTMLAudioElement) => {
+        audio.volume = 0;
+      });
+
+      const zeroVolume = await basicAudio.evaluate(
+        (audio: HTMLAudioElement) => audio.volume
+      );
+      expect(zeroVolume).toBe(0);
+
+      // Reset volume
+      await basicAudio.evaluate((audio: HTMLAudioElement) => {
+        audio.volume = 1.0;
+      });
+    });
+
+    test('should test audio time controls', async ({ page }) => {
+      const basicAudio = page.getByTestId('audio-basic');
+      await expect(basicAudio).toBeVisible();
+
+      // Test initial time (should be 0)
+      const initialTime = await basicAudio.evaluate(
+        (audio: HTMLAudioElement) => audio.currentTime
+      );
+      expect(initialTime).toBe(0);
+
+      // Test setting current time
+      await basicAudio.evaluate((audio: HTMLAudioElement) => {
+        audio.currentTime = 10;
+      });
+
+      const setTime = await basicAudio.evaluate(
+        (audio: HTMLAudioElement) => audio.currentTime
+      );
+      expect(setTime).toBe(10);
+
+      // Test duration (should be available after metadata loads)
+      const duration = await basicAudio.evaluate(
+        (audio: HTMLAudioElement) => audio.duration
+      );
+      expect(duration).toBeGreaterThan(0);
+      expect(duration).not.toBeNaN();
+
+      // Reset time
+      await basicAudio.evaluate((audio: HTMLAudioElement) => {
+        audio.currentTime = 0;
+      });
+    });
+  });
+
   test.describe('Accessibility Tests', () => {
     test('should verify audio player accessibility attributes', async ({
       page,
@@ -363,6 +560,41 @@ test.describe('Audio Player Tests', () => {
         const ariaLabel = await audio.getAttribute('aria-label');
         expect(ariaLabel).toBeTruthy();
       }
+    });
+
+    test('should verify keyboard navigation support', async ({ page }) => {
+      const basicAudio = page.getByTestId('audio-basic');
+      await expect(basicAudio).toBeVisible();
+
+      // Focus the audio element
+      await basicAudio.focus();
+      await expect(basicAudio).toBeFocused();
+
+      // Test that the audio element is focusable
+      const isFocusable = await basicAudio.evaluate(
+        (audio: HTMLAudioElement) => {
+          return audio.tabIndex >= 0;
+        }
+      );
+      expect(isFocusable).toBe(true);
+    });
+
+    test('should verify screen reader support', async ({ page }) => {
+      const basicAudio = page.getByTestId('audio-basic');
+      await expect(basicAudio).toBeVisible();
+
+      // Check for proper ARIA attributes
+      const ariaLabel = await basicAudio.getAttribute('aria-label');
+      expect(ariaLabel).toBe('Audio player');
+
+      const role = await basicAudio.getAttribute('role');
+      expect(role).toBe('application');
+
+      // Verify the audio element has proper semantic meaning
+      const tagName = await basicAudio.evaluate(
+        (audio: HTMLAudioElement) => audio.tagName
+      );
+      expect(tagName).toBe('AUDIO');
     });
   });
 
