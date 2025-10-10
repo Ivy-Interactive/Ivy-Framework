@@ -249,21 +249,6 @@ test.describe('Audio Player Tests', () => {
       });
       await expect(toggleButton).toBeVisible();
       await expect(toggleButton).toBeEnabled();
-
-      // Scroll to usage examples
-      const usageHeading = page.getByRole('heading', {
-        name: /Usage Examples/i,
-      });
-      await usageHeading.scrollIntoViewIfNeeded();
-      await expect(usageHeading).toBeVisible();
-
-      // Verify code block is present
-      const codeBlock = page.locator('pre').filter({ hasText: /new Audio/i });
-      await expect(codeBlock).toBeVisible();
-      const codeContent = await codeBlock.textContent();
-      expect(codeContent).toContain('new Audio');
-      expect(codeContent).toContain('.Loop(true)');
-      expect(codeContent).toContain('.Preload(AudioPreload.Auto)');
     });
 
     test('should verify button interaction in programmatic control section', async ({
@@ -595,30 +580,6 @@ test.describe('Audio Player Tests', () => {
         (audio: HTMLAudioElement) => audio.tagName
       );
       expect(tagName).toBe('AUDIO');
-    });
-  });
-
-  test.describe('Documentation and Code Examples', () => {
-    test('should display usage examples with code snippets', async ({
-      page,
-    }) => {
-      const usageHeading = page.getByRole('heading', {
-        name: /Usage Examples/i,
-      });
-      await usageHeading.scrollIntoViewIfNeeded();
-      await expect(usageHeading).toBeVisible();
-
-      // Verify code block contains all key methods
-      const codeBlock = page.locator('pre').filter({ hasText: /new Audio/i });
-      await expect(codeBlock).toBeVisible();
-
-      const codeContent = await codeBlock.textContent();
-      expect(codeContent).toContain('new Audio');
-      expect(codeContent).toContain('.Loop(true)');
-      expect(codeContent).toContain('.Preload(AudioPreload.Auto)');
-      expect(codeContent).toContain('.Muted(true)');
-      expect(codeContent).toContain('.Width(Size.Fraction(0.5f))');
-      expect(codeContent).toContain('.Height(Size.Units(12))');
     });
   });
 });

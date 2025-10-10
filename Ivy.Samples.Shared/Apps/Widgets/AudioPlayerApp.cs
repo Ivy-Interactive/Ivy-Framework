@@ -86,22 +86,6 @@ public class AudioPlayerApp : SampleBase
                       | themeAudio
                       | Text.Small("Try switching between light and dark themes to see the audio player adapt!")
                   ).Title("Theme Integration"))
-               | Layout.Vertical().Gap(4)
-                   | Text.H3("Usage Examples")
-                   | new Code("""
-                       // Basic audio player
-                       var audio = new Audio("path/to/audio.mp3");
-                       
-                       // Audio with custom settings
-                       var customAudio = new Audio("path/to/audio.mp3")
-                           .Loop(true)
-                           .Preload(AudioPreload.Auto)
-                           .Muted(true);
-                       
-                       // Custom sized audio
-                       var sizedAudio = new Audio("path/to/audio.mp3")
-                           .Width(Size.Fraction(0.5f))
-                           .Height(Size.Units(12));
-                       """, Languages.Csharp);
+                  ;
     }
 }
