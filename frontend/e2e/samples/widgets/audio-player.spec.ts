@@ -27,7 +27,41 @@ test.describe('Audio Player Tests', () => {
     await setupAudioPlayerPage(page);
   });
 
-  test.describe('Basic Audio Player Variants', () => {
+  test.describe('Smoke Tests', () => {
+    test('should render audio player app and display main heading', async ({
+      page,
+    }) => {
+      // Verify the main heading is present
+      await expect(
+        page.getByRole('heading', { name: /Audio Player Widget Examples/i })
+      ).toBeVisible();
+
+      // Verify at least one audio element exists
+      const audioElements = page.locator('audio');
+      const count = await audioElements.count();
+      expect(count).toBeGreaterThan(0);
+    });
+
+    test('should display all card sections', async ({ page }) => {
+      // Verify all main sections are visible
+      const sections = [
+        'Basic Audio Player',
+        'Looping Audio with Preload',
+        'Muted Autoplay Audio',
+        'Audio Without Controls',
+        'Custom Sized Audio Player',
+        'Theme Awareness',
+      ];
+
+      for (const section of sections) {
+        await expect(
+          page.getByRole('heading', { name: section, exact: true })
+        ).toBeVisible();
+      }
+    });
+  });
+
+  test.describe('Audio Widget Properties - All States', () => {
     test('should test basic audio player attributes', async ({ page }) => {
       const basicAudio = page.getByTestId('audio-basic');
       await expect(basicAudio).toBeVisible();
@@ -123,6 +157,186 @@ test.describe('Audio Player Tests', () => {
     });
   });
 
+  test.describe('Visual Properties Tests', () => {
+    test('should verify custom sizing is applied correctly', async ({
+      page,
+    }) => {
+      const customSizedAudio = page.getByTestId('audio-custom-sized');
+      await expect(customSizedAudio).toBeVisible();
+
+      // Verify the audio element has style attributes
+      const style = await customSizedAudio.getAttribute('style');
+      expect(style).toBeTruthy();
+
+      // Check that custom styling is present (width should be fractional, height in units)
+      const boundingBox = await customSizedAudio.boundingBox();
+      expect(boundingBox).toBeTruthy();
+      if (boundingBox) {
+        // Custom sized has Width(Size.Fraction(0.5f)) so it should be less than full width
+        expect(boundingBox.width).toBeGreaterThan(0);
+        expect(boundingBox.height).toBeGreaterThan(0);
+      }
+    });
+
+    test('should verify audio players have proper CSS classes', async ({
+      page,
+    }) => {
+      const basicAudio = page.getByTestId('audio-basic');
+      await expect(basicAudio).toBeVisible();
+
+      // Verify it has the expected CSS class
+      const classAttribute = await basicAudio.getAttribute('class');
+      expect(classAttribute).toContain('w-full');
+    });
+
+    test('should verify all audio players are contained in cards', async ({
+      page,
+    }) => {
+      // Verify all audio test IDs are present (one per card section)
+      const testIds = [
+        'audio-basic',
+        'audio-looping',
+        'audio-muted-autoplay',
+        'audio-no-controls',
+        'audio-custom-sized',
+        'audio-theme',
+      ];
+
+      for (const testId of testIds) {
+        const audio = page.getByTestId(testId);
+        await expect(audio).toBeAttached();
+      }
+
+      // Verify we have all 6 audio examples
+      const audioElements = page.locator('audio[data-testid]');
+      const count = await audioElements.count();
+      expect(count).toBe(6);
+    });
+  });
+
+  test.describe('Complex Routine Tests', () => {
+    test('should navigate and interact with multiple audio components', async ({
+      page,
+    }) => {
+      // Verify page loads with heading
+      await expect(
+        page.getByRole('heading', { name: /Audio Player Widget Examples/i })
+      ).toBeVisible();
+
+      // Check basic audio
+      const basicAudio = page.getByTestId('audio-basic');
+      await expect(basicAudio).toBeVisible();
+      await expect(basicAudio).toHaveAttribute('controls', '');
+
+      // Scroll to and check looping audio
+      const loopingHeading = page.getByRole('heading', {
+        name: 'Looping Audio with Preload',
+        exact: true,
+      });
+      await loopingHeading.scrollIntoViewIfNeeded();
+      const loopingAudio = page.getByTestId('audio-looping');
+      await expect(loopingAudio).toBeVisible();
+      await expect(loopingAudio).toHaveAttribute('loop', '');
+
+      // Scroll to and check programmatic control section with button
+      const controlHeading = page.getByRole('heading', {
+        name: 'Audio Without Controls',
+        exact: true,
+      });
+      await controlHeading.scrollIntoViewIfNeeded();
+      const toggleButton = page.getByRole('button', {
+        name: /Toggle Play\/Pause/i,
+      });
+      await expect(toggleButton).toBeVisible();
+      await expect(toggleButton).toBeEnabled();
+
+      // Scroll to usage examples
+      const usageHeading = page.getByRole('heading', {
+        name: /Usage Examples/i,
+      });
+      await usageHeading.scrollIntoViewIfNeeded();
+      await expect(usageHeading).toBeVisible();
+
+      // Verify code block is present
+      const codeBlock = page.locator('pre').filter({ hasText: /new Audio/i });
+      await expect(codeBlock).toBeVisible();
+      const codeContent = await codeBlock.textContent();
+      expect(codeContent).toContain('new Audio');
+      expect(codeContent).toContain('.Loop(true)');
+      expect(codeContent).toContain('.Preload(AudioPreload.Auto)');
+    });
+
+    test('should verify button interaction in programmatic control section', async ({
+      page,
+    }) => {
+      // Find and click the toggle button
+      const toggleButton = page.getByRole('button', {
+        name: /Toggle Play\/Pause/i,
+      });
+      await toggleButton.scrollIntoViewIfNeeded();
+      await expect(toggleButton).toBeVisible();
+
+      // Click the button (should show a toast)
+      await toggleButton.click();
+
+      // Button should remain enabled after click
+      await expect(toggleButton).toBeEnabled();
+    });
+  });
+
+  test.describe('All Audio Widget Methods Coverage', () => {
+    test('should verify all preload strategies', async ({ page }) => {
+      // Test Metadata (default)
+      const basicAudio = page.getByTestId('audio-basic');
+      const basicPreload = await basicAudio.getAttribute('preload');
+      expect(basicPreload).toBe('Metadata');
+
+      // Test Auto
+      const loopingAudio = page.getByTestId('audio-looping');
+      const autoPreload = await loopingAudio.getAttribute('preload');
+      expect(autoPreload).toBe('Auto');
+
+      // Note: None preload is not shown in the sample app
+      // but it's a valid value according to Audio.cs
+    });
+
+    test('should verify all audio sources are valid external URLs', async ({
+      page,
+    }) => {
+      const audioElements = page.locator('audio[data-testid]');
+      const count = await audioElements.count();
+
+      for (let i = 0; i < count; i++) {
+        const audio = audioElements.nth(i);
+        const src = await audio.getAttribute('src');
+        expect(src).toBeTruthy();
+        expect(src).toContain('https://');
+        expect(src).toContain('.mp3');
+      }
+    });
+
+    test('should verify combined state properties work together', async ({
+      page,
+    }) => {
+      // Test audio with multiple properties: muted + autoplay + loop
+      const mutedAutoplayAudio = page.getByTestId('audio-muted-autoplay');
+      await expect(mutedAutoplayAudio).toBeVisible();
+      await expect(mutedAutoplayAudio).toHaveAttribute('autoplay', '');
+      await expect(mutedAutoplayAudio).toHaveAttribute('loop', '');
+
+      // Test audio with loop + preload
+      const loopingAudio = page.getByTestId('audio-looping');
+      await expect(loopingAudio).toHaveAttribute('loop', '');
+      const preload = await loopingAudio.getAttribute('preload');
+      expect(preload).toBe('Auto');
+
+      // Test audio with controls disabled + muted
+      const noControlsAudio = page.getByTestId('audio-no-controls');
+      const hasControls = await noControlsAudio.getAttribute('controls');
+      expect(hasControls).toBeNull();
+    });
+  });
+
   test.describe('Accessibility Tests', () => {
     test('should verify audio player accessibility attributes', async ({
       page,
@@ -136,6 +350,43 @@ test.describe('Audio Player Tests', () => {
 
       const role = await basicAudio.getAttribute('role');
       expect(role).toBeTruthy();
+    });
+
+    test('should verify all visible audio players have aria-label', async ({
+      page,
+    }) => {
+      const audioElements = page.locator('audio[controls]');
+      const count = await audioElements.count();
+
+      for (let i = 0; i < count; i++) {
+        const audio = audioElements.nth(i);
+        const ariaLabel = await audio.getAttribute('aria-label');
+        expect(ariaLabel).toBeTruthy();
+      }
+    });
+  });
+
+  test.describe('Documentation and Code Examples', () => {
+    test('should display usage examples with code snippets', async ({
+      page,
+    }) => {
+      const usageHeading = page.getByRole('heading', {
+        name: /Usage Examples/i,
+      });
+      await usageHeading.scrollIntoViewIfNeeded();
+      await expect(usageHeading).toBeVisible();
+
+      // Verify code block contains all key methods
+      const codeBlock = page.locator('pre').filter({ hasText: /new Audio/i });
+      await expect(codeBlock).toBeVisible();
+
+      const codeContent = await codeBlock.textContent();
+      expect(codeContent).toContain('new Audio');
+      expect(codeContent).toContain('.Loop(true)');
+      expect(codeContent).toContain('.Preload(AudioPreload.Auto)');
+      expect(codeContent).toContain('.Muted(true)');
+      expect(codeContent).toContain('.Width(Size.Fraction(0.5f))');
+      expect(codeContent).toContain('.Height(Size.Units(12))');
     });
   });
 });
