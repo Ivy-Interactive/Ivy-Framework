@@ -12,6 +12,7 @@ interface AudioPlayerWidgetProps {
   muted?: boolean;
   preload?: 'none' | 'metadata' | 'auto';
   controls?: boolean;
+  'data-testid'?: string;
 }
 
 const getAudioUrl = (url: string): string => {
@@ -36,6 +37,7 @@ export const AudioPlayerWidget: React.FC<AudioPlayerWidgetProps> = ({
   muted = false,
   preload = 'metadata',
   controls = true,
+  'data-testid': dataTestId,
 }) => {
   const [hasError, setHasError] = useState(false);
 
@@ -86,6 +88,7 @@ export const AudioPlayerWidget: React.FC<AudioPlayerWidgetProps> = ({
       onError={() => setHasError(true)}
       aria-label="Audio player"
       role="application"
+      data-testid={dataTestId}
     >
       Your browser does not support the audio element.
     </audio>
