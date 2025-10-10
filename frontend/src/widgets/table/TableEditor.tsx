@@ -17,6 +17,8 @@ import { useTable } from './TableContext';
 import { tableStyles } from './styles/style';
 import { tableTheme } from './styles/theme';
 import { loadIconImage, getCachedIcon } from './utils/iconRenderer';
+import { getColumnTypeIcon } from './utils/columnHelpers';
+import { getSelectionProps } from './utils/selectionModes';
 
 interface TableEditorProps {
   hasOptions?: boolean;
@@ -34,9 +36,11 @@ export const TableEditor: React.FC<TableEditorProps> = ({
     hasMore,
     editable,
     config,
+    columnOrder,
     loadMoreData,
     handleColumnResize,
     handleSort,
+    handleColumnReorder,
   } = useTable();
 
   const {
@@ -45,7 +49,12 @@ export const TableEditor: React.FC<TableEditorProps> = ({
     allowCopySelection,
     allowSorting,
     freezeColumns,
+    showIndexColumn,
+    selectionMode,
+    showGroups,
   } = config;
+
+  const selectionProps = getSelectionProps(selectionMode);
 
   const gridRef = useRef<DataEditorRef>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -86,8 +95,14 @@ export const TableEditor: React.FC<TableEditorProps> = ({
     (cell: Item): GridCell => {
       const [col, row] = cell;
 
+      // Apply column order mapping
+      const orderedCols =
+        columnOrder.length === columns.length
+          ? columnOrder.map(idx => columns[idx])
+          : columns;
+
       // Safety check
-      if (row >= data.length || col >= columns.length) {
+      if (row >= data.length || col >= orderedCols.length) {
         return {
           kind: GridCellKind.Text,
           data: '',
@@ -98,8 +113,9 @@ export const TableEditor: React.FC<TableEditorProps> = ({
       }
 
       const rowData = data[row];
-      const cellValue = rowData.values[col];
-      const columnType = columns[col].type.toLowerCase();
+      const originalColumnIndex = columns.indexOf(orderedCols[col]);
+      const cellValue = rowData.values[originalColumnIndex];
+      const columnType = orderedCols[col].type.toLowerCase();
 
       // Handle null/undefined values
       if (cellValue === null || cellValue === undefined) {
@@ -217,7 +233,7 @@ export const TableEditor: React.FC<TableEditorProps> = ({
         readonly: !editable,
       };
     },
-    [data, columns, editable]
+    [data, columns, columnOrder, editable]
   );
 
   // Handle column header click for sorting
@@ -235,29 +251,40 @@ export const TableEditor: React.FC<TableEditorProps> = ({
   );
 
   // Convert our columns to GridColumn format with current widths
-  const gridColumns: GridColumn[] = columns.map((col, index) => {
-    const baseWidth = columnWidths[index.toString()] || col.width;
+  // Apply column order if available
+  const orderedColumns =
+    columnOrder.length === columns.length
+      ? columnOrder.map(idx => columns[idx])
+      : columns;
+
+  const gridColumns: GridColumn[] = orderedColumns.map((col, index) => {
+    const originalIndex = columns.indexOf(col);
+    const baseWidth = columnWidths[originalIndex.toString()] || col.width;
+    const icon = getColumnTypeIcon(col.type);
 
     // Make the last column fill the remaining space
-    if (index === columns.length - 1 && containerWidth > 0) {
-      const totalWidthOfOtherColumns = columns
+    if (index === orderedColumns.length - 1 && containerWidth > 0) {
+      const totalWidthOfOtherColumns = orderedColumns
         .slice(0, -1)
-        .reduce(
-          (sum, _, idx) =>
-            sum + (columnWidths[idx.toString()] || columns[idx].width),
-          0
-        );
+        .reduce((sum, c) => {
+          const idx = columns.indexOf(c);
+          return sum + (columnWidths[idx.toString()] || c.width);
+        }, 0);
 
       const remainingWidth = containerWidth - totalWidthOfOtherColumns;
       return {
         title: col.name,
         width: Math.max(baseWidth, remainingWidth) - 10,
+        icon,
+        group: showGroups ? col.group : undefined,
       };
     }
 
     return {
       title: col.name,
       width: baseWidth,
+      icon,
+      group: showGroups ? col.group : undefined,
     };
   });
 
@@ -336,11 +363,14 @@ export const TableEditor: React.FC<TableEditorProps> = ({
         freezeColumns={freezeColumns ?? 0}
         getCellsForSelection={(allowCopySelection ?? true) ? true : undefined}
         keybindings={{ search: false }}
-        columnSelect="none"
-        rangeSelect="rect"
+        rowSelect={selectionProps.rowSelect}
+        columnSelect={selectionProps.columnSelect}
+        rangeSelect={selectionProps.rangeSelect}
         width={containerWidth}
-        // TODO: inmplement handler for onColumnMoved
-        onColumnMoved={allowColumnReordering ? () => {} : undefined}
+        rowMarkers={showIndexColumn ? 'number' : 'none'}
+        rowMarkerStartIndex={showIndexColumn ? 1 : undefined}
+        onColumnMoved={allowColumnReordering ? handleColumnReorder : undefined}
+        groupHeaderHeight={showGroups ? 36 : undefined}
       />
     </div>
   );

@@ -30,6 +30,7 @@ interface TableContextType {
   config: DataTableConfiguration;
   activeFilter: Filter | null;
   activeSort: SortOrder[] | null;
+  columnOrder: number[];
 
   // Methods
   loadMoreData: () => Promise<void>;
@@ -37,9 +38,12 @@ interface TableContextType {
   handleSort: (columnName: string) => void;
   setActiveFilter: (filter: Filter | null) => void;
   setError: (error: string | null) => void;
+  handleColumnReorder: (startIndex: number, endIndex: number) => void;
 }
 
-const TableContext = createContext<TableContextType | undefined>(undefined);
+export const TableContext = createContext<TableContextType | undefined>(
+  undefined
+);
 
 interface TableProviderProps {
   children: React.ReactNode;
@@ -63,6 +67,7 @@ export const TableProvider: React.FC<TableProviderProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [activeFilter, setActiveFilter] = useState<Filter | null>(null);
   const [activeSort, setActiveSort] = useState<SortOrder[] | null>(null);
+  const [columnOrder, setColumnOrder] = useState<number[]>([]);
 
   const loadingRef = useRef(false);
   const currentRowCountRef = useRef(0);
@@ -112,6 +117,11 @@ export const TableProvider: React.FC<TableProviderProps> = ({
         setVisibleRows(result.rows.length);
         currentRowCountRef.current = result.rows.length;
         setHasMore(result.hasMore);
+
+        // Initialize column order when columns are first loaded
+        if (columnOrder.length === 0) {
+          setColumnOrder(result.columns.map((_, index) => index));
+        }
 
         // Initialize column widths only if not already set (first load)
         setColumnWidths(prevWidths => {
@@ -222,6 +232,19 @@ export const TableProvider: React.FC<TableProviderProps> = ({
     [allowSorting]
   );
 
+  // Handle column reorder
+  const handleColumnReorder = useCallback(
+    (startIndex: number, endIndex: number) => {
+      setColumnOrder(prevOrder => {
+        const newOrder = [...prevOrder];
+        const [movedIndex] = newOrder.splice(startIndex, 1);
+        newOrder.splice(endIndex, 0, movedIndex);
+        return newOrder;
+      });
+    },
+    []
+  );
+
   const value: TableContextType = {
     data,
     columns,
@@ -235,11 +258,13 @@ export const TableProvider: React.FC<TableProviderProps> = ({
     config,
     activeFilter,
     activeSort,
+    columnOrder,
     loadMoreData,
     handleColumnResize,
     handleSort,
     setActiveFilter,
     setError,
+    handleColumnReorder,
   };
 
   return (

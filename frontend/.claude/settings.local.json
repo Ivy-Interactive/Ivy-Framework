@@ -7,7 +7,14 @@
       "Bash(npm test:*)",
       "Bash(npm run build:*)",
       "Bash(cat:*)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:docs.grid.glideapps.com)",
+      "WebFetch(domain:glideapps.github.io)",
+      "WebSearch",
+      "Bash(npx playwright test:*)",
+      "Bash(npm run test:e2e:*)",
+      "Bash(npm run:*)"
     ],
     "deny": []
   }

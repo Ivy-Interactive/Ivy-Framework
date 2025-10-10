@@ -6,6 +6,7 @@ export interface DataColumn {
   name: string;
   type: string;
   width: number;
+  group?: string;
 }
 
 export interface DataTableConnection {
