@@ -80,7 +80,7 @@ test.describe('Audio Player Tests', () => {
 
       // Verify default preload
       const preload = await basicAudio.getAttribute('preload');
-      expect(preload).toBe('Metadata');
+      expect(preload).toBe('metadata');
     });
 
     test('should test looping audio player attributes', async ({ page }) => {
