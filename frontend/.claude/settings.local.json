@@ -14,7 +14,8 @@
       "WebSearch",
       "Bash(npx playwright test:*)",
       "Bash(npm run test:e2e:*)",
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "Bash(npx eslint:*)"
     ],
     "deny": []
   }

@@ -41,6 +41,7 @@ interface TableContextType {
   handleColumnReorder: (startIndex: number, endIndex: number) => void;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const TableContext = createContext<TableContextType | undefined>(
   undefined
 );
@@ -272,6 +273,7 @@ export const TableProvider: React.FC<TableProviderProps> = ({
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useTable = () => {
   const context = useContext(TableContext);
   if (!context) {
