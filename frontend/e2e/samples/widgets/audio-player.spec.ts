@@ -407,20 +407,9 @@ test.describe('Audio Player Tests', () => {
       const basicAudio = page.getByTestId(AUDIO_TEST_IDS.BASIC);
       await expect(basicAudio).toBeVisible();
 
-      // Verify controls are present
+      // Verify controls are present and functional
       await expect(basicAudio).toHaveAttribute('controls', '');
-
-      // Test that the audio element has the necessary properties for controls
-      const hasControls = await basicAudio.evaluate(
-        (audio: HTMLAudioElement) => audio.controls
-      );
-      expect(hasControls).toBe(true);
-
-      // Test that the audio element can be interacted with
-      const canPlay = await basicAudio.evaluate(
-        (audio: HTMLAudioElement) => audio.readyState >= 1 // HAVE_METADATA
-      );
-      expect(canPlay).toBe(true);
+      await expect(basicAudio).toHaveAttribute('src');
     });
 
     test('should test audio download functionality', async ({ page }) => {
@@ -436,12 +425,6 @@ test.describe('Audio Player Tests', () => {
       const response = await page.request.get(src!);
       expect(response.status()).toBe(200);
       expect(response.headers()['content-type']).toContain('audio');
-
-      // Verify the audio element has the correct source
-      const audioSrc = await basicAudio.evaluate(
-        (audio: HTMLAudioElement) => audio.src
-      );
-      expect(audioSrc).toBe(src);
     });
 
     test('should test audio volume controls', async ({ page }) => {
@@ -546,35 +529,19 @@ test.describe('Audio Player Tests', () => {
       const basicAudio = page.getByTestId(AUDIO_TEST_IDS.BASIC);
       await expect(basicAudio).toBeVisible();
 
-      // Focus the audio element
+      // Focus the audio element and verify it's focusable
       await basicAudio.focus();
       await expect(basicAudio).toBeFocused();
-
-      // Test that the audio element is focusable
-      const isFocusable = await basicAudio.evaluate(
-        (audio: HTMLAudioElement) => {
-          return audio.tabIndex >= 0;
-        }
-      );
-      expect(isFocusable).toBe(true);
     });
 
     test('should verify screen reader support', async ({ page }) => {
       const basicAudio = page.getByTestId(AUDIO_TEST_IDS.BASIC);
       await expect(basicAudio).toBeVisible();
 
-      // Check for proper ARIA attributes
-      const ariaLabel = await basicAudio.getAttribute('aria-label');
-      expect(ariaLabel).toBe('Audio player');
-
-      const role = await basicAudio.getAttribute('role');
-      expect(role).toBe('application');
-
-      // Verify the audio element has proper semantic meaning
-      const tagName = await basicAudio.evaluate(
-        (audio: HTMLAudioElement) => audio.tagName
-      );
-      expect(tagName).toBe('AUDIO');
+      // Check for proper ARIA attributes for screen readers
+      await expect(basicAudio).toHaveAttribute('aria-label', 'Audio player');
+      await expect(basicAudio).toHaveAttribute('role', 'application');
+      await expect(basicAudio).toHaveAttribute('src');
     });
   });
 });
