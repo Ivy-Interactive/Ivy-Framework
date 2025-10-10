@@ -72,6 +72,7 @@ public class AudioPlayerApp : SampleBase
                        | noControlsAudio
                        | new Button("Toggle Play/Pause", _ => client.Toast("In a real app, this would control the audio programmatically"))
                            .Variant(ButtonVariant.Outline)
+                           .TestId("toggle-play-pause-button")
                    ).Title("Programmatic Control"))
                    | (new Card(
                        Layout.Vertical().Gap(4)

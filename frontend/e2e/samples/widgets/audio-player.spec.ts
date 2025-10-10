@@ -243,9 +243,7 @@ test.describe('Audio Player Tests', () => {
         exact: true,
       });
       await controlHeading.scrollIntoViewIfNeeded();
-      const toggleButton = page.getByRole('button', {
-        name: /Toggle Play\/Pause/i,
-      });
+      const toggleButton = page.getByTestId('toggle-play-pause-button');
       await expect(toggleButton).toBeVisible();
       await expect(toggleButton).toBeEnabled();
     });
@@ -254,9 +252,7 @@ test.describe('Audio Player Tests', () => {
       page,
     }) => {
       // Find and click the toggle button
-      const toggleButton = page.getByRole('button', {
-        name: /Toggle Play\/Pause/i,
-      });
+      const toggleButton = page.getByTestId('toggle-play-pause-button');
       await toggleButton.scrollIntoViewIfNeeded();
       await expect(toggleButton).toBeVisible();
 
