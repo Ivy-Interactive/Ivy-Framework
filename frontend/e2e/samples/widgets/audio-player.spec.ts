@@ -328,7 +328,7 @@ test.describe('Audio Player Tests', () => {
       const loopingAudio = page.getByTestId('audio-looping');
       await expect(loopingAudio).toHaveAttribute('loop', '');
       const preload = await loopingAudio.getAttribute('preload');
-      expect(preload).toBe('Auto');
+      expect(preload).toBe('auto');
 
       // Test audio with controls disabled + muted
       const noControlsAudio = page.getByTestId('audio-no-controls');
