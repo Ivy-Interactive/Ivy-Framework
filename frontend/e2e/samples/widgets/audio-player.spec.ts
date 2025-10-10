@@ -1,5 +1,26 @@
 import { test, expect, type Page } from '@playwright/test';
 
+// Constants
+const AUDIO_TEST_IDS = {
+  BASIC: 'audio-basic',
+  LOOPING: 'audio-looping',
+  MUTED_AUTOPLAY: 'audio-muted-autoplay',
+  NO_CONTROLS: 'audio-no-controls',
+  CUSTOM_SIZED: 'audio-custom-sized',
+  THEME: 'audio-theme',
+} as const;
+
+const BUTTON_TEST_IDS = {
+  TOGGLE_PLAY_PAUSE: 'toggle-play-pause-button',
+} as const;
+
+const EXPECTED_VALUES = {
+  PRELOAD_METADATA: 'metadata',
+  PRELOAD_AUTO: 'auto',
+  AUDIO_FILE_EXTENSION: '.mp3',
+  AUDIO_URL_PROTOCOL: 'https://',
+} as const;
+
 // Shared setup function for audio player tests
 async function setupAudioPlayerPage(page: Page): Promise<void> {
   await page.goto('/');
@@ -44,7 +65,7 @@ test.describe('Audio Player Tests', () => {
 
   test.describe('Audio Widget Properties - All States', () => {
     test('should test basic audio player attributes', async ({ page }) => {
-      const basicAudio = page.getByTestId('audio-basic');
+      const basicAudio = page.getByTestId(AUDIO_TEST_IDS.BASIC);
       await expect(basicAudio).toBeVisible();
 
       // Verify it has controls
@@ -61,11 +82,11 @@ test.describe('Audio Player Tests', () => {
 
       // Verify default preload
       const preload = await basicAudio.getAttribute('preload');
-      expect(preload).toBe('metadata');
+      expect(preload).toBe(EXPECTED_VALUES.PRELOAD_METADATA);
     });
 
     test('should test looping audio player attributes', async ({ page }) => {
-      const loopingAudio = page.getByTestId('audio-looping');
+      const loopingAudio = page.getByTestId(AUDIO_TEST_IDS.LOOPING);
       await expect(loopingAudio).toBeVisible();
 
       // Verify loop attribute is set
@@ -73,7 +94,7 @@ test.describe('Audio Player Tests', () => {
 
       // Verify preload is auto
       const preload = await loopingAudio.getAttribute('preload');
-      expect(preload).toBe('auto');
+      expect(preload).toBe(EXPECTED_VALUES.PRELOAD_AUTO);
 
       // Verify it has controls
       await expect(loopingAudio).toHaveAttribute('controls', '');
@@ -82,7 +103,9 @@ test.describe('Audio Player Tests', () => {
     test('should test muted autoplay audio player attributes', async ({
       page,
     }) => {
-      const mutedAutoplayAudio = page.getByTestId('audio-muted-autoplay');
+      const mutedAutoplayAudio = page.getByTestId(
+        AUDIO_TEST_IDS.MUTED_AUTOPLAY
+      );
       await expect(mutedAutoplayAudio).toBeVisible();
 
       // Verify autoplay attribute is set
@@ -96,7 +119,7 @@ test.describe('Audio Player Tests', () => {
     });
 
     test('should test audio player without controls', async ({ page }) => {
-      const noControlsAudio = page.getByTestId('audio-no-controls');
+      const noControlsAudio = page.getByTestId(AUDIO_TEST_IDS.NO_CONTROLS);
 
       // Audio without controls is in the DOM but not visible - this is expected
       await expect(noControlsAudio).toBeAttached();
@@ -112,7 +135,7 @@ test.describe('Audio Player Tests', () => {
     });
 
     test('should test custom sized audio player', async ({ page }) => {
-      const customSizedAudio = page.getByTestId('audio-custom-sized');
+      const customSizedAudio = page.getByTestId(AUDIO_TEST_IDS.CUSTOM_SIZED);
       await expect(customSizedAudio).toBeVisible();
 
       // Verify it has a valid source
@@ -125,7 +148,7 @@ test.describe('Audio Player Tests', () => {
     });
 
     test('should test theme awareness audio player', async ({ page }) => {
-      const themeAudio = page.getByTestId('audio-theme');
+      const themeAudio = page.getByTestId(AUDIO_TEST_IDS.THEME);
       await expect(themeAudio).toBeVisible();
 
       // Verify it has a valid source
@@ -142,7 +165,7 @@ test.describe('Audio Player Tests', () => {
     test('should verify custom sizing is applied correctly', async ({
       page,
     }) => {
-      const customSizedAudio = page.getByTestId('audio-custom-sized');
+      const customSizedAudio = page.getByTestId(AUDIO_TEST_IDS.CUSTOM_SIZED);
       await expect(customSizedAudio).toBeVisible();
 
       // Verify the audio element has style attributes
@@ -162,7 +185,7 @@ test.describe('Audio Player Tests', () => {
     test('should verify audio players have proper CSS classes', async ({
       page,
     }) => {
-      const basicAudio = page.getByTestId('audio-basic');
+      const basicAudio = page.getByTestId(AUDIO_TEST_IDS.BASIC);
       await expect(basicAudio).toBeVisible();
 
       // Verify it has the expected CSS class
@@ -174,14 +197,7 @@ test.describe('Audio Player Tests', () => {
       page,
     }) => {
       // Verify all audio test IDs are present (one per card section)
-      const testIds = [
-        'audio-basic',
-        'audio-looping',
-        'audio-muted-autoplay',
-        'audio-no-controls',
-        'audio-custom-sized',
-        'audio-theme',
-      ];
+      const testIds = Object.values(AUDIO_TEST_IDS);
 
       for (const testId of testIds) {
         const audio = page.getByTestId(testId);
@@ -205,7 +221,7 @@ test.describe('Audio Player Tests', () => {
       ).toBeVisible();
 
       // Check basic audio
-      const basicAudio = page.getByTestId('audio-basic');
+      const basicAudio = page.getByTestId(AUDIO_TEST_IDS.BASIC);
       await expect(basicAudio).toBeVisible();
       await expect(basicAudio).toHaveAttribute('controls', '');
 
@@ -215,7 +231,7 @@ test.describe('Audio Player Tests', () => {
         exact: true,
       });
       await loopingHeading.scrollIntoViewIfNeeded();
-      const loopingAudio = page.getByTestId('audio-looping');
+      const loopingAudio = page.getByTestId(AUDIO_TEST_IDS.LOOPING);
       await expect(loopingAudio).toBeVisible();
       await expect(loopingAudio).toHaveAttribute('loop', '');
 
@@ -225,7 +241,7 @@ test.describe('Audio Player Tests', () => {
         exact: true,
       });
       await controlHeading.scrollIntoViewIfNeeded();
-      const toggleButton = page.getByTestId('toggle-play-pause-button');
+      const toggleButton = page.getByTestId(BUTTON_TEST_IDS.TOGGLE_PLAY_PAUSE);
       await expect(toggleButton).toBeVisible();
       await expect(toggleButton).toBeEnabled();
     });
@@ -234,7 +250,7 @@ test.describe('Audio Player Tests', () => {
       page,
     }) => {
       // Find and click the toggle button
-      const toggleButton = page.getByTestId('toggle-play-pause-button');
+      const toggleButton = page.getByTestId(BUTTON_TEST_IDS.TOGGLE_PLAY_PAUSE);
       await toggleButton.scrollIntoViewIfNeeded();
       await expect(toggleButton).toBeVisible();
 
@@ -249,12 +265,12 @@ test.describe('Audio Player Tests', () => {
   test.describe('All Audio Widget Methods Coverage', () => {
     test('should verify all preload strategies', async ({ page }) => {
       // Test metadata (default)
-      const basicAudio = page.getByTestId('audio-basic');
+      const basicAudio = page.getByTestId(AUDIO_TEST_IDS.BASIC);
       const basicPreload = await basicAudio.getAttribute('preload');
       expect(basicPreload).toBe('metadata');
 
       // Test auto
-      const loopingAudio = page.getByTestId('audio-looping');
+      const loopingAudio = page.getByTestId(AUDIO_TEST_IDS.LOOPING);
       const autoPreload = await loopingAudio.getAttribute('preload');
       expect(autoPreload).toBe('auto');
 
@@ -272,8 +288,8 @@ test.describe('Audio Player Tests', () => {
         const audio = audioElements.nth(i);
         const src = await audio.getAttribute('src');
         expect(src).toBeTruthy();
-        expect(src).toContain('https://');
-        expect(src).toContain('.mp3');
+        expect(src).toContain(EXPECTED_VALUES.AUDIO_URL_PROTOCOL);
+        expect(src).toContain(EXPECTED_VALUES.AUDIO_FILE_EXTENSION);
       }
     });
 
@@ -281,19 +297,21 @@ test.describe('Audio Player Tests', () => {
       page,
     }) => {
       // Test audio with multiple properties: muted + autoplay + loop
-      const mutedAutoplayAudio = page.getByTestId('audio-muted-autoplay');
+      const mutedAutoplayAudio = page.getByTestId(
+        AUDIO_TEST_IDS.MUTED_AUTOPLAY
+      );
       await expect(mutedAutoplayAudio).toBeVisible();
       await expect(mutedAutoplayAudio).toHaveAttribute('autoplay', '');
       await expect(mutedAutoplayAudio).toHaveAttribute('loop', '');
 
       // Test audio with loop + preload
-      const loopingAudio = page.getByTestId('audio-looping');
+      const loopingAudio = page.getByTestId(AUDIO_TEST_IDS.LOOPING);
       await expect(loopingAudio).toHaveAttribute('loop', '');
       const preload = await loopingAudio.getAttribute('preload');
-      expect(preload).toBe('auto');
+      expect(preload).toBe(EXPECTED_VALUES.PRELOAD_AUTO);
 
       // Test audio with controls disabled + muted
-      const noControlsAudio = page.getByTestId('audio-no-controls');
+      const noControlsAudio = page.getByTestId(AUDIO_TEST_IDS.NO_CONTROLS);
       const hasControls = await noControlsAudio.getAttribute('controls');
       expect(hasControls).toBeNull();
     });
@@ -301,7 +319,7 @@ test.describe('Audio Player Tests', () => {
 
   test.describe('Interactive Controls Tests', () => {
     test('should test mute button functionality', async ({ page }) => {
-      const basicAudio = page.getByTestId('audio-basic');
+      const basicAudio = page.getByTestId(AUDIO_TEST_IDS.BASIC);
       await expect(basicAudio).toBeVisible();
 
       // Wait for audio to be ready
@@ -335,7 +353,7 @@ test.describe('Audio Player Tests', () => {
     });
 
     test('should test playback speed controls', async ({ page }) => {
-      const basicAudio = page.getByTestId('audio-basic');
+      const basicAudio = page.getByTestId(AUDIO_TEST_IDS.BASIC);
       await expect(basicAudio).toBeVisible();
 
       // Wait for audio to be ready
@@ -386,7 +404,7 @@ test.describe('Audio Player Tests', () => {
     test('should test audio controls visibility and functionality', async ({
       page,
     }) => {
-      const basicAudio = page.getByTestId('audio-basic');
+      const basicAudio = page.getByTestId(AUDIO_TEST_IDS.BASIC);
       await expect(basicAudio).toBeVisible();
 
       // Verify controls are present
@@ -406,7 +424,7 @@ test.describe('Audio Player Tests', () => {
     });
 
     test('should test audio download functionality', async ({ page }) => {
-      const basicAudio = page.getByTestId('audio-basic');
+      const basicAudio = page.getByTestId(AUDIO_TEST_IDS.BASIC);
       await expect(basicAudio).toBeVisible();
 
       // Get the audio source URL
@@ -427,7 +445,7 @@ test.describe('Audio Player Tests', () => {
     });
 
     test('should test audio volume controls', async ({ page }) => {
-      const basicAudio = page.getByTestId('audio-basic');
+      const basicAudio = page.getByTestId(AUDIO_TEST_IDS.BASIC);
       await expect(basicAudio).toBeVisible();
 
       // Test default volume (should be 1.0)
@@ -463,7 +481,7 @@ test.describe('Audio Player Tests', () => {
     });
 
     test('should test audio time controls', async ({ page }) => {
-      const basicAudio = page.getByTestId('audio-basic');
+      const basicAudio = page.getByTestId(AUDIO_TEST_IDS.BASIC);
       await expect(basicAudio).toBeVisible();
 
       // Test initial time (should be 0)
@@ -500,7 +518,7 @@ test.describe('Audio Player Tests', () => {
     test('should verify audio player accessibility attributes', async ({
       page,
     }) => {
-      const basicAudio = page.getByTestId('audio-basic');
+      const basicAudio = page.getByTestId(AUDIO_TEST_IDS.BASIC);
       await expect(basicAudio).toBeVisible();
 
       // Check for accessibility attributes
@@ -525,7 +543,7 @@ test.describe('Audio Player Tests', () => {
     });
 
     test('should verify keyboard navigation support', async ({ page }) => {
-      const basicAudio = page.getByTestId('audio-basic');
+      const basicAudio = page.getByTestId(AUDIO_TEST_IDS.BASIC);
       await expect(basicAudio).toBeVisible();
 
       // Focus the audio element
@@ -542,7 +560,7 @@ test.describe('Audio Player Tests', () => {
     });
 
     test('should verify screen reader support', async ({ page }) => {
-      const basicAudio = page.getByTestId('audio-basic');
+      const basicAudio = page.getByTestId(AUDIO_TEST_IDS.BASIC);
       await expect(basicAudio).toBeVisible();
 
       // Check for proper ARIA attributes
