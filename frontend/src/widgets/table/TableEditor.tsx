@@ -13,10 +13,10 @@ import React, {
   useState,
   useMemo,
 } from 'react';
-import { useTable } from '../context/TableContext';
-import { tableStyles } from '../styles/style';
-import { tableTheme } from '../styles/theme';
-import { loadIconImage, getCachedIcon } from '../utils/iconRenderer';
+import { useTable } from './TableContext';
+import { tableStyles } from './styles/style';
+import { tableTheme } from './styles/theme';
+import { loadIconImage, getCachedIcon } from './utils/iconRenderer';
 
 interface TableEditorProps {
   hasOptions?: boolean;

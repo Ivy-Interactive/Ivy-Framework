@@ -13,8 +13,8 @@ import {
   DataRow,
   DataTableConfiguration,
   DataTableConnection,
-} from '../types/types';
-import { fetchTableData } from '../utils/tableDataFetcher';
+} from './types/types';
+import { fetchTableData } from './utils/tableDataFetcher';
 
 interface TableContextType {
   // State
