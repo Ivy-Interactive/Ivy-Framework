@@ -32,7 +32,7 @@ const EmbedCard: React.FC<EmbedCardProps> = ({
       className={`${platform.toLowerCase()}-embed border rounded-lg bg-card shadow-sm w-full @container`}
     >
       {/* Button layout - shown when container is wide enough */}
-      <div className="@[30rem]:flex hidden items-center gap-3 p-4">
+      <div className="@[30rem]:flex hidden items-center gap-3 p-2">
         <div className="flex-shrink-0">
           <Icon name={iconName} size={32} className={iconColor} />
         </div>
@@ -61,7 +61,7 @@ const EmbedCard: React.FC<EmbedCardProps> = ({
         href={sanitizedUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className="@[30rem]:hidden flex items-center gap-3 p-4 hover:bg-accent/5 transition-colors rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+        className="@[30rem]:hidden flex items-center gap-3 p-2 hover:bg-accent transition-colors rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
       >
         <div className="flex-shrink-0">
           <Icon name={iconName} size={24} className={iconColor} />
