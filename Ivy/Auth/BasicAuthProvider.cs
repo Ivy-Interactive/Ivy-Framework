@@ -92,7 +92,7 @@ public class BasicAuthProvider : IAuthProvider
 
     private AuthToken CreateToken(string user, DateTimeOffset now, long authTime)
     {
-        var expiresAt = now.AddMinutes(15);
+        var expiresAt = now.AddSeconds(25);
         var claims = new[] {
             new Claim(JwtRegisteredClaimNames.Sub, user),
             new Claim(TokenUseClaim, "access"),
