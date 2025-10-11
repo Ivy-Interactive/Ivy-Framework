@@ -157,30 +157,19 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
         }`}
       >
         {hasContent(slots?.SidebarHeader) && (
-          <div className="flex flex-col shrink-0 p-2 space-y-4 w-full min-w-0 overflow-hidden">
+          <div className="flex flex-col shrink-0 p-2 space-y-4">
             {slots?.SidebarHeader}
           </div>
         )}
         {slots?.SidebarContent && (
-          <div className="flex-1 overflow-hidden min-w-0">
+          <div className="flex-1 overflow-hidden">
             <ScrollArea className="h-full w-full">
-              <div className="p-2 w-full max-w-[240px] min-w-0 overflow-hidden bg-transparent">
-                <div className="space-y-2 w-full min-w-0 overflow-hidden bg-transparent">
-                  {slots.SidebarContent?.map((child, index) => (
-                    <div
-                      key={index}
-                      className="w-full min-w-0 overflow-hidden bg-transparent"
-                    >
-                      {child}
-                    </div>
-                  ))}
-                </div>
-              </div>
+              <div className="p-2 space-y-2">{slots.SidebarContent}</div>
             </ScrollArea>
           </div>
         )}
         {hasContent(slots?.SidebarFooter) && (
-          <div className="flex flex-col shrink-0 w-full min-w-0 overflow-hidden">
+          <div className="flex flex-col shrink-0">
             <div className="flex flex-col px-4 py-3 gap-4 min-h-0">
               {slots?.SidebarFooter}
             </div>
