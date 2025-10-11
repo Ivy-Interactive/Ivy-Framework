@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React from 'react';
 
 interface EmbedErrorFallbackProps {
   url: string;
@@ -9,30 +9,6 @@ const EmbedErrorFallback: React.FC<EmbedErrorFallbackProps> = ({
   url,
   platform,
 }) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [isNarrow, setIsNarrow] = useState(false);
-
-  useEffect(() => {
-    const checkWidth = () => {
-      if (containerRef.current) {
-        const width = containerRef.current.offsetWidth;
-        // If container is less than 400px wide, show compact version
-        setIsNarrow(width < 400);
-      }
-    };
-
-    checkWidth();
-
-    const resizeObserver = new ResizeObserver(checkWidth);
-    if (containerRef.current) {
-      resizeObserver.observe(containerRef.current);
-    }
-
-    return () => {
-      resizeObserver.disconnect();
-    };
-  }, []);
-
   const getErrorTitle = () => {
     if (platform === 'Unsupported') {
       return 'Unsupported URL';
@@ -50,58 +26,64 @@ const EmbedErrorFallback: React.FC<EmbedErrorFallbackProps> = ({
     return 'Failed to load embed. Please try again or visit the link directly.';
   };
 
+  const getLinkText = () => {
+    if (platform === 'Unsupported') {
+      return 'Visit Link';
+    }
+    return 'View Original';
+  };
+
   return (
-    <div
-      ref={containerRef}
-      className="embed-error border rounded-lg p-4 bg-card shadow-sm w-full min-w-0 overflow-hidden"
-    >
-      {!isNarrow ? (
-        // Normal width: Original horizontal layout
-        <div className="flex items-center space-x-3">
-          <div className="flex-1 min-w-0">
-            <h3 className="text-lg font-semibold text-card-foreground truncate">
-              {getErrorTitle()}
-            </h3>
-            <p className="text-sm text-muted-foreground">
-              {getErrorDescription()}
-            </p>
-          </div>
-          <div className="flex-shrink-0">
-            <a
-              href={url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center px-3 py-2 border shadow-sm text-sm font-medium rounded-md text-card-foreground bg-card hover:bg-accent focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
-            >
-              View Original
-            </a>
+    <div className="embed-error border rounded-lg bg-card shadow-sm w-full @container">
+      {/* Button layout - shown when container is wide enough */}
+      <div className="@[30rem]:flex hidden items-center gap-3 p-4">
+        <div className="flex-shrink-0">
+          <div className="w-8 h-8 rounded-full bg-destructive flex items-center justify-center">
+            <span className="text-destructive-foreground text-sm font-bold">
+              !
+            </span>
           </div>
         </div>
-      ) : (
-        // Small width: Compact button style
-        <div className="-m-4">
+        <div className="flex-1 min-w-0">
+          <h3 className="text-lg font-semibold text-card-foreground line-clamp-1">
+            {getErrorTitle()}
+          </h3>
+          <p className="text-sm text-muted-foreground line-clamp-1">
+            {getErrorDescription()}
+          </p>
+        </div>
+        <div className="flex-shrink-0">
           <a
             href={url}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-3 w-full px-4 py-3 bg-card hover:bg-accent text-card-foreground rounded-lg transition-all duration-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+            className="inline-flex items-center px-3 py-2 border shadow-sm text-sm font-medium rounded-md text-card-foreground bg-card hover:bg-accent focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary whitespace-nowrap"
           >
-            <div className="flex-shrink-0">
-              <div className="w-5 h-5 rounded-full bg-red flex items-center justify-center">
-                <span className="text-white text-xs font-bold">!</span>
-              </div>
-            </div>
-            <div className="flex-1 min-w-0">
-              <span className="text-sm font-medium block truncate">
-                {getErrorTitle()}
-              </span>
-              <span className="text-xs text-muted-foreground block truncate">
-                {getErrorDescription()}
-              </span>
-            </div>
+            {getLinkText()}
           </a>
         </div>
-      )}
+      </div>
+
+      {/* Clickable card layout - shown when container is too narrow */}
+      <a
+        href={url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="@[30rem]:hidden flex items-center gap-3 p-4 hover:bg-accent/5 transition-colors rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+      >
+        <div className="flex-shrink-0">
+          <div className="w-6 h-6 rounded-full bg-destructive flex items-center justify-center">
+            <span className="text-destructive-foreground text-xs font-bold">
+              !
+            </span>
+          </div>
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="text-sm font-medium text-card-foreground line-clamp-2">
+            {getLinkText()}
+          </div>
+        </div>
+      </a>
     </div>
   );
 };
