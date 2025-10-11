@@ -5,15 +5,10 @@ async function setupButtonPage(page: Page): Promise<void> {
   await page.goto('/');
   await page.waitForLoadState('networkidle');
 
-  // Find the sidebar search input
   const searchInput = page.getByTestId('sidebar-search');
   await expect(searchInput).toBeVisible();
-
-  // Click the search input
   await searchInput.click();
-  // Type 'button'
   await searchInput.fill('button');
-  // Press Enter
   await searchInput.press('Enter');
 
   const firstResult = page
@@ -21,8 +16,6 @@ async function setupButtonPage(page: Page): Promise<void> {
     .filter({ hasText: /^Button$/i })
     .first();
   await firstResult.click();
-
-  // Wait for navigation
   await page.waitForLoadState('networkidle');
 }
 
@@ -31,251 +24,228 @@ test.describe('Button Widget Tests', () => {
     await setupButtonPage(page);
   });
 
-  test.describe('Smoke Tests', () => {
-    test('should render button app with heading and multiple buttons', async ({
-      page,
-    }) => {
-      // Verify an H1 heading exists
-      const h1Heading = page.getByRole('heading', { level: 1 });
-      await expect(h1Heading.first()).toBeVisible();
-
-      // Verify multiple buttons exist
-      const buttons = page.getByRole('button');
-      expect(await buttons.count()).toBeGreaterThan(0);
-    });
+  test('should render button app with heading and multiple buttons', async ({
+    page,
+  }) => {
+    await expect(page.getByRole('heading', { level: 1 }).first()).toBeVisible();
+    expect(await page.getByRole('button').count()).toBeGreaterThan(0);
   });
 
-  test.describe('Button Variants Tests', () => {
-    test('should render and interact with all button variants', async ({
-      page,
-    }) => {
-      const variants = [
-        'Primary',
-        'Destructive',
-        'Secondary',
-        'Success',
-        'Warning',
-        'Info',
-        'Outline',
-        'Ghost',
-        'Link',
-      ];
+  test('should render and interact with all button variants', async ({
+    page,
+  }) => {
+    const variants = [
+      'Primary',
+      'Destructive',
+      'Secondary',
+      'Success',
+      'Warning',
+      'Info',
+      'Outline',
+      'Ghost',
+      'Link',
+    ];
 
-      // Test each variant is visible and clickable
-      for (const variant of variants) {
-        const button = page
-          .getByRole('button', { name: variant, exact: true })
-          .first();
-        await expect(button).toBeVisible();
-        await expect(button).toBeEnabled();
-
-        // Click the button
-        await button.click();
-
-        // Verify it's still enabled after click
-        await expect(button).toBeEnabled();
-      }
-    });
-
-    test('should verify variant-specific styling', async ({ page }) => {
-      // Test Destructive variant has destructive class
-      const destructiveButton = page
-        .getByRole('button', { name: 'Destructive', exact: true })
+    for (const variant of variants) {
+      const button = page
+        .getByRole('button', { name: variant, exact: true })
         .first();
-      const destructiveClass = await destructiveButton.getAttribute('class');
-      expect(destructiveClass).toContain('destructive');
-
-      // Test Outline variant has outline class
-      const outlineButton = page
-        .getByRole('button', { name: 'Outline', exact: true })
-        .first();
-      const outlineClass = await outlineButton.getAttribute('class');
-      expect(outlineClass).toContain('outline');
-
-      // Test Secondary variant has secondary class
-      const secondaryButton = page
-        .getByRole('button', { name: 'Secondary', exact: true })
-        .first();
-      const secondaryClass = await secondaryButton.getAttribute('class');
-      expect(secondaryClass).toContain('secondary');
-    });
+      await expect(button).toBeVisible();
+      await expect(button).toBeEnabled();
+      await button.click();
+      await expect(button).toBeEnabled();
+    }
   });
 
-  test.describe('Button Sizes Tests', () => {
-    test('should render all button sizes', async ({ page }) => {
-      // Test Small buttons
-      const smallButton = page.getByRole('button', { name: 'Small' }).first();
-      await expect(smallButton).toBeVisible();
+  test('should verify variant-specific styling', async ({ page }) => {
+    const variantsToCheck = [
+      { name: 'Destructive', className: 'destructive' },
+      { name: 'Outline', className: 'outline' },
+      { name: 'Secondary', className: 'secondary' },
+    ];
 
-      // Test Medium buttons
-      const mediumButton = page.getByRole('button', { name: 'Medium' }).first();
-      await expect(mediumButton).toBeVisible();
-
-      // Test Large buttons
-      const largeButton = page.getByRole('button', { name: 'Large' }).first();
-      await expect(largeButton).toBeVisible();
-    });
-
-    test('should verify size hierarchy', async ({ page }) => {
-      const smallButton = page.getByRole('button', { name: 'Small' }).first();
-      const mediumButton = page.getByRole('button', { name: 'Medium' }).first();
-      const largeButton = page.getByRole('button', { name: 'Large' }).first();
-
-      const smallBox = await smallButton.boundingBox();
-      const mediumBox = await mediumButton.boundingBox();
-      const largeBox = await largeButton.boundingBox();
-
-      expect(smallBox).toBeTruthy();
-      expect(mediumBox).toBeTruthy();
-      expect(largeBox).toBeTruthy();
-
-      // Verify small < medium < large
-      if (smallBox && mediumBox && largeBox) {
-        expect(smallBox.height).toBeLessThan(mediumBox.height);
-        expect(mediumBox.height).toBeLessThan(largeBox.height);
-      }
-    });
+    for (const { name, className } of variantsToCheck) {
+      const button = page.getByRole('button', { name, exact: true }).first();
+      const buttonClass = await button.getAttribute('class');
+      expect(buttonClass).toContain(className);
+    }
   });
 
-  test.describe('Button States Tests', () => {
-    test('should handle disabled buttons', async ({ page }) => {
-      // Scroll to states section
-      await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+  test('should render all button sizes with correct hierarchy', async ({
+    page,
+  }) => {
+    const sizes = ['Small', 'Medium', 'Large'];
 
-      // Check for disabled buttons
-      const disabledButtons = page.locator('button:disabled');
-      const disabledCount = await disabledButtons.count();
+    // Verify all sizes are visible
+    for (const size of sizes) {
+      await expect(
+        page.getByRole('button', { name: size }).first()
+      ).toBeVisible();
+    }
 
-      if (disabledCount > 0) {
-        await expect(disabledButtons.first()).toBeDisabled();
-      }
-    });
+    // Verify size hierarchy
+    const [smallBox, mediumBox, largeBox] = await Promise.all(
+      sizes.map(size =>
+        page.getByRole('button', { name: size }).first().boundingBox()
+      )
+    );
 
-    test('should display loading state', async ({ page }) => {
-      // Scroll to states section
-      await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-
-      // Check for loading spinners
-      const loadingSpinners = page.locator('.animate-spin');
-      const spinnerCount = await loadingSpinners.count();
-
-      if (spinnerCount > 0) {
-        await expect(loadingSpinners.first()).toBeVisible();
-      }
-    });
+    if (smallBox && mediumBox && largeBox) {
+      expect(smallBox.height).toBeLessThan(mediumBox.height);
+      expect(mediumBox.height).toBeLessThan(largeBox.height);
+    }
   });
 
-  test.describe('Button Icons Tests', () => {
-    test('should render buttons with icons', async ({ page }) => {
-      // Scroll to icons section
-      await page.evaluate(() =>
-        window.scrollTo(0, document.body.scrollHeight / 2)
-      );
+  test('should handle disabled and loading states', async ({ page }) => {
+    const disabledButtons = page.locator('button:disabled');
+    if ((await disabledButtons.count()) > 0) {
+      const firstDisabled = disabledButtons.first();
+      await firstDisabled.scrollIntoViewIfNeeded();
+      await expect(firstDisabled).toBeDisabled();
+    }
 
-      // Check for buttons with SVG icons
-      const buttonsWithIcons = page.locator('button:has(svg)');
-      expect(await buttonsWithIcons.count()).toBeGreaterThan(0);
+    const loadingSpinners = page.locator('.animate-spin');
+    if ((await loadingSpinners.count()) > 0) {
+      const firstSpinner = loadingSpinners.first();
+      await firstSpinner.scrollIntoViewIfNeeded();
+      await expect(firstSpinner).toBeVisible();
+    }
+  });
 
-      const firstIconButton = buttonsWithIcons.first();
-      await expect(firstIconButton).toBeVisible();
+  test('should render buttons with icons', async ({ page }) => {
+    const buttonsWithIcons = page.locator('button:has(svg)');
+    expect(await buttonsWithIcons.count()).toBeGreaterThan(0);
 
-      // Verify SVG exists inside button
-      const svgIcon = firstIconButton.locator('svg');
-      await expect(svgIcon.first()).toBeVisible();
-    });
+    const firstIconButton = buttonsWithIcons.first();
+    await expect(firstIconButton).toBeVisible();
+    await expect(firstIconButton.locator('svg').first()).toBeVisible();
 
-    test('should render icon-only buttons', async ({ page }) => {
-      // Scroll to icon-only section
-      await page.evaluate(() =>
-        window.scrollTo(0, document.body.scrollHeight / 2)
-      );
+    // Check for icon-only buttons (square aspect ratio)
+    const allButtons = page.getByRole('button');
+    const buttonCount = await allButtons.count();
 
-      // Find icon-only buttons (square aspect ratio)
-      const allButtons = page.getByRole('button');
-      const buttonCount = await allButtons.count();
-
-      for (let i = 0; i < buttonCount && i < 50; i++) {
-        const button = allButtons.nth(i);
-        const box = await button.boundingBox();
-
-        if (box && box.width > 0 && box.height > 0) {
-          const aspectRatio = box.width / box.height;
-          // Icon buttons are roughly square
-          if (aspectRatio > 0.8 && aspectRatio < 1.2 && box.width < 50) {
-            expect(aspectRatio).toBeGreaterThan(0.7);
-            expect(aspectRatio).toBeLessThan(1.3);
-            break;
-          }
+    for (let i = 0; i < Math.min(buttonCount, 50); i++) {
+      const box = await allButtons.nth(i).boundingBox();
+      if (box && box.width > 0 && box.height > 0) {
+        const aspectRatio = box.width / box.height;
+        if (aspectRatio > 0.8 && aspectRatio < 1.2 && box.width < 50) {
+          expect(aspectRatio).toBeGreaterThan(0.7);
+          expect(aspectRatio).toBeLessThan(1.3);
+          break;
         }
       }
-    });
+    }
   });
 
-  test.describe('Button Click Events Tests', () => {
-    test('should handle button clicks and update demo', async ({ page }) => {
-      // Click a Primary button
-      const primaryButton = page
-        .getByRole('button', { name: 'Primary', exact: true })
-        .first();
-      await expect(primaryButton).toBeVisible();
-      await primaryButton.click();
+  test('should render buttons with styling properties', async ({ page }) => {
+    const stylingButtons = [
+      { name: 'Rounded' },
+      { name: 'Full' },
+      { name: 'With Tooltip' },
+    ];
 
-      // Verify interactive demo updated
-      const updatedLabel = page.locator('text=/Button.*was clicked/');
-      await expect(updatedLabel).toBeVisible();
-    });
+    for (const { name } of stylingButtons) {
+      const buttons = page.getByRole('button', { name });
+      if ((await buttons.count()) > 0) {
+        const button = buttons.first();
+        await button.scrollIntoViewIfNeeded();
+        await expect(button).toBeVisible();
 
-    test('should handle multiple button clicks', async ({ page }) => {
-      // Click Primary button
-      const primaryButton = page
-        .getByRole('button', { name: 'Primary', exact: true })
-        .first();
-      await primaryButton.click();
-
-      // Click Destructive button
-      const destructiveButton = page
-        .getByRole('button', { name: 'Destructive', exact: true })
-        .first();
-      await destructiveButton.click();
-
-      // Verify demo was updated
-      const updatedLabel = page.locator('text=/Button.*was clicked/');
-      await expect(updatedLabel).toBeVisible();
-    });
+        if (name === 'With Tooltip') {
+          await button.hover();
+          await expect(button).toBeEnabled();
+        }
+      }
+    }
   });
 
-  test.describe('Accessibility Tests', () => {
-    test('should support keyboard navigation', async ({ page }) => {
-      const primaryButton = page
-        .getByRole('button', { name: 'Primary', exact: true })
+  test('should handle button clicks and update demo', async ({ page }) => {
+    const primaryButton = page
+      .getByRole('button', { name: 'Primary', exact: true })
+      .first();
+    await expect(primaryButton).toBeVisible();
+    await primaryButton.click();
+
+    const updatedLabel = page.locator('text=/Button.*was clicked/');
+    await expect(updatedLabel).toBeVisible();
+
+    // Click another button
+    await page
+      .getByRole('button', { name: 'Destructive', exact: true })
+      .first()
+      .click();
+    await expect(updatedLabel).toBeVisible();
+  });
+
+  test('should handle complex multi-step interactions', async ({ page }) => {
+    // Click multiple variants
+    const variantsToClick = ['Primary', 'Destructive', 'Outline'];
+    for (const variant of variantsToClick) {
+      const button = page
+        .getByRole('button', { name: variant, exact: true })
         .first();
+      await button.scrollIntoViewIfNeeded();
+      await button.click();
+    }
 
-      await expect(primaryButton).toBeVisible();
+    // Click different sizes
+    for (const size of ['Large', 'Small']) {
+      const button = page.getByRole('button', { name: size }).first();
+      await button.scrollIntoViewIfNeeded();
+      await button.click();
+    }
 
-      // Focus the button
-      await primaryButton.focus();
-      await expect(primaryButton).toBeFocused();
+    // Verify demo updated
+    await expect(page.locator('text=/Button.*was clicked/')).toBeVisible();
 
-      // Activate with Enter key
-      await page.keyboard.press('Enter');
+    // Test icon button
+    const iconButton = page.locator('button:has(svg)').first();
+    await iconButton.scrollIntoViewIfNeeded();
+    if (await iconButton.isVisible()) {
+      await iconButton.click();
+    }
+  });
 
-      // Button should still be enabled
-      await expect(primaryButton).toBeEnabled();
-    });
+  test('should verify all button methods work together', async ({ page }) => {
+    // Test enabled, disabled, and loading states
+    await page
+      .getByRole('button', { name: 'Primary', exact: true })
+      .first()
+      .click();
 
-    test('should verify button text content', async ({ page }) => {
-      const primaryButton = page
-        .getByRole('button', { name: 'Primary', exact: true })
-        .first();
+    const disabledButtons = page.locator('button:disabled');
+    if ((await disabledButtons.count()) > 0) {
+      await disabledButtons.first().scrollIntoViewIfNeeded();
+      await expect(disabledButtons.first()).toBeDisabled();
+    }
 
-      const textContent = await primaryButton.textContent();
-      expect(textContent).toBeTruthy();
-      expect(textContent?.trim()).toBe('Primary');
-    });
+    const loadingSpinners = page.locator('.animate-spin');
+    if ((await loadingSpinners.count()) > 0) {
+      await loadingSpinners.first().scrollIntoViewIfNeeded();
+      await expect(loadingSpinners.first()).toBeVisible();
+    }
 
-    test('should use semantic button elements', async ({ page }) => {
-      const buttons = page.getByRole('button');
-      expect(await buttons.count()).toBeGreaterThan(0);
-    });
+    const secondaryButton = page
+      .getByRole('button', { name: 'Secondary', exact: true })
+      .first();
+    await secondaryButton.scrollIntoViewIfNeeded();
+    await expect(secondaryButton).toBeVisible();
+    await secondaryButton.click();
+  });
+
+  test('should support keyboard navigation', async ({ page }) => {
+    const primaryButton = page
+      .getByRole('button', { name: 'Primary', exact: true })
+      .first();
+
+    await expect(primaryButton).toBeVisible();
+    await primaryButton.focus();
+    await expect(primaryButton).toBeFocused();
+    await page.keyboard.press('Enter');
+    await expect(primaryButton).toBeEnabled();
+
+    // Verify text content
+    const textContent = await primaryButton.textContent();
+    expect(textContent?.trim()).toBe('Primary');
   });
 });
