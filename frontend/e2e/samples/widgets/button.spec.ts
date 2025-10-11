@@ -119,8 +119,32 @@ test.describe('Button Widget Tests', () => {
     const firstIconButton = buttonsWithIcons.first();
     await expect(firstIconButton).toBeVisible();
     await expect(firstIconButton.locator('svg').first()).toBeVisible();
+  });
 
-    // Check for icon-only buttons (square aspect ratio)
+  test('should render buttons with left and right icon positions', async ({
+    page,
+  }) => {
+    // Find all buttons with both text and icons
+    const buttonsWithIcons = page.locator('button:has(svg)');
+    const count = await buttonsWithIcons.count();
+    expect(count).toBeGreaterThan(0);
+
+    // Check that we have multiple buttons with icons (different positions)
+    if (count >= 2) {
+      const firstButton = buttonsWithIcons.first();
+      await firstButton.scrollIntoViewIfNeeded();
+      await expect(firstButton).toBeVisible();
+      await expect(firstButton.locator('svg').first()).toBeVisible();
+
+      const secondButton = buttonsWithIcons.nth(1);
+      await secondButton.scrollIntoViewIfNeeded();
+      await expect(secondButton).toBeVisible();
+      await expect(secondButton.locator('svg').first()).toBeVisible();
+    }
+  });
+
+  test('should render icon-only buttons', async ({ page }) => {
+    // Find icon-only buttons (square aspect ratio)
     const allButtons = page.getByRole('button');
     const buttonCount = await allButtons.count();
 
@@ -178,32 +202,40 @@ test.describe('Button Widget Tests', () => {
   });
 
   test('should handle complex multi-step interactions', async ({ page }) => {
-    // Click multiple variants
-    const variantsToClick = ['Primary', 'Destructive', 'Outline'];
-    for (const variant of variantsToClick) {
-      const button = page
-        .getByRole('button', { name: variant, exact: true })
-        .first();
-      await button.scrollIntoViewIfNeeded();
-      await button.click();
-    }
+    // Step 1: Click Primary button
+    await page
+      .getByRole('button', { name: 'Primary', exact: true })
+      .first()
+      .click();
 
-    // Click different sizes
-    for (const size of ['Large', 'Small']) {
-      const button = page.getByRole('button', { name: size }).first();
-      await button.scrollIntoViewIfNeeded();
-      await button.click();
-    }
+    // Step 2: Click Destructive button
+    await page
+      .getByRole('button', { name: 'Destructive', exact: true })
+      .first()
+      .click();
 
-    // Verify demo updated
+    // Step 3: Verify demo updated
     await expect(page.locator('text=/Button.*was clicked/')).toBeVisible();
 
-    // Test icon button
+    // Step 4: Click a size button
+    const largeButton = page.getByRole('button', { name: 'Large' }).first();
+    await largeButton.scrollIntoViewIfNeeded();
+    await largeButton.click();
+
+    // Step 5: Test icon button
     const iconButton = page.locator('button:has(svg)').first();
     await iconButton.scrollIntoViewIfNeeded();
-    if (await iconButton.isVisible()) {
-      await iconButton.click();
-    }
+    await iconButton.click();
+
+    // Step 6: Click Outline variant
+    const outlineButton = page
+      .getByRole('button', { name: 'Outline', exact: true })
+      .first();
+    await outlineButton.scrollIntoViewIfNeeded();
+    await outlineButton.click();
+
+    // Verify final state
+    await expect(page.locator('text=/Button.*was clicked/')).toBeVisible();
   });
 
   test('should verify all button methods work together', async ({ page }) => {
