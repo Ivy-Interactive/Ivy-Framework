@@ -52,6 +52,7 @@ const EmbedWidget: React.FC<EmbedWidgetProps> = ({ url }) => {
       </EmbedErrorBoundary>
     );
   }
+
   if (url.includes('instagram.com')) {
     return (
       <EmbedErrorBoundary
@@ -63,6 +64,7 @@ const EmbedWidget: React.FC<EmbedWidgetProps> = ({ url }) => {
       </EmbedErrorBoundary>
     );
   }
+
   if (url.includes('tiktok.com')) {
     return (
       <EmbedErrorBoundary
@@ -74,6 +76,7 @@ const EmbedWidget: React.FC<EmbedWidgetProps> = ({ url }) => {
       </EmbedErrorBoundary>
     );
   }
+
   if (url.includes('twitter.com') || url.includes('x.com')) {
     return (
       <EmbedErrorBoundary
@@ -85,6 +88,7 @@ const EmbedWidget: React.FC<EmbedWidgetProps> = ({ url }) => {
       </EmbedErrorBoundary>
     );
   }
+
   if (url.includes('linkedin.com')) {
     return (
       <EmbedErrorBoundary
@@ -96,6 +100,7 @@ const EmbedWidget: React.FC<EmbedWidgetProps> = ({ url }) => {
       </EmbedErrorBoundary>
     );
   }
+
   if (url.includes('pinterest.com') || url.includes('pin.it')) {
     return (
       <EmbedErrorBoundary
@@ -107,6 +112,7 @@ const EmbedWidget: React.FC<EmbedWidgetProps> = ({ url }) => {
       </EmbedErrorBoundary>
     );
   }
+
   if (url.includes('github.com') || url.includes('gist.github.com')) {
     return (
       <EmbedErrorBoundary
@@ -118,6 +124,7 @@ const EmbedWidget: React.FC<EmbedWidgetProps> = ({ url }) => {
       </EmbedErrorBoundary>
     );
   }
+
   if (url.includes('reddit.com')) {
     return (
       <EmbedErrorBoundary
