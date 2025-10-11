@@ -33,11 +33,12 @@ const SECTIONS = {
 
 // Helper functions
 const getBadgeLocator = (page: Page, text: string) =>
-  page.locator('span[class*="badge"]', { hasText: text });
+  page.locator('div.inline-flex.items-center', { hasText: text });
 
 const scrollToSection = async (page: Page, sectionName: string) => {
   const heading = page.getByRole('heading', { name: sectionName, exact: true });
   await heading.scrollIntoViewIfNeeded();
+  await page.waitForTimeout(100);
   return heading;
 };
 
@@ -73,7 +74,7 @@ test.describe('Badge Widget Tests', () => {
       await expect(h1Heading).toBeVisible();
       await expect(h1Heading).toHaveText(SECTIONS.MAIN);
 
-      const badges = page.locator('[class*="badge"]');
+      const badges = page.locator('div.inline-flex.items-center.rounded-md');
       expect(await badges.count()).toBeGreaterThan(0);
     });
 
@@ -94,7 +95,7 @@ test.describe('Badge Widget Tests', () => {
         const badge = getBadgeLocator(page, variant).first();
         await expect(badge).toBeVisible();
         const classAttribute = await badge.getAttribute('class');
-        expect(classAttribute).toContain('badge');
+        expect(classAttribute).toContain('inline-flex');
       }
     });
   });
@@ -177,7 +178,7 @@ test.describe('Badge Widget Tests', () => {
     }) => {
       await scrollToSection(page, SECTIONS.ICON_ONLY);
 
-      const iconOnlyBadge = page.locator('span[class*="badge"]').last();
+      const iconOnlyBadge = page.locator('div.inline-flex.items-center').last();
       await expect(iconOnlyBadge).toBeVisible();
       await expect(iconOnlyBadge.locator('svg').first()).toBeVisible();
 
@@ -201,7 +202,7 @@ test.describe('Badge Widget Tests', () => {
       await expect(badge).toBeVisible();
 
       const classAttribute = await badge.getAttribute('class');
-      expect(classAttribute).toContain('badge');
+      expect(classAttribute).toContain('inline-flex');
       expect(classAttribute).toContain('whitespace-nowrap');
 
       const box = await badge.boundingBox();
@@ -267,7 +268,7 @@ test.describe('Badge Widget Tests', () => {
         const heading = await scrollToSection(page, section);
         await expect(heading).toBeVisible();
         expect(
-          await page.locator('span[class*="badge"]').count()
+          await page.locator('div.inline-flex.items-center').count()
         ).toBeGreaterThan(0);
       }
     });
@@ -296,7 +297,7 @@ test.describe('Badge Widget Tests', () => {
       await scrollToSection(page, SECTIONS.SIZES);
       const smallBadge = getBadgeLocator(page, BADGE_SIZES[0]).first();
       await expect(smallBadge).toBeVisible();
-      expect(await smallBadge.getAttribute('class')).toContain('badge');
+      expect(await smallBadge.getAttribute('class')).toContain('inline-flex');
 
       await scrollToSection(page, SECTIONS.WITH_ICONS);
       const iconBadge = getBadgeLocator(page, ICON_TYPES[0]).first();
@@ -335,7 +336,7 @@ test.describe('Badge Widget Tests', () => {
     test('should verify icon-only badges (title null)', async ({ page }) => {
       await scrollToSection(page, SECTIONS.ICON_ONLY);
 
-      const lastBadge = page.locator('span[class*="badge"]').last();
+      const lastBadge = page.locator('div.inline-flex.items-center').last();
       await expect(lastBadge).toBeVisible();
       await expect(lastBadge.locator('svg').first()).toBeVisible();
     });
@@ -404,7 +405,7 @@ test.describe('Badge Widget Tests', () => {
     }) => {
       await scrollToSection(page, SECTIONS.VARIANTS);
 
-      const badges = page.locator('span[class*="badge"]');
+      const badges = page.locator('div.inline-flex.items-center');
       const firstBadge = badges.first();
       const secondBadge = badges.nth(1);
 
