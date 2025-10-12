@@ -273,7 +273,14 @@ public class AppHub(
                 if (noToken)
                 {
                     // Close the connection to be extra safe.
-                    Context.Abort();
+                    try
+                    {
+                        Context.Abort();
+                    }
+                    catch (ObjectDisposedException)
+                    {
+                        // ignore
+                    }
                 }
                 else
                 {
