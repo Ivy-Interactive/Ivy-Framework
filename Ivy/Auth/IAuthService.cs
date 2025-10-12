@@ -47,4 +47,18 @@ public interface IAuthService
     /// </summary>
     /// <returns>Array of supported authentication options</returns>
     AuthOption[] GetAuthOptions();
+
+    /// <summary>
+    /// Checks whether the current authentication token has expired and refreshes it if necessary.
+    /// </summary>
+    /// <returns>
+    /// The existing or refreshed authentication token if valid; otherwise, null.
+    /// </returns>
+    Task<AuthToken?> RefreshTokenAsync();
+
+    /// <summary>
+    /// Gets the current authentication token.
+    /// </summary>
+    /// <returns>The current authentication token if available, null otherwise</returns>
+    AuthToken? GetCurrentToken();
 }

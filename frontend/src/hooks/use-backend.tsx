@@ -34,6 +34,11 @@ type AuthToken = {
   tag?: unknown;
 };
 
+type SetJwtMessage = {
+  authToken: AuthToken | null;
+  reloadPage: boolean;
+};
+
 const widgetTreeToXml = (node: WidgetNode) => {
   const tagName = node.type.replace('Ivy.', '');
   const attributes: string[] = [`Id="${escapeXml(node.id)}"`];
@@ -181,22 +186,25 @@ export const useBackend = (
     });
   }, [connection]);
 
-  const handleSetJwt = useCallback(async (jwt: AuthToken | null) => {
-    logger.debug('Processing SetJwt request', { hasJwt: !!jwt });
+  const handleSetJwt = useCallback(async (message: SetJwtMessage) => {
+    logger.debug('Processing SetJwt request', { hasJwt: !!message.authToken });
     const response = await fetch(`${getIvyHost()}/auth/set-jwt`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(jwt),
+      body: JSON.stringify(message.authToken),
       credentials: 'include',
     });
     if (response.ok) {
-      logger.info('JWT set successfully, reloading page');
-      window.location.reload();
+      logger.info('JWT set successfully');
     } else {
       logger.error('Failed to set JWT', {
         status: response.status,
         statusText: response.statusText,
       });
+    }
+    if (message.reloadPage) {
+      logger.info('Reloading page.');
+      window.location.reload();
     }
   }, []);
 
@@ -299,9 +307,9 @@ export const useBackend = (
             handleError(message);
           });
 
-          connection.on('SetJwt', jwt => {
+          connection.on('SetJwt', message => {
             logger.debug(`[${connection.connectionId}] SetJwt`);
-            handleSetJwt(jwt);
+            handleSetJwt(message);
           });
 
           connection.on('SetTheme', theme => {

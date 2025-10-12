@@ -10,7 +10,7 @@ namespace Ivy.Auth;
 /// </summary>
 /// <param name="authProvider">The underlying authentication provider</param>
 /// <param name="token">The current authentication token</param>
-public class AuthService(IAuthProvider authProvider, AuthToken? token) : IAuthService
+public class AuthService(IAuthProvider authProvider, AuthToken? token = null) : IAuthService
 {
     private AuthToken? _token = token;
     /// <summary>
@@ -86,5 +86,34 @@ public class AuthService(IAuthProvider authProvider, AuthToken? token) : IAuthSe
     public AuthOption[] GetAuthOptions()
     {
         return authProvider.GetAuthOptions();
+    }
+
+    /// <summary>
+    /// Checks whether the current authentication token has expired and refreshes it if necessary.
+    /// </summary>
+    /// <returns>
+    /// The existing or refreshed authentication token if valid; otherwise, null.
+    /// </returns>
+    public async Task<AuthToken?> RefreshTokenAsync()
+    {
+        if (!string.IsNullOrEmpty(_token?.Jwt))
+        {
+            _token = await authProvider.RefreshJwtAsync(_token);
+            if (!string.IsNullOrEmpty(_token?.Jwt) && !await authProvider.ValidateJwtAsync(_token.Jwt))
+            {
+                _token = null;
+            }
+        }
+
+        return _token;
+    }
+
+    /// <summary>
+    /// Gets the current authentication token.
+    /// </summary>
+    /// <returns>The current authentication token if available, null otherwise</returns>
+    public AuthToken? GetCurrentToken()
+    {
+        return _token;
     }
 }

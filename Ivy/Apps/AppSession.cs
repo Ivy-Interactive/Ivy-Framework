@@ -36,8 +36,6 @@ public class AppSession : IDisposable
 
     internal ConcurrentDictionary<Type, object> Signals { get; set; } = new();
 
-    internal Timer? AuthRefreshTimer { get; set; }
-
     public void Dispose()
     {
         _isDisposed = true;
