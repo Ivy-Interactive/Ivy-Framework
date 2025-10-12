@@ -1,4 +1,4 @@
-name: E2E Tests
+name: E2E Docs Tests
 on:
   push:
     branches: [ main, master ]
@@ -24,10 +24,6 @@ jobs:
       working-directory: ./frontend
       run: npm run build
     
-    - name: Run unit tests
-      working-directory: ./frontend
-      run: npm run test
-    
     # Setup .NET and build backend (now with frontend assets available)
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
@@ -35,11 +31,11 @@ jobs:
         dotnet-version: '9.0.x'
     
     - name: Build backend
-      run: dotnet build Ivy.Samples/Ivy.Samples.csproj
+      run: dotnet build Ivy.Docs/Ivy.Docs.csproj
     
     - name: Start backend server
       run: |
-        dotnet run --project Ivy.Samples/Ivy.Samples.csproj -- --port 5010 --silent &
+        dotnet run --project Ivy.Docs/Ivy.Docs.csproj -- --port 5010 --silent &
         echo $! > backend.pid
         # Wait for server to be ready
         timeout 30 bash -c 'until curl -f http://localhost:5010/ > /dev/null 2>&1; do sleep 1; done'
@@ -48,9 +44,11 @@ jobs:
       working-directory: ./frontend
       run: npx playwright install --with-deps
     
-    - name: Run Playwright tests
+    - name: Run Playwright tests for Docs
       working-directory: ./frontend
-      run: npx playwright test
+      run: npm run e2e:docs
+      env:
+        PLAYWRIGHT_BASE_URL: http://localhost:5010
     
     # Cleanup backend server
     - name: Stop backend server
@@ -64,6 +62,6 @@ jobs:
     - uses: actions/upload-artifact@v4
       if: ${{ !cancelled() }}
       with:
-        name: playwright-report
+        name: playwright-report-docs
         path: frontend/playwright-report/
-        retention-days: 30 
+        retention-days: 30

@@ -56,7 +56,7 @@ const DemoBoxWidget: React.FC<DemoBoxWidgetProps> = ({
   };
 
   return (
-    <div className={cn('border')} style={styles}>
+    <div className={cn('border')} style={styles} data-demo-box>
       {children}
     </div>
   );

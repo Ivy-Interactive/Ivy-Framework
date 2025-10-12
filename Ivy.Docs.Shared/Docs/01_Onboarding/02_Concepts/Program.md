@@ -105,24 +105,39 @@ This automatically refreshes the browser when C# code changes during development
 
 ### Chrome Configuration
 
-Configure the application chrome (navigation, layout):
+You can add custom elements to both the header and footer sections of the sidebar using `ChromeSettings`:
 
 ```csharp
-// Basic chrome
-server.UseChrome();
-
-// Custom chrome settings
 var chromeSettings = new ChromeSettings()
     .Header(
-        Layout.Vertical().Padding(2)
+        Layout.Vertical().Gap(2)
         | new IvyLogo()
-        | Text.Muted("Version 1.0")
+        | Text.Lead("Enterprise Management System")
+        | Text.Muted("Comprehensive business application suite")
+    )
+    .Footer(
+        Layout.Vertical().Gap(2)
+        | new Button("Support")
+            .HandleClick(_ => { })
+        | Text.Small("Enterprise Application Framework")
     )
     .DefaultApp<MyApp>()
     .UseTabs(preventDuplicates: true);
 
 server.UseChrome(() => new DefaultSidebarChrome(chromeSettings));
 ```
+
+Additional ChromeSettings options:
+
+- **DefaultAppId(string? appId)** - Sets the default app to load by ID.
+
+- **DefaultApp<T>()** - Sets the default app using a type (recommended for compile-time safety).
+
+- **UseTabs(bool preventDuplicates)** - Enables tab navigation. When `preventDuplicates` is `true`, prevents duplicate tabs.
+
+- **UsePages()** - Switches to page navigation (replaces content instead of opening tabs).
+
+For more information about SideBar, check its [documentation](../../02_Widgets/04_Layouts/SidebarLayout.md)
 
 ## Authentication
 

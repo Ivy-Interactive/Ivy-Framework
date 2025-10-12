@@ -13,7 +13,7 @@ import ReactFlow, {
   Handle,
   NodeProps,
 } from 'reactflow';
-import dagre from 'dagre';
+import { graphlib, layout } from '@dagrejs/dagre';
 import 'reactflow/dist/style.css';
 import { Parser } from '@dbml/core';
 import { getWidth, getHeight } from '@/lib/styles';
@@ -286,7 +286,7 @@ const getLayoutedElements = (
   edges: Edge[],
   direction = 'TB'
 ) => {
-  const dagreGraph = new dagre.graphlib.Graph();
+  const dagreGraph = new graphlib.Graph();
   dagreGraph.setDefaultEdgeLabel(() => ({}));
 
   // Create a map to store node dimensions
@@ -353,7 +353,7 @@ const getLayoutedElements = (
   });
 
   // Let dagre do its magic
-  dagre.layout(dagreGraph);
+  layout(dagreGraph);
 
   // Get the positioned nodes from dagre
   const layoutedNodes = nodes.map(node => {
@@ -391,9 +391,9 @@ export const DbmlCanvasWidget: React.FC<DbmlCanvasWidgetProps> = ({
   const [error, setError] = useState<DbmlError | null>(null);
   const { theme } = useTheme();
 
-  const getConnectionLineColor = () => {
+  const getConnectionLineColor = useCallback(() => {
     return theme === 'dark' ? 'var(--primary)' : 'var(--foreground)';
-  };
+  }, [theme]);
 
   const parseDbml = useCallback(() => {
     try {
@@ -541,7 +541,7 @@ export const DbmlCanvasWidget: React.FC<DbmlCanvasWidgetProps> = ({
 
       setError(errorInfo);
     }
-  }, [dbml, setNodes, setEdges, theme]);
+  }, [dbml, setNodes, setEdges, getConnectionLineColor]);
 
   useEffect(() => {
     parseDbml();

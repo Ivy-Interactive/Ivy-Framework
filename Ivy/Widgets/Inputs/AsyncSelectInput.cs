@@ -5,6 +5,7 @@ using Ivy.Core;
 using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
 using Ivy.Hooks;
+using Ivy.Shared;
 using Ivy.Views;
 using Ivy.Widgets.Inputs;
 
@@ -152,6 +153,9 @@ public class AsyncSelectInputView<TValue> : ViewBase, IAnyAsyncSelectInputBase, 
     /// Gets or sets the validation error message.
     /// </summary>
     public string? Invalid { get; set; }
+
+    /// <summary> Gets or sets the size of the async select input. </summary>
+    public Sizes Size { get; set; }
 
     /// <summary>
     /// Gets or sets the placeholder text displayed when no option is selected.

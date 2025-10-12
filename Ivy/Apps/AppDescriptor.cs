@@ -47,6 +47,8 @@ public class AppDescriptor : IAppRepositoryNode
 
     public string? DocumentSource { get; set; }
 
+    public string[]? SearchHints { get; set; }
+
     public ViewBase CreateApp()
     {
         if (ViewFactory != null)
@@ -69,6 +71,6 @@ public class AppDescriptor : IAppRepositoryNode
 
     public MenuItem GetMenuItem()
     {
-        return new MenuItem(Title, null, Icon, Id);
+        return new MenuItem(Title, null, Icon, Id, SearchHints: SearchHints);
     }
 }

@@ -37,6 +37,8 @@ public class EmbedApp : SampleBase
                     | new Embed("https://github.com/Ivy-Interactive/Ivy-Framework/pull/123")
                     | Text.H4("Gist")
                     | new Embed("https://gist.github.com/username/gistid")
+                    | Text.H4("GitHub Codespace")
+                    | new Embed("https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=Ivy-Interactive%2FIvy-Examples&machine=standardLinux32gb&devcontainer_path=.devcontainer%2Fqrcoder%2Fdevcontainer.json&location=EuropeWest")
             ).Width(Size.Fraction(0.5f))).Height(Size.Fit())
             ;
 

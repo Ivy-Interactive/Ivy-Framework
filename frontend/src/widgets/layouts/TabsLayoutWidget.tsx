@@ -8,7 +8,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
-import { getPadding } from '@/lib/styles';
+import { getPadding, getWidth } from '@/lib/styles';
 import {
   DndContext,
   closestCenter,
@@ -52,6 +52,7 @@ interface TabsLayoutWidgetProps {
   children: React.ReactElement<TabWidgetProps>[];
   events: string[];
   padding?: string;
+  width?: string;
 }
 
 function SortableTabTrigger({
@@ -102,6 +103,7 @@ function SortableTabTrigger({
       {...attributes}
       {...listeners}
       {...props}
+      role="tab"
     >
       {children}
     </TabsTrigger>
@@ -170,6 +172,7 @@ export const TabsLayoutWidget = ({
   removeParentPadding,
   variant = 'Tabs',
   padding,
+  width,
 }: TabsLayoutWidgetProps) => {
   const tabWidgets = React.Children.toArray(children).filter(
     child =>
@@ -197,7 +200,7 @@ export const TabsLayoutWidget = ({
   const eventHandler = useEventHandler();
   const containerRef = React.useRef<HTMLDivElement>(null);
   const tabsListRef = React.useRef<HTMLDivElement>(null);
-  const tabRefs = React.useRef<(HTMLDivElement | null)[]>([]);
+  const tabRefs = React.useRef<(HTMLButtonElement | null)[]>([]);
   const tabWidgetsRef = React.useRef(tabWidgets);
   const tabOrderRef = React.useRef(tabOrder);
   const eventHandlerRef = React.useRef(eventHandler);
@@ -243,7 +246,7 @@ export const TabsLayoutWidget = ({
         });
       }
     }
-  }, [activeIndex, tabOrder, variant, isInitialRender]);
+  }, [activeIndex, tabOrder, variant, isInitialRender, visibleTabs]);
 
   // Calculate which tabs fit and which don't - preserving order
   const calculateVisibleTabs = React.useCallback(() => {
@@ -255,7 +258,10 @@ export const TabsLayoutWidget = ({
     if (dropdownOpen) return;
 
     // Get the actual available width for tabs
-    const containerPadding = 48; // pl-12 + pr-12 = 48px total
+    const containerComputedStyle = getComputedStyle(container);
+    const containerPadding =
+      parseFloat(containerComputedStyle.paddingLeft) +
+        parseFloat(containerComputedStyle.paddingRight) || 0;
     const dropdownButtonWidth = 40; // Space for dropdown button only when needed
     let availableWidth = container.clientWidth - containerPadding;
 
@@ -291,45 +297,58 @@ export const TabsLayoutWidget = ({
       let tabWidth = measurements.get(tabId);
 
       // If we don't have a measurement (tab not rendered yet), estimate it
+      const tabWidget = tabWidgetsRef.current.find(
+        tab => (tab as React.ReactElement<TabWidgetProps>).props.id === tabId
+      );
+      if (!tabWidget || !React.isValidElement(tabWidget)) continue;
+
+      const { title, icon, badge } = tabWidget.props as TabWidgetProps;
       if (!tabWidth) {
-        const tabWidget = tabWidgetsRef.current.find(
-          tab => (tab as React.ReactElement<TabWidgetProps>).props.id === tabId
-        );
-        if (!tabWidget || !React.isValidElement(tabWidget)) continue;
+        let estimatedWidth = 0;
+        if (variant == 'Tabs') {
+          // More accurate estimation based on actual rendering
+          estimatedWidth += 24; // Base padding (px-3 = 12px * 2)
 
-        const { title, icon, badge } = tabWidget.props as TabWidgetProps;
+          // Icon width
+          if (icon) {
+            estimatedWidth += 22; // Icon (16px) + gap (6px)
+          }
 
-        // More accurate estimation based on actual rendering
-        let estimatedWidth = 24; // Base padding (px-3 = 12px * 2)
+          // Title width - use more accurate character width estimation
+          // Average character width in typical fonts is ~7-9px for normal text
+          const avgCharWidth = 7.5;
+          estimatedWidth += Math.ceil(title.length * avgCharWidth);
 
-        // Icon width
-        if (icon) {
-          estimatedWidth += 22; // Icon (16px) + gap (6px)
+          // Badge width
+          if (badge) {
+            const badgeWidth = Math.max(24, 16 + badge.length * avgCharWidth); // min width for single digit
+            estimatedWidth += 8 + badgeWidth; // ml-2 (8px) + badge
+          }
+
+          // Buttons width (refresh + close)
+          const hasButtons =
+            events.includes('OnClose') || events.includes('OnRefresh');
+          if (hasButtons) {
+            const buttonCount =
+              (events.includes('OnClose') ? 1 : 0) +
+              (events.includes('OnRefresh') ? 1 : 0);
+            estimatedWidth += 8 + buttonCount * 24; // ml-2 (8px) + buttons
+          }
+
+          // Border and gap between tabs
+          estimatedWidth += 3; // border + gap
+        } else {
+          // More accurate estimation based on actual rendering
+          estimatedWidth += 24; // Base padding (px-1.5 = 6px * 2)
+
+          // Title width - use more accurate character width estimation
+          // Average character width in typical fonts is ~7-9px for normal text
+          const avgCharWidth = 7.5;
+          estimatedWidth += Math.ceil(title.length * avgCharWidth);
+
+          // Gap between tabs
+          estimatedWidth += 6; // gap
         }
-
-        // Title width - use more accurate character width estimation
-        // Average character width in typical fonts is ~7-9px for normal text
-        const avgCharWidth = 7.5;
-        estimatedWidth += Math.ceil(title.length * avgCharWidth);
-
-        // Badge width
-        if (badge) {
-          const badgeWidth = Math.max(24, 16 + badge.length * avgCharWidth); // min width for single digit
-          estimatedWidth += 8 + badgeWidth; // ml-2 (8px) + badge
-        }
-
-        // Buttons width (refresh + close)
-        const hasButtons =
-          events.includes('OnClose') || events.includes('OnRefresh');
-        if (hasButtons) {
-          const buttonCount =
-            (events.includes('OnClose') ? 1 : 0) +
-            (events.includes('OnRefresh') ? 1 : 0);
-          estimatedWidth += 8 + buttonCount * 24; // ml-2 (8px) + buttons
-        }
-
-        // Border and gap between tabs
-        estimatedWidth += 3; // border + gap
 
         tabWidth = Math.ceil(estimatedWidth);
         estimatedWidths.set(tabId, tabWidth);
@@ -720,6 +739,65 @@ export const TabsLayoutWidget = ({
     );
   };
 
+  // Always render dropdown button but only show when needed
+  const dropdownMenu = (
+    <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          className={cn(
+            'absolute right-0 top-1/2 -translate-y-1/2 h-7 w-7 bg-transparent z-10 mr-3 transition-opacity',
+            hiddenTabs.length > 0
+              ? 'opacity-100'
+              : 'opacity-0 pointer-events-none'
+          )}
+          aria-label="Show more tabs"
+        >
+          <ChevronDown className="w-5 h-5" />
+        </Button>
+      </DropdownMenuTrigger>
+      {hiddenTabs.length > 0 && (
+        <DropdownMenuContent align="end">
+          <DndContext
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+            sensors={sensors}
+          >
+            <SortableContext items={tabOrder}>
+              <div className="flex flex-col gap-1 w-48">
+                {orderedTabWidgets.map(tabWidget => {
+                  if (!React.isValidElement(tabWidget)) return null;
+                  const props = tabWidget.props as Partial<TabWidgetProps>;
+                  if (!props.id) return null;
+                  const { title, id } = props;
+
+                  // Only render tabs that are hidden
+                  if (!hiddenTabs.includes(id)) return null;
+
+                  return (
+                    <SortableDropdownMenuItem
+                      key={id}
+                      id={id}
+                      onClick={() => {
+                        // Mark as user-initiated to prevent flicker
+                        isUserInitiatedChangeRef.current = true;
+                        handleTabSelect(id);
+                      }}
+                      isActive={activeTabId === id}
+                    >
+                      {title}
+                    </SortableDropdownMenuItem>
+                  );
+                })}
+              </div>
+            </SortableContext>
+          </DndContext>
+        </DropdownMenuContent>
+      )}
+    </DropdownMenu>
+  );
+
   // Custom tab bar for 'Content' variant
   if (variant === 'Content') {
     // Modern, animated, borderless tab bar implementation
@@ -730,7 +808,7 @@ export const TabsLayoutWidget = ({
           removeParentPadding && 'remove-parent-padding'
         )}
       >
-        <div className="relative">
+        <div ref={containerRef} className="relative" style={getWidth(width)}>
           {/* Hover Highlight */}
           <div
             className="absolute h-[26px] transition-all duration-300 ease-out bg-accent/20 rounded-[6px] flex items-center"
@@ -743,13 +821,15 @@ export const TabsLayoutWidget = ({
           <div
             className={cn(
               'absolute bottom-[-6px] h-[2px] bg-foreground',
-              !isInitialRender && 'transition-all duration-300 ease-out'
+              !isInitialRender && 'transition-all duration-300 ease-out',
+              activeTabId && !visibleTabs.includes(activeTabId) && 'opacity-0'
             )}
             style={activeStyle}
           />
           {/* Tabs */}
           <div
-            className="relative flex space-x-[6px] items-center"
+            ref={tabsListRef}
+            className={'relative flex space-x-[6px] gap-y-[20px] items-center'}
             role="tablist"
           >
             {orderedTabWidgets.map((tabWidget, index) => {
@@ -757,13 +837,18 @@ export const TabsLayoutWidget = ({
               const props = tabWidget.props as Partial<TabWidgetProps>;
               if (!props.id) return null;
               const { title, id } = props;
+
+              // Only render tabs that are visible
+              if (!visibleTabs.includes(id)) return null;
+
               return (
-                <div
+                <button
                   key={id}
                   ref={el => {
                     tabRefs.current[index] = el;
                   }}
                   role="tab"
+                  value={id}
                   aria-selected={index === activeIndex}
                   tabIndex={0}
                   className={cn(
@@ -785,10 +870,12 @@ export const TabsLayoutWidget = ({
                   <div className="text-sm font-medium leading-4 whitespace-nowrap flex items-center justify-center h-full">
                     {title}
                   </div>
-                </div>
+                </button>
               );
             })}
           </div>
+
+          {dropdownMenu}
         </div>
         <div className="flex-1 overflow-hidden">
           {orderedTabWidgets.map(tabWidget => {
@@ -841,9 +928,9 @@ export const TabsLayoutWidget = ({
         'flex flex-col h-full'
       )}
     >
-      <div className="flex-shrink-0">
+      <div className="flex-shrink-0" style={getWidth(width)}>
         <div
-          className="relative pl-12 pr-12 before:absolute before:inset-x-0 before:bottom-0 before:h-px before:bg-border before:z-0 overflow-hidden"
+          className="relative pl-12 pr-6 before:absolute before:inset-x-0 before:bottom-0 before:h-px before:bg-border before:z-0 overflow-hidden"
           ref={containerRef}
         >
           <DndContext
@@ -897,63 +984,7 @@ export const TabsLayoutWidget = ({
             </SortableContext>
           </DndContext>
 
-          {/* Always render dropdown button but only show when needed */}
-          <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className={cn(
-                  'absolute right-0 top-1/2 -translate-y-1/2 h-7 w-7 bg-transparent z-10 mr-3 transition-opacity',
-                  hiddenTabs.length > 0
-                    ? 'opacity-100'
-                    : 'opacity-0 pointer-events-none'
-                )}
-                aria-label="Show more tabs"
-              >
-                <ChevronDown className="w-5 h-5" />
-              </Button>
-            </DropdownMenuTrigger>
-            {hiddenTabs.length > 0 && (
-              <DropdownMenuContent align="end">
-                <DndContext
-                  collisionDetection={closestCenter}
-                  onDragEnd={handleDragEnd}
-                  sensors={sensors}
-                >
-                  <SortableContext items={tabOrder}>
-                    <div className="flex flex-col gap-1 w-48">
-                      {orderedTabWidgets.map(tabWidget => {
-                        if (!React.isValidElement(tabWidget)) return null;
-                        const props =
-                          tabWidget.props as Partial<TabWidgetProps>;
-                        if (!props.id) return null;
-                        const { title, id } = props;
-
-                        // Only render tabs that are hidden
-                        if (!hiddenTabs.includes(id)) return null;
-
-                        return (
-                          <SortableDropdownMenuItem
-                            key={id}
-                            id={id}
-                            onClick={() => {
-                              // Mark as user-initiated to prevent flicker
-                              isUserInitiatedChangeRef.current = true;
-                              handleTabSelect(id);
-                            }}
-                            isActive={activeTabId === id}
-                          >
-                            {title}
-                          </SortableDropdownMenuItem>
-                        );
-                      })}
-                    </div>
-                  </SortableContext>
-                </DndContext>
-              </DropdownMenuContent>
-            )}
-          </DropdownMenu>
+          {dropdownMenu}
         </div>
       </div>
 
