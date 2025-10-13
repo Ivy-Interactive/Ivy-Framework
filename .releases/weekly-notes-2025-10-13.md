@@ -39,7 +39,7 @@ Fixed an issue where headings from code examples were incorrectly appearing.
 
 ### Enhanced Text Selection
 
-The `CodeInputWidget` has been significantly improved with better text selection handling. This now also works better across different themes
+The `CodeInputWidget` has been significantly improved with better text selection handling. This now also works better across different themes.
 
 ## Layout Widgets
 
