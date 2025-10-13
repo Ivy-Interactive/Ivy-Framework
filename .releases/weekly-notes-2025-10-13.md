@@ -4,12 +4,6 @@
 
 This week's update focuses on maintenance and dependency updates to ensure the framework stays secure and up-to-date with the latest versions of underlying libraries.
 
-## Package Updates
-
-**Backend (.NET):** Microsoft.NET.Test.Sdk (v18.0.0), Microsoft.CodeAnalysis (v4.14.0), Entity Framework Core (v9.0.9), Auth0, Microsoft Entra, Azure Identity, Npgsql, MySQL, SQL Server, JSON handling libraries, reactive extensions libraries
-
-**Frontend (npm):** React (v19.2.0), React DOM (v19.2.0), CodeMirror language support, Radix UI components, TailwindCSS (v4.1.14), development tools, testing tools
-
 ## Documentation Improvements
 
 ### MetricView Widget Documentation
