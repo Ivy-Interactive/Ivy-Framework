@@ -59,7 +59,6 @@ export const Table: React.FC<TableProps> = ({
           <TableOptions
             hasOptions={{
               allowFiltering: finalConfig.allowFiltering,
-              allowMetadata: false,
             }}
           />
 
