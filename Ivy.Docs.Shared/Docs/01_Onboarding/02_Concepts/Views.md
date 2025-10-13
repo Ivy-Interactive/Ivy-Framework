@@ -195,10 +195,6 @@ public class TextInputApp : ViewBase
 }
 ```
 
-<Callout Type="tip">
-For comprehensive documentation on sidebar navigation, app organization, and search functionality, see the [Sidebar documentation](./Sidebar.md).
-</Callout>
-
 ## Advanced Patterns
 
 ### Conditional Rendering
