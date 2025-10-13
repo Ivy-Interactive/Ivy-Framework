@@ -33,7 +33,7 @@ new MetricView(
 
 ### Table of Contents Enhancement
 
-Fixed an issue where headings from code examples were incorrectly appearing.
+Fixed an issue where headings from code examples were incorrectly appearing in the table of contents.
 
 ## Code Input Widget Improvements
 
