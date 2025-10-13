@@ -45,7 +45,10 @@ export const TableOptions: React.FC<{
 
   const queryEditorContent = (
     <div className="flex gap-2 flex-col sm:flex-row">
-      <div className="w-full query-editor-wrapper" onKeyDown={handleKeyDown}>
+      <div
+        className="w-full min-w-[300px] query-editor-wrapper"
+        onKeyDown={handleKeyDown}
+      >
         <QueryEditor
           value={query}
           columns={columns}
