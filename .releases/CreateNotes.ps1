@@ -51,4 +51,4 @@ if (-not $SkipDownloads) {
 
 $promptFile = Join-Path $scriptDir "prompt.md"
 $commitFiles = Join-Path $commitsFolder "*.md"
-LlmEach.ps1 $commitFiles -PromptFile $promptFile -Parallel 1 -YesToAll
+./LlmEach.ps1 $commitFiles -PromptFile $promptFile -Parallel 1 -YesToAll
