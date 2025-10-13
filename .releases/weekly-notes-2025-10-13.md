@@ -7,6 +7,7 @@ This week's update focuses on maintenance and dependency updates to ensure the f
 ## Package Updates
 
 ### Backend Dependencies (.NET)
+
 - Updated Microsoft.NET.Test.Sdk to v18.0.0
 - Updated Microsoft.CodeAnalysis packages to v4.14.0
 - Updated Entity Framework Core packages to v9.0.9
@@ -15,6 +16,7 @@ This week's update focuses on maintenance and dependency updates to ensure the f
 - Updated JSON handling and reactive extensions libraries
 
 ### Frontend Dependencies (npm)
+
 - Updated React to v19.2.0 and React DOM to v19.2.0
 - Updated CodeMirror language support packages
 - Updated Radix UI components to latest versions
@@ -64,12 +66,14 @@ Fixed an issue where headings from code examples were incorrectly appearing in t
 The `CodeInputWidget` has been significantly improved with better text selection handling. The previous complex custom selection highlighting system has been replaced with a cleaner, more reliable approach using native CSS selection styling.
 
 **Key Improvements:**
+
 - **Simplified Selection Logic**: Removed complex custom selection decorations in favor of native browser selection
 - **Better Visual Feedback**: Text selection now uses a semi-transparent background color that blends with the theme
 - **Improved Performance**: Reduced CodeMirror extension complexity for better rendering performance
 - **Disabled Conflicting Shortcuts**: Disabled `Ctrl-d` and `Ctrl-Shift-l` shortcuts that could interfere with text selection
 
 **Technical Changes:**
+
 - Replaced custom StateField-based selection tracking with native CSS `::selection` pseudo-element
 - Simplified extension setup by removing complex decoration management
 - Updated theme configuration to use `color-mix()` for better selection visibility
@@ -83,11 +87,13 @@ This improvement makes text selection in code editors more intuitive and visuall
 The `TabsLayout` widget now provides improved mobile responsiveness for both Tab and Content variants. When tabs don't fit the available width, they automatically collapse into a dropdown menu, making the interface more usable on smaller screens.
 
 **Key improvements:**
+
 - Both `TabsVariant.Tabs` and `TabsVariant.Content` now support responsive dropdown behavior
 - Better width calculation and tab overflow handling
 - Enhanced sample app demonstrating responsive behavior with width control
 
 **Example usage:**
+
 ```csharp
 // Create a tabs layout that adapts to different widths
 var tabsLayout = new TabsLayout(OnTabSelect, OnTabClose, null, null, selectedIndex.Value,
@@ -110,6 +116,7 @@ The framework documentation now includes comprehensive visual demonstrations for
 **Key Additions:**
 
 #### Complete Widget Demos
+
 - **Common Widgets**: Interactive examples for buttons, badges, progress bars, cards, tables, lists, and tooltips
 - **Input Widgets**: All input types including text, number, boolean, file, date/time, color, code, and async select inputs
 - **Primitive Widgets**: Text variants, images, icons, avatars, callouts, boxes, separators, and content rendering (JSON, XML, HTML, code)
@@ -119,6 +126,7 @@ The framework documentation now includes comprehensive visual demonstrations for
 - **Advanced Components**: Sheet panels and chat interfaces
 
 #### Real-World Usage Examples
+
 Each demo shows practical implementation patterns that can be directly copied into applications:
 
 ```csharp
@@ -154,6 +162,7 @@ new Embed("https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo
 ```
 
 This enhancement allows developers to:
+
 - Share development environments directly through embeds
 - Provide "Open in Codespaces" functionality for repositories
 - Create interactive documentation with embedded development setups
@@ -176,6 +185,7 @@ The embed widget now automatically adapts between layouts for better user experi
 The sidebar search functionality has been significantly improved with the addition of search hints support. Apps can now include search hints (tags) that make them discoverable through alternative keywords, greatly improving the developer and user experience when navigating large applications.
 
 **Key Features:**
+
 - **Search Hints**: Apps can now specify additional keywords that make them searchable beyond just their title
 - **Flexible Search**: Search now matches both app titles and search hints using case-insensitive matching
 - **Easy Integration**: Simple attribute-based configuration for adding search hints to any app
@@ -195,6 +205,7 @@ public class TextInputApp : SampleBase
 With this example, users can now find the TextInput app by searching for "password", "textarea", "search", or "email" in addition to "text" or "input".
 
 **Technical Implementation:**
+
 - New `SearchHints` property on `AppAttribute` and `AppDescriptor`
 - Enhanced search logic in `DefaultSidebarChrome` that checks both titles and search hints
 - Updated `MenuItem` record to support search hints for consistent navigation experience
@@ -216,6 +227,7 @@ This complements our existing [waitlist signup](https://ivy.app/join-waitlist) f
 Added comprehensive testing capabilities for the Audio Player widget, including a new `TestId()` method for better test automation.
 
 **New API:**
+
 ```csharp
 // Add test identifiers to Audio widgets for E2E testing
 var audio = new Audio("path/to/audio.mp3")
@@ -231,6 +243,7 @@ The commit also includes extensive E2E test coverage for the Audio Player widget
 Added extensive E2E test coverage for the Badge widget in the Samples application. The new test suite provides comprehensive validation for all badge variants and states:
 
 **Test Coverage Areas:**
+
 - **Variant Testing**: Automated tests for all badge variants (Primary, Destructive, Secondary, Outline, Success, Warning, Info)
 - **Size Validation**: Tests for Small, Medium, and Large badge sizes with proper dimension verification
 - **Icon Support**: Testing for badges with different icon types (Bell, Heart, Star, Check) and icon positioning (Left/Right)
@@ -244,6 +257,7 @@ The test suite includes over 240 lines of comprehensive Playwright tests, coveri
 Added comprehensive E2E test coverage for the Button widget in the Samples application. The new test suite provides thorough validation for all button variants, states, and interaction patterns:
 
 **Test Coverage Areas:**
+
 - **Variant Testing**: Comprehensive tests for all button variants (Primary, Destructive, Secondary, Success, Warning, Info, Outline, Ghost, Link)
 - **Size Validation**: Tests for Small, Medium, and Large button sizes with proper dimension hierarchy verification
 - **Icon Support**: Testing for buttons with icons in different positions (left, right, icon-only) and various icon types
@@ -253,6 +267,7 @@ Added comprehensive E2E test coverage for the Button widget in the Samples appli
 - **Complex Interactions**: Multi-step interaction scenarios combining different button types and states
 
 The test suite includes over 280 lines of comprehensive Playwright tests with advanced features like:
+
 - Size hierarchy validation ensuring proper visual scaling (Small < Medium < Large)
 - Interactive state testing with click feedback and demo updates
 - Icon positioning and aspect ratio verification for icon-only buttons
