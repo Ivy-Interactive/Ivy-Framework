@@ -132,7 +132,7 @@ test.describe('Card Widget Tests', () => {
 
       // Click and verify state persists
       await clickCard.click();
-      await page.waitForTimeout(100);
+      // Wait for card to remain visible and maintain its role
       await expect(clickCard).toBeVisible();
       expect(await clickCard.getAttribute('role')).toBe('region');
 
@@ -142,7 +142,7 @@ test.describe('Card Widget Tests', () => {
 
       // Click button and verify state persists
       await signUpButton.click();
-      await page.waitForTimeout(100);
+      // Verify button remains enabled and visible after click
       await expect(signUpButton).toBeEnabled();
       await expect(signUpButton).toBeVisible();
     });
@@ -166,7 +166,8 @@ test.describe('Card Widget Tests', () => {
       // Interact with other cards
       const clickCard = getCardByTestId(page, 'card-onclick');
       await clickCard.click();
-      await page.waitForTimeout(100);
+      // Ensure click is processed by checking card remains visible
+      await expect(clickCard).toBeVisible();
 
       // Verify properties unchanged
       const afterStyles = await borderCard.evaluate(el => {
@@ -203,7 +204,7 @@ test.describe('Card Widget Tests', () => {
       await signUpButton.focus();
       await expect(signUpButton).toBeFocused();
       await page.keyboard.press('Enter');
-      await page.waitForTimeout(100);
+      // Verify button state after keyboard interaction
       await expect(signUpButton).toBeEnabled();
       await expect(signUpButton).toBeVisible();
     });
@@ -243,11 +244,13 @@ test.describe('Card Widget Tests', () => {
 
       const clickCard = getCardByTestId(page, 'card-onclick');
       await clickCard.click();
-      await page.waitForTimeout(200);
+      // Verify click processed
+      await expect(clickCard).toBeVisible();
 
       const signUpButton = getCardByTestId(page, 'card-app-signup-button');
       await signUpButton.click();
-      await page.waitForTimeout(200);
+      // Verify button click processed
+      await expect(signUpButton).toBeVisible();
 
       const salesCard = getCardByTestId(page, 'card-total-sales');
       await expect(
@@ -331,11 +334,13 @@ test.describe('Card Widget Tests', () => {
       // Perform interactions
       const clickCard = getCardByTestId(page, 'card-onclick');
       await clickCard.click();
-      await page.waitForTimeout(150);
+      // Ensure interaction is processed
+      await expect(clickCard).toBeVisible();
 
       const signUpButton = getCardByTestId(page, 'card-app-signup-button');
       await signUpButton.click();
-      await page.waitForTimeout(150);
+      // Ensure button interaction is processed
+      await expect(signUpButton).toBeVisible();
 
       // Verify all cards maintain their state and properties
       for (const { id, hasButton, clickable, hasBorder } of testCards) {
