@@ -45,17 +45,14 @@ export const TableOptions: React.FC<{
 
   const queryEditorContent = (
     <div className="flex gap-2 flex-col sm:flex-row">
-      <div
-        className="w-full sm:w-[600px] query-editor-wrapper"
-        onKeyDown={handleKeyDown}
-      >
+      <div className="w-full query-editor-wrapper" onKeyDown={handleKeyDown}>
         <QueryEditor
           value={query}
           columns={columns}
           onChange={handleQueryChange}
           placeholder='e.g., name = "John" AND age > 18 '
           height={40}
-          className="font-mono rounded-lg border shadow-sm [&:focus-within]:ring-2 [&:focus-within]:ring-ring [&:focus-within]:ring-offset-2"
+          className="font-mono rounded-lg border shadow-sm [&:focus-within]:ring-1 [&:focus-within]:ring-ring"
         />
         {/* TODO: don't force styling */}
         <style>{`

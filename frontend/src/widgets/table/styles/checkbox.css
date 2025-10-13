@@ -61,3 +61,17 @@
 .dvn-scroller .gdg-boolean-cell input[type='checkbox']:focus {
   outline: none;
 }
+
+/* Reduce padding on column headers for better text alignment */
+.dvn-scroller canvas {
+  /* Headers are rendered on canvas, so we adjust via theme cellHorizontalPadding */
+}
+
+/* Adjust header icon and text positioning if rendered via DOM */
+.dvn-scroller [class*='header'] {
+  padding-left: 8px !important;
+}
+
+.dvn-scroller [class*='gdg-header'] {
+  padding-left: 8px !important;
+}

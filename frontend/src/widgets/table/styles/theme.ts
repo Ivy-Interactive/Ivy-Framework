@@ -16,4 +16,5 @@ export const tableTheme: Partial<Theme> = {
   linkColor: '#e5e7eb',
   cellHorizontalPadding: 16,
   cellVerticalPadding: 8,
+  headerIconSize: 16,
 };

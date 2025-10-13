@@ -17,7 +17,6 @@ import { useTable } from './TableContext';
 import { tableStyles } from './styles/style';
 import { tableTheme } from './styles/theme';
 import { loadIconImage, getCachedIcon } from './utils/iconRenderer';
-import { getColumnTypeIcon } from './utils/columnHelpers';
 import { getSelectionProps } from './utils/selectionModes';
 import { getCellContent as getCellContentUtil } from './utils/cellContent';
 
@@ -123,7 +122,6 @@ export const TableEditor: React.FC<TableEditorProps> = ({
   const gridColumns: GridColumn[] = orderedColumns.map((col, index) => {
     const originalIndex = columns.indexOf(col);
     const baseWidth = columnWidths[originalIndex.toString()] || col.width;
-    const icon = getColumnTypeIcon(col.type);
 
     // Make the last column fill the remaining space
     if (index === orderedColumns.length - 1 && containerWidth > 0) {
@@ -138,7 +136,6 @@ export const TableEditor: React.FC<TableEditorProps> = ({
       return {
         title: col.name,
         width: Math.max(baseWidth, remainingWidth) - 10,
-        icon,
         group: showGroups ? col.group : undefined,
       };
     }
@@ -146,7 +143,6 @@ export const TableEditor: React.FC<TableEditorProps> = ({
     return {
       title: col.name,
       width: baseWidth,
-      icon,
       group: showGroups ? col.group : undefined,
     };
   });
