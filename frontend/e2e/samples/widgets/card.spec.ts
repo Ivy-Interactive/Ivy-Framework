@@ -1,4 +1,4 @@
-import { test, expect, type Page } from '@playwright/test';
+import { test, expect, type Page, type Locator } from '@playwright/test';
 
 // Helper functions
 const getCardByRole = (page: Page) => page.getByRole('region');
@@ -24,6 +24,72 @@ async function setupCardPage(page: Page): Promise<void> {
   await page.waitForLoadState('networkidle');
 }
 
+// Helper to get computed style property
+async function getComputedStyleProperty(
+  element: Locator,
+  property: string
+): Promise<string> {
+  return element.evaluate((el, prop) => {
+    const style = window.getComputedStyle(el);
+    return (
+      style.getPropertyValue(prop) ||
+      (style[prop as keyof CSSStyleDeclaration] as string)
+    );
+  }, property);
+}
+
+// Helper to get border styles
+async function getBorderStyles(element: Locator) {
+  return element.evaluate(el => {
+    const s = window.getComputedStyle(el);
+    return {
+      borderStyle: s.borderStyle,
+      borderWidth: s.borderTopWidth,
+      borderRadius: s.borderRadius,
+    };
+  });
+}
+
+// Helper to verify card is visible with correct role
+async function verifyCardVisibleWithRole(card: Locator): Promise<void> {
+  await card.scrollIntoViewIfNeeded();
+  await expect(card).toBeVisible();
+  expect(await card.getAttribute('role')).toBe('region');
+}
+
+// Helper to verify multiple cards
+async function verifyMultipleCards(
+  page: Page,
+  testIds: string[]
+): Promise<void> {
+  for (const testId of testIds) {
+    const card = getCardByTestId(page, testId);
+    await verifyCardVisibleWithRole(card);
+  }
+}
+
+// Helper to verify border width
+async function verifyBorderWidth(card: Locator): Promise<string> {
+  const borderWidth = await getComputedStyleProperty(card, 'borderTopWidth');
+  expect(borderWidth).toBeTruthy();
+  return borderWidth;
+}
+
+// Helper to verify cursor state
+async function verifyCursorState(
+  card: Locator,
+  expectedCursor: 'pointer' | 'not-pointer'
+): Promise<void> {
+  await card.scrollIntoViewIfNeeded();
+  if (expectedCursor === 'pointer') {
+    await card.hover();
+    await expect(card).toHaveCSS('cursor', 'pointer');
+  } else {
+    const cursor = await getComputedStyleProperty(card, 'cursor');
+    expect(cursor).not.toBe('pointer');
+  }
+}
+
 test.describe('Card Widget Tests', () => {
   test.beforeEach(async ({ page }) => {
     await setupCardPage(page);
@@ -41,13 +107,7 @@ test.describe('Card Widget Tests', () => {
       page,
     }) => {
       const testIds = ['card-app', 'card-border', 'card-border-color'];
-
-      for (const testId of testIds) {
-        const card = getCardByTestId(page, testId);
-        await card.scrollIntoViewIfNeeded();
-        await expect(card).toBeVisible();
-        expect(await card.getAttribute('role')).toBe('region');
-      }
+      await verifyMultipleCards(page, testIds);
     });
 
     test('should render cards with icons and progress bars', async ({
@@ -75,10 +135,7 @@ test.describe('Card Widget Tests', () => {
         await card.scrollIntoViewIfNeeded();
         await expect(card).toBeVisible();
 
-        const borderWidth = await card.evaluate(
-          el => window.getComputedStyle(el).borderTopWidth
-        );
-        expect(borderWidth).toBeTruthy();
+        const borderWidth = await verifyBorderWidth(card);
         borderWidths.push(borderWidth);
       }
 
@@ -109,16 +166,10 @@ test.describe('Card Widget Tests', () => {
 
     test('should handle different hover variant states', async ({ page }) => {
       const clickableCard = getCardByTestId(page, 'card-onclick');
-      await clickableCard.scrollIntoViewIfNeeded();
-      await clickableCard.hover();
-      await expect(clickableCard).toHaveCSS('cursor', 'pointer');
+      await verifyCursorState(clickableCard, 'pointer');
 
       const nonClickableCard = getCardByTestId(page, 'card-border');
-      await nonClickableCard.scrollIntoViewIfNeeded();
-      const cursor = await nonClickableCard.evaluate(
-        el => window.getComputedStyle(el).cursor
-      );
-      expect(cursor).not.toBe('pointer');
+      await verifyCursorState(nonClickableCard, 'not-pointer');
     });
   });
 
@@ -154,14 +205,7 @@ test.describe('Card Widget Tests', () => {
       await borderCard.scrollIntoViewIfNeeded();
 
       // Capture initial state
-      const initialStyles = await borderCard.evaluate(el => {
-        const s = window.getComputedStyle(el);
-        return {
-          borderStyle: s.borderStyle,
-          borderWidth: s.borderTopWidth,
-          borderRadius: s.borderRadius,
-        };
-      });
+      const initialStyles = await getBorderStyles(borderCard);
 
       // Interact with other cards
       const clickCard = getCardByTestId(page, 'card-onclick');
@@ -170,14 +214,7 @@ test.describe('Card Widget Tests', () => {
       await expect(clickCard).toBeVisible();
 
       // Verify properties unchanged
-      const afterStyles = await borderCard.evaluate(el => {
-        const s = window.getComputedStyle(el);
-        return {
-          borderStyle: s.borderStyle,
-          borderWidth: s.borderTopWidth,
-          borderRadius: s.borderRadius,
-        };
-      });
+      const afterStyles = await getBorderStyles(borderCard);
 
       expect(afterStyles.borderStyle).toBe(initialStyles.borderStyle);
       expect(afterStyles.borderWidth).toBe(initialStyles.borderWidth);
@@ -186,16 +223,10 @@ test.describe('Card Widget Tests', () => {
 
     test('should verify hover cursor states', async ({ page }) => {
       const clickCard = getCardByTestId(page, 'card-onclick');
-      await clickCard.scrollIntoViewIfNeeded();
-      await clickCard.hover();
-      await expect(clickCard).toHaveCSS('cursor', 'pointer');
+      await verifyCursorState(clickCard, 'pointer');
 
       const nonClickCard = getCardByTestId(page, 'card-border');
-      await nonClickCard.scrollIntoViewIfNeeded();
-      const cursor = await nonClickCard.evaluate(
-        el => window.getComputedStyle(el).cursor
-      );
-      expect(cursor).not.toBe('pointer');
+      await verifyCursorState(nonClickCard, 'not-pointer');
     });
 
     test('should support keyboard navigation', async ({ page }) => {
@@ -236,11 +267,7 @@ test.describe('Card Widget Tests', () => {
         'card-total-sales',
       ];
 
-      for (const testId of testCards) {
-        const card = getCardByTestId(page, testId);
-        await card.scrollIntoViewIfNeeded();
-        await expect(card).toBeVisible();
-      }
+      await verifyMultipleCards(page, testCards);
 
       const clickCard = getCardByTestId(page, 'card-onclick');
       await clickCard.click();
@@ -265,14 +292,10 @@ test.describe('Card Widget Tests', () => {
       const card = getCardByTestId(page, 'card-border');
       await card.scrollIntoViewIfNeeded();
 
-      const boxShadow = await card.evaluate(
-        el => window.getComputedStyle(el).boxShadow
-      );
+      const boxShadow = await getComputedStyleProperty(card, 'boxShadow');
       expect(boxShadow).toBeTruthy();
 
-      const borderRadius = await card.evaluate(
-        el => window.getComputedStyle(el).borderRadius
-      );
+      const borderRadius = await getComputedStyleProperty(card, 'borderRadius');
       expect(borderRadius).toBeTruthy();
       expect(borderRadius).not.toBe('0px');
 
@@ -293,20 +316,16 @@ test.describe('Card Widget Tests', () => {
       await borderCard.scrollIntoViewIfNeeded();
       await expect(borderCard).toBeVisible();
 
-      const borderWidth = await borderCard.evaluate(
-        el => window.getComputedStyle(el).borderTopWidth
-      );
-      expect(borderWidth).toBeTruthy();
+      await verifyBorderWidth(borderCard);
 
-      const borderRadius = await borderCard.evaluate(
-        el => window.getComputedStyle(el).borderRadius
+      const borderRadius = await getComputedStyleProperty(
+        borderCard,
+        'borderRadius'
       );
       expect(borderRadius).not.toBe('0px');
 
       const clickCard = getCardByTestId(page, 'card-onclick');
-      await clickCard.scrollIntoViewIfNeeded();
-      await clickCard.hover();
-      await expect(clickCard).toHaveCSS('cursor', 'pointer');
+      await verifyCursorState(clickCard, 'pointer');
       await clickCard.click();
       await expect(clickCard).toBeVisible();
 
@@ -353,15 +372,11 @@ test.describe('Card Widget Tests', () => {
         }
 
         if (clickable) {
-          await card.hover();
-          await expect(card).toHaveCSS('cursor', 'pointer');
+          await verifyCursorState(card, 'pointer');
         }
 
         if (hasBorder) {
-          const borderWidth = await card.evaluate(
-            el => window.getComputedStyle(el).borderTopWidth
-          );
-          expect(borderWidth).toBeTruthy();
+          await verifyBorderWidth(card);
         }
       }
     });
