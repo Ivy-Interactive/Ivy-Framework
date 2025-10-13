@@ -19,6 +19,7 @@ import { tableTheme } from './styles/theme';
 import { loadIconImage, getCachedIcon } from './utils/iconRenderer';
 import { getColumnTypeIcon } from './utils/columnHelpers';
 import { getSelectionProps } from './utils/selectionModes';
+import { getCellContent as getCellContentUtil } from './utils/cellContent';
 
 interface TableEditorProps {
   hasOptions?: boolean;
@@ -93,145 +94,7 @@ export const TableEditor: React.FC<TableEditorProps> = ({
   // Get cell content
   const getCellContent = useCallback(
     (cell: Item): GridCell => {
-      const [col, row] = cell;
-
-      // Apply column order mapping
-      const orderedCols =
-        columnOrder.length === columns.length
-          ? columnOrder.map(idx => columns[idx])
-          : columns;
-
-      // Safety check
-      if (row >= data.length || col >= orderedCols.length) {
-        return {
-          kind: GridCellKind.Text,
-          data: '',
-          displayData: '',
-          allowOverlay: false,
-          readonly: true,
-        };
-      }
-
-      const rowData = data[row];
-      const originalColumnIndex = columns.indexOf(orderedCols[col]);
-      const cellValue = rowData.values[originalColumnIndex];
-      const columnType = orderedCols[col].type.toLowerCase();
-
-      // Handle null/undefined values
-      if (cellValue === null || cellValue === undefined) {
-        return {
-          kind: GridCellKind.Text,
-          data: '',
-          displayData: 'null',
-          allowOverlay: editable,
-          readonly: !editable,
-          style: 'faded',
-        };
-      }
-
-      // Determine cell type based on Arrow data type and value
-      // Handle Date and DateTime types (check before numbers since timestamps are numbers)
-      if (columnType.includes('date') || columnType.includes('timestamp')) {
-        // Arrow can encode dates as milliseconds (number) or ISO strings
-        let dateValue: Date | null = null;
-
-        if (typeof cellValue === 'number') {
-          dateValue = new Date(cellValue);
-        } else if (typeof cellValue === 'string') {
-          dateValue = new Date(cellValue);
-        }
-
-        // Check if it's a valid date
-        if (dateValue && !isNaN(dateValue.getTime())) {
-          // Format based on whether it includes time component
-          const hasTime =
-            columnType.includes('datetime') ||
-            columnType.includes('timestamp') ||
-            dateValue.getHours() !== 0 ||
-            dateValue.getMinutes() !== 0 ||
-            dateValue.getSeconds() !== 0;
-
-          const displayData = hasTime
-            ? dateValue.toLocaleString()
-            : dateValue.toLocaleDateString();
-
-          return {
-            kind: GridCellKind.Text,
-            data: displayData,
-            displayData,
-            allowOverlay: editable,
-            readonly: !editable,
-          };
-        }
-      }
-
-      // Handle numeric types (int, uint, float, double, decimal, etc.)
-      if (typeof cellValue === 'number') {
-        // Check if column type indicates a numeric type
-        const isNumericType =
-          columnType.includes('int') ||
-          columnType.includes('float') ||
-          columnType.includes('double') ||
-          columnType.includes('decimal') ||
-          columnType.includes('number');
-
-        if (isNumericType) {
-          // Format floating point numbers with appropriate decimals
-          const displayData = Number.isInteger(cellValue)
-            ? cellValue.toString()
-            : cellValue.toFixed(2);
-
-          return {
-            kind: GridCellKind.Number,
-            data: cellValue,
-            displayData,
-            allowOverlay: editable,
-            readonly: !editable,
-          };
-        }
-      }
-
-      // Handle boolean types
-      if (typeof cellValue === 'boolean') {
-        return {
-          kind: GridCellKind.Boolean,
-          data: cellValue,
-          allowOverlay: false,
-          readonly: !editable,
-        };
-      }
-
-      // Handle icon types - detect by checking if value looks like a Lucide icon name
-      // Icons are PascalCase strings that match known icon names
-      const isProbablyIcon =
-        typeof cellValue === 'string' &&
-        /^[A-Z][a-zA-Z0-9]*$/.test(cellValue) &&
-        cellValue.length > 2 &&
-        // Only treat as icon if it's likely to be an icon value (not regular text)
-        // This heuristic works because Lucide icons are all PascalCase without spaces
-        !cellValue.includes(' ');
-
-      if (isProbablyIcon) {
-        return {
-          kind: GridCellKind.Custom,
-          allowOverlay: false,
-          readonly: true,
-          copyData: String(cellValue),
-          data: {
-            kind: 'icon-cell',
-            iconName: String(cellValue),
-          },
-        };
-      }
-
-      // Default to text for strings and other types
-      return {
-        kind: GridCellKind.Text,
-        data: String(cellValue),
-        displayData: String(cellValue),
-        allowOverlay: editable,
-        readonly: !editable,
-      };
+      return getCellContentUtil(cell, data, columns, columnOrder, editable);
     },
     [data, columns, columnOrder, editable]
   );
