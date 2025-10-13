@@ -33,336 +33,332 @@ test.describe('Card Widget Tests', () => {
     test('should render card app with heading and multiple cards', async ({
       page,
     }) => {
-      const h1 = page.getByRole('heading', { level: 1 });
-      await expect(h1).toBeVisible();
-      const h1Text = await h1.textContent();
-      expect(h1Text).toBeTruthy();
-      expect(h1Text!.length).toBeGreaterThan(0);
-
-      const cards = getCardByRole(page);
-      const cardCount = await cards.count();
-      expect(cardCount).toBeGreaterThanOrEqual(3);
+      await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+      expect(await getCardByRole(page).count()).toBeGreaterThanOrEqual(3);
     });
 
-    test('should render cards with test ids', async ({ page }) => {
-      const cardApp = getCardByTestId(page, 'card-app');
-      await cardApp.scrollIntoViewIfNeeded();
-      await page.waitForTimeout(100);
-      await expect(cardApp).toBeVisible();
-
-      const cardBorder = getCardByTestId(page, 'card-border');
-      await cardBorder.scrollIntoViewIfNeeded();
-      await expect(cardBorder).toBeVisible();
-
-      const cardBorderColor = getCardByTestId(page, 'card-border-color');
-      await cardBorderColor.scrollIntoViewIfNeeded();
-      await expect(cardBorderColor).toBeVisible();
-    });
-
-    test('should verify cards with different border colors', async ({
+    test('should render cards with test ids and correct role', async ({
       page,
     }) => {
-      const redBorderCard = getCardByTestId(page, 'card-border-color');
-      await redBorderCard.scrollIntoViewIfNeeded();
-      await page.waitForTimeout(100);
-      await expect(redBorderCard).toBeVisible();
+      const testIds = ['card-app', 'card-border', 'card-border-color'];
 
-      // Verify red border is applied
-      const borderColor = await redBorderCard.evaluate(
-        el => window.getComputedStyle(el).borderColor
-      );
-      expect(borderColor).toBeTruthy();
-
-      const primaryBorderCard = getCardByTestId(page, 'card-border');
-      await primaryBorderCard.scrollIntoViewIfNeeded();
-      const primaryBorderColor = await primaryBorderCard.evaluate(
-        el => window.getComputedStyle(el).borderColor
-      );
-
-      // Different cards should have different border colors
-      expect(borderColor).not.toBe(primaryBorderColor);
+      for (const testId of testIds) {
+        const card = getCardByTestId(page, testId);
+        await card.scrollIntoViewIfNeeded();
+        await expect(card).toBeVisible();
+        expect(await card.getAttribute('role')).toBe('region');
+      }
     });
 
-    test('should verify cards with icons in header', async ({ page }) => {
-      const salesCard = getCardByTestId(page, 'card-total-sales');
-      await salesCard.scrollIntoViewIfNeeded();
-      await page.waitForTimeout(100);
-      await expect(salesCard).toBeVisible();
-
-      // Verify icon exists in card header
-      const icon = salesCard.locator('svg').first();
-      await expect(icon).toBeVisible();
-    });
-
-    test('should verify cards contain progress bars', async ({ page }) => {
-      const salesCard = getCardByTestId(page, 'card-total-sales');
-      await salesCard.scrollIntoViewIfNeeded();
-      await page.waitForTimeout(100);
-      await expect(salesCard).toBeVisible();
-
-      // Verify progress bar exists
-      const progressBar = salesCard.locator('div[role="progressbar"]');
-      await expect(progressBar.first()).toBeVisible();
-
-      // Verify progress bar has content
-      const progressCount = await progressBar.count();
-      expect(progressCount).toBeGreaterThan(0);
-    });
-
-    test('should verify cards with various gap and spacing', async ({
+    test('should render cards with icons and progress bars', async ({
       page,
     }) => {
-      // Get all cards by role
-      const cards = getCardByRole(page);
-      const firstCard = cards.first();
-      await firstCard.scrollIntoViewIfNeeded();
-      await page.waitForTimeout(100);
-      await expect(firstCard).toBeVisible();
-
-      const secondCard = cards.nth(1);
-      await secondCard.scrollIntoViewIfNeeded();
-      await page.waitForTimeout(100);
-      await expect(secondCard).toBeVisible();
-
-      // Both should be visible but may have different internal spacing
-      const firstBox = await firstCard.boundingBox();
-      const secondBox = await secondCard.boundingBox();
-
-      expect(firstBox).toBeTruthy();
-      expect(secondBox).toBeTruthy();
-    });
-
-    test('should verify all cards have role region', async ({ page }) => {
-      // Verify specific cards have role region
-      const cardApp = getCardByTestId(page, 'card-app');
-      await cardApp.scrollIntoViewIfNeeded();
-      await expect(cardApp).toBeVisible();
-      const role1 = await cardApp.getAttribute('role');
-      expect(role1).toBe('region');
-
-      const cardBorder = getCardByTestId(page, 'card-border');
-      await cardBorder.scrollIntoViewIfNeeded();
-      const role2 = await cardBorder.getAttribute('role');
-      expect(role2).toBe('region');
-
-      const cardSales = getCardByTestId(page, 'card-total-sales');
-      await cardSales.scrollIntoViewIfNeeded();
-      const role3 = await cardSales.getAttribute('role');
-      expect(role3).toBe('region');
+      const salesCard = getCardByTestId(page, 'card-total-sales');
+      await salesCard.scrollIntoViewIfNeeded();
+      await expect(salesCard).toBeVisible();
+      await expect(salesCard.locator('svg').first()).toBeVisible();
+      await expect(
+        salesCard.locator('div[role="progressbar"]').first()
+      ).toBeVisible();
     });
   });
 
-  test.describe('Interactive Behavior', () => {
-    test('should handle card click events', async ({ page }) => {
-      const clickCard = getCardByTestId(page, 'card-onclick');
-      await clickCard.scrollIntoViewIfNeeded();
-      await page.waitForTimeout(100);
-      await expect(clickCard).toBeVisible();
+  test.describe('State and Property Tests', () => {
+    test('should render cards with different border property variations', async ({
+      page,
+    }) => {
+      const cards = ['card-border', 'card-border-color'];
+      const borderWidths: string[] = [];
 
-      // Click the card
-      await clickCard.click();
-      await page.waitForTimeout(100);
+      for (const id of cards) {
+        const card = getCardByTestId(page, id);
+        await card.scrollIntoViewIfNeeded();
+        await expect(card).toBeVisible();
+
+        const borderWidth = await card.evaluate(
+          el => window.getComputedStyle(el).borderTopWidth
+        );
+        expect(borderWidth).toBeTruthy();
+        borderWidths.push(borderWidth);
+      }
+
+      expect(borderWidths[0]).not.toBe(borderWidths[1]);
     });
 
-    test('should handle button clicks inside cards', async ({ page }) => {
+    test('should render cards with optional properties present and absent', async ({
+      page,
+    }) => {
+      // Card with all optional properties (title, description, icon, footer)
       const cardApp = getCardByTestId(page, 'card-app');
       await cardApp.scrollIntoViewIfNeeded();
+      await expect(cardApp).toBeVisible();
+      await expect(
+        getCardByTestId(page, 'card-app-signup-button')
+      ).toBeVisible();
+
+      // Card with minimal properties (content only, no footer in some cards)
+      const cards = getCardByRole(page);
+      const count = await cards.count();
+      expect(count).toBeGreaterThan(10);
+
+      // Verify cards render successfully with various property combinations
+      for (let i = 0; i < Math.min(count, 5); i++) {
+        await expect(cards.nth(i)).toBeVisible();
+      }
+    });
+
+    test('should handle different hover variant states', async ({ page }) => {
+      const clickableCard = getCardByTestId(page, 'card-onclick');
+      await clickableCard.scrollIntoViewIfNeeded();
+      await clickableCard.hover();
+      await expect(clickableCard).toHaveCSS('cursor', 'pointer');
+
+      const nonClickableCard = getCardByTestId(page, 'card-border');
+      await nonClickableCard.scrollIntoViewIfNeeded();
+      const cursor = await nonClickableCard.evaluate(
+        el => window.getComputedStyle(el).cursor
+      );
+      expect(cursor).not.toBe('pointer');
+    });
+  });
+
+  test.describe('Interactive Behavior and State Updates', () => {
+    test('should handle card and button click events with state persistence', async ({
+      page,
+    }) => {
+      const clickCard = getCardByTestId(page, 'card-onclick');
+      await clickCard.scrollIntoViewIfNeeded();
+      await expect(clickCard).toBeVisible();
+
+      // Click and verify state persists
+      await clickCard.click();
       await page.waitForTimeout(100);
+      await expect(clickCard).toBeVisible();
+      expect(await clickCard.getAttribute('role')).toBe('region');
 
       const signUpButton = getCardByTestId(page, 'card-app-signup-button');
       await expect(signUpButton).toBeVisible();
       await expect(signUpButton).toBeEnabled();
 
-      // Click the button
+      // Click button and verify state persists
       await signUpButton.click();
-
-      // Button should remain enabled after click
+      await page.waitForTimeout(100);
       await expect(signUpButton).toBeEnabled();
+      await expect(signUpButton).toBeVisible();
+    });
+
+    test('should maintain all properties after interactions', async ({
+      page,
+    }) => {
+      const borderCard = getCardByTestId(page, 'card-border');
+      await borderCard.scrollIntoViewIfNeeded();
+
+      // Capture initial state
+      const initialStyles = await borderCard.evaluate(el => {
+        const s = window.getComputedStyle(el);
+        return {
+          borderStyle: s.borderStyle,
+          borderWidth: s.borderTopWidth,
+          borderRadius: s.borderRadius,
+        };
+      });
+
+      // Interact with other cards
+      const clickCard = getCardByTestId(page, 'card-onclick');
+      await clickCard.click();
+      await page.waitForTimeout(100);
+
+      // Verify properties unchanged
+      const afterStyles = await borderCard.evaluate(el => {
+        const s = window.getComputedStyle(el);
+        return {
+          borderStyle: s.borderStyle,
+          borderWidth: s.borderTopWidth,
+          borderRadius: s.borderRadius,
+        };
+      });
+
+      expect(afterStyles.borderStyle).toBe(initialStyles.borderStyle);
+      expect(afterStyles.borderWidth).toBe(initialStyles.borderWidth);
+      expect(afterStyles.borderRadius).toBe(initialStyles.borderRadius);
+    });
+
+    test('should verify hover cursor states', async ({ page }) => {
+      const clickCard = getCardByTestId(page, 'card-onclick');
+      await clickCard.scrollIntoViewIfNeeded();
+      await clickCard.hover();
+      await expect(clickCard).toHaveCSS('cursor', 'pointer');
+
+      const nonClickCard = getCardByTestId(page, 'card-border');
+      await nonClickCard.scrollIntoViewIfNeeded();
+      const cursor = await nonClickCard.evaluate(
+        el => window.getComputedStyle(el).cursor
+      );
+      expect(cursor).not.toBe('pointer');
+    });
+
+    test('should support keyboard navigation', async ({ page }) => {
+      const signUpButton = getCardByTestId(page, 'card-app-signup-button');
+      await signUpButton.scrollIntoViewIfNeeded();
+      await signUpButton.focus();
+      await expect(signUpButton).toBeFocused();
+      await page.keyboard.press('Enter');
+      await page.waitForTimeout(100);
+      await expect(signUpButton).toBeEnabled();
+      await expect(signUpButton).toBeVisible();
     });
   });
 
   test.describe('Complex Layout Tests', () => {
-    test('should render cards with icons', async ({ page }) => {
-      // Verify Total Sales card has icons
-      const salesCard = getCardByTestId(page, 'card-total-sales');
-      await salesCard.scrollIntoViewIfNeeded();
-      await page.waitForTimeout(100);
-      await expect(salesCard).toBeVisible();
-
-      // Verify icon exists in header
-      const icons = salesCard.locator('svg');
-      expect(await icons.count()).toBeGreaterThan(0);
-    });
-
-    test('should render cards with progress bars', async ({ page }) => {
-      // Verify the Total Sales card has a progress bar
-      const salesCard = getCardByTestId(page, 'card-total-sales');
-      await salesCard.scrollIntoViewIfNeeded();
-      await page.waitForTimeout(100);
-      await expect(salesCard).toBeVisible();
-
-      // Verify progress bar exists
-      const progressBar = salesCard.locator('div[role="progressbar"]').first();
-      await expect(progressBar).toBeVisible();
-    });
-
-    test('should render cards with various content types', async ({ page }) => {
-      // Verify card with button content
-      const cardApp = getCardByTestId(page, 'card-app');
-      await cardApp.scrollIntoViewIfNeeded();
-      await expect(cardApp).toBeVisible();
-      await expect(cardApp.getByRole('button')).toBeVisible();
-
-      // Verify card with progress bar content
+    test('should render cards with nested layouts and complex content', async ({
+      page,
+    }) => {
       const salesCard = getCardByTestId(page, 'card-total-sales');
       await salesCard.scrollIntoViewIfNeeded();
       await expect(salesCard).toBeVisible();
+      expect(await salesCard.locator('svg').count()).toBeGreaterThan(0);
       await expect(
         salesCard.locator('div[role="progressbar"]').first()
       ).toBeVisible();
+
+      const cardApp = getCardByTestId(page, 'card-app');
+      await cardApp.scrollIntoViewIfNeeded();
+      await expect(cardApp.getByRole('button')).toBeVisible();
     });
 
-    test.describe('Complex Routine Test', () => {
-      test('should handle complete user interaction flow', async ({ page }) => {
-        // Step 1: Verify and interact with first card
-        const cardApp = getCardByTestId(page, 'card-app');
-        await cardApp.scrollIntoViewIfNeeded();
-        await page.waitForTimeout(100);
-        await expect(cardApp).toBeVisible();
+    test('should handle complete user interaction flow', async ({ page }) => {
+      const testCards = [
+        'card-app',
+        'card-onclick',
+        'card-border',
+        'card-border-color',
+        'card-total-sales',
+      ];
 
-        // Step 2: Click button inside card
-        const signUpButton = getCardByTestId(page, 'card-app-signup-button');
-        await signUpButton.click();
+      for (const testId of testCards) {
+        const card = getCardByTestId(page, testId);
+        await card.scrollIntoViewIfNeeded();
+        await expect(card).toBeVisible();
+      }
 
-        // Step 3: Click on an interactive card
-        const clickCard = getCardByTestId(page, 'card-onclick');
-        await clickCard.scrollIntoViewIfNeeded();
-        await page.waitForTimeout(100);
-        await clickCard.click();
-        await page.waitForTimeout(100);
+      const clickCard = getCardByTestId(page, 'card-onclick');
+      await clickCard.click();
+      await page.waitForTimeout(200);
 
-        // Step 4: Scroll through different card sections
-        const salesCard = getCardByTestId(page, 'card-total-sales');
-        await salesCard.scrollIntoViewIfNeeded();
-        await page.waitForTimeout(100);
-        await expect(salesCard).toBeVisible();
+      const signUpButton = getCardByTestId(page, 'card-app-signup-button');
+      await signUpButton.click();
+      await page.waitForTimeout(200);
 
-        // Step 5: Verify metric card with progress
-        const progressBar = salesCard
-          .locator('div[role="progressbar"]')
-          .first();
-        await expect(progressBar).toBeVisible();
+      const salesCard = getCardByTestId(page, 'card-total-sales');
+      await expect(
+        salesCard.locator('div[role="progressbar"]').first()
+      ).toBeVisible();
+      expect(await salesCard.locator('svg').count()).toBeGreaterThan(0);
 
-        // Step 6: Check border styled card
-        const borderCard = getCardByTestId(page, 'card-border-color');
-        await borderCard.scrollIntoViewIfNeeded();
-        await page.waitForTimeout(100);
-        await expect(borderCard).toBeVisible();
-
-        // Step 7: Final state verification
-        await expect(
-          page.getByRole('heading', { level: 1 }).first()
-        ).toBeVisible();
-      });
+      await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
     });
 
-    test.describe('Visual Side-Effects Tests', () => {
-      test('should verify card shadows and elevation', async ({ page }) => {
-        const card = getCardByTestId(page, 'card-app');
+    test('should verify visual properties', async ({ page }) => {
+      const card = getCardByTestId(page, 'card-border');
+      await card.scrollIntoViewIfNeeded();
+
+      const boxShadow = await card.evaluate(
+        el => window.getComputedStyle(el).boxShadow
+      );
+      expect(boxShadow).toBeTruthy();
+
+      const borderRadius = await card.evaluate(
+        el => window.getComputedStyle(el).borderRadius
+      );
+      expect(borderRadius).toBeTruthy();
+      expect(borderRadius).not.toBe('0px');
+
+      const box = await card.boundingBox();
+      expect(box).toBeTruthy();
+      if (box) {
+        expect(box.width).toBeGreaterThan(100);
+        expect(box.height).toBeGreaterThan(50);
+      }
+    });
+  });
+
+  test.describe('Method Verification', () => {
+    test('should verify all card methods render correctly', async ({
+      page,
+    }) => {
+      const borderCard = getCardByTestId(page, 'card-border');
+      await borderCard.scrollIntoViewIfNeeded();
+      await expect(borderCard).toBeVisible();
+
+      const borderWidth = await borderCard.evaluate(
+        el => window.getComputedStyle(el).borderTopWidth
+      );
+      expect(borderWidth).toBeTruthy();
+
+      const borderRadius = await borderCard.evaluate(
+        el => window.getComputedStyle(el).borderRadius
+      );
+      expect(borderRadius).not.toBe('0px');
+
+      const clickCard = getCardByTestId(page, 'card-onclick');
+      await clickCard.scrollIntoViewIfNeeded();
+      await clickCard.hover();
+      await expect(clickCard).toHaveCSS('cursor', 'pointer');
+      await clickCard.click();
+      await expect(clickCard).toBeVisible();
+
+      const salesCard = getCardByTestId(page, 'card-total-sales');
+      await salesCard.scrollIntoViewIfNeeded();
+      expect(await salesCard.locator('svg').count()).toBeGreaterThan(0);
+    });
+
+    test('should verify method state updates persist through interactions', async ({
+      page,
+    }) => {
+      const testCards = [
+        { id: 'card-app', hasButton: true },
+        { id: 'card-onclick', clickable: true },
+        { id: 'card-border', hasBorder: true },
+      ];
+
+      // Verify initial state
+      for (const { id } of testCards) {
+        const card = getCardByTestId(page, id);
         await card.scrollIntoViewIfNeeded();
-        await page.waitForTimeout(100);
+        await expect(card).toBeVisible();
+      }
 
-        const boxShadow = await card.evaluate(
-          el => window.getComputedStyle(el).boxShadow
-        );
+      // Perform interactions
+      const clickCard = getCardByTestId(page, 'card-onclick');
+      await clickCard.click();
+      await page.waitForTimeout(150);
 
-        // Card should have some shadow for elevation
-        expect(boxShadow).toBeTruthy();
-      });
+      const signUpButton = getCardByTestId(page, 'card-app-signup-button');
+      await signUpButton.click();
+      await page.waitForTimeout(150);
 
-      test('should verify card border radius', async ({ page }) => {
-        const card = getCardByTestId(page, 'card-border');
-        await card.scrollIntoViewIfNeeded();
-        await page.waitForTimeout(100);
+      // Verify all cards maintain their state and properties
+      for (const { id, hasButton, clickable, hasBorder } of testCards) {
+        const card = getCardByTestId(page, id);
+        await expect(card).toBeVisible();
+        expect(await card.getAttribute('role')).toBe('region');
 
-        const borderRadius = await card.evaluate(
-          el => window.getComputedStyle(el).borderRadius
-        );
-
-        expect(borderRadius).toBeTruthy();
-        // Rounded cards should have border radius > 0
-        expect(borderRadius).not.toBe('0px');
-      });
-
-      test('should verify card hover state (if clickable)', async ({
-        page,
-      }) => {
-        const clickCard = getCardByTestId(page, 'card-onclick');
-        await clickCard.scrollIntoViewIfNeeded();
-        await page.waitForTimeout(100);
-
-        // Hover over card
-        await clickCard.hover();
-
-        // Clickable card should have pointer cursor or similar indication
-        const hoverCursor = await clickCard.evaluate(
-          el => window.getComputedStyle(el).cursor
-        );
-
-        expect(hoverCursor).toBeTruthy();
-      });
-
-      test('should verify progress bar visual styling', async ({ page }) => {
-        const salesCard = getCardByTestId(page, 'card-total-sales');
-        await salesCard.scrollIntoViewIfNeeded();
-        await page.waitForTimeout(100);
-
-        const progressBar = salesCard
-          .locator('div[role="progressbar"]')
-          .first();
-        await expect(progressBar).toBeVisible();
-
-        // Check progress bar has proper height and background
-        const progressStyles = await progressBar.evaluate(el => {
-          const styles = window.getComputedStyle(el);
-          return {
-            height: styles.height,
-            backgroundColor: styles.backgroundColor,
-            borderRadius: styles.borderRadius,
-          };
-        });
-
-        expect(progressStyles.height).toBeTruthy();
-        expect(progressStyles.backgroundColor).toBeTruthy();
-      });
-
-      test('should verify card dimensions are reasonable', async ({ page }) => {
-        // Get a specific card we know exists
-        const card = getCardByTestId(page, 'card-app');
-        await card.scrollIntoViewIfNeeded();
-        await page.waitForTimeout(100);
-
-        const box = await card.boundingBox();
-
-        if (box) {
-          // Card should have reasonable dimensions
-          expect(box.width).toBeGreaterThan(100);
-          expect(box.height).toBeGreaterThan(50);
-          expect(box.width).toBeLessThan(2000);
-          expect(box.height).toBeLessThan(2000);
+        if (hasButton) {
+          await expect(card.getByRole('button')).toBeVisible();
         }
 
-        // Verify another card has similar dimensions
-        const salesCard = getCardByTestId(page, 'card-total-sales');
-        await salesCard.scrollIntoViewIfNeeded();
-        await page.waitForTimeout(100);
-
-        const salesBox = await salesCard.boundingBox();
-        if (salesBox) {
-          expect(salesBox.width).toBeGreaterThan(100);
-          expect(salesBox.height).toBeGreaterThan(50);
+        if (clickable) {
+          await card.hover();
+          await expect(card).toHaveCSS('cursor', 'pointer');
         }
-      });
+
+        if (hasBorder) {
+          const borderWidth = await card.evaluate(
+            el => window.getComputedStyle(el).borderTopWidth
+          );
+          expect(borderWidth).toBeTruthy();
+        }
+      }
     });
   });
 });
