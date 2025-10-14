@@ -4,18 +4,30 @@ import { convertArrowTableToData } from './tableDataMapper';
 
 describe('tableDataMapper', () => {
   describe('convertArrowTableToData', () => {
-    it.skip('should convert Arrow table with basic data types', () => {
-      const mockField1 = { name: 'id', type: { toString: () => 'int64' } };
-      const mockField2 = { name: 'name', type: { toString: () => 'utf8' } };
-      const mockField3 = { name: 'active', type: { toString: () => 'bool' } };
+    it('should convert Arrow table with basic data types', () => {
+      const mockField1 = {
+        name: 'id',
+        type: { toString: () => 'int64' },
+        metadata: null,
+      };
+      const mockField2 = {
+        name: 'name',
+        type: { toString: () => 'utf8' },
+        metadata: null,
+      };
+      const mockField3 = {
+        name: 'active',
+        type: { toString: () => 'bool' },
+        metadata: null,
+      };
 
       const mockSchema = {
         fields: [mockField1, mockField2, mockField3],
       };
 
-      const mockColumn1 = { get: vi.fn() };
-      const mockColumn2 = { get: vi.fn() };
-      const mockColumn3 = { get: vi.fn() };
+      const mockColumn1 = { get: vi.fn(), length: 2 };
+      const mockColumn2 = { get: vi.fn(), length: 2 };
+      const mockColumn3 = { get: vi.fn(), length: 2 };
 
       const mockTable = {
         schema: mockSchema,
@@ -24,25 +36,31 @@ describe('tableDataMapper', () => {
         getChildAt: vi.fn(),
       } as unknown as arrow.Table;
 
-      // Setup mock return values
-      mockColumn1.get.mockReturnValueOnce(1).mockReturnValueOnce(2);
-      mockColumn2.get.mockReturnValueOnce('Alice').mockReturnValueOnce('Bob');
-      mockColumn3.get.mockReturnValueOnce(true).mockReturnValueOnce(false);
+      // Setup mock return values for row iteration
+      mockColumn1.get.mockImplementation((i: number) => (i === 0 ? 1 : 2));
+      mockColumn2.get.mockImplementation((i: number) =>
+        i === 0 ? 'Alice' : 'Bob'
+      );
+      mockColumn3.get.mockImplementation((i: number) =>
+        i === 0 ? true : false
+      );
 
-      (mockTable.getChildAt as ReturnType<typeof vi.fn>)
-        .mockReturnValueOnce(mockColumn1)
-        .mockReturnValueOnce(mockColumn2)
-        .mockReturnValueOnce(mockColumn3)
-        .mockReturnValueOnce(mockColumn1)
-        .mockReturnValueOnce(mockColumn2)
-        .mockReturnValueOnce(mockColumn3);
+      // getChildAt is called: 3 times for width calc, then 3 times per row (2 rows)
+      (mockTable.getChildAt as ReturnType<typeof vi.fn>).mockImplementation(
+        (index: number) => {
+          if (index === 0) return mockColumn1;
+          if (index === 1) return mockColumn2;
+          if (index === 2) return mockColumn3;
+          return null;
+        }
+      );
 
       const result = convertArrowTableToData(mockTable, 5);
 
       expect(result.columns).toEqual([
-        { name: 'id', type: 'int64', width: 150 },
-        { name: 'name', type: 'utf8', width: 150 },
-        { name: 'active', type: 'bool', width: 150 },
+        { name: 'id', type: 'int64', width: expect.any(Number) },
+        { name: 'name', type: 'utf8', width: expect.any(Number) },
+        { name: 'active', type: 'bool', width: expect.any(Number) },
       ]);
 
       expect(result.rows).toEqual([
@@ -144,16 +162,24 @@ describe('tableDataMapper', () => {
       expect(result.rows).toEqual([{ values: [] }]);
     });
 
-    it.skip('should handle various data types correctly', () => {
+    it('should handle various data types correctly', () => {
       const mockFields = [
-        { name: 'int_col', type: { toString: () => 'int32' } },
-        { name: 'float_col', type: { toString: () => 'float64' } },
-        { name: 'string_col', type: { toString: () => 'utf8' } },
-        { name: 'bool_col', type: { toString: () => 'bool' } },
+        { name: 'int_col', type: { toString: () => 'int32' }, metadata: null },
+        {
+          name: 'float_col',
+          type: { toString: () => 'float64' },
+          metadata: null,
+        },
+        {
+          name: 'string_col',
+          type: { toString: () => 'utf8' },
+          metadata: null,
+        },
+        { name: 'bool_col', type: { toString: () => 'bool' }, metadata: null },
       ];
       const mockSchema = { fields: mockFields };
 
-      const mockColumns = mockFields.map(() => ({ get: vi.fn() }));
+      const mockColumns = mockFields.map(() => ({ get: vi.fn(), length: 1 }));
       const mockTable = {
         schema: mockSchema,
         numRows: 1,
@@ -170,11 +196,79 @@ describe('tableDataMapper', () => {
         .mockReturnValueOnce(mockColumns[0])
         .mockReturnValueOnce(mockColumns[1])
         .mockReturnValueOnce(mockColumns[2])
+        .mockReturnValueOnce(mockColumns[3])
+        .mockReturnValueOnce(mockColumns[0])
+        .mockReturnValueOnce(mockColumns[1])
+        .mockReturnValueOnce(mockColumns[2])
         .mockReturnValueOnce(mockColumns[3]);
 
       const result = convertArrowTableToData(mockTable, 5);
 
       expect(result.rows).toEqual([{ values: [42, 3.14, 'test', true] }]);
+    });
+
+    it('should parse metadata for renderType and iconSet', () => {
+      const mockMetadata = new Map([
+        ['render_type', 'icon'],
+        ['icon_set', 'lucide'],
+      ]);
+
+      const mockField = {
+        name: 'status_icon',
+        type: { toString: () => 'utf8' },
+        metadata: mockMetadata,
+      };
+
+      const mockSchema = { fields: [mockField] };
+      const mockColumn = {
+        get: vi.fn().mockReturnValue('Activity'),
+        length: 1,
+      };
+      const mockTable = {
+        schema: mockSchema,
+        numRows: 1,
+        numCols: 1,
+        getChildAt: vi.fn().mockReturnValue(mockColumn),
+      } as unknown as arrow.Table;
+
+      const result = convertArrowTableToData(mockTable, 5);
+
+      expect(result.columns).toEqual([
+        {
+          name: 'status_icon',
+          type: 'utf8',
+          width: expect.any(Number),
+          renderType: 'icon',
+          iconSet: 'lucide',
+        },
+      ]);
+    });
+
+    it('should handle fields without metadata', () => {
+      const mockField = {
+        name: 'regular_field',
+        type: { toString: () => 'utf8' },
+        metadata: null,
+      };
+
+      const mockSchema = { fields: [mockField] };
+      const mockColumn = { get: vi.fn().mockReturnValue('test'), length: 1 };
+      const mockTable = {
+        schema: mockSchema,
+        numRows: 1,
+        numCols: 1,
+        getChildAt: vi.fn().mockReturnValue(mockColumn),
+      } as unknown as arrow.Table;
+
+      const result = convertArrowTableToData(mockTable, 5);
+
+      expect(result.columns).toEqual([
+        {
+          name: 'regular_field',
+          type: 'utf8',
+          width: expect.any(Number),
+        },
+      ]);
     });
   });
 });
