@@ -1,3 +1,13 @@
+---
+searchHints:
+  - properties
+  - fields
+  - data
+  - information
+  - key-value
+  - todetails
+---
+
 # Details
 
 <Ingress>

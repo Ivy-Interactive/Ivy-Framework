@@ -1,3 +1,13 @@
+---
+searchHints:
+  - loading
+  - placeholder
+  - shimmer
+  - skeleton
+  - loading-state
+  - pending
+---
+
 # Skeleton
 
 <Ingress>

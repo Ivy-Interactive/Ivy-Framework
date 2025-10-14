@@ -1,3 +1,13 @@
+---
+searchHints:
+  - formatting
+  - markup
+  - markdown
+  - md
+  - text
+  - content
+---
+
 # Markdown
 
 <Ingress>

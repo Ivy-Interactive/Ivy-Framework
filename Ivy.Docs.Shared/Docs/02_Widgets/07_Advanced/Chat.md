@@ -1,3 +1,13 @@
+---
+searchHints:
+  - messaging
+  - conversation
+  - chat
+  - messages
+  - communication
+  - ai
+---
+
 # Chat
 
 The `Chat` widget renders a conversation between a user and an assistant.

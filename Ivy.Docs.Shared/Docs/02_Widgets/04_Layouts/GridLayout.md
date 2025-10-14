@@ -3,6 +3,18 @@ prepare: |
   var client = this.UseService<IClientProvider>();
 ---
 
+---
+searchHints:
+
+- layout
+- grid
+- columns
+- rows
+- responsive
+- arrangement
+
+---
+
 # GridLayout
 
 <Ingress>

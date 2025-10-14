@@ -1,3 +1,13 @@
+---
+searchHints:
+  - celebration
+  - particles
+  - animation
+  - effects
+  - visual
+  - party
+---
+
 # Confetti
 
 <Ingress>

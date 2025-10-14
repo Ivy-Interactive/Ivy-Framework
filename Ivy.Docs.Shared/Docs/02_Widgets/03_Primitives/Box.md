@@ -1,3 +1,13 @@
+---
+searchHints:
+  - container
+  - div
+  - wrapper
+  - rectangle
+  - styling
+  - layout
+---
+
 # Box
 
 <Ingress>

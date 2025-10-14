@@ -1,3 +1,13 @@
+---
+searchHints:
+  - alert
+  - notice
+  - warning
+  - info
+  - banner
+  - message
+---
+
 # Callout
 
 <Ingress>

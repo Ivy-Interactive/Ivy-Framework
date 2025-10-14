@@ -1,3 +1,13 @@
+---
+searchHints:
+  - divider
+  - line
+  - horizontal
+  - vertical
+  - separator
+  - hr
+---
+
 # Separator
 
 <Ingress>

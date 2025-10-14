@@ -1,3 +1,13 @@
+---
+searchHints:
+  - navigation
+  - menu
+  - drawer
+  - side-panel
+  - layout
+  - aside
+---
+
 # SidebarLayout
 
 <Ingress>

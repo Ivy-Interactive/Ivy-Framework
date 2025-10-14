@@ -1,6 +1,13 @@
 ---
 prepare: |
   var client = this.UseService<IClientProvider>();
+searchHints:
+  - picker
+  - palette
+  - hex
+  - rgb
+  - swatch
+  - color
 ---
 
 # ColorInput

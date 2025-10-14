@@ -1,3 +1,13 @@
+---
+searchHints:
+  - visualization
+  - graph
+  - analytics
+  - data
+  - comparison
+  - statistics
+---
+
 # BarChart
 
 `BarChart`s compare values across categories. The sample below shows a stacked bar
