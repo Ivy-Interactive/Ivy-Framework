@@ -206,18 +206,17 @@ public class AppHub(
         {
             logger.LogError(ex, "Failed to connect client {ConnectionId}", Context.ConnectionId);
 
-            // Try to notify the client about the error
             try
             {
                 await Clients.Caller.SendAsync("Error", new
                 {
-                    message = "Failed to establish connection",
-                    error = ex.Message
+                    title = "Internal Server Error",
+                    description = ex.Message,
+                    stackTrace = ex.StackTrace
                 });
             }
             catch
             {
-                // If we can't even send an error message, just log and continue
                 logger.LogError("Could not send error message to client {ConnectionId}", Context.ConnectionId);
             }
         }
