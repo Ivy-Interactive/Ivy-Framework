@@ -1,6 +1,8 @@
 import DataEditor, {
+  CompactSelection,
   DataEditorRef,
   GridCell,
+  GridSelection,
   Item,
 } from '@glideapps/glide-data-grid';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
@@ -51,6 +53,10 @@ export const TableEditor: React.FC<TableEditorProps> = ({
   const gridRef = useRef<DataEditorRef>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState<number>(0);
+  const [gridSelection, setGridSelection] = useState<GridSelection>({
+    columns: CompactSelection.empty(),
+    rows: CompactSelection.empty(),
+  });
   const scrollThreshold = 10;
 
   // Track container width
@@ -104,6 +110,14 @@ export const TableEditor: React.FC<TableEditorProps> = ({
     [columns, handleSort, allowSorting]
   );
 
+  // Handle selection changes
+  const handleGridSelectionChange = useCallback(
+    (newSelection: GridSelection) => {
+      setGridSelection(newSelection);
+    },
+    []
+  );
+
   // Convert columns to grid format with proper widths
   const gridColumns = convertToGridColumns(
     columns,
@@ -143,6 +157,8 @@ export const TableEditor: React.FC<TableEditorProps> = ({
         rowSelect={selectionProps.rowSelect}
         columnSelect={selectionProps.columnSelect}
         rangeSelect={selectionProps.rangeSelect}
+        gridSelection={gridSelection}
+        onGridSelectionChange={handleGridSelectionChange}
         width={containerWidth}
         rowMarkers={showIndexColumn ? 'number' : 'none'}
         onColumnMoved={allowColumnReordering ? handleColumnReorder : undefined}
