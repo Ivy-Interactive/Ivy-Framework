@@ -5,7 +5,7 @@ using Ivy.Shared;
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Inputs;
 
-[App(icon: Icons.LassoSelect, path: ["Widgets", "Inputs"])]
+[App(icon: Icons.LassoSelect, path: ["Widgets", "Inputs"], searchHints: ["dropdown", "picker", "options", "choice", "select", "menu"])]
 public class SelectInputApp : SampleBase
 {
     private static readonly Option<Guid>[] GuidOptions =

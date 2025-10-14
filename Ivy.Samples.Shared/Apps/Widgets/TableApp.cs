@@ -14,7 +14,7 @@ public class Product
     public required string Url { get; set; }
 }
 
-[App(icon: Icons.Table, path: ["Widgets"])]
+[App(icon: Icons.Table, path: ["Widgets"], searchHints: ["grid", "data", "rows", "columns", "cells", "spreadsheet"])]
 public class TableApp : SampleBase
 {
     protected override object? BuildSample()

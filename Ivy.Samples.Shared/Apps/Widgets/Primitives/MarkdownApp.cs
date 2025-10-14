@@ -2,7 +2,7 @@ using Ivy.Shared;
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Primitives;
 
-[App(icon: Icons.Text)]
+[App(icon: Icons.Text, searchHints: ["formatting", "markup", "markdown", "md", "text", "content"])]
 public class MarkdownApp : ViewBase
 {
     public override object? Build()

@@ -2,7 +2,7 @@
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Layouts;
 
-[App(icon: Icons.Toilet)]
+[App(icon: Icons.Toilet, searchHints: ["overlay", "modal", "popup", "floating", "dialog", "window"])]
 public class FloatingPanelApp : ViewBase
 {
     public override object? Build()

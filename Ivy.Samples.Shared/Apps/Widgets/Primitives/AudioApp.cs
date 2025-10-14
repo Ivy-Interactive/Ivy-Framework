@@ -2,7 +2,7 @@ using Ivy.Shared;
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Primitives;
 
-[App(icon: Icons.Volume2, path: ["Widgets", "Primitives"])]
+[App(icon: Icons.Volume2, path: ["Widgets", "Primitives"], searchHints: ["sound", "playback", "media", "mp3", "music", "player"])]
 public class AudioApp : SampleBase
 {
     protected override object? BuildSample()

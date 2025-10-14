@@ -3,7 +3,7 @@ using Ivy.Shared;
 namespace Ivy.Samples.Shared.Apps.Widgets.Inputs;
 
 
-[App(icon: Icons.Mic, path: ["Widgets", "Inputs"])]
+[App(icon: Icons.Mic, path: ["Widgets", "Inputs"], searchHints: ["microphone", "recording", "voice", "audio", "capture", "sound"])]
 
 public class AudioRecorderApp() : SampleBase
 {

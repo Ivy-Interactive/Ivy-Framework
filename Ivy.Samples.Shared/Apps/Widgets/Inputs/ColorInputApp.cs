@@ -2,7 +2,7 @@ using Ivy.Shared;
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Inputs;
 
-[App(icon: Icons.PaintBucket, path: ["Widgets", "Inputs"])]
+[App(icon: Icons.PaintBucket, path: ["Widgets", "Inputs"], searchHints: ["picker", "palette", "color", "hex", "rgb", "swatch"])]
 public class ColorInputApp : SampleBase
 {
     protected override object? BuildSample()

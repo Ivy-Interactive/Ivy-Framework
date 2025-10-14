@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Inputs;
 
-[App(icon: Icons.Timer)]
+[App(icon: Icons.Timer, searchHints: ["dropdown", "autocomplete", "search", "picker", "async", "options"])]
 public class AsyncSelectInputApp : SampleBase
 {
     protected override object? BuildSample()

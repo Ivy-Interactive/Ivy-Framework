@@ -2,7 +2,7 @@ using Ivy.Shared;
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Inputs;
 
-[App(icon: Icons.Calendar, path: ["Widgets", "Inputs"])]
+[App(icon: Icons.Calendar, path: ["Widgets", "Inputs"], searchHints: ["calendar", "date", "time", "picker", "datetime", "timestamp"])]
 public class DateTimeInputApp : SampleBase
 {
     protected override object? BuildSample()

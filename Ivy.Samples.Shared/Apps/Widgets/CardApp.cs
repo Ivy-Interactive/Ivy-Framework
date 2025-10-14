@@ -2,7 +2,7 @@ using Ivy.Shared;
 
 namespace Ivy.Samples.Shared.Apps.Widgets;
 
-[App(icon: Icons.IdCard, path: ["Widgets"])]
+[App(icon: Icons.IdCard, path: ["Widgets"], searchHints: ["container", "panel", "box", "section", "wrapper", "border"])]
 public class CardApp : SampleBase
 {
     protected override object? BuildSample()
