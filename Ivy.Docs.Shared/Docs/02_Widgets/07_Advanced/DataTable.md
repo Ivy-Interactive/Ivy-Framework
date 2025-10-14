@@ -5,7 +5,22 @@ prepare: |
         new { Name = "Sarah Johnson", Email = "sarah@example.com", Age = 34, IsActive = true, Status = Icons.Star, Salary = 55000, JoinDate = DateTime.Now.AddDays(-350) },
         new { Name = "Mike Brown", Email = "mike@example.com", Age = 42, IsActive = false, Status = Icons.ThumbsUp, Salary = 65000, JoinDate = DateTime.Now.AddDays(-500) },
         new { Name = "Emily Davis", Email = "emily@example.com", Age = 26, IsActive = true, Status = Icons.Rocket, Salary = 48000, JoinDate = DateTime.Now.AddDays(-150) },
-        new { Name = "Alex Wilson", Email = "alex@example.com", Age = 31, IsActive = true, Status = Icons.Star, Salary = 52000, JoinDate = DateTime.Now.AddDays(-400) }
+        new { Name = "Alex Wilson", Email = "alex@example.com", Age = 31, IsActive = true, Status = Icons.Star, Salary = 52000, JoinDate = DateTime.Now.AddDays(-400) },
+        new { Name = "Lisa Chen", Email = "lisa@example.com", Age = 29, IsActive = true, Status = Icons.Heart, Salary = 47000, JoinDate = DateTime.Now.AddDays(-180) },
+        new { Name = "David Miller", Email = "david@example.com", Age = 35, IsActive = false, Status = Icons.X, Salary = 58000, JoinDate = DateTime.Now.AddDays(-320) },
+        new { Name = "Jessica Taylor", Email = "jessica@example.com", Age = 27, IsActive = true, Status = Icons.Check, Salary = 46000, JoinDate = DateTime.Now.AddDays(-120) },
+        new { Name = "Robert Garcia", Email = "robert@example.com", Age = 39, IsActive = true, Status = Icons.Star, Salary = 62000, JoinDate = DateTime.Now.AddDays(-450) },
+        new { Name = "Amanda White", Email = "amanda@example.com", Age = 33, IsActive = false, Status = Icons.Clock, Salary = 54000, JoinDate = DateTime.Now.AddDays(-280) },
+        new { Name = "Kevin Lee", Email = "kevin@example.com", Age = 30, IsActive = true, Status = Icons.Rocket, Salary = 50000, JoinDate = DateTime.Now.AddDays(-220) },
+        new { Name = "Michelle Rodriguez", Email = "michelle@example.com", Age = 36, IsActive = true, Status = Icons.ThumbsUp, Salary = 59000, JoinDate = DateTime.Now.AddDays(-380) },
+        new { Name = "Christopher Martinez", Email = "chris@example.com", Age = 41, IsActive = false, Status = Icons.X, Salary = 64000, JoinDate = DateTime.Now.AddDays(-520) },
+        new { Name = "Jennifer Lopez", Email = "jennifer@example.com", Age = 32, IsActive = true, Status = Icons.Heart, Salary = 53000, JoinDate = DateTime.Now.AddDays(-240) },
+        new { Name = "Daniel Anderson", Email = "daniel@example.com", Age = 25, IsActive = true, Status = Icons.Star, Salary = 43000, JoinDate = DateTime.Now.AddDays(-90) },
+        new { Name = "Nicole Thompson", Email = "nicole@example.com", Age = 38, IsActive = true, Status = Icons.Check, Salary = 61000, JoinDate = DateTime.Now.AddDays(-420) },
+        new { Name = "Matthew Jackson", Email = "matthew@example.com", Age = 37, IsActive = false, Status = Icons.Circle, Salary = 60000, JoinDate = DateTime.Now.AddDays(-360) },
+        new { Name = "Stephanie Harris", Email = "stephanie@example.com", Age = 24, IsActive = true, Status = Icons.Rocket, Salary = 42000, JoinDate = DateTime.Now.AddDays(-60) },
+        new { Name = "Andrew Clark", Email = "andrew@example.com", Age = 40, IsActive = true, Status = Icons.Star, Salary = 63000, JoinDate = DateTime.Now.AddDays(-480) },
+        new { Name = "Rachel Lewis", Email = "rachel@example.com", Age = 29, IsActive = false, Status = Icons.Clock, Salary = 49000, JoinDate = DateTime.Now.AddDays(-200) }
     }.AsQueryable();
 ---
 
