@@ -2,7 +2,7 @@
 
 namespace Ivy.Samples.Shared.Apps.Other;
 
-[App(icon: Icons.Palette)]
+[App(icon: Icons.Palette, searchHints: ["palette", "swatches", "styling", "design", "appearance", "paint"])]
 public class ColorsApp : ViewBase
 {
     public override object? Build()
