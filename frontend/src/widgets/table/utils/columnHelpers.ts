@@ -1,3 +1,4 @@
+import type { GridColumn } from '@glideapps/glide-data-grid';
 import type { DataColumn } from '../types/types';
 
 /**
@@ -48,4 +49,49 @@ export function reorderColumns(
   const [removed] = result.splice(startIndex, 1);
   result.splice(endIndex, 0, removed);
   return result;
+}
+
+/**
+ * Converts data columns to GridColumn format with proper widths and groups
+ */
+export function convertToGridColumns(
+  columns: DataColumn[],
+  columnOrder: number[],
+  columnWidths: Record<string, number>,
+  containerWidth: number,
+  showGroups: boolean
+): GridColumn[] {
+  // Apply column order if available
+  const orderedColumns =
+    columnOrder.length === columns.length
+      ? columnOrder.map(idx => columns[idx])
+      : columns;
+
+  return orderedColumns.map((col, index) => {
+    const originalIndex = columns.indexOf(col);
+    const baseWidth = columnWidths[originalIndex.toString()] || col.width;
+
+    // Make the last column fill the remaining space
+    if (index === orderedColumns.length - 1 && containerWidth > 0) {
+      const totalWidthOfOtherColumns = orderedColumns
+        .slice(0, -1)
+        .reduce((sum, c) => {
+          const idx = columns.indexOf(c);
+          return sum + (columnWidths[idx.toString()] || c.width);
+        }, 0);
+
+      const remainingWidth = containerWidth - totalWidthOfOtherColumns;
+      return {
+        title: col.name,
+        width: Math.max(baseWidth, remainingWidth) - 10,
+        group: showGroups ? col.group : undefined,
+      };
+    }
+
+    return {
+      title: col.name,
+      width: baseWidth,
+      group: showGroups ? col.group : undefined,
+    };
+  });
 }
