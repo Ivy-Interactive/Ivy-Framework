@@ -1,4 +1,14 @@
-﻿# Remove Branding
+﻿---
+searchHints:
+  - branding
+  - license
+  - subscription
+  - white-label
+  - pro
+  - customization
+---
+
+# Remove Branding
 
 <Ingress>
 Remove Ivy branding from your deployed projects with a valid Ivy Pro or Team subscription.

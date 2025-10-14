@@ -1,5 +1,12 @@
 ---
 title: SQLite
+searchHints:
+  - sqlite
+  - database
+  - file-based
+  - embedded
+  - local
+  - db
 ---
 
 # SQLite Database Provider

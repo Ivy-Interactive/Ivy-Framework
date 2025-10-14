@@ -1,4 +1,14 @@
-﻿# Ivy Deployment
+﻿---
+searchHints:
+  - deployment
+  - cloud
+  - production
+  - aws
+  - azure
+  - docker
+---
+
+# Ivy Deployment
 
 <Ingress>
 Deploy your Ivy applications to cloud platforms with automated containerization, infrastructure setup, and configuration management.

@@ -1,3 +1,13 @@
+---
+searchHints:
+  - basic-auth
+  - authentication
+  - username
+  - password
+  - simple
+  - credentials
+---
+
 # Basic Authentication Provider
 
 <Ingress>
