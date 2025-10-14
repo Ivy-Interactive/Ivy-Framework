@@ -1,3 +1,13 @@
+---
+searchHints:
+  - communication
+  - events
+  - pubsub
+  - messaging
+  - broadcast
+  - cross-component
+---
+
 # Signals
 
 <Ingress>

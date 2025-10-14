@@ -1,3 +1,13 @@
+---
+searchHints:
+  - theme
+  - styling
+  - colors
+  - dark-mode
+  - customization
+  - branding
+---
+
 # Theming
 
 <Ingress>

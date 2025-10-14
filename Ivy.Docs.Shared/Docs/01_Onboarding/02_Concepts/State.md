@@ -1,3 +1,13 @@
+---
+searchHints:
+  - usestate
+  - reactive
+  - data
+  - hooks
+  - reactivity
+  - state-management
+---
+
 # State
 
 <Ingress>
