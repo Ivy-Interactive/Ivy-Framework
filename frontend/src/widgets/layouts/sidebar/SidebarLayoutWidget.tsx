@@ -164,7 +164,7 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
         {slots?.SidebarContent && (
           <div className="flex-1 overflow-hidden">
             <ScrollArea className="h-full w-full">
-              <div className="p-2">{slots.SidebarContent}</div>
+              <div className="p-2 space-y-2">{slots.SidebarContent}</div>
             </ScrollArea>
           </div>
         )}

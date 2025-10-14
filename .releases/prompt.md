@@ -12,7 +12,7 @@ it to be interesting for someone using the framework and the CLI and short and d
 
 For API changes/additions, we want to show code examples on how to use the new APIs.
 
-Read D:\Repos\_Ivy\Ivy-Framework\.releases\weekly-notes-2025-10-03.md (NOTES)
+Read D:\Repos\_Ivy\Ivy-Framework\.releases\weekly-notes-2025-10-13.md (NOTES)
 
 Read the COMMIT and update NOTES with the new changes. We will trigger this agent for each commit so don't spend time reading the others.
 

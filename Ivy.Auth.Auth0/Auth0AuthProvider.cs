@@ -42,7 +42,7 @@ public class Auth0AuthProvider : IAuthProvider
         _domain = configuration.GetValue<string>("Auth0:Domain") ?? throw new Exception("Auth0:Domain is required");
         _clientId = configuration.GetValue<string>("Auth0:ClientId") ?? throw new Exception("Auth0:ClientId is required");
         _clientSecret = configuration.GetValue<string>("Auth0:ClientSecret") ?? throw new Exception("Auth0:ClientSecret is required");
-        _audience = configuration.GetValue<string>("Auth0:Audience") ?? "";
+        _audience = configuration.GetValue<string>("Auth0:Audience") ?? throw new Exception("Auth0:Audience is required");
         _namespace = configuration.GetValue<string>("Auth0:Namespace") ?? "https://ivy.app/";
 
         _authClient = new AuthenticationApiClient(_domain);
