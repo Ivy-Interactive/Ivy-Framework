@@ -52,8 +52,8 @@ For more information, see [Authentication Overview](Overview.md).
 The following parameters are supported via connection string, environment variables, or .NET user secrets:
 
 - **Users**: Required. A semicolon-separated list of `username:password` pairs.
-- **HashSecret**: Optional. A custom secret pepper value for verifying hashed passwords. Must be a base64-encoded string that represents at least 256 bits (or 32 bytes) of information. If not provided, a cryptographically secure pseudorandom value will be generated automatically.
-- **JwtSecret**: Optional. A custom secret key for token generation. Must be a base64-encoded string that represents at least 256 bits (or 32 bytes) of information. If not provided, a cryptographically secure pseudorandom key will be generated automatically.
+- **HashSecret**: Required. A custom secret pepper value for verifying hashed passwords. Must be a base64-encoded string that represents at least 256 bits (or 32 bytes) of information. If not explicitly provided to `ivy auth add`, a cryptographically secure pseudorandom value will be generated automatically.
+- **JwtSecret**: Required. A custom secret key for token generation. Must be a base64-encoded string that represents at least 256 bits (or 32 bytes) of information. If not explicitly provided to `ivy auth add`, a cryptographically secure pseudorandom key will be generated automatically.
 - **JwtIssuer**: Optional. Used as the issuer of generated tokens. Default value: `ivy`.
 - **JwtAudience**: Optional. Used as the audience of generated tokens. Default value: `ivy-app`.
 
