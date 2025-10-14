@@ -35,7 +35,6 @@ interface CardWidgetProps {
   borderStyle?: BorderStyle;
   borderColor?: string;
   hoverVariant?: 'None' | 'Pointer' | 'PointerAndTranslate';
-  'data-testid'?: string;
   slots?: {
     Content?: React.ReactNode[];
     Footer?: React.ReactNode[];
@@ -56,7 +55,6 @@ export const CardWidget: React.FC<CardWidgetProps> = ({
   borderColor,
   hoverVariant,
   slots,
-  'data-testid': testId,
 }) => {
   const eventHandler = useEventHandler();
 
@@ -90,8 +88,6 @@ export const CardWidget: React.FC<CardWidgetProps> = ({
 
   return (
     <Card
-      role="region"
-      data-testid={testId}
       style={styles}
       className={cn('flex', 'flex-col', 'overflow-hidden', hoverClass)}
       onClick={handleClick}

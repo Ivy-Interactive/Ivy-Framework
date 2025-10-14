@@ -12,7 +12,6 @@ interface AudioPlayerWidgetProps {
   muted?: boolean;
   preload?: 'none' | 'metadata' | 'auto';
   controls?: boolean;
-  'data-testid'?: string;
 }
 
 const getAudioUrl = (url: string): string => {
@@ -37,15 +36,8 @@ export const AudioPlayerWidget: React.FC<AudioPlayerWidgetProps> = ({
   muted = false,
   preload = 'metadata',
   controls = true,
-  'data-testid': dataTestId,
 }) => {
   const [hasError, setHasError] = useState(false);
-
-  // Normalize preload to lowercase for HTML5 compliance
-  const normalizedPreload = preload?.toLowerCase() as
-    | 'none'
-    | 'metadata'
-    | 'auto';
 
   const styles: React.CSSProperties = {
     ...getWidth(width),
@@ -88,13 +80,12 @@ export const AudioPlayerWidget: React.FC<AudioPlayerWidgetProps> = ({
       autoPlay={autoplay}
       loop={loop}
       muted={muted}
-      preload={normalizedPreload}
+      preload={preload}
       controls={controls}
       className="w-full"
       onError={() => setHasError(true)}
       aria-label="Audio player"
       role="application"
-      data-testid={dataTestId}
     >
       Your browser does not support the audio element.
     </audio>

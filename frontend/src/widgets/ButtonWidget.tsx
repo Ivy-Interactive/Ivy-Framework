@@ -35,7 +35,6 @@ interface ButtonWidgetProps {
   width?: string;
   children?: React.ReactNode;
   borderRadius?: BorderRadius;
-  'data-testid'?: string;
 }
 
 const getUrl = (url: string) => {
@@ -60,7 +59,6 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
   children,
   borderRadius,
   size,
-  'data-testid': dataTestId,
 }) => {
   const eventHandler = useEventHandler();
 
@@ -135,7 +133,6 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
           ? title
           : undefined)
       }
-      data-testid={dataTestId}
     >
       {!hasChildren && (
         <>

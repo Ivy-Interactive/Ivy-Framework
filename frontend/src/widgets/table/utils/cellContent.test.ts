@@ -196,7 +196,7 @@ describe('cellContent utilities', () => {
       if (cell) {
         expect(cell.kind).toBe(GridCellKind.Text);
         expect(cell.allowOverlay).toBe(true);
-        // expect(cell.readonly).toBe(false);
+        expect(cell.readonly).toBe(false);
       }
     });
 
@@ -207,7 +207,7 @@ describe('cellContent utilities', () => {
       if (cell) {
         expect(cell.kind).toBe(GridCellKind.Text);
         expect(cell.allowOverlay).toBe(false);
-        // expect(cell.readonly).toBe(true);
+        expect(cell.readonly).toBe(true);
       }
     });
 

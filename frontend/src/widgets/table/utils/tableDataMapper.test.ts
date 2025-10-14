@@ -4,9 +4,7 @@ import { convertArrowTableToData } from './tableDataMapper';
 
 describe('tableDataMapper', () => {
   describe('convertArrowTableToData', () => {
-    // TODO: Fix this test
-    // This did not work
-    it.skip('should convert Arrow table with basic data types', () => {
+    it('should convert Arrow table with basic data types', () => {
       const mockField1 = { name: 'id', type: { toString: () => 'int64' } };
       const mockField2 = { name: 'name', type: { toString: () => 'utf8' } };
       const mockField3 = { name: 'active', type: { toString: () => 'bool' } };
@@ -146,9 +144,7 @@ describe('tableDataMapper', () => {
       expect(result.rows).toEqual([{ values: [] }]);
     });
 
-    // TODO: Fix this test
-    // This did not work
-    it.skip('should handle various data types correctly', () => {
+    it('should handle various data types correctly', () => {
       const mockFields = [
         { name: 'int_col', type: { toString: () => 'int32' } },
         { name: 'float_col', type: { toString: () => 'float64' } },

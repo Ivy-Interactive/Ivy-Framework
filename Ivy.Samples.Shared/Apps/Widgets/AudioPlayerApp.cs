@@ -10,41 +10,31 @@ public class AudioPlayerApp : SampleBase
         var client = UseService<IClientProvider>();
 
         // Basic audio player with default settings
-
-        var basicAudio = new Audio("https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3")
-            .TestId("audio-basic");
+        var basicAudio = new Audio("https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3");
 
         // Audio player with custom settings
         var customAudio = new Audio("https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3")
             .Loop(true)
-            .Preload(AudioPreload.Auto)
-            .TestId("audio-looping");
+            .Preload(AudioPreload.Auto);
 
         // Muted audio player (useful for autoplay scenarios)
         var mutedAudio = new Audio("https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3")
             .Muted(true)
             .Autoplay(true)
-            .Loop(true)
-            .TestId("audio-muted-autoplay");
+            .Loop(true);
 
         // Audio without controls (programmatic control only)
         var noControlsAudio = new Audio("https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3")
             .Controls(false)
-            .Muted(true)
-            .TestId("audio-no-controls");
+            .Muted(true);
 
         // Custom sized audio player
         var customSizedAudio = new Audio("https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3")
             .Width(Size.Fraction(0.5f))
-            .Height(Size.Units(12))
-            .TestId("audio-custom-sized");
-
-        // Theme awareness audio player (separate instance to avoid reuse issues)
-        var themeAudio = new Audio("https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3")
-            .TestId("audio-theme");
+            .Height(Size.Units(12));
 
         return Layout.Vertical()
-               | Text.H1("Audio Player Widget Examples")
+               | Text.H2("Audio Player Widget Examples")
                | Text.P("Demonstrates various configurations of the Audio widget for playing audio content. This widget is for audio playback, not recording. The audio player is theme-aware and adapts to light/dark themes.")
                | Layout.Vertical().Gap(6)
                    | (new Card(
@@ -72,7 +62,6 @@ public class AudioPlayerApp : SampleBase
                        | noControlsAudio
                        | new Button("Toggle Play/Pause", _ => client.Toast("In a real app, this would control the audio programmatically"))
                            .Variant(ButtonVariant.Outline)
-                           .TestId("toggle-play-pause-button")
                    ).Title("Programmatic Control"))
                    | (new Card(
                        Layout.Vertical().Gap(4)
@@ -80,13 +69,29 @@ public class AudioPlayerApp : SampleBase
                        | Text.Small("Audio player with custom width and height dimensions.")
                        | customSizedAudio
                    ).Title("Custom Sizing"))
-                  | (new Card(
-                      Layout.Vertical().Gap(4)
-                      | Text.H4("Theme Awareness")
-                      | Text.Small("The audio player automatically adapts to your current theme (light/dark mode). The controls, background, and text colors adjust accordingly.")
-                      | themeAudio
-                      | Text.Small("Try switching between light and dark themes to see the audio player adapt!")
-                  ).Title("Theme Integration"))
-                  ;
+                   | (new Card(
+                       Layout.Vertical().Gap(4)
+                       | Text.H4("Theme Awareness")
+                       | Text.Small("The audio player automatically adapts to your current theme (light/dark mode). The controls, background, and text colors adjust accordingly.")
+                       | basicAudio
+                       | Text.Small("Try switching between light and dark themes to see the audio player adapt!")
+                   ).Title("Theme Integration"))
+               | Layout.Vertical().Gap(4)
+                   | Text.H3("Usage Examples")
+                   | new Code("""
+                       // Basic audio player
+                       var audio = new Audio("path/to/audio.mp3");
+                       
+                       // Audio with custom settings
+                       var customAudio = new Audio("path/to/audio.mp3")
+                           .Loop(true)
+                           .Preload(AudioPreload.Auto)
+                           .Muted(true);
+                       
+                       // Custom sized audio
+                       var sizedAudio = new Audio("path/to/audio.mp3")
+                           .Width(Size.Fraction(0.5f))
+                           .Height(Size.Units(12));
+                       """, Languages.Csharp);
     }
 }
