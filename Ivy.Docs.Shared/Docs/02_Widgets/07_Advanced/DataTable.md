@@ -195,7 +195,7 @@ Control the overall table size:
 
 ```csharp demo-tabs
 sampleUsers.ToDataTable()
-    .Width(Size.Full())
+    .Width(Size.Px(300))
     .Height(Size.Px(400))
 ```
 

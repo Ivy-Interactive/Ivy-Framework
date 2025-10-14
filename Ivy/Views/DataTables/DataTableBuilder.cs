@@ -256,6 +256,10 @@ public class DataTableBuilder<TModel> : ViewBase, IStateless
         var columns = _columns.Values.Where(e => !e.Removed).OrderBy(c => c.Column.Order).Select(e => e.Column).ToArray();
         var removedColumns = _columns.Values.Where(e => e.Removed).Select(c => c.Column.Name).ToArray();
         var queryable = _queryable.RemoveFields(removedColumns);
-        return new DataTableView(queryable, _width, _height, columns, _configuration);
+
+        // Default to full width if not explicitly set
+        var width = _width ?? Size.Full();
+
+        return new DataTableView(queryable, width, _height, columns, _configuration);
     }
 }
