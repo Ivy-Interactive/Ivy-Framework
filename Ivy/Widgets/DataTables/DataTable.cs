@@ -14,10 +14,11 @@ public record DataTable : WidgetBase<DataTable>
         DataTableConfiguration configuration
     )
     {
-        Width = width;
-        Height = height;
+        Width = width ?? Size.Full();
+        Height = height ?? Size.Full();
         Connection = connection;
         Columns = columns;
+        Configuration = configuration;
     }
 
     [Prop] public DataTableColumn[] Columns { get; set; }

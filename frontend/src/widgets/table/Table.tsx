@@ -8,6 +8,7 @@ import { TableEditor } from './TableEditor';
 import { TableOptions } from './TableOptions';
 import { tableStyles } from './styles/style';
 import { TableProps } from './types/types';
+import { getWidth, getHeight } from '@/lib/styles';
 
 interface TableLayoutProps {
   children?: React.ReactNode;
@@ -32,6 +33,8 @@ export const Table: React.FC<TableProps> = ({
   connection,
   config = {},
   editable = false,
+  width,
+  height,
 }) => {
   // Apply default configuration values
   const finalConfig = {
@@ -48,24 +51,32 @@ export const Table: React.FC<TableProps> = ({
     showGroups: config.showGroups ?? false,
   };
 
-  return (
-    <TableProvider
-      connection={connection}
-      config={finalConfig}
-      editable={editable}
-    >
-      <TableLayout>
-        <>
-          <TableOptions
-            hasOptions={{
-              allowFiltering: finalConfig.allowFiltering,
-            }}
-          />
+  // Create styles object with width and height if provided
+  const containerStyle: React.CSSProperties = {
+    ...getWidth(width),
+    ...getHeight(height),
+  };
 
-          <TableEditor hasOptions={finalConfig.allowFiltering} />
-        </>
-      </TableLayout>
-    </TableProvider>
+  return (
+    <div style={containerStyle}>
+      <TableProvider
+        connection={connection}
+        config={finalConfig}
+        editable={editable}
+      >
+        <TableLayout>
+          <>
+            <TableOptions
+              hasOptions={{
+                allowFiltering: finalConfig.allowFiltering,
+              }}
+            />
+
+            <TableEditor hasOptions={finalConfig.allowFiltering} />
+          </>
+        </TableLayout>
+      </TableProvider>
+    </div>
   );
 };
 
