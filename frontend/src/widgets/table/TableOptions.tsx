@@ -147,7 +147,14 @@ export const TableOptions: React.FC<{
         `}</style>
       </div>
       {activeFilter && (
-        <Button variant="outline" onClick={() => setActiveFilter(null)}>
+        <Button
+          variant="outline"
+          onClick={() => {
+            setActiveFilter(null);
+            setQuery('');
+            setPendingFilter(null);
+          }}
+        >
           Clear
         </Button>
       )}
