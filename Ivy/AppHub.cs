@@ -169,7 +169,7 @@ public class AppHub(
 
             if (server.AuthProviderType != null && appId != AppIds.Auth)
             {
-                _ = AuthRefreshLoopAsync(Context.ConnectionId, Context.ConnectionAborted);
+                _ = Task.Run(() => AuthRefreshLoopAsync(Context.ConnectionId, Context.ConnectionAborted));
             }
             await base.OnConnectedAsync();
 
@@ -246,19 +246,49 @@ public class AppHub(
         }
     }
 
+    private async Task WaitUntilDeadline(DateTimeOffset deadline, CancellationToken cancellationToken)
+    {
+        while (true)
+        {
+            var delay = deadline - DateTimeOffset.UtcNow;
+            if (delay <= TimeSpan.Zero)
+            {
+                return;
+            }
+
+            await Task.Delay(delay, cancellationToken);
+        }
+    }
+
     private async Task AuthRefreshLoopAsync(string connectionId, CancellationToken abort)
     {
-        using var timer = new PeriodicTimer(TimeSpan.FromSeconds(5));
+        while (true)
+        {
+            var session = sessionStore.Sessions[connectionId];
+            using var scope = session.AppServices.CreateScope();
+            var authService = scope.ServiceProvider.GetRequiredService<IAuthService>();
+            var clientProvider = scope.ServiceProvider.GetRequiredService<IClientProvider>();
+
+            var oldToken = authService.GetCurrentToken();
+            if (oldToken == null)
+            {
+                await Task.Delay(TimeSpan.FromMinutes(5), abort);
+                continue;
+            }
+
+            var expiresAt = oldToken.ExpiresAt ?? DateTimeOffset.UtcNow.AddMinutes(15);
+
+            var newToken = await authService.RefreshTokenAsync();
+
+            var noToken = string.IsNullOrEmpty(newToken?.Jwt);
+        }
 
         while (await timer.WaitForNextTickAsync(abort))
         {
             Console.WriteLine("timer fired");
             try
             {
-                var session = sessionStore.Sessions[connectionId];
-                using var scope = session.AppServices.CreateScope();
-                var authService = scope.ServiceProvider.GetRequiredService<IAuthService>();
-                var clientProvider = scope.ServiceProvider.GetRequiredService<IClientProvider>(); // if you need to set a server-side JWT
+
 
                 var oldToken = authService.GetCurrentToken();
                 var newToken = await authService.RefreshTokenAsync();
@@ -266,7 +296,26 @@ public class AppHub(
                 var noToken = string.IsNullOrEmpty(newToken?.Jwt);
                 if (oldToken != newToken)
                 {
-                    Console.WriteLine($"setting JWT from {oldToken} and {newToken}");
+                    if (oldToken?.Jwt != null && newToken?.Jwt != null && oldToken.Jwt != newToken.Jwt)
+                    {
+                        Console.WriteLine("Refreshed access token");
+                    }
+                    if (oldToken?.RefreshToken != null && newToken?.RefreshToken != null && oldToken.RefreshToken != newToken.RefreshToken)
+                    {
+                        Console.WriteLine("Refreshed refresh token");
+                    }
+                    if (oldToken == null && newToken != null)
+                    {
+                        Console.WriteLine("Got initial token");
+                    }
+                    if (oldToken != null && newToken == null)
+                    {
+                        Console.WriteLine("Session expired");
+                    }
+
+
+
+                    // Console.WriteLine($"setting JWT from {oldToken} and {newToken}");
                     clientProvider.SetJwt(newToken, reloadPage: noToken);
                 }
 
