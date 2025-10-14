@@ -4,7 +4,7 @@ import DataEditor, {
   Item,
 } from '@glideapps/glide-data-grid';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { useTable } from './TableContext';
+import { useTable } from './DataTableContext';
 import { tableStyles } from './styles/style';
 import { tableTheme } from './styles/theme';
 import { getSelectionProps } from './utils/selectionModes';

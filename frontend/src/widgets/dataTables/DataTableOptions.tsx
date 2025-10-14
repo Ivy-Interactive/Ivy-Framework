@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useTable } from './TableContext';
+import { useTable } from './DataTableContext';
 import { tableStyles } from './styles/style';
 import { Button } from '@/components/ui/button';
 import { QueryEditor, QueryEditorChangeEvent } from 'filter-query-editor';

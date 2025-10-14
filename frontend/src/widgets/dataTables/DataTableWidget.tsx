@@ -1,11 +1,11 @@
 import '@glideapps/glide-data-grid/dist/index.css';
 import './styles/checkbox.css';
 import React from 'react';
-import { TableProvider, useTable } from './TableContext';
+import { TableProvider, useTable } from './DataTableContext';
 import { ErrorDisplay } from '@/components/ErrorDisplay';
 import { Loading } from '@/components/Loading';
-import { TableEditor } from './TableEditor';
-import { TableOptions } from './TableOptions';
+import { TableEditor } from './DataTableEditor';
+import { TableOptions } from './DataTableOptions';
 import { tableStyles } from './styles/style';
 import { TableProps } from './types/types';
 import { getWidth, getHeight } from '@/lib/styles';

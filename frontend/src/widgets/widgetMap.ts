@@ -8,7 +8,7 @@ import * as Inputs from '@/widgets/inputs';
 import * as Layouts from '@/widgets/layouts';
 import * as Lists from '@/widgets/lists';
 import * as Primitives from '@/widgets/primitives';
-import * as Tables from '@/widgets/table/';
+import * as Tables from '@/widgets/dataTables';
 import React from 'react';
 
 export const widgetMap = {
