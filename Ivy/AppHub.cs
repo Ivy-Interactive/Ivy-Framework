@@ -246,103 +246,74 @@ public class AppHub(
         }
     }
 
-    private async Task WaitUntilDeadline(DateTimeOffset deadline, CancellationToken cancellationToken)
-    {
-        while (true)
-        {
-            var delay = deadline - DateTimeOffset.UtcNow;
-            if (delay <= TimeSpan.Zero)
-            {
-                return;
-            }
-
-            await Task.Delay(delay, cancellationToken);
-        }
-    }
-
     private async Task AuthRefreshLoopAsync(string connectionId, CancellationToken abort)
     {
-        while (true)
+        try
         {
-            var session = sessionStore.Sessions[connectionId];
-            using var scope = session.AppServices.CreateScope();
-            var authService = scope.ServiceProvider.GetRequiredService<IAuthService>();
-            var clientProvider = scope.ServiceProvider.GetRequiredService<IClientProvider>();
-
-            var oldToken = authService.GetCurrentToken();
-            if (oldToken == null)
+            while (true)
             {
-                await Task.Delay(TimeSpan.FromMinutes(5), abort);
-                continue;
-            }
-
-            var expiresAt = oldToken.ExpiresAt ?? DateTimeOffset.UtcNow.AddMinutes(15);
-
-            var newToken = await authService.RefreshTokenAsync();
-
-            var noToken = string.IsNullOrEmpty(newToken?.Jwt);
-        }
-
-        while (await timer.WaitForNextTickAsync(abort))
-        {
-            Console.WriteLine("timer fired");
-            try
-            {
-
+                var session = sessionStore.Sessions[connectionId];
+                var authService = session.AppServices.GetRequiredService<IAuthService>();
+                var authProvider = session.AppServices.GetRequiredService<IAuthProvider>();
+                var clientProvider = session.AppServices.GetRequiredService<IClientProvider>();
 
                 var oldToken = authService.GetCurrentToken();
-                var newToken = await authService.RefreshTokenAsync();
-
-                var noToken = string.IsNullOrEmpty(newToken?.Jwt);
-                if (oldToken != newToken)
+                if (oldToken == null)
                 {
-                    if (oldToken?.Jwt != null && newToken?.Jwt != null && oldToken.Jwt != newToken.Jwt)
-                    {
-                        Console.WriteLine("Refreshed access token");
-                    }
-                    if (oldToken?.RefreshToken != null && newToken?.RefreshToken != null && oldToken.RefreshToken != newToken.RefreshToken)
-                    {
-                        Console.WriteLine("Refreshed refresh token");
-                    }
-                    if (oldToken == null && newToken != null)
-                    {
-                        Console.WriteLine("Got initial token");
-                    }
-                    if (oldToken != null && newToken == null)
-                    {
-                        Console.WriteLine("Session expired");
-                    }
-
-
-
-                    // Console.WriteLine($"setting JWT from {oldToken} and {newToken}");
-                    clientProvider.SetJwt(newToken, reloadPage: noToken);
+                    Console.WriteLine("AuthRefreshLoop: No token, waiting 5 minutes.");
+                    await Task.Delay(TimeSpan.FromMinutes(5), abort);
+                    continue;
                 }
 
-                if (noToken)
+                var newToken = await authService.RefreshTokenAsync();
+                var expiresAt = newToken != null
+                    ? authProvider.GetTokenExpiration(newToken)
+                    : null;
+                var reloadPage = string.IsNullOrEmpty(newToken?.Jwt);
+                if (expiresAt != null && expiresAt <= DateTimeOffset.UtcNow)
                 {
-                    // Close the connection to be extra safe.
+                    // If the token was expired and couldn't be refreshed, then RefreshTokenAsync should've returned null.
+                    logger.LogError("Token expiration time is in the past.");
+                    reloadPage = true;
+                }
+
+                if (oldToken != newToken)
+                {
+                    Console.WriteLine("AuthRefreshLoop: Token changed, updating client. Reloading: {0}", reloadPage);
+                    clientProvider.SetJwt(newToken, reloadPage);
+                }
+
+                if (reloadPage)
+                {
                     try
                     {
+                        Console.WriteLine("AuthRefreshLoop: closing connection");
+                        // Close the connection to be extra safe.
                         Context.Abort();
                     }
                     catch (ObjectDisposedException)
                     {
                         // ignore
                     }
+                    return;
                 }
-                else
-                {
-                    Console.WriteLine("not refreshing");
-                }
+
+                var refreshAt = expiresAt ?? DateTimeOffset.UtcNow.AddMinutes(15);
+                Console.WriteLine("AuthRefreshLoop: Token valid, will be refreshed at {0}, waiting...", refreshAt);
+                await Task.Delay(refreshAt - DateTimeOffset.UtcNow, abort);
             }
-            catch (OperationCanceledException)
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error during auth refresh loop for {ConnectionId}", connectionId);
+            try
             {
-                break;
+                // Close the connection to be extra safe.
+                Context.Abort();
             }
-            catch (Exception ex)
+            catch (ObjectDisposedException)
             {
-                logger.LogError(ex, "AuthRefreshLoop failed for {ConnectionId}", connectionId);
+                // ignore
             }
         }
     }

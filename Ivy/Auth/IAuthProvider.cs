@@ -65,6 +65,16 @@ public interface IAuthProvider
     Task<AuthToken?> HandleOAuthCallbackAsync(HttpRequest request);
 
     /// <summary>
+    /// Retrieves the expiration time of the given authentication token.
+    /// </summary>
+    /// <param name="token">The authentication token</param>
+    /// <returns>The expiration time if available, null otherwise</returns>
+    DateTimeOffset? GetTokenExpiration(AuthToken token)
+    {
+        return token.ExpiresAt;
+    }
+
+    /// <summary>
     /// Sets the HTTP context for the auth provider.
     /// </summary>
     /// <param name="context">The HTTP context</param>
