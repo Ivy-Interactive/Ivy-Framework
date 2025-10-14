@@ -48,5 +48,3 @@ The DataTable API provides a fluent interface to customize columns, sorting, fil
 <Callout Type="tip">
 DataTable provides automatic scaffolding - it will detect your model properties and create appropriate columns automatically. You only need to customize what you want to change.
 </Callout>
-
-<WidgetDocs Type="Ivy.DataTable" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/DataTables/DataTable.cs"/>
