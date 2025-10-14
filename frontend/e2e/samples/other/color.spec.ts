@@ -24,39 +24,18 @@ test.describe('Colors App Tests', () => {
     await setupColorsPage(page);
   });
 
-  test.describe('Smoke Tests', () => {
-    test('should render colors app with heading and color boxes', async ({
-      page,
-    }) => {
-      await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+  test('should render colors app with heading and theme-independent colors', async ({
+    page,
+  }) => {
+    // Basic smoke test - heading is visible
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
 
-      // Look for text content that looks like color names (starts with capital letter)
-      const colorTexts = page.getByText(/^[A-Z][a-z]+$/);
-      expect(await colorTexts.count()).toBeGreaterThan(10);
-    });
+    // Check for absolute colors that don't change across themes
+    // Go up 2 levels from text to reach the Box div with background color
+    const whiteBox = page.getByText('White').first().locator('../..');
+    await expect(whiteBox).toHaveCSS('background-color', 'rgb(255, 255, 255)');
 
-    test('should render multiple color variations', async ({ page }) => {
-      // Simple check that we have many elements rendered
-      const allText = await page.textContent('body');
-      expect(allText).toBeTruthy();
-      expect(allText!.length).toBeGreaterThan(100);
-    });
-  });
-
-  test.describe('Color Application Tests', () => {
-    test('should verify Box.Color() method applies background colors', async ({
-      page,
-    }) => {
-      // Check that color boxes are rendered (via text content)
-      const colorElements = page.getByText(/^[A-Z][a-z]+$/);
-      await page.waitForTimeout(200);
-
-      const count = await colorElements.count();
-      expect(count).toBeGreaterThan(10);
-
-      // Verify page has rendered properly with color content
-      const pageContent = await page.textContent('body');
-      expect(pageContent).toContain('Colors');
-    });
+    const blackBox = page.getByText('Black').first().locator('../..');
+    await expect(blackBox).toHaveCSS('background-color', 'rgb(0, 0, 0)');
   });
 });
