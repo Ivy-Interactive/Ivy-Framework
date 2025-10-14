@@ -1,116 +1,158 @@
 import { icons } from 'lucide-react';
-import { createRoot } from 'react-dom/client';
-import React from 'react';
+import { createElement } from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
+
+// Cache for SVG strings
+const svgCache = new Map<string, string>();
 
 // Cache for icon images
-const iconCache = new Map<string, HTMLImageElement>();
-const iconLoadPromises = new Map<string, Promise<HTMLImageElement>>();
+const iconImageCache = new Map<string, HTMLImageElement>();
 
 /**
- * Converts a Lucide icon name to an SVG data URL and loads it as an image
+ * Validates if an icon name exists in lucide-react
  */
-export async function loadIconImage(
-  iconName: string
-): Promise<HTMLImageElement | null> {
+export function isValidIconName(iconName: string): boolean {
+  return iconName in icons;
+}
+
+/**
+ * Gets the SVG string for a Lucide icon
+ */
+export function getIconSVG(
+  iconName: string,
+  options: {
+    size?: number;
+    color?: string;
+    strokeWidth?: number;
+  } = {}
+): string | null {
+  const { size = 20, color = '#666', strokeWidth = 2 } = options;
+  const cacheKey = `${iconName}-${size}-${color}-${strokeWidth}`;
+
   // Check cache first
-  if (iconCache.has(iconName)) {
-    return iconCache.get(iconName)!;
+  if (svgCache.has(cacheKey)) {
+    return svgCache.get(cacheKey)!;
   }
 
-  // Check if already loading
-  if (iconLoadPromises.has(iconName)) {
-    return iconLoadPromises.get(iconName)!;
+  // Get the icon component from lucide-react
+  const IconComponent = icons[iconName as keyof typeof icons];
+
+  if (!IconComponent) {
+    console.warn(`Icon ${iconName} not found in lucide-react`);
+    return null;
   }
-
-  // Create loading promise
-  const loadPromise = new Promise<HTMLImageElement>((resolve, reject) => {
-    try {
-      // Get the icon component from lucide-react
-      const IconComponent = icons[iconName as keyof typeof icons];
-
-      if (!IconComponent) {
-        reject(new Error(`Icon ${iconName} not found`));
-        return;
-      }
-
-      // Create a temporary container to render the icon
-      const container = document.createElement('div');
-      container.style.position = 'absolute';
-      container.style.left = '-9999px';
-      container.style.width = '24px';
-      container.style.height = '24px';
-      document.body.appendChild(container);
-
-      // Create root and render the icon
-      const root = createRoot(container);
-      const iconElement = React.createElement(IconComponent, {
-        size: 20,
-        color: '#666',
-        strokeWidth: 2,
-      });
-
-      root.render(iconElement);
-
-      // Wait for render to complete
-      setTimeout(() => {
-        const svgElement = container.querySelector('svg');
-
-        if (!svgElement) {
-          root.unmount();
-          document.body.removeChild(container);
-          reject(new Error(`Failed to render SVG for icon: ${iconName}`));
-          return;
-        }
-
-        // Get the SVG as a string
-        const svgString = new XMLSerializer().serializeToString(svgElement);
-
-        // Clean up
-        root.unmount();
-        document.body.removeChild(container);
-
-        // Convert SVG to data URL
-        const svgDataUrl = `data:image/svg+xml;base64,${btoa(svgString)}`;
-
-        // Create image from data URL
-        const img = new Image();
-        img.onload = () => {
-          iconCache.set(iconName, img);
-          resolve(img);
-        };
-        img.onerror = () => {
-          reject(new Error(`Failed to load icon: ${iconName}`));
-        };
-        img.src = svgDataUrl;
-      }, 50); // Small delay to ensure render is complete
-    } catch (error) {
-      reject(error);
-    }
-  });
-
-  iconLoadPromises.set(iconName, loadPromise);
 
   try {
-    const img = await loadPromise;
-    iconLoadPromises.delete(iconName);
-    return img;
+    // Render to static SVG string
+    const element = createElement(IconComponent, {
+      size,
+      color,
+      strokeWidth,
+    });
+
+    const svgString = renderToStaticMarkup(element);
+    svgCache.set(cacheKey, svgString);
+    return svgString;
   } catch (error) {
-    iconLoadPromises.delete(iconName);
-    console.error(`Error loading icon ${iconName}:`, error);
+    console.error(`Error rendering icon ${iconName}:`, error);
     return null;
   }
 }
 
 /**
- * Gets a cached icon image if available
+ * Converts SVG string to data URL
  */
-export function getCachedIcon(iconName: string): HTMLImageElement | null {
-  return iconCache.get(iconName) || null;
+export function svgToDataUrl(svgString: string): string {
+  // Encode SVG string to base64
+  const base64 = btoa(svgString);
+  return `data:image/svg+xml;base64,${base64}`;
+}
+
+/**
+ * Converts a Lucide icon name to an HTMLImageElement
+ * Uses cached images when available
+ */
+export function getIconImage(
+  iconName: string,
+  options: {
+    size?: number;
+    color?: string;
+    strokeWidth?: number;
+  } = {}
+): HTMLImageElement | null {
+  const { size = 20, color = '#666', strokeWidth = 2 } = options;
+  const cacheKey = `${iconName}-${size}-${color}-${strokeWidth}`;
+
+  // Check cache first
+  if (iconImageCache.has(cacheKey)) {
+    return iconImageCache.get(cacheKey)!;
+  }
+
+  // Get SVG string
+  const svgString = getIconSVG(iconName, options);
+  if (!svgString) {
+    return null;
+  }
+
+  // Convert to data URL and create image
+  const dataUrl = svgToDataUrl(svgString);
+  const img = new Image();
+  img.src = dataUrl;
+
+  // Cache the image
+  iconImageCache.set(cacheKey, img);
+
+  return img;
+}
+
+/**
+ * Asynchronously loads an icon image
+ * Useful for preloading or when you need to ensure image is fully loaded
+ */
+export async function loadIconImage(
+  iconName: string,
+  options: {
+    size?: number;
+    color?: string;
+    strokeWidth?: number;
+  } = {}
+): Promise<HTMLImageElement | null> {
+  const img = getIconImage(iconName, options);
+
+  if (!img) {
+    return null;
+  }
+
+  // If image is already complete, return it
+  if (img.complete) {
+    return img;
+  }
+
+  // Wait for image to load
+  return new Promise((resolve, reject) => {
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error(`Failed to load icon: ${iconName}`));
+  });
 }
 
 /**
  * Preloads multiple icons
  */
-export async function preloadIcons(iconNames: string[]): Promise<void> {
-  await Promise.all(iconNames.map(name => loadIconImage(name)));
+export async function preloadIcons(
+  iconNames: string[],
+  options?: {
+    size?: number;
+    color?: string;
+    strokeWidth?: number;
+  }
+): Promise<void> {
+  await Promise.all(iconNames.map(name => loadIconImage(name, options)));
+}
+
+/**
+ * Clears the icon caches
+ */
+export function clearIconCache(): void {
+  svgCache.clear();
+  iconImageCache.clear();
 }

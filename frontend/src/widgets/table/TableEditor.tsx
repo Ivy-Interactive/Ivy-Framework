@@ -16,7 +16,7 @@ import React, {
 import { useTable } from './TableContext';
 import { tableStyles } from './styles/style';
 import { tableTheme } from './styles/theme';
-import { loadIconImage, getCachedIcon } from './utils/iconRenderer';
+import { getIconImage, isValidIconName } from './utils/iconRenderer';
 import { getSelectionProps } from './utils/selectionModes';
 import { getCellContent as getCellContentUtil } from './utils/cellContent';
 
@@ -160,36 +160,61 @@ export const TableEditor: React.FC<TableEditorProps> = ({
         const { ctx, rect, theme } = args;
         const iconName = cell.data?.iconName;
 
-        if (!iconName) return true;
+        if (!iconName) return false;
 
-        // Check if the icon is already cached
-        const iconImage = getCachedIcon(iconName);
+        // Validate icon exists
+        if (!isValidIconName(iconName)) {
+          // Draw error indicator for invalid icon
+          ctx.fillStyle = theme.textDark;
+          ctx.font = '12px sans-serif';
+          ctx.fillText(
+            '?',
+            rect.x + rect.width / 2 - 4,
+            rect.y + rect.height / 2 + 4
+          );
+          return true;
+        }
 
-        if (iconImage) {
+        // Get icon image (cached or newly created)
+        const iconImage = getIconImage(iconName, {
+          size: 20,
+          color: theme.textDark,
+          strokeWidth: 2,
+        });
+
+        if (iconImage && iconImage.complete) {
           // Draw the icon centered in the cell
           const iconSize = 20;
           const x = rect.x + (rect.width - iconSize) / 2;
           const y = rect.y + (rect.height - iconSize) / 2;
           ctx.drawImage(iconImage, x, y, iconSize, iconSize);
-        } else {
-          // If icon is not loaded yet, draw a placeholder and trigger loading
-          ctx.fillStyle = theme.textMedium;
-          ctx.beginPath();
-          ctx.arc(
-            rect.x + rect.width / 2,
-            rect.y + rect.height / 2,
-            6,
-            0,
-            2 * Math.PI
-          );
-          ctx.fill();
-
-          // Trigger icon loading in the background
-          // Note: The grid will automatically redraw on next frame or scroll
-          loadIconImage(iconName);
+          return true;
         }
 
+        // If image is not complete, draw placeholder
+        ctx.fillStyle = theme.textMedium;
+        ctx.beginPath();
+        ctx.arc(
+          rect.x + rect.width / 2,
+          rect.y + rect.height / 2,
+          4,
+          0,
+          2 * Math.PI
+        );
+        ctx.fill();
+
         return true;
+      },
+      // Support copying icon name
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      onPaste: (value: string, data: any) => {
+        if (typeof value === 'string' && isValidIconName(value)) {
+          return {
+            ...data,
+            iconName: value,
+          };
+        }
+        return undefined;
       },
     }),
     []
