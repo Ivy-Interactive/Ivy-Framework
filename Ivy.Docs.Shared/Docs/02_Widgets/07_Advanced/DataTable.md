@@ -282,11 +282,13 @@ return bigDataset.ToDataTable()
 ## Configuration Reference
 
 ### FilterTypes
+
 - `None` - No filtering
 - `List` - Simple list-based filters  
 - `Tree` - Hierarchical tree filters
 
 ### SelectionModes
+
 - `None` - No selection
 - `SingleRow` - Single row selection
 - `SingleColumn` - Single column selection  
@@ -295,6 +297,7 @@ return bigDataset.ToDataTable()
 - `Cells` - Individual cell selection
 
 ### ColType
+
 - `Text` - String data
 - `Number` - Numeric data
 - `Boolean` - True/false values
