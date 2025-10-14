@@ -7,6 +7,8 @@ export interface DataColumn {
   type: string;
   width: number;
   group?: string;
+  renderType?: 'icon' | 'text' | 'number' | 'date' | 'boolean';
+  iconSet?: 'lucide' | 'custom';
 }
 
 export interface DataTableConnection {

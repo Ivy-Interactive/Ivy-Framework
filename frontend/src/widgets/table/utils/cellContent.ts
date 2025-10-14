@@ -30,6 +30,7 @@ export function createNullCell(editable: boolean): GridCell {
 
 /**
  * Checks if a string value looks like a Lucide icon name (PascalCase)
+ * @deprecated Use column metadata (renderType: 'icon') instead of heuristics
  */
 export function isProbablyIconValue(value: unknown): boolean {
   return (
@@ -223,13 +224,19 @@ export function getCellContent(
   }
 
   const rowData = data[row];
-  const originalColumnIndex = columns.indexOf(orderedCols[col]);
+  const column = orderedCols[col];
+  const originalColumnIndex = columns.indexOf(column);
   const cellValue = rowData.values[originalColumnIndex];
-  const columnType = orderedCols[col].type.toLowerCase();
+  const columnType = column.type.toLowerCase();
 
   // Handle null/undefined values
   if (cellValue === null || cellValue === undefined) {
     return createNullCell(editable);
+  }
+
+  // Handle explicit icon renderType from backend metadata
+  if (column.renderType === 'icon' && typeof cellValue === 'string') {
+    return createIconCell(cellValue);
   }
 
   // Handle Date and DateTime types
@@ -250,7 +257,8 @@ export function getCellContent(
     return createBooleanCell(cellValue, editable);
   }
 
-  // Handle icon types
+  // Fallback: Use heuristic icon detection if no metadata provided
+  // This maintains backward compatibility but should be replaced with proper metadata
   if (isProbablyIconValue(cellValue)) {
     return createIconCell(String(cellValue));
   }

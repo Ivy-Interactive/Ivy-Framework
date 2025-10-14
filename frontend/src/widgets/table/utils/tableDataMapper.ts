@@ -43,10 +43,19 @@ export function convertArrowTableToData(
         ? calculateColumnWidth(field.name, columnData)
         : 150;
 
+      // Parse metadata from Arrow schema
+      const metadata = field.metadata;
+      const renderType = metadata?.get(
+        'render_type'
+      ) as DataColumn['renderType'];
+      const iconSet = metadata?.get('icon_set') as DataColumn['iconSet'];
+
       return {
         name: field.name,
         type: field.type.toString(),
         width,
+        ...(renderType && { renderType }),
+        ...(iconSet && { iconSet }),
       };
     }
   );
