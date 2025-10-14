@@ -26,6 +26,7 @@ public static partial class MarkdownConverter
         public string ViewBase { get; set; } = "ViewBase";
         public string? Prepare { get; set; } = "";
         public bool GroupExpanded { get; set; } = false;
+        public List<string>? SearchHints { get; set; }
     }
 
     static AppMeta ParseYamlAppMeta(string yaml)
@@ -105,6 +106,11 @@ public static partial class MarkdownConverter
         codeBuilder.Append(appMeta.Title != null ? $", title:{FormatLiteral(appMeta.Title)}" : "");
         codeBuilder.Append(appMeta.GroupExpanded ? ", groupExpanded:true" : "");
         codeBuilder.Append(documentSource != null ? $", documentSource:{FormatLiteral(documentSource)}" : "");
+        if (appMeta.SearchHints != null && appMeta.SearchHints.Count > 0)
+        {
+            var hints = string.Join(", ", appMeta.SearchHints.Select(h => FormatLiteral(h)));
+            codeBuilder.Append($", searchHints: [{hints}]");
+        }
         codeBuilder.AppendLine(")]");
         codeBuilder.AppendLine($"public class {className}(bool onlyBody = false) : {appMeta.ViewBase}");
         codeBuilder.AppendLine("{");
