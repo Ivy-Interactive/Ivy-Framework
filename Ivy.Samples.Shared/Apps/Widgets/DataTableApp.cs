@@ -66,6 +66,16 @@ public class DataTableApp : SampleBase
             .Header(u => u.Priority, "Priority")
             .Header(u => u.Activity, "Activity")
             .Header(u => u.InternalId, "Internal ID")
+            // Set custom column widths
+            .Width(u => u.Name, Size.Px(150))
+            .Width(u => u.Email, Size.Px(250))
+            .Width(u => u.Age, Size.Px(80))
+            .Width(u => u.CreatedAt, Size.Px(200))
+            .Width(u => u.LastLogin, Size.Px(200))
+            .Width(u => u.Status, Size.Px(80))
+            .Width(u => u.Priority, Size.Px(80))
+            .Width(u => u.Activity, Size.Px(80))
+            .Width(u => u.InternalId, Size.Px(150))
             // Set all columns to left alignment
             .Align(u => u.Name, Align.Left)
             .Align(u => u.Email, Align.Left)

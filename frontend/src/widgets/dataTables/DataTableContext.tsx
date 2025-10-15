@@ -17,6 +17,26 @@ import {
 } from './types/types';
 import { fetchTableData } from './utils/tableDataFetcher';
 
+/**
+ * Parses a Size string (e.g., "Px:200") to a numeric pixel value
+ * If input is already a number, returns it as-is
+ */
+function parseSize(size: number | string | undefined): number {
+  if (typeof size === 'number') return size;
+  if (!size) return 150; // default width
+
+  // Parse "Px:200" or "Rem:10" format
+  const match = size.match(/^(Px|Rem):(\d+\.?\d*)$/);
+  if (match) {
+    const [, unit, value] = match;
+    const numValue = parseFloat(value);
+    // For Rem, convert to pixels (assuming 16px = 1rem)
+    return unit === 'Rem' ? numValue * 16 : numValue;
+  }
+
+  return 150; // fallback to default
+}
+
 interface TableContextType {
   // State
   data: DataRow[];
@@ -126,10 +146,12 @@ export const TableProvider: React.FC<TableProviderProps> = ({
         // Arrow columns only provide name, type, and calculated width
         const mergedColumns = columnsProp.map(propCol => {
           const arrowCol = result.columns.find(ac => ac.name === propCol.name);
+          // Parse width from Size string format to numeric pixels
+          const parsedWidth = parseSize(propCol.width);
           return {
             ...propCol,
-            // Use calculated width from Arrow if not specified
-            width: propCol.width || arrowCol?.width || 150,
+            // Use parsed width from prop, or calculated width from Arrow, or default
+            width: parsedWidth || parseSize(arrowCol?.width) || 150,
           };
         });
 
@@ -227,14 +249,11 @@ export const TableProvider: React.FC<TableProviderProps> = ({
       // Check if column resizing is allowed
       if (!allowColumnResizing) return;
 
-      const gridColumns: GridColumn[] = columns.map((col, index) => ({
-        title: col.name,
-        width: columnWidths[index.toString()] || col.width,
-      }));
-
-      const columnIndex = gridColumns.findIndex(
-        col => col.title === column.title
+      // Find the column by matching title (which is col.header || col.name)
+      const columnIndex = columns.findIndex(
+        col => (col.header || col.name) === column.title
       );
+
       if (columnIndex !== -1) {
         setColumnWidths(prev => ({
           ...prev,
@@ -242,7 +261,7 @@ export const TableProvider: React.FC<TableProviderProps> = ({
         }));
       }
     },
-    [columns, columnWidths, allowColumnResizing]
+    [columns, allowColumnResizing]
   );
 
   // Handle sort
@@ -276,13 +295,27 @@ export const TableProvider: React.FC<TableProviderProps> = ({
   const handleColumnReorder = useCallback(
     (startIndex: number, endIndex: number) => {
       setColumnOrder(prevOrder => {
+        // Get visible columns based on current order
+        const visibleColumns = prevOrder
+          .map(idx => columns[idx])
+          .filter(col => !col.hidden);
+
+        // Get the actual column indices being moved
+        const startColIndex = columns.indexOf(visibleColumns[startIndex]);
+        const endColIndex = columns.indexOf(visibleColumns[endIndex]);
+
+        // Find positions in the order array
+        const startPos = prevOrder.indexOf(startColIndex);
+        const endPos = prevOrder.indexOf(endColIndex);
+
+        // Reorder
         const newOrder = [...prevOrder];
-        const [movedIndex] = newOrder.splice(startIndex, 1);
-        newOrder.splice(endIndex, 0, movedIndex);
+        const [movedIndex] = newOrder.splice(startPos, 1);
+        newOrder.splice(endPos, 0, movedIndex);
         return newOrder;
       });
     },
-    []
+    [columns]
   );
 
   const value: TableContextType = {

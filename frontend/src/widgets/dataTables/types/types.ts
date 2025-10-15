@@ -28,7 +28,7 @@ export interface DataColumn {
   header?: string;
   type: ColType;
   group?: string;
-  width: number;
+  width: number | string;
   hidden?: boolean;
   sortable?: boolean;
   sortDirection?: SortDirection;
