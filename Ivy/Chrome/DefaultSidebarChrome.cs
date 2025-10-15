@@ -18,6 +18,15 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
     {
         public Tab ToTab() => new Tab(Title, AppHost).Icon(Icon).Key(Utils.GetShortHash(Id + RefreshToken));
     }
+    private static bool IsWordMatch(string tag, string searchString)
+    {
+        // Split the tag into individual words (separated by hyphens, underscores, or spaces)
+        var words = System.Text.RegularExpressions.Regex.Split(tag, @"[-_\s]+");
+
+        // Check if any word starts with the search string (prefix matching)
+        return words.Any(word => word.StartsWith(searchString, StringComparison.OrdinalIgnoreCase));
+    }
+
     private int itemMatchScore(MenuItem item, string searchString)
     {
         var label = item.Label ?? "";
@@ -35,7 +44,7 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
         }
 
         // Search hints match gets lowest priority (score 1)
-        if (item.SearchHints?.Any(tag => tag.Contains(searchString, StringComparison.OrdinalIgnoreCase)) == true)
+        if (item.SearchHints?.Any(tag => IsWordMatch(tag, searchString)) == true)
         {
             return 1;
         }
