@@ -456,7 +456,6 @@ public class TextBuilder(string content, TextVariant variant, Languages codeLang
     /// Builds the final text widget based on the variant and configuration.
     /// Special variants like Code, Markdown, JSON, XML, HTML, and LaTeX
     /// create specialized widgets, while other variants create TextBlock widgets.
-    /// URLs in text content are automatically converted to clickable links.
     /// </summary>
     /// <returns>A text widget configured with the current settings and variant.</returns>
     public override object? Build()
@@ -477,13 +476,6 @@ public class TextBuilder(string content, TextVariant variant, Languages codeLang
                 return new Markdown("$$" + Environment.NewLine + content + Environment.NewLine + "$$");
             default:
                 {
-                    // Check if content contains URLs and convert to Markdown if so
-                    if (ContainsUrl(content))
-                    {
-                        var markdownContent = ConvertUrlsToMarkdownLinks(content);
-                        return new Markdown(markdownContent);
-                    }
-
                     var text = new TextBlock(
                         content, variant, _width, _strikeThrough, _color, _noWrap, _overflow);
                     return text;
@@ -491,31 +483,6 @@ public class TextBuilder(string content, TextVariant variant, Languages codeLang
         }
     }
 
-    /// <summary>
-    /// Checks if the text content contains URLs.
-    /// </summary>
-    /// <param name="text">Text content to check.</param>
-    /// <returns>True if the text contains URLs, false otherwise.</returns>
-    private static bool ContainsUrl(string text)
-    {
-        // Simple URL pattern matching for http/https URLs
-        return System.Text.RegularExpressions.Regex.IsMatch(text, @"https?://[^\s]+", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
-    }
-
-    /// <summary>
-    /// Converts URLs in text to Markdown link format.
-    /// </summary>
-    /// <param name="text">Text content containing URLs.</param>
-    /// <returns>Text with URLs converted to Markdown links.</returns>
-    private static string ConvertUrlsToMarkdownLinks(string text)
-    {
-        // Convert URLs to markdown links
-        return System.Text.RegularExpressions.Regex.Replace(
-            text,
-            @"(https?://[^\s]+)",
-            "[$1]($1)",
-            System.Text.RegularExpressions.RegexOptions.IgnoreCase);
-    }
 
     /// <summary>
     /// Sets whether the text should be displayed with a strikethrough effect.

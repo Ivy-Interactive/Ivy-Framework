@@ -9,6 +9,30 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 
+// Helper function to detect URLs and convert them to clickable links
+const renderTextWithLinks = (text: string): React.ReactNode => {
+  // URL regex pattern for http/https URLs
+  const urlRegex = /(https?:\/\/[^\s]+)/gi;
+  const parts = text.split(urlRegex);
+
+  return parts.map((part, index) => {
+    if (urlRegex.test(part)) {
+      return (
+        <a
+          key={index}
+          href={part}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-primary underline brightness-90 hover:brightness-100"
+        >
+          {part}
+        </a>
+      );
+    }
+    return part;
+  });
+};
+
 type TextBlockVariant =
   | 'Literal'
   | 'H1'
@@ -50,27 +74,27 @@ interface VariantMap {
 const variantMap: VariantMap = {
   Literal: ({ children, className, style }) => (
     <span className={className} style={style}>
-      {children}
+      {renderTextWithLinks(children)}
     </span>
   ),
   H1: ({ children, className, style }) => (
     <h1 className={cn(textBlockClassMap.H1, className)} style={style}>
-      {children}
+      {renderTextWithLinks(children)}
     </h1>
   ),
   H2: ({ children, className, style }) => (
     <h2 className={cn(textBlockClassMap.H2, className)} style={style}>
-      {children}
+      {renderTextWithLinks(children)}
     </h2>
   ),
   H3: ({ children, className, style }) => (
     <h3 className={cn(textBlockClassMap.H3, className)} style={style}>
-      {children}
+      {renderTextWithLinks(children)}
     </h3>
   ),
   H4: ({ children, className, style }) => (
     <h4 className={cn(textBlockClassMap.H4, className)} style={style}>
-      {children}
+      {renderTextWithLinks(children)}
     </h4>
   ),
   Block: ({ children, className, style }) => {
@@ -120,12 +144,12 @@ const variantMap: VariantMap = {
   },
   P: ({ children, className, style }) => (
     <p className={cn(textBlockClassMap.P, className)} style={style}>
-      {children}
+      {renderTextWithLinks(children)}
     </p>
   ),
   Inline: ({ children, className, style }) => (
     <span className={cn(className)} style={style}>
-      {children}
+      {renderTextWithLinks(children)}
     </span>
   ),
   Blockquote: ({ children, className, style }) => (
@@ -133,17 +157,17 @@ const variantMap: VariantMap = {
       className={cn(textBlockClassMap.Blockquote, className)}
       style={style}
     >
-      {children}
+      {renderTextWithLinks(children)}
     </blockquote>
   ),
   InlineCode: ({ children, className, style }) => (
     <code className={cn(textBlockClassMap.InlineCode, className)} style={style}>
-      {children}
+      {renderTextWithLinks(children)}
     </code>
   ),
   Lead: ({ children, className, style }) => (
     <p className={cn(textBlockClassMap.Lead, className)} style={style}>
-      {children}
+      {renderTextWithLinks(children)}
     </p>
   ),
   Large: ({ children, className, style }) => (
@@ -151,7 +175,7 @@ const variantMap: VariantMap = {
       className={cn('text-semi-lead font-semibold', className)}
       style={style}
     >
-      {children}
+      {renderTextWithLinks(children)}
     </div>
   ),
   Small: ({ children, className, style }) => (
@@ -159,7 +183,7 @@ const variantMap: VariantMap = {
       className={cn('text-large-body font-medium leading-none', className)}
       style={style}
     >
-      {children}
+      {renderTextWithLinks(children)}
     </div>
   ),
   Muted: ({ children, className, style }) => (
@@ -167,7 +191,7 @@ const variantMap: VariantMap = {
       className={cn('text-sm text-muted-foreground', className)}
       style={style}
     >
-      {children}
+      {renderTextWithLinks(children)}
     </div>
   ),
   Danger: ({ children, className, style }) => (
@@ -178,7 +202,7 @@ const variantMap: VariantMap = {
       )}
       style={style}
     >
-      {children}
+      {renderTextWithLinks(children)}
     </div>
   ),
   Warning: ({ children, className, style }) => (
@@ -186,7 +210,7 @@ const variantMap: VariantMap = {
       className={cn('text-large-body text-amber font-semibold', className)}
       style={style}
     >
-      {children}
+      {renderTextWithLinks(children)}
     </div>
   ),
   Success: ({ children, className, style }) => (
@@ -194,7 +218,7 @@ const variantMap: VariantMap = {
       className={cn('text-large-body text-green font-semibold', className)}
       style={style}
     >
-      {children}
+      {renderTextWithLinks(children)}
     </div>
   ),
   Label: ({ children, className, style }) => (
@@ -205,12 +229,12 @@ const variantMap: VariantMap = {
       )}
       style={style}
     >
-      {children}
+      {renderTextWithLinks(children)}
     </div>
   ),
   Strong: ({ children, className, style }) => (
     <strong className={cn('font-semibold', className)} style={style}>
-      {children}
+      {renderTextWithLinks(children)}
     </strong>
   ),
 };
