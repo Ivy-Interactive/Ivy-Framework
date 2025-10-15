@@ -66,7 +66,7 @@ interface TextBlockWidgetProps {
 
 interface VariantMap {
   [key: string]: React.FC<{
-    children: string;
+    children: React.ReactNode;
     className?: string;
     style?: React.CSSProperties;
   }>;
@@ -74,27 +74,27 @@ interface VariantMap {
 const variantMap: VariantMap = {
   Literal: ({ children, className, style }) => (
     <span className={className} style={style}>
-      {renderTextWithLinks(children)}
+      {children}
     </span>
   ),
   H1: ({ children, className, style }) => (
     <h1 className={cn(textBlockClassMap.H1, className)} style={style}>
-      {renderTextWithLinks(children)}
+      {children}
     </h1>
   ),
   H2: ({ children, className, style }) => (
     <h2 className={cn(textBlockClassMap.H2, className)} style={style}>
-      {renderTextWithLinks(children)}
+      {children}
     </h2>
   ),
   H3: ({ children, className, style }) => (
     <h3 className={cn(textBlockClassMap.H3, className)} style={style}>
-      {renderTextWithLinks(children)}
+      {children}
     </h3>
   ),
   H4: ({ children, className, style }) => (
     <h4 className={cn(textBlockClassMap.H4, className)} style={style}>
-      {renderTextWithLinks(children)}
+      {children}
     </h4>
   ),
   Block: ({ children, className, style }) => {
@@ -144,12 +144,12 @@ const variantMap: VariantMap = {
   },
   P: ({ children, className, style }) => (
     <p className={cn(textBlockClassMap.P, className)} style={style}>
-      {renderTextWithLinks(children)}
+      {children}
     </p>
   ),
   Inline: ({ children, className, style }) => (
     <span className={cn(className)} style={style}>
-      {renderTextWithLinks(children)}
+      {children}
     </span>
   ),
   Blockquote: ({ children, className, style }) => (
@@ -157,17 +157,17 @@ const variantMap: VariantMap = {
       className={cn(textBlockClassMap.Blockquote, className)}
       style={style}
     >
-      {renderTextWithLinks(children)}
+      {children}
     </blockquote>
   ),
   InlineCode: ({ children, className, style }) => (
     <code className={cn(textBlockClassMap.InlineCode, className)} style={style}>
-      {renderTextWithLinks(children)}
+      {children}
     </code>
   ),
   Lead: ({ children, className, style }) => (
     <p className={cn(textBlockClassMap.Lead, className)} style={style}>
-      {renderTextWithLinks(children)}
+      {children}
     </p>
   ),
   Large: ({ children, className, style }) => (
@@ -175,7 +175,7 @@ const variantMap: VariantMap = {
       className={cn('text-semi-lead font-semibold', className)}
       style={style}
     >
-      {renderTextWithLinks(children)}
+      {children}
     </div>
   ),
   Small: ({ children, className, style }) => (
@@ -183,7 +183,7 @@ const variantMap: VariantMap = {
       className={cn('text-large-body font-medium leading-none', className)}
       style={style}
     >
-      {renderTextWithLinks(children)}
+      {children}
     </div>
   ),
   Muted: ({ children, className, style }) => (
@@ -191,7 +191,7 @@ const variantMap: VariantMap = {
       className={cn('text-sm text-muted-foreground', className)}
       style={style}
     >
-      {renderTextWithLinks(children)}
+      {children}
     </div>
   ),
   Danger: ({ children, className, style }) => (
@@ -202,7 +202,7 @@ const variantMap: VariantMap = {
       )}
       style={style}
     >
-      {renderTextWithLinks(children)}
+      {children}
     </div>
   ),
   Warning: ({ children, className, style }) => (
@@ -210,7 +210,7 @@ const variantMap: VariantMap = {
       className={cn('text-large-body text-amber font-semibold', className)}
       style={style}
     >
-      {renderTextWithLinks(children)}
+      {children}
     </div>
   ),
   Success: ({ children, className, style }) => (
@@ -218,7 +218,7 @@ const variantMap: VariantMap = {
       className={cn('text-large-body text-green font-semibold', className)}
       style={style}
     >
-      {renderTextWithLinks(children)}
+      {children}
     </div>
   ),
   Label: ({ children, className, style }) => (
@@ -229,12 +229,12 @@ const variantMap: VariantMap = {
       )}
       style={style}
     >
-      {renderTextWithLinks(children)}
+      {children}
     </div>
   ),
   Strong: ({ children, className, style }) => (
     <strong className={cn('font-semibold', className)} style={style}>
-      {renderTextWithLinks(children)}
+      {children}
     </strong>
   ),
 };
@@ -263,7 +263,7 @@ export const TextBlockWidget: React.FC<TextBlockWidgetProps> = ({
         noWrap && 'whitespace-nowrap'
       )}
     >
-      {content}
+      {renderTextWithLinks(content)}
     </Component>
   );
 };
