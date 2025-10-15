@@ -157,6 +157,13 @@ const DefaultVariant: React.FC<{
     onChange(e);
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.currentTarget.blur();
+      e.preventDefault();
+    }
+  };
+
   const styles: React.CSSProperties = {
     ...getWidth(props.width),
   };
@@ -175,6 +182,7 @@ const DefaultVariant: React.FC<{
         onChange={handleChange}
         onBlur={onBlur}
         onFocus={onFocus}
+        onKeyDown={handleKeyDown}
         className={cn(
           textInputSizeVariants({ size }),
           props.invalid && inputStyles.invalidInput,
@@ -310,6 +318,13 @@ const PasswordVariant: React.FC<{
     onChange(e);
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.currentTarget.blur();
+      e.preventDefault();
+    }
+  };
+
   const styles: React.CSSProperties = {
     ...getWidth(props.width),
   };
@@ -332,6 +347,7 @@ const PasswordVariant: React.FC<{
         onChange={handleChange}
         onBlur={onBlur}
         onFocus={onFocus}
+        onKeyDown={handleKeyDown}
         className={cn(
           textInputSizeVariants({ size }),
           props.invalid && inputStyles.invalidInput,
