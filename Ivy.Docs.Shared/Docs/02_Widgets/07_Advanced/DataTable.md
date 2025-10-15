@@ -37,14 +37,18 @@ sampleUsers.ToDataTable()
     .Header(u => u.Status, "Status")
 ```
 
-The DataTable API provides a fluent interface to customize columns, sorting, filtering, and more. Use methods like:
+## Column Types
 
-- `.Header()` - Set column headers
-- `.Width()`, `.Align()` - Control column layout
-- `.Sortable()`, `.Filterable()` - Enable column features
-- `.Config()` - Configure global table behavior
-- `.Renderer()` - Custom cell rendering
+DataTable automatically detects column types and provides appropriate labels:
+
+- **Text** - String and character data
+- **Number** - Numeric values (int, decimal, double, etc.)
+- **Boolean** - True/false values with checkboxes
+- **Date/DateTime** - Date and time values
+- **Icon** - Icon enum values displayed as icons
 
 <Callout Type="tip">
-DataTable provides automatic scaffolding - it will detect your model properties and create appropriate columns automatically. You only need to customize what you want to change.
+DataTable provides automatic scaffolding. It detects your model properties and creates appropriate columns automatically. You only need to customize what you want to change.
 </Callout>
+
+<WidgetDocs Type="Ivy.DataTable" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/DataTables/DataTable.cs"/>
