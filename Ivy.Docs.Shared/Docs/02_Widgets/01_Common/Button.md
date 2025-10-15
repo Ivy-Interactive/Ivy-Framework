@@ -75,21 +75,6 @@ Layout.Grid().Columns(3)
     | new Button("Destructive").Destructive().Loading()
 ```
 
-### Button Sizes
-
-```csharp demo-tabs
-Layout.Grid().Columns(3)
-    | new Button("Small").Small()
-    | new Button("Medium")
-    | new Button("Large").Large()
-    | new Button("Small").Secondary().Small()
-    | new Button("Medium").Secondary()
-    | new Button("Large").Secondary().Large()
-    | new Button("Small").Destructive().Small()
-    | new Button("Medium").Destructive()
-    | new Button("Large").Destructive().Large()
-```
-
 ### Border Radius
 
 ```csharp demo-tabs
