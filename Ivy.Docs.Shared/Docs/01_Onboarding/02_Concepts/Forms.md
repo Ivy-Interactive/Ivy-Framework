@@ -6,7 +6,7 @@ searchHints:
   - validation
   - submission
   - fields
-  - toform
+  - form
   - builder
 ---
 
