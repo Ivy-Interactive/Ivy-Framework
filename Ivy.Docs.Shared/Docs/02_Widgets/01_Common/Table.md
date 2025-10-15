@@ -5,7 +5,7 @@ searchHints:
   - rows
   - columns
   - cells
-  - totable
+  - table
 ---
 
 # Table
