@@ -29,7 +29,7 @@ The `DataTable` widget provides a powerful, high-performance solution for displa
 
 Create a DataTable from any `IQueryable<T>` using the `.ToDataTable()` extension method:
 
-```csharp demo
+```csharp demo-tabs
 sampleUsers.ToDataTable()
     .Header(u => u.Name, "Full Name")
     .Header(u => u.Email, "Email Address")
