@@ -76,6 +76,7 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
             else
             {
                 var result = appRepository.GetMenuItems().Flatten()
+                    .Where(item => item.Children == null || item.Children.Length == 0) // Only include leaf nodes (actual apps)
                     .Select(item => new { Item = item, Score = itemMatchScore(item, search.Value) })
                     .Where(x => x.Score > 0)
                     .OrderByDescending(x => x.Score)
