@@ -65,22 +65,27 @@ export function convertToGridColumns(
   // Filter out hidden columns first
   const visibleColumns = columns.filter(col => !col.hidden);
 
-  // Apply column order if available (using order property or columnOrder array)
+  // Apply column order if available
   let orderedColumns = visibleColumns;
 
-  // If columns have explicit order property, use that
-  const hasOrderProperty = visibleColumns.some(col => col.order !== undefined);
-  if (hasOrderProperty) {
-    orderedColumns = [...visibleColumns].sort((a, b) => {
-      const orderA = a.order ?? Number.MAX_SAFE_INTEGER;
-      const orderB = b.order ?? Number.MAX_SAFE_INTEGER;
-      return orderA - orderB;
-    });
-  } else if (columnOrder.length === columns.length) {
-    // Otherwise use the columnOrder array (from user reordering)
+  // User reordering (columnOrder array) takes precedence over backend order property
+  if (columnOrder.length === columns.length) {
+    // Use the columnOrder array (from user reordering)
     orderedColumns = columnOrder
       .map(idx => columns[idx])
       .filter(col => !col.hidden);
+  } else {
+    // Fall back to explicit order property if no user reordering has happened
+    const hasOrderProperty = visibleColumns.some(
+      col => col.order !== undefined
+    );
+    if (hasOrderProperty) {
+      orderedColumns = [...visibleColumns].sort((a, b) => {
+        const orderA = a.order ?? Number.MAX_SAFE_INTEGER;
+        const orderB = b.order ?? Number.MAX_SAFE_INTEGER;
+        return orderA - orderB;
+      });
+    }
   }
 
   return orderedColumns.map((col, index) => {

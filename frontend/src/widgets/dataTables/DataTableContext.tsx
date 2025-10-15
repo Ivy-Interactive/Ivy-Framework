@@ -95,13 +95,29 @@ export const TableProvider: React.FC<TableProviderProps> = ({
 
   const loadingRef = useRef(false);
   const currentRowCountRef = useRef(0);
+  const isReorderingRef = useRef(false);
   const batchSize = 20;
 
   const { allowColumnResizing, allowSorting } = config;
 
   // Update columns when columnsProp changes
   useEffect(() => {
-    setColumns(columnsProp);
+    // Don't update columns during reordering
+    if (isReorderingRef.current) return;
+
+    setColumns(prevColumns => {
+      // Only update if the column names or count changed
+      if (
+        prevColumns.length !== columnsProp.length ||
+        prevColumns.some((col, idx) => col.name !== columnsProp[idx].name)
+      ) {
+        // Structure changed, reset column order
+        setColumnOrder([]);
+        return columnsProp;
+      }
+      // Same structure, just update metadata without resetting order
+      return columnsProp;
+    });
   }, [columnsProp]);
 
   // Reset row count and column widths when connection changes
@@ -294,24 +310,37 @@ export const TableProvider: React.FC<TableProviderProps> = ({
   // Handle column reorder
   const handleColumnReorder = useCallback(
     (startIndex: number, endIndex: number) => {
+      // Set flag to prevent column updates during reordering
+      isReorderingRef.current = true;
+
       setColumnOrder(prevOrder => {
-        // Get visible columns based on current order
-        const visibleColumns = prevOrder
-          .map(idx => columns[idx])
-          .filter(col => !col.hidden);
+        // prevOrder contains indices into the full columns array
+        // startIndex and endIndex are positions in the VISIBLE columns
 
-        // Get the actual column indices being moved
-        const startColIndex = columns.indexOf(visibleColumns[startIndex]);
-        const endColIndex = columns.indexOf(visibleColumns[endIndex]);
+        // Get the visible column indices (filtering out hidden ones)
+        const visibleIndices = prevOrder.filter(idx => !columns[idx]?.hidden);
 
-        // Find positions in the order array
-        const startPos = prevOrder.indexOf(startColIndex);
-        const endPos = prevOrder.indexOf(endColIndex);
+        // Reorder just the visible indices
+        const newVisibleIndices = [...visibleIndices];
+        const [movedIndex] = newVisibleIndices.splice(startIndex, 1);
+        newVisibleIndices.splice(endIndex, 0, movedIndex);
 
-        // Reorder
+        // Reconstruct the full order array, preserving hidden column positions
         const newOrder = [...prevOrder];
-        const [movedIndex] = newOrder.splice(startPos, 1);
-        newOrder.splice(endPos, 0, movedIndex);
+        let visiblePosition = 0;
+
+        for (let i = 0; i < newOrder.length; i++) {
+          // Check if the column at this position in the ORIGINAL order is hidden
+          if (!columns[prevOrder[i]]?.hidden) {
+            newOrder[i] = newVisibleIndices[visiblePosition++];
+          }
+        }
+
+        // Reset flag after a short delay
+        setTimeout(() => {
+          isReorderingRef.current = false;
+        }, 100);
+
         return newOrder;
       });
     },

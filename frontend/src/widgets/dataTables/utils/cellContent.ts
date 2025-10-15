@@ -243,9 +243,17 @@ export function getCellContent(
 ): GridCell {
   const [col, row] = cell;
 
-  // Filter out hidden columns and apply order
-  const visibleColumns = columns.filter(col => !col.hidden);
-  const orderedCols = getOrderedColumns(visibleColumns, columnOrder);
+  // Apply column order first, then filter out hidden columns
+  let orderedCols: DataColumn[];
+  if (columnOrder.length === columns.length) {
+    // Map using columnOrder indices, then filter hidden
+    orderedCols = columnOrder
+      .map(idx => columns[idx])
+      .filter(col => !col.hidden);
+  } else {
+    // No reordering, just filter hidden columns
+    orderedCols = columns.filter(col => !col.hidden);
+  }
 
   // Safety check
   if (row >= data.length || col >= orderedCols.length) {

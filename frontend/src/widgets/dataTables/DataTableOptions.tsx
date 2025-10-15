@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useTable } from './DataTableContext';
 import { tableStyles } from './styles/style';
 import { QueryEditor, QueryEditorChangeEvent } from 'filter-query-editor';
@@ -46,7 +46,18 @@ export const TableOptions: React.FC<{
   };
 
   // Filter columns to only include filterable ones (defaults to true if not specified)
-  const filterableColumns = columns.filter(col => col.filterable ?? true);
+  // Map DataColumn to ColumnDef format expected by QueryEditor
+  const queryEditorColumns = useMemo(
+    () =>
+      columns
+        .filter(col => col.filterable ?? true)
+        .map(col => ({
+          name: col.name,
+          type: col.type.toLowerCase(),
+          width: typeof col.width === 'number' ? col.width : 150,
+        })),
+    [columns]
+  );
 
   const queryEditorContent = (
     <div className="flex gap-2 flex-col sm:flex-row">
@@ -56,7 +67,7 @@ export const TableOptions: React.FC<{
       >
         <QueryEditor
           value={query}
-          columns={filterableColumns}
+          columns={queryEditorColumns}
           onChange={handleQueryChange}
           placeholder='e.g., name = "John" AND age > 18 '
           height={40}
