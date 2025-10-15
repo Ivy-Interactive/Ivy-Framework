@@ -9,30 +9,6 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 
-// Helper function to detect URLs and convert them to clickable links
-const renderTextWithLinks = (text: string): React.ReactNode => {
-  // URL regex pattern for http/https URLs
-  const urlRegex = /(https?:\/\/[^\s]+)/gi;
-  const parts = text.split(urlRegex);
-
-  return parts.map((part, index) => {
-    if (urlRegex.test(part)) {
-      return (
-        <a
-          key={index}
-          href={part}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-primary underline brightness-90 hover:brightness-100"
-        >
-          {part}
-        </a>
-      );
-    }
-    return part;
-  });
-};
-
 type TextBlockVariant =
   | 'Literal'
   | 'H1'
@@ -254,6 +230,25 @@ export const TextBlockWidget: React.FC<TextBlockWidgetProps> = ({
     ...getOverflow(overflow),
   };
 
+  // Auto-convert URLs to clickable links
+  const processedContent = content
+    .split(/(https?:\/\/[^\s]+)/gi)
+    .map((part, index) =>
+      /^https?:\/\//i.test(part) ? (
+        <a
+          key={index}
+          href={part}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-primary underline brightness-90 hover:brightness-100"
+        >
+          {part}
+        </a>
+      ) : (
+        part
+      )
+    );
+
   const Component = variantMap[variant];
   return (
     <Component
@@ -263,7 +258,7 @@ export const TextBlockWidget: React.FC<TextBlockWidgetProps> = ({
         noWrap && 'whitespace-nowrap'
       )}
     >
-      {renderTextWithLinks(content)}
+      {processedContent}
     </Component>
   );
 };
