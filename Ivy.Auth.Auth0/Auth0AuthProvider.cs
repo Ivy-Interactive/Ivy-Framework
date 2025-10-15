@@ -139,7 +139,7 @@ public class Auth0AuthProvider : IAuthProvider
         }
     }
 
-    public async Task LogoutAsync(string jwt)
+    public async Task LogoutAsync(string token)
     {
         try
         {
@@ -153,11 +153,11 @@ public class Auth0AuthProvider : IAuthProvider
         }
     }
 
-    public async Task<AuthToken?> RefreshJwtAsync(AuthToken jwt)
+    public async Task<AuthToken?> RefreshAccessTokenAsync(AuthToken token)
     {
-        if (jwt.ExpiresAt == null || jwt.RefreshToken == null || DateTimeOffset.UtcNow < jwt.ExpiresAt)
+        if (token.ExpiresAt == null || token.RefreshToken == null || DateTimeOffset.UtcNow < token.ExpiresAt)
         {
-            return jwt;
+            return token;
         }
 
         try
@@ -166,11 +166,11 @@ public class Auth0AuthProvider : IAuthProvider
             {
                 ClientId = _clientId,
                 ClientSecret = _clientSecret,
-                RefreshToken = jwt.RefreshToken
+                RefreshToken = token.RefreshToken
             };
 
             var response = await _authClient.GetTokenAsync(request);
-            return new AuthToken(response.AccessToken, response.RefreshToken ?? jwt.RefreshToken, DateTimeOffset.UtcNow.AddSeconds(response.ExpiresIn));
+            return new AuthToken(response.AccessToken, response.RefreshToken ?? token.RefreshToken, DateTimeOffset.UtcNow.AddSeconds(response.ExpiresIn));
         }
         catch (Exception)
         {
@@ -209,15 +209,15 @@ public class Auth0AuthProvider : IAuthProvider
         }
     }
 
-    public async Task<bool> ValidateJwtAsync(string jwt)
+    public async Task<bool> ValidateAccessTokenAsync(string token)
     {
-        var verifiedToken = await VerifyToken(jwt);
+        var verifiedToken = await VerifyToken(token);
         return verifiedToken is not null;
     }
 
-    public async Task<UserInfo?> GetUserInfoAsync(string jwt)
+    public async Task<UserInfo?> GetUserInfoAsync(string token)
     {
-        if (await VerifyToken(jwt) is not var (claims, _))
+        if (await VerifyToken(token) is not var (claims, _))
         {
             return null;
         }
@@ -236,7 +236,7 @@ public class Auth0AuthProvider : IAuthProvider
 
     public async Task<DateTimeOffset?> GetTokenExpiration(AuthToken token)
     {
-        if (await VerifyToken(token.Jwt) is var (_, expiration))
+        if (await VerifyToken(token.AccessToken) is var (_, expiration))
         {
             return expiration;
         }

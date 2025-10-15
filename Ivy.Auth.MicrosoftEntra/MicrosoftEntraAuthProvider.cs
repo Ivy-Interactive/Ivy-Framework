@@ -147,7 +147,7 @@ public class MicrosoftEntraAuthProvider : IAuthProvider
         );
     }
 
-    public Task LogoutAsync(string jwt)
+    public Task LogoutAsync(string token)
     {
         _tokenCache = null;
         _app = null;
@@ -155,21 +155,21 @@ public class MicrosoftEntraAuthProvider : IAuthProvider
         return Task.CompletedTask;
     }
 
-    public async Task<AuthToken?> RefreshJwtAsync(AuthToken jwt)
+    public async Task<AuthToken?> RefreshAccessTokenAsync(AuthToken token)
     {
         var app = GetApp();
 
         if (app is not IByRefreshToken refresher
-            || jwt.Tag is not JsonElement tag
+            || token.Tag is not JsonElement tag
             || tag.GetString() is not string accountId
             || accountId.Length <= 0)
         {
-            return jwt;
+            return token;
         }
 
-        if (jwt.ExpiresAt == null || jwt.RefreshToken == null || DateTimeOffset.UtcNow < jwt.ExpiresAt)
+        if (token.ExpiresAt == null || token.RefreshToken == null || DateTimeOffset.UtcNow < token.ExpiresAt)
         {
-            return jwt;
+            return token;
         }
 
         try
@@ -188,7 +188,7 @@ public class MicrosoftEntraAuthProvider : IAuthProvider
 
                 if (result == null)
                 {
-                    return jwt;
+                    return token;
                 }
 
                 return new AuthToken(
@@ -200,12 +200,12 @@ public class MicrosoftEntraAuthProvider : IAuthProvider
             }
             else
             {
-                var result = await refresher.AcquireTokenByRefreshToken(_scopes, jwt.RefreshToken)
+                var result = await refresher.AcquireTokenByRefreshToken(_scopes, token.RefreshToken)
                     .ExecuteAsync();
 
                 if (result == null)
                 {
-                    return jwt;
+                    return token;
                 }
 
                 if (result.Account.HomeAccountId.Identifier != accountId)
@@ -227,16 +227,16 @@ public class MicrosoftEntraAuthProvider : IAuthProvider
         }
     }
 
-    public async Task<bool> ValidateJwtAsync(string jwt)
+    public async Task<bool> ValidateAccessTokenAsync(string token)
     {
-        return await VerifyToken(jwt) is not null;
+        return await VerifyToken(token) is not null;
     }
 
-    public async Task<UserInfo?> GetUserInfoAsync(string jwt)
+    public async Task<UserInfo?> GetUserInfoAsync(string token)
     {
         try
         {
-            var user = await GetMeAsync(jwt);
+            var user = await GetMeAsync(token);
 
             if (user == null || user.Id == null)
             {
@@ -310,10 +310,10 @@ public class MicrosoftEntraAuthProvider : IAuthProvider
         return null;
     }
 
-    private async Task<Microsoft.Graph.Models.User?> GetMeAsync(string jwt)
+    private async Task<Microsoft.Graph.Models.User?> GetMeAsync(string token)
     {
         var httpClient = new HttpClient();
-        httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", jwt);
+        httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
         var tempGraphClient = new GraphServiceClient(httpClient);
         return await tempGraphClient.Me.GetAsync();
     }

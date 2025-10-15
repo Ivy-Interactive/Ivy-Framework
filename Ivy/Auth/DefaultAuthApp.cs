@@ -81,7 +81,7 @@ public class PasswordEmailFlowView(IState<string?> errorMessage) : ViewBase
 
                 if (token != null)
                 {
-                    client.SetJwt(token);
+                    client.SetAuthToken(token);
                 }
                 else
                 {
@@ -128,7 +128,7 @@ public class OAuthFlowView(AuthOption option, IState<string?> errorMessage) : Vi
         var callback = this.UseWebhook(async (request) =>
         {
             var token = await auth.HandleOAuthCallbackAsync(request);
-            client.SetJwt(token);
+            client.SetAuthToken(token);
             return new RedirectResult("/");
         });
 

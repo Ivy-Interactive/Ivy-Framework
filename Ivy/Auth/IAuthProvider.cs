@@ -17,31 +17,31 @@ public interface IAuthProvider
     Task<AuthToken?> LoginAsync(string email, string password);
 
     /// <summary>
-    /// Logs out a user by invalidating their JWT token.
+    /// Logs out a user by invalidating their access token.
     /// </summary>
-    /// <param name="jwt">The JWT token to invalidate</param>
-    Task LogoutAsync(string jwt);
+    /// <param name="token">The access token to invalidate</param>
+    Task LogoutAsync(string token);
 
     /// <summary>
-    /// Refreshes an expired or expiring JWT token.
+    /// Refreshes an expired or expiring access token.
     /// </summary>
-    /// <param name="jwt">The current authentication token</param>
+    /// <param name="token">The current authentication token</param>
     /// <returns>A new authentication token if successful, null otherwise</returns>
-    Task<AuthToken?> RefreshJwtAsync(AuthToken jwt);
+    Task<AuthToken?> RefreshAccessTokenAsync(AuthToken token);
 
     /// <summary>
-    /// Validates whether a JWT token is still valid.
+    /// Checks whether an access token is valid.
     /// </summary>
-    /// <param name="jwt">The JWT token to validate</param>
+    /// <param name="token">The access token to validate</param>
     /// <returns>True if the token is valid, false otherwise</returns>
-    Task<bool> ValidateJwtAsync(string jwt);
+    Task<bool> ValidateAccessTokenAsync(string token);
 
     /// <summary>
-    /// Retrieves user information from a valid JWT token.
+    /// Retrieves user information using a valid access token.
     /// </summary>
-    /// <param name="jwt">The JWT token</param>
+    /// <param name="token">The access token</param>
     /// <returns>User information if successful, null otherwise</returns>
-    Task<UserInfo?> GetUserInfoAsync(string jwt);
+    Task<UserInfo?> GetUserInfoAsync(string token);
 
     /// <summary>
     /// Gets the available authentication options for this provider.

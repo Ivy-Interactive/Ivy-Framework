@@ -54,12 +54,12 @@ public class AuthService(IAuthProvider authProvider, AuthToken? token = null) : 
     /// </summary>
     public async Task LogoutAsync()
     {
-        if (string.IsNullOrWhiteSpace(_token?.Jwt))
+        if (string.IsNullOrWhiteSpace(_token?.AccessToken))
         {
             return;
         }
 
-        await authProvider.LogoutAsync(_token.Jwt);
+        await authProvider.LogoutAsync(_token.AccessToken);
         _token = null;
     }
 
@@ -69,14 +69,14 @@ public class AuthService(IAuthProvider authProvider, AuthToken? token = null) : 
     /// <returns>User information if authenticated, null otherwise</returns>
     public async Task<UserInfo?> GetUserInfoAsync()
     {
-        if (string.IsNullOrWhiteSpace(_token?.Jwt))
+        if (string.IsNullOrWhiteSpace(_token?.AccessToken))
         {
             return null!;
         }
 
         //todo: cache this!
 
-        return await authProvider.GetUserInfoAsync(_token.Jwt);
+        return await authProvider.GetUserInfoAsync(_token.AccessToken);
     }
 
     /// <summary>
@@ -96,10 +96,10 @@ public class AuthService(IAuthProvider authProvider, AuthToken? token = null) : 
     /// </returns>
     public async Task<AuthToken?> RefreshTokenAsync()
     {
-        if (!string.IsNullOrEmpty(_token?.Jwt))
+        if (!string.IsNullOrEmpty(_token?.AccessToken))
         {
-            _token = await authProvider.RefreshJwtAsync(_token);
-            if (!string.IsNullOrEmpty(_token?.Jwt) && !await authProvider.ValidateJwtAsync(_token.Jwt))
+            _token = await authProvider.RefreshAccessTokenAsync(_token);
+            if (!string.IsNullOrEmpty(_token?.AccessToken) && !await authProvider.ValidateAccessTokenAsync(_token.AccessToken))
             {
                 _token = null;
             }

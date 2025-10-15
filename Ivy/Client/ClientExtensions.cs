@@ -17,7 +17,7 @@ public class ErrorMessage
     public string? StackTrace { get; set; }
 }
 
-public class SetJwtMessage
+public class SetAuthTokenMessage
 {
     public required AuthToken? AuthToken { get; set; }
     public required bool ReloadPage { get; set; }
@@ -44,9 +44,9 @@ public static class ClientExtensions
         client.Sender.Send("Redirect", url);
     }
 
-    public static void SetJwt(this IClientProvider client, AuthToken? authToken, bool reloadPage = true)
+    public static void SetAuthToken(this IClientProvider client, AuthToken? authToken, bool reloadPage = true)
     {
-        client.Sender.Send("SetJwt", new SetJwtMessage { AuthToken = authToken, ReloadPage = reloadPage });
+        client.Sender.Send("SetAuthToken", new SetAuthTokenMessage { AuthToken = authToken, ReloadPage = reloadPage });
     }
 
     /// <summary>

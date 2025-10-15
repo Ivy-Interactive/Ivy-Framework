@@ -104,7 +104,7 @@ public class BasicAuthProvider : IAuthProvider
             claims: claims,
             expires: expiresAt.UtcDateTime,
             signingCredentials: creds);
-        var jwt = new JwtSecurityTokenHandler().WriteToken(token);
+        var accessToken = new JwtSecurityTokenHandler().WriteToken(token);
 
         var rtExpiresAt = now.AddSeconds(10);
         var maxAgeSeconds = (long)TimeSpan.FromSeconds(30).TotalSeconds;
@@ -128,40 +128,40 @@ public class BasicAuthProvider : IAuthProvider
         );
         var refreshToken = new JwtSecurityTokenHandler().WriteToken(refreshJwt);
 
-        return new AuthToken(jwt, refreshToken, expiresAt);
+        return new AuthToken(accessToken, refreshToken, expiresAt);
     }
 
     /// <summary>
-    /// Logs out a user by invalidating their JWT token.
+    /// Logs out a user by invalidating their access token.
     /// </summary>
-    /// <param name="jwt">The JWT token to invalidate</param>
-    public Task LogoutAsync(string jwt)
+    /// <param name="token">The access token to invalidate</param>
+    public Task LogoutAsync(string token)
     {
         // No server-side state to invalidate
         return Task.CompletedTask;
     }
 
     /// <summary>
-    /// Refreshes an expired or expiring JWT token.
+    /// Refreshes an expired or expiring access token.
     /// </summary>
-    /// <param name="jwt">The current authentication token</param>
+    /// <param name="token">The current authentication token</param>
     /// <returns>A new authentication token if successful, null otherwise</returns>
-    public Task<AuthToken?> RefreshJwtAsync(AuthToken jwt)
+    public Task<AuthToken?> RefreshAccessTokenAsync(AuthToken token)
     {
         // Check that refresh token is provided
-        if (string.IsNullOrEmpty(jwt.RefreshToken))
+        if (string.IsNullOrEmpty(token.RefreshToken))
         {
             return Task.FromResult<AuthToken?>(null);
         }
 
-        if (ValidateJwt(jwt.Jwt))
+        if (ValidateAccessToken(token.AccessToken))
         {
-            // No need to refresh if current JWT is still valid
-            return Task.FromResult<AuthToken?>(jwt);
+            // No need to refresh if current token is still valid
+            return Task.FromResult<AuthToken?>(token);
         }
 
         // Validate refresh token
-        if (ValidateToken(jwt.RefreshToken, "oauth2/token", "refresh") is not var (principal, _))
+        if (ValidateToken(token.RefreshToken, "oauth2/token", "refresh") is not var (principal, _))
         {
             return Task.FromResult<AuthToken?>(null);
         }
@@ -183,8 +183,8 @@ public class BasicAuthProvider : IAuthProvider
             return Task.FromResult<AuthToken?>(null);
         }
 
-        var token = CreateToken(user, now, authTime);
-        return Task.FromResult<AuthToken?>(token);
+        var newToken = CreateToken(user, now, authTime);
+        return Task.FromResult<AuthToken?>(newToken);
     }
 
     /// <summary>
@@ -209,31 +209,31 @@ public class BasicAuthProvider : IAuthProvider
     }
 
     /// <summary>
-    /// Validates whether a JWT token is still valid.
+    /// Checks whether an access token is valid.
     /// </summary>
-    /// <param name="jwt">The JWT token to validate</param>
+    /// <param name="token">The access token to validate</param>
     /// <returns>True if the token is valid, false otherwise</returns>
-    public Task<bool> ValidateJwtAsync(string jwt)
-        => Task.FromResult(ValidateJwt(jwt));
+    public Task<bool> ValidateAccessTokenAsync(string token)
+        => Task.FromResult(ValidateAccessToken(token));
 
     /// <summary>
-    /// Validates whether a JWT token is still valid.
+    /// Checks whether an access token is valid.
     /// </summary>
-    /// <param name="jwt">The JWT token to validate</param>
+    /// <param name="token">The access token to validate</param>
     /// <returns>True if the token is valid, false otherwise</returns>
-    private bool ValidateJwt(string jwt)
+    private bool ValidateAccessToken(string token)
     {
-        return ValidateToken(jwt, _audience, "access") != null;
+        return ValidateToken(token, _audience, "access") != null;
     }
 
     /// <summary>
-    /// Retrieves user information from a valid JWT token.
+    /// Retrieves user information using a valid access token.
     /// </summary>
-    /// <param name="jwt">The JWT token</param>
+    /// <param name="token">The access token</param>
     /// <returns>User information if successful, null otherwise</returns>
-    public Task<UserInfo?> GetUserInfoAsync(string jwt)
+    public Task<UserInfo?> GetUserInfoAsync(string token)
     {
-        if (ValidateToken(jwt, _audience, "access") is not var (principal, _) ||
+        if (ValidateToken(token, _audience, "access") is not var (principal, _) ||
             principal.FindFirst(ClaimTypes.NameIdentifier)?.Value is not { } user)
         {
             return Task.FromResult<UserInfo?>(null);
@@ -258,7 +258,7 @@ public class BasicAuthProvider : IAuthProvider
     /// <returns>The expiration time if available, null otherwise</returns>
     public Task<DateTimeOffset?> GetTokenExpiration(AuthToken token)
     {
-        if (ValidateToken(token.Jwt, _audience, "access") is var (_, expiration))
+        if (ValidateToken(token.AccessToken, _audience, "access") is var (_, expiration))
         {
             return Task.FromResult<DateTimeOffset?>(expiration);
         }

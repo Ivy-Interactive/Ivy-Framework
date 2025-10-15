@@ -56,7 +56,7 @@ public class AutheliaAuthProvider : IAuthProvider
         _cookieContainer.Add(new Uri(_baseUrl), expired);
     }
 
-    public Task<AuthToken?> RefreshJwtAsync(AuthToken jwt) => Task.FromResult<AuthToken?>(jwt);
+    public Task<AuthToken?> RefreshAccessTokenAsync(AuthToken token) => Task.FromResult<AuthToken?>(token);
 
     public Task<Uri> GetOAuthUriAsync(AuthOption option, WebhookEndpoint callback)
     {
@@ -68,19 +68,19 @@ public class AutheliaAuthProvider : IAuthProvider
         throw new NotImplementedException();
     }
 
-    public async Task<bool> ValidateJwtAsync(string jwt)
+    public async Task<bool> ValidateAccessTokenAsync(string token)
     {
         // Send a request with the session cookie to /api/user/info.
         var request = new HttpRequestMessage(HttpMethod.Get, "/api/user/info");
-        request.Headers.Add("Cookie", $"authelia_session={jwt}");
+        request.Headers.Add("Cookie", $"authelia_session={token}");
         var response = await _httpClient.SendAsync(request);
         return response.IsSuccessStatusCode;
     }
 
-    public async Task<UserInfo?> GetUserInfoAsync(string jwt)
+    public async Task<UserInfo?> GetUserInfoAsync(string token)
     {
         var request = new HttpRequestMessage(HttpMethod.Get, "/api/user/info");
-        request.Headers.Add("Cookie", $"authelia_session={jwt}");
+        request.Headers.Add("Cookie", $"authelia_session={token}");
         var response = await _httpClient.SendAsync(request);
         if (!response.IsSuccessStatusCode)
             return null;

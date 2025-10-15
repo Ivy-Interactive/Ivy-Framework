@@ -259,7 +259,7 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
                 {
                     if (auth == null) return;
                     await auth.LogoutAsync();
-                    client.SetJwt(null!);
+                    client.SetAuthToken(null!);
                 }
                 catch (Exception)
                 {

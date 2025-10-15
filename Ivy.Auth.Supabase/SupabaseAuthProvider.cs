@@ -129,17 +129,17 @@ public class SupabaseAuthProvider : IAuthProvider
         await _client.Auth.SignOut();
     }
 
-    public async Task<AuthToken?> RefreshJwtAsync(AuthToken jwt)
+    public async Task<AuthToken?> RefreshAccessTokenAsync(AuthToken token)
     {
-        if (jwt.ExpiresAt == null || jwt.RefreshToken == null || DateTimeOffset.UtcNow < jwt.ExpiresAt)
+        if (token.ExpiresAt == null || token.RefreshToken == null || DateTimeOffset.UtcNow < token.ExpiresAt)
         {
             // Refresh not needed (or not possible).
-            return jwt;
+            return token;
         }
 
         try
         {
-            var session = await _client.Auth.SetSession(jwt.Jwt, jwt.RefreshToken);
+            var session = await _client.Auth.SetSession(token.AccessToken, token.RefreshToken);
             var authToken = MakeAuthToken(session);
             return authToken;
         }
@@ -149,12 +149,12 @@ public class SupabaseAuthProvider : IAuthProvider
         }
     }
 
-    public async Task<bool> ValidateJwtAsync(string jwt)
+    public async Task<bool> ValidateAccessTokenAsync(string token)
     {
         try
         {
-            // Verify the JWT token with Supabase
-            var response = await _client.Auth.GetUser(jwt);
+            // Verify the access token with Supabase
+            var response = await _client.Auth.GetUser(token);
 
             // If we get a response back, the token is valid
             return response != null;
@@ -166,9 +166,9 @@ public class SupabaseAuthProvider : IAuthProvider
         }
     }
 
-    public async Task<UserInfo?> GetUserInfoAsync(string jwt)
+    public async Task<UserInfo?> GetUserInfoAsync(string token)
     {
-        var user = await _client.Auth.GetUser(jwt);
+        var user = await _client.Auth.GetUser(token);
 
         if (user == null)
         {
@@ -274,13 +274,13 @@ public class SupabaseAuthProvider : IAuthProvider
 
 }
 
-// public async Task<bool> ValidateJwtAsync(string jwt)
+// public async Task<bool> ValidateAccessTokenAsync(string token)
 // {
 //     try
 //     {
 //         // Get the Supabase JWT secret (this should be your project's JWT secret)
 //         string jwtSecret = "your-supabase-jwt-secret"; // Store this securely
-//     
+//
 //         var tokenHandler = new JwtSecurityTokenHandler();
 //         var validationParameters = new TokenValidationParameters
 //         {
@@ -293,13 +293,13 @@ public class SupabaseAuthProvider : IAuthProvider
 //         };
 //
 //         // This will throw an exception if validation fails
-//         var principal = tokenHandler.ValidateToken(jwt, validationParameters, out _);
-//     
+//         var principal = tokenHandler.ValidateToken(token, validationParameters, out _);
+//
 //         // Optional: Check for required claims
 //         // var userIdClaim = principal.FindFirst("sub")?.Value;
 //         // if (string.IsNullOrEmpty(userIdClaim))
 //         //     return false;
-//         
+//
 //         return true;
 //     }
 //     catch

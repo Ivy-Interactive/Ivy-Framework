@@ -110,7 +110,7 @@ public class AppHub(
 
                 if (authToken != oldAuthToken)
                 {
-                    clientProvider.SetJwt(authToken, reloadPage: false);
+                    clientProvider.SetAuthToken(authToken, reloadPage: false);
                 }
 
                 if (authToken == null)
@@ -268,7 +268,7 @@ public class AppHub(
                 var expiresAt = newToken != null
                     ? await authProvider.GetTokenExpiration(newToken)
                     : null;
-                var reloadPage = string.IsNullOrEmpty(newToken?.Jwt);
+                var reloadPage = string.IsNullOrEmpty(newToken?.AccessToken);
                 if (expiresAt != null && expiresAt <= DateTimeOffset.UtcNow)
                 {
                     // If the token was expired and couldn't be refreshed, then RefreshTokenAsync should've returned null.
@@ -279,7 +279,7 @@ public class AppHub(
                 if (oldToken != newToken)
                 {
                     Console.WriteLine("AuthRefreshLoop: Token changed, updating client. Reloading: {0}", reloadPage);
-                    clientProvider.SetJwt(newToken, reloadPage);
+                    clientProvider.SetAuthToken(newToken, reloadPage);
                 }
 
                 if (reloadPage)
@@ -365,15 +365,15 @@ public class AppHub(
     private AuthToken? GetAuthToken(HttpContext httpContext)
     {
         var cookies = httpContext.Request.Cookies;
-        var jwt = cookies["jwt"].NullIfEmpty();
-        if (jwt == null)
+        var authToken = cookies["auth_token"].NullIfEmpty();
+        if (authToken == null)
         {
             return null;
         }
 
         try
         {
-            var token = JsonSerializer.Deserialize<AuthToken>(jwt);
+            var token = JsonSerializer.Deserialize<AuthToken>(authToken);
             if (token == null)
             {
                 return null;
@@ -381,7 +381,7 @@ public class AppHub(
 
             if (token.RefreshToken == null)
             {
-                var refreshToken = cookies["jwt_ext_refresh_token"].NullIfEmpty();
+                var refreshToken = cookies["auth_ext_refresh_token"].NullIfEmpty();
                 return token with { RefreshToken = refreshToken };
             }
 
@@ -389,7 +389,7 @@ public class AppHub(
         }
         catch (Exception e)
         {
-            logger.LogWarning(e, "Failed to deserialize AuthToken from JWT.");
+            logger.LogWarning(e, "Failed to deserialize AuthToken from cookies.");
             return null;
         }
     }
