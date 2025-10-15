@@ -17,7 +17,7 @@ import {
   getOrderedColumns,
   getCellContent,
 } from './cellContent';
-import { DataColumn, DataRow } from '../types/types';
+import { DataColumn, DataRow, ColType } from '../types/types';
 
 describe('cellContent utilities', () => {
   describe('createEmptyCell', () => {
@@ -298,9 +298,9 @@ describe('cellContent utilities', () => {
 
   describe('getOrderedColumns', () => {
     const columns: DataColumn[] = [
-      { name: 'A', type: 'string', width: 100 },
-      { name: 'B', type: 'int', width: 100 },
-      { name: 'C', type: 'boolean', width: 100 },
+      { name: 'A', type: ColType.Text, width: 100 },
+      { name: 'B', type: ColType.Number, width: 100 },
+      { name: 'C', type: ColType.Boolean, width: 100 },
     ];
 
     it('should return columns in specified order', () => {
@@ -321,11 +321,11 @@ describe('cellContent utilities', () => {
 
   describe('getCellContent', () => {
     const columns: DataColumn[] = [
-      { name: 'Name', type: 'string', width: 100 },
-      { name: 'Age', type: 'int', width: 100 },
-      { name: 'Active', type: 'boolean', width: 100 },
-      { name: 'CreatedAt', type: 'timestamp', width: 100 },
-      { name: 'Icon', type: 'string', width: 100 },
+      { name: 'Name', type: ColType.Text, width: 100 },
+      { name: 'Age', type: ColType.Number, width: 100 },
+      { name: 'Active', type: ColType.Boolean, width: 100 },
+      { name: 'CreatedAt', type: ColType.DateTime, width: 100 },
+      { name: 'Icon', type: ColType.Text, width: 100 },
     ];
 
     const data: DataRow[] = [

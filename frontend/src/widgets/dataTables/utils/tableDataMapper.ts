@@ -1,5 +1,5 @@
 import * as arrow from 'apache-arrow';
-import { DataColumn, DataRow } from '../types/types';
+import { DataColumn, DataRow, ColType } from '../types/types';
 
 function calculateColumnWidth(
   columnName: string,
@@ -28,6 +28,52 @@ function calculateColumnWidth(
   return Math.min(Math.max(calculatedWidth, minWidth), maxWidth);
 }
 
+/**
+ * Maps Arrow field type to ColType enum
+ * If render_type metadata is provided, it takes precedence
+ */
+function mapArrowTypeToColType(
+  arrowType: string,
+  renderType?: string
+): ColType {
+  // If render_type is explicitly set, use it (takes precedence)
+  if (renderType) {
+    switch (renderType.toLowerCase()) {
+      case 'icon':
+        return ColType.Icon;
+      case 'text':
+        return ColType.Text;
+      case 'number':
+        return ColType.Number;
+      case 'boolean':
+        return ColType.Boolean;
+      case 'date':
+        return ColType.Date;
+      case 'datetime':
+        return ColType.DateTime;
+    }
+  }
+
+  // Otherwise infer from Arrow type
+  const lowerType = arrowType.toLowerCase();
+  if (
+    lowerType.includes('int') ||
+    lowerType.includes('float') ||
+    lowerType.includes('double') ||
+    lowerType.includes('decimal')
+  ) {
+    return ColType.Number;
+  }
+  if (lowerType.includes('bool')) {
+    return ColType.Boolean;
+  }
+  if (lowerType.includes('date') || lowerType.includes('timestamp')) {
+    return lowerType.includes('timestamp') ? ColType.DateTime : ColType.Date;
+  }
+  // Default to Text for strings and unknown types
+  return ColType.Text;
+}
+
 export function convertArrowTableToData(
   table: arrow.Table,
   requestedCount: number
@@ -45,17 +91,17 @@ export function convertArrowTableToData(
 
       // Parse metadata from Arrow schema
       const metadata = field.metadata;
-      const renderType = metadata?.get(
-        'render_type'
-      ) as DataColumn['renderType'];
+      const renderType = metadata?.get('render_type') as string | undefined;
       const iconSet = metadata?.get('icon_set') as DataColumn['iconSet'];
       const group = metadata?.get('group') as string | undefined;
 
+      // Map Arrow type to ColType, with render_type taking precedence
+      const type = mapArrowTypeToColType(field.type.toString(), renderType);
+
       return {
         name: field.name,
-        type: field.type.toString(),
+        type,
         width,
-        ...(renderType && { renderType }),
         ...(iconSet && { iconSet }),
         ...(group && { group }),
       };

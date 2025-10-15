@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import * as arrow from 'apache-arrow';
 import { convertArrowTableToData } from './tableDataMapper';
+import { ColType } from '../types/types';
 
 describe('tableDataMapper', () => {
   describe('convertArrowTableToData', () => {
@@ -58,9 +59,9 @@ describe('tableDataMapper', () => {
       const result = convertArrowTableToData(mockTable, 5);
 
       expect(result.columns).toEqual([
-        { name: 'id', type: 'int64', width: expect.any(Number) },
-        { name: 'name', type: 'utf8', width: expect.any(Number) },
-        { name: 'active', type: 'bool', width: expect.any(Number) },
+        { name: 'id', type: ColType.Number, width: expect.any(Number) },
+        { name: 'name', type: ColType.Text, width: expect.any(Number) },
+        { name: 'active', type: ColType.Boolean, width: expect.any(Number) },
       ]);
 
       expect(result.rows).toEqual([
@@ -157,7 +158,7 @@ describe('tableDataMapper', () => {
       const result = convertArrowTableToData(mockTable, 5);
 
       expect(result.columns).toEqual([
-        { name: 'id', type: 'int64', width: 150 },
+        { name: 'id', type: ColType.Number, width: 150 },
       ]);
       expect(result.rows).toEqual([{ values: [] }]);
     });
@@ -207,7 +208,7 @@ describe('tableDataMapper', () => {
       expect(result.rows).toEqual([{ values: [42, 3.14, 'test', true] }]);
     });
 
-    it('should parse metadata for renderType and iconSet', () => {
+    it('should parse metadata for render_type and iconSet', () => {
       const mockMetadata = new Map([
         ['render_type', 'icon'],
         ['icon_set', 'lucide'],
@@ -236,9 +237,8 @@ describe('tableDataMapper', () => {
       expect(result.columns).toEqual([
         {
           name: 'status_icon',
-          type: 'utf8',
+          type: ColType.Icon, // render_type takes precedence
           width: expect.any(Number),
-          renderType: 'icon',
           iconSet: 'lucide',
         },
       ]);
@@ -265,7 +265,7 @@ describe('tableDataMapper', () => {
       expect(result.columns).toEqual([
         {
           name: 'regular_field',
-          type: 'utf8',
+          type: ColType.Text,
           width: expect.any(Number),
         },
       ]);

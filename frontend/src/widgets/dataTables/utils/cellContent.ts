@@ -30,7 +30,7 @@ export function createNullCell(editable: boolean): GridCell {
 
 /**
  * Checks if a string value looks like a Lucide icon name (PascalCase)
- * @deprecated Use column metadata (renderType: 'icon') instead of heuristics
+ * @deprecated Use column type ColType.Icon instead of heuristics
  */
 export function isProbablyIconValue(value: unknown): boolean {
   return (
@@ -234,8 +234,8 @@ export function getCellContent(
     return createNullCell(editable);
   }
 
-  // Handle explicit icon renderType from backend metadata
-  if (column.renderType === 'icon' && typeof cellValue === 'string') {
+  // Handle explicit icon type from backend metadata
+  if (column.type === 'Icon' && typeof cellValue === 'string') {
     return createIconCell(cellValue);
   }
 

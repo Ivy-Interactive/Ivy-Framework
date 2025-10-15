@@ -9,6 +9,7 @@ import {
 import { convertArrowTableToData } from './tableDataMapper';
 import * as arrow from 'apache-arrow';
 import type { DataTableConnection } from '../types/types';
+import { ColType } from '../types/types';
 
 // Mock dependencies
 vi.mock('@/lib/utils');
@@ -30,8 +31,8 @@ describe('tableDataFetcher', () => {
   };
 
   const mockColumns = [
-    { name: 'id', type: 'int64', width: 150 },
-    { name: 'name', type: 'utf8', width: 150 },
+    { name: 'id', type: ColType.Number, width: 150 },
+    { name: 'name', type: ColType.Text, width: 150 },
   ];
 
   const mockRows = [{ values: [1, 'Alice'] }, { values: [2, 'Bob'] }];

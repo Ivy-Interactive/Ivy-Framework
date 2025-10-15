@@ -5,6 +5,7 @@ import {
   convertToGridColumns,
 } from './columnHelpers';
 import type { DataColumn } from '../types/types';
+import { ColType } from '../types/types';
 
 describe('columnHelpers', () => {
   describe('getColumnTypeIcon', () => {
@@ -39,10 +40,10 @@ describe('columnHelpers', () => {
 
   describe('reorderColumns', () => {
     const mockColumns: DataColumn[] = [
-      { name: 'First', type: 'string', width: 100 },
-      { name: 'Second', type: 'int64', width: 100 },
-      { name: 'Third', type: 'bool', width: 100 },
-      { name: 'Fourth', type: 'date', width: 100 },
+      { name: 'First', type: ColType.Text, width: 100 },
+      { name: 'Second', type: ColType.Number, width: 100 },
+      { name: 'Third', type: ColType.Boolean, width: 100 },
+      { name: 'Fourth', type: ColType.Date, width: 100 },
     ];
 
     it('should move column from start to middle', () => {
@@ -89,10 +90,10 @@ describe('columnHelpers', () => {
 
   describe('convertToGridColumns', () => {
     const mockColumns: DataColumn[] = [
-      { name: 'ID', type: 'int64', width: 80 },
-      { name: 'Name', type: 'string', width: 150 },
-      { name: 'Status', type: 'bool', width: 100 },
-      { name: 'Created', type: 'date', width: 120 },
+      { name: 'ID', type: ColType.Number, width: 80 },
+      { name: 'Name', type: ColType.Text, width: 150 },
+      { name: 'Status', type: ColType.Boolean, width: 100 },
+      { name: 'Created', type: ColType.Date, width: 120 },
     ];
 
     it('should convert columns to grid columns without reordering', () => {
@@ -183,9 +184,14 @@ describe('columnHelpers', () => {
 
     it('should include groups when showGroups is true', () => {
       const columnsWithGroups: DataColumn[] = [
-        { name: 'ID', type: 'int64', width: 80, group: 'Identity' },
-        { name: 'Name', type: 'string', width: 150, group: 'Identity' },
-        { name: 'Status', type: 'bool', width: 100, group: 'Metadata' },
+        { name: 'ID', type: ColType.Number, width: 80, group: 'Identity' },
+        { name: 'Name', type: ColType.Text, width: 150, group: 'Identity' },
+        {
+          name: 'Status',
+          type: ColType.Boolean,
+          width: 100,
+          group: 'Metadata',
+        },
       ];
 
       const result = convertToGridColumns(columnsWithGroups, [], {}, 0, true);
@@ -197,8 +203,8 @@ describe('columnHelpers', () => {
 
     it('should not include groups when showGroups is false', () => {
       const columnsWithGroups: DataColumn[] = [
-        { name: 'ID', type: 'int64', width: 80, group: 'Identity' },
-        { name: 'Name', type: 'string', width: 150, group: 'Identity' },
+        { name: 'ID', type: ColType.Number, width: 80, group: 'Identity' },
+        { name: 'Name', type: ColType.Text, width: 150, group: 'Identity' },
       ];
 
       const result = convertToGridColumns(columnsWithGroups, [], {}, 0, false);
@@ -238,7 +244,7 @@ describe('columnHelpers', () => {
 
     it('should handle single column', () => {
       const singleColumn: DataColumn[] = [
-        { name: 'Only', type: 'string', width: 100 },
+        { name: 'Only', type: ColType.Text, width: 100 },
       ];
 
       const result = convertToGridColumns(singleColumn, [], {}, 500, false);
