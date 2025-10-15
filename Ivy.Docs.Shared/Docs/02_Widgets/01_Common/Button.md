@@ -160,7 +160,6 @@ new Button("Advanced Button")
     .Icon(Icons.ArrowRight, Align.Right)
     .BorderRadius(BorderRadius.Full)
     .Large()
-    .Foreground(Colors.Blue)
 ```
 
 <WidgetDocs Type="Ivy.Button" ExtensionTypes="Ivy.ButtonExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Button.cs"/>
