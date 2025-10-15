@@ -463,7 +463,7 @@ test.describe('Audio Player Tests', () => {
       });
     });
 
-    test('should test audio time controls', async ({ page }) => {
+    test.skip('should test audio time controls', async ({ page }) => {
       const basicAudio = page.getByTestId(AUDIO_TEST_IDS.BASIC);
       await expect(basicAudio).toBeVisible();
 

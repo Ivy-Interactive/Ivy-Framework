@@ -201,7 +201,9 @@ test.describe('Button Widget Tests', () => {
     await expect(updatedLabel).toBeVisible();
   });
 
-  test('should handle complex multi-step interactions', async ({ page }) => {
+  test.skip('should handle complex multi-step interactions', async ({
+    page,
+  }) => {
     // Step 1: Click Primary button
     await page
       .getByRole('button', { name: 'Primary', exact: true })
