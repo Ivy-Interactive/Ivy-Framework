@@ -13,6 +13,7 @@ import {
   DataRow,
   DataTableConfiguration,
   DataTableConnection,
+  SortDirection,
 } from './types/types';
 import { fetchTableData } from './utils/tableDataFetcher';
 
@@ -122,6 +123,25 @@ export const TableProvider: React.FC<TableProviderProps> = ({
         // Initialize column order when columns are first loaded
         if (columnOrder.length === 0) {
           setColumnOrder(result.columns.map((_, index) => index));
+        }
+
+        // Initialize sort from column metadata (only on first load)
+        if (activeSort === null) {
+          const sortedColumn = result.columns.find(
+            col =>
+              col.sortDirection &&
+              col.sortDirection !== SortDirection.None &&
+              (col.sortable ?? true)
+          );
+          if (sortedColumn) {
+            const direction =
+              sortedColumn.sortDirection === SortDirection.Ascending
+                ? ('ASC' as const)
+                : ('DESC' as const);
+            setActiveSort([{ column: sortedColumn.name, direction }]);
+            // Don't fetch data again, this will trigger the effect
+            return;
+          }
         }
 
         // Initialize column widths only if not already set (first load)

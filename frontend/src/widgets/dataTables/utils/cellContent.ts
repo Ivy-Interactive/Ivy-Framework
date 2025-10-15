@@ -1,5 +1,23 @@
 import { GridCell, GridCellKind, Item } from '@glideapps/glide-data-grid';
-import { DataColumn, DataRow } from '../types/types';
+import { Align, DataColumn, DataRow } from '../types/types';
+
+/**
+ * Converts Align enum to contentAlign value for GridCell
+ */
+export function getContentAlign(align?: Align): 'left' | 'center' | 'right' {
+  if (!align) return 'left';
+
+  switch (align) {
+    case Align.Left:
+      return 'left';
+    case Align.Center:
+      return 'center';
+    case Align.Right:
+      return 'right';
+    default:
+      return 'left';
+  }
+}
 
 /**
  * Creates an empty/fallback cell for out-of-bounds requests
@@ -114,7 +132,8 @@ export function parseDateValue(cellValue: unknown): Date | null {
 export function createDateCell(
   cellValue: unknown,
   columnType: string,
-  editable: boolean
+  editable: boolean,
+  align?: Align
 ): GridCell | null {
   const dateValue = parseDateValue(cellValue);
 
@@ -130,6 +149,7 @@ export function createDateCell(
     displayData,
     allowOverlay: editable,
     readonly: !editable,
+    contentAlign: align ? getContentAlign(align) : undefined,
   };
 }
 
@@ -145,7 +165,8 @@ export function formatNumberValue(value: number): string {
  */
 export function createNumberCell(
   cellValue: number,
-  editable: boolean
+  editable: boolean,
+  align?: Align
 ): GridCell {
   const displayData = formatNumberValue(cellValue);
 
@@ -155,6 +176,7 @@ export function createNumberCell(
     displayData,
     allowOverlay: editable,
     readonly: !editable,
+    contentAlign: align ? getContentAlign(align) : undefined,
   };
 }
 
@@ -178,7 +200,8 @@ export function createBooleanCell(
  */
 export function createTextCell(
   cellValue: unknown,
-  editable: boolean
+  editable: boolean,
+  align?: Align
 ): GridCell {
   const stringValue = String(cellValue);
 
@@ -188,6 +211,7 @@ export function createTextCell(
     displayData: stringValue,
     allowOverlay: editable,
     readonly: !editable,
+    contentAlign: align ? getContentAlign(align) : undefined,
   };
 }
 
@@ -205,6 +229,7 @@ export function getOrderedColumns(
 
 /**
  * Main function to get cell content for a grid cell
+ * Filters out hidden columns and applies column ordering
  */
 export function getCellContent(
   cell: Item,
@@ -215,8 +240,9 @@ export function getCellContent(
 ): GridCell {
   const [col, row] = cell;
 
-  // Apply column order mapping
-  const orderedCols = getOrderedColumns(columns, columnOrder);
+  // Filter out hidden columns and apply order
+  const visibleColumns = columns.filter(col => !col.hidden);
+  const orderedCols = getOrderedColumns(visibleColumns, columnOrder);
 
   // Safety check
   if (row >= data.length || col >= orderedCols.length) {
@@ -228,6 +254,7 @@ export function getCellContent(
   const originalColumnIndex = columns.indexOf(column);
   const cellValue = rowData.values[originalColumnIndex];
   const columnType = column.type.toLowerCase();
+  const align = column.align;
 
   // Handle null/undefined values
   if (cellValue === null || cellValue === undefined) {
@@ -241,7 +268,7 @@ export function getCellContent(
 
   // Handle Date and DateTime types
   if (isDateColumnType(columnType)) {
-    const dateCell = createDateCell(cellValue, columnType, editable);
+    const dateCell = createDateCell(cellValue, columnType, editable, align);
     if (dateCell) {
       return dateCell;
     }
@@ -249,7 +276,7 @@ export function getCellContent(
 
   // Handle numeric types
   if (typeof cellValue === 'number' && isNumericColumnType(columnType)) {
-    return createNumberCell(cellValue, editable);
+    return createNumberCell(cellValue, editable, align);
   }
 
   // Handle boolean types
@@ -264,5 +291,5 @@ export function getCellContent(
   }
 
   // Default to text
-  return createTextCell(cellValue, editable);
+  return createTextCell(cellValue, editable, align);
 }

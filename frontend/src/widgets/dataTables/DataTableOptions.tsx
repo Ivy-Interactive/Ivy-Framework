@@ -45,6 +45,9 @@ export const TableOptions: React.FC<{
     }
   };
 
+  // Filter columns to only include filterable ones (defaults to true if not specified)
+  const filterableColumns = columns.filter(col => col.filterable ?? true);
+
   const queryEditorContent = (
     <div className="flex gap-2 flex-col sm:flex-row">
       <div
@@ -53,7 +56,7 @@ export const TableOptions: React.FC<{
       >
         <QueryEditor
           value={query}
-          columns={columns}
+          columns={filterableColumns}
           onChange={handleQueryChange}
           placeholder='e.g., name = "John" AND age > 18 '
           height={40}

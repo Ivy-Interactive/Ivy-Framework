@@ -1,5 +1,11 @@
 import * as arrow from 'apache-arrow';
-import { DataColumn, DataRow, ColType } from '../types/types';
+import {
+  DataColumn,
+  DataRow,
+  ColType,
+  SortDirection,
+  Align,
+} from '../types/types';
 
 function calculateColumnWidth(
   columnName: string,
@@ -94,6 +100,54 @@ export function convertArrowTableToData(
       const renderType = metadata?.get('render_type') as string | undefined;
       const iconSet = metadata?.get('icon_set') as DataColumn['iconSet'];
       const group = metadata?.get('group') as string | undefined;
+      const header = metadata?.get('header') as string | undefined;
+      const icon = metadata?.get('icon') as string | undefined;
+      const help = metadata?.get('help') as string | undefined;
+
+      // Parse boolean properties
+      const hidden = metadata?.get('hidden') === 'true';
+      const sortable = metadata?.get('sortable');
+      const filterable = metadata?.get('filterable');
+
+      // Parse sort direction
+      const sortDirectionStr = metadata?.get('sort_direction') as
+        | string
+        | undefined;
+      let sortDirection: SortDirection | undefined;
+      if (sortDirectionStr) {
+        switch (sortDirectionStr.toLowerCase()) {
+          case 'ascending':
+            sortDirection = SortDirection.Ascending;
+            break;
+          case 'descending':
+            sortDirection = SortDirection.Descending;
+            break;
+          case 'none':
+            sortDirection = SortDirection.None;
+            break;
+        }
+      }
+
+      // Parse alignment
+      const alignStr = metadata?.get('align') as string | undefined;
+      let align: Align | undefined;
+      if (alignStr) {
+        switch (alignStr.toLowerCase()) {
+          case 'left':
+            align = Align.Left;
+            break;
+          case 'center':
+            align = Align.Center;
+            break;
+          case 'right':
+            align = Align.Right;
+            break;
+        }
+      }
+
+      // Parse order (column display order)
+      const orderStr = metadata?.get('order') as string | undefined;
+      const order = orderStr ? parseInt(orderStr, 10) : undefined;
 
       // Map Arrow type to ColType, with render_type taking precedence
       const type = mapArrowTypeToColType(field.type.toString(), renderType);
@@ -102,8 +156,17 @@ export function convertArrowTableToData(
         name: field.name,
         type,
         width,
-        ...(iconSet && { iconSet }),
+        ...(header && { header }),
         ...(group && { group }),
+        ...(hidden && { hidden }),
+        ...(sortable !== undefined && { sortable: sortable === 'true' }),
+        ...(sortDirection && { sortDirection }),
+        ...(filterable !== undefined && { filterable: filterable === 'true' }),
+        ...(align && { align }),
+        ...(order !== undefined && !isNaN(order) && { order }),
+        ...(icon !== undefined && { icon: icon === 'null' ? null : icon }),
+        ...(help !== undefined && { help: help === 'null' ? null : help }),
+        ...(iconSet && { iconSet }),
       };
     }
   );
