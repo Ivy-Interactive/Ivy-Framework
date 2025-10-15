@@ -69,9 +69,9 @@ public interface IAuthProvider
     /// </summary>
     /// <param name="token">The authentication token</param>
     /// <returns>The expiration time if available, null otherwise</returns>
-    DateTimeOffset? GetTokenExpiration(AuthToken token)
+    Task<DateTimeOffset?> GetTokenExpiration(AuthToken token)
     {
-        return token.ExpiresAt;
+        return Task.FromResult(token.ExpiresAt);
     }
 
     /// <summary>

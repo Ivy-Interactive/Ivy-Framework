@@ -95,6 +95,12 @@ public class AutheliaAuthProvider : IAuthProvider
     {
         return [new AuthOption(AuthFlow.EmailPassword)];
     }
+
+    public Task<DateTimeOffset?> GetTokenExpiration(AuthToken token)
+    {
+        // Authelia session cookies do not have an expiration time we can read.
+        return Task.FromResult<DateTimeOffset?>(null);
+    }
 }
 
 public class AutheliaUser

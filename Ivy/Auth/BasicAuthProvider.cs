@@ -256,19 +256,19 @@ public class BasicAuthProvider : IAuthProvider
     /// </summary>
     /// <param name="token">The authentication token</param>
     /// <returns>The expiration time if available, null otherwise</returns>
-    public DateTimeOffset? GetTokenExpiration(AuthToken token)
+    public Task<DateTimeOffset?> GetTokenExpiration(AuthToken token)
     {
         if (ValidateToken(token.Jwt, _audience, "access") is var (_, expiration))
         {
-            return expiration;
+            return Task.FromResult<DateTimeOffset?>(expiration);
         }
         else
         {
-            return null;
+            return Task.FromResult<DateTimeOffset?>(null);
         }
     }
 
-    private (ClaimsPrincipal, DateTimeOffset?)? ValidateToken(string jwt, string audience, string tokenUse)
+    private (ClaimsPrincipal, DateTimeOffset)? ValidateToken(string jwt, string audience, string tokenUse)
     {
         var handler = new JwtSecurityTokenHandler();
         try

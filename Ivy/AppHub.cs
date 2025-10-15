@@ -267,7 +267,7 @@ public class AppHub(
 
                 var newToken = await authService.RefreshTokenAsync();
                 var expiresAt = newToken != null
-                    ? authProvider.GetTokenExpiration(newToken)
+                    ? await authProvider.GetTokenExpiration(newToken)
                     : null;
                 var reloadPage = string.IsNullOrEmpty(newToken?.Jwt);
                 if (expiresAt != null && expiresAt <= DateTimeOffset.UtcNow)

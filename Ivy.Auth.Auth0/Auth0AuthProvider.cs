@@ -178,7 +178,7 @@ public class Auth0AuthProvider : IAuthProvider
         }
     }
 
-    private async Task<ClaimsPrincipal?> VerifyToken(string jwt)
+    private async Task<(ClaimsPrincipal, DateTimeOffset)?> VerifyToken(string jwt)
     {
         try
         {
@@ -200,7 +200,8 @@ public class Auth0AuthProvider : IAuthProvider
             {
                 InboundClaimTypeMap = new Dictionary<string, string>()
             };
-            return handler.ValidateToken(jwt, tokenValidationParameters, out SecurityToken validatedToken);
+            var claims = handler.ValidateToken(jwt, tokenValidationParameters, out SecurityToken validatedToken);
+            return (claims, validatedToken.ValidTo);
         }
         catch (Exception)
         {
@@ -210,14 +211,13 @@ public class Auth0AuthProvider : IAuthProvider
 
     public async Task<bool> ValidateJwtAsync(string jwt)
     {
-        var claims = await VerifyToken(jwt);
-        return claims is not null;
+        var verifiedToken = await VerifyToken(jwt);
+        return verifiedToken is not null;
     }
 
     public async Task<UserInfo?> GetUserInfoAsync(string jwt)
     {
-        var claims = await VerifyToken(jwt);
-        if (claims is null)
+        if (await VerifyToken(jwt) is not var (claims, _))
         {
             return null;
         }
@@ -232,6 +232,18 @@ public class Auth0AuthProvider : IAuthProvider
     public AuthOption[] GetAuthOptions()
     {
         return _authOptions.ToArray();
+    }
+
+    public async Task<DateTimeOffset?> GetTokenExpiration(AuthToken token)
+    {
+        if (await VerifyToken(token.Jwt) is var (_, expiration))
+        {
+            return expiration;
+        }
+        else
+        {
+            return null;
+        }
     }
 
     public Auth0AuthProvider UseEmailPassword()
