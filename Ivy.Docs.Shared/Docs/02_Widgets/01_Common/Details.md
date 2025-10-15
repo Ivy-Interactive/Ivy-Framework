@@ -5,7 +5,7 @@ searchHints:
   - data
   - information
   - key-value
-  - todetails
+  - details
 ---
 
 # Details
