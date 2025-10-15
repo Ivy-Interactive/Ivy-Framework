@@ -161,7 +161,7 @@ public class BasicAuthProvider : IAuthProvider
         }
 
         // Validate refresh token
-        if (ValidateToken(jwt.RefreshToken, "oauth2/token", "refresh") is not { } principal)
+        if (ValidateToken(jwt.RefreshToken, "oauth2/token", "refresh") is not var (principal, _))
         {
             return Task.FromResult<AuthToken?>(null);
         }
@@ -233,7 +233,7 @@ public class BasicAuthProvider : IAuthProvider
     /// <returns>User information if successful, null otherwise</returns>
     public Task<UserInfo?> GetUserInfoAsync(string jwt)
     {
-        if (ValidateToken(jwt, _audience, "access") is not { } principal ||
+        if (ValidateToken(jwt, _audience, "access") is not var (principal, _) ||
             principal.FindFirst(ClaimTypes.NameIdentifier)?.Value is not { } user)
         {
             return Task.FromResult<UserInfo?>(null);
@@ -251,7 +251,24 @@ public class BasicAuthProvider : IAuthProvider
         return [new AuthOption(AuthFlow.EmailPassword)];
     }
 
-    private ClaimsPrincipal? ValidateToken(string jwt, string audience, string tokenUse)
+    /// <summary>
+    /// Retrieves the expiration time of the given authentication token.
+    /// </summary>
+    /// <param name="token">The authentication token</param>
+    /// <returns>The expiration time if available, null otherwise</returns>
+    public DateTimeOffset? GetTokenExpiration(AuthToken token)
+    {
+        if (ValidateToken(token.Jwt, _audience, "access") is var (_, expiration))
+        {
+            return expiration;
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    private (ClaimsPrincipal, DateTimeOffset?)? ValidateToken(string jwt, string audience, string tokenUse)
     {
         var handler = new JwtSecurityTokenHandler();
         try
@@ -267,12 +284,12 @@ public class BasicAuthProvider : IAuthProvider
                 ValidateLifetime = true,
                 ClockSkew = TimeSpan.Zero,
                 // ClockSkew = TimeSpan.FromSeconds(60),
-            }, out _);
+            }, out var validatedToken);
             if (claims.FindFirst(TokenUseClaim)?.Value != tokenUse)
             {
                 return null;
             }
-            return claims;
+            return (claims, validatedToken.ValidTo);
         }
         catch
         {
