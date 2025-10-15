@@ -57,22 +57,18 @@ Layout.Horizontal()
 
 ### Button States
 
-#### Disabled State
-
 ```csharp demo-tabs
-Layout.Grid().Columns(3)
+Layout.Vertical().Gap(4)
+    | Text.Large("Disabled State")
+    | (Layout.Horizontal().Gap(4)
     | new Button("Primary").Disabled()
     | new Button("Secondary").Secondary().Disabled()
-    | new Button("Destructive").Destructive().Disabled()
-```
-
-#### Loading State
-
-```csharp demo-tabs
-Layout.Grid().Columns(3)
+    | new Button("Destructive").Destructive().Disabled())
+    | Text.Large("Loading State")
+    | (Layout.Horizontal().Gap(4)
     | new Button("Primary").Loading()
     | new Button("Secondary").Secondary().Loading()
-    | new Button("Destructive").Destructive().Loading()
+    | new Button("Destructive").Destructive().Loading())
 ```
 
 ### Border Radius
