@@ -131,7 +131,8 @@ describe('customRenderers', () => {
         const result = iconCellRenderer.draw(mockArgs, cell);
 
         expect(result).toBe(true);
-        expect(mockCtx.fillText).toHaveBeenCalledWith('?', 46, 24);
+        // Default alignment is left, so x = rect.x + 16
+        expect(mockCtx.fillText).toHaveBeenCalledWith('?', 16, 24);
         expect(mockCtx.fillStyle).toBe('#000');
       });
 
@@ -160,8 +161,8 @@ describe('customRenderers', () => {
         expect(result).toBe(true);
         expect(mockCtx.drawImage).toHaveBeenCalledWith(
           mockImage,
-          40, // (100 - 20) / 2
-          10, // (40 - 20) / 2
+          16, // padding (left-aligned)
+          10, // (40 - 20) / 2 (vertically centered)
           20,
           20
         );
@@ -191,7 +192,8 @@ describe('customRenderers', () => {
 
         expect(result).toBe(true);
         expect(mockCtx.beginPath).toHaveBeenCalled();
-        expect(mockCtx.arc).toHaveBeenCalledWith(50, 20, 4, 0, 2 * Math.PI);
+        // Icon is now left-aligned with padding of 16 + 10 = 26
+        expect(mockCtx.arc).toHaveBeenCalledWith(26, 20, 4, 0, 2 * Math.PI);
         expect(mockCtx.fill).toHaveBeenCalled();
         expect(mockCtx.fillStyle).toBe('#666');
       });

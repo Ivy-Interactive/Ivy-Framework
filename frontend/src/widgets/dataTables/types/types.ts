@@ -62,6 +62,7 @@ export interface DataTableConfiguration {
 }
 
 export interface TableProps {
+  columns: DataColumn[];
   connection: DataTableConnection;
   config?: DataTableConfiguration;
   editable?: boolean;

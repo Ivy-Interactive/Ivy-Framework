@@ -181,7 +181,7 @@ public class DataTableBuilder<TModel> : ViewBase, IStateless
         return this;
     }
 
-    public DataTableBuilder<TModel> Icon(Expression<Func<TModel, object>> field, Icon icon)
+    public DataTableBuilder<TModel> Icon(Expression<Func<TModel, object>> field, Icons icon)
     {
         var column = GetColumn(field);
         column.Column.Icon = icon;

@@ -1,11 +1,5 @@
 import * as arrow from 'apache-arrow';
-import {
-  DataColumn,
-  DataRow,
-  ColType,
-  SortDirection,
-  Align,
-} from '../types/types';
+import { DataColumn, DataRow, ColType } from '../types/types';
 
 function calculateColumnWidth(
   columnName: string,
@@ -36,31 +30,8 @@ function calculateColumnWidth(
 
 /**
  * Maps Arrow field type to ColType enum
- * If render_type metadata is provided, it takes precedence
  */
-function mapArrowTypeToColType(
-  arrowType: string,
-  renderType?: string
-): ColType {
-  // If render_type is explicitly set, use it (takes precedence)
-  if (renderType) {
-    switch (renderType.toLowerCase()) {
-      case 'icon':
-        return ColType.Icon;
-      case 'text':
-        return ColType.Text;
-      case 'number':
-        return ColType.Number;
-      case 'boolean':
-        return ColType.Boolean;
-      case 'date':
-        return ColType.Date;
-      case 'datetime':
-        return ColType.DateTime;
-    }
-  }
-
-  // Otherwise infer from Arrow type
+function mapArrowTypeToColType(arrowType: string): ColType {
   const lowerType = arrowType.toLowerCase();
   if (
     lowerType.includes('int') ||
@@ -95,78 +66,13 @@ export function convertArrowTableToData(
         ? calculateColumnWidth(field.name, columnData)
         : 150;
 
-      // Parse metadata from Arrow schema
-      const metadata = field.metadata;
-      const renderType = metadata?.get('render_type') as string | undefined;
-      const iconSet = metadata?.get('icon_set') as DataColumn['iconSet'];
-      const group = metadata?.get('group') as string | undefined;
-      const header = metadata?.get('header') as string | undefined;
-      const icon = metadata?.get('icon') as string | undefined;
-      const help = metadata?.get('help') as string | undefined;
-
-      // Parse boolean properties
-      const hidden = metadata?.get('hidden') === 'true';
-      const sortable = metadata?.get('sortable');
-      const filterable = metadata?.get('filterable');
-
-      // Parse sort direction
-      const sortDirectionStr = metadata?.get('sort_direction') as
-        | string
-        | undefined;
-      let sortDirection: SortDirection | undefined;
-      if (sortDirectionStr) {
-        switch (sortDirectionStr.toLowerCase()) {
-          case 'ascending':
-            sortDirection = SortDirection.Ascending;
-            break;
-          case 'descending':
-            sortDirection = SortDirection.Descending;
-            break;
-          case 'none':
-            sortDirection = SortDirection.None;
-            break;
-        }
-      }
-
-      // Parse alignment
-      const alignStr = metadata?.get('align') as string | undefined;
-      let align: Align | undefined;
-      if (alignStr) {
-        switch (alignStr.toLowerCase()) {
-          case 'left':
-            align = Align.Left;
-            break;
-          case 'center':
-            align = Align.Center;
-            break;
-          case 'right':
-            align = Align.Right;
-            break;
-        }
-      }
-
-      // Parse order (column display order)
-      const orderStr = metadata?.get('order') as string | undefined;
-      const order = orderStr ? parseInt(orderStr, 10) : undefined;
-
-      // Map Arrow type to ColType, with render_type taking precedence
-      const type = mapArrowTypeToColType(field.type.toString(), renderType);
+      // Infer type from Arrow field type (no metadata parsing)
+      const type = mapArrowTypeToColType(field.type.toString());
 
       return {
         name: field.name,
         type,
         width,
-        ...(header && { header }),
-        ...(group && { group }),
-        ...(hidden && { hidden }),
-        ...(sortable !== undefined && { sortable: sortable === 'true' }),
-        ...(sortDirection && { sortDirection }),
-        ...(filterable !== undefined && { filterable: filterable === 'true' }),
-        ...(align && { align }),
-        ...(order !== undefined && !isNaN(order) && { order }),
-        ...(icon !== undefined && { icon: icon === 'null' ? null : icon }),
-        ...(help !== undefined && { help: help === 'null' ? null : help }),
-        ...(iconSet && { iconSet }),
       };
     }
   );

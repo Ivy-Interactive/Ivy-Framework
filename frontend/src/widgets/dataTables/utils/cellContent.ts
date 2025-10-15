@@ -62,7 +62,7 @@ export function isProbablyIconValue(value: unknown): boolean {
 /**
  * Creates an icon cell
  */
-export function createIconCell(iconName: string): GridCell {
+export function createIconCell(iconName: string, align?: Align): GridCell {
   return {
     kind: GridCellKind.Custom,
     allowOverlay: false,
@@ -71,6 +71,7 @@ export function createIconCell(iconName: string): GridCell {
     data: {
       kind: 'icon-cell',
       iconName,
+      align: align ? getContentAlign(align) : undefined,
     },
   };
 }
@@ -185,13 +186,15 @@ export function createNumberCell(
  */
 export function createBooleanCell(
   cellValue: boolean,
-  editable: boolean
+  editable: boolean,
+  align?: Align
 ): GridCell {
   return {
     kind: GridCellKind.Boolean,
     data: cellValue,
     allowOverlay: false,
     readonly: !editable,
+    contentAlign: align ? getContentAlign(align) : undefined,
   };
 }
 
@@ -253,7 +256,7 @@ export function getCellContent(
   const column = orderedCols[col];
   const originalColumnIndex = columns.indexOf(column);
   const cellValue = rowData.values[originalColumnIndex];
-  const columnType = column.type.toLowerCase();
+  const columnType = column.type?.toLowerCase() || 'text';
   const align = column.align;
 
   // Handle null/undefined values
@@ -263,7 +266,7 @@ export function getCellContent(
 
   // Handle explicit icon type from backend metadata
   if (column.type === 'Icon' && typeof cellValue === 'string') {
-    return createIconCell(cellValue);
+    return createIconCell(cellValue, align);
   }
 
   // Handle Date and DateTime types
@@ -281,13 +284,13 @@ export function getCellContent(
 
   // Handle boolean types
   if (typeof cellValue === 'boolean') {
-    return createBooleanCell(cellValue, editable);
+    return createBooleanCell(cellValue, editable, align);
   }
 
   // Fallback: Use heuristic icon detection if no metadata provided
   // This maintains backward compatibility but should be replaced with proper metadata
   if (isProbablyIconValue(cellValue)) {
-    return createIconCell(String(cellValue));
+    return createIconCell(String(cellValue), align);
   }
 
   // Default to text

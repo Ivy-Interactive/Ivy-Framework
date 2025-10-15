@@ -101,7 +101,8 @@ export function convertToGridColumns(
         title: col.header || col.name,
         width: Math.max(baseWidth, remainingWidth) - 10,
         group: showGroups ? col.group : undefined,
-        icon: col.icon ?? undefined,
+        // TODO: Custom header rendering needed for Lucide icons
+        // icon: col.icon ?? undefined,
       };
     }
 
@@ -109,7 +110,8 @@ export function convertToGridColumns(
       title: col.header || col.name,
       width: baseWidth,
       group: showGroups ? col.group : undefined,
-      icon: col.icon ?? undefined,
+      // TODO: Custom header rendering needed for Lucide icons
+      // icon: col.icon ?? undefined,
     };
   });
 }

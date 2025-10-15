@@ -49,6 +49,7 @@ export const TableContext = createContext<TableContextType | undefined>(
 
 interface TableProviderProps {
   children: React.ReactNode;
+  columns: DataColumn[];
   connection: DataTableConnection;
   config: DataTableConfiguration;
   editable?: boolean;
@@ -56,12 +57,13 @@ interface TableProviderProps {
 
 export const TableProvider: React.FC<TableProviderProps> = ({
   children,
+  columns: columnsProp,
   connection,
   config,
   editable = false,
 }) => {
   const [data, setData] = useState<DataRow[]>([]);
-  const [columns, setColumns] = useState<DataColumn[]>([]);
+  const [columns, setColumns] = useState<DataColumn[]>(columnsProp);
   const [columnWidths, setColumnWidths] = useState<Record<string, number>>({});
   const [visibleRows, setVisibleRows] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
@@ -76,6 +78,11 @@ export const TableProvider: React.FC<TableProviderProps> = ({
   const batchSize = 20;
 
   const { allowColumnResizing, allowSorting } = config;
+
+  // Update columns when columnsProp changes
+  useEffect(() => {
+    setColumns(columnsProp);
+  }, [columnsProp]);
 
   // Reset row count and column widths when connection changes
   useEffect(() => {
@@ -114,7 +121,19 @@ export const TableProvider: React.FC<TableProviderProps> = ({
           activeFilter,
           activeSort
         );
-        setColumns(result.columns);
+
+        // Merge Arrow columns with columnsProp (columnsProp has all metadata)
+        // Arrow columns only provide name, type, and calculated width
+        const mergedColumns = columnsProp.map(propCol => {
+          const arrowCol = result.columns.find(ac => ac.name === propCol.name);
+          return {
+            ...propCol,
+            // Use calculated width from Arrow if not specified
+            width: propCol.width || arrowCol?.width || 150,
+          };
+        });
+
+        setColumns(mergedColumns);
         setData(result.rows);
         setVisibleRows(result.rows.length);
         currentRowCountRef.current = result.rows.length;
@@ -122,12 +141,12 @@ export const TableProvider: React.FC<TableProviderProps> = ({
 
         // Initialize column order when columns are first loaded
         if (columnOrder.length === 0) {
-          setColumnOrder(result.columns.map((_, index) => index));
+          setColumnOrder(mergedColumns.map((_, index) => index));
         }
 
         // Initialize sort from column metadata (only on first load)
         if (activeSort === null) {
-          const sortedColumn = result.columns.find(
+          const sortedColumn = mergedColumns.find(
             col =>
               col.sortDirection &&
               col.sortDirection !== SortDirection.None &&
@@ -153,7 +172,7 @@ export const TableProvider: React.FC<TableProviderProps> = ({
 
           // First time loading, initialize with default widths
           const widths: Record<string, number> = {};
-          result.columns.forEach((col, index) => {
+          mergedColumns.forEach((col, index) => {
             widths[index.toString()] = col.width;
           });
           return widths;
