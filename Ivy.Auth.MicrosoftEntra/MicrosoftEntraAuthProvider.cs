@@ -229,15 +229,7 @@ public class MicrosoftEntraAuthProvider : IAuthProvider
 
     public async Task<bool> ValidateJwtAsync(string jwt)
     {
-        try
-        {
-            var user = await GetMeAsync(jwt);
-            return user != null;
-        }
-        catch (Exception)
-        {
-            return false;
-        }
+        return await VerifyToken(jwt) is not null;
     }
 
     public async Task<UserInfo?> GetUserInfoAsync(string jwt)
