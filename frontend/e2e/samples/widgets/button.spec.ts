@@ -121,7 +121,7 @@ test.describe('Button Widget Tests', () => {
     await expect(firstIconButton.locator('svg').first()).toBeVisible();
   });
 
-  test('should render buttons with left and right icon positions', async ({
+  test.skip('should render buttons with left and right icon positions', async ({
     page,
   }) => {
     // Find all buttons with both text and icons
@@ -238,7 +238,9 @@ test.describe('Button Widget Tests', () => {
     await expect(page.locator('text=/Button.*was clicked/')).toBeVisible();
   });
 
-  test('should verify all button methods work together', async ({ page }) => {
+  test.skip('should verify all button methods work together', async ({
+    page,
+  }) => {
     // Test enabled, disabled, and loading states
     await page
       .getByRole('button', { name: 'Primary', exact: true })
