@@ -6,7 +6,7 @@ interface FormWidgetProps {
 }
 
 export const FormWidget: React.FC<FormWidgetProps> = ({ children }) => {
-  const formRef = useRef<HTMLFormElement>(null);
+  const formRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const form = formRef.current;
@@ -43,17 +43,11 @@ export const FormWidget: React.FC<FormWidgetProps> = ({ children }) => {
       }
     };
 
-    const handleSubmit = (e: SubmitEvent) => {
-      e.preventDefault();
-    };
-
     form.addEventListener('keydown', handleKeyDown);
-    form.addEventListener('submit', handleSubmit);
     return () => {
       form.removeEventListener('keydown', handleKeyDown);
-      form.removeEventListener('submit', handleSubmit);
     };
   }, []);
 
-  return <form ref={formRef}>{children}</form>;
+  return <div ref={formRef}>{children}</div>;
 };
