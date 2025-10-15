@@ -7,6 +7,11 @@ using Microsoft.Graph;
 using Microsoft.Identity.Client;
 using Ivy.Hooks;
 using System.Text.Json.Serialization;
+using System.Security.Claims;
+using Microsoft.IdentityModel.Protocols;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace Ivy.Auth.MicrosoftEntra;
 
@@ -32,6 +37,7 @@ public class MicrosoftEntraAuthProvider : IAuthProvider
     private readonly string _tenantId;
     private readonly string _clientId;
     private readonly string _clientSecret;
+    private readonly ConfigurationManager<OpenIdConnectConfiguration> _configurationManager;
 
     record struct TokenCache(Dictionary<string, RefreshToken> RefreshToken);
 
@@ -47,6 +53,10 @@ public class MicrosoftEntraAuthProvider : IAuthProvider
         _tenantId = configuration.GetValue<string>("MicrosoftEntra:TenantId") ?? throw new Exception("MicrosoftEntra:TenantId is required");
         _clientId = configuration.GetValue<string>("MicrosoftEntra:ClientId") ?? throw new Exception("MicrosoftEntra:ClientId is required");
         _clientSecret = configuration.GetValue<string>("MicrosoftEntra:ClientSecret") ?? throw new Exception("MicrosoftEntra:ClientSecret is required");
+        _configurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(
+            "https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration",
+            new OpenIdConnectConfigurationRetriever()
+        );
     }
 
     public void SetHttpContext(HttpContext context) => _httpContext = context;
@@ -259,6 +269,11 @@ public class MicrosoftEntraAuthProvider : IAuthProvider
         return [.. _authOptions];
     }
 
+    public Task<DateTimeOffset?> GetTokenExpiration(AuthToken token)
+    {
+        return Task.FromResult<DateTimeOffset?>(token.ExpiresAt);
+    }
+
     public MicrosoftEntraAuthProvider UseMicrosoftEntra()
     {
         _authOptions.Add(new AuthOption(AuthFlow.OAuth, "Microsoft", "microsoft", Icons.Microsoft));
@@ -309,5 +324,36 @@ public class MicrosoftEntraAuthProvider : IAuthProvider
         httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", jwt);
         var tempGraphClient = new GraphServiceClient(httpClient);
         return await tempGraphClient.Me.GetAsync();
+    }
+
+    private async Task<(ClaimsPrincipal, DateTimeOffset)?> VerifyToken(string jwt)
+    {
+        try
+        {
+            var discoveryDocument = await _configurationManager.GetConfigurationAsync(CancellationToken.None);
+            var signingKeys = discoveryDocument.SigningKeys;
+
+            var tokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidIssuer = $"https://login.microsoftonline.com/{_tenantId}/v2.0",
+                ValidateAudience = true,
+                ValidAudience = $"api://{_clientId}",
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKeys = signingKeys,
+                ValidateLifetime = true,
+            };
+
+            var handler = new JwtSecurityTokenHandler
+            {
+                InboundClaimTypeMap = new Dictionary<string, string>()
+            };
+            var claims = handler.ValidateToken(jwt, tokenValidationParameters, out SecurityToken validatedToken);
+            return (claims, validatedToken.ValidTo);
+        }
+        catch (Exception)
+        {
+            return null;
+        }
     }
 }
