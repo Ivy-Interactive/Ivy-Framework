@@ -169,7 +169,8 @@ public class FormFieldBinding<TModel>(
     string? description = null,
     bool required = false,
     FormFieldLayoutOptions? layoutOptions = null,
-    Func<object?, (bool, string)>[]? validators = null
+    Func<object?, (bool, string)>[]? validators = null,
+    FormValidationStrategy validationStrategy = FormValidationStrategy.OnBlur
     ) : IFormFieldBinding<TModel>
 {
     /// <summary>
@@ -178,7 +179,7 @@ public class FormFieldBinding<TModel>(
     public (IFormFieldView, IDisposable) Bind(IState<TModel> model)
     {
         var (fieldState, disposable) = StateHelpers.MemberState(model, selector);
-        var fieldView = new FormFieldView(fieldState, factory, visible, updateSignal, label, description, required, layoutOptions, validators, FormValidationStrategy.OnSubmit);
+        var fieldView = new FormFieldView(fieldState, factory, visible, updateSignal, label, description, required, layoutOptions, validators, validationStrategy);
         return (fieldView, disposable);
     }
 }

@@ -51,6 +51,16 @@ public class FormBuilderField<TModel>
             Validators.Add(e => (Utils.IsValidRequired(e), "Required field"));
         }
 
+        // Add validators from DataAnnotations attributes
+        if (propertyInfo != null)
+        {
+            Validators.AddRange(FormHelpers.GetValidators(propertyInfo));
+        }
+        else if (fieldInfo != null)
+        {
+            Validators.AddRange(FormHelpers.GetValidators(fieldInfo));
+        }
+
         Visible = _ => true;
     }
 
@@ -123,6 +133,9 @@ public class FormBuilder<TModel> : ViewBase
     /// <summary>The list of group names that have been defined for organizing fields.</summary>
     private readonly List<string> _groups = new();
 
+    /// <summary>The validation strategy for form fields. Default is OnBlur.</summary>
+    public FormValidationStrategy ValidationStrategy { get; set; } = FormValidationStrategy.OnBlur;
+
     /// <summary>Initializes form builder for specified model state with automatic field scaffolding.</summary>
     /// <param name="model">Reactive state containing model object to be edited by form.</param>
     /// <param name="submitTitle">The text displayed on the form's submit button. Default is "Save".</param>
@@ -170,6 +183,27 @@ public class FormBuilder<TModel> : ViewBase
             _fields[field.Name] =
                 new FormBuilderField<TModel>(field.Name, label, order++, ScaffoldEditor(field.Name, field.Type),
                     field.FieldInfo, field.PropertyInfo, field.Required);
+        }
+
+        // Add automatic validators after fields are created
+        foreach (var field in _fields.Values)
+        {
+            // Automatic email validation for fields ending with "Email"
+            var nonNullableType = Nullable.GetUnderlyingType(field.Type) ?? field.Type;
+            if (field.Name.EndsWith("Email") && nonNullableType == typeof(string))
+            {
+                field.Validators.Add(email =>
+                {
+                    if (email is not string emailStr || string.IsNullOrWhiteSpace(emailStr))
+                        return (true, ""); // Empty is handled by Required validator
+
+                    // Basic email validation: must contain @ with text before and after
+                    var isValid = emailStr.Contains('@') &&
+                                  emailStr.IndexOf('@') > 0 &&
+                                  emailStr.IndexOf('@') < emailStr.Length - 1;
+                    return isValid ? (true, "") : (false, "Please enter a valid email address");
+                });
+            }
         }
     }
 
@@ -561,7 +595,8 @@ public class FormBuilder<TModel> : ViewBase
                 e.Description,
                 e.Required,
                 new FormFieldLayoutOptions(e.RowKey, e.Column, e.Order, e.Group),
-                e.Validators.ToArray()
+                e.Validators.ToArray(),
+                ValidationStrategy
             ))
             .Cast<IFormFieldBinding<TModel>>()
             .ToArray();

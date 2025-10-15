@@ -3,17 +3,21 @@ using Ivy.Views.Forms;
 
 namespace Ivy.Samples.Shared.Apps.Tests;
 
-public record LoginModel(string Username, string Password);
+public record LoginModel(string Username, string Email, string Password);
 
 [App(icon: Icons.LogIn, path: ["Tests"], isVisible: true)]
 public class FormSubmitTestApp : SampleBase
 {
     protected override object? BuildSample()
     {
-        var model = UseState(() => new LoginModel("", ""));
+        var model = UseState(() => new LoginModel("", "", ""));
 
-        return new Card().Title("Login")
-            | model.ToForm();
+        return new Card()
+            .Title("Login")
+                | model.ToForm()
+                  .Validate<string>(m => m.Username, username => (username.Length >= 3, "Username must be at least 3 characters"))
+                  .Validate<string>(m => m.Password, password => (password.Length >= 8, "Password must be at least 8 characters"))
+                ;
     }
 }
 
