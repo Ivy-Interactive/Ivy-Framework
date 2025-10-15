@@ -43,8 +43,16 @@ export const FormWidget: React.FC<FormWidgetProps> = ({ children }) => {
       }
     };
 
+    const handleSubmit = (e: SubmitEvent) => {
+      e.preventDefault();
+    };
+
     form.addEventListener('keydown', handleKeyDown);
-    return () => form.removeEventListener('keydown', handleKeyDown);
+    form.addEventListener('submit', handleSubmit);
+    return () => {
+      form.removeEventListener('keydown', handleKeyDown);
+      form.removeEventListener('submit', handleSubmit);
+    };
   }, []);
 
   return <form ref={formRef}>{children}</form>;
