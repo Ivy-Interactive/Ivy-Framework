@@ -483,7 +483,6 @@ public class TextBuilder(string content, TextVariant variant, Languages codeLang
         }
     }
 
-
     /// <summary>
     /// Sets whether the text should be displayed with a strikethrough effect.
     /// </summary>
