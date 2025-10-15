@@ -36,7 +36,7 @@ public static class FormHelpers
             {
                 try
                 {
-                    var validationContext = new ValidationContext(value ?? new object())
+                    var validationContext = new ValidationContext(new { })
                     {
                         MemberName = propertyInfo.Name,
                         DisplayName = propertyInfo.Name
@@ -74,7 +74,8 @@ public static class FormHelpers
             {
                 try
                 {
-                    var validationContext = new ValidationContext(value ?? new object())
+
+                    var validationContext = new ValidationContext(new { })
                     {
                         MemberName = fieldInfo.Name,
                         DisplayName = fieldInfo.Name

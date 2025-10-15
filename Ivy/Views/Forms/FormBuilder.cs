@@ -197,11 +197,17 @@ public class FormBuilder<TModel> : ViewBase
                     if (email is not string emailStr || string.IsNullOrWhiteSpace(emailStr))
                         return (true, ""); // Empty is handled by Required validator
 
-                    // Basic email validation: must contain @ with text before and after
-                    var isValid = emailStr.Contains('@') &&
-                                  emailStr.IndexOf('@') > 0 &&
-                                  emailStr.IndexOf('@') < emailStr.Length - 1;
-                    return isValid ? (true, "") : (false, "Please enter a valid email address");
+                    // Use EmailAddressAttribute for proper email validation
+                    var emailValidator = new System.ComponentModel.DataAnnotations.EmailAddressAttribute();
+                    var validationContext = new System.ComponentModel.DataAnnotations.ValidationContext(new { })
+                    {
+                        MemberName = field.Name,
+                        DisplayName = field.Name
+                    };
+                    var result = emailValidator.GetValidationResult(emailStr, validationContext);
+                    return result == System.ComponentModel.DataAnnotations.ValidationResult.Success
+                        ? (true, "")
+                        : (false, result?.ErrorMessage ?? "Please enter a valid email address");
                 });
             }
         }
