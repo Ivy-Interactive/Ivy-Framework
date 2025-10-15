@@ -47,6 +47,7 @@ export interface Filter {
   condition?: Condition;
   group?: FilterGroup;
   negate?: boolean;
+  invalidQuery?: string; // When set, indicates an unparseable query that should be processed by the agent
 }
 
 export interface Aggregation {
