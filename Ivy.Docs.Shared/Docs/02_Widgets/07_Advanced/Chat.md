@@ -5,6 +5,7 @@ searchHints:
   - chat
   - messages
   - communication
+  - agent
   - ai
 ---
 
