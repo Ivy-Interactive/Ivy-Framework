@@ -4,7 +4,7 @@ using Ivy.Views.DataTables;
 
 namespace Ivy.Samples.Apps.Widgets;
 
-public record UserWithIcon(string Name, string Email, int Age, Icons Status, Icons Priority, Icons Activity);
+public record UserWithIcon(string Name, string Email, int Age, Icons Status, bool Priority, Icons Activity);
 
 [App(icon: Icons.DatabaseZap)]
 public class DataTableApp : SampleBase
@@ -24,12 +24,8 @@ public class DataTableApp : SampleBase
             u.Age < 60 ? Icons.Clock :
             Icons.TriangleAlert,
 
-            // Priority icons with more variety
-            u.Age % 5 == 0 ? Icons.Flame :
-            u.Age % 5 == 1 ? Icons.Zap :
-            u.Age % 5 == 2 ? Icons.TrendingUp :
-            u.Age % 5 == 3 ? Icons.Target :
-            Icons.Flag,
+            // Priority as boolean (checkbox)
+            u.Age % 2 == 0,
 
             // Activity type icons
             u.IsActive ? (
@@ -47,8 +43,15 @@ public class DataTableApp : SampleBase
         return usersWithIcons.ToDataTable()
             .Header(u => u.Name, "Name")
             .Header(u => u.Email, "Email")
+            .Header(u => u.Age, "Age")
             .Header(u => u.Status, "Status")
             .Header(u => u.Priority, "Priority")
-            .Header(u => u.Activity, "Activity");
+            .Header(u => u.Activity, "Activity")
+            .Group(u => u.Name, "Basic Info")
+            .Group(u => u.Email, "Basic Info")
+            .Group(u => u.Age, "Basic Info")
+            .Group(u => u.Status, "Metrics")
+            .Group(u => u.Priority, "Metrics")
+            .Group(u => u.Activity, "Metrics");
     }
 }

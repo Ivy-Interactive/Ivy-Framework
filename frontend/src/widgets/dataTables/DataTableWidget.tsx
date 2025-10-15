@@ -48,7 +48,7 @@ export const Table: React.FC<TableProps> = ({
     allowCopySelection: config.allowCopySelection ?? true,
     selectionMode: config.selectionMode,
     showIndexColumn: config.showIndexColumn ?? false,
-    showGroups: config.showGroups ?? false,
+    showGroups: true,
   };
 
   // Create styles object with width and height if provided

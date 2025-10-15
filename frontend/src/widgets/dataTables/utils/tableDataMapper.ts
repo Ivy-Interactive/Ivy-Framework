@@ -49,6 +49,7 @@ export function convertArrowTableToData(
         'render_type'
       ) as DataColumn['renderType'];
       const iconSet = metadata?.get('icon_set') as DataColumn['iconSet'];
+      const group = metadata?.get('group') as string | undefined;
 
       return {
         name: field.name,
@@ -56,6 +57,7 @@ export function convertArrowTableToData(
         width,
         ...(renderType && { renderType }),
         ...(iconSet && { iconSet }),
+        ...(group && { group }),
       };
     }
   );
