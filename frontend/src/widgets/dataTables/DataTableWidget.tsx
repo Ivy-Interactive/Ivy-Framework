@@ -23,7 +23,7 @@ const TableLayout: React.FC<TableLayoutProps> = ({ children }) => {
   }
 
   return (
-    <div className={tableStyles.table.container}>
+    <div style={tableStyles.table.container}>
       {showTableEditor ? children : <Loading />}
     </div>
   );
