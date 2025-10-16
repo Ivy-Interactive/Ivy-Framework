@@ -37,6 +37,11 @@ Once your project is ready:
    - If using legacy API keys, use "anon" as your API key
    - Otherwise, use the publishable key
 
+If your project is still using a legacy JWT secret:
+
+1. **Click on "JWT Keys"** in the sidebar
+2. **Copy your legacy JWT secret**
+
 ### Step 3: Configure Authentication (Optional)
 
 To customize your authentication settings:
@@ -69,6 +74,7 @@ You will be prompted to provide the following Supabase configuration:
 
 - **Project URL**: Your Supabase project URL (e.g., `https://your-project.supabase.co`)
 - **API Key**: Your Supabase project's anonymous (anon) or publishable key
+- **Legacy JWT Secret** (optional): Your Supabase project's legacy JWT secret, if it is still using one.
 
 Your credentials will be stored securely in .NET user secrets. Ivy then finishes configuring your application automatically:
 
@@ -83,7 +89,7 @@ Your credentials will be stored securely in .NET user secrets. Ivy then finishes
 To skip the interactive prompts, you can provide configuration via a connection string:
 
 ```terminal
->ivy auth add --provider Supabase --connection-string "Supabase:Url=https://your-project.supabase.co;Supabase:ApiKey=your-api-key"
+>ivy auth add --provider Supabase --connection-string "Supabase:Url=https://your-project.supabase.co;Supabase:ApiKey=your-api-key; Supabase:LegacyJwtSecret=your-jwt-secret"
 ```
 
 For a list of connection string parameters, see [Configuration Parameters](#configuration-parameters) below.
@@ -102,6 +108,7 @@ The following parameters are supported via connection string, environment variab
 
 - **Supabase:Url**: Required. Your Supabase project URL.
 - **Supabase:ApiKey**: Required. Your Supabase project's anonymous (anon) or publishable key.
+- **Supabase:LegacyJwtSecret**: Required if still using a legacy JWT secret, otherwise optional. Your Supabase project's legacy JWT secret.
 
 ## Authentication Flow
 
@@ -134,6 +141,7 @@ Key features of the Supabase provider:
 
 - **Always use HTTPS** in production environments
 - **Store keys securely** in user secrets or environment variables
+- **Migrate to Supabase's new API keys and JWT signing keys** away from the legacy versions
 - **Enable Row Level Security** on database tables containing user data
 - **Configure email rate limiting** to prevent abuse
 - **Validate tokens server-side** for sensitive operations

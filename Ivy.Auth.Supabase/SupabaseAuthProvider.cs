@@ -1,11 +1,15 @@
 ﻿using System.Reflection;
+using System.Security.Claims;
+using System.Text;
 using Ivy.Hooks;
 using Ivy.Shared;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Supabase;
 using Supabase.Gotrue;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Text.Json;
 
 namespace Ivy.Auth.Supabase;
 
@@ -20,10 +24,16 @@ public class SupabaseOAuthException(string? error, string? errorCode, string? er
 public class SupabaseAuthProvider : IAuthProvider
 {
     private readonly global::Supabase.Client _client;
+    private readonly string _jwksUrl;
+    private readonly string _issuer;
+    private readonly SymmetricSecurityKey? _legacyJwtKey = null;
 
     private readonly List<AuthOption> _authOptions = new();
 
     private string? _pkceCodeVerifier = null;
+
+    private JsonWebKeySet? _cachedJwks = null;
+    private DateTime _jwksCacheExpiry = DateTime.MinValue;
 
     public SupabaseAuthProvider()
     {
@@ -33,7 +43,13 @@ public class SupabaseAuthProvider : IAuthProvider
             .Build();
 
         var url = configuration.GetValue<string>("Supabase:Url") ?? throw new Exception("Supabase:Url is required");
-        var key = configuration.GetValue<string>("Supabase:ApiKey") ?? throw new Exception("Supabase:ApiKey is required");
+        var apiKey = configuration.GetValue<string>("Supabase:ApiKey") ?? throw new Exception("Supabase:ApiKey is required");
+        var legacyJwtSecret = configuration.GetValue<string?>("Supabase:LegacyJwtSecret");
+        if (!string.IsNullOrEmpty(legacyJwtSecret))
+        {
+            var keyBytes = Encoding.UTF8.GetBytes(legacyJwtSecret);
+            _legacyJwtKey = new SymmetricSecurityKey(keyBytes);
+        }
 
         var options = new SupabaseOptions
         {
@@ -41,7 +57,11 @@ public class SupabaseAuthProvider : IAuthProvider
             AutoConnectRealtime = false
         };
 
-        _client = new global::Supabase.Client(url, key, options);
+        _client = new global::Supabase.Client(url, apiKey, options);
+
+        // Setup JWKS URL
+        _issuer = new Uri(new Uri(url), "auth/v1").ToString();
+        _jwksUrl = $"{_issuer}/.well-known/jwks.json";
     }
 
     public async Task<AuthToken?> LoginAsync(string email, string password)
@@ -139,7 +159,7 @@ public class SupabaseAuthProvider : IAuthProvider
 
         try
         {
-            var session = await _client.Auth.SetSession(token.AccessToken, token.RefreshToken);
+            var session = await _client.Auth.SetSession(token.AccessToken, token.RefreshToken, forceAccessTokenRefresh: true);
             var authToken = MakeAuthToken(session);
             return authToken;
         }
@@ -151,48 +171,65 @@ public class SupabaseAuthProvider : IAuthProvider
 
     public async Task<bool> ValidateAccessTokenAsync(string token)
     {
-        try
-        {
-            // Verify the access token with Supabase
-            var response = await _client.Auth.GetUser(token);
-
-            // If we get a response back, the token is valid
-            return response != null;
-        }
-        catch (Exception)
-        {
-            // If any exception occurs during validation, consider the token invalid
-            return false;
-        }
+        return await VerifyToken(token) is not null;
     }
 
     public async Task<UserInfo?> GetUserInfoAsync(string token)
     {
-        var user = await _client.Auth.GetUser(token);
-
-        if (user == null)
+        if (await VerifyToken(token) is not var (claims, _))
         {
             return null;
         }
 
-        if (user.Id == null || user.Email == null)
+        var userId = claims.FindFirst("sub")?.Value;
+        var email = claims.FindFirst("email")?.Value;
+        string? name = null, avatarUrl = null;
+
+        var metadataJson = claims.FindFirst("user_metadata")?.Value;
+        try
+        {
+            if (!string.IsNullOrEmpty(metadataJson))
+            {
+                using var doc = JsonDocument.Parse(metadataJson);
+                var root = doc.RootElement;
+
+                name = root.GetProperty("full_name").GetString();
+                avatarUrl = root.GetProperty("avatar_url").GetString();
+            }
+        }
+        catch (JsonException)
+        {
+            // Ignore JSON parsing errors
+        }
+
+        if (userId == null || email == null)
         {
             return null;
         }
 
         return new UserInfo(
-            user.Id,
-            user.Email,
-            user.UserMetadata != null && user.UserMetadata.TryGetValue("full_name", out var value)
-                ? value.ToString()
-                : string.Empty,
-            null
+            userId,
+            email,
+            name,
+            avatarUrl
         );
     }
 
     public AuthOption[] GetAuthOptions()
     {
         return _authOptions.ToArray();
+    }
+
+    public async Task<DateTimeOffset?> GetTokenExpiration(AuthToken token)
+    {
+        if (await VerifyToken(token.AccessToken) is var (_, expiration))
+        {
+            return expiration;
+        }
+        else
+        {
+            return null;
+        }
     }
 
     public SupabaseAuthProvider UseEmailPassword()
@@ -267,43 +304,62 @@ public class SupabaseAuthProvider : IAuthProvider
         return this;
     }
 
+    private async Task<(ClaimsPrincipal, DateTimeOffset)?> VerifyToken(string jwt)
+    {
+        try
+        {
+            var handler = new JwtSecurityTokenHandler
+            {
+                InboundClaimTypeMap = new Dictionary<string, string>()
+            };
+
+            var tokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidIssuer = _issuer,
+                ValidateAudience = true,
+                ValidAudience = "authenticated",
+                ValidateIssuerSigningKey = true,
+                ValidateLifetime = true,
+                ClockSkew = TimeSpan.FromMinutes(2),
+            };
+
+            var parsedToken = handler.ReadJwtToken(jwt);
+            if (parsedToken.Header.Alg == SecurityAlgorithms.HmacSha256)
+            {
+                tokenValidationParameters.IssuerSigningKey = _legacyJwtKey;
+            }
+            else
+            {
+                // Check cache first
+                if (_cachedJwks == null || DateTime.UtcNow >= _jwksCacheExpiry)
+                {
+                    using var httpClient = new HttpClient();
+                    var jwksJson = await httpClient.GetStringAsync(_jwksUrl);
+                    _cachedJwks = new JsonWebKeySet(jwksJson);
+                    _jwksCacheExpiry = DateTime.UtcNow.AddHours(24);
+                }
+
+                if (_cachedJwks.Keys.Count == 0)
+                {
+                    return null;
+                }
+
+                tokenValidationParameters.IssuerSigningKeys = _cachedJwks.Keys;
+            }
+
+            var claims = handler.ValidateToken(jwt, tokenValidationParameters, out SecurityToken validatedToken);
+            return (claims, validatedToken.ValidTo);
+        }
+        catch (Exception)
+        {
+            return null;
+        }
+    }
+
     private AuthToken? MakeAuthToken(Session? session) =>
         session?.AccessToken != null
-            ? new AuthToken(session.AccessToken, session.RefreshToken, session.ExpiresAt())
+            ? new AuthToken(session.AccessToken, session.RefreshToken, null)
             : null;
 
 }
-
-// public async Task<bool> ValidateAccessTokenAsync(string token)
-// {
-//     try
-//     {
-//         // Get the Supabase JWT secret (this should be your project's JWT secret)
-//         string jwtSecret = "your-supabase-jwt-secret"; // Store this securely
-//
-//         var tokenHandler = new JwtSecurityTokenHandler();
-//         var validationParameters = new TokenValidationParameters
-//         {
-//             ValidateIssuerSigningKey = true,
-//             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret)),
-//             ValidateIssuer = false,     // Set to true with proper issuer in production
-//             ValidateAudience = false,   // Set to true with proper audience in production
-//             ValidateLifetime = true,    // Check if the token is expired
-//             ClockSkew = TimeSpan.Zero   // No tolerance for token expiration
-//         };
-//
-//         // This will throw an exception if validation fails
-//         var principal = tokenHandler.ValidateToken(token, validationParameters, out _);
-//
-//         // Optional: Check for required claims
-//         // var userIdClaim = principal.FindFirst("sub")?.Value;
-//         // if (string.IsNullOrEmpty(userIdClaim))
-//         //     return false;
-//
-//         return true;
-//     }
-//     catch
-//     {
-//         return false;
-//     }
-// }
