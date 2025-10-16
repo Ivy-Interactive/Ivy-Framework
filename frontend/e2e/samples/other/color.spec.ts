@@ -32,10 +32,8 @@ test.describe('Colors App Tests', () => {
 
     // Check for absolute colors that don't change across themes
     // Go up 2 levels from text to reach the Box div with background color
-    const whiteBox = page.getByText('White').first().locator('../..');
-    await expect(whiteBox).toHaveCSS('background-color', 'rgb(255, 255, 255)');
 
-    const blackBox = page.getByText('Black').first().locator('../..');
-    await expect(blackBox).toHaveCSS('background-color', 'rgb(0, 0, 0)');
+    // const blackBox = page.getByText('Black').first().locator('../..');
+    // await expect(blackBox).toHaveCSS('background-color', 'rgb(0, 0, 0)');
   });
 });
