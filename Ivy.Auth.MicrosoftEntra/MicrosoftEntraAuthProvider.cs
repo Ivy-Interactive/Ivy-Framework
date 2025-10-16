@@ -142,7 +142,6 @@ public class MicrosoftEntraAuthProvider : IAuthProvider
         return new AuthToken(
             result.AccessToken,
             GetCurrentRefreshToken(accountId),
-            result.ExpiresOn,
             accountId
         );
     }
@@ -167,9 +166,9 @@ public class MicrosoftEntraAuthProvider : IAuthProvider
             return token;
         }
 
-        if (token.ExpiresAt == null || token.RefreshToken == null || DateTimeOffset.UtcNow < token.ExpiresAt)
+        if (token.RefreshToken == null)
         {
-            return token;
+            return null;
         }
 
         try
@@ -194,7 +193,6 @@ public class MicrosoftEntraAuthProvider : IAuthProvider
                 return new AuthToken(
                     result.AccessToken,
                     GetCurrentRefreshToken(accountId),
-                    result.ExpiresOn,
                     accountId
                 );
             }
@@ -216,7 +214,6 @@ public class MicrosoftEntraAuthProvider : IAuthProvider
                 return new AuthToken(
                     result.AccessToken,
                     GetCurrentRefreshToken(accountId),
-                    result.ExpiresOn,
                     accountId
                 );
             }
@@ -261,9 +258,16 @@ public class MicrosoftEntraAuthProvider : IAuthProvider
         return [.. _authOptions];
     }
 
-    public Task<DateTimeOffset?> GetTokenExpiration(AuthToken token)
+    public async Task<DateTimeOffset?> GetTokenExpiration(AuthToken token)
     {
-        return Task.FromResult<DateTimeOffset?>(token.ExpiresAt);
+        if (await VerifyToken(token.AccessToken) is var (_, expiration))
+        {
+            return expiration;
+        }
+        else
+        {
+            return null;
+        }
     }
 
     public MicrosoftEntraAuthProvider UseMicrosoftEntra()

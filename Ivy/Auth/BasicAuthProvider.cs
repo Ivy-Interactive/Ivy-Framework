@@ -128,7 +128,7 @@ public class BasicAuthProvider : IAuthProvider
         );
         var refreshToken = new JwtSecurityTokenHandler().WriteToken(refreshJwt);
 
-        return new AuthToken(accessToken, refreshToken, expiresAt);
+        return new AuthToken(accessToken, refreshToken);
     }
 
     /// <summary>

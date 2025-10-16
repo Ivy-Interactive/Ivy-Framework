@@ -69,10 +69,7 @@ public interface IAuthProvider
     /// </summary>
     /// <param name="token">The authentication token</param>
     /// <returns>The expiration time if available, null otherwise</returns>
-    Task<DateTimeOffset?> GetTokenExpiration(AuthToken token)
-    {
-        return Task.FromResult(token.ExpiresAt);
-    }
+    Task<DateTimeOffset?> GetTokenExpiration(AuthToken token);
 
     /// <summary>
     /// Sets the HTTP context for the auth provider.

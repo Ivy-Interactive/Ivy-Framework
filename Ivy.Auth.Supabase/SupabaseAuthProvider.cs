@@ -151,10 +151,10 @@ public class SupabaseAuthProvider : IAuthProvider
 
     public async Task<AuthToken?> RefreshAccessTokenAsync(AuthToken token)
     {
-        if (token.ExpiresAt == null || token.RefreshToken == null || DateTimeOffset.UtcNow < token.ExpiresAt)
+        if (token.RefreshToken == null)
         {
             // Refresh not needed (or not possible).
-            return token;
+            return null;
         }
 
         try
@@ -359,7 +359,7 @@ public class SupabaseAuthProvider : IAuthProvider
 
     private AuthToken? MakeAuthToken(Session? session) =>
         session?.AccessToken != null
-            ? new AuthToken(session.AccessToken, session.RefreshToken, null)
+            ? new AuthToken(session.AccessToken, session.RefreshToken)
             : null;
 
 }

@@ -71,7 +71,7 @@ public class Auth0AuthProvider : IAuthProvider
         };
 
         var response = await _authClient.GetTokenAsync(request);
-        return new AuthToken(response.AccessToken, response.RefreshToken, DateTimeOffset.UtcNow.AddSeconds(response.ExpiresIn));
+        return new AuthToken(response.AccessToken, response.RefreshToken);
     }
 
     public Task<Uri> GetOAuthUriAsync(AuthOption option, WebhookEndpoint callback)
@@ -131,7 +131,7 @@ public class Auth0AuthProvider : IAuthProvider
 
             var response = await _authClient.GetTokenAsync(request_);
 
-            return new AuthToken(response.AccessToken, response.RefreshToken, DateTimeOffset.UtcNow.AddSeconds(response.ExpiresIn));
+            return new AuthToken(response.AccessToken, response.RefreshToken);
         }
         catch (Exception ex)
         {
@@ -155,9 +155,9 @@ public class Auth0AuthProvider : IAuthProvider
 
     public async Task<AuthToken?> RefreshAccessTokenAsync(AuthToken token)
     {
-        if (token.ExpiresAt == null || token.RefreshToken == null || DateTimeOffset.UtcNow < token.ExpiresAt)
+        if (token.RefreshToken == null)
         {
-            return token;
+            return null;
         }
 
         try
@@ -170,7 +170,7 @@ public class Auth0AuthProvider : IAuthProvider
             };
 
             var response = await _authClient.GetTokenAsync(request);
-            return new AuthToken(response.AccessToken, response.RefreshToken ?? token.RefreshToken, DateTimeOffset.UtcNow.AddSeconds(response.ExpiresIn));
+            return new AuthToken(response.AccessToken, response.RefreshToken ?? token.RefreshToken);
         }
         catch (Exception)
         {
