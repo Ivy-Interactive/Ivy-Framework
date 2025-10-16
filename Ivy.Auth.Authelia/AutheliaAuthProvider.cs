@@ -98,8 +98,7 @@ public class AutheliaAuthProvider : IAuthProvider
 
     public Task<DateTimeOffset?> GetTokenExpiration(AuthToken token)
     {
-        // Authelia session cookies do not have an expiration time we can read.
-        return Task.FromResult<DateTimeOffset?>(null);
+        return Task.FromResult<DateTimeOffset?>(DateTimeOffset.MaxValue);
     }
 }
 

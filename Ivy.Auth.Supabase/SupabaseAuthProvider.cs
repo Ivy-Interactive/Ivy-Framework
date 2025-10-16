@@ -153,7 +153,6 @@ public class SupabaseAuthProvider : IAuthProvider
     {
         if (token.RefreshToken == null)
         {
-            // Refresh not needed (or not possible).
             return null;
         }
 
