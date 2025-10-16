@@ -332,6 +332,7 @@ public class FormSubmissionExample : ViewBase
     public override object? Build()
     {
         var contact = UseState(() => new ContactModel("", "", ""));
+        var client = UseService<IClientProvider>();
         
         UseEffect(() =>
         {
@@ -364,6 +365,7 @@ public class FormStatesExample : ViewBase
     public override object? Build()
     {
         var order = UseState(() => new OrderModel("", "", 1, 0.0m));
+        var client = UseService<IClientProvider>();
         
         UseEffect(() =>
         {
