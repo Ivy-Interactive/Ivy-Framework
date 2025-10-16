@@ -396,6 +396,17 @@ export class GrpcTableService extends EventEmitter {
       chunks.push(this.encodeField(3, 0, this.encodeVarint(negateValue)));
     }
 
+    if (filter.invalidQuery) {
+      logger.debug(
+        'serializeFilter: Serializing invalidQuery',
+        filter.invalidQuery
+      );
+      // Field 4: invalid_query (string)
+      const encoder = new TextEncoder();
+      const invalidQueryData = encoder.encode(filter.invalidQuery);
+      chunks.push(this.encodeField(4, 2, invalidQueryData));
+    }
+
     const result = this.combineChunks(chunks);
     logger.debug(
       'serializeFilter: Filter serialization complete, total length:',
