@@ -43,11 +43,24 @@ export const FormWidget: React.FC<FormWidgetProps> = ({ id, children }) => {
         if (nextInput) {
           nextInput.focus();
         } else {
-          // We're on the last field - send submit event to backend
-          logger.info(`Form submit triggered via Enter key on last field`, {
-            formId: id,
+          // We're on the last field - check for invalid fields
+          const invalidInputs = inputs.filter(input => {
+            const parent = input.closest('[class*="flex-col"]');
+            return (
+              parent?.querySelector('[class*="text-destructive"]') !== null
+            );
           });
-          eventHandler('HandleSubmit', id, []);
+
+          if (invalidInputs.length > 0) {
+            // Navigate to first invalid field instead of submitting
+            invalidInputs[0].focus();
+          } else {
+            // All fields valid - submit the form
+            logger.info(`Form submit triggered via Enter key on last field`, {
+              formId: id,
+            });
+            eventHandler('HandleSubmit', id, []);
+          }
         }
       }
     };
