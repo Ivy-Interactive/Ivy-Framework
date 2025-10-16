@@ -12,13 +12,10 @@ namespace Ivy.Test.DataTables;
 public class QueryProcessorTests
 {
     private readonly ITestOutputHelper _output;
-    private readonly ILogger<QueryProcessor>? _logger;
 
     public QueryProcessorTests(ITestOutputHelper output)
     {
         _output = output;
-        // Optionally create a logger that writes to test output
-        // _logger = new TestLogger<QueryProcessor>(output);
     }
 
     [Fact]
@@ -27,7 +24,7 @@ public class QueryProcessorTests
         // Arrange
         var products = TestDataGenerator.GenerateProducts(10);
         var queryable = products.AsQueryable();
-        var processor = new QueryProcessor(_logger);
+        var processor = new QueryProcessor(logger: null);
 
         var query = new DataTableQuery
         {
@@ -90,7 +87,7 @@ public class QueryProcessorTests
         // Arrange
         var products = TestDataGenerator.GenerateProducts(25);
         var queryable = products.AsQueryable();
-        var processor = new QueryProcessor(_logger);
+        var processor = new QueryProcessor(logger: null);
 
         var query = new DataTableQuery
         {
@@ -121,7 +118,7 @@ public class QueryProcessorTests
         // Arrange
         var products = TestDataGenerator.GenerateProducts(20);
         var queryable = products.AsQueryable();
-        var processor = new QueryProcessor(_logger);
+        var processor = new QueryProcessor(logger: null);
 
         var query = new DataTableQuery
         {
@@ -162,7 +159,7 @@ public class QueryProcessorTests
         // Arrange
         var products = TestDataGenerator.GenerateProducts(15);
         var queryable = products.AsQueryable();
-        var processor = new QueryProcessor(_logger);
+        var processor = new QueryProcessor(logger: null);
 
         var query = new DataTableQuery
         {
@@ -204,7 +201,7 @@ public class QueryProcessorTests
         // Arrange
         var people = TestDataGenerator.GeneratePeople(30);
         var queryable = people.AsQueryable();
-        var processor = new QueryProcessor(_logger);
+        var processor = new QueryProcessor(logger: null);
 
         var query = new DataTableQuery
         {
@@ -268,7 +265,7 @@ public class QueryProcessorTests
         // Arrange
         var products = TestDataGenerator.GenerateProducts(50);
         var queryable = products.AsQueryable();
-        var processor = new QueryProcessor(_logger);
+        var processor = new QueryProcessor(logger: null);
 
         // Find products with price > 500 AND stock < 50
         var query = new DataTableQuery
@@ -396,7 +393,7 @@ public class QueryProcessorTests
         // Arrange
         var products = TestDataGenerator.GenerateProducts(50);
         var queryable = products.AsQueryable();
-        var processor = new QueryProcessor(_logger);
+        var processor = new QueryProcessor(logger: null);
 
         // (Category = Electronics AND Price > 500) OR (Category = Home AND StockQuantity > 75)
         var query = new DataTableQuery
@@ -501,7 +498,7 @@ public class QueryProcessorTests
         // Arrange
         var products = TestDataGenerator.GenerateProducts(20);
         var queryable = products.AsQueryable();
-        var processor = new QueryProcessor(_logger);
+        var processor = new QueryProcessor(logger: null);
 
         // Test contains function
         var query = new DataTableQuery
@@ -573,7 +570,7 @@ public class QueryProcessorTests
         // Arrange
         var products = TestDataGenerator.GenerateProducts(30);
         var queryable = products.AsQueryable();
-        var processor = new QueryProcessor(_logger);
+        var processor = new QueryProcessor(logger: null);
 
         // Filter for null descriptions (every 3rd product has null description)
         var query = new DataTableQuery
@@ -618,7 +615,7 @@ public class QueryProcessorTests
     {
         // Test 1: Empty queryable
         var emptyQueryable = new List<Product>().AsQueryable();
-        var processor = new QueryProcessor(_logger);
+        var processor = new QueryProcessor(logger: null);
 
         var query = new DataTableQuery
         {
@@ -767,7 +764,7 @@ public class QueryProcessorTests
         // Arrange
         var products = TestDataGenerator.GenerateProducts(20);
         var queryable = products.AsQueryable();
-        var processor = new QueryProcessor(_logger);
+        var processor = new QueryProcessor(logger: null);
 
         // Filter for active products
         var query = new DataTableQuery
@@ -870,7 +867,7 @@ public class QueryProcessorTests
         // Arrange
         var products = TestDataGenerator.GenerateProducts(10);
         var queryable = products.AsQueryable();
-        var processor = new QueryProcessor(_logger);
+        var processor = new QueryProcessor(logger: null);
 
         var query = new DataTableQuery
         {
@@ -902,7 +899,7 @@ public class QueryProcessorTests
         // Arrange
         var products = TestDataGenerator.GenerateProducts(10);
         var queryable = products.AsQueryable();
-        var processor = new QueryProcessor(_logger);
+        var processor = new QueryProcessor(logger: null);
 
         var query = new DataTableQuery
         {

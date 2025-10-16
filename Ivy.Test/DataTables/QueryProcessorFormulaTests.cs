@@ -12,7 +12,6 @@ namespace Ivy.Test.DataTables;
 public class QueryProcessorFormulaTests
 {
     private readonly ITestOutputHelper _output;
-    private readonly ILogger<QueryProcessor>? _logger;
 
     public QueryProcessorFormulaTests(ITestOutputHelper output)
     {
@@ -27,7 +26,7 @@ public class QueryProcessorFormulaTests
         // Arrange
         var products = TestDataGenerator.GenerateProducts(10);
         var queryable = products.AsQueryable();
-        var processor = new QueryProcessor(_logger);
+        var processor = new QueryProcessor(logger: null);
 
         var filter = new Filter
         {
@@ -70,7 +69,7 @@ public class QueryProcessorFormulaTests
         // Arrange
         var products = TestDataGenerator.GenerateProducts(10);
         var queryable = products.AsQueryable();
-        var processor = new QueryProcessor(_logger);
+        var processor = new QueryProcessor(logger: null);
 
         var filter = new Filter
         {
@@ -110,7 +109,7 @@ public class QueryProcessorFormulaTests
         // Arrange
         var products = TestDataGenerator.GenerateProducts(10);
         var queryable = products.AsQueryable();
-        var processor = new QueryProcessor(_logger);
+        var processor = new QueryProcessor(logger: null);
 
         var filter = new Filter
         {
@@ -156,7 +155,7 @@ public class QueryProcessorFormulaTests
             new Product { Id = 4, Name = "Product 4", Description = "Another description", CreatedDate = DateTime.Now.AddDays(-4) }
         };
         var queryable = products.AsQueryable();
-        var processor = new QueryProcessor(_logger);
+        var processor = new QueryProcessor(logger: null);
 
         var filter = new Filter
         {
@@ -206,7 +205,7 @@ public class QueryProcessorFormulaTests
         }
 
         var queryable = products.AsQueryable();
-        var processor = new QueryProcessor(_logger);
+        var processor = new QueryProcessor(logger: null);
 
         var filter = new Filter
         {
@@ -263,7 +262,7 @@ public class QueryProcessorFormulaTests
         }
 
         var queryable = products.AsQueryable();
-        var processor = new QueryProcessor(_logger);
+        var processor = new QueryProcessor(logger: null);
 
         var filter = new Filter
         {
@@ -310,7 +309,7 @@ public class QueryProcessorFormulaTests
         // Arrange
         var products = TestDataGenerator.GenerateProducts(10);
         var queryable = products.AsQueryable();
-        var processor = new QueryProcessor(_logger);
+        var processor = new QueryProcessor(logger: null);
 
         var filter = new Filter
         {
@@ -354,7 +353,7 @@ public class QueryProcessorFormulaTests
         }
 
         var queryable = products.AsQueryable();
-        var processor = new QueryProcessor(_logger);
+        var processor = new QueryProcessor(logger: null);
 
         var filter = new Filter
         {
@@ -401,7 +400,7 @@ public class QueryProcessorFormulaTests
         }
 
         var queryable = products.AsQueryable();
-        var processor = new QueryProcessor(_logger);
+        var processor = new QueryProcessor(logger: null);
 
         var filter = new Filter
         {
@@ -445,7 +444,7 @@ public class QueryProcessorFormulaTests
         // Arrange
         var products = TestDataGenerator.GenerateProducts(20).ToList();
         var queryable = products.AsQueryable();
-        var processor = new QueryProcessor(_logger);
+        var processor = new QueryProcessor(logger: null);
 
         // Create filter: (Price in range [20, 60] AND Category not contains "B") OR Description is blank
         var filter = new Filter
@@ -538,7 +537,7 @@ public class QueryProcessorFormulaTests
         // Arrange
         var products = TestDataGenerator.GenerateProducts(10);
         var queryable = products.AsQueryable();
-        var processor = new QueryProcessor(_logger);
+        var processor = new QueryProcessor(logger: null);
 
         var filter = new Filter
         {
@@ -582,7 +581,7 @@ public class QueryProcessorFormulaTests
         // Arrange
         var products = TestDataGenerator.GenerateProducts(10);
         var queryable = products.AsQueryable();
-        var processor = new QueryProcessor(_logger);
+        var processor = new QueryProcessor(logger: null);
 
         var filter = new Filter
         {
@@ -621,7 +620,7 @@ public class QueryProcessorFormulaTests
             new Product { Id = 4, Name = "Product 4", Rating = null, CreatedDate = DateTime.Now.AddDays(-4) }
         };
         var queryable = products.AsQueryable();
-        var processor = new QueryProcessor(_logger);
+        var processor = new QueryProcessor(logger: null);
 
         var filter = new Filter
         {
