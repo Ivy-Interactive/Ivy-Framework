@@ -125,8 +125,8 @@ const CodeBlock = memo(
         const cleanContent = lines.join('\n'); // Remove any empty lines
 
         return (
-          <div className="relative">
-            <div className="absolute top-2 right-2 z-10">
+          <div className="relative group">
+            <div className="absolute -top-10 right-0 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
               <CopyToClipboardButton textToCopy={cleanContent} />
             </div>
             <ScrollArea className="w-full">
@@ -157,8 +157,8 @@ const CodeBlock = memo(
             </ScrollArea>
           }
         >
-          <div className="relative">
-            <div className="absolute top-2 right-2 z-10">
+          <div className="relative group">
+            <div className="absolute -top-10 right-0 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
               <CopyToClipboardButton textToCopy={content} />
             </div>
             <ScrollArea className="w-full">
