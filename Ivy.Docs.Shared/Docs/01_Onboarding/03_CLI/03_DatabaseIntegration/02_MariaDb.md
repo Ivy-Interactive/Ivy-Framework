@@ -1,5 +1,12 @@
 ---
 title: MariaDB
+searchHints:
+  - mariadb
+  - database
+  - sql
+  - mysql
+  - relational
+  - db
 ---
 
 # MariaDB Database Provider

@@ -1,3 +1,13 @@
+---
+searchHints:
+  - performance
+  - optimization
+  - caching
+  - usememo
+  - usecallback
+  - rendering
+---
+
 # Memoization
 
 <Ingress>

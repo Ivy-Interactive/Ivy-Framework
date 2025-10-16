@@ -1,6 +1,13 @@
 ---
 prepare: |
   var client = this.UseService<IClientProvider>();
+searchHints:
+  - thickness
+  - padding
+  - margin
+  - spacing
+  - borders
+  - layout
 ---
 
 # Thickness

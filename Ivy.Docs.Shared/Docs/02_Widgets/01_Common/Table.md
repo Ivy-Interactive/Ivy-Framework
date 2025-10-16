@@ -1,3 +1,13 @@
+---
+searchHints:
+  - grid
+  - data
+  - rows
+  - columns
+  - cells
+  - table
+---
+
 # Table
 
 <Ingress>

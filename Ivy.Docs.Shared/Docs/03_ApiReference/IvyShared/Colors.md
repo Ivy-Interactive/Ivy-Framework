@@ -1,4 +1,14 @@
-﻿# Colors
+﻿---
+searchHints:
+  - colors
+  - palette
+  - theme
+  - styling
+  - appearance
+  - design
+---
+
+# Colors
 
 Ivy provides predefined colors with light/dark theme support.
 

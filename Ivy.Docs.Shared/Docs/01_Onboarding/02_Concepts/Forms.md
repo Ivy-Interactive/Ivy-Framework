@@ -1,6 +1,13 @@
 ---
 prepare: |
   var client = this.UseService<IClientProvider>();
+searchHints:
+  - input
+  - validation
+  - submission
+  - fields
+  - form
+  - builder
 ---
 
 # Forms

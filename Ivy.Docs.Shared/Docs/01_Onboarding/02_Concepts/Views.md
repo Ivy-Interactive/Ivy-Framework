@@ -1,6 +1,13 @@
 ﻿---
 prepare: |
     var client = this.UseService<IClientProvider>();
+searchHints:
+  - components
+  - viewbase
+  - build
+  - render
+  - lifecycle
+  - composition
 ---
 
 # Views

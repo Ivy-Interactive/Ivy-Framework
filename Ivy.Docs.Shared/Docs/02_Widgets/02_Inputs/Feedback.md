@@ -1,6 +1,13 @@
 ---
 prepare: |
   var client = this.UseService<IClientProvider>();
+searchHints:
+  - rating
+  - stars
+  - review
+  - feedback
+  - score
+  - evaluation
 ---
 
 # FeedbackInput

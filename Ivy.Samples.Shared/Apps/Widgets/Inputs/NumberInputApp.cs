@@ -2,7 +2,7 @@ using Ivy.Shared;
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Inputs;
 
-[App(icon: Icons.DollarSign, path: ["Widgets", "Inputs"])]
+[App(icon: Icons.DollarSign, path: ["Widgets", "Inputs"], searchHints: ["numeric", "integer", "decimal", "number", "money", "currency"])]
 public class NumberInputApp : SampleBase
 {
     protected override object? BuildSample()

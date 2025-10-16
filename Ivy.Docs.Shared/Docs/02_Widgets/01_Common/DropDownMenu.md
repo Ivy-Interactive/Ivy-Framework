@@ -1,6 +1,13 @@
 ﻿---
 prepare: |
   var client = this.UseService<IClientProvider>();
+searchHints:
+  - menu
+  - dropdown
+  - context
+  - options
+  - actions
+  - popup
 ---
 
 # DropDownMenu

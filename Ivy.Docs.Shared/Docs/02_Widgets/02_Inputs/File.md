@@ -1,3 +1,13 @@
+---
+searchHints:
+  - upload
+  - file
+  - attachment
+  - drag-drop
+  - browse
+  - files
+---
+
 # FileInput
 
 <Ingress>

@@ -1,6 +1,12 @@
 ---
 prepare: |
     var client = this.UseService<IClientProvider>();
+searchHints:
+  - tutorial
+  - ai
+  - chat
+  - openai
+  - example
 ---
 
 # Chat Tutorial

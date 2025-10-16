@@ -4,7 +4,7 @@ using Ivy.Widgets.Internal;
 
 namespace Ivy.Samples.Shared.Apps.Demos;
 
-[App(icon: Icons.Code)]
+[App(icon: Icons.Code, searchHints: ["database", "schema", "erd", "modeling", "tables", "relations"])]
 public class DbmlEditorApp : ViewBase
 {
     public override object? Build()

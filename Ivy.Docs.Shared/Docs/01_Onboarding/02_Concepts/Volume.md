@@ -1,3 +1,13 @@
+---
+searchHints:
+  - storage
+  - files
+  - filesystem
+  - data
+  - paths
+  - volume
+---
+
 # Volume
 
 Ivy provides a standardized way to manage application data storage through the `IVolume` interface and `FolderVolume` implementation. This ensures consistent file path handling and proper directory structure for your application's data files.

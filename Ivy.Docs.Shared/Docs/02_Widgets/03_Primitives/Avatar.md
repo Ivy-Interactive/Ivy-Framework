@@ -1,3 +1,13 @@
+---
+searchHints:
+  - profile
+  - user
+  - image
+  - photo
+  - picture
+  - circle
+---
+
 # Avatar
 
 <Ingress>

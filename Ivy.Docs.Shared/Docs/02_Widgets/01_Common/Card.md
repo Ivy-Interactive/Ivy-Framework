@@ -1,6 +1,13 @@
 ﻿---
 prepare: |
   var client = this.UseService<IClientProvider>();
+searchHints:
+  - container
+  - panel
+  - box
+  - section
+  - wrapper
+  - border
 ---
 
 # Card

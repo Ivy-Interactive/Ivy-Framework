@@ -1,4 +1,14 @@
-﻿# Ivy Authentication
+﻿---
+searchHints:
+  - authentication
+  - login
+  - security
+  - auth
+  - oauth
+  - identity
+---
+
+# Ivy Authentication
 
 <Ingress>
 Secure your Ivy application with integrated authentication providers including Auth0, Supabase, Authelia, and Microsoft Entra ID.

@@ -1,4 +1,14 @@
-﻿# Icons
+﻿---
+searchHints:
+  - icons
+  - lucide
+  - symbols
+  - graphics
+  - glyphs
+  - svg
+---
+
+# Icons
 
 Ivy use the [Lucide](https://lucide.dev/icons/) icon library.
 

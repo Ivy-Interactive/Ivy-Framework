@@ -1,3 +1,13 @@
+---
+searchHints:
+  - components
+  - ui
+  - building-blocks
+  - elements
+  - widgets
+  - primitives
+---
+
 # Widgets
 
 <Ingress>

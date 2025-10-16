@@ -1,3 +1,13 @@
+---
+searchHints:
+  - dialog
+  - input
+  - confirmation
+  - user-interaction
+  - modal
+  - prompt
+---
+
 # Prompts
 
 <Ingress>

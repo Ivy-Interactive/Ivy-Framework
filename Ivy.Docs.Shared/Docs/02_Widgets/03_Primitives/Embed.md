@@ -1,3 +1,13 @@
+---
+searchHints:
+  - iframe
+  - external
+  - integration
+  - widget
+  - embed
+  - content
+---
+
 # Embed
 
 <Ingress>

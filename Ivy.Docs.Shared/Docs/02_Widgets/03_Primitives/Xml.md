@@ -1,3 +1,13 @@
+---
+searchHints:
+  - markup
+  - xml
+  - data
+  - format
+  - structure
+  - syntax
+---
+
 # Xml
 
 <Ingress>

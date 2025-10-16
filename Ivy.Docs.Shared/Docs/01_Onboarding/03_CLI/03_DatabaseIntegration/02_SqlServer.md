@@ -1,5 +1,12 @@
 ---
 title: SQL Server
+searchHints:
+  - sqlserver
+  - mssql
+  - database
+  - microsoft
+  - sql
+  - db
 ---
 
 # SQL Server Database Provider

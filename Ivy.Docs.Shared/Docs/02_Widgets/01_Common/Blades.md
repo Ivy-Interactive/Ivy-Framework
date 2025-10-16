@@ -1,3 +1,12 @@
+---
+searchHints:
+  - navigation
+  - panels
+  - sidebar
+  - drawer
+  - stack
+  - master-detail
+---
 
 # Blades
 

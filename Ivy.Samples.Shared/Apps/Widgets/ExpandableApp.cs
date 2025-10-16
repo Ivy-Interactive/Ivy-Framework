@@ -2,7 +2,7 @@ using Ivy.Shared;
 
 namespace Ivy.Samples.Shared.Apps.Widgets;
 
-[App(icon: Icons.ChevronsUpDown)]
+[App(icon: Icons.ChevronsUpDown, searchHints: ["accordion", "collapse", "expand", "toggle", "disclosure", "details"])]
 public class ExpandableApp : SampleBase
 {
     protected override object? BuildSample()
