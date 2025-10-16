@@ -3,7 +3,7 @@ using Ivy.Widgets.Internal;
 
 namespace Ivy.Samples.Shared.Apps.Demos;
 
-[App(icon: Icons.Terminal)]
+[App(icon: Icons.Terminal, searchHints: ["console", "cli", "command-line", "shell", "output", "commands"])]
 public class TerminalApp : ViewBase
 {
     public override object? Build()

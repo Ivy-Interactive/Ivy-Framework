@@ -1,6 +1,13 @@
 ﻿---
 prepare: |
   var client = this.UseService<IClientProvider>();
+searchHints:
+  - click
+  - action
+  - submit
+  - cta
+  - interactive
+  - control
 ---
 
 # Button

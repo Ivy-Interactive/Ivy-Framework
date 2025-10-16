@@ -1,6 +1,13 @@
 ﻿---
 prepare: |
     var client = this.UseService<IClientProvider>();
+searchHints:
+  - fundamentals
+  - views
+  - widgets
+  - state
+  - beginner
+  - basics
 ---
 
 # Basics

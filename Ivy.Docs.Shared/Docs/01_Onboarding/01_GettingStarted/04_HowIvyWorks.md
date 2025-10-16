@@ -1,3 +1,10 @@
+---
+searchHints:
+  - architecture
+  - concepts
+  - websocket
+---
+
 # How Ivy Works
 
 <Ingress>

@@ -1,3 +1,13 @@
+---
+searchHints:
+  - dialog
+  - toast
+  - notification
+  - modal
+  - confirm
+  - message
+---
+
 # Alerts & Notifications
 
 <Ingress>

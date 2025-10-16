@@ -1,3 +1,13 @@
+---
+searchHints:
+  - dropdown
+  - autocomplete
+  - search
+  - async
+  - picker
+  - options
+---
+
 # AsyncSelectInput
 
 <Ingress>

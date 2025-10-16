@@ -1,3 +1,13 @@
+---
+searchHints:
+  - alignment
+  - positioning
+  - center
+  - justify
+  - layout
+  - vertical
+---
+
 # Align
 
 `Align` specifies alignment options for UI elements across the Ivy framework. It is commonly used for aligning content within other widgets such as in `Layout.Horizontal` or `Layout.Vertical`.

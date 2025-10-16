@@ -2,7 +2,7 @@ using Ivy.Shared;
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Primitives;
 
-[App(icon: Icons.Text, path: ["Widgets", "Primitives"])]
+[App(icon: Icons.Type, path: ["Widgets", "Primitives"], searchHints: ["typography", "heading", "paragraph", "label", "text", "content"])]
 public class TextApp : SampleBase
 {
     protected override object? BuildSample()

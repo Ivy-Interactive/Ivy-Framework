@@ -4,7 +4,7 @@ using Ivy.Views.Charts;
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Charts;
 
-[App(icon: Icons.ChartPie)]
+[App(icon: Icons.ChartPie, searchHints: ["visualization", "graph", "analytics", "data", "donut", "statistics"])]
 public class PieChartApp : ViewBase
 {
     public override object? Build()

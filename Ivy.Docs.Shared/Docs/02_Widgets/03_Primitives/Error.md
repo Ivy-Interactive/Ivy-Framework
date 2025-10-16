@@ -1,3 +1,13 @@
+---
+searchHints:
+  - exception
+  - error
+  - failure
+  - crash
+  - debugging
+  - message
+---
+
 # Error
 
 <Ingress>

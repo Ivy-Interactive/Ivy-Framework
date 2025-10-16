@@ -1,4 +1,14 @@
-﻿# Ivy CLI - Overview
+﻿---
+searchHints:
+  - cli
+  - command-line
+  - terminal
+  - tools
+  - commands
+  - ivy-console
+---
+
+# Ivy CLI - Overview
 
 <Ingress>
 Streamline your Ivy development workflow with powerful CLI tools for project initialization, database integration, authentication, and deployment.

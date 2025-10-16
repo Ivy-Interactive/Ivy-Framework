@@ -1,3 +1,13 @@
+---
+searchHints:
+  - keyboard
+  - shortcut
+  - key
+  - hotkey
+  - command
+  - keys
+---
+
 # Kbd
 
 <Ingress>

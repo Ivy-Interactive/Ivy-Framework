@@ -24,7 +24,7 @@ public class LoginForm(IState<LoginData> login) : SampleBase
     }
 }
 
-[App(icon: Icons.Blocks)]
+[App(icon: Icons.Blocks, searchHints: ["components", "reusable", "composition", "nested", "modular", "structure"])]
 public class CompositeViewsApp : ViewBase
 {
     public override object? Build()

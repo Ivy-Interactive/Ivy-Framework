@@ -1,3 +1,13 @@
+---
+searchHints:
+  - calendar
+  - date
+  - picker
+  - range
+  - period
+  - dates
+---
+
 # DateRangeInput
 
 <Ingress>

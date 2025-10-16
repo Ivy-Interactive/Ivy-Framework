@@ -1,3 +1,13 @@
+---
+searchHints:
+  - configuration
+  - environment
+  - security
+  - credentials
+  - api-keys
+  - secrets
+---
+
 # Secrets
 
 <Ingress>

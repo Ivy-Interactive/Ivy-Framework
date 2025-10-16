@@ -2,7 +2,7 @@
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Inputs;
 
-[App(icon: Icons.ThumbsUp, path: ["Widgets", "Inputs"])]
+[App(icon: Icons.ThumbsUp, path: ["Widgets", "Inputs"], searchHints: ["rating", "stars", "review", "feedback", "score", "evaluation"])]
 public class FeedbackInputApp : SampleBase
 {
     protected override object? BuildSample()

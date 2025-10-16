@@ -1,3 +1,13 @@
+---
+searchHints:
+  - browser
+  - client-side
+  - javascript
+  - interop
+  - api
+  - provider
+---
+
 # Clients
 
 <Ingress>

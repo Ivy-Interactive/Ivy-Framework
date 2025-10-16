@@ -3,7 +3,7 @@ using Ivy.Shared;
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Charts;
 
-[App(icon: Icons.ChartBarStacked)]
+[App(icon: Icons.ChartBarStacked, searchHints: ["visualization", "graph", "analytics", "data", "comparison", "statistics"])]
 public class BarChartApp : ViewBase
 {
     public override object? Build()

@@ -1,3 +1,13 @@
+---
+searchHints:
+  - visualization
+  - graph
+  - analytics
+  - data
+  - donut
+  - statistics
+---
+
 # PieChart
 
 `PieChart`s represent parts of a whole. Each slice is drawn from the provided data.

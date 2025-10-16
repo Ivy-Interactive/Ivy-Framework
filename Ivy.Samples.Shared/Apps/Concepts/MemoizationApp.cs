@@ -3,7 +3,7 @@ using Ivy.Shared;
 
 namespace Ivy.Samples.Shared.Apps.Concepts;
 
-[App(icon: Icons.BrainCog)]
+[App(icon: Icons.BrainCog, searchHints: ["caching", "performance", "optimization", "rendering", "efficiency", "memory"])]
 public class MemoizationApp : SampleBase
 {
     protected override object? BuildSample()

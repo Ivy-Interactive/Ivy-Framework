@@ -1,3 +1,13 @@
+---
+searchHints:
+  - numeric
+  - integer
+  - decimal
+  - number
+  - money
+  - currency
+---
+
 # NumberInput
 
 <Ingress>

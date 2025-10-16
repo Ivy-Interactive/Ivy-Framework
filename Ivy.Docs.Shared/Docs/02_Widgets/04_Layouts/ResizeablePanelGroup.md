@@ -1,3 +1,13 @@
+---
+searchHints:
+  - split
+  - resizable
+  - panels
+  - divider
+  - adjustable
+  - layout
+---
+
 # ResizeablePanelGroup
 
 <Ingress>

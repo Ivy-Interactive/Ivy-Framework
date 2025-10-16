@@ -3,7 +3,7 @@ using Ivy.Shared;
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Primitives;
 
-[App(icon: Icons.Braces, path: ["Widgets", "Primitives"])]
+[App(icon: Icons.Braces, path: ["Widgets", "Primitives"], searchHints: ["data", "format", "json", "syntax", "structure", "object"])]
 public class JsonApp : SampleBase
 {
     protected override object? BuildSample()

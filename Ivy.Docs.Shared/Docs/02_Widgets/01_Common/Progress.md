@@ -1,6 +1,13 @@
 ﻿---
 prepare: |
   var client = this.UseService<IClientProvider>();
+searchHints:
+  - loading
+  - percentage
+  - bar
+  - indicator
+  - status
+  - completion
 ---
 
 # Progress

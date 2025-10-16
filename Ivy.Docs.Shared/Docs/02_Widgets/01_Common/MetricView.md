@@ -1,6 +1,13 @@
 ---
 prepare: |
   var client = this.UseService<IClientProvider>();
+searchHints:
+  - kpi
+  - metrics
+  - dashboard
+  - statistics
+  - analytics
+  - performance
 ---
 
 # MetricView

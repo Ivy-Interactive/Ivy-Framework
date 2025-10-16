@@ -1,3 +1,13 @@
+---
+searchHints:
+  - lucide
+  - symbols
+  - graphics
+  - glyphs
+  - svg
+  - icons
+---
+
 # Icon
 
 <Ingress>

@@ -2,7 +2,7 @@ using Ivy.Shared;
 
 namespace Ivy.Samples.Shared.Apps.Demos;
 
-[App(icon: Icons.PartyPopper, title: "Hello")]
+[App(icon: Icons.PartyPopper, title: "Hello", searchHints: ["welcome", "getting-started", "introduction", "first", "tutorial", "example"])]
 public class HelloApp : ViewBase
 {
     public override object? Build()

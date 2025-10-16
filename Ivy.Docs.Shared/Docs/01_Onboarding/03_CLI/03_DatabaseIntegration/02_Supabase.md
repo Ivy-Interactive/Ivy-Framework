@@ -1,3 +1,13 @@
+---
+searchHints:
+  - supabase
+  - database
+  - postgres
+  - backend
+  - cloud
+  - db
+---
+
 # Supabase Database Provider
 
 <Ingress>

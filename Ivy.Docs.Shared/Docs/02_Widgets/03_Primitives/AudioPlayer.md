@@ -1,3 +1,13 @@
+---
+searchHints:
+  - sound
+  - playback
+  - media
+  - mp3
+  - music
+  - audio
+---
+
 # Audio Player
 
 <Ingress>

@@ -1,3 +1,13 @@
+---
+searchHints:
+  - markup
+  - html
+  - custom
+  - raw
+  - embedded
+  - content
+---
+
 # Html
 
 <Ingress>

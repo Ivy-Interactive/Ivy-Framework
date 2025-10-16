@@ -1,3 +1,13 @@
+---
+searchHints:
+  - wrapper
+  - container
+  - grouping
+  - fragment
+  - virtual
+  - invisible
+---
+
 # Fragment
 
 <Ingress>

@@ -1,4 +1,14 @@
-﻿# Content Builders
+﻿---
+searchHints:
+  - formatting
+  - rendering
+  - transform
+  - display
+  - middleware
+  - custom
+---
+
+# Content Builders
 
 <Ingress>
 Flexible system for transforming and formatting content for display in Ivy.

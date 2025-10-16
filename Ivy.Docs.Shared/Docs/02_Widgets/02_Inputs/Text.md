@@ -1,9 +1,13 @@
 ---
-
 prepare: |
-
   var client = this.UseService<IClientProvider>();
-
+searchHints:
+  - input
+  - textbox
+  - password
+  - textarea
+  - email
+  - search
 ---
 
 
