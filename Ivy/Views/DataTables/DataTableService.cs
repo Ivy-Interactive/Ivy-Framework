@@ -1,7 +1,11 @@
 using Grpc.Core;
+using Ivy.Filters;
 using Ivy.Protos.DataTable;
+using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using OpenAI.Chat;
 
 //todo: Check for JWT
 //todo: We need the Widget
@@ -14,7 +18,7 @@ public class TableService(
     IDistributedCache? cache = null)
     : DataTableService.DataTableServiceBase
 {
-    public override Task<DataTableResult> Query(DataTableQuery request, ServerCallContext context)
+    public override async Task<DataTableResult> Query(DataTableQuery request, ServerCallContext context)
     {
         try
         {
@@ -29,21 +33,55 @@ public class TableService(
                 throw new RpcException(new Status(StatusCode.NotFound, $"Queryable '{request.SourceId}' not found."));
             }
 
-            // TODO: If filter has invalid_query set, use FilterParserAgent to convert it
-            // This requires:
-            // 1. Adding Ivy.Filters project reference
-            // 2. Injecting IChatClient into the constructor
-            // 3. Calling ProcessInvalidQuery(request, queryable) here
+            DataTableQuery queryToUse = request;
+
             if (request.Filter != null && !string.IsNullOrWhiteSpace(request.Filter.InvalidQuery))
             {
-                logger?.LogWarning("Invalid query detected but agent processing not implemented: {Query}",
-                    request.Filter.InvalidQuery);
-                throw new RpcException(new Status(StatusCode.InvalidArgument,
-                    $"Invalid filter query: {request.Filter.InvalidQuery}. Agent conversion not yet configured."));
+                var configuration = new ConfigurationBuilder()
+                    .AddUserSecrets<TableService>()
+                    .Build();
+
+                var endpoint = configuration["OpenAi:Endpoint"] ?? throw new InvalidOperationException("OpenAi:Endpoint not found in user secrets");
+                var apiKey = configuration["OpenAi:ApiKey"] ?? throw new InvalidOperationException("OpenAi:ApiKey not found in user secrets");
+
+                // Create OpenAI client
+                var openAiClient = new OpenAIClient(new System.ClientModel.ApiKeyCredential(apiKey), new OpenAIClientOptions
+                {
+                    Endpoint = new Uri(endpoint)
+                });
+
+                // Convert OpenAI ChatClient to IChatClient
+                var openAIChatClient = openAiClient.GetChatClient("gpt-4o");
+                var chatClient = openAIChatClient.AsIChatClient();
+
+                var agent = new FilterParserAgent(chatClient, logger);
+                var agentResult = await agent.Parse(request.Filter.InvalidQuery, queryable.ElementType.GetProperties().Select(p => new FieldMeta(p.Name, p.PropertyType)).ToArray());
+
+                if (agentResult.HasErrors || agentResult.Model == null)
+                {
+                    var errorMessage = agentResult.Diagnostics.FirstOrDefault()?.Message ?? "Failed to parse filter query";
+                    throw new RpcException(new Status(StatusCode.InvalidArgument, $"Invalid filter query: {errorMessage}"));
+                }
+
+                // Convert the FilterModel to protobuf Filter
+                var protoFilter = ConvertFilterModelToProto(agentResult.Model);
+
+                // Create new query with the converted filter
+                queryToUse = new DataTableQuery
+                {
+                    SourceId = request.SourceId,
+                    ConnectionId = request.ConnectionId,
+                    Filter = protoFilter,
+                    Offset = request.Offset,
+                    Limit = request.Limit
+                };
+                queryToUse.Sort.AddRange(request.Sort);
+                queryToUse.SelectColumns.AddRange(request.SelectColumns);
+                queryToUse.Aggregations.AddRange(request.Aggregations);
             }
 
             var queryProcessor = new QueryProcessor(logger: null, cache: cache);
-            var queryResult = queryProcessor.ProcessQuery(queryable, request);
+            var queryResult = queryProcessor.ProcessQuery(queryable, queryToUse);
 
             var tableResult = new DataTableResult
             {
@@ -53,7 +91,7 @@ public class TableService(
                 TotalRows = queryResult.TotalRows
             };
 
-            return Task.FromResult(tableResult);
+            return tableResult;
         }
         catch (RpcException)
         {
@@ -64,38 +102,6 @@ public class TableService(
             throw new RpcException(new Status(StatusCode.Internal, $"Internal server error: {ex.Message}"));
         }
     }
-
-    // TODO: Uncomment and implement when Ivy.Filters is available
-    // private async Task ProcessInvalidQuery(DataTableQuery request, IQueryable queryable)
-    // {
-    //     var invalidQuery = request.Filter!.InvalidQuery;
-    //     logger?.LogInformation("Processing invalid query with agent: {Query}", invalidQuery);
-    //
-    //     if (chatClient == null)
-    //     {
-    //         throw new RpcException(new Status(StatusCode.InvalidArgument,
-    //             "Invalid filter query and no AI chat client configured for conversion."));
-    //     }
-    //
-    //     // Extract fields from queryable
-    //     var fields = ExtractFieldsFromQueryable(queryable);
-    //
-    //     // Use agent to convert the invalid query
-    //     var agent = new FilterParserAgent(chatClient, logger);
-    //     var agentResult = await agent.Parse(invalidQuery, fields);
-    //
-    //     if (agentResult.HasErrors || agentResult.Model == null)
-    //     {
-    //         var errorMessage = string.Join(", ", agentResult.Diagnostics.Select(d => d.Message));
-    //         logger?.LogError("Agent failed to convert query: {Errors}", errorMessage);
-    //         throw new RpcException(new Status(StatusCode.InvalidArgument,
-    //             $"Could not parse filter query: {errorMessage}"));
-    //     }
-    //
-    //     // Replace the filter with the agent-converted one
-    //     request.Filter = agentResult.Model;
-    //     logger?.LogInformation("Successfully converted invalid query using agent");
-    // }
 
     public override Task<DataTableValuesResult> Values(DataTableValuesQuery request, ServerCallContext context)
     {
@@ -131,5 +137,32 @@ public class TableService(
         {
             throw new RpcException(new Status(StatusCode.Internal, $"Internal server error: {ex.Message}"));
         }
+    }
+
+    private static Filter ConvertFilterModelToProto(FilterModel model)
+    {
+        return model switch
+        {
+            GroupFilterModel group => new Filter
+            {
+                Group = new FilterGroup
+                {
+                    Op = group.Type.ToUpperInvariant() == "AND"
+                        ? FilterGroup.Types.LogicalOperator.And
+                        : FilterGroup.Types.LogicalOperator.Or,
+                    Filters = { group.Conditions.Select(ConvertFilterModelToProto) }
+                }
+            },
+            FieldFilterModel field => new Filter
+            {
+                Condition = new Condition
+                {
+                    Column = field.ColId,
+                    Function = field.Type,
+                    Args = { field.Filter != null ? [Google.Protobuf.WellKnownTypes.Any.Pack(new Google.Protobuf.WellKnownTypes.StringValue { Value = field.Filter.ToString() ?? "" })] : [] }
+                }
+            },
+            _ => throw new ArgumentException($"Unknown filter model type: {model.GetType().Name}")
+        };
     }
 }
