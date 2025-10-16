@@ -192,23 +192,7 @@ public class FormBuilder<TModel> : ViewBase
             var nonNullableType = Nullable.GetUnderlyingType(field.Type) ?? field.Type;
             if (field.Name.EndsWith("Email") && nonNullableType == typeof(string))
             {
-                field.Validators.Add(email =>
-                {
-                    if (email is not string emailStr || string.IsNullOrWhiteSpace(emailStr))
-                        return (true, ""); // Empty is handled by Required validator
-
-                    // Use EmailAddressAttribute for proper email validation
-                    var emailValidator = new System.ComponentModel.DataAnnotations.EmailAddressAttribute();
-                    var validationContext = new System.ComponentModel.DataAnnotations.ValidationContext(new { })
-                    {
-                        MemberName = field.Name,
-                        DisplayName = field.Name
-                    };
-                    var result = emailValidator.GetValidationResult(emailStr, validationContext);
-                    return result == System.ComponentModel.DataAnnotations.ValidationResult.Success
-                        ? (true, "")
-                        : (false, result?.ErrorMessage ?? "Please enter a valid email address");
-                });
+                field.Validators.Add(FormHelpers.CreateEmailValidator(field.Name));
             }
         }
     }

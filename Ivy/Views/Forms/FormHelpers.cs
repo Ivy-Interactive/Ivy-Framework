@@ -3,27 +3,17 @@ using System.Reflection;
 
 namespace Ivy.Views.Forms;
 
-/// <summary>
-/// Utility methods for determining field requirements during form scaffolding.
-/// </summary>
+/// <summary>Utility methods for determining field requirements during form scaffolding. </summary>
 public static class FormHelpers
 {
-    /// <summary>
-    /// Determines if a property should be required based on [Required] attribute or non-nullable string type.
-    /// </summary>
-    /// <param name="propertyInfo">The property to analyze.</param>
-    /// <returns>True if the property should be required.</returns>
+    /// <summary> Determines if a property should be required based on [Required] attribute or non-nullable string type.</summary>
     public static bool IsRequired(PropertyInfo propertyInfo)
     {
         if (propertyInfo.GetCustomAttribute<RequiredAttribute>() != null) return true;
         return IsNonNullableString(propertyInfo);
     }
 
-    /// <summary>
-    /// Gets all validators from DataAnnotations ValidationAttributes on a property.
-    /// </summary>
-    /// <param name="propertyInfo">The property to analyze.</param>
-    /// <returns>List of validator functions.</returns>
+    /// <summary> Gets all validators from DataAnnotations ValidationAttributes on a property. </summary> 
     public static List<Func<object?, (bool, string)>> GetValidators(PropertyInfo propertyInfo)
     {
         var validators = new List<Func<object?, (bool, string)>>();
@@ -57,11 +47,7 @@ public static class FormHelpers
         return validators;
     }
 
-    /// <summary>
-    /// Gets all validators from DataAnnotations ValidationAttributes on a field.
-    /// </summary>
-    /// <param name="fieldInfo">The field to analyze.</param>
-    /// <returns>List of validator functions.</returns>
+    /// <summary> Gets all validators from DataAnnotations ValidationAttributes on a field. </summary>
     public static List<Func<object?, (bool, string)>> GetValidators(FieldInfo fieldInfo)
     {
         var validators = new List<Func<object?, (bool, string)>>();
@@ -96,9 +82,6 @@ public static class FormHelpers
         return validators;
     }
 
-    /// <summary>
-    /// Checks if a property is a non-nullable string using nullability context.
-    /// </summary>
     private static bool IsNonNullableString(PropertyInfo propertyInfo)
     {
         if (propertyInfo.PropertyType != typeof(string)) return false;
@@ -107,26 +90,47 @@ public static class FormHelpers
         return nullabilityInfo.ReadState != NullabilityState.Nullable;
     }
 
-    /// <summary>
-    /// Determines if a field should be required based on [Required] attribute or non-nullable string type.
-    /// </summary>
-    /// <param name="fieldInfo">The field to analyze.</param>
-    /// <returns>True if the field should be required.</returns>
+    /// <summary> Determines if a field should be required based on [Required] attribute or non-nullable string type. </summary>
     public static bool IsRequired(FieldInfo fieldInfo)
     {
         if (fieldInfo.GetCustomAttribute<RequiredAttribute>() != null) return true;
         return IsNonNullableString(fieldInfo);
     }
 
-    /// <summary>
-    /// Checks if a field is a non-nullable string using nullability context.
-    /// </summary>
     private static bool IsNonNullableString(FieldInfo fieldInfo)
     {
         if (fieldInfo.FieldType != typeof(string)) return false;
         var nullabilityContext = new NullabilityInfoContext();
         var nullabilityInfo = nullabilityContext.Create(fieldInfo);
         return nullabilityInfo.ReadState != NullabilityState.Nullable;
+    }
+
+    /// <summary> Creates an email validator using EmailAddressAttribute for proper email validation. </summary>
+    public static Func<object?, (bool, string)> CreateEmailValidator(string fieldName)
+    {
+        var emailValidator = new EmailAddressAttribute();
+        return email =>
+        {
+            if (email is not string emailStr || string.IsNullOrWhiteSpace(emailStr))
+                return (true, ""); // Empty is handled by Required validator
+
+            try
+            {
+                var validationContext = new ValidationContext(new { })
+                {
+                    MemberName = fieldName,
+                    DisplayName = fieldName
+                };
+                var result = emailValidator.GetValidationResult(emailStr, validationContext);
+                return result == ValidationResult.Success
+                    ? (true, "")
+                    : (false, result?.ErrorMessage ?? "Please enter a valid email address");
+            }
+            catch
+            {
+                return (false, "Please enter a valid email address");
+            }
+        };
     }
 }
 
