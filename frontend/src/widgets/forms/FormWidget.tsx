@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { useEventHandler } from '@/components/event-handler';
+import { logger } from '@/lib/logger';
 
 interface FormWidgetProps {
   id: string;
@@ -43,6 +44,9 @@ export const FormWidget: React.FC<FormWidgetProps> = ({ id, children }) => {
           nextInput.focus();
         } else {
           // We're on the last field - send submit event to backend
+          logger.info(`Form submit triggered via Enter key on last field`, {
+            formId: id,
+          });
           eventHandler('HandleSubmit', id, []);
         }
       }
