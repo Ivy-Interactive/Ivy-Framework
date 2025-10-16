@@ -74,10 +74,8 @@ public class FormBuilderField<TModel>
     /// <summary>Name of field, typically matching property or field name in model.</summary>
     public string Name { get; set; }
 
-    /// <summary>Reflection information for field if it represents class field.</summary>
     private FieldInfo? FieldInfo { get; set; }
 
-    /// <summary>Reflection information for property if it represents class property.</summary>
     private PropertyInfo? PropertyInfo { get; set; }
 
     /// <summary>Type of field or property that this form field represents.</summary>
@@ -121,17 +119,13 @@ public class FormBuilderField<TModel>
 /// <typeparam name="TModel">Type of model object that form will edit.</typeparam>
 public class FormBuilder<TModel> : ViewBase
 {
-    /// <summary>The internal dictionary that stores field configurations indexed by field name.</summary>
     private readonly Dictionary<string, FormBuilderField<TModel>> _fields;
 
-    /// <summary>The reactive state that holds the model being edited by the form.</summary>
     private readonly IState<TModel> _model;
 
     /// <summary>The text displayed on the form's submit button.</summary>
     public readonly string SubmitTitle;
-
-    /// <summary>The list of group names that have been defined for organizing fields.</summary>
-    private readonly List<string> _groups = new();
+    private readonly List<string> _groups = [];
 
     /// <summary>The validation strategy for form fields. Default is OnBlur.</summary>
     public FormValidationStrategy ValidationStrategy { get; set; } = FormValidationStrategy.OnBlur;
@@ -143,11 +137,10 @@ public class FormBuilder<TModel> : ViewBase
     {
         _model = model;
         SubmitTitle = submitTitle;
-        _fields = new Dictionary<string, FormBuilderField<TModel>>();
+        _fields = [];
         _Scaffold();
     }
 
-    /// <summary>Automatically discovers and configures form fields by inspecting model type using reflection.</summary>
     private void _Scaffold()
     {
         var type = _model.GetStateType();
@@ -197,10 +190,6 @@ public class FormBuilder<TModel> : ViewBase
         }
     }
 
-    /// <summary>Creates appropriate input factory based on field name and type using intelligent heuristics.</summary>
-    /// <param name="name">Name of field, used for pattern matching (e.g., "Email", "Password", "Id").</param>
-    /// <param name="type">Type of field, used for type-based input selection.</param>
-    /// <returns>Input factory function creating appropriate input control, or null if no suitable input found.</returns>
     private Func<IAnyState, IAnyInput>? ScaffoldEditor(string name, Type type)
     {
         Type nonNullableType = Nullable.GetUnderlyingType(type) ?? type;
@@ -646,6 +635,7 @@ public class FormBuilder<TModel> : ViewBase
                | Layout.Horizontal(new Button(SubmitTitle).HandleClick(HandleSubmit)
                    .Loading(submitting).Disabled(submitting), validationView);
     }
+
     private static string InvalidMessage(int invalidFields)
     {
         return invalidFields == 1 ? "There is 1 invalid field." : $"There are {invalidFields} invalid fields.";
