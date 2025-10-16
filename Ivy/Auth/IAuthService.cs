@@ -49,12 +49,12 @@ public interface IAuthService
     AuthOption[] GetAuthOptions();
 
     /// <summary>
-    /// Checks whether the current authentication token has expired and refreshes it if necessary.
+    /// Refreshes the current authentication token.
     /// </summary>
     /// <returns>
-    /// The existing or refreshed authentication token if valid; otherwise, null.
+    /// The refreshed authentication token if successful; otherwise, null.
     /// </returns>
-    Task<AuthToken?> RefreshTokenAsync();
+    Task<AuthToken?> RefreshAccessTokenAsync();
 
     /// <summary>
     /// Gets the current authentication token.

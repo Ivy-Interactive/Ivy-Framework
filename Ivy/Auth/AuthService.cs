@@ -89,20 +89,16 @@ public class AuthService(IAuthProvider authProvider, AuthToken? token = null) : 
     }
 
     /// <summary>
-    /// Checks whether the current authentication token has expired and refreshes it if necessary.
+    /// Refreshes the current authentication token.
     /// </summary>
     /// <returns>
-    /// The existing or refreshed authentication token if valid; otherwise, null.
+    /// The refreshed authentication token if successful; otherwise, null.
     /// </returns>
-    public async Task<AuthToken?> RefreshTokenAsync()
+    public async Task<AuthToken?> RefreshAccessTokenAsync()
     {
-        if (!string.IsNullOrEmpty(_token?.AccessToken))
+        if (_token != null)
         {
             _token = await authProvider.RefreshAccessTokenAsync(_token);
-            if (!string.IsNullOrEmpty(_token?.AccessToken) && !await authProvider.ValidateAccessTokenAsync(_token.AccessToken))
-            {
-                _token = null;
-            }
         }
 
         return _token;

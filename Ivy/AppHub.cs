@@ -106,7 +106,18 @@ public class AppHub(
                 var authService = new AuthService(authProvider!, oldAuthToken);
                 appServices.AddSingleton<IAuthService>(s => authService);
 
-                var authToken = await authService.RefreshTokenAsync();
+                AuthToken? authToken = oldAuthToken;
+                if (!string.IsNullOrEmpty(oldAuthToken?.AccessToken))
+                {
+                    if (!await authProvider.ValidateAccessTokenAsync(oldAuthToken.AccessToken))
+                    {
+                        authToken = await authService.RefreshAccessTokenAsync();
+                    }
+                }
+                else
+                {
+                    authToken = null;
+                }
 
                 if (authToken != oldAuthToken)
                 {
@@ -264,17 +275,43 @@ public class AppHub(
                     continue;
                 }
 
-                var newToken = await authService.RefreshTokenAsync();
-                var expiresAt = newToken != null
+                DateTimeOffset? expiresAt;
+                var refreshNeeded = false;
+                if (await authProvider.ValidateAccessTokenAsync(oldToken.AccessToken))
+                {
+                    expiresAt = await authProvider.GetTokenExpiration(oldToken);
+                    if (expiresAt == null || expiresAt < DateTimeOffset.UtcNow.AddMinutes(2))
+                    {
+                        refreshNeeded = true;
+                    }
+                }
+                else
+                {
+                    refreshNeeded = true;
+                }
+
+                AuthToken? newToken = oldToken;
+                if (refreshNeeded)
+                {
+                    newToken = await authService.RefreshAccessTokenAsync();
+                }
+                expiresAt = newToken != null
                     ? await authProvider.GetTokenExpiration(newToken)
                     : null;
-                var reloadPage = string.IsNullOrEmpty(newToken?.AccessToken);
-                if (expiresAt != null && expiresAt <= DateTimeOffset.UtcNow)
+
+                var earliestWake = DateTimeOffset.UtcNow.AddMinutes(5);
+                var latestWake = DateTimeOffset.UtcNow.AddMinutes(30);
+                var nextUpdate = expiresAt?.AddMinutes(-2) ?? DateTimeOffset.UtcNow.AddMinutes(15);
+                if (nextUpdate < earliestWake)
                 {
-                    // If the token was expired and couldn't be refreshed, then RefreshTokenAsync should've returned null.
-                    logger.LogError("Token expiration time is in the past.");
-                    reloadPage = true;
+                    nextUpdate = earliestWake;
                 }
+                if (nextUpdate > latestWake)
+                {
+                    nextUpdate = latestWake;
+                }
+
+                var reloadPage = string.IsNullOrEmpty(newToken?.AccessToken);
 
                 if (oldToken != newToken)
                 {
@@ -297,9 +334,8 @@ public class AppHub(
                     return;
                 }
 
-                var refreshAt = expiresAt ?? DateTimeOffset.UtcNow.AddMinutes(15);
-                Console.WriteLine("AuthRefreshLoop: Token valid, will be refreshed at {0}, waiting...", refreshAt);
-                await Task.Delay(refreshAt - DateTimeOffset.UtcNow, abort);
+                Console.WriteLine("AuthRefreshLoop: next update at {0}...", nextUpdate);
+                await Task.Delay(nextUpdate - DateTimeOffset.UtcNow, abort);
             }
         }
         catch (Exception ex)
