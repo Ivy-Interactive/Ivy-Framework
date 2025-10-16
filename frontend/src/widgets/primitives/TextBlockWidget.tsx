@@ -40,6 +40,8 @@ interface TextBlockWidgetProps {
   overflow?: Overflow;
 }
 
+type ProcessedContent = React.ReactNode;
+
 interface VariantMap {
   [key: string]: React.FC<{
     children: React.ReactNode;
@@ -215,6 +217,14 @@ const variantMap: VariantMap = {
   ),
 };
 
+// Enhanced URL regex that handles punctuation better and supports more protocols
+const URL_REGEX =
+  /(https?:\/\/[^\s<>"]+[^\s<>".,!;:?])|(ftp:\/\/[^\s<>"]+[^\s<>".,!;:?])|(mailto:[^\s<>"]+[^\s<>".,!;:?])|(tel:[^\s<>"]+[^\s<>".,!;:?])/gi;
+
+const isUrl = (text: string): boolean => {
+  return /^(https?:\/\/|ftp:\/\/|mailto:|tel:)/i.test(text);
+};
+
 export const TextBlockWidget: React.FC<TextBlockWidgetProps> = ({
   content,
   variant,
@@ -230,24 +240,28 @@ export const TextBlockWidget: React.FC<TextBlockWidgetProps> = ({
     ...getOverflow(overflow),
   };
 
-  // Auto-convert URLs to clickable links
-  const processedContent = content
-    .split(/(https?:\/\/[^\s]+)/gi)
-    .map((part, index) =>
-      /^https?:\/\//i.test(part) ? (
-        <a
-          key={index}
-          href={part}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-primary underline brightness-90 hover:brightness-100"
-        >
-          {part}
-        </a>
-      ) : (
-        part
-      )
-    );
+  // Memoized URL processing for performance optimization
+  const processedContent: ProcessedContent = React.useMemo(() => {
+    return content.split(URL_REGEX).map((part, index) => {
+      if (isUrl(part)) {
+        const isExternalLink = /^https?:\/\//i.test(part);
+
+        return (
+          <a
+            key={index}
+            href={part}
+            target={isExternalLink ? '_blank' : undefined}
+            rel={isExternalLink ? 'noopener noreferrer' : undefined}
+            className="text-primary underline brightness-90 hover:brightness-100 transition-all duration-150"
+            aria-label={isExternalLink ? `External link: ${part}` : undefined}
+          >
+            {part}
+          </a>
+        );
+      }
+      return part;
+    });
+  }, [content]);
 
   const Component = variantMap[variant];
   return (
