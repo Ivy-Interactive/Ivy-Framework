@@ -5,6 +5,7 @@ using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using OpenAI;
 using OpenAI.Chat;
 
 //todo: Check for JWT
@@ -57,21 +58,18 @@ public class TableService(
                 var agent = new FilterParserAgent(chatClient, logger);
                 var agentResult = await agent.Parse(request.Filter.InvalidQuery, queryable.ElementType.GetProperties().Select(p => new FieldMeta(p.Name, p.PropertyType)).ToArray());
 
-                if (agentResult.HasErrors || agentResult.Model == null)
+                if (agentResult.HasErrors || agentResult.ProtoFilter == null)
                 {
                     var errorMessage = agentResult.Diagnostics.FirstOrDefault()?.Message ?? "Failed to parse filter query";
                     throw new RpcException(new Status(StatusCode.InvalidArgument, $"Invalid filter query: {errorMessage}"));
                 }
 
-                // Convert the FilterModel to protobuf Filter
-                var protoFilter = ConvertFilterModelToProto(agentResult.Model);
-
-                // Create new query with the converted filter
+                // Use the agent's parsed filter
                 queryToUse = new DataTableQuery
                 {
                     SourceId = request.SourceId,
                     ConnectionId = request.ConnectionId,
-                    Filter = protoFilter,
+                    Filter = (Filter)agentResult.ProtoFilter,
                     Offset = request.Offset,
                     Limit = request.Limit
                 };
@@ -137,32 +135,5 @@ public class TableService(
         {
             throw new RpcException(new Status(StatusCode.Internal, $"Internal server error: {ex.Message}"));
         }
-    }
-
-    private static Filter ConvertFilterModelToProto(FilterModel model)
-    {
-        return model switch
-        {
-            GroupFilterModel group => new Filter
-            {
-                Group = new FilterGroup
-                {
-                    Op = group.Type.ToUpperInvariant() == "AND"
-                        ? FilterGroup.Types.LogicalOperator.And
-                        : FilterGroup.Types.LogicalOperator.Or,
-                    Filters = { group.Conditions.Select(ConvertFilterModelToProto) }
-                }
-            },
-            FieldFilterModel field => new Filter
-            {
-                Condition = new Condition
-                {
-                    Column = field.ColId,
-                    Function = field.Type,
-                    Args = { field.Filter != null ? [Google.Protobuf.WellKnownTypes.Any.Pack(new Google.Protobuf.WellKnownTypes.StringValue { Value = field.Filter.ToString() ?? "" })] : [] }
-                }
-            },
-            _ => throw new ArgumentException($"Unknown filter model type: {model.GetType().Name}")
-        };
     }
 }
