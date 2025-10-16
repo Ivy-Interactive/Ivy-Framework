@@ -116,16 +116,7 @@ When you run `ivy deploy` without specifying options, Ivy will guide you through
 
 **Sliplane Services Used** - Container hosting and deployment, automated SSL/TLS certificates, load balancing and traffic routing, and automated health checks and monitoring.
 
-**Sliplane Setup Prerequisites** - Create a Sliplane account at [sliplane.io](https://sliplane.io), generate an API key from your Sliplane dashboard, and optionally create a server in your Sliplane dashboard (or let Ivy create one automatically).
-
-**Getting Your API Key**
-
-```terminal
-# 1. Login to your Sliplane dashboard
-# 2. Navigate to Settings > API Keys
-# 3. Click "Create API Key"
-# 4. Copy the generated key for use in deployment
-```
+**Sliplane Setup Prerequisites** - Create a Sliplane account, generate an API key from your Sliplane dashboard, and optionally create a server in your Sliplane dashboard (or let Ivy create one automatically).
 
 ### Deployment Process
 
@@ -273,7 +264,6 @@ ASPNETCORE_ENVIRONMENT="Production"
 ```terminal
 >ivy deploy
 # Select Sliplane
-# Enter your Sliplane API key
 # Configure server and deployment settings
 ```
 
