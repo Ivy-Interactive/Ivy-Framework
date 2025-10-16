@@ -11,6 +11,7 @@ import { getIconImage, isValidIconName } from './iconRenderer';
 export interface IconCellData {
   kind: 'icon-cell';
   iconName: string;
+  align?: 'left' | 'center' | 'right';
 }
 
 /**
@@ -31,6 +32,7 @@ export const iconCellRenderer: CustomRenderer<IconCell> = {
   draw: (args, cell) => {
     const { ctx, rect, theme } = args;
     const iconName = cell.data?.iconName;
+    const align = cell.data?.align || 'left';
 
     if (!iconName) return false;
 
@@ -39,11 +41,13 @@ export const iconCellRenderer: CustomRenderer<IconCell> = {
       // Draw error indicator for invalid icon
       ctx.fillStyle = theme.textDark;
       ctx.font = '12px sans-serif';
-      ctx.fillText(
-        '?',
-        rect.x + rect.width / 2 - 4,
-        rect.y + rect.height / 2 + 4
-      );
+      const errorX =
+        align === 'center'
+          ? rect.x + rect.width / 2 - 4
+          : align === 'right'
+            ? rect.x + rect.width - 20
+            : rect.x + 16;
+      ctx.fillText('?', errorX, rect.y + rect.height / 2 + 4);
       return true;
     }
 
@@ -55,24 +59,47 @@ export const iconCellRenderer: CustomRenderer<IconCell> = {
     });
 
     if (iconImage && iconImage.complete) {
-      // Draw the icon centered in the cell
+      // Draw the icon with specified alignment
       const iconSize = 20;
-      const x = rect.x + (rect.width - iconSize) / 2;
+      const padding = 16;
+      let x: number;
+
+      switch (align) {
+        case 'center':
+          x = rect.x + (rect.width - iconSize) / 2;
+          break;
+        case 'right':
+          x = rect.x + rect.width - iconSize - padding;
+          break;
+        case 'left':
+        default:
+          x = rect.x + padding;
+      }
+
       const y = rect.y + (rect.height - iconSize) / 2;
       ctx.drawImage(iconImage, x, y, iconSize, iconSize);
       return true;
     }
 
-    // If image is not complete, draw placeholder
+    // If image is not complete, draw placeholder with specified alignment
+    const padding = 16;
+    let centerX: number;
+
+    switch (align) {
+      case 'center':
+        centerX = rect.x + rect.width / 2;
+        break;
+      case 'right':
+        centerX = rect.x + rect.width - padding - 10;
+        break;
+      case 'left':
+      default:
+        centerX = rect.x + padding + 10;
+    }
+
     ctx.fillStyle = theme.textMedium;
     ctx.beginPath();
-    ctx.arc(
-      rect.x + rect.width / 2,
-      rect.y + rect.height / 2,
-      4,
-      0,
-      2 * Math.PI
-    );
+    ctx.arc(centerX, rect.y + rect.height / 2, 4, 0, 2 * Math.PI);
     ctx.fill();
 
     return true;

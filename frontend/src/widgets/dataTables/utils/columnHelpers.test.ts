@@ -5,6 +5,7 @@ import {
   convertToGridColumns,
 } from './columnHelpers';
 import type { DataColumn } from '../types/types';
+import { ColType } from '../types/types';
 
 describe('columnHelpers', () => {
   describe('getColumnTypeIcon', () => {
@@ -39,10 +40,10 @@ describe('columnHelpers', () => {
 
   describe('reorderColumns', () => {
     const mockColumns: DataColumn[] = [
-      { name: 'First', type: 'string', width: 100 },
-      { name: 'Second', type: 'int64', width: 100 },
-      { name: 'Third', type: 'bool', width: 100 },
-      { name: 'Fourth', type: 'date', width: 100 },
+      { name: 'First', type: ColType.Text, width: 100 },
+      { name: 'Second', type: ColType.Number, width: 100 },
+      { name: 'Third', type: ColType.Boolean, width: 100 },
+      { name: 'Fourth', type: ColType.Date, width: 100 },
     ];
 
     it('should move column from start to middle', () => {
@@ -89,10 +90,10 @@ describe('columnHelpers', () => {
 
   describe('convertToGridColumns', () => {
     const mockColumns: DataColumn[] = [
-      { name: 'ID', type: 'int64', width: 80 },
-      { name: 'Name', type: 'string', width: 150 },
-      { name: 'Status', type: 'bool', width: 100 },
-      { name: 'Created', type: 'date', width: 120 },
+      { name: 'ID', type: ColType.Number, width: 80 },
+      { name: 'Name', type: ColType.Text, width: 150 },
+      { name: 'Status', type: ColType.Boolean, width: 100 },
+      { name: 'Created', type: ColType.Date, width: 120 },
     ];
 
     it('should convert columns to grid columns without reordering', () => {
@@ -183,9 +184,14 @@ describe('columnHelpers', () => {
 
     it('should include groups when showGroups is true', () => {
       const columnsWithGroups: DataColumn[] = [
-        { name: 'ID', type: 'int64', width: 80, group: 'Identity' },
-        { name: 'Name', type: 'string', width: 150, group: 'Identity' },
-        { name: 'Status', type: 'bool', width: 100, group: 'Metadata' },
+        { name: 'ID', type: ColType.Number, width: 80, group: 'Identity' },
+        { name: 'Name', type: ColType.Text, width: 150, group: 'Identity' },
+        {
+          name: 'Status',
+          type: ColType.Boolean,
+          width: 100,
+          group: 'Metadata',
+        },
       ];
 
       const result = convertToGridColumns(columnsWithGroups, [], {}, 0, true);
@@ -197,8 +203,8 @@ describe('columnHelpers', () => {
 
     it('should not include groups when showGroups is false', () => {
       const columnsWithGroups: DataColumn[] = [
-        { name: 'ID', type: 'int64', width: 80, group: 'Identity' },
-        { name: 'Name', type: 'string', width: 150, group: 'Identity' },
+        { name: 'ID', type: ColType.Number, width: 80, group: 'Identity' },
+        { name: 'Name', type: ColType.Text, width: 150, group: 'Identity' },
       ];
 
       const result = convertToGridColumns(columnsWithGroups, [], {}, 0, false);
@@ -238,13 +244,118 @@ describe('columnHelpers', () => {
 
     it('should handle single column', () => {
       const singleColumn: DataColumn[] = [
-        { name: 'Only', type: 'string', width: 100 },
+        { name: 'Only', type: ColType.Text, width: 100 },
       ];
 
       const result = convertToGridColumns(singleColumn, [], {}, 500, false);
 
       // Last (and only) column should expand: max(100, 500 - 0) - 10 = 490
       expect('width' in result[0] && result[0].width).toBe(490);
+    });
+
+    it('should filter out hidden columns', () => {
+      const columns: DataColumn[] = [
+        { name: 'Visible1', type: ColType.Text, width: 100 },
+        { name: 'Hidden1', type: ColType.Text, width: 100, hidden: true },
+        { name: 'Visible2', type: ColType.Number, width: 100 },
+        { name: 'Hidden2', type: ColType.Boolean, width: 100, hidden: true },
+      ];
+
+      const result = convertToGridColumns(columns, [], {}, 0, false);
+
+      expect(result).toHaveLength(2);
+      expect(result[0].title).toBe('Visible1');
+      expect(result[1].title).toBe('Visible2');
+    });
+
+    it('should use custom header when provided', () => {
+      const columns: DataColumn[] = [
+        {
+          name: 'col1',
+          header: 'Custom Header 1',
+          type: ColType.Text,
+          width: 100,
+        },
+        { name: 'col2', type: ColType.Number, width: 100 },
+      ];
+
+      const result = convertToGridColumns(columns, [], {}, 0, false);
+
+      expect(result[0].title).toBe('Custom Header 1');
+      expect(result[1].title).toBe('col2');
+    });
+
+    it('should apply column order property', () => {
+      const columns: DataColumn[] = [
+        { name: 'Third', type: ColType.Text, width: 100, order: 2 },
+        { name: 'First', type: ColType.Number, width: 100, order: 0 },
+        { name: 'Second', type: ColType.Boolean, width: 100, order: 1 },
+      ];
+
+      const result = convertToGridColumns(columns, [], {}, 0, false);
+
+      expect(result[0].title).toBe('First');
+      expect(result[1].title).toBe('Second');
+      expect(result[2].title).toBe('Third');
+    });
+
+    it('should handle columns without order property', () => {
+      const columns: DataColumn[] = [
+        { name: 'A', type: ColType.Text, width: 100 },
+        { name: 'B', type: ColType.Number, width: 100 },
+      ];
+
+      const result = convertToGridColumns(columns, [], {}, 0, false);
+
+      expect(result[0].title).toBe('A');
+      expect(result[1].title).toBe('B');
+    });
+
+    it('should prioritize order property over columnOrder array', () => {
+      const columns: DataColumn[] = [
+        { name: 'C', type: ColType.Text, width: 100, order: 2 },
+        { name: 'A', type: ColType.Number, width: 100, order: 0 },
+        { name: 'B', type: ColType.Boolean, width: 100, order: 1 },
+      ];
+
+      // columnOrder would suggest B, C, A but order property should win
+      const result = convertToGridColumns(columns, [1, 2, 0], {}, 0, false);
+
+      expect(result[0].title).toBe('A');
+      expect(result[1].title).toBe('B');
+      expect(result[2].title).toBe('C');
+    });
+
+    it('should filter hidden columns and apply order', () => {
+      const columns: DataColumn[] = [
+        { name: 'D', type: ColType.Text, width: 100, order: 3, hidden: true },
+        { name: 'B', type: ColType.Number, width: 100, order: 1 },
+        { name: 'A', type: ColType.Boolean, width: 100, order: 0 },
+        { name: 'C', type: ColType.Date, width: 100, order: 2 },
+      ];
+
+      const result = convertToGridColumns(columns, [], {}, 0, false);
+
+      expect(result).toHaveLength(3);
+      expect(result[0].title).toBe('A');
+      expect(result[1].title).toBe('B');
+      expect(result[2].title).toBe('C');
+    });
+
+    it('should handle partial order values', () => {
+      const columns: DataColumn[] = [
+        { name: 'NoOrder1', type: ColType.Text, width: 100 },
+        { name: 'First', type: ColType.Number, width: 100, order: 0 },
+        { name: 'NoOrder2', type: ColType.Boolean, width: 100 },
+      ];
+
+      const result = convertToGridColumns(columns, [], {}, 0, false);
+
+      // Columns with order come first, then columns without order
+      expect(result[0].title).toBe('First');
+      // NoOrder columns should maintain their relative position
+      expect(result.map(r => r.title)).toContain('NoOrder1');
+      expect(result.map(r => r.title)).toContain('NoOrder2');
     });
   });
 });

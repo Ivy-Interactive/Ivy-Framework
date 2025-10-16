@@ -1,5 +1,5 @@
 import * as arrow from 'apache-arrow';
-import { DataColumn, DataRow } from '../types/types';
+import { DataColumn, DataRow, ColType } from '../types/types';
 
 function calculateColumnWidth(
   columnName: string,
@@ -28,6 +28,29 @@ function calculateColumnWidth(
   return Math.min(Math.max(calculatedWidth, minWidth), maxWidth);
 }
 
+/**
+ * Maps Arrow field type to ColType enum
+ */
+function mapArrowTypeToColType(arrowType: string): ColType {
+  const lowerType = arrowType.toLowerCase();
+  if (
+    lowerType.includes('int') ||
+    lowerType.includes('float') ||
+    lowerType.includes('double') ||
+    lowerType.includes('decimal')
+  ) {
+    return ColType.Number;
+  }
+  if (lowerType.includes('bool')) {
+    return ColType.Boolean;
+  }
+  if (lowerType.includes('date') || lowerType.includes('timestamp')) {
+    return lowerType.includes('timestamp') ? ColType.DateTime : ColType.Date;
+  }
+  // Default to Text for strings and unknown types
+  return ColType.Text;
+}
+
 export function convertArrowTableToData(
   table: arrow.Table,
   requestedCount: number
@@ -43,21 +66,13 @@ export function convertArrowTableToData(
         ? calculateColumnWidth(field.name, columnData)
         : 150;
 
-      // Parse metadata from Arrow schema
-      const metadata = field.metadata;
-      const renderType = metadata?.get(
-        'render_type'
-      ) as DataColumn['renderType'];
-      const iconSet = metadata?.get('icon_set') as DataColumn['iconSet'];
-      const group = metadata?.get('group') as string | undefined;
+      // Infer type from Arrow field type (no metadata parsing)
+      const type = mapArrowTypeToColType(field.type.toString());
 
       return {
         name: field.name,
-        type: field.type.toString(),
+        type,
         width,
-        ...(renderType && { renderType }),
-        ...(iconSet && { iconSet }),
-        ...(group && { group }),
       };
     }
   );

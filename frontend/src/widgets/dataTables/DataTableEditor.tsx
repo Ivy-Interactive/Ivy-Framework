@@ -99,12 +99,16 @@ export const TableEditor: React.FC<TableEditorProps> = ({
   // Handle column header click for sorting
   const handleHeaderMenuClick = useCallback(
     (col: number) => {
-      // Only handle sorting if it's enabled
+      // Only handle sorting if it's enabled globally
       if (!allowSorting) return;
 
-      const columnName = columns[col]?.name;
-      if (columnName) {
-        handleSort(columnName);
+      // Get visible columns to map the correct column index
+      const visibleColumns = columns.filter(c => !c.hidden);
+      const column = visibleColumns[col];
+
+      // Check if this specific column is sortable (defaults to true if not specified)
+      if (column && (column.sortable ?? true)) {
+        handleSort(column.name);
       }
     },
     [columns, handleSort, allowSorting]

@@ -13,8 +13,29 @@ import {
   DataRow,
   DataTableConfiguration,
   DataTableConnection,
+  SortDirection,
 } from './types/types';
 import { fetchTableData } from './utils/tableDataFetcher';
+
+/**
+ * Parses a Size string (e.g., "Px:200") to a numeric pixel value
+ * If input is already a number, returns it as-is
+ */
+function parseSize(size: number | string | undefined): number {
+  if (typeof size === 'number') return size;
+  if (!size) return 150; // default width
+
+  // Parse "Px:200" or "Rem:10" format
+  const match = size.match(/^(Px|Rem):(\d+\.?\d*)$/);
+  if (match) {
+    const [, unit, value] = match;
+    const numValue = parseFloat(value);
+    // For Rem, convert to pixels (assuming 16px = 1rem)
+    return unit === 'Rem' ? numValue * 16 : numValue;
+  }
+
+  return 150; // fallback to default
+}
 
 interface TableContextType {
   // State
@@ -48,6 +69,7 @@ export const TableContext = createContext<TableContextType | undefined>(
 
 interface TableProviderProps {
   children: React.ReactNode;
+  columns: DataColumn[];
   connection: DataTableConnection;
   config: DataTableConfiguration;
   editable?: boolean;
@@ -55,12 +77,13 @@ interface TableProviderProps {
 
 export const TableProvider: React.FC<TableProviderProps> = ({
   children,
+  columns: columnsProp,
   connection,
   config,
   editable = false,
 }) => {
   const [data, setData] = useState<DataRow[]>([]);
-  const [columns, setColumns] = useState<DataColumn[]>([]);
+  const [columns, setColumns] = useState<DataColumn[]>(columnsProp);
   const [columnWidths, setColumnWidths] = useState<Record<string, number>>({});
   const [visibleRows, setVisibleRows] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
@@ -72,9 +95,30 @@ export const TableProvider: React.FC<TableProviderProps> = ({
 
   const loadingRef = useRef(false);
   const currentRowCountRef = useRef(0);
+  const isReorderingRef = useRef(false);
   const batchSize = 20;
 
   const { allowColumnResizing, allowSorting } = config;
+
+  // Update columns when columnsProp changes
+  useEffect(() => {
+    // Don't update columns during reordering
+    if (isReorderingRef.current) return;
+
+    setColumns(prevColumns => {
+      // Only update if the column names or count changed
+      if (
+        prevColumns.length !== columnsProp.length ||
+        prevColumns.some((col, idx) => col.name !== columnsProp[idx].name)
+      ) {
+        // Structure changed, reset column order
+        setColumnOrder([]);
+        return columnsProp;
+      }
+      // Same structure, just update metadata without resetting order
+      return columnsProp;
+    });
+  }, [columnsProp]);
 
   // Reset row count and column widths when connection changes
   useEffect(() => {
@@ -113,7 +157,21 @@ export const TableProvider: React.FC<TableProviderProps> = ({
           activeFilter,
           activeSort
         );
-        setColumns(result.columns);
+
+        // Merge Arrow columns with columnsProp (columnsProp has all metadata)
+        // Arrow columns only provide name, type, and calculated width
+        const mergedColumns = columnsProp.map(propCol => {
+          const arrowCol = result.columns.find(ac => ac.name === propCol.name);
+          // Parse width from Size string format to numeric pixels
+          const parsedWidth = parseSize(propCol.width);
+          return {
+            ...propCol,
+            // Use parsed width from prop, or calculated width from Arrow, or default
+            width: parsedWidth || parseSize(arrowCol?.width) || 150,
+          };
+        });
+
+        setColumns(mergedColumns);
         setData(result.rows);
         setVisibleRows(result.rows.length);
         currentRowCountRef.current = result.rows.length;
@@ -121,7 +179,26 @@ export const TableProvider: React.FC<TableProviderProps> = ({
 
         // Initialize column order when columns are first loaded
         if (columnOrder.length === 0) {
-          setColumnOrder(result.columns.map((_, index) => index));
+          setColumnOrder(mergedColumns.map((_, index) => index));
+        }
+
+        // Initialize sort from column metadata (only on first load)
+        if (activeSort === null) {
+          const sortedColumn = mergedColumns.find(
+            col =>
+              col.sortDirection &&
+              col.sortDirection !== SortDirection.None &&
+              (col.sortable ?? true)
+          );
+          if (sortedColumn) {
+            const direction =
+              sortedColumn.sortDirection === SortDirection.Ascending
+                ? ('ASC' as const)
+                : ('DESC' as const);
+            setActiveSort([{ column: sortedColumn.name, direction }]);
+            // Don't fetch data again, this will trigger the effect
+            return;
+          }
         }
 
         // Initialize column widths only if not already set (first load)
@@ -133,7 +210,7 @@ export const TableProvider: React.FC<TableProviderProps> = ({
 
           // First time loading, initialize with default widths
           const widths: Record<string, number> = {};
-          result.columns.forEach((col, index) => {
+          mergedColumns.forEach((col, index) => {
             widths[index.toString()] = col.width;
           });
           return widths;
@@ -188,14 +265,11 @@ export const TableProvider: React.FC<TableProviderProps> = ({
       // Check if column resizing is allowed
       if (!allowColumnResizing) return;
 
-      const gridColumns: GridColumn[] = columns.map((col, index) => ({
-        title: col.name,
-        width: columnWidths[index.toString()] || col.width,
-      }));
-
-      const columnIndex = gridColumns.findIndex(
-        col => col.title === column.title
+      // Find the column by matching title (which is col.header || col.name)
+      const columnIndex = columns.findIndex(
+        col => (col.header || col.name) === column.title
       );
+
       if (columnIndex !== -1) {
         setColumnWidths(prev => ({
           ...prev,
@@ -203,7 +277,7 @@ export const TableProvider: React.FC<TableProviderProps> = ({
         }));
       }
     },
-    [columns, columnWidths, allowColumnResizing]
+    [columns, allowColumnResizing]
   );
 
   // Handle sort
@@ -236,14 +310,41 @@ export const TableProvider: React.FC<TableProviderProps> = ({
   // Handle column reorder
   const handleColumnReorder = useCallback(
     (startIndex: number, endIndex: number) => {
+      // Set flag to prevent column updates during reordering
+      isReorderingRef.current = true;
+
       setColumnOrder(prevOrder => {
+        // prevOrder contains indices into the full columns array
+        // startIndex and endIndex are positions in the VISIBLE columns
+
+        // Get the visible column indices (filtering out hidden ones)
+        const visibleIndices = prevOrder.filter(idx => !columns[idx]?.hidden);
+
+        // Reorder just the visible indices
+        const newVisibleIndices = [...visibleIndices];
+        const [movedIndex] = newVisibleIndices.splice(startIndex, 1);
+        newVisibleIndices.splice(endIndex, 0, movedIndex);
+
+        // Reconstruct the full order array, preserving hidden column positions
         const newOrder = [...prevOrder];
-        const [movedIndex] = newOrder.splice(startIndex, 1);
-        newOrder.splice(endIndex, 0, movedIndex);
+        let visiblePosition = 0;
+
+        for (let i = 0; i < newOrder.length; i++) {
+          // Check if the column at this position in the ORIGINAL order is hidden
+          if (!columns[prevOrder[i]]?.hidden) {
+            newOrder[i] = newVisibleIndices[visiblePosition++];
+          }
+        }
+
+        // Reset flag after a short delay
+        setTimeout(() => {
+          isReorderingRef.current = false;
+        }, 100);
+
         return newOrder;
       });
     },
-    []
+    [columns]
   );
 
   const value: TableContextType = {

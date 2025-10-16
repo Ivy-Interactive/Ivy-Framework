@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import * as arrow from 'apache-arrow';
 import { convertArrowTableToData } from './tableDataMapper';
+import { ColType } from '../types/types';
 
 describe('tableDataMapper', () => {
   describe('convertArrowTableToData', () => {
@@ -58,9 +59,9 @@ describe('tableDataMapper', () => {
       const result = convertArrowTableToData(mockTable, 5);
 
       expect(result.columns).toEqual([
-        { name: 'id', type: 'int64', width: expect.any(Number) },
-        { name: 'name', type: 'utf8', width: expect.any(Number) },
-        { name: 'active', type: 'bool', width: expect.any(Number) },
+        { name: 'id', type: ColType.Number, width: expect.any(Number) },
+        { name: 'name', type: ColType.Text, width: expect.any(Number) },
+        { name: 'active', type: ColType.Boolean, width: expect.any(Number) },
       ]);
 
       expect(result.rows).toEqual([
@@ -157,7 +158,7 @@ describe('tableDataMapper', () => {
       const result = convertArrowTableToData(mockTable, 5);
 
       expect(result.columns).toEqual([
-        { name: 'id', type: 'int64', width: 150 },
+        { name: 'id', type: ColType.Number, width: 150 },
       ]);
       expect(result.rows).toEqual([{ values: [] }]);
     });
@@ -207,43 +208,6 @@ describe('tableDataMapper', () => {
       expect(result.rows).toEqual([{ values: [42, 3.14, 'test', true] }]);
     });
 
-    it('should parse metadata for renderType and iconSet', () => {
-      const mockMetadata = new Map([
-        ['render_type', 'icon'],
-        ['icon_set', 'lucide'],
-      ]);
-
-      const mockField = {
-        name: 'status_icon',
-        type: { toString: () => 'utf8' },
-        metadata: mockMetadata,
-      };
-
-      const mockSchema = { fields: [mockField] };
-      const mockColumn = {
-        get: vi.fn().mockReturnValue('Activity'),
-        length: 1,
-      };
-      const mockTable = {
-        schema: mockSchema,
-        numRows: 1,
-        numCols: 1,
-        getChildAt: vi.fn().mockReturnValue(mockColumn),
-      } as unknown as arrow.Table;
-
-      const result = convertArrowTableToData(mockTable, 5);
-
-      expect(result.columns).toEqual([
-        {
-          name: 'status_icon',
-          type: 'utf8',
-          width: expect.any(Number),
-          renderType: 'icon',
-          iconSet: 'lucide',
-        },
-      ]);
-    });
-
     it('should handle fields without metadata', () => {
       const mockField = {
         name: 'regular_field',
@@ -265,10 +229,46 @@ describe('tableDataMapper', () => {
       expect(result.columns).toEqual([
         {
           name: 'regular_field',
-          type: 'utf8',
+          type: ColType.Text,
           width: expect.any(Number),
         },
       ]);
+    });
+
+    it('should handle type inference from Arrow types', () => {
+      const typeTests = [
+        { arrowType: 'int32', expectedType: ColType.Number },
+        { arrowType: 'int64', expectedType: ColType.Number },
+        { arrowType: 'float64', expectedType: ColType.Number },
+        { arrowType: 'double', expectedType: ColType.Number },
+        { arrowType: 'decimal', expectedType: ColType.Number },
+        { arrowType: 'bool', expectedType: ColType.Boolean },
+        { arrowType: 'boolean', expectedType: ColType.Boolean },
+        { arrowType: 'date', expectedType: ColType.Date },
+        { arrowType: 'timestamp', expectedType: ColType.DateTime },
+        { arrowType: 'utf8', expectedType: ColType.Text },
+        { arrowType: 'string', expectedType: ColType.Text },
+      ];
+
+      typeTests.forEach(({ arrowType, expectedType }) => {
+        const mockField = {
+          name: 'col',
+          type: { toString: () => arrowType },
+          metadata: null,
+        };
+
+        const mockSchema = { fields: [mockField] };
+        const mockColumn = { get: vi.fn(), length: 1 };
+        const mockTable = {
+          schema: mockSchema,
+          numRows: 1,
+          numCols: 1,
+          getChildAt: vi.fn().mockReturnValue(mockColumn),
+        } as unknown as arrow.Table;
+
+        const result = convertArrowTableToData(mockTable, 5);
+        expect(result.columns[0].type).toBe(expectedType);
+      });
     });
   });
 });

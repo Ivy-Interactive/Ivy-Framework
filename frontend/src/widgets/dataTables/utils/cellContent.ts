@@ -1,5 +1,23 @@
 import { GridCell, GridCellKind, Item } from '@glideapps/glide-data-grid';
-import { DataColumn, DataRow } from '../types/types';
+import { Align, DataColumn, DataRow } from '../types/types';
+
+/**
+ * Converts Align enum to contentAlign value for GridCell
+ */
+export function getContentAlign(align?: Align): 'left' | 'center' | 'right' {
+  if (!align) return 'left';
+
+  switch (align) {
+    case Align.Left:
+      return 'left';
+    case Align.Center:
+      return 'center';
+    case Align.Right:
+      return 'right';
+    default:
+      return 'left';
+  }
+}
 
 /**
  * Creates an empty/fallback cell for out-of-bounds requests
@@ -30,7 +48,7 @@ export function createNullCell(editable: boolean): GridCell {
 
 /**
  * Checks if a string value looks like a Lucide icon name (PascalCase)
- * @deprecated Use column metadata (renderType: 'icon') instead of heuristics
+ * @deprecated Use column type ColType.Icon instead of heuristics
  */
 export function isProbablyIconValue(value: unknown): boolean {
   return (
@@ -44,7 +62,7 @@ export function isProbablyIconValue(value: unknown): boolean {
 /**
  * Creates an icon cell
  */
-export function createIconCell(iconName: string): GridCell {
+export function createIconCell(iconName: string, align?: Align): GridCell {
   return {
     kind: GridCellKind.Custom,
     allowOverlay: false,
@@ -53,6 +71,7 @@ export function createIconCell(iconName: string): GridCell {
     data: {
       kind: 'icon-cell',
       iconName,
+      align: align ? getContentAlign(align) : undefined,
     },
   };
 }
@@ -114,7 +133,8 @@ export function parseDateValue(cellValue: unknown): Date | null {
 export function createDateCell(
   cellValue: unknown,
   columnType: string,
-  editable: boolean
+  editable: boolean,
+  align?: Align
 ): GridCell | null {
   const dateValue = parseDateValue(cellValue);
 
@@ -130,6 +150,7 @@ export function createDateCell(
     displayData,
     allowOverlay: editable,
     readonly: !editable,
+    contentAlign: align ? getContentAlign(align) : undefined,
   };
 }
 
@@ -145,7 +166,8 @@ export function formatNumberValue(value: number): string {
  */
 export function createNumberCell(
   cellValue: number,
-  editable: boolean
+  editable: boolean,
+  align?: Align
 ): GridCell {
   const displayData = formatNumberValue(cellValue);
 
@@ -155,6 +177,7 @@ export function createNumberCell(
     displayData,
     allowOverlay: editable,
     readonly: !editable,
+    contentAlign: align ? getContentAlign(align) : undefined,
   };
 }
 
@@ -163,13 +186,15 @@ export function createNumberCell(
  */
 export function createBooleanCell(
   cellValue: boolean,
-  editable: boolean
+  editable: boolean,
+  align?: Align
 ): GridCell {
   return {
     kind: GridCellKind.Boolean,
     data: cellValue,
     allowOverlay: false,
     readonly: !editable,
+    contentAlign: align ? getContentAlign(align) : undefined,
   };
 }
 
@@ -178,7 +203,8 @@ export function createBooleanCell(
  */
 export function createTextCell(
   cellValue: unknown,
-  editable: boolean
+  editable: boolean,
+  align?: Align
 ): GridCell {
   const stringValue = String(cellValue);
 
@@ -188,6 +214,7 @@ export function createTextCell(
     displayData: stringValue,
     allowOverlay: editable,
     readonly: !editable,
+    contentAlign: align ? getContentAlign(align) : undefined,
   };
 }
 
@@ -205,6 +232,7 @@ export function getOrderedColumns(
 
 /**
  * Main function to get cell content for a grid cell
+ * Filters out hidden columns and applies column ordering
  */
 export function getCellContent(
   cell: Item,
@@ -215,8 +243,17 @@ export function getCellContent(
 ): GridCell {
   const [col, row] = cell;
 
-  // Apply column order mapping
-  const orderedCols = getOrderedColumns(columns, columnOrder);
+  // Apply column order first, then filter out hidden columns
+  let orderedCols: DataColumn[];
+  if (columnOrder.length === columns.length) {
+    // Map using columnOrder indices, then filter hidden
+    orderedCols = columnOrder
+      .map(idx => columns[idx])
+      .filter(col => !col.hidden);
+  } else {
+    // No reordering, just filter hidden columns
+    orderedCols = columns.filter(col => !col.hidden);
+  }
 
   // Safety check
   if (row >= data.length || col >= orderedCols.length) {
@@ -227,21 +264,22 @@ export function getCellContent(
   const column = orderedCols[col];
   const originalColumnIndex = columns.indexOf(column);
   const cellValue = rowData.values[originalColumnIndex];
-  const columnType = column.type.toLowerCase();
+  const columnType = column.type?.toLowerCase() || 'text';
+  const align = column.align;
 
   // Handle null/undefined values
   if (cellValue === null || cellValue === undefined) {
     return createNullCell(editable);
   }
 
-  // Handle explicit icon renderType from backend metadata
-  if (column.renderType === 'icon' && typeof cellValue === 'string') {
-    return createIconCell(cellValue);
+  // Handle explicit icon type from backend metadata
+  if (column.type === 'Icon' && typeof cellValue === 'string') {
+    return createIconCell(cellValue, align);
   }
 
   // Handle Date and DateTime types
   if (isDateColumnType(columnType)) {
-    const dateCell = createDateCell(cellValue, columnType, editable);
+    const dateCell = createDateCell(cellValue, columnType, editable, align);
     if (dateCell) {
       return dateCell;
     }
@@ -249,20 +287,20 @@ export function getCellContent(
 
   // Handle numeric types
   if (typeof cellValue === 'number' && isNumericColumnType(columnType)) {
-    return createNumberCell(cellValue, editable);
+    return createNumberCell(cellValue, editable, align);
   }
 
   // Handle boolean types
   if (typeof cellValue === 'boolean') {
-    return createBooleanCell(cellValue, editable);
+    return createBooleanCell(cellValue, editable, align);
   }
 
   // Fallback: Use heuristic icon detection if no metadata provided
   // This maintains backward compatibility but should be replaced with proper metadata
   if (isProbablyIconValue(cellValue)) {
-    return createIconCell(String(cellValue));
+    return createIconCell(String(cellValue), align);
   }
 
   // Default to text
-  return createTextCell(cellValue, editable);
+  return createTextCell(cellValue, editable, align);
 }

@@ -1,4 +1,5 @@
 using Ivy.Shared;
+using System.Text.Json.Serialization;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy;
@@ -7,7 +8,10 @@ public class DataTableColumn
 {
     public required string Name { get; set; }
     public required string Header { get; set; }
+
+    [JsonPropertyName("type")]
     public required ColType ColType { get; set; }
+
     public string? Group { get; set; }
     public Size? Width { get; set; }
     public bool Hidden { get; set; } = false;
@@ -16,8 +20,10 @@ public class DataTableColumn
     public bool Filterable { get; set; } = true;
     public Align Align { get; set; } = Align.Left;
     public int Order { get; set; } = 0;
-    public Icon? Icon { get; set; } = null;
+    public Icons? Icon { get; set; } = null;
     public string? Help { get; set; } = null;
+
+    [JsonIgnore]
     public IDataTableColumnRenderer? Renderer { get; set; } = null;
 }
 

@@ -53,6 +53,7 @@ export function reorderColumns(
 
 /**
  * Converts data columns to GridColumn format with proper widths and groups
+ * Filters out hidden columns and applies column ordering
  */
 export function convertToGridColumns(
   columns: DataColumn[],
@@ -61,11 +62,31 @@ export function convertToGridColumns(
   containerWidth: number,
   showGroups: boolean
 ): GridColumn[] {
+  // Filter out hidden columns first
+  const visibleColumns = columns.filter(col => !col.hidden);
+
   // Apply column order if available
-  const orderedColumns =
-    columnOrder.length === columns.length
-      ? columnOrder.map(idx => columns[idx])
-      : columns;
+  let orderedColumns = visibleColumns;
+
+  // User reordering (columnOrder array) takes precedence over backend order property
+  if (columnOrder.length === columns.length) {
+    // Use the columnOrder array (from user reordering)
+    orderedColumns = columnOrder
+      .map(idx => columns[idx])
+      .filter(col => !col.hidden);
+  } else {
+    // Fall back to explicit order property if no user reordering has happened
+    const hasOrderProperty = visibleColumns.some(
+      col => col.order !== undefined
+    );
+    if (hasOrderProperty) {
+      orderedColumns = [...visibleColumns].sort((a, b) => {
+        const orderA = a.order ?? Number.MAX_SAFE_INTEGER;
+        const orderB = b.order ?? Number.MAX_SAFE_INTEGER;
+        return orderA - orderB;
+      });
+    }
+  }
 
   return orderedColumns.map((col, index) => {
     const originalIndex = columns.indexOf(col);
@@ -82,16 +103,20 @@ export function convertToGridColumns(
 
       const remainingWidth = containerWidth - totalWidthOfOtherColumns;
       return {
-        title: col.name,
+        title: col.header || col.name,
         width: Math.max(baseWidth, remainingWidth) - 10,
         group: showGroups ? col.group : undefined,
+        // TODO: Custom header rendering needed for Lucide icons
+        // icon: col.icon ?? undefined,
       };
     }
 
     return {
-      title: col.name,
+      title: col.header || col.name,
       width: baseWidth,
       group: showGroups ? col.group : undefined,
+      // TODO: Custom header rendering needed for Lucide icons
+      // icon: col.icon ?? undefined,
     };
   });
 }

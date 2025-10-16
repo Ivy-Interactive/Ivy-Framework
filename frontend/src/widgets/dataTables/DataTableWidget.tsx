@@ -30,6 +30,7 @@ const TableLayout: React.FC<TableLayoutProps> = ({ children }) => {
 };
 
 export const Table: React.FC<TableProps> = ({
+  columns,
   connection,
   config = {},
   editable = false,
@@ -48,7 +49,7 @@ export const Table: React.FC<TableProps> = ({
     allowCopySelection: config.allowCopySelection ?? true,
     selectionMode: config.selectionMode,
     showIndexColumn: config.showIndexColumn ?? false,
-    showGroups: true,
+    showGroups: config.showGroups ?? false,
   };
 
   // Create styles object with width and height if provided
@@ -60,6 +61,7 @@ export const Table: React.FC<TableProps> = ({
   return (
     <div style={containerStyle}>
       <TableProvider
+        columns={columns}
         connection={connection}
         config={finalConfig}
         editable={editable}

@@ -2,12 +2,41 @@ export interface DataRow {
   values: (string | number | boolean | null)[];
 }
 
+export enum ColType {
+  Number = 'Number',
+  Text = 'Text',
+  Boolean = 'Boolean',
+  Date = 'Date',
+  DateTime = 'DateTime',
+  Icon = 'Icon',
+}
+
+export enum SortDirection {
+  Ascending = 'Ascending',
+  Descending = 'Descending',
+  None = 'None',
+}
+
+export enum Align {
+  Left = 'Left',
+  Center = 'Center',
+  Right = 'Right',
+}
+
 export interface DataColumn {
   name: string;
-  type: string;
-  width: number;
+  header?: string;
+  type: ColType;
   group?: string;
-  renderType?: 'icon' | 'text' | 'number' | 'date' | 'boolean';
+  width: number | string;
+  hidden?: boolean;
+  sortable?: boolean;
+  sortDirection?: SortDirection;
+  filterable?: boolean;
+  align?: Align;
+  order?: number;
+  icon?: string | null;
+  help?: string | null;
   iconSet?: 'lucide' | 'custom';
 }
 
@@ -33,6 +62,7 @@ export interface DataTableConfiguration {
 }
 
 export interface TableProps {
+  columns: DataColumn[];
   connection: DataTableConnection;
   config?: DataTableConfiguration;
   editable?: boolean;
