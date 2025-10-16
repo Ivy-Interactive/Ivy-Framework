@@ -205,7 +205,7 @@ public interface IFormFieldBinding<TModel>
 /// <summary>
 /// Renders form fields in a structured layout with columns, rows, and groups.
 /// </summary>
-public class FormView<TModel>(IFormFieldView[] fieldViews) : ViewBase
+public class FormView<TModel>(IFormFieldView[] fieldViews, Func<Event<Form>, ValueTask>? handleSubmit = null) : ViewBase
 {
     /// <summary>
     /// Builds the complete form layout with multi-column support and field grouping.
@@ -240,6 +240,11 @@ public class FormView<TModel>(IFormFieldView[] fieldViews) : ViewBase
                         )).Cast<object>().ToArray()
                     .ToArray()));
 
-        return new Form(Layout.Horizontal(columns));
+        var form = new Form(Layout.Horizontal(columns));
+        if (handleSubmit != null)
+        {
+            form = form with { HandleSubmit = handleSubmit };
+        }
+        return form;
     }
 }

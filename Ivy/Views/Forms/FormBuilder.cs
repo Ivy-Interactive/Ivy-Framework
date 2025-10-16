@@ -625,8 +625,14 @@ public class FormBuilder<TModel> : ViewBase
 
         var fieldViews = bindings.Select(e => e.fieldView).ToArray();
 
+        async ValueTask HandleSubmitEvent(Event<Form> _)
+        {
+            await OnSubmit();
+        }
+
         var formView = new FormView<TModel>(
-            fieldViews
+            fieldViews,
+            HandleSubmitEvent
         );
 
         var validationView = new WrapperView(Layout.Vertical(

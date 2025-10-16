@@ -1,12 +1,14 @@
 import React, { useEffect, useRef } from 'react';
+import { useEventHandler } from '@/components/event-handler';
 
 interface FormWidgetProps {
   id: string;
   children?: React.ReactNode;
 }
 
-export const FormWidget: React.FC<FormWidgetProps> = ({ children }) => {
+export const FormWidget: React.FC<FormWidgetProps> = ({ id, children }) => {
   const formRef = useRef<HTMLDivElement>(null);
+  const eventHandler = useEventHandler();
 
   useEffect(() => {
     const form = formRef.current;
@@ -36,9 +38,12 @@ export const FormWidget: React.FC<FormWidgetProps> = ({ children }) => {
         // Blur current (triggers backend validation via OnBlur)
         target.blur();
 
-        // Focus next input if exists
+        // If there's a next input, focus it
         if (nextInput) {
           nextInput.focus();
+        } else {
+          // We're on the last field - send submit event to backend
+          eventHandler('HandleSubmit', id, []);
         }
       }
     };
@@ -47,7 +52,7 @@ export const FormWidget: React.FC<FormWidgetProps> = ({ children }) => {
     return () => {
       form.removeEventListener('keydown', handleKeyDown);
     };
-  }, []);
+  }, [id, eventHandler]);
 
   return <div ref={formRef}>{children}</div>;
 };
