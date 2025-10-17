@@ -18,7 +18,7 @@ interface TableEditorProps {
   hasOptions?: boolean;
 }
 
-export const TableEditor: React.FC<TableEditorProps> = ({
+export const DataTableEditor: React.FC<TableEditorProps> = ({
   hasOptions = false,
 }) => {
   const {

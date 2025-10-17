@@ -4,8 +4,8 @@ import React from 'react';
 import { TableProvider, useTable } from './DataTableContext';
 import { ErrorDisplay } from '@/components/ErrorDisplay';
 import { Loading } from '@/components/Loading';
-import { TableEditor } from './DataTableEditor';
-import { TableOptions } from './DataTableOptions';
+import { DataTableEditor } from './DataTableEditor';
+import { DataTableOptions } from './DataTableOptions';
 import { tableStyles } from './styles/style';
 import { TableProps } from './types/types';
 import { getWidth, getHeight } from '@/lib/styles';
@@ -29,7 +29,7 @@ const TableLayout: React.FC<TableLayoutProps> = ({ children }) => {
   );
 };
 
-export const Table: React.FC<TableProps> = ({
+export const DataTable: React.FC<TableProps> = ({
   columns,
   connection,
   config = {},
@@ -68,13 +68,13 @@ export const Table: React.FC<TableProps> = ({
       >
         <TableLayout>
           <>
-            <TableOptions
+            <DataTableOptions
               hasOptions={{
                 allowFiltering: finalConfig.allowFiltering,
               }}
             />
 
-            <TableEditor hasOptions={finalConfig.allowFiltering} />
+            <DataTableEditor hasOptions={finalConfig.allowFiltering} />
           </>
         </TableLayout>
       </TableProvider>
@@ -82,4 +82,4 @@ export const Table: React.FC<TableProps> = ({
   );
 };
 
-export default Table;
+export default DataTable;

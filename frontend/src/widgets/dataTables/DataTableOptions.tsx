@@ -4,7 +4,7 @@ import { tableStyles } from './styles/style';
 import { QueryEditor, QueryEditorChangeEvent } from 'filter-query-editor';
 import { Filter } from '@/services/grpcTableService';
 
-export const TableOptions: React.FC<{
+export const DataTableOptions: React.FC<{
   hasOptions: { allowFiltering: boolean };
 }> = ({ hasOptions }) => {
   const [query, setQuery] = useState<string>('');
