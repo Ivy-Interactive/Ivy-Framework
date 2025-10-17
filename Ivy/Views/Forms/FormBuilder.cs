@@ -185,7 +185,7 @@ public class FormBuilder<TModel> : ViewBase
             var nonNullableType = Nullable.GetUnderlyingType(field.Type) ?? field.Type;
             if (field.Name.EndsWith("Email") && nonNullableType == typeof(string))
             {
-                field.Validators.Add(FormHelpers.CreateEmailValidator(field.Name));
+                field.Validators.Add(Validators.CreateEmailValidator(field.Name));
             }
         }
     }
