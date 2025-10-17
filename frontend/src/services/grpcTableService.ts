@@ -47,7 +47,6 @@ export interface Filter {
   condition?: Condition;
   group?: FilterGroup;
   negate?: boolean;
-  invalidQuery?: string; // When set, indicates an unparseable query that should be processed by the agent
 }
 
 export interface Aggregation {
@@ -104,6 +103,10 @@ export class GrpcTableService extends EventEmitter {
   constructor(serverUrl: string) {
     super();
     this.serverUrl = serverUrl;
+    logger.debug(
+      'GrpcTableService constructor - Connecting to:',
+      this.serverUrl
+    );
   }
 
   async queryTable(options: GrpcTableStreamOptions): Promise<DataTableResult> {
@@ -394,17 +397,6 @@ export class GrpcTableService extends EventEmitter {
       // Field 3: negate (bool)
       const negateValue = filter.negate ? 1 : 0;
       chunks.push(this.encodeField(3, 0, this.encodeVarint(negateValue)));
-    }
-
-    if (filter.invalidQuery) {
-      logger.debug(
-        'serializeFilter: Serializing invalidQuery',
-        filter.invalidQuery
-      );
-      // Field 4: invalid_query (string)
-      const encoder = new TextEncoder();
-      const invalidQueryData = encoder.encode(filter.invalidQuery);
-      chunks.push(this.encodeField(4, 2, invalidQueryData));
     }
 
     const result = this.combineChunks(chunks);
