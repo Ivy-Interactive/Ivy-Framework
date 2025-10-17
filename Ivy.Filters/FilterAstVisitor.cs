@@ -78,7 +78,7 @@ public class FilterAstVisitor(
 
         var op = NormalizeComparisonOperator(context.compOp());
         var operand = ExtractOperandValue(context.operand(), field.Type);
-        
+
         if (!IsOperatorValidForType(op, field.Type))
         {
             errorListener.AddSemanticError(
