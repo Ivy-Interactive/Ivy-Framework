@@ -57,6 +57,10 @@ The Auth0 authentication provider now **requires** the `Auth0:Audience` paramete
 }
 ```
 
+Renamed `JWT`-related fields/methods that can sometimes have non-JWT tokens (as in `Authelia`’s case), to be more technically accurate (e.g., `AuthToken.Jwt` becomes `AuthToken.AccessToken`)
+
+Added prompt for a new `Supabase:LegacyJwtSecret` config parameter to the `CLI`, which will now be required if the user hasn’t migrated to Supabase’s newer asymmetric signing key system
+
 ## New search in your apps sidebar
 
 ### Comprehensive Search Hints Implementation
@@ -80,9 +84,7 @@ searchHints:
 
 ## Forms System Overhaul
 
-### Simplified Form Submission - Breaking Change
-
-Forms now handle submission automatically! The old `.UseForm()` pattern has been replaced with a much simpler approach where forms automatically handle Enter key presses and update model state directly.
+### Simplified Form Submission
 
 **New streamlined approach:**
 
