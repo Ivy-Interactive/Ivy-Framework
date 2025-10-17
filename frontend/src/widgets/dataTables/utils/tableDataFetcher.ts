@@ -36,7 +36,11 @@ export const fetchTableData = async (
 
     if (result.arrow_ipc_stream) {
       const table = arrow.tableFromIPC(result.arrow_ipc_stream);
-      return convertArrowTableToData(table, count);
+      // Use server-provided metadata to compute hasMore accurately
+      const offset = result.offset ?? startIndex;
+      const rowCount = result.row_count ?? table.numRows;
+      const totalRows = result.total_rows ?? offset + rowCount;
+      return convertArrowTableToData(table, { offset, rowCount, totalRows });
     }
 
     return { columns: [], rows: [], hasMore: false };
