@@ -165,10 +165,9 @@ public class CodeApp : SampleBase
         {
             cards.Add(
                 Layout.Vertical()
-                    | Text.H3(language.ToString())
                     | new Code(code, language)
-                        .ShowCopyButton(true)
-                        .Height(Size.Units(60))
+                    .ShowCopyButton(true)
+                    .Height(Size.Units(60))
             );
         }
 
