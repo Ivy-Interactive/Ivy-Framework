@@ -1,6 +1,13 @@
 ---
 prepare: |
   var client = this.UseService<IClientProvider>();
+searchHints:
+  - hint
+  - hover
+  - popover
+  - help
+  - info
+  - tooltip
 ---
 
 # Tooltip

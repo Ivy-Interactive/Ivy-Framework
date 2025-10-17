@@ -1,3 +1,13 @@
+---
+searchHints:
+  - syntax
+  - highlighting
+  - code-block
+  - snippet
+  - pre
+  - programming
+---
+
 # Code
 
 <Ingress>

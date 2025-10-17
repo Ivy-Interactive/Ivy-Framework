@@ -2,7 +2,7 @@ using Ivy.Shared;
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Layouts;
 
-[App(icon: Icons.LayoutTemplate, path: ["Widgets", "Layouts"])]
+[App(icon: Icons.LayoutTemplate, path: ["Widgets", "Layouts"], searchHints: ["navigation", "panels", "pages", "switcher", "tabbed", "sections"])]
 public class TabsApp : ViewBase
 {
     public override object? Build()

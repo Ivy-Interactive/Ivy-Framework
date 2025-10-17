@@ -1,3 +1,13 @@
+---
+searchHints:
+  - media
+  - youtube
+  - playback
+  - video
+  - streaming
+  - embed
+---
+
 # Video Player
 
 <Ingress>

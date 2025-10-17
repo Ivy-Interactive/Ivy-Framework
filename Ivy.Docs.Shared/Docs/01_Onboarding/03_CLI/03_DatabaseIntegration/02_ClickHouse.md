@@ -1,5 +1,12 @@
 ---
 title: ClickHouse
+searchHints:
+  - clickhouse
+  - database
+  - analytics
+  - olap
+  - columnar
+  - db
 ---
 
 # ClickHouse Database Provider

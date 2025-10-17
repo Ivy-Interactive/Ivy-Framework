@@ -2,7 +2,7 @@
 
 namespace Ivy.Samples.Shared.Apps.Other;
 
-[App(icon: Icons.Palette)]
+[App(icon: Icons.Palette, searchHints: ["palette", "swatches", "styling", "design", "appearance", "paint"])]
 public class ColorsApp : ViewBase
 {
     public override object? Build()
@@ -22,8 +22,10 @@ public class ColorsApp : ViewBase
             return colorView;
         }
 
-        return Layout.Grid().Columns(2)
-               | (Layout.Vertical().Padding(10) | GenerateColors())
-               | (Layout.Vertical().Padding(10).Background(Colors.Black) | GenerateColors());
+        return Layout.Vertical()
+            | Text.H1("Colors")
+            | (Layout.Grid().Columns(2)
+                | (Layout.Vertical().Padding(10) | GenerateColors())
+                | (Layout.Vertical().Padding(10).Background(Colors.Black) | GenerateColors()));
     }
 }

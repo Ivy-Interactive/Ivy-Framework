@@ -1,3 +1,13 @@
+---
+searchHints:
+  - entra
+  - azure
+  - microsoft
+  - authentication
+  - enterprise
+  - sso
+---
+
 # Microsoft Entra Authentication Provider
 
 <Ingress>

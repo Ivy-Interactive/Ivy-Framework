@@ -2,7 +2,7 @@ using Ivy.Shared;
 
 namespace Ivy.Samples.Shared.Apps.Widgets;
 
-[App(icon: Icons.SquareChevronRight, path: ["Widgets"])]
+[App(icon: Icons.SquareChevronRight, path: ["Widgets"], searchHints: ["paging", "navigation", "pages", "next", "previous", "numbers"])]
 public class PaginationApp() : SampleBase
 {
     protected override object? BuildSample()

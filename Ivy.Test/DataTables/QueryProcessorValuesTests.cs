@@ -14,7 +14,6 @@ namespace Ivy.Test.DataTables;
 public class QueryProcessorValuesTests
 {
     private readonly ITestOutputHelper _output;
-    private readonly ILogger<QueryProcessor>? _logger;
 
     public QueryProcessorValuesTests(ITestOutputHelper output)
     {
@@ -27,7 +26,7 @@ public class QueryProcessorValuesTests
         // Arrange
         var products = TestDataGenerator.GenerateProducts(20);
         var queryable = products.AsQueryable();
-        var processor = new QueryProcessor(_logger);
+        var processor = new QueryProcessor(logger: null);
 
         var query = new DataTableValuesQuery
         {
@@ -56,7 +55,7 @@ public class QueryProcessorValuesTests
         // Arrange
         var products = TestDataGenerator.GenerateProducts(50);
         var queryable = products.AsQueryable();
-        var processor = new QueryProcessor(_logger);
+        var processor = new QueryProcessor(logger: null);
 
         var query = new DataTableValuesQuery
         {
@@ -85,7 +84,7 @@ public class QueryProcessorValuesTests
         // Arrange
         var products = TestDataGenerator.GenerateProducts(30);
         var queryable = products.AsQueryable();
-        var processor = new QueryProcessor(_logger);
+        var processor = new QueryProcessor(logger: null);
 
         var query = new DataTableValuesQuery
         {
@@ -116,7 +115,7 @@ public class QueryProcessorValuesTests
         // Arrange
         var products = TestDataGenerator.GenerateProducts(15);
         var queryable = products.AsQueryable();
-        var processor = new QueryProcessor(_logger);
+        var processor = new QueryProcessor(logger: null);
 
         var query = new DataTableValuesQuery
         {
@@ -148,7 +147,7 @@ public class QueryProcessorValuesTests
         // Arrange
         var products = TestDataGenerator.GenerateProducts(20);
         var queryable = products.AsQueryable();
-        var processor = new QueryProcessor(_logger);
+        var processor = new QueryProcessor(logger: null);
 
         var query = new DataTableValuesQuery
         {
@@ -176,7 +175,7 @@ public class QueryProcessorValuesTests
         // Arrange
         var products = TestDataGenerator.GenerateProducts(30);
         var queryable = products.AsQueryable();
-        var processor = new QueryProcessor(_logger);
+        var processor = new QueryProcessor(logger: null);
 
         var query = new DataTableValuesQuery
         {
@@ -210,7 +209,7 @@ public class QueryProcessorValuesTests
         // Arrange
         var products = TestDataGenerator.GenerateProducts(25);
         var queryable = products.AsQueryable();
-        var processor = new QueryProcessor(_logger);
+        var processor = new QueryProcessor(logger: null);
 
         var query = new DataTableValuesQuery
         {
@@ -241,7 +240,7 @@ public class QueryProcessorValuesTests
     {
         // Arrange
         var emptyQueryable = new List<Product>().AsQueryable();
-        var processor = new QueryProcessor(_logger);
+        var processor = new QueryProcessor(logger: null);
 
         var query = new DataTableValuesQuery
         {
@@ -266,7 +265,7 @@ public class QueryProcessorValuesTests
         // Arrange
         var products = TestDataGenerator.GenerateProducts(10);
         var queryable = products.AsQueryable();
-        var processor = new QueryProcessor(_logger);
+        var processor = new QueryProcessor(logger: null);
 
         var query = new DataTableValuesQuery
         {
@@ -288,7 +287,7 @@ public class QueryProcessorValuesTests
         // Arrange
         var products = TestDataGenerator.GenerateProducts(10);
         var queryable = products.AsQueryable();
-        var processor = new QueryProcessor(_logger);
+        var processor = new QueryProcessor(logger: null);
 
         var query = new DataTableValuesQuery
         {
@@ -316,7 +315,7 @@ public class QueryProcessorValuesTests
             new Product { Id = 4, Name = "Product 4", Price = 49.00m, Category = "Test", CreatedDate = DateTime.Now }
         };
         var queryable = products.AsQueryable();
-        var processor = new QueryProcessor(_logger);
+        var processor = new QueryProcessor(logger: null);
 
         var query = new DataTableValuesQuery
         {
@@ -351,7 +350,7 @@ public class QueryProcessorValuesTests
             new Product { Id = 4, Name = "Product 4", Price = 400m, Category = "Test", CreatedDate = baseDate.AddDays(2) }
         };
         var queryable = products.AsQueryable();
-        var processor = new QueryProcessor(_logger);
+        var processor = new QueryProcessor(logger: null);
 
         var query = new DataTableValuesQuery
         {
@@ -379,7 +378,7 @@ public class QueryProcessorValuesTests
         var options = Options.Create(new MemoryDistributedCacheOptions());
         var cache = new MemoryDistributedCache(options);
 
-        var processor = new QueryProcessor(_logger, cache);
+        var processor = new QueryProcessor(logger: null, cache: cache);
 
         var query = new DataTableValuesQuery
         {
@@ -413,7 +412,7 @@ public class QueryProcessorValuesTests
         var options = Options.Create(new MemoryDistributedCacheOptions());
         var cache = new MemoryDistributedCache(options);
 
-        var processor = new QueryProcessor(_logger, cache);
+        var processor = new QueryProcessor(logger: null, cache: cache);
 
         var query1 = new DataTableValuesQuery
         {
@@ -449,7 +448,7 @@ public class QueryProcessorValuesTests
         // Create a failing cache implementation
         var failingCache = new FailingDistributedCache();
 
-        var processor = new QueryProcessor(_logger, failingCache);
+        var processor = new QueryProcessor(logger: null, cache: failingCache);
 
         var query = new DataTableValuesQuery
         {
@@ -486,7 +485,7 @@ public class QueryProcessorValuesTests
         // Arrange
         var people = TestDataGenerator.GeneratePeople(30);
         var queryable = people.AsQueryable();
-        var processor = new QueryProcessor(_logger);
+        var processor = new QueryProcessor(logger: null);
 
         // Test string column
         var query = new DataTableValuesQuery

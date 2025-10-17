@@ -2,7 +2,7 @@
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Primitives;
 
-[App(icon: Icons.Loader)]
+[App(icon: Icons.Loader, searchHints: ["spinner", "loader", "waiting", "progress", "loading", "busy"])]
 public class LoadingApp : SampleBase
 {
     protected override object? BuildSample()

@@ -1,3 +1,13 @@
+---
+searchHints:
+  - oracle
+  - database
+  - sql
+  - enterprise
+  - relational
+  - db
+---
+
 # Oracle Database Provider
 
 <Ingress>

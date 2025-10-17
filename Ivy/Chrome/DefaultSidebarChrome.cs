@@ -18,14 +18,39 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
     {
         public Tab ToTab() => new Tab(Title, AppHost).Icon(Icon).Key(Utils.GetShortHash(Id + RefreshToken));
     }
-    private bool itemMatchSearch(MenuItem item, string searchString)
+    private static bool IsWordMatch(string tag, string searchString)
     {
-        bool matchSearch = (item.Label ?? "").Contains(searchString, StringComparison.OrdinalIgnoreCase);
-        if (!matchSearch)
+        // Split the tag into individual words (separated by hyphens, underscores, or spaces)
+        var words = System.Text.RegularExpressions.Regex.Split(tag, @"[-_\s]+");
+
+        // Check if any word starts with the search string (prefix matching)
+        return words.Any(word => word.StartsWith(searchString, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private int itemMatchScore(MenuItem item, string searchString)
+    {
+        var label = item.Label ?? "";
+
+        // Exact match gets highest priority (score 3)
+        if (string.Equals(label, searchString, StringComparison.OrdinalIgnoreCase))
         {
-            matchSearch = item.SearchHints?.Any(tag => tag.Contains(searchString, StringComparison.OrdinalIgnoreCase)) == true;
+            return 3;
         }
-        return matchSearch;
+
+        // Label contains search string gets medium priority (score 2)
+        if (label.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+        {
+            return 2;
+        }
+
+        // Search hints match gets lowest priority (score 1)
+        if (item.SearchHints?.Any(tag => IsWordMatch(tag, searchString)) == true)
+        {
+            return 1;
+        }
+
+        // No match
+        return 0;
     }
 
     public override object? Build()
@@ -59,7 +84,14 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
             }
             else
             {
-                var result = appRepository.GetMenuItems().Flatten().Where(item => itemMatchSearch(item, search.Value)).ToArray();
+                var result = appRepository.GetMenuItems().Flatten()
+                    .Where(item => item.Children == null || item.Children.Length == 0) // Only include leaf nodes (actual apps)
+                    .Select(item => new { Item = item, Score = itemMatchScore(item, search.Value) })
+                    .Where(x => x.Score > 0)
+                    .OrderByDescending(x => x.Score)
+                    .ThenBy(x => x.Item.Label)
+                    .Select(x => x.Item)
+                    .ToArray();
 
                 if (result.Length > 0)
                 {

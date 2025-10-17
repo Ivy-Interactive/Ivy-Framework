@@ -1,4 +1,13 @@
-﻿# Installation
+﻿---
+searchHints:
+  - setup
+  - install
+  - cli
+  - getting-started
+  - download
+---
+
+# Installation
 
 <Ingress>
 Getting started with Ivy.

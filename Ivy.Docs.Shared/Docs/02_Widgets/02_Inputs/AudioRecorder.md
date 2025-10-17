@@ -1,3 +1,13 @@
+---
+searchHints:
+  - microphone
+  - recording
+  - voice
+  - audio
+  - capture
+  - sound
+---
+
 # Audio Recorder
 
 <Ingress>

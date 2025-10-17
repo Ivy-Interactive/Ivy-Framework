@@ -1,3 +1,13 @@
+---
+searchHints:
+  - layout
+  - header
+  - sticky
+  - toolbar
+  - fixed
+  - top
+---
+
 # HeaderLayout
 
 <Ingress>

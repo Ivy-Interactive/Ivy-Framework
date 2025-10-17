@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Ivy.Samples.Shared.Apps.Demos;
 
-[App(icon: Icons.Database)]
+[App(icon: Icons.Database, searchHints: ["crud", "management", "list", "details", "forms", "entity"])]
 public class ProductsApp : ViewBase
 {
     public override object? Build()

@@ -1,3 +1,13 @@
+---
+searchHints:
+  - spanner
+  - google
+  - database
+  - cloud
+  - distributed
+  - db
+---
+
 # Google Spanner Database Provider
 
 <Ingress>

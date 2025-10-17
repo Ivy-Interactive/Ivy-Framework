@@ -2,7 +2,7 @@
 
 namespace Ivy.Samples.Shared.Apps.Widgets;
 
-[App(icon: Icons.Film, path: ["Widgets"], isVisible: true)]
+[App(icon: Icons.Film, path: ["Widgets"], isVisible: true, searchHints: ["media", "youtube", "playback", "video", "streaming", "embed"])]
 public class VideoPlayerApp : SampleBase
 {
     protected override object? BuildSample()

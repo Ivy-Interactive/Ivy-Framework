@@ -1,5 +1,12 @@
 ---
 title: PostgreSQL
+searchHints:
+  - postgres
+  - postgresql
+  - database
+  - sql
+  - relational
+  - db
 ---
 
 # PostgreSQL Database Provider

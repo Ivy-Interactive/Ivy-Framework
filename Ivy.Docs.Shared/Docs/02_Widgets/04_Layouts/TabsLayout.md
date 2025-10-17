@@ -1,6 +1,13 @@
 ---
 prepare: |
   var client = this.UseService<IClientProvider>();
+searchHints:
+  - navigation
+  - panels
+  - pages
+  - switcher
+  - tabbed
+  - sections
 ---
 
 # TabsLayout

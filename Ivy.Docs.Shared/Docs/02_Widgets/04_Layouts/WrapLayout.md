@@ -1,3 +1,13 @@
+---
+searchHints:
+  - layout
+  - wrap
+  - responsive
+  - flexbox
+  - flow
+  - arrangement
+---
+
 # WrapLayout
 
 <Ingress>

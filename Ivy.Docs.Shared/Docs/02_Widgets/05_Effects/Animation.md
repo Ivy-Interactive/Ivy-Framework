@@ -1,3 +1,13 @@
+---
+searchHints:
+  - motion
+  - transition
+  - effects
+  - animated
+  - movement
+  - visual
+---
+
 # Animation
 
 <Ingress>

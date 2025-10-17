@@ -2,7 +2,7 @@ using Ivy.Shared;
 
 namespace Ivy.Samples.Shared.Apps.Widgets;
 
-[App(icon: Icons.IdCard, path: ["Widgets"])]
+[App(icon: Icons.IdCard, path: ["Widgets"], searchHints: ["container", "panel", "box", "section", "wrapper", "border"])]
 public class CardApp : SampleBase
 {
     protected override object? BuildSample()
@@ -11,8 +11,8 @@ public class CardApp : SampleBase
 
         var card1 = new Card(
             "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec nunc",
-            new Button("Sign Me Up", _ => client.Toast("You have signed up!"))
-        ).Title("Card App").Description("This is a card app.");
+            new Button("Sign Me Up", _ => client.Toast("You have signed up!")).TestId("card-app-signup-button")
+        ).Title("Card App").Description("This is a card app.").TestId("card-app");
 
         var card2 = new Card(
             "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec nunc"
@@ -21,7 +21,8 @@ public class CardApp : SampleBase
          .BorderThickness(3)
          .BorderStyle(BorderStyle.Dashed)
          .BorderColor(Colors.Primary)
-         .BorderRadius(BorderRadius.Rounded);
+         .BorderRadius(BorderRadius.Rounded)
+         .TestId("card-border");
 
         var card3 = new Card(
             "This card demonstrates the border color fix with a thick red border."
@@ -30,18 +31,21 @@ public class CardApp : SampleBase
          .BorderThickness(4)
          .BorderStyle(BorderStyle.Solid)
          .BorderColor(Colors.Red)
-         .BorderRadius(BorderRadius.Rounded);
+         .BorderRadius(BorderRadius.Rounded)
+         .TestId("card-border-color");
 
         var card4 = new Card(
            "This card demonstrates OnClick handlers."
        ).Title("OnClick test")
         .Description("Click me!")
+        .TestId("card-onclick")
         .HandleClick(_ =>
         {
             client.Toast("Clicked!");
         });
 
         return Layout.Vertical()
+               | Text.H1("Card")
                | (Layout.Grid().Columns(4)
                   | card1
                   | card2
@@ -98,7 +102,7 @@ public class MetricView(string title) : ViewBase
                  | Icons.TrendingUp.ToIcon().Color(Colors.Emerald)
                  | Text.Small("21%").Color(Colors.Emerald)),
                 new Progress(21).Goal(800_000.ToString("C0"))
-            ).Title(title).Icon(Icons.DollarSign)
+            ).Title(title).Icon(Icons.DollarSign).TestId("card-total-sales")
             ;
     }
 }

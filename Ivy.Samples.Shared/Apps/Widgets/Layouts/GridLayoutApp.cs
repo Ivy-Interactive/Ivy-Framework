@@ -2,7 +2,7 @@
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Layouts;
 
-[App(icon: Icons.Grid3x3)]
+[App(icon: Icons.Grid3x3, searchHints: ["layout", "grid", "columns", "rows", "responsive", "arrangement"])]
 public class GridLayoutApp : ViewBase
 {
     public override object? Build()

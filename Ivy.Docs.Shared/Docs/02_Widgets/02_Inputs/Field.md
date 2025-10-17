@@ -1,3 +1,13 @@
+---
+searchHints:
+  - label
+  - wrapper
+  - form-field
+  - input
+  - description
+  - help
+---
+
 # Field
 
 <Ingress>

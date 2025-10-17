@@ -1,3 +1,13 @@
+---
+searchHints:
+  - data
+  - format
+  - json
+  - syntax
+  - structure
+  - object
+---
+
 # Json
 
 The `Json` widget displays JSON data in a formatted, syntax-highlighted view. It's useful for debugging, data visualization, and displaying API responses.

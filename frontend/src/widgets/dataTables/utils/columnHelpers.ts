@@ -91,6 +91,9 @@ export function convertToGridColumns(
   return orderedColumns.map((col, index) => {
     const originalIndex = columns.indexOf(col);
     const baseWidth = columnWidths[originalIndex.toString()] || col.width;
+    // Ensure width is always a number
+    const numericBaseWidth =
+      typeof baseWidth === 'string' ? parseFloat(baseWidth) : baseWidth;
 
     // Make the last column fill the remaining space
     if (index === orderedColumns.length - 1 && containerWidth > 0) {
@@ -98,13 +101,16 @@ export function convertToGridColumns(
         .slice(0, -1)
         .reduce((sum, c) => {
           const idx = columns.indexOf(c);
-          return sum + (columnWidths[idx.toString()] || c.width);
+          const colWidth = columnWidths[idx.toString()] || c.width;
+          const numericColWidth =
+            typeof colWidth === 'string' ? parseFloat(colWidth) : colWidth;
+          return sum + numericColWidth;
         }, 0);
 
       const remainingWidth = containerWidth - totalWidthOfOtherColumns;
       return {
         title: col.header || col.name,
-        width: Math.max(baseWidth, remainingWidth) - 10,
+        width: Math.max(numericBaseWidth, remainingWidth) - 10,
         group: showGroups ? col.group : undefined,
         // TODO: Custom header rendering needed for Lucide icons
         // icon: col.icon ?? undefined,
@@ -113,7 +119,7 @@ export function convertToGridColumns(
 
     return {
       title: col.header || col.name,
-      width: baseWidth,
+      width: numericBaseWidth,
       group: showGroups ? col.group : undefined,
       // TODO: Custom header rendering needed for Lucide icons
       // icon: col.icon ?? undefined,

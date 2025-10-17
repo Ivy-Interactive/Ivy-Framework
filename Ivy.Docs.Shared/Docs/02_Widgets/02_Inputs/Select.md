@@ -1,3 +1,13 @@
+---
+searchHints:
+  - dropdown
+  - picker
+  - options
+  - choice
+  - select
+  - menu
+---
+
 # SelectInput
 
 <Ingress>

@@ -1,6 +1,13 @@
 ---
 prepare: |
   var client = this.UseService<IClientProvider>();
+searchHints:
+  - paging
+  - navigation
+  - pages
+  - next
+  - previous
+  - page-numbers
 ---
 
 # Pagination

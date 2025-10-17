@@ -3,7 +3,7 @@ using Ivy.Views.Builders;
 
 namespace Ivy.Samples.Shared.Apps.Concepts;
 
-[App(icon: Icons.Settings)]
+[App(icon: Icons.Settings, searchHints: ["properties", "fields", "display", "information", "view", "data"])]
 public class DetailsApp : SampleBase
 {
     protected override object? BuildSample()

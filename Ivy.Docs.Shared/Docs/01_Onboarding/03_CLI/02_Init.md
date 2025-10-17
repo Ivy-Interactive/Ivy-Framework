@@ -1,4 +1,14 @@
-﻿# Ivy Init - Getting Started
+﻿---
+searchHints:
+  - init
+  - create
+  - scaffold
+  - new-project
+  - setup
+  - initialize
+---
+
+# Ivy Init - Getting Started
 
 <Ingress>
 Quickly scaffold new Ivy projects with the necessary structure, configuration files, and boilerplate code using the init command.

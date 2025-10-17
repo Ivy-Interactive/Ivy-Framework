@@ -1,4 +1,14 @@
-﻿# Todo Tutorial
+﻿---
+searchHints:
+  - tutorial
+  - example
+  - todo
+  - walkthrough
+  - guide
+  - step-by-step
+---
+
+# Todo Tutorial
 
 <Ingress>
 Build a complete todo application from scratch to learn essential Ivy concepts including state management, components, and event handling.

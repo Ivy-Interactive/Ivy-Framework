@@ -1,3 +1,13 @@
+---
+searchHints:
+  - supabase
+  - authentication
+  - email
+  - social-login
+  - backend
+  - auth
+---
+
 # Supabase Authentication Provider
 
 <Ingress>

@@ -2,7 +2,12 @@
 export const tableStyles = {
   // Main Table component
   table: {
-    container: 'p-4',
+    container: {
+      padding: '1rem',
+      display: 'flex',
+      flexDirection: 'column',
+      height: '100%',
+    } as React.CSSProperties,
     heading: 'text-display-25 font-bold mb-4',
   },
 
@@ -36,14 +41,14 @@ export const tableStyles = {
   // TableEditor component
   tableEditor: {
     gridContainer: {
-      height: '600px',
+      height: '100%',
       width: '100%',
       border: '1px solid var(--border)',
       borderRadius: 'var(--radius)',
       overflow: 'hidden',
     },
     gridContainerWithOptions: {
-      height: '600px',
+      height: '100%',
       width: '100%',
       border: '1px solid var(--border)',
       borderTop: 'none',
