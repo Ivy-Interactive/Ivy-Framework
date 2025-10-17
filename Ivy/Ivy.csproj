@@ -53,7 +53,7 @@
     <PackageReference Include="Apache.Arrow" Version="15.0.0" />
     <PackageReference Include="ExcelNumberFormat" Version="1.1.0" />
     <PackageReference Include="Grpc.AspNetCore.Web" Version="2.71.0" />
-    <PackageReference Include="Microsoft.Extensions.AI.Abstractions" Version="9.10.0-preview.1.25513.3" />
+    <PackageReference Include="Microsoft.Extensions.AI.Abstractions" Version="9.10.0" />
     <PackageReference Include="Isopoh.Cryptography.Argon2" Version="2.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.9" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.2.0" />
