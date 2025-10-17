@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Copy, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface CopyToClipboardButtonProps {
@@ -6,70 +7,6 @@ interface CopyToClipboardButtonProps {
   label?: string;
   'aria-label'?: string;
 }
-
-// Simple overlapping squares icon to match the design
-const CopyIcon = ({
-  size = 16,
-  className,
-}: {
-  size?: number;
-  className?: string;
-}) => (
-  <svg
-    width={size}
-    height={size}
-    viewBox="0 0 16 16"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    className={className}
-  >
-    <rect
-      x="2"
-      y="2"
-      width="8"
-      height="8"
-      rx="1"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      fill="none"
-    />
-    <rect
-      x="6"
-      y="6"
-      width="8"
-      height="8"
-      rx="1"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      fill="none"
-    />
-  </svg>
-);
-
-const CheckIcon = ({
-  size = 16,
-  className,
-}: {
-  size?: number;
-  className?: string;
-}) => (
-  <svg
-    width={size}
-    height={size}
-    viewBox="0 0 16 16"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    className={className}
-  >
-    <path
-      d="M13.5 4.5L6 12L2.5 8.5"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
 
 const CopyToClipboardButton: React.FC<CopyToClipboardButtonProps> = ({
   textToCopy = '',
@@ -93,11 +30,11 @@ const CopyToClipboardButton: React.FC<CopyToClipboardButtonProps> = ({
       onClick={handleCopy}
       aria-label={ariaLabel || 'Copy to clipboard'}
       className={cn(
-        'flex items-center justify-center w-8 h-8 rounded transition-all duration-200 ease-in-out cursor-pointer',
-        'hover:bg-black/5 dark:hover:bg-white/5',
+        'flex items-center gap-1 px-3 py-2 rounded-lg transition-all duration-200 ease-in-out cursor-pointer',
+        'hover:bg-accent hover:shadow-sm',
         copied
-          ? 'text-green-600 dark:text-green-400'
-          : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+          ? 'bg-primary/10 text-primary'
+          : 'bg-transparent text-muted-foreground hover:text-foreground'
       )}
     >
       <span className="relative w-4 h-4">
@@ -107,7 +44,7 @@ const CopyToClipboardButton: React.FC<CopyToClipboardButtonProps> = ({
             copied ? 'scale-0' : 'scale-100'
           )}
         >
-          <CopyIcon size={16} />
+          <Copy size={16} />
         </span>
         <span
           className={cn(
@@ -115,13 +52,11 @@ const CopyToClipboardButton: React.FC<CopyToClipboardButtonProps> = ({
             copied ? 'scale-100' : 'scale-0'
           )}
         >
-          <CheckIcon size={16} />
+          <Check size={16} />
         </span>
       </span>
       {label && (
-        <span className="text-small-label ml-1">
-          {copied ? 'Copied!' : label}
-        </span>
+        <span className="text-small-label">{copied ? 'Copied!' : label}</span>
       )}
     </button>
   );
