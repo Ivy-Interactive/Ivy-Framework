@@ -8,6 +8,7 @@ import * as Blades from '@/widgets/blades';
 import * as Lists from '@/widgets/lists';
 import * as Details from '@/widgets/details';
 import * as Primitives from '@/widgets/primitives';
+import * as Kanban from '@/widgets/kanban';
 import React from 'react';
 import { LoadingScreen } from '@/components/LoadingScreen';
 
@@ -132,6 +133,11 @@ export const widgetMap = {
   'Ivy.Animation': React.lazy(
     () => import('@/widgets/effects/AnimationWidget')
   ),
+
+  // Kanban
+  'Ivy.Kanban': Kanban.KanbanWidget,
+  'Ivy.KanbanColumn': Kanban.KanbanColumnWidget,
+  'Ivy.KanbanCard': Kanban.KanbanCardWidget,
 
   // Internal
   'Ivy.DemoBox': React.lazy(() => import('@/widgets/internal/DemoBoxWidget')),
