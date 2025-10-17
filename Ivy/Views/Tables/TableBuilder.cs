@@ -141,10 +141,10 @@ public class TableBuilder<TModel> : ViewBase, IStateless
 
         baseWidth = column.Type switch
         {
-            var t when t?.IsNumeric() == true => Math.Max(baseWidth, 12),
-            var t when t == typeof(DateTime) || t == typeof(DateOnly) => Math.Max(baseWidth, 18),
+            var t when t?.IsNumeric() == true => Math.Max(baseWidth, 25),
+            var t when t == typeof(DateTime) || t == typeof(DateOnly) => Math.Max(baseWidth, 25),
             var t when t == typeof(bool) => Math.Max(baseWidth, 10),
-            var t when t == typeof(string) => Math.Max(baseWidth, 20),
+            var t when t == typeof(string) => Math.Max(baseWidth, 25),
             _ => baseWidth
         };
 
