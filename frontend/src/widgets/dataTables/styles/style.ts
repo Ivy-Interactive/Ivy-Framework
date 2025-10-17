@@ -70,7 +70,7 @@ export const tableStyles = {
         outline: none !important;
       }
       .query-editor-wrapper .cm-content {
-        padding: 10px 40px 10px 16px;
+        padding: 11px 40px 10px 16px;
         min-height: auto;
       }
 

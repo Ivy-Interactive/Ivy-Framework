@@ -69,7 +69,7 @@ export const DataTableOptions: React.FC<{
           value={query}
           columns={queryEditorColumns}
           onChange={handleQueryChange}
-          placeholder='e.g., name = "John" AND age > 18 '
+          placeholder='e.g., [Name] = "John" AND [Age] > 18'
           height={40}
           className="font-mono rounded-lg border shadow-sm [&:focus-within]:ring-1 [&:focus-within]:ring-ring"
         />
