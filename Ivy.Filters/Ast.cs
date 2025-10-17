@@ -59,7 +59,36 @@ public enum FieldType
 /// <summary>
 /// Metadata about a column including display name, internal ID, and data type
 /// </summary>
-public record FieldMeta(string DisplayName, string ColId, FieldType Type);
+public record FieldMeta(string DisplayName, string ColId, FieldType Type)
+{
+    /// <summary>
+    /// Constructor for creating FieldMeta from a PropertyInfo
+    /// </summary>
+    public FieldMeta(string name, Type propertyType)
+        : this(name, name, MapToFieldType(propertyType))
+    {
+    }
+
+    private static FieldType MapToFieldType(Type type)
+    {
+        var underlyingType = Nullable.GetUnderlyingType(type) ?? type;
+
+        if (underlyingType == typeof(string))
+            return FieldType.Text;
+        if (underlyingType == typeof(int) || underlyingType == typeof(long) ||
+            underlyingType == typeof(decimal) || underlyingType == typeof(double) ||
+            underlyingType == typeof(float))
+            return FieldType.Number;
+        if (underlyingType == typeof(DateTime))
+            return FieldType.DateTime;
+        if (underlyingType == typeof(DateOnly))
+            return FieldType.Date;
+        if (underlyingType == typeof(bool))
+            return FieldType.Boolean;
+
+        return FieldType.Text; // Default
+    }
+}
 
 /// <summary>
 /// Leaf node representing a single filter condition on a column
