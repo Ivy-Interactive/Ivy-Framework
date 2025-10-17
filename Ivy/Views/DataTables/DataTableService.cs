@@ -15,11 +15,10 @@ namespace Ivy.Views.DataTables;
 
 public class TableService(
     IQueryableRegistry queryableRegistry,
-    ILogger<TableService>? logger = null,
     IDistributedCache? cache = null)
     : DataTableService.DataTableServiceBase
 {
-    public override async Task<DataTableResult> Query(DataTableQuery request, ServerCallContext context)
+    public override Task<DataTableResult> Query(DataTableQuery request, ServerCallContext context)
     {
         try
         {
@@ -36,47 +35,47 @@ public class TableService(
 
             DataTableQuery queryToUse = request;
 
-            if (request.Filter != null && !string.IsNullOrWhiteSpace(request.Filter.InvalidQuery))
-            {
-                var configuration = new ConfigurationBuilder()
-                    .AddUserSecrets<TableService>()
-                    .Build();
+            // if (request.Filter != null && !string.IsNullOrWhiteSpace(request.Filter.InvalidQuery))
+            // {
+            //     var configuration = new ConfigurationBuilder()
+            //         .AddUserSecrets<TableService>()
+            //         .Build();
 
-                var endpoint = configuration["OpenAi:Endpoint"] ?? throw new InvalidOperationException("OpenAi:Endpoint not found in user secrets");
-                var apiKey = configuration["OpenAi:ApiKey"] ?? throw new InvalidOperationException("OpenAi:ApiKey not found in user secrets");
+            //     var endpoint = configuration["OpenAi:Endpoint"] ?? throw new InvalidOperationException("OpenAi:Endpoint not found in user secrets");
+            //     var apiKey = configuration["OpenAi:ApiKey"] ?? throw new InvalidOperationException("OpenAi:ApiKey not found in user secrets");
 
-                // Create OpenAI client
-                var openAiClient = new OpenAIClient(new System.ClientModel.ApiKeyCredential(apiKey), new OpenAIClientOptions
-                {
-                    Endpoint = new Uri(endpoint)
-                });
+            //     // Create OpenAI client
+            //     var openAiClient = new OpenAIClient(new System.ClientModel.ApiKeyCredential(apiKey), new OpenAIClientOptions
+            //     {
+            //         Endpoint = new Uri(endpoint)
+            //     });
 
-                // Convert OpenAI ChatClient to IChatClient
-                var openAIChatClient = openAiClient.GetChatClient("gpt-4o");
-                var chatClient = openAIChatClient.AsIChatClient();
+            //     // Convert OpenAI ChatClient to IChatClient
+            //     var openAIChatClient = openAiClient.GetChatClient("gpt-4o");
+            //     var chatClient = openAIChatClient.AsIChatClient();
 
-                var agent = new FilterParserAgent(chatClient, logger);
-                var agentResult = await agent.Parse(request.Filter.InvalidQuery, queryable.ElementType.GetProperties().Select(p => new FieldMeta(p.Name, p.PropertyType)).ToArray());
+            //     var agent = new FilterParserAgent(chatClient, logger);
+            //     var agentResult = await agent.Parse(request.Filter.InvalidQuery, queryable.ElementType.GetProperties().Select(p => new FieldMeta(p.Name, p.PropertyType)).ToArray());
 
-                if (agentResult.HasErrors || agentResult.ProtoFilter == null)
-                {
-                    var errorMessage = agentResult.Diagnostics.FirstOrDefault()?.Message ?? "Failed to parse filter query";
-                    throw new RpcException(new Status(StatusCode.InvalidArgument, $"Invalid filter query: {errorMessage}"));
-                }
+            //     if (agentResult.HasErrors || agentResult.ProtoFilter == null)
+            //     {
+            //         var errorMessage = agentResult.Diagnostics.FirstOrDefault()?.Message ?? "Failed to parse filter query";
+            //         throw new RpcException(new Status(StatusCode.InvalidArgument, $"Invalid filter query: {errorMessage}"));
+            //     }
 
-                // Use the agent's parsed filter
-                queryToUse = new DataTableQuery
-                {
-                    SourceId = request.SourceId,
-                    ConnectionId = request.ConnectionId,
-                    Filter = (Filter)agentResult.ProtoFilter,
-                    Offset = request.Offset,
-                    Limit = request.Limit
-                };
-                queryToUse.Sort.AddRange(request.Sort);
-                queryToUse.SelectColumns.AddRange(request.SelectColumns);
-                queryToUse.Aggregations.AddRange(request.Aggregations);
-            }
+            //     // Use the agent's parsed filter
+            //     queryToUse = new DataTableQuery
+            //     {
+            //         SourceId = request.SourceId,
+            //         ConnectionId = request.ConnectionId,
+            //         Filter = (Filter)agentResult.ProtoFilter,
+            //         Offset = request.Offset,
+            //         Limit = request.Limit
+            //     };
+            //     queryToUse.Sort.AddRange(request.Sort);
+            //     queryToUse.SelectColumns.AddRange(request.SelectColumns);
+            //     queryToUse.Aggregations.AddRange(request.Aggregations);
+            // }
 
             var queryProcessor = new QueryProcessor(logger: null, cache: cache);
             var queryResult = queryProcessor.ProcessQuery(queryable, queryToUse);
@@ -89,7 +88,7 @@ public class TableService(
                 TotalRows = queryResult.TotalRows
             };
 
-            return tableResult;
+            return Task.FromResult(tableResult);
         }
         catch (RpcException)
         {
