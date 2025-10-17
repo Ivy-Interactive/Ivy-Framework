@@ -143,12 +143,36 @@ public class FormApp : SampleBase
             ).Width(1 / 2f)
         );
 
+        // Form Size Examples
+        var sizeModel = UseState(() => new UserModel("John Doe", "password", true, DateTime.Parse("1990-01-01"), 175));
+
+        FormBuilder<UserModel> BuildSizeForm(IState<UserModel> x) =>
+            x.ToForm()
+                .Remove(m => m.UserId)
+                .Remove(m => m.Json)
+                .Remove(m => m.FavoriteFruits)
+                .Builder(m => m.Gender, s => s.ToSelectInput());
+
+        var sizeFormsLayout = Layout.Horizontal()
+            | new Card(
+                BuildSizeForm(sizeModel).Small()
+            ).Width(1 / 3f).Title("Small Form")
+            | new Card(
+                BuildSizeForm(sizeModel)
+            ).Width(1 / 3f).Title("Medium Form (Default)")
+            | new Card(
+                BuildSizeForm(sizeModel).Large()
+            ).Width(1 / 3f).Title("Large Form");
+
         return Layout.Vertical()
                | (Layout.Horizontal()
                   | new Button("Open in Sheet").ToTrigger((isOpen) => BuildForm(model).ToSheet(isOpen, "User Information", "Please fill in the form."))
                   | new Button("Open in Dialog").ToTrigger((isOpen) => BuildForm(model).ToDialog(isOpen, "User Information", "Please fill in the form.", width: Size.Units(200)))
                )
                | form0
+               | new Separator()
+               | Text.H3("Form Sizes")
+               | sizeFormsLayout
                | new Separator()
                | Text.H3("Database Generator Form Test")
                | databaseForm

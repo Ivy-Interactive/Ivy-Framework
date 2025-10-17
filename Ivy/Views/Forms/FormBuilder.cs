@@ -4,6 +4,7 @@ using Ivy.Core;
 using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
 using Ivy.Hooks;
+using Ivy.Shared;
 using Ivy.Widgets.Inputs;
 
 namespace Ivy.Views.Forms;
@@ -129,6 +130,9 @@ public class FormBuilder<TModel> : ViewBase
 
     /// <summary>The validation strategy for form fields. Default is OnBlur.</summary>
     public FormValidationStrategy ValidationStrategy { get; set; } = FormValidationStrategy.OnBlur;
+
+    /// <summary>The size of the form (Medium, Small, Large). Default is Medium.</summary>
+    public Sizes Size { get; set; } = Sizes.Medium;
 
     /// <summary>Initializes form builder for specified model state with automatic field scaffolding.</summary>
     /// <param name="model">Reactive state containing model object to be edited by form.</param>
@@ -605,7 +609,8 @@ public class FormBuilder<TModel> : ViewBase
 
         var formView = new FormView<TModel>(
             fieldViews,
-            HandleSubmitEvent
+            HandleSubmitEvent,
+            Size
         );
 
         var validationView = new WrapperView(Layout.Vertical(

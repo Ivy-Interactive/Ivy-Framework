@@ -108,4 +108,29 @@ public static class UseFormExtensions
         );
 
     }
+
+    /// <summary>Sets the size of the form.</summary>
+    /// <param name="formBuilder">The form builder to configure.</param>
+    /// <param name="size">The size to apply to the form.</param>
+    public static FormBuilder<TModel> Size<TModel>(this FormBuilder<TModel> formBuilder, Sizes size)
+    {
+        formBuilder.Size = size;
+        return formBuilder;
+    }
+
+    /// <summary>Sets the form size to large for prominent display.</summary>
+    /// <param name="formBuilder">The form builder to configure.</param>
+    /// <returns>The form builder instance with large size applied.</returns>
+    public static FormBuilder<TModel> Large<TModel>(this FormBuilder<TModel> formBuilder)
+    {
+        return formBuilder.Size(Sizes.Large);
+    }
+
+    /// <summary>Sets the form size to small for compact display.</summary>
+    /// <param name="formBuilder">The form builder to configure.</param>
+    /// <returns>The form builder instance with small size applied.</returns>
+    public static FormBuilder<TModel> Small<TModel>(this FormBuilder<TModel> formBuilder)
+    {
+        return formBuilder.Size(Sizes.Small);
+    }
 }

@@ -1,15 +1,34 @@
 import React, { useEffect, useRef } from 'react';
 import { useEventHandler } from '@/components/event-handler';
 import { logger } from '@/lib/logger';
+import { Sizes } from '@/types/sizes';
+import { cn } from '@/lib/utils';
 
 interface FormWidgetProps {
   id: string;
   children?: React.ReactNode;
+  size?: Sizes;
 }
 
-export const FormWidget: React.FC<FormWidgetProps> = ({ id, children }) => {
+export const FormWidget: React.FC<FormWidgetProps> = ({
+  id,
+  children,
+  size = Sizes.Medium,
+}) => {
   const formRef = useRef<HTMLDivElement>(null);
   const eventHandler = useEventHandler();
+
+  // Determine font size and spacing based on size
+  const getSizeClasses = (size: Sizes) => {
+    switch (size) {
+      case Sizes.Small:
+        return 'text-xs gap-3 [&_input]:text-xs [&_input]:h-8 [&_input]:px-2 [&_input]:py-1 [&_textarea]:text-xs [&_textarea]:min-h-[60px] [&_select]:text-xs [&_select]:h-8 [&_label]:text-xs [&_p]:text-xs [&_button]:text-xs [&_button]:h-8 [&_button]:px-3';
+      case Sizes.Large:
+        return 'text-base gap-6 [&_input]:text-base [&_input]:h-12 [&_input]:px-4 [&_input]:py-3 [&_textarea]:text-base [&_textarea]:min-h-[120px] [&_select]:text-base [&_select]:h-12 [&_label]:text-base [&_p]:text-base [&_button]:text-base [&_button]:h-12 [&_button]:px-6';
+      default:
+        return 'text-sm gap-4 [&_input]:text-sm [&_input]:h-10 [&_input]:px-3 [&_input]:py-2 [&_textarea]:text-sm [&_textarea]:min-h-[80px] [&_select]:text-sm [&_select]:h-10 [&_label]:text-sm [&_p]:text-sm [&_button]:text-sm [&_button]:h-10 [&_button]:px-4';
+    }
+  };
 
   useEffect(() => {
     const form = formRef.current;
@@ -71,5 +90,9 @@ export const FormWidget: React.FC<FormWidgetProps> = ({ id, children }) => {
     };
   }, [id, eventHandler]);
 
-  return <div ref={formRef}>{children}</div>;
+  return (
+    <div ref={formRef} className={cn('flex flex-col', getSizeClasses(size))}>
+      {children}
+    </div>
+  );
 };
