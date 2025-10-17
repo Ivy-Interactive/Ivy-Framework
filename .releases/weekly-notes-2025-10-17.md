@@ -100,7 +100,7 @@ UseEffect(() => {
 return contact.ToForm().Required(m => m.Name, m => m.Email);
 ```
 
-Fields will now also validate as soon as user blur's out of them.
+Fields will now also validate as soon as user blurs out of them.
 
 ### Enhanced Form Validation
 
