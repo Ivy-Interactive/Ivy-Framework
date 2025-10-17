@@ -237,6 +237,8 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         return this;
     }
 
+    /// <summary>Sets the multi-line flag for a column.</summary>
+    /// <param name="fields">Expressions identifying the columns to set multi-line for.</param>
     public TableBuilder<TModel> MultiLine(params Expression<Func<TModel, object>>[] fields)
     {
         foreach (var field in fields)
