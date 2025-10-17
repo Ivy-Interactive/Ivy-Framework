@@ -1,15 +1,16 @@
-import * as Widgets from '@/widgets';
-import * as Layouts from '@/widgets/layouts';
-import * as Inputs from '@/widgets/inputs';
-import * as Forms from '@/widgets/forms';
-import * as Dialogs from '@/widgets/dialogs';
-import * as Tables from '@/widgets/tables';
-import * as Blades from '@/widgets/blades';
-import * as Lists from '@/widgets/lists';
-import * as Details from '@/widgets/details';
-import * as Primitives from '@/widgets/primitives';
-import React from 'react';
 import { LoadingScreen } from '@/components/LoadingScreen';
+import * as Widgets from '@/widgets';
+import * as Blades from '@/widgets/blades';
+import * as Details from '@/widgets/details';
+import * as Dialogs from '@/widgets/dialogs';
+import * as Forms from '@/widgets/forms';
+import * as Inputs from '@/widgets/inputs';
+import * as Layouts from '@/widgets/layouts';
+import * as Lists from '@/widgets/lists';
+import * as Primitives from '@/widgets/primitives';
+import { DataTable } from '@/widgets/dataTables';
+import { TableWidget, TableRowWidget, TableCellWidget } from '@/widgets/tables';
+import React from 'react';
 
 export const widgetMap = {
   $loading: LoadingScreen,
@@ -109,9 +110,12 @@ export const widgetMap = {
   'Ivy.Blade': Blades.BladeWidget,
 
   // Tables
-  'Ivy.Table': Tables.TableWidget,
-  'Ivy.TableRow': Tables.TableRowWidget,
-  'Ivy.TableCell': Tables.TableCellWidget,
+  'Ivy.Table': TableWidget,
+  'Ivy.TableRow': TableRowWidget,
+  'Ivy.TableCell': TableCellWidget,
+
+  // DataTables
+  'Ivy.DataTable': DataTable,
 
   // Lists
   'Ivy.List': Lists.ListWidget,

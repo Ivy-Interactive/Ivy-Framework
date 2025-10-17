@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using Ivy.Apps;
@@ -9,6 +10,7 @@ using Ivy.Helpers;
 using Ivy.Hooks;
 using Ivy.Services;
 using Ivy.Views;
+using Ivy.Views.DataTables;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
@@ -21,7 +23,8 @@ public class AppHub(
     IClientNotifier clientNotifier,
     IContentBuilder contentBuilder,
     AppSessionStore sessionStore,
-    ILogger<AppHub> logger
+    ILogger<AppHub> logger,
+    IQueryableRegistry queryableRegistry
     ) : Hub
 {
     public static string GetAppId(Server server, HttpContext httpContext)
@@ -131,6 +134,10 @@ public class AppHub(
             appServices.AddSingleton(typeof(IContentBuilder), contentBuilder);
             appServices.AddSingleton(typeof(IAppRepository), server.AppRepository);
             appServices.AddSingleton(typeof(IDownloadService), new DownloadService(Context.ConnectionId));
+            appServices.AddSingleton(typeof(IDataTableService), new DataTableConnectionService(
+                queryableRegistry,
+                server.Args,
+                Context.ConnectionId));
             appServices.AddSingleton(typeof(IUploadService), new UploadService(Context.ConnectionId));
             appServices.AddSingleton(typeof(IClientProvider), clientProvider);
             appServices.AddSingleton(appDescriptor);

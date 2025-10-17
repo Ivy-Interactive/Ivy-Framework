@@ -41,9 +41,16 @@ This project and everyone participating in it is governed by our [Code of Conduc
   ```bash
   # For stable releases
   dotnet tool install -g Ivy.Console
-  
+
   # For prerelease versions (recommended for contributors)
   dotnet tool install -g Ivy.Console --prerelease
+  ```
+
+  - **ARM Mac Users**: [Rosetta 2](https://support.apple.com/en-us/HT211861) is required for the Google Protocol Buffers package to work properly:
+
+  ```bash
+  # Install Rosetta 2 if not already installed
+  /usr/sbin/softwareupdate --install-rosetta --agree-to-license
   ```
 
 ### Setup Steps
@@ -58,6 +65,7 @@ This project and everyone participating in it is governed by our [Code of Conduc
 2. **Follow the development setup in the main [README.md](README.md#developer-build)**
 
    The main README contains detailed instructions for:
+
    - Building the frontend
    - Pre-generating documentation files
    - Running the backend (Ivy.Samples or Ivy.Docs)
@@ -90,6 +98,7 @@ npm run e2e:samples
 **Important**: Always use the npm scripts (`npm run e2e*`) instead of `npx playwright test` to ensure consistent usage of the locally installed Playwright version and avoid version conflicts.
 
 Additional Playwright options can be passed after `--`:
+
 ```bash
 npm run e2e -- --headed  # Run tests in headed mode
 npm run e2e -- --debug   # Run tests in debug mode
@@ -216,12 +225,14 @@ Before submitting your widget PR, ensure you have:
    ```
 
 3. **Ensure your code follows our standards:**
+
    - Passes all tests
    - Follows code style guidelines
    - Includes appropriate documentation
    - Doesn't introduce new warnings
 
 4. **Update documentation** if your changes affect:
+
    - Public APIs
    - User-facing features
    - Installation or setup processes
