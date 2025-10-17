@@ -129,9 +129,40 @@ public class TableBuilder<TModel> : ViewBase, IStateless
 
             var removed = field.Name.StartsWith("_") && field.Name.Length > 1;
 
-            _columns[field.Name] =
-                new TableBuilderColumn(field.Name, order++, cellBuilder, cellAlignment, field.FieldInfo, field.PropertyInfo, removed);
+            var column = new TableBuilderColumn(field.Name, order++, cellBuilder, cellAlignment, field.FieldInfo, field.PropertyInfo, removed);
+            column.Width = CalculateSmartDefaultWidth(column);
+            _columns[field.Name] = column;
         }
+    }
+
+    private int CalculateColumnWidth(TableBuilderColumn column)
+    {
+        var baseWidth = Math.Max(15, column.Header.Length + 2);
+
+        baseWidth = column.Type switch
+        {
+            var t when t?.IsNumeric() == true => Math.Max(baseWidth, 12),
+            var t when t == typeof(DateTime) || t == typeof(DateOnly) => Math.Max(baseWidth, 18),
+            var t when t == typeof(bool) => Math.Max(baseWidth, 10),
+            var t when t == typeof(string) => Math.Max(baseWidth, 20),
+            _ => baseWidth
+        };
+
+        return Math.Min(baseWidth, 50);
+    }
+
+    private Size CalculateSmartDefaultWidth(TableBuilderColumn column) =>
+        Size.Units(CalculateColumnWidth(column));
+
+    private Size CalculateSmartTableWidth()
+    {
+        var visibleColumns = _columns.Values.Where(e => !e.Removed).ToList();
+        if (!visibleColumns.Any()) return Size.Units(100);
+
+        var totalWidth = visibleColumns.Sum(CalculateColumnWidth);
+        var calculatedWidth = Math.Max(100, Math.Min(400, totalWidth));
+
+        return Size.Units(calculatedWidth);
     }
 
     /// <summary>Sets the overall table width.</summary>
@@ -152,8 +183,6 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         return this;
     }
 
-    /// <summary>Gets the column configuration for a field expression.</summary>
-    /// <param name="field">Expression identifying the field to get configuration for.</param>
     private TableBuilderColumn GetField(Expression<Func<TModel, object>> field)
     {
         var name = Utils.GetNameFromMemberExpression(field.Body);
@@ -336,8 +365,8 @@ public class TableBuilder<TModel> : ViewBase, IStateless
 
         Table RenderTable(TableRow[] tableRows)
         {
-            var table = new Table(tableRows).Width(_width);
-            return table;
+            var tableWidth = _width ?? CalculateSmartTableWidth();
+            return new Table(tableRows).Width(tableWidth);
         }
 
         TableCell RenderCell(int index, TableBuilderColumn column, object? content, bool isHeader, bool isFooter)
@@ -417,7 +446,7 @@ public class TableBuilder<TModel> : ViewBase, IStateless
 }
 
 /// <summary>
-/// Factory for creating table builders from generic collections.
+/// <summary>Factory for creating table builders from generic collections.</summary>
 /// </summary>
 public static class TableBuilderFactory
 {
