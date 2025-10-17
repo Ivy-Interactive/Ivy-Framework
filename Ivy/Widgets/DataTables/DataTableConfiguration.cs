@@ -18,7 +18,7 @@ public class DataTableConfiguration
 public enum SelectionModes
 {
     None,
-    Row,
-    Column,
-    Cell
+    Rows,
+    Columns,
+    Cells
 }
