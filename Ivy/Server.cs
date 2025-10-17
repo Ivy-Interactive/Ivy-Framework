@@ -9,6 +9,7 @@ using Ivy.Connections;
 using Ivy.Core;
 using Ivy.Themes;
 using Ivy.Views;
+using Ivy.Views.DataTables;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http; //do not remove - used in RELEASE
@@ -352,6 +353,8 @@ public class Server
         builder.Services.AddControllers()
             .AddApplicationPart(Assembly.Load("Ivy"))
             .AddControllersAsServices();
+        builder.Services.AddGrpc();
+        builder.Services.AddSingleton<IQueryableRegistry, QueryableRegistry>();
         builder.Services.AddSingleton(_contentBuilder ?? new DefaultContentBuilder());
         builder.Services.AddSingleton(sessionStore);
         builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
@@ -428,10 +431,12 @@ public class Server
 
         app.UseRouting();
         app.UseCors();
+        app.UseGrpcWeb();
 
         app.MapControllers();
         app.MapHub<AppHub>("/messages");
         app.MapHealthChecks("/health");
+        app.MapGrpcService<TableService>().EnableGrpcWeb();
 
         if (_useHotReload)
         {
