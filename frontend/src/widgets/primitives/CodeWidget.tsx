@@ -42,12 +42,6 @@ const mapLanguageToPrism = (language: string): string | undefined => {
   return result === 'text' ? undefined : result;
 };
 
-const CodePanel = memo(({ textToCopy }: { textToCopy: string }) => (
-  <div className="absolute -top-10 right-0 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-    <CopyToClipboardButton textToCopy={textToCopy} />
-  </div>
-));
-
 const CodeWidget: React.FC<CodeWidgetProps> = memo(
   ({
     id,
@@ -84,37 +78,48 @@ const CodeWidget: React.FC<CodeWidgetProps> = memo(
     const dynamicTheme = useMemo(() => createPrismTheme(), []);
 
     return (
-      <div className="relative group">
-        {showCopyButton && <CodePanel textToCopy={content} />}
-        <ScrollArea
+      <div className="group">
+        <div
           className={cn(
-            'w-full h-full',
-            showBorder && 'border border-border rounded-md'
+            'w-full',
+            showBorder && 'border border-border rounded-md overflow-hidden'
           )}
         >
-          <Suspense
-            fallback={
-              <pre
-                className="p-4 bg-muted rounded-md font-mono text-sm"
-                style={styles}
+          {showCopyButton && (
+            <div className="flex items-center justify-between px-3 py-2 bg-muted/50 border-b border-border">
+              <div className="flex items-center gap-2">
+                <span className="px-2 py-1 text-xs font-medium bg-muted rounded text-muted-foreground">
+                  {language}
+                </span>
+              </div>
+              <CopyToClipboardButton textToCopy={content} />
+            </div>
+          )}
+          <ScrollArea className="w-full h-full">
+            <Suspense
+              fallback={
+                <pre
+                  className="p-4 bg-muted rounded-md font-mono text-sm"
+                  style={styles}
+                >
+                  {content}
+                </pre>
+              }
+            >
+              <SyntaxHighlighter
+                language={mapLanguageToPrism(language)}
+                customStyle={styles}
+                style={dynamicTheme}
+                showLineNumbers={showLineNumbers}
+                wrapLines={true}
+                key={highlighterKey}
               >
                 {content}
-              </pre>
-            }
-          >
-            <SyntaxHighlighter
-              language={mapLanguageToPrism(language)}
-              customStyle={styles}
-              style={dynamicTheme}
-              showLineNumbers={showLineNumbers}
-              wrapLines={true}
-              key={highlighterKey}
-            >
-              {content}
-            </SyntaxHighlighter>
-          </Suspense>
-          <ScrollBar orientation="horizontal" />
-        </ScrollArea>
+              </SyntaxHighlighter>
+            </Suspense>
+            <ScrollBar orientation="horizontal" />
+          </ScrollArea>
+        </div>
       </div>
     );
   }
