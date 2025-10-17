@@ -40,6 +40,7 @@ message Filter {
     FilterGroup group = 2;
   }
   bool negate = 3;
+  string invalid_query = 4; // When set, indicates an unparseable query that should be processed by the agent
 }
 
 message Condition {

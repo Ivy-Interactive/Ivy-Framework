@@ -58,6 +58,12 @@ public record FilterParseResult
     public bool HasErrors => Diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error);
     public UsageInfo? Usage { get; init; }
     public int Iterations { get; init; }
+
+    /// <summary>
+    /// Gets the protobuf Filter object that can be passed to QueryProcessor.
+    /// This is lazily computed from the Model property.
+    /// </summary>
+    public object? ProtoFilter => Model != null ? ProtoFilterConverter.ConvertToProtoFilter(Model) : null;
 }
 
 /// <summary>

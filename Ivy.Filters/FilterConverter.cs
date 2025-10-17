@@ -45,10 +45,10 @@ public class FilterConverter
                 return ConvertLeaf(leaf with { Op = negatedOp.Value });
             }
         }
-        
+
         return new GroupFilterModel
         {
-            Type = "AND", 
+            Type = "AND",
             Conditions = [ConvertToModel(inner)]
         };
     }

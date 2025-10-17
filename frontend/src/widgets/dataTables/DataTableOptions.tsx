@@ -26,6 +26,9 @@ export const TableOptions: React.FC<{
       setActiveFilter(null);
     } else if (event.isValid && event.filters) {
       setPendingFilter({ group: event.filters });
+    } else if (event.text.trim()) {
+      // Query is invalid but has text - set it as invalidQuery for agent processing
+      setPendingFilter({ invalidQuery: event.text });
     } else {
       setPendingFilter(null);
     }

@@ -38,9 +38,9 @@ public class FilterParser
             var parser = new FiltersParser(tokenStream);
             parser.RemoveErrorListeners();
             parser.AddErrorListener(errorListener);
-            
+
             var parseTree = parser.formula();
-            
+
             if (errorListener.Diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error))
             {
                 return new FilterParseResult
@@ -48,10 +48,10 @@ public class FilterParser
                     Diagnostics = errorListener.Diagnostics
                 };
             }
-            
+
             var visitor = new FilterAstVisitor(_fieldsByDisplayName, errorListener);
             var ast = visitor.Visit(parseTree);
-            
+
             if (errorListener.Diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error))
             {
                 return new FilterParseResult
@@ -60,7 +60,7 @@ public class FilterParser
                     Diagnostics = errorListener.Diagnostics
                 };
             }
-            
+
             var converter = new FilterConverter();
             var model = converter.ConvertToModel(ast);
 
