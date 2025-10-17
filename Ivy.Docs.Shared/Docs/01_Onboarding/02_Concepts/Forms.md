@@ -290,7 +290,6 @@ public class CustomSubmitTitleFormExample : ViewBase
 }
 ```
 
-
 ### Custom Validation
 
 Add custom validation logic using `.Validate()` method.
@@ -330,7 +329,7 @@ public class ValidationExample : ViewBase
 
 ### Basic Form Submission
 
-Use the `.UseForm()` method to get form submission handling.
+Forms automatically handle submission when the user presses Enter or clicks the built-in submit button. When a form is submitted successfully, it updates the model state, which triggers any `UseEffect` watching that state.
 
 ```csharp demo-tabs
 public class FormSubmissionExample : ViewBase
@@ -340,33 +339,25 @@ public class FormSubmissionExample : ViewBase
     public override object? Build()
     {
         var contact = UseState(() => new ContactModel("", "", ""));
-        var formBuilder = contact.ToForm()
-            .Required(m => m.Name, m => m.Email, m => m.Message);
+        var client = UseService<IClientProvider>();
         
-        var (onSubmit, formView, validationView, loading) = formBuilder.UseForm(this.Context);
-        
-        async ValueTask HandleSubmit()
+        UseEffect(() =>
         {
-            if (await onSubmit())
+            if (!string.IsNullOrEmpty(contact.Value.Name))
             {
-                // Form data is automatically copied to contact.Value
-                // You can access the client service here if needed
+                client.Toast($"Message from {contact.Value.Name} sent successfully!");
             }
-        }
+        }, contact);
         
-        return Layout.Vertical()
-            | formView
-            | (Layout.Horizontal()
-                | new Button("Send Message").HandleClick(_ => HandleSubmit())
-                    .Loading(loading).Disabled(loading)
-                | validationView);
+        return contact.ToForm()
+            .Required(m => m.Name, m => m.Email, m => m.Message);
     }
 }
 ```
 
-### Form States and Loading
+### Form Submission with State Updates
 
-Handle different form states including loading and validation.
+React to form submission by watching the model state with `UseEffect`. The form automatically updates the state when submitted successfully.
 
 ```csharp demo-tabs
 public class FormStatesExample : ViewBase
@@ -381,26 +372,20 @@ public class FormStatesExample : ViewBase
     public override object? Build()
     {
         var order = UseState(() => new OrderModel("", "", 1, 0.0m));
-        var formBuilder = order.ToForm()
-            .Required(m => m.CustomerName, m => m.ProductName, m => m.Quantity, m => m.UnitPrice);
+        var client = UseService<IClientProvider>();
         
-        var (onSubmit, formView, validationView, loading) = formBuilder.UseForm(this.Context);
-        
-        async ValueTask HandleSubmit()
+        UseEffect(() =>
         {
-            if (await onSubmit())
+            if (!string.IsNullOrEmpty(order.Value.CustomerName))
             {
                 var total = order.Value.Quantity * order.Value.UnitPrice;
-                // Handle success - you can access the client service here if needed
+                client.Toast($"Order created! Total: ${total:F2}");
             }
-        }
+        }, order);
         
         return Layout.Vertical()
-            | formView
-            | (Layout.Horizontal()
-                | new Button("Create Order").HandleClick(_ => HandleSubmit())
-                    .Loading(loading).Disabled(loading)
-                | validationView)
+            | order.ToForm()
+                .Required(m => m.CustomerName, m => m.ProductName, m => m.Quantity, m => m.UnitPrice)
             | Text.Block($"Total: ${order.Value.Quantity * order.Value.UnitPrice:F2}");
     }
 }
