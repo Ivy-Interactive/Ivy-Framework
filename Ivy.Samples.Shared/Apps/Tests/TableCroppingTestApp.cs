@@ -44,7 +44,7 @@ public class TableTestBlade : ViewBase
                 .Header(e => e.Priority, "Priority"),
             footer:
                 Layout.Horizontal().Gap(2).Width(Size.Full())
-                | new Button("+ Add Project").Icon(Icons.Plus)
+                | new Button("Add Project").Icon(Icons.Plus)
                 | Icons.RefreshCw.ToButton()
             ).Title("Projects Table - Testing Cropping Issue");
 
