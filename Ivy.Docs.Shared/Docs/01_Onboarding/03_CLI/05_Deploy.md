@@ -25,7 +25,10 @@ Ivy supports the following cloud deployment providers:
 - **AWS** - Amazon Web Services
 - **Azure** - Microsoft Azure
 - **GCP** - Google Cloud Platform
+<<<<<<< HEAD
 - **Sliplane** - Container deployment platform
+=======
+>>>>>>> epic/kanban
 
 ## Basic Usage
 
@@ -61,7 +64,11 @@ This command will:
 
 When you run `ivy deploy` without specifying options, Ivy will guide you through an interactive deployment process:
 
+<<<<<<< HEAD
 1. **Select Deployment Provider**: Choose from AWS, Azure, GCP, or Sliplane
+=======
+1. **Select Deployment Provider**: Choose from AWS, Azure, or GCP
+>>>>>>> epic/kanban
 2. **Configuration Setup**: Configure provider-specific settings
 3. **Build Process**: Ivy will build and containerize your project
 4. **Deployment**: Deploy to the selected cloud platform
@@ -113,6 +120,7 @@ When you run `ivy deploy` without specifying options, Ivy will guide you through
 
 **GCP Setup Prerequisites** - Create a Google Cloud account, install Google Cloud CLI, login to GCP: `gcloud auth login`, and set your project: `gcloud config set project <project-id>`.
 
+<<<<<<< HEAD
 **Sliplane** - Modern container deployment platform with automated infrastructure and simplified deployment workflow.
 
 **Setup Process**
@@ -128,6 +136,8 @@ When you run `ivy deploy` without specifying options, Ivy will guide you through
 
 **Sliplane Setup Prerequisites** - Create a Sliplane account, generate an API key from your Sliplane dashboard, and optionally create a server in your Sliplane dashboard (or let Ivy create one automatically).
 
+=======
+>>>>>>> epic/kanban
 ### Deployment Process
 
 **1. Project Validation** - Ivy validates your project before deployment: ensures it's an Ivy project, checks for required files and configuration, and validates authentication status.
@@ -269,6 +279,7 @@ ASPNETCORE_ENVIRONMENT="Production"
 # Configure project and region
 ```
 
+<<<<<<< HEAD
 **Sliplane Deployment**
 
 ```terminal
@@ -277,6 +288,8 @@ ASPNETCORE_ENVIRONMENT="Production"
 # Configure server and deployment settings
 ```
 
+=======
+>>>>>>> epic/kanban
 ### Best Practices
 
 **Pre-deployment Checklist** - Test locally (ensure your project runs locally), check dependencies (verify all required services are configured), review configuration (check environment variables and settings), and security review (verify authentication and authorization setup).
@@ -306,5 +319,9 @@ For detailed information about each cloud provider:
 
 - **AWS**: [AWS Documentation](https://docs.aws.amazon.com/)
 - **Azure**: [Azure Documentation](https://docs.microsoft.com/azure/)
+<<<<<<< HEAD
 - **GCP**: [Google Cloud Documentation](https://cloud.google.com/docs/)
 - **Sliplane**: [Sliplane Documentation](https://docs.sliplane.io/)
+=======
+- **GCP**: [Google Cloud Documentation](https://cloud.google.com/docs/)
+>>>>>>> epic/kanban

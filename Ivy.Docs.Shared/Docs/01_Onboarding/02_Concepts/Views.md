@@ -181,6 +181,7 @@ The `[App]` attribute supports several properties:
 
 - `icon`: Icon to display in navigation
 - `title`: Display name (defaults to class name)
+<<<<<<< HEAD
 - `path`: Navigation path array for hierarchical organization
 - `isVisible`: Whether to show in navigation
 - `searchHints`: Alternative keywords for search discoverability
@@ -201,6 +202,10 @@ public class TextInputApp : ViewBase
     }
 }
 ```
+=======
+- `path`: Navigation path array
+- `isVisible`: Whether to show in navigation
+>>>>>>> epic/kanban
 
 ## Advanced Patterns
 
