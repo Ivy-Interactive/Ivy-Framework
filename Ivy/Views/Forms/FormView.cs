@@ -243,7 +243,7 @@ public class FormView<TModel>(IFormFieldView[] fieldViews, Func<Event<Form>, Val
         var form = new Form(Layout.Horizontal(columns));
         if (handleSubmit != null)
         {
-            form = form with { HandleSubmit = handleSubmit };
+            form = form.HandleSubmit(handleSubmit);
         }
         return form;
     }

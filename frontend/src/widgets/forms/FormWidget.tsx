@@ -59,7 +59,7 @@ export const FormWidget: React.FC<FormWidgetProps> = ({ id, children }) => {
             logger.info(`Form submit triggered via Enter key on last field`, {
               formId: id,
             });
-            eventHandler('HandleSubmit', id, []);
+            eventHandler('OnSubmit', id, []);
           }
         }
       }
