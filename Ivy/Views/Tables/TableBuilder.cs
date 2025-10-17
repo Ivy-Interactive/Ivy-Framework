@@ -8,15 +8,10 @@ using Ivy.Views.Builders;
 
 namespace Ivy.Views.Tables;
 
-/// <summary>
-/// Fluent builder for creating tables from data collections with automatic column scaffolding.
-/// </summary>
+/// <summary>Fluent builder for creating tables from data collections with automatic column scaffolding.</summary>
 /// <typeparam name="TModel">The type of data objects in the table rows.</typeparam>
 public class TableBuilder<TModel> : ViewBase, IStateless
 {
-    /// <summary>
-    /// Internal column configuration with metadata and rendering options.
-    /// </summary>
     private class TableBuilderColumn(
         string name,
         int order,
@@ -74,9 +69,7 @@ public class TableBuilder<TModel> : ViewBase, IStateless
     private bool _removeHeader;
     private object? _empty;
 
-    /// <summary>
-    /// Creates a table builder with automatic column scaffolding from the model type.
-    /// </summary>
+    /// <summary>Creates a table builder with automatic column scaffolding from the model type.</summary>
     /// <param name="records">The data records to display in the table.</param>
     public TableBuilder(IEnumerable<TModel> records)
     {
@@ -86,9 +79,6 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         _Scaffold();
     }
 
-    /// <summary>
-    /// Automatically discovers columns from model properties and fields with intelligent defaults.
-    /// </summary>
     private void _Scaffold()
     {
         var type = typeof(TModel);
@@ -354,9 +344,7 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         return this;
     }
 
-    /// <summary>
-    /// Builds the complete table with headers, data rows, and optional footers.
-    /// </summary>
+    /// <summary>Builds the complete table with headers, data rows, and optional footers.</summary>
     public override object? Build()
     {
         if (!_records.Any()) return _empty!;
@@ -445,14 +433,10 @@ public class TableBuilder<TModel> : ViewBase, IStateless
     }
 }
 
-/// <summary>
 /// <summary>Factory for creating table builders from generic collections.</summary>
-/// </summary>
 public static class TableBuilderFactory
 {
-    /// <summary>
-    /// Creates a table view from any enumerable collection with automatic type detection.
-    /// </summary>
+    /// <summary>Creates a table view from any enumerable collection with automatic type detection.</summary>
     /// <param name="enumerable">The collection to create a table from.</param>
     public static ViewBase FromEnumerable(IEnumerable enumerable)
     {
