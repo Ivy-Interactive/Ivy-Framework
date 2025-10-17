@@ -17,6 +17,164 @@ Create dropdown menus with single or multiple selection capabilities, option gro
 The `SelectInput` widget provides a dropdown menu for selecting items from a predefined list of options. It supports single
 and multiple selections, option grouping, and custom rendering of option items.
 
+## Creating Options
+
+Before using `SelectInput`, you need to create options. There are several ways to do this depending on your data source and requirements.
+
+### Using ToOptions()
+
+The simplest way to create options is using the `.ToOptions()` extension method, which automatically converts collections into option arrays:
+
+```csharp demo-tabs
+public class ToOptionsDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var selectedFruit = UseState("Apple");
+        
+        // Simple array converted to options
+        var fruits = new[] { "Apple", "Banana", "Orange", "Grape" };
+        var fruitOptions = fruits.ToOptions();
+        
+        return Layout.Vertical()
+            | Text.Label("Select a fruit:")
+            | selectedFruit.ToSelectInput(fruitOptions)
+            | Text.Small($"You selected: {selectedFruit.Value}");
+    }
+}
+```
+
+When you use `.ToOptions()` on a collection, it automatically creates options where the **label and value are the same**. For example, `"Apple"` becomes an option with both label and value set to `"Apple"`.
+
+### Creating Custom Labels and Values
+
+For more control, create options manually with different labels and values. This is useful when you want user-friendly labels but need to store different values (like IDs):
+
+```csharp demo-tabs
+public class CustomOptionsDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var selectedUserId = UseState(1);
+        
+        // Create options with custom labels and values
+        var userOptions = new Option<int>[]
+        {
+            new("John Doe (Admin)", 1),
+            new("Jane Smith (Editor)", 2),
+            new("Bob Johnson (Viewer)", 3),
+            new("Alice Williams (Moderator)", 4)
+        };
+        
+        return Layout.Vertical()
+            | Text.Label("Assign to user:")
+            | selectedUserId.ToSelectInput(userOptions)
+            | Text.Small($"Selected User ID: {selectedUserId.Value}");
+    }
+}
+```
+
+This is particularly useful when working with database IDs, GUIDs, or any scenario where the display value differs from the stored value:
+
+```csharp demo-tabs
+public class GuidOptionsDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var departmentId = UseState(Guid.NewGuid());
+        
+        var departments = new Option<Guid>[]
+        {
+            new("Engineering", Guid.Parse("a1b2c3d4-e5f6-4a5b-8c9d-0e1f2a3b4c5d")),
+            new("Marketing", Guid.Parse("b2c3d4e5-f6a7-5b6c-9d0e-1f2a3b4c5d6e")),
+            new("Sales", Guid.Parse("c3d4e5f6-a7b8-6c7d-0e1f-2a3b4c5d6e7f")),
+            new("Human Resources", Guid.Parse("d4e5f6a7-b8c9-7d8e-1f2a-3b4c5d6e7f8a"))
+        };
+        
+        return Layout.Vertical()
+            | Text.Label("Select Department:")
+            | departmentId.ToSelectInput(departments)
+            | Text.Small($"Department ID: {departmentId.Value}");
+    }
+}
+```
+
+### Using Enums with ToOptions()
+
+Enums are automatically converted to user-friendly options with PascalCase splitting:
+
+```csharp demo-tabs
+public class EnumOptionsDemo : ViewBase
+{
+    private enum OrderStatus
+    {
+        PendingPayment,      // Displays as: "Pending Payment"
+        Processing,          // Displays as: "Processing"
+        Shipped,            // Displays as: "Shipped"
+        OutForDelivery,     // Displays as: "Out For Delivery"
+        Delivered           // Displays as: "Delivered"
+    }
+    
+    public override object? Build()
+    {
+        var status = UseState(OrderStatus.PendingPayment);
+        
+        // Enum automatically generates readable labels
+        var statusOptions = typeof(OrderStatus).ToOptions();
+        
+        return Layout.Vertical()
+            | Text.Label("Order Status:")
+            | status.ToSelectInput(statusOptions)
+            | Text.Block($"Current status: {status.Value}");
+    }
+}
+```
+
+### Enum with Description Attributes
+
+For complete control over enum labels, use the `[Description]` attribute:
+
+```csharp demo-tabs
+public class DescriptionAttributeDemo : ViewBase
+{
+    private enum ProgrammingLanguage
+    {
+        [Description("C#")]
+        CSharp,
+        
+        [Description("F#")]
+        FSharp,
+        
+        [Description("VB.NET")]
+        VisualBasic,
+        
+        [Description("JavaScript")]
+        JavaScript,
+        
+        [Description("TypeScript")]
+        TypeScript
+    }
+    
+    public override object? Build()
+    {
+        var language = UseState(ProgrammingLanguage.CSharp);
+        
+        // Description attributes are used for labels
+        var languageOptions = typeof(ProgrammingLanguage).ToOptions();
+        
+        return Layout.Vertical()
+            | Text.Label("Select Programming Language:")
+            | language.ToSelectInput(languageOptions)
+            | Text.Block($"Selected: {language.Value}")
+            | Text.Small("Note: Labels use [Description] attributes when available");
+    }
+}
+```
+
+<Callout Type="tip">
+Use `.ToOptions()` for simple cases where labels match values. Create manual `Option<T>` instances when you need different labels and values, or use `[Description]` attributes on enums for custom labels.
+</Callout>
+
 ## Basic Usage
 
 Here's a simple example of a `SelectInput` with a few options:
@@ -196,6 +354,87 @@ public class MultiSelectDataTypesDemo : ViewBase
 }
 ```
 
+## Option Grouping
+
+Organize related options into groups for better visual organization and user experience. This is especially useful when you have many options:
+
+```csharp demo-tabs
+public class OptionGroupingDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var selectedFood = UseState("Apple");
+        
+        var foodOptions = new Option<string>[]
+        {
+            // Fruits group
+            new("Apple", "Apple", group: "Fruits"),
+            new("Banana", "Banana", group: "Fruits"),
+            new("Orange", "Orange", group: "Fruits"),
+            new("Strawberry", "Strawberry", group: "Fruits"),
+            
+            // Vegetables group
+            new("Carrot", "Carrot", group: "Vegetables"),
+            new("Broccoli", "Broccoli", group: "Vegetables"),
+            new("Spinach", "Spinach", group: "Vegetables"),
+            new("Lettuce", "Lettuce", group: "Vegetables"),
+            
+            // Grains group
+            new("Rice", "Rice", group: "Grains"),
+            new("Wheat", "Wheat", group: "Grains"),
+            new("Oats", "Oats", group: "Grains"),
+            new("Quinoa", "Quinoa", group: "Grains")
+        };
+        
+        return Layout.Vertical()
+            | Text.Label("Select a food item:")
+            | selectedFood.ToSelectInput(foodOptions)
+                .Placeholder("Choose from categorized options...")
+            | Text.Small($"Selected: {selectedFood.Value}");
+    }
+}
+```
+
+Groups work with custom labels and values as well:
+
+```csharp demo-tabs
+public class GroupedLocationsDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var selectedCity = UseState(1);
+        
+        var cityOptions = new Option<int>[]
+        {
+            // USA
+            new("New York", 1, group: "USA"),
+            new("Los Angeles", 2, group: "USA"),
+            new("Chicago", 3, group: "USA"),
+            
+            // Europe
+            new("London", 4, group: "Europe"),
+            new("Paris", 5, group: "Europe"),
+            new("Berlin", 6, group: "Europe"),
+            
+            // Asia
+            new("Tokyo", 7, group: "Asia"),
+            new("Seoul", 8, group: "Asia"),
+            new("Singapore", 9, group: "Asia")
+        };
+        
+        return Layout.Vertical()
+            | Text.Label("Select a city:")
+            | selectedCity.ToSelectInput(cityOptions)
+                .Placeholder("Choose by region...")
+            | Text.Small($"Selected City ID: {selectedCity.Value}");
+    }
+}
+```
+
+<Callout Type="info">
+Option groups are displayed with visual separators and group headers in the dropdown, making it easier for users to find related options. Groups work with all SelectInput variants.
+</Callout>
+
 ## Event Handling
 
 Handle change events using the `onChange` parameter for custom logic:
@@ -272,9 +511,135 @@ public class DynamicOptionsDemo : ViewBase
 }
 ```
 
+## Blur Event Handling
+
+In addition to `onChange`, you can handle when the select input loses focus using the `HandleBlur` method:
+
+```csharp demo-tabs
+public class BlurHandlingDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var selectedOption = UseState("Option 1");
+        var blurCount = UseState(0);
+        var lastBlurTime = UseState<DateTime?>(() => null);
+        
+        var options = new[] { "Option 1", "Option 2", "Option 3", "Option 4" }.ToOptions();
+        
+        return Layout.Vertical()
+            | Text.Label("Select an option (click away to trigger blur):")
+            | selectedOption.ToSelectInput(options)
+                .HandleBlur(() =>
+                {
+                    blurCount.Set(blurCount.Value + 1);
+                    lastBlurTime.Set(DateTime.Now);
+                })
+            | Text.Small($"Blur events: {blurCount.Value}")
+            | Text.Small($"Last blur: {lastBlurTime.Value?.ToString("HH:mm:ss") ?? "Never"}");
+    }
+}
+```
+
+This is useful for validation, auto-save functionality, or analytics:
+
+```csharp demo-tabs
+public class BlurValidationDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var selectedCountry = UseState("");
+        var validationMessage = UseState<string?>(() => null);
+        
+        var countries = new[] { "USA", "UK", "Canada", "Australia", "Germany" }.ToOptions();
+        
+        return Layout.Vertical()
+            | Text.Label("Select your country:")
+            | selectedCountry.ToSelectInput(countries)
+                .Placeholder("Choose a country...")
+                .HandleBlur(() =>
+                {
+                    // Validate on blur
+                    if (string.IsNullOrEmpty(selectedCountry.Value))
+                    {
+                        validationMessage.Set("Country selection is required");
+                    }
+                    else
+                    {
+                        validationMessage.Set((string?)null);
+                    }
+                })
+                .Invalid(validationMessage.Value)
+            | (validationMessage.Value != null 
+                ? Text.Small(validationMessage.Value).Color(Colors.Red) 
+                : null);
+    }
+}
+```
+
 ## Styling and States
 
 Customize the `SelectInput` with various styling options:
+
+### Size Variants
+
+Control the visual size of select inputs for different contexts:
+
+```csharp demo-tabs
+public class SelectSizesDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var options = new[] { "Option A", "Option B", "Option C" }.ToOptions();
+        var smallSelect = UseState("Option A");
+        var mediumSelect = UseState("Option A");
+        var largeSelect = UseState("Option A");
+        
+        return Layout.Vertical()
+            | Text.Label("Small Size:")
+            | smallSelect.ToSelectInput(options)
+                .Small()
+                .Placeholder("Small select...")
+            
+            | Text.Label("Medium Size (Default):")
+            | mediumSelect.ToSelectInput(options)
+                .Placeholder("Medium select...")
+            
+            | Text.Label("Large Size:")
+            | largeSelect.ToSelectInput(options)
+                .Large()
+                .Placeholder("Large select...");
+    }
+}
+```
+
+Sizes work with all variants:
+
+```csharp demo-tabs
+public class VariantSizesDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var options = new[] { "Red", "Green", "Blue", "Yellow" }.ToOptions();
+        var colors = UseState<string[]>([]);
+        
+        return Layout.Vertical()
+            | Text.H3("List Variant - Different Sizes")
+            | Layout.Grid().Columns(3)
+                | Text.InlineCode("Small")
+                | Text.InlineCode("Medium")
+                | Text.InlineCode("Large")
+                
+                | colors.ToSelectInput(options)
+                    .Variant(SelectInputs.List)
+                    .Small()
+                | colors.ToSelectInput(options)
+                    .Variant(SelectInputs.List)
+                | colors.ToSelectInput(options)
+                    .Variant(SelectInputs.List)
+                    .Large();
+    }
+}
+```
 
 ### Invalid State
 
@@ -338,6 +703,130 @@ public class NullableSelectDemo : ViewBase
     }
 }
 ```
+
+## Advanced Configuration
+
+### Separator Character
+
+When using multi-select, you can customize the character used to separate values in display and serialization:
+
+```csharp demo-tabs
+public class SeparatorDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var selectedTags = UseState<string[]>([]);
+        var options = new[] { "Technology", "Science", "Health", "Sports", "Entertainment" }.ToOptions();
+        
+        return Layout.Vertical()
+            | Text.Label("Select tags (using comma separator):")
+            | selectedTags.ToSelectInput(options)
+                .Variant(SelectInputs.List)
+                .Separator(',')  // Default is ';'
+            | Text.Small($"Tags: {string.Join(", ", selectedTags.Value)}");
+    }
+}
+```
+
+### Supported Data Types
+
+`SelectInput` provides comprehensive type support with full type safety:
+
+```csharp demo-tabs
+public class DataTypeSupportDemo : ViewBase
+{
+    public override object? Build()
+    {
+        // String values
+        var stringState = UseState("Apple");
+        var stringOptions = new[] { "Apple", "Banana", "Cherry" }.ToOptions();
+        
+        // Integer values
+        var intState = UseState(1);
+        var intOptions = new Option<int>[]
+        {
+            new("One", 1),
+            new("Two", 2),
+            new("Three", 3)
+        };
+        
+        // Guid values
+        var guidState = UseState(Guid.NewGuid());
+        var guid1 = Guid.NewGuid();
+        var guid2 = Guid.NewGuid();
+        var guidOptions = new Option<Guid>[]
+        {
+            new("First ID", guid1),
+            new("Second ID", guid2)
+        };
+        
+        // Enum values
+        var enumState = UseState(DayOfWeek.Monday);
+        var enumOptions = typeof(DayOfWeek).ToOptions();
+        
+        return Layout.Vertical()
+            | Layout.Grid().Columns(2)
+                | Text.Label("String:")
+                | stringState.ToSelectInput(stringOptions)
+                
+                | Text.Label("Integer:")
+                | intState.ToSelectInput(intOptions)
+                
+                | Text.Label("Guid:")
+                | guidState.ToSelectInput(guidOptions)
+                
+                | Text.Label("Enum:")
+                | enumState.ToSelectInput(enumOptions);
+    }
+}
+```
+
+All types also support **collection types** for multi-select:
+
+```csharp demo-tabs
+public class MultiSelectTypesDemo : ViewBase
+{
+    public override object? Build()
+    {
+        // Arrays
+        var stringArray = UseState<string[]>([]);
+        var intArray = UseState<int[]>([]);
+        
+        // Lists
+        var stringList = UseState<List<string>>([]);
+        var enumList = UseState<List<DayOfWeek>>([]);
+        
+        // Nullable arrays
+        var nullableArray = UseState<string[]?>(() => null);
+        
+        var stringOptions = new[] { "A", "B", "C" }.ToOptions();
+        var intOptions = new Option<int>[] { new("1", 1), new("2", 2), new("3", 3) };
+        var enumOptions = typeof(DayOfWeek).ToOptions();
+        
+        return Layout.Vertical()
+            | Text.H3("Collection Types Support")
+            | Layout.Grid().Columns(2)
+                | Text.Label("string[]:")
+                | stringArray.ToSelectInput(stringOptions).List()
+                
+                | Text.Label("int[]:")
+                | intArray.ToSelectInput(intOptions).List()
+                
+                | Text.Label("List<string>:")
+                | stringList.ToSelectInput(stringOptions).List()
+                
+                | Text.Label("List<DayOfWeek>:")
+                | enumList.ToSelectInput(enumOptions).List()
+                
+                | Text.Label("string[]? (nullable):")
+                | nullableArray.ToSelectInput(stringOptions).List();
+    }
+}
+```
+
+<Callout Type="info">
+The framework automatically detects collection types (arrays, Lists) and enables multi-select mode. Type safety is maintained throughout - you can't accidentally assign the wrong type to your state.
+</Callout>
 
 <Callout Type="tip">
 Use Select for single choice dropdowns, List for multiple selection with checkboxes, and Toggle for visual button-based selection. The List variant is particularly useful for forms where users need to select multiple options.
