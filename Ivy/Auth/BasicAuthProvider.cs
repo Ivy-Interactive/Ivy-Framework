@@ -154,12 +154,6 @@ public class BasicAuthProvider : IAuthProvider
             return Task.FromResult<AuthToken?>(null);
         }
 
-        if (ValidateAccessToken(token.AccessToken))
-        {
-            // No need to refresh if current token is still valid
-            return Task.FromResult<AuthToken?>(token);
-        }
-
         // Validate refresh token
         if (ValidateToken(token.RefreshToken, "oauth2/token", "refresh") is not var (principal, _))
         {

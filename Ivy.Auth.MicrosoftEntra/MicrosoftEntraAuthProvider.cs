@@ -164,7 +164,7 @@ public class MicrosoftEntraAuthProvider : IAuthProvider
             || tag.GetString() is not string accountId
             || accountId.Length <= 0)
         {
-            return token;
+            return null;
         }
 
         if (token.RefreshToken == null)
@@ -188,7 +188,7 @@ public class MicrosoftEntraAuthProvider : IAuthProvider
 
                 if (result == null)
                 {
-                    return token;
+                    return null;
                 }
 
                 return new AuthToken(
@@ -204,7 +204,7 @@ public class MicrosoftEntraAuthProvider : IAuthProvider
 
                 if (result == null)
                 {
-                    return token;
+                    return null;
                 }
 
                 if (result.Account.HomeAccountId.Identifier != accountId)
