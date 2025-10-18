@@ -282,8 +282,7 @@ public class BasicAuthProvider : IAuthProvider
                 ValidateIssuerSigningKey = true,
                 IssuerSigningKey = _signingKey,
                 ValidateLifetime = true,
-                ClockSkew = TimeSpan.Zero,
-                // ClockSkew = TimeSpan.FromSeconds(60),
+                ClockSkew = TimeSpan.FromMinutes(2),
             }, out var validatedToken);
             if (claims.FindFirst(TokenUseClaim)?.Value != tokenUse)
             {

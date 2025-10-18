@@ -194,6 +194,7 @@ public class Auth0AuthProvider : IAuthProvider
                 ValidateIssuerSigningKey = true,
                 IssuerSigningKeys = signingKeys,
                 ValidateLifetime = true,
+                ClockSkew = TimeSpan.FromMinutes(2),
             };
 
             var handler = new JwtSecurityTokenHandler
@@ -211,8 +212,7 @@ public class Auth0AuthProvider : IAuthProvider
 
     public async Task<bool> ValidateAccessTokenAsync(string token)
     {
-        var verifiedToken = await VerifyToken(token);
-        return verifiedToken is not null;
+        return (await VerifyToken(token)) is not null;
     }
 
     public async Task<UserInfo?> GetUserInfoAsync(string token)

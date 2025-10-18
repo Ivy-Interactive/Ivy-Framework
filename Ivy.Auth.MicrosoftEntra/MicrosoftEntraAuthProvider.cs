@@ -347,6 +347,7 @@ public class MicrosoftEntraAuthProvider : IAuthProvider
                 ValidateIssuerSigningKey = true,
                 IssuerSigningKeys = signingKeys,
                 ValidateLifetime = true,
+                ClockSkew = TimeSpan.FromMinutes(2),
             };
 
             var claims = handler.ValidateToken(jwt, tokenValidationParameters, out SecurityToken validatedToken);
