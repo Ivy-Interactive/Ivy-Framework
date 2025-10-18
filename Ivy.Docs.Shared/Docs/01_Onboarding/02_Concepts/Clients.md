@@ -213,6 +213,40 @@ public class FileOperationsApp : ViewBase
 }
 ```
 
+## UI Refresh & State Management
+
+Ivy automatically handles UI refreshes in most cases. You typically **don't need** to manually refresh the UI:
+
+- **Form Submissions**: When forms are submitted successfully, the UI automatically updates
+- **State Changes**: When state values change, the UI automatically re-renders
+- **Sheet Dismissal**: Sheets are automatically closed by the framework when forms are submitted successfully
+- **Navigation**: Page navigation automatically refreshes the UI
+
+### When Manual Refresh is NOT Needed
+
+❌ **Don't do this** - The framework handles it automatically:
+
+```csharp
+// Don't call Refresh() on IClientProvider
+client.Refresh(); // This method doesn't exist and isn't needed
+```
+
+✅ **Do this instead** - Let the framework handle it:
+
+```csharp
+// Just update state, UI refreshes automatically
+var isOpen = UseState(false);
+var formData = UseState("");
+
+// When form submits successfully, sheet closes automatically
+if (formSubmitted.Value)
+{
+    formSubmitted.Value = false;
+    isOpen.Value = false; // This triggers UI update
+    client.Toast("Form saved successfully!");
+}
+```
+
 </Body>
 </Details>
 
