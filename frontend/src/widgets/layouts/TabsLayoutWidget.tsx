@@ -875,14 +875,14 @@ export const TabsLayoutWidget = ({
             })}
             {addButtonText && (
               <div className="flex items-center ml-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
+                <button
                   onClick={() => eventHandler('OnAddButtonClick', id, [0])}
-                  className="h-7 px-2 text-xs"
+                  className="px-3 py-1.5 cursor-pointer transition-colors duration-300 text-muted-foreground hover:text-foreground hover:muted-foreground rounded-[6px] flex items-center justify-center aspect-square border-none"
                 >
-                  {addButtonText}
-                </Button>
+                  <div className="text-sm font-medium leading-4 whitespace-nowrap flex items-center justify-center">
+                    {addButtonText}
+                  </div>
+                </button>
               </div>
             )}
           </div>
@@ -994,14 +994,14 @@ export const TabsLayoutWidget = ({
                 })}
                 {addButtonText && (
                   <div className="flex items-center ml-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
+                    <button
                       onClick={() => eventHandler('OnAddButtonClick', id, [0])}
-                      className="h-7 px-2 text-xs"
+                      className="py-2 cursor-pointer transition-colors duration-300 text-muted-foreground hover:text-foreground hover:bg-gray-200/20 rounded-[6px] flex-shrink-0 flex items-center justify-center aspect-square px-3 border-none"
                     >
-                      {addButtonText}
-                    </Button>
+                      <div className="text-sm font-medium leading-4 whitespace-nowrap flex items-center justify-center">
+                        {addButtonText}
+                      </div>
+                    </button>
                   </div>
                 )}
               </TabsList>
