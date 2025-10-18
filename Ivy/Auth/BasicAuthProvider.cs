@@ -92,7 +92,7 @@ public class BasicAuthProvider : IAuthProvider
 
     private AuthToken CreateToken(string user, DateTimeOffset now, long authTime)
     {
-        var expiresAt = now.AddSeconds(2);
+        var expiresAt = now.AddMinutes(15);
         var claims = new[] {
             new Claim(JwtRegisteredClaimNames.Sub, user),
             new Claim(TokenUseClaim, "access"),
@@ -106,8 +106,8 @@ public class BasicAuthProvider : IAuthProvider
             signingCredentials: creds);
         var accessToken = new JwtSecurityTokenHandler().WriteToken(token);
 
-        var rtExpiresAt = now.AddSeconds(10);
-        var maxAgeSeconds = (long)TimeSpan.FromSeconds(30).TotalSeconds;
+        var rtExpiresAt = now.AddHours(24);
+        var maxAgeSeconds = (long)TimeSpan.FromDays(365).TotalSeconds;
 
         var rtClaims = new[]
         {
