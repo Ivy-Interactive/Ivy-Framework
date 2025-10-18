@@ -17,6 +17,25 @@ Create dropdown menus with single or multiple selection capabilities, option gro
 The `SelectInput` widget provides a dropdown menu for selecting items from a predefined list of options. It supports single
 and multiple selections, option grouping, and custom rendering of option items.
 
+## Basic Usage
+
+Here's a simple example of a `SelectInput` with a few options:
+
+```csharp demo-tabs
+public class SelectVariantDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var langs = new string[]{"C#","Java","Go","JavaScript","F#","Kotlin","VB.NET","Rust"};
+        
+        var favLang = UseState("C#");
+        return Layout.Vertical() 
+                | Text.Label("Select your favourite programming language")
+                | favLang.ToSelectInput(langs.ToOptions()).Variant(SelectInputs.Select);
+    }    
+}
+```
+
 ## Creating Options
 
 Before using `SelectInput`, you need to create options. There are several ways to do this depending on your data source and requirements.
@@ -108,11 +127,11 @@ public class EnumOptionsDemo : ViewBase
 {
     private enum OrderStatus
     {
-        PendingPayment,      // Displays as: "Pending Payment"
-        Processing,          // Displays as: "Processing"
-        Shipped,            // Displays as: "Shipped"
-        OutForDelivery,     // Displays as: "Out For Delivery"
-        Delivered           // Displays as: "Delivered"
+        PendingPayment,
+        Processing,
+        Shipped,    
+        OutForDelivery,
+        Delivered
     }
     
     public override object? Build()
@@ -175,47 +194,7 @@ public class DescriptionAttributeDemo : ViewBase
 Use `.ToOptions()` for simple cases where labels match values. Create manual `Option<T>` instances when you need different labels and values, or use `[Description]` attributes on enums for custom labels.
 </Callout>
 
-## Basic Usage
-
-Here's a simple example of a `SelectInput` with a few options:
-
-```csharp demo-tabs
-public class SelectVariantDemo : ViewBase
-{
-    public override object? Build()
-    {
-        var langs = new string[]{"C#","Java","Go","JavaScript","F#","Kotlin","VB.NET","Rust"};
-        
-        var favLang = UseState("C#");
-        return Layout.Vertical() 
-                | Text.Label("Select your favourite programming language")
-                | favLang.ToSelectInput(langs.ToOptions()).Variant(SelectInputs.Select);
-    }    
-}
-```
-
 `SelectInput` supports three different variants for different use cases:
-
-### Default Select
-
-The default variant renders a traditional dropdown menu. Use this when only one item should be selected:
-
-```csharp demo-tabs
-public class SelectColorDemo : ViewBase
-{
-    public override object? Build()
-    {    
-        var fruits = new string[]{"Apple","Guava","Banana","Watermelon"};
-        var dishes = new string[]{"pie", "pickle", "shake", "juice"};
-        var guess = this.UseState(fruits[0]);
-        var fruitInput = guess.ToSelectInput(fruits.ToOptions());
-        return Layout.Vertical() 
-                | Text.Label("Your favourite fruit")
-                | fruitInput
-                | Text.Label($"{guess}  {dishes[Array.IndexOf(fruits,guess.Value)]} is delicious!");
-    }
-}    
-```
 
 ### List
 
@@ -293,17 +272,14 @@ public class MultiSelectVariantsDemo : ViewBase
         var languageOptions = typeof(ProgrammingLanguages).ToOptions();
         
         return Layout.Vertical()
-            | Text.H2("Multi-Select Variants")
-            | Layout.Grid().Columns(3)
                 | Text.InlineCode("Select Variant")
-                | Text.InlineCode("List Variant")
-                | Text.InlineCode("Toggle Variant")
-                
                 | languagesSelect.ToSelectInput(languageOptions)
                     .Variant(SelectInputs.Select)
                     .Placeholder("Choose languages...")
+                | Text.InlineCode("List Variant")
                 | languagesList.ToSelectInput(languageOptions)
                     .Variant(SelectInputs.List)
+                | Text.InlineCode("Toggle Variant")
                 | languagesToggle.ToSelectInput(languageOptions)
                     .Variant(SelectInputs.Toggle)
                 
@@ -579,67 +555,6 @@ public class BlurValidationDemo : ViewBase
 ## Styling and States
 
 Customize the `SelectInput` with various styling options:
-
-### Size Variants
-
-Control the visual size of select inputs for different contexts:
-
-```csharp demo-tabs
-public class SelectSizesDemo : ViewBase
-{
-    public override object? Build()
-    {
-        var options = new[] { "Option A", "Option B", "Option C" }.ToOptions();
-        var smallSelect = UseState("Option A");
-        var mediumSelect = UseState("Option A");
-        var largeSelect = UseState("Option A");
-        
-        return Layout.Vertical()
-            | Text.Label("Small Size:")
-            | smallSelect.ToSelectInput(options)
-                .Small()
-                .Placeholder("Small select...")
-            
-            | Text.Label("Medium Size (Default):")
-            | mediumSelect.ToSelectInput(options)
-                .Placeholder("Medium select...")
-            
-            | Text.Label("Large Size:")
-            | largeSelect.ToSelectInput(options)
-                .Large()
-                .Placeholder("Large select...");
-    }
-}
-```
-
-Sizes work with all variants:
-
-```csharp demo-tabs
-public class VariantSizesDemo : ViewBase
-{
-    public override object? Build()
-    {
-        var options = new[] { "Red", "Green", "Blue", "Yellow" }.ToOptions();
-        var colors = UseState<string[]>([]);
-        
-        return Layout.Vertical()
-            | Text.H3("List Variant - Different Sizes")
-            | Layout.Grid().Columns(3)
-                | Text.InlineCode("Small")
-                | Text.InlineCode("Medium")
-                | Text.InlineCode("Large")
-                
-                | colors.ToSelectInput(options)
-                    .Variant(SelectInputs.List)
-                    .Small()
-                | colors.ToSelectInput(options)
-                    .Variant(SelectInputs.List)
-                | colors.ToSelectInput(options)
-                    .Variant(SelectInputs.List)
-                    .Large();
-    }
-}
-```
 
 ### Invalid State
 
