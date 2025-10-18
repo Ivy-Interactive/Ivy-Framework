@@ -98,7 +98,7 @@ public class AutheliaAuthProvider : IAuthProvider
 
     public Task<DateTimeOffset?> GetTokenExpiration(AuthToken token)
     {
-        return Task.FromResult<DateTimeOffset?>(DateTimeOffset.MaxValue);
+        return Task.FromResult<DateTimeOffset?>(null);
     }
 }
 

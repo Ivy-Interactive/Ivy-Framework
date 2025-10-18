@@ -256,100 +256,145 @@ public class AppHub(
         }
     }
 
+    enum AuthRefreshState
+    {
+        Initial,
+        HasToken,
+        HasNoToken,
+        TokenExpired,
+    }
+
     private async Task AuthRefreshLoopAsync(string connectionId, CancellationToken abort)
     {
-        try
+        var state = AuthRefreshState.Initial;
+        var consecutiveErrors = 0;
+
+        void AbortConnection()
         {
-            while (true)
-            {
-                var session = sessionStore.Sessions[connectionId];
-                var authService = session.AppServices.GetRequiredService<IAuthService>();
-                var authProvider = session.AppServices.GetRequiredService<IAuthProvider>();
-                var clientProvider = session.AppServices.GetRequiredService<IClientProvider>();
-
-                var oldToken = authService.GetCurrentToken();
-                if (oldToken == null)
-                {
-                    Console.WriteLine("AuthRefreshLoop: No token, waiting 5 minutes.");
-                    await Task.Delay(TimeSpan.FromMinutes(5), abort);
-                    continue;
-                }
-
-                DateTimeOffset? expiresAt;
-                var refreshNeeded = false;
-                if (await authProvider.ValidateAccessTokenAsync(oldToken.AccessToken))
-                {
-                    expiresAt = await authProvider.GetTokenExpiration(oldToken);
-                    if (expiresAt == null || expiresAt < DateTimeOffset.UtcNow.AddMinutes(2))
-                    {
-                        refreshNeeded = true;
-                    }
-                }
-                else
-                {
-                    refreshNeeded = true;
-                }
-
-                AuthToken? newToken = oldToken;
-                if (refreshNeeded)
-                {
-                    newToken = await authService.RefreshAccessTokenAsync();
-                }
-                expiresAt = newToken != null
-                    ? await authProvider.GetTokenExpiration(newToken)
-                    : null;
-
-                var earliestWake = DateTimeOffset.UtcNow.AddMinutes(5);
-                var latestWake = DateTimeOffset.UtcNow.AddMinutes(30);
-                var nextUpdate = expiresAt?.AddMinutes(-2) ?? DateTimeOffset.UtcNow.AddMinutes(15);
-                if (nextUpdate < earliestWake)
-                {
-                    nextUpdate = earliestWake;
-                }
-                if (nextUpdate > latestWake)
-                {
-                    nextUpdate = latestWake;
-                }
-
-                var reloadPage = string.IsNullOrEmpty(newToken?.AccessToken);
-
-                if (oldToken != newToken)
-                {
-                    Console.WriteLine("AuthRefreshLoop: Token changed, updating client. Reloading: {0}", reloadPage);
-                    clientProvider.SetAuthToken(newToken, reloadPage);
-                }
-
-                if (reloadPage)
-                {
-                    try
-                    {
-                        Console.WriteLine("AuthRefreshLoop: closing connection");
-                        // Close the connection to be extra safe.
-                        Context.Abort();
-                    }
-                    catch (ObjectDisposedException)
-                    {
-                        // ignore
-                    }
-                    return;
-                }
-
-                Console.WriteLine("AuthRefreshLoop: next update at {0}...", nextUpdate);
-                await Task.Delay(nextUpdate - DateTimeOffset.UtcNow, abort);
-            }
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Error during auth refresh loop for {ConnectionId}", connectionId);
             try
             {
-                // Close the connection to be extra safe.
                 Context.Abort();
             }
             catch (ObjectDisposedException)
             {
                 // ignore
             }
+        }
+
+        while (true)
+        {
+            try
+            {
+                var session = sessionStore.Sessions[connectionId];
+                var authService = session.AppServices.GetRequiredService<IAuthService>();
+                var authProvider = session.AppServices.GetRequiredService<IAuthProvider>();
+                var clientProvider = session.AppServices.GetRequiredService<IClientProvider>();
+
+                var token = authService.GetCurrentToken();
+
+                switch (state)
+                {
+                    case AuthRefreshState.Initial:
+                        logger.LogInformation("AuthRefreshLoop: Starting for {ConnectionId}", connectionId);
+                        state = token == null
+                            ? AuthRefreshState.HasNoToken
+                            : AuthRefreshState.HasToken;
+                        break;
+
+                    case AuthRefreshState.HasNoToken:
+                        if (token != null)
+                        {
+                            state = AuthRefreshState.HasToken;
+                        }
+                        else
+                        {
+                            logger.LogInformation("AuthRefreshLoop: No token for {ConnectionId}, waiting 5 minutes.", connectionId);
+                            await Task.Delay(TimeSpan.FromMinutes(5), abort);
+                        }
+                        break;
+
+                    case AuthRefreshState.HasToken:
+                        if (token == null)
+                        {
+                            // This should never happen
+                            logger.LogError("AuthRefreshLoop: Token lost for {ConnectionId}, aborting connection.", connectionId);
+                            AbortConnection();
+                            return;
+                        }
+
+                        if (!await authProvider.ValidateAccessTokenAsync(token.AccessToken))
+                        {
+                            state = AuthRefreshState.TokenExpired;
+                        }
+                        else
+                        {
+                            var expiresAt = await authProvider.GetTokenExpiration(token);
+                            if (expiresAt != null && expiresAt < DateTimeOffset.UtcNow.AddMinutes(2))
+                            {
+                                state = AuthRefreshState.TokenExpired;
+                            }
+                            else
+                            {
+                                // Token is valid, wait until close to expiration
+                                var waitUntil = (expiresAt ?? DateTimeOffset.UtcNow.AddMinutes(15)).AddMinutes(-2);
+                                var delay = waitUntil - DateTimeOffset.UtcNow;
+
+                                // Don't wait more than 2 hours
+                                if (delay > TimeSpan.FromHours(2))
+                                {
+                                    delay = TimeSpan.FromHours(2);
+                                }
+                                logger.LogInformation("AuthRefreshLoop: Token valid for {ConnectionId}, next check at {NextCheck}.", connectionId, DateTimeOffset.UtcNow + delay);
+                                await Task.Delay(delay, abort);
+                            }
+                        }
+                        break;
+
+                    case AuthRefreshState.TokenExpired:
+                        {
+                            logger.LogInformation("AuthRefreshLoop: Attempting to refresh token for {ConnectionId}.", connectionId);
+                            var newToken = await authService.RefreshAccessTokenAsync();
+                            if (token != newToken)
+                            {
+                                logger.LogInformation("AuthRefreshLoop: updating stored for {ConnectionId}.", connectionId);
+                                clientProvider.SetAuthToken(newToken, reloadPage: string.IsNullOrEmpty(newToken?.AccessToken));
+                            }
+                            if (newToken == null)
+                            {
+                                logger.LogError("AuthRefreshLoop: Token refresh failed for {ConnectionId}, aborting connection.", connectionId);
+                                AbortConnection();
+                                return;
+                            }
+                            else
+                            {
+                                state = AuthRefreshState.HasToken;
+                            }
+                        }
+                        break;
+                }
+            }
+            catch (TaskCanceledException)
+            {
+                return;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "AuthRefreshLoop: Error during auth refresh loop for {ConnectionId}", connectionId);
+                consecutiveErrors++;
+                if (consecutiveErrors >= 5)
+                {
+                    logger.LogError("AuthRefreshLoop: Too many consecutive errors, aborting connection {ConnectionId}", connectionId);
+                    AbortConnection();
+                    return;
+                }
+                else
+                {
+                    logger.LogInformation("AuthRefreshLoop: waiting 30 seconds before retrying for {ConnectionId}", connectionId);
+                    await Task.Delay(TimeSpan.FromSeconds(30), abort);
+                }
+                continue;
+            }
+            consecutiveErrors = 0;
         }
     }
 
