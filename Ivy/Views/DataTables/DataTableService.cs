@@ -13,10 +13,10 @@ using OpenAI.Chat;
 
 namespace Ivy.Views.DataTables;
 
-public class TableService(
+public class DataTableService(
     IQueryableRegistry queryableRegistry,
     IDistributedCache? cache = null)
-    : DataTableService.DataTableServiceBase
+    : Protos.DataTable.DataTableService.DataTableServiceBase
 {
     public override Task<DataTableResult> Query(DataTableQuery request, ServerCallContext context)
     {
