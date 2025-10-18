@@ -116,8 +116,6 @@ Ivy automatically handles UI refreshes in most cases. You typically **don't need
 - **Sheet Dismissal**: Sheets are automatically closed by the framework when forms are submitted successfully
 - **Navigation**: Page navigation automatically refreshes the UI
 
-### When Manual Refresh is NOT Needed
-
 ❌ **Don't do this** - The framework handles it automatically:
 
 ```csharp
