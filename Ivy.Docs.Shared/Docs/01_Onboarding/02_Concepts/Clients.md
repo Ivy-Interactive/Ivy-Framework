@@ -17,34 +17,87 @@ var client = this.UseService<IClientProvider>();
 ### Showing Toasts
 
 ```csharp
+// Simple toast
 client.Toast("Operation successful!");
-```
 
-### Opening Dialogs
-
-```csharp
-client.Dialog(new DialogContent("Are you sure?", "This action cannot be undone."));
+// Toast with title
+client.Toast("Data saved", "Success");
 ```
 
 ### Navigation
 
 ```csharp
-client.Navigate("/some/path");
+// Navigate to different pages within the app
+client.Navigate("/dashboard");
+
+// Redirect to external site (replaces current page)
+client.Redirect("https://example.com");
+
+// Open URL in new tab (keeps current page open)
+client.OpenUrl("https://github.com");
+client.OpenUrl(new Uri("https://stackoverflow.com"));
 ```
 
-### File Operations
+### Downloading Files
 
 ```csharp
-// Download a file
-client.DownloadFile("data.csv", csvContent);
+// Download CSV data
+var csvData = Encoding.UTF8.GetBytes("Name,Age\nJohn,30\nJane,25");
+client.DownloadFile("users.csv", csvData, "text/csv");
 
-// Upload files
+// Download with progress tracking
+var progress = UseState(0.0);
+client.DownloadFile("large-file.zip", fileData, onProgress: p => progress.Value = p);
+```
+
+### Uploading Files
+
+```csharp
+// Handle single file upload
 client.UploadFiles(async files => {
-    foreach (var file in files)
+    var file = files.FirstOrDefault();
+    if (file != null)
     {
-        // Process uploaded file
+        var content = await file.GetContentAsync();
+        await ProcessFileAsync(file.FileName, content);
+        client.Toast($"Uploaded {file.FileName}");
     }
 });
+
+// Handle multiple file uploads
+client.UploadFiles(async files => {
+    var uploadTasks = files.Select(async file => {
+        var content = await file.GetContentAsync();
+        await ProcessFileAsync(file.FileName, content);
+        return file.FileName;
+    });
+    
+    var uploadedFiles = await Task.WhenAll(uploadTasks);
+    client.Toast($"Uploaded {uploadedFiles.Length} files");
+});
+```
+
+### Clipboard Operations
+
+```csharp
+// Copy text to clipboard
+client.CopyToClipboard("Copied to clipboard!");
+client.Toast("Text copied!");
+```
+
+### Theme Customization
+
+```csharp
+// Set theme mode
+client.SetThemeMode(ThemeMode.Dark);
+
+// Apply custom CSS
+var customCss = @"
+:root {
+    --primary: #ff6b6b;
+    --secondary: #4ecdc4;
+}";
+client.ApplyTheme(customCss);
 ```
 
 ## Best Practices
@@ -211,3 +264,4 @@ public class NavigationApp : ViewBase
 - [Forms](./Forms.md)
 - [State Management](./State.md)
 - [Effects](./Effects.md)
+- [Alerts & Notifications](./Alerts.md)
