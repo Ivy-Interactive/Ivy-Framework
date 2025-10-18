@@ -53,6 +53,7 @@ interface TabsLayoutWidgetProps {
   events: string[];
   padding?: string;
   width?: string;
+  addButtonText?: string;
 }
 
 function SortableTabTrigger({
@@ -173,6 +174,7 @@ export const TabsLayoutWidget = ({
   variant = 'Tabs',
   padding,
   width,
+  addButtonText,
 }: TabsLayoutWidgetProps) => {
   const tabWidgets = React.Children.toArray(children).filter(
     child =>
@@ -469,7 +471,6 @@ export const TabsLayoutWidget = ({
     }, 100);
 
     return () => clearTimeout(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Watch for dynamic content changes in tabs (like badge updates)
@@ -551,7 +552,6 @@ export const TabsLayoutWidget = ({
     }
     // Reset the flag after processing
     isUserInitiatedChangeRef.current = false;
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- activeTabId intentionally excluded to prevent race conditions
   }, [selectedIndex, tabOrder]);
 
   // Load active tab only when it becomes active
@@ -873,6 +873,18 @@ export const TabsLayoutWidget = ({
                 </button>
               );
             })}
+            {addButtonText && (
+              <div className="flex items-center ml-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => eventHandler('OnAddButtonClick', id, [0])}
+                  className="h-7 px-2 text-xs"
+                >
+                  {addButtonText}
+                </Button>
+              </div>
+            )}
           </div>
 
           {dropdownMenu}
@@ -980,6 +992,18 @@ export const TabsLayoutWidget = ({
                     </SortableTabTrigger>
                   );
                 })}
+                {addButtonText && (
+                  <div className="flex items-center ml-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => eventHandler('OnAddButtonClick', id, [0])}
+                      className="h-7 px-2 text-xs"
+                    >
+                      {addButtonText}
+                    </Button>
+                  </div>
+                )}
               </TabsList>
             </SortableContext>
           </DndContext>
