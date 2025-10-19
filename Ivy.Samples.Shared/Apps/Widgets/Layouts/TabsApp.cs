@@ -31,10 +31,10 @@ public class TabsApp : ViewBase
             tabs.Set(tabs.Value.RemoveAt(@event.Value));
         }
 
-        var addBtn = new Button("Add Tab").HandleClick(() =>
+        void OnAddButtonClick(Event<TabsLayout, int> @event)
         {
             tabs.Set(tabs.Value.Add(new Tab($"Tab {tabs.Value.Length + 1}", $"Tab {tabs.Value.Length + 1}")));
-        });
+        }
 
         var width = this.UseState(1.0);
 
@@ -43,14 +43,13 @@ public class TabsApp : ViewBase
             | Text.P("Adjust the width to see how the tabs react on mobile.")
             | width.ToSliderInput().Min(0f).Max(1f).WithLabel("Width")
             | Text.H2("Variants")
-            | new FloatingPanel(addBtn, Align.BottomLeft)
             | Text.H3("Tabs variant")
             | new TabsLayout(OnTabSelect, OnTabClose, null, null, selectedIndex.Value,
                 tabs.Value.ToArray()
-            ).Variant(TabsVariant.Tabs).Width(width.Value)
+            ).Variant(TabsVariant.Tabs).Width(width.Value).AddButton("+", OnAddButtonClick)
             | Text.H3("Content variant")
             | new TabsLayout(OnTabSelect, OnTabClose, null, null, selectedIndex.Value,
                 tabs.Value.ToArray()
-            ).Variant(TabsVariant.Content).Width(width.Value);
+            ).Variant(TabsVariant.Content).Width(width.Value).AddButton("+", OnAddButtonClick);
     }
 }
