@@ -131,6 +131,18 @@ const useCursorPosition = (
   return { elementRef, savePosition };
 };
 
+const useEnterKeyBlur = () => {
+  return useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      if (e.key === 'Enter') {
+        e.currentTarget.blur();
+        e.preventDefault();
+      }
+    },
+    []
+  );
+};
+
 const DefaultVariant: React.FC<{
   type: Lowercase<TextInputWidgetProps['variant']>;
   props: Omit<TextInputWidgetProps, 'variant'>;
@@ -151,6 +163,7 @@ const DefaultVariant: React.FC<{
   size = Sizes.Medium,
 }) => {
   const { elementRef, savePosition } = useCursorPosition(props.value, inputRef);
+  const handleKeyDown = useEnterKeyBlur();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     savePosition();
@@ -175,6 +188,7 @@ const DefaultVariant: React.FC<{
         onChange={handleChange}
         onBlur={onBlur}
         onFocus={onFocus}
+        onKeyDown={handleKeyDown}
         className={cn(
           textInputSizeVariants({ size }),
           props.invalid && inputStyles.invalidInput,
@@ -310,6 +324,8 @@ const PasswordVariant: React.FC<{
     onChange(e);
   };
 
+  const handleKeyDown = useEnterKeyBlur();
+
   const styles: React.CSSProperties = {
     ...getWidth(props.width),
   };
@@ -332,6 +348,7 @@ const PasswordVariant: React.FC<{
         onChange={handleChange}
         onBlur={onBlur}
         onFocus={onFocus}
+        onKeyDown={handleKeyDown}
         className={cn(
           textInputSizeVariants({ size }),
           props.invalid && inputStyles.invalidInput,

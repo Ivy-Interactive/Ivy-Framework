@@ -12,11 +12,11 @@ it to be interesting for someone using the framework and the CLI and short and d
 
 For API changes/additions, we want to show code examples on how to use the new APIs.
 
-Read D:\Repos\_Ivy\Ivy-Framework\.releases\weekly-notes-2025-10-13.md (NOTES)
+Read C:\git\ivy\Ivy-Framework\.releases\weekly-notes-2025-10-17.md (NOTES)
 
 Read the COMMIT and update NOTES with the new changes. We will trigger this agent for each commit so don't spend time reading the others.
 
 Skip stuff that doesn't affect the user of the framework or the CLI. Some commits are just internal refactorings or
 changes that don't affect the user. Merge commits can be skipped. It is fine to do no edits to (NOTES) if there's noting interesting in the commit.
 
-Write it all as a markdown article and add it to the file under an appropriate section. Make sure that you each time leave the article nice and coherent. 
+Write it all as a markdown article and add it to the file under an appropriate section. Make sure that you each time leave the article nice and coherent.
