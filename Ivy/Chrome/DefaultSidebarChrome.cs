@@ -114,7 +114,8 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
         {
             if (auth != null)
             {
-                user.Set(await auth.GetUserInfoAsync());
+                using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+                user.Set(await auth.GetUserInfoAsync(timeoutCts.Token));
             }
             if (!string.IsNullOrEmpty(settings.DefaultAppId))
             {
@@ -258,7 +259,9 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
                 try
                 {
                     if (auth == null) return;
-                    await auth.LogoutAsync();
+
+                    using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+                    await auth.LogoutAsync(timeoutCts.Token);
                     client.SetAuthToken(null!);
                 }
                 catch (Exception)

@@ -109,9 +109,18 @@ public class AppHub(
                 AuthToken? authToken = oldAuthToken;
                 if (!string.IsNullOrEmpty(oldAuthToken?.AccessToken))
                 {
-                    if (!await authProvider.ValidateAccessTokenAsync(oldAuthToken.AccessToken))
+                    bool isValid;
+                    using (var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(30)))
+                    using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(Context.ConnectionAborted, timeoutCts.Token))
                     {
-                        authToken = await authService.RefreshAccessTokenAsync();
+                        isValid = await authProvider.ValidateAccessTokenAsync(oldAuthToken.AccessToken, linkedCts.Token);
+                    }
+
+                    if (!isValid)
+                    {
+                        using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+                        using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(Context.ConnectionAborted, timeoutCts.Token);
+                        authToken = await authService.RefreshAccessTokenAsync(linkedCts.Token);
                     }
                 }
                 else
@@ -264,7 +273,7 @@ public class AppHub(
         TokenExpired,
     }
 
-    private async Task AuthRefreshLoopAsync(string connectionId, CancellationToken abort)
+    private async Task AuthRefreshLoopAsync(string connectionId, CancellationToken cancellationToken)
     {
         var state = AuthRefreshState.Initial;
         var consecutiveErrors = 0;
@@ -309,43 +318,58 @@ public class AppHub(
                         else
                         {
                             logger.LogInformation("AuthRefreshLoop: No token for {ConnectionId}, waiting 5 minutes.", connectionId);
-                            await Task.Delay(TimeSpan.FromMinutes(5), abort);
+                            await Task.Delay(TimeSpan.FromMinutes(5), cancellationToken);
                         }
                         break;
 
                     case AuthRefreshState.HasToken:
-                        if (token == null)
                         {
-                            // This should never happen
-                            logger.LogError("AuthRefreshLoop: Token lost for {ConnectionId}, aborting connection.", connectionId);
-                            AbortConnection();
-                            return;
-                        }
+                            if (token == null)
+                            {
+                                // This should never happen
+                                logger.LogError("AuthRefreshLoop: Token lost for {ConnectionId}, aborting connection.", connectionId);
+                                AbortConnection();
+                                return;
+                            }
 
-                        if (!await authProvider.ValidateAccessTokenAsync(token.AccessToken))
-                        {
-                            state = AuthRefreshState.TokenExpired;
-                        }
-                        else
-                        {
-                            var expiresAt = await authProvider.GetTokenExpiration(token);
-                            if (expiresAt != null && expiresAt < DateTimeOffset.UtcNow.AddMinutes(2))
+                            bool isValid;
+                            using (var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(30)))
+                            using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutCts.Token))
+                            {
+                                isValid = await authProvider.ValidateAccessTokenAsync(token.AccessToken, linkedCts.Token);
+                            }
+
+                            if (!isValid)
                             {
                                 state = AuthRefreshState.TokenExpired;
                             }
                             else
                             {
-                                // Token is valid, wait until close to expiration
-                                var waitUntil = (expiresAt ?? DateTimeOffset.UtcNow.AddMinutes(15)).AddMinutes(-2);
-                                var delay = waitUntil - DateTimeOffset.UtcNow;
-
-                                // Don't wait more than 2 hours
-                                if (delay > TimeSpan.FromHours(2))
+                                DateTimeOffset? expiresAt;
+                                using (var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(30)))
+                                using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutCts.Token))
                                 {
-                                    delay = TimeSpan.FromHours(2);
+                                    expiresAt = await authProvider.GetTokenExpiration(token, linkedCts.Token);
                                 }
-                                logger.LogInformation("AuthRefreshLoop: Token valid for {ConnectionId}, next check at {NextCheck}.", connectionId, DateTimeOffset.UtcNow + delay);
-                                await Task.Delay(delay, abort);
+
+                                if (expiresAt != null && expiresAt < DateTimeOffset.UtcNow.AddMinutes(2))
+                                {
+                                    state = AuthRefreshState.TokenExpired;
+                                }
+                                else
+                                {
+                                    // Token is valid, wait until close to expiration
+                                    var waitUntil = (expiresAt ?? DateTimeOffset.UtcNow.AddMinutes(15)).AddMinutes(-2);
+                                    var delay = waitUntil - DateTimeOffset.UtcNow;
+
+                                    // Don't wait more than 2 hours
+                                    if (delay > TimeSpan.FromHours(2))
+                                    {
+                                        delay = TimeSpan.FromHours(2);
+                                    }
+                                    logger.LogInformation("AuthRefreshLoop: Token valid for {ConnectionId}, next check at {NextCheck}.", connectionId, DateTimeOffset.UtcNow + delay);
+                                    await Task.Delay(delay, cancellationToken);
+                                }
                             }
                         }
                         break;
@@ -353,7 +377,11 @@ public class AppHub(
                     case AuthRefreshState.TokenExpired:
                         {
                             logger.LogInformation("AuthRefreshLoop: Attempting to refresh token for {ConnectionId}.", connectionId);
-                            var newToken = await authService.RefreshAccessTokenAsync();
+
+                            using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+                            using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutCts.Token);
+
+                            var newToken = await authService.RefreshAccessTokenAsync(linkedCts.Token);
                             if (token != newToken)
                             {
                                 logger.LogInformation("AuthRefreshLoop: updating stored for {ConnectionId}.", connectionId);
@@ -390,7 +418,7 @@ public class AppHub(
                 else
                 {
                     logger.LogInformation("AuthRefreshLoop: waiting 30 seconds before retrying for {ConnectionId}", connectionId);
-                    await Task.Delay(TimeSpan.FromSeconds(30), abort);
+                    await Task.Delay(TimeSpan.FromSeconds(30), cancellationToken);
                 }
                 continue;
             }

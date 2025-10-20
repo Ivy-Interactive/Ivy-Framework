@@ -28,11 +28,11 @@ public class AutheliaAuthProvider : IAuthProvider
         _httpClient = new HttpClient(handler) { BaseAddress = new Uri(_baseUrl) };
     }
 
-    public async Task<AuthToken?> LoginAsync(string username, string password)
+    public async Task<AuthToken?> LoginAsync(string username, string password, CancellationToken cancellationToken)
     {
         var payload = new { username, password };
         var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
-        var response = await _httpClient.PostAsync("/api/firstfactor", content);
+        var response = await _httpClient.PostAsync("/api/firstfactor", content, cancellationToken);
         if (response.IsSuccessStatusCode)
         {
             // Return the "authelia_session" cookie value as our token.
@@ -45,10 +45,10 @@ public class AutheliaAuthProvider : IAuthProvider
         return null;
     }
 
-    public async Task LogoutAsync(string _)
+    public async Task LogoutAsync(string _, CancellationToken cancellationToken)
     {
         // Instruct Authelia to log out. Then expire the session cookie.
-        await _httpClient.PostAsync("/api/logout", new StringContent(string.Empty));
+        await _httpClient.PostAsync("/api/logout", new StringContent(string.Empty), cancellationToken);
         var expired = new Cookie("authelia_session", "", "/", new Uri(_baseUrl).Host)
         {
             Expires = DateTime.UtcNow.AddDays(-1)
@@ -56,35 +56,35 @@ public class AutheliaAuthProvider : IAuthProvider
         _cookieContainer.Add(new Uri(_baseUrl), expired);
     }
 
-    public Task<AuthToken?> RefreshAccessTokenAsync(AuthToken token) => Task.FromResult<AuthToken?>(token);
+    public Task<AuthToken?> RefreshAccessTokenAsync(AuthToken token, CancellationToken cancellationToken) => Task.FromResult<AuthToken?>(token);
 
-    public Task<Uri> GetOAuthUriAsync(AuthOption option, WebhookEndpoint callback)
+    public Task<Uri> GetOAuthUriAsync(AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }
 
-    public Task<AuthToken?> HandleOAuthCallbackAsync(HttpRequest request)
+    public Task<AuthToken?> HandleOAuthCallbackAsync(HttpRequest request, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }
 
-    public async Task<bool> ValidateAccessTokenAsync(string token)
+    public async Task<bool> ValidateAccessTokenAsync(string token, CancellationToken cancellationToken)
     {
         // Send a request with the session cookie to /api/user/info.
         var request = new HttpRequestMessage(HttpMethod.Get, "/api/user/info");
         request.Headers.Add("Cookie", $"authelia_session={token}");
-        var response = await _httpClient.SendAsync(request);
+        var response = await _httpClient.SendAsync(request, cancellationToken);
         return response.IsSuccessStatusCode;
     }
 
-    public async Task<UserInfo?> GetUserInfoAsync(string token)
+    public async Task<UserInfo?> GetUserInfoAsync(string token, CancellationToken cancellationToken)
     {
         var request = new HttpRequestMessage(HttpMethod.Get, "/api/user/info");
         request.Headers.Add("Cookie", $"authelia_session={token}");
-        var response = await _httpClient.SendAsync(request);
+        var response = await _httpClient.SendAsync(request, cancellationToken);
         if (!response.IsSuccessStatusCode)
             return null;
-        var json = await response.Content.ReadAsStringAsync();
+        var json = await response.Content.ReadAsStringAsync(cancellationToken);
         var user = JsonSerializer.Deserialize<AutheliaUser>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
         if (user == null)
             return null;
@@ -96,7 +96,7 @@ public class AutheliaAuthProvider : IAuthProvider
         return [new AuthOption(AuthFlow.EmailPassword)];
     }
 
-    public Task<DateTimeOffset?> GetTokenExpiration(AuthToken token)
+    public Task<DateTimeOffset?> GetTokenExpiration(AuthToken token, CancellationToken cancellationToken)
     {
         return Task.FromResult<DateTimeOffset?>(null);
     }

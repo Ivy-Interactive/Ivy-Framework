@@ -93,10 +93,10 @@ public class MicrosoftEntraAuthProvider : IAuthProvider
         return _app;
     }
 
-    public Task<AuthToken?> LoginAsync(string email, string password)
+    public Task<AuthToken?> LoginAsync(string email, string password, CancellationToken cancellationToken)
         => throw new InvalidOperationException("Microsoft Entra login with email/password is not supported");
 
-    public async Task<Uri> GetOAuthUriAsync(AuthOption option, WebhookEndpoint callback)
+    public async Task<Uri> GetOAuthUriAsync(AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken)
     {
         _codeVerifier = GenerateCodeVerifier();
         var codeChallenge = GenerateCodeChallenge(_codeVerifier);
@@ -110,12 +110,12 @@ public class MicrosoftEntraAuthProvider : IAuthProvider
                 ["code_challenge_method"] = "S256",
                 ["state"] = callback.Id,
             })
-            .ExecuteAsync();
+            .ExecuteAsync(cancellationToken);
 
         return authUrl;
     }
 
-    public async Task<AuthToken?> HandleOAuthCallbackAsync(HttpRequest request)
+    public async Task<AuthToken?> HandleOAuthCallbackAsync(HttpRequest request, CancellationToken cancellationToken)
     {
         var code = request.Query["code"].ToString();
         var error = request.Query["error"].ToString();
@@ -137,7 +137,7 @@ public class MicrosoftEntraAuthProvider : IAuthProvider
 
         var result = await GetApp().AcquireTokenByAuthorizationCode(_scopes, code)
             .WithPkceCodeVerifier(_codeVerifier)
-            .ExecuteAsync();
+            .ExecuteAsync(cancellationToken);
 
         var accountId = result.Account.HomeAccountId!.Identifier;
         return new AuthToken(
@@ -147,7 +147,7 @@ public class MicrosoftEntraAuthProvider : IAuthProvider
         );
     }
 
-    public Task LogoutAsync(string token)
+    public Task LogoutAsync(string token, CancellationToken cancellationToken)
     {
         _tokenCache = null;
         _app = null;
@@ -155,7 +155,7 @@ public class MicrosoftEntraAuthProvider : IAuthProvider
         return Task.CompletedTask;
     }
 
-    public async Task<AuthToken?> RefreshAccessTokenAsync(AuthToken token)
+    public async Task<AuthToken?> RefreshAccessTokenAsync(AuthToken token, CancellationToken cancellationToken)
     {
         var app = GetApp();
 
@@ -174,7 +174,8 @@ public class MicrosoftEntraAuthProvider : IAuthProvider
 
         try
         {
-            var account = await app.GetAccountAsync(accountId);
+            var account = await app.GetAccountAsync(accountId)
+                .WaitAsync(cancellationToken);
 
             if (account != null)
             {
@@ -184,7 +185,7 @@ public class MicrosoftEntraAuthProvider : IAuthProvider
                 }
 
                 var result = await GetApp().AcquireTokenSilent(_scopes, account)
-                    .ExecuteAsync();
+                    .ExecuteAsync(cancellationToken);
 
                 if (result == null)
                 {
@@ -200,7 +201,7 @@ public class MicrosoftEntraAuthProvider : IAuthProvider
             else
             {
                 var result = await refresher.AcquireTokenByRefreshToken(_scopes, token.RefreshToken)
-                    .ExecuteAsync();
+                    .ExecuteAsync(cancellationToken);
 
                 if (result == null)
                 {
@@ -225,12 +226,12 @@ public class MicrosoftEntraAuthProvider : IAuthProvider
         }
     }
 
-    public async Task<bool> ValidateAccessTokenAsync(string token)
+    public async Task<bool> ValidateAccessTokenAsync(string token, CancellationToken cancellationToken)
     {
-        return await VerifyToken(token) is not null;
+        return await VerifyToken(token, cancellationToken) is not null;
     }
 
-    public Task<UserInfo?> GetUserInfoAsync(string idToken)
+    public Task<UserInfo?> GetUserInfoAsync(string idToken, CancellationToken cancellationToken)
     {
         try
         {
@@ -266,9 +267,9 @@ public class MicrosoftEntraAuthProvider : IAuthProvider
         return [.. _authOptions];
     }
 
-    public async Task<DateTimeOffset?> GetTokenExpiration(AuthToken token)
+    public async Task<DateTimeOffset?> GetTokenExpiration(AuthToken token, CancellationToken cancellationToken)
     {
-        if (await VerifyToken(token.AccessToken) is var (_, expiration))
+        if (await VerifyToken(token.AccessToken, cancellationToken) is var (_, expiration))
         {
             return expiration;
         }
@@ -322,7 +323,7 @@ public class MicrosoftEntraAuthProvider : IAuthProvider
         return null;
     }
 
-    private async Task<(ClaimsPrincipal, DateTimeOffset)?> VerifyToken(string jwt)
+    private async Task<(ClaimsPrincipal, DateTimeOffset)?> VerifyToken(string jwt, CancellationToken cancellationToken)
     {
         try
         {
@@ -331,7 +332,7 @@ public class MicrosoftEntraAuthProvider : IAuthProvider
                 InboundClaimTypeMap = new Dictionary<string, string>()
             };
 
-            var discoveryDocument = await _configurationManager.GetConfigurationAsync(CancellationToken.None);
+            var discoveryDocument = await _configurationManager.GetConfigurationAsync(cancellationToken);
             var signingKeys = discoveryDocument.SigningKeys;
 
             var tokenValidationParameters = new TokenValidationParameters

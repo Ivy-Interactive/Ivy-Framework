@@ -64,14 +64,15 @@ public class SupabaseAuthProvider : IAuthProvider
         _jwksUrl = $"{_issuer}/.well-known/jwks.json";
     }
 
-    public async Task<AuthToken?> LoginAsync(string email, string password)
+    public async Task<AuthToken?> LoginAsync(string email, string password, CancellationToken cancellationToken)
     {
-        var session = await _client.Auth.SignIn(email, password);
+        var session = await _client.Auth.SignIn(email, password)
+            .WaitAsync(cancellationToken);
         var authToken = MakeAuthToken(session);
         return authToken;
     }
 
-    public async Task<Uri> GetOAuthUriAsync(AuthOption option, WebhookEndpoint callback)
+    public async Task<Uri> GetOAuthUriAsync(AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken)
     {
         var provider = option.Id switch
         {
@@ -117,13 +118,14 @@ public class SupabaseAuthProvider : IAuthProvider
             };
         }
 
-        var providerAuthState = await _client.Auth.SignIn(provider, signInOptions);
+        var providerAuthState = await _client.Auth.SignIn(provider, signInOptions)
+            .WaitAsync(cancellationToken);
         _pkceCodeVerifier = providerAuthState.PKCEVerifier;
 
         return providerAuthState.Uri;
     }
 
-    public async Task<AuthToken?> HandleOAuthCallbackAsync(HttpRequest request)
+    public async Task<AuthToken?> HandleOAuthCallbackAsync(HttpRequest request, CancellationToken cancellationToken)
     {
         var code = request.Query["code"];
 
@@ -139,17 +141,19 @@ public class SupabaseAuthProvider : IAuthProvider
             throw new Exception("Received no recognized query parameters from Supabase.");
         }
 
-        var session = await _client.Auth.ExchangeCodeForSession(_pkceCodeVerifier!, code.ToString());
+        var session = await _client.Auth.ExchangeCodeForSession(_pkceCodeVerifier!, code.ToString())
+            .WaitAsync(cancellationToken);
         var authToken = MakeAuthToken(session);
         return authToken;
     }
 
-    public async Task LogoutAsync(string _)
+    public async Task LogoutAsync(string _, CancellationToken cancellationToken)
     {
-        await _client.Auth.SignOut();
+        await _client.Auth.SignOut()
+            .WaitAsync(cancellationToken);
     }
 
-    public async Task<AuthToken?> RefreshAccessTokenAsync(AuthToken token)
+    public async Task<AuthToken?> RefreshAccessTokenAsync(AuthToken token, CancellationToken cancellationToken)
     {
         if (token.RefreshToken == null)
         {
@@ -158,7 +162,8 @@ public class SupabaseAuthProvider : IAuthProvider
 
         try
         {
-            var session = await _client.Auth.SetSession(token.AccessToken, token.RefreshToken, forceAccessTokenRefresh: true);
+            var session = await _client.Auth.SetSession(token.AccessToken, token.RefreshToken, forceAccessTokenRefresh: true)
+                .WaitAsync(cancellationToken);
             var authToken = MakeAuthToken(session);
             return authToken;
         }
@@ -168,14 +173,14 @@ public class SupabaseAuthProvider : IAuthProvider
         }
     }
 
-    public async Task<bool> ValidateAccessTokenAsync(string token)
+    public async Task<bool> ValidateAccessTokenAsync(string token, CancellationToken cancellationToken)
     {
-        return await VerifyToken(token) is not null;
+        return await VerifyToken(token, cancellationToken) is not null;
     }
 
-    public async Task<UserInfo?> GetUserInfoAsync(string token)
+    public async Task<UserInfo?> GetUserInfoAsync(string token, CancellationToken cancellationToken)
     {
-        if (await VerifyToken(token) is not var (claims, _))
+        if (await VerifyToken(token, cancellationToken) is not var (claims, _))
         {
             return null;
         }
@@ -219,9 +224,9 @@ public class SupabaseAuthProvider : IAuthProvider
         return _authOptions.ToArray();
     }
 
-    public async Task<DateTimeOffset?> GetTokenExpiration(AuthToken token)
+    public async Task<DateTimeOffset?> GetTokenExpiration(AuthToken token, CancellationToken cancellationToken)
     {
-        if (await VerifyToken(token.AccessToken) is var (_, expiration))
+        if (await VerifyToken(token.AccessToken, cancellationToken) is var (_, expiration))
         {
             return expiration;
         }
@@ -303,7 +308,7 @@ public class SupabaseAuthProvider : IAuthProvider
         return this;
     }
 
-    private async Task<(ClaimsPrincipal, DateTimeOffset)?> VerifyToken(string jwt)
+    private async Task<(ClaimsPrincipal, DateTimeOffset)?> VerifyToken(string jwt, CancellationToken cancellationToken)
     {
         try
         {
@@ -334,7 +339,7 @@ public class SupabaseAuthProvider : IAuthProvider
                 if (_cachedJwks == null || DateTime.UtcNow >= _jwksCacheExpiry)
                 {
                     using var httpClient = new HttpClient();
-                    var jwksJson = await httpClient.GetStringAsync(_jwksUrl);
+                    var jwksJson = await httpClient.GetStringAsync(_jwksUrl, cancellationToken);
                     _cachedJwks = new JsonWebKeySet(jwksJson);
                     _jwksCacheExpiry = DateTime.UtcNow.AddHours(24);
                 }

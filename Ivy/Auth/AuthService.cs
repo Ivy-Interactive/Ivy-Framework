@@ -18,10 +18,11 @@ public class AuthService(IAuthProvider authProvider, AuthToken? token = null) : 
     /// </summary>
     /// <param name="email">The user's email address</param>
     /// <param name="password">The user's password</param>
+    /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>An authentication token if successful, null otherwise</returns>
-    public async Task<AuthToken?> LoginAsync(string email, string password)
+    public async Task<AuthToken?> LoginAsync(string email, string password, CancellationToken cancellationToken)
     {
-        var token = await authProvider.LoginAsync(email, password);
+        var token = await authProvider.LoginAsync(email, password, cancellationToken);
         _token = token;
         return token;
     }
@@ -31,20 +32,22 @@ public class AuthService(IAuthProvider authProvider, AuthToken? token = null) : 
     /// </summary>
     /// <param name="option">The OAuth authentication option</param>
     /// <param name="callback">The webhook endpoint for handling the OAuth callback</param>
+    /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>The OAuth authorization URI</returns>
-    public Task<Uri> GetOAuthUriAsync(AuthOption option, WebhookEndpoint callback)
+    public Task<Uri> GetOAuthUriAsync(AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken)
     {
-        return authProvider.GetOAuthUriAsync(option, callback);
+        return authProvider.GetOAuthUriAsync(option, callback, cancellationToken);
     }
 
     /// <summary>
     /// Handles the OAuth callback request and extracts the authentication token.
     /// </summary>
     /// <param name="request">The HTTP request containing OAuth callback data</param>
+    /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>An authentication token if successful, null otherwise</returns>
-    public async Task<AuthToken?> HandleOAuthCallbackAsync(HttpRequest request)
+    public async Task<AuthToken?> HandleOAuthCallbackAsync(HttpRequest request, CancellationToken cancellationToken)
     {
-        var token = await authProvider.HandleOAuthCallbackAsync(request);
+        var token = await authProvider.HandleOAuthCallbackAsync(request, cancellationToken);
         _token = token;
         return token;
     }
@@ -52,22 +55,24 @@ public class AuthService(IAuthProvider authProvider, AuthToken? token = null) : 
     /// <summary>
     /// Logs out the current user.
     /// </summary>
-    public async Task LogoutAsync()
+    /// <param name="cancellationToken">Cancellation token</param>
+    public async Task LogoutAsync(CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(_token?.AccessToken))
         {
             return;
         }
 
-        await authProvider.LogoutAsync(_token.AccessToken);
+        await authProvider.LogoutAsync(_token.AccessToken, cancellationToken);
         _token = null;
     }
 
     /// <summary>
     /// Retrieves information about the current authenticated user.
     /// </summary>
+    /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>User information if authenticated, null otherwise</returns>
-    public async Task<UserInfo?> GetUserInfoAsync()
+    public async Task<UserInfo?> GetUserInfoAsync(CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(_token?.AccessToken))
         {
@@ -76,7 +81,7 @@ public class AuthService(IAuthProvider authProvider, AuthToken? token = null) : 
 
         //todo: cache this!
 
-        return await authProvider.GetUserInfoAsync(_token.AccessToken);
+        return await authProvider.GetUserInfoAsync(_token.AccessToken, cancellationToken);
     }
 
     /// <summary>
@@ -91,14 +96,15 @@ public class AuthService(IAuthProvider authProvider, AuthToken? token = null) : 
     /// <summary>
     /// Refreshes the current authentication token.
     /// </summary>
+    /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>
     /// The refreshed authentication token if successful; otherwise, null.
     /// </returns>
-    public async Task<AuthToken?> RefreshAccessTokenAsync()
+    public async Task<AuthToken?> RefreshAccessTokenAsync(CancellationToken cancellationToken)
     {
         if (_token != null)
         {
-            _token = await authProvider.RefreshAccessTokenAsync(_token);
+            _token = await authProvider.RefreshAccessTokenAsync(_token, cancellationToken);
         }
 
         return _token;
