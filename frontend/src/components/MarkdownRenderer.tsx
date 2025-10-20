@@ -125,30 +125,23 @@ const CodeBlock = memo(
         const cleanContent = lines.join('\n'); // Remove any empty lines
 
         return (
-          <div className="relative group">
-            <div className="border border-border rounded-md overflow-hidden">
-              <div className="flex items-center justify-between px-3 py-2 bg-muted/50 border-b border-border">
-                <div className="flex items-center gap-2">
-                  <span className="px-2 py-1 text-xs font-medium bg-muted rounded text-muted-foreground">
-                    Terminal
-                  </span>
-                </div>
-                <CopyToClipboardButton textToCopy={cleanContent} />
-              </div>
-              <ScrollArea className="w-full">
-                <pre className="p-4 bg-muted rounded-md font-mono text-sm">
-                  {lines.map((line, index) => (
-                    <div key={index} className="flex">
-                      <span className="text-muted-foreground select-none pointer-events-none mr-2">
-                        {'> '}
-                      </span>
-                      <span className="flex-1">{line}</span>
-                    </div>
-                  ))}
-                </pre>
-                <ScrollBar orientation="horizontal" />
-              </ScrollArea>
+          <div className="relative">
+            <div className="absolute top-2 right-2 z-10">
+              <CopyToClipboardButton textToCopy={cleanContent} />
             </div>
+            <ScrollArea className="w-full">
+              <pre className="p-4 bg-muted rounded-md font-mono text-sm">
+                {lines.map((line, index) => (
+                  <div key={index} className="flex">
+                    <span className="text-muted-foreground select-none pointer-events-none mr-2">
+                      {'> '}
+                    </span>
+                    <span className="flex-1">{line}</span>
+                  </div>
+                ))}
+              </pre>
+              <ScrollBar orientation="horizontal" />
+            </ScrollArea>
           </div>
         );
       }
@@ -164,27 +157,20 @@ const CodeBlock = memo(
             </ScrollArea>
           }
         >
-          <div className="relative group">
-            <div className="border border-border rounded-md overflow-hidden">
-              <div className="flex items-center justify-between px-3 py-2 bg-muted/50 border-b border-border">
-                <div className="flex items-center gap-2">
-                  <span className="px-2 py-1 text-xs font-medium bg-muted rounded text-muted-foreground">
-                    {match[1]}
-                  </span>
-                </div>
-                <CopyToClipboardButton textToCopy={content} />
-              </div>
-              <ScrollArea className="w-full">
-                <SyntaxHighlighter
-                  language={match[1]}
-                  style={dynamicTheme}
-                  customStyle={{ margin: 0 }}
-                >
-                  {content}
-                </SyntaxHighlighter>
-                <ScrollBar orientation="horizontal" />
-              </ScrollArea>
+          <div className="relative">
+            <div className="absolute top-2 right-2 z-10">
+              <CopyToClipboardButton textToCopy={content} />
             </div>
+            <ScrollArea className="w-full">
+              <SyntaxHighlighter
+                language={match[1]}
+                style={dynamicTheme}
+                customStyle={{ margin: 0 }}
+              >
+                {content}
+              </SyntaxHighlighter>
+              <ScrollBar orientation="horizontal" />
+            </ScrollArea>
           </div>
         </Suspense>
       );

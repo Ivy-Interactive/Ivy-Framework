@@ -42,6 +42,12 @@ const mapLanguageToPrism = (language: string): string | undefined => {
   return result === 'text' ? undefined : result;
 };
 
+const MemoizedCopyButton = memo(({ textToCopy }: { textToCopy: string }) => (
+  <div className="absolute top-2 right-2 z-10">
+    <CopyToClipboardButton textToCopy={textToCopy} />
+  </div>
+));
+
 const CodeWidget: React.FC<CodeWidgetProps> = memo(
   ({
     id,
@@ -78,48 +84,37 @@ const CodeWidget: React.FC<CodeWidgetProps> = memo(
     const dynamicTheme = useMemo(() => createPrismTheme(), []);
 
     return (
-      <div className="group">
-        <div
+      <div className="relative">
+        {showCopyButton && <MemoizedCopyButton textToCopy={content} />}
+        <ScrollArea
           className={cn(
-            'w-full',
-            showBorder && 'border border-border rounded-md overflow-hidden'
+            'w-full h-full',
+            showBorder && 'border border-border rounded-md'
           )}
         >
-          {showCopyButton && (
-            <div className="flex items-center justify-between px-3 py-2 bg-muted/50 border-b border-border">
-              <div className="flex items-center gap-2">
-                <span className="px-2 py-1 text-xs font-medium bg-muted rounded text-muted-foreground">
-                  {language}
-                </span>
-              </div>
-              <CopyToClipboardButton textToCopy={content} />
-            </div>
-          )}
-          <ScrollArea className="w-full h-full">
-            <Suspense
-              fallback={
-                <pre
-                  className="p-4 bg-muted rounded-md font-mono text-sm"
-                  style={styles}
-                >
-                  {content}
-                </pre>
-              }
-            >
-              <SyntaxHighlighter
-                language={mapLanguageToPrism(language)}
-                customStyle={styles}
-                style={dynamicTheme}
-                showLineNumbers={showLineNumbers}
-                wrapLines={true}
-                key={highlighterKey}
+          <Suspense
+            fallback={
+              <pre
+                className="p-4 bg-muted rounded-md font-mono text-sm"
+                style={styles}
               >
                 {content}
-              </SyntaxHighlighter>
-            </Suspense>
-            <ScrollBar orientation="horizontal" />
-          </ScrollArea>
-        </div>
+              </pre>
+            }
+          >
+            <SyntaxHighlighter
+              language={mapLanguageToPrism(language)}
+              customStyle={styles}
+              style={dynamicTheme}
+              showLineNumbers={showLineNumbers}
+              wrapLines={true}
+              key={highlighterKey}
+            >
+              {content}
+            </SyntaxHighlighter>
+          </Suspense>
+          <ScrollBar orientation="horizontal" />
+        </ScrollArea>
       </div>
     );
   }
