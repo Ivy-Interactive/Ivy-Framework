@@ -15,4 +15,3 @@ export {
 } from './ChatWidget';
 export { DropDownMenuWidget } from './DropDownMenuWidget';
 export { PaginationWidget } from './PaginationWidget';
-export * from './kanban';
