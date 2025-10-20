@@ -3,6 +3,7 @@ import { Theme as AppTheme } from '@/components/theme-provider/types';
 
 // Helper to get computed CSS variable value
 function getCSSVariable(variable: string): string {
+  if (typeof document === 'undefined') return '';
   return getComputedStyle(document.documentElement)
     .getPropertyValue(variable)
     .trim();
@@ -13,6 +14,7 @@ function isDarkTheme(theme: AppTheme): boolean {
   if (theme === 'dark') return true;
   if (theme === 'light') return false;
   // For 'system', check the actual system preference
+  if (typeof window === 'undefined') return false;
   return window.matchMedia('(prefers-color-scheme: dark)').matches;
 }
 

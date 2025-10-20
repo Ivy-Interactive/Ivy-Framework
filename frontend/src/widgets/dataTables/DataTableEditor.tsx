@@ -5,7 +5,13 @@ import DataEditor, {
   GridSelection,
   Item,
 } from '@glideapps/glide-data-grid';
-import { useMemo, useCallback, useEffect, useRef, useState } from 'react';
+import React, {
+  useMemo,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import { useTable } from './DataTableContext';
 import { tableStyles } from './styles/style';
 import { getTableTheme } from './styles/theme';
