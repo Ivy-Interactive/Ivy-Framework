@@ -74,4 +74,9 @@
     </Compile>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Views\Kanban\" />
+    <Folder Include="Widgets\Kanban\" />
+  </ItemGroup>
+
 </Project>
