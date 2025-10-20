@@ -78,8 +78,8 @@ public class PasswordEmailFlowView(IState<string?> errorMessage) : ViewBase
             {
                 loading.Set(true);
 
-                using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
-                var token = await auth.LoginAsync(user.Value, password.Value, timeoutCts.Token);
+                var token = await TimeoutHelper.WithTimeoutAsync(
+                    ct => auth.LoginAsync(user.Value, password.Value, ct));
 
                 if (token != null)
                 {
@@ -129,8 +129,8 @@ public class OAuthFlowView(AuthOption option, IState<string?> errorMessage) : Vi
         var auth = this.UseService<IAuthService>();
         var callback = this.UseWebhook(async (request) =>
         {
-            using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
-            var token = await auth.HandleOAuthCallbackAsync(request, timeoutCts.Token);
+            var token = await TimeoutHelper.WithTimeoutAsync(
+                ct => auth.HandleOAuthCallbackAsync(request, ct));
             client.SetAuthToken(token);
             return new RedirectResult("/");
         });
@@ -139,8 +139,9 @@ public class OAuthFlowView(AuthOption option, IState<string?> errorMessage) : Vi
         {
             try
             {
-                using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
-                client.OpenUrl(await auth.GetOAuthUriAsync(option, callback, timeoutCts.Token));
+                var uri = await TimeoutHelper.WithTimeoutAsync(
+                    ct => auth.GetOAuthUriAsync(option, callback, ct));
+                client.OpenUrl(uri);
             }
             catch (Exception e)
             {

@@ -2,6 +2,7 @@ using Ivy.Apps;
 using Ivy.Auth;
 using Ivy.Client;
 using Ivy.Core;
+using Ivy.Helpers;
 using Ivy.Hooks;
 using Ivy.Shared;
 using Ivy.Views;
@@ -114,8 +115,10 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
         {
             if (auth != null)
             {
-                using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
-                user.Set(await auth.GetUserInfoAsync(timeoutCts.Token));
+                var userInfo = await TimeoutHelper.WithTimeoutAsync(
+                    auth.GetUserInfoAsync,
+                    CancellationToken.None);
+                user.Set(userInfo);
             }
             if (!string.IsNullOrEmpty(settings.DefaultAppId))
             {
@@ -260,8 +263,9 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
                 {
                     if (auth == null) return;
 
-                    using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
-                    await auth.LogoutAsync(timeoutCts.Token);
+                    await TimeoutHelper.WithTimeoutAsync(
+                        auth.LogoutAsync,
+                        CancellationToken.None);
                     client.SetAuthToken(null!);
                 }
                 catch (Exception)

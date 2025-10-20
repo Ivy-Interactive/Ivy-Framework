@@ -109,18 +109,15 @@ public class AppHub(
                 AuthToken? authToken = oldAuthToken;
                 if (!string.IsNullOrEmpty(oldAuthToken?.AccessToken))
                 {
-                    bool isValid;
-                    using (var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(30)))
-                    using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(Context.ConnectionAborted, timeoutCts.Token))
-                    {
-                        isValid = await authProvider.ValidateAccessTokenAsync(oldAuthToken.AccessToken, linkedCts.Token);
-                    }
+                    var isValid = await TimeoutHelper.WithTimeoutAsync(
+                        ct => authProvider.ValidateAccessTokenAsync(oldAuthToken.AccessToken, ct),
+                        Context.ConnectionAborted);
 
                     if (!isValid)
                     {
-                        using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
-                        using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(Context.ConnectionAborted, timeoutCts.Token);
-                        authToken = await authService.RefreshAccessTokenAsync(linkedCts.Token);
+                        authToken = await TimeoutHelper.WithTimeoutAsync(
+                            authService.RefreshAccessTokenAsync,
+                            Context.ConnectionAborted);
                     }
                 }
                 else
@@ -332,12 +329,9 @@ public class AppHub(
                                 return;
                             }
 
-                            bool isValid;
-                            using (var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(30)))
-                            using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutCts.Token))
-                            {
-                                isValid = await authProvider.ValidateAccessTokenAsync(token.AccessToken, linkedCts.Token);
-                            }
+                            var isValid = await TimeoutHelper.WithTimeoutAsync(
+                                ct => authProvider.ValidateAccessTokenAsync(token.AccessToken, ct),
+                                cancellationToken);
 
                             if (!isValid)
                             {
@@ -345,12 +339,9 @@ public class AppHub(
                             }
                             else
                             {
-                                DateTimeOffset? expiresAt;
-                                using (var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(30)))
-                                using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutCts.Token))
-                                {
-                                    expiresAt = await authProvider.GetTokenExpiration(token, linkedCts.Token);
-                                }
+                                var expiresAt = await TimeoutHelper.WithTimeoutAsync(
+                                    ct => authProvider.GetTokenExpiration(token, ct),
+                                    cancellationToken);
 
                                 if (expiresAt != null && expiresAt < DateTimeOffset.UtcNow.AddMinutes(2))
                                 {
@@ -378,10 +369,9 @@ public class AppHub(
                         {
                             logger.LogInformation("AuthRefreshLoop: Attempting to refresh token for {ConnectionId}.", connectionId);
 
-                            using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
-                            using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutCts.Token);
-
-                            var newToken = await authService.RefreshAccessTokenAsync(linkedCts.Token);
+                            var newToken = await TimeoutHelper.WithTimeoutAsync(
+                                authService.RefreshAccessTokenAsync,
+                                cancellationToken);
                             if (token != newToken)
                             {
                                 logger.LogInformation("AuthRefreshLoop: updating stored for {ConnectionId}.", connectionId);
