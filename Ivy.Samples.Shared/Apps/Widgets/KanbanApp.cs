@@ -44,9 +44,9 @@ public class KanbanApp : SampleBase
                 .CardOrder(e => e.Priority)
                 .ColumnTitle(status => status switch
                 {
-                    "Todo" => "📋 To Do",
-                    "In Progress" => "🚀 In Progress",
-                    "Done" => "✅ Done",
+                    "Todo" => "Custom Todo",
+                    "In Progress" => "Custom In Progress",
+                    "Done" => "Custom Done",
                     _ => status
                 })
                 .HandleAdd((string columnKey) => Console.WriteLine($"Card added to column: {columnKey}"))
