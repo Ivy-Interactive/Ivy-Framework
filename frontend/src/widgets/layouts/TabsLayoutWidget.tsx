@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import Icon from '@/components/Icon';
 import { Button } from '@/components/ui/button';

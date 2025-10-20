@@ -1,13 +1,82 @@
 import { LoadingScreen } from '@/components/LoadingScreen';
-import * as Widgets from '@/widgets';
-import * as Blades from '@/widgets/blades';
-import * as Details from '@/widgets/details';
-import * as Dialogs from '@/widgets/dialogs';
-import * as Forms from '@/widgets/forms';
-import * as Inputs from '@/widgets/inputs';
-import * as Layouts from '@/widgets/layouts';
-import * as Lists from '@/widgets/lists';
-import * as Primitives from '@/widgets/primitives';
+import {
+  ArticleWidget,
+  BadgeWidget,
+  ButtonWidget,
+  CardWidget,
+  ChatLoadingWidget,
+  ChatMessageWidget,
+  ChatStatusWidget,
+  ChatWidget,
+  DropDownMenuWidget,
+  ExpandableWidget,
+  ProgressWidget,
+  SheetWidget,
+  SlotWidget,
+  TooltipWidget,
+  PaginationWidget,
+} from '@/widgets';
+import { BladeContainerWidget, BladeWidget } from '@/widgets/blades';
+import { DetailsWidget, DetailWidget } from '@/widgets/details';
+import {
+  DialogWidget,
+  DialogHeaderWidget,
+  DialogBodyWidget,
+  DialogFooterWidget,
+} from '@/widgets/dialogs';
+import { FormWidget } from '@/widgets/forms';
+import {
+  FieldWidget,
+  TextInputWidget,
+  BoolInputWidget,
+  DateTimeInputWidget,
+  NumberInputWidget,
+  SelectInputWidget,
+  ReadOnlyInputWidget,
+  ColorInputWidget,
+  FeedbackInputWidget,
+  AsyncSelectInputWidget,
+  DateRangeInputWidget,
+  FileInputWidget,
+} from '@/widgets/inputs';
+import {
+  StackLayoutWidget,
+  WrapLayoutWidget,
+  GridLayoutWidget,
+  HeaderLayoutWidget,
+  FooterLayoutWidget,
+  TabsLayoutWidget,
+  TabWidget,
+  SidebarLayoutWidget,
+  SidebarMenuWidget,
+  ResizeablePanelGroupWidget,
+  ResizeablePanelWidget,
+  FloatingPanelWidget,
+} from '@/widgets/layouts';
+import { ListWidget, ListItemWidget } from '@/widgets/lists';
+import {
+  TextBlockWidget,
+  HtmlWidget,
+  ErrorWidget,
+  SvgWidget,
+  ImageWidget,
+  IframeWidget,
+  FragmentWidget,
+  SeparatorWidget,
+  SkeletonWidget,
+  IconWidget,
+  BoxWidget,
+  CalloutWidget,
+  KbdWidget,
+  EmptyWidget,
+  AvatarWidget,
+  IvyLogoWidget,
+  SpacerWidget,
+  LoadingWidget,
+  AppHostWidget,
+  AudioPlayerWidget,
+  VideoPlayerWidget,
+} from '@/widgets/primitives';
 import { DataTable } from '@/widgets/dataTables';
 import { TableWidget, TableRowWidget, TableCellWidget } from '@/widgets/tables';
 import React from 'react';
@@ -16,79 +85,79 @@ export const widgetMap = {
   $loading: LoadingScreen,
 
   // Primitives
-  'Ivy.TextBlock': Primitives.TextBlockWidget,
+  'Ivy.TextBlock': TextBlockWidget,
   'Ivy.Markdown': React.lazy(
     () => import('@/widgets/primitives/MarkdownWidget')
   ),
   'Ivy.Json': React.lazy(() => import('@/widgets/primitives/JsonWidget')),
-  'Ivy.Html': Primitives.HtmlWidget,
+  'Ivy.Html': HtmlWidget,
   'Ivy.Xml': React.lazy(() => import('@/widgets/primitives/XmlWidget')),
-  'Ivy.Error': Primitives.ErrorWidget,
-  'Ivy.Svg': Primitives.SvgWidget,
-  'Ivy.Image': Primitives.ImageWidget,
-  'Ivy.Iframe': Primitives.IframeWidget,
+  'Ivy.Error': ErrorWidget,
+  'Ivy.Svg': SvgWidget,
+  'Ivy.Image': ImageWidget,
+  'Ivy.Iframe': IframeWidget,
   'Ivy.Code': React.lazy(() => import('@/widgets/primitives/CodeWidget')),
-  'Ivy.Fragment': Primitives.FragmentWidget,
-  'Ivy.Separator': Primitives.SeparatorWidget,
-  'Ivy.Skeleton': Primitives.SkeletonWidget,
-  'Ivy.Icon': Primitives.IconWidget,
-  'Ivy.Box': Primitives.BoxWidget,
+  'Ivy.Fragment': FragmentWidget,
+  'Ivy.Separator': SeparatorWidget,
+  'Ivy.Skeleton': SkeletonWidget,
+  'Ivy.Icon': IconWidget,
+  'Ivy.Box': BoxWidget,
   'Ivy.Embed': React.lazy(() => import('@/widgets/primitives/EmbedWidget')),
-  'Ivy.Callout': Primitives.CalloutWidget,
-  'Ivy.Kbd': Primitives.KbdWidget,
-  'Ivy.Empty': Primitives.EmptyWidget,
-  'Ivy.Avatar': Primitives.AvatarWidget,
-  'Ivy.IvyLogo': Primitives.IvyLogoWidget,
-  'Ivy.Spacer': Primitives.SpacerWidget,
-  'Ivy.Loading': Primitives.LoadingWidget,
-  'Ivy.AppHost': Primitives.AppHostWidget,
-  'Ivy.Audio': Primitives.AudioPlayerWidget,
-  'Ivy.VideoPlayer': Primitives.VideoPlayerWidget,
+  'Ivy.Callout': CalloutWidget,
+  'Ivy.Kbd': KbdWidget,
+  'Ivy.Empty': EmptyWidget,
+  'Ivy.Avatar': AvatarWidget,
+  'Ivy.IvyLogo': IvyLogoWidget,
+  'Ivy.Spacer': SpacerWidget,
+  'Ivy.Loading': LoadingWidget,
+  'Ivy.AppHost': AppHostWidget,
+  'Ivy.Audio': AudioPlayerWidget,
+  'Ivy.VideoPlayer': VideoPlayerWidget,
 
   // Widgets
-  'Ivy.Article': Widgets.ArticleWidget,
-  'Ivy.Button': Widgets.ButtonWidget,
-  'Ivy.Progress': Widgets.ProgressWidget,
-  'Ivy.Tooltip': Widgets.TooltipWidget,
-  'Ivy.Slot': Widgets.SlotWidget,
-  'Ivy.Card': Widgets.CardWidget,
-  'Ivy.Sheet': Widgets.SheetWidget,
-  'Ivy.Badge': Widgets.BadgeWidget,
-  'Ivy.Expandable': Widgets.ExpandableWidget,
-  'Ivy.Chat': Widgets.ChatWidget,
-  'Ivy.ChatMessage': Widgets.ChatMessageWidget,
-  'Ivy.ChatLoading': Widgets.ChatLoadingWidget,
-  'Ivy.ChatStatus': Widgets.ChatStatusWidget,
-  'Ivy.DropDownMenu': Widgets.DropDownMenuWidget,
-  'Ivy.Pagination': Widgets.PaginationWidget,
+  'Ivy.Article': ArticleWidget,
+  'Ivy.Button': ButtonWidget,
+  'Ivy.Progress': ProgressWidget,
+  'Ivy.Tooltip': TooltipWidget,
+  'Ivy.Slot': SlotWidget,
+  'Ivy.Card': CardWidget,
+  'Ivy.Sheet': SheetWidget,
+  'Ivy.Badge': BadgeWidget,
+  'Ivy.Expandable': ExpandableWidget,
+  'Ivy.Chat': ChatWidget,
+  'Ivy.ChatMessage': ChatMessageWidget,
+  'Ivy.ChatLoading': ChatLoadingWidget,
+  'Ivy.ChatStatus': ChatStatusWidget,
+  'Ivy.DropDownMenu': DropDownMenuWidget,
+  'Ivy.Pagination': PaginationWidget,
 
   // Layouts
-  'Ivy.StackLayout': Layouts.StackLayoutWidget,
-  'Ivy.WrapLayout': Layouts.WrapLayoutWidget,
-  'Ivy.GridLayout': Layouts.GridLayoutWidget,
-  'Ivy.HeaderLayout': Layouts.HeaderLayoutWidget,
-  'Ivy.FooterLayout': Layouts.FooterLayoutWidget,
-  'Ivy.TabsLayout': Layouts.TabsLayoutWidget,
-  'Ivy.Tab': Layouts.TabWidget,
-  'Ivy.SidebarLayout': Layouts.SidebarLayoutWidget,
-  'Ivy.SidebarMenu': Layouts.SidebarMenuWidget,
-  'Ivy.ResizeablePanelGroup': Layouts.ResizeablePanelGroupWidget,
-  'Ivy.ResizeablePanel': Layouts.ResizeablePanelWidget,
-  'Ivy.FloatingPanel': Layouts.FloatingPanelWidget,
+  'Ivy.StackLayout': StackLayoutWidget,
+  'Ivy.WrapLayout': WrapLayoutWidget,
+  'Ivy.GridLayout': GridLayoutWidget,
+  'Ivy.HeaderLayout': HeaderLayoutWidget,
+  'Ivy.FooterLayout': FooterLayoutWidget,
+  'Ivy.TabsLayout': TabsLayoutWidget,
+  'Ivy.Tab': TabWidget,
+  'Ivy.SidebarLayout': SidebarLayoutWidget,
+  'Ivy.SidebarMenu': SidebarMenuWidget,
+  'Ivy.ResizeablePanelGroup': ResizeablePanelGroupWidget,
+  'Ivy.ResizeablePanel': ResizeablePanelWidget,
+  'Ivy.FloatingPanel': FloatingPanelWidget,
 
   // Inputs
-  'Ivy.Field': Inputs.FieldWidget,
-  'Ivy.TextInput': Inputs.TextInputWidget,
-  'Ivy.BoolInput': Inputs.BoolInputWidget,
-  'Ivy.DateTimeInput': Inputs.DateTimeInputWidget,
-  'Ivy.NumberInput': Inputs.NumberInputWidget,
-  'Ivy.SelectInput': Inputs.SelectInputWidget,
-  'Ivy.ReadOnlyInput': Inputs.ReadOnlyInputWidget,
-  'Ivy.ColorInput': Inputs.ColorInputWidget,
-  'Ivy.FeedbackInput': Inputs.FeedbackInputWidget,
-  'Ivy.AsyncSelectInput': Inputs.AsyncSelectInputWidget,
-  'Ivy.DateRangeInput': Inputs.DateRangeInputWidget,
-  'Ivy.FileInput': Inputs.FileInputWidget,
+  'Ivy.Field': FieldWidget,
+  'Ivy.TextInput': TextInputWidget,
+  'Ivy.BoolInput': BoolInputWidget,
+  'Ivy.DateTimeInput': DateTimeInputWidget,
+  'Ivy.NumberInput': NumberInputWidget,
+  'Ivy.SelectInput': SelectInputWidget,
+  'Ivy.ReadOnlyInput': ReadOnlyInputWidget,
+  'Ivy.ColorInput': ColorInputWidget,
+  'Ivy.FeedbackInput': FeedbackInputWidget,
+  'Ivy.AsyncSelectInput': AsyncSelectInputWidget,
+  'Ivy.DateRangeInput': DateRangeInputWidget,
+  'Ivy.FileInput': FileInputWidget,
   'Ivy.CodeInput': React.lazy(
     () => import('@/widgets/inputs/code/CodeInputWidget')
   ),
@@ -97,17 +166,17 @@ export const widgetMap = {
   ),
 
   // Forms
-  'Ivy.Form': Forms.FormWidget,
+  'Ivy.Form': FormWidget,
 
   // Dialogs
-  'Ivy.Dialog': Dialogs.DialogWidget,
-  'Ivy.DialogHeader': Dialogs.DialogHeaderWidget,
-  'Ivy.DialogBody': Dialogs.DialogBodyWidget,
-  'Ivy.DialogFooter': Dialogs.DialogFooterWidget,
+  'Ivy.Dialog': DialogWidget,
+  'Ivy.DialogHeader': DialogHeaderWidget,
+  'Ivy.DialogBody': DialogBodyWidget,
+  'Ivy.DialogFooter': DialogFooterWidget,
 
   // Blades
-  'Ivy.BladeContainer': Blades.BladeContainerWidget,
-  'Ivy.Blade': Blades.BladeWidget,
+  'Ivy.BladeContainer': BladeContainerWidget,
+  'Ivy.Blade': BladeWidget,
 
   // Tables
   'Ivy.Table': TableWidget,
@@ -118,12 +187,12 @@ export const widgetMap = {
   'Ivy.DataTable': DataTable,
 
   // Lists
-  'Ivy.List': Lists.ListWidget,
-  'Ivy.ListItem': Lists.ListItemWidget,
+  'Ivy.List': ListWidget,
+  'Ivy.ListItem': ListItemWidget,
 
   // Details
-  'Ivy.Details': Details.DetailsWidget,
-  'Ivy.Detail': Details.DetailWidget,
+  'Ivy.Details': DetailsWidget,
+  'Ivy.Detail': DetailWidget,
 
   // Charts
   'Ivy.LineChart': React.lazy(() => import('@/widgets/charts/LineChartWidget')),

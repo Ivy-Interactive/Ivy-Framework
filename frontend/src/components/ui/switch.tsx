@@ -1,6 +1,6 @@
 import * as React from 'react';
 import * as SwitchPrimitives from '@radix-ui/react-switch';
-import { type VariantProps } from 'class-variance-authority';
+import type { VariantProps } from 'class-variance-authority';
 
 import { cn } from '@/lib/utils';
 import { switchVariants, switchThumbVariants } from './input/switch-variants';
