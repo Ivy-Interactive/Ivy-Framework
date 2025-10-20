@@ -114,21 +114,29 @@ public class AppHub(
                 appServices.AddSingleton<IAuthService>(s => authService);
 
                 AuthToken? authToken = oldAuthToken;
-                if (!string.IsNullOrEmpty(oldAuthToken?.AccessToken))
+                try
                 {
-                    var isValid = await TimeoutHelper.WithTimeoutAsync(
-                        ct => authProvider.ValidateAccessTokenAsync(oldAuthToken.AccessToken, ct),
-                        Context.ConnectionAborted);
-
-                    if (!isValid)
+                    if (!string.IsNullOrEmpty(oldAuthToken?.AccessToken))
                     {
-                        authToken = await TimeoutHelper.WithTimeoutAsync(
-                            authService.RefreshAccessTokenAsync,
+                        var isValid = await TimeoutHelper.WithTimeoutAsync(
+                            ct => authProvider.ValidateAccessTokenAsync(oldAuthToken.AccessToken, ct),
                             Context.ConnectionAborted);
+
+                        if (!isValid)
+                        {
+                            authToken = await TimeoutHelper.WithTimeoutAsync(
+                                authService.RefreshAccessTokenAsync,
+                                Context.ConnectionAborted);
+                        }
+                    }
+                    else
+                    {
+                        authToken = null;
                     }
                 }
-                else
+                catch (Exception ex)
                 {
+                    logger.LogWarning(ex, "Auth validation or refresh failed during connection setup.");
                     authToken = null;
                 }
 
