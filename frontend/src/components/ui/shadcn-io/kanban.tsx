@@ -50,6 +50,7 @@ interface KanbanContextType {
   data: Task[];
   onDataChange: (data: Task[]) => void;
   onCardMove?: (cardId: string, fromColumn: string, toColumn: string) => void;
+  onCardReorder?: (cardId: string, columnId: string, newIndex: number) => void;
   onCardAdd?: (columnId: string) => void;
   onCardDelete?: (cardId: string) => void;
 }
@@ -70,6 +71,7 @@ interface KanbanProviderProps {
   data: Task[];
   onDataChange: (data: Task[]) => void;
   onCardMove?: (cardId: string, fromColumn: string, toColumn: string) => void;
+  onCardReorder?: (cardId: string, columnId: string, newIndex: number) => void;
   onCardAdd?: (columnId: string) => void;
   onCardDelete?: (cardId: string) => void;
   children: (column: Column) => ReactNode;
@@ -80,6 +82,7 @@ export function KanbanProvider({
   data,
   onDataChange,
   onCardMove,
+  onCardReorder,
   onCardAdd,
   onCardDelete,
   children,
@@ -142,14 +145,28 @@ export function KanbanProvider({
         }
       }
 
-      // Always trigger the move event for now, let the backend handle the logic
-      // This is a workaround for the drag-and-drop detection issue
-      onCardMove?.(activeId, activeTask.status, targetColumnId);
+      // Only trigger move event if the card is actually moving between columns
+      if (activeTask.status !== targetColumnId) {
+        onCardMove?.(activeId, activeTask.status, targetColumnId);
+      } else {
+        // Card is being reordered within the same column
+        // Find the new index by looking at the position relative to other cards
+        const columnTasks = data
+          .filter(task => task.status === targetColumnId)
+          .sort((a, b) => a.priority - b.priority);
+
+        // Find the index of the card we're dropping over
+        const overTaskIndex = columnTasks.findIndex(task => task.id === overId);
+        const newIndex =
+          overTaskIndex >= 0 ? overTaskIndex : columnTasks.length;
+
+        onCardReorder?.(activeId, targetColumnId, newIndex);
+      }
 
       // Note: We don't update local state here since this is a backend-first framework
       // The backend will handle the state update and re-render the component
     },
-    [data, columns, onCardMove]
+    [data, columns, onCardMove, onCardReorder]
   );
 
   const contextValue: KanbanContextType = {
@@ -157,6 +174,7 @@ export function KanbanProvider({
     data,
     onDataChange,
     onCardMove,
+    onCardReorder,
     onCardAdd,
     onCardDelete,
   };

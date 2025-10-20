@@ -149,6 +149,16 @@ export const KanbanWidget: React.FC<KanbanWidgetProps> = ({
     }
   };
 
+  const handleCardReorder = (
+    cardId: string,
+    columnId: string,
+    newIndex: number
+  ) => {
+    if (events?.onCardReorder) {
+      eventHandler('OnCardReorder', id, [cardId, columnId, newIndex]);
+    }
+  };
+
   const handleDataChange = () => {
     // In a backend-first framework, we don't update local state
     // The backend will handle the data updates
@@ -174,6 +184,7 @@ export const KanbanWidget: React.FC<KanbanWidgetProps> = ({
       data={extractedData.tasks}
       onDataChange={handleDataChange}
       onCardMove={handleCardMove}
+      onCardReorder={handleCardReorder}
       onCardAdd={handleCardAdd}
       onCardDelete={handleCardDelete}
     >
