@@ -42,7 +42,9 @@ Before using `SelectInput`, you need to create options. There are several ways t
 
 ### Using ToOptions()
 
-The simplest way to create options is using the `.ToOptions()` extension method, which automatically converts collections into option arrays:
+The simplest way to create options is using the `.ToOptions()` extension method, which automatically converts collections and enums into option arrays.
+
+**For collections and strings**, `.ToOptions()` creates options where the **label and value are the same**:
 
 ```csharp demo-tabs
 public class ToOptionsDemo : ViewBase
@@ -63,11 +65,66 @@ public class ToOptionsDemo : ViewBase
 }
 ```
 
-When you use `.ToOptions()` on a collection, it automatically creates options where the **label and value are the same**. For example, `"Apple"` becomes an option with both label and value set to `"Apple"`.
+**For enums**, Ivy automatically handles the conversion - simply call `.ToOptions()` on your enum type. Don't manually create `Option<T>` instances for enums; Ivy will automatically generate user-friendly labels with PascalCase splitting, and respects `[Description]` attributes when present:
+
+```csharp demo-tabs
+public class EnumOptionsDemo : ViewBase
+{
+    private enum OrderStatus
+    {
+        PendingPayment,        // Becomes "Pending Payment"
+        Processing,            // Becomes "Processing"
+        Shipped,               // Becomes "Shipped"
+        OutForDelivery,        // Becomes "Out For Delivery"
+        Delivered              // Becomes "Delivered"
+    }
+    
+    private enum ProgrammingLanguage
+    {
+        [Description("C#")]    // Uses description attribute
+        CSharp,
+        
+        [Description("F#")]
+        FSharp,
+        
+        [Description("VB.NET")]
+        VisualBasic,
+        
+        JavaScript,            // Becomes "Java Script"
+        TypeScript             // Becomes "Type Script"
+    }
+    
+    public override object? Build()
+    {
+        var selectedFruit = UseState("Apple");
+        var status = UseState(OrderStatus.PendingPayment);
+        var language = UseState(ProgrammingLanguage.CSharp);
+        
+        var fruits = new[] { "Apple", "Banana", "Orange", "Grape" };
+        
+        return Layout.Vertical()
+            | Text.Label("Select a fruit:")
+            | selectedFruit.ToSelectInput(fruits.ToOptions())
+            | Text.Small($"You selected: {selectedFruit.Value}")
+            
+            | Text.Label("Order Status:")
+            | status.ToSelectInput(typeof(OrderStatus).ToOptions())
+            | Text.Small($"Current status: {status.Value}")
+            
+            | Text.Label("Programming Language:")
+            | language.ToSelectInput(typeof(ProgrammingLanguage).ToOptions())
+            | Text.Small($"Selected: {language.Value}");
+    }
+}
+```
+
+<Callout Type="tip">
+Use `.ToOptions()` for simple cases where labels match values (strings, collections) or for enums where Ivy automatically handles PascalCase splitting and `[Description]` attributes. Only create manual `Option<T>` instances when you need different labels and values for non-enum types.
+</Callout>
 
 ### Creating Custom Labels and Values
 
-For more control, create options manually with different labels and values. This is useful when you want user-friendly labels but need to store different values (like IDs):
+For more control with non-enum types, create options manually with different labels and values. This is useful when you want user-friendly labels but need to store different values (like IDs):
 
 ```csharp demo-tabs
 public class CustomOptionsDemo : ViewBase
@@ -117,82 +174,6 @@ public class GuidOptionsDemo : ViewBase
     }
 }
 ```
-
-### Using Enums with ToOptions()
-
-Enums are automatically converted to user-friendly options with PascalCase splitting:
-
-```csharp demo-tabs
-public class EnumOptionsDemo : ViewBase
-{
-    private enum OrderStatus
-    {
-        PendingPayment,
-        Processing,
-        Shipped,    
-        OutForDelivery,
-        Delivered
-    }
-    
-    public override object? Build()
-    {
-        var status = UseState(OrderStatus.PendingPayment);
-        
-        // Enum automatically generates readable labels
-        var statusOptions = typeof(OrderStatus).ToOptions();
-        
-        return Layout.Vertical()
-            | Text.Label("Order Status:")
-            | status.ToSelectInput(statusOptions)
-            | Text.Block($"Current status: {status.Value}");
-    }
-}
-```
-
-### Enum with Description Attributes
-
-For complete control over enum labels, use the `[Description]` attribute:
-
-```csharp demo-tabs
-public class DescriptionAttributeDemo : ViewBase
-{
-    private enum ProgrammingLanguage
-    {
-        [Description("C#")]
-        CSharp,
-        
-        [Description("F#")]
-        FSharp,
-        
-        [Description("VB.NET")]
-        VisualBasic,
-        
-        [Description("JavaScript")]
-        JavaScript,
-        
-        [Description("TypeScript")]
-        TypeScript
-    }
-    
-    public override object? Build()
-    {
-        var language = UseState(ProgrammingLanguage.CSharp);
-        
-        // Description attributes are used for labels
-        var languageOptions = typeof(ProgrammingLanguage).ToOptions();
-        
-        return Layout.Vertical()
-            | Text.Label("Select Programming Language:")
-            | language.ToSelectInput(languageOptions)
-            | Text.Block($"Selected: {language.Value}")
-            | Text.Small("Note: Labels use [Description] attributes when available");
-    }
-}
-```
-
-<Callout Type="tip">
-Use `.ToOptions()` for simple cases where labels match values. Create manual `Option<T>` instances when you need different labels and values, or use `[Description]` attributes on enums for custom labels.
-</Callout>
 
 `SelectInput` supports three different variants for different use cases:
 
@@ -553,130 +534,6 @@ public class NullableSelectDemo : ViewBase
     }
 }
 ```
-
-## Advanced Configuration
-
-### Separator Character
-
-When using multi-select, you can customize the character used to separate values in display and serialization:
-
-```csharp demo-tabs
-public class SeparatorDemo : ViewBase
-{
-    public override object? Build()
-    {
-        var selectedTags = UseState<string[]>([]);
-        var options = new[] { "Technology", "Science", "Health", "Sports", "Entertainment" }.ToOptions();
-        
-        return Layout.Vertical()
-            | Text.Label("Select tags (using comma separator):")
-            | selectedTags.ToSelectInput(options)
-                .Variant(SelectInputs.List)
-                .Separator(',')  // Default is ';'
-            | Text.Small($"Tags: {string.Join(", ", selectedTags.Value)}");
-    }
-}
-```
-
-### Supported Data Types
-
-`SelectInput` provides comprehensive type support with full type safety:
-
-```csharp demo-tabs
-public class DataTypeSupportDemo : ViewBase
-{
-    public override object? Build()
-    {
-        // String values
-        var stringState = UseState("Apple");
-        var stringOptions = new[] { "Apple", "Banana", "Cherry" }.ToOptions();
-        
-        // Integer values
-        var intState = UseState(1);
-        var intOptions = new Option<int>[]
-        {
-            new("One", 1),
-            new("Two", 2),
-            new("Three", 3)
-        };
-        
-        // Guid values
-        var guidState = UseState(Guid.NewGuid());
-        var guid1 = Guid.NewGuid();
-        var guid2 = Guid.NewGuid();
-        var guidOptions = new Option<Guid>[]
-        {
-            new("First ID", guid1),
-            new("Second ID", guid2)
-        };
-        
-        // Enum values
-        var enumState = UseState(DayOfWeek.Monday);
-        var enumOptions = typeof(DayOfWeek).ToOptions();
-        
-        return Layout.Vertical()
-            | Layout.Grid().Columns(2)
-                | Text.Label("String:")
-                | stringState.ToSelectInput(stringOptions)
-                
-                | Text.Label("Integer:")
-                | intState.ToSelectInput(intOptions)
-                
-                | Text.Label("Guid:")
-                | guidState.ToSelectInput(guidOptions)
-                
-                | Text.Label("Enum:")
-                | enumState.ToSelectInput(enumOptions);
-    }
-}
-```
-
-All types also support **collection types** for multi-select:
-
-```csharp demo-tabs
-public class MultiSelectTypesDemo : ViewBase
-{
-    public override object? Build()
-    {
-        // Arrays
-        var stringArray = UseState<string[]>([]);
-        var intArray = UseState<int[]>([]);
-        
-        // Lists
-        var stringList = UseState<List<string>>([]);
-        var enumList = UseState<List<DayOfWeek>>([]);
-        
-        // Nullable arrays
-        var nullableArray = UseState<string[]?>(() => null);
-        
-        var stringOptions = new[] { "A", "B", "C" }.ToOptions();
-        var intOptions = new Option<int>[] { new("1", 1), new("2", 2), new("3", 3) };
-        var enumOptions = typeof(DayOfWeek).ToOptions();
-        
-        return Layout.Vertical()
-            | Text.H3("Collection Types Support")
-            | Layout.Grid().Columns(2)
-                | Text.Label("string[]:")
-                | stringArray.ToSelectInput(stringOptions).List()
-                
-                | Text.Label("int[]:")
-                | intArray.ToSelectInput(intOptions).List()
-                
-                | Text.Label("List<string>:")
-                | stringList.ToSelectInput(stringOptions).List()
-                
-                | Text.Label("List<DayOfWeek>:")
-                | enumList.ToSelectInput(enumOptions).List()
-                
-                | Text.Label("string[]? (nullable):")
-                | nullableArray.ToSelectInput(stringOptions).List();
-    }
-}
-```
-
-<Callout Type="info">
-The framework automatically detects collection types (arrays, Lists) and enables multi-select mode. Type safety is maintained throughout - you can't accidentally assign the wrong type to your state.
-</Callout>
 
 <Callout Type="tip">
 Use Select for single choice dropdowns, List for multiple selection with checkboxes, and Toggle for visual button-based selection. The List variant is particularly useful for forms where users need to select multiple options.
