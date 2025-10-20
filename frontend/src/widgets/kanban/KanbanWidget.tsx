@@ -31,72 +31,7 @@ export const KanbanWidget: React.FC<KanbanWidgetProps> = ({
 
   // Extract data from backend kanban structure
   const extractedData = React.useMemo(() => {
-    // Create default columns based on the backend task data
-    const defaultColumns: Column[] = [
-      { id: 'Todo', name: 'Todo', color: '#6B7280', order: 1 },
-      { id: 'In Progress', name: 'In Progress', color: '#F59E0B', order: 2 },
-      { id: 'Done', name: 'Done', color: '#10B981', order: 3 },
-    ];
-
-    // Create tasks from the backend data
-    const backendTasks: Task[] = [
-      {
-        id: '1',
-        title: 'Design Homepage',
-        status: 'Todo',
-        statusOrder: 1,
-        priority: 2,
-        description: 'Create wireframes and mockups',
-        assignee: 'Alice',
-      },
-      {
-        id: '2',
-        title: 'Setup Database',
-        status: 'Todo',
-        statusOrder: 1,
-        priority: 1,
-        description: 'Configure PostgreSQL instance',
-        assignee: 'Bob',
-      },
-      {
-        id: '3',
-        title: 'Implement Auth',
-        status: 'In Progress',
-        statusOrder: 2,
-        priority: 1,
-        description: 'Add OAuth2 authentication',
-        assignee: 'Charlie',
-      },
-      {
-        id: '4',
-        title: 'Build API',
-        status: 'In Progress',
-        statusOrder: 2,
-        priority: 2,
-        description: 'Create REST endpoints',
-        assignee: 'Alice',
-      },
-      {
-        id: '5',
-        title: 'Unit Tests',
-        status: 'Done',
-        statusOrder: 3,
-        priority: 2,
-        description: 'Write comprehensive test suite',
-        assignee: 'Bob',
-      },
-      {
-        id: '6',
-        title: 'Deploy to Production',
-        status: 'Done',
-        statusOrder: 3,
-        priority: 1,
-        description: 'Configure CI/CD pipeline',
-        assignee: 'Charlie',
-      },
-    ];
-
-    return { tasks: backendTasks, columns: defaultColumns };
+    return { tasks, columns };
   }, [children, tasks, columns]);
 
   const handleCardMove = (
@@ -104,15 +39,14 @@ export const KanbanWidget: React.FC<KanbanWidgetProps> = ({
     fromColumn: string,
     toColumn: string
   ) => {
-    if (events?.onCardMove) {
-      eventHandler('OnCardMove', id, [
-        {
-          cardId,
-          fromColumn,
-          toColumn,
-        },
-      ]);
-    }
+    // Always trigger the backend event for card moves
+    eventHandler('OnCardMove', id, [
+      {
+        cardId,
+        fromColumn,
+        toColumn,
+      },
+    ]);
   };
 
   const handleCardAdd = (columnId: string) => {
