@@ -299,9 +299,9 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
             kanban = kanban with
             {
                 OnMove = e => _onMove(new Event<Ivy.Kanban, (object?, TGroupKey, TGroupKey)>(
-                    e.EventName,
-                    e.Sender,
-                    (e.Value.CardId, (TGroupKey)e.Value.FromColumn!, (TGroupKey)e.Value.ToColumn!)))
+                                e.EventName,
+                                e.Sender,
+                                (e.Value.CardId, (TGroupKey)e.Value.FromColumn!, (TGroupKey)e.Value.ToColumn!)))
             };
         }
 

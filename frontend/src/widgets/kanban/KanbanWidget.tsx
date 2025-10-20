@@ -18,6 +18,9 @@ interface KanbanWidgetProps {
   tasks?: Task[];
   events?: Record<string, unknown>;
   children?: React.ReactNode;
+  slots?: {
+    default?: React.ReactNode[];
+  };
 }
 
 export const KanbanWidget: React.FC<KanbanWidgetProps> = ({
@@ -25,14 +28,104 @@ export const KanbanWidget: React.FC<KanbanWidgetProps> = ({
   columns = [],
   tasks = [],
   events,
-  children,
+  slots,
 }) => {
   const eventHandler = useEventHandler();
 
   // Extract data from backend kanban structure
   const extractedData = React.useMemo(() => {
+    // If we have slots with default children (backend kanban columns), parse them
+    if (slots?.default && slots.default.length > 0) {
+      const extractedTasks: Task[] = [];
+      const extractedColumns: Column[] = [];
+
+      // Parse the backend kanban structure
+      slots.default.forEach((columnNode, columnIndex) => {
+        if (React.isValidElement(columnNode)) {
+          // Extract column data from KanbanColumn
+          const columnProps = columnNode.props as {
+            title?: string;
+            columnKey?: string;
+            children?: React.ReactNode[];
+          };
+
+          const columnTitle = columnProps?.title || `Column ${columnIndex + 1}`;
+          const columnId = columnProps?.columnKey || columnTitle;
+
+          // Create column
+          const column: Column = {
+            id: columnId,
+            name: columnTitle,
+            color:
+              columnIndex === 0
+                ? '#6B7280'
+                : columnIndex === 1
+                  ? '#F59E0B'
+                  : '#10B981',
+            order: columnIndex + 1,
+          };
+          extractedColumns.push(column);
+
+          // Extract tasks from KanbanCard children
+          const columnChildren = columnProps?.children;
+          if (columnChildren && Array.isArray(columnChildren)) {
+            columnChildren.forEach(
+              (cardNode: React.ReactNode, cardIndex: number) => {
+                if (React.isValidElement(cardNode)) {
+                  const cardProps = cardNode.props as {
+                    cardId?: string;
+                    children?: React.ReactNode[];
+                  };
+
+                  // Extract card ID from the cardId prop
+                  const cardId =
+                    cardProps?.cardId || `task-${columnIndex}-${cardIndex}`;
+
+                  // Extract title and description from card content
+                  let title = `Task ${cardId}`;
+                  let description = '';
+
+                  // Try to extract title and description from card children
+                  const cardChildren = cardProps?.children;
+                  if (cardChildren && Array.isArray(cardChildren)) {
+                    cardChildren.forEach((child: React.ReactNode) => {
+                      if (React.isValidElement(child)) {
+                        const childProps = child.props as {
+                          title?: string;
+                          description?: string;
+                        };
+                        if (childProps?.title) {
+                          title = childProps.title;
+                        }
+                        if (childProps?.description) {
+                          description = childProps.description;
+                        }
+                      }
+                    });
+                  }
+
+                  const task: Task = {
+                    id: cardId,
+                    title: title,
+                    status: columnId,
+                    statusOrder: columnIndex + 1,
+                    priority: cardIndex + 1,
+                    description: description,
+                    assignee: 'Unassigned',
+                  };
+                  extractedTasks.push(task);
+                }
+              }
+            );
+          }
+        }
+      });
+
+      return { tasks: extractedTasks, columns: extractedColumns };
+    }
+
     return { tasks, columns };
-  }, [children, tasks, columns]);
+  }, [slots, tasks, columns]);
 
   const handleCardMove = (
     cardId: string,
@@ -40,13 +133,8 @@ export const KanbanWidget: React.FC<KanbanWidgetProps> = ({
     toColumn: string
   ) => {
     // Always trigger the backend event for card moves
-    eventHandler('OnCardMove', id, [
-      {
-        cardId,
-        fromColumn,
-        toColumn,
-      },
-    ]);
+    // The backend expects a tuple (CardId, FromColumn, ToColumn)
+    eventHandler('OnMove', id, [cardId, fromColumn, toColumn]);
   };
 
   const handleCardAdd = (columnId: string) => {

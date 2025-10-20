@@ -15,6 +15,7 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
+  useDroppable,
 } from '@dnd-kit/core';
 import {
   SortableContext,
@@ -102,14 +103,18 @@ export function KanbanProvider({
       const { active, over } = event;
       setActiveId(null);
 
-      if (!over) return;
+      if (!over) {
+        return;
+      }
 
       const activeId = active.id as string;
       const overId = over.id as string;
 
       // Find the task being dragged
       const activeTask = data.find(task => task.id === activeId);
-      if (!activeTask) return;
+      if (!activeTask) {
+        return;
+      }
 
       // Determine the target column
       let targetColumnId: string;
@@ -119,21 +124,32 @@ export function KanbanProvider({
       if (overTask) {
         targetColumnId = overTask.status;
       } else {
-        // Dropping on a column
-        targetColumnId = overId;
+        // Dropping on a column - find the column that matches the overId
+        const targetColumn = columns.find(col => col.id === overId);
+        if (targetColumn) {
+          targetColumnId = targetColumn.id;
+        } else {
+          // If overId doesn't match any column, check if it's a column ID from the data
+          // This handles cases where the overId might be the column ID but not in our columns array
+          const possibleColumnId = overId;
+          if (columns.some(col => col.id === possibleColumnId)) {
+            targetColumnId = possibleColumnId;
+          } else {
+            // Last resort: try to extract column from the overId or use the first available column
+            // For now, let's try to use the overId as the column ID
+            targetColumnId = overId;
+          }
+        }
       }
 
-      if (activeTask.status === targetColumnId) return;
-
-      // Update the task status
-      const updatedData = data.map(task =>
-        task.id === activeId ? { ...task, status: targetColumnId } : task
-      );
-
-      onDataChange(updatedData);
+      // Always trigger the move event for now, let the backend handle the logic
+      // This is a workaround for the drag-and-drop detection issue
       onCardMove?.(activeId, activeTask.status, targetColumnId);
+
+      // Note: We don't update local state here since this is a backend-first framework
+      // The backend will handle the state update and re-render the component
     },
-    [data, onDataChange, onCardMove]
+    [data, columns, onCardMove]
   );
 
   const contextValue: KanbanContextType = {
@@ -178,9 +194,23 @@ interface KanbanBoardProps {
   children: ReactNode;
 }
 
-export function KanbanBoard({ children }: KanbanBoardProps) {
+export function KanbanBoard({ id, children }: KanbanBoardProps) {
+  const { setNodeRef, isOver } = useDroppable({
+    id,
+    data: {
+      type: 'column',
+      columnId: id,
+    },
+  });
+
   return (
-    <div className="flex flex-col w-80 bg-gray-50 rounded-lg p-4 min-h-[600px]">
+    <div
+      ref={setNodeRef}
+      id={id}
+      className={`flex flex-col w-80 bg-gray-50 rounded-lg p-4 min-h-[600px] transition-colors duration-200 ${
+        isOver ? 'bg-blue-50 border-2 border-blue-300' : ''
+      }`}
+    >
       {children}
     </div>
   );
@@ -240,7 +270,13 @@ export function KanbanCard({ id, name, task, children }: KanbanCardProps) {
     transform,
     transition,
     isDragging,
-  } = useSortable({ id });
+  } = useSortable({
+    id,
+    data: {
+      type: 'card',
+      card: task,
+    },
+  });
 
   const style = {
     transform: CSS.Transform.toString(transform),
