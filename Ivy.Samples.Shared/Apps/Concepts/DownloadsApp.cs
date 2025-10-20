@@ -6,7 +6,7 @@ using SixLabors.ImageSharp.Processing;
 
 namespace Ivy.Samples.Shared.Apps.Concepts;
 
-[App(icon: Icons.Download)]
+[App(icon: Icons.Download, searchHints: ["files", "export", "save", "generate", "blob", "binary"])]
 public class DownloadsApp : SampleBase
 {
     protected override object? BuildSample()

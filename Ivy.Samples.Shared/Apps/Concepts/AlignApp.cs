@@ -2,7 +2,7 @@
 
 namespace Ivy.Samples.Shared.Apps.Concepts;
 
-[App(icon: Icons.Download)]
+[App(icon: Icons.Download, searchHints: ["positioning", "layout", "center", "vertical", "horizontal", "justify"])]
 public class AlignApp : ViewBase
 {
     public override object? Build()

@@ -1,6 +1,13 @@
 ---
 prepare: |
   var client = this.UseService<IClientProvider>();
+searchHints:
+  - editor
+  - syntax
+  - programming
+  - monaco
+  - highlighting
+  - code
 ---
 # CodeInput
 

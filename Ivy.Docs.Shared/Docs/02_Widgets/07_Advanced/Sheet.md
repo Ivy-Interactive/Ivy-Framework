@@ -1,3 +1,13 @@
+---
+searchHints:
+  - sidebar
+  - drawer
+  - panel
+  - slide-out
+  - modal
+  - overlay
+---
+
 # Sheet
 
 <Ingress>

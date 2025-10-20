@@ -1,3 +1,13 @@
+---
+searchHints:
+  - browser
+  - client-side
+  - javascript
+  - interop
+  - api
+  - provider
+---
+
 # Clients
 
 <Ingress>
@@ -17,34 +27,87 @@ var client = this.UseService<IClientProvider>();
 ### Showing Toasts
 
 ```csharp
+// Simple toast
 client.Toast("Operation successful!");
-```
 
-### Opening Dialogs
-
-```csharp
-client.Dialog(new DialogContent("Are you sure?", "This action cannot be undone."));
+// Toast with title
+client.Toast("Data saved", "Success");
 ```
 
 ### Navigation
 
 ```csharp
-client.Navigate("/some/path");
+// Navigate to different pages within the app
+client.Navigate("/dashboard");
+
+// Redirect to external site (replaces current page)
+client.Redirect("https://example.com");
+
+// Open URL in new tab (keeps current page open)
+client.OpenUrl("https://github.com");
+client.OpenUrl(new Uri("https://stackoverflow.com"));
 ```
 
-### File Operations
+### Downloading Files
 
 ```csharp
-// Download a file
-client.DownloadFile("data.csv", csvContent);
+// Download CSV data
+var csvData = Encoding.UTF8.GetBytes("Name,Age\nJohn,30\nJane,25");
+client.DownloadFile("users.csv", csvData, "text/csv");
 
-// Upload files
+// Download with progress tracking
+var progress = UseState(0.0);
+client.DownloadFile("large-file.zip", fileData, onProgress: p => progress.Value = p);
+```
+
+### Uploading Files
+
+```csharp
+// Handle single file upload
 client.UploadFiles(async files => {
-    foreach (var file in files)
+    var file = files.FirstOrDefault();
+    if (file != null)
     {
-        // Process uploaded file
+        var content = await file.GetContentAsync();
+        await ProcessFileAsync(file.FileName, content);
+        client.Toast($"Uploaded {file.FileName}");
     }
 });
+
+// Handle multiple file uploads
+client.UploadFiles(async files => {
+    var uploadTasks = files.Select(async file => {
+        var content = await file.GetContentAsync();
+        await ProcessFileAsync(file.FileName, content);
+        return file.FileName;
+    });
+    
+    var uploadedFiles = await Task.WhenAll(uploadTasks);
+    client.Toast($"Uploaded {uploadedFiles.Length} files");
+});
+```
+
+### Clipboard Operations
+
+```csharp
+// Copy text to clipboard
+client.CopyToClipboard("Copied to clipboard!");
+client.Toast("Text copied!");
+```
+
+### Theme Customization
+
+```csharp
+// Set theme mode
+client.SetThemeMode(ThemeMode.Dark);
+
+// Apply custom CSS
+var customCss = @"
+:root {
+    --primary: #ff6b6b;
+    --secondary: #4ecdc4;
+}";
+client.ApplyTheme(customCss);
 ```
 
 ## Best Practices
@@ -53,6 +116,38 @@ client.UploadFiles(async files => {
 2. **Error Handling**: Wrap client operations in try-catch blocks when appropriate.
 3. **Async Operations**: Use async/await for operations that might take time.
 4. **State Management**: Use clients in combination with state management for reactive updates.
+
+## UI Refresh & State Management
+
+Ivy automatically handles UI refreshes in most cases. You typically **don't need** to manually refresh the UI:
+
+- **Form Submissions**: When forms are submitted successfully, the UI automatically updates
+- **State Changes**: When state values change, the UI automatically re-renders
+- **Sheet Dismissal**: Sheets are automatically closed by the framework when forms are submitted successfully
+- **Navigation**: Page navigation automatically refreshes the UI
+
+❌ **Don't do this** - The framework handles it automatically:
+
+```csharp
+// Don't call Refresh() on IClientProvider
+client.Refresh(); // This method doesn't exist and isn't needed
+```
+
+✅ **Do this instead** - Let the framework handle it:
+
+```csharp
+// Just update state, UI refreshes automatically
+var isOpen = UseState(false);
+var formData = UseState("");
+
+// When form submits successfully, sheet closes automatically
+if (formSubmitted.Value)
+{
+    formSubmitted.Value = false;
+    isOpen.Value = false; // This triggers UI update
+    client.Toast("Form saved successfully!");
+}
+```
 
 ## Examples
 
@@ -211,3 +306,4 @@ public class NavigationApp : ViewBase
 - [Forms](./Forms.md)
 - [State Management](./State.md)
 - [Effects](./Effects.md)
+- [Alerts & Notifications](./Alerts.md)

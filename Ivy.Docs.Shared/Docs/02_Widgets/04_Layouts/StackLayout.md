@@ -1,3 +1,13 @@
+---
+searchHints:
+  - layout
+  - vertical
+  - horizontal
+  - stack
+  - arrangement
+  - flexbox
+---
+
 # StackLayout
 
 <Ingress>

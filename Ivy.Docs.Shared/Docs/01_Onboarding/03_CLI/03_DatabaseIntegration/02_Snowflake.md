@@ -1,3 +1,13 @@
+---
+searchHints:
+  - snowflake
+  - database
+  - warehouse
+  - analytics
+  - cloud
+  - db
+---
+
 # Snowflake Database Provider
 
 <Ingress>

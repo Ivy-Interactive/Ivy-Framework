@@ -2,7 +2,7 @@ using Ivy.Shared;
 
 namespace Ivy.Samples.Shared.Apps.Widgets;
 
-[App(icon: Icons.SquareChevronRight, path: ["Widgets"])]
+[App(icon: Icons.SquareChevronRight, path: ["Widgets"], searchHints: ["click", "action", "submit", "cta", "interactive", "control"])]
 public class ButtonApp() : SampleBase
 {
     private static readonly ButtonVariant[] Variants = [

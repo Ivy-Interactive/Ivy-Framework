@@ -1,3 +1,13 @@
+---
+searchHints:
+  - items
+  - collection
+  - listitem
+  - menu
+  - rows
+  - scroll
+---
+
 # List
 
 <Ingress>

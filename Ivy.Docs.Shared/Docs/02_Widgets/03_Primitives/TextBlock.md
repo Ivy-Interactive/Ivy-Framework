@@ -1,3 +1,13 @@
+---
+searchHints:
+  - typography
+  - heading
+  - paragraph
+  - label
+  - text
+  - content
+---
+
 # TextBlock
 
 The `TextBlock` widget displays text content with customizable styling. It's a fundamental building block for creating user interfaces with text, supporting various formatting options and layout properties.

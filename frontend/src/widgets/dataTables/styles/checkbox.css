@@ -1,0 +1,77 @@
+/* Custom styling for boolean checkboxes in glide-data-grid to match Ivy's checkbox design */
+
+/* Style the boolean cell checkboxes */
+.dvn-scroller .gdg-boolean-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Style the checkbox to match Ivy's design */
+.dvn-scroller .gdg-boolean-cell input[type='checkbox'] {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  width: 16px;
+  height: 16px;
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.25rem;
+  background-color: transparent;
+  cursor: pointer;
+  position: relative;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  transition: all 0.2s;
+}
+
+.dvn-scroller .gdg-boolean-cell input[type='checkbox']:hover:not(:disabled) {
+  border-color: hsl(var(--border));
+  opacity: 0.9;
+}
+
+.dvn-scroller .gdg-boolean-cell input[type='checkbox']:focus-visible {
+  outline: none;
+  ring: 1px;
+  ring-color: hsl(var(--ring));
+}
+
+.dvn-scroller .gdg-boolean-cell input[type='checkbox']:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.dvn-scroller .gdg-boolean-cell input[type='checkbox']:checked {
+  background-color: hsl(var(--primary));
+  border-color: hsl(var(--primary));
+}
+
+/* Add checkmark icon for checked state */
+.dvn-scroller .gdg-boolean-cell input[type='checkbox']:checked::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%) rotate(45deg);
+  width: 4px;
+  height: 8px;
+  border: solid hsl(var(--primary-foreground));
+  border-width: 0 2px 2px 0;
+}
+
+/* Remove default focus outline */
+.dvn-scroller .gdg-boolean-cell input[type='checkbox']:focus {
+  outline: none;
+}
+
+/* Reduce padding on column headers for better text alignment */
+.dvn-scroller canvas {
+  /* Headers are rendered on canvas, so we adjust via theme cellHorizontalPadding */
+}
+
+/* Adjust header icon and text positioning if rendered via DOM */
+.dvn-scroller [class*='header'] {
+  padding-left: 8px !important;
+}
+
+.dvn-scroller [class*='gdg-header'] {
+  padding-left: 8px !important;
+}

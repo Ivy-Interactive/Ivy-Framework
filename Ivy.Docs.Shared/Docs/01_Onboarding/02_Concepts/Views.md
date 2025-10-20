@@ -1,6 +1,13 @@
 ﻿---
 prepare: |
     var client = this.UseService<IClientProvider>();
+searchHints:
+  - components
+  - viewbase
+  - build
+  - render
+  - lifecycle
+  - composition
 ---
 
 # Views
@@ -174,8 +181,26 @@ The `[App]` attribute supports several properties:
 
 - `icon`: Icon to display in navigation
 - `title`: Display name (defaults to class name)
-- `path`: Navigation path array
+- `path`: Navigation path array for hierarchical organization
 - `isVisible`: Whether to show in navigation
+- `searchHints`: Alternative keywords for search discoverability
+- `order`: Sort order within group
+- `description`: Brief description of the app
+
+For enhanced search discoverability, use `searchHints` to provide alternative keywords:
+
+```csharp
+[App(icon: Icons.TextCursorInput, 
+     path: ["Widgets", "Inputs"], 
+     searchHints: ["password", "textarea", "search", "email"])]
+public class TextInputApp : ViewBase
+{
+    public override object? Build()
+    {
+        return Text.H1("Text Input Examples");
+    }
+}
+```
 
 ## Advanced Patterns
 

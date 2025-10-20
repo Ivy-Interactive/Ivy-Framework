@@ -4,7 +4,7 @@ using Microsoft.SemanticKernel.ChatCompletion;
 
 namespace Ivy.Samples.Shared.Apps.Demos;
 
-[App(icon: Icons.Sparkles)]
+[App(icon: Icons.Sparkles, searchHints: ["ai", "agent", "assistant", "chatbot", "suggestions", "semantic"])]
 public class LucideIconAgentApp() : SampleBase(Align.TopRight)
 {
     protected override object? BuildSample()

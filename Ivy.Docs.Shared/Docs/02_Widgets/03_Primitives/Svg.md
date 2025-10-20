@@ -1,3 +1,13 @@
+---
+searchHints:
+  - vector
+  - graphics
+  - svg
+  - image
+  - scalable
+  - illustration
+---
+
 # Svg
 
 <Ingress>

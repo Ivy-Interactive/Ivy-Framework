@@ -1,3 +1,13 @@
+---
+searchHints:
+  - visualization
+  - graph
+  - analytics
+  - data
+  - trends
+  - statistics
+---
+
 # LineChart
 
 <Ingress>

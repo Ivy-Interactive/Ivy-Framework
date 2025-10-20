@@ -1,3 +1,13 @@
+---
+searchHints:
+  - size
+  - width
+  - height
+  - dimensions
+  - units
+  - layout
+---
+
 # Size
 
 `Size` represents width or height values used throughout the framework. You can

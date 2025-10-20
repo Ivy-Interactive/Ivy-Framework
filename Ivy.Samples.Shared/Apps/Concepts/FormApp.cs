@@ -71,7 +71,7 @@ public record DatabaseGeneratorModel(
 public record UserModel(
     string Name, string Password, bool IsAwesome, DateTime BirthDate, int Height, int UserId = 123, Gender Gender = Gender.Male, string Json = "{}", List<Fruits> FavoriteFruits = null!);
 
-[App(icon: Icons.Clipboard)]
+[App(icon: Icons.Clipboard, searchHints: ["inputs", "fields", "validation", "submission", "data-entry", "controls"])]
 public class FormApp : SampleBase
 {
     protected override object? BuildSample()

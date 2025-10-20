@@ -1,3 +1,13 @@
+---
+searchHints:
+  - layout
+  - footer
+  - sticky
+  - actions
+  - bottom
+  - fixed
+---
+
 # FooterLayout
 
 <Ingress>

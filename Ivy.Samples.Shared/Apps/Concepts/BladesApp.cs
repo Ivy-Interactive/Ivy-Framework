@@ -3,7 +3,7 @@ using Ivy.Views.Blades;
 
 namespace Ivy.Samples.Shared.Apps.Concepts;
 
-[App(icon: Icons.PanelLeft)]
+[App(icon: Icons.PanelLeft, searchHints: ["panels", "sidebar", "drawer", "navigation", "stack", "layers"])]
 public class BladesApp : SampleBase
 {
     protected override object? BuildSample()

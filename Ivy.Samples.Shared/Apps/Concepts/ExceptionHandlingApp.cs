@@ -2,7 +2,7 @@
 
 namespace Ivy.Samples.Shared.Apps.Concepts;
 
-[App(icon: Icons.Bug)]
+[App(icon: Icons.Bug, searchHints: ["errors", "exceptions", "debugging", "crashes", "failure", "handling"])]
 public class ExceptionHandlingApp : ViewBase
 {
     public override object? Build()

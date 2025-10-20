@@ -8,15 +8,10 @@ using Ivy.Views.Builders;
 
 namespace Ivy.Views.Tables;
 
-/// <summary>
-/// Fluent builder for creating tables from data collections with automatic column scaffolding.
-/// </summary>
+/// <summary>Fluent builder for creating tables from data collections with automatic column scaffolding.</summary>
 /// <typeparam name="TModel">The type of data objects in the table rows.</typeparam>
 public class TableBuilder<TModel> : ViewBase, IStateless
 {
-    /// <summary>
-    /// Internal column configuration with metadata and rendering options.
-    /// </summary>
     private class TableBuilderColumn(
         string name,
         int order,
@@ -74,9 +69,7 @@ public class TableBuilder<TModel> : ViewBase, IStateless
     private bool _removeHeader;
     private object? _empty;
 
-    /// <summary>
-    /// Creates a table builder with automatic column scaffolding from the model type.
-    /// </summary>
+    /// <summary>Creates a table builder with automatic column scaffolding from the model type.</summary>
     /// <param name="records">The data records to display in the table.</param>
     public TableBuilder(IEnumerable<TModel> records)
     {
@@ -86,9 +79,6 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         _Scaffold();
     }
 
-    /// <summary>
-    /// Automatically discovers columns from model properties and fields with intelligent defaults.
-    /// </summary>
     private void _Scaffold()
     {
         var type = typeof(TModel);
@@ -129,9 +119,40 @@ public class TableBuilder<TModel> : ViewBase, IStateless
 
             var removed = field.Name.StartsWith("_") && field.Name.Length > 1;
 
-            _columns[field.Name] =
-                new TableBuilderColumn(field.Name, order++, cellBuilder, cellAlignment, field.FieldInfo, field.PropertyInfo, removed);
+            var column = new TableBuilderColumn(field.Name, order++, cellBuilder, cellAlignment, field.FieldInfo, field.PropertyInfo, removed);
+            column.Width = CalculateSmartDefaultWidth(column);
+            _columns[field.Name] = column;
         }
+    }
+
+    private int CalculateColumnWidth(TableBuilderColumn column)
+    {
+        var baseWidth = Math.Max(15, column.Header.Length + 2);
+
+        baseWidth = column.Type switch
+        {
+            var t when t?.IsNumeric() == true => Math.Max(baseWidth, 25),
+            var t when t == typeof(DateTime) || t == typeof(DateOnly) => Math.Max(baseWidth, 25),
+            var t when t == typeof(bool) => Math.Max(baseWidth, 10),
+            var t when t == typeof(string) => Math.Max(baseWidth, 25),
+            _ => baseWidth
+        };
+
+        return Math.Min(baseWidth, 50);
+    }
+
+    private Size CalculateSmartDefaultWidth(TableBuilderColumn column) =>
+        Size.Units(CalculateColumnWidth(column));
+
+    private Size CalculateSmartTableWidth()
+    {
+        var visibleColumns = _columns.Values.Where(e => !e.Removed).ToList();
+        if (!visibleColumns.Any()) return Size.Units(100);
+
+        var totalWidth = visibleColumns.Sum(CalculateColumnWidth);
+        var calculatedWidth = Math.Max(100, Math.Min(400, totalWidth));
+
+        return Size.Units(calculatedWidth);
     }
 
     /// <summary>Sets the overall table width.</summary>
@@ -152,8 +173,6 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         return this;
     }
 
-    /// <summary>Gets the column configuration for a field expression.</summary>
-    /// <param name="field">Expression identifying the field to get configuration for.</param>
     private TableBuilderColumn GetField(Expression<Func<TModel, object>> field)
     {
         var name = Utils.GetNameFromMemberExpression(field.Body);
@@ -237,6 +256,8 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         return this;
     }
 
+    /// <summary>Sets the multi-line flag for a column.</summary>
+    /// <param name="fields">Expressions identifying the columns to set multi-line for.</param>
     public TableBuilder<TModel> MultiLine(params Expression<Func<TModel, object>>[] fields)
     {
         foreach (var field in fields)
@@ -323,9 +344,7 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         return this;
     }
 
-    /// <summary>
-    /// Builds the complete table with headers, data rows, and optional footers.
-    /// </summary>
+    /// <summary>Builds the complete table with headers, data rows, and optional footers.</summary>
     public override object? Build()
     {
         if (!_records.Any()) return _empty!;
@@ -334,8 +353,8 @@ public class TableBuilder<TModel> : ViewBase, IStateless
 
         Table RenderTable(TableRow[] tableRows)
         {
-            var table = new Table(tableRows).Width(_width);
-            return table;
+            var tableWidth = _width ?? CalculateSmartTableWidth();
+            return new Table(tableRows).Width(tableWidth);
         }
 
         TableCell RenderCell(int index, TableBuilderColumn column, object? content, bool isHeader, bool isFooter)
@@ -414,14 +433,10 @@ public class TableBuilder<TModel> : ViewBase, IStateless
     }
 }
 
-/// <summary>
-/// Factory for creating table builders from generic collections.
-/// </summary>
+/// <summary>Factory for creating table builders from generic collections.</summary>
 public static class TableBuilderFactory
 {
-    /// <summary>
-    /// Creates a table view from any enumerable collection with automatic type detection.
-    /// </summary>
+    /// <summary>Creates a table view from any enumerable collection with automatic type detection.</summary>
     /// <param name="enumerable">The collection to create a table from.</param>
     public static ViewBase FromEnumerable(IEnumerable enumerable)
     {

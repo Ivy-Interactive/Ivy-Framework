@@ -2,7 +2,7 @@
 
 namespace Ivy.Samples.Shared.Apps.Widgets;
 
-[App(icon: Icons.Menu)]
+[App(icon: Icons.Menu, searchHints: ["menu", "options", "context", "actions", "popup", "items"])]
 public class DropDownMenuApp : SampleBase
 {
     protected override object? BuildSample()

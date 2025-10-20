@@ -2,7 +2,7 @@
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Effects;
 
-[App(icon: Icons.Play)]
+[App(icon: Icons.Play, searchHints: ["motion", "transition", "effects", "animated", "movement", "visual"])]
 public class AnimationApp : ViewBase
 {
     public override object? Build()

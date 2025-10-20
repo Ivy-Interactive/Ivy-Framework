@@ -1,0 +1,176 @@
+models:
+  - gpt-4o
+  - gpt-oss-120b
+  - claude-sonnet-4-5-20250929
+  
+suites:
+  - name: general
+    fields:
+      - id: name
+        displayName: Name
+        type: Text
+      - id: age
+        displayName: Age
+        type: Number
+      - id: email
+        displayName: Email
+        type: Text
+      - id: price
+        displayName: Price
+        type: Number
+      - id: status
+        displayName: Status
+        type: Text
+      - id: category
+        displayName: Category
+        type: Text
+      - id: createdDate
+        displayName: Created Date
+        type: Date
+      - id: isActive
+        displayName: Is Active
+        type: Boolean
+      - id: salary
+        displayName: Salary
+        type: Number
+      - id: department
+        displayName: Department
+        type: Text
+      - id: country
+        displayName: Country
+        type: Text
+      - id: region
+        displayName: Region
+        type: Text
+    tests:
+      - filter: "Show me records where name contains John"
+        expected:
+          - '[Name] contains "John"'
+      - filter: "Find people older than 30"
+        expected:
+          - "[Age] > 30"
+      - filter: "Show people over 25 who work in Sales department"
+        expected:
+          - '[Age] > 25 AND [Department] = "Sales"'
+      - filter: "Find employees from USA or Canada"
+        expected:
+          - '[Country] = "USA" OR [Country] = "Canada"'
+      - filter: "Show active employees older than 30 from either Sales or Marketing department with salary above 50000"
+        expected:
+          - '[Is Active] = true AND [Age] > 30 AND ([Department] = "Sales" OR [Department] = "Marketing") AND [Salary] > 50000'
+      - filter: "Find products priced between 100 and 500"
+        expected:
+          - "[Price] >= 100 AND [Price] <= 500"
+      - filter: "Show records where email is empty"
+        expected:
+          - "[Email] is blank"
+          - '[Email] = ""'
+      - filter: "Find records with non-empty department"
+        expected:
+          - "[Department] is not blank"
+          - '[Department] != ""'
+      - filter: "Find emails that start with admin"
+        expected:
+          - '[Email] starts with "admin"'
+      - filter: "Show names ending with son"
+        expected:
+          - '[Name] ends with "son"'
+      - filter: "Find records created after January 1st 2024"
+        expected:
+          - '[Created Date] > "2024-01-01"'
+      - filter: "Show only active status"
+        expected:
+          - '[Status] = "active"'
+      - filter: "Find all except inactive status"
+        expected:
+          - '[Status] != "inactive"'
+      - filter: "Show people named John or Jane in the IT department"
+        expected:
+          - '([Name] = "John" OR [Name] = "Jane") AND [Department] = "IT"'
+      - filter: "Show employees not in USA and age under 40"
+        expected:
+          - '[Country] != "USA" AND [Age] < 40'
+      - filter: "Show only active records"
+        expected:
+          - "[Is Active] = true"
+      - filter: "Find employees with salary of at least 75000"
+        expected:
+          - "[Salary] >= 75000"
+      - filter: "Show products priced up to 100"
+        expected:
+          - "[Price] <= 100"
+      - filter: "Filter by Electronics or Appliances category"
+        expected:
+          - '[Category] = "Electronics" OR [Category] = "Appliances"'
+      - filter: "Country equals Canada"
+        expected:
+          - '[Country] = "Canada"'
+      - filter: "Show records where nonexistent_field equals something"
+        expected:
+          - 'ERROR: Field "nonexistent_field" not found'
+      - filter: "Show the good ones"
+        expected:
+          - "ERROR: Ambiguous or unclear filter criteria"
+      - filter: "Show active employees aged between 25 and 45 from Sales or Marketing department in USA or Canada with salary greater than 60000 and email not empty"
+        expected:
+          - '[Is Active] = true AND [Age] >= 25 AND [Age] <= 45 AND ([Department] = "Sales" OR [Department] = "Marketing") AND ([Country] = "USA" OR [Country] = "Canada") AND [Salary] > 60000 AND [Email] is not blank'
+      - filter: "Age greater than or equal to 21 and less than 65"
+        expected:
+          - "[Age] >= 21 AND [Age] < 65"
+      - filter: "Created between January 1st 2024 and December 31st 2024"
+        expected:
+          - '[Created Date] >= "2024-01-01" AND [Created Date] <= "2024-12-31"'
+      - filter: "Show employees with age between 30 and 50 and salary between 50000 and 100000"
+        expected:
+          - "[Age] >= 30 AND [Age] <= 50 AND [Salary] >= 50000 AND [Salary] <= 100000"
+      - filter: "Department equals IT"
+        expected:
+          - '[Department] = "IT"'
+
+  - name: syntax_correction
+    fields:
+      - id: name
+        displayName: Name
+        type: Text
+      - id: status
+        displayName: Status
+        type: Text
+      - id: price
+        displayName: Price
+        type: Number
+      - id: email
+        displayName: Email
+        type: Text
+    tests:
+      # Test that agent corrects single quotes to double quotes
+      - filter: "name = 'John'"
+        expected:
+          - '[Name] = "John"'
+      - filter: "status is 'active' or status is 'pending'"
+        expected:
+          - '[Status] = "active" OR [Status] = "pending"'
+      # Test that agent handles "is blank" correctly
+      - filter: "email is blank"
+        expected:
+          - "[Email] is blank"
+      - filter: "email is not blank"
+        expected:
+          - "[Email] is not blank"
+      # Test that agent converts range to comparison operators
+      - filter: "price between 50 and 100"
+        expected:
+          - "[Price] >= 50 AND [Price] <= 100"
+      # Mixed syntax errors
+      - filter: "name = 'Jane' and email is not blank"
+        expected:
+          - '[Name] = "Jane" AND [Email] is not blank'
+      - filter: "status = 'active' and price between 10 and 99"
+        expected:
+          - '[Status] = "active" AND [Price] >= 10 AND [Price] <= 99'
+      # Test case insensitivity
+      - filter: "EMAIL IS BLANK"
+        expected:
+          - "[Email] is blank"
+      - filter: "STATUS = 'ACTIVE' AND EMAIL IS NOT BLANK"
+        expected:
+          - '[Status] = "ACTIVE" AND [Email] is not blank'

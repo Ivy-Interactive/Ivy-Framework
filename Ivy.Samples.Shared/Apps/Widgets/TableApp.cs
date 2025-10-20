@@ -14,7 +14,7 @@ public class Product
     public required string Url { get; set; }
 }
 
-[App(icon: Icons.Table, path: ["Widgets"])]
+[App(icon: Icons.Table, path: ["Widgets"], searchHints: ["grid", "data", "rows", "columns", "cells", "spreadsheet"])]
 public class TableApp : SampleBase
 {
     protected override object? BuildSample()
@@ -26,7 +26,7 @@ public class TableApp : SampleBase
             new {Sku = "1235", Foo = true, Name = "Jeans", Price = 20.0, Url = "http://example.com/jeans"},
             new {Sku = "1236", Foo = true, Name = "Sneakers", Price = 30.0, Url = "http://example.com/sneakers"},
             new {Sku = "1237", Foo = true, Name = "Hat", Price = 5.0, Url = "http://example.com/hat"},
-            new {Sku = "1238", Foo = true, Name = "Multiline Example Multiline Example Multiline Example Multiline Example Multiline Example Multiline Example Multiline Example Multiline Example Multiline Example Multiline Example Multiline Example", Price = 2.0, Url = "http://example.com/socks"}
+            new {Sku = "1238", Foo = true, Name = "Premium Luxury Extra-Soft Organic Cotton Socks with Reinforced Heel and Toe - Perfect for All-Day Comfort and Athletic Performance - Available in Multiple Colors", Price = 2.0, Url = "http://example.com/socks"}
         };
 
         // Table with long headers to test overflow and tooltips

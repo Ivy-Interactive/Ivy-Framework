@@ -3,7 +3,7 @@ using Ivy.Shared;
 
 namespace Ivy.Samples.Shared.Apps.Concepts;
 
-[App(icon: Icons.Webhook)]
+[App(icon: Icons.Webhook, searchHints: ["callbacks", "endpoints", "api", "integration", "url", "trigger"])]
 public class WebhookApp : ViewBase
 {
     public override object? Build()

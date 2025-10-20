@@ -5,7 +5,7 @@ using Ivy.Views.Builders;
 
 namespace Ivy.Samples.Shared.Apps.Widgets;
 
-[App(icon: Icons.List, path: ["Widgets"])]
+[App(icon: Icons.List, path: ["Widgets"], searchHints: ["items", "collection", "scroll", "menu", "rows", "vertical"])]
 public class ListApp : SampleBase
 {
     protected override object? BuildSample()

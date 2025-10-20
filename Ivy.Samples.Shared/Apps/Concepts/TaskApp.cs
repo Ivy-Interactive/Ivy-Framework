@@ -3,7 +3,7 @@ using Ivy.Shared;
 
 namespace Ivy.Samples.Shared.Apps.Concepts;
 
-[App(icon: Icons.Check)]
+[App(icon: Icons.Check, searchHints: ["async", "await", "loading", "asynchronous", "promises", "background"])]
 public class TaskApp : SampleBase
 {
     protected override async Task<object?> BuildSample()

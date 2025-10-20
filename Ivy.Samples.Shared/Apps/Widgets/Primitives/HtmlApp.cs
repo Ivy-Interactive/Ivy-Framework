@@ -2,7 +2,7 @@ using Ivy.Shared;
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Primitives;
 
-[App(icon: Icons.CodeXml, path: ["Widgets", "Primitives"])]
+[App(icon: Icons.CodeXml, path: ["Widgets", "Primitives"], searchHints: ["markup", "html", "custom", "raw", "embedded", "content"])]
 public class HtmlApp : SampleBase
 {
     protected override object? BuildSample()
