@@ -15,7 +15,7 @@ public interface IAuthService
     /// <param name="password">The user's password</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>An authentication token if successful, null otherwise</returns>
-    Task<AuthToken?> LoginAsync(string email, string password, CancellationToken cancellationToken);
+    Task<AuthToken?> LoginAsync(string email, string password, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Generates an OAuth authorization URI for the specified option.
@@ -24,7 +24,7 @@ public interface IAuthService
     /// <param name="callback">The webhook endpoint for handling the OAuth callback</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>The OAuth authorization URI</returns>
-    Task<Uri> GetOAuthUriAsync(AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken);
+    Task<Uri> GetOAuthUriAsync(AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Handles the OAuth callback request and extracts the authentication token.
@@ -32,20 +32,20 @@ public interface IAuthService
     /// <param name="request">The HTTP request containing OAuth callback data</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>An authentication token if successful, null otherwise</returns>
-    Task<AuthToken?> HandleOAuthCallbackAsync(HttpRequest request, CancellationToken cancellationToken);
+    Task<AuthToken?> HandleOAuthCallbackAsync(HttpRequest request, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Logs out the current user.
     /// </summary>
     /// <param name="cancellationToken">Cancellation token</param>
-    Task LogoutAsync(CancellationToken cancellationToken);
+    Task LogoutAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Retrieves information about the current authenticated user.
     /// </summary>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>User information if authenticated, null otherwise</returns>
-    Task<UserInfo?> GetUserInfoAsync(CancellationToken cancellationToken);
+    Task<UserInfo?> GetUserInfoAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Gets the available authentication options.
@@ -60,7 +60,7 @@ public interface IAuthService
     /// <returns>
     /// The refreshed authentication token if successful; otherwise, null.
     /// </returns>
-    Task<AuthToken?> RefreshAccessTokenAsync(CancellationToken cancellationToken);
+    Task<AuthToken?> RefreshAccessTokenAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Gets the current authentication token.

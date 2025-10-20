@@ -15,14 +15,14 @@ public interface IAuthProvider
     /// <param name="password">The user's password</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>An authentication token if successful, null otherwise</returns>
-    Task<AuthToken?> LoginAsync(string email, string password, CancellationToken cancellationToken /* = default */);
+    Task<AuthToken?> LoginAsync(string email, string password, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Logs out a user by invalidating their access token.
     /// </summary>
     /// <param name="token">The access token to invalidate</param>
     /// <param name="cancellationToken">Cancellation token</param>
-    Task LogoutAsync(string token, CancellationToken cancellationToken /* = default */);
+    Task LogoutAsync(string token, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Refreshes an expired or expiring access token.
@@ -30,7 +30,7 @@ public interface IAuthProvider
     /// <param name="token">The current authentication token</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>A new authentication token if successful, null otherwise</returns>
-    Task<AuthToken?> RefreshAccessTokenAsync(AuthToken token, CancellationToken cancellationToken /* = default */);
+    Task<AuthToken?> RefreshAccessTokenAsync(AuthToken token, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Checks whether an access token is valid.
@@ -38,7 +38,7 @@ public interface IAuthProvider
     /// <param name="token">The access token to validate</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>True if the token is valid, false otherwise</returns>
-    Task<bool> ValidateAccessTokenAsync(string token, CancellationToken cancellationToken /* = default */);
+    Task<bool> ValidateAccessTokenAsync(string token, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Retrieves user information using a valid access token.
@@ -46,7 +46,7 @@ public interface IAuthProvider
     /// <param name="token">The access token</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>User information if successful, null otherwise</returns>
-    Task<UserInfo?> GetUserInfoAsync(string token, CancellationToken cancellationToken /* = default */);
+    Task<UserInfo?> GetUserInfoAsync(string token, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Gets the available authentication options for this provider.
@@ -61,7 +61,7 @@ public interface IAuthProvider
     /// <param name="callback">The webhook endpoint for handling the OAuth callback</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>The OAuth authorization URI</returns>
-    Task<Uri> GetOAuthUriAsync(AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken /* = default */);
+    Task<Uri> GetOAuthUriAsync(AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Handles the OAuth callback request and extracts the authentication token.
@@ -69,7 +69,7 @@ public interface IAuthProvider
     /// <param name="request">The HTTP request containing OAuth callback data</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>An authentication token if successful, null otherwise</returns>
-    Task<AuthToken?> HandleOAuthCallbackAsync(HttpRequest request, CancellationToken cancellationToken /* = default */);
+    Task<AuthToken?> HandleOAuthCallbackAsync(HttpRequest request, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Retrieves the expiration time of the given authentication token.
@@ -77,7 +77,7 @@ public interface IAuthProvider
     /// <param name="token">The authentication token</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>The expiration time if available, null otherwise</returns>
-    Task<DateTimeOffset?> GetTokenExpiration(AuthToken token, CancellationToken cancellationToken /* = default */);
+    Task<DateTimeOffset?> GetTokenExpiration(AuthToken token, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Sets the HTTP context for the auth provider.
