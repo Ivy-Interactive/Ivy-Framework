@@ -51,7 +51,7 @@ public class KanbanApp : SampleBase
                 })
                 .HandleAdd((string columnKey) => Console.WriteLine($"Card added to column: {columnKey}"))
                 .HandleMove(moveData => Console.WriteLine($"Card {moveData.CardId} moved from {moveData.FromColumn} to {moveData.ToColumn}"))
-                .HandleDelete(cardId => Console.WriteLine($"Card deleted: {cardId}"))
+                .HandleDelete(cardId => Console.WriteLine($"🗑️ Card deleted: {cardId}"))
                 .Empty(
                     new Card()
                         .Title("No Tasks")

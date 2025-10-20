@@ -144,9 +144,7 @@ export const KanbanWidget: React.FC<KanbanWidgetProps> = ({
   };
 
   const handleCardDelete = (cardId: string) => {
-    if (events?.onCardDelete) {
-      eventHandler('OnCardDelete', id, [{ cardId }]);
-    }
+    eventHandler('OnDelete', id, [{ cardId }]);
   };
 
   const handleCardReorder = (

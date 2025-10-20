@@ -25,6 +25,8 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Card } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import { Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 // Types
@@ -281,6 +283,8 @@ interface KanbanCardProps {
 }
 
 export function KanbanCard({ id, name, task, children }: KanbanCardProps) {
+  const { onCardDelete } = useKanbanContext();
+
   const {
     attributes,
     listeners,
@@ -301,6 +305,11 @@ export function KanbanCard({ id, name, task, children }: KanbanCardProps) {
     transition,
   };
 
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onCardDelete?.(id);
+  };
+
   return (
     <Card
       ref={setNodeRef}
@@ -308,7 +317,7 @@ export function KanbanCard({ id, name, task, children }: KanbanCardProps) {
       {...attributes}
       {...listeners}
       className={cn(
-        'p-3 cursor-grab active:cursor-grabbing',
+        'p-3 cursor-grab active:cursor-grabbing group',
         isDragging && 'opacity-50'
       )}
     >
@@ -319,20 +328,32 @@ export function KanbanCard({ id, name, task, children }: KanbanCardProps) {
             <p className="m-0 text-gray-500 text-xs">{task.description}</p>
           )}
         </div>
-        {task?.assignee && (
-          <Avatar className="h-6 w-6 shrink-0">
-            <AvatarFallback className="text-xs">
-              {task.assignee.slice(0, 2).toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
-        )}
+        <div className="flex items-center gap-2">
+          {task?.assignee && (
+            <Avatar className="h-6 w-6 shrink-0">
+              <AvatarFallback className="text-xs">
+                {task.assignee.slice(0, 2).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+          )}
+          {onCardDelete && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+              onClick={handleDelete}
+            >
+              <Trash2 className="h-3 w-3 text-red-500" />
+            </Button>
+          )}
+        </div>
       </div>
 
       <div className="mt-2 flex items-center justify-between text-xs text-gray-500">
         <span className="px-2 py-1 bg-gray-100 rounded">
           Priority {task?.priority || 1}
         </span>
-        <span>{task?.assignee || 'Unassigned'}</span>
+        {!task?.assignee && <span className="text-gray-400">Unassigned</span>}
       </div>
 
       {children}
