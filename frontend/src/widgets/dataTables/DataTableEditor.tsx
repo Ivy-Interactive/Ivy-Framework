@@ -5,14 +5,21 @@ import DataEditor, {
   GridSelection,
   Item,
 } from '@glideapps/glide-data-grid';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, {
+  useMemo,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import { useTable } from './DataTableContext';
 import { tableStyles } from './styles/style';
-import { tableTheme } from './styles/theme';
+import { getTableTheme } from './styles/theme';
 import { getSelectionProps } from './utils/selectionModes';
 import { getCellContent as getCellContentUtil } from './utils/cellContent';
 import { convertToGridColumns } from './utils/columnHelpers';
 import { iconCellRenderer } from './utils/customRenderers';
+import { useTheme } from '@/components/theme-provider';
 
 interface TableEditorProps {
   hasOptions?: boolean;
@@ -48,6 +55,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     showGroups,
   } = config;
 
+  const { theme } = useTheme();
   const selectionProps = getSelectionProps(selectionMode);
 
   const gridRef = useRef<DataEditorRef>(null);
@@ -58,6 +66,9 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     rows: CompactSelection.empty(),
   });
   const scrollThreshold = 10;
+
+  // Generate theme based on current theme context
+  const tableTheme = useMemo(() => getTableTheme(theme), [theme]);
 
   // Track container width
   useEffect(() => {
