@@ -290,40 +290,73 @@ public class CustomSubmitTitleFormExample : ViewBase
 }
 ```
 
-### Custom Validation
+### Form Validation
 
-Add custom validation logic using `.Validate()` method.
+Forms support automatic validation using standard .NET DataAnnotations, with the ability to add custom validation logic for specific business rules. Validation errors appear when you try to submit the form.
 
 ```csharp demo-tabs
 public class ValidationExample : ViewBase
 {
-    public record UserModel(
-        string Username,
-        string Email,
-        string Password,
-        int Age,
-        DateTime BirthDate
-    );
+    public class UserModel
+    {
+        [Required, MinLength(3)]
+        public string Username { get; set; } = "";
+        
+        [Required, EmailAddress]
+        public string Email { get; set; } = "";
+        
+        [Required, MinLength(8)]
+        public string Password { get; set; } = "";
+        
+        [Range(13, 120)]
+        public int Age { get; set; } = 18;
+        
+        public DateTime BirthDate { get; set; } = DateTime.Now;
+    }
 
     public override object? Build()
     {
-        var user = UseState(() => new UserModel("", "", "", 18, DateTime.Now));
+        var user = UseState(() => new UserModel());
+        var client = UseService<IClientProvider>();
         
-        return user.ToForm()
-            .Validate<string>(m => m.Username, username => 
-                (username.Length >= 3, "Username must be at least 3 characters"))
-            .Validate<string>(m => m.Email, email => 
-                (email.Contains("@") && email.Contains("."), "Please enter a valid email address"))
-            .Validate<string>(m => m.Password, password => 
-                (password.Length >= 8, "Password must be at least 8 characters"))
-            .Validate<int>(m => m.Age, age => 
-                (age >= 13, "You must be at least 13 years old"))
+        UseEffect(() =>
+        {
+            // This only fires when the form is submitted successfully (passes validation)
+            if (!string.IsNullOrEmpty(user.Value.Username))
+            {
+                client.Toast($"Account created for {user.Value.Username}!");
+            }
+        }, user);
+        
+        return user.ToForm("Create Account")
+            // Custom validation: birth date cannot be in the future
             .Validate<DateTime>(m => m.BirthDate, birthDate => 
                 (birthDate <= DateTime.Now, "Birth date cannot be in the future"))
-            .Required(m => m.Username, m => m.Email, m => m.Password);
+            // Custom validation: username cannot contain spaces
+            .Validate<string>(m => m.Username, username =>
+                (!username.Contains(' '), "Username cannot contain spaces"));
     }
 }
 ```
+
+This example demonstrates:
+- **DataAnnotations** for standard validation (Required, MinLength, EmailAddress, Range)
+- **Custom `.Validate()`** for business logic that operates on individual field values
+
+<Callout Type="tip">
+**Automatic Email Validation**: Fields ending with "Email" (like `UserEmail`, `ContactEmail`) automatically get email validation, even without the `[EmailAddress]` attribute.
+</Callout>
+
+**Supported DataAnnotations:**
+
+- `[Required]` - Field must have a value
+- `[MinLength(n)]` - Minimum string length
+- `[MaxLength(n)]` - Maximum string length
+- `[Range(min, max)]` - Value must be within range
+- `[EmailAddress]` - Valid email format
+- `[Phone]` - Valid phone number format
+- `[Url]` - Valid URL format
+- `[RegularExpression(pattern)]` - Match a regex pattern
 
 ## Form Submission
 
