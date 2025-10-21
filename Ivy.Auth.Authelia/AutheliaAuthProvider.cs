@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.Linq;
+using System.Net;
 using System.Reflection;
 using System.Text;
 using System.Text.Json;
@@ -14,6 +15,11 @@ public class AutheliaAuthProvider : IAuthProvider
     private readonly HttpClient _httpClient;
     private readonly CookieContainer _cookieContainer;
     private readonly string _baseUrl;
+
+    private readonly JsonSerializerOptions _jsonOptions = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
+    };
 
     public AutheliaAuthProvider()
     {
@@ -85,10 +91,14 @@ public class AutheliaAuthProvider : IAuthProvider
         if (!response.IsSuccessStatusCode)
             return null;
         var json = await response.Content.ReadAsStringAsync(cancellationToken);
-        var user = JsonSerializer.Deserialize<AutheliaUser>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-        if (user == null)
+        var wrapper = JsonSerializer.Deserialize<AutheliaUserInfoResponse>(json, _jsonOptions);
+        if (wrapper?.Data == null)
             return null;
-        return new UserInfo(user.Id, user.Email, user.DisplayName, null);
+        var displayName = wrapper.Data.DisplayName ?? string.Empty;
+        var email = wrapper.Data.Emails?.FirstOrDefault();
+        return email != null
+            ? new UserInfo(displayName, email, displayName, null)
+            : null;
     }
 
     public AuthOption[] GetAuthOptions()
@@ -102,9 +112,18 @@ public class AutheliaAuthProvider : IAuthProvider
     }
 }
 
-public class AutheliaUser
+public class AutheliaUserInfoResponse
 {
-    public string Id { get; set; } = string.Empty;
-    public string Email { get; set; } = string.Empty;
-    public string DisplayName { get; set; } = string.Empty;
+    public string? Status { get; set; }
+    public AutheliaUserInfoData? Data { get; set; }
+}
+
+public class AutheliaUserInfoData
+{
+    public string? DisplayName { get; set; }
+    public string? Method { get; set; }
+    public bool HasWebauthn { get; set; }
+    public bool HasTotp { get; set; }
+    public bool HasDuo { get; set; }
+    public string[]? Emails { get; set; }
 }
