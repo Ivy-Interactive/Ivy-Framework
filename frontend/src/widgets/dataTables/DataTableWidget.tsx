@@ -39,7 +39,7 @@ export const DataTable: React.FC<TableProps> = ({
 }) => {
   // Apply default configuration values
   const finalConfig = {
-    allowSearch: config.allowSearch ?? true,
+    // allowSearch: config.allowSearch ?? true,
     filterType: config.filterType,
     freezeColumns: config.freezeColumns ?? null,
     allowSorting: config.allowSorting ?? true,
