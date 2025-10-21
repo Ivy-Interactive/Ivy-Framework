@@ -100,19 +100,8 @@ const AreaChartWidget: React.FC<AreaChartWidgetProps> = ({
       setThemeColors(getThemeColors());
     });
 
-    // Watch for changes to the document element classes
-    const observer = new MutationObserver(() => {
-      setThemeColors(getThemeColors());
-    });
-
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ['class'],
-    });
-
     return () => {
       cancelAnimationFrame(frame);
-      observer.disconnect();
     };
   }, [theme]);
 
