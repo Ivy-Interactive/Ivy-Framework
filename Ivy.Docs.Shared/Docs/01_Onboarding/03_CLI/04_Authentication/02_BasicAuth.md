@@ -93,11 +93,11 @@ var authProvider = UseService<IAuthProvider>();
 
 // Login returns both access and refresh tokens
 var authToken = await authProvider.LoginAsync(email, password);
-// authToken.Jwt - Access token (15 min expiry)
+// authToken.AccessToken - Access token (15 min expiry)
 // authToken.RefreshToken - Refresh token (24 hour expiry, 365 day max age)
 
-// When access token expires, refresh automatically
-var newToken = await authProvider.RefreshJwtAsync(authToken);
+// When access token expires, refresh:
+var newToken = await authProvider.RefreshAccessTokenAsync(authToken);
 ```
 
 ## Security Best Practices

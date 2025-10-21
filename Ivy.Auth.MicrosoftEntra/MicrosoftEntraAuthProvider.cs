@@ -7,6 +7,11 @@ using Microsoft.Graph;
 using Microsoft.Identity.Client;
 using Ivy.Hooks;
 using System.Text.Json.Serialization;
+using System.Security.Claims;
+using Microsoft.IdentityModel.Protocols;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace Ivy.Auth.MicrosoftEntra;
 
@@ -32,6 +37,7 @@ public class MicrosoftEntraAuthProvider : IAuthProvider
     private readonly string _tenantId;
     private readonly string _clientId;
     private readonly string _clientSecret;
+    private readonly ConfigurationManager<OpenIdConnectConfiguration> _configurationManager;
 
     record struct TokenCache(Dictionary<string, RefreshToken> RefreshToken);
 
@@ -47,6 +53,11 @@ public class MicrosoftEntraAuthProvider : IAuthProvider
         _tenantId = configuration.GetValue<string>("MicrosoftEntra:TenantId") ?? throw new Exception("MicrosoftEntra:TenantId is required");
         _clientId = configuration.GetValue<string>("MicrosoftEntra:ClientId") ?? throw new Exception("MicrosoftEntra:ClientId is required");
         _clientSecret = configuration.GetValue<string>("MicrosoftEntra:ClientSecret") ?? throw new Exception("MicrosoftEntra:ClientSecret is required");
+
+        _configurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(
+            $"https://login.microsoftonline.com/{_tenantId}/.well-known/openid-configuration",
+            new OpenIdConnectConfigurationRetriever()
+        );
     }
 
     public void SetHttpContext(HttpContext context) => _httpContext = context;
@@ -82,10 +93,10 @@ public class MicrosoftEntraAuthProvider : IAuthProvider
         return _app;
     }
 
-    public Task<AuthToken?> LoginAsync(string email, string password)
+    public Task<AuthToken?> LoginAsync(string email, string password, CancellationToken cancellationToken)
         => throw new InvalidOperationException("Microsoft Entra login with email/password is not supported");
 
-    public async Task<Uri> GetOAuthUriAsync(AuthOption option, WebhookEndpoint callback)
+    public async Task<Uri> GetOAuthUriAsync(AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken)
     {
         _codeVerifier = GenerateCodeVerifier();
         var codeChallenge = GenerateCodeChallenge(_codeVerifier);
@@ -99,12 +110,12 @@ public class MicrosoftEntraAuthProvider : IAuthProvider
                 ["code_challenge_method"] = "S256",
                 ["state"] = callback.Id,
             })
-            .ExecuteAsync();
+            .ExecuteAsync(cancellationToken);
 
         return authUrl;
     }
 
-    public async Task<AuthToken?> HandleOAuthCallbackAsync(HttpRequest request)
+    public async Task<AuthToken?> HandleOAuthCallbackAsync(HttpRequest request, CancellationToken cancellationToken)
     {
         var code = request.Query["code"].ToString();
         var error = request.Query["error"].ToString();
@@ -126,18 +137,17 @@ public class MicrosoftEntraAuthProvider : IAuthProvider
 
         var result = await GetApp().AcquireTokenByAuthorizationCode(_scopes, code)
             .WithPkceCodeVerifier(_codeVerifier)
-            .ExecuteAsync();
+            .ExecuteAsync(cancellationToken);
 
         var accountId = result.Account.HomeAccountId!.Identifier;
         return new AuthToken(
-            result.AccessToken,
+            result.IdToken,
             GetCurrentRefreshToken(accountId),
-            result.ExpiresOn,
             accountId
         );
     }
 
-    public Task LogoutAsync(string jwt)
+    public Task LogoutAsync(string token, CancellationToken cancellationToken)
     {
         _tokenCache = null;
         _app = null;
@@ -145,26 +155,27 @@ public class MicrosoftEntraAuthProvider : IAuthProvider
         return Task.CompletedTask;
     }
 
-    public async Task<AuthToken?> RefreshJwtAsync(AuthToken jwt)
+    public async Task<AuthToken?> RefreshAccessTokenAsync(AuthToken token, CancellationToken cancellationToken)
     {
         var app = GetApp();
 
         if (app is not IByRefreshToken refresher
-            || jwt.Tag is not JsonElement tag
+            || token.Tag is not JsonElement tag
             || tag.GetString() is not string accountId
             || accountId.Length <= 0)
         {
-            return jwt;
+            return null;
         }
 
-        if (jwt.ExpiresAt == null || jwt.RefreshToken == null || DateTimeOffset.UtcNow < jwt.ExpiresAt)
+        if (token.RefreshToken == null)
         {
-            return jwt;
+            return null;
         }
 
         try
         {
-            var account = await app.GetAccountAsync(accountId);
+            var account = await app.GetAccountAsync(accountId)
+                .WaitAsync(cancellationToken);
 
             if (account != null)
             {
@@ -174,28 +185,27 @@ public class MicrosoftEntraAuthProvider : IAuthProvider
                 }
 
                 var result = await GetApp().AcquireTokenSilent(_scopes, account)
-                    .ExecuteAsync();
+                    .ExecuteAsync(cancellationToken);
 
                 if (result == null)
                 {
-                    return jwt;
+                    return null;
                 }
 
                 return new AuthToken(
-                    result.AccessToken,
+                    result.IdToken,
                     GetCurrentRefreshToken(accountId),
-                    result.ExpiresOn,
                     accountId
                 );
             }
             else
             {
-                var result = await refresher.AcquireTokenByRefreshToken(_scopes, jwt.RefreshToken)
-                    .ExecuteAsync();
+                var result = await refresher.AcquireTokenByRefreshToken(_scopes, token.RefreshToken)
+                    .ExecuteAsync(cancellationToken);
 
                 if (result == null)
                 {
-                    return jwt;
+                    return null;
                 }
 
                 if (result.Account.HomeAccountId.Identifier != accountId)
@@ -204,9 +214,8 @@ public class MicrosoftEntraAuthProvider : IAuthProvider
                 }
 
                 return new AuthToken(
-                    result.AccessToken,
+                    result.IdToken,
                     GetCurrentRefreshToken(accountId),
-                    result.ExpiresOn,
                     accountId
                 );
             }
@@ -217,46 +226,57 @@ public class MicrosoftEntraAuthProvider : IAuthProvider
         }
     }
 
-    public async Task<bool> ValidateJwtAsync(string jwt)
+    public async Task<bool> ValidateAccessTokenAsync(string token, CancellationToken cancellationToken)
     {
-        try
-        {
-            var user = await GetMeAsync(jwt);
-            return user != null;
-        }
-        catch (Exception)
-        {
-            return false;
-        }
+        return await VerifyToken(token, cancellationToken) is not null;
     }
 
-    public async Task<UserInfo?> GetUserInfoAsync(string jwt)
+    public Task<UserInfo?> GetUserInfoAsync(string idToken, CancellationToken cancellationToken)
     {
         try
         {
-            var user = await GetMeAsync(jwt);
+            var handler = new JwtSecurityTokenHandler();
+            var jwtToken = handler.ReadJwtToken(idToken);
 
-            if (user == null || user.Id == null)
+            var userId = jwtToken.Claims.FirstOrDefault(c => c.Type == "oid")?.Value
+                ?? jwtToken.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
+            var email = jwtToken.Claims.FirstOrDefault(c => c.Type == "email")?.Value
+                ?? jwtToken.Claims.FirstOrDefault(c => c.Type == "preferred_username")?.Value;
+            var name = jwtToken.Claims.FirstOrDefault(c => c.Type == "name")?.Value;
+
+            if (userId == null || email == null)
             {
-                return null;
+                return Task.FromResult<UserInfo?>(null);
             }
 
-            return new UserInfo(
-                user.Id,
-                user.Mail ?? user.UserPrincipalName ?? string.Empty,
-                user.DisplayName,
+            return Task.FromResult<UserInfo?>(new UserInfo(
+                userId,
+                email,
+                name,
                 null
-            );
+            ));
         }
         catch (Exception)
         {
-            return null;
+            return Task.FromResult<UserInfo?>(null);
         }
     }
 
     public AuthOption[] GetAuthOptions()
     {
         return [.. _authOptions];
+    }
+
+    public async Task<DateTimeOffset?> GetTokenExpiration(AuthToken token, CancellationToken cancellationToken)
+    {
+        if (await VerifyToken(token.AccessToken, cancellationToken) is var (_, expiration))
+        {
+            return expiration;
+        }
+        else
+        {
+            return null;
+        }
     }
 
     public MicrosoftEntraAuthProvider UseMicrosoftEntra()
@@ -303,11 +323,40 @@ public class MicrosoftEntraAuthProvider : IAuthProvider
         return null;
     }
 
-    private async Task<Microsoft.Graph.Models.User?> GetMeAsync(string jwt)
+    private async Task<(ClaimsPrincipal, DateTimeOffset)?> VerifyToken(string jwt, CancellationToken cancellationToken)
     {
-        var httpClient = new HttpClient();
-        httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", jwt);
-        var tempGraphClient = new GraphServiceClient(httpClient);
-        return await tempGraphClient.Me.GetAsync();
+        try
+        {
+            var handler = new JwtSecurityTokenHandler
+            {
+                InboundClaimTypeMap = new Dictionary<string, string>()
+            };
+
+            var discoveryDocument = await _configurationManager.GetConfigurationAsync(cancellationToken);
+            var signingKeys = discoveryDocument.SigningKeys;
+
+            var tokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidIssuers = new[]
+                {
+                    $"https://sts.windows.net/{_tenantId}/",
+                    $"https://login.microsoftonline.com/{_tenantId}/v2.0"
+                },
+                ValidateAudience = true,
+                ValidAudience = _clientId,
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKeys = signingKeys,
+                ValidateLifetime = true,
+                ClockSkew = TimeSpan.FromMinutes(2),
+            };
+
+            var claims = handler.ValidateToken(jwt, tokenValidationParameters, out SecurityToken validatedToken);
+            return (claims, validatedToken.ValidTo);
+        }
+        catch (Exception)
+        {
+            return null;
+        }
     }
 }

@@ -57,7 +57,7 @@ public class Auth0AuthProvider : IAuthProvider
         );
     }
 
-    public async Task<AuthToken?> LoginAsync(string email, string password)
+    public async Task<AuthToken?> LoginAsync(string email, string password, CancellationToken cancellationToken)
     {
         var request = new ResourceOwnerTokenRequest
         {
@@ -70,11 +70,11 @@ public class Auth0AuthProvider : IAuthProvider
             Realm = "Username-Password-Authentication",
         };
 
-        var response = await _authClient.GetTokenAsync(request);
-        return new AuthToken(response.AccessToken, response.RefreshToken, DateTimeOffset.UtcNow.AddSeconds(response.ExpiresIn));
+        var response = await _authClient.GetTokenAsync(request, cancellationToken);
+        return new AuthToken(response.AccessToken, response.RefreshToken);
     }
 
-    public Task<Uri> GetOAuthUriAsync(AuthOption option, WebhookEndpoint callback)
+    public Task<Uri> GetOAuthUriAsync(AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken)
     {
         var connection = option.Id switch
         {
@@ -103,7 +103,7 @@ public class Auth0AuthProvider : IAuthProvider
         return Task.FromResult(authorizationUrl.Build());
     }
 
-    public async Task<AuthToken?> HandleOAuthCallbackAsync(HttpRequest request)
+    public async Task<AuthToken?> HandleOAuthCallbackAsync(HttpRequest request, CancellationToken cancellationToken)
     {
         var code = request.Query["code"].ToString();
         var error = request.Query["error"].ToString();
@@ -129,9 +129,9 @@ public class Auth0AuthProvider : IAuthProvider
                 RedirectUri = $"{request.Scheme}://{request.Host}{request.Path}"
             };
 
-            var response = await _authClient.GetTokenAsync(request_);
+            var response = await _authClient.GetTokenAsync(request_, cancellationToken);
 
-            return new AuthToken(response.AccessToken, response.RefreshToken, DateTimeOffset.UtcNow.AddSeconds(response.ExpiresIn));
+            return new AuthToken(response.AccessToken, response.RefreshToken);
         }
         catch (Exception ex)
         {
@@ -139,25 +139,14 @@ public class Auth0AuthProvider : IAuthProvider
         }
     }
 
-    public async Task LogoutAsync(string jwt)
-    {
-        try
-        {
-            // Auth0 logout is typically handled on the client side
-            // This method can be extended to revoke tokens if needed
-            await Task.CompletedTask;
-        }
-        catch (Exception)
-        {
-            // Logout failures are typically not critical
-        }
-    }
+    public Task LogoutAsync(string token, CancellationToken cancellationToken)
+        => Task.CompletedTask;
 
-    public async Task<AuthToken?> RefreshJwtAsync(AuthToken jwt)
+    public async Task<AuthToken?> RefreshAccessTokenAsync(AuthToken token, CancellationToken cancellationToken)
     {
-        if (jwt.ExpiresAt == null || jwt.RefreshToken == null || DateTimeOffset.UtcNow < jwt.ExpiresAt)
+        if (token.RefreshToken == null)
         {
-            return jwt;
+            return null;
         }
 
         try
@@ -166,11 +155,11 @@ public class Auth0AuthProvider : IAuthProvider
             {
                 ClientId = _clientId,
                 ClientSecret = _clientSecret,
-                RefreshToken = jwt.RefreshToken
+                RefreshToken = token.RefreshToken
             };
 
-            var response = await _authClient.GetTokenAsync(request);
-            return new AuthToken(response.AccessToken, response.RefreshToken ?? jwt.RefreshToken, DateTimeOffset.UtcNow.AddSeconds(response.ExpiresIn));
+            var response = await _authClient.GetTokenAsync(request, cancellationToken);
+            return new AuthToken(response.AccessToken, response.RefreshToken ?? token.RefreshToken);
         }
         catch (Exception)
         {
@@ -178,11 +167,11 @@ public class Auth0AuthProvider : IAuthProvider
         }
     }
 
-    private async Task<ClaimsPrincipal?> VerifyToken(string jwt)
+    private async Task<(ClaimsPrincipal, DateTimeOffset)?> VerifyToken(string jwt, CancellationToken cancellationToken)
     {
         try
         {
-            var discoveryDocument = await _configurationManager.GetConfigurationAsync(CancellationToken.None);
+            var discoveryDocument = await _configurationManager.GetConfigurationAsync(cancellationToken);
             var signingKeys = discoveryDocument.SigningKeys;
 
             var tokenValidationParameters = new TokenValidationParameters
@@ -194,13 +183,15 @@ public class Auth0AuthProvider : IAuthProvider
                 ValidateIssuerSigningKey = true,
                 IssuerSigningKeys = signingKeys,
                 ValidateLifetime = true,
+                ClockSkew = TimeSpan.FromMinutes(2),
             };
 
             var handler = new JwtSecurityTokenHandler
             {
                 InboundClaimTypeMap = new Dictionary<string, string>()
             };
-            return handler.ValidateToken(jwt, tokenValidationParameters, out SecurityToken validatedToken);
+            var claims = handler.ValidateToken(jwt, tokenValidationParameters, out SecurityToken validatedToken);
+            return (claims, validatedToken.ValidTo);
         }
         catch (Exception)
         {
@@ -208,16 +199,14 @@ public class Auth0AuthProvider : IAuthProvider
         }
     }
 
-    public async Task<bool> ValidateJwtAsync(string jwt)
+    public async Task<bool> ValidateAccessTokenAsync(string token, CancellationToken cancellationToken)
     {
-        var claims = await VerifyToken(jwt);
-        return claims is not null;
+        return (await VerifyToken(token, cancellationToken)) is not null;
     }
 
-    public async Task<UserInfo?> GetUserInfoAsync(string jwt)
+    public async Task<UserInfo?> GetUserInfoAsync(string token, CancellationToken cancellationToken)
     {
-        var claims = await VerifyToken(jwt);
-        if (claims is null)
+        if (await VerifyToken(token, cancellationToken) is not var (claims, _))
         {
             return null;
         }
@@ -232,6 +221,18 @@ public class Auth0AuthProvider : IAuthProvider
     public AuthOption[] GetAuthOptions()
     {
         return _authOptions.ToArray();
+    }
+
+    public async Task<DateTimeOffset?> GetTokenExpiration(AuthToken token, CancellationToken cancellationToken)
+    {
+        if (await VerifyToken(token.AccessToken, cancellationToken) is var (_, expiration))
+        {
+            return expiration;
+        }
+        else
+        {
+            return null;
+        }
     }
 
     public Auth0AuthProvider UseEmailPassword()

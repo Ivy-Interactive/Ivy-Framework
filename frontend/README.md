@@ -35,7 +35,7 @@ When detailed logging is enabled, you'll see debug messages for:
 - **Select Input Interactions**: Value changes, conversions, clear operations
 - **SignalR Communication**: Message processing, updates, events
 - **Widget Tree Operations**: XML conversion, patches, updates
-- **Authentication**: JWT operations, theme changes
+- **Authentication**: access token operations, theme changes
 - **Error Handling**: Connection issues, parsing errors
 
 ### Log Levels

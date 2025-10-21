@@ -85,43 +85,6 @@ public class AppHub(
             var httpContext = Context.GetHttpContext()!;
             var appId = GetAppId(server, httpContext);
 
-            var isAuthProtected = server.AuthProviderType != null;
-            AuthToken? authToken = null, oldAuthToken = null;
-            if (isAuthProtected)
-            {
-                var authProvider = server.Services.BuildServiceProvider().GetService<IAuthProvider>() ?? throw new Exception("IAuthProvider not found");
-                authProvider.SetHttpContext(httpContext);
-
-                oldAuthToken = authToken = GetAuthToken(httpContext);
-
-                if (string.IsNullOrEmpty(authToken?.Jwt))
-                {
-                    appId = AppIds.Auth;
-                }
-                else
-                {
-                    authToken = await authProvider.RefreshJwtAsync(authToken);
-                    if (string.IsNullOrEmpty(authToken?.Jwt))
-                    {
-                        appId = AppIds.Auth;
-                    }
-                    else
-                    {
-                        var validJwt = await authProvider.ValidateJwtAsync(authToken.Jwt);
-                        if (!validJwt)
-                        {
-                            appId = AppIds.Auth;
-                        }
-                    }
-                }
-                appServices.AddSingleton<IAuthService>(s => new AuthService(authProvider, authToken));
-            }
-
-            var appArgs = GetAppArgs(Context.ConnectionId, appId, httpContext);
-            var appDescriptor = server.GetApp(appId);
-
-            logger.LogInformation($"Connected: {Context.ConnectionId} [{appId}]");
-
             var clientProvider = new ClientProvider(new ClientSender(clientNotifier, Context.ConnectionId));
 
             if (server.Services.All(sd => sd.ServiceType != typeof(IExceptionHandler)))
@@ -140,16 +103,64 @@ public class AppHub(
                 Context.ConnectionId));
             appServices.AddSingleton(typeof(IUploadService), new UploadService(Context.ConnectionId));
             appServices.AddSingleton(typeof(IClientProvider), clientProvider);
-            appServices.AddSingleton(appDescriptor);
+
+            if (server.AuthProviderType != null)
+            {
+                var authProvider = server.Services.BuildServiceProvider().GetService<IAuthProvider>() ?? throw new Exception("IAuthProvider not found");
+                authProvider.SetHttpContext(httpContext);
+
+                var oldAuthToken = GetAuthToken(httpContext);
+                var authService = new AuthService(authProvider!, oldAuthToken);
+                appServices.AddSingleton<IAuthService>(s => authService);
+
+                AuthToken? authToken = oldAuthToken;
+                try
+                {
+                    if (!string.IsNullOrEmpty(oldAuthToken?.AccessToken))
+                    {
+                        var isValid = await TimeoutHelper.WithTimeoutAsync(
+                            ct => authProvider.ValidateAccessTokenAsync(oldAuthToken.AccessToken, ct),
+                            Context.ConnectionAborted);
+
+                        if (!isValid)
+                        {
+                            authToken = await TimeoutHelper.WithTimeoutAsync(
+                                authService.RefreshAccessTokenAsync,
+                                Context.ConnectionAborted);
+                        }
+                    }
+                    else
+                    {
+                        authToken = null;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    logger.LogWarning(ex, "Auth validation or refresh failed during connection setup.");
+                    authToken = null;
+                }
+
+                if (authToken != oldAuthToken)
+                {
+                    clientProvider.SetAuthToken(authToken, reloadPage: false);
+                }
+
+                if (authToken == null)
+                {
+                    appId = AppIds.Auth;
+                }
+            }
+
+            var appArgs = GetAppArgs(Context.ConnectionId, appId, httpContext);
+            var appDescriptor = server.GetApp(appId);
+
+            logger.LogInformation($"Connected: {Context.ConnectionId} [{appId}]");
+
             appServices.AddSingleton(appArgs);
+            appServices.AddSingleton(appDescriptor);
 
             appServices.AddTransient<IWebhookRegistry, WebhookController>();
             appServices.AddTransient<SignalRouter>(_ => new SignalRouter(sessionStore));
-
-            if (authToken != oldAuthToken)
-            {
-                clientProvider.SetJwt(authToken);
-            }
 
             var serviceProvider = new CompositeServiceProvider(appServices, server.Services);
 
@@ -168,7 +179,7 @@ public class AppHub(
                 WidgetTree = widgetTree,
                 ContentBuilder = contentBuilder,
                 AppServices = serviceProvider,
-                LastInteraction = DateTime.UtcNow
+                LastInteraction = DateTime.UtcNow,
             };
 
             async void OnWidgetTreeChanged(WidgetTreeChanged[] changes)
@@ -187,6 +198,9 @@ public class AppHub(
             appState.TrackDisposable(widgetTree.Subscribe(OnWidgetTreeChanged));
 
             sessionStore.Sessions[Context.ConnectionId] = appState;
+
+            var connectionId = Context.ConnectionId;
+            var connectionAborted = Context.ConnectionAborted;
 
             await base.OnConnectedAsync();
 
@@ -207,6 +221,11 @@ public class AppHub(
                 {
                     Widgets = tree.GetWidgets().Serialize()
                 });
+            }
+
+            if (server.AuthProviderType != null && appId != AppIds.Auth)
+            {
+                _ = Task.Run(() => AuthRefreshLoopAsync(connectionId, connectionAborted));
             }
         }
         catch (Exception ex)
@@ -262,6 +281,178 @@ public class AppHub(
         }
     }
 
+    enum AuthRefreshState
+    {
+        Initial,
+        HasToken,
+        HasNoToken,
+        TokenExpired,
+    }
+
+    private async Task AuthRefreshLoopAsync(string connectionId, CancellationToken cancellationToken)
+    {
+        var state = AuthRefreshState.Initial;
+        var consecutiveErrors = 0;
+
+        // Replace connection's widget tree with an error view, so an unauthenticated user cannot interact with the real app.
+        // This is intended mainly as a safeguard against malicious clients (e.g., those which ignore messages that should trigger a page reload and/or cookie updates).
+        // The error page this provides is not very user-friendly, but in practice it should very rarely appear for a legitimate user.
+        async Task AbandonConnection(bool resetTokenAndReload)
+        {
+            try
+            {
+                var displayException = new Exception("Your session is no longer valid. Please log in again.");
+                var session = sessionStore.Sessions[connectionId];
+                var clientProvider = session.AppServices.GetRequiredService<IClientProvider>();
+                if (resetTokenAndReload)
+                {
+                    clientProvider.SetAuthToken(null, reloadPage: true);
+                }
+                session.WidgetTree = new WidgetTree(new ErrorView(displayException), contentBuilder, session.AppServices);
+                await session.WidgetTree.BuildAsync();
+                clientProvider.Sender.Send("Refresh", new
+                {
+                    Widgets = session.WidgetTree.GetWidgets().Serialize()
+                });
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "AuthRefreshLoop: Error sending session expired message to {ConnectionId}", connectionId);
+            }
+        }
+
+        while (true)
+        {
+            try
+            {
+                var session = sessionStore.Sessions[connectionId];
+                var authService = session.AppServices.GetRequiredService<IAuthService>();
+                var authProvider = session.AppServices.GetRequiredService<IAuthProvider>();
+                var clientProvider = session.AppServices.GetRequiredService<IClientProvider>();
+
+                var token = authService.GetCurrentToken();
+
+                switch (state)
+                {
+                    case AuthRefreshState.Initial:
+                        logger.LogInformation("AuthRefreshLoop: Starting for {ConnectionId}", connectionId);
+                        state = token == null
+                            ? AuthRefreshState.HasNoToken
+                            : AuthRefreshState.HasToken;
+                        break;
+
+                    case AuthRefreshState.HasNoToken:
+                        if (token != null)
+                        {
+                            state = AuthRefreshState.HasToken;
+                        }
+                        else
+                        {
+                            logger.LogInformation("AuthRefreshLoop: No token for {ConnectionId}, waiting 5 minutes.", connectionId);
+                            await Task.Delay(TimeSpan.FromMinutes(5), cancellationToken);
+                        }
+                        break;
+
+                    case AuthRefreshState.HasToken:
+                        {
+                            if (token == null)
+                            {
+                                logger.LogError("AuthRefreshLoop: Token lost for {ConnectionId}.", connectionId);
+                                await AbandonConnection(resetTokenAndReload: true);
+                                return;
+                            }
+
+                            var isValid = await TimeoutHelper.WithTimeoutAsync(
+                                ct => authProvider.ValidateAccessTokenAsync(token.AccessToken, ct),
+                                cancellationToken);
+
+                            if (!isValid)
+                            {
+                                state = AuthRefreshState.TokenExpired;
+                            }
+                            else
+                            {
+                                var expiresAt = await TimeoutHelper.WithTimeoutAsync(
+                                    ct => authProvider.GetTokenExpiration(token, ct),
+                                    cancellationToken);
+
+                                if (expiresAt != null && expiresAt < DateTimeOffset.UtcNow.AddMinutes(2))
+                                {
+                                    state = AuthRefreshState.TokenExpired;
+                                }
+                                else
+                                {
+                                    // Token is valid, wait until close to expiration
+                                    var waitUntil = (expiresAt ?? DateTimeOffset.UtcNow.AddMinutes(15)).AddMinutes(-2);
+                                    var delay = waitUntil - DateTimeOffset.UtcNow;
+
+                                    // Don't wait more than `maxDelay`
+                                    var maxDelay = TimeSpan.FromHours(2);
+                                    if (delay > maxDelay)
+                                    {
+                                        delay = maxDelay;
+                                    }
+                                    logger.LogInformation("AuthRefreshLoop: Token valid for {ConnectionId}, next check at {NextCheck}.", connectionId, DateTimeOffset.UtcNow + delay);
+                                    await Task.Delay(delay, cancellationToken);
+                                }
+                            }
+                        }
+                        break;
+
+                    case AuthRefreshState.TokenExpired:
+                        {
+                            logger.LogInformation("AuthRefreshLoop: Attempting to refresh token for {ConnectionId}.", connectionId);
+
+                            var newToken = await TimeoutHelper.WithTimeoutAsync(
+                                authService.RefreshAccessTokenAsync,
+                                cancellationToken);
+                            if (token != newToken)
+                            {
+                                logger.LogInformation("AuthRefreshLoop: updating stored token for {ConnectionId}.", connectionId);
+                                clientProvider.SetAuthToken(newToken, reloadPage: string.IsNullOrEmpty(newToken?.AccessToken));
+                            }
+                            if (newToken == null)
+                            {
+                                logger.LogError("AuthRefreshLoop: Token refresh failed for {ConnectionId}, aborting connection.", connectionId);
+                                // Setting the token and reloading will have already happened above if null.
+                                await AbandonConnection(resetTokenAndReload: false);
+                                return;
+                            }
+                            else
+                            {
+                                state = AuthRefreshState.HasToken;
+                            }
+                        }
+                        break;
+                }
+            }
+            catch (TaskCanceledException)
+            {
+                logger.LogInformation("AuthRefreshLoop: cancelled for {ConnectionId}", connectionId);
+                return;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "AuthRefreshLoop: Error during auth refresh loop for {ConnectionId}", connectionId);
+                consecutiveErrors++;
+                if (consecutiveErrors >= 5)
+                {
+                    logger.LogError("AuthRefreshLoop: Too many consecutive errors, abandoning connection {ConnectionId}", connectionId);
+                    await AbandonConnection(resetTokenAndReload: true);
+                    return;
+                }
+                else
+                {
+                    logger.LogInformation("AuthRefreshLoop: waiting 30 seconds before retrying for {ConnectionId}", connectionId);
+                    await Task.Delay(TimeSpan.FromSeconds(30), cancellationToken);
+                }
+                continue;
+            }
+
+            consecutiveErrors = 0;
+        }
+    }
+
     public void HotReload()
     {
         if (sessionStore.Sessions.TryGetValue(Context.ConnectionId, out var appSession))
@@ -283,7 +474,7 @@ public class AppHub(
         }
     }
 
-    public async Task Event(string eventName, string widgetId, JsonArray? args)
+    public void Event(string eventName, string widgetId, JsonArray? args)
     {
         logger.LogInformation($"Event: {eventName} {widgetId} {args}");
         if (!sessionStore.Sessions.TryGetValue(Context.ConnectionId, out var appSession))
@@ -294,25 +485,6 @@ public class AppHub(
 
         try
         {
-            if (server.AuthProviderType != null)
-            {
-                if (appSession.AppId != AppIds.Auth)
-                {
-                    var authProvider = server.Services.BuildServiceProvider()
-                                           .GetService<IAuthProvider>() ??
-                                       throw new Exception("IAuthProvider not found");
-
-                    var authToken = GetAuthToken(Context.GetHttpContext()!);
-
-                    if (string.IsNullOrEmpty(authToken?.Jwt) || !await authProvider.ValidateJwtAsync(authToken.Jwt))
-                    {
-                        logger.LogWarning("Invalid JWT for event from {ConnectionId}. Aborting.", Context.ConnectionId);
-                        Context.Abort();
-                        return;
-                    }
-                }
-            }
-
             appSession.LastInteraction = DateTime.UtcNow;
             if (!appSession.WidgetTree.TriggerEvent(widgetId, eventName, args ?? new JsonArray()))
             {
@@ -329,15 +501,15 @@ public class AppHub(
     private AuthToken? GetAuthToken(HttpContext httpContext)
     {
         var cookies = httpContext.Request.Cookies;
-        var jwt = cookies["jwt"].NullIfEmpty();
-        if (jwt == null)
+        var authToken = cookies["auth_token"].NullIfEmpty();
+        if (authToken == null)
         {
             return null;
         }
 
         try
         {
-            var token = JsonSerializer.Deserialize<AuthToken>(jwt);
+            var token = JsonSerializer.Deserialize<AuthToken>(authToken);
             if (token == null)
             {
                 return null;
@@ -345,7 +517,7 @@ public class AppHub(
 
             if (token.RefreshToken == null)
             {
-                var refreshToken = cookies["jwt_ext_refresh_token"].NullIfEmpty();
+                var refreshToken = cookies["auth_ext_refresh_token"].NullIfEmpty();
                 return token with { RefreshToken = refreshToken };
             }
 
@@ -353,7 +525,7 @@ public class AppHub(
         }
         catch (Exception e)
         {
-            logger.LogWarning(e, "Failed to deserialize AuthToken from JWT.");
+            logger.LogWarning(e, "Failed to deserialize AuthToken from cookies.");
             return null;
         }
     }
