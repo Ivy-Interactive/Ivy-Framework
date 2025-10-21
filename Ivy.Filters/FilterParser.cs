@@ -45,6 +45,7 @@ public class FilterParser
             {
                 return new FilterParseResult
                 {
+                    Filter = filter,
                     Diagnostics = errorListener.Diagnostics
                 };
             }
@@ -56,6 +57,7 @@ public class FilterParser
             {
                 return new FilterParseResult
                 {
+                    Filter = filter,
                     Ast = ast,
                     Diagnostics = errorListener.Diagnostics
                 };
@@ -66,6 +68,7 @@ public class FilterParser
 
             return new FilterParseResult
             {
+                Filter = filter,
                 Ast = ast,
                 Model = model,
                 Diagnostics = errorListener.Diagnostics
@@ -78,6 +81,7 @@ public class FilterParser
 
             return new FilterParseResult
             {
+                Filter = filter,
                 Diagnostics = errorListener.Diagnostics
             };
         }

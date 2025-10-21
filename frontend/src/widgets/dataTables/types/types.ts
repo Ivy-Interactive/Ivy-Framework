@@ -48,11 +48,11 @@ export interface DataTableConnection {
 }
 
 export interface DataTableConfiguration {
-  allowSearch?: boolean;
   filterType?: FilterTypes;
   freezeColumns?: number | null;
   allowSorting?: boolean;
   allowFiltering?: boolean;
+  allowLlmFiltering?: boolean;
   allowColumnReordering?: boolean;
   allowColumnResizing?: boolean;
   allowCopySelection?: boolean;
