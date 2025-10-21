@@ -10,12 +10,10 @@ const RedditEmbed: React.FC<RedditEmbedProps> = ({ url }) => {
   const [scriptLoaded, setScriptLoaded] = useState(false);
   const [scriptError, setScriptError] = useState(false);
 
-  const extractPostId = (redditUrl: string): string | null => {
-    const match = redditUrl.match(/reddit\.com\/r\/[^/]+\/comments\/([^/]+)/);
+  const postId = React.useMemo(() => {
+    const match = url.match(/reddit\.com\/r\/[^/]+\/comments\/([^/]+)/);
     return match ? sanitizeId(match[1]) : null;
-  };
-
-  const postId = extractPostId(url);
+  }, [url]);
 
   useEffect(() => {
     if (postId) {

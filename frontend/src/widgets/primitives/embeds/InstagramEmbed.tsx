@@ -10,13 +10,11 @@ const InstagramEmbed: React.FC<InstagramEmbedProps> = ({ url }) => {
   const [scriptLoaded, setScriptLoaded] = useState(false);
   const [scriptError, setScriptError] = useState(false);
 
-  const extractPostId = (instagramUrl: string): string | null => {
+  const postId = React.useMemo(() => {
     // Instagram post URL: https://www.instagram.com/p/ABC123/
-    const match = instagramUrl.match(/instagram\.com\/p\/([^/?]+)/);
+    const match = url.match(/instagram\.com\/p\/([^/?]+)/);
     return match ? sanitizeId(match[1]) : null;
-  };
-
-  const postId = extractPostId(url);
+  }, [url]);
 
   useEffect(() => {
     if (postId) {

@@ -10,13 +10,11 @@ const TikTokEmbed: React.FC<TikTokEmbedProps> = ({ url }) => {
   const [scriptLoaded, setScriptLoaded] = useState(false);
   const [scriptError, setScriptError] = useState(false);
 
-  const extractVideoId = (tiktokUrl: string): string | null => {
+  const videoId = React.useMemo(() => {
     // TikTok video URL: https://www.tiktok.com/@username/video/1234567890
-    const match = tiktokUrl.match(/tiktok\.com\/@[^/]+\/video\/(\d+)/);
+    const match = url.match(/tiktok\.com\/@[^/]+\/video\/(\d+)/);
     return match ? sanitizeId(match[1]) : null;
-  };
-
-  const videoId = extractVideoId(url);
+  }, [url]);
 
   useEffect(() => {
     if (videoId) {

@@ -411,7 +411,6 @@ const SearchVariant: React.FC<{
   size = Sizes.Medium,
 }) => {
   const { savePosition } = useCursorPosition(props.value, inputRef) as {
-    elementRef: React.RefObject<HTMLInputElement>;
     savePosition: () => void;
   };
   const { ref: focusRef } = useFocusable('sidebar-navigation', 0);

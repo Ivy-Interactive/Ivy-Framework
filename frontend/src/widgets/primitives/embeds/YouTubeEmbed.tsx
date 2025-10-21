@@ -9,22 +9,20 @@ interface YouTubeEmbedProps {
 }
 
 const YouTubeEmbed: React.FC<YouTubeEmbedProps> = ({ url, width, height }) => {
-  const extractVideoId = (youtubeUrl: string): string | null => {
+  const videoId = React.useMemo(() => {
     const patterns = [
       /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/,
       /youtube\.com\/watch\?.*v=([^&\n?#]+)/,
     ];
 
     for (const pattern of patterns) {
-      const match = youtubeUrl.match(pattern);
+      const match = url.match(pattern);
       if (match) {
         return sanitizeId(match[1]);
       }
     }
     return null;
-  };
-
-  const videoId = extractVideoId(url);
+  }, [url]);
 
   if (!videoId) {
     return <EmbedErrorFallback url={url} platform="YouTube" />;
