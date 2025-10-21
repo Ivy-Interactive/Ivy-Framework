@@ -3,7 +3,7 @@ using Ivy.Core;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
-/// <summary>Kanban column widget containing a collection of kanban cards with optional title and pipe operator for card addition.</summary>
+/// <summary>Kanban column widget containing a collection of kanban cards with optional title and pipe operator for adding cards.</summary>
 public record KanbanColumn : WidgetBase<KanbanColumn>
 {
     /// <summary>Initializes KanbanColumn with specified kanban cards.</summary>
