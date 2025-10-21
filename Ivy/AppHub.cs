@@ -389,7 +389,7 @@ public class AppHub(
                                 cancellationToken);
                             if (token != newToken)
                             {
-                                logger.LogInformation("AuthRefreshLoop: updating stored for {ConnectionId}.", connectionId);
+                                logger.LogInformation("AuthRefreshLoop: updating stored token for {ConnectionId}.", connectionId);
                                 clientProvider.SetAuthToken(newToken, reloadPage: string.IsNullOrEmpty(newToken?.AccessToken));
                             }
                             if (newToken == null)
