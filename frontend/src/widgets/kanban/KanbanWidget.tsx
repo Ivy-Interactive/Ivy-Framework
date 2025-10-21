@@ -106,7 +106,7 @@ export const KanbanWidget: React.FC<KanbanWidgetProps> = ({
 
                   const task: Task = {
                     id: cardId,
-                    title: title,
+                    title,
                     status: columnId,
                     statusOrder: columnIndex + 1,
                     priority: cardIndex + 1,
