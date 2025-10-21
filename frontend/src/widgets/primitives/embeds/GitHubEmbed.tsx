@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { sanitizeUrl, sanitizeId } from './shared';
 import EmbedCard from './EmbedCard';
 import EmbedErrorFallback from './EmbedErrorFallback';
@@ -8,87 +8,77 @@ interface GitHubEmbedProps {
 }
 
 const GitHubEmbed: React.FC<GitHubEmbedProps> = ({ url }) => {
-  const [repoInfo, setRepoInfo] = useState<{
-    owner?: string;
-    repo?: string;
-    type?: string;
-    number?: string;
-    ref?: string;
-  } | null>(null);
+  const parseGitHubUrl = (githubUrl: string) => {
+    // Codespace: https://github.com/codespaces/new?repo=owner%2Frepo&ref=branch
+    let match = githubUrl.match(
+      /github\.com\/codespaces\/new\?.*repo=([^&]+)(?:&ref=([^&]+))?/
+    );
+    if (match) {
+      try {
+        const repoParam = match[1];
+        const refParam = match[2];
+        const decodedRepo = decodeURIComponent(repoParam);
+        const [owner, repo] = decodedRepo.split('/');
 
-  useEffect(() => {
-    const parseGitHubUrl = (githubUrl: string) => {
-      // Codespace: https://github.com/codespaces/new?repo=owner%2Frepo&ref=branch
-      let match = githubUrl.match(
-        /github\.com\/codespaces\/new\?.*repo=([^&]+)(?:&ref=([^&]+))?/
-      );
-      if (match) {
-        try {
-          const repoParam = match[1];
-          const refParam = match[2];
-          const decodedRepo = decodeURIComponent(repoParam);
-          const [owner, repo] = decodedRepo.split('/');
-
-          if (owner && repo) {
-            return {
-              owner: sanitizeId(owner),
-              repo: sanitizeId(repo),
-              type: 'codespace',
-              ref: refParam ? sanitizeId(refParam) : 'main',
-            };
-          }
-        } catch {
-          return null;
+        if (owner && repo) {
+          return {
+            owner: sanitizeId(owner),
+            repo: sanitizeId(repo),
+            type: 'codespace',
+            ref: refParam ? sanitizeId(refParam) : 'main',
+          };
         }
+      } catch {
+        return null;
       }
+    }
 
-      // Issue: https://github.com/owner/repo/issues/123
-      match = githubUrl.match(/github\.com\/([^/]+)\/([^/]+)\/issues\/(\d+)/);
-      if (match) {
-        return {
-          owner: sanitizeId(match[1]),
-          repo: sanitizeId(match[2]),
-          type: 'issue',
-          number: match[3],
-        };
-      }
+    // Issue: https://github.com/owner/repo/issues/123
+    match = githubUrl.match(/github\.com\/([^/]+)\/([^/]+)\/issues\/(\d+)/);
+    if (match) {
+      return {
+        owner: sanitizeId(match[1]),
+        repo: sanitizeId(match[2]),
+        type: 'issue',
+        number: match[3],
+      };
+    }
 
-      // Pull Request: https://github.com/owner/repo/pull/123
-      match = githubUrl.match(/github\.com\/([^/]+)\/([^/]+)\/pull\/(\d+)/);
-      if (match) {
-        return {
-          owner: sanitizeId(match[1]),
-          repo: sanitizeId(match[2]),
-          type: 'pull',
-          number: match[3],
-        };
-      }
+    // Pull Request: https://github.com/owner/repo/pull/123
+    match = githubUrl.match(/github\.com\/([^/]+)\/([^/]+)\/pull\/(\d+)/);
+    if (match) {
+      return {
+        owner: sanitizeId(match[1]),
+        repo: sanitizeId(match[2]),
+        type: 'pull',
+        number: match[3],
+      };
+    }
 
-      // Repository: https://github.com/owner/repo
-      match = githubUrl.match(/github\.com\/([^/]+)\/([^/]+)$/);
-      if (match) {
-        return {
-          owner: sanitizeId(match[1]),
-          repo: sanitizeId(match[2]),
-          type: 'repository',
-        };
-      }
+    // Repository: https://github.com/owner/repo
+    match = githubUrl.match(/github\.com\/([^/]+)\/([^/]+)$/);
+    if (match) {
+      return {
+        owner: sanitizeId(match[1]),
+        repo: sanitizeId(match[2]),
+        type: 'repository',
+      };
+    }
 
-      // Gist: https://gist.github.com/username/gistId
-      match = githubUrl.match(/gist\.github\.com\/([^/]+)\/([^/]+)/);
-      if (match) {
-        return {
-          owner: sanitizeId(match[1]),
-          repo: 'gist',
-          type: 'gist',
-        };
-      }
+    // Gist: https://gist.github.com/username/gistId
+    match = githubUrl.match(/gist\.github\.com\/([^/]+)\/([^/]+)/);
+    if (match) {
+      return {
+        owner: sanitizeId(match[1]),
+        repo: 'gist',
+        type: 'gist',
+      };
+    }
 
-      return null;
-    };
+    return null;
+  };
 
-    setRepoInfo(parseGitHubUrl(url));
-  }, [url]);
+  const repoInfo = parseGitHubUrl(url);
 
   const sanitizedUrl = sanitizeUrl(url);
   if (!repoInfo || !sanitizedUrl) {

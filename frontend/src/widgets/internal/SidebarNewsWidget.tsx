@@ -61,26 +61,20 @@ const OPACITY_FACTOR = 0.1;
 const STORAGE_KEY = 'ivy-dismissed-news';
 
 function News({ articles }: { articles: NewsArticle[] }) {
-  const [dismissedNews, setDismissedNews] = React.useState<string[] | null>(
-    null
-  );
   const cleanupDoneRef = React.useRef(false);
 
-  useEffect(() => {
+  // Initialize dismissed news from localStorage
+  const [dismissedNews, setDismissedNews] = React.useState<string[]>(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        setDismissedNews(JSON.parse(stored));
-      } else {
-        setDismissedNews([]);
-      }
+      return stored ? JSON.parse(stored) : [];
     } catch {
-      setDismissedNews([]);
+      return [];
     }
-  }, []);
+  });
 
   useEffect(() => {
-    if (dismissedNews !== null && !cleanupDoneRef.current) {
+    if (!cleanupDoneRef.current) {
       const validIds = new Set(articles.map(a => a.id));
       const filtered = dismissedNews.filter(id => validIds.has(id));
       if (filtered.length !== dismissedNews.length) {

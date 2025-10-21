@@ -7,21 +7,18 @@ interface TwitterEmbedProps {
 }
 
 const TwitterEmbed: React.FC<TwitterEmbedProps> = ({ url }) => {
-  const [tweetId, setTweetId] = useState<string | null>(null);
   const [scriptLoaded, setScriptLoaded] = useState(false);
   const [scriptError, setScriptError] = useState(false);
 
-  useEffect(() => {
-    const extractTweetId = (twitterUrl: string): string | null => {
-      // Support both twitter.com and x.com URLs, with or without @ prefix
-      const match = twitterUrl.match(
-        /(?:twitter\.com|x\.com)\/\w+\/status\/(\d+)/
-      );
-      return match ? sanitizeId(match[1]) : null;
-    };
+  const extractTweetId = (twitterUrl: string): string | null => {
+    // Support both twitter.com and x.com URLs, with or without @ prefix
+    const match = twitterUrl.match(
+      /(?:twitter\.com|x\.com)\/\w+\/status\/(\d+)/
+    );
+    return match ? sanitizeId(match[1]) : null;
+  };
 
-    setTweetId(extractTweetId(url));
-  }, [url]);
+  const tweetId = extractTweetId(url);
 
   useEffect(() => {
     if (tweetId) {

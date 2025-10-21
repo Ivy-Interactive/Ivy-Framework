@@ -8,7 +8,7 @@ import {
 } from '@/components/ui/sheet';
 import { getWidth } from '@/lib/styles';
 import { cn } from '@/lib/utils';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 
 interface SheetWidgetProps {
   id: string;
@@ -28,12 +28,7 @@ export const SheetWidget: React.FC<SheetWidgetProps> = ({
   width,
 }) => {
   const eventHandler = useEventHandler();
-  const [isOpen, setIsOpen] = useState(false);
-
-  useEffect(() => {
-    // Set sheet to open state when component mounts
-    setIsOpen(true);
-  }, []);
+  const [isOpen, setIsOpen] = useState(true);
 
   const handleClose = () => {
     setIsOpen(false);

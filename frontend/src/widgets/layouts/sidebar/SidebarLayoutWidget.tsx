@@ -431,11 +431,7 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
     [searchActive, flatItems, selectedIndex, eventHandler, id]
   );
 
-  const renderMenuItemsWithHighlight = (
-    items: MenuItem[],
-    level: number,
-    flatIdxRef: { current: number }
-  ) => {
+  const renderMenuItemsWithHighlight = (items: MenuItem[], level: number) => {
     const onCtrlRightMouseClick = (e: React.MouseEvent, item: MenuItem) => {
       if (e.ctrlKey && e.button === 2 && !!item.tag) {
         e.preventDefault();
@@ -451,17 +447,14 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
               {item.label}
             </h4>
             <ul className="space-y-1">
-              {renderMenuItemsWithHighlight(
-                item.children,
-                level + 1,
-                flatIdxRef
-              )}
+              {renderMenuItemsWithHighlight(item.children, level + 1)}
             </ul>
           </div>
         );
       } else {
-        const flatIdx = flatIdxRef.current;
-        flatIdxRef.current++;
+        const flatIdx = flatItems.findIndex(
+          flatItem => flatItem.tag === item.tag
+        );
         const isActive = searchActive && flatIdx === selectedIndex;
         return (
           <li key={item.tag}>
@@ -489,7 +482,6 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
     });
   };
 
-  const flatIdxRef = { current: 0 };
   return (
     <div
       ref={el => {
@@ -508,7 +500,7 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
     >
       {searchActive ? (
         flatItems.length > 0 ? (
-          renderMenuItemsWithHighlight(items, 0, flatIdxRef)
+          renderMenuItemsWithHighlight(items, 0)
         ) : (
           <div className="flex items-center justify-center p-4 text-descriptive text-muted-foreground">
             No results found
