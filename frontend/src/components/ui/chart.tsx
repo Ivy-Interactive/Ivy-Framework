@@ -87,13 +87,12 @@ ${colorConfig
   return <style dangerouslySetInnerHTML={{ __html: css }} />;
 };
 
-// Placeholder components for chart functionality
-const ChartTooltip = ({ children }: { children: React.ReactNode }) => children;
-const ChartTooltipContent = ({ children }: { children: React.ReactNode }) =>
-  children;
-const ChartLegend = ({ children }: { children: React.ReactNode }) => children;
-const ChartLegendContent = ({ children }: { children: React.ReactNode }) =>
-  children;
+// Recharts components removed - migrated to echarts
+// These components are no longer used; echarts handles tooltips and legends via configuration
+const ChartTooltip = () => null;
+const ChartTooltipContent = () => null;
+const ChartLegend = () => null;
+const ChartLegendContent = () => null;
 
 export {
   ChartContainer,
