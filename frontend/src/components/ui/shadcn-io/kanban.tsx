@@ -23,7 +23,13 @@ import {
 } from '@dnd-kit/sortable';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Card } from '@/components/ui/card';
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  CardFooter,
+} from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Trash2 } from 'lucide-react';
@@ -227,8 +233,8 @@ export function KanbanBoard({ id, children }: KanbanBoardProps) {
     <div
       ref={setNodeRef}
       id={id}
-      className={`flex flex-col w-80 min-w-80 bg-gray-50 rounded-lg p-4 min-h-[600px] transition-colors duration-200 ${
-        isOver ? 'bg-blue-50 border-2 border-blue-300' : ''
+      className={`flex flex-col w-80 min-w-80 bg-muted/50 rounded-lg p-4 min-h-[600px] transition-colors duration-200 ${
+        isOver ? 'bg-accent border-2 border-primary' : ''
       }`}
     >
       {children}
@@ -330,18 +336,15 @@ export function KanbanCard({ id, name, task, children }: KanbanCardProps) {
       {...attributes}
       {...listeners}
       className={cn(
-        'h-40 p-4 cursor-grab active:cursor-grabbing group hover:shadow-md transition-all duration-200 flex flex-col',
+        'h-40 cursor-grab active:cursor-grabbing group hover:shadow-md transition-all duration-200 flex flex-col',
         isDragging && 'opacity-50 rotate-2 scale-105'
       )}
     >
-      {/* Header with title and actions */}
-      <div className="flex items-start justify-between gap-3 mb-3 flex-shrink-0">
-        <div className="flex-1 min-w-0">
-          <h3 className="font-semibold text-sm text-gray-900 leading-tight line-clamp-2 overflow-hidden text-ellipsis">
+      <CardHeader className="flex-none pb-2">
+        <div className="flex items-start justify-between gap-3">
+          <CardTitle className="text-sm leading-tight line-clamp-2 overflow-hidden text-ellipsis flex-1 min-w-0">
             {name}
-          </h3>
-        </div>
-        <div className="flex items-center gap-1 shrink-0">
+          </CardTitle>
           {onCardDelete && (
             <Button
               variant="ghost"
@@ -353,46 +356,48 @@ export function KanbanCard({ id, name, task, children }: KanbanCardProps) {
             </Button>
           )}
         </div>
-      </div>
+      </CardHeader>
 
-      {/* Description - flexible content area */}
-      <div className="flex-1 min-h-0 mb-3 overflow-hidden">
+      <CardContent className="flex-1 min-h-0 overflow-hidden pt-0">
         {task?.description && (
-          <p className="text-xs text-gray-600 line-clamp-4 leading-relaxed overflow-hidden text-ellipsis break-words">
+          <p className="text-xs text-muted-foreground line-clamp-4 leading-relaxed overflow-hidden text-ellipsis break-words">
             {task.description}
           </p>
         )}
-      </div>
+      </CardContent>
 
-      {/* Footer with metadata - always at bottom */}
-      <div className="flex items-center justify-between gap-2 flex-shrink-0">
-        <div className="flex items-center gap-2">
-          {/* Priority badge */}
-          <span
-            className={cn(
-              'px-2 py-1 text-xs font-medium rounded-md border',
-              getPriorityColor(task?.priority || 1)
+      <CardFooter className="flex-none pt-0">
+        <div className="flex items-center justify-between gap-2 w-full">
+          <div className="flex items-center gap-2">
+            {/* Priority badge */}
+            <span
+              className={cn(
+                'px-2 py-1 text-xs font-medium rounded-md border',
+                getPriorityColor(task?.priority || 1)
+              )}
+            >
+              P{task?.priority || 1}
+            </span>
+          </div>
+
+          {/* Assignee avatar */}
+          <div className="flex items-center gap-1">
+            {task?.assignee && task.assignee !== 'Unassigned' ? (
+              <Avatar className="h-6 w-6">
+                <AvatarFallback className="text-xs font-medium bg-blue-100 text-blue-700">
+                  {task.assignee.slice(0, 2).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+            ) : (
+              <div className="h-6 w-6 rounded-full bg-muted flex items-center justify-center">
+                <span className="text-xs text-muted-foreground font-medium">
+                  ?
+                </span>
+              </div>
             )}
-          >
-            P{task?.priority || 1}
-          </span>
+          </div>
         </div>
-
-        {/* Assignee avatar */}
-        <div className="flex items-center gap-1">
-          {task?.assignee && task.assignee !== 'Unassigned' ? (
-            <Avatar className="h-6 w-6">
-              <AvatarFallback className="text-xs font-medium bg-blue-100 text-blue-700">
-                {task.assignee.slice(0, 2).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-          ) : (
-            <div className="h-6 w-6 rounded-full bg-gray-100 flex items-center justify-center">
-              <span className="text-xs text-gray-400 font-medium">?</span>
-            </div>
-          )}
-        </div>
-      </div>
+      </CardFooter>
 
       {children}
     </Card>
