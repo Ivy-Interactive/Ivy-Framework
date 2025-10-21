@@ -36,84 +36,14 @@ public class SelectVariantDemo : ViewBase
 }
 ```
 
-`SelectInput` supports three different variants for different use cases:
-
-### Default Select
-
-The default variant renders a traditional dropdown menu. Use this when only one item should be selected:
-
-```csharp demo-tabs
-public class SelectColorDemo : ViewBase
-{
-    public override object? Build()
-    {    
-        var fruits = new string[]{"Apple","Guava","Banana","Watermelon"};
-        var dishes = new string[]{"pie", "pickle", "shake", "juice"};
-        var guess = this.UseState(fruits[0]);
-        var fruitInput = guess.ToSelectInput(fruits.ToOptions());
-        return Layout.Vertical() 
-                | Text.Label("Your favourite fruit")
-                | fruitInput
-                | Text.Label($"{guess}  {dishes[Array.IndexOf(fruits,guess.Value)]} is delicious!");
-    }
-}    
-```
-
-### List
-
-The List variant renders options as checkboxes, perfect for multiple selection scenarios:
-
-```csharp demo-tabs
-public class ListVariantDemo : ViewBase
-{
-    public override object? Build()
-    {
-        var options = new List<string>() { "Email", "Phone", "SMS", "Push Notification" };
-        var selectedNotice = UseState(new string[]{});
-        return Layout.Vertical() 
-                | Text.Label("How would you like to be notified?") 
-                | selectedNotice.ToSelectInput(options.ToOptions())
-                                .Variant(SelectInputs.List)
-                | Text.Small($"Selected: {string.Join(", ", selectedNotice.Value)}");
-    }
-}
-```
-
-### Toggle
-
-The Toggle variant displays options as toggleable buttons, great for visual selection interfaces:
-
-```csharp demo-tabs
-public class ToggleVariantDemo : ViewBase
-{
-    public override object? Build()
-    {
-        var mealOptions = new string[]{"Breakfast", "Lunch", "Dinner", "Snack"};
-        var selectedMeals = UseState(new string[]{});
-        
-        return Layout.Vertical()
-            | Text.Label("Select your meal preferences:")
-            | selectedMeals.ToSelectInput(mealOptions.ToOptions())
-                .Variant(SelectInputs.Toggle)
-            | Text.Small($"You selected: {string.Join(", ", selectedMeals.Value)}");
-    }
-}
-```
-
-<Callout Type="tip">
-The framework automatically detects when you use a collection type (array, List, etc.) as your state and enables multiple selection. No need to manually configure this!
-</Callout>
-
 ## Multiple Selection
 
 Multiple selection is automatically enabled when you use a collection type (array, List, etc.) as your state. The framework automatically detects this and enables multi-select functionality.
 
-### Multi-Select with Different Variants
-
-Here's a comprehensive example showing all three variants with multiple selection:
+`SelectInput` supports three variants: **Select** (dropdown), **List** (checkboxes), and **Toggle** (button toggles). Multi-select works with all variants and data types. Here's an example demonstrating different combinations:
 
 ```csharp demo-tabs
-public class MultiSelectVariantsDemo : ViewBase
+public class MultiSelectDemo : ViewBase
 {
     private enum ProgrammingLanguages
     {
@@ -122,135 +52,58 @@ public class MultiSelectVariantsDemo : ViewBase
         Python,
         JavaScript,
         Go,
-        Rust,
-        FSharp,
-        Kotlin
+        Rust
     }
     
     public override object? Build()
     {
         var languagesSelect = UseState<ProgrammingLanguages[]>([]);
-        var languagesList = UseState<ProgrammingLanguages[]>([]);
-        var languagesToggle = UseState<ProgrammingLanguages[]>([]);
-        var languageOptions = typeof(ProgrammingLanguages).ToOptions();
-        
-        return Layout.Vertical()
-            | Text.H2("Multi-Select Variants")
-            | Layout.Grid().Columns(3)
-                | Text.InlineCode("Select Variant")
-                | Text.InlineCode("List Variant")
-                | Text.InlineCode("Toggle Variant")
-                
-                | languagesSelect.ToSelectInput(languageOptions)
-                    .Variant(SelectInputs.Select)
-                    .Placeholder("Choose languages...")
-                | languagesList.ToSelectInput(languageOptions)
-                    .Variant(SelectInputs.List)
-                | languagesToggle.ToSelectInput(languageOptions)
-                    .Variant(SelectInputs.Toggle)
-                
-                | Text.Small($"Selected: {string.Join(", ", languagesSelect.Value)}")
-                | Text.Small($"Selected: {string.Join(", ", languagesList.Value)}")
-                | Text.Small($"Selected: {string.Join(", ", languagesToggle.Value)}");
-    }
-}
-```
-
-### Multi-Select with Different Data Types
-
-This example demonstrates multi-select with various data types:
-
-```csharp demo-tabs
-public class MultiSelectDataTypesDemo : ViewBase
-{
-    public override object? Build()
-    {
         var stringArray = UseState<string[]>([]);
         var intArray = UseState<int[]>([]);
-        var guidArray = UseState<Guid[]>([]);
         
+        var languageOptions = typeof(ProgrammingLanguages).ToOptions();
         var stringOptions = new[]{"Option A", "Option B", "Option C", "Option D"}.ToOptions();
         var intOptions = new[]{1, 2, 3, 4, 5}.ToOptions();
-        var guidOptions = new[]{Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid()}.ToOptions();
         
         return Layout.Vertical()
-            | Layout.Grid().Columns(3)
-                | Text.InlineCode("String Array")
-                | Text.InlineCode("Integer Array")
-                | Text.InlineCode("Guid Array")
-                
-                | stringArray.ToSelectInput(stringOptions)
-                    .Variant(SelectInputs.List)
-                    .Placeholder("Select strings...")
-                | intArray.ToSelectInput(intOptions)
-                    .Variant(SelectInputs.List)
-                    .Placeholder("Select numbers...")
-                | guidArray.ToSelectInput(guidOptions)
-                    .Variant(SelectInputs.List)
-                    .Placeholder("Select GUIDs...")
-                
-                | Text.Small($"Count: {stringArray.Value.Length}")
-                | Text.Small($"Count: {intArray.Value.Length}")
-                | Text.Small($"Count: {guidArray.Value.Length}");
+            | Text.InlineCode("Select Variant (Enum)")
+            | languagesSelect.ToSelectInput(languageOptions)
+                .Variant(SelectInputs.Select)
+                .Placeholder("Choose languages...")
+            | Text.Small($"Selected: {string.Join(", ", languagesSelect.Value)}")
+            
+            | Text.InlineCode("List Variant (String Array)")
+            | stringArray.ToSelectInput(stringOptions)
+                .Variant(SelectInputs.List)
+            | Text.Small($"Count: {stringArray.Value.Length}")
+            
+            | Text.InlineCode("Toggle Variant (Integer Array)")
+            | intArray.ToSelectInput(intOptions)
+                .Variant(SelectInputs.Toggle)
+            | Text.Small($"Count: {intArray.Value.Length}");
     }
 }
 ```
 
 ## Event Handling
 
-Handle change events using the `onChange` parameter for custom logic:
+Handle change events and create dynamic option lists that respond to user selections:
 
 ```csharp demo-tabs
-public class SelectEventHandlingDemo : ViewBase
-{
-    public override object? Build()
-    {
-        var selectedCountry = UseState("");
-        var showEuropeInfo = UseState(false);
-        var showAsiaInfo = UseState(false);
-        var showAmericaInfo = UseState(false);
-        
-        var countries = new[]{"Germany", "France", "Japan", "China", "USA", "Canada"}.ToOptions();
-        
-        return Layout.Vertical() 
-                | Text.Label("Select a country:") 
-                | new SelectInput<string>(
-                    value: selectedCountry.Value, 
-                    onChange: e =>
-                    {
-                        selectedCountry.Set(e.Value);
-                        showEuropeInfo.Set(e.Value is "Germany" or "France");
-                        showAsiaInfo.Set(e.Value is "Japan" or "China");
-                        showAmericaInfo.Set(e.Value is "USA" or "Canada");
-                    }, 
-                    countries)
-                | Layout.Horizontal()
-                    | (showEuropeInfo.Value ? Text.Block("🇪🇺 European Union member") : null)
-                    | (showAsiaInfo.Value ? Text.Block("🌏 Asian country") : null)
-                    | (showAmericaInfo.Value ? Text.Block("🦅 American country") : null);
-    }
-}
-```
-
-### Dynamic Options Based on Selection
-
-This example shows how to dynamically change available options based on user selection:
-
-```csharp demo-tabs
-public class DynamicOptionsDemo : ViewBase
+public class EventHandlingDemo : ViewBase
 {
     private static readonly Dictionary<string, string[]> CategoryOptions = new()
     {
-        ["Programming"] = new[]{"C#", "Java", "Python", "JavaScript", "Go", "Rust"},
-        ["Design"] = new[]{"Photoshop", "Illustrator", "Figma", "Sketch", "InDesign"},
-        ["Database"] = new[]{"SQL Server", "PostgreSQL", "MySQL", "MongoDB", "Redis"},
-        ["Cloud"] = new[]{"AWS", "Azure", "GCP", "DigitalOcean", "Heroku"}
+        ["Programming"] = new[]{"C#", "Java", "Python", "JavaScript"},
+        ["Design"] = new[]{"Photoshop", "Figma", "Sketch"},
+        ["Database"] = new[]{"SQL Server", "PostgreSQL", "MongoDB"}
     };
     
     public override object? Build()
     {
         var selectedCategory = UseState("Programming");
-        var selectedSkills = UseState<string[]>([]);
+        var selectedSkill = UseState("");
+        var showInfo = UseState(false);
         
         var categoryOptions = CategoryOptions.Keys.ToOptions();
         var skillOptions = CategoryOptions[selectedCategory.Value].ToOptions();
@@ -261,13 +114,20 @@ public class DynamicOptionsDemo : ViewBase
                 | selectedCategory.ToSelectInput(categoryOptions)
                     .Placeholder("Choose a category...")
                 
-                | Text.Label("Skills:")
-                | selectedSkills.ToSelectInput(skillOptions)
-                    .Variant(SelectInputs.List)
-                    .Placeholder("Select your skills...")
+                | Text.Label("Skill:")
+                | new SelectInput<string>(
+                    value: selectedSkill.Value,
+                    onChange: e =>
+                    {
+                        selectedSkill.Set(e.Value);
+                        showInfo.Set(!string.IsNullOrEmpty(e.Value));
+                    },
+                    skillOptions)
+                    .Placeholder("Select a skill...")
             
-            | Text.P("Selected Skills:")
-            | Text.Block(string.Join(", ", selectedSkills.Value));
+            | (showInfo.Value 
+                ? Text.Block($"Selected: {selectedCategory.Value} → {selectedSkill.Value}") 
+                : null);
     }
 }
 ```

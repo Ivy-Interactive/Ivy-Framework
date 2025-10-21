@@ -1,4 +1,5 @@
 ﻿global using System.Collections.Immutable;
+global using System.ComponentModel;
 global using System.Reactive.Linq;
 global using Ivy.Auth;
 global using Ivy.Apps;

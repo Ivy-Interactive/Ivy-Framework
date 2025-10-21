@@ -31,10 +31,10 @@ const CopyToClipboardButton: React.FC<CopyToClipboardButtonProps> = ({
       aria-label={ariaLabel || 'Copy to clipboard'}
       className={cn(
         'flex items-center gap-1 px-3 py-2 rounded-lg transition-all duration-200 ease-in-out cursor-pointer',
-        'hover:bg-accent hover:shadow-sm',
+        'hover:bg-accent hover:shadow-sm border-0',
         copied
-          ? 'bg-primary/10 text-primary'
-          : 'bg-transparent text-muted-foreground hover:text-foreground'
+          ? 'bg-primary text-primary-foreground'
+          : 'bg-background text-muted-foreground hover:text-foreground'
       )}
     >
       <span className="relative w-4 h-4">
