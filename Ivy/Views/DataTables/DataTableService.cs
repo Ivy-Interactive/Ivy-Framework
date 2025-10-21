@@ -128,7 +128,7 @@ public class DataTableService(
             var agent = new FilterParserAgent(chatClient, logger);
             var agentResult = await agent.Parse(request.FilterExpression, fields);
 
-            if (agentResult.HasErrors || agentResult.ProtoFilter == null)
+            if (agentResult.HasErrors)
             {
                 var errorMessage = agentResult.Diagnostics.FirstOrDefault()?.Message ?? "Failed to parse filter expression";
                 throw new RpcException(new Status(StatusCode.InvalidArgument, $"Invalid filter expression: {errorMessage}"));
@@ -136,7 +136,7 @@ public class DataTableService(
 
             return new DataTableFilterParserResponse
             {
-                Filter = (Filter)agentResult.ProtoFilter
+                FilterExpression = agentResult.Filter
             };
         }
         catch (RpcException)

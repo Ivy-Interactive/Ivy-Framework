@@ -90,5 +90,5 @@ message DataTableFilterParserRequest {
 }
 
 message DataTableFilterParserResponse {
-  Filter filter = 1;
+  string filter_expression = 1;
 }

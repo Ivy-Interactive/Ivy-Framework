@@ -8,6 +8,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <NoWarn>CS1591</NoWarn>
+    <UserSecretsId>c484b30a-b440-4aee-9a34-604c3ed3032e</UserSecretsId>
   </PropertyGroup>
   
   <ItemGroup>
