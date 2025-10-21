@@ -188,7 +188,7 @@ export function KanbanProvider({
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
       >
-        <div className="flex gap-4 overflow-x-auto p-4">
+        <div className="flex gap-4 overflow-x-auto">
           {columns
             .sort((a, b) => a.order - b.order)
             .map(column => children(column))}
