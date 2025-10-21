@@ -224,7 +224,7 @@ export const TableProvider: React.FC<TableProviderProps> = ({
       }
     };
     loadInitialData();
-  }, [connection, activeFilter, activeSort]);
+  }, [connection, activeFilter, activeSort, columnOrder.length, columnsProp]);
 
   // Load more data
   const loadMoreData = useCallback(async () => {

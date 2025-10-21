@@ -252,7 +252,7 @@ export const useBackend = (
       .build();
 
     currentConnectionRef.current = newConnection;
-    setConnection(newConnection);
+    queueMicrotask(() => setConnection(newConnection));
 
     return () => {
       // Clean up on component unmount

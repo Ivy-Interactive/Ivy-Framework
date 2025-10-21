@@ -73,7 +73,7 @@ const CodeWidget: React.FC<CodeWidgetProps> = memo(
       }
 
       return baseStyles;
-    }, [width, height, showBorder, showCopyButton]);
+    }, [width, height, showBorder]);
 
     const highlighterKey = useMemo(
       () =>

@@ -3,7 +3,7 @@ import { InvalidIcon } from '@/components/InvalidIcon';
 import { inputStyles } from '@/lib/styles';
 import { Input } from '@/components/ui/input';
 import { X } from 'lucide-react';
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { logger } from '@/lib/logger';
 import {
   colorInputVariants,
@@ -65,30 +65,22 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
   size = Sizes.Medium,
 }) => {
   const eventHandler = useEventHandler();
-  const [displayValue, setDisplayValue] = useState(value ?? '');
-  const [inputValue, setInputValue] = useState(value ?? '');
-
-  useEffect(() => {
-    setDisplayValue(value ?? '');
-    setInputValue(value ?? '');
-  }, [value]);
+  // Use derived state for display and input values
+  const displayValue = value ?? '';
+  const inputValue = value ?? '';
 
   const handleColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
-    setDisplayValue(newValue);
-    setInputValue(newValue);
     eventHandler('OnChange', id, [newValue]);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
-    setInputValue(newValue);
+    eventHandler('OnChange', id, [newValue]);
   };
 
   const handleInputBlur = () => {
     const convertedValue = convertToHex(inputValue);
-    setDisplayValue(convertedValue);
-    setInputValue(convertedValue);
     eventHandler('OnChange', id, [convertedValue]);
     if (events.includes('OnBlur')) eventHandler('OnBlur', id, [convertedValue]);
   };
@@ -100,8 +92,6 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
   };
 
   const handleClear = () => {
-    setDisplayValue('');
-    setInputValue('');
     eventHandler('OnChange', id, [null]);
   };
 

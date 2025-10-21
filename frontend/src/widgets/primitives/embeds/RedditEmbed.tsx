@@ -7,17 +7,12 @@ interface RedditEmbedProps {
 }
 
 const RedditEmbed: React.FC<RedditEmbedProps> = ({ url }) => {
-  const [postId, setPostId] = useState<string | null>(null);
   const [scriptLoaded, setScriptLoaded] = useState(false);
   const [scriptError, setScriptError] = useState(false);
 
-  useEffect(() => {
-    const extractPostId = (redditUrl: string): string | null => {
-      const match = redditUrl.match(/reddit\.com\/r\/[^/]+\/comments\/([^/]+)/);
-      return match ? sanitizeId(match[1]) : null;
-    };
-
-    setPostId(extractPostId(url));
+  const postId = React.useMemo(() => {
+    const match = url.match(/reddit\.com\/r\/[^/]+\/comments\/([^/]+)/);
+    return match ? sanitizeId(match[1]) : null;
   }, [url]);
 
   useEffect(() => {

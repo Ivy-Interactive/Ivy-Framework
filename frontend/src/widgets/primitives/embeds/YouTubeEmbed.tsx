@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { sanitizeId } from './shared';
 import EmbedErrorFallback from './EmbedErrorFallback';
 
@@ -9,25 +9,19 @@ interface YouTubeEmbedProps {
 }
 
 const YouTubeEmbed: React.FC<YouTubeEmbedProps> = ({ url, width, height }) => {
-  const [videoId, setVideoId] = useState<string | null>(null);
+  const videoId = React.useMemo(() => {
+    const patterns = [
+      /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/,
+      /youtube\.com\/watch\?.*v=([^&\n?#]+)/,
+    ];
 
-  useEffect(() => {
-    const extractVideoId = (youtubeUrl: string): string | null => {
-      const patterns = [
-        /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/,
-        /youtube\.com\/watch\?.*v=([^&\n?#]+)/,
-      ];
-
-      for (const pattern of patterns) {
-        const match = youtubeUrl.match(pattern);
-        if (match) {
-          return sanitizeId(match[1]);
-        }
+    for (const pattern of patterns) {
+      const match = url.match(pattern);
+      if (match) {
+        return sanitizeId(match[1]);
       }
-      return null;
-    };
-
-    setVideoId(extractVideoId(url));
+    }
+    return null;
   }, [url]);
 
   if (!videoId) {
