@@ -4,10 +4,44 @@ import {
   SortOrder,
   TableQuery,
   grpcTableService,
+  ParseFilterResult,
 } from '@/services/grpcTableService';
 import * as arrow from 'apache-arrow';
 import { DataColumn, DataRow, DataTableConnection } from '../types/types';
 import { convertArrowTableToData } from './tableDataMapper';
+
+export const parseInvalidQuery = async (
+  invalidQuery: string,
+  connection?: DataTableConnection
+): Promise<ParseFilterResult> => {
+  try {
+    // If connection is provided, configure the server URL
+    // let serverUrl = '';
+    // if (connection) {
+    //   const backendUrl = new URL(getIvyHost());
+    //   serverUrl = `${backendUrl.protocol}//${backendUrl.hostname}:${connection.port}`;
+    //   // Configure grpcTableService with the server URL
+    //   (grpcTableService as any).serverUrl = serverUrl;
+    // }
+
+    const backendUrl = new URL(getIvyHost());
+    const serverUrl = `${backendUrl.protocol}//${backendUrl.hostname}:${connection?.port}`;
+
+    const result = await grpcTableService.parseFilter(
+      {
+        payload: invalidQuery,
+        connectionId: connection?.connectionId,
+        sourceId: connection?.sourceId,
+      },
+      serverUrl
+    );
+
+    return result;
+  } catch (error) {
+    console.error('Failed to parse invalid query:', error);
+    throw error;
+  }
+};
 
 export const fetchTableData = async (
   connection: DataTableConnection,

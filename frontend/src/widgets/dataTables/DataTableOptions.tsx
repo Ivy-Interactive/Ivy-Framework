@@ -1,16 +1,23 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback, useRef } from 'react';
 import { useTable } from './DataTableContext';
 import { tableStyles } from './styles/style';
-import { QueryEditor, QueryEditorChangeEvent } from 'filter-query-editor';
+import {
+  QueryEditor,
+  QueryEditorChangeEvent,
+  parseQuery,
+} from 'filter-query-editor';
 import { Filter } from '@/services/grpcTableService';
+import { parseInvalidQuery } from './utils/tableDataFetcher';
 
 export const DataTableOptions: React.FC<{
   hasOptions: { allowFiltering: boolean };
 }> = ({ hasOptions }) => {
   const [query, setQuery] = useState<string>('');
   const [pendingFilter, setPendingFilter] = useState<Filter | null>(null);
+  const [isParsing, setIsParsing] = useState(false);
+  const lastInvalidQueryRef = useRef<string>('');
 
-  const { columns, setActiveFilter } = useTable();
+  const { columns, setActiveFilter, connection } = useTable();
 
   const { allowFiltering } = hasOptions;
 
@@ -32,18 +39,57 @@ export const DataTableOptions: React.FC<{
     return null;
   }
 
-  const handleQueryChange = (event: QueryEditorChangeEvent) => {
-    setQuery(event.text);
+  const handleQueryChange = useCallback(
+    async (event: QueryEditorChangeEvent) => {
+      setQuery(event.text);
 
-    if (event.text.trim() === '') {
-      setPendingFilter(null);
-      setActiveFilter(null);
-    } else if (event.isValid && event.filters) {
-      setPendingFilter({ group: event.filters });
-    } else {
-      setPendingFilter(null);
-    }
-  };
+      if (event.text.trim() === '') {
+        setPendingFilter(null);
+        setActiveFilter(null);
+        lastInvalidQueryRef.current = '';
+      } else if (event.isValid && event.filters) {
+        setPendingFilter({ group: event.filters });
+        lastInvalidQueryRef.current = '';
+      } else if (!event.isValid && event.text.trim() !== '') {
+        // Query is invalid and not empty
+        setPendingFilter(null);
+
+        // Avoid re-parsing the same invalid query
+        if (lastInvalidQueryRef.current === event.text || isParsing) {
+          return;
+        }
+
+        lastInvalidQueryRef.current = event.text;
+        setIsParsing(true);
+
+        try {
+          // Call parseFilter endpoint with the invalid query string
+          const result = await parseInvalidQuery(event.text, connection);
+
+          if (result.filterExpression) {
+            // Parse the corrected query string back to AST using parseQuery
+            const parsedResult = parseQuery(
+              result.filterExpression,
+              queryEditorColumns
+            );
+
+            if (parsedResult.isValid && parsedResult.filters) {
+              // Update the query editor with the corrected query
+              setQuery(result.filterExpression);
+              setPendingFilter({ group: parsedResult.filters });
+            }
+          }
+        } catch (error) {
+          console.error('Failed to parse invalid query:', error);
+        } finally {
+          setIsParsing(false);
+        }
+      } else {
+        setPendingFilter(null);
+      }
+    },
+    [queryEditorColumns, isParsing, connection]
+  );
 
   const handleKeyDown = (event: React.KeyboardEvent) => {
     if (
