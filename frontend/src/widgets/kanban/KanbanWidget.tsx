@@ -189,13 +189,15 @@ export const KanbanWidget: React.FC<KanbanWidgetProps> = ({
       {column => (
         <KanbanBoard id={column.id} key={column.id}>
           <KanbanHeader>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 min-w-0">
               <div
-                className="h-3 w-3 rounded-full"
+                className="h-3 w-3 rounded-full flex-shrink-0"
                 style={{ backgroundColor: column.color }}
               />
-              <span className="font-semibold text-gray-800">{column.name}</span>
-              <span className="text-sm text-gray-500">
+              <span className="font-semibold text-gray-800 truncate flex-1 min-w-0">
+                {column.name}
+              </span>
+              <span className="text-sm text-gray-500 flex-shrink-0">
                 (
                 {
                   extractedData.tasks.filter(task => task.status === column.id)

@@ -33,23 +33,25 @@ export const KanbanCardWidget: React.FC<KanbanCardWidgetProps> = ({
   };
 
   return (
-    <Card className="p-4 hover:shadow-md transition-all duration-200">
+    <Card className="h-40 p-4 hover:shadow-md transition-all duration-200 flex flex-col">
       {/* Header with title */}
-      <div className="mb-3">
-        <h3 className="font-semibold text-sm text-gray-900 leading-tight line-clamp-2">
+      <div className="mb-3 flex-shrink-0">
+        <h3 className="font-semibold text-sm text-gray-900 leading-tight line-clamp-2 overflow-hidden text-ellipsis">
           {title || 'Untitled Task'}
         </h3>
       </div>
 
-      {/* Description */}
-      {description && (
-        <p className="text-xs text-gray-600 mb-3 line-clamp-2 leading-relaxed">
-          {description}
-        </p>
-      )}
+      {/* Description - flexible content area */}
+      <div className="flex-1 min-h-0 mb-3 overflow-hidden">
+        {description && (
+          <p className="text-xs text-gray-600 line-clamp-4 leading-relaxed overflow-hidden text-ellipsis break-words">
+            {description}
+          </p>
+        )}
+      </div>
 
-      {/* Footer with metadata */}
-      <div className="flex items-center justify-between gap-2">
+      {/* Footer with metadata - always at bottom */}
+      <div className="flex items-center justify-between gap-2 flex-shrink-0">
         <div className="flex items-center gap-2">
           {/* Priority badge */}
           <span

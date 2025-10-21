@@ -227,7 +227,7 @@ export function KanbanBoard({ id, children }: KanbanBoardProps) {
     <div
       ref={setNodeRef}
       id={id}
-      className={`flex flex-col w-80 bg-gray-50 rounded-lg p-4 min-h-[600px] transition-colors duration-200 ${
+      className={`flex flex-col w-80 min-w-80 bg-gray-50 rounded-lg p-4 min-h-[600px] transition-colors duration-200 ${
         isOver ? 'bg-blue-50 border-2 border-blue-300' : ''
       }`}
     >
@@ -330,14 +330,14 @@ export function KanbanCard({ id, name, task, children }: KanbanCardProps) {
       {...attributes}
       {...listeners}
       className={cn(
-        'p-4 cursor-grab active:cursor-grabbing group hover:shadow-md transition-all duration-200',
+        'h-40 p-4 cursor-grab active:cursor-grabbing group hover:shadow-md transition-all duration-200 flex flex-col',
         isDragging && 'opacity-50 rotate-2 scale-105'
       )}
     >
       {/* Header with title and actions */}
-      <div className="flex items-start justify-between gap-3 mb-3">
+      <div className="flex items-start justify-between gap-3 mb-3 flex-shrink-0">
         <div className="flex-1 min-w-0">
-          <h3 className="font-semibold text-sm text-gray-900 leading-tight line-clamp-2">
+          <h3 className="font-semibold text-sm text-gray-900 leading-tight line-clamp-2 overflow-hidden text-ellipsis">
             {name}
           </h3>
         </div>
@@ -355,15 +355,17 @@ export function KanbanCard({ id, name, task, children }: KanbanCardProps) {
         </div>
       </div>
 
-      {/* Description */}
-      {task?.description && (
-        <p className="text-xs text-gray-600 mb-3 line-clamp-2 leading-relaxed">
-          {task.description}
-        </p>
-      )}
+      {/* Description - flexible content area */}
+      <div className="flex-1 min-h-0 mb-3 overflow-hidden">
+        {task?.description && (
+          <p className="text-xs text-gray-600 line-clamp-4 leading-relaxed overflow-hidden text-ellipsis break-words">
+            {task.description}
+          </p>
+        )}
+      </div>
 
-      {/* Footer with metadata */}
-      <div className="flex items-center justify-between gap-2">
+      {/* Footer with metadata - always at bottom */}
+      <div className="flex items-center justify-between gap-2 flex-shrink-0">
         <div className="flex items-center gap-2">
           {/* Priority badge */}
           <span
