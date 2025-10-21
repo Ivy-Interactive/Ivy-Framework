@@ -90,8 +90,8 @@ export const generateDataProps = (data: Record<string, unknown>[]) => {
 export function generateEChartGrid(cartesianGrid?: CartesianGridProps) {
   const defaultGrid = {
     show: true,
-    left: 30,
-    right: 10,
+    left: 2,
+    right: 2,
     top: 30,
     bottom: 30,
     containLabel: true,
