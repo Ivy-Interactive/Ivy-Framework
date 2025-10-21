@@ -410,10 +410,7 @@ const SearchVariant: React.FC<{
   isFocused,
   size = Sizes.Medium,
 }) => {
-  const { elementRef, savePosition } = useCursorPosition(
-    props.value,
-    inputRef
-  ) as {
+  const { savePosition } = useCursorPosition(props.value, inputRef) as {
     elementRef: React.RefObject<HTMLInputElement>;
     savePosition: () => void;
   };
@@ -462,16 +459,7 @@ const SearchVariant: React.FC<{
 
       {/* Search Input */}
       <Input
-        ref={el => {
-          // Handle both refs without modifying hook return value
-          if (el) {
-            // Set the elementRef using a callback approach
-            if (typeof elementRef === 'function') {
-              elementRef(el);
-            }
-            focusRef(el);
-          }
-        }}
+        ref={focusRef}
         id={props.id}
         type="search"
         placeholder={props.placeholder}

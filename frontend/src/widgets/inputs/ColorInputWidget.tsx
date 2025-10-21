@@ -92,8 +92,6 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
   };
 
   const handleClear = () => {
-    setDisplayValue('');
-    setInputValue('');
     eventHandler('OnChange', id, [null]);
   };
 
