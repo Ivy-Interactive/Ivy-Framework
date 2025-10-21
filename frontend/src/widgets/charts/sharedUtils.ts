@@ -169,7 +169,7 @@ export const generateSeries = (
         focus: 'series',
         disabled: true,
         lineStyle: { width: 3, opacity: 1 },
-        itemStyle: { borderWidth: 2, borderColor: '#fff' },
+        itemStyle: { borderWidth: 2, borderColor: 'var(--background, #fff)' },
       },
       blur: { lineStyle: { opacity: 0.6 } },
       animation: true,
