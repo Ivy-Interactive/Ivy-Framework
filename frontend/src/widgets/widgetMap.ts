@@ -15,9 +15,6 @@ import {
   SlotWidget,
   TooltipWidget,
   PaginationWidget,
-  KanbanWidget,
-  KanbanColumnWidget,
-  KanbanCardWidget,
 } from '@/widgets';
 import { BladeContainerWidget, BladeWidget } from '@/widgets/blades';
 import { DetailsWidget, DetailWidget } from '@/widgets/details';
@@ -133,9 +130,21 @@ export const widgetMap = {
   'Ivy.ChatStatus': ChatStatusWidget,
   'Ivy.DropDownMenu': DropDownMenuWidget,
   'Ivy.Pagination': PaginationWidget,
-  'Ivy.Kanban': KanbanWidget,
-  'Ivy.KanbanColumn': KanbanColumnWidget,
-  'Ivy.KanbanCard': KanbanCardWidget,
+  'Ivy.Kanban': React.lazy(() =>
+    import('@/widgets/kanban/KanbanWidget').then(m => ({
+      default: m.KanbanWidget,
+    }))
+  ),
+  'Ivy.KanbanColumn': React.lazy(() =>
+    import('@/widgets/kanban/KanbanColumnWidget').then(m => ({
+      default: m.KanbanColumnWidget,
+    }))
+  ),
+  'Ivy.KanbanCard': React.lazy(() =>
+    import('@/widgets/kanban/KanbanCardWidget').then(m => ({
+      default: m.KanbanCardWidget,
+    }))
+  ),
 
   // Layouts
   'Ivy.StackLayout': StackLayoutWidget,
