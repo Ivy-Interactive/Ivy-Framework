@@ -1,59 +1,20 @@
-import React from 'react';
-import {
-  LineChart,
-  CartesianGrid,
-  Line,
-  XAxis,
-  YAxis,
-  ReferenceArea,
-  ReferenceLine,
-  ReferenceDot,
-  CartesianGridProps,
-  ReferenceLineProps,
-  ReferenceAreaProps,
-  ReferenceDotProps,
-  LegendProps,
-} from 'recharts';
-import {
-  ChartConfig,
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-  ChartLegend,
-  ChartLegendContent,
-} from '@/components/ui/chart';
-import { ColorScheme, ExtendedTooltipProps, getColorGenerator } from './shared';
-import {
-  ExtendedXAxisProps,
-  ExtendedYAxisProps,
-  ExtendedLineProps,
-  generateXAxisProps,
-  generateYAxisProps,
-  generateLegendProps,
-  generateLineProps,
-} from './shared';
+import React, { useEffect, useState } from 'react';
+import ReactECharts from 'echarts-for-react';
 import { getHeight, getWidth } from '@/lib/styles';
-
-interface LineChartData {
-  [key: string]: string | number;
-}
-
-interface LineChartWidgetProps {
-  id: string;
-  data: LineChartData[];
-  width?: string;
-  height?: string;
-  lines?: ExtendedLineProps[];
-  cartesianGrid?: CartesianGridProps;
-  xAxis?: ExtendedXAxisProps[];
-  yAxis?: ExtendedYAxisProps[];
-  tooltip?: ExtendedTooltipProps;
-  legend?: LegendProps;
-  referenceLines?: ReferenceLineProps[];
-  referenceAreas?: ReferenceAreaProps[];
-  referenceDots?: ReferenceDotProps[];
-  colorScheme: ColorScheme;
-}
+import { useTheme } from '@/components/theme-provider';
+import {
+  generateDataProps,
+  generateEChartGrid,
+  generateEChartLegend,
+  generateSeries,
+  generateTooltip,
+  generateTextStyle,
+  generateXAxis,
+  generateYAxis,
+  getColors,
+  getTransformValueFn,
+} from './sharedUtils';
+import { LineChartWidgetProps } from './chartTypes';
 
 const LineChartWidget: React.FC<LineChartWidgetProps> = ({
   data,
@@ -70,71 +31,104 @@ const LineChartWidget: React.FC<LineChartWidgetProps> = ({
   referenceDots,
   colorScheme,
 }) => {
+  const { theme } = useTheme();
+  const [themeColors, setThemeColors] = useState({
+    foreground: '#000000',
+    mutedForeground: '#666666',
+    fontSans: 'Geist, sans-serif',
+    background: '#ffffff',
+  });
+
+  useEffect(() => {
+    const getThemeColors = () => {
+      const root = document.documentElement;
+      const computedStyle = getComputedStyle(root);
+
+      // Use the theme value directly instead of checking DOM classes
+      const isDarkMode =
+        theme === 'dark' ||
+        (theme === 'system' &&
+          window.matchMedia('(prefers-color-scheme: dark)').matches);
+
+      return {
+        foreground:
+          computedStyle.getPropertyValue('--foreground').trim() ||
+          (isDarkMode ? '#f8f8f8' : '#000000'),
+        mutedForeground:
+          computedStyle.getPropertyValue('--muted-foreground').trim() ||
+          (isDarkMode ? '#a1a1aa' : '#666666'),
+        fontSans:
+          computedStyle.getPropertyValue('--font-sans').trim() ||
+          'Geist, sans-serif',
+        background:
+          computedStyle.getPropertyValue('--background').trim() ||
+          (isDarkMode ? '#000000' : '#ffffff'),
+      };
+    };
+
+    // Update colors on next frame to avoid synchronous setState in effect
+    const frame = requestAnimationFrame(() => {
+      setThemeColors(getThemeColors());
+    });
+
+    return () => {
+      cancelAnimationFrame(frame);
+    };
+  }, [theme]);
+
   const styles: React.CSSProperties = {
     ...getWidth(width),
     ...getHeight(height),
+    minHeight: 300,
   };
 
-  const chartConfig = {} satisfies ChartConfig;
-  const [colorGenerator] = getColorGenerator(colorScheme);
+  const colors = getColors(colorScheme);
+  const { categories, valueKeys } = generateDataProps(data);
+  const { transform, largeSpread, minValue, maxValue } =
+    getTransformValueFn(data);
 
-  return (
-    <ChartContainer
-      config={chartConfig}
-      style={styles}
-      className="w-full max-w-[800px]"
-    >
-      <LineChart
-        margin={{ top: 10, right: 10, bottom: 10, left: 10 }}
-        accessibilityLayer
-        data={data}
-      >
-        {cartesianGrid && <CartesianGrid {...cartesianGrid} />}
+  const option = {
+    grid: generateEChartGrid(cartesianGrid),
+    xAxis: generateXAxis(categories as string[], xAxis, false, {
+      mutedForeground: themeColors.mutedForeground,
+      fontSans: themeColors.fontSans,
+    }),
+    yAxis: generateYAxis(
+      largeSpread,
+      transform,
+      minValue,
+      maxValue,
+      yAxis,
+      false,
+      undefined,
+      {
+        mutedForeground: themeColors.mutedForeground,
+        fontSans: themeColors.fontSans,
+      }
+    ),
+    tooltip: generateTooltip(tooltip, 'shadow', {
+      foreground: themeColors.foreground,
+      fontSans: themeColors.fontSans,
+      background: themeColors.background,
+    }),
+    legend: generateEChartLegend(legend, {
+      foreground: themeColors.foreground,
+      fontSans: themeColors.fontSans,
+    }),
+    textStyle: generateTextStyle(themeColors.foreground, themeColors.fontSans),
+    color: colors,
+    series: generateSeries(
+      data,
+      valueKeys,
+      lines,
+      transform,
+      referenceDots,
+      referenceLines,
+      referenceAreas
+    ),
+  };
 
-        {xAxis?.map((props, index) => (
-          <XAxis key={`xaxis${index}`} {...generateXAxisProps(props)} />
-        ))}
-
-        {yAxis?.map((props, index) => (
-          <YAxis key={`yaxis${index}`} {...generateYAxisProps(props)} />
-        ))}
-
-        {legend && (
-          <ChartLegend
-            {...generateLegendProps(legend)}
-            content={<ChartLegendContent splitThreshold={6} />}
-          />
-        )}
-        {/* eslint-disable-next-line @typescript-eslint/no-unused-vars */}
-        {referenceAreas?.map(({ ref, ...props }, index) => (
-          <ReferenceArea key={`refArea${index}`} {...props} />
-        ))}
-        {/* eslint-disable-next-line @typescript-eslint/no-unused-vars */}
-        {referenceLines?.map(({ ref, ...props }, index) => (
-          <ReferenceLine key={`refLine${index}`} {...props} />
-        ))}
-        {/* eslint-disable-next-line @typescript-eslint/no-unused-vars */}
-        {referenceDots?.map(({ ref, ...props }, index) => (
-          <ReferenceDot key={`refDot${index}`} {...props} />
-        ))}
-
-        {lines?.map((props, index) => (
-          <Line
-            key={`line${index}`}
-            {...generateLineProps(props, index, colorGenerator)}
-          />
-        ))}
-
-        {tooltip && (
-          <ChartTooltip
-            cursor={false}
-            isAnimationActive={tooltip?.animated}
-            content={<ChartTooltipContent />}
-          />
-        )}
-      </LineChart>
-    </ChartContainer>
-  );
+  return <ReactECharts key={theme} option={option} style={styles} />;
 };
 
 export default LineChartWidget;

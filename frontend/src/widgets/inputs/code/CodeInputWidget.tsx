@@ -77,15 +77,17 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
   const [isFocused, setIsFocused] = useState(false);
   const localValueRef = useRef(localValue);
 
-  // Keep ref in sync with state
-  localValueRef.current = localValue;
-
   // Update local value when server value changes and control is not focused
   useEffect(() => {
     if (!isFocused && value !== localValueRef.current) {
-      setLocalValue(value || '');
+      queueMicrotask(() => setLocalValue(value || ''));
     }
   }, [value, isFocused]);
+
+  // Keep ref in sync with state
+  useEffect(() => {
+    localValueRef.current = localValue;
+  }, [localValue]);
 
   const handleChange = useCallback(
     (value: string) => {

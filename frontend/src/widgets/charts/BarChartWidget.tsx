@@ -1,63 +1,49 @@
-import React from 'react';
-import {
-  CartesianGrid,
-  XAxis,
-  YAxis,
-  ReferenceArea,
-  ReferenceLine,
-  ReferenceDot,
-  CartesianGridProps,
-  ReferenceLineProps,
-  ReferenceAreaProps,
-  ReferenceDotProps,
-  LegendProps,
-  Bar,
-  BarChart,
-  LabelList,
-} from 'recharts';
-import {
-  ChartConfig,
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-  ChartLegend,
-  ChartLegendContent,
-} from '@/components/ui/chart';
+import React, { useEffect, useState } from 'react';
 import {
   ColorScheme,
-  ExtendedBarProps,
-  ExtendedTooltipProps,
-  generateBarProps,
-  generateLabelListProps,
-  getColorGenerator,
-} from './shared';
+  generateTooltip,
+  generateTextStyle,
+  generateXAxis,
+  generateYAxis,
+} from './sharedUtils';
 import {
-  ExtendedXAxisProps,
-  ExtendedYAxisProps,
-  generateXAxisProps,
-  generateYAxisProps,
-  generateLegendProps,
-} from './shared';
+  generateDataProps,
+  generateEChartGrid,
+  generateEChartLegend,
+  getColors,
+} from './sharedUtils';
+import { useTheme } from '@/components/theme-provider';
 import { getHeight, getWidth } from '@/lib/styles';
-import { StackOffsetType } from 'recharts/types/util/types';
-import { camelCase } from 'lodash';
+import ReactECharts from 'echarts-for-react';
+import {
+  BarProps,
+  CartesianGridProps,
+  ChartType,
+  LegendProps,
+  MarkArea,
+  MarkLine,
+  ReferenceDot,
+  ToolTipProps,
+  XAxisProps,
+  YAxisProps,
+} from './chartTypes';
+import { ChartData } from './chartTypes';
 
 interface BarChartWidgetProps {
   id: string;
-  data: Record<string, unknown>[];
+  data: ChartData[];
   width?: string;
   height?: string;
-  bars?: ExtendedBarProps[];
+  bars?: BarProps[];
   cartesianGrid?: CartesianGridProps;
-  xAxis?: ExtendedXAxisProps[];
-  yAxis?: ExtendedYAxisProps[];
-  tooltip?: ExtendedTooltipProps;
+  xAxis?: XAxisProps[];
+  yAxis?: YAxisProps[];
+  tooltip?: ToolTipProps;
   legend?: LegendProps;
-  referenceLines?: ReferenceLineProps[];
-  referenceAreas?: ReferenceAreaProps[];
-  referenceDots?: ReferenceDotProps[];
+  referenceLines?: MarkLine;
+  referenceAreas?: MarkArea;
+  referenceDots?: ReferenceDot;
   colorScheme: ColorScheme;
-  stackOffset: StackOffsetType;
   barGap?: number;
   barCategoryGap?: number | string;
   maxBarSize?: number;
@@ -79,87 +65,148 @@ const BarChartWidget: React.FC<BarChartWidgetProps> = ({
   referenceAreas,
   referenceDots,
   colorScheme,
-  stackOffset,
+  //stackOffset,
   barGap,
   barCategoryGap,
   maxBarSize,
   reverseStackOrder,
   layout,
 }) => {
+  const { theme } = useTheme();
+  const [themeColors, setThemeColors] = useState({
+    foreground: '#000000',
+    mutedForeground: '#666666',
+    fontSans: 'Geist, sans-serif',
+    background: '#ffffff',
+  });
+
+  useEffect(() => {
+    const getThemeColors = () => {
+      const root = document.documentElement;
+      const computedStyle = getComputedStyle(root);
+
+      // Use the theme value directly instead of checking DOM classes
+      const isDarkMode =
+        theme === 'dark' ||
+        (theme === 'system' &&
+          window.matchMedia('(prefers-color-scheme: dark)').matches);
+
+      return {
+        foreground:
+          computedStyle.getPropertyValue('--foreground').trim() ||
+          (isDarkMode ? '#f8f8f8' : '#000000'),
+        mutedForeground:
+          computedStyle.getPropertyValue('--muted-foreground').trim() ||
+          (isDarkMode ? '#a1a1aa' : '#666666'),
+        fontSans:
+          computedStyle.getPropertyValue('--font-sans').trim() ||
+          'Geist, sans-serif',
+        background:
+          computedStyle.getPropertyValue('--background').trim() ||
+          (isDarkMode ? '#000000' : '#ffffff'),
+      };
+    };
+
+    // Update colors on next frame to avoid synchronous setState in effect
+    const frame = requestAnimationFrame(() => {
+      setThemeColors(getThemeColors());
+    });
+
+    return () => {
+      cancelAnimationFrame(frame);
+    };
+  }, [theme]);
+
   const styles: React.CSSProperties = {
     ...getWidth(width),
     ...getHeight(height),
+    minHeight: 300,
   };
 
-  const chartConfig = {} satisfies ChartConfig;
-  const [colorGenerator] = getColorGenerator(colorScheme);
+  const { categories, valueKeys, transform, largeSpread, minValue, maxValue } =
+    generateDataProps(data);
+  const colors = getColors(colorScheme);
+  const series = valueKeys.map((key, i) => ({
+    name: key,
+    type: ChartType.Bar,
+    legendHoverLink: true,
+    showBackground: true,
+    data: data.map(d => d[key]),
+    stack:
+      bars && bars[i]?.stackId !== undefined
+        ? String(bars[i].stackId)
+        : undefined,
+    barGap: barGap ? `${barGap}%` : '4%',
+    barCategoryGap: barCategoryGap ? `${barCategoryGap}%` : '10%',
+    barMaxWidth: maxBarSize,
+    stackOrder: reverseStackOrder ? 'seriesDesc' : 'seriesAsc',
+    markPoint: {
+      label: {
+        show: referenceDots ? true : false,
+      },
+    },
+    markLine: referenceLines ?? {},
+    markArea: referenceAreas ?? {},
+  }));
+  const isVertical = layout?.toLowerCase() === 'vertical';
+
+  const option = {
+    grid: generateEChartGrid(cartesianGrid),
+    color: colors,
+    textStyle: generateTextStyle(themeColors.foreground, themeColors.fontSans),
+    xAxis: generateXAxis(categories, xAxis, isVertical, {
+      mutedForeground: themeColors.mutedForeground,
+      fontSans: themeColors.fontSans,
+    }),
+    yAxis: generateYAxis(
+      largeSpread,
+      transform,
+      minValue,
+      maxValue,
+      yAxis,
+      isVertical,
+      categories,
+      {
+        mutedForeground: themeColors.mutedForeground,
+        fontSans: themeColors.fontSans,
+      }
+    ),
+    toolbox: !isVertical
+      ? {
+          top: legend?.verticalAlign === 'Top' ? 'bottom' : 'top',
+          feature: {
+            dataView: {
+              show: true,
+            },
+            magicType: {
+              type: ['line', 'bar'],
+            },
+            saveAsImage: {
+              type: 'png',
+            },
+          },
+        }
+      : {},
+    series,
+    legend: generateEChartLegend(legend, {
+      foreground: themeColors.foreground,
+      fontSans: themeColors.fontSans,
+    }),
+    tooltip: generateTooltip(tooltip, 'shadow', {
+      foreground: themeColors.foreground,
+      fontSans: themeColors.fontSans,
+      background: themeColors.background,
+    }),
+  };
 
   return (
-    <ChartContainer config={chartConfig} style={styles} className="w-full">
-      <BarChart
-        margin={{ top: 10, right: 10, bottom: 10, left: 10 }}
-        layout={camelCase(layout) as 'horizontal' | 'vertical'}
-        accessibilityLayer
-        data={data}
-        stackOffset={stackOffset}
-        barGap={barGap}
-        barCategoryGap={barCategoryGap}
-        maxBarSize={maxBarSize}
-        reverseStackOrder={reverseStackOrder}
-      >
-        {cartesianGrid && <CartesianGrid {...cartesianGrid} />}
-
-        {xAxis?.map((props, index) => (
-          <XAxis key={`xaxis${index}`} {...generateXAxisProps(props)} />
-        ))}
-
-        {yAxis?.map((props, index) => (
-          <YAxis key={`yaxis${index}`} {...generateYAxisProps(props)} />
-        ))}
-
-        {legend && (
-          <ChartLegend
-            {...generateLegendProps(legend)}
-            content={<ChartLegendContent splitThreshold={6} />}
-          />
-        )}
-
-        {/* eslint-disable-next-line @typescript-eslint/no-unused-vars */}
-        {referenceAreas?.map(({ ref, ...props }, index) => (
-          <ReferenceArea key={`refArea${index}`} {...props} />
-        ))}
-        {/* eslint-disable-next-line @typescript-eslint/no-unused-vars */}
-        {referenceLines?.map(({ ref, ...props }, index) => (
-          <ReferenceLine key={`refLine${index}`} {...props} />
-        ))}
-        {/* eslint-disable-next-line @typescript-eslint/no-unused-vars */}
-        {referenceDots?.map(({ ref, ...props }, index) => (
-          <ReferenceDot key={`refDot${index}`} {...props} />
-        ))}
-
-        {tooltip && (
-          <ChartTooltip
-            cursor={false}
-            isAnimationActive={tooltip?.animated}
-            content={<ChartTooltipContent />}
-          />
-        )}
-
-        {bars?.map((props, index) => (
-          <Bar
-            key={`bar${index}`}
-            {...generateBarProps(props, index, colorGenerator)}
-          >
-            {props.labelLists?.map((labelList, labelListIndex) => (
-              <LabelList
-                key={`labelList-${labelListIndex}`}
-                {...generateLabelListProps(labelList)}
-              />
-            ))}
-          </Bar>
-        ))}
-      </BarChart>
-    </ChartContainer>
+    <div style={styles}>
+      <ReactECharts
+        key={theme}
+        option={option}
+        style={{ width: '100%', height: '100%', minHeight: 300 }}
+      />
+    </div>
   );
 };
 

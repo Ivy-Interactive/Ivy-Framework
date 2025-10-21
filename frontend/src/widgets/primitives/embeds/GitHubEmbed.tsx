@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { sanitizeUrl, sanitizeId } from './shared';
 import EmbedCard from './EmbedCard';
 import EmbedErrorFallback from './EmbedErrorFallback';
@@ -8,15 +8,7 @@ interface GitHubEmbedProps {
 }
 
 const GitHubEmbed: React.FC<GitHubEmbedProps> = ({ url }) => {
-  const [repoInfo, setRepoInfo] = useState<{
-    owner?: string;
-    repo?: string;
-    type?: string;
-    number?: string;
-    ref?: string;
-  } | null>(null);
-
-  useEffect(() => {
+  const repoInfo = React.useMemo(() => {
     const parseGitHubUrl = (githubUrl: string) => {
       // Codespace: https://github.com/codespaces/new?repo=owner%2Frepo&ref=branch
       let match = githubUrl.match(
@@ -87,7 +79,7 @@ const GitHubEmbed: React.FC<GitHubEmbedProps> = ({ url }) => {
       return null;
     };
 
-    setRepoInfo(parseGitHubUrl(url));
+    return parseGitHubUrl(url);
   }, [url]);
 
   const sanitizedUrl = sanitizeUrl(url);

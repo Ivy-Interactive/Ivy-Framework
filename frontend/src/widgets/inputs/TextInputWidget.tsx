@@ -110,25 +110,25 @@ const useCursorPosition = (
   const internalRef = useRef<HTMLInputElement | HTMLTextAreaElement | null>(
     null
   );
-  const elementRef = externalRef || internalRef;
+  const elementRefRef = externalRef || internalRef;
   const cursorPositionRef = useRef<number | null>(null);
 
   const savePosition = () => {
-    if (elementRef.current) {
-      cursorPositionRef.current = elementRef.current.selectionStart;
+    if (elementRefRef.current) {
+      cursorPositionRef.current = elementRefRef.current.selectionStart;
     }
   };
 
   useEffect(() => {
-    if (elementRef.current && cursorPositionRef.current !== null) {
-      elementRef.current.setSelectionRange(
+    if (elementRefRef.current && cursorPositionRef.current !== null) {
+      elementRefRef.current.setSelectionRange(
         cursorPositionRef.current,
         cursorPositionRef.current
       );
     }
-  }, [value, elementRef]);
+  }, [value, elementRefRef]);
 
-  return { elementRef, savePosition };
+  return { elementRef: elementRefRef, savePosition };
 };
 
 const useEnterKeyBlur = () => {
@@ -410,11 +410,7 @@ const SearchVariant: React.FC<{
   isFocused,
   size = Sizes.Medium,
 }) => {
-  const { elementRef, savePosition } = useCursorPosition(
-    props.value,
-    inputRef
-  ) as {
-    elementRef: React.RefObject<HTMLInputElement>;
+  const { savePosition } = useCursorPosition(props.value, inputRef) as {
     savePosition: () => void;
   };
   const { ref: focusRef } = useFocusable('sidebar-navigation', 0);
@@ -462,15 +458,7 @@ const SearchVariant: React.FC<{
 
       {/* Search Input */}
       <Input
-        ref={el => {
-          // Handle both refs
-          if (el) {
-            (
-              elementRef as React.MutableRefObject<HTMLInputElement | null>
-            ).current = el;
-            focusRef(el);
-          }
-        }}
+        ref={focusRef}
         id={props.id}
         type="search"
         placeholder={props.placeholder}
@@ -546,7 +534,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
   // Update local value when server value changes and control is not focused
   useEffect(() => {
     if (!isFocused && value !== localValue) {
-      setLocalValue(value);
+      queueMicrotask(() => setLocalValue(value));
     }
   }, [value, isFocused, localValue]);
 

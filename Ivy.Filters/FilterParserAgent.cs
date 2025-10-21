@@ -79,10 +79,11 @@ public class FilterParserAgent(IChatClient chatClient, ILogger? logger = null)
                     var reason = responseText.Replace("PARSE_FAILED:", "").Trim();
                     return new FilterParseResult
                     {
-                        Diagnostics = new[]
-                        {
+                        Filter = filterExpression,
+                        Diagnostics =
+                        [
                             new Diagnostic(DiagnosticSeverity.Error, reason, 1, 0)
-                        },
+                        ],
                         Usage = new UsageInfo
                         {
                             InputTokens = totalInputTokens,
@@ -154,6 +155,7 @@ public class FilterParserAgent(IChatClient chatClient, ILogger? logger = null)
 
                     return new FilterParseResult
                     {
+                        Filter = filterExpression,
                         Diagnostics =
                         [
                             new Diagnostic(DiagnosticSeverity.Error, exceptionErrorMessage, 1, 0)
@@ -188,6 +190,7 @@ public class FilterParserAgent(IChatClient chatClient, ILogger? logger = null)
 
         return new FilterParseResult
         {
+            Filter = filterExpression,
             Diagnostics =
             [
                 new Diagnostic(DiagnosticSeverity.Error, errorMessage, 1, 0)
@@ -206,8 +209,8 @@ public class FilterParserAgent(IChatClient chatClient, ILogger? logger = null)
     {
         var fieldsList = fields.Select(f => new
         {
-            DisplayName = f.DisplayName,
-            ColId = f.ColId,
+            f.DisplayName,
+            f.ColId,
             Type = f.Type.ToString()
         }).ToList();
 

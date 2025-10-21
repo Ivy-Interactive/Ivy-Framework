@@ -14,6 +14,20 @@ export const DataTableOptions: React.FC<{
 
   const { allowFiltering } = hasOptions;
 
+  // Filter columns to only include filterable ones (defaults to true if not specified)
+  // Map DataColumn to ColumnDef format expected by QueryEditor
+  const queryEditorColumns = useMemo(
+    () =>
+      columns
+        .filter(col => col.filterable ?? true)
+        .map(col => ({
+          name: col.name,
+          type: col.type.toLowerCase(),
+          width: typeof col.width === 'number' ? col.width : 150,
+        })),
+    [columns]
+  );
+
   if (columns.length === 0) {
     return null;
   }
@@ -44,20 +58,6 @@ export const DataTableOptions: React.FC<{
       }
     }
   };
-
-  // Filter columns to only include filterable ones (defaults to true if not specified)
-  // Map DataColumn to ColumnDef format expected by QueryEditor
-  const queryEditorColumns = useMemo(
-    () =>
-      columns
-        .filter(col => col.filterable ?? true)
-        .map(col => ({
-          name: col.name,
-          type: col.type.toLowerCase(),
-          width: typeof col.width === 'number' ? col.width : 150,
-        })),
-    [columns]
-  );
 
   const queryEditorContent = (
     <div className="flex gap-2 flex-col sm:flex-row">

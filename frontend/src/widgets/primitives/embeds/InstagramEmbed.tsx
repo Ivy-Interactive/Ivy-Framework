@@ -7,18 +7,13 @@ interface InstagramEmbedProps {
 }
 
 const InstagramEmbed: React.FC<InstagramEmbedProps> = ({ url }) => {
-  const [postId, setPostId] = useState<string | null>(null);
   const [scriptLoaded, setScriptLoaded] = useState(false);
   const [scriptError, setScriptError] = useState(false);
 
-  useEffect(() => {
-    const extractPostId = (instagramUrl: string): string | null => {
-      // Instagram post URL: https://www.instagram.com/p/ABC123/
-      const match = instagramUrl.match(/instagram\.com\/p\/([^/?]+)/);
-      return match ? sanitizeId(match[1]) : null;
-    };
-
-    setPostId(extractPostId(url));
+  const postId = React.useMemo(() => {
+    // Instagram post URL: https://www.instagram.com/p/ABC123/
+    const match = url.match(/instagram\.com\/p\/([^/?]+)/);
+    return match ? sanitizeId(match[1]) : null;
   }, [url]);
 
   useEffect(() => {
