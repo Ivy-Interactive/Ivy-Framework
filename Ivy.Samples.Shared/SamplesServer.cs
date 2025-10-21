@@ -22,9 +22,11 @@ public static class SamplesServer
             )
             .DefaultApp<HelloApp>()
             .UseTabs(preventDuplicates: true);
-
         server.UseChrome(() => new DefaultSidebarChrome(chromeSettings));
+
         server.Services.AddSingleton<SampleDbContextFactory>();
+
+
         await server.RunAsync();
     }
 }

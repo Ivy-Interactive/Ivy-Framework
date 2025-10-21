@@ -4,6 +4,7 @@ using Ivy.Core;
 using Ivy.Core.Hooks;
 using Ivy.Helpers;
 using Ivy.Shared;
+using Microsoft.Extensions.AI;
 
 namespace Ivy.Views.DataTables;
 
@@ -35,50 +36,40 @@ public class DataTableBuilder<TModel> : ViewBase, IStateless
     {
         var underlyingType = Nullable.GetUnderlyingType(type) ?? type;
 
-        // Icon types
         if (underlyingType == typeof(Icons))
             return Ivy.ColType.Icon;
 
-        // String types
         if (underlyingType == typeof(string) || underlyingType == typeof(char))
             return Ivy.ColType.Text;
 
-        // Numeric types - integers
         if (underlyingType == typeof(int) || underlyingType == typeof(long) ||
             underlyingType == typeof(short) || underlyingType == typeof(byte) ||
             underlyingType == typeof(uint) || underlyingType == typeof(ulong) ||
             underlyingType == typeof(ushort) || underlyingType == typeof(sbyte))
             return Ivy.ColType.Number;
 
-        // Numeric types - floating point
         if (underlyingType == typeof(decimal) || underlyingType == typeof(double) ||
             underlyingType == typeof(float))
             return Ivy.ColType.Number;
 
-        // Boolean
         if (underlyingType == typeof(bool))
             return Ivy.ColType.Boolean;
 
-        // Date and time types
         if (underlyingType == typeof(DateTime) || underlyingType == typeof(DateTimeOffset))
             return Ivy.ColType.DateTime;
 
         if (underlyingType == typeof(DateOnly))
             return Ivy.ColType.Date;
 
-        // TimeSpan should be treated as String since there's no Time hint
         if (underlyingType == typeof(TimeSpan) || underlyingType == typeof(TimeOnly))
             return Ivy.ColType.Text;
 
-        // Other common types that should be treated as strings
         if (underlyingType == typeof(Guid) || underlyingType.IsEnum)
             return Ivy.ColType.Text;
 
-        // Arrays and collections should be treated as strings (will likely be JSON serialized)
         if (underlyingType.IsArray || typeof(System.Collections.IEnumerable).IsAssignableFrom(underlyingType))
             return Ivy.ColType.Text;
 
-        // Default fallback for unknown types
         return Ivy.ColType.Text;
     }
 
@@ -253,6 +244,8 @@ public class DataTableBuilder<TModel> : ViewBase, IStateless
 
     public override object? Build()
     {
+        var chatClient = this.UseService<IChatClient?>();
+
         var columns = _columns.Values.Where(e => !e.Removed).OrderBy(c => c.Column.Order).Select(e => e.Column).ToArray();
         var removedColumns = _columns.Values.Where(e => e.Removed).Select(c => c.Column.Name).ToArray();
         var queryable = _queryable.RemoveFields(removedColumns);
@@ -260,6 +253,12 @@ public class DataTableBuilder<TModel> : ViewBase, IStateless
         // Default to full width if not explicitly set
         var width = _width ?? Size.Full();
 
-        return new DataTableView(queryable, width, _height, columns, _configuration);
+        var configuration = _configuration;
+        if (chatClient is not null)
+        {
+            configuration = _configuration with { AllowLlmFiltering = true };
+        }
+
+        return new DataTableView(queryable, width, _height, columns, configuration);
     }
 }
