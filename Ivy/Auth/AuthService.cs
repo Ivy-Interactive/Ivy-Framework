@@ -12,7 +12,8 @@ namespace Ivy.Auth;
 /// <param name="token">The current authentication token</param>
 public class AuthService(IAuthProvider authProvider, AuthToken? token = null) : IAuthService
 {
-    private AuthToken? _token = token;
+    private volatile AuthToken? _token = token;
+
     /// <summary>
     /// Authenticates a user with email and password.
     /// </summary>
@@ -58,13 +59,14 @@ public class AuthService(IAuthProvider authProvider, AuthToken? token = null) : 
     /// <param name="cancellationToken">Cancellation token</param>
     public async Task LogoutAsync(CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(_token?.AccessToken))
+        var token = Interlocked.Exchange(ref _token, null);
+
+        if (string.IsNullOrWhiteSpace(token?.AccessToken))
         {
             return;
         }
 
-        await authProvider.LogoutAsync(_token.AccessToken, cancellationToken);
-        _token = null;
+        await authProvider.LogoutAsync(token.AccessToken, cancellationToken);
     }
 
     /// <summary>
@@ -74,14 +76,16 @@ public class AuthService(IAuthProvider authProvider, AuthToken? token = null) : 
     /// <returns>User information if authenticated, null otherwise</returns>
     public async Task<UserInfo?> GetUserInfoAsync(CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(_token?.AccessToken))
+        var token = _token;
+
+        if (string.IsNullOrWhiteSpace(token?.AccessToken))
         {
-            return null!;
+            return null;
         }
 
         //todo: cache this!
 
-        return await authProvider.GetUserInfoAsync(_token.AccessToken, cancellationToken);
+        return await authProvider.GetUserInfoAsync(token.AccessToken, cancellationToken);
     }
 
     /// <summary>
@@ -102,12 +106,30 @@ public class AuthService(IAuthProvider authProvider, AuthToken? token = null) : 
     /// </returns>
     public async Task<AuthToken?> RefreshAccessTokenAsync(CancellationToken cancellationToken)
     {
-        if (_token != null)
+        var token = _token;
+        if (token is null)
         {
-            _token = await authProvider.RefreshAccessTokenAsync(_token, cancellationToken);
+            return null;
         }
 
-        return _token;
+        var refreshedToken = await authProvider.RefreshAccessTokenAsync(token, cancellationToken);
+
+        // Update _token only if it's still the same object we read earlier.
+        var seen = Interlocked.CompareExchange(ref _token, refreshedToken, token);
+        if (!ReferenceEquals(seen, token))
+        {
+            // Another thread updated the token in the meantime; return it if valid.
+            if (seen is not null && await authProvider.ValidateAccessTokenAsync(seen.AccessToken, cancellationToken))
+            {
+                return seen;
+            }
+
+            // Otherwise, set and return null.
+            _token = null;
+            return null;
+        }
+
+        return refreshedToken;
     }
 
     /// <summary>
