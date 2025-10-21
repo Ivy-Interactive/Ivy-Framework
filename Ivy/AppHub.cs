@@ -368,10 +368,11 @@ public class AppHub(
                                     var waitUntil = (expiresAt ?? DateTimeOffset.UtcNow.AddMinutes(15)).AddMinutes(-2);
                                     var delay = waitUntil - DateTimeOffset.UtcNow;
 
-                                    // Don't wait more than 2 hours
-                                    if (delay > TimeSpan.FromHours(2))
+                                    // Don't wait more than `maxDelay`
+                                    var maxDelay = TimeSpan.FromHours(2);
+                                    if (delay > maxDelay)
                                     {
-                                        delay = TimeSpan.FromHours(2);
+                                        delay = maxDelay;
                                     }
                                     logger.LogInformation("AuthRefreshLoop: Token valid for {ConnectionId}, next check at {NextCheck}.", connectionId, DateTimeOffset.UtcNow + delay);
                                     await Task.Delay(delay, cancellationToken);
@@ -408,6 +409,7 @@ public class AppHub(
             }
             catch (TaskCanceledException)
             {
+                logger.LogInformation("AuthRefreshLoop: cancelled for {ConnectionId}", connectionId);
                 return;
             }
             catch (Exception ex)
