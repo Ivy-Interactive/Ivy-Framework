@@ -19,31 +19,60 @@ export const KanbanCardWidget: React.FC<KanbanCardWidgetProps> = ({
   priority,
   children,
 }) => {
+  const getPriorityColor = (priority: number) => {
+    switch (priority) {
+      case 1:
+        return 'bg-red-100 text-red-700 border-red-200';
+      case 2:
+        return 'bg-yellow-100 text-yellow-700 border-yellow-200';
+      case 3:
+        return 'bg-green-100 text-green-700 border-green-200';
+      default:
+        return 'bg-gray-100 text-gray-700 border-gray-200';
+    }
+  };
+
   return (
-    <Card className="p-3">
-      <div className="flex items-start justify-between gap-2">
-        <div className="flex flex-col gap-1 flex-1">
-          <p className="m-0 flex-1 font-medium text-sm">
-            {title || 'Untitled Task'}
-          </p>
-          {description && (
-            <p className="m-0 text-gray-500 text-xs">{description}</p>
-          )}
-        </div>
-        {assignee && (
-          <div className="h-6 w-6 shrink-0 rounded-full bg-gray-200 flex items-center justify-center">
-            <span className="text-xs font-medium">
-              {assignee.slice(0, 2).toUpperCase()}
-            </span>
-          </div>
-        )}
+    <Card className="p-4 hover:shadow-md transition-all duration-200">
+      {/* Header with title */}
+      <div className="mb-3">
+        <h3 className="font-semibold text-sm text-gray-900 leading-tight line-clamp-2">
+          {title || 'Untitled Task'}
+        </h3>
       </div>
 
-      <div className="mt-2 flex items-center justify-between text-xs text-gray-500">
-        <span className="px-2 py-1 bg-gray-100 rounded">
-          Priority {priority || 1}
-        </span>
-        <span>{assignee || 'Unassigned'}</span>
+      {/* Description */}
+      {description && (
+        <p className="text-xs text-gray-600 mb-3 line-clamp-2 leading-relaxed">
+          {description}
+        </p>
+      )}
+
+      {/* Footer with metadata */}
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          {/* Priority badge */}
+          <span
+            className={`px-2 py-1 text-xs font-medium rounded-md border ${getPriorityColor(priority || 1)}`}
+          >
+            P{priority || 1}
+          </span>
+        </div>
+
+        {/* Assignee avatar */}
+        <div className="flex items-center gap-1">
+          {assignee && assignee !== 'Unassigned' ? (
+            <div className="h-6 w-6 rounded-full bg-blue-100 flex items-center justify-center">
+              <span className="text-xs font-medium text-blue-700">
+                {assignee.slice(0, 2).toUpperCase()}
+              </span>
+            </div>
+          ) : (
+            <div className="h-6 w-6 rounded-full bg-gray-100 flex items-center justify-center">
+              <span className="text-xs text-gray-400 font-medium">?</span>
+            </div>
+          )}
+        </div>
       </div>
 
       {children}

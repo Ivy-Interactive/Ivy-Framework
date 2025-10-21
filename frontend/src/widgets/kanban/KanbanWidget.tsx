@@ -213,25 +213,7 @@ export const KanbanWidget: React.FC<KanbanWidgetProps> = ({
                 key={task.id}
                 name={task.title}
                 task={task}
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex flex-col gap-1">
-                    <p className="m-0 flex-1 font-medium text-sm">
-                      {task.title}
-                    </p>
-                  </div>
-                  {task.assignee && (
-                    <div className="h-6 w-6 shrink-0 rounded-full bg-gray-200 flex items-center justify-center">
-                      <span className="text-xs font-medium">
-                        {task.assignee.slice(0, 2).toUpperCase()}
-                      </span>
-                    </div>
-                  )}
-                </div>
-                <p className="m-0 text-muted-foreground text-xs">
-                  Priority {task.priority} • {task.assignee}
-                </p>
-              </KanbanCard>
+              />
             )}
           </KanbanCards>
         </KanbanBoard>

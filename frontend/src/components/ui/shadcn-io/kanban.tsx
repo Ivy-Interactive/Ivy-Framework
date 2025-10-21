@@ -310,6 +310,19 @@ export function KanbanCard({ id, name, task, children }: KanbanCardProps) {
     onCardDelete?.(id);
   };
 
+  const getPriorityColor = (priority: number) => {
+    switch (priority) {
+      case 1:
+        return 'bg-red-100 text-red-700 border-red-200';
+      case 2:
+        return 'bg-yellow-100 text-yellow-700 border-yellow-200';
+      case 3:
+        return 'bg-green-100 text-green-700 border-green-200';
+      default:
+        return 'bg-gray-100 text-gray-700 border-gray-200';
+    }
+  };
+
   return (
     <Card
       ref={setNodeRef}
@@ -317,30 +330,23 @@ export function KanbanCard({ id, name, task, children }: KanbanCardProps) {
       {...attributes}
       {...listeners}
       className={cn(
-        'p-3 cursor-grab active:cursor-grabbing group',
-        isDragging && 'opacity-50'
+        'p-4 cursor-grab active:cursor-grabbing group hover:shadow-md transition-all duration-200',
+        isDragging && 'opacity-50 rotate-2 scale-105'
       )}
     >
-      <div className="flex items-start justify-between gap-2">
-        <div className="flex flex-col gap-1 flex-1">
-          <p className="m-0 flex-1 font-medium text-sm">{name}</p>
-          {task?.description && (
-            <p className="m-0 text-gray-500 text-xs">{task.description}</p>
-          )}
+      {/* Header with title and actions */}
+      <div className="flex items-start justify-between gap-3 mb-3">
+        <div className="flex-1 min-w-0">
+          <h3 className="font-semibold text-sm text-gray-900 leading-tight line-clamp-2">
+            {name}
+          </h3>
         </div>
-        <div className="flex items-center gap-2">
-          {task?.assignee && (
-            <Avatar className="h-6 w-6 shrink-0">
-              <AvatarFallback className="text-xs">
-                {task.assignee.slice(0, 2).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-          )}
+        <div className="flex items-center gap-1 shrink-0">
           {onCardDelete && (
             <Button
               variant="ghost"
               size="sm"
-              className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+              className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-50"
               onClick={handleDelete}
             >
               <Trash2 className="h-3 w-3 text-red-500" />
@@ -349,11 +355,41 @@ export function KanbanCard({ id, name, task, children }: KanbanCardProps) {
         </div>
       </div>
 
-      <div className="mt-2 flex items-center justify-between text-xs text-gray-500">
-        <span className="px-2 py-1 bg-gray-100 rounded">
-          Priority {task?.priority || 1}
-        </span>
-        {!task?.assignee && <span className="text-gray-400">Unassigned</span>}
+      {/* Description */}
+      {task?.description && (
+        <p className="text-xs text-gray-600 mb-3 line-clamp-2 leading-relaxed">
+          {task.description}
+        </p>
+      )}
+
+      {/* Footer with metadata */}
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          {/* Priority badge */}
+          <span
+            className={cn(
+              'px-2 py-1 text-xs font-medium rounded-md border',
+              getPriorityColor(task?.priority || 1)
+            )}
+          >
+            P{task?.priority || 1}
+          </span>
+        </div>
+
+        {/* Assignee avatar */}
+        <div className="flex items-center gap-1">
+          {task?.assignee && task.assignee !== 'Unassigned' ? (
+            <Avatar className="h-6 w-6">
+              <AvatarFallback className="text-xs font-medium bg-blue-100 text-blue-700">
+                {task.assignee.slice(0, 2).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+          ) : (
+            <div className="h-6 w-6 rounded-full bg-gray-100 flex items-center justify-center">
+              <span className="text-xs text-gray-400 font-medium">?</span>
+            </div>
+          )}
+        </div>
       </div>
 
       {children}
