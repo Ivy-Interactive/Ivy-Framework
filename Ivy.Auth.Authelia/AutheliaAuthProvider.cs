@@ -62,7 +62,12 @@ public class AutheliaAuthProvider : IAuthProvider
         _cookieContainer.Add(new Uri(_baseUrl), expired);
     }
 
-    public Task<AuthToken?> RefreshAccessTokenAsync(AuthToken token, CancellationToken cancellationToken) => Task.FromResult<AuthToken?>(token);
+    public async Task<AuthToken?> RefreshAccessTokenAsync(AuthToken token, CancellationToken cancellationToken)
+    {
+        // Authelia session tokens cannot be refreshed - validate and return null if invalid
+        var isValid = await ValidateAccessTokenAsync(token.AccessToken, cancellationToken);
+        return isValid ? token : null;
+    }
 
     public Task<Uri> GetOAuthUriAsync(AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken)
     {
