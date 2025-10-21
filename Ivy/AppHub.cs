@@ -199,10 +199,9 @@ public class AppHub(
 
             sessionStore.Sessions[Context.ConnectionId] = appState;
 
-            if (server.AuthProviderType != null && appId != AppIds.Auth)
-            {
-                _ = Task.Run(() => AuthRefreshLoopAsync(Context.ConnectionId, Context.ConnectionAborted));
-            }
+            var connectionId = Context.ConnectionId;
+            var connectionAborted = Context.ConnectionAborted;
+
             await base.OnConnectedAsync();
 
             try
@@ -222,6 +221,11 @@ public class AppHub(
                 {
                     Widgets = tree.GetWidgets().Serialize()
                 });
+            }
+
+            if (server.AuthProviderType != null && appId != AppIds.Auth)
+            {
+                _ = Task.Run(() => AuthRefreshLoopAsync(connectionId, connectionAborted));
             }
         }
         catch (Exception ex)
@@ -290,15 +294,30 @@ public class AppHub(
         var state = AuthRefreshState.Initial;
         var consecutiveErrors = 0;
 
-        void AbortConnection()
+        // Replace connection's widget tree with an error view, so an unauthenticated user cannot interact with the real app.
+        // This is intended mainly as a safeguard against malicious clients (e.g., those which ignore messages that should trigger a page reload and/or cookie updates).
+        // The error page this provides is not very user-friendly, but in practice it should very rarely appear for a legitimate user.
+        async Task AbandonConnection(bool resetTokenAndReload)
         {
             try
             {
-                Context.Abort();
+                var displayException = new Exception("Your session is no longer valid. Please log in again.");
+                var session = sessionStore.Sessions[connectionId];
+                var clientProvider = session.AppServices.GetRequiredService<IClientProvider>();
+                if (resetTokenAndReload)
+                {
+                    clientProvider.SetAuthToken(null, reloadPage: true);
+                }
+                session.WidgetTree = new WidgetTree(new ErrorView(displayException), contentBuilder, session.AppServices);
+                await session.WidgetTree.BuildAsync();
+                clientProvider.Sender.Send("Refresh", new
+                {
+                    Widgets = session.WidgetTree.GetWidgets().Serialize()
+                });
             }
-            catch (ObjectDisposedException)
+            catch (Exception ex)
             {
-                // ignore
+                logger.LogError(ex, "AuthRefreshLoop: Error sending session expired message to {ConnectionId}", connectionId);
             }
         }
 
@@ -338,9 +357,8 @@ public class AppHub(
                         {
                             if (token == null)
                             {
-                                // This should never happen
-                                logger.LogError("AuthRefreshLoop: Token lost for {ConnectionId}, aborting connection.", connectionId);
-                                AbortConnection();
+                                logger.LogError("AuthRefreshLoop: Token lost for {ConnectionId}.", connectionId);
+                                await AbandonConnection(resetTokenAndReload: true);
                                 return;
                             }
 
@@ -396,7 +414,8 @@ public class AppHub(
                             if (newToken == null)
                             {
                                 logger.LogError("AuthRefreshLoop: Token refresh failed for {ConnectionId}, aborting connection.", connectionId);
-                                AbortConnection();
+                                // Setting the token and reloading will have already happened above if null.
+                                await AbandonConnection(resetTokenAndReload: false);
                                 return;
                             }
                             else
@@ -418,8 +437,8 @@ public class AppHub(
                 consecutiveErrors++;
                 if (consecutiveErrors >= 5)
                 {
-                    logger.LogError("AuthRefreshLoop: Too many consecutive errors, aborting connection {ConnectionId}", connectionId);
-                    AbortConnection();
+                    logger.LogError("AuthRefreshLoop: Too many consecutive errors, abandoning connection {ConnectionId}", connectionId);
+                    await AbandonConnection(resetTokenAndReload: true);
                     return;
                 }
                 else
@@ -429,6 +448,7 @@ public class AppHub(
                 }
                 continue;
             }
+
             consecutiveErrors = 0;
         }
     }
