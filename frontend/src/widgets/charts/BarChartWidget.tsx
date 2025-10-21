@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   ColorScheme,
   generateTooltip,
+  generateTextStyle,
   generateXAxis,
   generateYAxis,
 } from './sharedUtils';
@@ -11,6 +12,7 @@ import {
   generateEChartLegend,
   getColors,
 } from './sharedUtils';
+import { useTheme } from '@/components/theme-provider';
 import { getHeight, getWidth } from '@/lib/styles';
 import ReactECharts from 'echarts-for-react';
 import {
@@ -70,6 +72,62 @@ const BarChartWidget: React.FC<BarChartWidgetProps> = ({
   reverseStackOrder,
   layout,
 }) => {
+  const { theme } = useTheme();
+  const [themeColors, setThemeColors] = useState({
+    foreground: '#000000',
+    mutedForeground: '#666666',
+    fontSans: 'Geist, sans-serif',
+    background: '#ffffff',
+  });
+
+  useEffect(() => {
+    const getThemeColors = () => {
+      const root = document.documentElement;
+      const computedStyle = getComputedStyle(root);
+
+      // Use the theme value directly instead of checking DOM classes
+      const isDarkMode =
+        theme === 'dark' ||
+        (theme === 'system' &&
+          window.matchMedia('(prefers-color-scheme: dark)').matches);
+
+      return {
+        foreground:
+          computedStyle.getPropertyValue('--foreground').trim() ||
+          (isDarkMode ? '#f8f8f8' : '#000000'),
+        mutedForeground:
+          computedStyle.getPropertyValue('--muted-foreground').trim() ||
+          (isDarkMode ? '#a1a1aa' : '#666666'),
+        fontSans:
+          computedStyle.getPropertyValue('--font-sans').trim() ||
+          'Geist, sans-serif',
+        background:
+          computedStyle.getPropertyValue('--background').trim() ||
+          (isDarkMode ? '#000000' : '#ffffff'),
+      };
+    };
+
+    // Update colors on next frame to avoid synchronous setState in effect
+    const frame = requestAnimationFrame(() => {
+      setThemeColors(getThemeColors());
+    });
+
+    // Watch for changes to the document element classes
+    const observer = new MutationObserver(() => {
+      setThemeColors(getThemeColors());
+    });
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class'],
+    });
+
+    return () => {
+      cancelAnimationFrame(frame);
+      observer.disconnect();
+    };
+  }, [theme]);
+
   const styles: React.CSSProperties = {
     ...getWidth(width),
     ...getHeight(height),
@@ -106,7 +164,11 @@ const BarChartWidget: React.FC<BarChartWidgetProps> = ({
   const option = {
     grid: generateEChartGrid(cartesianGrid),
     color: colors,
-    xAxis: generateXAxis(categories, xAxis, isVertical),
+    textStyle: generateTextStyle(themeColors.foreground, themeColors.fontSans),
+    xAxis: generateXAxis(categories, xAxis, isVertical, {
+      mutedForeground: themeColors.mutedForeground,
+      fontSans: themeColors.fontSans,
+    }),
     yAxis: generateYAxis(
       largeSpread,
       transform,
@@ -114,7 +176,11 @@ const BarChartWidget: React.FC<BarChartWidgetProps> = ({
       maxValue,
       yAxis,
       isVertical,
-      categories
+      categories,
+      {
+        mutedForeground: themeColors.mutedForeground,
+        fontSans: themeColors.fontSans,
+      }
     ),
     toolbox: !isVertical
       ? {
@@ -133,13 +199,21 @@ const BarChartWidget: React.FC<BarChartWidgetProps> = ({
         }
       : {},
     series,
-    legend: generateEChartLegend(legend),
-    tooltip: generateTooltip(tooltip, 'shadow'),
+    legend: generateEChartLegend(legend, {
+      foreground: themeColors.foreground,
+      fontSans: themeColors.fontSans,
+    }),
+    tooltip: generateTooltip(tooltip, 'shadow', {
+      foreground: themeColors.foreground,
+      fontSans: themeColors.fontSans,
+      background: themeColors.background,
+    }),
   };
 
   return (
     <div style={styles}>
       <ReactECharts
+        key={theme}
         option={option}
         style={{ width: '100%', height: '100%', minHeight: 300 }}
       />

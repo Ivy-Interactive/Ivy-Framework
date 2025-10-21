@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { getHeight, getWidth } from '@/lib/styles';
+import { useTheme } from '@/components/theme-provider';
 import ReactECharts from 'echarts-for-react';
-import { getColors } from './sharedUtils';
+import { getColors, generateTextStyle } from './sharedUtils';
 import { ChartType, PieChartWidgetProps } from './chartTypes';
 import { generateDataProps } from './sharedUtils';
 
@@ -15,6 +16,58 @@ const PieChartWidget: React.FC<PieChartWidgetProps> = ({
   colorScheme,
   total,
 }) => {
+  const { theme } = useTheme();
+  const [themeColors, setThemeColors] = useState({
+    foreground: '#000000',
+    fontSans: 'Geist, sans-serif',
+    background: '#ffffff',
+  });
+
+  useEffect(() => {
+    const getThemeColors = () => {
+      const root = document.documentElement;
+      const computedStyle = getComputedStyle(root);
+
+      // Use the theme value directly instead of checking DOM classes
+      const isDarkMode =
+        theme === 'dark' ||
+        (theme === 'system' &&
+          window.matchMedia('(prefers-color-scheme: dark)').matches);
+
+      return {
+        foreground:
+          computedStyle.getPropertyValue('--foreground').trim() ||
+          (isDarkMode ? '#f8f8f8' : '#000000'),
+        fontSans:
+          computedStyle.getPropertyValue('--font-sans').trim() ||
+          'Geist, sans-serif',
+        background:
+          computedStyle.getPropertyValue('--background').trim() ||
+          (isDarkMode ? '#000000' : '#ffffff'),
+      };
+    };
+
+    // Update colors on next frame to avoid synchronous setState in effect
+    const frame = requestAnimationFrame(() => {
+      setThemeColors(getThemeColors());
+    });
+
+    // Watch for changes to the document element classes
+    const observer = new MutationObserver(() => {
+      setThemeColors(getThemeColors());
+    });
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class'],
+    });
+
+    return () => {
+      cancelAnimationFrame(frame);
+      observer.disconnect();
+    };
+  }, [theme]);
+
   const styles: React.CSSProperties = {
     ...getWidth(width),
     ...getHeight(height),
@@ -98,18 +151,18 @@ const PieChartWidget: React.FC<PieChartWidgetProps> = ({
         type: 'scroll',
       },
     }),
-    textStyle: {
-      color: 'var(--text-primary, #333)',
-      fontSize: 12,
-    },
+    textStyle: generateTextStyle(themeColors.foreground, themeColors.fontSans),
     tooltip: {
       trigger: 'item',
       formatter: '{a} <br/>{b}: {c} ({d}%)',
       animated: tooltip?.animated ?? true,
-      textStyle: {
-        fontSize: 12,
-        fontWeight: 'normal',
-      },
+      textStyle: generateTextStyle(
+        themeColors.foreground,
+        themeColors.fontSans
+      ),
+      backgroundColor: themeColors.background,
+      borderColor: themeColors.foreground,
+      borderWidth: 1,
     },
     series: series,
   };
@@ -122,7 +175,7 @@ const PieChartWidget: React.FC<PieChartWidgetProps> = ({
           <span>{total.formattedValue}</span>
         </div>
       )}
-      <ReactECharts option={option} style={styles} />
+      <ReactECharts key={theme} option={option} style={styles} />
     </div>
   );
 };
