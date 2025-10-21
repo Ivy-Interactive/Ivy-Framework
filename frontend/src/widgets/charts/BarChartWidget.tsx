@@ -12,7 +12,6 @@ import {
   getColors,
 } from './sharedUtils';
 import { getHeight, getWidth } from '@/lib/styles';
-import { StackOffsetType } from 'recharts/types/util/types';
 import ReactECharts from 'echarts-for-react';
 import {
   BarProps,
@@ -43,7 +42,6 @@ interface BarChartWidgetProps {
   referenceAreas?: MarkArea;
   referenceDots?: ReferenceDot;
   colorScheme: ColorScheme;
-  stackOffset: StackOffsetType;
   barGap?: number;
   barCategoryGap?: number | string;
   maxBarSize?: number;

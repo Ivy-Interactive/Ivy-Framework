@@ -1,7 +1,6 @@
 import React from 'react';
 import { ColorScheme } from './sharedUtils';
 import { getHeight, getWidth } from '@/lib/styles';
-import { StackOffsetType } from 'recharts/types/util/types';
 import ReactECharts from 'echarts-for-react';
 import {
   generateDataProps,
@@ -42,7 +41,6 @@ interface AreaChartWidgetProps {
   referenceAreas?: MarkArea;
   referenceDots?: ReferenceDot;
   colorScheme: ColorScheme;
-  stackOffset: StackOffsetType;
 }
 
 const AreaChartWidget: React.FC<AreaChartWidgetProps> = ({
@@ -59,7 +57,6 @@ const AreaChartWidget: React.FC<AreaChartWidgetProps> = ({
   referenceAreas,
   referenceDots,
   colorScheme,
-  stackOffset,
 }) => {
   const styles: React.CSSProperties = {
     ...getWidth(width),
@@ -91,7 +88,6 @@ const AreaChartWidget: React.FC<AreaChartWidgetProps> = ({
     return {
       name: key,
       type: ChartType.Line,
-      stack: stackOffset !== 'none' ? 'total' : undefined,
       smooth: areaConfig?.curveType?.toLowerCase() === 'natural',
       lineStyle: {
         width: areaConfig?.strokeWidth ?? 2,
