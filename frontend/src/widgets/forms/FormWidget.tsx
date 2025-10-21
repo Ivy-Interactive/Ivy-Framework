@@ -1,14 +1,8 @@
-import React, { useEffect, useRef, createContext, useContext } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useEventHandler } from '@/components/event-handler';
 import { logger } from '@/lib/logger';
 import { Sizes } from '@/types/sizes';
 import { cn } from '@/lib/utils';
-
-// Create a context to pass form size to child components
-const FormSizeContext = createContext<Sizes>(Sizes.Medium);
-
-// Hook to use form size in child components
-export const useFormSize = () => useContext(FormSizeContext);
 
 interface FormWidgetProps {
   id: string;
@@ -24,15 +18,14 @@ export const FormWidget: React.FC<FormWidgetProps> = ({
   const formRef = useRef<HTMLDivElement>(null);
   const eventHandler = useEventHandler();
 
-  // Determine font size and spacing based on size
   const getSizeClasses = (size: Sizes) => {
     switch (size) {
       case Sizes.Small:
-        return 'text-xs gap-2 [&_input]:text-xs [&_input]:h-8 [&_input]:px-2 [&_input]:py-1 [&_textarea]:text-xs [&_textarea]:min-h-[60px] [&_select]:text-xs [&_select]:h-8 [&_label]:text-xs [&_p]:text-xs [&_button]:text-xs [&_button]:h-8 [&_button]:px-3';
+        return 'gap-2 text-xs [&_input]:text-xs [&_input]:h-8 [&_input]:px-2 [&_input]:py-1 [&_textarea]:text-xs [&_textarea]:min-h-[60px] [&_select]:text-xs [&_select]:h-8 [&_label]:text-xs [&_p]:text-xs [&_button]:text-xs [&_button]:h-8 [&_button]:px-3 [&_.field]:gap-1';
       case Sizes.Large:
-        return 'text-base gap-12 [&_input]:text-base [&_input]:h-12 [&_input]:px-4 [&_input]:py-3 [&_textarea]:text-base [&_textarea]:min-h-[120px] [&_select]:text-base [&_select]:h-12 [&_label]:text-base [&_p]:text-base [&_button]:text-base [&_button]:h-12 [&_button]:px-6';
+        return 'gap-12 text-base [&_input]:text-base [&_input]:h-12 [&_input]:px-4 [&_input]:py-3 [&_textarea]:text-base [&_textarea]:min-h-[120px] [&_select]:text-base [&_select]:h-12 [&_label]:text-base [&_p]:text-base [&_button]:text-base [&_button]:h-12 [&_button]:px-6 [&_.field]:gap-6';
       default:
-        return 'text-sm gap-6 [&_input]:text-sm [&_input]:h-10 [&_input]:px-3 [&_input]:py-2 [&_textarea]:text-sm [&_textarea]:min-h-[80px] [&_select]:text-sm [&_select]:h-10 [&_label]:text-sm [&_p]:text-sm [&_button]:text-sm [&_button]:h-10 [&_button]:px-4';
+        return 'gap-6 text-sm [&_input]:text-sm [&_input]:h-10 [&_input]:px-3 [&_input]:py-2 [&_textarea]:text-sm [&_textarea]:min-h-[80px] [&_select]:text-sm [&_select]:h-10 [&_label]:text-sm [&_p]:text-sm [&_button]:text-sm [&_button]:h-10 [&_button]:px-4 [&_.field]:gap-3';
     }
   };
 
@@ -97,10 +90,8 @@ export const FormWidget: React.FC<FormWidgetProps> = ({
   }, [id, eventHandler]);
 
   return (
-    <FormSizeContext.Provider value={size}>
-      <div ref={formRef} className={cn('flex flex-col', getSizeClasses(size))}>
-        {children}
-      </div>
-    </FormSizeContext.Provider>
+    <div ref={formRef} className={cn('flex flex-col', getSizeClasses(size))}>
+      {children}
+    </div>
   );
 };
