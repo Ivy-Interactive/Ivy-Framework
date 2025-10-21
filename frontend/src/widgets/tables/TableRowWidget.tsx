@@ -1,10 +1,12 @@
 import React from 'react';
 import { TableRow } from '@/components/ui/table';
+import { Sizes } from '@/types/sizes';
 
 interface TableRowWidgetProps {
   id: string;
   isHeader?: boolean;
   isFooter?: boolean;
+  size?: Sizes;
   children?: React.ReactNode;
 }
 
