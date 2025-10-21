@@ -1,4 +1,7 @@
 using Ivy.Samples.Shared.Apps.Demos;
+using Microsoft.Extensions.AI;
+using Microsoft.Extensions.Configuration;
+using OpenAI;
 
 namespace Ivy.Samples.Shared;
 
@@ -26,6 +29,18 @@ public static class SamplesServer
 
         server.Services.AddSingleton<SampleDbContextFactory>();
 
+        if (server.Configuration.GetValue<string>("OpenAi:ApiKey") is { } openAiApiKey &&
+           server.Configuration.GetValue<string>("OpenAi:Endpoint") is { } openAiEndpoint)
+        {
+            var openAiClient = new OpenAIClient(new System.ClientModel.ApiKeyCredential(openAiApiKey), new OpenAIClientOptions
+            {
+                Endpoint = new Uri(openAiEndpoint)
+            });
+
+            var openAiChatClient = openAiClient.GetChatClient("gpt-4o");
+            var chatClient = openAiChatClient.AsIChatClient();
+            server.Services.AddSingleton<IChatClient>(chatClient);
+        }
 
         await server.RunAsync();
     }

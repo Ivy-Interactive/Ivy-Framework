@@ -3,7 +3,6 @@ namespace Ivy;
 
 public record DataTableConfiguration
 {
-    public bool AllowSearch { get; set; } = true;
     public int? FreezeColumns { get; set; } = null;
     public bool AllowSorting { get; set; } = true;
     public bool AllowFiltering { get; set; } = true;
