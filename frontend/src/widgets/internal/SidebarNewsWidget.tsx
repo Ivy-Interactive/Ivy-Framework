@@ -78,8 +78,10 @@ function News({ articles }: { articles: NewsArticle[] }) {
       const validIds = new Set(articles.map(a => a.id));
       const filtered = dismissedNews.filter(id => validIds.has(id));
       if (filtered.length !== dismissedNews.length) {
-        setDismissedNews(filtered);
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered));
+        queueMicrotask(() => {
+          setDismissedNews(filtered);
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered));
+        });
       }
       cleanupDoneRef.current = true;
     }
@@ -263,6 +265,18 @@ function NewsCard({
   const onDragEnd = () => stopDragging(false);
   const onDragCancel = () => stopDragging(true);
 
+  const bindListeners = () => {
+    document.addEventListener('pointermove', onDragMove);
+    document.addEventListener('pointerup', onDragEnd);
+    document.addEventListener('pointercancel', onDragCancel);
+  };
+
+  const unbindListeners = () => {
+    document.removeEventListener('pointermove', onDragMove);
+    document.removeEventListener('pointerup', onDragEnd);
+    document.removeEventListener('pointercancel', onDragCancel);
+  };
+
   const onPointerDown = (e: React.PointerEvent) => {
     if (!active || !ref.current || animation.current?.playState === 'running')
       return;
@@ -285,18 +299,6 @@ function NewsCard({
       // Touch user didn't drag far or for long, open the link
       window.open(href, '_blank');
     }
-  };
-
-  const bindListeners = () => {
-    document.addEventListener('pointermove', onDragMove);
-    document.addEventListener('pointerup', onDragEnd);
-    document.addEventListener('pointercancel', onDragCancel);
-  };
-
-  const unbindListeners = () => {
-    document.removeEventListener('pointermove', onDragMove);
-    document.removeEventListener('pointerup', onDragEnd);
-    document.removeEventListener('pointercancel', onDragCancel);
   };
 
   return (

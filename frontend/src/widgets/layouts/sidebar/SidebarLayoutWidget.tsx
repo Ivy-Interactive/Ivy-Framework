@@ -400,6 +400,7 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
 }) => {
   const eventHandler = useEventHandler();
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const prevSearchActiveRef = React.useRef(searchActive);
   // Register only the sidebar menu container with useFocusable
   const { ref: focusRef } = useFocusable('sidebar-navigation', 1);
 
@@ -408,7 +409,11 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
   }, [searchActive, items]);
 
   useEffect(() => {
-    setSelectedIndex(0);
+    // Only reset when search becomes active (false -> true transition)
+    if (searchActive && !prevSearchActiveRef.current) {
+      queueMicrotask(() => setSelectedIndex(0));
+    }
+    prevSearchActiveRef.current = searchActive;
   }, [searchActive]);
 
   const handleMenuKeyDown = useCallback(

@@ -547,7 +547,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
   // Update local value when server value changes and control is not focused
   useEffect(() => {
     if (!isFocused && value !== localValue) {
-      setLocalValue(value);
+      queueMicrotask(() => setLocalValue(value));
     }
   }, [value, isFocused, localValue]);
 

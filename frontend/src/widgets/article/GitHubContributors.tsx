@@ -108,10 +108,10 @@ export const GitHubContributors: React.FC<GitHubContributorsProps> = ({
     }
 
     onLoadingChange?.(true);
-    setError(null);
 
     fetch(apiUrl)
       .then(response => {
+        setError(null);
         if (!response.ok) {
           if (response.status === 403) {
             throw new Error(

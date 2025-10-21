@@ -1,5 +1,5 @@
 import { Dialog, DialogContent } from '@/components/ui/dialog';
-import React, { useState } from 'react';
+import React from 'react';
 import { useEventHandler } from '@/components/event-handler';
 import { getWidth } from '@/lib/styles';
 import { cn } from '@/lib/utils';

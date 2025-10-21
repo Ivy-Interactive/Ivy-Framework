@@ -398,7 +398,7 @@ export const TabsLayoutWidget = ({
       setVisibleTabs(newVisibleTabs);
       setHiddenTabs(newHiddenTabs);
     }
-  }, [tabOrder, dropdownOpen, visibleTabs, hiddenTabs, events]);
+  }, [tabOrder, dropdownOpen, visibleTabs, hiddenTabs, events, variant]);
 
   const debouncedCalculateVisibleTabs = useDebounce(calculateVisibleTabs, 100);
   const debouncedCalculateVisibleTabsRef = React.useRef(
@@ -471,7 +471,7 @@ export const TabsLayoutWidget = ({
     }, 100);
 
     return () => clearTimeout(timer);
-  }, []);
+  }, [hiddenTabs.length, tabOrder, visibleTabs.length]);
 
   // Watch for dynamic content changes in tabs (like badge updates)
   React.useEffect(() => {
@@ -552,7 +552,7 @@ export const TabsLayoutWidget = ({
     }
     // Reset the flag after processing
     isUserInitiatedChangeRef.current = false;
-  }, [selectedIndex, tabOrder]);
+  }, [selectedIndex, tabOrder, activeTabId, addToLoadedTabs]);
 
   // Load active tab only when it becomes active
   React.useEffect(() => {

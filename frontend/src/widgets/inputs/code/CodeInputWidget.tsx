@@ -80,7 +80,7 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
   // Update local value when server value changes and control is not focused
   useEffect(() => {
     if (!isFocused && value !== localValueRef.current) {
-      setLocalValue(value || '');
+      queueMicrotask(() => setLocalValue(value || ''));
     }
   }, [value, isFocused]);
 
