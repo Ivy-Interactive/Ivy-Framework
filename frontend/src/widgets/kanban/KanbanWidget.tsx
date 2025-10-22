@@ -44,10 +44,11 @@ export const KanbanWidget: React.FC<KanbanWidgetProps> = ({
       slots.default.forEach((columnNode, columnIndex) => {
         if (React.isValidElement(columnNode)) {
           // The actual column props are nested in children.props
-          const columnProps = columnNode.props?.children?.props as Record<
-            string,
-            unknown
-          >;
+          const columnProps = (
+            columnNode.props as {
+              children?: { props?: Record<string, unknown> };
+            }
+          )?.children?.props as Record<string, unknown>;
 
           // Create column from backend data
           const column: Column = {
@@ -59,18 +60,23 @@ export const KanbanWidget: React.FC<KanbanWidgetProps> = ({
           extractedColumns.push(column);
 
           // Extract tasks from column children - they're in slots.default
-          const columnSlots = columnProps?.slots?.default;
+          const columnSlots = (
+            columnProps?.slots as { default?: React.ReactNode[] }
+          )?.default;
           if (columnSlots && Array.isArray(columnSlots)) {
             columnSlots.forEach((cardNode: React.ReactNode) => {
               if (React.isValidElement(cardNode)) {
                 // Cards are wrapped in Suspense, need to go deeper
-                const cardProps = cardNode.props?.children?.props as Record<
-                  string,
-                  unknown
-                >;
+                const cardProps = (
+                  cardNode.props as {
+                    children?: { props?: Record<string, unknown> };
+                  }
+                )?.children?.props as Record<string, unknown>;
 
                 // Extract task data from slots.default
-                const taskSlots = cardProps?.slots?.default;
+                const taskSlots = (
+                  cardProps?.slots as { default?: React.ReactNode[] }
+                )?.default;
                 let taskData: Record<string, unknown> = {};
                 if (
                   taskSlots &&
@@ -100,8 +106,8 @@ export const KanbanWidget: React.FC<KanbanWidgetProps> = ({
         }
       });
 
-      // Sort columns by their order to maintain backend status order
-      const sortedColumns = extractedColumns.sort((a, b) => a.order - b.order);
+      // Use columns in the order they come from the backend (already sorted by ColumnOrder)
+      const sortedColumns = extractedColumns;
 
       return { tasks: extractedTasks, columns: sortedColumns };
     }
