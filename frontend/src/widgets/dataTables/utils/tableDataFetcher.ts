@@ -9,6 +9,7 @@ import {
 import * as arrow from 'apache-arrow';
 import { DataColumn, DataRow, DataTableConnection } from '../types/types';
 import { convertArrowTableToData } from './tableDataMapper';
+import { logger } from '@/lib/logger';
 
 export const parseInvalidQuery = async (
   invalidQuery: string,
@@ -29,7 +30,7 @@ export const parseInvalidQuery = async (
 
     return result;
   } catch (error) {
-    console.error('Failed to parse invalid query:', error);
+    logger.error('Failed to parse invalid query:', error);
     throw error;
   }
 };
