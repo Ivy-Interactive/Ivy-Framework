@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <NoWarn>CS1591</NoWarn>
+    <PackageId>Ivy.Abstractions</PackageId>
+    <Version>1.0.1</Version>
+    <Company>Ivy</Company>
+    <Description>Build Internal Applications with AI and Pure C#</Description>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/Ivy-Interactive/Ivy</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Ivy-Interactive/Ivy</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+  
+</Project>
