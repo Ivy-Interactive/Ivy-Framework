@@ -10,19 +10,19 @@ namespace Ivy.Auth;
 public class AuthController() : Controller
 {
     /// <summary>
-    /// Sets or clears the JWT authentication token in HTTP cookies.
+    /// Sets or clears the authentication token in HTTP cookies.
     /// </summary>
     /// <param name="token">The authentication token to set, or null to clear</param>
     /// <returns>OK result indicating the operation completed</returns>
-    [Route("auth/set-jwt")]
+    [Route("auth/set-auth-token")]
     [HttpPatch]
-    public IActionResult SetJwt([FromBody] AuthToken? token)
+    public IActionResult SetAuthToken([FromBody] AuthToken? token)
     {
         var cookies = HttpContext.Response.Cookies;
-        if (string.IsNullOrEmpty(token?.Jwt))
+        if (string.IsNullOrEmpty(token?.AccessToken))
         {
-            cookies.Delete("jwt");
-            cookies.Delete("jwt_ext_refresh_token");
+            cookies.Delete("auth_token");
+            cookies.Delete("auth_ext_refresh_token");
         }
         else
         {
@@ -45,13 +45,13 @@ public class AuthController() : Controller
                 var refreshToken = token.RefreshToken!; // non-nullness implied by condition above
                 var modifiedToken = token with { RefreshToken = null };
                 tokenJson = JsonSerializer.Serialize(modifiedToken);
-                cookies.Append("jwt_ext_refresh_token", refreshToken, cookieOptions);
+                cookies.Append("auth_ext_refresh_token", refreshToken, cookieOptions);
             }
             else
             {
-                cookies.Delete("jwt_ext_refresh_token");
+                cookies.Delete("auth_ext_refresh_token");
             }
-            cookies.Append("jwt", tokenJson, cookieOptions);
+            cookies.Append("auth_token", tokenJson, cookieOptions);
         }
         return Ok();
     }

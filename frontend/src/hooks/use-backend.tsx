@@ -28,10 +28,15 @@ type ErrorMessage = {
 };
 
 type AuthToken = {
-  jwt: string;
+  accessToken: string;
   refreshToken?: string;
   expiresAt?: string;
   tag?: unknown;
+};
+
+type SetAuthTokenMessage = {
+  authToken: AuthToken | null;
+  reloadPage: boolean;
 };
 
 const widgetTreeToXml = (node: WidgetNode) => {
@@ -181,24 +186,32 @@ export const useBackend = (
     });
   }, [connection]);
 
-  const handleSetJwt = useCallback(async (jwt: AuthToken | null) => {
-    logger.debug('Processing SetJwt request', { hasJwt: !!jwt });
-    const response = await fetch(`${getIvyHost()}/auth/set-jwt`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(jwt),
-      credentials: 'include',
-    });
-    if (response.ok) {
-      logger.info('JWT set successfully, reloading page');
-      window.location.reload();
-    } else {
-      logger.error('Failed to set JWT', {
-        status: response.status,
-        statusText: response.statusText,
+  const handleSetAuthToken = useCallback(
+    async (message: SetAuthTokenMessage) => {
+      logger.debug('Processing SetAuthToken request', {
+        hasAuthToken: !!message.authToken,
       });
-    }
-  }, []);
+      const response = await fetch(`${getIvyHost()}/auth/set-auth-token`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(message.authToken),
+        credentials: 'include',
+      });
+      if (response.ok) {
+        logger.info('Auth token set successfully');
+      } else {
+        logger.error('Failed to set auth token', {
+          status: response.status,
+          statusText: response.statusText,
+        });
+      }
+      if (message.reloadPage) {
+        logger.info('Reloading page.');
+        window.location.reload();
+      }
+    },
+    []
+  );
 
   const handleSetTheme = useCallback((theme: string) => {
     logger.debug('Processing SetTheme request', { theme });
@@ -299,9 +312,9 @@ export const useBackend = (
             handleError(message);
           });
 
-          connection.on('SetJwt', jwt => {
-            logger.debug(`[${connection.connectionId}] SetJwt`);
-            handleSetJwt(jwt);
+          connection.on('SetAuthToken', message => {
+            logger.debug(`[${connection.connectionId}] SetAuthToken`);
+            handleSetAuthToken(message);
           });
 
           connection.on('SetTheme', theme => {
@@ -368,7 +381,7 @@ export const useBackend = (
         connection.off('Error');
         connection.off('CopyToClipboard');
         connection.off('HotReload');
-        connection.off('SetJwt');
+        connection.off('SetAuthToken');
         connection.off('SetTheme');
         connection.off('OpenUrl');
         connection.off('ApplyTheme');
@@ -393,7 +406,7 @@ export const useBackend = (
     handleUpdateMessage,
     handleHotReloadMessage,
     toast,
-    handleSetJwt,
+    handleSetAuthToken,
     handleSetTheme,
     handleError,
     appId,

@@ -90,8 +90,8 @@ export const generateDataProps = (data: Record<string, unknown>[]) => {
 export function generateEChartGrid(cartesianGrid?: CartesianGridProps) {
   const defaultGrid = {
     show: true,
-    left: 30,
-    right: 10,
+    left: 2,
+    right: 2,
     top: 30,
     bottom: 30,
     containLabel: true,
@@ -109,8 +109,18 @@ export function generateEChartGrid(cartesianGrid?: CartesianGridProps) {
   };
 }
 
-export function generateEChartLegend(legend?: LegendProps) {
-  if (!legend) return { show: true };
+export function generateEChartLegend(
+  legend?: LegendProps,
+  themeColors?: { foreground: string; fontSans: string }
+) {
+  if (!legend)
+    return {
+      show: true,
+      textStyle: generateTextStyle(
+        themeColors?.foreground,
+        themeColors?.fontSans
+      ),
+    };
 
   return {
     show: true,
@@ -121,6 +131,10 @@ export function generateEChartLegend(legend?: LegendProps) {
     orient: legend.layout?.toLowerCase(),
     top: legend.verticalAlign === 'Bottom' ? 'bottom' : 'top',
     type: 'scroll',
+    textStyle: generateTextStyle(
+      themeColors?.foreground,
+      themeColors?.fontSans
+    ),
   };
 }
 
@@ -141,6 +155,24 @@ export const getTransformValueFn = (data: ChartData[]) => {
 
   return { transform, largeSpread, minValue, maxValue };
 };
+
+export const generateTextStyle = (
+  foreground: string = '#000000',
+  fontSans: string = 'Geist, sans-serif'
+) => ({
+  color: foreground,
+  fontFamily: fontSans,
+  fontSize: 12,
+});
+
+export const generateAxisLabelStyle = (
+  mutedForeground: string = '#666666',
+  fontSans: string = 'Geist, sans-serif'
+) => ({
+  color: mutedForeground,
+  fontFamily: fontSans,
+  fontSize: 11,
+});
 
 export const generateSeries = (
   data: ChartData[],
@@ -169,7 +201,7 @@ export const generateSeries = (
         focus: 'series',
         disabled: true,
         lineStyle: { width: 3, opacity: 1 },
-        itemStyle: { borderWidth: 2, borderColor: '#fff' },
+        itemStyle: { borderWidth: 2, borderColor: 'var(--background, #fff)' },
       },
       blur: { lineStyle: { opacity: 0.6 } },
       animation: true,
@@ -184,15 +216,21 @@ export const generateSeries = (
 export const generateXAxis = (
   categories: string[],
   xAxis?: XAxisProps[],
-  isVertical?: boolean
+  isVertical?: boolean,
+  themeColors?: { mutedForeground: string; fontSans: string }
 ) => ({
   position: xAxis?.[0]?.orientation?.toLowerCase() === 'top' ? 'top' : 'bottom',
   type: isVertical ? 'value' : 'category',
   data: isVertical ? undefined : categories,
   axisLabel: {
+    show: true,
     formatter: (value: string) =>
       value.length > 10 ? value.match(/.{1,10}/g)?.join('\n') : value,
     interval: 'auto',
+    ...generateAxisLabelStyle(
+      themeColors?.mutedForeground,
+      themeColors?.fontSans
+    ),
   },
 });
 
@@ -203,7 +241,8 @@ export const generateYAxis = (
   maxValue: number = 100,
   yAxis?: YAxisProps[],
   isVertical: boolean = false,
-  categories?: string[]
+  categories?: string[],
+  themeColors?: { mutedForeground: string; fontSans: string }
 ) => {
   const safeTransform = transformValue ?? ((v: number) => v);
 
@@ -211,6 +250,7 @@ export const generateYAxis = (
     type: isVertical ? 'category' : 'value',
     data: isVertical ? categories : undefined,
     axisLabel: {
+      show: true,
       formatter: (value: number) => {
         if (largeSpread) {
           const unscaled = Math.sign(value) * (10 ** Math.abs(value) - 1);
@@ -227,6 +267,10 @@ export const generateYAxis = (
         if (Math.abs(value) >= 1e3) return (value / 1e3).toFixed(0) + 'K';
         return value;
       },
+      ...generateAxisLabelStyle(
+        themeColors?.mutedForeground,
+        themeColors?.fontSans
+      ),
     },
     splitNumber: largeSpread ? 3 : 5,
     min: largeSpread ? safeTransform(minValue) : 0,
@@ -235,11 +279,19 @@ export const generateYAxis = (
   };
 };
 
-export const generateTooltip = (tooltip?: ToolTipProps, type?: string) => ({
+export const generateTooltip = (
+  tooltip?: ToolTipProps,
+  type?: string,
+  themeColors?: { foreground: string; fontSans: string; background: string }
+) => ({
   trigger: 'axis',
   axisPointer: {
     type: type ?? 'cross',
     animated: tooltip?.animated ?? true,
     shadowStyle: { opacity: 0.5 },
   },
+  textStyle: generateTextStyle(themeColors?.foreground, themeColors?.fontSans),
+  backgroundColor: themeColors?.background || 'rgba(255, 255, 255, 0.9)',
+  borderColor: themeColors?.foreground || '#000',
+  borderWidth: 1,
 });

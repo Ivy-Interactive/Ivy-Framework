@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { ColorScheme } from './sharedUtils';
 import { getHeight, getWidth } from '@/lib/styles';
+import { useTheme } from '@/components/theme-provider';
 import ReactECharts from 'echarts-for-react';
 import {
   generateDataProps,
@@ -8,6 +9,7 @@ import {
   generateXAxis,
   generateEChartLegend,
   generateTooltip,
+  generateTextStyle,
   generateEChartGrid,
   generateYAxis,
 } from './sharedUtils';
@@ -58,10 +60,54 @@ const AreaChartWidget: React.FC<AreaChartWidgetProps> = ({
   referenceDots,
   colorScheme,
 }) => {
+  const { theme } = useTheme();
+  const [themeColors, setThemeColors] = useState({
+    foreground: '#000000',
+    mutedForeground: '#666666',
+    fontSans: 'Geist, sans-serif',
+    background: '#ffffff',
+  });
+
+  useEffect(() => {
+    const getThemeColors = () => {
+      const root = document.documentElement;
+      const computedStyle = getComputedStyle(root);
+
+      // Use the theme value directly instead of checking DOM classes
+      const isDarkMode =
+        theme === 'dark' ||
+        (theme === 'system' &&
+          window.matchMedia('(prefers-color-scheme: dark)').matches);
+
+      return {
+        foreground:
+          computedStyle.getPropertyValue('--foreground').trim() ||
+          (isDarkMode ? '#f8f8f8' : '#000000'),
+        mutedForeground:
+          computedStyle.getPropertyValue('--muted-foreground').trim() ||
+          (isDarkMode ? '#a1a1aa' : '#666666'),
+        fontSans:
+          computedStyle.getPropertyValue('--font-sans').trim() ||
+          'Geist, sans-serif',
+        background:
+          computedStyle.getPropertyValue('--background').trim() ||
+          (isDarkMode ? '#000000' : '#ffffff'),
+      };
+    };
+
+    // Update colors on next frame to avoid synchronous setState in effect
+    const frame = requestAnimationFrame(() => {
+      setThemeColors(getThemeColors());
+    });
+
+    return () => {
+      cancelAnimationFrame(frame);
+    };
+  }, [theme]);
+
   const styles: React.CSSProperties = {
     ...getWidth(width),
     ...getHeight(height),
-    minHeight: 300,
   };
 
   const { categories, valueKeys } = generateDataProps(data);
@@ -107,19 +153,46 @@ const AreaChartWidget: React.FC<AreaChartWidgetProps> = ({
   const option = {
     grid: generateEChartGrid(cartesianGrid),
     color: colors,
-    tooltip: generateTooltip(tooltip, 'cross'),
-    legend: generateEChartLegend(legend),
+    tooltip: generateTooltip(tooltip, 'cross', {
+      foreground: themeColors.foreground,
+      fontSans: themeColors.fontSans,
+      background: themeColors.background,
+    }),
+    legend: generateEChartLegend(legend, {
+      foreground: themeColors.foreground,
+      fontSans: themeColors.fontSans,
+    }),
+    textStyle: generateTextStyle(themeColors.foreground, themeColors.fontSans),
     toolbox: {
       feature: {
         saveAsImage: {},
       },
     },
-    xAxis: generateXAxis(categories as string[], xAxis),
-    yAxis: generateYAxis(largeSpread, transform, minValue, maxValue, yAxis),
+    xAxis: generateXAxis(categories as string[], xAxis, false, {
+      mutedForeground: themeColors.mutedForeground,
+      fontSans: themeColors.fontSans,
+    }),
+    yAxis: generateYAxis(
+      largeSpread,
+      transform,
+      minValue,
+      maxValue,
+      yAxis,
+      false,
+      undefined,
+      {
+        mutedForeground: themeColors.mutedForeground,
+        fontSans: themeColors.fontSans,
+      }
+    ),
     series: series,
   };
 
-  return <ReactECharts option={option} style={styles} />;
+  return (
+    <div style={styles}>
+      <ReactECharts key={theme} option={option} />
+    </div>
+  );
 };
 
 export default AreaChartWidget;
