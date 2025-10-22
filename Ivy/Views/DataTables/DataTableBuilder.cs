@@ -8,7 +8,7 @@ using Microsoft.Extensions.AI;
 
 namespace Ivy.Views.DataTables;
 
-public class DataTableBuilder<TModel> : ViewBase, IStateless
+public class DataTableBuilder<TModel> : ViewBase
 {
     private readonly IQueryable<TModel> _queryable;
     private Size? _width;
