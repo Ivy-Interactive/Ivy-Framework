@@ -8,6 +8,7 @@ import {
   tableSizeVariants,
 } from './table/table-variants';
 import { TableProvider, useTableSize } from './table/TableContext';
+import { Sizes } from '@/types/sizes';
 
 export interface TableProps
   extends Omit<React.HTMLAttributes<HTMLTableElement>, 'size'>,
@@ -15,7 +16,7 @@ export interface TableProps
 
 const Table = React.forwardRef<HTMLTableElement, TableProps>(
   ({ className, size, children, ...props }, ref) => (
-    <TableProvider size={size}>
+    <TableProvider size={size as Sizes}>
       <div className="relative w-full overflow-auto">
         <table
           ref={ref}

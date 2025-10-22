@@ -1,15 +1,16 @@
 import React, { createContext, useContext } from 'react';
 import type { VariantProps } from 'class-variance-authority';
 import { tableCellSizeVariants } from './table-variants';
+import { Sizes } from '@/types/sizes';
 
 type TableContextValue = VariantProps<typeof tableCellSizeVariants>;
 
 const TableContext = createContext<TableContextValue>({
-  size: 'Medium',
+  size: Sizes.Medium,
 });
 
 export const TableProvider: React.FC<{
-  size?: VariantProps<typeof tableCellSizeVariants>['size'];
+  size?: Sizes;
   children: React.ReactNode;
 }> = ({ size, children }) => {
   return (
