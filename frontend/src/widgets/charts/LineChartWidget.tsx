@@ -79,7 +79,6 @@ const LineChartWidget: React.FC<LineChartWidgetProps> = ({
   const styles: React.CSSProperties = {
     ...getWidth(width),
     ...getHeight(height),
-    minHeight: 300,
   };
 
   const colors = getColors(colorScheme);
@@ -128,7 +127,11 @@ const LineChartWidget: React.FC<LineChartWidgetProps> = ({
     ),
   };
 
-  return <ReactECharts key={theme} option={option} style={styles} />;
+  return (
+    <div style={styles}>
+      <ReactECharts key={theme} option={option} />;
+    </div>
+  );
 };
 
 export default LineChartWidget;

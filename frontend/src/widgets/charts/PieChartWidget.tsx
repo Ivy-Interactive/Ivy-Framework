@@ -60,7 +60,6 @@ const PieChartWidget: React.FC<PieChartWidgetProps> = ({
   const styles: React.CSSProperties = {
     ...getWidth(width),
     ...getHeight(height),
-    minHeight: 300,
   };
 
   const { valueKeys } = generateDataProps(data);
@@ -157,14 +156,14 @@ const PieChartWidget: React.FC<PieChartWidgetProps> = ({
   };
 
   return (
-    <div>
+    <div style={styles}>
       {total && (
         <div style={{ textAlign: 'center', marginBottom: 12 }}>
           <span>{total.label}</span>
           <span>{total.formattedValue}</span>
         </div>
       )}
-      <ReactECharts key={theme} option={option} style={styles} />
+      <ReactECharts key={theme} option={option} />
     </div>
   );
 };

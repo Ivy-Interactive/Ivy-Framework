@@ -17,7 +17,13 @@ export const fetchTableData = async (
   sort?: SortOrder[] | null
 ): Promise<{ columns: DataColumn[]; rows: DataRow[]; hasMore: boolean }> => {
   const backendUrl = new URL(getIvyHost());
-  const serverUrl = `${backendUrl.protocol}//${backendUrl.hostname}:${connection.port}`;
+
+  // Use environment variable for robust environment detection
+  // In development, use the connection port; in production, use the current host
+  const isDevelopment = process.env.NODE_ENV === 'development';
+  const serverUrl = isDevelopment
+    ? `${backendUrl.protocol}//${backendUrl.hostname}:${connection.port}`
+    : `${backendUrl.protocol}//${backendUrl.hostname}`;
 
   const query: TableQuery = {
     limit: count,

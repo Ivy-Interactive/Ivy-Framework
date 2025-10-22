@@ -120,7 +120,6 @@ const BarChartWidget: React.FC<BarChartWidgetProps> = ({
   const styles: React.CSSProperties = {
     ...getWidth(width),
     ...getHeight(height),
-    minHeight: 300,
   };
 
   const { categories, valueKeys, transform, largeSpread, minValue, maxValue } =
@@ -201,11 +200,7 @@ const BarChartWidget: React.FC<BarChartWidgetProps> = ({
 
   return (
     <div style={styles}>
-      <ReactECharts
-        key={theme}
-        option={option}
-        style={{ width: '100%', height: '100%', minHeight: 300 }}
-      />
+      <ReactECharts key={theme} option={option} />
     </div>
   );
 };

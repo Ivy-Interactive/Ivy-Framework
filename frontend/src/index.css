@@ -1,53 +1,5 @@
 @import 'tailwindcss';
 
-/* Simple Chart Label Overlap Fix */
-.recharts-legend-wrapper {
-  display: flex !important;
-  flex-wrap: wrap !important;
-  justify-content: center !important;
-  gap: 6px !important;
-  padding: 8px !important;
-}
-
-.recharts-legend-item {
-  display: flex !important;
-  align-items: center !important;
-  gap: 4px !important;
-  margin: 1px !important;
-  font-size: 11px !important;
-}
-
-/* Responsive font sizes for better readability */
-@media (max-width: 640px) {
-  .recharts-cartesian-axis-tick-value {
-    font-size: 9px !important;
-  }
-
-  .recharts-legend-item {
-    font-size: 9px !important;
-  }
-}
-
-@media (min-width: 641px) and (max-width: 1024px) {
-  .recharts-cartesian-axis-tick-value {
-    font-size: 10px !important;
-  }
-
-  .recharts-legend-item {
-    font-size: 10px !important;
-  }
-}
-
-@media (min-width: 1025px) {
-  .recharts-cartesian-axis-tick-value {
-    font-size: 11px !important;
-  }
-
-  .recharts-legend-item {
-    font-size: 11px !important;
-  }
-}
-
 /* Geist Sans Font Family */
 @font-face {
   font-family: 'Geist';
