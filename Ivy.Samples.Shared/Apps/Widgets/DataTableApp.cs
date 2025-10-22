@@ -108,7 +108,7 @@ public class DataTableApp : SampleBase
             .Group(u => u.Status, "Metrics")
             .Group(u => u.Priority, "Metrics")
             .Group(u => u.Activity, "Metrics")
-            // Enable LLM filtering for natural language queries
+            // Config
             .Config(config => config.AllowLlmFiltering = true);
     }
 }

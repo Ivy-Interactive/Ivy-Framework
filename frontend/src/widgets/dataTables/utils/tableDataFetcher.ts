@@ -15,15 +15,6 @@ export const parseInvalidQuery = async (
   connection?: DataTableConnection
 ): Promise<ParseFilterResult> => {
   try {
-    // If connection is provided, configure the server URL
-    // let serverUrl = '';
-    // if (connection) {
-    //   const backendUrl = new URL(getIvyHost());
-    //   serverUrl = `${backendUrl.protocol}//${backendUrl.hostname}:${connection.port}`;
-    //   // Configure grpcTableService with the server URL
-    //   (grpcTableService as any).serverUrl = serverUrl;
-    // }
-
     const backendUrl = new URL(getIvyHost());
     const serverUrl = `${backendUrl.protocol}//${backendUrl.hostname}:${connection?.port}`;
 
