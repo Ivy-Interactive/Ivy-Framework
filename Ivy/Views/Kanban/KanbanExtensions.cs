@@ -80,37 +80,4 @@ public static class KanbanExtensions
             descriptionSelector.Compile(),
             orderSelector.Compile());
     }
-
-    /// <summary>
-    /// Converts any enumerable collection to a kanban builder with automatic column grouping, card field selection, custom ordering, and column ordering.
-    /// </summary>
-    /// <typeparam name="TModel">The type of objects in the collection.</typeparam>
-    /// <typeparam name="TGroupKey">The type of the grouping key used to organize items into columns.</typeparam>
-    /// <param name="records">The collection to convert to a kanban board.</param>
-    /// <param name="groupBySelector">Expression that determines which column each item belongs to.</param>
-    /// <param name="idSelector">Expression that selects the card ID field.</param>
-    /// <param name="titleSelector">Expression that selects the card title field.</param>
-    /// <param name="descriptionSelector">Expression that selects the card description field.</param>
-    /// <param name="orderSelector">Expression that selects the field to use for ordering cards within columns.</param>
-    /// <param name="columnOrderSelector">Expression that selects the field to use for ordering columns.</param>
-    /// <returns>A kanban builder for fluent configuration of columns, cards, and formatting.</returns>
-    public static KanbanBuilder<TModel, TGroupKey> ToKanban<TModel, TGroupKey>(
-        this IEnumerable<TModel> records,
-        Expression<Func<TModel, TGroupKey>> groupBySelector,
-        Expression<Func<TModel, object?>> idSelector,
-        Expression<Func<TModel, object?>> titleSelector,
-        Expression<Func<TModel, object?>> descriptionSelector,
-        Expression<Func<TModel, object?>> orderSelector,
-        Expression<Func<TModel, object?>> columnOrderSelector)
-        where TGroupKey : notnull
-    {
-        return new KanbanBuilder<TModel, TGroupKey>(
-            records,
-            groupBySelector.Compile(),
-            idSelector.Compile(),
-            titleSelector.Compile(),
-            descriptionSelector.Compile(),
-            orderSelector.Compile(),
-            columnOrderSelector.Compile());
-    }
 }

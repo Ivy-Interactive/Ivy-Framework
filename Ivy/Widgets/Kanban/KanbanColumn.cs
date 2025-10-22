@@ -18,9 +18,6 @@ public record KanbanColumn : WidgetBase<KanbanColumn>
     /// <summary>Optional column key value used to identify the column in event handlers.</summary>
     [Prop] public object? ColumnKey { get; set; }
 
-    /// <summary>Optional column order value used to determine column ordering. Lower values appear first.</summary>
-    [Prop] public int? Order { get; set; }
-
     /// <summary>Event handler called when a card is added to this column.</summary>
     [Event] public Func<Event<KanbanColumn, object?>, ValueTask>? OnAdd { get; set; }
 
@@ -53,14 +50,5 @@ public static class KanbanColumnExtensions
     public static KanbanColumn ColumnKey(this KanbanColumn column, object? columnKey)
     {
         return column with { ColumnKey = columnKey };
-    }
-
-    /// <summary>Sets the column order for kanban column.</summary>
-    /// <param name="column">KanbanColumn to configure.</param>
-    /// <param name="columnOrder">Order value to determine column position. Lower values appear first.</param>
-    /// <returns>New KanbanColumn instance with updated column order.</returns>
-    public static KanbanColumn ColumnOrder(this KanbanColumn column, int columnOrder)
-    {
-        return column with { Order = columnOrder };
     }
 }

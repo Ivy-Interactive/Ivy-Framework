@@ -40,8 +40,8 @@ public class KanbanApp : SampleBase
                     idSelector: e => e.Id,
                     titleSelector: e => e.Title,
                     descriptionSelector: e => e.Description,
-                    orderSelector: e => e.Priority,
-                    columnOrderSelector: e => e.StatusOrder)
+                    orderSelector: e => e.Priority)
+                .ColumnOrder(e => e.StatusOrder)
                 .ColumnTitle(status => status switch
                 {
                     "Todo" => "Custom Todo",
