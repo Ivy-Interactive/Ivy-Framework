@@ -88,6 +88,16 @@ export interface DataTableDistinctResult {
   values: string[];
 }
 
+export interface ParseFilterRequest {
+  payload: string;
+  connectionId?: string;
+  sourceId?: string;
+}
+
+export interface ParseFilterResult {
+  filterExpression: string;
+}
+
 export interface GrpcTableStreamOptions {
   serverUrl: string;
   query: DataTableQuery;
@@ -107,6 +117,55 @@ export class GrpcTableService extends EventEmitter {
       'GrpcTableService constructor - Connecting to:',
       this.serverUrl
     );
+  }
+
+  async parseFilter(
+    request: ParseFilterRequest,
+    serverUrl: string
+  ): Promise<ParseFilterResult> {
+    try {
+      logger.debug('parseFilter - Request:', request);
+
+      // Create gRPC-Web request headers
+      const grpcHeaders = {
+        'Content-Type': 'application/grpc-web+proto',
+        Accept: 'application/grpc-web+proto',
+        'X-Grpc-Web': '1',
+      };
+
+      // Serialize the request
+      const serializedRequest = this.serializeParseFilterRequest(request);
+      const grpcMessage = this.createGrpcMessage(serializedRequest);
+
+      const requestUrl = `${serverUrl}/datatable.DataTableService/ParseFilter`;
+      logger.debug('parseFilter - Request URL:', requestUrl);
+
+      // Make the gRPC-Web request
+      const response = await fetch(requestUrl, {
+        method: 'POST',
+        headers: grpcHeaders,
+        body: grpcMessage as BodyInit,
+      });
+
+      logger.debug('parseFilter - Response status:', response.status);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        logger.error('parseFilter - Error response:', errorText);
+        throw new Error(
+          `gRPC Error: ${response.status} ${response.statusText} - ${errorText}`
+        );
+      }
+      // Parse the response
+      const result = await this.parseFilterResponse(response);
+
+      return result;
+    } catch (error) {
+      const errorObj =
+        error instanceof Error ? error : new Error('ParseFilter failed');
+      logger.error('parseFilter - Error:', errorObj);
+      throw errorObj;
+    }
   }
 
   async queryTable(options: GrpcTableStreamOptions): Promise<DataTableResult> {
@@ -209,6 +268,38 @@ export class GrpcTableService extends EventEmitter {
     result.set(data, 5);
 
     return result;
+  }
+
+  // Serialize ParseFilterRequest to protobuf format
+  private serializeParseFilterRequest(request: ParseFilterRequest): Uint8Array {
+    logger.debug(
+      'serializeParseFilterRequest: Starting serialization',
+      request
+    );
+
+    const encoder = new TextEncoder();
+    const chunks: Uint8Array[] = [];
+
+    // Field 1: payload (serialized as JSON string for now)
+    if (request.payload !== undefined) {
+      const payloadJson = JSON.stringify(request.payload);
+      const payloadData = encoder.encode(payloadJson);
+      chunks.push(this.encodeField(1, 2, payloadData)); // Field 1, wire type 2 (string)
+    }
+
+    // Field 2: connectionId (string)
+    if (request.connectionId) {
+      const connData = encoder.encode(request.connectionId);
+      chunks.push(this.encodeField(2, 2, connData)); // Field 2, wire type 2
+    }
+
+    // Field 3: sourceId (string)
+    if (request.sourceId) {
+      const sourceData = encoder.encode(request.sourceId);
+      chunks.push(this.encodeField(3, 2, sourceData)); // Field 3, wire type 2
+    }
+
+    return this.combineChunks(chunks);
   }
 
   // Serialize DataTableQuery to protobuf format
@@ -560,6 +651,67 @@ export class GrpcTableService extends EventEmitter {
     }
     bytes.push(value & 0x7f);
     return new Uint8Array(bytes);
+  }
+
+  // Parse ParseFilter response
+  private async parseFilterResponse(
+    response: Response
+  ): Promise<ParseFilterResult> {
+    const buffer = await response.arrayBuffer();
+    const uint8Array = new Uint8Array(buffer);
+
+    logger.debug('parseParseFilterResponse - Buffer size:', buffer.byteLength);
+
+    // Extract protobuf message from gRPC wrapper
+    if (uint8Array.length < 5) {
+      throw new Error('Invalid gRPC message: too short');
+    }
+
+    const messageLength =
+      (uint8Array[1] << 24) |
+      (uint8Array[2] << 16) |
+      (uint8Array[3] << 8) |
+      uint8Array[4];
+    const messageData = uint8Array.slice(5, 5 + messageLength);
+
+    // Parse the protobuf message to extract the filter string
+    let offset = 0;
+    let filterString = '';
+
+    while (offset < messageData.length) {
+      // Read field tag
+      const tag = this.decodeVarint(messageData, offset);
+      offset += this.getVarintLength(tag);
+
+      const fieldNumber = tag >>> 3;
+      const wireType = tag & 0x7;
+
+      logger.debug(
+        `parseParseFilterResponse - Field ${fieldNumber}, wire type ${wireType}`
+      );
+
+      if (fieldNumber === 1 && wireType === 2) {
+        // filterString field (string)
+        const length = this.decodeVarint(messageData, offset);
+        offset += this.getVarintLength(length);
+        const decoder = new TextDecoder();
+        filterString = decoder.decode(
+          messageData.slice(offset, offset + length)
+        );
+        offset += length;
+        logger.debug(
+          'parseParseFilterResponse - Got filter string:',
+          filterString
+        );
+      } else {
+        // Skip other fields
+        offset = this.skipField(messageData, offset, wireType);
+      }
+    }
+
+    return {
+      filterExpression: filterString,
+    };
   }
 
   // Parse gRPC-Web response

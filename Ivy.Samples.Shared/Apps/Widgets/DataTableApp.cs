@@ -107,6 +107,8 @@ public class DataTableApp : SampleBase
             .Group(u => u.LastLogin, "Timestamps")
             .Group(u => u.Status, "Metrics")
             .Group(u => u.Priority, "Metrics")
-            .Group(u => u.Activity, "Metrics");
+            .Group(u => u.Activity, "Metrics")
+            // Config
+            .Config(config => config.AllowLlmFiltering = true);
     }
 }
