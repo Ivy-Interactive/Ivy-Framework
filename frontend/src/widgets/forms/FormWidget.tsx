@@ -21,11 +21,11 @@ export const FormWidget: React.FC<FormWidgetProps> = ({
   const getSizeClasses = (size: Sizes) => {
     switch (size) {
       case Sizes.Small:
-        return 'gap-2 text-xs [&_input]:text-xs [&_input]:h-8 [&_input]:px-2 [&_input]:py-1 [&_textarea]:text-xs [&_textarea]:min-h-[60px] [&_select]:text-xs [&_select]:h-8 [&_label]:text-xs [&_p]:text-xs [&_button]:text-xs [&_button]:h-8 [&_button]:px-3 [&_.field]:gap-1';
+        return 'gap-2 text-xs [&_input:not([type="checkbox"])]:text-xs [&_input:not([type="checkbox"])]:h-8 [&_input:not([type="checkbox"])]:px-2 [&_input:not([type="checkbox"])]:py-1 [&_textarea]:text-xs [&_textarea]:min-h-[60px] [&_select]:text-xs [&_select]:h-8 [&_label]:text-xs [&_p]:text-xs [&_button:not([role="checkbox"])]:text-xs [&_button:not([role="checkbox"])]:h-8 [&_button:not([role="checkbox"])]:px-3 [&_.field]:gap-1 [&_button[role="checkbox"]]:!h-3 [&_button[role="checkbox"]]:!w-3';
       case Sizes.Large:
-        return 'gap-12 text-base [&_input]:text-base [&_input]:h-12 [&_input]:px-4 [&_input]:py-3 [&_textarea]:text-base [&_textarea]:min-h-[120px] [&_select]:text-base [&_select]:h-12 [&_label]:text-base [&_p]:text-base [&_button]:text-base [&_button]:h-12 [&_button]:px-6 [&_.field]:gap-6';
+        return 'gap-12 text-base [&_input:not([type="checkbox"])]:text-base [&_input:not([type="checkbox"])]:h-12 [&_input:not([type="checkbox"])]:px-4 [&_input:not([type="checkbox"])]:py-3 [&_textarea]:text-base [&_textarea]:min-h-[120px] [&_select]:text-base [&_select]:h-12 [&_label]:text-base [&_p]:text-base [&_button:not([role="checkbox"])]:text-base [&_button:not([role="checkbox"])]:h-12 [&_button:not([role="checkbox"])]:px-6 [&_.field]:gap-6 [&_button[role="checkbox"]]:!h-5 [&_button[role="checkbox"]]:!w-5';
       default:
-        return 'gap-6 text-sm [&_input]:text-sm [&_input]:h-10 [&_input]:px-3 [&_input]:py-2 [&_textarea]:text-sm [&_textarea]:min-h-[80px] [&_select]:text-sm [&_select]:h-10 [&_label]:text-sm [&_p]:text-sm [&_button]:text-sm [&_button]:h-10 [&_button]:px-4 [&_.field]:gap-3';
+        return 'gap-6 text-sm [&_input:not([type="checkbox"])]:text-sm [&_input:not([type="checkbox"])]:h-10 [&_input:not([type="checkbox"])]:px-3 [&_input:not([type="checkbox"])]:py-2 [&_textarea]:text-sm [&_textarea]:min-h-[80px] [&_select]:text-sm [&_select]:h-10 [&_label]:text-sm [&_p]:text-sm [&_button:not([role="checkbox"])]:text-sm [&_button:not([role="checkbox"])]:h-10 [&_button:not([role="checkbox"])]:px-4 [&_.field]:gap-3 [&_button[role="checkbox"]]:!h-4 [&_button[role="checkbox"]]:!w-4';
     }
   };
 
