@@ -14,6 +14,7 @@ interface Column {
   name: string;
   color: string;
   order: number;
+  widgetId: string;
 }
 
 interface KanbanWidgetProps {
@@ -56,6 +57,8 @@ export const KanbanWidget: React.FC<KanbanWidgetProps> = ({
             name: columnProps?.title as string,
             color: columnProps?.color as string,
             order: (columnProps?.order as number) || 999,
+            widgetId:
+              (columnProps?.id as string) || (columnProps?.columnKey as string),
           };
           extractedColumns.push(column);
 
@@ -121,13 +124,17 @@ export const KanbanWidget: React.FC<KanbanWidgetProps> = ({
     toColumn: string,
     targetIndex?: number
   ) => {
-    // Send move event to backend
+    // Send move event to backend with column keys
     eventHandler('OnMove', id, [cardId, fromColumn, toColumn, targetIndex]);
   };
 
-  const handleCardAdd = (columnKey: string) => {
-    // Send add event to backend
-    eventHandler('OnAdd', id, [columnKey]);
+  const handleCardAdd = (columnId: string) => {
+    // Find the column and get its widget ID
+    const column = extractedData.columns.find(c => c.id === columnId);
+    const widgetId = column?.widgetId || columnId;
+
+    // Send add event to backend using widget ID with column name as parameter
+    eventHandler('OnAdd', widgetId, [column?.name || columnId]);
   };
 
   const handleCardDelete = (cardId: string) => {
@@ -165,12 +172,21 @@ export const KanbanWidget: React.FC<KanbanWidgetProps> = ({
       {column => (
         <KanbanBoard id={column.id} key={column.id}>
           <KanbanHeader>
-            <div className="flex items-center gap-2">
-              <div
-                className="h-2 w-2 rounded-full"
-                style={{ backgroundColor: column.color }}
-              />
-              <span>{column.name}</span>
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <div
+                  className="h-2 w-2 rounded-full"
+                  style={{ backgroundColor: column.color }}
+                />
+                <span>{column.name}</span>
+              </div>
+              <button
+                onClick={() => handleCardAdd(column.id)}
+                className="text-gray-500 hover:text-gray-700 text-lg font-bold"
+                title="Add card"
+              >
+                +
+              </button>
             </div>
           </KanbanHeader>
           <KanbanCards id={column.id}>
