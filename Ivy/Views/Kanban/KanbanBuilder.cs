@@ -30,7 +30,7 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
     private readonly Func<TModel, object?>? _orderSelector;
     private Func<TModel, object>? _customCardRenderer;
     private Func<Event<Ivy.Kanban, object?>, ValueTask>? _onDelete;
-    private Func<Event<Ivy.Kanban, (object? CardId, TGroupKey FromColumn, TGroupKey ToColumn)>, ValueTask>? _onMove;
+    private Func<Event<Ivy.Kanban, (object? CardId, TGroupKey FromColumn, TGroupKey ToColumn, int? TargetIndex)>, ValueTask>? _onMove;
     private object? _empty;
 
     /// <summary>
@@ -41,31 +41,7 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
     /// <param name="cardIdSelector">Optional function to select the card ID field.</param>
     /// <param name="cardTitleSelector">Optional function to select the card title field.</param>
     /// <param name="cardDescriptionSelector">Optional function to select the card description field.</param>
-    public KanbanBuilder(
-        IEnumerable<TModel> records,
-        Func<TModel, TGroupKey> groupBySelector,
-        Func<TModel, object?>? cardIdSelector = null,
-        Func<TModel, object?>? cardTitleSelector = null,
-        Func<TModel, object?>? cardDescriptionSelector = null)
-    {
-        _records = records;
-        _groupBySelector = groupBySelector;
-        _builderFactory = new BuilderFactory<TModel>();
-        _cardBuilder = _builderFactory.Default();
-        _cardIdSelector = cardIdSelector;
-        _cardTitleSelector = cardTitleSelector;
-        _cardDescriptionSelector = cardDescriptionSelector;
-    }
-
-    /// <summary>
-    /// Creates a kanban builder with automatic column grouping based on the selector and custom ordering.
-    /// </summary>
-    /// <param name="records">The data records to display in the kanban board.</param>
-    /// <param name="groupBySelector">Function that determines which column each item belongs to.</param>
-    /// <param name="cardIdSelector">Optional function to select the card ID field.</param>
-    /// <param name="cardTitleSelector">Optional function to select the card title field.</param>
-    /// <param name="cardDescriptionSelector">Optional function to select the card description field.</param>
-    /// <param name="orderSelector">Function to select the field used for ordering cards within columns.</param>
+    /// <param name="orderSelector">Optional function to select the field used for ordering cards within columns.</param>
     public KanbanBuilder(
         IEnumerable<TModel> records,
         Func<TModel, TGroupKey> groupBySelector,
@@ -176,25 +152,25 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
         return this;
     }
 
-    /// <summary>Sets the event handler called when a card is moved between columns.</summary>
-    /// <param name="onMove">Event handler that receives the card ID, from column key, and to column key when a card is moved.</param>
-    public KanbanBuilder<TModel, TGroupKey> HandleMove(Func<Event<Ivy.Kanban, (object? CardId, TGroupKey FromColumn, TGroupKey ToColumn)>, ValueTask> onMove)
+    /// <summary>Sets the event handler called when a card is moved between columns or reordered within a column.</summary>
+    /// <param name="onMove">Event handler that receives the card ID, from column key, to column key, and target index when a card is moved.</param>
+    public KanbanBuilder<TModel, TGroupKey> HandleMove(Func<Event<Ivy.Kanban, (object? CardId, TGroupKey FromColumn, TGroupKey ToColumn, int? TargetIndex)>, ValueTask> onMove)
     {
         _onMove = onMove;
         return this;
     }
 
-    /// <summary>Sets the event handler called when a card is moved between columns.</summary>
-    /// <param name="onMove">Event handler that receives the card ID, from column key, and to column key when a card is moved.</param>
-    public KanbanBuilder<TModel, TGroupKey> HandleMove(Action<Event<Ivy.Kanban, (object? CardId, TGroupKey FromColumn, TGroupKey ToColumn)>> onMove)
+    /// <summary>Sets the event handler called when a card is moved between columns or reordered within a column.</summary>
+    /// <param name="onMove">Event handler that receives the card ID, from column key, to column key, and target index when a card is moved.</param>
+    public KanbanBuilder<TModel, TGroupKey> HandleMove(Action<Event<Ivy.Kanban, (object? CardId, TGroupKey FromColumn, TGroupKey ToColumn, int? TargetIndex)>> onMove)
     {
         _onMove = e => { onMove(e); return ValueTask.CompletedTask; };
         return this;
     }
 
-    /// <summary>Sets a simple event handler called when a card is moved between columns.</summary>
-    /// <param name="onMove">Simple action that receives a tuple with (CardId, FromColumn, ToColumn) when a card is moved.</param>
-    public KanbanBuilder<TModel, TGroupKey> HandleMove(Action<(object? CardId, TGroupKey FromColumn, TGroupKey ToColumn)> onMove)
+    /// <summary>Sets a simple event handler called when a card is moved between columns or reordered within a column.</summary>
+    /// <param name="onMove">Simple action that receives a tuple with (CardId, FromColumn, ToColumn, TargetIndex) when a card is moved.</param>
+    public KanbanBuilder<TModel, TGroupKey> HandleMove(Action<(object? CardId, TGroupKey FromColumn, TGroupKey ToColumn, int? TargetIndex)> onMove)
     {
         _onMove = e => { onMove(e.Value); return ValueTask.CompletedTask; };
         return this;
@@ -332,10 +308,10 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
         {
             kanban = kanban with
             {
-                OnMove = e => _onMove(new Event<Ivy.Kanban, (object?, TGroupKey, TGroupKey)>(
+                OnMove = e => _onMove(new Event<Ivy.Kanban, (object?, TGroupKey, TGroupKey, int?)>(
                                 e.EventName,
                                 e.Sender,
-                                (e.Value.CardId, (TGroupKey)e.Value.FromColumn!, (TGroupKey)e.Value.ToColumn!)))
+                                (e.Value.CardId, (TGroupKey)e.Value.FromColumn!, (TGroupKey)e.Value.ToColumn!, e.Value.TargetIndex)))
             };
         }
 

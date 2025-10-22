@@ -130,11 +130,12 @@ export const KanbanWidget: React.FC<KanbanWidgetProps> = ({
   const handleCardMove = (
     cardId: string,
     fromColumn: string,
-    toColumn: string
+    toColumn: string,
+    targetIndex?: number
   ) => {
     // Always trigger the backend event for card moves
-    // The backend expects a tuple (CardId, FromColumn, ToColumn)
-    eventHandler('OnMove', id, [cardId, fromColumn, toColumn]);
+    // The backend expects a tuple (CardId, FromColumn, ToColumn, TargetIndex)
+    eventHandler('OnMove', id, [cardId, fromColumn, toColumn, targetIndex]);
   };
 
   const handleCardAdd = (columnId: string) => {

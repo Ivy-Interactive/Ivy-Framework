@@ -27,8 +27,8 @@ public record Kanban : WidgetBase<Kanban>
     /// <summary>Event handler called when a card is deleted from the kanban board.</summary>
     [Event] public Func<Event<Kanban, object?>, ValueTask>? OnDelete { get; set; }
 
-    /// <summary>Event handler called when a card is moved between columns.</summary>
-    [Event] public Func<Event<Kanban, (object? CardId, object? FromColumn, object? ToColumn)>, ValueTask>? OnMove { get; set; }
+    /// <summary>Event handler called when a card is moved between columns or reordered within a column.</summary>
+    [Event] public Func<Event<Kanban, (object? CardId, object? FromColumn, object? ToColumn, int? TargetIndex)>, ValueTask>? OnMove { get; set; }
 
     /// <summary>Allows adding single KanbanColumn using pipe operator for convenient kanban board construction.</summary>
     /// <param name="kanban">Kanban to add column to.</param>

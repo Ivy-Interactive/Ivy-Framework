@@ -57,7 +57,12 @@ interface KanbanContextType {
   columns: Column[];
   data: Task[];
   onDataChange: (data: Task[]) => void;
-  onCardMove?: (cardId: string, fromColumn: string, toColumn: string) => void;
+  onCardMove?: (
+    cardId: string,
+    fromColumn: string,
+    toColumn: string,
+    targetIndex?: number
+  ) => void;
   onCardReorder?: (cardId: string, columnId: string, newIndex: number) => void;
   onCardAdd?: (columnId: string) => void;
   onCardDelete?: (cardId: string) => void;
@@ -78,7 +83,12 @@ interface KanbanProviderProps {
   columns: Column[];
   data: Task[];
   onDataChange: (data: Task[]) => void;
-  onCardMove?: (cardId: string, fromColumn: string, toColumn: string) => void;
+  onCardMove?: (
+    cardId: string,
+    fromColumn: string,
+    toColumn: string,
+    targetIndex?: number
+  ) => void;
   onCardReorder?: (cardId: string, columnId: string, newIndex: number) => void;
   onCardAdd?: (columnId: string) => void;
   onCardDelete?: (cardId: string) => void;
@@ -153,23 +163,24 @@ export function KanbanProvider({
         }
       }
 
-      // Only trigger move event if the card is actually moving between columns
-      if (activeTask.status !== targetColumnId) {
-        onCardMove?.(activeId, activeTask.status, targetColumnId);
-      } else {
-        // Card is being reordered within the same column
-        // Find the new index by looking at the position relative to other cards
-        const columnTasks = data
-          .filter(task => task.status === targetColumnId)
-          .sort((a, b) => a.priority - b.priority);
+      // Calculate target index for precise positioning
+      const columnTasks = data
+        .filter(task => task.status === targetColumnId)
+        .sort((a, b) => a.priority - b.priority);
 
-        // Find the index of the card we're dropping over
+      let targetIndex: number | undefined;
+
+      if (overTask) {
+        // Dropping on another card - find its position
         const overTaskIndex = columnTasks.findIndex(task => task.id === overId);
-        const newIndex =
-          overTaskIndex >= 0 ? overTaskIndex : columnTasks.length;
-
-        onCardReorder?.(activeId, targetColumnId, newIndex);
+        targetIndex = overTaskIndex >= 0 ? overTaskIndex : undefined;
+      } else {
+        // Dropping on column - append to end
+        targetIndex = columnTasks.length;
       }
+
+      // Always trigger move event with position information
+      onCardMove?.(activeId, activeTask.status, targetColumnId, targetIndex);
 
       // Note: We don't update local state here since this is a backend-first framework
       // The backend will handle the state update and re-render the component

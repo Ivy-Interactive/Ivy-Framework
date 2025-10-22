@@ -47,7 +47,8 @@ public static class KanbanExtensions
             groupBySelector.Compile(),
             idSelector.Compile(),
             titleSelector.Compile(),
-            descriptionSelector.Compile());
+            descriptionSelector.Compile(),
+            null);
     }
 
     /// <summary>

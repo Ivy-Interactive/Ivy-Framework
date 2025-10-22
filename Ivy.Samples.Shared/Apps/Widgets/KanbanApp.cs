@@ -31,7 +31,7 @@ public class KanbanApp : SampleBase
 
         return Layout.Vertical(
             Text.H3("Task Board Demo"),
-            Text.P("Showcasing kanban features: field selectors, column/card ordering with drag-and-drop support, custom column titles, and event handlers."),
+            Text.P("Showcasing kanban features: field selectors, column/card ordering with precise drag-and-drop positioning, custom column titles, and event handlers."),
 
             // Kanban with common features
             tasks
@@ -50,7 +50,7 @@ public class KanbanApp : SampleBase
                     _ => status
                 })
                 .HandleAdd((string columnKey) => Console.WriteLine($"Card added to column: {columnKey}"))
-                .HandleMove(moveData => Console.WriteLine($"Card {moveData.CardId} moved from {moveData.FromColumn} to {moveData.ToColumn}"))
+                .HandleMove(moveData => Console.WriteLine($"Card {moveData.CardId} moved from {moveData.FromColumn} to {moveData.ToColumn} at index {moveData.TargetIndex}"))
                 .HandleDelete(cardId => Console.WriteLine($"Card deleted: {cardId}"))
                 .Empty(
                     new Card()
