@@ -906,6 +906,11 @@
   }
 }
 
+/* Force text size inheritance for table cells */
+.force-text-inherit * {
+  font-size: inherit !important;
+}
+
 /* Prevent dialog from getting focus rings when elements inside are focused */
 @layer components {
   [data-radix-dialog-content] {

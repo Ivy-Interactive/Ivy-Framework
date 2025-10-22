@@ -39,7 +39,7 @@ export const TableCellWidget: React.FC<TableCellWidgetProps> = ({
   const content = (
     <div
       className={cn(
-        'align-middle w-full',
+        'align-middle w-full force-text-inherit',
         multiLine && 'whitespace-normal break-words',
         !multiLine && 'min-w-0'
       )}
@@ -60,7 +60,7 @@ export const TableCellWidget: React.FC<TableCellWidgetProps> = ({
       className={cn(
         isHeader && 'header-cell bg-muted font-semibold',
         isFooter && 'footer-cell bg-muted font-semibold',
-        'border-border',
+        'border-border force-text-inherit',
         // Ensure proper width constraints for truncation
         'max-w-0 overflow-hidden'
       )}
