@@ -31,17 +31,17 @@ public class KanbanApp : SampleBase
 
         return Layout.Vertical(
             Text.H3("Task Board Demo"),
-            Text.P("Showcasing kanban features: field selectors, column/card ordering, custom column titles, and event handlers."),
+            Text.P("Showcasing kanban features: field selectors, column/card ordering with drag-and-drop support, custom column titles, and event handlers."),
 
             // Kanban with common features
             tasks
                 .ToKanban(
                     groupBySelector: e => e.Status,
-                    cardIdSelector: e => e.Id,
-                    cardTitleSelector: e => e.Title,
-                    cardDescriptionSelector: e => e.Description)
+                    idSelector: e => e.Id,
+                    titleSelector: e => e.Title,
+                    descriptionSelector: e => e.Description,
+                    orderSelector: e => e.Priority)
                 .ColumnOrder(e => e.StatusOrder)
-                .CardOrder(e => e.Priority)
                 .ColumnTitle(status => status switch
                 {
                     "Todo" => "Custom Todo",

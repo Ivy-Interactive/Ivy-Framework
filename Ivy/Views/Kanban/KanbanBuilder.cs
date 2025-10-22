@@ -27,6 +27,7 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
     private readonly Func<TModel, object?>? _cardIdSelector;
     private readonly Func<TModel, object?>? _cardTitleSelector;
     private readonly Func<TModel, object?>? _cardDescriptionSelector;
+    private readonly Func<TModel, object?>? _orderSelector;
     private Func<TModel, object>? _customCardRenderer;
     private Func<Event<Ivy.Kanban, object?>, ValueTask>? _onDelete;
     private Func<Event<Ivy.Kanban, (object? CardId, TGroupKey FromColumn, TGroupKey ToColumn)>, ValueTask>? _onMove;
@@ -54,6 +55,33 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
         _cardIdSelector = cardIdSelector;
         _cardTitleSelector = cardTitleSelector;
         _cardDescriptionSelector = cardDescriptionSelector;
+    }
+
+    /// <summary>
+    /// Creates a kanban builder with automatic column grouping based on the selector and custom ordering.
+    /// </summary>
+    /// <param name="records">The data records to display in the kanban board.</param>
+    /// <param name="groupBySelector">Function that determines which column each item belongs to.</param>
+    /// <param name="cardIdSelector">Optional function to select the card ID field.</param>
+    /// <param name="cardTitleSelector">Optional function to select the card title field.</param>
+    /// <param name="cardDescriptionSelector">Optional function to select the card description field.</param>
+    /// <param name="orderSelector">Function to select the field used for ordering cards within columns.</param>
+    public KanbanBuilder(
+        IEnumerable<TModel> records,
+        Func<TModel, TGroupKey> groupBySelector,
+        Func<TModel, object?>? cardIdSelector = null,
+        Func<TModel, object?>? cardTitleSelector = null,
+        Func<TModel, object?>? cardDescriptionSelector = null,
+        Func<TModel, object?>? orderSelector = null)
+    {
+        _records = records;
+        _groupBySelector = groupBySelector;
+        _builderFactory = new BuilderFactory<TModel>();
+        _cardBuilder = _builderFactory.Default();
+        _cardIdSelector = cardIdSelector;
+        _cardTitleSelector = cardTitleSelector;
+        _cardDescriptionSelector = cardDescriptionSelector;
+        _orderSelector = orderSelector;
     }
 
     /// <summary>Sets a custom builder for rendering card content.</summary>
@@ -212,8 +240,14 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
             {
                 // Apply card ordering if specified
                 IEnumerable<TModel> orderedItems;
-                if (_cardOrderBySelector != null)
+                if (_orderSelector != null)
                 {
+                    // Use the orderSelector from ToKanban method
+                    orderedItems = group!.OrderBy(_orderSelector);
+                }
+                else if (_cardOrderBySelector != null)
+                {
+                    // Use the CardOrder method for backward compatibility
                     orderedItems = _cardOrderDescending
                         ? group!.OrderByDescending(_cardOrderBySelector)
                         : group!.OrderBy(_cardOrderBySelector);
