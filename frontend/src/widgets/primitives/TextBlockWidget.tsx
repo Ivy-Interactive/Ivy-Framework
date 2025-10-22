@@ -45,6 +45,7 @@ interface VariantMap {
     children: string;
     className?: string;
     style?: React.CSSProperties;
+    shouldApplyEllipsis?: boolean;
   }>;
 }
 const variantMap: VariantMap = {
@@ -73,7 +74,7 @@ const variantMap: VariantMap = {
       {children}
     </h4>
   ),
-  Block: ({ children, className, style }) => {
+  Block: ({ children, className, style, shouldApplyEllipsis = false }) => {
     const spanRef = React.useRef<HTMLSpanElement>(null);
     const [isTruncated, setIsTruncated] = React.useState(false);
     const [showTooltip, setShowTooltip] = React.useState(false);
@@ -91,6 +92,18 @@ const variantMap: VariantMap = {
         window.removeEventListener('resize', checkTruncation);
       };
     }, [children, style]);
+
+    if (!shouldApplyEllipsis) {
+      return (
+        <div
+          className={cn('flex items-center text-sm', className)}
+          style={style}
+        >
+          {children}
+        </div>
+      );
+    }
+
     return (
       <div
         className={cn('flex items-center text-sm min-w-0', className)}
@@ -101,7 +114,7 @@ const variantMap: VariantMap = {
             <TooltipTrigger asChild>
               <span
                 ref={spanRef}
-                className="overflow-hidden text-ellipsis"
+                className="overflow-hidden text-ellipsis whitespace-nowrap"
                 onMouseEnter={() => setShowTooltip(true)}
                 onMouseLeave={() => setShowTooltip(false)}
               >
@@ -123,11 +136,55 @@ const variantMap: VariantMap = {
       {children}
     </p>
   ),
-  Inline: ({ children, className, style }) => (
-    <span className={cn(className)} style={style}>
-      {children}
-    </span>
-  ),
+  Inline: ({ children, className, style, shouldApplyEllipsis = false }) => {
+    if (!shouldApplyEllipsis) {
+      return (
+        <span className={className} style={style}>
+          {children}
+        </span>
+      );
+    }
+
+    const spanRef = React.useRef<HTMLSpanElement>(null);
+    const [isTruncated, setIsTruncated] = React.useState(false);
+    const [showTooltip, setShowTooltip] = React.useState(false);
+    React.useEffect(() => {
+      const checkTruncation = () => {
+        const el = spanRef.current;
+        if (el) {
+          setIsTruncated(el.scrollWidth > el.clientWidth);
+        }
+      };
+      checkTruncation();
+      window.addEventListener('resize', checkTruncation);
+      return () => {
+        window.removeEventListener('resize', checkTruncation);
+      };
+    }, [children, style]);
+    return (
+      <span className={cn('min-w-0', className)} style={style}>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span
+                ref={spanRef}
+                className="overflow-hidden text-ellipsis whitespace-nowrap"
+                onMouseEnter={() => setShowTooltip(true)}
+                onMouseLeave={() => setShowTooltip(false)}
+              >
+                {children}
+              </span>
+            </TooltipTrigger>
+            {showTooltip && isTruncated && typeof children === 'string' && (
+              <TooltipContent className="bg-popover text-popover-foreground shadow-md">
+                {children}
+              </TooltipContent>
+            )}
+          </Tooltip>
+        </TooltipProvider>
+      </span>
+    );
+  },
   Blockquote: ({ children, className, style }) => (
     <blockquote
       className={cn(textBlockClassMap.Blockquote, className)}
@@ -197,22 +254,116 @@ const variantMap: VariantMap = {
       {children}
     </div>
   ),
-  Label: ({ children, className, style }) => (
-    <div
-      className={cn(
-        'text-large-label font-medium leading-none flex items-center',
-        className
-      )}
-      style={style}
-    >
-      {children}
-    </div>
-  ),
-  Strong: ({ children, className, style }) => (
-    <strong className={cn('font-semibold', className)} style={style}>
-      {children}
-    </strong>
-  ),
+  Label: ({ children, className, style, shouldApplyEllipsis = false }) => {
+    if (!shouldApplyEllipsis) {
+      return (
+        <div
+          className={cn(
+            'text-large-label font-medium leading-none flex items-center',
+            className
+          )}
+          style={style}
+        >
+          {children}
+        </div>
+      );
+    }
+
+    const spanRef = React.useRef<HTMLSpanElement>(null);
+    const [isTruncated, setIsTruncated] = React.useState(false);
+    const [showTooltip, setShowTooltip] = React.useState(false);
+    React.useEffect(() => {
+      const checkTruncation = () => {
+        const el = spanRef.current;
+        if (el) {
+          setIsTruncated(el.scrollWidth > el.clientWidth);
+        }
+      };
+      checkTruncation();
+      window.addEventListener('resize', checkTruncation);
+      return () => {
+        window.removeEventListener('resize', checkTruncation);
+      };
+    }, [children, style]);
+    return (
+      <div
+        className={cn(
+          'text-large-label font-medium leading-none flex items-center min-w-0',
+          className
+        )}
+        style={style}
+      >
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span
+                ref={spanRef}
+                className="overflow-hidden text-ellipsis whitespace-nowrap"
+                onMouseEnter={() => setShowTooltip(true)}
+                onMouseLeave={() => setShowTooltip(false)}
+              >
+                {children}
+              </span>
+            </TooltipTrigger>
+            {showTooltip && isTruncated && typeof children === 'string' && (
+              <TooltipContent className="bg-popover text-popover-foreground shadow-md">
+                {children}
+              </TooltipContent>
+            )}
+          </Tooltip>
+        </TooltipProvider>
+      </div>
+    );
+  },
+  Strong: ({ children, className, style, shouldApplyEllipsis = false }) => {
+    if (!shouldApplyEllipsis) {
+      return (
+        <strong className={cn('font-semibold', className)} style={style}>
+          {children}
+        </strong>
+      );
+    }
+
+    const spanRef = React.useRef<HTMLSpanElement>(null);
+    const [isTruncated, setIsTruncated] = React.useState(false);
+    const [showTooltip, setShowTooltip] = React.useState(false);
+    React.useEffect(() => {
+      const checkTruncation = () => {
+        const el = spanRef.current;
+        if (el) {
+          setIsTruncated(el.scrollWidth > el.clientWidth);
+        }
+      };
+      checkTruncation();
+      window.addEventListener('resize', checkTruncation);
+      return () => {
+        window.removeEventListener('resize', checkTruncation);
+      };
+    }, [children, style]);
+    return (
+      <strong className={cn('font-semibold min-w-0', className)} style={style}>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span
+                ref={spanRef}
+                className="overflow-hidden text-ellipsis whitespace-nowrap"
+                onMouseEnter={() => setShowTooltip(true)}
+                onMouseLeave={() => setShowTooltip(false)}
+              >
+                {children}
+              </span>
+            </TooltipTrigger>
+            {showTooltip && isTruncated && typeof children === 'string' && (
+              <TooltipContent className="bg-popover text-popover-foreground shadow-md">
+                {children}
+              </TooltipContent>
+            )}
+          </Tooltip>
+        </TooltipProvider>
+      </strong>
+    );
+  },
 };
 
 export const TextBlockWidget: React.FC<TextBlockWidgetProps> = ({
@@ -231,6 +382,10 @@ export const TextBlockWidget: React.FC<TextBlockWidgetProps> = ({
   };
 
   const Component = variantMap[variant];
+
+  // Only apply ellipsis logic if overflow is explicitly set to 'Ellipsis'
+  const shouldApplyEllipsis = overflow === 'Ellipsis';
+
   return (
     <Component
       style={styles}
@@ -238,6 +393,7 @@ export const TextBlockWidget: React.FC<TextBlockWidgetProps> = ({
         strikeThrough && 'line-through',
         noWrap && 'whitespace-nowrap'
       )}
+      shouldApplyEllipsis={shouldApplyEllipsis}
     >
       {content}
     </Component>

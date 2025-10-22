@@ -159,7 +159,7 @@ const DefaultVariant: React.FC<{
         onBlur={onBlur}
         onFocus={onFocus}
         className={cn(
-          'w-full',
+          'w-full text-ellipsis',
           props.invalid && inputStyles.invalidInput,
           props.invalid && 'pr-8',
           props.shortcutKey && !isFocused && 'pr-16'
@@ -306,7 +306,7 @@ const PasswordVariant: React.FC<{
         onBlur={onBlur}
         onFocus={onFocus}
         className={cn(
-          'w-full',
+          'w-full text-ellipsis',
           props.invalid && inputStyles.invalidInput,
           props.invalid ? 'pr-14' : 'pr-8',
           hasLastPass && 'pr-3',
@@ -431,7 +431,7 @@ const SearchVariant: React.FC<{
         onKeyDown={handleKeyDown}
         autoComplete="off"
         className={cn(
-          'w-full pl-8 cursor-pointer',
+          'w-full pl-8 cursor-pointer text-ellipsis',
           props.invalid && inputStyles.invalidInput,
           props.invalid && 'pr-8',
           hasValue && 'pr-8',

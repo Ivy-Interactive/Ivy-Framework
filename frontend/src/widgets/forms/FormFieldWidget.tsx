@@ -14,9 +14,9 @@ export const FormFieldWidget: React.FC<FormFieldWidgetProps> = ({
   required,
   children,
 }) => (
-  <div className="flex flex-col gap-2 flex-1 min-w-0">
+  <div className="flex flex-col gap-2 flex-1">
     {label && (
-      <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+      <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex-shrink-0">
         {label} {required && <span className="font-mono text-primary">*</span>}
       </label>
     )}

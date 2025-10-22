@@ -38,12 +38,12 @@ export const AsyncSelectInputWidget: React.FC<AsyncSelectInputWidgetProps> = ({
         )}
       >
         {displayValue && (
-          <span className="flex-grow text-primary font-semibold text-body ml-3 underline">
+          <span className="flex-grow text-primary font-semibold text-body ml-3 underline overflow-hidden text-ellipsis whitespace-nowrap">
             {displayValue}
           </span>
         )}
         {!displayValue && (
-          <span className="flex-grow text-muted-foreground text-body ml-3">
+          <span className="flex-grow text-muted-foreground text-body ml-3 overflow-hidden text-ellipsis whitespace-nowrap">
             {placeholder}
           </span>
         )}

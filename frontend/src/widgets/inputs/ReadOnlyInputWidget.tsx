@@ -17,7 +17,7 @@ export const ReadOnlyInputWidget: React.FC<ReadOnlyInputWidgetProps> = ({
       key={id}
       className="text-body text-muted-foreground flex flex-row items-center w-full"
     >
-      <div className="flex-1">
+      <div className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap">
         {value && value}
         {!value && '-'}
       </div>
