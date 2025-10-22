@@ -140,25 +140,32 @@ export function KanbanProvider({
       // Determine the target column
       let targetColumnId: string;
 
-      // Check if we're dropping on a column or on another card
-      const overTask = data.find(task => task.id === overId);
-      if (overTask) {
-        targetColumnId = overTask.status;
+      // Handle the case where we're dropping on the same card (overId === activeId)
+      // This happens when the column drop zone isn't properly detected
+      if (overId === activeId) {
+        // Try to determine the target column based on the drag position
+        // We'll use a heuristic: check if the overId matches any column ID
+        const possibleColumnId = overId;
+        if (columns.some(col => col.id === possibleColumnId)) {
+          targetColumnId = possibleColumnId;
+        } else {
+          // If we can't determine the target column, try to use the visual position
+          // For now, we'll keep the card in its current column (no move)
+          targetColumnId = activeTask.status;
+        }
       } else {
-        // Dropping on a column - find the column that matches the overId
+        // Check if we're dropping on a column (for first/last position)
         const targetColumn = columns.find(col => col.id === overId);
         if (targetColumn) {
           targetColumnId = targetColumn.id;
         } else {
-          // If overId doesn't match any column, check if it's a column ID from the data
-          // This handles cases where the overId might be the column ID but not in our columns array
-          const possibleColumnId = overId;
-          if (columns.some(col => col.id === possibleColumnId)) {
-            targetColumnId = possibleColumnId;
+          // Check if we're dropping on another card
+          const overTask = data.find(task => task.id === overId);
+          if (overTask) {
+            targetColumnId = overTask.status;
           } else {
-            // Last resort: try to extract column from the overId or use the first available column
-            // For now, let's try to use the overId as the column ID
-            targetColumnId = overId;
+            // If not dropping on a column or card, cancel the move
+            return;
           }
         }
       }
@@ -170,12 +177,14 @@ export function KanbanProvider({
 
       let targetIndex: number | undefined;
 
+      // Calculate target index based on drop target
+      const overTask = data.find(task => task.id === overId);
       if (overTask) {
         // Dropping on another card - find its position
         const overTaskIndex = columnTasks.findIndex(task => task.id === overId);
         targetIndex = overTaskIndex >= 0 ? overTaskIndex : undefined;
       } else {
-        // Dropping on column - append to end
+        // Dropping on column - append to end (last position)
         targetIndex = columnTasks.length;
       }
 
@@ -207,15 +216,21 @@ export function KanbanProvider({
       >
         <div className="flex gap-4 overflow-x-auto">
           {columns
-            .sort((a, b) => a.order - b.order)
+            .sort((a, b) => {
+              // CRITICAL: Always sort by order property to respect backend Order
+              // Order = 1 means first column, Order = 2 means second, etc.
+              const orderA = a.order || 999;
+              const orderB = b.order || 999;
+              return orderA - orderB;
+            })
             .map(column => children(column))}
         </div>
         <DragOverlay>
           {activeId ? (
             <KanbanCard
               id={activeId}
-              column={data.find(t => t.id === activeId)?.status || ''}
-              name={data.find(t => t.id === activeId)?.title || ''}
+              column={data.find(t => t.id === activeId)?.status}
+              name={data.find(t => t.id === activeId)?.title}
               task={data.find(t => t.id === activeId)}
             />
           ) : null}
@@ -347,7 +362,7 @@ export function KanbanCard({ id, name, task, children }: KanbanCardProps) {
       {...attributes}
       {...listeners}
       className={cn(
-        'h-40 cursor-grab active:cursor-grabbing group hover:shadow-md transition-all duration-200 flex flex-col',
+        'min-h-32 cursor-grab active:cursor-grabbing group hover:shadow-md transition-all duration-200 flex flex-col',
         isDragging && 'opacity-50 rotate-2 scale-105'
       )}
     >
@@ -384,10 +399,10 @@ export function KanbanCard({ id, name, task, children }: KanbanCardProps) {
             <span
               className={cn(
                 'px-2 py-1 text-xs font-medium rounded-md border',
-                getPriorityColor(task?.priority || 1)
+                getPriorityColor(task?.priority)
               )}
             >
-              P{task?.priority || 1}
+              P{task?.priority}
             </span>
           </div>
 

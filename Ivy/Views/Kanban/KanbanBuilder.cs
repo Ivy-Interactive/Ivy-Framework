@@ -28,6 +28,7 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
     private readonly Func<TModel, object?>? _cardTitleSelector;
     private readonly Func<TModel, object?>? _cardDescriptionSelector;
     private readonly Func<TModel, object?>? _orderSelector;
+    private readonly Func<TModel, object?>? _columnOrderSelector;
     private Func<TModel, object>? _customCardRenderer;
     private Func<Event<Ivy.Kanban, object?>, ValueTask>? _onDelete;
     private Func<Event<Ivy.Kanban, (object? CardId, TGroupKey FromColumn, TGroupKey ToColumn, int? TargetIndex)>, ValueTask>? _onMove;
@@ -42,13 +43,15 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
     /// <param name="cardTitleSelector">Optional function to select the card title field.</param>
     /// <param name="cardDescriptionSelector">Optional function to select the card description field.</param>
     /// <param name="orderSelector">Optional function to select the field used for ordering cards within columns.</param>
+    /// <param name="columnOrderSelector">Optional function to select the field used for ordering columns.</param>
     public KanbanBuilder(
         IEnumerable<TModel> records,
         Func<TModel, TGroupKey> groupBySelector,
         Func<TModel, object?>? cardIdSelector = null,
         Func<TModel, object?>? cardTitleSelector = null,
         Func<TModel, object?>? cardDescriptionSelector = null,
-        Func<TModel, object?>? orderSelector = null)
+        Func<TModel, object?>? orderSelector = null,
+        Func<TModel, object?>? columnOrderSelector = null)
     {
         _records = records;
         _groupBySelector = groupBySelector;
@@ -58,6 +61,7 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
         _cardTitleSelector = cardTitleSelector;
         _cardDescriptionSelector = cardDescriptionSelector;
         _orderSelector = orderSelector;
+        _columnOrderSelector = columnOrderSelector;
     }
 
     /// <summary>Sets a custom builder for rendering card content.</summary>
@@ -195,8 +199,18 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
 
         // Apply column ordering if specified
         IEnumerable<IGrouping<TGroupKey, TModel>> orderedGroups;
-        if (_columnOrderBySelector != null)
+        if (_columnOrderSelector != null)
         {
+            // Use the columnOrderSelector from ToKanban method
+            var groupsWithKeys = grouped
+                .Select(g => new { Group = g, SortKey = g.FirstOrDefault() })
+                .Where(x => x.SortKey != null);
+
+            orderedGroups = groupsWithKeys.OrderBy(x => _columnOrderSelector(x.SortKey!)).Select(x => x.Group);
+        }
+        else if (_columnOrderBySelector != null)
+        {
+            // Use the ColumnOrder method for backward compatibility
             var groupsWithKeys = grouped
                 .Select(g => new { Group = g, SortKey = g.FirstOrDefault() })
                 .Where(x => x.SortKey != null);
@@ -275,6 +289,16 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
                 var column = new KanbanColumn(cards)
                     .Title(title)
                     .ColumnKey(group!.Key);
+
+                // Set ColumnOrder if columnOrderSelector is provided
+                if (_columnOrderSelector != null)
+                {
+                    var columnOrder = _columnOrderSelector(group!.FirstOrDefault()!);
+                    if (columnOrder is int order)
+                    {
+                        column = column.ColumnOrder(order);
+                    }
+                }
 
                 // Attach OnAdd handler if specified
                 if (_onAdd != null)
