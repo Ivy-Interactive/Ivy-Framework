@@ -71,7 +71,7 @@ export const CardWidget: React.FC<CardWidgetProps> = ({
           content: 'p-3 pt-0 [&_*]:text-xs',
           footer: 'p-3 pt-0',
           title: 'text-sm',
-          description: 'text-xs',
+          description: 'text-xs mt-1',
           icon: 'h-4 w-4',
         };
       case Sizes.Large:
@@ -80,7 +80,7 @@ export const CardWidget: React.FC<CardWidgetProps> = ({
           content: 'p-8 pt-0 [&_*]:text-base',
           footer: 'p-8 pt-0',
           title: 'text-lg',
-          description: 'text-base',
+          description: 'text-base mt-3',
           icon: 'h-6 w-6',
         };
       default:
@@ -89,7 +89,7 @@ export const CardWidget: React.FC<CardWidgetProps> = ({
           content: 'p-6 pt-0 [&_*]:text-sm',
           footer: 'p-6 pt-0',
           title: 'text-base',
-          description: 'text-sm',
+          description: 'text-sm mt-2',
           icon: 'h-5 w-5',
         };
     }
@@ -145,7 +145,7 @@ export const CardWidget: React.FC<CardWidgetProps> = ({
               <CardTitle className={sizeClasses.title}>{title}</CardTitle>
             )}
             {description && (
-              <CardDescription className={cn('mt-2', sizeClasses.description)}>
+              <CardDescription className={sizeClasses.description}>
                 {description}
               </CardDescription>
             )}

@@ -57,55 +57,99 @@ public class CardApp : SampleBase
             "This is a large card with generous spacing and larger text for better readability."
         ).Title("Large Card").Description("Spacious size").Size(Sizes.Large).TestId("card-large");
 
+        // Card Size Examples
+        var smallCardWithoutDescription = new Card(
+            "This is a small card with compact spacing and smaller text."
+        ).Title("Small Card").Size(Sizes.Small).TestId("card-small");
+
+        var mediumCardWithoutDescription = new Card(
+            "This is a medium card with standard spacing and text size."
+        ).Title("Medium Card").TestId("card-medium");
+
+        var largeCardWithoutDescription = new Card(
+            "This is a large card with generous spacing and larger text for better readability."
+        ).Title("Large Card").Size(Sizes.Large).TestId("card-large");
+        var smallCardWithElements = new Card(
+         "This is a small card with elements."
+        ).Title("Small Card with Elements")
+        .Description("This is a small card with elements.")
+        .Icon(Icons.Info)
+        .BorderStyle(BorderStyle.Dashed)
+        .BorderColor(Colors.Primary)
+        .Size(Sizes.Small)
+        .TestId("card-small-with-elements");
+        var mediumCardWithElements = new Card(
+         "This is a medium card with elements."
+        ).Title("Medium Card with Elements")
+        .Description("This is a medium card with elements.")
+        .Icon(Icons.Info)
+        .BorderStyle(BorderStyle.Dashed)
+        .BorderColor(Colors.Primary)
+        .Size(Sizes.Medium)
+        .TestId("card-medium-with-elements");
+        var largeCardWithElements = new Card(
+         "This is a large card with elements."
+        ).Title("Large Card with Elements")
+        .Description("This is a large card with elements.")
+        .Icon(Icons.Info)
+        .BorderStyle(BorderStyle.Dashed)
+        .BorderColor(Colors.Primary)
+        .Size(Sizes.Large);
         return Layout.Vertical()
-               | Text.H1("Card")
-               | Text.H2("Size Variants")
-               | (Layout.Grid().Columns(3)
-                  | smallCard
-                  | mediumCard
-                  | largeCard
-                  )
-               | Text.H2("Basic Examples")
-               | (Layout.Grid().Columns(4)
-                  | card1
-                  | card2
-                  | card3
-                  | card4
-                  )
-               | (Layout.Grid().Columns(4)
-                  | new TotalSalesMetricView()
-                  | new LongNumberMetricView()
-                  | new HighPercentageMetricView()
-                  | new TotalCommentsPerAuthorMetricView()
-                  )
-               | (Layout.Grid().Columns(4)
-                  | new VeryLongTitleMetricView()
-                  | new UserEngagementWidget()
-                  | new TaskCompletionWidget()
-                  | new SystemHealthWidget()
-                  )
-               | (Layout.Grid().Columns(4)
-                  | new RevenueGrowthWidget()
-                  | new IconTextShowcaseWidget()
-                  | new ProgressBarVariationsWidget()
-                  | new LayoutTestWidget()
-                  )
-               | (Layout.Grid().Columns(3)
-                  | new MixedContentWidget()
-                  | new ResponsiveLayoutWidget()
-                  | new TextSpacingDemoWidget()
-                  )
-               | (Layout.Grid().Columns(3)
-                  | new CardPaddingOverrideWidget()
-                  | new LayoutSpacingControlWidget()
-                  )
-               | Text.H2("Metric Cards with Different Sizes")
-               | (Layout.Grid().Columns(3)
-                  | new SmallMetricView()
-                  | new MediumMetricView()
-                  | new LargeMetricView()
-                  )
-            ;
+         | Text.H1("Card")
+         | Text.H2("Size Variants")
+         | (Layout.Grid().Columns(3)
+            | smallCard
+            | mediumCard
+            | largeCard
+            | smallCardWithoutDescription
+            | mediumCardWithoutDescription
+            | largeCardWithoutDescription
+            | smallCardWithElements
+            | mediumCardWithElements
+            | largeCardWithElements
+            )
+         | Text.H2("Basic Examples")
+         | (Layout.Grid().Columns(4)
+            | card1
+            | card2
+            | card3
+            | card4
+            )
+         | (Layout.Grid().Columns(4)
+            | new TotalSalesMetricView()
+            | new LongNumberMetricView()
+            | new HighPercentageMetricView()
+            | new TotalCommentsPerAuthorMetricView()
+            )
+         | (Layout.Grid().Columns(4)
+            | new VeryLongTitleMetricView()
+            | new UserEngagementWidget()
+            | new TaskCompletionWidget()
+            | new SystemHealthWidget()
+            )
+         | (Layout.Grid().Columns(4)
+            | new RevenueGrowthWidget()
+            | new IconTextShowcaseWidget()
+            | new ProgressBarVariationsWidget()
+            | new LayoutTestWidget()
+            )
+         | (Layout.Grid().Columns(3)
+            | new MixedContentWidget()
+            | new ResponsiveLayoutWidget()
+            | new TextSpacingDemoWidget()
+            )
+         | (Layout.Grid().Columns(3)
+            | new CardPaddingOverrideWidget()
+            | new LayoutSpacingControlWidget()
+            )
+         | Text.H2("Metric Cards with Different Sizes")
+         | (Layout.Grid().Columns(3)
+            | new SmallMetricView()
+            | new MediumMetricView()
+            | new LargeMetricView()
+            )
+      ;
     }
 }
 
