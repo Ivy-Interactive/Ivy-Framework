@@ -540,10 +540,31 @@ public class FormBuilder<TModel> : ViewBase
     /// <summary>Sets the size of the form affecting spacing between fields.</summary>
     /// <param name="size">The size of the form (Small, Medium, Large).</param>
     /// <returns>Form builder instance for method chaining.</returns>
-    public FormBuilder<TModel> Size(Sizes size)
+    public FormBuilder<TModel> SetSize(Sizes size)
     {
         FormSize = size;
         return this;
+    }
+
+    /// <summary>Sets form size to small for compact display.</summary>
+    /// <returns>Form builder instance with small size applied.</returns>
+    public FormBuilder<TModel> Small()
+    {
+        return SetSize(Sizes.Small);
+    }
+
+    /// <summary>Sets form size to medium for standard display.</summary>
+    /// <returns>Form builder instance with medium size applied.</returns>
+    public FormBuilder<TModel> Medium()
+    {
+        return SetSize(Sizes.Medium);
+    }
+
+    /// <summary>Sets form size to large for prominent display.</summary>
+    /// <returns>Form builder instance with large size applied.</returns>
+    public FormBuilder<TModel> Large()
+    {
+        return SetSize(Sizes.Large);
     }
 
     /// <summary>Applies the form size to an input control.</summary>

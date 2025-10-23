@@ -81,7 +81,7 @@ public class FormSizeTestApp : SampleBase
                | (Layout.Horizontal()
                 | new Card(
                     smallModel.ToForm()
-                        .Size(Sizes.Small)
+                        .Small()
                         .Builder(m => m.Description, s => s.ToTextAreaInput())
                         .Builder(m => m.Password, s => s.ToPasswordInput())
                         .Builder(m => m.PhoneNumber, s => s.ToTelInput())
@@ -92,7 +92,7 @@ public class FormSizeTestApp : SampleBase
                 .Title("Small Form")
                 | new Card(
                     mediumModel.ToForm()
-                        .Size(Sizes.Medium)
+                        .Medium()
                         .Builder(m => m.Description, s => s.ToTextAreaInput())
                         .Builder(m => m.Password, s => s.ToPasswordInput())
                         .Builder(m => m.PhoneNumber, s => s.ToTelInput())
@@ -103,7 +103,7 @@ public class FormSizeTestApp : SampleBase
                 .Title("Medium Form (Default)")
                 | new Card(
                     largeModel.ToForm()
-                        .Size(Sizes.Large)
+                        .Large()
                         .Builder(m => m.Description, s => s.ToTextAreaInput())
                         .Builder(m => m.Password, s => s.ToPasswordInput())
                         .Builder(m => m.PhoneNumber, s => s.ToTelInput())
@@ -114,7 +114,7 @@ public class FormSizeTestApp : SampleBase
                 .Title("Large Form"))
                | Text.P("Notice how the spacing between fields, the size of input elements, field labels, AND submit buttons all change based on the form size setting.")
                | Text.P("This example shows all available input types: Text, Email, Password, TextArea, Boolean, Number, DateTime, Select (Enum), Tel, URL, and Color inputs.")
-               | Text.P("The FormBuilder.Size() method controls the gap between form fields, the size of all input elements, field labels, and submit buttons within the form.")
+               | Text.P("The FormBuilder.Small(), .Medium(), and .Large() methods control the gap between form fields, the size of all input elements, field labels, and submit buttons within the form.")
             ;
     }
 }
