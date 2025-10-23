@@ -132,7 +132,7 @@ public class FormBuilder<TModel> : ViewBase
     public FormValidationStrategy ValidationStrategy { get; set; } = FormValidationStrategy.OnBlur;
 
     /// <summary>The size of the form affecting spacing between fields. Default is Medium.</summary>
-    public Sizes Size { get; set; } = Sizes.Medium;
+    public Sizes FormSize { get; set; } = Sizes.Medium;
 
     /// <summary>Initializes form builder for specified model state with automatic field scaffolding.</summary>
     /// <param name="model">Reactive state containing model object to be edited by form.</param>
@@ -540,9 +540,9 @@ public class FormBuilder<TModel> : ViewBase
     /// <summary>Sets the size of the form affecting spacing between fields.</summary>
     /// <param name="size">The size of the form (Small, Medium, Large).</param>
     /// <returns>Form builder instance for method chaining.</returns>
-    public FormBuilder<TModel> WithSize(Sizes size)
+    public FormBuilder<TModel> Size(Sizes size)
     {
-        Size = size;
+        FormSize = size;
         return this;
     }
 
@@ -551,7 +551,7 @@ public class FormBuilder<TModel> : ViewBase
     /// <returns>The input control with the form size applied.</returns>
     private IAnyInput ApplyFormSize(IAnyInput input)
     {
-        input.Size = Size;
+        input.Size = FormSize;
         return input;
     }
 
@@ -598,7 +598,7 @@ public class FormBuilder<TModel> : ViewBase
                 new FormFieldLayoutOptions(e.RowKey, e.Column, e.Order, e.Group),
                 e.Validators.ToArray(),
                 ValidationStrategy,
-                Size
+                FormSize
             ))
             .Cast<IFormFieldBinding<TModel>>()
             .ToArray();
@@ -629,7 +629,7 @@ public class FormBuilder<TModel> : ViewBase
         var formView = new FormView<TModel>(
             fieldViews,
             HandleSubmitEvent,
-            Size
+            FormSize
         );
 
         var validationView = new WrapperView(Layout.Vertical(
@@ -657,7 +657,7 @@ public class FormBuilder<TModel> : ViewBase
         return Layout.Vertical()
                | formView
                | Layout.Horizontal(new Button(SubmitTitle).HandleClick(HandleSubmit)
-                   .Loading(submitting).Disabled(submitting).Size(Size), validationView);
+                   .Loading(submitting).Disabled(submitting).Size(FormSize), validationView);
     }
 
     private static string InvalidMessage(int invalidFields)

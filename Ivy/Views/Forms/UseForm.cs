@@ -49,9 +49,9 @@ public static class UseFormExtensions
                 var layout = new FooterLayout(
                     Layout.Horizontal().Gap(2)
                         | new Button(submitTitle ?? formBuilder.SubmitTitle).HandleClick(_ => HandleSubmit())
-                            .Loading(loading).Disabled(loading).Size(formBuilder.Size)
+                            .Loading(loading).Disabled(loading).Size(formBuilder.FormSize)
                         | new Button("Cancel").Variant(ButtonVariant.Outline).HandleClick(_ => isOpen.Set(false))
-                            .Size(formBuilder.Size)
+                            .Size(formBuilder.FormSize)
                         | validationView,
                     formView
                 );
@@ -100,9 +100,9 @@ public static class UseFormExtensions
                     ),
                     new DialogFooter(
                         validationView,
-                        new Button("Cancel", _ => isOpen.Value = false, variant: ButtonVariant.Outline).Size(formBuilder.Size),
+                        new Button("Cancel", _ => isOpen.Value = false, variant: ButtonVariant.Outline).Size(formBuilder.FormSize),
                         new Button(submitTitle ?? formBuilder.SubmitTitle).HandleClick(_ => HandleSubmit())
-                            .Loading(loading).Disabled(loading).Size(formBuilder.Size)
+                            .Loading(loading).Disabled(loading).Size(formBuilder.FormSize)
                     )
                 ).Width(width ?? Dialog.DefaultWidth);
             }
