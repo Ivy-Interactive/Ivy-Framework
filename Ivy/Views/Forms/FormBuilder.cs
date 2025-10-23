@@ -657,7 +657,7 @@ public class FormBuilder<TModel> : ViewBase
         return Layout.Vertical()
                | formView
                | Layout.Horizontal(new Button(SubmitTitle).HandleClick(HandleSubmit)
-                   .Loading(submitting).Disabled(submitting), validationView);
+                   .Loading(submitting).Disabled(submitting).Size(Size), validationView);
     }
 
     private static string InvalidMessage(int invalidFields)
