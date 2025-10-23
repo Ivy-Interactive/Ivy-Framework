@@ -43,72 +43,8 @@ public class CardApp : SampleBase
         {
             client.Toast("Clicked!");
         });
-
-        // Card Size Examples
-        var smallCard = new Card(
-            "This is a small card with compact spacing and smaller text."
-        ).Title("Small Card").Description("Compact size").Size(Sizes.Small).TestId("card-small");
-
-        var mediumCard = new Card(
-            "This is a medium card with standard spacing and text size."
-        ).Title("Medium Card").Description("Default size").TestId("card-medium");
-
-        var largeCard = new Card(
-            "This is a large card with generous spacing and larger text for better readability."
-        ).Title("Large Card").Description("Spacious size").Size(Sizes.Large).TestId("card-large");
-
-        // Card Size Examples
-        var smallCardWithoutDescription = new Card(
-            "This is a small card with compact spacing and smaller text."
-        ).Title("Small Card").Size(Sizes.Small).TestId("card-small");
-
-        var mediumCardWithoutDescription = new Card(
-            "This is a medium card with standard spacing and text size."
-        ).Title("Medium Card").TestId("card-medium");
-
-        var largeCardWithoutDescription = new Card(
-            "This is a large card with generous spacing and larger text for better readability."
-        ).Title("Large Card").Size(Sizes.Large).TestId("card-large");
-        var smallCardWithElements = new Card(
-         "This is a small card with elements."
-        ).Title("Small Card with Elements")
-        .Description("This is a small card with elements.")
-        .Icon(Icons.Info)
-        .BorderStyle(BorderStyle.Dashed)
-        .BorderColor(Colors.Primary)
-        .Size(Sizes.Small)
-        .TestId("card-small-with-elements");
-        var mediumCardWithElements = new Card(
-         "This is a medium card with elements."
-        ).Title("Medium Card with Elements")
-        .Description("This is a medium card with elements.")
-        .Icon(Icons.Info)
-        .BorderStyle(BorderStyle.Dashed)
-        .BorderColor(Colors.Primary)
-        .Size(Sizes.Medium)
-        .TestId("card-medium-with-elements");
-        var largeCardWithElements = new Card(
-         "This is a large card with elements."
-        ).Title("Large Card with Elements")
-        .Description("This is a large card with elements.")
-        .Icon(Icons.Info)
-        .BorderStyle(BorderStyle.Dashed)
-        .BorderColor(Colors.Primary)
-        .Size(Sizes.Large);
         return Layout.Vertical()
          | Text.H1("Card")
-         | Text.H2("Size Variants")
-         | (Layout.Grid().Columns(3)
-            | smallCard
-            | mediumCard
-            | largeCard
-            | smallCardWithoutDescription
-            | mediumCardWithoutDescription
-            | largeCardWithoutDescription
-            | smallCardWithElements
-            | mediumCardWithElements
-            | largeCardWithElements
-            )
          | Text.H2("Basic Examples")
          | (Layout.Grid().Columns(4)
             | card1
