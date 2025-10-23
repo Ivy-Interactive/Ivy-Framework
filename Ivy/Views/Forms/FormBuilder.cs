@@ -540,7 +540,7 @@ public class FormBuilder<TModel> : ViewBase
     /// <summary>Sets the size of the form affecting spacing between fields.</summary>
     /// <param name="size">The size of the form (Small, Medium, Large).</param>
     /// <returns>Form builder instance for method chaining.</returns>
-    public FormBuilder<TModel> SetSize(Sizes size)
+    internal FormBuilder<TModel> SetSize(Sizes size)
     {
         FormSize = size;
         return this;
