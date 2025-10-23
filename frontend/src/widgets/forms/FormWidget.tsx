@@ -71,9 +71,5 @@ export const FormWidget: React.FC<FormWidgetProps> = ({ id, children }) => {
     };
   }, [id, eventHandler]);
 
-  return (
-    <div ref={formRef} className="flex flex-col">
-      {children}
-    </div>
-  );
+  return <div ref={formRef}>{children}</div>;
 };
