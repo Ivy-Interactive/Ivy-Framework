@@ -170,22 +170,6 @@ const BarChartWidget: React.FC<BarChartWidgetProps> = ({
         fontSans: themeColors.fontSans,
       }
     ),
-    toolbox: !isVertical
-      ? {
-          top: legend?.verticalAlign === 'Top' ? 'bottom' : 'top',
-          feature: {
-            dataView: {
-              show: true,
-            },
-            magicType: {
-              type: ['line', 'bar'],
-            },
-            saveAsImage: {
-              type: 'png',
-            },
-          },
-        }
-      : {},
     series,
     legend: generateEChartLegend(legend, {
       foreground: themeColors.foreground,

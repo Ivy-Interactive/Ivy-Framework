@@ -129,7 +129,7 @@ const LineChartWidget: React.FC<LineChartWidgetProps> = ({
 
   return (
     <div style={styles}>
-      <ReactECharts key={theme} option={option} />;
+      <ReactECharts key={theme} option={option} />
     </div>
   );
 };

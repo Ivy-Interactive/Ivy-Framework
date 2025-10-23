@@ -142,7 +142,7 @@ const AreaChartWidget: React.FC<AreaChartWidgetProps> = ({
       },
       showSymbol: false,
       areaStyle: gradientColors[i],
-      emphasis: { focus: 'series' }, // Disable hover animation only for area, keep axisPointer
+      emphasis: { focus: 'series' },
       data: data.map(d => d[key]),
       markPoint: referenceDots ?? {},
       markLine: referenceLines ?? {},
@@ -163,11 +163,6 @@ const AreaChartWidget: React.FC<AreaChartWidgetProps> = ({
       fontSans: themeColors.fontSans,
     }),
     textStyle: generateTextStyle(themeColors.foreground, themeColors.fontSans),
-    toolbox: {
-      feature: {
-        saveAsImage: {},
-      },
-    },
     xAxis: generateXAxis(categories as string[], xAxis, false, {
       mutedForeground: themeColors.mutedForeground,
       fontSans: themeColors.fontSans,

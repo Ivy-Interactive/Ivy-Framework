@@ -113,28 +113,23 @@ export function generateEChartLegend(
   legend?: LegendProps,
   themeColors?: { foreground: string; fontSans: string }
 ) {
-  if (!legend)
-    return {
-      show: true,
-      textStyle: generateTextStyle(
-        themeColors?.foreground,
-        themeColors?.fontSans
-      ),
-    };
-
-  return {
-    show: true,
-    icon: legend.iconType ? legend.iconType : 'rect',
-    itemWidth: legend.iconSize ?? 14,
-    itemHeight: legend.iconSize ?? 14,
-    itemGap: 16,
-    orient: legend.layout?.toLowerCase(),
-    top: legend.verticalAlign === 'Bottom' ? 'bottom' : 'top',
+  const defaultLegends = {
     type: 'scroll',
+    show: true,
     textStyle: generateTextStyle(
       themeColors?.foreground,
       themeColors?.fontSans
     ),
+  };
+  if (!legend) return defaultLegends;
+
+  return {
+    ...defaultLegends,
+    icon: legend.iconType ? legend.iconType : 'rect',
+    itemWidth: legend.iconSize ?? 14,
+    itemHeight: legend.iconSize ?? 14,
+    orient: legend.layout?.toLowerCase(),
+    top: legend.verticalAlign === 'Bottom' ? 'bottom' : 'top',
   };
 }
 
