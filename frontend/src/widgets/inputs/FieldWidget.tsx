@@ -30,8 +30,11 @@ export const FieldWidget: React.FC<FieldWidgetProps> = ({
         ? 'text-sm'
         : 'text-sm';
 
+  const gapClass =
+    size === Sizes.Small ? 'gap-2' : size === Sizes.Large ? 'gap-4' : 'gap-3';
+
   return (
-    <div className="flex flex-col gap-2 flex-1 min-w-0">
+    <div className={`flex flex-col ${gapClass} flex-1 min-w-0`}>
       {label && (
         <label
           className={`${labelSizeClass} font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70`}
