@@ -77,7 +77,7 @@ export const FormWidget: React.FC<FormWidgetProps> = ({
   }, [id, eventHandler]);
 
   const gapClass =
-    size === 'Small' ? 'gap-2' : size === 'Large' ? 'gap-6' : 'gap-4';
+    size === 'Small' ? 'gap-2' : size === 'Large' ? 'gap-8' : 'gap-6';
 
   return (
     <div ref={formRef} className={`flex flex-col ${gapClass}`}>
