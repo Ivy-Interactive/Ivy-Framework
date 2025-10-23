@@ -133,6 +133,18 @@ public static class CardExtensions
     /// <param name="size">The size variant to apply to the card.</param>
     public static Card Size(this Card card, Sizes size) => card with { Size = size };
 
+    /// <summary>Sets the card size to Small.</summary>
+    /// <param name="card">The Card to configure.</param>
+    public static Card Small(this Card card) => card with { Size = Sizes.Small };
+
+    /// <summary>Sets the card size to Medium.</summary>
+    /// <param name="card">The Card to configure.</param>
+    public static Card Medium(this Card card) => card with { Size = Sizes.Medium };
+
+    /// <summary>Sets the card size to Large.</summary>
+    /// <param name="card">The Card to configure.</param>
+    public static Card Large(this Card card) => card with { Size = Sizes.Large };
+
     /// <summary>Sets the style variant to apply on cursor hover.</summary>
     /// <param name="card">Card to configure.</param>
     /// <param name="variant">Style variants to apply on cursor hover.</param>

@@ -48,21 +48,21 @@ public class CardApp : SampleBase
         ).Title("Small Card with Elements")
         .Description("This is a small card with elements.")
         .Icon(Icons.Info)
-        .Size(Sizes.Small)
+        .Small()
         .TestId("card-small-with-elements");
         var mediumCard = new Card(
          "This is a medium card with elements."
         ).Title("Medium Card with Elements")
         .Description("This is a medium card with elements.")
         .Icon(Icons.Info)
-        .Size(Sizes.Medium)
+        .Medium()
         .TestId("card-medium-with-elements");
         var largeCard = new Card(
          "This is a large card with elements."
         ).Title("Large Card with Elements")
         .Description("This is a large card with elements.")
         .Icon(Icons.Info)
-        .Size(Sizes.Large);
+        .Large();
 
         return Layout.Vertical()
          | Text.H1("Card")
@@ -494,7 +494,7 @@ public class SmallMetricView : ViewBase
                  | Icons.TrendingUp.ToIcon().Color(Colors.Emerald)
                  | Text.Small("+5%").Color(Colors.Emerald)),
                 new Progress(25).Goal("$50K target")
-            ).Title("Small Revenue").Icon(Icons.DollarSign).Size(Sizes.Small)
+            ).Title("Small Revenue").Icon(Icons.DollarSign).Small()
             ;
     }
 }
@@ -524,7 +524,7 @@ public class LargeMetricView : ViewBase
                  | Icons.TrendingUp.ToIcon().Color(Colors.Emerald)
                  | Text.Small("+45%").Color(Colors.Emerald)),
                 new Progress(75).Goal("$1.5M target")
-            ).Title("Large Revenue").Icon(Icons.DollarSign).Size(Sizes.Large)
+            ).Title("Large Revenue").Icon(Icons.DollarSign).Large()
             ;
     }
 }
