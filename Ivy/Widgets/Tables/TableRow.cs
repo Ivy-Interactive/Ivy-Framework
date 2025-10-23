@@ -53,4 +53,8 @@ public static class TableRowExtensions
     /// <summary>Sets the table row size to small for compact display.</summary>
     /// <param name="row">The table row to configure.</param>
     public static TableRow Small(this TableRow row) => row.Size(Sizes.Small);
+
+    /// <summary>Sets the table row size to medium for medium display.</summary>
+    /// <param name="row">The table row to configure.</param>
+    public static TableRow Medium(this TableRow row) => row.Size(Sizes.Medium);
 }

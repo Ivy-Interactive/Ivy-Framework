@@ -41,4 +41,8 @@ public static class TableExtensions
     /// <summary>Sets the table size to small for compact display.</summary>
     /// <param name="widget">The table to configure.</param>
     public static Table Small(this Table widget) => widget.Size(Sizes.Small);
+
+    /// <summary>Sets the table size to medium for medium display.</summary>
+    /// <param name="widget">The table to configure.</param>
+    public static Table Medium(this Table widget) => widget.Size(Sizes.Medium);
 }

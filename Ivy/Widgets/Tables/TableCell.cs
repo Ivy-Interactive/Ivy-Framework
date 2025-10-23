@@ -80,4 +80,8 @@ public static class TableCellExtensions
     /// <summary>Sets the table cell size to small for compact display.</summary>
     /// <param name="cell">The table cell to configure.</param>
     public static TableCell Small(this TableCell cell) => cell.Size(Sizes.Small);
+
+    /// <summary>Sets the table cell size to medium for medium display.</summary>
+    /// <param name="cell">The table cell to configure.</param>
+    public static TableCell Medium(this TableCell cell) => cell.Size(Sizes.Medium);
 }

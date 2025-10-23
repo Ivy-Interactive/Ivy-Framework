@@ -178,6 +178,13 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         return this;
     }
 
+    /// <summary>Sets the table size to medium for medium display.</summary>
+    public TableBuilder<TModel> Medium()
+    {
+        _size = Sizes.Medium;
+        return this;
+    }
+
     /// <summary>Sets the width of a specific column.</summary>
     /// <param name="field">Expression identifying the column to set width for.</param>
     /// <param name="width">The width to set for the column.</param>
