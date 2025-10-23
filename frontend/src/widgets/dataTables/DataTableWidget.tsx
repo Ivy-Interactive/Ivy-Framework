@@ -50,6 +50,8 @@ export const DataTable: React.FC<TableProps> = ({
     selectionMode: config.selectionMode,
     showIndexColumn: config.showIndexColumn ?? false,
     showGroups: config.showGroups ?? false,
+    batchSize: config.batchSize,
+    loadAllRows: config.loadAllRows ?? false,
   };
 
   // Create styles object with width and height if provided
