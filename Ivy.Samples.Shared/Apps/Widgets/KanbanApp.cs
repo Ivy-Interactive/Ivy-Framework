@@ -22,15 +22,21 @@ public class KanbanApp : SampleBase
         {
             new Task { Id = "1", Title = "Design Homepage", Status = "Todo", Priority = 2, Description = "Create wireframes and mockups", Assignee = "Alice" },
             new Task { Id = "2", Title = "Setup Database", Status = "Todo", Priority = 1, Description = "Configure PostgreSQL instance", Assignee = "Bob" },
-            new Task { Id = "3", Title = "Implement Auth", Status = "In Progress", Priority = 1, Description = "Add OAuth2 authentication", Assignee = "Charlie" },
-            new Task { Id = "4", Title = "Build API", Status = "In Progress", Priority = 2, Description = "Create REST endpoints", Assignee = "Alice" },
-            new Task { Id = "5", Title = "Unit Tests", Status = "Done", Priority = 2, Description = "Write comprehensive test suite", Assignee = "Bob" },
-            new Task { Id = "6", Title = "Deploy to Production", Status = "Done", Priority = 1, Description = "Configure CI/CD pipeline", Assignee = "Charlie" },
+            new Task { Id = "3", Title = "Implement Auth", Status = "Todo", Priority = 3, Description = "Add OAuth2 authentication", Assignee = "Charlie" },
+            new Task { Id = "4", Title = "Build API", Status = "Todo", Priority = 4, Description = "Create REST endpoints", Assignee = "Alice" },
+            new Task { Id = "5", Title = "Write Tests", Status = "Todo", Priority = 5, Description = "Unit and integration tests", Assignee = "Bob" },
+            new Task { Id = "6", Title = "Code Review", Status = "In Progress", Priority = 1, Description = "Review pull requests", Assignee = "Charlie" },
+            new Task { Id = "7", Title = "Performance Optimization", Status = "In Progress", Priority = 2, Description = "Optimize database queries", Assignee = "Alice" },
+            new Task { Id = "8", Title = "Bug Fixes", Status = "In Progress", Priority = 3, Description = "Fix reported bugs", Assignee = "Bob" },
+            new Task { Id = "9", Title = "Documentation", Status = "In Progress", Priority = 4, Description = "Update API documentation", Assignee = "Charlie" },
+            new Task { Id = "10", Title = "Unit Tests", Status = "Done", Priority = 1, Description = "Write comprehensive test suite", Assignee = "Bob" },
+            new Task { Id = "11", Title = "Deploy to Production", Status = "Done", Priority = 2, Description = "Configure CI/CD pipeline", Assignee = "Charlie" },
+            new Task { Id = "12", Title = "User Training", Status = "Done", Priority = 3, Description = "Train users on new features", Assignee = "Alice" },
         });
 
         return Layout.Vertical(
             Text.H3("Task Board Demo"),
-            Text.P("Showcasing kanban features: field selectors, column/card ordering with precise drag-and-drop positioning, custom column titles, and event handlers."),
+            Text.P("Showcasing kanban features: field selectors, column/card ordering with precise drag-and-drop positioning, custom column titles, event handlers, and width/height sizing."),
 
             // Kanban with common features
             tasks.Value
@@ -40,6 +46,7 @@ public class KanbanApp : SampleBase
                     titleSelector: e => e.Title,
                     descriptionSelector: e => e.Description,
                     orderSelector: e => e.Priority)
+                .Height(Size.Units(200))
                 .ColumnOrder(e => GetStatusOrder(e.Status))
                 .ColumnTitle(status => status switch
                 {

@@ -8,6 +8,7 @@ import {
   type Task,
 } from '@/components/ui/shadcn-io/kanban';
 import { useEventHandler } from '@/components/event-handler';
+import { getWidth, getHeight } from '@/lib/styles';
 
 interface Column {
   id: string;
@@ -22,6 +23,8 @@ interface KanbanWidgetProps {
   columns?: Column[];
   tasks?: Task[];
   events?: Record<string, unknown>;
+  width?: string;
+  height?: string;
   children?: React.ReactNode;
   slots?: {
     default?: React.ReactNode[];
@@ -32,6 +35,8 @@ export const KanbanWidget: React.FC<KanbanWidgetProps> = ({
   id,
   columns = [],
   tasks = [],
+  width,
+  height,
   slots,
 }) => {
   const eventHandler = useEventHandler();
@@ -160,48 +165,56 @@ export const KanbanWidget: React.FC<KanbanWidgetProps> = ({
     );
   }
 
+  const styles = {
+    ...getWidth(width),
+    ...getHeight(height),
+    overflow: 'hidden', // Prevent the container from scrolling
+  };
+
   return (
-    <KanbanProvider
-      columns={extractedData.columns}
-      data={extractedData.tasks}
-      onDataChange={handleDataChange}
-      onCardMove={handleCardMove}
-      onCardAdd={handleCardAdd}
-      onCardDelete={handleCardDelete}
-    >
-      {column => (
-        <KanbanBoard id={column.id} key={column.id}>
-          <KanbanHeader>
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <div
-                  className="h-2 w-2 rounded-full"
-                  style={{ backgroundColor: column.color }}
-                />
-                <span>{column.name}</span>
+    <div style={styles}>
+      <KanbanProvider
+        columns={extractedData.columns}
+        data={extractedData.tasks}
+        onDataChange={handleDataChange}
+        onCardMove={handleCardMove}
+        onCardAdd={handleCardAdd}
+        onCardDelete={handleCardDelete}
+      >
+        {column => (
+          <KanbanBoard id={column.id} key={column.id}>
+            <KanbanHeader>
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <div
+                    className="h-2 w-2 rounded-full"
+                    style={{ backgroundColor: column.color }}
+                  />
+                  <span>{column.name}</span>
+                </div>
+                <button
+                  onClick={() => handleCardAdd(column.id)}
+                  className="text-gray-500 hover:text-gray-700 text-lg font-bold"
+                  title="Add card"
+                >
+                  +
+                </button>
               </div>
-              <button
-                onClick={() => handleCardAdd(column.id)}
-                className="text-gray-500 hover:text-gray-700 text-lg font-bold"
-                title="Add card"
-              >
-                +
-              </button>
-            </div>
-          </KanbanHeader>
-          <KanbanCards id={column.id}>
-            {(task: Task) => (
-              <KanbanCard
-                column={column.id}
-                id={task.id}
-                key={task.id}
-                name={task.title}
-                task={task}
-              />
-            )}
-          </KanbanCards>
-        </KanbanBoard>
-      )}
-    </KanbanProvider>
+            </KanbanHeader>
+            <KanbanCards id={column.id}>
+              {(task: Task) => (
+                <KanbanCard
+                  column={column.id}
+                  id={task.id}
+                  key={task.id}
+                  name={task.title}
+                  task={task}
+                />
+              )}
+            </KanbanCards>
+          </KanbanBoard>
+        )}
+      </KanbanProvider>
+    </div>
   );
 };

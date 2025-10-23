@@ -34,6 +34,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 // Types
 export interface Task {
@@ -214,7 +215,7 @@ export function KanbanProvider({
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
       >
-        <div className="flex gap-4 overflow-x-auto">
+        <div className="flex gap-4 overflow-x-auto h-full">
           {columns
             .sort((a, b) => {
               // CRITICAL: Always sort by order property to respect backend Order
@@ -229,8 +230,8 @@ export function KanbanProvider({
           {activeId ? (
             <KanbanCard
               id={activeId}
-              column={data.find(t => t.id === activeId)?.status}
-              name={data.find(t => t.id === activeId)?.title}
+              column={data.find(t => t.id === activeId)?.status || ''}
+              name={data.find(t => t.id === activeId)?.title || ''}
               task={data.find(t => t.id === activeId)}
             />
           ) : null}
@@ -259,7 +260,7 @@ export function KanbanBoard({ id, children }: KanbanBoardProps) {
     <div
       ref={setNodeRef}
       id={id}
-      className={`flex flex-col w-80 min-w-80 bg-muted/50 rounded-lg p-4 min-h-[600px] transition-colors duration-200 ${
+      className={`flex flex-col w-80 min-w-80 bg-muted/50 rounded-lg p-4 h-full transition-colors duration-200 ${
         isOver ? 'bg-accent border-2 border-primary' : ''
       }`}
     >
@@ -296,11 +297,13 @@ export function KanbanCards({ id, children }: KanbanCardsProps) {
       items={columnTasks.map(task => task.id)}
       strategy={verticalListSortingStrategy}
     >
-      <div className="flex flex-col gap-3 flex-1">
-        {columnTasks.map(task => (
-          <div key={task.id}>{children(task)}</div>
-        ))}
-      </div>
+      <ScrollArea className="flex-1 min-h-0">
+        <div className="flex flex-col gap-3 p-1">
+          {columnTasks.map(task => (
+            <div key={task.id}>{children(task)}</div>
+          ))}
+        </div>
+      </ScrollArea>
     </SortableContext>
   );
 }
@@ -399,10 +402,10 @@ export function KanbanCard({ id, name, task, children }: KanbanCardProps) {
             <span
               className={cn(
                 'px-2 py-1 text-xs font-medium rounded-md border',
-                getPriorityColor(task?.priority)
+                getPriorityColor(task?.priority || 1)
               )}
             >
-              P{task?.priority}
+              P{task?.priority || 1}
             </span>
           </div>
 

@@ -8,6 +8,7 @@ import {
   CardContent,
   CardFooter,
 } from '@/components/ui/card';
+import { getWidth, getHeight } from '@/lib/styles';
 
 interface KanbanCardWidgetProps {
   id: string;
@@ -15,6 +16,8 @@ interface KanbanCardWidgetProps {
   description?: string;
   assignee?: string;
   priority?: number;
+  width?: string;
+  height?: string;
   children?: React.ReactNode;
 }
 
@@ -23,6 +26,8 @@ export const KanbanCardWidget: React.FC<KanbanCardWidgetProps> = ({
   description,
   assignee,
   priority,
+  width,
+  height,
   children,
 }) => {
   const getPriorityColor = (priority: number) => {
@@ -38,8 +43,16 @@ export const KanbanCardWidget: React.FC<KanbanCardWidgetProps> = ({
     }
   };
 
+  const styles = {
+    ...getWidth(width),
+    ...getHeight(height),
+  };
+
   return (
-    <Card className="h-40 hover:shadow-md transition-all duration-200 flex flex-col">
+    <Card
+      className="h-40 hover:shadow-md transition-all duration-200 flex flex-col"
+      style={styles}
+    >
       <CardHeader className="flex-none pb-2">
         <CardTitle className="text-sm leading-tight line-clamp-2 overflow-hidden text-ellipsis">
           {title || 'Untitled Task'}

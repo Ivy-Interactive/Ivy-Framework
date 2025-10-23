@@ -32,6 +32,8 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
     private Func<Event<Ivy.Kanban, object?>, ValueTask>? _onDelete;
     private Func<Event<Ivy.Kanban, (object? CardId, TGroupKey FromColumn, TGroupKey ToColumn, int? TargetIndex)>, ValueTask>? _onMove;
     private object? _empty;
+    private Size? _width;
+    private Size? _height;
 
     /// <summary>
     /// Creates a kanban builder with automatic column grouping based on the selector.
@@ -184,6 +186,78 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
         return this;
     }
 
+    /// <summary>Sets the width of the kanban board.</summary>
+    /// <param name="width">The width of the kanban board.</param>
+    public KanbanBuilder<TModel, TGroupKey> Width(Size? width)
+    {
+        _width = width;
+        return this;
+    }
+
+    /// <summary>Sets the width of the kanban board in units.</summary>
+    /// <param name="units">The width of the kanban board in units.</param>
+    public KanbanBuilder<TModel, TGroupKey> Width(int units)
+    {
+        _width = Size.Units(units);
+        return this;
+    }
+
+    /// <summary>Sets the width of the kanban board as a fraction.</summary>
+    /// <param name="fraction">The width of the kanban board as a fraction.</param>
+    public KanbanBuilder<TModel, TGroupKey> Width(float fraction)
+    {
+        _width = Size.Fraction(fraction);
+        return this;
+    }
+
+    /// <summary>Sets the width of the kanban board as a percentage.</summary>
+    /// <param name="percent">The width of the kanban board as a percentage string (e.g., "50%").</param>
+    public KanbanBuilder<TModel, TGroupKey> Width(string percent)
+    {
+        if (percent.EndsWith("%"))
+        {
+            if (float.TryParse(percent.Substring(0, percent.Length - 1), out var value))
+                _width = Size.Fraction(value / 100);
+        }
+        return this;
+    }
+
+    /// <summary>Sets the height of the kanban board.</summary>
+    /// <param name="height">The height of the kanban board.</param>
+    public KanbanBuilder<TModel, TGroupKey> Height(Size? height)
+    {
+        _height = height;
+        return this;
+    }
+
+    /// <summary>Sets the height of the kanban board in units.</summary>
+    /// <param name="units">The height of the kanban board in units.</param>
+    public KanbanBuilder<TModel, TGroupKey> Height(int units)
+    {
+        _height = Size.Units(units);
+        return this;
+    }
+
+    /// <summary>Sets the height of the kanban board as a fraction.</summary>
+    /// <param name="fraction">The height of the kanban board as a fraction.</param>
+    public KanbanBuilder<TModel, TGroupKey> Height(float fraction)
+    {
+        _height = Size.Fraction(fraction);
+        return this;
+    }
+
+    /// <summary>Sets the height of the kanban board as a percentage.</summary>
+    /// <param name="percent">The height of the kanban board as a percentage string (e.g., "50%").</param>
+    public KanbanBuilder<TModel, TGroupKey> Height(string percent)
+    {
+        if (percent.EndsWith("%"))
+        {
+            if (float.TryParse(percent.Substring(0, percent.Length - 1), out var value))
+                _height = Size.Fraction(value / 100);
+        }
+        return this;
+    }
+
     /// <summary>
     /// Builds the complete kanban board with columns and cards.
     /// </summary>
@@ -295,7 +369,9 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
             ShowCounts = true,
             AllowAdd = _onAdd != null,
             AllowMove = _onMove != null,
-            AllowDelete = _onDelete != null
+            AllowDelete = _onDelete != null,
+            Width = _width,
+            Height = _height
         };
 
         // Attach OnDelete handler if specified
