@@ -40,6 +40,8 @@ public class DataTablesMillionRowsApp : SampleBase
             .Icon(row => row.Value, Icons.Text)
             .Icon(row => row.CreatedAt, Icons.Calendar)
             // Configure for performance with large datasets
-            .Config(config => config.AllowLlmFiltering = true);
+            .Config(config => config.AllowLlmFiltering = true)
+            // Configure to load all 1 million rows at once
+            .LoadAllRows(true);
     }
 }
