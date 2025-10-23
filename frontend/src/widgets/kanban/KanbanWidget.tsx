@@ -1,12 +1,7 @@
 import React from 'react';
-import {
-  KanbanBoard,
-  KanbanCard,
-  KanbanCards,
-  KanbanHeader,
-  KanbanProvider,
-  type Task,
-} from '@/components/ui/shadcn-io/kanban';
+import { Kanban, type Task } from '@/components/ui/shadcn-io/kanban';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { useEventHandler } from '@/components/event-handler';
 import { getWidth, getHeight } from '@/lib/styles';
 
@@ -103,7 +98,7 @@ export const KanbanWidget: React.FC<KanbanWidgetProps> = ({
                   title: taskData?.title as string,
                   status: columnProps?.columnKey as string,
                   statusOrder: columnIndex + 1,
-                  priority: taskData?.priority as number,
+                  priority: cardProps?.priority as number,
                   description: taskData?.description as string,
                   assignee: (taskData?.assignee as string) || '',
                 };
@@ -133,25 +128,6 @@ export const KanbanWidget: React.FC<KanbanWidgetProps> = ({
     eventHandler('OnMove', id, [cardId, fromColumn, toColumn, targetIndex]);
   };
 
-  const handleCardAdd = (columnId: string) => {
-    // Find the column and get its widget ID
-    const column = extractedData.columns.find(c => c.id === columnId);
-    const widgetId = column?.widgetId || columnId;
-
-    // Send add event to backend using widget ID with column name as parameter
-    eventHandler('OnAdd', widgetId, [column?.name || columnId]);
-  };
-
-  const handleCardDelete = (cardId: string) => {
-    // Send delete event to backend
-    eventHandler('OnDelete', id, [cardId]);
-  };
-
-  const handleDataChange = () => {
-    // Handle data changes from drag and drop
-    // The backend will handle the actual state update
-  };
-
   if (extractedData.tasks.length === 0 && extractedData.columns.length === 0) {
     return (
       <div className="flex items-center justify-center p-8 text-gray-500">
@@ -173,48 +149,66 @@ export const KanbanWidget: React.FC<KanbanWidgetProps> = ({
 
   return (
     <div style={styles}>
-      <KanbanProvider
-        columns={extractedData.columns}
+      <Kanban
         data={extractedData.tasks}
-        onDataChange={handleDataChange}
+        columns={extractedData.columns}
         onCardMove={handleCardMove}
-        onCardAdd={handleCardAdd}
-        onCardDelete={handleCardDelete}
       >
-        {column => (
-          <KanbanBoard id={column.id} key={column.id}>
-            <KanbanHeader>
-              <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2">
-                  <div
-                    className="h-2 w-2 rounded-full"
-                    style={{ backgroundColor: column.color }}
-                  />
-                  <span>{column.name}</span>
-                </div>
-                <button
-                  onClick={() => handleCardAdd(column.id)}
-                  className="text-gray-500 hover:text-gray-700 text-lg font-bold"
-                  title="Add card"
-                >
-                  +
-                </button>
-              </div>
-            </KanbanHeader>
-            <KanbanCards id={column.id}>
-              {(task: Task) => (
-                <KanbanCard
-                  column={column.id}
-                  id={task.id}
-                  key={task.id}
-                  name={task.title}
-                  task={task}
-                />
-              )}
-            </KanbanCards>
+        {({
+          KanbanBoard,
+          KanbanColumn,
+          KanbanCards,
+          KanbanCard,
+          KanbanHeader,
+          KanbanCardContent,
+        }) => (
+          <KanbanBoard>
+            {extractedData.columns.map(column => (
+              <KanbanColumn
+                key={column.id}
+                id={column.id}
+                name={column.name}
+                color={column.color}
+              >
+                <KanbanCards id={column.id}>
+                  {(task: Task) => (
+                    <KanbanCard key={task.id} id={task.id} column={column.id}>
+                      <Card>
+                        <CardHeader>
+                          <KanbanHeader>
+                            <div className="flex items-center justify-between gap-2">
+                              <div className="flex items-center gap-2">
+                                <CardTitle className="text-sm">
+                                  {task.title}
+                                </CardTitle>
+                              </div>
+                              <Badge variant="secondary">
+                                P{task.priority}
+                              </Badge>
+                            </div>
+                          </KanbanHeader>
+                        </CardHeader>
+                        <CardContent>
+                          <KanbanCardContent>
+                            <p className="text-xs text-muted-foreground">
+                              {task.description}
+                            </p>
+                            {task.assignee && (
+                              <p className="text-xs text-muted-foreground">
+                                Assignee: {task.assignee}
+                              </p>
+                            )}
+                          </KanbanCardContent>
+                        </CardContent>
+                      </Card>
+                    </KanbanCard>
+                  )}
+                </KanbanCards>
+              </KanbanColumn>
+            ))}
           </KanbanBoard>
         )}
-      </KanbanProvider>
+      </Kanban>
     </div>
   );
 };

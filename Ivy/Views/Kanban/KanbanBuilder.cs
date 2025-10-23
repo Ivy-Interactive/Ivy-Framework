@@ -289,24 +289,9 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
             .Where(group => group != null)
             .Select(group =>
             {
-                // Apply card ordering if specified
-                IEnumerable<TModel> orderedItems;
-                if (_orderSelector != null)
-                {
-                    // Use the orderSelector from ToKanban method
-                    orderedItems = group!.OrderBy(_orderSelector);
-                }
-                else if (_cardOrderBySelector != null)
-                {
-                    // Use the CardOrder method for backward compatibility
-                    orderedItems = _cardOrderDescending
-                        ? group!.OrderByDescending(_cardOrderBySelector)
-                        : group!.OrderBy(_cardOrderBySelector);
-                }
-                else
-                {
-                    orderedItems = group!;
-                }
+                // Use natural order of items (no automatic sorting by priority)
+                // Users can drag cards around without affecting priority values
+                IEnumerable<TModel> orderedItems = group!;
 
                 var cards = orderedItems.Select(item =>
                 {
@@ -340,6 +325,11 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
                     if (cardId != null)
                         card = card with { CardId = cardId };
 
+                    // Set priority if order selector is provided
+                    var priority = _orderSelector?.Invoke(item);
+                    if (priority != null)
+                        card = card with { Priority = priority };
+
                     return card;
                 }).ToArray();
 
@@ -370,8 +360,8 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
             AllowAdd = _onAdd != null,
             AllowMove = _onMove != null,
             AllowDelete = _onDelete != null,
-            Width = _width,
-            Height = _height
+            Width = _width ?? Size.Full(),
+            Height = _height ?? Size.Full()
         };
 
         // Attach OnDelete handler if specified
