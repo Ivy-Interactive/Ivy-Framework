@@ -4,6 +4,7 @@ using Ivy.Core;
 using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
 using Ivy.Hooks;
+using Ivy.Shared;
 using Ivy.Widgets.Inputs;
 
 namespace Ivy.Views.Forms;
@@ -130,6 +131,9 @@ public class FormBuilder<TModel> : ViewBase
     /// <summary>The validation strategy for form fields. Default is OnBlur.</summary>
     public FormValidationStrategy ValidationStrategy { get; set; } = FormValidationStrategy.OnBlur;
 
+    /// <summary>The size of the form affecting spacing between fields. Default is Medium.</summary>
+    public Sizes Size { get; set; } = Sizes.Medium;
+
     /// <summary>Initializes form builder for specified model state with automatic field scaffolding.</summary>
     /// <param name="model">Reactive state containing model object to be edited by form.</param>
     /// <param name="submitTitle">The text displayed on the form's submit button. Default is "Save".</param>
@@ -196,22 +200,22 @@ public class FormBuilder<TModel> : ViewBase
 
         if (type == typeof(FileInput))
         {
-            return (state) => state.ToFileInput();
+            return (state) => ApplyFormSize(state.ToFileInput());
         }
 
         if (name.EndsWith("Id") && (type == typeof(Guid) || type == typeof(int) || type == typeof(string)))
         {
-            return (state) => state.ToReadOnlyInput();
+            return (state) => ApplyFormSize(state.ToReadOnlyInput());
         }
 
         if (name.EndsWith("Email") && nonNullableType == typeof(string))
         {
-            return (state) => state.ToEmailInput();
+            return (state) => ApplyFormSize(state.ToEmailInput());
         }
 
         if ((name.EndsWith("Color") || name.EndsWith("Colour")) && nonNullableType == typeof(string))
         {
-            return (state) => state.ToColorInput();
+            return (state) => ApplyFormSize(state.ToColorInput());
         }
 
         if (nonNullableType == typeof(bool))
@@ -230,7 +234,7 @@ public class FormBuilder<TModel> : ViewBase
                     // Use scaffold defaults
                     input.ScaffoldDefaults(name, type);
                 }
-                return input;
+                return ApplyFormSize(input);
             };
         }
 
@@ -238,30 +242,30 @@ public class FormBuilder<TModel> : ViewBase
         {
             if (name.EndsWith("Password"))
             {
-                return (state) => state.ToPasswordInput();
+                return (state) => ApplyFormSize(state.ToPasswordInput());
             }
 
-            return (state) => state.ToTextInput();
+            return (state) => ApplyFormSize(state.ToTextInput());
         }
 
         if (nonNullableType.IsEnum)
         {
-            return (state) => state.ToSelectInput();
+            return (state) => ApplyFormSize(state.ToSelectInput());
         }
 
         if (type.IsCollectionType() && type.GetCollectionTypeParameter() is { IsEnum: true })
         {
-            return (state) => state.ToSelectInput().List();
+            return (state) => ApplyFormSize(state.ToSelectInput().List());
         }
 
         if (type.IsNumeric())
         {
-            return (state) => state.ToNumberInput().ScaffoldDefaults(name, type);
+            return (state) => ApplyFormSize(state.ToNumberInput().ScaffoldDefaults(name, type));
         }
 
         if (type.IsDate())
         {
-            return (state) => state.ToDateTimeInput();
+            return (state) => ApplyFormSize(state.ToDateTimeInput());
         }
 
         return null;
@@ -298,7 +302,7 @@ public class FormBuilder<TModel> : ViewBase
                 {
                     numberInput.ScaffoldDefaults(hint.Name, hint.Type);
                 }
-                return input;
+                return ApplyFormSize(input);
             };
         }
 
@@ -314,7 +318,7 @@ public class FormBuilder<TModel> : ViewBase
     {
         foreach (var hint in _fields.Values.Where(e => e.Type is TU))
         {
-            hint.InputFactory = input;
+            hint.InputFactory = (state) => ApplyFormSize(input(state));
         }
 
         return this;
@@ -533,6 +537,24 @@ public class FormBuilder<TModel> : ViewBase
         return this;
     }
 
+    /// <summary>Sets the size of the form affecting spacing between fields.</summary>
+    /// <param name="size">The size of the form (Small, Medium, Large).</param>
+    /// <returns>Form builder instance for method chaining.</returns>
+    public FormBuilder<TModel> WithSize(Sizes size)
+    {
+        Size = size;
+        return this;
+    }
+
+    /// <summary>Applies the form size to an input control.</summary>
+    /// <param name="input">The input control to apply the form size to.</param>
+    /// <returns>The input control with the form size applied.</returns>
+    private IAnyInput ApplyFormSize(IAnyInput input)
+    {
+        input.Size = Size;
+        return input;
+    }
+
     //todo: this looks like a hack that should be fixed properly
     private static bool HasCustomLabel(string label, string name)
         => label != Utils.SplitPascalCase(name);
@@ -605,7 +627,8 @@ public class FormBuilder<TModel> : ViewBase
 
         var formView = new FormView<TModel>(
             fieldViews,
-            HandleSubmitEvent
+            HandleSubmitEvent,
+            Size
         );
 
         var validationView = new WrapperView(Layout.Vertical(

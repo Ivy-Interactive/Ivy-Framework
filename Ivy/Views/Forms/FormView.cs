@@ -4,6 +4,7 @@ using Ivy.Core;
 using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
 using Ivy.Hooks;
+using Ivy.Shared;
 using Ivy.Widgets.Inputs;
 
 namespace Ivy.Views.Forms;
@@ -181,7 +182,7 @@ public interface IFormFieldBinding<TModel>
 }
 
 /// <summary>Renders form fields in a structured layout with columns, rows, and groups.</summary>
-public class FormView<TModel>(IFormFieldView[] fieldViews, Func<Event<Form>, ValueTask>? handleSubmit = null) : ViewBase
+public class FormView<TModel>(IFormFieldView[] fieldViews, Func<Event<Form>, ValueTask>? handleSubmit = null, Sizes size = Sizes.Medium) : ViewBase
 {
     /// <summary>Builds the complete form layout with multi-column support and field grouping.</summary>
     public override object? Build()
@@ -195,9 +196,18 @@ public class FormView<TModel>(IFormFieldView[] fieldViews, Func<Event<Form>, Val
 
         object RenderRows(IFormFieldView[] fs)
         {
+            var gap = size switch
+            {
+                Sizes.Small => 2,
+                Sizes.Medium => 4,
+                Sizes.Large => 6,
+                _ => 4
+            };
+
             return Layout
                 .Vertical(fs.OrderBy(h => h.Layout.Order)
-                    .GroupBy(f => f.Layout.RowKey).Select(e => e.ToArray()).Select(RenderRow));
+                    .GroupBy(f => f.Layout.RowKey).Select(e => e.ToArray()).Select(RenderRow))
+                .Gap(gap);
         }
 
         var columns = fieldViews
