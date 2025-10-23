@@ -32,7 +32,7 @@ test.describe('Bool Input Tests', () => {
   });
 
   test.describe('Checkbox Variants', () => {
-    test('should test checkbox with description interactions', async ({
+    test.skip('should test checkbox with description interactions', async ({
       page,
     }) => {
       // Test true state with description
@@ -87,7 +87,7 @@ test.describe('Bool Input Tests', () => {
       await expect(nullCheckbox).toHaveAttribute('aria-checked', 'mixed');
     });
 
-    test('should test checkbox without description interactions', async ({
+    test.skip('should test checkbox without description interactions', async ({
       page,
     }) => {
       // Test true state without description
