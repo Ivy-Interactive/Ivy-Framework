@@ -69,21 +69,39 @@ public class KanbanApp : SampleBase
                     var taskId = moveData.CardId?.ToString();
                     if (string.IsNullOrEmpty(taskId)) return;
 
-                    var updatedTasks = tasks.Value.Select(task =>
-                        task.Id == taskId
-                            ? new Task
-                            {
-                                Id = task.Id,
-                                Title = task.Title,
-                                Status = moveData.ToColumn,
-                                Priority = moveData.TargetIndex.HasValue ? moveData.TargetIndex.Value + 1 : task.Priority,
-                                Description = task.Description,
-                                Assignee = task.Assignee
-                            }
-                            : task
-                    ).ToArray();
+                    var updatedTasks = tasks.Value.ToList();
+                    var taskToMove = updatedTasks.FirstOrDefault(t => t.Id == taskId);
+                    if (taskToMove == null) return;
 
-                    tasks.Set(updatedTasks);
+                    // Update the task's status
+                    taskToMove = new Task
+                    {
+                        Id = taskToMove.Id,
+                        Title = taskToMove.Title,
+                        Status = moveData.ToColumn,
+                        Priority = taskToMove.Priority,
+                        Description = taskToMove.Description,
+                        Assignee = taskToMove.Assignee
+                    };
+
+                    // Remove the task from its current position
+                    updatedTasks.RemoveAll(t => t.Id == taskId);
+
+                    // Insert the task at the desired position within the target column
+                    var tasksInTargetColumn = updatedTasks.Where(t => t.Status == moveData.ToColumn).ToList();
+                    if (moveData.TargetIndex.HasValue && moveData.TargetIndex.Value < tasksInTargetColumn.Count)
+                    {
+                        // Insert at specific position
+                        var insertIndex = moveData.TargetIndex.Value;
+                        updatedTasks.InsertRange(insertIndex, new[] { taskToMove });
+                    }
+                    else
+                    {
+                        // Add to end of column
+                        updatedTasks.Add(taskToMove);
+                    }
+
+                    tasks.Set(updatedTasks.ToArray());
                 })
                 .HandleDelete(cardId =>
                 {

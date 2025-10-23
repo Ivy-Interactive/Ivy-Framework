@@ -172,18 +172,30 @@ export function KanbanProvider({
       }
 
       // Calculate target index for precise positioning
-      const columnTasks = data
-        .filter(task => task.status === targetColumnId)
-        .sort((a, b) => a.priority - b.priority);
+      const columnTasks = data.filter(task => task.status === targetColumnId);
 
       let targetIndex: number | undefined;
 
       // Calculate target index based on drop target
       const overTask = data.find(task => task.id === overId);
-      if (overTask) {
-        // Dropping on another card - find its position
+      if (overTask && overTask.status === targetColumnId) {
+        // Dropping on another card in the same column - find its position
         const overTaskIndex = columnTasks.findIndex(task => task.id === overId);
-        targetIndex = overTaskIndex >= 0 ? overTaskIndex : undefined;
+        if (overTaskIndex >= 0) {
+          // Use arrayMove logic for proper swapping
+          if (activeTask.status === targetColumnId) {
+            // Same column - use arrayMove index calculation
+            const activeTaskIndex = columnTasks.findIndex(
+              task => task.id === activeId
+            );
+            if (activeTaskIndex >= 0) {
+              targetIndex = overTaskIndex;
+            }
+          } else {
+            // Different column - use the target index as-is
+            targetIndex = overTaskIndex;
+          }
+        }
       } else {
         // Dropping on column - append to end (last position)
         targetIndex = columnTasks.length;
@@ -288,14 +300,13 @@ interface KanbanCardsProps {
 
 export function KanbanCards({ id, children }: KanbanCardsProps) {
   const { data } = useKanbanContext();
-  const columnTasks = data
-    .filter(task => task.status === id)
-    .sort((a, b) => a.priority - b.priority);
+  const columnTasks = data.filter(task => task.status === id);
 
   return (
     <SortableContext
       items={columnTasks.map(task => task.id)}
       strategy={verticalListSortingStrategy}
+      disabled={false}
     >
       <ScrollArea className="flex-1 min-h-0">
         <div className="flex flex-col gap-3 p-1">
