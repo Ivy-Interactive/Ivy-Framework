@@ -5,14 +5,9 @@ import { logger } from '@/lib/logger';
 interface FormWidgetProps {
   id: string;
   children?: React.ReactNode;
-  size?: 'Small' | 'Medium' | 'Large';
 }
 
-export const FormWidget: React.FC<FormWidgetProps> = ({
-  id,
-  children,
-  size = 'Medium',
-}) => {
+export const FormWidget: React.FC<FormWidgetProps> = ({ id, children }) => {
   const formRef = useRef<HTMLDivElement>(null);
   const eventHandler = useEventHandler();
 
@@ -76,11 +71,8 @@ export const FormWidget: React.FC<FormWidgetProps> = ({
     };
   }, [id, eventHandler]);
 
-  const gapClass =
-    size === 'Small' ? 'gap-2' : size === 'Large' ? 'gap-8' : 'gap-6';
-
   return (
-    <div ref={formRef} className={`flex flex-col ${gapClass}`}>
+    <div ref={formRef} className="flex flex-col">
       {children}
     </div>
   );
