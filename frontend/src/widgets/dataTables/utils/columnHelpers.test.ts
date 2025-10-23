@@ -1,43 +1,9 @@
 import { describe, it, expect } from 'vitest';
-import {
-  getColumnTypeIcon,
-  reorderColumns,
-  convertToGridColumns,
-} from './columnHelpers';
+import { reorderColumns, convertToGridColumns } from './columnHelpers';
 import type { DataColumn } from '../types/types';
 import { ColType } from '../types/types';
 
 describe('columnHelpers', () => {
-  describe('getColumnTypeIcon', () => {
-    it('should return Hash icon for numeric types', () => {
-      expect(getColumnTypeIcon('int64')).toBe('Hash');
-      expect(getColumnTypeIcon('int32')).toBe('Hash');
-      expect(getColumnTypeIcon('float64')).toBe('Hash');
-      expect(getColumnTypeIcon('double')).toBe('Hash');
-    });
-
-    it('should return Calendar icon for date/time types', () => {
-      expect(getColumnTypeIcon('date')).toBe('Calendar');
-      expect(getColumnTypeIcon('datetime')).toBe('Calendar');
-      expect(getColumnTypeIcon('timestamp')).toBe('Calendar');
-    });
-
-    it('should return ToggleLeft icon for boolean types', () => {
-      expect(getColumnTypeIcon('bool')).toBe('ToggleLeft');
-      expect(getColumnTypeIcon('boolean')).toBe('ToggleLeft');
-    });
-
-    it('should return Type icon for string types', () => {
-      expect(getColumnTypeIcon('utf8')).toBe('Type');
-      expect(getColumnTypeIcon('string')).toBe('Type');
-    });
-
-    it('should return Type icon for unknown types', () => {
-      expect(getColumnTypeIcon('unknown')).toBe('Type');
-      expect(getColumnTypeIcon('custom_type')).toBe('Type');
-    });
-  });
-
   describe('reorderColumns', () => {
     const mockColumns: DataColumn[] = [
       { name: 'First', type: ColType.Text, width: 100 },
@@ -107,10 +73,15 @@ describe('columnHelpers', () => {
       );
 
       expect(result).toEqual([
-        { title: 'ID', width: 80, group: undefined },
-        { title: 'Name', width: 150, group: undefined },
-        { title: 'Status', width: 100, group: undefined },
-        { title: 'Created', width: 120, group: undefined },
+        { title: 'ID', width: 80, group: undefined, icon: 'headerNumber' },
+        { title: 'Name', width: 150, group: undefined, icon: 'headerString' },
+        {
+          title: 'Status',
+          width: 100,
+          group: undefined,
+          icon: 'headerBoolean',
+        },
+        { title: 'Created', width: 120, group: undefined, icon: 'headerDate' },
       ]);
     });
 

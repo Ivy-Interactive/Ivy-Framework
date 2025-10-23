@@ -1,39 +1,64 @@
-import type { GridColumn } from '@glideapps/glide-data-grid';
+import { GridColumn, GridColumnIcon } from '@glideapps/glide-data-grid';
 import type { DataColumn } from '../types/types';
 
 /**
- * Maps data column types to lucide-react icon names
+ * Maps column icon names or types to appropriate icons
+ * Uses built-in GridColumnIcon values where possible, custom names otherwise
  */
-export function getColumnTypeIcon(type: string): string {
-  const normalizedType = type.toLowerCase();
-
-  // Numeric types
-  if (
-    normalizedType.includes('int') ||
-    normalizedType.includes('float') ||
-    normalizedType.includes('double') ||
-    normalizedType.includes('decimal') ||
-    normalizedType.includes('number')
-  ) {
-    return 'Hash';
+export function mapColumnIcon(
+  col: DataColumn
+): GridColumnIcon | string | undefined {
+  // If column has explicit icon, check if we can map it to built-in
+  if (col.icon) {
+    // Map icons to built-in GridColumnIcon values
+    switch (col.icon) {
+      case 'Hash':
+        return GridColumnIcon.HeaderNumber;
+      case 'Type':
+      case 'User':
+      case 'Mail':
+        return GridColumnIcon.HeaderString;
+      case 'Calendar':
+      case 'Clock':
+        return GridColumnIcon.HeaderDate;
+      case 'Image':
+        return GridColumnIcon.HeaderImage;
+      case 'Link':
+        return GridColumnIcon.HeaderUri;
+      // Map Activity, Flag, and Zap to closest built-in icons
+      case 'Activity':
+        return GridColumnIcon.HeaderCode; // Use code icon for activity
+      case 'Flag':
+        return GridColumnIcon.HeaderBoolean; // Use boolean/checkbox for priority flag
+      case 'Zap':
+        return GridColumnIcon.HeaderEmoji; // Use emoji for zap
+      default:
+        // Try to use custom icon name for headerIcons lookup
+        // But for now, default to a built-in icon
+        return GridColumnIcon.HeaderString;
+    }
   }
 
-  // Date/time types
-  if (
-    normalizedType.includes('date') ||
-    normalizedType.includes('time') ||
-    normalizedType.includes('timestamp')
-  ) {
-    return 'Calendar';
+  // If no explicit icon, use column type
+  const normalizedType = col.type.toLowerCase();
+
+  if (normalizedType === 'number') {
+    return GridColumnIcon.HeaderNumber;
+  }
+  if (normalizedType === 'text') {
+    return GridColumnIcon.HeaderString;
+  }
+  if (normalizedType === 'date' || normalizedType === 'datetime') {
+    return GridColumnIcon.HeaderDate;
+  }
+  if (normalizedType === 'boolean') {
+    return GridColumnIcon.HeaderBoolean;
+  }
+  if (normalizedType === 'icon') {
+    return GridColumnIcon.HeaderImage;
   }
 
-  // Boolean types
-  if (normalizedType.includes('bool')) {
-    return 'ToggleLeft';
-  }
-
-  // Default to string/text icon
-  return 'Type';
+  return GridColumnIcon.HeaderString; // Default
 }
 
 /**
@@ -92,8 +117,13 @@ export function convertToGridColumns(
     const originalIndex = columns.indexOf(col);
     const baseWidth = columnWidths[originalIndex.toString()] || col.width;
     // Ensure width is always a number
-    const numericBaseWidth =
+    let numericBaseWidth =
       typeof baseWidth === 'string' ? parseFloat(baseWidth) : baseWidth;
+
+    // Fix NaN width - default to 150 if parsing fails
+    if (isNaN(numericBaseWidth) || !numericBaseWidth) {
+      numericBaseWidth = 150;
+    }
 
     // Make the last column fill the remaining space
     if (index === orderedColumns.length - 1 && containerWidth > 0) {
@@ -112,8 +142,7 @@ export function convertToGridColumns(
         title: col.header || col.name,
         width: Math.max(numericBaseWidth, remainingWidth) - 10,
         group: showGroups ? col.group : undefined,
-        // TODO: Custom header rendering needed for Lucide icons
-        // icon: col.icon ?? undefined,
+        icon: mapColumnIcon(col),
       };
     }
 
@@ -121,8 +150,7 @@ export function convertToGridColumns(
       title: col.header || col.name,
       width: numericBaseWidth,
       group: showGroups ? col.group : undefined,
-      // TODO: Custom header rendering needed for Lucide icons
-      // icon: col.icon ?? undefined,
+      icon: mapColumnIcon(col),
     };
   });
 }

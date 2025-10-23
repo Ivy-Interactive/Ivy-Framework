@@ -4,6 +4,7 @@ import DataEditor, {
   GridCell,
   GridSelection,
   Item,
+  Theme,
 } from '@glideapps/glide-data-grid';
 import React, {
   useMemo,
@@ -14,12 +15,13 @@ import React, {
 } from 'react';
 import { useTable } from './DataTableContext';
 import { tableStyles } from './styles/style';
-import { getTableTheme } from './styles/theme';
+import { useThemeWithMonitoring } from '@/components/theme-provider';
 import { getSelectionProps } from './utils/selectionModes';
 import { getCellContent as getCellContentUtil } from './utils/cellContent';
 import { convertToGridColumns } from './utils/columnHelpers';
 import { iconCellRenderer } from './utils/customRenderers';
-import { useTheme } from '@/components/theme-provider';
+import { generateHeaderIcons, addStandardIcons } from './utils/headerIcons';
+import { ThemeColors } from '@/lib/color-utils';
 
 interface TableEditorProps {
   hasOptions?: boolean;
@@ -55,8 +57,43 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     showGroups,
   } = config;
 
-  const { theme } = useTheme();
   const selectionProps = getSelectionProps(selectionMode);
+
+  // Use the enhanced theme hook with custom DataGrid theme generator
+  const { customTheme: tableTheme } = useThemeWithMonitoring<Partial<Theme>>({
+    monitorDOM: true,
+    monitorSystem: true,
+    customThemeGenerator: (
+      colors: ThemeColors,
+      isDark: boolean
+    ): Partial<Theme> => ({
+      bgCell: colors.background || (isDark ? '#000000' : '#ffffff'),
+      bgHeader: colors.background || (isDark ? '#1a1a1f' : '#f9fafb'),
+      bgHeaderHasFocus: colors.muted || (isDark ? '#26262b' : '#f3f4f6'),
+      bgHeaderHovered: colors.accent || (isDark ? '#26262b' : '#e5e7eb'),
+      textHeader: colors.foreground || (isDark ? '#f8f8f8' : '#111827'),
+      textDark: colors.foreground || (isDark ? '#f8f8f8' : '#111827'),
+      textMedium: colors.mutedForeground || (isDark ? '#a1a1aa' : '#6b7280'),
+      textLight: colors.mutedForeground || (isDark ? '#71717a' : '#9ca3af'),
+      // bgIconHeader is the background color for icon areas, should be subtle
+      bgIconHeader: colors.muted || (isDark ? '#26262b' : '#f3f4f6'),
+      // accentColor affects icon foreground colors in headers
+      accentColor:
+        colors.primary || colors.accent || (isDark ? '#60a5fa' : '#3b82f6'),
+      horizontalBorderColor: colors.border || (isDark ? '#404045' : '#d1d5db'),
+      linkColor:
+        colors.primary || colors.accent || (isDark ? '#3b82f6' : '#2563eb'),
+      borderColor: 'transparent',
+      cellHorizontalPadding: 16,
+      cellVerticalPadding: 8,
+      headerIconSize: 20,
+      // Add proper text colors for group headers and icons
+      textGroupHeader:
+        colors.mutedForeground || (isDark ? '#a1a1aa' : '#6b7280'),
+      // Icon foreground color
+      fgIconHeader: colors.mutedForeground || (isDark ? '#9ca3af' : '#6b7280'),
+    }),
+  });
 
   const gridRef = useRef<DataEditorRef>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -67,8 +104,11 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
   });
   const scrollThreshold = 10;
 
-  // Generate theme based on current theme context
-  const tableTheme = useMemo(() => getTableTheme(theme), [theme]);
+  // Generate header icons map for all column icons
+  const headerIcons = useMemo(() => {
+    const baseIcons = generateHeaderIcons(columns);
+    return addStandardIcons(baseIcons);
+  }, [columns]);
 
   // Track container width
   useEffect(() => {
@@ -158,6 +198,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
         rows={visibleRows}
         getCellContent={getCellContent}
         customRenderers={[iconCellRenderer]}
+        headerIcons={headerIcons}
         onColumnResize={allowColumnResizing ? handleColumnResize : undefined}
         onVisibleRegionChanged={handleVisibleRegionChanged}
         onHeaderClicked={allowSorting ? handleHeaderMenuClick : undefined}

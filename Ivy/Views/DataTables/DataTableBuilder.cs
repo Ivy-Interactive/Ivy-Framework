@@ -172,7 +172,7 @@ public class DataTableBuilder<TModel> : ViewBase
         return this;
     }
 
-    public DataTableBuilder<TModel> Icon(Expression<Func<TModel, object>> field, Icons icon)
+    public DataTableBuilder<TModel> Icon(Expression<Func<TModel, object>> field, string icon)
     {
         var column = GetColumn(field);
         column.Column.Icon = icon;
