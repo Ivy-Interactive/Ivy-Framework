@@ -57,7 +57,8 @@ public class FormFieldView(
     bool required,
     FormFieldLayoutOptions? layoutOptions,
     Func<object?, (bool, string)>[]? validators,
-    FormValidationStrategy validationStrategy) : ViewBase, IFormFieldView
+    FormValidationStrategy validationStrategy,
+    Sizes size = Sizes.Medium) : ViewBase, IFormFieldView
 {
     /// <summary>Layout configuration for positioning this field in the form.</summary>
     public FormFieldLayoutOptions Layout { get; } = layoutOptions ?? new FormFieldLayoutOptions(Guid.NewGuid());
@@ -133,7 +134,7 @@ public class FormFieldView(
             input.HandleBlur(OnBlur);
         }
 
-        return visibleState.Value ? new Field(input, label, description, required) : null;
+        return visibleState.Value ? new Field(input, label, description, required) { Size = size } : null;
     }
 }
 
@@ -155,14 +156,15 @@ public class FormFieldBinding<TModel>(
     bool required = false,
     FormFieldLayoutOptions? layoutOptions = null,
     Func<object?, (bool, string)>[]? validators = null,
-    FormValidationStrategy validationStrategy = FormValidationStrategy.OnBlur
+    FormValidationStrategy validationStrategy = FormValidationStrategy.OnBlur,
+    Sizes size = Sizes.Medium
     ) : IFormFieldBinding<TModel>
 {
     /// <summary>Creates a bound field view connected to the model state.</summary>
     public (IFormFieldView, IDisposable) Bind(IState<TModel> model)
     {
         var (fieldState, disposable) = StateHelpers.MemberState(model, selector);
-        var fieldView = new FormFieldView(fieldState, factory, visible, updateSignal, label, description, required, layoutOptions, validators, validationStrategy);
+        var fieldView = new FormFieldView(fieldState, factory, visible, updateSignal, label, description, required, layoutOptions, validators, validationStrategy, size);
         return (fieldView, disposable);
     }
 }

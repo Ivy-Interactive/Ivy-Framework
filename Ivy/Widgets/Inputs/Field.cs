@@ -1,4 +1,5 @@
 ﻿using Ivy.Core;
+using Ivy.Shared;
 using Ivy.Widgets.Inputs;
 using System;
 using System.Collections.Generic;
@@ -50,6 +51,9 @@ public record Field : WidgetBase<Field>
     /// <summary>Whether field is required. Default is false.</summary>
     [Prop] public bool Required { get; set; }
 
+    /// <summary>The size of the field affecting label and input sizing. Default is Medium.</summary>
+    [Prop] public Sizes Size { get; set; } = Sizes.Medium;
+
     /// <summary>Prevents adding children to Field widgets using pipe operator.</summary>
     /// <param name="widget">Field widget.</param>
     /// <param name="child">Child object attempting to be added.</param>
@@ -81,6 +85,11 @@ public static class FieldExtensions
     /// <summary>Make the input child required</summary>
     /// <param name="field">The field to configure.</param>
     public static Field Required(this Field field) => field with { Required = true };
+
+    /// <summary>Sets the size of the field affecting label and input sizing.</summary>
+    /// <param name="field">The field to configure.</param>
+    /// <param name="size">The size of the field (Small, Medium, Large).</param>
+    public static Field Size(this Field field, Sizes size) => field with { Size = size };
 
     /// <summary>
     /// Wraps the specified input control in a <see cref="Field"/> widget.

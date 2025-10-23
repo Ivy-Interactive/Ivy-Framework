@@ -112,9 +112,9 @@ public class FormSizeTestApp : SampleBase
                 )
                 .Width(1 / 3f)
                 .Title("Large Form"))
-               | Text.P("Notice how both the spacing between fields AND the size of the input elements change based on the form size setting.")
+               | Text.P("Notice how the spacing between fields, the size of input elements, AND the size of field labels all change based on the form size setting.")
                | Text.P("This example shows all available input types: Text, Email, Password, TextArea, Boolean, Number, DateTime, Select (Enum), Tel, URL, and Color inputs.")
-               | Text.P("The FormBuilder.WithSize() method controls both the gap between form fields and the size of all input elements within the form.")
+               | Text.P("The FormBuilder.WithSize() method controls the gap between form fields, the size of all input elements, and the size of field labels within the form.")
             ;
     }
 }

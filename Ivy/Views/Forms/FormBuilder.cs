@@ -597,7 +597,8 @@ public class FormBuilder<TModel> : ViewBase
                 e.Required,
                 new FormFieldLayoutOptions(e.RowKey, e.Column, e.Order, e.Group),
                 e.Validators.ToArray(),
-                ValidationStrategy
+                ValidationStrategy,
+                Size
             ))
             .Cast<IFormFieldBinding<TModel>>()
             .ToArray();
