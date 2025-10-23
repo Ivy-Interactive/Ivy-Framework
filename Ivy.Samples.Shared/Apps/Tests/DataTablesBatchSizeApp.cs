@@ -4,26 +4,26 @@ using Ivy.Views.DataTables;
 
 namespace Ivy.Samples.Shared.Apps.Tests;
 
-public record MillionRowData(
+public record BatchSizeData(
     int Id,
     string Value,
     DateTime CreatedAt
 );
 
-[App(icon: Icons.Database, path: ["Tests"], isVisible: true, searchHints: ["datatable", "million", "performance", "large", "data"])]
-public class DataTablesMillionRowsApp : SampleBase
+[App(icon: Icons.Database, path: ["Tests"], isVisible: true, searchHints: ["datatable", "batch", "size", "pagination", "performance"])]
+public class DataTablesBatchSizeApp : SampleBase
 {
     protected override object? BuildSample()
     {
-        // Generate 1 million rows of data
-        var millionRows = Enumerable.Range(1, 1_000_000)
-            .Select(i => new MillionRowData(
+        // Generate 500,000 rows of data
+        var batchRows = Enumerable.Range(1, 500_000)
+            .Select(i => new BatchSizeData(
                 Id: i,
-                Value: $"Row {i:N0}",
+                Value: $"Batch Row {i:N0}",
                 CreatedAt: DateTime.Now.AddSeconds(-i)
             )).AsQueryable();
 
-        return millionRows.ToDataTable()
+        return batchRows.ToDataTable()
             .Header(row => row.Id, "ID")
             .Header(row => row.Value, "Value")
             .Header(row => row.CreatedAt, "Created At")
@@ -41,9 +41,7 @@ public class DataTablesMillionRowsApp : SampleBase
             .Icon(row => row.CreatedAt, Icons.Calendar)
             // Configure for performance with large datasets
             .Config(config => config.AllowLlmFiltering = true)
-            // Configure to load all 1 million rows at once
-            .LoadAllRows(true);
-        // Alternative: Set a large batch size instead of loading all at once
-        // .BatchSize(100000); // Uncomment this and comment LoadAllRows(true) to use batch loading
+            // Use large batch size for better performance
+            .BatchSize(50000); // Load 50,000 rows per batch
     }
 }
