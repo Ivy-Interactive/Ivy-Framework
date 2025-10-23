@@ -200,22 +200,22 @@ public class FormBuilder<TModel> : ViewBase
 
         if (type == typeof(FileInput))
         {
-            return (state) => ApplyFormSize(state.ToFileInput());
+            return (state) => state.ToFileInput().Size(FormSize);
         }
 
         if (name.EndsWith("Id") && (type == typeof(Guid) || type == typeof(int) || type == typeof(string)))
         {
-            return (state) => ApplyFormSize(state.ToReadOnlyInput());
+            return (state) => state.ToReadOnlyInput().Size(FormSize);
         }
 
         if (name.EndsWith("Email") && nonNullableType == typeof(string))
         {
-            return (state) => ApplyFormSize(state.ToEmailInput());
+            return (state) => state.ToEmailInput().Size(FormSize);
         }
 
         if ((name.EndsWith("Color") || name.EndsWith("Colour")) && nonNullableType == typeof(string))
         {
-            return (state) => ApplyFormSize(state.ToColorInput());
+            return (state) => state.ToColorInput().Size(FormSize);
         }
 
         if (nonNullableType == typeof(bool))
@@ -234,7 +234,7 @@ public class FormBuilder<TModel> : ViewBase
                     // Use scaffold defaults
                     input.ScaffoldDefaults(name, type);
                 }
-                return ApplyFormSize(input);
+                return input.Size(FormSize);
             };
         }
 
@@ -242,30 +242,30 @@ public class FormBuilder<TModel> : ViewBase
         {
             if (name.EndsWith("Password"))
             {
-                return (state) => ApplyFormSize(state.ToPasswordInput());
+                return (state) => state.ToPasswordInput().Size(FormSize);
             }
 
-            return (state) => ApplyFormSize(state.ToTextInput());
+            return (state) => state.ToTextInput().Size(FormSize);
         }
 
         if (nonNullableType.IsEnum)
         {
-            return (state) => ApplyFormSize(state.ToSelectInput());
+            return (state) => state.ToSelectInput().Size(FormSize);
         }
 
         if (type.IsCollectionType() && type.GetCollectionTypeParameter() is { IsEnum: true })
         {
-            return (state) => ApplyFormSize(state.ToSelectInput().List());
+            return (state) => state.ToSelectInput().List().Size(FormSize);
         }
 
         if (type.IsNumeric())
         {
-            return (state) => ApplyFormSize(state.ToNumberInput().ScaffoldDefaults(name, type));
+            return (state) => state.ToNumberInput().ScaffoldDefaults(name, type).Size(FormSize);
         }
 
         if (type.IsDate())
         {
-            return (state) => ApplyFormSize(state.ToDateTimeInput());
+            return (state) => state.ToDateTimeInput().Size(FormSize);
         }
 
         return null;
@@ -302,7 +302,7 @@ public class FormBuilder<TModel> : ViewBase
                 {
                     numberInput.ScaffoldDefaults(hint.Name, hint.Type);
                 }
-                return ApplyFormSize(input);
+                return input.Size(FormSize);
             };
         }
 
@@ -318,7 +318,7 @@ public class FormBuilder<TModel> : ViewBase
     {
         foreach (var hint in _fields.Values.Where(e => e.Type is TU))
         {
-            hint.InputFactory = (state) => ApplyFormSize(input(state));
+            hint.InputFactory = (state) => input(state).Size(FormSize);
         }
 
         return this;
@@ -565,15 +565,6 @@ public class FormBuilder<TModel> : ViewBase
     public FormBuilder<TModel> Large()
     {
         return SetSize(Sizes.Large);
-    }
-
-    /// <summary>Applies the form size to an input control.</summary>
-    /// <param name="input">The input control to apply the form size to.</param>
-    /// <returns>The input control with the form size applied.</returns>
-    private IAnyInput ApplyFormSize(IAnyInput input)
-    {
-        input.Size = FormSize;
-        return input;
     }
 
     //todo: this looks like a hack that should be fixed properly
