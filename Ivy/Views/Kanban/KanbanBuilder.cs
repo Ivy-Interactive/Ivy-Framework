@@ -340,6 +340,11 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
                     if (cardId != null)
                         card = card with { CardId = cardId };
 
+                    // Set priority if order selector is provided
+                    var priority = _orderSelector?.Invoke(item);
+                    if (priority != null)
+                        card = card with { Priority = priority };
+
                     return card;
                 }).ToArray();
 

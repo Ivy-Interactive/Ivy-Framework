@@ -103,7 +103,7 @@ export const KanbanWidget: React.FC<KanbanWidgetProps> = ({
                   title: taskData?.title as string,
                   status: columnProps?.columnKey as string,
                   statusOrder: columnIndex + 1,
-                  priority: taskData?.priority as number,
+                  priority: cardProps?.priority as number,
                   description: taskData?.description as string,
                   assignee: (taskData?.assignee as string) || '',
                 };
