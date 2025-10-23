@@ -58,11 +58,11 @@ public class PasswordCaptureDemo: ViewBase
     public override object? Build()
     {
         var password = UseState("");
-        return Layout.Horizontal()
-               | Text.Block("Enter Password")
-               | new TextInput(password)
+        return new TextInput(password)
                      .Placeholder("Password")
-                     .Variant(TextInputs.Password);         
+                     .Variant(TextInputs.Password)
+                     .WithField()
+                     .Label("Enter Password");         
     }
 }
 ```
@@ -80,13 +80,13 @@ public class CaptureAddressDemo: ViewBase
     public override object? Build()
     {
         var address = UseState("");
-        return Layout.Horizontal()
-                | Text.Block("Address")
-                | new TextInput(address)
+        return new TextInput(address)
                                .Placeholder("Åkervägen 9, \n132 39 Saltsjö-Boo, \nSweden")
                                .Variant(TextInputs.Textarea)
                                .Height(30)
-                               .Width(100);         
+                               .Width(100)
+                               .WithField()
+                               .Label("Address");         
     }
 }
 ```
@@ -107,11 +107,11 @@ public class SearchBarDemo: ViewBase
     public override object? Build()
     {
         var searchThis = UseState("");
-        return Layout.Horizontal()
-                | Text.Block("Search")
-                | new TextInput(searchThis)
+        return new TextInput(searchThis)
                                .Placeholder("search for?")
-                               .Variant(TextInputs.Search);
+                               .Variant(TextInputs.Search)
+                               .WithField()
+                               .Label("Search");
     }
 }
 ```
@@ -128,11 +128,11 @@ public class EmailEnterDemo: ViewBase
     public override object? Build()
     {
         var email = UseState("");
-        return Layout.Horizontal()
-                | Text.Block("Email")
-                | new TextInput(email)
+        return new TextInput(email)
                        .Placeholder("user@domain.com")
-                       .Variant(TextInputs.Email);
+                       .Variant(TextInputs.Email)
+                       .WithField()
+                       .Label("Email");
     }
 }
 ```
@@ -149,11 +149,11 @@ public class PhoneEnterDemo: ViewBase
     public override object? Build()
     {
         var tel = UseState("");
-        return Layout.Horizontal()
-                | Text.Block("Phone")
-                | new TextInput(tel)
+        return new TextInput(tel)
                       .Placeholder("+1-123-3456")
-                      .Variant(TextInputs.Tel);
+                      .Variant(TextInputs.Tel)
+                      .WithField()
+                      .Label("Phone");
     }
 }
 ```
@@ -170,11 +170,11 @@ public class URLEnterDemo: ViewBase
     public override object? Build()
     {
         var url = UseState("");
-        return Layout.Horizontal()
-                | Text.Block("Website")
-                | new TextInput(url)
+        return new TextInput(url)
                       .Placeholder("https://ivy.app/")
-                      .Variant(TextInputs.Url);
+                      .Variant(TextInputs.Url)
+                      .WithField()
+                      .Label("Website");
     }
 }
 ```
@@ -197,8 +197,7 @@ public class EventsDemoApp : ViewBase
      {
         var onChangedState = UseState("");
         var onChangeLabel = UseState("");
-        return Layout.Horizontal()
-                | Text.Block("Name ")
+        return Layout.Vertical()
                 | new TextInput(onChangedState.Value, e =>
                     {
                        onChangedState.Set(e.Value);
@@ -211,6 +210,8 @@ public class EventsDemoApp : ViewBase
                             onChangeLabel.Set("Hello! " + e.Value);
                        }
                     })
+                    .WithField()
+                    .Label("Name")
                 | onChangeLabel;
      }
 }
@@ -334,32 +335,32 @@ public class DataCaptureUsingExtensionDemo: ViewBase
         var address = UseState("");
         var website = UseState("");
         return Layout.Vertical()
-                | (Layout.Horizontal()
-                   | Text.Block("Username").Width(Size.Fraction(0.15f))
-                   | userName.ToTextInput()
-                             .Placeholder("User name"))
-                | (Layout.Horizontal()
-                   | Text.Block("Password").Width(Size.Fraction(0.15f))
-                   | password.ToPasswordInput(placeholder: "Password")
-                             .Disabled(userName.Value.Length == 0))
-                | (Layout.Horizontal()
-                   | Text.Block("Email").Width(Size.Fraction(0.15f))
-                   | email.ToEmailInput()
-                           .Placeholder("Email"))
-                | (Layout.Horizontal() 
-                   | Text.Block("Mobile").Width(Size.Fraction(0.15f))
-                   | tel.ToTelInput()
-                        .Placeholder("Mobile"))
-                | (Layout.Horizontal()
-                   | Text.Block("Address").Width(Size.Fraction(0.15f))
-                   | address.ToTextAreaInput()
-                            .Placeholder("Address Line1\nAddress Line2\nAddress Line 3")
-                            .Height(40)
-                            .Width(100))
-                | (Layout.Horizontal()
-                   | Text.Block("Website").Width(Size.Fraction(0.15f))
-                   | website.ToUrlInput()
-                            .Placeholder("https://ivy.app/"));                             
+                | userName.ToTextInput()
+                          .Placeholder("User name")
+                          .WithField()
+                          .Label("Username")
+                | password.ToPasswordInput(placeholder: "Password")
+                          .Disabled(userName.Value.Length == 0)
+                          .WithField()
+                          .Label("Password")
+                | email.ToEmailInput()
+                       .Placeholder("Email")
+                       .WithField()
+                       .Label("Email")
+                | tel.ToTelInput()
+                     .Placeholder("Mobile")
+                     .WithField()
+                     .Label("Mobile")
+                | address.ToTextAreaInput()
+                         .Placeholder("Address Line1\nAddress Line2\nAddress Line 3")
+                         .Height(40)
+                         .Width(100)
+                         .WithField()
+                         .Label("Address")
+                | website.ToUrlInput()
+                         .Placeholder("https://ivy.app/")
+                         .WithField()
+                         .Label("Website");                             
     }
 }
 ```
@@ -423,9 +424,7 @@ public class EmailValidationDemo : ViewBase
         var onChangedState = UseState("");         
         var invalidState = UseState("");         
         
-        return Layout.Horizontal()       
-            | Text.Block("Email")
-            | new TextInput(onChangedState.Value, e =>                    
+        return new TextInput(onChangedState.Value, e =>                    
               {                        
                 onChangedState.Set(e.Value);
                 if (string.IsNullOrWhiteSpace(e.Value))
@@ -441,7 +440,9 @@ public class EmailValidationDemo : ViewBase
                     invalidState.Set(""); 
                 }                    
               })
-              .Invalid(invalidState.Value);
+              .Invalid(invalidState.Value)
+              .WithField()
+              .Label("Email");
          
     }     
 }
