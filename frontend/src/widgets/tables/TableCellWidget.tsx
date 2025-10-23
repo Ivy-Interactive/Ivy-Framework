@@ -8,6 +8,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import './table.css';
 
 interface TableCellWidgetProps {
   id: string;

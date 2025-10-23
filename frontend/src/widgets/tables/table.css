@@ -1,0 +1,4 @@
+/* Force text size inheritance for table cells */
+.force-text-inherit * {
+  font-size: inherit !important;
+}
