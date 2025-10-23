@@ -7,7 +7,8 @@ import {
   tableHeadSizeVariants,
   tableSizeVariants,
 } from './table/table-variants';
-import { TableProvider, useTableSize } from './table/TableContext';
+import { TableProvider } from './table/TableContext';
+import { useTableSize } from './table/useTableSize';
 import { Sizes } from '@/types/sizes';
 
 export interface TableProps
