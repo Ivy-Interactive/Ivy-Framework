@@ -43,6 +43,27 @@ public class CardApp : SampleBase
         {
             client.Toast("Clicked!");
         });
+        var smallCard = new Card(
+         "This is a small card with elements."
+        ).Title("Small Card with Elements")
+        .Description("This is a small card with elements.")
+        .Icon(Icons.Info)
+        .Size(Sizes.Small)
+        .TestId("card-small-with-elements");
+        var mediumCard = new Card(
+         "This is a medium card with elements."
+        ).Title("Medium Card with Elements")
+        .Description("This is a medium card with elements.")
+        .Icon(Icons.Info)
+        .Size(Sizes.Medium)
+        .TestId("card-medium-with-elements");
+        var largeCard = new Card(
+         "This is a large card with elements."
+        ).Title("Large Card with Elements")
+        .Description("This is a large card with elements.")
+        .Icon(Icons.Info)
+        .Size(Sizes.Large);
+
         return Layout.Vertical()
          | Text.H1("Card")
          | Text.H2("Basic Examples")
@@ -84,6 +105,12 @@ public class CardApp : SampleBase
             | new SmallMetricView()
             | new MediumMetricView()
             | new LargeMetricView()
+            )
+        | Text.H2("Size Variants")
+         | (Layout.Grid().Columns(3)
+            | smallCard
+            | mediumCard
+            | largeCard
             )
       ;
     }
