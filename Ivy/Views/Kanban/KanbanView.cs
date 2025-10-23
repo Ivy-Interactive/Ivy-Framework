@@ -1,5 +1,6 @@
 using Ivy.Core;
 using Ivy.Core.Hooks;
+using Ivy.Shared;
 
 namespace Ivy.Views.Kanban;
 
@@ -27,6 +28,10 @@ public class KanbanView<TModel, TGroupKey>(IEnumerable<TModel> model, Func<TMode
             return new KanbanColumn(cards).Title(group.Key?.ToString() ?? "");
         }).ToArray();
 
-        return new Ivy.Kanban(columns);
+        return new Ivy.Kanban(columns) with
+        {
+            Width = Size.Full(),
+            Height = Size.Full()
+        };
     }
 }

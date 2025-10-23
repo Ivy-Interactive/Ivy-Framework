@@ -34,10 +34,7 @@ public class KanbanApp : SampleBase
             new Task { Id = "12", Title = "User Training", Status = "Done", Priority = 3, Description = "Train users on new features", Assignee = "Alice" },
         });
 
-        return Layout.Vertical(
-            Text.H3("Task Board Demo"),
-            Text.P("Showcasing kanban features: field selectors, column/card ordering with precise drag-and-drop positioning, custom column titles, event handlers, and width/height sizing."),
-
+        return
             // Kanban with common features
             tasks.Value
                 .ToKanban(
@@ -46,7 +43,6 @@ public class KanbanApp : SampleBase
                     titleSelector: e => e.Title,
                     descriptionSelector: e => e.Description,
                     orderSelector: e => e.Priority)
-                .Height(Size.Units(200))
                 .ColumnOrder(e => GetStatusOrder(e.Status))
                 .ColumnTitle(status => status switch
                 {
@@ -101,8 +97,7 @@ public class KanbanApp : SampleBase
                     new Card()
                         .Title("No Tasks")
                         .Description("Create your first task to get started")
-                )
-        );
+                );
     }
 
     private static int GetStatusOrder(string status) => status switch

@@ -370,8 +370,8 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
             AllowAdd = _onAdd != null,
             AllowMove = _onMove != null,
             AllowDelete = _onDelete != null,
-            Width = _width,
-            Height = _height
+            Width = _width ?? Size.Full(),
+            Height = _height ?? Size.Full()
         };
 
         // Attach OnDelete handler if specified

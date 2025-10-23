@@ -192,13 +192,6 @@ export const KanbanWidget: React.FC<KanbanWidgetProps> = ({
                   />
                   <span>{column.name}</span>
                 </div>
-                <button
-                  onClick={() => handleCardAdd(column.id)}
-                  className="text-gray-500 hover:text-gray-700 text-lg font-bold"
-                  title="Add card"
-                >
-                  +
-                </button>
               </div>
             </KanbanHeader>
             <KanbanCards id={column.id}>
