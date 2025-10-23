@@ -14,4 +14,7 @@ public record KanbanCard : WidgetBase<KanbanCard>
 
     /// <summary>Optional ID for the kanban card.</summary>
     [Prop] public object? CardId { get; set; }
+
+    /// <summary>Optional priority for the kanban card.</summary>
+    [Prop] public object? Priority { get; set; }
 }
