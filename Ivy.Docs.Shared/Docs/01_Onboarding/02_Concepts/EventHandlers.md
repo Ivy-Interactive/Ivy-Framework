@@ -24,17 +24,9 @@ The `OnBlur` event handler is triggered when an input widget loses focus. This i
 ### When OnBlur Fires
 
 ```mermaid
-sequenceDiagram
-    participant User
-    participant Input Field
-    participant OnBlur Handler
-    
-    User->>Input Field: Click/Focus on field
-    Note over Input Field: Input is focused
-    User->>Input Field: Type or modify value
-    User->>Input Field: Tab away or click elsewhere
-    Input Field->>OnBlur Handler: Trigger OnBlur event
-    Note over OnBlur Handler: Execute custom logic
+graph LR
+    A[User types in field] --> B[User clicks away]
+    B --> C[OnBlur fires]
 ```
 
 The `OnBlur` event fires when:
