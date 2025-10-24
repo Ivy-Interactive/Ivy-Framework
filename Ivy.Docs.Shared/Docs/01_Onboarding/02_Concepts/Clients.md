@@ -265,7 +265,7 @@ Navigation and URL Management
 <Body>
 
 ```csharp demo-tabs
-public class NavigationApp : ViewBase
+public class ClientNavigationApp : ViewBase
 {
     public override object? Build()
     {
