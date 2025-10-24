@@ -132,7 +132,7 @@ public class FormBuilder<TModel> : ViewBase
     public FormValidationStrategy ValidationStrategy { get; set; } = FormValidationStrategy.OnBlur;
 
     /// <summary>The size of the form affecting spacing between fields. Default is Medium.</summary>
-    public Sizes FormSize { get; set; } = Sizes.Medium;
+    public Sizes Size { get; set; } = Sizes.Medium;
 
     /// <summary>Initializes form builder for specified model state with automatic field scaffolding.</summary>
     /// <param name="model">Reactive state containing model object to be edited by form.</param>
@@ -200,22 +200,22 @@ public class FormBuilder<TModel> : ViewBase
 
         if (type == typeof(FileInput))
         {
-            return (state) => state.ToFileInput().Size(FormSize);
+            return (state) => state.ToFileInput().Size(Size);
         }
 
         if (name.EndsWith("Id") && (type == typeof(Guid) || type == typeof(int) || type == typeof(string)))
         {
-            return (state) => state.ToReadOnlyInput().Size(FormSize);
+            return (state) => state.ToReadOnlyInput().Size(Size);
         }
 
         if (name.EndsWith("Email") && nonNullableType == typeof(string))
         {
-            return (state) => state.ToEmailInput().Size(FormSize);
+            return (state) => state.ToEmailInput().Size(Size);
         }
 
         if ((name.EndsWith("Color") || name.EndsWith("Colour")) && nonNullableType == typeof(string))
         {
-            return (state) => state.ToColorInput().Size(FormSize);
+            return (state) => state.ToColorInput().Size(Size);
         }
 
         if (nonNullableType == typeof(bool))
@@ -234,7 +234,7 @@ public class FormBuilder<TModel> : ViewBase
                     // Use scaffold defaults
                     input.ScaffoldDefaults(name, type);
                 }
-                return input.Size(FormSize);
+                return input.Size(Size);
             };
         }
 
@@ -242,30 +242,30 @@ public class FormBuilder<TModel> : ViewBase
         {
             if (name.EndsWith("Password"))
             {
-                return (state) => state.ToPasswordInput().Size(FormSize);
+                return (state) => state.ToPasswordInput().Size(Size);
             }
 
-            return (state) => state.ToTextInput().Size(FormSize);
+            return (state) => state.ToTextInput().Size(Size);
         }
 
         if (nonNullableType.IsEnum)
         {
-            return (state) => state.ToSelectInput().Size(FormSize);
+            return (state) => state.ToSelectInput().Size(Size);
         }
 
         if (type.IsCollectionType() && type.GetCollectionTypeParameter() is { IsEnum: true })
         {
-            return (state) => state.ToSelectInput().List().Size(FormSize);
+            return (state) => state.ToSelectInput().List().Size(Size);
         }
 
         if (type.IsNumeric())
         {
-            return (state) => state.ToNumberInput().ScaffoldDefaults(name, type).Size(FormSize);
+            return (state) => state.ToNumberInput().ScaffoldDefaults(name, type).Size(Size);
         }
 
         if (type.IsDate())
         {
-            return (state) => state.ToDateTimeInput().Size(FormSize);
+            return (state) => state.ToDateTimeInput().Size(Size);
         }
 
         return null;
@@ -302,7 +302,7 @@ public class FormBuilder<TModel> : ViewBase
                 {
                     numberInput.ScaffoldDefaults(hint.Name, hint.Type);
                 }
-                return input.Size(FormSize);
+                return input.Size(Size);
             };
         }
 
@@ -318,7 +318,7 @@ public class FormBuilder<TModel> : ViewBase
     {
         foreach (var hint in _fields.Values.Where(e => e.Type is TU))
         {
-            hint.InputFactory = (state) => input(state).Size(FormSize);
+            hint.InputFactory = (state) => input(state).Size(Size);
         }
 
         return this;
@@ -542,7 +542,7 @@ public class FormBuilder<TModel> : ViewBase
     /// <returns>Form builder instance for method chaining.</returns>
     internal FormBuilder<TModel> SetSize(Sizes size)
     {
-        FormSize = size;
+        Size = size;
         return this;
     }
 
@@ -610,7 +610,7 @@ public class FormBuilder<TModel> : ViewBase
                 new FormFieldLayoutOptions(e.RowKey, e.Column, e.Order, e.Group),
                 e.Validators.ToArray(),
                 ValidationStrategy,
-                FormSize
+                Size
             ))
             .Cast<IFormFieldBinding<TModel>>()
             .ToArray();
@@ -641,7 +641,7 @@ public class FormBuilder<TModel> : ViewBase
         var formView = new FormView<TModel>(
             fieldViews,
             HandleSubmitEvent,
-            FormSize
+            Size
         );
 
         var validationView = new WrapperView(Layout.Vertical(
@@ -669,7 +669,7 @@ public class FormBuilder<TModel> : ViewBase
         return Layout.Vertical()
                | formView
                | Layout.Horizontal(new Button(SubmitTitle).HandleClick(HandleSubmit)
-                   .Loading(submitting).Disabled(submitting).Size(FormSize), validationView);
+                   .Loading(submitting).Disabled(submitting).Size(Size), validationView);
     }
 
     private static string InvalidMessage(int invalidFields)
