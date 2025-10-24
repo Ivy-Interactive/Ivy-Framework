@@ -4,7 +4,7 @@
 
 Ivy - The ultimate framework for building internal tools with LLM code generation by unifying front-end and back-end into a single C# codebase. With Ivy, you can build robust internal tools and dashboards using C# and AI assistance based on your existing database.
 
-[Sign up for our waitlist](https://ivy.app/join-waitlist) to be among the first to get access or [Book a 1-on-1 session](https://calendly.com/mikael-ivy/30min) with one of our founding engineers.
+[Sign up for our waitlist](https://ivy.app/join-waitlist) to be among the first to get access or [book a 1-on-1 session](https://calendly.com/mikael-ivy/30min) with one of our founding engineers.
 
 [Documentation](https://docs.ivy.app) | [Samples](https://samples.ivy.app) | [Current Sprint](https://github.com/orgs/Ivy-Interactive/projects/8) | [Roadmap](https://github.com/orgs/Ivy-Interactive/projects/7) | [Examples](https://github.com/Ivy-Interactive/Ivy-Examples)
 
