@@ -33,10 +33,9 @@ public class BasicRefreshExample : ViewBase
         }, [refreshToken]);
         
         return Layout.Vertical()
-            | Text.Large("Refresh Token Demo")
-            | Text.P($"Last refreshed: {timestamp.Value:HH:mm:ss.fff}")
+            | Text.Muted("Click the button to manually trigger a refresh")
             | new Button("Refresh", onClick: _ => refreshToken.Refresh())
-            | Text.Muted("Click the button to manually trigger a refresh");
+            | Text.P($"Last refreshed: {timestamp.Value:HH:mm:ss.fff}");
     }
 }
 ```
@@ -79,13 +78,11 @@ public class ReturnValueExample : ViewBase
         }, [refreshToken]);
         
         return Layout.Vertical()
-            | Text.Large("Return Value Demo")
-            | Text.P(selectedColor.Value)
             | Layout.Horizontal(
                 new Button("Red", onClick: _ => refreshToken.Refresh("Red")),
                 new Button("Green", onClick: _ => refreshToken.Refresh("Green")),
-                new Button("Blue", onClick: _ => refreshToken.Refresh("Blue"))
-            );
+                new Button("Blue", onClick: _ => refreshToken.Refresh("Blue")))
+            | Text.P(selectedColor.Value);
     }
 }
 ```
