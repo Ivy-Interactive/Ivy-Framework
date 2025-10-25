@@ -158,7 +158,7 @@ public class AsyncBlurExample : ViewBase
                     await Task.Delay(1000); // API call
                     
                     var isAvailable = !username.Value.Equals("admin", StringComparison.OrdinalIgnoreCase);
-                    message.Set(isAvailable ? "✓ Available" : "✗ Taken");
+                    message.Set(isAvailable ? "Available" : "Taken");
                 })
             | Text.P(message.Value);
     }
