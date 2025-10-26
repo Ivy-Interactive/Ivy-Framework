@@ -168,166 +168,44 @@ public class KanbanWithDeleteExample : ViewBase
 The Kanban widget automatically enables interactive features when handlers are configured. You don't need to manually set `AllowAdd`, `AllowMove`, or `AllowDelete` properties - they're automatically enabled when you provide the corresponding handlers.
 </Callout>
 
-## Customization
+<Callout Type="info">
+When using the `ToKanban` extension method, you can provide just the `groupBySelector` for basic boards, or include `idSelector`, `titleSelector`, `descriptionSelector`, and `orderSelector` for more control over card appearance and behavior.
+</Callout>
 
-### Column Titles
+## Low-Level API
 
-Customize how column titles are displayed using the `ColumnTitle` method:
-
-```csharp demo-tabs
-public class CustomColumnTitlesExample : ViewBase
-{
-    record Task(string Id, string Title, string Status);
-    
-    public override object? Build()
-    {
-        var tasks = new[]
-        {
-            new Task("1", "Design Homepage", "Todo"),
-            new Task("2", "Code Review", "In Progress"),
-            new Task("3", "Deploy", "Done"),
-        };
-        
-        return tasks
-            .ToKanban(
-                groupBySelector: t => t.Status,
-                idSelector: t => t.Id,
-                titleSelector: t => t.Title,
-                descriptionSelector: t => t.Id)
-            .ColumnTitle(status => status switch
-            {
-                "Todo" => "📋 To Do",
-                "In Progress" => "⚡ In Progress",
-                "Done" => "✅ Completed",
-                _ => status
-            });
-    }
-}
-```
-
-### Column Ordering
-
-Control the order of columns using the `ColumnOrder` method:
+For advanced scenarios, you can manually construct kanban boards using the `Kanban`, `KanbanColumn`, and `KanbanCard` widgets:
 
 ```csharp demo-tabs
-public class ColumnOrderExample : ViewBase
+public class ManualKanbanExample : ViewBase
 {
-    record Task(string Id, string Title, string Status, int Order);
-    
     public override object? Build()
     {
-        var tasks = new[]
-        {
-            new Task("1", "Deploy", "Done", 3),
-            new Task("2", "Design Homepage", "Todo", 1),
-            new Task("3", "Code Review", "In Progress", 2),
-        };
-        
-        return tasks
-            .ToKanban(
-                groupBySelector: t => t.Status,
-                idSelector: t => t.Id,
-                titleSelector: t => t.Title,
-                descriptionSelector: t => t.Id)
-            .ColumnOrder(t => t.Order);
-    }
-}
-```
-
-### Card Ordering
-
-Order cards within columns using the `CardOrder` method:
-
-```csharp demo-tabs
-public class CardOrderExample : ViewBase
-{
-    record Task(string Id, string Title, string Status, int Priority);
-    
-    public override object? Build()
-    {
-        var tasks = new[]
-        {
-            new Task("1", "Low Priority Task", "Todo", 3),
-            new Task("2", "High Priority Task", "Todo", 1),
-            new Task("3", "Medium Priority Task", "Todo", 2),
-        };
-        
-        return tasks
-            .ToKanban(
-                groupBySelector: t => t.Status,
-                idSelector: t => t.Id,
-                titleSelector: t => t.Title,
-                descriptionSelector: t => t.Id)
-            .CardOrder(t => t.Priority);
-    }
-}
-```
-
-### Custom Card Rendering
-
-Create fully custom card layouts using the `CardBuilder` method:
-
-```csharp demo-tabs
-public class CustomCardExample : ViewBase
-{
-    record Task(string Id, string Title, string Status, int Priority, string Description, string Assignee);
-    
-    public override object? Build()
-    {
-        var tasks = new[]
-        {
-            new Task("1", "Design Homepage", "Todo", 1, "Create wireframes", "Alice"),
-            new Task("2", "Code Review", "In Progress", 2, "Review PRs", "Bob"),
-        };
-        
-        return tasks
-            .ToKanban(groupBySelector: t => t.Status)
-            .CardBuilder(task => 
-                new Card(
-                    Layout.Vertical().Gap(2)
-                        | Text.H4(task.Title)
-                        | Text.Muted(task.Description)
-                        | (Layout.Horizontal().Gap(2)
-                            | new Badge(task.Assignee).Variant(BadgeVariant.Secondary)
-                            | new Badge($"Priority {task.Priority}").Variant(BadgeVariant.Outline)
-                        )
-                )
-            );
-    }
-}
-```
-
-### Empty State
-
-Display custom content when the kanban board has no data:
-
-```csharp demo-tabs
-public class EmptyKanbanExample : ViewBase
-{
-    record Task(string Id, string Title, string Status);
-    
-    public override object? Build()
-    {
-        return Array.Empty<Task>()
-            .ToKanban(
-                groupBySelector: t => t.Status,
-                idSelector: t => t.Id,
-                titleSelector: t => t.Title,
-                descriptionSelector: t => t.Id)
-            .Empty(
-                new Card()
-                    .Title("No Tasks")
-                    .Description("Create your first task to get started")
-            );
+        return new Kanban(
+            new KanbanColumn(
+                new KanbanCard("Design mockups") { CardId = "1" },
+                new KanbanCard("Create wireframes") { CardId = "2" }
+            ).Title("To Do").ColumnKey("todo"),
+            
+            new KanbanColumn(
+                new KanbanCard("Implement feature") { CardId = "3" }
+            ).Title("In Progress").ColumnKey("in-progress"),
+            
+            new KanbanColumn(
+                new KanbanCard("Deploy to staging") { CardId = "4" }
+            ).Title("Done").ColumnKey("done")
+        ) { ShowCounts = true };
     }
 }
 ```
 
 ## Examples
 
-### Complete Project Management Board
-
-Here's a comprehensive example combining all interactive features:
+<Details>
+<Summary>
+Complete Project Management Board
+</Summary>
+<Body>
 
 ```csharp demo-tabs
 public class FullKanbanExample : ViewBase
@@ -416,9 +294,14 @@ public class FullKanbanExample : ViewBase
 }
 ```
 
-### Simple Status Board
+</Body>
+</Details>
 
-A minimal kanban board for tracking simple statuses:
+<Details>
+<Summary>
+Simple Status Board
+</Summary>
+<Body>
 
 ```csharp demo-tabs
 public class SimpleStatusBoard : ViewBase
@@ -444,35 +327,7 @@ public class SimpleStatusBoard : ViewBase
 }
 ```
 
-<Callout Type="info">
-When using the `ToKanban` extension method, you can provide just the `groupBySelector` for basic boards, or include `idSelector`, `titleSelector`, `descriptionSelector`, and `orderSelector` for more control over card appearance and behavior.
-</Callout>
-
-## Low-Level API
-
-For advanced scenarios, you can manually construct kanban boards using the `Kanban`, `KanbanColumn`, and `KanbanCard` widgets:
-
-```csharp demo-tabs
-public class ManualKanbanExample : ViewBase
-{
-    public override object? Build()
-    {
-        return new Kanban(
-            new KanbanColumn(
-                new KanbanCard("Design mockups") { CardId = "1" },
-                new KanbanCard("Create wireframes") { CardId = "2" }
-            ).Title("To Do").ColumnKey("todo"),
-            
-            new KanbanColumn(
-                new KanbanCard("Implement feature") { CardId = "3" }
-            ).Title("In Progress").ColumnKey("in-progress"),
-            
-            new KanbanColumn(
-                new KanbanCard("Deploy to staging") { CardId = "4" }
-            ).Title("Done").ColumnKey("done")
-        ) { ShowCounts = true };
-    }
-}
-```
+</Body>
+</Details>
 
 <WidgetDocs Type="Ivy.Kanban" ExtensionTypes="Ivy.KanbanColumnExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Kanban/Kanban.cs"/>
