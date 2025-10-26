@@ -97,33 +97,6 @@ public class KanbanWithMoveExample : ViewBase
 }
 ```
 
-## Low-Level API
-
-For advanced scenarios, you can manually construct kanban boards using the `Kanban`, `KanbanColumn`, and `KanbanCard` widgets:
-
-```csharp demo-below
-public class ManualKanbanExample : ViewBase
-{
-    public override object? Build()
-    {
-        return new Kanban(
-            new KanbanColumn(
-                new KanbanCard("Design mockups") { CardId = "1" },
-                new KanbanCard("Create wireframes") { CardId = "2" }
-            ).Title("To Do"),
-            
-            new KanbanColumn(
-                new KanbanCard("Implement feature") { CardId = "3" }
-            ).Title("In Progress"),
-            
-            new KanbanColumn(
-                new KanbanCard("Deploy to staging") { CardId = "4" }
-            ).Title("Done")
-        ) { ShowCounts = true };
-    }
-}
-```
-
 ## Examples
 
 <Details>
