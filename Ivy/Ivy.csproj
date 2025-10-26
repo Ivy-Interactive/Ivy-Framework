@@ -85,11 +85,8 @@
     </Compile>
   </ItemGroup>
   
-  <ItemGroup Condition="'$(CI)' != 'true'">
+  <ItemGroup>
     <ProjectReference Include="..\Ivy.Filters\Ivy.Filters.csproj" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(CI)' == 'true'">
-    <PackageReference Include="Ivy.Filters" Version="$(Version)" />
   </ItemGroup>
 
 </Project>
