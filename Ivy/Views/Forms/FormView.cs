@@ -4,6 +4,7 @@ using Ivy.Core;
 using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
 using Ivy.Hooks;
+using Ivy.Shared;
 using Ivy.Widgets.Inputs;
 
 namespace Ivy.Views.Forms;
@@ -56,7 +57,8 @@ public class FormFieldView(
     bool required,
     FormFieldLayoutOptions? layoutOptions,
     Func<object?, (bool, string)>[]? validators,
-    FormValidationStrategy validationStrategy) : ViewBase, IFormFieldView
+    FormValidationStrategy validationStrategy,
+    Sizes size = Sizes.Medium) : ViewBase, IFormFieldView
 {
     /// <summary>Layout configuration for positioning this field in the form.</summary>
     public FormFieldLayoutOptions Layout { get; } = layoutOptions ?? new FormFieldLayoutOptions(Guid.NewGuid());
@@ -132,7 +134,7 @@ public class FormFieldView(
             input.HandleBlur(OnBlur);
         }
 
-        return visibleState.Value ? new Field(input, label, description, required) : null;
+        return visibleState.Value ? new Field(input, label, description, required) { Size = size } : null;
     }
 }
 
@@ -154,14 +156,15 @@ public class FormFieldBinding<TModel>(
     bool required = false,
     FormFieldLayoutOptions? layoutOptions = null,
     Func<object?, (bool, string)>[]? validators = null,
-    FormValidationStrategy validationStrategy = FormValidationStrategy.OnBlur
+    FormValidationStrategy validationStrategy = FormValidationStrategy.OnBlur,
+    Sizes size = Sizes.Medium
     ) : IFormFieldBinding<TModel>
 {
     /// <summary>Creates a bound field view connected to the model state.</summary>
     public (IFormFieldView, IDisposable) Bind(IState<TModel> model)
     {
         var (fieldState, disposable) = StateHelpers.MemberState(model, selector);
-        var fieldView = new FormFieldView(fieldState, factory, visible, updateSignal, label, description, required, layoutOptions, validators, validationStrategy);
+        var fieldView = new FormFieldView(fieldState, factory, visible, updateSignal, label, description, required, layoutOptions, validators, validationStrategy, size);
         return (fieldView, disposable);
     }
 }
@@ -181,7 +184,7 @@ public interface IFormFieldBinding<TModel>
 }
 
 /// <summary>Renders form fields in a structured layout with columns, rows, and groups.</summary>
-public class FormView<TModel>(IFormFieldView[] fieldViews, Func<Event<Form>, ValueTask>? handleSubmit = null) : ViewBase
+public class FormView<TModel>(IFormFieldView[] fieldViews, Func<Event<Form>, ValueTask>? handleSubmit = null, Sizes size = Sizes.Medium) : ViewBase
 {
     /// <summary>Builds the complete form layout with multi-column support and field grouping.</summary>
     public override object? Build()
@@ -195,9 +198,18 @@ public class FormView<TModel>(IFormFieldView[] fieldViews, Func<Event<Form>, Val
 
         object RenderRows(IFormFieldView[] fs)
         {
+            var gap = size switch
+            {
+                Sizes.Small => 4,
+                Sizes.Medium => 6,
+                Sizes.Large => 8,
+                _ => 8
+            };
+
             return Layout
                 .Vertical(fs.OrderBy(h => h.Layout.Order)
-                    .GroupBy(f => f.Layout.RowKey).Select(e => e.ToArray()).Select(RenderRow));
+                    .GroupBy(f => f.Layout.RowKey).Select(e => e.ToArray()).Select(RenderRow))
+                .Gap(gap);
         }
 
         var columns = fieldViews
