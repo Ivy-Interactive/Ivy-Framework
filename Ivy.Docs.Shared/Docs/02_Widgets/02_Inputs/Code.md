@@ -33,7 +33,7 @@ new Code("using System;\n\npublic class Program\n{\n    static void Main()\n    
 
 ```csharp demo-tabs
 new Code("function greet(name) {\n  console.log(`Hello, ${name}!`);\n}\ngreet('World');")
-    .Width(Size.Auto())
+    .Width(Size.Full())
     .Height(Size.Auto())
     .Language(Languages.Javascript)
 ```
@@ -42,7 +42,7 @@ new Code("function greet(name) {\n  console.log(`Hello, ${name}!`);\n}\ngreet('W
 
 ```csharp demo-tabs
 new Code("def greet(name):\n    print(f'Hello, {name}!')\n\ngreet('World')")
-    .Width(Size.Auto())
+    .Width(Size.Full())
     .Height(Size.Auto())
     .Language(Languages.Python)
 ```
@@ -51,7 +51,7 @@ new Code("def greet(name):\n    print(f'Hello, {name}!')\n\ngreet('World')")
 
 ```csharp demo-tabs
 new Code("SELECT u.name, u.email, p.title\nFROM users u\nJOIN posts p ON u.id = p.user_id\nWHERE u.active = true\nORDER BY p.created_at DESC;")
-    .Width(Size.Auto())
+    .Width(Size.Full())
     .Height(Size.Auto())
     .Language(Languages.Sql)
 ```
@@ -60,7 +60,7 @@ new Code("SELECT u.name, u.email, p.title\nFROM users u\nJOIN posts p ON u.id = 
 
 ```csharp demo-tabs
 new Code("<html>\n<body>\n  <h1>Hello World!</h1>\n</body>\n</html>")
-    .Width(Size.Auto())
+    .Width(Size.Full())
     .Height(Size.Auto())
     .Language(Languages.Html)
 ```
@@ -69,7 +69,7 @@ new Code("<html>\n<body>\n  <h1>Hello World!</h1>\n</body>\n</html>")
 
 ```csharp demo-tabs
 new Code("body {\n  font-family: Arial, sans-serif;\n  color: #333;\n}")
-    .Width(Size.Auto())
+    .Width(Size.Full())
     .Height(Size.Auto())
     .Language(Languages.Css)
 ```
@@ -78,7 +78,7 @@ new Code("body {\n  font-family: Arial, sans-serif;\n  color: #333;\n}")
 
 ```csharp demo-tabs
 new Code("{\n  \"name\": \"Ivy\",\n  \"version\": \"1.0.0\",\n  \"features\": [\"syntax highlighting\", \"auto-complete\"],\n  \"config\": {\n    \"theme\": \"dark\",\n    \"fontSize\": 14\n  }\n}")
-    .Width(Size.Auto())
+    .Width(Size.Full())
     .Height(Size.Auto())
     .Language(Languages.Json)
 ```
@@ -87,7 +87,7 @@ new Code("{\n  \"name\": \"Ivy\",\n  \"version\": \"1.0.0\",\n  \"features\": [\
 
 ```csharp demo-tabs
 new Code("Table users {\n  id integer [primary key]\n  username varchar\n  role varchar\n  created_at timestamp\n}")
-    .Width(Size.Auto())
+    .Width(Size.Full())
     .Height(Size.Auto())
     .Language(Languages.Dbml)
 ```
@@ -96,7 +96,7 @@ new Code("Table users {\n  id integer [primary key]\n  username varchar\n  role 
 
 ```csharp demo-tabs
 new Code("interface User {\n  name: string;\n  age: number;\n}\n\nconst user: User = { name: 'John', age: 30 };")
-    .Width(Size.Auto())
+    .Width(Size.Full())
     .Height(Size.Auto())
     .Language(Languages.Typescript)
 ```
@@ -105,7 +105,7 @@ new Code("interface User {\n  name: string;\n  age: number;\n}\n\nconst user: Us
 
 ```csharp demo-tabs
 new Code("Here is some plain text, with no syntax highlighting whatsoever.\nUnlike the TextInput widget, this uses a monospaced font, which\nmakes some types of text easier to read. For example:\n\n  +----------------------------+\n  |                            |\n  |       ASCII Diagrams       |\n  |                            |\n  +----------------------------+")
-    .Width(Size.Auto())
+    .Width(Size.Full())
     .Height(Size.Auto())
     .Language(Languages.Text)
 ```
@@ -119,9 +119,7 @@ The `Invalid` state provides visual feedback when code contains syntax errors or
 Mark a `CodeInput` as invalid when content has syntax errors:
 
 ```csharp demo-tabs
-new Code("function greet(name) {\n    console.log('Hello, ' + name);\n    return 'Welcome ' + name;\n}")
-    .Width(Size.Auto())
-    .Height(Size.Auto())
+new CodeInput<string>("function greet(name) {\n    console.log('Hello, ' + name);\n    return 'Welcome ' + name;\n}")
     .Language(Languages.Javascript)
     .Invalid("Missing closing parenthesis!")
 ```
@@ -133,9 +131,7 @@ The `Disabled` state prevents editing while allowing users to view the code. It'
 Disable a `CodeInput` when needed:
 
 ```csharp demo-tabs
-new Code("def calculate_fibonacci(n):\n    if n <= 1:\n        return n\n    return calculate_fibonacci(n-1) + calculate_fibonacci(n-2)\n\nresult = calculate_fibonacci(10)")
-    .Width(Size.Auto())
-    .Height(Size.Auto())
+new CodeInput<string>("def calculate_fibonacci(n):\n    if n <= 1:\n        return n\n    return calculate_fibonacci(n-1) + calculate_fibonacci(n-2)\n\nresult = calculate_fibonacci(10)")
     .Language(Languages.Python)
     .Disabled()
 ```
