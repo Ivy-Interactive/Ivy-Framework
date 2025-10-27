@@ -87,13 +87,16 @@ export const generateDataProps = (data: Record<string, unknown>[]) => {
   };
 };
 
-export function generateEChartGrid(cartesianGrid?: CartesianGridProps) {
+export function generateEChartGrid(
+  cartesianGrid?: CartesianGridProps,
+  hasLegend: boolean = false
+) {
   const defaultGrid = {
     show: true,
     left: 2,
     right: 2,
     top: 30,
-    bottom: 30,
+    bottom: hasLegend ? 60 : 30, // More space for legend
     containLabel: true,
   };
 
