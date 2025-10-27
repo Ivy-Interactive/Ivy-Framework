@@ -23,8 +23,7 @@ It supports various programming languages and offers features like line numbers 
 ### C#
 
 ```csharp demo-tabs
-Layout.Vertical()
-| UseState("using System;\n\npublic class Program\n{\n    static void Main()\n    {\n        Console.WriteLine(\"Hello, World!\");\n    }\n}")
+UseState("using System;\n\npublic class Program\n{\n    static void Main()\n    {\n        Console.WriteLine(\"Hello, World!\");\n    }\n}")
     .ToCodeInput()
     .Width(Size.Full())
     .Height(Size.Auto())
@@ -34,8 +33,7 @@ Layout.Vertical()
 ### Javascript
 
 ```csharp demo-tabs
-Layout.Vertical()
-| UseState("function greet(name) {\n  console.log(`Hello, ${name}!`);\n}\ngreet('World');")
+UseState("function greet(name) {\n  console.log(`Hello, ${name}!`);\n}\ngreet('World');")
     .ToCodeInput()
     .Width(Size.Full())
     .Height(Size.Auto())
@@ -45,8 +43,7 @@ Layout.Vertical()
 ### Python
 
 ```csharp demo-tabs
-Layout.Vertical()
-| UseState("def greet(name):\n    print(f'Hello, {name}!')\n\ngreet('World')")
+UseState("def greet(name):\n    print(f'Hello, {name}!')\n\ngreet('World')")
     .ToCodeInput()
     .Width(Size.Full())
     .Height(Size.Auto())
@@ -56,8 +53,7 @@ Layout.Vertical()
 ### SQL
 
 ```csharp demo-tabs
-Layout.Vertical()
-| UseState("SELECT u.name, u.email, p.title\nFROM users u\nJOIN posts p ON u.id = p.user_id\nWHERE u.active = true\nORDER BY p.created_at DESC;")
+UseState("SELECT u.name, u.email, p.title\nFROM users u\nJOIN posts p ON u.id = p.user_id\nWHERE u.active = true\nORDER BY p.created_at DESC;")
     .ToCodeInput()
     .Width(Size.Full())
     .Height(Size.Auto())
@@ -67,8 +63,7 @@ Layout.Vertical()
 ### HTML
 
 ```csharp demo-tabs
-Layout.Vertical()
-| UseState("<html>\n<body>\n  <h1>Hello World!</h1>\n</body>\n</html>")
+UseState("<html>\n<body>\n  <h1>Hello World!</h1>\n</body>\n</html>")
     .ToCodeInput()
     .Width(Size.Full())
     .Height(Size.Auto())
@@ -78,8 +73,7 @@ Layout.Vertical()
 ### CSS
 
 ```csharp demo-tabs
-Layout.Vertical()
-| UseState("body {\n  font-family: Arial, sans-serif;\n  color: #333;\n}")
+UseState("body {\n  font-family: Arial, sans-serif;\n  color: #333;\n}")
     .ToCodeInput()
     .Width(Size.Full())
     .Height(Size.Auto())
@@ -89,8 +83,7 @@ Layout.Vertical()
 ### Json
 
 ```csharp demo-tabs
-Layout.Vertical()
-| UseState("{\n  \"name\": \"Ivy\",\n  \"version\": \"1.0.0\",\n  \"features\": [\"syntax highlighting\", \"auto-complete\"],\n  \"config\": {\n    \"theme\": \"dark\",\n    \"fontSize\": 14\n  }\n}")
+UseState("{\n  \"name\": \"Ivy\",\n  \"version\": \"1.0.0\",\n  \"features\": [\"syntax highlighting\", \"auto-complete\"],\n  \"config\": {\n    \"theme\": \"dark\",\n    \"fontSize\": 14\n  }\n}")
     .ToCodeInput()
     .Width(Size.Full())
     .Height(Size.Auto())
@@ -100,8 +93,7 @@ Layout.Vertical()
 ### DBML
 
 ```csharp demo-tabs
-Layout.Vertical()
-| UseState("Table users {\n  id integer [primary key]\n  username varchar\n  role varchar\n  created_at timestamp\n}")
+UseState("Table users {\n  id integer [primary key]\n  username varchar\n  role varchar\n  created_at timestamp\n}")
     .ToCodeInput()
     .Width(Size.Full())
     .Height(Size.Auto())
@@ -111,8 +103,7 @@ Layout.Vertical()
 ### Typescript
 
 ```csharp demo-tabs
-Layout.Vertical()
-| UseState("interface User {\n  name: string;\n  age: number;\n}\n\nconst user: User = { name: 'John', age: 30 };")
+UseState("interface User {\n  name: string;\n  age: number;\n}\n\nconst user: User = { name: 'John', age: 30 };")
     .ToCodeInput()
     .Width(Size.Full())
     .Height(Size.Auto())
@@ -122,8 +113,7 @@ Layout.Vertical()
 ### Plain Text
 
 ```csharp demo-tabs
-Layout.Vertical()
-| UseState("Here is some plain text, with no syntax highlighting whatsoever.\nUnlike the TextInput widget, this uses a monospaced font, which\nmakes some types of text easier to read. For example:\n\n  +----------------------------+\n  |                            |\n  |       ASCII Diagrams       |\n  |                            |\n  +----------------------------+")
+UseState("Here is some plain text, with no syntax highlighting whatsoever.\nUnlike the TextInput widget, this uses a monospaced font, which\nmakes some types of text easier to read. For example:\n\n  +----------------------------+\n  |                            |\n  |       ASCII Diagrams       |\n  |                            |\n  +----------------------------+")
     .ToCodeInput()
     .Width(Size.Full())
     .Height(Size.Auto())
@@ -139,8 +129,7 @@ The `Invalid` state provides visual feedback when code contains syntax errors or
 Mark a `CodeInput` as invalid when content has syntax errors:
 
 ```csharp demo-tabs
-Layout.Vertical()
-| UseState("function greet(name) {\n    console.log('Hello, ' + name);\n    return 'Welcome ' + name;\n}")
+UseState("function greet(name) {\n    console.log('Hello, ' + name);\n    return 'Welcome ' + name;\n}")
     .ToCodeInput()
     .Language(Languages.Javascript)
     .Invalid("Missing closing parenthesis!")
@@ -153,8 +142,7 @@ The `Disabled` state prevents editing while allowing users to view the code. It'
 Disable a `CodeInput` when needed:
 
 ```csharp demo-tabs
-Layout.Vertical()
-| UseState("def calculate_fibonacci(n):\n    if n <= 1:\n        return n\n    return calculate_fibonacci(n-1) + calculate_fibonacci(n-2)\n\nresult = calculate_fibonacci(10)")
+UseState("def calculate_fibonacci(n):\n    if n <= 1:\n        return n\n    return calculate_fibonacci(n-1) + calculate_fibonacci(n-2)\n\nresult = calculate_fibonacci(10)")
     .ToCodeInput()
     .Language(Languages.Python)
     .Disabled()
