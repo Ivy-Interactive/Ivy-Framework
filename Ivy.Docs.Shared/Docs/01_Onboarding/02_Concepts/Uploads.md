@@ -121,7 +121,7 @@ public class ValidatedUploadView : ViewBase
         );
 
         return Layout.Vertical(
-            files.ToFileInput(uploadUrl, "Upload Image").Accept(".jpg,.jpeg,.png,.mp4,.mov,.avi,.wmv,.mpeg,.mpg"),
+            files.ToFileInput(uploadUrl, "Upload Image").Accept(".jpg,.jpeg,.png"),
             error.Value != null
                 ? new Callout(error.Value, variant: CalloutVariant.Error)
                 : null
@@ -161,7 +161,7 @@ public class ImageUploadView : ViewBase
                 // Create preview URL from uploaded bytes
                 preview.Set($"data:image/jpeg;base64,{Convert.ToBase64String(fileBytes)}");
                 // Process uploaded file bytes
-                client.Toast($"Image uploaded successfully", "Success");
+                client.Toast($"Image uploaded successfully ({fileBytes.Length} bytes)", "Success");
             },
             "image/jpeg",
             "uploaded-image"
