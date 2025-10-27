@@ -60,6 +60,8 @@ const PieChartWidget: React.FC<PieChartWidgetProps> = ({
   const styles: React.CSSProperties = {
     ...getWidth(width),
     ...getHeight(height),
+    display: 'flex',
+    flexDirection: 'column',
   };
 
   const { valueKeys } = generateDataProps(data);
@@ -73,6 +75,19 @@ const PieChartWidget: React.FC<PieChartWidgetProps> = ({
   const series = valueKeys.map(key => {
     const pieProperties = pies?.find(a => a.dataKey.toLowerCase() === key);
 
+    // Adjust vertical center based on total and legend presence
+    let centerY = pieProperties?.cy ?? '50%';
+    if (!pieProperties?.cy) {
+      // Only adjust if not explicitly set
+      if (total && legend) {
+        centerY = '45%'; // Both total and legend need space
+      } else if (legend) {
+        centerY = '45%'; // Legend at bottom needs space
+      } else if (total) {
+        centerY = '52%'; // Total at top, shift down slightly
+      }
+    }
+
     return {
       name: key.charAt(0).toUpperCase() + key.slice(1),
       type: ChartType.Pie,
@@ -80,7 +95,7 @@ const PieChartWidget: React.FC<PieChartWidgetProps> = ({
         pieProperties?.innerRadius ?? '40%',
         pieProperties?.outerRadius ?? '70%',
       ],
-      center: [pieProperties?.cx ?? '50%', pieProperties?.cy ?? '50%'],
+      center: [pieProperties?.cx ?? '50%', centerY],
       startAngle: pieProperties?.startAngle ?? 90,
       endAngle: pieProperties?.endAngle ?? 450,
       animation: pieProperties?.animated ?? true,
@@ -95,9 +110,7 @@ const PieChartWidget: React.FC<PieChartWidgetProps> = ({
         scaleSize: 5,
         focus: 'none',
         label: {
-          show: true,
-          fontSize: 40,
-          fontWeight: 'bold',
+          show: false,
         },
       },
       labelLine: {
@@ -158,12 +171,18 @@ const PieChartWidget: React.FC<PieChartWidgetProps> = ({
   return (
     <div style={styles}>
       {total && (
-        <div style={{ textAlign: 'center', marginBottom: 12 }}>
+        <div style={{ textAlign: 'center', marginBottom: 12, flexShrink: 0 }}>
           <span>{total.label}</span>
           <span>{total.formattedValue}</span>
         </div>
       )}
-      <ReactECharts key={theme} option={option} />
+      <div style={{ flex: 1, minHeight: 0 }}>
+        <ReactECharts
+          key={theme}
+          option={option}
+          style={{ height: '100%', width: '100%' }}
+        />
+      </div>
     </div>
   );
 };
