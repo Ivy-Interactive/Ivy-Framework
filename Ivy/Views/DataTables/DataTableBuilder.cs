@@ -242,6 +242,18 @@ public class DataTableBuilder<TModel> : ViewBase
         return this;
     }
 
+    public DataTableBuilder<TModel> BatchSize(int batchSize)
+    {
+        _configuration.BatchSize = batchSize;
+        return this;
+    }
+
+    public DataTableBuilder<TModel> LoadAllRows(bool loadAll = true)
+    {
+        _configuration.LoadAllRows = loadAll;
+        return this;
+    }
+
     public override object? Build()
     {
         var chatClient = this.UseService<IChatClient?>();

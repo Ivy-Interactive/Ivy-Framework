@@ -109,6 +109,8 @@ public class DataTableApp : SampleBase
             .Group(u => u.Priority, "Metrics")
             .Group(u => u.Activity, "Metrics")
             // Config
-            .Config(config => config.AllowLlmFiltering = true);
+            .Config(config => config.AllowLlmFiltering = true)
+            // Use small batch size for demonstration
+            .BatchSize(10);
     }
 }

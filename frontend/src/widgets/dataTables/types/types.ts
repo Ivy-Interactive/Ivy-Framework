@@ -59,6 +59,8 @@ export interface DataTableConfiguration {
   selectionMode?: SelectionModes;
   showIndexColumn?: boolean;
   showGroups?: boolean;
+  batchSize?: number;
+  loadAllRows?: boolean;
 }
 
 export interface TableProps {

@@ -96,7 +96,7 @@ export const TableProvider: React.FC<TableProviderProps> = ({
   const loadingRef = useRef(false);
   const currentRowCountRef = useRef(0);
   const isReorderingRef = useRef(false);
-  const batchSize = 20;
+  const batchSize = config.batchSize ?? 20;
 
   const { allowColumnResizing, allowSorting } = config;
 
@@ -144,9 +144,10 @@ export const TableProvider: React.FC<TableProviderProps> = ({
 
       try {
         // When sorting/filtering changes, currentRowCountRef is reset to 0
-        // so we always start fresh with batchSize rows
-        const rowsToFetch =
-          currentRowCountRef.current > 0
+        // so we always start fresh with batchSize rows, or all rows if loadAllRows is true
+        const rowsToFetch = config.loadAllRows
+          ? 1000000 // Large number to fetch all rows
+          : currentRowCountRef.current > 0
             ? currentRowCountRef.current
             : batchSize;
 
@@ -228,7 +229,7 @@ export const TableProvider: React.FC<TableProviderProps> = ({
 
   // Load more data
   const loadMoreData = useCallback(async () => {
-    if (loadingRef.current || !hasMore) return;
+    if (loadingRef.current || !hasMore || config.loadAllRows) return;
 
     loadingRef.current = true;
     setIsLoading(true);
