@@ -107,6 +107,17 @@ public class ButtonApp() : SampleBase
                    Icons.Star.ToButton(eventHandler, ButtonVariant.Outline)
                )
 
+               | Text.H2("Buttons with URLs")
+               | (Layout.Horizontal().Gap(8)
+                   | new Button("Visit Ivy GitHub", variant: ButtonVariant.Primary)
+                       .Url("https://github.com/Ivy-Interactive/Ivy-Framework")
+                   | new Button("External Link", variant: ButtonVariant.Secondary)
+                       .Url("https://github.com/Ivy-Interactive/Ivy-Framework")
+                       .Icon(Icons.ExternalLink, Align.Right)
+                   | new Button("Link Style", variant: ButtonVariant.Link)
+                       .Url("https://github.com/Ivy-Interactive/Ivy-Framework")
+               )
+
                | Text.H2("Interactive Demo")
                | Text.Literal(label.Value)
             ;

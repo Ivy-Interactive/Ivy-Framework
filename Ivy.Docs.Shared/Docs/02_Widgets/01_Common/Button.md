@@ -122,4 +122,23 @@ Layout.Vertical().Gap(4)
         .Large()
 ```
 
+## Buttons with URLs
+
+Buttons can act as links by providing a URL. When a button has a URL, clicking it will navigate to that URL in a new tab instead of triggering an `onClick` event.
+
+<Callout Type="tip">
+Buttons with URLs support right-click actions like "Copy Link" and "Open in New Tab", providing a better user experience than programmatic navigation.
+</Callout>
+
+```csharp demo-tabs
+    Layout.Horizontal().Gap(4)
+        | new Button("Visit Ivy Docs", variant: ButtonVariant.Primary)
+            .Url("https://github.com/Ivy-Interactive/Ivy-Framework")
+        | new Button("External Link", variant: ButtonVariant.Secondary)
+            .Url("https://github.com/Ivy-Interactive/Ivy-Framework")
+            .Icon(Icons.ExternalLink, Align.Right)
+        | new Button("Link Style", variant: ButtonVariant.Link)
+            .Url("https://github.com/Ivy-Interactive/Ivy-Framework")
+```
+
 <WidgetDocs Type="Ivy.Button" ExtensionTypes="Ivy.ButtonExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Button.cs"/>
