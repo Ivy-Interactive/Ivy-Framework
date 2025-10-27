@@ -20,7 +20,7 @@ It supports various programming languages and offers features like line numbers 
 
 ## Supported Languages
 
-### C #
+### C#
 
 ```csharp demo-tabs
 new Code("using System;\n\npublic class Program\n{\n    static void Main()\n    {\n        Console.WriteLine(\"Hello, World!\");\n    }\n}")
