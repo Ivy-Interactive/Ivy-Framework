@@ -118,9 +118,9 @@ public class ValidatedUploadView : ViewBase
         var files = UseState<FileInput?>(() => null);
         var uploadUrl = this.UseUpload(
             fileBytes => {
-                if (fileBytes.Length > 5 * 1024 * 1024) // 5MB limit
+                if (fileBytes.Length > 2 * 1024 * 1024) // 2MB limit
                 {
-                    error.Set("File size must be less than 5MB");
+                    error.Set("File size must be less than 2MB");
                     return;
                 }
                 error.Set((string?)null);
@@ -132,7 +132,7 @@ public class ValidatedUploadView : ViewBase
         );
 
         return Layout.Vertical(
-            files.ToFileInput(uploadUrl, "Upload Image").Accept(".jpg,.jpeg,.png"),
+            files.ToFileInput(uploadUrl, "Upload Image").Accept(".jpg,.jpeg,.png,.mp4,.mov,.avi,.wmv,.mpeg,.mpg"),
             error.Value != null
                 ? new Callout(error.Value, variant: CalloutVariant.Error)
                 : null
@@ -146,9 +146,8 @@ public class ValidatedUploadView : ViewBase
 1. **File Validation**: Validate file types and sizes using `Accept()` and custom validation
 2. **Status Feedback**: Provide clear feedback about upload status (processing, success, errors)
 3. **Error Handling**: Implement proper error handling in your upload handler
-4. **Security**: Always validate files on the server side, never trust client-side validation alone
+4. **Security**: Always validate files on the server side
 5. **User Experience**: Show file information (name, size) after selection and clear status messages
-6. **Accessibility**: Ensure upload interfaces are accessible with proper labels and keyboard support
 
 <WidgetDocs Type="Ivy.FileInput" ExtensionTypes="Ivy.FileInputExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Inputs/FileInput.cs"/>
 
