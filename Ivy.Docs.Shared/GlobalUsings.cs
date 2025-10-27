@@ -26,5 +26,6 @@ global using Ivy.Views.Blades;
 global using Ivy.Views.Dashboards;
 global using Ivy.Docs.Shared.Helpers;
 global using Ivy.Views.DataTables;
+global using Ivy.Views.Kanban;
 
 namespace Ivy.Docs.Shared;
