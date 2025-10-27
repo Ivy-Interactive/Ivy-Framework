@@ -11,7 +11,7 @@ searchHints:
 # Uploads
 
 <Ingress>
-Handle file uploads robustly with support for single/multiple files, drag-and-drop interfaces, and progress tracking for various file types.
+Handle file uploads robustly with support for single/multiple files, drag-and-drop interfaces, and status feedback for various file types.
 </Ingress>
 
 ## Overview
@@ -20,28 +20,45 @@ The upload system in Ivy supports:
 
 - Single and multiple file uploads
 - Drag and drop interfaces
-- Progress tracking
+- Upload status feedback
 - File validation
 - Error handling
-- Preview capabilities
+- Image preview capabilities
+
+## How It Works
+
+The upload system connects three key pieces:
+
+1. **UseUpload Hook**: Creates a server-side upload endpoint and returns a state containing the upload URL
+2. **State for Files**: A state variable that holds the selected file(s) information
+3. **ToFileInput Extension**: Connects the file state to the upload URL, creating a file input widget
+
+Here's how they work together:
+
+```csharp
+// 1. Create upload handler - returns state with URL like "/upload/{connectionId}/{uploadId}"
+var uploadUrl = this.UseUpload(
+    fileBytes => {
+        // This handler is called when a file is uploaded
+        Console.WriteLine($"Received {fileBytes.Length} bytes");
+    },
+    "application/octet-stream",  // Expected MIME type
+    "uploaded-file"              // Default filename
+);
+
+// 2. Create state to hold file information
+var files = UseState<FileInput?>(() => null);
+
+// 3. Connect them with ToFileInput - creates a widget that:
+//    - Updates the files state when user selects files
+//    - Automatically uploads to the uploadUrl
+//    - Calls your handler with the file bytes
+files.ToFileInput(uploadUrl, "Choose Files")
+```
 
 ## Basic Usage
 
-Here's a simple example of handling file uploads:
-
-```csharp
-var uploadUrl = this.UseUpload(
-    fileBytes => {
-        // Process uploaded file bytes
-        // For example: save to database, process image, etc.
-        Console.WriteLine($"Received {fileBytes.Length} bytes");
-    },
-    "application/octet-stream",
-    "uploaded-file"
-);
-```
-
-### File Input Component
+### Single File Upload
 
 The most common way to handle uploads is using the FileInput component:
 
@@ -50,25 +67,19 @@ public class FileUploadView : ViewBase
 {
     public override object? Build()
     {
-        var isUploading = UseState(() => false);
         var files = UseState<FileInput?>(() => null);
         var uploadUrl = this.UseUpload(
             fileBytes => {
-                isUploading.Set(true);
-                try {
-                    // Process uploaded file bytes
-                    Console.WriteLine($"Received {fileBytes.Length} bytes");
-                } finally {
-                    isUploading.Set(false);
-                }
+                // Process uploaded file bytes
+                Console.WriteLine($"Received {fileBytes.Length} bytes");
             },
             "application/octet-stream",
             "uploaded-file"
         );
 
         return Layout.Vertical(
-            uploadUrl.Value != null
-                ? Text.Inline($"Upload URL: {uploadUrl.Value}")
+            files.Value != null
+                ? Text.Inline($"Selected: {files.Value.Name} ({files.Value.Size} bytes)")
                 : null,
             files.ToFileInput(uploadUrl, "Choose Files").Accept(".pdf,.doc,.docx")
         );
@@ -76,27 +87,28 @@ public class FileUploadView : ViewBase
 }
 ```
 
-### Progress Tracking
+### Upload Status Feedback
 
-Track upload progress for better user feedback:
+Provide feedback during file upload:
 
 ```csharp demo-below
-public class UploadWithProgressView : ViewBase
+public class UploadWithStatusView : ViewBase
 {
     public override object? Build()
     {
-        var progress = UseState(() => 0);
-        var isUploading = UseState(() => false);
+        var status = UseState<string?>(() => null);
         var files = UseState<FileInput?>(() => null);
         var uploadUrl = this.UseUpload(
             fileBytes => {
-                isUploading.Set(true);
+                status.Set("Processing...");
                 try {
                     // Process uploaded file bytes
                     Console.WriteLine($"Received {fileBytes.Length} bytes");
-                } finally {
-                    isUploading.Set(false);
-                    progress.Set(0);
+                    // Simulate processing
+                    System.Threading.Thread.Sleep(1000);
+                    status.Set($"✓ Uploaded {fileBytes.Length} bytes successfully");
+                } catch (Exception ex) {
+                    status.Set($"✗ Upload failed: {ex.Message}");
                 }
             },
             "application/octet-stream",
@@ -104,10 +116,10 @@ public class UploadWithProgressView : ViewBase
         );
 
         return Layout.Vertical(
-            isUploading.Value
-                ? new Progress(progress.Value)
+            status.Value != null
+                ? Text.Inline(status.Value)
                 : null,
-            files.ToFileInput(uploadUrl, "Upload Files")
+            files.ToFileInput(uploadUrl, "Upload File")
         );
     }
 }
@@ -151,12 +163,12 @@ public class ValidatedUploadView : ViewBase
 
 ### Best Practices
 
-1. **File Validation**: Validate file types and sizes before upload
-2. **Progress Feedback**: Show upload progress for better UX
-3. **Error Handling**: Implement proper error handling
-4. **Security**: Validate files on the server side
-5. **User Feedback**: Provide clear feedback about upload status
-6. **Accessibility**: Ensure upload interfaces are accessible
+1. **File Validation**: Validate file types and sizes using `Accept()` and custom validation
+2. **Status Feedback**: Provide clear feedback about upload status (processing, success, errors)
+3. **Error Handling**: Implement proper error handling in your upload handler
+4. **Security**: Always validate files on the server side, never trust client-side validation alone
+5. **User Experience**: Show file information (name, size) after selection and clear status messages
+6. **Accessibility**: Ensure upload interfaces are accessible with proper labels and keyboard support
 
 <WidgetDocs Type="Ivy.FileInput" ExtensionTypes="Ivy.FileInputExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Inputs/FileInput.cs"/>
 
