@@ -36,9 +36,9 @@ public class DataTablesMillionRowsApp : SampleBase
             .Align(row => row.Value, Align.Left)
             .Align(row => row.CreatedAt, Align.Left)
             // Add icons to headers
-            .Icon(row => row.Id, Icons.Hash)
-            .Icon(row => row.Value, Icons.Text)
-            .Icon(row => row.CreatedAt, Icons.Calendar)
+            .Icon(row => row.Id, Icons.Hash.ToString())
+            .Icon(row => row.Value, Icons.Text.ToString())
+            .Icon(row => row.CreatedAt, Icons.Calendar.ToString())
             // Configure for performance with large datasets
             .Config(config => config.AllowLlmFiltering = true)
             // Configure to load all 1 million rows at once

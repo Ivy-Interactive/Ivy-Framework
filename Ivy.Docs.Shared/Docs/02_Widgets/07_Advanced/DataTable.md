@@ -2,7 +2,7 @@
 prepare: |
   var firstNames = new[] { "John", "Sarah", "Mike", "Emily", "Alex", "Lisa", "David", "Jessica", "Robert", "Amanda" };
   var lastNames = new[] { "Smith", "Johnson", "Brown", "Davis", "Wilson", "Chen", "Miller", "Taylor", "Garcia", "White" };
-  var statusIcons = new[] { Icons.Rocket, Icons.Star, Icons.ThumbsUp, Icons.Heart, Icons.Check, Icons.Clock };
+  var statusIcons = new[] { Icons.Rocket.ToString(), Icons.Star.ToString(), Icons.ThumbsUp.ToString(), Icons.Heart.ToString(), Icons.Check.ToString(), Icons.Clock.ToString() };
   var sampleUsers = Enumerable.Range(0, 100).Select(id =>
   {
       var random = new Random(id * 17 + 42);
@@ -61,10 +61,10 @@ sampleUsers.ToDataTable()
     .Width(u => u.Email, Size.Units(60))
     .Width(u => u.Salary, Size.Units(80))
     .Align(u => u.Salary, Align.Right)
-    .Icon(u => u.Name, Icons.User)
-    .Icon(u => u.Email, Icons.Mail)
-    .Icon(u => u.Salary, Icons.DollarSign)
-    .Icon(u => u.Status, Icons.Activity)
+    .Icon(u => u.Name, Icons.User.ToString())
+    .Icon(u => u.Email, Icons.Mail.ToString())
+    .Icon(u => u.Salary, Icons.DollarSign.ToString())
+    .Icon(u => u.Status, Icons.Activity.ToString())
     .Sortable(u => u.Email, false)
     .SortDirection(u => u.Salary, SortDirection.Descending)
     .Help(u => u.Name, "Employee full name")
