@@ -14,6 +14,23 @@ searchHints:
 Handle file uploads robustly with support for single/multiple files, drag-and-drop interfaces, and status feedback for various file types.
 </Ingress>
 
+## Basic Usage
+
+The most common way to handle uploads is using the FileInput component:
+
+```csharp demo-below
+public class FileUploadView : ViewBase
+{
+    public override object? Build()
+    {
+        var files = UseState<FileInput?>(() => null);
+        var uploadUrl = this.UseUpload(fileBytes => { }, "*/*", "file");
+
+        return files.ToFileInput(uploadUrl, "Choose a file");
+    }
+}
+```
+
 ## Overview
 
 The upload system in Ivy supports:
@@ -36,11 +53,14 @@ The upload system connects three key pieces:
 Here's how they work together:
 
 ```csharp
-// 1. Create upload handler - returns state with URL like "/upload/{connectionId}/{uploadId}"
+var client = UseService<IClientProvider>();
+
+// 1. Create upload handler - returns state with
+// URL like "/upload/{connectionId}/{uploadId}"
 var uploadUrl = this.UseUpload(
     fileBytes => {
         // This handler is called when a file is uploaded
-        Console.WriteLine($"Received {fileBytes.Length} bytes");
+        client.Toast($"Received {fileBytes.Length} bytes", "File Uploaded");
     },
     "application/octet-stream",  // Expected MIME type
     "uploaded-file"              // Default filename
@@ -56,71 +76,30 @@ var files = UseState<FileInput?>(() => null);
 files.ToFileInput(uploadUrl, "Choose Files")
 ```
 
-## Basic Usage
-
-### Single File Upload
-
-The most common way to handle uploads is using the FileInput component:
-
-```csharp demo-below
-public class FileUploadView : ViewBase
-{
-    public override object? Build()
-    {
-        var files = UseState<FileInput?>(() => null);
-        var uploadUrl = this.UseUpload(
-            fileBytes => {
-                // Process uploaded file bytes
-                Console.WriteLine($"Received {fileBytes.Length} bytes");
-            },
-            "application/octet-stream",
-            "uploaded-file"
-        );
-
-        return Layout.Vertical(
-            files.Value != null
-                ? Text.Inline($"Selected: {files.Value.Name} ({files.Value.Size} bytes)")
-                : null,
-            files.ToFileInput(uploadUrl, "Choose Files").Accept(".pdf,.doc,.docx")
-        );
-    }
-}
-```
-
 ### Upload Status Feedback
 
-Provide feedback during file upload:
+Provide feedback during file upload using toasts:
 
 ```csharp demo-below
 public class UploadWithStatusView : ViewBase
 {
     public override object? Build()
     {
-        var status = UseState<string?>(() => null);
+        var client = UseService<IClientProvider>();
         var files = UseState<FileInput?>(() => null);
         var uploadUrl = this.UseUpload(
             fileBytes => {
-                status.Set("Processing...");
                 try {
-                    // Process uploaded file bytes
-                    Console.WriteLine($"Received {fileBytes.Length} bytes");
-                    // Simulate processing
-                    System.Threading.Thread.Sleep(1000);
-                    status.Set($"✓ Uploaded {fileBytes.Length} bytes successfully");
+                    client.Toast($"Successfully uploaded {fileBytes.Length} bytes", "Upload Complete");
                 } catch (Exception ex) {
-                    status.Set($"✗ Upload failed: {ex.Message}");
+                    client.Toast(ex);
                 }
             },
             "application/octet-stream",
             "uploaded-file"
         );
 
-        return Layout.Vertical(
-            status.Value != null
-                ? Text.Inline(status.Value)
-                : null,
-            files.ToFileInput(uploadUrl, "Upload File")
-        );
+        return files.ToFileInput(uploadUrl, "Upload File");
     }
 }
 ```
@@ -134,6 +113,7 @@ public class ValidatedUploadView : ViewBase
 {
     public override object? Build()
     {
+        var client = UseService<IClientProvider>();
         var error = UseState<string?>(() => null);
         var files = UseState<FileInput?>(() => null);
         var uploadUrl = this.UseUpload(
@@ -145,17 +125,17 @@ public class ValidatedUploadView : ViewBase
                 }
                 error.Set((string?)null);
                 // Process uploaded file bytes
-                Console.WriteLine($"Received {fileBytes.Length} bytes");
+                client.Toast($"Image uploaded successfully ({fileBytes.Length} bytes)", "Success");
             },
             "image/jpeg",
             "uploaded-image"
         );
 
         return Layout.Vertical(
+            files.ToFileInput(uploadUrl, "Upload Image").Accept(".jpg,.jpeg,.png"),
             error.Value != null
                 ? new Callout(error.Value, variant: CalloutVariant.Error)
-                : null,
-            files.ToFileInput(uploadUrl, "Upload Image").Accept(".jpg,.jpeg,.png")
+                : null
         );
     }
 }
@@ -185,30 +165,25 @@ public class ImageUploadView : ViewBase
 {
     public override object? Build()
     {
+        var client = UseService<IClientProvider>();
         var preview = UseState<string?>(() => null);
-        var isUploading = UseState(() => false);
         var files = UseState<FileInput?>(() => null);
         var uploadUrl = this.UseUpload(
             fileBytes => {
                 // Create preview URL from uploaded bytes
                 preview.Set($"data:image/jpeg;base64,{Convert.ToBase64String(fileBytes)}");
-                isUploading.Set(true);
-                try {
-                    // Process uploaded file bytes
-                    Console.WriteLine($"Received {fileBytes.Length} bytes");
-                } finally {
-                    isUploading.Set(false);
-                }
+                // Process uploaded file bytes
+                client.Toast($"Image uploaded successfully", "Success");
             },
             "image/jpeg",
             "uploaded-image"
         );
 
         return Layout.Vertical(
+            files.ToFileInput(uploadUrl, "Upload Image").Accept("image/*"),
             preview.Value != null
                 ? new Image(preview.Value)
-                : null,
-            files.ToFileInput(uploadUrl, "Upload Image").Accept("image/*")
+                : null
         );
     }
 }
@@ -229,18 +204,15 @@ public class MultiFileUploadView : ViewBase
 {
     public override object? Build()
     {
-        var files = UseState(() => new List<FileInput>());
-        var isUploading = UseState(() => false);
+        var client = UseService<IClientProvider>();
+        var uploadedFiles = UseState(() => new List<string>());
         var newFiles = UseState<IEnumerable<FileInput>?>(() => null);
         var uploadUrl = this.UseUpload(
             fileBytes => {
-                isUploading.Set(true);
-                try {
-                    // Process uploaded file bytes
-                    Console.WriteLine($"Received {fileBytes.Length} bytes");
-                } finally {
-                    isUploading.Set(false);
-                }
+                // Process uploaded file bytes
+                client.Toast($"File uploaded ({fileBytes.Length} bytes)", "Upload Complete");
+                // Add to list of uploaded files
+                uploadedFiles.Set(uploadedFiles.Value.Append($"File {uploadedFiles.Value.Count + 1}").ToList());
             },
             "application/octet-stream",
             "uploaded-files"
@@ -248,9 +220,9 @@ public class MultiFileUploadView : ViewBase
 
         return Layout.Vertical(
             newFiles.ToFileInput(uploadUrl, "Upload Files"),
-            new List(
-                files.Value.Select(f => Text.Inline(f.Name))
-            )
+            uploadedFiles.Value.Any() 
+                ? new List(uploadedFiles.Value.Select(f => Text.Inline(f)))
+                : null
         );
     }
 }
