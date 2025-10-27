@@ -63,7 +63,7 @@ describe('tableDataFetcher', () => {
       const result = await fetchTableData(mockConnection, 0, 10);
 
       expect(mockGrpcTableService.queryTable).toHaveBeenCalledWith({
-        serverUrl: 'https://localhost',
+        serverUrl: 'https://localhost:3000',
         query: {
           limit: 10,
           offset: 0,
@@ -113,7 +113,7 @@ describe('tableDataFetcher', () => {
       await fetchTableData(mockConnection, 0, 10, mockFilter);
 
       expect(mockGrpcTableService.queryTable).toHaveBeenCalledWith({
-        serverUrl: 'https://localhost',
+        serverUrl: 'https://localhost:3000',
         query: {
           limit: 10,
           offset: 0,
@@ -144,7 +144,7 @@ describe('tableDataFetcher', () => {
       await fetchTableData(mockConnection, 0, 10, null, mockSort);
 
       expect(mockGrpcTableService.queryTable).toHaveBeenCalledWith({
-        serverUrl: 'https://localhost',
+        serverUrl: 'https://localhost:3000',
         query: {
           limit: 10,
           offset: 0,
@@ -182,7 +182,7 @@ describe('tableDataFetcher', () => {
       await fetchTableData(mockConnection, 5, 20, mockFilter, mockSort);
 
       expect(mockGrpcTableService.queryTable).toHaveBeenCalledWith({
-        serverUrl: 'https://localhost',
+        serverUrl: 'https://localhost:3000',
         query: {
           limit: 20,
           offset: 5,
@@ -236,7 +236,7 @@ describe('tableDataFetcher', () => {
       await fetchTableData(mockConnection, 0, 10);
 
       expect(mockGrpcTableService.queryTable).toHaveBeenCalledWith({
-        serverUrl: 'http://example.com',
+        serverUrl: 'http://example.com:9000/path',
         query: expect.any(Object),
       });
     });
@@ -261,7 +261,7 @@ describe('tableDataFetcher', () => {
       consoleSpy.mockRestore();
     });
 
-    it('should use correct port from connection', async () => {
+    it('should use serverUrl from getIvyHost regardless of connection port', async () => {
       const customConnection: DataTableConnection = {
         ...mockConnection,
         port: 9999,
@@ -283,8 +283,9 @@ describe('tableDataFetcher', () => {
 
       await fetchTableData(customConnection, 0, 10);
 
+      // Should use getIvyHost() return value, not connection.port
       expect(mockGrpcTableService.queryTable).toHaveBeenCalledWith({
-        serverUrl: 'https://localhost',
+        serverUrl: 'https://localhost:3000',
         query: expect.any(Object),
       });
     });
@@ -307,7 +308,7 @@ describe('tableDataFetcher', () => {
       await fetchTableData(mockConnection, 0, 10, null, null);
 
       expect(mockGrpcTableService.queryTable).toHaveBeenCalledWith({
-        serverUrl: 'https://localhost',
+        serverUrl: 'https://localhost:3000',
         query: {
           limit: 10,
           offset: 0,
@@ -317,8 +318,8 @@ describe('tableDataFetcher', () => {
       });
     });
 
-    it('should use port in development environment', async () => {
-      // Set NODE_ENV to development
+    it('should use serverUrl from getIvyHost regardless of NODE_ENV', async () => {
+      // Set NODE_ENV to development (this should not affect the behavior anymore)
       process.env.NODE_ENV = 'development';
 
       const mockResult = {
@@ -337,8 +338,9 @@ describe('tableDataFetcher', () => {
 
       await fetchTableData(mockConnection, 0, 10);
 
+      // Should use getIvyHost() return value, NODE_ENV should not affect it
       expect(mockGrpcTableService.queryTable).toHaveBeenCalledWith({
-        serverUrl: 'https://localhost:8080',
+        serverUrl: 'https://localhost:3000',
         query: {
           limit: 10,
           offset: 0,
