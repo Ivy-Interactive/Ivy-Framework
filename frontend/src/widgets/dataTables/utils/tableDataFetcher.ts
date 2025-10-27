@@ -16,8 +16,8 @@ export const parseInvalidQuery = async (
   connection?: DataTableConnection
 ): Promise<ParseFilterResult> => {
   try {
-    const backendUrl = new URL(getIvyHost());
-    const serverUrl = `${backendUrl.protocol}//${backendUrl.hostname}:${connection?.port}`;
+    // Use getIvyHost() which returns the correct backend URL from meta tag or window.location.origin
+    const serverUrl = getIvyHost();
 
     const result = await grpcTableService.parseFilter(
       {
@@ -42,14 +42,8 @@ export const fetchTableData = async (
   filter?: Filter | null,
   sort?: SortOrder[] | null
 ): Promise<{ columns: DataColumn[]; rows: DataRow[]; hasMore: boolean }> => {
-  const backendUrl = new URL(getIvyHost());
-
-  // Use environment variable for robust environment detection
-  // In development, use the connection port; in production, use the current host
-  const isDevelopment = process.env.NODE_ENV === 'development';
-  const serverUrl = isDevelopment
-    ? `${backendUrl.protocol}//${backendUrl.hostname}:${connection.port}`
-    : `${backendUrl.protocol}//${backendUrl.hostname}`;
+  // Use getIvyHost() which returns the correct backend URL from meta tag or window.location.origin
+  const serverUrl = getIvyHost();
 
   const query: TableQuery = {
     limit: count,
