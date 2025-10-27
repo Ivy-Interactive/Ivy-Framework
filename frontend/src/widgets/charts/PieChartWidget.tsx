@@ -95,9 +95,7 @@ const PieChartWidget: React.FC<PieChartWidgetProps> = ({
         scaleSize: 5,
         focus: 'none',
         label: {
-          show: true,
-          fontSize: 40,
-          fontWeight: 'bold',
+          show: false,
         },
       },
       labelLine: {
