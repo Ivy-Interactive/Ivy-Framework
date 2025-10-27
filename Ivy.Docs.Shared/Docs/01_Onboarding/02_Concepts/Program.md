@@ -147,6 +147,10 @@ Additional ChromeSettings options:
 
 - **UsePages()** - Switches to page navigation (replaces content instead of opening tabs).
 
+<Callout Type="tip">
+Use `server.UseDefaultApp(typeof(AppName))` instead of `UseChrome()` for single-purpose applications, embedded views, or minimal interfaces where sidebar navigation isn't needed.
+</Callout>
+
 For more information about SideBar, check its [documentation](../../02_Widgets/04_Layouts/SidebarLayout.md)
 
 ## Authentication
