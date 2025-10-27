@@ -31,17 +31,6 @@ public class FileUploadView : ViewBase
 }
 ```
 
-## Overview
-
-The upload system in Ivy supports:
-
-- Single and multiple file uploads
-- Drag and drop interfaces
-- Upload status feedback
-- File validation
-- Error handling
-- Image preview capabilities
-
 ## How It Works
 
 The upload system connects three key pieces:
