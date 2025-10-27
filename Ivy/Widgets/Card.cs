@@ -25,7 +25,7 @@ public record Card : WidgetBase<Card>
     /// <param name="footer">Optional footer content displayed at the bottom.</param>
     public Card(object? content = null, object? footer = null) : base([new Slot("Content", content), new Slot("Footer", footer!)])
     {
-        Width = Size.Full();
+        Width = Ivy.Shared.Size.Full();
     }
 
     /// <summary>Gets or sets the title text displayed at the top of the card.</summary>
@@ -54,6 +54,9 @@ public record Card : WidgetBase<Card>
 
     /// <summary>Event handler called when card is clicked. Default is null.</summary>
     [Event] public Func<Event<Card>, ValueTask>? OnClick { get; set; }
+
+    /// <summary>Gets or sets the size variant of the card. Default is Medium.</summary>
+    [Prop] public Sizes Size { get; set; } = Sizes.Medium;
 
     /// <summary>
     /// Adds content to the card's main content area using the pipe operator.
@@ -124,6 +127,23 @@ public static class CardExtensions
     /// <param name="card">The Card to configure.</param>
     /// <param name="color">The color to apply to the card's border.</param>
     public static Card BorderColor(this Card card, Colors color) => card with { BorderColor = color };
+
+    /// <summary>Sets the size variant for the card.</summary>
+    /// <param name="card">The Card to configure.</param>
+    /// <param name="size">The size variant to apply to the card.</param>
+    public static Card Size(this Card card, Sizes size) => card with { Size = size };
+
+    /// <summary>Sets the card size to Small.</summary>
+    /// <param name="card">The Card to configure.</param>
+    public static Card Small(this Card card) => card with { Size = Sizes.Small };
+
+    /// <summary>Sets the card size to Medium.</summary>
+    /// <param name="card">The Card to configure.</param>
+    public static Card Medium(this Card card) => card with { Size = Sizes.Medium };
+
+    /// <summary>Sets the card size to Large.</summary>
+    /// <param name="card">The Card to configure.</param>
+    public static Card Large(this Card card) => card with { Size = Sizes.Large };
 
     /// <summary>Sets the style variant to apply on cursor hover.</summary>
     /// <param name="card">Card to configure.</param>

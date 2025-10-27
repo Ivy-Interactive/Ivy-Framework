@@ -43,43 +43,76 @@ public class CardApp : SampleBase
         {
             client.Toast("Clicked!");
         });
+        var smallCard = new Card(
+         "This is a small card with elements."
+        ).Title("Small Card with Elements")
+        .Description("This is a small card with elements.")
+        .Icon(Icons.Info)
+        .Small()
+        .TestId("card-small-with-elements");
+        var mediumCard = new Card(
+         "This is a medium card with elements."
+        ).Title("Medium Card with Elements")
+        .Description("This is a medium card with elements.")
+        .Icon(Icons.Info)
+        .Medium()
+        .TestId("card-medium-with-elements");
+        var largeCard = new Card(
+         "This is a large card with elements."
+        ).Title("Large Card with Elements")
+        .Description("This is a large card with elements.")
+        .Icon(Icons.Info)
+        .Large();
 
         return Layout.Vertical()
-               | Text.H1("Card")
-               | (Layout.Grid().Columns(4)
-                  | card1
-                  | card2
-                  | card3
-                  | card4
-                  )
-               | (Layout.Grid().Columns(4)
-                  | new TotalSalesMetricView()
-                  | new LongNumberMetricView()
-                  | new HighPercentageMetricView()
-                  | new TotalCommentsPerAuthorMetricView()
-                  )
-               | (Layout.Grid().Columns(4)
-                  | new VeryLongTitleMetricView()
-                  | new UserEngagementWidget()
-                  | new TaskCompletionWidget()
-                  | new SystemHealthWidget()
-                  )
-               | (Layout.Grid().Columns(4)
-                  | new RevenueGrowthWidget()
-                  | new IconTextShowcaseWidget()
-                  | new ProgressBarVariationsWidget()
-                  | new LayoutTestWidget()
-                  )
-               | (Layout.Grid().Columns(3)
-                  | new MixedContentWidget()
-                  | new ResponsiveLayoutWidget()
-                  | new TextSpacingDemoWidget()
-                  )
-               | (Layout.Grid().Columns(3)
-                  | new CardPaddingOverrideWidget()
-                  | new LayoutSpacingControlWidget()
-                  )
-            ;
+         | Text.H1("Card")
+         | Text.H2("Basic Examples")
+         | (Layout.Grid().Columns(4)
+            | card1
+            | card2
+            | card3
+            | card4
+            )
+         | (Layout.Grid().Columns(4)
+            | new TotalSalesMetricView()
+            | new LongNumberMetricView()
+            | new HighPercentageMetricView()
+            | new TotalCommentsPerAuthorMetricView()
+            )
+         | (Layout.Grid().Columns(4)
+            | new VeryLongTitleMetricView()
+            | new UserEngagementWidget()
+            | new TaskCompletionWidget()
+            | new SystemHealthWidget()
+            )
+         | (Layout.Grid().Columns(4)
+            | new RevenueGrowthWidget()
+            | new IconTextShowcaseWidget()
+            | new ProgressBarVariationsWidget()
+            | new LayoutTestWidget()
+            )
+         | (Layout.Grid().Columns(3)
+            | new MixedContentWidget()
+            | new ResponsiveLayoutWidget()
+            | new TextSpacingDemoWidget()
+            )
+         | (Layout.Grid().Columns(3)
+            | new CardPaddingOverrideWidget()
+            | new LayoutSpacingControlWidget()
+            )
+         | Text.H2("Metric Cards with Different Sizes")
+         | (Layout.Grid().Columns(3)
+            | new SmallMetricView()
+            | new MediumMetricView()
+            | new LargeMetricView()
+            )
+        | Text.H2("Size Variants")
+         | (Layout.Grid().Columns(3)
+            | smallCard
+            | mediumCard
+            | largeCard
+            )
+      ;
     }
 }
 
@@ -446,6 +479,52 @@ public class LayoutSpacingControlWidget : ViewBase
                    | Text.Small("Precise layout").Color(Colors.Gray))
                 | new Progress(90).Goal("Custom control")
             ).Title("Spacing Control").Icon(Icons.Settings)
+            ;
+    }
+}
+
+// Size variant metric views
+public class SmallMetricView : ViewBase
+{
+    public override object? Build()
+    {
+        return new Card(
+                (Layout.Horizontal().Align(Align.Left).Gap(1)
+                 | Text.H4("$12.5K")
+                 | Icons.TrendingUp.ToIcon().Color(Colors.Emerald)
+                 | Text.Small("+5%").Color(Colors.Emerald)),
+                new Progress(25).Goal("$50K target")
+            ).Title("Small Revenue").Icon(Icons.DollarSign).Small()
+            ;
+    }
+}
+
+public class MediumMetricView : ViewBase
+{
+    public override object? Build()
+    {
+        return new Card(
+                (Layout.Horizontal().Align(Align.Left).Gap(2)
+                 | Text.H4("$84,250")
+                 | Icons.TrendingUp.ToIcon().Color(Colors.Emerald)
+                 | Text.Small("21%").Color(Colors.Emerald)),
+                new Progress(21).Goal("$400K target")
+            ).Title("Medium Revenue").Icon(Icons.DollarSign)
+            ;
+    }
+}
+
+public class LargeMetricView : ViewBase
+{
+    public override object? Build()
+    {
+        return new Card(
+                (Layout.Horizontal().Align(Align.Left).Gap(3)
+                 | Text.H4("$1,234,567")
+                 | Icons.TrendingUp.ToIcon().Color(Colors.Emerald)
+                 | Text.Small("+45%").Color(Colors.Emerald)),
+                new Progress(75).Goal("$1.5M target")
+            ).Title("Large Revenue").Icon(Icons.DollarSign).Large()
             ;
     }
 }
