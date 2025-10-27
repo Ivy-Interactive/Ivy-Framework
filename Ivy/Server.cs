@@ -498,6 +498,12 @@ public static class WebApplicationExtensions
         var resourceName = $"{assembly.GetName().Name}.index.html";
         app.MapGet("/", async context =>
         {
+            var version = assembly.GetName().Version?.ToString();
+            if (!string.IsNullOrEmpty(version))
+            {
+                context.Response.Headers["ivy-version"] = version;
+            }
+
             await using var stream = assembly.GetManifestResourceStream(resourceName);
             if (stream != null)
             {
