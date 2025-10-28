@@ -144,7 +144,8 @@ export const KanbanWidget: React.FC<KanbanWidgetProps> = ({
   const styles = {
     ...getWidth(width),
     ...getHeight(height),
-    overflow: 'hidden', // Prevent the container from scrolling
+    overflowY: 'hidden' as const,
+    overflowX: 'auto' as const, // Allow horizontal scrolling when content is wider
   };
 
   return (

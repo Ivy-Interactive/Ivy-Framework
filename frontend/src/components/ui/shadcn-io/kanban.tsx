@@ -114,7 +114,7 @@ interface KanbanBoardProps {
 
 export function KanbanBoard({ children, className }: KanbanBoardProps) {
   return (
-    <div className={cn('flex gap-4 h-full bg-background', className)}>
+    <div className={cn('flex gap-4 h-full bg-background min-w-fit', className)}>
       {children}
     </div>
   );
