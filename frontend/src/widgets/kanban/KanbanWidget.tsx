@@ -13,6 +13,10 @@ interface Column {
   widgetId: string;
 }
 
+interface TaskWithWidgetId extends Task {
+  widgetId: string;
+}
+
 interface KanbanWidgetProps {
   id: string;
   columns?: Column[];
@@ -20,6 +24,7 @@ interface KanbanWidgetProps {
   events?: Record<string, unknown>;
   width?: string;
   height?: string;
+  allowDelete?: boolean;
   children?: React.ReactNode;
   slots?: {
     default?: React.ReactNode[];
@@ -32,13 +37,14 @@ export const KanbanWidget: React.FC<KanbanWidgetProps> = ({
   tasks = [],
   width,
   height,
+  allowDelete = false,
   slots,
 }) => {
   const eventHandler = useEventHandler();
   // Extract data from backend kanban structure
   const extractedData = React.useMemo(() => {
     if (slots?.default && slots.default.length > 0) {
-      const extractedTasks: Task[] = [];
+      const extractedTasks: TaskWithWidgetId[] = [];
       const extractedColumns: Column[] = [];
 
       // Parse the backend kanban structure
@@ -93,7 +99,7 @@ export const KanbanWidget: React.FC<KanbanWidgetProps> = ({
                 }
 
                 // Create task from backend data
-                const task: Task = {
+                const task: TaskWithWidgetId = {
                   id: cardProps?.cardId as string,
                   title: taskData?.title as string,
                   status: columnProps?.columnKey as string,
@@ -101,6 +107,7 @@ export const KanbanWidget: React.FC<KanbanWidgetProps> = ({
                   priority: cardProps?.priority as number,
                   description: taskData?.description as string,
                   assignee: (taskData?.assignee as string) || '',
+                  widgetId: cardProps?.id as string, // Store the card widget ID
                 };
                 extractedTasks.push(task);
               }
@@ -128,6 +135,22 @@ export const KanbanWidget: React.FC<KanbanWidgetProps> = ({
     eventHandler('OnMove', id, [cardId, fromColumn, toColumn, targetIndex]);
   };
 
+  const handleCardClick = (cardId: string) => {
+    // Find the card widget ID for this task
+    const task = extractedData.tasks.find(t => t.id === cardId) as
+      | TaskWithWidgetId
+      | undefined;
+    if (task?.widgetId) {
+      // Send click event to the specific card widget
+      eventHandler('OnClick', task.widgetId, [cardId]);
+    }
+  };
+
+  const handleCardDelete = (cardId: string) => {
+    // Send delete event to backend (on the Kanban widget, not the card)
+    eventHandler('OnDelete', id, [cardId]);
+  };
+
   if (extractedData.tasks.length === 0 && extractedData.columns.length === 0) {
     return (
       <div className="flex items-center justify-center p-8 text-gray-500">
@@ -144,7 +167,8 @@ export const KanbanWidget: React.FC<KanbanWidgetProps> = ({
   const styles = {
     ...getWidth(width),
     ...getHeight(height),
-    overflow: 'hidden', // Prevent the container from scrolling
+    overflowY: 'hidden' as const,
+    overflowX: 'auto' as const, // Allow horizontal scrolling when content is wider
   };
 
   return (
@@ -153,6 +177,8 @@ export const KanbanWidget: React.FC<KanbanWidgetProps> = ({
         data={extractedData.tasks}
         columns={extractedData.columns}
         onCardMove={handleCardMove}
+        onCardClick={handleCardClick}
+        onCardDelete={allowDelete ? handleCardDelete : undefined}
       >
         {({
           KanbanBoard,

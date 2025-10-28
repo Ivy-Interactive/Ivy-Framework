@@ -31,6 +31,7 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
     private Func<TModel, object>? _customCardRenderer;
     private Func<Event<Ivy.Kanban, object?>, ValueTask>? _onDelete;
     private Func<Event<Ivy.Kanban, (object? CardId, TGroupKey FromColumn, TGroupKey ToColumn, int? TargetIndex)>, ValueTask>? _onMove;
+    private Func<Event<KanbanCard, object?>, ValueTask>? _onClick;
     private object? _empty;
     private Size? _width;
     private Size? _height;
@@ -175,6 +176,30 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
     public KanbanBuilder<TModel, TGroupKey> HandleMove(Action<(object? CardId, TGroupKey FromColumn, TGroupKey ToColumn, int? TargetIndex)> onMove)
     {
         _onMove = e => { onMove(e.Value); return ValueTask.CompletedTask; };
+        return this;
+    }
+
+    /// <summary>Sets the event handler called when a card is clicked.</summary>
+    /// <param name="onClick">Event handler that receives the card ID when a card is clicked.</param>
+    public KanbanBuilder<TModel, TGroupKey> HandleClick(Func<Event<KanbanCard, object?>, ValueTask> onClick)
+    {
+        _onClick = onClick;
+        return this;
+    }
+
+    /// <summary>Sets the event handler called when a card is clicked.</summary>
+    /// <param name="onClick">Event handler that receives the card ID when a card is clicked.</param>
+    public KanbanBuilder<TModel, TGroupKey> HandleClick(Action<Event<KanbanCard, object?>> onClick)
+    {
+        _onClick = e => { onClick(e); return ValueTask.CompletedTask; };
+        return this;
+    }
+
+    /// <summary>Sets a simple event handler called when a card is clicked.</summary>
+    /// <param name="onClick">Simple action that receives the card ID when a card is clicked.</param>
+    public KanbanBuilder<TModel, TGroupKey> HandleClick(Action<object?> onClick)
+    {
+        _onClick = e => { onClick(e.Value); return ValueTask.CompletedTask; };
         return this;
     }
 
@@ -329,6 +354,10 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
                     var priority = _orderSelector?.Invoke(item);
                     if (priority != null)
                         card = card with { Priority = priority };
+
+                    // Attach OnClick handler if specified
+                    if (_onClick != null && cardId != null)
+                        card = card with { OnClick = _onClick };
 
                     return card;
                 }).ToArray();
