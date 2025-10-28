@@ -301,10 +301,10 @@ public class ShortCutDemo : ViewBase
         var message = UseState("");
         return Layout.Vertical()
                 | Text.Inline("Keyboard Shortcuts Demo")
-                | Text.Inline("Ctrl+F - Focus Name, Ctrl+E - Focus Email, Ctrl+M - Focus Message")  
+                | Text.Inline("Ctrl+J - Focus Name, Ctrl+E - Focus Email, Ctrl+M - Focus Message")  
                 | new TextInput(name)
-                      .Placeholder("Name (Ctrl+F)")
-                      .ShortcutKey("Ctrl+F")    
+                      .Placeholder("Name (Ctrl+J)")
+                      .ShortcutKey("Ctrl+J")    
                 | new TextInput(email)
                       .Placeholder("Email (Ctrl+E)")
                       .ShortcutKey("Ctrl+E")
