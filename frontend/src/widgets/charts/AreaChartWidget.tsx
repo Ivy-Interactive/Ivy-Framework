@@ -186,11 +186,7 @@ const AreaChartWidget: React.FC<AreaChartWidgetProps> = ({
 
   return (
     <div style={styles}>
-      <ReactECharts
-        key={theme}
-        option={option}
-        style={{ height: '100%', width: '100%' }}
-      />
+      <ReactECharts key={theme} option={option} />
     </div>
   );
 };

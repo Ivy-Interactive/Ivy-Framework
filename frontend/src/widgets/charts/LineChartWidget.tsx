@@ -130,11 +130,7 @@ const LineChartWidget: React.FC<LineChartWidgetProps> = ({
 
   return (
     <div style={styles}>
-      <ReactECharts
-        key={theme}
-        option={option}
-        style={{ height: '100%', width: '100%' }}
-      />
+      <ReactECharts key={theme} option={option} />
     </div>
   );
 };
