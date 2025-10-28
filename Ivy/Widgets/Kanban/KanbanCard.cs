@@ -17,4 +17,7 @@ public record KanbanCard : WidgetBase<KanbanCard>
 
     /// <summary>Optional priority for the kanban card.</summary>
     [Prop] public object? Priority { get; set; }
+
+    /// <summary>Event handler called when the card is clicked.</summary>
+    [Event] public Func<Event<KanbanCard, object?>, ValueTask>? OnClick { get; set; }
 }

@@ -13,6 +13,10 @@ interface Column {
   widgetId: string;
 }
 
+interface TaskWithWidgetId extends Task {
+  widgetId: string;
+}
+
 interface KanbanWidgetProps {
   id: string;
   columns?: Column[];
@@ -38,7 +42,7 @@ export const KanbanWidget: React.FC<KanbanWidgetProps> = ({
   // Extract data from backend kanban structure
   const extractedData = React.useMemo(() => {
     if (slots?.default && slots.default.length > 0) {
-      const extractedTasks: Task[] = [];
+      const extractedTasks: TaskWithWidgetId[] = [];
       const extractedColumns: Column[] = [];
 
       // Parse the backend kanban structure
@@ -93,7 +97,7 @@ export const KanbanWidget: React.FC<KanbanWidgetProps> = ({
                 }
 
                 // Create task from backend data
-                const task: Task = {
+                const task: TaskWithWidgetId = {
                   id: cardProps?.cardId as string,
                   title: taskData?.title as string,
                   status: columnProps?.columnKey as string,
@@ -101,6 +105,7 @@ export const KanbanWidget: React.FC<KanbanWidgetProps> = ({
                   priority: cardProps?.priority as number,
                   description: taskData?.description as string,
                   assignee: (taskData?.assignee as string) || '',
+                  widgetId: cardProps?.id as string, // Store the card widget ID
                 };
                 extractedTasks.push(task);
               }
@@ -126,6 +131,17 @@ export const KanbanWidget: React.FC<KanbanWidgetProps> = ({
   ) => {
     // Send move event to backend with column keys
     eventHandler('OnMove', id, [cardId, fromColumn, toColumn, targetIndex]);
+  };
+
+  const handleCardClick = (cardId: string) => {
+    // Find the card widget ID for this task
+    const task = extractedData.tasks.find(t => t.id === cardId) as
+      | TaskWithWidgetId
+      | undefined;
+    if (task?.widgetId) {
+      // Send click event to the specific card widget
+      eventHandler('OnClick', task.widgetId, [cardId]);
+    }
   };
 
   if (extractedData.tasks.length === 0 && extractedData.columns.length === 0) {
@@ -154,6 +170,7 @@ export const KanbanWidget: React.FC<KanbanWidgetProps> = ({
         data={extractedData.tasks}
         columns={extractedData.columns}
         onCardMove={handleCardMove}
+        onCardClick={handleCardClick}
       >
         {({
           KanbanBoard,

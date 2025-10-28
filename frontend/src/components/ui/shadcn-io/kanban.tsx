@@ -40,6 +40,7 @@ interface KanbanContextType {
     targetIndex?: number
   ) => void;
   onCardReorder?: (cardId: string, fromIndex: number, toIndex: number) => void;
+  onCardClick?: (cardId: string) => void;
 }
 
 const KanbanContext = createContext<KanbanContextType>({
@@ -62,6 +63,7 @@ interface KanbanProps {
     targetIndex?: number
   ) => void;
   onCardReorder?: (cardId: string, fromIndex: number, toIndex: number) => void;
+  onCardClick?: (cardId: string) => void;
   children: (components: {
     KanbanBoard: typeof KanbanBoard;
     KanbanColumn: typeof KanbanColumn;
@@ -77,6 +79,7 @@ export function Kanban({
   data,
   onCardMove,
   onCardReorder,
+  onCardClick,
   children,
 }: KanbanProps) {
   const [draggedCardColumn, setDraggedCardColumn] = useState<string | null>(
@@ -90,6 +93,7 @@ export function Kanban({
     setDraggedCardColumn,
     onCardMove,
     onCardReorder,
+    onCardClick,
   };
 
   return (
@@ -247,7 +251,8 @@ export function KanbanCard({
 }: KanbanCardProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
-  const { onCardMove, data, setDraggedCardColumn } = useKanbanContext();
+  const { onCardMove, data, setDraggedCardColumn, onCardClick } =
+    useKanbanContext();
 
   const handleDragStart = useCallback(
     (e: React.DragEvent) => {
@@ -302,6 +307,17 @@ export function KanbanCard({
     [id, column, onCardMove, data]
   );
 
+  const handleClick = useCallback(
+    (e: React.MouseEvent) => {
+      // Only trigger click if not dragging
+      if (!isDragging) {
+        e.stopPropagation();
+        onCardClick?.(id);
+      }
+    },
+    [id, onCardClick, isDragging]
+  );
+
   return (
     <div
       draggable
@@ -310,6 +326,7 @@ export function KanbanCard({
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
+      onClick={handleClick}
       className={cn(
         'cursor-grab opacity-100 transition-all',
         isDragging && 'opacity-50 cursor-grabbing',
