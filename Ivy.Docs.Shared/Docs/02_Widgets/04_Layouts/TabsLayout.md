@@ -18,7 +18,7 @@ The TabsLayout widget creates a tabbed interface that allows users to switch bet
 
 We recommend using Layout.Tabs to create simple tabbed interfaces.
 
-```csharp demo-tabs 
+```csharp demo-tabs
 Layout.Tabs(
     new Tab("Profile", "User profile information"),
     new Tab("Security", "Security settings"),
@@ -32,7 +32,7 @@ This example creates a basic layout with three tabs.
 
 This example demonstrates how to combine multiple TabView features, including icons, badges, variant selection, and size control:
 
-```csharp demo-tabs 
+```csharp demo-tabs
 Layout.Tabs(
     new Tab("Customers", "Customer list").Icon(Icons.User).Badge("10"),
     new Tab("Orders", "Order management").Icon(Icons.DollarSign).Badge("0"),
@@ -49,7 +49,7 @@ If you need more flexibility in creating and managing tabs, TabsLayout offers a 
 
 The first parameter is the selected tab index (0), and the remaining parameters are the Tab objects.
 
-```csharp demo-tabs 
+```csharp demo-tabs
 new TabsLayout(null, null, null, null, 0,
     new Tab("Overview", "This is the overview content"),
     new Tab("Details", "This is the details content"),
@@ -67,7 +67,7 @@ new TabsLayout(null, null, null, null, 0,
 
 This example demonstrates how to handle all available events. The event handlers receive the tab index and can perform custom actions such as logging, state updates, or API calls.
 
-```csharp demo-tabs 
+```csharp demo-tabs
 new TabsLayout(
     onSelect: (e) => Console.WriteLine($"Selected: {e.Value}"),
     onClose: (e) => Console.WriteLine($"Closed: {e.Value}"),
@@ -86,7 +86,7 @@ new TabsLayout(
 
 The Tabs variant displays tabs as clickable buttons with an underline indicator for the active tab, providing a traditional tab interface.
 
-```csharp demo-tabs 
+```csharp demo-tabs
 new TabsLayout(null, null, null, null, 0,
     new Tab("First", "First tab content"),
     new Tab("Second", "Second tab content"),
@@ -118,6 +118,46 @@ new TabsLayout(null, null, null, null, 0,
     new Tab("Orders", "Order management").Icon(Icons.DollarSign).Badge("0"),
     new Tab("Settings", "Configuration").Icon(Icons.Settings).Badge("999")
 ).Variant(TabsVariant.Tabs)
+```
+
+### Add Tab Button
+
+You can add a button that allows users to dynamically create new tabs. When tabs don't fit in the available space, they automatically overflow into a dropdown menu:
+
+```csharp demo-tabs
+public class DynamicTabsDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var selectedIndex = this.UseState<int?>();
+        var tabs = UseState(() => ImmutableArray.Create<Tab>([
+            new Tab("Customers", "Customers").Icon(Icons.User).Badge("10"),
+            new Tab("Orders", "Orders").Icon(Icons.DollarSign).Badge("0"),
+            new Tab("Settings", "Settings").Icon(Icons.Settings).Badge("999")
+        ]));
+
+        void OnTabSelect(Event<TabsLayout, int> @event)
+        {
+            selectedIndex.Set(@event.Value);
+        }
+
+        void OnTabClose(Event<TabsLayout, int> @event)
+        {
+            var newIndex = Math.Min(@event.Value, tabs.Value.Length - 2);
+            selectedIndex.Set(newIndex >= 0 ? newIndex : null);
+            tabs.Set(tabs.Value.RemoveAt(@event.Value));
+        }
+
+        void OnAddButtonClick(Event<TabsLayout, int> @event)
+        {
+            tabs.Set(tabs.Value.Add(new Tab($"Tab {tabs.Value.Length + 1}", $"Tab {tabs.Value.Length + 1}")));
+        }
+
+        return new TabsLayout(OnTabSelect, OnTabClose, null, null, selectedIndex.Value,
+            tabs.Value.ToArray()
+        ).Variant(TabsVariant.Tabs).AddButton("+", OnAddButtonClick);
+    }
+}
 ```
 
 <WidgetDocs Type="Ivy.TabsLayout" ExtensionTypes="Ivy.Views.Tabs.TabsLayoutExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/TabsLayout/TabsLayout.cs"/>
