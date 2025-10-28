@@ -308,8 +308,8 @@ export function KanbanCard({
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
       className={cn(
-        'cursor-move opacity-100 transition-all',
-        isDragging && 'opacity-50',
+        'cursor-grab opacity-100 transition-all',
+        isDragging && 'opacity-50 cursor-grabbing',
         isDragOver &&
           'bg-accent border-2 border-accent-foreground border-dashed',
         className
