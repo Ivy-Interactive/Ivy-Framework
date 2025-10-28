@@ -105,10 +105,22 @@ const AreaChartWidget: React.FC<AreaChartWidgetProps> = ({
     };
   }, [theme]);
 
+  // When height is Full (100%), use flex to expand. Otherwise use explicit height.
+  const heightStyle = height ? getHeight(height) : {};
+  const isFull = height?.toLowerCase().startsWith('full');
+
   const styles: React.CSSProperties = {
     ...getWidth(width),
-    ...getHeight(height),
-    minHeight: '200px',
+    ...(isFull
+      ? { display: 'flex', flexDirection: 'column', height: '100%' }
+      : {}),
+  };
+
+  const chartStyles: React.CSSProperties = {
+    ...(isFull
+      ? { flex: 1, minHeight: '200px' }
+      : { ...heightStyle, minHeight: '200px' }),
+    width: '100%',
   };
 
   const { categories, valueKeys } = generateDataProps(data);
@@ -186,7 +198,7 @@ const AreaChartWidget: React.FC<AreaChartWidgetProps> = ({
 
   return (
     <div style={styles}>
-      <ReactECharts key={theme} option={option} />
+      <ReactECharts key={theme} option={option} style={chartStyles} />
     </div>
   );
 };
