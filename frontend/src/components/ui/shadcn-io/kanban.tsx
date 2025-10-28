@@ -178,11 +178,14 @@ export function KanbanColumn({
     [id, onCardMove, data]
   );
 
+  // Only show drag-over styling when actively dragging AND hovering over this column
+  const showDragOver = isDragOver && draggedCardColumn !== null;
+
   return (
     <div
       className={cn(
         'flex-1 bg-background border border-border rounded-lg p-4 min-h-0 flex flex-col transition-colors',
-        isDragOver &&
+        showDragOver &&
           'bg-accent border-accent-foreground border-2 border-dashed',
         className
       )}
