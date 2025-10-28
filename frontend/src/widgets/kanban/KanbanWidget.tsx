@@ -24,6 +24,7 @@ interface KanbanWidgetProps {
   events?: Record<string, unknown>;
   width?: string;
   height?: string;
+  allowDelete?: boolean;
   children?: React.ReactNode;
   slots?: {
     default?: React.ReactNode[];
@@ -36,6 +37,7 @@ export const KanbanWidget: React.FC<KanbanWidgetProps> = ({
   tasks = [],
   width,
   height,
+  allowDelete = false,
   slots,
 }) => {
   const eventHandler = useEventHandler();
@@ -144,6 +146,11 @@ export const KanbanWidget: React.FC<KanbanWidgetProps> = ({
     }
   };
 
+  const handleCardDelete = (cardId: string) => {
+    // Send delete event to backend (on the Kanban widget, not the card)
+    eventHandler('OnDelete', id, [cardId]);
+  };
+
   if (extractedData.tasks.length === 0 && extractedData.columns.length === 0) {
     return (
       <div className="flex items-center justify-center p-8 text-gray-500">
@@ -171,6 +178,7 @@ export const KanbanWidget: React.FC<KanbanWidgetProps> = ({
         columns={extractedData.columns}
         onCardMove={handleCardMove}
         onCardClick={handleCardClick}
+        onCardDelete={allowDelete ? handleCardDelete : undefined}
       >
         {({
           KanbanBoard,

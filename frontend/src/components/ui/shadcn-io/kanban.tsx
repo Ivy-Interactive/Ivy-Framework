@@ -41,6 +41,7 @@ interface KanbanContextType {
   ) => void;
   onCardReorder?: (cardId: string, fromIndex: number, toIndex: number) => void;
   onCardClick?: (cardId: string) => void;
+  onCardDelete?: (cardId: string) => void;
 }
 
 const KanbanContext = createContext<KanbanContextType>({
@@ -64,6 +65,7 @@ interface KanbanProps {
   ) => void;
   onCardReorder?: (cardId: string, fromIndex: number, toIndex: number) => void;
   onCardClick?: (cardId: string) => void;
+  onCardDelete?: (cardId: string) => void;
   children: (components: {
     KanbanBoard: typeof KanbanBoard;
     KanbanColumn: typeof KanbanColumn;
@@ -80,6 +82,7 @@ export function Kanban({
   onCardMove,
   onCardReorder,
   onCardClick,
+  onCardDelete,
   children,
 }: KanbanProps) {
   const [draggedCardColumn, setDraggedCardColumn] = useState<string | null>(
@@ -94,6 +97,7 @@ export function Kanban({
     onCardMove,
     onCardReorder,
     onCardClick,
+    onCardDelete,
   };
 
   return (
@@ -251,7 +255,8 @@ export function KanbanCard({
 }: KanbanCardProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
-  const { onCardMove, data, setDraggedCardColumn, onCardClick } =
+  const [isHovered, setIsHovered] = useState(false);
+  const { onCardMove, data, setDraggedCardColumn, onCardClick, onCardDelete } =
     useKanbanContext();
 
   const handleDragStart = useCallback(
@@ -318,6 +323,15 @@ export function KanbanCard({
     [id, onCardClick, isDragging]
   );
 
+  const handleDelete = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      e.preventDefault();
+      onCardDelete?.(id);
+    },
+    [id, onCardDelete]
+  );
+
   return (
     <div
       draggable
@@ -327,14 +341,38 @@ export function KanbanCard({
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
       onClick={handleClick}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       className={cn(
-        'cursor-grab opacity-100 transition-all',
+        'cursor-grab opacity-100 transition-all relative group',
         isDragging && 'opacity-50 cursor-grabbing',
         isDragOver &&
           'bg-accent border-2 border-accent-foreground border-dashed',
         className
       )}
     >
+      {onCardDelete && isHovered && !isDragging && (
+        <button
+          onClick={handleDelete}
+          className="absolute top-1.5 right-1.5 z-10 h-5 w-5 rounded-sm bg-muted/80 hover:bg-destructive text-muted-foreground hover:text-destructive-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all cursor-pointer"
+          aria-label="Delete card"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="h-3 w-3"
+          >
+            <path d="M3 6h18" />
+            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+          </svg>
+        </button>
+      )}
       {children}
     </div>
   );
