@@ -86,7 +86,7 @@ export const CardWidget: React.FC<CardWidgetProps> = ({
       default:
         return {
           header: 'p-6',
-          content: 'p-6 pt-0 [&_*]:text-sm',
+          content: 'p-6 pt-0',
           footer: 'p-6 pt-0',
           title: 'text-base',
           description: 'text-sm mt-2',
