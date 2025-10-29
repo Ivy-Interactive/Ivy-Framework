@@ -52,6 +52,8 @@ interface TableContextType {
   activeFilter: Filter | null;
   activeSort: SortOrder[] | null;
   columnOrder: number[];
+  selectedColumns: number[];
+  setSelectedColumns: (columns: number[]) => void;
 
   // Methods
   loadMoreData: () => Promise<void>;
@@ -92,6 +94,7 @@ export const TableProvider: React.FC<TableProviderProps> = ({
   const [activeFilter, setActiveFilter] = useState<Filter | null>(null);
   const [activeSort, setActiveSort] = useState<SortOrder[] | null>(null);
   const [columnOrder, setColumnOrder] = useState<number[]>([]);
+  const [selectedColumns, setSelectedColumns] = useState<number[]>([]);
 
   const loadingRef = useRef(false);
   const currentRowCountRef = useRef(0);
@@ -362,6 +365,8 @@ export const TableProvider: React.FC<TableProviderProps> = ({
     activeFilter,
     activeSort,
     columnOrder,
+    selectedColumns,
+    setSelectedColumns,
     loadMoreData,
     handleColumnResize,
     handleSort,

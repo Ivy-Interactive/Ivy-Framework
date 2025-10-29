@@ -40,6 +40,8 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     editable,
     config,
     columnOrder,
+    selectedColumns,
+    setSelectedColumns,
     loadMoreData,
     handleColumnResize,
     handleSort,
@@ -98,10 +100,17 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
   const gridRef = useRef<DataEditorRef>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState<number>(0);
-  const [gridSelection, setGridSelection] = useState<GridSelection>({
-    columns: CompactSelection.empty(),
-    rows: CompactSelection.empty(),
-  });
+  // Initialize grid selection with selected columns
+  // Derive grid selection from selectedColumns
+  const gridSelection = useMemo(() => {
+    const columnSelection = CompactSelection.empty();
+    selectedColumns.forEach(col => columnSelection.add(col));
+    return {
+      columns: columnSelection,
+      rows: CompactSelection.empty(),
+    };
+  }, [selectedColumns]);
+
   const scrollThreshold = 10;
 
   // Generate header icons map for all column icons
@@ -168,9 +177,16 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
   // Handle selection changes
   const handleGridSelectionChange = useCallback(
     (newSelection: GridSelection) => {
-      setGridSelection(newSelection);
+      // Update selected columns in context state
+      const selectedCols: number[] = [];
+      for (let i = 0; i < columns.length; i++) {
+        if (newSelection.columns.hasIndex(i)) {
+          selectedCols.push(i);
+        }
+      }
+      setSelectedColumns(selectedCols);
     },
-    []
+    [columns.length, setSelectedColumns]
   );
 
   // Convert columns to grid format with proper widths
