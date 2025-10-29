@@ -57,11 +57,22 @@ const PieChartWidget: React.FC<PieChartWidgetProps> = ({
     };
   }, [theme]);
 
+  // When height is Full (100%), use flex to expand. Otherwise use explicit height.
+  const heightStyle = height ? getHeight(height) : {};
+  const isFull = height?.toLowerCase().startsWith('full');
+
   const styles: React.CSSProperties = {
     ...getWidth(width),
-    ...getHeight(height),
-    display: 'flex',
-    flexDirection: 'column',
+    ...(isFull
+      ? { display: 'flex', flexDirection: 'column', height: '100%' }
+      : {}),
+  };
+
+  const chartStyles: React.CSSProperties = {
+    ...(isFull
+      ? { flex: 1, minHeight: '200px' }
+      : { ...heightStyle, minHeight: '200px' }),
+    width: '100%',
   };
 
   const { valueKeys } = generateDataProps(data);
@@ -170,19 +181,7 @@ const PieChartWidget: React.FC<PieChartWidgetProps> = ({
 
   return (
     <div style={styles}>
-      {total && (
-        <div style={{ textAlign: 'center', marginBottom: 12, flexShrink: 0 }}>
-          <span>{total.label}</span>
-          <span>{total.formattedValue}</span>
-        </div>
-      )}
-      <div style={{ flex: 1, minHeight: 0 }}>
-        <ReactECharts
-          key={theme}
-          option={option}
-          style={{ height: '100%', width: '100%' }}
-        />
-      </div>
+      <ReactECharts key={theme} option={option} style={chartStyles} />
     </div>
   );
 };
