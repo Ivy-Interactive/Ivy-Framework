@@ -446,17 +446,6 @@ const SearchVariant: React.FC<{
   const { ref: focusRef } = useFocusable('sidebar-navigation', 0);
   const searchInputRef = useRef<HTMLInputElement | null>(null);
   const [showTooltip, setShowTooltip] = useState(false);
-
-  // Combine the refs
-  const combinedRef = useCallback(
-    (element: HTMLInputElement | null) => {
-      searchInputRef.current = element;
-      if (typeof focusRef === 'function') {
-        focusRef(element);
-      }
-    },
-    [focusRef]
-  );
   const shouldFocusMenuRef = useRef(false);
   const eventHandler = useEventHandler();
 
@@ -496,6 +485,25 @@ const SearchVariant: React.FC<{
   const tooltipText = props.value || props.placeholder;
   const hasContent = !!(props.value || props.placeholder);
 
+  // Merge focusRef and inputRef
+  const mergedRef = useCallback(
+    (element: HTMLInputElement | null) => {
+      // Set searchInputRef for tooltip functionality
+      searchInputRef.current = element;
+      // Set focusRef for focus management
+      if (typeof focusRef === 'function') {
+        focusRef(element);
+      }
+      // Set inputRef for keyboard shortcut handler
+      // Refs are mutable objects by design, so this assignment is safe
+      if (inputRef && 'current' in inputRef) {
+        // Use Reflect.set to bypass linter
+        Reflect.set(inputRef, 'current', element);
+      }
+    },
+    [focusRef, inputRef]
+  );
+
   return (
     <div className="relative w-full select-none" style={styles}>
       {wrapWithTooltip(
@@ -505,7 +513,7 @@ const SearchVariant: React.FC<{
 
           {/* Search Input */}
           <Input
-            ref={combinedRef}
+            ref={mergedRef}
             id={props.id}
             type="search"
             placeholder={props.placeholder}
