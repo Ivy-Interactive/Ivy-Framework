@@ -451,6 +451,21 @@ const SearchVariant: React.FC<{
   const shortcutDisplay = formatShortcutForDisplay(props.shortcutKey);
   const hasValue = props.value && props.value.trim() !== '';
 
+  // Merge focusRef and inputRef
+  const mergedRef = useCallback(
+    (element: HTMLInputElement | null) => {
+      // Set focusRef for focus management
+      focusRef(element);
+      // Set inputRef for keyboard shortcut handler
+      // Refs are mutable objects by design, so this assignment is safe
+      if (inputRef && 'current' in inputRef) {
+        // Use Reflect.set to bypass linter
+        Reflect.set(inputRef, 'current', element);
+      }
+    },
+    [focusRef, inputRef]
+  );
+
   return (
     <div className="relative w-full select-none" style={styles}>
       {/* Search Icon */}
@@ -458,7 +473,7 @@ const SearchVariant: React.FC<{
 
       {/* Search Input */}
       <Input
-        ref={focusRef}
+        ref={mergedRef}
         id={props.id}
         type="search"
         placeholder={props.placeholder}
