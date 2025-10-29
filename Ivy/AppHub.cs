@@ -28,13 +28,20 @@ public class AppHub(
     IQueryableRegistry queryableRegistry
     ) : Hub
 {
-    public static (string AppId, string? NavigationAppId) GetAppId(Server server, HttpContext httpContext)
+    private static bool GetChromeParam(HttpContext httpContext)
     {
         bool chrome = true;
         if (httpContext!.Request.Query.ContainsKey("chrome"))
         {
             chrome = !httpContext!.Request.Query["chrome"].ToString().Equals("false", StringComparison.InvariantCultureIgnoreCase);
         }
+
+        return chrome;
+    }
+
+    public static (string AppId, string? NavigationAppId) GetAppId(Server server, HttpContext httpContext)
+    {
+        bool chrome = GetChromeParam(httpContext);
 
         string? appId = null;
         string? navigationAppId = null;
@@ -172,11 +179,6 @@ public class AppHub(
                 }
             }
 
-            // if (appId != AppIds.Chrome)
-            // {
-            //     appServices.AddSingleton<IChromeService, ChromeService>();
-            // }
-
             var appArgs = GetAppArgs(Context.ConnectionId, appId, navigationAppId, httpContext);
             var appDescriptor = server.GetApp(appId);
 
@@ -207,6 +209,12 @@ public class AppHub(
                 AppServices = serviceProvider,
                 LastInteraction = DateTime.UtcNow,
             };
+
+            if (appId != AppIds.Chrome && sessionStore.FindChrome(appState) == null)
+            {
+                var navigateArgs = new NavigateArgs(appId, Chrome: GetChromeParam(httpContext));
+                clientProvider.Redirect(navigateArgs.GetUrl(), replaceHistory: true);
+            }
 
             async void OnWidgetTreeChanged(WidgetTreeChanged[] changes)
             {
