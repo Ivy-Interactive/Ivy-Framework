@@ -120,44 +120,4 @@ new TabsLayout(null, null, null, null, 0,
 ).Variant(TabsVariant.Tabs)
 ```
 
-### Add Tab Button
-
-You can add a button that allows users to dynamically create new tabs. When tabs don't fit in the available space, they automatically overflow into a dropdown menu:
-
-```csharp demo-tabs
-public class DynamicTabsDemo : ViewBase
-{
-    public override object? Build()
-    {
-        var selectedIndex = this.UseState<int?>();
-        var tabs = UseState(() => ImmutableArray.Create<Tab>([
-            new Tab("Customers", "Customers").Icon(Icons.User).Badge("10"),
-            new Tab("Orders", "Orders").Icon(Icons.DollarSign).Badge("0"),
-            new Tab("Settings", "Settings").Icon(Icons.Settings).Badge("999")
-        ]));
-
-        void OnTabSelect(Event<TabsLayout, int> @event)
-        {
-            selectedIndex.Set(@event.Value);
-        }
-
-        void OnTabClose(Event<TabsLayout, int> @event)
-        {
-            var newIndex = Math.Min(@event.Value, tabs.Value.Length - 2);
-            selectedIndex.Set(newIndex >= 0 ? newIndex : null);
-            tabs.Set(tabs.Value.RemoveAt(@event.Value));
-        }
-
-        void OnAddButtonClick(Event<TabsLayout, int> @event)
-        {
-            tabs.Set(tabs.Value.Add(new Tab($"Tab {tabs.Value.Length + 1}", $"Tab {tabs.Value.Length + 1}")));
-        }
-
-        return new TabsLayout(OnTabSelect, OnTabClose, null, null, selectedIndex.Value,
-            tabs.Value.ToArray()
-        ).Variant(TabsVariant.Tabs).AddButton("+", OnAddButtonClick);
-    }
-}
-```
-
 <WidgetDocs Type="Ivy.TabsLayout" ExtensionTypes="Ivy.Views.Tabs.TabsLayoutExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/TabsLayout/TabsLayout.cs"/>
