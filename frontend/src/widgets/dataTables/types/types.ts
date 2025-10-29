@@ -59,6 +59,7 @@ export interface DataTableConfiguration {
   selectionMode?: SelectionModes;
   showIndexColumn?: boolean;
   showGroups?: boolean;
+  enableCollapsibleGroups?: boolean;
   batchSize?: number;
   loadAllRows?: boolean;
 }

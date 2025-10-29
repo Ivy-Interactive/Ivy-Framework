@@ -50,6 +50,7 @@ export const DataTable: React.FC<TableProps> = ({
     selectionMode: config.selectionMode,
     showIndexColumn: config.showIndexColumn ?? false,
     showGroups: config.showGroups ?? false,
+    enableCollapsibleGroups: config.enableCollapsibleGroups ?? false,
     batchSize: config.batchSize,
     loadAllRows: config.loadAllRows ?? false,
   };
@@ -77,7 +78,10 @@ export const DataTable: React.FC<TableProps> = ({
               }}
             />
 
-            <DataTableEditor hasOptions={finalConfig.allowFiltering} />
+            <DataTableEditor
+              hasOptions={finalConfig.allowFiltering}
+              enableCollapsibleGroups={finalConfig.enableCollapsibleGroups}
+            />
           </>
         </TableLayout>
       </TableProvider>
