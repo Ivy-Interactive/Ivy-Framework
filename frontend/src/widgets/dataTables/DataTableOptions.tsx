@@ -8,7 +8,9 @@ import {
 } from 'filter-query-editor';
 import { Filter } from '@/services/grpcTableService';
 import { parseInvalidQuery } from './utils/tableDataFetcher';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Filter as FilterIcon, X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { ColType } from './types/types';
 
 export const DataTableOptions: React.FC<{
   hasOptions: { allowFiltering: boolean; allowLlmFiltering: boolean };
@@ -17,6 +19,7 @@ export const DataTableOptions: React.FC<{
   const [pendingFilter, setPendingFilter] = useState<Filter | null>(null);
   const [isParsing, setIsParsing] = useState(false);
   const [isQueryValid, setIsQueryValid] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(false); // Start with editor visible
 
   const { columns, setActiveFilter, connection } = useTable();
 
@@ -39,25 +42,21 @@ export const DataTableOptions: React.FC<{
   /**
    * Handle query editor text changes - only update state, no filtering
    */
-  const handleQueryChange = useCallback(
-    (event: QueryEditorChangeEvent) => {
-      setQuery(event.text);
-      setIsQueryValid(event.isValid);
+  const handleQueryChange = useCallback((event: QueryEditorChangeEvent) => {
+    setQuery(event.text);
+    setIsQueryValid(event.isValid);
 
-      if (event.text.trim() === '') {
-        // Clear pending filter for empty query
-        setPendingFilter(null);
-        setActiveFilter(null);
-      } else if (event.isValid && event.filters) {
-        // Store valid filter for when user presses Enter
-        setPendingFilter({ group: event.filters });
-      } else {
-        // Invalid query - clear pending filter
-        setPendingFilter(null);
-      }
-    },
-    [setActiveFilter]
-  );
+    if (event.text.trim() === '') {
+      // Clear pending filter for empty query
+      setPendingFilter(null);
+    } else if (event.isValid && event.filters) {
+      // Store valid filter for when user presses Enter
+      setPendingFilter({ group: event.filters });
+    } else {
+      // Invalid query - clear pending filter
+      setPendingFilter(null);
+    }
+  }, []);
 
   /**
    * Handle invalid query by calling parseInvalidQuery service
@@ -147,29 +146,92 @@ export const DataTableOptions: React.FC<{
     [handleEnterKey]
   );
 
+  // Generate dynamic placeholder based on available columns
+  const placeholderText = useMemo(() => {
+    if (columns.length === 0) return 'No columns available';
+
+    // Get first two columns for example
+    const firstColumn = columns[0];
+    const secondColumn = columns[1];
+
+    if (secondColumn) {
+      // If we have at least two columns, show an AND example
+      const firstExample =
+        firstColumn.type === ColType.Number
+          ? `[${firstColumn.name}] > 100`
+          : `[${firstColumn.name}] = "value"`;
+      const secondExample =
+        secondColumn.type === ColType.Number
+          ? `[${secondColumn.name}] < 50`
+          : `[${secondColumn.name}] != "text"`;
+      return `e.g., ${firstExample} AND ${secondExample}`;
+    } else if (firstColumn) {
+      // If we only have one column, show a simple example
+      return firstColumn.type === ColType.Number
+        ? `e.g., [${firstColumn.name}] > 100`
+        : `e.g., [${firstColumn.name}] = "value"`;
+    }
+
+    return 'Enter filter expression';
+  }, [columns]);
+
   // Early return after all hooks
   if (columns.length === 0) {
     return null;
   }
 
   const queryEditorContent = (
-    <div className="flex gap-2 items-center flex-col sm:flex-row">
+    <div className="relative flex items-center border rounded-md mb-2 w-fit h-fit">
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={() => {
+          setIsExpanded(!isExpanded);
+        }}
+        className={`h-9 w-9 flex-shrink-0 ${isExpanded ? 'text-primary' : ''}`}
+        title={isExpanded ? 'Collapse filter' : 'Expand filter'}
+      >
+        <FilterIcon className="h-4 w-4" />
+      </Button>
       <div
-        className="w-full min-w-[300px] query-editor-wrapper"
+        className={`query-editor-wrapper min-h-[40px] overflow-hidden transition-all duration-300 ease-in-out ${
+          isExpanded ? 'w-[400px] opacity-100' : 'w-0 opacity-0'
+        }`}
         onKeyDown={handleKeyDown}
       >
         <QueryEditor
           value={query}
           columns={queryEditorColumns}
           onChange={handleQueryChange}
-          placeholder='e.g., [Name] = "John" AND [Age] > 18'
+          placeholder={placeholderText}
           height={40}
-          className="font-mono rounded-lg border shadow-sm [&:focus-within]:ring-1 [&:focus-within]:ring-ring"
+          className="font-mono"
         />
         <style>{tableStyles.queryEditor.css}</style>
       </div>
-      {isParsing && (
-        <div className="flex items-center justify-center">
+      {isExpanded && query && (
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => {
+            // Clear the query
+            setQuery('');
+            setActiveFilter(null);
+            setPendingFilter(null);
+            setIsQueryValid(true);
+          }}
+          className="h-10 w-10 flex-shrink-0"
+          title="Clear filter"
+        >
+          <X className="h-4 w-4" />
+        </Button>
+      )}
+      {isParsing && isExpanded && (
+        <div
+          className={`absolute top-1/2 -translate-y-1/2 ${
+            query ? 'right-[50px]' : 'right-[10px]'
+          }`}
+        >
           <Loader2 className="animate-spin h-4 w-4 text-gray-500" />
         </div>
       )}
@@ -177,8 +239,8 @@ export const DataTableOptions: React.FC<{
   );
 
   return (
-    <div style={tableStyles.tableOptions.container}>
-      <div className={tableStyles.tableOptions.inner}>
+    <div className="w-full">
+      <div className="flex items-center">
         {allowFiltering && queryEditorContent}
       </div>
     </div>
