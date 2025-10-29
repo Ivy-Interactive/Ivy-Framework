@@ -27,14 +27,46 @@ export function useCollapsableColumnGroups(columns: GridColumn[]) {
     return Array.from(uniqueGroups);
   }, [columns]);
 
-  // Filter columns based on collapsed groups
-  const visibleColumns = useMemo(() => {
-    return columns.filter(col => {
-      // If column has no group, always show it
-      if (!col.group) return true;
+  // Adjust column widths based on collapsed groups
+  const adjustedColumns = useMemo(() => {
+    // Group columns by their group name
+    const columnsByGroup = new Map<string, GridColumn[]>();
+    columns.forEach(col => {
+      if (col.group) {
+        const group = columnsByGroup.get(col.group) || [];
+        group.push(col);
+        columnsByGroup.set(col.group, group);
+      }
+    });
 
-      // If column's group is collapsed, hide it
-      return !collapsedGroups.has(col.group);
+    return columns.map(col => {
+      // If column has no group, return as-is
+      if (!col.group) return col;
+
+      // If column's group is collapsed
+      if (collapsedGroups.has(col.group)) {
+        const groupColumns = columnsByGroup.get(col.group) || [];
+        const isFirstInGroup = groupColumns[0] === col;
+
+        if (isFirstInGroup) {
+          // First column in collapsed group shows group indicator
+          return {
+            ...col,
+            width: 60, // Slightly wider for the first column
+            title: '▶', // Show collapse indicator
+          };
+        } else {
+          // Other columns in collapsed group are hidden (width 0)
+          return {
+            ...col,
+            width: 0,
+            title: '',
+          };
+        }
+      }
+
+      // Otherwise return the column unchanged
+      return col;
     });
   }, [columns, collapsedGroups]);
 
@@ -95,7 +127,7 @@ export function useCollapsableColumnGroups(columns: GridColumn[]) {
 
   return {
     // Props to spread on DataEditor
-    columns: visibleColumns,
+    columns: adjustedColumns,
     onGroupHeaderClicked,
 
     // Helper functions
@@ -107,8 +139,10 @@ export function useCollapsableColumnGroups(columns: GridColumn[]) {
 
     // Metadata
     totalColumns: columns.length,
-    visibleColumnCount: visibleColumns.length,
-    hiddenColumnCount: columns.length - visibleColumns.length,
+    visibleColumnCount: adjustedColumns.length,
+    collapsedColumnCount: adjustedColumns.filter(
+      col => col.group && collapsedGroups.has(col.group)
+    ).length,
   };
 }
 

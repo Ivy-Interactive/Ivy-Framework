@@ -26,12 +26,10 @@ import { useCollapsableColumnGroups } from './hooks/useCollapsableColumnGroups';
 
 interface TableEditorProps {
   hasOptions?: boolean;
-  enableCollapsibleGroups?: boolean;
 }
 
 export const DataTableEditor: React.FC<TableEditorProps> = ({
   hasOptions = false,
-  enableCollapsibleGroups = false,
 }) => {
   const {
     data,
@@ -86,7 +84,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
       horizontalBorderColor: colors.border || (isDark ? '#404045' : '#d1d5db'),
       linkColor:
         colors.primary || colors.accent || (isDark ? '#3b82f6' : '#2563eb'),
-      borderColor: 'transparent',
+      borderColor: colors.border || (isDark ? '#404045' : '#d1d5db'),
       cellHorizontalPadding: 16,
       cellVerticalPadding: 8,
       headerIconSize: 20,
@@ -185,12 +183,11 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     showGroups ?? false
   );
 
-  // Use collapsible groups hook when enabled
+  // Use collapsible groups hook when showGroups is enabled
   const collapsibleGroupsHook = useCollapsableColumnGroups(gridColumns);
-  const shouldUseCollapsibleGroups =
-    enableCollapsibleGroups && (showGroups ?? false);
+  const shouldUseCollapsibleGroups = showGroups ?? false;
 
-  // Use collapsible columns if enabled, otherwise use regular columns
+  // Use collapsible columns if showGroups is enabled, otherwise use regular columns
   const finalColumns = shouldUseCollapsibleGroups
     ? collapsibleGroupsHook.columns
     : gridColumns;
