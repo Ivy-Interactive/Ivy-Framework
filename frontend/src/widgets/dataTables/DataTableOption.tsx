@@ -109,16 +109,16 @@ export const DataTableOption: React.FC<DataTableOptionProps> = ({
         className={cn(
           'inline-flex items-center mb-3',
           'border rounded-md',
+          'bg-transparent border-input',
           'transition-all duration-300 ease-in-out',
-          'bg-transparent',
-          expanded ? 'border-input' : 'border-input hover:bg-accent',
+          !expanded && 'hover:bg-accent',
           className
         )}
       >
         <button
           className={cn(
             'inline-flex items-center justify-center text-sm font-medium',
-            'h-9 w-9 gap-2 cursor-pointer',
+            'h-9 w-9 gap-2 cursor-pointer flex-shrink-0',
             'bg-transparent hover:bg-accent hover:text-accent-foreground rounded-l-md',
             'transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
             expanded && 'bg-accent'
@@ -129,17 +129,22 @@ export const DataTableOption: React.FC<DataTableOptionProps> = ({
           {buttonContent}
         </button>
 
-        {/* Sliding content container */}
+        {/* Content container - fixed dimensions when expanded */}
         <div
           className={cn(
-            'overflow-hidden transition-all duration-300 ease-in-out',
-            'border-l',
+            'overflow-hidden border-l h-9',
+            'transition-all duration-300 ease-in-out',
             expanded
-              ? 'max-w-[800px] opacity-100 border-input/30'
-              : 'max-w-0 opacity-0 border-transparent'
+              ? 'w-[450px] opacity-100 border-input/30' // Fixed width when expanded
+              : 'w-0 opacity-0 border-transparent'
           )}
         >
-          <div className={cn('h-9 flex items-center', contentClassName)}>
+          <div
+            className={cn(
+              'h-full w-[450px] flex items-center px-2 overflow-hidden', // Added overflow-hidden
+              contentClassName
+            )}
+          >
             {children}
           </div>
         </div>

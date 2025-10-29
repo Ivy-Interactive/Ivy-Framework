@@ -180,9 +180,9 @@ export const DataTableFilterOption: React.FC<{
   }
 
   return (
-    <div className="flex gap-2 items-center flex-row">
+    <div className="flex items-center w-full h-full">
       <div
-        className="w-full min-w-[300px] query-editor-wrapper"
+        className="flex-1 min-w-0 max-w-[350px] overflow-hidden query-editor-wrapper"
         onKeyDown={handleKeyDown}
       >
         <QueryEditor
@@ -191,29 +191,33 @@ export const DataTableFilterOption: React.FC<{
           onChange={handleQueryChange}
           placeholder={placeholderText}
           height={40}
-          className="font-mono border-0 shadow-none [&>.cm-editor]:border-0 [&>.cm-editor]:shadow-none"
+          className="font-mono border-0 shadow-none [&>.cm-editor]:border-0 [&>.cm-editor]:shadow-none [&_.cm-content]:overflow-x-auto"
         />
         <style>{tableStyles.queryEditor.css}</style>
       </div>
-      {isParsing && (
-        <div className="flex items-center justify-center">
-          <Loader2 className="animate-spin h-4 w-4 text-gray-500" />
-        </div>
-      )}
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={handleClearFilter}
-        disabled={!query}
-        className={cn(
-          'h-9 px-3 mr-1 text-sm hover:bg-transparent hover:text-foreground transition-opacity',
-          query
-            ? 'opacity-100 visible'
-            : 'opacity-0 invisible pointer-events-none'
+
+      {/* Fixed position container for loader and clear button */}
+      <div className="flex items-center gap-2 ml-2 flex-shrink-0">
+        {isParsing && (
+          <div className="flex items-center justify-center">
+            <Loader2 className="animate-spin h-4 w-4 text-gray-500" />
+          </div>
         )}
-      >
-        Clear
-      </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleClearFilter}
+          disabled={!query}
+          className={cn(
+            'h-9 px-3 text-sm hover:bg-transparent hover:text-foreground transition-opacity',
+            query
+              ? 'opacity-100 visible'
+              : 'opacity-0 invisible pointer-events-none'
+          )}
+        >
+          Clear
+        </Button>
+      </div>
     </div>
   );
 };
