@@ -13,6 +13,7 @@ public record DataTableConfiguration
     public SelectionModes SelectionMode { get; set; } = SelectionModes.Cells;
     public bool ShowIndexColumn { get; set; } = false;
     public bool ShowGroups { get; set; } = false;
+    public bool ShowColumnTypeIcons { get; set; } = true;
     public int? BatchSize { get; set; } = null;
     public bool LoadAllRows { get; set; } = false;
 }
