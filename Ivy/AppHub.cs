@@ -42,7 +42,7 @@ public class AppHub(
         if (httpContext!.Request.Query.ContainsKey("appId"))
         {
             var id = httpContext!.Request.Query["appId"].ToString();
-            if (string.IsNullOrEmpty(id))
+            if (string.IsNullOrEmpty(id) || id == AppIds.Chrome || id == AppIds.Auth || id == AppIds.Default)
             {
                 id = null;
             }
@@ -171,6 +171,11 @@ public class AppHub(
                     appId = AppIds.Auth;
                 }
             }
+
+            // if (appId != AppIds.Chrome)
+            // {
+            //     appServices.AddSingleton<IChromeService, ChromeService>();
+            // }
 
             var appArgs = GetAppArgs(Context.ConnectionId, appId, navigationAppId, httpContext);
             var appDescriptor = server.GetApp(appId);
