@@ -61,6 +61,7 @@ export interface DataTableConfiguration {
   showGroups?: boolean;
   batchSize?: number;
   loadAllRows?: boolean;
+  showSearch?: boolean;
 }
 
 export interface TableProps {
