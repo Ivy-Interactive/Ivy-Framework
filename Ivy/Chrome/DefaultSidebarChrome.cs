@@ -198,6 +198,10 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
             {
                 OpenApp(new NavigateArgs(initialAppId), replaceHistory: true);
             }
+            else
+            {
+                client.Redirect("/", replaceHistory: true);
+            }
         });
 
         void OnMenuSelect(Event<SidebarMenu, object> @event)
