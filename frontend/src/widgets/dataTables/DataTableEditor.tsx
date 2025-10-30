@@ -117,7 +117,9 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
   });
   const [showSearch, setShowSearch] = useState(false);
   const [hoverRow, setHoverRow] = useState<number | undefined>(undefined);
+
   const scrollThreshold = 10;
+  const rowHeight = 38;
 
   // Generate header icons map for all column icons
   const headerIcons = useMemo(() => {
@@ -150,9 +152,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
 
     // Calculate if the container height can show more rows than we have loaded
     const containerHeight = containerRef.current.clientHeight;
-    const rowHeight = 38; // Must match the rowHeight prop in DataEditor
-    const headerHeight = 32; // Must match the headerHeight prop in DataEditor
-    const availableHeight = containerHeight - headerHeight;
+    const availableHeight = containerHeight + rowHeight;
     const visibleRowCapacity = Math.ceil(availableHeight / rowHeight);
 
     // If container can show more rows than we have, and we have more data available, load it
@@ -292,8 +292,8 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
         smoothScrollX={true}
         smoothScrollY={true}
         theme={tableTheme}
-        rowHeight={38}
-        headerHeight={32}
+        rowHeight={rowHeight}
+        headerHeight={rowHeight}
         freezeColumns={freezeColumns ?? 0}
         getCellsForSelection={(allowCopySelection ?? true) ? true : undefined}
         keybindings={{ search: false }}
