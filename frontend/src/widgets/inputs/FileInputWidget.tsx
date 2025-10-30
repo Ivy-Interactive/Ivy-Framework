@@ -13,7 +13,7 @@ import {
   textVariants,
 } from '@/components/ui/input/file-input-variants';
 
-enum FileInputState {
+enum FileInputStatus {
   Pending = 'Pending',
   Aborted = 'Aborted',
   Loading = 'Loading',
@@ -27,7 +27,7 @@ interface FileInput {
   contentType: string;
   length: number;
   progress: number;
-  state: FileInputState;
+  status: FileInputStatus;
 }
 
 interface FileInputWidgetProps {
@@ -63,7 +63,6 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
   const [isDragging, setIsDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const hasClearHandler = events.includes('OnClear');
   const hasDeleteHandler = events.includes('OnDelete');
 
   const uploadFile = useCallback(
@@ -125,12 +124,6 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
     },
     [multiple, uploadFile, maxFiles]
   );
-
-  const handleClear = useCallback(() => {
-    if (hasClearHandler) {
-      handleEvent('OnClear', id, []);
-    }
-  }, [hasClearHandler, handleEvent, id]);
 
   const handleDelete = useCallback(
     (fileId: string) => {
@@ -212,7 +205,7 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
 
   // Render individual file item for multiple files view
   const renderFileItem = (file: FileInput) => {
-    const isFileLoading = file.state === FileInputState.Loading;
+    const isFileLoading = file.status === FileInputStatus.Loading;
     const fileProgress = file.progress ?? 0;
 
     return (
@@ -309,22 +302,6 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
           <div className="space-y-2 w-full">
             {fileList.map(file => renderFileItem(file))}
           </div>
-        )}
-
-        {/* Clear button when files exist and handler is present */}
-        {hasFiles && !disabled && hasClearHandler && (
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className="absolute right-2 top-2 h-6 w-6 z-10 bg-background/80 hover:bg-background"
-            onClick={e => {
-              e.stopPropagation();
-              handleClear();
-            }}
-          >
-            <X className="h-4 w-4" />
-          </Button>
         )}
       </div>
     </div>

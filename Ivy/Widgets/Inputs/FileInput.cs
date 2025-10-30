@@ -14,7 +14,7 @@ using Ivy.Widgets.Inputs;
 namespace Ivy;
 
 [JsonConverter(typeof(JsonStringEnumConverter))]
-public enum FileInputState
+public enum FileInputStatus
 {
     Pending,
     Aborted,
@@ -51,7 +51,7 @@ public record FileInput : FileBase
     /// <summary>
     /// Gets the current state of the file upload.
     /// </summary>
-    public FileInputState State { get; set; } = FileInputState.Pending;
+    public FileInputStatus Status { get; set; } = FileInputStatus.Pending;
 }
 
 /// <summary>
@@ -109,9 +109,6 @@ public abstract record FileInputBase : WidgetBase<FileInputBase>, IAnyFileInput
 
     /// <summary>Gets or sets the event handler called when the input loses focus.</summary>
     [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
-
-    /// <summary>Gets or sets the event handler called when the clear button is clicked.</summary>
-    [Event] public Func<Event<IAnyInput>, ValueTask>? OnClear { get; set; }
 
     /// <summary>Gets or sets the event handler called when a file is deleted (passes FileInput.Id as parameter).</summary>
     [Event] public Func<Event<IAnyInput, Guid>, ValueTask>? OnDelete { get; set; }
@@ -232,12 +229,12 @@ public static class FileInputExtensions
         }
     }
 
-    public static void SetState(this IState<FileInput?> fileInputState, FileInputState state)
+    public static void SetStatus(this IState<FileInput?> fileInputState, FileInputStatus status)
     {
         var file = fileInputState.Value;
         if (file != null)
         {
-            fileInputState.Set(file with { State = state });
+            fileInputState.Set(file with { Status = status });
         }
     }
 
@@ -445,37 +442,6 @@ public static class FileInputExtensions
     public static FileInputBase HandleBlur(this FileInputBase widget, Action onBlur)
     {
         return widget.HandleBlur(_ => { onBlur(); return ValueTask.CompletedTask; });
-    }
-
-    /// <summary>
-    /// Sets the clear event handler for the file input.
-    /// </summary>
-    /// <param name="widget">The file input to configure.</param>
-    /// <param name="onClear">The event handler to call when the clear button is clicked.</param>
-    [OverloadResolutionPriority(1)]
-    public static FileInputBase HandleClear(this FileInputBase widget, Func<Event<IAnyInput>, ValueTask> onClear)
-    {
-        return widget with { OnClear = onClear };
-    }
-
-    /// <summary>
-    /// Sets the clear event handler for the file input.
-    /// </summary>
-    /// <param name="widget">The file input to configure.</param>
-    /// <param name="onClear">The event handler to call when the clear button is clicked.</param>
-    public static FileInputBase HandleClear(this FileInputBase widget, Action<Event<IAnyInput>> onClear)
-    {
-        return widget.HandleClear(onClear.ToValueTask());
-    }
-
-    /// <summary>
-    /// Sets a simple clear event handler for the file input.
-    /// </summary>
-    /// <param name="widget">The file input to configure.</param>
-    /// <param name="onClear">The simple action to perform when the clear button is clicked.</param>
-    public static FileInputBase HandleClear(this FileInputBase widget, Action onClear)
-    {
-        return widget.HandleClear(_ => { onClear(); return ValueTask.CompletedTask; });
     }
 
     /// <summary>

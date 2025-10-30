@@ -38,7 +38,7 @@ public class SingleFileUpload : ViewBase
 
                 using var memoryStream = new MemoryStream();
 
-                selectedFile.SetState(FileInputState.Loading);
+                selectedFile.SetStatus(FileInputStatus.Loading);
 
                 int bytesRead;
                 while ((bytesRead = await fileUpload.Stream.ReadAsync(buffer, 0, buffer.Length)) > 0)
@@ -53,24 +53,25 @@ public class SingleFileUpload : ViewBase
                 }
 
                 uploadedBytes.Set(memoryStream.ToArray());
-                selectedFile.SetState(FileInputState.Finished);
+                selectedFile.SetStatus(FileInputStatus.Finished);
             }
             catch (Exception)
             {
-                selectedFile.SetState(FileInputState.Failed);
+                selectedFile.SetStatus(FileInputStatus.Failed);
                 throw;
             }
         });
 
-        void OnClear()
+        void OnDelete(Guid fileId)
         {
+            // Thread-safe: clear the file
             selectedFile.Default();
             uploadedBytes.Default();
         }
 
         return Layout.Vertical()
                | Text.H1("Single File Upload")
-               | selectedFile.ToFileInput(uploadUrl).Accept("*/*").Placeholder("Choose a file to upload").HandleClear(OnClear)
+               | selectedFile.ToFileInput(uploadUrl).Accept("*/*").Placeholder("Choose a file to upload").HandleDelete(OnDelete)
                | selectedFile.ToDetails()
                    .Builder(e => e!.Length, e => e.Func((long x) => Utils.FormatBytes(x)))
                    .Builder(e => e!.Progress, e => e.Func((float x) => x.ToString("P0")))
@@ -98,7 +99,7 @@ public class MultipleFilesUpload : ViewBase
             using var memoryStream = new MemoryStream();
 
             // Update to Loading state
-            var loadingFile = currentFile with { State = FileInputState.Loading };
+            var loadingFile = currentFile with { Status = FileInputStatus.Loading };
             selectedFiles.Set(files => files.Replace(currentFile, loadingFile));
             currentFile = loadingFile;
 
@@ -119,17 +120,11 @@ public class MultipleFilesUpload : ViewBase
             }
 
             // Mark as finished - thread-safe atomic operation
-            var finishedFile = currentFile with { State = FileInputState.Finished };
+            var finishedFile = currentFile with { Status = FileInputStatus.Finished };
             selectedFiles.Set(files => files.Replace(currentFile, finishedFile));
 
             uploadCount.Set(count => count + 1);
         });
-
-        void OnClear()
-        {
-            selectedFiles.Default();
-            uploadCount.Default();
-        }
 
         void OnDelete(Guid fileId)
         {
@@ -142,7 +137,7 @@ public class MultipleFilesUpload : ViewBase
 
         var layout = Layout.Vertical()
                      | Text.H1("Multiple Files Upload")
-                     | selectedFiles.ToFileInput(uploadUrl).Accept("*/*").Placeholder("Choose files to upload").HandleClear(OnClear).HandleDelete(OnDelete)
+                     | selectedFiles.ToFileInput(uploadUrl).Accept("*/*").Placeholder("Choose files to upload").HandleDelete(OnDelete)
                      | selectedFiles.Value.ToTable()
                          .Width(Size.Full())
                          .Builder(e => e.Length, e => e.Func((long x) => Utils.FormatBytes(x)))
