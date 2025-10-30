@@ -135,21 +135,10 @@ If configuration is present in both .NET user secrets and environment variables,
 
 ```csharp
 var auth = this.UseService<IAuthService>();
-var client = this.UseService<IClientProvider>();
 
-// Log in a user
-var token = await auth.LoginAsync(email, password);
-if (token != null) client.SetAuthToken(token);
-
-// Get current user information
-var userInfo = await auth.GetUserInfoAsync();
-
-// Handle logout
+await auth.LoginAsync(email, password);
+var user = await auth.GetUserInfoAsync();
 await auth.LogoutAsync();
-
-// Refresh tokens
-var newToken = await auth.RefreshAccessTokenAsync();
-if (newToken != null) client.SetAuthToken(newToken);
 ```
 
 ## Supported Authentication Providers
