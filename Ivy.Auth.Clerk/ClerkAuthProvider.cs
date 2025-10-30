@@ -50,7 +50,7 @@ public class ClerkAuthProvider : IAuthProvider
         _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_secretKey}");
     }
 
-    public async Task<AuthToken?> LoginAsync(string email, string password)
+    public async Task<AuthToken?> LoginAsync(string email, string password, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -69,7 +69,7 @@ public class ClerkAuthProvider : IAuthProvider
         }
     }
 
-    public Task<Uri> GetOAuthUriAsync(AuthOption option, WebhookEndpoint callback)
+    public Task<Uri> GetOAuthUriAsync(AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken = default)
     {
         // Clerk OAuth URLs are typically generated on the client side
         // The server-side SDK doesn't provide direct OAuth URL generation
@@ -94,7 +94,7 @@ public class ClerkAuthProvider : IAuthProvider
         return Task.FromResult(new Uri(authUrl));
     }
 
-    public async Task<AuthToken?> HandleOAuthCallbackAsync(HttpRequest request)
+    public async Task<AuthToken?> HandleOAuthCallbackAsync(HttpRequest request, CancellationToken cancellationToken = default)
     {
         var code = request.Query["code"].ToString();
         var error = request.Query["error"].ToString();
@@ -118,7 +118,7 @@ public class ClerkAuthProvider : IAuthProvider
             await Task.CompletedTask;
 
             // Return a mock token - in practice, this would be the actual Clerk session token
-            return new AuthToken("mock_clerk_jwt_token", null, DateTimeOffset.UtcNow.AddHours(1));
+            return new AuthToken("mock_clerk_jwt_token", null, null);
         }
         catch (Exception ex)
         {
@@ -126,7 +126,7 @@ public class ClerkAuthProvider : IAuthProvider
         }
     }
 
-    public async Task LogoutAsync(string jwt)
+    public async Task LogoutAsync(string jwt, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -140,13 +140,8 @@ public class ClerkAuthProvider : IAuthProvider
         }
     }
 
-    public async Task<AuthToken?> RefreshJwtAsync(AuthToken jwt)
+    public async Task<AuthToken?> RefreshAccessTokenAsync(AuthToken token, CancellationToken cancellationToken = default)
     {
-        if (jwt.ExpiresAt == null || DateTimeOffset.UtcNow < jwt.ExpiresAt)
-        {
-            return jwt;
-        }
-
         try
         {
             // Clerk handles token refresh automatically in most cases
@@ -154,7 +149,7 @@ public class ClerkAuthProvider : IAuthProvider
             await Task.CompletedTask;
 
             // Return the same token or a refreshed one
-            return jwt;
+            return token;
         }
         catch (Exception)
         {
@@ -162,7 +157,7 @@ public class ClerkAuthProvider : IAuthProvider
         }
     }
 
-    public async Task<bool> ValidateJwtAsync(string jwt)
+    public async Task<bool> ValidateAccessTokenAsync(string token, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -184,7 +179,7 @@ public class ClerkAuthProvider : IAuthProvider
                 ClockSkew = TimeSpan.Zero
             };
 
-            var principal = tokenHandler.ValidateToken(jwt, validationParameters, out SecurityToken validatedToken);
+            var principal = tokenHandler.ValidateToken(token, validationParameters, out SecurityToken validatedToken);
             return principal != null;
         }
         catch (Exception)
@@ -193,7 +188,7 @@ public class ClerkAuthProvider : IAuthProvider
         }
     }
 
-    public async Task<UserInfo?> GetUserInfoAsync(string jwt)
+    public async Task<UserInfo?> GetUserInfoAsync(string token, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -204,7 +199,7 @@ public class ClerkAuthProvider : IAuthProvider
             }
 
             var tokenHandler = new JwtSecurityTokenHandler();
-            var jsonToken = tokenHandler.ReadJwtToken(jwt);
+            var jsonToken = tokenHandler.ReadJwtToken(token);
 
             var userId = jsonToken.Claims.FirstOrDefault(x => x.Type == "sub")?.Value ?? "";
             var email = jsonToken.Claims.FirstOrDefault(x => x.Type == "email")?.Value ?? "";
@@ -217,6 +212,14 @@ public class ClerkAuthProvider : IAuthProvider
         {
             return null;
         }
+    }
+
+    public Task<DateTimeOffset?> GetTokenExpiration(AuthToken token, CancellationToken cancellationToken = default)
+    {
+        // Clerk tokens typically encode expiration in the JWT
+        // In a real implementation, you would parse the JWT and extract the exp claim
+        // For now, return null to indicate unknown expiration
+        return Task.FromResult<DateTimeOffset?>(null);
     }
 
     public AuthOption[] GetAuthOptions()
