@@ -2,6 +2,14 @@
 
 namespace Ivy.Services;
 
+public class MultiFileUploadHandler : IUploadHandler
+{
+    public Task HandleUploadAsync(FileUpload fileUpload, Stream stream, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
+}
+
 public class MemoryStreamUploadHandler(IState<byte[]?> contentState, IState<FileUpload?> uploadState, int chunkSize = 8192 /* 8KB chunks */)
     : IUploadHandler
 {
