@@ -29,6 +29,7 @@ import {
   dateRangeInputIconVariants,
   dateRangeInputTextVariants,
 } from '@/components/ui/input/date-range-input-variants';
+import { wrapWithTooltip } from '@/lib/tooltipHelper';
 
 interface DateRangeInputWidgetProps {
   id: string;
@@ -164,27 +165,32 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
             <CalendarIcon
               className={cn('mr-2', dateRangeInputIconVariants({ size }))}
             />
-            {date?.from ? (
-              date.to ? (
-                <span className={dateRangeInputTextVariants({ size })}>
-                  {format(date.from, displayFormat)} -{' '}
-                  {format(date.to, displayFormat)}
+            {(() => {
+              const text = date?.from
+                ? date.to
+                  ? `${format(date.from, displayFormat)} - ${format(date.to, displayFormat)}`
+                  : `${format(date.from, displayFormat)}`
+                : placeholder;
+              const textNode = (
+                <span
+                  className={cn(
+                    dateRangeInputTextVariants({ size }),
+                    !date?.from && 'text-muted-foreground',
+                    'flex-1 min-w-0 truncate'
+                  )}
+                >
+                  {text}
                 </span>
-              ) : (
-                <span className={dateRangeInputTextVariants({ size })}>
-                  {format(date.from, displayFormat)}
-                </span>
-              )
-            ) : (
-              <span
-                className={cn(
-                  dateRangeInputTextVariants({ size }),
-                  'text-muted-foreground'
-                )}
-              >
-                {placeholder}
-              </span>
-            )}
+              );
+              return wrapWithTooltip(
+                textNode,
+                text ? (
+                  <div className="whitespace-pre-wrap wrap-break-word max-w-sm">
+                    {text}
+                  </div>
+                ) : undefined
+              );
+            })()}
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start">

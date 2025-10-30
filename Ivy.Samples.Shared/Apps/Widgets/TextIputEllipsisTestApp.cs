@@ -35,6 +35,12 @@ public class TextInputEllipsisTestApp : SampleBase
             "Go"
         };
         var selectedLang = this.UseState(languages[0]);
+        // Date & time states
+        var dateOnly = this.UseState(DateTime.Today);
+        var dateTime = this.UseState(DateTime.Now);
+        var timeOnly = this.UseState(DateTime.Now);
+        var dateRange = this.UseState<(DateOnly, DateOnly)>(() => (DateOnly.FromDateTime(DateTime.Today.AddDays(-7)), DateOnly.FromDateTime(DateTime.Today)));
+        var nullableDateRange = this.UseState<(DateOnly?, DateOnly?)>(() => (null, null));
 
         return Layout.Vertical()
                | Text.H1("TextInput Ellipsis Test")
@@ -210,7 +216,7 @@ public class TextInputEllipsisTestApp : SampleBase
                        .ToColorInput()
                        .Placeholder("Select a color or paste a hex code like #ff00ff; this placeholder is long to test ellipsis behavior in narrow inputs")
                        .Variant(ColorInputs.TextAndPicker)
-                       .Width(Size.Units(20))
+                       .Width(Size.Units(10))
                    // Select input with long options and placeholder
                    | Text.P("SelectInput with long option and placeholder (small width):")
                    | selectedLang
@@ -218,6 +224,36 @@ public class TextInputEllipsisTestApp : SampleBase
                        .Variant(SelectInputs.Select)
                        .Width(Size.Units(40))
                ).Width(Size.Units(60))
+
+             | new Card(
+                 Layout.Vertical()
+                 | Text.H2("Date/Time Inputs Ellipsis Tests")
+                 | Text.P("Small width to verify truncation and tooltip behavior for date/time widgets:")
+                 | Text.P("Date (long placeholder, small width):")
+                 | dateOnly
+                     .ToDateInput()
+                     .Placeholder("Select a very long date placeholder that should truncate with ellipsis when the input is narrow")
+                     .Width(Size.Units(30))
+                 | Text.P("DateTime (long placeholder, small width):")
+                 | dateTime
+                     .ToDateTimeInput()
+                     .Placeholder("Pick a very long date and time placeholder to verify truncation in a constrained input field width")
+                     .Width(Size.Units(30))
+                 | Text.P("Time (long placeholder, small width):")
+                 | timeOnly
+                     .ToTimeInput()
+                     .Placeholder("Choose a very long time value placeholder to ensure truncation")
+                     .Width(Size.Units(30))
+                 | Text.P("Date range with long placeholder (small width):")
+                 | nullableDateRange
+                     .ToDateRangeInput()
+                     .Placeholder("Select a very long date range placeholder that should truncate with ellipsis when the input width is small")
+                     .Width(Size.Units(30))
+                 | Text.P("Pre-filled date range (small width):")
+                 | dateRange
+                     .ToDateRangeInput()
+                     .Width(Size.Units(30))
+             ).Width(Size.Units(60))
 
                | Text.H2("Expected Behavior")
                | Text.P("Expected ellipsis behavior:")
