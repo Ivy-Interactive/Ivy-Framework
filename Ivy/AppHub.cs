@@ -31,9 +31,9 @@ public class AppHub(
     private static bool GetChromeParam(HttpContext httpContext)
     {
         bool chrome = true;
-        if (httpContext!.Request.Query.ContainsKey("chrome"))
+        if (httpContext!.Request.Query.TryGetValue("chrome", out var chromeParam))
         {
-            chrome = !httpContext!.Request.Query["chrome"].ToString().Equals("false", StringComparison.InvariantCultureIgnoreCase);
+            chrome = !chromeParam.ToString().Equals("false", StringComparison.InvariantCultureIgnoreCase);
         }
 
         return chrome;
@@ -46,9 +46,9 @@ public class AppHub(
         string? appId = null;
         string? navigationAppId = null;
 
-        if (httpContext!.Request.Query.ContainsKey("appId"))
+        if (httpContext!.Request.Query.TryGetValue("appId", out var appIdParam))
         {
-            var id = httpContext!.Request.Query["appId"].ToString();
+            var id = appIdParam.ToString();
             if (string.IsNullOrEmpty(id) || id == AppIds.Chrome || id == AppIds.Auth || id == AppIds.Default)
             {
                 id = null;
@@ -74,9 +74,9 @@ public class AppHub(
 
     public static string GetMachineId(HttpContext httpContext)
     {
-        if (httpContext!.Request.Query.ContainsKey("machineId"))
+        if (httpContext!.Request.Query.TryGetValue("machineId", out var machineIdParam))
         {
-            return httpContext!.Request.Query["machineId"].ToString().NullIfEmpty() ?? throw new Exception("Missing machineId in request.");
+            return machineIdParam.ToString().NullIfEmpty() ?? throw new Exception("Missing machineId in request.");
         }
 
         throw new Exception("Missing machineId in request.");
@@ -84,9 +84,9 @@ public class AppHub(
 
     public static string? GetParentId(HttpContext httpContext)
     {
-        if (httpContext!.Request.Query.ContainsKey("parentId"))
+        if (httpContext!.Request.Query.TryGetValue("parentId", out var parentIdParam))
         {
-            return httpContext!.Request.Query["parentId"].ToString().NullIfEmpty();
+            return parentIdParam.ToString().NullIfEmpty();
         }
 
         return null;
@@ -95,9 +95,9 @@ public class AppHub(
     public AppArgs GetAppArgs(string connectionId, string appId, string? navigationAppId, HttpContext httpContext)
     {
         string? appArgs = null;
-        if (httpContext!.Request.Query.ContainsKey("appArgs"))
+        if (httpContext!.Request.Query.TryGetValue("appArgs", out var appArgsParam))
         {
-            appArgs = httpContext!.Request.Query["appArgs"].ToString().NullIfEmpty();
+            appArgs = appArgsParam.ToString().NullIfEmpty();
         }
 
         HttpRequest request = httpContext.Request;
