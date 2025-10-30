@@ -64,6 +64,7 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
 
   const hasClearHandler = events.includes('OnClear');
+  const hasDeleteHandler = events.includes('OnDelete');
 
   const uploadFile = useCallback(
     async (file: File): Promise<void> => {
@@ -131,6 +132,15 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
     }
   }, [hasClearHandler, handleEvent, id]);
 
+  const handleDelete = useCallback(
+    (fileId: string) => {
+      if (hasDeleteHandler) {
+        handleEvent('OnDelete', id, [fileId]);
+      }
+    },
+    [hasDeleteHandler, handleEvent, id]
+  );
+
   const handleDragEnter = useCallback(
     (e: React.DragEvent) => {
       e.preventDefault();
@@ -185,22 +195,66 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
     [multiple, disabled, uploadFile, maxFiles]
   );
 
-  const handleClick = useCallback(() => {
-    if (!disabled && inputRef.current) {
-      inputRef.current.click();
-    }
-  }, [disabled]);
+  const handleClick = useCallback(
+    (e: React.MouseEvent) => {
+      // Don't trigger file selection if clicking on a file item or button
+      const target = e.target as HTMLElement;
+      if (target.closest('button') || target.closest('[data-file-item]')) {
+        return;
+      }
 
-  const displayValue = value
-    ? Array.isArray(value)
-      ? value.map(f => f.fileName).join(', ')
-      : value.fileName
-    : '';
+      if (!disabled && inputRef.current) {
+        inputRef.current.click();
+      }
+    },
+    [disabled]
+  );
 
-  // Get single file for progress/state display (for single file mode)
-  const singleFile = value && !Array.isArray(value) ? value : null;
-  const isLoading = singleFile?.state === FileInputState.Loading;
-  const progress = singleFile?.progress ?? 0;
+  // Render individual file item for multiple files view
+  const renderFileItem = (file: FileInput) => {
+    const isFileLoading = file.state === FileInputState.Loading;
+    const fileProgress = file.progress ?? 0;
+
+    return (
+      <div
+        key={file.id}
+        data-file-item
+        className="flex items-center gap-3 p-3 border border-muted-foreground/25 rounded-md bg-background"
+      >
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium truncate">{file.fileName}</p>
+          {isFileLoading && (
+            <div className="mt-2">
+              <div className="w-full bg-muted rounded-full h-1.5">
+                <div
+                  className="bg-primary h-1.5 rounded-full transition-all duration-300"
+                  style={{ width: `${fileProgress * 100}%` }}
+                />
+              </div>
+            </div>
+          )}
+        </div>
+        {hasDeleteHandler && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 flex-shrink-0"
+            onClick={e => {
+              e.stopPropagation();
+              handleDelete(file.id);
+            }}
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        )}
+      </div>
+    );
+  };
+
+  // Check if we have any files to display
+  const hasFiles = value && (Array.isArray(value) ? value.length > 0 : true);
+  const fileList = Array.isArray(value) ? value : value ? [value] : [];
 
   return (
     <div
@@ -223,7 +277,8 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
           isDragging && !disabled
             ? 'border-primary bg-primary/5'
             : 'border-muted-foreground/25',
-          disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+          disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
+          hasFiles ? 'overflow-y-auto' : ''
         )}
         onClick={handleClick}
       >
@@ -237,20 +292,32 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
           disabled={disabled}
           className="hidden"
         />
-        <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-          <Upload className={uploadIconVariants({ size })} />
-          <p className={textVariants({ size })}>
-            {displayValue ||
-              placeholder ||
-              `Drag and drop your ${multiple ? 'files' : 'file'} here or click to select`}
-          </p>
-        </div>
-        {value && !disabled && hasClearHandler && (
+
+        {/* Show upload prompt when no files */}
+        {!hasFiles && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+            <Upload className={uploadIconVariants({ size })} />
+            <p className={textVariants({ size })}>
+              {placeholder ||
+                `Drag and drop your ${multiple ? 'files' : 'file'} here or click to select`}
+            </p>
+          </div>
+        )}
+
+        {/* Show file list when files are present */}
+        {hasFiles && (
+          <div className="space-y-2 w-full">
+            {fileList.map(file => renderFileItem(file))}
+          </div>
+        )}
+
+        {/* Clear button when files exist and handler is present */}
+        {hasFiles && !disabled && hasClearHandler && (
           <Button
             type="button"
             variant="ghost"
             size="icon"
-            className="absolute right-2 top-2 h-6 w-6 z-10"
+            className="absolute right-2 top-2 h-6 w-6 z-10 bg-background/80 hover:bg-background"
             onClick={e => {
               e.stopPropagation();
               handleClear();
@@ -260,20 +327,6 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
           </Button>
         )}
       </div>
-      {/* Progress bar for loading state */}
-      {isLoading && (
-        <div className="mt-2">
-          <div className="w-full bg-muted rounded-full h-2">
-            <div
-              className="bg-primary h-2 rounded-full transition-all duration-300"
-              style={{ width: `${progress * 100}%` }}
-            />
-          </div>
-          <p className="text-sm text-muted-foreground mt-1">
-            Uploading... {Math.round(progress * 100)}%
-          </p>
-        </div>
-      )}
     </div>
   );
 };

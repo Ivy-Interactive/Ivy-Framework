@@ -38,7 +38,7 @@ public static class FileInputValidation
         {
             if (!IsFileTypeAllowed(file, allowedPatterns))
             {
-                invalidFiles.Add(file.FileName);
+                invalidFiles.Add(file.FileName ?? "unknown");
             }
         }
 
@@ -99,7 +99,7 @@ public static class FileInputValidation
             {
                 // Wildcard MIME type (e.g., "image/*")
                 var baseType = pattern[..^2];
-                return file.ContentType.StartsWith(baseType, StringComparison.OrdinalIgnoreCase);
+                return file.ContentType?.StartsWith(baseType, StringComparison.OrdinalIgnoreCase) ?? false;
             }
             else
             {

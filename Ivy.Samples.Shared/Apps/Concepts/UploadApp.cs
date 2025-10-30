@@ -71,6 +71,8 @@ public class SingleFileUpload : ViewBase
                | Text.H1("Single File Upload")
                | selectedFile.ToFileInput(uploadUrl).Accept("*/*").Placeholder("Choose a file to upload").HandleClear(OnClear)
                | selectedFile.ToDetails()
+                   .Builder(e => e!.Length, e => e.Func((long x) => Utils.FormatBytes(x)))
+                   .Builder(e => e!.Progress, e => e.Func((float x) => x.ToString("P0")))
             ;
     }
 }
@@ -135,9 +137,16 @@ public class MultipleFilesUpload : ViewBase
             uploadCount.Default();
         }
 
+        void OnDelete(Guid fileId)
+        {
+            var currentFiles = selectedFiles.Value?.ToList() ?? new List<FileInput>();
+            var updatedFiles = currentFiles.Where(f => f.Id != fileId).ToList();
+            selectedFiles.Set(updatedFiles);
+        }
+
         var layout = Layout.Vertical()
                      | Text.H1("Multiple Files Upload")
-                     | selectedFiles.ToFileInput(uploadUrl).Accept("*/*").Placeholder("Choose files to upload").HandleClear(OnClear)
+                     | selectedFiles.ToFileInput(uploadUrl).Accept("*/*").Placeholder("Choose files to upload").HandleClear(OnClear).HandleDelete(OnDelete)
                      | selectedFiles.Value?.ToTable()
                          .Width(Size.Full())
                          .Builder(e => e.Length, e => e.Func((long x) => Utils.FormatBytes(x)))
