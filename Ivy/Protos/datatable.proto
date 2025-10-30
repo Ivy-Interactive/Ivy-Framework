@@ -1,0 +1,94 @@
+syntax = "proto3";
+
+package datatable;
+
+import "google/protobuf/any.proto";
+
+option csharp_namespace = "Ivy.Protos.DataTable";
+
+service DataTableService {
+  rpc Query(DataTableQuery) returns (DataTableResult);
+  rpc Values(DataTableValuesQuery) returns (DataTableValuesResult);
+  rpc ParseFilter(DataTableFilterParserRequest) returns (DataTableFilterParserResponse);
+}
+
+message DataTableQuery {
+  repeated SortOrder sort = 1;
+  Filter filter = 2;
+  int32 offset = 3;
+  int32 limit = 4;
+  repeated string select_columns = 5; 
+  repeated Aggregation aggregations = 6; 
+  string connectionId = 7; 
+  string sourceId = 8;
+}
+
+message SortOrder {
+  string column = 1;
+  SortDirection direction = 2;
+}
+
+enum SortDirection {
+  ASC = 0;
+  DESC = 1;
+}
+
+// Recursive filter structure
+message Filter {
+  oneof node {
+    Condition condition = 1;
+    FilterGroup group = 2;
+  }
+  bool negate = 3;
+  string invalid_query = 4; // When set, indicates an unparseable query that should be processed by the agent
+}
+
+message Condition {
+  string column = 1;
+  string function = 2; // e.g. "equals", "greaterThan", "inSet", "contains"
+  repeated google.protobuf.Any args = 3;
+}
+
+message FilterGroup {
+  enum LogicalOperator {
+    AND = 0;
+    OR = 1;
+  }
+  LogicalOperator op = 1;
+  repeated Filter filters = 2;
+}
+
+message Aggregation {
+  string column = 1;
+  string function = 2; // e.g. "sum", "avg", "min", "max", "count"
+}
+
+message DataTableResult {
+  bytes arrow_ipc_stream = 1; // Arrow Table serialized as IPC stream
+  int32 offset = 2;
+  int32 row_count = 3;
+  int32 total_rows = 4;
+}
+
+message DataTableValuesQuery {
+  string column = 1;
+  string search = 2;
+  int32 limit = 3;
+  string connectionId = 4;
+  string sourceId = 5; 
+}
+
+message DataTableValuesResult {
+  repeated string values = 1;
+  int32 total_values = 2;
+}
+
+message DataTableFilterParserRequest {
+  string filter_expression = 1; // e.g. "age > 30 AND (status = 'active' OR status = 'pending')"
+  string connectionId = 2;
+  string sourceId = 3; 
+}
+
+message DataTableFilterParserResponse {
+  string filter_expression = 1;
+}

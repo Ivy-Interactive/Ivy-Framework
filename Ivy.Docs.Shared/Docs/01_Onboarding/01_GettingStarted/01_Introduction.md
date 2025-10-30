@@ -1,3 +1,11 @@
+---
+searchHints:
+  - overview
+  - what-is
+  - framework
+  - fullstack
+---
+
 # Introduction to Ivy
 
 <Ingress>

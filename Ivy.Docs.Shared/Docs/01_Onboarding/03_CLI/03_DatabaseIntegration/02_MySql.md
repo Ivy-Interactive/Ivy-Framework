@@ -1,5 +1,12 @@
 ---
 title: MySQL
+searchHints:
+  - mysql
+  - database
+  - sql
+  - relational
+  - oracle
+  - db
 ---
 
 # MySQL Database Provider

@@ -1,7 +1,7 @@
 import { TableOfContents } from '@/widgets/article/TableOfContents';
 import { GitHubContributors } from '@/widgets/article/GitHubContributors';
 import { DocumentTools } from '@/widgets/article/DocumentTools';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 
 interface ArticleSidebarProps {
   articleRef: React.RefObject<HTMLElement | null>;
@@ -18,14 +18,8 @@ export const ArticleSidebar: React.FC<ArticleSidebarProps> = ({
 }) => {
   const [tocLoading, setTocLoading] = useState(true);
   const [contributorsLoading, setContributorsLoading] = useState(true);
-  const [showContributors, setShowContributors] = useState(false);
-
   // Only show contributors when TOC is ready too
-  useEffect(() => {
-    if (!tocLoading && !contributorsLoading) {
-      setShowContributors(true);
-    }
-  }, [tocLoading, contributorsLoading]);
+  const showContributors = !tocLoading && !contributorsLoading;
   // Only show sidebar if TOC should be displayed
   if (!showToc) return null;
 

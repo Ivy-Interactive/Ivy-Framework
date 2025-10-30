@@ -1,3 +1,13 @@
+---
+searchHints:
+  - async
+  - observables
+  - streams
+  - reactive
+  - tasks
+  - rx
+---
+
 # Tasks and Observables
 
 <Ingress>

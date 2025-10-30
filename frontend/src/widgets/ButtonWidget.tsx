@@ -5,6 +5,9 @@ import { cn, getIvyHost, camelCase } from '@/lib/utils';
 import { useEventHandler } from '@/components/event-handler';
 import withTooltip from '@/hoc/withTooltip';
 import { Loader2 } from 'lucide-react';
+
+// Create tooltip-wrapped button outside of component
+const ButtonWithTooltip = withTooltip(Button);
 import {
   BorderRadius,
   getBorderRadius,
@@ -35,6 +38,7 @@ interface ButtonWidgetProps {
   width?: string;
   children?: React.ReactNode;
   borderRadius?: BorderRadius;
+  'data-testid'?: string;
 }
 
 const getUrl = (url: string) => {
@@ -59,6 +63,7 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
   children,
   borderRadius,
   size,
+  'data-testid': dataTestId,
 }) => {
   const eventHandler = useEventHandler();
 
@@ -91,24 +96,58 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
     height: `${iconSize * 0.25}rem`,
   };
 
-  const ButtonWithTooltip = withTooltip(Button);
+  const effectiveUrl = url;
 
-  const handleClick = useCallback(() => {
-    if (disabled) return;
-    if (url) {
-      window.open(getUrl(url), '_blank');
-      return;
-    }
-    eventHandler('OnClick', id, []);
-  }, [id, disabled, url, eventHandler]);
+  const handleClick = useCallback(
+    (e: React.MouseEvent) => {
+      if (disabled) {
+        e.preventDefault();
+        return;
+      }
+      // Only call eventHandler for non-URL buttons
+      if (!effectiveUrl) {
+        eventHandler('OnClick', id, []);
+      }
+    },
+    [id, disabled, effectiveUrl, eventHandler]
+  );
 
   const hasChildren = !!children;
+  const hasUrl = !!(effectiveUrl && !disabled);
+
+  const buttonContent = (
+    <>
+      {!hasChildren && (
+        <>
+          {iconPosition == 'Left' && loading && (
+            <Loader2 className="animate-spin" style={iconStyles} />
+          )}
+          {iconPosition == 'Left' && !loading && icon && icon != 'None' && (
+            <Icon style={iconStyles} name={icon} />
+          )}
+          {variant === 'Link' || variant === 'Inline' ? (
+            <span className="truncate">{title}</span>
+          ) : (
+            title
+          )}
+          {iconPosition == 'Right' && loading && (
+            <Loader2 className="animate-spin" style={iconStyles} />
+          )}
+          {iconPosition == 'Right' && !loading && icon && icon != 'None' && (
+            <Icon style={iconStyles} name={icon} />
+          )}
+        </>
+      )}
+      {children}
+    </>
+  );
 
   return (
     <ButtonWithTooltip
+      asChild={hasUrl}
       style={styles}
       size={buttonSize}
-      onClick={handleClick}
+      onClick={hasUrl ? undefined : handleClick}
       variant={
         (variant === 'Primary' ? 'default' : camelCase(variant)) as
           | 'default'
@@ -133,37 +172,19 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
           ? title
           : undefined)
       }
+      data-testid={dataTestId}
     >
-      {!hasChildren && (
-        <>
-          {iconPosition == 'Left' && (
-            <>
-              {loading && (
-                <Loader2 className="animate-spin" style={iconStyles} />
-              )}
-              {!loading && icon && icon != 'None' && (
-                <Icon style={iconStyles} name={icon} />
-              )}
-            </>
-          )}
-          {variant === 'Link' || variant === 'Inline' ? (
-            <span className="truncate">{title}</span>
-          ) : (
-            title
-          )}
-          {iconPosition == 'Right' && (
-            <>
-              {loading && (
-                <Loader2 className="animate-spin" style={iconStyles} />
-              )}
-              {!loading && icon && icon != 'None' && (
-                <Icon style={iconStyles} name={icon} />
-              )}
-            </>
-          )}
-        </>
+      {hasUrl ? (
+        <a
+          href={getUrl(effectiveUrl!)}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {buttonContent}
+        </a>
+      ) : (
+        buttonContent
       )}
-      {children}
     </ButtonWithTooltip>
   );
 };

@@ -3,7 +3,7 @@ using Ivy.Shared;
 
 namespace Ivy.Samples.Shared.Apps.Demos;
 
-[App(icon: Icons.Workflow)]
+[App(icon: Icons.Workflow, searchHints: ["scheduler", "tasks", "background", "parallel", "queue", "processing"])]
 public class JobsApp : ViewBase
 {
     public override object? Build()

@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Ivy.Samples.Shared.Apps.Demos;
 
-[App(icon: Icons.ChartArea)]
+[App(icon: Icons.ChartArea, searchHints: ["charts", "metrics", "visualization", "analytics", "reporting", "kpi"])]
 public class DashboardApp : ViewBase
 {
     public override object? Build()

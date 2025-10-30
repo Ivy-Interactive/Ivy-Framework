@@ -1,3 +1,13 @@
+---
+searchHints:
+  - files
+  - export
+  - save
+  - download
+  - blob
+  - generate
+---
+
 # Downloads
 
 <Ingress>

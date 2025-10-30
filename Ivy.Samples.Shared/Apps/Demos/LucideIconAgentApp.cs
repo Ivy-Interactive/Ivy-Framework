@@ -1,15 +1,20 @@
 ﻿using Ivy.Shared;
-using Microsoft.SemanticKernel;
-using Microsoft.SemanticKernel.ChatCompletion;
+using Microsoft.Extensions.AI;
 
 namespace Ivy.Samples.Shared.Apps.Demos;
 
-[App(icon: Icons.Sparkles)]
+[App(icon: Icons.Sparkles, searchHints: ["ai", "agent", "assistant", "chatbot", "suggestions", "semantic"])]
 public class LucideIconAgentApp() : SampleBase(Align.TopRight)
 {
     protected override object? BuildSample()
     {
         var client = UseService<IClientProvider>();
+        var chatClient = UseService<IChatClient?>();
+
+        if (chatClient == null)
+        {
+            return Callout.Error("IChatClient is not configured. Please specify OpenAi:ApiKey and OpenAi:Endpoint in your configuration.");
+        }
 
         var messages = UseState(ImmutableArray.Create<ChatMessage>(new ChatMessage(ChatSender.Assistant,
             "Hello! I'm the Lucide Icon Agent. I can help you find icons for your app. Please describe your application.")));
@@ -20,7 +25,7 @@ public class LucideIconAgentApp() : SampleBase(Align.TopRight)
             var currentMessages = messages.Value;
             messages.Set(messages.Value.Add(new ChatMessage(ChatSender.Assistant, new ChatStatus("Thinking..."))));
 
-            var agent = new LucideIconAgent();
+            var agent = new LucideIconAgent(chatClient);
             var suggestion = await agent.SuggestIconAsync(@event.Value);
             if (suggestion != null)
             {
@@ -51,46 +56,34 @@ public class LucideIconAgentApp() : SampleBase(Align.TopRight)
     }
 }
 
-public class LucideIconAgent
+public class LucideIconAgent(IChatClient chatClient)
 {
-    private readonly Kernel _kernel;
-
-    public LucideIconAgent()
-    {
-        var openAiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY")!;
-        _kernel = Kernel.CreateBuilder().AddOpenAIChatCompletion("gpt-4o-2024-11-20", openAiKey)
-            .Build();
-    }
-
     public async Task<string?> SuggestIconAsync(string appDescription)
     {
-        var chatCompletionService = _kernel.GetRequiredService<IChatCompletionService>();
-
-        var history = new ChatHistory();
-
         var allIcons = Enum.GetValues<Icons>().Where(e => e != Icons.None);
 
-        history.AddSystemMessage(
-            $"""
-            You are an expert on Lucide React. 
-            User will submit a description of an application that is being built and you will suggest 7 icons from the Lucide React 
-            library that are good idiomatic alternatives to recommend. 
-            Answer with ; separated list of icon names.
-            
-            Available icons in the Lucide React library:
-            ```
-            {string.Join("\n", allIcons.Select(e => e.ToString()).ToArray())}
-            ```
-            
-            Do not use code blocks or any other markdown formatting. No explanation is needed.
-            """
-        );
-        history.AddUserMessage(appDescription);
+        var messages = new List<Microsoft.Extensions.AI.ChatMessage>
+        {
+            new(ChatRole.System,
+                $"""
+                You are an expert on Lucide React.
+                User will submit a description of an application that is being built and you will suggest 7 icons from the Lucide React
+                library that are good idiomatic alternatives to recommend.
+                Answer with ; separated list of icon names.
 
-        var result = await chatCompletionService.GetChatMessageContentAsync(
-            history,
-            kernel: _kernel);
+                Available icons in the Lucide React library:
+                ```
+                {string.Join("\n", allIcons.Select(e => e.ToString()).ToArray())}
+                ```
 
-        return result.Content;
+                Do not use code blocks or any other markdown formatting. No explanation is needed.
+                """
+            ),
+            new(ChatRole.User, appDescription)
+        };
+
+        var result = await chatClient.GetResponseAsync(messages);
+
+        return result.Text;
     }
 }

@@ -2,7 +2,7 @@ using Ivy.Shared;
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Primitives;
 
-[App(icon: Icons.Code, path: ["Widgets", "Primitives"])]
+[App(icon: Icons.Code, path: ["Widgets", "Primitives"], searchHints: ["syntax", "highlighting", "programming", "code-block", "snippet", "pre"])]
 public class CodeApp : SampleBase
 {
     protected override object? BuildSample()
@@ -165,10 +165,9 @@ public class CodeApp : SampleBase
         {
             cards.Add(
                 Layout.Vertical()
-                    | Text.H3(language.ToString())
                     | new Code(code, language)
-                        .ShowCopyButton(true)
-                        .Height(Size.Units(60))
+                    .ShowCopyButton(true)
+                    .Height(Size.Units(60))
             );
         }
 

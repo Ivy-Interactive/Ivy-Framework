@@ -1,4 +1,14 @@
-﻿# Expandable
+﻿---
+searchHints:
+  - accordion
+  - collapse
+  - expand
+  - toggle
+  - disclosure
+  - collapsible
+---
+
+# Expandable
 
 <Ingress>
 Create collapsible content sections that users can expand and collapse to maintain clean, organized layouts.

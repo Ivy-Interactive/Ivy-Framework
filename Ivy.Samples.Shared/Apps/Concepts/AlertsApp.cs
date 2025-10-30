@@ -3,7 +3,7 @@ using Ivy.Views.Alerts;
 
 namespace Ivy.Samples.Shared.Apps.Concepts;
 
-[App(icon: Icons.Bell)]
+[App(icon: Icons.Bell, searchHints: ["notification", "dialog", "modal", "message", "popup", "confirm"])]
 public class AlertsApp : SampleBase
 {
     protected override object? BuildSample()

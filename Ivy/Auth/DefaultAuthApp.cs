@@ -77,11 +77,13 @@ public class PasswordEmailFlowView(IState<string?> errorMessage) : ViewBase
             try
             {
                 loading.Set(true);
-                var token = await auth.LoginAsync(user.Value, password.Value);
+
+                var token = await TimeoutHelper.WithTimeoutAsync(
+                    ct => auth.LoginAsync(user.Value, password.Value, ct));
 
                 if (token != null)
                 {
-                    client.SetJwt(token);
+                    client.SetAuthToken(token);
                 }
                 else
                 {
@@ -127,8 +129,9 @@ public class OAuthFlowView(AuthOption option, IState<string?> errorMessage) : Vi
         var auth = this.UseService<IAuthService>();
         var callback = this.UseWebhook(async (request) =>
         {
-            var token = await auth.HandleOAuthCallbackAsync(request);
-            client.SetJwt(token);
+            var token = await TimeoutHelper.WithTimeoutAsync(
+                ct => auth.HandleOAuthCallbackAsync(request, ct));
+            client.SetAuthToken(token);
             return new RedirectResult("/");
         });
 
@@ -136,7 +139,9 @@ public class OAuthFlowView(AuthOption option, IState<string?> errorMessage) : Vi
         {
             try
             {
-                client.OpenUrl(await auth.GetOAuthUriAsync(option, callback));
+                var uri = await TimeoutHelper.WithTimeoutAsync(
+                    ct => auth.GetOAuthUriAsync(option, callback, ct));
+                client.OpenUrl(uri);
             }
             catch (Exception e)
             {

@@ -1,4 +1,14 @@
-﻿# Ivy Authentication
+﻿---
+searchHints:
+  - authentication
+  - login
+  - security
+  - auth
+  - oauth
+  - identity
+---
+
+# Ivy Authentication
 
 <Ingress>
 Secure your Ivy application with integrated authentication providers including Auth0, Supabase, Authelia, and Microsoft Entra ID.
@@ -85,18 +95,20 @@ Instead of .NET user secrets, you can also use environment variables to store au
 **Windows (PowerShell):**
 
 ```powershell
-$env:AUTH0_DOMAIN="your-domain.auth0.com"
-$env:AUTH0_CLIENT_ID="your-client-id"
-$env:AUTH0_CLIENT_SECRET="your-client-secret"
-$env:AUTH0_AUDIENCE="https://your-domain.auth0.com/api/v2"
+$env:Auth0__Domain="your-domain.auth0.com"
+$env:Auth0__ClientId="your-client-id"
+$env:Auth0__ClientSecret="your-client-secret"
+$env:Auth0__Audience="https://your-domain.auth0.com/api/v2"
+$env:Auth0__Namespace="https://ivy.app/"
 ```
 
 **Mac/Linux (Bash):**
 ```bash
-export AUTH0_DOMAIN="your-domain.auth0.com"
-export AUTH0_CLIENT_ID="your-client-id"
-export AUTH0_CLIENT_SECRET="your-client-secret"
-export AUTH0_AUDIENCE="https://your-domain.auth0.com/api/v2"
+export Auth0__Domain="your-domain.auth0.com"
+export Auth0__ClientId="your-client-id"
+export Auth0__ClientSecret="your-client-secret"
+export Auth0__Audience="https://your-domain.auth0.com/api/v2"
+export Auth0__Namespace="https://ivy.app/"
 ```
 
 If configuration is present in both .NET user secrets and environment variables, Ivy will use the values in .NET user secrets.

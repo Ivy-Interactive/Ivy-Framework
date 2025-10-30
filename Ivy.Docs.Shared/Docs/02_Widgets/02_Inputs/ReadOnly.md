@@ -1,3 +1,13 @@
+---
+searchHints:
+  - disabled
+  - readonly
+  - display
+  - static
+  - non-editable
+  - locked
+---
+
 # ReadOnlyInput
 
 <Ingress>

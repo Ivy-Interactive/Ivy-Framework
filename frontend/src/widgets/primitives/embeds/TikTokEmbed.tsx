@@ -7,18 +7,13 @@ interface TikTokEmbedProps {
 }
 
 const TikTokEmbed: React.FC<TikTokEmbedProps> = ({ url }) => {
-  const [videoId, setVideoId] = useState<string | null>(null);
   const [scriptLoaded, setScriptLoaded] = useState(false);
   const [scriptError, setScriptError] = useState(false);
 
-  useEffect(() => {
-    const extractVideoId = (tiktokUrl: string): string | null => {
-      // TikTok video URL: https://www.tiktok.com/@username/video/1234567890
-      const match = tiktokUrl.match(/tiktok\.com\/@[^/]+\/video\/(\d+)/);
-      return match ? sanitizeId(match[1]) : null;
-    };
-
-    setVideoId(extractVideoId(url));
+  const videoId = React.useMemo(() => {
+    // TikTok video URL: https://www.tiktok.com/@username/video/1234567890
+    const match = url.match(/tiktok\.com\/@[^/]+\/video\/(\d+)/);
+    return match ? sanitizeId(match[1]) : null;
   }, [url]);
 
   useEffect(() => {

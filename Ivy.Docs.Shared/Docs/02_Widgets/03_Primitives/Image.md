@@ -1,3 +1,13 @@
+---
+searchHints:
+  - picture
+  - photo
+  - img
+  - graphics
+  - media
+  - visual
+---
+
 # Image
 
 <Ingress>

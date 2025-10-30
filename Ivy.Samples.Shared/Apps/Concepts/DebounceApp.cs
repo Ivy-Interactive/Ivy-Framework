@@ -2,7 +2,7 @@ using Ivy.Shared;
 
 namespace Ivy.Samples.Shared.Apps.Concepts;
 
-[App(icon: Icons.Hourglass)]
+[App(icon: Icons.Hourglass, searchHints: ["throttle", "delay", "performance", "optimization", "rate-limiting", "input"])]
 public class DebounceApp : SampleBase
 {
     protected override object? BuildSample()

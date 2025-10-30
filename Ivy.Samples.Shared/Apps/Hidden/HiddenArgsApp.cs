@@ -4,7 +4,7 @@ namespace Ivy.Samples.Shared.Apps.Hidden;
 
 public record HiddenArgsAppArgs(string Name, int Value);
 
-[App(icon: Icons.EyeOff, isVisible: false)]
+[App(icon: Icons.EyeOff, isVisible: false, searchHints: ["navigation", "arguments", "routing", "hidden", "parameters", "deeplink"])]
 public class HiddenArgsApp : SampleBase
 {
     protected override object? BuildSample()

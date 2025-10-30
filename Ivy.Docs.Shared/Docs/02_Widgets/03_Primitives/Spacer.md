@@ -1,3 +1,13 @@
+---
+searchHints:
+  - spacing
+  - gap
+  - margin
+  - padding
+  - layout
+  - whitespace
+---
+
 # Spacer
 
 <Ingress>

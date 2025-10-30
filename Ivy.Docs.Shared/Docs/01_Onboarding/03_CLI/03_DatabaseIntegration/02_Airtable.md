@@ -1,3 +1,13 @@
+---
+searchHints:
+  - airtable
+  - database
+  - spreadsheet
+  - api
+  - cloud
+  - nocode
+---
+
 # Airtable Database Provider
 
 <Ingress>

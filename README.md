@@ -4,9 +4,7 @@
 
 Ivy - The ultimate framework for building internal tools with LLM code generation by unifying front-end and back-end into a single C# codebase. With Ivy, you can build robust internal tools and dashboards using C# and AI assistance based on your existing database.
 
-**[Sign up for our waitlist](https://ivy.app/join-waitlist) to be among the first to get access.**
-
-**[Book a 1-on-1 session](https://calendly.com/mikael-ivy/30min) to get personalized onboarding for free.**
+[Sign up for our waitlist](https://ivy.app/join-waitlist) to be among the first to get access or [book a 1-on-1 session](https://calendly.com/mikael-ivy/30min) with one of our founding engineers.
 
 [Documentation](https://docs.ivy.app) | [Samples](https://samples.ivy.app) | [Current Sprint](https://github.com/orgs/Ivy-Interactive/projects/8) | [Roadmap](https://github.com/orgs/Ivy-Interactive/projects/7) | [Examples](https://github.com/Ivy-Interactive/Ivy-Examples)
 
@@ -45,7 +43,7 @@ The whole framework is built around strict enterprise security constraints. As t
 
 > ⚠️ **Note:** Ivy.Console is still in beta, and the agentic features require an account. [Sign up for our waitlist](https://ivy.app/join-waitlist) to be among the first to get access.
 
-Make sure you have the [.Net 9 SDK installed](https://dotnet.microsoft.com/en-us/download/dotnet/9.0).
+Make sure you have the [.NET 9 SDK installed](https://dotnet.microsoft.com/en-us/download/dotnet/9.0).
 
 1. **Install Ivy CLI**:
 

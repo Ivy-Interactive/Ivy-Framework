@@ -7,33 +7,28 @@ interface LinkedInEmbedProps {
 }
 
 const LinkedInEmbed: React.FC<LinkedInEmbedProps> = ({ url }) => {
-  const [postId, setPostId] = useState<string | null>(null);
   const [scriptError, setScriptError] = useState(false);
 
-  useEffect(() => {
-    const extractPostId = (linkedinUrl: string): string | null => {
-      // First try to find activity ID in the URL
-      let match = linkedinUrl.match(/activity-(\d+)/);
-      if (match) {
-        return match[1];
-      }
+  const postId = React.useMemo(() => {
+    // First try to find activity ID in the URL
+    let match = url.match(/activity-(\d+)/);
+    if (match) {
+      return match[1];
+    }
 
-      // Try to find URN format
-      match = linkedinUrl.match(/urn:li:activity:(\d+)/);
-      if (match) {
-        return match[1];
-      }
+    // Try to find URN format
+    match = url.match(/urn:li:activity:(\d+)/);
+    if (match) {
+      return match[1];
+    }
 
-      // Try to extract from posts URL
-      match = linkedinUrl.match(/linkedin\.com\/posts\/[^/]+-activity-(\d+)/);
-      if (match) {
-        return match[1];
-      }
+    // Try to extract from posts URL
+    match = url.match(/linkedin\.com\/posts\/[^/]+-activity-(\d+)/);
+    if (match) {
+      return match[1];
+    }
 
-      return null;
-    };
-
-    setPostId(extractPostId(url));
+    return null;
   }, [url]);
 
   useEffect(() => {

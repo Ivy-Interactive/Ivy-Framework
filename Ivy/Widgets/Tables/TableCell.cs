@@ -24,6 +24,9 @@ public record TableCell : WidgetBase<TableCell>
 
     /// <summary>Whether cell content should be displayed in multi-line format. Default is false (single-line).</summary>
     [Prop] public bool MultiLine { get; set; }
+
+    /// <summary>Gets or sets the size of the table cell.</summary>
+    [Prop] public Sizes Size { get; set; } = Sizes.Medium;
 }
 
 /// <summary>Extension methods for TableCell widget providing fluent API for configuring cell properties and styling.</summary>
@@ -64,4 +67,21 @@ public static class TableCellExtensions
     {
         return cell with { MultiLine = multiLine };
     }
+
+    /// <summary>Sets the size of the table cell.</summary>
+    /// <param name="cell">The table cell to configure.</param>
+    /// <param name="size">The size to apply to the table cell.</param>
+    public static TableCell Size(this TableCell cell, Sizes size) => cell with { Size = size };
+
+    /// <summary>Sets the table cell size to large for prominent display.</summary>
+    /// <param name="cell">The table cell to configure.</param>
+    public static TableCell Large(this TableCell cell) => cell.Size(Sizes.Large);
+
+    /// <summary>Sets the table cell size to small for compact display.</summary>
+    /// <param name="cell">The table cell to configure.</param>
+    public static TableCell Small(this TableCell cell) => cell.Size(Sizes.Small);
+
+    /// <summary>Sets the table cell size to medium for medium display.</summary>
+    /// <param name="cell">The table cell to configure.</param>
+    public static TableCell Medium(this TableCell cell) => cell.Size(Sizes.Medium);
 }

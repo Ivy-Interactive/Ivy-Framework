@@ -1,3 +1,13 @@
+---
+searchHints:
+  - visualization
+  - graph
+  - analytics
+  - data
+  - trends
+  - statistics
+---
+
 # AreaChart
 
 `AreaChart`s display quantitative data over time. Multiple series can be stacked

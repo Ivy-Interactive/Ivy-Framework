@@ -1,6 +1,13 @@
 ﻿---
 prepare: |
   var client = this.UseService<IClientProvider>();
+searchHints:
+  - tag
+  - label
+  - chip
+  - status
+  - indicator
+  - pill
 ---
 
 # Badge

@@ -34,6 +34,28 @@ export default tseslint.config(
           message: 'console log is not allowed. Use logger.info instead.',
         },
       ],
+      // Ban wildcard imports except for React and specific allowed libraries
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: [
+                '@/widgets*',
+                '@/components*',
+                '@/lib*',
+                '@/hooks*',
+                '@/services*',
+              ],
+              importNames: ['*'],
+              message:
+                'Wildcard imports from internal modules are not allowed. Use named imports instead.',
+            },
+          ],
+        },
+      ],
+      // TypeScript ESLint rule for import/export patterns
+      '@typescript-eslint/no-import-type-side-effects': 'error',
     },
   }
 );

@@ -1,6 +1,13 @@
 ---
 prepare: |
   var client = this.UseService<IClientProvider>();
+searchHints:
+  - input
+  - validation
+  - submission
+  - fields
+  - form
+  - builder
 ---
 
 # Forms
@@ -283,47 +290,79 @@ public class CustomSubmitTitleFormExample : ViewBase
 }
 ```
 
+### Form Validation
 
-### Custom Validation
-
-Add custom validation logic using `.Validate()` method.
+Forms support automatic validation using standard .NET DataAnnotations, with the ability to add custom validation logic for specific business rules. Validation errors appear when you try to submit the form.
 
 ```csharp demo-tabs
 public class ValidationExample : ViewBase
 {
-    public record UserModel(
-        string Username,
-        string Email,
-        string Password,
-        int Age,
-        DateTime BirthDate
-    );
+    public class UserModel
+    {
+        [Required, MinLength(3)]
+        public string Username { get; set; } = "";
+        
+        [Required, EmailAddress]
+        public string Email { get; set; } = "";
+        
+        [Required, MinLength(8)]
+        public string Password { get; set; } = "";
+        
+        [Range(13, 120)]
+        public int Age { get; set; } = 18;
+        
+        public DateTime BirthDate { get; set; } = DateTime.Now;
+    }
 
     public override object? Build()
     {
-        var user = UseState(() => new UserModel("", "", "", 18, DateTime.Now));
+        var user = UseState(() => new UserModel());
+        var client = UseService<IClientProvider>();
         
-        return user.ToForm()
-            .Validate<string>(m => m.Username, username => 
-                (username.Length >= 3, "Username must be at least 3 characters"))
-            .Validate<string>(m => m.Email, email => 
-                (email.Contains("@") && email.Contains("."), "Please enter a valid email address"))
-            .Validate<string>(m => m.Password, password => 
-                (password.Length >= 8, "Password must be at least 8 characters"))
-            .Validate<int>(m => m.Age, age => 
-                (age >= 13, "You must be at least 13 years old"))
+        UseEffect(() =>
+        {
+            // This only fires when the form is submitted successfully (passes validation)
+            if (!string.IsNullOrEmpty(user.Value.Username))
+            {
+                client.Toast($"Account created for {user.Value.Username}!");
+            }
+        }, user);
+        
+        return user.ToForm("Create Account")
+            // Custom validation: birth date cannot be in the future
             .Validate<DateTime>(m => m.BirthDate, birthDate => 
                 (birthDate <= DateTime.Now, "Birth date cannot be in the future"))
-            .Required(m => m.Username, m => m.Email, m => m.Password);
+            // Custom validation: username cannot contain spaces
+            .Validate<string>(m => m.Username, username =>
+                (!username.Contains(' '), "Username cannot contain spaces"));
     }
 }
 ```
+
+This example demonstrates:
+- **DataAnnotations** for standard validation (Required, MinLength, EmailAddress, Range)
+- **Custom `.Validate()`** for business logic that operates on individual field values
+
+<Callout Type="tip">
+**Automatic Email Validation**: Fields ending with "Email" (like `UserEmail`, `ContactEmail`) automatically get email validation, even without the `[EmailAddress]` attribute.
+</Callout>
+
+**Supported DataAnnotations:**
+
+- `[Required]` - Field must have a value
+- `[MinLength(n)]` - Minimum string length
+- `[MaxLength(n)]` - Maximum string length
+- `[Range(min, max)]` - Value must be within range
+- `[EmailAddress]` - Valid email format
+- `[Phone]` - Valid phone number format
+- `[Url]` - Valid URL format
+- `[RegularExpression(pattern)]` - Match a regex pattern
 
 ## Form Submission
 
 ### Basic Form Submission
 
-Use the `.UseForm()` method to get form submission handling.
+Forms automatically handle submission when the user presses Enter or clicks the built-in submit button. When a form is submitted successfully, it updates the model state, which triggers any `UseEffect` watching that state.
 
 ```csharp demo-tabs
 public class FormSubmissionExample : ViewBase
@@ -333,33 +372,25 @@ public class FormSubmissionExample : ViewBase
     public override object? Build()
     {
         var contact = UseState(() => new ContactModel("", "", ""));
-        var formBuilder = contact.ToForm()
-            .Required(m => m.Name, m => m.Email, m => m.Message);
+        var client = UseService<IClientProvider>();
         
-        var (onSubmit, formView, validationView, loading) = formBuilder.UseForm(this.Context);
-        
-        async ValueTask HandleSubmit()
+        UseEffect(() =>
         {
-            if (await onSubmit())
+            if (!string.IsNullOrEmpty(contact.Value.Name))
             {
-                // Form data is automatically copied to contact.Value
-                // You can access the client service here if needed
+                client.Toast($"Message from {contact.Value.Name} sent successfully!");
             }
-        }
+        }, contact);
         
-        return Layout.Vertical()
-            | formView
-            | (Layout.Horizontal()
-                | new Button("Send Message").HandleClick(_ => HandleSubmit())
-                    .Loading(loading).Disabled(loading)
-                | validationView);
+        return contact.ToForm()
+            .Required(m => m.Name, m => m.Email, m => m.Message);
     }
 }
 ```
 
-### Form States and Loading
+### Form Submission with State Updates
 
-Handle different form states including loading and validation.
+React to form submission by watching the model state with `UseEffect`. The form automatically updates the state when submitted successfully.
 
 ```csharp demo-tabs
 public class FormStatesExample : ViewBase
@@ -374,26 +405,20 @@ public class FormStatesExample : ViewBase
     public override object? Build()
     {
         var order = UseState(() => new OrderModel("", "", 1, 0.0m));
-        var formBuilder = order.ToForm()
-            .Required(m => m.CustomerName, m => m.ProductName, m => m.Quantity, m => m.UnitPrice);
+        var client = UseService<IClientProvider>();
         
-        var (onSubmit, formView, validationView, loading) = formBuilder.UseForm(this.Context);
-        
-        async ValueTask HandleSubmit()
+        UseEffect(() =>
         {
-            if (await onSubmit())
+            if (!string.IsNullOrEmpty(order.Value.CustomerName))
             {
                 var total = order.Value.Quantity * order.Value.UnitPrice;
-                // Handle success - you can access the client service here if needed
+                client.Toast($"Order created! Total: ${total:F2}");
             }
-        }
+        }, order);
         
         return Layout.Vertical()
-            | formView
-            | (Layout.Horizontal()
-                | new Button("Create Order").HandleClick(_ => HandleSubmit())
-                    .Loading(loading).Disabled(loading)
-                | validationView)
+            | order.ToForm()
+                .Required(m => m.CustomerName, m => m.ProductName, m => m.Quantity, m => m.UnitPrice)
             | Text.Block($"Total: ${order.Value.Quantity * order.Value.UnitPrice:F2}");
     }
 }

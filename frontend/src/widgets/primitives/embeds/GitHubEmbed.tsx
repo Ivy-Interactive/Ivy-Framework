@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { sanitizeUrl, sanitizeId } from './shared';
 import EmbedCard from './EmbedCard';
 import EmbedErrorFallback from './EmbedErrorFallback';
@@ -8,19 +8,34 @@ interface GitHubEmbedProps {
 }
 
 const GitHubEmbed: React.FC<GitHubEmbedProps> = ({ url }) => {
-  const [repoInfo, setRepoInfo] = useState<{
-    owner?: string;
-    repo?: string;
-    type?: string;
-    number?: string;
-  } | null>(null);
-
-  useEffect(() => {
+  const repoInfo = React.useMemo(() => {
     const parseGitHubUrl = (githubUrl: string) => {
-      // Issue: https://github.com/owner/repo/issues/123
+      // Codespace: https://github.com/codespaces/new?repo=owner%2Frepo&ref=branch
       let match = githubUrl.match(
-        /github\.com\/([^/]+)\/([^/]+)\/issues\/(\d+)/
+        /github\.com\/codespaces\/new\?.*repo=([^&]+)(?:&ref=([^&]+))?/
       );
+      if (match) {
+        try {
+          const repoParam = match[1];
+          const refParam = match[2];
+          const decodedRepo = decodeURIComponent(repoParam);
+          const [owner, repo] = decodedRepo.split('/');
+
+          if (owner && repo) {
+            return {
+              owner: sanitizeId(owner),
+              repo: sanitizeId(repo),
+              type: 'codespace',
+              ref: refParam ? sanitizeId(refParam) : 'main',
+            };
+          }
+        } catch {
+          return null;
+        }
+      }
+
+      // Issue: https://github.com/owner/repo/issues/123
+      match = githubUrl.match(/github\.com\/([^/]+)\/([^/]+)\/issues\/(\d+)/);
       if (match) {
         return {
           owner: sanitizeId(match[1]),
@@ -64,7 +79,7 @@ const GitHubEmbed: React.FC<GitHubEmbedProps> = ({ url }) => {
       return null;
     };
 
-    setRepoInfo(parseGitHubUrl(url));
+    return parseGitHubUrl(url);
   }, [url]);
 
   const sanitizedUrl = sanitizeUrl(url);
@@ -73,6 +88,9 @@ const GitHubEmbed: React.FC<GitHubEmbedProps> = ({ url }) => {
   }
 
   const getTitle = () => {
+    if (repoInfo.type === 'codespace') {
+      return `${repoInfo.owner}/${repoInfo.repo}`;
+    }
     if (repoInfo.type === 'gist') {
       return `${repoInfo.owner}/gist`;
     }
@@ -86,6 +104,9 @@ const GitHubEmbed: React.FC<GitHubEmbedProps> = ({ url }) => {
   };
 
   const getDescription = () => {
+    if (repoInfo.type === 'codespace') {
+      return `Open in GitHub Codespaces${repoInfo.ref ? ` (${repoInfo.ref})` : ''}`;
+    }
     if (repoInfo.type === 'gist') {
       return 'View gist on GitHub';
     }
@@ -99,6 +120,9 @@ const GitHubEmbed: React.FC<GitHubEmbedProps> = ({ url }) => {
   };
 
   const getLinkText = () => {
+    if (repoInfo.type === 'codespace') {
+      return 'Open in Codespaces';
+    }
     if (repoInfo.type === 'issue') {
       return 'View Issue';
     }

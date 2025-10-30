@@ -67,6 +67,12 @@ public record TabsLayout : WidgetBase<TabsLayout>
     /// <summary> Gets or sets the event handler for tab reordering events. </summary>
     [Event] public Func<Event<TabsLayout, int[]>, ValueTask>? OnReorder { get; set; }
 
+    /// <summary> Gets or sets the text for the optional add button to display next to the tabs. </summary>
+    [Prop] public string? AddButtonText { get; set; }
+
+    /// <summary> Gets or sets the event handler for the add button click events. </summary>
+    [Event] public Func<Event<TabsLayout, int>, ValueTask>? OnAddButtonClick { get; set; }
+
     /// <summary> Compatibility constructor for Action-based event handlers. </summary>
     /// <param name="onSelect">Optional Action-based event handler for tab selection events.</param>
     /// <param name="onClose">Optional Action-based event handler for tab close events.</param>
@@ -144,6 +150,29 @@ public static class TabsLayoutExtensions
     public static TabsLayout Padding(this TabsLayout tabsLayout, int left, int top, int right, int bottom)
     {
         return tabsLayout with { Padding = new Thickness(left, top, right, bottom) };
+    }
+
+    /// <summary> Sets the add button text and click handler to display next to the tabs. </summary>
+    /// <param name="tabsLayout">The TabsLayout to configure.</param>
+    /// <param name="addButtonText">The text to display on the add button, or null to remove the button.</param>
+    /// <param name="onAddButtonClick">The event handler for the add button click events.</param>
+    public static TabsLayout AddButton(this TabsLayout tabsLayout, string? addButtonText, Func<Event<TabsLayout, int>, ValueTask>? onAddButtonClick = null)
+    {
+        return tabsLayout with { AddButtonText = addButtonText, OnAddButtonClick = onAddButtonClick };
+    }
+
+    /// <summary> Sets the add button text and click handler to display next to the tabs. </summary>
+    /// <param name="tabsLayout">The TabsLayout to configure.</param>
+    /// <param name="addButtonText">The text to display on the add button, or null to remove the button.</param>
+    /// <param name="onAddButtonClick">The Action-based event handler for the add button click events.</param>
+    public static TabsLayout AddButton(this TabsLayout tabsLayout, string? addButtonText, Action<Event<TabsLayout, int>>? onAddButtonClick)
+    {
+        return tabsLayout with
+        {
+            AddButtonText = addButtonText,
+            OnAddButtonClick = onAddButtonClick != null ? e => { onAddButtonClick(e); return ValueTask.CompletedTask; }
+            : null
+        };
     }
 }
 

@@ -4,6 +4,7 @@ using Ivy.Core;
 using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
 using Ivy.Hooks;
+using Ivy.Shared;
 using Ivy.Widgets.Inputs;
 
 namespace Ivy.Views.Forms;
@@ -51,6 +52,16 @@ public class FormBuilderField<TModel>
             Validators.Add(e => (Utils.IsValidRequired(e), "Required field"));
         }
 
+        // Add validators from DataAnnotations attributes
+        if (propertyInfo != null)
+        {
+            Validators.AddRange(FormHelpers.GetValidators(propertyInfo));
+        }
+        else if (fieldInfo != null)
+        {
+            Validators.AddRange(FormHelpers.GetValidators(fieldInfo));
+        }
+
         Visible = _ => true;
     }
 
@@ -64,10 +75,8 @@ public class FormBuilderField<TModel>
     /// <summary>Name of field, typically matching property or field name in model.</summary>
     public string Name { get; set; }
 
-    /// <summary>Reflection information for field if it represents class field.</summary>
     private FieldInfo? FieldInfo { get; set; }
 
-    /// <summary>Reflection information for property if it represents class property.</summary>
     private PropertyInfo? PropertyInfo { get; set; }
 
     /// <summary>Type of field or property that this form field represents.</summary>
@@ -111,17 +120,19 @@ public class FormBuilderField<TModel>
 /// <typeparam name="TModel">Type of model object that form will edit.</typeparam>
 public class FormBuilder<TModel> : ViewBase
 {
-    /// <summary>The internal dictionary that stores field configurations indexed by field name.</summary>
     private readonly Dictionary<string, FormBuilderField<TModel>> _fields;
 
-    /// <summary>The reactive state that holds the model being edited by the form.</summary>
     private readonly IState<TModel> _model;
 
     /// <summary>The text displayed on the form's submit button.</summary>
     public readonly string SubmitTitle;
+    private readonly List<string> _groups = [];
 
-    /// <summary>The list of group names that have been defined for organizing fields.</summary>
-    private readonly List<string> _groups = new();
+    /// <summary>The validation strategy for form fields. Default is OnBlur.</summary>
+    public FormValidationStrategy ValidationStrategy { get; set; } = FormValidationStrategy.OnBlur;
+
+    /// <summary>The size of the form affecting spacing between fields. Default is Medium.</summary>
+    public Sizes Size { get; set; } = Sizes.Medium;
 
     /// <summary>Initializes form builder for specified model state with automatic field scaffolding.</summary>
     /// <param name="model">Reactive state containing model object to be edited by form.</param>
@@ -130,11 +141,10 @@ public class FormBuilder<TModel> : ViewBase
     {
         _model = model;
         SubmitTitle = submitTitle;
-        _fields = new Dictionary<string, FormBuilderField<TModel>>();
+        _fields = [];
         _Scaffold();
     }
 
-    /// <summary>Automatically discovers and configures form fields by inspecting model type using reflection.</summary>
     private void _Scaffold()
     {
         var type = _model.GetStateType();
@@ -171,34 +181,41 @@ public class FormBuilder<TModel> : ViewBase
                 new FormBuilderField<TModel>(field.Name, label, order++, ScaffoldEditor(field.Name, field.Type),
                     field.FieldInfo, field.PropertyInfo, field.Required);
         }
+
+        // Add automatic validators after fields are created
+        foreach (var field in _fields.Values)
+        {
+            // Automatic email validation for fields ending with "Email"
+            var nonNullableType = Nullable.GetUnderlyingType(field.Type) ?? field.Type;
+            if (field.Name.EndsWith("Email") && nonNullableType == typeof(string))
+            {
+                field.Validators.Add(Validators.CreateEmailValidator(field.Name));
+            }
+        }
     }
 
-    /// <summary>Creates appropriate input factory based on field name and type using intelligent heuristics.</summary>
-    /// <param name="name">Name of field, used for pattern matching (e.g., "Email", "Password", "Id").</param>
-    /// <param name="type">Type of field, used for type-based input selection.</param>
-    /// <returns>Input factory function creating appropriate input control, or null if no suitable input found.</returns>
     private Func<IAnyState, IAnyInput>? ScaffoldEditor(string name, Type type)
     {
         Type nonNullableType = Nullable.GetUnderlyingType(type) ?? type;
 
         if (type == typeof(FileInput))
         {
-            return (state) => state.ToFileInput();
+            return (state) => state.ToFileInput().Size(Size);
         }
 
         if (name.EndsWith("Id") && (type == typeof(Guid) || type == typeof(int) || type == typeof(string)))
         {
-            return (state) => state.ToReadOnlyInput();
+            return (state) => state.ToReadOnlyInput().Size(Size);
         }
 
         if (name.EndsWith("Email") && nonNullableType == typeof(string))
         {
-            return (state) => state.ToEmailInput();
+            return (state) => state.ToEmailInput().Size(Size);
         }
 
         if ((name.EndsWith("Color") || name.EndsWith("Colour")) && nonNullableType == typeof(string))
         {
-            return (state) => state.ToColorInput();
+            return (state) => state.ToColorInput().Size(Size);
         }
 
         if (nonNullableType == typeof(bool))
@@ -217,7 +234,7 @@ public class FormBuilder<TModel> : ViewBase
                     // Use scaffold defaults
                     input.ScaffoldDefaults(name, type);
                 }
-                return input;
+                return input.Size(Size);
             };
         }
 
@@ -225,30 +242,30 @@ public class FormBuilder<TModel> : ViewBase
         {
             if (name.EndsWith("Password"))
             {
-                return (state) => state.ToPasswordInput();
+                return (state) => state.ToPasswordInput().Size(Size);
             }
 
-            return (state) => state.ToTextInput();
+            return (state) => state.ToTextInput().Size(Size);
         }
 
         if (nonNullableType.IsEnum)
         {
-            return (state) => state.ToSelectInput();
+            return (state) => state.ToSelectInput().Size(Size);
         }
 
         if (type.IsCollectionType() && type.GetCollectionTypeParameter() is { IsEnum: true })
         {
-            return (state) => state.ToSelectInput().List();
+            return (state) => state.ToSelectInput().List().Size(Size);
         }
 
         if (type.IsNumeric())
         {
-            return (state) => state.ToNumberInput().ScaffoldDefaults(name, type);
+            return (state) => state.ToNumberInput().ScaffoldDefaults(name, type).Size(Size);
         }
 
         if (type.IsDate())
         {
-            return (state) => state.ToDateTimeInput();
+            return (state) => state.ToDateTimeInput().Size(Size);
         }
 
         return null;
@@ -285,7 +302,7 @@ public class FormBuilder<TModel> : ViewBase
                 {
                     numberInput.ScaffoldDefaults(hint.Name, hint.Type);
                 }
-                return input;
+                return input.Size(Size);
             };
         }
 
@@ -301,7 +318,7 @@ public class FormBuilder<TModel> : ViewBase
     {
         foreach (var hint in _fields.Values.Where(e => e.Type is TU))
         {
-            hint.InputFactory = input;
+            hint.InputFactory = (state) => input(state).Size(Size);
         }
 
         return this;
@@ -520,6 +537,36 @@ public class FormBuilder<TModel> : ViewBase
         return this;
     }
 
+    /// <summary>Sets the size of the form affecting spacing between fields.</summary>
+    /// <param name="size">The size of the form (Small, Medium, Large).</param>
+    /// <returns>Form builder instance for method chaining.</returns>
+    internal FormBuilder<TModel> SetSize(Sizes size)
+    {
+        Size = size;
+        return this;
+    }
+
+    /// <summary>Sets form size to small for compact display.</summary>
+    /// <returns>Form builder instance with small size applied.</returns>
+    public FormBuilder<TModel> Small()
+    {
+        return SetSize(Sizes.Small);
+    }
+
+    /// <summary>Sets form size to medium for standard display.</summary>
+    /// <returns>Form builder instance with medium size applied.</returns>
+    public FormBuilder<TModel> Medium()
+    {
+        return SetSize(Sizes.Medium);
+    }
+
+    /// <summary>Sets form size to large for prominent display.</summary>
+    /// <returns>Form builder instance with large size applied.</returns>
+    public FormBuilder<TModel> Large()
+    {
+        return SetSize(Sizes.Large);
+    }
+
     //todo: this looks like a hack that should be fixed properly
     private static bool HasCustomLabel(string label, string name)
         => label != Utils.SplitPascalCase(name);
@@ -561,7 +608,9 @@ public class FormBuilder<TModel> : ViewBase
                 e.Description,
                 e.Required,
                 new FormFieldLayoutOptions(e.RowKey, e.Column, e.Order, e.Group),
-                e.Validators.ToArray()
+                e.Validators.ToArray(),
+                ValidationStrategy,
+                Size
             ))
             .Cast<IFormFieldBinding<TModel>>()
             .ToArray();
@@ -584,8 +633,15 @@ public class FormBuilder<TModel> : ViewBase
 
         var fieldViews = bindings.Select(e => e.fieldView).ToArray();
 
+        async ValueTask HandleSubmitEvent(Event<Form> _)
+        {
+            await OnSubmit();
+        }
+
         var formView = new FormView<TModel>(
-            fieldViews
+            fieldViews,
+            HandleSubmitEvent,
+            Size
         );
 
         var validationView = new WrapperView(Layout.Vertical(
@@ -613,8 +669,9 @@ public class FormBuilder<TModel> : ViewBase
         return Layout.Vertical()
                | formView
                | Layout.Horizontal(new Button(SubmitTitle).HandleClick(HandleSubmit)
-                   .Loading(submitting).Disabled(submitting), validationView);
+                   .Loading(submitting).Disabled(submitting).Size(Size), validationView);
     }
+
     private static string InvalidMessage(int invalidFields)
     {
         return invalidFields == 1 ? "There is 1 invalid field." : $"There are {invalidFields} invalid fields.";

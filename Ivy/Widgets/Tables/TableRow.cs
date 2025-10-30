@@ -1,4 +1,5 @@
 using Ivy.Core;
+using Ivy.Shared;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy;
@@ -14,6 +15,9 @@ public record TableRow : WidgetBase<TableRow>
 
     /// <summary>Whether row should be treated as header row with special styling. Default is false.</summary>
     [Prop] public bool IsHeader { get; set; }
+
+    /// <summary>Gets or sets the size of the table row.</summary>
+    [Prop] public Sizes Size { get; set; } = Sizes.Medium;
 
     /// <summary>Allows adding single TableCell using pipe operator for convenient row construction.</summary>
     /// <param name="row">TableRow to add cell to.</param>
@@ -36,4 +40,21 @@ public static class TableRowExtensions
     {
         return row with { IsHeader = isHeader };
     }
+
+    /// <summary>Sets the size of the table row.</summary>
+    /// <param name="row">The table row to configure.</param>
+    /// <param name="size">The size to apply to the table row.</param>
+    public static TableRow Size(this TableRow row, Sizes size) => row with { Size = size };
+
+    /// <summary>Sets the table row size to large for prominent display.</summary>
+    /// <param name="row">The table row to configure.</param>
+    public static TableRow Large(this TableRow row) => row.Size(Sizes.Large);
+
+    /// <summary>Sets the table row size to small for compact display.</summary>
+    /// <param name="row">The table row to configure.</param>
+    public static TableRow Small(this TableRow row) => row.Size(Sizes.Small);
+
+    /// <summary>Sets the table row size to medium for medium display.</summary>
+    /// <param name="row">The table row to configure.</param>
+    public static TableRow Medium(this TableRow row) => row.Size(Sizes.Medium);
 }

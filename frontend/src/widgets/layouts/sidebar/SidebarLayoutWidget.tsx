@@ -164,7 +164,7 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
         {slots?.SidebarContent && (
           <div className="flex-1 overflow-hidden">
             <ScrollArea className="h-full w-full">
-              <div className="p-2">{slots.SidebarContent}</div>
+              <div className="p-2 space-y-2">{slots.SidebarContent}</div>
             </ScrollArea>
           </div>
         )}
@@ -400,6 +400,7 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
 }) => {
   const eventHandler = useEventHandler();
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const prevSearchActiveRef = React.useRef(searchActive);
   // Register only the sidebar menu container with useFocusable
   const { ref: focusRef } = useFocusable('sidebar-navigation', 1);
 
@@ -408,7 +409,11 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
   }, [searchActive, items]);
 
   useEffect(() => {
-    setSelectedIndex(0);
+    // Only reset when search becomes active (false -> true transition)
+    if (searchActive && !prevSearchActiveRef.current) {
+      queueMicrotask(() => setSelectedIndex(0));
+    }
+    prevSearchActiveRef.current = searchActive;
   }, [searchActive]);
 
   const handleMenuKeyDown = useCallback(
@@ -431,11 +436,7 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
     [searchActive, flatItems, selectedIndex, eventHandler, id]
   );
 
-  const renderMenuItemsWithHighlight = (
-    items: MenuItem[],
-    level: number,
-    flatIdxRef: { current: number }
-  ) => {
+  const renderMenuItemsWithHighlight = (items: MenuItem[], level: number) => {
     const onCtrlRightMouseClick = (e: React.MouseEvent, item: MenuItem) => {
       if (e.ctrlKey && e.button === 2 && !!item.tag) {
         e.preventDefault();
@@ -451,17 +452,14 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
               {item.label}
             </h4>
             <ul className="space-y-1">
-              {renderMenuItemsWithHighlight(
-                item.children,
-                level + 1,
-                flatIdxRef
-              )}
+              {renderMenuItemsWithHighlight(item.children, level + 1)}
             </ul>
           </div>
         );
       } else {
-        const flatIdx = flatIdxRef.current;
-        flatIdxRef.current++;
+        const flatIdx = flatItems.findIndex(
+          flatItem => flatItem.tag === item.tag
+        );
         const isActive = searchActive && flatIdx === selectedIndex;
         return (
           <li key={item.tag}>
@@ -489,7 +487,6 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
     });
   };
 
-  const flatIdxRef = { current: 0 };
   return (
     <div
       ref={el => {
@@ -508,7 +505,7 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
     >
       {searchActive ? (
         flatItems.length > 0 ? (
-          renderMenuItemsWithHighlight(items, 0, flatIdxRef)
+          renderMenuItemsWithHighlight(items, 0)
         ) : (
           <div className="flex items-center justify-center p-4 text-descriptive text-muted-foreground">
             No results found

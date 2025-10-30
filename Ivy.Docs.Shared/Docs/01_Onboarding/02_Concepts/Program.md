@@ -1,4 +1,14 @@
-﻿# Program
+﻿---
+searchHints:
+  - startup
+  - configuration
+  - bootstrap
+  - server
+  - main
+  - entry-point
+---
+
+# Program
 
 <Ingress>
 Configure and bootstrap your Ivy application with dependency injection, services, and middleware for production-ready deployment.
@@ -136,6 +146,10 @@ Additional ChromeSettings options:
 - **UseTabs(bool preventDuplicates)** - Enables tab navigation. When `preventDuplicates` is `true`, prevents duplicate tabs.
 
 - **UsePages()** - Switches to page navigation (replaces content instead of opening tabs).
+
+<Callout Type="tip">
+Use `server.UseDefaultApp(typeof(AppName))` instead of `UseChrome()` for single-purpose applications, embedded views, or minimal interfaces where sidebar navigation isn't needed.
+</Callout>
 
 For more information about SideBar, check its [documentation](../../02_Widgets/04_Layouts/SidebarLayout.md)
 

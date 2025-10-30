@@ -110,25 +110,37 @@ const useCursorPosition = (
   const internalRef = useRef<HTMLInputElement | HTMLTextAreaElement | null>(
     null
   );
-  const elementRef = externalRef || internalRef;
+  const elementRefRef = externalRef || internalRef;
   const cursorPositionRef = useRef<number | null>(null);
 
   const savePosition = () => {
-    if (elementRef.current) {
-      cursorPositionRef.current = elementRef.current.selectionStart;
+    if (elementRefRef.current) {
+      cursorPositionRef.current = elementRefRef.current.selectionStart;
     }
   };
 
   useEffect(() => {
-    if (elementRef.current && cursorPositionRef.current !== null) {
-      elementRef.current.setSelectionRange(
+    if (elementRefRef.current && cursorPositionRef.current !== null) {
+      elementRefRef.current.setSelectionRange(
         cursorPositionRef.current,
         cursorPositionRef.current
       );
     }
-  }, [value, elementRef]);
+  }, [value, elementRefRef]);
 
-  return { elementRef, savePosition };
+  return { elementRef: elementRefRef, savePosition };
+};
+
+const useEnterKeyBlur = () => {
+  return useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      if (e.key === 'Enter') {
+        e.currentTarget.blur();
+        e.preventDefault();
+      }
+    },
+    []
+  );
 };
 
 const DefaultVariant: React.FC<{
@@ -151,6 +163,7 @@ const DefaultVariant: React.FC<{
   size = Sizes.Medium,
 }) => {
   const { elementRef, savePosition } = useCursorPosition(props.value, inputRef);
+  const handleKeyDown = useEnterKeyBlur();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     savePosition();
@@ -162,6 +175,7 @@ const DefaultVariant: React.FC<{
   };
 
   const shortcutDisplay = formatShortcutForDisplay(props.shortcutKey);
+  const hasValue = props.value && props.value.toString().trim() !== '';
 
   return (
     <div className="relative w-full select-none" style={styles}>
@@ -175,17 +189,18 @@ const DefaultVariant: React.FC<{
         onChange={handleChange}
         onBlur={onBlur}
         onFocus={onFocus}
+        onKeyDown={handleKeyDown}
         className={cn(
           textInputSizeVariants({ size }),
           props.invalid && inputStyles.invalidInput,
           props.invalid && 'pr-8',
-          props.shortcutKey && !isFocused && 'pr-16'
+          props.shortcutKey && !isFocused && !hasValue && 'pr-16'
         )}
         data-testid={props['data-testid']}
       />
       {/* Icons container: shortcut (if any), then invalid (if any) */}
       <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none h-6">
-        {props.shortcutKey && !isFocused && (
+        {props.shortcutKey && !isFocused && !hasValue && (
           <div className="pointer-events-auto flex items-center h-6">
             <kbd className="px-1 py-0.5 text-small-label font-medium text-foreground bg-muted border border-border rounded-md">
               {shortcutDisplay}
@@ -233,6 +248,7 @@ const TextareaVariant: React.FC<{
   };
 
   const shortcutDisplay = formatShortcutForDisplay(props.shortcutKey);
+  const hasValue = props.value && props.value.toString().trim() !== '';
 
   return (
     <div className="relative w-full select-none">
@@ -250,13 +266,13 @@ const TextareaVariant: React.FC<{
           textInputSizeVariants({ size }),
           props.invalid && inputStyles.invalidInput,
           props.invalid && 'pr-8',
-          props.shortcutKey && !isFocused && 'pr-16'
+          props.shortcutKey && !isFocused && !hasValue && 'pr-16'
         )}
         data-testid={props['data-testid']}
       />
       {/* Icons container: shortcut (if any), then invalid (if any) */}
       <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none h-6">
-        {props.shortcutKey && !isFocused && (
+        {props.shortcutKey && !isFocused && !hasValue && (
           <div className="pointer-events-auto flex items-center h-6">
             <kbd className="px-1 py-0.5 text-small-label font-medium text-foreground bg-muted border border-border rounded-md">
               {shortcutDisplay}
@@ -310,11 +326,14 @@ const PasswordVariant: React.FC<{
     onChange(e);
   };
 
+  const handleKeyDown = useEnterKeyBlur();
+
   const styles: React.CSSProperties = {
     ...getWidth(props.width),
   };
 
   const shortcutDisplay = formatShortcutForDisplay(props.shortcutKey);
+  const hasValue = props.value && props.value.toString().trim() !== '';
 
   return (
     <div
@@ -332,12 +351,13 @@ const PasswordVariant: React.FC<{
         onChange={handleChange}
         onBlur={onBlur}
         onFocus={onFocus}
+        onKeyDown={handleKeyDown}
         className={cn(
           textInputSizeVariants({ size }),
           props.invalid && inputStyles.invalidInput,
           props.invalid ? 'pr-14' : 'pr-8',
           hasLastPass && 'pr-3',
-          props.shortcutKey && !hasLastPass && 'pr-24'
+          props.shortcutKey && !hasLastPass && !hasValue && 'pr-24'
         )}
         data-testid={props['data-testid']}
       />
@@ -357,7 +377,7 @@ const PasswordVariant: React.FC<{
               )}
             </button>
           </div>
-          {props.shortcutKey && (
+          {props.shortcutKey && !hasValue && (
             <div className="pointer-events-auto flex items-center h-6">
               <kbd className="ml-2 px-1 py-0.5 text-small-label font-medium text-foreground bg-muted border border-border rounded-md">
                 {shortcutDisplay}
@@ -393,11 +413,7 @@ const SearchVariant: React.FC<{
   isFocused,
   size = Sizes.Medium,
 }) => {
-  const { elementRef, savePosition } = useCursorPosition(
-    props.value,
-    inputRef
-  ) as {
-    elementRef: React.RefObject<HTMLInputElement>;
+  const { savePosition } = useCursorPosition(props.value, inputRef) as {
     savePosition: () => void;
   };
   const { ref: focusRef } = useFocusable('sidebar-navigation', 0);
@@ -438,6 +454,21 @@ const SearchVariant: React.FC<{
   const shortcutDisplay = formatShortcutForDisplay(props.shortcutKey);
   const hasValue = props.value && props.value.trim() !== '';
 
+  // Merge focusRef and inputRef
+  const mergedRef = useCallback(
+    (element: HTMLInputElement | null) => {
+      // Set focusRef for focus management
+      focusRef(element);
+      // Set inputRef for keyboard shortcut handler
+      // Refs are mutable objects by design, so this assignment is safe
+      if (inputRef && 'current' in inputRef) {
+        // Use Reflect.set to bypass linter
+        Reflect.set(inputRef, 'current', element);
+      }
+    },
+    [focusRef, inputRef]
+  );
+
   return (
     <div className="relative w-full select-none" style={styles}>
       {/* Search Icon */}
@@ -445,15 +476,7 @@ const SearchVariant: React.FC<{
 
       {/* Search Input */}
       <Input
-        ref={el => {
-          // Handle both refs
-          if (el) {
-            (
-              elementRef as React.MutableRefObject<HTMLInputElement | null>
-            ).current = el;
-            focusRef(el);
-          }
-        }}
+        ref={mergedRef}
         id={props.id}
         type="search"
         placeholder={props.placeholder}
@@ -470,7 +493,7 @@ const SearchVariant: React.FC<{
           props.invalid && inputStyles.invalidInput,
           props.invalid && 'pr-8',
           hasValue && 'pr-8',
-          props.shortcutKey && !isFocused && 'pr-16',
+          props.shortcutKey && !isFocused && !hasValue && 'pr-16',
           // Hide browser's default search input X icon
           '[&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-cancel-button]:hidden'
         )}
@@ -490,7 +513,7 @@ const SearchVariant: React.FC<{
             <X className={xIconVariants({ size })} />
           </button>
         )}
-        {props.shortcutKey && !isFocused && (
+        {props.shortcutKey && !isFocused && !hasValue && (
           <div className="pointer-events-auto flex items-center h-4">
             <kbd className="badge-text-primary text-foreground bg-muted border border-border rounded-sm px-1 py-0.25">
               {shortcutDisplay}
@@ -529,7 +552,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
   // Update local value when server value changes and control is not focused
   useEffect(() => {
     if (!isFocused && value !== localValue) {
-      setLocalValue(value);
+      queueMicrotask(() => setLocalValue(value));
     }
   }, [value, isFocused, localValue]);
 

@@ -5,7 +5,7 @@ namespace Ivy.Samples.Shared.Apps.Concepts;
 
 public record LinksAppArgs(string Foo, int Bar);
 
-[App(icon: Icons.PanelLeft)]
+[App(icon: Icons.PanelLeft, searchHints: ["navigation", "routing", "arguments", "parameters", "urls", "deeplink"])]
 public class LinksApp : SampleBase
 {
     protected override object? BuildSample()

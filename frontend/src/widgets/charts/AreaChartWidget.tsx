@@ -1,63 +1,48 @@
-import React from 'react';
-import {
-  CartesianGrid,
-  XAxis,
-  YAxis,
-  ReferenceArea,
-  ReferenceLine,
-  ReferenceDot,
-  CartesianGridProps,
-  ReferenceLineProps,
-  ReferenceAreaProps,
-  ReferenceDotProps,
-  LegendProps,
-  AreaChart,
-  Area,
-} from 'recharts';
-import {
-  ChartConfig,
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from '@/components/ui/chart';
-import {
-  ColorScheme,
-  ExtendedAreaProps,
-  ExtendedTooltipProps,
-  generateAreaProps,
-  getColorGenerator,
-} from './shared';
-import {
-  ExtendedXAxisProps,
-  ExtendedYAxisProps,
-  generateXAxisProps,
-  generateYAxisProps,
-  generateLegendProps,
-} from './shared';
+import React, { useEffect, useState } from 'react';
+import { ColorScheme } from './sharedUtils';
 import { getHeight, getWidth } from '@/lib/styles';
-import { ChartLegend, ChartLegendContent } from '@/components/ui/chart';
-import { StackOffsetType } from 'recharts/types/util/types';
-
-interface AreaChartData {
-  [key: string]: string | number;
-}
+import { useTheme } from '@/components/theme-provider';
+import ReactECharts from 'echarts-for-react';
+import {
+  generateDataProps,
+  getColors,
+  generateXAxis,
+  generateEChartLegend,
+  generateTooltip,
+  generateTextStyle,
+  generateEChartGrid,
+  generateYAxis,
+} from './sharedUtils';
+import {
+  ChartType,
+  XAxisProps,
+  YAxisProps,
+  LinesProps,
+  MarkLine,
+  MarkArea,
+  LegendProps,
+  CartesianGridProps,
+  ToolTipProps,
+} from './chartTypes';
+import { ChartData } from './chartTypes';
+import { getTransformValueFn } from './sharedUtils';
+import { ReferenceDot } from './chartTypes';
 
 interface AreaChartWidgetProps {
   id: string;
-  data: AreaChartData[];
+  data: ChartData[];
   width?: string;
   height?: string;
-  areas?: ExtendedAreaProps[];
+  areas?: LinesProps[];
   cartesianGrid?: CartesianGridProps;
-  xAxis?: ExtendedXAxisProps[];
-  yAxis?: ExtendedYAxisProps[];
-  tooltip?: ExtendedTooltipProps;
+  xAxis?: XAxisProps[];
+  yAxis?: YAxisProps[];
+  tooltip?: ToolTipProps;
   legend?: LegendProps;
-  referenceLines?: ReferenceLineProps[];
-  referenceAreas?: ReferenceAreaProps[];
-  referenceDots?: ReferenceDotProps[];
+  referenceLines?: MarkLine;
+  referenceAreas?: MarkArea;
+  referenceDots?: ReferenceDot;
   colorScheme: ColorScheme;
-  stackOffset: StackOffsetType;
 }
 
 const AreaChartWidget: React.FC<AreaChartWidgetProps> = ({
@@ -74,74 +59,147 @@ const AreaChartWidget: React.FC<AreaChartWidgetProps> = ({
   referenceAreas,
   referenceDots,
   colorScheme,
-  stackOffset,
 }) => {
+  const { theme } = useTheme();
+  const [themeColors, setThemeColors] = useState({
+    foreground: '#000000',
+    mutedForeground: '#666666',
+    fontSans: 'Geist, sans-serif',
+    background: '#ffffff',
+  });
+
+  useEffect(() => {
+    const getThemeColors = () => {
+      const root = document.documentElement;
+      const computedStyle = getComputedStyle(root);
+
+      // Use the theme value directly instead of checking DOM classes
+      const isDarkMode =
+        theme === 'dark' ||
+        (theme === 'system' &&
+          window.matchMedia('(prefers-color-scheme: dark)').matches);
+
+      return {
+        foreground:
+          computedStyle.getPropertyValue('--foreground').trim() ||
+          (isDarkMode ? '#f8f8f8' : '#000000'),
+        mutedForeground:
+          computedStyle.getPropertyValue('--muted-foreground').trim() ||
+          (isDarkMode ? '#a1a1aa' : '#666666'),
+        fontSans:
+          computedStyle.getPropertyValue('--font-sans').trim() ||
+          'Geist, sans-serif',
+        background:
+          computedStyle.getPropertyValue('--background').trim() ||
+          (isDarkMode ? '#000000' : '#ffffff'),
+      };
+    };
+
+    // Update colors on next frame to avoid synchronous setState in effect
+    const frame = requestAnimationFrame(() => {
+      setThemeColors(getThemeColors());
+    });
+
+    return () => {
+      cancelAnimationFrame(frame);
+    };
+  }, [theme]);
+
+  // When height is Full (100%), use flex to expand. Otherwise use explicit height.
+  const heightStyle = height ? getHeight(height) : {};
+  const isFull = height?.toLowerCase().startsWith('full');
+
   const styles: React.CSSProperties = {
     ...getWidth(width),
-    ...getHeight(height),
+    ...(isFull
+      ? { display: 'flex', flexDirection: 'column', height: '100%' }
+      : {}),
   };
-  const chartConfig = {} satisfies ChartConfig;
-  const [colorGenerator, svgDefs] = getColorGenerator(colorScheme);
+
+  const chartStyles: React.CSSProperties = {
+    ...(isFull
+      ? { flex: 1, minHeight: '200px' }
+      : { ...heightStyle, minHeight: '200px' }),
+    width: '100%',
+  };
+
+  const { categories, valueKeys } = generateDataProps(data);
+
+  const colors = getColors(colorScheme);
+  const { transform, largeSpread, minValue, maxValue } =
+    getTransformValueFn(data);
+  // precompute
+  const gradientColors = colors.map(color => ({
+    opacity: 0.4,
+    type: 'linear',
+    x: 0,
+    y: 0,
+    x2: 0,
+    y2: 1,
+    colorStops: [
+      { offset: 0, color },
+      { offset: 1, color: 'transparent' },
+    ],
+  }));
+  const series = valueKeys.map((key, i) => {
+    const areaConfig = areas?.find(a => a.dataKey.toLowerCase() === key);
+
+    return {
+      name: key,
+      type: ChartType.Line,
+      smooth: areaConfig?.curveType?.toLowerCase() === 'natural',
+      lineStyle: {
+        width: areaConfig?.strokeWidth ?? 2,
+        color: areaConfig?.stroke ?? colors[i],
+        type: areaConfig?.strokeDashArray ? 'dashed' : 'solid',
+      },
+      showSymbol: false,
+      areaStyle: gradientColors[i],
+      emphasis: { focus: 'series' },
+      data: data.map(d => d[key]),
+      markPoint: referenceDots ?? {},
+      markLine: referenceLines ?? {},
+      markArea: referenceAreas ?? {},
+    };
+  });
+
+  const option = {
+    grid: generateEChartGrid(cartesianGrid),
+    color: colors,
+    tooltip: generateTooltip(tooltip, 'cross', {
+      foreground: themeColors.foreground,
+      fontSans: themeColors.fontSans,
+      background: themeColors.background,
+    }),
+    legend: generateEChartLegend(legend, {
+      foreground: themeColors.foreground,
+      fontSans: themeColors.fontSans,
+    }),
+    textStyle: generateTextStyle(themeColors.foreground, themeColors.fontSans),
+    xAxis: generateXAxis(categories as string[], xAxis, false, {
+      mutedForeground: themeColors.mutedForeground,
+      fontSans: themeColors.fontSans,
+    }),
+    yAxis: generateYAxis(
+      largeSpread,
+      transform,
+      minValue,
+      maxValue,
+      yAxis,
+      false,
+      undefined,
+      {
+        mutedForeground: themeColors.mutedForeground,
+        fontSans: themeColors.fontSans,
+      }
+    ),
+    series: series,
+  };
 
   return (
-    <ChartContainer config={chartConfig} style={styles} className="w-full">
-      <AreaChart
-        margin={{ top: 10, right: 10, bottom: 10, left: 10 }}
-        accessibilityLayer
-        data={data}
-        stackOffset={stackOffset}
-      >
-        {svgDefs}
-
-        {cartesianGrid && <CartesianGrid {...cartesianGrid} />}
-
-        {xAxis?.map((props, index) => (
-          <XAxis key={`xaxis${index}`} {...generateXAxisProps(props)} />
-        ))}
-
-        {yAxis?.map((props, index) => (
-          <YAxis key={`yaxis${index}`} {...generateYAxisProps(props)} />
-        ))}
-
-        {legend && (
-          <ChartLegend
-            {...generateLegendProps(legend)}
-            verticalAlign="bottom"
-            align="center"
-            layout="horizontal"
-            content={<ChartLegendContent splitThreshold={6} />}
-          />
-        )}
-
-        {/* eslint-disable-next-line @typescript-eslint/no-unused-vars */}
-        {referenceAreas?.map(({ ref, ...props }, index) => (
-          <ReferenceArea key={`refArea${index}`} {...props} />
-        ))}
-        {/* eslint-disable-next-line @typescript-eslint/no-unused-vars */}
-        {referenceLines?.map(({ ref, ...props }, index) => (
-          <ReferenceLine key={`refLine${index}`} {...props} />
-        ))}
-        {/* eslint-disable-next-line @typescript-eslint/no-unused-vars */}
-        {referenceDots?.map(({ ref, ...props }, index) => (
-          <ReferenceDot key={`refDot${index}`} {...props} />
-        ))}
-
-        {areas?.map((props, index) => (
-          <Area
-            key={`line${index}`}
-            {...generateAreaProps(props, index, colorGenerator)}
-          />
-        ))}
-
-        {tooltip && (
-          <ChartTooltip
-            cursor={false}
-            isAnimationActive={tooltip?.animated}
-            content={<ChartTooltipContent />}
-          />
-        )}
-      </AreaChart>
-    </ChartContainer>
+    <div style={styles}>
+      <ReactECharts key={theme} option={option} style={chartStyles} />
+    </div>
   );
 };
 

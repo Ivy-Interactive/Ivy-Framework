@@ -2,7 +2,7 @@
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Effects;
 
-[App(icon: Icons.PartyPopper)]
+[App(icon: Icons.PartyPopper, searchHints: ["celebration", "particles", "animation", "effects", "visual", "party"])]
 public class ConfettiApp : ViewBase
 {
     public override object? Build()

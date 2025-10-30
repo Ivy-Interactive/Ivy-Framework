@@ -1,5 +1,5 @@
 import { Dialog, DialogContent } from '@/components/ui/dialog';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useEventHandler } from '@/components/event-handler';
 import { getWidth } from '@/lib/styles';
 import { cn } from '@/lib/utils';
@@ -16,11 +16,7 @@ export const DialogWidget: React.FC<DialogWidgetProps> = ({
   width,
 }) => {
   const eventHandler = useEventHandler();
-  const [isVisible, setIsVisible] = useState(false);
-
-  useEffect(() => {
-    setIsVisible(true);
-  }, []);
+  const isVisible = true;
 
   const styles = {
     ...getWidth(width),

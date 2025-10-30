@@ -14,7 +14,7 @@ public class Product
     public required string Url { get; set; }
 }
 
-[App(icon: Icons.Table, path: ["Widgets"])]
+[App(icon: Icons.Table, path: ["Widgets"], searchHints: ["grid", "data", "rows", "columns", "cells", "spreadsheet"])]
 public class TableApp : SampleBase
 {
     protected override object? BuildSample()
@@ -26,7 +26,7 @@ public class TableApp : SampleBase
             new {Sku = "1235", Foo = true, Name = "Jeans", Price = 20.0, Url = "http://example.com/jeans"},
             new {Sku = "1236", Foo = true, Name = "Sneakers", Price = 30.0, Url = "http://example.com/sneakers"},
             new {Sku = "1237", Foo = true, Name = "Hat", Price = 5.0, Url = "http://example.com/hat"},
-            new {Sku = "1238", Foo = true, Name = "Multiline Example Multiline Example Multiline Example Multiline Example Multiline Example Multiline Example Multiline Example Multiline Example Multiline Example Multiline Example Multiline Example", Price = 2.0, Url = "http://example.com/socks"}
+            new {Sku = "1238", Foo = true, Name = "Premium Luxury Extra-Soft Organic Cotton Socks with Reinforced Heel and Toe - Perfect for All-Day Comfort and Athletic Performance - Available in Multiple Colors", Price = 2.0, Url = "http://example.com/socks"}
         };
 
         // Table with long headers to test overflow and tooltips
@@ -58,8 +58,23 @@ public class TableApp : SampleBase
             )
         );
 
+
         return Layout.Vertical(
-            Text.H3("Products Table"),
+            Text.H3("Table Sizes"),
+            Text.Label("Small Size:"),
+            products
+                .ToTable().Small()
+                .Builder(e => e.Url, e => e.Link())
+                .Width(Size.Full())
+                .MultiLine(e => e.Name)
+                // Add explicit column widths to test overflow
+                .Width(e => e.Sku, Size.Fraction(0.15f))      // 15% for SKU
+                .Width(e => e.Foo, Size.Fraction(0.1f))       // 10% for Foo  
+                .Width(e => e.Name, Size.Fraction(0.3f))      // 30% for Name
+                .Width(e => e.Price, Size.Fraction(0.15f))    // 15% for Price
+                .Width(e => e.Url, Size.Fraction(0.3f)),      // 30% for URL
+
+            Text.Label("Medium Size:"),
             products
                 .ToTable()
                 .Builder(e => e.Url, e => e.Link())
@@ -71,6 +86,20 @@ public class TableApp : SampleBase
                 .Width(e => e.Name, Size.Fraction(0.3f))      // 30% for Name
                 .Width(e => e.Price, Size.Fraction(0.15f))    // 15% for Price
                 .Width(e => e.Url, Size.Fraction(0.3f)),      // 30% for URL
+
+            Text.Label("Large Size:"),
+            products
+                .ToTable().Large()
+                .Builder(e => e.Url, e => e.Link())
+                .Width(Size.Full())
+                .MultiLine(e => e.Name)
+                // Add explicit column widths to test overflow
+                .Width(e => e.Sku, Size.Fraction(0.15f))      // 15% for SKU
+                .Width(e => e.Foo, Size.Fraction(0.1f))       // 10% for Foo  
+                .Width(e => e.Name, Size.Fraction(0.3f))      // 30% for Name
+                .Width(e => e.Price, Size.Fraction(0.15f))    // 15% for Price
+                .Width(e => e.Url, Size.Fraction(0.3f)),      // 30% for URL
+
 
             Text.H3("Long Headers Table (Test Overflow & Tooltips)"),
             longHeaderTable.Width(Size.Full())

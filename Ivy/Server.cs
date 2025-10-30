@@ -1,4 +1,3 @@
-using Ivy.Helpers;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -9,6 +8,7 @@ using Ivy.Connections;
 using Ivy.Core;
 using Ivy.Themes;
 using Ivy.Views;
+using Ivy.Views.DataTables;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http; //do not remove - used in RELEASE
@@ -49,17 +49,17 @@ public class Server
     private bool _useHotReload;
     private bool _useHttpRedirection;
     private readonly List<Action<WebApplicationBuilder>> _builderMods = new();
-
     public string? DefaultAppId { get; private set; }
     public AppRepository AppRepository { get; } = new();
     public IServiceCollection Services { get; } = new ServiceCollection();
+    public IConfiguration Configuration { get; private set; } = ServerUtils.GetConfiguration();
     public Type? AuthProviderType { get; private set; } = null;
     public ServerArgs Args => _args;
     private ServerArgs _args;
 
     public Server(ServerArgs? args = null)
     {
-        _args = args ?? IvyServerUtils.GetArgs();
+        _args = args ?? ServerUtils.GetArgs();
         if (int.TryParse(Environment.GetEnvironmentVariable("PORT"), out int parsedPort))
         {
             _args = _args with { Port = parsedPort };
@@ -142,6 +142,12 @@ public class Server
     public Server UseHttpRedirection()
     {
         _useHttpRedirection = true;
+        return this;
+    }
+
+    public Server UseConfiguration(IConfiguration configuration)
+    {
+        Configuration = configuration;
         return this;
     }
 
@@ -330,11 +336,7 @@ public class Server
 
         var builder = WebApplication.CreateBuilder();
 
-        builder.Configuration.AddEnvironmentVariables();
-        if (Assembly.GetEntryAssembly() is { } entryAssembly)
-        {
-            builder.Configuration.AddUserSecrets(entryAssembly);
-        }
+        builder.Configuration.AddConfiguration(Configuration);
 
         foreach (var mod in _builderMods)
         {
@@ -352,6 +354,8 @@ public class Server
         builder.Services.AddControllers()
             .AddApplicationPart(Assembly.Load("Ivy"))
             .AddControllersAsServices();
+        builder.Services.AddGrpc();
+        builder.Services.AddSingleton<IQueryableRegistry, QueryableRegistry>();
         builder.Services.AddSingleton(_contentBuilder ?? new DefaultContentBuilder());
         builder.Services.AddSingleton(sessionStore);
         builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
@@ -428,10 +432,12 @@ public class Server
 
         app.UseRouting();
         app.UseCors();
+        app.UseGrpcWeb();
 
         app.MapControllers();
         app.MapHub<AppHub>("/messages");
         app.MapHealthChecks("/health");
+        app.MapGrpcService<DataTableService>().EnableGrpcWeb();
 
         if (_useHotReload)
         {
@@ -492,6 +498,12 @@ public static class WebApplicationExtensions
         var resourceName = $"{assembly.GetName().Name}.index.html";
         app.MapGet("/", async context =>
         {
+            var version = assembly.GetName().Version?.ToString();
+            if (!string.IsNullOrEmpty(version))
+            {
+                context.Response.Headers["ivy-version"] = version;
+            }
+
             await using var stream = assembly.GetManifestResourceStream(resourceName);
             if (stream != null)
             {
@@ -600,32 +612,5 @@ public static class WebApplicationExtensions
 #endif
             }
         };
-    }
-}
-
-public static class IvyServerUtils
-{
-    public static ServerArgs GetArgs()
-    {
-        var parser = new ArgsParser();
-        var args = Environment.GetCommandLineArgs().Skip(1).ToArray();
-        var parsedArgs = parser.Parse(args);
-        var serverArgs = new ServerArgs()
-        {
-            Port = parser.GetValue(parsedArgs, "port", ServerArgs.DefaultPort),
-            Verbose = parser.GetValue(parsedArgs, "verbose", false),
-            IKillForThisPort = parser.GetValue(parsedArgs, "i-kill-for-this-port", false),
-            Browse = parser.GetValue(parsedArgs, "browse", false),
-            Args = parser.GetValue<string?>(parsedArgs, "args", null),
-            DefaultAppId = parser.GetValue<string?>(parsedArgs, "app", null),
-            Silent = parser.GetValue(parsedArgs, "silent", false),
-            Describe = parser.GetValue(parsedArgs, "describe", false)
-        };
-#if DEBUG
-        serverArgs = serverArgs with { FindAvailablePort = parser.GetValue(parsedArgs, "find-available-port", true) };
-#else
-        serverArgs = serverArgs with { FindAvailablePort = parser.GetValue(parsedArgs, "find-available-port", false) };
-#endif
-        return serverArgs;
     }
 }

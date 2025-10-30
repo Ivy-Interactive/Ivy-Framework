@@ -164,44 +164,67 @@ public abstract record AbstractWidget : IWidget
         if (eventDelegate == null)
             return false;
 
-        if (IsFunc(eventDelegate, out Type? eventType, out Type? returnType))
+        if (IsFunc(eventDelegate, out Type? eventType, out Type? returnType) && returnType == typeof(ValueTask))
         {
-            if (returnType == typeof(ValueTask))
+            var eventInstance = eventType!.IsGenericType switch
             {
-                if (eventType!.IsGenericType && eventType.GetGenericTypeDefinition() == typeof(Event<>))
-                {
-                    var eventInstance = Activator.CreateInstance(eventType, eventName, this);
-                    var result = ((Delegate)eventDelegate).DynamicInvoke(eventInstance);
-                    if (result is ValueTask valueTask)
-                    {
-                        valueTask.AsTask().GetAwaiter().GetResult();
-                    }
-                    return true;
-                }
-                if (eventType!.IsGenericType && eventType.GetGenericTypeDefinition() == typeof(Event<,>))
-                {
-                    var genericArguments = eventType.GetGenericArguments();
-                    if (genericArguments.Length == 2)
-                    {
-                        if (args.Count() != 1) return false;
+                true when eventType.GetGenericTypeDefinition() == typeof(Event<>) =>
+                    Activator.CreateInstance(eventType, eventName, this),
+                true when eventType.GetGenericTypeDefinition() == typeof(Event<,>) =>
+                    CreateEventWithValue(eventType, eventName, this, args),
+                _ => null
+            };
 
-                        var valueType = genericArguments[1];
-                        var value = Utils.ConvertJsonNode(args[0], valueType);
+            if (eventInstance == null) return false;
 
-                        var eventInstance = Activator.CreateInstance(eventType, eventName, this, value);
-                        var result = ((Delegate)eventDelegate).DynamicInvoke(eventInstance);
-                        if (result is ValueTask valueTask)
-                        {
-                            valueTask.AsTask().GetAwaiter().GetResult();
-                        }
-                        return true;
-                    }
-                }
+            // Invoke the event handler
+            var result = ((Delegate)eventDelegate).DynamicInvoke(eventInstance);
+            if (result is ValueTask valueTask)
+            {
+                valueTask.AsTask().GetAwaiter().GetResult();
             }
+            return true;
         }
 
         return false;
     }
+
+    private static object? CreateEventWithValue(Type eventType, string eventName, object sender, JsonArray args)
+    {
+        var valueType = eventType.GetGenericArguments()[1];
+        var value = ConvertToValue(valueType, args);
+        return value != null ? Activator.CreateInstance(eventType, eventName, sender, value) : null;
+    }
+
+    private static object? ConvertToValue(Type valueType, JsonArray args)
+    {
+        // Handle tuples with multiple arguments
+        if (IsValueTuple(valueType) && args.Count() > 1)
+        {
+            var tupleTypes = valueType.GetGenericArguments();
+            if (args.Count() == tupleTypes.Length)
+            {
+                var tupleArgs = new object[tupleTypes.Length];
+                for (int i = 0; i < tupleTypes.Length; i++)
+                {
+                    tupleArgs[i] = Utils.ConvertJsonNode(args[i], tupleTypes[i])!;
+                }
+                return Activator.CreateInstance(valueType, tupleArgs);
+            }
+            return null;
+        }
+
+        // Handle single argument
+        if (args.Count == 1)
+        {
+            return Utils.ConvertJsonNode(args[0], valueType);
+        }
+
+        return null;
+    }
+
+    private static bool IsValueTuple(Type t) =>
+        t is { IsValueType: true, IsGenericType: true } && t.FullName?.StartsWith("System.ValueTuple") == true;
     private static bool IsFunc(object eventDelegate, out Type? eventType, out Type? returnType)
     {
         eventType = null;

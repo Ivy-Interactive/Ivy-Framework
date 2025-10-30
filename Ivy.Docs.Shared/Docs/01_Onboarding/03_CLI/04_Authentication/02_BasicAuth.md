@@ -1,3 +1,13 @@
+---
+searchHints:
+  - basic-auth
+  - authentication
+  - username
+  - password
+  - simple
+  - credentials
+---
+
 # Basic Authentication Provider
 
 <Ingress>
@@ -51,11 +61,11 @@ For more information, see [Authentication Overview](Overview.md).
 
 The following parameters are supported via connection string, environment variables, or .NET user secrets:
 
-- **Users**: Required. A semicolon-separated list of `username:password` pairs.
-- **HashSecret**: Optional. A custom secret pepper value for verifying hashed passwords. Must be a base64-encoded string that represents at least 256 bits (or 32 bytes) of information. If not provided, a cryptographically secure pseudorandom value will be generated automatically.
-- **JwtSecret**: Optional. A custom secret key for token generation. Must be a base64-encoded string that represents at least 256 bits (or 32 bytes) of information. If not provided, a cryptographically secure pseudorandom key will be generated automatically.
-- **JwtIssuer**: Optional. Used as the issuer of generated tokens. Default value: `ivy`.
-- **JwtAudience**: Optional. Used as the audience of generated tokens. Default value: `ivy-app`.
+- **BasicAuth:Users**: Required. A semicolon-separated list of `username:password` pairs. When provided to Ivy at runtime via an environment variable or .NET user secret, passwords in this parameter must have been hashed, salted and peppered using the argon2id algorithm. When provided to `ivy auth add` via interactive prompt or connection string, passwords are treated as plaintext. For this reason, it is recommended that you configure basic auth using `ivy auth add` first, then copy required secrets from `dotnet user-secrets list`.
+- **BasicAuth:HashSecret**: Required. A custom secret pepper value for verifying hashed passwords. Must be a base64-encoded string that represents at least 256 bits (or 32 bytes) of information. If not explicitly provided to `ivy auth add`, a cryptographically secure pseudorandom value will be generated automatically.
+- **BasicAuth:JwtSecret**: Required. A custom secret key for token generation. Must be a base64-encoded string that represents at least 256 bits (or 32 bytes) of information. If not explicitly provided to `ivy auth add`, a cryptographically secure pseudorandom key will be generated automatically.
+- **BasicAuth:JwtIssuer**: Optional. Used as the issuer of generated tokens. Default value: `ivy`.
+- **BasicAuth:JwtAudience**: Optional. Used as the audience of generated tokens. Default value: `ivy-app`.
 
 ## Authentication Flow
 
@@ -83,11 +93,11 @@ var authProvider = UseService<IAuthProvider>();
 
 // Login returns both access and refresh tokens
 var authToken = await authProvider.LoginAsync(email, password);
-// authToken.Jwt - Access token (15 min expiry)
+// authToken.AccessToken - Access token (15 min expiry)
 // authToken.RefreshToken - Refresh token (24 hour expiry, 365 day max age)
 
-// When access token expires, refresh automatically
-var newToken = await authProvider.RefreshJwtAsync(authToken);
+// When access token expires, refresh:
+var newToken = await authProvider.RefreshAccessTokenAsync(authToken, cancellationToken);
 ```
 
 ## Security Best Practices

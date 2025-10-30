@@ -1,3 +1,13 @@
+---
+searchHints:
+  - dependency-injection
+  - di
+  - useservice
+  - services
+  - ioc
+  - container
+---
+
 # Services
 
 <Ingress>

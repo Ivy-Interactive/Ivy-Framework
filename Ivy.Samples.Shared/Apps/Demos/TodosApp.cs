@@ -4,7 +4,7 @@ namespace Ivy.Samples.Shared.Apps.Demos;
 
 public record Todo(string Title, bool Done);
 
-[App(icon: Icons.Calendar, path: ["Demos"])]
+[App(icon: Icons.Calendar, path: ["Demos"], searchHints: ["tasks", "checklist", "list", "items", "completed", "manage"])]
 public class TodosApp : SampleBase
 {
     protected override object? BuildSample()

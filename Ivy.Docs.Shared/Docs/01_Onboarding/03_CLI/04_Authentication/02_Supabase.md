@@ -1,3 +1,13 @@
+---
+searchHints:
+  - supabase
+  - authentication
+  - email
+  - social-login
+  - backend
+  - auth
+---
+
 # Supabase Authentication Provider
 
 <Ingress>
@@ -29,11 +39,18 @@ Before using Supabase with Ivy, you'll need to create a Supabase project and obt
 Once your project is ready:
 
 1. **Go to your project dashboard**
-2. **Click on "Settings"** in the sidebar
-3. **Click on "API"**
-4. **Copy these values**:
-   - **Project URL**: Found under "Project URL" (e.g., `https://your-project-id.supabase.co`)
-   - **Anon Key**: Found under "Project API keys" → "anon public" (this is your API key)
+2. **Click on "Project Settings"** in the sidebar
+3. **Click on "Data API"** in the sidebar
+4. **Copy your Project URL** (e.g., `https://your-project-id.supabase.co`)
+5. **Click on "API Keys"** in the sidebar
+6. **Copy your API Key**:
+   - If using legacy API keys, use "anon" as your API key
+   - Otherwise, use the publishable key
+
+If your project is still using a legacy JWT secret:
+
+1. **Click on "JWT Keys"** in the sidebar
+2. **Copy your legacy JWT secret**
 
 ### Step 3: Configure Authentication (Optional)
 
@@ -66,7 +83,8 @@ To set up Supabase Authentication with Ivy, run the following command and choose
 You will be prompted to provide the following Supabase configuration:
 
 - **Project URL**: Your Supabase project URL (e.g., `https://your-project.supabase.co`)
-- **API Key**: Your Supabase project's anonymous (anon) key
+- **API Key**: Your Supabase project's anonymous (anon) or publishable key
+- **Legacy JWT Secret** (optional): Your Supabase project's legacy JWT secret, if it is still using one.
 
 Your credentials will be stored securely in .NET user secrets. Ivy then finishes configuring your application automatically:
 
@@ -81,8 +99,12 @@ Your credentials will be stored securely in .NET user secrets. Ivy then finishes
 To skip the interactive prompts, you can provide configuration via a connection string:
 
 ```terminal
->ivy auth add --provider Supabase --connection-string "Supabase:Url=https://your-project.supabase.co;Supabase:ApiKey=your-anon-key"
+>ivy auth add --provider Supabase --connection-string "Supabase:Url=https://your-project.supabase.co;Supabase:ApiKey=your-api-key; Supabase:LegacyJwtSecret=your-jwt-secret"
 ```
+
+<Callout Tip="Info">
+`LegacyJwtSecret` parameter is only required if your Supabase project is still using legacy JWT secrets. If you don't need legacy JWT support, you can omit this parameter from the connection string and leave the field empty during interactive setup.
+</Callout>
 
 For a list of connection string parameters, see [Configuration Parameters](#configuration-parameters) below.
 
@@ -99,7 +121,8 @@ For more information, see [Authentication Overview](Overview.md).
 The following parameters are supported via connection string, environment variables, or .NET user secrets:
 
 - **Supabase:Url**: Required. Your Supabase project URL.
-- **Supabase:ApiKey**: Required. Your Supabase project's anonymous key.
+- **Supabase:ApiKey**: Required. Your Supabase project's anonymous (anon) or publishable key.
+- **Supabase:LegacyJwtSecret**: Required if still using a legacy JWT secret, otherwise optional. Your Supabase project's legacy JWT secret.
 
 ## Authentication Flow
 
@@ -132,6 +155,7 @@ Key features of the Supabase provider:
 
 - **Always use HTTPS** in production environments
 - **Store keys securely** in user secrets or environment variables
+- **Migrate to Supabase's new API keys and JWT signing keys** away from the legacy versions
 - **Enable Row Level Security** on database tables containing user data
 - **Configure email rate limiting** to prevent abuse
 - **Validate tokens server-side** for sensitive operations
@@ -142,9 +166,9 @@ Key features of the Supabase provider:
 ### Common Issues
 
 **Invalid API Key**
-- Verify anon key is correct and copied from Settings > API in your Supabase dashboard
+- Verify API key is correct and copied from Settings > API in your Supabase dashboard
 - Check that the key hasn't been regenerated
-- Ensure you're using the anon key, not service role key for client authentication
+- Ensure you're using the API key, not service role key for client authentication
 
 **Email Not Delivered**
 - Check spam/junk folders for authentication emails

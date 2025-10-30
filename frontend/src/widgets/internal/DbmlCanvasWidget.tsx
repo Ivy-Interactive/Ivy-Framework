@@ -538,13 +538,12 @@ export const DbmlCanvasWidget: React.FC<DbmlCanvasWidgetProps> = ({
           })
           .join('\n');
       }
-
       setError(errorInfo);
     }
   }, [dbml, setNodes, setEdges, getConnectionLineColor]);
 
   useEffect(() => {
-    parseDbml();
+    queueMicrotask(parseDbml);
   }, [dbml, parseDbml]);
 
   const styles = {

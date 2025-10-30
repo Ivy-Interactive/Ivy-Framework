@@ -2,7 +2,7 @@ using Ivy.Shared;
 
 namespace Ivy.Samples.Shared.Apps.Widgets;
 
-[App(icon: Icons.SquareChevronRight, path: ["Widgets"])]
+[App(icon: Icons.SquareChevronRight, path: ["Widgets"], searchHints: ["click", "action", "submit", "cta", "interactive", "control"])]
 public class ButtonApp() : SampleBase
 {
     private static readonly ButtonVariant[] Variants = [
@@ -105,6 +105,17 @@ public class ButtonApp() : SampleBase
                    Icons.MessageSquareX.ToButton(eventHandler),
                    Icons.Heart.ToButton(eventHandler, ButtonVariant.Destructive),
                    Icons.Star.ToButton(eventHandler, ButtonVariant.Outline)
+               )
+
+               | Text.H2("Buttons with URLs")
+               | (Layout.Horizontal().Gap(8)
+                   | new Button("Visit Ivy GitHub", variant: ButtonVariant.Primary)
+                       .Url("https://github.com/Ivy-Interactive/Ivy-Framework")
+                   | new Button("External Link", variant: ButtonVariant.Secondary)
+                       .Url("https://github.com/Ivy-Interactive/Ivy-Framework")
+                       .Icon(Icons.ExternalLink, Align.Right)
+                   | new Button("Link Style", variant: ButtonVariant.Link)
+                       .Url("https://github.com/Ivy-Interactive/Ivy-Framework")
                )
 
                | Text.H2("Interactive Demo")

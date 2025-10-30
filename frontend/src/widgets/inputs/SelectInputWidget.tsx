@@ -484,7 +484,7 @@ const RadioVariant: React.FC<SelectInputWidgetProps> = ({
                   <Label
                     htmlFor={`${id}-${option.value}`}
                     className={cn(
-                      'cursor-pointer',
+                      'cursor-pointer leading-none',
                       selectTextVariants[size],
                       stringValue === option.value.toString() && invalid
                         ? inputStyles.invalidInput

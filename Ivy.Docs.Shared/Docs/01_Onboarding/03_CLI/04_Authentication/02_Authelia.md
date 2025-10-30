@@ -1,3 +1,13 @@
+---
+searchHints:
+  - authelia
+  - authentication
+  - self-hosted
+  - ldap
+  - forward-auth
+  - sso
+---
+
 # Authelia Authentication Provider
 
 <Ingress>

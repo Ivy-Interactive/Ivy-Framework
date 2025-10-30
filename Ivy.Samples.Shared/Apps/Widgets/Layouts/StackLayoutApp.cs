@@ -2,7 +2,7 @@
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Layouts;
 
-[App(icon: Icons.Grid3x3)]
+[App(icon: Icons.Grid3x3, searchHints: ["layout", "vertical", "horizontal", "stack", "arrangement", "flexbox"])]
 public class StackLayoutApp : ViewBase
 {
     public override object? Build()

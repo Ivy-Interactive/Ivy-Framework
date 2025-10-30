@@ -1,3 +1,13 @@
+---
+searchHints:
+  - auth0
+  - authentication
+  - oauth
+  - social-login
+  - identity
+  - sso
+---
+
 # Auth0 Authentication Provider
 
 <Ingress>

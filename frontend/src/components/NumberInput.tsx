@@ -274,11 +274,8 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
       [formatValue, value, onBlur]
     );
 
-    useEffect(() => {
-      if (!isFocused) {
-        setDisplayValue(formatValue(value));
-      }
-    }, [value, formatValue, isFocused]);
+    // Update display value when not focused and value changes
+    const displayValueToUse = isFocused ? displayValue : formatValue(value);
 
     return (
       <div className="relative">
@@ -293,7 +290,7 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
           }}
           type="text"
           inputMode="decimal"
-          value={displayValue}
+          value={displayValueToUse}
           onChange={handleChange}
           onFocus={handleFocus}
           onBlur={handleBlur}

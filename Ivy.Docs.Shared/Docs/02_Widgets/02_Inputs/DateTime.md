@@ -1,3 +1,13 @@
+---
+searchHints:
+  - calendar
+  - date
+  - time
+  - picker
+  - datetime
+  - timestamp
+---
+
 # DateTimeInput
 
 <Ingress>

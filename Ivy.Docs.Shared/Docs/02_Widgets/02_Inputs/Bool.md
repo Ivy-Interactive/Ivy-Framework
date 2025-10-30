@@ -1,3 +1,13 @@
+---
+searchHints:
+  - checkbox
+  - switch
+  - toggle
+  - boolean
+  - true-false
+  - option
+---
+
 # BoolInput
 
 <Ingress>

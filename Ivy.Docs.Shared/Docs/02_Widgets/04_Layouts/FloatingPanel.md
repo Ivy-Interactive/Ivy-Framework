@@ -1,3 +1,13 @@
+---
+searchHints:
+  - overlay
+  - modal
+  - popup
+  - floating
+  - dialog
+  - window
+---
+
 # FloatingPanel
 
 <Ingress>

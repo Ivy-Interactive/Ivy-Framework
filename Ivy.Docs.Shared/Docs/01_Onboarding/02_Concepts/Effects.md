@@ -1,4 +1,14 @@
-﻿# Effects
+﻿---
+searchHints:
+  - useeffect
+  - lifecycle
+  - hooks
+  - side-effects
+  - async
+  - cleanup
+---
+
+# Effects
 
 <Ingress>
 Perform side effects in your Ivy views with the UseEffect hook, similar to React's useEffect but optimized for server-side architecture.
