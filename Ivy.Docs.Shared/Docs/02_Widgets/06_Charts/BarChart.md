@@ -122,7 +122,7 @@ here is done for the `Blueberry` column.
 
 <Details>
 <Summary>
-The following shows a demonstration of these where TIOBE index is shown for some programming languages over the last five years.
+TIOBE Programming Language Rankings Example
 </Summary>
 <Body>
 BarChart handles negative and double values. Changing the value of the year, changes the chart below.
