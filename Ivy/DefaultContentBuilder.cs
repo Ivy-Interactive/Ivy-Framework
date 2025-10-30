@@ -86,7 +86,7 @@ public class DefaultContentBuilder : IContentBuilder
             return ObservableViewFactory.FromObservable(content);
         }
 
-        if (content is FuncBuilder funcBuilder)
+        if (content is FuncViewBuilder funcBuilder)
         {
             return new FuncView(funcBuilder);
         }

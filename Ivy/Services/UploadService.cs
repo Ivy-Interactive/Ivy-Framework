@@ -7,8 +7,8 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Ivy.Services;
 
-public record FileUpload(string FileName, string ContentType, long Length, DateTime? LastModified, Stream Stream)
-    : FileBase(FileName, ContentType, Length, LastModified);
+public record FileUpload(string FileName, string ContentType, long Length, Stream Stream)
+    : FileBase(FileName, ContentType, Length);
 
 [ApiController]
 [Route("upload")]
@@ -78,8 +78,7 @@ public class UploadService(string connectionId) : IUploadService, IDisposable
             FileName: actualFileName,
             ContentType: actualMimeType,
             Length: file.Length,
-            Stream: file.OpenReadStream(),
-            LastModified: DateTime.UtcNow
+            Stream: file.OpenReadStream()
         );
 
         await handler(fileUpload);

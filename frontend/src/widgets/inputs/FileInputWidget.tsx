@@ -26,7 +26,6 @@ interface FileInput {
   fileName: string;
   contentType: string;
   length: number;
-  lastModified?: Date;
   progress: number;
   state: FileInputState;
 }

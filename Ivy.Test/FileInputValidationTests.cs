@@ -312,7 +312,7 @@ public class FileInputValidationTests
 
     private static FileInput CreateTestFile(string name, string type = "text/plain")
     {
-        return new FileInput("example.txt", "text/plain", 12345, DateTime.Now);
+        return new FileInput(name, type, 12345);
     }
 
     [Fact]

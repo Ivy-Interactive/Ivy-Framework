@@ -90,7 +90,6 @@ public class ConvertJsonNodeTests
                                       "name": "myfile.txt",
                                       "size": 123,
                                       "type": "text/plain",
-                                      "lastModified": "2023-03-14T09:30:00+01:00",
                                       "content": "SGVsbG8="
                                   }
                                   """);
@@ -100,7 +99,6 @@ public class ConvertJsonNodeTests
         Assert.Equal("myfile.txt", result.FileName);
         Assert.Equal("text/plain", result.ContentType);
         Assert.Equal(123, result.Length);
-        Assert.Equal(DateTime.Parse("2023-03-14T09:30:00+01:00"), result.LastModified);
         //Assert.Equal("Hello", Encoding.UTF8.GetString(result.Content!));
     }
 

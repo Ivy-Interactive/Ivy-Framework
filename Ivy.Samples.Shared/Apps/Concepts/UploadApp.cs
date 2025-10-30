@@ -138,7 +138,11 @@ public class MultipleFilesUpload : ViewBase
         var layout = Layout.Vertical()
                      | Text.H1("Multiple Files Upload")
                      | selectedFiles.ToFileInput(uploadUrl).Accept("*/*").Placeholder("Choose files to upload").HandleClear(OnClear)
-                     | selectedFiles.Value?.ToTable().Width(Size.Full()).Remove(e => e.Id)
+                     | selectedFiles.Value?.ToTable()
+                         .Width(Size.Full())
+                         .Builder(e => e.Length, e => e.Func((long x) => Utils.FormatBytes(x)))
+                         .Builder(e => e.Progress, e => e.Func((float x) => x.ToString("P0")))
+                         .Remove(e => e.Id)
                      | (uploadCount.Value > 0 ? Text.Block($"Uploaded {uploadCount.Value} file(s)") : null);
 
 

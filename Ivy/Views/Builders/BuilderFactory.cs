@@ -29,4 +29,9 @@ public static class BuilderFactoryExtensions
     {
         return new CopyToClipboardBuilder<TModel>();
     }
+
+    public static IBuilder<TModel> Func<TModel, TIn>(this IBuilderFactory<TModel> factory, Func<TIn, object?> func)
+    {
+        return new FuncBuilder<TModel, TIn>(func);
+    }
 }

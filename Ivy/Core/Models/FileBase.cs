@@ -6,12 +6,11 @@ public abstract record FileBase
     {
     }
 
-    protected FileBase(string FileName, string ContentType, long Length, DateTime? LastModified = null)
+    protected FileBase(string FileName, string ContentType, long Length)
     {
         this.FileName = FileName;
         this.ContentType = ContentType;
         this.Length = Length;
-        this.LastModified = LastModified;
     }
 
     /// <summary>Gets the name of the uploaded file including its extension.</summary>
@@ -22,7 +21,4 @@ public abstract record FileBase
 
     /// <summary>Gets the size of the uploaded file in bytes.</summary>
     public long Length { get; set; }
-
-    /// <summary>Gets the date and time when the file was last modified, if available.</summary>
-    public DateTime? LastModified { get; set; }
 }

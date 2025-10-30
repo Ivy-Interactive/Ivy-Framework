@@ -78,7 +78,7 @@ public class Server
         Services.AddSingleton(_args);
     }
 
-    public Server(FuncBuilder viewFactory) : this()
+    public Server(FuncViewBuilder viewFactory) : this()
     {
         AddApp(new AppDescriptor
         {

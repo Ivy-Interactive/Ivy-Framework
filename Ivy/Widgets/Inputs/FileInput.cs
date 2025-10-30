@@ -32,8 +32,8 @@ public record FileInput : FileBase
     {
     }
 
-    public FileInput(string FileName, string ContentType, long Length, DateTime? LastModified = null)
-        : base(FileName, ContentType, Length, LastModified)
+    public FileInput(string FileName, string ContentType, long Length)
+        : base(FileName, ContentType, Length)
     {
     }
 

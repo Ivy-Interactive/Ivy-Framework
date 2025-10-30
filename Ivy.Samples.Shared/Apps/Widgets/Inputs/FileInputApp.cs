@@ -10,7 +10,7 @@ public class FileInputApp : SampleBase
     protected override object? BuildSample()
     {
         // Mock file for 'With Value' example
-        var mockFile = new FileInput("example.txt", "text/plain", 12345, DateTime.Now);
+        var mockFile = new FileInput("example.txt", "text/plain", 12345);
 
         var singleFile = UseState<FileInput?>(() => null);
         var singleFileWithValue = UseState<FileInput?>(() => mockFile);
