@@ -68,6 +68,11 @@ public record NavigateArgs(string? AppId, object? AppArgs = null, string? TabId 
 
     public string GetUrl(string? parentId = null)
     {
+        if (this.AppId?.Contains('/') == true)
+        {
+            throw new InvalidOperationException("Cannot get URL: AppId contains invalid characters.");
+        }
+
         // Use path-based URL for better user experience
         var url = $"/{this.AppId}";
 
