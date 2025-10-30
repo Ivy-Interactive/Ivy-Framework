@@ -77,9 +77,10 @@ public class NullableBoolDemo: ViewBase
         else 
             status.Set(going.Value == true ? "Yes!" : "No, not yet!");
         return Layout.Vertical()
-                | Text.Small("Have you booked return tickets?")
                 | Text.Html($"<i>{status}</i>")
-                | going.ToSwitchInput();        
+                | going.ToSwitchInput()
+                       .WithField()
+                       .Label("Have you booked return tickets?");        
     }    
 }
 ```
@@ -262,18 +263,18 @@ public class SimpleFlightBooking : ViewBase
                 // Round Trip Switch
                 | isRoundTrip.ToSwitchInput().Label("Round Trip")
                 // Departure Date (always visible)
-                | (Layout.Vertical()
-                   | Text.Label("Departure Date:")
-                   | departureDate.ToDateTimeInput()
-                                  .Variant(DateTimeInputs.Date)
-                                  .Placeholder("Select departure date"))
+                | departureDate.ToDateTimeInput()
+                              .Variant(DateTimeInputs.Date)
+                              .Placeholder("Select departure date")
+                              .WithField()
+                              .Label("Departure Date:")
                 // Return Date (only visible when round trip is on)
-                | (Layout.Vertical()
-                       | Text.Label("Return Date:")
-                       | returnDate.ToDateTimeInput()
-                                   .Variant(DateTimeInputs.Date)
-                                   .Placeholder("Select return date")
-                                   .Disabled(!isRoundTrip.Value))
+                | returnDate.ToDateTimeInput()
+                           .Variant(DateTimeInputs.Date)
+                           .Placeholder("Select return date")
+                           .Disabled(!isRoundTrip.Value)
+                           .WithField()
+                           .Label("Return Date:")
                 // Summary
                 | Text.Small($"Round trip: {departureDate.Value:MMM dd} → {returnDate.Value:MMM dd}")
                 | Text.Small($"One way: {departureDate.Value:MMM dd}");

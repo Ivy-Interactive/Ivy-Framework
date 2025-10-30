@@ -71,24 +71,21 @@ public class ColorDemo : ViewBase
         var pickerColorState = UseState("#ff0000");
         var textAndPickerColorState = UseState("#ff0000");
         return Layout.Vertical()
-                | (Layout.Horizontal()
-                    | Text.Small("Just Text")
-                          .Width(25)
-                    | textColorState
-                          .ToColorInput()
-                          .Variant(ColorInputs.Text))
-                | (Layout.Horizontal()
-                    | Text.Small("Just Picker")
-                          .Width(25)
-                    | pickerColorState
-                          .ToColorInput()
-                          .Variant(ColorInputs.Picker))
-                | (Layout.Horizontal()
-                    | Text.Small("Text and Picker")
-                          .Width(25)
-                    | textAndPickerColorState
-                          .ToColorInput()
-                          .Variant(ColorInputs.TextAndPicker));
+                | textColorState
+                      .ToColorInput()
+                      .Variant(ColorInputs.Text)
+                      .WithField()
+                      .Label("Just Text")
+                | pickerColorState
+                      .ToColorInput()
+                      .Variant(ColorInputs.Picker)
+                      .WithField()
+                      .Label("Just Picker")
+                | textAndPickerColorState
+                      .ToColorInput()
+                      .Variant(ColorInputs.TextAndPicker)
+                      .WithField()
+                      .Label("Text and Picker");
     }   
 }
 ```
@@ -113,10 +110,11 @@ public class ColorChangedDemo : ViewBase
             colorState.Set(e.Value);
         };
         return Layout.Vertical() 
-                | H3("Hex Color Picker")
                 | new ColorInput<string>
                        (colorState.Value, onChangeHandler)
-                      .Variant(ColorInputs.Picker) 
+                      .Variant(ColorInputs.Picker)
+                      .WithField()
+                      .Label("Hex Color Picker")
                 | new Code(colorName.Value)
                      .ShowCopyButton()
                      .ShowBorder();
@@ -189,24 +187,21 @@ public class CSSColorDemo : ViewBase
                             .Replace("[BORDER]",border.Value));
         return Layout.Vertical()
                 | H3("CSS Block Generator")
-                | (Layout.Horizontal()
-                   | Text.InlineCode("color")
-                         .Width(35)
-                   | color.ToColorInput()
-                          .Variant(ColorInputs.Picker))
-                | (Layout.Horizontal()
-                   | Text.InlineCode("background-color")
-                         .Width(35)
-                   | bgColor.ToColorInput()
-                          .Variant(ColorInputs.Picker))
-                | (Layout.Horizontal()
-                   | Text.InlineCode("border")
-                         .Width(35)
-                   | border.ToColorInput()
-                          .Variant(ColorInputs.Picker))
-                   | new Code(genCode.Value)
-                         .Language(Languages.Css)
-                         .ShowCopyButton();
+                | color.ToColorInput()
+                      .Variant(ColorInputs.Picker)
+                      .WithField()
+                      .Label("color")
+                | bgColor.ToColorInput()
+                      .Variant(ColorInputs.Picker)
+                      .WithField()
+                      .Label("background-color")
+                | border.ToColorInput()
+                      .Variant(ColorInputs.Picker)
+                      .WithField()
+                      .Label("border")
+                | new Code(genCode.Value)
+                      .Language(Languages.Css)
+                      .ShowCopyButton();
     }
 }
 ```

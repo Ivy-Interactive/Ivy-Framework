@@ -43,8 +43,9 @@ public class AsyncSelectBasicDemo : ViewBase
         }
 
         return Layout.Vertical()
-            | Text.Label("Select a category:")
             | selectedCategory.ToAsyncSelectInput(QueryCategories, LookupCategory, "Search categories...")
+                .WithField()
+                .Label("Select a category:")
             | Text.Small($"Selected: {selectedCategory.Value ?? "None"}");
     }
 }
@@ -77,8 +78,9 @@ public class StringAsyncSelectDemo : ViewBase
         }
 
         return Layout.Vertical()
-            | Text.Label("Select a country:")
             | selectedCountry.ToAsyncSelectInput(QueryCountries, LookupCountry, placeholder: "Search countries...")
+                .WithField()
+                .Label("Select a country:")
             | Text.Small($"Selected: {selectedCountry.Value ?? "None"}");
     }
 }
@@ -123,8 +125,9 @@ public class IntegerAsyncSelectDemo : ViewBase
         }
 
         return Layout.Vertical()
-            | Text.Label("Select a year:")
             | selectedYear.ToAsyncSelectInput(QueryYears, LookupYear, placeholder: "Search years...")
+                .WithField()
+                .Label("Select a year:")
             | Text.Small($"Selected: {selectedYear.Value?.ToString() ?? "None"}");
     }
 }
@@ -185,8 +188,9 @@ public class EnumAsyncSelectDemo : ViewBase
         }
 
         return Layout.Vertical()
-            | Text.Label("Select a programming language:")
             | selectedLanguage.ToAsyncSelectInput(QueryLanguages, LookupLanguage, placeholder: "Search languages...")
+                .WithField()
+                .Label("Select a programming language:")
             | Text.Small($"Selected: {selectedLanguage.Value.ToString()}");
     }
 }
@@ -270,8 +274,9 @@ public class AdvancedQueryDemo : ViewBase
         );
 
         return Layout.Vertical()
-            | Text.Label("Search and select a user:")
             | customAsyncSelect
+                .WithField()
+                .Label("Search and select a user:")
             | Text.Small($"Selected: {selectedUserInfo.Value}");
     }
 }
@@ -325,8 +330,9 @@ public class ErrorHandlingDemo : ViewBase
         }
 
         return Layout.Vertical()
-            | Text.Label("AsyncSelect with error handling:")
             | selectedItem.ToAsyncSelectInput(QueryWithErrors, LookupWithErrors, placeholder: "Search items...")
+                .WithField()
+                .Label("AsyncSelect with error handling:")
             | (errorMessage.Value != null ? Text.Block(errorMessage.Value) : null)
             | Text.Small($"Selected: {selectedItem.Value ?? "None"}");
     }
@@ -361,16 +367,19 @@ public class StylingDemo : ViewBase
         }
 
         return Layout.Vertical()
-            | Text.Label("Normal AsyncSelectInput:")
             | normalSelect.ToAsyncSelectInput(QueryOptions, LookupOption, placeholder: "Choose an option...")
+                .WithField()
+                .Label("Normal AsyncSelectInput:")
             
-            | Text.Label("Invalid AsyncSelectInput:")
             | invalidSelect.ToAsyncSelectInput(QueryOptions, LookupOption, placeholder: "This has an error...")
                 .Invalid("This field is required")
+                .WithField()
+                .Label("Invalid AsyncSelectInput:")
             
-            | Text.Label("Disabled AsyncSelectInput:")
             | disabledSelect.ToAsyncSelectInput(QueryOptions, LookupOption, placeholder: "This is disabled...")
-                .Disabled(true);
+                .Disabled(true)
+                .WithField()
+                .Label("Disabled AsyncSelectInput:");
     }
 }
 ```
