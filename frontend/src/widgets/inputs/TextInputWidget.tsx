@@ -175,6 +175,7 @@ const DefaultVariant: React.FC<{
   };
 
   const shortcutDisplay = formatShortcutForDisplay(props.shortcutKey);
+  const hasValue = props.value && props.value.toString().trim() !== '';
 
   return (
     <div className="relative w-full select-none" style={styles}>
@@ -193,13 +194,13 @@ const DefaultVariant: React.FC<{
           textInputSizeVariants({ size }),
           props.invalid && inputStyles.invalidInput,
           props.invalid && 'pr-8',
-          props.shortcutKey && !isFocused && 'pr-16'
+          props.shortcutKey && !isFocused && !hasValue && 'pr-16'
         )}
         data-testid={props['data-testid']}
       />
       {/* Icons container: shortcut (if any), then invalid (if any) */}
       <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none h-6">
-        {props.shortcutKey && !isFocused && (
+        {props.shortcutKey && !isFocused && !hasValue && (
           <div className="pointer-events-auto flex items-center h-6">
             <kbd className="px-1 py-0.5 text-small-label font-medium text-foreground bg-muted border border-border rounded-md">
               {shortcutDisplay}
@@ -247,6 +248,7 @@ const TextareaVariant: React.FC<{
   };
 
   const shortcutDisplay = formatShortcutForDisplay(props.shortcutKey);
+  const hasValue = props.value && props.value.toString().trim() !== '';
 
   return (
     <div className="relative w-full select-none">
@@ -264,13 +266,13 @@ const TextareaVariant: React.FC<{
           textInputSizeVariants({ size }),
           props.invalid && inputStyles.invalidInput,
           props.invalid && 'pr-8',
-          props.shortcutKey && !isFocused && 'pr-16'
+          props.shortcutKey && !isFocused && !hasValue && 'pr-16'
         )}
         data-testid={props['data-testid']}
       />
       {/* Icons container: shortcut (if any), then invalid (if any) */}
       <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none h-6">
-        {props.shortcutKey && !isFocused && (
+        {props.shortcutKey && !isFocused && !hasValue && (
           <div className="pointer-events-auto flex items-center h-6">
             <kbd className="px-1 py-0.5 text-small-label font-medium text-foreground bg-muted border border-border rounded-md">
               {shortcutDisplay}
@@ -331,6 +333,7 @@ const PasswordVariant: React.FC<{
   };
 
   const shortcutDisplay = formatShortcutForDisplay(props.shortcutKey);
+  const hasValue = props.value && props.value.toString().trim() !== '';
 
   return (
     <div
@@ -354,7 +357,7 @@ const PasswordVariant: React.FC<{
           props.invalid && inputStyles.invalidInput,
           props.invalid ? 'pr-14' : 'pr-8',
           hasLastPass && 'pr-3',
-          props.shortcutKey && !hasLastPass && 'pr-24'
+          props.shortcutKey && !hasLastPass && !hasValue && 'pr-24'
         )}
         data-testid={props['data-testid']}
       />
@@ -374,7 +377,7 @@ const PasswordVariant: React.FC<{
               )}
             </button>
           </div>
-          {props.shortcutKey && (
+          {props.shortcutKey && !hasValue && (
             <div className="pointer-events-auto flex items-center h-6">
               <kbd className="ml-2 px-1 py-0.5 text-small-label font-medium text-foreground bg-muted border border-border rounded-md">
                 {shortcutDisplay}
@@ -490,7 +493,7 @@ const SearchVariant: React.FC<{
           props.invalid && inputStyles.invalidInput,
           props.invalid && 'pr-8',
           hasValue && 'pr-8',
-          props.shortcutKey && !isFocused && 'pr-16',
+          props.shortcutKey && !isFocused && !hasValue && 'pr-16',
           // Hide browser's default search input X icon
           '[&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-cancel-button]:hidden'
         )}
@@ -510,7 +513,7 @@ const SearchVariant: React.FC<{
             <X className={xIconVariants({ size })} />
           </button>
         )}
-        {props.shortcutKey && !isFocused && (
+        {props.shortcutKey && !isFocused && !hasValue && (
           <div className="pointer-events-auto flex items-center h-4">
             <kbd className="badge-text-primary text-foreground bg-muted border border-border rounded-sm px-1 py-0.25">
               {shortcutDisplay}

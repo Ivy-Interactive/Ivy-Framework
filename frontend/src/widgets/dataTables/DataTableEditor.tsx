@@ -3,6 +3,7 @@ import DataEditor, {
   DataEditorRef,
   GridCell,
   GridSelection,
+  GridMouseEventArgs,
   Item,
   Theme,
 } from '@glideapps/glide-data-grid';
@@ -22,12 +23,16 @@ import { convertToGridColumns } from './utils/columnHelpers';
 import { iconCellRenderer } from './utils/customRenderers';
 import { generateHeaderIcons, addStandardIcons } from './utils/headerIcons';
 import { ThemeColors } from '@/lib/color-utils';
+import { useEventHandler } from '@/components/event-handler';
+import { useColumnGroups } from './hooks/useColumnGroups';
 
 interface TableEditorProps {
+  widgetId: string;
   hasOptions?: boolean;
 }
 
 export const DataTableEditor: React.FC<TableEditorProps> = ({
+  widgetId,
   hasOptions = false,
 }) => {
   const {
@@ -55,13 +60,21 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     showIndexColumn,
     selectionMode,
     showGroups,
+    enableCellClickEvents,
+    showSearch: showSearchConfig,
     showColumnTypeIcons,
+    showVerticalBorders,
+    enableRowHover,
   } = config;
 
   const selectionProps = getSelectionProps(selectionMode);
 
   // Use the enhanced theme hook with custom DataGrid theme generator
-  const { customTheme: tableTheme } = useThemeWithMonitoring<Partial<Theme>>({
+  const {
+    customTheme: tableTheme,
+    colors: themeColors,
+    isDark,
+  } = useThemeWithMonitoring<Partial<Theme>>({
     monitorDOM: true,
     monitorSystem: true,
     customThemeGenerator: (
@@ -84,7 +97,10 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
       horizontalBorderColor: colors.border || (isDark ? '#404045' : '#d1d5db'),
       linkColor:
         colors.primary || colors.accent || (isDark ? '#3b82f6' : '#2563eb'),
-      borderColor: 'transparent',
+      // Control vertical borders by setting borderColor to transparent when disabled
+      borderColor: showVerticalBorders
+        ? colors.border || (isDark ? '#404045' : '#d1d5db')
+        : 'transparent',
       cellHorizontalPadding: 16,
       cellVerticalPadding: 8,
       headerIconSize: 20,
@@ -103,6 +119,8 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     columns: CompactSelection.empty(),
     rows: CompactSelection.empty(),
   });
+  const [showSearch, setShowSearch] = useState(false);
+  const [hoverRow, setHoverRow] = useState<number | undefined>(undefined);
   const scrollThreshold = 10;
 
   // Generate header icons map for all column icons
@@ -127,6 +145,25 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
       resizeObserver.disconnect();
     };
   }, []);
+
+  // Handle keyboard shortcut for search (Ctrl/Cmd + F)
+  useEffect(() => {
+    if (!showSearchConfig) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && event.code === 'KeyF') {
+        setShowSearch(current => !current);
+        event.stopPropagation();
+        event.preventDefault();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown, true);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown, true);
+    };
+  }, [showSearchConfig]);
 
   // Handle scroll events
   const handleVisibleRegionChanged = useCallback(
@@ -174,6 +211,100 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     []
   );
 
+  // Get event handler for sending events to backend
+  const eventHandler = useEventHandler();
+
+  // Handle cell single-clicks (for backend events only)
+  const handleCellClicked = useCallback(
+    (cell: Item) => {
+      if (enableCellClickEvents) {
+        // Get actual cell value
+        const cellContent = getCellContent(cell);
+        const visibleColumns = columns.filter(c => !c.hidden);
+        const column = visibleColumns[cell[0]];
+
+        // Extract the actual value from the cell based on its kind
+        let cellValue: unknown = null;
+        if (
+          cellContent.kind === 'text' ||
+          cellContent.kind === 'number' ||
+          cellContent.kind === 'boolean'
+        ) {
+          cellValue = cellContent.data;
+        } else if ('data' in cellContent) {
+          // Cast to unknown first, then access the data property
+          cellValue = (cellContent as unknown as { data: unknown }).data;
+        }
+
+        // Send event to backend with row, column, and value
+        eventHandler('OnCellClick', widgetId, [
+          cell[1], // row index
+          cell[0], // column index
+          column?.name || '', // column name
+          cellValue, // cell value
+        ]);
+      }
+      // Do NOT prevent default - let selection happen normally!
+    },
+    [enableCellClickEvents, eventHandler, widgetId, columns, getCellContent]
+  );
+
+  // Handle cell double-clicks/activation (for editing)
+  const handleCellActivated = useCallback(
+    (cell: Item) => {
+      if (enableCellClickEvents) {
+        const cellContent = getCellContent(cell);
+        const visibleColumns = columns.filter(c => !c.hidden);
+        const column = visibleColumns[cell[0]];
+
+        // Extract the actual value from the cell based on its kind
+        let cellValue: unknown = null;
+        if (
+          cellContent.kind === 'text' ||
+          cellContent.kind === 'number' ||
+          cellContent.kind === 'boolean'
+        ) {
+          cellValue = cellContent.data;
+        } else if ('data' in cellContent) {
+          // Cast to unknown first, then access the data property
+          cellValue = (cellContent as unknown as { data: unknown }).data;
+        }
+
+        // Send activation event to backend
+        eventHandler('OnCellActivated', widgetId, [
+          cell[1], // row index
+          cell[0], // column index
+          column?.name || '', // column name
+          cellValue, // cell value
+        ]);
+      }
+    },
+    [enableCellClickEvents, eventHandler, widgetId, columns, getCellContent]
+  );
+
+  // Handle row hover
+  const onItemHovered = useCallback(
+    (args: GridMouseEventArgs) => {
+      if (!enableRowHover) return;
+      const [, row] = args.location;
+      setHoverRow(args.kind !== 'cell' ? undefined : row);
+    },
+    [enableRowHover]
+  );
+
+  // Get row theme override for hover effect
+  const getRowThemeOverride = useCallback(
+    (row: number) => {
+      if (!enableRowHover || row !== hoverRow) return undefined;
+      // Use theme-aware colors for hover effect
+      return {
+        bgCell: themeColors.accent || (isDark ? '#26262b' : '#f7f7f7'),
+        bgCellMedium: themeColors.muted || (isDark ? '#1f1f23' : '#f0f0f0'),
+      };
+    },
+    [hoverRow, enableRowHover, themeColors, isDark]
+  );
+
   // Convert columns to grid format with proper widths
   const gridColumns = convertToGridColumns(
     columns,
@@ -184,7 +315,16 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     showColumnTypeIcons ?? true
   );
 
-  if (gridColumns.length === 0) {
+  // Use column groups hook when showGroups is enabled
+  const columnGroupsHook = useColumnGroups(gridColumns);
+  const shouldUseColumnGroups = showGroups ?? false;
+
+  // Use grouped columns if showGroups is enabled, otherwise use regular columns
+  const finalColumns = shouldUseColumnGroups
+    ? columnGroupsHook.columns
+    : gridColumns;
+
+  if (finalColumns.length === 0) {
     return null;
   }
 
@@ -196,7 +336,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     <div ref={containerRef} style={containerStyle}>
       <DataEditor
         ref={gridRef}
-        columns={gridColumns}
+        columns={finalColumns}
         rows={visibleRows}
         getCellContent={getCellContent}
         customRenderers={[iconCellRenderer]}
@@ -221,6 +361,18 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
         rowMarkers={showIndexColumn ? 'number' : 'none'}
         onColumnMoved={allowColumnReordering ? handleColumnReorder : undefined}
         groupHeaderHeight={showGroups ? 36 : undefined}
+        cellActivationBehavior="double-click"
+        onCellClicked={handleCellClicked}
+        onCellActivated={handleCellActivated}
+        onGroupHeaderClicked={
+          shouldUseColumnGroups
+            ? columnGroupsHook.onGroupHeaderClicked
+            : undefined
+        }
+        showSearch={showSearchConfig ? showSearch : false}
+        onSearchClose={() => setShowSearch(false)}
+        onItemHovered={enableRowHover ? onItemHovered : undefined}
+        getRowThemeOverride={enableRowHover ? getRowThemeOverride : undefined}
       />
     </div>
   );

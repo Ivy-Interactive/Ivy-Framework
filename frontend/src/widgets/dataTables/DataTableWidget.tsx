@@ -33,6 +33,7 @@ const TableLayout: React.FC<TableLayoutProps> = ({ children }) => {
 };
 
 export const DataTable: React.FC<TableProps> = ({
+  id,
   columns,
   connection,
   configuration = {},
@@ -44,18 +45,22 @@ export const DataTable: React.FC<TableProps> = ({
   const finalConfig = {
     filterType: configuration.filterType,
     freezeColumns: configuration.freezeColumns ?? null,
-    allowLlmFiltering: configuration.allowLlmFiltering ?? true,
+    allowLlmFiltering: configuration.allowLlmFiltering ?? false,
     allowSorting: configuration.allowSorting ?? true,
-    allowFiltering: configuration.allowFiltering ?? true,
+    allowFiltering: configuration.allowFiltering ?? false,
     allowColumnReordering: configuration.allowColumnReordering ?? true,
     allowColumnResizing: configuration.allowColumnResizing ?? true,
-    allowCopySelection: configuration.allowCopySelection ?? true,
+    allowCopySelection: configuration.allowCopySelection ?? false,
     selectionMode: configuration.selectionMode,
     showIndexColumn: configuration.showIndexColumn ?? false,
     showGroups: configuration.showGroups ?? false,
-    showColumnTypeIcons: configuration.showColumnTypeIcons ?? true,
+    showColumnTypeIcons: configuration.showColumnTypeIcons ?? false,
+    showVerticalBorders: configuration.showVerticalBorders ?? false,
     batchSize: configuration.batchSize,
     loadAllRows: configuration.loadAllRows ?? false,
+    showSearch: configuration.showSearch ?? false,
+    enableRowHover: configuration.enableRowHover ?? false,
+    enableCellClickEvents: configuration.enableCellClickEvents ?? false,
   };
 
   // Create styles object with width and height if provided
@@ -92,7 +97,10 @@ export const DataTable: React.FC<TableProps> = ({
               )}
             </DataTableHeader>
 
-            <DataTableEditor hasOptions={finalConfig.allowFiltering} />
+            <DataTableEditor
+              widgetId={id}
+              hasOptions={finalConfig.allowFiltering}
+            />
           </>
         </TableLayout>
       </TableProvider>
