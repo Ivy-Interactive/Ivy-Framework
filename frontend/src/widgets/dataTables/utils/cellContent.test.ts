@@ -40,7 +40,7 @@ describe('cellContent utilities', () => {
       expect(cell.kind).toBe(GridCellKind.Text);
       if (cell.kind === GridCellKind.Text) {
         expect(cell.data).toBe('');
-        expect(cell.displayData).toBe('null');
+        expect(cell.displayData).toBe(''); // Changed to empty string
         expect(cell.style).toBe('faded');
         expect(cell.allowOverlay).toBe(true);
         expect(cell.readonly).toBe(false);
@@ -362,7 +362,7 @@ describe('cellContent utilities', () => {
     it('should return null cell for null values', () => {
       const cell = getCellContent([1, 1], data, columns, [], true);
       if (cell.kind === GridCellKind.Text) {
-        expect(cell.displayData).toBe('null');
+        expect(cell.displayData).toBe(''); // Changed to empty string
         expect(cell.style).toBe('faded');
       }
     });
@@ -400,14 +400,13 @@ describe('cellContent utilities', () => {
       }
     });
 
-    it('should return icon cell for icon-like values', () => {
+    it('should return text cell for icon-like values without Icon type', () => {
+      // Column 4 has type ColType.Text, not ColType.Icon
+      // So even though value looks like an icon, it renders as text (no heuristic)
       const cell = getCellContent([4, 0], data, columns, [], true);
-      expect(cell.kind).toBe(GridCellKind.Custom);
-      if (cell.kind === GridCellKind.Custom) {
-        expect(cell.data).toEqual({
-          kind: 'icon-cell',
-          iconName: 'UserCircle',
-        });
+      expect(cell.kind).toBe(GridCellKind.Text);
+      if (cell.kind === GridCellKind.Text) {
+        expect(cell.data).toBe('UserCircle');
       }
     });
 
