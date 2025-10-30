@@ -23,6 +23,18 @@ public class TextInputEllipsisTestApp : SampleBase
         var placeholderText = this.UseState("");
         var disabledText = this.UseState("This is disabled text that should also demonstrate ellipsis behavior");
         var invalidText = this.UseState("This is invalid text with error state that should show ellipsis behavior");
+        // Additional states for other input examples
+        var boolState = this.UseState(false);
+        var colorState = this.UseState("#ff0000");
+        var languages = new string[]
+        {
+            "This is an extremely long option label that should definitely be truncated with ellipsis when the select is narrow",
+            "C#",
+            "JavaScript",
+            "Rust",
+            "Go"
+        };
+        var selectedLang = this.UseState(languages[0]);
 
         return Layout.Vertical()
                | Text.H1("TextInput Ellipsis Test")
@@ -181,6 +193,31 @@ public class TextInputEllipsisTestApp : SampleBase
                    | Text.P("Testing AsyncSelectInput with category selection:")
                    | new AsyncSelectDemo()
                ).Width(Size.Units(60))
+               | new Card(
+                   Layout.Vertical()
+                   | Text.H2("Other Inputs Ellipsis Tests")
+                   | Text.P("Small-width inputs should show ellipsis for long labels, placeholders and options:")
+                   // Bool input with long label/description
+                   | Text.P("BoolInput with long label and description (small width):")
+                   | boolState
+                       .ToBoolInput()
+                       .Label("Enable the feature with a very long descriptive label that should not overflow the container and should be truncated appropriately with ellipsis when the width is constrained")
+                       .Description("This description explains in detail what the toggle does and is intentionally very long to verify that descriptions are also truncated with ellipsis when there is not enough space")
+                       .Width(Size.Units(20))
+                   // Color input with long placeholder
+                   | Text.P("ColorInput with long placeholder (small width):")
+                   | colorState
+                       .ToColorInput()
+                       .Placeholder("Select a color or paste a hex code like #ff00ff; this placeholder is long to test ellipsis behavior in narrow inputs")
+                       .Variant(ColorInputs.TextAndPicker)
+                       .Width(Size.Units(20))
+                   // Select input with long options and placeholder
+                   | Text.P("SelectInput with long option and placeholder (small width):")
+                   | selectedLang
+                       .ToSelectInput(languages.ToOptions(), "Choose your favourite language from this incredibly long placeholder text that should be truncated with ellipsis in a small select")
+                       .Variant(SelectInputs.Select)
+                       .Width(Size.Units(40))
+               ).Width(Size.Units(60))
 
                | Text.H2("Expected Behavior")
                | Text.P("Expected ellipsis behavior:")
@@ -220,7 +257,7 @@ public class AsyncSelectDemo : ViewBase
             | Text.Label("Select a category:")
             | (Layout.Horizontal()
                 | selectedCategory.ToAsyncSelectInput(QueryCategories, LookupCategory, "Search categories...Search categories...Search categories...Search categories...Search categories..."))
-                .Width(Size.Units(30))
+                .Width(Size.Units(20))
             | Text.Small($"Selected: {selectedCategory.Value ?? "None"}");
     }
 }

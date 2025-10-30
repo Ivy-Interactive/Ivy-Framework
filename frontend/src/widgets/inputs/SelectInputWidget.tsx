@@ -15,6 +15,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { InvalidIcon } from '@/components/InvalidIcon';
 import { cn } from '@/lib/utils';
 import { getWidth, inputStyles } from '@/lib/styles';
+import { wrapWithTooltip } from '@/lib/tooltipHelper';
 import {
   Tooltip,
   TooltipProvider,
@@ -869,6 +870,13 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
       : undefined;
 
   const hasValue = stringValue !== undefined;
+  // hasValue calculated post-early-return
+
+  // Resolve current label for tooltip display (no hook to avoid conditional hook order issues)
+  const currentLabel = !hasValue
+    ? placeholder || ''
+    : (validOptions.find(o => o.value.toString() === (stringValue as string))
+        ?.label ?? (stringValue as string));
 
   return (
     <div className="flex items-center gap-2 w-full" style={styles}>
@@ -880,12 +888,24 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
           onValueChange={handleValueChange}
           data-testid={dataTestId}
         >
-          <SelectTrigger
-            className={cn('relative', invalid && inputStyles.invalidInput)}
-            size={size}
-          >
-            <SelectValue placeholder={placeholder} />
-          </SelectTrigger>
+          {wrapWithTooltip(
+            <SelectTrigger
+              className={cn(
+                'relative w-full min-w-0',
+                invalid && inputStyles.invalidInput
+              )}
+              size={size}
+            >
+              <div className="w-full min-w-0 truncate">
+                <SelectValue placeholder={placeholder} />
+              </div>
+            </SelectTrigger>,
+            currentLabel ? (
+              <div className="whitespace-pre-wrap wrap-break-word max-w-sm">
+                {currentLabel}
+              </div>
+            ) : undefined
+          )}
           {/* Right-side icon container */}
           {(nullable && hasValue && !disabled) || invalid ? (
             <div
@@ -937,7 +957,12 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
                     value={option.value.toString()}
                     size={size}
                   >
-                    {option.label}
+                    {wrapWithTooltip(
+                      <div className="w-full min-w-0 truncate">
+                        {option.label}
+                      </div>,
+                      <div className="max-w-xs sm:max-w-sm">{option.label}</div>
+                    )}
                   </SelectItem>
                 ))}
               </SelectGroup>
