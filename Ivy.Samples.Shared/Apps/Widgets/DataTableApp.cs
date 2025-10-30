@@ -131,24 +131,24 @@ public class DataTableApp : SampleBase
             .Width(e => e.OptionalId, Size.Px(100))
             .Width(e => e.Bonus, Size.Px(120))
 
-            // Alignments
-            .Align(e => e.Id, Align.Right)
-            .Align(e => e.Age, Align.Right)
-            .Align(e => e.Salary, Align.Right)
-            .Align(e => e.Performance, Align.Right)
-            .Align(e => e.OptionalId, Align.Right)
-            .Align(e => e.Bonus, Align.Right)
-            .Align(e => e.EmployeeCode, Align.Left)
-            .Align(e => e.Name, Align.Left)
-            .Align(e => e.Email, Align.Left)
-            .Align(e => e.Notes, Align.Left)
-            .Align(e => e.IsActive, Align.Center)
-            .Align(e => e.IsManager, Align.Center)
-            .Align(e => e.HireDate, Align.Left)
-            .Align(e => e.LastReview, Align.Left)
-            .Align(e => e.Status, Align.Center)
-            .Align(e => e.Priority, Align.Center)
-            .Align(e => e.Department, Align.Center)
+            // // Alignments
+            // .Align(e => e.Id, Align.Left)
+            // .Align(e => e.Age, Align.Left)
+            // .Align(e => e.Salary, Align.Left)
+            // .Align(e => e.Performance, Align.Left)
+            // .Align(e => e.OptionalId, Align.Left)
+            // .Align(e => e.Bonus, Align.Left)
+            // .Align(e => e.EmployeeCode, Align.Left)
+            // .Align(e => e.Name, Align.Right)
+            // .Align(e => e.Email, Align.Left)
+            // .Align(e => e.Notes, Align.Left)
+            // .Align(e => e.IsActive, Align.Left)
+            // .Align(e => e.IsManager, Align.Left)
+            // .Align(e => e.HireDate, Align.Left)
+            // .Align(e => e.LastReview, Align.Left)
+            // .Align(e => e.Status, Align.Left)
+            // .Align(e => e.Priority, Align.Left)
+            // .Align(e => e => e.Department, Align.Left)
 
             // Groups
             .Group(e => e.Id, "Identity")
@@ -183,11 +183,11 @@ public class DataTableApp : SampleBase
                 config.AllowColumnReordering = true;
                 config.AllowColumnResizing = true;
                 config.AllowCopySelection = true;
-                config.SelectionMode = SelectionModes.Cells;
+                config.SelectionMode = SelectionModes.Columns;
                 config.ShowIndexColumn = true;
                 config.ShowGroups = true;
                 config.ShowVerticalBorders = false;
-                config.ShowColumnTypeIcons = true;           // Show type icons
+                config.ShowColumnTypeIcons = false;           // Show type icons
                 config.BatchSize = 50;                       // Load 50 rows at a time
                 config.LoadAllRows = false;                  // Use pagination
                 config.ShowSearch = true;
