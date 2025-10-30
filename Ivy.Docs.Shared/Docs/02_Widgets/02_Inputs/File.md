@@ -50,7 +50,7 @@ public class FileDropDemo : ViewBase
     public override object? Build()
     {    
         var fileState = this.UseState((FileInput?)null);
-        var fileStates = this.UseState<IEnumerable<FileInput>?>(null);
+        var fileStates = this.UseState((IEnumerable<FileInput>?)null);
         return  Layout.Vertical()
                 | fileState.ToFileInput().Variant(FileInputs.Drop)
                 | fileStates.ToFileInput().Variant(FileInputs.Drop);
