@@ -232,7 +232,8 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
         ) {
           cellValue = cellContent.data;
         } else if ('data' in cellContent) {
-          cellValue = (cellContent as Record<string, unknown>).data;
+          // Cast to unknown first, then access the data property
+          cellValue = (cellContent as unknown as { data: unknown }).data;
         }
 
         // Send event to backend with row, column, and value
@@ -265,7 +266,8 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
         ) {
           cellValue = cellContent.data;
         } else if ('data' in cellContent) {
-          cellValue = (cellContent as Record<string, unknown>).data;
+          // Cast to unknown first, then access the data property
+          cellValue = (cellContent as unknown as { data: unknown }).data;
         }
 
         // Send activation event to backend
