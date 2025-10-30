@@ -56,6 +56,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     showIndexColumn,
     selectionMode,
     showGroups,
+    showColumnTypeIcons,
   } = config;
 
   const selectionProps = getSelectionProps(selectionMode);
@@ -180,7 +181,8 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     columnOrder,
     columnWidths,
     containerWidth,
-    showGroups ?? false
+    showGroups ?? false,
+    showColumnTypeIcons ?? true
   );
 
   // Use column groups hook when showGroups is enabled

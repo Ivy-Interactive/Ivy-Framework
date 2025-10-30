@@ -85,7 +85,8 @@ export function convertToGridColumns(
   columnOrder: number[],
   columnWidths: Record<string, number>,
   containerWidth: number,
-  showGroups: boolean
+  showGroups: boolean,
+  showColumnTypeIcons: boolean = true
 ): GridColumn[] {
   // Filter out hidden columns first
   const visibleColumns = columns.filter(col => !col.hidden);
@@ -142,7 +143,7 @@ export function convertToGridColumns(
         title: col.header || col.name,
         width: Math.max(numericBaseWidth, remainingWidth) - 10,
         group: showGroups ? col.group : undefined,
-        icon: mapColumnIcon(col),
+        icon: showColumnTypeIcons ? mapColumnIcon(col) : undefined,
       };
     }
 
@@ -150,7 +151,7 @@ export function convertToGridColumns(
       title: col.header || col.name,
       width: numericBaseWidth,
       group: showGroups ? col.group : undefined,
-      icon: mapColumnIcon(col),
+      icon: showColumnTypeIcons ? mapColumnIcon(col) : undefined,
     };
   });
 }

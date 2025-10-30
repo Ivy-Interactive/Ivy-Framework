@@ -97,7 +97,7 @@ var authToken = await authProvider.LoginAsync(email, password);
 // authToken.RefreshToken - Refresh token (24 hour expiry, 365 day max age)
 
 // When access token expires, refresh:
-var newToken = await authProvider.RefreshAccessTokenAsync(authToken);
+var newToken = await authProvider.RefreshAccessTokenAsync(authToken, cancellationToken);
 ```
 
 ## Security Best Practices
