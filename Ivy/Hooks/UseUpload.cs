@@ -6,6 +6,28 @@ namespace Ivy.Hooks;
 
 public static class UseUploadExtensions
 {
+    public static IState<string?> UseUpload<TView>(this TView view, Action<FileUpload> handler, string? defaultContentType = null, string? defaultFileName = null) where TView : ViewBase =>
+        view.Context.UseUpload(handler, defaultContentType, defaultFileName);
+
+    public static IState<string?> UseUpload<TView>(this TView view, Func<FileUpload, Task> handler, string? defaultContentType = null, string? defaultFileName = null) where TView : ViewBase =>
+        view.Context.UseUpload(handler, defaultContentType, defaultFileName);
+
+    public static IState<string?> UseUpload(this IViewContext context, Action<FileUpload> handler, string? defaultContentType = null, string? defaultFileName = null) =>
+        context.UseUpload(upload => { handler(upload); return Task.CompletedTask; }, defaultContentType, defaultFileName);
+
+    public static IState<string?> UseUpload(this IViewContext context, Func<FileUpload, Task> handler, string? defaultContentType = null, string? defaultFileName = null)
+    {
+        var url = context.UseState<string?>();
+        var uploadService = context.UseService<IUploadService>();
+        context.UseEffect(() =>
+        {
+            var (cleanup, uploadUrl) = uploadService.AddUpload(handler, defaultContentType, defaultFileName);
+            url.Set(uploadUrl);
+            return cleanup;
+        });
+        return url;
+    }
+
     public static IState<string?> UseUpload<TView>(this TView view, Action<byte[]> handler, string mimeType, string fileName) where TView : ViewBase =>
         view.Context.UseUpload(handler, mimeType, fileName);
 
@@ -17,14 +39,15 @@ public static class UseUploadExtensions
 
     public static IState<string?> UseUpload(this IViewContext context, Func<byte[], Task> handler, string mimeType, string fileName)
     {
-        var url = context.UseState<string?>();
-        var uploadService = context.UseService<IUploadService>();
-        context.UseEffect(() =>
+        // Adapt byte[] handler to FileUpload handler
+        Func<FileUpload, Task> adaptedHandler = async (fileUpload) =>
         {
-            var (cleanup, uploadUrl) = uploadService.AddUpload(handler, mimeType, fileName);
-            url.Set(uploadUrl);
-            return cleanup;
-        });
-        return url;
+            using var memoryStream = new MemoryStream();
+            await fileUpload.Stream.CopyToAsync(memoryStream);
+            var bytes = memoryStream.ToArray();
+            await handler(bytes);
+        };
+
+        return context.UseUpload(adaptedHandler, mimeType, fileName);
     }
 }

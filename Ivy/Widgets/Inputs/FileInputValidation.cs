@@ -38,7 +38,7 @@ public static class FileInputValidation
         {
             if (!IsFileTypeAllowed(file, allowedPatterns))
             {
-                invalidFiles.Add(file.Name);
+                invalidFiles.Add(file.FileName);
             }
         }
 
@@ -64,7 +64,7 @@ public static class FileInputValidation
 
         if (!IsFileTypeAllowed(file, allowedPatterns))
         {
-            return ValidationResult.Error($"Invalid file type: {file.Name}. Allowed types: {accept}");
+            return ValidationResult.Error($"Invalid file type: {file.FileName}. Allowed types: {accept}");
         }
 
         return ValidationResult.Success();
@@ -99,24 +99,24 @@ public static class FileInputValidation
             {
                 // Wildcard MIME type (e.g., "image/*")
                 var baseType = pattern[..^2];
-                return file.Type.StartsWith(baseType, StringComparison.OrdinalIgnoreCase);
+                return file.ContentType.StartsWith(baseType, StringComparison.OrdinalIgnoreCase);
             }
             else
             {
                 // Exact MIME type (e.g., "text/plain")
-                return string.Equals(file.Type, pattern, StringComparison.OrdinalIgnoreCase);
+                return string.Equals(file.ContentType, pattern, StringComparison.OrdinalIgnoreCase);
             }
         }
 
         // Handle file extension patterns (e.g., ".txt", ".pdf")
         if (pattern.StartsWith("."))
         {
-            var fileExtension = Path.GetExtension(file.Name);
+            var fileExtension = Path.GetExtension(file.FileName);
             return string.Equals(fileExtension, pattern, StringComparison.OrdinalIgnoreCase);
         }
 
         // Handle extension without dot (e.g., "txt", "pdf")
-        var extension = Path.GetExtension(file.Name);
+        var extension = Path.GetExtension(file.FileName);
         if (!string.IsNullOrEmpty(extension))
         {
             extension = extension[1..]; // Remove the dot

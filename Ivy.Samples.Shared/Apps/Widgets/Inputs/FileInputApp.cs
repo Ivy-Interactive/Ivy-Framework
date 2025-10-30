@@ -10,14 +10,7 @@ public class FileInputApp : SampleBase
     protected override object? BuildSample()
     {
         // Mock file for 'With Value' example
-        var mockFile = new FileInput
-        {
-            Name = "example.txt",
-            Type = "text/plain",
-            Size = 1234,
-            LastModified = DateTime.Now,
-            Content = null
-        };
+        var mockFile = new FileInput("example.txt", "text/plain", 12345, DateTime.Now);
 
         var singleFile = UseState<FileInput?>(() => null);
         var singleFileWithValue = UseState<FileInput?>(() => mockFile);
@@ -187,10 +180,10 @@ public class FileInputApp : SampleBase
                   | Text.InlineCode("File Details")
 
                   | singleFile.ToFileInput().Placeholder("Select a text file to view content")
-                  | (singleFile.Value != null ? (object)singleFile.ToDetails().Remove(e => e!.Content) : Text.Block("No file selected"))
+                  | (singleFile.Value != null ? (object)singleFile.ToDetails() : Text.Block("No file selected"))
 
-                  | singleFile.ToFileInput().Placeholder("Select a file to view as plain text")
-                  | (singleFile.Value?.ToPlainText() ?? (object)Text.Block("No file selected"))
+               // | singleFile.ToFileInput().Placeholder("Select a file to view as plain text")
+               // | (singleFile.Value?.ToPlainText() ?? (object)Text.Block("No file selected"))
                )
 
                // Backend Validation:

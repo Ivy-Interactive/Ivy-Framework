@@ -24,7 +24,7 @@ public class FileUploadView : ViewBase
     public override object? Build()
     {
         var files = UseState<FileInput?>(() => null);
-        var uploadUrl = this.UseUpload(fileBytes => { }, "*/*", "file");
+        var uploadUrl = this.UseUpload(fileUpload => { });
 
         return files.ToFileInput(uploadUrl, "Choose a file");
     }
@@ -47,12 +47,12 @@ var client = UseService<IClientProvider>();
 // 1. Create upload handler - returns state with
 // URL like "/upload/{connectionId}/{uploadId}"
 var uploadUrl = this.UseUpload(
-    fileBytes => {
+    fileUpload => {
         // This handler is called when a file is uploaded
-        client.Toast($"Received {fileBytes.Length} bytes", "File Uploaded");
-    },
-    "application/octet-stream",  // Expected MIME type
-    "uploaded-file"              // Default filename
+        // Access file metadata: fileUpload.Name, fileUpload.Type, fileUpload.Size, fileUpload.Stream
+        client.Toast($"Received {fileUpload.Size} bytes", "File Uploaded");
+    }
+    // mimeType and fileName are optional parameters with defaults from the uploaded file
 );
 
 // 2. Create state to hold file information
@@ -61,7 +61,7 @@ var files = UseState<FileInput?>(() => null);
 // 3. Connect them with ToFileInput - creates a widget that:
 //    - Updates the files state when user selects files
 //    - Automatically uploads to the uploadUrl
-//    - Calls your handler with the file bytes
+//    - Calls your handler with the FileUpload record
 files.ToFileInput(uploadUrl, "Choose Files")
 ```
 
@@ -77,15 +77,13 @@ public class UploadWithStatusView : ViewBase
         var client = UseService<IClientProvider>();
         var files = UseState<FileInput?>(() => null);
         var uploadUrl = this.UseUpload(
-            fileBytes => {
+            fileUpload => {
                 try {
-                    client.Toast($"Successfully uploaded {fileBytes.Length} bytes", "Upload Complete");
+                    client.Toast($"Successfully uploaded {fileUpload.Size} bytes", "Upload Complete");
                 } catch (Exception ex) {
                     client.Toast(ex);
                 }
-            },
-            "application/octet-stream",
-            "uploaded-file"
+            }
         );
 
         return files.ToFileInput(uploadUrl, "Upload File");
@@ -106,18 +104,17 @@ public class ValidatedUploadView : ViewBase
         var error = UseState<string?>(() => null);
         var files = UseState<FileInput?>(() => null);
         var uploadUrl = this.UseUpload(
-            fileBytes => {
-                if (fileBytes.Length > 2 * 1024 * 1024) // 2MB limit
+            fileUpload => {
+                if (fileUpload.Size > 2 * 1024 * 1024) // 2MB limit
                 {
                     error.Set("File size must be less than 2MB");
                     return;
                 }
                 error.Set((string?)null);
-                // Process uploaded file bytes
-                client.Toast($"Image uploaded successfully ({fileBytes.Length} bytes)", "Success");
+                // Process uploaded file
+                client.Toast($"Image uploaded successfully ({fileUpload.Size} bytes)", "Success");
             },
-            "image/jpeg",
-            "uploaded-image"
+            "image/jpeg" // Optional: specify expected MIME type
         );
 
         return Layout.Vertical(
@@ -157,14 +154,18 @@ public class ImageUploadView : ViewBase
         var preview = UseState<string?>(() => null);
         var files = UseState<FileInput?>(() => null);
         var uploadUrl = this.UseUpload(
-            fileBytes => {
+            fileUpload => {
+                // Convert stream to bytes for preview
+                using var memoryStream = new MemoryStream();
+                fileUpload.Stream.CopyTo(memoryStream);
+                var fileBytes = memoryStream.ToArray();
+
                 // Create preview URL from uploaded bytes
                 preview.Set($"data:image/jpeg;base64,{Convert.ToBase64String(fileBytes)}");
-                // Process uploaded file bytes
-                client.Toast($"Image uploaded successfully ({fileBytes.Length} bytes)", "Success");
+                // Process uploaded file
+                client.Toast($"Image uploaded successfully ({fileUpload.Size} bytes)", "Success");
             },
-            "image/jpeg",
-            "uploaded-image"
+            "image/jpeg"
         );
 
         return Layout.Vertical(
@@ -196,19 +197,17 @@ public class MultiFileUploadView : ViewBase
         var uploadedFiles = UseState(() => new List<string>());
         var newFiles = UseState<IEnumerable<FileInput>?>(() => null);
         var uploadUrl = this.UseUpload(
-            fileBytes => {
-                // Process uploaded file bytes
-                client.Toast($"File uploaded ({fileBytes.Length} bytes)", "Upload Complete");
+            fileUpload => {
+                // Process uploaded file
+                client.Toast($"File uploaded ({fileUpload.Size} bytes)", "Upload Complete");
                 // Add to list of uploaded files
                 uploadedFiles.Set(uploadedFiles.Value.Append($"File {uploadedFiles.Value.Count + 1}").ToList());
-            },
-            "application/octet-stream",
-            "uploaded-files"
+            }
         );
 
         return Layout.Vertical(
             newFiles.ToFileInput(uploadUrl, "Upload Files"),
-            uploadedFiles.Value.Any() 
+            uploadedFiles.Value.Any()
                 ? new List(uploadedFiles.Value.Select(f => Text.Inline(f)))
                 : null
         );

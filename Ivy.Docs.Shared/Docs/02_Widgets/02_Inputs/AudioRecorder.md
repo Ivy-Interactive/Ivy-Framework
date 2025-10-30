@@ -26,17 +26,15 @@ public class BasicAudioRecorderDemo : ViewBase
     public override object? Build()
     {
         var uploadUrl = this.UseUpload(
-            fileBytes => {
-                // Process uploaded file bytes
-                Console.WriteLine($"Received {fileBytes.Length} bytes");
-            },
-            "application/octet-stream",
-            "uploaded-audio"
+            fileUpload => {
+                // Process uploaded file
+                Console.WriteLine($"Received {fileUpload.Size} bytes");
+            }
         );
 
         return new AudioRecorder("Start recording", "Recording audio..").UploadUrl(uploadUrl.Value).ChunkInterval(3000);
-   }     
-}    
+   }
+}
 ```
 
 ## Styling

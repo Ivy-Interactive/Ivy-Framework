@@ -5,32 +5,46 @@ using System.Threading.Tasks;
 using Ivy.Core;
 using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
+using Ivy.Core.Models;
+using Ivy.Services;
 using Ivy.Shared;
 using Ivy.Widgets.Inputs;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+public enum FileInputState
+{
+    Pending,
+    Aborted,
+    Loading,
+    Failed,
+    Finished
+}
+
 /// <summary>
 /// Represents a file uploaded through a file input control.
 /// </summary>
-public record FileInput
+public record FileInput : FileBase
 {
-    /// <summary>Gets the name of the uploaded file including its extension.</summary>
-    public required string Name { get; init; }
+    public FileInput(string FileName, string ContentType, long Length, DateTime? LastModified = null)
+        : base(FileName, ContentType, Length, LastModified)
+    {
+    }
 
-    /// <summary>Gets the MIME type of the uploaded file.</summary>
-    public required string Type { get; init; }
+    public FileInput(FileUpload upload) : this(upload.FileName, upload.ContentType, upload.Length, null)
+    {
+    }
 
-    /// <summary>Gets the size of the uploaded file in bytes.</summary>
-    public int Size { get; init; }
+    /// <summary>
+    /// Value from 0.0 to 1.0 indicating upload progress.
+    /// </summary>
+    public float Progress { get; init; }
 
-    /// <summary>Gets the last modified date of the uploaded file.</summary>
-    public DateTime LastModified { get; init; }
-
-    /// <summary>Gets the binary content of the uploaded file.</summary>
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
-    public byte[]? Content { get; init; }
+    /// <summary>
+    /// Gets the current state of the file upload.
+    /// </summary>
+    public FileInputState State { get; init; } = FileInputState.Pending;
 }
 
 /// <summary>
@@ -106,7 +120,8 @@ public abstract record FileInputBase : WidgetBase<FileInputBase>, IAnyFileInput
         {
             return FileInputValidation.ValidateFileType(file, Accept);
         }
-        else if (value is IEnumerable<FileInput> files)
+
+        if (value is IEnumerable<FileInput> files)
         {
             var filesList = files.ToList();
 
@@ -230,22 +245,40 @@ public record FileInput<TValue> : FileInputBase, IInput<TValue>, IAnyFileInput
 /// </summary>
 public static class FileInputExtensions
 {
-    /// <summary>
-    /// Converts the file content to plain text using UTF-8 encoding.
-    /// </summary>
-    /// <param name="file">The file input containing the content to convert.</param>
-    public static string? ToPlainText(this FileInput file)
+    public static void SetProgress(this IState<FileInput?> fileInputState, float progress)
     {
-        if (file.Content == null)
+        var file = fileInputState.Value;
+        if (file != null)
         {
-            return null;
+            fileInputState.Set(file with { Progress = progress });
         }
-        return file.Content.Length switch
-        {
-            0 => null,
-            _ => Encoding.UTF8.GetString(file.Content)
-        };
     }
+
+    public static void SetState(this IState<FileInput?> fileInputState, FileInputState state)
+    {
+        var file = fileInputState.Value;
+        if (file != null)
+        {
+            fileInputState.Set(file with { State = state });
+        }
+    }
+
+    // /// <summary>
+    // /// Converts the file content to plain text using UTF-8 encoding.
+    // /// </summary>
+    // /// <param name="file">The file input containing the content to convert.</param>
+    // public static string? ToPlainText(this FileInput file)
+    // {
+    //     if (file.Content == null)
+    //     {
+    //         return null;
+    //     }
+    //     return file.Content.Length switch
+    //     {
+    //         0 => null,
+    //         _ => Encoding.UTF8.GetString(file.Content)
+    //     };
+    // }
 
     /// <summary>
     /// Creates a file input from a state object.
@@ -406,7 +439,6 @@ public static class FileInputExtensions
         // Then validate file types
         return FileInputValidation.ValidateFileTypes(filesList, widget.Accept);
     }
-
 
     /// <summary>
     /// Sets the blur event handler for the file input.

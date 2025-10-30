@@ -1,10 +1,14 @@
 using System.Collections.Concurrent;
 using System.Reactive.Disposables;
+using Ivy.Core.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Ivy.Services;
+
+public record FileUpload(string FileName, string ContentType, long Length, DateTime? LastModified, Stream Stream)
+    : FileBase(FileName, ContentType, Length, LastModified);
 
 [ApiController]
 [Route("upload")]
@@ -37,12 +41,12 @@ public class UploadController(AppSessionStore sessionStore) : Controller
 
 public class UploadService(string connectionId) : IUploadService, IDisposable
 {
-    private readonly ConcurrentDictionary<Guid, (Func<byte[], Task> handler, string mimeType, string fileName)> _uploads = new();
+    private readonly ConcurrentDictionary<Guid, (Func<FileUpload, Task> handler, string? mimeType, string? fileName)> _uploads = new();
 
-    public (IDisposable cleanup, string url) AddUpload(Func<byte[], Task> handler, string mimeType, string fileName)
+    public (IDisposable cleanup, string url) AddUpload(Func<FileUpload, Task> handler, string? defaultContentType = null, string? defaultFileName = null)
     {
         var uploadId = Guid.NewGuid();
-        _uploads[uploadId] = (handler, mimeType, fileName);
+        _uploads[uploadId] = (handler, defaultContentType, defaultFileName);
 
         var cleanup = Disposable.Create(() =>
         {
@@ -59,25 +63,26 @@ public class UploadService(string connectionId) : IUploadService, IDisposable
             return new BadRequestObjectResult($"Invalid or unknown uploadId: '{uploadId}'.");
         }
 
-        var (handler, expectedContentType, expectedFileName) = upload;
+        var (handler, defaultContentType, defaultFileName) = upload;
 
-        if (file == null || file.Length == 0)
+        if (file.Length == 0)
         {
             return new BadRequestObjectResult("Empty file.");
         }
 
-        // Optional sanity checks; do not block upload if mismatched, just basic validation could be enforced here
-        // If strict validation is desired, uncomment the checks below
-        // if (!string.IsNullOrWhiteSpace(expectedContentType) && !string.Equals(file.ContentType, expectedContentType, StringComparison.OrdinalIgnoreCase))
-        // {
-        //     return new BadRequestObjectResult($"Unexpected content type. Expected '{expectedContentType}', got '{file.ContentType}'.");
-        // }
+        var actualMimeType = file.ContentType.NullIfEmpty() ?? defaultContentType ?? "application/octet-stream";
+        var actualFileName = file.FileName.NullIfEmpty() ?? defaultFileName ?? "upload";
 
-        using var memoryStream = new MemoryStream();
-        await file.CopyToAsync(memoryStream);
-        var fileBytes = memoryStream.ToArray();
+        // Note: IFormFile.OpenReadStream() returns a Stream that's valid during reqnuest
+        var fileUpload = new FileUpload(
+            FileName: actualFileName,
+            ContentType: actualMimeType,
+            Length: file.Length,
+            Stream: file.OpenReadStream(),
+            LastModified: DateTime.UtcNow
+        );
 
-        await handler(fileBytes);
+        await handler(fileUpload);
 
         return new OkResult();
     }
@@ -90,7 +95,7 @@ public class UploadService(string connectionId) : IUploadService, IDisposable
 
 public interface IUploadService
 {
-    (IDisposable cleanup, string url) AddUpload(Func<byte[], Task> handler, string mimeType, string fileName);
+    (IDisposable cleanup, string url) AddUpload(Func<FileUpload, Task> handler, string? defaultContentType = null, string? defaultFileName = null);
 
     Task<IActionResult> Upload(string uploadId, IFormFile file);
 }
