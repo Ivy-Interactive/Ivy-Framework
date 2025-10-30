@@ -54,6 +54,7 @@ export const DataTable: React.FC<TableProps> = ({
     showVerticalBorders: configuration.showVerticalBorders ?? true,
     batchSize: configuration.batchSize,
     loadAllRows: configuration.loadAllRows ?? false,
+    showSearch: configuration.showSearch ?? false,
   };
 
   // Create styles object with width and height if provided

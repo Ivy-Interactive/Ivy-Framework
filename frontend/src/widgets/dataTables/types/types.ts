@@ -63,6 +63,7 @@ export interface DataTableConfiguration {
   showVerticalBorders?: boolean;
   batchSize?: number;
   loadAllRows?: boolean;
+  showSearch?: boolean;
 }
 
 export interface TableProps {

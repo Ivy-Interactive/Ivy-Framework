@@ -56,6 +56,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     showIndexColumn,
     selectionMode,
     showGroups,
+    showSearch: showSearchConfig,
     showColumnTypeIcons,
     showVerticalBorders,
   } = config;
@@ -108,6 +109,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     columns: CompactSelection.empty(),
     rows: CompactSelection.empty(),
   });
+  const [showSearch, setShowSearch] = useState(false);
   const scrollThreshold = 10;
 
   // Generate header icons map for all column icons
@@ -132,6 +134,25 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
       resizeObserver.disconnect();
     };
   }, []);
+
+  // Handle keyboard shortcut for search (Ctrl/Cmd + F)
+  useEffect(() => {
+    if (!showSearchConfig) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && event.code === 'KeyF') {
+        setShowSearch(current => !current);
+        event.stopPropagation();
+        event.preventDefault();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown, true);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown, true);
+    };
+  }, [showSearchConfig]);
 
   // Handle scroll events
   const handleVisibleRegionChanged = useCallback(
@@ -240,6 +261,8 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
             ? columnGroupsHook.onGroupHeaderClicked
             : undefined
         }
+        showSearch={showSearchConfig ? showSearch : false}
+        onSearchClose={() => setShowSearch(false)}
       />
     </div>
   );
