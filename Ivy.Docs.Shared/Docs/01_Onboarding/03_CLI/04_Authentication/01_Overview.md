@@ -1,4 +1,4 @@
-﻿---
+---
 searchHints:
   - authentication
   - login
@@ -133,47 +133,23 @@ If configuration is present in both .NET user secrets and environment variables,
 
 ## Using IAuthService in Views
 
-Access `IAuthService` in your views to handle authentication programmatically:
-
 ```csharp
 var auth = this.UseService<IAuthService>();
 var client = this.UseService<IClientProvider>();
-```
 
-### Log in a User
-
-```csharp
+// Log in a user
 var token = await auth.LoginAsync(email, password);
-if (token != null)
-{
-    client.SetAuthToken(token);
-}
-```
+if (token != null) client.SetAuthToken(token);
 
-### Get Current User Information
-
-```csharp
+// Get current user information
 var userInfo = await auth.GetUserInfoAsync();
-if (userInfo != null)
-{
-    // Use userInfo.Email, userInfo.Name, etc.
-}
-```
 
-### Handle Logout
-
-```csharp
+// Handle logout
 await auth.LogoutAsync();
-```
 
-### Refresh Tokens
-
-```csharp
+// Refresh tokens
 var newToken = await auth.RefreshAccessTokenAsync();
-if (newToken != null)
-{
-    client.SetAuthToken(newToken);
-}
+if (newToken != null) client.SetAuthToken(newToken);
 ```
 
 ## Supported Authentication Providers
