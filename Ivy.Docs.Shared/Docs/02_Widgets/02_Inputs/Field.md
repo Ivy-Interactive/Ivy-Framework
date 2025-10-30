@@ -53,47 +53,10 @@ A `Field` supports the following common properties:
 * **HelpText(string)** - An optional help text displayed as a tooltip on an info icon next to the label.
 * **Required(bool)** - Marks the input as required (adds an asterisk or style cue).
 
-## Examples
-
-### Required Field
+### Properties Usage
 
 ```csharp demo-below
-public class RequiredDemo : ViewBase
-{
-    public override object? Build()
-    {
-        var email = UseState("");
-        return email.ToEmailInput()
-            .Placeholder("user@domain.com")
-            .WithField()
-            .Label("Email")
-            .Required();
-    }
-}
-```
-
-### Field With Description
-
-```csharp demo-below
-public class WithDescriptionDemo : ViewBase
-{
-    public override object? Build()
-    {
-        var password = UseState("");
-        return password.ToPasswordInput()
-            .WithField()
-            .Label("Password")
-            .Description("Must be at least 8 characters long and include a number");
-    }
-}
-```
-
-### Field With Help Text
-
-Use help text to provide contextual information without cluttering the interface:
-
-```csharp demo-below
-public class WithHelpTextDemo : ViewBase
+public class FieldExample : ViewBase
 {
     public override object? Build()
     {
@@ -102,6 +65,7 @@ public class WithHelpTextDemo : ViewBase
             .Placeholder("Enter username")
             .WithField()
             .Label("Username")
+            .Description("Must be at least 8 characters long")
             .HelpText("Your username must be unique and contain only letters, numbers, and underscores")
             .Required();
     }
@@ -142,6 +106,3 @@ Use `Field` whenever you want **consistent form layout** across your application
 </Callout>
 
 <WidgetDocs Type="Ivy.Field" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Inputs/Field.cs"/>
-
-
-
