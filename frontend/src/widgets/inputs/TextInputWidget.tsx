@@ -192,8 +192,7 @@ const DefaultVariant: React.FC<{
   size = Sizes.Medium,
 }) => {
   const { elementRef, savePosition } = useCursorPosition(props.value, inputRef);
-  const { isTruncated, showTooltip, setShowTooltip } =
-    useTruncationDetection(elementRef);
+  const { showTooltip, setShowTooltip } = useTruncationDetection(elementRef);
   const handleKeyDown = useEnterKeyBlur();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -240,7 +239,7 @@ const DefaultVariant: React.FC<{
           </div>
         ) : undefined,
         {
-          open: isTruncated && showTooltip && !isFocused && hasContent,
+          open: showTooltip && !isFocused && hasContent,
           contentClassName: 'max-w-sm',
           triggerAsChild: true,
         }
@@ -463,7 +462,7 @@ const SearchVariant: React.FC<{
   };
   const { ref: focusRef } = useFocusable('sidebar-navigation', 0);
   const searchInputRef = useRef<HTMLInputElement | null>(null);
-  const { isTruncated, showTooltip, setShowTooltip } =
+  const { showTooltip, setShowTooltip } =
     useTruncationDetection(searchInputRef);
 
   // Combine the refs
@@ -556,7 +555,7 @@ const SearchVariant: React.FC<{
           </div>
         ) : undefined,
         {
-          open: isTruncated && showTooltip && !isFocused && hasContent,
+          open: showTooltip && !isFocused && hasContent,
           contentClassName: 'max-w-sm',
           triggerAsChild: true,
         }
