@@ -131,6 +131,51 @@ If configuration is present in both .NET user secrets and environment variables,
 3. Credentials are validated by the configured authentication provider.
 4. If valid, Ivy establishes an authenticated session for the user.
 
+## Using IAuthService in Views
+
+Access `IAuthService` in your views to handle authentication programmatically:
+
+```csharp
+var auth = this.UseService<IAuthService>();
+var client = this.UseService<IClientProvider>();
+```
+
+### Log in a User
+
+```csharp
+var token = await auth.LoginAsync(email, password);
+if (token != null)
+{
+    client.SetAuthToken(token);
+}
+```
+
+### Get Current User Information
+
+```csharp
+var userInfo = await auth.GetUserInfoAsync();
+if (userInfo != null)
+{
+    // Use userInfo.Email, userInfo.Name, etc.
+}
+```
+
+### Handle Logout
+
+```csharp
+await auth.LogoutAsync();
+```
+
+### Refresh Tokens
+
+```csharp
+var newToken = await auth.RefreshAccessTokenAsync();
+if (newToken != null)
+{
+    client.SetAuthToken(newToken);
+}
+```
+
 ## Supported Authentication Providers
 
 Ivy supports the following authentication providers. Click on any provider for detailed setup instructions:
