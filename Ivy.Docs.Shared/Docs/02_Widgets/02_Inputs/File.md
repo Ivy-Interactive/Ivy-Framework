@@ -50,14 +50,18 @@ public class FileDropDemo : ViewBase
     public override object? Build()
     {    
         var fileState = this.UseState((FileInput?)null);
-        var fileStates = this.UseState((FileInput?)null);
+        var fileStates = this.UseState((IEnumerable<FileInput>?)null);
         return  Layout.Vertical()
                 | fileState.ToFileInput().Variant(FileInputs.Drop)
-                | fileStates.ToFileInput().Variant(FileInputs.Drop).Multiple;
+                | fileStates.ToFileInput().Variant(FileInputs.Drop);
     }
 }    
          
 ```
+
+<Callout Type="tip">
+Multiple file selection is automatically enabled when you use a collection type (`IEnumerable<FileInput>`, `FileInput[]`, `List<FileInput>`, etc.) as your state. You do **not** need to explicitly set a `.Multiple()` property.
+</Callout>
 
 ## Styling
 
