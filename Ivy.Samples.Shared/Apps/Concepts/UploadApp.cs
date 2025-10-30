@@ -29,14 +29,11 @@ public class SingleFileUpload : ViewBase
 
         var uploadUrl = this.UseUpload(async (fileUpload, stream, cancellationToken) =>
         {
-            var uploadId = Guid.NewGuid();
-            var currentFile = fileUpload with { Id = uploadId };
-
             try
             {
-                selectedFile.Set(currentFile);
+                selectedFile.Set(fileUpload);
 
-                var totalBytes = currentFile.Length;
+                var totalBytes = fileUpload.Length;
                 var processedBytes = 0L;
                 var buffer = new byte[8192]; // 8KB chunks
 
@@ -72,7 +69,7 @@ public class SingleFileUpload : ViewBase
             }
         });
 
-        void OnDelete(object fileId)
+        void OnDelete(Guid fileId)
         {
             selectedFile.Default();
             uploadedBytes.Default();
@@ -118,8 +115,7 @@ public class MultipleFilesUpload : ViewBase
 
         var uploadUrl = this.UseUpload(async (fileUpload, stream, cancellationToken) =>
         {
-            var uploadId = Guid.NewGuid();
-            var currentFile = fileUpload with { Id = uploadId };
+            var currentFile = fileUpload;
 
             try
             {
@@ -168,9 +164,9 @@ public class MultipleFilesUpload : ViewBase
             }
         });
 
-        void OnDelete(object fileId)
+        void OnDelete(Guid fileId)
         {
-            var file = selectedFiles.Value.FirstOrDefault(f => f.Id.Equals(fileId));
+            var file = selectedFiles.Value.FirstOrDefault(f => f.Id == fileId);
             if (file == null) return;
             selectedFiles.Set(files => files.Remove(file));
         }

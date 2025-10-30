@@ -23,8 +23,8 @@ public enum FileUploadStatus
 /// </summary>
 public record FileUpload
 {
-    /// <summary>Gets the identifier for this file upload, set by the client.</summary>
-    public object? Id { get; set; }
+    /// <summary>Gets the identifier for this file upload, set by the server.</summary>
+    public Guid Id { get; init; }
 
     /// <summary>Gets the name of the uploaded file including its extension.</summary>
     public string FileName { get; init; } = string.Empty;
@@ -139,6 +139,7 @@ public class UploadService(string connectionId) : IUploadService, IDisposable
 
         var fileUpload = new FileUpload
         {
+            Id = guid,
             FileName = actualFileName,
             ContentType = actualMimeType,
             Length = file.Length

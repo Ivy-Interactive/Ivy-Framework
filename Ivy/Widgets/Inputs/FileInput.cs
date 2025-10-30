@@ -69,7 +69,7 @@ public abstract record FileInputBase : WidgetBase<FileInputBase>, IAnyFileInput
     [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
 
     /// <summary>Gets or sets the event handler called when a file is deleted (passes FileInput.Id as parameter).</summary>
-    [Event] public Func<Event<IAnyInput, object>, ValueTask>? OnDelete { get; set; }
+    [Event] public Func<Event<IAnyInput, Guid>, ValueTask>? OnDelete { get; set; }
 
     /// <summary>
     /// Returns the types that this file input can bind to.
@@ -373,7 +373,7 @@ public static class FileInputExtensions
     /// <param name="widget">The file input to configure.</param>
     /// <param name="onDelete">The event handler to call when a file is deleted, receives the FileInput.Id.</param>
     [OverloadResolutionPriority(1)]
-    public static FileInputBase HandleDelete(this FileInputBase widget, Func<Event<IAnyInput, object>, ValueTask> onDelete)
+    public static FileInputBase HandleDelete(this FileInputBase widget, Func<Event<IAnyInput, Guid>, ValueTask> onDelete)
     {
         return widget with { OnDelete = onDelete };
     }
@@ -383,7 +383,7 @@ public static class FileInputExtensions
     /// </summary>
     /// <param name="widget">The file input to configure.</param>
     /// <param name="onDelete">The event handler to call when a file is deleted, receives the FileInput.Id.</param>
-    public static FileInputBase HandleDelete(this FileInputBase widget, Action<Event<IAnyInput, object>> onDelete)
+    public static FileInputBase HandleDelete(this FileInputBase widget, Action<Event<IAnyInput, Guid>> onDelete)
     {
         return widget.HandleDelete(onDelete.ToValueTask());
     }
@@ -393,7 +393,7 @@ public static class FileInputExtensions
     /// </summary>
     /// <param name="widget">The file input to configure.</param>
     /// <param name="onDelete">The simple action to perform when a file is deleted, receives the FileInput.Id.</param>
-    public static FileInputBase HandleDelete(this FileInputBase widget, Action<object> onDelete)
+    public static FileInputBase HandleDelete(this FileInputBase widget, Action<Guid> onDelete)
     {
         return widget.HandleDelete(e => { onDelete(e.Value); return ValueTask.CompletedTask; });
     }

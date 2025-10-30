@@ -11,7 +11,7 @@ public class FileInputApp : SampleBase
     protected override object? BuildSample()
     {
         // Mock file for 'With Value' example
-        var mockFile = new FileUpload { Id = Guid.NewGuid(), FileName = "example.txt", ContentType = "text/plain", Length = 12345 };
+        var mockFile = new FileUpload { FileName = "example.txt", ContentType = "text/plain", Length = 12345 };
 
         var singleFile = UseState<FileUpload?>(() => null);
         var singleFileWithValue = UseState<FileUpload?>(() => mockFile);

@@ -14,5 +14,6 @@ global using System.ComponentModel.DataAnnotations;
 global using System.Globalization;
 global using Ivy;
 global using Ivy.Chrome;
+global using Ivy.Services;
 
 namespace Ivy.Samples.Shared;

@@ -62,7 +62,7 @@ public class FileDropDemo : ViewBase
 ```
 
 <Callout Type="tip">
-Multiple file selection is automatically enabled when you use a collection type (`IEnumerable<FileUpload>`, `FileUpload[]`, `List<FileUpload>`, etc.) as your state. You do **not** need to explicitly set a `.Multiple()` property.
+Multiple file selection is automatically enabled when you use a collection type (`IEnumerable<FileUpload>`, `FileUpload[]`, `List<FileUpload>`, etc.) as your state. You do **not** need to explicitly set a `.Multiple()` property,
 </Callout>
 
 ## Styling

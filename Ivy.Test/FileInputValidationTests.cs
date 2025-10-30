@@ -313,7 +313,7 @@ public class FileInputValidationTests
 
     private static FileUpload CreateTestFile(string name, string type = "text/plain")
     {
-        return new FileUpload { Id = Guid.NewGuid(), FileName = name, ContentType = type, Length = 12345 };
+        return new FileUpload { FileName = name, ContentType = type, Length = 12345 };
     }
 
     [Fact]
