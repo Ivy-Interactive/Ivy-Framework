@@ -91,7 +91,7 @@ public class PathToAppIdMiddleware
 
             // Rewrite the request to root with appId parameter
             context.Request.Path = "/";
-            context.Request.QueryString = new QueryString($"{queryString}appId={Uri.EscapeDataString(appId)}");
+            context.Request.QueryString = new QueryString($"{queryString}appId={System.Web.HttpUtility.UrlEncode(appId)}");
         }
 
         await _next(context);
