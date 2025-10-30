@@ -57,6 +57,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     selectionMode,
     showGroups,
     showColumnTypeIcons,
+    showVerticalBorders,
   } = config;
 
   const selectionProps = getSelectionProps(selectionMode);
@@ -85,7 +86,10 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
       horizontalBorderColor: colors.border || (isDark ? '#404045' : '#d1d5db'),
       linkColor:
         colors.primary || colors.accent || (isDark ? '#3b82f6' : '#2563eb'),
-      borderColor: colors.border || (isDark ? '#404045' : '#d1d5db'),
+      // Control vertical borders by setting borderColor to transparent when disabled
+      borderColor: showVerticalBorders
+        ? colors.border || (isDark ? '#404045' : '#d1d5db')
+        : 'transparent',
       cellHorizontalPadding: 16,
       cellVerticalPadding: 8,
       headerIconSize: 20,
