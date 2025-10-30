@@ -23,6 +23,7 @@ searchHints:
   - columns
   - sort
   - filter
+  - search
   - dataset
 ---
 
@@ -112,6 +113,7 @@ sampleUsers.ToDataTable()
         config.AllowLlmFiltering = true;
         config.AllowSorting = true;
         config.AllowFiltering = true;
+        config.ShowSearch = true;
     })
     .Height(Size.Units(100))
 ```
@@ -128,6 +130,7 @@ sampleUsers.ToDataTable()
 - **AllowLlmFiltering** - Enable AI-powered natural language filtering
 - **AllowSorting** - Enable/disable sorting globally
 - **AllowFiltering** - Enable/disable filtering globally
+- **ShowSearch** - Enable search functionality (accessible via Ctrl/Cmd + F keyboard shortcut)
 
 ## Performance with Large Datasets
 
