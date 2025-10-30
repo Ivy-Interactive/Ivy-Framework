@@ -46,6 +46,20 @@ public record FileUpload
     public FileUploadStatus Status { get; set; } = FileUploadStatus.Pending;
 }
 
+/// <summary>
+/// Interface for handling file uploads with custom logic.
+/// </summary>
+public interface IUploadHandler
+{
+    /// <summary>
+    /// Handles the file upload asynchronously.
+    /// </summary>
+    /// <param name="fileUpload">The file upload metadata.</param>
+    /// <param name="stream">The file content stream.</param>
+    /// <param name="cancellationToken">Cancellation token for the operation.</param>
+    Task HandleUploadAsync(FileUpload fileUpload, Stream stream, CancellationToken cancellationToken);
+}
+
 public static class FileUploadExtensions
 {
     public static void SetProgress(this IState<FileUpload?> fileInputState, float progress)
@@ -87,10 +101,6 @@ public class UploadController(AppSessionStore sessionStore) : Controller
         if (string.IsNullOrEmpty(uploadId))
         {
             return BadRequest("uploadId is required.");
-        }
-        if (file == null)
-        {
-            return BadRequest("file is required.");
         }
         if (sessionStore.Sessions.TryGetValue(connectionId, out var session))
         {

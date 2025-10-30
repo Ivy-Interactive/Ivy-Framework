@@ -24,61 +24,23 @@ public class SingleFileUpload : ViewBase
 {
     public override object? Build()
     {
-        var selectedFile = UseState<FileUpload?>();
-        var uploadedBytes = UseState<byte[]?>();
+        var contentState = UseState<byte[]?>();
+        var uploadState = UseState<FileUpload?>();
 
-        var uploadUrl = this.UseUpload(async (fileUpload, stream, cancellationToken) =>
-        {
-            try
-            {
-                selectedFile.Set(fileUpload);
+        var uploadHandler = new MemoryStreamUploadHandler(contentState, uploadState);
 
-                var totalBytes = fileUpload.Length;
-                var processedBytes = 0L;
-                var buffer = new byte[8192]; // 8KB chunks
-
-                using var memoryStream = new MemoryStream();
-
-                selectedFile.SetStatus(FileUploadStatus.Loading);
-
-                int bytesRead;
-                while ((bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length, cancellationToken)) > 0)
-                {
-                    cancellationToken.ThrowIfCancellationRequested();
-
-                    await memoryStream.WriteAsync(buffer, 0, bytesRead, cancellationToken);
-                    processedBytes += bytesRead;
-                    var progress = totalBytes > 0 ? ((float)processedBytes / totalBytes) : 0;
-                    selectedFile.SetProgress(progress);
-
-                    //Simulate this being slower
-                    await Task.Delay(50, cancellationToken);
-                }
-
-                uploadedBytes.Set(memoryStream.ToArray());
-                selectedFile.SetStatus(FileUploadStatus.Finished);
-            }
-            catch (OperationCanceledException)
-            {
-                selectedFile.SetStatus(FileUploadStatus.Aborted);
-            }
-            catch (Exception)
-            {
-                selectedFile.SetStatus(FileUploadStatus.Failed);
-                throw;
-            }
-        });
+        var uploadUrl = this.UseUpload(uploadHandler);
 
         void OnDelete(Guid fileId)
         {
-            selectedFile.Default();
-            uploadedBytes.Default();
+            uploadState.Default();
+            contentState.Default();
         }
 
         return Layout.Vertical()
                | Text.H1("Single File Upload")
-               | selectedFile.ToFileInput(uploadUrl).Accept("*/*").Placeholder("Choose a file to upload").HandleDelete(OnDelete)
-               | selectedFile.ToDetails()
+               | uploadState.ToFileInput(uploadUrl).Accept("*/*").Placeholder("Choose a file to upload").HandleDelete(OnDelete)
+               | uploadState.ToDetails()
                    .Builder(e => e!.Length, e => e.Func((long x) => Utils.FormatBytes(x)))
                    .Builder(e => e!.Progress, e => e.Func((float x) => x.ToString("P0")))
             ;

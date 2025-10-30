@@ -22,26 +22,27 @@ public static class UseUploadExtensions
         return url;
     }
 
-    public static IState<string?> UseUpload<TView>(this TView view, Action<byte[]> handler, string mimeType, string fileName) where TView : ViewBase =>
-        view.Context.UseUpload(handler, mimeType, fileName);
+    /// <summary>
+    /// Creates an upload endpoint using an IUploadHandler for custom upload logic.
+    /// </summary>
+    /// <param name="view">The view context.</param>
+    /// <param name="handler">The upload handler to process uploaded files.</param>
+    /// <param name="defaultContentType">Optional default content type for uploaded files.</param>
+    /// <param name="defaultFileName">Optional default file name for uploaded files.</param>
+    /// <returns>A state containing the upload URL.</returns>
+    public static IState<string?> UseUpload<TView>(this TView view, IUploadHandler handler, string? defaultContentType = null, string? defaultFileName = null) where TView : ViewBase =>
+        view.Context.UseUpload(handler, defaultContentType, defaultFileName);
 
-    public static IState<string?> UseUpload<TView>(this TView view, Func<byte[], Task> handler, string mimeType, string fileName) where TView : ViewBase =>
-        view.Context.UseUpload(handler, mimeType, fileName);
-
-    public static IState<string?> UseUpload(this IViewContext context, Action<byte[]> handler, string mimeType, string fileName) =>
-        context.UseUpload(async (bytes) => { handler(bytes); await Task.CompletedTask; }, mimeType, fileName);
-
-    public static IState<string?> UseUpload(this IViewContext context, Func<byte[], Task> handler, string mimeType, string fileName)
+    /// <summary>
+    /// Creates an upload endpoint using an IUploadHandler for custom upload logic.
+    /// </summary>
+    /// <param name="context">The view context.</param>
+    /// <param name="handler">The upload handler to process uploaded files.</param>
+    /// <param name="defaultContentType">Optional default content type for uploaded files.</param>
+    /// <param name="defaultFileName">Optional default file name for uploaded files.</param>
+    /// <returns>A state containing the upload URL.</returns>
+    public static IState<string?> UseUpload(this IViewContext context, IUploadHandler handler, string? defaultContentType = null, string? defaultFileName = null)
     {
-        // Adapt byte[] handler to UploadDelegate
-        async Task AdaptedHandler(FileUpload fileUpload, Stream stream, CancellationToken cancellationToken)
-        {
-            using var memoryStream = new MemoryStream();
-            await stream.CopyToAsync(memoryStream, cancellationToken);
-            var bytes = memoryStream.ToArray();
-            await handler(bytes);
-        }
-
-        return context.UseUpload(AdaptedHandler, mimeType, fileName);
+        return context.UseUpload(handler.HandleUploadAsync, defaultContentType, defaultFileName);
     }
 }
