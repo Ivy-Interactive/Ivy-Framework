@@ -106,7 +106,7 @@ public class ColorChangedDemo : ViewBase
     public override object? Build()
     {    
         var colorState = this.UseState("#ff0000");
-        var colorName = UseState("");
+        var colorName = UseState(colorState.Value);
         var onChangeHandler = (Event<IInput<string>, string> e) =>
         {
             colorName.Set(e.Value);
@@ -114,12 +114,13 @@ public class ColorChangedDemo : ViewBase
         };
         return Layout.Vertical() 
                 | H3("Hex Color Picker")
+                | (Layout.Horizontal()
                 | new ColorInput<string>
                        (colorState.Value, onChangeHandler)
                       .Variant(ColorInputs.Picker) 
                 | new Code(colorName.Value)
-                     .ShowCopyButton()
-                     .ShowBorder();
+                    .ShowCopyButton()
+                    .ShowBorder());
     }    
 }    
 ```
