@@ -59,6 +59,7 @@ export interface DataTableConfiguration {
   selectionMode?: SelectionModes;
   showIndexColumn?: boolean;
   showGroups?: boolean;
+  showColumnTypeIcons?: boolean;
   batchSize?: number;
   loadAllRows?: boolean;
 }
@@ -66,7 +67,7 @@ export interface DataTableConfiguration {
 export interface TableProps {
   columns: DataColumn[];
   connection: DataTableConnection;
-  config?: DataTableConfiguration;
+  configuration?: DataTableConfiguration;
   editable?: boolean;
   width?: string;
   height?: string;

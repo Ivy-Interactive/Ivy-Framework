@@ -32,26 +32,27 @@ const TableLayout: React.FC<TableLayoutProps> = ({ children }) => {
 export const DataTable: React.FC<TableProps> = ({
   columns,
   connection,
-  config = {},
+  configuration = {},
   editable = false,
   width,
   height,
 }) => {
   // Apply default configuration values
   const finalConfig = {
-    filterType: config.filterType,
-    freezeColumns: config.freezeColumns ?? null,
-    allowLlmFiltering: config.allowLlmFiltering ?? true,
-    allowSorting: config.allowSorting ?? true,
-    allowFiltering: config.allowFiltering ?? true,
-    allowColumnReordering: config.allowColumnReordering ?? true,
-    allowColumnResizing: config.allowColumnResizing ?? true,
-    allowCopySelection: config.allowCopySelection ?? true,
-    selectionMode: config.selectionMode,
-    showIndexColumn: config.showIndexColumn ?? false,
-    showGroups: config.showGroups ?? false,
-    batchSize: config.batchSize,
-    loadAllRows: config.loadAllRows ?? false,
+    filterType: configuration.filterType,
+    freezeColumns: configuration.freezeColumns ?? null,
+    allowLlmFiltering: configuration.allowLlmFiltering ?? true,
+    allowSorting: configuration.allowSorting ?? true,
+    allowFiltering: configuration.allowFiltering ?? true,
+    allowColumnReordering: configuration.allowColumnReordering ?? true,
+    allowColumnResizing: configuration.allowColumnResizing ?? true,
+    allowCopySelection: configuration.allowCopySelection ?? true,
+    selectionMode: configuration.selectionMode,
+    showIndexColumn: configuration.showIndexColumn ?? false,
+    showGroups: configuration.showGroups ?? false,
+    showColumnTypeIcons: configuration.showColumnTypeIcons ?? true,
+    batchSize: configuration.batchSize,
+    loadAllRows: configuration.loadAllRows ?? false,
   };
 
   // Create styles object with width and height if provided

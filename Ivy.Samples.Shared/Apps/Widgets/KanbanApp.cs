@@ -18,6 +18,7 @@ public class KanbanApp : SampleBase
 {
     protected override object? BuildSample()
     {
+        var selectedTaskId = this.UseState((string?)null);
         var tasks = UseState(new[]
         {
             new Task { Id = "1", Title = "Design Homepage", Status = "Todo", Priority = 2, Description = "Create wireframes and mockups", Assignee = "Alice" },
@@ -34,9 +35,7 @@ public class KanbanApp : SampleBase
             new Task { Id = "12", Title = "User Training", Status = "Done", Priority = 3, Description = "Train users on new features", Assignee = "Alice" },
         });
 
-        return
-            // Kanban with common features
-            tasks.Value
+        var kanban = tasks.Value
                 .ToKanban(
                     groupBySelector: e => e.Status,
                     idSelector: e => e.Id,
@@ -111,11 +110,42 @@ public class KanbanApp : SampleBase
                     var updatedTasks = tasks.Value.Where(task => task.Id != taskId).ToArray();
                     tasks.Set(updatedTasks);
                 })
+                .HandleClick(cardId =>
+                {
+                    var taskId = cardId?.ToString();
+                    if (taskId != null)
+                        selectedTaskId.Set(taskId);
+                })
                 .Empty(
                     new Card()
                         .Title("No Tasks")
                         .Description("Create your first task to get started")
                 );
+
+        return new Fragment(
+            kanban,
+            selectedTaskId.Value != null ? BuildTaskSheet(selectedTaskId as IState<string?>, tasks) : null
+        );
+    }
+
+    private object BuildTaskSheet(IState<string?>? selectedTaskId, IState<Task[]> tasks)
+    {
+        var task = tasks.Value.FirstOrDefault(t => t.Id == selectedTaskId?.Value);
+        if (task == null) return new Fragment();
+
+        return new Sheet(
+            onClose: () => selectedTaskId?.Set((string?)null),
+            content: Layout.Vertical()
+                | new Card()
+                    .Title(task.Title)
+                    .Description(task.Description)
+                | Layout.Horizontal()
+                    | new Card().Title("Priority").Description($"P{task.Priority}")
+                    | new Card().Title("Assignee").Description(task.Assignee)
+                    | new Card().Title("Status").Description(task.Status),
+            title: task.Title,
+            description: "Task Details"
+        ).Width(Size.Rem(32));
     }
 
     private static int GetStatusOrder(string status) => status switch
