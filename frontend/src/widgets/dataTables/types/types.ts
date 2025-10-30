@@ -61,9 +61,11 @@ export interface DataTableConfiguration {
   showGroups?: boolean;
   batchSize?: number;
   loadAllRows?: boolean;
+  enableCellClickEvents?: boolean;
 }
 
 export interface TableProps {
+  id: string;
   columns: DataColumn[];
   connection: DataTableConnection;
   config?: DataTableConfiguration;

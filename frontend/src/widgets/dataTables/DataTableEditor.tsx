@@ -22,12 +22,15 @@ import { convertToGridColumns } from './utils/columnHelpers';
 import { iconCellRenderer } from './utils/customRenderers';
 import { generateHeaderIcons, addStandardIcons } from './utils/headerIcons';
 import { ThemeColors } from '@/lib/color-utils';
+import { useEventHandler } from '@/components/event-handler';
 
 interface TableEditorProps {
+  widgetId: string;
   hasOptions?: boolean;
 }
 
 export const DataTableEditor: React.FC<TableEditorProps> = ({
+  widgetId,
   hasOptions = false,
 }) => {
   const {
@@ -55,6 +58,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     showIndexColumn,
     selectionMode,
     showGroups,
+    enableCellClickEvents,
   } = config;
 
   const selectionProps = getSelectionProps(selectionMode);
@@ -173,6 +177,75 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     []
   );
 
+  // Get event handler for sending events to backend
+  const eventHandler = useEventHandler();
+
+  // Handle cell single-clicks (for backend events only)
+  const handleCellClicked = useCallback(
+    (cell: Item) => {
+      if (enableCellClickEvents) {
+        // Get actual cell value
+        const cellContent = getCellContent(cell);
+        const visibleColumns = columns.filter(c => !c.hidden);
+        const column = visibleColumns[cell[0]];
+
+        // Extract the actual value from the cell based on its kind
+        let cellValue: unknown = null;
+        if (
+          cellContent.kind === 'text' ||
+          cellContent.kind === 'number' ||
+          cellContent.kind === 'boolean'
+        ) {
+          cellValue = cellContent.data;
+        } else if ('data' in cellContent) {
+          cellValue = (cellContent as Record<string, unknown>).data;
+        }
+
+        // Send event to backend with row, column, and value
+        eventHandler('OnCellClick', widgetId, [
+          cell[1], // row index
+          cell[0], // column index
+          column?.name || '', // column name
+          cellValue, // cell value
+        ]);
+      }
+      // Do NOT prevent default - let selection happen normally!
+    },
+    [enableCellClickEvents, eventHandler, widgetId, columns, getCellContent]
+  );
+
+  // Handle cell double-clicks/activation (for editing)
+  const handleCellActivated = useCallback(
+    (cell: Item) => {
+      if (enableCellClickEvents) {
+        const cellContent = getCellContent(cell);
+        const visibleColumns = columns.filter(c => !c.hidden);
+        const column = visibleColumns[cell[0]];
+
+        // Extract the actual value from the cell based on its kind
+        let cellValue: unknown = null;
+        if (
+          cellContent.kind === 'text' ||
+          cellContent.kind === 'number' ||
+          cellContent.kind === 'boolean'
+        ) {
+          cellValue = cellContent.data;
+        } else if ('data' in cellContent) {
+          cellValue = (cellContent as Record<string, unknown>).data;
+        }
+
+        // Send activation event to backend
+        eventHandler('OnCellActivated', widgetId, [
+          cell[1], // row index
+          cell[0], // column index
+          column?.name || '', // column name
+          cellValue, // cell value
+        ]);
+      }
+    },
+    [enableCellClickEvents, eventHandler, widgetId, columns, getCellContent]
+  );
+
   // Convert columns to grid format with proper widths
   const gridColumns = convertToGridColumns(
     columns,
@@ -219,6 +292,9 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
         rowMarkers={showIndexColumn ? 'number' : 'none'}
         onColumnMoved={allowColumnReordering ? handleColumnReorder : undefined}
         groupHeaderHeight={showGroups ? 36 : undefined}
+        cellActivationBehavior="double-click"
+        onCellClicked={handleCellClicked}
+        onCellActivated={handleCellActivated}
       />
     </div>
   );
