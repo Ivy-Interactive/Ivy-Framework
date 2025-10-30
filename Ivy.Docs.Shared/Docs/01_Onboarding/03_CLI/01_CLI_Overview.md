@@ -1,4 +1,4 @@
-﻿---
+---
 searchHints:
   - cli
   - command-line
@@ -101,6 +101,6 @@ Most Ivy commands require authentication. Use `ivy login` to authenticate with y
 For detailed information on each feature, see the specific documentation files:
 
 - [Init.md](Init.md) - Project initialization guide
-- [DatabaseIntegration/01_Overview.md](DatabaseIntegration/01_Overview.md) - Database integration guide
-- [Authentication/01_Overview.md](Authentication/01_Overview.md) - Authentication setup guide
+- [DatabaseIntegration/01_Database_Overview.md](DatabaseIntegration/01_Database_Overview.md) - Database integration guide
+- [Authentication/01_Authentication_Overview.md](Authentication/01_Authentication_Overview.md) - Authentication setup guide
 - [Deploy.md](Deploy.md) - Deployment guide
