@@ -102,6 +102,10 @@ To skip the interactive prompts, you can provide configuration via a connection 
 >ivy auth add --provider Supabase --connection-string "Supabase:Url=https://your-project.supabase.co;Supabase:ApiKey=your-api-key; Supabase:LegacyJwtSecret=your-jwt-secret"
 ```
 
+<Callout Tip="Info">
+`LegacyJwtSecret` parameter is only required if your Supabase project is still using legacy JWT secrets. If you don't need legacy JWT support, you can omit this parameter from the connection string and leave the field empty during interactive setup.
+</Callout>
+
 For a list of connection string parameters, see [Configuration Parameters](#configuration-parameters) below.
 
 #### Manual Configuration
