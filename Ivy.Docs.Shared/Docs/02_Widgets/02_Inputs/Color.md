@@ -71,24 +71,21 @@ public class ColorDemo : ViewBase
         var pickerColorState = UseState("#ff0000");
         var textAndPickerColorState = UseState("#ff0000");
         return Layout.Vertical()
-                | (Layout.Horizontal()
-                    | Text.Small("Just Text")
-                          .Width(25)
-                    | textColorState
+                | textColorState
                           .ToColorInput()
-                          .Variant(ColorInputs.Text))
-                | (Layout.Horizontal()
-                    | Text.Small("Just Picker")
-                          .Width(25)
-                    | pickerColorState
+                          .Variant(ColorInputs.Text)
+                          .WithField()
+                          .Label("Just Text")
+                | pickerColorState
                           .ToColorInput()
-                          .Variant(ColorInputs.Picker))
-                | (Layout.Horizontal()
-                    | Text.Small("Text and Picker")
-                          .Width(25)
-                    | textAndPickerColorState
+                          .Variant(ColorInputs.Picker)
+                          .WithField()
+                          .Label("Just Picker")
+                | textAndPickerColorState
                           .ToColorInput()
-                          .Variant(ColorInputs.TextAndPicker));
+                          .Variant(ColorInputs.TextAndPicker)
+                          .WithField()
+                          .Label("Text and Picker");
     }   
 }
 ```

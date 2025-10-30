@@ -11,11 +11,11 @@ searchHints:
 # Field
 
 <Ingress>
-Group any input with a label, description, and required indicator for a consistent, accessible form design.
+Group any input with a label, description, help text, and required indicator for a consistent, accessible form design.
 </Ingress>
 
 The `Field` widget acts as a **wrapper** around any input (such as `TextInput`, `Select`, `DateTime`, etc.).  
-It provides a standardized way to display a label, optional description, and visual cues like a required asterisk.  
+It provides a standardized way to display a label, optional description, help text tooltips, and visual cues like a required asterisk.  
 
 This makes forms easier to build and ensures inputs remain consistent in layout and accessibility.
 
@@ -50,6 +50,7 @@ A `Field` supports the following common properties:
 
 * **Label(string)** - The display label above the input.
 * **Description(string)** - An optional helper text shown below the input.
+* **HelpText(string)** - An optional help text displayed as a tooltip on an info icon next to the label.
 * **Required(bool)** - Marks the input as required (adds an asterisk or style cue).
 
 ## Examples
@@ -83,6 +84,26 @@ public class WithDescriptionDemo : ViewBase
             .WithField()
             .Label("Password")
             .Description("Must be at least 8 characters long and include a number");
+    }
+}
+```
+
+### Field With Help Text
+
+Use help text to provide contextual information without cluttering the interface:
+
+```csharp demo-below
+public class WithHelpTextDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var username = UseState("");
+        return username.ToTextInput()
+            .Placeholder("Enter username")
+            .WithField()
+            .Label("Username")
+            .HelpText("Your username must be unique and contain only letters, numbers, and underscores")
+            .Required();
     }
 }
 ```

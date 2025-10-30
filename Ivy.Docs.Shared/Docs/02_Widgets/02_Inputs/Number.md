@@ -60,7 +60,6 @@ public class NumberSliderInput : ViewBase
         var tapes = UseState(1.0);
         var cart = UseState("");
         return Layout.Vertical()
-                | Text.Block("Tapes")
                 | new NumberInput<double>(
                       tapes.Value,
                       e => {
@@ -72,6 +71,8 @@ public class NumberSliderInput : ViewBase
                      .Precision(2)
                      .Step(0.5)
                      .Variant(NumberInputs.Slider)
+                     .WithField()
+                     .Label("Tapes")
                 | Text.Block(cart);
     }
 }
@@ -100,7 +101,6 @@ public class MoneyInputDemo : ViewBase
         
         return Layout.Vertical()
                 | Text.H3("Simple Currency Converter")
-                | Text.Label("Enter EUR amount:")
                 | new NumberInput<decimal>(
                     moneyInEUR.Value,
                     e => {
@@ -112,16 +112,20 @@ public class MoneyInputDemo : ViewBase
                 .FormatStyle(NumberFormatStyle.Currency)
                 .Currency("EUR")
                 .Placeholder("€0.00")
+                .WithField()
+                .Label("Enter EUR amount")
                     
-                | Text.Label("USD:")
                 | moneyInUSD.ToMoneyInput()
                             .Currency("USD")
                             .Disabled()
+                            .WithField()
+                            .Label("USD")
                     
-                | Text.Label("GBP:")
                 | moneyInGBP.ToMoneyInput()
                             .Currency("GBP")
-                            .Disabled();
+                            .Disabled()
+                            .WithField()
+                            .Label("GBP");
     }
 }
 ```
@@ -178,15 +182,16 @@ public class MoneyPrecisionDemo : ViewBase
     public override object? Build()
     {
         var precValue = UseState(0.50M);
-        return Layout.Horizontal() 
-                | Text.Label("Min 0, Max 100, Step 0.5, Precision 2")
-                | new NumberInput<decimal>(precValue)
+        return new NumberInput<decimal>(precValue)
                      .Min(0.0)
                      .Max(100.0)
                      .Step(0.5)
                      .Precision(2)
                      .FormatStyle(NumberFormatStyle.Currency)
-                     .Currency("USD");
+                     .Currency("USD")
+                     .WithField()
+                     .Label("Price")
+                     .Description("Min 0, Max 100, Step 0.5, Precision 2");
     }
 }
 ```
@@ -249,21 +254,19 @@ public class GroceryAppDemo : ViewBase
         var eggCost = 3.45M;
         var breadCost = 6.13M;
         return Layout.Vertical()
-                | (Layout.Horizontal() 
-                   | Text.Label("Egg").Width(10)
-                   | eggs.ToNumberInput()
+                | eggs.ToNumberInput()
                          .Min(0)
                          .Max(12)
-                         .Width(10)
-                   | Text.Html("<i>Maximum 12</i>"))  
+                         .WithField()
+                         .Label("Egg")
+                         .Description("Maximum 12")
         
-                | (Layout.Horizontal()
-                   | Text.Label("Bread").Width(10)
-                   | breads.ToNumberInput()
+                | breads.ToNumberInput()
                               .Min(0)
                               .Max(5)
-                              .Width(10)
-                   | Text.Html("<i>Maximum 5</i>"))
+                              .WithField()
+                              .Label("Bread")
+                              .Description("Maximum 5")
                 | Text.Large($"{eggs} eggs and {breads} breads")
                 | (Layout.Horizontal()
                    | Text.Large("Bill : ")

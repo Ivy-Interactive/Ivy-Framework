@@ -29,9 +29,10 @@ public class SelectVariantDemo : ViewBase
         var langs = new string[]{"C#","Java","Go","JavaScript","F#","Kotlin","VB.NET","Rust"};
         
         var favLang = UseState("C#");
-        return Layout.Vertical() 
-                | Text.Label("Select your favourite programming language")
-                | favLang.ToSelectInput(langs.ToOptions()).Variant(SelectInputs.Select);
+        return favLang.ToSelectInput(langs.ToOptions())
+                      .Variant(SelectInputs.Select)
+                      .WithField()
+                      .Label("Select your favourite programming language");
     }    
 }
 ```
@@ -109,13 +110,12 @@ public class EventHandlingDemo : ViewBase
         var skillOptions = CategoryOptions[selectedCategory.Value].ToOptions();
         
         return Layout.Vertical()
-            | Layout.Grid().Columns(2)
-                | Text.Label("Category:")
-                | selectedCategory.ToSelectInput(categoryOptions)
+            | selectedCategory.ToSelectInput(categoryOptions)
                     .Placeholder("Choose a category...")
+                    .WithField()
+                    .Label("Category")
                 
-                | Text.Label("Skill:")
-                | new SelectInput<string>(
+            | new SelectInput<string>(
                     value: selectedSkill.Value,
                     onChange: e =>
                     {
@@ -124,6 +124,8 @@ public class EventHandlingDemo : ViewBase
                     },
                     skillOptions)
                     .Placeholder("Select a skill...")
+                    .WithField()
+                    .Label("Skill")
             
             | (showInfo.Value 
                 ? Text.Block($"Selected: {selectedCategory.Value} → {selectedSkill.Value}") 
@@ -152,19 +154,22 @@ public class SelectStylingDemo : ViewBase
         var options = new[]{"Option 1", "Option 2", "Option 3"}.ToOptions();
         
         return Layout.Vertical()
-            | Text.Label("Normal SelectInput:")
             | normalSelect.ToSelectInput(options)
                 .Placeholder("Choose an option...")
+                .WithField()
+                .Label("Normal SelectInput")
             
-            | Text.Label("Invalid SelectInput:")
             | invalidSelect.ToSelectInput(options)
                 .Placeholder("This has an error...")
                 .Invalid("This field is required")
+                .WithField()
+                .Label("Invalid SelectInput")
             
-            | Text.Label("Disabled SelectInput:")
             | disabledSelect.ToSelectInput(options)
                 .Placeholder("This is disabled...")
-                .Disabled(true);
+                .Disabled(true)
+                .WithField()
+                .Label("Disabled SelectInput");
     }
 }
 ```
@@ -184,14 +189,16 @@ public class NullableSelectDemo : ViewBase
         var options = new[]{"Red", "Green", "Blue"}.ToOptions();
         
         return Layout.Vertical()
-            | Text.Label("Nullable Single Select:")
             | nullableString.ToSelectInput(options)
                 .Placeholder("Choose a color (optional)")
+                .WithField()
+                .Label("Nullable Single Select")
             
-            | Text.Label("Nullable Multi-Select:")
             | nullableArray.ToSelectInput(options)
                 .Variant(SelectInputs.List)
                 .Placeholder("Choose colors (optional)")
+                .WithField()
+                .Label("Nullable Multi-Select")
             
             | Text.Small($"Single: {nullableString.Value ?? "None"}")
             | Text.Small($"Multiple: {nullableArray.Value?.Length ?? 0} selected");
@@ -266,15 +273,17 @@ public class CoffeeShopDemo: ViewBase
         var orderSummary = BuildOrderSummary(coffee.Value, coffeeSize.Value, selectedCondiments.Value);
         
         return Layout.Vertical()
-                | Layout.Grid().Columns(2)
-                    | Text.Label("Coffee Type:")
-                    | coffee.ToSelectInput(CoffeeAccompaniments.Keys.ToOptions())
+                | coffee.ToSelectInput(CoffeeAccompaniments.Keys.ToOptions())
+                        .WithField()
+                        .Label("Coffee Type")
                     
-                    | Text.Label("Size:")
-                    | coffeeSizeMenu
+                | coffeeSizeMenu
+                        .WithField()
+                        .Label("Size")
                     
-                    | Text.Label("Condiments:")
-                    | condimentMenu
+                | condimentMenu
+                        .WithField()
+                        .Label("Condiments")
                     
                 | new Icon(Icons.Coffee) 
                 | Text.Block(orderSummary);
