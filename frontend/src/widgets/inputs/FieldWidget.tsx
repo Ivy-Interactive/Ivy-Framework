@@ -58,6 +58,7 @@ export const FieldWidget: React.FC<FieldWidgetProps> = ({
                 <TooltipTrigger asChild>
                   <button
                     type="button"
+                    aria-label="More information"
                     className="inline-flex items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
                   >
                     <Icon
