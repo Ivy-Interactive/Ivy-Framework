@@ -590,10 +590,8 @@ public class TextBuilder(string content, TextVariant variant, Languages codeLang
         return this;
     }
 
-    /// <summary>
-    /// Sets whether the text should be displayed in bold.
-    /// </summary>
-    /// <param name="value">True to apply bold styling, false to remove it (defaults to true).</param>
+    /// <summary>Applies bold styling to the text.</summary>
+    /// <param name="value">True to apply bold.</param>
     /// <returns>The current TextBuilder instance for method chaining.</returns>
     public TextBuilder Bold(bool value = true)
     {
@@ -601,10 +599,8 @@ public class TextBuilder(string content, TextVariant variant, Languages codeLang
         return this;
     }
 
-    /// <summary>
-    /// Sets whether the text should be displayed in italic.
-    /// </summary>
-    /// <param name="value">True to apply italic styling, false to remove it (defaults to true).</param>
+    /// <summary>Applies italic styling to the text.</summary>
+    /// <param name="value">True to apply italic.</param>
     /// <returns>The current TextBuilder instance for method chaining.</returns>
     public TextBuilder Italic(bool value = true)
     {
@@ -612,10 +608,8 @@ public class TextBuilder(string content, TextVariant variant, Languages codeLang
         return this;
     }
 
-    /// <summary>
-    /// Sets whether the text should be displayed with muted styling.
-    /// </summary>
-    /// <param name="value">True to apply muted styling, false to remove it (defaults to true).</param>
+    /// <summary>Applies muted styling to the text.</summary>
+    /// <param name="value">True to apply muted.</param>
     /// <returns>The current TextBuilder instance for method chaining.</returns>
     public TextBuilder Muted(bool value = true)
     {
