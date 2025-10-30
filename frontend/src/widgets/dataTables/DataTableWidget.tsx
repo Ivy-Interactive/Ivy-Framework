@@ -30,6 +30,7 @@ const TableLayout: React.FC<TableLayoutProps> = ({ children }) => {
 };
 
 export const DataTable: React.FC<TableProps> = ({
+  id,
   columns,
   connection,
   configuration = {},
@@ -56,6 +57,7 @@ export const DataTable: React.FC<TableProps> = ({
     loadAllRows: configuration.loadAllRows ?? false,
     showSearch: configuration.showSearch ?? false,
     enableRowHover: configuration.enableRowHover ?? false,
+    enableCellClickEvents: configuration.enableCellClickEvents ?? false,
   };
 
   // Create styles object with width and height if provided
@@ -81,7 +83,10 @@ export const DataTable: React.FC<TableProps> = ({
               }}
             />
 
-            <DataTableEditor hasOptions={finalConfig.allowFiltering} />
+            <DataTableEditor
+              widgetId={id}
+              hasOptions={finalConfig.allowFiltering}
+            />
           </>
         </TableLayout>
       </TableProvider>

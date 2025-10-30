@@ -17,6 +17,7 @@ public record DataTableConfiguration
     public bool ShowVerticalBorders { get; set; } = true;
     public int? BatchSize { get; set; } = null;
     public bool LoadAllRows { get; set; } = false;
+    public bool EnableCellClickEvents { get; set; } = false;
     public bool ShowSearch { get; set; } = false;
 }
 
