@@ -55,83 +55,84 @@ public class DataTableApp : SampleBase
 
             // Internal ID - this will be hidden
             $"USR-{u.Name.GetHashCode():X8}"
-        )).ToList();
+        )).AsQueryable();
 
         // State to track selected user for sheet
         var selectedUser = this.UseState(() => (UserWithIcon?)null);
 
         return new Fragment(
-            usersWithIcons.AsQueryable().ToDataTable()
-                .Header(u => u.Name, "Name")
-                .Header(u => u.Email, "Email")
-                .Header(u => u.Age, "Age")
-                .Header(u => u.CreatedAt, "Created")
-                .Header(u => u.LastLogin, "Last Login")
-                .Header(u => u.Status, "Status")
-                .Header(u => u.Priority, "Priority")
-                .Header(u => u.Activity, "Activity")
-                .Header(u => u.InternalId, "Internal ID")
-                // Set custom column widths
-                .Width(u => u.Name, Size.Px(150))
-                .Width(u => u.Email, Size.Px(250))
-                .Width(u => u.Age, Size.Px(80))
-                .Width(u => u.CreatedAt, Size.Px(180))
-                .Width(u => u.LastLogin, Size.Px(180))
-                .Width(u => u.Status, Size.Px(100))
-                .Width(u => u.Priority, Size.Px(100))
-                .Width(u => u.Activity, Size.Px(100))
-                .Width(u => u.InternalId, Size.Px(150))
-                // Set all columns to left alignment
-                .Align(u => u.Name, Align.Left)
-                .Align(u => u.Email, Align.Left)
-                .Align(u => u.Age, Align.Left)
-                .Align(u => u.CreatedAt, Align.Left)
-                .Align(u => u.LastLogin, Align.Left)
-                .Align(u => u.Status, Align.Left)
-                .Align(u => u.Priority, Align.Left)
-                .Align(u => u.Activity, Align.Left)
-                .Align(u => u.InternalId, Align.Left)
-                // Email is not sortable
-                .Sortable(u => u.Email, false)
-                // InternalId is hidden
-                .Hidden([u => u.InternalId])
-                // Groups
-                .Group(u => u.Name, "Basic Info")
-                .Group(u => u.Email, "Basic Info")
-                .Group(u => u.Age, "Basic Info")
-                .Group(u => u.CreatedAt, "Timestamps")
-                .Group(u => u.LastLogin, "Timestamps")
-                .Group(u => u.Status, "Metrics")
-                .Group(u => u.Priority, "Metrics")
-                .Group(u => u.Activity, "Metrics")
-                // Configure all available DataTable properties
-                .Config(config =>
+            usersWithIcons.ToDataTable()
+            .Header(u => u.Name, "Name")
+            .Header(u => u.Email, "Email")
+            .Header(u => u.Age, "Age")
+            .Header(u => u.CreatedAt, "Created")
+            .Header(u => u.LastLogin, "Last Login")
+            .Header(u => u.Status, "Status")
+            .Header(u => u.Priority, "Priority")
+            .Header(u => u.Activity, "Activity")
+            .Header(u => u.InternalId, "Internal ID")
+            // Set custom column widths
+            .Width(u => u.Name, Size.Px(150))
+            .Width(u => u.Email, Size.Px(250))
+            .Width(u => u.Age, Size.Px(80))
+            .Width(u => u.CreatedAt, Size.Px(180))
+            .Width(u => u.LastLogin, Size.Px(180))
+            .Width(u => u.Status, Size.Px(100))
+            .Width(u => u.Priority, Size.Px(100))
+            .Width(u => u.Activity, Size.Px(100))
+            .Width(u => u.InternalId, Size.Px(150))
+            // Set all columns to left alignment
+            .Align(u => u.Name, Align.Left)
+            .Align(u => u.Email, Align.Left)
+            .Align(u => u.Age, Align.Left)
+            .Align(u => u.CreatedAt, Align.Left)
+            .Align(u => u.LastLogin, Align.Left)
+            .Align(u => u.Status, Align.Left)
+            .Align(u => u.Priority, Align.Left)
+            .Align(u => u.Activity, Align.Left)
+            .Align(u => u.InternalId, Align.Left)
+            // Email is not sortable
+            .Sortable(u => u.Email, false)
+            // InternalId is hidden
+            .Hidden([u => u.InternalId])
+            // Groups
+            .Group(u => u.Name, "Basic Info")
+            .Group(u => u.Email, "Basic Info")
+            .Group(u => u.Age, "Basic Info")
+            .Group(u => u.CreatedAt, "Timestamps")
+            .Group(u => u.LastLogin, "Timestamps")
+            .Group(u => u.Status, "Metrics")
+            .Group(u => u.Priority, "Metrics")
+            .Group(u => u.Activity, "Metrics")
+            // Configure all available DataTable properties
+            .Config(config =>
+            {
+                config.FreezeColumns = 2;                    // Freeze first 2 columns (Name, Email)
+                config.AllowSorting = true;                  // Enable sorting
+                config.AllowFiltering = true;                // Enable filtering
+                config.AllowLlmFiltering = true;             // Enable AI-powered filtering
+                config.AllowColumnReordering = true;         // Allow reordering columns
+                config.AllowColumnResizing = true;           // Allow resizing columns
+                config.AllowCopySelection = true;            // Allow copying selected cells
+                config.SelectionMode = SelectionModes.Cells; // Enable cell selection
+                config.ShowIndexColumn = true;               // Show row index column
+                config.ShowGroups = true;                   // Show column groups
+                config.ShowVerticalBorders = false;          // Hide vertical borders between columns
+                config.ShowColumnTypeIcons = false;          // Hide column type icons
+                config.BatchSize = 20;                       // Load 10 rows at a time
+                config.LoadAllRows = false;                  // Use pagination instead of loading all
+                config.ShowSearch = true;                    // Show search input
+            })
+            // Handle cell activation (double-click) - open sheet with row details
+            .HandleCellActivated(cellInfo =>
+            {
+                var rowIndex = cellInfo.RowIndex;
+                var user = usersWithIcons.Skip(rowIndex).FirstOrDefault();
+                if (user != null)
                 {
-                    config.FreezeColumns = 2;                    // Freeze first 2 columns (Name, Email)
-                    config.AllowSorting = true;                  // Enable sorting
-                    config.AllowFiltering = true;                // Enable filtering
-                    config.AllowLlmFiltering = true;             // Enable AI-powered filtering
-                    config.AllowColumnReordering = true;         // Allow reordering columns
-                    config.AllowColumnResizing = true;           // Allow resizing columns
-                    config.AllowCopySelection = true;            // Allow copying selected cells
-                    config.SelectionMode = SelectionModes.Cells; // Enable cell selection
-                    config.ShowIndexColumn = true;               // Show row index column
-                    config.ShowGroups = true;                   // Show column groups
-                    config.ShowVerticalBorders = false;          // Hide vertical borders between columns
-                    config.ShowColumnTypeIcons = false;          // Hide column type icons
-                    config.BatchSize = 20;                       // Load 10 rows at a time
-                    config.LoadAllRows = false;                  // Use pagination instead of loading all
-                    config.ShowSearch = true;                    // Show search input
-                })
-                // Handle cell activation (double-click) - open sheet with row details
-                .HandleCellActivated(cellInfo =>
-                {
-                    var rowIndex = cellInfo.RowIndex;
-                    if (rowIndex >= 0 && rowIndex < usersWithIcons.Count)
-                    {
-                        selectedUser.Value = usersWithIcons[rowIndex];
-                    }
-                }),
+                    selectedUser.Value = user;
+                }
+            }),
 
             // Show sheet when a user is selected
             selectedUser.Value != null
