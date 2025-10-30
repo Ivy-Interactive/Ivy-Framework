@@ -319,7 +319,7 @@ public class FileInputValidationTests
     public void FileInput_ValidateValue_WithNullValue_ReturnsSuccess()
     {
         // Arrange
-        var fileInput = new FileInput<FileInput?>(null, null, "Test");
+        var fileInput = new FileInput<FileInput?>((FileInput?)null, "Test");
 
         // Act
         var result = fileInput.ValidateValue(null);
@@ -334,7 +334,7 @@ public class FileInputValidationTests
     {
         // Arrange
         var file = CreateTestFile("test.txt", "text/plain");
-        var fileInput = new FileInput<FileInput?>(null, null, "Test") with { Accept = ".txt" };
+        var fileInput = new FileInput<FileInput?>((FileInput?)null, "Test") with { Accept = ".txt" };
 
         // Act
         var result = fileInput.ValidateValue(file);
@@ -349,7 +349,7 @@ public class FileInputValidationTests
     {
         // Arrange
         var file = CreateTestFile("test.pdf", "application/pdf");
-        var fileInput = new FileInput<FileInput?>(null, null, "Test") with { Accept = ".txt" };
+        var fileInput = new FileInput<FileInput?>((FileInput?)null, "Test") with { Accept = ".txt" };
 
         // Act
         var result = fileInput.ValidateValue(file);
@@ -368,7 +368,7 @@ public class FileInputValidationTests
             CreateTestFile("test1.txt", "text/plain"),
             CreateTestFile("test2.txt", "text/plain")
         };
-        var fileInput = new FileInput<IEnumerable<FileInput>?>(null, null, "Test") with { Accept = ".txt", MaxFiles = 3 };
+        var fileInput = new FileInput<IEnumerable<FileInput>?>((IEnumerable<FileInput>?)null, "Test") with { Accept = ".txt", MaxFiles = 3 };
 
         // Act
         var result = fileInput.ValidateValue(files);
@@ -388,7 +388,7 @@ public class FileInputValidationTests
             CreateTestFile("test2.txt", "text/plain"),
             CreateTestFile("test3.txt", "text/plain")
         };
-        var fileInput = new FileInput<IEnumerable<FileInput>?>(null, null, "Test") with { Accept = ".txt", MaxFiles = 2 };
+        var fileInput = new FileInput<IEnumerable<FileInput>?>((IEnumerable<FileInput>?)null, "Test") with { Accept = ".txt", MaxFiles = 2 };
 
         // Act
         var result = fileInput.ValidateValue(files);
@@ -407,7 +407,7 @@ public class FileInputValidationTests
             CreateTestFile("test1.txt", "text/plain"),
             CreateTestFile("test2.pdf", "application/pdf")
         };
-        var fileInput = new FileInput<IEnumerable<FileInput>?>(null, null, "Test") with { Accept = ".txt", MaxFiles = 3 };
+        var fileInput = new FileInput<IEnumerable<FileInput>?>((IEnumerable<FileInput>?)null, "Test") with { Accept = ".txt", MaxFiles = 3 };
 
         // Act
         var result = fileInput.ValidateValue(files);
@@ -426,7 +426,7 @@ public class FileInputValidationTests
             CreateTestFile("test1.jpg", "image/jpeg"),
             CreateTestFile("test2.png", "image/png")
         };
-        var fileInput = new FileInput<IEnumerable<FileInput>?>(null, null, "Test") with { Accept = "image/*" };
+        var fileInput = new FileInput<IEnumerable<FileInput>?>((IEnumerable<FileInput>?)null, "Test") with { Accept = "image/*" };
 
         // Act
         var result = fileInput.ValidateValue(files);
@@ -445,7 +445,7 @@ public class FileInputValidationTests
             CreateTestFile("test1.txt", "text/plain"),
             CreateTestFile("test2.pdf", "application/pdf")
         };
-        var fileInput = new FileInput<IEnumerable<FileInput>?>(null, null, "Test");
+        var fileInput = new FileInput<IEnumerable<FileInput>?>((IEnumerable<FileInput>?)null, "Test");
 
         // Act
         var result = fileInput.ValidateValue(files);

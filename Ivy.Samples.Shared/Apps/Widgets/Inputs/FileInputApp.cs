@@ -26,8 +26,6 @@ public class FileInputApp : SampleBase
         var singleSizeFile = UseState<FileInput?>(() => null);
         var multipleSizeFiles = UseState<IEnumerable<FileInput>?>(() => null);
 
-        var onChangedState = UseState<FileInput?>(() => null);
-        var onChangeLabel = UseState("");
         var onBlurState = UseState<FileInput?>(() => null);
         var onBlurLabel = UseState("");
 
@@ -156,17 +154,8 @@ public class FileInputApp : SampleBase
                   | multipleFiles.ToFileInput().MaxFiles(5).Placeholder("Select up to 5 files")
                )
 
-               // Events: 
+               // Events:
                | Text.H2("Events")
-               | Text.H3("OnChange")
-               | Layout.Horizontal(
-                   new FileInput<FileInput?>(onChangedState.Value, e =>
-                   {
-                       onChangedState.Set(e.Value);
-                       onChangeLabel.Set("Changed");
-                   }),
-                   onChangeLabel
-               )
                | Text.H3("OnBlur")
                | Layout.Horizontal(
                    onBlurState.ToFileInput().HandleBlur(e => onBlurLabel.Set("Blur")),

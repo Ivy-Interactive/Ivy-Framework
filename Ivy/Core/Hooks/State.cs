@@ -58,6 +58,11 @@ public interface IState<T> : IObservable<T>, IAnyState
         Value = setter(Value);
         return Value;
     }
+
+    public T Default()
+    {
+        return Set(default(T)!);
+    }
 }
 
 /// <summary>

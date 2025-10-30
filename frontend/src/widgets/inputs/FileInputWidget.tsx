@@ -1,12 +1,12 @@
 import React, { useCallback, useState, useRef } from 'react';
 import { Input } from '@/components/ui/input';
-import { useEventHandler } from '@/components/event-handler';
 import { Upload, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { getWidth } from '@/lib/styles';
 import { InvalidIcon } from '@/components/InvalidIcon';
 import { Sizes } from '@/types/sizes';
+import { useEventHandler } from '@/components/event-handler';
 import {
   fileInputVariants,
   uploadIconVariants,
@@ -22,6 +22,7 @@ enum FileInputState {
 }
 
 interface FileInput {
+  id: string;
   fileName: string;
   contentType: string;
   length: number;
@@ -50,6 +51,7 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
   value,
   disabled,
   invalid,
+  events,
   width,
   accept,
   multiple = false,
@@ -61,6 +63,8 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
   const handleEvent = useEventHandler();
   const [isDragging, setIsDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const hasClearHandler = events.includes('OnClear');
 
   const uploadFile = useCallback(
     async (file: File): Promise<void> => {
@@ -96,30 +100,6 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
     [uploadUrl]
   );
 
-  const convertFileToUploadFile = useCallback(
-    async (file: File): Promise<FileInput> => {
-      if (!file) {
-        throw new Error('File is required');
-      }
-
-      if (uploadUrl) {
-        await uploadFile(file);
-      }
-
-      // Ivy FileInput should only contain metadata
-      // Backend maintains progress and state
-      return {
-        fileName: file.name,
-        contentType: file.type,
-        length: file.size,
-        lastModified: new Date(file.lastModified),
-        progress: 0,
-        state: FileInputState.Pending,
-      };
-    },
-    [uploadFile, uploadUrl]
-  );
-
   const handleChange = useCallback(
     async (e: React.ChangeEvent<HTMLInputElement>) => {
       const files = e.target.files;
@@ -129,26 +109,28 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
       if (maxFiles && files.length > maxFiles) {
         // Only take the first maxFiles files
         const limitedFiles = Array.from(files).slice(0, maxFiles);
-        const selectedFiles = multiple
-          ? await Promise.all(limitedFiles.map(convertFileToUploadFile))
-          : await convertFileToUploadFile(limitedFiles[0]);
-
-        handleEvent('OnChange', id, [selectedFiles]);
+        if (multiple) {
+          await Promise.all(limitedFiles.map(uploadFile));
+        } else {
+          await uploadFile(limitedFiles[0]);
+        }
         return;
       }
 
-      const selectedFiles = multiple
-        ? await Promise.all(Array.from(files).map(convertFileToUploadFile))
-        : await convertFileToUploadFile(files[0]);
-
-      handleEvent('OnChange', id, [selectedFiles]);
+      if (multiple) {
+        await Promise.all(Array.from(files).map(uploadFile));
+      } else {
+        await uploadFile(files[0]);
+      }
     },
-    [id, multiple, handleEvent, convertFileToUploadFile, maxFiles]
+    [multiple, uploadFile, maxFiles]
   );
 
   const handleClear = useCallback(() => {
-    handleEvent('OnChange', id, [null]);
-  }, [id, handleEvent]);
+    if (hasClearHandler) {
+      handleEvent('OnClear', id, []);
+    }
+  }, [hasClearHandler, handleEvent, id]);
 
   const handleDragEnter = useCallback(
     (e: React.DragEvent) => {
@@ -187,21 +169,21 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
       if (maxFiles && files.length > maxFiles) {
         // Only take the first maxFiles files
         const limitedFiles = files.slice(0, maxFiles);
-        const selectedFiles = multiple
-          ? await Promise.all(limitedFiles.map(convertFileToUploadFile))
-          : await convertFileToUploadFile(limitedFiles[0]);
-
-        handleEvent('OnChange', id, [selectedFiles]);
+        if (multiple) {
+          await Promise.all(limitedFiles.map(uploadFile));
+        } else {
+          await uploadFile(limitedFiles[0]);
+        }
         return;
       }
 
-      const selectedFiles = multiple
-        ? await Promise.all(files.map(convertFileToUploadFile))
-        : await convertFileToUploadFile(files[0]);
-
-      handleEvent('OnChange', id, [selectedFiles]);
+      if (multiple) {
+        await Promise.all(files.map(uploadFile));
+      } else {
+        await uploadFile(files[0]);
+      }
     },
-    [id, multiple, handleEvent, disabled, convertFileToUploadFile, maxFiles]
+    [multiple, disabled, uploadFile, maxFiles]
   );
 
   const handleClick = useCallback(() => {
@@ -264,7 +246,7 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
               `Drag and drop your ${multiple ? 'files' : 'file'} here or click to select`}
           </p>
         </div>
-        {value && !disabled && (
+        {value && !disabled && hasClearHandler && (
           <Button
             type="button"
             variant="ghost"

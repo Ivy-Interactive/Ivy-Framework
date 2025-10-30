@@ -13,6 +13,7 @@ using Ivy.Widgets.Inputs;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum FileInputState
 {
     Pending,
@@ -36,9 +37,11 @@ public record FileInput : FileBase
     {
     }
 
-    public FileInput(FileUpload upload) : this(upload.FileName, upload.ContentType, upload.Length, null)
+    public FileInput(FileUpload upload) : this(upload.FileName, upload.ContentType, upload.Length)
     {
     }
+
+    public Guid Id { get; } = Guid.NewGuid();
 
     /// <summary>
     /// Value from 0.0 to 1.0 indicating upload progress.
@@ -107,6 +110,9 @@ public abstract record FileInputBase : WidgetBase<FileInputBase>, IAnyFileInput
     /// <summary>Gets or sets the event handler called when the input loses focus.</summary>
     [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
 
+    /// <summary>Gets or sets the event handler called when the clear button is clicked.</summary>
+    [Event] public Func<Event<IAnyInput>, ValueTask>? OnClear { get; set; }
+
     /// <summary>
     /// Returns the types that this file input can bind to.
     /// </summary>
@@ -152,6 +158,7 @@ public abstract record FileInputBase : WidgetBase<FileInputBase>, IAnyFileInput
 
 /// <summary>
 /// Generic file input control that provides type-safe file upload functionality.
+/// State is managed entirely by the server via the upload handler.
 /// </summary>
 /// <typeparam name="TValue">The type of the file value.</typeparam>
 public record FileInput<TValue> : FileInputBase, IInput<TValue>, IAnyFileInput
@@ -169,55 +176,19 @@ public record FileInput<TValue> : FileInputBase, IInput<TValue>, IAnyFileInput
     {
         var typedState = state.As<TValue>();
         Value = typedState.Value;
-        OnChange = e =>
-        {
-            typedState.Set(e.Value);
-
-            // Auto-validate if Accept or MaxFiles is set
-            if (!string.IsNullOrWhiteSpace(Accept) || MaxFiles.HasValue)
-            {
-                var validation = ValidateValue(e.Value);
-                if (!validation.IsValid)
-                {
-                    Invalid = validation.ErrorMessage;
-                }
-                else
-                {
-                    Invalid = null;
-                }
-            }
-            return ValueTask.CompletedTask;
-        };
     }
 
     /// <summary>
     /// Initializes a new instance with an explicit value.
     /// </summary>
     /// <param name="value">The initial file value.</param>
-    /// <param name="onChange">Optional event handler called when the file value changes.</param>
     /// <param name="placeholder">Optional placeholder text displayed when no files are selected.</param>
     /// <param name="disabled">Whether the input should be disabled initially.</param>
     /// <param name="variant">The visual variant of the file input.</param>
     [OverloadResolutionPriority(1)]
-    public FileInput(TValue value, Func<Event<IInput<TValue>, TValue>, ValueTask>? onChange, string? placeholder = null, bool disabled = false, FileInputs variant = FileInputs.Drop)
+    public FileInput(TValue value, string? placeholder = null, bool disabled = false, FileInputs variant = FileInputs.Drop)
         : this(placeholder, disabled, variant)
     {
-        OnChange = onChange;
-        Value = value;
-    }
-
-    /// <summary>
-    /// Initializes a new instance with an explicit value and synchronous change handler.
-    /// </summary>
-    /// <param name="value">The initial file value.</param>
-    /// <param name="onChange">Optional event handler called when the file value changes.</param>
-    /// <param name="placeholder">Optional placeholder text displayed when no files are selected.</param>
-    /// <param name="disabled">Whether the input should be disabled initially.</param>
-    /// <param name="variant">The visual variant of the file input.</param>
-    public FileInput(TValue value, Action<Event<IInput<TValue>, TValue>>? onChange, string? placeholder = null, bool disabled = false, FileInputs variant = FileInputs.Drop)
-        : this(placeholder, disabled, variant)
-    {
-        OnChange = onChange == null ? null : e => { onChange(e); return ValueTask.CompletedTask; };
         Value = value;
     }
 
@@ -240,8 +211,8 @@ public record FileInput<TValue> : FileInputBase, IInput<TValue>, IAnyFileInput
     /// <summary>Gets the current file value.</summary>
     [Prop] public TValue Value { get; } = default!;
 
-    /// <summary>Gets the event handler called when the file value changes.</summary>
-    [Event] public Func<Event<IInput<TValue>, TValue>, ValueTask>? OnChange { get; }
+    /// <summary>OnChange event is not used - file state is managed by the server.</summary>
+    [Event] public Func<Event<IInput<TValue>, TValue>, ValueTask>? OnChange => null;
 }
 
 /// <summary>
@@ -473,5 +444,36 @@ public static class FileInputExtensions
     public static FileInputBase HandleBlur(this FileInputBase widget, Action onBlur)
     {
         return widget.HandleBlur(_ => { onBlur(); return ValueTask.CompletedTask; });
+    }
+
+    /// <summary>
+    /// Sets the clear event handler for the file input.
+    /// </summary>
+    /// <param name="widget">The file input to configure.</param>
+    /// <param name="onClear">The event handler to call when the clear button is clicked.</param>
+    [OverloadResolutionPriority(1)]
+    public static FileInputBase HandleClear(this FileInputBase widget, Func<Event<IAnyInput>, ValueTask> onClear)
+    {
+        return widget with { OnClear = onClear };
+    }
+
+    /// <summary>
+    /// Sets the clear event handler for the file input.
+    /// </summary>
+    /// <param name="widget">The file input to configure.</param>
+    /// <param name="onClear">The event handler to call when the clear button is clicked.</param>
+    public static FileInputBase HandleClear(this FileInputBase widget, Action<Event<IAnyInput>> onClear)
+    {
+        return widget.HandleClear(onClear.ToValueTask());
+    }
+
+    /// <summary>
+    /// Sets a simple clear event handler for the file input.
+    /// </summary>
+    /// <param name="widget">The file input to configure.</param>
+    /// <param name="onClear">The simple action to perform when the clear button is clicked.</param>
+    public static FileInputBase HandleClear(this FileInputBase widget, Action onClear)
+    {
+        return widget.HandleClear(_ => { onClear(); return ValueTask.CompletedTask; });
     }
 }
