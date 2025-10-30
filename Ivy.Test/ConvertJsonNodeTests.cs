@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using Ivy.Services;
 
 namespace Ivy.Test;
 
@@ -94,7 +95,7 @@ public class ConvertJsonNodeTests
                                   }
                                   """);
 
-        var result = (FileInput)Core.Utils.ConvertJsonNode(json!, typeof(FileInput))!;
+        var result = (FileUpload)Core.Utils.ConvertJsonNode(json!, typeof(FileUpload))!;
 
         Assert.Equal("myfile.txt", result.FileName);
         Assert.Equal("text/plain", result.ContentType);

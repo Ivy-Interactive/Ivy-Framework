@@ -5,77 +5,12 @@ using System.Threading.Tasks;
 using Ivy.Core;
 using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
-using Ivy.Core.Models;
 using Ivy.Services;
 using Ivy.Shared;
 using Ivy.Widgets.Inputs;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy;
-
-[JsonConverter(typeof(JsonStringEnumConverter))]
-public enum FileInputStatus
-{
-    Pending,
-    Aborted,
-    Loading,
-    Failed,
-    Finished
-}
-
-/// <summary>
-/// Represents a file uploaded through a file input control.
-/// </summary>
-public record FileInput : FileBase, IDisposable
-{
-    public FileInput()
-    {
-    }
-
-    public FileInput(string FileName, string ContentType, long Length)
-        : base(FileName, ContentType, Length)
-    {
-    }
-
-    public FileInput(FileUpload upload) : this(upload.FileName!, upload.ContentType!, upload.Length)
-    {
-    }
-
-    public Guid Id { get; } = Guid.NewGuid();
-
-    /// <summary>
-    /// Value from 0.0 to 1.0 indicating upload progress.
-    /// </summary>
-    public float Progress { get; set; }
-
-    /// <summary>
-    /// Gets the current state of the file upload.
-    /// </summary>
-    public FileInputStatus Status { get; set; } = FileInputStatus.Pending;
-
-    [JsonIgnore]
-    private CancellationTokenSource? CancellationTokenSource { get; set; } = new();
-
-    [JsonIgnore]
-    public CancellationToken CancellationToken => CancellationTokenSource?.Token ?? CancellationToken.None;
-
-    public void CancelUpload()
-    {
-        try
-        {
-            CancellationTokenSource?.Cancel();
-        }
-        catch (Exception)
-        {
-            //ignore
-        }
-    }
-
-    public void Dispose()
-    {
-        CancellationTokenSource?.Dispose();
-    }
-}
 
 /// <summary>
 /// Defines the visual variants available for file input controls.
@@ -134,7 +69,7 @@ public abstract record FileInputBase : WidgetBase<FileInputBase>, IAnyFileInput
     [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
 
     /// <summary>Gets or sets the event handler called when a file is deleted (passes FileInput.Id as parameter).</summary>
-    [Event] public Func<Event<IAnyInput, Guid>, ValueTask>? OnDelete { get; set; }
+    [Event] public Func<Event<IAnyInput, object>, ValueTask>? OnDelete { get; set; }
 
     /// <summary>
     /// Returns the types that this file input can bind to.
@@ -149,12 +84,12 @@ public abstract record FileInputBase : WidgetBase<FileInputBase>, IAnyFileInput
     {
         if (value == null) return ValidationResult.Success();
 
-        if (value is FileInput file)
+        if (value is FileUpload file)
         {
             return FileInputValidation.ValidateFileType(file, Accept);
         }
 
-        if (value is IEnumerable<FileInput> files)
+        if (value is IEnumerable<FileUpload> files)
         {
             var filesList = files.ToList();
 
@@ -243,41 +178,6 @@ public record FileInput<TValue> : FileInputBase, IInput<TValue>, IAnyFileInput
 /// </summary>
 public static class FileInputExtensions
 {
-    public static void SetProgress(this IState<FileInput?> fileInputState, float progress)
-    {
-        var file = fileInputState.Value;
-        if (file != null)
-        {
-            fileInputState.Set(file with { Progress = progress });
-        }
-    }
-
-    public static void SetStatus(this IState<FileInput?> fileInputState, FileInputStatus status)
-    {
-        var file = fileInputState.Value;
-        if (file != null)
-        {
-            fileInputState.Set(file with { Status = status });
-        }
-    }
-
-    // /// <summary>
-    // /// Converts the file content to plain text using UTF-8 encoding.
-    // /// </summary>
-    // /// <param name="file">The file input containing the content to convert.</param>
-    // public static string? ToPlainText(this FileInput file)
-    // {
-    //     if (file.Content == null)
-    //     {
-    //         return null;
-    //     }
-    //     return file.Content.Length switch
-    //     {
-    //         0 => null,
-    //         _ => Encoding.UTF8.GetString(file.Content)
-    //     };
-    // }
-
     /// <summary>
     /// Creates a file input from a state object.
     /// </summary>
@@ -289,13 +189,13 @@ public static class FileInputExtensions
     {
         var type = state.GetStateType();
 
-        //Check that type is FileInput, FileInput? or IEnumerable<FileInput> (including ImmutableArray, List, etc.)
-        var isCollection = typeof(IEnumerable<FileInput>).IsAssignableFrom(type) && type != typeof(string);
-        var isValid = type == typeof(FileInput) || isCollection;
+        //Check that type is FileUpload, FileUpload? or IEnumerable<FileUpload> (including ImmutableArray, List, etc.)
+        var isCollection = typeof(IEnumerable<FileUpload>).IsAssignableFrom(type) && type != typeof(string);
+        var isValid = type == typeof(FileUpload) || isCollection;
 
         if (!isValid)
         {
-            throw new Exception("Invalid type for FileInput");
+            throw new Exception("Invalid type for FileInput - must be FileUpload or IEnumerable<FileUpload>");
         }
 
         Type genericType = typeof(FileInput<>).MakeGenericType(type);
@@ -411,7 +311,7 @@ public static class FileInputExtensions
     /// </summary>
     /// <param name="widget">The file input widget containing validation rules.</param>
     /// <param name="file">The file to validate.</param>
-    public static ValidationResult ValidateFile(this FileInputBase widget, FileInput file)
+    public static ValidationResult ValidateFile(this FileInputBase widget, FileUpload file)
     {
         return FileInputValidation.ValidateFileType(file, widget.Accept);
     }
@@ -421,7 +321,7 @@ public static class FileInputExtensions
     /// </summary>
     /// <param name="widget">The file input widget containing validation rules.</param>
     /// <param name="files">The files to validate.</param>
-    public static ValidationResult ValidateFiles(this FileInputBase widget, IEnumerable<FileInput> files)
+    public static ValidationResult ValidateFiles(this FileInputBase widget, IEnumerable<FileUpload> files)
     {
         var filesList = files.ToList();
 
@@ -473,7 +373,7 @@ public static class FileInputExtensions
     /// <param name="widget">The file input to configure.</param>
     /// <param name="onDelete">The event handler to call when a file is deleted, receives the FileInput.Id.</param>
     [OverloadResolutionPriority(1)]
-    public static FileInputBase HandleDelete(this FileInputBase widget, Func<Event<IAnyInput, Guid>, ValueTask> onDelete)
+    public static FileInputBase HandleDelete(this FileInputBase widget, Func<Event<IAnyInput, object>, ValueTask> onDelete)
     {
         return widget with { OnDelete = onDelete };
     }
@@ -483,7 +383,7 @@ public static class FileInputExtensions
     /// </summary>
     /// <param name="widget">The file input to configure.</param>
     /// <param name="onDelete">The event handler to call when a file is deleted, receives the FileInput.Id.</param>
-    public static FileInputBase HandleDelete(this FileInputBase widget, Action<Event<IAnyInput, Guid>> onDelete)
+    public static FileInputBase HandleDelete(this FileInputBase widget, Action<Event<IAnyInput, object>> onDelete)
     {
         return widget.HandleDelete(onDelete.ToValueTask());
     }
@@ -493,7 +393,7 @@ public static class FileInputExtensions
     /// </summary>
     /// <param name="widget">The file input to configure.</param>
     /// <param name="onDelete">The simple action to perform when a file is deleted, receives the FileInput.Id.</param>
-    public static FileInputBase HandleDelete(this FileInputBase widget, Action<Guid> onDelete)
+    public static FileInputBase HandleDelete(this FileInputBase widget, Action<object> onDelete)
     {
         return widget.HandleDelete(e => { onDelete(e.Value); return ValueTask.CompletedTask; });
     }

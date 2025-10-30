@@ -6,6 +6,8 @@ searchHints:
   - elements
   - widgets
   - primitives
+imports:
+  - Ivy.Services
 ---
 
 # Widgets
@@ -153,7 +155,7 @@ public class InputWidgetsDemo : ViewBase
         var dateRangeState = UseState<(DateOnly?, DateOnly?)>((null, null));
         var colorState = UseState("#00cc92");
         var codeState = UseState("var x = 10;");
-        var fileState = UseState((FileInput?)null);
+        var fileState = UseState((FileUpload?)null);
         var feedbackState = UseState(4);
         var selectState = UseState("");
         var asyncSelectState = UseState((string?)null);

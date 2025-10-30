@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Ivy.Core;
+using Ivy.Services;
 using Ivy.Views.Forms;
 
 namespace Ivy.Views.Alerts;
@@ -24,7 +25,7 @@ public class WithPromptView<T>(Button button, Action<T> handleResult, T? default
     public override object? Build()
     {
         if (
-            typeof(T) != typeof(FileInput)
+            typeof(T) != typeof(FileUpload)
             && !Utils.IsSimpleType(typeof(T)))
         {
             throw new NotSupportedException();

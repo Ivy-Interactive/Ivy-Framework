@@ -1,4 +1,5 @@
-﻿using Ivy.Shared;
+﻿using Ivy.Services;
+using Ivy.Shared;
 using Ivy.Views.Builders;
 using Ivy.Views.Forms;
 
@@ -10,29 +11,29 @@ public class FileInputApp : SampleBase
     protected override object? BuildSample()
     {
         // Mock file for 'With Value' example
-        var mockFile = new FileInput("example.txt", "text/plain", 12345);
+        var mockFile = new FileUpload { Id = Guid.NewGuid(), FileName = "example.txt", ContentType = "text/plain", Length = 12345 };
 
-        var singleFile = UseState<FileInput?>(() => null);
-        var singleFileWithValue = UseState<FileInput?>(() => mockFile);
-        var multipleFiles = UseState<IEnumerable<FileInput>?>(() => null);
-        var multipleFilesWithValue = UseState<IEnumerable<FileInput>?>(() => new[] { mockFile });
-        var disabledFile = UseState<FileInput?>(() => null);
-        var invalidFile = UseState<FileInput?>(() => null);
-        var placeholderFile = UseState<FileInput?>(() => null);
-        var limitedFiles = UseState<IEnumerable<FileInput>?>(() => null);
-        var textFiles = UseState<IEnumerable<FileInput>?>(() => null);
-        var pdfFiles = UseState<IEnumerable<FileInput>?>(() => null);
-        var imageFiles = UseState<IEnumerable<FileInput>?>(() => null);
-        var singleSizeFile = UseState<FileInput?>(() => null);
-        var multipleSizeFiles = UseState<IEnumerable<FileInput>?>(() => null);
+        var singleFile = UseState<FileUpload?>(() => null);
+        var singleFileWithValue = UseState<FileUpload?>(() => mockFile);
+        var multipleFiles = UseState<IEnumerable<FileUpload>?>(() => null);
+        var multipleFilesWithValue = UseState<IEnumerable<FileUpload>?>(() => new[] { mockFile });
+        var disabledFile = UseState<FileUpload?>(() => null);
+        var invalidFile = UseState<FileUpload?>(() => null);
+        var placeholderFile = UseState<FileUpload?>(() => null);
+        var limitedFiles = UseState<IEnumerable<FileUpload>?>(() => null);
+        var textFiles = UseState<IEnumerable<FileUpload>?>(() => null);
+        var pdfFiles = UseState<IEnumerable<FileUpload>?>(() => null);
+        var imageFiles = UseState<IEnumerable<FileUpload>?>(() => null);
+        var singleSizeFile = UseState<FileUpload?>(() => null);
+        var multipleSizeFiles = UseState<IEnumerable<FileUpload>?>(() => null);
 
-        var onBlurState = UseState<FileInput?>(() => null);
+        var onBlurState = UseState<FileUpload?>(() => null);
         var onBlurLabel = UseState("");
 
         // Validation examples
         var validationError = UseState<string?>(() => null);
-        var validatedFiles = UseState<IEnumerable<FileInput>?>(() => null);
-        var singleFileWithValidation = UseState<FileInput?>(() => null);
+        var validatedFiles = UseState<IEnumerable<FileUpload>?>(() => null);
+        var singleFileWithValidation = UseState<FileUpload?>(() => null);
 
         var dataBinding = Layout.Grid().Columns(3)
                           | Text.InlineCode("FileInput")
@@ -218,7 +219,7 @@ public class FileInputApp : SampleBase
 
 public class SizingExample : ViewBase
 {
-    public record FileModel(FileInput? ProfilePhoto, FileInput? Document, FileInput? Certificate);
+    public record FileModel(FileUpload? ProfilePhoto, FileUpload? Document, FileUpload? Certificate);
 
     public override object? Build()
     {

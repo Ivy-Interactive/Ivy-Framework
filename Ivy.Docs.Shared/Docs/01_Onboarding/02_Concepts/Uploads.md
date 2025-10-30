@@ -6,6 +6,8 @@ searchHints:
   - drag-drop
   - attachments
   - images
+imports:
+  - Ivy.Services
 ---
 
 # Uploads
@@ -23,8 +25,8 @@ public class FileUploadView : ViewBase
 {
     public override object? Build()
     {
-        var files = UseState<FileInput?>(() => null);
-        var uploadUrl = this.UseUpload(fileUpload => { });
+        var files = UseState<FileUpload?>(() => null);
+        var uploadUrl = this.UseUpload(async (fileUpload, stream, cancellationToken) => { });
 
         return files.ToFileInput(uploadUrl, "Choose a file");
     }
@@ -47,21 +49,22 @@ var client = UseService<IClientProvider>();
 // 1. Create upload handler - returns state with
 // URL like "/upload/{connectionId}/{uploadId}"
 var uploadUrl = this.UseUpload(
-    fileUpload => {
+    async (fileUpload, stream, cancellationToken) => {
         // This handler is called when a file is uploaded
-        // Access file metadata: fileUpload.Name, fileUpload.Type, fileUpload.Size, fileUpload.Stream
-        client.Toast($"Received {fileUpload.Size} bytes", "File Uploaded");
+        // Access file metadata: fileUpload.FileName, fileUpload.ContentType, fileUpload.Length
+        // Access file content via the stream parameter
+        client.Toast($"Received {fileUpload.Length} bytes", "File Uploaded");
     }
     // mimeType and fileName are optional parameters with defaults from the uploaded file
 );
 
 // 2. Create state to hold file information
-var files = UseState<FileInput?>(() => null);
+var files = UseState<FileUpload?>(() => null);
 
 // 3. Connect them with ToFileInput - creates a widget that:
 //    - Updates the files state when user selects files
 //    - Automatically uploads to the uploadUrl
-//    - Calls your handler with the FileUpload record
+//    - Calls your handler with the FileUpload record and stream
 files.ToFileInput(uploadUrl, "Choose Files")
 ```
 
@@ -75,11 +78,11 @@ public class UploadWithStatusView : ViewBase
     public override object? Build()
     {
         var client = UseService<IClientProvider>();
-        var files = UseState<FileInput?>(() => null);
+        var files = UseState<FileUpload?>(() => null);
         var uploadUrl = this.UseUpload(
-            fileUpload => {
+            async (fileUpload, stream, cancellationToken) => {
                 try {
-                    client.Toast($"Successfully uploaded {fileUpload.Size} bytes", "Upload Complete");
+                    client.Toast($"Successfully uploaded {fileUpload.Length} bytes", "Upload Complete");
                 } catch (Exception ex) {
                     client.Toast(ex);
                 }
@@ -102,17 +105,17 @@ public class ValidatedUploadView : ViewBase
     {
         var client = UseService<IClientProvider>();
         var error = UseState<string?>(() => null);
-        var files = UseState<FileInput?>(() => null);
+        var files = UseState<FileUpload?>(() => null);
         var uploadUrl = this.UseUpload(
-            fileUpload => {
-                if (fileUpload.Size > 2 * 1024 * 1024) // 2MB limit
+            async (fileUpload, stream, cancellationToken) => {
+                if (fileUpload.Length > 2 * 1024 * 1024) // 2MB limit
                 {
                     error.Set("File size must be less than 2MB");
                     return;
                 }
                 error.Set((string?)null);
                 // Process uploaded file
-                client.Toast($"Image uploaded successfully ({fileUpload.Size} bytes)", "Success");
+                client.Toast($"Image uploaded successfully ({fileUpload.Length} bytes)", "Success");
             },
             "image/jpeg" // Optional: specify expected MIME type
         );
@@ -152,18 +155,18 @@ public class ImageUploadView : ViewBase
     {
         var client = UseService<IClientProvider>();
         var preview = UseState<string?>(() => null);
-        var files = UseState<FileInput?>(() => null);
+        var files = UseState<FileUpload?>(() => null);
         var uploadUrl = this.UseUpload(
-            fileUpload => {
+            async (fileUpload, stream, cancellationToken) => {
                 // Convert stream to bytes for preview
                 using var memoryStream = new MemoryStream();
-                fileUpload.Stream.CopyTo(memoryStream);
+                await stream.CopyToAsync(memoryStream, cancellationToken);
                 var fileBytes = memoryStream.ToArray();
 
                 // Create preview URL from uploaded bytes
                 preview.Set($"data:image/jpeg;base64,{Convert.ToBase64String(fileBytes)}");
                 // Process uploaded file
-                client.Toast($"Image uploaded successfully ({fileUpload.Size} bytes)", "Success");
+                client.Toast($"Image uploaded successfully ({fileUpload.Length} bytes)", "Success");
             },
             "image/jpeg"
         );
@@ -195,11 +198,11 @@ public class MultiFileUploadView : ViewBase
     {
         var client = UseService<IClientProvider>();
         var uploadedFiles = UseState(() => new List<string>());
-        var newFiles = UseState<IEnumerable<FileInput>?>(() => null);
+        var newFiles = UseState<IEnumerable<FileUpload>?>(() => null);
         var uploadUrl = this.UseUpload(
-            fileUpload => {
+            async (fileUpload, stream, cancellationToken) => {
                 // Process uploaded file
-                client.Toast($"File uploaded ({fileUpload.Size} bytes)", "Upload Complete");
+                client.Toast($"File uploaded ({fileUpload.Length} bytes)", "Upload Complete");
                 // Add to list of uploaded files
                 uploadedFiles.Set(uploadedFiles.Value.Append($"File {uploadedFiles.Value.Count + 1}").ToList());
             }

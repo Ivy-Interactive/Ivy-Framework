@@ -6,6 +6,8 @@ searchHints:
   - audio
   - capture
   - sound
+imports:
+  - Ivy.Services
 ---
 
 # Audio Recorder
@@ -26,9 +28,9 @@ public class BasicAudioRecorderDemo : ViewBase
     public override object? Build()
     {
         var uploadUrl = this.UseUpload(
-            fileUpload => {
+            async (fileUpload, stream, cancellationToken) => {
                 // Process uploaded file
-                Console.WriteLine($"Received {fileUpload.Size} bytes");
+                Console.WriteLine($"Received {fileUpload.Length} bytes");
             }
         );
 

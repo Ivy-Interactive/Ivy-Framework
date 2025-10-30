@@ -1,3 +1,4 @@
+using Ivy.Services;
 using System.Text.RegularExpressions;
 
 namespace Ivy.Widgets.Inputs;
@@ -9,7 +10,7 @@ public static class FileInputValidation
     /// </summary>
     /// <param name="files">The files to validate</param>
     /// <param name="maxFiles">Maximum number of files allowed</param>
-    public static ValidationResult ValidateFileCount(IEnumerable<FileInput> files, int? maxFiles)
+    public static ValidationResult ValidateFileCount(IEnumerable<FileUpload> files, int? maxFiles)
     {
         if (maxFiles == null) return ValidationResult.Success();
 
@@ -27,7 +28,7 @@ public static class FileInputValidation
     /// </summary>
     /// <param name="files">The files to validate</param>
     /// <param name="accept">The accept pattern (e.g., ".txt,.pdf" or "image/*")</param>
-    public static ValidationResult ValidateFileTypes(IEnumerable<FileInput> files, string? accept)
+    public static ValidationResult ValidateFileTypes(IEnumerable<FileUpload> files, string? accept)
     {
         if (string.IsNullOrWhiteSpace(accept)) return ValidationResult.Success();
 
@@ -56,7 +57,7 @@ public static class FileInputValidation
     /// </summary>
     /// <param name="file">The file to validate</param>
     /// <param name="accept">The accept pattern</param>
-    public static ValidationResult ValidateFileType(FileInput file, string? accept)
+    public static ValidationResult ValidateFileType(FileUpload file, string? accept)
     {
         if (string.IsNullOrWhiteSpace(accept)) return ValidationResult.Success();
 
@@ -78,7 +79,7 @@ public static class FileInputValidation
                     .ToList();
     }
 
-    private static bool IsFileTypeAllowed(FileInput file, List<string> allowedPatterns)
+    private static bool IsFileTypeAllowed(FileUpload file, List<string> allowedPatterns)
     {
         foreach (var pattern in allowedPatterns)
         {
@@ -90,7 +91,7 @@ public static class FileInputValidation
         return false;
     }
 
-    private static bool IsFileTypeMatch(FileInput file, string pattern)
+    private static bool IsFileTypeMatch(FileUpload file, string pattern)
     {
         // Handle MIME type patterns (e.g., "image/*", "text/plain")
         if (pattern.Contains("/"))

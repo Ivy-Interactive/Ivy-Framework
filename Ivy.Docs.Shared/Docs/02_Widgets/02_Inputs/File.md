@@ -6,6 +6,8 @@ searchHints:
   - drag-drop
   - browse
   - files
+imports:
+  - Ivy.Services
 ---
 
 # FileInput
@@ -24,16 +26,16 @@ Here's a simple example of a `FileInput` that allows users to select files:
 public class BasicFileInputDemo : ViewBase
 {
     public override object? Build()
-    {    
-        var fileState = this.UseState((FileInput?)null);
-        var selected = fileState.Value?.Name;
+    {
+        var fileState = this.UseState((FileUpload?)null);
+        var selected = fileState.Value?.FileName;
         return Layout.Vertical()
                 | fileState.ToFileInput()
                            .Placeholder("Select a file")
                            .Accept(".txt,.pdf,.cs")
-                | Text.Large(selected);                    
-   }     
-}    
+                | Text.Large(selected);
+   }
+}
 ```
 
 To create a file upload input, `ToFileInput` is the recommended function.
@@ -46,21 +48,21 @@ section. The following demo showcases this.
 
 ```csharp demo-below
 public class FileDropDemo : ViewBase
-{    
+{
     public override object? Build()
-    {    
-        var fileState = this.UseState((FileInput?)null);
-        var fileStates = this.UseState((IEnumerable<FileInput>?)null);
+    {
+        var fileState = this.UseState((FileUpload?)null);
+        var fileStates = this.UseState((IEnumerable<FileUpload>?)null);
         return  Layout.Vertical()
                 | fileState.ToFileInput().Variant(FileInputs.Drop)
                 | fileStates.ToFileInput().Variant(FileInputs.Drop);
     }
-}    
-         
+}
+
 ```
 
 <Callout Type="tip">
-Multiple file selection is automatically enabled when you use a collection type (`IEnumerable<FileInput>`, `FileInput[]`, `List<FileInput>`, etc.) as your state. You do **not** need to explicitly set a `.Multiple()` property.
+Multiple file selection is automatically enabled when you use a collection type (`IEnumerable<FileUpload>`, `FileUpload[]`, `List<FileUpload>`, etc.) as your state. You do **not** need to explicitly set a `.Multiple()` property.
 </Callout>
 
 ## Styling
@@ -76,13 +78,13 @@ public class FileInputDisabledDemo : ViewBase
 {
     public override object? Build()
     {
-        var fileState = this.UseState((FileInput?)null);
+        var fileState = this.UseState((FileUpload?)null);
          return fileState.ToFileInput()
                     .Placeholder("Select a file")
                     .Accept(".jpg,.png")
                     .Disabled();
     }
-}    
+}
 ```
 
 <WidgetDocs Type="Ivy.FileInput" ExtensionTypes="Ivy.FileInputExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Inputs/FileInput.cs"/>
@@ -99,14 +101,13 @@ Multiple File Selection
 public class MultiFileSelectionDemo : ViewBase
 {
     public override object? Build()
-    {    
-        
-        var filesState = UseState<IEnumerable<FileInput>>([]);
+    {
+        var filesState = UseState<IEnumerable<FileUpload>>([]);
         var selected = UseState("");
         if(filesState.Value.Count() > 0)
         {
-            selected.Set($"Files selected: {string.Join(", ", filesState.Value?.Select(f => f.Name) ?? new string[0])}");
-        }   
+            selected.Set($"Files selected: {string.Join(", ", filesState.Value?.Select(f => f.FileName) ?? new string[0])}");
+        }
         return Layout.Vertical()
                 |  filesState.ToFileInput()
                 |  Text.Large(selected);

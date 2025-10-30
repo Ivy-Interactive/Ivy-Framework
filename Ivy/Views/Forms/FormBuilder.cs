@@ -4,6 +4,7 @@ using Ivy.Core;
 using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
 using Ivy.Hooks;
+using Ivy.Services;
 using Ivy.Shared;
 using Ivy.Widgets.Inputs;
 
@@ -198,7 +199,7 @@ public class FormBuilder<TModel> : ViewBase
     {
         Type nonNullableType = Nullable.GetUnderlyingType(type) ?? type;
 
-        if (type == typeof(FileInput))
+        if (type == typeof(FileUpload))
         {
             return (state) => state.ToFileInput().Size(Size);
         }

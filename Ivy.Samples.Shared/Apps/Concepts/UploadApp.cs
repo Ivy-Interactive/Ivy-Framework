@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using Ivy.Hooks;
+using Ivy.Services;
 using Ivy.Shared;
 using Ivy.Views.Builders;
 using Ivy.Views.Tables;
@@ -23,58 +24,56 @@ public class SingleFileUpload : ViewBase
 {
     public override object? Build()
     {
-        var selectedFile = UseState<FileInput?>();
+        var selectedFile = UseState<FileUpload?>();
         var uploadedBytes = UseState<byte[]?>();
 
-        var uploadUrl = this.UseUpload(async (fileUpload) =>
+        var uploadUrl = this.UseUpload(async (fileUpload, stream, cancellationToken) =>
         {
-            var currentFile = new FileInput(fileUpload);
+            var uploadId = Guid.NewGuid();
+            var currentFile = fileUpload with { Id = uploadId };
 
             try
             {
                 selectedFile.Set(currentFile);
 
-                var totalBytes = fileUpload.Length;
+                var totalBytes = currentFile.Length;
                 var processedBytes = 0L;
                 var buffer = new byte[8192]; // 8KB chunks
 
                 using var memoryStream = new MemoryStream();
 
-                selectedFile.SetStatus(FileInputStatus.Loading);
+                selectedFile.SetStatus(FileUploadStatus.Loading);
 
                 int bytesRead;
-                while ((bytesRead = await fileUpload.Stream.ReadAsync(buffer, 0, buffer.Length, currentFile.CancellationToken)) > 0)
+                while ((bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length, cancellationToken)) > 0)
                 {
-                    currentFile.CancellationToken.ThrowIfCancellationRequested();
+                    cancellationToken.ThrowIfCancellationRequested();
 
-                    await memoryStream.WriteAsync(buffer, 0, bytesRead, currentFile.CancellationToken);
+                    await memoryStream.WriteAsync(buffer, 0, bytesRead, cancellationToken);
                     processedBytes += bytesRead;
                     var progress = totalBytes > 0 ? ((float)processedBytes / totalBytes) : 0;
                     selectedFile.SetProgress(progress);
 
                     //Simulate this being slower
-                    await Task.Delay(50, currentFile.CancellationToken);
+                    await Task.Delay(50, cancellationToken);
                 }
 
                 uploadedBytes.Set(memoryStream.ToArray());
-                selectedFile.SetStatus(FileInputStatus.Finished);
+                selectedFile.SetStatus(FileUploadStatus.Finished);
             }
             catch (OperationCanceledException)
             {
-                selectedFile.SetStatus(FileInputStatus.Aborted);
+                selectedFile.SetStatus(FileUploadStatus.Aborted);
             }
             catch (Exception)
             {
-                selectedFile.SetStatus(FileInputStatus.Failed);
+                selectedFile.SetStatus(FileUploadStatus.Failed);
                 throw;
             }
-
-            return currentFile; //IDisposable
         });
 
-        void OnDelete(Guid fileId)
+        void OnDelete(object fileId)
         {
-            selectedFile.Value?.CancelUpload();
             selectedFile.Default();
             uploadedBytes.Default();
         }
@@ -89,38 +88,60 @@ public class SingleFileUpload : ViewBase
     }
 }
 
+// public class MemoryStreamUploadHandler() : IUploadHandler
+// {
+//     public MemoryStreamUploadHandler(IState<byte[]?> state)
+//     {
+//     }
+//     
+//     public MemoryStreamUploadHandler(IState<ImmutableArray<byte[]?> state)
+//     {
+//     }
+//     
+//     public async Task HandleUploadAsync(FileUpload fileUpload, Stream stream, CancellationToken cancellationToken)
+//     {
+//         //todo:
+//     }
+// }
+//
+// public interface IUploadHandler
+// {
+//     Task HandleUploadAsync(FileUpload fileUpload, Stream stream, CancellationToken cancellationToken);
+// }
+
 public class MultipleFilesUpload : ViewBase
 {
     public override object? Build()
     {
-        var selectedFiles = UseState(ImmutableArray.Create<FileInput>());
+        var selectedFiles = UseState(ImmutableArray.Create<FileUpload>());
         var uploadCount = UseState(0);
 
-        var uploadUrl = this.UseUpload(async (fileUpload) =>
+        var uploadUrl = this.UseUpload(async (fileUpload, stream, cancellationToken) =>
         {
-            var currentFile = new FileInput(fileUpload);
+            var uploadId = Guid.NewGuid();
+            var currentFile = fileUpload with { Id = uploadId };
 
             try
             {
                 selectedFiles.Set(files => files.Add(currentFile));
 
-                var totalBytes = fileUpload.Length;
+                var totalBytes = currentFile.Length;
                 var processedBytes = 0L;
                 var buffer = new byte[8192]; // 8KB chunks
 
                 using var memoryStream = new MemoryStream();
 
                 // Update to Loading state
-                var loadingFile = currentFile with { Status = FileInputStatus.Loading };
+                var loadingFile = currentFile with { Status = FileUploadStatus.Loading };
                 selectedFiles.Set(files => files.Replace(currentFile, loadingFile));
                 currentFile = loadingFile;
 
                 int bytesRead;
-                while ((bytesRead = await fileUpload.Stream.ReadAsync(buffer, 0, buffer.Length, currentFile.CancellationToken)) > 0)
+                while ((bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length, cancellationToken)) > 0)
                 {
-                    currentFile.CancellationToken.ThrowIfCancellationRequested();
+                    cancellationToken.ThrowIfCancellationRequested();
 
-                    await memoryStream.WriteAsync(buffer, 0, bytesRead, currentFile.CancellationToken);
+                    await memoryStream.WriteAsync(buffer, 0, bytesRead, cancellationToken);
                     processedBytes += bytesRead;
                     var progress = totalBytes > 0 ? ((float)processedBytes / totalBytes) : 0;
 
@@ -130,11 +151,11 @@ public class MultipleFilesUpload : ViewBase
                     currentFile = updatedFile;
 
                     //Simulate this being slower
-                    await Task.Delay(50, currentFile.CancellationToken);
+                    await Task.Delay(50, cancellationToken);
                 }
 
                 // Mark as finished - thread-safe atomic operation
-                var finishedFile = currentFile with { Status = FileInputStatus.Finished };
+                var finishedFile = currentFile with { Status = FileUploadStatus.Finished };
                 selectedFiles.Set(files => files.Replace(currentFile, finishedFile));
 
                 uploadCount.Set(count => count + 1);
@@ -142,18 +163,15 @@ public class MultipleFilesUpload : ViewBase
             catch (OperationCanceledException)
             {
                 // Upload was aborted by user
-                var abortedFile = currentFile with { Status = FileInputStatus.Aborted };
+                var abortedFile = currentFile with { Status = FileUploadStatus.Aborted };
                 selectedFiles.Set(files => files.Replace(currentFile, abortedFile));
             }
-
-            return currentFile; //IDisposable - automatically disposed by UploadService
         });
 
-        void OnDelete(Guid fileId)
+        void OnDelete(object fileId)
         {
-            var file = selectedFiles.Value.FirstOrDefault(f => f.Id == fileId);
+            var file = selectedFiles.Value.FirstOrDefault(f => f.Id.Equals(fileId));
             if (file == null) return;
-            file.CancelUpload();
             selectedFiles.Set(files => files.Remove(file));
         }
 
