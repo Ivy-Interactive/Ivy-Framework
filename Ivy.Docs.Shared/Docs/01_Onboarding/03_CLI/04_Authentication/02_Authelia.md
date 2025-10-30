@@ -62,7 +62,7 @@ When deploying an Ivy project without using `ivy deploy`, your local .NET user s
 
 > **Note:** If configuration is present in both .NET user secrets and environment variables, Ivy will use the values in **.NET user secrets over environment variables**.
 
-For more information, see [Authentication_Overview](01_Authentication_Overview.md).
+For more information, see [Authentication Overview](01_Authentication_Overview.md).
 
 #### Configuration Parameters
 
@@ -117,6 +117,6 @@ Key features of the Authelia provider:
 
 ## Related Documentation
 
-- [Authentication_Overview](01_Authentication_Overview.md)
+- [Authentication Overview](01_Authentication_Overview.md)
 - [Auth0 Provider](Auth0.md)
 - [Microsoft Entra Provider](MicrosoftEntra.md)
