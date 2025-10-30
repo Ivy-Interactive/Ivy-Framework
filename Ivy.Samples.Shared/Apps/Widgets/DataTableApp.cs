@@ -112,7 +112,7 @@ public class DataTableApp : SampleBase
                 config.SelectionMode = SelectionModes.Cells; // Enable cell selection
                 config.ShowIndexColumn = true;               // Show row index column
                 config.ShowGroups = true;                   // Show column groups
-                config.ShowVerticalBorders = true;          // Hide vertical borders between columns
+                config.ShowVerticalBorders = false;          // Hide vertical borders between columns
                 config.ShowColumnTypeIcons = false;          // Hide column type icons
                 config.BatchSize = 20;                       // Load 10 rows at a time
                 config.LoadAllRows = false;                  // Use pagination instead of loading all
