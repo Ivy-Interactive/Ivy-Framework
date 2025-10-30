@@ -53,7 +53,7 @@ For all connection options, see the [SqlConnection.ConnectionString documentatio
 
 Your connection string will be stored in .NET user secrets.
 
-See [Database Integration Overview](Overview.md) for more information on adding database connections to Ivy.
+See [Database_Overview](01_Database_Overview.md) for more information on adding database connections to Ivy.
 
 ## Configuration
 
@@ -96,7 +96,7 @@ For detailed troubleshooting, see [SQL Server Troubleshooting](https://learn.mic
 
 ## Related Documentation
 
-- [Database Overview](Overview.md)
+- [Database_Overview](01_Database_Overview.md)
 - [PostgreSQL Provider](PostgreSql.md)
 - [MySQL Provider](MySql.md)
 - [SQLite Provider](SQLite.md)

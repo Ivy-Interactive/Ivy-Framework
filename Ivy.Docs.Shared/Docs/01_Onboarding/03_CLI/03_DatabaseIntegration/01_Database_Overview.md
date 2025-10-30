@@ -1,4 +1,4 @@
-﻿---
+---
 searchHints:
   - database
   - entityframework

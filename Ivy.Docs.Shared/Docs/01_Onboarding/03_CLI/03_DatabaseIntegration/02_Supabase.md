@@ -55,7 +55,7 @@ For either format, remember to replace `[YOUR-PASSWORD]` with your database pass
 
 Ivy CLI will automatically detect and convert URI-style connection strings to the key-value format. After conversion, your connection string will be stored in .NET user secrets.
 
-See [Database Integration Overview](Overview.md) for more information on adding database connections to Ivy.
+See [Database_Overview](01_Database_Overview.md) for more information on adding database connections to Ivy.
 
 ## Configuration
 
@@ -87,7 +87,7 @@ See [Supabase Connection Troubleshooting](https://supabase.com/docs/guides/datab
 
 ## Related Documentation
 
-- [Database Overview](Overview.md)
+- [Database_Overview](01_Database_Overview.md)
 - [Supabase Authentication](../04_Authentication/Supabase.md)
 - [PostgreSQL Provider](PostgreSql.md)
 - [Official Supabase Documentation](https://supabase.com/docs)
