@@ -26,7 +26,7 @@ public enum FileInputStatus
 /// <summary>
 /// Represents a file uploaded through a file input control.
 /// </summary>
-public record FileInput : FileBase
+public record FileInput : FileBase, IDisposable
 {
     public FileInput()
     {
@@ -52,6 +52,29 @@ public record FileInput : FileBase
     /// Gets the current state of the file upload.
     /// </summary>
     public FileInputStatus Status { get; set; } = FileInputStatus.Pending;
+
+    [JsonIgnore]
+    private CancellationTokenSource? CancellationTokenSource { get; set; } = new();
+
+    [JsonIgnore]
+    public CancellationToken CancellationToken => CancellationTokenSource?.Token ?? CancellationToken.None;
+
+    public void CancelUpload()
+    {
+        try
+        {
+            CancellationTokenSource?.Cancel();
+        }
+        catch (Exception)
+        {
+            //ignore
+        }
+    }
+
+    public void Dispose()
+    {
+        CancellationTokenSource?.Dispose();
+    }
 }
 
 /// <summary>

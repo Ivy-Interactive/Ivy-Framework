@@ -41,9 +41,9 @@ public class UploadController(AppSessionStore sessionStore) : Controller
 
 public class UploadService(string connectionId) : IUploadService, IDisposable
 {
-    private readonly ConcurrentDictionary<Guid, (Func<FileUpload, Task> handler, string? mimeType, string? fileName)> _uploads = new();
+    private readonly ConcurrentDictionary<Guid, (Func<FileUpload, Task<IDisposable?>> handler, string? mimeType, string? fileName)> _uploads = new();
 
-    public (IDisposable cleanup, string url) AddUpload(Func<FileUpload, Task> handler, string? defaultContentType = null, string? defaultFileName = null)
+    public (IDisposable cleanup, string url) AddUpload(Func<FileUpload, Task<IDisposable?>> handler, string? defaultContentType = null, string? defaultFileName = null)
     {
         var uploadId = Guid.NewGuid();
         _uploads[uploadId] = (handler, defaultContentType, defaultFileName);
@@ -73,7 +73,6 @@ public class UploadService(string connectionId) : IUploadService, IDisposable
         var actualMimeType = file.ContentType.NullIfEmpty() ?? defaultContentType ?? "application/octet-stream";
         var actualFileName = file.FileName.NullIfEmpty() ?? defaultFileName ?? "upload";
 
-        // Note: IFormFile.OpenReadStream() returns a Stream that's valid during reqnuest
         var fileUpload = new FileUpload(
             FileName: actualFileName,
             ContentType: actualMimeType,
@@ -81,7 +80,8 @@ public class UploadService(string connectionId) : IUploadService, IDisposable
             Stream: file.OpenReadStream()
         );
 
-        await handler(fileUpload);
+        var disposable = await handler(fileUpload);
+        disposable?.Dispose(); // Automatically dispose CancellationTokenSource or other resources
 
         return new OkResult();
     }
@@ -94,7 +94,7 @@ public class UploadService(string connectionId) : IUploadService, IDisposable
 
 public interface IUploadService
 {
-    (IDisposable cleanup, string url) AddUpload(Func<FileUpload, Task> handler, string? defaultContentType = null, string? defaultFileName = null);
+    (IDisposable cleanup, string url) AddUpload(Func<FileUpload, Task<IDisposable?>> handler, string? defaultContentType = null, string? defaultFileName = null);
 
     Task<IActionResult> Upload(string uploadId, IFormFile file);
 }

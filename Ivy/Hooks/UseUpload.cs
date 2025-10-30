@@ -12,10 +12,16 @@ public static class UseUploadExtensions
     public static IState<string?> UseUpload<TView>(this TView view, Func<FileUpload, Task> handler, string? defaultContentType = null, string? defaultFileName = null) where TView : ViewBase =>
         view.Context.UseUpload(handler, defaultContentType, defaultFileName);
 
-    public static IState<string?> UseUpload(this IViewContext context, Action<FileUpload> handler, string? defaultContentType = null, string? defaultFileName = null) =>
-        context.UseUpload(upload => { handler(upload); return Task.CompletedTask; }, defaultContentType, defaultFileName);
+    public static IState<string?> UseUpload<TView>(this TView view, Func<FileUpload, Task<IDisposable?>> handler, string? defaultContentType = null, string? defaultFileName = null) where TView : ViewBase =>
+        view.Context.UseUpload(handler, defaultContentType, defaultFileName);
 
-    public static IState<string?> UseUpload(this IViewContext context, Func<FileUpload, Task> handler, string? defaultContentType = null, string? defaultFileName = null)
+    public static IState<string?> UseUpload(this IViewContext context, Action<FileUpload> handler, string? defaultContentType = null, string? defaultFileName = null) =>
+        context.UseUpload(upload => { handler(upload); return Task.FromResult<IDisposable?>(null); }, defaultContentType, defaultFileName);
+
+    public static IState<string?> UseUpload(this IViewContext context, Func<FileUpload, Task> handler, string? defaultContentType = null, string? defaultFileName = null) =>
+        context.UseUpload(async upload => { await handler(upload); return null; }, defaultContentType, defaultFileName);
+
+    public static IState<string?> UseUpload(this IViewContext context, Func<FileUpload, Task<IDisposable?>> handler, string? defaultContentType = null, string? defaultFileName = null)
     {
         var url = context.UseState<string?>();
         var uploadService = context.UseService<IUploadService>();
@@ -35,19 +41,20 @@ public static class UseUploadExtensions
         view.Context.UseUpload(handler, mimeType, fileName);
 
     public static IState<string?> UseUpload(this IViewContext context, Action<byte[]> handler, string mimeType, string fileName) =>
-        context.UseUpload(bytes => { handler(bytes); return Task.CompletedTask; }, mimeType, fileName);
+        context.UseUpload(bytes => { handler(bytes); return Task.FromResult<IDisposable?>(null); }, mimeType, fileName);
 
     public static IState<string?> UseUpload(this IViewContext context, Func<byte[], Task> handler, string mimeType, string fileName)
     {
         // Adapt byte[] handler to FileUpload handler
-        Func<FileUpload, Task> adaptedHandler = async (fileUpload) =>
+        async Task<IDisposable?> AdaptedHandler(FileUpload fileUpload)
         {
             using var memoryStream = new MemoryStream();
             await fileUpload.Stream.CopyToAsync(memoryStream);
             var bytes = memoryStream.ToArray();
             await handler(bytes);
-        };
+            return null;
+        }
 
-        return context.UseUpload(adaptedHandler, mimeType, fileName);
+        return context.UseUpload((Func<FileUpload, Task<IDisposable?>>)AdaptedHandler, mimeType, fileName);
     }
 }

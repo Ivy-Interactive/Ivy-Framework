@@ -28,9 +28,11 @@ public class SingleFileUpload : ViewBase
 
         var uploadUrl = this.UseUpload(async (fileUpload) =>
         {
+            var currentFile = new FileInput(fileUpload);
+
             try
             {
-                selectedFile.Set(new FileInput(fileUpload));
+                selectedFile.Set(currentFile);
 
                 var totalBytes = fileUpload.Length;
                 var processedBytes = 0L;
@@ -41,30 +43,38 @@ public class SingleFileUpload : ViewBase
                 selectedFile.SetStatus(FileInputStatus.Loading);
 
                 int bytesRead;
-                while ((bytesRead = await fileUpload.Stream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+                while ((bytesRead = await fileUpload.Stream.ReadAsync(buffer, 0, buffer.Length, currentFile.CancellationToken)) > 0)
                 {
-                    await memoryStream.WriteAsync(buffer, 0, bytesRead);
+                    currentFile.CancellationToken.ThrowIfCancellationRequested();
+
+                    await memoryStream.WriteAsync(buffer, 0, bytesRead, currentFile.CancellationToken);
                     processedBytes += bytesRead;
                     var progress = totalBytes > 0 ? ((float)processedBytes / totalBytes) : 0;
                     selectedFile.SetProgress(progress);
 
                     //Simulate this being slower
-                    await Task.Delay(50);
+                    await Task.Delay(50, currentFile.CancellationToken);
                 }
 
                 uploadedBytes.Set(memoryStream.ToArray());
                 selectedFile.SetStatus(FileInputStatus.Finished);
+            }
+            catch (OperationCanceledException)
+            {
+                selectedFile.SetStatus(FileInputStatus.Aborted);
             }
             catch (Exception)
             {
                 selectedFile.SetStatus(FileInputStatus.Failed);
                 throw;
             }
+
+            return currentFile; //IDisposable
         });
 
         void OnDelete(Guid fileId)
         {
-            // Thread-safe: clear the file
+            selectedFile.Value?.CancelUpload();
             selectedFile.Default();
             uploadedBytes.Default();
         }
@@ -90,49 +100,61 @@ public class MultipleFilesUpload : ViewBase
         {
             var currentFile = new FileInput(fileUpload);
 
-            selectedFiles.Set(files => files.Add(currentFile));
-
-            var totalBytes = fileUpload.Length;
-            var processedBytes = 0L;
-            var buffer = new byte[8192]; // 8KB chunks
-
-            using var memoryStream = new MemoryStream();
-
-            // Update to Loading state
-            var loadingFile = currentFile with { Status = FileInputStatus.Loading };
-            selectedFiles.Set(files => files.Replace(currentFile, loadingFile));
-            currentFile = loadingFile;
-
-            int bytesRead;
-            while ((bytesRead = await fileUpload.Stream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+            try
             {
-                await memoryStream.WriteAsync(buffer, 0, bytesRead);
-                processedBytes += bytesRead;
-                var progress = totalBytes > 0 ? ((float)processedBytes / totalBytes) : 0;
+                selectedFiles.Set(files => files.Add(currentFile));
 
-                // Update progress - thread-safe atomic operation
-                var updatedFile = currentFile with { Progress = progress };
-                selectedFiles.Set(files => files.Replace(currentFile, updatedFile));
-                currentFile = updatedFile;
+                var totalBytes = fileUpload.Length;
+                var processedBytes = 0L;
+                var buffer = new byte[8192]; // 8KB chunks
 
-                //Simulate this being slower
-                await Task.Delay(50);
+                using var memoryStream = new MemoryStream();
+
+                // Update to Loading state
+                var loadingFile = currentFile with { Status = FileInputStatus.Loading };
+                selectedFiles.Set(files => files.Replace(currentFile, loadingFile));
+                currentFile = loadingFile;
+
+                int bytesRead;
+                while ((bytesRead = await fileUpload.Stream.ReadAsync(buffer, 0, buffer.Length, currentFile.CancellationToken)) > 0)
+                {
+                    currentFile.CancellationToken.ThrowIfCancellationRequested();
+
+                    await memoryStream.WriteAsync(buffer, 0, bytesRead, currentFile.CancellationToken);
+                    processedBytes += bytesRead;
+                    var progress = totalBytes > 0 ? ((float)processedBytes / totalBytes) : 0;
+
+                    // Update progress - thread-safe atomic operation
+                    var updatedFile = currentFile with { Progress = progress };
+                    selectedFiles.Set(files => files.Replace(currentFile, updatedFile));
+                    currentFile = updatedFile;
+
+                    //Simulate this being slower
+                    await Task.Delay(50, currentFile.CancellationToken);
+                }
+
+                // Mark as finished - thread-safe atomic operation
+                var finishedFile = currentFile with { Status = FileInputStatus.Finished };
+                selectedFiles.Set(files => files.Replace(currentFile, finishedFile));
+
+                uploadCount.Set(count => count + 1);
+            }
+            catch (OperationCanceledException)
+            {
+                // Upload was aborted by user
+                var abortedFile = currentFile with { Status = FileInputStatus.Aborted };
+                selectedFiles.Set(files => files.Replace(currentFile, abortedFile));
             }
 
-            // Mark as finished - thread-safe atomic operation
-            var finishedFile = currentFile with { Status = FileInputStatus.Finished };
-            selectedFiles.Set(files => files.Replace(currentFile, finishedFile));
-
-            uploadCount.Set(count => count + 1);
+            return currentFile; //IDisposable - automatically disposed by UploadService
         });
 
         void OnDelete(Guid fileId)
         {
-            selectedFiles.Set(files =>
-            {
-                var fileToRemove = files.FirstOrDefault(f => f.Id == fileId);
-                return fileToRemove != null ? files.Remove(fileToRemove) : files;
-            });
+            var file = selectedFiles.Value.FirstOrDefault(f => f.Id == fileId);
+            if (file == null) return;
+            file.CancelUpload();
+            selectedFiles.Set(files => files.Remove(file));
         }
 
         var layout = Layout.Vertical()
