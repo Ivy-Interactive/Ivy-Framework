@@ -26,7 +26,7 @@ public class FileUploadView : ViewBase
     public override object? Build()
     {
         var files = UseState<FileUpload?>(() => null);
-        var uploadUrl = this.UseUpload(async (fileUpload, stream, cancellationToken) => { });
+        var uploadUrl = this.UseUpload((fileUpload, stream, cancellationToken) => Task.CompletedTask);
 
         return files.ToFileInput(uploadUrl, "Choose a file");
     }
@@ -49,11 +49,12 @@ var client = UseService<IClientProvider>();
 // 1. Create upload handler - returns state with
 // URL like "/upload/{connectionId}/{uploadId}"
 var uploadUrl = this.UseUpload(
-    async (fileUpload, stream, cancellationToken) => {
+    (fileUpload, stream, cancellationToken) => {
         // This handler is called when a file is uploaded
         // Access file metadata: fileUpload.FileName, fileUpload.ContentType, fileUpload.Length
         // Access file content via the stream parameter
         client.Toast($"Received {fileUpload.Length} bytes", "File Uploaded");
+        return Task.CompletedTask;
     }
     // mimeType and fileName are optional parameters with defaults from the uploaded file
 );
@@ -80,12 +81,13 @@ public class UploadWithStatusView : ViewBase
         var client = UseService<IClientProvider>();
         var files = UseState<FileUpload?>(() => null);
         var uploadUrl = this.UseUpload(
-            async (fileUpload, stream, cancellationToken) => {
+            (fileUpload, stream, cancellationToken) => {
                 try {
                     client.Toast($"Successfully uploaded {fileUpload.Length} bytes", "Upload Complete");
                 } catch (Exception ex) {
                     client.Toast(ex);
                 }
+                return Task.CompletedTask;
             }
         );
 
@@ -107,15 +109,16 @@ public class ValidatedUploadView : ViewBase
         var error = UseState<string?>(() => null);
         var files = UseState<FileUpload?>(() => null);
         var uploadUrl = this.UseUpload(
-            async (fileUpload, stream, cancellationToken) => {
+            (fileUpload, stream, cancellationToken) => {
                 if (fileUpload.Length > 2 * 1024 * 1024) // 2MB limit
                 {
                     error.Set("File size must be less than 2MB");
-                    return;
+                    return Task.CompletedTask;
                 }
                 error.Set((string?)null);
                 // Process uploaded file
                 client.Toast($"Image uploaded successfully ({fileUpload.Length} bytes)", "Success");
+                return Task.CompletedTask;
             },
             "image/jpeg" // Optional: specify expected MIME type
         );
@@ -200,11 +203,12 @@ public class MultiFileUploadView : ViewBase
         var uploadedFiles = UseState(() => new List<string>());
         var newFiles = UseState<IEnumerable<FileUpload>?>(() => null);
         var uploadUrl = this.UseUpload(
-            async (fileUpload, stream, cancellationToken) => {
+            (fileUpload, stream, cancellationToken) => {
                 // Process uploaded file
                 client.Toast($"File uploaded ({fileUpload.Length} bytes)", "Upload Complete");
                 // Add to list of uploaded files
                 uploadedFiles.Set(uploadedFiles.Value.Append($"File {uploadedFiles.Value.Count + 1}").ToList());
+                return Task.CompletedTask;
             }
         );
 

@@ -85,27 +85,6 @@ public class SingleFileUpload : ViewBase
     }
 }
 
-// public class MemoryStreamUploadHandler() : IUploadHandler
-// {
-//     public MemoryStreamUploadHandler(IState<byte[]?> state)
-//     {
-//     }
-//     
-//     public MemoryStreamUploadHandler(IState<ImmutableArray<byte[]?> state)
-//     {
-//     }
-//     
-//     public async Task HandleUploadAsync(FileUpload fileUpload, Stream stream, CancellationToken cancellationToken)
-//     {
-//         //todo:
-//     }
-// }
-//
-// public interface IUploadHandler
-// {
-//     Task HandleUploadAsync(FileUpload fileUpload, Stream stream, CancellationToken cancellationToken);
-// }
-
 public class MultipleFilesUpload : ViewBase
 {
     public override object? Build()

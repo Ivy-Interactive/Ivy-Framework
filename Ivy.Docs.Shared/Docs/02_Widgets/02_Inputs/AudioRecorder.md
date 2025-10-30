@@ -26,9 +26,10 @@ public class BasicAudioRecorderDemo : ViewBase
     public override object? Build()
     {
         var uploadUrl = this.UseUpload(
-            async (fileUpload, stream, cancellationToken) => {
+            (fileUpload, stream, cancellationToken) => {
                 // Process uploaded file
                 Console.WriteLine($"Received {fileUpload.Length} bytes");
+                return Task.CompletedTask;
             }
         );
 
