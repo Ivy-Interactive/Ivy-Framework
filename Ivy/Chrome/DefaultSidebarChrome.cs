@@ -204,6 +204,11 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
             }
         });
 
+        bool CheckTabExists(int tabId)
+        {
+            return tabId >= 0 && tabId < tabs.Value.Length;
+        }
+
         void OnMenuSelect(Event<SidebarMenu, object> @event)
         {
             if (@event.Value is string appId)
@@ -223,19 +228,26 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
 
         void OnTabSelect(Event<TabsLayout, int> @event)
         {
+            if (!CheckTabExists(@event.Value))
+            {
+                return;
+            }
+
             selectedIndex.Set(@event.Value);
 
             // Update browser URL when tab is selected
-            if (@event.Value < tabs.Value.Length)
-            {
-                var tab = tabs.Value[@event.Value];
-                var navigateArgs = new NavigateArgs(tab.AppId);
-                client.Redirect(navigateArgs.GetUrl(), tabId: tab.Id);
-            }
+            var tab = tabs.Value[@event.Value];
+            var navigateArgs = new NavigateArgs(tab.AppId);
+            client.Redirect(navigateArgs.GetUrl(), tabId: tab.Id);
         }
 
         void OnTabClose(Event<TabsLayout, int> @event)
         {
+            if (!CheckTabExists(@event.Value))
+            {
+                return;
+            }
+
             var closedIndex = @event.Value;
             var wasSelected = selectedIndex.Value == closedIndex;
             var newTabs = tabs.Value.RemoveAt(closedIndex);
@@ -278,6 +290,11 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
 
         void OnTabRefresh(Event<TabsLayout, int> @event)
         {
+            if (!CheckTabExists(@event.Value))
+            {
+                return;
+            }
+
             var tab = tabs.Value[@event.Value];
             tabs.Set(tabs.Value.RemoveAt(@event.Value).Insert(@event.Value, tab with { RefreshToken = Guid.NewGuid().ToString() }));
             selectedIndex.Set(@event.Value);
