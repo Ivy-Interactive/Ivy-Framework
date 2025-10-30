@@ -60,6 +60,7 @@ export interface DataTableConfiguration {
   showIndexColumn?: boolean;
   showGroups?: boolean;
   showColumnTypeIcons?: boolean;
+  showVerticalBorders?: boolean;
   batchSize?: number;
   loadAllRows?: boolean;
   showSearch?: boolean;

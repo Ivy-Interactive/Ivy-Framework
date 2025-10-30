@@ -51,6 +51,7 @@ export const DataTable: React.FC<TableProps> = ({
     showIndexColumn: configuration.showIndexColumn ?? false,
     showGroups: configuration.showGroups ?? false,
     showColumnTypeIcons: configuration.showColumnTypeIcons ?? true,
+    showVerticalBorders: configuration.showVerticalBorders ?? true,
     batchSize: configuration.batchSize,
     loadAllRows: configuration.loadAllRows ?? false,
     showSearch: configuration.showSearch ?? false,

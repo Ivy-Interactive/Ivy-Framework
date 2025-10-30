@@ -22,6 +22,7 @@ import { convertToGridColumns } from './utils/columnHelpers';
 import { iconCellRenderer } from './utils/customRenderers';
 import { generateHeaderIcons, addStandardIcons } from './utils/headerIcons';
 import { ThemeColors } from '@/lib/color-utils';
+import { useColumnGroups } from './hooks/useColumnGroups';
 
 interface TableEditorProps {
   hasOptions?: boolean;
@@ -57,6 +58,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     showGroups,
     showSearch: showSearchConfig,
     showColumnTypeIcons,
+    showVerticalBorders,
   } = config;
 
   const selectionProps = getSelectionProps(selectionMode);
@@ -85,7 +87,10 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
       horizontalBorderColor: colors.border || (isDark ? '#404045' : '#d1d5db'),
       linkColor:
         colors.primary || colors.accent || (isDark ? '#3b82f6' : '#2563eb'),
-      borderColor: 'transparent',
+      // Control vertical borders by setting borderColor to transparent when disabled
+      borderColor: showVerticalBorders
+        ? colors.border || (isDark ? '#404045' : '#d1d5db')
+        : 'transparent',
       cellHorizontalPadding: 16,
       cellVerticalPadding: 8,
       headerIconSize: 20,
@@ -205,7 +210,16 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     showColumnTypeIcons ?? true
   );
 
-  if (gridColumns.length === 0) {
+  // Use column groups hook when showGroups is enabled
+  const columnGroupsHook = useColumnGroups(gridColumns);
+  const shouldUseColumnGroups = showGroups ?? false;
+
+  // Use grouped columns if showGroups is enabled, otherwise use regular columns
+  const finalColumns = shouldUseColumnGroups
+    ? columnGroupsHook.columns
+    : gridColumns;
+
+  if (finalColumns.length === 0) {
     return null;
   }
 
@@ -217,7 +231,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     <div ref={containerRef} style={containerStyle}>
       <DataEditor
         ref={gridRef}
-        columns={gridColumns}
+        columns={finalColumns}
         rows={visibleRows}
         getCellContent={getCellContent}
         customRenderers={[iconCellRenderer]}
@@ -242,6 +256,11 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
         rowMarkers={showIndexColumn ? 'number' : 'none'}
         onColumnMoved={allowColumnReordering ? handleColumnReorder : undefined}
         groupHeaderHeight={showGroups ? 36 : undefined}
+        onGroupHeaderClicked={
+          shouldUseColumnGroups
+            ? columnGroupsHook.onGroupHeaderClicked
+            : undefined
+        }
         showSearch={showSearchConfig ? showSearch : false}
         onSearchClose={() => setShowSearch(false)}
       />
