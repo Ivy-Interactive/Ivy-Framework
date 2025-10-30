@@ -3,6 +3,7 @@ import DataEditor, {
   DataEditorRef,
   GridCell,
   GridSelection,
+  GridMouseEventArgs,
   Item,
   Theme,
 } from '@glideapps/glide-data-grid';
@@ -59,12 +60,17 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     showSearch: showSearchConfig,
     showColumnTypeIcons,
     showVerticalBorders,
+    enableRowHover,
   } = config;
 
   const selectionProps = getSelectionProps(selectionMode);
 
   // Use the enhanced theme hook with custom DataGrid theme generator
-  const { customTheme: tableTheme } = useThemeWithMonitoring<Partial<Theme>>({
+  const {
+    customTheme: tableTheme,
+    colors: themeColors,
+    isDark,
+  } = useThemeWithMonitoring<Partial<Theme>>({
     monitorDOM: true,
     monitorSystem: true,
     customThemeGenerator: (
@@ -110,6 +116,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     rows: CompactSelection.empty(),
   });
   const [showSearch, setShowSearch] = useState(false);
+  const [hoverRow, setHoverRow] = useState<number | undefined>(undefined);
   const scrollThreshold = 10;
 
   // Generate header icons map for all column icons
@@ -200,6 +207,29 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     []
   );
 
+  // Handle row hover
+  const onItemHovered = useCallback(
+    (args: GridMouseEventArgs) => {
+      if (!enableRowHover) return;
+      const [, row] = args.location;
+      setHoverRow(args.kind !== 'cell' ? undefined : row);
+    },
+    [enableRowHover]
+  );
+
+  // Get row theme override for hover effect
+  const getRowThemeOverride = useCallback(
+    (row: number) => {
+      if (!enableRowHover || row !== hoverRow) return undefined;
+      // Use theme-aware colors for hover effect
+      return {
+        bgCell: themeColors.accent || (isDark ? '#26262b' : '#f7f7f7'),
+        bgCellMedium: themeColors.muted || (isDark ? '#1f1f23' : '#f0f0f0'),
+      };
+    },
+    [hoverRow, enableRowHover, themeColors, isDark]
+  );
+
   // Convert columns to grid format with proper widths
   const gridColumns = convertToGridColumns(
     columns,
@@ -263,6 +293,8 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
         }
         showSearch={showSearchConfig ? showSearch : false}
         onSearchClose={() => setShowSearch(false)}
+        onItemHovered={enableRowHover ? onItemHovered : undefined}
+        getRowThemeOverride={enableRowHover ? getRowThemeOverride : undefined}
       />
     </div>
   );

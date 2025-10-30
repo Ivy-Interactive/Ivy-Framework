@@ -64,6 +64,7 @@ export interface DataTableConfiguration {
   batchSize?: number;
   loadAllRows?: boolean;
   showSearch?: boolean;
+  enableRowHover?: boolean;
 }
 
 export interface TableProps {
