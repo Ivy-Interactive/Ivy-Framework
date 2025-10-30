@@ -142,6 +142,26 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     };
   }, []);
 
+  // Check if we need to load more data when container height is large or when visible rows change
+  useEffect(() => {
+    if (!containerRef.current || visibleRows === 0 || isLoading) {
+      return;
+    }
+
+    // Calculate if the container height can show more rows than we have loaded
+    const containerHeight = containerRef.current.clientHeight;
+    const rowHeight = 38; // Must match the rowHeight prop in DataEditor
+    const headerHeight = 32; // Must match the headerHeight prop in DataEditor
+    const availableHeight = containerHeight - headerHeight;
+    const visibleRowCapacity = Math.ceil(availableHeight / rowHeight);
+
+    // If container can show more rows than we have, and we have more data available, load it
+    // This will keep loading until we have enough rows to fill the container
+    if (visibleRowCapacity > visibleRows && hasMore) {
+      loadMoreData();
+    }
+  }, [visibleRows, hasMore, isLoading, loadMoreData, containerRef]);
+
   // Handle keyboard shortcut for search (Ctrl/Cmd + F)
   useEffect(() => {
     if (!showSearchConfig) return;
