@@ -62,6 +62,7 @@ export interface DataTableConfiguration {
   showColumnTypeIcons?: boolean;
   batchSize?: number;
   loadAllRows?: boolean;
+  showSearch?: boolean;
 }
 
 export interface TableProps {

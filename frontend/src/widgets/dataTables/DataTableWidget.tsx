@@ -53,6 +53,7 @@ export const DataTable: React.FC<TableProps> = ({
     showColumnTypeIcons: configuration.showColumnTypeIcons ?? true,
     batchSize: configuration.batchSize,
     loadAllRows: configuration.loadAllRows ?? false,
+    showSearch: configuration.showSearch ?? false,
   };
 
   // Create styles object with width and height if provided

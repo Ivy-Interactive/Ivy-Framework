@@ -115,6 +115,7 @@ public class DataTableApp : SampleBase
                 config.ShowColumnTypeIcons = false;          // Hide column type icons
                 config.BatchSize = 20;                       // Load 10 rows at a time
                 config.LoadAllRows = false;                  // Use pagination instead of loading all
+                config.ShowSearch = true;                    // Show search input
             });
     }
 }
