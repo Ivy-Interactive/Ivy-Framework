@@ -4,22 +4,6 @@ using Ivy.Shared;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
-/// <summary>Event arguments for cell click events in a DataTable.</summary>
-public class CellClickEventArgs
-{
-    /// <summary>The row index of the clicked cell.</summary>
-    public int RowIndex { get; set; }
-
-    /// <summary>The column index of the clicked cell.</summary>
-    public int ColumnIndex { get; set; }
-
-    /// <summary>The name of the column for the clicked cell.</summary>
-    public string ColumnName { get; set; } = "";
-
-    /// <summary>The value of the clicked cell.</summary>
-    public object? CellValue { get; set; }
-}
-
 public record DataTable : WidgetBase<DataTable>
 {
     public DataTable(
@@ -43,11 +27,11 @@ public record DataTable : WidgetBase<DataTable>
 
     [Prop] public DataTableConfiguration Configuration { get; set; }
 
-    /// <summary>Event handler called when a cell is clicked (single-click).</summary>
-    [Event] public Func<Event<DataTable, CellClickEventArgs>, ValueTask>? OnCellClick { get; set; }
+    /// <summary>Event handler called when a cell is clicked (single-click). Value is (RowIndex, ColumnIndex, ColumnName, CellValue).</summary>
+    [Event] public Func<Event<DataTable, (int RowIndex, int ColumnIndex, string ColumnName, object? CellValue)>, ValueTask>? OnCellClick { get; set; }
 
-    /// <summary>Event handler called when a cell is activated (double-clicked for editing).</summary>
-    [Event] public Func<Event<DataTable, CellClickEventArgs>, ValueTask>? OnCellActivated { get; set; }
+    /// <summary>Event handler called when a cell is activated (double-clicked). Value is (RowIndex, ColumnIndex, ColumnName, CellValue).</summary>
+    [Event] public Func<Event<DataTable, (int RowIndex, int ColumnIndex, string ColumnName, object? CellValue)>, ValueTask>? OnCellActivated { get; set; }
 
     public static Detail operator |(DataTable widget, object child)
     {

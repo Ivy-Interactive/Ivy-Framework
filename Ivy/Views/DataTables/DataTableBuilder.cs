@@ -254,12 +254,12 @@ public class DataTableBuilder<TModel> : ViewBase
         return this;
     }
 
-    private Func<Event<DataTable, CellClickEventArgs>, ValueTask>? _onCellClick;
-    private Func<Event<DataTable, CellClickEventArgs>, ValueTask>? _onCellActivated;
+    private Func<Event<DataTable, (int RowIndex, int ColumnIndex, string ColumnName, object? CellValue)>, ValueTask>? _onCellClick;
+    private Func<Event<DataTable, (int RowIndex, int ColumnIndex, string ColumnName, object? CellValue)>, ValueTask>? _onCellActivated;
 
     /// <summary>Sets the event handler called when a cell is clicked.</summary>
     /// <param name="onCellClick">Event handler that receives cell click information including row index, column index, column name, and cell value.</param>
-    public DataTableBuilder<TModel> HandleCellClick(Func<Event<DataTable, CellClickEventArgs>, ValueTask> onCellClick)
+    public DataTableBuilder<TModel> HandleCellClick(Func<Event<DataTable, (int RowIndex, int ColumnIndex, string ColumnName, object? CellValue)>, ValueTask> onCellClick)
     {
         _onCellClick = onCellClick;
         return this;
@@ -267,7 +267,7 @@ public class DataTableBuilder<TModel> : ViewBase
 
     /// <summary>Sets the event handler called when a cell is clicked.</summary>
     /// <param name="onCellClick">Event handler that receives cell click information including row index, column index, column name, and cell value.</param>
-    public DataTableBuilder<TModel> HandleCellClick(Action<Event<DataTable, CellClickEventArgs>> onCellClick)
+    public DataTableBuilder<TModel> HandleCellClick(Action<Event<DataTable, (int RowIndex, int ColumnIndex, string ColumnName, object? CellValue)>> onCellClick)
     {
         _onCellClick = e => { onCellClick(e); return ValueTask.CompletedTask; };
         return this;
@@ -275,7 +275,7 @@ public class DataTableBuilder<TModel> : ViewBase
 
     /// <summary>Sets a simple event handler called when a cell is clicked.</summary>
     /// <param name="onCellClick">Simple action that receives cell click information when a cell is clicked.</param>
-    public DataTableBuilder<TModel> HandleCellClick(Action<CellClickEventArgs> onCellClick)
+    public DataTableBuilder<TModel> HandleCellClick(Action<(int RowIndex, int ColumnIndex, string ColumnName, object? CellValue)> onCellClick)
     {
         _onCellClick = e => { onCellClick(e.Value); return ValueTask.CompletedTask; };
         return this;
@@ -283,7 +283,7 @@ public class DataTableBuilder<TModel> : ViewBase
 
     /// <summary>Sets the event handler called when a cell is activated (double-clicked).</summary>
     /// <param name="onCellActivated">Event handler that receives cell activation information including row index, column index, column name, and cell value.</param>
-    public DataTableBuilder<TModel> HandleCellActivated(Func<Event<DataTable, CellClickEventArgs>, ValueTask> onCellActivated)
+    public DataTableBuilder<TModel> HandleCellActivated(Func<Event<DataTable, (int RowIndex, int ColumnIndex, string ColumnName, object? CellValue)>, ValueTask> onCellActivated)
     {
         _onCellActivated = onCellActivated;
         return this;
@@ -291,7 +291,7 @@ public class DataTableBuilder<TModel> : ViewBase
 
     /// <summary>Sets the event handler called when a cell is activated (double-clicked).</summary>
     /// <param name="onCellActivated">Event handler that receives cell activation information including row index, column index, column name, and cell value.</param>
-    public DataTableBuilder<TModel> HandleCellActivated(Action<Event<DataTable, CellClickEventArgs>> onCellActivated)
+    public DataTableBuilder<TModel> HandleCellActivated(Action<Event<DataTable, (int RowIndex, int ColumnIndex, string ColumnName, object? CellValue)>> onCellActivated)
     {
         _onCellActivated = e => { onCellActivated(e); return ValueTask.CompletedTask; };
         return this;
@@ -299,7 +299,7 @@ public class DataTableBuilder<TModel> : ViewBase
 
     /// <summary>Sets a simple event handler called when a cell is activated (double-clicked).</summary>
     /// <param name="onCellActivated">Simple action that receives cell activation information when a cell is activated.</param>
-    public DataTableBuilder<TModel> HandleCellActivated(Action<CellClickEventArgs> onCellActivated)
+    public DataTableBuilder<TModel> HandleCellActivated(Action<(int RowIndex, int ColumnIndex, string ColumnName, object? CellValue)> onCellActivated)
     {
         _onCellActivated = e => { onCellActivated(e.Value); return ValueTask.CompletedTask; };
         return this;

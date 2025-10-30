@@ -29,11 +29,13 @@ import { useColumnGroups } from './hooks/useColumnGroups';
 interface TableEditorProps {
   widgetId: string;
   hasOptions?: boolean;
+  events?: string[];
 }
 
 export const DataTableEditor: React.FC<TableEditorProps> = ({
   widgetId,
   hasOptions = false,
+  events = [],
 }) => {
   const {
     data,
@@ -217,7 +219,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
   // Handle cell single-clicks (for backend events only)
   const handleCellClicked = useCallback(
     (cell: Item) => {
-      if (enableCellClickEvents) {
+      if (enableCellClickEvents && events.includes('OnCellClick')) {
         // Get actual cell value
         const cellContent = getCellContent(cell);
         const visibleColumns = columns.filter(c => !c.hidden);
@@ -246,13 +248,20 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
       }
       // Do NOT prevent default - let selection happen normally!
     },
-    [enableCellClickEvents, eventHandler, widgetId, columns, getCellContent]
+    [
+      enableCellClickEvents,
+      eventHandler,
+      widgetId,
+      columns,
+      getCellContent,
+      events,
+    ]
   );
 
   // Handle cell double-clicks/activation (for editing)
   const handleCellActivated = useCallback(
     (cell: Item) => {
-      if (enableCellClickEvents) {
+      if (enableCellClickEvents && events.includes('OnCellActivated')) {
         const cellContent = getCellContent(cell);
         const visibleColumns = columns.filter(c => !c.hidden);
         const column = visibleColumns[cell[0]];
@@ -279,7 +288,14 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
         ]);
       }
     },
-    [enableCellClickEvents, eventHandler, widgetId, columns, getCellContent]
+    [
+      enableCellClickEvents,
+      eventHandler,
+      widgetId,
+      columns,
+      getCellContent,
+      events,
+    ]
   );
 
   // Handle row hover

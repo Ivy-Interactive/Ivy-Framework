@@ -9,18 +9,31 @@ public class DataTableView(
     Size? height,
     DataTableColumn[] columns,
     DataTableConfiguration configuration,
-    Func<Event<DataTable, CellClickEventArgs>, ValueTask>? onCellClick = null,
-    Func<Event<DataTable, CellClickEventArgs>, ValueTask>? onCellActivated = null) : ViewBase
+    Func<Event<DataTable, (int RowIndex, int ColumnIndex, string ColumnName, object? CellValue)>, ValueTask>? onCellClick = null,
+    Func<Event<DataTable, (int RowIndex, int ColumnIndex, string ColumnName, object? CellValue)>, ValueTask>? onCellActivated = null) : ViewBase
 {
     public override object? Build()
     {
         var connection = this.UseDataTable(queryable);
         if (connection == null) return null;
 
-        return new DataTable(connection, width, height, columns, configuration)
+        // Store handlers in state so they persist across rebuilds
+        var handlers = this.UseState(() => (onCellClick, onCellActivated));
+
+        var dataTable = new DataTable(connection, width, height, columns, configuration);
+
+        // Attach OnCellClick handler if specified
+        if (handlers.Value.onCellClick != null)
         {
-            OnCellClick = onCellClick,
-            OnCellActivated = onCellActivated
-        };
+            dataTable = dataTable with { OnCellClick = handlers.Value.onCellClick };
+        }
+
+        // Attach OnCellActivated handler if specified
+        if (handlers.Value.onCellActivated != null)
+        {
+            dataTable = dataTable with { OnCellActivated = handlers.Value.onCellActivated };
+        }
+
+        return dataTable;
     }
 }

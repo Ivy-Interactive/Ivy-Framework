@@ -76,6 +76,7 @@ export interface TableProps {
   editable?: boolean;
   width?: string;
   height?: string;
+  events?: string[];
   onCellUpdate?: (row: number, col: number, value: unknown) => void;
 }
 

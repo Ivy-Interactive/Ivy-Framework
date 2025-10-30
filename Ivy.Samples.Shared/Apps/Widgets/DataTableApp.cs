@@ -124,9 +124,9 @@ public class DataTableApp : SampleBase
                     config.ShowSearch = true;                    // Show search input
                 })
                 // Handle cell activation (double-click) - open sheet with row details
-                .HandleCellActivated(e =>
+                .HandleCellActivated(cellInfo =>
                 {
-                    var rowIndex = e.Value.RowIndex;
+                    var rowIndex = cellInfo.RowIndex;
                     if (rowIndex >= 0 && rowIndex < usersWithIcons.Count)
                     {
                         selectedUser.Value = usersWithIcons[rowIndex];

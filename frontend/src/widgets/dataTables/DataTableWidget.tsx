@@ -37,6 +37,7 @@ export const DataTable: React.FC<TableProps> = ({
   editable = false,
   width,
   height,
+  events = [],
 }) => {
   // Apply default configuration values
   const finalConfig = {
@@ -86,6 +87,7 @@ export const DataTable: React.FC<TableProps> = ({
             <DataTableEditor
               widgetId={id}
               hasOptions={finalConfig.allowFiltering}
+              events={events}
             />
           </>
         </TableLayout>
