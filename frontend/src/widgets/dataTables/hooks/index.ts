@@ -1,1 +1,1 @@
-export { useCollapsableColumnGroups } from './useCollapsableColumnGroups';
+export { useColumnGroups } from './useColumnGroups';

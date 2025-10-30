@@ -5,12 +5,12 @@ import {
 } from '@glideapps/glide-data-grid';
 
 /**
- * Hook to enable collapsible column groups in DataTable
+ * Hook to enable column groups in DataTable
  *
  * @param columns - The grid columns array
  * @returns Object containing props to spread on DataEditor and helper functions
  */
-export function useCollapsableColumnGroups(columns: GridColumn[]) {
+export function useColumnGroups(columns: GridColumn[]) {
   // Track which groups are collapsed
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(
     new Set()
@@ -146,4 +146,4 @@ export function useCollapsableColumnGroups(columns: GridColumn[]) {
   };
 }
 
-export default useCollapsableColumnGroups;
+export default useColumnGroups;

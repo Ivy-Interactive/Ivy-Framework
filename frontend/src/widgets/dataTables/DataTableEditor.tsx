@@ -22,7 +22,7 @@ import { convertToGridColumns } from './utils/columnHelpers';
 import { iconCellRenderer } from './utils/customRenderers';
 import { generateHeaderIcons, addStandardIcons } from './utils/headerIcons';
 import { ThemeColors } from '@/lib/color-utils';
-import { useCollapsableColumnGroups } from './hooks/useCollapsableColumnGroups';
+import { useColumnGroups } from './hooks/useColumnGroups';
 
 interface TableEditorProps {
   hasOptions?: boolean;
@@ -183,13 +183,13 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     showGroups ?? false
   );
 
-  // Use collapsible groups hook when showGroups is enabled
-  const collapsibleGroupsHook = useCollapsableColumnGroups(gridColumns);
-  const shouldUseCollapsibleGroups = showGroups ?? false;
+  // Use column groups hook when showGroups is enabled
+  const columnGroupsHook = useColumnGroups(gridColumns);
+  const shouldUseColumnGroups = showGroups ?? false;
 
-  // Use collapsible columns if showGroups is enabled, otherwise use regular columns
-  const finalColumns = shouldUseCollapsibleGroups
-    ? collapsibleGroupsHook.columns
+  // Use grouped columns if showGroups is enabled, otherwise use regular columns
+  const finalColumns = shouldUseColumnGroups
+    ? columnGroupsHook.columns
     : gridColumns;
 
   if (finalColumns.length === 0) {
@@ -230,8 +230,8 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
         onColumnMoved={allowColumnReordering ? handleColumnReorder : undefined}
         groupHeaderHeight={showGroups ? 36 : undefined}
         onGroupHeaderClicked={
-          shouldUseCollapsibleGroups
-            ? collapsibleGroupsHook.onGroupHeaderClicked
+          shouldUseColumnGroups
+            ? columnGroupsHook.onGroupHeaderClicked
             : undefined
         }
       />
