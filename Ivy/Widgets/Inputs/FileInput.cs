@@ -269,10 +269,8 @@ public static class FileInputExtensions
     {
         var type = state.GetStateType();
 
-        //Check that type is FileInput, FileInput? or IEnumerable<FileInput>
-        var isCollection = type.IsGenericType &&
-                          type.GetGenericTypeDefinition() == typeof(IEnumerable<>) &&
-                          type.GetGenericArguments()[0] == typeof(FileInput);
+        //Check that type is FileInput, FileInput? or IEnumerable<FileInput> (including ImmutableArray, List, etc.)
+        var isCollection = typeof(IEnumerable<FileInput>).IsAssignableFrom(type) && type != typeof(string);
         var isValid = type == typeof(FileInput) || isCollection;
 
         if (!isValid)

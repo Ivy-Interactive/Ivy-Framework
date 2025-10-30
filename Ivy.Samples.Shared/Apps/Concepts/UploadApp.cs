@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using Ivy.Hooks;
 using Ivy.Shared;
 using Ivy.Views.Builders;
@@ -81,21 +82,14 @@ public class MultipleFilesUpload : ViewBase
 {
     public override object? Build()
     {
-        var selectedFiles = UseState<IEnumerable<FileInput>?>();
+        var selectedFiles = UseState(ImmutableArray.Create<FileInput>());
         var uploadCount = UseState(0);
 
         var uploadUrl = this.UseUpload(async (fileUpload) =>
         {
-            var newFile = new FileInput(fileUpload);
+            var currentFile = new FileInput(fileUpload);
 
-            // Add the new file to the list
-            var currentFiles = selectedFiles.Value?.ToList() ?? new List<FileInput>();
-            currentFiles.Add(newFile);
-            selectedFiles.Set(currentFiles);
-
-            // Find the file we just added to update its progress
-            var fileToUpdate = currentFiles.Last();
-            var fileIndex = currentFiles.Count - 1;
+            selectedFiles.Set(files => files.Add(currentFile));
 
             var totalBytes = fileUpload.Length;
             var processedBytes = 0L;
@@ -103,9 +97,10 @@ public class MultipleFilesUpload : ViewBase
 
             using var memoryStream = new MemoryStream();
 
-            // Update state for this specific file
-            currentFiles[fileIndex] = fileToUpdate with { State = FileInputState.Loading };
-            selectedFiles.Set(currentFiles.ToArray());
+            // Update to Loading state
+            var loadingFile = currentFile with { State = FileInputState.Loading };
+            selectedFiles.Set(files => files.Replace(currentFile, loadingFile));
+            currentFile = loadingFile;
 
             int bytesRead;
             while ((bytesRead = await fileUpload.Stream.ReadAsync(buffer, 0, buffer.Length)) > 0)
@@ -114,21 +109,20 @@ public class MultipleFilesUpload : ViewBase
                 processedBytes += bytesRead;
                 var progress = totalBytes > 0 ? ((float)processedBytes / totalBytes) : 0;
 
-                // Update progress for this specific file
-                var updatedFiles = currentFiles.ToArray();
-                updatedFiles[fileIndex] = updatedFiles[fileIndex] with { Progress = progress };
-                selectedFiles.Set(updatedFiles);
+                // Update progress - thread-safe atomic operation
+                var updatedFile = currentFile with { Progress = progress };
+                selectedFiles.Set(files => files.Replace(currentFile, updatedFile));
+                currentFile = updatedFile;
 
                 //Simulate this being slower
                 await Task.Delay(50);
             }
 
-            // Mark as finished
-            var finalFiles = selectedFiles.Value!.ToArray();
-            finalFiles[fileIndex] = finalFiles[fileIndex] with { State = FileInputState.Finished };
-            selectedFiles.Set(finalFiles);
+            // Mark as finished - thread-safe atomic operation
+            var finishedFile = currentFile with { State = FileInputState.Finished };
+            selectedFiles.Set(files => files.Replace(currentFile, finishedFile));
 
-            uploadCount.Set(uploadCount.Value + 1);
+            uploadCount.Set(count => count + 1);
         });
 
         void OnClear()
@@ -139,15 +133,17 @@ public class MultipleFilesUpload : ViewBase
 
         void OnDelete(Guid fileId)
         {
-            var currentFiles = selectedFiles.Value?.ToList() ?? new List<FileInput>();
-            var updatedFiles = currentFiles.Where(f => f.Id != fileId).ToList();
-            selectedFiles.Set(updatedFiles);
+            selectedFiles.Set(files =>
+            {
+                var fileToRemove = files.FirstOrDefault(f => f.Id == fileId);
+                return fileToRemove != null ? files.Remove(fileToRemove) : files;
+            });
         }
 
         var layout = Layout.Vertical()
                      | Text.H1("Multiple Files Upload")
                      | selectedFiles.ToFileInput(uploadUrl).Accept("*/*").Placeholder("Choose files to upload").HandleClear(OnClear).HandleDelete(OnDelete)
-                     | selectedFiles.Value?.ToTable()
+                     | selectedFiles.Value.ToTable()
                          .Width(Size.Full())
                          .Builder(e => e.Length, e => e.Func((long x) => Utils.FormatBytes(x)))
                          .Builder(e => e.Progress, e => e.Func((float x) => x.ToString("P0")))
