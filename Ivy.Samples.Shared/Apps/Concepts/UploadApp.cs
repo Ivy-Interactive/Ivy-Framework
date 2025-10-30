@@ -1,6 +1,7 @@
 using Ivy.Hooks;
 using Ivy.Shared;
 using Ivy.Views.Builders;
+using Microsoft.Extensions.Logging;
 
 namespace Ivy.Samples.Shared.Apps.Concepts;
 
@@ -53,6 +54,7 @@ public class UploadApp : SampleBase
 
         return Layout.Vertical()
                | selectedFile.ToFileInput(uploadUrl).Accept("*/*").Placeholder("Choose a file to upload")
-               | selectedFile.ToDetails();
+               | selectedFile
+            ;
     }
 }

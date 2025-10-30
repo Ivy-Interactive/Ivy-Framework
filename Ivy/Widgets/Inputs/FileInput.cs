@@ -27,6 +27,10 @@ public enum FileInputState
 /// </summary>
 public record FileInput : FileBase
 {
+    public FileInput()
+    {
+    }
+
     public FileInput(string FileName, string ContentType, long Length, DateTime? LastModified = null)
         : base(FileName, ContentType, Length, LastModified)
     {
@@ -39,12 +43,12 @@ public record FileInput : FileBase
     /// <summary>
     /// Value from 0.0 to 1.0 indicating upload progress.
     /// </summary>
-    public float Progress { get; init; }
+    public float Progress { get; set; }
 
     /// <summary>
     /// Gets the current state of the file upload.
     /// </summary>
-    public FileInputState State { get; init; } = FileInputState.Pending;
+    public FileInputState State { get; set; } = FileInputState.Pending;
 }
 
 /// <summary>

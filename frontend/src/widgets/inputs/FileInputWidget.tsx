@@ -13,12 +13,21 @@ import {
   textVariants,
 } from '@/components/ui/input/file-input-variants';
 
+enum FileInputState {
+  Pending = 'Pending',
+  Aborted = 'Aborted',
+  Loading = 'Loading',
+  Failed = 'Failed',
+  Finished = 'Finished',
+}
+
 interface FileInput {
-  name: string;
-  size: number;
-  type: string;
-  lastModified: Date;
-  content?: string;
+  fileName: string;
+  contentType: string;
+  length: number;
+  lastModified?: Date;
+  progress: number;
+  state: FileInputState;
 }
 
 interface FileInputWidgetProps {
@@ -97,13 +106,15 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
         await uploadFile(file);
       }
 
-      // Ivy FileInput should only contain metadata, not file content
+      // Ivy FileInput should only contain metadata
+      // Backend maintains progress and state
       return {
-        name: file.name,
-        size: file.size,
-        type: file.type,
+        fileName: file.name,
+        contentType: file.type,
+        length: file.size,
         lastModified: new Date(file.lastModified),
-        // Don't include content - it's handled by UploadService
+        progress: 0,
+        state: FileInputState.Pending,
       };
     },
     [uploadFile, uploadUrl]
@@ -201,9 +212,14 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
 
   const displayValue = value
     ? Array.isArray(value)
-      ? value.map(f => f.name).join(', ')
-      : value.name
+      ? value.map(f => f.fileName).join(', ')
+      : value.fileName
     : '';
+
+  // Get single file for progress/state display (for single file mode)
+  const singleFile = value && !Array.isArray(value) ? value : null;
+  const isLoading = singleFile?.state === FileInputState.Loading;
+  const progress = singleFile?.progress ?? 0;
 
   return (
     <div
@@ -263,6 +279,20 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
           </Button>
         )}
       </div>
+      {/* Progress bar for loading state */}
+      {isLoading && (
+        <div className="mt-2">
+          <div className="w-full bg-muted rounded-full h-2">
+            <div
+              className="bg-primary h-2 rounded-full transition-all duration-300"
+              style={{ width: `${progress * 100}%` }}
+            />
+          </div>
+          <p className="text-sm text-muted-foreground mt-1">
+            Uploading... {Math.round(progress * 100)}%
+          </p>
+        </div>
+      )}
     </div>
   );
 };
