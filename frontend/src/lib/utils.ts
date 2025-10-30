@@ -1,6 +1,7 @@
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { textBlockClassMap } from './textBlockClassMap';
+import routingConstants from '../routing-constants.json' assert { type: 'json' };
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -17,39 +18,6 @@ export function getAppId(): string | null {
   const path = window.location.pathname.toLowerCase();
   const originalPath = window.location.pathname;
 
-  // Patterns that should NOT be converted (existing endpoints)
-  const excludedPaths = [
-    '/messages', // SignalR hub
-    '/webhook', // Webhook endpoints
-    '/auth', // Auth endpoints
-    '/assets', // Static assets
-    '/fonts', // Font files
-    '/_framework', // Blazor framework files
-    '/favicon.ico', // Favicon
-    '/manifest.json', // PWA manifest
-    '/service-worker.js', // Service worker
-    '/index.html', // Direct index.html access
-  ];
-
-  // File extensions that should be served as static files
-  const staticFileExtensions = [
-    '.js',
-    '.css',
-    '.html',
-    '.json',
-    '.ico',
-    '.png',
-    '.jpg',
-    '.jpeg',
-    '.gif',
-    '.svg',
-    '.woff',
-    '.woff2',
-    '.ttf',
-    '.eot',
-    '.map',
-  ];
-
   // Skip if path is empty or just "/"
   if (!path || path === '/') {
     return null;
@@ -57,7 +25,7 @@ export function getAppId(): string | null {
 
   // Skip if path starts with any excluded pattern (must be exact segment match)
   if (
-    excludedPaths.some(
+    routingConstants.excludedPaths.some(
       excluded => path === excluded || path.startsWith(excluded + '/')
     )
   ) {
@@ -65,7 +33,7 @@ export function getAppId(): string | null {
   }
 
   // Skip if path has a static file extension
-  if (staticFileExtensions.some(ext => path.endsWith(ext))) {
+  if (routingConstants.staticFileExtensions.some(ext => path.endsWith(ext))) {
     return null;
   }
 

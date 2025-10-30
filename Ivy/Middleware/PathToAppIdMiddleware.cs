@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using System.Text.RegularExpressions;
+using System.Reflection;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Ivy.Middleware;
 
@@ -14,27 +16,23 @@ public class PathToAppIdMiddleware
     private readonly RequestDelegate _next;
     private readonly ILogger<PathToAppIdMiddleware> _logger;
 
-    // Patterns that should NOT be converted (existing endpoints)
-    private static readonly string[] ExcludedPaths =
+    private class RoutingConstantData
     {
-        "/messages",      // SignalR hub
-        "/webhook",       // Webhook endpoints
-        "/auth",          // Auth endpoints
-        "/assets",        // Static assets
-        "/fonts",         // Font files
-        "/_framework",    // Blazor framework files
-        "/favicon.ico",   // Favicon
-        "/manifest.json", // PWA manifest
-        "/service-worker.js", // Service worker
-        "/index.html"     // Direct index.html access
-    };
+        [JsonPropertyName("excludedPaths")]
+        public string[] ExcludedPaths { get; set; } = [];
 
-    // File extensions that should be served as static files
-    private static readonly string[] StaticFileExtensions =
+        [JsonPropertyName("staticFileExtensions")]
+        public string[] StaticFileExtensions { get; set; } = [];
+    }
+
+    private static readonly RoutingConstantData RoutingConstants;
+
+    static PathToAppIdMiddleware()
     {
-        ".js", ".css", ".html", ".json", ".ico", ".png", ".jpg", ".jpeg",
-        ".gif", ".svg", ".woff", ".woff2", ".ttf", ".eot", ".map"
-    };
+        using var stream = Assembly.GetExecutingAssembly()
+            .GetManifestResourceStream("RoutingConstants")!;
+        RoutingConstants = JsonSerializer.Deserialize<RoutingConstantData>(stream)!;
+    }
 
     public PathToAppIdMiddleware(RequestDelegate next, ILogger<PathToAppIdMiddleware> logger)
     {
@@ -55,14 +53,14 @@ public class PathToAppIdMiddleware
         }
 
         // Skip if path starts with any excluded pattern (must be exact segment match)
-        if (ExcludedPaths.Any(excluded => path == excluded || path.StartsWith(excluded + "/")))
+        if (RoutingConstants.ExcludedPaths.Any(excluded => path == excluded || path.StartsWith(excluded + "/")))
         {
             await _next(context);
             return;
         }
 
         // Skip if path has a static file extension
-        if (StaticFileExtensions.Any(ext => path.EndsWith(ext)))
+        if (RoutingConstants.StaticFileExtensions.Any(ext => path.EndsWith(ext)))
         {
             await _next(context);
             return;
