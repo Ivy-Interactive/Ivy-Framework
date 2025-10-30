@@ -3,6 +3,7 @@ import { X, RotateCw } from 'lucide-react';
 import { useEventHandler } from '@/components/event-handler';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { getWidth } from '@/lib/styles';
+import { buttonVariants } from '@/components/ui/button/variants';
 
 interface BladeWidgetProps {
   id: string;
@@ -55,14 +56,14 @@ export function BladeWidget({
         <div className="flex items-center h-[70px]">
           <button
             onClick={() => eventHandler('OnRefresh', id, [])}
-            className="hover:bg-accent border border-transparent hover:border-border rounded-sm transition-colors h-9 w-9 inline-flex items-center justify-center cursor-pointer"
+            className={buttonVariants({ variant: 'outline', size: 'icon' })}
           >
             <RotateCw className="h-4 w-4" />
           </button>
           {index > 0 && (
             <button
               onClick={() => eventHandler('OnClose', id, [])}
-              className="hover:bg-accent border border-transparent hover:border-border rounded-sm transition-colors h-9 w-9 inline-flex items-center justify-center cursor-pointer"
+              className={buttonVariants({ variant: 'outline', size: 'icon' })}
             >
               <X className="h-4 w-4" />
             </button>
@@ -73,7 +74,7 @@ export function BladeWidget({
         {/* radix scrollarea breaks the nested containers widths*/}
         <ScrollArea
           type="hover"
-          className="blade-container h-full [&>div>div[style]]:!block"
+          className="blade-container h-full [&>div>div[style]]:block!"
         >
           <div className="p-4">{children}</div>
         </ScrollArea>
