@@ -2,12 +2,7 @@ import { getColor, getOverflow, getWidth, Overflow } from '@/lib/styles';
 import { cn } from '@/lib/utils';
 import React from 'react';
 import { textBlockClassMap } from '../../lib/textBlockClassMap';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
+import { wrapWithTooltip } from '@/lib/tooltipHelper';
 
 type TextBlockVariant =
   | 'Literal'
@@ -96,25 +91,19 @@ const variantMap: VariantMap = {
         className={cn('flex items-center text-sm min-w-0', className)}
         style={style}
       >
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <span
-                ref={spanRef}
-                className="overflow-hidden text-ellipsis"
-                onMouseEnter={() => setShowTooltip(true)}
-                onMouseLeave={() => setShowTooltip(false)}
-              >
-                {children}
-              </span>
-            </TooltipTrigger>
-            {showTooltip && isTruncated && typeof children === 'string' && (
-              <TooltipContent className="bg-popover text-popover-foreground shadow-md">
-                {children}
-              </TooltipContent>
-            )}
-          </Tooltip>
-        </TooltipProvider>
+        {wrapWithTooltip(
+          <span
+            ref={spanRef}
+            className="overflow-hidden text-ellipsis"
+            onMouseEnter={() => setShowTooltip(true)}
+            onMouseLeave={() => setShowTooltip(false)}
+          >
+            {children}
+          </span>,
+          showTooltip && isTruncated && typeof children === 'string'
+            ? children
+            : undefined
+        )}
       </div>
     );
   },
@@ -245,15 +234,10 @@ export const TextBlockWidget: React.FC<TextBlockWidgetProps> = ({
 
   // If ellipsis overflow is set, wrap in tooltip
   if (overflow === 'Ellipsis') {
-    return (
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>{element}</TooltipTrigger>
-          <TooltipContent className="bg-popover text-popover-foreground shadow-md max-w-sm">
-            <div className="whitespace-pre-wrap wrap-break-word">{content}</div>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
+    return wrapWithTooltip(
+      element,
+      <div className="whitespace-pre-wrap wrap-break-word">{content}</div>,
+      { contentClassName: 'max-w-sm' }
     );
   }
 

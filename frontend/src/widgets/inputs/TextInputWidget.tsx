@@ -21,12 +21,7 @@ import {
   xIconVariants,
   eyeIconVariants,
 } from '@/components/ui/input/text-input-variants';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
+import { wrapWithTooltip } from '@/lib/tooltipHelper';
 
 interface TextInputWidgetProps {
   id: string;
@@ -217,40 +212,39 @@ const DefaultVariant: React.FC<{
 
   return (
     <div className="relative w-full select-none" style={styles}>
-      <TooltipProvider>
-        <Tooltip open={isTruncated && showTooltip && !isFocused && hasContent}>
-          <TooltipTrigger asChild>
-            <Input
-              ref={elementRef as React.RefObject<HTMLInputElement>}
-              id={props.id}
-              placeholder={props.placeholder}
-              value={props.value}
-              type={type}
-              disabled={props.disabled}
-              onChange={handleChange}
-              onBlur={onBlur}
-              onFocus={onFocus}
-              onKeyDown={handleKeyDown}
-              onMouseEnter={() => setShowTooltip(true)}
-              onMouseLeave={() => setShowTooltip(false)}
-              className={cn(
-                textInputSizeVariants({ size }),
-                props.invalid && inputStyles.invalidInput,
-                props.invalid && 'pr-8',
-                props.shortcutKey && !isFocused && 'pr-16'
-              )}
-              data-testid={props['data-testid']}
-            />
-          </TooltipTrigger>
-          {hasContent && (
-            <TooltipContent className="bg-popover text-popover-foreground shadow-md max-w-sm">
-              <div className="whitespace-pre-wrap wrap-break-word">
-                {tooltipText}
-              </div>
-            </TooltipContent>
+      {wrapWithTooltip(
+        <Input
+          ref={elementRef as React.RefObject<HTMLInputElement>}
+          id={props.id}
+          placeholder={props.placeholder}
+          value={props.value}
+          type={type}
+          disabled={props.disabled}
+          onChange={handleChange}
+          onBlur={onBlur}
+          onFocus={onFocus}
+          onKeyDown={handleKeyDown}
+          onMouseEnter={() => setShowTooltip(true)}
+          onMouseLeave={() => setShowTooltip(false)}
+          className={cn(
+            textInputSizeVariants({ size }),
+            props.invalid && inputStyles.invalidInput,
+            props.invalid && 'pr-8',
+            props.shortcutKey && !isFocused && 'pr-16'
           )}
-        </Tooltip>
-      </TooltipProvider>
+          data-testid={props['data-testid']}
+        />,
+        hasContent ? (
+          <div className="whitespace-pre-wrap wrap-break-word">
+            {tooltipText}
+          </div>
+        ) : undefined,
+        {
+          open: isTruncated && showTooltip && !isFocused && hasContent,
+          contentClassName: 'max-w-sm',
+          triggerAsChild: true,
+        }
+      )}
       {/* Icons container: shortcut (if any), then invalid (if any) */}
       <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none h-6">
         {props.shortcutKey && !isFocused && (
@@ -523,51 +517,50 @@ const SearchVariant: React.FC<{
 
   return (
     <div className="relative w-full select-none" style={styles}>
-      <TooltipProvider>
-        <Tooltip open={isTruncated && showTooltip && !isFocused && hasContent}>
-          <TooltipTrigger asChild>
-            <div className="relative w-full">
-              {/* Search Icon */}
-              <Search className={searchIconVariants({ size })} />
+      {wrapWithTooltip(
+        <div className="relative w-full">
+          {/* Search Icon */}
+          <Search className={searchIconVariants({ size })} />
 
-              {/* Search Input */}
-              <Input
-                ref={combinedRef}
-                id={props.id}
-                type="search"
-                placeholder={props.placeholder}
-                value={props.value}
-                disabled={props.disabled}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                onFocus={onFocus}
-                onKeyDown={handleKeyDown}
-                onMouseEnter={() => setShowTooltip(true)}
-                onMouseLeave={() => setShowTooltip(false)}
-                autoComplete="off"
-                className={cn(
-                  textInputSizeVariants({ size }),
-                  'pl-8 cursor-pointer',
-                  props.invalid && inputStyles.invalidInput,
-                  props.invalid && 'pr-8',
-                  hasValue && 'pr-8',
-                  props.shortcutKey && !isFocused && 'pr-16',
-                  // Hide browser's default search input X icon
-                  '[&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-cancel-button]:hidden'
-                )}
-                data-testid={props['data-testid']}
-              />
-            </div>
-          </TooltipTrigger>
-          {hasContent && (
-            <TooltipContent className="bg-popover text-popover-foreground shadow-md max-w-sm">
-              <div className="whitespace-pre-wrap wrap-break-word">
-                {tooltipText}
-              </div>
-            </TooltipContent>
-          )}
-        </Tooltip>
-      </TooltipProvider>
+          {/* Search Input */}
+          <Input
+            ref={combinedRef}
+            id={props.id}
+            type="search"
+            placeholder={props.placeholder}
+            value={props.value}
+            disabled={props.disabled}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            onFocus={onFocus}
+            onKeyDown={handleKeyDown}
+            onMouseEnter={() => setShowTooltip(true)}
+            onMouseLeave={() => setShowTooltip(false)}
+            autoComplete="off"
+            className={cn(
+              textInputSizeVariants({ size }),
+              'pl-8 cursor-pointer',
+              props.invalid && inputStyles.invalidInput,
+              props.invalid && 'pr-8',
+              hasValue && 'pr-8',
+              props.shortcutKey && !isFocused && 'pr-16',
+              // Hide browser's default search input X icon
+              '[&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-cancel-button]:hidden'
+            )}
+            data-testid={props['data-testid']}
+          />
+        </div>,
+        hasContent ? (
+          <div className="whitespace-pre-wrap wrap-break-word">
+            {tooltipText}
+          </div>
+        ) : undefined,
+        {
+          open: isTruncated && showTooltip && !isFocused && hasContent,
+          contentClassName: 'max-w-sm',
+          triggerAsChild: true,
+        }
+      )}
       {/* Icons container: clear (if any), shortcut (if any), then invalid (if any) */}
       <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none z-10 h-6">
         {hasValue && !props.disabled && (
