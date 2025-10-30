@@ -56,6 +56,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     selectionMode,
     showGroups,
     showSearch: showSearchConfig,
+    showColumnTypeIcons,
   } = config;
 
   const selectionProps = getSelectionProps(selectionMode);
@@ -200,7 +201,8 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     columnOrder,
     columnWidths,
     containerWidth,
-    showGroups ?? false
+    showGroups ?? false,
+    showColumnTypeIcons ?? true
   );
 
   if (gridColumns.length === 0) {
