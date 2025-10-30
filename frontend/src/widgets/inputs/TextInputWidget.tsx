@@ -248,6 +248,7 @@ const TextareaVariant: React.FC<{
   };
 
   const shortcutDisplay = formatShortcutForDisplay(props.shortcutKey);
+  const hasValue = props.value && props.value.toString().trim() !== '';
 
   return (
     <div className="relative w-full select-none">
@@ -265,13 +266,13 @@ const TextareaVariant: React.FC<{
           textInputSizeVariants({ size }),
           props.invalid && inputStyles.invalidInput,
           props.invalid && 'pr-8',
-          props.shortcutKey && !isFocused && 'pr-16'
+          props.shortcutKey && !isFocused && !hasValue && 'pr-16'
         )}
         data-testid={props['data-testid']}
       />
       {/* Icons container: shortcut (if any), then invalid (if any) */}
       <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none h-6">
-        {props.shortcutKey && !isFocused && (
+        {props.shortcutKey && !isFocused && !hasValue && (
           <div className="pointer-events-auto flex items-center h-6">
             <kbd className="px-1 py-0.5 text-small-label font-medium text-foreground bg-muted border border-border rounded-md">
               {shortcutDisplay}
