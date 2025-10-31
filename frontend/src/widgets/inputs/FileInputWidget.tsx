@@ -63,7 +63,8 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
   const [isDragging, setIsDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const hasCancelHandler = events.includes('OnCancel');
+  // Be defensive in case events is undefined at runtime
+  const hasCancelHandler = Array.isArray(events) && events.includes('OnCancel');
 
   const uploadFile = useCallback(
     async (file: File): Promise<void> => {
