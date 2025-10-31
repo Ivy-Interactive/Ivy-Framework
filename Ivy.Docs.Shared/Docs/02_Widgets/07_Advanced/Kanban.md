@@ -97,6 +97,67 @@ public class KanbanWithMoveExample : ViewBase
 }
 ```
 
+## Card Click Events
+
+Handle card click events by providing a `HandleClick` handler. This is useful for opening task details, showing modals, navigating to detail pages, or performing any other action when a user clicks on a card:
+
+```csharp demo-tabs
+public class KanbanWithClickExample : ViewBase
+{
+    record Task(string Id, string Title, string Status, int Priority, string Description, string Assignee);
+    
+    public override object? Build()
+    {
+        var taskState = UseState(new[]
+        {
+            new Task("1", "Design Homepage", "Todo", 1, "Create wireframes and mockups", "Alice"),
+            new Task("2", "Setup Database", "Todo", 2, "Configure PostgreSQL instance", "Bob"),
+            new Task("3", "Implement Auth", "Todo", 3, "Add OAuth2 authentication", "Charlie"),
+            new Task("4", "Build API", "Todo", 4, "Create REST endpoints", "Alice"),
+            new Task("5", "Code Review", "In Progress", 1, "Review pull requests", "Charlie"),
+            new Task("6", "Performance Optimization", "In Progress", 2, "Optimize database queries", "Alice"),
+            new Task("7", "Bug Fixes", "In Progress", 3, "Fix reported bugs", "Bob"),
+            new Task("8", "Unit Tests", "Done", 1, "Write comprehensive test suite", "Bob"),
+            new Task("9", "Deploy to Production", "Done", 2, "Configure CI/CD pipeline", "Charlie"),
+            new Task("10", "User Training", "Done", 3, "Train users on new features", "Alice"),
+        });
+        
+        var client = UseService<IClientProvider>();
+        
+        return taskState.Value
+            .ToKanban(
+                groupBySelector: t => t.Status,
+                idSelector: t => t.Id,
+                titleSelector: t => t.Title,
+                descriptionSelector: t => t.Description)
+            .HandleClick(cardId =>
+            {
+                var taskId = cardId?.ToString();
+                var clickedTask = taskState.Value.FirstOrDefault(t => t.Id == taskId);
+                if (clickedTask != null)
+                {
+                    client.Toast($"Clicked: {clickedTask.Title}");
+                }
+            })
+            .HandleMove(moveData =>
+            {
+                var taskId = moveData.CardId?.ToString();
+                var updatedTasks = taskState.Value.ToList();
+                var taskToMove = updatedTasks.FirstOrDefault(t => t.Id == taskId);
+                
+                if (taskToMove != null)
+                {
+                    // Update task status to match new column
+                    var updated = taskToMove with { Status = moveData.ToColumn };
+                    updatedTasks.RemoveAll(t => t.Id == taskId);
+                    updatedTasks.Add(updated);
+                    taskState.Set(updatedTasks.ToArray());
+                }
+            });
+    }
+}
+```
+
 ## Examples
 
 <Details>
