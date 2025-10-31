@@ -78,7 +78,7 @@ Full browser history integration with path-based URLs (`/my-app`), forward/back 
 - **Search**: Enable with `config.ShowSearch = true`, toggle with Ctrl/Cmd+F
 - **Collapsible Groups**: Click group headers to collapse/expand when `ShowGroups` is enabled
 - **Row Hover**: `config.EnableRowHover = true` for theme-aware hover effects
-- *Cell Click Events**: Handle single-click (`OnCellClick`) and double-click (`OnCellActivated`) with access to row/column/value data
+- **Cell Click Events**: Handle single-click (`OnCellClick`) and double-click (`OnCellActivated`) with access to row/column/value data
 - **Vertical Borders**: `config.ShowVerticalBorders = false` to hide column borders
 
 ## CLI & Tooling
