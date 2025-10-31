@@ -9,7 +9,7 @@ export type ColorScheme = 'Default' | 'Rainbow';
  * Chart color variable names - single source of truth for available chart colors
  * Add new colors here when they are added to index.css
  */
-const CHART_COLOR_VARIABLES = [
+const chartColorVars = [
   'chart-1',
   'chart-2',
   'chart-3',
@@ -23,9 +23,10 @@ const CHART_COLOR_VARIABLES = [
 ] as const;
 
 /**
- * Rainbow color scheme - static colors that work in both themes
+ * Rainbow color scheme - CSS variable names from index.css
+ * These are defined in :root and properly theme-aware
  */
-const rainbowColors = [
+const rainbowColorVars = [
   'blue',
   'cyan',
   'yellow',
@@ -43,7 +44,7 @@ const rainbowColors = [
   'emerald',
   'fuchsia',
   'sky',
-];
+] as const;
 
 /**
  * Read chart colors from CSS variables
@@ -52,16 +53,55 @@ const rainbowColors = [
 function readChartColorsFromCSS(): string[] {
   if (typeof document === 'undefined') return [];
 
-  return CHART_COLOR_VARIABLES.map(varName => {
-    const value = getComputedStyle(document.documentElement)
-      .getPropertyValue(`--${varName}`)
-      .trim();
-    return value;
-  }).filter(Boolean);
+  try {
+    const docElement = document.documentElement;
+    if (!docElement) return [];
+
+    return chartColorVars
+      .map(varName => {
+        const value = getComputedStyle(docElement)
+          .getPropertyValue(`--${varName}`)
+          .trim();
+        return value;
+      })
+      .filter(Boolean);
+  } catch (error) {
+    console.warn('Failed to read chart colors from CSS:', error);
+    return [];
+  }
+}
+
+/**
+ * Read rainbow colors from CSS variables
+ * Uses color names defined in index.css (--blue, --cyan, etc.)
+ */
+function readRainbowColorsFromCSS(): string[] {
+  if (typeof document === 'undefined') return [];
+
+  try {
+    const docElement = document.documentElement;
+    if (!docElement) return [];
+
+    return rainbowColorVars
+      .map(varName => {
+        const value = getComputedStyle(docElement)
+          .getPropertyValue(`--${varName}`)
+          .trim();
+        return value;
+      })
+      .filter(Boolean);
+  } catch (error) {
+    console.warn('Failed to read rainbow colors from CSS:', error);
+    return [];
+  }
 }
 
 /**
  * Get chart colors based on scheme
+ *
+ * Both schemes read colors from CSS variables in index.css:
+ * - 'Default': Uses --chart-1, --chart-2, ..., --chart-10
+ * - 'Rainbow': Uses --blue, --cyan, --yellow, --red, etc.
  *
  * IMPORTANT: Chart colors DO NOT change with theme!
  * Only background, text, axes, and tooltips change with theme.
@@ -83,8 +123,12 @@ export const getChartColors = (
       // Fallback to primary color if no chart colors found
       return colors.length > 0 ? colors : [themeColors.primary];
     }
-    case 'Rainbow':
-      return rainbowColors;
+    case 'Rainbow': {
+      // Read rainbow colors from CSS variables (--blue, --cyan, etc.)
+      const colors = readRainbowColorsFromCSS();
+      // Fallback to primary color if no colors found
+      return colors.length > 0 ? colors : [themeColors.primary];
+    }
     default:
       return [];
   }

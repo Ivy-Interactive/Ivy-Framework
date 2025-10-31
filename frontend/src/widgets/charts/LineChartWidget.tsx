@@ -34,8 +34,8 @@ const LineChartWidget: React.FC<LineChartWidgetProps> = ({
 }) => {
   // Use enhanced theme hook with automatic monitoring
   const { colors, isDark } = useThemeWithMonitoring({
-    monitorDOM: true,
-    monitorSystem: true,
+    monitorDOM: false, // Disabled to prevent excessive re-renders from MutationObserver
+    monitorSystem: true, // Keep system theme monitoring for light/dark mode switching
   });
 
   // Extract chart-specific theme colors
@@ -64,7 +64,7 @@ const LineChartWidget: React.FC<LineChartWidgetProps> = ({
 
   const { categories, valueKeys } = generateDataProps(data);
 
-  // Memoize chart colors
+  // Memoize chart colors - recalculate when colorScheme or theme colors change
   const chartColors = useMemo(
     () => getColors(colorScheme, colors),
     [colorScheme, colors]
@@ -145,7 +145,7 @@ const LineChartWidget: React.FC<LineChartWidgetProps> = ({
       <ReactECharts
         option={option}
         style={chartStyles}
-        notMerge={false}
+        notMerge={true} // Merge changes instead of full rebuild for better performance
         lazyUpdate={true}
       />
     </div>

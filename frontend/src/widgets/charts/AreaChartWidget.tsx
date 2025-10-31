@@ -63,8 +63,8 @@ const AreaChartWidget: React.FC<AreaChartWidgetProps> = ({
 }) => {
   // Use enhanced theme hook with automatic monitoring
   const { colors, isDark } = useThemeWithMonitoring({
-    monitorDOM: true,
-    monitorSystem: true,
+    monitorDOM: false, // Disabled to prevent excessive re-renders from MutationObserver
+    monitorSystem: true, // Keep system theme monitoring for light/dark mode switching
   });
 
   // Extract chart-specific theme colors
@@ -203,7 +203,7 @@ const AreaChartWidget: React.FC<AreaChartWidgetProps> = ({
       <ReactECharts
         option={option}
         style={chartStyles}
-        notMerge={false}
+        notMerge={true} // Merge changes instead of full rebuild for better performance
         lazyUpdate={true}
       />
     </div>
