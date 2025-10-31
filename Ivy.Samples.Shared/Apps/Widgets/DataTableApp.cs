@@ -113,9 +113,9 @@ public class DataTableApp : SampleBase
             .Header(e => e.Department, "Dept")
 
             // Column widths
-            .Width(e => e.Id, Size.Px(80))
+            .Width(e => e.Id, Size.Px(40))
             .Width(e => e.EmployeeCode, Size.Px(100))
-            .Width(e => e.Name, Size.Px(180))
+            .Width(e => e.Name, Size.Px(120))
             .Width(e => e.Email, Size.Px(250))
             .Width(e => e.Age, Size.Px(70))
             .Width(e => e.Salary, Size.Px(120))
@@ -131,24 +131,23 @@ public class DataTableApp : SampleBase
             .Width(e => e.OptionalId, Size.Px(100))
             .Width(e => e.Bonus, Size.Px(120))
 
-            // // Alignments
-            // .Align(e => e.Id, Align.Left)
-            // .Align(e => e.Age, Align.Left)
-            // .Align(e => e.Salary, Align.Left)
-            // .Align(e => e.Performance, Align.Left)
-            // .Align(e => e.OptionalId, Align.Left)
-            // .Align(e => e.Bonus, Align.Left)
-            // .Align(e => e.EmployeeCode, Align.Left)
-            // .Align(e => e.Name, Align.Right)
-            // .Align(e => e.Email, Align.Left)
-            // .Align(e => e.Notes, Align.Left)
-            // .Align(e => e.IsActive, Align.Left)
-            // .Align(e => e.IsManager, Align.Left)
-            // .Align(e => e.HireDate, Align.Left)
-            // .Align(e => e.LastReview, Align.Left)
-            // .Align(e => e.Status, Align.Left)
-            // .Align(e => e.Priority, Align.Left)
-            // .Align(e => e => e.Department, Align.Left)
+            // Alignments
+            .Align(e => e.Id, Align.Left)
+            .Align(e => e.Age, Align.Left)
+            .Align(e => e.Salary, Align.Left)
+            .Align(e => e.Performance, Align.Left)
+            .Align(e => e.Name, Align.Left)
+            .Align(e => e.Email, Align.Left)
+            .Align(e => e.Notes, Align.Left)
+            .Align(e => e.IsActive, Align.Left)
+            .Align(e => e.IsManager, Align.Left)
+            .Align(e => e.HireDate, Align.Left)
+            .Align(e => e.LastReview, Align.Left)
+            .Align(e => e.Status, Align.Left)
+            .Align(e => e.Priority, Align.Left)
+            .Align(e => e.Department, Align.Left)
+            .Align(e => e.Bonus, Align.Left)
+            .Align(e => e.OptionalId, Align.Left)
 
             // Groups
             .Group(e => e.Id, "Identity")
@@ -184,7 +183,7 @@ public class DataTableApp : SampleBase
                 config.AllowColumnResizing = true;
                 config.AllowCopySelection = true;
                 config.SelectionMode = SelectionModes.Columns;
-                config.ShowIndexColumn = true;
+                config.ShowIndexColumn = false;
                 config.ShowGroups = true;
                 config.ShowVerticalBorders = false;
                 config.ShowColumnTypeIcons = false;           // Show type icons
