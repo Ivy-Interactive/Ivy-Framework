@@ -1,6 +1,7 @@
 export { ArticleWidget } from './article';
 export { BadgeWidget } from './BadgeWidget';
 export { ButtonWidget } from './ButtonWidget';
+export { SignInButtonWidget } from './SignInButtonWidget';
 export { CardWidget } from './CardWidget';
 export {
   ChatLoadingWidget,
