@@ -1,4 +1,4 @@
-﻿---
+---
 searchHints:
   - authentication
   - login
@@ -130,6 +130,16 @@ If configuration is present in both .NET user secrets and environment variables,
 2. User is prompted for a username and password.
 3. Credentials are validated by the configured authentication provider.
 4. If valid, Ivy establishes an authenticated session for the user.
+
+## Using IAuthService in Views
+
+```csharp
+var auth = this.UseService<IAuthService>();
+
+await auth.LoginAsync(email, password);
+var user = await auth.GetUserInfoAsync();
+await auth.LogoutAsync();
+```
 
 ## Supported Authentication Providers
 
