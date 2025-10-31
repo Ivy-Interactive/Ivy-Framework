@@ -208,21 +208,76 @@ public class DataProvider : ViewBase
 }
 ```
 
+## API Reference
+
+### Required Imports
+
+Add `using Ivy.Hooks;` to access signal functionality:
+
+```csharp
+using Ivy.Hooks;
+```
+
+### Key Types
+
+- **`AbstractSignal<TInput, TOutput>`** - Base class for signals
+- **`Unit`** - Void return type for notifications without responses
+- **`Context.CreateSignal<TSignal, TInput, TOutput>()`** - Creates signal sender
+- **`Context.UseSignal<TSignal, TInput, TOutput>()`** - Creates signal receiver
+
+### Signal Operations
+
+**Creating a sender** (to broadcast messages):
+
+```csharp
+var signal = Context.CreateSignal<CounterSignal, int, string>();
+await signal.Send(42); // Returns TOutput[] from all subscribers
+```
+
+**Creating a receiver** (to listen to messages):
+
+```csharp
+var signal = Context.UseSignal<CounterSignal, int, string>();
+UseEffect(() => signal.Receive(input => {
+    // Handle message and return response
+    return $"Processed: {input}";
+}));
+```
+
+**Important**: Always use `UseEffect()` to manage signal subscriptions for proper lifecycle handling.
+
+### Signal Types
+
+- `TInput` - Data sent to subscribers
+- `TOutput` - Response type from each subscriber (aggregated into array)
+
+Use `Unit` when no response is needed, otherwise return meaningful data.
+
 ## Broadcast Types
 
-Signals can be configured to broadcast across different scopes:
+### Contextual vs Broadcast Signals
 
-### App-Level Broadcasting
+By default, signals are **contextual** (scoped to component tree). For cross-session communication, add the `[Signal]` attribute:
+
+```csharp
+// Contextual - scoped to parent component tree
+public class LocalSignal : AbstractSignal<string, Unit> { }
+
+// Broadcast - scoped by BroadcastType
+[Signal(BroadcastType.App)]
+public class AppSignal : AbstractSignal<string, Unit> { }
+```
+
+### Available Broadcast Types
+
+- **`App`** - All sessions running the same application
+- **`Server`** - All active sessions on the server
+- **`Machine`** - All sessions on the same physical machine
+- **`Chrome`** - Parent Chrome session (for embedded apps)
 
 ```csharp
 [Signal(BroadcastType.App)]
 public class AppNotificationSignal : AbstractSignal<string, Unit> { }
-
-[Signal(BroadcastType.Server)]
-public class ServerEventSignal : AbstractSignal<ServerEvent, Unit> { }
-
-[Signal(BroadcastType.Machine)]
-public class SystemSignal : AbstractSignal<SystemEvent, Unit> { }
 ```
 
 ```mermaid
