@@ -84,12 +84,12 @@ public abstract record FileInputBase : WidgetBase<FileInputBase>, IAnyFileInput
     {
         if (value == null) return ValidationResult.Success();
 
-        if (value is FileUpload file)
+        if (value is IFileUpload file)
         {
             return FileInputValidation.ValidateFileType(file, Accept);
         }
 
-        if (value is IEnumerable<FileUpload> files)
+        if (value is IEnumerable<IFileUpload> files)
         {
             var filesList = files.ToList();
 
@@ -189,13 +189,40 @@ public static class FileInputExtensions
     {
         var type = state.GetStateType();
 
-        //Check that type is FileUpload, FileUpload? or IEnumerable<FileUpload> (including ImmutableArray, List, etc.)
-        var isCollection = typeof(IEnumerable<FileUpload>).IsAssignableFrom(type) && type != typeof(string);
-        var isValid = type == typeof(FileUpload) || isCollection;
+        bool IsFileUploadType(Type t)
+        {
+            if (t == typeof(FileUpload)) return true;
+            if (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(FileUpload<>)) return true;
+            return typeof(IFileUpload).IsAssignableFrom(t);
+        }
+
+        bool IsEnumerableOfFileUpload(Type t)
+        {
+            if (t == typeof(string)) return false;
+            if (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IEnumerable<>))
+            {
+                var arg = t.GetGenericArguments()[0];
+                return IsFileUploadType(arg);
+            }
+            // Check implemented interfaces (handles ImmutableArray<>, List<>, etc.)
+            foreach (var it in t.GetInterfaces())
+            {
+                if (it.IsGenericType && it.GetGenericTypeDefinition() == typeof(IEnumerable<>))
+                {
+                    var arg = it.GetGenericArguments()[0];
+                    if (IsFileUploadType(arg)) return true;
+                }
+            }
+            return false;
+        }
+
+        //Check that type is FileUpload / FileUpload<T> or IEnumerable<FileUpload>/IEnumerable<FileUpload<T>>
+        var isCollection = IsEnumerableOfFileUpload(type);
+        var isValid = IsFileUploadType(type) || isCollection;
 
         if (!isValid)
         {
-            throw new Exception("Invalid type for FileInput - must be FileUpload or IEnumerable<FileUpload>");
+            throw new Exception("Invalid type for FileInput - must be FileUpload, FileUpload<T>, or a collection thereof");
         }
 
         Type genericType = typeof(FileInput<>).MakeGenericType(type);
@@ -311,7 +338,7 @@ public static class FileInputExtensions
     /// </summary>
     /// <param name="widget">The file input widget containing validation rules.</param>
     /// <param name="file">The file to validate.</param>
-    public static ValidationResult ValidateFile(this FileInputBase widget, FileUpload file)
+    public static ValidationResult ValidateFile(this FileInputBase widget, IFileUpload file)
     {
         return FileInputValidation.ValidateFileType(file, widget.Accept);
     }
@@ -321,7 +348,7 @@ public static class FileInputExtensions
     /// </summary>
     /// <param name="widget">The file input widget containing validation rules.</param>
     /// <param name="files">The files to validate.</param>
-    public static ValidationResult ValidateFiles(this FileInputBase widget, IEnumerable<FileUpload> files)
+    public static ValidationResult ValidateFiles(this FileInputBase widget, IEnumerable<IFileUpload> files)
     {
         var filesList = files.ToList();
 

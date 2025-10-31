@@ -55,7 +55,7 @@ public interface IState<T> : IObservable<T>, IAnyState
     /// Resets the state to its default value.
     /// </summary>
     /// <returns>The default value.</returns>
-    public T Default();
+    public T Reset();
 }
 
 /// <summary>
@@ -154,7 +154,7 @@ public class State<T> : IState<T>
     /// Thread-safe.
     /// </summary>
     /// <returns>The default value.</returns>
-    public T Default()
+    public T Reset()
     {
         return Set(default(T)!);
     }

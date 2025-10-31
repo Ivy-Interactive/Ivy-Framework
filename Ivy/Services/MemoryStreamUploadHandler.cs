@@ -3,7 +3,7 @@
 namespace Ivy.Services;
 
 
-public class MemoryStreamUploadHandler(IState<byte[]?> contentState, IState<FileUpload?> uploadState, int chunkSize = 8192 /* 8KB chunks */)
+public class MemoryStreamUploadHandler(IState<FileUpload<byte[]>?> uploadState, int chunkSize = 8192 /* 8KB chunks */)
     : IUploadHandler
 {
     public async Task HandleUploadAsync(FileUpload fileUpload, Stream stream, CancellationToken cancellationToken)
@@ -11,15 +11,22 @@ public class MemoryStreamUploadHandler(IState<byte[]?> contentState, IState<File
         try
         {
             Console.WriteLine($"[UploadHandler] Start reading fileId={fileUpload.Id} name='{fileUpload.FileName}' length={fileUpload.Length}");
-            uploadState.Set(fileUpload);
+            var typed = new FileUpload<byte[]>
+            {
+                Id = fileUpload.Id,
+                FileName = fileUpload.FileName,
+                ContentType = fileUpload.ContentType,
+                Length = fileUpload.Length,
+                Status = FileUploadStatus.Loading,
+                Progress = 0f
+            };
+            uploadState.Set(typed);
 
             var totalBytes = fileUpload.Length;
             var processedBytes = 0L;
             var buffer = new byte[chunkSize];
 
             using var memoryStream = new MemoryStream();
-
-            uploadState.SetStatus(FileUploadStatus.Loading);
 
             int bytesRead;
             var nextLog = 0.25f;
@@ -38,11 +45,10 @@ public class MemoryStreamUploadHandler(IState<byte[]?> contentState, IState<File
                     nextLog += 0.25f;
                 }
 
-                await Task.Delay(50);
+                // no artificial delay
             }
 
-            contentState.Set(memoryStream.ToArray());
-            uploadState.SetStatus(FileUploadStatus.Finished);
+            uploadState.Set(typed with { Content = memoryStream.ToArray(), Status = FileUploadStatus.Finished, Progress = 1f });
             Console.WriteLine($"[UploadHandler] Finished fileId={fileUpload.Id} bytes={processedBytes}");
         }
         catch (OperationCanceledException)

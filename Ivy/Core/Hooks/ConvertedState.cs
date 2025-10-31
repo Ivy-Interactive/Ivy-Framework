@@ -87,7 +87,7 @@ public class ConvertedState<TFrom, TTo>(IState<TFrom> originalState, Func<TFrom,
     /// Thread-safe: delegates to the original state's Default method.
     /// </summary>
     /// <returns>The default value.</returns>
-    public TTo Default()
+    public TTo Reset()
     {
         return Set(default(TTo)!);
     }

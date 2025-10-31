@@ -24,17 +24,17 @@ public class SingleFileUpload : ViewBase
 {
     public override object? Build()
     {
-        var contentState = UseState<byte[]?>();
-        var uploadState = UseState<FileUpload?>();
+        var uploadState = UseState<FileUpload<byte[]>?>();
+        var uploadService = UseService<IUploadService>();
 
-        var uploadHandler = new MemoryStreamUploadHandler(contentState, uploadState);
+        var uploadHandler = new MemoryStreamUploadHandler(uploadState);
 
         var uploadUrl = this.UseUpload(uploadHandler);
 
-        void OnDelete(Guid fileId)
+        void OnDelete(Guid uploadId)
         {
-            uploadState.Default();
-            contentState.Default();
+            //uploadService.CancelFile(uploadId);
+            //uploadState.Default();
         }
 
         return Layout.Vertical()
@@ -53,6 +53,7 @@ public class MultipleFilesUpload : ViewBase
     {
         var selectedFiles = UseState(ImmutableArray.Create<FileUpload>());
         var uploadCount = UseState(0);
+        var uploadService = UseService<IUploadService>();
 
         var uploadUrl = this.UseUpload(async (fileUpload, stream, cancellationToken) =>
         {
@@ -119,6 +120,8 @@ public class MultipleFilesUpload : ViewBase
         {
             var file = selectedFiles.Value.FirstOrDefault(f => f.Id == fileId);
             if (file == null) return;
+            // Request cancellation if this file is still uploading
+            //todo:uploadService.CancelFile(fileId);
             selectedFiles.Set(files => files.Remove(file));
         }
 

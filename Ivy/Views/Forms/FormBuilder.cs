@@ -199,9 +199,29 @@ public class FormBuilder<TModel> : ViewBase
     {
         Type nonNullableType = Nullable.GetUnderlyingType(type) ?? type;
 
-        if (type == typeof(FileUpload))
+        static bool IsFileUploadType(Type t)
+        {
+            if (t == typeof(FileUpload)) return true;
+            if (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(FileUpload<>)) return true;
+            return typeof(IFileUpload).IsAssignableFrom(t);
+        }
+
+        if (IsFileUploadType(nonNullableType))
         {
             return (state) => state.ToFileInput().Size(Size);
+        }
+
+        // Collections of FileUpload / FileUpload<T>
+        foreach (var it in type.GetInterfaces().Concat([type]))
+        {
+            if (it.IsGenericType && it.GetGenericTypeDefinition() == typeof(IEnumerable<>))
+            {
+                var arg = it.GetGenericArguments()[0];
+                if (IsFileUploadType(arg))
+                {
+                    return (state) => state.ToFileInput().Size(Size);
+                }
+            }
         }
 
         if (name.EndsWith("Id") && (type == typeof(Guid) || type == typeof(int) || type == typeof(string)))

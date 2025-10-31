@@ -20,9 +20,22 @@ public enum FileUploadStatus
 }
 
 /// <summary>
+/// Common contract for uploaded file metadata used by both generic and non-generic file upload records.
+/// </summary>
+public interface IFileUpload
+{
+    Guid Id { get; }
+    string FileName { get; }
+    string ContentType { get; }
+    long Length { get; }
+    float Progress { get; set; }
+    FileUploadStatus Status { get; set; }
+}
+
+/// <summary>
 /// Represents a file uploaded through a file input control.
 /// </summary>
-public record FileUpload
+public record FileUpload : IFileUpload
 {
     /// <summary>Gets the identifier for this file upload, set by the server.</summary>
     public Guid Id { get; init; }
@@ -48,6 +61,19 @@ public record FileUpload
 }
 
 /// <summary>
+/// Generic variant of FileUpload allowing an associated typed payload to be tracked alongside the upload metadata.
+/// </summary>
+/// <typeparam name="T">The type of the associated payload.</typeparam>
+public record FileUpload<T> : FileUpload
+{
+    /// <summary>
+    /// Optional typed content associated with this upload (e.g., raw bytes, parsed model).
+    /// </summary>
+    [JsonIgnore]
+    public T? Content { get; init; }
+}
+
+/// <summary>
 /// Interface for handling file uploads with custom logic.
 /// </summary>
 public interface IUploadHandler
@@ -63,7 +89,7 @@ public interface IUploadHandler
 
 public static class FileUploadExtensions
 {
-    public static void SetProgress(this IState<FileUpload?> fileInputState, float progress)
+    public static void SetProgress<T>(this IState<FileUpload<T>?> fileInputState, float progress)
     {
         var file = fileInputState.Value;
         if (file != null)
@@ -72,7 +98,7 @@ public static class FileUploadExtensions
         }
     }
 
-    public static void SetStatus(this IState<FileUpload?> fileInputState, FileUploadStatus status)
+    public static void SetStatus<T>(this IState<FileUpload<T>?> fileInputState, FileUploadStatus status)
     {
         var file = fileInputState.Value;
         if (file != null)
@@ -115,6 +141,7 @@ public class UploadController(AppSessionStore sessionStore) : Controller
 public class UploadService(string connectionId) : IUploadService, IDisposable
 {
     private readonly ConcurrentDictionary<Guid, (UploadDelegate handler, CancellationTokenSource cts, string? mimeType, string? fileName)> _uploads = new();
+    private readonly ConcurrentDictionary<Guid, CancellationTokenSource> _inflightUploads = new();
 
     public (IDisposable cleanup, string url) AddUpload(UploadDelegate handler, string? defaultContentType = null, string? defaultFileName = null)
     {
@@ -168,6 +195,9 @@ public class UploadService(string connectionId) : IUploadService, IDisposable
             using var uploadStream = file.OpenReadStream();
             using var timeoutCts = new CancellationTokenSource(TimeSpan.FromMinutes(2));
             using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cts.Token, timeoutCts.Token);
+            // Track this upload by fileId so we can cancel on demand
+            _inflightUploads[fileUpload.Id] = linkedCts;
+
             Console.WriteLine($"[UploadService] Begin upload connection={connectionId} uploadId={uploadId} fileId={fileUpload.Id} name='{fileUpload.FileName}' length={fileUpload.Length} contentType='{fileUpload.ContentType}'");
             await handler(fileUpload, uploadStream, linkedCts.Token);
             sw.Stop();
@@ -180,8 +210,29 @@ public class UploadService(string connectionId) : IUploadService, IDisposable
             // Bubble up to framework after handler updates status; controller will return 500
             throw;
         }
+        finally
+        {
+            // Remove tracking for this fileId
+            _inflightUploads.TryRemove(fileUpload.Id, out _);
+        }
 
         return new OkResult();
+    }
+
+    public void CancelUpload(Guid fileId)
+    {
+        if (_inflightUploads.TryGetValue(fileId, out var cts))
+        {
+            try
+            {
+                Console.WriteLine($"[UploadService] Cancellation requested connection={connectionId} fileId={fileId}");
+                cts.Cancel();
+            }
+            catch (ObjectDisposedException)
+            {
+                // If already disposed, ignore
+            }
+        }
     }
 
     public void Dispose()
@@ -195,4 +246,10 @@ public interface IUploadService
     (IDisposable cleanup, string url) AddUpload(UploadDelegate handler, string? defaultContentType = null, string? defaultFileName = null);
 
     Task<IActionResult> Upload(string uploadId, IFormFile file);
+
+    /// <summary>
+    /// Requests cancellation of an in-flight upload by its fileId.
+    /// Safe to call if no upload is in-flight for the given id.
+    /// </summary>
+    void CancelUpload(Guid fileId);
 }

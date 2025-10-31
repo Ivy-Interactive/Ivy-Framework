@@ -269,7 +269,7 @@ public class TextInputTests
             return Value;
         }
 
-        public T Default()
+        public T Reset()
         {
             return Set(default(T)!);
         }
