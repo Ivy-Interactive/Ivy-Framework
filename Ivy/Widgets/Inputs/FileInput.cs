@@ -68,8 +68,8 @@ public abstract record FileInputBase : WidgetBase<FileInputBase>, IAnyFileInput
     /// <summary>Gets or sets the event handler called when the input loses focus.</summary>
     [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
 
-    /// <summary>Gets or sets the event handler called when a file is deleted (passes FileInput.Id as parameter).</summary>
-    [Event] public Func<Event<IAnyInput, Guid>, ValueTask>? OnDelete { get; set; }
+    /// <summary>Gets or sets the event handler called when a file upload is canceled (passes FileUpload.Id as parameter).</summary>
+    [Event] public Func<Event<IAnyInput, Guid>, ValueTask>? OnCancel { get; set; }
 
     /// <summary>
     /// Returns the types that this file input can bind to.
@@ -395,33 +395,33 @@ public static class FileInputExtensions
     }
 
     /// <summary>
-    /// Sets the delete event handler for the file input.
+    /// Sets the cancel event handler for the file input.
     /// </summary>
     /// <param name="widget">The file input to configure.</param>
-    /// <param name="onDelete">The event handler to call when a file is deleted, receives the FileInput.Id.</param>
+    /// <param name="onCancel">The event handler to call when a file is canceled, receives the FileUpload.Id.</param>
     [OverloadResolutionPriority(1)]
-    public static FileInputBase HandleDelete(this FileInputBase widget, Func<Event<IAnyInput, Guid>, ValueTask> onDelete)
+    public static FileInputBase HandleCancel(this FileInputBase widget, Func<Event<IAnyInput, Guid>, ValueTask> onCancel)
     {
-        return widget with { OnDelete = onDelete };
+        return widget with { OnCancel = onCancel };
     }
 
     /// <summary>
-    /// Sets the delete event handler for the file input.
+    /// Sets the cancel event handler for the file input.
     /// </summary>
     /// <param name="widget">The file input to configure.</param>
-    /// <param name="onDelete">The event handler to call when a file is deleted, receives the FileInput.Id.</param>
-    public static FileInputBase HandleDelete(this FileInputBase widget, Action<Event<IAnyInput, Guid>> onDelete)
+    /// <param name="onCancel">The event handler to call when a file is canceled, receives the FileUpload.Id.</param>
+    public static FileInputBase HandleCancel(this FileInputBase widget, Action<Event<IAnyInput, Guid>> onCancel)
     {
-        return widget.HandleDelete(onDelete.ToValueTask());
+        return widget.HandleCancel(onCancel.ToValueTask());
     }
 
     /// <summary>
-    /// Sets a simple delete event handler for the file input.
+    /// Sets a simple cancel event handler for the file input.
     /// </summary>
     /// <param name="widget">The file input to configure.</param>
-    /// <param name="onDelete">The simple action to perform when a file is deleted, receives the FileInput.Id.</param>
-    public static FileInputBase HandleDelete(this FileInputBase widget, Action<Guid> onDelete)
+    /// <param name="onCancel">The simple action to perform when a file is canceled, receives the FileUpload.Id.</param>
+    public static FileInputBase HandleCancel(this FileInputBase widget, Action<Guid> onCancel)
     {
-        return widget.HandleDelete(e => { onDelete(e.Value); return ValueTask.CompletedTask; });
+        return widget.HandleCancel(e => { onCancel(e.Value); return ValueTask.CompletedTask; });
     }
 }

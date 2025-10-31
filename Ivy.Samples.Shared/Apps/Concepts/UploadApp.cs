@@ -31,15 +31,16 @@ public class SingleFileUpload : ViewBase
 
         var uploadUrl = this.UseUpload(uploadHandler);
 
-        void OnDelete(Guid uploadId)
+        void OnCancel(Guid uploadId)
         {
+            // Cancel the in-flight upload and reset state
             //uploadService.CancelFile(uploadId);
             //uploadState.Default();
         }
 
         return Layout.Vertical()
                | Text.H1("Single File Upload")
-               | uploadState.ToFileInput(uploadUrl).Accept("*/*").Placeholder("Choose a file to upload").HandleDelete(OnDelete)
+               | uploadState.ToFileInput(uploadUrl).Accept("*/*").Placeholder("Choose a file to upload").HandleCancel(OnCancel)
                | uploadState.ToDetails()
                    .Builder(e => e!.Length, e => e.Func((long x) => Utils.FormatBytes(x)))
                    .Builder(e => e!.Progress, e => e.Func((float x) => x.ToString("P0")))
@@ -116,7 +117,7 @@ public class MultipleFilesUpload : ViewBase
             }
         });
 
-        void OnDelete(Guid fileId)
+        void OnCancel(Guid fileId)
         {
             var file = selectedFiles.Value.FirstOrDefault(f => f.Id == fileId);
             if (file == null) return;
@@ -127,7 +128,7 @@ public class MultipleFilesUpload : ViewBase
 
         var layout = Layout.Vertical()
                      | Text.H1("Multiple Files Upload")
-                     | selectedFiles.ToFileInput(uploadUrl).Accept("*/*").Placeholder("Choose files to upload").HandleDelete(OnDelete)
+                     | selectedFiles.ToFileInput(uploadUrl).Accept("*/*").Placeholder("Choose files to upload").HandleCancel(OnCancel)
                      | selectedFiles.Value.ToTable()
                          .Width(Size.Full())
                          .Builder(e => e.Length, e => e.Func((long x) => Utils.FormatBytes(x)))

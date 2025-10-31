@@ -63,7 +63,7 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
   const [isDragging, setIsDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const hasDeleteHandler = events.includes('OnDelete');
+  const hasCancelHandler = events.includes('OnCancel');
 
   const uploadFile = useCallback(
     async (file: File): Promise<void> => {
@@ -130,17 +130,17 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
     [multiple, uploadFile, maxFiles]
   );
 
-  const handleDelete = useCallback(
+  const handleCancel = useCallback(
     (fileId: string) => {
-      if (hasDeleteHandler) {
-        handleEvent('OnDelete', id, [fileId]);
+      if (hasCancelHandler) {
+        handleEvent('OnCancel', id, [fileId]);
       }
       // Also clear file input to allow re-selecting same file
       if (inputRef.current) {
         inputRef.current.value = '';
       }
     },
-    [hasDeleteHandler, handleEvent, id]
+    [hasCancelHandler, handleEvent, id]
   );
 
   const handleDragEnter = useCallback(
@@ -236,7 +236,7 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
             </div>
           )}
         </div>
-        {hasDeleteHandler && (
+        {hasCancelHandler && (
           <Button
             type="button"
             variant="ghost"
@@ -244,7 +244,7 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
             className="h-8 w-8 flex-shrink-0"
             onClick={e => {
               e.stopPropagation();
-              handleDelete(file.id);
+              handleCancel(file.id);
             }}
           >
             <X className="h-4 w-4" />
