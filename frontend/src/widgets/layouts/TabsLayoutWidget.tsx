@@ -569,7 +569,7 @@ export const TabsLayoutWidget = ({
     // Update activeIndex for Content variant animation
     const newIndex = tabOrder.indexOf(tabId);
     setActiveIndex(newIndex);
-    eventHandler('OnSelect', id, [newIndex]);
+    if (events?.includes('OnSelect')) eventHandler('OnSelect', id, [newIndex]);
   };
 
   const handleMouseDown = (e: React.MouseEvent, index: number) => {
@@ -864,7 +864,8 @@ export const TabsLayoutWidget = ({
                     addToLoadedTabs(tabId);
                     setActiveIndex(index);
                     setActiveTabId(tabId);
-                    eventHandler('OnSelect', id, [index]);
+                    if (events?.includes('OnSelect'))
+                      eventHandler('OnSelect', id, [index]);
                   }}
                 >
                   <div className="text-sm font-medium leading-4 whitespace-nowrap flex items-center justify-center h-full">
@@ -931,7 +932,8 @@ export const TabsLayoutWidget = ({
           isUserInitiatedChangeRef.current = true;
           const newIndex = tabOrder.indexOf(value);
           setActiveIndex(newIndex);
-          eventHandler('OnSelect', id, [newIndex]);
+          if (events?.includes('OnSelect'))
+            eventHandler('OnSelect', id, [newIndex]);
         }
       }}
       useRadix={useRadix}

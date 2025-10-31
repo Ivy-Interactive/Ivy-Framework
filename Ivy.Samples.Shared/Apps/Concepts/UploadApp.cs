@@ -5,6 +5,7 @@ using Ivy.Shared;
 using Ivy.Views.Builders;
 using Ivy.Views.Tables;
 using Microsoft.Extensions.Logging;
+using System.Linq;
 
 namespace Ivy.Samples.Shared.Apps.Concepts;
 
@@ -15,7 +16,8 @@ public class UploadApp : SampleBase
     {
         return Layout.Tabs(
             new Tab("Single File", new SingleFileUpload()),
-            new Tab("Multiple Files", new MultipleFilesUpload())
+            new Tab("Multiple Files", new MultipleFilesUpload()),
+            new Tab("Dialog", new DialogFileUpload())
         );
     }
 }
@@ -25,12 +27,11 @@ public class SingleFileUpload : ViewBase
     public override object? Build()
     {
         var uploadState = UseState<FileUpload<byte[]>?>();
-        var uploadHandler = new MemoryStreamUploadHandler(uploadState);
-        var uploadContext = this.UseUpload(uploadHandler);
+        var upload = this.UseUpload(MemoryStreamUploadHandler.Create(uploadState));
 
         return Layout.Vertical()
                | Text.H1("Single File Upload")
-               | uploadState.ToFileInput(uploadContext).Accept("*/*").Placeholder("Choose a file to upload")
+               | uploadState.ToFileInput(upload).Accept("*/*").Placeholder("Choose a file to upload")
                | uploadState.ToDetails()
                    .Remove(e => e!.Content!)
                    .Builder(e => e!.Length, e => e.Func((long x) => Utils.FormatBytes(x)))
@@ -39,72 +40,80 @@ public class SingleFileUpload : ViewBase
     }
 }
 
+public class DialogFileUpload : ViewBase
+{
+    public override object? Build()
+    {
+        var selectedFile = UseState<FileUpload<byte[]>?>();
+
+        // Ephemeral state used inside the dialog while picking a file
+        var dialogFile = UseState<FileUpload<byte[]>?>();
+        var uploadContext = this.UseUpload(MemoryStreamUploadHandler.Create(dialogFile));
+
+        // Dialog visibility state
+        var isOpen = UseState(false);
+
+        ValueTask OnDialogClose(Event<Dialog> _)
+        {
+            isOpen.Value = false;
+            dialogFile.Reset();
+            return ValueTask.CompletedTask;
+        }
+
+        var openButton = new Button("Open Dialog", _ =>
+        {
+            dialogFile.Reset();
+            isOpen.Value = true;
+        });
+
+        var dialog = isOpen.Value
+            ? new Dialog(
+                OnDialogClose,
+                new DialogHeader("Select File"),
+                new DialogBody(
+                    Layout.Vertical()
+                        | dialogFile.ToFileInput(uploadContext)
+                            .Accept("*/*")
+                            .Placeholder("Choose a file to upload")
+                ),
+                new DialogFooter(
+                    new Button("Cancel", _ =>
+                    {
+                        isOpen.Value = false;
+                        dialogFile.Reset();
+                    }, variant: ButtonVariant.Outline),
+                    new Button("Ok", _ =>
+                    {
+                        if (dialogFile.Value != null)
+                        {
+                            selectedFile.Set(dialogFile.Value);
+                        }
+                        isOpen.Value = false;
+                        dialogFile.Reset();
+                    })
+                )
+            )
+            : null;
+
+        return Layout.Vertical()
+               | Text.H1("Dialog Upload")
+               | openButton
+               | (selectedFile.Value != null
+                    ? selectedFile.ToDetails()
+                        .Remove(e => e!.Content!)
+                        .Builder(e => e!.Length, e => e.Func((long x) => Utils.FormatBytes(x)))
+                        .Builder(e => e!.Progress, e => e.Func((float x) => x.ToString("P0")))
+                    : Text.Block("No file selected"))
+               | dialog;
+    }
+}
+
 public class MultipleFilesUpload : ViewBase
 {
     public override object? Build()
     {
-        var selectedFiles = UseState(ImmutableArray.Create<FileUpload>());
-        var uploadCount = UseState(0);
-        var upload = this.UseUpload(async (fileUpload, stream, cancellationToken) =>
-        {
-            var currentFile = fileUpload;
-
-            try
-            {
-                Console.WriteLine($"[Samples] Start multi upload fileId={currentFile.Id} name='{currentFile.FileName}' length={currentFile.Length}");
-                selectedFiles.Set(files => files.Add(currentFile));
-
-                var totalBytes = currentFile.Length;
-                var processedBytes = 0L;
-                var buffer = new byte[8192]; // 8KB chunks
-
-                using var memoryStream = new MemoryStream();
-
-                // Update to Loading state
-                var loadingFile = currentFile with { Status = FileUploadStatus.Loading };
-                selectedFiles.Set(files => files.Replace(currentFile, loadingFile));
-                currentFile = loadingFile;
-
-                int bytesRead;
-                var nextLog = 0.25f;
-                while ((bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length, cancellationToken)) > 0)
-                {
-                    cancellationToken.ThrowIfCancellationRequested();
-
-                    await memoryStream.WriteAsync(buffer, 0, bytesRead, cancellationToken);
-                    processedBytes += bytesRead;
-                    var progress = totalBytes > 0 ? ((float)processedBytes / totalBytes) : 0;
-
-                    // Update progress - thread-safe atomic operation
-                    var updatedFile = currentFile with { Progress = progress };
-                    selectedFiles.Set(files => files.Replace(currentFile, updatedFile));
-                    currentFile = updatedFile;
-
-                    if (progress >= nextLog)
-                    {
-                        Console.WriteLine($"[Samples] Progress fileId={currentFile.Id} {(int)(progress * 100)}%");
-                        nextLog += 0.25f;
-                    }
-
-                    //Simulate this being slower
-                    await Task.Delay(50, cancellationToken);
-                }
-
-                // Mark as finished - thread-safe atomic operation
-                var finishedFile = currentFile with { Status = FileUploadStatus.Finished };
-                selectedFiles.Set(files => files.Replace(currentFile, finishedFile));
-
-                uploadCount.Set(count => count + 1);
-                Console.WriteLine($"[Samples] Finished fileId={currentFile.Id}");
-            }
-            catch (OperationCanceledException)
-            {
-                // Upload was aborted by user
-                var abortedFile = currentFile with { Status = FileUploadStatus.Aborted };
-                selectedFiles.Set(files => files.Replace(currentFile, abortedFile));
-                Console.WriteLine($"[Samples] Aborted fileId={currentFile.Id}");
-            }
-        });
+        var selectedFiles = UseState(ImmutableArray.Create<FileUpload<byte[]>>());
+        var upload = this.UseUpload(MemoryStreamUploadHandler.Create(selectedFiles));
 
         var layout = Layout.Vertical()
                      | Text.H1("Multiple Files Upload")
@@ -113,9 +122,7 @@ public class MultipleFilesUpload : ViewBase
                          .Width(Size.Full())
                          .Builder(e => e.Length, e => e.Func((long x) => Utils.FormatBytes(x)))
                          .Builder(e => e.Progress, e => e.Func((float x) => x.ToString("P0")))
-                         .Remove(e => e.Id)
-                     | (uploadCount.Value > 0 ? Text.Block($"Uploaded {uploadCount.Value} file(s)") : null);
-
+                         .Remove(e => e.Id);
 
         return layout;
     }
