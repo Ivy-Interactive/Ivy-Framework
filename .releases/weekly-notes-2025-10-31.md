@@ -1,5 +1,12 @@
 # Ivy Framework Weekly Notes - Week of 2025-10-31
 
+> [!NOTE]
+> We usually release on Fridays every week. Sign up on [https://ivy.app/](https://ivy.app/auth/sign-up) to get release notes directly to your inbox.
+
+## Overview
+
+This week's main features are the Kanban widget, AI-powered DataTable filtering, and URL-state preservation.
+
 ## Bug Fixes
 
 - **Checkbox/Radio Alignment**: Fixed vertical centering of labels
@@ -17,7 +24,7 @@
 
 ### Enhanced AI-Powered DataTable Filtering
 
-Intelligent query interpretation now handles type mismatches (e.g., "[Activity] above 45" → [Age] > 45), conceptual queries (e.g., "drinking age" → [Age] >= 18), superlatives, and partial field matches. This can also be used to transform human language into a valid query.
+Intelligent query interpretation now handles type mismatches (e.g., "[Activity] above 45" → [Age] > 45), conceptual queries (e.g., "drinking age" → [Age] >= 18), superlatives, and partial field matches. This can also be used to transform human language into a valid
 
 ### DataTable UI & Performance
 
@@ -39,6 +46,28 @@ Text.P("Bold italic").Bold().Italic()
 - Blade buttons use consistent styling
 
 ## New Features
+
+### Kanban Widget
+
+Visualize and manage data in a drag-and-drop board interface with automatic grouping:
+
+```csharp
+var tasks = new[] {
+    new Task { Id = "1", Title = "Design Homepage", Status = "Todo", ... },
+    new Task { Id = "2", Title = "Code Review", Status = "In Progress", ... },
+    new Task { Id = "3", Title = "Deploy", Status = "Done", ... }
+};
+
+return tasks.ToKanban(
+    groupBySelector: e => e.Status,
+    idSelector: e => e.Id,
+    titleSelector: e => e.Title,
+    descriptionSelector: e => e.Description)
+    .HandleMove(moveData => { /* Update task status */ })
+    .HandleAdd(columnKey => { /* Add new task */ })
+    .HandleDelete(cardId => { /* Remove task */ })
+    .HandleClick(cardId => { /* Show details */ });
+```
 
 ### URL State Preservation
 
