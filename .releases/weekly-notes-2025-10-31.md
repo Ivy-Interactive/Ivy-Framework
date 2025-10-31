@@ -24,7 +24,7 @@ This week's main features are the Kanban widget, AI-powered DataTable filtering,
 
 ### Enhanced AI-Powered DataTable Filtering
 
-Intelligent query interpretation now handles type mismatches (e.g., "[Activity] above 45" → [Age] > 45), conceptual queries (e.g., "drinking age" → [Age] >= 18), superlatives, and partial field matches. This can also be used to transform human language into a valid
+Intelligent query interpretation now handles type mismatches (e.g., "[Activity] above 45" → [Age] > 45), conceptual queries (e.g., "drinking age" → [Age] >= 18), superlatives, and partial field matches. This can also be used to transform human language into a valid filter expression.
 
 ### DataTable UI & Performance
 
