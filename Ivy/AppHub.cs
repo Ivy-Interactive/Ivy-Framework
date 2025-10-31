@@ -3,6 +3,7 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using Ivy.Apps;
 using Ivy.Auth;
+using Ivy.Chrome;
 using Ivy.Client;
 using Ivy.Core;
 using Ivy.Core.Exceptions;
@@ -27,13 +28,40 @@ public class AppHub(
     IQueryableRegistry queryableRegistry
     ) : Hub
 {
-    public static string GetAppId(Server server, HttpContext httpContext)
+    private static bool GetChromeParam(HttpContext httpContext)
     {
-        string? appId = server.DefaultAppId;
-
-        if (httpContext!.Request.Query.ContainsKey("appId"))
+        bool chrome = true;
+        if (httpContext!.Request.Query.TryGetValue("chrome", out var chromeParam))
         {
-            appId = httpContext!.Request.Query["appId"].ToString();
+            chrome = !chromeParam.ToString().Equals("false", StringComparison.InvariantCultureIgnoreCase);
+        }
+
+        return chrome;
+    }
+
+    public static (string AppId, string? NavigationAppId) GetAppId(Server server, HttpContext httpContext)
+    {
+        bool chrome = GetChromeParam(httpContext);
+
+        string? appId = null;
+        string? navigationAppId = null;
+
+        if (httpContext!.Request.Query.TryGetValue("appId", out var appIdParam))
+        {
+            var id = appIdParam.ToString();
+            if (string.IsNullOrEmpty(id) || id == AppIds.Chrome || id == AppIds.Auth || id == AppIds.Default)
+            {
+                id = null;
+            }
+
+            if (chrome)
+            {
+                navigationAppId = id;
+            }
+            else
+            {
+                appId = id;
+            }
         }
 
         if (string.IsNullOrEmpty(appId))
@@ -41,14 +69,14 @@ public class AppHub(
             appId = server.DefaultAppId ?? server.AppRepository.GetAppOrDefault(null).Id;
         }
 
-        return appId;
+        return (appId, navigationAppId);
     }
 
     public static string GetMachineId(HttpContext httpContext)
     {
-        if (httpContext!.Request.Query.ContainsKey("machineId"))
+        if (httpContext!.Request.Query.TryGetValue("machineId", out var machineIdParam))
         {
-            return httpContext!.Request.Query["machineId"].ToString().NullIfEmpty() ?? throw new Exception("Missing machineId in request.");
+            return machineIdParam.ToString().NullIfEmpty() ?? throw new Exception("Missing machineId in request.");
         }
 
         throw new Exception("Missing machineId in request.");
@@ -56,24 +84,24 @@ public class AppHub(
 
     public static string? GetParentId(HttpContext httpContext)
     {
-        if (httpContext!.Request.Query.ContainsKey("parentId"))
+        if (httpContext!.Request.Query.TryGetValue("parentId", out var parentIdParam))
         {
-            return httpContext!.Request.Query["parentId"].ToString().NullIfEmpty();
+            return parentIdParam.ToString().NullIfEmpty();
         }
 
         return null;
     }
 
-    public AppArgs GetAppArgs(string connectionId, string appId, HttpContext httpContext)
+    public AppArgs GetAppArgs(string connectionId, string appId, string? navigationAppId, HttpContext httpContext)
     {
         string? appArgs = null;
-        if (httpContext!.Request.Query.ContainsKey("appArgs"))
+        if (httpContext!.Request.Query.TryGetValue("appArgs", out var appArgsParam))
         {
-            appArgs = httpContext!.Request.Query["appArgs"].ToString().NullIfEmpty();
+            appArgs = appArgsParam.ToString().NullIfEmpty();
         }
 
         HttpRequest request = httpContext.Request;
-        return new AppArgs(connectionId, appId, appArgs ?? server.Args?.Args, request.Scheme, request.Host.Value!);
+        return new AppArgs(connectionId, appId, navigationAppId, appArgs ?? server.Args?.Args, request.Scheme, request.Host.Value!);
     }
 
     public override async Task OnConnectedAsync()
@@ -83,7 +111,7 @@ public class AppHub(
             var appServices = new ServiceCollection();
 
             var httpContext = Context.GetHttpContext()!;
-            var appId = GetAppId(server, httpContext);
+            var (appId, navigationAppId) = GetAppId(server, httpContext);
 
             var clientProvider = new ClientProvider(new ClientSender(clientNotifier, Context.ConnectionId));
 
@@ -151,7 +179,7 @@ public class AppHub(
                 }
             }
 
-            var appArgs = GetAppArgs(Context.ConnectionId, appId, httpContext);
+            var appArgs = GetAppArgs(Context.ConnectionId, appId, navigationAppId, httpContext);
             var appDescriptor = server.GetApp(appId);
 
             logger.LogInformation($"Connected: {Context.ConnectionId} [{appId}]");
@@ -181,6 +209,12 @@ public class AppHub(
                 AppServices = serviceProvider,
                 LastInteraction = DateTime.UtcNow,
             };
+
+            if (appId != AppIds.Chrome && sessionStore.FindChrome(appState) == null)
+            {
+                var navigateArgs = new NavigateArgs(appId, Chrome: GetChromeParam(httpContext));
+                clientProvider.Redirect(navigateArgs.GetUrl(), replaceHistory: true);
+            }
 
             async void OnWidgetTreeChanged(WidgetTreeChanged[] changes)
             {
@@ -495,6 +529,41 @@ public class AppHub(
         {
             var exceptionHandler = appSession.AppServices.GetService<IExceptionHandler>()!;
             exceptionHandler.HandleException(e);
+        }
+    }
+
+    public async Task Navigate(string? appId, HistoryState? state)
+    {
+        logger.LogInformation("Navigate: {ConnectionId} to [{AppId}] with tab ID {TabId}", Context.ConnectionId, appId, state?.TabId);
+
+        // Find the Chrome session for this connection
+        if (!sessionStore.Sessions.TryGetValue(Context.ConnectionId, out var appSession))
+        {
+            logger.LogWarning("Navigate: {ConnectionId} [{AppId}] [AppSession not found]", Context.ConnectionId, appId);
+            return;
+        }
+
+        var chromeSession = sessionStore.FindChrome(appSession);
+        if (chromeSession == null)
+        {
+            logger.LogWarning("Navigate: {ConnectionId} [{AppId}] [Chrome session not found]", Context.ConnectionId, appId);
+            return;
+        }
+
+        try
+        {
+            var navigateSignal = (NavigateSignal)chromeSession.Signals.GetOrAdd(
+                typeof(NavigateSignal),
+                _ => new NavigateSignal()
+            );
+
+            await navigateSignal.Send(new NavigateArgs(appId, TabId: state?.TabId, Purpose: NavigationPurpose.HistoryTraversal));
+
+            logger.LogInformation("Navigate signal sent: {ConnectionId} to [{AppId}]", Context.ConnectionId, appId);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to send navigate signal: {ConnectionId} to [{AppId}]", Context.ConnectionId, appId);
         }
     }
 

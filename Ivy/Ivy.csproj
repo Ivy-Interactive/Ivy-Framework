@@ -37,6 +37,7 @@
 
   <ItemGroup>
     <EmbeddedResource Include="../frontend/dist/**/*" />
+    <EmbeddedResource Include="../frontend/src/routing-constants.json" LogicalName="RoutingConstants" />
     <EmbeddedResource Update="Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
