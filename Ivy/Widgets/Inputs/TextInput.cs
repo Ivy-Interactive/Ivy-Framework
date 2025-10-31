@@ -1,8 +1,10 @@
 using System.Runtime.CompilerServices;
+using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 using Ivy.Core;
 using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
+using Ivy.Views.Forms;
 using Ivy.Widgets.Inputs;
 using Ivy.Shared;
 
@@ -53,6 +55,9 @@ public abstract record TextInputBase : WidgetBase<TextInputBase>, IAnyTextInput
     /// <summary>Gets or sets the visual and functional variant of the text input.</summary>
     [Prop] public TextInputs Variant { get; set; }
 
+    /// <summary>Internal: Gets or sets the state object this input is bound to (used for automatic validation).</summary>
+    internal IAnyState? BoundState { get; set; }
+
     /// <summary>Gets or sets the keyboard shortcut key for focusing this input.</summary>
     [Prop] public string? ShortcutKey { get; set; }
 
@@ -81,6 +86,7 @@ public record TextInput<TString> : TextInputBase, IInput<TString>
         var typedState = state.As<TString>();
         Value = typedState.Value;
         OnChange = e => { typedState.Set(e.Value); return ValueTask.CompletedTask; };
+        BoundState = state;
     }
 
     /// <summary>
@@ -280,5 +286,87 @@ public static class TextInputExtensions
     public static TextInputBase HandleBlur(this TextInputBase widget, Action onBlur)
     {
         return widget.HandleBlur(_ => { onBlur(); return ValueTask.CompletedTask; });
+    }
+}
+
+/// <summary> Provides extension methods for adding validation to text inputs in ViewBase context. </summary>
+public static class TextInputValidationExtensions
+{
+    /// <summary>
+    /// Adds automatic email validation to an email input created from a state when used in a ViewBase context.
+    /// The validation will trigger on blur and set the Invalid property when validation fails.
+    /// </summary>
+    /// <param name="state">The state object the input is bound to.</param>
+    /// <param name="view">The ViewBase context.</param>
+    /// <param name="input">The email input to add validation to.</param>
+    /// <returns>The input with validation attached.</returns>
+    public static TextInputBase WithEmailValidation(this IAnyState state, ViewBase view, TextInputBase input)
+    {
+        if (input.Variant != TextInputs.Email)
+            return input;
+
+        return view.AddTextInputValidation(state, input, Validators.CreateEmailValidator("Email"),
+            "Please enter a valid email address");
+    }
+
+    /// <summary>
+    /// Adds automatic password validation to a password input created from a state when used in a ViewBase context.
+    /// The validation will trigger on blur and set the Invalid property when validation fails.
+    /// </summary>
+    /// <param name="state">The state object the input is bound to.</param>
+    /// <param name="view">The ViewBase context.</param>
+    /// <param name="input">The password input to add validation to.</param>
+    /// <returns>The input with validation attached.</returns>
+    public static TextInputBase WithPasswordValidation(this IAnyState state, ViewBase view, TextInputBase input)
+    {
+        if (input.Variant != TextInputs.Password)
+            return input;
+
+        // Basic password validation: at least 8 characters
+        Func<object?, (bool, string)> passwordValidator = value =>
+        {
+            if (value is not string passwordStr || string.IsNullOrWhiteSpace(passwordStr))
+                return (true, ""); // Empty is handled by Required validator
+
+            if (passwordStr.Length < 8)
+                return (false, "Password must be at least 8 characters long");
+
+            return (true, "");
+        };
+
+        return view.AddTextInputValidation(state, input, passwordValidator,
+            "Password must be at least 8 characters long");
+    }
+
+    /// <summary>
+    /// Internal helper method to add validation to a text input with blur-based validation strategy.
+    /// </summary>
+    private static TextInputBase AddTextInputValidation(this ViewBase view, IAnyState state, TextInputBase input,
+        Func<object?, (bool, string)> validator, string defaultErrorMessage)
+    {
+        var invalidState = view.Context.UseState((string?)null!);
+        var blurOnceState = view.Context.UseState(false);
+
+        // Validate on value change (after first blur)
+        view.Context.UseEffect(() =>
+        {
+            if (blurOnceState.Value)
+            {
+                var currentValue = state.As<object>().Value;
+                var (isValid, message) = validator(currentValue);
+                invalidState.Set(isValid ? null! : message);
+            }
+        }, state, blurOnceState);
+
+        // Validate on blur
+        void OnBlur(Event<IAnyInput> _)
+        {
+            blurOnceState.Set(true);
+            var currentValue = state.As<object>().Value;
+            var (isValid, message) = validator(currentValue);
+            invalidState.Set(isValid ? null! : message);
+        }
+
+        return input.HandleBlur(OnBlur).Invalid(invalidState.Value);
     }
 }
