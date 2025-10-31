@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Reactive.Disposables;
+using System.Diagnostics;
 using System.Text.Json.Serialization;
 using Ivy.Core.Hooks;
 using Microsoft.AspNetCore.Http;
@@ -132,8 +133,11 @@ public class UploadService(string connectionId) : IUploadService, IDisposable
 
     public async Task<IActionResult> Upload(string uploadId, IFormFile file)
     {
+        var sw = Stopwatch.StartNew();
+
         if (!Guid.TryParse(uploadId, out var guid) || !_uploads.TryGetValue(guid, out var upload))
         {
+            Console.WriteLine($"[UploadService] Invalid or unknown uploadId: '{uploadId}'");
             return new BadRequestObjectResult($"Invalid or unknown uploadId: '{uploadId}'.");
         }
 
@@ -141,21 +145,41 @@ public class UploadService(string connectionId) : IUploadService, IDisposable
 
         if (file.Length == 0)
         {
+            Console.WriteLine($"[UploadService] Empty file received for uploadId: {uploadId}");
             return new BadRequestObjectResult("Empty file.");
         }
 
         var actualMimeType = file.ContentType.NullIfEmpty() ?? defaultContentType ?? "application/octet-stream";
         var actualFileName = file.FileName.NullIfEmpty() ?? defaultFileName ?? "upload";
 
+        // Generate a unique id per uploaded file to avoid collisions
+        // when multiple files are uploaded using the same upload endpoint.
         var fileUpload = new FileUpload
         {
-            Id = guid,
+            Id = Guid.NewGuid(),
             FileName = actualFileName,
             ContentType = actualMimeType,
             Length = file.Length
         };
 
-        await handler(fileUpload, file.OpenReadStream(), cts.Token);
+        // Ensure request stream is disposed deterministically to avoid leaking handles
+        try
+        {
+            using var uploadStream = file.OpenReadStream();
+            using var timeoutCts = new CancellationTokenSource(TimeSpan.FromMinutes(2));
+            using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cts.Token, timeoutCts.Token);
+            Console.WriteLine($"[UploadService] Begin upload connection={connectionId} uploadId={uploadId} fileId={fileUpload.Id} name='{fileUpload.FileName}' length={fileUpload.Length} contentType='{fileUpload.ContentType}'");
+            await handler(fileUpload, uploadStream, linkedCts.Token);
+            sw.Stop();
+            Console.WriteLine($"[UploadService] Completed upload connection={connectionId} fileId={fileUpload.Id} elapsed={sw.ElapsedMilliseconds}ms");
+        }
+        catch (Exception)
+        {
+            sw.Stop();
+            Console.WriteLine($"[UploadService] Failed upload connection={connectionId} uploadId={uploadId} elapsed={sw.ElapsedMilliseconds}ms");
+            // Bubble up to framework after handler updates status; controller will return 500
+            throw;
+        }
 
         return new OkResult();
     }

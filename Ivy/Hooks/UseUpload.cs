@@ -18,7 +18,7 @@ public static class UseUploadExtensions
             var (cleanup, uploadUrl) = uploadService.AddUpload(handler, defaultContentType, defaultFileName);
             url.Set(uploadUrl);
             return cleanup;
-        });
+        }, [EffectTrigger.AfterInit()]);
         return url;
     }
 

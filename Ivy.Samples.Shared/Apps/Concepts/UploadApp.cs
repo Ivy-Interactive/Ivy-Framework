@@ -60,6 +60,7 @@ public class MultipleFilesUpload : ViewBase
 
             try
             {
+                Console.WriteLine($"[Samples] Start multi upload fileId={currentFile.Id} name='{currentFile.FileName}' length={currentFile.Length}");
                 selectedFiles.Set(files => files.Add(currentFile));
 
                 var totalBytes = currentFile.Length;
@@ -74,6 +75,7 @@ public class MultipleFilesUpload : ViewBase
                 currentFile = loadingFile;
 
                 int bytesRead;
+                var nextLog = 0.25f;
                 while ((bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length, cancellationToken)) > 0)
                 {
                     cancellationToken.ThrowIfCancellationRequested();
@@ -87,6 +89,12 @@ public class MultipleFilesUpload : ViewBase
                     selectedFiles.Set(files => files.Replace(currentFile, updatedFile));
                     currentFile = updatedFile;
 
+                    if (progress >= nextLog)
+                    {
+                        Console.WriteLine($"[Samples] Progress fileId={currentFile.Id} {(int)(progress * 100)}%");
+                        nextLog += 0.25f;
+                    }
+
                     //Simulate this being slower
                     await Task.Delay(50, cancellationToken);
                 }
@@ -96,12 +104,14 @@ public class MultipleFilesUpload : ViewBase
                 selectedFiles.Set(files => files.Replace(currentFile, finishedFile));
 
                 uploadCount.Set(count => count + 1);
+                Console.WriteLine($"[Samples] Finished fileId={currentFile.Id}");
             }
             catch (OperationCanceledException)
             {
                 // Upload was aborted by user
                 var abortedFile = currentFile with { Status = FileUploadStatus.Aborted };
                 selectedFiles.Set(files => files.Replace(currentFile, abortedFile));
+                Console.WriteLine($"[Samples] Aborted fileId={currentFile.Id}");
             }
         });
 

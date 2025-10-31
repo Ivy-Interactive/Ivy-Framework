@@ -113,6 +113,8 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
         } else {
           await uploadFile(limitedFiles[0]);
         }
+        // Reset the input so selecting the same file again triggers onChange
+        e.target.value = '';
         return;
       }
 
@@ -121,6 +123,9 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
       } else {
         await uploadFile(files[0]);
       }
+
+      // Reset the input so selecting the same file again triggers onChange
+      e.target.value = '';
     },
     [multiple, uploadFile, maxFiles]
   );
@@ -129,6 +134,10 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
     (fileId: string) => {
       if (hasDeleteHandler) {
         handleEvent('OnDelete', id, [fileId]);
+      }
+      // Also clear file input to allow re-selecting same file
+      if (inputRef.current) {
+        inputRef.current.value = '';
       }
     },
     [hasDeleteHandler, handleEvent, id]

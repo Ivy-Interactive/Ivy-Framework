@@ -91,11 +91,20 @@ public class State<T> : IState<T>
         }
         set
         {
+            T? newValue = default;
+            bool changed = false;
             lock (_lock)
             {
-                if (Equals(_value, value)) return;
-                _value = value;
-                if (!_subject.IsDisposed) _subject.OnNext(_value);
+                if (!Equals(_value, value))
+                {
+                    _value = value;
+                    newValue = _value;
+                    changed = true;
+                }
+            }
+            if (changed && !_subject.IsDisposed)
+            {
+                _subject.OnNext(newValue!);
             }
         }
     }
@@ -120,14 +129,24 @@ public class State<T> : IState<T>
     /// <returns>The new state value.</returns>
     public T Set(Func<T, T> setter)
     {
+        T current;
+        T updated;
+        bool changed;
         lock (_lock)
         {
-            var newValue = setter(_value);
-            if (Equals(_value, newValue)) return _value;
-            _value = newValue;
-            if (!_subject.IsDisposed) _subject.OnNext(_value);
-            return _value;
+            current = _value;
+            updated = setter(current);
+            changed = !Equals(_value, updated);
+            if (changed)
+            {
+                _value = updated;
+            }
         }
+        if (changed && !_subject.IsDisposed)
+        {
+            _subject.OnNext(updated);
+        }
+        return _value;
     }
 
     /// <summary>
