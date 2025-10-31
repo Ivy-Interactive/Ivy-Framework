@@ -52,13 +52,13 @@ export const ProgressWidget: React.FC<ProgressWidgetProps> = ({
   return (
     <>
       <SparkleStyles />
-      <div className="w-full group" style={styles}>
+      <div className="w-full" style={styles}>
         {goal && (
           <div
             className={cn(
               'rounded-xl rounded-br-none bg-muted p-2 mb-2 w-fit ml-auto',
               'text-muted-foreground flex flex-row items-center text-sm',
-              !isCompleted && 'opacity-50 group-hover:opacity-100',
+              !isCompleted && 'opacity-50 hover:opacity-100',
               isCompleted && 'sparkle-glow'
             )}
           >

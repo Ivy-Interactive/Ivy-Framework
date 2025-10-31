@@ -38,6 +38,9 @@ interface TextBlockWidgetProps {
   color: string;
   noWrap?: boolean;
   overflow?: Overflow;
+  bold?: boolean;
+  italic?: boolean;
+  muted?: boolean;
 }
 
 interface VariantMap {
@@ -220,6 +223,9 @@ export const TextBlockWidget: React.FC<TextBlockWidgetProps> = ({
   strikeThrough,
   noWrap,
   overflow,
+  bold,
+  italic,
+  muted,
 }) => {
   const styles: React.CSSProperties = {
     ...getWidth(width),
@@ -233,7 +239,10 @@ export const TextBlockWidget: React.FC<TextBlockWidgetProps> = ({
       style={styles}
       className={cn(
         strikeThrough && 'line-through',
-        noWrap && 'whitespace-nowrap'
+        noWrap && 'whitespace-nowrap',
+        bold && 'font-semibold',
+        italic && 'italic',
+        muted && 'text-muted-foreground'
       )}
     >
       {content}

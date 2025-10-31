@@ -23,13 +23,16 @@ import { convertToGridColumns } from './utils/columnHelpers';
 import { iconCellRenderer } from './utils/customRenderers';
 import { generateHeaderIcons, addStandardIcons } from './utils/headerIcons';
 import { ThemeColors } from '@/lib/color-utils';
+import { useEventHandler } from '@/components/event-handler';
 import { useColumnGroups } from './hooks/useColumnGroups';
 
 interface TableEditorProps {
+  widgetId: string;
   hasOptions?: boolean;
 }
 
 export const DataTableEditor: React.FC<TableEditorProps> = ({
+  widgetId,
   hasOptions = false,
 }) => {
   const {
@@ -57,6 +60,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     showIndexColumn,
     selectionMode,
     showGroups,
+    enableCellClickEvents,
     showSearch: showSearchConfig,
     showColumnTypeIcons,
     showVerticalBorders,
@@ -117,7 +121,9 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
   });
   const [showSearch, setShowSearch] = useState(false);
   const [hoverRow, setHoverRow] = useState<number | undefined>(undefined);
+
   const scrollThreshold = 10;
+  const rowHeight = 38;
 
   // Generate header icons map for all column icons
   const headerIcons = useMemo(() => {
@@ -141,6 +147,24 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
       resizeObserver.disconnect();
     };
   }, []);
+
+  // Check if we need to load more data when container height is large or when visible rows change
+  useEffect(() => {
+    if (!containerRef.current || visibleRows === 0 || isLoading) {
+      return;
+    }
+
+    // Calculate if the container height can show more rows than we have loaded
+    const containerHeight = containerRef.current.clientHeight;
+    const availableHeight = containerHeight + rowHeight;
+    const visibleRowCapacity = Math.ceil(availableHeight / rowHeight);
+
+    // If container can show more rows than we have, and we have more data available, load it
+    // This will keep loading until we have enough rows to fill the container
+    if (visibleRowCapacity > visibleRows && hasMore) {
+      loadMoreData();
+    }
+  }, [visibleRows, hasMore, isLoading, loadMoreData, containerRef]);
 
   // Handle keyboard shortcut for search (Ctrl/Cmd + F)
   useEffect(() => {
@@ -205,6 +229,77 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
       setGridSelection(newSelection);
     },
     []
+  );
+
+  // Get event handler for sending events to backend
+  const eventHandler = useEventHandler();
+
+  // Handle cell single-clicks (for backend events only)
+  const handleCellClicked = useCallback(
+    (cell: Item) => {
+      if (enableCellClickEvents) {
+        // Get actual cell value
+        const cellContent = getCellContent(cell);
+        const visibleColumns = columns.filter(c => !c.hidden);
+        const column = visibleColumns[cell[0]];
+
+        // Extract the actual value from the cell based on its kind
+        let cellValue: unknown = null;
+        if (
+          cellContent.kind === 'text' ||
+          cellContent.kind === 'number' ||
+          cellContent.kind === 'boolean'
+        ) {
+          cellValue = cellContent.data;
+        } else if ('data' in cellContent) {
+          // Cast to unknown first, then access the data property
+          cellValue = (cellContent as unknown as { data: unknown }).data;
+        }
+
+        // Send event to backend with row, column, and value
+        eventHandler('OnCellClick', widgetId, [
+          cell[1], // row index
+          cell[0], // column index
+          column?.name || '', // column name
+          cellValue, // cell value
+        ]);
+      }
+      // Do NOT prevent default - let selection happen normally!
+    },
+    [enableCellClickEvents, eventHandler, widgetId, columns, getCellContent]
+  );
+
+  // Handle cell double-clicks/activation (for editing)
+  const handleCellActivated = useCallback(
+    (cell: Item) => {
+      if (enableCellClickEvents) {
+        const cellContent = getCellContent(cell);
+        const visibleColumns = columns.filter(c => !c.hidden);
+        const column = visibleColumns[cell[0]];
+
+        // Extract the actual value from the cell based on its kind
+        let cellValue: unknown = null;
+        if (
+          cellContent.kind === 'text' ||
+          cellContent.kind === 'number' ||
+          cellContent.kind === 'boolean'
+        ) {
+          cellValue = cellContent.data;
+        } else if ('data' in cellContent) {
+          // Cast to unknown first, then access the data property
+          cellValue = (cellContent as unknown as { data: unknown }).data;
+        }
+
+        // Send activation event to backend
+        eventHandler('OnCellActivated', widgetId, [
+          cell[1], // row index
+          cell[0], // column index
+          column?.name || '', // column name
+          cellValue, // cell value
+        ]);
+      }
+    },
+    [enableCellClickEvents, eventHandler, widgetId, columns, getCellContent]
   );
 
   // Handle row hover
@@ -272,8 +367,8 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
         smoothScrollX={true}
         smoothScrollY={true}
         theme={tableTheme}
-        rowHeight={38}
-        headerHeight={32}
+        rowHeight={rowHeight}
+        headerHeight={rowHeight}
         freezeColumns={freezeColumns ?? 0}
         getCellsForSelection={(allowCopySelection ?? true) ? true : undefined}
         keybindings={{ search: false }}
@@ -286,6 +381,9 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
         rowMarkers={showIndexColumn ? 'number' : 'none'}
         onColumnMoved={allowColumnReordering ? handleColumnReorder : undefined}
         groupHeaderHeight={showGroups ? 36 : undefined}
+        cellActivationBehavior="double-click"
+        onCellClicked={handleCellClicked}
+        onCellActivated={handleCellActivated}
         onGroupHeaderClicked={
           shouldUseColumnGroups
             ? columnGroupsHook.onGroupHeaderClicked
