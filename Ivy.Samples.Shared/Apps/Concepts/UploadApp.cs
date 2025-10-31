@@ -18,7 +18,7 @@ public class UploadApp : SampleBase
             new Tab("Single File", new SingleFileUpload()),
             new Tab("Multiple Files", new MultipleFilesUpload()),
             new Tab("Dialog", new DialogFileUpload())
-        );
+        ).Variant(TabsVariant.Content);
     }
 }
 

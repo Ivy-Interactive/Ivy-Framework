@@ -256,7 +256,50 @@ public static class FileInputExtensions
                 var fileId = e.Value;
                 var c = uploadContext.Value;
                 c?.Cancel(fileId);
-                state.As<object>().Reset();
+
+                var stateType = state.GetStateType();
+                try
+                {
+                    // Handle ImmutableArray<FileUpload> by removing the canceled file
+                    if (stateType == typeof(System.Collections.Immutable.ImmutableArray<Ivy.Services.FileUpload>))
+                    {
+                        var s = state.As<System.Collections.Immutable.ImmutableArray<Ivy.Services.FileUpload>>();
+                        s.Set(list =>
+                        {
+                            var builder = System.Collections.Immutable.ImmutableArray.CreateBuilder<Ivy.Services.FileUpload>(list.Length);
+                            foreach (var f in list)
+                            {
+                                if (f.Id != fileId) builder.Add(f);
+                            }
+                            return builder.ToImmutable();
+                        });
+                    }
+                    // Handle ImmutableArray<FileUpload<byte[]>> similarly
+                    else if (stateType == typeof(System.Collections.Immutable.ImmutableArray<Ivy.Services.FileUpload<byte[]>>))
+                    {
+                        var s = state.As<System.Collections.Immutable.ImmutableArray<Ivy.Services.FileUpload<byte[]>>>();
+                        s.Set(list =>
+                        {
+                            var builder = System.Collections.Immutable.ImmutableArray.CreateBuilder<Ivy.Services.FileUpload<byte[]>>(list.Length);
+                            foreach (var f in list)
+                            {
+                                if (f.Id != fileId) builder.Add(f);
+                            }
+                            return builder.ToImmutable();
+                        });
+                    }
+                    else
+                    {
+                        // Fallback: reset single-file state
+                        state.As<object>().Reset();
+                    }
+                }
+                catch
+                {
+                    // As a last resort, reset
+                    state.As<object>().Reset();
+                }
+
                 return ValueTask.CompletedTask;
             }
         };

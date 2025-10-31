@@ -200,6 +200,22 @@ export const TabsLayoutWidget = ({
   });
   const activeTabIdRef = React.useRef<string | null>(activeTabId);
   const eventHandler = useEventHandler();
+  const safeEvent = React.useCallback(
+    (
+      name:
+        | 'OnSelect'
+        | 'OnClose'
+        | 'OnRefresh'
+        | 'OnReorder'
+        | 'OnAddButtonClick',
+      args: unknown[]
+    ) => {
+      if (Array.isArray(events) && events.includes(name)) {
+        eventHandler(name, id, args);
+      }
+    },
+    [events, eventHandler, id]
+  );
   const containerRef = React.useRef<HTMLDivElement>(null);
   const tabsListRef = React.useRef<HTMLDivElement>(null);
   const tabRefs = React.useRef<(HTMLButtonElement | null)[]>([]);
@@ -569,13 +585,13 @@ export const TabsLayoutWidget = ({
     // Update activeIndex for Content variant animation
     const newIndex = tabOrder.indexOf(tabId);
     setActiveIndex(newIndex);
-    if (events?.includes('OnSelect')) eventHandler('OnSelect', id, [newIndex]);
+    if (events?.includes('OnSelect')) safeEvent('OnSelect', [newIndex]);
   };
 
   const handleMouseDown = (e: React.MouseEvent, index: number) => {
     if (e.button === 1) {
       e.preventDefault();
-      eventHandler('OnClose', id, [index]);
+      safeEvent('OnClose', [index]);
     }
   };
 
@@ -625,7 +641,7 @@ export const TabsLayoutWidget = ({
         ) {
           // Mark as user-initiated to prevent backend sync from interfering
           isUserInitiatedChangeRef.current = true;
-          eventHandler('OnReorder', id, [reorderMapping]);
+          safeEvent('OnReorder', [reorderMapping]);
         } else {
           console.error('Tab reorder aborted: Invalid mapping', {
             reorderMapping,
@@ -646,7 +662,7 @@ export const TabsLayoutWidget = ({
       }
       isDraggingRef.current = false;
     },
-    [tabOrder, activeTabId, eventHandler, id, tabWidgets]
+    [tabOrder, activeTabId, safeEvent, tabWidgets]
   );
 
   React.useEffect(() => {
@@ -654,7 +670,8 @@ export const TabsLayoutWidget = ({
       const customEvent = e as CustomEvent<{ id: string }>;
       if (!customEvent.detail?.id) return;
       const idx = tabOrderRef.current.indexOf(customEvent.detail.id);
-      if (idx !== -1) eventHandlerRef.current(eventType, id, [idx]);
+      if (idx !== -1 && events?.includes(eventType))
+        eventHandlerRef.current(eventType, id, [idx]);
     };
 
     const closeHandler = handleTabEvent('OnClose');
@@ -667,7 +684,7 @@ export const TabsLayoutWidget = ({
       window.removeEventListener('tab-close', closeHandler);
       window.removeEventListener('tab-refresh', refreshHandler);
     };
-  }, [id]);
+  }, [id, events]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -714,7 +731,7 @@ export const TabsLayoutWidget = ({
                 e.stopPropagation();
                 // Mark as user-initiated to prevent sync issues
                 isUserInitiatedChangeRef.current = true;
-                eventHandler('OnRefresh', id, [tabOrder.indexOf(tabId)]);
+                safeEvent('OnRefresh', [tabOrder.indexOf(tabId)]);
               }}
               className="opacity-60 p-1 rounded-full border border-transparent hover:border-border hover:bg-accent hover:opacity-100 transition-colors cursor-pointer"
             >
@@ -727,7 +744,7 @@ export const TabsLayoutWidget = ({
                 e.stopPropagation();
                 // Mark as user-initiated since close affects selection
                 isUserInitiatedChangeRef.current = true;
-                eventHandler('OnClose', id, [tabOrder.indexOf(tabId)]);
+                safeEvent('OnClose', [tabOrder.indexOf(tabId)]);
               }}
               className="opacity-60 p-1 rounded-full border border-transparent hover:border-border hover:bg-accent hover:opacity-100 transition-colors cursor-pointer"
             >
@@ -864,8 +881,7 @@ export const TabsLayoutWidget = ({
                     addToLoadedTabs(tabId);
                     setActiveIndex(index);
                     setActiveTabId(tabId);
-                    if (events?.includes('OnSelect'))
-                      eventHandler('OnSelect', id, [index]);
+                    safeEvent('OnSelect', [index]);
                   }}
                 >
                   <div className="text-sm font-medium leading-4 whitespace-nowrap flex items-center justify-center h-full">
@@ -877,7 +893,7 @@ export const TabsLayoutWidget = ({
             {addButtonText && (
               <div className="flex items-center ml-2">
                 <button
-                  onClick={() => eventHandler('OnAddButtonClick', id, [0])}
+                  onClick={() => safeEvent('OnAddButtonClick', [0])}
                   className="px-3 py-1.5 cursor-pointer transition-colors duration-300 text-muted-foreground hover:text-foreground hover:muted-foreground rounded-[6px] flex items-center justify-center aspect-square border-none"
                 >
                   <div className="text-sm font-medium leading-4 whitespace-nowrap flex items-center justify-center">
@@ -932,8 +948,7 @@ export const TabsLayoutWidget = ({
           isUserInitiatedChangeRef.current = true;
           const newIndex = tabOrder.indexOf(value);
           setActiveIndex(newIndex);
-          if (events?.includes('OnSelect'))
-            eventHandler('OnSelect', id, [newIndex]);
+          if (events?.includes('OnSelect')) safeEvent('OnSelect', [newIndex]);
         }
       }}
       useRadix={useRadix}
@@ -997,7 +1012,7 @@ export const TabsLayoutWidget = ({
                 {addButtonText && (
                   <div className="flex items-center ml-2">
                     <button
-                      onClick={() => eventHandler('OnAddButtonClick', id, [0])}
+                      onClick={() => safeEvent('OnAddButtonClick', [0])}
                       className="py-2 cursor-pointer transition-colors duration-300 text-muted-foreground hover:text-foreground hover:bg-gray-200/20 rounded-[6px] flex-shrink-0 flex items-center justify-center aspect-square px-3 border-none"
                     >
                       <div className="text-sm font-medium leading-4 whitespace-nowrap flex items-center justify-center">

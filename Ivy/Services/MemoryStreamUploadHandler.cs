@@ -28,6 +28,7 @@ public class MemoryStreamUploadHandler : IUploadHandler
     public static IUploadHandler Create(IState<ImmutableArray<FileUpload<byte[]>>> manyState, int chunkSize = 8192)
         => new MemoryStreamUploadHandler(new ImmutableArraySink(manyState), chunkSize);
 
+
     public async Task HandleUploadAsync(FileUpload fileUpload, Stream stream, CancellationToken cancellationToken)
     {
         Guid key = fileUpload.Id;
@@ -92,8 +93,7 @@ public class MemoryStreamUploadHandler : IUploadHandler
         return (memoryStream.ToArray(), processedBytes);
     }
 
-    // Internal sink abstraction (not public)
-    private interface IFileUploadSink<TContent>
+    private interface IFileUploadSink<in TContent>
     {
         Guid Start(FileUpload file);
         void Progress(Guid key, float progress);
@@ -236,4 +236,5 @@ public class MemoryStreamUploadHandler : IUploadHandler
             });
         }
     }
+
 }
