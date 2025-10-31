@@ -78,30 +78,27 @@ export const DataTable: React.FC<TableProps> = ({
         editable={editable}
       >
         <TableLayout>
-          <>
-            {/* DataTableHeader wraps all table options */}
-            <DataTableHeader>
-              {finalConfig.allowFiltering && (
-                <DataTableOption
-                  icon={FilterIcon}
-                  label="Filter"
-                  tooltip="Filter table data"
-                  displayMode="inline"
-                  inlineDirection="right"
-                  showLabel={false}
-                >
-                  <DataTableFilterOption
-                    allowLlmFiltering={finalConfig.allowLlmFiltering}
-                  />
-                </DataTableOption>
-              )}
-            </DataTableHeader>
+          <DataTableHeader>
+            {finalConfig.allowFiltering && (
+              <DataTableOption
+                icon={FilterIcon}
+                label="Filter"
+                tooltip="Filter table data"
+                displayMode="inline"
+                inlineDirection="right"
+                showLabel={false}
+              >
+                <DataTableFilterOption
+                  allowLlmFiltering={finalConfig.allowLlmFiltering}
+                />
+              </DataTableOption>
+            )}
+          </DataTableHeader>
 
-            <DataTableEditor
-              widgetId={id}
-              hasOptions={finalConfig.allowFiltering}
-            />
-          </>
+          <DataTableEditor
+            widgetId={id}
+            hasOptions={finalConfig.allowFiltering}
+          />
         </TableLayout>
       </TableProvider>
     </div>

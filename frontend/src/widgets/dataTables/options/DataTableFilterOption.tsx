@@ -1,10 +1,11 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { useTable } from '../DataTableContext';
 import { tableStyles } from '../styles/style';
 import {
   QueryEditor,
   QueryEditorChangeEvent,
   parseQuery,
+  useDropdownState,
 } from 'filter-query-editor';
 import { Filter } from '@/services/grpcTableService';
 import { parseInvalidQuery } from '../utils/tableDataFetcher';
@@ -24,8 +25,29 @@ export const DataTableFilterOption: React.FC<{
   const [pendingFilter, setPendingFilter] = useState<Filter | null>(null);
   const [isParsing, setIsParsing] = useState(false);
   const [isQueryValid, setIsQueryValid] = useState(true);
+  const dropdownState = useDropdownState();
 
   const { columns, setActiveFilter, connection } = useTable();
+
+  /**
+   * Monitor CodeMirror's autocomplete dropdown and sync with dropdownState
+   * The autocomplete is created by CodeMirror as .cm-tooltip-autocomplete
+   */
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      const autocompleteTooltip = document.querySelector(
+        '.cm-tooltip-autocomplete'
+      );
+      dropdownState.setIsOpen(!!autocompleteTooltip);
+    });
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+    });
+
+    return () => observer.disconnect();
+  }, [dropdownState]);
 
   // Filter columns to only include filterable ones
   const queryEditorColumns = useMemo(
@@ -134,7 +156,33 @@ export const DataTableFilterOption: React.FC<{
   }, [setActiveFilter]);
 
   /**
-   * Keyboard event handler
+   * Keyboard event handler (capture phase)
+   * Checks for autocomplete BEFORE CodeMirror processes the event
+   */
+  const handleKeyDownCapture = useCallback(
+    (event: React.KeyboardEvent) => {
+      if (
+        event.key === 'Enter' &&
+        (event.metaKey || event.ctrlKey || !event.shiftKey)
+      ) {
+        // In capture phase, check if autocomplete is open
+        const autocompleteInDOM = document.querySelector(
+          '.cm-tooltip-autocomplete'
+        );
+
+        if (autocompleteInDOM || dropdownState.stateRef.current) {
+          // Mark this event so bubble phase knows to ignore it
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (event.nativeEvent as any).__skipFilterTrigger = true;
+        }
+      }
+    },
+    [dropdownState.stateRef]
+  );
+
+  /**
+   * Keyboard event handler (bubble phase)
+   * Triggers filter search if autocomplete didn't handle it
    */
   const handleKeyDown = useCallback(
     async (event: React.KeyboardEvent) => {
@@ -142,6 +190,12 @@ export const DataTableFilterOption: React.FC<{
         event.key === 'Enter' &&
         (event.metaKey || event.ctrlKey || !event.shiftKey)
       ) {
+        // Check if capture phase marked this to skip
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        if ((event.nativeEvent as any).__skipFilterTrigger) {
+          return;
+        }
+
         event.preventDefault();
         await handleEnterKey();
       }
@@ -180,9 +234,10 @@ export const DataTableFilterOption: React.FC<{
   }
 
   return (
-    <div className="flex items-center w-full h-full">
+    <div className="flex items-center w-full h-full justify-between">
       <div
         className="flex-1 min-w-0 max-w-[350px] overflow-hidden query-editor-wrapper"
+        onKeyDownCapture={handleKeyDownCapture}
         onKeyDown={handleKeyDown}
       >
         <QueryEditor

@@ -141,7 +141,7 @@ export const DataTableOption: React.FC<DataTableOptionProps> = ({
         >
           <div
             className={cn(
-              'h-full w-[450px] flex items-center px-2 overflow-hidden', // Added overflow-hidden
+              'h-full w-[450px] flex items-centeroverflow-hidden', // Added overflow-hidden
               contentClassName
             )}
           >
