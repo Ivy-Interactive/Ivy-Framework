@@ -23,10 +23,10 @@ const chartColorVars = [
 ] as const;
 
 /**
- * Rainbow color scheme - color names that ECharts interprets
- * These are NOT CSS variables, just standard color names
+ * Rainbow color scheme - uses existing semantic color variables from index.css
+ * These are already defined in the design system
  */
-const rainbowColors = [
+const rainbowColorVars = [
   'blue',
   'cyan',
   'yellow',
@@ -72,12 +72,39 @@ function readChartColorsFromCSS(): string[] {
 }
 
 /**
+ * Read rainbow colors from existing semantic color CSS variables
+ * Uses colors like --blue, --cyan, --yellow that are already defined in index.css
+ */
+function readRainbowColorsFromCSS(): string[] {
+  if (typeof document === 'undefined') return [];
+
+  try {
+    const docElement = document.documentElement;
+    if (!docElement) return [];
+
+    return rainbowColorVars
+      .map(varName => {
+        const value = getComputedStyle(docElement)
+          .getPropertyValue(`--${varName}`)
+          .trim();
+        return value;
+      })
+      .filter(Boolean);
+  } catch (error) {
+    console.warn('Failed to read rainbow colors from CSS:', error);
+    return [];
+  }
+}
+
+/**
  * Get chart colors based on scheme
  *
- * - 'Default': Reads from CSS variables (--chart-1, --chart-2, ..., --chart-10)
- *   These are theme-aware - different values in light vs dark themes
- * - 'Rainbow': Returns standard color names for ECharts to interpret
- *   These are NOT CSS variables, just color names like 'blue', 'cyan', etc.
+ * Both schemes read colors from CSS variables in index.css:
+ * - 'Default': Reads from --chart-1 through --chart-10 (theme-aware, different in light/dark)
+ * - 'Rainbow': Reads from semantic colors --blue, --cyan, --yellow, --red, etc. (existing in design system)
+ *
+ * Default scheme changes with theme for optimal contrast. Rainbow uses the existing
+ * semantic color palette which may have different values across themes if defined in CSS.
  *
  * @param scheme - Color scheme to use
  * @param themeColors - Current theme colors (used only for fallback)
@@ -95,8 +122,10 @@ export const getChartColors = (
       return colors.length > 0 ? colors : [themeColors.primary];
     }
     case 'Rainbow': {
-      // Return color names for ECharts to interpret (NOT theme-aware)
-      return rainbowColors as unknown as string[];
+      // Read rainbow colors from CSS variables (theme-aware)
+      const colors = readRainbowColorsFromCSS();
+      // Fallback to primary color if no colors found
+      return colors.length > 0 ? colors : [themeColors.primary];
     }
     default:
       return [];
