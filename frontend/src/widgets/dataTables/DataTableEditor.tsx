@@ -109,6 +109,8 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
         colors.mutedForeground || (isDark ? '#a1a1aa' : '#6b7280'),
       // Icon foreground color
       fgIconHeader: colors.mutedForeground || (isDark ? '#9ca3af' : '#6b7280'),
+      // Ensure group headers have consistent text styling
+      fontFamily: 'Geist, sans-serif',
     }),
   });
 
@@ -344,6 +346,21 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     ? columnGroupsHook.columns
     : gridColumns;
 
+  // Implement getGroupDetails for proper group header rendering with borders
+  const getGroupDetails = useCallback(
+    (groupName: string) => {
+      return {
+        name: groupName,
+        overrideTheme: {
+          // Add a visible horizontal border beneath group headers
+          horizontalBorderColor:
+            themeColors.border || (isDark ? '#404045' : '#d1d5db'),
+        },
+      };
+    },
+    [themeColors, isDark]
+  );
+
   if (finalColumns.length === 0) {
     return null;
   }
@@ -389,6 +406,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
             ? columnGroupsHook.onGroupHeaderClicked
             : undefined
         }
+        getGroupDetails={shouldUseColumnGroups ? getGroupDetails : undefined}
         showSearch={showSearchConfig ? showSearch : false}
         onSearchClose={() => setShowSearch(false)}
         onItemHovered={enableRowHover ? onItemHovered : undefined}
