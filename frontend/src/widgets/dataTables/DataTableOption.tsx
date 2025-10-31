@@ -1,4 +1,4 @@
-import React, { ReactNode, useState, useEffect, useRef } from 'react';
+import React, { ReactNode, useState, useRef } from 'react';
 import { LucideIcon } from 'lucide-react';
 import {
   Popover,
@@ -65,23 +65,23 @@ export const DataTableOption: React.FC<DataTableOptionProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Handle click outside to collapse
-  useEffect(() => {
-    if (!expanded || displayMode === 'popover') return;
+  // useEffect(() => {
+  //   if (!expanded || displayMode === 'popover') return;
 
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(event.target as Node)
-      ) {
-        setExpanded(false);
-      }
-    };
+  //   const handleClickOutside = (event: MouseEvent) => {
+  //     if (
+  //       containerRef.current &&
+  //       !containerRef.current.contains(event.target as Node)
+  //     ) {
+  //       setExpanded(false);
+  //     }
+  //   };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [expanded, displayMode]);
+  //   document.addEventListener('mousedown', handleClickOutside);
+  //   return () => {
+  //     document.removeEventListener('mousedown', handleClickOutside);
+  //   };
+  // }, [expanded, displayMode]);
 
   // Popover mode - uses default button styling
   if (displayMode === 'popover') {

@@ -285,7 +285,7 @@ export const DataTableFilterOption: React.FC<{
       onClick={handleContainerClick}
       className={cn(
         'flex items-center w-full h-full justify-between',
-        'rounded-tr-md rounded-br-md border transition-colors px-2',
+        'rounded-tr-md rounded-br-md border transition-colors',
         isFocused ? 'border-border' : 'border-transparent',
         isExpanded ? 'cursor-text' : 'pointer-events-none'
       )}
@@ -308,25 +308,26 @@ export const DataTableFilterOption: React.FC<{
 
       {/* Fixed position container for loader and clear button */}
       <div className="flex items-center gap-2 ml-2 flex-shrink-0">
-        {isParsing && (
-          <div className="flex items-center justify-center">
+        {isParsing ? (
+          <div className="flex items-center justify-center px-4">
             <Loader2 className="animate-spin h-4 w-4 text-gray-500" />
           </div>
+        ) : (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleClearFilter}
+            disabled={!query}
+            className={cn(
+              'h-9 px-3 text-sm hover:bg-muted/50 transition-all',
+              query
+                ? 'opacity-100 visible'
+                : 'opacity-0 invisible pointer-events-none'
+            )}
+          >
+            Clear
+          </Button>
         )}
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handleClearFilter}
-          disabled={!query}
-          className={cn(
-            'h-9 px-3 text-sm hover:bg-muted/50 transition-all',
-            query
-              ? 'opacity-100 visible'
-              : 'opacity-0 invisible pointer-events-none'
-          )}
-        >
-          Clear
-        </Button>
       </div>
     </div>
   );
