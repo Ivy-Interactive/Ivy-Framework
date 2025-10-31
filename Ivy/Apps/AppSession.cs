@@ -36,9 +36,17 @@ public class AppSession : IDisposable
 
     internal ConcurrentDictionary<Type, object> Signals { get; set; } = new();
 
+    // Dedicated per-session event queue to avoid consuming ThreadPool workers
+    public EventDispatchQueue? EventQueue { get; set; }
+
+    // Coalesced UI update scheduling
+    internal volatile bool UpdateScheduled;
+    internal object? PendingUpdate; // holds WidgetTreeChanged[] payload
+
     public void Dispose()
     {
         _isDisposed = true;
+        EventQueue?.Dispose();
         _disposables.Dispose();
         WidgetTree.Dispose();
     }

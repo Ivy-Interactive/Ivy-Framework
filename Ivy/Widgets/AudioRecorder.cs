@@ -1,4 +1,5 @@
 using Ivy.Core;
+using Ivy.Services;
 using Ivy.Shared;
 
 // ReSharper disable once CheckNamespace
@@ -95,6 +96,14 @@ public static class AudioRecorderExtensions
     public static AudioRecorder UploadUrl(this AudioRecorder widget, string? uploadUrl)
     {
         return widget with { UploadUrl = uploadUrl };
+    }
+
+    /// <summary>Sets the upload URL using an UploadContext (from UseUpload).</summary>
+    /// <param name="widget">The audio recorder to configure.</param>
+    /// <param name="upload">The upload context returned by UseUpload.</param>
+    public static AudioRecorder UploadUrl(this AudioRecorder widget, UploadContext? upload)
+    {
+        return widget with { UploadUrl = upload?.UploadUrl };
     }
 
     /// <summary>Sets the size of the audio recorder.</summary>

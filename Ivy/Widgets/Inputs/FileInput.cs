@@ -235,17 +235,31 @@ public static class FileInputExtensions
     }
 
     /// <summary>
-    /// Creates a file input that automatically uploads files to the specified upload URL.
+    /// Creates a file input that automatically uploads files using the provided upload context
+    /// and wires cancellation with state reset.
     /// </summary>
     /// <param name="state">The state to bind the file input to.</param>
-    /// <param name="uploadUrl">The upload URL state from UseUpload hook.</param>
+    /// <param name="uploadContext">The upload context state from UseUpload hook.</param>
     /// <param name="placeholder">Optional placeholder text displayed when no files are selected.</param>
     /// <param name="disabled">Whether the input should be disabled initially.</param>
     /// <param name="variant">The visual variant of the file input.</param>
-    public static FileInputBase ToFileInput(this IAnyState state, IState<string?> uploadUrl, string? placeholder = null, bool disabled = false, FileInputs variant = FileInputs.Drop)
+    public static FileInputBase ToFileInput(this IAnyState state, IState<UploadContext?> uploadContext, string? placeholder = null, bool disabled = false, FileInputs variant = FileInputs.Drop)
     {
         var input = state.ToFileInput(placeholder, disabled, variant);
-        input = input with { UploadUrl = uploadUrl.Value };
+        var ctx = uploadContext.Value;
+        input = input with { UploadUrl = ctx?.UploadUrl };
+
+        input = input with
+        {
+            OnCancel = e =>
+            {
+                var fileId = e.Value;
+                var c = uploadContext.Value;
+                c?.Cancel(fileId);
+                state.As<object>().Reset();
+                return ValueTask.CompletedTask;
+            }
+        };
         return input;
     }
 

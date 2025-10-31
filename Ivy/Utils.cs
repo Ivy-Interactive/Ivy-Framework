@@ -158,7 +158,8 @@ public static class Utils
             return list;
         }
 
-        return Task.FromResult(source.ToList()).Result;
+        // Synchronous fallback without blocking on Task.Result
+        return source.ToList();
     }
 
     public static async Task<T[]> ToArrayAsync<T>(

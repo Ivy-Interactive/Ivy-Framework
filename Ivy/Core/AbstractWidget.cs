@@ -181,6 +181,8 @@ public abstract record AbstractWidget : IWidget
             var result = ((Delegate)eventDelegate).DynamicInvoke(eventInstance);
             if (result is ValueTask valueTask)
             {
+                // Preserve original synchronous semantics: complete the handler before returning
+                // This executes on our dedicated event queue thread (AppHub), not the ThreadPool.
                 valueTask.AsTask().GetAwaiter().GetResult();
             }
             return true;
@@ -266,4 +268,3 @@ public abstract record AbstractWidget : IWidget
         return widget with { Children = [.. widget.Children, child] };
     }
 }
-

@@ -21,8 +21,8 @@ public class TaskView<T>(Task<T> task) : ViewBase
 
         UseEffect(async () =>
         {
-            await task;
-            taskResult.Set(task.Result!);
+            var result = await task;
+            taskResult.Set(result!);
         });
 
         return taskResult.Value;

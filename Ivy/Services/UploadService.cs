@@ -9,6 +9,12 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Ivy.Services;
 
+/// <summary>
+/// Context for an upload endpoint created by UseUpload, providing the client-facing URL
+/// and a server-side cancel function to abort an in-flight upload by fileId.
+/// </summary>
+public record UploadContext(string UploadUrl, Action<Guid> Cancel);
+
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum FileUploadStatus
 {

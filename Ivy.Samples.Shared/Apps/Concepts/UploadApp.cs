@@ -25,23 +25,14 @@ public class SingleFileUpload : ViewBase
     public override object? Build()
     {
         var uploadState = UseState<FileUpload<byte[]>?>();
-        var uploadService = UseService<IUploadService>();
-
         var uploadHandler = new MemoryStreamUploadHandler(uploadState);
-
-        var uploadUrl = this.UseUpload(uploadHandler);
-
-        void OnCancel(Guid uploadId)
-        {
-            // Cancel the in-flight upload and reset state
-            //uploadService.CancelFile(uploadId);
-            //uploadState.Default();
-        }
+        var uploadContext = this.UseUpload(uploadHandler);
 
         return Layout.Vertical()
                | Text.H1("Single File Upload")
-               | uploadState.ToFileInput(uploadUrl).Accept("*/*").Placeholder("Choose a file to upload").HandleCancel(OnCancel)
+               | uploadState.ToFileInput(uploadContext).Accept("*/*").Placeholder("Choose a file to upload")
                | uploadState.ToDetails()
+                   .Remove(e => e!.Content!)
                    .Builder(e => e!.Length, e => e.Func((long x) => Utils.FormatBytes(x)))
                    .Builder(e => e!.Progress, e => e.Func((float x) => x.ToString("P0")))
             ;
@@ -54,9 +45,7 @@ public class MultipleFilesUpload : ViewBase
     {
         var selectedFiles = UseState(ImmutableArray.Create<FileUpload>());
         var uploadCount = UseState(0);
-        var uploadService = UseService<IUploadService>();
-
-        var uploadUrl = this.UseUpload(async (fileUpload, stream, cancellationToken) =>
+        var upload = this.UseUpload(async (fileUpload, stream, cancellationToken) =>
         {
             var currentFile = fileUpload;
 
@@ -117,18 +106,9 @@ public class MultipleFilesUpload : ViewBase
             }
         });
 
-        void OnCancel(Guid fileId)
-        {
-            var file = selectedFiles.Value.FirstOrDefault(f => f.Id == fileId);
-            if (file == null) return;
-            // Request cancellation if this file is still uploading
-            //todo:uploadService.CancelFile(fileId);
-            selectedFiles.Set(files => files.Remove(file));
-        }
-
         var layout = Layout.Vertical()
                      | Text.H1("Multiple Files Upload")
-                     | selectedFiles.ToFileInput(uploadUrl).Accept("*/*").Placeholder("Choose files to upload").HandleCancel(OnCancel)
+                     | selectedFiles.ToFileInput(upload).Accept("*/*").Placeholder("Choose files to upload")
                      | selectedFiles.Value.ToTable()
                          .Width(Size.Full())
                          .Builder(e => e.Length, e => e.Func((long x) => Utils.FormatBytes(x)))
