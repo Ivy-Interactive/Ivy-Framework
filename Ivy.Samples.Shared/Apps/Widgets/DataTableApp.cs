@@ -24,8 +24,7 @@ public record EmployeeRecord(
     Icons Priority,
     Icons Department,
     string Notes,
-    int? OptionalId,
-    decimal? Bonus
+    int? OptionalId
 );
 
 [App(icon: Icons.DatabaseZap)]
@@ -61,7 +60,6 @@ public class DataTableApp : SampleBase
             var department = departments[random.Next(departments.Length)];
             var notes = isActive ? "Active employee" : "Inactive";
             var optionalId = random.Next(100) > 20 ? (int?)random.Next(1000, 9999) : null;
-            var bonus = isManager ? (decimal?)(random.Next(5, 20) * 1000) : null;
 
             return new EmployeeRecord(
                 Id: i,
@@ -79,8 +77,7 @@ public class DataTableApp : SampleBase
                 Priority: priority,
                 Department: department,
                 Notes: notes,
-                OptionalId: optionalId,
-                Bonus: bonus
+                OptionalId: optionalId
             );
         }).AsQueryable();
 
@@ -91,7 +88,6 @@ public class DataTableApp : SampleBase
             .Header(e => e.Salary, "Salary")
             .Header(e => e.Performance, "Performance")
             .Header(e => e.OptionalId, "Badge #")
-            .Header(e => e.Bonus, "Bonus")
 
             // Text columns (including formatted strings)
             .Header(e => e.EmployeeCode, "Code")
@@ -129,7 +125,6 @@ public class DataTableApp : SampleBase
             .Width(e => e.Department, Size.Px(90))
             .Width(e => e.Notes, Size.Px(150))
             .Width(e => e.OptionalId, Size.Px(100))
-            .Width(e => e.Bonus, Size.Px(120))
 
             // Alignments
             .Align(e => e.Id, Align.Left)
@@ -146,7 +141,6 @@ public class DataTableApp : SampleBase
             .Align(e => e.Status, Align.Left)
             .Align(e => e.Priority, Align.Left)
             .Align(e => e.Department, Align.Left)
-            .Align(e => e.Bonus, Align.Left)
             .Align(e => e.OptionalId, Align.Left)
 
             // Groups
@@ -157,7 +151,6 @@ public class DataTableApp : SampleBase
             .Group(e => e.Age, "Personal")
             .Group(e => e.Salary, "Compensation")
             .Group(e => e.Performance, "Compensation")
-            .Group(e => e.Bonus, "Compensation")
             .Group(e => e.IsActive, "Status")
             .Group(e => e.IsManager, "Status")
             .Group(e => e.Status, "Status")

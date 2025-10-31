@@ -69,7 +69,7 @@ export const tableStyles = {
         box-shadow: none !important;
       }
       .query-editor-wrapper .cm-content {
-        padding: 11px 16px 10px 16px;
+        padding: 12px 16px 10px 16px;
         min-height: auto;
       }
 
