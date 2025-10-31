@@ -1,4 +1,10 @@
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, {
+  useState,
+  useMemo,
+  useCallback,
+  useEffect,
+  useRef,
+} from 'react';
 import { useTable } from '../DataTableContext';
 import { tableStyles } from '../styles/style';
 import {
@@ -20,12 +26,15 @@ import { cn } from '@/lib/utils';
  */
 export const DataTableFilterOption: React.FC<{
   allowLlmFiltering?: boolean;
-}> = ({ allowLlmFiltering = true }) => {
+  isExpanded?: boolean;
+}> = ({ allowLlmFiltering = true, isExpanded = true }) => {
   const [query, setQuery] = useState<string>('');
   const [pendingFilter, setPendingFilter] = useState<Filter | null>(null);
   const [isParsing, setIsParsing] = useState(false);
   const [isQueryValid, setIsQueryValid] = useState(true);
+  const [isFocused, setIsFocused] = useState(false);
   const dropdownState = useDropdownState();
+  const editorContainerRef = useRef<HTMLDivElement>(null);
 
   const { columns, setActiveFilter, connection } = useTable();
 
@@ -48,6 +57,28 @@ export const DataTableFilterOption: React.FC<{
 
     return () => observer.disconnect();
   }, [dropdownState]);
+
+  /**
+   * Monitor focus/blur events on the CodeMirror editor
+   * Use focusin/focusout which bubble up from CodeMirror
+   */
+  useEffect(() => {
+    if (!editorContainerRef.current) return;
+
+    const handleFocusIn = () => setIsFocused(true);
+    const handleFocusOut = () => setIsFocused(false);
+
+    const container = editorContainerRef.current;
+
+    // Use focusin/focusout which bubble (unlike focus/blur)
+    container.addEventListener('focusin', handleFocusIn);
+    container.addEventListener('focusout', handleFocusOut);
+
+    return () => {
+      container.removeEventListener('focusin', handleFocusIn);
+      container.removeEventListener('focusout', handleFocusOut);
+    };
+  }, []);
 
   // Filter columns to only include filterable ones
   const queryEditorColumns = useMemo(
@@ -156,6 +187,21 @@ export const DataTableFilterOption: React.FC<{
   }, [setActiveFilter]);
 
   /**
+   * Handle click on container to focus the editor
+   */
+  const handleContainerClick = useCallback(() => {
+    if (editorContainerRef.current) {
+      // Find the CodeMirror content element and focus it
+      const cmContent = editorContainerRef.current.querySelector(
+        '.cm-content'
+      ) as HTMLElement;
+      if (cmContent) {
+        cmContent.focus();
+      }
+    }
+  }, []);
+
+  /**
    * Keyboard event handler (capture phase)
    * Checks for autocomplete BEFORE CodeMirror processes the event
    */
@@ -234,9 +280,18 @@ export const DataTableFilterOption: React.FC<{
   }
 
   return (
-    <div className="flex items-center w-full h-full justify-between">
+    <div
+      ref={editorContainerRef}
+      onClick={handleContainerClick}
+      className={cn(
+        'flex items-center w-full h-full justify-between',
+        'rounded-tr-md rounded-br-md border transition-colors px-2',
+        isFocused ? 'border-border' : 'border-transparent',
+        isExpanded ? 'cursor-text' : 'pointer-events-none'
+      )}
+    >
       <div
-        className="flex-1 min-w-0 max-w-[350px] overflow-hidden query-editor-wrapper"
+        className="flex-1 min-w-0 max-w-[350px] query-editor-wrapper cursor-text"
         onKeyDownCapture={handleKeyDownCapture}
         onKeyDown={handleKeyDown}
       >
@@ -264,7 +319,7 @@ export const DataTableFilterOption: React.FC<{
           onClick={handleClearFilter}
           disabled={!query}
           className={cn(
-            'h-9 px-3 text-sm hover:bg-transparent hover:text-foreground transition-opacity',
+            'h-9 px-3 text-sm hover:bg-muted/50 transition-all',
             query
               ? 'opacity-100 visible'
               : 'opacity-0 invisible pointer-events-none'

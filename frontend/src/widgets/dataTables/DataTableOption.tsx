@@ -1,4 +1,4 @@
-import React, { ReactNode, useState } from 'react';
+import React, { ReactNode, useState, useEffect, useRef } from 'react';
 import { LucideIcon } from 'lucide-react';
 import {
   Popover,
@@ -62,6 +62,26 @@ export const DataTableOption: React.FC<DataTableOptionProps> = ({
   showLabel = true,
 }) => {
   const [expanded, setExpanded] = useState(defaultExpanded);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Handle click outside to collapse
+  useEffect(() => {
+    if (!expanded || displayMode === 'popover') return;
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target as Node)
+      ) {
+        setExpanded(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [expanded, displayMode]);
 
   // Popover mode - uses default button styling
   if (displayMode === 'popover') {
@@ -106,12 +126,12 @@ export const DataTableOption: React.FC<DataTableOptionProps> = ({
   if (inlineDirection === 'right') {
     return (
       <div
+        ref={containerRef}
         className={cn(
           'inline-flex items-center mb-3',
           'border rounded-md',
           'bg-transparent border-input',
           'transition-all duration-300 ease-in-out',
-          !expanded && 'hover:bg-accent',
           className
         )}
       >
@@ -119,9 +139,11 @@ export const DataTableOption: React.FC<DataTableOptionProps> = ({
           className={cn(
             'inline-flex items-center justify-center text-sm font-medium',
             'h-9 w-9 gap-2 cursor-pointer flex-shrink-0',
-            'bg-transparent hover:bg-accent hover:text-accent-foreground rounded-l-md',
+            'bg-transparent rounded-l-md',
             'transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
-            expanded && 'bg-accent'
+            expanded
+              ? 'bg-accent hover:bg-accent hover:text-accent-foreground'
+              : 'hover:bg-accent hover:text-accent-foreground'
           )}
           onClick={() => setExpanded(!expanded)}
           title={tooltip || label}
@@ -132,7 +154,7 @@ export const DataTableOption: React.FC<DataTableOptionProps> = ({
         {/* Content container - fixed dimensions when expanded */}
         <div
           className={cn(
-            'overflow-hidden border-l h-9',
+            'border-l h-9',
             'transition-all duration-300 ease-in-out',
             expanded
               ? 'w-[450px] opacity-100 border-input/30' // Fixed width when expanded
@@ -141,11 +163,16 @@ export const DataTableOption: React.FC<DataTableOptionProps> = ({
         >
           <div
             className={cn(
-              'h-full w-[450px] flex items-centeroverflow-hidden', // Added overflow-hidden
+              'h-full w-[450px] flex items-center ',
               contentClassName
             )}
           >
-            {children}
+            {React.isValidElement(children)
+              ? React.cloneElement(
+                  children as React.ReactElement<{ isExpanded?: boolean }>,
+                  { isExpanded: expanded }
+                )
+              : children}
           </div>
         </div>
       </div>
@@ -155,6 +182,7 @@ export const DataTableOption: React.FC<DataTableOptionProps> = ({
   if (inlineDirection === 'left') {
     return (
       <div
+        ref={containerRef}
         className={cn(
           'inline-flex items-center mb-3',
           'border rounded-md',
@@ -167,7 +195,7 @@ export const DataTableOption: React.FC<DataTableOptionProps> = ({
         {/* Sliding content container */}
         <div
           className={cn(
-            'overflow-hidden transition-all duration-300 ease-in-out',
+            'transition-all duration-300 ease-in-out',
             'border-r',
             expanded
               ? 'max-w-[800px] opacity-100 border-input/30'
@@ -175,7 +203,12 @@ export const DataTableOption: React.FC<DataTableOptionProps> = ({
           )}
         >
           <div className={cn('h-9 flex items-center', contentClassName)}>
-            {children}
+            {React.isValidElement(children)
+              ? React.cloneElement(
+                  children as React.ReactElement<{ isExpanded?: boolean }>,
+                  { isExpanded: expanded }
+                )
+              : children}
           </div>
         </div>
 
@@ -199,6 +232,7 @@ export const DataTableOption: React.FC<DataTableOptionProps> = ({
   // Default: below with unified border
   return (
     <div
+      ref={containerRef}
       className={cn(
         'inline-flex flex-col mb-3',
         'border rounded-md',
@@ -224,11 +258,18 @@ export const DataTableOption: React.FC<DataTableOptionProps> = ({
 
       <div
         className={cn(
-          'overflow-hidden transition-all duration-300 ease-in-out',
+          'transition-all duration-300 ease-in-out',
           expanded ? 'max-h-[200px] opacity-100' : 'max-h-0 opacity-0'
         )}
       >
-        <div className={cn('p-2', contentClassName)}>{children}</div>
+        <div className={cn('p-2', contentClassName)}>
+          {React.isValidElement(children)
+            ? React.cloneElement(
+                children as React.ReactElement<{ isExpanded?: boolean }>,
+                { isExpanded: expanded }
+              )
+            : children}
+        </div>
       </div>
     </div>
   );
