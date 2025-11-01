@@ -30,7 +30,7 @@ public interface IWidget
     /// <param name="eventName">The name of the event to invoke (e.g., "onClick", "onChange").</param>
     /// <param name="args">The arguments passed from the client-side event.</param>
     /// <returns>True if the event was successfully invoked; false if the event handler was not found.</returns>
-    public bool InvokeEvent(string eventName, JsonArray args);
+    public Task<bool> InvokeEventAsync(string eventName, JsonArray args);
 
     /// <summary>
     /// Gets an attached property value that was set by a parent widget for layout or behavior purposes.

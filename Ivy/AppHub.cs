@@ -523,13 +523,13 @@ public class AppHub(
             return Task.CompletedTask;
         }
 
-        // Enqueue event handling to avoid tying up ThreadPool workers
-        appSession.EventQueue?.Enqueue(() =>
+        // Enqueue async event handling to avoid tying up ThreadPool workers
+        appSession.EventQueue?.Enqueue(async () =>
         {
             try
             {
                 appSession.LastInteraction = DateTime.UtcNow;
-                if (!appSession.WidgetTree.TriggerEvent(widgetId, eventName, args ?? new JsonArray()))
+                if (!await appSession.WidgetTree.TriggerEventAsync(widgetId, eventName, args ?? new JsonArray()))
                 {
                     logger.LogWarning($"Event '{eventName}' for Widget '{widgetId}' not found.");
                 }

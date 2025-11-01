@@ -8,7 +8,7 @@ namespace Ivy.Core;
 /// </summary>
 public sealed class EventDispatchQueue : IDisposable
 {
-    private readonly Channel<Action> _channel;
+    private readonly Channel<Func<Task>> _channel;
     private readonly CancellationTokenSource _cts;
     private readonly Task _worker;
 
@@ -20,10 +20,10 @@ public sealed class EventDispatchQueue : IDisposable
             SingleWriter = false,
             FullMode = BoundedChannelFullMode.DropOldest
         };
-        _channel = Channel.CreateBounded<Action>(options);
+        _channel = Channel.CreateBounded<Func<Task>>(options);
         _cts = CancellationTokenSource.CreateLinkedTokenSource(externalCancellation);
 
-        _worker = Task.Factory.StartNew(async () =>
+        _worker = Task.Run(async () =>
         {
             try
             {
@@ -31,7 +31,10 @@ public sealed class EventDispatchQueue : IDisposable
                 {
                     while (_channel.Reader.TryRead(out var work))
                     {
-                        try { work(); }
+                        try
+                        {
+                            await work().ConfigureAwait(false);
+                        }
                         catch (Exception ex)
                         {
                             Console.WriteLine($"[ERROR] EventDispatchQueue work failed: {ex}");
@@ -40,15 +43,25 @@ public sealed class EventDispatchQueue : IDisposable
                 }
             }
             catch (OperationCanceledException) { }
-        }, _cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default).Unwrap();
+        }, _cts.Token);
     }
 
     public void Enqueue(Action action)
     {
-        if (!_channel.Writer.TryWrite(action))
+        // Wrap synchronous action in a Task-returning function
+        if (!_channel.Writer.TryWrite(() => { action(); return Task.CompletedTask; }))
         {
             // Fallback to best-effort
-            _ = _channel.Writer.WriteAsync(action, _cts.Token);
+            _ = _channel.Writer.WriteAsync(() => { action(); return Task.CompletedTask; }, _cts.Token);
+        }
+    }
+
+    public void Enqueue(Func<Task> asyncAction)
+    {
+        if (!_channel.Writer.TryWrite(asyncAction))
+        {
+            // Fallback to best-effort
+            _ = _channel.Writer.WriteAsync(asyncAction, _cts.Token);
         }
     }
 
