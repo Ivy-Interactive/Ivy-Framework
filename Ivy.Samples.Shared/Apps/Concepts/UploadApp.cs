@@ -27,11 +27,11 @@ public class SingleFileUpload : ViewBase
     public override object? Build()
     {
         var uploadState = UseState<FileUpload<byte[]>?>();
-        var upload = this.UseUpload(MemoryStreamUploadHandler.Create(uploadState));
+        var upload = this.UseUpload(MemoryStreamUploadHandler.Create(uploadState)).Accept("*/*").MaxFileSize(10 * 1024 * 1024);
 
         return Layout.Vertical()
                | Text.H1("Single File Upload")
-               | uploadState.ToFileInput(upload).Accept("*/*").Placeholder("Choose a file to upload")
+               | uploadState.ToFileInput(upload).Placeholder("Choose a file to upload")
                | uploadState.ToDetails()
                    .Builder(e => e!.Length, e => e.Func((long x) => Utils.FormatBytes(x)))
                    .Builder(e => e!.Progress, e => e.Func((float x) => x.ToString("P0")))
@@ -47,7 +47,7 @@ public class DialogFileUpload : ViewBase
 
         // Ephemeral state used inside the dialog while picking a file
         var dialogFile = UseState<FileUpload<byte[]>?>();
-        var uploadContext = this.UseUpload(MemoryStreamUploadHandler.Create(dialogFile));
+        var uploadContext = this.UseUpload(MemoryStreamUploadHandler.Create(dialogFile)).Accept("*/*").MaxFileSize(10 * 1024 * 1024);
 
         // Dialog visibility state
         var isOpen = UseState(false);
@@ -111,11 +111,11 @@ public class MultipleFilesUpload : ViewBase
     public override object? Build()
     {
         var selectedFiles = UseState(ImmutableArray.Create<FileUpload<byte[]>>());
-        var upload = this.UseUpload(MemoryStreamUploadHandler.Create(selectedFiles));
+        var upload = this.UseUpload(MemoryStreamUploadHandler.Create(selectedFiles)).Accept("*/*").MaxFileSize(10 * 1024 * 1024);
 
         var layout = Layout.Vertical()
                      | Text.H1("Multiple Files Upload")
-                     | selectedFiles.ToFileInput(upload).Accept("*/*").Placeholder("Choose files to upload")
+                     | selectedFiles.ToFileInput(upload).Placeholder("Choose files to upload")
                      | selectedFiles.Value.ToTable()
                          .Width(Size.Full())
                          .Builder(e => e.Length, e => e.Func((long x) => Utils.FormatBytes(x)))
