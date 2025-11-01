@@ -1,6 +1,7 @@
 ﻿using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json.Serialization;
+using System.Linq;
 using System.Threading.Tasks;
 using Ivy.Core;
 using Ivy.Core.Helpers;
@@ -178,60 +179,10 @@ public record FileInput<TValue> : FileInputBase, IInput<TValue>, IAnyFileInput
 /// </summary>
 public static class FileInputExtensions
 {
-    /// <summary>
-    /// Creates a file input from a state object.
-    /// </summary>
-    /// <param name="state">The state object to bind to.</param>
-    /// <param name="placeholder">Optional placeholder text displayed when no files are selected.</param>
-    /// <param name="disabled">Whether the input should be disabled initially.</param>
-    /// <param name="variant">The visual variant of the file input.</param>
+    [Obsolete("ToFileInput now requires an UploadContext. Use state.ToFileInput(uploadContext, ...).", true)]
     public static FileInputBase ToFileInput(this IAnyState state, string? placeholder = null, bool disabled = false, FileInputs variant = FileInputs.Drop)
     {
-        var type = state.GetStateType();
-
-        bool IsFileUploadType(Type t)
-        {
-            if (t == typeof(FileUpload)) return true;
-            if (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(FileUpload<>)) return true;
-            return typeof(IFileUpload).IsAssignableFrom(t);
-        }
-
-        bool IsEnumerableOfFileUpload(Type t)
-        {
-            if (t == typeof(string)) return false;
-            if (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IEnumerable<>))
-            {
-                var arg = t.GetGenericArguments()[0];
-                return IsFileUploadType(arg);
-            }
-            // Check implemented interfaces (handles ImmutableArray<>, List<>, etc.)
-            foreach (var it in t.GetInterfaces())
-            {
-                if (it.IsGenericType && it.GetGenericTypeDefinition() == typeof(IEnumerable<>))
-                {
-                    var arg = it.GetGenericArguments()[0];
-                    if (IsFileUploadType(arg)) return true;
-                }
-            }
-            return false;
-        }
-
-        //Check that type is FileUpload / FileUpload<T> or IEnumerable<FileUpload>/IEnumerable<FileUpload<T>>
-        var isCollection = IsEnumerableOfFileUpload(type);
-        var isValid = IsFileUploadType(type) || isCollection;
-
-        if (!isValid)
-        {
-            throw new Exception("Invalid type for FileInput - must be FileUpload, FileUpload<T>, or a collection thereof");
-        }
-
-        Type genericType = typeof(FileInput<>).MakeGenericType(type);
-        FileInputBase input = (FileInputBase)Activator.CreateInstance(genericType, state, placeholder, disabled, variant)!;
-
-        // Set Multiple based on type
-        input = input with { Multiple = isCollection };
-
-        return input;
+        throw new NotSupportedException("ToFileInput now requires an UploadContext. Use state.ToFileInput(uploadContext, ...).");
     }
 
     /// <summary>
@@ -245,7 +196,63 @@ public static class FileInputExtensions
     /// <param name="variant">The visual variant of the file input.</param>
     public static FileInputBase ToFileInput(this IAnyState state, IState<UploadContext?> uploadContext, string? placeholder = null, bool disabled = false, FileInputs variant = FileInputs.Drop)
     {
-        var input = state.ToFileInput(placeholder, disabled, variant);
+        static bool IsFileUploadType(Type t)
+        {
+            if (t == typeof(FileUpload)) return true;
+            if (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(FileUpload<>)) return true;
+            return typeof(IFileUpload).IsAssignableFrom(t);
+        }
+
+        static bool IsEnumerableOfFileUpload(Type t)
+        {
+            if (t == typeof(string)) return false;
+            if (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IEnumerable<>))
+            {
+                var arg = t.GetGenericArguments()[0];
+                return IsFileUploadType(arg);
+            }
+            foreach (var it in t.GetInterfaces())
+            {
+                if (it.IsGenericType && it.GetGenericTypeDefinition() == typeof(IEnumerable<>))
+                {
+                    var arg = it.GetGenericArguments()[0];
+                    if (IsFileUploadType(arg)) return true;
+                }
+            }
+            return false;
+        }
+
+        static FileUpload Project(IFileUpload f) => new()
+        {
+            Id = f.Id,
+            FileName = f.FileName,
+            ContentType = f.ContentType,
+            Length = f.Length,
+            Progress = f.Progress,
+            Status = f.Status
+        };
+
+        var stateType = state.GetStateType();
+        var isCollection = IsEnumerableOfFileUpload(stateType);
+
+        FileInputBase input;
+        if (isCollection)
+        {
+            var valueObj = state.As<object>().Value;
+            IEnumerable<FileUpload> projected = Array.Empty<FileUpload>();
+            if (valueObj is IEnumerable<IFileUpload> list)
+            {
+                projected = list.Select(Project).ToArray();
+            }
+            input = new FileInput<IEnumerable<FileUpload>>(projected, placeholder, disabled, variant) with { Multiple = true };
+        }
+        else
+        {
+            var valueObj = state.As<object>().Value;
+            FileUpload? single = valueObj is IFileUpload f ? Project(f) : null;
+            input = new FileInput<FileUpload?>(single, placeholder, disabled, variant);
+        }
+
         var ctx = uploadContext.Value;
         input = input with { UploadUrl = ctx?.UploadUrl };
 
@@ -254,13 +261,11 @@ public static class FileInputExtensions
             OnCancel = e =>
             {
                 var fileId = e.Value;
-                var c = uploadContext.Value;
-                c?.Cancel(fileId);
+                uploadContext.Value?.Cancel(fileId);
 
-                var stateType = state.GetStateType();
                 try
                 {
-                    // Handle ImmutableArray<FileUpload> by removing the canceled file
+                    // Handle common immutable collection cases by removing the canceled file
                     if (stateType == typeof(System.Collections.Immutable.ImmutableArray<Ivy.Services.FileUpload>))
                     {
                         var s = state.As<System.Collections.Immutable.ImmutableArray<Ivy.Services.FileUpload>>();
@@ -274,7 +279,6 @@ public static class FileInputExtensions
                             return builder.ToImmutable();
                         });
                     }
-                    // Handle ImmutableArray<FileUpload<byte[]>> similarly
                     else if (stateType == typeof(System.Collections.Immutable.ImmutableArray<Ivy.Services.FileUpload<byte[]>>))
                     {
                         var s = state.As<System.Collections.Immutable.ImmutableArray<Ivy.Services.FileUpload<byte[]>>>();
@@ -290,7 +294,7 @@ public static class FileInputExtensions
                     }
                     else
                     {
-                        // Fallback: reset single-file state
+                        // Fallback: reset state (works for single-file or unsupported collections)
                         state.As<object>().Reset();
                     }
                 }
@@ -303,6 +307,7 @@ public static class FileInputExtensions
                 return ValueTask.CompletedTask;
             }
         };
+
         return input;
     }
 

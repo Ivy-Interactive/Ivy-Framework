@@ -208,7 +208,9 @@ public class FormBuilder<TModel> : ViewBase
 
         if (IsFileUploadType(nonNullableType))
         {
-            return (state) => state.ToFileInput().Size(Size);
+            //todo: this needs 
+            var upload = this.UseUpload((fileUpload, stream, cancellationToken) => Task.CompletedTask);
+            return (state) => state.ToFileInput(upload).Size(Size);
         }
 
         // Collections of FileUpload / FileUpload<T>
@@ -219,7 +221,8 @@ public class FormBuilder<TModel> : ViewBase
                 var arg = it.GetGenericArguments()[0];
                 if (IsFileUploadType(arg))
                 {
-                    return (state) => state.ToFileInput().Size(Size);
+                    var upload = this.UseUpload((fileUpload, stream, cancellationToken) => Task.CompletedTask);
+                    return (state) => state.ToFileInput(upload).Size(Size);
                 }
             }
         }
