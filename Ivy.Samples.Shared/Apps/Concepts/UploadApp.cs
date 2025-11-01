@@ -6,6 +6,7 @@ using Ivy.Views.Builders;
 using Ivy.Views.Tables;
 using Microsoft.Extensions.Logging;
 using System.Linq;
+using Ivy.Views.Forms;
 
 namespace Ivy.Samples.Shared.Apps.Concepts;
 
@@ -17,7 +18,8 @@ public class UploadApp : SampleBase
         return Layout.Tabs(
             new Tab("Single File", new SingleFileUpload()),
             new Tab("Multiple Files", new MultipleFilesUpload()),
-            new Tab("Dialog", new DialogFileUpload())
+            new Tab("Dialog", new DialogFileUpload()),
+            new Tab("Validation", new FileUploadValidation())
         ).Variant(TabsVariant.Content);
     }
 }
@@ -36,6 +38,26 @@ public class SingleFileUpload : ViewBase
                    .Builder(e => e!.Length, e => e.Func((long x) => Utils.FormatBytes(x)))
                    .Builder(e => e!.Progress, e => e.Func((float x) => x.ToString("P0")))
             ;
+    }
+}
+
+public class MultipleFilesUpload : ViewBase
+{
+    public override object? Build()
+    {
+        var selectedFiles = UseState(ImmutableArray.Create<FileUpload<byte[]>>());
+        var upload = this.UseUpload(MemoryStreamUploadHandler.Create(selectedFiles)).Accept("*/*").MaxFileSize(10 * 1024 * 1024);
+
+        var layout = Layout.Vertical()
+                     | Text.H1("Multiple Files Upload")
+                     | selectedFiles.ToFileInput(upload).Placeholder("Choose files to upload")
+                     | selectedFiles.Value.ToTable()
+                         .Width(Size.Full())
+                         .Builder(e => e.Length, e => e.Func((long x) => Utils.FormatBytes(x)))
+                         .Builder(e => e.Progress, e => e.Func((float x) => x.ToString("P0")))
+                         .Remove(e => e.Id);
+
+        return layout;
     }
 }
 
@@ -106,16 +128,43 @@ public class DialogFileUpload : ViewBase
     }
 }
 
-public class MultipleFilesUpload : ViewBase
+public record FileUploadValidationSettings
+{
+    [Range(1, long.MaxValue)]
+    public long MaxFileSize { get; init; } = 5 * 1024 * 1024; // 5 MB
+
+    [Range(1, 20)]
+    public int MaxFiles { get; init; } = 3;
+
+    [AllowedValues("*/*", "image/png", "image/jpeg", "application/pdf")]
+    public string Accept { get; init; } = "*/*";
+
+    public string Placeholder { get; init; } = "Choose files to upload";
+}
+
+
+public class FileUploadValidation : ViewBase
+{
+    public override object? Build()
+    {
+        var settings = UseState(new FileUploadValidationSettings());
+        return new SidebarLayout(
+            new FileUploadValidationUploader(settings.Value).Key(settings),
+            settings.ToForm()
+        );
+    }
+}
+
+public class FileUploadValidationUploader(FileUploadValidationSettings settings) : ViewBase
 {
     public override object? Build()
     {
         var selectedFiles = UseState(ImmutableArray.Create<FileUpload<byte[]>>());
-        var upload = this.UseUpload(MemoryStreamUploadHandler.Create(selectedFiles)).Accept("*/*").MaxFileSize(10 * 1024 * 1024);
+        var upload = this.UseUpload(MemoryStreamUploadHandler.Create(selectedFiles)).Accept(settings.Accept).MaxFileSize(settings.MaxFileSize);
 
         var layout = Layout.Vertical()
                      | Text.H1("Multiple Files Upload")
-                     | selectedFiles.ToFileInput(upload).Placeholder("Choose files to upload")
+                     | selectedFiles.ToFileInput(upload).Placeholder(settings.Placeholder).MaxFiles(settings.MaxFiles)
                      | selectedFiles.Value.ToTable()
                          .Width(Size.Full())
                          .Builder(e => e.Length, e => e.Func((long x) => Utils.FormatBytes(x)))

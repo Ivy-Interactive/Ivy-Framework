@@ -618,7 +618,7 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
     /// <param name="args">The arguments to pass to the event handler.</param>
     /// <returns>True if the event was successfully invoked; false otherwise.</returns>
     /// <exception cref="NotSupportedException">Thrown if the widget is not found or the node is not a widget.</exception>
-    public bool TriggerEvent(string widgetId, string eventName, JsonArray args)
+    public async Task<bool> TriggerEventAsync(string widgetId, string eventName, JsonArray args)
     {
         if (!_nodes.TryGetValue(widgetId, out var node))
             throw new NotSupportedException($"Node '{widgetId}' not found.");
@@ -628,7 +628,7 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
 
         var widget = node.Widget!;
 
-        var result = widget.InvokeEvent(eventName, args);
+        var result = await widget.InvokeEventAsync(eventName, args);
 
         return result;
     }
