@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.ComponentModel.DataAnnotations;
 using System.Reactive.Disposables;
 using System.Diagnostics;
 using System.Text.Json.Serialization;
@@ -76,6 +77,7 @@ public record FileUpload<T> : FileUpload
     /// Optional typed content associated with this upload (e.g., raw bytes, parsed model).
     /// </summary>
     [JsonIgnore]
+    [ScaffoldColumn(false)]
     public T? Content { get; init; }
 }
 

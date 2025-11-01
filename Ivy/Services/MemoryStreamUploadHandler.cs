@@ -73,7 +73,8 @@ public class MemoryStreamUploadHandler : IUploadHandler
         var buffer = new byte[chunkSize];
         long processedBytes = 0L;
         int bytesRead;
-        float nextLog = 0.25f;
+        float lastReportedProgress = 0f;
+        const float progressThreshold = 0.05f; // Only report every 5%
 
         while ((bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length, ct)) > 0)
         {
@@ -81,12 +82,12 @@ public class MemoryStreamUploadHandler : IUploadHandler
             await memoryStream.WriteAsync(buffer, 0, bytesRead, ct);
             processedBytes += bytesRead;
             var progress = totalLength > 0 ? (float)processedBytes / totalLength : 0f;
-            onProgress(progress);
 
-            if (progress >= nextLog)
+            // Only report progress if it changed by at least 5%
+            if (progress - lastReportedProgress >= progressThreshold)
             {
-                // Maintain threshold calculation for parity/logging (caller logs if desired)
-                nextLog += 0.25f;
+                onProgress(progress);
+                lastReportedProgress = progress;
             }
         }
 
@@ -176,13 +177,17 @@ public class MemoryStreamUploadHandler : IUploadHandler
                 Status = FileUploadStatus.Loading,
                 Progress = 0f
             };
+            Console.WriteLine($"[ImmutableArraySink] Start: Adding file {file.Id} to state");
             _state.Set(list => list.Add(typed));
+            Console.WriteLine($"[ImmutableArraySink] Start: State updated, current count: {_state.Value.Length}");
             return file.Id;
         }
 
         public void Progress(Guid key, float progress)
         {
-            _state.Set(list =>
+            Console.WriteLine($"[ImmutableArraySink] Progress: File {key}, progress: {progress:P0}");
+            var oldValue = _state.Value;
+            var newValue = _state.Set(list =>
             {
                 var idx = IndexOfById(list, key);
                 if (idx >= 0)
@@ -192,20 +197,31 @@ public class MemoryStreamUploadHandler : IUploadHandler
                 }
                 return list;
             });
+            var actuallyChanged = oldValue != newValue;
+            Console.WriteLine($"[ImmutableArraySink] Progress: State changed? {actuallyChanged}, old count: {oldValue.Length}, new count: {newValue.Length}");
+            if (newValue.Length > 0)
+            {
+                Console.WriteLine($"[ImmutableArraySink] Progress: First item progress after update: {newValue[0].Progress:P0}, status: {newValue[0].Status}");
+            }
         }
 
         public void Complete(Guid key, byte[] content)
         {
+            Console.WriteLine($"[ImmutableArraySink] Complete: File {key}, content length: {content.Length}");
             _state.Set(list =>
             {
                 var idx = IndexOfById(list, key);
+                Console.WriteLine($"[ImmutableArraySink] Complete: Found file at index {idx}");
                 if (idx >= 0)
                 {
                     var updated = list[idx] with { Content = content, Status = FileUploadStatus.Finished, Progress = 1f };
+                    Console.WriteLine($"[ImmutableArraySink] Complete: Updated file status={updated.Status}, progress={updated.Progress}");
                     return list.SetItem(idx, updated);
                 }
+                Console.WriteLine($"[ImmutableArraySink] Complete: File not found in list!");
                 return list;
             });
+            Console.WriteLine($"[ImmutableArraySink] Complete: State updated, current count: {_state.Value.Length}");
         }
 
         public void Aborted(Guid key)

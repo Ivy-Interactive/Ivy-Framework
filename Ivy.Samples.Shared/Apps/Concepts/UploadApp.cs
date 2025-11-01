@@ -33,7 +33,6 @@ public class SingleFileUpload : ViewBase
                | Text.H1("Single File Upload")
                | uploadState.ToFileInput(upload).Accept("*/*").Placeholder("Choose a file to upload")
                | uploadState.ToDetails()
-                   .Remove(e => e!.Content!)
                    .Builder(e => e!.Length, e => e.Func((long x) => Utils.FormatBytes(x)))
                    .Builder(e => e!.Progress, e => e.Func((float x) => x.ToString("P0")))
             ;
@@ -100,7 +99,6 @@ public class DialogFileUpload : ViewBase
                | openButton
                | (selectedFile.Value != null
                     ? selectedFile.ToDetails()
-                        .Remove(e => e!.Content!)
                         .Builder(e => e!.Length, e => e.Func((long x) => Utils.FormatBytes(x)))
                         .Builder(e => e!.Progress, e => e.Func((float x) => x.ToString("P0")))
                     : Text.Block("No file selected"))
