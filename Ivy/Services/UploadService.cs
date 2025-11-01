@@ -14,7 +14,44 @@ namespace Ivy.Services;
 /// Context for an upload endpoint created by UseUpload, providing the client-facing URL
 /// and a server-side cancel function to abort an in-flight upload by fileId.
 /// </summary>
-public record UploadContext(string UploadUrl, Action<Guid> Cancel);
+public record UploadContext(string UploadUrl, Action<Guid> Cancel)
+{
+    /// <summary>Gets or sets the accepted file types using MIME types or file extensions.</summary>
+    public string? Accept { get; init; }
+
+    /// <summary>Gets or sets the maximum file size in bytes.</summary>
+    public long? MaxFileSize { get; init; }
+}
+
+/// <summary>
+/// Extension methods for configuring UploadContext.
+/// </summary>
+public static class UploadContextExtensions
+{
+    /// <summary>Sets the accepted file types for the upload state using MIME types or file extensions.</summary>
+    /// <param name="state">The upload context state to configure.</param>
+    /// <param name="accept">A comma-separated list of accepted file types (e.g., "image/*", ".pdf,.doc", "text/plain").</param>
+    public static Core.Hooks.IState<UploadContext?> Accept(this Core.Hooks.IState<UploadContext?> state, string accept)
+    {
+        if (state.Value != null)
+        {
+            state.Set(state.Value with { Accept = accept });
+        }
+        return state;
+    }
+
+    /// <summary>Sets the maximum file size in bytes for the upload state.</summary>
+    /// <param name="state">The upload context state to configure.</param>
+    /// <param name="maxFileSize">The maximum file size in bytes.</param>
+    public static Core.Hooks.IState<UploadContext?> MaxFileSize(this Core.Hooks.IState<UploadContext?> state, long maxFileSize)
+    {
+        if (state.Value != null)
+        {
+            state.Set(state.Value with { MaxFileSize = maxFileSize });
+        }
+        return state;
+    }
+}
 
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum FileUploadStatus
@@ -148,14 +185,29 @@ public class UploadController(AppSessionStore sessionStore) : Controller
 
 public class UploadService(string connectionId) : IUploadService, IDisposable
 {
-    private readonly ConcurrentDictionary<Guid, (UploadDelegate handler, CancellationTokenSource cts, string? mimeType, string? fileName)> _uploads = new();
+    private readonly ConcurrentDictionary<Guid, (UploadDelegate handler, CancellationTokenSource cts, string? mimeType, string? fileName, Func<(string? accept, long? maxFileSize)> getValidation)> _uploads = new();
     private readonly ConcurrentDictionary<Guid, CancellationTokenSource> _inflightUploads = new();
 
-    public (IDisposable cleanup, string url) AddUpload(UploadDelegate handler, string? defaultContentType = null, string? defaultFileName = null)
+    public (IDisposable cleanup, string url) AddUpload(UploadDelegate handler, string? defaultContentType = null, string? defaultFileName = null, string? accept = null, long? maxFileSize = null)
     {
         var uploadId = Guid.NewGuid();
         var cts = new CancellationTokenSource();
-        _uploads[uploadId] = (handler, cts, defaultContentType, defaultFileName);
+        _uploads[uploadId] = (handler, cts, defaultContentType, defaultFileName, () => (accept, maxFileSize));
+
+        var cleanup = Disposable.Create(() =>
+        {
+            _uploads.TryRemove(uploadId, out var upload);
+            upload.cts?.Dispose();
+        });
+
+        return (cleanup, $"/upload/{connectionId}/{uploadId}");
+    }
+
+    public (IDisposable cleanup, string url) AddUpload(UploadDelegate handler, Func<(string? accept, long? maxFileSize)> getValidation, string? defaultContentType = null, string? defaultFileName = null)
+    {
+        var uploadId = Guid.NewGuid();
+        var cts = new CancellationTokenSource();
+        _uploads[uploadId] = (handler, cts, defaultContentType, defaultFileName, getValidation);
 
         var cleanup = Disposable.Create(() =>
         {
@@ -168,19 +220,16 @@ public class UploadService(string connectionId) : IUploadService, IDisposable
 
     public async Task<IActionResult> Upload(string uploadId, IFormFile file)
     {
-        var sw = Stopwatch.StartNew();
-
         if (!Guid.TryParse(uploadId, out var guid) || !_uploads.TryGetValue(guid, out var upload))
         {
-            Console.WriteLine($"[UploadService] Invalid or unknown uploadId: '{uploadId}'");
             return new BadRequestObjectResult($"Invalid or unknown uploadId: '{uploadId}'.");
         }
 
-        var (handler, cts, defaultContentType, defaultFileName) = upload;
+        var (handler, cts, defaultContentType, defaultFileName, getValidation) = upload;
+        var (accept, maxFileSize) = getValidation();
 
         if (file.Length == 0)
         {
-            Console.WriteLine($"[UploadService] Empty file received for uploadId: {uploadId}");
             return new BadRequestObjectResult("Empty file.");
         }
 
@@ -197,6 +246,26 @@ public class UploadService(string connectionId) : IUploadService, IDisposable
             Length = file.Length
         };
 
+        // Validate file size
+        if (maxFileSize.HasValue)
+        {
+            var sizeValidation = Widgets.Inputs.FileInputValidation.ValidateFileSize(fileUpload, maxFileSize);
+            if (!sizeValidation.IsValid)
+            {
+                return new BadRequestObjectResult(sizeValidation.ErrorMessage);
+            }
+        }
+
+        // Validate file type
+        if (!string.IsNullOrWhiteSpace(accept))
+        {
+            var typeValidation = Widgets.Inputs.FileInputValidation.ValidateFileType(fileUpload, accept);
+            if (!typeValidation.IsValid)
+            {
+                return new BadRequestObjectResult(typeValidation.ErrorMessage);
+            }
+        }
+
         // Ensure request stream is disposed deterministically to avoid leaking handles
         try
         {
@@ -206,17 +275,7 @@ public class UploadService(string connectionId) : IUploadService, IDisposable
             // Track this upload by fileId so we can cancel on demand
             _inflightUploads[fileUpload.Id] = linkedCts;
 
-            Console.WriteLine($"[UploadService] Begin upload connection={connectionId} uploadId={uploadId} fileId={fileUpload.Id} name='{fileUpload.FileName}' length={fileUpload.Length} contentType='{fileUpload.ContentType}'");
             await handler(fileUpload, uploadStream, linkedCts.Token);
-            sw.Stop();
-            Console.WriteLine($"[UploadService] Completed upload connection={connectionId} fileId={fileUpload.Id} elapsed={sw.ElapsedMilliseconds}ms");
-        }
-        catch (Exception)
-        {
-            sw.Stop();
-            Console.WriteLine($"[UploadService] Failed upload connection={connectionId} uploadId={uploadId} elapsed={sw.ElapsedMilliseconds}ms");
-            // Bubble up to framework after handler updates status; controller will return 500
-            throw;
         }
         finally
         {
@@ -233,7 +292,6 @@ public class UploadService(string connectionId) : IUploadService, IDisposable
         {
             try
             {
-                Console.WriteLine($"[UploadService] Cancellation requested connection={connectionId} fileId={fileId}");
                 cts.Cancel();
             }
             catch (ObjectDisposedException)
@@ -251,7 +309,9 @@ public class UploadService(string connectionId) : IUploadService, IDisposable
 
 public interface IUploadService
 {
-    (IDisposable cleanup, string url) AddUpload(UploadDelegate handler, string? defaultContentType = null, string? defaultFileName = null);
+    (IDisposable cleanup, string url) AddUpload(UploadDelegate handler, string? defaultContentType = null, string? defaultFileName = null, string? accept = null, long? maxFileSize = null);
+
+    (IDisposable cleanup, string url) AddUpload(UploadDelegate handler, Func<(string? accept, long? maxFileSize)> getValidation, string? defaultContentType = null, string? defaultFileName = null);
 
     Task<IActionResult> Upload(string uploadId, IFormFile file);
 

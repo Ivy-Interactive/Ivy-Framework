@@ -15,7 +15,7 @@ public static class UseUploadExtensions
         var uploadService = context.UseService<IUploadService>();
         context.UseEffect(() =>
         {
-            var (cleanup, uploadUrl) = uploadService.AddUpload(handler, defaultContentType, defaultFileName);
+            var (cleanup, uploadUrl) = uploadService.AddUpload(handler, () => (ctxState.Value?.Accept, ctxState.Value?.MaxFileSize), defaultContentType, defaultFileName);
             ctxState.Set(new UploadContext(uploadUrl, fileId => uploadService.CancelUpload(fileId)));
             return cleanup;
         }, [EffectTrigger.AfterInit()]);

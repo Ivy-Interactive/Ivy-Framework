@@ -38,6 +38,7 @@ interface FileInputWidgetProps {
   events: string[];
   width?: string;
   accept?: string;
+  maxFileSize?: number;
   multiple?: boolean;
   maxFiles?: number;
   placeholder?: string;
@@ -53,6 +54,7 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
   events,
   width,
   accept,
+  maxFileSize,
   multiple = false,
   maxFiles,
   placeholder,
@@ -62,13 +64,43 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
   const handleEvent = useEventHandler();
   const [isDragging, setIsDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const [validationError, setValidationError] = useState<string | null>(null);
 
   // Be defensive in case events is undefined at runtime
   const hasCancelHandler = Array.isArray(events) && events.includes('OnCancel');
 
+  const formatBytes = (bytes: number): string => {
+    const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+    if (bytes === 0) return '0 B';
+    const i = Math.floor(Math.log(bytes) / Math.log(1024));
+    const size = bytes / Math.pow(1024, i);
+    return `${size.toFixed(size >= 10 ? 0 : 2)} ${sizes[i]}`;
+  };
+
+  const validateFile = useCallback(
+    (file: File): string | null => {
+      // Validate file size
+      if (maxFileSize && file.size > maxFileSize) {
+        const maxSizeFormatted = formatBytes(maxFileSize);
+        const fileSizeFormatted = formatBytes(file.size);
+        return `File '${file.name}' is too large (${fileSizeFormatted}). Maximum allowed size is ${maxSizeFormatted}.`;
+      }
+      return null;
+    },
+    [maxFileSize]
+  );
+
   const uploadFile = useCallback(
     async (file: File): Promise<void> => {
       if (!uploadUrl) return;
+
+      // Validate file before upload
+      const error = validateFile(file);
+      if (error) {
+        setValidationError(error);
+        return;
+      }
+      setValidationError(null);
 
       // Get the correct host from meta tag or use relative URL
       const getUploadUrl = () => {
@@ -97,7 +129,7 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
         console.error('File upload error:', error);
       }
     },
-    [uploadUrl]
+    [uploadUrl, validateFile]
   );
 
   const handleChange = useCallback(
@@ -269,9 +301,9 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
       onDrop={handleDrop}
     >
       {/* Invalid icon in top right corner, above input */}
-      {invalid && (
+      {(invalid || validationError) && (
         <div className="absolute top-2 right-2 z-20 pointer-events-none">
-          <InvalidIcon message={invalid} />
+          <InvalidIcon message={invalid || validationError || ''} />
         </div>
       )}
       <div

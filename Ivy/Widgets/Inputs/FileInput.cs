@@ -54,6 +54,9 @@ public abstract record FileInputBase : WidgetBase<FileInputBase>, IAnyFileInput
     /// <summary>Gets or sets the accepted file types using MIME types or file extensions.</summary>
     [Prop] public string? Accept { get; set; }
 
+    /// <summary>Gets or sets the maximum file size in bytes.</summary>
+    [Prop] public long? MaxFileSize { get; set; }
+
     /// <summary>Gets or sets whether multiple files can be selected.</summary>
     [Prop] public bool Multiple { get; set; }
 
@@ -87,7 +90,12 @@ public abstract record FileInputBase : WidgetBase<FileInputBase>, IAnyFileInput
 
         if (value is IFileUpload file)
         {
-            return FileInputValidation.ValidateFileType(file, Accept);
+            // Validate file type
+            var typeValidation = FileInputValidation.ValidateFileType(file, Accept);
+            if (!typeValidation.IsValid) return typeValidation;
+
+            // Validate file size
+            return FileInputValidation.ValidateFileSize(file, MaxFileSize);
         }
 
         if (value is IEnumerable<IFileUpload> files)
@@ -104,10 +112,18 @@ public abstract record FileInputBase : WidgetBase<FileInputBase>, IAnyFileInput
                 }
             }
 
-            // Then validate file types if Accept is set
+            // Validate file types if Accept is set
             if (!string.IsNullOrWhiteSpace(Accept))
             {
-                return FileInputValidation.ValidateFileTypes(filesList, Accept);
+                var typeValidation = FileInputValidation.ValidateFileTypes(filesList, Accept);
+                if (!typeValidation.IsValid) return typeValidation;
+            }
+
+            // Validate file sizes
+            foreach (var f in filesList)
+            {
+                var sizeValidation = FileInputValidation.ValidateFileSize(f, MaxFileSize);
+                if (!sizeValidation.IsValid) return sizeValidation;
             }
         }
 
@@ -254,7 +270,12 @@ public static class FileInputExtensions
         }
 
         var ctx = uploadContext.Value;
-        input = input with { UploadUrl = ctx?.UploadUrl };
+        input = input with
+        {
+            UploadUrl = ctx?.UploadUrl,
+            Accept = ctx?.Accept ?? input.Accept,
+            MaxFileSize = ctx?.MaxFileSize
+        };
 
         input = input with
         {
@@ -363,6 +384,14 @@ public static class FileInputExtensions
             throw new InvalidOperationException("MaxFiles can only be set on a multi-file input (IEnumerable<FileInput>). Use a collection state type for multiple files.");
         }
         return widget with { MaxFiles = maxFiles };
+    }
+
+    /// <summary>Sets the maximum file size in bytes for the file input.</summary>
+    /// <param name="widget">The file input to configure.</param>
+    /// <param name="maxFileSize">The maximum file size in bytes.</param>
+    public static FileInputBase MaxFileSize(this FileInputBase widget, long maxFileSize)
+    {
+        return widget with { MaxFileSize = maxFileSize };
     }
 
     /// <summary>Sets the upload URL for automatic file uploads.</summary>

@@ -71,6 +71,25 @@ public static class FileInputValidation
         return ValidationResult.Success();
     }
 
+    /// <summary>
+    /// Validates file size against maximum allowed size
+    /// </summary>
+    /// <param name="file">The file to validate</param>
+    /// <param name="maxFileSize">Maximum file size in bytes</param>
+    public static ValidationResult ValidateFileSize(IFileUpload file, long? maxFileSize)
+    {
+        if (maxFileSize == null) return ValidationResult.Success();
+
+        if (file.Length > maxFileSize.Value)
+        {
+            var maxSizeFormatted = Utils.FormatBytes(maxFileSize.Value);
+            var fileSizeFormatted = Utils.FormatBytes(file.Length);
+            return ValidationResult.Error($"File '{file.FileName}' is too large ({fileSizeFormatted}). Maximum allowed size is {maxSizeFormatted}.");
+        }
+
+        return ValidationResult.Success();
+    }
+
     private static List<string> ParseAcceptPattern(string accept)
     {
         return accept.Split(',')
