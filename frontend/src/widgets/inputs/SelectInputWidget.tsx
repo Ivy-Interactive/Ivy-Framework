@@ -896,7 +896,7 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
               )}
               size={size}
             >
-              <div className="w-full min-w-0 truncate">
+              <div className="w-full min-w-0 truncate text-left">
                 <SelectValue placeholder={placeholder} />
               </div>
             </SelectTrigger>,
@@ -958,7 +958,7 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
                     size={size}
                   >
                     {wrapWithTooltip(
-                      <div className="w-full min-w-0 truncate">
+                      <div className="w-full min-w-0 truncate text-left">
                         {option.label}
                       </div>,
                       <div className="max-w-xs sm:max-w-sm">{option.label}</div>
