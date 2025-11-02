@@ -1,0 +1,31 @@
+{
+  "excludedPaths": [
+    "/messages",
+    "/webhook",
+    "/auth",
+    "/assets",
+    "/fonts",
+    "/_framework",
+    "/favicon.ico",
+    "/manifest.json",
+    "/service-worker.js",
+    "/index.html"
+  ],
+  "staticFileExtensions": [
+    ".js",
+    ".css",
+    ".html",
+    ".json",
+    ".ico",
+    ".png",
+    ".jpg",
+    ".jpeg",
+    ".gif",
+    ".svg",
+    ".woff",
+    ".woff2",
+    ".ttf",
+    ".eot",
+    ".map"
+  ]
+}

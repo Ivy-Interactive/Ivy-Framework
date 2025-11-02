@@ -7,6 +7,7 @@ using Ivy.Chrome;
 using Ivy.Connections;
 using Ivy.Core;
 using Ivy.Themes;
+using Ivy.Middleware;
 using Ivy.Views;
 using Ivy.Views.DataTables;
 using Microsoft.AspNetCore.Builder;
@@ -429,6 +430,9 @@ public class Server
         }
 
         var logger = _args.Verbose ? app.Services.GetRequiredService<ILogger<Server>>() : new NullLogger<Server>();
+
+
+        app.UsePathToAppId();
 
         app.UseRouting();
         app.UseCors();

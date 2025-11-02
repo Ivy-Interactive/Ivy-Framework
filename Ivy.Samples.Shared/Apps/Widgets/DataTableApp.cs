@@ -24,8 +24,7 @@ public record EmployeeRecord(
     Icons Priority,
     Icons Department,
     string Notes,
-    int? OptionalId,
-    decimal? Bonus
+    int? OptionalId
 );
 
 [App(icon: Icons.DatabaseZap)]
@@ -61,7 +60,6 @@ public class DataTableApp : SampleBase
             var department = departments[random.Next(departments.Length)];
             var notes = isActive ? "Active employee" : "Inactive";
             var optionalId = random.Next(100) > 20 ? (int?)random.Next(1000, 9999) : null;
-            var bonus = isManager ? (decimal?)(random.Next(5, 20) * 1000) : null;
 
             return new EmployeeRecord(
                 Id: i,
@@ -79,8 +77,7 @@ public class DataTableApp : SampleBase
                 Priority: priority,
                 Department: department,
                 Notes: notes,
-                OptionalId: optionalId,
-                Bonus: bonus
+                OptionalId: optionalId
             );
         }).AsQueryable();
 
@@ -91,7 +88,6 @@ public class DataTableApp : SampleBase
             .Header(e => e.Salary, "Salary")
             .Header(e => e.Performance, "Performance")
             .Header(e => e.OptionalId, "Badge #")
-            .Header(e => e.Bonus, "Bonus")
 
             // Text columns (including formatted strings)
             .Header(e => e.EmployeeCode, "Code")
@@ -113,9 +109,9 @@ public class DataTableApp : SampleBase
             .Header(e => e.Department, "Dept")
 
             // Column widths
-            .Width(e => e.Id, Size.Px(80))
+            .Width(e => e.Id, Size.Px(40))
             .Width(e => e.EmployeeCode, Size.Px(100))
-            .Width(e => e.Name, Size.Px(180))
+            .Width(e => e.Name, Size.Px(120))
             .Width(e => e.Email, Size.Px(250))
             .Width(e => e.Age, Size.Px(70))
             .Width(e => e.Salary, Size.Px(120))
@@ -129,26 +125,23 @@ public class DataTableApp : SampleBase
             .Width(e => e.Department, Size.Px(90))
             .Width(e => e.Notes, Size.Px(150))
             .Width(e => e.OptionalId, Size.Px(100))
-            .Width(e => e.Bonus, Size.Px(120))
 
-            // // Alignments
-            // .Align(e => e.Id, Align.Left)
-            // .Align(e => e.Age, Align.Left)
-            // .Align(e => e.Salary, Align.Left)
-            // .Align(e => e.Performance, Align.Left)
-            // .Align(e => e.OptionalId, Align.Left)
-            // .Align(e => e.Bonus, Align.Left)
-            // .Align(e => e.EmployeeCode, Align.Left)
-            // .Align(e => e.Name, Align.Right)
-            // .Align(e => e.Email, Align.Left)
-            // .Align(e => e.Notes, Align.Left)
-            // .Align(e => e.IsActive, Align.Left)
-            // .Align(e => e.IsManager, Align.Left)
-            // .Align(e => e.HireDate, Align.Left)
-            // .Align(e => e.LastReview, Align.Left)
-            // .Align(e => e.Status, Align.Left)
-            // .Align(e => e.Priority, Align.Left)
-            // .Align(e => e => e.Department, Align.Left)
+            // Alignments
+            .Align(e => e.Id, Align.Left)
+            .Align(e => e.Age, Align.Left)
+            .Align(e => e.Salary, Align.Left)
+            .Align(e => e.Performance, Align.Left)
+            .Align(e => e.Name, Align.Left)
+            .Align(e => e.Email, Align.Left)
+            .Align(e => e.Notes, Align.Left)
+            .Align(e => e.IsActive, Align.Left)
+            .Align(e => e.IsManager, Align.Left)
+            .Align(e => e.HireDate, Align.Left)
+            .Align(e => e.LastReview, Align.Left)
+            .Align(e => e.Status, Align.Left)
+            .Align(e => e.Priority, Align.Left)
+            .Align(e => e.Department, Align.Left)
+            .Align(e => e.OptionalId, Align.Left)
 
             // Groups
             .Group(e => e.Id, "Identity")
@@ -158,7 +151,6 @@ public class DataTableApp : SampleBase
             .Group(e => e.Age, "Personal")
             .Group(e => e.Salary, "Compensation")
             .Group(e => e.Performance, "Compensation")
-            .Group(e => e.Bonus, "Compensation")
             .Group(e => e.IsActive, "Status")
             .Group(e => e.IsManager, "Status")
             .Group(e => e.Status, "Status")
@@ -184,7 +176,7 @@ public class DataTableApp : SampleBase
                 config.AllowColumnResizing = true;
                 config.AllowCopySelection = true;
                 config.SelectionMode = SelectionModes.Columns;
-                config.ShowIndexColumn = true;
+                config.ShowIndexColumn = false;
                 config.ShowGroups = true;
                 config.ShowVerticalBorders = false;
                 config.ShowColumnTypeIcons = false;           // Show type icons
