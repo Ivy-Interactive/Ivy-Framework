@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useRef } from 'react';
 import { DateRange } from 'react-day-picker';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
@@ -136,12 +136,19 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
 
   const [month, setMonth] = useState(today);
   const [isOpen, setIsOpen] = useState(false);
+  const textSpanRef = useRef<HTMLSpanElement>(null);
+  const [showTooltip, setShowTooltip] = useState(false);
 
   // Use custom format if provided, otherwise use default
   const displayFormat = formatProp || 'LLL dd, y';
 
   // Show clear button if nullable, not disabled, and has a value
   const showClear = nullable && !disabled && (date?.from || date?.to);
+
+  const checkIsTruncated = (): boolean => {
+    if (!textSpanRef.current) return false;
+    return textSpanRef.current.scrollWidth > textSpanRef.current.clientWidth;
+  };
 
   return (
     <div className="relative w-full select-none">
@@ -173,11 +180,17 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
                 : placeholder;
               const textNode = (
                 <span
+                  ref={textSpanRef}
                   className={cn(
                     dateRangeInputTextVariants({ size }),
                     !date?.from && 'text-muted-foreground',
                     'flex-1 min-w-0 truncate'
                   )}
+                  onMouseEnter={() => {
+                    const isTruncated = checkIsTruncated();
+                    setShowTooltip(isTruncated);
+                  }}
+                  onMouseLeave={() => setShowTooltip(false)}
                 >
                   {text}
                 </span>
@@ -188,7 +201,11 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
                   <div className="whitespace-pre-wrap wrap-break-word max-w-sm">
                     {text}
                   </div>
-                ) : undefined
+                ) : undefined,
+                {
+                  open: showTooltip && !!text,
+                  triggerAsChild: true,
+                }
               );
             })()}
           </Button>

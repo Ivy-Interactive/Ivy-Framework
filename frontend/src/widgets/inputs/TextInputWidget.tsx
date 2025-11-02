@@ -144,32 +144,11 @@ const useEnterKeyBlur = () => {
   );
 };
 
-const useTruncationDetection = (
-  inputRef?: React.RefObject<HTMLInputElement | HTMLTextAreaElement | null>
-) => {
-  const [isTruncated, setIsTruncated] = useState(false);
-  const [showTooltip, setShowTooltip] = useState(false);
-
-  useEffect(() => {
-    const checkTruncation = () => {
-      if (inputRef?.current) {
-        setIsTruncated(
-          inputRef.current.scrollWidth > inputRef.current.clientWidth
-        );
-      }
-    };
-
-    checkTruncation();
-    const timer = setTimeout(checkTruncation, 100);
-    window.addEventListener('resize', checkTruncation);
-
-    return () => {
-      clearTimeout(timer);
-      window.removeEventListener('resize', checkTruncation);
-    };
-  }, [inputRef]);
-
-  return { isTruncated, showTooltip, setShowTooltip };
+const checkIsTruncated = (
+  element: HTMLInputElement | HTMLTextAreaElement | null
+): boolean => {
+  if (!element) return false;
+  return element.scrollWidth > element.clientWidth;
 };
 
 const DefaultVariant: React.FC<{
@@ -192,7 +171,7 @@ const DefaultVariant: React.FC<{
   size = Sizes.Medium,
 }) => {
   const { elementRef, savePosition } = useCursorPosition(props.value, inputRef);
-  const { showTooltip, setShowTooltip } = useTruncationDetection(elementRef);
+  const [showTooltip, setShowTooltip] = useState(false);
   const handleKeyDown = useEnterKeyBlur();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -223,7 +202,10 @@ const DefaultVariant: React.FC<{
           onBlur={onBlur}
           onFocus={onFocus}
           onKeyDown={handleKeyDown}
-          onMouseEnter={() => setShowTooltip(true)}
+          onMouseEnter={() => {
+            const isTruncated = checkIsTruncated(elementRef.current);
+            setShowTooltip(isTruncated);
+          }}
           onMouseLeave={() => setShowTooltip(false)}
           className={cn(
             textInputSizeVariants({ size }),
@@ -462,8 +444,7 @@ const SearchVariant: React.FC<{
   };
   const { ref: focusRef } = useFocusable('sidebar-navigation', 0);
   const searchInputRef = useRef<HTMLInputElement | null>(null);
-  const { showTooltip, setShowTooltip } =
-    useTruncationDetection(searchInputRef);
+  const [showTooltip, setShowTooltip] = useState(false);
 
   // Combine the refs
   const combinedRef = useCallback(
@@ -533,7 +514,10 @@ const SearchVariant: React.FC<{
             onBlur={handleBlur}
             onFocus={onFocus}
             onKeyDown={handleKeyDown}
-            onMouseEnter={() => setShowTooltip(true)}
+            onMouseEnter={() => {
+              const isTruncated = checkIsTruncated(searchInputRef.current);
+              setShowTooltip(isTruncated);
+            }}
             onMouseLeave={() => setShowTooltip(false)}
             autoComplete="off"
             className={cn(

@@ -9,6 +9,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { useState, useRef } from 'react';
 
 interface AsyncSelectInputWidgetProps {
   id: string;
@@ -27,17 +28,25 @@ export const AsyncSelectInputWidget: React.FC<AsyncSelectInputWidgetProps> = ({
   invalid,
 }) => {
   const eventHandler = useEventHandler();
+  const textSpanRef = useRef<HTMLSpanElement>(null);
+  const [showTooltip, setShowTooltip] = useState(false);
+
+  const checkIsTruncated = (): boolean => {
+    if (!textSpanRef.current) return false;
+    return textSpanRef.current.scrollWidth > textSpanRef.current.clientWidth;
+  };
 
   const handleSelect = () => {
     eventHandler('OnSelect', id, []);
   };
 
   const tooltipText = displayValue || placeholder;
+  const hasContent = !!tooltipText;
 
   return (
     <div className="relative">
       <TooltipProvider>
-        <Tooltip>
+        <Tooltip open={showTooltip && hasContent} onOpenChange={setShowTooltip}>
           <TooltipTrigger asChild>
             <button
               type="button"
@@ -47,14 +56,25 @@ export const AsyncSelectInputWidget: React.FC<AsyncSelectInputWidgetProps> = ({
                 'hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed flex h-9 text-left w-full items-center rounded-md border border-input bg-background text-base shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring cursor-pointer',
                 invalid && inputStyles.invalidInput
               )}
+              onMouseEnter={() => {
+                const isTruncated = checkIsTruncated();
+                setShowTooltip(isTruncated);
+              }}
+              onMouseLeave={() => setShowTooltip(false)}
             >
               {displayValue && (
-                <span className="grow text-primary font-semibold text-body ml-3 underline truncate min-w-0 mr-2">
+                <span
+                  ref={textSpanRef}
+                  className="grow text-primary font-semibold text-body ml-3 underline truncate min-w-0 mr-2"
+                >
                   {displayValue}
                 </span>
               )}
               {!displayValue && (
-                <span className="grow text-muted-foreground text-body ml-3 truncate min-w-0 mr-2">
+                <span
+                  ref={textSpanRef}
+                  className="grow text-muted-foreground text-body ml-3 truncate min-w-0 mr-2"
+                >
                   {placeholder}
                 </span>
               )}
