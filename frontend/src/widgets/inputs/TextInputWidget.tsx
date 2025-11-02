@@ -184,6 +184,7 @@ const DefaultVariant: React.FC<{
   };
 
   const shortcutDisplay = formatShortcutForDisplay(props.shortcutKey);
+  const hasValue = props.value && props.value.toString().trim() !== '';
 
   const tooltipText = props.value || props.placeholder;
   const hasContent = !!(props.value || props.placeholder);
@@ -211,7 +212,7 @@ const DefaultVariant: React.FC<{
             textInputSizeVariants({ size }),
             props.invalid && inputStyles.invalidInput,
             props.invalid && 'pr-8',
-            props.shortcutKey && !isFocused && 'pr-16'
+            props.shortcutKey && !isFocused && !hasValue && 'pr-16'
           )}
           data-testid={props['data-testid']}
         />,
