@@ -3,6 +3,15 @@ using System.Reflection;
 
 namespace Ivy.Views.Forms;
 
+/// <summary>Display information extracted from DataAnnotations Display attribute.</summary>
+public record DisplayInfo(
+    string? Name = null,
+    string? Description = null,
+    string? GroupName = null,
+    string? Prompt = null,
+    int? Order = null
+);
+
 /// <summary>Utility methods for determining field requirements during form scaffolding. </summary>
 public static class FormHelpers
 {
@@ -11,6 +20,36 @@ public static class FormHelpers
     {
         if (propertyInfo.GetCustomAttribute<RequiredAttribute>() != null) return true;
         return IsNonNullableString(propertyInfo);
+    }
+
+    /// <summary> Extracts Display attribute information from a property.</summary>
+    public static DisplayInfo GetDisplayInfo(PropertyInfo propertyInfo)
+    {
+        var displayAttr = propertyInfo.GetCustomAttribute<DisplayAttribute>();
+        if (displayAttr == null) return new DisplayInfo();
+        
+        return new DisplayInfo(
+            Name: displayAttr.Name,
+            Description: displayAttr.Description,
+            GroupName: displayAttr.GroupName,
+            Prompt: displayAttr.Prompt,
+            Order: displayAttr.Order
+        );
+    }
+
+    /// <summary> Extracts Display attribute information from a field.</summary>
+    public static DisplayInfo GetDisplayInfo(FieldInfo fieldInfo)
+    {
+        var displayAttr = fieldInfo.GetCustomAttribute<DisplayAttribute>();
+        if (displayAttr == null) return new DisplayInfo();
+        
+        return new DisplayInfo(
+            Name: displayAttr.Name,
+            Description: displayAttr.Description,
+            GroupName: displayAttr.GroupName,
+            Prompt: displayAttr.Prompt,
+            Order: displayAttr.Order
+        );
     }
 
     /// <summary> Gets all validators from DataAnnotations ValidationAttributes on a property. </summary> 

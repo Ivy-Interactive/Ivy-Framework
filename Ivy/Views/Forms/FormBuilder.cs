@@ -148,38 +148,11 @@ public class FormBuilder<TModel> : ViewBase
     private void _Scaffold()
     {
         var type = _model.GetStateType();
-
-        var fields = type
-            .GetFields()
-            .Select(e => new
-            {
-                e.Name,
-                Type = e.FieldType,
-                FieldInfo = e,
-                PropertyInfo = (PropertyInfo)null!,
-                Required = FormHelpers.IsRequired(e)
-            })
-            .Union(
-                type
-                    .GetProperties()
-                    .Select(e => new
-                    {
-                        e.Name,
-                        Type = e.PropertyType,
-                        FieldInfo = (FieldInfo)null!,
-                        PropertyInfo = e,
-                        Required = FormHelpers.IsRequired(e)
-                    })
-            )
-            .ToList();
-
-        var order = fields.Count;
-        foreach (var field in fields)
+        var scaffoldedFields = FormScaffolder.ScaffoldFields<TModel>(type, Size);
+        
+        foreach (var kvp in scaffoldedFields)
         {
-            var label = Utils.LabelFor(field.Name, field.Type);
-            _fields[field.Name] =
-                new FormBuilderField<TModel>(field.Name, label, order++, ScaffoldEditor(field.Name, field.Type),
-                    field.FieldInfo, field.PropertyInfo, field.Required);
+            _fields[kvp.Key] = kvp.Value;
         }
 
         // Add automatic validators after fields are created
@@ -194,82 +167,6 @@ public class FormBuilder<TModel> : ViewBase
         }
     }
 
-    private Func<IAnyState, IAnyInput>? ScaffoldEditor(string name, Type type)
-    {
-        Type nonNullableType = Nullable.GetUnderlyingType(type) ?? type;
-
-        if (type == typeof(FileInput))
-        {
-            return (state) => state.ToFileInput().Size(Size);
-        }
-
-        if (name.EndsWith("Id") && (type == typeof(Guid) || type == typeof(int) || type == typeof(string)))
-        {
-            return (state) => state.ToReadOnlyInput().Size(Size);
-        }
-
-        if (name.EndsWith("Email") && nonNullableType == typeof(string))
-        {
-            return (state) => state.ToEmailInput().Size(Size);
-        }
-
-        if ((name.EndsWith("Color") || name.EndsWith("Colour")) && nonNullableType == typeof(string))
-        {
-            return (state) => state.ToColorInput().Size(Size);
-        }
-
-        if (nonNullableType == typeof(bool))
-        {
-            return (state) =>
-            {
-                var input = state.ToBoolInput();
-                // Only apply scaffold defaults if no custom label was set
-                if (_fields.TryGetValue(name, out var field) && HasCustomLabel(field.Label, name))
-                {
-                    // Custom label was set, don't override it
-                    input.Label = field.Label;
-                }
-                else
-                {
-                    // Use scaffold defaults
-                    input.ScaffoldDefaults(name, type);
-                }
-                return input.Size(Size);
-            };
-        }
-
-        if (nonNullableType == typeof(string))
-        {
-            if (name.EndsWith("Password"))
-            {
-                return (state) => state.ToPasswordInput().Size(Size);
-            }
-
-            return (state) => state.ToTextInput().Size(Size);
-        }
-
-        if (nonNullableType.IsEnum)
-        {
-            return (state) => state.ToSelectInput().Size(Size);
-        }
-
-        if (type.IsCollectionType() && type.GetCollectionTypeParameter() is { IsEnum: true })
-        {
-            return (state) => state.ToSelectInput().List().Size(Size);
-        }
-
-        if (type.IsNumeric())
-        {
-            return (state) => state.ToNumberInput().ScaffoldDefaults(name, type).Size(Size);
-        }
-
-        if (type.IsDate())
-        {
-            return (state) => state.ToDateTimeInput().Size(Size);
-        }
-
-        return null;
-    }
 
     /// <summary>Configures custom input factory for specified field with automatic scaffolding wrapper.</summary>
     /// <param name="field">Expression identifying field to configure.</param>
