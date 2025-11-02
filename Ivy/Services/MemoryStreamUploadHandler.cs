@@ -1,32 +1,39 @@
 using System.Collections.Immutable;
+using System.Text;
 using Ivy.Core.Hooks;
 
 namespace Ivy.Services;
 
-public class MemoryStreamUploadHandler : IUploadHandler
+public class MemoryStreamUploadHandler<T> : IUploadHandler
 {
-    private readonly IFileUploadSink<byte[]> _sink;
+    private readonly IFileUploadSink<T> _sink;
     private readonly int _chunkSize;
+    private readonly Func<byte[], T> _converter;
 
-    // Backwards-compatible constructor for single-file state
-    public MemoryStreamUploadHandler(IState<FileUpload<byte[]>?> singleState, int chunkSize = 8192)
-        : this(new SingleFileSink(singleState), chunkSize)
-    { }
-
-    // Internal constructor used by factory methods
-    private MemoryStreamUploadHandler(IFileUploadSink<byte[]> sink, int chunkSize = 8192)
+    private MemoryStreamUploadHandler(IFileUploadSink<T> sink, Func<byte[], T> converter, int chunkSize = 8192)
     {
         _sink = sink;
         _chunkSize = chunkSize;
+        _converter = converter;
     }
 
-    // Factory for single state
     public static IUploadHandler Create(IState<FileUpload<byte[]>?> singleState, int chunkSize = 8192)
-        => new MemoryStreamUploadHandler(singleState, chunkSize);
+        => new MemoryStreamUploadHandler<byte[]>(new SingleFileSink<byte[]>(singleState), bytes => bytes, chunkSize);
 
-    // Factory for ImmutableArray multi state
+    public static IUploadHandler Create(IState<FileUpload<string>?> singleState, Encoding? encoding = null, int chunkSize = 8192)
+        => new MemoryStreamUploadHandler<string>(
+            new SingleFileSink<string>(singleState),
+            bytes => (encoding ?? Encoding.UTF8).GetString(bytes),
+            chunkSize);
+
     public static IUploadHandler Create(IState<ImmutableArray<FileUpload<byte[]>>> manyState, int chunkSize = 8192)
-        => new MemoryStreamUploadHandler(new ImmutableArraySink(manyState), chunkSize);
+        => new MemoryStreamUploadHandler<byte[]>(new MultipleFileSink<byte[]>(manyState), bytes => bytes, chunkSize);
+
+    public static IUploadHandler Create(IState<ImmutableArray<FileUpload<string>>> manyState, Encoding? encoding = null, int chunkSize = 8192)
+        => new MemoryStreamUploadHandler<string>(
+            new MultipleFileSink<string>(manyState),
+            bytes => (encoding ?? Encoding.UTF8).GetString(bytes),
+            chunkSize);
 
 
     public async Task HandleUploadAsync(FileUpload fileUpload, Stream stream, CancellationToken cancellationToken)
@@ -44,7 +51,8 @@ public class MemoryStreamUploadHandler : IUploadHandler
                 cancellationToken
             );
 
-            _sink.Complete(key, bytes);
+            var content = _converter(bytes);
+            _sink.Complete(key, content);
         }
         catch (OperationCanceledException)
         {
@@ -88,149 +96,4 @@ public class MemoryStreamUploadHandler : IUploadHandler
 
         return (memoryStream.ToArray(), processedBytes);
     }
-
-    private interface IFileUploadSink<in TContent>
-    {
-        Guid Start(FileUpload file);
-        void Progress(Guid key, float progress);
-        void Complete(Guid key, TContent content);
-        void Aborted(Guid key);
-        void Failed(Guid key);
-    }
-
-    private sealed class SingleFileSink : IFileUploadSink<byte[]>
-    {
-        private readonly IState<FileUpload<byte[]>?> _state;
-        public SingleFileSink(IState<FileUpload<byte[]>?> state) => _state = state;
-
-        public Guid Start(FileUpload file)
-        {
-            var typed = new FileUpload<byte[]>
-            {
-                Id = file.Id,
-                FileName = file.FileName,
-                ContentType = file.ContentType,
-                Length = file.Length,
-                Status = FileUploadStatus.Loading,
-                Progress = 0f
-            };
-            _state.Set(typed);
-            return file.Id;
-        }
-
-        public void Progress(Guid key, float progress)
-        {
-            _state.SetProgress(progress);
-        }
-
-        public void Complete(Guid key, byte[] content)
-        {
-            var current = _state.Value;
-            if (current != null && current.Id == key)
-            {
-                _state.Set(current with { Content = content, Status = FileUploadStatus.Finished, Progress = 1f });
-            }
-            else if (current == null)
-            {
-                // Fallback if state was cleared
-                _state.Set(new FileUpload<byte[]>
-                {
-                    Id = key,
-                    Content = content,
-                    Status = FileUploadStatus.Finished,
-                    Progress = 1f
-                });
-            }
-        }
-
-        public void Aborted(Guid key) => _state.SetStatus(FileUploadStatus.Aborted);
-        public void Failed(Guid key) => _state.SetStatus(FileUploadStatus.Failed);
-    }
-
-    private sealed class ImmutableArraySink : IFileUploadSink<byte[]>
-    {
-        private readonly IState<ImmutableArray<FileUpload<byte[]>>> _state;
-        public ImmutableArraySink(IState<ImmutableArray<FileUpload<byte[]>>> state) => _state = state;
-
-        private static int IndexOfById(ImmutableArray<FileUpload<byte[]>> list, Guid key)
-        {
-            for (int i = 0; i < list.Length; i++)
-            {
-                if (list[i].Id == key) return i;
-            }
-            return -1;
-        }
-
-        public Guid Start(FileUpload file)
-        {
-            var typed = new FileUpload<byte[]>
-            {
-                Id = file.Id,
-                FileName = file.FileName,
-                ContentType = file.ContentType,
-                Length = file.Length,
-                Status = FileUploadStatus.Loading,
-                Progress = 0f
-            };
-            _state.Set(list => list.Add(typed));
-            return file.Id;
-        }
-
-        public void Progress(Guid key, float progress)
-        {
-            _state.Set(list =>
-            {
-                var idx = IndexOfById(list, key);
-                if (idx >= 0)
-                {
-                    var updated = list[idx] with { Progress = progress };
-                    return list.SetItem(idx, updated);
-                }
-                return list;
-            });
-        }
-
-        public void Complete(Guid key, byte[] content)
-        {
-            _state.Set(list =>
-            {
-                var idx = IndexOfById(list, key);
-                if (idx >= 0)
-                {
-                    var updated = list[idx] with { Content = content, Status = FileUploadStatus.Finished, Progress = 1f };
-                    return list.SetItem(idx, updated);
-                }
-                return list;
-            });
-        }
-
-        public void Aborted(Guid key)
-        {
-            _state.Set(list =>
-            {
-                var idx = IndexOfById(list, key);
-                if (idx >= 0)
-                {
-                    var updated = list[idx] with { Status = FileUploadStatus.Aborted };
-                    return list.SetItem(idx, updated);
-                }
-                return list;
-            });
-        }
-
-        public void Failed(Guid key)
-        {
-            _state.Set(list =>
-            {
-                var idx = IndexOfById(list, key);
-                if (idx >= 0)
-                {
-                    var updated = list[idx] with { Status = FileUploadStatus.Failed };
-                    return list.SetItem(idx, updated);
-                }
-                return list;
-            });
-        }
-    }
-
 }

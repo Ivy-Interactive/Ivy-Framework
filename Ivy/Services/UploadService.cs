@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Collections.Immutable;
 using System.ComponentModel.DataAnnotations;
 using System.Reactive.Disposables;
 using System.Diagnostics;
@@ -173,6 +174,145 @@ public static class FileUploadExtensions
 /// </summary>
 public delegate Task UploadDelegate(FileUpload fileUpload, Stream stream, CancellationToken cancellationToken);
 
+
+public interface IFileUploadSink<in TContent>
+{
+    Guid Start(FileUpload file);
+    void Progress(Guid key, float progress);
+    void Complete(Guid key, TContent content);
+    void Aborted(Guid key);
+    void Failed(Guid key);
+}
+
+public sealed class SingleFileSink<T>(IState<FileUpload<T>?> state) : IFileUploadSink<T>
+{
+    public Guid Start(FileUpload file)
+    {
+        var typed = new FileUpload<T>
+        {
+            Id = file.Id,
+            FileName = file.FileName,
+            ContentType = file.ContentType,
+            Length = file.Length,
+            Status = FileUploadStatus.Loading,
+            Progress = 0f
+        };
+        state.Set(typed);
+        return file.Id;
+    }
+
+    public void Progress(Guid key, float progress)
+    {
+        state.SetProgress(progress);
+    }
+
+    public void Complete(Guid key, T content)
+    {
+        var current = state.Value;
+        if (current != null && current.Id == key)
+        {
+            state.Set(current with { Content = content, Status = FileUploadStatus.Finished, Progress = 1f });
+        }
+        else if (current == null)
+        {
+            // Fallback if state was cleared
+            state.Set(new FileUpload<T>
+            {
+                Id = key,
+                Content = content,
+                Status = FileUploadStatus.Finished,
+                Progress = 1f
+            });
+        }
+    }
+
+    public void Aborted(Guid key) => state.SetStatus(FileUploadStatus.Aborted);
+    public void Failed(Guid key) => state.SetStatus(FileUploadStatus.Failed);
+}
+
+public sealed class MultipleFileSink<T>(IState<ImmutableArray<FileUpload<T>>> state) : IFileUploadSink<T>
+{
+    private static int IndexOfById(ImmutableArray<FileUpload<T>> list, Guid key)
+    {
+        for (int i = 0; i < list.Length; i++)
+        {
+            if (list[i].Id == key) return i;
+        }
+        return -1;
+    }
+
+    public Guid Start(FileUpload file)
+    {
+        var typed = new FileUpload<T>
+        {
+            Id = file.Id,
+            FileName = file.FileName,
+            ContentType = file.ContentType,
+            Length = file.Length,
+            Status = FileUploadStatus.Loading,
+            Progress = 0f
+        };
+        state.Set(list => list.Add(typed));
+        return file.Id;
+    }
+
+    public void Progress(Guid key, float progress)
+    {
+        state.Set(list =>
+        {
+            var idx = IndexOfById(list, key);
+            if (idx >= 0)
+            {
+                var updated = list[idx] with { Progress = progress };
+                return list.SetItem(idx, updated);
+            }
+            return list;
+        });
+    }
+
+    public void Complete(Guid key, T content)
+    {
+        state.Set(list =>
+        {
+            var idx = IndexOfById(list, key);
+            if (idx >= 0)
+            {
+                var updated = list[idx] with { Content = content, Status = FileUploadStatus.Finished, Progress = 1f };
+                return list.SetItem(idx, updated);
+            }
+            return list;
+        });
+    }
+
+    public void Aborted(Guid key)
+    {
+        state.Set(list =>
+        {
+            var idx = IndexOfById(list, key);
+            if (idx >= 0)
+            {
+                var updated = list[idx] with { Status = FileUploadStatus.Aborted };
+                return list.SetItem(idx, updated);
+            }
+            return list;
+        });
+    }
+
+    public void Failed(Guid key)
+    {
+        state.Set(list =>
+        {
+            var idx = IndexOfById(list, key);
+            if (idx >= 0)
+            {
+                var updated = list[idx] with { Status = FileUploadStatus.Failed };
+                return list.SetItem(idx, updated);
+            }
+            return list;
+        });
+    }
+}
+
 [ApiController]
 [Route("upload")]
 public class UploadController(AppSessionStore sessionStore) : Controller
@@ -284,7 +424,7 @@ public class UploadService(string connectionId) : IUploadService, IDisposable
         // Ensure request stream is disposed deterministically to avoid leaking handles
         try
         {
-            using var uploadStream = file.OpenReadStream();
+            await using var uploadStream = file.OpenReadStream();
             using var timeoutCts = new CancellationTokenSource(TimeSpan.FromMinutes(2));
             using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cts.Token, timeoutCts.Token);
             // Track this upload by fileId so we can cancel on demand
@@ -301,7 +441,7 @@ public class UploadService(string connectionId) : IUploadService, IDisposable
         return new OkResult();
     }
 
-    public void CancelUpload(Guid fileId)
+    public void Cancel(Guid fileId)
     {
         if (_inflightUploads.TryGetValue(fileId, out var cts))
         {
@@ -324,8 +464,6 @@ public class UploadService(string connectionId) : IUploadService, IDisposable
 
 public interface IUploadService
 {
-    (IDisposable cleanup, string url) AddUpload(UploadDelegate handler, string? defaultContentType = null, string? defaultFileName = null, string? accept = null, long? maxFileSize = null);
-
     (IDisposable cleanup, string url) AddUpload(UploadDelegate handler, Func<(string? accept, long? maxFileSize)> getValidation, string? defaultContentType = null, string? defaultFileName = null);
 
     Task<IActionResult> Upload(string uploadId, IFormFile file);
@@ -334,5 +472,5 @@ public interface IUploadService
     /// Requests cancellation of an in-flight upload by its fileId.
     /// Safe to call if no upload is in-flight for the given id.
     /// </summary>
-    void CancelUpload(Guid fileId);
+    void Cancel(Guid fileId);
 }
