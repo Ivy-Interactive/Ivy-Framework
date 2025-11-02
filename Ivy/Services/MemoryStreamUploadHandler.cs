@@ -4,36 +4,39 @@ using Ivy.Core.Hooks;
 
 namespace Ivy.Services;
 
-public class MemoryStreamUploadHandler<T> : IUploadHandler
+public static class MemoryStreamUploadHandler
 {
-    private readonly IFileUploadSink<T> _sink;
-    private readonly int _chunkSize;
-    private readonly Func<byte[], T> _converter;
-
-    private MemoryStreamUploadHandler(IFileUploadSink<T> sink, Func<byte[], T> converter, int chunkSize = 8192)
-    {
-        _sink = sink;
-        _chunkSize = chunkSize;
-        _converter = converter;
-    }
-
     public static IUploadHandler Create(IState<FileUpload<byte[]>?> singleState, int chunkSize = 8192)
-        => new MemoryStreamUploadHandler<byte[]>(new SingleFileSink<byte[]>(singleState), bytes => bytes, chunkSize);
+        => new MemoryStreamUploadHandlerImpl<byte[]>(new SingleFileSink<byte[]>(singleState), bytes => bytes, chunkSize);
 
     public static IUploadHandler Create(IState<FileUpload<string>?> singleState, Encoding? encoding = null, int chunkSize = 8192)
-        => new MemoryStreamUploadHandler<string>(
+        => new MemoryStreamUploadHandlerImpl<string>(
             new SingleFileSink<string>(singleState),
             bytes => (encoding ?? Encoding.UTF8).GetString(bytes),
             chunkSize);
 
     public static IUploadHandler Create(IState<ImmutableArray<FileUpload<byte[]>>> manyState, int chunkSize = 8192)
-        => new MemoryStreamUploadHandler<byte[]>(new MultipleFileSink<byte[]>(manyState), bytes => bytes, chunkSize);
+        => new MemoryStreamUploadHandlerImpl<byte[]>(new MultipleFileSink<byte[]>(manyState), bytes => bytes, chunkSize);
 
     public static IUploadHandler Create(IState<ImmutableArray<FileUpload<string>>> manyState, Encoding? encoding = null, int chunkSize = 8192)
-        => new MemoryStreamUploadHandler<string>(
+        => new MemoryStreamUploadHandlerImpl<string>(
             new MultipleFileSink<string>(manyState),
             bytes => (encoding ?? Encoding.UTF8).GetString(bytes),
             chunkSize);
+}
+
+internal sealed class MemoryStreamUploadHandlerImpl<T> : IUploadHandler
+{
+    private readonly IFileUploadSink<T> _sink;
+    private readonly int _chunkSize;
+    private readonly Func<byte[], T> _converter;
+
+    internal MemoryStreamUploadHandlerImpl(IFileUploadSink<T> sink, Func<byte[], T> converter, int chunkSize = 8192)
+    {
+        _sink = sink;
+        _chunkSize = chunkSize;
+        _converter = converter;
+    }
 
 
     public async Task HandleUploadAsync(FileUpload fileUpload, Stream stream, CancellationToken cancellationToken)
