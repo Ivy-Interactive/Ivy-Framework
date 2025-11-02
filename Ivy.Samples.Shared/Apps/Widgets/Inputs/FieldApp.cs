@@ -40,7 +40,7 @@ public class FieldApp : SampleBase
                     .WithField()
                     .Label("Email")
                     .Description("Required for contact")
-                    .HelpText("We will never share your email with third parties")
+                    .Help("We will never share your email with third parties")
                     .Required()
 
                 // Password field, disabled if name is empty, with help text
@@ -50,7 +50,7 @@ public class FieldApp : SampleBase
                     .WithField()
                     .Label("Password")
                     .Description("At least 8 characters")
-                    .HelpText("Use a mix of letters, numbers, and symbols for better security")
+                    .Help("Use a mix of letters, numbers, and symbols for better security")
 
                 // Checkbox wrapped with .WithField()
                 | acceptedTerms.ToSelectInput(options.ToOptions())

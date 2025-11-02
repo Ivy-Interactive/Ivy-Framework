@@ -13,7 +13,7 @@ interface FieldWidgetProps {
   label: string;
   description?: string;
   required: boolean;
-  helpText?: string;
+  help?: string;
   children?: React.ReactNode;
   size?: Sizes;
 }
@@ -22,7 +22,7 @@ export const FieldWidget: React.FC<FieldWidgetProps> = ({
   label,
   description,
   required,
-  helpText,
+  help,
   children,
   size = Sizes.Medium,
 }) => {
@@ -52,7 +52,7 @@ export const FieldWidget: React.FC<FieldWidgetProps> = ({
             {label}{' '}
             {required && <span className="font-mono text-primary">*</span>}
           </label>
-          {helpText && (
+          {help && (
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -69,7 +69,7 @@ export const FieldWidget: React.FC<FieldWidgetProps> = ({
                   </button>
                 </TooltipTrigger>
                 <TooltipContent className="bg-popover text-popover-foreground shadow-md">
-                  {helpText}
+                  {help}
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>

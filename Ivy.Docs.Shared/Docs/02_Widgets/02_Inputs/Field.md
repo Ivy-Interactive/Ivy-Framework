@@ -50,7 +50,7 @@ A `Field` supports the following common properties:
 
 * **Label(string)** - The display label above the input.
 * **Description(string)** - An optional helper text shown below the input.
-* **HelpText(string)** - An optional help text displayed as a tooltip on an info icon next to the label.
+* **Help(string)** - An optional help text displayed as a tooltip on an info icon next to the label.
 * **Required(bool)** - Marks the input as required (adds an asterisk or style cue).
 
 ### Properties Usage
@@ -66,7 +66,7 @@ public class FieldExample : ViewBase
             .WithField()
             .Label("Username")
             .Description("Must be at least 8 characters long")
-            .HelpText("Your username must be unique and contain only letters, numbers, and underscores")
+            .Help("Your username must be unique and contain only letters, numbers, and underscores")
             .Required();
     }
 }
