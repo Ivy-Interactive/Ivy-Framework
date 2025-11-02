@@ -6,10 +6,21 @@ import { ThemeColors } from '@/lib/color-utils';
 export type ColorScheme = 'Default' | 'Rainbow';
 
 /**
- * Chart color variables from index.css (--chart-1 through --chart-5)
+ * Chart color variables from index.css (--chart-1 through --chart-10)
  * These colors are theme-aware and automatically change for light/dark mode
  */
-const chartColorVars = ['chart-1', 'chart-2', 'chart-3', 'chart-4', 'chart-5'];
+const chartColorVars = [
+  'chart-1',
+  'chart-2',
+  'chart-3',
+  'chart-4',
+  'chart-5',
+  'chart-6',
+  'chart-7',
+  'chart-8',
+  'chart-9',
+  'chart-10',
+];
 
 /**
  * Rainbow color variables from index.css

@@ -20,13 +20,27 @@ export const getChartThemeColors = (
   colors: ThemeColors,
   isDark: boolean
 ): ChartThemeColors => {
+  // Read font-sans CSS variable with error handling (similar to getChartColors)
+  const getFontSans = (): string => {
+    if (typeof document === 'undefined') {
+      return 'Geist, sans-serif'; // SSR fallback
+    }
+
+    try {
+      const font = getComputedStyle(document.documentElement)
+        .getPropertyValue('--font-sans')
+        .trim();
+      return font || 'Geist, sans-serif';
+    } catch (error) {
+      console.warn('Failed to read font from CSS:', error);
+      return 'Geist, sans-serif';
+    }
+  };
+
   return {
     foreground: colors.foreground || (isDark ? '#f8f8f8' : '#000000'),
     mutedForeground: colors.mutedForeground || (isDark ? '#a1a1aa' : '#666666'),
-    fontSans:
-      getComputedStyle(document.documentElement)
-        .getPropertyValue('--font-sans')
-        .trim() || 'Geist, sans-serif',
+    fontSans: getFontSans(),
     background: colors.background || (isDark ? '#000000' : '#ffffff'),
   };
 };
