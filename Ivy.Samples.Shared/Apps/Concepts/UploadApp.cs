@@ -19,6 +19,7 @@ public class UploadApp : SampleBase
             new Tab("Single File", new SingleFileUpload()),
             new Tab("Multiple Files", new MultipleFilesUpload()),
             new Tab("Dialog", new DialogFileUpload()),
+            new Tab("Form", new FormFileUpload()),
             new Tab("Validation", new FileUploadValidation())
         ).Variant(TabsVariant.Content);
     }
@@ -136,10 +137,10 @@ public record FileUploadValidationSettings
     [Range(1, 20)]
     public int MaxFiles { get; init; } = 3;
 
-    [AllowedValues("*/*", "image/png", "image/jpeg", "application/pdf")]
+    //[AllowedValues("*/*", "image/png", "image/jpeg", "application/pdf")]
     public string Accept { get; init; } = "*/*";
 
-    public string Placeholder { get; init; } = "Choose files to upload";
+    public string? Placeholder { get; init; } = null!;
 }
 
 
@@ -172,5 +173,23 @@ public class FileUploadValidationUploader(FileUploadValidationSettings settings)
                          .Remove(e => e.Id);
 
         return layout;
+    }
+}
+
+public record FormFileUploadModel
+{
+    [Required]
+    public string Subject { get; set; } = string.Empty;
+
+    public FileUpload<byte[]>? Attachment { get; set; }
+}
+
+public class FormFileUpload : ViewBase
+{
+    public override object? Build()
+    {
+        return "";
+        //var model = UseState(new FormFileUploadModel());
+        //return model.ToForm();
     }
 }

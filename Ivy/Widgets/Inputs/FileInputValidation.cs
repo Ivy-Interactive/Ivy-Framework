@@ -112,6 +112,12 @@ public static class FileInputValidation
 
     private static bool IsFileTypeMatch(IFileUpload file, string pattern)
     {
+        // Handle special case: accept all files
+        if (pattern == "*/*" || pattern == "*")
+        {
+            return true;
+        }
+
         // Handle MIME type patterns (e.g., "image/*", "text/plain")
         if (pattern.Contains("/"))
         {

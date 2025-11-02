@@ -1,8 +1,4 @@
 ﻿using System.Runtime.CompilerServices;
-using System.Text;
-using System.Text.Json.Serialization;
-using System.Linq;
-using System.Threading.Tasks;
 using Ivy.Core;
 using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
@@ -274,7 +270,8 @@ public static class FileInputExtensions
         {
             UploadUrl = ctx?.UploadUrl,
             Accept = ctx?.Accept ?? input.Accept,
-            MaxFileSize = ctx?.MaxFileSize
+            MaxFileSize = ctx?.MaxFileSize,
+            MaxFiles = ctx?.MaxFiles ?? input.MaxFiles
         };
 
         input = input with

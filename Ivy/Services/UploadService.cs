@@ -21,6 +21,9 @@ public record UploadContext(string UploadUrl, Action<Guid> Cancel)
 
     /// <summary>Gets or sets the maximum file size in bytes.</summary>
     public long? MaxFileSize { get; init; }
+
+    /// <summary>Gets or sets the maximum number of files that can be uploaded.</summary>
+    public int? MaxFiles { get; init; }
 }
 
 /// <summary>
@@ -48,6 +51,18 @@ public static class UploadContextExtensions
         if (state.Value != null)
         {
             state.Set(state.Value with { MaxFileSize = maxFileSize });
+        }
+        return state;
+    }
+
+    /// <summary>Sets the maximum number of files that can be uploaded for the upload state.</summary>
+    /// <param name="state">The upload context state to configure.</param>
+    /// <param name="maxFiles">The maximum number of files allowed.</param>
+    public static Core.Hooks.IState<UploadContext?> MaxFiles(this Core.Hooks.IState<UploadContext?> state, int maxFiles)
+    {
+        if (state.Value != null)
+        {
+            state.Set(state.Value with { MaxFiles = maxFiles });
         }
         return state;
     }
