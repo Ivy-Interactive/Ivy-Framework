@@ -71,6 +71,7 @@ public class FormFieldView(
 
         if (validators != null)
         {
+
             var isValid = true;
             var message = string.Empty;
             foreach (var validator in validators)
