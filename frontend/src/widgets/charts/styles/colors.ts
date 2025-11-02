@@ -12,15 +12,29 @@ export type ColorScheme = 'Default' | 'Rainbow';
 const chartColorVars = ['chart-1', 'chart-2', 'chart-3', 'chart-4', 'chart-5'];
 
 /**
+ * Rainbow color variables from index.css
+ */
+const rainbowColorVars = [
+  'blue',
+  'cyan',
+  'yellow',
+  'red',
+  'green',
+  'purple',
+  'orange',
+  'pink',
+];
+
+/**
  * Get chart colors from CSS variables
- * Reads --chart-1 through --chart-5 from index.css
+ * Reads color variables from index.css based on the selected scheme
  *
- * @param _scheme - Color scheme (kept for API compatibility, currently ignored)
+ * @param scheme - Color scheme ('Default' uses chart-1...5, 'Rainbow' uses blue, cyan, etc.)
  * @param themeColors - Theme colors (used as fallback if CSS variables unavailable)
  * @returns Array of hex color values from CSS variables
  */
 export const getChartColors = (
-  _scheme: ColorScheme,
+  scheme: ColorScheme,
   themeColors: ThemeColors
 ): string[] => {
   // SSR protection
@@ -29,7 +43,18 @@ export const getChartColors = (
   }
 
   try {
-    const colors = chartColorVars
+    // Select color variables based on scheme
+    let colorVars: string[];
+
+    if (scheme === 'Rainbow') {
+      // Use rainbow color variables: --blue, --cyan, --yellow, etc.
+      colorVars = rainbowColorVars;
+    } else {
+      // Default: Use chart-specific variables: --chart-1, --chart-2, etc.
+      colorVars = chartColorVars;
+    }
+
+    const colors = colorVars
       .map(name =>
         getComputedStyle(document.documentElement)
           .getPropertyValue(`--${name}`)
