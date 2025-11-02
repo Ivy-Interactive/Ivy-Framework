@@ -71,21 +71,24 @@ public class ColorDemo : ViewBase
         var pickerColorState = UseState("#ff0000");
         var textAndPickerColorState = UseState("#ff0000");
         return Layout.Vertical()
-                | textColorState
-                      .ToColorInput()
-                      .Variant(ColorInputs.Text)
-                      .WithField()
-                      .Label("Just Text")
-                | pickerColorState
-                      .ToColorInput()
-                      .Variant(ColorInputs.Picker)
-                      .WithField()
-                      .Label("Just Picker")
-                | textAndPickerColorState
-                      .ToColorInput()
-                      .Variant(ColorInputs.TextAndPicker)
-                      .WithField()
-                      .Label("Text and Picker");
+                | (Layout.Horizontal()
+                    | Text.Small("Just Text")
+                          .Width(25)
+                    | textColorState
+                          .ToColorInput()
+                          .Variant(ColorInputs.Text))
+                | (Layout.Horizontal()
+                    | Text.Small("Just Picker")
+                          .Width(25)
+                    | pickerColorState
+                          .ToColorInput()
+                          .Variant(ColorInputs.Picker))
+                | (Layout.Horizontal()
+                    | Text.Small("Text and Picker")
+                          .Width(25)
+                    | textAndPickerColorState
+                          .ToColorInput()
+                          .Variant(ColorInputs.TextAndPicker));
     }   
 }
 ```
@@ -103,21 +106,21 @@ public class ColorChangedDemo : ViewBase
     public override object? Build()
     {    
         var colorState = this.UseState("#ff0000");
-        var colorName = UseState("");
+        var colorName = UseState(colorState.Value);
         var onChangeHandler = (Event<IInput<string>, string> e) =>
         {
             colorName.Set(e.Value);
             colorState.Set(e.Value);
         };
         return Layout.Vertical() 
+                | H3("Hex Color Picker")
+                | (Layout.Horizontal()
                 | new ColorInput<string>
                        (colorState.Value, onChangeHandler)
-                      .Variant(ColorInputs.Picker)
-                      .WithField()
-                      .Label("Hex Color Picker")
+                      .Variant(ColorInputs.Picker) 
                 | new Code(colorName.Value)
-                     .ShowCopyButton()
-                     .ShowBorder();
+                    .ShowCopyButton()
+                    .ShowBorder());
     }    
 }    
 ```
@@ -187,21 +190,24 @@ public class CSSColorDemo : ViewBase
                             .Replace("[BORDER]",border.Value));
         return Layout.Vertical()
                 | H3("CSS Block Generator")
-                | color.ToColorInput()
-                      .Variant(ColorInputs.Picker)
-                      .WithField()
-                      .Label("color")
-                | bgColor.ToColorInput()
-                      .Variant(ColorInputs.Picker)
-                      .WithField()
-                      .Label("background-color")
-                | border.ToColorInput()
-                      .Variant(ColorInputs.Picker)
-                      .WithField()
-                      .Label("border")
-                | new Code(genCode.Value)
-                      .Language(Languages.Css)
-                      .ShowCopyButton();
+                | (Layout.Horizontal()
+                   | Text.InlineCode("color")
+                         .Width(35)
+                   | color.ToColorInput()
+                          .Variant(ColorInputs.Picker))
+                | (Layout.Horizontal()
+                   | Text.InlineCode("background-color")
+                         .Width(35)
+                   | bgColor.ToColorInput()
+                          .Variant(ColorInputs.Picker))
+                | (Layout.Horizontal()
+                   | Text.InlineCode("border")
+                         .Width(35)
+                   | border.ToColorInput()
+                          .Variant(ColorInputs.Picker))
+                   | new Code(genCode.Value)
+                         .Language(Languages.Css)
+                         .ShowCopyButton();
     }
 }
 ```

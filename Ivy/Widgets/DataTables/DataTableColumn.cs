@@ -18,7 +18,10 @@ public class DataTableColumn
     public bool Sortable { get; set; } = true;
     public SortDirection SortDirection { get; set; } = SortDirection.None;
     public bool Filterable { get; set; } = true;
+
+    [JsonPropertyName("align")]
     public Align Align { get; set; } = Align.Left;
+
     public int Order { get; set; } = 0;
     public string? Icon { get; set; } = null;
     public string? Help { get; set; } = null;
