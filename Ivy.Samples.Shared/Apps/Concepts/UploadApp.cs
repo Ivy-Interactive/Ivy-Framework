@@ -131,14 +131,11 @@ public class DialogFileUpload : ViewBase
 
 public record FileUploadValidationSettings
 {
-    [Range(1, long.MaxValue)]
     public long MaxFileSize { get; init; } = 5 * 1024 * 1024; // 5 MB
 
-    [Range(1, 20)]
     public int MaxFiles { get; init; } = 3;
 
-    //[AllowedValues("*/*", "image/png", "image/jpeg", "application/pdf")]
-    public string Accept { get; init; } = "*/*";
+    public string? Accept { get; init; }
 
     public string? Placeholder { get; init; } = null!;
 }
@@ -151,7 +148,7 @@ public class FileUploadValidation : ViewBase
         var settings = UseState(new FileUploadValidationSettings());
         return new SidebarLayout(
             new FileUploadValidationUploader(settings.Value).Key(settings),
-            settings.ToForm()
+            settings.ToForm(submitTitle: "Update")
         );
     }
 }
@@ -161,11 +158,11 @@ public class FileUploadValidationUploader(FileUploadValidationSettings settings)
     public override object? Build()
     {
         var selectedFiles = UseState(ImmutableArray.Create<FileUpload<byte[]>>());
-        var upload = this.UseUpload(MemoryStreamUploadHandler.Create(selectedFiles)).Accept(settings.Accept).MaxFileSize(settings.MaxFileSize);
+        var upload = this.UseUpload(MemoryStreamUploadHandler.Create(selectedFiles)).Accept(settings.Accept!).MaxFileSize(settings.MaxFileSize).MaxFiles(settings.MaxFiles);
 
         var layout = Layout.Vertical()
                      | Text.H1("Multiple Files Upload")
-                     | selectedFiles.ToFileInput(upload).Placeholder(settings.Placeholder).MaxFiles(settings.MaxFiles)
+                     | selectedFiles.ToFileInput(upload).Placeholder(settings.Placeholder!)
                      | selectedFiles.Value.ToTable()
                          .Width(Size.Full())
                          .Builder(e => e.Length, e => e.Func((long x) => Utils.FormatBytes(x)))

@@ -313,7 +313,8 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
             ? 'border-primary bg-primary/5'
             : 'border-muted-foreground/25',
           disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
-          hasFiles ? 'overflow-y-auto' : ''
+          hasFiles ? 'overflow-y-auto' : 'flex items-center justify-center',
+          'p-4'
         )}
         onClick={handleClick}
       >
@@ -328,20 +329,20 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
           className="hidden"
         />
 
-        {/* Show upload prompt when no files */}
-        {!hasFiles && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-            <Upload className={uploadIconVariants({ size })} />
+        {/* Always show upload icon */}
+        <div className="flex flex-col items-center justify-center text-center w-full">
+          <Upload className={uploadIconVariants({ size })} />
+          {!hasFiles && (
             <p className={textVariants({ size })}>
               {placeholder ||
                 `Drag and drop your ${multiple ? 'files' : 'file'} here or click to select`}
             </p>
-          </div>
-        )}
+          )}
+        </div>
 
         {/* Show file list when files are present */}
         {hasFiles && (
-          <div className="space-y-2 w-full">
+          <div className="space-y-2 w-full mt-4">
             {fileList.map(file => renderFileItem(file))}
           </div>
         )}
