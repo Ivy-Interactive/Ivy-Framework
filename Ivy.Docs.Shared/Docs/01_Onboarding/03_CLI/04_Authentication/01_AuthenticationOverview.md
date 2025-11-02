@@ -8,7 +8,7 @@ searchHints:
   - identity
 ---
 
-# Ivy Authentication
+# Authentication Overview
 
 <Ingress>
 Secure your Ivy application with integrated authentication providers including Auth0, Supabase, Authelia, and Microsoft Entra ID.
