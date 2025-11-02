@@ -889,7 +889,7 @@ export const TabsLayoutWidget = ({
 
           {dropdownMenu}
         </div>
-        <div className="flex-1 overflow-hidden">
+        <div className="flex-1 overflow-hidden relative">
           {orderedTabWidgets.map(tabWidget => {
             if (!React.isValidElement(tabWidget)) return null;
             const props = tabWidget.props as Partial<TabWidgetProps>;
@@ -903,9 +903,10 @@ export const TabsLayoutWidget = ({
                 role="tabpanel"
                 aria-hidden={activeTabId !== id}
                 className={cn(
-                  'h-full overflow-auto',
-                  activeTabId === id ? 'block' : 'hidden',
-                  'border-none'
+                  'absolute inset-0 overflow-auto border-none',
+                  activeTabId === id
+                    ? 'visible z-10'
+                    : 'invisible pointer-events-none z-0'
                 )}
                 style={paddingStyle}
               >
@@ -1012,7 +1013,7 @@ export const TabsLayoutWidget = ({
         </div>
       </div>
 
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-hidden relative">
         {orderedTabWidgets.map(tabWidget => {
           if (!React.isValidElement(tabWidget)) return null;
           const props = tabWidget.props as Partial<TabWidgetProps>;
@@ -1043,8 +1044,10 @@ export const TabsLayoutWidget = ({
             <div
               key={id}
               className={cn(
-                'h-full overflow-auto',
-                activeTabId === id ? 'block' : 'hidden'
+                'absolute inset-0 overflow-auto',
+                activeTabId === id
+                  ? 'visible z-10'
+                  : 'invisible pointer-events-none z-0'
               )}
               style={paddingStyle}
             >
