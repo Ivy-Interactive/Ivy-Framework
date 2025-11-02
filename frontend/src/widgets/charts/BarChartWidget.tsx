@@ -106,7 +106,7 @@ const BarChartWidget: React.FC<BarChartWidgetProps> = ({
   const { categories, valueKeys, transform, largeSpread, minValue, maxValue } =
     generateDataProps(data);
 
-  // Memoize chart colors - recalculate when colorScheme or theme colors change
+  // Chart colors depend on theme (--chart-1 through --chart-5 change for light/dark)
   const chartColors = useMemo(
     () => getColors(colorScheme, colors),
     [colorScheme, colors]
