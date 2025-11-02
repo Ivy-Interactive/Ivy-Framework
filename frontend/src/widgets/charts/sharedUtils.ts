@@ -65,12 +65,13 @@ export function generateEChartGrid(
   hasLegend: boolean = false
 ) {
   const defaultGrid = {
-    show: true,
+    show: false, // Hide grid border to remove the square frame
     left: 2,
     right: 2,
     top: 30,
     bottom: hasLegend ? 60 : 30, // More space for legend
     containLabel: true,
+    borderWidth: 0, // Ensure no border is drawn
   };
 
   if (!cartesianGrid) return defaultGrid;
@@ -187,6 +188,29 @@ export const generateXAxis = (
       themeColors?.fontSans
     ),
   },
+  axisLine: {
+    show: true,
+    lineStyle: {
+      type: 'dashed',
+      color: themeColors?.mutedForeground,
+      opacity: 0.1,
+    },
+  },
+  axisTick: {
+    show: true,
+    lineStyle: {
+      color: themeColors?.mutedForeground,
+      opacity: 0.4,
+    },
+  },
+  splitLine: {
+    show: true,
+    lineStyle: {
+      type: 'dashed',
+      color: themeColors?.mutedForeground,
+      opacity: 0.4,
+    },
+  },
 });
 
 export const generateYAxis = (
@@ -231,6 +255,29 @@ export const generateYAxis = (
     min: largeSpread ? safeTransform(minValue) : 0,
     max: largeSpread ? safeTransform(maxValue) : 'dataMax',
     position: yAxis?.[0]?.orientation === 'Right' ? 'right' : 'left',
+    axisLine: {
+      show: true,
+      lineStyle: {
+        type: 'dashed',
+        color: themeColors?.mutedForeground,
+        opacity: 0.1,
+      },
+    },
+    axisTick: {
+      show: true,
+      lineStyle: {
+        color: themeColors?.mutedForeground,
+        opacity: 0.4,
+      },
+    },
+    splitLine: {
+      show: true,
+      lineStyle: {
+        type: 'dashed',
+        color: themeColors?.mutedForeground,
+        opacity: 0.4,
+      },
+    },
   };
 };
 
