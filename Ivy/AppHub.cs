@@ -219,7 +219,7 @@ public class AppHub(
                 clientProvider.Redirect(navigateArgs.GetUrl(), replaceHistory: true);
             }
 
-            async void OnWidgetTreeChanged(WidgetTreeChanged[] changes)
+            void OnWidgetTreeChanged(WidgetTreeChanged[] changes)
             {
                 try
                 {
