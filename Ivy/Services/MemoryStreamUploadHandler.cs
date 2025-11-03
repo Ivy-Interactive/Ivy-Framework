@@ -60,6 +60,7 @@ internal sealed class MemoryStreamUploadHandlerImpl<T> : IUploadHandler
         catch (OperationCanceledException)
         {
             _sink.Aborted(key);
+            throw;
         }
         catch (Exception)
         {

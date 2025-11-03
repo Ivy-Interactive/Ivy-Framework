@@ -2,7 +2,6 @@ using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.ComponentModel.DataAnnotations;
 using System.Reactive.Disposables;
-using System.Diagnostics;
 using System.Text.Json.Serialization;
 using Ivy.Core.Hooks;
 using Microsoft.AspNetCore.Http;
@@ -175,6 +174,11 @@ public static class FileUploadExtensions
 public delegate Task UploadDelegate(FileUpload fileUpload, Stream stream, CancellationToken cancellationToken);
 
 
+/// <summary>
+/// Interface for managing file upload state.
+/// Sinks are simple state controllers that update FileUpload state for single or multiple files.
+/// Cleanup logic should be handled by the upload handler, not the sink.
+/// </summary>
 public interface IFileUploadSink<in TContent>
 {
     Guid Start(FileUpload file);
