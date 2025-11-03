@@ -30,10 +30,19 @@ const rainbowColorVars = [
   'cyan',
   'yellow',
   'red',
-  'green',
-  'purple',
   'orange',
+  'purple',
+  'lime',
+  'indigo',
+  'rose',
+  'green',
   'pink',
+  'teal',
+  'amber',
+  'violet',
+  'emerald',
+  'fuchsia',
+  'sky',
 ];
 
 /**
