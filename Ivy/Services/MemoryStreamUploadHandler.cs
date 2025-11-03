@@ -11,7 +11,7 @@ public static class MemoryStreamUploadHandler
     /// Creates an upload handler from an IAnyState by automatically detecting the state type.
     /// Supports: FileUpload&lt;byte[]&gt;?, FileUpload&lt;string&gt;?, ImmutableArray&lt;FileUpload&lt;byte[]&gt;&gt;, ImmutableArray&lt;FileUpload&lt;string&gt;&gt;
     /// </summary>
-    public static IUploadHandler Create(IAnyState anyState, Encoding? encoding = null, int chunkSize = 8192)
+    public static IUploadHandler Create(IAnyState anyState, Encoding? encoding = null, int chunkSize = 8192, float progressThreshold = 0.05f)
     {
         var stateType = anyState.GetStateType();
 
@@ -25,12 +25,12 @@ public static class MemoryStreamUploadHandler
 
             if (contentType == typeof(byte[]))
             {
-                return Create(anyState.As<FileUpload<byte[]>?>(), chunkSize);
+                return Create(anyState.As<FileUpload<byte[]>?>(), chunkSize, progressThreshold);
             }
 
             if (contentType == typeof(string))
             {
-                return Create(anyState.As<FileUpload<string>?>(), encoding, chunkSize);
+                return Create(anyState.As<FileUpload<string>?>(), encoding, chunkSize, progressThreshold);
             }
         }
 
@@ -45,11 +45,11 @@ public static class MemoryStreamUploadHandler
 
                 if (contentType == typeof(byte[]))
                 {
-                    return Create(anyState.As<ImmutableArray<FileUpload<byte[]>>>(), chunkSize);
+                    return Create(anyState.As<ImmutableArray<FileUpload<byte[]>>>(), chunkSize, progressThreshold);
                 }
                 if (contentType == typeof(string))
                 {
-                    return Create(anyState.As<ImmutableArray<FileUpload<string>>>(), encoding, chunkSize);
+                    return Create(anyState.As<ImmutableArray<FileUpload<string>>>(), encoding, chunkSize, progressThreshold);
                 }
             }
         }
@@ -59,23 +59,25 @@ public static class MemoryStreamUploadHandler
             nameof(anyState));
     }
 
-    public static IUploadHandler Create(IState<FileUpload<byte[]>?> singleState, int chunkSize = 8192)
-        => new MemoryStreamUploadHandlerImpl<byte[]>(new SingleFileSink<byte[]>(singleState), bytes => bytes, chunkSize);
+    public static IUploadHandler Create(IState<FileUpload<byte[]>?> singleState, int chunkSize = 8192, float progressThreshold = 0.05f)
+        => new MemoryStreamUploadHandlerImpl<byte[]>(new SingleFileSink<byte[]>(singleState), bytes => bytes, chunkSize, progressThreshold);
 
-    public static IUploadHandler Create(IState<FileUpload<string>?> singleState, Encoding? encoding = null, int chunkSize = 8192)
+    public static IUploadHandler Create(IState<FileUpload<string>?> singleState, Encoding? encoding = null, int chunkSize = 8192, float progressThreshold = 0.05f)
         => new MemoryStreamUploadHandlerImpl<string>(
             new SingleFileSink<string>(singleState),
             bytes => (encoding ?? Encoding.UTF8).GetString(bytes),
-            chunkSize);
+            chunkSize,
+            progressThreshold);
 
-    public static IUploadHandler Create(IState<ImmutableArray<FileUpload<byte[]>>> manyState, int chunkSize = 8192)
-        => new MemoryStreamUploadHandlerImpl<byte[]>(new MultipleFileSink<byte[]>(manyState), bytes => bytes, chunkSize);
+    public static IUploadHandler Create(IState<ImmutableArray<FileUpload<byte[]>>> manyState, int chunkSize = 8192, float progressThreshold = 0.05f)
+        => new MemoryStreamUploadHandlerImpl<byte[]>(new MultipleFileSink<byte[]>(manyState), bytes => bytes, chunkSize, progressThreshold);
 
-    public static IUploadHandler Create(IState<ImmutableArray<FileUpload<string>>> manyState, Encoding? encoding = null, int chunkSize = 8192)
+    public static IUploadHandler Create(IState<ImmutableArray<FileUpload<string>>> manyState, Encoding? encoding = null, int chunkSize = 8192, float progressThreshold = 0.05f)
         => new MemoryStreamUploadHandlerImpl<string>(
             new MultipleFileSink<string>(manyState),
             bytes => (encoding ?? Encoding.UTF8).GetString(bytes),
-            chunkSize);
+            chunkSize,
+            progressThreshold);
 }
 
 internal sealed class MemoryStreamUploadHandlerImpl<T> : IUploadHandler
@@ -83,12 +85,14 @@ internal sealed class MemoryStreamUploadHandlerImpl<T> : IUploadHandler
     private readonly IFileUploadSink<T> _sink;
     private readonly int _chunkSize;
     private readonly Func<byte[], T> _converter;
+    private readonly float _progressThreshold;
 
-    internal MemoryStreamUploadHandlerImpl(IFileUploadSink<T> sink, Func<byte[], T> converter, int chunkSize = 8192)
+    internal MemoryStreamUploadHandlerImpl(IFileUploadSink<T> sink, Func<byte[], T> converter, int chunkSize = 8192, float progressThreshold = 0.05f)
     {
         _sink = sink;
         _chunkSize = chunkSize;
         _converter = converter;
+        _progressThreshold = progressThreshold;
     }
 
 
@@ -104,6 +108,7 @@ internal sealed class MemoryStreamUploadHandlerImpl<T> : IUploadHandler
                 _chunkSize,
                 fileUpload.Length,
                 p => _sink.Progress(key, p),
+                _progressThreshold,
                 cancellationToken
             );
 
@@ -127,6 +132,7 @@ internal sealed class MemoryStreamUploadHandlerImpl<T> : IUploadHandler
         int chunkSize,
         long totalLength,
         Action<float> onProgress,
+        float progressThreshold,
         CancellationToken ct)
     {
         using var memoryStream = new MemoryStream();
@@ -134,7 +140,6 @@ internal sealed class MemoryStreamUploadHandlerImpl<T> : IUploadHandler
         long processedBytes = 0L;
         int bytesRead;
         float lastReportedProgress = 0f;
-        const float progressThreshold = 0.05f; // Only report every 5%
 
         while ((bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length, ct)) > 0)
         {
@@ -143,7 +148,7 @@ internal sealed class MemoryStreamUploadHandlerImpl<T> : IUploadHandler
             processedBytes += bytesRead;
             var progress = totalLength > 0 ? (float)processedBytes / totalLength : 0f;
 
-            // Only report progress if it changed by at least 5%
+            // Only report progress if it changed by the configured threshold
             if (progress - lastReportedProgress >= progressThreshold)
             {
                 onProgress(progress);
