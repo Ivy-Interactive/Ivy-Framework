@@ -5,7 +5,10 @@ import { TableProvider, useTable } from './DataTableContext';
 import { ErrorDisplay } from '@/components/ErrorDisplay';
 import { Loading } from '@/components/Loading';
 import { DataTableEditor } from './DataTableEditor';
-import { DataTableOptions } from './DataTableOptions';
+import { DataTableHeader } from './DataTableHeader';
+import { DataTableOption } from './DataTableOption';
+import { DataTableFilterOption } from './options/DataTableFilterOption';
+import { Filter as FilterIcon } from 'lucide-react';
 import { tableStyles } from './styles/style';
 import { TableProps } from './types/types';
 import { getWidth, getHeight } from '@/lib/styles';
@@ -30,6 +33,7 @@ const TableLayout: React.FC<TableLayoutProps> = ({ children }) => {
 };
 
 export const DataTable: React.FC<TableProps> = ({
+  id,
   columns,
   connection,
   configuration = {},
@@ -41,18 +45,22 @@ export const DataTable: React.FC<TableProps> = ({
   const finalConfig = {
     filterType: configuration.filterType,
     freezeColumns: configuration.freezeColumns ?? null,
-    allowLlmFiltering: configuration.allowLlmFiltering ?? true,
+    allowLlmFiltering: configuration.allowLlmFiltering ?? false,
     allowSorting: configuration.allowSorting ?? true,
-    allowFiltering: configuration.allowFiltering ?? true,
+    allowFiltering: configuration.allowFiltering ?? false,
     allowColumnReordering: configuration.allowColumnReordering ?? true,
     allowColumnResizing: configuration.allowColumnResizing ?? true,
-    allowCopySelection: configuration.allowCopySelection ?? true,
+    allowCopySelection: configuration.allowCopySelection ?? false,
     selectionMode: configuration.selectionMode,
     showIndexColumn: configuration.showIndexColumn ?? false,
     showGroups: configuration.showGroups ?? false,
-    showColumnTypeIcons: configuration.showColumnTypeIcons ?? true,
+    showColumnTypeIcons: configuration.showColumnTypeIcons ?? false,
+    showVerticalBorders: configuration.showVerticalBorders ?? false,
     batchSize: configuration.batchSize,
     loadAllRows: configuration.loadAllRows ?? false,
+    showSearch: configuration.showSearch ?? false,
+    enableRowHover: configuration.enableRowHover ?? false,
+    enableCellClickEvents: configuration.enableCellClickEvents ?? false,
   };
 
   // Create styles object with width and height if provided
@@ -70,16 +78,27 @@ export const DataTable: React.FC<TableProps> = ({
         editable={editable}
       >
         <TableLayout>
-          <>
-            <DataTableOptions
-              hasOptions={{
-                allowFiltering: finalConfig.allowFiltering,
-                allowLlmFiltering: finalConfig.allowLlmFiltering,
-              }}
-            />
+          <DataTableHeader>
+            {finalConfig.allowFiltering && (
+              <DataTableOption
+                icon={FilterIcon}
+                label="Filter"
+                tooltip="Filter table data"
+                displayMode="inline"
+                inlineDirection="right"
+                showLabel={false}
+              >
+                <DataTableFilterOption
+                  allowLlmFiltering={finalConfig.allowLlmFiltering}
+                />
+              </DataTableOption>
+            )}
+          </DataTableHeader>
 
-            <DataTableEditor hasOptions={finalConfig.allowFiltering} />
-          </>
+          <DataTableEditor
+            widgetId={id}
+            hasOptions={finalConfig.allowFiltering}
+          />
         </TableLayout>
       </TableProvider>
     </div>

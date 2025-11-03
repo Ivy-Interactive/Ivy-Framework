@@ -220,4 +220,3 @@ public abstract class ViewBase() : IView, IViewContextOwner
         this.Context.UseArgs<T>();
 
 }
-

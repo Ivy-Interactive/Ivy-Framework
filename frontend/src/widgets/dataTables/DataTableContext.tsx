@@ -160,7 +160,7 @@ export const TableProvider: React.FC<TableProviderProps> = ({
         );
 
         // Merge Arrow columns with columnsProp (columnsProp has all metadata)
-        // Arrow columns only provide name, type, and calculated width
+        // Arrow columns only provide name and calculated width (type inference is unreliable)
         const mergedColumns = columnsProp.map(propCol => {
           const arrowCol = result.columns.find(ac => ac.name === propCol.name);
           // Parse width from Size string format to numeric pixels
@@ -169,6 +169,8 @@ export const TableProvider: React.FC<TableProviderProps> = ({
             ...propCol,
             // Use parsed width from prop, or calculated width from Arrow, or default
             width: parsedWidth || parseSize(arrowCol?.width) || 150,
+            // IMPORTANT: Keep type from propCol, never override with Arrow's inferred type
+            type: propCol.type,
           };
         });
 

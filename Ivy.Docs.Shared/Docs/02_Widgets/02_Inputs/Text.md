@@ -470,14 +470,16 @@ public class LoginForm : ViewBase
         return Layout.Vertical()
             | Text.Label("Login")
             | Layout.Vertical()
-                | Text.Label("Username")
                 | usernameState.ToTextInput()
                     .Placeholder("Enter your username")
-                | Text.Label("Password") 
+                    .WithField()
+                    .Label("Username")
                 | passwordState.ToPasswordInput()
                     .Placeholder("Enter your password")
                      // Disabled when username is empty
                     .Disabled(string.IsNullOrWhiteSpace(usernameState.Value))
+                    .WithField()
+                    .Label("Password")
                 | new Button("Login")
                     .Disabled(string.IsNullOrWhiteSpace(usernameState.Value) || 
                         string.IsNullOrWhiteSpace(passwordState.Value));                             

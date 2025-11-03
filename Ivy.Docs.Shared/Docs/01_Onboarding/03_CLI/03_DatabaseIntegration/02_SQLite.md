@@ -43,7 +43,7 @@ Data Source=data.db
 
 Unlike other providers, SQLite doesn't store this connection string in .NET user secrets. Instead, it is included directly in the generated DbContextFactory source file.
 
-See [Database Integration Overview](Overview.md) for more information on adding database connections to Ivy.
+See [Database Overview](01_DatabaseOverview.md) for more information on adding database connections to Ivy.
 
 ## Configuration
 
@@ -106,7 +106,7 @@ See the [SQLite FAQ](https://www.sqlite.org/faq.html) for more help.
 
 ## Related Documentation
 
-- [Database Overview](Overview.md)
+- [Database Overview](01_DatabaseOverview.md)
 - [PostgreSQL Provider](PostgreSql.md)
 - [SQL Server Provider](SqlServer.md)
 - [MySQL Provider](MySql.md)

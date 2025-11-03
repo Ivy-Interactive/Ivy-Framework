@@ -60,11 +60,16 @@ export interface DataTableConfiguration {
   showIndexColumn?: boolean;
   showGroups?: boolean;
   showColumnTypeIcons?: boolean;
+  showVerticalBorders?: boolean;
   batchSize?: number;
   loadAllRows?: boolean;
+  enableCellClickEvents?: boolean;
+  showSearch?: boolean;
+  enableRowHover?: boolean;
 }
 
 export interface TableProps {
+  id: string;
   columns: DataColumn[];
   connection: DataTableConnection;
   configuration?: DataTableConfiguration;

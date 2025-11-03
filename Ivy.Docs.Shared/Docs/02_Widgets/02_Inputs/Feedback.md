@@ -63,15 +63,18 @@ public class FeedbackDemo : ViewBase
         var emojiFeedback = UseState(4);
         return Layout.Vertical()
                 | H3 ("Simple movie review")
-                | Text.Block("Did you like the movie ?")
                 | new FeedbackInput<bool>(thumbsFeedback)
                       .Variant(FeedbackInputs.Thumbs)
-                | Text.Block("How would you like to rate the movie ?")
+                      .WithField()
+                      .Label("Did you like the movie ?")
                 | new FeedbackInput<int>(starFeedback)
                       .Variant(FeedbackInputs.Stars)
-                | Text.Block("How do you feel after seeing the movie ?")
+                      .WithField()
+                      .Label("How would you like to rate the movie ?")
                 | new FeedbackInput<int>(emojiFeedback)
-                      .Variant(FeedbackInputs.Emojis);
+                      .Variant(FeedbackInputs.Emojis)
+                      .WithField()
+                      .Label("How do you feel after seeing the movie ?");
     }  
 }    
 ```

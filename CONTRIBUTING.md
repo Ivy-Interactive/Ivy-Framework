@@ -243,6 +243,10 @@ Before submitting your widget PR, ensure you have:
    - Screenshots for UI changes
    - Test results
 
+### Example of a Good Pull Request
+
+For a reference on what constitutes a well-structured pull request, see [#1285](https://github.com/Ivy-Interactive/Ivy-Framework/issues/1285).
+
 ## Code Style and Standards
 
 ### Linting and Formatting

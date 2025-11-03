@@ -122,7 +122,7 @@ here is done for the `Blueberry` column.
 
 <Details>
 <Summary>
-The following shows a demonstration of these where TIOBE index is shown for some programming languages over the last five years.
+TIOBE Programming Language Rankings Example
 </Summary>
 <Body>
 BarChart handles negative and double values. Changing the value of the year, changes the chart below.
@@ -235,10 +235,10 @@ public class TiobeIndexDemo : ViewBase
          var year = UseState(2020);
          
          return Layout.Vertical()
-                    | Text.Large("TIOBE Programming Language Rankings.")
-                    | Text.Small("Select Year")
                     | year.ToNumberInput()
                           .Min(2020).Max(2025).Step(1)
+                          .WithField()
+                          .Label("Select Year (2020-2025)")
                     | new BarChart(tiobeMap[year.Value])
                             .ColorScheme(ColorScheme.Default)
                             .Bar(new Bar("Rating", 1)

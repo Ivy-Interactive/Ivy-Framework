@@ -54,7 +54,7 @@ Once these components have been selected, by either method above, a connection s
 Data Source=projects/{projectId}/instances/{instanceId}/databases/{databaseId}
 ```
 
-See [Database Integration Overview](Overview.md) for more information on adding database connections to Ivy.
+See [Database Overview](01_DatabaseOverview.md) for more information on adding database connections to Ivy.
 
 ## Configuration
 
@@ -116,7 +116,7 @@ For more information, visit the [Spanner documentation](https://cloud.google.com
 
 ## Related Documentation
 
-- [Database Overview](Overview.md)
+- [Database Overview](01_DatabaseOverview.md)
 - [SQL Server Provider](SqlServer.md)
 - [PostgreSQL Provider](PostgreSql.md)
 - [Official Google Cloud Spanner Documentation](https://cloud.google.com/spanner/docs)

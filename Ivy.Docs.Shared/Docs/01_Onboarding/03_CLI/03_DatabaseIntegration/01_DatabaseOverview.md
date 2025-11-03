@@ -1,4 +1,4 @@
-﻿---
+---
 searchHints:
   - database
   - entityframework
@@ -8,7 +8,7 @@ searchHints:
   - db
 ---
 
-# Ivy Database Integration
+# Database Overview
 
 <Ingress>
 Connect your Ivy application to various databases with automatic Entity Framework configuration for SQL Server, PostgreSQL, MySQL, SQLite, and more.

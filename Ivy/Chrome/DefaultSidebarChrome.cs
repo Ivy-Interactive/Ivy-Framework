@@ -105,15 +105,59 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
             }
         }, [search]);
 
-        void OpenApp(NavigateArgs navigateArgs)
+        void OpenApp(NavigateArgs navigateArgs, bool replaceHistory = false)
         {
-            var app = appRepository!.GetAppOrDefault(navigateArgs.AppId);
             if (settings.Navigation == ChromeNavigation.Pages)
             {
-                currentApp.Set(navigateArgs.ToAppHost(args.ConnectionId));
+                var previousApp = currentApp.Value?.AppId;
+
+                if (navigateArgs.AppId == null)
+                {
+                    navigateArgs = navigateArgs with { AppId = settings.DefaultAppId };
+                }
+
+                var appHost = navigateArgs.AppId != null
+                    ? navigateArgs.ToAppHost(args.ConnectionId)
+                    : null;
+
+                currentApp.Set(appHost);
+                // Update browser URL for page navigation
+                if (navigateArgs.Purpose is NavigationPurpose.NewDestination && previousApp != navigateArgs.AppId)
+                {
+                    client.Redirect(navigateArgs.GetUrl(), replaceHistory);
+                }
             }
             else
             {
+                if (!string.IsNullOrEmpty(navigateArgs.TabId))
+                {
+                    // Try to find existing tab with the given TabId
+                    var tabIndex = tabs.Value.ToList().FindIndex(t => t.Id == navigateArgs.TabId);
+                    if (tabIndex >= 0)
+                    {
+                        selectedIndex.Set(tabIndex);
+
+                        // Update browser URL when switching to existing tab
+                        var tab = tabs.Value[tabIndex];
+                        if (navigateArgs.Purpose is NavigationPurpose.NewDestination)
+                        {
+                            client.Redirect(navigateArgs.GetUrl(), replaceHistory, tabId: tab.Id);
+                        }
+                        return;
+                    }
+                    else if (navigateArgs.Purpose is NavigationPurpose.HistoryTraversal)
+                    {
+                        client.Error(new InvalidOperationException("Tab no longer exists."));
+                        return;
+                    }
+                }
+
+                if (navigateArgs.AppId == null)
+                {
+                    // If there is no app ID or tab ID specified, do nothing.
+                    return;
+                }
+
                 var tabId = Guid.NewGuid().ToString();
                 var appHost = navigateArgs.ToAppHost(args.ConnectionId);
 
@@ -132,14 +176,28 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
 
                     if (existingTabIndex >= 0)
                     {
+                        var previousSelectedIndex = selectedIndex.Value;
                         selectedIndex.Set(existingTabIndex);
+                        tabId = tabs.Value[existingTabIndex].Id;
+                        // Update browser URL when switching to existing tab
+                        if (navigateArgs.Purpose is NavigationPurpose.NewDestination && previousSelectedIndex != existingTabIndex)
+                        {
+                            client.Redirect(navigateArgs.GetUrl(), replaceHistory, tabId: tabId);
+                        }
                         return;
                     }
                 }
 
-                var newTabs = tabs.Value.Add(new TabState(tabId, app.Id, app.Title, appHost, app.Icon, Guid.NewGuid().ToString()));
-                tabs.Set(newTabs);
-                selectedIndex.Set(newTabs.Length - 1);
+                if (navigateArgs.Purpose is NavigationPurpose.NewDestination)
+                {
+                    var app = appRepository!.GetAppOrDefault(navigateArgs.AppId);
+                    var newTabs = tabs.Value.Add(new TabState(tabId, app.Id, app.Title, appHost, app.Icon, Guid.NewGuid().ToString()));
+                    tabs.Set(newTabs);
+                    selectedIndex.Set(newTabs.Length - 1);
+
+                    // Update browser URL when new tab is opened
+                    client.Redirect(navigateArgs.GetUrl(), replaceHistory, tabId: tabId);
+                }
             }
         }
 
@@ -150,11 +208,22 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
                 var userInfo = await TimeoutHelper.WithTimeoutAsync(auth.GetUserInfoAsync);
                 user.Set(userInfo);
             }
-            if (!string.IsNullOrEmpty(settings.DefaultAppId))
+
+            var initialAppId = args.NavigationAppId ?? settings.DefaultAppId;
+            if (!string.IsNullOrWhiteSpace(initialAppId))
             {
-                OpenApp(new NavigateArgs(settings.DefaultAppId));
+                OpenApp(new NavigateArgs(initialAppId), replaceHistory: true);
+            }
+            else
+            {
+                client.Redirect("/", replaceHistory: true);
             }
         });
+
+        bool CheckTabExists(int tabId)
+        {
+            return tabId >= 0 && tabId < tabs.Value.Length;
+        }
 
         void OnMenuSelect(Event<SidebarMenu, object> @event)
         {
@@ -168,18 +237,33 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
         {
             if (@event.Value is string appId)
             {
-                client.OpenUrl(new NavigateArgs(appId).GetUrl());
+                client.OpenUrl(new NavigateArgs(appId, Chrome: false).GetUrl());
             }
             return ValueTask.CompletedTask;
         }
 
         void OnTabSelect(Event<TabsLayout, int> @event)
         {
+            if (!CheckTabExists(@event.Value))
+            {
+                return;
+            }
+
             selectedIndex.Set(@event.Value);
+
+            // Update browser URL when tab is selected
+            var tab = tabs.Value[@event.Value];
+            var navigateArgs = new NavigateArgs(tab.AppId);
+            client.Redirect(navigateArgs.GetUrl(), tabId: tab.Id);
         }
 
         void OnTabClose(Event<TabsLayout, int> @event)
         {
+            if (!CheckTabExists(@event.Value))
+            {
+                return;
+            }
+
             var closedIndex = @event.Value;
             var wasSelected = selectedIndex.Value == closedIndex;
             var newTabs = tabs.Value.RemoveAt(closedIndex);
@@ -200,11 +284,32 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
                 }
             }
             selectedIndex.Set(newIndex);
+
+            // Update browser URL when current tab was closed
+            if (wasSelected)
+            {
+                if (newIndex != null)
+                {
+                    var tab = newTabs[newIndex.Value];
+                    var navigateArgs = new NavigateArgs(tab.AppId);
+                    client.Redirect(navigateArgs.GetUrl(), tabId: tab.Id);
+                }
+                else
+                {
+                    client.Redirect("/");
+                }
+            }
+
             tabs.Set(newTabs);
         }
 
         void OnTabRefresh(Event<TabsLayout, int> @event)
         {
+            if (!CheckTabExists(@event.Value))
+            {
+                return;
+            }
+
             var tab = tabs.Value[@event.Value];
             tabs.Set(tabs.Value.RemoveAt(@event.Value).Insert(@event.Value, tab with { RefreshToken = Guid.NewGuid().ToString() }));
             selectedIndex.Set(@event.Value);

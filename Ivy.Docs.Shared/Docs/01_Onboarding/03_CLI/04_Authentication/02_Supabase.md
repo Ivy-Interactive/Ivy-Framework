@@ -114,7 +114,7 @@ When deploying an Ivy project without using `ivy deploy`, your local .NET user s
 
 > **Note:** If configuration is present in both .NET user secrets and environment variables, Ivy will use the values in **.NET user secrets over environment variables**.
 
-For more information, see [Authentication Overview](Overview.md).
+For more information, see [Authentication Overview](01_AuthenticationOverview.md).
 
 #### Configuration Parameters
 
@@ -189,6 +189,6 @@ Key features of the Supabase provider:
 
 ## Related Documentation
 
-- [Authentication Overview](Overview.md)
+- [Authentication Overview](01_AuthenticationOverview.md)
 - [Auth0 Provider](Auth0.md)
 - [Microsoft Entra Provider](MicrosoftEntra.md)
