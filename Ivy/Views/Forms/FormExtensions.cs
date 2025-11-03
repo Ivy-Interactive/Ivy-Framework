@@ -19,7 +19,6 @@ public static class FormExtensions
     /// <typeparam name="T">The type of the model object contained in the state.</typeparam>
     /// <param name="obj">The reactive state object containing the model to be edited by the form.</param>
     /// <param name="submitTitle">The text displayed on the form's submit button. Default is "Save".</param>
-    /// <param name="upload">Optional upload context state for FileUpload fields. Required if form contains FileUpload fields.</param>
     /// <returns>A new FormBuilder instance configured for the specified model type with automatic field discovery.</returns>
     /// <remarks>
     /// <para>This extension method provides a fluent entry point for form creation by converting
@@ -42,9 +41,12 @@ public static class FormExtensions
     /// var userState = UseState(new User());
     /// return userState.ToForm();
     ///
-    /// // Form with file upload
-    /// var uploadContext = this.UseUpload(handler);
-    /// return userState.ToForm(uploadContext: uploadContext);
+    /// // Form with file upload (use .Builder() with context-aware factory)
+    /// return userState.ToForm()
+    ///     .Builder(x => x.Avatar, (state, view) => {
+    ///         var uploadContext = view.UseUpload(handler).Accept("image/*");
+    ///         return state.ToFileInput(uploadContext);
+    ///     });
     ///
     /// // Form with customization
     /// return userState.ToForm()
@@ -58,8 +60,8 @@ public static class FormExtensions
     /// maintaining the convenience of automatic scaffolding for rapid development.</para>
     /// </remarks>
     /// <seealso cref="FormBuilder{T}"/>
-    public static FormBuilder<T> ToForm<T>(this IState<T> obj, string submitTitle = "Save", IState<UploadContext>? upload = null)
+    public static FormBuilder<T> ToForm<T>(this IState<T> obj, string submitTitle = "Save")
     {
-        return new FormBuilder<T>(obj, submitTitle, upload);
+        return new FormBuilder<T>(obj, submitTitle);
     }
 }

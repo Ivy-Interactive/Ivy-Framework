@@ -47,21 +47,47 @@ public enum FormValidationStrategy
 }
 
 /// <summary>Form field view with validation, data binding, and visibility control.</summary>
-public class FormFieldView(
-    IAnyState bindingState,
-    Func<IAnyState, IAnyInput> inputFactory,
-    Func<bool> visible,
-    ISignalSender<Unit, Unit> updateSender,
-    string? label,
-    string? description,
-    bool required,
-    FormFieldLayoutOptions? layoutOptions,
-    Func<object?, (bool, string)>[]? validators,
-    FormValidationStrategy validationStrategy,
-    Sizes size = Sizes.Medium) : ViewBase, IFormFieldView
+public class FormFieldView : ViewBase, IFormFieldView
 {
+    private readonly IAnyState bindingState;
+    private readonly Func<IAnyState, IViewContext, IAnyInput> inputFactory;
+    private readonly Func<bool> visible;
+    private readonly ISignalSender<Unit, Unit> updateSender;
+    private readonly string? label;
+    private readonly string? description;
+    private readonly bool required;
+    private readonly Func<object?, (bool, string)>[]? validators;
+    private readonly FormValidationStrategy validationStrategy;
+    private readonly Sizes size;
+
     /// <summary>Layout configuration for positioning this field in the form.</summary>
-    public FormFieldLayoutOptions Layout { get; } = layoutOptions ?? new FormFieldLayoutOptions(Guid.NewGuid());
+    public FormFieldLayoutOptions Layout { get; }
+
+    public FormFieldView(
+        IAnyState bindingState,
+        Func<IAnyState, IViewContext, IAnyInput> inputFactory,
+        Func<bool> visible,
+        ISignalSender<Unit, Unit> updateSender,
+        string? label = null,
+        string? description = null,
+        bool required = false,
+        FormFieldLayoutOptions? layoutOptions = null,
+        Func<object?, (bool, string)>[]? validators = null,
+        FormValidationStrategy validationStrategy = FormValidationStrategy.OnBlur,
+        Sizes size = Sizes.Medium)
+    {
+        this.bindingState = bindingState;
+        this.inputFactory = inputFactory;
+        this.visible = visible;
+        this.updateSender = updateSender;
+        this.label = label;
+        this.description = description;
+        this.required = required;
+        this.Layout = layoutOptions ?? new FormFieldLayoutOptions(Guid.NewGuid());
+        this.validators = validators;
+        this.validationStrategy = validationStrategy;
+        this.size = size;
+    }
 
     /// <summary>Validates the field value using configured validators.</summary>
     private bool Validate<T>(T value, IState<string> invalid)
@@ -128,7 +154,7 @@ public class FormFieldView(
             blurOnceState.Set(true);
         }
 
-        var input = inputFactory(inputState).Invalid(invalidState.Value);
+        var input = inputFactory(inputState, Context).Invalid(invalidState.Value);
         if (validationStrategy == FormValidationStrategy.OnBlur)
         {
             input.HandleBlur(OnBlur);
@@ -148,7 +174,7 @@ public record FormFieldLayoutOptions(Guid RowKey, int Column = 0, int Order = 0,
 /// <summary>Binds a form field to a model property with validation and layout configuration.</summary>
 public class FormFieldBinding<TModel>(
     Expression<Func<TModel, object>> selector,
-    Func<IAnyState, IAnyInput> factory,
+    Func<IAnyState, IViewContext, IAnyInput> factory,
     Func<bool> visible,
     ISignalSender<Unit, Unit> updateSignal,
     string? label = null,
