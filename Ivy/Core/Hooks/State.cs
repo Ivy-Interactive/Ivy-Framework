@@ -146,7 +146,7 @@ public class State<T> : IState<T>
         {
             _subject.OnNext(updated);
         }
-        return _value;
+        return updated;
     }
 
     /// <summary>

@@ -8,13 +8,14 @@ namespace Ivy.Core;
 /// </summary>
 public sealed class EventDispatchQueue : IDisposable
 {
+    private const int DefaultChannelCapacity = 1024;
     private readonly Channel<Func<Task>> _channel;
     private readonly CancellationTokenSource _cts;
     private readonly Task _worker;
 
     public EventDispatchQueue(CancellationToken externalCancellation)
     {
-        var options = new BoundedChannelOptions(1024)
+        var options = new BoundedChannelOptions(DefaultChannelCapacity)
         {
             SingleReader = true,
             SingleWriter = false,
