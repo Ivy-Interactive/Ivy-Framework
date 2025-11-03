@@ -36,7 +36,7 @@ interface GitHubContributorsProps {
 const IVY_TEAM_MEMBERS: Record<string, string> = {
   ArtemKhvorostianyi: 'Engineer',
   rorychatt: 'Founding Engineer',
-  nielsbosma: 'CEO',
+  nielsbosma: 'Founder',
   zachwolfe: 'Software Developer',
   // Add more team members as needed
 };
