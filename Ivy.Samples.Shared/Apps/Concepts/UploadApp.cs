@@ -198,18 +198,18 @@ public class FormFileUpload : ViewBase
         var form = model.ToForm()
             .Builder(e => e.Attachment1, (state, view) =>
             {
-                var uploadContext = view.UseUpload(MemoryStreamUploadHandler.Create(state))
+                var uploadContext = view.UseUpload(new DelayedFileUploadHandler(MemoryStreamUploadHandler.Create(state), TimeSpan.FromMilliseconds(50)))
                     .Accept("image/jpeg").MaxFileSize(1 * 1024 * 1024);
                 return state.ToFileInput(uploadContext);
             })
-            .Label(x => x.Attachment1, "Attachment1 image/jpeg (Required)")
+            .Label(x => x.Attachment1, "image/jpeg (Required)")
             .Builder(e => e.Attachment2, (state, view) =>
             {
-                var uploadContext = view.UseUpload(MemoryStreamUploadHandler.Create(state))
+                var uploadContext = view.UseUpload(new DelayedFileUploadHandler(MemoryStreamUploadHandler.Create(state), TimeSpan.FromMilliseconds(50)))
                     .Accept("application/pdf").MaxFileSize(5 * 1024 * 1024);
                 return state.ToFileInput(uploadContext);
             })
-            .Label(x => x.Attachment2, "Attachment2 application/pdf (Optional)");
+            .Label(x => x.Attachment2, "application/pdf (Optional)");
 
         return Layout.Vertical()
                | Text.H1("Form with File Upload")
