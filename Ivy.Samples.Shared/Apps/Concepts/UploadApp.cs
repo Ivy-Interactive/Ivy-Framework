@@ -33,8 +33,6 @@ public class SingleFileUpload : ViewBase
                | Text.H1("Single File Upload")
                | uploadState.ToFileInput(upload).Placeholder("Choose a file to upload")
                | uploadState.ToDetails()
-                   .Builder(e => e!.Length, e => e.Func((long x) => Utils.FormatBytes(x)))
-                   .Builder(e => e!.Progress, e => e.Func((float x) => x.ToString("P0")))
             ;
     }
 }
@@ -119,9 +117,7 @@ public class DialogFileUpload : ViewBase
                | openButton
                | (selectedFile.Value != null
                     ? selectedFile.ToDetails()
-                        .Builder(e => e!.Length, e => e.Func((long x) => Utils.FormatBytes(x)))
-                        .Builder(e => e!.Progress, e => e.Func((float x) => x.ToString("P0")))
-                    : Text.Block("No file selected"))
+                    : Text.P("No file selected"))
                | dialog;
     }
 }
@@ -143,10 +139,6 @@ public class FileUploadValidation : ViewBase
     public override object? Build()
     {
         var settings = UseState(new FileUploadValidationSettings());
-        // return new SidebarLayout(
-        //     new FileUploadValidationUploader(settings.Value).Key(settings),
-        //     settings.ToForm(submitTitle: "Update")
-        // );
         return Layout.Horizontal()
                | new FileUploadValidationUploader(settings.Value).Key(settings)
                | new Separator()
@@ -180,32 +172,40 @@ public class FileUploadValidationUploader(FileUploadValidationSettings settings)
 public record FormFileUploadModel
 {
     [Required]
-    public string Subject { get; set; } = string.Empty;
+    public FileUpload<byte[]>? Attachment1 { get; set; }
 
-    public FileUpload<byte[]>? Attachment { get; set; }
+    public FileUpload<byte[]>? Attachment2 { get; set; }
 }
 
 public class FormFileUpload : ViewBase
 {
     public override object? Build()
     {
-        var model = UseState(new FormFileUploadModel());
+        var model = UseState(() => new FormFileUploadModel());
 
-        var (attachmentAnyState, _) = StateHelpers.MemberState(model, m => m.Attachment);
-        var attachmentState = attachmentAnyState.As<FileUpload<byte[]>?>();
-
-        var uploadContext = this.UseUpload(
-            MemoryStreamUploadHandler.Create(attachmentState)
-        ).Accept("*/*").MaxFileSize(5 * 1024 * 1024);
+        var form = model.ToForm()
+            .Builder(e => e.Attachment1, (state, view) =>
+            {
+                var uploadContext = view.UseUpload(MemoryStreamUploadHandler.Create(state))
+                    .Accept("image/jpeg").MaxFileSize(1 * 1024 * 1024);
+                return state.ToFileInput(uploadContext);
+            })
+            .Label(x => x.Attachment1, "Attachment1 image/jpeg (Required)")
+            .Builder(e => e.Attachment2, (state, view) =>
+            {
+                var uploadContext = view.UseUpload(MemoryStreamUploadHandler.Create(state))
+                    .Accept("application/pdf").MaxFileSize(5 * 1024 * 1024);
+                return state.ToFileInput(uploadContext);
+            })
+            .Label(x => x.Attachment2, "Attachment2 application/pdf (Optional)");
 
         return Layout.Vertical()
                | Text.H1("Form with File Upload")
-               | model.ToForm(upload: uploadContext)
-                   .Label(x => x.Attachment, "Attachment (Optional)")
-               | (model.Value.Attachment != null
-                    ? attachmentState.ToDetails()
-                        .Builder(e => e!.Length, e => e.Func((long x) => Utils.FormatBytes(x)))
-                        .Builder(e => e!.Progress, e => e.Func((float x) => x.ToString("P0")))
-                    : null!);
+               | form
+               | model.Value.Attachment1?.ToDetails()
+               | model.Value.Attachment2?.ToDetails()
+               ;
     }
 }
+
+

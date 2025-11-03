@@ -160,6 +160,6 @@ public static class DetailsBuilderExtensions
 
     public static DetailsBuilder<TModel> ToDetails<TModel>(this IState<TModel> model)
     {
-        return new DetailsBuilder<TModel>(model.Value);
+        return model.Value.ToDetails();
     }
 }

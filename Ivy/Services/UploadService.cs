@@ -6,6 +6,7 @@ using System.Text.Json.Serialization;
 using Ivy.Client;
 using Ivy.Core;
 using Ivy.Core.Hooks;
+using Ivy.Views.Builders;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
@@ -124,6 +125,14 @@ public record FileUpload<T> : FileUpload
     [JsonIgnore]
     [ScaffoldColumn(false)]
     public T? Content { get; init; }
+
+    public DetailsBuilder<FileUpload<T>> ToDetails()
+    {
+        return new DetailsBuilder<FileUpload<T>>(this)
+            .Builder(e => e.Length, e => e.Func((long x) => Utils.FormatBytes(x)))
+            .Builder(e => e.Progress, e => e.Func((float x) => x.ToString("P0")))
+            .Remove(e => e.Id);
+    }
 }
 
 /// <summary>

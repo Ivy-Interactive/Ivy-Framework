@@ -1,11 +1,64 @@
 using System.Collections.Immutable;
 using System.Text;
+using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
 
 namespace Ivy.Services;
 
 public static class MemoryStreamUploadHandler
 {
+    /// <summary>
+    /// Creates an upload handler from an IAnyState by automatically detecting the state type.
+    /// Supports: FileUpload&lt;byte[]&gt;?, FileUpload&lt;string&gt;?, ImmutableArray&lt;FileUpload&lt;byte[]&gt;&gt;, ImmutableArray&lt;FileUpload&lt;string&gt;&gt;
+    /// </summary>
+    public static IUploadHandler Create(IAnyState anyState, Encoding? encoding = null, int chunkSize = 8192)
+    {
+        var stateType = anyState.GetStateType();
+
+        // Handle nullable value types - unwrap to get the underlying type
+        var underlyingType = Nullable.GetUnderlyingType(stateType) ?? stateType;
+
+        // Check for FileUpload<byte[]>
+        if (underlyingType.IsGenericType && underlyingType.GetGenericTypeDefinition() == typeof(FileUpload<>))
+        {
+            var contentType = underlyingType.GetGenericArguments()[0];
+
+            if (contentType == typeof(byte[]))
+            {
+                return Create(anyState.As<FileUpload<byte[]>?>(), chunkSize);
+            }
+
+            if (contentType == typeof(string))
+            {
+                return Create(anyState.As<FileUpload<string>?>(), encoding, chunkSize);
+            }
+        }
+
+        // Check for ImmutableArray<FileUpload<T>>
+        if (underlyingType.IsGenericType && underlyingType.GetGenericTypeDefinition() == typeof(ImmutableArray<>))
+        {
+            var elementType = underlyingType.GetGenericArguments()[0];
+
+            if (elementType.IsGenericType && elementType.GetGenericTypeDefinition() == typeof(FileUpload<>))
+            {
+                var contentType = elementType.GetGenericArguments()[0];
+
+                if (contentType == typeof(byte[]))
+                {
+                    return Create(anyState.As<ImmutableArray<FileUpload<byte[]>>>(), chunkSize);
+                }
+                if (contentType == typeof(string))
+                {
+                    return Create(anyState.As<ImmutableArray<FileUpload<string>>>(), encoding, chunkSize);
+                }
+            }
+        }
+
+        throw new ArgumentException(
+            $@"Unsupported state type: {stateType}. Supported types are: FileUpload<byte[]>?, FileUpload<string>?, ImmutableArray<FileUpload<byte[]>>, ImmutableArray<FileUpload<string>>",
+            nameof(anyState));
+    }
+
     public static IUploadHandler Create(IState<FileUpload<byte[]>?> singleState, int chunkSize = 8192)
         => new MemoryStreamUploadHandlerImpl<byte[]>(new SingleFileSink<byte[]>(singleState), bytes => bytes, chunkSize);
 
