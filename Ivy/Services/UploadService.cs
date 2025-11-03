@@ -36,36 +36,27 @@ public static class UploadContextExtensions
     /// <summary>Sets the accepted file types for the upload state using MIME types or file extensions.</summary>
     /// <param name="state">The upload context state to configure.</param>
     /// <param name="accept">A comma-separated list of accepted file types (e.g., "image/*", ".pdf,.doc", "text/plain").</param>
-    public static Core.Hooks.IState<UploadContext?> Accept(this Core.Hooks.IState<UploadContext?> state, string accept)
+    public static Core.Hooks.IState<UploadContext> Accept(this Core.Hooks.IState<UploadContext> state, string accept)
     {
-        if (state.Value != null)
-        {
-            state.Set(state.Value with { Accept = accept });
-        }
+        state.Set(state.Value with { Accept = accept });
         return state;
     }
 
     /// <summary>Sets the maximum file size in bytes for the upload state.</summary>
     /// <param name="state">The upload context state to configure.</param>
     /// <param name="maxFileSize">The maximum file size in bytes.</param>
-    public static Core.Hooks.IState<UploadContext?> MaxFileSize(this Core.Hooks.IState<UploadContext?> state, long maxFileSize)
+    public static Core.Hooks.IState<UploadContext> MaxFileSize(this Core.Hooks.IState<UploadContext> state, long maxFileSize)
     {
-        if (state.Value != null)
-        {
-            state.Set(state.Value with { MaxFileSize = maxFileSize });
-        }
+        state.Set(state.Value with { MaxFileSize = maxFileSize });
         return state;
     }
 
     /// <summary>Sets the maximum number of files that can be uploaded for the upload state.</summary>
     /// <param name="state">The upload context state to configure.</param>
     /// <param name="maxFiles">The maximum number of files allowed.</param>
-    public static Core.Hooks.IState<UploadContext?> MaxFiles(this Core.Hooks.IState<UploadContext?> state, int maxFiles)
+    public static Core.Hooks.IState<UploadContext> MaxFiles(this Core.Hooks.IState<UploadContext> state, int maxFiles)
     {
-        if (state.Value != null)
-        {
-            state.Set(state.Value with { MaxFiles = maxFiles });
-        }
+        state.Set(state.Value with { MaxFiles = maxFiles });
         return state;
     }
 }

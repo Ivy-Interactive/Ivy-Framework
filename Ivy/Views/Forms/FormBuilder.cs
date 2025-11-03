@@ -125,7 +125,7 @@ public class FormBuilder<TModel> : ViewBase
     private readonly Dictionary<string, FormBuilderField<TModel>> _fields;
 
     private readonly IState<TModel> _model;
-    private readonly IState<UploadContext?>? _uploadContext;
+    private readonly IState<UploadContext>? _uploadContext;
 
     /// <summary>The text displayed on the form's submit button.</summary>
     public readonly string SubmitTitle;
@@ -141,7 +141,7 @@ public class FormBuilder<TModel> : ViewBase
     /// <param name="model">Reactive state containing model object to be edited by form.</param>
     /// <param name="submitTitle">The text displayed on the form's submit button. Default is "Save".</param>
     /// <param name="uploadContext">Optional upload context state for FileUpload fields. Required if form contains FileUpload fields.</param>
-    public FormBuilder(IState<TModel> model, string submitTitle = "Save", IState<UploadContext?>? uploadContext = null)
+    public FormBuilder(IState<TModel> model, string submitTitle = "Save", IState<UploadContext>? uploadContext = null)
     {
         _model = model;
         _uploadContext = uploadContext;

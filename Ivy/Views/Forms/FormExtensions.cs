@@ -58,7 +58,7 @@ public static class FormExtensions
     /// maintaining the convenience of automatic scaffolding for rapid development.</para>
     /// </remarks>
     /// <seealso cref="FormBuilder{T}"/>
-    public static FormBuilder<T> ToForm<T>(this IState<T> obj, string submitTitle = "Save", IState<UploadContext?>? upload = null)
+    public static FormBuilder<T> ToForm<T>(this IState<T> obj, string submitTitle = "Save", IState<UploadContext>? upload = null)
     {
         return new FormBuilder<T>(obj, submitTitle, upload);
     }

@@ -206,7 +206,7 @@ public static class FileInputExtensions
     /// <param name="placeholder">Optional placeholder text displayed when no files are selected.</param>
     /// <param name="disabled">Whether the input should be disabled initially.</param>
     /// <param name="variant">The visual variant of the file input.</param>
-    public static FileInputBase ToFileInput(this IAnyState state, IState<UploadContext?> uploadContext, string? placeholder = null, bool disabled = false, FileInputs variant = FileInputs.Drop)
+    public static FileInputBase ToFileInput(this IAnyState state, IState<UploadContext> uploadContext, string? placeholder = null, bool disabled = false, FileInputs variant = FileInputs.Drop)
     {
         static bool IsFileUploadType(Type t)
         {
