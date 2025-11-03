@@ -228,9 +228,9 @@ public class AppHub(
                     if (appState.UpdateScheduled) return;
                     appState.UpdateScheduled = true;
 
-                    appState.EventQueue?.Enqueue(() =>
+                    appState.EventQueue?.Enqueue(async () =>
                     {
-                        try { Thread.Sleep(16); }
+                        try { await Task.Delay(16); }
                         catch
                         {
                         }
