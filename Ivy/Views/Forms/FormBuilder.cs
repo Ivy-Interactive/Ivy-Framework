@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Linq.Expressions;
 using System.Reflection;
+using Ivy.Client;
 using Ivy.Core;
 using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
@@ -707,19 +708,92 @@ public class FormBuilder<TModel> : ViewBase
     {
         (Func<Task<bool>> onSubmit, IView formView, IView validationView, bool submitting) = UseForm(this.Context);
 
+        // Track upload state to disable submit button
+        var hasUploading = UseState(false);
+        var client = UseService<IClientProvider>();
+
+        UseEffect(() =>
+        {
+            hasUploading.Set(CheckForLoadingUploads(_model.Value));
+        }, _model);
+
         async ValueTask HandleSubmit()
         {
+            if (hasUploading.Value)
+            {
+                client.Toast(
+                    "File uploads are still in progress. Please wait for them to complete.",
+                    "Uploads in Progress"
+                );
+                return;
+            }
             await onSubmit();
         }
 
         return Layout.Vertical()
                | formView
                | Layout.Horizontal(new Button(SubmitTitle).HandleClick(HandleSubmit)
-                   .Loading(submitting).Disabled(submitting).Size(Size), validationView);
+                   .Loading(submitting).Disabled(submitting || hasUploading.Value).Size(Size), validationView);
     }
 
     private static string InvalidMessage(int invalidFields)
     {
         return invalidFields == 1 ? "There is 1 invalid field." : $"There are {invalidFields} invalid fields.";
+    }
+
+    /// <summary>Recursively checks if any FileUpload fields in the model are currently uploading.</summary>
+    private static bool CheckForLoadingUploads(object? obj)
+    {
+        if (obj == null) return false;
+
+        // Check single file upload
+        if (obj is IFileUpload file)
+            return file.Status == FileUploadStatus.Loading;
+
+        // Check collection of uploads
+        if (obj is IEnumerable<IFileUpload> files)
+            return files.Any(f => f.Status == FileUploadStatus.Loading);
+
+        // Recursively check all properties
+        var type = obj.GetType();
+
+        // Skip primitive types and strings
+        if (type.IsPrimitive || type == typeof(string) || type == typeof(decimal) || type == typeof(DateTime) || type == typeof(DateTimeOffset))
+            return false;
+
+        foreach (var prop in type.GetProperties(BindingFlags.Public | BindingFlags.Instance))
+        {
+            // Skip indexed properties
+            if (prop.GetIndexParameters().Length > 0)
+                continue;
+
+            try
+            {
+                var value = prop.GetValue(obj);
+                if (CheckForLoadingUploads(value))
+                    return true;
+            }
+            catch
+            {
+                // Skip properties that can't be read
+            }
+        }
+
+        // Check fields as well
+        foreach (var field in type.GetFields(BindingFlags.Public | BindingFlags.Instance))
+        {
+            try
+            {
+                var value = field.GetValue(obj);
+                if (CheckForLoadingUploads(value))
+                    return true;
+            }
+            catch
+            {
+                // Skip fields that can't be read
+            }
+        }
+
+        return false;
     }
 }
