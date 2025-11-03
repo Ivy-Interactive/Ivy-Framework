@@ -101,8 +101,8 @@ public class AppHub(
                 queryableRegistry,
                 server.Args,
                 Context.ConnectionId));
-            appServices.AddSingleton(typeof(IUploadService), new UploadService(Context.ConnectionId));
             appServices.AddSingleton(typeof(IClientProvider), clientProvider);
+            appServices.AddSingleton(typeof(IUploadService), new UploadService(Context.ConnectionId, clientProvider));
 
             if (server.AuthProviderType != null)
             {

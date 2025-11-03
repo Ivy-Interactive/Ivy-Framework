@@ -125,6 +125,7 @@ public class FormBuilder<TModel> : ViewBase
     private readonly Dictionary<string, FormBuilderField<TModel>> _fields;
 
     private readonly IState<TModel> _model;
+    private readonly IState<UploadContext?>? _uploadContext;
 
     /// <summary>The text displayed on the form's submit button.</summary>
     public readonly string SubmitTitle;
@@ -139,9 +140,11 @@ public class FormBuilder<TModel> : ViewBase
     /// <summary>Initializes form builder for specified model state with automatic field scaffolding.</summary>
     /// <param name="model">Reactive state containing model object to be edited by form.</param>
     /// <param name="submitTitle">The text displayed on the form's submit button. Default is "Save".</param>
-    public FormBuilder(IState<TModel> model, string submitTitle = "Save")
+    /// <param name="uploadContext">Optional upload context state for FileUpload fields. Required if form contains FileUpload fields.</param>
+    public FormBuilder(IState<TModel> model, string submitTitle = "Save", IState<UploadContext?>? uploadContext = null)
     {
         _model = model;
+        _uploadContext = uploadContext;
         SubmitTitle = submitTitle;
         _fields = [];
         _Scaffold();
@@ -211,9 +214,14 @@ public class FormBuilder<TModel> : ViewBase
 
         if (IsFileUploadType(nonNullableType))
         {
-            //todo: this needs 
-            var upload = this.UseUpload((fileUpload, stream, cancellationToken) => Task.CompletedTask);
-            return (state) => state.ToFileInput(upload).Size(Size);
+            if (_uploadContext == null)
+            {
+                throw new InvalidOperationException(
+                    $"Cannot scaffold field '{name}' of type '{type.Name}'. " +
+                    "FileUpload fields require an UploadContext to be provided to the FormBuilder constructor. " +
+                    "Use: model.ToForm(uploadContext: uploadContextState)");
+            }
+            return (state) => state.ToFileInput(_uploadContext).Size(Size);
         }
 
         // Collections of FileUpload / FileUpload<T>
@@ -224,8 +232,14 @@ public class FormBuilder<TModel> : ViewBase
                 var arg = it.GetGenericArguments()[0];
                 if (IsFileUploadType(arg))
                 {
-                    var upload = this.UseUpload((fileUpload, stream, cancellationToken) => Task.CompletedTask);
-                    return (state) => state.ToFileInput(upload).Size(Size);
+                    if (_uploadContext == null)
+                    {
+                        throw new InvalidOperationException(
+                            $"Cannot scaffold field '{name}' of type '{type.Name}'. " +
+                            "FileUpload fields require an UploadContext to be provided to the FormBuilder constructor. " +
+                            "Use: model.ToForm(uploadContext: uploadContextState)");
+                    }
+                    return (state) => state.ToFileInput(_uploadContext).Size(Size);
                 }
             }
         }

@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using Ivy.Core.Helpers;
 using Ivy.Hooks;
 using Ivy.Services;
 using Ivy.Shared;
@@ -185,8 +186,25 @@ public class FormFileUpload : ViewBase
 {
     public override object? Build()
     {
-        return "";
-        //var model = UseState(new FormFileUploadModel());
-        //return model.ToForm();
+        var model = UseState(new FormFileUploadModel());
+
+        // Create a nested state for the Attachment property
+        var (attachmentAnyState, _) = StateHelpers.MemberState(model, m => m.Attachment);
+        var attachmentState = attachmentAnyState.As<FileUpload<byte[]>?>();
+
+        // Create upload handler and context for the form
+        var uploadContext = this.UseUpload(
+            MemoryStreamUploadHandler.Create(attachmentState)
+        ).Accept("*/*").MaxFileSize(5 * 1024 * 1024);
+
+        return Layout.Vertical()
+               | Text.H1("Form with File Upload")
+               | model.ToForm(upload: uploadContext)
+                   .Label(x => x.Attachment, "Attachment (Optional)")
+               | (model.Value.Attachment != null
+                    ? attachmentState.ToDetails()
+                        .Builder(e => e!.Length, e => e.Func((long x) => Utils.FormatBytes(x)))
+                        .Builder(e => e!.Progress, e => e.Func((float x) => x.ToString("P0")))
+                    : null!);
     }
 }

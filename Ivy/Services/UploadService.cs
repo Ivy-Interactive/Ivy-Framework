@@ -3,6 +3,8 @@ using System.Collections.Immutable;
 using System.ComponentModel.DataAnnotations;
 using System.Reactive.Disposables;
 using System.Text.Json.Serialization;
+using Ivy.Client;
+using Ivy.Core;
 using Ivy.Core.Hooks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -342,7 +344,7 @@ public class UploadController(AppSessionStore sessionStore) : Controller
     }
 }
 
-public class UploadService(string connectionId) : IUploadService, IDisposable
+public class UploadService(string connectionId, IClientProvider clientProvider) : IUploadService, IDisposable
 {
     private readonly ConcurrentDictionary<Guid, (UploadDelegate handler, CancellationTokenSource cts, string? mimeType, string? fileName, Func<(string? accept, long? maxFileSize)> getValidation)> _uploads = new();
     private readonly ConcurrentDictionary<Guid, CancellationTokenSource> _inflightUploads = new();
@@ -411,7 +413,9 @@ public class UploadService(string connectionId) : IUploadService, IDisposable
             var sizeValidation = Widgets.Inputs.FileInputValidation.ValidateFileSize(fileUpload, maxFileSize);
             if (!sizeValidation.IsValid)
             {
-                return new BadRequestObjectResult(sizeValidation.ErrorMessage);
+                // Send toast notification for file size error
+                clientProvider.Toast(sizeValidation.ErrorMessage ?? "File is too large", "File too large");
+                return new OkResult(); // Return OK to prevent frontend error handling
             }
         }
 
@@ -421,7 +425,9 @@ public class UploadService(string connectionId) : IUploadService, IDisposable
             var typeValidation = Widgets.Inputs.FileInputValidation.ValidateFileType(fileUpload, accept);
             if (!typeValidation.IsValid)
             {
-                return new BadRequestObjectResult(typeValidation.ErrorMessage);
+                // Send toast notification for file type error
+                clientProvider.Toast(typeValidation.ErrorMessage ?? "File type is not allowed", "Invalid file type");
+                return new OkResult(); // Return OK to prevent frontend error handling
             }
         }
 

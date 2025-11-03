@@ -7,6 +7,7 @@ import { getWidth } from '@/lib/styles';
 import { InvalidIcon } from '@/components/InvalidIcon';
 import { Sizes } from '@/types/sizes';
 import { useEventHandler } from '@/components/event-handler';
+import { toast } from '@/hooks/use-toast';
 import {
   fileInputVariants,
   uploadIconVariants,
@@ -64,7 +65,6 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
   const handleEvent = useEventHandler();
   const [isDragging, setIsDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-  const [validationError, setValidationError] = useState<string | null>(null);
 
   // Be defensive in case events is undefined at runtime
   const hasCancelHandler = Array.isArray(events) && events.includes('OnCancel');
@@ -78,14 +78,19 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
   };
 
   const validateFile = useCallback(
-    (file: File): string | null => {
+    (file: File): boolean => {
       // Validate file size
       if (maxFileSize && file.size > maxFileSize) {
         const maxSizeFormatted = formatBytes(maxFileSize);
         const fileSizeFormatted = formatBytes(file.size);
-        return `File '${file.name}' is too large (${fileSizeFormatted}). Maximum allowed size is ${maxSizeFormatted}.`;
+        toast({
+          title: 'File too large',
+          description: `File '${file.name}' is ${fileSizeFormatted}. Maximum allowed size is ${maxSizeFormatted}.`,
+          variant: 'destructive',
+        });
+        return false;
       }
-      return null;
+      return true;
     },
     [maxFileSize]
   );
@@ -94,13 +99,10 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
     async (file: File): Promise<void> => {
       if (!uploadUrl) return;
 
-      // Validate file before upload
-      const error = validateFile(file);
-      if (error) {
-        setValidationError(error);
+      // Validate file before upload - show toast on error
+      if (!validateFile(file)) {
         return;
       }
-      setValidationError(null);
 
       // Get the correct host from meta tag or use relative URL
       const getUploadUrl = () => {
@@ -139,14 +141,11 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
 
       // Check max files limit
       if (maxFiles && files.length > maxFiles) {
-        // Only take the first maxFiles files
-        const limitedFiles = Array.from(files).slice(0, maxFiles);
-        if (multiple) {
-          await Promise.all(limitedFiles.map(uploadFile));
-        } else {
-          await uploadFile(limitedFiles[0]);
-        }
-        // Reset the input so selecting the same file again triggers onChange
+        toast({
+          title: 'Too many files',
+          description: `You selected ${files.length} files. Maximum allowed is ${maxFiles}.`,
+          variant: 'destructive',
+        });
         e.target.value = '';
         return;
       }
@@ -211,13 +210,11 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
 
       // Check max files limit
       if (maxFiles && files.length > maxFiles) {
-        // Only take the first maxFiles files
-        const limitedFiles = files.slice(0, maxFiles);
-        if (multiple) {
-          await Promise.all(limitedFiles.map(uploadFile));
-        } else {
-          await uploadFile(limitedFiles[0]);
-        }
+        toast({
+          title: 'Too many files',
+          description: `You selected ${files.length} files. Maximum allowed is ${maxFiles}.`,
+          variant: 'destructive',
+        });
         return;
       }
 
@@ -300,10 +297,10 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
       onDragOver={handleDragOver}
       onDrop={handleDrop}
     >
-      {/* Invalid icon in top right corner, above input */}
-      {(invalid || validationError) && (
+      {/* Invalid icon in top right corner - only for required field validation */}
+      {invalid && (
         <div className="absolute top-2 right-2 z-20 pointer-events-none">
-          <InvalidIcon message={invalid || validationError || ''} />
+          <InvalidIcon message={invalid} />
         </div>
       )}
       <div
