@@ -22,23 +22,12 @@ public class UploadApp : SampleBase
     }
 }
 
-// just for demonstration purposes so we can simulate delay and see progress bar in action
-public class DelayedFileUploadHandler(IUploadHandler innerHandler, TimeSpan delay) : IUploadHandler
-{
-    public Task HandleUploadAsync(FileUpload fileUpload, Stream stream, CancellationToken cancellationToken)
-    {
-        return Task.Delay(delay, cancellationToken)
-            .ContinueWith(_ => innerHandler.HandleUploadAsync(fileUpload, stream, cancellationToken), cancellationToken)
-            .Unwrap();
-    }
-}
-
 public class SingleFileUpload : ViewBase
 {
     public override object? Build()
     {
         var uploadState = UseState<FileUpload<byte[]>?>();
-        var upload = this.UseUpload(new DelayedFileUploadHandler(MemoryStreamUploadHandler.Create(uploadState), TimeSpan.FromMilliseconds(50)))
+        var upload = this.UseUpload(MemoryStreamUploadHandler.Create(uploadState))
             .Accept("*/*").MaxFileSize(10 * 1024 * 1024);
 
         return Layout.Vertical()
@@ -198,14 +187,14 @@ public class FormFileUpload : ViewBase
         var form = model.ToForm()
             .Builder(e => e.Attachment1, (state, view) =>
             {
-                var uploadContext = view.UseUpload(new DelayedFileUploadHandler(MemoryStreamUploadHandler.Create(state), TimeSpan.FromMilliseconds(50)))
+                var uploadContext = view.UseUpload(MemoryStreamUploadHandler.Create(state))
                     .Accept("image/jpeg").MaxFileSize(1 * 1024 * 1024);
                 return state.ToFileInput(uploadContext);
             })
             .Label(x => x.Attachment1, "image/jpeg (Required)")
             .Builder(e => e.Attachment2, (state, view) =>
             {
-                var uploadContext = view.UseUpload(new DelayedFileUploadHandler(MemoryStreamUploadHandler.Create(state), TimeSpan.FromMilliseconds(50)))
+                var uploadContext = view.UseUpload(MemoryStreamUploadHandler.Create(state))
                     .Accept("application/pdf").MaxFileSize(5 * 1024 * 1024);
                 return state.ToFileInput(uploadContext);
             })
