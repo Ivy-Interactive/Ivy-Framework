@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useMemo } from 'react';
 import {
   ColorScheme,
   generateTooltip,
@@ -12,9 +12,10 @@ import {
   generateEChartLegend,
   getColors,
 } from './sharedUtils';
-import { useTheme } from '@/components/theme-provider';
+import { useThemeWithMonitoring } from '@/components/theme-provider';
 import { getHeight, getWidth } from '@/lib/styles';
 import ReactECharts from 'echarts-for-react';
+import { getChartThemeColors } from './styles';
 import {
   BarProps,
   CartesianGridProps,
@@ -72,50 +73,17 @@ const BarChartWidget: React.FC<BarChartWidgetProps> = ({
   reverseStackOrder,
   layout,
 }) => {
-  const { theme } = useTheme();
-  const [themeColors, setThemeColors] = useState({
-    foreground: '#000000',
-    mutedForeground: '#666666',
-    fontSans: 'Geist, sans-serif',
-    background: '#ffffff',
+  // Use enhanced theme hook with automatic monitoring
+  const { colors, isDark } = useThemeWithMonitoring({
+    monitorDOM: false, // Disabled to prevent excessive re-renders from MutationObserver
+    monitorSystem: true, // Keep system theme monitoring for light/dark mode switching
   });
 
-  useEffect(() => {
-    const getThemeColors = () => {
-      const root = document.documentElement;
-      const computedStyle = getComputedStyle(root);
-
-      // Use the theme value directly instead of checking DOM classes
-      const isDarkMode =
-        theme === 'dark' ||
-        (theme === 'system' &&
-          window.matchMedia('(prefers-color-scheme: dark)').matches);
-
-      return {
-        foreground:
-          computedStyle.getPropertyValue('--foreground').trim() ||
-          (isDarkMode ? '#f8f8f8' : '#000000'),
-        mutedForeground:
-          computedStyle.getPropertyValue('--muted-foreground').trim() ||
-          (isDarkMode ? '#a1a1aa' : '#666666'),
-        fontSans:
-          computedStyle.getPropertyValue('--font-sans').trim() ||
-          'Geist, sans-serif',
-        background:
-          computedStyle.getPropertyValue('--background').trim() ||
-          (isDarkMode ? '#000000' : '#ffffff'),
-      };
-    };
-
-    // Update colors on next frame to avoid synchronous setState in effect
-    const frame = requestAnimationFrame(() => {
-      setThemeColors(getThemeColors());
-    });
-
-    return () => {
-      cancelAnimationFrame(frame);
-    };
-  }, [theme]);
+  // Extract chart-specific theme colors
+  const themeColors = useMemo(
+    () => getChartThemeColors(colors, isDark),
+    [colors, isDark]
+  );
 
   // When height is Full (100%), use flex to expand. Otherwise use explicit height.
   const heightStyle = height ? getHeight(height) : {};
@@ -137,67 +105,117 @@ const BarChartWidget: React.FC<BarChartWidgetProps> = ({
 
   const { categories, valueKeys, transform, largeSpread, minValue, maxValue } =
     generateDataProps(data);
-  const colors = getColors(colorScheme);
-  const series = valueKeys.map((key, i) => ({
-    name: key,
-    type: ChartType.Bar,
-    legendHoverLink: true,
-    showBackground: true,
-    data: data.map(d => d[key]),
-    stack:
-      bars && bars[i]?.stackId !== undefined
-        ? String(bars[i].stackId)
-        : undefined,
-    barGap: barGap ? `${barGap}%` : '4%',
-    barCategoryGap: barCategoryGap ? `${barCategoryGap}%` : '10%',
-    barMaxWidth: maxBarSize,
-    stackOrder: reverseStackOrder ? 'seriesDesc' : 'seriesAsc',
-    markPoint: {
-      label: {
-        show: referenceDots ? true : false,
-      },
-    },
-    markLine: referenceLines ?? {},
-    markArea: referenceAreas ?? {},
-  }));
+
+  // Chart colors depend on theme (--chart-1 through --chart-5 change for light/dark)
+  const chartColors = useMemo(
+    () => getColors(colorScheme, colors),
+    [colorScheme, colors]
+  );
+
+  // Memoize series configuration
+  const series = useMemo(
+    () =>
+      valueKeys.map((key, i) => ({
+        name: key,
+        type: ChartType.Bar,
+        legendHoverLink: true,
+        showBackground: true,
+        data: data.map(d => d[key]),
+        stack:
+          bars && bars[i]?.stackId !== undefined
+            ? String(bars[i].stackId)
+            : undefined,
+        barGap: barGap ? `${barGap}%` : '4%',
+        barCategoryGap: barCategoryGap ? `${barCategoryGap}%` : '10%',
+        barMaxWidth: maxBarSize,
+        stackOrder: reverseStackOrder ? 'seriesDesc' : 'seriesAsc',
+        markPoint: {
+          label: {
+            show: referenceDots ? true : false,
+          },
+        },
+        markLine: referenceLines ?? {},
+        markArea: referenceAreas ?? {},
+      })),
+    [
+      valueKeys,
+      data,
+      bars,
+      barGap,
+      barCategoryGap,
+      maxBarSize,
+      reverseStackOrder,
+      referenceDots,
+      referenceLines,
+      referenceAreas,
+    ]
+  );
+
   const isVertical = layout?.toLowerCase() === 'vertical';
 
-  const option = {
-    grid: generateEChartGrid(cartesianGrid),
-    color: colors,
-    textStyle: generateTextStyle(themeColors.foreground, themeColors.fontSans),
-    xAxis: generateXAxis(categories, xAxis, isVertical, {
-      mutedForeground: themeColors.mutedForeground,
-      fontSans: themeColors.fontSans,
+  // Memoize option configuration
+  const option = useMemo(
+    () => ({
+      grid: generateEChartGrid(cartesianGrid),
+      color: chartColors,
+      textStyle: generateTextStyle(
+        themeColors.foreground,
+        themeColors.fontSans
+      ),
+      xAxis: generateXAxis(categories, xAxis, isVertical, {
+        mutedForeground: themeColors.mutedForeground,
+        fontSans: themeColors.fontSans,
+      }),
+      yAxis: generateYAxis(
+        largeSpread,
+        transform,
+        minValue,
+        maxValue,
+        yAxis,
+        isVertical,
+        categories,
+        {
+          mutedForeground: themeColors.mutedForeground,
+          fontSans: themeColors.fontSans,
+        }
+      ),
+      series,
+      legend: generateEChartLegend(legend, {
+        foreground: themeColors.foreground,
+        fontSans: themeColors.fontSans,
+      }),
+      tooltip: generateTooltip(tooltip, 'shadow', {
+        foreground: themeColors.foreground,
+        fontSans: themeColors.fontSans,
+        background: themeColors.background,
+      }),
     }),
-    yAxis: generateYAxis(
+    [
+      cartesianGrid,
+      chartColors,
+      themeColors,
+      categories,
+      xAxis,
+      isVertical,
       largeSpread,
       transform,
       minValue,
       maxValue,
       yAxis,
-      isVertical,
-      categories,
-      {
-        mutedForeground: themeColors.mutedForeground,
-        fontSans: themeColors.fontSans,
-      }
-    ),
-    series,
-    legend: generateEChartLegend(legend, {
-      foreground: themeColors.foreground,
-      fontSans: themeColors.fontSans,
-    }),
-    tooltip: generateTooltip(tooltip, 'shadow', {
-      foreground: themeColors.foreground,
-      fontSans: themeColors.fontSans,
-      background: themeColors.background,
-    }),
-  };
+      series,
+      legend,
+      tooltip,
+    ]
+  );
 
   return (
     <div style={styles}>
-      <ReactECharts key={theme} option={option} style={chartStyles} />
+      <ReactECharts
+        option={option}
+        style={chartStyles}
+        notMerge={true} // Merge changes instead of full rebuild for better performance
+        lazyUpdate={true}
+      />
     </div>
   );
 };

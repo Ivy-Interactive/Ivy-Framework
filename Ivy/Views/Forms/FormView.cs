@@ -59,6 +59,7 @@ public class FormFieldView : ViewBase, IFormFieldView
     private readonly Func<object?, (bool, string)>[]? validators;
     private readonly FormValidationStrategy validationStrategy;
     private readonly Sizes size;
+    private readonly string? help;
 
     /// <summary>Layout configuration for positioning this field in the form.</summary>
     public FormFieldLayoutOptions Layout { get; }
@@ -74,7 +75,8 @@ public class FormFieldView : ViewBase, IFormFieldView
         FormFieldLayoutOptions? layoutOptions = null,
         Func<object?, (bool, string)>[]? validators = null,
         FormValidationStrategy validationStrategy = FormValidationStrategy.OnBlur,
-        Sizes size = Sizes.Medium)
+        Sizes size = Sizes.Medium,
+        string? help = null)
     {
         this.bindingState = bindingState;
         this.inputFactory = inputFactory;
@@ -87,6 +89,7 @@ public class FormFieldView : ViewBase, IFormFieldView
         this.validators = validators;
         this.validationStrategy = validationStrategy;
         this.size = size;
+        this.help = help;
     }
 
     /// <summary>Validates the field value using configured validators.</summary>
@@ -96,6 +99,7 @@ public class FormFieldView : ViewBase, IFormFieldView
 
         if (validators != null)
         {
+
             var isValid = true;
             var message = string.Empty;
             foreach (var validator in validators)
@@ -160,7 +164,7 @@ public class FormFieldView : ViewBase, IFormFieldView
             input.HandleBlur(OnBlur);
         }
 
-        return visibleState.Value ? new Field(input, label, description, required) { Size = size } : null;
+        return visibleState.Value ? new Field(input, label, description, required, help) { Size = size } : null;
     }
 }
 
@@ -183,14 +187,15 @@ public class FormFieldBinding<TModel>(
     FormFieldLayoutOptions? layoutOptions = null,
     Func<object?, (bool, string)>[]? validators = null,
     FormValidationStrategy validationStrategy = FormValidationStrategy.OnBlur,
-    Sizes size = Sizes.Medium
+    Sizes size = Sizes.Medium,
+    string? help = null
     ) : IFormFieldBinding<TModel>
 {
     /// <summary>Creates a bound field view connected to the model state.</summary>
     public (IFormFieldView, IDisposable) Bind(IState<TModel> model)
     {
         var (fieldState, disposable) = StateHelpers.MemberState(model, selector);
-        var fieldView = new FormFieldView(fieldState, factory, visible, updateSignal, label, description, required, layoutOptions, validators, validationStrategy, size);
+        var fieldView = new FormFieldView(fieldState, factory, visible, updateSignal, label, description, required, layoutOptions, validators, validationStrategy, size, help);
         return (fieldView, disposable);
     }
 }

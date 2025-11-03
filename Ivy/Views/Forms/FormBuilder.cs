@@ -106,6 +106,9 @@ public class FormBuilderField<TModel>
     /// <summary>Optional description text providing additional context for field.</summary>
     public string? Description { get; set; }
 
+    /// <summary>Optional help text displayed as tooltip on info icon next to label.</summary>
+    public string? Help { get; set; }
+
     /// <summary>Factory function creating input control for this field with access to view context.</summary>
     public Func<IAnyState, IViewContext, IAnyInput>? InputFactory { get; set; }
 
@@ -376,6 +379,17 @@ public class FormBuilder<TModel> : ViewBase
     {
         var hint = GetField(field);
         hint.Description = description;
+        return this;
+    }
+
+    /// <summary>Sets help text for specified field displayed as tooltip on info icon next to label.</summary>
+    /// <param name="field">Expression identifying field to configure.</param>
+    /// <param name="help">Help text to display in tooltip.</param>
+    /// <returns>Form builder instance for method chaining.</returns>
+    public FormBuilder<TModel> Help(Expression<Func<TModel, object>> field, string help)
+    {
+        var hint = GetField(field);
+        hint.Help = help;
         return this;
     }
 
@@ -656,7 +670,8 @@ public class FormBuilder<TModel> : ViewBase
                     new FormFieldLayoutOptions(e.RowKey, e.Column, e.Order, e.Group),
                     e.Validators.ToArray(),
                     ValidationStrategy,
-                    Size
+                    Size,
+                    e.Help
                 );
                 return binding;
             })

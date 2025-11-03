@@ -99,10 +99,12 @@ public class FormApp : SampleBase
         FormBuilder<UserModel> BuildForm(IState<UserModel> x) =>
             x.ToForm()
                 .Label(m => m.Name, "Full Name")
+                .Description(m => m.Name, "Make sure you enter your full name.")
+                .Help(m => m.Name, "Use your full legal name as it appears on official documents")
                 .Builder(m => m.IsAwesome, s => s.ToBoolInput().Description("Is this user awesome?"))
                 .Builder(m => m.Gender, s => s.ToSelectInput())
                 .Builder(m => m.Json, s => s.ToCodeInput().Language(Languages.Json))
-                .Description(m => m.Name, "Make sure you enter your full name.");
+                .Help(m => m.Json, "Enter JSON data in valid format. Use curly braces for objects and square brackets for arrays.");
 
         var form0 = Layout.Horizontal(
             new Card(

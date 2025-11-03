@@ -1,4 +1,4 @@
-﻿using Ivy.Core;
+using Ivy.Core;
 using Ivy.Shared;
 using Ivy.Widgets.Inputs;
 using System;
@@ -18,7 +18,8 @@ public record Field : WidgetBase<Field>
     /// <param name="label">Optional label text.</param>
     /// <param name="description">Optional description.</param>
     /// <param name="required">Whether field is required.</param>
-    public Field(IAnyInput input, string? label = null, string? description = null, bool required = false) : base([input])
+    /// <param name="help">Optional help text displayed as tooltip on info icon.</param>
+    public Field(IAnyInput input, string? label = null, string? description = null, bool required = false, string? help = null) : base([input])
     {
         var labelProp = input.GetType().GetProperty("Label");
         if (labelProp != null && labelProp.PropertyType == typeof(string))
@@ -40,6 +41,7 @@ public record Field : WidgetBase<Field>
         Label = label;
         Description = description;
         Required = required;
+        Help = help;
     }
 
     /// <summary>Label text displayed for field.</summary>
@@ -50,6 +52,9 @@ public record Field : WidgetBase<Field>
 
     /// <summary>Whether field is required. Default is false.</summary>
     [Prop] public bool Required { get; set; }
+
+    /// <summary>Help text displayed as tooltip on info icon next to label.</summary>
+    [Prop] public string? Help { get; set; }
 
     /// <summary>The size of the field affecting label and input sizing. Default is Medium.</summary>
     [Prop] public Sizes Size { get; set; } = Sizes.Medium;
@@ -81,6 +86,10 @@ public static class FieldExtensions
     /// <param name="description">The description text to display for the child input.</param>
     public static Field Description(this Field field, string description) => field with { Description = description };
 
+    /// <summary>Sets the help text displayed as tooltip on info icon next to label.</summary>
+    /// <param name="field">The field to configure.</param>
+    /// <param name="help">The help text to display in tooltip.</param>
+    public static Field Help(this Field field, string help) => field with { Help = help };
 
     /// <summary>Make the input child required</summary>
     /// <param name="field">The field to configure.</param>

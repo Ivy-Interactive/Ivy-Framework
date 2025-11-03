@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useMemo } from 'react';
 import { ColorScheme } from './sharedUtils';
 import { getHeight, getWidth } from '@/lib/styles';
-import { useTheme } from '@/components/theme-provider';
+import { useThemeWithMonitoring } from '@/components/theme-provider';
 import ReactECharts from 'echarts-for-react';
 import {
   generateDataProps,
@@ -13,6 +13,7 @@ import {
   generateEChartGrid,
   generateYAxis,
 } from './sharedUtils';
+import { generateGradientColors, getChartThemeColors } from './styles';
 import {
   ChartType,
   XAxisProps,
@@ -60,50 +61,17 @@ const AreaChartWidget: React.FC<AreaChartWidgetProps> = ({
   referenceDots,
   colorScheme,
 }) => {
-  const { theme } = useTheme();
-  const [themeColors, setThemeColors] = useState({
-    foreground: '#000000',
-    mutedForeground: '#666666',
-    fontSans: 'Geist, sans-serif',
-    background: '#ffffff',
+  // Use enhanced theme hook with automatic monitoring
+  const { colors, isDark } = useThemeWithMonitoring({
+    monitorDOM: false, // Disabled to prevent excessive re-renders from MutationObserver
+    monitorSystem: true, // Keep system theme monitoring for light/dark mode switching
   });
 
-  useEffect(() => {
-    const getThemeColors = () => {
-      const root = document.documentElement;
-      const computedStyle = getComputedStyle(root);
-
-      // Use the theme value directly instead of checking DOM classes
-      const isDarkMode =
-        theme === 'dark' ||
-        (theme === 'system' &&
-          window.matchMedia('(prefers-color-scheme: dark)').matches);
-
-      return {
-        foreground:
-          computedStyle.getPropertyValue('--foreground').trim() ||
-          (isDarkMode ? '#f8f8f8' : '#000000'),
-        mutedForeground:
-          computedStyle.getPropertyValue('--muted-foreground').trim() ||
-          (isDarkMode ? '#a1a1aa' : '#666666'),
-        fontSans:
-          computedStyle.getPropertyValue('--font-sans').trim() ||
-          'Geist, sans-serif',
-        background:
-          computedStyle.getPropertyValue('--background').trim() ||
-          (isDarkMode ? '#000000' : '#ffffff'),
-      };
-    };
-
-    // Update colors on next frame to avoid synchronous setState in effect
-    const frame = requestAnimationFrame(() => {
-      setThemeColors(getThemeColors());
-    });
-
-    return () => {
-      cancelAnimationFrame(frame);
-    };
-  }, [theme]);
+  // Extract chart-specific theme colors
+  const themeColors = useMemo(
+    () => getChartThemeColors(colors, isDark),
+    [colors, isDark]
+  );
 
   // When height is Full (100%), use flex to expand. Otherwise use explicit height.
   const heightStyle = height ? getHeight(height) : {};
@@ -125,80 +93,119 @@ const AreaChartWidget: React.FC<AreaChartWidgetProps> = ({
 
   const { categories, valueKeys } = generateDataProps(data);
 
-  const colors = getColors(colorScheme);
+  // Chart colors depend on theme (--chart-1 through --chart-5 change for light/dark)
+  const chartColors = useMemo(
+    () => getColors(colorScheme, colors),
+    [colorScheme, colors]
+  );
+
   const { transform, largeSpread, minValue, maxValue } =
     getTransformValueFn(data);
-  // precompute
-  const gradientColors = colors.map(color => ({
-    opacity: 0.4,
-    type: 'linear',
-    x: 0,
-    y: 0,
-    x2: 0,
-    y2: 1,
-    colorStops: [
-      { offset: 0, color },
-      { offset: 1, color: 'transparent' },
-    ],
-  }));
-  const series = valueKeys.map((key, i) => {
-    const areaConfig = areas?.find(a => a.dataKey.toLowerCase() === key);
 
-    return {
-      name: key,
-      type: ChartType.Line,
-      smooth: areaConfig?.curveType?.toLowerCase() === 'natural',
-      lineStyle: {
-        width: areaConfig?.strokeWidth ?? 2,
-        color: areaConfig?.stroke ?? colors[i],
-        type: areaConfig?.strokeDashArray ? 'dashed' : 'solid',
-      },
-      showSymbol: false,
-      areaStyle: gradientColors[i],
-      emphasis: { focus: 'series' },
-      data: data.map(d => d[key]),
-      markPoint: referenceDots ?? {},
-      markLine: referenceLines ?? {},
-      markArea: referenceAreas ?? {},
-    };
-  });
+  // Memoize gradient colors
+  const gradientColors = useMemo(
+    () => generateGradientColors(chartColors, 0.4),
+    [chartColors]
+  );
 
-  const option = {
-    grid: generateEChartGrid(cartesianGrid),
-    color: colors,
-    tooltip: generateTooltip(tooltip, 'cross', {
-      foreground: themeColors.foreground,
-      fontSans: themeColors.fontSans,
-      background: themeColors.background,
+  // Memoize series configuration
+  const series = useMemo(
+    () =>
+      valueKeys.map((key, i) => {
+        const areaConfig = areas?.find(a => a.dataKey.toLowerCase() === key);
+
+        return {
+          name: key,
+          type: ChartType.Line,
+          smooth: areaConfig?.curveType?.toLowerCase() === 'natural',
+          lineStyle: {
+            width: areaConfig?.strokeWidth ?? 2,
+            color: areaConfig?.stroke ?? chartColors[i],
+            type: areaConfig?.strokeDashArray ? 'dashed' : 'solid',
+          },
+          showSymbol: false,
+          areaStyle: gradientColors[i],
+          emphasis: { focus: 'series' },
+          data: data.map(d => d[key]),
+          markPoint: referenceDots ?? {},
+          markLine: referenceLines ?? {},
+          markArea: referenceAreas ?? {},
+        };
+      }),
+    [
+      valueKeys,
+      areas,
+      chartColors,
+      gradientColors,
+      data,
+      referenceDots,
+      referenceLines,
+      referenceAreas,
+    ]
+  );
+
+  // Memoize complete option configuration
+  const option = useMemo(
+    () => ({
+      grid: generateEChartGrid(cartesianGrid),
+      color: chartColors,
+      tooltip: generateTooltip(tooltip, 'cross', {
+        foreground: themeColors.foreground,
+        fontSans: themeColors.fontSans,
+        background: themeColors.background,
+      }),
+      legend: generateEChartLegend(legend, {
+        foreground: themeColors.foreground,
+        fontSans: themeColors.fontSans,
+      }),
+      textStyle: generateTextStyle(
+        themeColors.foreground,
+        themeColors.fontSans
+      ),
+      xAxis: generateXAxis(categories as string[], xAxis, false, {
+        mutedForeground: themeColors.mutedForeground,
+        fontSans: themeColors.fontSans,
+      }),
+      yAxis: generateYAxis(
+        largeSpread,
+        transform,
+        minValue,
+        maxValue,
+        yAxis,
+        false,
+        undefined,
+        {
+          mutedForeground: themeColors.mutedForeground,
+          fontSans: themeColors.fontSans,
+        }
+      ),
+      series: series,
     }),
-    legend: generateEChartLegend(legend, {
-      foreground: themeColors.foreground,
-      fontSans: themeColors.fontSans,
-    }),
-    textStyle: generateTextStyle(themeColors.foreground, themeColors.fontSans),
-    xAxis: generateXAxis(categories as string[], xAxis, false, {
-      mutedForeground: themeColors.mutedForeground,
-      fontSans: themeColors.fontSans,
-    }),
-    yAxis: generateYAxis(
+    [
+      cartesianGrid,
+      chartColors,
+      tooltip,
+      themeColors,
+      legend,
+      categories,
+      xAxis,
       largeSpread,
       transform,
       minValue,
       maxValue,
       yAxis,
-      false,
-      undefined,
-      {
-        mutedForeground: themeColors.mutedForeground,
-        fontSans: themeColors.fontSans,
-      }
-    ),
-    series: series,
-  };
+      series,
+    ]
+  );
 
   return (
     <div style={styles}>
-      <ReactECharts key={theme} option={option} style={chartStyles} />
+      <ReactECharts
+        option={option}
+        style={chartStyles}
+        notMerge={true} // Merge changes instead of full rebuild for better performance
+        lazyUpdate={true}
+      />
     </div>
   );
 };

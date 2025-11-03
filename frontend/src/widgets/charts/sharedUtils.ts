@@ -11,43 +11,16 @@ import {
   YAxisProps,
 } from './chartTypes';
 import { ChartData } from './chartTypes';
+import {
+  generateTextStyle,
+  generateAxisLabelStyle,
+  type ChartThemeColors,
+} from './styles/theme';
 
-export type ColorScheme = 'Default' | 'Rainbow';
-const defaultColors = ['chart-1', 'chart-2', 'chart-3', 'chart-4', 'chart-5'];
-const rainbowColors = [
-  'blue',
-  'cyan',
-  'yellow',
-  'red',
-  'orange',
-  'purple',
-  'lime',
-  'indigo',
-  'rose',
-  'green',
-  'pink',
-  'teal',
-  'amber',
-  'violet',
-  'emerald',
-  'fuchsia',
-  'sky',
-];
-
-export const getColors = (scheme: ColorScheme): string[] => {
-  switch (scheme) {
-    case 'Default':
-      return defaultColors.map(name =>
-        getComputedStyle(document.documentElement)
-          .getPropertyValue(`--${name}`)
-          .trim()
-      );
-    case 'Rainbow':
-      return rainbowColors;
-    default:
-      return [];
-  }
-};
+// Re-export from styles
+export type { ColorScheme } from './styles/colors';
+export { getChartColors as getColors } from './styles/colors';
+export { generateTextStyle, generateAxisLabelStyle, type ChartThemeColors };
 
 export const generateDataProps = (data: Record<string, unknown>[]) => {
   if (data.length === 0) {
@@ -92,12 +65,13 @@ export function generateEChartGrid(
   hasLegend: boolean = false
 ) {
   const defaultGrid = {
-    show: true,
+    show: false, // Hide grid border to remove the square frame
     left: 2,
     right: 2,
     top: 30,
     bottom: hasLegend ? 60 : 30, // More space for legend
     containLabel: true,
+    borderWidth: 0, // Ensure no border is drawn
   };
 
   if (!cartesianGrid) return defaultGrid;
@@ -154,23 +128,7 @@ export const getTransformValueFn = (data: ChartData[]) => {
   return { transform, largeSpread, minValue, maxValue };
 };
 
-export const generateTextStyle = (
-  foreground: string = '#000000',
-  fontSans: string = 'Geist, sans-serif'
-) => ({
-  color: foreground,
-  fontFamily: fontSans,
-  fontSize: 12,
-});
-
-export const generateAxisLabelStyle = (
-  mutedForeground: string = '#666666',
-  fontSans: string = 'Geist, sans-serif'
-) => ({
-  color: mutedForeground,
-  fontFamily: fontSans,
-  fontSize: 11,
-});
+// Text and axis styles are now imported from './styles/theme'
 
 export const generateSeries = (
   data: ChartData[],
@@ -230,6 +188,29 @@ export const generateXAxis = (
       themeColors?.fontSans
     ),
   },
+  axisLine: {
+    show: true,
+    lineStyle: {
+      type: 'dashed',
+      color: themeColors?.mutedForeground,
+      opacity: 0.1,
+    },
+  },
+  axisTick: {
+    show: true,
+    lineStyle: {
+      color: themeColors?.mutedForeground,
+      opacity: 0.4,
+    },
+  },
+  splitLine: {
+    show: true,
+    lineStyle: {
+      type: 'dashed',
+      color: themeColors?.mutedForeground,
+      opacity: 0.4,
+    },
+  },
 });
 
 export const generateYAxis = (
@@ -274,6 +255,29 @@ export const generateYAxis = (
     min: largeSpread ? safeTransform(minValue) : 0,
     max: largeSpread ? safeTransform(maxValue) : 'dataMax',
     position: yAxis?.[0]?.orientation === 'Right' ? 'right' : 'left',
+    axisLine: {
+      show: true,
+      lineStyle: {
+        type: 'dashed',
+        color: themeColors?.mutedForeground,
+        opacity: 0.1,
+      },
+    },
+    axisTick: {
+      show: true,
+      lineStyle: {
+        color: themeColors?.mutedForeground,
+        opacity: 0.4,
+      },
+    },
+    splitLine: {
+      show: true,
+      lineStyle: {
+        type: 'dashed',
+        color: themeColors?.mutedForeground,
+        opacity: 0.4,
+      },
+    },
   };
 };
 

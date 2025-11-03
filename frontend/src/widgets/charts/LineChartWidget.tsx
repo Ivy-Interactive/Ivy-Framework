@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useMemo } from 'react';
 import ReactECharts from 'echarts-for-react';
 import { getHeight, getWidth } from '@/lib/styles';
-import { useTheme } from '@/components/theme-provider';
+import { useThemeWithMonitoring } from '@/components/theme-provider';
 import {
   generateDataProps,
   generateEChartGrid,
@@ -14,6 +14,7 @@ import {
   getColors,
   getTransformValueFn,
 } from './sharedUtils';
+import { getChartThemeColors } from './styles';
 import { LineChartWidgetProps } from './chartTypes';
 
 const LineChartWidget: React.FC<LineChartWidgetProps> = ({
@@ -31,50 +32,17 @@ const LineChartWidget: React.FC<LineChartWidgetProps> = ({
   referenceDots,
   colorScheme,
 }) => {
-  const { theme } = useTheme();
-  const [themeColors, setThemeColors] = useState({
-    foreground: '#000000',
-    mutedForeground: '#666666',
-    fontSans: 'Geist, sans-serif',
-    background: '#ffffff',
+  // Use enhanced theme hook with automatic monitoring
+  const { colors, isDark } = useThemeWithMonitoring({
+    monitorDOM: false, // Disabled to prevent excessive re-renders from MutationObserver
+    monitorSystem: true, // Keep system theme monitoring for light/dark mode switching
   });
 
-  useEffect(() => {
-    const getThemeColors = () => {
-      const root = document.documentElement;
-      const computedStyle = getComputedStyle(root);
-
-      // Use the theme value directly instead of checking DOM classes
-      const isDarkMode =
-        theme === 'dark' ||
-        (theme === 'system' &&
-          window.matchMedia('(prefers-color-scheme: dark)').matches);
-
-      return {
-        foreground:
-          computedStyle.getPropertyValue('--foreground').trim() ||
-          (isDarkMode ? '#f8f8f8' : '#000000'),
-        mutedForeground:
-          computedStyle.getPropertyValue('--muted-foreground').trim() ||
-          (isDarkMode ? '#a1a1aa' : '#666666'),
-        fontSans:
-          computedStyle.getPropertyValue('--font-sans').trim() ||
-          'Geist, sans-serif',
-        background:
-          computedStyle.getPropertyValue('--background').trim() ||
-          (isDarkMode ? '#000000' : '#ffffff'),
-      };
-    };
-
-    // Update colors on next frame to avoid synchronous setState in effect
-    const frame = requestAnimationFrame(() => {
-      setThemeColors(getThemeColors());
-    });
-
-    return () => {
-      cancelAnimationFrame(frame);
-    };
-  }, [theme]);
+  // Extract chart-specific theme colors
+  const themeColors = useMemo(
+    () => getChartThemeColors(colors, isDark),
+    [colors, isDark]
+  );
 
   // When height is Full (100%), use flex to expand. Otherwise use explicit height.
   const heightStyle = height ? getHeight(height) : {};
@@ -94,55 +62,92 @@ const LineChartWidget: React.FC<LineChartWidgetProps> = ({
     width: '100%',
   };
 
-  const colors = getColors(colorScheme);
   const { categories, valueKeys } = generateDataProps(data);
+
+  // Chart colors depend on theme (--chart-1 through --chart-5 change for light/dark)
+  const chartColors = useMemo(
+    () => getColors(colorScheme, colors),
+    [colorScheme, colors]
+  );
+
   const { transform, largeSpread, minValue, maxValue } =
     getTransformValueFn(data);
 
-  const option = {
-    grid: generateEChartGrid(cartesianGrid),
-    xAxis: generateXAxis(categories as string[], xAxis, false, {
-      mutedForeground: themeColors.mutedForeground,
-      fontSans: themeColors.fontSans,
+  // Memoize option configuration
+  const option = useMemo(
+    () => ({
+      grid: generateEChartGrid(cartesianGrid),
+      xAxis: generateXAxis(categories as string[], xAxis, false, {
+        mutedForeground: themeColors.mutedForeground,
+        fontSans: themeColors.fontSans,
+      }),
+      yAxis: generateYAxis(
+        largeSpread,
+        transform,
+        minValue,
+        maxValue,
+        yAxis,
+        false,
+        undefined,
+        {
+          mutedForeground: themeColors.mutedForeground,
+          fontSans: themeColors.fontSans,
+        }
+      ),
+      tooltip: generateTooltip(tooltip, 'shadow', {
+        foreground: themeColors.foreground,
+        fontSans: themeColors.fontSans,
+        background: themeColors.background,
+      }),
+      legend: generateEChartLegend(legend, {
+        foreground: themeColors.foreground,
+        fontSans: themeColors.fontSans,
+      }),
+      textStyle: generateTextStyle(
+        themeColors.foreground,
+        themeColors.fontSans
+      ),
+      color: chartColors,
+      series: generateSeries(
+        data,
+        valueKeys,
+        lines,
+        transform,
+        referenceDots,
+        referenceLines,
+        referenceAreas
+      ),
     }),
-    yAxis: generateYAxis(
+    [
+      cartesianGrid,
+      categories,
+      xAxis,
+      themeColors,
       largeSpread,
       transform,
       minValue,
       maxValue,
       yAxis,
-      false,
-      undefined,
-      {
-        mutedForeground: themeColors.mutedForeground,
-        fontSans: themeColors.fontSans,
-      }
-    ),
-    tooltip: generateTooltip(tooltip, 'shadow', {
-      foreground: themeColors.foreground,
-      fontSans: themeColors.fontSans,
-      background: themeColors.background,
-    }),
-    legend: generateEChartLegend(legend, {
-      foreground: themeColors.foreground,
-      fontSans: themeColors.fontSans,
-    }),
-    textStyle: generateTextStyle(themeColors.foreground, themeColors.fontSans),
-    color: colors,
-    series: generateSeries(
+      tooltip,
+      legend,
+      chartColors,
       data,
       valueKeys,
       lines,
-      transform,
       referenceDots,
       referenceLines,
-      referenceAreas
-    ),
-  };
+      referenceAreas,
+    ]
+  );
 
   return (
     <div style={styles}>
-      <ReactECharts key={theme} option={option} style={chartStyles} />
+      <ReactECharts
+        option={option}
+        style={chartStyles}
+        notMerge={true} // Merge changes instead of full rebuild for better performance
+        lazyUpdate={true}
+      />
     </div>
   );
 };
