@@ -143,10 +143,14 @@ public class FileUploadValidation : ViewBase
     public override object? Build()
     {
         var settings = UseState(new FileUploadValidationSettings());
-        return new SidebarLayout(
-            new FileUploadValidationUploader(settings.Value).Key(settings),
-            settings.ToForm(submitTitle: "Update")
-        );
+        // return new SidebarLayout(
+        //     new FileUploadValidationUploader(settings.Value).Key(settings),
+        //     settings.ToForm(submitTitle: "Update")
+        // );
+        return Layout.Horizontal()
+               | new FileUploadValidationUploader(settings.Value).Key(settings)
+               | new Separator()
+               | settings.ToForm(submitTitle: "Update").WithLayout().Width(120);
     }
 }
 
@@ -155,10 +159,13 @@ public class FileUploadValidationUploader(FileUploadValidationSettings settings)
     public override object? Build()
     {
         var selectedFiles = UseState(ImmutableArray.Create<FileUpload<byte[]>>());
-        var upload = this.UseUpload(MemoryStreamUploadHandler.Create(selectedFiles)).Accept(settings.Accept!).MaxFileSize(settings.MaxFileSize).MaxFiles(settings.MaxFiles);
+        var upload = this.UseUpload(MemoryStreamUploadHandler.Create(selectedFiles))
+            .Accept(settings.Accept!)
+            .MaxFileSize(settings.MaxFileSize)
+            .MaxFiles(settings.MaxFiles);
 
         var layout = Layout.Vertical()
-                     | Text.H1("Multiple Files Upload")
+                     | Text.H1("Upload Validation")
                      | selectedFiles.ToFileInput(upload).Placeholder(settings.Placeholder!)
                      | selectedFiles.Value.ToTable()
                          .Width(Size.Full())
@@ -184,11 +191,9 @@ public class FormFileUpload : ViewBase
     {
         var model = UseState(new FormFileUploadModel());
 
-        // Create a nested state for the Attachment property
         var (attachmentAnyState, _) = StateHelpers.MemberState(model, m => m.Attachment);
         var attachmentState = attachmentAnyState.As<FileUpload<byte[]>?>();
 
-        // Create upload handler and context for the form
         var uploadContext = this.UseUpload(
             MemoryStreamUploadHandler.Create(attachmentState)
         ).Accept("*/*").MaxFileSize(5 * 1024 * 1024);

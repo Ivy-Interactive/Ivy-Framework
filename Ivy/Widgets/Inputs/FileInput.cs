@@ -268,10 +268,10 @@ public static class FileInputExtensions
         var ctx = uploadContext.Value;
         input = input with
         {
-            UploadUrl = ctx?.UploadUrl,
-            Accept = ctx?.Accept ?? input.Accept,
-            MaxFileSize = ctx?.MaxFileSize,
-            MaxFiles = ctx?.MaxFiles ?? input.MaxFiles
+            UploadUrl = ctx.UploadUrl,
+            Accept = ctx.Accept ?? input.Accept,
+            MaxFileSize = ctx.MaxFileSize,
+            MaxFiles = ctx.MaxFiles ?? input.MaxFiles
         };
 
         input = input with
@@ -279,7 +279,7 @@ public static class FileInputExtensions
             OnCancel = e =>
             {
                 var fileId = e.Value;
-                uploadContext.Value?.Cancel(fileId);
+                uploadContext.Value.Cancel(fileId);
 
                 try
                 {

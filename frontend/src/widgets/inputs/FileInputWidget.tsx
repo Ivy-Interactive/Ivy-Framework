@@ -139,11 +139,20 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
       const files = e.target.files;
       if (!files) return;
 
-      // Check max files limit
-      if (maxFiles && files.length > maxFiles) {
+      // Check max files limit (including already uploaded files)
+      const currentFileCount = Array.isArray(value)
+        ? value.length
+        : value
+          ? 1
+          : 0;
+      if (maxFiles && currentFileCount + files.length > maxFiles) {
+        const remaining = maxFiles - currentFileCount;
         toast({
           title: 'Too many files',
-          description: `You selected ${files.length} files. Maximum allowed is ${maxFiles}.`,
+          description:
+            remaining > 0
+              ? `You can only upload ${remaining} more file${remaining !== 1 ? 's' : ''}. Maximum is ${maxFiles} files total.`
+              : `Maximum of ${maxFiles} file${maxFiles !== 1 ? 's' : ''} already reached.`,
           variant: 'destructive',
         });
         e.target.value = '';
@@ -159,7 +168,7 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
       // Reset the input so selecting the same file again triggers onChange
       e.target.value = '';
     },
-    [multiple, uploadFile, maxFiles]
+    [multiple, uploadFile, maxFiles, value]
   );
 
   const handleCancel = useCallback(
@@ -208,11 +217,20 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
       const files = Array.from(e.dataTransfer.files);
       if (files.length === 0) return;
 
-      // Check max files limit
-      if (maxFiles && files.length > maxFiles) {
+      // Check max files limit (including already uploaded files)
+      const currentFileCount = Array.isArray(value)
+        ? value.length
+        : value
+          ? 1
+          : 0;
+      if (maxFiles && currentFileCount + files.length > maxFiles) {
+        const remaining = maxFiles - currentFileCount;
         toast({
           title: 'Too many files',
-          description: `You selected ${files.length} files. Maximum allowed is ${maxFiles}.`,
+          description:
+            remaining > 0
+              ? `You can only upload ${remaining} more file${remaining !== 1 ? 's' : ''}. Maximum is ${maxFiles} files total.`
+              : `Maximum of ${maxFiles} file${maxFiles !== 1 ? 's' : ''} already reached.`,
           variant: 'destructive',
         });
         return;
@@ -224,7 +242,7 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
         await uploadFile(files[0]);
       }
     },
-    [multiple, disabled, uploadFile, maxFiles]
+    [multiple, disabled, uploadFile, maxFiles, value]
   );
 
   const handleClick = useCallback(
