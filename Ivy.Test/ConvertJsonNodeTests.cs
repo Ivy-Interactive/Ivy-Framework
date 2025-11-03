@@ -88,10 +88,9 @@ public class ConvertJsonNodeTests
     {
         var json = JsonNode.Parse("""
                                   {
-                                      "name": "myfile.txt",
-                                      "size": 123,
-                                      "type": "text/plain",
-                                      "content": "SGVsbG8="
+                                      "fileName": "myfile.txt",
+                                      "length": 123,
+                                      "contentType": "text/plain"
                                   }
                                   """);
 
@@ -100,7 +99,6 @@ public class ConvertJsonNodeTests
         Assert.Equal("myfile.txt", result.FileName);
         Assert.Equal("text/plain", result.ContentType);
         Assert.Equal(123, result.Length);
-        //Assert.Equal("Hello", Encoding.UTF8.GetString(result.Content!));
     }
 
     private void Test(JsonNode? input, Type type, object? expectedResult)
