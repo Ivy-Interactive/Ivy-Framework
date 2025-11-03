@@ -556,6 +556,11 @@ public static class WebApplicationExtensions
                     html = Regex.Replace(html, "<title>.*?</title>", metaTitleTag, RegexOptions.Singleline);
                 }
 
+#if DEBUG
+                var ivyHostTag = $"<meta name=\"ivy-host\" content=\"http://localhost:{serverArgs.Port}\" />";
+                html = html.Replace("</head>", $"  {ivyHostTag}\n</head>");
+#endif
+
                 // Inject theme configuration
                 var themeService = app.Services.GetService<IThemeService>();
                 if (themeService != null)
