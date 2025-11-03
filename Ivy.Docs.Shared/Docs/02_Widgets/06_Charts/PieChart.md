@@ -129,12 +129,12 @@ public class DrillDownDemo : ViewBase
         // Country population summary (in millions)
         var countryData = new []
         {
-            new { Country = "United States", Population = 333 },
-            new { Country = "Sweden", Population = 10 },
-            new { Country = "China", Population = 1412 },
-            new { Country = "Brazil", Population = 215 },
-            new { Country = "Canada", Population = 38 },
-            new { Country = "Germany", Population = 83 }
+            new PieChartData("United States", 333),
+            new PieChartData("Sweden", 10),
+            new PieChartData("China", 1412),
+            new PieChartData("Brazil", 215),
+            new PieChartData("Canada", 38),
+            new PieChartData("Germany", 83)
         };
 
         // Population data for drill-down chart
@@ -223,30 +223,27 @@ public class DrillDownDemo : ViewBase
 
         var country = this.UseState(countries[0]);
 
-        var countryInput = country.ToSelectInput(countries.ToOptions())
-                                       .Width(15);
+        var countryInput = country.ToSelectInput(countries.ToOptions());
 
-        // Get states for selected country
+        // Get states for selected country and convert to PieChartData format
         var selectedCountryStates = populationData
             .Where(t => t.Country.Equals(country.Value))
+            .Select(t => new PieChartData(t.State, t.Population))
             .ToArray();
 
-        return Layout.Horizontal()
-
+        return Layout.Vertical()
+                | (Layout.Horizontal()
                 | (Layout.Vertical()
                    | Text.Small("Countries Population")
                    | new PieChart(countryData)
-                        .Pie(new Pie("Population", "Country")
-                            .InnerRadius(60)
-                            .OuterRadius(80)).Tooltip())
+                        .Pie("Measure", "Dimension")
+                        .Tooltip())
                 | (Layout.Vertical()
                     | Text.Small($"{country.Value} - States Population")
                     | new PieChart(selectedCountryStates)
-                            .Pie(new Pie("Population", "State")
-                                     .OuterRadius(80)).Tooltip()
-                    | countryInput);
-
-
+                            .Pie("Measure", "Dimension")
+                            .Tooltip()))
+                | countryInput;
     }
 }
 ```
