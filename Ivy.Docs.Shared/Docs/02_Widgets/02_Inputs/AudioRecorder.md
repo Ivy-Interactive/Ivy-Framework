@@ -8,6 +8,7 @@ searchHints:
   - sound
 imports:
   - Ivy.Services
+  - Ivy.Core
 ---
 
 # Audio Recorder
@@ -29,11 +30,7 @@ public class BasicAudioRecorderDemo : ViewBase
     {
         // Create an upload handler for audio chunks
         var upload = this.UseUpload(
-            (fileUpload, stream, cancellationToken) => {
-                // Process uploaded audio chunk
-                Console.WriteLine($"Received {fileUpload.Length} bytes of audio");
-                return Task.CompletedTask;
-            },
+            (fileUpload, stream, cancellationToken) => Task.CompletedTask,
             defaultContentType: "audio/webm" // Match the recorder's mime type
         );
 
@@ -56,10 +53,12 @@ public class ChunkedUploadDemo : ViewBase
 {
     public override object? Build()
     {
+        var client = UseService<IClientProvider>();
+        
         var upload = this.UseUpload(
             (fileUpload, stream, cancellationToken) => {
                 // Each chunk arrives as recording continues
-                Console.WriteLine($"Chunk received: {fileUpload.Length} bytes");
+                client.Toast($"Chunk received: {fileUpload.Length} bytes");
                 return Task.CompletedTask;
             },
             defaultContentType: "audio/webm"
@@ -80,10 +79,12 @@ public class SingleUploadDemo : ViewBase
 {
     public override object? Build()
     {
+        var client = UseService<IClientProvider>();
+        
         var upload = this.UseUpload(
             (fileUpload, stream, cancellationToken) => {
                 // Complete recording arrives when user stops
-                Console.WriteLine($"Recording complete: {fileUpload.Length} bytes");
+                client.Toast($"Recording complete: {fileUpload.Length} bytes");
                 return Task.CompletedTask;
             },
             defaultContentType: "audio/webm"
