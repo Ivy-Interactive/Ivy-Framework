@@ -288,7 +288,7 @@ export const useBackend = (
 
     const newConnection = new signalR.HubConnectionBuilder()
       .withUrl(
-        `${getIvyHost()}/messages?appId=${appId ?? ''}&appArgs=${appArgs ?? ''}&machineId=${machineId}&parentId=${parentId ?? ''}&chrome=${chrome}`
+        `${getIvyHost()}/messages?appId=${stableAppId ?? ''}&appArgs=${appArgs ?? ''}&machineId=${machineId}&parentId=${parentId ?? ''}&chrome=${chrome}`
       )
       .withAutomaticReconnect()
       .build();
@@ -305,7 +305,7 @@ export const useBackend = (
         currentConnectionRef.current = null;
       }
     };
-  }, [appArgs, stableAppId, machineId, parentId]);
+  }, [appArgs, stableAppId, machineId, parentId, chrome]);
 
   useEffect(() => {
     if (
@@ -316,7 +316,7 @@ export const useBackend = (
         .start()
         .then(() => {
           logger.info('✅ WebSocket connection established for:', {
-            appId,
+            appId: stableAppId || null,
             parentId,
             connectionId: connection.connectionId,
           });

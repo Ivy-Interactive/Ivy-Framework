@@ -196,11 +196,43 @@ public class AppHub(
 
             var widgetTree = new WidgetTree(app, contentBuilder, serviceProvider);
 
+            var machineId = GetMachineId(httpContext);
+            var requestedParentId = GetParentId(httpContext);
+            var resolvedParentId = requestedParentId;
+
+            // Validate parentId and resolve to current Chrome connection if parent is invalid
+            // This handles the race condition where AppHost reconnects with an old parentId
+            if (requestedParentId != null)
+            {
+                var parentExists = sessionStore.Sessions.ContainsKey(requestedParentId);
+                if (!parentExists)
+                {
+                    // Try to find the Chrome session for the same machineId
+                    var chromeSession = sessionStore.Sessions.Values
+                        .FirstOrDefault(s => s.MachineId == machineId && s.AppDescriptor.IsChrome);
+
+                    if (chromeSession != null)
+                    {
+                        logger.LogWarning(
+                            "Parent connection {RequestedParentId} not found for AppHost {AppId}. Using Chrome connection {ChromeConnectionId} as parent.",
+                            requestedParentId, appId, chromeSession.ConnectionId);
+                        resolvedParentId = chromeSession.ConnectionId;
+                    }
+                    else
+                    {
+                        logger.LogWarning(
+                            "Parent connection {RequestedParentId} not found for AppHost {AppId} and no Chrome session available. Treating as standalone.",
+                            requestedParentId, appId);
+                        resolvedParentId = null;
+                    }
+                }
+            }
+
             var appState = new AppSession
             {
                 AppId = appId,
-                MachineId = GetMachineId(httpContext),
-                ParentId = GetParentId(httpContext),
+                MachineId = machineId,
+                ParentId = resolvedParentId,
                 AppDescriptor = appDescriptor,
                 App = app,
                 ConnectionId = Context.ConnectionId,
