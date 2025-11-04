@@ -70,32 +70,6 @@ public class ChunkedUploadDemo : ViewBase
 }
 ```
 
-### Single Upload
-
-Upload the complete recording when stopped:
-
-```csharp demo-below
-public class SingleUploadDemo : ViewBase
-{
-    public override object? Build()
-    {
-        var client = UseService<IClientProvider>();
-        
-        var upload = this.UseUpload(
-            (fileUpload, stream, cancellationToken) => {
-                // Complete recording arrives when user stops
-                client.Toast($"Recording complete: {fileUpload.Length} bytes");
-                return Task.CompletedTask;
-            },
-            defaultContentType: "audio/webm"
-        );
-
-        // No ChunkInterval = upload when recording stops
-        return new AudioRecorder(upload.Value, "Record", "Recording...");
-    }
-}
-```
-
 ## Audio Format
 
 Specify the audio format using MIME type:
