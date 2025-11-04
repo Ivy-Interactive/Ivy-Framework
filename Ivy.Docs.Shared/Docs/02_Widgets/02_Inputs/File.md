@@ -163,35 +163,6 @@ public class PlaceholderDemo : ViewBase
 }
 ```
 
-### Size Variants
-
-Control the size of the file input:
-
-```csharp demo-below
-public class FileInputSizeVariantsDemo : ViewBase
-{
-    public override object? Build()
-    {
-        var smallFile = UseState<FileUpload<byte[]>?>();
-        var smallUpload = this.UseUpload(MemoryStreamUploadHandler.Create(smallFile));
-
-        var mediumFile = UseState<FileUpload<byte[]>?>();
-        var mediumUpload = this.UseUpload(MemoryStreamUploadHandler.Create(mediumFile));
-
-        var largeFile = UseState<FileUpload<byte[]>?>();
-        var largeUpload = this.UseUpload(MemoryStreamUploadHandler.Create(largeFile));
-
-        return Layout.Vertical()
-                | Text.H2("Small")
-                | smallFile.ToFileInput(smallUpload).Small()
-                | Text.H2("Medium (Default)")
-                | mediumFile.ToFileInput(mediumUpload)
-                | Text.H2("Large")
-                | largeFile.ToFileInput(largeUpload).Large();
-    }
-}
-```
-
 ### Disabled State
 
 Disable the file input:
