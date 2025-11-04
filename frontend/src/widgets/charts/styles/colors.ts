@@ -13,13 +13,13 @@ export type ColorScheme = 'Default' | 'Rainbow';
 const defaultColorVars = [
   'emerald', // Green-cyan, high visibility
   'red', // Red, high contrast
-  'blue', // Blue, distinct
-  'amber', // Yellow-orange, warm
+  'teal', // Blue, distinct
   'purple', // Purple, good contrast
   'orange', // Orange, warm accent
   'green', // Pure green
   'cyan', // Cyan-blue, cool
   'pink', // Pink, soft accent
+  'amber', // Yellow-orange, warm
   'indigo', // Deep blue, distinct
 ];
 
