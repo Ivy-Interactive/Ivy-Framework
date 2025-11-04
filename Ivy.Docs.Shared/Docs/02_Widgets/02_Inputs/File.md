@@ -139,26 +139,6 @@ public class MaxFilesDemo : ViewBase
 }
 ```
 
-## Styling
-
-### Placeholder Text
-
-Set custom placeholder text:
-
-```csharp demo-below
-public class PlaceholderDemo : ViewBase
-{
-    public override object? Build()
-    {
-        var file = UseState<FileUpload<byte[]>?>();
-        var upload = this.UseUpload(MemoryStreamUploadHandler.Create(file));
-
-        return file.ToFileInput(upload)
-                   .Placeholder("Drag and drop your file here or click to browse");
-    }
-}
-```
-
 ### Disabled State
 
 Disable the file input:
