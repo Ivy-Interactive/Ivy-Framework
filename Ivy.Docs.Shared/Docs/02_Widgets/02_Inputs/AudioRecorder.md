@@ -97,31 +97,6 @@ Use `audio/webm` for best browser compatibility. Other formats like `audio/mp4` 
 
 ## Styling
 
-### Size Variants
-
-Control the size of the audio recorder:
-
-```csharp demo-below
-public class SizeVariantsDemo : ViewBase
-{
-    public override object? Build()
-    {
-        var upload = this.UseUpload(
-            (fileUpload, stream, cancellationToken) => Task.CompletedTask,
-            defaultContentType: "audio/webm"
-        );
-
-        return Layout.Vertical()
-                | Text.H2("Small")
-                | new AudioRecorder(upload.Value, "Record", "Recording...").Small()
-                | Text.H2("Medium (Default)")
-                | new AudioRecorder(upload.Value, "Record", "Recording...")
-                | Text.H2("Large")
-                | new AudioRecorder(upload.Value, "Record", "Recording...").Large();
-    }
-}
-```
-
 ### Custom Labels
 
 Customize the labels shown when idle and recording:
