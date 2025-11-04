@@ -232,11 +232,15 @@ export const generateYAxis = (
 
   // Calculate optimal interval between Y-axis divisions
   const calculateOptimalInterval = (dataMax: number, splitNum: number = 5) => {
-    // Return small value for zero or very small data
-    if (dataMax <= 0) return 1;
+    // Handle zero or negative values using absolute value
+    const absDataMax = Math.abs(dataMax);
+    if (absDataMax <= 0) return 1;
 
     // Calculate rough interval between divisions
-    const roughInterval = dataMax / splitNum;
+    const roughInterval = absDataMax / splitNum;
+
+    // Guard against zero or negative interval before log calculation
+    if (roughInterval <= 0) return 1;
 
     // Find order of magnitude (1, 10, 100, 1000...)
     const magnitude = Math.pow(10, Math.floor(Math.log10(roughInterval)));

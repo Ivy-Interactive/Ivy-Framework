@@ -110,6 +110,50 @@ const BarChartWidget: React.FC<BarChartWidgetProps> = ({
   const { categories, valueKeys, transform, largeSpread, minValue, maxValue } =
     generateDataProps(data);
 
+  // Helper function to group series by stackId
+  const getStackGroups = (
+    keys: string[],
+    barConfigs?: BarProps[]
+  ): Record<string, string[]> => {
+    const stackGroups: Record<string, string[]> = {};
+
+    keys.forEach((key, i) => {
+      const stackId =
+        barConfigs && barConfigs[i]?.stackId !== undefined
+          ? String(barConfigs[i].stackId)
+          : `__nostack_${key}`;
+
+      if (!stackGroups[stackId]) {
+        stackGroups[stackId] = [];
+      }
+      stackGroups[stackId].push(key);
+    });
+
+    return stackGroups;
+  };
+
+  // Helper function to calculate stacked maximum value
+  const calculateStackedMaxValue = (
+    dataItems: ChartData[],
+    stackGroups: Record<string, string[]>
+  ): number => {
+    let globalMax = 0;
+
+    dataItems.forEach(item => {
+      Object.values(stackGroups).forEach(keys => {
+        const stackSum = keys.reduce((sum, key) => {
+          const value = Number(item[key]);
+          // Explicitly check for NaN
+          if (isNaN(value)) return sum;
+          return sum + value;
+        }, 0);
+        globalMax = Math.max(globalMax, stackSum);
+      });
+    });
+
+    return globalMax;
+  };
+
   // For stacked bar charts, calculate the correct maximum (sum of stacks)
   const actualMaxValue = useMemo(() => {
     // Check if there's at least one stack
@@ -120,35 +164,11 @@ const BarChartWidget: React.FC<BarChartWidgetProps> = ({
       return maxValue;
     }
 
-    // Has stacks, need to calculate maximum sum
-    // Group series by stackId
-    const stackGroups: Record<string, string[]> = {};
-    valueKeys.forEach((key, i) => {
-      const stackId =
-        bars && bars[i]?.stackId !== undefined
-          ? String(bars[i].stackId)
-          : `__nostack_${key}`;
+    // Has stacks, calculate maximum sum
+    const stackGroups = getStackGroups(valueKeys, bars);
+    const stackedMax = calculateStackedMaxValue(data, stackGroups);
 
-      if (!stackGroups[stackId]) {
-        stackGroups[stackId] = [];
-      }
-      stackGroups[stackId].push(key);
-    });
-
-    // Calculate maximum for each category
-    let globalMax = 0;
-    data.forEach(item => {
-      // For each stackId, sum the values
-      Object.values(stackGroups).forEach(keys => {
-        const stackSum = keys.reduce((sum, key) => {
-          const value = Number(item[key]) || 0;
-          return sum + value;
-        }, 0);
-        globalMax = Math.max(globalMax, stackSum);
-      });
-    });
-
-    return globalMax || maxValue;
+    return stackedMax || maxValue;
   }, [data, valueKeys, bars, maxValue]);
 
   // Chart colors depend on theme (--chart-1 through --chart-5 change for light/dark)
