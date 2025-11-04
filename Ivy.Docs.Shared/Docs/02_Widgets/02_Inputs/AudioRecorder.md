@@ -28,14 +28,10 @@ public class BasicAudioRecorderDemo : ViewBase
 {
     public override object? Build()
     {
-        // Create an upload handler for audio chunks
         var upload = this.UseUpload(
-            (fileUpload, stream, cancellationToken) => Task.CompletedTask,
-            defaultContentType: "audio/webm" // Match the recorder's mime type
-        );
+            (fileUpload, stream, cancellationToken) => Task.CompletedTask);
 
-        return new AudioRecorder(upload.Value, "Start recording", "Recording audio...")
-                   .ChunkInterval(3000); // Upload every 3 seconds
+        return new AudioRecorder(upload.Value, "Start recording", "Recording audio...");
    }
 }
 ```
@@ -60,8 +56,7 @@ public class ChunkedUploadDemo : ViewBase
                 // Each chunk arrives as recording continues
                 client.Toast($"Chunk received: {fileUpload.Length} bytes");
                 return Task.CompletedTask;
-            },
-            defaultContentType: "audio/webm"
+            }
         );
 
         return new AudioRecorder(upload.Value, "Record with streaming", "Streaming...")
