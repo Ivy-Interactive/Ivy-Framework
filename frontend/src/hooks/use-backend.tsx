@@ -288,7 +288,7 @@ export const useBackend = (
 
     const newConnection = new signalR.HubConnectionBuilder()
       .withUrl(
-        `${getIvyHost()}/messages?appId=${stableAppId ?? ''}&appArgs=${appArgs ?? ''}&machineId=${machineId}&parentId=${parentId ?? ''}&chrome=${chrome}`
+        `${getIvyHost()}/messages?appId=${appId ?? ''}&appArgs=${appArgs ?? ''}&machineId=${machineId}&parentId=${parentId ?? ''}&chrome=${chrome}`
       )
       .withAutomaticReconnect()
       .build();
@@ -305,6 +305,10 @@ export const useBackend = (
         currentConnectionRef.current = null;
       }
     };
+    // appId is intentionally excluded: we use stableAppId to prevent unnecessary reconnections
+    // when navigating within Chrome (where appId changes but stableAppId stays empty).
+    // The appId in the URL is still needed for the server to know the navigation target.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [appArgs, stableAppId, machineId, parentId, chrome]);
 
   useEffect(() => {
