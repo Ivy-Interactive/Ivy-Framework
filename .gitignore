@@ -410,3 +410,6 @@ test-results/
 /Ivy/.claude/settings.local.json
 /Ivy.Samples/.claude/settings.local.json
 /.releases/Commits/*
+
+# Claude
+.claude/
