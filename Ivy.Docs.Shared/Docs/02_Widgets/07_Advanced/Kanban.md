@@ -99,10 +99,10 @@ public class KanbanWithMoveExample : ViewBase
 
 ## Card Click Events
 
-Handle card click events by providing a `HandleClick` handler. This is useful for opening task details, showing modals, navigating to detail pages, or performing any other action when a user clicks on a card:
+Handle all card interactions by providing event handlers for click, move, add, and delete operations. This enables a fully interactive Kanban board with complete CRUD functionality:
 
 ```csharp demo-tabs
-public class KanbanWithClickExample : ViewBase
+public class KanbanWithAllEventsExample : ViewBase
 {
     record Task(string Id, string Title, string Status, int Priority, string Description, string Assignee);
     
@@ -132,26 +132,52 @@ public class KanbanWithClickExample : ViewBase
                 descriptionSelector: t => t.Description)
             .HandleClick(cardId =>
             {
+                // Handle card click - show details, open modal, navigate, etc.
                 var taskId = cardId?.ToString();
                 var clickedTask = taskState.Value.FirstOrDefault(t => t.Id == taskId);
                 if (clickedTask != null)
                 {
-                    client.Toast($"Clicked: {clickedTask.Title}");
+                    client.Toast($"Clicked: {clickedTask.Title} - {clickedTask.Description}");
                 }
             })
             .HandleMove(moveData =>
             {
+                // Update task status when card is moved between columns
                 var taskId = moveData.CardId?.ToString();
                 var updatedTasks = taskState.Value.ToList();
                 var taskToMove = updatedTasks.FirstOrDefault(t => t.Id == taskId);
                 
                 if (taskToMove != null)
                 {
-                    // Update task status to match new column
                     var updated = taskToMove with { Status = moveData.ToColumn };
                     updatedTasks.RemoveAll(t => t.Id == taskId);
                     updatedTasks.Add(updated);
                     taskState.Set(updatedTasks.ToArray());
+                }
+            })
+            .HandleAdd(columnKey =>
+            {
+                // Add new task when "+" button is clicked in a column
+                var newTask = new Task(
+                    Id: Guid.NewGuid().ToString(),
+                    Title: "New Task",
+                    Status: columnKey,
+                    Priority: taskState.Value.Count(t => t.Status == columnKey) + 1,
+                    Description: "Add task description",
+                    Assignee: "Unassigned"
+                );
+                taskState.Set(taskState.Value.Append(newTask).ToArray());
+                client.Toast($"Added new task to {columnKey}");
+            })
+            .HandleDelete(cardId =>
+            {
+                // Remove task when delete action is triggered
+                var taskId = cardId?.ToString();
+                var taskToDelete = taskState.Value.FirstOrDefault(t => t.Id == taskId);
+                if (taskToDelete != null)
+                {
+                    taskState.Set(taskState.Value.Where(t => t.Id != taskId).ToArray());
+                    client.Toast($"Deleted: {taskToDelete.Title}");
                 }
             });
     }
