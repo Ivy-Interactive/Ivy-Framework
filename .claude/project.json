@@ -1,0 +1,160 @@
+{
+  "name": "Ivy Framework",
+  "description": "AI-first .NET development framework for internal tools",
+  "commands": [
+    {
+      "name": "new-worktree",
+      "description": "Create a new git worktree on the main branch",
+      "command": "git worktree add ../ivy-framework-worktree-$(date +%Y%m%d-%H%M%S) main",
+      "confirmBeforeRun": true
+    },
+    {
+      "name": "new-feature-worktree",
+      "description": "Create a new worktree for a feature branch",
+      "command": "read -p 'Enter branch name: ' branch && git worktree add ../ivy-framework-$branch main && cd ../ivy-framework-$branch && git checkout -b $branch",
+      "confirmBeforeRun": true
+    },
+    {
+      "name": "list-worktrees",
+      "description": "List all git worktrees",
+      "command": "git worktree list"
+    },
+    {
+      "name": "remove-worktree",
+      "description": "Remove a git worktree",
+      "command": "git worktree list && read -p 'Enter worktree path to remove: ' path && git worktree remove $path",
+      "confirmBeforeRun": true
+    }
+  ],
+  "hooks": {
+    "beforeCommit": {
+      "rules": [
+        "⛔ NEVER commit to any branch without explicit user approval. Always ask: 'Ready to commit these changes to [branch-name]?'",
+        "Run quality checks before allowing commit: npm run lint && npm run build && npm run format"
+      ],
+      "commands": ["npm run lint", "npm run build", "npm run format"]
+    },
+    "beforePush": {
+      "rules": ["Confirm push destination with user before executing"]
+    },
+    "onFileCreate": {
+      "rules": [
+        "Always use CSS color variables from the theme system (e.g., var(--color-primary), var(--color-background))",
+        "Always use components/Icon component for all icons - never use raw SVGs or icon libraries directly",
+        "Follow the established component structure and naming conventions"
+      ]
+    },
+    "onFileModify": {
+      "rules": [
+        "Maintain existing color variable usage - never hardcode colors",
+        "Keep Icon component usage consistent",
+        "Preserve code formatting and style consistency"
+      ]
+    },
+    "onTypeScriptFile": {
+      "rules": [
+        "When creating utility functions, always place them in a utils/ folder in the same directory",
+        "Always create corresponding test files for utility functions: {utilName}.test.ts",
+        "When a component has 3+ useEffect hooks, refactor into a custom hook",
+        "Custom hooks should be in a hooks/ folder in the same directory and start with 'use' prefix"
+      ]
+    }
+  },
+  "codeRules": [
+    {
+      "rule": "⛔ CRITICAL: Never commit to any branch without explicit user permission",
+      "category": "git",
+      "severity": "critical",
+      "description": "Always ask user 'Ready to commit to [branch]?' before running git commit"
+    },
+    {
+      "rule": "Always use CSS color variables from the theme system",
+      "category": "styling",
+      "severity": "error",
+      "examples": [
+        "✅ GOOD: color: var(--color-primary);",
+        "✅ GOOD: background: var(--color-background-secondary);",
+        "❌ BAD: color: #3b82f6;",
+        "❌ BAD: background: rgb(59, 130, 246);"
+      ]
+    },
+    {
+      "rule": "Always use components/Icon for icons",
+      "category": "components",
+      "severity": "error",
+      "examples": [
+        "✅ GOOD: <Icon name=\"chevron-right\" size={20} />",
+        "✅ GOOD: import { Icon } from '@/components/Icon';",
+        "❌ BAD: <svg><path d=\"...\"/></svg>",
+        "❌ BAD: import { ChevronRight } from 'lucide-react';"
+      ]
+    },
+    {
+      "rule": "Always run quality checks: npm run lint, npm run build, npm run format",
+      "category": "quality",
+      "severity": "error",
+      "description": "Before any commit, ensure all quality checks pass"
+    },
+    {
+      "rule": "Utility functions must be in utils/ folder with tests",
+      "category": "typescript",
+      "severity": "error",
+      "description": "Keep utility functions organized and tested",
+      "examples": [
+        "✅ GOOD: src/components/UserCard/utils/formatName.ts",
+        "✅ GOOD: src/components/UserCard/utils/formatName.test.ts",
+        "✅ GOOD: src/pages/Dashboard/utils/calculations.ts",
+        "❌ BAD: src/components/UserCard/formatName.ts (not in utils/)",
+        "❌ BAD: Creating utils without corresponding .test.ts file"
+      ],
+      "structure": {
+        "utilFile": "src/{feature}/utils/{utilName}.ts",
+        "testFile": "src/{feature}/utils/{utilName}.test.ts"
+      }
+    },
+    {
+      "rule": "Refactor 3+ useEffect hooks into custom hooks",
+      "category": "react",
+      "severity": "warning",
+      "description": "Components with many effects should extract logic into custom hooks",
+      "examples": [
+        "✅ GOOD: Component with 1-2 useEffect hooks inline",
+        "✅ GOOD: Component using useDataFetching() and useWebSocket() custom hooks",
+        "❌ BAD: Component with 5 useEffect hooks handling different concerns",
+        "❌ BAD: Complex effect logic not extracted to reusable hook"
+      ],
+      "pattern": {
+        "hookFile": "src/{feature}/hooks/use{HookName}.ts",
+        "usage": "const { data, loading } = useDataFetching(userId);"
+      }
+    },
+    {
+      "rule": "Custom hooks in hooks/ folder, prefixed with 'use'",
+      "category": "react",
+      "severity": "error",
+      "description": "Keep custom hooks organized and follow naming convention",
+      "examples": [
+        "✅ GOOD: src/components/DataTable/hooks/useTableSort.ts",
+        "✅ GOOD: src/features/auth/hooks/useAuth.ts",
+        "✅ GOOD: hooks/useLocalStorage.ts (shared hooks at root)",
+        "❌ BAD: src/components/DataTable/tableSort.ts (missing 'use' prefix)",
+        "❌ BAD: src/components/DataTable/useTableSort.ts (not in hooks/ folder)"
+      ]
+    },
+    {
+      "rule": "Follow TypeScript strict mode - no implicit any",
+      "category": "typescript",
+      "severity": "warning"
+    },
+    {
+      "rule": "Use named exports over default exports for components",
+      "category": "components",
+      "severity": "warning"
+    }
+  ],
+  "preferences": {
+    "alwaysConfirmDestructiveActions": true,
+    "autoRunLintOnSave": true,
+    "suggestRefactoringOpportunities": true
+  }
+}
