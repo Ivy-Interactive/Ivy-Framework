@@ -72,35 +72,6 @@ public class SingleVsMultipleDemo : ViewBase
 Multiple file selection is automatically enabled when you use `ImmutableArray&lt;FileUpload&lt;T&gt;&gt;` as your state type. You do **not** need to explicitly set a `.Multiple()` property.
 </Callout>
 
-## Variants
-
-The `FileInput` widget supports different visual variants:
-
-```csharp demo-below
-public class FileInputVariantsDemo : ViewBase
-{
-    public override object? Build()
-    {
-        var defaultFile = UseState<FileUpload<byte[]>?>();
-        var defaultUpload = this.UseUpload(MemoryStreamUploadHandler.Create(defaultFile));
-
-        var dropFile = UseState<FileUpload<byte[]>?>();
-        var dropUpload = this.UseUpload(MemoryStreamUploadHandler.Create(dropFile));
-
-        var dropFiles = UseState(ImmutableArray.Create<FileUpload<byte[]>>());
-        var dropFilesUpload = this.UseUpload(MemoryStreamUploadHandler.Create(dropFiles));
-
-        return Layout.Vertical()
-                | Text.H2("Default Variant")
-                | defaultFile.ToFileInput(defaultUpload).Placeholder("Browse for file")
-                | Text.H2("Drop Variant (Single)")
-                | dropFile.ToFileInput(dropUpload).Variant(FileInputs.Drop)
-                | Text.H2("Drop Variant (Multiple)")
-                | dropFiles.ToFileInput(dropFilesUpload).Variant(FileInputs.Drop);
-    }
-}
-```
-
 ## File Type Filtering
 
 Use `.Accept()` on the upload context to filter file types:
