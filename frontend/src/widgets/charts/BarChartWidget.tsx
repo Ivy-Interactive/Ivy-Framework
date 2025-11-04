@@ -110,18 +110,18 @@ const BarChartWidget: React.FC<BarChartWidgetProps> = ({
   const { categories, valueKeys, transform, largeSpread, minValue, maxValue } =
     generateDataProps(data);
 
-  // Для stacked bar chart нужно вычислить правильный максимум (сумму стеков)
+  // For stacked bar charts, calculate the correct maximum (sum of stacks)
   const actualMaxValue = useMemo(() => {
-    // Проверяем, есть ли хотя бы один стек
+    // Check if there's at least one stack
     const hasStacks = bars && bars.some(bar => bar.stackId !== undefined);
 
     if (!hasStacks) {
-      // Нет стеков, используем обычный maxValue
+      // No stacks, use regular maxValue
       return maxValue;
     }
 
-    // Есть стеки, нужно вычислить максимальную сумму
-    // Группируем series по stackId
+    // Has stacks, need to calculate maximum sum
+    // Group series by stackId
     const stackGroups: Record<string, string[]> = {};
     valueKeys.forEach((key, i) => {
       const stackId =
@@ -135,10 +135,10 @@ const BarChartWidget: React.FC<BarChartWidgetProps> = ({
       stackGroups[stackId].push(key);
     });
 
-    // Вычисляем максимум для каждой категории
+    // Calculate maximum for each category
     let globalMax = 0;
     data.forEach(item => {
-      // Для каждого stackId суммируем значения
+      // For each stackId, sum the values
       Object.values(stackGroups).forEach(keys => {
         const stackSum = keys.reduce((sum, key) => {
           const value = Number(item[key]) || 0;

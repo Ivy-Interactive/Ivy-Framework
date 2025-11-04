@@ -230,21 +230,21 @@ export const generateYAxis = (
 ) => {
   const safeTransform = transformValue ?? ((v: number) => v);
 
-  // Функция для вычисления оптимального интервала между делениями
+  // Calculate optimal interval between Y-axis divisions
   const calculateOptimalInterval = (dataMax: number, splitNum: number = 5) => {
-    // Если данные нулевые или очень маленькие, возвращаем небольшое значение
+    // Return small value for zero or very small data
     if (dataMax <= 0) return 1;
 
-    // Вычисляем примерный интервал между делениями
+    // Calculate rough interval between divisions
     const roughInterval = dataMax / splitNum;
 
-    // Находим порядок величины (1, 10, 100, 1000...)
+    // Find order of magnitude (1, 10, 100, 1000...)
     const magnitude = Math.pow(10, Math.floor(Math.log10(roughInterval)));
 
-    // Нормализуем интервал относительно порядка величины
+    // Normalize interval relative to magnitude
     const normalized = roughInterval / magnitude;
 
-    // Выбираем оптимальный интервал: 1, 2, 3, 5 или 10
+    // Choose optimal interval: 1, 2, 3, 5, or 10
     let optimalInterval;
     if (normalized < 1.5) optimalInterval = 1 * magnitude;
     else if (normalized < 2.5) optimalInterval = 2 * magnitude;
@@ -255,7 +255,7 @@ export const generateYAxis = (
     return optimalInterval;
   };
 
-  // Функция для вычисления оптимального максимума оси
+  // Calculate optimal maximum for Y-axis
   const calculateOptimalMax = (value: { max: number }) => {
     const dataMax = value.max;
     if (dataMax <= 0) return 10;
@@ -263,12 +263,12 @@ export const generateYAxis = (
     const splitNum = 5;
     const optimalInterval = calculateOptimalInterval(dataMax, splitNum);
 
-    // Округляем максимум вверх до следующего деления
+    // Round up maximum to next division
     return Math.ceil(dataMax / optimalInterval) * optimalInterval;
   };
 
-  // Вычисляем интервал заранее для использования в конфигурации оси
-  // Это обеспечит одинаковые интервалы между всеми делениями
+  // Pre-calculate interval for axis configuration
+  // This ensures consistent intervals between all divisions
   const axisInterval =
     !largeSpread && maxValue > 0
       ? calculateOptimalInterval(maxValue, 5)
@@ -300,9 +300,9 @@ export const generateYAxis = (
         themeColors?.fontSans
       ),
     },
-    // Не используем splitNumber когда задаем interval явно
+    // Don't use splitNumber when interval is explicitly set
     ...(axisInterval ? {} : { splitNumber: largeSpread ? 3 : 5 }),
-    // Явно указываем интервал между метками для одинаковых делений
+    // Explicitly set interval for consistent divisions
     ...(axisInterval ? { interval: axisInterval } : {}),
     min: largeSpread ? safeTransform(minValue) : 0,
     max: largeSpread ? safeTransform(maxValue) : calculateOptimalMax,
