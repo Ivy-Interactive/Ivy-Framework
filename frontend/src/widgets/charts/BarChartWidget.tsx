@@ -110,6 +110,47 @@ const BarChartWidget: React.FC<BarChartWidgetProps> = ({
   const { categories, valueKeys, transform, largeSpread, minValue, maxValue } =
     generateDataProps(data);
 
+  // Для stacked bar chart нужно вычислить правильный максимум (сумму стеков)
+  const actualMaxValue = useMemo(() => {
+    // Проверяем, есть ли хотя бы один стек
+    const hasStacks = bars && bars.some(bar => bar.stackId !== undefined);
+
+    if (!hasStacks) {
+      // Нет стеков, используем обычный maxValue
+      return maxValue;
+    }
+
+    // Есть стеки, нужно вычислить максимальную сумму
+    // Группируем series по stackId
+    const stackGroups: Record<string, string[]> = {};
+    valueKeys.forEach((key, i) => {
+      const stackId =
+        bars && bars[i]?.stackId !== undefined
+          ? String(bars[i].stackId)
+          : `__nostack_${key}`;
+
+      if (!stackGroups[stackId]) {
+        stackGroups[stackId] = [];
+      }
+      stackGroups[stackId].push(key);
+    });
+
+    // Вычисляем максимум для каждой категории
+    let globalMax = 0;
+    data.forEach(item => {
+      // Для каждого stackId суммируем значения
+      Object.values(stackGroups).forEach(keys => {
+        const stackSum = keys.reduce((sum, key) => {
+          const value = Number(item[key]) || 0;
+          return sum + value;
+        }, 0);
+        globalMax = Math.max(globalMax, stackSum);
+      });
+    });
+
+    return globalMax || maxValue;
+  }, [data, valueKeys, bars, maxValue]);
+
   // Chart colors depend on theme (--chart-1 through --chart-5 change for light/dark)
   const chartColors = useMemo(
     () => getColors(colorScheme, colors),
@@ -174,7 +215,7 @@ const BarChartWidget: React.FC<BarChartWidgetProps> = ({
         largeSpread,
         transform,
         minValue,
-        maxValue,
+        actualMaxValue,
         yAxis,
         isVertical,
         categories,
@@ -205,7 +246,7 @@ const BarChartWidget: React.FC<BarChartWidgetProps> = ({
       largeSpread,
       transform,
       minValue,
-      maxValue,
+      actualMaxValue,
       yAxis,
       series,
       legend,

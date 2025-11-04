@@ -230,6 +230,50 @@ export const generateYAxis = (
 ) => {
   const safeTransform = transformValue ?? ((v: number) => v);
 
+  // Функция для вычисления оптимального интервала между делениями
+  const calculateOptimalInterval = (dataMax: number, splitNum: number = 5) => {
+    // Если данные нулевые или очень маленькие, возвращаем небольшое значение
+    if (dataMax <= 0) return 1;
+
+    // Вычисляем примерный интервал между делениями
+    const roughInterval = dataMax / splitNum;
+
+    // Находим порядок величины (1, 10, 100, 1000...)
+    const magnitude = Math.pow(10, Math.floor(Math.log10(roughInterval)));
+
+    // Нормализуем интервал относительно порядка величины
+    const normalized = roughInterval / magnitude;
+
+    // Выбираем оптимальный интервал: 1, 2, 3, 5 или 10
+    let optimalInterval;
+    if (normalized < 1.5) optimalInterval = 1 * magnitude;
+    else if (normalized < 2.5) optimalInterval = 2 * magnitude;
+    else if (normalized < 4) optimalInterval = 3 * magnitude;
+    else if (normalized < 7.5) optimalInterval = 5 * magnitude;
+    else optimalInterval = 10 * magnitude;
+
+    return optimalInterval;
+  };
+
+  // Функция для вычисления оптимального максимума оси
+  const calculateOptimalMax = (value: { max: number }) => {
+    const dataMax = value.max;
+    if (dataMax <= 0) return 10;
+
+    const splitNum = 5;
+    const optimalInterval = calculateOptimalInterval(dataMax, splitNum);
+
+    // Округляем максимум вверх до следующего деления
+    return Math.ceil(dataMax / optimalInterval) * optimalInterval;
+  };
+
+  // Вычисляем интервал заранее для использования в конфигурации оси
+  // Это обеспечит одинаковые интервалы между всеми делениями
+  const axisInterval =
+    !largeSpread && maxValue > 0
+      ? calculateOptimalInterval(maxValue, 5)
+      : undefined;
+
   return {
     type: isVertical ? 'category' : 'value',
     data: isVertical ? categories : undefined,
@@ -256,9 +300,12 @@ export const generateYAxis = (
         themeColors?.fontSans
       ),
     },
-    splitNumber: largeSpread ? 3 : 5,
+    // Не используем splitNumber когда задаем interval явно
+    ...(axisInterval ? {} : { splitNumber: largeSpread ? 3 : 5 }),
+    // Явно указываем интервал между метками для одинаковых делений
+    ...(axisInterval ? { interval: axisInterval } : {}),
     min: largeSpread ? safeTransform(minValue) : 0,
-    max: largeSpread ? safeTransform(maxValue) : 'dataMax',
+    max: largeSpread ? safeTransform(maxValue) : calculateOptimalMax,
     position: yAxis?.[0]?.orientation === 'Right' ? 'right' : 'left',
     axisLine: {
       show: true,
