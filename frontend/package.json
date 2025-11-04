@@ -82,7 +82,7 @@
     "lodash": "4.17.21",
     "lodash-es": "4.17.21",
     "lucide-react": "0.546.0",
-    "mermaid": "11.12.0",
+    "mermaid": "11.12.1",
     "react": "19.2.0",
     "react-day-picker": "9.11.1",
     "react-dom": "19.2.0",
@@ -91,7 +91,7 @@
     "react-is": "19.2.0",
     "react-markdown": "10.1.0",
     "react-resizable-panels": "3.0.6",
-    "react-syntax-highlighter": "15.6.6",
+    "react-syntax-highlighter": "16.1.0",
     "reactflow": "11.11.4",
     "rehype-katex": "7.0.1",
     "rehype-raw": "7.0.0",
@@ -151,6 +151,10 @@
     ]
   },
   "overrides": {
-    "@swc/helpers": "0.5.17"
+    "@swc/helpers": "0.5.17",
+    "dompurify": "3.3.0",
+    "remark-mermaid-plugin": {
+      "mermaid": "11.12.1"
+    }
   }
 }
