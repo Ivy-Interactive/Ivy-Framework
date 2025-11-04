@@ -54,7 +54,7 @@ const PieChartWidget: React.FC<PieChartWidgetProps> = ({
 
   const { valueKeys } = generateDataProps(data);
 
-  // Chart colors depend on theme (--chart-1 through --chart-5 change for light/dark)
+  // Chart colors depend on theme (chromatic colors automatically adapt to light/dark mode)
   const chartColors = useMemo(
     () => getColors(colorScheme, colors),
     [colorScheme, colors]
