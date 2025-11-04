@@ -67,6 +67,11 @@ public class DataTableBuilder<TModel> : ViewBase
         if (underlyingType == typeof(Guid) || underlyingType.IsEnum)
             return Ivy.ColType.Text;
 
+        // Handle string arrays as Labels type
+        if (underlyingType.IsArray && underlyingType.GetElementType() == typeof(string))
+            return Ivy.ColType.Labels;
+
+        // Handle other arrays and collections as Text
         if (underlyingType.IsArray || typeof(System.Collections.IEnumerable).IsAssignableFrom(underlyingType))
             return Ivy.ColType.Text;
 

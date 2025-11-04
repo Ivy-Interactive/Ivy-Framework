@@ -1,5 +1,5 @@
 export interface DataRow {
-  values: (string | number | boolean | null)[];
+  values: (string | number | boolean | string[] | null)[];
 }
 
 export enum ColType {
@@ -9,6 +9,7 @@ export enum ColType {
   Date = 'Date',
   DateTime = 'DateTime',
   Icon = 'Icon',
+  Labels = 'Labels',
 }
 
 export enum SortDirection {

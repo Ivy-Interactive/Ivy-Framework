@@ -219,6 +219,50 @@ export function createTextCell(
 }
 
 /**
+ * Creates a labels/bubble cell for displaying multiple labels as chips
+ */
+export function createLabelsCell(cellValue: unknown, align?: Align): GridCell {
+  // Handle different input formats
+  let labels: readonly string[];
+
+  if (Array.isArray(cellValue)) {
+    labels = cellValue.filter(item => item != null).map(String);
+  } else if (typeof cellValue === 'string') {
+    // Try to parse as JSON first (from backend serialization)
+    try {
+      const parsed = JSON.parse(cellValue);
+      if (Array.isArray(parsed)) {
+        labels = parsed.filter(item => item != null).map(String);
+      } else {
+        // Fallback to comma-separated if JSON parsing doesn't yield an array
+        labels = cellValue
+          .split(',')
+          .map(s => s.trim())
+          .filter(s => s.length > 0);
+      }
+    } catch {
+      // Not JSON, treat as comma-separated string
+      labels = cellValue
+        .split(',')
+        .map(s => s.trim())
+        .filter(s => s.length > 0);
+    }
+  } else if (cellValue != null) {
+    labels = [String(cellValue)];
+  } else {
+    labels = [];
+  }
+
+  return {
+    kind: GridCellKind.Bubble,
+    data: labels,
+    allowOverlay: false,
+    readonly: true,
+    contentAlign: align ? getContentAlign(align) : undefined,
+  };
+}
+
+/**
  * Gets the ordered columns based on columnOrder array
  */
 export function getOrderedColumns(
@@ -275,6 +319,11 @@ export function getCellContent(
   // Handle explicit icon type from backend metadata
   if (column.type === 'Icon' && typeof cellValue === 'string') {
     return createIconCell(cellValue, align);
+  }
+
+  // Handle Labels type - supports arrays or comma-separated strings
+  if (column.type === 'Labels') {
+    return createLabelsCell(cellValue, align);
   }
 
   // Handle Date and DateTime types

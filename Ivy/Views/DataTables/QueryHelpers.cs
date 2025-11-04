@@ -58,6 +58,7 @@ public static class QueryHelpers
             SystemType t when t == typeof(Guid) => StringType.Default,
             SystemType t when t == typeof(byte[]) => BinaryType.Default,
             SystemType t when t == typeof(string) => StringType.Default,
+            SystemType t when t.IsArray && t.GetElementType() == typeof(string) => StringType.Default, // Serialize string arrays as JSON
             _ => StringType.Default
         };
     }
@@ -67,6 +68,12 @@ public static class QueryHelpers
         var values = data.Select(property.GetValue).ToList();
         var type = property.PropertyType;
         var underlyingType = Nullable.GetUnderlyingType(type) ?? type;
+
+        // Handle string arrays - serialize as JSON strings
+        if (underlyingType.IsArray && underlyingType.GetElementType() == typeof(string))
+        {
+            return CreateStringArrayAsJson(values);
+        }
 
         return underlyingType switch
         {
@@ -247,6 +254,31 @@ public static class QueryHelpers
                 builder.Append(value.ToString());
             else
                 builder.AppendNull();
+        }
+        return builder.Build();
+    }
+
+    public static IArrowArray CreateStringArrayAsJson(List<object?> values)
+    {
+        var builder = new StringArray.Builder();
+        foreach (var value in values)
+        {
+            if (value is string[] stringArray)
+            {
+                // Serialize array as JSON
+                var json = System.Text.Json.JsonSerializer.Serialize(stringArray);
+                builder.Append(json);
+            }
+            else if (value == null)
+            {
+                builder.AppendNull();
+            }
+            else
+            {
+                // Fallback: serialize as single-item array
+                var json = System.Text.Json.JsonSerializer.Serialize(new[] { value.ToString() });
+                builder.Append(json);
+            }
         }
         return builder.Build();
     }

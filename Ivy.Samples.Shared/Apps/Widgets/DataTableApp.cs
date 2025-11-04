@@ -24,7 +24,8 @@ public record EmployeeRecord(
     Icons Priority,
     Icons Department,
     string Notes,
-    int? OptionalId
+    int? OptionalId,
+    string[] Skills
 );
 
 [App(icon: Icons.DatabaseZap)]
@@ -41,6 +42,8 @@ public class DataTableApp : SampleBase
 
         var firstNames = new[] { "John", "Jane", "Mike", "Sarah", "David", "Emily", "Chris", "Lisa", "Tom", "Anna" };
         var lastNames = new[] { "Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis", "Rodriguez", "Martinez" };
+
+        var allSkills = new[] { "C#", "JavaScript", "Python", "SQL", "React", "Leadership", "Communication", "Problem Solving", "Team Player", "Agile" };
 
         var employees = Enumerable.Range(1, 1000).Select(i =>
         {
@@ -61,6 +64,13 @@ public class DataTableApp : SampleBase
             var notes = isActive ? "Active employee" : "Inactive";
             var optionalId = random.Next(100) > 20 ? (int?)random.Next(1000, 9999) : null;
 
+            // Generate 2-5 random skills for each employee
+            var skillCount = random.Next(2, 6);
+            var skills = Enumerable.Range(0, skillCount)
+                .Select(_ => allSkills[random.Next(allSkills.Length)])
+                .Distinct()
+                .ToArray();
+
             return new EmployeeRecord(
                 Id: i,
                 EmployeeCode: $"EMP{i:D4}",
@@ -77,7 +87,8 @@ public class DataTableApp : SampleBase
                 Priority: priority,
                 Department: department,
                 Notes: notes,
-                OptionalId: optionalId
+                OptionalId: optionalId,
+                Skills: skills
             );
         }).AsQueryable();
 
@@ -108,6 +119,9 @@ public class DataTableApp : SampleBase
             .Header(e => e.Priority, "Priority")
             .Header(e => e.Department, "Dept")
 
+            // Labels column (issue #1146)
+            .Header(e => e.Skills, "Skills")
+
             // Column widths
             .Width(e => e.Id, Size.Px(40))
             .Width(e => e.EmployeeCode, Size.Px(100))
@@ -125,6 +139,7 @@ public class DataTableApp : SampleBase
             .Width(e => e.Department, Size.Px(90))
             .Width(e => e.Notes, Size.Px(150))
             .Width(e => e.OptionalId, Size.Px(100))
+            .Width(e => e.Skills, Size.Px(300))
 
             // Alignments
             .Align(e => e.Id, Align.Left)
@@ -142,6 +157,7 @@ public class DataTableApp : SampleBase
             .Align(e => e.Priority, Align.Left)
             .Align(e => e.Department, Align.Left)
             .Align(e => e.OptionalId, Align.Left)
+            .Align(e => e.Skills, Align.Left)
 
             // Groups
             .Group(e => e.Id, "Identity")
@@ -160,6 +176,7 @@ public class DataTableApp : SampleBase
             .Group(e => e.LastReview, "Timeline")
             .Group(e => e.Notes, "Other")
             .Group(e => e.OptionalId, "Other")
+            .Group(e => e.Skills, "Personal")
 
             // Sorting
             .Sortable(e => e.Email, false) // Email not sortable
