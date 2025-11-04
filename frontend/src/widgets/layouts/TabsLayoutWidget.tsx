@@ -116,11 +116,13 @@ function SortableDropdownMenuItem({
   children,
   onClick,
   isActive,
+  showClose,
 }: {
   id: string;
   children: React.ReactNode;
   onClick: () => void;
   isActive?: boolean;
+  showClose?: boolean;
 }) {
   const {
     attributes,
@@ -149,18 +151,20 @@ function SortableDropdownMenuItem({
       )}
     >
       <span className="truncate text-left">{children}</span>
-      <button
-        type="button"
-        className="ml-auto opacity-60 p-1 hover:opacity-100 invisible group-hover:visible cursor-pointer"
-        onClick={e => {
-          e.stopPropagation();
-          window.dispatchEvent(
-            new CustomEvent('tab-close', { detail: { id } })
-          );
-        }}
-      >
-        <X className="w-3 h-3" />
-      </button>
+      {showClose && (
+        <button
+          type="button"
+          className="ml-auto opacity-60 p-1 hover:opacity-100 invisible group-hover:visible cursor-pointer"
+          onClick={e => {
+            e.stopPropagation();
+            window.dispatchEvent(
+              new CustomEvent('tab-close', { detail: { id } })
+            );
+          }}
+        >
+          <X className="w-3 h-3" />
+        </button>
+      )}
     </div>
   );
 }
@@ -802,6 +806,7 @@ export const TabsLayoutWidget = ({
                         handleTabSelect(id);
                       }}
                       isActive={activeTabId === id}
+                      showClose={showClose}
                     >
                       {title}
                     </SortableDropdownMenuItem>
