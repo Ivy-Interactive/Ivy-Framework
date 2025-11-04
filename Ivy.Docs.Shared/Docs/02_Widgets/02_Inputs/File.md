@@ -33,11 +33,7 @@ public class BasicFileInputDemo : ViewBase
             .Accept(".txt,.pdf,.cs")
             .MaxFileSize(5 * 1024 * 1024); // 5 MB
 
-        var selected = fileState.Value?.FileName ?? "No file selected";
-
-        return Layout.Vertical()
-                | fileState.ToFileInput(upload).Placeholder("Select a file")
-                | Text.Large(selected);
+        return fileState.ToFileInput(upload).Placeholder("Select a file");
    }
 }
 ```
