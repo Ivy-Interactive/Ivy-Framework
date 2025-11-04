@@ -196,11 +196,13 @@ public class AppHub(
 
             var widgetTree = new WidgetTree(app, contentBuilder, serviceProvider);
 
+            var parentId = GetParentId(httpContext);
+
             var appState = new AppSession
             {
                 AppId = appId,
                 MachineId = GetMachineId(httpContext),
-                ParentId = GetParentId(httpContext),
+                ParentId = parentId,
                 AppDescriptor = appDescriptor,
                 App = app,
                 ConnectionId = Context.ConnectionId,
@@ -213,7 +215,7 @@ public class AppHub(
             var connectionAborted = Context.ConnectionAborted;
             appState.EventQueue = new EventDispatchQueue(connectionAborted);
 
-            if (appId != AppIds.Chrome && sessionStore.FindChrome(appState) == null)
+            if (appId != AppIds.Chrome && parentId == null)
             {
                 var navigateArgs = new NavigateArgs(appId, Chrome: GetChromeParam(httpContext));
                 clientProvider.Redirect(navigateArgs.GetUrl(), replaceHistory: true);
