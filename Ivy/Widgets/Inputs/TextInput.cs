@@ -295,6 +295,7 @@ public static class TextInputValidationExtensions
     /// <summary>
     /// Adds automatic email validation to an email input created from a state when used in a ViewBase context.
     /// The validation will trigger on blur and set the Invalid property when validation fails.
+    /// Validates that the email contains "@" and "." characters.
     /// </summary>
     /// <param name="state">The state object the input is bound to.</param>
     /// <param name="view">The ViewBase context.</param>
@@ -305,7 +306,19 @@ public static class TextInputValidationExtensions
         if (input.Variant != TextInputs.Email)
             return input;
 
-        return view.AddTextInputValidation(state, input, Validators.CreateEmailValidator("Email"),
+        // Simple email validation: must contain "@" and "."
+        Func<object?, (bool, string)> emailValidator = value =>
+        {
+            if (value is not string emailStr || string.IsNullOrWhiteSpace(emailStr))
+                return (true, ""); // Empty is handled by Required validator
+
+            if (!emailStr.Contains("@") || !emailStr.Contains("."))
+                return (false, "Please enter a valid email address");
+
+            return (true, "");
+        };
+
+        return view.AddTextInputValidation(state, input, emailValidator,
             "Please enter a valid email address");
     }
 
