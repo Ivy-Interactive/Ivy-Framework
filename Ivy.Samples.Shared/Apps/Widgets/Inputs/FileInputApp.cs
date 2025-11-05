@@ -14,17 +14,22 @@ public class FileInputApp : SampleBase
         // Mock file for 'With Value' example
         var mockFile = new FileUpload { FileName = "example.txt", ContentType = "text/plain", Length = 12345 };
 
-        var singleFile = UseState<FileUpload?>(() => null);
-        var singleFileWithValue = UseState<FileUpload?>(() => mockFile);
-        var multipleFiles = UseState<IEnumerable<FileUpload>?>(() => null);
-        var multipleFilesWithValue = UseState<IEnumerable<FileUpload>?>(() => new[] { mockFile });
-        var disabledFile = UseState<FileUpload?>(() => null);
-        var invalidFile = UseState<FileUpload?>(() => null);
-        var placeholderFile = UseState<FileUpload?>(() => null);
-        var limitedFiles = UseState<IEnumerable<FileUpload>?>(() => null);
-        var textFiles = UseState<IEnumerable<FileUpload>?>(() => null);
-        var pdfFiles = UseState<IEnumerable<FileUpload>?>(() => null);
-        var imageFiles = UseState<IEnumerable<FileUpload>?>(() => null);
+        // Variants section - use FileUpload<byte[]> for feedback
+        var singleFile = UseState<FileUpload<byte[]>?>(() => null);
+        var multipleFiles = UseState(ImmutableArray.Create<FileUpload<byte[]>>());
+        var disabledFile = UseState<FileUpload<byte[]>?>(() => null);
+        var invalidFile = UseState<FileUpload<byte[]>?>(() => null);
+        var placeholderFile = UseState<FileUpload<byte[]>?>(() => null);
+
+        // File Type Restrictions section
+        var textFiles = UseState(ImmutableArray.Create<FileUpload<byte[]>>());
+        var pdfFiles = UseState(ImmutableArray.Create<FileUpload<byte[]>>());
+        var imageFiles = UseState(ImmutableArray.Create<FileUpload<byte[]>>());
+
+        // File Count Limits section
+        var limitedFiles = UseState(ImmutableArray.Create<FileUpload<byte[]>>());
+        var singleLimitFile = UseState<FileUpload<byte[]>?>(() => null);
+        var multipleLimitFiles = UseState(ImmutableArray.Create<FileUpload<byte[]>>());
         var singleSizeFile = UseState<FileUpload<byte[]>?>(() => null);
         var multipleSizeFiles = UseState(ImmutableArray.Create<FileUpload<byte[]>>());
 
@@ -35,15 +40,20 @@ public class FileInputApp : SampleBase
         var validatedFiles = UseState<IEnumerable<FileUpload>?>(() => null);
         var singleFileWithValidation = UseState<FileUpload?>(() => null);
 
-        // Upload contexts (using simple lambda handlers for demo purposes)
-        var singleFileUpload = this.UseUpload((fileUpload, stream, cancellationToken) => System.Threading.Tasks.Task.CompletedTask);
-        var singleFileWithValueUpload = this.UseUpload((fileUpload, stream, cancellationToken) => System.Threading.Tasks.Task.CompletedTask);
-        var multipleFilesUpload = this.UseUpload((fileUpload, stream, cancellationToken) => System.Threading.Tasks.Task.CompletedTask);
-        var multipleFilesWithValueUpload = this.UseUpload((fileUpload, stream, cancellationToken) => System.Threading.Tasks.Task.CompletedTask);
-        var placeholderFileUpload = this.UseUpload((fileUpload, stream, cancellationToken) => System.Threading.Tasks.Task.CompletedTask);
-        var textFilesUpload = this.UseUpload((fileUpload, stream, cancellationToken) => System.Threading.Tasks.Task.CompletedTask);
-        var pdfFilesUpload = this.UseUpload((fileUpload, stream, cancellationToken) => System.Threading.Tasks.Task.CompletedTask);
-        var imageFilesUpload = this.UseUpload((fileUpload, stream, cancellationToken) => System.Threading.Tasks.Task.CompletedTask);
+        // Upload contexts for Variants section - use MemoryStreamUploadHandler for feedback
+        var singleFileUpload = this.UseUpload(MemoryStreamUploadHandler.Create(singleFile));
+        var multipleFilesUpload = this.UseUpload(MemoryStreamUploadHandler.Create(multipleFiles));
+        var placeholderFileUpload = this.UseUpload(MemoryStreamUploadHandler.Create(placeholderFile));
+
+        // Upload contexts for File Type Restrictions section
+        var textFilesUpload = this.UseUpload(MemoryStreamUploadHandler.Create(textFiles));
+        var pdfFilesUpload = this.UseUpload(MemoryStreamUploadHandler.Create(pdfFiles));
+        var imageFilesUpload = this.UseUpload(MemoryStreamUploadHandler.Create(imageFiles));
+
+        // Upload contexts for File Count Limits section
+        var limitedFilesUpload = this.UseUpload(MemoryStreamUploadHandler.Create(limitedFiles));
+        var singleLimitFileUpload = this.UseUpload(MemoryStreamUploadHandler.Create(singleLimitFile));
+        var multipleLimitFilesUpload = this.UseUpload(MemoryStreamUploadHandler.Create(multipleLimitFiles));
 
         // Upload handlers for size variants - use MemoryStreamUploadHandler for automatic progress tracking
         var singleSizeFileUpload = this.UseUpload(MemoryStreamUploadHandler.Create(singleSizeFile));
@@ -112,14 +122,14 @@ public class FileInputApp : SampleBase
 
                   | Text.InlineCode("Single File")
                   | singleFile.ToFileInput(singleFileUpload)
-                  | singleFileWithValue.ToFileInput(singleFileWithValueUpload)
+                  | singleFile.ToFileInput(singleFileUpload).Placeholder("File input with value (upload a file)")
                   | singleFile.ToFileInput(singleFileUpload).Disabled()
                   | singleFile.ToFileInput(singleFileUpload).Invalid("Please select a valid file")
                   | placeholderFile.ToFileInput(placeholderFileUpload).Placeholder("Click to select a file")
 
                   | Text.InlineCode("Multiple Files")
                   | multipleFiles.ToFileInput(multipleFilesUpload)
-                  | multipleFilesWithValue.ToFileInput(multipleFilesWithValueUpload)
+                  | multipleFiles.ToFileInput(multipleFilesUpload).Placeholder("Multiple files with value (upload files)")
                   | multipleFiles.ToFileInput(multipleFilesUpload).Disabled()
                   | multipleFiles.ToFileInput(multipleFilesUpload).Invalid("Please select valid files")
                   | multipleFiles.ToFileInput(multipleFilesUpload).Placeholder("Click to select files")
@@ -150,7 +160,7 @@ public class FileInputApp : SampleBase
 
                   | Text.Block("All Files")
                   | Text.InlineCode("(default)")
-                  | singleFile.ToFileInput(singleFileUpload).Placeholder("Select any file")
+                  | singleLimitFile.ToFileInput(singleLimitFileUpload).Placeholder("Select any file")
                )
 
                // File Count Limits:
@@ -162,15 +172,15 @@ public class FileInputApp : SampleBase
 
                   | Text.Block("No Limit")
                   | Text.Block("Default behavior - no restriction on number of files")
-                  | multipleFiles.ToFileInput(multipleFilesUpload).Placeholder("Select unlimited files")
+                  | limitedFiles.ToFileInput(limitedFilesUpload).Placeholder("Select unlimited files")
 
                   | Text.Block("1 File")
                   | Text.Block("Single file selection only")
-                  | singleFile.ToFileInput(singleFileUpload).Placeholder("Select one file")
+                  | singleLimitFile.ToFileInput(singleLimitFileUpload).Placeholder("Select one file")
 
                   | Text.Block("3 Files")
                   | Text.Block("Maximum of 3 files allowed")
-                  | multipleFiles.ToFileInput(multipleFilesUpload).MaxFiles(3).Placeholder("Select up to 3 files")
+                  | multipleLimitFiles.ToFileInput(multipleLimitFilesUpload).MaxFiles(3).Placeholder("Select up to 3 files")
                )
 
                // File Content Display:
@@ -179,8 +189,8 @@ public class FileInputApp : SampleBase
                   | Text.InlineCode("File Input")
                   | Text.InlineCode("File Details")
 
-                  | singleFile.ToFileInput(singleFileUpload).Placeholder("Select a text file to view content")
-                  | (singleFile.Value != null ? (object)singleFile.ToDetails() : Text.Block("No file selected"))
+                  | singleLimitFile.ToFileInput(singleLimitFileUpload).Placeholder("Select a text file to view content")
+                  | (singleLimitFile.Value != null ? (object)singleLimitFile.Value.ToDetails() : Text.Block("No file selected"))
 
                // | singleFile.ToFileInput(singleFileUpload).Placeholder("Select a file to view as plain text")
                // | (singleFile.Value?.ToPlainText() ?? (object)Text.Block("No file selected"))
