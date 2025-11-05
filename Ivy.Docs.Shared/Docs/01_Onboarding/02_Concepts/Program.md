@@ -1,4 +1,4 @@
-﻿---
+---
 searchHints:
   - startup
   - configuration
@@ -156,7 +156,7 @@ For more information about SideBar, check its [documentation](../../02_Widgets/0
 ## Authentication
 
 <Callout Type="tip">
-Use the `ivy auth add` command to automatically configure authentication providers in your project. This CLI command will update your `Program.cs` and manage secrets for you. See the [Authentication CLI documentation](../03_CLI/04_Authentication/01_Overview.md) for details.
+Use the `ivy auth add` command to automatically configure authentication providers in your project. This CLI command will update your `Program.cs` and manage secrets for you. See the [Authentication CLI documentation](../03_CLI/04_Authentication/01_AuthenticationOverview.md) for details.
 </Callout>
 
 Ivy supports various authentication providers:

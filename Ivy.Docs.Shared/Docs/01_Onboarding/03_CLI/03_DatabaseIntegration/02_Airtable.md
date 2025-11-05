@@ -37,7 +37,7 @@ These values will be combined into a connection string and stored in .NET user s
 BaseId=appXXXXXXXXXXXXXX;ApiKey=patXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ```
 
-See [Database Integration Overview](Overview.md) for more information on adding database connections to Ivy.
+See [Database Overview](01_DatabaseOverview.md) for more information on adding database connections to Ivy.
 
 ## Creating an Access Token
 
@@ -90,7 +90,7 @@ See [Airtable's API Reference](https://airtable.com/developers/web/api/introduct
 
 ## Related Documentation
 
-- [Database Overview](Overview.md)
+- [Database Overview](01_DatabaseOverview.md)
 - [SQLite Provider](SQLite.md)
 - [PostgreSQL Provider](PostgreSql.md)
 - [Official Airtable API Documentation](https://airtable.com/developers/web/api/introduction)

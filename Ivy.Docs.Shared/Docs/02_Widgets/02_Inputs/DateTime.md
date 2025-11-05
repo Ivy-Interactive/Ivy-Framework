@@ -28,9 +28,10 @@ public class BasicDateTimeUsageDemo : ViewBase
         var dateState = UseState(DateTime.Today);
         var daysBetween = dateState.Value.Subtract(DateTime.Today).Days;
         return Layout.Vertical() 
-                | Text.Large("When is your birthday?")
                 | dateState.ToDateTimeInput()
                            .Variant(DateTimeInputs.Date)
+                           .WithField()
+                           .Label("When is your birthday?")
                 | Text.Html($"<i>That's <b>{daysBetween}</b> days from now!");
     }
 }    
@@ -82,20 +83,17 @@ public class DateTimeVariantsDemo : ViewBase
         var dateTimeState = UseState(DateTime.Today);
         
         return Layout.Vertical()
-                | (Layout.Horizontal()
-                    | Text.Small("Date")
-                          .Width(35)
-                    | dateState.ToDateInput()
-                           .Format("dd/MM/yyyy"))
-                | (Layout.Horizontal()
-                    | Text.Small("DateTime")
-                          .Width(35)
-                    | dateTimeState.ToDateTimeInput()
-                           .Format("dd/MM/yyyy HH:mm:ss"))
-                | (Layout.Horizontal()
-                    | Text.Small("Time")
-                          .Width(35)
-                    | timeState.ToTimeInput());
+                | dateState.ToDateInput()
+                       .Format("dd/MM/yyyy")
+                       .WithField()
+                       .Label("Date")
+                | dateTimeState.ToDateTimeInput()
+                       .Format("dd/MM/yyyy HH:mm:ss")
+                       .WithField()
+                       .Label("DateTime")
+                | timeState.ToTimeInput()
+                       .WithField()
+                       .Label("Time");
     }    
 }                
 ```
@@ -139,17 +137,15 @@ public class FormatDemo : ViewBase
          var yearMonthDate = UseState(DateTime.Today.Date);
          
          return Layout.Vertical()
-                 | (Layout.Horizontal()
-                     | Text.Small("MM/dd/yyyy")
-                           .Width(25) 
-                     | monthDateYear.ToDateInput()
-                                    .Format("MM/dd/yyyy"))
-                | (Layout.Horizontal()
-                    | Text.Small("yyyy/MMM/dd")
-                          .Width(25)
-                    | yearMonthDate.ToDateInput()
-                                   .Placeholder("yyyy/MMM/dd")
-                                   .Format("yyyy/MMM/dd"));
+                 | monthDateYear.ToDateInput()
+                                .Format("MM/dd/yyyy")
+                                .WithField()
+                                .Label("MM/dd/yyyy")
+                | yearMonthDate.ToDateInput()
+                               .Placeholder("yyyy/MMM/dd")
+                               .Format("yyyy/MMM/dd")
+                               .WithField()
+                               .Label("yyyy/MMM/dd");
     }
 }    
 ```
@@ -166,9 +162,10 @@ public class InvalidDateTimeDemo : ViewBase
     {
         var thisDate = UseState(DateTime.Today.Date.AddDays(8));
         return Layout.Vertical()
-                | Text.Large("Return date")
                 | thisDate.ToDateInput()
-                          .Invalid("Date is beyond the last approved date!");
+                          .Invalid("Date is beyond the last approved date!")
+                          .WithField()
+                          .Label("Return date");
     }
 }
 
@@ -225,12 +222,14 @@ public class LibraryBookReturnDemo : ViewBase
                 | Icons.Book    
                 | H3("Library Book Return")
                 | Text.Small("Library book returns must be within a week")
-                | Text.Large("Issue Date")
                 | issueDate.ToDateInput()
                            .Disabled()
-                | Text.Large("Return Date")
+                           .WithField()
+                           .Label("Issue Date")
                 | returnDate.ToDateInput()
                             .Disabled()
+                            .WithField()
+                            .Label("Return Date")
                 | actualReturnDate.ToDateInput()
                                     .Invalid(invalidMessage.Value);
     }    

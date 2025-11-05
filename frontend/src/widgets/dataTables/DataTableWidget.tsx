@@ -5,7 +5,10 @@ import { TableProvider, useTable } from './DataTableContext';
 import { ErrorDisplay } from '@/components/ErrorDisplay';
 import { Loading } from '@/components/Loading';
 import { DataTableEditor } from './DataTableEditor';
-import { DataTableOptions } from './DataTableOptions';
+import { DataTableHeader } from './DataTableHeader';
+import { DataTableOption } from './DataTableOption';
+import { DataTableFilterOption } from './options/DataTableFilterOption';
+import { Filter as FilterIcon } from 'lucide-react';
 import { tableStyles } from './styles/style';
 import { TableProps } from './types/types';
 import { getWidth, getHeight } from '@/lib/styles';
@@ -75,19 +78,27 @@ export const DataTable: React.FC<TableProps> = ({
         editable={editable}
       >
         <TableLayout>
-          <>
-            <DataTableOptions
-              hasOptions={{
-                allowFiltering: finalConfig.allowFiltering,
-                allowLlmFiltering: finalConfig.allowLlmFiltering,
-              }}
-            />
+          <DataTableHeader>
+            {finalConfig.allowFiltering && (
+              <DataTableOption
+                icon={FilterIcon}
+                label="Filter"
+                tooltip="Filter table data"
+                displayMode="inline"
+                inlineDirection="right"
+                showLabel={false}
+              >
+                <DataTableFilterOption
+                  allowLlmFiltering={finalConfig.allowLlmFiltering}
+                />
+              </DataTableOption>
+            )}
+          </DataTableHeader>
 
-            <DataTableEditor
-              widgetId={id}
-              hasOptions={finalConfig.allowFiltering}
-            />
-          </>
+          <DataTableEditor
+            widgetId={id}
+            hasOptions={finalConfig.allowFiltering}
+          />
         </TableLayout>
       </TableProvider>
     </div>

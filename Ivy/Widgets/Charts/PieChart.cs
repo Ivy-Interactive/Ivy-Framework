@@ -44,6 +44,12 @@ public record PieChart : WidgetBase<PieChart>
     [Prop] public Legend? Legend { get; init; } = null;
 
     /// <summary>
+    /// Gets or sets the toolbox configuration.
+    /// </summary>
+    [Prop] public Toolbox? Toolbox { get; init; } = null;
+
+
+    /// <summary>
     /// Gets or sets the array of Pie configurations.
     /// </summary>
     [Prop] public Pie[] Pies { get; init; } = [];
@@ -87,6 +93,7 @@ public static class PieChartExtensions
         return chart with { Pies = [.. chart.Pies, pie] };
     }
 
+
     /// <summary>
     /// Adds a simple pie configuration.
     /// </summary>
@@ -129,6 +136,29 @@ public static class PieChartExtensions
     public static PieChart Legend(this PieChart chart)
     {
         return chart with { Legend = new Legend() };
+    }
+
+
+
+    /// <summary>
+    /// Sets the toolbox configuration.
+    /// </summary>
+    /// <param name="chart">The PieChart to configure.</param>
+    /// <param name="toolbox">The Toolbox configuration to use, or null to disable toolbox.</param>
+    /// <returns>A new PieChart instance with the updated toolbox configuration.</returns>
+    public static PieChart Toolbox(this PieChart chart, Toolbox toolbox)
+    {
+        return chart with { Toolbox = toolbox };
+    }
+
+    /// <summary>
+    /// Enables the toolbox.
+    /// </summary>
+    /// <param name="chart">The PieChart to configure.</param>
+    /// <returns>A new PieChart instance with default toolbox enabled.</returns>
+    public static PieChart Toolbox(this PieChart chart)
+    {
+        return chart with { Toolbox = new Toolbox() };
     }
 
     /// <summary>

@@ -1,9 +1,12 @@
+using System.ComponentModel.DataAnnotations;
 using System.Linq.Expressions;
 using System.Reflection;
+using Ivy.Client;
 using Ivy.Core;
 using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
 using Ivy.Hooks;
+using Ivy.Services;
 using Ivy.Shared;
 using Ivy.Widgets.Inputs;
 
@@ -25,7 +28,7 @@ public class FormBuilderField<TModel>
         string name,
         string label,
         int order,
-        Func<IAnyState, IAnyInput>? inputFactory,
+        Func<IAnyState, IViewContext, IAnyInput>? inputFactory,
         FieldInfo? fieldInfo,
         PropertyInfo? propertyInfo,
         bool required)
@@ -103,8 +106,11 @@ public class FormBuilderField<TModel>
     /// <summary>Optional description text providing additional context for field.</summary>
     public string? Description { get; set; }
 
-    /// <summary>Factory function creating input control for this field.</summary>
-    public Func<IAnyState, IAnyInput>? InputFactory { get; set; }
+    /// <summary>Optional help text displayed as tooltip on info icon next to label.</summary>
+    public string? Help { get; set; }
+
+    /// <summary>Factory function creating input control for this field with access to view context.</summary>
+    public Func<IAnyState, IViewContext, IAnyInput>? InputFactory { get; set; }
 
     /// <summary>Whether field has been removed from form and should not be rendered.</summary>
     public bool Removed { get; set; }
@@ -151,6 +157,7 @@ public class FormBuilder<TModel> : ViewBase
 
         var fields = type
             .GetFields()
+            .Where(f => f.GetCustomAttribute<ScaffoldColumnAttribute>()?.Scaffold != false)
             .Select(e => new
             {
                 e.Name,
@@ -162,6 +169,7 @@ public class FormBuilder<TModel> : ViewBase
             .Union(
                 type
                     .GetProperties()
+                    .Where(p => p.GetCustomAttribute<ScaffoldColumnAttribute>()?.Scaffold != false)
                     .Select(e => new
                     {
                         e.Name,
@@ -194,33 +202,54 @@ public class FormBuilder<TModel> : ViewBase
         }
     }
 
-    private Func<IAnyState, IAnyInput>? ScaffoldEditor(string name, Type type)
+    private Func<IAnyState, IViewContext, IAnyInput>? ScaffoldEditor(string name, Type type)
     {
         Type nonNullableType = Nullable.GetUnderlyingType(type) ?? type;
 
-        if (type == typeof(FileInput))
+        static bool IsFileUploadType(Type t)
         {
-            return (state) => state.ToFileInput().Size(Size);
+            if (t == typeof(FileUpload)) return true;
+            if (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(FileUpload<>)) return true;
+            return typeof(IFileUpload).IsAssignableFrom(t);
+        }
+
+        // FileUpload fields are not auto-scaffolded - use .Builder() to configure them manually
+        if (IsFileUploadType(nonNullableType))
+        {
+            return null;
+        }
+
+        // Collections of FileUpload / FileUpload<T>
+        foreach (var it in type.GetInterfaces().Concat([type]))
+        {
+            if (it.IsGenericType && it.GetGenericTypeDefinition() == typeof(IEnumerable<>))
+            {
+                var arg = it.GetGenericArguments()[0];
+                if (IsFileUploadType(arg))
+                {
+                    return null;
+                }
+            }
         }
 
         if (name.EndsWith("Id") && (type == typeof(Guid) || type == typeof(int) || type == typeof(string)))
         {
-            return (state) => state.ToReadOnlyInput().Size(Size);
+            return (state, _) => state.ToReadOnlyInput().Size(Size);
         }
 
         if (name.EndsWith("Email") && nonNullableType == typeof(string))
         {
-            return (state) => state.ToEmailInput().Size(Size);
+            return (state, _) => state.ToEmailInput().Size(Size);
         }
 
         if ((name.EndsWith("Color") || name.EndsWith("Colour")) && nonNullableType == typeof(string))
         {
-            return (state) => state.ToColorInput().Size(Size);
+            return (state, _) => state.ToColorInput().Size(Size);
         }
 
         if (nonNullableType == typeof(bool))
         {
-            return (state) =>
+            return (state, _) =>
             {
                 var input = state.ToBoolInput();
                 // Only apply scaffold defaults if no custom label was set
@@ -242,48 +271,57 @@ public class FormBuilder<TModel> : ViewBase
         {
             if (name.EndsWith("Password"))
             {
-                return (state) => state.ToPasswordInput().Size(Size);
+                return (state, _) => state.ToPasswordInput().Size(Size);
             }
 
-            return (state) => state.ToTextInput().Size(Size);
+            return (state, _) => state.ToTextInput().Size(Size);
         }
 
         if (nonNullableType.IsEnum)
         {
-            return (state) => state.ToSelectInput().Size(Size);
+            return (state, _) => state.ToSelectInput().Size(Size);
         }
 
         if (type.IsCollectionType() && type.GetCollectionTypeParameter() is { IsEnum: true })
         {
-            return (state) => state.ToSelectInput().List().Size(Size);
+            return (state, _) => state.ToSelectInput().List().Size(Size);
         }
 
         if (type.IsNumeric())
         {
-            return (state) => state.ToNumberInput().ScaffoldDefaults(name, type).Size(Size);
+            return (state, _) => state.ToNumberInput().ScaffoldDefaults(name, type).Size(Size);
         }
 
         if (type.IsDate())
         {
-            return (state) => state.ToDateTimeInput().Size(Size);
+            return (state, _) => state.ToDateTimeInput().Size(Size);
         }
 
         return null;
     }
 
-    /// <summary>Configures custom input factory for specified field with automatic scaffolding wrapper.</summary>
+    /// <summary>Configures custom input factory for specified field (convenience overload without view context).</summary>
     /// <param name="field">Expression identifying field to configure.</param>
     /// <param name="factory">Input factory function to use for creating input control.</param>
     /// <returns>Form builder instance for method chaining.</returns>
     public FormBuilder<TModel> Builder(Expression<Func<TModel, object>> field, Func<IAnyState, IAnyInput> factory)
     {
+        return Builder(field, (state, _) => factory(state));
+    }
+
+    /// <summary>Configures custom input factory for specified field with automatic scaffolding wrapper.</summary>
+    /// <param name="field">Expression identifying field to configure.</param>
+    /// <param name="factory">Input factory function that receives both state and view context.</param>
+    /// <returns>Form builder instance for method chaining.</returns>
+    public FormBuilder<TModel> Builder(Expression<Func<TModel, object>> field, Func<IAnyState, IViewContext, IAnyInput> factory)
+    {
         var hint = GetField(field);
 
-        Func<IAnyState, IAnyInput> ScaffoldWrapper(Func<IAnyState, IAnyInput> inner)
+        Func<IAnyState, IViewContext, IAnyInput> ScaffoldWrapper(Func<IAnyState, IViewContext, IAnyInput> inner)
         {
-            return (state) =>
+            return (state, context) =>
             {
-                var input = inner(state);
+                var input = inner(state, context);
                 if (input is IAnyBoolInput boolInput)
                 {
                     // Only apply scaffold defaults if no custom label was set
@@ -310,15 +348,24 @@ public class FormBuilder<TModel> : ViewBase
         return this;
     }
 
-    /// <summary>Configures custom input factory for all fields of specified type.</summary>
+    /// <summary>Configures custom input factory for all fields of specified type (convenience overload without view context).</summary>
     /// <typeparam name="TU">Type of fields to configure.</typeparam>
     /// <param name="input">Input factory function to use for all fields of this type.</param>
     /// <returns>Form builder instance for method chaining.</returns>
     public FormBuilder<TModel> Builder<TU>(Func<IAnyState, IAnyInput> input)
     {
+        return Builder<TU>((state, _) => input(state));
+    }
+
+    /// <summary>Configures custom input factory for all fields of specified type.</summary>
+    /// <typeparam name="TU">Type of fields to configure.</typeparam>
+    /// <param name="input">Input factory function that receives both state and view context.</param>
+    /// <returns>Form builder instance for method chaining.</returns>
+    public FormBuilder<TModel> Builder<TU>(Func<IAnyState, IViewContext, IAnyInput> input)
+    {
         foreach (var hint in _fields.Values.Where(e => e.Type is TU))
         {
-            hint.InputFactory = (state) => input(state).Size(Size);
+            hint.InputFactory = (state, context) => input(state, context).Size(Size);
         }
 
         return this;
@@ -332,6 +379,17 @@ public class FormBuilder<TModel> : ViewBase
     {
         var hint = GetField(field);
         hint.Description = description;
+        return this;
+    }
+
+    /// <summary>Sets help text for specified field displayed as tooltip on info icon next to label.</summary>
+    /// <param name="field">Expression identifying field to configure.</param>
+    /// <param name="help">Help text to display in tooltip.</param>
+    /// <returns>Form builder instance for method chaining.</returns>
+    public FormBuilder<TModel> Help(Expression<Func<TModel, object>> field, string help)
+    {
+        var hint = GetField(field);
+        hint.Help = help;
         return this;
     }
 
@@ -598,21 +656,25 @@ public class FormBuilder<TModel> : ViewBase
 
         var fields = _fields
             .Values
-            .Where(e => e is { Removed: false, InputFactory: not null })
-            .Select(e => new FormFieldBinding<TModel>(
-                CreateSelector(e.Name),
-                e.InputFactory!,
-                () => e.Visible(currentModel.Value),
-                updateSignal,
-                e.Label,
-                e.Description,
-                e.Required,
-                new FormFieldLayoutOptions(e.RowKey, e.Column, e.Order, e.Group),
-                e.Validators.ToArray(),
-                ValidationStrategy,
-                Size
-            ))
-            .Cast<IFormFieldBinding<TModel>>()
+            .Where(e => e is { Removed: false } && e.InputFactory != null)
+            .Select(e =>
+            {
+                IFormFieldBinding<TModel> binding = new FormFieldBinding<TModel>(
+                    CreateSelector(e.Name),
+                    e.InputFactory!,
+                    () => e.Visible(currentModel.Value),
+                    updateSignal,
+                    e.Label,
+                    e.Description,
+                    e.Required,
+                    new FormFieldLayoutOptions(e.RowKey, e.Column, e.Order, e.Group),
+                    e.Validators.ToArray(),
+                    ValidationStrategy,
+                    Size,
+                    e.Help
+                );
+                return binding;
+            })
             .ToArray();
 
         async Task<bool> OnSubmit()
@@ -661,19 +723,92 @@ public class FormBuilder<TModel> : ViewBase
     {
         (Func<Task<bool>> onSubmit, IView formView, IView validationView, bool submitting) = UseForm(this.Context);
 
+        // Track upload state to disable submit button
+        var hasUploading = UseState(false);
+        var client = UseService<IClientProvider>();
+
+        UseEffect(() =>
+        {
+            hasUploading.Set(CheckForLoadingUploads(_model.Value));
+        }, _model);
+
         async ValueTask HandleSubmit()
         {
+            if (hasUploading.Value)
+            {
+                client.Toast(
+                    "File uploads are still in progress. Please wait for them to complete.",
+                    "Uploads in Progress"
+                );
+                return;
+            }
             await onSubmit();
         }
 
         return Layout.Vertical()
                | formView
                | Layout.Horizontal(new Button(SubmitTitle).HandleClick(HandleSubmit)
-                   .Loading(submitting).Disabled(submitting).Size(Size), validationView);
+                   .Loading(submitting).Disabled(submitting || hasUploading.Value).Size(Size), validationView);
     }
 
     private static string InvalidMessage(int invalidFields)
     {
         return invalidFields == 1 ? "There is 1 invalid field." : $"There are {invalidFields} invalid fields.";
+    }
+
+    /// <summary>Recursively checks if any FileUpload fields in the model are currently uploading.</summary>
+    private static bool CheckForLoadingUploads(object? obj)
+    {
+        if (obj == null) return false;
+
+        // Check single file upload
+        if (obj is IFileUpload file)
+            return file.Status == FileUploadStatus.Loading;
+
+        // Check collection of uploads
+        if (obj is IEnumerable<IFileUpload> files)
+            return files.Any(f => f.Status == FileUploadStatus.Loading);
+
+        // Recursively check all properties
+        var type = obj.GetType();
+
+        // Skip primitive types and strings
+        if (type.IsPrimitive || type == typeof(string) || type == typeof(decimal) || type == typeof(DateTime) || type == typeof(DateTimeOffset))
+            return false;
+
+        foreach (var prop in type.GetProperties(BindingFlags.Public | BindingFlags.Instance))
+        {
+            // Skip indexed properties
+            if (prop.GetIndexParameters().Length > 0)
+                continue;
+
+            try
+            {
+                var value = prop.GetValue(obj);
+                if (CheckForLoadingUploads(value))
+                    return true;
+            }
+            catch
+            {
+                // Skip properties that can't be read
+            }
+        }
+
+        // Check fields as well
+        foreach (var field in type.GetFields(BindingFlags.Public | BindingFlags.Instance))
+        {
+            try
+            {
+                var value = field.GetValue(obj);
+                if (CheckForLoadingUploads(value))
+                    return true;
+            }
+            catch
+            {
+                // Skip fields that can't be read
+            }
+        }
+
+        return false;
     }
 }

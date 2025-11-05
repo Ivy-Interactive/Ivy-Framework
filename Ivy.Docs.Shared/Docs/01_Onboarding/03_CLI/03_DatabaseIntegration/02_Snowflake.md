@@ -46,7 +46,7 @@ For additional authentication methods (OAuth, SSO, etc.) and all connection opti
 
 Your connection string will be stored in .NET user secrets.
 
-See [Database Integration Overview](Overview.md) for more information on adding database connections to Ivy.
+See [Database Overview](01_DatabaseOverview.md) for more information on adding database connections to Ivy.
 
 ## Configuration
 
@@ -86,7 +86,7 @@ Learn more in the [Snowflake Documentation](https://docs.snowflake.com/en/user-g
 
 ## Related Documentation
 
-- [Database Overview](Overview.md)
+- [Database Overview](01_DatabaseOverview.md)
 - [PostgreSQL Provider](PostgreSql.md)
 - [SQL Server Provider](SqlServer.md)
 - [Official Snowflake Documentation](https://docs.snowflake.com)

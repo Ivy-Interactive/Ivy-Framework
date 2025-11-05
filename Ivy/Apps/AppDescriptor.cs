@@ -32,7 +32,7 @@ public class AppDescriptor : IAppRepositoryNode
 
     public Func<ViewBase>? ViewFactory { get; init; }
 
-    public FuncBuilder? ViewFunc { get; init; }
+    public FuncViewBuilder? ViewFunc { get; init; }
 
     public required bool IsVisible { get; init; }
 

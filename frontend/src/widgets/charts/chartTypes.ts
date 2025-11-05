@@ -40,6 +40,7 @@ export interface PieChartWidgetProps {
   legend?: PieLegendProps;
   colorScheme: ColorScheme;
   total?: PieChartTotalProps;
+  toolbox?: ToolboxProps;
 }
 
 export type YAxisProps = {
@@ -112,6 +113,27 @@ export type LegendProps = {
   iconType?: string | null;
   layout?: 'Horizontal' | 'Vertical';
   verticalAlign?: 'Top' | 'Middle' | 'Bottom';
+};
+
+type ToolboxFeatureDataView = { show?: boolean; readOnly?: boolean };
+type ToolboxFeatureMagicType = { show?: boolean; type?: string[] };
+type ToolboxFeatureSaveAsImage = { show?: boolean };
+
+export type ToolboxFeatures = {
+  dataView?: ToolboxFeatureDataView;
+  magicType?: ToolboxFeatureMagicType;
+  saveAsImage?: ToolboxFeatureSaveAsImage;
+};
+
+export type ToolboxProps = {
+  enabled?: boolean;
+  orientation?: 'Horizontal' | 'Vertical';
+  align?: 'Left' | 'Center' | 'Right';
+  verticalAlign?: 'Top' | 'Middle' | 'Bottom';
+  saveAsImage?: boolean;
+  restore?: boolean;
+  dataView?: boolean;
+  magicType?: boolean;
 };
 
 export interface MarkLine {
@@ -239,6 +261,7 @@ export interface LineChartWidgetProps {
   xAxis?: XAxisProps[];
   yAxis?: YAxisProps[];
   tooltip?: ToolTipProps;
+  toolbox?: ToolboxProps;
   legend?: LegendProps;
   referenceLines?: MarkLine;
   referenceAreas?: MarkArea;

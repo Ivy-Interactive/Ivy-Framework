@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Linq;
+using System.Text.Json;
 using Ivy.Apps;
 using Ivy.Client;
 using Ivy.Core;
@@ -47,26 +48,59 @@ public static class ChromeSettingsExtensions
 [Signal(BroadcastType.Chrome)]
 public class NavigateSignal : AbstractSignal<NavigateArgs, Unit> { }
 
-public record NavigateArgs(string AppId, object? AppArgs = null)
+public enum NavigationPurpose
+{
+    NewDestination,
+    HistoryTraversal,
+}
+
+public record NavigateArgs(string? AppId, object? AppArgs = null, string? TabId = null, NavigationPurpose Purpose = NavigationPurpose.NewDestination, bool Chrome = true)
 {
     public AppHost ToAppHost(string? parentId = null)
     {
+        if (this.AppId == null)
+        {
+            throw new InvalidOperationException("Cannot create AppHost: AppId is null.");
+        }
+
         return new AppHost(this.AppId, this.AppArgs != null ? JsonSerializer.Serialize(this.AppArgs) : null, parentId);
     }
 
     public string GetUrl(string? parentId = null)
     {
-        var url = $"index.html?appId={this.AppId}";
+        if (this.AppId?.StartsWith('/') == true)
+        {
+            throw new InvalidOperationException("Cannot get URL: AppId starts with an invalid character.");
+        }
+
+        // Use path-based URL for better user experience
+        var url = $"/{this.AppId}";
+
+        // Build query parameters if needed
+        var queryParams = new List<string>();
+
         if (parentId != null)
         {
-            url += $"&parentId={parentId}";
+            queryParams.Add($"parentId={parentId}");
         }
+
         if (this.AppArgs != null)
         {
             var jsonArgs = JsonSerializer.Serialize(this.AppArgs);
             var encodedArgs = System.Web.HttpUtility.UrlEncode(jsonArgs);
-            url += $"&appArgs={encodedArgs}";
+            queryParams.Add($"appArgs={encodedArgs}");
         }
+
+        if (!this.Chrome)
+        {
+            queryParams.Add("chrome=false");
+        }
+
+        if (queryParams.Any())
+        {
+            url += "?" + string.Join("&", queryParams);
+        }
+
         return url;
     }
 }
@@ -115,5 +149,3 @@ public interface INavigator
     public void Navigate(Type type, object? appArgs = null);
     public void Navigate(string uri, object? appArgs = null);
 }
-
-

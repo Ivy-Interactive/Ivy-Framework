@@ -153,7 +153,8 @@ public class InputWidgetsDemo : ViewBase
         var dateRangeState = UseState<(DateOnly?, DateOnly?)>((null, null));
         var colorState = UseState("#00cc92");
         var codeState = UseState("var x = 10;");
-        var fileState = UseState((FileInput?)null);
+        var fileState = UseState((FileUpload?)null);
+        var fileUpload = this.UseUpload((fileUpload, stream, cancellationToken) => System.Threading.Tasks.Task.CompletedTask);
         var feedbackState = UseState(4);
         var selectState = UseState("");
         var asyncSelectState = UseState((string?)null);
@@ -194,7 +195,7 @@ public class InputWidgetsDemo : ViewBase
                     | boolState.ToSwitchInput().Label("Enable notifications")
             ).Title("BoolInput").Description("Checkbox input").Height(Size.Units(60))
             | new Card(
-                fileState.ToFileInput().Placeholder("Upload file")
+                fileState.ToFileInput(fileUpload).Placeholder("Upload file")
             ).Title("FileInput").Description("File upload").Height(Size.Units(60))
             | new Card(
                 dateRangeState.ToDateRangeInput().Placeholder("Select date range")

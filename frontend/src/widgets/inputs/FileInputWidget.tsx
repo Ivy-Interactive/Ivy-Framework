@@ -1,24 +1,34 @@
 import React, { useCallback, useState, useRef } from 'react';
 import { Input } from '@/components/ui/input';
-import { useEventHandler } from '@/components/event-handler';
 import { Upload, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { getWidth } from '@/lib/styles';
 import { InvalidIcon } from '@/components/InvalidIcon';
 import { Sizes } from '@/types/sizes';
+import { useEventHandler } from '@/components/event-handler';
+import { toast } from '@/hooks/use-toast';
 import {
   fileInputVariants,
   uploadIconVariants,
   textVariants,
 } from '@/components/ui/input/file-input-variants';
 
+enum FileInputStatus {
+  Pending = 'Pending',
+  Aborted = 'Aborted',
+  Loading = 'Loading',
+  Failed = 'Failed',
+  Finished = 'Finished',
+}
+
 interface FileInput {
-  name: string;
-  size: number;
-  type: string;
-  lastModified: Date;
-  content?: string;
+  id: string;
+  fileName: string;
+  contentType: string;
+  length: number;
+  progress: number;
+  status: FileInputStatus;
 }
 
 interface FileInputWidgetProps {
@@ -29,6 +39,7 @@ interface FileInputWidgetProps {
   events: string[];
   width?: string;
   accept?: string;
+  maxFileSize?: number;
   multiple?: boolean;
   maxFiles?: number;
   placeholder?: string;
@@ -41,8 +52,10 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
   value,
   disabled,
   invalid,
+  events,
   width,
   accept,
+  maxFileSize,
   multiple = false,
   maxFiles,
   placeholder,
@@ -53,9 +66,43 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
   const [isDragging, setIsDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // Be defensive in case events is undefined at runtime
+  const hasCancelHandler = Array.isArray(events) && events.includes('OnCancel');
+
+  const formatBytes = (bytes: number): string => {
+    const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+    if (bytes === 0) return '0 B';
+    const i = Math.floor(Math.log(bytes) / Math.log(1024));
+    const size = bytes / Math.pow(1024, i);
+    return `${size.toFixed(size >= 10 ? 0 : 2)} ${sizes[i]}`;
+  };
+
+  const validateFile = useCallback(
+    (file: File): boolean => {
+      // Validate file size
+      if (maxFileSize && file.size > maxFileSize) {
+        const maxSizeFormatted = formatBytes(maxFileSize);
+        const fileSizeFormatted = formatBytes(file.size);
+        toast({
+          title: 'File too large',
+          description: `File '${file.name}' is ${fileSizeFormatted}. Maximum allowed size is ${maxSizeFormatted}.`,
+          variant: 'destructive',
+        });
+        return false;
+      }
+      return true;
+    },
+    [maxFileSize]
+  );
+
   const uploadFile = useCallback(
     async (file: File): Promise<void> => {
       if (!uploadUrl) return;
+
+      // Validate file before upload - show toast on error
+      if (!validateFile(file)) {
+        return;
+      }
 
       // Get the correct host from meta tag or use relative URL
       const getUploadUrl = () => {
@@ -84,29 +131,7 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
         console.error('File upload error:', error);
       }
     },
-    [uploadUrl]
-  );
-
-  const convertFileToUploadFile = useCallback(
-    async (file: File): Promise<FileInput> => {
-      if (!file) {
-        throw new Error('File is required');
-      }
-
-      if (uploadUrl) {
-        await uploadFile(file);
-      }
-
-      // Ivy FileInput should only contain metadata, not file content
-      return {
-        name: file.name,
-        size: file.size,
-        type: file.type,
-        lastModified: new Date(file.lastModified),
-        // Don't include content - it's handled by UploadService
-      };
-    },
-    [uploadFile, uploadUrl]
+    [uploadUrl, validateFile]
   );
 
   const handleChange = useCallback(
@@ -114,30 +139,50 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
       const files = e.target.files;
       if (!files) return;
 
-      // Check max files limit
-      if (maxFiles && files.length > maxFiles) {
-        // Only take the first maxFiles files
-        const limitedFiles = Array.from(files).slice(0, maxFiles);
-        const selectedFiles = multiple
-          ? await Promise.all(limitedFiles.map(convertFileToUploadFile))
-          : await convertFileToUploadFile(limitedFiles[0]);
-
-        handleEvent('OnChange', id, [selectedFiles]);
+      // Check max files limit (including already uploaded files)
+      const currentFileCount = Array.isArray(value)
+        ? value.length
+        : value
+          ? 1
+          : 0;
+      if (maxFiles && currentFileCount + files.length > maxFiles) {
+        const remaining = maxFiles - currentFileCount;
+        toast({
+          title: 'Too many files',
+          description:
+            remaining > 0
+              ? `You can only upload ${remaining} more file${remaining !== 1 ? 's' : ''}. Maximum is ${maxFiles} files total.`
+              : `Maximum of ${maxFiles} file${maxFiles !== 1 ? 's' : ''} already reached.`,
+          variant: 'destructive',
+        });
+        e.target.value = '';
         return;
       }
 
-      const selectedFiles = multiple
-        ? await Promise.all(Array.from(files).map(convertFileToUploadFile))
-        : await convertFileToUploadFile(files[0]);
+      if (multiple) {
+        await Promise.all(Array.from(files).map(uploadFile));
+      } else {
+        await uploadFile(files[0]);
+      }
 
-      handleEvent('OnChange', id, [selectedFiles]);
+      // Reset the input so selecting the same file again triggers onChange
+      e.target.value = '';
     },
-    [id, multiple, handleEvent, convertFileToUploadFile, maxFiles]
+    [multiple, uploadFile, maxFiles, value]
   );
 
-  const handleClear = useCallback(() => {
-    handleEvent('OnChange', id, [null]);
-  }, [id, handleEvent]);
+  const handleCancel = useCallback(
+    (fileId: string) => {
+      if (hasCancelHandler) {
+        handleEvent('OnCancel', id, [fileId]);
+      }
+      // Also clear file input to allow re-selecting same file
+      if (inputRef.current) {
+        inputRef.current.value = '';
+      }
+    },
+    [hasCancelHandler, handleEvent, id]
+  );
 
   const handleDragEnter = useCallback(
     (e: React.DragEvent) => {
@@ -172,38 +217,94 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
       const files = Array.from(e.dataTransfer.files);
       if (files.length === 0) return;
 
-      // Check max files limit
-      if (maxFiles && files.length > maxFiles) {
-        // Only take the first maxFiles files
-        const limitedFiles = files.slice(0, maxFiles);
-        const selectedFiles = multiple
-          ? await Promise.all(limitedFiles.map(convertFileToUploadFile))
-          : await convertFileToUploadFile(limitedFiles[0]);
-
-        handleEvent('OnChange', id, [selectedFiles]);
+      // Check max files limit (including already uploaded files)
+      const currentFileCount = Array.isArray(value)
+        ? value.length
+        : value
+          ? 1
+          : 0;
+      if (maxFiles && currentFileCount + files.length > maxFiles) {
+        const remaining = maxFiles - currentFileCount;
+        toast({
+          title: 'Too many files',
+          description:
+            remaining > 0
+              ? `You can only upload ${remaining} more file${remaining !== 1 ? 's' : ''}. Maximum is ${maxFiles} files total.`
+              : `Maximum of ${maxFiles} file${maxFiles !== 1 ? 's' : ''} already reached.`,
+          variant: 'destructive',
+        });
         return;
       }
 
-      const selectedFiles = multiple
-        ? await Promise.all(files.map(convertFileToUploadFile))
-        : await convertFileToUploadFile(files[0]);
-
-      handleEvent('OnChange', id, [selectedFiles]);
+      if (multiple) {
+        await Promise.all(files.map(uploadFile));
+      } else {
+        await uploadFile(files[0]);
+      }
     },
-    [id, multiple, handleEvent, disabled, convertFileToUploadFile, maxFiles]
+    [multiple, disabled, uploadFile, maxFiles, value]
   );
 
-  const handleClick = useCallback(() => {
-    if (!disabled && inputRef.current) {
-      inputRef.current.click();
-    }
-  }, [disabled]);
+  const handleClick = useCallback(
+    (e: React.MouseEvent) => {
+      // Don't trigger file selection if clicking on a file item or button
+      const target = e.target as HTMLElement;
+      if (target.closest('button') || target.closest('[data-file-item]')) {
+        return;
+      }
 
-  const displayValue = value
-    ? Array.isArray(value)
-      ? value.map(f => f.name).join(', ')
-      : value.name
-    : '';
+      if (!disabled && inputRef.current) {
+        inputRef.current.click();
+      }
+    },
+    [disabled]
+  );
+
+  // Render individual file item for multiple files view
+  const renderFileItem = (file: FileInput) => {
+    const isFileLoading = file.status === FileInputStatus.Loading;
+    const fileProgress = file.progress ?? 0;
+
+    return (
+      <div
+        key={file.id}
+        data-file-item
+        className="flex items-center gap-3 p-3 border border-muted-foreground/25 rounded-md bg-background"
+      >
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium truncate">{file.fileName}</p>
+          {isFileLoading && (
+            <div className="mt-2">
+              <div className="w-full bg-muted rounded-full h-1.5">
+                <div
+                  className="bg-primary h-1.5 rounded-full transition-all duration-300"
+                  style={{ width: `${fileProgress * 100}%` }}
+                />
+              </div>
+            </div>
+          )}
+        </div>
+        {hasCancelHandler && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 flex-shrink-0"
+            onClick={e => {
+              e.stopPropagation();
+              handleCancel(file.id);
+            }}
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        )}
+      </div>
+    );
+  };
+
+  // Check if we have any files to display
+  const hasFiles = value && (Array.isArray(value) ? value.length > 0 : true);
+  const fileList = Array.isArray(value) ? value : value ? [value] : [];
 
   return (
     <div
@@ -214,7 +315,7 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
       onDragOver={handleDragOver}
       onDrop={handleDrop}
     >
-      {/* Invalid icon in top right corner, above input */}
+      {/* Invalid icon in top right corner - only for required field validation */}
       {invalid && (
         <div className="absolute top-2 right-2 z-20 pointer-events-none">
           <InvalidIcon message={invalid} />
@@ -226,7 +327,9 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
           isDragging && !disabled
             ? 'border-primary bg-primary/5'
             : 'border-muted-foreground/25',
-          disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+          disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
+          hasFiles ? 'overflow-y-auto' : 'flex items-center justify-center',
+          'p-4'
         )}
         onClick={handleClick}
       >
@@ -240,27 +343,23 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
           disabled={disabled}
           className="hidden"
         />
-        <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+
+        {/* Always show upload icon */}
+        <div className="flex flex-col items-center justify-center text-center w-full">
           <Upload className={uploadIconVariants({ size })} />
-          <p className={textVariants({ size })}>
-            {displayValue ||
-              placeholder ||
-              `Drag and drop your ${multiple ? 'files' : 'file'} here or click to select`}
-          </p>
+          {!hasFiles && (
+            <p className={textVariants({ size })}>
+              {placeholder ||
+                `Drag and drop your ${multiple ? 'files' : 'file'} here or click to select`}
+            </p>
+          )}
         </div>
-        {value && !disabled && (
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className="absolute right-2 top-2 h-6 w-6 z-10"
-            onClick={e => {
-              e.stopPropagation();
-              handleClear();
-            }}
-          >
-            <X className="h-4 w-4" />
-          </Button>
+
+        {/* Show file list when files are present */}
+        {hasFiles && (
+          <div className="space-y-2 w-full mt-4">
+            {fileList.map(file => renderFileItem(file))}
+          </div>
         )}
       </div>
     </div>

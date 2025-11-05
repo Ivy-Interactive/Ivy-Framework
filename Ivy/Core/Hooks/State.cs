@@ -42,22 +42,20 @@ public interface IState<T> : IObservable<T>, IAnyState
     /// </summary>
     /// <param name="value">The new value to set.</param>
     /// <returns>The new state value.</returns>
-    public T Set(T value)
-    {
-        Value = value;
-        return Value;
-    }
+    public T Set(T value);
 
     /// <summary>
     /// Updates the state value using a setter function and returns the new value.
     /// </summary>
     /// <param name="setter">Function that takes the current value and returns the new value.</param>
     /// <returns>The new state value.</returns>
-    public T Set(Func<T, T> setter)
-    {
-        Value = setter(Value);
-        return Value;
-    }
+    public T Set(Func<T, T> setter);
+
+    /// <summary>
+    /// Resets the state to its default value.
+    /// </summary>
+    /// <returns>The default value.</returns>
+    public T Reset();
 }
 
 /// <summary>
@@ -68,6 +66,7 @@ public class State<T> : IState<T>
 {
     private T _value;
     private readonly Subject<T> _subject = new();
+    private readonly object _lock = new();
 
     /// <summary>
     /// Creates a new state instance with the specified initial value.
@@ -83,13 +82,81 @@ public class State<T> : IState<T>
     /// </summary>
     public T Value
     {
-        get => _value;
+        get
+        {
+            lock (_lock)
+            {
+                return _value;
+            }
+        }
         set
         {
-            if (Equals(_value, value)) return;
-            _value = value;
-            if (!_subject.IsDisposed) _subject.OnNext(_value);
+            T? newValue = default;
+            bool changed = false;
+            lock (_lock)
+            {
+                if (!Equals(_value, value))
+                {
+                    _value = value;
+                    newValue = _value;
+                    changed = true;
+                }
+            }
+            if (changed && !_subject.IsDisposed)
+            {
+                _subject.OnNext(newValue!);
+            }
         }
+    }
+
+    /// <summary>
+    /// Sets the state value and returns the new value.
+    /// Thread-safe.
+    /// </summary>
+    /// <param name="value">The new value to set.</param>
+    /// <returns>The new state value.</returns>
+    public T Set(T value)
+    {
+        Value = value;
+        return Value;
+    }
+
+    /// <summary>
+    /// Updates the state value using a setter function and returns the new value.
+    /// Thread-safe: the entire read-modify-write operation is atomic.
+    /// </summary>
+    /// <param name="setter">Function that takes the current value and returns the new value.</param>
+    /// <returns>The new state value.</returns>
+    public T Set(Func<T, T> setter)
+    {
+        T current;
+        T updated;
+        bool changed;
+        lock (_lock)
+        {
+            current = _value;
+            updated = setter(current);
+            changed = !Equals(_value, updated);
+            if (changed)
+            {
+                _value = updated;
+            }
+        }
+        if (changed && !_subject.IsDisposed)
+        {
+            _subject.OnNext(updated);
+        }
+        return updated;
+    }
+
+    /// <summary>
+    /// Resets the state to its default value.
+    /// Thread-safe.
+    /// </summary>
+    /// <returns>The default value.</returns>
+    public T Reset()
+    {
+        return Set(default(T)!);
     }
 
     /// <summary>
@@ -99,8 +166,11 @@ public class State<T> : IState<T>
     /// <returns>Disposable subscription.</returns>
     public IDisposable Subscribe(IObserver<T> observer)
     {
-        observer.OnNext(_value);
-        return _subject.Subscribe(observer);
+        lock (_lock)
+        {
+            observer.OnNext(_value);
+            return _subject.Subscribe(observer);
+        }
     }
 
     /// <summary>

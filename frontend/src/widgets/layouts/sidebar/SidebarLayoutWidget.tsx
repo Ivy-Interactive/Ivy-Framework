@@ -338,7 +338,7 @@ const renderMenuItems = (
       if (level === 0) {
         return (
           <div key={item.label} className="space-y-1 mt-6 first:mt-0">
-            <h4 className="px-3 py-2 text-small-label text-muted-foreground mb-0">
+            <h4 className="sticky top-0 z-10 bg-sidebar px-3 py-2 text-small-label text-muted-foreground mb-0">
               {item.label}
             </h4>
             <ul className="space-y-1">
@@ -448,7 +448,7 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
       if (item.children && item.children.length > 0) {
         return (
           <div key={item.label} className="space-y-1 mt-6 first:mt-0">
-            <h4 className="px-3 py-2 text-small-label text-muted-foreground mb-0">
+            <h4 className="sticky top-0 z-10 bg-sidebar px-3 py-2 text-small-label text-muted-foreground mb-0">
               {item.label}
             </h4>
             <ul className="space-y-1">

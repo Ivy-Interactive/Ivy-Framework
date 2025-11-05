@@ -6,7 +6,7 @@ public interface IAppRepository
 {
     MenuItem[] GetMenuItems();
 
-    AppDescriptor GetAppOrDefault(string id);
+    AppDescriptor GetAppOrDefault(string? id);
 
     AppDescriptor? GetApp(string id);
 

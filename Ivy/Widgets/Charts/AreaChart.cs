@@ -60,6 +60,10 @@ public record AreaChart : WidgetBase<AreaChart>
     [Prop] public Legend? Legend { get; init; } = null;
 
     /// <summary>
+    /// Gets or sets the toolbox configuration.
+    /// </summary>
+    [Prop] public Toolbox? Toolbox { get; init; } = null;
+    /// <summary>
     /// Gets or sets the array of X-axis configurations.
     /// </summary>
     [Prop] public XAxis[] XAxis { get; init; } = [];
@@ -267,6 +271,28 @@ public static class AreaChartExtensions
     public static AreaChart Legend(this AreaChart chart)
     {
         return chart with { Legend = new Legend() };
+    }
+
+
+    /// <summary>
+    /// Sets the toolbox configuration.
+    /// </summary>
+    /// <param name="chart">The AreaChart to configure.</param>
+    /// <param name="toolbox">The Toolbox configuration to use, or null to disable toolbox.</param>
+    /// <returns>A new AreaChart instance with the updated toolbox configuration.</returns>
+    public static AreaChart Toolbox(this AreaChart chart, Toolbox? toolbox)
+    {
+        return chart with { Toolbox = toolbox };
+    }
+
+    /// <summary>
+    /// Enables the toolbox.
+    /// </summary>
+    /// <param name="chart">The AreaChart to configure.</param>
+    /// <returns>A new AreaChart instance with default toolbox enabled.</returns>
+    public static AreaChart Toolbox(this AreaChart chart)
+    {
+        return chart with { Toolbox = new Toolbox() };
     }
 
     /// <summary>

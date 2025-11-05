@@ -43,7 +43,7 @@ Specifically, your connection string should contain the following information, i
 
 Your connection string will be stored in .NET user secrets.
 
-See [Database Integration Overview](Overview.md) for more information on adding database connections to Ivy.
+See [Database Overview](01_DatabaseOverview.md) for more information on adding database connections to Ivy.
 
 ## Configuration
 
@@ -81,7 +81,7 @@ See the [ClickHouse Troubleshooting Guide](https://clickhouse.com/docs/guides/tr
 
 ## Related Documentation
 
-- [Database Overview](Overview.md)
+- [Database Overview](01_DatabaseOverview.md)
 - [PostgreSQL Provider](PostgreSql.md)
 - [Snowflake Provider](Snowflake.md)
 - [Official ClickHouse Documentation](https://clickhouse.com/docs/)

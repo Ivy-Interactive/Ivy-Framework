@@ -16,7 +16,12 @@ export const AppHostWidget: React.FC<AppHostWidgetProps> = ({
   appArgs,
   parentId,
 }) => {
-  const { widgetTree, eventHandler } = useBackend(appId, appArgs, parentId);
+  const { widgetTree, eventHandler } = useBackend(
+    appId,
+    appArgs,
+    parentId,
+    false
+  );
   const containerRef = useRef<HTMLDivElement>(null);
   const previousAppIdRef = useRef<string>(appId);
   const hasResetForCurrentApp = useRef<boolean>(false);

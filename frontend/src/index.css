@@ -109,7 +109,7 @@
     --chart-8: #d48265;
     --chart-9: #749f83;
     --chart-10: #ca8622;
-
+    --toolbox: #38363a;
     --sidebar: oklch(0.99 0 0);
     --sidebar-foreground: oklch(0.26 0 0);
     --sidebar-primary: #00cc92;
@@ -325,6 +325,7 @@
     --chart-8: #f26d3d;
     --chart-9: #c54df2;
     --chart-10: #e6b422;
+    --toolbox: #edeaf1;
     --sidebar: #18181d;
     --sidebar-foreground: oklch(0.97 0 286.38);
     --sidebar-primary: oklch(0.49 0.22 264.39);

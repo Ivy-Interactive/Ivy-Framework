@@ -1,4 +1,4 @@
-﻿---
+---
 searchHints:
   - cli
   - command-line
@@ -8,7 +8,7 @@ searchHints:
   - ivy-console
 ---
 
-# Ivy CLI - Overview
+# CLI Overview
 
 <Ingress>
 Streamline your Ivy development workflow with powerful CLI tools for project initialization, database integration, authentication, and deployment.
@@ -101,6 +101,6 @@ Most Ivy commands require authentication. Use `ivy login` to authenticate with y
 For detailed information on each feature, see the specific documentation files:
 
 - [Init.md](Init.md) - Project initialization guide
-- [DatabaseIntegration/01_Overview.md](DatabaseIntegration/01_Overview.md) - Database integration guide
-- [Authentication/01_Overview.md](Authentication/01_Overview.md) - Authentication setup guide
+- [DatabaseIntegration/01_DatabaseOverview.md](DatabaseIntegration/01_DatabaseOverview.md) - Database integration guide
+- [Authentication/01_AuthenticationOverview.md](Authentication/01_AuthenticationOverview.md) - Authentication setup guide
 - [Deploy.md](Deploy.md) - Deployment guide
