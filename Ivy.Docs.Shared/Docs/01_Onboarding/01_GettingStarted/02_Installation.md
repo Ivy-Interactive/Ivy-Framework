@@ -1,4 +1,4 @@
-﻿---
+---
 searchHints:
   - setup
   - install
@@ -39,4 +39,4 @@ Use the Ivy CLI to scaffold a new project:
 >dotnet watch
 ```
 
-For more terminal usage, check out the [CLI section](../03_CLI/01_Overview.md).
+For more terminal usage, check out the [CLI section](../03_CLI/01_CLIOverview.md).

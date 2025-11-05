@@ -45,7 +45,7 @@ For all connection options, see [Npgsql Connection String Parameters](https://ww
 
 Your connection string will be stored in .NET user secrets.
 
-See [Database Integration Overview](Overview.md) for more information on adding database connections to Ivy.
+See [Database Overview](01_DatabaseOverview.md) for more information on adding database connections to Ivy.
 
 ## Configuration
 
@@ -91,7 +91,7 @@ For detailed help, see the [PostgreSQL Documentation](https://www.postgresql.org
 
 ## Related Documentation
 
-- [Database Overview](Overview.md)
+- [Database Overview](01_DatabaseOverview.md)
 - [SQL Server Provider](SqlServer.md)
 - [MySQL Provider](MySql.md)
 - [Supabase Provider](Supabase.md)

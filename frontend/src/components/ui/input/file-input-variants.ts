@@ -6,9 +6,9 @@ export const fileInputVariants = cva(
   {
     variants: {
       size: {
-        Small: 'min-h-[80px] p-2 border-2',
-        Medium: 'min-h-[100px] p-4 border-2',
-        Large: 'min-h-[120px] p-6 border-3',
+        Small: 'min-h-[80px] max-h-[200px] p-2 border-2',
+        Medium: 'min-h-[100px] max-h-[300px] p-4 border-2',
+        Large: 'min-h-[120px] max-h-[400px] p-6 border-3',
       },
     },
     defaultVariants: {

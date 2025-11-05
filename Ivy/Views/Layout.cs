@@ -130,4 +130,9 @@ public static class LayoutExtensions
     {
         return Layout.Horizontal(anything).Margin(left, top, right, bottom);
     }
+
+    public static LayoutView WithLayout(this object anything)
+    {
+        return Layout.Vertical(anything);
+    }
 }

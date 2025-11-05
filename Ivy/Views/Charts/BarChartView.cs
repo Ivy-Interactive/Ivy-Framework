@@ -86,6 +86,14 @@ public class DefaultBarChartStyle<TSource> : IBarChartStyle<TSource>
                 .Align(Legend.Alignments.Center)
                 .VerticalAlign(Legend.VerticalAlignments.Bottom)
             )
+            .Toolbox(new Toolbox()
+                .Orientation(Toolbox.Orientations.Horizontal)
+                .Align(Toolbox.Alignments.Right)
+                .VerticalAlign(Toolbox.VerticalAlignments.Top)
+                .SaveAsImage(true)
+                .DataView(true)
+                .MagicType(true)
+            )
         ;
     }
 }

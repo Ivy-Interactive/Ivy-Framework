@@ -79,6 +79,10 @@ public class TextModifiersDemo : ViewBase
             | Text.P("Normal paragraph text")
             | Text.P("Colored text").Color(Colors.Primary)
             | Text.P("Amber colored text").Color(Colors.Amber)
+            | Text.P("Bold text").Bold()
+            | Text.P("Italic text").Italic()
+            | Text.P("Muted text").Muted()
+            | Text.P("Bold and italic text").Bold().Italic()
             | Text.P("Strikethrough text").StrikeThrough()
             | Text.P("No wrap text that should not wrap to multiple lines").NoWrap()
             | Text.P("Text with custom width").Width(Size.Units(200))
@@ -186,6 +190,9 @@ The TextBuilder class provides several modifiers for customizing text appearance
 
 | Modifier | Description | Example |
 |----------|-------------|---------|
+| `Bold()` | Apply bold styling | `Text.P("Bold text").Bold()` |
+| `Italic()` | Apply italic styling | `Text.P("Italic text").Italic()` |
+| `Muted()` | Apply muted/disabled styling | `Text.P("Muted text").Muted()` |
 | `Color()` | Set text color | `Text.P("Red text").Color(Colors.Destructive)` |
 | `Width()` | Set text width | `Text.P("Fixed width").Width(Size.Units(200))` |
 | `StrikeThrough()` | Add strikethrough | `Text.P("Crossed out").StrikeThrough()` |

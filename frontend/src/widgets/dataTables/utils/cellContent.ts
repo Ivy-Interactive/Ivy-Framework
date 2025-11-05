@@ -39,7 +39,7 @@ export function createNullCell(editable: boolean): GridCell {
   return {
     kind: GridCellKind.Text,
     data: '',
-    displayData: 'null',
+    displayData: '', // Show empty instead of "null" text
     allowOverlay: editable,
     readonly: !editable,
     style: 'faded',
@@ -295,11 +295,9 @@ export function getCellContent(
     return createBooleanCell(cellValue, editable, align);
   }
 
-  // Fallback: Use heuristic icon detection if no metadata provided
-  // This maintains backward compatibility but should be replaced with proper metadata
-  if (isProbablyIconValue(cellValue)) {
-    return createIconCell(String(cellValue), align);
-  }
+  // REMOVED: Heuristic icon detection (now that we have proper type metadata from backend)
+  // The heuristic was causing false positives for PascalCase text like "Active", "EMP0001", etc.
+  // Now that column.type is properly preserved from backend (#1273), we don't need this fallback
 
   // Default to text
   return createTextCell(cellValue, editable, align);

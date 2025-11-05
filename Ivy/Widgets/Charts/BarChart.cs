@@ -59,6 +59,11 @@ public record BarChart : WidgetBase<BarChart>
     [Prop] public Legend? Legend { get; init; } = null;
 
     /// <summary>
+    /// Gets or sets the toolbox configuration.
+    /// </summary>
+    [Prop] public Toolbox? Toolbox { get; init; } = null;
+
+    /// <summary>
     /// Gets or sets the array of X-axis configurations.
     /// </summary>
     [Prop] public XAxis[] XAxis { get; init; } = [];
@@ -148,13 +153,16 @@ public static class BarChartExtensions
     }
 
     /// <summary>
-    /// Sets the layout to vertical.
+    /// Sets the layout to vertical and disables the toolbox to avoid visual conflicts.
     /// </summary>
     /// <param name="chart">The BarChart to configure.</param>
-    /// <returns>A new BarChart instance with vertical layout.</returns>
+    /// <returns>A new BarChart instance with vertical layout and disabled toolbox.</returns>
     public static BarChart Vertical(this BarChart chart)
     {
-        return chart with { Layout = Layouts.Vertical };
+        return chart with
+        {
+            Layout = Layouts.Vertical
+        };
     }
 
     /// <summary>
@@ -307,6 +315,27 @@ public static class BarChartExtensions
     public static BarChart Legend(this BarChart chart)
     {
         return chart with { Legend = new Legend() };
+    }
+
+    /// <summary>
+    /// Sets the toolbox configuration.
+    /// </summary>
+    /// <param name="chart">The BarChart to configure.</param>
+    /// <param name="toolbox">The Toolbox configuration to use, or null to disable toolbox.</param>
+    /// <returns>A new BarChart instance with the updated toolbox configuration.</returns>
+    public static BarChart Toolbox(this BarChart chart, Toolbox toolbox)
+    {
+        return chart with { Toolbox = toolbox };
+    }
+
+    /// <summary>
+    /// Enables the toolbox.
+    /// </summary>
+    /// <param name="chart">The BarChart to configure.</param>
+    /// <returns>A new BarChart instance with default toolbox enabled.</returns>
+    public static BarChart Toolbox(this BarChart chart)
+    {
+        return chart with { Toolbox = new Toolbox() };
     }
 
     /// <summary>

@@ -11,11 +11,11 @@ searchHints:
 # Field
 
 <Ingress>
-Group any input with a label, description, and required indicator for a consistent, accessible form design.
+Group any input with a label, description, help text, and required indicator for a consistent, accessible form design.
 </Ingress>
 
 The `Field` widget acts as a **wrapper** around any input (such as `TextInput`, `Select`, `DateTime`, etc.).  
-It provides a standardized way to display a label, optional description, and visual cues like a required asterisk.  
+It provides a standardized way to display a label, optional description, help text tooltips, and visual cues like a required asterisk.  
 
 This makes forms easier to build and ensures inputs remain consistent in layout and accessibility.
 
@@ -50,40 +50,24 @@ A `Field` supports the following common properties:
 
 * **Label(string)** - The display label above the input.
 * **Description(string)** - An optional helper text shown below the input.
+* **Help(string)** - An optional help text displayed as a tooltip on an info icon next to the label.
 * **Required(bool)** - Marks the input as required (adds an asterisk or style cue).
 
-## Examples
-
-### Required Field
+### Properties Usage
 
 ```csharp demo-below
-public class RequiredDemo : ViewBase
+public class FieldExample : ViewBase
 {
     public override object? Build()
     {
-        var email = UseState("");
-        return new Field(
-            email.ToEmailInput().Placeholder("user@domain.com")
-        )
-        .Label("Email")
-        .Required();
-    }
-}
-```
-
-### Field With Description
-
-```csharp demo-below
-public class WithDescriptionDemo : ViewBase
-{
-    public override object? Build()
-    {
-        var password = UseState("");
-        return new Field(
-            password.ToPasswordInput()
-        )
-        .Label("Password")
-        .Description("Must be at least 8 characters long and include a number");
+        var username = UseState("");
+        return username.ToTextInput()
+            .Placeholder("Enter username")
+            .WithField()
+            .Label("Username")
+            .Description("Must be at least 8 characters long")
+            .Help("Your username must be unique and contain only letters, numbers, and underscores")
+            .Required();
     }
 }
 ```
@@ -103,27 +87,22 @@ public class MixedInputsDemo : ViewBase
         var options = new List<string>() { "I read the terms and conditions and I agree"};
         var selectedNotice = UseState(new string[]{});
         return Layout.Vertical()
-            | new Field(
-                dateState.ToDateTimeInput()
-                           .Variant(DateTimeInputs.Date)
-            )
-            .Label("Date of birth")
-            | new Field(
-                selectedNotice.ToSelectInput(options.ToOptions())
-                                .Variant(SelectInputs.List)
-            )
-            .Label("Terms & Conditions")
-            .Description("You must agree before continuing")
-            .Required();
+            | dateState.ToDateTimeInput()
+                .Variant(DateTimeInputs.Date)
+                .WithField()
+                .Label("Date of birth")
+            | selectedNotice.ToSelectInput(options.ToOptions())
+                .Variant(SelectInputs.List)
+                .WithField()
+                .Label("Terms & Conditions")
+                .Description("You must agree before continuing")
+                .Required();
     }
 }
 ```
 
-## When to Use
-
-* Use `Field` whenever you want **consistent form layout** across your application with labels, description and required asterisk.
+<Callout Tip="Info">
+Use `Field` whenever you want **consistent form layout** across your application with labels, description and required asterisk.
+</Callout>
 
 <WidgetDocs Type="Ivy.Field" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Inputs/Field.cs"/>
-
-
-

@@ -67,7 +67,7 @@ export const CardWidget: React.FC<CardWidgetProps> = ({
     switch (size) {
       case Sizes.Small:
         return {
-          header: 'p-3',
+          header: 'px-3 pt-3 pb-1',
           content: 'p-3 pt-0 [&_*]:text-xs',
           footer: 'p-3 pt-0',
           title: 'text-sm',
@@ -76,7 +76,7 @@ export const CardWidget: React.FC<CardWidgetProps> = ({
         };
       case Sizes.Large:
         return {
-          header: 'p-8',
+          header: 'px-8 pt-8 pb-2',
           content: 'p-8 pt-0 [&_*]:text-base',
           footer: 'p-8 pt-0',
           title: 'text-lg',
@@ -85,7 +85,7 @@ export const CardWidget: React.FC<CardWidgetProps> = ({
         };
       default:
         return {
-          header: 'p-6',
+          header: 'px-6 pt-6 pb-2',
           content: 'p-6 pt-0',
           footer: 'p-6 pt-0',
           title: 'text-base',

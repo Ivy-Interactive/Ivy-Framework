@@ -284,6 +284,23 @@ public static class Text
     public static TextBuilder Strong(IAnyState state) => Strong(state.ToString() ?? "");
 
     /// <summary>
+    /// Creates a bold text builder. This is an alias for Strong().
+    /// </summary>
+    /// <param name="content">The bold text content.</param>
+    /// <returns>A TextBuilder configured for bold text display.</returns>
+    public static TextBuilder Bold(string content)
+    {
+        return new TextBuilder(content, TextVariant.Strong);
+    }
+
+    /// <summary>
+    /// Creates a bold text builder from a state object. This is an alias for Strong().
+    /// </summary>
+    /// <param name="state">The state object to convert to bold text.</param>
+    /// <returns>A TextBuilder configured for bold text display.</returns>
+    public static TextBuilder Bold(IAnyState state) => Bold(state.ToString() ?? "");
+
+    /// <summary>
     /// Creates a danger text builder for error or warning messages.
     /// </summary>
     /// <param name="content">The danger text content.</param>
@@ -451,6 +468,9 @@ public class TextBuilder(string content, TextVariant variant, Languages codeLang
     private Colors? _color;
     private bool _noWrap;
     private Overflow? _overflow;
+    private bool _bold;
+    private bool _italic;
+    private bool _muted;
 
     /// <summary>
     /// Builds the final text widget based on the variant and configuration.
@@ -477,7 +497,7 @@ public class TextBuilder(string content, TextVariant variant, Languages codeLang
             default:
                 {
                     var text = new TextBlock(
-                        content, variant, _width, _strikeThrough, _color, _noWrap, _overflow);
+                        content, variant, _width, _strikeThrough, _color, _noWrap, _overflow, _bold, _italic, _muted);
                     return text;
                 }
         }
@@ -567,6 +587,33 @@ public class TextBuilder(string content, TextVariant variant, Languages codeLang
     public TextBuilder Overflow(Overflow overflow)
     {
         _overflow = overflow;
+        return this;
+    }
+
+    /// <summary>Applies bold styling to the text.</summary>
+    /// <param name="value">True to apply bold.</param>
+    /// <returns>The current TextBuilder instance for method chaining.</returns>
+    public TextBuilder Bold(bool value = true)
+    {
+        _bold = value;
+        return this;
+    }
+
+    /// <summary>Applies italic styling to the text.</summary>
+    /// <param name="value">True to apply italic.</param>
+    /// <returns>The current TextBuilder instance for method chaining.</returns>
+    public TextBuilder Italic(bool value = true)
+    {
+        _italic = value;
+        return this;
+    }
+
+    /// <summary>Applies muted styling to the text.</summary>
+    /// <param name="value">True to apply muted.</param>
+    /// <returns>The current TextBuilder instance for method chaining.</returns>
+    public TextBuilder Muted(bool value = true)
+    {
+        _muted = value;
         return this;
     }
 }

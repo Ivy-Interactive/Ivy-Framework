@@ -27,6 +27,16 @@ type ErrorMessage = {
   stackTrace?: string;
 };
 
+type HistoryState = {
+  tabId?: string;
+};
+
+type RedirectMessage = {
+  url: string;
+  replaceHistory: boolean;
+  state: HistoryState;
+};
+
 type AuthToken = {
   accessToken: string;
   refreshToken?: string;
@@ -129,7 +139,8 @@ function applyUpdateMessage(
 export const useBackend = (
   appId: string | null,
   appArgs: string | null,
-  parentId: string | null
+  parentId: string | null,
+  chrome: boolean
 ) => {
   const [connection, setConnection] = useState<signalR.HubConnection | null>(
     null
@@ -140,6 +151,7 @@ export const useBackend = (
   const machineId = getMachineId();
   const connectionId = connection?.connectionId;
   const currentConnectionRef = useRef<signalR.HubConnection | null>(null);
+  const stableAppId = chrome ? '' : appId;
 
   useEffect(() => {
     if (import.meta.env.DEV && widgetTree) {
@@ -213,6 +225,23 @@ export const useBackend = (
     []
   );
 
+  const handleRedirect = useCallback((message: RedirectMessage) => {
+    logger.debug('Processing Redirect request', message);
+    const { url, replaceHistory } = message;
+
+    if (url.startsWith('/')) {
+      // For path-based redirects, update the pathname
+      if (replaceHistory) {
+        window.history.replaceState(message.state, '', url);
+      } else {
+        window.history.pushState(message.state, '', url);
+      }
+    } else {
+      // For full URL redirects
+      window.location.href = url;
+    }
+  }, []);
+
   const handleSetTheme = useCallback((theme: string) => {
     logger.debug('Processing SetTheme request', { theme });
     const normalizedTheme = theme.toLowerCase();
@@ -259,7 +288,7 @@ export const useBackend = (
 
     const newConnection = new signalR.HubConnectionBuilder()
       .withUrl(
-        `${getIvyHost()}/messages?appId=${appId ?? ''}&appArgs=${appArgs ?? ''}&machineId=${machineId}&parentId=${parentId ?? ''}`
+        `${getIvyHost()}/messages?appId=${appId ?? ''}&appArgs=${appArgs ?? ''}&machineId=${machineId}&parentId=${parentId ?? ''}&chrome=${chrome}`
       )
       .withAutomaticReconnect()
       .build();
@@ -276,7 +305,7 @@ export const useBackend = (
         currentConnectionRef.current = null;
       }
     };
-  }, [appArgs, appId, machineId, parentId]);
+  }, [appArgs, stableAppId, machineId, parentId]);
 
   useEffect(() => {
     if (
@@ -332,6 +361,11 @@ export const useBackend = (
             window.open(url, '_blank');
           });
 
+          connection.on('Redirect', message => {
+            logger.debug(`[${connection.connectionId}] Redirect`, message);
+            handleRedirect(message);
+          });
+
           connection.on('ApplyTheme', (css: string) => {
             logger.debug(`[${connection.connectionId}] ApplyTheme`);
 
@@ -384,6 +418,7 @@ export const useBackend = (
         connection.off('SetAuthToken');
         connection.off('SetTheme');
         connection.off('OpenUrl');
+        connection.off('Redirect');
         connection.off('ApplyTheme');
         connection.off('reconnecting');
         connection.off('reconnected');
@@ -407,9 +442,10 @@ export const useBackend = (
     handleHotReloadMessage,
     toast,
     handleSetAuthToken,
+    handleRedirect,
     handleSetTheme,
     handleError,
-    appId,
+    stableAppId,
     parentId,
   ]);
 

@@ -163,13 +163,14 @@ public class CodeInputWithValidation : ViewBase
         var isValid = !string.IsNullOrWhiteSpace(codeState.Value);
         
         return Layout.Vertical()
-            | Text.Label("Enter Code:")
             | codeState.ToCodeInput()
                     .Width(Size.Auto())
                     .Height(Size.Auto())
                     .Placeholder("Enter your code here...")
                     .Language(Languages.Javascript)
-                                | new Button("Execute Code")
+                    .WithField()
+                    .Label("Enter Code:")
+            | new Button("Execute Code")
                 .Disabled(!isValid)
             | Text.Small(isValid 
                 ? "Ready to execute!" 

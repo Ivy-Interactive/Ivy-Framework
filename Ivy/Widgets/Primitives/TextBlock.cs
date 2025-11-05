@@ -73,8 +73,12 @@ public record TextBlock : WidgetBase<TextBlock>
     /// <param name="color">Optional color override for text.</param>
     /// <param name="noWrap">Whether to prevent text wrapping.</param>
     /// <param name="overflow">How to handle text overflow.</param>
+    /// <param name="bold">Whether to apply bold styling.</param>
+    /// <param name="italic">Whether to apply italic styling.</param>
+    /// <param name="muted">Whether to apply muted styling.</param>
     internal TextBlock(string content = "", TextVariant variant = TextVariant.Literal, Size? width = null,
-        bool strikeThrough = false, Colors? color = null, bool noWrap = false, Overflow? overflow = null)
+        bool strikeThrough = false, Colors? color = null, bool noWrap = false, Overflow? overflow = null,
+        bool bold = false, bool italic = false, bool muted = false)
     {
         Content = content;
         Variant = variant;
@@ -83,6 +87,9 @@ public record TextBlock : WidgetBase<TextBlock>
         Color = color;
         NoWrap = noWrap;
         Overflow = overflow;
+        Bold = bold;
+        Italic = italic;
+        Muted = muted;
     }
 
     /// <summary>How text overflow is handled.</summary>
@@ -102,4 +109,13 @@ public record TextBlock : WidgetBase<TextBlock>
 
     /// <summary>Color override for text, or null to use default color for variant.</summary>
     [Prop] public Colors? Color { get; set; }
+
+    /// <summary>Whether bold styling is applied.</summary>
+    [Prop] public bool Bold { get; set; }
+
+    /// <summary>Whether italic styling is applied.</summary>
+    [Prop] public bool Italic { get; set; }
+
+    /// <summary>Whether muted styling is applied.</summary>
+    [Prop] public bool Muted { get; set; }
 }

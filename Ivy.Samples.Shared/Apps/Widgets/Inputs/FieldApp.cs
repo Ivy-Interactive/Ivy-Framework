@@ -1,4 +1,4 @@
-﻿using Ivy.Shared;
+using Ivy.Shared;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
@@ -34,21 +34,23 @@ public class FieldApp : SampleBase
                 .Description("Your full name")
                 .Required()
 
-                // Using .WithField() shortcut
+                // Using .WithField() shortcut with help text
                 | emailState.ToTextInput()
                     .Placeholder("Enter your email")
                     .WithField()
                     .Label("Email")
                     .Description("Required for contact")
+                    .Help("We will never share your email with third parties")
                     .Required()
 
-                // Password field, disabled if name is empty
+                // Password field, disabled if name is empty, with help text
                 | passwordState.ToPasswordInput()
                     .Placeholder("Enter password")
                     .Disabled(string.IsNullOrWhiteSpace(nameState.Value))
                     .WithField()
                     .Label("Password")
                     .Description("At least 8 characters")
+                    .Help("Use a mix of letters, numbers, and symbols for better security")
 
                 // Checkbox wrapped with .WithField()
                 | acceptedTerms.ToSelectInput(options.ToOptions())

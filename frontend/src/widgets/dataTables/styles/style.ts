@@ -3,7 +3,6 @@ export const tableStyles = {
   // Main Table component
   table: {
     container: {
-      padding: '1rem',
       display: 'flex',
       flexDirection: 'column',
       height: '100%',
@@ -15,12 +14,6 @@ export const tableStyles = {
   tableOptions: {
     container: {
       width: '100%',
-      border: '1px solid var(--border)',
-      borderBottom: 'none',
-      borderRadius: 'var(--radius) var(--radius) 0 0',
-      borderBottomColor: 'var(--border)',
-      borderBottomWidth: '1px',
-      borderBottomStyle: 'solid',
     },
     inner: 'flex items-center gap-4 px-3 py-3',
     leftSection: 'flex items-center gap-4',
@@ -51,8 +44,7 @@ export const tableStyles = {
       height: '100%',
       width: '100%',
       border: '1px solid var(--border)',
-      borderTop: 'none',
-      borderRadius: '0 0 var(--radius) var(--radius)',
+      borderRadius: 'var(--radius)',
       overflow: 'hidden',
     },
   },
@@ -66,11 +58,18 @@ export const tableStyles = {
   // QueryEditor component
   queryEditor: {
     css: `
+      .query-editor-wrapper .cm-editor {
+        border: none !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+      }
       .query-editor-wrapper .cm-editor.cm-focused {
         outline: none !important;
+        border: none !important;
+        box-shadow: none !important;
       }
       .query-editor-wrapper .cm-content {
-        padding: 11px 40px 10px 16px;
+        padding: 12px 16px 10px 16px;
         min-height: auto;
       }
 
