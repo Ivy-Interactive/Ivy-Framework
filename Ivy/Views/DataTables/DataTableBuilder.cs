@@ -15,7 +15,7 @@ public class DataTableBuilder<TModel> : ViewBase
     private Size? _width;
     private Size? _height;
     private readonly Dictionary<string, InternalColumn> _columns;
-    private readonly DataTableConfiguration _configuration = new();
+    private readonly DataTableConfig _configuration = new();
 
     private class InternalColumn
     {
@@ -239,7 +239,7 @@ public class DataTableBuilder<TModel> : ViewBase
         return this;
     }
 
-    public DataTableBuilder<TModel> Config(Action<DataTableConfiguration> config)
+    public DataTableBuilder<TModel> Config(Action<DataTableConfig> config)
     {
         config(_configuration);
         return this;

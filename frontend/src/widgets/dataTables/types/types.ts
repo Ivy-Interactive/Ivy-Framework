@@ -47,7 +47,7 @@ export interface DataTableConnection {
   sourceId: string;
 }
 
-export interface DataTableConfiguration {
+export interface DataTableConfig {
   filterType?: FilterTypes;
   freezeColumns?: number | null;
   allowSorting?: boolean;
@@ -72,7 +72,7 @@ export interface TableProps {
   id: string;
   columns: DataColumn[];
   connection: DataTableConnection;
-  config?: DataTableConfiguration;
+  config?: DataTableConfig;
   editable?: boolean;
   width?: string;
   height?: string;

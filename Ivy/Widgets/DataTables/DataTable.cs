@@ -27,7 +27,7 @@ public record DataTable : WidgetBase<DataTable>
         Size? width,
         Size? height,
         DataTableColumn[] columns,
-        DataTableConfiguration config
+        DataTableConfig config
     )
     {
         Width = width ?? Size.Full();
@@ -41,7 +41,7 @@ public record DataTable : WidgetBase<DataTable>
 
     [Prop] public DataTableConnection Connection { get; set; }
 
-    [Prop] public DataTableConfiguration Config { get; set; }
+    [Prop] public DataTableConfig Config { get; set; }
 
     /// <summary>Event handler called when a cell is clicked (single-click).</summary>
     [Event] public Func<Event<DataTable, CellClickEventArgs>, ValueTask>? OnCellClick { get; set; }
