@@ -53,26 +53,31 @@ public class FileInputApp : SampleBase
         var validatedFilesUpload = this.UseUpload((fileUpload, stream, cancellationToken) => System.Threading.Tasks.Task.CompletedTask);
         var singleFileWithValidationUpload = this.UseUpload((fileUpload, stream, cancellationToken) => System.Threading.Tasks.Task.CompletedTask);
 
+        // Data binding examples - different state types
+        var dataBindingFile = UseState<FileUpload<byte[]>?>(() => null);
+        var dataBindingFileUpload = this.UseUpload(MemoryStreamUploadHandler.Create(dataBindingFile));
+
+        var dataBindingNullableFile = UseState<FileUpload<byte[]>?>(() => null);
+        var dataBindingNullableFileUpload = this.UseUpload(MemoryStreamUploadHandler.Create(dataBindingNullableFile));
+
+        var dataBindingMultipleFiles = UseState(ImmutableArray.Create<FileUpload<byte[]>>());
+        var dataBindingMultipleFilesUpload = this.UseUpload(MemoryStreamUploadHandler.Create(dataBindingMultipleFiles));
+
         var dataBinding = Layout.Grid().Columns(3)
                           | Text.InlineCode("FileInput")
-                          | (Layout.Vertical()
-                             | singleFile.ToFileInput(singleFileUpload)
-                             | singleFile.ToFileInput(singleFileUpload)
-                          )
-                          | singleFile
+                          | dataBindingFile.ToFileInput(dataBindingFileUpload)
+                              .Placeholder("Single file: FileUpload<byte[]>? (nullable single file binding)")
+                          | dataBindingFile
 
                           | Text.InlineCode("FileInput?")
-                          | (Layout.Vertical()
-                             | singleFile.ToFileInput(singleFileUpload)
-                             | singleFile.ToFileInput(singleFileUpload)
-                          )
-                          | singleFile
+                          | dataBindingNullableFile.ToFileInput(dataBindingNullableFileUpload)
+                              .Placeholder("Single file: FileUpload<byte[]>? (explicitly nullable binding)")
+                          | dataBindingNullableFile
 
                           | Text.InlineCode("IEnumerable<FileInput>")
-                          | (Layout.Vertical()
-                             | multipleFiles.ToFileInput(multipleFilesUpload)
-                          )
-                          | multipleFiles
+                          | dataBindingMultipleFiles.ToFileInput(dataBindingMultipleFilesUpload)
+                              .Placeholder("Multiple files: ImmutableArray<FileUpload<byte[]>> (collection binding)")
+                          | dataBindingMultipleFiles
             ;
 
         return Layout.Vertical()
