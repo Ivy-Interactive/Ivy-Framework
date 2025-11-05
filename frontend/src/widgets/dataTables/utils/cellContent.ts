@@ -255,9 +255,8 @@ export function createLabelsCell(cellValue: unknown, align?: Align): GridCell {
 
   return {
     kind: GridCellKind.Bubble,
-    data: labels,
+    data: labels as string[],
     allowOverlay: false,
-    readonly: true,
     contentAlign: align ? getContentAlign(align) : undefined,
   };
 }

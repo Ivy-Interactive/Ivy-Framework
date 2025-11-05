@@ -582,7 +582,6 @@ describe('cellContent utilities', () => {
       if (cell.kind === GridCellKind.Bubble) {
         expect(cell.data).toEqual(['Tag1', 'Tag2', 'Tag3']);
         expect(cell.allowOverlay).toBe(false);
-        expect(cell.readonly).toBe(true);
       }
     });
 
