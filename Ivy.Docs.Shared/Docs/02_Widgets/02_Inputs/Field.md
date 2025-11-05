@@ -65,12 +65,44 @@ public class FieldExample : ViewBase
             .Placeholder("Enter username")
             .WithField()
             .Label("Username")
-            .Description("Must be at least 8 characters long")
+            .Description("Your username")
             .Help("Your username must be unique and contain only letters, numbers, and underscores")
             .Required();
     }
 }
 ```
+
+### Validation for Email and Password
+
+When using `ToEmailInput()` or `ToPasswordInput()` with `.WithField()`, validation is automatically applied:
+
+```csharp demo-below
+public class FieldValidationDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var email = UseState("");
+        var password = UseState("");
+
+        return Layout.Vertical()
+            | email.ToEmailInput()
+                .Placeholder("user@domain.com")
+                .WithField()
+                .Label("Email")
+                .Required()
+            | password.ToPasswordInput()
+                .WithField()
+                .Label("Password")
+                .Description("Must be at least 8 characters long and include a number");
+    }
+}
+```
+
+<Callout Type="tip">
+**Automatic Email Validation**: When you use `ToEmailInput().WithField()`, the email is automatically validated to ensure it contains "@" and "." characters. The validation triggers on blur and shows an error message if the email is invalid.
+
+**Automatic Password Validation**: When you use `ToPasswordInput().WithField()`, the password is automatically validated to ensure it's at least 8 characters long.
+</Callout>
 
 ### Wrapping Other Inputs
 

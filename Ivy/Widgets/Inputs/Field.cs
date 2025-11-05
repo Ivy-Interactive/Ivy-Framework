@@ -11,12 +11,13 @@ using System.Threading.Tasks;
 
 namespace Ivy;
 
-/// <summary>Interface for field-like objects that support Label, Description, Required, and Size methods.</summary>
+/// <summary>Interface for field-like objects that support Label, Description, Required, Help, and Size methods.</summary>
 public interface IFieldLike
 {
     string? Label { get; set; }
     string? Description { get; set; }
     bool Required { get; set; }
+    string? Help { get; set; }
     Sizes Size { get; set; }
 }
 
@@ -141,6 +142,24 @@ public static class FieldExtensions
     /// <param name="help">The help text to display in tooltip.</param>
     public static Field Help(this Field field, string help) => field with { Help = help };
 
+    /// <summary>Sets the help text displayed as tooltip on info icon next to label for a FieldView.</summary>
+    /// <param name="fieldView">The field view to configure.</param>
+    /// <param name="help">The help text to display in tooltip.</param>
+    public static FieldView Help(this FieldView fieldView, string help)
+    {
+        fieldView.Help = help;
+        return fieldView;
+    }
+
+    /// <summary>Sets the help text displayed as tooltip on info icon next to label for any field-like object.</summary>
+    /// <param name="fieldLike">The field-like object to configure.</param>
+    /// <param name="help">The help text to display in tooltip.</param>
+    public static IFieldLike Help(this IFieldLike fieldLike, string help)
+    {
+        fieldLike.Help = help;
+        return fieldLike;
+    }
+
     /// <summary>Make the input child required</summary>
     /// <param name="field">The field to configure.</param>
     public static Field Required(this Field field) => field with { Required = true };
@@ -217,6 +236,7 @@ public static class FieldExtensions
         public string? Label { get; set; }
         public string? Description { get; set; }
         public bool Required { get; set; }
+        public string? Help { get; set; }
         public Sizes Size { get; set; } = Sizes.Medium;
 
         public FieldView(IAnyState state, TextInputBase input)
@@ -242,7 +262,7 @@ public static class FieldExtensions
                 validatedInput = _input;
             }
 
-            var field = new Field(validatedInput, Label, Description, Required) { Size = Size };
+            var field = new Field(validatedInput, Label, Description, Required, Help) { Size = Size };
             return field;
         }
     }
