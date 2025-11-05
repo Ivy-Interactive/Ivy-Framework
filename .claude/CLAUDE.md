@@ -83,7 +83,8 @@ className="text-blue-500"
 ```
 src/components/UserCard/
 ├── UserCard.tsx           # Main component
-├── UserCard.test.tsx      # Component tests
+├── UserCardContext.tsx    # Main component context 
+├── UserCardHeader.tsx     # Main component sub part 
 ├── utils/                 # Utility functions
 │   ├── formatName.ts
 │   └── formatName.test.ts
@@ -145,40 +146,6 @@ export function useUserData(userId: string): UseUserDataResult {
 ## Widget Contribution Requirements
 
 **Important:** Before contributing, read [CONTRIBUTING.md](../CONTRIBUTING.md) for the complete contribution guide and workflow.
-
-When contributing a widget, you MUST include:
-
-### 1. Backend (C#)
-- Widget class in `Ivy/Widgets/` inheriting from `WidgetBase<T>`
-- Comprehensive XML documentation
-- `[Prop]` attributes on all public properties
-- Constructor overloads
-
-### 2. Frontend (React/TypeScript)
-- React component in `frontend/src/widgets/`
-- TypeScript props interface
-- Only Tailwind CSS and shadcn/ui for styling
-- Accessibility support (ARIA attributes)
-- Responsive design
-
-### 3. Testing
-- C# unit tests in `Ivy.Test/`
-- Frontend unit tests (Vitest) with `.test.ts` extension
-- E2E tests (Playwright) in `frontend/e2e/`
-- Edge case testing (null, empty, invalid input)
-
-### 4. Documentation
-- XML documentation on C# widget
-- Code examples showing usage
-- Screenshots of different states (normal, hover, disabled, error)
-- Light and dark mode examples
-
-### 5. Dependencies
-- **No new npm packages without approval**
-- Stick to shadcn/ui and existing dependencies
-- Tailwind CSS only (no custom CSS files)
-
----
 
 ## Testing Standards
 
@@ -252,71 +219,6 @@ npm run e2e:docs      # Ivy.Docs tests only
 npm run e2e:samples   # Ivy.Samples tests only
 ```
 
----
-
-## Code Review Guidelines
-
-### Review Checklist
-
-**Functionality:**
-- [ ] Code does what it's supposed to do
-- [ ] Logic is correct and handles edge cases
-- [ ] Error handling is appropriate
-
-**Quality:**
-- [ ] Code is readable and maintainable
-- [ ] Functions are small and focused
-- [ ] No code duplication (DRY)
-
-**Testing:**
-- [ ] Unit tests for new functionality
-- [ ] Tests cover happy path and edge cases
-- [ ] All tests pass
-
-**Documentation:**
-- [ ] XML docs on C# public APIs
-- [ ] Comments for complex logic
-- [ ] README updates if needed
-
-**Style:**
-- [ ] C#: XML docs, `dotnet format` run, no warnings
-- [ ] TypeScript: No `any` types, proper naming, lint/format run
-- [ ] Follows project conventions
-
-**Security:**
-- [ ] No security vulnerabilities
-- [ ] Input validation present
-- [ ] No hardcoded secrets
-
-### Review Comment Format
-
-```markdown
-**🟠 Important**: Missing error handling
-
-The API call doesn't handle network errors.
-
-**Suggestion:**
-\`\`\`typescript
-try {
-  const response = await fetch(\`/api/users/\${userId}\`);
-  if (!response.ok) throw new Error('Failed to fetch');
-  return await response.json();
-} catch (error) {
-  console.error('Error:', error);
-  throw error;
-}
-\`\`\`
-```
-
-### Severity Levels
-
-- 🔴 **Critical**: Security, crashes, breaking changes (MUST FIX)
-- 🟠 **Important**: Code quality, missing tests, performance (SHOULD FIX)
-- 🟡 **Minor**: Style, optimizations, docs (NICE TO HAVE)
-- 💡 **Suggestion**: Alternative approaches, future improvements (OPTIONAL)
-
----
-
 ## Code Quality Checklist
 
 ### Before Any Commit
@@ -386,27 +288,3 @@ try {
 ❌ Prop drilling instead of context
 ❌ Re-rendering unnecessarily
 ❌ Missing error boundaries
-
----
-
-## Pre-commit Hooks
-
-The project uses pre-commit hooks that automatically:
-- Run linting and formatting on staged files
-- Ensure code quality before commits
-
-**Setup:**
-```bash
-cd frontend
-npm install  # Sets up all pre-commit hooks
-```
-
----
-
-## Reference Links
-
-- [Microsoft C# Conventions](https://docs.microsoft.com/en-us/dotnet/csharp/fundamentals/coding-style/coding-conventions)
-- [TypeScript Style Guide](https://github.com/microsoft/TypeScript/wiki/Coding-guidelines)
-- [React Best Practices](https://react.dev/)
-- [CONTRIBUTING.md](../CONTRIBUTING.md) - Full contribution guide
-- [Ivy Discord](https://discord.gg/sSwGzZAYb6)
