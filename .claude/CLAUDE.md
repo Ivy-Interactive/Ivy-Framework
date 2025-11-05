@@ -10,11 +10,9 @@ This file contains all coding conventions, standards, and guidelines for the Ivy
 
 ### Core Principles
 
-1. Follow [Microsoft C# Coding Conventions](https://docs.microsoft.com/en-us/dotnet/csharp/fundamentals/coding-style/coding-conventions)
-2. Use meaningful variable and method names
-3. Keep methods focused and concise
-4. Use async/await for asynchronous operations
-5. Always format code with `dotnet format`
+1. Use `async`/`await` for asynchronous operations and `ValueTask` for hot paths
+2. Always format code with `dotnet format` before committing
+3. Run `dotnet build` to catch compilation errors - build output is the source of truth
 
 ### XML Documentation Requirements
 
@@ -22,7 +20,6 @@ This file contains all coding conventions, standards, and guidelines for the Ivy
 - `<summary>` tags describing the purpose
 - `<param>` tags for each parameter
 - `<returns>` tags for return values
-- `<remarks>` tags for additional context when needed
 
 ```csharp
 /// <summary>
@@ -32,31 +29,6 @@ This file contains all coding conventions, standards, and guidelines for the Ivy
 /// <param name="rules">The validation rules to apply.</param>
 /// <returns>A validation result indicating success or failure.</returns>
 public ValidationResult ProcessInput(string input, ValidationRules rules) { }
-```
-
-### Widget Development Standards
-
-**Widget Class Requirements:**
-- Inherit from `WidgetBase<T>`
-- Use namespace: `namespace Ivy;`
-- Include comprehensive XML documentation
-- Use `[Prop]` attribute for all public properties with descriptions
-- Provide constructor overloads for different use cases
-
-```csharp
-namespace Ivy;
-
-/// <summary>
-/// Displays a badge with customizable text and styling.
-/// </summary>
-public class BadgeWidget : WidgetBase<BadgeWidget>
-{
-    [Prop("The text content of the badge")]
-    public string Text { get; set; } = string.Empty;
-
-    public BadgeWidget() { }
-    public BadgeWidget(string text) { Text = text; }
-}
 ```
 
 ### Naming Conventions
@@ -89,10 +61,10 @@ public class BadgeWidget : WidgetBase<BadgeWidget>
 - CSS color variables: `var(--color-primary)`, `var(--color-background)`
 
 **❌ NEVER Use:**
-- Custom CSS files or styled-components
+- styled-components or CSS-in-JS libraries (plain CSS files are allowed when needed)
 - Alternative UI libraries (Material-UI, Ant Design, etc.)
 - Different icon libraries (FontAwesome, Heroicons, etc.)
-- Hardcoded colors (`#3b82f6`, `rgb()`)
+- Hardcoded colors (`#3b82f6`, `rgb()`) - always use CSS variables
 
 ```typescript
 // ✅ GOOD
@@ -103,6 +75,8 @@ className="text-[var(--color-primary)] bg-[var(--color-background)]"
 className="text-blue-500"
 <ChevronRight size={20} />
 ```
+
+**Theming Note:** CSS variables enable proper light/dark mode theming. Always use variables like `var(--color-primary)`, `var(--color-background)`, etc. for colors to ensure components adapt correctly to theme changes.
 
 ### Component Structure
 
@@ -139,9 +113,11 @@ function processUser(user: any) { }
 export default UserCard;
 ```
 
+**Note:** Always run `npm run build` to catch TypeScript errors - build errors are the source of truth for type correctness.
+
 ### React Hooks Guidelines
 
-- Custom hooks must be in `hooks/` folder with `use` prefix
+- Custom hooks must be in `./hooks/*` folder (within the same component module) with `use` prefix
 - When a component has **3+ useEffect hooks**, refactor into custom hooks
 - Always type hook return values
 
@@ -167,6 +143,8 @@ export function useUserData(userId: string): UseUserDataResult {
 ---
 
 ## Widget Contribution Requirements
+
+**Important:** Before contributing, read [CONTRIBUTING.md](../CONTRIBUTING.md) for the complete contribution guide and workflow.
 
 When contributing a widget, you MUST include:
 
