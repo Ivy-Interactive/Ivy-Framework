@@ -72,7 +72,7 @@ export interface TableProps {
   id: string;
   columns: DataColumn[];
   connection: DataTableConnection;
-  configuration?: DataTableConfiguration;
+  config?: DataTableConfiguration;
   editable?: boolean;
   width?: string;
   height?: string;
