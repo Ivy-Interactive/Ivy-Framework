@@ -1,14 +1,10 @@
 using Grpc.Core;
-using Ivy.Auth;
 using Ivy.Filters;
 using Ivy.Protos.DataTable;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Net.Http.Headers;
-using System.Net;
-using System.Text.Json;
+using Ivy.Helpers;
 
 namespace Ivy.Views.DataTables;
 
@@ -26,7 +22,7 @@ public class DataTableService(
     {
         try
         {
-            await ValidateAuthIfRequired(context);
+            await AuthHelper.ValidateAuthIfRequired(server, serviceProvider, context);
 
             if (string.IsNullOrEmpty(request.SourceId))
             {
@@ -68,7 +64,7 @@ public class DataTableService(
     {
         try
         {
-            await ValidateAuthIfRequired(context);
+            await AuthHelper.ValidateAuthIfRequired(server, serviceProvider, context);
 
             if (string.IsNullOrEmpty(request.SourceId))
             {
@@ -106,7 +102,7 @@ public class DataTableService(
     {
         try
         {
-            await ValidateAuthIfRequired(context);
+            await AuthHelper.ValidateAuthIfRequired(server, serviceProvider, context);
 
             if (string.IsNullOrWhiteSpace(request.FilterExpression))
             {
@@ -154,87 +150,6 @@ public class DataTableService(
         catch (Exception ex)
         {
             throw new RpcException(new Status(StatusCode.Internal, $"Internal server error: {ex.Message}"));
-        }
-    }
-
-    private AuthToken? GetAuthToken(ServerCallContext context)
-    {
-        var cookies = context.RequestHeaders.GetValue("cookie") ?? string.Empty;
-        if (string.IsNullOrEmpty(cookies))
-        {
-            return null;
-        }
-
-        var cookieHeader = CookieHeaderValue.ParseList([cookies]).ToList();
-        var rawAuthTokenValue = cookieHeader
-            .FirstOrDefault(c => c.Name.Equals("auth_token", StringComparison.OrdinalIgnoreCase))?.Value.Value;
-
-        if (string.IsNullOrEmpty(rawAuthTokenValue))
-        {
-            return null;
-        }
-
-        var authTokenValue = WebUtility.UrlDecode(rawAuthTokenValue);
-
-        try
-        {
-            var token = JsonSerializer.Deserialize<AuthToken>(authTokenValue);
-            if (token == null)
-            {
-                return null;
-            }
-
-            // Check if refresh token is in a separate cookie
-            if (token.RefreshToken == null)
-            {
-                var refreshTokenValue = cookieHeader
-                    .FirstOrDefault(c => c.Name.Equals("auth_ext_refresh_token", StringComparison.OrdinalIgnoreCase))?.Value.Value;
-                return token with { RefreshToken = refreshTokenValue };
-            }
-
-            return token;
-        }
-        catch (Exception ex)
-        {
-            logger?.LogWarning(ex, "Failed to deserialize AuthToken from cookies.");
-            return null;
-        }
-    }
-
-    private async Task ValidateAuthIfRequired(ServerCallContext context)
-    {
-        // Check if auth is required
-        if (server.AuthProviderType == null)
-        {
-            return;
-        }
-
-        var authToken = GetAuthToken(context);
-        if (authToken == null || string.IsNullOrEmpty(authToken.AccessToken))
-        {
-            throw new RpcException(new Status(StatusCode.Unauthenticated, "Authentication required."));
-        }
-
-        // Get auth provider and validate token
-        var authProvider = serviceProvider.GetService<IAuthProvider>()
-            ?? throw new RpcException(new Status(StatusCode.Internal, "Auth provider not configured."));
-
-        try
-        {
-            var isValid = await authProvider.ValidateAccessTokenAsync(authToken.AccessToken, context.CancellationToken);
-            if (!isValid)
-            {
-                throw new RpcException(new Status(StatusCode.Unauthenticated, "Invalid or expired authentication token."));
-            }
-        }
-        catch (RpcException)
-        {
-            throw;
-        }
-        catch (Exception ex)
-        {
-            logger?.LogError(ex, "Error validating auth token.");
-            throw new RpcException(new Status(StatusCode.Internal, "Error validating auth token."));
         }
     }
 }

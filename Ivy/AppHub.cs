@@ -137,7 +137,7 @@ public class AppHub(
                 var authProvider = server.Services.BuildServiceProvider().GetService<IAuthProvider>() ?? throw new Exception("IAuthProvider not found");
                 authProvider.SetHttpContext(httpContext);
 
-                var oldAuthToken = GetAuthToken(httpContext);
+                var oldAuthToken = AuthHelper.GetAuthToken(httpContext);
                 var authService = new AuthService(authProvider!, oldAuthToken);
                 appServices.AddSingleton<IAuthService>(s => authService);
 
@@ -608,38 +608,6 @@ public class AppHub(
         catch (Exception ex)
         {
             logger.LogError(ex, "Failed to send navigate signal: {ConnectionId} to [{AppId}]", Context.ConnectionId, appId);
-        }
-    }
-
-    private AuthToken? GetAuthToken(HttpContext httpContext)
-    {
-        var cookies = httpContext.Request.Cookies;
-        var authToken = cookies["auth_token"].NullIfEmpty();
-        if (authToken == null)
-        {
-            return null;
-        }
-
-        try
-        {
-            var token = JsonSerializer.Deserialize<AuthToken>(authToken);
-            if (token == null)
-            {
-                return null;
-            }
-
-            if (token.RefreshToken == null)
-            {
-                var refreshToken = cookies["auth_ext_refresh_token"].NullIfEmpty();
-                return token with { RefreshToken = refreshToken };
-            }
-
-            return token;
-        }
-        catch (Exception e)
-        {
-            logger.LogWarning(e, "Failed to deserialize AuthToken from cookies.");
-            return null;
         }
     }
 }
