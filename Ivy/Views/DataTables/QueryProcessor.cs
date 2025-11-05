@@ -1075,7 +1075,13 @@ public class QueryProcessor(ILogger<QueryProcessor>? logger = null, IDistributed
             else
             {
                 totalValues = rawValues.Count;
-                values = rawValues
+
+                // Apply limit if specified
+                var limitedValues = query.Limit > 0
+                    ? rawValues.Take(query.Limit)
+                    : rawValues;
+
+                values = limitedValues
                     .Select(v => v.ToString()!)
                     .ToList();
             }
