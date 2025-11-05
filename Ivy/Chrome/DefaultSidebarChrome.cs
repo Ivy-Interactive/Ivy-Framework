@@ -249,12 +249,16 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
                 return;
             }
 
-            selectedIndex.Set(@event.Value);
+            // Only update and redirect if the selected index actually changes
+            if (selectedIndex.Value != @event.Value)
+            {
+                selectedIndex.Set(@event.Value);
 
-            // Update browser URL when tab is selected
-            var tab = tabs.Value[@event.Value];
-            var navigateArgs = new NavigateArgs(tab.AppId);
-            client.Redirect(navigateArgs.GetUrl(), tabId: tab.Id);
+                // Update browser URL when tab is selected
+                var tab = tabs.Value[@event.Value];
+                var navigateArgs = new NavigateArgs(tab.AppId);
+                client.Redirect(navigateArgs.GetUrl(), tabId: tab.Id);
+            }
         }
 
         void OnTabClose(Event<TabsLayout, int> @event)
