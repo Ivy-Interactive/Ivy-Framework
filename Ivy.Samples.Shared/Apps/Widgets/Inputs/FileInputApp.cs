@@ -25,8 +25,8 @@ public class FileInputApp : SampleBase
         var textFiles = UseState<IEnumerable<FileUpload>?>(() => null);
         var pdfFiles = UseState<IEnumerable<FileUpload>?>(() => null);
         var imageFiles = UseState<IEnumerable<FileUpload>?>(() => null);
-        var singleSizeFile = UseState<FileUpload?>(() => null);
-        var multipleSizeFiles = UseState<IEnumerable<FileUpload>?>(() => null);
+        var singleSizeFile = UseState<FileUpload<byte[]>?>(() => null);
+        var multipleSizeFiles = UseState(ImmutableArray.Create<FileUpload<byte[]>>());
 
         var onBlurState = UseState<FileUpload?>(() => null);
         var onBlurLabel = UseState("");
@@ -45,8 +45,10 @@ public class FileInputApp : SampleBase
         var textFilesUpload = this.UseUpload((fileUpload, stream, cancellationToken) => System.Threading.Tasks.Task.CompletedTask);
         var pdfFilesUpload = this.UseUpload((fileUpload, stream, cancellationToken) => System.Threading.Tasks.Task.CompletedTask);
         var imageFilesUpload = this.UseUpload((fileUpload, stream, cancellationToken) => System.Threading.Tasks.Task.CompletedTask);
-        var singleSizeFileUpload = this.UseUpload((fileUpload, stream, cancellationToken) => System.Threading.Tasks.Task.CompletedTask);
-        var multipleSizeFilesUpload = this.UseUpload((fileUpload, stream, cancellationToken) => System.Threading.Tasks.Task.CompletedTask);
+
+        // Upload handlers for size variants - use MemoryStreamUploadHandler for automatic progress tracking
+        var singleSizeFileUpload = this.UseUpload(MemoryStreamUploadHandler.Create(singleSizeFile));
+        var multipleSizeFilesUpload = this.UseUpload(MemoryStreamUploadHandler.Create(multipleSizeFiles));
         var onBlurUpload = this.UseUpload((fileUpload, stream, cancellationToken) => System.Threading.Tasks.Task.CompletedTask);
         var validatedFilesUpload = this.UseUpload((fileUpload, stream, cancellationToken) => System.Threading.Tasks.Task.CompletedTask);
         var singleFileWithValidationUpload = this.UseUpload((fileUpload, stream, cancellationToken) => System.Threading.Tasks.Task.CompletedTask);
