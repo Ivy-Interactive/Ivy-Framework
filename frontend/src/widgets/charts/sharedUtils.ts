@@ -230,54 +230,6 @@ export const generateYAxis = (
 ) => {
   const safeTransform = transformValue ?? ((v: number) => v);
 
-  // Calculate optimal interval between Y-axis divisions
-  const calculateOptimalInterval = (dataMax: number, splitNum: number = 5) => {
-    // Handle zero or negative values using absolute value
-    const absDataMax = Math.abs(dataMax);
-    if (absDataMax <= 0) return 1;
-
-    // Calculate rough interval between divisions
-    const roughInterval = absDataMax / splitNum;
-
-    // Guard against zero or negative interval before log calculation
-    if (roughInterval <= 0) return 1;
-
-    // Find order of magnitude (1, 10, 100, 1000...)
-    const magnitude = Math.pow(10, Math.floor(Math.log10(roughInterval)));
-
-    // Normalize interval relative to magnitude
-    const normalized = roughInterval / magnitude;
-
-    // Choose optimal interval: 1, 2, 3, 5, or 10
-    let optimalInterval;
-    if (normalized < 1.5) optimalInterval = 1 * magnitude;
-    else if (normalized < 2.5) optimalInterval = 2 * magnitude;
-    else if (normalized < 4) optimalInterval = 3 * magnitude;
-    else if (normalized < 7.5) optimalInterval = 5 * magnitude;
-    else optimalInterval = 10 * magnitude;
-
-    return optimalInterval;
-  };
-
-  // Calculate optimal maximum for Y-axis
-  const calculateOptimalMax = (value: { max: number }) => {
-    const dataMax = value.max;
-    if (dataMax <= 0) return 10;
-
-    const splitNum = 5;
-    const optimalInterval = calculateOptimalInterval(dataMax, splitNum);
-
-    // Round up maximum to next division
-    return Math.ceil(dataMax / optimalInterval) * optimalInterval;
-  };
-
-  // Pre-calculate interval for axis configuration
-  // This ensures consistent intervals between all divisions
-  const axisInterval =
-    !largeSpread && maxValue > 0
-      ? calculateOptimalInterval(maxValue, 5)
-      : undefined;
-
   return {
     type: isVertical ? 'category' : 'value',
     data: isVertical ? categories : undefined,
@@ -304,12 +256,9 @@ export const generateYAxis = (
         themeColors?.fontSans
       ),
     },
-    // Don't use splitNumber when interval is explicitly set
-    ...(axisInterval ? {} : { splitNumber: largeSpread ? 3 : 5 }),
-    // Explicitly set interval for consistent divisions
-    ...(axisInterval ? { interval: axisInterval } : {}),
+    splitNumber: largeSpread ? 3 : 5,
     min: largeSpread ? safeTransform(minValue) : 0,
-    max: largeSpread ? safeTransform(maxValue) : calculateOptimalMax,
+    ...(largeSpread && { max: safeTransform(maxValue) }),
     position: yAxis?.[0]?.orientation === 'Right' ? 'right' : 'left',
     axisLine: {
       show: true,
