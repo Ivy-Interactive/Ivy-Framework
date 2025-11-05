@@ -1,74 +1,36 @@
 # Ivy Framework - Claude Code Configuration
 
-## Overview
+## C# Conventions
 
-This file contains all coding conventions, standards, and guidelines for the Ivy Framework project. These rules are always active when working with Claude Code.
+**Core Rules:**
+- Use `async`/`await` for async operations, `ValueTask` for hot paths
+- Run `dotnet format` before committing
+- Run `dotnet build` to verify - build errors are source of truth
+- PascalCase for classes/methods/properties, _camelCase for private fields, camelCase for parameters/locals
 
----
-
-## C# Code Conventions
-
-### Core Principles
-
-1. Use `async`/`await` for asynchronous operations and `ValueTask` for hot paths
-2. Always format code with `dotnet format` before committing
-3. Run `dotnet build` to catch compilation errors - build output is the source of truth
-
-### XML Documentation Requirements
-
-**All Public APIs MUST Have:**
-- `<summary>` tags describing the purpose
-- `<param>` tags for each parameter
-- `<returns>` tags for return values
-
+**XML Documentation (Required for Public APIs):**
 ```csharp
-/// <summary>
-/// Processes user input and validates against the specified rules.
-/// </summary>
+/// <summary>Processes user input and validates against rules.</summary>
 /// <param name="input">The user input to process.</param>
 /// <param name="rules">The validation rules to apply.</param>
 /// <returns>A validation result indicating success or failure.</returns>
 public ValidationResult ProcessInput(string input, ValidationRules rules) { }
 ```
 
-### Naming Conventions
-
-- **Classes**: PascalCase (`UserService`, `DataProcessor`)
-- **Methods**: PascalCase (`GetUserById`, `ProcessData`)
-- **Properties**: PascalCase (`UserName`, `IsActive`)
-- **Private fields**: _camelCase (`_userId`, `_dataStore`)
-- **Parameters**: camelCase (`userId`, `inputData`)
-- **Local variables**: camelCase (`result`, `userName`)
-
----
-
 ## TypeScript/React Conventions
 
-### Core Principles
+**Core Rules:**
+- NEVER use `any` type - use proper typing
+- Use named exports (no default exports)
+- Run `npm run build` to verify - build errors are source of truth
 
-1. Follow [TypeScript style guide](https://github.com/microsoft/TypeScript/wiki/Coding-guidelines)
-2. Use functional components with hooks
-3. **NEVER use `any` type** - use proper typing
-4. Use named exports over default exports
-5. Follow React best practices
-
-### Styling Requirements
-
-**✅ ALWAYS Use:**
-- Tailwind CSS for all styling
-- shadcn/ui components for UI elements
-- Lucide React for icons (via Icon component)
-- CSS color variables: `var(--color-primary)`, `var(--color-background)`
-
-**❌ NEVER Use:**
-- styled-components or CSS-in-JS libraries (plain CSS files are allowed when needed)
-- Alternative UI libraries (Material-UI, Ant Design, etc.)
-- Different icon libraries (FontAwesome, Heroicons, etc.)
-- Hardcoded colors (`#3b82f6`, `rgb()`) - always use CSS variables
+**Styling (Required):**
+- ✅ Tailwind CSS, shadcn/ui components, Lucide icons via `<Icon>`, CSS variables for colors
+- ❌ NO styled-components, Material-UI, Ant Design, FontAwesome, hardcoded colors
 
 ```typescript
 // ✅ GOOD
-className="text-[var(--color-primary)] bg-[var(--color-background)]"
+className="text-[var(--color-primary)]"
 <Icon name="edit" size={16} />
 
 // ❌ BAD
@@ -76,215 +38,76 @@ className="text-blue-500"
 <ChevronRight size={20} />
 ```
 
-**Theming Note:** CSS variables enable proper light/dark mode theming. Always use variables like `var(--color-primary)`, `var(--color-background)`, etc. for colors to ensure components adapt correctly to theme changes.
-
-### Component Structure
-
+**File Organization:**
 ```
 src/components/UserCard/
-├── UserCard.tsx           # Main component
-├── UserCardContext.tsx    # Main component context 
-├── UserCardHeader.tsx     # Main component sub part 
-├── utils/                 # Utility functions
-│   ├── formatName.ts
-│   └── formatName.test.ts
-└── hooks/                 # Custom hooks
-    ├── useUserData.ts
-    └── useUserData.test.ts
+├── UserCard.tsx
+├── UserCardContext.tsx
+├── utils/*.ts + *.test.ts
+└── hooks/use*.ts + *.test.ts
 ```
 
-### TypeScript Best Practices
-
-```typescript
-// ✅ GOOD: Proper typing
-interface User {
-  id: string;
-  name: string;
-  role: 'admin' | 'user' | 'guest';
-}
-function processUser(user: User): void { }
-
-// ✅ GOOD: Named exports
-export function UserCard() { }
-
-// ❌ BAD: Using 'any'
-function processUser(user: any) { }
-
-// ❌ BAD: Default exports
-export default UserCard;
-```
-
-**Note:** Always run `npm run build` to catch TypeScript errors - build errors are the source of truth for type correctness.
-
-### React Hooks Guidelines
-
-- Custom hooks must be in `./hooks/*` folder (within the same component module) with `use` prefix
-- When a component has **3+ useEffect hooks**, refactor into custom hooks
+**Hooks:**
+- Put custom hooks in `./hooks/*` with `use` prefix
+- Refactor when component has 3+ useEffect hooks
 - Always type hook return values
 
-```typescript
-// hooks/useUserData.ts
-interface UseUserDataResult {
-  user: User | null;
-  loading: boolean;
-  error: Error | null;
-}
+## Testing
 
-export function useUserData(userId: string): UseUserDataResult {
-  // Implementation
-}
-```
-
-### Utility Functions
-
-- Must be in `utils/` folder
-- Must have corresponding `.test.ts` file
-- Must be properly typed
-
----
-
-## Widget Contribution Requirements
-
-**Important:** Before contributing, read [CONTRIBUTING.md](../CONTRIBUTING.md) for the complete contribution guide and workflow.
-
-## Testing Standards
-
-### Backend Testing (C# / xUnit)
-
+**Backend (xUnit):**
 ```csharp
 [Fact]
-public void GetUser_WithValidId_ReturnsUser()
-{
-    // Arrange
-    var service = new UserService();
-
-    // Act
-    var result = service.GetUser("123");
-
-    // Assert
-    Assert.NotNull(result);
-}
+public void GetUser_WithValidId_ReturnsUser() { /* Arrange, Act, Assert */ }
 
 [Theory]
 [InlineData(null)]
-[InlineData("")]
-public void GetUser_WithInvalidId_ThrowsException(string userId)
-{
-    Assert.Throws<ArgumentException>(() => service.GetUser(userId));
-}
+public void GetUser_WithInvalidId_ThrowsException(string userId) { }
 ```
 
-### Frontend Testing (Vitest)
-
+**Frontend (Vitest):**
 ```typescript
 describe('UserCard', () => {
   it('renders user information', () => {
-    render(<UserCard userId="1" name="John Doe" />);
-    expect(screen.getByText('John Doe')).toBeInTheDocument();
-  });
-
-  it('calls onEdit when clicked', () => {
-    const handleEdit = vi.fn();
-    render(<UserCard userId="1" name="John" onEdit={handleEdit} />);
-    fireEvent.click(screen.getByRole('button'));
-    expect(handleEdit).toHaveBeenCalledOnce();
+    render(<UserCard userId="1" name="John" />);
+    expect(screen.getByText('John')).toBeInTheDocument();
   });
 });
 ```
 
-### E2E Testing (Playwright)
-
+**E2E (Playwright):**
 ```typescript
-test('user can create new item', async ({ page }) => {
+test('user can create item', async ({ page }) => {
   await page.goto('/items');
   await page.click('button[aria-label="Add Item"]');
-  await page.fill('input[name="title"]', 'New Item');
-  await page.click('button[type="submit"]');
   await expect(page.locator('text=New Item')).toBeVisible();
 });
 ```
 
-### Running Tests
-
+**Run Tests:**
 ```bash
-# Backend tests
-dotnet test
-
-# Frontend unit tests
-cd frontend && npm run test
-
-# E2E tests (ALWAYS use npm scripts, not npx)
-npm run e2e           # All E2E tests
-npm run e2e:docs      # Ivy.Docs tests only
-npm run e2e:samples   # Ivy.Samples tests only
+dotnet test                    # Backend
+cd frontend && npm run test    # Frontend
+npm run e2e                    # E2E (use npm scripts, not npx)
 ```
 
-## Code Quality Checklist
+## Before Commit Checklist
 
-### Before Any Commit
+**C#:** `dotnet format`, `dotnet test`, no warnings, XML docs on public APIs
+**TypeScript:** `npm run lint:fix`, `npm run format`, `npm run test`, no `any` types
+**E2E:** `npm run e2e` passes
 
-**C# Code:**
-- [ ] Run `dotnet format`
-- [ ] Run `dotnet test` - all pass
-- [ ] No compiler warnings
-- [ ] XML documentation on public APIs
-- [ ] Meaningful variable/method names
+## Approved Dependencies
 
-**TypeScript Code:**
-- [ ] Run `npm run lint:fix` (in frontend/)
-- [ ] Run `npm run format` (in frontend/)
-- [ ] Run `npm run test` - all pass
-- [ ] No TypeScript errors
-- [ ] No `any` types
-- [ ] Proper file organization (utils/, hooks/)
+shadcn/ui, Tailwind CSS, Radix UI, Lucide React, React Hook Form, Zod
 
-**E2E Tests:**
-- [ ] Run `npm run e2e` - all pass
+**Policy:** ❌ NO new npm packages without approval. Discuss in issue first.
 
----
+## Common Mistakes
 
-## Package Dependencies
+**C#:** Missing XML docs, improper async/await, poor error handling, string concatenation, not disposing IDisposable
+**TypeScript:** Using `any`, hardcoded colors, direct icon imports, missing useEffect dependencies, not cleaning up subscriptions
+**React:** Too many component responsibilities, not memoizing expensive calculations, prop drilling, unnecessary re-renders, missing error boundaries
 
-### Approved Frontend Libraries
+## Resources
 
-- ✅ shadcn/ui (Primary UI components)
-- ✅ Tailwind CSS (Styling)
-- ✅ Radix UI (Primitives via shadcn/ui)
-- ✅ Lucide React (Icons - via Icon component)
-- ✅ React Hook Form (Forms)
-- ✅ Zod (Validation)
-
-### Policy
-
-- ❌ **NO new npm packages without explicit approval**
-- ❌ **NO custom CSS files or alternative UI libraries**
-- ✅ **Discuss in an issue before adding any dependency**
-- ✅ **Justify necessity and consider bundle size**
-
----
-
-## Common Issues to Avoid
-
-### C# Issues
-
-❌ Missing XML documentation
-❌ Not using async/await properly
-❌ Poor exception handling
-❌ String concatenation instead of interpolation
-❌ Not disposing IDisposable resources
-
-### TypeScript Issues
-
-❌ Using `any` type
-❌ Hardcoded colors instead of CSS variables
-❌ Direct icon imports instead of Icon component
-❌ Missing dependency arrays in useEffect
-❌ Not cleaning up useEffect subscriptions
-
-### React Issues
-
-❌ Too many responsibilities in one component
-❌ Not memoizing expensive calculations
-❌ Prop drilling instead of context
-❌ Re-rendering unnecessarily
-❌ Missing error boundaries
+See [CONTRIBUTING.md](../CONTRIBUTING.md) for full contribution guide.
