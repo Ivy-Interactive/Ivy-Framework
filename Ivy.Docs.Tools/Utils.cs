@@ -76,10 +76,10 @@ public static class Utils
         if (string.IsNullOrWhiteSpace(input))
             return string.Empty;
 
-        // if (input.EndsWith("app", StringComparison.InvariantCultureIgnoreCase))
-        // {
-        //     input = input[..^3];
-        // }
+        if (input.EndsWith("app", StringComparison.InvariantCultureIgnoreCase))
+        {
+            input = input[..^3];
+        }
 
         bool hadUnderscore = input.StartsWith("_");
         if (hadUnderscore)
