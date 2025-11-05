@@ -1,14 +1,17 @@
 ﻿using System.Reactive.Disposables;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
+using Ivy.Helpers;
 
 namespace Ivy.Hooks;
 
-public class DownloadController(AppSessionStore sessionStore) : Controller
+public class DownloadController(AppSessionStore sessionStore, Server server, IServiceProvider serviceProvider) : Controller
 {
     [Route("download/{connectionId}/{downloadId}")]
     public async Task<IActionResult> Download(string connectionId, string downloadId)
     {
+        await AuthHelper.ValidateAuthIfRequired(server, serviceProvider, HttpContext);
+
         if (sessionStore.Sessions.TryGetValue(connectionId, out var session))
         {
             var downloadService = session.AppServices.GetRequiredService<IDownloadService>();

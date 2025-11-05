@@ -45,7 +45,7 @@ public static class AuthHelper
     /// </summary>
     /// <param name="server">The Server instance to check for authentication requirements.</param>
     /// <param name="serviceProvider">The service provider to resolve the IAuthProvider from.</param>
-    /// <param name="context">The gRPC ServerCallContext containing the auth token in headers.</param>
+    /// <param name="context">The gRPC ServerCallContext containing the auth token in cookies.</param>
     /// <exception cref="RpcException">
     /// Thrown with StatusCode.Unauthenticated if:
     /// - Authentication is required but no valid token is provided
@@ -66,7 +66,41 @@ public static class AuthHelper
         }
 
         var authToken = GetAuthToken(context);
+        await ValidateAuth(serviceProvider, authToken, context.CancellationToken);
+    }
 
+    /// <summary>
+    /// Validates authentication for an HTTP request if the server requires it.
+    /// Checks if the server has an AuthProviderType configured, and if so, validates the auth token.
+    /// </summary>
+    /// <param name="server">The Server instance to check for authentication requirements.</param>
+    /// <param name="serviceProvider">The service provider to resolve the IAuthProvider from.</param>
+    /// <param name="context">The HttpContext containing the auth token in cookies.</param>
+    /// <exception cref="RpcException">
+    /// Thrown with StatusCode.Unauthenticated if:
+    /// - Authentication is required but no valid token is provided
+    /// - The provided token is invalid or expired
+    /// Thrown with StatusCode.Internal if:
+    /// - The auth provider is not configured when it should be
+    /// - An unexpected error occurs during token validation
+    /// </exception>
+    /// <remarks>
+    /// This method is a no-op if the server does not require authentication (server.AuthProviderType == null).
+    /// </remarks>
+    public static async Task ValidateAuthIfRequired(Server server, IServiceProvider serviceProvider, HttpContext context)
+    {
+        // Check if auth is required
+        if (server.AuthProviderType == null)
+        {
+            return;
+        }
+
+        var authToken = GetAuthToken(context);
+        await ValidateAuth(serviceProvider, authToken, context.RequestAborted);
+    }
+
+    private static async Task ValidateAuth(IServiceProvider serviceProvider, AuthToken? authToken, CancellationToken cancellationToken)
+    {
         if (authToken == null || string.IsNullOrEmpty(authToken.AccessToken))
         {
             throw new RpcException(new Status(StatusCode.Unauthenticated, "Authentication required."));
@@ -78,7 +112,7 @@ public static class AuthHelper
 
         try
         {
-            var isValid = await authProvider.ValidateAccessTokenAsync(authToken.AccessToken, context.CancellationToken);
+            var isValid = await authProvider.ValidateAccessTokenAsync(authToken.AccessToken, cancellationToken);
             if (!isValid)
             {
                 throw new RpcException(new Status(StatusCode.Unauthenticated, "Invalid or expired auth token."));
