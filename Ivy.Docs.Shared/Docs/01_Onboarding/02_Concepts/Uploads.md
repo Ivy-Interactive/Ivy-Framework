@@ -33,14 +33,8 @@ public class SingleFileUpload : ViewBase
     public override object? Build()
     {
         var uploadState = UseState<FileUpload<byte[]>?>();
-        var upload = this.UseUpload(MemoryStreamUploadHandler.Create(uploadState))
-            .Accept("*/*")
-            .MaxFileSize(10 * 1024 * 1024); // 10 MB
-
-        return Layout.Vertical()
-               | Text.H1("Single File Upload")
-               | uploadState.ToFileInput(upload).Placeholder("Choose a file to upload")
-               | uploadState.ToDetails();
+        var upload = this.UseUpload(MemoryStreamUploadHandler.Create(uploadState));
+        return uploadState.ToFileInput(upload).Placeholder("Choose a file to upload");
     }
 }
 ```
@@ -156,7 +150,9 @@ var textFilesState = UseState(ImmutableArray.Create<FileUpload<string>>());
 var textFilesUpload = this.UseUpload(MemoryStreamUploadHandler.Create(textFilesState, Encoding.UTF8));
 ```
 
-## Dialog Integration
+## Integration Examples
+
+### Dialog Integration
 
 Use ephemeral state for temporary file selection in dialogs:
 
@@ -196,7 +192,6 @@ public class DialogFileUpload : ViewBase
             : null;
 
         return Layout.Vertical()
-               | Text.H1("Dialog Upload")
                | new Button("Open Dialog", _ => { dialogFile.Reset(); isOpen.Value = true; })
                | (selectedFile.Value != null
                    ? selectedFile.ToDetails()
@@ -206,7 +201,7 @@ public class DialogFileUpload : ViewBase
 }
 ```
 
-## Form Integration
+### Form Integration
 
 Integrate file uploads in forms using the context-aware `.Builder()` overload:
 
@@ -244,10 +239,28 @@ public class FormFileUpload : ViewBase
             .Label(x => x.Attachment2, "Attachment2 application/pdf (Optional)");
 
         return Layout.Vertical()
-               | Text.H1("Form with File Upload")
                | form
                | model.Value.Attachment1?.ToDetails()
                | model.Value.Attachment2?.ToDetails();
+    }
+}
+```
+
+### Details Integration
+
+Use `.ToDetails()` to automatically display file information in a structured format:
+
+```csharp demo-below
+public class FileUploadWithDetails : ViewBase
+{
+    public override object? Build()
+    {
+        var uploadState = UseState<FileUpload<byte[]>?>();
+        var upload = this.UseUpload(MemoryStreamUploadHandler.Create(uploadState));
+
+        return Layout.Vertical()
+               | uploadState.ToFileInput(upload).Placeholder("Choose a file to upload")
+               | uploadState.ToDetails();
     }
 }
 ```
