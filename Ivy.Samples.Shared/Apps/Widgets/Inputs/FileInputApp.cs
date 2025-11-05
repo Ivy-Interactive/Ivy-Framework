@@ -28,8 +28,7 @@ public class FileInputApp : SampleBase
         var singleSizeFile = UseState<FileUpload<byte[]>?>(() => null);
         var multipleSizeFiles = UseState(ImmutableArray.Create<FileUpload<byte[]>>());
 
-        var onBlurState = UseState<FileUpload?>(() => null);
-        var onBlurLabel = UseState("");
+        var onBlurState = UseState<FileUpload<byte[]>?>(() => null);
 
         // Validation examples
         var validationError = UseState<string?>(() => null);
@@ -49,7 +48,7 @@ public class FileInputApp : SampleBase
         // Upload handlers for size variants - use MemoryStreamUploadHandler for automatic progress tracking
         var singleSizeFileUpload = this.UseUpload(MemoryStreamUploadHandler.Create(singleSizeFile));
         var multipleSizeFilesUpload = this.UseUpload(MemoryStreamUploadHandler.Create(multipleSizeFiles));
-        var onBlurUpload = this.UseUpload((fileUpload, stream, cancellationToken) => System.Threading.Tasks.Task.CompletedTask);
+        var onBlurUpload = this.UseUpload(MemoryStreamUploadHandler.Create(onBlurState));
         var validatedFilesUpload = this.UseUpload((fileUpload, stream, cancellationToken) => System.Threading.Tasks.Task.CompletedTask);
         var singleFileWithValidationUpload = this.UseUpload((fileUpload, stream, cancellationToken) => System.Threading.Tasks.Task.CompletedTask);
 
@@ -172,18 +171,6 @@ public class FileInputApp : SampleBase
                   | Text.Block("3 Files")
                   | Text.Block("Maximum of 3 files allowed")
                   | multipleFiles.ToFileInput(multipleFilesUpload).MaxFiles(3).Placeholder("Select up to 3 files")
-
-                  | Text.Block("5 Files")
-                  | Text.Block("Maximum of 5 files allowed")
-                  | multipleFiles.ToFileInput(multipleFilesUpload).MaxFiles(5).Placeholder("Select up to 5 files")
-               )
-
-               // Events:
-               | Text.H2("Events")
-               | Text.H3("OnBlur")
-               | Layout.Horizontal(
-                   onBlurState.ToFileInput(onBlurUpload).HandleBlur(e => onBlurLabel.Set("Blur")),
-                   onBlurLabel
                )
 
                // File Content Display:
@@ -197,40 +184,6 @@ public class FileInputApp : SampleBase
 
                // | singleFile.ToFileInput(singleFileUpload).Placeholder("Select a file to view as plain text")
                // | (singleFile.Value?.ToPlainText() ?? (object)Text.Block("No file selected"))
-               )
-
-               // Backend Validation:
-               | Text.H2("Backend Validation")
-               | Text.P("The backend provides validation methods that can be used to validate files against Accept patterns and MaxFiles limits:")
-               | (Layout.Grid().Columns(2)
-                  | Text.InlineCode("Validation Method")
-                  | Text.InlineCode("Usage Example")
-
-                  | Text.Block("Validate Single File")
-                  | Text.Code("var validation = fileInput.ValidateFile(file);\nif (!validation.IsValid) {\n    // Handle error\n}")
-
-                  | Text.Block("Validate Multiple Files")
-                  | Text.Code("var validation = fileInput.ValidateFiles(files);\nif (!validation.IsValid) {\n    // Handle error\n}")
-
-                  | Text.Block("Validate Any Value")
-                  | Text.Code("var validation = fileInput.ValidateValue(value);\nif (!validation.IsValid) {\n    // Handle error\n}")
-
-                  | Text.Block("Supported Patterns")
-                  | Text.Code(".txt,.pdf          // File extensions\nimage/*           // MIME type wildcards\ntext/plain        // Exact MIME types")
-               )
-
-               // Automatic Validation Examples:
-               | Text.H2("Automatic Validation Examples")
-               | Text.P("FileInput automatically validates files when Accept or MaxFiles is set:")
-               | (Layout.Grid().Columns(2)
-                  | Text.InlineCode("Description")
-                  | Text.InlineCode("File Input")
-
-                  | Text.Block("Single file with type validation")
-                  | singleFileWithValidation.ToFileInput(singleFileWithValidationUpload).Accept(".txt,.pdf").Placeholder("Select .txt or .pdf file")
-
-                  | Text.Block("Multiple files with count and type validation")
-                  | validatedFiles.ToFileInput(validatedFilesUpload).MaxFiles(3).Accept("image/*").Placeholder("Select up to 3 image files")
                )
 
                // File Upload Form with Different Sizes:
