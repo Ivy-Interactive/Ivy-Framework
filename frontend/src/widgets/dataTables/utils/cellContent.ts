@@ -114,6 +114,11 @@ export function formatDateValue(dateValue: Date, columnType: string): string {
  * Parses a date from various input formats
  */
 export function parseDateValue(cellValue: unknown): Date | null {
+  // Handle Date objects directly (from Arrow Timestamp vectors)
+  if (cellValue instanceof Date) {
+    return !isNaN(cellValue.getTime()) ? cellValue : null;
+  }
+
   if (typeof cellValue === 'number') {
     const date = new Date(cellValue);
     return !isNaN(date.getTime()) ? date : null;

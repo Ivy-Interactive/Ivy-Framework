@@ -162,6 +162,20 @@ describe('cellContent utilities', () => {
   });
 
   describe('parseDateValue', () => {
+    it('should parse Date objects directly (from Arrow Timestamp vectors)', () => {
+      const date = new Date('2025-10-13T14:30:00.000Z');
+      const result = parseDateValue(date);
+      expect(result).toBeInstanceOf(Date);
+      expect(result).toBe(date); // Should return the same Date object
+      expect(result?.getTime()).toBe(date.getTime());
+    });
+
+    it('should return null for invalid Date objects', () => {
+      const invalidDate = new Date('invalid');
+      const result = parseDateValue(invalidDate);
+      expect(result).toBeNull();
+    });
+
     it('should parse numeric timestamp', () => {
       const timestamp = Date.now();
       const result = parseDateValue(timestamp);
@@ -190,6 +204,16 @@ describe('cellContent utilities', () => {
   });
 
   describe('createDateCell', () => {
+    it('should create a date cell from Date object (Arrow Timestamp)', () => {
+      const date = new Date('2025-10-13T14:30:00.000Z');
+      const cell = createDateCell(date, 'datetime', true);
+      expect(cell).not.toBeNull();
+      if (cell && cell.kind === GridCellKind.Text) {
+        expect(cell.allowOverlay).toBe(true);
+        expect(cell.displayData).toBe(date.toLocaleString());
+      }
+    });
+
     it('should create a date cell from timestamp', () => {
       const timestamp = new Date('2025-10-13T00:00:00.000Z').getTime();
       const cell = createDateCell(timestamp, 'date', true);
