@@ -88,7 +88,6 @@ public class MultipleFilesUpload : ViewBase
             .MaxFileSize(10 * 1024 * 1024);
 
         return Layout.Vertical()
-               | Text.H1("Multiple Files Upload")
                | selectedFiles.ToFileInput(upload).Placeholder("Choose files to upload")
                | selectedFiles.Value.ToTable()
                    .Width(Size.Full())
@@ -115,7 +114,6 @@ public class FileUploadValidation : ViewBase
             .MaxFiles(3);                         // Maximum 3 files total
 
         return Layout.Vertical()
-               | Text.H1("Upload Validation")
                | selectedFiles.ToFileInput(upload).Placeholder("Choose up to 3 images (max 5 MB each)")
                | selectedFiles.Value.ToTable()
                    .Width(Size.Full())
