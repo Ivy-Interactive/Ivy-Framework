@@ -7,6 +7,7 @@ using Ivy.Client;
 using Ivy.Core;
 using Ivy.Core.Hooks;
 using Ivy.Views.Builders;
+using Ivy.Helpers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
@@ -321,12 +322,14 @@ public sealed class MultipleFileSink<T>(IState<ImmutableArray<FileUpload<T>>> st
 
 [ApiController]
 [Route("upload")]
-public class UploadController(AppSessionStore sessionStore) : Controller
+public class UploadController(AppSessionStore sessionStore, Server server, IServiceProvider serviceProvider) : Controller
 {
     [HttpPost("{connectionId}/{uploadId}")]
     [Consumes("multipart/form-data")]
     public async Task<IActionResult> Upload([FromRoute] string connectionId, [FromRoute] string uploadId, [FromForm] IFormFile file)
     {
+        await AuthHelper.ValidateAuthIfRequired(server, serviceProvider, HttpContext);
+
         if (string.IsNullOrEmpty(connectionId))
         {
             return BadRequest("connectionId is required.");
