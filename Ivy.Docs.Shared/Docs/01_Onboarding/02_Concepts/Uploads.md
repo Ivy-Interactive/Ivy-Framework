@@ -154,7 +154,7 @@ var textFilesUpload = this.UseUpload(MemoryStreamUploadHandler.Create(textFilesS
 
 Use ephemeral state for temporary file selection in dialogs:
 
-```csharp demo-below
+```csharp demo-tabs
 public class DialogFileUpload : ViewBase
 {
     public override object? Build()
@@ -203,7 +203,7 @@ public class DialogFileUpload : ViewBase
 
 Integrate file uploads in forms using the context-aware `.Builder()` overload:
 
-```csharp demo-below
+```csharp demo-tabs
 public record FormFileUploadModel
 {
     [Required]
@@ -240,25 +240,6 @@ public class FormFileUpload : ViewBase
                | form
                | model.Value.Attachment1?.ToDetails()
                | model.Value.Attachment2?.ToDetails();
-    }
-}
-```
-
-### Details Integration
-
-Use `.ToDetails()` to automatically display file information in a structured format:
-
-```csharp demo-below
-public class FileUploadWithDetails : ViewBase
-{
-    public override object? Build()
-    {
-        var uploadState = UseState<FileUpload<byte[]>?>();
-        var upload = this.UseUpload(MemoryStreamUploadHandler.Create(uploadState));
-
-        return Layout.Vertical()
-               | uploadState.ToFileInput(upload).Placeholder("Choose a file to upload")
-               | uploadState.ToDetails();
     }
 }
 ```
