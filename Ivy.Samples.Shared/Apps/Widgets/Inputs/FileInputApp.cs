@@ -205,22 +205,53 @@ public class FileInputApp : SampleBase
 
 public class SizingExample : ViewBase
 {
-    public record FileModel(FileUpload? ProfilePhoto, FileUpload? Document, FileUpload? Certificate);
+    public record FileModel(FileUpload<byte[]>? ProfilePhoto, FileUpload<byte[]>? Document, FileUpload<byte[]>? Certificate);
 
     public override object? Build()
     {
         var fileModel = UseState(() => new FileModel(null, null, null));
 
-        var profilePhotoUpload = this.UseUpload((fileUpload, stream, cancellationToken) => System.Threading.Tasks.Task.CompletedTask);
-        var documentUpload = this.UseUpload((fileUpload, stream, cancellationToken) => System.Threading.Tasks.Task.CompletedTask);
-        var certificateUpload = this.UseUpload((fileUpload, stream, cancellationToken) => System.Threading.Tasks.Task.CompletedTask);
+        // Profile Photo: 5 MB max, Large size
+        const long profilePhotoMaxSize = 5 * 1024 * 1024; // 5 MB
+
+        // Document: 10 MB max, Medium size (default)
+        const long documentMaxSize = 10 * 1024 * 1024; // 10 MB
+
+        // Certificate: 2 MB max, Small size
+        const long certificateMaxSize = 2 * 1024 * 1024; // 2 MB
 
         return Layout.Vertical()
             | new Card(
                 fileModel.ToForm()
-                    .Builder(m => m.ProfilePhoto, s => s.ToFileInput(profilePhotoUpload).Large().Accept("image/*"))
-                    .Builder(m => m.Document, s => s.ToFileInput(documentUpload).Accept(".pdf,.doc,.docx"))
-                    .Builder(m => m.Certificate, s => s.ToFileInput(certificateUpload).Small().Accept(".pdf"))
+                    .Builder(m => m.ProfilePhoto, (state, view) =>
+                    {
+                        var uploadContext = view.UseUpload(MemoryStreamUploadHandler.Create(state))
+                            .Accept("image/*")
+                            .MaxFileSize(profilePhotoMaxSize);
+                        return state.ToFileInput(uploadContext)
+                            .Large()
+                            .Accept("image/*")
+                            .Placeholder($"Upload profile photo (max {Utils.FormatBytes(profilePhotoMaxSize)})");
+                    })
+                    .Builder(m => m.Document, (state, view) =>
+                    {
+                        var uploadContext = view.UseUpload(MemoryStreamUploadHandler.Create(state))
+                            .Accept(".pdf,.doc,.docx")
+                            .MaxFileSize(documentMaxSize);
+                        return state.ToFileInput(uploadContext)
+                            .Accept(".pdf,.doc,.docx")
+                            .Placeholder($"Upload document (max {Utils.FormatBytes(documentMaxSize)})");
+                    })
+                    .Builder(m => m.Certificate, (state, view) =>
+                    {
+                        var uploadContext = view.UseUpload(MemoryStreamUploadHandler.Create(state))
+                            .Accept(".pdf")
+                            .MaxFileSize(certificateMaxSize);
+                        return state.ToFileInput(uploadContext)
+                            .Small()
+                            .Accept(".pdf")
+                            .Placeholder($"Upload certificate (max {Utils.FormatBytes(certificateMaxSize)})");
+                    })
                     .Label(m => m.ProfilePhoto, "Profile Photo")
                     .Label(m => m.Document, "Document")
                     .Label(m => m.Certificate, "Certificate")
