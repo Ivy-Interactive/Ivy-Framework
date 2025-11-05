@@ -7,6 +7,7 @@ namespace Ivy.Samples.Apps.Widgets;
 /// <summary>
 /// Comprehensive DataTable test with all column types
 /// Tests the fix for issue #1273 - column type metadata preservation
+/// Tests the fix for issue #1311 - table width and height setting
 /// </summary>
 public record EmployeeRecord(
     int Id,
@@ -82,6 +83,10 @@ public class DataTableApp : SampleBase
         }).AsQueryable();
 
         return employees.ToDataTable()
+            // Table dimensions (fix for issue #1311)
+            .TableWidth(Size.Units(120))     // Table takes full available width
+            .TableHeight(Size.Units(120)) // Table height set to 120 units (30rem)
+
             // Numeric columns
             .Header(e => e.Id, "ID")
             .Header(e => e.Age, "Age")

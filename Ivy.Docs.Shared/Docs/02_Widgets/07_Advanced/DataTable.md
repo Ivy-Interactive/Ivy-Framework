@@ -45,8 +45,27 @@ sampleUsers.ToDataTable()
     .Header(u => u.Email, "Email Address")
     .Header(u => u.Salary, "Salary")
     .Header(u => u.Status, "Status")
-    .Height(Size.Units(100))
+    .TableHeight(Size.Units(100))
 ```
+
+## Table Sizing
+
+Control the overall dimensions of the DataTable using `TableWidth()` and `TableHeight()` methods:
+
+```csharp demo-tabs
+sampleUsers.ToDataTable()
+    .Header(u => u.Name, "Full Name")
+    .Header(u => u.Email, "Email Address")
+    .Header(u => u.Salary, "Salary")
+    .TableWidth(Size.Px(800))
+    .TableHeight(Size.Units(100))
+```
+
+**Table sizing methods:**
+
+- **TableWidth** - Set the overall width of the table using `Size.Px()`, `Size.Units()`, `Size.Fraction()`, etc.
+- **TableHeight** - Set the overall height of the table
+- **Width** (deprecated for table sizing) - Use `TableWidth()` instead to avoid confusion with column width configuration
 
 ## Column Configuration
 
@@ -70,7 +89,7 @@ sampleUsers.ToDataTable()
     .SortDirection(u => u.Salary, SortDirection.Descending)
     .Help(u => u.Name, "Employee full name")
     .Help(u => u.Salary, "Annual salary in USD")
-    .Height(Size.Units(100))
+    .TableHeight(Size.Units(100))
 ```
 
 **Column customization methods:**
@@ -117,7 +136,7 @@ sampleUsers.ToDataTable()
         config.EnableCellClickEvents = true;
         config.ShowVerticalBorders = false;
     })
-    .Height(Size.Units(100))
+    .TableHeight(Size.Units(100))
 ```
 
 **Configuration options:**
@@ -148,7 +167,7 @@ Enumerable.Range(1, 500)
     .Header(x => x.Id, "ID")
     .Header(x => x.Value, "Value")
     .LoadAllRows(true)  // Load all rows at once
-    .Height(Size.Units(100))
+    .TableHeight(Size.Units(100))
 ```
 
 **Performance options:**
