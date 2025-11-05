@@ -328,7 +328,10 @@ public class UploadController(AppSessionStore sessionStore, Server server, IServ
     [Consumes("multipart/form-data")]
     public async Task<IActionResult> Upload([FromRoute] string connectionId, [FromRoute] string uploadId, [FromForm] IFormFile file)
     {
-        await AuthHelper.ValidateAuthIfRequired(server, serviceProvider, HttpContext);
+        if (await this.ValidateAuthIfRequired(server, serviceProvider) is { } errorResult)
+        {
+            return errorResult;
+        }
 
         if (string.IsNullOrEmpty(connectionId))
         {

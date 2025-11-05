@@ -10,7 +10,10 @@ public class DownloadController(AppSessionStore sessionStore, Server server, ISe
     [Route("download/{connectionId}/{downloadId}")]
     public async Task<IActionResult> Download(string connectionId, string downloadId)
     {
-        await AuthHelper.ValidateAuthIfRequired(server, serviceProvider, HttpContext);
+        if (await this.ValidateAuthIfRequired(server, serviceProvider) is { } errorResult)
+        {
+            return errorResult;
+        }
 
         if (sessionStore.Sessions.TryGetValue(connectionId, out var session))
         {

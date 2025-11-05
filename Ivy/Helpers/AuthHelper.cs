@@ -3,6 +3,7 @@ using System.Text.Json;
 using Grpc.Core;
 using Ivy.Auth;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Net.Http.Headers;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -66,65 +67,106 @@ public static class AuthHelper
         }
 
         var authToken = GetAuthToken(context);
-        await ValidateAuth(serviceProvider, authToken, context.CancellationToken);
+
+        try
+        {
+            await ValidateAuth(serviceProvider, authToken, context.CancellationToken);
+        }
+        catch (AuthenticationRequiredException ex)
+        {
+            throw new RpcException(new Status(StatusCode.Unauthenticated, ex.Message));
+        }
+        catch (InvalidAuthTokenException ex)
+        {
+            throw new RpcException(new Status(StatusCode.Unauthenticated, ex.Message));
+        }
+        catch (AuthProviderNotConfiguredException ex)
+        {
+            throw new RpcException(new Status(StatusCode.Internal, ex.Message));
+        }
+        catch (AuthValidationException ex)
+        {
+            throw new RpcException(new Status(StatusCode.Internal, ex.Message));
+        }
     }
 
     /// <summary>
-    /// Validates authentication for an HTTP request if the server requires it.
-    /// Checks if the server has an AuthProviderType configured, and if so, validates the auth token.
+    /// Validates authentication for an HTTP Controller request if the server requires it.
+    /// Checks if the server has an AuthProviderType configured, and if so, validates the auth token from the controller's HttpContext.
     /// </summary>
+    /// <param name="controller">The Controller instance to extract the HttpContext from.</param>
     /// <param name="server">The Server instance to check for authentication requirements.</param>
     /// <param name="serviceProvider">The service provider to resolve the IAuthProvider from.</param>
-    /// <param name="context">The HttpContext containing the auth token in cookies.</param>
-    /// <exception cref="RpcException">
-    /// Thrown with StatusCode.Unauthenticated if:
-    /// - Authentication is required but no valid token is provided
-    /// - The provided token is invalid or expired
-    /// Thrown with StatusCode.Internal if:
-    /// - The auth provider is not configured when it should be
-    /// - An unexpected error occurs during token validation
-    /// </exception>
+    /// <returns>
+    /// An IActionResult representing an error response if authentication fails:
+    /// - Unauthorized (401) for missing or invalid tokens
+    /// - InternalServerError (500) for configuration or validation errors
+    /// Returns null if authentication is not required or if validation succeeds.
+    /// </returns>
     /// <remarks>
-    /// This method is a no-op if the server does not require authentication (server.AuthProviderType == null).
+    /// This is an extension method for Controller that handles authentication validation and automatically
+    /// converts auth exceptions to appropriate HTTP responses. Returns null if the server does not require
+    /// authentication (server.AuthProviderType == null) or if authentication succeeds.
     /// </remarks>
-    public static async Task ValidateAuthIfRequired(Server server, IServiceProvider serviceProvider, HttpContext context)
+    public static async Task<IActionResult?> ValidateAuthIfRequired(this Controller controller, Server server, IServiceProvider serviceProvider)
     {
         // Check if auth is required
         if (server.AuthProviderType == null)
         {
-            return;
+            return null;
         }
 
-        var authToken = GetAuthToken(context);
-        await ValidateAuth(serviceProvider, authToken, context.RequestAborted);
+        try
+        {
+            var authToken = GetAuthToken(controller.HttpContext);
+            await ValidateAuth(serviceProvider, authToken, controller.HttpContext.RequestAborted);
+        }
+        catch (AuthenticationRequiredException ex)
+        {
+            return controller.Unauthorized(ex.Message);
+        }
+        catch (InvalidAuthTokenException ex)
+        {
+            return controller.Unauthorized(ex.Message);
+        }
+        catch (AuthProviderNotConfiguredException ex)
+        {
+            return controller.StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+        }
+        catch (AuthValidationException ex)
+        {
+            return controller.StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+        }
+
+        return null;
     }
 
     private static async Task ValidateAuth(IServiceProvider serviceProvider, AuthToken? authToken, CancellationToken cancellationToken)
     {
         if (authToken == null || string.IsNullOrEmpty(authToken.AccessToken))
         {
-            throw new RpcException(new Status(StatusCode.Unauthenticated, "Authentication required."));
+            throw new AuthenticationRequiredException();
         }
 
         // Get auth provider and validate token
         var authProvider = serviceProvider.GetService<IAuthProvider>()
-            ?? throw new RpcException(new Status(StatusCode.Internal, "Auth provider not configured."));
+            ?? throw new AuthProviderNotConfiguredException();
 
         try
         {
             var isValid = await authProvider.ValidateAccessTokenAsync(authToken.AccessToken, cancellationToken);
             if (!isValid)
             {
-                throw new RpcException(new Status(StatusCode.Unauthenticated, "Invalid or expired auth token."));
+                throw new InvalidAuthTokenException();
             }
         }
-        catch (RpcException)
+        catch (AuthException)
         {
             throw;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            throw new RpcException(new Status(StatusCode.Internal, "Error validating auth token."));
+            throw new AuthValidationException("Error validating auth token.", ex);
         }
     }
 
