@@ -6,9 +6,6 @@ searchHints:
   - drag-drop
   - attachments
   - images
-imports:
-  - Ivy.Services
-  - Ivy.Core.Helpers
 ---
 
 # Uploads
