@@ -25,9 +25,8 @@ public record EmployeeRecord(
     Icons Department,
     string Notes,
     int? OptionalId,
-    string? ProfileUrl,
-    string? LinkedInUrl,
-    string? DocsLink
+    string? WidgetLink,
+    string? ProfileLink
 );
 
 [App(icon: Icons.DatabaseZap)]
@@ -65,9 +64,8 @@ public class DataTableApp : SampleBase
             var optionalId = random.Next(100) > 20 ? (int?)random.Next(1000, 9999) : null;
 
             // Generate link URLs
-            var profileUrl = $"https://company.com/profiles/{firstName.ToLower()}-{lastName.ToLower()}-{i}";
-            var linkedInUrl = $"https://linkedin.com/in/{firstName.ToLower()}{lastName.ToLower()}{i}";
-            var docsLink = i % 5 == 0 ? "app://concepts/links-app" : $"https://github.com/user/{firstName.ToLower()}{lastName.ToLower()}";
+            var widgetLink = "/widgets/charts/area-chart-app"; // Internal widget link - relative URL works on any domain
+            var profileLink = $"https://linkedin.com/in/{firstName.ToLower()}{lastName.ToLower()}{i}"; // External LinkedIn profile
 
             return new EmployeeRecord(
                 Id: i,
@@ -86,9 +84,8 @@ public class DataTableApp : SampleBase
                 Department: department,
                 Notes: notes,
                 OptionalId: optionalId,
-                ProfileUrl: profileUrl,
-                LinkedInUrl: linkedInUrl,
-                DocsLink: docsLink
+                WidgetLink: widgetLink,
+                ProfileLink: profileLink
             );
         }).AsQueryable();
 
@@ -120,9 +117,8 @@ public class DataTableApp : SampleBase
             .Header(e => e.Department, "Dept")
 
             // Link columns
-            .Header(e => e.ProfileUrl, "Profile")
-            .Header(e => e.LinkedInUrl, "LinkedIn")
-            .Header(e => e.DocsLink, "Docs/GitHub")
+            .Header(e => e.WidgetLink, "Widgets")
+            .Header(e => e.ProfileLink, "Profiles")
 
             // Column widths
             .Width(e => e.Id, Size.Px(40))
@@ -141,9 +137,8 @@ public class DataTableApp : SampleBase
             .Width(e => e.Department, Size.Px(90))
             .Width(e => e.Notes, Size.Px(150))
             .Width(e => e.OptionalId, Size.Px(100))
-            .Width(e => e.ProfileUrl, Size.Px(200))
-            .Width(e => e.LinkedInUrl, Size.Px(200))
-            .Width(e => e.DocsLink, Size.Px(200))
+            .Width(e => e.WidgetLink, Size.Px(200))
+            .Width(e => e.ProfileLink, Size.Px(250))
 
             // Alignments
             .Align(e => e.Id, Align.Left)
@@ -161,9 +156,8 @@ public class DataTableApp : SampleBase
             .Align(e => e.Priority, Align.Left)
             .Align(e => e.Department, Align.Left)
             .Align(e => e.OptionalId, Align.Left)
-            .Align(e => e.ProfileUrl, Align.Left)
-            .Align(e => e.LinkedInUrl, Align.Left)
-            .Align(e => e.DocsLink, Align.Left)
+            .Align(e => e.WidgetLink, Align.Left)
+            .Align(e => e.ProfileLink, Align.Left)
 
             // Groups
             .Group(e => e.Id, "Identity")
@@ -182,14 +176,12 @@ public class DataTableApp : SampleBase
             .Group(e => e.LastReview, "Timeline")
             .Group(e => e.Notes, "Other")
             .Group(e => e.OptionalId, "Other")
-            .Group(e => e.ProfileUrl, "Links")
-            .Group(e => e.LinkedInUrl, "Links")
-            .Group(e => e.DocsLink, "Links")
+            .Group(e => e.WidgetLink, "Links")
+            .Group(e => e.ProfileLink, "Links")
 
             // Column types - Set Link type explicitly
-            .DataTypeHint(e => e.ProfileUrl, ColType.Link)
-            .DataTypeHint(e => e.LinkedInUrl, ColType.Link)
-            .DataTypeHint(e => e.DocsLink, ColType.Link)
+            .DataTypeHint(e => e.WidgetLink, ColType.Link)
+            .DataTypeHint(e => e.ProfileLink, ColType.Link)
 
             // Sorting
             .Sortable(e => e.Email, false) // Email not sortable

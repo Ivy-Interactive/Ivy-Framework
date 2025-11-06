@@ -227,9 +227,26 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
   // Handle selection changes
   const handleGridSelectionChange = useCallback(
     (newSelection: GridSelection) => {
+      // Check if the new selection includes URI cells and prevent fuzzy effect
+      // by clearing the selection if it's a single URI cell click
+      if (newSelection.current !== undefined) {
+        const [col, row] = newSelection.current.cell;
+        const cellContent = getCellContent([col, row]);
+
+        // If it's a URI cell, don't allow it to be selected (prevents fuzzy effect)
+        if (cellContent.kind === GridCellKind.Uri) {
+          // Clear the selection for URI cells
+          setGridSelection({
+            columns: CompactSelection.empty(),
+            rows: CompactSelection.empty(),
+          });
+          return;
+        }
+      }
+
       setGridSelection(newSelection);
     },
-    []
+    [getCellContent]
   );
 
   // Get event handler for sending events to backend
