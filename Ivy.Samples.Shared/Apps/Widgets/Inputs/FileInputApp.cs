@@ -271,7 +271,6 @@ public class SizingExample : ViewBase
                             .MaxFileSize(profilePhotoMaxSize);
                         return state.ToFileInput(uploadContext)
                             .Large()
-                            .Accept("image/*")
                             .Placeholder($"Upload profile photo (max {Utils.FormatBytes(profilePhotoMaxSize)})");
                     })
                     .Builder(m => m.Document, (state, view) =>
@@ -280,7 +279,6 @@ public class SizingExample : ViewBase
                             .Accept(".pdf,.doc,.docx")
                             .MaxFileSize(documentMaxSize);
                         return state.ToFileInput(uploadContext)
-                            .Accept(".pdf,.doc,.docx")
                             .Placeholder($"Upload document (max {Utils.FormatBytes(documentMaxSize)})");
                     })
                     .Builder(m => m.Certificate, (state, view) =>
@@ -290,7 +288,6 @@ public class SizingExample : ViewBase
                             .MaxFileSize(certificateMaxSize);
                         return state.ToFileInput(uploadContext)
                             .Small()
-                            .Accept(".pdf")
                             .Placeholder($"Upload certificate (max {Utils.FormatBytes(certificateMaxSize)})");
                     })
                     .Label(m => m.ProfilePhoto, "Profile Photo")
