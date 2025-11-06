@@ -11,7 +11,9 @@ public class DataTableView(
     DataTableColumn[] columns,
     DataTableConfiguration configuration,
     Func<Event<DataTable, CellClickEventArgs>, ValueTask>? onCellClick = null,
-    Func<Event<DataTable, CellClickEventArgs>, ValueTask>? onCellActivated = null) : ViewBase, IMemoized
+    Func<Event<DataTable, CellClickEventArgs>, ValueTask>? onCellActivated = null,
+    RowAction[]? rowActions = null,
+    Func<Event<DataTable, RowActionClickEventArgs>, ValueTask>? onRowAction = null) : ViewBase, IMemoized
 {
     public override object? Build()
     {
@@ -24,7 +26,9 @@ public class DataTableView(
         var table = new DataTable(connection, width, height, columns, configuration)
         {
             OnCellClick = onCellClick,
-            OnCellActivated = onCellActivated
+            OnCellActivated = onCellActivated,
+            RowActions = rowActions,
+            OnRowAction = onRowAction
         };
 
         return table;

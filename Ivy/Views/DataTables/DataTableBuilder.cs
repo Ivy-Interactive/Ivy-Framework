@@ -17,6 +17,8 @@ public class DataTableBuilder<TModel> : ViewBase, IMemoized
     private readonly DataTableConfiguration _configuration = new();
     private Func<Event<DataTable, CellClickEventArgs>, ValueTask>? _onCellClick;
     private Func<Event<DataTable, CellClickEventArgs>, ValueTask>? _onCellActivated;
+    private RowAction[]? _rowActions;
+    private Func<Event<DataTable, RowActionClickEventArgs>, ValueTask>? _onRowAction;
 
     private class InternalColumn
     {
@@ -288,6 +290,36 @@ public class DataTableBuilder<TModel> : ViewBase, IMemoized
         return this;
     }
 
+    /// <summary>
+    /// Configures row action buttons that appear when hovering over a row.
+    /// </summary>
+    /// <param name="actions">Array of row actions to display.</param>
+    /// <returns>The DataTableBuilder instance for method chaining.</returns>
+    /// <remarks>
+    /// <para>Row actions appear as small icon buttons on the right side of each row when hovering.</para>
+    /// <para>Each action can have a custom icon and event name that will be handled by OnRowAction.</para>
+    /// </remarks>
+    public DataTableBuilder<TModel> RowActions(params RowAction[] actions)
+    {
+        _rowActions = actions;
+        return this;
+    }
+
+    /// <summary>
+    /// Sets the event handler called when a row action button is clicked.
+    /// </summary>
+    /// <param name="handler">Event handler to invoke when a row action is clicked.</param>
+    /// <returns>The DataTableBuilder instance for method chaining.</returns>
+    /// <remarks>
+    /// <para>The event args include the action ID, event name, row index, and full row data.</para>
+    /// <para>Use a switch on EventName to handle different actions (e.g., "OnEdit", "OnDelete", "OnView").</para>
+    /// </remarks>
+    public DataTableBuilder<TModel> OnRowAction(Func<Event<DataTable, RowActionClickEventArgs>, ValueTask> handler)
+    {
+        _onRowAction = handler;
+        return this;
+    }
+
     public override object? Build()
     {
         var chatClient = this.UseService<IChatClient?>();
@@ -311,7 +343,7 @@ public class DataTableBuilder<TModel> : ViewBase, IMemoized
             configuration = configuration with { EnableCellClickEvents = true };
         }
 
-        return new DataTableView(queryable, width, _height, columns, configuration, _onCellClick, _onCellActivated);
+        return new DataTableView(queryable, width, _height, columns, configuration, _onCellClick, _onCellActivated, _rowActions, _onRowAction);
     }
 
     public object[] GetMemoValues()

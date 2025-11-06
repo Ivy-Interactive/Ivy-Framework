@@ -38,6 +38,10 @@ public class DataTableApp : SampleBase
         // Store selected cell information
         var selectedCell = this.UseState<CellClickEventArgs?>(() => null);
 
+        // Store selected row for row actions
+        var selectedRowIndex = this.UseState<int?>(() => null);
+        var actionName = this.UseState<string?>(() => null);
+
         // Create the employee data once at app level (like Kanban caches its tasks)
         var employees = this.UseState(() =>
         {
@@ -179,54 +183,72 @@ public class DataTableApp : SampleBase
                 config.LoadAllRows = false;                  // Use pagination
                 config.ShowSearch = true;
             })
-            // Event handler for double-click
-            .OnCellActivated(e =>
+            // Configure row action buttons
+            .RowActions(
+                new RowAction { Id = "menu", Icon = "EllipsisVertical", EventName = "OnRowMenu" }
+            )
+            // Handle row action clicks
+            .OnRowAction(e =>
             {
-                selectedCell.Set(e.Value);
+                var args = e.Value;
+                selectedRowIndex.Set(args.RowIndex);
+                actionName.Set(args.EventName);
+                selectedCell.Set((CellClickEventArgs?)null); // Clear cell selection
                 isOpen.Set(true);
                 return ValueTask.CompletedTask;
             });
 
-        // Build Sheet content with cell details
+        // Build Sheet content based on interaction type
         object? sheetContent = null;
-        if (selectedCell.Value != null)
+        string sheetTitle = "Row Details";
+        string sheetDescription = "";
+
+        if (selectedRowIndex.Value != null)
         {
-            var cell = selectedCell.Value;
-            var employee = employees.Value.ElementAtOrDefault(cell.RowIndex);
+            // Row action button was clicked
+            var employee = employees.Value.ElementAtOrDefault(selectedRowIndex.Value.Value);
 
             if (employee != null)
             {
-                sheetContent = new StackLayout([
-                    new Card(
-                        new StackLayout([
-                            $"Row: {cell.RowIndex}",
-                            $"Column: {cell.ColumnName}",
-                            $"Value: {cell.CellValue ?? "(null)"}"
-                        ], gap: 8)
-                    ).Title("Cell Information"),
+                sheetTitle = "Employee Details";
+                sheetDescription = $"Row {selectedRowIndex.Value} information";
 
-                    new Card(
-                        new StackLayout([
-                            $"ID: {employee.Id}",
-                            $"Code: {employee.EmployeeCode}",
-                            $"Name: {employee.Name}",
-                            $"Email: {employee.Email}",
-                            $"Age: {employee.Age}",
-                            $"Salary: {employee.Salary:C}",
-                            $"Performance: {employee.Performance}",
-                            $"Active: {employee.IsActive}",
-                            $"Manager: {employee.IsManager}",
-                            $"Hire Date: {employee.HireDate:d}",
-                            $"Last Review: {employee.LastReview:d}",
-                            $"Notes: {employee.Notes}"
-                        ], gap: 8)
-                    ).Title("Employee Details")
-                ], gap: 16);
+                sheetContent = new Card(
+                    new StackLayout([
+                        $"ID: {employee.Id}",
+                        $"Code: {employee.EmployeeCode}",
+                        $"Name: {employee.Name}",
+                        $"Email: {employee.Email}",
+                        $"Age: {employee.Age}",
+                        $"Salary: {employee.Salary:C}",
+                        $"Performance: {employee.Performance}",
+                        $"Active: {employee.IsActive}",
+                        $"Manager: {employee.IsManager}",
+                        $"Hire Date: {employee.HireDate:d}",
+                        $"Last Review: {employee.LastReview:d}",
+                        $"Department: {employee.Department}",
+                        $"Status: {employee.Status}",
+                        $"Priority: {employee.Priority}",
+                        $"Notes: {employee.Notes}"
+                    ], gap: 8)
+                ).Title("Employee Information");
             }
         }
         else
         {
-            sheetContent = "Double-click any cell in the DataTable to view employee details!";
+            sheetTitle = "Welcome";
+            sheetDescription = "How to interact with the table";
+            sheetContent = new StackLayout([
+                new Card(
+                    new StackLayout([
+                        "• Hover over any row to see action buttons on the right",
+                        "• Click Edit, Delete, or View icons to perform actions",
+                        "• Double-click any cell to view cell details",
+                        "",
+                        "The action buttons demonstrate the new row actions feature!",
+                    ], gap: 8)
+                ).Title("Instructions")
+            ]);
         }
 
         // Layout: DataTable is always rendered, Sheet overlays on top when open
@@ -238,7 +260,7 @@ public class DataTableApp : SampleBase
                 {
                     isOpen.Set(false);
                     return ValueTask.CompletedTask;
-                }, sheetContent!, "Cell Details", "Double-click any cell to view employee information").Width(Size.Fraction(0.4f))
+                }, sheetContent!, sheetTitle, sheetDescription).Width(Size.Fraction(0.4f))
                 : null
         );
     }

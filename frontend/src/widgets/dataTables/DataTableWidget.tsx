@@ -40,6 +40,7 @@ export const DataTable: React.FC<TableProps> = ({
   editable = false,
   width,
   height,
+  rowActions,
 }) => {
   // Apply default configuration values
   const finalConfig = {
@@ -59,7 +60,7 @@ export const DataTable: React.FC<TableProps> = ({
     batchSize: configuration.batchSize,
     loadAllRows: configuration.loadAllRows ?? false,
     showSearch: configuration.showSearch ?? false,
-    enableRowHover: configuration.enableRowHover ?? false,
+    enableRowHover: configuration.enableRowHover ?? true,
     enableCellClickEvents: configuration.enableCellClickEvents ?? false,
   };
 
@@ -98,6 +99,7 @@ export const DataTable: React.FC<TableProps> = ({
           <DataTableEditor
             widgetId={id}
             hasOptions={finalConfig.allowFiltering}
+            rowActions={rowActions}
           />
         </TableLayout>
       </TableProvider>
