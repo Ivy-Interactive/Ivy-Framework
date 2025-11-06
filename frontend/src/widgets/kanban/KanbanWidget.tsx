@@ -225,7 +225,7 @@ export const KanbanWidget: React.FC<KanbanWidgetProps> = ({
                         </CardHeader>
                         <CardContent>
                           <KanbanCardContent>
-                            <p className="text-xs text-muted-foreground">
+                            <p className="text-xs text-muted-foreground whitespace-pre-line">
                               {task.description}
                             </p>
                             {task.assignee && (
