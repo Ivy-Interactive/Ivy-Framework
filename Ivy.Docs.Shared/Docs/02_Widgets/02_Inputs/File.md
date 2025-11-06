@@ -6,9 +6,6 @@ searchHints:
   - drag-drop
   - browse
   - files
-imports:
-  - Ivy.Services
-  - Ivy.Core.Helpers
 ---
 
 # FileInput
@@ -29,11 +26,8 @@ public class BasicFileInputDemo : ViewBase
     public override object? Build()
     {
         var fileState = UseState<FileUpload<byte[]>?>();
-        var upload = this.UseUpload(MemoryStreamUploadHandler.Create(fileState))
-            .Accept(".txt,.pdf,.cs")
-            .MaxFileSize(5 * 1024 * 1024); // 5 MB
-
-        return fileState.ToFileInput(upload).Placeholder("Select a file");
+        var upload = this.UseUpload(MemoryStreamUploadHandler.Create(fileState));
+        return fileState.ToFileInput(upload);
    }
 }
 ```
