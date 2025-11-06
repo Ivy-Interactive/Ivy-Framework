@@ -1,4 +1,6 @@
 name: Frontend Unit Tests
+permissions:
+  contents: read
 on:
   push:
     branches: [ main, master ]
