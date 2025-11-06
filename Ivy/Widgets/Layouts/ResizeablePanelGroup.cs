@@ -61,10 +61,6 @@ public record ResizeablePanel : WidgetBase<ResizeablePanel>
     /// Initializes a new instance of the ResizeablePanel class with the specified default size and content.
     /// The panel will be sized according to the default size setting and can contain any combination of widgets or content elements.
     /// </summary>
-    /// <param name="defaultSize">The default size of the panel as a percentage of the total available space.
-    /// When null, the panel will automatically size itself based on available space and content.
-    /// When specified, the panel will maintain approximately this percentage of the total space.</param>
-    /// <param name="children">Variable number of content elements to display within the resizable panel.</param>
     public ResizeablePanel(int? defaultSize, params object[] children) : base(children)
     {
         DefaultSize = defaultSize;
