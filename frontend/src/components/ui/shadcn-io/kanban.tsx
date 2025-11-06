@@ -9,6 +9,7 @@ import {
 } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
+import { getWidth } from '@/lib/styles';
 
 // Types
 export interface Task {
@@ -138,6 +139,7 @@ interface KanbanColumnProps {
   id: string;
   name?: string;
   color?: string;
+  width?: string;
   children: ReactNode;
   className?: string;
 }
@@ -146,6 +148,7 @@ export function KanbanColumn({
   id,
   name,
   color,
+  width,
   children,
   className,
 }: KanbanColumnProps) {
@@ -194,14 +197,19 @@ export function KanbanColumn({
   // Only show drag-over styling when actively dragging AND hovering over this column
   const showDragOver = isDragOver && draggedCardColumn !== null;
 
+  const widthStyles = width ? getWidth(width) : {};
+  const hasExplicitWidth = width && Object.keys(widthStyles).length > 0;
+
   return (
     <div
       className={cn(
-        'flex-1 bg-background rounded-lg p-4 min-h-0 flex flex-col transition-colors min-w-70',
+        hasExplicitWidth ? 'bg-background' : 'flex-1 bg-background',
+        'rounded-lg p-4 min-h-0 flex flex-col transition-colors min-w-70',
         showDragOver &&
           'bg-accent border-2 border-accent-foreground border-dashed rounded-lg',
         className
       )}
+      style={widthStyles}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}

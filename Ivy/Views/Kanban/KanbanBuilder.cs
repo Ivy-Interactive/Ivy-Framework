@@ -283,6 +283,34 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
         return this;
     }
 
+    /// <summary>Sets the width of columns based on their group key value.</summary>
+    /// <param name="groupKeySelector">Expression that selects the group key field (same as used in ToKanban grouping).</param>
+    /// <param name="width">The width to set for columns matching the group key.</param>
+    /// <remarks>
+    /// This method sets the width for all columns that have the same group key value as the first record.
+    /// For more precise control, use Width(TGroupKey, Size) with specific group key values.
+    /// </remarks>
+    public KanbanBuilder<TModel, TGroupKey> Width(Expression<Func<TModel, TGroupKey>> groupKeySelector, Size width)
+    {
+        // Evaluate the selector on all unique group keys to set widths for all matching columns
+        var compiledSelector = groupKeySelector.Compile();
+        var uniqueKeys = _records.Select(compiledSelector).Distinct();
+        foreach (var key in uniqueKeys)
+        {
+            _columnWidths[key] = width;
+        }
+        return this;
+    }
+
+    /// <summary>Sets the width of a specific column identified by the group key.</summary>
+    /// <param name="groupKey">The group key that identifies the column.</param>
+    /// <param name="width">The width to set for the column.</param>
+    public KanbanBuilder<TModel, TGroupKey> Width(TGroupKey groupKey, Size width)
+    {
+        _columnWidths[groupKey] = width;
+        return this;
+    }
+
     /// <summary>
     /// Builds the complete kanban board with columns and cards.
     /// </summary>
@@ -369,6 +397,12 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
                 var column = new KanbanColumn(cards)
                     .Title(title)
                     .ColumnKey(group!.Key);
+
+                // Apply column width if specified
+                if (_columnWidths.TryGetValue(group!.Key, out var columnWidth))
+                {
+                    column = column.Width(columnWidth);
+                }
 
                 // Attach OnAdd handler if specified
                 if (_onAdd != null)

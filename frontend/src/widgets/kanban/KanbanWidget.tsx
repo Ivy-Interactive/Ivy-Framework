@@ -11,6 +11,7 @@ interface Column {
   color: string;
   order: number;
   widgetId: string;
+  width?: string;
 }
 
 interface TaskWithWidgetId extends Task {
@@ -65,6 +66,7 @@ export const KanbanWidget: React.FC<KanbanWidgetProps> = ({
             order: (columnProps?.order as number) || 999,
             widgetId:
               (columnProps?.id as string) || (columnProps?.columnKey as string),
+            width: columnProps?.width as string | undefined,
           };
           extractedColumns.push(column);
 
@@ -195,6 +197,7 @@ export const KanbanWidget: React.FC<KanbanWidgetProps> = ({
                 id={column.id}
                 name={column.name}
                 color={column.color}
+                width={column.width}
               >
                 <KanbanCards id={column.id}>
                   {(task: Task) => (
