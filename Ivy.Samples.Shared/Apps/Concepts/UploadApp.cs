@@ -12,13 +12,15 @@ public class UploadApp : SampleBase
 {
     protected override object? BuildSample()
     {
-        return Layout.Tabs(
-            new Tab("Single File", new SingleFileUpload()),
-            new Tab("Multiple Files", new MultipleFilesUpload()),
-            new Tab("Dialog", new DialogFileUpload()),
-            new Tab("Form", new FormFileUpload()),
-            new Tab("Validation", new FileUploadValidation())
-        ).Variant(TabsVariant.Content);
+        return Layout.Vertical()
+               | Text.H1("Uploads")
+               | Layout.Tabs(
+                   new Tab("Single File", new SingleFileUpload()),
+                   new Tab("Multiple Files", new MultipleFilesUpload()),
+                   new Tab("Dialog", new DialogFileUpload()),
+                   new Tab("Form", new FormFileUpload()),
+                   new Tab("Validation", new FileUploadValidation())
+               ).Variant(TabsVariant.Content);
     }
 }
 
@@ -31,7 +33,7 @@ public class SingleFileUpload : ViewBase
             .Accept("*/*").MaxFileSize(10 * 1024 * 1024);
 
         return Layout.Vertical()
-               | Text.H1("Single File Upload")
+               | Text.H2("Single File")
                | uploadState.ToFileInput(upload).Placeholder("Choose a file to upload")
                | uploadState.ToDetails()
             ;
@@ -46,7 +48,7 @@ public class MultipleFilesUpload : ViewBase
         var upload = this.UseUpload(MemoryStreamUploadHandler.Create(selectedFiles)).Accept("*/*").MaxFileSize(10 * 1024 * 1024);
 
         var layout = Layout.Vertical()
-                     | Text.H1("Multiple Files Upload")
+                     | Text.H2("Multiple Files")
                      | selectedFiles.ToFileInput(upload).Placeholder("Choose files to upload")
                      | selectedFiles.Value.ToTable()
                          .Width(Size.Full())
@@ -114,7 +116,7 @@ public class DialogFileUpload : ViewBase
             : null;
 
         return Layout.Vertical()
-               | Text.H1("Dialog Upload")
+               | Text.H2("Dialog")
                | openButton
                | (selectedFile.Value != null
                     ? selectedFile.ToDetails()
@@ -146,7 +148,7 @@ public class FormFileUpload : ViewBase
             .Label(x => x.Attachment2, "application/pdf (Optional)");
 
         return Layout.Vertical()
-               | Text.H1("Form with File Upload")
+               | Text.H2("Form")
                | form
                | model.Value.Attachment1?.ToDetails()
                | model.Value.Attachment2?.ToDetails()
@@ -159,10 +161,12 @@ public class FileUploadValidation : ViewBase
     public override object? Build()
     {
         var settings = UseState(new FileUploadValidationSettings());
-        return Layout.Horizontal()
-               | new FileUploadValidationUploader(settings.Value).Key(settings)
-               | new Separator()
-               | settings.ToForm(submitTitle: "Update").WithLayout().Width(120);
+        return Layout.Vertical()
+               | Text.H2("Validation")
+               | Layout.Horizontal()
+                   | new FileUploadValidationUploader(settings.Value).Key(settings)
+                   | new Separator()
+                   | settings.ToForm(submitTitle: "Update").WithLayout().Width(120);
     }
 }
 
@@ -189,7 +193,6 @@ public class FileUploadValidationUploader(FileUploadValidationSettings settings)
             .MaxFiles(settings.MaxFiles);
 
         var layout = Layout.Vertical()
-                     | Text.H1("Upload Validation")
                      | selectedFiles.ToFileInput(upload).Placeholder(settings.Placeholder!)
                      | selectedFiles.Value.ToTable()
                          .Width(Size.Full())
