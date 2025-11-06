@@ -125,7 +125,7 @@ export function KanbanBoard({ children, className }: KanbanBoardProps) {
   return (
     <div
       className={cn(
-        'flex gap-0.5 h-full bg-muted/30 border border-border rounded-lg p-1 min-w-fit',
+        'flex gap-0.5 h-full bg-muted/30 rounded-lg p-1 min-w-fit',
         className
       )}
     >
@@ -215,7 +215,7 @@ export function KanbanColumn({
       onDrop={handleDrop}
     >
       {/* Column Header */}
-      <div className="px-9">
+      <div className="px-3">
         <h3 className="font-semibold text-foreground flex items-center gap-2">
           {color && (
             <div
