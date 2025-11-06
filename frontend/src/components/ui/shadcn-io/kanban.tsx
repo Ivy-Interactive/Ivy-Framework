@@ -125,7 +125,7 @@ export function KanbanBoard({ children, className }: KanbanBoardProps) {
   return (
     <div
       className={cn(
-        'flex gap-2 h-full bg-muted/30 border border-border rounded-lg p-4 min-w-fit',
+        'flex gap-0.5 h-full bg-muted/30 border border-border rounded-lg p-1 min-w-fit',
         className
       )}
     >
@@ -204,7 +204,7 @@ export function KanbanColumn({
     <div
       className={cn(
         hasExplicitWidth ? 'bg-background' : 'flex-1 bg-background',
-        'rounded-lg p-4 min-h-0 flex flex-col transition-colors min-w-70',
+        'rounded-lg px-0 py-4 min-h-0 flex flex-col transition-colors min-w-70',
         showDragOver &&
           'bg-accent border-2 border-accent-foreground border-dashed rounded-lg',
         className
@@ -215,7 +215,7 @@ export function KanbanColumn({
       onDrop={handleDrop}
     >
       {/* Column Header */}
-      <div className="mb-4">
+      <div className="px-9">
         <h3 className="font-semibold text-foreground flex items-center gap-2">
           {color && (
             <div
@@ -243,7 +243,7 @@ export function KanbanCards({ id, children }: KanbanCardsProps) {
 
   return (
     <ScrollArea className="flex-1 min-h-0">
-      <div className="flex flex-col gap-3 p-1">
+      <div className="flex flex-col gap-3 p-3">
         {columnTasks.map(task => (
           <div key={task.id}>{children(task)}</div>
         ))}

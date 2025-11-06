@@ -35,6 +35,7 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
     private object? _empty;
     private Size? _width;
     private Size? _height;
+    private readonly Dictionary<TGroupKey, Size> _columnWidths = new();
 
     /// <summary>
     /// Creates a kanban builder with automatic column grouping based on the selector.
@@ -399,7 +400,7 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
                     .ColumnKey(group!.Key);
 
                 // Apply column width if specified
-                if (_columnWidths.TryGetValue(group!.Key, out var columnWidth))
+                if (group!.Key != null && _columnWidths.TryGetValue(group.Key, out var columnWidth))
                 {
                     column = column.Width(columnWidth);
                 }
