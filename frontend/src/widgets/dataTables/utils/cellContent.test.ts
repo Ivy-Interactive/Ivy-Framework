@@ -14,6 +14,7 @@ import {
   createNumberCell,
   createBooleanCell,
   createTextCell,
+  createLabelsCell,
   getOrderedColumns,
   getCellContent,
   getContentAlign,
@@ -595,6 +596,131 @@ describe('cellContent utilities', () => {
         true
       );
       expect(rightCell.contentAlign).toBe('right');
+    });
+  });
+
+  describe('createLabelsCell', () => {
+    it('should create a bubble cell from an array of strings', () => {
+      const cell = createLabelsCell(['Tag1', 'Tag2', 'Tag3']);
+      expect(cell.kind).toBe(GridCellKind.Bubble);
+      if (cell.kind === GridCellKind.Bubble) {
+        expect(cell.data).toEqual(['Tag1', 'Tag2', 'Tag3']);
+        expect(cell.allowOverlay).toBe(false);
+      }
+    });
+
+    it('should create a bubble cell from a comma-separated string', () => {
+      const cell = createLabelsCell('Red, Green, Blue');
+      expect(cell.kind).toBe(GridCellKind.Bubble);
+      if (cell.kind === GridCellKind.Bubble) {
+        expect(cell.data).toEqual(['Red', 'Green', 'Blue']);
+      }
+    });
+
+    it('should handle comma-separated string with extra spaces', () => {
+      const cell = createLabelsCell('  Tag1  ,  Tag2  ,  Tag3  ');
+      if (cell.kind === GridCellKind.Bubble) {
+        expect(cell.data).toEqual(['Tag1', 'Tag2', 'Tag3']);
+      }
+    });
+
+    it('should create a bubble cell from a single string value', () => {
+      const cell = createLabelsCell('SingleTag');
+      if (cell.kind === GridCellKind.Bubble) {
+        expect(cell.data).toEqual(['SingleTag']);
+      }
+    });
+
+    it('should handle empty array', () => {
+      const cell = createLabelsCell([]);
+      if (cell.kind === GridCellKind.Bubble) {
+        expect(cell.data).toEqual([]);
+      }
+    });
+
+    it('should handle null and undefined values in array', () => {
+      const cell = createLabelsCell(['Tag1', null, 'Tag2', undefined, 'Tag3']);
+      if (cell.kind === GridCellKind.Bubble) {
+        expect(cell.data).toEqual(['Tag1', 'Tag2', 'Tag3']);
+      }
+    });
+
+    it('should handle null input', () => {
+      const cell = createLabelsCell(null);
+      if (cell.kind === GridCellKind.Bubble) {
+        expect(cell.data).toEqual([]);
+      }
+    });
+
+    it('should handle undefined input', () => {
+      const cell = createLabelsCell(undefined);
+      if (cell.kind === GridCellKind.Bubble) {
+        expect(cell.data).toEqual([]);
+      }
+    });
+
+    it('should convert non-string array values to strings', () => {
+      const cell = createLabelsCell([123, true, 'text']);
+      if (cell.kind === GridCellKind.Bubble) {
+        expect(cell.data).toEqual(['123', 'true', 'text']);
+      }
+    });
+
+    it('should apply alignment when provided', () => {
+      const cell = createLabelsCell(['Tag1', 'Tag2'], Align.Center);
+      expect(cell.contentAlign).toBe('center');
+    });
+
+    it('should filter out empty strings from comma-separated input', () => {
+      const cell = createLabelsCell('Tag1,  ,Tag2,,Tag3,');
+      if (cell.kind === GridCellKind.Bubble) {
+        expect(cell.data).toEqual(['Tag1', 'Tag2', 'Tag3']);
+      }
+    });
+  });
+
+  describe('getCellContent with Labels type', () => {
+    it('should create labels cell for Labels column type with array value', () => {
+      const labelsColumns: DataColumn[] = [
+        { name: 'tags', type: ColType.Labels, width: 200 },
+      ];
+
+      const labelsData: DataRow[] = [
+        { values: [['Important', 'Urgent', 'Review']] },
+      ];
+
+      const cell = getCellContent([0, 0], labelsData, labelsColumns, [], true);
+      expect(cell.kind).toBe(GridCellKind.Bubble);
+      if (cell.kind === GridCellKind.Bubble) {
+        expect(cell.data).toEqual(['Important', 'Urgent', 'Review']);
+      }
+    });
+
+    it('should create labels cell for Labels column type with string value', () => {
+      const labelsColumns: DataColumn[] = [
+        { name: 'categories', type: ColType.Labels, width: 200 },
+      ];
+
+      const labelsData: DataRow[] = [
+        { values: ['Bug, Feature, Documentation'] },
+      ];
+
+      const cell = getCellContent([0, 0], labelsData, labelsColumns, [], true);
+      expect(cell.kind).toBe(GridCellKind.Bubble);
+      if (cell.kind === GridCellKind.Bubble) {
+        expect(cell.data).toEqual(['Bug', 'Feature', 'Documentation']);
+      }
+    });
+
+    it('should respect alignment for Labels column type', () => {
+      const labelsColumns: DataColumn[] = [
+        { name: 'tags', type: ColType.Labels, width: 200, align: Align.Right },
+      ];
+
+      const labelsData: DataRow[] = [{ values: [['Tag1', 'Tag2']] }];
+
+      const cell = getCellContent([0, 0], labelsData, labelsColumns, [], true);
+      expect(cell.contentAlign).toBe('right');
     });
   });
 });

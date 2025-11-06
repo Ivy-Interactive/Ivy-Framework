@@ -11,7 +11,7 @@ import React, {
 import {
   DataColumn,
   DataRow,
-  DataTableConfiguration,
+  DataTableConfig,
   DataTableConnection,
   SortDirection,
 } from './types/types';
@@ -48,7 +48,7 @@ interface TableContextType {
   error: string | null;
   editable: boolean;
   connection: DataTableConnection;
-  config: DataTableConfiguration;
+  config: DataTableConfig;
   activeFilter: Filter | null;
   activeSort: SortOrder[] | null;
   columnOrder: number[];
@@ -71,7 +71,7 @@ interface TableProviderProps {
   children: React.ReactNode;
   columns: DataColumn[];
   connection: DataTableConnection;
-  config: DataTableConfiguration;
+  config: DataTableConfig;
   editable?: boolean;
 }
 

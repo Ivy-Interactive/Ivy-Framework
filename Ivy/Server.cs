@@ -79,7 +79,7 @@ public class Server
         Services.AddSingleton(_args);
     }
 
-    public Server(FuncBuilder viewFactory) : this()
+    public Server(FuncViewBuilder viewFactory) : this()
     {
         AddApp(new AppDescriptor
         {
@@ -276,7 +276,8 @@ public class Server
         };
 
 #if (DEBUG)
-        _ = Task.Run(() =>
+        // Run key listener on a dedicated thread to avoid consuming a ThreadPool worker
+        _ = Task.Factory.StartNew(() =>
         {
             while (!cts.Token.IsCancellationRequested)
             {
@@ -286,7 +287,7 @@ public class Server
                     sessionStore.Dump();
                 }
             }
-        }, cts.Token);
+        }, cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
 
         if (Utils.IsPortInUse(_args.Port))
         {
@@ -334,6 +335,16 @@ public class Server
         }
 
         AppRepository.Reload();
+
+        // Ensure sufficient ThreadPool workers to avoid heartbeat warnings under bursty loads
+        try
+        {
+            ThreadPool.GetMinThreads(out var workerMin, out var ioMin);
+            var target = Math.Max(workerMin, Environment.ProcessorCount * 16);
+            var targetIo = Math.Max(ioMin, Environment.ProcessorCount * 16);
+            ThreadPool.SetMinThreads(target, targetIo);
+        }
+        catch { /* best-effort */ }
 
         var builder = WebApplication.CreateBuilder();
 

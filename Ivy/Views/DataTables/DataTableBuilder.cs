@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.Linq.Expressions;
 using System.Reflection;
 using Ivy.Core;
@@ -14,7 +15,7 @@ public class DataTableBuilder<TModel> : ViewBase
     private Size? _width;
     private Size? _height;
     private readonly Dictionary<string, InternalColumn> _columns;
-    private readonly DataTableConfiguration _configuration = new();
+    private readonly DataTableConfig _configuration = new();
 
     private class InternalColumn
     {
@@ -67,6 +68,11 @@ public class DataTableBuilder<TModel> : ViewBase
         if (underlyingType == typeof(Guid) || underlyingType.IsEnum)
             return Ivy.ColType.Text;
 
+        // Handle string arrays as Labels type
+        if (underlyingType.IsArray && underlyingType.GetElementType() == typeof(string))
+            return Ivy.ColType.Labels;
+
+        // Handle other arrays and collections as Text
         if (underlyingType.IsArray || typeof(System.Collections.IEnumerable).IsAssignableFrom(underlyingType))
             return Ivy.ColType.Text;
 
@@ -79,10 +85,12 @@ public class DataTableBuilder<TModel> : ViewBase
 
         var fields = type
             .GetFields()
+            .Where(f => f.GetCustomAttribute<ScaffoldColumnAttribute>()?.Scaffold != false)
             .Select(e => new { e.Name, Type = e.FieldType, FieldInfo = e, PropertyInfo = (PropertyInfo)null! })
             .Union(
                 type
                     .GetProperties()
+                    .Where(p => p.GetCustomAttribute<ScaffoldColumnAttribute>()?.Scaffold != false)
                     .Select(e => new { e.Name, Type = e.PropertyType, FieldInfo = (FieldInfo)null!, PropertyInfo = e })
             )
             .ToList();
@@ -236,7 +244,7 @@ public class DataTableBuilder<TModel> : ViewBase
         return this;
     }
 
-    public DataTableBuilder<TModel> Config(Action<DataTableConfiguration> config)
+    public DataTableBuilder<TModel> Config(Action<DataTableConfig> config)
     {
         config(_configuration);
         return this;

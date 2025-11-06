@@ -77,6 +77,11 @@ public record LineChart : WidgetBase<LineChart>
     [Prop] public Legend? Legend { get; init; } = null;
 
     /// <summary>
+    /// Gets or sets the toolbox configuration.
+    /// </summary>
+    [Prop] public Toolbox? Toolbox { get; init; } = new Toolbox();
+
+    /// <summary>
     /// Gets or sets the array of X-axis configurations.
     /// </summary>
     [Prop] public XAxis[] XAxis { get; init; } = [];
@@ -147,7 +152,11 @@ public static class LineChartExtensions
     /// <returns>A new LineChart instance with vertical layout.</returns> //todo: not implemented on the frontend
     public static LineChart Vertical(this LineChart chart)
     {
-        return chart with { Layout = Layouts.Vertical };
+        return chart with
+        {
+            Layout = Layouts.Vertical,
+            Toolbox = new Toolbox()
+        };
     }
 
     /// <summary>
@@ -288,6 +297,27 @@ public static class LineChartExtensions
     public static LineChart Legend(this LineChart chart)
     {
         return chart with { Legend = new Legend() };
+    }
+
+    /// <summary>
+    /// Sets the toolbox configuration.
+    /// </summary>
+    /// <param name="chart">The LineChart to configure.</param>
+    /// <param name="toolbox">The Toolbox configuration to use, or null to disable toolbox.</param>
+    /// <returns>A new LineChart instance with the updated toolbox configuration.</returns>
+    public static LineChart Toolbox(this LineChart chart, Toolbox? toolbox)
+    {
+        return chart with { Toolbox = toolbox };
+    }
+
+    /// <summary>
+    /// Enables the toolbox.
+    /// </summary>
+    /// <param name="chart">The LineChart to configure.</param>
+    /// <returns>A new LineChart instance with default toolbox enabled.</returns>
+    public static LineChart Toolbox(this LineChart chart)
+    {
+        return chart with { Toolbox = new Toolbox() };
     }
 
     /// <summary>

@@ -30,11 +30,17 @@ public class Job(string title, Func<Job, IJobScheduler, IProgress<double>, Cance
     public TaskCompletionSource<bool> CompletionSource { get; } = new();
     public double Progress { get; private set; }
     public bool ContinueOnChildFailure { get; internal set; }
+    public object? Display { get; private set; }
     private readonly List<Job> _pendingChildrenToSchedule = new();
 
     public void AddChildToSchedule(Job child)
     {
         _pendingChildrenToSchedule.Add(child);
+    }
+
+    public void SetDisplay(object? display)
+    {
+        Display = display;
     }
 
     internal async Task ExecuteAsync(IJobScheduler scheduler, CancellationToken token)
@@ -279,6 +285,13 @@ public class JobScheduler(int maxParallelJobs) : IJobScheduler, IObservable<Job>
                             job.CompletionSource.TrySetCanceled();
                             NotifyJobUpdated(job);
                         }
+                        catch (Exception ex)
+                        {
+                            // Catch any other exceptions to prevent unobserved task exceptions
+                            // The exception is already stored in job.CompletionSource by ExecuteAsync
+                            // This catch block ensures the Task itself doesn't have unobserved exceptions
+                            System.Diagnostics.Debug.WriteLine($"Job '{job.Title}' failed with exception: {ex.Message}");
+                        }
                         finally
                         {
                             if (isRoot)
@@ -359,6 +372,13 @@ public class JobScheduler(int maxParallelJobs) : IJobScheduler, IObservable<Job>
                 job.State = job.State == JobState.Waiting ? JobState.Cancelled : JobState.Failed;
                 job.CompletionSource.TrySetCanceled();
                 NotifyJobUpdated(job);
+            }
+            catch (Exception ex)
+            {
+                // Catch any other exceptions to prevent unobserved task exceptions
+                // The exception is already stored in job.CompletionSource by ExecuteAsync
+                // This catch block ensures the Task itself doesn't have unobserved exceptions
+                System.Diagnostics.Debug.WriteLine($"Job '{job.Title}' failed with exception: {ex.Message}");
             }
         }, token);
     }

@@ -96,49 +96,6 @@ public class RenameView : ViewBase
 }
 ```
 
-### File Selection Prompts
-
-Handle file selection through dialogs with file inputs:
-
-```csharp demo-tabs
-public record UploadRequest
-{
-    public IEnumerable<FileInput> Files { get; set; } = Array.Empty<FileInput>();
-}
-
-public class UploadView : ViewBase
-{
-    public override object? Build()
-    {
-        var client = this.UseService<IClientProvider>();
-        var isOpen = this.UseState(false);
-        var uploadData = this.UseState(new UploadRequest());
-        
-        this.UseEffect(() => {
-            if (!isOpen.Value && uploadData.Value.Files.Any())
-            {
-                // Files would be uploaded here
-                client.Toast($"Selected {uploadData.Value.Files.Count()} file(s)", "Success");
-            }
-        }, [isOpen]);
-        
-        return Layout.Vertical(
-            new Button(
-                "Upload File",
-                onClick: _ => isOpen.Set(true)
-            ),
-            isOpen.Value ? uploadData.ToForm()
-                .Builder(e => e.Files, e => e.ToFileInput().Accept(".pdf,.doc,.docx"))
-                .Label(e => e.Files, "Select Files:")
-                .ToDialog(isOpen, 
-                    title: "Upload Files", 
-                    submitTitle: "Upload"
-                ) : null
-        );
-    }
-}
-```
-
 ### Custom Prompts
 
 Create custom dialogs with multiple inputs:

@@ -1,7 +1,7 @@
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
-public record DataTableConfiguration
+public record DataTableConfig
 {
     public int? FreezeColumns { get; set; } = null;
     public bool AllowSorting { get; set; } = true;

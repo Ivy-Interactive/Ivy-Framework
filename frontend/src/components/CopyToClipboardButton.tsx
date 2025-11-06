@@ -34,7 +34,7 @@ const CopyToClipboardButton: React.FC<CopyToClipboardButtonProps> = ({
         'hover:bg-accent hover:shadow-sm border-0',
         copied
           ? 'bg-primary text-primary-foreground'
-          : 'bg-background text-muted-foreground hover:text-foreground'
+          : 'bg-transparent text-muted-foreground hover:text-foreground'
       )}
     >
       <span className="relative w-4 h-4">

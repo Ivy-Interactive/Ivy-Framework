@@ -3,6 +3,7 @@
     "/messages",
     "/webhook",
     "/auth",
+    "/upload",
     "/assets",
     "/fonts",
     "/_framework",

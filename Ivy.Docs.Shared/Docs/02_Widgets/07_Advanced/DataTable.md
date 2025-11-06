@@ -115,6 +115,7 @@ sampleUsers.ToDataTable()
         config.AllowFiltering = true;
         config.ShowSearch = true;
         config.EnableCellClickEvents = true;
+        config.ShowVerticalBorders = false;
     })
     .Height(Size.Units(100))
 ```
@@ -133,6 +134,7 @@ sampleUsers.ToDataTable()
 - **AllowFiltering** - Enable/disable filtering globally
 - **ShowSearch** - Enable search functionality (accessible via Ctrl/Cmd + F keyboard shortcut)
 - **EnableCellClickEvents** - Enable cell click and activation events. When enabled, you can handle `OnCellClick` (single-click) and `OnCellActivated` (double-click) events on the DataTable widget. Events provide `CellClickEventArgs` with `RowIndex`, `ColumnIndex`, `ColumnName`, and `CellValue`.
+- **ShowVerticalBorders** - Show vertical borders between columns. Set to `false` to hide column borders for a cleaner appearance
 
 ## Performance with Large Datasets
 

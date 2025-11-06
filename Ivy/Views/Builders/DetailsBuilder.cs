@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.Linq.Expressions;
 using System.Reflection;
 using Ivy.Core;
@@ -60,10 +61,12 @@ public class DetailsBuilder<TModel> : ViewBase, IStateless
 
         var fields = type
             .GetFields()
+            .Where(f => f.GetCustomAttribute<ScaffoldColumnAttribute>()?.Scaffold != false)
             .Select(e => new { e.Name, Type = e.FieldType, FieldInfo = e, PropertyInfo = (PropertyInfo)null! })
             .Union(
                 type
                     .GetProperties()
+                    .Where(p => p.GetCustomAttribute<ScaffoldColumnAttribute>()?.Scaffold != false)
                     .Select(e => new { e.Name, Type = e.PropertyType, FieldInfo = (FieldInfo)null!, PropertyInfo = e })
             )
             .ToList();
@@ -157,6 +160,6 @@ public static class DetailsBuilderExtensions
 
     public static DetailsBuilder<TModel> ToDetails<TModel>(this IState<TModel> model)
     {
-        return new DetailsBuilder<TModel>(model.Value);
+        return model.Value.ToDetails();
     }
 }
