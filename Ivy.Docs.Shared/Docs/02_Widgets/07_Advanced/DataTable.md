@@ -45,27 +45,26 @@ sampleUsers.ToDataTable()
     .Header(u => u.Email, "Email Address")
     .Header(u => u.Salary, "Salary")
     .Header(u => u.Status, "Status")
-    .TableHeight(Size.Units(100))
+    .Height(Size.Units(100))
 ```
 
 ## Table Sizing
 
-Control the overall dimensions of the DataTable using `TableWidth()` and `TableHeight()` methods:
+Control the overall dimensions of the DataTable using `Width()` and `Height()` methods:
 
 ```csharp demo-tabs
 sampleUsers.ToDataTable()
     .Header(u => u.Name, "Full Name")
     .Header(u => u.Email, "Email Address")
     .Header(u => u.Salary, "Salary")
-    .TableWidth(Size.Px(800))
-    .TableHeight(Size.Units(100))
+    .Width(Size.Px(800))
+    .Height(Size.Units(100))
 ```
 
 **Table sizing methods:**
 
-- **TableWidth** - Set the overall width of the table using `Size.Px()`, `Size.Units()`, `Size.Fraction()`, etc.
-- **TableHeight** - Set the overall height of the table
-- **Width** (deprecated for table sizing) - Use `TableWidth()` instead to avoid confusion with column width configuration
+- **Width** - Set the overall width of the table using `Size.Px()`, `Size.Units()`, `Size.Fraction()`, etc. For column-specific widths, use `Width(expression, size)`.
+- **Height** - Set the overall height of the table
 
 ## Column Configuration
 
@@ -89,7 +88,7 @@ sampleUsers.ToDataTable()
     .SortDirection(u => u.Salary, SortDirection.Descending)
     .Help(u => u.Name, "Employee full name")
     .Help(u => u.Salary, "Annual salary in USD")
-    .TableHeight(Size.Units(100))
+    .Height(Size.Units(100))
 ```
 
 **Column customization methods:**
@@ -136,7 +135,7 @@ sampleUsers.ToDataTable()
         config.EnableCellClickEvents = true;
         config.ShowVerticalBorders = false;
     })
-    .TableHeight(Size.Units(100))
+    .Height(Size.Units(100))
 ```
 
 **Configuration options:**
@@ -167,7 +166,7 @@ Enumerable.Range(1, 500)
     .Header(x => x.Id, "ID")
     .Header(x => x.Value, "Value")
     .LoadAllRows(true)  // Load all rows at once
-    .TableHeight(Size.Units(100))
+    .Height(Size.Units(100))
 ```
 
 **Performance options:**
