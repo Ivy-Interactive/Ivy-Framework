@@ -264,14 +264,12 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
       ) {
         const url = cellContent.data as string;
 
-        // Handle internal app:// navigation
-        if (url.startsWith('app://')) {
-          // Use window.location.href for internal navigation
-          // The Ivy framework will handle app:// URLs automatically
-          window.location.href = url;
-        } else {
-          // Handle external URLs - open in new tab
+        // External URLs (http/https) open in new tab
+        if (url.startsWith('http://') || url.startsWith('https://')) {
           window.open(url, '_blank', 'noopener,noreferrer');
+        } else {
+          // Internal relative URLs navigate in same tab
+          window.location.href = url;
         }
         return; // Don't proceed with other click handling
       }
