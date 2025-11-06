@@ -219,6 +219,26 @@ export function createTextCell(
 }
 
 /**
+ * Creates a link/URI cell
+ */
+export function createLinkCell(
+  url: string,
+  editable: boolean,
+  align?: Align
+): GridCell {
+  return {
+    kind: GridCellKind.Uri,
+    data: url,
+    displayData: url,
+    allowOverlay: editable,
+    readonly: !editable,
+    contentAlign: align ? getContentAlign(align) : undefined,
+    hoverEffect: true,
+    onClickUri: undefined, // We'll handle this in the DataTableEditor
+  };
+}
+
+/**
  * Gets the ordered columns based on columnOrder array
  */
 export function getOrderedColumns(
@@ -275,6 +295,11 @@ export function getCellContent(
   // Handle explicit icon type from backend metadata
   if (column.type === 'Icon' && typeof cellValue === 'string') {
     return createIconCell(cellValue, align);
+  }
+
+  // Handle explicit link type from backend metadata
+  if (column.type === 'Link' && typeof cellValue === 'string') {
+    return createLinkCell(cellValue, editable, align);
   }
 
   // Handle Date and DateTime types

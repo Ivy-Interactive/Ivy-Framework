@@ -2,6 +2,7 @@ import DataEditor, {
   CompactSelection,
   DataEditorRef,
   GridCell,
+  GridCellKind,
   GridSelection,
   GridMouseEventArgs,
   Item,
@@ -234,12 +235,32 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
   // Get event handler for sending events to backend
   const eventHandler = useEventHandler();
 
-  // Handle cell single-clicks (for backend events only)
+  // Handle cell single-clicks (for backend events and link navigation)
   const handleCellClicked = useCallback(
-    (cell: Item) => {
+    (cell: Item, args: GridMouseEventArgs) => {
+      const cellContent = getCellContent(cell);
+
+      // Handle Ctrl+Click or Cmd+Click on URI cells
+      if (
+        cellContent.kind === GridCellKind.Uri &&
+        (args.ctrlKey || args.metaKey)
+      ) {
+        const url = cellContent.data as string;
+
+        // Handle internal app:// navigation
+        if (url.startsWith('app://')) {
+          // Use window.location.href for internal navigation
+          // The Ivy framework will handle app:// URLs automatically
+          window.location.href = url;
+        } else {
+          // Handle external URLs - open in new tab
+          window.open(url, '_blank', 'noopener,noreferrer');
+        }
+        return; // Don't proceed with other click handling
+      }
+
       if (enableCellClickEvents) {
         // Get actual cell value
-        const cellContent = getCellContent(cell);
         const visibleColumns = columns.filter(c => !c.hidden);
         const column = visibleColumns[cell[0]];
 

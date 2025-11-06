@@ -44,7 +44,8 @@ public enum ColType
     Boolean,
     Date,
     DateTime,
-    Icon
+    Icon,
+    Link
 }
 
 public interface IDataTableColumnRenderer
