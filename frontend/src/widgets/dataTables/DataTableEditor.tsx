@@ -91,9 +91,10 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
       textLight: colors.mutedForeground || (isDark ? '#71717a' : '#9ca3af'),
       // bgIconHeader is the background color for icon areas, should be subtle
       bgIconHeader: colors.muted || (isDark ? '#26262b' : '#f3f4f6'),
-      // accentColor affects icon foreground colors in headers
-      accentColor:
-        colors.primary || colors.accent || (isDark ? '#60a5fa' : '#3b82f6'),
+      // Set accentColor to transparent to remove cell selection border
+      accentColor: 'transparent',
+      // accentLight provides subtle background highlight for selected cells
+      accentLight: colors.accent || (isDark ? '#26262b' : '#f3f4f6'),
       horizontalBorderColor: colors.border || (isDark ? '#404045' : '#d1d5db'),
       linkColor:
         colors.primary || colors.accent || (isDark ? '#3b82f6' : '#2563eb'),
