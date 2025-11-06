@@ -124,7 +124,7 @@ export function KanbanBoard({ children, className }: KanbanBoardProps) {
   return (
     <div
       className={cn(
-        'flex gap-4 h-full bg-muted/30 border border-border rounded-lg p-4 min-w-fit',
+        'flex gap-2 h-full bg-muted/30 border border-border rounded-lg p-4 min-w-fit',
         className
       )}
     >
