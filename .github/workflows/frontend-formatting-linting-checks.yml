@@ -1,4 +1,6 @@
 name: Frontend Code Quality Checks
+permissions:
+  contents: read
 on:
   push:
     branches: [ main, master ]
