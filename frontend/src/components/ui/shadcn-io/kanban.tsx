@@ -123,12 +123,7 @@ interface KanbanBoardProps {
 
 export function KanbanBoard({ children, className }: KanbanBoardProps) {
   return (
-    <div
-      className={cn(
-        'flex gap-0.5 h-full bg-muted/30 rounded-lg p-1 min-w-fit',
-        className
-      )}
-    >
+    <div className={cn('flex gap-4 h-full bg-background min-w-fit', className)}>
       {children}
     </div>
   );
