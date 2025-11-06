@@ -380,6 +380,31 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     ? columnGroupsHook.columns
     : gridColumns;
 
+  // Add drawCell callback to render tooltips for URI cells
+  const drawCell = useCallback(
+    (args: { cell: GridCell; ctx: CanvasRenderingContext2D }) => {
+      const { cell, ctx } = args;
+
+      // Only handle URI cells
+      if (cell.kind !== GridCellKind.Uri) {
+        return false; // Let default rendering happen
+      }
+
+      // Store tooltip info on the canvas element for browser tooltip
+      const canvas = ctx.canvas;
+      if (canvas && cell.data) {
+        const isMac =
+          typeof navigator !== 'undefined' &&
+          /Mac|iPhone|iPod|iPad/i.test(navigator.platform);
+        const modifierKey = isMac ? 'Cmd' : 'Ctrl';
+        canvas.title = `${cell.data}\n${modifierKey}+Click to open`;
+      }
+
+      return false; // Let default URI rendering happen
+    },
+    []
+  );
+
   if (finalColumns.length === 0) {
     return null;
   }
@@ -396,6 +421,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
         rows={visibleRows}
         getCellContent={getCellContent}
         customRenderers={[iconCellRenderer]}
+        drawCell={drawCell}
         headerIcons={headerIcons}
         onColumnResize={allowColumnResizing ? handleColumnResize : undefined}
         onVisibleRegionChanged={handleVisibleRegionChanged}

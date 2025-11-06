@@ -226,12 +226,6 @@ export function createLinkCell(
   editable: boolean,
   align?: Align
 ): GridCell {
-  // Detect if user is on Mac for showing Cmd instead of Ctrl
-  const isMac =
-    typeof navigator !== 'undefined' &&
-    /Mac|iPhone|iPod|iPad/i.test(navigator.platform);
-  const modifierKey = isMac ? 'Cmd' : 'Ctrl';
-
   return {
     kind: GridCellKind.Uri,
     data: url,
@@ -241,13 +235,6 @@ export function createLinkCell(
     contentAlign: align ? getContentAlign(align) : undefined,
     hoverEffect: true,
     onClickUri: undefined, // We'll handle this in the DataTableEditor
-    style: 'normal',
-    themeOverride: {
-      // This adds a native browser title attribute for tooltip
-      cellHorizontalPadding: 8,
-    },
-    // Add tooltip with URL and keyboard shortcut instruction
-    tooltip: `${url}\n${modifierKey}+Click to open`,
   };
 }
 
