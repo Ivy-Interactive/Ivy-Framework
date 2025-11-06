@@ -55,10 +55,6 @@ public record DropDownMenu : WidgetBase<DropDownMenu>
         };
     }
 
-    /// <summary>Constructor for Action-based event handlers.</summary>
-    /// <param name="onSelect">Action-based event handler for menu selection.</param>
-    /// <param name="trigger">Element that triggers the dropdown.</param>
-    /// <param name="items">Menu items defining structure.</param>
     public DropDownMenu(Action<Event<DropDownMenu, object>> onSelect, object trigger, params IEnumerable<MenuItem> items)
         : this(e => { onSelect(e); return ValueTask.CompletedTask; }, trigger, items)
     {
@@ -106,72 +102,61 @@ public static class DropDownMenuExtensions
         return dropDownMenu with { Children = [.. dropDownMenu.Children, new Slot("Header", header)] };
     }
 
-    /// <summary>Sets alignment relative to trigger.</summary>
     public static DropDownMenu Align(this DropDownMenu dropDownMenu, DropDownMenu.AlignOptions align)
     {
         return dropDownMenu with { Align = align };
     }
 
-    /// <summary>Sets alignment offset for positioning.</summary>
     public static DropDownMenu AlignOffset(this DropDownMenu dropDownMenu, int offset)
     {
         return dropDownMenu with { AlignOffset = offset };
     }
 
-    /// <summary>Sets side where dropdown appears relative to trigger.</summary>
     public static DropDownMenu Side(this DropDownMenu dropDownMenu, DropDownMenu.SideOptions side)
     {
         return dropDownMenu with { Side = side };
     }
 
-    /// <summary>Sets dropdown to appear above trigger.</summary>
     [RelatedTo(nameof(DropDownMenu.Side))]
     public static DropDownMenu Top(this DropDownMenu dropDownMenu)
     {
         return dropDownMenu with { Side = DropDownMenu.SideOptions.Top };
     }
 
-    /// <summary>Sets dropdown to appear to the right of trigger.</summary>
     [RelatedTo(nameof(DropDownMenu.Side))]
     public static DropDownMenu Right(this DropDownMenu dropDownMenu)
     {
         return dropDownMenu with { Side = DropDownMenu.SideOptions.Right };
     }
 
-    /// <summary>Sets dropdown to appear below trigger (default).</summary>
     [RelatedTo(nameof(DropDownMenu.Side))]
     public static DropDownMenu Bottom(this DropDownMenu dropDownMenu)
     {
         return dropDownMenu with { Side = DropDownMenu.SideOptions.Bottom };
     }
 
-    /// <summary>Sets dropdown to appear to the left of trigger.</summary>
     [RelatedTo(nameof(DropDownMenu.Side))]
     public static DropDownMenu Left(this DropDownMenu dropDownMenu)
     {
         return dropDownMenu with { Side = DropDownMenu.SideOptions.Left };
     }
 
-    /// <summary>Sets menu items enabling dynamic menu content.</summary>
     public static DropDownMenu Items(this DropDownMenu dropDownMenu, MenuItem[] items)
     {
         return dropDownMenu with { Items = items };
     }
 
-    /// <summary>Sets selection event handler.</summary>
     [OverloadResolutionPriority(1)]
     public static DropDownMenu HandleSelect(this DropDownMenu dropDownMenu, Func<Event<DropDownMenu, object>, ValueTask> onSelect)
     {
         return dropDownMenu with { OnSelect = onSelect };
     }
 
-    /// <summary>Sets Action-based event handler for menu selection.</summary>
     public static DropDownMenu HandleSelect(this DropDownMenu dropDownMenu, Action<Event<DropDownMenu, object>> onSelect)
     {
         return dropDownMenu with { OnSelect = onSelect.ToValueTask() };
     }
 
-    /// <summary>Sets simplified event handler receiving only selected value.</summary>
     public static DropDownMenu HandleSelect(this DropDownMenu dropDownMenu, Action<object> onSelect)
     {
         return dropDownMenu with { OnSelect = @event => { onSelect(@event.Value); return ValueTask.CompletedTask; } };
