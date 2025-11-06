@@ -79,76 +79,39 @@ public record Card : WidgetBase<Card>
 /// <summary>Extension methods for configuring Card widget properties. </summary>
 public static class CardExtensions
 {
-    /// <summary>Sets the title text for the card.</summary>
-    /// <param name="card">The Card to configure.</param>
-    /// <param name="title">The title text to display at the top of the card.</param>
     public static Card Title(this Card card, string title)
     {
         return card with { Title = title };
     }
 
-    /// <summary>Sets the description text for the card.</summary>
-    /// <param name="card">The Card to configure.</param>
-    /// <param name="description">The description text to display below the title.</param>
     public static Card Description(this Card card, string description)
     {
         return card with { Description = description };
     }
 
-    /// <summary>Sets the icon for the card.</summary>
-    /// <param name="card">The Card to configure.</param>
-    /// <param name="icon">The icon to display alongside the title and description.</param>
     public static Card Icon(this Card card, Icons? icon)
     {
         return card with { Icon = icon };
     }
 
-    /// <summary>Sets the border thickness for the card using an integer value.</summary>
-    /// <param name="card">The Card to configure.</param>
-    /// <param name="thickness">The uniform border thickness to apply to all sides.</param>
     public static Card BorderThickness(this Card card, int thickness) => card with { BorderThickness = new(thickness) };
 
-    /// <summary>Sets the border thickness for the card using a Thickness object.</summary>
-    /// <param name="card">The Card to configure.</param>
-    /// <param name="thickness">The Thickness object defining border thickness for each side.</param>
     public static Card BorderThickness(this Card card, Thickness thickness) => card with { BorderThickness = thickness };
 
-    /// <summary>Sets the border radius for the card's corners.</summary>
-    /// <param name="card">The Card to configure.</param>
-    /// <param name="radius">The border radius to apply to the card's corners.</param>
     public static Card BorderRadius(this Card card, BorderRadius radius) => card with { BorderRadius = radius };
 
-    /// <summary>Sets the visual style of the card's border.</summary>
-    /// <param name="card">The Card to configure.</param>
-    /// <param name="style">The border style to apply to the card.</param>
     public static Card BorderStyle(this Card card, BorderStyle style) => card with { BorderStyle = style };
 
-    /// <summary>Sets the color of the card's border.</summary>
-    /// <param name="card">The Card to configure.</param>
-    /// <param name="color">The color to apply to the card's border.</param>
     public static Card BorderColor(this Card card, Colors color) => card with { BorderColor = color };
 
-    /// <summary>Sets the size variant for the card.</summary>
-    /// <param name="card">The Card to configure.</param>
-    /// <param name="size">The size variant to apply to the card.</param>
     public static Card Size(this Card card, Sizes size) => card with { Size = size };
 
-    /// <summary>Sets the card size to Small.</summary>
-    /// <param name="card">The Card to configure.</param>
     public static Card Small(this Card card) => card with { Size = Sizes.Small };
 
-    /// <summary>Sets the card size to Medium.</summary>
-    /// <param name="card">The Card to configure.</param>
     public static Card Medium(this Card card) => card with { Size = Sizes.Medium };
 
-    /// <summary>Sets the card size to Large.</summary>
-    /// <param name="card">The Card to configure.</param>
     public static Card Large(this Card card) => card with { Size = Sizes.Large };
 
-    /// <summary>Sets the style variant to apply on cursor hover.</summary>
-    /// <param name="card">Card to configure.</param>
-    /// <param name="variant">Style variants to apply on cursor hover.</param>
-    /// <returns>New Card instance with updated hover variant.</returns>
     public static Card Hover(this Card card, CardHoverVariant variant)
     {
         return card with { HoverVariant = variant };
@@ -159,10 +122,6 @@ public static class CardExtensions
         return card.HoverVariant == CardHoverVariant.None ? CardHoverVariant.PointerAndTranslate : card.HoverVariant;
     }
 
-    /// <summary>Sets the click event handler for the card.</summary>
-    /// <param name="card">The Card to configure.</param>
-    /// <param name="onClick">Event handler to call when clicked.</param>
-    /// <returns>New Card instance with updated click handler.</returns>
     public static Card HandleClick(this Card card, Func<Event<Card>, ValueTask> onClick)
     {
         return card with
@@ -181,10 +140,6 @@ public static class CardExtensions
         };
     }
 
-    /// <summary>Sets a simple click event handler for the card.</summary>
-    /// <param name="card">The Card to configure.</param>
-    /// <param name="onClick">Simple action to perform when clicked.</param>
-    /// <returns>New Card instance with updated click handler.</returns>
     public static Card HandleClick(this Card card, Action onClick)
     {
         return card with
