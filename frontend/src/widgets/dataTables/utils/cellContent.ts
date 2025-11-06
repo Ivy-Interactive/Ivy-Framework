@@ -230,8 +230,8 @@ export function createLinkCell(
     kind: GridCellKind.Uri,
     data: url,
     displayData: url,
-    allowOverlay: editable,
-    readonly: !editable,
+    allowOverlay: false, // Disable overlay to prevent fuzzy shadow on click
+    readonly: true, // Links should not be editable in the cell
     contentAlign: align ? getContentAlign(align) : undefined,
     hoverEffect: true,
     onClickUri: undefined, // We'll handle this in the DataTableEditor
