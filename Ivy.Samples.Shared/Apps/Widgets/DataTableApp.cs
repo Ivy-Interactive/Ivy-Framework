@@ -84,8 +84,8 @@ public class DataTableApp : SampleBase
 
         return employees.ToDataTable()
             // Table dimensions (fix for issue #1311)
-            .TableWidth(Size.Units(120))     // Table takes full available width
-            .TableHeight(Size.Units(120)) // Table height set to 120 units (30rem)
+            .Width(Size.Units(120))     // Table width set to 120 units (30rem)
+            .Height(Size.Units(120)) // Table height set to 120 units (30rem)
 
             // Numeric columns
             .Header(e => e.Id, "ID")
