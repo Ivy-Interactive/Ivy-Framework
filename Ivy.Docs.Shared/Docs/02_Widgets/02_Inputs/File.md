@@ -139,6 +139,29 @@ public class MaxFilesDemo : ViewBase
 }
 ```
 
+## Upload Progress
+
+The `FileUpload` record automatically tracks upload progress:
+
+```csharp demo-below
+public class UploadProgressDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var files = UseState(ImmutableArray.Create<FileUpload<byte[]>>());
+        var upload = this.UseUpload(MemoryStreamUploadHandler.Create(files));
+
+        return Layout.Vertical()
+                | files.ToFileInput(upload).Placeholder("Choose files")
+                | files.Value.ToTable()
+                    .Width(Size.Full())
+                    .Builder(e => e.Length, e => e.Func((long x) => Utils.FormatBytes(x)))
+                    .Builder(e => e.Progress, e => e.Func((float x) => x.ToString("P0")))
+                    .Remove(e => e.Id);
+    }
+}
+```
+
 ### Disabled State
 
 Disable the file input:
