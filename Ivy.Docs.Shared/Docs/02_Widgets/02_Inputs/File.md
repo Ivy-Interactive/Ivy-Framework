@@ -176,4 +176,46 @@ public class FileInputDisabledDemo : ViewBase
 }
 ```
 
+## MemoryStreamUploadHandler
+
+`MemoryStreamUploadHandler` automatically manages file uploads by reading the file stream into memory and updating your state. It handles progress tracking, cancellation, and error states automatically.
+
+### Configuration Options
+
+`MemoryStreamUploadHandler.Create()` supports optional configuration parameters:
+
+```csharp
+// Default configuration (binary file)
+var upload = this.UseUpload(MemoryStreamUploadHandler.Create(fileState));
+
+// Text file with encoding (encoding parameter only available for FileUpload<string>)
+var textState = UseState<FileUpload<string>?>();
+var upload = this.UseUpload(MemoryStreamUploadHandler.Create(textState, System.Text.Encoding.UTF8));
+
+// Binary file with custom chunk size (default: 8192 bytes)
+// Larger chunks = fewer progress updates but potentially better performance
+var upload = this.UseUpload(MemoryStreamUploadHandler.Create(fileState, chunkSize: 16384));
+
+// Binary file with custom chunk size and progress threshold
+// Progress threshold (default: 0.05 = 5%) - only reports progress when it changes by this amount
+var upload = this.UseUpload(MemoryStreamUploadHandler.Create(
+    fileState, 
+    chunkSize: 16384, 
+    progressThreshold: 0.1f
+));
+
+// Text file with all options
+var textState = UseState<FileUpload<string>?>();
+var upload = this.UseUpload(MemoryStreamUploadHandler.Create(
+    textState, 
+    encoding: System.Text.Encoding.UTF8,
+    chunkSize: 16384,
+    progressThreshold: 0.1f
+));
+```
+
+<Callout Type="tip">
+`MemoryStreamUploadHandler` automatically detects the state type and configures itself accordingly. For binary files, use `FileUpload&lt;byte[]&gt;`. For text files, use `FileUpload&lt;string&gt;` and optionally specify the encoding (defaults to UTF-8).
+</Callout>
+
 <WidgetDocs Type="Ivy.FileInput" ExtensionTypes="Ivy.FileInputExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Inputs/FileInput.cs"/>
