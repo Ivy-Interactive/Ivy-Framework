@@ -43,10 +43,26 @@ public record DataTable : WidgetBase<DataTable>
 
     [Prop] public DataTableConfiguration Configuration { get; set; }
 
-    /// <summary>Event handler called when a cell is clicked (single-click).</summary>
+    /// <summary>
+    /// Event handler called when a cell is clicked (single-click).
+    /// Use this for quick actions like showing previews, navigation, or selection.
+    /// </summary>
+    /// <remarks>
+    /// <para><strong>Best Practice:</strong> Avoid using both OnCellClick and OnCellActivated simultaneously as this can create UX conflicts.</para>
+    /// <para><strong>When to use:</strong> Quick actions, navigation, showing details in a side panel, row selection.</para>
+    /// <para><strong>Note:</strong> OnCellClick fires before OnCellActivated on double-click, which may cause unexpected behavior.</para>
+    /// </remarks>
     [Event] public Func<Event<DataTable, CellClickEventArgs>, ValueTask>? OnCellClick { get; set; }
 
-    /// <summary>Event handler called when a cell is activated (double-clicked for editing).</summary>
+    /// <summary>
+    /// Event handler called when a cell is activated (double-clicked).
+    /// Use this for deliberate actions like opening edit dialogs or drilling into details.
+    /// </summary>
+    /// <remarks>
+    /// <para><strong>Best Practice:</strong> Avoid using both OnCellClick and OnCellActivated simultaneously as this can create UX conflicts.</para>
+    /// <para><strong>When to use:</strong> Opening edit dialogs/sheets, entering edit mode, drilling down into details.</para>
+    /// <para><strong>Mobile Note:</strong> Double-click is awkward on touch devices. Consider mobile users when choosing this event.</para>
+    /// </remarks>
     [Event] public Func<Event<DataTable, CellClickEventArgs>, ValueTask>? OnCellActivated { get; set; }
 
     public static Detail operator |(DataTable widget, object child)

@@ -256,12 +256,14 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
           cellValue = (cellContent as unknown as { data: unknown }).data;
         }
 
-        // Send event to backend with row, column, and value
+        // Send event to backend as a single object matching CellClickEventArgs structure
         eventHandler('OnCellClick', widgetId, [
-          cell[1], // row index
-          cell[0], // column index
-          column?.name || '', // column name
-          cellValue, // cell value
+          {
+            rowIndex: cell[1],
+            columnIndex: cell[0],
+            columnName: column?.name || '',
+            cellValue: cellValue,
+          },
         ]);
       }
       // Do NOT prevent default - let selection happen normally!
@@ -290,12 +292,14 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
           cellValue = (cellContent as unknown as { data: unknown }).data;
         }
 
-        // Send activation event to backend
+        // Send activation event to backend as a single object matching CellClickEventArgs structure
         eventHandler('OnCellActivated', widgetId, [
-          cell[1], // row index
-          cell[0], // column index
-          column?.name || '', // column name
-          cellValue, // cell value
+          {
+            rowIndex: cell[1],
+            columnIndex: cell[0],
+            columnName: column?.name || '',
+            cellValue: cellValue,
+          },
         ]);
       }
     },

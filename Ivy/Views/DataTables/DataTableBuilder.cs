@@ -8,13 +8,15 @@ using Microsoft.Extensions.AI;
 
 namespace Ivy.Views.DataTables;
 
-public class DataTableBuilder<TModel> : ViewBase
+public class DataTableBuilder<TModel> : ViewBase, IMemoized
 {
     private readonly IQueryable<TModel> _queryable;
     private Size? _width;
     private Size? _height;
     private readonly Dictionary<string, InternalColumn> _columns;
     private readonly DataTableConfiguration _configuration = new();
+    private Func<Event<DataTable, CellClickEventArgs>, ValueTask>? _onCellClick;
+    private Func<Event<DataTable, CellClickEventArgs>, ValueTask>? _onCellActivated;
 
     private class InternalColumn
     {
@@ -254,6 +256,38 @@ public class DataTableBuilder<TModel> : ViewBase
         return this;
     }
 
+    /// <summary>
+    /// Sets the event handler called when a cell is clicked (single-click).
+    /// </summary>
+    /// <param name="handler">Event handler to invoke when a cell is clicked.</param>
+    /// <returns>The DataTableBuilder instance for method chaining.</returns>
+    /// <remarks>
+    /// <para><strong>Best Practice:</strong> Choose either OnCellClick OR OnCellActivated, not both.</para>
+    /// <para>Use OnCellClick for quick actions like navigation or showing details.</para>
+    /// <para>Use OnCellActivated (double-click) for deliberate actions like opening edit dialogs.</para>
+    /// </remarks>
+    public DataTableBuilder<TModel> OnCellClick(Func<Event<DataTable, CellClickEventArgs>, ValueTask> handler)
+    {
+        _onCellClick = handler;
+        return this;
+    }
+
+    /// <summary>
+    /// Sets the event handler called when a cell is activated (double-clicked).
+    /// </summary>
+    /// <param name="handler">Event handler to invoke when a cell is activated.</param>
+    /// <returns>The DataTableBuilder instance for method chaining.</returns>
+    /// <remarks>
+    /// <para><strong>Best Practice:</strong> Choose either OnCellClick OR OnCellActivated, not both.</para>
+    /// <para>Use OnCellActivated for deliberate actions like opening edit dialogs or entering edit mode.</para>
+    /// <para><strong>Mobile Note:</strong> Double-click is awkward on touch devices.</para>
+    /// </remarks>
+    public DataTableBuilder<TModel> OnCellActivated(Func<Event<DataTable, CellClickEventArgs>, ValueTask> handler)
+    {
+        _onCellActivated = handler;
+        return this;
+    }
+
     public override object? Build()
     {
         var chatClient = this.UseService<IChatClient?>();
@@ -271,6 +305,18 @@ public class DataTableBuilder<TModel> : ViewBase
             configuration = _configuration with { AllowLlmFiltering = true };
         }
 
-        return new DataTableView(queryable, width, _height, columns, configuration);
+        // Automatically enable cell click events if handlers are provided
+        if (_onCellClick != null || _onCellActivated != null)
+        {
+            configuration = configuration with { EnableCellClickEvents = true };
+        }
+
+        return new DataTableView(queryable, width, _height, columns, configuration, _onCellClick, _onCellActivated);
+    }
+
+    public object[] GetMemoValues()
+    {
+        // Memoize based on configuration - if config hasn't changed, don't rebuild
+        return [(object?)_width!, (object?)_height!, _configuration];
     }
 }
