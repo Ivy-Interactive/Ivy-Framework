@@ -122,7 +122,12 @@ interface KanbanBoardProps {
 
 export function KanbanBoard({ children, className }: KanbanBoardProps) {
   return (
-    <div className={cn('flex gap-4 h-full bg-background min-w-fit', className)}>
+    <div
+      className={cn(
+        'flex gap-4 h-full bg-muted/30 border border-border rounded-lg p-4 min-w-fit',
+        className
+      )}
+    >
       {children}
     </div>
   );
@@ -192,9 +197,9 @@ export function KanbanColumn({
   return (
     <div
       className={cn(
-        'flex-1 bg-background border border-border rounded-lg p-4 min-h-0 flex flex-col transition-colors min-w-70',
+        'flex-1 bg-background rounded-lg p-4 min-h-0 flex flex-col transition-colors min-w-70',
         showDragOver &&
-          'bg-accent border-accent-foreground border-2 border-dashed',
+          'bg-accent border-2 border-accent-foreground border-dashed rounded-lg',
         className
       )}
       onDragOver={handleDragOver}
