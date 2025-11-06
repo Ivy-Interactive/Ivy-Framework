@@ -50,67 +50,46 @@ public record AudioRecorder : WidgetBase<AudioRecorder>
 /// <summary>Extension methods for configuring audio recorders.</summary>
 public static class AudioRecorderExtensions
 {
-    /// <summary>Sets the label text to display when no audio is recording.</summary>
-    /// <param name="widget">The audio recorder to configure.</param>
-    /// <param name="label">The label text.</param>
     public static AudioRecorder Label(this AudioRecorder widget, string label)
     {
         return widget with { Label = label };
     }
 
-    /// <summary>Sets the label text to display when audio is recording.</summary>
-    /// <param name="widget">The audio recorder to configure.</param>
-    /// <param name="label">The label text.</param>
     public static AudioRecorder RecordingLabel(this AudioRecorder widget, string label)
     {
         return widget with { RecordingLabel = label };
     }
 
-    /// <summary>Sets the disabled state of the audio recorder.</summary>
-    /// <param name="widget">The audio recorder to configure.</param>
-    /// <param name="disabled">Whether the recorder should be disabled.</param>
     public static AudioRecorder Disabled(this AudioRecorder widget, bool disabled = true)
     {
         return widget with { Disabled = disabled };
     }
 
-    /// <summary>Sets the mime type used for recorded audio.</summary>
-    /// <param name="widget">The audio recorder to configure.</param>
-    /// <param name="mimeType">Mime type to use (e.g., "audio/webm").</param>
     public static AudioRecorder MimeType(this AudioRecorder widget, string mimeType)
     {
         return widget with { MimeType = mimeType };
     }
 
-    /// <summary>Sets the chunk size, in milliseconds, for continuous chunked uploads.</summary>
-    /// <param name="widget">The audio recorder to configure.</param>
-    /// <param name="chunkInterval">Chunk size to use, in milliseconds. If null, audio will only be uploaded when recording stops.</param>
     public static AudioRecorder ChunkInterval(this AudioRecorder widget, int? chunkInterval)
     {
         return widget with { ChunkInterval = chunkInterval };
     }
 
-    /// <summary>Sets the upload URL for automatic audio file uploads.</summary>
-    /// <param name="widget">The audio recorder to configure.</param>
-    /// <param name="uploadUrl">The upload URL where audio chunks should automatically be uploaded.</param>
     public static AudioRecorder UploadUrl(this AudioRecorder widget, string? uploadUrl)
     {
         return widget with { UploadUrl = uploadUrl };
     }
 
-    /// <summary>Sets the size of the audio recorder.</summary>
     public static AudioRecorder Size(this AudioRecorder widget, Sizes size)
     {
         return widget with { Size = size };
     }
 
-    /// <summary>Sets the audio recorder size to large for prominent display.</summary>
     public static AudioRecorder Large(this AudioRecorder widget)
     {
         return widget.Size(Sizes.Large);
     }
 
-    /// <summary>Sets the audio recorder size to small for compact display.</summary>
     public static AudioRecorder Small(this AudioRecorder widget)
     {
         return widget.Size(Sizes.Small);
