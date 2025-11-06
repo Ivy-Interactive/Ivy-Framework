@@ -265,7 +265,7 @@ public class AsyncSelectListSheet<T>(RefreshToken refreshToken, AsyncSelectQuery
         });
 
         var items = records.Value.Select(option =>
-            new ListItem(title: option.Label, onClick: onItemClicked, tag: option));
+            new ListItem(title: option.Label, onClick: onItemClicked, tag: option)).ToArray();
 
         return Layout.Vertical().Gap(2)
             | filter.ToSearchInput().Placeholder("Search").Width(Size.Grow())
