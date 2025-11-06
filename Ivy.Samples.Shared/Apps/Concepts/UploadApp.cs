@@ -34,6 +34,7 @@ public class SingleFileUpload : ViewBase
 
         return Layout.Vertical()
                | Text.H2("Single File")
+               | Text.P("Upload a single file with progress tracking and file details display.")
                | uploadState.ToFileInput(upload).Placeholder("Choose a file to upload")
                | uploadState.ToDetails()
             ;
@@ -49,6 +50,7 @@ public class MultipleFilesUpload : ViewBase
 
         var layout = Layout.Vertical()
                      | Text.H2("Multiple Files")
+                     | Text.P("Upload multiple files simultaneously with a table showing upload progress for each file.")
                      | selectedFiles.ToFileInput(upload).Placeholder("Choose files to upload")
                      | selectedFiles.Value.ToTable()
                          .Width(Size.Full())
@@ -117,6 +119,7 @@ public class DialogFileUpload : ViewBase
 
         return Layout.Vertical()
                | Text.H2("Dialog")
+               | Text.P("Upload files through a dialog interface, allowing users to select files in a modal window.")
                | openButton
                | (selectedFile.Value != null
                     ? selectedFile.ToDetails()
@@ -149,6 +152,7 @@ public class FormFileUpload : ViewBase
 
         return Layout.Vertical()
                | Text.H2("Form")
+               | Text.P("Integrate file uploads into forms with validation, supporting multiple file fields with different requirements.")
                | form
                | model.Value.Attachment1?.ToDetails()
                | model.Value.Attachment2?.ToDetails()
@@ -163,10 +167,10 @@ public class FileUploadValidation : ViewBase
         var settings = UseState(new FileUploadValidationSettings());
         return Layout.Vertical()
                | Text.H2("Validation")
-               | Layout.Horizontal()
+               | Text.P("Configure and test file upload validation rules including file size limits, file count limits, and accepted file types.")
+               | (Layout.Horizontal()
                    | new FileUploadValidationUploader(settings.Value).Key(settings)
-                   | new Separator()
-                   | settings.ToForm(submitTitle: "Update").WithLayout().Width(120);
+                   | settings.ToForm(submitTitle: "Update").WithLayout().Width(120));
     }
 }
 
@@ -192,15 +196,13 @@ public class FileUploadValidationUploader(FileUploadValidationSettings settings)
             .MaxFileSize(settings.MaxFileSize)
             .MaxFiles(settings.MaxFiles);
 
-        var layout = Layout.Vertical()
-                     | selectedFiles.ToFileInput(upload).Placeholder(settings.Placeholder!)
-                     | selectedFiles.Value.ToTable()
-                         .Width(Size.Full())
-                         .Builder(e => e.Length, e => e.Func((long x) => Ivy.Utils.FormatBytes(x)))
-                         .Builder(e => e.Progress, e => e.Func((float x) => x.ToString("P0")))
-                         .Remove(e => e.Id);
-
-        return layout;
+        return Layout.Vertical()
+                    | selectedFiles.ToFileInput(upload).Placeholder(settings.Placeholder!)
+                    | selectedFiles.Value.ToTable()
+                        .Width(Size.Full())
+                        .Builder(e => e.Length, e => e.Func((long x) => Ivy.Utils.FormatBytes(x)))
+                        .Builder(e => e.Progress, e => e.Func((float x) => x.ToString("P0")))
+                        .Remove(e => e.Id);
     }
 }
 
