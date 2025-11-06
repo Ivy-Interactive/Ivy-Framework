@@ -9,6 +9,7 @@ export enum ColType {
   Date = 'Date',
   DateTime = 'DateTime',
   Icon = 'Icon',
+  Link = 'Link',
 }
 
 export enum SortDirection {
