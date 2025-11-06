@@ -269,7 +269,7 @@ export function KanbanCard({
   const [isDragging, setIsDragging] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-  const { onCardMove, data, setDraggedCardColumn, onCardClick, onCardDelete } =
+  const { onCardMove, data, setDraggedCardColumn, onCardDelete } =
     useKanbanContext();
 
   const handleDragStart = useCallback(
@@ -325,17 +325,6 @@ export function KanbanCard({
     [id, column, onCardMove, data]
   );
 
-  const handleClick = useCallback(
-    (e: React.MouseEvent) => {
-      // Only trigger click if not dragging
-      if (!isDragging) {
-        e.stopPropagation();
-        onCardClick?.(id);
-      }
-    },
-    [id, onCardClick, isDragging]
-  );
-
   const handleDelete = useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation();
@@ -353,7 +342,6 @@ export function KanbanCard({
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
-      onClick={handleClick}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       className={cn(
