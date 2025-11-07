@@ -11,11 +11,8 @@ namespace Ivy.Middleware;
 /// Middleware that converts path-based URLs to appId query parameters for backward compatibility.
 /// For example: /onboarding/getting-started/chat-tutorial-app -> /?appId=onboarding/getting-started/chat-tutorial-app
 /// </summary>
-public class PathToAppIdMiddleware
+public class PathToAppIdMiddleware(RequestDelegate next, ILogger<PathToAppIdMiddleware> logger)
 {
-    private readonly RequestDelegate _next;
-    private readonly ILogger<PathToAppIdMiddleware> _logger;
-
     private class RoutingConstantData
     {
         [JsonPropertyName("excludedPaths")]
@@ -34,12 +31,6 @@ public class PathToAppIdMiddleware
         RoutingConstants = JsonSerializer.Deserialize<RoutingConstantData>(stream)!;
     }
 
-    public PathToAppIdMiddleware(RequestDelegate next, ILogger<PathToAppIdMiddleware> logger)
-    {
-        _next = next;
-        _logger = logger;
-    }
-
     public async Task InvokeAsync(HttpContext context)
     {
         var path = context.Request.Path.Value?.ToLower() ?? "";
@@ -48,28 +39,28 @@ public class PathToAppIdMiddleware
         // Skip if path is empty or just "/"
         if (string.IsNullOrEmpty(path) || path == "/")
         {
-            await _next(context);
+            await next(context);
             return;
         }
 
         // Skip if path starts with any excluded pattern (must be exact segment match)
         if (RoutingConstants.ExcludedPaths.Any(excluded => path == excluded || path.StartsWith(excluded + "/")))
         {
-            await _next(context);
+            await next(context);
             return;
         }
 
         // Skip if path has a static file extension
         if (RoutingConstants.StaticFileExtensions.Any(ext => path.EndsWith(ext)))
         {
-            await _next(context);
+            await next(context);
             return;
         }
 
         // Skip if already has appId query parameter
         if (context.Request.Query.ContainsKey("appId"))
         {
-            await _next(context);
+            await next(context);
             return;
         }
 
@@ -80,7 +71,7 @@ public class PathToAppIdMiddleware
         // Only convert if the path looks like an app ID (contains at least one segment)
         if (!string.IsNullOrEmpty(appId) && !appId.Contains('.'))
         {
-            _logger.LogDebug("Converting path '{Path}' to appId '{AppId}'", originalPath, appId);
+            logger.LogDebug("Converting path '{Path}' to appId '{AppId}'", originalPath, appId);
 
             // Preserve existing query parameters
             var queryString = context.Request.QueryString.HasValue
@@ -92,7 +83,7 @@ public class PathToAppIdMiddleware
             context.Request.QueryString = new QueryString($"{queryString}appId={System.Web.HttpUtility.UrlEncode(appId)}");
         }
 
-        await _next(context);
+        await next(context);
     }
 }
 

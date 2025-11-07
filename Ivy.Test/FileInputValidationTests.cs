@@ -1,3 +1,4 @@
+using Ivy.Services;
 using Ivy.Widgets.Inputs;
 using Ivy.Core.Hooks;
 
@@ -9,7 +10,7 @@ public class FileInputValidationTests
     public void ValidateFileCount_WithNullMaxFiles_ReturnsSuccess()
     {
         // Arrange
-        var files = new List<FileInput>
+        var files = new List<FileUpload>
         {
             CreateTestFile("test1.txt"),
             CreateTestFile("test2.txt"),
@@ -28,7 +29,7 @@ public class FileInputValidationTests
     public void ValidateFileCount_WithValidCount_ReturnsSuccess()
     {
         // Arrange
-        var files = new List<FileInput>
+        var files = new List<FileUpload>
         {
             CreateTestFile("test1.txt"),
             CreateTestFile("test2.txt")
@@ -46,7 +47,7 @@ public class FileInputValidationTests
     public void ValidateFileCount_WithExactCount_ReturnsSuccess()
     {
         // Arrange
-        var files = new List<FileInput>
+        var files = new List<FileUpload>
         {
             CreateTestFile("test1.txt"),
             CreateTestFile("test2.txt")
@@ -64,7 +65,7 @@ public class FileInputValidationTests
     public void ValidateFileCount_WithTooManyFiles_ReturnsError()
     {
         // Arrange
-        var files = new List<FileInput>
+        var files = new List<FileUpload>
         {
             CreateTestFile("test1.txt"),
             CreateTestFile("test2.txt"),
@@ -83,7 +84,7 @@ public class FileInputValidationTests
     public void ValidateFileCount_WithSingleFileLimit_ReturnsError()
     {
         // Arrange
-        var files = new List<FileInput>
+        var files = new List<FileUpload>
         {
             CreateTestFile("test1.txt"),
             CreateTestFile("test2.txt")
@@ -101,7 +102,7 @@ public class FileInputValidationTests
     public void ValidateFileTypes_WithNullAccept_ReturnsSuccess()
     {
         // Arrange
-        var files = new List<FileInput>
+        var files = new List<FileUpload>
         {
             CreateTestFile("test.txt", "text/plain"),
             CreateTestFile("test.pdf", "application/pdf")
@@ -119,7 +120,7 @@ public class FileInputValidationTests
     public void ValidateFileTypes_WithEmptyAccept_ReturnsSuccess()
     {
         // Arrange
-        var files = new List<FileInput>
+        var files = new List<FileUpload>
         {
             CreateTestFile("test.txt", "text/plain"),
             CreateTestFile("test.pdf", "application/pdf")
@@ -137,7 +138,7 @@ public class FileInputValidationTests
     public void ValidateFileTypes_WithValidExtension_ReturnsSuccess()
     {
         // Arrange
-        var files = new List<FileInput>
+        var files = new List<FileUpload>
         {
             CreateTestFile("test.txt", "text/plain"),
             CreateTestFile("test2.txt", "text/plain")
@@ -155,7 +156,7 @@ public class FileInputValidationTests
     public void ValidateFileTypes_WithValidExtensions_ReturnsSuccess()
     {
         // Arrange
-        var files = new List<FileInput>
+        var files = new List<FileUpload>
         {
             CreateTestFile("test.txt", "text/plain"),
             CreateTestFile("test.pdf", "application/pdf")
@@ -173,7 +174,7 @@ public class FileInputValidationTests
     public void ValidateFileTypes_WithInvalidExtension_ReturnsError()
     {
         // Arrange
-        var files = new List<FileInput>
+        var files = new List<FileUpload>
         {
             CreateTestFile("test.txt", "text/plain"),
             CreateTestFile("test.pdf", "application/pdf")
@@ -191,7 +192,7 @@ public class FileInputValidationTests
     public void ValidateFileTypes_WithMimeTypeWildcard_ReturnsSuccess()
     {
         // Arrange
-        var files = new List<FileInput>
+        var files = new List<FileUpload>
         {
             CreateTestFile("test.jpg", "image/jpeg"),
             CreateTestFile("test.png", "image/png")
@@ -209,7 +210,7 @@ public class FileInputValidationTests
     public void ValidateFileTypes_WithExactMimeType_ReturnsSuccess()
     {
         // Arrange
-        var files = new List<FileInput>
+        var files = new List<FileUpload>
         {
             CreateTestFile("test.txt", "text/plain")
         };
@@ -226,7 +227,7 @@ public class FileInputValidationTests
     public void ValidateFileTypes_WithInvalidMimeType_ReturnsError()
     {
         // Arrange
-        var files = new List<FileInput>
+        var files = new List<FileUpload>
         {
             CreateTestFile("test.txt", "text/plain"),
             CreateTestFile("test.pdf", "application/pdf")
@@ -310,23 +311,16 @@ public class FileInputValidationTests
         Assert.Equal("Invalid file type: testfile. Allowed types: .txt", result.ErrorMessage);
     }
 
-    private static FileInput CreateTestFile(string name, string type = "text/plain")
+    private static FileUpload CreateTestFile(string name, string type = "text/plain")
     {
-        return new FileInput
-        {
-            Name = name,
-            Type = type,
-            Size = 1024,
-            LastModified = DateTime.Now,
-            Content = null
-        };
+        return new FileUpload { FileName = name, ContentType = type, Length = 12345 };
     }
 
     [Fact]
     public void FileInput_ValidateValue_WithNullValue_ReturnsSuccess()
     {
         // Arrange
-        var fileInput = new FileInput<FileInput?>(null, null, "Test");
+        var fileInput = new FileInput<FileUpload?>((FileUpload?)null, "Test");
 
         // Act
         var result = fileInput.ValidateValue(null);
@@ -341,7 +335,7 @@ public class FileInputValidationTests
     {
         // Arrange
         var file = CreateTestFile("test.txt", "text/plain");
-        var fileInput = new FileInput<FileInput?>(null, null, "Test") with { Accept = ".txt" };
+        var fileInput = new FileInput<FileUpload?>((FileUpload?)null, "Test") with { Accept = ".txt" };
 
         // Act
         var result = fileInput.ValidateValue(file);
@@ -356,7 +350,7 @@ public class FileInputValidationTests
     {
         // Arrange
         var file = CreateTestFile("test.pdf", "application/pdf");
-        var fileInput = new FileInput<FileInput?>(null, null, "Test") with { Accept = ".txt" };
+        var fileInput = new FileInput<FileUpload?>((FileUpload?)null, "Test") with { Accept = ".txt" };
 
         // Act
         var result = fileInput.ValidateValue(file);
@@ -370,12 +364,12 @@ public class FileInputValidationTests
     public void FileInput_ValidateValue_WithValidMultipleFiles_ReturnsSuccess()
     {
         // Arrange
-        var files = new List<FileInput>
+        var files = new List<FileUpload>
         {
             CreateTestFile("test1.txt", "text/plain"),
             CreateTestFile("test2.txt", "text/plain")
         };
-        var fileInput = new FileInput<IEnumerable<FileInput>?>(null, null, "Test") with { Accept = ".txt", MaxFiles = 3 };
+        var fileInput = new FileInput<IEnumerable<FileUpload>?>((IEnumerable<FileUpload>?)null, "Test") with { Accept = ".txt", MaxFiles = 3 };
 
         // Act
         var result = fileInput.ValidateValue(files);
@@ -389,13 +383,13 @@ public class FileInputValidationTests
     public void FileInput_ValidateValue_WithTooManyFiles_ReturnsError()
     {
         // Arrange
-        var files = new List<FileInput>
+        var files = new List<FileUpload>
         {
             CreateTestFile("test1.txt", "text/plain"),
             CreateTestFile("test2.txt", "text/plain"),
             CreateTestFile("test3.txt", "text/plain")
         };
-        var fileInput = new FileInput<IEnumerable<FileInput>?>(null, null, "Test") with { Accept = ".txt", MaxFiles = 2 };
+        var fileInput = new FileInput<IEnumerable<FileUpload>?>((IEnumerable<FileUpload>?)null, "Test") with { Accept = ".txt", MaxFiles = 2 };
 
         // Act
         var result = fileInput.ValidateValue(files);
@@ -409,12 +403,12 @@ public class FileInputValidationTests
     public void FileInput_ValidateValue_WithInvalidFileTypes_ReturnsError()
     {
         // Arrange
-        var files = new List<FileInput>
+        var files = new List<FileUpload>
         {
             CreateTestFile("test1.txt", "text/plain"),
             CreateTestFile("test2.pdf", "application/pdf")
         };
-        var fileInput = new FileInput<IEnumerable<FileInput>?>(null, null, "Test") with { Accept = ".txt", MaxFiles = 3 };
+        var fileInput = new FileInput<IEnumerable<FileUpload>?>((IEnumerable<FileUpload>?)null, "Test") with { Accept = ".txt", MaxFiles = 3 };
 
         // Act
         var result = fileInput.ValidateValue(files);
@@ -428,12 +422,12 @@ public class FileInputValidationTests
     public void FileInput_ValidateValue_WithMimeTypeWildcard_ReturnsSuccess()
     {
         // Arrange
-        var files = new List<FileInput>
+        var files = new List<FileUpload>
         {
             CreateTestFile("test1.jpg", "image/jpeg"),
             CreateTestFile("test2.png", "image/png")
         };
-        var fileInput = new FileInput<IEnumerable<FileInput>?>(null, null, "Test") with { Accept = "image/*" };
+        var fileInput = new FileInput<IEnumerable<FileUpload>?>((IEnumerable<FileUpload>?)null, "Test") with { Accept = "image/*" };
 
         // Act
         var result = fileInput.ValidateValue(files);
@@ -447,12 +441,12 @@ public class FileInputValidationTests
     public void FileInput_ValidateValue_WithNoAcceptOrMaxFiles_ReturnsSuccess()
     {
         // Arrange
-        var files = new List<FileInput>
+        var files = new List<FileUpload>
         {
             CreateTestFile("test1.txt", "text/plain"),
             CreateTestFile("test2.pdf", "application/pdf")
         };
-        var fileInput = new FileInput<IEnumerable<FileInput>?>(null, null, "Test");
+        var fileInput = new FileInput<IEnumerable<FileUpload>?>((IEnumerable<FileUpload>?)null, "Test");
 
         // Act
         var result = fileInput.ValidateValue(files);

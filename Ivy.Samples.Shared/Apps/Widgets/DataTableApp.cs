@@ -7,6 +7,7 @@ namespace Ivy.Samples.Apps.Widgets;
 /// <summary>
 /// Comprehensive DataTable test with all column types
 /// Tests the fix for issue #1273 - column type metadata preservation
+/// Tests the fix for issue #1311 - table width and height setting
 /// </summary>
 public record EmployeeRecord(
     int Id,
@@ -24,7 +25,8 @@ public record EmployeeRecord(
     Icons Priority,
     Icons Department,
     string Notes,
-    int? OptionalId
+    int? OptionalId,
+    string[] Skills
 );
 
 [App(icon: Icons.DatabaseZap)]
@@ -42,6 +44,8 @@ public class DataTableApp : SampleBase
         var selectedRowIndex = this.UseState<int?>(() => null);
         var actionName = this.UseState<string?>(() => null);
 
+        var allSkills = new[] { "C#", "JavaScript", "Python", "SQL", "React", "Leadership", "Communication", "Problem Solving", "Team Player", "Agile" };
+
         // Create the employee data once at app level (like Kanban caches its tasks)
         var employees = this.UseState(() =>
         {
@@ -55,28 +59,59 @@ public class DataTableApp : SampleBase
             var firstNames = new[] { "John", "Jane", "Mike", "Sarah", "David", "Emily", "Chris", "Lisa", "Tom", "Anna" };
             var lastNames = new[] { "Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis", "Rodriguez", "Martinez" };
 
-            return Enumerable.Range(1, 200).Select(i => new EmployeeRecord(
-                Id: i,
-                EmployeeCode: $"EMP{i:D4}",
-                Name: $"{firstNames[random.Next(firstNames.Length)]} {lastNames[random.Next(lastNames.Length)]}",
-                Email: $"employee{i}@company.com",
-                Age: random.Next(22, 65),
-                Salary: (decimal)(random.Next(30000, 150000) / 1000 * 1000),
-                Performance: Math.Round(random.NextDouble() * 5, 2),
-                IsActive: random.NextDouble() > 0.2,
-                IsManager: random.NextDouble() > 0.8,
-                HireDate: startDate.AddDays(random.Next(0, 1826)),
-                LastReview: DateTime.Now.AddDays(-random.Next(0, 365)),
-                Status: statuses[random.Next(statuses.Length)],
-                Priority: priorities[random.Next(priorities.Length)],
-                Department: departments[random.Next(departments.Length)],
-                Notes: $"Employee notes for {i}",
-                OptionalId: random.NextDouble() > 0.3 ? random.Next(1, 1000) : null
-            )).ToList();
+            return Enumerable.Range(1, 1000).Select(i =>
+            {
+                var name = $"{firstNames[random.Next(firstNames.Length)]} {lastNames[random.Next(lastNames.Length)]}";
+                var email = $"employee{i}@company.com";
+                var age = random.Next(22, 65);
+                var salary = (decimal)(random.Next(30000, 150000) / 1000 * 1000);
+                var performance = Math.Round(random.NextDouble() * 5, 2);
+                var isActive = random.NextDouble() > 0.2;
+                var isManager = random.NextDouble() > 0.8;
+                var hireDate = startDate.AddDays(random.Next(0, 1826));
+                var lastReview = DateTime.Now.AddDays(-random.Next(0, 365));
+                var status = statuses[random.Next(statuses.Length)];
+                var priority = priorities[random.Next(priorities.Length)];
+                var department = departments[random.Next(departments.Length)];
+                var notes = $"Employee notes for {i}";
+                var optionalId = random.NextDouble() > 0.3 ? random.Next(1, 1000) : null;
+
+                // Generate 2-5 random skills for each employee
+                var skillCount = random.Next(2, 6);
+                var skills = Enumerable.Range(0, skillCount)
+                    .Select(_ => allSkills[random.Next(allSkills.Length)])
+                    .Distinct()
+                    .ToArray();
+
+                return new EmployeeRecord(
+                    Id: i,
+                    EmployeeCode: $"EMP{i:D4}",
+                    Name: name,
+                    Email: email,
+                    Age: age,
+                    Salary: salary,
+                    Performance: performance,
+                    IsActive: isActive,
+                    IsManager: isManager,
+                    HireDate: hireDate,
+                    LastReview: lastReview,
+                    Status: status,
+                    Priority: priority,
+                    Department: department,
+                    Notes: notes,
+                    OptionalId: optionalId,
+                    Skills: skills
+                );
+            }).ToList();
         });
 
         // The DataTable builder will be recreated each time, but use the cached employee data
         var dataTable = employees.Value.AsQueryable().ToDataTable()
+            // Table dimensions (fix for issue #1311)
+            .Width(Size.Units(120))     // Table width set to 120 units (30rem)
+            .Height(Size.Units(120)) // Table height set to 120 units (30rem)
+
+
             // Numeric columns
             .Header(e => e.Id, "ID")
             .Header(e => e.Age, "Age")
@@ -103,9 +138,8 @@ public class DataTableApp : SampleBase
             .Header(e => e.Priority, "Priority")
             .Header(e => e.Department, "Dept")
 
-            // Table dimensions
-            .Width(Size.Full())
-            .Height(Size.Full())
+            // Labels column (issue #1146)
+            .Header(e => e.Skills, "Skills")
 
             // Column widths
             .Width(e => e.Id, Size.Px(40))
@@ -124,6 +158,7 @@ public class DataTableApp : SampleBase
             .Width(e => e.Department, Size.Px(90))
             .Width(e => e.Notes, Size.Px(150))
             .Width(e => e.OptionalId, Size.Px(100))
+            .Width(e => e.Skills, Size.Px(300))
 
             // Alignments
             .Align(e => e.Id, Align.Left)
@@ -141,6 +176,7 @@ public class DataTableApp : SampleBase
             .Align(e => e.Priority, Align.Left)
             .Align(e => e.Department, Align.Left)
             .Align(e => e.OptionalId, Align.Left)
+            .Align(e => e.Skills, Align.Left)
 
             // Groups
             .Group(e => e.Id, "Identity")
@@ -159,6 +195,7 @@ public class DataTableApp : SampleBase
             .Group(e => e.LastReview, "Timeline")
             .Group(e => e.Notes, "Other")
             .Group(e => e.OptionalId, "Other")
+            .Group(e => e.Skills, "Personal")
 
             // Sorting
             .Sortable(e => e.Email, false) // Email not sortable

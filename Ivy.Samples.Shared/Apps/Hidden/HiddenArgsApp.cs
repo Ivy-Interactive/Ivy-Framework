@@ -20,7 +20,7 @@ public class HiddenArgsApp : SampleBase
                 Text.P($"Value: {args.Value}"),
                 new Button("Back to Links").HandleClick(() =>
                 {
-                    navigator.Navigate("app://concepts/links-app");
+                    navigator.Navigate("app://concepts/links");
                 })
             );
         }

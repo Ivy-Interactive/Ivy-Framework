@@ -106,8 +106,8 @@ public class EffectQueue(IExceptionHandler exceptionHandler) : IDisposable
             try
             {
                 var task = effect.Handler();
-                await task;
-                _disposables.Add(task.Result);
+                var disposable = await task;
+                _disposables.Add(disposable);
                 await Task.Yield();
             }
             catch (Exception ex)

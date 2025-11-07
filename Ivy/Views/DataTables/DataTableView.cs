@@ -9,7 +9,7 @@ public class DataTableView(
     Size? width,
     Size? height,
     DataTableColumn[] columns,
-    DataTableConfiguration configuration,
+    DataTableConfig config,
     Func<Event<DataTable, CellClickEventArgs>, ValueTask>? onCellClick = null,
     Func<Event<DataTable, CellClickEventArgs>, ValueTask>? onCellActivated = null,
     RowAction[]? rowActions = null,
@@ -23,7 +23,7 @@ public class DataTableView(
             return null;
         }
 
-        var table = new DataTable(connection, width, height, columns, configuration)
+        var table = new DataTable(connection, width, height, columns, config)
         {
             OnCellClick = onCellClick,
             OnCellActivated = onCellActivated,
@@ -39,6 +39,6 @@ public class DataTableView(
         // Memoize based on queryable and configuration
         // Don't include the queryable itself as it might change reference
         // Only memoize if all inputs are stable
-        return [(object?)width!, (object?)height!, columns, configuration];
+        return [(object?)width!, (object?)height!, columns, config];
     }
 }

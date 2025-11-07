@@ -10,13 +10,13 @@ namespace Ivy.Views;
 /// <param name="context">The current view context providing access to
 /// state management, services, and other view-related functionality.</param>
 /// <returns>The view content object that should be displayed.</returns>
-public delegate object? FuncBuilder(IViewContext context);
+public delegate object? FuncViewBuilder(IViewContext context);
 
 /// <summary>
 /// Represents a function-based view that dynamically creates content
 /// using a view factory function.
 /// </summary>
-public class FuncView(FuncBuilder viewFactory) : ViewBase
+public class FuncView(FuncViewBuilder viewFactory) : ViewBase
 {
     /// <summary>
     /// Builds the view content by invoking the view factory function

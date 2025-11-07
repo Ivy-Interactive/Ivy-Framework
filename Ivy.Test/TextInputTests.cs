@@ -257,7 +257,23 @@ public class TextInputTests
 
         public T Value { get; set; } = value;
 
-        public T Set(T value) => Value = value;
+        public T Set(T value)
+        {
+            Value = value;
+            return Value;
+        }
+
+        public T Set(Func<T, T> setter)
+        {
+            Value = setter(Value);
+            return Value;
+        }
+
+        public T Reset()
+        {
+            return Set(default(T)!);
+        }
+
         public Type GetStateType() => typeof(T);
 
         public IDisposable Subscribe(IObserver<T> observer)

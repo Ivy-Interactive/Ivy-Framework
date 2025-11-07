@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.Linq.Expressions;
 using System.Reflection;
 using Ivy.Core;
@@ -14,7 +15,7 @@ public class DataTableBuilder<TModel> : ViewBase, IMemoized
     private Size? _width;
     private Size? _height;
     private readonly Dictionary<string, InternalColumn> _columns;
-    private readonly DataTableConfiguration _configuration = new();
+    private readonly DataTableConfig _configuration = new();
     private Func<Event<DataTable, CellClickEventArgs>, ValueTask>? _onCellClick;
     private Func<Event<DataTable, CellClickEventArgs>, ValueTask>? _onCellActivated;
     private RowAction[]? _rowActions;
@@ -71,6 +72,11 @@ public class DataTableBuilder<TModel> : ViewBase, IMemoized
         if (underlyingType == typeof(Guid) || underlyingType.IsEnum)
             return Ivy.ColType.Text;
 
+        // Handle string arrays as Labels type
+        if (underlyingType.IsArray && underlyingType.GetElementType() == typeof(string))
+            return Ivy.ColType.Labels;
+
+        // Handle other arrays and collections as Text
         if (underlyingType.IsArray || typeof(System.Collections.IEnumerable).IsAssignableFrom(underlyingType))
             return Ivy.ColType.Text;
 
@@ -83,10 +89,12 @@ public class DataTableBuilder<TModel> : ViewBase, IMemoized
 
         var fields = type
             .GetFields()
+            .Where(f => f.GetCustomAttribute<ScaffoldColumnAttribute>()?.Scaffold != false)
             .Select(e => new { e.Name, Type = e.FieldType, FieldInfo = e, PropertyInfo = (PropertyInfo)null! })
             .Union(
                 type
                     .GetProperties()
+                    .Where(p => p.GetCustomAttribute<ScaffoldColumnAttribute>()?.Scaffold != false)
                     .Select(e => new { e.Name, Type = e.PropertyType, FieldInfo = (FieldInfo)null!, PropertyInfo = e })
             )
             .ToList();
@@ -106,7 +114,7 @@ public class DataTableBuilder<TModel> : ViewBase, IMemoized
                 align = Shared.Align.Center;
             }
 
-            var removed = field.Name.StartsWith("_") && field.Name.Length > 1;
+            var removed = field.Name.StartsWith("_") && field.Name.Length > 1 && char.IsLetter(field.Name[1]);
 
             _columns[field.Name] = new InternalColumn()
             {
@@ -123,12 +131,22 @@ public class DataTableBuilder<TModel> : ViewBase, IMemoized
         }
     }
 
+    /// <summary>
+    /// Sets the overall width of the DataTable. For column-specific widths, use Width(Expression, Size).
+    /// </summary>
+    /// <param name="width">The desired width for the table.</param>
+    /// <returns>The builder for method chaining.</returns>
     public DataTableBuilder<TModel> Width(Size width)
     {
         _width = width;
         return this;
     }
 
+    /// <summary>
+    /// Sets the overall height of the DataTable.
+    /// </summary>
+    /// <param name="height">The desired height for the table.</param>
+    /// <returns>The builder for method chaining.</returns>
     public DataTableBuilder<TModel> Height(Size height)
     {
         _height = height;
@@ -240,7 +258,7 @@ public class DataTableBuilder<TModel> : ViewBase, IMemoized
         return this;
     }
 
-    public DataTableBuilder<TModel> Config(Action<DataTableConfiguration> config)
+    public DataTableBuilder<TModel> Config(Action<DataTableConfig> config)
     {
         config(_configuration);
         return this;

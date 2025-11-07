@@ -43,6 +43,8 @@ public class KanbanApp : SampleBase
                     descriptionSelector: e => e.Description,
                     orderSelector: e => e.Priority)
                 .ColumnOrder(e => GetStatusOrder(e.Status))
+                .Width(Size.Full())
+                .Width(e => e.Status, Size.Fraction(0.33f))
                 .ColumnTitle(status => status switch
                 {
                     "Todo" => "Custom Todo",

@@ -42,34 +42,12 @@ public record ResizeablePanelGroup : WidgetBase<ResizeablePanelGroup>
 /// </summary>
 public static class ResizeablePanelsExtensions
 {
-    /// <summary>
-    /// Sets whether the resize handles between panels are visible and interactive.
-    /// This method allows you to control handle visibility after creation, enabling or disabling the resizing functionality as needed.
-    /// </summary>
-    /// <param name="widget">The ResizeablePanelGroup to configure.</param>
-    /// <param name="value">Whether resize handles should be visible and interactive.</param>
     public static ResizeablePanelGroup ShowHandle(this ResizeablePanelGroup widget, bool value) => widget with { ShowHandle = value };
 
-    /// <summary>
-    /// Sets the orientation direction for arranging panels within the group.
-    /// This method allows you to specify whether panels should be arranged horizontally or vertically, affecting both layout direction and handle orientation.
-    /// </summary>
-    /// <param name="widget">The ResizeablePanelGroup to configure.</param>
-    /// <param name="value">The orientation direction for panel arrangement.</param>
     public static ResizeablePanelGroup Direction(this ResizeablePanelGroup widget, Orientation value) => widget with { Direction = value };
 
-    /// <summary>
-    /// Sets the panel group to horizontal orientation, arranging panels side by side.
-    /// This convenience method creates a horizontal layout with vertical drag handles for resizing panels from left to right.
-    /// </summary>
-    /// <param name="widget">The ResizeablePanelGroup to configure.</param>
     public static ResizeablePanelGroup Horizontal(this ResizeablePanelGroup widget) => widget with { Direction = Orientation.Horizontal };
 
-    /// <summary>
-    /// Sets the panel group to vertical orientation, stacking panels on top of each other.
-    /// This convenience method creates a vertical layout with horizontal drag handles for resizing panels from top to bottom.
-    /// </summary>
-    /// <param name="widget">The ResizeablePanelGroup to configure.</param>
     public static ResizeablePanelGroup Vertical(this ResizeablePanelGroup widget) => widget with { Direction = Orientation.Vertical };
 }
 
@@ -83,10 +61,6 @@ public record ResizeablePanel : WidgetBase<ResizeablePanel>
     /// Initializes a new instance of the ResizeablePanel class with the specified default size and content.
     /// The panel will be sized according to the default size setting and can contain any combination of widgets or content elements.
     /// </summary>
-    /// <param name="defaultSize">The default size of the panel as a percentage of the total available space.
-    /// When null, the panel will automatically size itself based on available space and content.
-    /// When specified, the panel will maintain approximately this percentage of the total space.</param>
-    /// <param name="children">Variable number of content elements to display within the resizable panel.</param>
     public ResizeablePanel(int? defaultSize, params object[] children) : base(children)
     {
         DefaultSize = defaultSize;

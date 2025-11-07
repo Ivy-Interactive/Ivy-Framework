@@ -38,23 +38,25 @@ export const ExpandableWidget: React.FC<ExpandableWidgetProps> = ({
       data-disabled={disabled}
       role="details"
     >
-      <div className="flex justify-between items-center space-x-4">
+      <CollapsibleTrigger
+        disabled={disabled}
+        className="w-full flex justify-between items-center space-x-4 cursor-pointer hover:bg-accent/50 rounded-sm transition-colors data-[disabled=true]:cursor-not-allowed data-[disabled=true]:hover:bg-transparent"
+      >
         <div className="flex-1 ml-2 min-w-0" role="summary">
           {slots?.Header}
         </div>
-        <CollapsibleTrigger asChild disabled={disabled}>
-          <Button
-            variant="ghost"
-            className="p-0 h-9 w-9 shrink-0 hover:bg-accent"
-          >
-            <ChevronRight
-              className={`h-4 w-4 transition-transform duration-200 ease-in-out ${
-                isOpen ? 'rotate-90' : 'rotate-0'
-              }`}
-            />
-          </Button>
-        </CollapsibleTrigger>
-      </div>
+        <Button
+          variant="ghost"
+          className="p-0 h-9 w-9 shrink-0 hover:bg-transparent pointer-events-none"
+          tabIndex={-1}
+        >
+          <ChevronRight
+            className={`h-4 w-4 transition-transform duration-200 ease-in-out ${
+              isOpen ? 'rotate-90' : 'rotate-0'
+            }`}
+          />
+        </Button>
+      </CollapsibleTrigger>
       <CollapsibleContent className="overflow-hidden transition-all data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
         <div className="space-y-4 p-2">{slots?.Content}</div>
       </CollapsibleContent>

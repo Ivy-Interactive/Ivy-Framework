@@ -23,8 +23,6 @@ public interface IAnyOption
 /// <typeparam name="TValue">Type of option's value.</typeparam>
 public class Option<TValue>(string label, TValue value, string? group = null) : IAnyOption
 {
-    /// <summary>Initializes option with automatic label generation from value.</summary>
-    /// <param name="value">Value to use for both option value and automatic label generation.</param>
     public Option(TValue value) : this(value?.ToString() ?? "?", value, null)
     {
     }

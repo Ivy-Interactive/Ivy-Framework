@@ -8,7 +8,6 @@ namespace Ivy;
 public record Image : WidgetBase<Image>
 {
     /// <summary>Initializes image widget. Default size: min-content (natural dimensions).</summary>
-    /// <param name="src">Image URL, path, or data URI.</param>
     public Image(string src)
     {
         Src = src;
