@@ -10,12 +10,12 @@ public class AuthException : Exception
 }
 
 /// <summary>
-/// Exception thrown when authentication is required but no valid token is provided.
+/// Exception thrown when authentication is required but no token is provided or the token is empty.
 /// </summary>
-public class AuthenticationRequiredException : AuthException
+public class MissingAuthTokenException : AuthException
 {
-    public AuthenticationRequiredException() : base("Authentication required.") { }
-    public AuthenticationRequiredException(string message) : base(message) { }
+    public MissingAuthTokenException() : base("Missing auth token") { }
+    public MissingAuthTokenException(string message) : base(message) { }
 }
 
 /// <summary>
@@ -23,7 +23,7 @@ public class AuthenticationRequiredException : AuthException
 /// </summary>
 public class InvalidAuthTokenException : AuthException
 {
-    public InvalidAuthTokenException() : base("Invalid or expired auth token.") { }
+    public InvalidAuthTokenException() : base("Invalid or expired auth token") { }
     public InvalidAuthTokenException(string message) : base(message) { }
 }
 
@@ -32,7 +32,7 @@ public class InvalidAuthTokenException : AuthException
 /// </summary>
 public class AuthProviderNotConfiguredException : AuthException
 {
-    public AuthProviderNotConfiguredException() : base("Auth provider not configured.") { }
+    public AuthProviderNotConfiguredException() : base("Auth provider not configured") { }
     public AuthProviderNotConfiguredException(string message) : base(message) { }
 }
 
@@ -41,7 +41,7 @@ public class AuthProviderNotConfiguredException : AuthException
 /// </summary>
 public class AuthValidationException : AuthException
 {
-    public AuthValidationException() : base("Error validating auth token.") { }
+    public AuthValidationException() : base("Error validating auth token") { }
     public AuthValidationException(string message) : base(message) { }
     public AuthValidationException(string message, Exception innerException) : base(message, innerException) { }
 }

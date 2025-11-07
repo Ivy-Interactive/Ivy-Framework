@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Net.Http.Headers;
 using Microsoft.Extensions.DependencyInjection;
+using Ivy.Core;
+using Ivy.Client;
 
 namespace Ivy.Helpers;
 
@@ -72,7 +74,7 @@ public static class AuthHelper
         {
             await ValidateAuth(serviceProvider, authToken, context.CancellationToken);
         }
-        catch (AuthenticationRequiredException ex)
+        catch (MissingAuthTokenException ex)
         {
             throw new RpcException(new Status(StatusCode.Unauthenticated, ex.Message));
         }
@@ -116,25 +118,30 @@ public static class AuthHelper
             return null;
         }
 
+        var clientProvider = serviceProvider.GetRequiredService<IClientProvider>();
         try
         {
             var authToken = GetAuthToken(controller.HttpContext);
             await ValidateAuth(serviceProvider, authToken, controller.HttpContext.RequestAborted);
         }
-        catch (AuthenticationRequiredException ex)
+        catch (MissingAuthTokenException ex)
         {
+            clientProvider.Toast(ex.Message, "Authentication failed");
             return controller.Unauthorized(ex.Message);
         }
         catch (InvalidAuthTokenException ex)
         {
+            clientProvider.Toast(ex.Message, "Authentication failed");
             return controller.Unauthorized(ex.Message);
         }
         catch (AuthProviderNotConfiguredException ex)
         {
+            clientProvider.Error(ex);
             return controller.StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
         }
         catch (AuthValidationException ex)
         {
+            clientProvider.Error(ex);
             return controller.StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
         }
 
@@ -145,7 +152,7 @@ public static class AuthHelper
     {
         if (authToken == null || string.IsNullOrEmpty(authToken.AccessToken))
         {
-            throw new AuthenticationRequiredException();
+            throw new MissingAuthTokenException();
         }
 
         // Get auth provider and validate token

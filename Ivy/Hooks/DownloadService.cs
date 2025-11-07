@@ -5,22 +5,23 @@ using Ivy.Helpers;
 
 namespace Ivy.Hooks;
 
-public class DownloadController(AppSessionStore sessionStore, Server server, IServiceProvider serviceProvider) : Controller
+public class DownloadController(AppSessionStore sessionStore, Server server) : Controller
 {
     [Route("download/{connectionId}/{downloadId}")]
     public async Task<IActionResult> Download(string connectionId, string downloadId)
     {
-        if (await this.ValidateAuthIfRequired(server, serviceProvider) is { } errorResult)
+        if (!sessionStore.Sessions.TryGetValue(connectionId, out var session))
+        {
+            throw new Exception($"Download 'download/{connectionId}/{downloadId}' not found.");
+        }
+
+        if (await this.ValidateAuthIfRequired(server, session.AppServices) is { } errorResult)
         {
             return errorResult;
         }
 
-        if (sessionStore.Sessions.TryGetValue(connectionId, out var session))
-        {
-            var downloadService = session.AppServices.GetRequiredService<IDownloadService>();
-            return await downloadService.Download(downloadId);
-        }
-        throw new Exception($"Download 'download/{connectionId}/{downloadId}' not found.");
+        var downloadService = session.AppServices.GetRequiredService<IDownloadService>();
+        return await downloadService.Download(downloadId);
     }
 }
 

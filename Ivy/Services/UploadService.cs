@@ -322,31 +322,33 @@ public sealed class MultipleFileSink<T>(IState<ImmutableArray<FileUpload<T>>> st
 
 [ApiController]
 [Route("upload")]
-public class UploadController(AppSessionStore sessionStore, Server server, IServiceProvider serviceProvider) : Controller
+public class UploadController(AppSessionStore sessionStore, Server server) : Controller
 {
     [HttpPost("{connectionId}/{uploadId}")]
     [Consumes("multipart/form-data")]
     public async Task<IActionResult> Upload([FromRoute] string connectionId, [FromRoute] string uploadId, [FromForm] IFormFile file)
     {
-        if (await this.ValidateAuthIfRequired(server, serviceProvider) is { } errorResult)
-        {
-            return errorResult;
-        }
-
         if (string.IsNullOrEmpty(connectionId))
         {
             return BadRequest("connectionId is required.");
         }
+        if (!sessionStore.Sessions.TryGetValue(connectionId, out var session))
+        {
+            return NotFound($"Session for connectionId '{connectionId}' not found.");
+        }
+
+        if (await this.ValidateAuthIfRequired(server, session.AppServices) is { } errorResult)
+        {
+            return errorResult;
+        }
+
         if (string.IsNullOrEmpty(uploadId))
         {
             return BadRequest("uploadId is required.");
         }
-        if (sessionStore.Sessions.TryGetValue(connectionId, out var session))
-        {
-            var uploadService = session.AppServices.GetRequiredService<IUploadService>();
-            return await uploadService.Upload(uploadId, file);
-        }
-        return NotFound($"Session for connectionId '{connectionId}' not found.");
+
+        var uploadService = session.AppServices.GetRequiredService<IUploadService>();
+        return await uploadService.Upload(uploadId, file);
     }
 }
 
