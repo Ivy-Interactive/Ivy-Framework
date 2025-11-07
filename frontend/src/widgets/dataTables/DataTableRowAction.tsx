@@ -57,7 +57,7 @@ export const RowActionButtons: React.FC<RowActionButtonsProps> = ({
       {actions.map(action => (
         <button
           key={action.id}
-          className="flex items-center justify-center p-1 rounded bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 transition-colors cursor-pointer"
+          className="flex items-center justify-center p-1 rounded bg-gray-50 hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 transition-colors cursor-pointer"
           onClick={() => onActionClick(action)}
           aria-label={action.eventName}
           type="button"
@@ -65,7 +65,7 @@ export const RowActionButtons: React.FC<RowActionButtonsProps> = ({
           <Icon
             name={action.icon}
             size={16}
-            className="text-[#606664] dark:text-gray-300"
+            className="text-gray-600 dark:text-gray-300"
           />
         </button>
       ))}
