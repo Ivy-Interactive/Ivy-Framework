@@ -74,7 +74,7 @@ public class DataTableApp : SampleBase
                 var priority = priorities[random.Next(priorities.Length)];
                 var department = departments[random.Next(departments.Length)];
                 var notes = $"Employee notes for {i}";
-                var optionalId = random.NextDouble() > 0.3 ? random.Next(1, 1000) : null;
+                var optionalId = random.NextDouble() > 0.3 ? (int?)random.Next(1, 1000) : null;
 
                 // Generate 2-5 random skills for each employee
                 var skillCount = random.Next(2, 6);
