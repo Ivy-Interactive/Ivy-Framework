@@ -159,6 +159,32 @@ public class CodeInputApp : SampleBase
 
         var dataBinding = CreateStringTypeTests();
 
+        var cardCode = UseState(
+            """
+            public class Example
+            {
+                public void DoWork()
+                {
+                    Console.WriteLine("Code inside Card");
+                }
+            }
+            """);
+
+        // Links with copy functionality using one Code block inside Card
+        var socialMediaLinksContent = """
+            discord.gg: https://discord.gg/62DYrqEX
+            github.com: https://github.com/Ivy-Interactive/Ivy-Framework
+            linkedin.com: https://www.linkedin.com/company/ivy-interactive/posts/?feedView=all
+            discord.gg: https://discord.gg/rVcUVZPG
+            youtube.com: https://www.youtube.com/@IvyInteractive
+            github.com: https://github.com/Ivy-Interactive/Ivy-Framework
+            x.com: https://x.com/ivy_interactive
+            """;
+
+        var socialMediaLinks = new Card(
+            new Code(socialMediaLinksContent, Languages.Text).ShowCopyButton().ShowBorder(false)
+        );
+
         return Layout.Vertical()
                | Text.H2("Sizes")
                | sizeGrid
@@ -169,6 +195,11 @@ public class CodeInputApp : SampleBase
                | thirdGrid
                | Text.H2("Data Binding")
                | dataBinding
+               | Text.H2("CodeInput in Card")
+               | new Card(
+                   cardCode.ToCodeInput().Language(Languages.Csharp).ShowCopyButton().Height(Size.Auto())
+               ).Title("Code Example").Description("Testing copy button visibility with card background")
+               | socialMediaLinks
                ;
     }
 

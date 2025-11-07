@@ -70,6 +70,16 @@ public record MenuItem(
             _onSelect = value;
         }
     }
+
+    public static MenuItem operator |(MenuItem parent, MenuItem child)
+    {
+        return parent with
+        {
+            Children = [.. parent.Children ?? [], child]
+        };
+    }
+
+
 }
 
 /// <summary>Extension methods for MenuItem manipulation and fluent configuration.</summary>

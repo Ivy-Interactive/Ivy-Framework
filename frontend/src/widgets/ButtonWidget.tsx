@@ -115,6 +115,9 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
   const hasChildren = !!children;
   const hasUrl = !!(effectiveUrl && !disabled);
 
+  // Check if URL is a download link (starts with /download/)
+  const isDownloadUrl = effectiveUrl?.startsWith('/download/') ?? false;
+
   const buttonContent = (
     <>
       {!hasChildren && (
@@ -177,8 +180,9 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
       {hasUrl ? (
         <a
           href={getUrl(effectiveUrl!)}
-          target="_blank"
-          rel="noopener noreferrer"
+          {...(isDownloadUrl
+            ? {}
+            : { target: '_blank', rel: 'noopener noreferrer' })}
         >
           {buttonContent}
         </a>

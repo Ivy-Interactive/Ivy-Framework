@@ -242,7 +242,7 @@ public class HiddenArgsApp : SampleBase
                 Text.P($"Value: {args.Value}"),
                 new Button("Back").HandleClick(() => 
                 {
-                    navigator.Navigate("app://concepts/links-app");
+                    navigator.Navigate("app://concepts/links");
                 })
             );
         }
@@ -256,11 +256,11 @@ public class HiddenArgsApp : SampleBase
 
 ```csharp
 // Navigate using app URI scheme with arguments
-navigator.Navigate("app://hidden/hidden-args-app", 
+navigator.Navigate("app://hidden/hidden-args", 
     new HiddenArgsAppArgs("John", 42));
 
 // Navigate back using URI
-navigator.Navigate("app://concepts/links-app");
+navigator.Navigate("app://concepts/links");
 ```
 
 The `isVisible: false` attribute hides apps from navigation menus while keeping them accessible via URI. Perfect for admin panels, developer tools, or role-based features.

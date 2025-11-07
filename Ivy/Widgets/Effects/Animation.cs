@@ -195,111 +195,51 @@ public static class AnimationExtensions
         return new Animation(animation).Content(widget);
     }
 
-    /// <summary>
-    /// Sets the duration of the animation.
-    /// </summary>
-    /// <param name="animation">The animation to configure.</param>
-    /// <param name="duration">The duration in seconds.</param>
-    /// <returns>The animation with the specified duration.</returns>
     public static Animation Duration(this Animation animation, double duration)
     {
         return animation with { Duration = duration };
     }
 
-    /// <summary>
-    /// Sets the delay before the animation starts.
-    /// </summary>
-    /// <param name="animation">The animation to configure.</param>
-    /// <param name="delay">The delay in seconds.</param>
-    /// <returns>The animation with the specified delay.</returns>
     public static Animation Delay(this Animation animation, double delay)
     {
         return animation with { Delay = delay };
     }
 
-    /// <summary>
-    /// Sets the direction for directional animations.
-    /// </summary>
-    /// <param name="animation">The animation to configure.</param>
-    /// <param name="direction">The direction of movement.</param>
-    /// <returns>The animation with the specified direction.</returns>
     public static Animation Direction(this Animation animation, AnimationDirection direction)
     {
         return animation with { Direction = direction };
     }
 
-    /// <summary>
-    /// Sets the distance for movement-based animations.
-    /// </summary>
-    /// <param name="animation">The animation to configure.</param>
-    /// <param name="distance">The distance in pixels.</param>
-    /// <returns>The animation with the specified distance.</returns>
     public static Animation Distance(this Animation animation, double distance)
     {
         return animation with { Distance = distance };
     }
 
-    /// <summary>
-    /// Sets the easing function for the animation.
-    /// </summary>
-    /// <param name="animation">The animation to configure.</param>
-    /// <param name="easing">The easing function to apply.</param>
-    /// <returns>The animation with the specified easing.</returns>
     public static Animation Easing(this Animation animation, AnimationEasing easing)
     {
         return animation with { Easing = easing };
     }
 
-    /// <summary>
-    /// Sets the number of times the animation should repeat.
-    /// </summary>
-    /// <param name="animation">The animation to configure.</param>
-    /// <param name="repeat">The number of repetitions, or null for no repetition.</param>
-    /// <returns>The animation with the specified repeat count.</returns>
     public static Animation Repeat(this Animation animation, int? repeat)
     {
         return animation with { Repeat = repeat };
     }
 
-    /// <summary>
-    /// Sets the delay between animation repetitions.
-    /// </summary>
-    /// <param name="animation">The animation to configure.</param>
-    /// <param name="repeatDelay">The delay in seconds between repeats.</param>
-    /// <returns>The animation with the specified repeat delay.</returns>
     public static Animation RepeatDelay(this Animation animation, double repeatDelay)
     {
         return animation with { RepeatDelay = repeatDelay };
     }
 
-    /// <summary>
-    /// Sets the intensity or magnitude of the animation effect.
-    /// </summary>
-    /// <param name="animation">The animation to configure.</param>
-    /// <param name="intensity">The intensity multiplier (1.0 is normal intensity).</param>
-    /// <returns>The animation with the specified intensity.</returns>
     public static Animation Intensity(this Animation animation, double intensity)
     {
         return animation with { Intensity = intensity };
     }
 
-    /// <summary>
-    /// Sets when the animation should be triggered.
-    /// </summary>
-    /// <param name="animation">The animation to configure.</param>
-    /// <param name="trigger">The trigger condition for the animation.</param>
-    /// <returns>The animation with the specified trigger.</returns>
     public static Animation Trigger(this Animation animation, AnimationTrigger trigger)
     {
         return animation with { Trigger = trigger };
     }
 
-    /// <summary>
-    /// Sets the content to be animated.
-    /// </summary>
-    /// <param name="animation">The animation to configure.</param>
-    /// <param name="child">The widget or content to animate.</param>
-    /// <returns>The animation with the specified content.</returns>
     public static Animation Content(this Animation animation, object child)
     {
         return animation with { Children = [child] };

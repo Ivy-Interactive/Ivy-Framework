@@ -7,47 +7,22 @@ import {
   MarkLine,
   ReferenceDot,
   ToolTipProps,
+  ToolboxFeatures,
+  ToolboxProps,
   XAxisProps,
   YAxisProps,
 } from './chartTypes';
 import { ChartData } from './chartTypes';
+import {
+  generateTextStyle,
+  generateAxisLabelStyle,
+  type ChartThemeColors,
+} from './styles/theme';
 
-export type ColorScheme = 'Default' | 'Rainbow';
-const defaultColors = ['chart-1', 'chart-2', 'chart-3', 'chart-4', 'chart-5'];
-const rainbowColors = [
-  'blue',
-  'cyan',
-  'yellow',
-  'red',
-  'orange',
-  'purple',
-  'lime',
-  'indigo',
-  'rose',
-  'green',
-  'pink',
-  'teal',
-  'amber',
-  'violet',
-  'emerald',
-  'fuchsia',
-  'sky',
-];
-
-export const getColors = (scheme: ColorScheme): string[] => {
-  switch (scheme) {
-    case 'Default':
-      return defaultColors.map(name =>
-        getComputedStyle(document.documentElement)
-          .getPropertyValue(`--${name}`)
-          .trim()
-      );
-    case 'Rainbow':
-      return rainbowColors;
-    default:
-      return [];
-  }
-};
+// Re-export from styles
+export type { ColorScheme } from './styles/colors';
+export { getChartColors as getColors } from './styles/colors';
+export { generateTextStyle, generateAxisLabelStyle, type ChartThemeColors };
 
 export const generateDataProps = (data: Record<string, unknown>[]) => {
   if (data.length === 0) {
@@ -92,12 +67,13 @@ export function generateEChartGrid(
   hasLegend: boolean = false
 ) {
   const defaultGrid = {
-    show: true,
-    left: 2,
-    right: 2,
+    show: false, // Hide grid border to remove the square frame
+    left: '4%',
+    right: '4%',
     top: 30,
     bottom: hasLegend ? 60 : 30, // More space for legend
     containLabel: true,
+    borderWidth: 0, // Ensure no border is drawn
   };
 
   if (!cartesianGrid) return defaultGrid;
@@ -123,6 +99,7 @@ export function generateEChartLegend(
       themeColors?.foreground,
       themeColors?.fontSans
     ),
+    top: 'bottom',
   };
   if (!legend) return defaultLegends;
 
@@ -154,23 +131,7 @@ export const getTransformValueFn = (data: ChartData[]) => {
   return { transform, largeSpread, minValue, maxValue };
 };
 
-export const generateTextStyle = (
-  foreground: string = '#000000',
-  fontSans: string = 'Geist, sans-serif'
-) => ({
-  color: foreground,
-  fontFamily: fontSans,
-  fontSize: 12,
-});
-
-export const generateAxisLabelStyle = (
-  mutedForeground: string = '#666666',
-  fontSans: string = 'Geist, sans-serif'
-) => ({
-  color: mutedForeground,
-  fontFamily: fontSans,
-  fontSize: 11,
-});
+// Text and axis styles are now imported from './styles/theme'
 
 export const generateSeries = (
   data: ChartData[],
@@ -212,6 +173,7 @@ export const generateSeries = (
 };
 
 export const generateXAxis = (
+  chartType: string,
   categories: string[],
   xAxis?: XAxisProps[],
   isVertical?: boolean,
@@ -219,6 +181,7 @@ export const generateXAxis = (
 ) => ({
   position: xAxis?.[0]?.orientation?.toLowerCase() === 'top' ? 'top' : 'bottom',
   type: isVertical ? 'value' : 'category',
+  boundaryGap: chartType === 'bar' ? true : false,
   data: isVertical ? undefined : categories,
   axisLabel: {
     show: true,
@@ -229,6 +192,29 @@ export const generateXAxis = (
       themeColors?.mutedForeground,
       themeColors?.fontSans
     ),
+  },
+  axisLine: {
+    show: true,
+    lineStyle: {
+      type: 'dashed',
+      color: themeColors?.mutedForeground,
+      opacity: 0.1,
+    },
+  },
+  axisTick: {
+    show: true,
+    lineStyle: {
+      color: themeColors?.mutedForeground,
+      opacity: 0.4,
+    },
+  },
+  splitLine: {
+    show: true,
+    lineStyle: {
+      type: 'dashed',
+      color: themeColors?.mutedForeground,
+      opacity: 0.4,
+    },
   },
 });
 
@@ -272,8 +258,31 @@ export const generateYAxis = (
     },
     splitNumber: largeSpread ? 3 : 5,
     min: largeSpread ? safeTransform(minValue) : 0,
-    max: largeSpread ? safeTransform(maxValue) : 'dataMax',
+    ...(largeSpread && { max: safeTransform(maxValue) }),
     position: yAxis?.[0]?.orientation === 'Right' ? 'right' : 'left',
+    axisLine: {
+      show: true,
+      lineStyle: {
+        type: 'dashed',
+        color: themeColors?.mutedForeground,
+        opacity: 0.1,
+      },
+    },
+    axisTick: {
+      show: true,
+      lineStyle: {
+        color: themeColors?.mutedForeground,
+        opacity: 0.4,
+      },
+    },
+    splitLine: {
+      show: true,
+      lineStyle: {
+        type: 'dashed',
+        color: themeColors?.mutedForeground,
+        opacity: 0.4,
+      },
+    },
   };
 };
 
@@ -293,3 +302,61 @@ export const generateTooltip = (
   borderColor: themeColors?.foreground || '#000',
   borderWidth: 1,
 });
+
+export const generateEChartToolbox = (toolbox?: ToolboxProps) => {
+  if (!toolbox || toolbox.enabled === false) {
+    return { show: false };
+  }
+
+  const features: ToolboxFeatures = {};
+
+  if (toolbox.dataView !== false) {
+    features.dataView = {
+      show: true,
+      readOnly: false,
+    };
+  }
+
+  if (toolbox.magicType !== false) {
+    features.magicType = {
+      show: true,
+      type: ['line', 'bar'],
+    };
+  }
+
+  if (toolbox.saveAsImage !== false) {
+    features.saveAsImage = {
+      show: true,
+    };
+  }
+
+  return {
+    show: true,
+    orient:
+      toolbox.orientation?.toLowerCase() === 'vertical'
+        ? 'vertical'
+        : 'horizontal',
+    left:
+      toolbox.align?.toLowerCase() === 'left'
+        ? 'left'
+        : toolbox.align?.toLowerCase() === 'center'
+          ? 'center'
+          : 'right',
+    top:
+      toolbox.verticalAlign?.toLowerCase() === 'top'
+        ? 'top'
+        : toolbox.verticalAlign?.toLowerCase() === 'middle'
+          ? 'middle'
+          : 'bottom',
+    feature: features,
+    emphasis: {
+      iconStyle: {
+        color: null,
+        borderColor: null,
+        textFill: getComputedStyle(document.documentElement)
+          .getPropertyValue('--toolbox')
+          .trim(),
+      },
+    },
+  };
+};

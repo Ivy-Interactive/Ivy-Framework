@@ -11,27 +11,17 @@ interface TextShimmerProps {
   spread?: number;
 }
 
-// Create motion components outside of render
-const MotionP = motion('p');
-const MotionSpan = motion('span');
-const MotionDiv = motion('div');
-const MotionH1 = motion('h1');
-const MotionH2 = motion('h2');
-const MotionH3 = motion('h3');
-const MotionH4 = motion('h4');
-const MotionH5 = motion('h5');
-const MotionH6 = motion('h6');
-
+// Use component properties instead of string factory (avoids deprecation warnings)
 const motionComponents = {
-  p: MotionP,
-  span: MotionSpan,
-  div: MotionDiv,
-  h1: MotionH1,
-  h2: MotionH2,
-  h3: MotionH3,
-  h4: MotionH4,
-  h5: MotionH5,
-  h6: MotionH6,
+  p: motion.p,
+  span: motion.span,
+  div: motion.div,
+  h1: motion.h1,
+  h2: motion.h2,
+  h3: motion.h3,
+  h4: motion.h4,
+  h5: motion.h5,
+  h6: motion.h6,
 } as const;
 
 export function TextShimmer({
@@ -42,7 +32,9 @@ export function TextShimmer({
   spread = 2,
 }: TextShimmerProps) {
   const MotionComponent =
-    motionComponents[Component as keyof typeof motionComponents] || MotionP;
+    (motionComponents as Record<string, typeof motion.div>)[
+      (Component as unknown as string) || 'p'
+    ] ?? motion.p;
 
   const dynamicSpread = useMemo(() => {
     return children.length * spread;
