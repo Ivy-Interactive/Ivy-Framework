@@ -31,7 +31,7 @@ public class AppHub(
     private static bool GetChromeParam(HttpContext httpContext)
     {
         bool chrome = true;
-        if (httpContext!.Request.Query.TryGetValue("chrome", out var chromeParam))
+        if (httpContext.Request.Query.TryGetValue("chrome", out var chromeParam))
         {
             chrome = !chromeParam.ToString().Equals("false", StringComparison.InvariantCultureIgnoreCase);
         }
@@ -129,8 +129,8 @@ public class AppHub(
                 queryableRegistry,
                 server.Args,
                 Context.ConnectionId));
-            appServices.AddSingleton(typeof(IUploadService), new UploadService(Context.ConnectionId));
             appServices.AddSingleton(typeof(IClientProvider), clientProvider);
+            appServices.AddSingleton(typeof(IUploadService), new UploadService(Context.ConnectionId, clientProvider));
 
             if (server.AuthProviderType != null)
             {
@@ -196,11 +196,13 @@ public class AppHub(
 
             var widgetTree = new WidgetTree(app, contentBuilder, serviceProvider);
 
+            var parentId = GetParentId(httpContext);
+
             var appState = new AppSession
             {
                 AppId = appId,
                 MachineId = GetMachineId(httpContext),
-                ParentId = GetParentId(httpContext),
+                ParentId = parentId,
                 AppDescriptor = appDescriptor,
                 App = app,
                 ConnectionId = Context.ConnectionId,
@@ -210,18 +212,51 @@ public class AppHub(
                 LastInteraction = DateTime.UtcNow,
             };
 
-            if (appId != AppIds.Chrome && sessionStore.FindChrome(appState) == null)
+            var connectionAborted = Context.ConnectionAborted;
+            appState.EventQueue = new EventDispatchQueue(connectionAborted);
+
+            if (appId != AppIds.Chrome && parentId == null)
             {
                 var navigateArgs = new NavigateArgs(appId, Chrome: GetChromeParam(httpContext));
                 clientProvider.Redirect(navigateArgs.GetUrl(), replaceHistory: true);
             }
 
-            async void OnWidgetTreeChanged(WidgetTreeChanged[] changes)
+            void OnWidgetTreeChanged(WidgetTreeChanged[] changes)
             {
                 try
                 {
-                    logger.LogDebug($"> Update");
-                    await clientNotifier.NotifyClientAsync(appState.ConnectionId, "Update", changes);
+                    logger.LogDebug("> Update");
+                    appState.PendingUpdate = changes;
+                    if (appState.UpdateScheduled) return;
+                    appState.UpdateScheduled = true;
+
+                    // Use Task.Run instead of EventQueue to prevent UI updates from being blocked by long-running event handlers
+                    _ = Task.Run(async () =>
+                    {
+                        try { await Task.Delay(16, connectionAborted); }
+                        catch
+                        {
+                            // ignored
+                        }
+
+                        try
+                        {
+                            var payload = appState.PendingUpdate;
+                            if (payload != null)
+                            {
+                                clientProvider.Sender.Send("Update", payload);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            logger.LogError(ex, "{ConnectionId}", appState.ConnectionId);
+                        }
+                        finally
+                        {
+                            appState.UpdateScheduled = false;
+                            appState.PendingUpdate = null;
+                        }
+                    });
                 }
                 catch (Exception e)
                 {
@@ -234,7 +269,6 @@ public class AppHub(
             sessionStore.Sessions[Context.ConnectionId] = appState;
 
             var connectionId = Context.ConnectionId;
-            var connectionAborted = Context.ConnectionAborted;
 
             await base.OnConnectedAsync();
 
@@ -245,7 +279,7 @@ public class AppHub(
                 await Clients.Caller.SendAsync("Refresh", new
                 {
                     Widgets = widgetTree.GetWidgets().Serialize()
-                });
+                }, cancellationToken: connectionAborted);
             }
             catch (Exception e)
             {
@@ -254,12 +288,12 @@ public class AppHub(
                 await Clients.Caller.SendAsync("Refresh", new
                 {
                     Widgets = tree.GetWidgets().Serialize()
-                });
+                }, cancellationToken: connectionAborted);
             }
 
             if (server.AuthProviderType != null && appId != AppIds.Auth)
             {
-                _ = Task.Run(() => AuthRefreshLoopAsync(connectionId, connectionAborted));
+                _ = Task.Run(() => AuthRefreshLoopAsync(connectionId, connectionAborted), connectionAborted);
             }
         }
         catch (Exception ex)
@@ -299,6 +333,19 @@ public class AppHub(
             {
                 try
                 {
+                    try
+                    {
+                        var cp = appState.AppServices.GetService<IClientProvider>();
+                        if (cp?.Sender is ClientSender cs)
+                        {
+                            cs.Dispose();
+                        }
+                    }
+                    catch
+                    {
+                        // ignored
+                    }
+
                     appState.Dispose();
                 }
                 catch (Exception ex)
@@ -475,11 +522,8 @@ public class AppHub(
                     await AbandonConnection(resetTokenAndReload: true);
                     return;
                 }
-                else
-                {
-                    logger.LogInformation("AuthRefreshLoop: waiting 30 seconds before retrying for {ConnectionId}", connectionId);
-                    await Task.Delay(TimeSpan.FromSeconds(30), cancellationToken);
-                }
+                logger.LogInformation("AuthRefreshLoop: waiting 30 seconds before retrying for {ConnectionId}", connectionId);
+                await Task.Delay(TimeSpan.FromSeconds(30), cancellationToken);
                 continue;
             }
 
@@ -508,28 +552,34 @@ public class AppHub(
         }
     }
 
-    public void Event(string eventName, string widgetId, JsonArray? args)
+    public Task Event(string eventName, string widgetId, JsonArray? args)
     {
-        logger.LogInformation($"Event: {eventName} {widgetId} {args}");
+        logger.LogDebug($"Event: {eventName} {widgetId} {args}");
         if (!sessionStore.Sessions.TryGetValue(Context.ConnectionId, out var appSession))
         {
             logger.LogWarning($"Event: {eventName} {widgetId} [AppSession Not Found]");
-            return;
+            return Task.CompletedTask;
         }
 
-        try
+        // Enqueue async event handling to avoid tying up ThreadPool workers
+        appSession.EventQueue?.Enqueue(async () =>
         {
-            appSession.LastInteraction = DateTime.UtcNow;
-            if (!appSession.WidgetTree.TriggerEvent(widgetId, eventName, args ?? new JsonArray()))
+            try
             {
-                logger.LogWarning($"Event '{eventName}' for Widget '{widgetId}' not found.");
+                appSession.LastInteraction = DateTime.UtcNow;
+                if (!await appSession.WidgetTree.TriggerEventAsync(widgetId, eventName, args ?? new JsonArray()))
+                {
+                    logger.LogWarning($"Event '{eventName}' for Widget '{widgetId}' not found.");
+                }
             }
-        }
-        catch (Exception e)
-        {
-            var exceptionHandler = appSession.AppServices.GetService<IExceptionHandler>()!;
-            exceptionHandler.HandleException(e);
-        }
+            catch (Exception e)
+            {
+                var exceptionHandler = appSession.AppServices.GetService<IExceptionHandler>()!;
+                exceptionHandler.HandleException(e);
+            }
+        });
+
+        return Task.CompletedTask;
     }
 
     public async Task Navigate(string? appId, HistoryState? state)
@@ -600,22 +650,87 @@ public class AppHub(
     }
 }
 
-public class ClientSender(IClientNotifier clientNotifier, string connectionId) : IClientSender
+public class ClientSender : IClientSender, IDisposable
 {
-    public void Send(string method, object? data)
+    private readonly IClientNotifier _clientNotifier;
+    private readonly string _connectionId;
+    private readonly System.Threading.Channels.Channel<(string method, object? data)> _channel;
+    private readonly CancellationTokenSource _cts = new();
+    private readonly Task _worker;
+
+    public ClientSender(IClientNotifier clientNotifier, string connectionId)
     {
-        // Fire and forget, but handle exceptions to prevent crashes
-        _ = Task.Run(async () =>
+        _clientNotifier = clientNotifier;
+        _connectionId = connectionId;
+        var options = new System.Threading.Channels.BoundedChannelOptions(2048)
+        {
+            SingleReader = true,
+            SingleWriter = false,
+            FullMode = System.Threading.Channels.BoundedChannelFullMode.DropOldest
+        };
+        _channel = System.Threading.Channels.Channel.CreateBounded<(string, object?)>(options);
+
+        _worker = Task.Factory.StartNew(async () =>
         {
             try
             {
-                await clientNotifier.NotifyClientAsync(connectionId, method, data);
+                while (await _channel.Reader.WaitToReadAsync(_cts.Token).ConfigureAwait(false))
+                {
+                    while (_channel.Reader.TryRead(out var msg))
+                    {
+                        try
+                        {
+                            await _clientNotifier.NotifyClientAsync(_connectionId, msg.method, msg.data).ConfigureAwait(false);
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"[ERROR] Failed to send {msg.method} to client {_connectionId}: {ex.Message}");
+                        }
+                    }
+                }
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"[ERROR] Failed to send {method} to client {connectionId}: {ex.Message}");
-            }
-        });
+            catch (OperationCanceledException) { }
+        }, _cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default).Unwrap();
+    }
+
+    public void Send(string method, object? data)
+    {
+        if (!_channel.Writer.TryWrite((method, data)))
+        {
+            _ = _channel.Writer.WriteAsync((method, data), _cts.Token);
+        }
+    }
+
+    public void Dispose()
+    {
+        try
+        {
+            _cts.Cancel();
+        }
+        catch
+        {
+            // ignored
+        }
+
+        try
+        {
+            _channel.Writer.TryComplete();
+        }
+        catch
+        {
+            // ignored
+        }
+
+        try
+        {
+            _worker.Wait(TimeSpan.FromSeconds(2));
+        }
+        catch
+        {
+            // ignored
+        }
+
+        _cts.Dispose();
     }
 }
 

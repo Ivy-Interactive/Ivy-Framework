@@ -7,7 +7,7 @@ public class LinkConverterTests
     {
         var converter = new LinkConverter("01_Onboarding/01_Introduction.md");
         var input = "[Example](02_Installation.md)";
-        var expectedMarkdown = "[Example](app://onboarding/installation-app)";
+        var expectedMarkdown = "[Example](app://onboarding/installation)";
         var expectedTypes = new HashSet<string> { "Onboarding.InstallationApp" };
         var (types, markdown) = converter.Convert(input);
         Assert.Equal(expectedTypes, types);
@@ -15,11 +15,11 @@ public class LinkConverterTests
     }
 
     [Theory]
-    [InlineData("01_Onboarding/01_Introduction.md", "[Intro](./02_Installation.md)", "[Intro](app://onboarding/installation-app)", "Onboarding.InstallationApp")]
+    [InlineData("01_Onboarding/01_Introduction.md", "[Intro](./02_Installation.md)", "[Intro](app://onboarding/installation)", "Onboarding.InstallationApp")]
     [InlineData("01_Onboarding/01_Introduction.md", "[External](https://example.com)", "[External](https://example.com)", null)]
-    [InlineData("01_Onboarding/01_Introduction.md", "[Parent](../Common/Utils.md)", "[Parent](app://common/utils-app)", "Common.UtilsApp")]
-    [InlineData("GettingStarted/Index.md", "[Step](./Setup/Step1.md)", "[Step](app://getting-started/setup/step1-app)", "GettingStarted.Setup.Step1App")]
-    [InlineData("Index.md", "[Start](Foo.md)", "[Start](app://foo-app)", "FooApp")]
+    [InlineData("01_Onboarding/01_Introduction.md", "[Parent](../Common/Utils.md)", "[Parent](app://common/utils)", "Common.UtilsApp")]
+    [InlineData("GettingStarted/Index.md", "[Step](./Setup/Step1.md)", "[Step](app://getting-started/setup/step1)", "GettingStarted.Setup.Step1App")]
+    [InlineData("Index.md", "[Start](Foo.md)", "[Start](app://foo)", "FooApp")]
     public void Convert_VariousLinks_Works(string sourcePath, string input, string expectedMarkdown, string? expectedType)
     {
         var converter = new LinkConverter(sourcePath);
@@ -37,22 +37,22 @@ public class LinkConverterTests
     [InlineData(
         "01_Onboarding/01_Introduction.md",
         "[One](./02_Installation.md) and [Two](../Common/Utils.md)",
-        "[One](app://onboarding/installation-app) and [Two](app://common/utils-app)",
+        "[One](app://onboarding/installation) and [Two](app://common/utils)",
         new[] { "Onboarding.InstallationApp", "Common.UtilsApp" })]
     [InlineData(
         "GettingStarted/Index.md",
         "See [Setup](./Setup/Step1.md) or visit [Site](https://example.com)",
-        "See [Setup](app://getting-started/setup/step1-app) or visit [Site](https://example.com)",
+        "See [Setup](app://getting-started/setup/step1) or visit [Site](https://example.com)",
         new[] { "GettingStarted.Setup.Step1App" })]
     [InlineData(
         "Index.md",
         "[A](Foo.md), [B](Bar/Baz.md), [C](https://external.com)",
-        "[A](app://foo-app), [B](app://bar/baz-app), [C](https://external.com)",
+        "[A](app://foo), [B](app://bar/baz), [C](https://external.com)",
         new[] { "FooApp", "Bar.BazApp" })]
     [InlineData(
         "01_Onboarding\\02_Concepts\\Clients.md",
         "- [Forms](./Forms.md)",
-        "- [Forms](app://onboarding/concepts/forms-app)",
+        "- [Forms](app://onboarding/concepts/forms)",
         new[] { "Onboarding.Concepts.FormsApp" })]
     public void Convert_MultipleLinks_Works(string sourcePath, string input, string expectedMarkdown, string[] expectedTypes)
     {

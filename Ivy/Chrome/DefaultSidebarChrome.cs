@@ -8,7 +8,6 @@ using Ivy.Shared;
 using Ivy.Views;
 using Ivy.Widgets.Internal;
 using System.Collections.Immutable;
-using System.Linq;
 
 namespace Ivy.Chrome;
 
@@ -18,40 +17,6 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
     private record TabState(string Id, string AppId, string Title, AppHost AppHost, Icons? Icon, string RefreshToken)
     {
         public Tab ToTab() => new Tab(Title, AppHost).Icon(Icon).Key(Utils.GetShortHash(Id + RefreshToken));
-    }
-    private static bool IsWordMatch(string tag, string searchString)
-    {
-        // Split the tag into individual words (separated by hyphens, underscores, or spaces)
-        var words = System.Text.RegularExpressions.Regex.Split(tag, @"[-_\s]+");
-
-        // Check if any word starts with the search string (prefix matching)
-        return words.Any(word => word.StartsWith(searchString, StringComparison.OrdinalIgnoreCase));
-    }
-
-    private int itemMatchScore(MenuItem item, string searchString)
-    {
-        var label = item.Label ?? "";
-
-        // Exact match gets highest priority (score 3)
-        if (string.Equals(label, searchString, StringComparison.OrdinalIgnoreCase))
-        {
-            return 3;
-        }
-
-        // Label contains search string gets medium priority (score 2)
-        if (label.Contains(searchString, StringComparison.OrdinalIgnoreCase))
-        {
-            return 2;
-        }
-
-        // Search hints match gets lowest priority (score 1)
-        if (item.SearchHints?.Any(tag => IsWordMatch(tag, searchString)) == true)
-        {
-            return 1;
-        }
-
-        // No match
-        return 0;
     }
 
     public override object? Build()
@@ -67,6 +32,7 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
         var menuItems = UseState(() => appRepository.GetMenuItems());
         var args = UseService<AppArgs>();
         var navigate = Context.UseSignal<NavigateSignal, NavigateArgs, Unit>();
+        var navigator = this.UseNavigation();
 
         UseEffect(() =>
         {
@@ -87,7 +53,7 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
             {
                 var result = appRepository.GetMenuItems().Flatten()
                     .Where(item => item.Children == null || item.Children.Length == 0) // Only include leaf nodes (actual apps)
-                    .Select(item => new { Item = item, Score = itemMatchScore(item, search.Value) })
+                    .Select(item => new { Item = item, Score = ChromeUtils.ItemMatchScore(item, search.Value) })
                     .Where(x => x.Score > 0)
                     .OrderByDescending(x => x.Score)
                     .ThenBy(x => x.Item.Label)
@@ -145,7 +111,8 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
                         }
                         return;
                     }
-                    else if (navigateArgs.Purpose is NavigationPurpose.HistoryTraversal)
+
+                    if (navigateArgs.Purpose is NavigationPurpose.HistoryTraversal)
                     {
                         client.Error(new InvalidOperationException("Tab no longer exists."));
                         return;
@@ -249,12 +216,16 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
                 return;
             }
 
-            selectedIndex.Set(@event.Value);
+            // Only update and redirect if the selected index actually changes
+            if (selectedIndex.Value != @event.Value)
+            {
+                selectedIndex.Set(@event.Value);
 
-            // Update browser URL when tab is selected
-            var tab = tabs.Value[@event.Value];
-            var navigateArgs = new NavigateArgs(tab.AppId);
-            client.Redirect(navigateArgs.GetUrl(), tabId: tab.Id);
+                // Update browser URL when tab is selected
+                var tab = tabs.Value[@event.Value];
+                var navigateArgs = new NavigateArgs(tab.AppId);
+                client.Redirect(navigateArgs.GetUrl(), tabId: tab.Id);
+            }
         }
 
         void OnTabClose(Event<TabsLayout, int> @event)
@@ -342,9 +313,20 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
         }
         else
         {
-            body = new TabsLayout(OnTabSelect, OnTabClose, OnTabRefresh, OnTabReorder, selectedIndex.Value,
-                tabs.Value.ToArray().Select(e => e.ToTab()).ToArray()
-            ).RemoveParentPadding().Variant(TabsVariant.Tabs).Padding(0);
+            if (tabs.Value.Length == 0)
+            {
+                body = null;
+                if (settings.WallpaperAppId != null)
+                {
+                    body = new AppHost(settings.WallpaperAppId, null, args.ConnectionId);
+                }
+            }
+            else
+            {
+                body = new TabsLayout(OnTabSelect, OnTabClose, OnTabRefresh, OnTabReorder, selectedIndex.Value,
+                    tabs.Value.ToArray().Select(e => e.ToTab()).ToArray()
+                ).RemoveParentPadding().Variant(TabsVariant.Tabs).Padding(0);
+            }
         }
 
         var searchInput = search.ToSearchInput().ShortcutKey("CTRL+K").TestId("sidebar-search");
@@ -359,9 +341,10 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
 
         var commonMenuItems = new[]
         {
-            MenuItem.Default("Star on Github").Icon(Icons.Github)
+            MenuItem.Default("Star on Github").Tag("$github").Icon(Icons.Github)
                 .HandleSelect(() => client.OpenUrl(Resources.IvyGitHubUrl)),
             MenuItem.Default("Theme")
+                .Tag("$theme")
                 .Icon(Icons.SunMoon)
                 .Children(
                     MenuItem.Checkbox("Light").Icon(Icons.Sun).HandleSelect(() => client.SetThemeMode(ThemeMode.Light)),
@@ -407,9 +390,9 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
                 }
             });
 
-            footer = footer.Items([
-                ..commonMenuItems, MenuItem.Default("Logout").Icon(Icons.LogOut).HandleSelect(onLogout)
-            ]);
+            footer = footer.Items(settings.FooterMenuItemsTransformer([
+                ..commonMenuItems, MenuItem.Default("Logout").Tag("$logout").Icon(Icons.LogOut).HandleSelect(onLogout)
+            ], navigator));
         }
         else
         {
@@ -426,7 +409,7 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
                     trigger)
                 .Top()
                 .Items(
-                    commonMenuItems
+                    settings.FooterMenuItemsTransformer(commonMenuItems, navigator)
                 );
         }
 

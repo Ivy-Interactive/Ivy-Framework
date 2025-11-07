@@ -45,6 +45,7 @@ public enum ColType
     Date,
     DateTime,
     Icon,
+    Labels,
     Link
 }
 
@@ -99,6 +100,11 @@ public enum LinkDisplayType
 }
 
 public class ProgressDisplayRenderer : IDataTableColumnRenderer
+{
+    public bool IsEditable => false;
+}
+
+public class LabelsDisplayRenderer : IDataTableColumnRenderer
 {
     public bool IsEditable => false;
 }

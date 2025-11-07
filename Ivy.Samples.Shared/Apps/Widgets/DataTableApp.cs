@@ -7,6 +7,7 @@ namespace Ivy.Samples.Apps.Widgets;
 /// <summary>
 /// Comprehensive DataTable test with all column types
 /// Tests the fix for issue #1273 - column type metadata preservation
+/// Tests the fix for issue #1311 - table width and height setting
 /// </summary>
 public record EmployeeRecord(
     int Id,
@@ -25,6 +26,7 @@ public record EmployeeRecord(
     Icons Department,
     string Notes,
     int? OptionalId,
+    string[] Skills,
     string? WidgetLink,
     string? ProfileLink
 );
@@ -44,6 +46,8 @@ public class DataTableApp : SampleBase
         var firstNames = new[] { "John", "Jane", "Mike", "Sarah", "David", "Emily", "Chris", "Lisa", "Tom", "Anna" };
         var lastNames = new[] { "Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis", "Rodriguez", "Martinez" };
 
+        var allSkills = new[] { "C#", "JavaScript", "Python", "SQL", "React", "Leadership", "Communication", "Problem Solving", "Team Player", "Agile" };
+
         var employees = Enumerable.Range(1, 1000).Select(i =>
         {
             var firstName = firstNames[random.Next(firstNames.Length)];
@@ -62,6 +66,13 @@ public class DataTableApp : SampleBase
             var department = departments[random.Next(departments.Length)];
             var notes = isActive ? "Active employee" : "Inactive";
             var optionalId = random.Next(100) > 20 ? (int?)random.Next(1000, 9999) : null;
+
+            // Generate 2-5 random skills for each employee
+            var skillCount = random.Next(2, 6);
+            var skills = Enumerable.Range(0, skillCount)
+                .Select(_ => allSkills[random.Next(allSkills.Length)])
+                .Distinct()
+                .ToArray();
 
             // Generate link URLs
             var widgetLink = "/widgets/charts/area-chart-app"; // Internal widget link - relative URL works on any domain
@@ -84,12 +95,17 @@ public class DataTableApp : SampleBase
                 Department: department,
                 Notes: notes,
                 OptionalId: optionalId,
+                Skills: skills,
                 WidgetLink: widgetLink,
                 ProfileLink: profileLink
             );
         }).AsQueryable();
 
         return employees.ToDataTable()
+            // Table dimensions (fix for issue #1311)
+            .Width(Size.Units(120))     // Table width set to 120 units (30rem)
+            .Height(Size.Units(120)) // Table height set to 120 units (30rem)
+
             // Numeric columns
             .Header(e => e.Id, "ID")
             .Header(e => e.Age, "Age")
@@ -116,6 +132,9 @@ public class DataTableApp : SampleBase
             .Header(e => e.Priority, "Priority")
             .Header(e => e.Department, "Dept")
 
+            // Labels column (issue #1146)
+            .Header(e => e.Skills, "Skills")
+
             // Link columns
             .Header(e => e.WidgetLink, "Widgets")
             .Header(e => e.ProfileLink, "Profiles")
@@ -137,6 +156,7 @@ public class DataTableApp : SampleBase
             .Width(e => e.Department, Size.Px(90))
             .Width(e => e.Notes, Size.Px(150))
             .Width(e => e.OptionalId, Size.Px(100))
+            .Width(e => e.Skills, Size.Px(300))
             .Width(e => e.WidgetLink, Size.Px(200))
             .Width(e => e.ProfileLink, Size.Px(250))
 
@@ -156,6 +176,7 @@ public class DataTableApp : SampleBase
             .Align(e => e.Priority, Align.Left)
             .Align(e => e.Department, Align.Left)
             .Align(e => e.OptionalId, Align.Left)
+            .Align(e => e.Skills, Align.Left)
             .Align(e => e.WidgetLink, Align.Left)
             .Align(e => e.ProfileLink, Align.Left)
 
@@ -176,6 +197,7 @@ public class DataTableApp : SampleBase
             .Group(e => e.LastReview, "Timeline")
             .Group(e => e.Notes, "Other")
             .Group(e => e.OptionalId, "Other")
+            .Group(e => e.Skills, "Personal")
             .Group(e => e.WidgetLink, "Links")
             .Group(e => e.ProfileLink, "Links")
 

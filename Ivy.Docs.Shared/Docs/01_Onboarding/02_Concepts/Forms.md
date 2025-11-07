@@ -58,7 +58,7 @@ The FormBuilder automatically maps C# types to appropriate input widgets:
 
 ### Custom Labels and Descriptions
 
-Use `.Label()` and `.Description()` to customize field appearance and provide help text.
+Use `.Label()`, `.Description()`, and `.Help()` to customize field appearance and provide help text.
 
 ```csharp demo-tabs
 public class ConfiguredFormExample : ViewBase
@@ -82,6 +82,7 @@ public class ConfiguredFormExample : ViewBase
             .Label(m => m.Name, "Full Name")
             .Description(m => m.Name, "Enter your full name as it appears on official documents")
             .Label(m => m.Email, "Email Address")
+            .Help(m => m.Email, "We'll use this email to send you updates and important notifications")
             .Description(m => m.Email, "We'll use this to send you updates")
             .Label(m => m.Phone, "Phone Number")
             .Label(m => m.Message, "Your Message")
@@ -151,6 +152,7 @@ public class RequiredFieldsExample : ViewBase
             .Label(m => m.CustomerName, "Customer Name")
             .Label(m => m.CustomerEmail, "Email Address")
             .Label(m => m.ShippingAddress, "Shipping Address")
+            .Help(m => m.ShippingAddress, "Enter the complete shipping address including street, city, and postal code")
             .Label(m => m.Quantity, "Quantity")
             .Label(m => m.IsPriority, "Priority Order");
     }

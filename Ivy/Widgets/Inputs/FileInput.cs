@@ -1,37 +1,13 @@
 ﻿using System.Runtime.CompilerServices;
-using System.Text;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 using Ivy.Core;
 using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
+using Ivy.Services;
 using Ivy.Shared;
 using Ivy.Widgets.Inputs;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy;
-
-/// <summary>
-/// Represents a file uploaded through a file input control.
-/// </summary>
-public record FileInput
-{
-    /// <summary>Gets the name of the uploaded file including its extension.</summary>
-    public required string Name { get; init; }
-
-    /// <summary>Gets the MIME type of the uploaded file.</summary>
-    public required string Type { get; init; }
-
-    /// <summary>Gets the size of the uploaded file in bytes.</summary>
-    public int Size { get; init; }
-
-    /// <summary>Gets the last modified date of the uploaded file.</summary>
-    public DateTime LastModified { get; init; }
-
-    /// <summary>Gets the binary content of the uploaded file.</summary>
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
-    public byte[]? Content { get; init; }
-}
 
 /// <summary>
 /// Defines the visual variants available for file input controls.
@@ -74,6 +50,9 @@ public abstract record FileInputBase : WidgetBase<FileInputBase>, IAnyFileInput
     /// <summary>Gets or sets the accepted file types using MIME types or file extensions.</summary>
     [Prop] public string? Accept { get; set; }
 
+    /// <summary>Gets or sets the maximum file size in bytes.</summary>
+    [Prop] public long? MaxFileSize { get; set; }
+
     /// <summary>Gets or sets whether multiple files can be selected.</summary>
     [Prop] public bool Multiple { get; set; }
 
@@ -89,6 +68,9 @@ public abstract record FileInputBase : WidgetBase<FileInputBase>, IAnyFileInput
     /// <summary>Gets or sets the event handler called when the input loses focus.</summary>
     [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
 
+    /// <summary>Gets or sets the event handler called when a file upload is canceled (passes FileUpload.Id as parameter).</summary>
+    [Event] public Func<Event<IAnyInput, Guid>, ValueTask>? OnCancel { get; set; }
+
     /// <summary>
     /// Returns the types that this file input can bind to.
     /// </summary>
@@ -102,11 +84,17 @@ public abstract record FileInputBase : WidgetBase<FileInputBase>, IAnyFileInput
     {
         if (value == null) return ValidationResult.Success();
 
-        if (value is FileInput file)
+        if (value is IFileUpload file)
         {
-            return FileInputValidation.ValidateFileType(file, Accept);
+            // Validate file type
+            var typeValidation = FileInputValidation.ValidateFileType(file, Accept);
+            if (!typeValidation.IsValid) return typeValidation;
+
+            // Validate file size
+            return FileInputValidation.ValidateFileSize(file, MaxFileSize);
         }
-        else if (value is IEnumerable<FileInput> files)
+
+        if (value is IEnumerable<IFileUpload> files)
         {
             var filesList = files.ToList();
 
@@ -120,10 +108,18 @@ public abstract record FileInputBase : WidgetBase<FileInputBase>, IAnyFileInput
                 }
             }
 
-            // Then validate file types if Accept is set
+            // Validate file types if Accept is set
             if (!string.IsNullOrWhiteSpace(Accept))
             {
-                return FileInputValidation.ValidateFileTypes(filesList, Accept);
+                var typeValidation = FileInputValidation.ValidateFileTypes(filesList, Accept);
+                if (!typeValidation.IsValid) return typeValidation;
+            }
+
+            // Validate file sizes
+            foreach (var f in filesList)
+            {
+                var sizeValidation = FileInputValidation.ValidateFileSize(f, MaxFileSize);
+                if (!sizeValidation.IsValid) return sizeValidation;
             }
         }
 
@@ -133,6 +129,7 @@ public abstract record FileInputBase : WidgetBase<FileInputBase>, IAnyFileInput
 
 /// <summary>
 /// Generic file input control that provides type-safe file upload functionality.
+/// State is managed entirely by the server via the upload handler.
 /// </summary>
 /// <typeparam name="TValue">The type of the file value.</typeparam>
 public record FileInput<TValue> : FileInputBase, IInput<TValue>, IAnyFileInput
@@ -150,55 +147,19 @@ public record FileInput<TValue> : FileInputBase, IInput<TValue>, IAnyFileInput
     {
         var typedState = state.As<TValue>();
         Value = typedState.Value;
-        OnChange = e =>
-        {
-            typedState.Set(e.Value);
-
-            // Auto-validate if Accept or MaxFiles is set
-            if (!string.IsNullOrWhiteSpace(Accept) || MaxFiles.HasValue)
-            {
-                var validation = ValidateValue(e.Value);
-                if (!validation.IsValid)
-                {
-                    Invalid = validation.ErrorMessage;
-                }
-                else
-                {
-                    Invalid = null;
-                }
-            }
-            return ValueTask.CompletedTask;
-        };
     }
 
     /// <summary>
     /// Initializes a new instance with an explicit value.
     /// </summary>
     /// <param name="value">The initial file value.</param>
-    /// <param name="onChange">Optional event handler called when the file value changes.</param>
     /// <param name="placeholder">Optional placeholder text displayed when no files are selected.</param>
     /// <param name="disabled">Whether the input should be disabled initially.</param>
     /// <param name="variant">The visual variant of the file input.</param>
     [OverloadResolutionPriority(1)]
-    public FileInput(TValue value, Func<Event<IInput<TValue>, TValue>, ValueTask>? onChange, string? placeholder = null, bool disabled = false, FileInputs variant = FileInputs.Drop)
+    public FileInput(TValue value, string? placeholder = null, bool disabled = false, FileInputs variant = FileInputs.Drop)
         : this(placeholder, disabled, variant)
     {
-        OnChange = onChange;
-        Value = value;
-    }
-
-    /// <summary>
-    /// Initializes a new instance with an explicit value and synchronous change handler.
-    /// </summary>
-    /// <param name="value">The initial file value.</param>
-    /// <param name="onChange">Optional event handler called when the file value changes.</param>
-    /// <param name="placeholder">Optional placeholder text displayed when no files are selected.</param>
-    /// <param name="disabled">Whether the input should be disabled initially.</param>
-    /// <param name="variant">The visual variant of the file input.</param>
-    public FileInput(TValue value, Action<Event<IInput<TValue>, TValue>>? onChange, string? placeholder = null, bool disabled = false, FileInputs variant = FileInputs.Drop)
-        : this(placeholder, disabled, variant)
-    {
-        OnChange = onChange == null ? null : e => { onChange(e); return ValueTask.CompletedTask; };
         Value = value;
     }
 
@@ -221,8 +182,8 @@ public record FileInput<TValue> : FileInputBase, IInput<TValue>, IAnyFileInput
     /// <summary>Gets the current file value.</summary>
     [Prop] public TValue Value { get; } = default!;
 
-    /// <summary>Gets the event handler called when the file value changes.</summary>
-    [Event] public Func<Event<IInput<TValue>, TValue>, ValueTask>? OnChange { get; }
+    /// <summary>OnChange event is not used - file state is managed by the server.</summary>
+    [Event] public Func<Event<IInput<TValue>, TValue>, ValueTask>? OnChange => null;
 }
 
 /// <summary>
@@ -230,66 +191,141 @@ public record FileInput<TValue> : FileInputBase, IInput<TValue>, IAnyFileInput
 /// </summary>
 public static class FileInputExtensions
 {
-    /// <summary>
-    /// Converts the file content to plain text using UTF-8 encoding.
-    /// </summary>
-    /// <param name="file">The file input containing the content to convert.</param>
-    public static string? ToPlainText(this FileInput file)
-    {
-        if (file.Content == null)
-        {
-            return null;
-        }
-        return file.Content.Length switch
-        {
-            0 => null,
-            _ => Encoding.UTF8.GetString(file.Content)
-        };
-    }
-
-    /// <summary>
-    /// Creates a file input from a state object.
-    /// </summary>
-    /// <param name="state">The state object to bind to.</param>
-    /// <param name="placeholder">Optional placeholder text displayed when no files are selected.</param>
-    /// <param name="disabled">Whether the input should be disabled initially.</param>
-    /// <param name="variant">The visual variant of the file input.</param>
+    [Obsolete("ToFileInput now requires an UploadContext. Use state.ToFileInput(uploadContext, ...).", true)]
     public static FileInputBase ToFileInput(this IAnyState state, string? placeholder = null, bool disabled = false, FileInputs variant = FileInputs.Drop)
     {
-        var type = state.GetStateType();
-
-        //Check that type is FileInput, FileInput? or IEnumerable<FileInput>
-        var isCollection = type.IsGenericType &&
-                          type.GetGenericTypeDefinition() == typeof(IEnumerable<>) &&
-                          type.GetGenericArguments()[0] == typeof(FileInput);
-        var isValid = type == typeof(FileInput) || isCollection;
-
-        if (!isValid)
-        {
-            throw new Exception("Invalid type for FileInput");
-        }
-
-        Type genericType = typeof(FileInput<>).MakeGenericType(type);
-        FileInputBase input = (FileInputBase)Activator.CreateInstance(genericType, state, placeholder, disabled, variant)!;
-
-        // Set Multiple based on type
-        input = input with { Multiple = isCollection };
-
-        return input;
+        throw new NotSupportedException("ToFileInput now requires an UploadContext. Use state.ToFileInput(uploadContext, ...).");
     }
 
     /// <summary>
-    /// Creates a file input that automatically uploads files to the specified upload URL.
+    /// Creates a file input that automatically uploads files using the provided upload context
+    /// and wires cancellation with state reset.
     /// </summary>
     /// <param name="state">The state to bind the file input to.</param>
-    /// <param name="uploadUrl">The upload URL state from UseUpload hook.</param>
+    /// <param name="uploadContext">The upload context state from UseUpload hook.</param>
     /// <param name="placeholder">Optional placeholder text displayed when no files are selected.</param>
     /// <param name="disabled">Whether the input should be disabled initially.</param>
     /// <param name="variant">The visual variant of the file input.</param>
-    public static FileInputBase ToFileInput(this IAnyState state, IState<string?> uploadUrl, string? placeholder = null, bool disabled = false, FileInputs variant = FileInputs.Drop)
+    public static FileInputBase ToFileInput(this IAnyState state, IState<UploadContext> uploadContext, string? placeholder = null, bool disabled = false, FileInputs variant = FileInputs.Drop)
     {
-        var input = state.ToFileInput(placeholder, disabled, variant);
-        input = input with { UploadUrl = uploadUrl.Value };
+        static bool IsFileUploadType(Type t)
+        {
+            if (t == typeof(FileUpload)) return true;
+            if (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(FileUpload<>)) return true;
+            return typeof(IFileUpload).IsAssignableFrom(t);
+        }
+
+        static bool IsEnumerableOfFileUpload(Type t)
+        {
+            if (t == typeof(string)) return false;
+            if (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IEnumerable<>))
+            {
+                var arg = t.GetGenericArguments()[0];
+                return IsFileUploadType(arg);
+            }
+            foreach (var it in t.GetInterfaces())
+            {
+                if (it.IsGenericType && it.GetGenericTypeDefinition() == typeof(IEnumerable<>))
+                {
+                    var arg = it.GetGenericArguments()[0];
+                    if (IsFileUploadType(arg)) return true;
+                }
+            }
+            return false;
+        }
+
+        static FileUpload Project(IFileUpload f) => new()
+        {
+            Id = f.Id,
+            FileName = f.FileName,
+            ContentType = f.ContentType,
+            Length = f.Length,
+            Progress = f.Progress,
+            Status = f.Status
+        };
+
+        var stateType = state.GetStateType();
+        var isCollection = IsEnumerableOfFileUpload(stateType);
+
+        FileInputBase input;
+        if (isCollection)
+        {
+            var valueObj = state.As<object>().Value;
+            IEnumerable<FileUpload> projected = Array.Empty<FileUpload>();
+            if (valueObj is IEnumerable<IFileUpload> list)
+            {
+                projected = list.Select(Project).ToArray();
+            }
+            input = new FileInput<IEnumerable<FileUpload>>(projected, placeholder, disabled, variant) with { Multiple = true };
+        }
+        else
+        {
+            var valueObj = state.As<object>().Value;
+            FileUpload? single = valueObj is IFileUpload f ? Project(f) : null;
+            input = new FileInput<FileUpload?>(single, placeholder, disabled, variant);
+        }
+
+        var ctx = uploadContext.Value;
+        input = input with
+        {
+            UploadUrl = ctx.UploadUrl,
+            Accept = ctx.Accept ?? input.Accept,
+            MaxFileSize = ctx.MaxFileSize,
+            MaxFiles = ctx.MaxFiles ?? input.MaxFiles
+        };
+
+        input = input with
+        {
+            OnCancel = e =>
+            {
+                var fileId = e.Value;
+                uploadContext.Value.Cancel(fileId);
+
+                try
+                {
+                    // Handle common immutable collection cases by removing the canceled file
+                    if (stateType == typeof(System.Collections.Immutable.ImmutableArray<Ivy.Services.FileUpload>))
+                    {
+                        var s = state.As<System.Collections.Immutable.ImmutableArray<Ivy.Services.FileUpload>>();
+                        s.Set(list =>
+                        {
+                            var builder = System.Collections.Immutable.ImmutableArray.CreateBuilder<Ivy.Services.FileUpload>(list.Length);
+                            foreach (var f in list)
+                            {
+                                if (f.Id != fileId) builder.Add(f);
+                            }
+                            return builder.ToImmutable();
+                        });
+                    }
+                    else if (stateType == typeof(System.Collections.Immutable.ImmutableArray<Ivy.Services.FileUpload<byte[]>>))
+                    {
+                        var s = state.As<System.Collections.Immutable.ImmutableArray<Ivy.Services.FileUpload<byte[]>>>();
+                        s.Set(list =>
+                        {
+                            var builder = System.Collections.Immutable.ImmutableArray.CreateBuilder<Ivy.Services.FileUpload<byte[]>>(list.Length);
+                            foreach (var f in list)
+                            {
+                                if (f.Id != fileId) builder.Add(f);
+                            }
+                            return builder.ToImmutable();
+                        });
+                    }
+                    else
+                    {
+                        // Fallback: reset state (works for single-file or unsupported collections)
+                        state.As<object>().Reset();
+                    }
+                }
+                catch
+                {
+                    // As a last resort, reset
+                    state.As<object>().Reset();
+                }
+
+                return ValueTask.CompletedTask;
+            }
+        };
+
         return input;
     }
 
@@ -347,6 +383,14 @@ public static class FileInputExtensions
         return widget with { MaxFiles = maxFiles };
     }
 
+    /// <summary>Sets the maximum file size in bytes for the file input.</summary>
+    /// <param name="widget">The file input to configure.</param>
+    /// <param name="maxFileSize">The maximum file size in bytes.</param>
+    public static FileInputBase MaxFileSize(this FileInputBase widget, long maxFileSize)
+    {
+        return widget with { MaxFileSize = maxFileSize };
+    }
+
     /// <summary>Sets the upload URL for automatic file uploads.</summary>
     /// <param name="widget">The file input to configure.</param>
     /// <param name="uploadUrl">The upload URL where files should be automatically uploaded.</param>
@@ -382,7 +426,7 @@ public static class FileInputExtensions
     /// </summary>
     /// <param name="widget">The file input widget containing validation rules.</param>
     /// <param name="file">The file to validate.</param>
-    public static ValidationResult ValidateFile(this FileInputBase widget, FileInput file)
+    public static ValidationResult ValidateFile(this FileInputBase widget, IFileUpload file)
     {
         return FileInputValidation.ValidateFileType(file, widget.Accept);
     }
@@ -392,7 +436,7 @@ public static class FileInputExtensions
     /// </summary>
     /// <param name="widget">The file input widget containing validation rules.</param>
     /// <param name="files">The files to validate.</param>
-    public static ValidationResult ValidateFiles(this FileInputBase widget, IEnumerable<FileInput> files)
+    public static ValidationResult ValidateFiles(this FileInputBase widget, IEnumerable<IFileUpload> files)
     {
         var filesList = files.ToList();
 
@@ -406,7 +450,6 @@ public static class FileInputExtensions
         // Then validate file types
         return FileInputValidation.ValidateFileTypes(filesList, widget.Accept);
     }
-
 
     /// <summary>
     /// Sets the blur event handler for the file input.
@@ -437,5 +480,36 @@ public static class FileInputExtensions
     public static FileInputBase HandleBlur(this FileInputBase widget, Action onBlur)
     {
         return widget.HandleBlur(_ => { onBlur(); return ValueTask.CompletedTask; });
+    }
+
+    /// <summary>
+    /// Sets the cancel event handler for the file input.
+    /// </summary>
+    /// <param name="widget">The file input to configure.</param>
+    /// <param name="onCancel">The event handler to call when a file is canceled, receives the FileUpload.Id.</param>
+    [OverloadResolutionPriority(1)]
+    public static FileInputBase HandleCancel(this FileInputBase widget, Func<Event<IAnyInput, Guid>, ValueTask> onCancel)
+    {
+        return widget with { OnCancel = onCancel };
+    }
+
+    /// <summary>
+    /// Sets the cancel event handler for the file input.
+    /// </summary>
+    /// <param name="widget">The file input to configure.</param>
+    /// <param name="onCancel">The event handler to call when a file is canceled, receives the FileUpload.Id.</param>
+    public static FileInputBase HandleCancel(this FileInputBase widget, Action<Event<IAnyInput, Guid>> onCancel)
+    {
+        return widget.HandleCancel(onCancel.ToValueTask());
+    }
+
+    /// <summary>
+    /// Sets a simple cancel event handler for the file input.
+    /// </summary>
+    /// <param name="widget">The file input to configure.</param>
+    /// <param name="onCancel">The simple action to perform when a file is canceled, receives the FileUpload.Id.</param>
+    public static FileInputBase HandleCancel(this FileInputBase widget, Action<Guid> onCancel)
+    {
+        return widget.HandleCancel(e => { onCancel(e.Value); return ValueTask.CompletedTask; });
     }
 }

@@ -1,5 +1,5 @@
 export interface DataRow {
-  values: (string | number | boolean | null)[];
+  values: (string | number | boolean | Date | string[] | null)[];
 }
 
 export enum ColType {
@@ -9,6 +9,7 @@ export enum ColType {
   Date = 'Date',
   DateTime = 'DateTime',
   Icon = 'Icon',
+  Labels = 'Labels',
   Link = 'Link',
 }
 
@@ -48,7 +49,7 @@ export interface DataTableConnection {
   sourceId: string;
 }
 
-export interface DataTableConfiguration {
+export interface DataTableConfig {
   filterType?: FilterTypes;
   freezeColumns?: number | null;
   allowSorting?: boolean;
@@ -73,7 +74,7 @@ export interface TableProps {
   id: string;
   columns: DataColumn[];
   connection: DataTableConnection;
-  configuration?: DataTableConfiguration;
+  config?: DataTableConfig;
   editable?: boolean;
   width?: string;
   height?: string;

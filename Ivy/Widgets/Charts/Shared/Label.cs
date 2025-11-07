@@ -45,45 +45,21 @@ public record Label
 /// </summary>
 public static class LabelExtensions
 {
-    /// <summary>
-    /// Sets the offset distance of the label from its associated chart element in pixels.
-    /// </summary>
-    /// <param name="label">The Label to configure.</param>
-    /// <param name="offset">The offset distance in pixels.</param>
-    /// <returns>A new Label instance with the updated offset.</returns>
     public static Label Offset(this Label label, double offset)
     {
         return label with { Offset = offset };
     }
 
-    /// <summary>
-    /// Sets the rotation angle of the label text in degrees. Positive values rotate clockwise.
-    /// </summary>
-    /// <param name="label">The Label to configure.</param>
-    /// <param name="angle">The rotation angle in degrees.</param>
-    /// <returns>A new Label instance with the updated rotation angle.</returns>
     public static Label Angle(this Label label, double angle)
     {
         return label with { Angle = angle };
     }
 
-    /// <summary>
-    /// Sets the position of the label relative to its associated chart element.
-    /// </summary>
-    /// <param name="label">The Label to configure.</param>
-    /// <param name="position">The position for the label.</param>
-    /// <returns>A new Label instance with the updated position.</returns>
     public static Label Position(this Label label, Positions position)
     {
         return label with { Position = position };
     }
 
-    /// <summary>
-    /// Sets the color of the label text.
-    /// </summary>
-    /// <param name="label">The Label to configure.</param>
-    /// <param name="color">The color to use for the label text.</param>
-    /// <returns>A new Label instance with the updated color.</returns>
     public static Label Color(this Label label, Colors color)
     {
         return label with { Color = color };

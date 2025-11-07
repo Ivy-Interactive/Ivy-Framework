@@ -5,8 +5,6 @@ using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using OpenAI;
-using OpenAI.Chat;
 
 //todo: Check for JWT
 

@@ -27,21 +27,21 @@ public record DataTable : WidgetBase<DataTable>
         Size? width,
         Size? height,
         DataTableColumn[] columns,
-        DataTableConfiguration configuration
+        DataTableConfig config
     )
     {
         Width = width ?? Size.Full();
         Height = height ?? Size.Full();
         Connection = connection;
         Columns = columns;
-        Configuration = configuration;
+        Config = config;
     }
 
     [Prop] public DataTableColumn[] Columns { get; set; }
 
     [Prop] public DataTableConnection Connection { get; set; }
 
-    [Prop] public DataTableConfiguration Configuration { get; set; }
+    [Prop] public DataTableConfig Config { get; set; }
 
     /// <summary>Event handler called when a cell is clicked (single-click).</summary>
     [Event] public Func<Event<DataTable, CellClickEventArgs>, ValueTask>? OnCellClick { get; set; }

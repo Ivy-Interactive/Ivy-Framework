@@ -79,6 +79,7 @@ public class DefaultLineChartStyle<TSource> : ILineChartStyle<TSource>
     /// <returns>A fully configured line chart with default styling.</returns>
     public LineChart Design(ExpandoObject[] data, Dimension<TSource> dimension, Measure<TSource>[] measures, TableCalculation[] calculations)
     {
+
         return new LineChart(data)
                 .Line(measures.Select(m => new Line(m.Name)).ToArray())
                 .Line(calculations.Select(c => new Line(c.Name)).ToArray())
@@ -90,6 +91,14 @@ public class DefaultLineChartStyle<TSource> : ILineChartStyle<TSource>
                     .Align(Legend.Alignments.Center)
                     .VerticalAlign(Legend.VerticalAlignments.Bottom)
                 )
+                .Toolbox(new Toolbox()
+                .Orientation(Toolbox.Orientations.Horizontal)
+                .Align(Toolbox.Alignments.Right)
+                .VerticalAlign(Toolbox.VerticalAlignments.Top)
+                .SaveAsImage(true)
+                .DataView(true)
+                .MagicType(true)
+            )
             ;
     }
 }
@@ -117,6 +126,14 @@ public class DashboardLineChartStyle<TSource> : ILineChartStyle<TSource>
                 .Line(calculations.Select(c => new Line(c.Name).CurveType(CurveTypes.Natural)).ToArray())
                 .XAxis(new XAxis(dimension.Name).TickLine(false).AxisLine(false).MinTickGap(10))
                 .Tooltip(new Ivy.Charts.Tooltip().Animated(true))
+                .Toolbox(new Toolbox()
+                .Orientation(Toolbox.Orientations.Horizontal)
+                .Align(Toolbox.Alignments.Right)
+                .VerticalAlign(Toolbox.VerticalAlignments.Top)
+                .SaveAsImage(true)
+                .DataView(true)
+                .MagicType(true)
+            )
             ;
     }
 }

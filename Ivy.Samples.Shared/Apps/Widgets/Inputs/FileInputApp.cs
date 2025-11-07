@@ -1,4 +1,6 @@
-﻿using Ivy.Shared;
+﻿using Ivy.Hooks;
+using Ivy.Services;
+using Ivy.Shared;
 using Ivy.Views.Builders;
 using Ivy.Views.Forms;
 
@@ -9,85 +11,35 @@ public class FileInputApp : SampleBase
 {
     protected override object? BuildSample()
     {
-        // Mock file for 'With Value' example
-        var mockFile = new FileInput
-        {
-            Name = "example.txt",
-            Type = "text/plain",
-            Size = 1234,
-            LastModified = DateTime.Now,
-            Content = null
-        };
-
-        var singleFile = UseState<FileInput?>(() => null);
-        var singleFileWithValue = UseState<FileInput?>(() => mockFile);
-        var multipleFiles = UseState<IEnumerable<FileInput>?>(() => null);
-        var multipleFilesWithValue = UseState<IEnumerable<FileInput>?>(() => new[] { mockFile });
-        var disabledFile = UseState<FileInput?>(() => null);
-        var invalidFile = UseState<FileInput?>(() => null);
-        var placeholderFile = UseState<FileInput?>(() => null);
-        var limitedFiles = UseState<IEnumerable<FileInput>?>(() => null);
-        var textFiles = UseState<IEnumerable<FileInput>?>(() => null);
-        var pdfFiles = UseState<IEnumerable<FileInput>?>(() => null);
-        var imageFiles = UseState<IEnumerable<FileInput>?>(() => null);
-        var singleSizeFile = UseState<FileInput?>(() => null);
-        var multipleSizeFiles = UseState<IEnumerable<FileInput>?>(() => null);
-
-        var onChangedState = UseState<FileInput?>(() => null);
-        var onChangeLabel = UseState("");
-        var onBlurState = UseState<FileInput?>(() => null);
-        var onBlurLabel = UseState("");
-
-        // Validation examples
-        var validationError = UseState<string?>(() => null);
-        var validatedFiles = UseState<IEnumerable<FileInput>?>(() => null);
-        var singleFileWithValidation = UseState<FileInput?>(() => null);
-
-        var dataBinding = Layout.Grid().Columns(3)
-                          | Text.InlineCode("FileInput")
-                          | (Layout.Vertical()
-                             | singleFile.ToFileInput()
-                             | singleFile.ToFileInput()
-                          )
-                          | singleFile
-
-                          | Text.InlineCode("FileInput?")
-                          | (Layout.Vertical()
-                             | singleFile.ToFileInput()
-                             | singleFile.ToFileInput()
-                          )
-                          | singleFile
-
-                          | Text.InlineCode("IEnumerable<FileInput>")
-                          | (Layout.Vertical()
-                             | multipleFiles.ToFileInput()
-                          )
-                          | multipleFiles
-            ;
-
         return Layout.Vertical()
                | Text.H1("File Inputs")
+               | Layout.Tabs(
+                   new Tab("Variants", new FileInputVariants()),
+                   new Tab("Size Variants", new FileInputSizeVariants()),
+                   new Tab("Data Binding", new FileInputDataBinding()),
+                   new Tab("File Type Restrictions", new FileInputTypeRestrictions()),
+                   new Tab("File Count Limits", new FileInputCountLimits()),
+                   new Tab("File Content Display", new FileInputContentDisplay()),
+                   new Tab("Form Example", new FileInputFormExample())
+               ).Variant(TabsVariant.Content);
+    }
+}
 
-               // Size Variants:
-               | Text.H2("Size Variants")
-               | (Layout.Grid().Columns(4)
-                  | null!
-                  | Text.InlineCode("Small")
-                  | Text.InlineCode("Medium")
-                  | Text.InlineCode("Large")
+public class FileInputVariants : ViewBase
+{
+    public override object? Build()
+    {
+        var singleFile = UseState<FileUpload<byte[]>?>(() => null);
+        var multipleFiles = UseState(ImmutableArray.Create<FileUpload<byte[]>>());
+        var placeholderFile = UseState<FileUpload<byte[]>?>(() => null);
 
-                  | Text.InlineCode("Single File")
-                  | singleSizeFile.ToFileInput().Small().Placeholder("Small file input")
-                  | singleSizeFile.ToFileInput().Placeholder("Medium file input")
-                  | singleSizeFile.ToFileInput().Large().Placeholder("Large file input")
+        var singleFileUpload = this.UseUpload(MemoryStreamUploadHandler.Create(singleFile));
+        var multipleFilesUpload = this.UseUpload(MemoryStreamUploadHandler.Create(multipleFiles));
+        var placeholderFileUpload = this.UseUpload(MemoryStreamUploadHandler.Create(placeholderFile));
 
-                  | Text.InlineCode("Multiple Files")
-                  | multipleSizeFiles.ToFileInput().Small()
-                  | multipleSizeFiles.ToFileInput()
-                  | multipleSizeFiles.ToFileInput().Large()
-               )
-
+        return Layout.Vertical()
                | Text.H2("Variants")
+               | Text.P("Demonstrate different visual states of file inputs including empty, with value, disabled, invalid, and with placeholder.")
                | (Layout.Grid().Columns(6)
                   | null!
                   | Text.InlineCode("Empty")
@@ -97,26 +49,108 @@ public class FileInputApp : SampleBase
                   | Text.InlineCode("With Placeholder")
 
                   | Text.InlineCode("Single File")
-                  | singleFile.ToFileInput()
-                  | singleFileWithValue.ToFileInput()
-                  | singleFile.ToFileInput().Disabled()
-                  | singleFile.ToFileInput().Invalid("Please select a valid file")
-                  | placeholderFile.ToFileInput().Placeholder("Click to select a file")
+                  | singleFile.ToFileInput(singleFileUpload)
+                  | singleFile.ToFileInput(singleFileUpload).Placeholder("File input with value (upload a file)")
+                  | singleFile.ToFileInput(singleFileUpload).Disabled()
+                  | singleFile.ToFileInput(singleFileUpload).Invalid("Please select a valid file")
+                  | placeholderFile.ToFileInput(placeholderFileUpload).Placeholder("Click to select a file")
 
                   | Text.InlineCode("Multiple Files")
-                  | multipleFiles.ToFileInput()
-                  | multipleFilesWithValue.ToFileInput()
-                  | multipleFiles.ToFileInput().Disabled()
-                  | multipleFiles.ToFileInput().Invalid("Please select valid files")
-                  | multipleFiles.ToFileInput().Placeholder("Click to select files")
-               )
+                  | multipleFiles.ToFileInput(multipleFilesUpload)
+                  | multipleFiles.ToFileInput(multipleFilesUpload).Placeholder("Multiple files with value (upload files)")
+                  | multipleFiles.ToFileInput(multipleFilesUpload).Disabled()
+                  | multipleFiles.ToFileInput(multipleFilesUpload).Invalid("Please select valid files")
+                  | multipleFiles.ToFileInput(multipleFilesUpload).Placeholder("Click to select files")
+               );
+    }
+}
 
-               // Data Binding:
+public class FileInputSizeVariants : ViewBase
+{
+    public override object? Build()
+    {
+        var singleSizeFile = UseState<FileUpload<byte[]>?>(() => null);
+        var multipleSizeFiles = UseState(ImmutableArray.Create<FileUpload<byte[]>>());
+
+        var singleSizeFileUpload = this.UseUpload(MemoryStreamUploadHandler.Create(singleSizeFile));
+        var multipleSizeFilesUpload = this.UseUpload(MemoryStreamUploadHandler.Create(multipleSizeFiles));
+
+        return Layout.Vertical()
+               | Text.H2("Size Variants")
+               | Text.P("File inputs support different sizes: Small, Medium (default), and Large for both single and multiple file selection.")
+               | (Layout.Grid().Columns(4)
+                  | null!
+                  | Text.InlineCode("Small")
+                  | Text.InlineCode("Medium")
+                  | Text.InlineCode("Large")
+
+                  | Text.InlineCode("Single File")
+                  | singleSizeFile.ToFileInput(singleSizeFileUpload).Small().Placeholder("Small file input")
+                  | singleSizeFile.ToFileInput(singleSizeFileUpload).Placeholder("Medium file input")
+                  | singleSizeFile.ToFileInput(singleSizeFileUpload).Large().Placeholder("Large file input")
+
+                  | Text.InlineCode("Multiple Files")
+                  | multipleSizeFiles.ToFileInput(multipleSizeFilesUpload).Small()
+                  | multipleSizeFiles.ToFileInput(multipleSizeFilesUpload)
+                  | multipleSizeFiles.ToFileInput(multipleSizeFilesUpload).Large()
+               );
+    }
+}
+
+public class FileInputDataBinding : ViewBase
+{
+    public override object? Build()
+    {
+        var dataBindingFile = UseState<FileUpload<byte[]>?>(() => null);
+        var dataBindingFileUpload = this.UseUpload(MemoryStreamUploadHandler.Create(dataBindingFile));
+
+        var dataBindingNullableFile = UseState<FileUpload<byte[]>?>(() => null);
+        var dataBindingNullableFileUpload = this.UseUpload(MemoryStreamUploadHandler.Create(dataBindingNullableFile));
+
+        var dataBindingMultipleFiles = UseState(ImmutableArray.Create<FileUpload<byte[]>>());
+        var dataBindingMultipleFilesUpload = this.UseUpload(MemoryStreamUploadHandler.Create(dataBindingMultipleFiles));
+
+        var dataBinding = Layout.Grid().Columns(3)
+                          | Text.InlineCode("FileInput")
+                          | dataBindingFile.ToFileInput(dataBindingFileUpload)
+                              .Placeholder("Single file: FileUpload<byte[]>? (nullable single file binding)")
+                          | dataBindingFile
+
+                          | Text.InlineCode("FileInput?")
+                          | dataBindingNullableFile.ToFileInput(dataBindingNullableFileUpload)
+                              .Placeholder("Single file: FileUpload<byte[]>? (explicitly nullable binding)")
+                          | dataBindingNullableFile
+
+                          | Text.InlineCode("IEnumerable<FileInput>")
+                          | dataBindingMultipleFiles.ToFileInput(dataBindingMultipleFilesUpload)
+                              .Placeholder("Multiple files: ImmutableArray<FileUpload<byte[]>> (collection binding)")
+                          | dataBindingMultipleFiles
+            ;
+
+        return Layout.Vertical()
                | Text.H2("Data Binding")
-               | dataBinding
+               | Text.P("File inputs support different data binding types for single files (nullable and non-nullable) and multiple files (collections).")
+               | dataBinding;
+    }
+}
 
-               // File Type Restrictions:
+public class FileInputTypeRestrictions : ViewBase
+{
+    public override object? Build()
+    {
+        var textFiles = UseState(ImmutableArray.Create<FileUpload<byte[]>>());
+        var pdfFiles = UseState(ImmutableArray.Create<FileUpload<byte[]>>());
+        var imageFiles = UseState(ImmutableArray.Create<FileUpload<byte[]>>());
+        var singleLimitFile = UseState<FileUpload<byte[]>?>(() => null);
+
+        var textFilesUpload = this.UseUpload(MemoryStreamUploadHandler.Create(textFiles));
+        var pdfFilesUpload = this.UseUpload(MemoryStreamUploadHandler.Create(pdfFiles));
+        var imageFilesUpload = this.UseUpload(MemoryStreamUploadHandler.Create(imageFiles));
+        var singleLimitFileUpload = this.UseUpload(MemoryStreamUploadHandler.Create(singleLimitFile));
+
+        return Layout.Vertical()
                | Text.H2("File Type Restrictions")
+               | Text.P("Restrict file selection to specific types using the Accept property with file extensions or MIME types.")
                | (Layout.Grid().Columns(3)
                   | Text.InlineCode("File Type")
                   | Text.InlineCode("Accept Property")
@@ -124,23 +158,38 @@ public class FileInputApp : SampleBase
 
                   | Text.Block("Text Files")
                   | Text.InlineCode(".txt,.md,.csv")
-                  | textFiles.ToFileInput().Accept(".txt,.md,.csv").Placeholder("Select text files")
+                  | textFiles.ToFileInput(textFilesUpload).Accept(".txt,.md,.csv").Placeholder("Select text files")
 
                   | Text.Block("PDF Files")
                   | Text.InlineCode(".pdf")
-                  | pdfFiles.ToFileInput().Accept(".pdf").Placeholder("Select PDF files")
+                  | pdfFiles.ToFileInput(pdfFilesUpload).Accept(".pdf").Placeholder("Select PDF files")
 
                   | Text.Block("Images")
                   | Text.InlineCode(".jpg,.jpeg,.png,.gif,.webp")
-                  | imageFiles.ToFileInput().Accept(".jpg,.jpeg,.png,.gif,.webp").Placeholder("Select image files")
+                  | imageFiles.ToFileInput(imageFilesUpload).Accept(".jpg,.jpeg,.png,.gif,.webp").Placeholder("Select image files")
 
                   | Text.Block("All Files")
                   | Text.InlineCode("(default)")
-                  | singleFile.ToFileInput().Placeholder("Select any file")
-               )
+                  | singleLimitFile.ToFileInput(singleLimitFileUpload).Placeholder("Select any file")
+               );
+    }
+}
 
-               // File Count Limits:
+public class FileInputCountLimits : ViewBase
+{
+    public override object? Build()
+    {
+        var limitedFiles = UseState(ImmutableArray.Create<FileUpload<byte[]>>());
+        var singleLimitFile = UseState<FileUpload<byte[]>?>(() => null);
+        var multipleLimitFiles = UseState(ImmutableArray.Create<FileUpload<byte[]>>());
+
+        var limitedFilesUpload = this.UseUpload(MemoryStreamUploadHandler.Create(limitedFiles));
+        var singleLimitFileUpload = this.UseUpload(MemoryStreamUploadHandler.Create(singleLimitFile));
+        var multipleLimitFilesUpload = this.UseUpload(MemoryStreamUploadHandler.Create(multipleLimitFiles));
+
+        return Layout.Vertical()
                | Text.H2("File Count Limits")
+               | Text.P("Control the maximum number of files that can be selected using the MaxFiles property.")
                | (Layout.Grid().Columns(3)
                   | Text.InlineCode("Max Files")
                   | Text.InlineCode("Description")
@@ -148,106 +197,99 @@ public class FileInputApp : SampleBase
 
                   | Text.Block("No Limit")
                   | Text.Block("Default behavior - no restriction on number of files")
-                  | multipleFiles.ToFileInput().Placeholder("Select unlimited files")
+                  | limitedFiles.ToFileInput(limitedFilesUpload).Placeholder("Select unlimited files")
 
                   | Text.Block("1 File")
                   | Text.Block("Single file selection only")
-                  | singleFile.ToFileInput().Placeholder("Select one file")
+                  | singleLimitFile.ToFileInput(singleLimitFileUpload).Placeholder("Select one file")
 
                   | Text.Block("3 Files")
                   | Text.Block("Maximum of 3 files allowed")
-                  | multipleFiles.ToFileInput().MaxFiles(3).Placeholder("Select up to 3 files")
+                  | multipleLimitFiles.ToFileInput(multipleLimitFilesUpload).MaxFiles(3).Placeholder("Select up to 3 files")
+               );
+    }
+}
 
-                  | Text.Block("5 Files")
-                  | Text.Block("Maximum of 5 files allowed")
-                  | multipleFiles.ToFileInput().MaxFiles(5).Placeholder("Select up to 5 files")
-               )
+public class FileInputContentDisplay : ViewBase
+{
+    public override object? Build()
+    {
+        var singleLimitFile = UseState<FileUpload<byte[]>?>(() => null);
+        var singleLimitFileUpload = this.UseUpload(MemoryStreamUploadHandler.Create(singleLimitFile));
 
-               // Events: 
-               | Text.H2("Events")
-               | Text.H3("OnChange")
-               | Layout.Horizontal(
-                   new FileInput<FileInput?>(onChangedState.Value, e =>
-                   {
-                       onChangedState.Set(e.Value);
-                       onChangeLabel.Set("Changed");
-                   }),
-                   onChangeLabel
-               )
-               | Text.H3("OnBlur")
-               | Layout.Horizontal(
-                   onBlurState.ToFileInput().HandleBlur(e => onBlurLabel.Set("Blur")),
-                   onBlurLabel
-               )
-
-               // File Content Display:
+        return Layout.Vertical()
                | Text.H2("File Content Display")
+               | Text.P("Display file details and metadata after selection, showing information like file name, size, content type, and upload progress.")
                | (Layout.Grid().Columns(2)
                   | Text.InlineCode("File Input")
                   | Text.InlineCode("File Details")
 
-                  | singleFile.ToFileInput().Placeholder("Select a text file to view content")
-                  | (singleFile.Value != null ? (object)singleFile.ToDetails().Remove(e => e!.Content) : Text.Block("No file selected"))
+                  | singleLimitFile.ToFileInput(singleLimitFileUpload).Placeholder("Select a text file to view content")
+                  | (singleLimitFile.Value != null ? (object)singleLimitFile.Value.ToDetails() : Text.Block("No file selected"))
 
-                  | singleFile.ToFileInput().Placeholder("Select a file to view as plain text")
-                  | (singleFile.Value?.ToPlainText() ?? (object)Text.Block("No file selected"))
-               )
+               // | singleFile.ToFileInput(singleFileUpload).Placeholder("Select a file to view as plain text")
+               // | (singleFile.Value?.ToPlainText() ?? (object)Text.Block("No file selected"))
+               );
+    }
+}
 
-               // Backend Validation:
-               | Text.H2("Backend Validation")
-               | Text.P("The backend provides validation methods that can be used to validate files against Accept patterns and MaxFiles limits:")
-               | (Layout.Grid().Columns(2)
-                  | Text.InlineCode("Validation Method")
-                  | Text.InlineCode("Usage Example")
-
-                  | Text.Block("Validate Single File")
-                  | Text.Code("var validation = fileInput.ValidateFile(file);\nif (!validation.IsValid) {\n    // Handle error\n}")
-
-                  | Text.Block("Validate Multiple Files")
-                  | Text.Code("var validation = fileInput.ValidateFiles(files);\nif (!validation.IsValid) {\n    // Handle error\n}")
-
-                  | Text.Block("Validate Any Value")
-                  | Text.Code("var validation = fileInput.ValidateValue(value);\nif (!validation.IsValid) {\n    // Handle error\n}")
-
-                  | Text.Block("Supported Patterns")
-                  | Text.Code(".txt,.pdf          // File extensions\nimage/*           // MIME type wildcards\ntext/plain        // Exact MIME types")
-               )
-
-               // Automatic Validation Examples:
-               | Text.H2("Automatic Validation Examples")
-               | Text.P("FileInput automatically validates files when Accept or MaxFiles is set:")
-               | (Layout.Grid().Columns(2)
-                  | Text.InlineCode("Description")
-                  | Text.InlineCode("File Input")
-
-                  | Text.Block("Single file with type validation")
-                  | singleFileWithValidation.ToFileInput().Accept(".txt,.pdf").Placeholder("Select .txt or .pdf file")
-
-                  | Text.Block("Multiple files with count and type validation")
-                  | validatedFiles.ToFileInput().MaxFiles(3).Accept("image/*").Placeholder("Select up to 3 image files")
-               )
-
-               // File Upload Form with Different Sizes:
-               | Text.H2("File Upload Form with Different Sizes")
-               | new SizingExample()
-            ;
+public class FileInputFormExample : ViewBase
+{
+    public override object? Build()
+    {
+        return Layout.Vertical()
+               | Text.H2("Form Example")
+               | Text.P("Example of integrating file inputs into a form with different sizes, file type restrictions, and size limits.")
+               | new SizingExample();
     }
 }
 
 public class SizingExample : ViewBase
 {
-    public record FileModel(FileInput? ProfilePhoto, FileInput? Document, FileInput? Certificate);
+    public record FileModel(FileUpload<byte[]>? ProfilePhoto, FileUpload<byte[]>? Document, FileUpload<byte[]>? Certificate);
 
     public override object? Build()
     {
         var fileModel = UseState(() => new FileModel(null, null, null));
 
+        // Profile Photo: 5 MB max, Large size
+        const long profilePhotoMaxSize = 5 * 1024 * 1024; // 5 MB
+
+        // Document: 10 MB max, Medium size (default)
+        const long documentMaxSize = 10 * 1024 * 1024; // 10 MB
+
+        // Certificate: 2 MB max, Small size
+        const long certificateMaxSize = 2 * 1024 * 1024; // 2 MB
+
         return Layout.Vertical()
             | new Card(
                 fileModel.ToForm()
-                    .Builder(m => m.ProfilePhoto, s => s.ToFileInput().Large().Accept("image/*"))
-                    .Builder(m => m.Document, s => s.ToFileInput().Accept(".pdf,.doc,.docx"))
-                    .Builder(m => m.Certificate, s => s.ToFileInput().Small().Accept(".pdf"))
+                    .Builder(m => m.ProfilePhoto, (state, view) =>
+                    {
+                        var uploadContext = view.UseUpload(MemoryStreamUploadHandler.Create(state))
+                            .Accept("image/*")
+                            .MaxFileSize(profilePhotoMaxSize);
+                        return state.ToFileInput(uploadContext)
+                            .Large()
+                            .Placeholder($"Upload profile photo (max {Utils.FormatBytes(profilePhotoMaxSize)})");
+                    })
+                    .Builder(m => m.Document, (state, view) =>
+                    {
+                        var uploadContext = view.UseUpload(MemoryStreamUploadHandler.Create(state))
+                            .Accept(".pdf,.doc,.docx")
+                            .MaxFileSize(documentMaxSize);
+                        return state.ToFileInput(uploadContext)
+                            .Placeholder($"Upload document (max {Utils.FormatBytes(documentMaxSize)})");
+                    })
+                    .Builder(m => m.Certificate, (state, view) =>
+                    {
+                        var uploadContext = view.UseUpload(MemoryStreamUploadHandler.Create(state))
+                            .Accept(".pdf")
+                            .MaxFileSize(certificateMaxSize);
+                        return state.ToFileInput(uploadContext)
+                            .Small()
+                            .Placeholder($"Upload certificate (max {Utils.FormatBytes(certificateMaxSize)})");
+                    })
                     .Label(m => m.ProfilePhoto, "Profile Photo")
                     .Label(m => m.Document, "Document")
                     .Label(m => m.Certificate, "Certificate")

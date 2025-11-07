@@ -1,11 +1,19 @@
 import React from 'react';
 import { Sizes } from '@/types/sizes';
+import Icon from '@/components/Icon';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 interface FieldWidgetProps {
   id: string;
   label: string;
   description?: string;
   required: boolean;
+  help?: string;
   children?: React.ReactNode;
   size?: Sizes;
 }
@@ -14,6 +22,7 @@ export const FieldWidget: React.FC<FieldWidgetProps> = ({
   label,
   description,
   required,
+  help,
   children,
   size = Sizes.Medium,
 }) => {
@@ -36,12 +45,36 @@ export const FieldWidget: React.FC<FieldWidgetProps> = ({
   return (
     <div className={`flex flex-col ${gapClass} flex-1 min-w-0`}>
       {label && (
-        <label
-          className={`${labelSizeClass} font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70`}
-        >
-          {label}{' '}
-          {required && <span className="font-mono text-primary">*</span>}
-        </label>
+        <div className="flex items-center gap-1.5">
+          <label
+            className={`${labelSizeClass} font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70`}
+          >
+            {label}{' '}
+            {required && <span className="font-mono text-primary">*</span>}
+          </label>
+          {help && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    type="button"
+                    aria-label="Help"
+                    className="inline-flex items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
+                  >
+                    <Icon
+                      name="Info"
+                      size="14"
+                      className="text-muted-foreground hover:text-foreground transition-colors"
+                    />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent className="bg-popover text-popover-foreground shadow-md">
+                  {help}
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
+        </div>
       )}
       {children}
       {description && (

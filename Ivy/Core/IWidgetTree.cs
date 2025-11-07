@@ -41,7 +41,7 @@ public interface IWidgetTree : IDisposable
     /// <param name="eventName">The name of the event to trigger.</param>
     /// <param name="args">The arguments to pass with the event as a JSON array.</param>
     /// <returns>True if the event was successfully triggered, false otherwise.</returns>
-    public bool TriggerEvent(string widgetId, string eventName, JsonArray args);
+    public Task<bool> TriggerEventAsync(string widgetId, string eventName, JsonArray args);
 
     /// <summary>
     /// Performs a hot reload of the widget tree, allowing for dynamic updates

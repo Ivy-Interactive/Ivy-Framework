@@ -11,6 +11,7 @@ interface Column {
   color: string;
   order: number;
   widgetId: string;
+  width?: string;
 }
 
 interface TaskWithWidgetId extends Task {
@@ -65,6 +66,7 @@ export const KanbanWidget: React.FC<KanbanWidgetProps> = ({
             order: (columnProps?.order as number) || 999,
             widgetId:
               (columnProps?.id as string) || (columnProps?.columnKey as string),
+            width: columnProps?.width as string | undefined,
           };
           extractedColumns.push(column);
 
@@ -195,6 +197,7 @@ export const KanbanWidget: React.FC<KanbanWidgetProps> = ({
                 id={column.id}
                 name={column.name}
                 color={column.color}
+                width={column.width}
               >
                 <KanbanCards id={column.id}>
                   {(task: Task) => (
@@ -204,7 +207,13 @@ export const KanbanWidget: React.FC<KanbanWidgetProps> = ({
                           <KanbanHeader>
                             <div className="flex items-center justify-between gap-2">
                               <div className="flex items-center gap-2">
-                                <CardTitle className="text-sm">
+                                <CardTitle
+                                  className="text-sm cursor-pointer hover:underline hover:text-primary transition-colors"
+                                  onClick={(e: React.MouseEvent) => {
+                                    e.stopPropagation();
+                                    handleCardClick(task.id);
+                                  }}
+                                >
                                   {task.title}
                                 </CardTitle>
                               </div>
@@ -216,7 +225,7 @@ export const KanbanWidget: React.FC<KanbanWidgetProps> = ({
                         </CardHeader>
                         <CardContent>
                           <KanbanCardContent>
-                            <p className="text-xs text-muted-foreground">
+                            <p className="text-xs text-muted-foreground whitespace-pre-line">
                               {task.description}
                             </p>
                             {task.assignee && (
