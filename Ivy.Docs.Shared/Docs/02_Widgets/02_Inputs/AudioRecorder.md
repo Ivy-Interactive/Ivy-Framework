@@ -6,9 +6,6 @@ searchHints:
   - audio
   - capture
   - sound
-imports:
-  - Ivy.Services
-  - Ivy.Core
 ---
 
 # Audio Recorder
@@ -21,28 +18,31 @@ The `AudioRecorder` widget allows users to record audio using their microphone. 
 
 ## Basic Usage
 
-Here's a simple example of an `AudioRecorder` that uploads audio to the server:
+Here's a simple example of an `AudioRecorder` that uploads audio to the server and stores it in state:
 
 ```csharp demo-below
 public class BasicAudioRecorderDemo : ViewBase
 {
     public override object? Build()
     {
+        var audioFile = UseState<FileUpload<byte[]>?>();
         var upload = this.UseUpload(
-            (fileUpload, stream, cancellationToken) => Task.CompletedTask);
+            MemoryStreamUploadHandler.Create(audioFile),
+            defaultContentType: "audio/webm"
+        );
 
-        return new AudioRecorder(upload.Value, "Start recording", "Recording audio...");
+        return Layout.Vertical()
+               | new AudioRecorder(upload.Value, "Start recording", "Recording audio...")
+               | (audioFile.Value != null
+                   ? Text.P($"Recorded: {audioFile.Value.FileName} ({Utils.FormatBytes(audioFile.Value.Length)})")
+                   : null);
    }
 }
 ```
 
-## Upload Modes
-
-The audio recorder supports two upload modes:
-
 ### Chunked Upload (Streaming)
 
-Upload audio in chunks while recording:
+Upload audio in chunks while recording. Use `ChunkedMemoryStreamUploadHandler` to accumulate chunks into a single file:
 
 ```csharp demo-below
 public class ChunkedUploadDemo : ViewBase
@@ -50,20 +50,30 @@ public class ChunkedUploadDemo : ViewBase
     public override object? Build()
     {
         var client = UseService<IClientProvider>();
-        
+        var audioFile = UseState<FileUpload<byte[]>?>();
+        var chunkCount = UseState(0);
+
+        // Use ChunkedMemoryStreamUploadHandler to accumulate chunks into a single file
         var upload = this.UseUpload(
-            (fileUpload, stream, cancellationToken) => {
-                // Each chunk arrives as recording continues
-                client.Toast($"Chunk received: {fileUpload.Length} bytes");
-                return Task.CompletedTask;
-            }
+            ChunkedMemoryStreamUploadHandler.Create(audioFile),
+            defaultContentType: "audio/webm"
         );
 
-        return new AudioRecorder(upload.Value, "Record with streaming", "Streaming...")
-                   .ChunkInterval(1000); // Upload every 1 second
+        return Layout.Vertical().Gap(4)
+               | Text.P("Records audio and uploads in 2-second chunks while recording. Each chunk is accumulated into a single file.")
+               | new AudioRecorder(upload.Value, "Start chunked recording", "Recording (uploading every 2s)...")
+                   .ChunkInterval(2000)
+               | Text.Small($"Chunks received: {chunkCount.Value}")
+               | (audioFile.Value != null
+                   ? Text.Small($"Total accumulated: {Utils.FormatBytes(audioFile.Value.Length)}")
+                   : null);
     }
 }
 ```
+
+<Callout Type="tip">
+Use `MemoryStreamUploadHandler` for complete file uploads (uploads when recording stops) and `ChunkedMemoryStreamUploadHandler` for streaming uploads (uploads chunks during recording).
+</Callout>
 
 ## Audio Format
 
@@ -74,14 +84,20 @@ public class AudioFormatDemo : ViewBase
 {
     public override object? Build()
     {
+        var audioFile = UseState<FileUpload<byte[]>?>();
+
         // Use webm format (most compatible)
-        var webmUpload = this.UseUpload(
-            (fileUpload, stream, cancellationToken) => Task.CompletedTask,
+        var upload = this.UseUpload(
+            MemoryStreamUploadHandler.Create(audioFile),
             defaultContentType: "audio/webm"
         );
 
-        return new AudioRecorder(webmUpload.Value, "Record WebM", "Recording WebM...")
-                   .MimeType("audio/webm");
+        return Layout.Vertical()
+               | new AudioRecorder(upload.Value, "Record WebM", "Recording WebM...")
+                   .MimeType("audio/webm")
+               | (audioFile.Value != null
+                   ? Text.Small($"Format: {audioFile.Value.ContentType}, Size: {Utils.FormatBytes(audioFile.Value.Length)}")
+                   : null);
     }
 }
 ```
@@ -101,14 +117,19 @@ public class CustomLabelsDemo : ViewBase
 {
     public override object? Build()
     {
+        var audioFile = UseState<FileUpload<byte[]>?>();
         var upload = this.UseUpload(
-            (fileUpload, stream, cancellationToken) => Task.CompletedTask,
+            MemoryStreamUploadHandler.Create(audioFile),
             defaultContentType: "audio/webm"
         );
 
-        return new AudioRecorder(upload.Value)
+        return Layout.Vertical()
+               | new AudioRecorder(upload.Value)
                    .Label("Click to start voice memo")
-                   .RecordingLabel("Recording your voice...");
+                   .RecordingLabel("Recording your voice...")
+               | (audioFile.Value != null
+                   ? audioFile.Value.ToDetails()
+                   : null);
     }
 }
 ```
@@ -122,8 +143,9 @@ public class AudioRecorderDisabledDemo : ViewBase
 {
     public override object? Build()
     {
+        var audioFile = UseState<FileUpload<byte[]>?>();
         var upload = this.UseUpload(
-            (fileUpload, stream, cancellationToken) => Task.CompletedTask,
+            MemoryStreamUploadHandler.Create(audioFile),
             defaultContentType: "audio/webm"
         );
 
