@@ -170,7 +170,7 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
         )}
         {hasContent(slots?.SidebarFooter) && (
           <div className="flex flex-col shrink-0">
-            <div className="flex flex-col px-4 py-3 gap-4 min-h-0">
+            <div className="flex flex-col p-2 gap-4 min-h-0">
               {slots?.SidebarFooter}
             </div>
           </div>
