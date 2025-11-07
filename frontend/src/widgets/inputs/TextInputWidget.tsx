@@ -51,6 +51,12 @@ interface TextInputWidgetProps {
   'data-testid'?: string;
 }
 
+const EMAIL_VALIDATION_MESSAGE = 'Please enter a valid email address';
+
+const PASSWORD_VALIDATION_MESSAGE =
+  'Password must be at least 8 characters long';
+const MIN_PASSWORD_LENGTH = 8;
+
 // Utility to detect Mac platform
 const isMac =
   typeof navigator !== 'undefined' &&
@@ -606,6 +612,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
   const eventHandler = useEventHandler();
   const [localValue, setLocalValue] = useState(value);
   const [isFocused, setIsFocused] = useState(false);
+  const [hasBlurred, setHasBlurred] = useState(false);
   const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement | null>(null);
 
   // Update local value when server value changes and control is not focused
@@ -664,6 +671,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
 
   const handleBlur = useCallback(() => {
     setIsFocused(false);
+    setHasBlurred(true);
     if (events.includes('OnBlur')) eventHandler('OnBlur', id, []);
   }, [eventHandler, id, events]);
 
@@ -672,13 +680,42 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
     if (events.includes('OnFocus')) eventHandler('OnFocus', id, []);
   }, [eventHandler, id, events]);
 
+  const clientInvalid = useMemo(() => {
+    if (!hasBlurred || invalid) return undefined;
+
+    if (variant !== 'Email' && variant !== 'Password') {
+      return undefined;
+    }
+
+    const currentValue = localValue ?? '';
+    if (currentValue.trim() === '') {
+      return undefined;
+    }
+
+    if (variant === 'Email') {
+      if (typeof document === 'undefined') {
+        return undefined;
+      }
+      const emailInput = document.createElement('input');
+      emailInput.type = 'email';
+      emailInput.value = currentValue;
+      return emailInput.checkValidity() ? undefined : EMAIL_VALIDATION_MESSAGE;
+    }
+
+    return currentValue.length >= MIN_PASSWORD_LENGTH
+      ? undefined
+      : PASSWORD_VALIDATION_MESSAGE;
+  }, [hasBlurred, invalid, variant, localValue]);
+
+  const mergedInvalid = invalid ?? clientInvalid;
+
   const commonProps = useMemo(
     () => ({
       id,
       placeholder,
       value: localValue,
       disabled,
-      invalid,
+      invalid: mergedInvalid,
       width,
       height,
       events,
@@ -693,7 +730,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
       placeholder,
       localValue,
       disabled,
-      invalid,
+      mergedInvalid,
       events,
       width,
       height,

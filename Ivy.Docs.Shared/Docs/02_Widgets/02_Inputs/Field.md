@@ -105,4 +105,35 @@ public class MixedInputsDemo : ViewBase
 Use `Field` whenever you want **consistent form layout** across your application with labels, description and required asterisk.
 </Callout>
 
+## Email & Password Validation
+
+When you wrap `ToEmailInput()` or `ToPasswordInput()` with `Field`, the wrapper now mirrors the same validation used inside forms. After the user leaves the field, invalid entries automatically surface the appropriate error message.
+
+```csharp demo-below
+public class EmailPasswordValidationDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var email = UseState("");
+        var password = UseState("");
+
+        return Layout.Vertical().Gap(4)
+            | email.ToEmailInput()
+                .Placeholder("name@example.com")
+                .WithField()
+                .Label("Email")
+                .Description("Must be a valid email address")
+            | password.ToPasswordInput()
+                .Placeholder("Min. 8 characters")
+                .WithField()
+                .Label("Password")
+                .Description("Automatically validates length");
+    }
+}
+```
+
+<Callout Type="info">
+These validation messages appear as soon as the field blurs. Server-side validation still takes precedence if the backend returns an error.
+</Callout>
+
 <WidgetDocs Type="Ivy.Field" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Inputs/Field.cs"/>

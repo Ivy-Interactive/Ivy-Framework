@@ -199,6 +199,10 @@ public class FormBuilder<TModel> : ViewBase
             {
                 field.Validators.Add(Validators.CreateEmailValidator(field.Name));
             }
+            else if (field.Name.EndsWith("Password") && nonNullableType == typeof(string))
+            {
+                field.Validators.Add(Validators.CreatePasswordValidator());
+            }
         }
     }
 
