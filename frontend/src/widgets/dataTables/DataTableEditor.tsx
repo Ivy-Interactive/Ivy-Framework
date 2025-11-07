@@ -25,7 +25,7 @@ import { generateHeaderIcons, addStandardIcons } from './utils/headerIcons';
 import { ThemeColors } from '@/lib/color-utils';
 import { useEventHandler } from '@/components/event-handler';
 import { useColumnGroups } from './hooks/useColumnGroups';
-import { RowActionButtons } from './components/RowActionButtons';
+import { RowActionButtons } from './components/DataTableRowAction';
 import { RowAction } from './types/types';
 
 interface TableEditorProps {
