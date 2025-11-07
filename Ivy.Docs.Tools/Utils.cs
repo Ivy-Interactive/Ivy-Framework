@@ -87,24 +87,20 @@ public static class Utils
             input = input[1..];
         }
 
-        StringBuilder sb = new();
+        var withWordBoundaries = Regex.Replace(input, @"([A-Z]+)([A-Z][a-z])", "$1-$2");
+        withWordBoundaries = Regex.Replace(withWordBoundaries, @"([a-z0-9])([A-Z])", "$1-$2");
+        withWordBoundaries = withWordBoundaries
+            .Replace('_', '-')
+            .Replace(' ', '-');
 
-        for (int i = 0; i < input.Length; i++)
-        {
-            if (char.IsUpper(input[i]) && i > 0)
-            {
-                sb.Append('-');
-            }
-
-            sb.Append(char.ToLower(input[i]));
-        }
+        var normalized = Regex.Replace(withWordBoundaries, "-{2,}", "-").Trim('-').ToLowerInvariant();
 
         if (hadUnderscore)
         {
-            sb.Insert(0, '_');
+            normalized = "_" + normalized;
         }
 
-        return sb.ToString();
+        return normalized;
     }
 
     public static string GetRelativeFolderWithoutOrder(string inputFolder, string inputFile)
