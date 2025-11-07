@@ -347,12 +347,12 @@ describe('cellContent utilities', () => {
       }
     });
 
-    it('should create editable URI cell when editable=true', () => {
+    it('should create readonly URI cell (links are always readonly to prevent overlay issues)', () => {
       const url = 'https://github.com/user/repo';
       const cell = createLinkCell(url, true);
       if (cell.kind === GridCellKind.Uri) {
-        expect(cell.allowOverlay).toBe(true);
-        expect(cell.readonly).toBe(false);
+        expect(cell.allowOverlay).toBe(false);
+        expect(cell.readonly).toBe(true);
       }
     });
 
