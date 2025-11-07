@@ -258,62 +258,28 @@ public class DataTableBuilder<TModel> : ViewBase, IMemoized
         return this;
     }
 
-    /// <summary>
-    /// Sets the event handler called when a cell is clicked (single-click).
-    /// </summary>
-    /// <param name="handler">Event handler to invoke when a cell is clicked.</param>
-    /// <returns>The DataTableBuilder instance for method chaining.</returns>
-    /// <remarks>
-    /// <para><strong>Best Practice:</strong> Choose either OnCellClick OR OnCellActivated, not both.</para>
-    /// <para>Use OnCellClick for quick actions like navigation or showing details.</para>
-    /// <para>Use OnCellActivated (double-click) for deliberate actions like opening edit dialogs.</para>
-    /// </remarks>
+    /// <summary>Sets the event handler for cell clicks (single-click).</summary>
     public DataTableBuilder<TModel> OnCellClick(Func<Event<DataTable, CellClickEventArgs>, ValueTask> handler)
     {
         _onCellClick = handler;
         return this;
     }
 
-    /// <summary>
-    /// Sets the event handler called when a cell is activated (double-clicked).
-    /// </summary>
-    /// <param name="handler">Event handler to invoke when a cell is activated.</param>
-    /// <returns>The DataTableBuilder instance for method chaining.</returns>
-    /// <remarks>
-    /// <para><strong>Best Practice:</strong> Choose either OnCellClick OR OnCellActivated, not both.</para>
-    /// <para>Use OnCellActivated for deliberate actions like opening edit dialogs or entering edit mode.</para>
-    /// <para><strong>Mobile Note:</strong> Double-click is awkward on touch devices.</para>
-    /// </remarks>
+    /// <summary>Sets the event handler for cell activation (double-click).</summary>
     public DataTableBuilder<TModel> OnCellActivated(Func<Event<DataTable, CellClickEventArgs>, ValueTask> handler)
     {
         _onCellActivated = handler;
         return this;
     }
 
-    /// <summary>
-    /// Configures row action buttons that appear when hovering over a row.
-    /// </summary>
-    /// <param name="actions">Array of row actions to display.</param>
-    /// <returns>The DataTableBuilder instance for method chaining.</returns>
-    /// <remarks>
-    /// <para>Row actions appear as small icon buttons on the right side of each row when hovering.</para>
-    /// <para>Each action can have a custom icon and event name that will be handled by OnRowAction.</para>
-    /// </remarks>
+    /// <summary>Configures row action buttons that appear on hover.</summary>
     public DataTableBuilder<TModel> RowActions(params RowAction[] actions)
     {
         _rowActions = actions;
         return this;
     }
 
-    /// <summary>
-    /// Sets the event handler called when a row action button is clicked.
-    /// </summary>
-    /// <param name="handler">Event handler to invoke when a row action is clicked.</param>
-    /// <returns>The DataTableBuilder instance for method chaining.</returns>
-    /// <remarks>
-    /// <para>The event args include the action ID, event name, row index, and full row data.</para>
-    /// <para>Use a switch on EventName to handle different actions (e.g., "OnEdit", "OnDelete", "OnView").</para>
-    /// </remarks>
+    /// <summary>Sets the event handler for row action button clicks.</summary>
     public DataTableBuilder<TModel> OnRowAction(Func<Event<DataTable, RowActionClickEventArgs>, ValueTask> handler)
     {
         _onRowAction = handler;
