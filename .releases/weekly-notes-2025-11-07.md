@@ -45,12 +45,14 @@ The framework now checks if the selected tab index has actually changed before u
 App URLs in the framework now use a cleaner format without the `-app` suffix. This makes navigation URIs more concise and easier to read. The change applies to all app navigation scenarios, including programmatic navigation and documentation links.
 
 **Before:**
+
 ```csharp
 navigator.Navigate("app://concepts/links-app");
 navigator.Navigate("app://hidden/hidden-args-app", args);
 ```
 
 **After:**
+
 ```csharp
 navigator.Navigate("app://concepts/links");
 navigator.Navigate("app://hidden/hidden-args", args);
@@ -129,6 +131,7 @@ When the Expandable is disabled, the entire header area correctly shows a "not-a
 The Kanban widget has received several visual and UX improvements for a cleaner, more modern appearance:
 
 **Visual Enhancements:**
+
 - **Cleaner layout**: Removed vertical borders from scroll bars and column containers, reducing visual clutter
 - **Better spacing**: Reduced gaps between cards and columns for a more compact, organized appearance
 - **Card title interaction**: Only card titles are now clickable and show a hover underline effect, making it clearer where to click to open cards
@@ -306,6 +309,7 @@ public override object? Build()
 **Row Action Properties:**
 
 Each `RowAction` has the following properties:
+
 - **Id**: Unique identifier for the action
 - **Icon**: Lucide icon name (e.g., "Pencil", "Trash", "Eye", "EllipsisVertical")
 - **EventName**: The event name passed to your handler (useful for routing different actions)
@@ -314,6 +318,7 @@ Each `RowAction` has the following properties:
 **RowActionClickEventArgs Properties:**
 
 When a row action is clicked, the event handler receives these details:
+
 - **ActionId**: The ID of the clicked action
 - **EventName**: The event name you configured
 - **RowIndex**: The zero-based index of the row
@@ -383,6 +388,7 @@ public override object? Build()
 **CellClickEventArgs Properties:**
 
 Both event handlers receive these properties:
+
 - **RowIndex**: The zero-based row index of the clicked cell
 - **ColumnIndex**: The zero-based column index
 - **ColumnName**: The name of the column (as configured in your DataTable)
@@ -437,6 +443,7 @@ return new Fragment(
 **Implementation Details:**
 
 The `UseDataTable` hook now:
+
 1. Creates the connection only once using a `hasRun` flag
 2. Disables automatic rebuilding when the connection state changes (`buildOnChange: false`)
 3. Properly registers cleanup handlers to dispose connections when the view is unmounted
@@ -521,12 +528,14 @@ You can filter or reorder the default footer items (Theme, GitHub, Logout) using
 ```
 
 The transformer receives two parameters:
+
 - `items`: The default footer menu items (Theme, GitHub, Logout, etc.)
 - `navigator`: An `INavigator` instance for programmatic navigation
 
 **Default Item Tags:**
 
 The framework assigns tags to default menu items for easy identification:
+
 - `$theme` - Theme selector menu
 - `$github` - GitHub repository link
 - `$logout` - Logout action
@@ -572,6 +581,7 @@ Users can now filter DateTime columns using intuitive expressions:
 ```
 
 **Supported Operators:**
+
 - Equality: `=`, `!=`
 - Comparison: `>`, `<`, `>=`, `<=`
 - Null checks: `is blank`, `is not blank`
@@ -627,6 +637,7 @@ return employees.ToDataTable()
 **Filtering:**
 
 The Labels column type supports intelligent filtering:
+
 - **Equals filter**: Shows rows where the label array contains the specified value
 - **Not equals filter**: Shows rows where the label array does not contain the specified value
 - **Dropdown values**: When you click the filter dropdown, all unique labels across all rows are listed as individual options, even if they appear in different arrays
@@ -693,6 +704,7 @@ public override object? Build()
 **Link Cell Properties:**
 
 Link columns automatically:
+
 - Display the full URL as text in the cell
 - Show hover effects to indicate interactivity
 - Prevent cell selection (which could cause visual artifacts)
@@ -891,6 +903,7 @@ public override ChromeSettings GetChromeSettings()
 When users close all tabs, the wallpaper app automatically displays in the main content area. Once a user opens a new tab, the wallpaper disappears and the normal tab interface returns.
 
 This feature works exclusively with tab-based Chrome navigation. Use it to create:
+
 - Welcome screens with quick actions
 - Dashboard views showing key metrics
 - Branded landing pages
@@ -962,6 +975,7 @@ The toolbox automatically adapts to your application's theme and positions itsel
 The PieChart widget now has a cleaner, more intuitive API. Instead of configuring complex `Pie` objects with explicit measure and dimension names, you can now use the simplified `.Pie()` method that automatically reads from your `PieChartData` records:
 
 **New simplified approach:**
+
 ```csharp
 // Create data using PieChartData records
 var data = new[]
@@ -978,6 +992,7 @@ return new PieChart(data)
 ```
 
 **Previous approach (still supported):**
+
 ```csharp
 return new PieChart(data)
     .Pie(new Pie("Population", "Country")
@@ -1016,6 +1031,7 @@ ivy connect openapi add https://api.example.com/openapi.json
 ```
 
 The generated connection class automatically:
+
 - Extracts available endpoints from the generated client interface
 - Registers the API client in your service collection
 - Manages secrets through environment variables
@@ -1075,6 +1091,7 @@ File uploads now use a streamlined three-component architecture:
 3. **Upload Handlers**: Automatically manage file data and progress
 
 **Before (old API):**
+
 ```csharp
 // Old way - manual handling
 var files = UseState<FileInput?>(() => null);
@@ -1086,6 +1103,7 @@ return files.ToFileInput(uploadUrl, "Choose a file");
 ```
 
 **After (new API):**
+
 ```csharp
 // New way - automatic state management
 var file = UseState<FileUpload<byte[]>?>();
@@ -1116,6 +1134,7 @@ public record FileUpload<TContent>
 ### Built-in Upload Handlers
 
 **MemoryStreamUploadHandler** - For standard uploads:
+
 ```csharp
 // Binary content (byte[])
 var file = UseState<FileUpload<byte[]>?>();
@@ -1131,6 +1150,7 @@ var upload = this.UseUpload(MemoryStreamUploadHandler.Create(files));
 ```
 
 **ChunkedMemoryStreamUploadHandler** - For streaming uploads (e.g., audio recording):
+
 ```csharp
 var audioFile = UseState<FileUpload<byte[]>?>();
 var upload = this.UseUpload(ChunkedMemoryStreamUploadHandler.Create(audioFile));
@@ -1325,6 +1345,7 @@ The improvement is automatic and requires no code changes—your existing apps w
 The Button widget's `.Loading()` method now accepts an `IState<bool>` parameter directly, eliminating the need to manually extract the `.Value` property:
 
 **New simplified approach:**
+
 ```csharp
 var loading = UseState(false);
 return new Button("Submit")
@@ -1333,6 +1354,7 @@ return new Button("Submit")
 ```
 
 **Previous approach (still works):**
+
 ```csharp
 var loading = UseState(false);
 return new Button("Submit")
@@ -1347,6 +1369,7 @@ This small improvement makes button loading states more concise and consistent w
 MenuItem now supports a convenient pipe operator (`|`) for composing parent-child menu structures. This makes it much more readable to build nested menus with multiple children:
 
 **New approach with pipe operator:**
+
 ```csharp
 var menu = MenuItem.Default("File")
     .Icon(Icons.Folder)
@@ -1356,6 +1379,7 @@ var menu = MenuItem.Default("File")
 ```
 
 **Previous approach:**
+
 ```csharp
 var menu = MenuItem.Default("File")
     .Icon(Icons.Folder)
@@ -1516,6 +1540,7 @@ return table.Builder<User>()
 The builder method `.Config()` still works the same way—the change is purely internal with the type rename from `DataTableConfiguration` to `DataTableConfig`. This makes the API more concise while maintaining all functionality.
 
 On the frontend, the TypeScript types have been updated accordingly:
+
 - `DataTableConfiguration` interface is now `DataTableConfig`
 - The `configuration` prop is now `config`
 
@@ -1554,6 +1579,7 @@ With authentication enabled, these operations are now protected:
 **User Feedback:**
 
 When authentication fails, users now receive clear feedback:
+
 - **Toast notifications** appear explaining the authentication failure
 - **Error messages** provide context about missing or invalid tokens
 - **HTTP 401 responses** are returned for unauthorized requests
@@ -1561,6 +1587,7 @@ When authentication fails, users now receive clear feedback:
 **Auth Token Handling:**
 
 The framework includes improved auth token management:
+
 - **Smart cookie handling**: Auth tokens that exceed browser cookie size limits (4KB) are automatically split across multiple cookies
 - **URL-encoded length calculation**: Token size validation now correctly accounts for URL encoding overhead
 - **Token extraction**: The new `AuthHelper` class provides utilities for extracting tokens from HTTP and gRPC contexts
@@ -1590,6 +1617,7 @@ public class MyController : Controller
 **New Exception Types:**
 
 The framework now provides specific exception types for authentication errors:
+
 - `MissingAuthTokenException` - No token provided
 - `InvalidAuthTokenException` - Token is invalid or expired
 - `AuthProviderNotConfiguredException` - Auth provider not set up correctly
@@ -1602,6 +1630,7 @@ These changes ensure that your authenticated apps properly protect all data acce
 The frontend has received a comprehensive security update with all npm packages updated to their latest versions. This update improves the overall security posture of Ivy applications by addressing known vulnerabilities and ensuring compatibility with the latest browser security standards.
 
 Key dependency updates include:
+
 - Updated all Radix UI components to latest versions for improved accessibility and performance
 - Updated React syntax highlighter for better code display
 - Updated Mermaid to version 11.12.1 for improved diagram rendering
@@ -1697,6 +1726,7 @@ echo "A task management system" | ivy db generate --yes-to-all
 ```
 
 **Available Options:**
+
 - `--prompt` - Database schema description in plain English
 - `--dbml` - DBML schema content (alternative to prompt)
 - `--provider` - Database provider: `Sqlite`, `Postgres`, `MySql`, or `SqlServer`
@@ -1748,6 +1778,7 @@ ivy init --yes-to-all --namespace MyApp --prerelease
 ```
 
 **What happens with `--yes-to-all`:**
+
 - **Namespace:** Automatically uses the current folder name as the namespace (or "IvyApplication" if the folder name is invalid/reserved)
 - **Template:** Skips template selection and creates a basic project without applying any template
 
