@@ -1,6 +1,6 @@
 import React from 'react';
 import Icon from '@/components/Icon';
-import { RowAction } from '../types/types';
+import { RowAction } from './types/types';
 
 interface RowActionButtonsProps {
   /**

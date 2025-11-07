@@ -102,8 +102,6 @@ export const TableProvider: React.FC<TableProviderProps> = ({
 
   // Update columns when columnsProp changes
   useEffect(() => {
-    // DEBUG: Uncomment to track column updates
-    // console.log('[DataTable] columnsProp changed, triggering column update');
     // Don't update columns during reordering
     if (isReorderingRef.current) return;
 
@@ -113,15 +111,11 @@ export const TableProvider: React.FC<TableProviderProps> = ({
         prevColumns.length !== columnsProp.length ||
         prevColumns.some((col, idx) => col.name !== columnsProp[idx].name)
       ) {
-        // DEBUG: Uncomment to track structure changes
-        // console.log('[DataTable] Column structure changed, resetting order');
         // Structure changed, reset column order
         setColumnOrder([]);
         return columnsProp;
       }
       // Same structure, just update metadata without resetting order
-      // DEBUG: Uncomment to track preservation
-      // console.log('[DataTable] Column structure unchanged, preserving order');
       return columnsProp;
     });
   }, [columnsProp]);
@@ -139,16 +133,12 @@ export const TableProvider: React.FC<TableProviderProps> = ({
 
   // Load initial data
   useEffect(() => {
-    // DEBUG: Uncomment to track data loading
-    // console.log('[DataTable] Load initial data effect triggered');
     const loadInitialData = async () => {
       if (!connection.port || !connection.path) {
         setError('Connection configuration is required');
         return;
       }
 
-      // DEBUG: Uncomment to track data fetch start
-      // console.log('[DataTable] Starting data fetch');
       setIsLoading(true);
       setError(null);
 
