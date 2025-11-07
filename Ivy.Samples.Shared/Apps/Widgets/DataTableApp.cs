@@ -108,8 +108,8 @@ public class DataTableApp : SampleBase
         // The DataTable builder will be recreated each time, but use the cached employee data
         var dataTable = employees.Value.AsQueryable().ToDataTable()
             // Table dimensions (fix for issue #1311)
-            .Width(Size.Units(120))     // Table width set to 120 units (30rem)
-            .Height(Size.Units(120)) // Table height set to 120 units (30rem)
+            .Width(Size.Full())     // Table width set to 120 units (30rem)
+            .Height(Size.Full()) // Table height set to 120 units (30rem)
 
 
             // Numeric columns

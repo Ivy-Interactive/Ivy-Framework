@@ -336,7 +336,11 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
           // Subtract container offset to get position relative to container
           const buttonHeight = 24;
           const buttonTop =
-            bounds.y - containerRect.top + bounds.height / 2 - buttonHeight / 2;
+            bounds.y -
+            containerRect.top +
+            bounds.height / 2 -
+            buttonHeight / 2 -
+            1.5;
           setActionButtonsTop(buttonTop);
         }
       }
