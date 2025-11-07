@@ -63,7 +63,9 @@ public class DataTableApp : SampleBase
 
             return Enumerable.Range(1, 1000).Select(i =>
             {
-                var name = $"{firstNames[random.Next(firstNames.Length)]} {lastNames[random.Next(lastNames.Length)]}";
+                var firstName = firstNames[random.Next(firstNames.Length)];
+                var lastName = lastNames[random.Next(lastNames.Length)];
+                var name = $"{firstName} {lastName}";
                 var email = $"employee{i}@company.com";
                 var age = random.Next(22, 65);
                 var salary = (decimal)(random.Next(30000, 150000) / 1000 * 1000);
