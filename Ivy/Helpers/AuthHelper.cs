@@ -47,9 +47,12 @@ public static class AuthHelper
     /// Checks if the server has an AuthProviderType configured, and if so, validates the auth token.
     /// </summary>
     /// <param name="server">The Server instance to check for authentication requirements.</param>
-    /// <param name="serviceProvider">The service provider to resolve the IAuthProvider from.</param>
+    /// <param name="sessionStore">The AppSessionStore to retrieve the session and service provider from.</param>
+    /// <param name="connectionId">The connection ID to identify the session.</param>
     /// <param name="context">The gRPC ServerCallContext containing the auth token in cookies.</param>
     /// <exception cref="RpcException">
+    /// Thrown with StatusCode.InvalidArgument if connectionId is null or empty.
+    /// Thrown with StatusCode.NotFound if the session for the connectionId is not found.
     /// Thrown with StatusCode.Unauthenticated if:
     /// - Authentication is required but no valid token is provided
     /// - The provided token is invalid or expired
@@ -60,7 +63,7 @@ public static class AuthHelper
     /// <remarks>
     /// This method is a no-op if the server does not require authentication (server.AuthProviderType == null).
     /// </remarks>
-    public static async Task ValidateAuthIfRequired(Server server, IServiceProvider serviceProvider, ServerCallContext context)
+    public static async Task ValidateAuthIfRequired(Server server, AppSessionStore sessionStore, string connectionId, ServerCallContext context)
     {
         // Check if auth is required
         if (server.AuthProviderType == null)
@@ -68,8 +71,19 @@ public static class AuthHelper
             return;
         }
 
+        if (string.IsNullOrEmpty(connectionId))
+        {
+            throw new RpcException(new Status(StatusCode.InvalidArgument, "ConnectionId is required in the request."));
+        }
+
+        if (!sessionStore.Sessions.TryGetValue(connectionId, out var session))
+        {
+            throw new RpcException(new Status(StatusCode.NotFound, $"Connection '{connectionId}' not found."));
+        }
+
         var authToken = GetAuthToken(context);
 
+        var serviceProvider = session.AppServices;
         var clientProvider = serviceProvider.GetRequiredService<IClientProvider>();
         try
         {
