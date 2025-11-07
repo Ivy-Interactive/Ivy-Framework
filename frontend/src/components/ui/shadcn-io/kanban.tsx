@@ -9,6 +9,7 @@ import {
 } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
+import { getWidth } from '@/lib/styles';
 
 // Types
 export interface Task {
@@ -133,6 +134,7 @@ interface KanbanColumnProps {
   id: string;
   name?: string;
   color?: string;
+  width?: string;
   children: ReactNode;
   className?: string;
 }
@@ -141,6 +143,7 @@ export function KanbanColumn({
   id,
   name,
   color,
+  width,
   children,
   className,
 }: KanbanColumnProps) {
@@ -189,20 +192,25 @@ export function KanbanColumn({
   // Only show drag-over styling when actively dragging AND hovering over this column
   const showDragOver = isDragOver && draggedCardColumn !== null;
 
+  const widthStyles = width ? getWidth(width) : {};
+  const hasExplicitWidth = width && Object.keys(widthStyles).length > 0;
+
   return (
     <div
       className={cn(
-        'flex-1 bg-background border border-border rounded-lg p-4 min-h-0 flex flex-col transition-colors min-w-70',
+        hasExplicitWidth ? 'bg-background' : 'flex-1 bg-background',
+        'rounded-lg px-0 py-4 min-h-0 flex flex-col transition-colors min-w-70',
         showDragOver &&
-          'bg-accent border-accent-foreground border-2 border-dashed',
+          'bg-accent border-2 border-accent-foreground border-dashed rounded-lg',
         className
       )}
+      style={widthStyles}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
     >
       {/* Column Header */}
-      <div className="mb-4">
+      <div className="px-3">
         <h3 className="font-semibold text-foreground flex items-center gap-2">
           {color && (
             <div
@@ -230,7 +238,7 @@ export function KanbanCards({ id, children }: KanbanCardsProps) {
 
   return (
     <ScrollArea className="flex-1 min-h-0">
-      <div className="flex flex-col gap-3 p-1">
+      <div className="flex flex-col gap-3 p-3">
         {columnTasks.map(task => (
           <div key={task.id}>{children(task)}</div>
         ))}
@@ -256,7 +264,7 @@ export function KanbanCard({
   const [isDragging, setIsDragging] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-  const { onCardMove, data, setDraggedCardColumn, onCardClick, onCardDelete } =
+  const { onCardMove, data, setDraggedCardColumn, onCardDelete } =
     useKanbanContext();
 
   const handleDragStart = useCallback(
@@ -312,17 +320,6 @@ export function KanbanCard({
     [id, column, onCardMove, data]
   );
 
-  const handleClick = useCallback(
-    (e: React.MouseEvent) => {
-      // Only trigger click if not dragging
-      if (!isDragging) {
-        e.stopPropagation();
-        onCardClick?.(id);
-      }
-    },
-    [id, onCardClick, isDragging]
-  );
-
   const handleDelete = useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation();
@@ -340,7 +337,6 @@ export function KanbanCard({
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
-      onClick={handleClick}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       className={cn(

@@ -58,43 +58,36 @@ public record VideoPlayer : WidgetBase<VideoPlayer>
 /// </summary>
 public static class VideoPlayerExtensions
 {
-    /// <summary>Sets the video source URL or file path.</summary>
     public static VideoPlayer Source(this VideoPlayer widget, string source)
     {
         return widget with { Source = source };
     }
 
-    /// <summary>Sets autoplay mode.</summary>
     public static VideoPlayer Autoplay(this VideoPlayer widget, bool autoplay = true)
     {
         return widget with { Autoplay = autoplay };
     }
 
-    /// <summary>Enables or disables playback controls.</summary>
     public static VideoPlayer Controls(this VideoPlayer widget, bool controls = true)
     {
         return widget with { Controls = controls };
     }
 
-    /// <summary>Sets muted state.</summary>
     public static VideoPlayer Muted(this VideoPlayer widget, bool muted = true)
     {
         return widget with { Muted = muted };
     }
 
-    /// <summary>Sets looping behavior.</summary>
     public static VideoPlayer Loop(this VideoPlayer widget, bool loop = true)
     {
         return widget with { Loop = loop };
     }
 
-    /// <summary>Sets the poster image URL to display before the video starts or while loading.</summary>
     public static VideoPlayer Poster(this VideoPlayer widget, string? poster = null)
     {
         return widget with { Poster = poster };
     }
 
-    /// <summary>Sets a unique identifier for the video player instance.</summary> 
     public static VideoPlayer Id(this VideoPlayer widget, string id)
     {
         return widget with { Id = id };

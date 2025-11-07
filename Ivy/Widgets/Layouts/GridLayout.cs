@@ -133,52 +133,24 @@ public record GridLayout : WidgetBase<GridLayout>
 /// </summary>
 public static class GridExtensions
 {
-    /// <summary>
-    /// Sets the specific column position for a child element in the grid.
-    /// </summary>
-    /// <typeparam name="T">The type of the widget being positioned.</typeparam>
-    /// <param name="child">The child widget to position in the grid.</param>
-    /// <param name="column">The column index where the child should be placed (1-based indexing).</param>
-    /// <returns>The child widget with the grid column position set.</returns>
     public static WidgetBase<T> GridColumn<T>(this WidgetBase<T> child, int column) where T : WidgetBase<T>
     {
         child.SetAttachedValue(typeof(GridLayout), nameof(GridColumn), column);
         return child;
     }
 
-    /// <summary>
-    /// Sets how many columns a child element should span in the grid.
-    /// </summary>
-    /// <typeparam name="T">The type of the widget being positioned.</typeparam>
-    /// <param name="child">The child widget to configure for column spanning.</param>
-    /// <param name="columnSpan">The number of columns the child should span across.</param>
-    /// <returns>The child widget with the grid column span set.</returns>
     public static WidgetBase<T> GridColumnSpan<T>(this WidgetBase<T> child, int columnSpan) where T : WidgetBase<T>
     {
         child.SetAttachedValue(typeof(GridLayout), nameof(GridColumnSpan), columnSpan);
         return child;
     }
 
-    /// <summary>
-    /// Sets the specific row position for a child element in the grid.
-    /// </summary>
-    /// <typeparam name="T">The type of the widget being positioned.</typeparam>
-    /// <param name="child">The child widget to position in the grid.</param>
-    /// <param name="row">The row index where the child should be placed (1-based indexing).</param>
-    /// <returns>The child widget with the grid row position set.</returns>
     public static WidgetBase<T> GridRow<T>(this WidgetBase<T> child, int row) where T : WidgetBase<T>
     {
         child.SetAttachedValue(typeof(GridLayout), nameof(GridRow), row);
         return child;
     }
 
-    /// <summary>
-    /// Sets how many rows a child element should span in the grid.
-    /// </summary>
-    /// <typeparam name="T">The type of the widget being positioned.</typeparam>
-    /// <param name="child">The child widget to configure for row spanning.</param>
-    /// <param name="rowSpan">The number of rows the child should span across.</param>
-    /// <returns>The child widget with the grid row span set.</returns>
     public static WidgetBase<T> GridRowSpan<T>(this WidgetBase<T> child, int rowSpan) where T : WidgetBase<T>
     {
         child.SetAttachedValue(typeof(GridLayout), nameof(GridRowSpan), rowSpan);

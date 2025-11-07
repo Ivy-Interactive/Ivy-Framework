@@ -15,7 +15,7 @@ public class DataTableBuilder<TModel> : ViewBase
     private Size? _width;
     private Size? _height;
     private readonly Dictionary<string, InternalColumn> _columns;
-    private readonly DataTableConfiguration _configuration = new();
+    private readonly DataTableConfig _configuration = new();
 
     private class InternalColumn
     {
@@ -68,6 +68,11 @@ public class DataTableBuilder<TModel> : ViewBase
         if (underlyingType == typeof(Guid) || underlyingType.IsEnum)
             return Ivy.ColType.Text;
 
+        // Handle string arrays as Labels type
+        if (underlyingType.IsArray && underlyingType.GetElementType() == typeof(string))
+            return Ivy.ColType.Labels;
+
+        // Handle other arrays and collections as Text
         if (underlyingType.IsArray || typeof(System.Collections.IEnumerable).IsAssignableFrom(underlyingType))
             return Ivy.ColType.Text;
 
@@ -105,7 +110,7 @@ public class DataTableBuilder<TModel> : ViewBase
                 align = Shared.Align.Center;
             }
 
-            var removed = field.Name.StartsWith("_") && field.Name.Length > 1;
+            var removed = field.Name.StartsWith("_") && field.Name.Length > 1 && char.IsLetter(field.Name[1]);
 
             _columns[field.Name] = new InternalColumn()
             {
@@ -122,12 +127,22 @@ public class DataTableBuilder<TModel> : ViewBase
         }
     }
 
+    /// <summary>
+    /// Sets the overall width of the DataTable. For column-specific widths, use Width(Expression, Size).
+    /// </summary>
+    /// <param name="width">The desired width for the table.</param>
+    /// <returns>The builder for method chaining.</returns>
     public DataTableBuilder<TModel> Width(Size width)
     {
         _width = width;
         return this;
     }
 
+    /// <summary>
+    /// Sets the overall height of the DataTable.
+    /// </summary>
+    /// <param name="height">The desired height for the table.</param>
+    /// <returns>The builder for method chaining.</returns>
     public DataTableBuilder<TModel> Height(Size height)
     {
         _height = height;
@@ -239,7 +254,7 @@ public class DataTableBuilder<TModel> : ViewBase
         return this;
     }
 
-    public DataTableBuilder<TModel> Config(Action<DataTableConfiguration> config)
+    public DataTableBuilder<TModel> Config(Action<DataTableConfig> config)
     {
         config(_configuration);
         return this;

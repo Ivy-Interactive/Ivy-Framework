@@ -468,9 +468,14 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
                 isActive ? 'bg-accent text-accent-foreground' : ''
               }`}
               tabIndex={-1} // Not focusable
-              onClick={() =>
-                item.tag && eventHandler('OnSelect', id, [item.tag])
-              }
+              onClick={() => {
+                if (item.tag) {
+                  if (searchActive && flatIdx !== -1) {
+                    setSelectedIndex(flatIdx);
+                  }
+                  eventHandler('OnSelect', id, [item.tag]);
+                }
+              }}
               onMouseDown={e => onCtrlRightMouseClick(e, item)}
               onMouseEnter={() => {
                 if (searchActive) {

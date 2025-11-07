@@ -6,20 +6,21 @@ import { ThemeColors } from '@/lib/color-utils';
 export type ColorScheme = 'Default' | 'Rainbow';
 
 /**
- * Chart color variables from index.css (--chart-1 through --chart-10)
+ * Default color scheme variables from index.css
  * These colors are theme-aware and automatically change for light/dark mode
+ * Uses existing chromatic colors for better consistency
  */
-const chartColorVars = [
-  'chart-1',
-  'chart-2',
-  'chart-3',
-  'chart-4',
-  'chart-5',
-  'chart-6',
-  'chart-7',
-  'chart-8',
-  'chart-9',
-  'chart-10',
+const defaultColorVars = [
+  'emerald', // Green-cyan, high visibility
+  'red', // Red, high contrast
+  'teal', // Blue, distinct
+  'purple', // Purple, good contrast
+  'orange', // Orange, warm accent
+  'green', // Pure green
+  'cyan', // Cyan-blue, cool
+  'pink', // Pink, soft accent
+  'amber', // Yellow-orange, warm
+  'indigo', // Deep blue, distinct
 ];
 
 /**
@@ -49,7 +50,7 @@ const rainbowColorVars = [
  * Get chart colors from CSS variables
  * Reads color variables from index.css based on the selected scheme
  *
- * @param scheme - Color scheme ('Default' uses chart-1...5, 'Rainbow' uses blue, cyan, etc.)
+ * @param scheme - Color scheme ('Default' uses emerald, red, blue, etc., 'Rainbow' uses all chromatic colors)
  * @param themeColors - Theme colors (used as fallback if CSS variables unavailable)
  * @returns Array of hex color values from CSS variables
  */
@@ -70,8 +71,8 @@ export const getChartColors = (
       // Use rainbow color variables: --blue, --cyan, --yellow, etc.
       colorVars = rainbowColorVars;
     } else {
-      // Default: Use chart-specific variables: --chart-1, --chart-2, etc.
-      colorVars = chartColorVars;
+      // Default: Use default color scheme: --emerald, --red, --blue, etc.
+      colorVars = defaultColorVars;
     }
 
     const colors = colorVars

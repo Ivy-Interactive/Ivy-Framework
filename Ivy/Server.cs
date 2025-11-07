@@ -77,6 +77,7 @@ public class Server
         };
 
         Services.AddSingleton(_args);
+        Services.AddSingleton(Configuration);
     }
 
     public Server(FuncViewBuilder viewFactory) : this()
@@ -90,6 +91,11 @@ public class Server
             IsVisible = true
         });
         DefaultAppId = AppIds.Default;
+    }
+
+    public void AddApp<T>(bool isDefault = false)
+    {
+        AddApp(typeof(T), isDefault);
     }
 
     public void AddApp(Type appType, bool isDefault = false)

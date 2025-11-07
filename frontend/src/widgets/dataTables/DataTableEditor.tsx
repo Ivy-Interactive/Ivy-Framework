@@ -101,7 +101,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
       borderColor: showVerticalBorders
         ? colors.border || (isDark ? '#404045' : '#d1d5db')
         : 'transparent',
-      cellHorizontalPadding: 16,
+      cellHorizontalPadding: 8,
       cellVerticalPadding: 8,
       headerIconSize: 20,
       // Add proper text colors for group headers and icons

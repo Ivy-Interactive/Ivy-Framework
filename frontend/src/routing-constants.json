@@ -4,6 +4,7 @@
     "/webhook",
     "/auth",
     "/upload",
+    "/download",
     "/assets",
     "/fonts",
     "/_framework",

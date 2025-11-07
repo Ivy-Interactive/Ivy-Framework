@@ -166,83 +166,46 @@ public static class ButtonExtensions
         );
     }
 
-    /// <summary>Sets the title text for the button.</summary>
-    /// <param name="button">Button to configure.</param>
-    /// <param name="title">Text content to display on the button.</param>
-    /// <returns>New Button instance with updated title.</returns>
     public static Button Title(this Button button, string title)
     {
         return button with { Title = title };
     }
 
-    /// <summary>Sets the navigation URL for the button.</summary>
-    /// <param name="button">Button to configure.</param>
-    /// <param name="url">URL to navigate to when clicked.</param>
-    /// <returns>New Button instance with updated URL.</returns>
     public static Button Url(this Button button, string url)
     {
         return button with { Url = url };
     }
 
-    /// <summary>Sets the disabled state of the button.</summary>
-    /// <param name="button">Button to configure.</param>
-    /// <param name="disabled">Whether button should be disabled. Default is true.</param>
-    /// <returns>New Button instance with updated disabled state.</returns>
     public static Button Disabled(this Button button, bool disabled = true)
     {
         return button with { Disabled = disabled };
     }
 
-    /// <summary>Sets the icon and its position for the button.</summary>
-    /// <param name="button">Button to configure.</param>
-    /// <param name="icon">Icon to display, or null to remove icon.</param>
-    /// <param name="position">Icon position relative to title text. Default is <see cref="Align.Left"/>.</param>
-    /// <returns>New Button instance with updated icon and position.</returns>
     public static Button Icon(this Button button, Icons? icon, Align position = Align.Left)
     {
         return button with { Icon = icon, IconPosition = position };
     }
 
-    /// <summary>Sets the visual style variant for the button.</summary>
-    /// <param name="button">Button to configure.</param>
-    /// <param name="variant">Visual style variant to apply.</param>
-    /// <returns>New Button instance with updated variant.</returns>
     public static Button Variant(this Button button, ButtonVariant variant)
     {
         return button with { Variant = variant };
     }
 
-    /// <summary>Sets the foreground color for button text and icon.</summary>
-    /// <param name="button">Button to configure.</param>
-    /// <param name="color">Color to apply to text and icon.</param>
-    /// <returns>New Button instance with updated foreground color.</returns>
     public static Button Foreground(this Button button, Colors color)
     {
         return button with { Foreground = color };
     }
 
-    /// <summary>Sets the tooltip text for the button.</summary>
-    /// <param name="button">Button to configure.</param>
-    /// <param name="tooltip">Tooltip text to display when hovering.</param>
-    /// <returns>New Button instance with updated tooltip.</returns>
     public static Button Tooltip(this Button button, string tooltip)
     {
         return button with { Tooltip = tooltip };
     }
 
-    /// <summary>Sets the loading state of the button.</summary>
-    /// <param name="button">Button to configure.</param>
-    /// <param name="loading">Whether button should be in loading state. Default is true.</param>
-    /// <returns>New Button instance with updated loading state.</returns>
     public static Button Loading(this Button button, bool loading = true)
     {
         return button with { Loading = loading };
     }
 
-    /// <summary>Sets the click event handler for the button.</summary>
-    /// <param name="button">Button to configure.</param>
-    /// <param name="onClick">Event handler to call when clicked.</param>
-    /// <returns>New Button instance with updated click handler.</returns>
     public static Button HandleClick(this Button button, Func<Event<Button>, ValueTask> onClick)
     {
         return button with { OnClick = onClick };
@@ -253,10 +216,6 @@ public static class ButtonExtensions
         return button with { OnClick = onClick.ToValueTask() };
     }
 
-    /// <summary>Sets a simple click event handler for the button.</summary>
-    /// <param name="button">Button to configure.</param>
-    /// <param name="onClick">Simple action to perform when clicked.</param>
-    /// <returns>New Button instance with updated click handler.</returns>
     public static Button HandleClick(this Button button, Action onClick)
     {
         return button with { OnClick = _ => { onClick(); return ValueTask.CompletedTask; } };
@@ -267,117 +226,74 @@ public static class ButtonExtensions
         return button with { OnClick = _ => onClick() };
     }
 
-    /// <summary>Sets a custom tag object for the button.</summary>
-    /// <param name="button">Button to configure.</param>
-    /// <param name="tag">Custom tag object to associate with button.</param>
-    /// <returns>New Button instance with updated tag.</returns>
     public static Button Tag(this Button button, object tag)
     {
         return button with { Tag = tag };
     }
 
-    /// <summary>Sets the content for the button.</summary>
-    /// <param name="button">Button to configure.</param>
-    /// <param name="child">Child content to display within button.</param>
-    /// <returns>New Button instance with updated content.</returns>
     public static Button Content(this Button button, object child)
     {
         return button with { Children = [child] };
     }
 
-    /// <summary>Sets button variant to primary for maximum visual emphasis.</summary>
-    /// <param name="button">Button to configure.</param>
-    /// <returns>New Button instance with primary variant applied.</returns>
     [RelatedTo(nameof(Button.Variant))]
     public static Button Primary(this Button button)
     {
         return button.Variant(ButtonVariant.Primary);
     }
 
-    /// <summary>Sets button variant to secondary for reduced visual emphasis.</summary>
-    /// <param name="button">Button to configure.</param>
-    /// <returns>New Button instance with secondary variant applied.</returns>
     [RelatedTo(nameof(Button.Variant))]
     public static Button Secondary(this Button button)
     {
         return button.Variant(ButtonVariant.Secondary);
     }
 
-    /// <summary>Sets button variant to outline for bordered appearance.</summary>
-    /// <param name="button">Button to configure.</param>
-    /// <returns>New Button instance with outline variant applied.</returns>
     [RelatedTo(nameof(Button.Variant))]
     public static Button Outline(this Button button)
     {
         return button.Variant(ButtonVariant.Outline);
     }
 
-    /// <summary>Sets button variant to destructive for warning or error styling.</summary>
-    /// <param name="button">Button to configure.</param>
-    /// <returns>New Button instance with destructive variant applied.</returns>
     [RelatedTo(nameof(Button.Variant))]
     public static Button Destructive(this Button button)
     {
         return button.Variant(ButtonVariant.Destructive);
     }
 
-    /// <summary>Sets button variant to ghost for minimal visual styling.</summary>
-    /// <param name="button">Button to configure.</param>
-    /// <returns>New Button instance with ghost variant applied.</returns>
     [RelatedTo(nameof(Button.Variant))]
     public static Button Ghost(this Button button)
     {
         return button.Variant(ButtonVariant.Ghost);
     }
 
-    /// <summary>Sets button variant to link for clickable link appearance.</summary>
-    /// <param name="button">Button to configure.</param>
-    /// <returns>New Button instance with link variant applied.</returns>
     [RelatedTo(nameof(Button.Variant))]
     public static Button Link(this Button button)
     {
         return button.Variant(ButtonVariant.Link);
     }
 
-    /// <summary>Sets button variant to inline for seamless text integration.</summary>
-    /// <param name="button">Button to configure.</param>
-    /// <returns>New Button instance with inline variant applied.</returns>
     [RelatedTo(nameof(Button.Variant))]
     public static Button Inline(this Button button)
     {
         return button.Variant(ButtonVariant.Inline);
     }
 
-    /// <summary>Sets the border radius for button corners.</summary>
-    /// <param name="button">Button to configure.</param>
-    /// <param name="radius">Border radius to apply to corners.</param>
-    /// <returns>New Button instance with updated border radius.</returns>
     public static Button BorderRadius(this Button button, BorderRadius radius)
     {
         return button with { BorderRadius = radius };
     }
 
-    /// <summary>Sets the size of the button.</summary>
-    /// <param name="button">Button to configure.</param>
-    /// <param name="size">Size to apply to the button.</param>
-    /// <returns>New Button instance with updated size.</returns>
     public static Button Size(this Button button, Sizes size)
     {
         return button with { Size = size };
     }
 
-    /// <summary>Sets button size to large for prominent display.</summary>
-    /// <param name="button">Button to configure.</param>
-    /// <returns>New Button instance with large size applied.</returns>
     [RelatedTo(nameof(Button.Size))]
     public static Button Large(this Button button)
     {
         return button.Size(Sizes.Large);
     }
 
-    /// <summary>Sets button size to small for compact display.</summary>
-    /// <param name="button">Button to configure.</param>
-    /// <returns>New Button instance with small size applied.</returns>
     [RelatedTo(nameof(Button.Size))]
     public static Button Small(this Button button)
     {

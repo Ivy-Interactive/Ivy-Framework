@@ -54,28 +54,16 @@ public record Progress : WidgetBase<Progress>
 /// <summary>Extension methods for Progress widget providing fluent API for configuring appearance, behavior, and content.</summary>
 public static class ProgressExtensions
 {
-    /// <summary>Sets progress value using state-bound integer for automatic updates.</summary>
-    /// <param name="progress">Progress widget to configure.</param>
-    /// <param name="value">IState&lt;int&gt; object providing progress value.</param>
-    /// <returns>New Progress instance with updated value from state.</returns>
     public static Progress Value(this Progress progress, IState<int> value)
     {
         return progress with { Value = value.Value };
     }
 
-    /// <summary>Sets goal or description text for progress bar providing context.</summary>
-    /// <param name="progress">Progress widget to configure.</param>
-    /// <param name="goal">Goal text to display alongside progress bar, or null to remove.</param>
-    /// <returns>New Progress instance with updated goal text.</returns>
     public static Progress Goal(this Progress progress, string? goal)
     {
         return progress with { Goal = goal };
     }
 
-    /// <summary>Sets color variant for progress bar changing visual styling and color scheme.</summary>
-    /// <param name="progress">Progress widget to configure.</param>
-    /// <param name="variant">Color variant to apply to progress bar.</param>
-    /// <returns>New Progress instance with updated color variant.</returns>
     public static Progress ColorVariant(this Progress progress, Progress.ColorVariants variant)
     {
         return progress with { ColorVariant = variant };

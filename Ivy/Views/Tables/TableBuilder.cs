@@ -121,7 +121,7 @@ public class TableBuilder<TModel> : ViewBase, IStateless
                 cellBuilder = _builderFactory.Link();
             }
 
-            var removed = field.Name.StartsWith("_") && field.Name.Length > 1;
+            var removed = field.Name.StartsWith("_") && field.Name.Length > 1 && char.IsLetter(field.Name[1]);
 
             var column = new TableBuilderColumn(field.Name, order++, cellBuilder, cellAlignment, field.FieldInfo, field.PropertyInfo, removed);
             column.Width = CalculateSmartDefaultWidth(column);

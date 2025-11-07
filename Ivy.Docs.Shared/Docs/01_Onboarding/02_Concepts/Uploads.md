@@ -6,9 +6,6 @@ searchHints:
   - drag-drop
   - attachments
   - images
-imports:
-  - Ivy.Services
-  - Ivy.Core.Helpers
 ---
 
 # Uploads
@@ -33,14 +30,8 @@ public class SingleFileUpload : ViewBase
     public override object? Build()
     {
         var uploadState = UseState<FileUpload<byte[]>?>();
-        var upload = this.UseUpload(MemoryStreamUploadHandler.Create(uploadState))
-            .Accept("*/*")
-            .MaxFileSize(10 * 1024 * 1024); // 10 MB
-
-        return Layout.Vertical()
-               | Text.H1("Single File Upload")
-               | uploadState.ToFileInput(upload).Placeholder("Choose a file to upload")
-               | uploadState.ToDetails();
+        var upload = this.UseUpload(MemoryStreamUploadHandler.Create(uploadState));
+        return uploadState.ToFileInput(upload).Placeholder("Choose a file to upload");
     }
 }
 ```
@@ -94,7 +85,6 @@ public class MultipleFilesUpload : ViewBase
             .MaxFileSize(10 * 1024 * 1024);
 
         return Layout.Vertical()
-               | Text.H1("Multiple Files Upload")
                | selectedFiles.ToFileInput(upload).Placeholder("Choose files to upload")
                | selectedFiles.Value.ToTable()
                    .Width(Size.Full())
@@ -121,7 +111,6 @@ public class FileUploadValidation : ViewBase
             .MaxFiles(3);                         // Maximum 3 files total
 
         return Layout.Vertical()
-               | Text.H1("Upload Validation")
                | selectedFiles.ToFileInput(upload).Placeholder("Choose up to 3 images (max 5 MB each)")
                | selectedFiles.Value.ToTable()
                    .Width(Size.Full())
@@ -156,11 +145,13 @@ var textFilesState = UseState(ImmutableArray.Create<FileUpload<string>>());
 var textFilesUpload = this.UseUpload(MemoryStreamUploadHandler.Create(textFilesState, Encoding.UTF8));
 ```
 
-## Dialog Integration
+## Integration Examples
+
+### Dialog Integration
 
 Use ephemeral state for temporary file selection in dialogs:
 
-```csharp demo-below
+```csharp demo-tabs
 public class DialogFileUpload : ViewBase
 {
     public override object? Build()
@@ -196,7 +187,6 @@ public class DialogFileUpload : ViewBase
             : null;
 
         return Layout.Vertical()
-               | Text.H1("Dialog Upload")
                | new Button("Open Dialog", _ => { dialogFile.Reset(); isOpen.Value = true; })
                | (selectedFile.Value != null
                    ? selectedFile.ToDetails()
@@ -206,11 +196,11 @@ public class DialogFileUpload : ViewBase
 }
 ```
 
-## Form Integration
+### Form Integration
 
 Integrate file uploads in forms using the context-aware `.Builder()` overload:
 
-```csharp demo-below
+```csharp demo-tabs
 public record FormFileUploadModel
 {
     [Required]
@@ -244,7 +234,6 @@ public class FormFileUpload : ViewBase
             .Label(x => x.Attachment2, "Attachment2 application/pdf (Optional)");
 
         return Layout.Vertical()
-               | Text.H1("Form with File Upload")
                | form
                | model.Value.Attachment1?.ToDetails()
                | model.Value.Attachment2?.ToDetails();
