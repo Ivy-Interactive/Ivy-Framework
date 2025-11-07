@@ -70,24 +70,29 @@ public static class AuthHelper
 
         var authToken = GetAuthToken(context);
 
+        var clientProvider = serviceProvider.GetRequiredService<IClientProvider>();
         try
         {
             await ValidateAuth(serviceProvider, authToken, context.CancellationToken);
         }
         catch (MissingAuthTokenException ex)
         {
+            clientProvider.Toast(ex.Message, "Authentication failed");
             throw new RpcException(new Status(StatusCode.Unauthenticated, ex.Message));
         }
         catch (InvalidAuthTokenException ex)
         {
+            clientProvider.Toast(ex.Message, "Authentication failed");
             throw new RpcException(new Status(StatusCode.Unauthenticated, ex.Message));
         }
         catch (AuthProviderNotConfiguredException ex)
         {
+            clientProvider.Error(ex);
             throw new RpcException(new Status(StatusCode.Internal, ex.Message));
         }
         catch (AuthValidationException ex)
         {
+            clientProvider.Error(ex);
             throw new RpcException(new Status(StatusCode.Internal, ex.Message));
         }
     }

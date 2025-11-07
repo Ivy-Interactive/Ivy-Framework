@@ -10,8 +10,8 @@ namespace Ivy.Views.DataTables;
 
 public class DataTableService(
     IQueryableRegistry queryableRegistry,
+    AppSessionStore sessionStore,
     Server server,
-    IServiceProvider serviceProvider,
     IDistributedCache? cache = null,
     IChatClient? chatClient = null,
     ILogger<DataTableService>? logger = null
@@ -22,7 +22,17 @@ public class DataTableService(
     {
         try
         {
-            await AuthHelper.ValidateAuthIfRequired(server, serviceProvider, context);
+            if (string.IsNullOrEmpty(request.ConnectionId))
+            {
+                throw new RpcException(new Status(StatusCode.InvalidArgument, "ConnectionId is required in the request."));
+            }
+
+            if (!sessionStore.Sessions.TryGetValue(request.ConnectionId, out var session))
+            {
+                throw new RpcException(new Status(StatusCode.NotFound, $"Connection '{request.ConnectionId}' not found."));
+            }
+
+            await AuthHelper.ValidateAuthIfRequired(server, session.AppServices, context);
 
             if (string.IsNullOrEmpty(request.SourceId))
             {
@@ -64,7 +74,17 @@ public class DataTableService(
     {
         try
         {
-            await AuthHelper.ValidateAuthIfRequired(server, serviceProvider, context);
+            if (string.IsNullOrEmpty(request.ConnectionId))
+            {
+                throw new RpcException(new Status(StatusCode.InvalidArgument, "ConnectionId is required in the request."));
+            }
+
+            if (!sessionStore.Sessions.TryGetValue(request.ConnectionId, out var session))
+            {
+                throw new RpcException(new Status(StatusCode.NotFound, $"Connection '{request.ConnectionId}' not found."));
+            }
+
+            await AuthHelper.ValidateAuthIfRequired(server, session.AppServices, context);
 
             if (string.IsNullOrEmpty(request.SourceId))
             {
@@ -102,7 +122,17 @@ public class DataTableService(
     {
         try
         {
-            await AuthHelper.ValidateAuthIfRequired(server, serviceProvider, context);
+            if (string.IsNullOrEmpty(request.ConnectionId))
+            {
+                throw new RpcException(new Status(StatusCode.InvalidArgument, "ConnectionId is required in the request."));
+            }
+
+            if (!sessionStore.Sessions.TryGetValue(request.ConnectionId, out var session))
+            {
+                throw new RpcException(new Status(StatusCode.NotFound, $"Connection '{request.ConnectionId}' not found."));
+            }
+
+            await AuthHelper.ValidateAuthIfRequired(server, session.AppServices, context);
 
             if (string.IsNullOrWhiteSpace(request.FilterExpression))
             {
