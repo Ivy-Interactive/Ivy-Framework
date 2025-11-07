@@ -19,14 +19,6 @@ interface RowActionButtonsProps {
    * Click handler for action buttons
    */
   onActionClick: (action: RowAction) => void;
-  /**
-   * Mouse enter handler to prevent losing hover state
-   */
-  onMouseEnter?: () => void;
-  /**
-   * Mouse leave handler
-   */
-  onMouseLeave?: () => void;
 }
 
 /**
@@ -37,8 +29,6 @@ export const RowActionButtons: React.FC<RowActionButtonsProps> = ({
   top,
   visible,
   onActionClick,
-  onMouseEnter,
-  onMouseLeave,
 }) => {
   if (!visible || actions.length === 0) return null;
 
@@ -51,22 +41,27 @@ export const RowActionButtons: React.FC<RowActionButtonsProps> = ({
         opacity: visible ? 1 : 0,
         pointerEvents: visible ? 'auto' : 'none',
       }}
-      onMouseEnter={onMouseEnter}
-      onMouseLeave={onMouseLeave}
     >
       {actions.map(action => (
         <button
           key={action.id}
-          className="flex items-center justify-center p-1 rounded bg-gray-50 hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 transition-colors cursor-pointer"
+          className="flex items-center justify-center p-1 rounded transition-colors cursor-pointer"
+          style={{
+            backgroundColor: 'var(--accent)',
+            color: 'var(--muted-foreground)',
+          }}
+          onMouseEnter={e => {
+            e.currentTarget.style.backgroundColor = 'var(--muted-foreground)';
+            e.currentTarget.style.color = 'var(--accent)';
+          }}
+          onMouseLeave={e => {
+            e.currentTarget.style.backgroundColor = 'var(--accent)';
+          }}
           onClick={() => onActionClick(action)}
           aria-label={action.eventName}
           type="button"
         >
-          <Icon
-            name={action.icon}
-            size={16}
-            className="text-gray-600 dark:text-gray-300"
-          />
+          <Icon name={action.icon} size={16} />
         </button>
       ))}
     </div>
