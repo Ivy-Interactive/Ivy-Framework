@@ -118,7 +118,7 @@ public static class MenuItemExtensions
                 return handler;
             }
 
-            if (item.Tag == value || item.Label == (string?)value)
+            if (Equals(item.Tag, value) || item.Label == (string?)value)
             {
                 if (item.OnSelect == null)
                 {
