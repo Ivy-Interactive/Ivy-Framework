@@ -66,7 +66,11 @@ public class AppHub(
 
         if (string.IsNullOrEmpty(appId))
         {
-            appId = server.DefaultAppId ?? server.AppRepository.GetAppOrDefault(null).Id;
+            appId = server.AppRepository.GetAppOrDefault(null).Id;
+            if (chrome || server.DefaultAppId != AppIds.Chrome)
+            {
+                appId = server.DefaultAppId ?? appId;
+            }
         }
 
         return (appId, navigationAppId);
