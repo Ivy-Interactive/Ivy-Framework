@@ -367,7 +367,6 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
                            | Text.Label(user.Value.Email).Overflow(Overflow.Ellipsis))
                         .Grow()
                         .Size(Size.Full().Min(0))
-                        | Icons.ChevronsUpDown
                 ).Width(Size.Full());
 
             footer = new DropDownMenu(
