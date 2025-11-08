@@ -180,10 +180,11 @@ public class AppRepository : IAppRepository
 
     public AppDescriptor GetAppOrDefault(string? id)
     {
-        if (id == null)
-            return Apps.Values.First();
+        var app = id != null
+            ? Apps.GetValueOrDefault(id)
+            : null;
 
-        return Apps.TryGetValue(id, out var app) ? app : Apps.Values.First();
+        return app ?? Apps.Values.First(app => app.Id != AppIds.Auth && app.Id != AppIds.Chrome);
     }
 
     public AppDescriptor? GetApp(string id)
