@@ -278,6 +278,44 @@ public class DisabledInputDemo : ViewBase
 Notice, how extension functions `ToTextInput`, and `ToPasswordInput` are used  to generate `TextInput` variants
 needed for the form.
 
+## Prefix and Suffix
+
+In certain scenarios, it is beneficial to prepend or append static content—such as text fragments or icons—to an input field. This practice is particularly useful for displaying the protocol in a URL field, a currency symbol, or an icon that denotes the expected input.
+
+### Adding text prefixes and suffixes
+
+```csharp demo-below
+public class UrlInputDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var domain = UseState("example");
+        return domain.ToTextInput()
+                     .Prefix("https://")
+                     .Suffix(".com");
+    }
+}
+```
+
+### Using icons as prefixes
+
+`Prefix` and `Suffix` can also accept widgets like icons:
+
+```csharp demo-below
+public class EmailInputDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var email = UseState("");
+        return email.ToTextInput()
+                    .Prefix(Icons.Mail)
+                    .Placeholder("Enter email");
+    }
+}
+```
+
+The `Prefix` and `Suffix` methods accept either a `string` or an `IWidget`, thereby providing complete flexibility for augmenting the contextual information of the input.
+
 ## Shortcuts
 
 We can use associate keyboard shortcuts to text inputs the following way.
