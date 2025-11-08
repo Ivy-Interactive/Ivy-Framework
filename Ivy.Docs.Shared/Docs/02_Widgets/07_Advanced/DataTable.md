@@ -192,6 +192,46 @@ public class RowActionsDemo : ViewBase
 
 Use the emitted `RowActionEventArgs` inside `OnRowAction` to perform edits, deletions, or other custom logic based on `EventName`, `RowIndex`, and the underlying data.
 
+## Cell Click Events
+
+Enable single- and double-click handlers for any cell by turning on `EnableCellClickEvents` in the table configuration and wiring up `.OnCellClick()` / `.OnCellActivated()` delegates.
+
+```csharp demo-tabs
+public class CellClickDemo : ViewBase
+{
+    public record Employee(int Id, string Name, string Department);
+
+    public override object? Build()
+    {
+        var client = UseService<IClientProvider>();
+        var employees = new[]
+        {
+            new Employee(1, "Alice", "Design"),
+            new Employee(2, "Bob", "Development"),
+            new Employee(3, "Charlie", "QA")
+        }.AsQueryable();
+
+        return employees
+            .ToDataTable()
+            .Config(c => c.EnableCellClickEvents = true)
+            .OnCellClick(e =>
+            {
+                var args = e.Value;
+                client.Toast($"Clicked: {args.ColumnName} (row {args.RowIndex})");
+                return ValueTask.CompletedTask;
+            })
+            .OnCellActivated(e =>
+            {
+                var args = e.Value;
+                client.Toast($"Double-clicked: {args.ColumnName} (row {args.RowIndex})");
+                return ValueTask.CompletedTask;
+            });
+    }
+}
+```
+
+`CellClickEventArgs` exposes `RowIndex`, `ColumnIndex`, `ColumnName`, and `CellValue`, allowing you to perform any context-specific action.
+
 ## Performance with Large Datasets
 
 DataTable is optimized for handling extremely large datasets efficiently. For optimal performance with large datasets (100,000+ rows), configure how data is loaded:
