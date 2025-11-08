@@ -608,6 +608,8 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
   const eventHandler = useEventHandler();
   const [localValue, setLocalValue] = useState(value);
   const [isFocused, setIsFocused] = useState(false);
+  // Indicates that we requested validation from backend and are waiting for response
+  const [pendingValidation, setPendingValidation] = useState(false);
   const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement | null>(null);
 
   // Update local value when server value changes and control is not focused
@@ -666,16 +668,22 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
 
   const handleBlur = useCallback(() => {
     setIsFocused(false);
+    // Mark field as pending validation so it shows invalid style until backend responds
+    setPendingValidation(true);
     if (events.includes('OnBlur')) eventHandler('OnBlur', id, []);
   }, [eventHandler, id, events]);
 
   const handleFocus = useCallback(() => {
     setIsFocused(true);
+    setPendingValidation(false);
     if (events.includes('OnFocus')) eventHandler('OnFocus', id, []);
   }, [eventHandler, id, events]);
 
+  // Compute whether we should show temporary invalid state while waiting for backend
+  const pendingActive = pendingValidation && invalid === undefined;
+
   // Client-side validation removed. Use server-provided `invalid` only.
-  const mergedInvalid = invalid;
+  const mergedInvalid = invalid ?? (pendingActive ? ' ' : undefined);
 
   const commonProps = useMemo(
     () => ({
