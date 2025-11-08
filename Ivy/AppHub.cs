@@ -219,10 +219,14 @@ public class AppHub(
             var connectionAborted = Context.ConnectionAborted;
             appState.EventQueue = new EventDispatchQueue(connectionAborted);
 
-            if (appId != AppIds.Chrome && parentId == null)
+            if (parentId == null)
             {
-                var navigateArgs = new NavigateArgs(appId, Chrome: GetChromeParam(httpContext));
-                clientProvider.Redirect(navigateArgs.GetUrl(), replaceHistory: true);
+                clientProvider.SetRootAppId(appId);
+                if (appId != AppIds.Chrome)
+                {
+                    var navigateArgs = new NavigateArgs(appId, Chrome: GetChromeParam(httpContext));
+                    clientProvider.Redirect(navigateArgs.GetUrl(), replaceHistory: true);
+                }
             }
 
             void OnWidgetTreeChanged(WidgetTreeChanged[] changes)
