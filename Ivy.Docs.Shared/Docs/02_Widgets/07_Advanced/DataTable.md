@@ -161,20 +161,22 @@ Add contextual actions to each row using `RowActions()` and handle them via `OnR
 ```csharp demo-tabs
 public class RowActionsDemo : ViewBase
 {
-    public record Employee(int Id, string Name, string Title);
+    public record Employee(int Id, string Name, string Title, string ProfileLink);
 
     public override object? Build()
     {
         var client = UseService<IClientProvider>();
         var employees = new[]
         {
-            new Employee(1, "Alice", "Designer"),
-            new Employee(2, "Bob", "Developer"),
-            new Employee(3, "Charlie", "Project Manager")
+            new Employee(1, "Alice", "Designer", "https://github.com/Ivy-Interactive/Ivy-Framework"),
+            new Employee(2, "Bob", "Developer", "https://github.com/Ivy-Interactive"),
+            new Employee(3, "Charlie", "Project Manager", "https://github.com/Ivy-Interactive/Ivy-Examples")
         }.AsQueryable();
 
         return employees
             .ToDataTable()
+            .Header(e => e.ProfileLink, "Profile")
+            .DataTypeHint(e => e.ProfileLink, ColType.Link)
             .RowActions(
                 new RowAction { Id = "edit", Icon = Icons.Pencil.ToString(), EventName = "OnEdit" },
                 new RowAction { Id = "delete", Icon = Icons.Trash.ToString(), EventName = "OnDelete" }
@@ -189,6 +191,10 @@ public class RowActionsDemo : ViewBase
     }
 }
 ```
+
+<Callout Type="tip">
+Use <code>DataTypeHint(expr, ColType.Link)</code> to mark a URL string column as a clickable hyperlink. Users can open the link with <kbd>Ctrl</kbd>/<kbd>Cmd</kbd> + click or via the context menu.
+</Callout>
 
 Use the emitted `RowActionEventArgs` inside `OnRowAction` to perform edits, deletions, or other custom logic based on `EventName`, `RowIndex`, and the underlying data.
 
