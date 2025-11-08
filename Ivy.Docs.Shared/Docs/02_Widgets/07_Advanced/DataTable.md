@@ -238,7 +238,7 @@ public class CellClickDemo : ViewBase
 
 ```text
 [HireDate] = "2024-05-30"
-[OrderDate] >= "2024-01-01" AND [OrderDate] <= "2024-12-31"
+[OrderDate] >= "2025-11-01" AND [OrderDate] <= "2025-11-31"
 ```
 
 into the filter box (Ctrl/Cmd&nbsp;+&nbsp;F) or the column filter UI, and the underlying dataset will be queried server-side. The parsing engine recognises dates without needing quotes if there are no spaces, but quoting is recommended.
@@ -273,7 +273,7 @@ public class DateFilterDemo : ViewBase
 }
 ```
 
-Try filtering the *Order Date* column with a range such as `>= "2024-05-01" AND <= "2024-05-31"` to see the results update in real time.
+Try filtering the *Order Date* column with a range such as [OrderDate] >= "2025-11-01" AND [OrderDate] <= "2025-11-31" to see the results update in real time.
 
 ## Performance with Large Datasets
 
