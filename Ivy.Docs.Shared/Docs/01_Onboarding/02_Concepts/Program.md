@@ -147,6 +147,8 @@ Additional ChromeSettings options:
 
 - **UsePages()** - Switches to page navigation (replaces content instead of opening tabs).
 
+- **WallpaperAppId(string? appId)** / **WallpaperApp<T>()** - Sets a dedicated *wallpaper* app that is shown whenever the tab list is empty. Handy for welcome screens or branded backgrounds. See the [Wallpaper documentation](Wallpaper.md).
+
 <Callout Type="tip">
 Use `server.UseDefaultApp(typeof(AppName))` instead of `UseChrome()` for single-purpose applications, embedded views, or minimal interfaces where sidebar navigation isn't needed.
 </Callout>
