@@ -232,6 +232,49 @@ public class CellClickDemo : ViewBase
 
 `CellClickEventArgs` exposes `RowIndex`, `ColumnIndex`, `ColumnName`, and `CellValue`, allowing you to perform any context-specific action.
 
+## DateTime Filtering
+
+`DataTable` fully supports filtering `DateTime`, `Date`, and `DateTimeOffset` columns using ISO-8601 date strings. Users can type expressions such as
+
+```text
+[HireDate] = "2024-05-30"
+[OrderDate] >= "2024-01-01" AND [OrderDate] <= "2024-12-31"
+```
+
+into the filter box (Ctrl/Cmd&nbsp;+&nbsp;F) or the column filter UI, and the underlying dataset will be queried server-side. The parsing engine recognises dates without needing quotes if there are no spaces, but quoting is recommended.
+
+```csharp demo-tabs
+public class DateFilterDemo : ViewBase
+{
+    public record Order(int Id, DateTime OrderDate, DateTime? ShippedDate, int Total);
+
+    public override object? Build()
+    {
+        var orders = Enumerable.Range(1, 50)
+            .Select(i => new Order(
+                i,
+                OrderDate: DateTime.Today.AddDays(-i),
+                ShippedDate: i % 3 == 0 ? DateTime.Today.AddDays(-i + 2) : null,
+                Total: 55 + i * 5))
+            .AsQueryable();
+
+        return orders
+            .ToDataTable()
+            .Header(o => o.OrderDate, "Order Date")
+            .Header(o => o.ShippedDate, "Shipped")
+            .Header(o => o.Total, "Total ($)")
+            .Config(c =>
+            {
+                c.AllowFiltering = true;     // enable filter row + Ctrl/Cmd+F search
+                c.ShowSearch = true;
+            })
+            .Height(Size.Units(100));
+    }
+}
+```
+
+Try filtering the *Order Date* column with a range such as `>= "2024-05-01" AND <= "2024-05-31"` to see the results update in real time.
+
 ## Performance with Large Datasets
 
 DataTable is optimized for handling extremely large datasets efficiently. For optimal performance with large datasets (100,000+ rows), configure how data is loaded:
