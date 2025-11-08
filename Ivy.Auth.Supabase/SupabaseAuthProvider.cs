@@ -197,8 +197,14 @@ public class SupabaseAuthProvider : IAuthProvider
                 using var doc = JsonDocument.Parse(metadataJson);
                 var root = doc.RootElement;
 
-                name = root.GetProperty("full_name").GetString();
-                avatarUrl = root.GetProperty("avatar_url").GetString();
+                if (root.TryGetProperty("full_name", out var fullNameProperty))
+                {
+                    name = fullNameProperty.GetString();
+                }
+                if (root.TryGetProperty("avatar_url", out var avatarUrlProperty))
+                {
+                    avatarUrl = avatarUrlProperty.GetString();
+                }
             }
         }
         catch (JsonException)
