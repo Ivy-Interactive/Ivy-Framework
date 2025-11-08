@@ -359,7 +359,7 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
             var trigger = new Button().Variant(ButtonVariant.Ghost)
                 .Content(
                     Layout.Horizontal().Align(Align.Left).Width(Size.Full())
-                        | new Avatar(user.Value.Initials)
+                        | new Avatar(user.Value.Initials, user.Value.AvatarUrl)
                         | (Layout.Vertical().Gap(1)
                            | (user.Value.FullName != null
                                ? Text.Muted(user.Value.FullName!).Overflow(Overflow.Ellipsis)
