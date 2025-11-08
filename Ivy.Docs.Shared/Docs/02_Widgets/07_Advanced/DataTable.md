@@ -154,6 +154,44 @@ sampleUsers.ToDataTable()
 - **EnableCellClickEvents** - Enable cell click and activation events. When enabled, you can handle `OnCellClick` (single-click) and `OnCellActivated` (double-click) events on the DataTable widget. Events provide `CellClickEventArgs` with `RowIndex`, `ColumnIndex`, `ColumnName`, and `CellValue`.
 - **ShowVerticalBorders** - Show vertical borders between columns. Set to `false` to hide column borders for a cleaner appearance
 
+## Row Actions
+
+Add contextual actions to each row using `RowActions()` and handle them via `OnRowAction()`. Actions are rendered as icons or buttons within a dedicated column.
+
+```csharp demo-tabs
+public class RowActionsDemo : ViewBase
+{
+    public record Employee(int Id, string Name, string Title);
+
+    public override object? Build()
+    {
+        var client = UseService<IClientProvider>();
+        var employees = new[]
+        {
+            new Employee(1, "Alice", "Designer"),
+            new Employee(2, "Bob", "Developer"),
+            new Employee(3, "Charlie", "Project Manager")
+        }.AsQueryable();
+
+        return employees
+            .ToDataTable()
+            .RowActions(
+                new RowAction { Id = "edit", Icon = Icons.Pencil.ToString(), EventName = "OnEdit" },
+                new RowAction { Id = "delete", Icon = Icons.Trash.ToString(), EventName = "OnDelete" }
+            )
+            .OnRowAction(e =>
+            {
+                var args = e.Value;
+                client.Toast($"Action: {args.EventName} (Row {args.RowIndex})");
+                return ValueTask.CompletedTask;
+            })
+            ;
+    }
+}
+```
+
+Use the emitted `RowActionEventArgs` inside `OnRowAction` to perform edits, deletions, or other custom logic based on `EventName`, `RowIndex`, and the underlying data.
+
 ## Performance with Large Datasets
 
 DataTable is optimized for handling extremely large datasets efficiently. For optimal performance with large datasets (100,000+ rows), configure how data is loaded:
