@@ -3,6 +3,10 @@
 > [!NOTE]
 > We usually release on Fridays every week. Sign up on [https://ivy.app/](https://ivy.app/auth/sign-up) to get release notes directly to your inbox.
 
+## Overview
+
+This release introduces a complete file upload system overhaul with automatic state management, progress tracking, and validation, along with breaking API changes. Major enhancements include extensive DataTable improvements (row actions, cell handlers, label/link columns, DateTime filtering), TextInput prefix/suffix support, customizable Chrome footer menus and wallpaper apps and interactive chart toolboxes.
+
 ## Bug Fixes
 
 - **Reconnection Redirects**: Fixed incorrect redirect to `chrome=false` when reconnecting to apps with parent sessions
