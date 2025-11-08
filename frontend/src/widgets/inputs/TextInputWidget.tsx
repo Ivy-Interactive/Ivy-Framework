@@ -51,11 +51,7 @@ interface TextInputWidgetProps {
   'data-testid'?: string;
 }
 
-const EMAIL_VALIDATION_MESSAGE = 'Please enter a valid email address';
-
-const PASSWORD_VALIDATION_MESSAGE =
-  'Password must be at least 8 characters long';
-const MIN_PASSWORD_LENGTH = 8;
+// Client-side validation removed. Validation is handled on the backend.
 
 // Utility to detect Mac platform
 const isMac =
@@ -612,7 +608,6 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
   const eventHandler = useEventHandler();
   const [localValue, setLocalValue] = useState(value);
   const [isFocused, setIsFocused] = useState(false);
-  const [hasBlurred, setHasBlurred] = useState(false);
   const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement | null>(null);
 
   // Update local value when server value changes and control is not focused
@@ -671,7 +666,6 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
 
   const handleBlur = useCallback(() => {
     setIsFocused(false);
-    setHasBlurred(true);
     if (events.includes('OnBlur')) eventHandler('OnBlur', id, []);
   }, [eventHandler, id, events]);
 
@@ -680,34 +674,8 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
     if (events.includes('OnFocus')) eventHandler('OnFocus', id, []);
   }, [eventHandler, id, events]);
 
-  const clientInvalid = useMemo(() => {
-    if (!hasBlurred || invalid) return undefined;
-
-    if (variant !== 'Email' && variant !== 'Password') {
-      return undefined;
-    }
-
-    const currentValue = localValue ?? '';
-    if (currentValue.trim() === '') {
-      return undefined;
-    }
-
-    if (variant === 'Email') {
-      if (typeof document === 'undefined') {
-        return undefined;
-      }
-      const emailInput = document.createElement('input');
-      emailInput.type = 'email';
-      emailInput.value = currentValue;
-      return emailInput.checkValidity() ? undefined : EMAIL_VALIDATION_MESSAGE;
-    }
-
-    return currentValue.length >= MIN_PASSWORD_LENGTH
-      ? undefined
-      : PASSWORD_VALIDATION_MESSAGE;
-  }, [hasBlurred, invalid, variant, localValue]);
-
-  const mergedInvalid = invalid ?? clientInvalid;
+  // Client-side validation removed. Use server-provided `invalid` only.
+  const mergedInvalid = invalid;
 
   const commonProps = useMemo(
     () => ({
