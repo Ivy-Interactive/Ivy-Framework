@@ -230,22 +230,6 @@ return new LineChart(data)
     );
 ```
 
-### Simplified PieChart API
-
-Cleaner API for PieChart:
-
-```csharp
-var data = new[]
-{
-    new PieChartData("United States", 333),
-    new PieChartData("Sweden", 10)
-};
-
-return new PieChart(data)
-    .Pie("Measure", "Dimension")
-    .Tooltip();
-```
-
 ### OpenAPI Connection Support
 
 Add OpenAPI connections via CLI:
