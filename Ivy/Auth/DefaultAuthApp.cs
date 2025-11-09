@@ -1,4 +1,5 @@
-﻿using Ivy.Apps;
+﻿using System.Collections.Generic;
+using Ivy.Apps;
 using Ivy.Client;
 using Ivy.Core;
 using Ivy.Core.Hooks;
@@ -6,6 +7,7 @@ using Ivy.Helpers;
 using Ivy.Hooks;
 using Ivy.Shared;
 using Ivy.Views;
+using Ivy.Views.Forms;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
@@ -59,27 +61,50 @@ public class DefaultAuthApp : ViewBase
 /// <param name="errorMessage">State for displaying error messages</param>
 public class PasswordEmailFlowView(IState<string?> errorMessage) : ViewBase
 {
+    private record LoginFormModel(string User, string Password);
+
     /// <summary>
     /// Builds the email/password login form.
     /// </summary>
     /// <returns>The login form UI</returns>
     public override object Build()
     {
-        var user = this.UseState<string>("");
-        var password = this.UseState<string>("");
-        var result = this.UseState<string?>();
+        var credentials = this.UseState(() => new LoginFormModel("", ""));
         var loading = this.UseState<bool>();
         var auth = this.UseService<IAuthService>();
         var client = this.UseService<IClientProvider>();
+        var lastSubmitted = this.UseState<LoginFormModel?>(() => null);
 
-        async ValueTask Login()
+        var formBuilder = credentials.ToForm("Login")
+            .Required(m => m.User, m => m.Password)
+            .Label(m => m.User, "User")
+            .Label(m => m.Password, "Password")
+            .Builder(m => m.User, state => state.ToTextInput())
+            .Builder(m => m.Password, state => state.ToPasswordInput());
+
+        var (submitForm, formView, _, submitting) = formBuilder.UseForm(this.Context);
+
+        var isBusy = loading.Value || submitting;
+
+        async ValueTask HandleSubmit()
+        {
+            if (isBusy)
+            {
+                return;
+            }
+
+            await submitForm();
+        }
+
+        async ValueTask HandleLoginAsync()
         {
             try
             {
                 loading.Set(true);
+                errorMessage.Set((string?)null);
 
                 var token = await TimeoutHelper.WithTimeoutAsync(
-                    ct => auth.LoginAsync(user.Value, password.Value, ct));
+                    ct => auth.LoginAsync(credentials.Value.User, credentials.Value.Password, ct));
 
                 if (token != null)
                 {
@@ -100,14 +125,38 @@ public class PasswordEmailFlowView(IState<string?> errorMessage) : ViewBase
             }
         }
 
+        UseEffect(async () =>
+        {
+            if (loading.Value)
+            {
+                return;
+            }
+
+            var current = credentials.Value;
+
+            if (string.IsNullOrWhiteSpace(current.User) ||
+                string.IsNullOrWhiteSpace(current.Password))
+            {
+                return;
+            }
+
+            if (lastSubmitted.Value is { } previous && previous == current)
+            {
+                return;
+            }
+
+            lastSubmitted.Set(current);
+            await HandleLoginAsync();
+        }, credentials, loading);
+
         return Layout.Vertical()
-         | Text.Label("User:")
-         | user.ToTextInput().Disabled(loading.Value)
-         | Text.Label("Password:")
-         | password.ToPasswordInput().Disabled(loading.Value)
-         | new Button("Login").Width(Size.Full()).HandleClick(Login).Loading(loading.Value).Disabled(loading.Value)
-         | result
-         ;
+               | formView
+               | new Button("Login")
+                   .HandleClick(HandleSubmit)
+                   .Loading(isBusy)
+                   .Disabled(isBusy)
+                   .Size(formBuilder.Size)
+                   .Width(Size.Full());
     }
 }
 
