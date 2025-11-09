@@ -176,7 +176,6 @@ export const useBackend = (
     if (!isRootConnection) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setStableAppId(appId);
-
       setStableChrome(chrome);
       return;
     }
@@ -188,7 +187,6 @@ export const useBackend = (
 
     if (shouldReconnect) {
       setStableAppId(appId);
-
       setStableChrome(chrome);
     }
   }, [appId, chrome, isRootConnection]);
