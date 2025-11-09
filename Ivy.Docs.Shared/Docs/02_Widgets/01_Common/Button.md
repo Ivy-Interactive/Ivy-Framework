@@ -78,6 +78,31 @@ Layout.Vertical().Gap(4)
     | new Button("Destructive").Destructive().Loading())
 ```
 
+You can bind the loading spinner to an `IState<bool>` directly. This is useful when you manage long-running actions:
+
+```csharp demo-tabs
+public class ButtonLoadingStateDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var isSaving = this.UseState(false);
+         return new Button("Save", onClick: async _ =>
+            {
+                isSaving.Value = true;
+                try
+                {
+                    await System.Threading.Tasks.Task.Delay(1500);
+                }
+                finally
+                {
+                    isSaving.Value = false;
+                }
+            })
+            .Loading(isSaving);
+    }
+}
+```
+
 ### Border Radius
 
 ```csharp demo-tabs
