@@ -167,9 +167,9 @@ public class AppHub(
                     authToken = null;
                 }
 
-                if (authToken != oldAuthToken)
+                if (authToken != oldAuthToken || parentId != null)
                 {
-                    clientProvider.SetAuthToken(authToken, reloadPage: false);
+                    clientProvider.SetAuthToken(authToken, reloadPage: parentId != null && authToken == null);
                 }
 
                 if (authToken == null)
