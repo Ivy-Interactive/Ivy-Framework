@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Reflection;
 using Ivy.Apps;
 using Ivy.Client;
 using Ivy.Core;
@@ -27,6 +28,10 @@ public class DefaultAuthApp : ViewBase
     {
         var auth = this.UseService<IAuthService>();
         var errorMessage = this.UseState<string?>();
+        var serverArgs = this.UseService<ServerArgs>();
+        var appName = serverArgs.MetaTitle.NullIfEmpty()
+                      ?? Assembly.GetEntryAssembly()?.GetName().Name.NullIfEmpty()
+                      ?? "Ivy Application";
 
         var options = auth.GetAuthOptions();
 
@@ -43,15 +48,30 @@ public class DefaultAuthApp : ViewBase
             renderedOptions.Add(Layout.Vertical() | oAuthOptions.Select(e => new OAuthFlowView(e, errorMessage)));
         }
 
+        var flows = renderedOptions
+            .SelectMany(x => new[] { x, new Separator("OR") })
+            .Take(Math.Max(renderedOptions.Count * 2 - 1, 0))
+            .ToArray();
+
+        var flowsLayout = renderedOptions.Count > 0
+            ? Layout.Vertical().Gap(6)
+                | flows
+            : null;
+
         return
             Layout.Horizontal().Align(Align.Center).Height(Size.Screen())
-            | (new Card().Width(100).Title("Login")
-               | (Layout.Vertical()
-                  | new Spacer().Height(2)
-                  | (errorMessage.Value.NullIfEmpty() != null ? new Callout(errorMessage.Value).Variant(CalloutVariant.Error) : null)
-                  | renderedOptions.SelectMany(x => new[] { x, new Separator("OR") }).Take(renderedOptions.Count * 2 - 1)
-                   .ToArray())
-               );
+            | (new Card(
+                Layout.Vertical().Gap(6).Padding(2)
+                | new IvyLogo()
+                | Text.H2($"Welcome to {appName}!")
+                | (errorMessage.Value.NullIfEmpty() == null
+                    ? Text.Markdown("Enter user credentials for authentication.")
+                    : null)
+                | (errorMessage.Value.NullIfEmpty() != null ? new Callout(errorMessage.Value).Variant(CalloutVariant.Error) : null)
+                | flowsLayout
+              )
+              .Width(Size.Units(120).Max(500))
+            );
     }
 }
 
@@ -149,7 +169,7 @@ public class PasswordEmailFlowView(IState<string?> errorMessage) : ViewBase
             await HandleLoginAsync();
         }, credentials, loading);
 
-        return Layout.Vertical()
+        return Layout.Vertical().Gap(12)
                | formView
                | new Button("Login")
                    .HandleClick(HandleSubmit)
