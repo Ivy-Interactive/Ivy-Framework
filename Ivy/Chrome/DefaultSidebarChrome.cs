@@ -14,6 +14,8 @@ namespace Ivy.Chrome;
 [App(isVisible: false)]
 public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
 {
+    internal ChromeSettings Settings => settings;
+
     private record TabState(string Id, string AppId, string Title, AppHost AppHost, Icons? Icon, string RefreshToken)
     {
         public Tab ToTab() => new Tab(Title, AppHost).Icon(Icon).Key(Utils.GetShortHash(Id + RefreshToken));
