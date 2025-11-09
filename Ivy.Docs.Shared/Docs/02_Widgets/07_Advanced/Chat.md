@@ -50,7 +50,9 @@ public class BasicChatDemo : ViewBase
 
 A chat that simulates AI processing with loading indicators.
 
-This example shows how to implement async message handling, display loading states using ChatStatus, and manage message updates during processing.
+First, the handler appends the user's message so the transcript updates immediately. It then pushes a `ChatStatus` entry that renders the animated "thinking" indicator while the asynchronous work (a delay in this demo, your AI call in production) runs. When the task completes, the status message is removed and replaced by the assistant's final response so the user never sees an empty gap.
+
+This example shows how to implement async message handling, display loading states using `ChatStatus`, and manage message updates during processing.
 
 ```csharp demo-tabs 
 public class LoadingChatDemo : ViewBase
