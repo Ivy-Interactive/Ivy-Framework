@@ -168,12 +168,10 @@ export const useBackend = (
     latestChromeRef.current = chrome;
   }, [chrome]);
 
-  // Store the root appId sent by backend
   const rootAppIdRef = useRef<string | undefined>(undefined);
 
   const isRootConnection = parentId === null;
 
-  // Update stable values to trigger reconnection when needed
   useEffect(() => {
     if (!isRootConnection) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -340,7 +338,7 @@ export const useBackend = (
     return () => {
       if (currentConnectionRef.current === newConnection) {
         newConnection.stop().catch(err => {
-          logger.warn('Error stopping SignalR connection during cleanup:', err);
+          logger.warn('Error stopping SignalR connection during unmount:', err);
         });
         currentConnectionRef.current = null;
       }
