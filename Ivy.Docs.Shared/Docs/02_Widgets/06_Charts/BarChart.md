@@ -32,10 +32,7 @@ public class BarChartBasic : ViewBase
                     .Dimension("Month", e => e.Month)
                         .Measure("Desktop", e => e.Sum(f => f.Desktop))
                         .Measure("Mobile", e => e.Sum(f => f.Mobile))
-                        .Toolbox(new Toolbox()
-                            .SaveAsImage(true)
-                            .DataView(true)
-                            .MagicType(true));
+                        .Toolbox();
     }
 }    
 ```

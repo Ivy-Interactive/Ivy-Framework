@@ -34,10 +34,7 @@ public class BasicLineChartDemo : ViewBase
         return Layout.Vertical()
                  | data.ToLineChart(
                         style: LineChartStyles.Default,
-                        polish: chart => chart.Toolbox(new Toolbox()
-                            .SaveAsImage(true)
-                            .DataView(true)
-                            .MagicType(true)))
+                        polish: chart => chart.Toolbox())
                         .Dimension("Month", e => e.Month)
                         .Measure("Desktop", e => e.Sum(f => f.Desktop))
                         .Measure("Mobile", e => e.Sum(f => f.Mobile));
@@ -82,10 +79,7 @@ public class LineStylesDemo: ViewBase
                  | styleInput
                  | data.ToLineChart(
                         style: style,
-                        polish: chart => chart.Toolbox(new Toolbox()
-                            .SaveAsImage(true)
-                            .DataView(true)
-                            .MagicType(true)))
+                        polish: chart => chart.Toolbox())
                         .Dimension("Month", e => e.Month)
                         .Measure("Desktop", e => e.Sum(f => f.Desktop))
                         .Measure("Mobile", e => e.Sum(f => f.Mobile));
@@ -309,10 +303,7 @@ public class BitcoinChart : ViewBase
                  | Text.Html($"<i>From {bitcoinData.First().Date:yyyy-MM-dd} to {bitcoinData.Last().Date:yyyy-MM-dd}</i>")
                  | bitcoinData.ToLineChart(
                         style: LineChartStyles.Dashboard,
-                        polish: chart => chart.Toolbox(new Toolbox()
-                            .SaveAsImage(true)
-                            .DataView(true)
-                            .MagicType(true)))
+                        polish: chart => chart.Toolbox())
                     .Dimension("Date", e => e.Date)
                     .Measure("Price", e => e.Sum(f => f.Price));
     }

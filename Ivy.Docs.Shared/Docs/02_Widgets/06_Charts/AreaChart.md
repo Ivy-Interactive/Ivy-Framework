@@ -72,7 +72,7 @@ public class Covid19Demo : ViewBase
         };
 
         return new Card().Title("COVID-19 cases")
-            | data.ToAreaChart(polish: chart => chart.Toolbox(new Toolbox().MagicType(false)))
+            | data.ToAreaChart(polish: chart => chart.Toolbox())
                 .Dimension("Month", e => e.Month)
                 .Measure("Cases", e => e.Sum(f => f.Cases))
                 .Measure("Deaths", e => e.Sum(f => f.Deaths))
