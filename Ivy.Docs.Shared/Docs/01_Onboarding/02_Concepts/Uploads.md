@@ -241,6 +241,26 @@ public class FormFileUpload : ViewBase
 }
 ```
 
+## Slow Upload Handler (1 MB/s)
+
+Use `SlowMemoryStreamUploadHandler` to simulate slow connections during demos. The handler throttles read speed to approximately 1 MB per second while still reporting progress updates.
+
+```csharp demo-tabs
+public class SlowUploadDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var uploadState = UseState<FileUpload<byte[]>?>();
+        var upload = this.UseUpload(SlowMemoryStreamUploadHandler.Create(uploadState))
+            .Accept("*/*");
+
+        return Layout.Vertical()
+               | uploadState.ToFileInput(upload).Placeholder("Upload with throttled speed (1 MB/s)")
+               | uploadState.Value?.ToDetails();
+    }
+}
+```
+
 ## FileUpload Record
 
 The `FileUpload<TContent>` record contains all file information:
