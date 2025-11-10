@@ -112,7 +112,8 @@ public class PasswordEmailFlowView(IState<string?> errorMessage) : ViewBase
                 return;
             }
 
-            if (!await submitForm())
+            var isValid = await submitForm(); // FormBuilder runs validation and updates field errors
+            if (!isValid)
             {
                 return;
             }
