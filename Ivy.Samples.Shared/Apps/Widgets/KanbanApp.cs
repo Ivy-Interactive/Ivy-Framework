@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using Ivy.Shared;
 using Ivy.Views.Kanban;
 
@@ -70,39 +73,105 @@ public class KanbanApp : SampleBase
                     var taskId = moveData.CardId?.ToString();
                     if (string.IsNullOrEmpty(taskId)) return;
 
-                    var updatedTasks = tasks.Value.ToList();
-                    var taskToMove = updatedTasks.FirstOrDefault(t => t.Id == taskId);
-                    if (taskToMove == null) return;
+                    var columns = tasks.Value
+                        .GroupBy(t => t.Status)
+                        .ToDictionary(
+                            g => g.Key,
+                            g => g.Select(task => new Task
+                            {
+                                Id = task.Id,
+                                Title = task.Title,
+                                Status = task.Status,
+                                Priority = task.Priority,
+                                Description = task.Description,
+                                Assignee = task.Assignee
+                            }).ToList());
 
-                    // Update the task's status
-                    taskToMove = new Task
+                    if (!columns.TryGetValue(moveData.FromColumn, out var sourceList))
                     {
-                        Id = taskToMove.Id,
-                        Title = taskToMove.Title,
-                        Status = moveData.ToColumn,
-                        Priority = taskToMove.Priority,
-                        Description = taskToMove.Description,
-                        Assignee = taskToMove.Assignee
-                    };
+                        return;
+                    }
 
-                    // Remove the task from its current position
-                    updatedTasks.RemoveAll(t => t.Id == taskId);
-
-                    // Insert the task at the desired position within the target column
-                    var tasksInTargetColumn = updatedTasks.Where(t => t.Status == moveData.ToColumn).ToList();
-                    if (moveData.TargetIndex.HasValue && moveData.TargetIndex.Value < tasksInTargetColumn.Count)
+                    var originalIndex = sourceList.FindIndex(t => t.Id == taskId);
+                    if (originalIndex < 0)
                     {
-                        // Insert at specific position
-                        var insertIndex = moveData.TargetIndex.Value;
-                        updatedTasks.InsertRange(insertIndex, new[] { taskToMove });
+                        return;
+                    }
+
+                    var movingTask = sourceList[originalIndex];
+
+                    if (!columns.TryGetValue(moveData.ToColumn, out var targetList))
+                    {
+                        targetList = new List<Task>();
+                        columns[moveData.ToColumn] = targetList;
+                    }
+
+                    if (moveData.FromColumn == moveData.ToColumn && moveData.TargetIndex.HasValue)
+                    {
+                        var swapIndex = Math.Clamp(moveData.TargetIndex.Value, 0, targetList.Count - 1);
+                        if (swapIndex == originalIndex)
+                        {
+                            return;
+                        }
+
+                        var targetTask = targetList[swapIndex];
+                        var movingClone = CloneTask(movingTask, moveData.ToColumn);
+                        var targetClone = CloneTask(targetTask, moveData.ToColumn);
+
+                        targetList[swapIndex] = movingClone;
+                        targetList[originalIndex] = targetClone;
                     }
                     else
                     {
-                        // Add to end of column
-                        updatedTasks.Add(taskToMove);
+                        sourceList.RemoveAt(originalIndex);
+
+                        var insertIndex = moveData.TargetIndex ?? targetList.Count;
+                        insertIndex = Math.Clamp(insertIndex, 0, targetList.Count);
+
+                        if (moveData.TargetIndex.HasValue && targetList.Count > 0 && insertIndex < targetList.Count)
+                        {
+                            var targetTask = targetList[insertIndex];
+                            var movingClone = CloneTask(movingTask, moveData.ToColumn);
+                            var targetCloneForSource = CloneTask(targetTask, moveData.FromColumn);
+
+                            targetList[insertIndex] = movingClone;
+                            sourceList.Insert(originalIndex, targetCloneForSource);
+                        }
+                        else
+                        {
+                            var movingClone = CloneTask(movingTask, moveData.ToColumn);
+                            targetList.RemoveAll(task => task.Id == movingClone.Id);
+                            targetList.Insert(insertIndex, movingClone);
+                        }
                     }
 
-                    tasks.Set(updatedTasks.ToArray());
+                    var orderedStatuses = tasks.Value
+                        .Select(t => t.Status)
+                        .Concat(new[] { moveData.ToColumn })
+                        .Distinct()
+                        .OrderBy(GetStatusOrder)
+                        .ThenBy(t => t);
+
+                    var reorderedTasks = new List<Task>();
+                    foreach (var status in orderedStatuses)
+                    {
+                        if (columns.TryGetValue(status, out var list))
+                        {
+                            reorderedTasks.AddRange(list);
+                        }
+                    }
+
+                    tasks.Set(reorderedTasks.ToArray());
+
+                    static Task CloneTask(Task task, string status) => new Task
+                    {
+                        Id = task.Id,
+                        Title = task.Title,
+                        Status = status,
+                        Priority = task.Priority,
+                        Description = task.Description,
+                        Assignee = task.Assignee
+                    };
                 })
                 .HandleDelete(cardId =>
                 {
