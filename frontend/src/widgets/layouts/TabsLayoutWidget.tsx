@@ -716,6 +716,7 @@ export const TabsLayoutWidget = ({
   const renderTabContent = (tabWidget: React.ReactElement) => {
     if (!React.isValidElement(tabWidget)) return null;
     const { title, id: tabId, icon, badge } = tabWidget.props as TabWidgetProps;
+    const isActive = activeTabId === tabId;
 
     return (
       <>
@@ -728,16 +729,15 @@ export const TabsLayoutWidget = ({
             {badge}
           </Badge>
         )}
-        <div className="ml-2 items-center flex gap-0 relative">
-          {activeTabId === tabId && showRefresh && (
+        <div className="ml-2 items-center flex gap-0">
+          {isActive && showRefresh && (
             <a
               onClick={e => {
                 e.stopPropagation();
-                // Mark as user-initiated to prevent sync issues
                 isUserInitiatedChangeRef.current = true;
                 safeEvent('OnRefresh', [tabOrder.indexOf(tabId)]);
               }}
-              className="opacity-60 p-1 rounded-full border border-transparent hover:border-border hover:bg-accent hover:opacity-100 transition-colors cursor-pointer"
+              className="opacity-60 p-1 rounded border border-transparent hover:border-border hover:bg-accent hover:opacity-100 transition-colors cursor-pointer"
             >
               <RotateCw className="w-3 h-3" />
             </a>
@@ -746,11 +746,13 @@ export const TabsLayoutWidget = ({
             <a
               onClick={e => {
                 e.stopPropagation();
-                // Mark as user-initiated since close affects selection
                 isUserInitiatedChangeRef.current = true;
                 safeEvent('OnClose', [tabOrder.indexOf(tabId)]);
               }}
-              className="opacity-60 p-1 rounded-full border border-transparent hover:border-border hover:bg-accent hover:opacity-100 transition-colors cursor-pointer"
+              className={cn(
+                'opacity-60 p-1 rounded border border-transparent hover:border-border hover:bg-accent hover:opacity-100 transition-colors cursor-pointer',
+                !isActive && 'invisible group-hover:visible'
+              )}
             >
               <X className="w-3 h-3" />
             </a>
@@ -977,7 +979,7 @@ export const TabsLayoutWidget = ({
               <TabsList
                 ref={tabsListRef}
                 useRadix={useRadix}
-                className="relative h-auto w-full gap-0.5 mt-2.5 bg-transparent p-0 flex justify-start flex-nowrap"
+                className="relative h-auto w-full bg-transparent p-0 flex justify-start flex-nowrap"
               >
                 {orderedTabWidgets.map(tabWidget => {
                   if (!React.isValidElement(tabWidget)) return null;
@@ -1003,11 +1005,13 @@ export const TabsLayoutWidget = ({
                         handleMouseDown(e, tabOrder.indexOf(id))
                       }
                       className={cn(
-                        'group overflow-hidden rounded-b-none py-2 data-[state=active]:z-10 data-[state=active]:shadow-none border-x border-t border-border flex-shrink-0',
-                        variant === 'Tabs' &&
-                          'data-[state=active]:bg-background',
+                        'group overflow-hidden h-full data-[state=active]:z-10 data-[state=active]:shadow-none border-x border-t border-b border-border flex-shrink-0',
+                        // Inactive tab styling with darker hover
+                        'bg-muted hover:bg-muted-foreground/20',
+                        // Active tab styling (overrides inactive)
+                        'data-[state=active]:bg-background data-[state=active]:hover:bg-background',
                         (variant as string) === 'Content' &&
-                          'border-b-2 border-b-transparent data-[state=active]:border-b-primary data-[state=active]:bg-background/50'
+                          'border-b-2 border-b-transparent data-[state=active]:border-b-primary'
                       )}
                     >
                       {renderTabContent(tabWidget)}

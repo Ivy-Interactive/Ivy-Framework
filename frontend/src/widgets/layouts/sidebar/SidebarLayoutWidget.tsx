@@ -181,9 +181,10 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
       {showToggleButton && mainAppSidebar && (
         <button
           onClick={handleManualToggle}
-          className="absolute top-2 z-50 p-2 rounded-md bg-background hover:bg-accent hover:text-accent-foreground cursor-pointer transition-all duration-200"
+          className="absolute top-0 z-50 p-2 rounded-md bg-background hover:bg-sidebar-accent hover:text-accent-foreground cursor-pointer transition-all duration-200"
           style={{
             left: isSidebarOpen ? 'calc(16rem + 8px)' : '8px',
+            marginTop: '1px',
             transition: 'left 300ms ease-in-out',
             transform: 'translateX(0)', // Ensure button moves with its parent sidebar
           }}
@@ -270,7 +271,7 @@ const CollapsibleMenuItem: React.FC<{
         <li className="relative">
           <CollapsibleTrigger asChild>
             <button
-              className="flex w-full items-center gap-2 rounded-lg p-2 text-large-label hover:bg-accent hover:text-accent-foreground cursor-pointer h-8"
+              className="flex w-full items-center gap-2 rounded-lg p-2 text-large-label hover:bg-sidebar-accent hover:text-accent-foreground cursor-pointer h-8"
               onClick={() => {
                 // For items with children, toggle the collapsible state
                 // Only try to navigate if the item has a tag
@@ -303,7 +304,7 @@ const CollapsibleMenuItem: React.FC<{
     return (
       <li key={item.label}>
         <button
-          className="flex w-full items-center gap-2 rounded-lg p-2 text-large-label hover:bg-accent hover:text-accent-foreground cursor-pointer h-8"
+          className="flex w-full items-center gap-2 rounded-lg p-2 text-large-label hover:bg-sidebar-accent hover:text-accent-foreground cursor-pointer h-8"
           onClick={() => onItemClick(item)}
           onMouseDown={e => onCtrlRightMouseClick(e, item)}
         >
@@ -366,7 +367,7 @@ const renderMenuItems = (
         return (
           <li key={item.tag}>
             <button
-              className="flex w-full items-center gap-2 rounded-lg p-2 text-body hover:bg-accent hover:text-accent-foreground cursor-pointer h-8"
+              className="flex w-full items-center gap-2 rounded-lg p-2 text-body hover:bg-sidebar-accent hover:text-accent-foreground cursor-pointer h-8"
               onClick={() => onItemClick(item)}
               onMouseDown={e => onCtrlRightMouseClick(e, item)}
             >
@@ -379,7 +380,7 @@ const renderMenuItems = (
         return (
           <li key={item.tag}>
             <button
-              className="flex w-full items-center gap-2 rounded-lg p-2 text-body hover:bg-accent hover:text-accent-foreground cursor-pointer h-8"
+              className="flex w-full items-center gap-2 rounded-lg p-2 text-body hover:bg-sidebar-accent hover:text-accent-foreground cursor-pointer h-8"
               onClick={() => onItemClick(item)}
               onMouseDown={e => onCtrlRightMouseClick(e, item)}
             >
@@ -464,7 +465,7 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
         return (
           <li key={item.tag}>
             <button
-              className={`flex w-full items-center gap-2 rounded-lg p-2 text-sm hover:bg-accent hover:text-accent-foreground cursor-pointer h-8 ${
+              className={`flex w-full items-center gap-2 rounded-lg p-2 text-sm hover:bg-sidebar-accent hover:text-accent-foreground cursor-pointer h-8 ${
                 isActive ? 'bg-accent text-accent-foreground' : ''
               }`}
               tabIndex={-1} // Not focusable
