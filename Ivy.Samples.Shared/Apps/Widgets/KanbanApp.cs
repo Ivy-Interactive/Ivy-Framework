@@ -73,19 +73,7 @@ public class KanbanApp : SampleBase
                     var taskId = moveData.CardId?.ToString();
                     if (string.IsNullOrEmpty(taskId)) return;
 
-                    var columns = tasks.Value
-                        .GroupBy(t => t.Status)
-                        .ToDictionary(
-                            g => g.Key,
-                            g => g.Select(task => new Task
-                            {
-                                Id = task.Id,
-                                Title = task.Title,
-                                Status = task.Status,
-                                Priority = task.Priority,
-                                Description = task.Description,
-                                Assignee = task.Assignee
-                            }).ToList());
+                    var columns = BuildColumnMap(tasks.Value);
 
                     if (!columns.TryGetValue(moveData.FromColumn, out var sourceList))
                     {
@@ -106,72 +94,24 @@ public class KanbanApp : SampleBase
                         columns[moveData.ToColumn] = targetList;
                     }
 
-                    if (moveData.FromColumn == moveData.ToColumn && moveData.TargetIndex.HasValue)
+                    var handled = moveData.FromColumn == moveData.ToColumn && moveData.TargetIndex.HasValue
+                        ? TrySwapWithinColumn(targetList, originalIndex, moveData.TargetIndex.Value)
+                        : MoveAcrossColumns(
+                            sourceList,
+                            targetList,
+                            movingTask,
+                            originalIndex,
+                            moveData.TargetIndex,
+                            moveData.FromColumn,
+                            moveData.ToColumn);
+
+                    if (!handled)
                     {
-                        var swapIndex = Math.Clamp(moveData.TargetIndex.Value, 0, targetList.Count - 1);
-                        if (swapIndex == originalIndex)
-                        {
-                            return;
-                        }
-
-                        var targetTask = targetList[swapIndex];
-                        var movingClone = CloneTask(movingTask, moveData.ToColumn);
-                        var targetClone = CloneTask(targetTask, moveData.ToColumn);
-
-                        targetList[swapIndex] = movingClone;
-                        targetList[originalIndex] = targetClone;
-                    }
-                    else
-                    {
-                        sourceList.RemoveAt(originalIndex);
-
-                        var insertIndex = moveData.TargetIndex ?? targetList.Count;
-                        insertIndex = Math.Clamp(insertIndex, 0, targetList.Count);
-
-                        if (moveData.TargetIndex.HasValue && targetList.Count > 0 && insertIndex < targetList.Count)
-                        {
-                            var targetTask = targetList[insertIndex];
-                            var movingClone = CloneTask(movingTask, moveData.ToColumn);
-                            var targetCloneForSource = CloneTask(targetTask, moveData.FromColumn);
-
-                            targetList[insertIndex] = movingClone;
-                            sourceList.Insert(originalIndex, targetCloneForSource);
-                        }
-                        else
-                        {
-                            var movingClone = CloneTask(movingTask, moveData.ToColumn);
-                            targetList.RemoveAll(task => task.Id == movingClone.Id);
-                            targetList.Insert(insertIndex, movingClone);
-                        }
+                        return;
                     }
 
-                    var orderedStatuses = tasks.Value
-                        .Select(t => t.Status)
-                        .Concat(new[] { moveData.ToColumn })
-                        .Distinct()
-                        .OrderBy(GetStatusOrder)
-                        .ThenBy(t => t);
-
-                    var reorderedTasks = new List<Task>();
-                    foreach (var status in orderedStatuses)
-                    {
-                        if (columns.TryGetValue(status, out var list))
-                        {
-                            reorderedTasks.AddRange(list);
-                        }
-                    }
-
+                    var reorderedTasks = RebuildTasks(tasks.Value, columns, moveData.ToColumn);
                     tasks.Set(reorderedTasks.ToArray());
-
-                    static Task CloneTask(Task task, string status) => new Task
-                    {
-                        Id = task.Id,
-                        Title = task.Title,
-                        Status = status,
-                        Priority = task.Priority,
-                        Description = task.Description,
-                        Assignee = task.Assignee
-                    };
                 })
                 .HandleDelete(cardId =>
                 {
@@ -218,6 +158,117 @@ public class KanbanApp : SampleBase
             description: "Task Details"
         ).Width(Size.Rem(32));
     }
+
+    private static Dictionary<string, List<Task>> BuildColumnMap(Task[] source)
+    {
+        var map = new Dictionary<string, List<Task>>(StringComparer.Ordinal);
+
+        foreach (var task in source)
+        {
+            if (!map.TryGetValue(task.Status, out var list))
+            {
+                list = new List<Task>();
+                map[task.Status] = list;
+            }
+
+            list.Add(CloneTask(task, task.Status));
+        }
+
+        return map;
+    }
+
+    private static bool TrySwapWithinColumn(List<Task> column, int originalIndex, int targetIndex)
+    {
+        if (column.Count == 0)
+        {
+            return false;
+        }
+
+        var boundedTarget = Math.Clamp(targetIndex, 0, column.Count - 1);
+        if (boundedTarget == originalIndex)
+        {
+            return false;
+        }
+
+        var sourceTask = column[originalIndex];
+        var targetTask = column[boundedTarget];
+
+        column[boundedTarget] = CloneTask(sourceTask, sourceTask.Status);
+        column[originalIndex] = CloneTask(targetTask, targetTask.Status);
+        return true;
+    }
+
+    private static bool MoveAcrossColumns(
+        List<Task> sourceList,
+        List<Task> targetList,
+        Task movingTask,
+        int originalIndex,
+        int? targetIndex,
+        string fromColumn,
+        string toColumn)
+    {
+        if (originalIndex < 0 || originalIndex >= sourceList.Count)
+        {
+            return false;
+        }
+
+        sourceList.RemoveAt(originalIndex);
+
+        var insertIndex = Math.Clamp(targetIndex ?? targetList.Count, 0, targetList.Count);
+
+        if (targetIndex.HasValue && targetList.Count > 0 && insertIndex < targetList.Count)
+        {
+            var targetTask = targetList[insertIndex];
+            var movingClone = CloneTask(movingTask, toColumn);
+            var targetCloneForSource = CloneTask(targetTask, fromColumn);
+
+            targetList[insertIndex] = movingClone;
+            var safeInsertIndex = Math.Clamp(originalIndex, 0, sourceList.Count);
+            sourceList.Insert(safeInsertIndex, targetCloneForSource);
+        }
+        else
+        {
+            var movingClone = CloneTask(movingTask, toColumn);
+            targetList.RemoveAll(task => task.Id == movingClone.Id);
+            targetList.Insert(insertIndex, movingClone);
+        }
+
+        return true;
+    }
+
+    private static Task[] RebuildTasks(
+        Task[] original,
+        Dictionary<string, List<Task>> columns,
+        string targetColumn)
+    {
+        var orderedStatuses = original
+            .Select(t => t.Status)
+            .Concat(new[] { targetColumn })
+            .Distinct()
+            .OrderBy(GetStatusOrder)
+            .ThenBy(t => t);
+
+        var reorderedTasks = new List<Task>();
+        foreach (var status in orderedStatuses)
+        {
+            if (columns.TryGetValue(status, out var list))
+            {
+                reorderedTasks.AddRange(list);
+            }
+        }
+
+        return reorderedTasks.ToArray();
+    }
+
+    private static Task CloneTask(Task task, string status) => new Task
+    {
+        Id = task.Id,
+        Title = task.Title,
+        Status = status,
+        Priority = task.Priority,
+        Description = task.Description,
+        Assignee = task.Assignee
+    };
 
     private static int GetStatusOrder(string status) => status switch
     {
