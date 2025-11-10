@@ -90,4 +90,10 @@
     <ProjectReference Include="..\Ivy.Filters\Ivy.Filters.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="Ivy.DesignSystem">
+      <HintPath>../../Ivy-Design-System/bin/Debug/netstandard2.0/Ivy.DesignSystem.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>
