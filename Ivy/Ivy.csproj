@@ -91,9 +91,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="Ivy.DesignSystem">
-      <HintPath>../../Ivy-Design-System/bin/Debug/netstandard2.0/Ivy.DesignSystem.dll</HintPath>
-    </Reference>
+    <PackageReference Include="Ivy.DesignSystem" Version="1.1.0" />
   </ItemGroup>
 
 </Project>
