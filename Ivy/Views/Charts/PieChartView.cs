@@ -87,9 +87,6 @@ public class DefaultPieChartStyle<TSource> : IPieChartStyle<TSource>
                 .Layout(Legend.Layouts.Horizontal)
                 .Align(Legend.Alignments.Center)
                 .VerticalAlign(Legend.VerticalAlignments.Bottom)
-            )
-            .Toolbox(new Toolbox()
-            .MagicType(false)
             );
     }
 }
@@ -120,10 +117,7 @@ public class DashboardPieChartStyle<TSource> : IPieChartStyle<TSource>
                     .Align(Legend.Alignments.Center)
                     .VerticalAlign(Legend.VerticalAlignments.Bottom)
                 )
-                .Tooltip(new Ivy.Charts.Tooltip().Animated(true))
-                .Toolbox(new Toolbox()
-                .MagicType(false)
-            );
+                .Tooltip(new Ivy.Charts.Tooltip().Animated(true));
     }
 }
 

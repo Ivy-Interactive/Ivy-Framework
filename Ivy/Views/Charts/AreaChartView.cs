@@ -80,10 +80,7 @@ public class DefaultAreaChartStyle<TSource> : IAreaChartStyle<TSource>
             .XAxis(new XAxis(dimension.Name).TickLine(false).AxisLine(false).MinTickGap(10))
             .CartesianGrid(new CartesianGrid().Horizontal())
             .Tooltip(new Ivy.Charts.Tooltip().Animated(true))
-            .Legend()
-            .Toolbox(new Toolbox()
-            .MagicType(false)
-            );
+            .Legend();
 
     }
 }

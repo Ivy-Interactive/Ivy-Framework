@@ -38,11 +38,12 @@ public class PieChartDemo : ViewBase
          //Showing default placement of the legend at the bottom of the chart
          return Layout.Vertical()
             | Text.Large("Mobile sales over Q1(January-March)")
-            | data.ToPieChart
+           | data.ToPieChart
                  (
                     e => e.Month,
                     e => e.Sum(f => f.Mobile),
-                    PieChartStyles.Dashboard
+                    PieChartStyles.Dashboard,
+                    polish: chart => chart.Toolbox(new Toolbox().MagicType(false))
                 )
            | Text.Large("Desktop sales over Q1(January-March)")
            // Showing custom placement of the legend at the right bottom of the chart

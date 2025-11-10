@@ -34,7 +34,8 @@ public class BasicAreaChart : ViewBase
                     .CartesianGrid(new CartesianGrid().Horizontal())
                     .Tooltip()
                     .XAxis(new XAxis("Month").TickLine(false).AxisLine(false))
-                    .Legend();
+                    .Legend()
+                    .Toolbox();
    }
 }
 ```
@@ -71,7 +72,7 @@ public class Covid19Demo : ViewBase
         };
 
         return new Card().Title("COVID-19 cases")
-            | data.ToAreaChart()
+            | data.ToAreaChart(polish: chart => chart.Toolbox(new Toolbox().MagicType(false)))
                 .Dimension("Month", e => e.Month)
                 .Measure("Cases", e => e.Sum(f => f.Cases))
                 .Measure("Deaths", e => e.Sum(f => f.Deaths))
@@ -137,7 +138,8 @@ public class ImmigrationToEurope : ViewBase
                         .FillOpacity(0.55))   
                     .XAxis(new XAxis("Month").TickLine(false).AxisLine(false))
                     .Tooltip()
-                    .Legend();        
+                    .Legend()
+                    .Toolbox();        
     }
 }
 ```

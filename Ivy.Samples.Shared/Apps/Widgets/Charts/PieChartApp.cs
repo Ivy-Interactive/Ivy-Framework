@@ -43,7 +43,8 @@ public class PieChart0View : ViewBase
                 (
                     e => e.Category,
                     e => e.Sum(f => f.Value),
-                    PieChartStyles.Default
+                    PieChartStyles.Default,
+                    polish: chart => chart.Toolbox(new Toolbox().MagicType(false))
                 )
         ;
     }
@@ -66,7 +67,8 @@ public class PieChart1View : ViewBase
                 (
                     e => e.Browser,
                     e => e.Sum(f => f.Users),
-                    PieChartStyles.Dashboard
+                    PieChartStyles.Dashboard,
+                    polish: chart => chart.Toolbox(new Toolbox().MagicType(false))
                 )
         ;
     }
@@ -91,7 +93,8 @@ public class PieChart2View : ViewBase
                 (
                     e => e.Month,
                     e => e.Sum(f => f.Sales),
-                    PieChartStyles.Default
+                    PieChartStyles.Default,
+                    polish: chart => chart.Toolbox(new Toolbox().MagicType(false))
                 )
         ;
     }
@@ -115,7 +118,8 @@ public class PieChart3View : ViewBase
                 (
                     e => e.Department,
                     e => e.Sum(f => f.Budget),
-                    PieChartStyles.Dashboard
+                    PieChartStyles.Dashboard,
+                    polish: chart => chart.Toolbox(new Toolbox().MagicType(false))
                 )
         ;
     }
@@ -138,7 +142,8 @@ public class PieChart4View : ViewBase
                 (
                     e => e.Product,
                     e => e.Sum(f => f.Revenue),
-                    PieChartStyles.Default
+                    PieChartStyles.Default,
+                    polish: chart => chart.Toolbox(new Toolbox().MagicType(false))
                 )
         ;
     }
@@ -163,7 +168,8 @@ public class PieChart5View : ViewBase
                 (
                     e => e.Region,
                     e => e.Sum(f => f.Customers),
-                    PieChartStyles.Dashboard
+                    PieChartStyles.Dashboard,
+                    polish: chart => chart.Toolbox(new Toolbox().MagicType(false))
                 )
         ;
     }
@@ -190,7 +196,8 @@ public class PieChart6View : ViewBase
                 (
                     e => e.Platform,
                     e => e.Sum(f => f.Users),
-                    PieChartStyles.Donut
+                    PieChartStyles.Donut,
+                    polish: chart => chart.Toolbox(new Toolbox().MagicType(false))
                 )
         ;
     }
@@ -215,7 +222,8 @@ public class PieChart7View : ViewBase
                 (
                     e => e.Department,
                     e => e.Sum(f => f.Budget),
-                    PieChartStyles.Default
+                    PieChartStyles.Default,
+                    polish: chart => chart.Toolbox(new Toolbox().MagicType(false))
                 )
         ;
     }
@@ -239,7 +247,8 @@ public class PieChart8View : ViewBase
                 (
                     e => e.Status,
                     e => e.Sum(f => f.Tasks),
-                    PieChartStyles.Dashboard
+                    PieChartStyles.Dashboard,
+                    polish: chart => chart.Toolbox(new Toolbox().MagicType(false))
                 )
         ;
     }
@@ -265,7 +274,8 @@ public class PieChart9View : ViewBase
                 (
                     e => e.Technology,
                     e => e.Sum(f => f.Developers),
-                    PieChartStyles.Default
+                    PieChartStyles.Default,
+                    polish: chart => chart.Toolbox(new Toolbox().MagicType(false))
                 )
         ;
     }
@@ -293,7 +303,8 @@ public class PieChart10View : ViewBase
                 (
                     e => e.Category,
                     e => e.Sum(f => f.Amount),
-                    PieChartStyles.Donut
+                    PieChartStyles.Donut,
+                    polish: chart => chart.Toolbox(new Toolbox().MagicType(false))
                 )
         ;
     }
@@ -318,7 +329,8 @@ public class PieChart11View : ViewBase
                 (
                     e => e.AgeGroup,
                     e => e.Sum(f => f.Users),
-                    PieChartStyles.Dashboard
+                    PieChartStyles.Dashboard,
+                    polish: chart => chart.Toolbox(new Toolbox().MagicType(false))
                 )
         ;
     }
