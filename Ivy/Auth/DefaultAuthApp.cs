@@ -93,7 +93,6 @@ public class PasswordEmailFlowView(IState<string?> errorMessage) : ViewBase
         var loading = this.UseState<bool>();
         var auth = this.UseService<IAuthService>();
         var client = this.UseService<IClientProvider>();
-        var lastSubmitted = this.UseState<LoginFormModel?>(() => null);
 
         var formBuilder = credentials.ToForm("Login")
             .Required(m => m.User, m => m.Password)
@@ -113,7 +112,12 @@ public class PasswordEmailFlowView(IState<string?> errorMessage) : ViewBase
                 return;
             }
 
-            await submitForm();
+            if (!await submitForm())
+            {
+                return;
+            }
+
+            await HandleLoginAsync();
         }
 
         async ValueTask HandleLoginAsync()
@@ -144,30 +148,6 @@ public class PasswordEmailFlowView(IState<string?> errorMessage) : ViewBase
                 loading.Set(false);
             }
         }
-
-        UseEffect(async () =>
-        {
-            if (loading.Value)
-            {
-                return;
-            }
-
-            var current = credentials.Value;
-
-            if (string.IsNullOrWhiteSpace(current.User) ||
-                string.IsNullOrWhiteSpace(current.Password))
-            {
-                return;
-            }
-
-            if (lastSubmitted.Value is { } previous && previous == current)
-            {
-                return;
-            }
-
-            lastSubmitted.Set(current);
-            await HandleLoginAsync();
-        }, credentials, loading);
 
         return Layout.Vertical().Gap(12)
                | formView
