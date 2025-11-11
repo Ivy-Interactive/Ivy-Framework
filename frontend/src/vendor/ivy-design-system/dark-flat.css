@@ -1,0 +1,8 @@
+@layer base {
+  .dark {
+    --primary-foreground: #18181d;
+    --secondary-foreground: #f8f8f8;
+    --destructive-foreground: #f8f8f8;
+    --sidebar-foreground: #f8f8f8;
+  }
+}

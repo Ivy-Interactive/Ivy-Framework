@@ -1,8 +1,8 @@
 @import 'tailwindcss';
 
-/* Import Ivy Design System flat CSS tokens */
-@import 'ivy-design-system/css/ivy-framework-flat';
-@import 'ivy-design-system/css/dark-flat';
+/* Import Ivy Design System flat CSS tokens from vendor directory */
+@import './vendor/ivy-design-system/ivy-framework-flat.css';
+@import './vendor/ivy-design-system/dark-flat.css';
 
 /* Geist Sans Font Family */
 @font-face {

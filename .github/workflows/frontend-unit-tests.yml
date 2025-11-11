@@ -12,26 +12,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-      with:
-        submodules: recursive
 
     - uses: actions/setup-node@v4
       with:
         node-version: lts/*
 
-    # Build and link ivy-design-system package
-    - name: Build ivy-design-system
-      working-directory: ./Ivy-Design-System
-      run: |
-        npm ci
-        npm run build
-        npm pack
-
     - name: Install dependencies
       working-directory: ./frontend
-      run: |
-        npm ci
-        npm install ../Ivy-Design-System/ivy-design-system-*.tgz
+      run: npm ci
     
     - name: Run unit tests
       working-directory: ./frontend
