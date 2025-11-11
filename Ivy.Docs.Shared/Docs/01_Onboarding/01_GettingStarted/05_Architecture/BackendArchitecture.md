@@ -15,11 +15,21 @@ searchHints:
 The Ivy backend is built on ASP.NET Core with SignalR for real-time communication. The Server class serves as the main configuration entry point, providing a fluent API for setting up applications, authentication, and services.
 </Ingress>
 
-## Server Configuration
+For information about the React frontend system and widget rendering, see [Frontend Architecture](./FrontendArchitecture.md). For details on SignalR communication patterns, see [Frontend-Backend Communication](./FrontendBackendArchitecture.md).
 
-The `Server` class provides a fluent configuration API for setting up your Ivy application:
+## Core Server Architecture
 
-```42:106:Ivy/Server.cs
+The Ivy backend is built around the `Server` class which serves as the main configuration and hosting entry point. The server provides a fluent API for configuring applications, authentication, chrome (UI shell), and middleware.
+
+### Server Startup Flow
+
+The `Server` class manages three primary concerns:
+
+- **Application Discovery**: Through `AppRepository` which finds and instantiates application classes
+- **Service Configuration**: Via the `Services` property exposing ASP.NET Core's `IServiceCollection`
+- **Web Host Setup**: In the `RunAsync` method which configures the ASP.NET Core pipeline
+
+```csharp:Ivy/Server.cs
 public class Server
 {
     private readonly WebApplicationBuilder _builder;
@@ -34,86 +44,86 @@ public class Server
         _builder = builder;
     }
 
-    /// <summary>
-    /// Adds applications from the specified assembly by discovering all types that inherit from ViewBase
-    /// and are decorated with the [App] attribute.
-    /// </summary>
-    public Server AddAppsFromAssembly(Assembly assembly)
-    {
-        var appTypes = assembly.GetTypes()
-            .Where(t => t.IsSubclassOf(typeof(ViewBase)) && t.GetCustomAttribute<AppAttribute>() != null)
-            .ToList();
-
-        _appTypes.AddRange(appTypes);
-        return this;
-    }
-
-    /// <summary>
-    /// Configures the application chrome (layout wrapper) that will be used for all apps.
-    /// </summary>
-    public Server UseChrome(Chrome chrome)
-    {
-        _chrome = chrome;
-        return this;
-    }
-
-    /// <summary>
-    /// Enables hot reload functionality for development.
-    /// </summary>
-    public Server UseHotReload()
-    {
-        _hotReloadEnabled = true;
-        return this;
-    }
-
-    /// <summary>
-    /// Configures an authentication provider for the application.
-    /// </summary>
-    public Server UseAuth<T>() where T : class, IAuthProvider
-    {
-        _authProviderType = typeof(T);
-        return this;
-    }
+    // ... configuration methods ...
+}
 ```
 
-### Key Configuration Methods
+### Core Server Components
 
-- **`AddAppsFromAssembly()`**: Auto-discovers application classes decorated with `[App]` attribute
-- **`UseChrome()`**: Set up application chrome/layout wrapper
-- **`UseHotReload()`**: Enable hot reload during development
-- **`UseAuth<T>()`**: Configure authentication providers
+The server exposes several key properties and methods for configuration:
 
-```164:184:Ivy/Server.cs
-    /// <summary>
-    /// Configures an authentication provider for the application.
-    /// </summary>
-    public Server UseAuth<T>() where T : class, IAuthProvider
+- **Services**: Direct access to ASP.NET Core's dependency injection container
+- **AddApp()**: Register individual applications
+- **AddAppsFromAssembly()**: Auto-discover applications via reflection
+- **UseChrome()**: Configure the application shell/layout
+- **UseAuth<T>()**: Configure authentication providers
+- **UseHotReload()**: Enable development hot reload
+
+```csharp:Ivy/Server.cs
+public async Task RunAsync()
+{
+    var app = _builder.Build();
+    
+    // Configure SignalR hub
+    app.MapHub<AppHub>("/messages");
+    
+    // Register applications
+    var appRepository = new AppRepository(_appTypes);
+    app.Services.AddSingleton(appRepository);
+    
+    // Enable hot reload if configured
+    if (_hotReloadEnabled)
     {
-        _authProviderType = typeof(T);
-        return this;
+        var hotReloadService = app.Services.GetRequiredService<HotReloadService>();
+        hotReloadService.StartWatching();
     }
-
-    /// <summary>
-    /// Adds a service to the dependency injection container.
-    /// </summary>
-    public Server AddService<TService, TImplementation>()
-        where TService : class
-        where TImplementation : class, TService
-    {
-        _serviceTypes.Add(typeof(TImplementation));
-        _builder.Services.AddScoped<TService, TImplementation>();
-        return this;
-    }
+    
+    await app.RunAsync();
+}
 ```
 
-## Application and Service Architecture
+## Application System
 
-### Application Discovery
+The application system is built around a pattern where each application is defined by an `AppDescriptor` that specifies how to create `ViewBase` instances. Applications are discovered through reflection or explicitly registered.
 
-Applications are discovered automatically by scanning assemblies for classes that:
+### Application Registration and Discovery
 
-1. Inherit from `ViewBase`
-2. Are decorated with the `[App]` attribute
+| Registration Method | Description | Example Usage |
+|-------------------|-------------|---------------|
+| `AddApp(Type)` | Register a single app type | `server.AddApp<MyApp>()` |
+| `AddApp(AppDescriptor)` | Register with explicit descriptor | Custom configuration |
+| `AddAppsFromAssembly()` | Auto-discover apps with `[App]` attribute | Scan entire assembly |
+| Constructor with `FuncBuilder` | Single-app server | Quick prototyping |
+
+```csharp:Ivy/Server.cs
+public Server AddAppsFromAssembly(Assembly assembly)
+{
+    var appTypes = assembly.GetTypes()
+        .Where(t => t.IsSubclassOf(typeof(ViewBase)) && t.GetCustomAttribute<AppAttribute>() != null)
+        .ToList();
+
+    _appTypes.AddRange(appTypes);
+    return this;
+}
+
+public Server AddApp<T>() where T : ViewBase
+{
+    _appTypes.Add(typeof(T));
+    return this;
+}
+```
+
+### ViewBase and Application Lifecycle
+
+Applications in Ivy inherit from `ViewBase`, which provides access to state management hooks, memoization, and service injection. The `ViewBase` class serves as the foundation for all application logic and UI composition.
+
+**Key Features:**
+
+- **Build()**: Method that returns widgets or other views
+- **Hooks**: State management (`UseState`, `UseEffect`, etc.)
+- **Services**: Dependency injection via `UseService<T>()`
+- **Memoization**: Automatic caching of expensive computations
+- **Lifecycle**: Automatic cleanup and resource management
 
 ```csharp
 [App(icon: Icons.Calendar, name: "Todo App")]
@@ -121,129 +131,194 @@ public class TodoApp : ViewBase
 {
     public override object? Build()
     {
-        // Application implementation
+        var todos = UseState(ImmutableArray.Create<Todo>());
+        var client = UseService<IClientProvider>();
+        
+        return Layout.Vertical(
+            new Button("Add Todo", onClick: _ => {
+                todos.Set(todos.Value.Add(new Todo("New Task", false)));
+                client.Toast("Todo added!");
+            }),
+            todos.Value.Select(todo => new TodoItem(todo))
+        );
     }
 }
 ```
 
-### View System
+## Widget System Architecture
 
-Views are the core building blocks of Ivy applications:
+The backend widget system defines the data models and type hierarchy for all UI components. Widgets are implemented as C# records that serialize to JSON for frontend consumption.
 
-- **ViewBase**: Base class for all views
-- **Build()**: Method that returns widgets or other views
-- **Hooks**: State management and side effects (`UseState`, `UseEffect`, etc.)
-- **Services**: Dependency injection via `UseService<T>()`
+### Widget Type Hierarchy
 
-### Widget System
+Widgets inherit from `WidgetBase` and can represent input controls, layout containers, or content renderers. The type system ensures type safety while allowing flexible composition.
 
-Widgets represent UI components that are serialized to JSON and sent to the frontend:
+```csharp:Ivy/Widgets/Inputs/IAnyInput.cs
+public interface IAnyInput
+{
+    string Id { get; }
+    object? Value { get; }
+    bool IsReadOnly { get; }
+    string? Placeholder { get; }
+    ValidationState ValidationState { get; }
+    string? ValidationMessage { get; }
+}
 
-- **WidgetBase**: Base class for all widgets
-- **Serialization**: Widgets are serialized to JSON using System.Text.Json
-- **Type Mapping**: Widget types map to React components on the frontend
-- **Props**: Widget properties are serialized and passed to React components
-
-## Communication System
-
-### SignalR Hub
-
-The `AppHub` handles WebSocket connections and message routing:
-
-- **Connection Management**: Establishes connections per app instance
-- **Message Routing**: Routes messages between frontend and backend
-- **State Management**: Tracks widget tree state per connection
-- **Event Handling**: Processes user interaction events
-
-### Message Types
-
-The backend sends several types of messages:
-
-- **Refresh**: Complete widget tree replacement
-- **Update**: JSON patch updates for incremental changes
-- **Toast**: Notification messages
-- **Error**: Error reporting with stack traces
-
-## Hot Reload System
-
-During development, the `HotReloadService` monitors file changes and triggers rebuilds:
-
-```322:330:Ivy/Server.cs
-        if (_hotReloadEnabled)
-        {
-            var hotReloadService = app.Services.GetRequiredService<HotReloadService>();
-            hotReloadService.StartWatching();
-        }
+public interface IInput<T> : IAnyInput
+{
+    new T? Value { get; }
+    event Action<T?>? OnChange;
+}
 ```
 
-The hot reload system:
+### Input Widget Type System
 
-- Watches for file changes in the application directory
-- Triggers rebuilds when changes are detected
-- Sends refresh messages to connected clients
-- Maintains application state during reloads
+The input widget system uses a sophisticated type conversion mechanism that allows widgets to bind to various .NET types while maintaining type safety:
 
-## Production Deployment
-
-In production, the frontend is embedded as resources in the C# assembly:
-
-```364:427:Ivy/Server.cs
-    public static void UseFrontend(this WebApplication app)
+```csharp:Ivy/Widgets/Inputs/BoolInput.cs
+public abstract class BoolInputBase : InputWidgetBase<bool>
+{
+    protected override IEnumerable<Type> SupportedStateTypes()
     {
-        var assembly = Assembly.GetExecutingAssembly();
-        var embeddedProvider = new EmbeddedFileProvider(assembly, "Ivy.frontend");
-
-        app.UseDefaultFiles(new DefaultFilesOptions
-        {
-            FileProvider = embeddedProvider,
-            RequestPath = ""
-        });
-
-        app.UseStaticFiles(new StaticFilesOptions
-        {
-            FileProvider = embeddedProvider,
-            RequestPath = "",
-            OnPrepareResponse = ctx =>
-            {
-                // Set cache headers for static assets
-                var path = ctx.File.Name;
-                if (path.EndsWith(".html"))
-                {
-                    ctx.Context.Response.Headers.CacheControl = "no-cache, no-store, must-revalidate";
-                }
-                else
-                {
-                    ctx.Context.Response.Headers.CacheControl = "public, max-age=31536000, immutable";
-                }
-            }
-        });
-
-        // Handle SPA routing - serve index.html for all non-API routes
-        app.MapFallback(async context =>
-        {
-            context.Response.ContentType = "text/html";
-            await using var stream = assembly.GetManifestResourceStream("Ivy.frontend.index.html");
-            if (stream != null)
-            {
-                await stream.CopyToAsync(context.Response.Body);
-            }
-        });
+        yield return typeof(bool);
+        yield return typeof(bool?);
+        yield return typeof(int);
+        yield return typeof(int?);
+        yield return typeof(long);
+        yield return typeof(long?);
     }
+}
 ```
 
-The embedded file provider:
+```csharp:Ivy/Widgets/Inputs/NumberInput.cs
+public abstract class NumberInputBase : InputWidgetBase<decimal>
+{
+    protected override IEnumerable<Type> SupportedStateTypes()
+    {
+        yield return typeof(byte);
+        yield return typeof(sbyte);
+        yield return typeof(short);
+        yield return typeof(ushort);
+        yield return typeof(int);
+        yield return typeof(uint);
+        yield return typeof(long);
+        yield return typeof(ulong);
+        yield return typeof(float);
+        yield return typeof(double);
+        yield return typeof(decimal);
+        // ... nullable variants
+    }
+}
+```
 
-- Serves the built frontend assets from the assembly
-- Handles HTML template injection for metadata
-- Sets appropriate caching headers
-- Provides ETag generation for cache invalidation
+```csharp:Ivy/Widgets/Inputs/DateTimeInput.cs
+public abstract class DateTimeInputBase : InputWidgetBase<DateTime>
+{
+    protected override IEnumerable<Type> SupportedStateTypes()
+    {
+        yield return typeof(DateTime);
+        yield return typeof(DateTime?);
+        yield return typeof(DateOnly);
+        yield return typeof(DateOnly?);
+        yield return typeof(TimeOnly);
+        yield return typeof(TimeOnly?);
+    }
+}
+```
 
-## Dependency Injection
+Each input widget base class implements `SupportedStateTypes()` method that returns compatible .NET types:
 
-Ivy integrates with ASP.NET Core's dependency injection system:
+| Widget Type | Supported Types | Example |
+|------------|----------------|---------|
+| `BoolInputBase` | `bool`, `bool?`, numeric types | Checkbox, Switch, Toggle |
+| `NumberInputBase` | All numeric types, nullable variants | Number input, Slider |
+| `DateTimeInputBase` | `DateTime`, `DateOnly`, `TimeOnly` + nullable | Date picker, Time picker |
+| `TextInputBase` | `string`, most convertible types | Text area, Single line |
 
-- **Service Registration**: Services are registered in the `Server` configuration
-- **Service Resolution**: Views can access services via `UseService<T>()`
-- **Scoped Services**: Each request gets its own service scope
-- **Built-in Services**: `IClientProvider`, `ILogger`, etc. are available automatically
+## State Management
 
+The state management system provides reactive state handling through hooks-style APIs similar to React, but implemented in C#.
+
+### State Hook Patterns
+
+State objects provide automatic change detection and can be bound directly to input widgets through extension methods like `state.ToBoolInput()` or `state.ToNumberInput()`.
+
+```csharp:Ivy/Widgets/Inputs/BoolInput.cs
+public static BoolInput ToBoolInput(this IState<bool> state, string? placeholder = null)
+{
+    return new BoolInput(state.Id)
+        .Value(state.Value)
+        .Placeholder(placeholder)
+        .OnChange(value => state.Set(value));
+}
+```
+
+**State Features:**
+
+- **Automatic Change Detection**: State changes trigger re-renders
+- **Type Safety**: Strongly typed state values
+- **Widget Binding**: Direct conversion to input widgets
+- **Persistence**: Optional state persistence across sessions
+- **Computed Values**: Derived state from other state values
+
+## Service Container and Dependency Injection
+
+The server exposes ASP.NET Core's dependency injection container through the `Services` property, allowing registration of custom services, database contexts, and other dependencies.
+
+### Service Registration Patterns
+
+```csharp:Ivy/Server.cs
+public Server AddService<TService, TImplementation>()
+    where TService : class
+    where TImplementation : class, TService
+{
+    _serviceTypes.Add(typeof(TImplementation));
+    _builder.Services.AddScoped<TService, TImplementation>();
+    return this;
+}
+
+public Server AddService<TService>(Func<IServiceProvider, TService> factory)
+    where TService : class
+{
+    _builder.Services.AddScoped(factory);
+    return this;
+}
+```
+
+The framework automatically registers core services like `IClientNotifier` for SignalR communication and `AppSessionStore` for session management.
+
+**Built-in Services:**
+
+- `IClientProvider`: Send messages and notifications to frontend
+- `IThemeService`: Manage application themes
+- `ILogger<T>`: Logging infrastructure
+- `AppSessionStore`: Session state management
+- `HotReloadService`: Development hot reload support
+
+## Real-time Communication Infrastructure
+
+The backend provides real-time communication through SignalR with the `AppHub` class serving as the central message hub.
+
+### SignalR Hub Architecture
+
+```csharp:Ivy/Server.cs
+app.MapHub<AppHub>("/messages");
+
+if (_hotReloadEnabled)
+{
+    var hotReloadService = app.Services.GetRequiredService<HotReloadService>();
+    hotReloadService.StartWatching();
+}
+```
+
+The SignalR hub is registered at the `/messages` endpoint and handles real-time communication including hot reload notifications during development and widget event processing.
+
+**Hub Responsibilities:**
+
+- **Connection Management**: Establishes and maintains WebSocket connections
+- **Message Routing**: Routes messages between frontend and backend
+- **State Synchronization**: Tracks widget tree state per connection
+- **Event Handling**: Processes user interaction events from frontend
+- **Hot Reload**: Sends refresh messages when code changes are detected
+
+This backend architecture provides a solid foundation for building internal applications with real-time updates, type-safe widget binding, and flexible service composition while maintaining clean separation between server-side logic and frontend presentation.

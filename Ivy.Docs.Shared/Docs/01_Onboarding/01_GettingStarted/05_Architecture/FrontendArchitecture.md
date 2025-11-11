@@ -11,7 +11,7 @@ searchHints:
 # Frontend Architecture
 
 <Ingress>
-This document covers the architecture of Ivy's React/TypeScript frontend application, including the build system, real-time communication infrastructure, widget rendering pipeline, and development tooling. The frontend serves as the presentation layer that renders C# widget definitions from the backend into interactive React components.
+The Ivy frontend is a single-page React application built with TypeScript and Vite. It uses a real-time communication model where the backend sends widget tree updates that are applied to the frontend state.
 </Ingress>
 
 For information about the backend C# framework that defines widgets and handles business logic, see [Backend Architecture](./BackendArchitecture.md). For details on how frontend and backend communicate via SignalR, see [Frontend-Backend Communication](./FrontendBackendArchitecture.md).
