@@ -248,7 +248,7 @@ export interface WidgetNode {
 
 ## Theming and Styling System
 
-The theming system uses CSS custom properties with comprehensive light and dark mode support. The system provides a complete design token set covering colors, typography, spacing, and animations.
+The theming system uses CSS custom properties with comprehensive light and dark mode support. The system provides a complete design token set covering colors, typography, spacing, and animations. These default styles can be overridden at runtime using the Theming service, which allows applications to dynamically generate and apply custom CSS variables through `IThemeService.SetTheme()` and `IThemeService.GenerateThemeCss()`.
 
 **Theme Features:**
 
