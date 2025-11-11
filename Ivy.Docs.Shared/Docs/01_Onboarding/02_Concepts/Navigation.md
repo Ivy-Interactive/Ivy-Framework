@@ -292,7 +292,7 @@ navigator.Navigate("example.com"); // Incorrect - treated as app URI
 
 ## See Also
 
-- [Chrome Settings](./Program/Chrome.md)
+- [Chrome Settings](./Program/02_Chrome.md)
 - [App Arguments](./Views.md)
 - [Signals](./Signals.md)
 - [State Management](./State.md)

@@ -47,9 +47,9 @@ server.UseChrome(() => new DefaultSidebarChrome(chromeSettings));
 
 - **UsePages()** - Switches to page navigation (replaces content instead of opening tabs).
 
-- **UseFooterMenuItemsTransformer(`Func<IEnumerable<MenuItem>, INavigator, IEnumerable<MenuItem>>` transformer)** - Provides a way to dynamically transform the footer menu items. Useful for adding, removing, or re-ordering links based on runtime context such as user roles or navigation state. See [Footer Transformer](./FooterTransformer.md).
+- **UseFooterMenuItemsTransformer(`Func<IEnumerable<MenuItem>, INavigator, IEnumerable<MenuItem>>` transformer)** - Provides a way to dynamically transform the footer menu items. Useful for adding, removing, or re-ordering links based on runtime context such as user roles or navigation state. See [Footer Transformer](./04_FooterTransformer.md).
 
-- **WallpaperAppId(string? appId)** / **WallpaperApp<T>()** - Sets a dedicated *wallpaper* app that is shown whenever the tab list is empty. Handy for welcome screens or branded backgrounds. See [Wallpaper](./Wallpaper.md).
+- **WallpaperAppId(string? appId)** / **WallpaperApp<T>()** - Sets a dedicated *wallpaper* app that is shown whenever the tab list is empty. Handy for welcome screens or branded backgrounds. See [Wallpaper](./03_Wallpaper.md).
 
 <Callout Type="tip">
 Use `server.UseDefaultApp(typeof(AppName))` instead of `UseChrome()` for single-purpose applications, embedded views, or minimal interfaces where sidebar navigation isn't needed.

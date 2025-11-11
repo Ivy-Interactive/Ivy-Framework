@@ -213,7 +213,7 @@ graph LR
 
 The server configuration follows a builder pattern where each method configures different aspects of the Ivy application before calling `RunAsync()` to start the web server.
 
-For detailed server configuration options, including `ServerArgs` properties and advanced settings, see [Program](../02_Concepts/Program/_Index.md).
+For detailed server configuration options, including `ServerArgs` properties and advanced settings, see [Program](../02_Concepts/Program/01_Program.md).
 
 ### Development vs Production
 
