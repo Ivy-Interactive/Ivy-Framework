@@ -15,6 +15,8 @@ Ivy lets you build modern web UIs using pure C# on the server, combining the fam
 
 Ivy is a **server-side web framework** that brings React-like patterns to C#. Instead of wrestling with JavaScript, HTML, and CSS, you write everything in C# using a reactive, component-based architecture.
 
+**In production, you only work with the backend** - the React frontend is pre-built and embedded in the Ivy framework, so you don't need to manage frontend code, build processes, or deployment configurations. You write C# code, and Ivy handles the rest.
+
 ## Architecture Overview
 
 ```mermaid

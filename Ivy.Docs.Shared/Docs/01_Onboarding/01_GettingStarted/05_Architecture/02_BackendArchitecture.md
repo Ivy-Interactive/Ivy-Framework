@@ -12,7 +12,7 @@ searchHints:
 # Backend Architecture
 
 <Ingress>
-The Ivy backend is built on ASP.NET Core with SignalR for real-time communication. The Server class serves as the main configuration entry point, providing a fluent API for setting up applications, authentication, and services.
+The Ivy backend is built on ASP.NET Core with SignalR for real-time communication. The Server class serves as the main configuration entry point, providing a fluent API for setting up applications, authentication, and services. In production, you only work with the backend C# code - the frontend is pre-built and embedded, so you don't need to manage frontend build processes or deployment.
 </Ingress>
 
 For information about the React frontend system and widget rendering, see [Frontend Architecture](./01_FrontendArchitecture.md). For details on SignalR communication patterns, see [Communication](./03_Communication.md).
