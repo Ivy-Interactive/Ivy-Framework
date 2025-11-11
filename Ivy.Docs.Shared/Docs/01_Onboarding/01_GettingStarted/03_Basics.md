@@ -97,4 +97,4 @@ public class CounterApp : ViewBase
 }
 ```
 
-You can learn more about layouts [here](../../02_Widgets/04_Layouts/SidebarLayout.md).
+You can learn more about layouts [here](../../02_Widgets/04_Layouts/SidebarLayout.md). For more information about widgets, see [Widgets](../02_Concepts/Widgets.md).

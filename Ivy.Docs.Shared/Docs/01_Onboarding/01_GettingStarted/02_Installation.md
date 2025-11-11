@@ -39,4 +39,4 @@ Use the Ivy CLI to scaffold a new project:
 >dotnet watch
 ```
 
-For more terminal usage, check out the [CLI section](../03_CLI/01_CLIOverview.md).
+For more terminal usage, check out the [CLI section](../03_CLI/01_CLIOverview.md). For detailed project setup and server configuration, see [Program](../02_Concepts/Program.md).
