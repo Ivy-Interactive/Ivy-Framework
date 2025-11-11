@@ -1,5 +1,10 @@
 import React from 'react';
-import { SignInButton } from '@clerk/clerk-react';
+import {
+  SignedOut,
+  SignedIn,
+  SignInButton,
+  SignOutButton,
+} from '@clerk/clerk-react';
 
 interface SignInButtonWidgetProps {
   id: string;
@@ -23,15 +28,22 @@ export const SignInButtonWidget: React.FC<SignInButtonWidgetProps> = ({
   children,
 }) => {
   return (
-    <SignInButton
-      mode={mode}
-      fallbackRedirectUrl={fallbackRedirectUrl}
-      forceRedirectUrl={forceRedirectUrl}
-      signUpForceRedirectUrl={signUpForceRedirectUrl}
-      signUpFallbackRedirectUrl={signUpFallbackRedirectUrl}
-      initialValues={initialValues}
-    >
-      {children}
-    </SignInButton>
+    <div>
+      <SignedIn>
+        Already signed in! <SignOutButton />
+      </SignedIn>
+      <SignedOut>
+        <SignInButton
+          mode={mode}
+          fallbackRedirectUrl={fallbackRedirectUrl}
+          forceRedirectUrl={forceRedirectUrl}
+          signUpForceRedirectUrl={signUpForceRedirectUrl}
+          signUpFallbackRedirectUrl={signUpFallbackRedirectUrl}
+          initialValues={initialValues}
+        >
+          {children}
+        </SignInButton>
+      </SignedOut>
+    </div>
   );
 };
