@@ -192,14 +192,7 @@ public interface IInput<T> : IAnyInput
 }
 ```
 
-The input widget system uses a sophisticated type conversion mechanism that allows widgets to bind to various .NET types while maintaining type safety. Each input widget base class implements `SupportedStateTypes()` method that returns compatible .NET types:
-
-| Widget Type | Supported .NET Types | Example |
-|-------------|---------------------|---------|
-| `BoolInputBase` | `bool`, `bool?`, `int`, `int?`, `long`, `long?` | Checkbox, Switch, Toggle |
-| `NumberInputBase` | `byte`, `sbyte`, `short`, `ushort`, `int`, `uint`, `long`, `ulong`, `float`, `double`, `decimal` (and nullable variants) | Number input, Slider |
-| `DateTimeInputBase` | `DateTime`, `DateTime?`, `DateOnly`, `DateOnly?`, `TimeOnly`, `TimeOnly?` | Date picker, Time picker |
-| `TextInputBase` | `string`, most convertible types | Text area, Single line |
+The input widget system uses a sophisticated type conversion mechanism that allows widgets to bind to various .NET types while maintaining type safety. Each input widget base class implements `SupportedStateTypes()` method that returns compatible .NET types.
 
 ## State Management
 
