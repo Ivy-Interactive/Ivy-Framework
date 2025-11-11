@@ -39,10 +39,12 @@ The build system uses Vite with custom plugins for seamless integration with the
 
 **Development Workflow:**
 
-- Frontend dev server runs on port 5173 via `npm run dev`
-- Backend server runs on port 5010 via `dotnet watch`
-- Metadata injection synchronizes page metadata from backend to frontend
-- Hot reload preserves application state during code changes
+| Service | Configuration | Purpose |
+|---------|---------------|---------|
+| Frontend Dev Server | Port 5173 via `npm run dev` | Development server with HMR |
+| Backend Server | Port 5010 via `dotnet watch` | C# backend with hot reload |
+| Metadata Injection | `injectMeta` plugin | Synchronizes page metadata from backend to frontend |
+| Hot Reload | State preservation | Preserves application state during code changes |
 
 ```typescript
     plugins: [
@@ -78,10 +80,18 @@ The `useBackend` hook manages the SignalR connection lifecycle and processes rea
 
 **Message Processing:**
 
-- **Refresh messages** contain complete widget trees from the backend
-- **Update messages** contain JSON patches for efficient partial updates
-- **Event messages** handle user interactions and system notifications
-- **Authentication messages** manage JWT tokens and theme preferences
+```mermaid
+graph TD
+    A[Backend Messages] --> B[Refresh Messages]
+    A --> C[Update Messages]
+    A --> D[Event Messages]
+    A --> E[Authentication Messages]
+    
+    B --> B1[Complete Widget Trees]
+    C --> C1[JSON Patches]
+    D --> D1[User Interactions]
+    E --> E1[JWT & Theme]
+```
 
 The hook applies JSON patches using `fast-json-patch` and `lodash.cloneDeep` to maintain immutable state updates while ensuring optimal performance.
 
@@ -98,37 +108,24 @@ export function useBackend(appId: string, appArgs?: string) {
 ```
 
 ```typescript
-  const handleMessage = useCallback((message: BackendMessage) => {
-    switch (message.type) {
-      case "refresh":
-        setWidgetTree(message.widget);
-        break;
-      case "update":
-        if (widgetTree) {
-          const patched = applyPatch(
-            cloneDeep(widgetTree),
-            message.patches,
-            undefined,
-            false,
-            false
-          ).newDocument;
-          setWidgetTree(patched);
-        }
-        break;
-      case "toast":
-        // Handle toast notifications
-        break;
-      case "error":
-        // Handle error messages
-        break;
-      case "setJwt":
-        // Handle JWT token updates
-        break;
-      case "setTheme":
-        // Handle theme changes
-        break;
-    }
-  }, [widgetTree]);
+const handleMessage = (message: BackendMessage) => {
+  switch (message.type) {
+    case "refresh":
+      setWidgetTree(message.widget);
+      break;
+    case "update":
+      if (widgetTree) {
+        setWidgetTree(applyPatch(cloneDeep(widgetTree), message.patches).newDocument);
+      }
+      break;
+    case "toast":
+    case "error":
+    case "setJwt":
+    case "setTheme":
+      // Handle respective message type
+      break;
+  }
+};
 ```
 
 ## Widget Rendering System
@@ -137,10 +134,14 @@ The widget rendering system transforms C# widget definitions into React componen
 
 **Core Components:**
 
-- **WidgetNode interface** defines the structure for backend widget data
-- **widgetMap registry** maps widget type strings to React components
-- **renderWidgetTree** recursively renders widget hierarchies
-- **Slot system** enables flexible component composition
+```mermaid
+graph LR
+    A[WidgetNode Interface] --> B[renderWidgetTree]
+    B --> C[widgetMap Registry]
+    C --> B
+    B --> D[Slot System]
+    D --> B
+```
 
 **Rendering Process:**
 
@@ -385,18 +386,24 @@ The development environment provides comprehensive hot reload capabilities for b
 
 **Development Features:**
 
-- Vite HMR for instant frontend updates
-- SignalR hot reload for backend changes
-- State preservation during updates
-- XML debugging for widget tree inspection
-- Error overlay with source map support
+```mermaid
+graph LR
+    A[Frontend Changes] --> B[Vite HMR]
+    C[Backend Changes] --> D[SignalR Hot Reload]
+    B --> E[State Preservation]
+    D --> E
+    E --> F[XML Debugging]
+    F --> G[Error Overlay]
+```
 
 **Development Commands:**
 
-- `npm run dev` - Start development server with HMR
-- `npm run build` - Production build with optimization
-- `npm run lint` - ESLint code analysis
-- `npm run format` - Prettier code formatting
+| Command | Purpose |
+|---------|---------|
+| `npm run dev` | Start development server with HMR |
+| `npm run build` | Production build with optimization |
+| `npm run lint` | ESLint code analysis |
+| `npm run format` | Prettier code formatting |
 
 **Backend Integration:** The development server connects to the backend via environment variable `IVY_HOST` (defaults to `http://localhost:5010`). The `injectMeta` plugin synchronizes metadata between frontend and backend during development.
 
