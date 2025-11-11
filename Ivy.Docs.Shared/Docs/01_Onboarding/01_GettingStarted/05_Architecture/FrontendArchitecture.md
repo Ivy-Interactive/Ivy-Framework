@@ -11,68 +11,146 @@ searchHints:
 # Frontend Architecture
 
 <Ingress>
-The Ivy frontend is a single-page React application built with TypeScript and Vite. It uses a real-time communication model where the backend sends widget tree updates that are applied to the frontend state.
+This document covers the architecture of Ivy's React/TypeScript frontend application, including the build system, real-time communication infrastructure, widget rendering pipeline, and development tooling. The frontend serves as the presentation layer that renders C# widget definitions from the backend into interactive React components.
 </Ingress>
+
+For information about the backend C# framework that defines widgets and handles business logic, see [Backend Architecture](./BackendArchitecture.md). For details on how frontend and backend communicate via SignalR, see [Frontend-Backend Communication](./FrontendBackendArchitecture.md).
 
 ## Technology Stack
 
+The Ivy frontend is built using modern web technologies optimized for development speed and runtime performance:
+
 | Component | Technology | Purpose |
-|-----------|-----------|---------|
-| Build Tool | Vite | Development server and bundling |
-| Framework | React 19 | UI framework |
+|-----------|------------|---------|
+| UI Framework | React | UI library |
 | Language | TypeScript | Type safety |
+| Build Tool | Vite | Build tool and dev server |
 | Styling | Tailwind CSS | Utility-first styling |
 | UI Components | Radix UI | Accessible component primitives |
-| State Management | React hooks | Local component state |
-| Real-time Communication | SignalR | WebSocket communication |
+| Communication | SignalR | Real-time communication |
 
-## Frontend Communication Flow
+The application uses Vite as the primary build tool, providing fast hot module replacement during development and optimized production builds. React 19 with concurrent features enables responsive UI updates, while TypeScript provides compile-time type safety for the entire codebase.
 
-The `useBackend` hook manages the WebSocket connection and state updates. It handles several message types:
+For a complete list of all dependencies and their versions, see the `package.json` file in the `frontend` directory.
 
-- **Refresh**: Complete widget tree replacement
-- **Update**: JSON patch updates to specific widgets
-- **Toast**: Display notifications
-- **Error**: Error handling with stack traces
-- **SetJwt**: Authentication token management
-- **SetTheme**: Theme switching
+## Build System and Development Environment
 
-```123:127:frontend/src/hooks/use-backend.tsx
+The build system uses Vite with custom plugins for seamless integration with the C# backend. The `injectMeta` plugin fetches HTML metadata from the backend server during development, enabling the frontend to inherit page titles and configuration from the server.
+
+**Development Workflow:**
+
+- Frontend dev server runs on port 5173 via `npm run dev`
+- Backend server runs on port 5010 via `dotnet watch`
+- Metadata injection synchronizes page metadata from backend to frontend
+- Hot reload preserves application state during code changes
+
+```typescript
+    plugins: [
+      react(),
+      injectMeta({
+        host: process.env.IVY_HOST || "http://localhost:5010",
+      }),
+    ],
+    server: {
+      port: 5173,
+      proxy: {
+        "/messages": {
+          target: process.env.IVY_HOST || "http://localhost:5010",
+          ws: true,
+        },
+      },
+    },
+```
+
+```json
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "lint": "eslint .",
+    "preview": "vite preview",
+    "format": "prettier --write \"src/**/*.{ts,tsx}\""
+  },
+```
+
+## Real-Time Communication Architecture
+
+The `useBackend` hook manages the SignalR connection lifecycle and processes real-time messages from the backend. The connection uses automatic reconnection and handles various message types for state synchronization.
+
+**Message Processing:**
+
+- **Refresh messages** contain complete widget trees from the backend
+- **Update messages** contain JSON patches for efficient partial updates
+- **Event messages** handle user interactions and system notifications
+- **Authentication messages** manage JWT tokens and theme preferences
+
+The hook applies JSON patches using `fast-json-patch` and `lodash.cloneDeep` to maintain immutable state updates while ensuring optimal performance.
+
+```typescript
 export function useBackend(appId: string, appArgs?: string) {
   const [widgetTree, setWidgetTree] = useState<Widget | null>(null);
   const [connectionState, setConnectionState] = useState<ConnectionState>("disconnected");
-  // ... more code ...
+  const [hubConnection, setHubConnection] = useState<HubConnection | null>(null);
+  const machineId = useMachineId();
+  const { parentId } = useSearchParams();
+
+  // ... connection setup and message handling ...
+}
 ```
 
-### Message Handling
-
-The hook processes different message types:
-
-```162:174:frontend/src/hooks/use-backend.tsx
+```typescript
+  const handleMessage = useCallback((message: BackendMessage) => {
+    switch (message.type) {
       case "refresh":
         setWidgetTree(message.widget);
         break;
       case "update":
         if (widgetTree) {
-          const patched = applyPatch(widgetTree, message.patches, undefined, false, false).newDocument;
+          const patched = applyPatch(
+            cloneDeep(widgetTree),
+            message.patches,
+            undefined,
+            false,
+            false
+          ).newDocument;
           setWidgetTree(patched);
         }
         break;
+      case "toast":
+        // Handle toast notifications
+        break;
+      case "error":
+        // Handle error messages
+        break;
+      case "setJwt":
+        // Handle JWT token updates
+        break;
+      case "setTheme":
+        // Handle theme changes
+        break;
+    }
+  }, [widgetTree]);
 ```
 
-## Widget Rendering Pipeline
+## Widget Rendering System
 
-The widget rendering system maps C# widget definitions to React components through the `widgetMap.ts` registry.
+The widget rendering system transforms C# widget definitions into React components through a centralized registry and rendering pipeline.
 
-The `renderWidgetTree` function handles:
+**Core Components:**
 
-- Component lookup from the widget map
-- Props transformation and event binding
-- Slot-based content distribution
-- Lazy loading for chart components
-- Fragment flattening for layout optimization
+- **WidgetNode interface** defines the structure for backend widget data
+- **widgetMap registry** maps widget type strings to React components
+- **renderWidgetTree** recursively renders widget hierarchies
+- **Slot system** enables flexible component composition
 
-```29:97:frontend/src/widgets/WidgetRenderer.tsx
+**Rendering Process:**
+
+1. Backend sends widget definitions as `WidgetNode` structures
+2. `renderWidgetTree` looks up components in `widgetMap`
+3. Props are mapped and children are processed recursively
+4. Slot widgets enable named content placement
+5. Lazy components use `React.Suspense` with custom loading states
+
+```typescript
 export function renderWidgetTree(
   widget: Widget | null,
   onEvent: (event: WidgetEvent) => void,
@@ -158,44 +236,249 @@ export function renderWidgetTree(
 }
 ```
 
-## Build Configuration
+```typescript
+export interface WidgetNode {
+  id: string;
+  type: string;
+  props?: Record<string, any>;
+  children?: WidgetNode | WidgetNode[];
+  slots?: Record<string, WidgetNode | WidgetNode[]>;
+}
+```
 
-The frontend build process includes:
+## Theming and Styling System
 
-- TypeScript compilation
-- Tailwind CSS processing
-- Asset bundling and optimization
-- Embedded resource generation for the C# assembly
+The theming system uses CSS custom properties with comprehensive light and dark mode support. The system provides a complete design token set covering colors, typography, spacing, and animations.
 
-```56:77:frontend/vite.config.ts
+**Theme Features:**
+
+- CSS custom properties for all design tokens
+- Automatic theme detection via `MutationObserver`
+- Extended color palette with light/dark variants
+- Typography scales with Geist font family
+- Tailwind CSS integration for utility-first styling
+
+**Font System:** The application uses Geist and Geist Mono fonts with `font-display: swap` for optimal loading performance. Font files are served locally with multiple weights (400, 500, 600, 700).
+
+**Component Integration:** Radix UI components receive theme-aware styling through CSS custom properties, ensuring consistent appearance across light and dark modes.
+
+```css
+@import "tailwindcss";
+
+:root {
+  --background: 0 0% 100%;
+  --foreground: 222.2 84% 4.9%;
+  --card: 0 0% 100%;
+  --card-foreground: 222.2 84% 4.9%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222.2 84% 4.9%;
+  --primary: 222.2 47.4% 11.2%;
+  --primary-foreground: 210 40% 98%;
+  --secondary: 210 40% 96.1%;
+  --secondary-foreground: 222.2 47.4% 11.2%;
+  --muted: 210 40% 96.1%;
+  --muted-foreground: 215.4 16.3% 46.9%;
+  --accent: 210 40% 96.1%;
+  --accent-foreground: 222.2 47.4% 11.2%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 214.3 31.8% 91.4%;
+  --input: 214.3 31.8% 91.4%;
+  --ring: 222.2 84% 4.9%;
+  --radius: 0.5rem;
+  --chart-1: 12 76% 61%;
+  --chart-2: 173 58% 39%;
+  --chart-3: 197 37% 24%;
+  --chart-4: 43 74% 66%;
+  --chart-5: 27 87% 67%;
+}
+
+.dark {
+  --background: 222.2 84% 4.9%;
+  --foreground: 210 40% 98%;
+  --card: 222.2 84% 4.9%;
+  --card-foreground: 210 40% 98%;
+  --popover: 222.2 84% 4.9%;
+  --popover-foreground: 210 40% 98%;
+  --primary: 210 40% 98%;
+  --primary-foreground: 222.2 47.4% 11.2%;
+  --secondary: 217.2 32.6% 17.5%;
+  --secondary-foreground: 210 40% 98%;
+  --muted: 217.2 32.6% 17.5%;
+  --muted-foreground: 215 20.2% 65.1%;
+  --accent: 217.2 32.6% 17.5%;
+  --accent-foreground: 210 40% 98%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 217.2 32.6% 17.5%;
+  --input: 217.2 32.6% 17.5%;
+  --ring: 212.7 26.8% 83.9%;
+  --chart-1: 220 70% 50%;
+  --chart-2: 160 60% 45%;
+  --chart-3: 30 80% 55%;
+  --chart-4: 280 65% 60%;
+  --chart-5: 340 75% 55%;
+}
+
+// ... more theme definitions ...
+```
+
+```css
+@font-face {
+  font-family: "Geist";
+  src: url("/fonts/Geist-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Geist";
+  src: url("/fonts/Geist-Medium.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+// ... more font definitions ...
+```
+
+```typescript
+export function MermaidRenderer({ content }: { content: string }) {
+  const [svg, setSvg] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const theme = useTheme();
+
+  useEffect(() => {
+    const renderDiagram = async () => {
+      try {
+        setError(null);
+        const mermaid = (await import("mermaid")).default;
+        
+        mermaid.initialize({
+          startOnLoad: false,
+          theme: theme === "dark" ? "dark" : "default",
+          securityLevel: "loose",
+        });
+
+        const id = `mermaid-${Math.random().toString(36).substr(2, 9)}`;
+        const { svg: renderedSvg } = await mermaid.render(id, content);
+        setSvg(renderedSvg);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to render diagram");
+      }
+    };
+
+    renderDiagram();
+  }, [content, theme]);
+
+  if (error) {
+    return <div className="text-destructive">Error: {error}</div>;
+  }
+
+  if (!svg) {
+    return <LoadingScreen />;
+  }
+
+  return (
+    <div
+      className="mermaid-container"
+      dangerouslySetInnerHTML={{ __html: svg }}
+    />
+  );
+}
+```
+
+## Development Tools and Hot Reload
+
+The development environment provides comprehensive hot reload capabilities for both frontend and backend changes. The system maintains application state during code updates and provides detailed debugging information.
+
+**Development Features:**
+
+- Vite HMR for instant frontend updates
+- SignalR hot reload for backend changes
+- State preservation during updates
+- XML debugging for widget tree inspection
+- Error overlay with source map support
+
+**Development Commands:**
+
+- `npm run dev` - Start development server with HMR
+- `npm run build` - Production build with optimization
+- `npm run lint` - ESLint code analysis
+- `npm run format` - Prettier code formatting
+
+**Backend Integration:** The development server connects to the backend via environment variable `IVY_HOST` (defaults to `http://localhost:5010`). The `injectMeta` plugin synchronizes metadata between frontend and backend during development.
+
+```typescript
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import path from "path";
+import { injectMeta } from "./vite-plugin-inject-meta";
+
+export default defineConfig({
+  plugins: [
+    react(),
+    injectMeta({
+      host: process.env.IVY_HOST || "http://localhost:5010",
+    }),
+  ],
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+    },
+  },
+  server: {
+    port: 5173,
+    proxy: {
+      "/messages": {
+        target: process.env.IVY_HOST || "http://localhost:5010",
+        ws: true,
+      },
+    },
+  },
   build: {
     outDir: "dist",
     emptyOutDir: true,
     rollupOptions: {
-      input: {
-        main: path.resolve(__dirname, "index.html"),
-      },
-    },
-    // Generate embedded resources for C# assembly
-    rollupOptions: {
       output: {
-        // Ensure consistent file names for embedded resources
         entryFileNames: "assets/[name].[hash].js",
         chunkFileNames: "assets/[name].[hash].js",
         assetFileNames: "assets/[name].[hash].[ext]",
       },
     },
   },
+});
 ```
 
-## Development Workflow
+```typescript
+    connection.on("refresh", (message: RefreshMessage) => {
+      handleMessage({ type: "refresh", widget: message.widget });
+    });
 
-During development, Vite provides:
+    connection.on("update", (message: UpdateMessage) => {
+      handleMessage({ type: "update", patches: message.patches });
+    });
+```
 
-- Hot Module Replacement (HMR) for instant updates
-- Fast refresh for React components
-- TypeScript type checking
-- Tailwind CSS JIT compilation
+```typescript
+    connection.start()
+      .then(() => {
+        setConnectionState("connected");
+      })
+      .catch((error) => {
+        console.error("Connection error:", error);
+        setConnectionState("error");
+      });
 
-The development server runs independently and communicates with the backend via WebSocket, allowing for rapid iteration during development.
+    connection.onclose(() => {
+      setConnectionState("disconnected");
+    });
 
+    setHubConnection(connection);
+
+    return () => {
+      connection.stop();
+    };
+  }, [appId, appArgs, machineId, parentId]);
+```
