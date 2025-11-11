@@ -1,6 +1,12 @@
 import React from 'react';
 import type { TabsLayoutWidgetProps } from './types';
-import { filterTabWidgets, orderTabWidgets } from './utils/tabUtils';
+import {
+  filterTabWidgets,
+  orderTabWidgets,
+  extractTabIds,
+  swapTabsInOrder,
+  createReorderMapping,
+} from './utils/tabUtils';
 import { TabContentRenderer } from './components/TabContent';
 import { TabsDropdownMenu } from './components/DropdownMenu';
 import { ContentVariant, TabsVariant } from './components/Variants';
@@ -81,8 +87,26 @@ export const TabsLayoutWidget = ({
     addToLoadedTabs(tabId);
     setActiveTabId(tabId);
     setDropdownOpen(false);
-    // Update activeIndex for Content variant animation
-    const newIndex = tabOrder.indexOf(tabId);
+
+    // If selecting from dropdown, swap with last visible tab
+    let effectiveTabOrder = tabOrder;
+    if (hiddenTabs.includes(tabId) && visibleTabs.length > 0) {
+      const lastVisibleTabId = visibleTabs[visibleTabs.length - 1];
+      const newOrder = swapTabsInOrder(tabOrder, tabId, lastVisibleTabId);
+
+      // Update tab order
+      setTabOrder(newOrder);
+      effectiveTabOrder = newOrder;
+
+      // Send reorder event to backend
+      const originalTabOrder = extractTabIds(tabWidgets);
+      const reorderMapping = createReorderMapping(newOrder, originalTabOrder);
+      isUserInitiatedChangeRef.current = true;
+      safeEvent('OnReorder', [reorderMapping]);
+    }
+
+    // Update activeIndex for Content variant animation (use new order if swapped)
+    const newIndex = effectiveTabOrder.indexOf(tabId);
     setActiveIndex(newIndex);
     if (events?.includes('OnSelect')) safeEvent('OnSelect', [newIndex]);
   };

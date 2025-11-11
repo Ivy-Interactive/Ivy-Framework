@@ -53,6 +53,47 @@ export function extractTabIds(
   );
 }
 
+/**
+ * Swaps two tabs in the tab order array
+ * @param tabOrder - Current tab order
+ * @param tabId1 - First tab ID
+ * @param tabId2 - Second tab ID
+ * @returns New tab order with swapped tabs, or original if tabs not found
+ */
+export function swapTabsInOrder(
+  tabOrder: string[],
+  tabId1: string,
+  tabId2: string
+): string[] {
+  const index1 = tabOrder.indexOf(tabId1);
+  const index2 = tabOrder.indexOf(tabId2);
+
+  // If either tab not found, return original order
+  if (index1 === -1 || index2 === -1) {
+    return tabOrder;
+  }
+
+  // Create new array and swap
+  const newOrder = [...tabOrder];
+  newOrder[index1] = tabId2;
+  newOrder[index2] = tabId1;
+
+  return newOrder;
+}
+
+/**
+ * Creates reorder mapping for backend sync
+ * @param newOrder - New tab order
+ * @param originalOrder - Original tab order
+ * @returns Array of indices mapping new positions to original positions
+ */
+export function createReorderMapping(
+  newOrder: string[],
+  originalOrder: string[]
+): number[] {
+  return newOrder.map(id => originalOrder.indexOf(id));
+}
+
 // ====================
 // Tab Width Calculations
 // ====================

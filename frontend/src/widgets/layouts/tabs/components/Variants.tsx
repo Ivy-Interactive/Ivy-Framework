@@ -273,7 +273,7 @@ export const TabsVariant: React.FC<TabsVariantProps> = ({
     >
       <div className="flex-shrink-0" style={getWidth(width)}>
         <div
-          className="relative pl-12 pr-6 before:absolute before:inset-x-0 before:bottom-0 before:h-px before:bg-border before:z-0 overflow-hidden"
+          className="relative pl-10 pr-6 before:absolute before:inset-x-0 before:bottom-0 before:h-px before:bg-border before:z-0 overflow-hidden"
           ref={containerRef}
         >
           <DndContext
