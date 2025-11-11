@@ -29,7 +29,7 @@ The `Server` class manages three primary concerns:
 - **Service Configuration**: Via the `Services` property exposing ASP.NET Core's `IServiceCollection`
 - **Web Host Setup**: In the `RunAsync` method which configures the ASP.NET Core pipeline
 
-```csharp:Ivy/Server.cs
+```csharp
 public class Server
 {
     private readonly WebApplicationBuilder _builder;
@@ -59,7 +59,7 @@ The server exposes several key properties and methods for configuration:
 - **UseAuth<T>()**: Configure authentication providers
 - **UseHotReload()**: Enable development hot reload
 
-```csharp:Ivy/Server.cs
+```csharp
 public async Task RunAsync()
 {
     var app = _builder.Build();
@@ -95,7 +95,7 @@ The application system is built around a pattern where each application is defin
 | `AddAppsFromAssembly()` | Auto-discover apps with `[App]` attribute | Scan entire assembly |
 | Constructor with `FuncBuilder` | Single-app server | Quick prototyping |
 
-```csharp:Ivy/Server.cs
+```csharp
 public Server AddAppsFromAssembly(Assembly assembly)
 {
     var appTypes = assembly.GetTypes()
@@ -153,7 +153,7 @@ The backend widget system defines the data models and type hierarchy for all UI 
 
 Widgets inherit from `WidgetBase` and can represent input controls, layout containers, or content renderers. The type system ensures type safety while allowing flexible composition.
 
-```csharp:Ivy/Widgets/Inputs/IAnyInput.cs
+```csharp
 public interface IAnyInput
 {
     string Id { get; }
@@ -175,7 +175,7 @@ public interface IInput<T> : IAnyInput
 
 The input widget system uses a sophisticated type conversion mechanism that allows widgets to bind to various .NET types while maintaining type safety:
 
-```csharp:Ivy/Widgets/Inputs/BoolInput.cs
+```csharp
 public abstract class BoolInputBase : InputWidgetBase<bool>
 {
     protected override IEnumerable<Type> SupportedStateTypes()
@@ -190,7 +190,7 @@ public abstract class BoolInputBase : InputWidgetBase<bool>
 }
 ```
 
-```csharp:Ivy/Widgets/Inputs/NumberInput.cs
+```csharp
 public abstract class NumberInputBase : InputWidgetBase<decimal>
 {
     protected override IEnumerable<Type> SupportedStateTypes()
@@ -211,7 +211,7 @@ public abstract class NumberInputBase : InputWidgetBase<decimal>
 }
 ```
 
-```csharp:Ivy/Widgets/Inputs/DateTimeInput.cs
+```csharp
 public abstract class DateTimeInputBase : InputWidgetBase<DateTime>
 {
     protected override IEnumerable<Type> SupportedStateTypes()
@@ -243,7 +243,7 @@ The state management system provides reactive state handling through hooks-style
 
 State objects provide automatic change detection and can be bound directly to input widgets through extension methods like `state.ToBoolInput()` or `state.ToNumberInput()`.
 
-```csharp:Ivy/Widgets/Inputs/BoolInput.cs
+```csharp
 public static BoolInput ToBoolInput(this IState<bool> state, string? placeholder = null)
 {
     return new BoolInput(state.Id)
@@ -267,7 +267,7 @@ The server exposes ASP.NET Core's dependency injection container through the `Se
 
 ### Service Registration Patterns
 
-```csharp:Ivy/Server.cs
+```csharp
 public Server AddService<TService, TImplementation>()
     where TService : class
     where TImplementation : class, TService
@@ -301,7 +301,7 @@ The backend provides real-time communication through SignalR with the `AppHub` c
 
 ### SignalR Hub Architecture
 
-```csharp:Ivy/Server.cs
+```csharp
 app.MapHub<AppHub>("/messages");
 
 if (_hotReloadEnabled)
