@@ -14,7 +14,7 @@ searchHints:
 The Ivy frontend is a single-page React application built with TypeScript and Vite. It uses a real-time communication model where the backend sends widget tree updates that are applied to the frontend state.
 </Ingress>
 
-For information about the backend C# framework that defines widgets and handles business logic, see [Backend Architecture](./BackendArchitecture.md). For details on how frontend and backend communicate via SignalR, see [Frontend-Backend Communication](./FrontendBackendArchitecture.md).
+For information about the backend C# framework that defines widgets and handles business logic, see [Backend Architecture](./02_BackendArchitecture.md). For details on how frontend and backend communicate via SignalR, see [Communication](./03_Communication.md).
 
 ## Technology Stack
 

@@ -124,9 +124,9 @@ When working with search results in the sidebar (both in Ivy Samples and Docs), 
 
 For a comprehensive technical overview of Ivy's architecture, see:
 
-- **[Frontend Architecture](./05_Architecture/FrontendArchitecture.md)** - React/TypeScript frontend, widget rendering pipeline, and build system
-- **[Backend Architecture](./05_Architecture/BackendArchitecture.md)** - C# server configuration, application system, and deployment
-- **[Frontend-Backend Communication](./05_Architecture/FrontendBackendArchitecture.md)** - SignalR protocol, message types, and state synchronization
+- **[Frontend Architecture](./05_Architecture/01_FrontendArchitecture.md)** - React/TypeScript frontend, widget rendering pipeline, and build system
+- **[Backend Architecture](./05_Architecture/02_BackendArchitecture.md)** - C# server configuration, application system, and deployment
+- **[Communication](./05_Architecture/03_Communication.md)** - SignalR protocol, message types, and state synchronization
 
 ## Development Experience
 
