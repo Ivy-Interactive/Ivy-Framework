@@ -5,7 +5,10 @@ import { TableProvider, useTable } from './DataTableContext';
 import { ErrorDisplay } from '@/components/ErrorDisplay';
 import { Loading } from '@/components/Loading';
 import { DataTableEditor } from './DataTableEditor';
-import { DataTableOptions } from './DataTableOptions';
+import { DataTableHeader } from './DataTableHeader';
+import { DataTableOption } from './DataTableOption';
+import { DataTableFilterOption } from './options/DataTableFilterOption';
+import { Filter as FilterIcon } from 'lucide-react';
 import { tableStyles } from './styles/style';
 import { TableProps } from './types/types';
 import { getWidth, getHeight } from '@/lib/styles';
@@ -30,29 +33,35 @@ const TableLayout: React.FC<TableLayoutProps> = ({ children }) => {
 };
 
 export const DataTable: React.FC<TableProps> = ({
+  id,
   columns,
   connection,
-  configuration = {},
+  config = {},
   editable = false,
   width,
   height,
+  rowActions,
 }) => {
-  // Apply default configuration values
+  // Apply default config values
   const finalConfig = {
-    filterType: configuration.filterType,
-    freezeColumns: configuration.freezeColumns ?? null,
-    allowLlmFiltering: configuration.allowLlmFiltering ?? true,
-    allowSorting: configuration.allowSorting ?? true,
-    allowFiltering: configuration.allowFiltering ?? true,
-    allowColumnReordering: configuration.allowColumnReordering ?? true,
-    allowColumnResizing: configuration.allowColumnResizing ?? true,
-    allowCopySelection: configuration.allowCopySelection ?? true,
-    selectionMode: configuration.selectionMode,
-    showIndexColumn: configuration.showIndexColumn ?? false,
-    showGroups: configuration.showGroups ?? false,
-    showColumnTypeIcons: configuration.showColumnTypeIcons ?? true,
-    batchSize: configuration.batchSize,
-    loadAllRows: configuration.loadAllRows ?? false,
+    filterType: config.filterType,
+    freezeColumns: config.freezeColumns ?? null,
+    allowLlmFiltering: config.allowLlmFiltering ?? false,
+    allowSorting: config.allowSorting ?? true,
+    allowFiltering: config.allowFiltering ?? false,
+    allowColumnReordering: config.allowColumnReordering ?? true,
+    allowColumnResizing: config.allowColumnResizing ?? true,
+    allowCopySelection: config.allowCopySelection ?? false,
+    selectionMode: config.selectionMode,
+    showIndexColumn: config.showIndexColumn ?? false,
+    showGroups: config.showGroups ?? false,
+    showColumnTypeIcons: config.showColumnTypeIcons ?? false,
+    showVerticalBorders: config.showVerticalBorders ?? false,
+    batchSize: config.batchSize,
+    loadAllRows: config.loadAllRows ?? false,
+    showSearch: config.showSearch ?? false,
+    enableRowHover: config.enableRowHover ?? true,
+    enableCellClickEvents: config.enableCellClickEvents ?? false,
   };
 
   // Create styles object with width and height if provided
@@ -70,16 +79,28 @@ export const DataTable: React.FC<TableProps> = ({
         editable={editable}
       >
         <TableLayout>
-          <>
-            <DataTableOptions
-              hasOptions={{
-                allowFiltering: finalConfig.allowFiltering,
-                allowLlmFiltering: finalConfig.allowLlmFiltering,
-              }}
-            />
+          <DataTableHeader>
+            {finalConfig.allowFiltering && (
+              <DataTableOption
+                icon={FilterIcon}
+                label="Filter"
+                tooltip="Filter table data"
+                displayMode="inline"
+                inlineDirection="right"
+                showLabel={false}
+              >
+                <DataTableFilterOption
+                  allowLlmFiltering={finalConfig.allowLlmFiltering}
+                />
+              </DataTableOption>
+            )}
+          </DataTableHeader>
 
-            <DataTableEditor hasOptions={finalConfig.allowFiltering} />
-          </>
+          <DataTableEditor
+            widgetId={id}
+            hasOptions={finalConfig.allowFiltering}
+            rowActions={rowActions}
+          />
         </TableLayout>
       </TableProvider>
     </div>

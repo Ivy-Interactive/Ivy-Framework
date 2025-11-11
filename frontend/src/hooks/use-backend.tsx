@@ -27,6 +27,16 @@ type ErrorMessage = {
   stackTrace?: string;
 };
 
+type HistoryState = {
+  tabId?: string;
+};
+
+type RedirectMessage = {
+  url: string;
+  replaceHistory: boolean;
+  state: HistoryState;
+};
+
 type AuthToken = {
   accessToken: string;
   refreshToken?: string;
@@ -129,7 +139,8 @@ function applyUpdateMessage(
 export const useBackend = (
   appId: string | null,
   appArgs: string | null,
-  parentId: string | null
+  parentId: string | null,
+  chrome: boolean
 ) => {
   const [connection, setConnection] = useState<signalR.HubConnection | null>(
     null
@@ -140,6 +151,45 @@ export const useBackend = (
   const machineId = getMachineId();
   const connectionId = connection?.connectionId;
   const currentConnectionRef = useRef<signalR.HubConnection | null>(null);
+
+  // Stable values used in dependency arrays - only updated when we want to reconnect
+  const [stableAppId, setStableAppId] = useState(appId);
+  const [stableChrome, setStableChrome] = useState(chrome);
+
+  // Refs to always have latest values in callbacks, without needing to add them to dependency arrays
+  const latestAppIdRef = useRef(appId);
+  const latestChromeRef = useRef(chrome);
+
+  useEffect(() => {
+    latestAppIdRef.current = appId;
+  }, [appId]);
+
+  useEffect(() => {
+    latestChromeRef.current = chrome;
+  }, [chrome]);
+
+  const rootAppIdRef = useRef<string | undefined>(undefined);
+
+  const isRootConnection = parentId === null;
+
+  useEffect(() => {
+    if (!isRootConnection) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setStableAppId(appId);
+      setStableChrome(chrome);
+      return;
+    }
+
+    const rootAppId = rootAppIdRef.current;
+    const shouldReconnect =
+      !rootAppId ||
+      (rootAppId === '$chrome' ? chrome === false : appId !== rootAppId);
+
+    if (shouldReconnect) {
+      setStableAppId(appId);
+      setStableChrome(chrome);
+    }
+  }, [appId, chrome, isRootConnection]);
 
   useEffect(() => {
     if (import.meta.env.DEV && widgetTree) {
@@ -213,6 +263,23 @@ export const useBackend = (
     []
   );
 
+  const handleRedirect = useCallback((message: RedirectMessage) => {
+    logger.debug('Processing Redirect request', message);
+    const { url, replaceHistory } = message;
+
+    if (url.startsWith('/')) {
+      // For path-based redirects, update the pathname
+      if (replaceHistory) {
+        window.history.replaceState(message.state, '', url);
+      } else {
+        window.history.pushState(message.state, '', url);
+      }
+    } else {
+      // For full URL redirects
+      window.location.href = url;
+    }
+  }, []);
+
   const handleSetTheme = useCallback((theme: string) => {
     logger.debug('Processing SetTheme request', { theme });
     const normalizedTheme = theme.toLowerCase();
@@ -250,7 +317,6 @@ export const useBackend = (
   );
 
   useEffect(() => {
-    // Clean up the previous connection before creating a new one
     if (currentConnectionRef.current) {
       currentConnectionRef.current.stop().catch(err => {
         logger.warn('Error stopping previous SignalR connection:', err);
@@ -259,7 +325,7 @@ export const useBackend = (
 
     const newConnection = new signalR.HubConnectionBuilder()
       .withUrl(
-        `${getIvyHost()}/messages?appId=${appId ?? ''}&appArgs=${appArgs ?? ''}&machineId=${machineId}&parentId=${parentId ?? ''}`
+        `${getIvyHost()}/messages?appId=${latestAppIdRef.current ?? ''}&appArgs=${appArgs ?? ''}&machineId=${machineId}&parentId=${parentId ?? ''}&chrome=${latestChromeRef.current}`
       )
       .withAutomaticReconnect()
       .build();
@@ -268,15 +334,25 @@ export const useBackend = (
     queueMicrotask(() => setConnection(newConnection));
 
     return () => {
-      // Clean up on component unmount
       if (currentConnectionRef.current === newConnection) {
         newConnection.stop().catch(err => {
           logger.warn('Error stopping SignalR connection during unmount:', err);
         });
         currentConnectionRef.current = null;
       }
+
+      if (isRootConnection) {
+        rootAppIdRef.current = undefined;
+      }
     };
-  }, [appArgs, appId, machineId, parentId]);
+  }, [
+    appArgs,
+    stableAppId,
+    machineId,
+    parentId,
+    stableChrome,
+    isRootConnection,
+  ]);
 
   useEffect(() => {
     if (
@@ -287,7 +363,7 @@ export const useBackend = (
         .start()
         .then(() => {
           logger.info('✅ WebSocket connection established for:', {
-            appId,
+            appId: latestAppIdRef.current,
             parentId,
             connectionId: connection.connectionId,
           });
@@ -317,6 +393,13 @@ export const useBackend = (
             handleSetAuthToken(message);
           });
 
+          connection.on('SetRootAppId', (message: { rootAppId: string }) => {
+            logger.debug(`[${connection.connectionId}] SetRootAppId`, {
+              rootAppId: message.rootAppId,
+            });
+            rootAppIdRef.current = message.rootAppId;
+          });
+
           connection.on('SetTheme', theme => {
             logger.debug(`[${connection.connectionId}] SetTheme`, { theme });
             handleSetTheme(theme);
@@ -330,6 +413,11 @@ export const useBackend = (
           connection.on('OpenUrl', (url: string) => {
             logger.debug(`[${connection.connectionId}] OpenUrl`, { url });
             window.open(url, '_blank');
+          });
+
+          connection.on('Redirect', message => {
+            logger.debug(`[${connection.connectionId}] Redirect`, message);
+            handleRedirect(message);
           });
 
           connection.on('ApplyTheme', (css: string) => {
@@ -382,8 +470,10 @@ export const useBackend = (
         connection.off('CopyToClipboard');
         connection.off('HotReload');
         connection.off('SetAuthToken');
+        connection.off('SetRootAppId');
         connection.off('SetTheme');
         connection.off('OpenUrl');
+        connection.off('Redirect');
         connection.off('ApplyTheme');
         connection.off('reconnecting');
         connection.off('reconnected');
@@ -407,9 +497,10 @@ export const useBackend = (
     handleHotReloadMessage,
     toast,
     handleSetAuthToken,
+    handleRedirect,
     handleSetTheme,
     handleError,
-    appId,
+    stableAppId,
     parentId,
   ]);
 

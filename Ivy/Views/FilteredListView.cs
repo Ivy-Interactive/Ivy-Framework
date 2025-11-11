@@ -51,7 +51,7 @@ public class FilteredListView<T>(
             (Layout.Horizontal().Gap(1)
              | filter.ToSearchInput().Placeholder("Search").Width(Size.Grow())
              | toolButtons!),
-            loading.Value ? "Loading..." : new List(items)
+            loading.Value ? Text.Muted("Loading...") : new List(items)
         );
     }
 }

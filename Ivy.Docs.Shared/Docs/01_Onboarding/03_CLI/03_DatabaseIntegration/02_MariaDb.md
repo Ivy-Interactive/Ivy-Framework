@@ -45,7 +45,7 @@ For all connection options, see the [MySqlConnector documentation](https://mysql
 
 Your connection string will be stored in .NET user secrets.
 
-See [Database Integration Overview](Overview.md) for more information on adding database connections to Ivy.
+See [Database Overview](01_DatabaseOverview.md) for more information on adding database connections to Ivy.
 
 ## Configuration
 
@@ -84,7 +84,7 @@ See [MariaDB Troubleshooting](https://mariadb.com/kb/en/troubleshooting-connecti
 
 ## Related Documentation
 
-- [Database Overview](Overview.md)
+- [Database Overview](01_DatabaseOverview.md)
 - [MySQL Provider](MySql.md)
 - [PostgreSQL Provider](PostgreSql.md)
 - [SQL Server Provider](SqlServer.md)

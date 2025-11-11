@@ -158,7 +158,8 @@ public static class Utils
             return list;
         }
 
-        return Task.FromResult(source.ToList()).Result;
+        // Synchronous fallback without blocking on Task.Result
+        return source.ToList();
     }
 
     public static async Task<T[]> ToArrayAsync<T>(
@@ -239,10 +240,10 @@ public static class Utils
         if (string.IsNullOrWhiteSpace(input))
             return string.Empty;
 
-        // if (input.EndsWith("app", StringComparison.InvariantCultureIgnoreCase))
-        // {
-        //     input = input[..^3];
-        // }
+        if (input.EndsWith("app", StringComparison.InvariantCultureIgnoreCase))
+        {
+            input = input[..^3];
+        }
 
         bool hadUnderscore = input.StartsWith("_");
         if (hadUnderscore)
@@ -250,24 +251,20 @@ public static class Utils
             input = input[1..];
         }
 
-        StringBuilder sb = new();
+        var withWordBoundaries = Regex.Replace(input, @"([A-Z]+)([A-Z][a-z])", "$1-$2");
+        withWordBoundaries = Regex.Replace(withWordBoundaries, @"([a-z0-9])([A-Z])", "$1-$2");
+        withWordBoundaries = withWordBoundaries
+            .Replace('_', '-')
+            .Replace(' ', '-');
 
-        for (int i = 0; i < input.Length; i++)
-        {
-            if (char.IsUpper(input[i]) && i > 0)
-            {
-                sb.Append('-');
-            }
-
-            sb.Append(char.ToLower(input[i]));
-        }
+        var normalized = Regex.Replace(withWordBoundaries, "-{2,}", "-").Trim('-').ToLowerInvariant();
 
         if (hadUnderscore)
         {
-            sb.Insert(0, '_');
+            normalized = "_" + normalized;
         }
 
-        return sb.ToString();
+        return normalized;
     }
 
     /// <summary>
@@ -728,5 +725,20 @@ public static class Utils
             }
         }
         return SplitPascalCase(name) ?? name;
+    }
+
+    public static string FormatBytes(long bytes)
+    {
+        string[] sizes = ["B", "KB", "MB", "GB", "TB"];
+        double len = bytes;
+        int order = 0;
+
+        while (len >= 1024 && order < sizes.Length - 1)
+        {
+            order++;
+            len /= 1024;
+        }
+
+        return $"{len:0.##} {sizes[order]}";
     }
 }

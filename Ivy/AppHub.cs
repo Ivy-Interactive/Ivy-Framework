@@ -3,6 +3,7 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using Ivy.Apps;
 using Ivy.Auth;
+using Ivy.Chrome;
 using Ivy.Client;
 using Ivy.Core;
 using Ivy.Core.Exceptions;
@@ -27,28 +28,51 @@ public class AppHub(
     IQueryableRegistry queryableRegistry
     ) : Hub
 {
-    public static string GetAppId(Server server, HttpContext httpContext)
+    private static bool GetChromeParam(HttpContext httpContext)
     {
-        string? appId = server.DefaultAppId;
-
-        if (httpContext!.Request.Query.ContainsKey("appId"))
+        bool chrome = true;
+        if (httpContext.Request.Query.TryGetValue("chrome", out var chromeParam))
         {
-            appId = httpContext!.Request.Query["appId"].ToString();
+            chrome = !chromeParam.ToString().Equals("false", StringComparison.InvariantCultureIgnoreCase);
         }
 
-        if (string.IsNullOrEmpty(appId))
+        return chrome;
+    }
+
+    public static (string? AppId, string? NavigationAppId) GetAppId(Server server, HttpContext httpContext, bool chrome)
+    {
+        string? appId = null;
+        string? navigationAppId = null;
+
+        if (httpContext!.Request.Query.TryGetValue("appId", out var appIdParam))
         {
-            appId = server.DefaultAppId ?? server.AppRepository.GetAppOrDefault(null).Id;
+            var id = appIdParam.ToString();
+            if (string.IsNullOrEmpty(id) || id == AppIds.Chrome || id == AppIds.Auth || id == AppIds.Default)
+            {
+                id = null;
+            }
+
+            if (id == server.AppRepository.GetAppOrDefault(id).Id)
+            {
+                if (chrome)
+                {
+                    navigationAppId = id;
+                }
+                else
+                {
+                    appId = id;
+                }
+            }
         }
 
-        return appId;
+        return (appId, navigationAppId);
     }
 
     public static string GetMachineId(HttpContext httpContext)
     {
-        if (httpContext!.Request.Query.ContainsKey("machineId"))
+        if (httpContext!.Request.Query.TryGetValue("machineId", out var machineIdParam))
         {
-            return httpContext!.Request.Query["machineId"].ToString().NullIfEmpty() ?? throw new Exception("Missing machineId in request.");
+            return machineIdParam.ToString().NullIfEmpty() ?? throw new Exception("Missing machineId in request.");
         }
 
         throw new Exception("Missing machineId in request.");
@@ -56,24 +80,24 @@ public class AppHub(
 
     public static string? GetParentId(HttpContext httpContext)
     {
-        if (httpContext!.Request.Query.ContainsKey("parentId"))
+        if (httpContext!.Request.Query.TryGetValue("parentId", out var parentIdParam))
         {
-            return httpContext!.Request.Query["parentId"].ToString().NullIfEmpty();
+            return parentIdParam.ToString().NullIfEmpty();
         }
 
         return null;
     }
 
-    public AppArgs GetAppArgs(string connectionId, string appId, HttpContext httpContext)
+    public AppArgs GetAppArgs(string connectionId, string appId, string? navigationAppId, HttpContext httpContext)
     {
         string? appArgs = null;
-        if (httpContext!.Request.Query.ContainsKey("appArgs"))
+        if (httpContext!.Request.Query.TryGetValue("appArgs", out var appArgsParam))
         {
-            appArgs = httpContext!.Request.Query["appArgs"].ToString().NullIfEmpty();
+            appArgs = appArgsParam.ToString().NullIfEmpty();
         }
 
         HttpRequest request = httpContext.Request;
-        return new AppArgs(connectionId, appId, appArgs ?? server.Args?.Args, request.Scheme, request.Host.Value!);
+        return new AppArgs(connectionId, appId, navigationAppId, appArgs ?? server.Args?.Args, request.Scheme, request.Host.Value!);
     }
 
     public override async Task OnConnectedAsync()
@@ -83,7 +107,10 @@ public class AppHub(
             var appServices = new ServiceCollection();
 
             var httpContext = Context.GetHttpContext()!;
-            var appId = GetAppId(server, httpContext);
+
+            var chrome = GetChromeParam(httpContext);
+            var parentId = GetParentId(httpContext);
+            var (appId, navigationAppId) = GetAppId(server, httpContext, chrome);
 
             var clientProvider = new ClientProvider(new ClientSender(clientNotifier, Context.ConnectionId));
 
@@ -101,15 +128,15 @@ public class AppHub(
                 queryableRegistry,
                 server.Args,
                 Context.ConnectionId));
-            appServices.AddSingleton(typeof(IUploadService), new UploadService(Context.ConnectionId));
             appServices.AddSingleton(typeof(IClientProvider), clientProvider);
+            appServices.AddSingleton(typeof(IUploadService), new UploadService(Context.ConnectionId, clientProvider));
 
             if (server.AuthProviderType != null)
             {
                 var authProvider = server.Services.BuildServiceProvider().GetService<IAuthProvider>() ?? throw new Exception("IAuthProvider not found");
                 authProvider.SetHttpContext(httpContext);
 
-                var oldAuthToken = GetAuthToken(httpContext);
+                var oldAuthToken = AuthHelper.GetAuthToken(httpContext);
                 var authService = new AuthService(authProvider!, oldAuthToken);
                 appServices.AddSingleton<IAuthService>(s => authService);
 
@@ -140,9 +167,9 @@ public class AppHub(
                     authToken = null;
                 }
 
-                if (authToken != oldAuthToken)
+                if (authToken != oldAuthToken || parentId != null)
                 {
-                    clientProvider.SetAuthToken(authToken, reloadPage: false);
+                    clientProvider.SetAuthToken(authToken, reloadPage: parentId != null && authToken == null);
                 }
 
                 if (authToken == null)
@@ -151,7 +178,30 @@ public class AppHub(
                 }
             }
 
-            var appArgs = GetAppArgs(Context.ConnectionId, appId, httpContext);
+            if (string.IsNullOrEmpty(appId))
+            {
+                appId = server.DefaultAppId ?? server.AppRepository.GetAppOrDefault(null).Id;
+                var chromeApp = server.AppRepository.GetAppOrDefault(AppIds.Chrome);
+                if (chromeApp?.Id == AppIds.Chrome)
+                {
+                    string? chromeDefaultAppId = null;
+                    if (chromeApp.CreateApp() is DefaultSidebarChrome chromeView)
+                    {
+                        chromeDefaultAppId = chromeView.Settings.DefaultAppId;
+                    }
+                    if (appId == AppIds.Chrome && (parentId != null || !chrome))
+                    {
+                        appId = chromeDefaultAppId;
+                    }
+                    else if (chrome && navigationAppId == null)
+                    {
+                        navigationAppId = chromeDefaultAppId;
+                    }
+                }
+                appId = server.AppRepository.GetAppOrDefault(appId).Id;
+            }
+
+            var appArgs = GetAppArgs(Context.ConnectionId, appId, navigationAppId, httpContext);
             var appDescriptor = server.GetApp(appId);
 
             logger.LogInformation($"Connected: {Context.ConnectionId} [{appId}]");
@@ -172,7 +222,7 @@ public class AppHub(
             {
                 AppId = appId,
                 MachineId = GetMachineId(httpContext),
-                ParentId = GetParentId(httpContext),
+                ParentId = parentId,
                 AppDescriptor = appDescriptor,
                 App = app,
                 ConnectionId = Context.ConnectionId,
@@ -182,12 +232,55 @@ public class AppHub(
                 LastInteraction = DateTime.UtcNow,
             };
 
-            async void OnWidgetTreeChanged(WidgetTreeChanged[] changes)
+            var connectionAborted = Context.ConnectionAborted;
+            appState.EventQueue = new EventDispatchQueue(connectionAborted);
+
+            if (parentId == null)
+            {
+                clientProvider.SetRootAppId(appId);
+                if (appId != AppIds.Chrome)
+                {
+                    var navigateArgs = new NavigateArgs(appId, Chrome: chrome);
+                    clientProvider.Redirect(navigateArgs.GetUrl(), replaceHistory: true);
+                }
+            }
+
+            void OnWidgetTreeChanged(WidgetTreeChanged[] changes)
             {
                 try
                 {
-                    logger.LogDebug($"> Update");
-                    await clientNotifier.NotifyClientAsync(appState.ConnectionId, "Update", changes);
+                    logger.LogDebug("> Update");
+                    appState.PendingUpdate = changes;
+                    if (appState.UpdateScheduled) return;
+                    appState.UpdateScheduled = true;
+
+                    // Use Task.Run instead of EventQueue to prevent UI updates from being blocked by long-running event handlers
+                    _ = Task.Run(async () =>
+                    {
+                        try { await Task.Delay(16, connectionAborted); }
+                        catch
+                        {
+                            // ignored
+                        }
+
+                        try
+                        {
+                            var payload = appState.PendingUpdate;
+                            if (payload != null)
+                            {
+                                clientProvider.Sender.Send("Update", payload);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            logger.LogError(ex, "{ConnectionId}", appState.ConnectionId);
+                        }
+                        finally
+                        {
+                            appState.UpdateScheduled = false;
+                            appState.PendingUpdate = null;
+                        }
+                    });
                 }
                 catch (Exception e)
                 {
@@ -200,7 +293,6 @@ public class AppHub(
             sessionStore.Sessions[Context.ConnectionId] = appState;
 
             var connectionId = Context.ConnectionId;
-            var connectionAborted = Context.ConnectionAborted;
 
             await base.OnConnectedAsync();
 
@@ -211,7 +303,7 @@ public class AppHub(
                 await Clients.Caller.SendAsync("Refresh", new
                 {
                     Widgets = widgetTree.GetWidgets().Serialize()
-                });
+                }, cancellationToken: connectionAborted);
             }
             catch (Exception e)
             {
@@ -220,12 +312,12 @@ public class AppHub(
                 await Clients.Caller.SendAsync("Refresh", new
                 {
                     Widgets = tree.GetWidgets().Serialize()
-                });
+                }, cancellationToken: connectionAborted);
             }
 
             if (server.AuthProviderType != null && appId != AppIds.Auth)
             {
-                _ = Task.Run(() => AuthRefreshLoopAsync(connectionId, connectionAborted));
+                _ = Task.Run(() => AuthRefreshLoopAsync(connectionId, connectionAborted), connectionAborted);
             }
         }
         catch (Exception ex)
@@ -265,6 +357,19 @@ public class AppHub(
             {
                 try
                 {
+                    try
+                    {
+                        var cp = appState.AppServices.GetService<IClientProvider>();
+                        if (cp?.Sender is ClientSender cs)
+                        {
+                            cs.Dispose();
+                        }
+                    }
+                    catch
+                    {
+                        // ignored
+                    }
+
                     appState.Dispose();
                 }
                 catch (Exception ex)
@@ -441,11 +546,8 @@ public class AppHub(
                     await AbandonConnection(resetTokenAndReload: true);
                     return;
                 }
-                else
-                {
-                    logger.LogInformation("AuthRefreshLoop: waiting 30 seconds before retrying for {ConnectionId}", connectionId);
-                    await Task.Delay(TimeSpan.FromSeconds(30), cancellationToken);
-                }
+                logger.LogInformation("AuthRefreshLoop: waiting 30 seconds before retrying for {ConnectionId}", connectionId);
+                await Task.Delay(TimeSpan.FromSeconds(30), cancellationToken);
                 continue;
             }
 
@@ -474,79 +576,153 @@ public class AppHub(
         }
     }
 
-    public void Event(string eventName, string widgetId, JsonArray? args)
+    public Task Event(string eventName, string widgetId, JsonArray? args)
     {
-        logger.LogInformation($"Event: {eventName} {widgetId} {args}");
+        logger.LogDebug($"Event: {eventName} {widgetId} {args}");
         if (!sessionStore.Sessions.TryGetValue(Context.ConnectionId, out var appSession))
         {
             logger.LogWarning($"Event: {eventName} {widgetId} [AppSession Not Found]");
+            return Task.CompletedTask;
+        }
+
+        // Enqueue async event handling to avoid tying up ThreadPool workers
+        appSession.EventQueue?.Enqueue(async () =>
+        {
+            try
+            {
+                appSession.LastInteraction = DateTime.UtcNow;
+                if (!await appSession.WidgetTree.TriggerEventAsync(widgetId, eventName, args ?? new JsonArray()))
+                {
+                    logger.LogWarning($"Event '{eventName}' for Widget '{widgetId}' not found.");
+                }
+            }
+            catch (Exception e)
+            {
+                var exceptionHandler = appSession.AppServices.GetService<IExceptionHandler>()!;
+                exceptionHandler.HandleException(e);
+            }
+        });
+
+        return Task.CompletedTask;
+    }
+
+    public async Task Navigate(string? appId, HistoryState? state)
+    {
+        logger.LogInformation("Navigate: {ConnectionId} to [{AppId}] with tab ID {TabId}", Context.ConnectionId, appId, state?.TabId);
+
+        // Find the Chrome session for this connection
+        if (!sessionStore.Sessions.TryGetValue(Context.ConnectionId, out var appSession))
+        {
+            logger.LogWarning("Navigate: {ConnectionId} [{AppId}] [AppSession not found]", Context.ConnectionId, appId);
+            return;
+        }
+
+        var chromeSession = sessionStore.FindChrome(appSession);
+        if (chromeSession == null)
+        {
+            logger.LogWarning("Navigate: {ConnectionId} [{AppId}] [Chrome session not found]", Context.ConnectionId, appId);
             return;
         }
 
         try
         {
-            appSession.LastInteraction = DateTime.UtcNow;
-            if (!appSession.WidgetTree.TriggerEvent(widgetId, eventName, args ?? new JsonArray()))
-            {
-                logger.LogWarning($"Event '{eventName}' for Widget '{widgetId}' not found.");
-            }
-        }
-        catch (Exception e)
-        {
-            var exceptionHandler = appSession.AppServices.GetService<IExceptionHandler>()!;
-            exceptionHandler.HandleException(e);
-        }
-    }
+            var navigateSignal = (NavigateSignal)chromeSession.Signals.GetOrAdd(
+                typeof(NavigateSignal),
+                _ => new NavigateSignal()
+            );
 
-    private AuthToken? GetAuthToken(HttpContext httpContext)
-    {
-        var cookies = httpContext.Request.Cookies;
-        var authToken = cookies["auth_token"].NullIfEmpty();
-        if (authToken == null)
-        {
-            return null;
+            await navigateSignal.Send(new NavigateArgs(appId, TabId: state?.TabId, Purpose: NavigationPurpose.HistoryTraversal));
+
+            logger.LogInformation("Navigate signal sent: {ConnectionId} to [{AppId}]", Context.ConnectionId, appId);
         }
-
-        try
+        catch (Exception ex)
         {
-            var token = JsonSerializer.Deserialize<AuthToken>(authToken);
-            if (token == null)
-            {
-                return null;
-            }
-
-            if (token.RefreshToken == null)
-            {
-                var refreshToken = cookies["auth_ext_refresh_token"].NullIfEmpty();
-                return token with { RefreshToken = refreshToken };
-            }
-
-            return token;
-        }
-        catch (Exception e)
-        {
-            logger.LogWarning(e, "Failed to deserialize AuthToken from cookies.");
-            return null;
+            logger.LogError(ex, "Failed to send navigate signal: {ConnectionId} to [{AppId}]", Context.ConnectionId, appId);
         }
     }
 }
 
-public class ClientSender(IClientNotifier clientNotifier, string connectionId) : IClientSender
+public class ClientSender : IClientSender, IDisposable
 {
-    public void Send(string method, object? data)
+    private readonly IClientNotifier _clientNotifier;
+    private readonly string _connectionId;
+    private readonly System.Threading.Channels.Channel<(string method, object? data)> _channel;
+    private readonly CancellationTokenSource _cts = new();
+    private readonly Task _worker;
+
+    public ClientSender(IClientNotifier clientNotifier, string connectionId)
     {
-        // Fire and forget, but handle exceptions to prevent crashes
-        _ = Task.Run(async () =>
+        _clientNotifier = clientNotifier;
+        _connectionId = connectionId;
+        var options = new System.Threading.Channels.BoundedChannelOptions(2048)
+        {
+            SingleReader = true,
+            SingleWriter = false,
+            FullMode = System.Threading.Channels.BoundedChannelFullMode.DropOldest
+        };
+        _channel = System.Threading.Channels.Channel.CreateBounded<(string, object?)>(options);
+
+        _worker = Task.Factory.StartNew(async () =>
         {
             try
             {
-                await clientNotifier.NotifyClientAsync(connectionId, method, data);
+                while (await _channel.Reader.WaitToReadAsync(_cts.Token).ConfigureAwait(false))
+                {
+                    while (_channel.Reader.TryRead(out var msg))
+                    {
+                        try
+                        {
+                            await _clientNotifier.NotifyClientAsync(_connectionId, msg.method, msg.data).ConfigureAwait(false);
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"[ERROR] Failed to send {msg.method} to client {_connectionId}: {ex.Message}");
+                        }
+                    }
+                }
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"[ERROR] Failed to send {method} to client {connectionId}: {ex.Message}");
-            }
-        });
+            catch (OperationCanceledException) { }
+        }, _cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default).Unwrap();
+    }
+
+    public void Send(string method, object? data)
+    {
+        if (!_channel.Writer.TryWrite((method, data)))
+        {
+            _ = _channel.Writer.WriteAsync((method, data), _cts.Token);
+        }
+    }
+
+    public void Dispose()
+    {
+        try
+        {
+            _cts.Cancel();
+        }
+        catch
+        {
+            // ignored
+        }
+
+        try
+        {
+            _channel.Writer.TryComplete();
+        }
+        catch
+        {
+            // ignored
+        }
+
+        try
+        {
+            _worker.Wait(TimeSpan.FromSeconds(2));
+        }
+        catch
+        {
+            // ignored
+        }
+
+        _cts.Dispose();
     }
 }
 

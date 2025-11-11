@@ -60,7 +60,6 @@ export default defineConfig(({ mode }) => ({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
-      lodash: 'lodash-es',
     },
   },
   build: {
@@ -98,7 +97,6 @@ export default defineConfig(({ mode }) => ({
             if (id.includes('reactflow')) return 'vendor-reactflow';
             if (id.includes('framer-motion')) return 'vendor-motion';
             if (id.includes('katex')) return 'vendor-katex';
-            if (id.includes('axios')) return 'vendor-axios';
             if (id.includes('lodash')) return 'vendor-lodash';
           }
           return undefined;

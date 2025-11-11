@@ -28,11 +28,11 @@ public class AppDescriptor : IAppRepositoryNode
 
     public int Order { get; set; }
 
-    public string Url => "index.html?appId=" + Id;
+    //public string Url => "index.html?appId=" + Id;
 
     public Func<ViewBase>? ViewFactory { get; init; }
 
-    public FuncBuilder? ViewFunc { get; init; }
+    public FuncViewBuilder? ViewFunc { get; init; }
 
     public required bool IsVisible { get; init; }
 

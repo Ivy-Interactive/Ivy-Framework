@@ -97,6 +97,93 @@ public class KanbanWithMoveExample : ViewBase
 }
 ```
 
+## Card Click Events
+
+Handle all card interactions by providing event handlers for click, move, add, and delete operations. This enables a fully interactive Kanban board with complete CRUD functionality:
+
+```csharp demo-tabs
+public class KanbanWithAllEventsExample : ViewBase
+{
+    record Task(string Id, string Title, string Status, int Priority, string Description, string Assignee);
+    
+    public override object? Build()
+    {
+        var taskState = UseState(new[]
+        {
+            new Task("1", "Design Homepage", "Todo", 1, "Create wireframes and mockups", "Alice"),
+            new Task("2", "Setup Database", "Todo", 2, "Configure PostgreSQL instance", "Bob"),
+            new Task("3", "Implement Auth", "Todo", 3, "Add OAuth2 authentication", "Charlie"),
+            new Task("4", "Build API", "Todo", 4, "Create REST endpoints", "Alice"),
+            new Task("5", "Code Review", "In Progress", 1, "Review pull requests", "Charlie"),
+            new Task("6", "Performance Optimization", "In Progress", 2, "Optimize database queries", "Alice"),
+            new Task("7", "Bug Fixes", "In Progress", 3, "Fix reported bugs", "Bob"),
+            new Task("8", "Unit Tests", "Done", 1, "Write comprehensive test suite", "Bob"),
+            new Task("9", "Deploy to Production", "Done", 2, "Configure CI/CD pipeline", "Charlie"),
+            new Task("10", "User Training", "Done", 3, "Train users on new features", "Alice"),
+        });
+        
+        var client = UseService<IClientProvider>();
+        
+        return taskState.Value
+            .ToKanban(
+                groupBySelector: t => t.Status,
+                idSelector: t => t.Id,
+                titleSelector: t => t.Title,
+                descriptionSelector: t => t.Description)
+            .HandleClick(cardId =>
+            {
+                // Handle card click - show details, open modal, navigate, etc.
+                var taskId = cardId?.ToString();
+                var clickedTask = taskState.Value.FirstOrDefault(t => t.Id == taskId);
+                if (clickedTask != null)
+                {
+                    client.Toast($"Clicked: {clickedTask.Title} - {clickedTask.Description}");
+                }
+            })
+            .HandleMove(moveData =>
+            {
+                // Update task status when card is moved between columns
+                var taskId = moveData.CardId?.ToString();
+                var updatedTasks = taskState.Value.ToList();
+                var taskToMove = updatedTasks.FirstOrDefault(t => t.Id == taskId);
+                
+                if (taskToMove != null)
+                {
+                    var updated = taskToMove with { Status = moveData.ToColumn };
+                    updatedTasks.RemoveAll(t => t.Id == taskId);
+                    updatedTasks.Add(updated);
+                    taskState.Set(updatedTasks.ToArray());
+                }
+            })
+            .HandleAdd(columnKey =>
+            {
+                // Add new task when "+" button is clicked in a column
+                var newTask = new Task(
+                    Id: Guid.NewGuid().ToString(),
+                    Title: "New Task",
+                    Status: columnKey,
+                    Priority: taskState.Value.Count(t => t.Status == columnKey) + 1,
+                    Description: "Add task description",
+                    Assignee: "Unassigned"
+                );
+                taskState.Set(taskState.Value.Append(newTask).ToArray());
+                client.Toast($"Added new task to {columnKey}");
+            })
+            .HandleDelete(cardId =>
+            {
+                // Remove task when delete action is triggered
+                var taskId = cardId?.ToString();
+                var taskToDelete = taskState.Value.FirstOrDefault(t => t.Id == taskId);
+                if (taskToDelete != null)
+                {
+                    taskState.Set(taskState.Value.Where(t => t.Id != taskId).ToArray());
+                    client.Toast($"Deleted: {taskToDelete.Title}");
+                }
+            });
+    }
+}
+```
+
 ## Examples
 
 <Details>

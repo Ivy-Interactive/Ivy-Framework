@@ -21,10 +21,6 @@ public record Expandable : WidgetBase<Expandable>
 /// <summary>Extension methods for Expandable widget providing fluent API for configuring behavior and appearance.</summary>
 public static class ExpandableExtensions
 {
-    /// <summary>Sets disabled state of expandable widget controlling interaction ability.</summary>
-    /// <param name="widget">Expandable widget to configure.</param>
-    /// <param name="disabled">Whether widget should be disabled (true) or enabled (false).</param>
-    /// <returns>Expandable instance for method chaining.</returns>
     public static Expandable Disabled(this Expandable widget, bool disabled)
     {
         widget.Disabled = disabled;

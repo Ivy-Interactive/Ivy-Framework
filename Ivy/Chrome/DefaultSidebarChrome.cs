@@ -8,50 +8,17 @@ using Ivy.Shared;
 using Ivy.Views;
 using Ivy.Widgets.Internal;
 using System.Collections.Immutable;
-using System.Linq;
 
 namespace Ivy.Chrome;
 
 [App(isVisible: false)]
 public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
 {
+    internal ChromeSettings Settings => settings;
+
     private record TabState(string Id, string AppId, string Title, AppHost AppHost, Icons? Icon, string RefreshToken)
     {
         public Tab ToTab() => new Tab(Title, AppHost).Icon(Icon).Key(Utils.GetShortHash(Id + RefreshToken));
-    }
-    private static bool IsWordMatch(string tag, string searchString)
-    {
-        // Split the tag into individual words (separated by hyphens, underscores, or spaces)
-        var words = System.Text.RegularExpressions.Regex.Split(tag, @"[-_\s]+");
-
-        // Check if any word starts with the search string (prefix matching)
-        return words.Any(word => word.StartsWith(searchString, StringComparison.OrdinalIgnoreCase));
-    }
-
-    private int itemMatchScore(MenuItem item, string searchString)
-    {
-        var label = item.Label ?? "";
-
-        // Exact match gets highest priority (score 3)
-        if (string.Equals(label, searchString, StringComparison.OrdinalIgnoreCase))
-        {
-            return 3;
-        }
-
-        // Label contains search string gets medium priority (score 2)
-        if (label.Contains(searchString, StringComparison.OrdinalIgnoreCase))
-        {
-            return 2;
-        }
-
-        // Search hints match gets lowest priority (score 1)
-        if (item.SearchHints?.Any(tag => IsWordMatch(tag, searchString)) == true)
-        {
-            return 1;
-        }
-
-        // No match
-        return 0;
     }
 
     public override object? Build()
@@ -67,6 +34,7 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
         var menuItems = UseState(() => appRepository.GetMenuItems());
         var args = UseService<AppArgs>();
         var navigate = Context.UseSignal<NavigateSignal, NavigateArgs, Unit>();
+        var navigator = this.UseNavigation();
 
         UseEffect(() =>
         {
@@ -87,7 +55,7 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
             {
                 var result = appRepository.GetMenuItems().Flatten()
                     .Where(item => item.Children == null || item.Children.Length == 0) // Only include leaf nodes (actual apps)
-                    .Select(item => new { Item = item, Score = itemMatchScore(item, search.Value) })
+                    .Select(item => new { Item = item, Score = ChromeUtils.ItemMatchScore(item, search.Value) })
                     .Where(x => x.Score > 0)
                     .OrderByDescending(x => x.Score)
                     .ThenBy(x => x.Item.Label)
@@ -105,15 +73,60 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
             }
         }, [search]);
 
-        void OpenApp(NavigateArgs navigateArgs)
+        void OpenApp(NavigateArgs navigateArgs, bool replaceHistory = false)
         {
-            var app = appRepository!.GetAppOrDefault(navigateArgs.AppId);
             if (settings.Navigation == ChromeNavigation.Pages)
             {
-                currentApp.Set(navigateArgs.ToAppHost(args.ConnectionId));
+                var previousApp = currentApp.Value?.AppId;
+
+                if (navigateArgs.AppId == null)
+                {
+                    navigateArgs = navigateArgs with { AppId = settings.DefaultAppId };
+                }
+
+                var appHost = navigateArgs.AppId != null
+                    ? navigateArgs.ToAppHost(args.ConnectionId)
+                    : null;
+
+                currentApp.Set(appHost);
+                // Update browser URL for page navigation
+                if (navigateArgs.Purpose is NavigationPurpose.NewDestination && previousApp != navigateArgs.AppId)
+                {
+                    client.Redirect(navigateArgs.GetUrl(), replaceHistory);
+                }
             }
             else
             {
+                if (!string.IsNullOrEmpty(navigateArgs.TabId))
+                {
+                    // Try to find existing tab with the given TabId
+                    var tabIndex = tabs.Value.ToList().FindIndex(t => t.Id == navigateArgs.TabId);
+                    if (tabIndex >= 0)
+                    {
+                        selectedIndex.Set(tabIndex);
+
+                        // Update browser URL when switching to existing tab
+                        var tab = tabs.Value[tabIndex];
+                        if (navigateArgs.Purpose is NavigationPurpose.NewDestination)
+                        {
+                            client.Redirect(navigateArgs.GetUrl(), replaceHistory, tabId: tab.Id);
+                        }
+                        return;
+                    }
+
+                    if (navigateArgs.Purpose is NavigationPurpose.HistoryTraversal)
+                    {
+                        client.Error(new InvalidOperationException("Tab no longer exists."));
+                        return;
+                    }
+                }
+
+                if (navigateArgs.AppId == null)
+                {
+                    // If there is no app ID or tab ID specified, do nothing.
+                    return;
+                }
+
                 var tabId = Guid.NewGuid().ToString();
                 var appHost = navigateArgs.ToAppHost(args.ConnectionId);
 
@@ -132,14 +145,28 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
 
                     if (existingTabIndex >= 0)
                     {
+                        var previousSelectedIndex = selectedIndex.Value;
                         selectedIndex.Set(existingTabIndex);
+                        tabId = tabs.Value[existingTabIndex].Id;
+                        // Update browser URL when switching to existing tab
+                        if (navigateArgs.Purpose is NavigationPurpose.NewDestination && previousSelectedIndex != existingTabIndex)
+                        {
+                            client.Redirect(navigateArgs.GetUrl(), replaceHistory, tabId: tabId);
+                        }
                         return;
                     }
                 }
 
-                var newTabs = tabs.Value.Add(new TabState(tabId, app.Id, app.Title, appHost, app.Icon, Guid.NewGuid().ToString()));
-                tabs.Set(newTabs);
-                selectedIndex.Set(newTabs.Length - 1);
+                if (navigateArgs.Purpose is NavigationPurpose.NewDestination)
+                {
+                    var app = appRepository!.GetAppOrDefault(navigateArgs.AppId);
+                    var newTabs = tabs.Value.Add(new TabState(tabId, app.Id, app.Title, appHost, app.Icon, Guid.NewGuid().ToString()));
+                    tabs.Set(newTabs);
+                    selectedIndex.Set(newTabs.Length - 1);
+
+                    // Update browser URL when new tab is opened
+                    client.Redirect(navigateArgs.GetUrl(), replaceHistory, tabId: tabId);
+                }
             }
         }
 
@@ -150,11 +177,22 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
                 var userInfo = await TimeoutHelper.WithTimeoutAsync(auth.GetUserInfoAsync);
                 user.Set(userInfo);
             }
-            if (!string.IsNullOrEmpty(settings.DefaultAppId))
+
+            var initialAppId = args.NavigationAppId ?? settings.DefaultAppId;
+            if (!string.IsNullOrWhiteSpace(initialAppId))
             {
-                OpenApp(new NavigateArgs(settings.DefaultAppId));
+                OpenApp(new NavigateArgs(initialAppId), replaceHistory: true);
+            }
+            else
+            {
+                client.Redirect("/", replaceHistory: true);
             }
         });
+
+        bool CheckTabExists(int tabId)
+        {
+            return tabId >= 0 && tabId < tabs.Value.Length;
+        }
 
         void OnMenuSelect(Event<SidebarMenu, object> @event)
         {
@@ -168,18 +206,37 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
         {
             if (@event.Value is string appId)
             {
-                client.OpenUrl(new NavigateArgs(appId).GetUrl());
+                client.OpenUrl(new NavigateArgs(appId, Chrome: false).GetUrl());
             }
             return ValueTask.CompletedTask;
         }
 
         void OnTabSelect(Event<TabsLayout, int> @event)
         {
-            selectedIndex.Set(@event.Value);
+            if (!CheckTabExists(@event.Value))
+            {
+                return;
+            }
+
+            // Only update and redirect if the selected index actually changes
+            if (selectedIndex.Value != @event.Value)
+            {
+                selectedIndex.Set(@event.Value);
+
+                // Update browser URL when tab is selected
+                var tab = tabs.Value[@event.Value];
+                var navigateArgs = new NavigateArgs(tab.AppId);
+                client.Redirect(navigateArgs.GetUrl(), tabId: tab.Id);
+            }
         }
 
         void OnTabClose(Event<TabsLayout, int> @event)
         {
+            if (!CheckTabExists(@event.Value))
+            {
+                return;
+            }
+
             var closedIndex = @event.Value;
             var wasSelected = selectedIndex.Value == closedIndex;
             var newTabs = tabs.Value.RemoveAt(closedIndex);
@@ -200,11 +257,32 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
                 }
             }
             selectedIndex.Set(newIndex);
+
+            // Update browser URL when current tab was closed
+            if (wasSelected)
+            {
+                if (newIndex != null)
+                {
+                    var tab = newTabs[newIndex.Value];
+                    var navigateArgs = new NavigateArgs(tab.AppId);
+                    client.Redirect(navigateArgs.GetUrl(), tabId: tab.Id);
+                }
+                else
+                {
+                    client.Redirect("/");
+                }
+            }
+
             tabs.Set(newTabs);
         }
 
         void OnTabRefresh(Event<TabsLayout, int> @event)
         {
+            if (!CheckTabExists(@event.Value))
+            {
+                return;
+            }
+
             var tab = tabs.Value[@event.Value];
             tabs.Set(tabs.Value.RemoveAt(@event.Value).Insert(@event.Value, tab with { RefreshToken = Guid.NewGuid().ToString() }));
             selectedIndex.Set(@event.Value);
@@ -237,9 +315,20 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
         }
         else
         {
-            body = new TabsLayout(OnTabSelect, OnTabClose, OnTabRefresh, OnTabReorder, selectedIndex.Value,
-                tabs.Value.ToArray().Select(e => e.ToTab()).ToArray()
-            ).RemoveParentPadding().Variant(TabsVariant.Tabs).Padding(0);
+            if (tabs.Value.Length == 0)
+            {
+                body = null;
+                if (settings.WallpaperAppId != null)
+                {
+                    body = new AppHost(settings.WallpaperAppId, null, args.ConnectionId);
+                }
+            }
+            else
+            {
+                body = new TabsLayout(OnTabSelect, OnTabClose, OnTabRefresh, OnTabReorder, selectedIndex.Value,
+                    tabs.Value.ToArray().Select(e => e.ToTab()).ToArray()
+                ).RemoveParentPadding().Variant(TabsVariant.Tabs).Padding(0);
+            }
         }
 
         var searchInput = search.ToSearchInput().ShortcutKey("CTRL+K").TestId("sidebar-search");
@@ -254,9 +343,10 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
 
         var commonMenuItems = new[]
         {
-            MenuItem.Default("Star on Github").Icon(Icons.Github)
+            MenuItem.Default("Star on Github").Tag("$github").Icon(Icons.Github)
                 .HandleSelect(() => client.OpenUrl(Resources.IvyGitHubUrl)),
             MenuItem.Default("Theme")
+                .Tag("$theme")
                 .Icon(Icons.SunMoon)
                 .Children(
                     MenuItem.Checkbox("Light").Icon(Icons.Sun).HandleSelect(() => client.SetThemeMode(ThemeMode.Light)),
@@ -271,7 +361,7 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
             var trigger = new Button().Variant(ButtonVariant.Ghost)
                 .Content(
                     Layout.Horizontal().Align(Align.Left).Width(Size.Full())
-                        | new Avatar(user.Value.Initials)
+                        | new Avatar(user.Value.Initials, user.Value.AvatarUrl)
                         | (Layout.Vertical().Gap(1)
                            | (user.Value.FullName != null
                                ? Text.Muted(user.Value.FullName!).Overflow(Overflow.Ellipsis)
@@ -279,7 +369,6 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
                            | Text.Label(user.Value.Email).Overflow(Overflow.Ellipsis))
                         .Grow()
                         .Size(Size.Full().Min(0))
-                        | Icons.ChevronsUpDown
                 ).Width(Size.Full());
 
             footer = new DropDownMenu(
@@ -302,9 +391,9 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
                 }
             });
 
-            footer = footer.Items([
-                ..commonMenuItems, MenuItem.Default("Logout").Icon(Icons.LogOut).HandleSelect(onLogout)
-            ]);
+            footer = footer.Items(settings.FooterMenuItemsTransformer([
+                ..commonMenuItems, MenuItem.Default("Logout").Tag("$logout").Icon(Icons.LogOut).HandleSelect(onLogout)
+            ], navigator));
         }
         else
         {
@@ -321,7 +410,7 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
                     trigger)
                 .Top()
                 .Items(
-                    commonMenuItems
+                    settings.FooterMenuItemsTransformer(commonMenuItems, navigator)
                 );
         }
 

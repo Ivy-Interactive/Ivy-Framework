@@ -70,6 +70,16 @@ public record MenuItem(
             _onSelect = value;
         }
     }
+
+    public static MenuItem operator |(MenuItem parent, MenuItem child)
+    {
+        return parent with
+        {
+            Children = [.. parent.Children ?? [], child]
+        };
+    }
+
+
 }
 
 /// <summary>Extension methods for MenuItem manipulation and fluent configuration.</summary>
@@ -108,7 +118,7 @@ public static class MenuItemExtensions
                 return handler;
             }
 
-            if (item.Tag == value || item.Label == (string?)value)
+            if (Equals(item.Tag, value) || item.Label == (string?)value)
             {
                 if (item.OnSelect == null)
                 {

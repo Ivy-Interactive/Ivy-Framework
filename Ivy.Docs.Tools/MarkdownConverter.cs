@@ -27,6 +27,7 @@ public static partial class MarkdownConverter
         public string? Prepare { get; set; } = "";
         public bool GroupExpanded { get; set; } = false;
         public List<string>? SearchHints { get; set; }
+        public List<string>? Imports { get; set; }
     }
 
     static AppMeta ParseYamlAppMeta(string yaml)
@@ -98,6 +99,13 @@ public static partial class MarkdownConverter
         codeBuilder.AppendLine("using Ivy.Core;");
         codeBuilder.AppendLine("using static Ivy.Views.Layout;");
         codeBuilder.AppendLine("using static Ivy.Views.Text;");
+        if (appMeta.Imports != null)
+        {
+            foreach (var import in appMeta.Imports)
+            {
+                codeBuilder.AppendLine($"using {import};");
+            }
+        }
         codeBuilder.AppendLine();
         codeBuilder.AppendLine($"namespace {@namespace};");
         codeBuilder.AppendLine();

@@ -2,7 +2,9 @@ import DataEditor, {
   CompactSelection,
   DataEditorRef,
   GridCell,
+  GridCellKind,
   GridSelection,
+  GridMouseEventArgs,
   Item,
   Theme,
 } from '@glideapps/glide-data-grid';
@@ -22,13 +24,21 @@ import { convertToGridColumns } from './utils/columnHelpers';
 import { iconCellRenderer } from './utils/customRenderers';
 import { generateHeaderIcons, addStandardIcons } from './utils/headerIcons';
 import { ThemeColors } from '@/lib/color-utils';
+import { useEventHandler } from '@/components/event-handler';
+import { useColumnGroups } from './hooks/useColumnGroups';
+import { RowActionButtons } from './DataTableRowAction';
+import { RowAction } from './types/types';
 
 interface TableEditorProps {
+  widgetId: string;
   hasOptions?: boolean;
+  rowActions?: RowAction[];
 }
 
 export const DataTableEditor: React.FC<TableEditorProps> = ({
+  widgetId,
   hasOptions = false,
+  rowActions,
 }) => {
   const {
     data,
@@ -55,13 +65,21 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     showIndexColumn,
     selectionMode,
     showGroups,
+    enableCellClickEvents,
+    showSearch: showSearchConfig,
     showColumnTypeIcons,
+    showVerticalBorders,
+    enableRowHover,
   } = config;
 
   const selectionProps = getSelectionProps(selectionMode);
 
   // Use the enhanced theme hook with custom DataGrid theme generator
-  const { customTheme: tableTheme } = useThemeWithMonitoring<Partial<Theme>>({
+  const {
+    customTheme: tableTheme,
+    colors: themeColors,
+    isDark,
+  } = useThemeWithMonitoring<Partial<Theme>>({
     monitorDOM: true,
     monitorSystem: true,
     customThemeGenerator: (
@@ -78,14 +96,18 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
       textLight: colors.mutedForeground || (isDark ? '#71717a' : '#9ca3af'),
       // bgIconHeader is the background color for icon areas, should be subtle
       bgIconHeader: colors.muted || (isDark ? '#26262b' : '#f3f4f6'),
-      // accentColor affects icon foreground colors in headers
-      accentColor:
-        colors.primary || colors.accent || (isDark ? '#60a5fa' : '#3b82f6'),
+      // Set accentColor to transparent to remove cell selection border
+      accentColor: 'transparent',
+      // accentLight provides subtle background highlight for selected cells
+      accentLight: colors.accent || (isDark ? '#26262b' : '#f3f4f6'),
       horizontalBorderColor: colors.border || (isDark ? '#404045' : '#d1d5db'),
       linkColor:
         colors.primary || colors.accent || (isDark ? '#3b82f6' : '#2563eb'),
-      borderColor: 'transparent',
-      cellHorizontalPadding: 16,
+      // Control vertical borders by setting borderColor to transparent when disabled
+      borderColor: showVerticalBorders
+        ? colors.border || (isDark ? '#404045' : '#d1d5db')
+        : 'transparent',
+      cellHorizontalPadding: 8,
       cellVerticalPadding: 8,
       headerIconSize: 20,
       // Add proper text colors for group headers and icons
@@ -103,7 +125,12 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     columns: CompactSelection.empty(),
     rows: CompactSelection.empty(),
   });
+  const [showSearch, setShowSearch] = useState(false);
+  const [hoverRow, setHoverRow] = useState<number | undefined>(undefined);
+  const [actionButtonsTop, setActionButtonsTop] = useState<number>(0);
+
   const scrollThreshold = 10;
+  const rowHeight = 38;
 
   // Generate header icons map for all column icons
   const headerIcons = useMemo(() => {
@@ -127,6 +154,43 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
       resizeObserver.disconnect();
     };
   }, []);
+
+  // Check if we need to load more data when container height is large or when visible rows change
+  useEffect(() => {
+    if (!containerRef.current || visibleRows === 0 || isLoading) {
+      return;
+    }
+
+    // Calculate if the container height can show more rows than we have loaded
+    const containerHeight = containerRef.current.clientHeight;
+    const availableHeight = containerHeight + rowHeight;
+    const visibleRowCapacity = Math.ceil(availableHeight / rowHeight);
+
+    // If container can show more rows than we have, and we have more data available, load it
+    // This will keep loading until we have enough rows to fill the container
+    if (visibleRowCapacity > visibleRows && hasMore) {
+      loadMoreData();
+    }
+  }, [visibleRows, hasMore, isLoading, loadMoreData, containerRef]);
+
+  // Handle keyboard shortcut for search (Ctrl/Cmd + F)
+  useEffect(() => {
+    if (!showSearchConfig) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && event.code === 'KeyF') {
+        setShowSearch(current => !current);
+        event.stopPropagation();
+        event.preventDefault();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown, true);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown, true);
+    };
+  }, [showSearchConfig]);
 
   // Handle scroll events
   const handleVisibleRegionChanged = useCallback(
@@ -169,9 +233,217 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
   // Handle selection changes
   const handleGridSelectionChange = useCallback(
     (newSelection: GridSelection) => {
+      // Check if the new selection includes URI cells and prevent fuzzy effect
+      // by clearing the selection if it's a single URI cell click
+      if (newSelection.current !== undefined) {
+        const [col, row] = newSelection.current.cell;
+        const cellContent = getCellContent([col, row]);
+
+        // If it's a URI cell, don't allow it to be selected (prevents fuzzy effect)
+        if (cellContent.kind === GridCellKind.Uri) {
+          // Clear the selection for URI cells
+          setGridSelection({
+            columns: CompactSelection.empty(),
+            rows: CompactSelection.empty(),
+          });
+          return;
+        }
+      }
+
       setGridSelection(newSelection);
     },
-    []
+    [getCellContent]
+  );
+
+  // Get event handler for sending events to backend
+  const eventHandler = useEventHandler();
+
+  // Handle cell single-clicks (for backend events and link navigation)
+  const handleCellClicked = useCallback(
+    (cell: Item, args: GridMouseEventArgs) => {
+      const cellContent = getCellContent(cell);
+
+      // Handle Ctrl+Click or Cmd+Click on URI cells
+      if (
+        cellContent.kind === GridCellKind.Uri &&
+        (args.ctrlKey || args.metaKey)
+      ) {
+        const url = cellContent.data as string;
+
+        // External URLs (http/https) open in new tab
+        if (url.startsWith('http://') || url.startsWith('https://')) {
+          window.open(url, '_blank', 'noopener,noreferrer');
+        } else {
+          // Internal relative URLs navigate in same tab
+          window.location.href = url;
+        }
+        return; // Don't proceed with other click handling
+      }
+
+      if (enableCellClickEvents) {
+        // Get actual cell value
+        const visibleColumns = columns.filter(c => !c.hidden);
+        const column = visibleColumns[cell[0]];
+
+        // Extract the actual value from the cell based on its kind
+        let cellValue: unknown = null;
+        if (
+          cellContent.kind === 'text' ||
+          cellContent.kind === 'number' ||
+          cellContent.kind === 'boolean'
+        ) {
+          cellValue = cellContent.data;
+        } else if ('data' in cellContent) {
+          // Cast to unknown first, then access the data property
+          cellValue = (cellContent as unknown as { data: unknown }).data;
+        }
+
+        // Send event to backend as a single object matching CellClickEventArgs structure
+        eventHandler('OnCellClick', widgetId, [
+          {
+            rowIndex: cell[1],
+            columnIndex: cell[0],
+            columnName: column?.name || '',
+            cellValue: cellValue,
+          },
+        ]);
+      }
+      // Do NOT prevent default - let selection happen normally!
+    },
+    [enableCellClickEvents, eventHandler, widgetId, columns, getCellContent]
+  );
+
+  // Handle cell double-clicks/activation (for editing)
+  const handleCellActivated = useCallback(
+    (cell: Item) => {
+      if (enableCellClickEvents) {
+        const cellContent = getCellContent(cell);
+        const visibleColumns = columns.filter(c => !c.hidden);
+        const column = visibleColumns[cell[0]];
+
+        // Extract the actual value from the cell based on its kind
+        let cellValue: unknown = null;
+        if (
+          cellContent.kind === 'text' ||
+          cellContent.kind === 'number' ||
+          cellContent.kind === 'boolean'
+        ) {
+          cellValue = cellContent.data;
+        } else if ('data' in cellContent) {
+          // Cast to unknown first, then access the data property
+          cellValue = (cellContent as unknown as { data: unknown }).data;
+        }
+
+        // Send activation event to backend as a single object matching CellClickEventArgs structure
+        eventHandler('OnCellActivated', widgetId, [
+          {
+            rowIndex: cell[1],
+            columnIndex: cell[0],
+            columnName: column?.name || '',
+            cellValue: cellValue,
+          },
+        ]);
+      }
+    },
+    [enableCellClickEvents, eventHandler, widgetId, columns, getCellContent]
+  );
+
+  // Handle row hover
+  const onItemHovered = useCallback(
+    (args: GridMouseEventArgs) => {
+      if (!enableRowHover) return;
+      const [col, row] = args.location;
+      const newHoverRow = args.kind !== 'cell' ? undefined : row;
+      setHoverRow(newHoverRow);
+
+      // Calculate action buttons position if row actions are configured
+      if (
+        rowActions &&
+        rowActions.length > 0 &&
+        newHoverRow !== undefined &&
+        gridRef.current &&
+        containerRef.current
+      ) {
+        // Use getBounds to get the actual cell position from the grid
+        const bounds = gridRef.current.getBounds(col, newHoverRow);
+        const containerRect = containerRef.current.getBoundingClientRect();
+
+        if (bounds) {
+          // Position button in the center of the row using the actual bounds
+          // Subtract container offset to get position relative to container
+          const buttonHeight = 24;
+          const buttonTop =
+            bounds.y -
+            containerRect.top +
+            bounds.height / 2 -
+            buttonHeight / 2 -
+            1.5;
+          setActionButtonsTop(buttonTop);
+        }
+      }
+    },
+    [enableRowHover, rowActions]
+  );
+
+  // Get row theme override for hover effect
+  const getRowThemeOverride = useCallback(
+    (row: number) => {
+      if (!enableRowHover || row !== hoverRow) return undefined;
+      // Use theme-aware colors for hover effect
+      return {
+        bgCell: themeColors.accent || (isDark ? '#26262b' : '#f7f7f7'),
+        bgCellMedium: themeColors.muted || (isDark ? '#1f1f23' : '#f0f0f0'),
+      };
+    },
+    [hoverRow, enableRowHover, themeColors, isDark]
+  );
+
+  // Get row data as a record of column name -> value
+  const getRowData = useCallback(
+    (rowIndex: number): Record<string, unknown> => {
+      const rowData: Record<string, unknown> = {};
+      const visibleColumns = columns.filter(c => !c.hidden);
+
+      visibleColumns.forEach((column, colIndex) => {
+        const cell = getCellContent([colIndex, rowIndex]);
+        let cellValue: unknown = null;
+
+        if (
+          cell.kind === 'text' ||
+          cell.kind === 'number' ||
+          cell.kind === 'boolean'
+        ) {
+          cellValue = cell.data;
+        } else if ('data' in cell) {
+          cellValue = (cell as unknown as { data: unknown }).data;
+        }
+
+        rowData[column.name] = cellValue;
+      });
+
+      return rowData;
+    },
+    [columns, getCellContent]
+  );
+
+  // Handle row action button click
+  const handleRowActionClick = useCallback(
+    (action: RowAction) => {
+      if (hoverRow === undefined) return;
+
+      const rowData = getRowData(hoverRow);
+
+      // Send event to backend's OnRowAction event
+      eventHandler('OnRowAction', widgetId, [
+        {
+          actionId: action.id,
+          eventName: action.eventName,
+          rowIndex: hoverRow,
+          rowData: rowData,
+        },
+      ]);
+    },
+    [hoverRow, getRowData, eventHandler, widgetId]
   );
 
   // Convert columns to grid format with proper widths
@@ -184,7 +456,16 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     showColumnTypeIcons ?? true
   );
 
-  if (gridColumns.length === 0) {
+  // Use column groups hook when showGroups is enabled
+  const columnGroupsHook = useColumnGroups(gridColumns);
+  const shouldUseColumnGroups = showGroups ?? false;
+
+  // Use grouped columns if showGroups is enabled, otherwise use regular columns
+  const finalColumns = shouldUseColumnGroups
+    ? columnGroupsHook.columns
+    : gridColumns;
+
+  if (finalColumns.length === 0) {
     return null;
   }
 
@@ -193,35 +474,67 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     : tableStyles.tableEditor.gridContainer;
 
   return (
-    <div ref={containerRef} style={containerStyle}>
-      <DataEditor
-        ref={gridRef}
-        columns={gridColumns}
-        rows={visibleRows}
-        getCellContent={getCellContent}
-        customRenderers={[iconCellRenderer]}
-        headerIcons={headerIcons}
-        onColumnResize={allowColumnResizing ? handleColumnResize : undefined}
-        onVisibleRegionChanged={handleVisibleRegionChanged}
-        onHeaderClicked={allowSorting ? handleHeaderMenuClick : undefined}
-        smoothScrollX={true}
-        smoothScrollY={true}
-        theme={tableTheme}
-        rowHeight={38}
-        headerHeight={32}
-        freezeColumns={freezeColumns ?? 0}
-        getCellsForSelection={(allowCopySelection ?? true) ? true : undefined}
-        keybindings={{ search: false }}
-        rowSelect={selectionProps.rowSelect}
-        columnSelect={selectionProps.columnSelect}
-        rangeSelect={selectionProps.rangeSelect}
-        gridSelection={gridSelection}
-        onGridSelectionChange={handleGridSelectionChange}
-        width={containerWidth}
-        rowMarkers={showIndexColumn ? 'number' : 'none'}
-        onColumnMoved={allowColumnReordering ? handleColumnReorder : undefined}
-        groupHeaderHeight={showGroups ? 36 : undefined}
-      />
-    </div>
+    <>
+      <div
+        ref={containerRef}
+        style={{ ...containerStyle, position: 'relative' }}
+      >
+        <DataEditor
+          ref={gridRef}
+          columns={finalColumns}
+          rows={visibleRows}
+          getCellContent={getCellContent}
+          customRenderers={[iconCellRenderer]}
+          headerIcons={headerIcons}
+          onColumnResize={allowColumnResizing ? handleColumnResize : undefined}
+          onVisibleRegionChanged={handleVisibleRegionChanged}
+          onHeaderClicked={allowSorting ? handleHeaderMenuClick : undefined}
+          smoothScrollX={true}
+          smoothScrollY={true}
+          theme={tableTheme}
+          rowHeight={rowHeight}
+          headerHeight={rowHeight}
+          freezeColumns={freezeColumns ?? 0}
+          getCellsForSelection={(allowCopySelection ?? true) ? true : undefined}
+          keybindings={{ search: false }}
+          rowSelect={selectionProps.rowSelect}
+          columnSelect={selectionProps.columnSelect}
+          rangeSelect={selectionProps.rangeSelect}
+          gridSelection={gridSelection}
+          onGridSelectionChange={handleGridSelectionChange}
+          width={containerWidth}
+          rowMarkers={showIndexColumn ? 'number' : 'none'}
+          onColumnMoved={
+            allowColumnReordering ? handleColumnReorder : undefined
+          }
+          groupHeaderHeight={showGroups ? 36 : undefined}
+          cellActivationBehavior="double-click"
+          onCellClicked={handleCellClicked}
+          onCellActivated={handleCellActivated}
+          onGroupHeaderClicked={
+            shouldUseColumnGroups
+              ? columnGroupsHook.onGroupHeaderClicked
+              : undefined
+          }
+          showSearch={showSearchConfig ? showSearch : false}
+          onSearchClose={() => setShowSearch(false)}
+          onItemHovered={enableRowHover ? onItemHovered : undefined}
+          getRowThemeOverride={enableRowHover ? getRowThemeOverride : undefined}
+        />
+
+        {/* Row action buttons overlay */}
+        {rowActions && rowActions.length > 0 && (
+          <RowActionButtons
+            actions={rowActions}
+            top={actionButtonsTop}
+            visible={hoverRow !== undefined}
+            onActionClick={handleRowActionClick}
+            onMouseEnter={() => {
+              // Keep hover state when hovering over buttons
+            }}
+          />
+        )}
+      </div>
+    </>
   );
 };

@@ -23,6 +23,7 @@ searchHints:
   - columns
   - sort
   - filter
+  - search
   - dataset
 ---
 
@@ -46,6 +47,24 @@ sampleUsers.ToDataTable()
     .Header(u => u.Status, "Status")
     .Height(Size.Units(100))
 ```
+
+## Table Sizing
+
+Control the overall dimensions of the DataTable using `Width()` and `Height()` methods:
+
+```csharp demo-tabs
+sampleUsers.ToDataTable()
+    .Header(u => u.Name, "Full Name")
+    .Header(u => u.Email, "Email Address")
+    .Header(u => u.Salary, "Salary")
+    .Width(Size.Px(800))
+    .Height(Size.Units(100))
+```
+
+**Table sizing methods:**
+
+- **Width** - Set the overall width of the table using `Size.Px()`, `Size.Units()`, `Size.Fraction()`, etc. For column-specific widths, use `Width(expression, size)`.
+- **Height** - Set the overall height of the table
 
 ## Column Configuration
 
@@ -112,6 +131,9 @@ sampleUsers.ToDataTable()
         config.AllowLlmFiltering = true;
         config.AllowSorting = true;
         config.AllowFiltering = true;
+        config.ShowSearch = true;
+        config.EnableCellClickEvents = true;
+        config.ShowVerticalBorders = false;
     })
     .Height(Size.Units(100))
 ```
@@ -128,6 +150,9 @@ sampleUsers.ToDataTable()
 - **AllowLlmFiltering** - Enable AI-powered natural language filtering
 - **AllowSorting** - Enable/disable sorting globally
 - **AllowFiltering** - Enable/disable filtering globally
+- **ShowSearch** - Enable search functionality (accessible via Ctrl/Cmd + F keyboard shortcut)
+- **EnableCellClickEvents** - Enable cell click and activation events. When enabled, you can handle `OnCellClick` (single-click) and `OnCellActivated` (double-click) events on the DataTable widget. Events provide `CellClickEventArgs` with `RowIndex`, `ColumnIndex`, `ColumnName`, and `CellValue`.
+- **ShowVerticalBorders** - Show vertical borders between columns. Set to `false` to hide column borders for a cleaner appearance
 
 ## Performance with Large Datasets
 

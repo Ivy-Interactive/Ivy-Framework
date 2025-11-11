@@ -39,7 +39,7 @@ export function createNullCell(editable: boolean): GridCell {
   return {
     kind: GridCellKind.Text,
     data: '',
-    displayData: 'null',
+    displayData: '', // Show empty instead of "null" text
     allowOverlay: editable,
     readonly: !editable,
     style: 'faded',
@@ -114,6 +114,11 @@ export function formatDateValue(dateValue: Date, columnType: string): string {
  * Parses a date from various input formats
  */
 export function parseDateValue(cellValue: unknown): Date | null {
+  // Handle Date objects directly (from Arrow Timestamp vectors)
+  if (cellValue instanceof Date) {
+    return !isNaN(cellValue.getTime()) ? cellValue : null;
+  }
+
   if (typeof cellValue === 'number') {
     const date = new Date(cellValue);
     return !isNaN(date.getTime()) ? date : null;
@@ -219,6 +224,69 @@ export function createTextCell(
 }
 
 /**
+ * Creates a labels/bubble cell for displaying multiple labels as chips
+ */
+export function createLabelsCell(cellValue: unknown, align?: Align): GridCell {
+  // Handle different input formats
+  let labels: readonly string[];
+
+  if (Array.isArray(cellValue)) {
+    labels = cellValue.filter(item => item != null).map(String);
+  } else if (typeof cellValue === 'string') {
+    // Try to parse as JSON first (from backend serialization)
+    try {
+      const parsed = JSON.parse(cellValue);
+      if (Array.isArray(parsed)) {
+        labels = parsed.filter(item => item != null).map(String);
+      } else {
+        // Fallback to comma-separated if JSON parsing doesn't yield an array
+        labels = cellValue
+          .split(',')
+          .map(s => s.trim())
+          .filter(s => s.length > 0);
+      }
+    } catch {
+      // Not JSON, treat as comma-separated string
+      labels = cellValue
+        .split(',')
+        .map(s => s.trim())
+        .filter(s => s.length > 0);
+    }
+  } else if (cellValue != null) {
+    labels = [String(cellValue)];
+  } else {
+    labels = [];
+  }
+
+  return {
+    kind: GridCellKind.Bubble,
+    data: labels as string[],
+    allowOverlay: false,
+    contentAlign: align ? getContentAlign(align) : undefined,
+  };
+}
+
+/**
+ * Creates a link/URI cell
+ */
+export function createLinkCell(
+  url: string,
+  _editable: boolean, // Intentionally unused - links are always readonly
+  align?: Align
+): GridCell {
+  return {
+    kind: GridCellKind.Uri,
+    data: url,
+    displayData: url,
+    allowOverlay: false, // Disable overlay to prevent fuzzy shadow on click
+    readonly: true, // Links should not be editable in the cell
+    contentAlign: align ? getContentAlign(align) : undefined,
+    hoverEffect: true,
+    onClickUri: undefined, // We'll handle this in the DataTableEditor
+  };
+}
+
+/**
  * Gets the ordered columns based on columnOrder array
  */
 export function getOrderedColumns(
@@ -277,6 +345,16 @@ export function getCellContent(
     return createIconCell(cellValue, align);
   }
 
+  // Handle Labels type - supports arrays or comma-separated strings
+  if (column.type === 'Labels') {
+    return createLabelsCell(cellValue, align);
+  }
+
+  // Handle explicit link type from backend metadata
+  if (column.type === 'Link' && typeof cellValue === 'string') {
+    return createLinkCell(cellValue, editable, align);
+  }
+
   // Handle Date and DateTime types
   if (isDateColumnType(columnType)) {
     const dateCell = createDateCell(cellValue, columnType, editable, align);
@@ -295,11 +373,9 @@ export function getCellContent(
     return createBooleanCell(cellValue, editable, align);
   }
 
-  // Fallback: Use heuristic icon detection if no metadata provided
-  // This maintains backward compatibility but should be replaced with proper metadata
-  if (isProbablyIconValue(cellValue)) {
-    return createIconCell(String(cellValue), align);
-  }
+  // REMOVED: Heuristic icon detection (now that we have proper type metadata from backend)
+  // The heuristic was causing false positives for PascalCase text like "Active", "EMP0001", etc.
+  // Now that column.type is properly preserved from backend (#1273), we don't need this fallback
 
   // Default to text
   return createTextCell(cellValue, editable, align);
