@@ -31,7 +31,7 @@ graph LR
     H --> A
 ```
 
-### 1. Views & Components
+### Views & Components
 
 Every Ivy app is built from **Views** - C# classes that inherit from `ViewBase`. Each view implements a single `Build()` method that returns widgets or other views:
 
@@ -63,7 +63,7 @@ public class TodoApp : ViewBase
 }
 ```
 
-### 2. Reactive State Management
+### Reactive State Management
 
 Ivy provides React-inspired hooks for state management:
 
@@ -90,7 +90,7 @@ public override object? Build()
 }
 ```
 
-### 3. Widget Library
+### Widget Library
 
 Ivy ships with a comprehensive set of strongly-typed widgets:
 
@@ -104,7 +104,7 @@ Ivy ships with a comprehensive set of strongly-typed widgets:
 | Charts | `LineChart`, `BarChart`, `PieChart`, `AreaChart`... |
 | Advanced | `Sheet`, `Chat`... |
 
-### 4. Real-time Communication
+### Real-time Communication
 
 The magic happens through WebSocket communication:
 
