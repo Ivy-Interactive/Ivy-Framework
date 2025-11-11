@@ -21,6 +21,7 @@ public class ClerkAuthProvider : IAuthProvider
 {
     private readonly string _secretKey;
     private readonly string? _jwtKey;
+    private readonly string? _publishableKey;
     private readonly string? _fapiInstance;
     private readonly List<AuthOption> _authOptions = new();
     private readonly HttpClient _httpClient;
@@ -34,17 +35,7 @@ public class ClerkAuthProvider : IAuthProvider
 
         _secretKey = configuration.GetValue<string>("Clerk:SecretKey") ?? throw new Exception("Clerk:SecretKey is required");
         _jwtKey = configuration.GetValue<string>("Clerk:JwtKey") ?? throw new Exception("Clerk:JwtKey is required");
-        var publishableKey = configuration.GetValue<string>("Clerk:PublishableKey") ?? throw new Exception("Clerk:PublishableKey is required");
-
-        try
-        {
-            var pkBytes = Convert.FromBase64String(publishableKey);
-            _fapiInstance = System.Text.Encoding.UTF8.GetString(pkBytes).Split('%')[0];
-        }
-        catch (Exception)
-        {
-            throw new Exception("Clerk:PublishableKey is not a valid base64 string");
-        }
+        _publishableKey = configuration.GetValue<string>("Clerk:PublishableKey") ?? throw new Exception("Clerk:PublishableKey is required");
 
         _httpClient = new HttpClient();
         _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_secretKey}");
