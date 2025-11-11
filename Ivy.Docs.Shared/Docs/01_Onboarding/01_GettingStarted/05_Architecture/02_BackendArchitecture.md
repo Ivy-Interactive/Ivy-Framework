@@ -25,9 +25,15 @@ The Ivy backend is built around the `Server` class which serves as the main conf
 
 The `Server` class manages three primary concerns:
 
-- **Application Discovery**: Through `AppRepository` which finds and instantiates application classes
-- **Service Configuration**: Via the `Services` property exposing ASP.NET Core's `IServiceCollection`
-- **Web Host Setup**: In the `RunAsync` method which configures the ASP.NET Core pipeline
+```mermaid
+graph LR
+    A[Server Class] --> B[AppRepository]
+    A --> C[Services Property]
+    A --> D[RunAsync Method]
+    B --> B1[Application Discovery]
+    C --> C1[Service Configuration]
+    D --> D1[Web Host Setup]
+```
 
 ```csharp
 public class Server
@@ -52,12 +58,15 @@ public class Server
 
 The server exposes several key properties and methods for configuration:
 
-- **Services**: Direct access to ASP.NET Core's dependency injection container
-- **AddApp()**: Register individual applications
-- **AddAppsFromAssembly()**: Auto-discover applications via reflection
-- **UseChrome()**: Configure the application shell/layout
-- **UseAuth<T>()**: Configure authentication providers
-- **UseHotReload()**: Enable development hot reload
+```mermaid
+graph LR
+    A[Server] --> B[Services: DI Container]
+    A --> C[AddApp: Register Apps]
+    A --> D[AddAppsFromAssembly: Auto-discovery]
+    A --> E[UseChrome: Shell/Layout]
+    A --> F[UseAuth: Authentication]
+    A --> G[UseHotReload: Hot Reload]
+```
 
 ```csharp
 public async Task RunAsync()
@@ -149,13 +158,21 @@ public class TodoApp : ViewBase
 
 The backend widget system defines the data models and type hierarchy for all UI components. Widgets are implemented as C# records that serialize to JSON for frontend consumption.
 
-### Widget Serialization and Props
+```mermaid
+graph TD
+    A[Widget System] --> B[WidgetBase]
+    A --> C[Prop Serialization]
+    B --> D[Input Controls]
+    B --> E[Layout Containers]
+    B --> F[Content Renderers]
+    C --> C1[Prop Attribute]
+    C --> C2[JSON Serialization]
+    C --> C3[Null Optimization]
+```
 
-Widget properties marked with `[Prop]` attribute are serialized to JSON and sent to the frontend. As an optimization, **null values are not serialized** - properties with null values are omitted from the JSON payload to reduce network traffic.
+**Widget Type Hierarchy:** All widgets inherit from `WidgetBase` and can represent input controls, layout containers, or content renderers. The type system ensures type safety while allowing flexible composition.
 
-### Widget Type Hierarchy
-
-Widgets inherit from `WidgetBase` and can represent input controls, layout containers, or content renderers. The type system ensures type safety while allowing flexible composition.
+**Widget Serialization:** Properties marked with `[Prop]` attribute are serialized to JSON and sent to the frontend. As an optimization, null values are not serialized - properties with null values are omitted from the JSON payload to reduce network traffic.
 
 ```csharp
 public interface IAnyInput
@@ -175,75 +192,18 @@ public interface IInput<T> : IAnyInput
 }
 ```
 
-### Input Widget Type System
+The input widget system uses a sophisticated type conversion mechanism that allows widgets to bind to various .NET types while maintaining type safety. Each input widget base class implements `SupportedStateTypes()` method that returns compatible .NET types:
 
-The input widget system uses a sophisticated type conversion mechanism that allows widgets to bind to various .NET types while maintaining type safety:
-
-```csharp
-public abstract class BoolInputBase : InputWidgetBase<bool>
-{
-    protected override IEnumerable<Type> SupportedStateTypes()
-    {
-        yield return typeof(bool);
-        yield return typeof(bool?);
-        yield return typeof(int);
-        yield return typeof(int?);
-        yield return typeof(long);
-        yield return typeof(long?);
-    }
-}
-```
-
-```csharp
-public abstract class NumberInputBase : InputWidgetBase<decimal>
-{
-    protected override IEnumerable<Type> SupportedStateTypes()
-    {
-        yield return typeof(byte);
-        yield return typeof(sbyte);
-        yield return typeof(short);
-        yield return typeof(ushort);
-        yield return typeof(int);
-        yield return typeof(uint);
-        yield return typeof(long);
-        yield return typeof(ulong);
-        yield return typeof(float);
-        yield return typeof(double);
-        yield return typeof(decimal);
-        // ... nullable variants
-    }
-}
-```
-
-```csharp
-public abstract class DateTimeInputBase : InputWidgetBase<DateTime>
-{
-    protected override IEnumerable<Type> SupportedStateTypes()
-    {
-        yield return typeof(DateTime);
-        yield return typeof(DateTime?);
-        yield return typeof(DateOnly);
-        yield return typeof(DateOnly?);
-        yield return typeof(TimeOnly);
-        yield return typeof(TimeOnly?);
-    }
-}
-```
-
-Each input widget base class implements `SupportedStateTypes()` method that returns compatible .NET types:
-
-| Widget Type | Supported Types | Example |
-|------------|----------------|---------|
-| `BoolInputBase` | `bool`, `bool?`, numeric types | Checkbox, Switch, Toggle |
-| `NumberInputBase` | All numeric types, nullable variants | Number input, Slider |
-| `DateTimeInputBase` | `DateTime`, `DateOnly`, `TimeOnly` + nullable | Date picker, Time picker |
+| Widget Type | Supported .NET Types | Example |
+|-------------|---------------------|---------|
+| `BoolInputBase` | `bool`, `bool?`, `int`, `int?`, `long`, `long?` | Checkbox, Switch, Toggle |
+| `NumberInputBase` | `byte`, `sbyte`, `short`, `ushort`, `int`, `uint`, `long`, `ulong`, `float`, `double`, `decimal` (and nullable variants) | Number input, Slider |
+| `DateTimeInputBase` | `DateTime`, `DateTime?`, `DateOnly`, `DateOnly?`, `TimeOnly`, `TimeOnly?` | Date picker, Time picker |
 | `TextInputBase` | `string`, most convertible types | Text area, Single line |
 
 ## State Management
 
 The state management system provides reactive state handling through hooks-style APIs similar to React, but implemented in C#.
-
-### State Hook Patterns
 
 State objects provide automatic change detection and can be bound directly to input widgets through extension methods like `state.ToBoolInput()` or `state.ToNumberInput()`.
 
@@ -267,9 +227,7 @@ public static BoolInput ToBoolInput(this IState<bool> state, string? placeholder
 
 ## Service Container and Dependency Injection
 
-The server exposes ASP.NET Core's dependency injection container through the `Services` property, allowing registration of custom services, database contexts, and other dependencies.
-
-### Service Registration Patterns
+The server exposes ASP.NET Core's dependency injection container through the `Services` property, allowing registration of custom services, database contexts, and other dependencies. Here are Service Registration Patterns:
 
 ```csharp
 public Server AddService<TService, TImplementation>()
@@ -293,17 +251,17 @@ The framework automatically registers core services like `IClientNotifier` for S
 
 **Built-in Services:**
 
-- `IClientProvider`: Send messages and notifications to frontend
-- `IThemeService`: Manage application themes
-- `ILogger<T>`: Logging infrastructure
-- `AppSessionStore`: Session state management
-- `HotReloadService`: Development hot reload support
+| Service | Purpose |
+|---------|---------|
+| `IClientProvider` | Send messages and notifications to frontend |
+| `IThemeService` | Manage application themes |
+| `ILogger<T>` | Logging infrastructure |
+| `AppSessionStore` | Session state management |
+| `HotReloadService` | Development hot reload support |
 
 ## Real-time Communication Infrastructure
 
-The backend provides real-time communication through SignalR with the `AppHub` class serving as the central message hub.
-
-### SignalR Hub Architecture
+The backend provides real-time communication through SignalR with the `AppHub` class serving as the central message hub. Have a look at the SignalR Hub Architecture:
 
 ```csharp
 app.MapHub<AppHub>("/messages");
@@ -319,10 +277,18 @@ The SignalR hub is registered at the `/messages` endpoint and handles real-time 
 
 **Hub Responsibilities:**
 
-- **Connection Management**: Establishes and maintains WebSocket connections
-- **Message Routing**: Routes messages between frontend and backend
-- **State Synchronization**: Tracks widget tree state per connection
-- **Event Handling**: Processes user interaction events from frontend
-- **Hot Reload**: Sends refresh messages when code changes are detected
+```mermaid
+graph TD
+    A[AppHub] --> B[Connection Management]
+    A --> C[Message Routing]
+    A --> D[State Synchronization]
+    A --> E[Event Handling]
+    A --> F[Hot Reload]
+    B --> B1[WebSocket Connections]
+    C --> C1[Frontend ↔ Backend]
+    D --> D1[Widget Tree State]
+    E --> E1[User Interactions]
+    F --> F1[Code Changes]
+```
 
 This backend architecture provides a solid foundation for building internal applications with real-time updates, type-safe widget binding, and flexible service composition while maintaining clean separation between server-side logic and frontend presentation.
