@@ -99,9 +99,9 @@ public class ThemeColors
 
     public static ThemeColors DefaultLight => new()
     {
-        // Semantic colors - temporarily override until Ivy.DesignSystem 1.1.1 is published
-        Primary = "#00cc92", // TODO: Revert to IvyFrameworkTokens.Color.ColorSemanticPrimaryBase when 1.1.1 is available
-        PrimaryForeground = "#000000",
+        // Semantic colors from Ivy Design System
+        Primary = IvyFrameworkTokens.Color.ColorSemanticPrimaryBase,
+        PrimaryForeground = IvyFrameworkTokens.Color.ColorSemanticPrimaryForeground,
         Secondary = IvyFrameworkTokens.Color.ColorSemanticSecondaryBase,
         SecondaryForeground = IvyFrameworkTokens.Color.ColorSemanticSecondaryForeground,
         Background = IvyFrameworkTokens.Color.ColorUiBackgroundBase,
@@ -131,9 +131,9 @@ public class ThemeColors
 
     public static ThemeColors DefaultDark => new()
     {
-        // Semantic colors - temporarily override until Ivy.DesignSystem 1.1.1 is published
-        Primary = "#00cc92", // TODO: Revert to DarkThemeTokens.Theme.ThemeDarkPrimaryBase when 1.1.1 is available
-        PrimaryForeground = "#000000",
+        // Semantic colors from Ivy Design System (Dark Theme)
+        Primary = DarkThemeTokens.Theme.ThemeDarkPrimaryBase,
+        PrimaryForeground = DarkThemeTokens.Theme.ThemeDarkPrimaryForeground,
         Secondary = DarkThemeTokens.Theme.ThemeDarkSecondaryBase,
         SecondaryForeground = DarkThemeTokens.Theme.ThemeDarkSecondaryForeground,
         Background = DarkThemeTokens.Theme.ThemeDarkBackgroundBase,
