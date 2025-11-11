@@ -147,7 +147,7 @@ Additional ChromeSettings options:
 
 - **UsePages()** - Switches to page navigation (replaces content instead of opening tabs).
 
-- **UseFooterMenuItemsTransformer(`Func<IEnumerable<MenuItem>, INavigator, IEnumerable<MenuItem>>` transformer)** - Provides a way to dynamically transform the footer menu items. Useful for adding, removing, or re-ordering links based on runtime context such as user roles or navigation state. See the [Footer transformer documentation](app://onboarding/concepts/footermenuitemstransformer).
+- **UseFooterMenuItemsTransformer(`Func<IEnumerable<MenuItem>, INavigator, IEnumerable<MenuItem>>` transformer)** - Provides a way to dynamically transform the footer menu items. Useful for adding, removing, or re-ordering links based on runtime context such as user roles or navigation state. See the [Footer Transformer documentation](./FooterTransformer.md).
 - **WallpaperAppId(string? appId)** / **WallpaperApp<T>()** - Sets a dedicated *wallpaper* app that is shown whenever the tab list is empty. Handy for welcome screens or branded backgrounds. See the [Wallpaper documentation](Wallpaper.md).
 
 <Callout Type="tip">

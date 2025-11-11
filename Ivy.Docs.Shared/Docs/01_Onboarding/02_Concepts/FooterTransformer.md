@@ -7,7 +7,7 @@ searchHints:
   - sidebar
 ---
 
-# Footer Menu Items Transformer
+# Footer Transformer
 
 <Ingress>
 Dynamically customize the list of links shown at the very bottom of the sidebar by providing a transformation function with `UseFooterMenuItemsTransformer`.
