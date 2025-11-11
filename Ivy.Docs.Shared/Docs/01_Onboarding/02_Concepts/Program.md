@@ -107,12 +107,12 @@ server.UseHotReload();
 
 This automatically refreshes the browser when C# code changes during development.
 
-For more information about configuring the application chrome (sidebar, header, footer), see [Chrome Configuration](./02_Chrome.md).
+For more information about configuring the application chrome (sidebar, header, footer), see [Chrome Configuration](./Chrome.md).
 
 ## Authentication
 
 <Callout Type="tip">
-Use the `ivy auth add` command to automatically configure authentication providers in your project. This CLI command will update your `Program.cs` and manage secrets for you. See the [Authentication CLI documentation](../../03_CLI/04_Authentication/01_AuthenticationOverview.md) for details.
+Use the `ivy auth add` command to automatically configure authentication providers in your project. This CLI command will update your `Program.cs` and manage secrets for you. See the [Authentication CLI documentation](../03_CLI/04_Authentication/01_AuthenticationOverview.md) for details.
 </Callout>
 
 Ivy supports various authentication providers:
@@ -324,4 +324,3 @@ server.AddConnectionsFromAssembly();
 ```
 
 This automatically discovers and registers SignalR connection classes for real-time communication.
-
