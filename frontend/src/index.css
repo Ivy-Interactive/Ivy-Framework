@@ -107,10 +107,6 @@
   .dark {
     /* Additional dark theme overrides not in design system yet */
     --toolbox: #edeaf1;
-    --sidebar-primary: oklch(0.49 0.22 264.39);
-    --sidebar-primary-foreground: oklch(1 0 0);
-    --sidebar-accent-foreground: oklch(0.97 0 286.38);
-    --sidebar-border: #26262b;
   }
   @theme inline {
     --color-background: var(--background);

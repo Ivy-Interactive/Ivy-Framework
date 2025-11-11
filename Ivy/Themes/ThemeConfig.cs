@@ -97,23 +97,6 @@ public class ThemeColors
     public string? Popover { get; set; }
     public string? PopoverForeground { get; set; }
 
-    // Chart colors
-    public string? Chart1 { get; set; }
-    public string? Chart2 { get; set; }
-    public string? Chart3 { get; set; }
-    public string? Chart4 { get; set; }
-    public string? Chart5 { get; set; }
-
-    // Sidebar colors
-    public string? Sidebar { get; set; }
-    public string? SidebarForeground { get; set; }
-    public string? SidebarPrimary { get; set; }
-    public string? SidebarPrimaryForeground { get; set; }
-    public string? SidebarAccent { get; set; }
-    public string? SidebarAccentForeground { get; set; }
-    public string? SidebarBorder { get; set; }
-    public string? SidebarRing { get; set; }
-
     public static ThemeColors DefaultLight => new()
     {
         // Semantic colors from Ivy Design System
@@ -143,24 +126,7 @@ public class ThemeColors
         Card = IvyFrameworkTokens.Color.ColorUiCardBase,
         CardForeground = IvyFrameworkTokens.Color.ColorUiCardForeground,
         Popover = IvyFrameworkTokens.Color.ColorUiPopoverBase,
-        PopoverForeground = IvyFrameworkTokens.Color.ColorUiPopoverForeground,
-
-        // Chart colors from Ivy Design System
-        Chart1 = IvyFrameworkTokens.Color.ColorChart1,
-        Chart2 = IvyFrameworkTokens.Color.ColorChart2,
-        Chart3 = IvyFrameworkTokens.Color.ColorChart3,
-        Chart4 = IvyFrameworkTokens.Color.ColorChart4,
-        Chart5 = IvyFrameworkTokens.Color.ColorChart5,
-
-        // Sidebar colors from Ivy Design System
-        Sidebar = IvyFrameworkTokens.Color.ColorSidebarBase,
-        SidebarForeground = IvyFrameworkTokens.Color.ColorSidebarForeground,
-        SidebarPrimary = IvyFrameworkTokens.Color.ColorSidebarPrimary,
-        SidebarPrimaryForeground = IvyFrameworkTokens.Color.ColorSidebarPrimaryForeground,
-        SidebarAccent = IvyFrameworkTokens.Color.ColorSidebarAccent,
-        SidebarAccentForeground = IvyFrameworkTokens.Color.ColorSidebarAccentForeground,
-        SidebarBorder = IvyFrameworkTokens.Color.ColorSidebarBorder,
-        SidebarRing = IvyFrameworkTokens.Color.ColorSidebarRing
+        PopoverForeground = IvyFrameworkTokens.Color.ColorUiPopoverForeground
     };
 
     public static ThemeColors DefaultDark => new()
@@ -193,22 +159,5 @@ public class ThemeColors
         CardForeground = DarkThemeTokens.Theme.ThemeDarkUiCardForeground,
         Popover = DarkThemeTokens.Theme.ThemeDarkUiPopoverBase,
         PopoverForeground = DarkThemeTokens.Theme.ThemeDarkUiPopoverForeground,
-
-        // Chart colors from Ivy Design System (same for light/dark)
-        Chart1 = IvyFrameworkTokens.Color.ColorChart1,
-        Chart2 = IvyFrameworkTokens.Color.ColorChart2,
-        Chart3 = IvyFrameworkTokens.Color.ColorChart3,
-        Chart4 = IvyFrameworkTokens.Color.ColorChart4,
-        Chart5 = IvyFrameworkTokens.Color.ColorChart5,
-
-        // Sidebar colors from Ivy Design System (Dark Theme)
-        Sidebar = DarkThemeTokens.Theme.ThemeDarkSidebarBase,
-        SidebarForeground = DarkThemeTokens.Theme.ThemeDarkSidebarForeground,
-        SidebarPrimary = DarkThemeTokens.Theme.ThemeDarkSidebarPrimary,
-        SidebarPrimaryForeground = DarkThemeTokens.Theme.ThemeDarkSidebarPrimaryForeground,
-        SidebarAccent = DarkThemeTokens.Theme.ThemeDarkSidebarAccent,
-        SidebarAccentForeground = DarkThemeTokens.Theme.ThemeDarkSidebarAccentForeground,
-        SidebarBorder = DarkThemeTokens.Theme.ThemeDarkSidebarBorder,
-        SidebarRing = DarkThemeTokens.Theme.ThemeDarkSidebarRing
     };
 }
