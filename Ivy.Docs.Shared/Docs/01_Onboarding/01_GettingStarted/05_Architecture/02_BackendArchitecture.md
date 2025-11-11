@@ -149,6 +149,10 @@ public class TodoApp : ViewBase
 
 The backend widget system defines the data models and type hierarchy for all UI components. Widgets are implemented as C# records that serialize to JSON for frontend consumption.
 
+### Widget Serialization and Props
+
+Widget properties marked with `[Prop]` attribute are serialized to JSON and sent to the frontend. As an optimization, **null values are not serialized** - properties with null values are omitted from the JSON payload to reduce network traffic.
+
 ### Widget Type Hierarchy
 
 Widgets inherit from `WidgetBase` and can represent input controls, layout containers, or content renderers. The type system ensures type safety while allowing flexible composition.
