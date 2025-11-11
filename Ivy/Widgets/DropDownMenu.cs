@@ -76,6 +76,9 @@ public record DropDownMenu : WidgetBase<DropDownMenu>
     /// <summary>Offset distance from trigger in alignment direction. Default is 0 pixels.</summary>
     [Prop] public int AlignOffset { get; set; } = 0;
 
+    /// <summary>Keyboard shortcut key that triggers the dropdown when combined with Ctrl (Windows/Linux) or Cmd (Mac). For example, "," enables Ctrl+, or Cmd+,.</summary>
+    [Prop] public string? KeyboardShortcut { get; set; }
+
     /// <summary>Event handler for menu item selection.</summary>
     [Event] public Func<Event<DropDownMenu, object>, ValueTask> OnSelect { get; set; }
 
@@ -175,5 +178,13 @@ public static class DropDownMenuExtensions
     public static DropDownMenu HandleSelect(this DropDownMenu dropDownMenu, Action<object> onSelect)
     {
         return dropDownMenu with { OnSelect = @event => { onSelect(@event.Value); return ValueTask.CompletedTask; } };
+    }
+
+    /// <summary>Sets keyboard shortcut key that triggers the dropdown when combined with Ctrl (Windows/Linux) or Cmd (Mac).</summary>
+    /// <param name="dropDownMenu">The dropdown menu to configure.</param>
+    /// <param name="key">The key character, for example "," for Ctrl+, or "k" for Ctrl+K.</param>
+    public static DropDownMenu KeyboardShortcut(this DropDownMenu dropDownMenu, string key)
+    {
+        return dropDownMenu with { KeyboardShortcut = key };
     }
 }

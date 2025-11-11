@@ -1,5 +1,5 @@
 import { useEventHandler } from '@/components/event-handler';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import {
   DropdownMenu,
@@ -25,6 +25,11 @@ interface DropDownMenuWidgetProps {
   align?: 'Start' | 'Center' | 'End';
   side?: 'Top' | 'Right' | 'Bottom' | 'Left';
   alignOffset?: number;
+  /**
+   * Keyboard shortcut key that triggers the dropdown when combined with Ctrl (Windows/Linux) or Cmd (Mac).
+   * For example, "," enables Ctrl+, or Cmd+,
+   */
+  keyboardShortcut?: string;
   slots?: {
     Trigger?: React.ReactNode[];
     Header?: React.ReactNode[];
@@ -38,10 +43,26 @@ export const DropDownMenuWidget: React.FC<DropDownMenuWidgetProps> = ({
   align = 'Start',
   side = 'Bottom',
   alignOffset,
+  keyboardShortcut,
 }) => {
   const eventHandler = useEventHandler();
   const [open, setOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
+
+  // Add keyboard shortcut for dropdown (Ctrl+key or Cmd+key)
+  useEffect(() => {
+    if (!keyboardShortcut) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === keyboardShortcut && (event.metaKey || event.ctrlKey)) {
+        event.preventDefault();
+        setOpen((prevOpen: boolean) => !prevOpen);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [keyboardShortcut]);
 
   if (!slots?.Trigger) {
     return (

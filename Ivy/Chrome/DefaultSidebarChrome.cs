@@ -374,7 +374,8 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
             footer = new DropDownMenu(
                     DropDownMenu.DefaultSelectHandler(),
                     trigger)
-                .Top();
+                .Top()
+                .KeyboardShortcut(",");
 
             var onLogout = new Action(async () =>
             {
@@ -409,6 +410,7 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
                     DropDownMenu.DefaultSelectHandler(),
                     trigger)
                 .Top()
+                .KeyboardShortcut(",")
                 .Items(
                     settings.FooterMenuItemsTransformer(commonMenuItems, navigator)
                 );
