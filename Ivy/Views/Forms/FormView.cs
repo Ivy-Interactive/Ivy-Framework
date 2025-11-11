@@ -215,7 +215,7 @@ public interface IFormFieldBinding<TModel>
 }
 
 /// <summary>Renders form fields in a structured layout with columns, rows, and groups.</summary>
-public class FormView<TModel>(IFormFieldView[] fieldViews, Func<Event<Form>, ValueTask>? handleSubmit = null, Sizes size = Sizes.Medium) : ViewBase
+public class FormView<TModel>(IFormFieldView[] fieldViews, Func<Event<Form>, ValueTask>? handleSubmit = null, Sizes size = Sizes.Medium, Dictionary<string, bool>? groupOpenStates = null) : ViewBase
 {
     /// <summary>Builds the complete form layout with multi-column support and field grouping.</summary>
     public override object? Build()
@@ -254,6 +254,7 @@ public class FormView<TModel>(IFormFieldView[] fieldViews, Func<Event<Form>, Val
                             f.Key == null
                                 ? RenderRows(f.Select(g => g).ToArray())
                                 : new Expandable(f.Key, RenderRows(f.ToArray()))
+                                    .Open(groupOpenStates?.GetValueOrDefault(f.Key, false) ?? false)
                         )).Cast<object>().ToArray()
                     .ToArray()));
 

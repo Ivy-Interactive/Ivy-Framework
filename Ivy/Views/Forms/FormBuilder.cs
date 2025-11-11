@@ -133,6 +133,7 @@ public class FormBuilder<TModel> : ViewBase
     /// <summary>The text displayed on the form's submit button.</summary>
     public readonly string SubmitTitle;
     private readonly List<string> _groups = [];
+    private readonly Dictionary<string, bool> _groupOpenStates = [];
 
     /// <summary>The validation strategy for form fields. Default is OnBlur.</summary>
     public FormValidationStrategy ValidationStrategy { get; set; } = FormValidationStrategy.OnBlur;
@@ -461,6 +462,25 @@ public class FormBuilder<TModel> : ViewBase
         return _Place(col, row ? Guid.NewGuid() : null, fields);
     }
 
+    /// <summary>Groups specified fields under named section in first column.</summary>
+    /// <param name="group">Name of group for organizing related fields.</param>
+    /// <param name="fields">Fields to include in named group.</param>
+    /// <returns>Form builder instance for method chaining.</returns>
+    public FormBuilder<TModel> Group(string group, params Expression<Func<TModel, object>>[] fields)
+    {
+        return Group(group, 0, false, fields);
+    }
+
+    /// <summary>Groups specified fields under named section in first column with optional open state.</summary>
+    /// <param name="group">Name of group for organizing related fields.</param>
+    /// <param name="open">Whether the group should be open by default.</param>
+    /// <param name="fields">Fields to include in named group.</param>
+    /// <returns>Form builder instance for method chaining.</returns>
+    public FormBuilder<TModel> Group(string group, bool open, params Expression<Func<TModel, object>>[] fields)
+    {
+        return Group(group, 0, open, fields);
+    }
+
     /// <summary>Groups specified fields under named section in specified column.</summary>
     /// <param name="group">Name of group for organizing related fields.</param>
     /// <param name="column">Column index where grouped fields should be placed.</param>
@@ -468,12 +488,25 @@ public class FormBuilder<TModel> : ViewBase
     /// <returns>Form builder instance for method chaining.</returns>
     public FormBuilder<TModel> Group(string group, int column, params Expression<Func<TModel, object>>[] fields)
     {
+        return Group(group, column, false, fields);
+    }
+
+    /// <summary>Groups specified fields under named section in specified column with optional open state.</summary>
+    /// <param name="group">Name of group for organizing related fields.</param>
+    /// <param name="column">Column index where grouped fields should be placed.</param>
+    /// <param name="open">Whether the group should be open by default.</param>
+    /// <param name="fields">Fields to include in named group.</param>
+    /// <returns>Form builder instance for method chaining.</returns>
+    public FormBuilder<TModel> Group(string group, int column, bool open, params Expression<Func<TModel, object>>[] fields)
+    {
         int order = 0;
 
         if (!_groups.Contains(group))
         {
             _groups.Add(group);
         }
+
+        _groupOpenStates[group] = open;
 
         foreach (var expr in fields)
         {
@@ -485,13 +518,14 @@ public class FormBuilder<TModel> : ViewBase
         return this;
     }
 
-    /// <summary>Groups specified fields under named section in first column.</summary>
-    /// <param name="group">Name of group for organizing related fields.</param>
-    /// <param name="fields">Fields to include in named group.</param>
+    /// <summary>Sets whether a form group should be open by default.</summary>
+    /// <param name="group">Name of group to configure.</param>
+    /// <param name="open">True to open by default; false to close by default. Default is true.</param>
     /// <returns>Form builder instance for method chaining.</returns>
-    public FormBuilder<TModel> Group(string group, params Expression<Func<TModel, object>>[] fields)
+    public FormBuilder<TModel> GroupOpen(string group, bool open = true)
     {
-        return Group(group, 0, fields);
+        _groupOpenStates[group] = open;
+        return this;
     }
 
     /// <summary>Removes specified fields from form so they will not be rendered.</summary>
@@ -703,7 +737,8 @@ public class FormBuilder<TModel> : ViewBase
         var formView = new FormView<TModel>(
             fieldViews,
             HandleSubmitEvent,
-            Size
+            Size,
+            _groupOpenStates
         );
 
         var validationView = new WrapperView(Layout.Vertical(

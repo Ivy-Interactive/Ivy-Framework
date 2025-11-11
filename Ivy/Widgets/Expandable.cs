@@ -16,6 +16,9 @@ public record Expandable : WidgetBase<Expandable>
 
     /// <summary>Whether expandable widget is disabled and cannot be interacted with. Default is false.</summary>
     [Prop] public bool Disabled { get; set; } = false;
+
+    /// <summary>Whether expandable widget is open by default. Default is false.</summary>
+    [Prop] public bool Open { get; set; } = false;
 }
 
 /// <summary>Extension methods for Expandable widget providing fluent API for configuring behavior and appearance.</summary>
@@ -24,6 +27,16 @@ public static class ExpandableExtensions
     public static Expandable Disabled(this Expandable widget, bool disabled)
     {
         widget.Disabled = disabled;
+        return widget;
+    }
+
+    /// <summary>Sets whether expandable widget should be open by default.</summary>
+    /// <param name="widget">Expandable widget to configure.</param>
+    /// <param name="open">True to open by default; false to close by default.</param>
+    /// <returns>Configured expandable widget for method chaining.</returns>
+    public static Expandable Open(this Expandable widget, bool open = true)
+    {
+        widget.Open = open;
         return widget;
     }
 }
