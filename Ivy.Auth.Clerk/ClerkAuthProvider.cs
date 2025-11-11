@@ -22,7 +22,7 @@ public class ClerkAuthProvider : IAuthProvider
     private readonly string _secretKey;
     private readonly string? _jwtKey;
     private readonly string? _publishableKey;
-    private readonly string? _fapiInstance;
+    private readonly string? _frontendApiDomain;
     private readonly List<AuthOption> _authOptions = new();
     private readonly HttpClient _httpClient;
 
@@ -36,6 +36,7 @@ public class ClerkAuthProvider : IAuthProvider
         _secretKey = configuration.GetValue<string>("Clerk:SecretKey") ?? throw new Exception("Clerk:SecretKey is required");
         _jwtKey = configuration.GetValue<string>("Clerk:JwtKey") ?? throw new Exception("Clerk:JwtKey is required");
         _publishableKey = configuration.GetValue<string>("Clerk:PublishableKey") ?? throw new Exception("Clerk:PublishableKey is required");
+        _frontendApiDomain = configuration.GetValue<string>("Clerk:FrontendApiDomain") ?? throw new Exception("Clerk:FrontendApiDomain is required");
 
         _httpClient = new HttpClient();
         _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_secretKey}");
