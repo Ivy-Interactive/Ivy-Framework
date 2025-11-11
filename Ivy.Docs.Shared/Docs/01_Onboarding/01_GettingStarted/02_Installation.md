@@ -233,7 +233,3 @@ graph TD
     C --> C2[Compressed Responses]
     C --> C3[Error Logging Only]
 ```
-
-## Next Steps
-
-This installation and project setup provides the foundation for building Ivy applications. The next step is understanding core concepts like Views, state management, and the widget system covered in [Core Concepts](../02_Concepts/Views.md).
