@@ -120,6 +120,14 @@ The magic happens through WebSocket communication:
 When working with search results in the sidebar (both in Ivy Samples and Docs), you can **Ctrl + right click** on any item to open it as a separate app in a new window. This is handy for multitasking or developing multiple features simultaneously.
 </Callout>
 
+## Detailed Architecture
+
+For a comprehensive technical overview of Ivy's architecture, see:
+
+- **[Frontend Architecture](./05_Architecture/FrontendArchitecture.md)** - React/TypeScript frontend, widget rendering pipeline, and build system
+- **[Backend Architecture](./05_Architecture/BackendArchitecture.md)** - C# server configuration, application system, and deployment
+- **[Frontend-Backend Communication](./05_Architecture/FrontendBackendArchitecture.md)** - SignalR protocol, message types, and state synchronization
+
 ## Development Experience
 
 ### Hot Reloading
