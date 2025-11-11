@@ -14,8 +14,6 @@ searchHints:
 Configure and bootstrap your Ivy application with dependency injection, services, and middleware for production-ready deployment.
 </Ingress>
 
-## Overview
-
 The `Program.cs` file is the entry point for your Ivy application. It configures and starts the Ivy server using the `Server` class, which provides a fluent API for setting up apps, authentication, middleware, and other services.
 
 ## Basic Structure
@@ -34,8 +32,6 @@ await server.RunAsync();
 ```
 
 ## Server Configuration
-
-### Creating a Server Instance
 
 The `Server` class accepts optional `ServerArgs` for configuration:
 
@@ -101,9 +97,7 @@ server.AddApp(new AppDescriptor
 });
 ```
 
-## Development Features
-
-### Hot Reload
+## Hot Reload
 
 Enable hot reload for development:
 
