@@ -741,4 +741,176 @@ public static class Utils
 
         return $"{len:0.##} {sizes[order]}";
     }
+
+    /// <summary>
+    /// Validates and sanitizes a URL to prevent open redirect vulnerabilities.
+    /// Only allows relative paths (starting with /) or absolute URLs with http/https protocol.
+    /// For redirects, external URLs are only allowed if they match the current origin.
+    /// </summary>
+    /// <param name="url">The URL to validate</param>
+    /// <param name="allowExternal">Whether to allow external URLs (default: false for redirects)</param>
+    /// <param name="currentOrigin">The current origin to compare against for same-origin validation</param>
+    /// <returns>The sanitized URL if valid, null otherwise</returns>
+    public static string? ValidateRedirectUrl(string? url, bool allowExternal = false, string? currentOrigin = null)
+    {
+        if (string.IsNullOrWhiteSpace(url))
+        {
+            return null;
+        }
+
+        url = url.Trim();
+
+        // Allow relative paths (starting with /)
+        if (url.StartsWith('/'))
+        {
+            // Validate it's a safe relative path (no protocol, no javascript:, etc.)
+            if (url.Contains(':'))
+            {
+                return null;
+            }
+            return url;
+        }
+
+        // For external URLs, validate protocol and optionally origin
+        try
+        {
+            var uri = new Uri(url, UriKind.Absolute);
+
+            // Only allow http and https protocols
+            if (uri.Scheme != "http" && uri.Scheme != "https")
+            {
+                return null;
+            }
+
+            // If external URLs are not allowed, only allow same-origin
+            if (!allowExternal)
+            {
+                if (string.IsNullOrEmpty(currentOrigin))
+                {
+                    // Reject external URLs when allowExternal is false and no origin is provided
+                    return null;
+                }
+
+                var currentUri = new Uri(currentOrigin);
+                if (uri.Scheme != currentUri.Scheme || uri.Host != currentUri.Host || uri.Port != currentUri.Port)
+                {
+                    return null;
+                }
+            }
+
+            return uri.ToString();
+        }
+        catch (UriFormatException)
+        {
+            // Invalid URL format
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// Validates and sanitizes a URL for use in anchor tags or window.open.
+    /// Allows relative paths, external http/https URLs, and app:// URLs, but prevents dangerous protocols.
+    /// </summary>
+    /// <param name="url">The URL to validate</param>
+    /// <returns>The sanitized URL if valid, null otherwise</returns>
+    public static string? ValidateLinkUrl(string? url)
+    {
+        if (string.IsNullOrWhiteSpace(url))
+        {
+            return null;
+        }
+
+        url = url.Trim();
+
+        // Allow app:// URLs (Ivy internal navigation)
+        if (url.StartsWith("app://", StringComparison.OrdinalIgnoreCase))
+        {
+            // Validate app:// URLs don't contain dangerous characters
+            if (url.Contains('?') || url.Contains('#') || url.Contains('&') || url.Count(c => c == ':') > 1)
+            {
+                return null;
+            }
+            return url;
+        }
+
+        // Allow anchor links (starting with #)
+        if (url.StartsWith('#'))
+        {
+            // Validate anchor links are safe
+            if (url.Contains('?') || url.Contains('&') || url.Count(c => c == ':') > 0)
+            {
+                return null;
+            }
+            return url;
+        }
+
+        // Allow relative paths (starting with /)
+        if (url.StartsWith('/'))
+        {
+            // Validate it's a safe relative path
+            if (url.Contains(':'))
+            {
+                return null;
+            }
+            return url;
+        }
+
+        // For absolute URLs, validate protocol
+        try
+        {
+            var uri = new Uri(url, UriKind.Absolute);
+
+            // Only allow http and https protocols (prevent javascript:, data:, etc.)
+            if (uri.Scheme != "http" && uri.Scheme != "https")
+            {
+                return null;
+            }
+
+            return uri.ToString();
+        }
+        catch (UriFormatException)
+        {
+            // Invalid URL format - treat as relative if it doesn't contain colons
+            if (!url.Contains(':'))
+            {
+                // Might be a relative path without leading slash
+                return url.StartsWith('/') ? url : $"/{url}";
+            }
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// Validates that an AppId is safe for use in URLs.
+    /// Prevents injection of malicious characters or protocols.
+    /// </summary>
+    /// <param name="appId">The AppId to validate</param>
+    /// <returns>True if the AppId is safe, false otherwise</returns>
+    public static bool IsSafeAppId(string? appId)
+    {
+        if (string.IsNullOrWhiteSpace(appId))
+        {
+            return false;
+        }
+
+        // AppId should not contain protocol separators, query parameters, or other URL components
+        if (appId.Contains(':') || appId.Contains('?') || appId.Contains('#') || appId.Contains('&'))
+        {
+            return false;
+        }
+
+        // AppId should not start with / (handled separately in NavigateArgs)
+        if (appId.StartsWith('/'))
+        {
+            return false;
+        }
+
+        // AppId should not contain control characters or dangerous patterns
+        if (appId.Any(c => char.IsControl(c)))
+        {
+            return false;
+        }
+
+        return true;
+    }
 }

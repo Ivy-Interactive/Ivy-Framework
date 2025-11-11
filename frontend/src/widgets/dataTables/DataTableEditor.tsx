@@ -25,6 +25,7 @@ import { iconCellRenderer } from './utils/customRenderers';
 import { generateHeaderIcons, addStandardIcons } from './utils/headerIcons';
 import { ThemeColors } from '@/lib/color-utils';
 import { useEventHandler } from '@/components/event-handler';
+import { validateLinkUrl, validateRedirectUrl } from '@/lib/utils';
 import { useColumnGroups } from './hooks/useColumnGroups';
 import { RowActionButtons } from './DataTableRowAction';
 import { RowAction } from './types/types';
@@ -270,12 +271,26 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
       ) {
         const url = cellContent.data as string;
 
+        // Validate URL to prevent open redirect vulnerabilities
+        const validatedUrl = validateLinkUrl(url);
+        if (validatedUrl === '#') {
+          // Invalid URL, don't proceed
+          return;
+        }
+
         // External URLs (http/https) open in new tab
-        if (url.startsWith('http://') || url.startsWith('https://')) {
-          window.open(url, '_blank', 'noopener,noreferrer');
+        if (
+          validatedUrl.startsWith('http://') ||
+          validatedUrl.startsWith('https://')
+        ) {
+          window.open(validatedUrl, '_blank', 'noopener,noreferrer');
         } else {
           // Internal relative URLs navigate in same tab
-          window.location.href = url;
+          // Validate it's safe for redirect (relative path or same-origin)
+          const redirectUrl = validateRedirectUrl(validatedUrl, false);
+          if (redirectUrl) {
+            window.location.href = redirectUrl;
+          }
         }
         return; // Don't proceed with other click handling
       }
