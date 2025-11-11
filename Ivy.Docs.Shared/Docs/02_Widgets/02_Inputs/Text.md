@@ -282,8 +282,6 @@ needed for the form.
 
 In certain scenarios, it is beneficial to prepend or append static content—such as text fragments or icons—to an input field. This practice is particularly useful for displaying the protocol in a URL field, a currency symbol, or an icon that denotes the expected input.
 
-### Adding text prefixes and suffixes
-
 ```csharp demo-below
 public class UrlInputDemo : ViewBase
 {
@@ -291,25 +289,8 @@ public class UrlInputDemo : ViewBase
     {
         var domain = UseState("example");
         return domain.ToTextInput()
-                     .Prefix("https://")
+                     .Prefix(Icons.Globe)
                      .Suffix(".com");
-    }
-}
-```
-
-### Using icons as prefixes
-
-`Prefix` and `Suffix` can also accept widgets like icons:
-
-```csharp demo-below
-public class EmailInputDemo : ViewBase
-{
-    public override object? Build()
-    {
-        var email = UseState("");
-        return email.ToTextInput()
-                    .Prefix(Icons.Mail)
-                    .Placeholder("Enter email");
     }
 }
 ```
