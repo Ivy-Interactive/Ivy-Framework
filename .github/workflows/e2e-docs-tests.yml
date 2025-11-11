@@ -12,18 +12,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    
+      with:
+        submodules: recursive
+
     # Setup Node.js and frontend first
     - uses: actions/setup-node@v4
       with:
         node-version: lts/*
-
-    # Checkout Ivy-Design-System repository
-    - name: Checkout Ivy-Design-System
-      uses: actions/checkout@v4
-      with:
-        repository: Ivy-Interactive/Ivy-Design-System
-        path: Ivy-Design-System
 
     # Build and link ivy-design-system package
     - name: Build ivy-design-system

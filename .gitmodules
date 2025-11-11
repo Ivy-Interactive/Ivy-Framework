@@ -1,0 +1,3 @@
+[submodule "Ivy-Design-System"]
+	path = Ivy-Design-System
+	url = git@github.com:Ivy-Interactive/Ivy-Design-System.git
