@@ -471,7 +471,7 @@ public class FormBuilder<TModel> : ViewBase
         return Group(group, 0, false, fields);
     }
 
-    /// <summary>Groups specified fields under named section in first column with optional open state.</summary>
+    /// <summary>Groups specified fields under named section in first column.</summary>
     /// <param name="group">Name of group for organizing related fields.</param>
     /// <param name="open">Whether the group should be open by default.</param>
     /// <param name="fields">Fields to include in named group.</param>
@@ -491,13 +491,24 @@ public class FormBuilder<TModel> : ViewBase
         return Group(group, column, false, fields);
     }
 
-    /// <summary>Groups specified fields under named section in specified column with optional open state.</summary>
+    /// <summary>Groups specified fields under named section in specified column.</summary>
     /// <param name="group">Name of group for organizing related fields.</param>
     /// <param name="column">Column index where grouped fields should be placed.</param>
     /// <param name="open">Whether the group should be open by default.</param>
     /// <param name="fields">Fields to include in named group.</param>
     /// <returns>Form builder instance for method chaining.</returns>
     public FormBuilder<TModel> Group(string group, int column, bool open, params Expression<Func<TModel, object>>[] fields)
+    {
+        return Group(group, column, open, fields);
+    }
+
+    /// <summary>Groups specified fields under named section in specified column with optional open state.</summary>
+    /// <param name="group">Name of group for organizing related fields.</param>
+    /// <param name="column">Column index where grouped fields should be placed.</param>
+    /// <param name="open">Whether the group should be open by default.</param>
+    /// <param name="fields">Fields to include in named group.</param>
+    /// <returns>Form builder instance for method chaining.</returns>
+    private FormBuilder<TModel> Group(string group, int column, bool open, params Expression<Func<TModel, object>>[] fields)
     {
         int order = 0;
 
