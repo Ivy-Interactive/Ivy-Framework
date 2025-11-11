@@ -167,29 +167,3 @@ public override object? Build()
         );
 }
 ```
-
-## Why This Approach Works
-
-### For C# Developers
-
-- Leverage existing C# skills and ecosystem
-- Full IntelliSense and debugging support
-- Type safety prevents runtime UI errors
-- Seamless integration with existing .NET code
-
-### For Teams
-
-- Single language across the entire stack
-- Shared models between frontend and backend
-- Easier code reviews and maintenance
-- Faster development cycles
-
-### For Applications
-
-- Real-time updates without complex JavaScript
-- Built-in security (business logic stays on server)
-- Easy deployment (single .NET project)
-
----
-
-**Next:** Ready to build something? Check out the [Todo Tutorial](05_TodoTutorial.md) to see Ivy in action!

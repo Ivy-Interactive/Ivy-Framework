@@ -16,7 +16,7 @@ searchHints:
 Learn the essential concepts of Ivy development including Views, Widgets, state management, and how to build your first interactive application.
 </Ingress>
 
-First, make sure you have [installed](./02_Installation.md) Ivy on your development machine.
+First, make sure you have [installed Ivy](./02_Installation.md) on your development machine.
 
 ## Create a new project
 
