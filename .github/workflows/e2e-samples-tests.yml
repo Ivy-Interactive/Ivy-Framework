@@ -17,10 +17,27 @@ jobs:
     - uses: actions/setup-node@v4
       with:
         node-version: lts/*
-    
+
+    # Checkout Ivy-Design-System repository
+    - name: Checkout Ivy-Design-System
+      uses: actions/checkout@v4
+      with:
+        repository: Ivy-Interactive/Ivy-Design-System
+        path: Ivy-Design-System
+
+    # Build and link ivy-design-system package
+    - name: Build ivy-design-system
+      working-directory: ./Ivy-Design-System
+      run: |
+        npm ci
+        npm run build
+        npm pack
+
     - name: Install frontend dependencies
       working-directory: ./frontend
-      run: npm ci
+      run: |
+        npm ci
+        npm install ../Ivy-Design-System/ivy-design-system-*.tgz
     
     - name: Build frontend
       working-directory: ./frontend
