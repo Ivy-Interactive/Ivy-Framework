@@ -46,25 +46,23 @@ public override object? Build()
 
 The `useBackend` hook manages the SignalR connection lifecycle, including connection establishment, automatic reconnection, and cleanup. It accepts application parameters and establishes a WebSocket connection to the backend's message hub.
 
-### Connection Setup
+The connection is established with query parameters that identify the application context. The connection URL includes several parameters that provide context to the backend:
 
-The connection is established with query parameters that identify the application context:
+| Parameter | Description |
+|-----------|-------------|
+| `appId` | Identifies which application to render |
+| `appArgs` | Serialized arguments passed to the application |
+| `machineId` | Unique client identifier for session tracking |
+| `parentId` | Parent application identifier for nested applications |
 
-The connection URL includes several parameters that provide context to the backend:
-
-- **appId**: Identifies which application to render
-- **appArgs**: Serialized arguments passed to the application
-- **machineId**: Unique client identifier for session tracking
-- **parentId**: Parent application identifier for nested applications
+SignalR provides automatic reconnection capabilities with built-in reconnection handlers that update the UI state during connection interruptions.
 
 ```typescript
 const connection = new HubConnectionBuilder()
   .withUrl(`/messages?appId=${appId}&appArgs=${encodeURIComponent(appArgs || "")}&machineId=${machineId}&parentId=${parentId || ""}`)
   .withAutomaticReconnect()
   .build();
-```
 
-```typescript
 connection.start()
   .then(() => {
     setConnectionState("connected");
@@ -73,13 +71,7 @@ connection.start()
     console.error("Connection error:", error);
     setConnectionState("error");
   });
-```
 
-### Automatic Reconnection
-
-SignalR provides automatic reconnection capabilities with built-in reconnection handlers that update the UI state during connection interruptions.
-
-```typescript
 connection.onreconnecting(() => {
   setConnectionState("reconnecting");
 });
@@ -93,18 +85,17 @@ connection.onreconnected(() => {
 
 The frontend and backend exchange several types of messages through the SignalR connection, each serving a specific purpose in maintaining the reactive user interface.
 
-### Backend-to-Frontend Messages
-
-#### Message Type Definitions
-
-The frontend defines TypeScript interfaces for the different message types received from the backend:
-
-- **UpdateMessage**: Contains JSON patches to apply to specific widget tree nodes
-- **RefreshMessage**: Contains a complete new widget tree to replace the current state
-- **ErrorMessage**: Contains error details with title, description, and optional stack trace
-- **AuthToken**: Contains JWT token information for authentication
+```mermaid
+graph LR
+    A[Backend] -->|RefreshMessage| B[Frontend]
+    A -->|UpdateMessage| B
+    A -->|ErrorMessage| B
+    A -->|AuthToken| B
+    B -->|WidgetEvent| A
+```
 
 ```typescript
+// Backend-to-Frontend Messages
 interface RefreshMessage {
   widget: WidgetNode;
 }
@@ -124,13 +115,8 @@ interface ErrorMessage {
 interface AuthToken {
   jwt: string | null;
 }
-```
 
-### Frontend-to-Backend Messages
-
-The primary communication from frontend to backend consists of widget events triggered by user interactions:
-
-```typescript
+// Frontend-to-Backend Messages
 interface WidgetEvent {
   widgetId: string;
   eventType: string;
@@ -184,52 +170,43 @@ The Ivy Framework maintains consistency between frontend and backend state throu
 
 The widget tree is represented as a hierarchical structure where each node contains:
 
-- **type**: The widget type identifier (e.g., "Ivy.TextInput")
-- **id**: Unique identifier for the widget instance
-- **props**: Widget properties and configuration
-- **events**: Event handler definitions
-- **children**: Array of child widget nodes
+```mermaid
+graph TD
+    A[Widget Node] --> B[type: Widget Type]
+    A --> C[id: Unique ID]
+    A --> D[props: Properties]
+    A --> E[events: Handlers]
+    A --> F[children: Array]
+    F --> G[Widget Node]
+    G --> H[Recursive Structure]
+```
 
 ### JSON Patch System
 
-Instead of sending complete widget trees for every change, Ivy uses JSON patches to send only the differences:
+Instead of sending complete widget trees for every change, Ivy uses JSON patches to send only the differences. The `applyUpdateMessage` function efficiently applies JSON patches to the widget tree:
 
-The `applyUpdateMessage` function efficiently applies JSON patches to the widget tree by:
-
-- Deep cloning the current tree to avoid mutations
-- Traversing to the target nodes using index arrays
-- Applying JSON patch operations to the specific locations
+| Step | Description |
+|------|-------------|
+| Deep Cloning | Clone the current tree to avoid mutations |
+| Path Traversal | Traverse to target nodes using index arrays |
+| Patch Application | Apply JSON patch operations to specific locations |
 
 ```typescript
-function applyUpdateMessage(
-  tree: WidgetNode,
-  message: UpdateMessage
-): WidgetNode {
+function applyUpdateMessage(tree: WidgetNode, message: UpdateMessage): WidgetNode {
   const newTree = cloneDeep(tree);
-  
   message.patches.forEach(patch => {
     const path = patch.path.split('/').filter(Boolean);
     let current: any = newTree;
-    
     for (let i = 0; i < path.length - 1; i++) {
-      const key = path[i];
-      current = current[key];
+      current = current[path[i]];
     }
-    
     const lastKey = path[path.length - 1];
     switch (patch.op) {
-      case 'replace':
-        current[lastKey] = patch.value;
-        break;
-      case 'add':
-        // ... handle add operation
-        break;
-      case 'remove':
-        // ... handle remove operation
-        break;
+      case 'replace': current[lastKey] = patch.value; break;
+      case 'add': /* handle add */ break;
+      case 'remove': /* handle remove */ break;
     }
   });
-  
   return newTree;
 }
 ```
@@ -258,47 +235,42 @@ connection.on("Update", (message: UpdateMessage) => {
 
 The backend can send commands to control browser behavior and client-side functionality through the SignalR connection.
 
-### Client Command Types
-
 The backend can send various commands to the frontend:
 
-- **CopyToClipboard**: Copies text to the system clipboard
-- **OpenUrl**: Opens URLs in new browser tabs
-- **SetJwt**: Manages authentication tokens in localStorage
-- **SetTheme**: Changes the application theme
-- **Toast**: Shows notification messages
-- **Error**: Displays detailed error information
+```mermaid
+graph LR
+    A[Backend] -->|CopyToClipboard| B[Frontend]
+    A -->|OpenUrl| B
+    A -->|SetJwt| B
+    A -->|SetTheme| B
+    A -->|Toast| B
+    A -->|Error| B
+    B --> B1[Clipboard]
+    B --> B2[Browser Tabs]
+    B --> B3[localStorage]
+    B --> B4[Theme]
+    B --> B5[Notifications]
+    B --> B6[Error Display]
+```
 
 ### Client Extension Methods
 
-The backend provides extension methods for common client operations:
+The backend provides extension methods for common client operations. All methods follow the same pattern:
 
 ```csharp
-public static void CopyToClipboard(this IClientProvider client, string text)
+public static void MethodName(this IClientProvider client, params)
 {
-    client.SendCommand("copyToClipboard", new { text });
-}
-
-public static void OpenUrl(this IClientProvider client, string url, bool newTab = true)
-{
-    client.SendCommand("openUrl", new { url, newTab });
-}
-
-public static void SetJwt(this IClientProvider client, string? jwt)
-{
-    client.SendCommand("setJwt", new { jwt });
-}
-
-public static void SetTheme(this IClientProvider client, string theme)
-{
-    client.SendCommand("setTheme", new { theme });
-}
-
-public static void Toast(this IClientProvider client, string message, string variant = "default")
-{
-    client.SendCommand("toast", new { message, variant });
+    client.SendCommand("commandName", new { params });
 }
 ```
+
+| Method | Parameters | Command |
+|--------|------------|---------|
+| `CopyToClipboard` | `string text` | `copyToClipboard` |
+| `OpenUrl` | `string url, bool newTab = true` | `openUrl` |
+| `SetJwt` | `string? jwt` | `setJwt` |
+| `SetTheme` | `string theme` | `setTheme` |
+| `Toast` | `string message, string variant = "default"` | `toast` |
 
 ### Authentication Token Management
 
