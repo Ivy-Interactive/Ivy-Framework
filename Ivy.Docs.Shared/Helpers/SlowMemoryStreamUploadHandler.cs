@@ -4,9 +4,9 @@ using System.Diagnostics;
 using System.Text;
 
 using Ivy.Core.Helpers;
-using Ivy.Core.Hooks;
+using Ivy.Services;
 
-namespace Ivy.Services;
+namespace Ivy.Docs.Shared.Helpers;
 
 public static class SlowMemoryStreamUploadHandler
 {
@@ -108,6 +108,8 @@ internal sealed class SlowMemoryStreamUploadHandlerImpl<T>(
     int chunkSize = 8192,
     float progressThreshold = 0.05f) : IUploadHandler
 {
+    private const int BytesPerSecond = 1 * 1024 * 1024;
+
     private readonly IFileUploadSink<T> _sink = sink;
     private readonly Func<byte[], T> _converter = converter;
     private readonly int _chunkSize = chunkSize;
@@ -143,8 +145,6 @@ internal sealed class SlowMemoryStreamUploadHandlerImpl<T>(
             throw;
         }
     }
-
-    private const int BytesPerSecond = 1 * 1024 * 1024;
 
     private static async Task<(byte[] bytes, long totalRead)> ReadAllWithProgressAndThrottleAsync(
         Stream stream,

@@ -2,9 +2,10 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using Ivy.Core.Hooks;
+using Ivy.Docs.Shared.Helpers;
 using Ivy.Services;
 
-namespace Ivy.Test;
+namespace Ivy.Docs.Test;
 
 public class SlowMemoryStreamUploadHandlerTests
 {
@@ -33,7 +34,7 @@ public class SlowMemoryStreamUploadHandlerTests
 
         var stored = state.Value;
         Assert.NotNull(stored);
-        Assert.Equal(FileUploadStatus.Finished, stored.Status);
+        Assert.Equal(FileUploadStatus.Finished, stored!.Status);
         Assert.Equal(1f, stored.Progress);
         Assert.NotNull(stored.Content);
         Assert.Equal(dataLength, stored.Content!.Length);
@@ -64,7 +65,7 @@ public class SlowMemoryStreamUploadHandlerTests
 
         var stored = state.Value;
         Assert.NotNull(stored);
-        Assert.Equal(FileUploadStatus.Aborted, stored.Status);
+        Assert.Equal(FileUploadStatus.Aborted, stored!.Status);
         Assert.True(stored.Progress <= 1f);
     }
 }
