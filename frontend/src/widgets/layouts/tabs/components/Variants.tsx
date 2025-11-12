@@ -52,6 +52,7 @@ interface TabsVariantProps {
   tabsListRef: React.MutableRefObject<HTMLDivElement | null>;
   visibleTabs: string[];
   orderedTabWidgets: React.ReactElement[];
+  tabWidgets: React.ReactElement[];
   loadedTabs: Set<string>;
   sensors: ReturnType<typeof import('@dnd-kit/core').useSensors>;
   handleDragStart: () => void;
@@ -237,6 +238,7 @@ export const TabsVariant: React.FC<TabsVariantProps> = ({
   tabsListRef,
   visibleTabs,
   orderedTabWidgets,
+  tabWidgets,
   loadedTabs,
   sensors,
   handleDragStart,
@@ -346,45 +348,47 @@ export const TabsVariant: React.FC<TabsVariantProps> = ({
       </div>
 
       <div className="flex-1 overflow-hidden">
-        {orderedTabWidgets.map(tabWidget => {
-          if (!React.isValidElement(tabWidget)) return null;
-          const props = tabWidget.props as Partial<TabWidgetProps>;
-          if (!props.id) return null;
-          const { id } = props;
+        {React.useMemo(() => {
+          return tabWidgets.map(tabWidget => {
+            if (!React.isValidElement(tabWidget)) return null;
+            const props = tabWidget.props as Partial<TabWidgetProps>;
+            if (!props.id) return null;
+            const { id } = props;
 
-          if (!loadedTabs.has(id)) return null;
+            if (!loadedTabs.has(id)) return null;
 
-          const paddingStyle = getPadding(padding);
+            const paddingStyle = getPadding(padding);
 
-          if (useRadix) {
-            // Use TabsContent for Radix version (Content variant)
+            if (useRadix) {
+              // Use TabsContent for Radix version (Content variant)
+              return (
+                <TabsContent
+                  key={id}
+                  value={id}
+                  useRadix={useRadix}
+                  className={cn('h-full overflow-auto border-none mt-0')}
+                  style={paddingStyle}
+                >
+                  {tabWidget}
+                </TabsContent>
+              );
+            }
+
+            // Use custom div-based content for non-Radix version (Tabs variant)
             return (
-              <TabsContent
+              <div
                 key={id}
-                value={id}
-                useRadix={useRadix}
-                className={cn('h-full overflow-auto border-none mt-0')}
+                className={cn(
+                  'h-full overflow-auto',
+                  activeTabId === id ? 'block' : 'hidden'
+                )}
                 style={paddingStyle}
               >
                 {tabWidget}
-              </TabsContent>
+              </div>
             );
-          }
-
-          // Use custom div-based content for non-Radix version (Tabs variant)
-          return (
-            <div
-              key={id}
-              className={cn(
-                'h-full overflow-auto',
-                activeTabId === id ? 'block' : 'hidden'
-              )}
-              style={paddingStyle}
-            >
-              {tabWidget}
-            </div>
-          );
-        })}
+          });
+        }, [tabWidgets, loadedTabs, activeTabId, padding, useRadix])}
       </div>
     </Tabs>
   );

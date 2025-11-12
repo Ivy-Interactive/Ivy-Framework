@@ -142,8 +142,6 @@ export function useTabManagement(
         }
       }
     }
-    // Reset the flag after processing
-    isUserInitiatedChangeRef.current = false;
   }, [
     selectedIndex,
     tabOrder,
@@ -153,6 +151,13 @@ export function useTabManagement(
     setActiveTabId,
     setActiveIndex,
   ]);
+
+  // Reset user-initiated flag when tabWidgets changes (backend response received)
+  React.useEffect(() => {
+    if (isUserInitiatedChangeRef.current) {
+      isUserInitiatedChangeRef.current = false;
+    }
+  }, [tabWidgets, isUserInitiatedChangeRef]);
 
   // Load active tab only when it becomes active
   React.useEffect(() => {

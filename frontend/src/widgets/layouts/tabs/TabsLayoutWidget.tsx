@@ -26,7 +26,35 @@ export const TabsLayoutWidget = ({
   width,
   addButtonText,
 }: TabsLayoutWidgetProps) => {
-  const tabWidgets = filterTabWidgets(children);
+  // Store stable children and only update when the actual tab IDs change
+  const [stableChildren, setStableChildren] = React.useState(children);
+  const [prevHash, setPrevHash] = React.useState('');
+
+  // Calculate hash of children IDs (sorted to ignore order changes)
+  const childrenHash = React.useMemo(() => {
+    const ids = React.Children.map(children, child => {
+      if (React.isValidElement(child)) {
+        return (child.props as { id?: string }).id || '';
+      }
+      return '';
+    });
+    // Sort IDs so that reordering doesn't change the hash
+    const sortedIds = ids ? [...ids].sort() : [];
+    return sortedIds.join(',');
+  }, [children]);
+
+  // Only update stableChildren when hash changes
+  React.useEffect(() => {
+    if (childrenHash !== prevHash) {
+      setStableChildren(children);
+      setPrevHash(childrenHash);
+    }
+  }, [children, childrenHash, prevHash]);
+
+  const tabWidgets = React.useMemo(
+    () => filterTabWidgets(stableChildren),
+    [stableChildren]
+  );
 
   // Centralized state management (includes synchronization logic)
   const {
@@ -215,6 +243,7 @@ export const TabsLayoutWidget = ({
       tabsListRef={tabsListRef}
       visibleTabs={visibleTabs}
       orderedTabWidgets={orderedTabWidgets}
+      tabWidgets={tabWidgets}
       loadedTabs={loadedTabs}
       sensors={sensors}
       handleDragStart={handleDragStart}
