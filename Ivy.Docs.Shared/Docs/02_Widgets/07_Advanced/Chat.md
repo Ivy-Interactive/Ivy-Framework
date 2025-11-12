@@ -238,13 +238,17 @@ public class AdvancedChatDemo : ViewBase
                     }, 
                     "Value", 
                     "Month"
-                ).Height(Size.Units(50)),
+                ).Height(Size.Units(50))
+                 .Width(Size.Units(80)),
                 
                 "table data" => new Table(
-                    new TableRow(new TableCell("Name"), new TableCell("Age"), new TableCell("Role")).IsHeader(),
-                    new TableRow(new TableCell("John Doe"), new TableCell("30"), new TableCell("Developer")),
-                    new TableRow(new TableCell("Jane Smith"), new TableCell("25"), new TableCell("Designer"))
-                ),
+                    new TableRow(new TableCell("Name"), new TableCell("Age"), new TableCell("Role"), new TableCell("Department")).IsHeader(),
+                    new TableRow(new TableCell("John Doe"), new TableCell("30"), new TableCell("Developer"), new TableCell("Engineering")),
+                    new TableRow(new TableCell("Jane Smith"), new TableCell("25"), new TableCell("Designer"), new TableCell("Design")),
+                    new TableRow(new TableCell("Bob Johnson"), new TableCell("35"), new TableCell("Manager"), new TableCell("Product")),
+                    new TableRow(new TableCell("Alice Williams"), new TableCell("28"), new TableCell("Developer"), new TableCell("Engineering")),
+                    new TableRow(new TableCell("Charlie Brown"), new TableCell("32"), new TableCell("QA Engineer"), new TableCell("Quality Assurance"))
+                ).Width(Size.Units(100)),
                 
                 _ => $"You said: '{@event.Value}'. Try the commands: 'analyze code', 'create form', 'show chart', or 'table data'!"
             };
