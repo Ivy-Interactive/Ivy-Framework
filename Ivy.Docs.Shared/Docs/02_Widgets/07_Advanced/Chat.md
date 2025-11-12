@@ -21,7 +21,7 @@ A simple chat with an echo bot that repeats user messages.
 
 This demonstrates the fundamental usage of the Chat widget with basic message handling and state management.
 
-```csharp demo-tabs 
+```csharp demo-tabs
 public class BasicChatDemo : ViewBase
 {   
     public override object? Build()
@@ -40,7 +40,7 @@ public class BasicChatDemo : ViewBase
         }
 
         return new Chat(messages.Value.ToArray(), OnSendMessage)
-            .Width(Size.Full().Max(400))
+            .Width(Size.Full())
             .Height(Size.Auto());
     }
 }
@@ -54,7 +54,7 @@ First, the handler appends the user's message so the transcript updates immediat
 
 This example shows how to implement async message handling, display loading states using `ChatStatus`, and manage message updates during processing.
 
-```csharp demo-tabs 
+```csharp demo-tabs
 public class LoadingChatDemo : ViewBase
 {   
     public override object? Build()
@@ -82,7 +82,7 @@ public class LoadingChatDemo : ViewBase
         }
 
         return new Chat(messages.Value.ToArray(), OnSendMessage)
-            .Width(Size.Full().Max(400))
+            .Width(Size.Full())
             .Height(Size.Auto());
     }
 }
@@ -94,7 +94,7 @@ A chat that responds with interactive elements like buttons and cards.
 
 This demonstrates how to return complex UI components as chat responses, creating dynamic and engaging conversations with rich media content.
 
-```csharp demo-tabs 
+```csharp demo-tabs
 public class InteractiveChatDemo : ViewBase
 {   
     public override object? Build()
@@ -129,7 +129,7 @@ public class InteractiveChatDemo : ViewBase
         }
 
         return new Chat(messages.Value.ToArray(), OnSendMessage)
-            .Width(Size.Full().Max(400))
+            .Width(Size.Full())
             .Height(Size.Auto());
     }
 }
@@ -141,7 +141,7 @@ A chat that demonstrates error handling and different message types.
 
 This example shows how to use the Error widget for different message severities and how to integrate ChatStatus for loading indicators within chat conversations.
 
-```csharp demo-tabs 
+```csharp demo-tabs
 public class ErrorHandlingChatDemo : ViewBase
 {   
     public override object? Build()
@@ -172,7 +172,7 @@ public class ErrorHandlingChatDemo : ViewBase
         }
 
         return new Chat(messages.Value.ToArray(), OnSendMessage)
-            .Width(Size.Full().Max(400))
+            .Width(Size.Full())
             .Height(Size.Auto());
     }
 }
@@ -184,7 +184,7 @@ A sophisticated chat that responds to specific commands with different content t
 
 This example showcasing the full range of Ivy widgets that can be embedded in chat responses.
 
-```csharp demo-tabs 
+```csharp demo-tabs
 public class AdvancedChatDemo : ViewBase
 {   
     public override object? Build()
@@ -253,7 +253,7 @@ public class AdvancedChatDemo : ViewBase
         }
 
         return new Chat(messages.Value.ToArray(), OnSendMessage)
-            .Width(Size.Full().Max(400))
+            .Width(Size.Full())
             .Height(Size.Auto());
     }
 }
@@ -265,7 +265,7 @@ Customize the input placeholder text.
 
 This example shows how to use the Placeholder extension method to provide custom guidance text for users, improving the user experience by making it clear what type of input is expected.
 
-```csharp demo-tabs 
+```csharp demo-tabs
 public class CustomPlaceholderDemo : ViewBase
 {   
     public override object? Build()
@@ -284,7 +284,7 @@ public class CustomPlaceholderDemo : ViewBase
 
         return new Chat(messages.Value.ToArray(), OnSendMessage)
             .Placeholder("Type your message here...")
-            .Width(Size.Full().Max(400))
+            .Width(Size.Full())
             .Height(Size.Auto());
     }
 }
