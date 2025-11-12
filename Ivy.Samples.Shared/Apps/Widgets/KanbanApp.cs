@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Diagnostics;
 using System.Linq.Expressions;
 using Ivy.Shared;
 using Ivy.Views.Kanban;
@@ -124,12 +125,15 @@ public class KanbanApp : SampleBase
     private static KanbanState AddTask(KanbanState state, string columnKey, Task task)
     {
         var columns = state.Columns;
-        var column = columns.TryGetValue(columnKey, out var items)
-            ? items.Add(task)
+        var columnExists = columns.TryGetValue(columnKey, out var items);
+        var column = columnExists
+            ? items!.Add(task)
             : ImmutableArray.Create(task);
 
         var updatedColumns = columns.SetItem(columnKey, column);
-        var updatedOrder = BuildColumnOrder(updatedColumns, state.ColumnOrder);
+        var updatedOrder = columnExists
+            ? state.ColumnOrder
+            : BuildColumnOrder(updatedColumns, state.ColumnOrder);
 
         return state with { Columns = updatedColumns, ColumnOrder = updatedOrder };
     }
@@ -152,7 +156,7 @@ public class KanbanApp : SampleBase
                 ? existingTarget.ToBuilder()
                 : ImmutableArray.CreateBuilder<Task>();
 
-        var originalIndex = IndexOfTask(sourceBuilder, taskId);
+        var originalIndex = IndexOfTask(sourceBuilder, taskId, moveData.FromColumn);
         var movingTask = sourceBuilder[originalIndex];
 
         if (sameColumn && moveData.TargetIndex.HasValue)
@@ -189,7 +193,9 @@ public class KanbanApp : SampleBase
                 .SetItem(moveData.FromColumn, sourceBuilder.ToImmutable())
                 .SetItem(moveData.ToColumn, targetBuilder.ToImmutable());
 
-        var updatedOrder = BuildColumnOrder(updatedColumns, state.ColumnOrder);
+        var updatedOrder = ShouldRebuildColumnOrder(state.Columns, updatedColumns)
+            ? BuildColumnOrder(updatedColumns, state.ColumnOrder)
+            : state.ColumnOrder;
 
         return state with { Columns = updatedColumns, ColumnOrder = updatedOrder };
     }
@@ -205,7 +211,9 @@ public class KanbanApp : SampleBase
         builder.RemoveAt(index);
 
         var updatedColumns = state.Columns.SetItem(columnKey, builder.ToImmutable());
-        var updatedOrder = BuildColumnOrder(updatedColumns, state.ColumnOrder);
+        var updatedOrder = ShouldRebuildColumnOrder(state.Columns, updatedColumns)
+            ? BuildColumnOrder(updatedColumns, state.ColumnOrder)
+            : state.ColumnOrder;
 
         return state with { Columns = updatedColumns, ColumnOrder = updatedOrder };
     }
@@ -226,7 +234,7 @@ public class KanbanApp : SampleBase
         (column[boundedTarget], column[originalIndex]) = (column[originalIndex], column[boundedTarget]);
     }
 
-    private static int IndexOfTask(ImmutableArray<Task>.Builder column, string taskId)
+    private static int IndexOfTask(ImmutableArray<Task>.Builder column, string taskId, string columnKey)
     {
         for (var i = 0; i < column.Count; i++)
         {
@@ -236,7 +244,8 @@ public class KanbanApp : SampleBase
             }
         }
 
-        throw new InvalidOperationException($"Task '{taskId}' was not found in the source column.");
+        Debug.WriteLine($"[Kanban] Task '{taskId}' was not found in column '{columnKey}'.");
+        throw new InvalidOperationException($"Task '{taskId}' was not found in the source column '{columnKey}'.");
     }
 
     private static void RemoveTaskById(ImmutableArray<Task>.Builder column, string taskId)
@@ -344,6 +353,26 @@ public class KanbanApp : SampleBase
             .OrderBy(GetStatusOrder)
             .ThenBy(k => k)
             .ToImmutableArray();
+    }
+
+    private static bool ShouldRebuildColumnOrder(
+        ImmutableDictionary<string, ImmutableArray<Task>> previous,
+        ImmutableDictionary<string, ImmutableArray<Task>> updated)
+    {
+        if (previous.Count != updated.Count)
+        {
+            return true;
+        }
+
+        foreach (var key in previous.Keys)
+        {
+            if (!updated.ContainsKey(key))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private static int GetTotalTaskCount(KanbanState state) =>
