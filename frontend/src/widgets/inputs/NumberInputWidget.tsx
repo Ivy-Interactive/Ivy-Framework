@@ -56,7 +56,6 @@ interface NumberInputWidgetProps
   extends Omit<NumberInputBaseProps, 'onValueChange'> {
   variant?: 'Default' | 'Slider';
   targetType?: string;
-  events?: string[];
 }
 
 // Function to validate and cap values based on target type
@@ -205,14 +204,6 @@ const NumberVariant = memo(
     size = Sizes.Medium,
     'data-testid': dataTestId,
   }: NumberInputBaseProps) => {
-    // Local state for optimistic updates - immediately reflects user actions
-    const [localValue, setLocalValue] = React.useState<number | null>(value);
-
-    // Sync local state with prop value when it changes from server
-    React.useEffect(() => {
-      setLocalValue(value);
-    }, [value]);
-
     const formatConfig = useMemo(
       () => ({
         style: formatStyleMap[formatStyle],
@@ -227,10 +218,6 @@ const NumberVariant = memo(
 
     const handleNumberChange = useCallback(
       (newValue: number | null) => {
-        // Optimistically update local state immediately for instant feedback
-        setLocalValue(newValue);
-
-        // Then send to backend
         // If not nullable and value is null, convert to 0
         if (!nullable && newValue === null) {
           onValueChange(0);
@@ -241,13 +228,6 @@ const NumberVariant = memo(
       [onValueChange, nullable]
     );
 
-    const handleClear = useCallback(() => {
-      // Optimistically clear immediately
-      setLocalValue(null);
-      // Then send to backend
-      onValueChange(null);
-    }, [onValueChange]);
-
     return (
       <div className="relative w-full flex-1">
         <NumberInput
@@ -256,28 +236,27 @@ const NumberVariant = memo(
           step={step}
           format={formatConfig}
           placeholder={placeholder}
-          value={localValue}
+          value={value}
           disabled={disabled}
           size={size}
           onChange={handleNumberChange}
           className={cn(
             invalid && inputStyles.invalidInput,
             // Add padding for icon container
-            ((nullable && localValue !== null && !disabled) || invalid) &&
-              'pr-12'
+            ((nullable && value !== null && !disabled) || invalid) && 'pr-12'
           )}
           data-testid={dataTestId}
         />
         {/* Icon container - flex row aligned to right */}
-        {((nullable && localValue !== null && !disabled) || invalid) && (
+        {((nullable && value !== null && !disabled) || invalid) && (
           <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-row items-center gap-1">
             {/* Clear (X) button - leftmost */}
-            {nullable && localValue !== null && !disabled && (
+            {nullable && value !== null && !disabled && (
               <button
                 type="button"
                 tabIndex={-1}
                 aria-label="Clear"
-                onClick={handleClear}
+                onClick={() => onValueChange(null)}
                 className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
               >
                 <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
@@ -299,7 +278,6 @@ export const NumberInputWidget = memo(
     id,
     variant = 'Default',
     nullable = false,
-    events = [],
     ...props
   }: NumberInputWidgetProps) => {
     const eventHandler = useEventHandler() as EventHandler;
@@ -310,7 +288,6 @@ export const NumberInputWidget = memo(
 
     const handleChange = useCallback(
       (newValue: number | null) => {
-        if (!events.includes('OnChange')) return;
         // Apply bounds only if value is not null
         if (newValue !== null) {
           // First apply component-level bounds (min/max props) only when provided
@@ -334,7 +311,7 @@ export const NumberInputWidget = memo(
           eventHandler('OnChange', id, [newValue]);
         }
       },
-      [eventHandler, id, events, props.min, props.max, props.targetType]
+      [eventHandler, id, props.min, props.max, props.targetType]
     );
 
     return variant === 'Slider' ? (
