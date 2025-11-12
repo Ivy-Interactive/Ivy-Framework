@@ -18,7 +18,7 @@ public class LinkBuilder<TModel>(string? url = null, string? label = null) : IBu
         if (validatedUrl == null)
         {
             // Invalid URL, return button with disabled state or empty URL
-            return new Button(label ?? actualUrl, variant: ButtonVariant.Inline).Disabled(true);
+            return new Button(label ?? "Invalid Link", variant: ButtonVariant.Inline).Disabled(true);
         }
 
         return new Button(label ?? validatedUrl, variant: ButtonVariant.Inline).Url(validatedUrl);
