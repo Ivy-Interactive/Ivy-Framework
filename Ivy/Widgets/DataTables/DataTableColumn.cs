@@ -45,7 +45,8 @@ public enum ColType
     Date,
     DateTime,
     Icon,
-    Labels
+    Labels,
+    Link
 }
 
 public interface IDataTableColumnRenderer

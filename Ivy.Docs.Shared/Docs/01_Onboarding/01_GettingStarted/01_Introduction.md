@@ -44,6 +44,8 @@ public class UserDashboard : ViewBase
 
 ## Why Ivy Exists
 
+The Ivy Framework is a comprehensive solution for building internal business applications. The framework targets scenarios where rapid development, maintainability, and integration with existing enterprise systems are prioritized.
+
 We created Ivy to solve common frustrations with modern web development:
 
 ### Cost & Speed Optimization
@@ -57,10 +59,6 @@ Traditional SPA solutions require separate frontend/backend codebases communicat
 ### Avoiding Technical Debt
 
 Many low-code SaaS products are limited, expensive long-term, and create vendor lock-in. Ivy gives you the productivity benefits without the constraints.
-
-### Open-Source & Cloud-Native
-
-Deploy anywhere - AWS, Azure, GCP, or your own infrastructure. No vendor lock-in, no proprietary hosting requirements.
 
 ## Core Features
 
@@ -128,8 +126,8 @@ graph LR
     A[Security] --- B[Data] --- C[Architecture]
 ```
 
-- Authentication & authorization providers with RBAC
-- Entity Framework Core integration
+- Multiple authentication providers (Supabase, Authelia, Basic Auth) with RBAC
+- Database integration (SQL Server, PostgreSQL, SQLite, MySQL) via Entity Framework Core
 - Secrets management and configuration
 - Dependency injection throughout
 - Caching and performance optimizations
@@ -148,8 +146,8 @@ graph LR
     
 ```
 
-- One-command container deployment to any cloud provider
 - Rich CLI tooling for project scaffolding and deployment
+- One-command container deployment to AWS, Azure, GCP, or your own infrastructure
 - Unit testing without browser automation complexity
 - Docker-first deployment with environment management
 

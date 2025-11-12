@@ -15,6 +15,7 @@ import {
   createBooleanCell,
   createTextCell,
   createLabelsCell,
+  createLinkCell,
   getOrderedColumns,
   getCellContent,
   getContentAlign,
@@ -322,6 +323,48 @@ describe('cellContent utilities', () => {
     });
   });
 
+  describe('createLinkCell', () => {
+    it('should create a URI cell for external URL', () => {
+      const url = 'https://example.com';
+      const cell = createLinkCell(url, false);
+      expect(cell.kind).toBe(GridCellKind.Uri);
+      if (cell.kind === GridCellKind.Uri) {
+        expect(cell.data).toBe(url);
+        expect(cell.displayData).toBe(url);
+        expect(cell.allowOverlay).toBe(false);
+        expect(cell.readonly).toBe(true);
+        expect(cell.hoverEffect).toBe(true);
+      }
+    });
+
+    it('should create a URI cell for internal app:// link', () => {
+      const url = 'app://concepts/links-app';
+      const cell = createLinkCell(url, false);
+      expect(cell.kind).toBe(GridCellKind.Uri);
+      if (cell.kind === GridCellKind.Uri) {
+        expect(cell.data).toBe(url);
+        expect(cell.displayData).toBe(url);
+      }
+    });
+
+    it('should create readonly URI cell (links are always readonly to prevent overlay issues)', () => {
+      const url = 'https://github.com/user/repo';
+      const cell = createLinkCell(url, true);
+      if (cell.kind === GridCellKind.Uri) {
+        expect(cell.allowOverlay).toBe(false);
+        expect(cell.readonly).toBe(true);
+      }
+    });
+
+    it('should respect alignment parameter', () => {
+      const url = 'https://example.com';
+      const cell = createLinkCell(url, false, Align.Center);
+      if (cell.kind === GridCellKind.Uri) {
+        expect(cell.contentAlign).toBe('center');
+      }
+    });
+  });
+
   describe('getOrderedColumns', () => {
     const columns: DataColumn[] = [
       { name: 'A', type: ColType.Text, width: 100 },
@@ -503,6 +546,34 @@ describe('cellContent utilities', () => {
           kind: 'icon-cell',
           iconName: 'Settings',
         });
+      }
+    });
+
+    it('should handle Link type from metadata', () => {
+      const linkColumns: DataColumn[] = [
+        { name: 'url_col', type: ColType.Link, width: 200 },
+      ];
+
+      const linkData: DataRow[] = [
+        { values: ['https://example.com'] },
+        { values: ['app://concepts/links-app'] },
+      ];
+
+      // Test external URL
+      const cell1 = getCellContent([0, 0], linkData, linkColumns, [], false);
+      expect(cell1.kind).toBe(GridCellKind.Uri);
+      if (cell1.kind === GridCellKind.Uri) {
+        expect(cell1.data).toBe('https://example.com');
+        expect(cell1.displayData).toBe('https://example.com');
+        expect(cell1.hoverEffect).toBe(true);
+        expect(cell1.readonly).toBe(true);
+      }
+
+      // Test internal app:// link
+      const cell2 = getCellContent([0, 1], linkData, linkColumns, [], false);
+      expect(cell2.kind).toBe(GridCellKind.Uri);
+      if (cell2.kind === GridCellKind.Uri) {
+        expect(cell2.data).toBe('app://concepts/links-app');
       }
     });
 

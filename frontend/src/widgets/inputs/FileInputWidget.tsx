@@ -269,7 +269,7 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
       <div
         key={file.id}
         data-file-item
-        className="flex items-center gap-3 p-3 border border-muted-foreground/25 rounded-md bg-background"
+        className="flex items-center gap-3 p-3 border border-muted-foreground/25 rounded-md bg-transparent"
       >
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium truncate">{file.fileName}</p>
@@ -289,7 +289,7 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
             type="button"
             variant="ghost"
             size="icon"
-            className="h-8 w-8 flex-shrink-0"
+            className="h-8 w-8 shrink-0"
             onClick={e => {
               e.stopPropagation();
               handleCancel(file.id);

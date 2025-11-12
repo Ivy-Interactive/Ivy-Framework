@@ -267,6 +267,26 @@ export function createLabelsCell(cellValue: unknown, align?: Align): GridCell {
 }
 
 /**
+ * Creates a link/URI cell
+ */
+export function createLinkCell(
+  url: string,
+  _editable: boolean, // Intentionally unused - links are always readonly
+  align?: Align
+): GridCell {
+  return {
+    kind: GridCellKind.Uri,
+    data: url,
+    displayData: url,
+    allowOverlay: false, // Disable overlay to prevent fuzzy shadow on click
+    readonly: true, // Links should not be editable in the cell
+    contentAlign: align ? getContentAlign(align) : undefined,
+    hoverEffect: true,
+    onClickUri: undefined, // We'll handle this in the DataTableEditor
+  };
+}
+
+/**
  * Gets the ordered columns based on columnOrder array
  */
 export function getOrderedColumns(
@@ -328,6 +348,11 @@ export function getCellContent(
   // Handle Labels type - supports arrays or comma-separated strings
   if (column.type === 'Labels') {
     return createLabelsCell(cellValue, align);
+  }
+
+  // Handle explicit link type from backend metadata
+  if (column.type === 'Link' && typeof cellValue === 'string') {
+    return createLinkCell(cellValue, editable, align);
   }
 
   // Handle Date and DateTime types

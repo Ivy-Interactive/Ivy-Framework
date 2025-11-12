@@ -151,7 +151,45 @@ export const useBackend = (
   const machineId = getMachineId();
   const connectionId = connection?.connectionId;
   const currentConnectionRef = useRef<signalR.HubConnection | null>(null);
-  const stableAppId = chrome ? '' : appId;
+
+  // Stable values used in dependency arrays - only updated when we want to reconnect
+  const [stableAppId, setStableAppId] = useState(appId);
+  const [stableChrome, setStableChrome] = useState(chrome);
+
+  // Refs to always have latest values in callbacks, without needing to add them to dependency arrays
+  const latestAppIdRef = useRef(appId);
+  const latestChromeRef = useRef(chrome);
+
+  useEffect(() => {
+    latestAppIdRef.current = appId;
+  }, [appId]);
+
+  useEffect(() => {
+    latestChromeRef.current = chrome;
+  }, [chrome]);
+
+  const rootAppIdRef = useRef<string | undefined>(undefined);
+
+  const isRootConnection = parentId === null;
+
+  useEffect(() => {
+    if (!isRootConnection) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setStableAppId(appId);
+      setStableChrome(chrome);
+      return;
+    }
+
+    const rootAppId = rootAppIdRef.current;
+    const shouldReconnect =
+      !rootAppId ||
+      (rootAppId === '$chrome' ? chrome === false : appId !== rootAppId);
+
+    if (shouldReconnect) {
+      setStableAppId(appId);
+      setStableChrome(chrome);
+    }
+  }, [appId, chrome, isRootConnection]);
 
   useEffect(() => {
     if (import.meta.env.DEV && widgetTree) {
@@ -279,7 +317,6 @@ export const useBackend = (
   );
 
   useEffect(() => {
-    // Clean up the previous connection before creating a new one
     if (currentConnectionRef.current) {
       currentConnectionRef.current.stop().catch(err => {
         logger.warn('Error stopping previous SignalR connection:', err);
@@ -288,7 +325,7 @@ export const useBackend = (
 
     const newConnection = new signalR.HubConnectionBuilder()
       .withUrl(
-        `${getIvyHost()}/messages?appId=${appId ?? ''}&appArgs=${appArgs ?? ''}&machineId=${machineId}&parentId=${parentId ?? ''}&chrome=${chrome}`
+        `${getIvyHost()}/messages?appId=${latestAppIdRef.current ?? ''}&appArgs=${appArgs ?? ''}&machineId=${machineId}&parentId=${parentId ?? ''}&chrome=${latestChromeRef.current}`
       )
       .withAutomaticReconnect()
       .build();
@@ -297,15 +334,25 @@ export const useBackend = (
     queueMicrotask(() => setConnection(newConnection));
 
     return () => {
-      // Clean up on component unmount
       if (currentConnectionRef.current === newConnection) {
         newConnection.stop().catch(err => {
           logger.warn('Error stopping SignalR connection during unmount:', err);
         });
         currentConnectionRef.current = null;
       }
+
+      if (isRootConnection) {
+        rootAppIdRef.current = undefined;
+      }
     };
-  }, [appArgs, stableAppId, machineId, parentId]);
+  }, [
+    appArgs,
+    stableAppId,
+    machineId,
+    parentId,
+    stableChrome,
+    isRootConnection,
+  ]);
 
   useEffect(() => {
     if (
@@ -316,7 +363,7 @@ export const useBackend = (
         .start()
         .then(() => {
           logger.info('✅ WebSocket connection established for:', {
-            appId,
+            appId: latestAppIdRef.current,
             parentId,
             connectionId: connection.connectionId,
           });
@@ -344,6 +391,13 @@ export const useBackend = (
           connection.on('SetAuthToken', message => {
             logger.debug(`[${connection.connectionId}] SetAuthToken`);
             handleSetAuthToken(message);
+          });
+
+          connection.on('SetRootAppId', (message: { rootAppId: string }) => {
+            logger.debug(`[${connection.connectionId}] SetRootAppId`, {
+              rootAppId: message.rootAppId,
+            });
+            rootAppIdRef.current = message.rootAppId;
           });
 
           connection.on('SetTheme', theme => {
@@ -416,6 +470,7 @@ export const useBackend = (
         connection.off('CopyToClipboard');
         connection.off('HotReload');
         connection.off('SetAuthToken');
+        connection.off('SetRootAppId');
         connection.off('SetTheme');
         connection.off('OpenUrl');
         connection.off('Redirect');

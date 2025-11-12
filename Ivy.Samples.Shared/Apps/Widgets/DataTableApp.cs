@@ -26,7 +26,9 @@ public record EmployeeRecord(
     Icons Department,
     string Notes,
     int? OptionalId,
-    string[] Skills
+    string[] Skills,
+    string? WidgetLink,
+    string? ProfileLink
 );
 
 [App(icon: Icons.DatabaseZap)]
@@ -61,7 +63,9 @@ public class DataTableApp : SampleBase
 
             return Enumerable.Range(1, 1000).Select(i =>
             {
-                var name = $"{firstNames[random.Next(firstNames.Length)]} {lastNames[random.Next(lastNames.Length)]}";
+                var firstName = firstNames[random.Next(firstNames.Length)];
+                var lastName = lastNames[random.Next(lastNames.Length)];
+                var name = $"{firstName} {lastName}";
                 var email = $"employee{i}@company.com";
                 var age = random.Next(22, 65);
                 var salary = (decimal)(random.Next(30000, 150000) / 1000 * 1000);
@@ -83,6 +87,10 @@ public class DataTableApp : SampleBase
                     .Distinct()
                     .ToArray();
 
+                // Generate link URLs
+                var widgetLink = "/widgets/charts/area-chart-app"; // Internal widget link - relative URL works on any domain
+                var profileLink = $"https://linkedin.com/in/{firstName.ToLower()}{lastName.ToLower()}{i}"; // External LinkedIn profile
+
                 return new EmployeeRecord(
                     Id: i,
                     EmployeeCode: $"EMP{i:D4}",
@@ -100,7 +108,9 @@ public class DataTableApp : SampleBase
                     Department: department,
                     Notes: notes,
                     OptionalId: optionalId,
-                    Skills: skills
+                    Skills: skills,
+                    WidgetLink: widgetLink,
+                    ProfileLink: profileLink
                 );
             }).ToList();
         });
@@ -110,7 +120,6 @@ public class DataTableApp : SampleBase
             // Table dimensions (fix for issue #1311)
             .Width(Size.Full())     // Table width set to 120 units (30rem)
             .Height(Size.Full()) // Table height set to 120 units (30rem)
-
 
             // Numeric columns
             .Header(e => e.Id, "ID")
@@ -141,6 +150,10 @@ public class DataTableApp : SampleBase
             // Labels column (issue #1146)
             .Header(e => e.Skills, "Skills")
 
+            // Link columns
+            .Header(e => e.WidgetLink, "Widgets")
+            .Header(e => e.ProfileLink, "Profiles")
+
             // Column widths
             .Width(e => e.Id, Size.Px(40))
             .Width(e => e.EmployeeCode, Size.Px(100))
@@ -159,6 +172,8 @@ public class DataTableApp : SampleBase
             .Width(e => e.Notes, Size.Px(150))
             .Width(e => e.OptionalId, Size.Px(100))
             .Width(e => e.Skills, Size.Px(300))
+            .Width(e => e.WidgetLink, Size.Px(200))
+            .Width(e => e.ProfileLink, Size.Px(250))
 
             // Alignments
             .Align(e => e.Id, Align.Left)
@@ -177,6 +192,8 @@ public class DataTableApp : SampleBase
             .Align(e => e.Department, Align.Left)
             .Align(e => e.OptionalId, Align.Left)
             .Align(e => e.Skills, Align.Left)
+            .Align(e => e.WidgetLink, Align.Left)
+            .Align(e => e.ProfileLink, Align.Left)
 
             // Groups
             .Group(e => e.Id, "Identity")
@@ -196,6 +213,12 @@ public class DataTableApp : SampleBase
             .Group(e => e.Notes, "Other")
             .Group(e => e.OptionalId, "Other")
             .Group(e => e.Skills, "Personal")
+            .Group(e => e.WidgetLink, "Links")
+            .Group(e => e.ProfileLink, "Links")
+
+            // Column types - Set Link type explicitly
+            .DataTypeHint(e => e.WidgetLink, ColType.Link)
+            .DataTypeHint(e => e.ProfileLink, ColType.Link)
 
             // Sorting
             .Sortable(e => e.Email, false) // Email not sortable

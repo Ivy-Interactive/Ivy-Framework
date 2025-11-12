@@ -85,7 +85,8 @@ public abstract record AbstractWidget : IWidget
             Converters =
             {
                 new JsonEnumConverter(),
-                new ValueTupleConverterFactory()
+                new ValueTupleConverterFactory(),
+                new PrefixSuffixJsonConverterFactory()
             }
         };
 

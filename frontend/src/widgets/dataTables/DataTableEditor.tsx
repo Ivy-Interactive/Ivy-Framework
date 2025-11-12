@@ -2,6 +2,7 @@ import DataEditor, {
   CompactSelection,
   DataEditorRef,
   GridCell,
+  GridCellKind,
   GridSelection,
   GridMouseEventArgs,
   Item,
@@ -232,20 +233,55 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
   // Handle selection changes
   const handleGridSelectionChange = useCallback(
     (newSelection: GridSelection) => {
+      // Check if the new selection includes URI cells and prevent fuzzy effect
+      // by clearing the selection if it's a single URI cell click
+      if (newSelection.current !== undefined) {
+        const [col, row] = newSelection.current.cell;
+        const cellContent = getCellContent([col, row]);
+
+        // If it's a URI cell, don't allow it to be selected (prevents fuzzy effect)
+        if (cellContent.kind === GridCellKind.Uri) {
+          // Clear the selection for URI cells
+          setGridSelection({
+            columns: CompactSelection.empty(),
+            rows: CompactSelection.empty(),
+          });
+          return;
+        }
+      }
+
       setGridSelection(newSelection);
     },
-    []
+    [getCellContent]
   );
 
   // Get event handler for sending events to backend
   const eventHandler = useEventHandler();
 
-  // Handle cell single-clicks (for backend events only)
+  // Handle cell single-clicks (for backend events and link navigation)
   const handleCellClicked = useCallback(
-    (cell: Item) => {
+    (cell: Item, args: GridMouseEventArgs) => {
+      const cellContent = getCellContent(cell);
+
+      // Handle Ctrl+Click or Cmd+Click on URI cells
+      if (
+        cellContent.kind === GridCellKind.Uri &&
+        (args.ctrlKey || args.metaKey)
+      ) {
+        const url = cellContent.data as string;
+
+        // External URLs (http/https) open in new tab
+        if (url.startsWith('http://') || url.startsWith('https://')) {
+          window.open(url, '_blank', 'noopener,noreferrer');
+        } else {
+          // Internal relative URLs navigate in same tab
+          window.location.href = url;
+        }
+        return; // Don't proceed with other click handling
+      }
+
       if (enableCellClickEvents) {
         // Get actual cell value
-        const cellContent = getCellContent(cell);
         const visibleColumns = columns.filter(c => !c.hidden);
         const column = visibleColumns[cell[0]];
 

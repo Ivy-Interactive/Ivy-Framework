@@ -62,7 +62,7 @@ Long text in cells automatically gets truncated with ellipsis (...) and shows fu
 
 **Order(p => p.ColumnNameFirst, p.ColumnNameSecond, p.ColumnNameThird, ...)** - is used to order columns in a specific way
 
-**Remove(p => p.ColumnName)** - makes possible not to show column in the table
+**Remove(p => p.ColumnName)** - makes possible not to show column in the table.
 
 **Totals(p => p.ColumnName)** calculates the sum of the column if it contains numbers
 
@@ -74,8 +74,8 @@ public class CustomBuilderTable : ViewBase
     public override object? Build()
     {
         var products = new[] {
-            new {Sku = "1234", Name = "T-shirt", Price = 10, Url = "http://example.com/tshirt"},
-            new {Sku = "1235", Name = "Jeans", Price = 20, Url = "http://example.com/jeans"}
+            new {Sku = "1234", Name = "T-shirt", Price = 10, Url = "http://example.com/tshirt", _hiddenNotes = "archived"},
+            new {Sku = "1235", Name = "Jeans", Price = 20, Url = "http://example.com/jeans", _hiddenNotes = "best-seller"}
         };
 
         return products.ToTable()
@@ -85,6 +85,7 @@ public class CustomBuilderTable : ViewBase
             .Width(p => p.Name, Size.Fraction(0.3f))
             .Width(p => p.Url, Size.Fraction(0.55f))
             .Header(p => p.Price, "Unit Price")
+            .Header(p => p._hiddenNotes, "Internal Notes") // underscore + letter hidden automatically
             .Align(p => p.Price, Align.Right)
             .Order(p => p.Name, p => p.Price, p => p.Sku)
             .Remove(p => p.Url)
@@ -93,6 +94,10 @@ public class CustomBuilderTable : ViewBase
     }
 }
 ```
+
+<Callout Type="tip">
+Columns whose names start with an underscore followed by a letter (for example `_hidden`, `_internalId`) are automatically removed by default. Properties that use an underscore followed by a digit or symbol (such as `_1` or `_$special`) now stay visible unless you explicitly hide them.
+</Callout>
 
 ### Column Management Examples
 
@@ -105,9 +110,9 @@ public class ColumnManagementTable : ViewBase
     public override object? Build()
     {
         var products = new[] {
-            new {Sku = "1234", Name = "T-shirt", Price = 10, Category = "Clothing", Stock = 50},
-            new {Sku = "1235", Name = "Jeans", Price = 20, Category = "Clothing", Stock = 30},
-            new {Sku = "1236", Name = "Sneakers", Price = 30, Category = "Footwear", Stock = 25}
+            new {Sku = "1234", Name = "T-shirt", Price = 10, Category = "Clothing", Stock = 50, _hiddenInternal = "archived"},
+            new {Sku = "1235", Name = "Jeans", Price = 20, Category = "Clothing", Stock = 30, _hiddenInternal = "featured"},
+            new {Sku = "1236", Name = "Sneakers", Price = 30, Category = "Footwear", Stock = 25, _hiddenInternal = "featured"}
         };
 
         return products.ToTable()
@@ -116,6 +121,7 @@ public class ColumnManagementTable : ViewBase
             .Add(p => p.Name)                          // Show only Name column
             .Add(p => p.Price)                         // Add Price column
             .Add(p => p.Stock)                         // Add Stock column
+            .Header(p => p._hiddenInternal, "Internal Flag") // hidden by default due to underscore
             .Header(p => p.Price, "Unit Price")
             .Align(p => p.Price, Align.Right)
             .Align(p => p.Stock, Align.Center);
@@ -163,15 +169,17 @@ public class EmptyColumnsTable : ViewBase
     public override object? Build()
     {
         var products = new[] {
-            new {Sku = "1234", Name = "T-shirt", Price = 10, Description = "", Notes = ""},
-            new {Sku = "1235", Name = "Jeans", Price = 20, Description = "Blue jeans", Notes = ""},
-            new {Sku = "1236", Name = "Sneakers", Price = 30, Description = "", Notes = "Limited edition"}
+            new {Sku = "1234", Name = "T-shirt", Price = 10, Description = "", Notes = "", _hiddenFlag = "internal", _1 = "kept"},
+            new {Sku = "1235", Name = "Jeans", Price = 20, Description = "Blue jeans", Notes = "", _hiddenFlag = "internal", _1 = "kept"},
+            new {Sku = "1236", Name = "Sneakers", Price = 30, Description = "", Notes = "Limited edition", _hiddenFlag = "internal", _1 = "kept"}
         };
 
         return products.ToTable()
             .Width(Size.Full())
             .RemoveEmptyColumns()                      // Hide columns with no data
             .Header(p => p.Price, "Unit Price")
+            .Header(p => p._hiddenFlag, "Hidden Flag") // underscore + letter hidden
+            .Header(p => p._1, "Index Field")          // underscore + digit kept
             .Align(p => p.Price, Align.Right);
     }
 }
@@ -187,8 +195,8 @@ public class ResetTableExample : ViewBase
     public override object? Build()
     {
         var products = new[] {
-            new {Sku = "1234", Name = "T-shirt", Price = 10, Category = "Clothing"},
-            new {Sku = "1235", Name = "Jeans", Price = 20, Category = "Clothing"}
+            new {Sku = "1234", Name = "T-shirt", Price = 10, Category = "Clothing", _hiddenMetadata = "legacy"},
+            new {Sku = "1235", Name = "Jeans", Price = 20, Category = "Clothing", _hiddenMetadata = "seasonal"}
         };
 
         return products.ToTable()
@@ -196,6 +204,7 @@ public class ResetTableExample : ViewBase
             .Remove(p => p.Category)                   // Hide Category column
             .Align(p => p.Price, Align.Right)          // Set alignment
             .Header(p => p.Price, "Unit Price")        // Custom header
+            .Header(p => p._hiddenMetadata, "Metadata") // underscore + letter hidden automatically
             .Reset()                                   // Reset all settings to defaults
             .Order(p => p.Name, p => p.Price)          // Apply new order
             .Totals(p => p.Price);                     // Add totals

@@ -15,6 +15,8 @@ Ivy lets you build modern web UIs using pure C# on the server, combining the fam
 
 Ivy is a **server-side web framework** that brings React-like patterns to C#. Instead of wrestling with JavaScript, HTML, and CSS, you write everything in C# using a reactive, component-based architecture.
 
+**In production, you only work with the backend** - the React frontend is pre-built and embedded in the Ivy framework, so you don't need to manage frontend code, build processes, or deployment configurations. You write C# code, and Ivy handles the rest.
+
 ## Architecture Overview
 
 ```mermaid
@@ -31,7 +33,7 @@ graph LR
     H --> A
 ```
 
-### 1. Views & Components
+### Views & Components
 
 Every Ivy app is built from **Views** - C# classes that inherit from `ViewBase`. Each view implements a single `Build()` method that returns widgets or other views:
 
@@ -63,7 +65,7 @@ public class TodoApp : ViewBase
 }
 ```
 
-### 2. Reactive State Management
+### Reactive State Management
 
 Ivy provides React-inspired hooks for state management:
 
@@ -90,7 +92,7 @@ public override object? Build()
 }
 ```
 
-### 3. Widget Library
+### Widget Library
 
 Ivy ships with a comprehensive set of strongly-typed widgets:
 
@@ -104,7 +106,7 @@ Ivy ships with a comprehensive set of strongly-typed widgets:
 | Charts | `LineChart`, `BarChart`, `PieChart`, `AreaChart`... |
 | Advanced | `Sheet`, `Chat`... |
 
-### 4. Real-time Communication
+### Real-time Communication
 
 The magic happens through WebSocket communication:
 
@@ -119,6 +121,14 @@ The magic happens through WebSocket communication:
 <Callout Type="tip">
 When working with search results in the sidebar (both in Ivy Samples and Docs), you can **Ctrl + right click** on any item to open it as a separate app in a new window. This is handy for multitasking or developing multiple features simultaneously.
 </Callout>
+
+## Detailed Architecture
+
+For a comprehensive technical overview of Ivy's architecture, see:
+
+- **[Frontend Architecture](./05_Architecture/01_FrontendArchitecture.md)** - React/TypeScript frontend, widget rendering pipeline, and build system
+- **[Backend Architecture](./05_Architecture/02_BackendArchitecture.md)** - C# server configuration, application system, and deployment
+- **[Communication](./05_Architecture/03_Communication.md)** - SignalR protocol, message types, and state synchronization
 
 ## Development Experience
 
@@ -167,29 +177,3 @@ public override object? Build()
         );
 }
 ```
-
-## Why This Approach Works
-
-### For C# Developers
-
-- Leverage existing C# skills and ecosystem
-- Full IntelliSense and debugging support
-- Type safety prevents runtime UI errors
-- Seamless integration with existing .NET code
-
-### For Teams
-
-- Single language across the entire stack
-- Shared models between frontend and backend
-- Easier code reviews and maintenance
-- Faster development cycles
-
-### For Applications
-
-- Real-time updates without complex JavaScript
-- Built-in security (business logic stays on server)
-- Easy deployment (single .NET project)
-
----
-
-**Next:** Ready to build something? Check out the [Todo Tutorial](05_TodoTutorial.md) to see Ivy in action!

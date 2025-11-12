@@ -14,6 +14,8 @@ namespace Ivy.Chrome;
 [App(isVisible: false)]
 public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
 {
+    internal ChromeSettings Settings => settings;
+
     private record TabState(string Id, string AppId, string Title, AppHost AppHost, Icons? Icon, string RefreshToken)
     {
         public Tab ToTab() => new Tab(Title, AppHost).Icon(Icon).Key(Utils.GetShortHash(Id + RefreshToken));
@@ -359,7 +361,7 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
             var trigger = new Button().Variant(ButtonVariant.Ghost)
                 .Content(
                     Layout.Horizontal().Align(Align.Left).Width(Size.Full())
-                        | new Avatar(user.Value.Initials)
+                        | new Avatar(user.Value.Initials, user.Value.AvatarUrl)
                         | (Layout.Vertical().Gap(1)
                            | (user.Value.FullName != null
                                ? Text.Muted(user.Value.FullName!).Overflow(Overflow.Ellipsis)
@@ -367,7 +369,6 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
                            | Text.Label(user.Value.Email).Overflow(Overflow.Ellipsis))
                         .Grow()
                         .Size(Size.Full().Min(0))
-                        | Icons.ChevronsUpDown
                 ).Width(Size.Full());
 
             footer = new DropDownMenu(
