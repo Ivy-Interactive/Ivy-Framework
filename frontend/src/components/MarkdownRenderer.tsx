@@ -212,14 +212,10 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
       const isExternalLink = href?.match(/^(https?:\/\/|mailto:|tel:)/i);
       const isAnchorLink = href?.startsWith('#');
 
-      // For app:// links or internal links, use the onLinkClick handler if provided
       if (!isExternalLink && !isAnchorLink && onLinkClick && href) {
         event.preventDefault();
-        event.stopPropagation();
         onLinkClick(href);
       }
-      // If no handler is provided for internal links, let the browser handle it
-      // (this shouldn't happen in normal usage, but helps with debugging)
     },
     [onLinkClick]
   );

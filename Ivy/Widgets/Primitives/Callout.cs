@@ -50,9 +50,6 @@ public record Callout : WidgetBase<Callout>
 
     [Prop] public Icons? Icon { get; set; }
 
-    /// <summary>Event handler called when links in markdown content are clicked.</summary>
-    [Event] public Func<Event<Callout, string>, ValueTask>? OnLinkClick { get; set; }
-
     /// <summary>Creates Info callout.</summary>
     public static Callout Info(string? description = null, string? title = null) => new(description, title);
 
@@ -88,46 +85,19 @@ public static class CalloutExtensions
         return callout with { Icon = icon };
     }
 
-    /// <summary>Sets link click event handler for Callout widget.</summary>
+    /// <summary>Sets link click event handler for Callout widget by setting it on the internal Markdown widget.</summary>
     /// <param name="callout">Callout widget to configure.</param>
-    /// <param name="onLinkClick">Event handler receiving full event context.</param>
-    /// <returns>Callout widget with specified link click handler.</returns>
-    [OverloadResolutionPriority(1)]
-    public static Callout HandleLinkClick(this Callout callout, Func<Event<Callout, string>, ValueTask> onLinkClick)
-    {
-        var updatedCallout = callout with { OnLinkClick = onLinkClick };
-
-        // If the first child is a Markdown widget, also set its link click handler
-        if (updatedCallout.Children.Length > 0 && updatedCallout.Children[0] is Markdown markdown)
-        {
-            // Ensure Content is preserved - use Content property or fallback to empty string
-            var content = markdown.Content ?? string.Empty;
-
-            // Create a new Markdown widget with the link click handler that forwards to the Callout's handler
-            var markdownWithHandler = new Markdown(content, (Event<Markdown, string> @event) =>
-                onLinkClick(new Event<Callout, string>(@event.EventName, updatedCallout, @event.Value)));
-
-            updatedCallout = updatedCallout with
-            {
-                Children = new object[] { markdownWithHandler }
-            };
-        }
-
-        return updatedCallout;
-    }
-
-    // Overload for Action<Event<Callout, string>>
-    public static Callout HandleLinkClick(this Callout callout, Action<Event<Callout, string>> onLinkClick)
-    {
-        return callout.HandleLinkClick(onLinkClick.ToValueTask());
-    }
-
-    /// <summary>Sets link click event handler for Callout widget with simplified callback.</summary>
-    /// <param name="callout">Callout widget to configure.</param>
-    /// <param name="onLinkClick">Simplified event handler receiving only clicked link URL.</param>
-    /// <returns>Callout widget with specified link click handler.</returns>
+    /// <param name="onLinkClick">Event handler for link clicks.</param>
+    /// <returns>Callout widget with link click handler set on its Markdown child.</returns>
     public static Callout HandleLinkClick(this Callout callout, Action<string> onLinkClick)
     {
-        return callout.HandleLinkClick(@event => { onLinkClick(@event.Value); return ValueTask.CompletedTask; });
+        if (callout.Children.Length > 0 && callout.Children[0] is Markdown markdown)
+        {
+            var markdownWithHandler = new Markdown(markdown.Content ?? string.Empty,
+                (Event<Markdown, string> @event) => { onLinkClick(@event.Value); return ValueTask.CompletedTask; });
+
+            return callout with { Children = new object[] { markdownWithHandler } };
+        }
+        return callout;
     }
 }
