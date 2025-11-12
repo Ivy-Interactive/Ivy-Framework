@@ -1,5 +1,4 @@
 using Ivy.Shared;
-using Microsoft.OpenApi.Models;
 
 namespace Ivy.Apps;
 
