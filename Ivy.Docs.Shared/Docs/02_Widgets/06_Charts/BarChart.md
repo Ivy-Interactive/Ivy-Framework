@@ -248,8 +248,8 @@ public class TiobeIndexDemo : ViewBase
                             .CartesianGrid(new CartesianGrid().Horizontal())
                             .Tooltip()
                             .XAxis(new XAxis("Language").TickLine(false).AxisLine(false))
-                                                    .Legend()
-                                                    .Toolbox();
+                            .Legend()
+                            .Toolbox();
     }
 }
 ```

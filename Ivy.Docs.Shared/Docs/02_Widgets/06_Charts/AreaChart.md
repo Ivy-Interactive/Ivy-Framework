@@ -72,10 +72,11 @@ public class Covid19Demo : ViewBase
         };
 
         return new Card().Title("COVID-19 cases")
-            | data.ToAreaChart().Toolbox()
+            | data.ToAreaChart()
                 .Dimension("Month", e => e.Month)
                 .Measure("Cases", e => e.Sum(f => f.Cases))
                 .Measure("Deaths", e => e.Sum(f => f.Deaths))
+                .Toolbox()
         ;
     }
 }

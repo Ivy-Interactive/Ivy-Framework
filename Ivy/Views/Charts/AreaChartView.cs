@@ -219,11 +219,6 @@ public class AreaChartBuilder<TSource>(
         return this;
     }
 
-    /// <summary>
-    /// Configures the toolbox for the resulting area chart using a predefined toolbox instance.
-    /// </summary>
-    /// <param name="toolbox">The toolbox configuration to apply.</param>
-    /// <returns>The builder instance for method chaining.</returns>
     public AreaChartBuilder<TSource> Toolbox(Toolbox toolbox)
     {
         ArgumentNullException.ThrowIfNull(toolbox);
@@ -232,11 +227,6 @@ public class AreaChartBuilder<TSource>(
         return this;
     }
 
-    /// <summary>
-    /// Configures the toolbox for the resulting area chart using a customization delegate.
-    /// </summary>
-    /// <param name="configure">Delegate that accepts the current toolbox (or a new instance) and returns the updated toolbox.</param>
-    /// <returns>The builder instance for method chaining.</returns>
     public AreaChartBuilder<TSource> Toolbox(Func<Toolbox, Toolbox> configure)
     {
         ArgumentNullException.ThrowIfNull(configure);
@@ -245,10 +235,6 @@ public class AreaChartBuilder<TSource>(
         return this;
     }
 
-    /// <summary>
-    /// Enables the default toolbox with standard configuration.
-    /// </summary>
-    /// <returns>The builder instance for method chaining.</returns>
     public AreaChartBuilder<TSource> Toolbox()
     {
         return Toolbox(_ => new Toolbox());

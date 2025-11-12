@@ -155,7 +155,7 @@ public class BarChart4 : ViewBase
                 .Tooltip()
                 .XAxis(new XAxis("Quarter").TickLine(false).AxisLine(false))
                 .Legend()
-                 .Toolbox()
+                .Toolbox()
         ;
     }
 }

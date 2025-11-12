@@ -41,10 +41,11 @@ public class LineChart0View : ViewBase
         };
 
         return new Card().Title("Basic Line Chart (Default Style)")
-            | data.ToLineChart(style: LineChartStyles.Default).Toolbox()
+            | data.ToLineChart(style: LineChartStyles.Default)
                 .Dimension("Month", e => e.Month)
                 .Measure("Desktop", e => e.Sum(f => f.Desktop))
                 .Measure("Mobile", e => e.Sum(f => f.Mobile))
+                .Toolbox()
         ;
     }
 }
@@ -64,11 +65,12 @@ public class LineChart1View : ViewBase
         };
 
         return new Card().Title("Department Performance (Dashboard Style)")
-            | data.ToLineChart(style: LineChartStyles.Dashboard).Toolbox()
+            | data.ToLineChart(style: LineChartStyles.Dashboard)
                 .Dimension("Month", e => e.Month)
                 .Measure("Sales", e => e.Sum(f => f.Sales))
                 .Measure("Marketing", e => e.Sum(f => f.Marketing))
                 .Measure("Development", e => e.Sum(f => f.Development))
+                .Toolbox()
         ;
     }
 }
@@ -87,10 +89,11 @@ public class LineChart2View : ViewBase
         };
 
         return new Card().Title("Financial Growth (Custom Style)")
-            | data.ToLineChart(style: LineChartStyles.Custom).Toolbox()
+            | data.ToLineChart(style: LineChartStyles.Custom)
                 .Dimension("Year", e => e.Year)
                 .Measure("Revenue", e => e.Sum(f => f.Revenue))
                 .Measure("Profit", e => e.Sum(f => f.Profit))
+                .Toolbox()
         ;
     }
 }
@@ -108,11 +111,12 @@ public class LineChart3View : ViewBase
         };
 
         return new Card().Title("Product Sales Trends (Rainbow Colors)")
-            | data.ToLineChart(style: LineChartStyles.Default).Toolbox()
+            | data.ToLineChart(style: LineChartStyles.Default)
                 .Dimension("Quarter", e => e.Quarter)
                 .Measure("ProductA", e => e.Sum(f => f.ProductA))
                 .Measure("ProductB", e => e.Sum(f => f.ProductB))
                 .Measure("ProductC", e => e.Sum(f => f.ProductC))
+                .Toolbox()
         ;
     }
 }
@@ -132,11 +136,12 @@ public class LineChart4View : ViewBase
         };
 
         return new Card().Title("Website Analytics (Step Lines)")
-            | data.ToLineChart(style: LineChartStyles.Default).Toolbox()
+            | data.ToLineChart(style: LineChartStyles.Default)
                 .Dimension("Month", e => e.Month)
                 .Measure("Users", e => e.Sum(f => f.Users))
                 .Measure("Sessions", e => e.Sum(f => f.Sessions))
                 .Measure("Conversions", e => e.Sum(f => f.Conversions))
+                .Toolbox()
         ;
     }
 }
@@ -156,11 +161,12 @@ public class LineChart5View : ViewBase
         };
 
         return new Card().Title("Weather Monitoring (Mixed Styles)")
-            | data.ToLineChart(style: LineChartStyles.Default).Toolbox()
+            | data.ToLineChart(style: LineChartStyles.Default)
                 .Dimension("Week", e => e.Week)
                 .Measure("Temperature", e => e.Sum(f => f.Temperature))
                 .Measure("Humidity", e => e.Sum(f => f.Humidity))
                 .Measure("Pressure", e => e.Sum(f => f.Pressure))
+                .Toolbox()
         ;
     }
 }
@@ -177,11 +183,12 @@ public class LineChart6View : ViewBase
         };
 
         return new Card().Title("Extreme Values Test (Zero, Negative, Very Large)")
-            | data.ToLineChart(style: LineChartStyles.Default).Toolbox()
+            | data.ToLineChart(style: LineChartStyles.Default)
                 .Dimension("Period", e => e.Period)
                 .Measure("Normal", e => e.Sum(f => f.Value))
                 .Measure("Negative", e => e.Sum(f => f.Negative))
                 .Measure("Very Large", e => e.Sum(f => f.Large))
+                .Toolbox()
         ;
     }
 }
@@ -200,11 +207,12 @@ public class LineChart7View : ViewBase
         };
 
         return new Card().Title("Sparse Data Test (Many Zero Values)")
-            | data.ToLineChart(style: LineChartStyles.Dashboard).Toolbox()
+            | data.ToLineChart(style: LineChartStyles.Dashboard)
                 .Dimension("Day", e => e.Day)
                 .Measure("Sales", e => e.Sum(f => f.Sales))
                 .Measure("Marketing", e => e.Sum(f => f.Marketing))
                 .Measure("Support", e => e.Sum(f => f.Support))
+                .Toolbox()
         ;
     }
 }
@@ -219,9 +227,10 @@ public class LineChart8View : ViewBase
         };
 
         return new Card().Title("Single Data Point Test")
-            | data.ToLineChart(style: LineChartStyles.Custom).Toolbox()
+            | data.ToLineChart(style: LineChartStyles.Custom)
                 .Dimension("Point", e => e.Point)
                 .Measure("Value", e => e.Sum(f => f.Value))
+                .Toolbox()
         ;
     }
 }
@@ -240,9 +249,10 @@ public class LineChart9View : ViewBase
         };
 
         return new Card().Title("Long Labels & Special Characters Test")
-            | data.ToLineChart(style: LineChartStyles.Default).Toolbox()
+            | data.ToLineChart(style: LineChartStyles.Default)
                 .Dimension("Label", e => e.Label)
                 .Measure("Value", e => e.Sum(f => f.Value))
+                .Toolbox()
         ;
     }
 }
@@ -261,11 +271,12 @@ public class LineChart10View : ViewBase
         };
 
         return new Card().Title("Flat Lines Test (Identical Values)")
-            | data.ToLineChart(style: LineChartStyles.Dashboard).Toolbox()
+            | data.ToLineChart(style: LineChartStyles.Dashboard)
                 .Dimension("Time", e => e.Time)
                 .Measure("Flat Line", e => e.Sum(f => f.Flat))
                 .Measure("Identical", e => e.Sum(f => f.Identical))
                 .Measure("Same Value", e => e.Sum(f => f.Same))
+                .Toolbox()
         ;
     }
 }
@@ -282,12 +293,13 @@ public class LineChart11View : ViewBase
         };
 
         return new Card().Title("Mixed Scales Test (Very Different Ranges)")
-            | data.ToLineChart(style: LineChartStyles.Custom).Toolbox()
+            | data.ToLineChart(style: LineChartStyles.Custom)
                 .Dimension("Scale", e => e.Scale)
                 .Measure("Tiny (0.001-0.1)", e => e.Sum(f => f.Tiny))
                 .Measure("Small (1-100)", e => e.Sum(f => f.Small))
                 .Measure("Medium (1K-100K)", e => e.Sum(f => f.Medium))
                 .Measure("Large (1M-100M)", e => e.Sum(f => f.Large))
+                .Toolbox()
         ;
     }
 }
