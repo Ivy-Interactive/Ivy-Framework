@@ -76,11 +76,15 @@ public class JobsDashboard : ViewBase
 
 Jobs transition through these states automatically:
 
-- `Waiting`: Scheduled but not yet running.
-- `Running`: Currently executing the job action.
-- `Finished`: Completed successfully.
-- `Failed`: Threw an exception.
-- `Cancelled`: Cancelled before completion.
+```mermaid
+graph LR
+    A[Waiting] --> B[Running]
+    B --> C[Finished]
+    B --> D[Failed]
+    A --> E[Cancelled]
+    B --> E
+    
+```
 
 ## Creating Jobs
 
@@ -316,21 +320,19 @@ The view automatically:
 - `AllCompleted()` returns `true` when every job is `Finished`.
 - `Subscribe(observer)` yields each job update; use it to refresh state or log progress.
 
-## Best Practices
-
-1. **Keep scheduler instances stable** (store in state/hook) to avoid restarting jobs on each render.
-2. **Report frequent progress** for long-running work to keep the UI responsive.
-3. **Use `WithContinueOnChildFailure()`** when child failures should not abort the parent job graph.
-4. **Attach custom `Display` content** for rich status (links, counters, logs).
-5. **Trigger jobs from user actions** (buttons, forms) rather than on page render.
-
 ## Reference
 
-- `JobScheduler(JobScheduler maxParallelJobs)` controls concurrency and lifecycle.
-- `JobScheduler.CreateJob(string title)` → `JobBuilder`.
-- `JobBuilder.WithAction(...)` registers job logic (multiple overloads).
-- `JobBuilder.DependsOn(params Job[] jobs)` sets prerequisites.
-- `JobBuilder.WithContinueOnChildFailure(bool)` keeps parents alive when children fail.
-- `JobBuilder.Then(...)` chains dependent jobs fluently.
-- `JobScheduler.AddChild(Job parent, Job child)` links dynamic child work.
-- `JobSchedulerExtensions.ToView()` renders the scheduler state using Ivy components.
+| Method | Description |
+|--------|-------------|
+| `JobScheduler(int maxParallelJobs)` | Constructor that controls concurrency and lifecycle. |
+| `JobScheduler.CreateJob(string title)` | Creates a new job builder. Returns `JobBuilder`. |
+| `JobBuilder.WithAction(...)` | Registers job logic. Supports multiple overloads. |
+| `JobBuilder.DependsOn(params Job[] jobs)` | Sets job prerequisites. |
+| `JobBuilder.WithContinueOnChildFailure(bool)` | Keeps parents alive when children fail. |
+| `JobBuilder.Then(...)` | Chains dependent jobs fluently. |
+| `JobScheduler.AddChild(Job parent, Job child)` | Links dynamic child work to a parent job. |
+| `JobSchedulerExtensions.ToView()` | Renders the scheduler state using Ivy components. |
+| `JobScheduler.RunAsync(CancellationToken?)` | Starts scheduling and waits until all jobs settle. |
+| `JobScheduler.CancelAll()` | Requests cancellation on all running jobs. |
+| `JobScheduler.AllCompleted()` | Returns `true` when every job is `Finished`. |
+| `JobScheduler.Subscribe(IObserver<Job> observer)` | Yields each job update for state refresh or logging. |
