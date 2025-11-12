@@ -1,9 +1,5 @@
 @import 'tailwindcss';
 
-/* Import Ivy Design System flat CSS tokens */
-@import 'ivy-design-system/css/ivy-framework-flat';
-@import 'ivy-design-system/css/dark-flat';
-
 /* Geist Sans Font Family */
 @font-face {
   font-family: 'Geist';
@@ -84,6 +80,25 @@
     --font-serif: 'Geist';
     --font-mono: 'Geist Mono';
 
+    /* Chromatic color palette for charts and UI elements */
+    --red: #dd5860;
+    --orange: #dc824d;
+    --amber: #deb145;
+    --yellow: #e5e04c;
+    --lime: #afd953;
+    --green: #86d26f;
+    --emerald: #76cd94;
+    --teal: #5b9ba8;
+    --cyan: #4469c0;
+    --sky: #373bda;
+    --blue: #381ff4;
+    --indigo: #4b28e2;
+    --violet: #6637d1;
+    --purple: #844cc0;
+    --fuchsia: #a361af;
+    --pink: #c377a0;
+    --rose: #e48e91;
+
     /* Additional variables not in design system yet */
     --toolbox: #38363a;
     --spacing: 0.27rem;
@@ -109,6 +124,8 @@
     --toolbox: #edeaf1;
   }
   @theme inline {
+    /* Semantic color mappings for Tailwind utility classes */
+    /* These reference CSS variables injected by the backend */
     --color-background: var(--background);
     --color-foreground: var(--foreground);
     --color-card: var(--card);
@@ -140,37 +157,10 @@
     --text-large-body: 14px;
     --text-large-label: 14px;
     --text-small-label: 12px;
+
+    /* Sidebar color overrides */
     --color-sidebar: var(--muted);
     --color-sidebar-foreground: var(--foreground);
-
-    /* Custom color palette - using variables from :root */
-    --color-black: var(--black);
-    --color-white: var(--white);
-    --color-slate: var(--slate);
-    --color-gray: var(--gray);
-    --color-zinc: var(--zinc);
-    --color-neutral: var(--neutral);
-    --color-stone: var(--stone);
-    --color-red: var(--red);
-    --color-orange: var(--orange);
-    --color-amber: var(--amber);
-    --color-yellow: var(--yellow);
-    --color-lime: var(--lime);
-    --color-green: var(--green);
-    --color-emerald: var(--emerald);
-    --color-teal: var(--teal);
-    --color-cyan: var(--cyan);
-    --color-sky: var(--sky);
-    --color-blue: var(--blue);
-    --color-indigo: var(--indigo);
-    --color-violet: var(--violet);
-    --color-purple: var(--purple);
-    --color-fuchsia: var(--fuchsia);
-    --color-pink: var(--pink);
-    --color-rose: var(--rose);
-    --color-primary: var(--primary);
-    --color-secondary: var(--secondary);
-    --color-destructive: var(--destructive);
 
     /* Spacing */
     --radius-sm: calc(var(--radius) - 4px);
