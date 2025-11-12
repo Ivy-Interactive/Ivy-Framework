@@ -315,10 +315,10 @@ export const TabsVariant: React.FC<TabsVariantProps> = ({
                       }
                       className={cn(
                         'group overflow-hidden h-full data-[state=active]:z-10 data-[state=active]:shadow-none border-x border-t border-b border-border flex-shrink-0',
-                        // Inactive tab styling with darker hover
-                        'bg-muted hover:bg-muted-foreground/20',
+                        // Inactive tab styling - pure black in dark mode
+                        'bg-muted dark:bg-background hover:bg-muted-foreground/20 dark:hover:bg-muted-foreground/20',
                         // Active tab styling (overrides inactive)
-                        'data-[state=active]:bg-background data-[state=active]:hover:bg-background',
+                        'data-[state=active]:bg-card data-[state=active]:hover:bg-card',
                         (variant as string) === 'Content' &&
                           'border-b-2 border-b-transparent data-[state=active]:border-b-primary'
                       )}
