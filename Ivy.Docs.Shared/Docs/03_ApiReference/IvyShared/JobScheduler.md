@@ -194,16 +194,136 @@ public class DynamicChildrenDemo : ViewBase
 }
 ```
 
+### Fluent Job Chaining
+
+Use `Then()` to chain dependent jobs fluently:
+
+```csharp demo-tabs
+public class FluentChainingDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var scheduler = this.UseStatic(BuildScheduler);
+        var refresh = this.UseRefreshToken();
+
+        UseEffect(() => scheduler.Subscribe(_ => refresh.Refresh()));
+
+        return Layout.Vertical()
+            | new Button("Run Pipeline", onClick: async _ => await scheduler.RunAsync())
+            | scheduler.ToView();
+    }
+
+    private static JobScheduler BuildScheduler()
+    {
+        var scheduler = new JobScheduler(maxParallelJobs: 1);
+
+        scheduler.CreateJob("Step 1: Extract")
+            .WithAction(async (_, _, progress, token) =>
+            {
+                await Task.Delay(300, token);
+                progress.Report(1);
+            })
+            .Then("Step 2: Transform", async (_, _, progress, token) =>
+            {
+                await Task.Delay(300, token);
+                progress.Report(1);
+            })
+            .Then("Step 3: Load", async (_, _, progress, token) =>
+            {
+                await Task.Delay(300, token);
+                progress.Report(1);
+            })
+            .Build();
+
+        return scheduler;
+    }
+}
+```
+
+### Multiple Children with Progress
+
+Create complex job hierarchies with multiple children that report progress:
+
+```csharp demo-tabs
+public class MultipleChildrenDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var scheduler = this.UseStatic(BuildScheduler);
+        var refresh = this.UseRefreshToken();
+
+        UseEffect(() => scheduler.Subscribe(_ => refresh.Refresh()));
+
+        return Layout.Vertical()
+            | new Button("Start Processing", onClick: async _ => await scheduler.RunAsync())
+            | scheduler.ToView();
+    }
+
+    private static JobScheduler BuildScheduler()
+    {
+        var scheduler = new JobScheduler(maxParallelJobs: 3);
+
+        Job jobA = scheduler.CreateJob("Job A")
+            .WithAction(async (job, sched, _, token) =>
+            {
+                // Create multiple children with progress reporting
+                for (int i = 1; i <= 5; i++)
+                {
+                    var child = sched.CreateJob($"Child A-{i}")
+                        .WithAction(async (_, _, progress, childToken) =>
+                        {
+                            for (int j = 0; j <= 100; j++)
+                            {
+                                await Task.Delay(30, childToken);
+                                progress.Report(j / 100.0);
+                            }
+                        })
+                        .Build();
+
+                    sched.AddChild(job, child);
+                }
+
+                await Task.Delay(500, token);
+            })
+            .Build();
+
+        // Job B depends on Job A
+        scheduler.CreateJob("Job B")
+            .DependsOn(jobA)
+            .WithAction(async (_, _, progress, token) =>
+            {
+                await Task.Delay(400, token);
+                progress.Report(1);
+            })
+            .Build();
+
+        // Job C is independent
+        scheduler.CreateJob("Job C")
+            .WithAction(async (_, _, progress, token) =>
+            {
+                await Task.Delay(600, token);
+                progress.Report(1);
+            })
+            .Build();
+
+        return scheduler;
+    }
+}
+```
+
 ## Reference
 
 | Method | Description |
 |--------|-------------|
 | `JobScheduler(int maxParallelJobs)` | Constructor that controls concurrency and lifecycle. |
 | `JobScheduler.CreateJob(string title)` | Creates a new job builder. Returns `JobBuilder`. |
+| `JobBuilder.WithTitle(string title)` | Sets or updates the job title. |
 | `JobBuilder.WithAction(...)` | Registers job logic. Supports multiple overloads. |
 | `JobBuilder.DependsOn(params Job[] jobs)` | Sets job prerequisites. |
 | `JobBuilder.WithContinueOnChildFailure(bool)` | Keeps parents alive when children fail. |
 | `JobBuilder.Then(...)` | Chains dependent jobs fluently. |
+| `JobBuilder.Build()` | Builds and registers the job with the scheduler. |
+| `Job.SetDisplay(object? display)` | Attaches custom status UI to the job. |
 | `JobScheduler.AddChild(Job parent, Job child)` | Links dynamic child work to a parent job. |
 | `JobSchedulerExtensions.ToView()` | Renders the scheduler state using Ivy components. |
 | `JobScheduler.RunAsync(CancellationToken?)` | Starts scheduling and waits until all jobs settle. |
