@@ -247,7 +247,10 @@ Choose a handler that matches your scenario:
 
 - `MemoryStreamUploadHandler`: Reads the entire upload into memory and updates state automatically.
 - `ChunkedMemoryStreamUploadHandler`: Accumulates chunked uploads when data arrives in segments, such as audio capture.
-- `SlowMemoryStreamUploadHandler`: Throttles to about 1 MB/s for demo/testing purposes only (not for production).
+
+<Callout Type="info">
+In the docs we also use `SlowMemoryStreamUploadHandler` to simulate ~1 MB/s uploads for demos and progress tracking. It is documentation-only and not meant for production use.
+</Callout>
 
 ## FileUpload Record
 
