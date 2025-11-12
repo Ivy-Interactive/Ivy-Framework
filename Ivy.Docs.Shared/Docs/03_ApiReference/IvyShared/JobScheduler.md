@@ -72,6 +72,10 @@ public class JobsDashboard : ViewBase
 }
 ```
 
+<Callout Type="tip">
+Call `progress.Report(0..1)` inside the action to report progress. The scheduler clamps values and the built-in view renders a progress bar automatically.
+</Callout>
+
 ## Job States
 
 Jobs transition through these states automatically:
@@ -85,60 +89,6 @@ graph LR
     B --> E
     
 ```
-
-## Creating Jobs
-
-Use `CreateJob()` to obtain a `JobBuilder`, configure the job, then call `Build()` to register it.
-
-```csharp demo-tabs
-public class ImportJobDemo : ViewBase
-{
-    public override object? Build()
-    {
-        var scheduler = this.UseStatic(BuildScheduler);
-        var refresh = this.UseRefreshToken();
-
-        UseEffect(() => scheduler.Subscribe(_ => refresh.Refresh()));
-
-        return Layout.Vertical()
-            | new Button("Import Data", onClick: async _ => await scheduler.RunAsync())
-            | scheduler.ToView();
-    }
-
-    private static JobScheduler BuildScheduler()
-    {
-        var scheduler = new JobScheduler(maxParallelJobs: 1);
-
-        scheduler.CreateJob("Import Customers")
-            .WithAction(async (_, _, progress, token) =>
-            {
-                await Task.Delay(250, token);
-                progress.Report(0.25);
-
-                await Task.Delay(400, token);
-                progress.Report(0.75);
-
-                await Task.Delay(150, token);
-                progress.Report(1);
-            })
-            .Build();
-
-        return scheduler;
-    }
-}
-```
-
-`WithAction` overloads accept signatures ranging from `Func<Task>` to full access with `(Job, IJobScheduler, IProgress<double>, CancellationToken)`.
-
-### Reporting Progress
-
-Inside the action, call `progress.Report(0..1)`. The scheduler clamps values and the built-in view renders a progress bar.
-
-### Setting Display Content
-
-Call `job.SetDisplay(object)` within the action to attach custom status UI. The view renders any display object between the job header and its children.
-
-## Dependencies
 
 ### Linear Dependencies
 
@@ -194,6 +144,8 @@ public class DependencyGraphDemo : ViewBase
 }
 ```
 
+`WithAction` overloads accept signatures ranging from `Func<Task>` to full access with `(Job, IJobScheduler, IProgress<double>, CancellationToken)`.
+
 ### Dynamically Adding Child Jobs
 
 Children can be attached to a parent at build time or while the parent is running. When added during execution, the scheduler defers them until the parent finishes its action.
@@ -241,84 +193,6 @@ public class DynamicChildrenDemo : ViewBase
     }
 }
 ```
-
-### Handling Failures
-
-- Exceptions inside a job transition it to `Failed` and propagate through `CompletionSource`.
-- By default, `CancelAll()` is invoked when a job fails. Opt in to continue by calling `WithContinueOnChildFailure()` on the parent job builder.
-- Cancellation requests set state to `Cancelled` and complete the job's task with `TrySetCanceled()`.
-
-## UI Rendering
-
-`JobSchedulerExtensions.ToView()` renders a collapsible tree showing each job's title, icon by state, progress, custom display, and failures.
-
-```csharp demo-tabs
-public class JobMonitorDemo : ViewBase
-{
-    public override object? Build()
-    {
-        var scheduler = this.UseStatic(() => BuildScheduler());
-        var refresh = this.UseRefreshToken();
-
-        UseEffect(() => scheduler.Subscribe(_ => refresh.Refresh()));
-
-        return Layout.Vertical()
-            | Text.H2("Background Jobs")
-            | new Button("Start Jobs", onClick: async _ => await scheduler.RunAsync())
-            | scheduler.ToView();
-    }
-
-    private static JobScheduler BuildScheduler()
-    {
-        var scheduler = new JobScheduler(maxParallelJobs: 4);
-
-        var plan = scheduler.CreateJob("Plan")
-            .WithAction(async (_, _, progress, token) =>
-            {
-                await Task.Delay(200, token);
-                progress.Report(1);
-            })
-            .Build();
-
-        scheduler.CreateJob("Execute")
-            .DependsOn(plan)
-            .WithAction(async (_, _, progress, token) =>
-            {
-                for (var i = 0; i < 4; i++)
-                {
-                    await Task.Delay(150, token);
-                    progress.Report((i + 1) / 4.0);
-                }
-            })
-            .Build();
-
-        scheduler.CreateJob("Review")
-            .DependsOn(plan)
-            .WithAction(async (_, _, progress, token) =>
-            {
-                await Task.Delay(400, token);
-                progress.Report(1);
-            })
-            .Build();
-
-        return scheduler;
-    }
-}
-```
-
-The view automatically:
-
-- Chooses icons for waiting, running, finished, failed, and cancelled jobs.
-- Animates running jobs and shows percentage bars when progress is between 0% and 100%.
-- Displays only relevant error details (parent errors hide when a failing child already shows them).
-- Nests child jobs with separators and hides completed branches to reduce noise.
-
-## Running and Monitoring
-
-- `RunAsync(token)` starts scheduling and waits until all jobs settle. Remaining `Waiting` jobs are cancelled when scheduling completes.
-- `CancelAll()` requests cancellation on all running jobs and prevents new scheduling.
-- `AllCompleted()` returns `true` when every job is `Finished`.
-- `Subscribe(observer)` yields each job update; use it to refresh state or log progress.
 
 ## Reference
 
