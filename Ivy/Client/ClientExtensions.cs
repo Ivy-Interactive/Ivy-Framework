@@ -76,7 +76,7 @@ public static class ClientExtensions
         var validatedUrl = Utils.ValidateRedirectUrl(url, allowExternal: false);
         if (validatedUrl == null)
         {
-            throw new ArgumentException($"Invalid redirect URL: {url}. Only relative paths are allowed.", nameof(url));
+            throw new ArgumentException($"Invalid redirect URL: {url}. Only relative paths or same-origin URLs are allowed.", nameof(url));
         }
         client.Sender.Send(
             "Redirect",
