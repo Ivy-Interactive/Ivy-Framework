@@ -43,9 +43,9 @@ public class PieChart0View : ViewBase
                 (
                     e => e.Category,
                     e => e.Sum(f => f.Value),
-                    PieChartStyles.Default,
-                    polish: chart => chart.Toolbox(new Toolbox().MagicType(false))
+                    PieChartStyles.Default
                 )
+                .Toolbox(toolbox => toolbox.MagicType(false)) // MagicType(true) is not supported for PieChart
         ;
     }
 }
@@ -67,9 +67,9 @@ public class PieChart1View : ViewBase
                 (
                     e => e.Browser,
                     e => e.Sum(f => f.Users),
-                    PieChartStyles.Dashboard,
-                    polish: chart => chart.Toolbox(new Toolbox().MagicType(false))
+                    PieChartStyles.Dashboard
                 )
+                .Toolbox(toolbox => toolbox.MagicType(false)) // MagicType(true) is not supported for PieChart
         ;
     }
 }
@@ -93,9 +93,9 @@ public class PieChart2View : ViewBase
                 (
                     e => e.Month,
                     e => e.Sum(f => f.Sales),
-                    PieChartStyles.Default,
-                    polish: chart => chart.Toolbox(new Toolbox().MagicType(false))
+                    PieChartStyles.Default
                 )
+                .Toolbox(toolbox => toolbox.MagicType(false)) // MagicType(true) is not supported for PieChart
         ;
     }
 }
@@ -118,9 +118,9 @@ public class PieChart3View : ViewBase
                 (
                     e => e.Department,
                     e => e.Sum(f => f.Budget),
-                    PieChartStyles.Dashboard,
-                    polish: chart => chart.Toolbox(new Toolbox().MagicType(false))
+                    PieChartStyles.Dashboard
                 )
+                .Toolbox(toolbox => toolbox.MagicType(false)) // MagicType(true) is not supported for PieChart
         ;
     }
 }
@@ -142,9 +142,9 @@ public class PieChart4View : ViewBase
                 (
                     e => e.Product,
                     e => e.Sum(f => f.Revenue),
-                    PieChartStyles.Default,
-                    polish: chart => chart.Toolbox(new Toolbox().MagicType(false))
+                    PieChartStyles.Default
                 )
+                .Toolbox(toolbox => toolbox.MagicType(false)) // MagicType(true) is not supported for PieChart
         ;
     }
 }
@@ -168,9 +168,9 @@ public class PieChart5View : ViewBase
                 (
                     e => e.Region,
                     e => e.Sum(f => f.Customers),
-                    PieChartStyles.Dashboard,
-                    polish: chart => chart.Toolbox(new Toolbox().MagicType(false))
+                    PieChartStyles.Dashboard
                 )
+                .Toolbox(toolbox => toolbox.MagicType(false)) // MagicType(true) is not supported for PieChart
         ;
     }
 }
@@ -196,9 +196,9 @@ public class PieChart6View : ViewBase
                 (
                     e => e.Platform,
                     e => e.Sum(f => f.Users),
-                    PieChartStyles.Donut,
-                    polish: chart => chart.Toolbox(new Toolbox().MagicType(false))
+                    PieChartStyles.Donut
                 )
+                .Toolbox(toolbox => toolbox.MagicType(false)) // MagicType(true) is not supported for PieChart
         ;
     }
 }
@@ -222,9 +222,9 @@ public class PieChart7View : ViewBase
                 (
                     e => e.Department,
                     e => e.Sum(f => f.Budget),
-                    PieChartStyles.Default,
-                    polish: chart => chart.Toolbox(new Toolbox().MagicType(false))
+                    PieChartStyles.Default
                 )
+                .Toolbox(toolbox => toolbox.MagicType(false)) // MagicType(true) is not supported for PieChart
         ;
     }
 }
@@ -247,9 +247,9 @@ public class PieChart8View : ViewBase
                 (
                     e => e.Status,
                     e => e.Sum(f => f.Tasks),
-                    PieChartStyles.Dashboard,
-                    polish: chart => chart.Toolbox(new Toolbox().MagicType(false))
+                    PieChartStyles.Dashboard
                 )
+                .Toolbox(toolbox => toolbox.MagicType(false)) // MagicType(true) is not supported for PieChart
         ;
     }
 }
@@ -274,9 +274,9 @@ public class PieChart9View : ViewBase
                 (
                     e => e.Technology,
                     e => e.Sum(f => f.Developers),
-                    PieChartStyles.Default,
-                    polish: chart => chart.Toolbox(new Toolbox().MagicType(false))
+                    PieChartStyles.Default
                 )
+                .Toolbox(toolbox => toolbox.MagicType(false)) // MagicType(true) is not supported for PieChart
         ;
     }
 }
@@ -303,9 +303,9 @@ public class PieChart10View : ViewBase
                 (
                     e => e.Category,
                     e => e.Sum(f => f.Amount),
-                    PieChartStyles.Donut,
-                    polish: chart => chart.Toolbox(new Toolbox().MagicType(false))
+                    PieChartStyles.Donut
                 )
+                .Toolbox(toolbox => toolbox.MagicType(false)) // MagicType(true) is not supported for PieChart
         ;
     }
 }
@@ -329,9 +329,9 @@ public class PieChart11View : ViewBase
                 (
                     e => e.AgeGroup,
                     e => e.Sum(f => f.Users),
-                    PieChartStyles.Dashboard,
-                    polish: chart => chart.Toolbox(new Toolbox().MagicType(false))
+                    PieChartStyles.Dashboard
                 )
+                .Toolbox(toolbox => toolbox.MagicType(false)) // MagicType(true) is not supported for PieChart
         ;
     }
 }

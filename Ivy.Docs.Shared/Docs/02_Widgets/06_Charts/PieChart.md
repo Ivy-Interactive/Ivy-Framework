@@ -42,9 +42,9 @@ public class PieChartDemo : ViewBase
                  (
                     e => e.Month,
                     e => e.Sum(f => f.Mobile),
-                    PieChartStyles.Dashboard,
-                    polish: chart => chart.Toolbox(new Toolbox().MagicType(false))
+                    PieChartStyles.Dashboard
                 )
+                .Toolbox(toolbox => toolbox.MagicType(false)) // MagicType(true) is not supported for PieChart
            | Text.Large("Desktop sales over Q1(January-March)")
            // Showing custom placement of the legend at the right bottom of the chart
            | data.ToPieChart

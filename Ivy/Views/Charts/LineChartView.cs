@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Immutable;
 using System.Dynamic;
 using System.Linq.Expressions;
@@ -175,6 +176,8 @@ public class LineChartBuilder<TSource>(
 {
     private readonly List<Measure<TSource>> _measures = [.. measures ?? []];
     private readonly List<TableCalculation> _calculations = new();
+    private Toolbox? _toolbox;
+    private Func<Toolbox, Toolbox>? _toolboxFactory;
 
     /// <summary>
     /// Builds the line chart by processing the data and applying the configured style.
@@ -225,7 +228,19 @@ public class LineChartBuilder<TSource>(
             _calculations.ToArray()
         );
 
-        return polish?.Invoke(scaffolded) ?? scaffolded;
+        var configuredChart = scaffolded;
+
+        if (_toolbox is not null)
+        {
+            configuredChart = configuredChart.Toolbox(_toolbox);
+        }
+        else if (_toolboxFactory is not null)
+        {
+            var baseToolbox = configuredChart.Toolbox ?? new Toolbox();
+            configuredChart = configuredChart.Toolbox(_toolboxFactory(baseToolbox));
+        }
+
+        return polish?.Invoke(configuredChart) ?? configuredChart;
     }
 
     /// <summary>
@@ -261,6 +276,41 @@ public class LineChartBuilder<TSource>(
     {
         _calculations.Add(calculation);
         return this;
+    }
+
+    /// <summary>
+    /// Configures the toolbox for the resulting line chart using a predefined toolbox instance.
+    /// </summary>
+    /// <param name="toolbox">The toolbox configuration to apply.</param>
+    /// <returns>The builder instance for method chaining.</returns>
+    public LineChartBuilder<TSource> Toolbox(Toolbox toolbox)
+    {
+        ArgumentNullException.ThrowIfNull(toolbox);
+        _toolbox = toolbox;
+        _toolboxFactory = null;
+        return this;
+    }
+
+    /// <summary>
+    /// Configures the toolbox for the resulting line chart using a customization delegate.
+    /// </summary>
+    /// <param name="configure">Delegate that accepts the current toolbox (or a new instance) and returns the updated toolbox.</param>
+    /// <returns>The builder instance for method chaining.</returns>
+    public LineChartBuilder<TSource> Toolbox(Func<Toolbox, Toolbox> configure)
+    {
+        ArgumentNullException.ThrowIfNull(configure);
+        _toolbox = null;
+        _toolboxFactory = configure;
+        return this;
+    }
+
+    /// <summary>
+    /// Enables the default toolbox with standard configuration.
+    /// </summary>
+    /// <returns>The builder instance for method chaining.</returns>
+    public LineChartBuilder<TSource> Toolbox()
+    {
+        return Toolbox(_ => new Toolbox());
     }
 }
 

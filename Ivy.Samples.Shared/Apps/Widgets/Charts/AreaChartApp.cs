@@ -40,7 +40,7 @@ public class AreaChart0View : ViewBase
         };
 
         return new Card().Title("Basic Area Chart")
-            | data.ToAreaChart(polish: chart => chart.Toolbox())
+            | data.ToAreaChart().Toolbox()
                 .Dimension("Month", e => e.Month)
                 .Measure("Desktop", e => e.Sum(f => f.Desktop))
                 .Measure("Mobile", e => e.Sum(f => f.Mobile))
@@ -63,7 +63,7 @@ public class AreaChart1View : ViewBase
         };
 
         return new Card().Title("Multi-Series Area Chart")
-            | data.ToAreaChart(polish: chart => chart.Toolbox())
+            | data.ToAreaChart().Toolbox()
                 .Dimension("Month", e => e.Month)
                 .Measure("Desktop", e => e.Sum(f => f.Desktop))
                 .Measure("Mobile", e => e.Sum(f => f.Mobile))
@@ -87,7 +87,7 @@ public class AreaChart2View : ViewBase
         };
 
         return new Card().Title("Financial Overview")
-            | data.ToAreaChart(polish: chart => chart.Toolbox())
+            | data.ToAreaChart().Toolbox()
                 .Dimension("Month", e => e.Month)
                 .Measure("Revenue", e => e.Sum(f => f.Revenue))
                 .Measure("Expenses", e => e.Sum(f => f.Expenses))
@@ -108,7 +108,7 @@ public class AreaChart3View : ViewBase
         };
 
         return new Card().Title("Product Sales by Quarter")
-            | data.ToAreaChart(polish: chart => chart.Toolbox())
+            | data.ToAreaChart().Toolbox()
                 .Dimension("Quarter", e => e.Quarter)
                 .Measure("ProductA", e => e.Sum(f => f.ProductA))
                 .Measure("ProductB", e => e.Sum(f => f.ProductB))
@@ -131,7 +131,7 @@ public class AreaChart4View : ViewBase
         };
 
         return new Card().Title("Regional Growth Trends")
-            | data.ToAreaChart(polish: chart => chart.Toolbox())
+            | data.ToAreaChart().Toolbox()
                 .Dimension("Year", e => e.Year)
                 .Measure("North", e => e.Sum(f => f.North))
                 .Measure("South", e => e.Sum(f => f.South))
@@ -156,7 +156,7 @@ public class AreaChart5View : ViewBase
         };
 
         return new Card().Title("Website Analytics")
-            | data.ToAreaChart(polish: chart => chart.Toolbox())
+            | data.ToAreaChart().Toolbox()
                 .Dimension("Month", e => e.Month)
                 .Measure("Users", e => e.Sum(f => f.Users))
                 .Measure("Sessions", e => e.Sum(f => f.Sessions))
@@ -180,7 +180,7 @@ public class AreaChart6View : ViewBase
         };
 
         return new Card().Title("System Performance Metrics")
-            | data.ToAreaChart(polish: chart => chart.Toolbox())
+            | data.ToAreaChart().Toolbox()
                 .Dimension("Week", e => e.Week)
                 .Measure("CPU Usage (%)", e => e.Sum(f => f.CPU))
                 .Measure("Memory Usage (%)", e => e.Sum(f => f.Memory))
@@ -211,7 +211,7 @@ public class AreaChart7View : ViewBase
         };
 
         return new Card().Title("Weather Data Trends (Annual)")
-            | data.ToAreaChart(polish: chart => chart.Toolbox())
+            | data.ToAreaChart().Toolbox()
                 .Dimension("Month", e => e.Month)
                 .Measure("Temperature (°C)", e => e.Sum(f => f.Temperature))
                 .Measure("Humidity (%)", e => e.Sum(f => f.Humidity))
@@ -242,7 +242,7 @@ public class AreaChart8View : ViewBase
         };
 
         return new Card().Title("Temperature Trends (°C)")
-            | data.ToAreaChart(polish: chart => chart.Toolbox())
+            | data.ToAreaChart().Toolbox()
                 .Dimension("Month", e => e.Month)
                 .Measure("High", e => e.Sum(f => f.High))
                 .Measure("Average", e => e.Sum(f => f.Average))
@@ -266,7 +266,7 @@ public class AreaChart9View : ViewBase
         };
 
         return new Card().Title("Market Share Analysis (%)")
-            | data.ToAreaChart(polish: chart => chart.Toolbox())
+            | data.ToAreaChart().Toolbox()
                 .Dimension("Quarter", e => e.Quarter)
                 .Measure("CompanyA", e => e.Sum(f => f.CompanyA))
                 .Measure("CompanyB", e => e.Sum(f => f.CompanyB))
