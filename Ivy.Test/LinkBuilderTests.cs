@@ -268,7 +268,7 @@ public class LinkBuilderTests
     }
 
     [Fact]
-    public void LinkBuilder_InvalidUrl_NoLabel_UsesUrlAsLabel()
+    public void LinkBuilder_InvalidUrl_NoLabel_UsesSafeDefault()
     {
         // Arrange
         var builder = new LinkBuilder<object>();
@@ -281,7 +281,26 @@ public class LinkBuilderTests
         Assert.NotNull(result);
         var button = Assert.IsType<Button>(result);
         Assert.True(button.Disabled);
-        Assert.Equal(invalidUrl, button.Title); // Uses invalid URL as label
+        // Invalid URLs should always use safe default label to avoid displaying potentially dangerous content
+        Assert.Equal("Invalid Link", button.Title);
+    }
+
+    [Fact]
+    public void LinkBuilder_InvalidButSafeUrl_NoLabel_UsesSafeDefault()
+    {
+        // Arrange
+        var builder = new LinkBuilder<object>();
+        var invalidButSafeUrl = "://malformed";
+
+        // Act
+        var result = builder.Build(invalidButSafeUrl, new object());
+
+        // Assert
+        Assert.NotNull(result);
+        var button = Assert.IsType<Button>(result);
+        Assert.True(button.Disabled);
+        // All invalid URLs use safe default, regardless of whether they're dangerous
+        Assert.Equal("Invalid Link", button.Title);
     }
 
     #endregion
