@@ -253,36 +253,6 @@ public class AdvancedChatDemo : ViewBase
         }
 
         return new Chat(messages.Value.ToArray(), OnSendMessage)
-            .Width(Size.Full())
-            .Height(Size.Auto());
-    }
-}
-```
-
-## Chat with Custom Placeholder
-
-Customize the input placeholder text.
-
-This example shows how to use the Placeholder extension method to provide custom guidance text for users, improving the user experience by making it clear what type of input is expected.
-
-```csharp demo-tabs
-public class CustomPlaceholderDemo : ViewBase
-{   
-    public override object? Build()
-    {
-        var messages = UseState(ImmutableArray.Create<ChatMessage>(
-            new ChatMessage(ChatSender.Assistant, "This chat has a custom placeholder text. Try typing something!")
-        ));
-
-        void OnSendMessage(Event<Chat, string> @event)
-        {
-            var messagesWithUser = messages.Value.Add(new ChatMessage(ChatSender.User, @event.Value));
-            messages.Set(messagesWithUser);
-            
-            messages.Set(messagesWithUser.Add(new ChatMessage(ChatSender.Assistant, $"Thanks for your message: {@event.Value}")));
-        }
-
-        return new Chat(messages.Value.ToArray(), OnSendMessage)
             .Placeholder("Type your message here...")
             .Width(Size.Full())
             .Height(Size.Auto());
