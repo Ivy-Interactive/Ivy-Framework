@@ -14,30 +14,13 @@ searchHints:
 Coordinate complex async work with declarative job graphs, dependency-aware scheduling, and built-in UI status reporting.
 </Ingress>
 
-The `JobScheduler` in `Ivy.Helpers` orchestrates asynchronous jobs, resolves dependencies, and exposes real-time state via reactive updates. Pair it with `JobSchedulerExtensions.ToView()` to render a hierarchical job monitor without hand-built UI.
+The `JobScheduler` in `Ivy.Helpers` orchestrates asynchronous jobs, resolves dependencies, and exposes real-time state via reactive updates. Pair it with `JobSchedulerExtensions.ToView()` to render a hierarchical job monitor.
 
-## Core Concepts
+## Basic Usage
 
-- `JobScheduler` coordinates concurrency, dependency resolution, cancellation, and lifecycle notifications.
-- `JobBuilder` provides a fluent API for configuring jobs (`WithAction`, `DependsOn`, `WithContinueOnChildFailure`, `Then`).
-- `Job` represents a unit of work with `JobState`, child jobs, progress reporting, and completion signaling.
-- `JobSchedulerExtensions.ToView()` converts the scheduler into a view, including icons, progress bars, nested children, and failure details.
+Create a scheduler, define jobs, and use a button to trigger execution:
 
-### Job States
-
-Jobs transition through these states automatically:
-
-- `Waiting`: Scheduled but not yet running.
-- `Running`: Currently executing the job action.
-- `Finished`: Completed successfully.
-- `Failed`: Threw an exception (optionally cancels the remaining graph).
-- `Cancelled`: Cancelled before completion.
-
-## Creating a Scheduler
-
-Instantiate a scheduler with your preferred root concurrency limit. Keep the scheduler stable across renders and subscribe to its updates to refresh your UI.
-
-```csharp demo-below
+```csharp demo-tabs
 public class JobsDashboard : ViewBase
 {
     public override object? Build()
@@ -46,10 +29,9 @@ public class JobsDashboard : ViewBase
         var refresh = this.UseRefreshToken();
 
         UseEffect(() => scheduler.Subscribe(_ => refresh.Refresh()));
-        UseEffect(async () => await scheduler.RunAsync());
 
         return Layout.Vertical()
-            | Text.H2("Background Jobs")
+            | new Button("Start Jobs", onClick: async _ => await scheduler.RunAsync())
             | scheduler.ToView();
     }
 
@@ -90,13 +72,21 @@ public class JobsDashboard : ViewBase
 }
 ```
 
-> `RunAsync()` starts scheduling jobs, respecting dependencies and the concurrency limit. Subscribing to the scheduler keeps your UI in sync with job state changes.
+## Job States
 
-## Building Jobs
+Jobs transition through these states automatically:
+
+- `Waiting`: Scheduled but not yet running.
+- `Running`: Currently executing the job action.
+- `Finished`: Completed successfully.
+- `Failed`: Threw an exception.
+- `Cancelled`: Cancelled before completion.
+
+## Creating Jobs
 
 Use `CreateJob()` to obtain a `JobBuilder`, configure the job, then call `Build()` to register it.
 
-```csharp demo-below
+```csharp demo-tabs
 public class ImportJobDemo : ViewBase
 {
     public override object? Build()
@@ -105,9 +95,10 @@ public class ImportJobDemo : ViewBase
         var refresh = this.UseRefreshToken();
 
         UseEffect(() => scheduler.Subscribe(_ => refresh.Refresh()));
-        UseEffect(async () => await scheduler.RunAsync());
 
-        return scheduler.ToView();
+        return Layout.Vertical()
+            | new Button("Import Data", onClick: async _ => await scheduler.RunAsync())
+            | scheduler.ToView();
     }
 
     private static JobScheduler BuildScheduler()
@@ -117,13 +108,13 @@ public class ImportJobDemo : ViewBase
         scheduler.CreateJob("Import Customers")
             .WithAction(async (_, _, progress, token) =>
             {
-                await Task.Delay(250, token);         // prepare
+                await Task.Delay(250, token);
                 progress.Report(0.25);
 
-                await Task.Delay(400, token);         // perform work
+                await Task.Delay(400, token);
                 progress.Report(0.75);
 
-                await Task.Delay(150, token);         // finalize
+                await Task.Delay(150, token);
                 progress.Report(1);
             })
             .Build();
@@ -133,23 +124,23 @@ public class ImportJobDemo : ViewBase
 }
 ```
 
-`WithAction` overloads accept signatures ranging from `Func<Task>` to full access with `(Job, IJobScheduler, IProgress<double>, CancellationToken)`. Use whichever matches the level of control you need.
+`WithAction` overloads accept signatures ranging from `Func<Task>` to full access with `(Job, IJobScheduler, IProgress<double>, CancellationToken)`.
 
 ### Reporting Progress
 
-Inside the action, call `progress.Report(0..1)`. The scheduler clamps values, re-emits job updates, and the built-in view renders a progress bar when the value is between 0% and 100%.
+Inside the action, call `progress.Report(0..1)`. The scheduler clamps values and the built-in view renders a progress bar.
 
 ### Setting Display Content
 
-Call `job.SetDisplay(object)` within the action to attach custom status UI (for example, a log snippet or metrics). The view renders any display object between the job header and its children.
+Call `job.SetDisplay(object)` within the action to attach custom status UI. The view renders any display object between the job header and its children.
 
-## Managing Dependencies and Children
+## Dependencies
 
 ### Linear Dependencies
 
 `DependsOn` enforces that a job waits for its prerequisites to finish before entering the queue.
 
-```csharp demo-below
+```csharp demo-tabs
 public class DependencyGraphDemo : ViewBase
 {
     public override object? Build()
@@ -158,9 +149,10 @@ public class DependencyGraphDemo : ViewBase
         var refresh = this.UseRefreshToken();
 
         UseEffect(() => scheduler.Subscribe(_ => refresh.Refresh()));
-        UseEffect(async () => await scheduler.RunAsync());
 
-        return scheduler.ToView();
+        return Layout.Vertical()
+            | new Button("Run Pipeline", onClick: async _ => await scheduler.RunAsync())
+            | scheduler.ToView();
     }
 
     private static JobScheduler BuildScheduler()
@@ -202,7 +194,7 @@ public class DependencyGraphDemo : ViewBase
 
 Children can be attached to a parent at build time or while the parent is running. When added during execution, the scheduler defers them until the parent finishes its action.
 
-```csharp demo-below
+```csharp demo-tabs
 public class DynamicChildrenDemo : ViewBase
 {
     public override object? Build()
@@ -211,9 +203,10 @@ public class DynamicChildrenDemo : ViewBase
         var refresh = this.UseRefreshToken();
 
         UseEffect(() => scheduler.Subscribe(_ => refresh.Refresh()));
-        UseEffect(async () => await scheduler.RunAsync());
 
-        return scheduler.ToView();
+        return Layout.Vertical()
+            | new Button("Generate Reports", onClick: async _ => await scheduler.RunAsync())
+            | scheduler.ToView();
     }
 
     private static JobScheduler BuildScheduler()
@@ -251,16 +244,9 @@ public class DynamicChildrenDemo : ViewBase
 - By default, `CancelAll()` is invoked when a job fails. Opt in to continue by calling `WithContinueOnChildFailure()` on the parent job builder.
 - Cancellation requests set state to `Cancelled` and complete the job's task with `TrySetCanceled()`.
 
-## Running and Monitoring
-
-- `RunAsync(token)` starts scheduling and waits until all jobs settle. Remaining `Waiting` jobs are cancelled when scheduling completes.
-- `CancelAll()` requests cancellation on all running jobs and prevents new scheduling.
-- `AllCompleted()` returns `true` when every job is `Finished`.
-- `Subscribe(observer)` yields each job update; use it to refresh state or log progress.
-
 ## UI Rendering
 
-`JobSchedulerExtensions.ToView()` renders a collapsible tree showing each job's title, icon by state, progress, custom display, and failures without duplication.
+`JobSchedulerExtensions.ToView()` renders a collapsible tree showing each job's title, icon by state, progress, custom display, and failures.
 
 ```csharp demo-tabs
 public class JobMonitorDemo : ViewBase
@@ -271,10 +257,10 @@ public class JobMonitorDemo : ViewBase
         var refresh = this.UseRefreshToken();
 
         UseEffect(() => scheduler.Subscribe(_ => refresh.Refresh()));
-        UseEffect(async () => await scheduler.RunAsync());
 
         return Layout.Vertical()
             | Text.H2("Background Jobs")
+            | new Button("Start Jobs", onClick: async _ => await scheduler.RunAsync())
             | scheduler.ToView();
     }
 
@@ -323,13 +309,20 @@ The view automatically:
 - Displays only relevant error details (parent errors hide when a failing child already shows them).
 - Nests child jobs with separators and hides completed branches to reduce noise.
 
+## Running and Monitoring
+
+- `RunAsync(token)` starts scheduling and waits until all jobs settle. Remaining `Waiting` jobs are cancelled when scheduling completes.
+- `CancelAll()` requests cancellation on all running jobs and prevents new scheduling.
+- `AllCompleted()` returns `true` when every job is `Finished`.
+- `Subscribe(observer)` yields each job update; use it to refresh state or log progress.
+
 ## Best Practices
 
 1. **Keep scheduler instances stable** (store in state/hook) to avoid restarting jobs on each render.
 2. **Report frequent progress** for long-running work to keep the UI responsive.
 3. **Use `WithContinueOnChildFailure()`** when child failures should not abort the parent job graph.
 4. **Attach custom `Display` content** for rich status (links, counters, logs).
-5. **Always await `RunAsync()`** during app initialization to ensure all jobs schedule correctly.
+5. **Trigger jobs from user actions** (buttons, forms) rather than on page render.
 
 ## Reference
 
