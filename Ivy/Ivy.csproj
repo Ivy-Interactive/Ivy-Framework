@@ -41,7 +41,7 @@
     <EmbeddedResource Update="Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-      <Culture>neutral</Culture>
+      <LogicalName>Ivy.Resources.resources</LogicalName>
     </EmbeddedResource>
   </ItemGroup>
 
