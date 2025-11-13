@@ -1,12 +1,11 @@
-﻿using System.IdentityModel.Tokens.Jwt;
+﻿using System.Security.Cryptography;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
 using System.Reflection;
-using System.Security.Claims;
-using Clerk.Net;
 using Ivy.Hooks;
 using Ivy.Shared;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
-using Microsoft.IdentityModel.Tokens;
 
 namespace Ivy.Auth.Clerk;
 
@@ -20,9 +19,9 @@ public class ClerkOAuthException(string? error, string? errorDescription)
 public class ClerkAuthProvider : IAuthProvider
 {
     private readonly string _secretKey;
-    private readonly string? _jwtKey;
-    private readonly string? _publishableKey;
-    private readonly string? _frontendApiDomain;
+    private readonly string _jwtKey;
+    private readonly string _publishableKey;
+    private readonly string _frontendApiDomain;
     private readonly List<AuthOption> _authOptions = new();
     private readonly HttpClient _httpClient;
 
@@ -63,32 +62,44 @@ public class ClerkAuthProvider : IAuthProvider
 
     public Task<Uri> GetOAuthUriAsync(AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken = default)
     {
-        // Clerk OAuth URLs are typically generated on the client side
-        // The server-side SDK doesn't provide direct OAuth URL generation
-        // In a real implementation, you would construct the Clerk OAuth URL
-        // based on your Clerk configuration and the selected provider
+        var redirectUri = callback.GetUri(includeIdInPath: true);
 
-        var redirectUri = callback.GetUri(includeIdInPath: false);
-
-        var provider = option.Id switch
-        {
-            "google" => "oauth_google",
-            "github" => "oauth_github",
-            "twitter" => "oauth_twitter",
-            "microsoft" => "oauth_microsoft",
-            "apple" => "oauth_apple",
-            _ => throw new ArgumentException($"Unknown OAuth provider: {option.Id}")
-        };
-
-        // TODO: fetch the correct sign-in URL. This is the default, but it is configurable in Clerk dashboard
-        var authUrl = $"https://{_fapiInstance}/sign-in?provider={provider}&redirect_url={Uri.EscapeDataString(redirectUri.ToString())}&state={callback.Id}";
+        // TODO: fetch the correct sign-in URL. This is the default, but it is configurable in Clerk dashboard. Also we may want to just take complete control of the sign-in flow:
+        // https://clerk.com/docs/reference/frontend-api/tag/sign-ins/post/v1/client/sign_ins
+        var authUrl = $"https://{_frontendApiDomain}.accounts.dev/sign-in?redirect_url={Uri.EscapeDataString(redirectUri.ToString())}";
 
         return Task.FromResult(new Uri(authUrl));
     }
 
+    public string VerifyHandshakeJwt(string jwt)
+    {
+        using var rsa = RSA.Create();
+        rsa.ImportFromPem(_jwtKey.AsSpan());
+
+        var key = new RsaSecurityKey(rsa);
+
+        var parameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = key,
+
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.FromMinutes(2),
+
+            ValidAlgorithms = [SecurityAlgorithms.RsaSha256],
+        };
+
+        var handler = new JwtSecurityTokenHandler();
+        var principal = handler.ValidateToken(jwt, parameters, out var validatedToken);
+
+        return principal.FindFirst("handshake")?.Value ?? throw new Exception("handshake claim not found in token");
+    }
+
     public async Task<AuthToken?> HandleOAuthCallbackAsync(HttpRequest request, CancellationToken cancellationToken = default)
     {
-        var code = request.Query["code"].ToString();
+        var handshakeJwt = request.Query["__clerk_handshake"].ToString();
+        var devBrowserJwt = request.Query["__clerk_db_jwt"].ToString();
+
         var error = request.Query["error"].ToString();
         var errorDescription = request.Query["error_description"].ToString();
 
@@ -97,16 +108,15 @@ public class ClerkAuthProvider : IAuthProvider
             throw new ClerkOAuthException(error, errorDescription);
         }
 
-        if (string.IsNullOrEmpty(code))
+        if (string.IsNullOrEmpty(handshakeJwt))
         {
-            throw new Exception("Received no authorization code from Clerk.");
+            throw new Exception("Received no handshake JWT from Clerk.");
         }
+
+        Console.WriteLine("Received handshake JWT: " + VerifyHandshakeJwt(handshakeJwt));
 
         try
         {
-            // In a real Clerk implementation, you would exchange the code for a session token
-            // This typically involves client-side Clerk libraries
-            // For now, we'll simulate a successful authentication
             await Task.CompletedTask;
 
             // Return a mock token - in practice, this would be the actual Clerk session token

@@ -149,7 +149,6 @@ public class OAuthFlowView(AuthOption option, IState<string?> errorMessage) : Vi
             }
         }
 
-        // return new Button(option.Name).Secondary().Icon(option.Icon).Width(Size.Full()).HandleClick(Login);
-        return new SignInButton();
+        return new Button(option.Name).Secondary().Icon(option.Icon).Width(Size.Full()).HandleClick(Login);
     }
 }
