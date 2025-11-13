@@ -1,32 +1,31 @@
 import React from 'react';
-import { Kanban, type Task } from '@/components/ui/shadcn-io/kanban';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Kanban } from '@/components/ui/shadcn-io/kanban';
 import { useEventHandler } from '@/components/event-handler';
 import { getWidth, getHeight } from '@/lib/styles';
 
-interface Column {
+interface ColumnInfo {
   id: string;
   name: string;
-  color: string;
-  order: number;
-  widgetId: string;
+  columnKey: string;
   width?: string;
 }
 
-interface TaskWithWidgetId extends Task {
+interface CardInfo {
+  cardId: string;
+  priority?: number;
   widgetId: string;
+  content: React.ReactNode[]; // Array of React nodes from slots
 }
 
 interface KanbanWidgetProps {
   id: string;
-  columns?: Column[];
-  tasks?: Task[];
   events?: Record<string, unknown>;
   width?: string;
   height?: string;
   allowDelete?: boolean;
-  children?: React.ReactNode;
+  allowMove?: boolean;
+  allowAdd?: boolean;
+  showCounts?: boolean;
   slots?: {
     default?: React.ReactNode[];
   };
@@ -34,98 +33,124 @@ interface KanbanWidgetProps {
 
 export const KanbanWidget: React.FC<KanbanWidgetProps> = ({
   id,
-  columns = [],
-  tasks = [],
   width,
   height,
   allowDelete = false,
+  allowMove = false,
   slots,
 }) => {
   const eventHandler = useEventHandler();
-  // Extract data from backend kanban structure
-  const extractedData = React.useMemo(() => {
-    if (slots?.default && slots.default.length > 0) {
-      const extractedTasks: TaskWithWidgetId[] = [];
-      const extractedColumns: Column[] = [];
 
-      // Parse the backend kanban structure
-      slots.default.forEach((columnNode, columnIndex) => {
-        if (React.isValidElement(columnNode)) {
-          // The actual column props are nested in children.props
-          const columnProps = (
-            columnNode.props as {
-              children?: { props?: Record<string, unknown> };
+  // Extract column and card structure from backend widgets
+  const kanbanData = React.useMemo(() => {
+    if (!slots?.default || slots.default.length === 0) {
+      return { columns: [], cardsByColumn: new Map<string, CardInfo[]>() };
+    }
+
+    const columns: ColumnInfo[] = [];
+    const cardsByColumn = new Map<string, CardInfo[]>();
+
+    slots.default.forEach(columnNode => {
+      if (React.isValidElement(columnNode)) {
+        // Get column props - handle Suspense wrapper
+        let columnProps: Record<string, unknown> = {};
+        const props = columnNode.props as Record<string, unknown>;
+
+        // Check if it's wrapped in Suspense
+        if (props.children) {
+          if (React.isValidElement(props.children)) {
+            columnProps =
+              (props.children.props as Record<string, unknown>) || {};
+          } else if (Array.isArray(props.children)) {
+            // Multiple children - take first one
+            const firstChild = props.children[0];
+            if (React.isValidElement(firstChild)) {
+              columnProps = (firstChild.props as Record<string, unknown>) || {};
             }
-          )?.children?.props as Record<string, unknown>;
+          }
+        } else {
+          // Direct props access
+          columnProps = props;
+        }
 
-          // Create column from backend data
-          const column: Column = {
-            id: columnProps?.columnKey as string,
-            name: columnProps?.title as string,
-            color: columnProps?.color as string,
-            order: (columnProps?.order as number) || 999,
-            widgetId:
-              (columnProps?.id as string) || (columnProps?.columnKey as string),
+        const columnKey = (columnProps?.columnKey as string) || '';
+        const columnTitle = (columnProps?.title as string) || columnKey;
+
+        if (columnKey) {
+          columns.push({
+            id: columnKey, // Use columnKey as id so it matches task.status
+            name: columnTitle,
+            columnKey: columnKey,
             width: columnProps?.width as string | undefined,
-          };
-          extractedColumns.push(column);
+          });
 
-          // Extract tasks from column children - they're in slots.default
+          // Extract cards from column slots
           const columnSlots = (
             columnProps?.slots as { default?: React.ReactNode[] }
           )?.default;
+
           if (columnSlots && Array.isArray(columnSlots)) {
+            const cards: CardInfo[] = [];
+
             columnSlots.forEach((cardNode: React.ReactNode) => {
               if (React.isValidElement(cardNode)) {
-                // Cards are wrapped in Suspense, need to go deeper
-                const cardProps = (
-                  cardNode.props as {
-                    children?: { props?: Record<string, unknown> };
-                  }
-                )?.children?.props as Record<string, unknown>;
+                // Get card props - handle Suspense wrapper
+                let cardProps: Record<string, unknown> = {};
+                const cardNodeProps = cardNode.props as Record<string, unknown>;
 
-                // Extract task data from slots.default
-                const taskSlots = (
-                  cardProps?.slots as { default?: React.ReactNode[] }
-                )?.default;
-                let taskData: Record<string, unknown> = {};
-                if (
-                  taskSlots &&
-                  Array.isArray(taskSlots) &&
-                  taskSlots.length > 0
-                ) {
-                  const taskSlot = taskSlots[0];
-                  if (React.isValidElement(taskSlot)) {
-                    taskData = taskSlot.props as Record<string, unknown>;
+                if (cardNodeProps.children) {
+                  if (React.isValidElement(cardNodeProps.children)) {
+                    cardProps =
+                      (cardNodeProps.children.props as Record<
+                        string,
+                        unknown
+                      >) || {};
+                  } else if (Array.isArray(cardNodeProps.children)) {
+                    const firstChild = cardNodeProps.children[0];
+                    if (React.isValidElement(firstChild)) {
+                      cardProps =
+                        (firstChild.props as Record<string, unknown>) || {};
+                    }
                   }
+                } else {
+                  cardProps = cardNodeProps;
                 }
 
-                // Create task from backend data
-                const task: TaskWithWidgetId = {
-                  id: cardProps?.cardId as string,
-                  title: taskData?.title as string,
-                  status: columnProps?.columnKey as string,
-                  statusOrder: columnIndex + 1,
-                  priority: cardProps?.priority as number,
-                  description: taskData?.description as string,
-                  assignee: (taskData?.assignee as string) || '',
-                  widgetId: cardProps?.id as string, // Store the card widget ID
-                };
-                extractedTasks.push(task);
+                const cardId = (cardProps?.cardId as string) || '';
+                const widgetId = (cardProps?.id as string) || '';
+
+                // Get the actual card content from slots
+                const cardContentSlots = (
+                  cardProps?.slots as { default?: React.ReactNode[] }
+                )?.default;
+
+                if (
+                  cardId &&
+                  cardContentSlots &&
+                  Array.isArray(cardContentSlots) &&
+                  cardContentSlots.length > 0
+                ) {
+                  // Store the slots array directly - we'll render it in the component
+                  cards.push({
+                    cardId,
+                    priority: cardProps?.priority as number | undefined,
+                    widgetId,
+                    content: cardContentSlots, // Store the array directly
+                  });
+                }
               }
             });
+
+            if (cards.length > 0) {
+              cardsByColumn.set(columnKey, cards);
+            }
           }
         }
-      });
+      }
+    });
 
-      // Use columns in the order they come from the backend (already sorted by ColumnOrder)
-      const sortedColumns = extractedColumns;
-
-      return { tasks: extractedTasks, columns: sortedColumns };
-    }
-
-    return { tasks, columns };
-  }, [slots, tasks, columns]);
+    return { columns, cardsByColumn };
+  }, [slots]);
 
   const handleCardMove = (
     cardId: string,
@@ -136,13 +161,9 @@ export const KanbanWidget: React.FC<KanbanWidgetProps> = ({
     eventHandler('OnMove', id, [cardId, fromColumn, toColumn, targetIndex]);
   };
 
-  const handleCardClick = (cardId: string) => {
-    // Find the card widget ID for this task
-    const task = extractedData.tasks.find(t => t.id === cardId) as
-      | TaskWithWidgetId
-      | undefined;
-    if (task?.widgetId) {
-      eventHandler('OnClick', task.widgetId, [cardId]);
+  const handleCardClick = (cardId: string, widgetId: string) => {
+    if (widgetId) {
+      eventHandler('OnClick', widgetId, [cardId]);
     }
   };
 
@@ -150,7 +171,7 @@ export const KanbanWidget: React.FC<KanbanWidgetProps> = ({
     eventHandler('OnDelete', id, [cardId]);
   };
 
-  if (extractedData.tasks.length === 0 && extractedData.columns.length === 0) {
+  if (kanbanData.columns.length === 0) {
     return (
       <div className="flex items-center justify-center p-8 text-gray-500">
         <div className="text-center">
@@ -167,77 +188,92 @@ export const KanbanWidget: React.FC<KanbanWidgetProps> = ({
     ...getWidth(width),
     ...getHeight(height),
     overflowY: 'hidden' as const,
-    overflowX: 'auto' as const, // Allow horizontal scrolling when content is wider
+    overflowX: 'auto' as const,
   };
+
+  // Convert to format expected by shadcn kanban component
+  // Provide minimal task data for drag/drop functionality
+  const tasks = Array.from(kanbanData.cardsByColumn.entries()).flatMap(
+    ([columnKey, cards]) =>
+      cards.map(card => ({
+        id: card.cardId,
+        title: '', // Not used - we render actual content
+        status: columnKey, // This must match the column id passed to KanbanCards
+        statusOrder:
+          kanbanData.columns.findIndex(c => c.columnKey === columnKey) + 1,
+        priority: card.priority || 0,
+        description: '', // Not used - we render actual content
+        assignee: '', // Not used - we render actual content
+      }))
+  );
+
+  const columns = kanbanData.columns.map(col => ({
+    id: col.columnKey, // Use columnKey as id to match task.status
+    name: col.name,
+    color: '',
+  }));
 
   return (
     <div style={styles}>
       <Kanban
-        data={extractedData.tasks}
-        columns={extractedData.columns}
-        onCardMove={handleCardMove}
-        onCardClick={handleCardClick}
+        data={tasks}
+        columns={columns}
+        onCardMove={allowMove ? handleCardMove : undefined}
+        onCardClick={(cardId: string) => {
+          // Find the widget ID for this card
+          for (const cards of kanbanData.cardsByColumn.values()) {
+            const card = cards.find(c => c.cardId === cardId);
+            if (card) {
+              handleCardClick(cardId, card.widgetId);
+              break;
+            }
+          }
+        }}
         onCardDelete={allowDelete ? handleCardDelete : undefined}
       >
-        {({
-          KanbanBoard,
-          KanbanColumn,
-          KanbanCards,
-          KanbanCard,
-          KanbanHeader,
-          KanbanCardContent,
-        }) => (
+        {({ KanbanBoard, KanbanColumn, KanbanCards, KanbanCard }) => (
           <KanbanBoard>
-            {extractedData.columns.map(column => (
-              <KanbanColumn
-                key={column.id}
-                id={column.id}
-                name={column.name}
-                color={column.color}
-                width={column.width}
-              >
-                <KanbanCards id={column.id}>
-                  {(task: Task) => (
-                    <KanbanCard key={task.id} id={task.id} column={column.id}>
-                      <Card>
-                        <CardHeader>
-                          <KanbanHeader>
-                            <div className="flex items-center justify-between gap-2">
-                              <div className="flex items-center gap-2">
-                                <CardTitle
-                                  className="text-sm cursor-pointer hover:underline hover:text-primary transition-colors"
-                                  onClick={(e: React.MouseEvent) => {
-                                    e.stopPropagation();
-                                    handleCardClick(task.id);
-                                  }}
-                                >
-                                  {task.title}
-                                </CardTitle>
-                              </div>
-                              <Badge variant="secondary">
-                                P{task.priority}
-                              </Badge>
-                            </div>
-                          </KanbanHeader>
-                        </CardHeader>
-                        <CardContent>
-                          <KanbanCardContent>
-                            <p className="text-xs text-muted-foreground whitespace-pre-line">
-                              {task.description}
-                            </p>
-                            {task.assignee && (
-                              <p className="text-xs text-muted-foreground">
-                                Assignee: {task.assignee}
-                              </p>
-                            )}
-                          </KanbanCardContent>
-                        </CardContent>
-                      </Card>
-                    </KanbanCard>
-                  )}
-                </KanbanCards>
-              </KanbanColumn>
-            ))}
+            {kanbanData.columns.map(column => {
+              const cards =
+                kanbanData.cardsByColumn.get(column.columnKey) || [];
+              // Create a map for quick lookup
+              const cardMap = new Map(cards.map(card => [card.cardId, card]));
+
+              return (
+                <KanbanColumn key={column.id} id={column.id} name={column.name}>
+                  <KanbanCards id={column.id}>
+                    {task => {
+                      const card = cardMap.get(task.id);
+                      if (!card) return null;
+
+                      return (
+                        <KanbanCard
+                          key={card.cardId}
+                          id={card.cardId}
+                          column={column.id}
+                        >
+                          {/* Render the actual widget content from backend */}
+                          <div
+                            onClick={() =>
+                              handleCardClick(card.cardId, card.widgetId)
+                            }
+                            className="cursor-pointer w-full"
+                          >
+                            {Array.isArray(card.content)
+                              ? card.content.map((item, idx) => (
+                                  <React.Fragment key={idx}>
+                                    {item}
+                                  </React.Fragment>
+                                ))
+                              : card.content}
+                          </div>
+                        </KanbanCard>
+                      );
+                    }}
+                  </KanbanCards>
+                </KanbanColumn>
+              );
+            })}
           </KanbanBoard>
         )}
       </Kanban>
