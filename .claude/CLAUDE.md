@@ -31,7 +31,6 @@ public ValidationResult ProcessInput(string input, ValidationRules rules) { }
 ```typescript
 // ✅ GOOD
 className="text-[var(--color-primary)]"
->>>>>>> ivy-fork/main
 <Icon name="edit" size={16} />
 
 // ❌ BAD
@@ -71,7 +70,6 @@ describe('UserCard', () => {
   it('renders user information', () => {
     render(<UserCard userId="1" name="John" />);
     expect(screen.getByText('John')).toBeInTheDocument();
->>>>>>> ivy-fork/main
   });
 });
 ```
