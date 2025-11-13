@@ -60,7 +60,7 @@ To customize your authentication settings:
 2. **Click "Settings"**
 3. **Configure**:
    - **Site URL**: Your application's URL (e.g., `http://localhost:5010`)
-   - **Redirect URLs**: Add your callback URLs (e.g., `http://localhost:5010/webhook/*`)
+   - **Redirect URLs**: Add your callback URLs (e.g., `http://localhost:5010/ivy/webhook/*`)
 
 ### Step 4: Enable Social Providers (Optional)
 

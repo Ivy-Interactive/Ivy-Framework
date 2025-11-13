@@ -241,7 +241,7 @@ export const useBackend = (
       logger.debug('Processing SetAuthToken request', {
         hasAuthToken: !!message.authToken,
       });
-      const response = await fetch(`${getIvyHost()}/auth/set-auth-token`, {
+      const response = await fetch(`${getIvyHost()}/ivy/auth/set-auth-token`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(message.authToken),
@@ -325,7 +325,7 @@ export const useBackend = (
 
     const newConnection = new signalR.HubConnectionBuilder()
       .withUrl(
-        `${getIvyHost()}/messages?appId=${latestAppIdRef.current ?? ''}&appArgs=${appArgs ?? ''}&machineId=${machineId}&parentId=${parentId ?? ''}&chrome=${latestChromeRef.current}`
+        `${getIvyHost()}/ivy/messages?appId=${latestAppIdRef.current ?? ''}&appArgs=${appArgs ?? ''}&machineId=${machineId}&parentId=${parentId ?? ''}&chrome=${latestChromeRef.current}`
       )
       .withAutomaticReconnect()
       .build();

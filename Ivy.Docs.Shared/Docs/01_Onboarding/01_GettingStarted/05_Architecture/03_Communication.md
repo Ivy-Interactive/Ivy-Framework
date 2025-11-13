@@ -59,7 +59,7 @@ SignalR provides automatic reconnection capabilities with built-in reconnection 
 
 ```typescript
 const connection = new HubConnectionBuilder()
-  .withUrl(`/messages?appId=${appId}&appArgs=${encodeURIComponent(appArgs || "")}&machineId=${machineId}&parentId=${parentId || ""}`)
+  .withUrl(`/ivy/messages?appId=${appId}&appArgs=${encodeURIComponent(appArgs || "")}&machineId=${machineId}&parentId=${parentId || ""}`)
   .withAutomaticReconnect()
   .build();
 

@@ -115,8 +115,8 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
   const hasChildren = !!children;
   const hasUrl = !!(effectiveUrl && !disabled);
 
-  // Check if URL is a download link (starts with /download/)
-  const isDownloadUrl = effectiveUrl?.startsWith('/download/') ?? false;
+  // Check if URL is a download link (starts with /ivy/download/)
+  const isDownloadUrl = effectiveUrl?.startsWith('/ivy/download/') ?? false;
 
   const buttonContent = (
     <>

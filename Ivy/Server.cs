@@ -456,8 +456,8 @@ public class Server
         app.UseGrpcWeb();
 
         app.MapControllers();
-        app.MapHub<AppHub>("/messages");
-        app.MapHealthChecks("/health");
+        app.MapHub<AppHub>("/ivy/messages");
+        app.MapHealthChecks("/ivy/health");
         app.MapGrpcService<DataTableService>().EnableGrpcWeb();
 
         if (_useHotReload)
@@ -471,7 +471,7 @@ public class Server
         }
 
         app.UseFrontend(_args, logger);
-        app.UseAssets(_args, logger, "Assets");
+        app.UseAssets(_args, logger, "Assets", "ivy/assets");
 
         app.Lifetime.ApplicationStarted.Register(() =>
         {
@@ -590,7 +590,7 @@ public static class WebApplicationExtensions
     }
 
     public static WebApplication UseAssets(this WebApplication app, ServerArgs args, ILogger<Server> logger,
-        string folder)
+        string folder, string? requestPath = null)
     {
         var assembly = args.AssetAssembly ?? Assembly.GetEntryAssembly()!;
 
@@ -601,7 +601,11 @@ public static class WebApplicationExtensions
             assembly.GetName().Name + "." + folder
         );
 
-        app.UseStaticFiles(GetStaticFileOptions("/" + folder, embeddedProvider, assembly));
+        var path = requestPath != null
+            ? (requestPath.StartsWith("/") ? requestPath : "/" + requestPath)
+            : "/" + folder;
+
+        app.UseStaticFiles(GetStaticFileOptions(path, embeddedProvider, assembly));
         return app;
     }
 
