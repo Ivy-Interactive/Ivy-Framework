@@ -64,14 +64,15 @@ public class ClerkAuthProvider : IAuthProvider
     {
         var redirectUri = callback.GetUri(includeIdInPath: true);
 
-        // TODO: fetch the correct sign-in URL. This is the default, but it is configurable in Clerk dashboard. Also we may want to just take complete control of the sign-in flow:
+        // TODO: fetch the correct sign-in URL. This is the default, but it is configurable in Clerk dashboard.
+        // Also we may want to just take complete control of the sign-in flow:
         // https://clerk.com/docs/reference/frontend-api/tag/sign-ins/post/v1/client/sign_ins
         var authUrl = $"https://{_frontendApiDomain}.accounts.dev/sign-in?redirect_url={Uri.EscapeDataString(redirectUri.ToString())}";
 
         return Task.FromResult(new Uri(authUrl));
     }
 
-    public string VerifyHandshakeJwt(string jwt)
+    public AuthToken VerifyHandshakeJwt(string jwt)
     {
         using var rsa = RSA.Create();
         rsa.ImportFromPem(_jwtKey.AsSpan());
@@ -80,19 +81,42 @@ public class ClerkAuthProvider : IAuthProvider
 
         var parameters = new TokenValidationParameters
         {
+            TryAllIssuerSigningKeys = true,
             ValidateIssuerSigningKey = true,
-            IssuerSigningKey = key,
-
-            ValidateLifetime = true,
-            ClockSkew = TimeSpan.FromMinutes(2),
-
+            IssuerSigningKeys = [key],
             ValidAlgorithms = [SecurityAlgorithms.RsaSha256],
+
+            ValidateLifetime = false,
+            ValidateAudience = false,
+            ValidateIssuer = false,
         };
 
         var handler = new JwtSecurityTokenHandler();
         var principal = handler.ValidateToken(jwt, parameters, out var validatedToken);
 
-        return principal.FindFirst("handshake")?.Value ?? throw new Exception("handshake claim not found in token");
+        // This handshake claim contains HTTP-style cookie assignments.
+        var handshakeClaims = principal.FindAll("handshake");
+        var cookieValues = new List<(string, string)>();
+        foreach (var claim in handshakeClaims)
+        {
+            var parts = claim.Value.Split(';', StringSplitOptions.TrimEntries);
+            if (parts.Length < 2)
+            {
+                throw new Exception("Invalid handshake claim format.");
+            }
+
+            var cookieAssignment = parts[0];
+            var cookieParts = cookieAssignment.Split('=', 2, StringSplitOptions.TrimEntries);
+            if (cookieParts.Length < 2)
+            {
+                throw new Exception("Invalid cookie assignment format in handshake claim.");
+            }
+
+            cookieValues.Add((cookieParts[0], cookieParts[1]));
+        }
+        var sessionCookie = cookieValues.First(c => c.Item1 == "__session").Item2;
+        var refreshCookie = cookieValues.First(c => c.Item1.StartsWith("__refresh")).Item2;
+        return new AuthToken(sessionCookie, refreshCookie);
     }
 
     public async Task<AuthToken?> HandleOAuthCallbackAsync(HttpRequest request, CancellationToken cancellationToken = default)
@@ -113,19 +137,8 @@ public class ClerkAuthProvider : IAuthProvider
             throw new Exception("Received no handshake JWT from Clerk.");
         }
 
-        Console.WriteLine("Received handshake JWT: " + VerifyHandshakeJwt(handshakeJwt));
-
-        try
-        {
-            await Task.CompletedTask;
-
-            // Return a mock token - in practice, this would be the actual Clerk session token
-            return new AuthToken("mock_clerk_jwt_token", null, null);
-        }
-        catch (Exception ex)
-        {
-            throw new Exception($"Failed to exchange authorization code for tokens: {ex.Message}");
-        }
+        Console.WriteLine("Received handshake JWT!");
+        return VerifyHandshakeJwt(handshakeJwt);
     }
 
     public async Task LogoutAsync(string jwt, CancellationToken cancellationToken = default)
