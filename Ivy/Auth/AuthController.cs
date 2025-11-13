@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Net;
+using System.Text.Json;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -37,10 +38,17 @@ public class AuthController() : Controller
 
             var tokenJson = JsonSerializer.Serialize(token);
 
+            // Calculate url-encoded token length
+            var tokenJsonLength = WebUtility.UrlEncode(tokenJson).Length;
+            var refreshTokenLength = token.RefreshToken != null
+                ? WebUtility.UrlEncode(token.RefreshToken).Length
+                : 0;
+
             // If the token is too big, try putting the refresh token into its own cookie.
             // I'm not trying to be overly precise here.
             const int CookieSizeLimit = 4000;
-            if (tokenJson.Length > CookieSizeLimit && tokenJson.Length - (token.RefreshToken?.Length ?? 0) < CookieSizeLimit)
+
+            if (tokenJsonLength > CookieSizeLimit && tokenJsonLength - refreshTokenLength < CookieSizeLimit)
             {
                 var refreshToken = token.RefreshToken!; // non-nullness implied by condition above
                 var modifiedToken = token with { RefreshToken = null };

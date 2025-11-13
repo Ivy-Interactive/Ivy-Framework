@@ -4,20 +4,31 @@ using Ivy.Shared;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
-/// <summary>Event arguments for cell click events in a DataTable.</summary>
+/// <summary>Event arguments for cell click events.</summary>
 public class CellClickEventArgs
 {
-    /// <summary>The row index of the clicked cell.</summary>
     public int RowIndex { get; set; }
-
-    /// <summary>The column index of the clicked cell.</summary>
     public int ColumnIndex { get; set; }
-
-    /// <summary>The name of the column for the clicked cell.</summary>
     public string ColumnName { get; set; } = "";
-
-    /// <summary>The value of the clicked cell.</summary>
     public object? CellValue { get; set; }
+}
+
+/// <summary>Configuration for a row action button.</summary>
+public class RowAction
+{
+    public string Id { get; set; } = "";
+    public string Icon { get; set; } = "";
+    public string EventName { get; set; } = "";
+    public string? Tooltip { get; set; }
+}
+
+/// <summary>Event arguments for row action click events.</summary>
+public class RowActionClickEventArgs
+{
+    public string ActionId { get; set; } = "";
+    public string EventName { get; set; } = "";
+    public int RowIndex { get; set; }
+    public Dictionary<string, object?> RowData { get; set; } = new();
 }
 
 public record DataTable : WidgetBase<DataTable>
@@ -43,11 +54,16 @@ public record DataTable : WidgetBase<DataTable>
 
     [Prop] public DataTableConfig Config { get; set; }
 
-    /// <summary>Event handler called when a cell is clicked (single-click).</summary>
+    [Prop] public RowAction[]? RowActions { get; set; }
+
+    /// <summary>Called when a cell is clicked (single-click).</summary>
     [Event] public Func<Event<DataTable, CellClickEventArgs>, ValueTask>? OnCellClick { get; set; }
 
-    /// <summary>Event handler called when a cell is activated (double-clicked for editing).</summary>
+    /// <summary>Called when a cell is activated (double-clicked).</summary>
     [Event] public Func<Event<DataTable, CellClickEventArgs>, ValueTask>? OnCellActivated { get; set; }
+
+    /// <summary>Called when a row action button is clicked.</summary>
+    [Event] public Func<Event<DataTable, RowActionClickEventArgs>, ValueTask>? OnRowAction { get; set; }
 
     public static Detail operator |(DataTable widget, object child)
     {

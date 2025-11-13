@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Copy, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { buttonVariants } from '@/components/ui/button/variants';
 
 interface CopyToClipboardButtonProps {
   textToCopy?: string;
@@ -25,16 +26,21 @@ const CopyToClipboardButton: React.FC<CopyToClipboardButtonProps> = ({
     }
   };
 
+  const isIconOnly = !label;
+
   return (
     <button
       onClick={handleCopy}
       aria-label={ariaLabel || 'Copy to clipboard'}
       className={cn(
-        'flex items-center gap-1 px-3 py-2 rounded-lg transition-all duration-200 ease-in-out cursor-pointer',
-        'hover:bg-accent hover:shadow-sm border-0',
-        copied
-          ? 'bg-primary text-primary-foreground'
-          : 'bg-transparent text-muted-foreground hover:text-foreground'
+        isIconOnly
+          ? buttonVariants({ variant: 'ghost', size: 'icon' })
+          : 'flex items-center gap-1 px-3 py-2 rounded-lg transition-all duration-200 ease-in-out cursor-pointer hover:bg-accent hover:shadow-sm border-0',
+        !isIconOnly &&
+          (copied
+            ? 'bg-primary text-primary-foreground'
+            : 'bg-transparent text-muted-foreground hover:text-foreground'),
+        copied && isIconOnly && 'bg-primary text-primary-foreground'
       )}
     >
       <span className="relative w-4 h-4">
@@ -44,7 +50,7 @@ const CopyToClipboardButton: React.FC<CopyToClipboardButtonProps> = ({
             copied ? 'scale-0' : 'scale-100'
           )}
         >
-          <Copy size={16} />
+          <Copy className="h-4 w-4" />
         </span>
         <span
           className={cn(
@@ -52,7 +58,7 @@ const CopyToClipboardButton: React.FC<CopyToClipboardButtonProps> = ({
             copied ? 'scale-100' : 'scale-0'
           )}
         >
-          <Check size={16} />
+          <Check className="h-4 w-4" />
         </span>
       </span>
       {label && (

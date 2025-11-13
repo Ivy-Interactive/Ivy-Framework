@@ -7,7 +7,7 @@ import { buttonVariants } from '@/components/ui/button/variants';
 
 interface BladeWidgetProps {
   id: string;
-  title: string;
+  title?: string;
   width?: string;
   index: number;
   children: ReactNode;
@@ -50,7 +50,9 @@ export function BladeWidget({
         onMouseDown={e => handleMouseDown(e)}
       >
         <div className="flex items-center h-[70px]">
-          {!slots?.BladeHeader && <h2 className="text-body">{title}</h2>}
+          {!slots?.BladeHeader && title && (
+            <h2 className="text-body">{title}</h2>
+          )}
           <div>{slots?.BladeHeader}</div>
         </div>
         <div className="flex items-center h-[70px]">

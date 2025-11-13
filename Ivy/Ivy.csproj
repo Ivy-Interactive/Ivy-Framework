@@ -41,7 +41,7 @@
     <EmbeddedResource Update="Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-      <Culture>neutral</Culture>
+      <LogicalName>Ivy.Resources.resources</LogicalName>
     </EmbeddedResource>
   </ItemGroup>
 
@@ -88,6 +88,10 @@
   
   <ItemGroup>
     <ProjectReference Include="..\Ivy.Filters\Ivy.Filters.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Ivy.DesignSystem" Version="1.1.1" />
   </ItemGroup>
 
 </Project>

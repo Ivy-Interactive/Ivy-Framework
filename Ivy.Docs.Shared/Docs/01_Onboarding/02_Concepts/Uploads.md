@@ -241,6 +241,17 @@ public class FormFileUpload : ViewBase
 }
 ```
 
+## Upload Handlers Overview
+
+Choose a handler that matches your scenario:
+
+- `MemoryStreamUploadHandler`: Reads the entire upload into memory and updates state automatically.
+- `ChunkedMemoryStreamUploadHandler`: Accumulates chunked uploads when data arrives in segments, such as audio capture.
+
+<Callout Type="info">
+In the docs we also use `SlowMemoryStreamUploadHandler` to simulate ~1 MB/s uploads for demos and progress tracking. It is documentation-only and not meant for production use.
+</Callout>
+
 ## FileUpload Record
 
 The `FileUpload<TContent>` record contains all file information:

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Immutable;
 using System.Dynamic;
 using System.Linq.Expressions;
@@ -80,10 +81,7 @@ public class DefaultAreaChartStyle<TSource> : IAreaChartStyle<TSource>
             .XAxis(new XAxis(dimension.Name).TickLine(false).AxisLine(false).MinTickGap(10))
             .CartesianGrid(new CartesianGrid().Horizontal())
             .Tooltip(new Ivy.Charts.Tooltip().Animated(true))
-            .Legend()
-            .Toolbox(new Toolbox()
-            .MagicType(false)
-            );
+            .Legend();
 
     }
 }
@@ -131,6 +129,8 @@ public class AreaChartBuilder<TSource>(
     : ViewBase
 {
     private readonly List<Measure<TSource>> _measures = [.. measures ?? []];
+    private Toolbox? _toolbox;
+    private Func<Toolbox, Toolbox>? _toolboxFactory;
 
     /// <summary>
     /// Builds the area chart by processing the data and applying the configured style.
@@ -180,7 +180,19 @@ public class AreaChartBuilder<TSource>(
             _measures.ToArray()
         );
 
-        return polish?.Invoke(scaffolded) ?? scaffolded;
+        var configuredChart = scaffolded;
+
+        if (_toolbox is not null)
+        {
+            configuredChart = configuredChart.Toolbox(_toolbox);
+        }
+        else if (_toolboxFactory is not null)
+        {
+            var baseToolbox = configuredChart.Toolbox ?? new Toolbox();
+            configuredChart = configuredChart.Toolbox(_toolboxFactory(baseToolbox));
+        }
+
+        return polish?.Invoke(configuredChart) ?? configuredChart;
     }
 
     /// <summary>
@@ -205,6 +217,27 @@ public class AreaChartBuilder<TSource>(
     {
         _measures.Add(new Measure<TSource>(name, aggregator));
         return this;
+    }
+
+    public AreaChartBuilder<TSource> Toolbox(Toolbox toolbox)
+    {
+        ArgumentNullException.ThrowIfNull(toolbox);
+        _toolbox = toolbox;
+        _toolboxFactory = null;
+        return this;
+    }
+
+    public AreaChartBuilder<TSource> Toolbox(Func<Toolbox, Toolbox> configure)
+    {
+        ArgumentNullException.ThrowIfNull(configure);
+        _toolbox = null;
+        _toolboxFactory = configure;
+        return this;
+    }
+
+    public AreaChartBuilder<TSource> Toolbox()
+    {
+        return Toolbox(_ => new Toolbox());
     }
 }
 

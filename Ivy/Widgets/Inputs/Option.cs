@@ -12,6 +12,9 @@ public interface IAnyOption
     /// <summary>Gets or sets the display label for the option.</summary>
     public string Label { get; set; }
 
+    /// <summary>Gets or sets the description providing additional context for the option.</summary>
+    public string? Description { get; set; }
+
     /// <summary>Gets or sets the group name for organizing related options.</summary>
     public string? Group { get; set; }
 
@@ -21,7 +24,7 @@ public interface IAnyOption
 
 /// <summary>Generic option class providing type-safe option items for selection controls.</summary>
 /// <typeparam name="TValue">Type of option's value.</typeparam>
-public class Option<TValue>(string label, TValue value, string? group = null) : IAnyOption
+public class Option<TValue>(string label, TValue value, string? group = null, string? description = null) : IAnyOption
 {
     public Option(TValue value) : this(value?.ToString() ?? "?", value, null)
     {
@@ -35,6 +38,9 @@ public class Option<TValue>(string label, TValue value, string? group = null) : 
 
     /// <summary>Gets or sets the display label for the option.</summary>
     public string Label { get; set; } = label;
+
+    /// <summary>Gets or sets the description providing additional context for the option.</summary>
+    public string? Description { get; set; } = description;
 
     /// <summary>Gets or sets the underlying value of the option as an object.</summary>
     public object Value { get; set; } = value!;

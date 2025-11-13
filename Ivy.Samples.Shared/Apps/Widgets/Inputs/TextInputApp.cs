@@ -78,6 +78,9 @@ public class TextInputApp : SampleBase
                   | withValue.ToSearchInput().Invalid("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec eros")
                )
 
+                | Text.H2("Prefix and Suffix")
+                | CreatePrefixSuffixSection()
+
                //Data Binding:
 
                | Text.H2("Data Binding")
@@ -135,5 +138,37 @@ public class TextInputApp : SampleBase
                | searchState.ToSearchInput().Small()
                | searchState.ToSearchInput()
                | searchState.ToSearchInput().Large();
+    }
+
+    private object CreatePrefixSuffixSection()
+    {
+        var textState = UseState("example");
+        var nullableState = UseState<string?>((string?)null);
+
+        return Layout.Grid().Columns(4)
+               | null!
+               | Text.InlineCode("Prefix only")
+               | Text.InlineCode("Suffix only")
+               | Text.InlineCode("Both")
+
+               | Text.InlineCode("Text prefix/suffix")
+               | textState.ToTextInput().Prefix("https://")
+               | textState.ToTextInput().Suffix(".com")
+               | textState.ToTextInput().Prefix("https://").Suffix(".com")
+
+               | Text.InlineCode("Icon prefix/suffix")
+               | textState.ToTextInput().Prefix(Icons.Mail)
+               | textState.ToTextInput().Suffix(Icons.Mail)
+               | textState.ToTextInput().Prefix(Icons.Mail).Suffix(Icons.Mail)
+
+               | Text.InlineCode("Nullable with prefix/suffix")
+               | nullableState.ToTextInput().Prefix("$").Placeholder("Amount")
+               | nullableState.ToTextInput().Suffix("%").Placeholder("Percentage")
+               | nullableState.ToTextInput().Prefix("https://").Suffix(".com").Placeholder("domain")
+
+               | Text.InlineCode("Nullable + Invalid + ShortcutKey")
+               | nullableState.ToTextInput().Prefix("@").Invalid("Required field").ShortcutKey("Ctrl+U")
+               | nullableState.ToTextInput().Suffix(Icons.Search).Invalid("Invalid input").ShortcutKey("Ctrl+F")
+               | nullableState.ToTextInput().Prefix(Icons.Mail).Suffix(".com").Invalid("Error").ShortcutKey("Ctrl+E");
     }
 }

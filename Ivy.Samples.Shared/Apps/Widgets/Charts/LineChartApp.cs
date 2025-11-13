@@ -45,6 +45,7 @@ public class LineChart0View : ViewBase
                 .Dimension("Month", e => e.Month)
                 .Measure("Desktop", e => e.Sum(f => f.Desktop))
                 .Measure("Mobile", e => e.Sum(f => f.Mobile))
+                .Toolbox()
         ;
     }
 }
@@ -69,6 +70,7 @@ public class LineChart1View : ViewBase
                 .Measure("Sales", e => e.Sum(f => f.Sales))
                 .Measure("Marketing", e => e.Sum(f => f.Marketing))
                 .Measure("Development", e => e.Sum(f => f.Development))
+                .Toolbox()
         ;
     }
 }
@@ -91,6 +93,7 @@ public class LineChart2View : ViewBase
                 .Dimension("Year", e => e.Year)
                 .Measure("Revenue", e => e.Sum(f => f.Revenue))
                 .Measure("Profit", e => e.Sum(f => f.Profit))
+                .Toolbox()
         ;
     }
 }
@@ -113,6 +116,7 @@ public class LineChart3View : ViewBase
                 .Measure("ProductA", e => e.Sum(f => f.ProductA))
                 .Measure("ProductB", e => e.Sum(f => f.ProductB))
                 .Measure("ProductC", e => e.Sum(f => f.ProductC))
+                .Toolbox()
         ;
     }
 }
@@ -137,6 +141,7 @@ public class LineChart4View : ViewBase
                 .Measure("Users", e => e.Sum(f => f.Users))
                 .Measure("Sessions", e => e.Sum(f => f.Sessions))
                 .Measure("Conversions", e => e.Sum(f => f.Conversions))
+                .Toolbox()
         ;
     }
 }
@@ -161,6 +166,7 @@ public class LineChart5View : ViewBase
                 .Measure("Temperature", e => e.Sum(f => f.Temperature))
                 .Measure("Humidity", e => e.Sum(f => f.Humidity))
                 .Measure("Pressure", e => e.Sum(f => f.Pressure))
+                .Toolbox()
         ;
     }
 }
@@ -182,6 +188,7 @@ public class LineChart6View : ViewBase
                 .Measure("Normal", e => e.Sum(f => f.Value))
                 .Measure("Negative", e => e.Sum(f => f.Negative))
                 .Measure("Very Large", e => e.Sum(f => f.Large))
+                .Toolbox()
         ;
     }
 }
@@ -205,6 +212,7 @@ public class LineChart7View : ViewBase
                 .Measure("Sales", e => e.Sum(f => f.Sales))
                 .Measure("Marketing", e => e.Sum(f => f.Marketing))
                 .Measure("Support", e => e.Sum(f => f.Support))
+                .Toolbox()
         ;
     }
 }
@@ -222,6 +230,7 @@ public class LineChart8View : ViewBase
             | data.ToLineChart(style: LineChartStyles.Custom)
                 .Dimension("Point", e => e.Point)
                 .Measure("Value", e => e.Sum(f => f.Value))
+                .Toolbox()
         ;
     }
 }
@@ -243,6 +252,7 @@ public class LineChart9View : ViewBase
             | data.ToLineChart(style: LineChartStyles.Default)
                 .Dimension("Label", e => e.Label)
                 .Measure("Value", e => e.Sum(f => f.Value))
+                .Toolbox()
         ;
     }
 }
@@ -266,6 +276,7 @@ public class LineChart10View : ViewBase
                 .Measure("Flat Line", e => e.Sum(f => f.Flat))
                 .Measure("Identical", e => e.Sum(f => f.Identical))
                 .Measure("Same Value", e => e.Sum(f => f.Same))
+                .Toolbox()
         ;
     }
 }
@@ -288,6 +299,7 @@ public class LineChart11View : ViewBase
                 .Measure("Small (1-100)", e => e.Sum(f => f.Small))
                 .Measure("Medium (1K-100K)", e => e.Sum(f => f.Medium))
                 .Measure("Large (1M-100M)", e => e.Sum(f => f.Large))
+                .Toolbox()
         ;
     }
 }

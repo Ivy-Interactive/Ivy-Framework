@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Immutable;
 using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
@@ -87,9 +88,6 @@ public class DefaultPieChartStyle<TSource> : IPieChartStyle<TSource>
                 .Layout(Legend.Layouts.Horizontal)
                 .Align(Legend.Alignments.Center)
                 .VerticalAlign(Legend.VerticalAlignments.Bottom)
-            )
-            .Toolbox(new Toolbox()
-            .MagicType(false)
             );
     }
 }
@@ -120,10 +118,7 @@ public class DashboardPieChartStyle<TSource> : IPieChartStyle<TSource>
                     .Align(Legend.Alignments.Center)
                     .VerticalAlign(Legend.VerticalAlignments.Bottom)
                 )
-                .Tooltip(new Ivy.Charts.Tooltip().Animated(true))
-                .Toolbox(new Toolbox()
-                .MagicType(false)
-            );
+                .Tooltip(new Ivy.Charts.Tooltip().Animated(true));
     }
 }
 
@@ -176,6 +171,9 @@ public class PieChartBuilder<TSource>(
     Func<PieChart, PieChart>? polish = null)
     : ViewBase
 {
+    private Toolbox? _toolbox;
+    private Func<Toolbox, Toolbox>? _toolboxFactory;
+
     /// <summary>
     /// Builds the pie chart by processing the data and applying the configured style.
     /// </summary>
@@ -223,7 +221,40 @@ public class PieChartBuilder<TSource>(
            total
         );
 
-        return polish?.Invoke(scaffolded) ?? scaffolded;
+        var configuredChart = scaffolded;
+
+        if (_toolbox is not null)
+        {
+            configuredChart = configuredChart.Toolbox(_toolbox);
+        }
+        else if (_toolboxFactory is not null)
+        {
+            var baseToolbox = configuredChart.Toolbox ?? new Toolbox();
+            configuredChart = configuredChart.Toolbox(_toolboxFactory(baseToolbox));
+        }
+
+        return polish?.Invoke(configuredChart) ?? configuredChart;
+    }
+
+    public PieChartBuilder<TSource> Toolbox(Toolbox toolbox)
+    {
+        ArgumentNullException.ThrowIfNull(toolbox);
+        _toolbox = toolbox;
+        _toolboxFactory = null;
+        return this;
+    }
+
+    public PieChartBuilder<TSource> Toolbox(Func<Toolbox, Toolbox> configure)
+    {
+        ArgumentNullException.ThrowIfNull(configure);
+        _toolbox = null;
+        _toolboxFactory = configure;
+        return this;
+    }
+
+    public PieChartBuilder<TSource> Toolbox()
+    {
+        return Toolbox(_ => new Toolbox());
     }
 }
 

@@ -9,13 +9,17 @@ using Microsoft.Extensions.AI;
 
 namespace Ivy.Views.DataTables;
 
-public class DataTableBuilder<TModel> : ViewBase
+public class DataTableBuilder<TModel> : ViewBase, IMemoized
 {
     private readonly IQueryable<TModel> _queryable;
     private Size? _width;
     private Size? _height;
     private readonly Dictionary<string, InternalColumn> _columns;
     private readonly DataTableConfig _configuration = new();
+    private Func<Event<DataTable, CellClickEventArgs>, ValueTask>? _onCellClick;
+    private Func<Event<DataTable, CellClickEventArgs>, ValueTask>? _onCellActivated;
+    private RowAction[]? _rowActions;
+    private Func<Event<DataTable, RowActionClickEventArgs>, ValueTask>? _onRowAction;
 
     private class InternalColumn
     {
@@ -272,6 +276,34 @@ public class DataTableBuilder<TModel> : ViewBase
         return this;
     }
 
+    /// <summary>Sets the event handler for cell clicks (single-click).</summary>
+    public DataTableBuilder<TModel> OnCellClick(Func<Event<DataTable, CellClickEventArgs>, ValueTask> handler)
+    {
+        _onCellClick = handler;
+        return this;
+    }
+
+    /// <summary>Sets the event handler for cell activation (double-click).</summary>
+    public DataTableBuilder<TModel> OnCellActivated(Func<Event<DataTable, CellClickEventArgs>, ValueTask> handler)
+    {
+        _onCellActivated = handler;
+        return this;
+    }
+
+    /// <summary>Configures row action buttons that appear on hover.</summary>
+    public DataTableBuilder<TModel> RowActions(params RowAction[] actions)
+    {
+        _rowActions = actions;
+        return this;
+    }
+
+    /// <summary>Sets the event handler for row action button clicks.</summary>
+    public DataTableBuilder<TModel> OnRowAction(Func<Event<DataTable, RowActionClickEventArgs>, ValueTask> handler)
+    {
+        _onRowAction = handler;
+        return this;
+    }
+
     public override object? Build()
     {
         var chatClient = this.UseService<IChatClient?>();
@@ -289,6 +321,18 @@ public class DataTableBuilder<TModel> : ViewBase
             configuration = _configuration with { AllowLlmFiltering = true };
         }
 
-        return new DataTableView(queryable, width, _height, columns, configuration);
+        // Automatically enable cell click events if handlers are provided
+        if (_onCellClick != null || _onCellActivated != null)
+        {
+            configuration = configuration with { EnableCellClickEvents = true };
+        }
+
+        return new DataTableView(queryable, width, _height, columns, configuration, _onCellClick, _onCellActivated, _rowActions, _onRowAction);
+    }
+
+    public object[] GetMemoValues()
+    {
+        // Memoize based on configuration - if config hasn't changed, don't rebuild
+        return [(object?)_width!, (object?)_height!, _configuration];
     }
 }

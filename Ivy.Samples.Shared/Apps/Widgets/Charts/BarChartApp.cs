@@ -128,6 +128,7 @@ public class BarChart3 : ViewBase
                 .Tooltip()
                 .YAxis(new YAxis("Month").TickLine(false).AxisLine(false).Type(AxisTypes.Category).Hide())
                 .XAxis(new XAxis("Desktop").Type(AxisTypes.Number).Hide())
+                .Toolbox()
         ;
     }
 }
@@ -154,7 +155,7 @@ public class BarChart4 : ViewBase
                 .Tooltip()
                 .XAxis(new XAxis("Quarter").TickLine(false).AxisLine(false))
                 .Legend()
-                 .Toolbox()
+                .Toolbox()
         ;
     }
 }

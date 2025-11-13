@@ -133,7 +133,6 @@ export const KanbanWidget: React.FC<KanbanWidgetProps> = ({
     toColumn: string,
     targetIndex?: number
   ) => {
-    // Send move event to backend with column keys
     eventHandler('OnMove', id, [cardId, fromColumn, toColumn, targetIndex]);
   };
 
@@ -143,13 +142,11 @@ export const KanbanWidget: React.FC<KanbanWidgetProps> = ({
       | TaskWithWidgetId
       | undefined;
     if (task?.widgetId) {
-      // Send click event to the specific card widget
       eventHandler('OnClick', task.widgetId, [cardId]);
     }
   };
 
   const handleCardDelete = (cardId: string) => {
-    // Send delete event to backend (on the Kanban widget, not the card)
     eventHandler('OnDelete', id, [cardId]);
   };
 

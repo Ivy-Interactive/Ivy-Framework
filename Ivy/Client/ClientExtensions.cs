@@ -35,6 +35,11 @@ public class SetAuthTokenMessage
     public required bool ReloadPage { get; set; }
 }
 
+public class SetRootAppIdMessage
+{
+    public required string RootAppId { get; set; }
+}
+
 public static class ClientExtensions
 {
     public static void CopyToClipboard(this IClientProvider client, string content)
@@ -66,6 +71,11 @@ public static class ClientExtensions
     public static void SetAuthToken(this IClientProvider client, AuthToken? authToken, bool reloadPage = true)
     {
         client.Sender.Send("SetAuthToken", new SetAuthTokenMessage { AuthToken = authToken, ReloadPage = reloadPage });
+    }
+
+    public static void SetRootAppId(this IClientProvider client, string rootAppId)
+    {
+        client.Sender.Send("SetRootAppId", new SetRootAppIdMessage { RootAppId = rootAppId });
     }
 
     /// <summary>

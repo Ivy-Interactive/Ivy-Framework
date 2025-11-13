@@ -3,25 +3,27 @@ using Ivy.Filters;
 using Ivy.Protos.DataTable;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-
-//todo: Check for JWT
+using Ivy.Helpers;
 
 namespace Ivy.Views.DataTables;
 
 public class DataTableService(
     IQueryableRegistry queryableRegistry,
+    AppSessionStore sessionStore,
+    Server server,
     IDistributedCache? cache = null,
     IChatClient? chatClient = null,
     ILogger<DataTableService>? logger = null
     )
     : Protos.DataTable.DataTableService.DataTableServiceBase
 {
-    public override Task<DataTableResult> Query(DataTableQuery request, ServerCallContext context)
+    public override async Task<DataTableResult> Query(DataTableQuery request, ServerCallContext context)
     {
         try
         {
+            await AuthHelper.ValidateAuthIfRequired(server, sessionStore, request.ConnectionId, context);
+
             if (string.IsNullOrEmpty(request.SourceId))
             {
                 throw new RpcException(new Status(StatusCode.InvalidArgument, "SourceId is required in the request."));
@@ -46,7 +48,7 @@ public class DataTableService(
                 TotalRows = queryResult.TotalRows
             };
 
-            return Task.FromResult(tableResult);
+            return tableResult;
         }
         catch (RpcException)
         {
@@ -58,10 +60,12 @@ public class DataTableService(
         }
     }
 
-    public override Task<DataTableValuesResult> Values(DataTableValuesQuery request, ServerCallContext context)
+    public override async Task<DataTableValuesResult> Values(DataTableValuesQuery request, ServerCallContext context)
     {
         try
         {
+            await AuthHelper.ValidateAuthIfRequired(server, sessionStore, request.ConnectionId, context);
+
             if (string.IsNullOrEmpty(request.SourceId))
             {
                 throw new RpcException(new Status(StatusCode.InvalidArgument, "SourceId is required in the request."));
@@ -82,7 +86,7 @@ public class DataTableService(
             };
             result.Values.AddRange(valuesResult.Values);
 
-            return Task.FromResult(result);
+            return result;
         }
         catch (RpcException)
         {
@@ -98,6 +102,8 @@ public class DataTableService(
     {
         try
         {
+            await AuthHelper.ValidateAuthIfRequired(server, sessionStore, request.ConnectionId, context);
+
             if (string.IsNullOrWhiteSpace(request.FilterExpression))
             {
                 throw new RpcException(new Status(StatusCode.InvalidArgument, "FilterExpression is required in the request."));

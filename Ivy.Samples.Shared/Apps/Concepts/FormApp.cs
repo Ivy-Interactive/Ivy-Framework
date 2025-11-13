@@ -222,6 +222,8 @@ public class FormApp : SampleBase
                 | new Card(
                     smallModel.ToForm()
                         .Small()
+                        .Group("Personal Information", open: true, m => m.Name, m => m.Email, m => m.Age)
+                        .Group("Contact Details", m => m.PhoneNumber, m => m.Website)
                         .Builder(m => m.Description, s => s.ToTextAreaInput())
                         .Builder(m => m.Password, s => s.ToPasswordInput())
                         .Builder(m => m.PhoneNumber, s => s.ToTelInput())
@@ -229,10 +231,12 @@ public class FormApp : SampleBase
                         .Builder(m => m.Color, s => s.ToColorInput())
                 )
                 .Width(1 / 3f)
-                .Title("Small Form")
+                .Title("Small Form (with Groups)")
                 | new Card(
                     mediumModel.ToForm()
                         .Medium()
+                        .Group("Account", open: true, m => m.Name, m => m.Email, m => m.Password)
+                        .Group("Profile", m => m.Age, m => m.BirthDate, m => m.Role)
                         .Builder(m => m.Description, s => s.ToTextAreaInput())
                         .Builder(m => m.Password, s => s.ToPasswordInput())
                         .Builder(m => m.PhoneNumber, s => s.ToTelInput())
@@ -240,10 +244,12 @@ public class FormApp : SampleBase
                         .Builder(m => m.Color, s => s.ToColorInput())
                 )
                 .Width(1 / 3f)
-                .Title("Medium Form (Default)")
+                .Title("Medium Form (with Groups)")
                 | new Card(
                     largeModel.ToForm()
                         .Large()
+                        .Group("Basic Info", open: true, m => m.Name, m => m.Email)
+                        .Group("Details", m => m.Description, m => m.Color)
                         .Builder(m => m.Description, s => s.ToTextAreaInput())
                         .Builder(m => m.Password, s => s.ToPasswordInput())
                         .Builder(m => m.PhoneNumber, s => s.ToTelInput())
@@ -251,7 +257,7 @@ public class FormApp : SampleBase
                         .Builder(m => m.Color, s => s.ToColorInput())
                 )
                 .Width(1 / 3f)
-                .Title("Large Form"))
+                .Title("Large Form (with Groups)"))
             ;
         ;
     }
