@@ -1,4 +1,5 @@
 using Ivy.Shared;
+using Ivy.Views.Builders;
 using Ivy.Views.Kanban;
 
 namespace Ivy.Samples.Shared.Apps.Widgets;
@@ -17,6 +18,17 @@ public class Task
 public class KanbanApp : SampleBase
 {
     protected override object? BuildSample()
+    {
+        return Layout.Tabs(
+            new Tab("Basic Example", new BasicKanbanExample()),
+            new Tab("Card Builder Example", new CardBuilderKanbanExample())
+        ).Variant(TabsVariant.Content);
+    }
+}
+
+public class BasicKanbanExample : ViewBase
+{
+    public override object? Build()
     {
         var selectedTaskId = this.UseState((string?)null);
         var tasks = UseState(new[]
@@ -163,4 +175,86 @@ public class KanbanApp : SampleBase
         var tasksInColumn = tasks.Where(t => t.Status == columnKey).ToList();
         return tasksInColumn.Count + 1;
     }
+}
+
+public class CardBuilderKanbanExample : ViewBase
+{
+    public override object? Build()
+    {
+        var tasks = UseState(new[]
+        {
+            new Task { Id = "1", Title = "Design Homepage", Status = "Todo", Priority = 2, Description = "Create wireframes and mockups", Assignee = "Alice" },
+            new Task { Id = "2", Title = "Setup Database", Status = "Todo", Priority = 1, Description = "Configure PostgreSQL instance", Assignee = "Bob" },
+            new Task { Id = "3", Title = "Implement Auth", Status = "Todo", Priority = 3, Description = "Add OAuth2 authentication", Assignee = "Charlie" },
+            new Task { Id = "4", Title = "Build API", Status = "Todo", Priority = 4, Description = "Create REST endpoints", Assignee = "Alice" },
+            new Task { Id = "5", Title = "Code Review", Status = "In Progress", Priority = 1, Description = "Review pull requests", Assignee = "Charlie" },
+            new Task { Id = "6", Title = "Performance Optimization", Status = "In Progress", Priority = 2, Description = "Optimize database queries", Assignee = "Alice" },
+            new Task { Id = "7", Title = "Bug Fixes", Status = "In Progress", Priority = 3, Description = "Fix reported bugs", Assignee = "Bob" },
+            new Task { Id = "8", Title = "Unit Tests", Status = "Done", Priority = 1, Description = "Write comprehensive test suite", Assignee = "Bob" },
+            new Task { Id = "9", Title = "Deploy to Production", Status = "Done", Priority = 2, Description = "Configure CI/CD pipeline", Assignee = "Charlie" },
+        });
+
+        var kanban = tasks.Value
+                .ToKanban(groupBySelector: e => e.Status)
+                .CardId(e => e.Id)
+                .Builder(factory => factory.Func<Task, Task>(task => new Card(
+                    content: task.ToDetails()
+                        .Remove(x => x.Id)
+                        .MultiLine(x => x.Description)
+                )
+                    .Title(task.Title)
+                ))
+                .ColumnOrder(e => GetStatusOrder(e.Status))
+                .Width(Size.Full())
+                .Width(e => e.Status, Size.Fraction(0.33f))
+                .HandleMove(moveData =>
+                {
+                    var taskId = moveData.CardId?.ToString();
+                    if (string.IsNullOrEmpty(taskId)) return;
+
+                    var updatedTasks = tasks.Value.ToList();
+                    var taskToMove = updatedTasks.FirstOrDefault(t => t.Id == taskId);
+                    if (taskToMove == null) return;
+
+                    // Update the task's status
+                    taskToMove = new Task
+                    {
+                        Id = taskToMove.Id,
+                        Title = taskToMove.Title,
+                        Status = moveData.ToColumn,
+                        Priority = taskToMove.Priority,
+                        Description = taskToMove.Description,
+                        Assignee = taskToMove.Assignee
+                    };
+
+                    // Remove the task from its current position
+                    updatedTasks.RemoveAll(t => t.Id == taskId);
+
+                    // Insert the task at the desired position within the target column
+                    var tasksInTargetColumn = updatedTasks.Where(t => t.Status == moveData.ToColumn).ToList();
+                    if (moveData.TargetIndex.HasValue && moveData.TargetIndex.Value < tasksInTargetColumn.Count)
+                    {
+                        // Insert at specific position
+                        var insertIndex = moveData.TargetIndex.Value;
+                        updatedTasks.InsertRange(insertIndex, new[] { taskToMove });
+                    }
+                    else
+                    {
+                        // Add to end of column
+                        updatedTasks.Add(taskToMove);
+                    }
+
+                    tasks.Set(updatedTasks.ToArray());
+                });
+
+        return kanban;
+    }
+
+    private static int GetStatusOrder(string status) => status switch
+    {
+        "Todo" => 1,
+        "In Progress" => 2,
+        "Done" => 3,
+        _ => 0
+    };
 }

@@ -19,7 +19,7 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
     private Func<TModel, object?>? _cardOrderBySelector;
     private bool _cardOrderDescending;
     private Func<Event<KanbanColumn, TGroupKey>, ValueTask>? _onAdd;
-    private readonly Func<TModel, object?>? _cardIdSelector;
+    private Func<TModel, object?>? _cardIdSelector;
     private readonly Func<TModel, object?>? _cardTitleSelector;
     private readonly Func<TModel, object?>? _cardDescriptionSelector;
     private readonly Func<TModel, object?>? _orderSelector;
@@ -59,6 +59,12 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
     public KanbanBuilder<TModel, TGroupKey> CardBuilder(Func<TModel, object> cardRenderer)
     {
         _customCardRenderer = cardRenderer;
+        return this;
+    }
+
+    public KanbanBuilder<TModel, TGroupKey> CardId<TId>(Expression<Func<TModel, TId>> idSelector)
+    {
+        _cardIdSelector = idSelector.Compile() as Func<TModel, object?>;
         return this;
     }
 
