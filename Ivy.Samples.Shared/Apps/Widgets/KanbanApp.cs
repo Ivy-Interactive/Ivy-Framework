@@ -197,7 +197,7 @@ public class CardBuilderKanbanExample : ViewBase
         var kanban = tasks.Value
                 .ToKanban(groupBySelector: e => e.Status)
                 .CardId(e => e.Id)
-                .Builder(factory => factory.Func<Task, Task>(task => new Card(
+                .CardBuilder(factory => factory.Func<Task, Task>(task => new Card(
                     content: task.ToDetails()
                         .Remove(x => x.Id)
                         .MultiLine(x => x.Description)

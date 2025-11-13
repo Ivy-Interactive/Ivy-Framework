@@ -50,7 +50,7 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
         _orderSelector = orderSelector;
     }
 
-    public KanbanBuilder<TModel, TGroupKey> Builder(Func<IBuilderFactory<TModel>, IBuilder<TModel>> builder)
+    public KanbanBuilder<TModel, TGroupKey> CardBuilder(Func<IBuilderFactory<TModel>, IBuilder<TModel>> builder)
     {
         _cardBuilder = builder(_builderFactory);
         return this;
