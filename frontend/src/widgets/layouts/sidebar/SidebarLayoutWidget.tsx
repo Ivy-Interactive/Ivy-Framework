@@ -152,7 +152,7 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
     >
       {/* Custom Sidebar with Slide Animation */}
       <div
-        className={`flex h-full w-[256px] flex-col bg-sidebar text-sidebar-foreground border-r border-border transition-transform duration-300 ease-in-out relative overflow-hidden ${
+        className={`flex h-full w-[256px] flex-col bg-background text-foreground border-r border-border transition-transform duration-300 ease-in-out relative overflow-hidden ${
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -339,7 +339,7 @@ const renderMenuItems = (
       if (level === 0) {
         return (
           <div key={item.label} className="space-y-1 mt-6 first:mt-0">
-            <h4 className="sticky top-0 z-10 bg-sidebar px-3 py-2 text-small-label text-muted-foreground mb-0">
+            <h4 className="sticky top-0 z-10 bg-background px-3 py-2 text-small-label text-muted-foreground mb-0">
               {item.label}
             </h4>
             <ul className="space-y-1">
@@ -449,7 +449,7 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
       if (item.children && item.children.length > 0) {
         return (
           <div key={item.label} className="space-y-1 mt-6 first:mt-0">
-            <h4 className="sticky top-0 z-10 bg-sidebar px-3 py-2 text-small-label text-muted-foreground mb-0">
+            <h4 className="sticky top-0 z-10 bg-background px-3 py-2 text-small-label text-muted-foreground mb-0">
               {item.label}
             </h4>
             <ul className="space-y-1">

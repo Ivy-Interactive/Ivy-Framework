@@ -158,10 +158,6 @@
     --text-large-label: 14px;
     --text-small-label: 12px;
 
-    /* Sidebar color overrides */
-    --color-sidebar: var(--muted);
-    --color-sidebar-foreground: var(--foreground);
-
     /* Spacing */
     --radius-sm: calc(var(--radius) - 4px);
     --radius-md: calc(var(--radius) - 2px);
