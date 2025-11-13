@@ -291,7 +291,13 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
           const src = props.src;
           const imageSrc =
             src && !src?.match(/^(https?:\/\/|data:|blob:|app:)/i)
-              ? `${getIvyHost()}${src?.startsWith('/') ? '' : '/'}${src}`
+              ? (() => {
+                  const normalizedSrc = src.startsWith('/') ? src : `/${src}`;
+                  const prefixedSrc = normalizedSrc.startsWith('/ivy/')
+                    ? normalizedSrc
+                    : `/ivy${normalizedSrc}`;
+                  return `${getIvyHost()}${prefixedSrc}`;
+                })()
               : src;
 
           return (
