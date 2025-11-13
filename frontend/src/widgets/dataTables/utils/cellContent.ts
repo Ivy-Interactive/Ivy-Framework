@@ -271,7 +271,7 @@ export function createLabelsCell(cellValue: unknown, align?: Align): GridCell {
  */
 export function createLinkCell(
   url: string,
-  editable: boolean,
+  _editable: boolean,
   align?: Align
 ): GridCell {
   return {

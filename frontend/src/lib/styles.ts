@@ -20,9 +20,10 @@ export const getWidth = (width?: string): React.CSSProperties => {
 const _getWantedWidth = (width?: string): React.CSSProperties => {
   if (!width) return {};
   const [sizeType, value] = width.split(':');
+  const remValue = parseFloat(value) * 0.25;
   switch (sizeType.toLowerCase()) {
     case 'units':
-      return { width: `${parseFloat(value) * 0.25}rem` };
+      return { width: `${remValue}rem`, maxWidth: `${remValue}rem` };
     case 'px':
       return { width: `${value}px` };
     case 'rem':

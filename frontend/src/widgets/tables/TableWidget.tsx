@@ -26,7 +26,7 @@ export const TableWidget: React.FC<TableWidgetProps> = ({
       className={cn('w-full')}
       style={{
         ...styles,
-        tableLayout: 'auto',
+        tableLayout: 'fixed',
       }}
     >
       <TableBody>{children}</TableBody>
