@@ -97,9 +97,9 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
       textLight: colors.mutedForeground || (isDark ? '#71717a' : '#9ca3af'),
       // bgIconHeader is the background color for icon areas, should be subtle
       bgIconHeader: colors.muted || (isDark ? '#26262b' : '#f3f4f6'),
-      //
+      // accentColor is used as the background for selected cells or highlights
       accentColor: colors.secondary || (isDark ? '#26262b' : '#e5e7eb'),
-      //
+      // accentFg is the foreground/text color used on top of accentColor backgrounds
       accentFg: colors.muted || (isDark ? '#f8f8f8' : '#18181b'),
       // column focus bg color
       accentLight: colors.muted || (isDark ? '#27272a' : '#e4e4e7'),
