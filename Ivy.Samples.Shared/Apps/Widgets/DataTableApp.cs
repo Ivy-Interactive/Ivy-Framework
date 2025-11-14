@@ -36,15 +36,7 @@ public class DataTableApp : SampleBase
 {
     protected override object? BuildSample()
     {
-        // Manage Sheet open/close state at app level
-        var isOpen = this.UseState(false);
-
-        // Store selected cell information
-        var selectedCell = this.UseState<CellClickEventArgs?>(() => null);
-
-        // Store selected row for row actions
-        var selectedRowIndex = this.UseState<int?>(() => null);
-        var actionName = this.UseState<string?>(() => null);
+        var client = UseService<IClientProvider>();
 
         var allSkills = new[] { "C#", "JavaScript", "Python", "SQL", "React", "Leadership", "Communication", "Problem Solving", "Team Player", "Agile" };
 
@@ -216,9 +208,9 @@ public class DataTableApp : SampleBase
             .Group(e => e.WidgetLink, "Links")
             .Group(e => e.ProfileLink, "Links")
 
-            // Column types - Set Link type explicitly
-            .DataTypeHint(e => e.WidgetLink, ColType.Link)
-            .DataTypeHint(e => e.ProfileLink, ColType.Link)
+            // Column renderers - Set Link renderer explicitly
+            .Renderer(e => e.WidgetLink, new LinkDisplayRenderer { Type = LinkDisplayType.Url })
+            .Renderer(e => e.ProfileLink, new LinkDisplayRenderer { Type = LinkDisplayType.Url })
 
             // Sorting
             .Sortable(e => e.Email, false) // Email not sortable
@@ -237,7 +229,7 @@ public class DataTableApp : SampleBase
                 config.SelectionMode = SelectionModes.Columns;
                 config.ShowIndexColumn = false;
                 config.ShowGroups = true;
-                config.ShowVerticalBorders = false;
+                config.ShowVerticalBorders = true;
                 config.ShowColumnTypeIcons = false; // Show type icons
                 config.BatchSize = 50; // Load 50 rows at a time
                 config.LoadAllRows = false; // Use pagination
@@ -245,83 +237,23 @@ public class DataTableApp : SampleBase
             })
             // Configure row action buttons
             .RowActions(
-                new RowAction { Id = "menu", Icon = "EllipsisVertical", EventName = "OnRowMenu" }
+                MenuItem.Default(Icons.Pencil, "edit").Tooltip("Edit employee"),
+                MenuItem.Default(Icons.Trash2, "delete").Tooltip("Delete employee"),
+                MenuItem.Default(Icons.Eye, "view").Tooltip("View details"),
+                MenuItem.Default(Icons.EllipsisVertical, "menu")
+                    .Tooltip("More actions")
+                    .Children([
+                        MenuItem.Default(Icons.Archive, "archive").Label("Archive"),
+                        MenuItem.Default(Icons.Download, "export").Label("Export"),
+                        MenuItem.Default(Icons.Share2, "share").Label("Share")
+                    ])
             )
-            // Handle row action clicks
-            .OnRowAction(e =>
+            // Handle row action menu selections
+            .HandleRowAction((employee, menuItem) =>
             {
-                var args = e.Value;
-                selectedRowIndex.Set(args.RowIndex);
-                actionName.Set(args.EventName);
-                selectedCell.Set((CellClickEventArgs?)null); // Clear cell selection
-                isOpen.Set(true);
-                return ValueTask.CompletedTask;
+                client.Toast($"Fired custom event: {menuItem.Tag} for {employee.Name}");
             });
 
-        // Build Sheet content based on interaction type
-        object? sheetContent = null;
-        string sheetTitle = "Row Details";
-        string sheetDescription = "";
-
-        if (selectedRowIndex.Value != null)
-        {
-            // Row action button was clicked
-            var employee = employees.Value.ElementAtOrDefault(selectedRowIndex.Value.Value);
-
-            if (employee != null)
-            {
-                sheetTitle = "Employee Details";
-                sheetDescription = $"Row {selectedRowIndex.Value} information";
-
-                sheetContent = new Card(
-                    new StackLayout([
-                        $"ID: {employee.Id}",
-                        $"Code: {employee.EmployeeCode}",
-                        $"Name: {employee.Name}",
-                        $"Email: {employee.Email}",
-                        $"Age: {employee.Age}",
-                        $"Salary: {employee.Salary:C}",
-                        $"Performance: {employee.Performance}",
-                        $"Active: {employee.IsActive}",
-                        $"Manager: {employee.IsManager}",
-                        $"Hire Date: {employee.HireDate:d}",
-                        $"Last Review: {employee.LastReview:d}",
-                        $"Department: {employee.Department}",
-                        $"Status: {employee.Status}",
-                        $"Priority: {employee.Priority}",
-                        $"Notes: {employee.Notes}"
-                    ], gap: 8)
-                ).Title("Employee Information");
-            }
-        }
-        else
-        {
-            sheetTitle = "Welcome";
-            sheetDescription = "How to interact with the table";
-            sheetContent = new StackLayout([
-                new Card(
-                    new StackLayout([
-                        "• Hover over any row to see action buttons on the right",
-                        "• Click Edit, Delete, or View icons to perform actions",
-                        "• Double-click any cell to view cell details",
-                        "",
-                        "The action buttons demonstrate the new row actions feature!",
-                    ], gap: 8)
-                ).Title("Instructions")
-            ]);
-        }
-
-        // Layout: DataTable is always rendered, Sheet overlays on top when open
-        return new Fragment(
-            dataTable,
-            // Sheet appears as overlay without unmounting the DataTable
-            isOpen.Value
-                ? new Sheet(_ =>
-                {
-                    isOpen.Set(false);
-                    return ValueTask.CompletedTask;
-                }, sheetContent!, sheetTitle, sheetDescription).Width(Size.Fraction(0.4f))
-                : null
-        );
+        return dataTable;
     }
 }

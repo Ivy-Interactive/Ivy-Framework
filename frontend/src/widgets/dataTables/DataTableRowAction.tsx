@@ -1,6 +1,12 @@
 import React from 'react';
 import Icon from '@/components/Icon';
 import { RowAction } from './types/types';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface RowActionButtonsProps {
   /**
@@ -42,6 +48,63 @@ export const RowActionButtons: React.FC<RowActionButtonsProps> = ({
 }) => {
   if (!visible || actions.length === 0) return null;
 
+  const renderAction = (action: RowAction) => {
+    // If action has children, render as dropdown menu
+    if (action.children && action.children.length > 0) {
+      return (
+        <DropdownMenu key={action.id}>
+          <DropdownMenuTrigger asChild>
+            <button
+              className="flex items-center justify-center p-1 rounded bg-[var(--color-muted)] hover:bg-[var(--color-accent)] transition-colors cursor-pointer"
+              aria-label={action.tooltip || action.eventName}
+              type="button"
+            >
+              <Icon
+                name={action.icon}
+                size={16}
+                className="text-[var(--color-foreground)]"
+              />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {action.children.map(childAction => (
+              <DropdownMenuItem
+                key={childAction.id}
+                onClick={() => onActionClick(childAction)}
+              >
+                {childAction.icon && (
+                  <Icon
+                    name={childAction.icon}
+                    size={16}
+                    className="mr-2 text-[var(--color-foreground)]"
+                  />
+                )}
+                {childAction.label || childAction.id}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      );
+    }
+
+    // Otherwise, render as regular button
+    return (
+      <button
+        key={action.id}
+        className="flex items-center justify-center p-1 rounded bg-[var(--color-muted)] hover:bg-[var(--color-accent)] transition-colors cursor-pointer"
+        onClick={() => onActionClick(action)}
+        aria-label={action.tooltip || action.eventName}
+        type="button"
+      >
+        <Icon
+          name={action.icon}
+          size={16}
+          className="text-[var(--color-foreground)]"
+        />
+      </button>
+    );
+  };
+
   return (
     <div
       className="absolute z-50 flex flex-row gap-1"
@@ -54,21 +117,7 @@ export const RowActionButtons: React.FC<RowActionButtonsProps> = ({
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >
-      {actions.map(action => (
-        <button
-          key={action.id}
-          className="flex items-center justify-center p-1 rounded bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 transition-colors cursor-pointer"
-          onClick={() => onActionClick(action)}
-          aria-label={action.eventName}
-          type="button"
-        >
-          <Icon
-            name={action.icon}
-            size={16}
-            className="text-[#606664] dark:text-gray-300"
-          />
-        </button>
-      ))}
+      {actions.map(renderAction)}
     </div>
   );
 };

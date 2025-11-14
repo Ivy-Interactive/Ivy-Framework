@@ -176,16 +176,15 @@ public class RowActionsDemo : ViewBase
         return employees
             .ToDataTable()
             .Header(e => e.ProfileLink, "Profile")
-            .DataTypeHint(e => e.ProfileLink, ColType.Link)
+            .Renderer(e => e.ProfileLink, new LinkDisplayRenderer { Type = LinkDisplayType.Url })
             .RowActions(
-                new RowAction { Id = "edit", Icon = Icons.Pencil.ToString(), EventName = "OnEdit" },
-                new RowAction { Id = "delete", Icon = Icons.Trash.ToString(), EventName = "OnDelete" }
+                MenuItem.Default(Icons.Pencil, "edit").Tooltip("Edit employee"),
+                MenuItem.Default(Icons.Trash, "delete").Tooltip("Delete employee")
             )
-            .OnRowAction(e =>
+            .HandleRowAction((employee, menuItem) =>
             {
-                var args = e.Value;
-                client.Toast($"Action: {args.EventName} (Row {args.RowIndex})");
-                return ValueTask.CompletedTask;
+                var action = menuItem.Tag?.ToString();
+                client.Toast($"Action: {action} on {employee.Name}");
             })
             ;
     }
@@ -193,10 +192,10 @@ public class RowActionsDemo : ViewBase
 ```
 
 <Callout Type="tip">
-Use <code>DataTypeHint(expr, ColType.Link)</code> to mark a URL string column as a clickable hyperlink. Users can open the link with <kbd>Ctrl</kbd>/<kbd>Cmd</kbd> + click or via the context menu.
+Use <code>Renderer(expr, new LinkDisplayRenderer { Type = LinkDisplayType.Url })</code> to mark a URL string column as a clickable hyperlink. Users can open the link with <kbd>Ctrl</kbd>/<kbd>Cmd</kbd> + click or via the context menu.
 </Callout>
 
-Use the emitted `RowActionEventArgs` inside `OnRowAction` to perform edits, deletions, or other custom logic based on `EventName`, `RowIndex`, and the underlying data.
+Use `HandleRowAction` to respond to row action menu selections. The handler receives the strongly-typed row model and the selected `MenuItem`, providing direct access to the row data and action context.
 
 ## Cell Click Events
 

@@ -30,6 +30,7 @@ public enum MenuItemVariant
 /// <param name="Disabled">Whether item is disabled and non-interactive.</param>
 /// <param name="Shortcut">Keyboard shortcut text to display.</param>
 /// <param name="Expanded">Whether child items are expanded in hierarchical menus.</param>
+/// <param name="Tooltip">Tooltip text to display on hover.</param>
 /// <param name="OnSelect">Event handler called when item is selected.</param>
 /// <param name="SearchHints">Tags used for the search functionality.</param>
 public record MenuItem(

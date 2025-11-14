@@ -22,13 +22,15 @@ public class RowActionClickEventArgs
     public Dictionary<string, object?> RowData { get; set; } = new();
 }
 
-/// <summary>Configuration for a row action button.</summary>
+/// <summary>Configuration for a row action button or dropdown menu.</summary>
 public record RowAction
 {
     public string Id { get; set; } = "";
     public string Icon { get; set; } = "";
     public string EventName { get; set; } = "";
     public string? Tooltip { get; set; }
+    public string? Label { get; set; } = null;
+    public RowAction[]? Children { get; set; } = null;
 }
 
 public record DataTable : WidgetBase<DataTable>

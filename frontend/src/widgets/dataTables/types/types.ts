@@ -94,7 +94,7 @@ export enum SelectionModes {
 }
 
 /**
- * Configuration for a single row action button
+ * Configuration for a single row action button or dropdown menu
  */
 export interface RowAction {
   /**
@@ -113,6 +113,14 @@ export interface RowAction {
    * Tooltip text for the button
    */
   tooltip?: string;
+  /**
+   * Label text for dropdown menu items
+   */
+  label?: string;
+  /**
+   * Child actions for dropdown menus
+   */
+  children?: RowAction[];
 }
 
 /**
