@@ -324,33 +324,35 @@ describe('cellContent utilities', () => {
   });
 
   describe('createLinkCell', () => {
-    it('should create a URI cell for external URL', () => {
+    it('should create a custom link cell for external URL', () => {
       const url = 'https://example.com';
       const cell = createLinkCell(url, false);
-      expect(cell.kind).toBe(GridCellKind.Uri);
-      if (cell.kind === GridCellKind.Uri) {
-        expect(cell.data).toBe(url);
-        expect(cell.displayData).toBe(url);
+      expect(cell.kind).toBe(GridCellKind.Custom);
+      if (cell.kind === GridCellKind.Custom) {
+        const linkData = cell.data as { kind: string; url: string };
+        expect(linkData.kind).toBe('link-cell');
+        expect(linkData.url).toBe(url);
         expect(cell.allowOverlay).toBe(false);
         expect(cell.readonly).toBe(true);
-        expect(cell.hoverEffect).toBe(true);
+        expect(cell.copyData).toBe(url);
       }
     });
 
-    it('should create a URI cell for internal app:// link', () => {
+    it('should create a custom link cell for internal app:// link', () => {
       const url = 'app://concepts/links-app';
       const cell = createLinkCell(url, false);
-      expect(cell.kind).toBe(GridCellKind.Uri);
-      if (cell.kind === GridCellKind.Uri) {
-        expect(cell.data).toBe(url);
-        expect(cell.displayData).toBe(url);
+      expect(cell.kind).toBe(GridCellKind.Custom);
+      if (cell.kind === GridCellKind.Custom) {
+        const linkData = cell.data as { kind: string; url: string };
+        expect(linkData.kind).toBe('link-cell');
+        expect(linkData.url).toBe(url);
       }
     });
 
-    it('should create readonly URI cell (links are always readonly to prevent overlay issues)', () => {
+    it('should create readonly custom link cell (links are always readonly to prevent overlay issues)', () => {
       const url = 'https://github.com/user/repo';
       const cell = createLinkCell(url, true);
-      if (cell.kind === GridCellKind.Uri) {
+      if (cell.kind === GridCellKind.Custom) {
         expect(cell.allowOverlay).toBe(false);
         expect(cell.readonly).toBe(true);
       }
@@ -359,8 +361,13 @@ describe('cellContent utilities', () => {
     it('should respect alignment parameter', () => {
       const url = 'https://example.com';
       const cell = createLinkCell(url, false, Align.Center);
-      if (cell.kind === GridCellKind.Uri) {
-        expect(cell.contentAlign).toBe('center');
+      if (cell.kind === GridCellKind.Custom) {
+        const linkData = cell.data as {
+          kind: string;
+          url: string;
+          align?: string;
+        };
+        expect(linkData.align).toBe('center');
       }
     });
   });
@@ -561,19 +568,22 @@ describe('cellContent utilities', () => {
 
       // Test external URL
       const cell1 = getCellContent([0, 0], linkData, linkColumns, [], false);
-      expect(cell1.kind).toBe(GridCellKind.Uri);
-      if (cell1.kind === GridCellKind.Uri) {
-        expect(cell1.data).toBe('https://example.com');
-        expect(cell1.displayData).toBe('https://example.com');
-        expect(cell1.hoverEffect).toBe(true);
+      expect(cell1.kind).toBe(GridCellKind.Custom);
+      if (cell1.kind === GridCellKind.Custom) {
+        const linkData1 = cell1.data as { kind: string; url: string };
+        expect(linkData1.kind).toBe('link-cell');
+        expect(linkData1.url).toBe('https://example.com');
+        expect(cell1.copyData).toBe('https://example.com');
         expect(cell1.readonly).toBe(true);
       }
 
       // Test internal app:// link
       const cell2 = getCellContent([0, 1], linkData, linkColumns, [], false);
-      expect(cell2.kind).toBe(GridCellKind.Uri);
-      if (cell2.kind === GridCellKind.Uri) {
-        expect(cell2.data).toBe('app://concepts/links-app');
+      expect(cell2.kind).toBe(GridCellKind.Custom);
+      if (cell2.kind === GridCellKind.Custom) {
+        const linkData2 = cell2.data as { kind: string; url: string };
+        expect(linkData2.kind).toBe('link-cell');
+        expect(linkData2.url).toBe('app://concepts/links-app');
       }
     });
 
