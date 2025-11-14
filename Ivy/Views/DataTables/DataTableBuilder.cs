@@ -18,8 +18,8 @@ public class DataTableBuilder<TModel> : ViewBase, IMemoized
     private readonly DataTableConfig _configuration = new();
     private Func<Event<DataTable, CellClickEventArgs>, ValueTask>? _onCellClick;
     private Func<Event<DataTable, CellClickEventArgs>, ValueTask>? _onCellActivated;
-    private Action<TModel, MenuItem>? _handleRowAction;
     private MenuItem[]? _menuItemRowActions;
+    private Func<Event<DataTable, RowActionClickEventArgs>, ValueTask>? _onRowAction;
     private readonly Dictionary<string, Action<object>> _cellActions = new();
 
     private class InternalColumn
@@ -298,9 +298,9 @@ public class DataTableBuilder<TModel> : ViewBase, IMemoized
         return this;
     }
 
-    public DataTableBuilder<TModel> HandleRowAction(Action<TModel, MenuItem> handler)
+    public DataTableBuilder<TModel> HandleRowAction(Func<Event<DataTable, RowActionClickEventArgs>, ValueTask> handler)
     {
-        _handleRowAction = handler;
+        _onRowAction = handler;
         return this;
     }
 
@@ -334,155 +334,6 @@ public class DataTableBuilder<TModel> : ViewBase, IMemoized
             configuration = configuration with { EnableCellClickEvents = true };
         }
 
-        // Convert MenuItem[] row actions to RowAction[]
-        RowAction[]? rowActions = null;
-        if (_menuItemRowActions != null && _menuItemRowActions.Length > 0)
-        {
-            rowActions = _menuItemRowActions.Select(ConvertMenuItemToRowAction).ToArray();
-        }
-
-        // Helper method to recursively convert MenuItem tree to RowAction tree
-        static RowAction ConvertMenuItemToRowAction(MenuItem menuItem)
-        {
-            return new RowAction
-            {
-                Id = menuItem.Tag?.ToString() ?? menuItem.Label ?? "",
-                Icon = menuItem.Icon?.ToString() ?? "",
-                EventName = menuItem.Tag?.ToString() ?? menuItem.Label ?? "",
-                Tooltip = menuItem.Tooltip,
-                Label = menuItem.Label,
-                Children = menuItem.Children?.Where(c => c.Variant != MenuItemVariant.Separator)
-                    .Select(ConvertMenuItemToRowAction).ToArray()
-            };
-        }
-
-        // Helper method to recursively find MenuItem by actionId
-        static MenuItem? FindMenuItem(MenuItem[] menuItems, string actionId)
-        {
-            foreach (var item in menuItems)
-            {
-                // Check if this item matches
-                if (item.Tag?.ToString() == actionId || item.Label == actionId)
-                {
-                    return item;
-                }
-
-                // Recursively search children
-                if (item.Children != null && item.Children.Length > 0)
-                {
-                    var found = FindMenuItem(item.Children, actionId);
-                    if (found != null)
-                    {
-                        return found;
-                    }
-                }
-            }
-
-            return null;
-        }
-
-        // Create wrapper for HandleRowAction
-        Func<Event<DataTable, RowActionClickEventArgs>, ValueTask>? onRowAction = null;
-        if (_handleRowAction != null)
-        {
-            // Capture logger and queryable list during Build (can only access Context here)
-            var logger = this.UseService<Microsoft.Extensions.Logging.ILogger<DataTableBuilder<TModel>>?>();
-
-            // Materialize the queryable to a list so we can look up items by index
-            // This is more reliable than deserializing corrupted frontend data
-            var dataList = _queryable.ToList();
-
-            onRowAction = async (Event<DataTable, RowActionClickEventArgs> e) =>
-            {
-                var args = e.Value;
-
-                try
-                {
-                    // Try to get the Id from RowData to look up the actual model instance
-                    if (args.RowData.TryGetValue("Id", out var idValue))
-                    {
-                        // Find the Id property on TModel
-                        var idProperty = typeof(TModel).GetProperty("Id");
-                        TModel? modelInstance = default;
-
-                        if (idProperty != null)
-                        {
-                            // Handle JsonElement - need to extract the actual value first
-                            object? rawId = idValue;
-                            if (idValue is System.Text.Json.JsonElement jsonElement)
-                            {
-                                // Extract the value based on the property type
-                                if (idProperty.PropertyType == typeof(int))
-                                {
-                                    rawId = jsonElement.GetInt32();
-                                }
-                                else if (idProperty.PropertyType == typeof(long))
-                                {
-                                    rawId = jsonElement.GetInt64();
-                                }
-                                else if (idProperty.PropertyType == typeof(string))
-                                {
-                                    rawId = jsonElement.GetString();
-                                }
-                                else if (idProperty.PropertyType == typeof(Guid))
-                                {
-                                    rawId = jsonElement.GetGuid();
-                                }
-                                else
-                                {
-                                    // Fallback: try to convert the string representation
-                                    rawId = Convert.ChangeType(jsonElement.ToString(), idProperty.PropertyType);
-                                }
-                            }
-
-                            // Convert the value to the correct type if needed
-                            var convertedId = rawId != null && rawId.GetType() == idProperty.PropertyType
-                                ? rawId
-                                : Convert.ChangeType(rawId, idProperty.PropertyType);
-
-                            // Find the item in the list with matching Id
-                            modelInstance = dataList.FirstOrDefault(item =>
-                            {
-                                var itemId = idProperty.GetValue(item);
-                                return itemId?.Equals(convertedId) == true;
-                            });
-                        }
-
-                        if (modelInstance == null)
-                        {
-                            if (logger != null)
-                            {
-                                Microsoft.Extensions.Logging.LoggerExtensions.LogWarning(logger, "Could not find model instance with Id: {Id}", idValue);
-                            }
-                            return;
-                        }
-
-                        // Find the matching MenuItem (search recursively through children)
-                        MenuItem? matchingMenuItem = null;
-                        if (_menuItemRowActions != null)
-                        {
-                            matchingMenuItem = FindMenuItem(_menuItemRowActions, args.ActionId);
-                        }
-
-                        if (matchingMenuItem != null)
-                        {
-                            _handleRowAction(modelInstance, matchingMenuItem);
-                        }
-                    }
-                }
-                catch (System.Exception ex)
-                {
-                    // Log the error but don't crash the app
-                    if (logger != null)
-                    {
-                        Microsoft.Extensions.Logging.LoggerExtensions.LogError(logger, ex, "Failed to handle row action for {ModelType}", typeof(TModel).Name);
-                    }
-                }
-
-                await ValueTask.CompletedTask;
-            };
-        }
-
         // Wire up cell actions to OnCellActivated
         Func<Event<DataTable, CellClickEventArgs>, ValueTask>? onCellActivated = _onCellActivated;
         if (_cellActions.Count > 0)
@@ -504,7 +355,7 @@ public class DataTableBuilder<TModel> : ViewBase, IMemoized
             };
         }
 
-        return new DataTableView(queryable, width, _height, columns, configuration, _onCellClick, onCellActivated, rowActions, onRowAction);
+        return new DataTableView(queryable, width, _height, columns, configuration, _onCellClick, onCellActivated, _menuItemRowActions, _onRowAction);
     }
 
     public object[] GetMemoValues()

@@ -235,10 +235,11 @@ public class DataTableApp : SampleBase
                         MenuItem.Default(Icons.Share2, "share").Label("Share")
                     ])
             )
-            // Handle row action menu selections
-            .HandleRowAction((employee, menuItem) =>
+            .HandleRowAction(async e =>
             {
-                client.Toast($"Fired custom event: {menuItem.Tag} for {employee.Name}");
+                var args = e.Value;
+                client.Toast($"Row action: {args.ActionId} at row {args.RowIndex}");
+                await ValueTask.CompletedTask;
             });
 
         return dataTable;

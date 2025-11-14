@@ -1,6 +1,6 @@
 import React from 'react';
 import Icon from '@/components/Icon';
-import { RowAction } from './types/types';
+import { MenuItem } from '@/types/widgets';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,7 +12,7 @@ interface RowActionButtonsProps {
   /**
    * Array of action configurations
    */
-  actions: RowAction[];
+  actions: MenuItem[];
   /**
    * Y position of the button group (should center within row)
    */
@@ -24,7 +24,7 @@ interface RowActionButtonsProps {
   /**
    * Click handler for action buttons
    */
-  onActionClick: (action: RowAction) => void;
+  onActionClick: (action: MenuItem) => void;
   /**
    * Mouse enter handler to prevent losing hover state
    */
@@ -48,40 +48,56 @@ export const RowActionButtons: React.FC<RowActionButtonsProps> = ({
 }) => {
   if (!visible || actions.length === 0) return null;
 
-  const renderAction = (action: RowAction) => {
+  const renderAction = (action: MenuItem) => {
+    // Skip separator variants
+    if (action.variant === 'Separator') {
+      return null;
+    }
+
+    // Get action identifier (tag or label)
+    const actionId = action.tag?.toString() || action.label || '';
+
     // If action has children, render as dropdown menu
     if (action.children && action.children.length > 0) {
       return (
-        <DropdownMenu key={action.id}>
+        <DropdownMenu key={actionId}>
           <DropdownMenuTrigger asChild>
             <button
               className="flex items-center justify-center p-1.5 rounded bg-background hover:bg-[var(--color-muted)] transition-colors cursor-pointer border border-[var(--color-border)]"
-              aria-label={action.tooltip || action.eventName}
+              aria-label={action.label || actionId}
               type="button"
             >
-              <Icon
-                name={action.icon}
-                size={16}
-                className="text-[var(--color-foreground)]"
-              />
+              {action.icon && (
+                <Icon
+                  name={action.icon}
+                  size={16}
+                  className="text-[var(--color-foreground)]"
+                />
+              )}
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            {action.children.map(childAction => (
-              <DropdownMenuItem
-                key={childAction.id}
-                onClick={() => onActionClick(childAction)}
-              >
-                {childAction.icon && (
-                  <Icon
-                    name={childAction.icon}
-                    size={16}
-                    className="mr-2 text-[var(--color-foreground)] "
-                  />
-                )}
-                {childAction.label || childAction.id}
-              </DropdownMenuItem>
-            ))}
+            {action.children
+              .filter(child => child.variant !== 'Separator')
+              .map(childAction => {
+                const childId =
+                  childAction.tag?.toString() || childAction.label || '';
+                return (
+                  <DropdownMenuItem
+                    key={childId}
+                    onClick={() => onActionClick(childAction)}
+                  >
+                    {childAction.icon && (
+                      <Icon
+                        name={childAction.icon}
+                        size={16}
+                        className="mr-2 text-[var(--color-foreground)] "
+                      />
+                    )}
+                    {childAction.label || childId}
+                  </DropdownMenuItem>
+                );
+              })}
           </DropdownMenuContent>
         </DropdownMenu>
       );
@@ -90,17 +106,19 @@ export const RowActionButtons: React.FC<RowActionButtonsProps> = ({
     // Otherwise, render as regular button
     return (
       <button
-        key={action.id}
+        key={actionId}
         className="flex items-center  justify-center p-1.5 rounded bg-background hover:bg-[var(--color-muted)] transition-colors cursor-pointer border border-[var(--color-border)]"
         onClick={() => onActionClick(action)}
-        aria-label={action.tooltip || action.eventName}
+        aria-label={action.label || actionId}
         type="button"
       >
-        <Icon
-          name={action.icon}
-          size={16}
-          className="text-[var(--color-foreground)]"
-        />
+        {action.icon && (
+          <Icon
+            name={action.icon}
+            size={16}
+            className="text-[var(--color-foreground)]"
+          />
+        )}
       </button>
     );
   };

@@ -27,12 +27,12 @@ import { ThemeColors } from '@/lib/color-utils';
 import { useEventHandler } from '@/components/event-handler';
 import { useColumnGroups } from './hooks/useColumnGroups';
 import { RowActionButtons } from './DataTableRowAction';
-import { RowAction } from './types/types';
+import { MenuItem } from '@/types/widgets';
 
 interface TableEditorProps {
   widgetId: string;
   hasOptions?: boolean;
-  rowActions?: RowAction[];
+  rowActions?: MenuItem[];
 }
 
 export const DataTableEditor: React.FC<TableEditorProps> = ({
@@ -434,16 +434,19 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
 
   // Handle row action button click
   const handleRowActionClick = useCallback(
-    (action: RowAction) => {
+    (action: MenuItem) => {
       if (hoverRow === undefined) return;
 
       const rowData = getRowData(hoverRow);
 
+      // Get action identifier from tag or label
+      const actionId = action.tag?.toString() || action.label || '';
+
       // Send event to backend's OnRowAction event
       eventHandler('OnRowAction', widgetId, [
         {
-          actionId: action.id,
-          eventName: action.eventName,
+          actionId: actionId,
+          eventName: actionId,
           rowIndex: hoverRow,
           rowData: rowData,
         },

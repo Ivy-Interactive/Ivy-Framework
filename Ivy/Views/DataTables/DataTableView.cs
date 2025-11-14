@@ -12,7 +12,7 @@ public class DataTableView(
     DataTableConfig config,
     Func<Event<DataTable, CellClickEventArgs>, ValueTask>? onCellClick = null,
     Func<Event<DataTable, CellClickEventArgs>, ValueTask>? onCellActivated = null,
-    RowAction[]? rowActions = null,
+    MenuItem[]? rowActions = null,
     Func<Event<DataTable, RowActionClickEventArgs>, ValueTask>? onRowAction = null) : ViewBase, IMemoized
 {
     public override object? Build()

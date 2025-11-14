@@ -22,17 +22,6 @@ public class RowActionClickEventArgs
     public Dictionary<string, object?> RowData { get; set; } = new();
 }
 
-/// <summary>Configuration for a row action button or dropdown menu.</summary>
-public record RowAction
-{
-    public string Id { get; set; } = "";
-    public string Icon { get; set; } = "";
-    public string EventName { get; set; } = "";
-    public string? Tooltip { get; set; }
-    public string? Label { get; set; } = null;
-    public RowAction[]? Children { get; set; } = null;
-}
-
 public record DataTable : WidgetBase<DataTable>
 {
     public DataTable(
@@ -56,7 +45,7 @@ public record DataTable : WidgetBase<DataTable>
 
     [Prop] public DataTableConfig Config { get; set; }
 
-    [Prop] public RowAction[]? RowActions { get; set; }
+    [Prop] public MenuItem[]? RowActions { get; set; }
 
     /// <summary>Called when a cell is clicked (single-click).</summary>
     [Event] public Func<Event<DataTable, CellClickEventArgs>, ValueTask>? OnCellClick { get; set; }
