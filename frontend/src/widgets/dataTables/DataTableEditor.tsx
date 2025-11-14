@@ -233,15 +233,18 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
   // Handle selection changes
   const handleGridSelectionChange = useCallback(
     (newSelection: GridSelection) => {
-      // Check if the new selection includes URI cells and prevent fuzzy effect
-      // by clearing the selection if it's a single URI cell click
+      // Check if the new selection includes link cells and prevent fuzzy effect
+      // by clearing the selection if it's a single link cell click
       if (newSelection.current !== undefined) {
         const [col, row] = newSelection.current.cell;
         const cellContent = getCellContent([col, row]);
 
-        // If it's a URI cell, don't allow it to be selected (prevents fuzzy effect)
-        if (cellContent.kind === GridCellKind.Uri) {
-          // Clear the selection for URI cells
+        // If it's a link cell, don't allow it to be selected (prevents fuzzy effect)
+        if (
+          cellContent.kind === GridCellKind.Custom &&
+          (cellContent.data as { kind?: string })?.kind === 'link-cell'
+        ) {
+          // Clear the selection for link cells
           setGridSelection({
             columns: CompactSelection.empty(),
             rows: CompactSelection.empty(),
@@ -263,21 +266,13 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     (cell: Item, args: GridMouseEventArgs) => {
       const cellContent = getCellContent(cell);
 
-      // Handle Ctrl+Click or Cmd+Click on link cells (both URI and custom link cells)
-      if (args.ctrlKey || args.metaKey) {
-        let url: string | null = null;
-
-        // Check if it's a URI cell
-        if (cellContent.kind === GridCellKind.Uri) {
-          url = cellContent.data as string;
-        }
-        // Check if it's a custom link cell
-        else if (
-          cellContent.kind === GridCellKind.Custom &&
-          (cellContent.data as { kind?: string })?.kind === 'link-cell'
-        ) {
-          url = (cellContent.data as { url?: string })?.url || null;
-        }
+      // Handle Ctrl+Click or Cmd+Click on custom link cells
+      if (
+        (args.ctrlKey || args.metaKey) &&
+        cellContent.kind === GridCellKind.Custom &&
+        (cellContent.data as { kind?: string })?.kind === 'link-cell'
+      ) {
+        const url = (cellContent.data as { url?: string })?.url;
 
         if (url) {
           // External URLs (http/https) open in new tab
