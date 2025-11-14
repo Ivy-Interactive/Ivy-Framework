@@ -275,9 +275,10 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
         const url = (cellContent.data as { url?: string })?.url;
 
         if (url) {
-          // External URLs (http/https) open in new tab
+          // External URLs (http/https) open in new tab and focus it
           if (url.startsWith('http://') || url.startsWith('https://')) {
-            window.open(url, '_blank', 'noopener,noreferrer');
+            const newWindow = window.open(url, '_blank', 'noopener,noreferrer');
+            newWindow?.focus();
           } else {
             // Internal relative URLs navigate in same tab
             window.location.href = url;

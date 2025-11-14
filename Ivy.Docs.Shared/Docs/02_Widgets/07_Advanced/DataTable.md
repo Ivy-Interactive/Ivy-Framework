@@ -192,7 +192,7 @@ public class RowActionsDemo : ViewBase
 ```
 
 <Callout Type="tip">
-Use <code>Renderer(expr, new LinkDisplayRenderer { Type = LinkDisplayType.Url })</code> to mark a URL string column as a clickable hyperlink. Users can open the link with <kbd>Ctrl</kbd>/<kbd>Cmd</kbd> + click or via the context menu.
+Use <code>Renderer(expr, new LinkDisplayRenderer { Type = LinkDisplayType.Url })</code> to mark a URL string column as a clickable hyperlink. Users can open the link with <kbd>Ctrl</kbd>/<kbd>Cmd</kbd> + click or via the context menu. External links (http/https) open in a new focused tab, while relative URLs navigate in the same tab.
 </Callout>
 
 Use `HandleRowAction` to respond to row action menu selections. The handler receives the strongly-typed row model and the selected `MenuItem`, providing direct access to the row data and action context.
