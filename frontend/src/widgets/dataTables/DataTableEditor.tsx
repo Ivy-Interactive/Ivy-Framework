@@ -21,7 +21,7 @@ import { useThemeWithMonitoring } from '@/components/theme-provider';
 import { getSelectionProps } from './utils/selectionModes';
 import { getCellContent as getCellContentUtil } from './utils/cellContent';
 import { convertToGridColumns } from './utils/columnHelpers';
-import { iconCellRenderer } from './utils/customRenderers';
+import { iconCellRenderer, linkCellRenderer } from './utils/customRenderers';
 import { generateHeaderIcons, addStandardIcons } from './utils/headerIcons';
 import { ThemeColors } from '@/lib/color-utils';
 import { useEventHandler } from '@/components/event-handler';
@@ -263,21 +263,32 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     (cell: Item, args: GridMouseEventArgs) => {
       const cellContent = getCellContent(cell);
 
-      // Handle Ctrl+Click or Cmd+Click on URI cells
-      if (
-        cellContent.kind === GridCellKind.Uri &&
-        (args.ctrlKey || args.metaKey)
-      ) {
-        const url = cellContent.data as string;
+      // Handle Ctrl+Click or Cmd+Click on link cells (both URI and custom link cells)
+      if (args.ctrlKey || args.metaKey) {
+        let url: string | null = null;
 
-        // External URLs (http/https) open in new tab
-        if (url.startsWith('http://') || url.startsWith('https://')) {
-          window.open(url, '_blank', 'noopener,noreferrer');
-        } else {
-          // Internal relative URLs navigate in same tab
-          window.location.href = url;
+        // Check if it's a URI cell
+        if (cellContent.kind === GridCellKind.Uri) {
+          url = cellContent.data as string;
         }
-        return; // Don't proceed with other click handling
+        // Check if it's a custom link cell
+        else if (
+          cellContent.kind === GridCellKind.Custom &&
+          (cellContent.data as { kind?: string })?.kind === 'link-cell'
+        ) {
+          url = (cellContent.data as { url?: string })?.url || null;
+        }
+
+        if (url) {
+          // External URLs (http/https) open in new tab
+          if (url.startsWith('http://') || url.startsWith('https://')) {
+            window.open(url, '_blank', 'noopener,noreferrer');
+          } else {
+            // Internal relative URLs navigate in same tab
+            window.location.href = url;
+          }
+          return; // Don't proceed with other click handling
+        }
       }
 
       if (enableCellClickEvents) {
@@ -377,7 +388,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
             containerRect.top +
             bounds.height / 2 -
             buttonHeight / 2 -
-            1.5;
+            5;
           setActionButtonsTop(buttonTop);
         }
       }
@@ -484,7 +495,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
           columns={finalColumns}
           rows={visibleRows}
           getCellContent={getCellContent}
-          customRenderers={[iconCellRenderer]}
+          customRenderers={[iconCellRenderer, linkCellRenderer]}
           headerIcons={headerIcons}
           onColumnResize={allowColumnResizing ? handleColumnResize : undefined}
           onVisibleRegionChanged={handleVisibleRegionChanged}

@@ -113,36 +113,24 @@ public class DataTableApp : SampleBase
             .Width(Size.Full()) // Table width set to 120 units (30rem)
             .Height(Size.Full()) // Table height set to 120 units (30rem)
 
-            // Numeric columns
+            // Column titles
             .Header(e => e.Id, "ID")
             .Header(e => e.Age, "Age")
             .Header(e => e.Salary, "Salary")
             .Header(e => e.Performance, "Performance")
             .Header(e => e.OptionalId, "Badge #")
-
-            // Text columns (including formatted strings)
             .Header(e => e.EmployeeCode, "Code")
             .Header(e => e.Name, "Name")
             .Header(e => e.Email, "Email")
             .Header(e => e.Notes, "Notes")
-
-            // Boolean columns
             .Header(e => e.IsActive, "Active")
             .Header(e => e.IsManager, "Manager")
-
-            // Date columns
             .Header(e => e.HireDate, "Hire Date")
             .Header(e => e.LastReview, "Last Review")
-
-            // Icon columns (the main fix target)
             .Header(e => e.Status, "Status")
             .Header(e => e.Priority, "Priority")
             .Header(e => e.Department, "Dept")
-
-            // Labels column (issue #1146)
             .Header(e => e.Skills, "Skills")
-
-            // Link columns
             .Header(e => e.WidgetLink, "Widgets")
             .Header(e => e.ProfileLink, "Profiles")
 
@@ -208,7 +196,7 @@ public class DataTableApp : SampleBase
             .Group(e => e.WidgetLink, "Links")
             .Group(e => e.ProfileLink, "Links")
 
-            // Column renderers - Set Link renderer explicitly
+            // Column renderers - LinkDisplayRenderer automatically sets ColType.Link
             .Renderer(e => e.WidgetLink, new LinkDisplayRenderer { Type = LinkDisplayType.Url })
             .Renderer(e => e.ProfileLink, new LinkDisplayRenderer { Type = LinkDisplayType.Url })
 

@@ -227,6 +227,7 @@ public class DataTableBuilder<TModel> : ViewBase, IMemoized
     {
         var column = GetColumn(field);
         column.Column.Renderer = renderer;
+        column.Column.ColType = renderer.ColType;
         return this;
     }
 
@@ -362,6 +363,31 @@ public class DataTableBuilder<TModel> : ViewBase, IMemoized
             };
         }
 
+        // Helper method to recursively find MenuItem by actionId
+        static MenuItem? FindMenuItem(MenuItem[] menuItems, string actionId)
+        {
+            foreach (var item in menuItems)
+            {
+                // Check if this item matches
+                if (item.Tag?.ToString() == actionId || item.Label == actionId)
+                {
+                    return item;
+                }
+
+                // Recursively search children
+                if (item.Children != null && item.Children.Length > 0)
+                {
+                    var found = FindMenuItem(item.Children, actionId);
+                    if (found != null)
+                    {
+                        return found;
+                    }
+                }
+            }
+
+            return null;
+        }
+
         // Create wrapper for HandleRowAction
         Func<Event<DataTable, RowActionClickEventArgs>, ValueTask>? onRowAction = null;
         if (_handleRowAction != null)
@@ -438,9 +464,12 @@ public class DataTableBuilder<TModel> : ViewBase, IMemoized
                             return;
                         }
 
-                        // Find the matching MenuItem
-                        var matchingMenuItem = _menuItemRowActions?.FirstOrDefault(m =>
-                            m.Tag?.ToString() == args.ActionId || m.Label == args.ActionId);
+                        // Find the matching MenuItem (search recursively through children)
+                        MenuItem? matchingMenuItem = null;
+                        if (_menuItemRowActions != null)
+                        {
+                            matchingMenuItem = FindMenuItem(_menuItemRowActions, args.ActionId);
+                        }
 
                         if (matchingMenuItem != null)
                         {

@@ -267,7 +267,7 @@ export function createLabelsCell(cellValue: unknown, align?: Align): GridCell {
 }
 
 /**
- * Creates a link/URI cell
+ * Creates a link cell with custom renderer (blue text + underline)
  */
 export function createLinkCell(
   url: string,
@@ -275,14 +275,15 @@ export function createLinkCell(
   align?: Align
 ): GridCell {
   return {
-    kind: GridCellKind.Uri,
-    data: url,
-    displayData: url,
-    allowOverlay: false, // Disable overlay to prevent fuzzy shadow on click
-    readonly: true, // Links should not be editable in the cell
-    contentAlign: align ? getContentAlign(align) : undefined,
-    hoverEffect: true,
-    onClickUri: undefined, // We'll handle this in the DataTableEditor
+    kind: GridCellKind.Custom,
+    data: {
+      kind: 'link-cell',
+      url: url,
+      align: align?.toLowerCase() as 'left' | 'center' | 'right' | undefined,
+    },
+    copyData: url,
+    allowOverlay: false,
+    readonly: true,
   };
 }
 

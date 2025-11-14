@@ -52,49 +52,58 @@ public enum ColType
 public interface IDataTableColumnRenderer
 {
     public bool IsEditable { get; }
+    public ColType ColType { get; }
 }
 
 public class TextDisplayRenderer : IDataTableColumnRenderer
 {
     public bool IsEditable => false;
+    public ColType ColType => ColType.Text;
 }
 
 public class NumberDisplayRenderer : IDataTableColumnRenderer
 {
     public string Format { get; set; } = "N2"; // Default format for numbers - should be based on Excel formatting!
     public bool IsEditable => false;
+    public ColType ColType => ColType.Number;
 }
 
 public class BoolDisplayRenderer : IDataTableColumnRenderer
 {
     public bool IsEditable => false;
+    public ColType ColType => ColType.Boolean;
 }
 
 public class IconDisplayRenderer : IDataTableColumnRenderer
 {
     public bool IsEditable => false;
+    public ColType ColType => ColType.Icon;
 }
 
 public class ButtonDisplayRenderer : IDataTableColumnRenderer
 {
     public bool IsEditable => false;
+    public ColType ColType => ColType.Text;
 }
 
 public class DateTimeDisplayRenderer : IDataTableColumnRenderer
 {
     public string Format { get; set; } = "g"; // General date/time pattern (short time) - should be based on Excel formatting?
     public bool IsEditable => false;
+    public ColType ColType => ColType.DateTime;
 }
 
 public class ImageDisplayRenderer : IDataTableColumnRenderer
 {
     public bool IsEditable => false;
+    public ColType ColType => ColType.Text;
 }
 
 public class LinkDisplayRenderer : IDataTableColumnRenderer
 {
     public bool IsEditable => false;
     public LinkDisplayType Type { get; set; } = LinkDisplayType.Url;
+    public ColType ColType => ColType.Link;
 }
 
 public enum LinkDisplayType
@@ -108,11 +117,13 @@ public enum LinkDisplayType
 public class ProgressDisplayRenderer : IDataTableColumnRenderer
 {
     public bool IsEditable => false;
+    public ColType ColType => ColType.Number;
 }
 
 public class LabelsDisplayRenderer : IDataTableColumnRenderer
 {
     public bool IsEditable => false;
+    public ColType ColType => ColType.Labels;
 }
 
 /// <summary>
