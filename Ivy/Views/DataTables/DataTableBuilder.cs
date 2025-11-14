@@ -292,25 +292,18 @@ public class DataTableBuilder<TModel> : ViewBase, IMemoized
         return this;
     }
 
-    /// <summary>Configures row action menu items that appear on hover using MenuItem structure.</summary>
-    /// <param name="actions">Menu items to display as row actions.</param>
     public DataTableBuilder<TModel> RowActions(params MenuItem[] actions)
     {
         _menuItemRowActions = actions;
         return this;
     }
 
-    /// <summary>Sets the event handler for row action menu item selections using MenuItem-based actions.</summary>
-    /// <param name="handler">Handler that receives the row model and the selected menu item.</param>
     public DataTableBuilder<TModel> HandleRowAction(Action<TModel, MenuItem> handler)
     {
         _handleRowAction = handler;
         return this;
     }
 
-    /// <summary>Attaches an action handler to a specific cell/column that will be invoked when the cell is interacted with.</summary>
-    /// <param name="field">Expression identifying the field/column.</param>
-    /// <param name="action">Action to execute when the cell is activated, receives the cell value.</param>
     public DataTableBuilder<TModel> HandleCellAction(Expression<Func<TModel, object>> field, Action<object> action)
     {
         var columnName = Utils.GetNameFromMemberExpression(field.Body);
