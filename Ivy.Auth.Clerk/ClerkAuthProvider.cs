@@ -19,11 +19,11 @@ public class ClerkOAuthException(string? error, string? errorDescription)
 public class ClerkAuthProvider : IAuthProvider
 {
     private readonly string _secretKey;
-    private readonly string _jwtKey;
-    private readonly string _publishableKey;
     private readonly string _frontendApiDomain;
     private readonly List<AuthOption> _authOptions = new();
     private readonly HttpClient _httpClient;
+    private ICollection<SecurityKey>? _signingKeys;
+    private DateTime _signingKeysLastFetched = DateTime.MinValue;
 
     public ClerkAuthProvider()
     {
@@ -33,12 +33,28 @@ public class ClerkAuthProvider : IAuthProvider
             .Build();
 
         _secretKey = configuration.GetValue<string>("Clerk:SecretKey") ?? throw new Exception("Clerk:SecretKey is required");
-        _jwtKey = configuration.GetValue<string>("Clerk:JwtKey") ?? throw new Exception("Clerk:JwtKey is required");
-        _publishableKey = configuration.GetValue<string>("Clerk:PublishableKey") ?? throw new Exception("Clerk:PublishableKey is required");
         _frontendApiDomain = configuration.GetValue<string>("Clerk:FrontendApiDomain") ?? throw new Exception("Clerk:FrontendApiDomain is required");
 
         _httpClient = new HttpClient();
         _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_secretKey}");
+    }
+
+    private async Task<ICollection<SecurityKey>> GetSigningKeysAsync(CancellationToken cancellationToken = default)
+    {
+        // Cache keys for 1 hour
+        if (_signingKeys != null && DateTime.UtcNow - _signingKeysLastFetched < TimeSpan.FromHours(1))
+        {
+            return _signingKeys;
+        }
+
+        var jwksUrl = $"https://{_frontendApiDomain}.accounts.dev/.well-known/jwks.json";
+        var jwksJson = await _httpClient.GetStringAsync(jwksUrl, cancellationToken);
+        var jwks = new JsonWebKeySet(jwksJson);
+
+        _signingKeys = jwks.GetSigningKeys();
+        _signingKeysLastFetched = DateTime.UtcNow;
+
+        return _signingKeys;
     }
 
     public async Task<AuthToken?> LoginAsync(string email, string password, CancellationToken cancellationToken = default)
@@ -72,18 +88,15 @@ public class ClerkAuthProvider : IAuthProvider
         return Task.FromResult(new Uri(authUrl));
     }
 
-    public AuthToken VerifyHandshakeJwt(string jwt)
+    public async Task<AuthToken> VerifyHandshakeJwtAsync(string jwt, CancellationToken cancellationToken = default)
     {
-        using var rsa = RSA.Create();
-        rsa.ImportFromPem(_jwtKey.AsSpan());
-
-        var key = new RsaSecurityKey(rsa);
+        var signingKeys = await GetSigningKeysAsync(cancellationToken);
 
         var parameters = new TokenValidationParameters
         {
             TryAllIssuerSigningKeys = true,
             ValidateIssuerSigningKey = true,
-            IssuerSigningKeys = [key],
+            IssuerSigningKeys = signingKeys,
             ValidAlgorithms = [SecurityAlgorithms.RsaSha256],
 
             ValidateLifetime = false,
@@ -138,7 +151,7 @@ public class ClerkAuthProvider : IAuthProvider
         }
 
         Console.WriteLine("Received handshake JWT!");
-        return VerifyHandshakeJwt(handshakeJwt);
+        return await VerifyHandshakeJwtAsync(handshakeJwt, cancellationToken);
     }
 
     public async Task LogoutAsync(string jwt, CancellationToken cancellationToken = default)
@@ -176,21 +189,17 @@ public class ClerkAuthProvider : IAuthProvider
     {
         try
         {
-            if (string.IsNullOrEmpty(_jwtKey))
-            {
-                // Without JWT key, we can't validate the token locally
-                // In practice, you would call Clerk's verification API
-                return await Task.FromResult(true); // Mock validation
-            }
+            var signingKeys = await GetSigningKeysAsync(cancellationToken);
 
-            // Validate JWT token using Clerk's public key
             var tokenHandler = new JwtSecurityTokenHandler();
             var validationParameters = new TokenValidationParameters
             {
+                TryAllIssuerSigningKeys = true,
                 ValidateIssuerSigningKey = true,
-                IssuerSigningKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(_jwtKey)),
-                ValidateIssuer = false, // Clerk manages the issuer
-                ValidateAudience = false, // Clerk manages the audience
+                IssuerSigningKeys = signingKeys,
+                ValidAlgorithms = [SecurityAlgorithms.RsaSha256],
+                ValidateIssuer = false,
+                ValidateAudience = false,
                 ClockSkew = TimeSpan.Zero
             };
 
@@ -207,12 +216,6 @@ public class ClerkAuthProvider : IAuthProvider
     {
         try
         {
-            if (string.IsNullOrEmpty(_jwtKey))
-            {
-                // Mock user info when we can't validate the token
-                return new UserInfo("mock_user_id", "user@example.com", "Mock User", null);
-            }
-
             var tokenHandler = new JwtSecurityTokenHandler();
             var jsonToken = tokenHandler.ReadJwtToken(token);
 
