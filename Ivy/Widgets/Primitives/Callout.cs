@@ -85,10 +85,6 @@ public static class CalloutExtensions
         return callout with { Icon = icon };
     }
 
-    /// <summary>Sets link click event handler for Callout widget by setting it on the internal Markdown widget.</summary>
-    /// <param name="callout">Callout widget to configure.</param>
-    /// <param name="onLinkClick">Event handler for link clicks.</param>
-    /// <returns>Callout widget with link click handler set on its Markdown child.</returns>
     public static Callout HandleLinkClick(this Callout callout, Action<string> onLinkClick)
     {
         if (callout.Children.Length > 0 && callout.Children[0] is Markdown markdown)
