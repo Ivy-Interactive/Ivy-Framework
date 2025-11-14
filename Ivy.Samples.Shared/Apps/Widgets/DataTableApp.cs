@@ -225,11 +225,10 @@ public class DataTableApp : SampleBase
             })
             // Configure row action buttons
             .RowActions(
-                MenuItem.Default(Icons.Pencil, "edit").Tooltip("Edit employee"),
-                MenuItem.Default(Icons.Trash2, "delete").Tooltip("Delete employee"),
-                MenuItem.Default(Icons.Eye, "view").Tooltip("View details"),
+                MenuItem.Default(Icons.Pencil, "edit"),
+                MenuItem.Default(Icons.Trash2, "delete"),
+                MenuItem.Default(Icons.Eye, "view"),
                 MenuItem.Default(Icons.EllipsisVertical, "menu")
-                    .Tooltip("More actions")
                     .Children([
                         MenuItem.Default(Icons.Archive, "archive").Label("Archive"),
                         MenuItem.Default(Icons.Download, "export").Label("Export"),
