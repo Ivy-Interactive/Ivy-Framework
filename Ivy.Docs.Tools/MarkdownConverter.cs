@@ -232,7 +232,7 @@ public static partial class MarkdownConverter
                     continue;
                 }
 
-                HandleHtmlBlock(markdownContent, htmlBlock, codeBuilder, viewBuilder, usedClassNames);
+                HandleHtmlBlock(markdownContent, htmlBlock, codeBuilder, viewBuilder, usedClassNames, linkConverter, referencedApps);
             }
 
             else if (child is FencedCodeBlock codeBlock)
@@ -291,7 +291,7 @@ public static partial class MarkdownConverter
         }
     }
 
-    private static void HandleHtmlBlock(string markdownContent, HtmlBlock htmlBlock, StringBuilder codeBuilder, StringBuilder viewBuilder, HashSet<string> usedClassNames)
+    private static void HandleHtmlBlock(string markdownContent, HtmlBlock htmlBlock, StringBuilder codeBuilder, StringBuilder viewBuilder, HashSet<string> usedClassNames, LinkConverter linkConverter, HashSet<string> referencedApps)
     {
         string htmlContent = markdownContent.Substring(htmlBlock.Span.Start, htmlBlock.Span.Length).Trim();
 
@@ -325,7 +325,7 @@ public static partial class MarkdownConverter
 
         if (xml.Name.LocalName == "Callout")
         {
-            HandleCalloutBlock(codeBuilder, xml);
+            HandleCalloutBlock(codeBuilder, xml, linkConverter, referencedApps);
         }
         else if (xml.Name.LocalName == "Embed")
         {
@@ -446,11 +446,26 @@ public static partial class MarkdownConverter
         codeBuilder.AppendTab(3).AppendLine($"""| new WidgetDocsView("{typeName}", {(!string.IsNullOrEmpty(extensionTypes) ? FormatLiteral(extensionTypes) : "null")}, {(!string.IsNullOrEmpty(sourceUrl) ? FormatLiteral(sourceUrl) : "null")})""");
     }
 
-    private static void HandleCalloutBlock(StringBuilder codeBuilder, XElement xml)
+    private static void HandleCalloutBlock(StringBuilder codeBuilder, XElement xml, LinkConverter linkConverter, HashSet<string> referencedApps)
     {
-        string icon = xml.Attribute("Icon")?.Value ?? "Info";
+        // Handle Type attribute (tip, info, warning, error) - map to icon
+        string? type = xml.Attribute("Type")?.Value;
+        string icon = xml.Attribute("Icon")?.Value ??
+            (type?.ToLowerInvariant() switch
+            {
+                "tip" or "info" => "Info",
+                "warning" => "CircleAlert",
+                "error" => "CircleAlert",
+                "success" => "CircleCheck",
+                _ => "Info"
+            });
         string content = xml.Value.Trim();
-        AppendAsMultiLineStringIfNecessary(3, content, codeBuilder, "| new Callout(", $", icon:Icons.{icon})");
+
+        // Convert links in the Callout content to app:// format
+        var (types, convertedContent) = linkConverter.Convert(content);
+        referencedApps.UnionWith(types);
+
+        AppendAsMultiLineStringIfNecessary(3, convertedContent, codeBuilder, "| new Callout(", $", icon:Icons.{icon}).HandleLinkClick(onLinkClick)");
     }
 
     private static void HandleEmbedBlock(StringBuilder codeBuilder, XElement xml)

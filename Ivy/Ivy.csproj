@@ -6,7 +6,7 @@
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <NoWarn>CS1591</NoWarn>
+    <NoWarn>CS1591;CS1573</NoWarn>
     <PackageId>Ivy</PackageId>
     <Company>Ivy</Company>
     <Description>Build Internal Applications with AI and Pure C#</Description>
@@ -41,7 +41,7 @@
     <EmbeddedResource Update="Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-      <Culture>neutral</Culture>
+      <LogicalName>Ivy.Resources.resources</LogicalName>
     </EmbeddedResource>
   </ItemGroup>
 
@@ -88,6 +88,10 @@
   
   <ItemGroup>
     <ProjectReference Include="..\Ivy.Filters\Ivy.Filters.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Ivy.DesignSystem" Version="1.1.1" />
   </ItemGroup>
 
 </Project>

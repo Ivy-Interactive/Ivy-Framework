@@ -18,6 +18,12 @@ import 'reactflow/dist/style.css';
 import { Parser } from '@dbml/core';
 import { getWidth, getHeight } from '@/lib/styles';
 import { useTheme } from '@/components/theme-provider/hooks';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import './DbmlCanvasWidget.css';
 
 interface DbmlCanvasWidgetProps {
@@ -149,7 +155,9 @@ export const DatabaseSchemaTableRow = ({
   children,
 }: DatabaseSchemaTableRowProps) => {
   return (
-    <div className="flex items-center justify-between py-1">{children}</div>
+    <div className="flex items-center justify-between gap-4 py-1">
+      {children}
+    </div>
   );
 };
 
@@ -206,25 +214,48 @@ const DbmlTableNode: React.FC<DbmlTableNodeProps> = ({ data, selected }) => {
                 }}
               />
             )}
-            <DatabaseSchemaTableCell>
-              <div className="flex items-center">
+            <DatabaseSchemaTableCell className="min-w-0 flex-1">
+              <div className="flex items-center min-w-0">
                 {field.pk && (
-                  <span className="mr-1.5 text-amber-500" title="Primary Key">
+                  <span
+                    className="mr-1.5 text-amber-500 shrink-0"
+                    title="Primary Key"
+                  >
                     🔑
                   </span>
                 )}
-                <span
-                  className={`font-medium ${field.pk ? 'text-primary' : ''}`}
-                >
-                  {field.name}
-                </span>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span
+                        className={`font-medium truncate ${field.pk ? 'text-primary' : ''}`}
+                      >
+                        {field.name}
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent className="bg-popover text-popover-foreground shadow-md max-w-xs">
+                      {field.name}
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               </div>
             </DatabaseSchemaTableCell>
-            <DatabaseSchemaTableCell className="text-muted-foreground ml-2">
-              {field.type}
-              {field.nullable ? '?' : ''}
+            <DatabaseSchemaTableCell className="text-muted-foreground ml-auto text-right shrink-0">
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="truncate max-w-[120px] inline-block">
+                      {field.type}
+                      {field.nullable ? '?' : ''}
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent className="bg-popover text-popover-foreground shadow-md max-w-xs">
+                    {`${field.type}${field.nullable ? '?' : ''}`}
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </DatabaseSchemaTableCell>
-            {(field.isSource || field.pk) && (
+            {field.isSource && (
               <Handle
                 type="source"
                 position={Position.Right}
@@ -248,26 +279,12 @@ const nodeTypes: NodeTypes = {
 };
 
 const calculateNodeDimensions = (tableData: DbmlTableData) => {
-  // Base dimensions
-  const minWidth = 200;
+  // Fixed dimensions for all tables
+  const fixedWidth = 240;
   const minHeight = 120;
   const fieldHeight = 28; // Height per field row
   const headerHeight = 40; // Height for table header
   const padding = 16; // Padding inside the table
-
-  // Calculate width based on content (table name and field names/types)
-  const tableName = tableData.label;
-  const longestField = tableData.fields.reduce((longest, field) => {
-    const fieldText = `${field.name} ${field.type}${field.nullable ? '?' : ''}`;
-    return fieldText.length > longest.length ? fieldText : longest;
-  }, '');
-
-  // Estimate width based on character count (rough approximation)
-  const estimatedWidth = Math.max(
-    tableName.length * 8 + 60, // Table name width + padding for PK icon
-    longestField.length * 7 + 60, // Longest field width + padding
-    minWidth
-  );
 
   // Calculate height based on number of fields
   const calculatedHeight = Math.max(
@@ -276,7 +293,7 @@ const calculateNodeDimensions = (tableData: DbmlTableData) => {
   );
 
   return {
-    width: Math.min(estimatedWidth, 350), // Cap max width at 350px
+    width: fixedWidth,
     height: calculatedHeight,
   };
 };
@@ -469,7 +486,7 @@ export const DbmlCanvasWidget: React.FC<DbmlCanvasWidgetProps> = ({
                 name: field.name,
                 type: field.type.type_name,
                 pk: field.pk || false,
-                isSource: tableRelations.sources.has(field.name) || field.pk,
+                isSource: tableRelations.sources.has(field.name),
                 isTarget: tableRelations.targets.has(field.name),
                 nullable: field.not_null === false,
               })),

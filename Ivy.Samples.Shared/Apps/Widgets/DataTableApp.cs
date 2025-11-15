@@ -118,7 +118,7 @@ public class DataTableApp : SampleBase
         // The DataTable builder will be recreated each time, but use the cached employee data
         var dataTable = employees.Value.AsQueryable().ToDataTable()
             // Table dimensions (fix for issue #1311)
-            .Width(Size.Full())     // Table width set to 120 units (30rem)
+            .Width(Size.Full()) // Table width set to 120 units (30rem)
             .Height(Size.Full()) // Table height set to 120 units (30rem)
 
             // Numeric columns
@@ -227,7 +227,7 @@ public class DataTableApp : SampleBase
             // Configuration
             .Config(config =>
             {
-                config.FreezeColumns = 2;                    // Freeze ID and Code
+                config.FreezeColumns = 2; // Freeze ID and Code
                 config.AllowSorting = true;
                 config.AllowFiltering = true;
                 config.AllowLlmFiltering = true;
@@ -238,9 +238,9 @@ public class DataTableApp : SampleBase
                 config.ShowIndexColumn = false;
                 config.ShowGroups = true;
                 config.ShowVerticalBorders = false;
-                config.ShowColumnTypeIcons = false;           // Show type icons
-                config.BatchSize = 50;                       // Load 50 rows at a time
-                config.LoadAllRows = false;                  // Use pagination
+                config.ShowColumnTypeIcons = false; // Show type icons
+                config.BatchSize = 50; // Load 50 rows at a time
+                config.LoadAllRows = false; // Use pagination
                 config.ShowSearch = true;
             })
             // Configure row action buttons

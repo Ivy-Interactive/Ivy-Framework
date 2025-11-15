@@ -133,6 +133,7 @@ public class FormBuilder<TModel> : ViewBase
     /// <summary>The text displayed on the form's submit button.</summary>
     public readonly string SubmitTitle;
     private readonly List<string> _groups = [];
+    private readonly Dictionary<string, bool> _groupOpenStates = [];
 
     /// <summary>The validation strategy for form fields. Default is OnBlur.</summary>
     public FormValidationStrategy ValidationStrategy { get; set; } = FormValidationStrategy.OnBlur;
@@ -446,9 +447,15 @@ public class FormBuilder<TModel> : ViewBase
     /// <param name="row">True to arrange fields side-by-side in the same row; false to stack vertically.</param>
     /// <param name="fields">Fields to arrange. When row is true, fields will be distributed evenly across the row width.</param>
     /// <returns>Form builder instance for method chaining.</returns>
+    [Obsolete("Use PlaceHorizontal")]
     public FormBuilder<TModel> Place(bool row, params Expression<Func<TModel, object>>[] fields)
     {
         return _Place(0, row ? Guid.NewGuid() : null, fields);
+    }
+
+    public FormBuilder<TModel> PlaceHorizontal(params Expression<Func<TModel, object>>[] fields)
+    {
+        return _Place(0, Guid.NewGuid(), fields);
     }
 
     /// <summary>Places specified fields in a specific column, optionally arranging them horizontally side-by-side.</summary>
@@ -461,12 +468,22 @@ public class FormBuilder<TModel> : ViewBase
         return _Place(col, row ? Guid.NewGuid() : null, fields);
     }
 
-    /// <summary>Groups specified fields under named section in specified column.</summary>
-    /// <param name="group">Name of group for organizing related fields.</param>
-    /// <param name="column">Column index where grouped fields should be placed.</param>
-    /// <param name="fields">Fields to include in named group.</param>
-    /// <returns>Form builder instance for method chaining.</returns>
+    public FormBuilder<TModel> Group(string group, params Expression<Func<TModel, object>>[] fields)
+    {
+        return Group(group, 0, false, fields);
+    }
+
+    public FormBuilder<TModel> Group(string group, bool open, params Expression<Func<TModel, object>>[] fields)
+    {
+        return Group(group, 0, open, fields);
+    }
+
     public FormBuilder<TModel> Group(string group, int column, params Expression<Func<TModel, object>>[] fields)
+    {
+        return Group(group, column, false, fields);
+    }
+
+    public FormBuilder<TModel> Group(string group, int column, bool open, params Expression<Func<TModel, object>>[] fields)
     {
         int order = 0;
 
@@ -474,6 +491,8 @@ public class FormBuilder<TModel> : ViewBase
         {
             _groups.Add(group);
         }
+
+        _groupOpenStates[group] = open;
 
         foreach (var expr in fields)
         {
@@ -483,15 +502,6 @@ public class FormBuilder<TModel> : ViewBase
             hint.Column = column;
         }
         return this;
-    }
-
-    /// <summary>Groups specified fields under named section in first column.</summary>
-    /// <param name="group">Name of group for organizing related fields.</param>
-    /// <param name="fields">Fields to include in named group.</param>
-    /// <returns>Form builder instance for method chaining.</returns>
-    public FormBuilder<TModel> Group(string group, params Expression<Func<TModel, object>>[] fields)
-    {
-        return Group(group, 0, fields);
     }
 
     /// <summary>Removes specified fields from form so they will not be rendered.</summary>
@@ -703,7 +713,8 @@ public class FormBuilder<TModel> : ViewBase
         var formView = new FormView<TModel>(
             fieldViews,
             HandleSubmitEvent,
-            Size
+            Size,
+            _groupOpenStates
         );
 
         var validationView = new WrapperView(Layout.Vertical(

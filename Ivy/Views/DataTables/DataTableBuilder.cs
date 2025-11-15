@@ -297,9 +297,28 @@ public class DataTableBuilder<TModel> : ViewBase, IMemoized
         return this;
     }
 
+    public DataTableBuilder<TModel> HandleRowAction(Action<TModel, MenuItem> handler)
+    {
+        //todo: Implement
+        return this;
+    }
+
+    public DataTableBuilder<TModel> RowActions2(params MenuItem[] actions)
+    {
+        //todo: Implement and rename to RowActions
+        return this;
+    }
+
+    public DataTableBuilder<TModel> HandleCellAction(Expression<Func<TModel, object>> field, Action<object> action)
+    {
+        //todo: Implement
+        return this;
+    }
+
     /// <summary>Sets the event handler for row action button clicks.</summary>
     public DataTableBuilder<TModel> OnRowAction(Func<Event<DataTable, RowActionClickEventArgs>, ValueTask> handler)
     {
+        //todo: remove
         _onRowAction = handler;
         return this;
     }
@@ -333,6 +352,6 @@ public class DataTableBuilder<TModel> : ViewBase, IMemoized
     public object[] GetMemoValues()
     {
         // Memoize based on configuration - if config hasn't changed, don't rebuild
-        return [(object?)_width!, (object?)_height!, _configuration];
+        return [_width!, _height!, _configuration];
     }
 }

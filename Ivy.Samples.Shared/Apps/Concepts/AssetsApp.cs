@@ -7,6 +7,6 @@ public class AssetsApp : ViewBase
 {
     public override object? Build()
     {
-        return new Image("/assets/tagline.png");
+        return new Image("/ivy/assets/tagline.png");
     }
 }

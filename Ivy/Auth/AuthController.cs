@@ -15,7 +15,7 @@ public class AuthController() : Controller
     /// </summary>
     /// <param name="token">The authentication token to set, or null to clear</param>
     /// <returns>OK result indicating the operation completed</returns>
-    [Route("auth/set-auth-token")]
+    [Route("ivy/auth/set-auth-token")]
     [HttpPatch]
     public IActionResult SetAuthToken([FromBody] AuthToken? token)
     {

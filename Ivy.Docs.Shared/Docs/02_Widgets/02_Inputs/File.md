@@ -58,9 +58,7 @@ public class SingleVsMultipleDemo : ViewBase
 }
 ```
 
-<Callout Type="tip">
 Multiple file selection is automatically enabled when you use `ImmutableArray&lt;FileUpload&lt;T&gt;&gt;` as your state type. You do **not** need to explicitly set a `.Multiple()` property.
-</Callout>
 
 ## File Type Filtering
 
@@ -99,7 +97,7 @@ public class FileSizeLimitDemo : ViewBase
     {
         var file = UseState<FileUpload<byte[]>?>();
         var upload = this.UseUpload(MemoryStreamUploadHandler.Create(file))
-            .MaxFileSize(2 * 1024 * 1024); // 2 MB limit
+            .MaxFileSize(FileSize.FromMegabytes(2));
 
         return Layout.Vertical()
                 | Text.H2("2 MB Size Limit")
@@ -110,6 +108,11 @@ public class FileSizeLimitDemo : ViewBase
     }
 }
 ```
+
+<Callout Tip="Info">
+You can set size limits clearly with helper methods:
+`.FromKilobytes()`, `.FromMegabytes()`, or `.FromGigabytes()` provide clear, self-documenting limits.
+</Callout>
 
 ## Multiple Files Limit
 
@@ -123,7 +126,7 @@ public class MaxFilesDemo : ViewBase
         var files = UseState(ImmutableArray.Create<FileUpload<byte[]>>());
         var upload = this.UseUpload(MemoryStreamUploadHandler.Create(files))
             .MaxFiles(3)  // Maximum 3 files
-            .MaxFileSize(5 * 1024 * 1024);
+            .MaxFileSize(FileSize.FromMegabytes(5));
 
         return Layout.Vertical()
                 | Text.H2("Maximum 3 Files")
@@ -214,8 +217,6 @@ var upload = this.UseUpload(MemoryStreamUploadHandler.Create(
 ));
 ```
 
-<Callout Type="tip">
 `MemoryStreamUploadHandler` automatically detects the state type and configures itself accordingly. For binary files, use `FileUpload&lt;byte[]&gt;`. For text files, use `FileUpload&lt;string&gt;` and optionally specify the encoding (defaults to UTF-8).
-</Callout>
 
 <WidgetDocs Type="Ivy.FileInput" ExtensionTypes="Ivy.FileInputExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Inputs/FileInput.cs"/>

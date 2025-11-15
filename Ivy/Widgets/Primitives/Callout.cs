@@ -1,5 +1,7 @@
 ﻿using Ivy.Core;
 using Ivy.Shared;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy;
@@ -81,5 +83,17 @@ public static class CalloutExtensions
     public static Callout Icon(this Callout callout, Icons icon)
     {
         return callout with { Icon = icon };
+    }
+
+    public static Callout HandleLinkClick(this Callout callout, Action<string> onLinkClick)
+    {
+        if (callout.Children.Length > 0 && callout.Children[0] is Markdown markdown)
+        {
+            var markdownWithHandler = new Markdown(markdown.Content ?? string.Empty,
+                (Event<Markdown, string> @event) => { onLinkClick(@event.Value); return ValueTask.CompletedTask; });
+
+            return callout with { Children = new object[] { markdownWithHandler } };
+        }
+        return callout;
     }
 }

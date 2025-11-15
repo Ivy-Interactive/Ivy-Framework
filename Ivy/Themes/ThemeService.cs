@@ -112,23 +112,6 @@ public class ThemeService : IThemeService
         // Popover colors
         AppendColorVariable(sb, "--popover", colors.Popover);
         AppendColorVariable(sb, "--popover-foreground", colors.PopoverForeground);
-
-        // Chart colors
-        AppendColorVariable(sb, "--chart-1", colors.Chart1);
-        AppendColorVariable(sb, "--chart-2", colors.Chart2);
-        AppendColorVariable(sb, "--chart-3", colors.Chart3);
-        AppendColorVariable(sb, "--chart-4", colors.Chart4);
-        AppendColorVariable(sb, "--chart-5", colors.Chart5);
-
-        // Sidebar colors
-        AppendColorVariable(sb, "--sidebar", colors.Sidebar);
-        AppendColorVariable(sb, "--sidebar-foreground", colors.SidebarForeground);
-        AppendColorVariable(sb, "--sidebar-primary", colors.SidebarPrimary);
-        AppendColorVariable(sb, "--sidebar-primary-foreground", colors.SidebarPrimaryForeground);
-        AppendColorVariable(sb, "--sidebar-accent", colors.SidebarAccent);
-        AppendColorVariable(sb, "--sidebar-accent-foreground", colors.SidebarAccentForeground);
-        AppendColorVariable(sb, "--sidebar-border", colors.SidebarBorder);
-        AppendColorVariable(sb, "--sidebar-ring", colors.SidebarRing);
     }
 
     private void AppendOtherThemeProperties(StringBuilder sb)
