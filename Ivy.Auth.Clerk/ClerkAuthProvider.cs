@@ -1,11 +1,12 @@
-﻿using System.Security.Cryptography;
-using Microsoft.IdentityModel.Tokens;
+﻿using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Reflection;
 using Ivy.Hooks;
 using Ivy.Shared;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
+using Ivy.Auth.Clerk.ApiClient;
+using System.Text.Json;
 
 namespace Ivy.Auth.Clerk;
 
@@ -20,10 +21,13 @@ public class ClerkAuthProvider : IAuthProvider
 {
     private readonly string _secretKey;
     private readonly string _frontendApiDomain;
-    private readonly List<AuthOption> _authOptions = new();
+    private readonly List<AuthOption> _authOptions = [];
     private readonly HttpClient _httpClient;
     private ICollection<SecurityKey>? _signingKeys;
     private DateTime _signingKeysLastFetched = DateTime.MinValue;
+    private readonly FrontendApiClient _frontendClient;
+
+    private const string ORIGIN_TEMPORARY_REMOVE_THIS_BEFORE_MERGE = "http://localhost:5010";
 
     public ClerkAuthProvider()
     {
@@ -37,6 +41,8 @@ public class ClerkAuthProvider : IAuthProvider
 
         _httpClient = new HttpClient();
         _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_secretKey}");
+
+        _frontendClient = new FrontendApiClient(_frontendApiDomain, _secretKey);
     }
 
     private async Task<ICollection<SecurityKey>> GetSigningKeysAsync(CancellationToken cancellationToken = default)
@@ -76,16 +82,43 @@ public class ClerkAuthProvider : IAuthProvider
         }
     }
 
-    public Task<Uri> GetOAuthUriAsync(AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken = default)
+    public async Task<Uri> GetOAuthUriAsync(AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken = default)
     {
+        string? devBrowserJwt = null;
+        try
+        {
+            var devBrowserTokenResponse = await _frontendClient.CreateDevBrowserTokenAsync(cancellationToken);
+            Console.WriteLine($"got dev browser token: {JsonSerializer.Serialize(devBrowserTokenResponse)}\n");
+            devBrowserJwt = devBrowserTokenResponse.Id;
+
+            var updateEnvironmentResponse = await _frontendClient.UpdateEnvironmentAsync(devBrowserTokenResponse.Id, ORIGIN_TEMPORARY_REMOVE_THIS_BEFORE_MERGE, cancellationToken);
+            Console.WriteLine($"updated environment: {JsonSerializer.Serialize(updateEnvironmentResponse)}\n");
+
+            var clientResponse = await _frontendClient.GetCurrentClient(devBrowserTokenResponse.Id, cancellationToken);
+            Console.WriteLine($"got client: {JsonSerializer.Serialize(clientResponse)}\n");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error during frontend API calls: {ex}");
+        }
+
         var redirectUri = callback.GetUri(includeIdInPath: true);
 
-        // TODO: fetch the correct sign-in URL. This is the default, but it is configurable in Clerk dashboard.
+        // TODO: use the correct sign-in URL. This is the default, but it is configurable in Clerk dashboard.
         // Also we may want to just take complete control of the sign-in flow:
         // https://clerk.com/docs/reference/frontend-api/tag/sign-ins/post/v1/client/sign_ins
         var authUrl = $"https://{_frontendApiDomain}.accounts.dev/sign-in?redirect_url={Uri.EscapeDataString(redirectUri.ToString())}";
+        if (!string.IsNullOrEmpty(devBrowserJwt))
+        {
+            Console.WriteLine($"(not) Appending devBrowserJwt to auth URL:  {devBrowserJwt}.\n");
+            // authUrl += $"&__clerk_db_jwt={devBrowserJwt}";
+        }
+        else
+        {
+            Console.WriteLine("Warning: devBrowserJwt is null or empty, proceeding without it.\n");
+        }
 
-        return Task.FromResult(new Uri(authUrl));
+        return new Uri(authUrl);
     }
 
     public async Task<AuthToken> VerifyHandshakeJwtAsync(string jwt, CancellationToken cancellationToken = default)
@@ -135,6 +168,7 @@ public class ClerkAuthProvider : IAuthProvider
     {
         var handshakeJwt = request.Query["__clerk_handshake"].ToString();
         var devBrowserJwt = request.Query["__clerk_db_jwt"].ToString();
+        Console.WriteLine($"Received dev browser JWT in callback: {devBrowserJwt}\n");
 
         var error = request.Query["error"].ToString();
         var errorDescription = request.Query["error_description"].ToString();

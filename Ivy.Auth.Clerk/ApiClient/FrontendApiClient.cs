@@ -1,8 +1,8 @@
 using System.Text.Json;
 using System.Net.Http.Headers;
-using Ivy.Auth.Clerk.FrontendApiClient.Responses;
+using Ivy.Auth.Clerk.ApiClient.Responses;
 
-namespace Ivy.Auth.Clerk.FrontendApiClient;
+namespace Ivy.Auth.Clerk.ApiClient;
 
 public class FrontendApiClient
 {
