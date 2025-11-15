@@ -80,91 +80,76 @@ public record Size
         Value = value;
     }
 
-    /// <summary>Creates a size with absolute pixel value.</summary>
     public static Size Px(int value)
     {
         return new Size(SizeType.Px, value);
     }
 
-    /// <summary>Creates a size with rem units relative to root font size.</summary>
     public static Size Rem(int value)
     {
         return new Size(SizeType.Rem, value);
     }
 
-    /// <summary>Creates a size with framework-specific units.</summary>
     public static Size Units(int value)
     {
         return new Size(SizeType.Units, value);
     }
 
-    /// <summary>Creates a fractional size (0.0 to 1.0) for percentage-based sizing.</summary>
     public static Size Fraction(float value)
     {
         return new Size(SizeType.Fraction, value);
     }
 
-    /// <summary>Creates a size that takes up the full available space.</summary>
     public static Size Full()
     {
         return new Size(SizeType.Full, null);
     }
 
-    /// <summary>Creates a size that fits the content.</summary>
     public static Size Fit()
     {
         return new Size(SizeType.Fit, null);
     }
 
-    /// <summary>Creates a size relative to screen dimensions.</summary>
     public static Size Screen()
     {
         return new Size(SizeType.Screen, null);
     }
 
-    /// <summary>Creates a size based on minimum intrinsic content width.</summary>
     public static Size MinContent()
     {
         return new Size(SizeType.MinContent, null);
     }
 
-    /// <summary>Creates a size based on maximum intrinsic content width.</summary>
     public static Size MaxContent()
     {
         return new Size(SizeType.MaxContent, null);
     }
 
-    /// <summary>Creates an automatic size based on content and context.</summary>
     public static Size Auto()
     {
         return new Size(SizeType.Auto, null);
     }
 
-    /// <summary>Creates a flexible grow size for layout containers.</summary>
     public static Size Grow(int value = 1)
     {
         return new Size(SizeType.Grow, value);
     }
 
-    /// <summary>Creates a flexible shrink size for layout containers.</summary>
     public static Size Shrink(int value = 1)
     {
         return new Size(SizeType.Shrink, value);
     }
 
-    /// <summary>Creates a half-width fractional size (0.5).</summary>
     public static Size Half()
     {
         return Fraction(0.5f);
     }
 
-    /// <summary>Creates a third-width fractional size (0.333).</summary>
     public static Size Third()
     {
         return Fraction(0.333f);
     }
 
-    /// <summary>Creates a fractional size with gap consideration for layout spacing.</summary>
     public static Size FractionGap(float value)
     {
         return new Size(SizeType.FractionGap, value);

@@ -39,7 +39,6 @@ public record Card : WidgetBase<Card>
 
     [Prop] public Sizes Size { get; set; } = Sizes.Medium;
 
-    /// <summary>Adds content to the card's main content area using the pipe operator</summary>
     /// <returns>A new Card instance with the updated content.</returns>
     /// <exception cref="NotSupportedException">Thrown when attempting to add multiple children at once.</exception>
     public static Card operator |(Card widget, object child)

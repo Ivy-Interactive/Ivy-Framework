@@ -81,7 +81,6 @@ public static class EffectExtensions
             // Nothing to dispose for observables
         }
 
-        /// <summary>Creates an effect trigger (not implemented for observables).</summary>
         public IEffectTrigger ToTrigger()
         {
             throw new NotImplementedException();

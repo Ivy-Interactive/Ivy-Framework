@@ -4,51 +4,34 @@ using System.Runtime.CompilerServices;
 
 namespace Ivy.Views.Charts;
 
-/// <summary>
-/// Represents a dimension (grouping column) in a pivot table with a name and selector expression.
-/// </summary>
+/// <summary>Represents a dimension (grouping column) in a pivot table with a name and selector expression.</summary>
 /// <typeparam name="T">The type of the source data objects.</typeparam>
 /// <param name="Name">The display name for the dimension column.</param>
 /// <param name="Selector">Expression to select the dimension value from source objects.</param>
 public record Dimension<T>(string Name, Expression<Func<T, object>> Selector);
 
-/// <summary>
-/// Represents a measure (aggregated value) in a pivot table with a name and aggregation expression.
-/// </summary>
+/// <summary>Represents a measure (aggregated value) in a pivot table with a name and aggregation expression.</summary>
 /// <typeparam name="T">The type of the source data objects.</typeparam>
 /// <param name="Name">The display name for the measure column.</param>
 /// <param name="Aggregator">Expression to aggregate values from grouped data (e.g., Sum, Count, Average).</param>
 public record Measure<T>(string Name, Expression<Func<IQueryable<T>, object>> Aggregator);
 
-/// <summary>
-/// Represents a table calculation that performs post-aggregation computations on pivot table results.
-/// </summary>
+/// <summary>Represents a table calculation that performs post-aggregation computations on pivot table results.</summary>
 /// <param name="Name">The name of the calculated column.</param>
 /// <param name="MeasureNames">Array of measure names that this calculation depends on.</param>
 /// <param name="Calculation">Action that performs the calculation on the pivot table data.</param>
 public record TableCalculation(string Name, string[] MeasureNames, Action<List<Dictionary<string, object>>> Calculation);
 
-/// <summary>
-/// Core pivot table engine that transforms data by grouping dimensions and aggregating measures.
-/// </summary>
+/// <summary>Core pivot table engine that transforms data by grouping dimensions and aggregating measures.</summary>
 /// <typeparam name="T">The type of the source data objects.</typeparam>
 public class PivotTable<T>
 {
-    /// <summary>Gets the collection of dimensions (grouping columns) for the pivot table.</summary>
-    /// <value>A list of dimension configurations that define how data is grouped.</value>
     public IList<Dimension<T>> Dimensions { get; } = new List<Dimension<T>>();
 
-    /// <summary>Gets the collection of measures (aggregated values) for the pivot table.</summary>
-    /// <value>A list of measure configurations that define how grouped data is aggregated.</value>
     public IList<Measure<T>> Measures { get; } = new List<Measure<T>>();
 
-    /// <summary>Gets the collection of table calculations for post-aggregation computations.</summary>
-    /// <value>A list of table calculations that operate on the aggregated pivot table results.</value>
     public IList<TableCalculation> TableCalculations { get; } = new List<TableCalculation>();
 
-    /// <summary>
-    /// Initializes a new pivot table with the specified dimensions, measures, and optional table calculations.
-    /// </summary>
     /// <param name="dimensions">The dimensions to group data by.</param>
     /// <param name="measures">The measures to aggregate for each group.</param>
     /// <param name="calculations">Optional table calculations for post-aggregation computations.</param>
@@ -183,9 +166,7 @@ public class PivotTable<T>
     }
 }
 
-/// <summary>
-/// Fluent builder for configuring and executing pivot table transformations.
-/// </summary>
+/// <summary>Fluent builder for configuring and executing pivot table transformations.</summary>
 /// <typeparam name="TSource">The type of the source data objects.</typeparam>
 public class PivotTableBuilder<TSource>(IQueryable<TSource> data)
 {
@@ -302,8 +283,6 @@ public class PivotTableBuilder<TSource>(IQueryable<TSource> data)
 /// <typeparam name="TDestination">The target type for the pivot table results.</typeparam>
 public class PivotTableMapper<TSource, TDestination>(PivotTableBuilder<TSource> builder)
 {
-    /// <summary>Gets the underlying pivot table builder.</summary>
-    /// <value>The builder instance that configures the pivot table transformation.</value>
     public PivotTableBuilder<TSource> Builder { get; } = builder;
 
     /// <summary>
@@ -373,9 +352,7 @@ public class PivotTableMapper<TSource, TDestination>(PivotTableBuilder<TSource> 
     }
 }
 
-/// <summary>
-/// Extension methods for creating pivot table builders from data collections.
-/// </summary>
+/// <summary>Extension methods for creating pivot table builders from data collections.</summary>
 public static class PivotTableBuilderExtensions
 {
     /// <summary>

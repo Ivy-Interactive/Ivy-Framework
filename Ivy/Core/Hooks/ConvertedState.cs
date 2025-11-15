@@ -16,11 +16,8 @@ public class ConvertedState<TFrom, TTo>(IState<TFrom> originalState, Func<TFrom,
     /// </summary>
     private class ForwardingObserver(IObserver<TTo> observer, Func<TFrom, TTo> forward) : IObserver<TFrom>
     {
-        /// <summary>Converts and forwards the next value to the target observer.</summary>
         public void OnNext(TFrom value) => observer.OnNext(forward(value));
-        /// <summary>Forwards error notifications to the target observer.</summary>
         public void OnError(Exception error) => observer.OnError(error);
-        /// <summary>Forwards completion notifications to the target observer.</summary>
         public void OnCompleted() => observer.OnCompleted();
     }
 
@@ -37,7 +34,6 @@ public class ConvertedState<TFrom, TTo>(IState<TFrom> originalState, Func<TFrom,
     /// <summary>Disposes the original state.</summary>
     public void Dispose() => originalState.Dispose();
 
-    /// <summary>Creates an effect trigger from the original state.</summary>
     public IEffectTrigger ToTrigger() => originalState.ToTrigger();
 
     /// <summary>Subscribes to any changes in the original state.</summary>

@@ -290,7 +290,6 @@ public class DataTableBuilder<TModel> : ViewBase, IMemoized
         return this;
     }
 
-    /// <summary>Configures row action buttons that appear on hover.</summary>
     public DataTableBuilder<TModel> RowActions(params RowAction[] actions)
     {
         _rowActions = actions;

@@ -91,41 +91,30 @@ internal class PrefixSuffixJsonConverter : JsonConverter<PrefixSuffix>
 /// <summary> Interface for text input controls that extends IAnyInput with text-specific properties. </summary>
 public interface IAnyTextInput : IAnyInput
 {
-    /// <summary>Gets or sets the placeholder text displayed when the input is empty.</summary>
     public string? Placeholder { get; set; }
 
-    /// <summary>Gets or sets the visual and functional variant of the text input.</summary>
     public TextInputs Variant { get; set; }
 }
 
 /// <summary> Abstract base class for text input controls that provides common text input functionality. </summary>
 public abstract record TextInputBase : WidgetBase<TextInputBase>, IAnyTextInput
 {
-    /// <summary>Gets or sets whether the input is disabled.</summary>
     [Prop] public bool Disabled { get; set; }
 
-    /// <summary>Gets or sets the validation error message.</summary>
     [Prop] public string? Invalid { get; set; }
 
-    /// <summary>Gets or sets the placeholder text displayed when the input is empty.</summary>
     [Prop] public string? Placeholder { get; set; }
 
-    /// <summary>Gets or sets the visual and functional variant of the text input.</summary>
     [Prop] public TextInputs Variant { get; set; }
 
-    /// <summary>Gets or sets the keyboard shortcut key for focusing this input.</summary>
     [Prop] public string? ShortcutKey { get; set; }
 
-    /// <summary>Gets or sets the size of the text input.</summary>
     [Prop] public Sizes Size { get; set; } = Sizes.Medium;
 
-    /// <summary>Gets or sets the prefix displayed before the input field (either text or icon).</summary>
     [Prop] public PrefixSuffix? Prefix { get; set; }
 
-    /// <summary>Gets or sets the suffix displayed after the input field (either text or icon).</summary>
     [Prop] public PrefixSuffix? Suffix { get; set; }
 
-    /// <summary>Gets or sets the event handler called when the input loses focus.</summary>
     [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
 
     /// <summary> Returns the types that this text input can bind to and work with. </summary>
@@ -181,10 +170,8 @@ public record TextInput<TString> : TextInputBase, IInput<TString>
         Disabled = disabled;
     }
 
-    /// <summary>Gets the current text value.</summary>
     [Prop] public TString Value { get; } = default!;
 
-    /// <summary>Gets the event handler called when the text value changes.</summary>
     [Event] public Func<Event<IInput<TString>, TString>, ValueTask>? OnChange { get; }
 }
 
@@ -287,59 +274,47 @@ public static class TextInputExtensions
     /// <param name="disabled">Whether the input should be disabled initially.</param>
     public static TextInputBase ToTelInput(this IAnyState state, string? placeholder = null, bool disabled = false) => state.ToTextInput(placeholder, disabled, TextInputs.Tel);
 
-    /// <summary>Sets the placeholder text for the text input.</summary>
     /// <param name="widget">The text input to configure.</param>
     /// <param name="placeholder">The placeholder text to display when the input is empty.</param>
     public static TextInputBase Placeholder(this TextInputBase widget, string placeholder) => widget with { Placeholder = placeholder };
 
-    /// <summary>Sets the disabled state of the text input.</summary>
     /// <param name="widget">The text input to configure.</param>
     /// <param name="disabled">Whether the input should be disabled.</param>
     public static TextInputBase Disabled(this TextInputBase widget, bool disabled = true) => widget with { Disabled = disabled };
 
-    /// <summary>Sets the visual and functional variant of the text input.</summary>
     /// <param name="widget">The text input to configure.</param>
     /// <param name="variant">The text input variant (Text, Textarea, Email, Tel, Url, Password, or Search).</param>
     public static TextInputBase Variant(this TextInputBase widget, TextInputs variant) => widget with { Variant = variant };
 
-    /// <summary>Sets the validation error message for the text input.</summary>
     /// <param name="widget">The text input to configure.</param>
     /// <param name="invalid">The validation error message to display.</param>
     public static TextInputBase Invalid(this TextInputBase widget, string invalid) => widget with { Invalid = invalid };
 
-    /// <summary>Sets the keyboard shortcut key for focusing the text input.</summary>
     /// <param name="widget">The text input to configure.</param>
     /// <param name="shortcutKey">The keyboard shortcut key combination for focusing this input.</param>
     public static TextInputBase ShortcutKey(this TextInputBase widget, string shortcutKey) => widget with { ShortcutKey = shortcutKey };
 
-    /// <summary>Sets the size of the text input.</summary>
     public static TextInputBase Size(this TextInputBase widget, Sizes size) => widget with { Size = size };
 
-    /// <summary>Sets the text input size to large for prominent display.</summary>
     public static TextInputBase Large(this TextInputBase widget) => widget.Size(Sizes.Large);
 
-    /// <summary>Sets the text input size to small for compact display.</summary>
     public static TextInputBase Small(this TextInputBase widget) => widget.Size(Sizes.Small);
 
-    /// <summary>Sets the text prefix displayed before the input field.</summary>
     /// <param name="widget">The text input to configure.</param>
     /// <param name="prefixText">The text to display before the input.</param>
     public static TextInputBase Prefix(this TextInputBase widget, string prefixText)
         => widget with { Prefix = new PrefixSuffix.Text(prefixText) };
 
-    /// <summary>Sets the icon prefix displayed before the input field.</summary>
     /// <param name="widget">The text input to configure.</param>
     /// <param name="prefixIcon">The icon to display before the input.</param>
     public static TextInputBase Prefix(this TextInputBase widget, Icons prefixIcon)
         => widget with { Prefix = new PrefixSuffix.Icon(prefixIcon) };
 
-    /// <summary>Sets the text suffix displayed after the input field.</summary>
     /// <param name="widget">The text input to configure.</param>
     /// <param name="suffixText">The text to display after the input.</param>
     public static TextInputBase Suffix(this TextInputBase widget, string suffixText)
         => widget with { Suffix = new PrefixSuffix.Text(suffixText) };
 
-    /// <summary>Sets the icon suffix displayed after the input field.</summary>
     /// <param name="widget">The text input to configure.</param>
     /// <param name="suffixIcon">The icon to display after the input.</param>
     public static TextInputBase Suffix(this TextInputBase widget, Icons suffixIcon)

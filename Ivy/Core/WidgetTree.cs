@@ -11,10 +11,7 @@ using Ivy.Core.Hooks;
 
 namespace Ivy.Core;
 
-/// <summary>
-/// Represents a node in the widget tree hierarchy, containing either a widget or view with its associated context and children.
-/// Manages the hierarchical structure and provides methods for tree traversal and widget extraction.
-/// </summary>
+/// <summary>Represents a node in the widget tree hierarchy, containing either a widget or view with its associated context and children. Manages the hierarchical structure and provides methods for tree traversal and widget extraction.</summary>
 /// <param name="id">The unique identifier for this node.</param>
 /// <param name="index">The index position of this node among its siblings.</param>
 /// <param name="parentPath">The path from the root to this node's parent.</param>
@@ -59,23 +56,14 @@ public class TreeNode(string id, int index, Path parentPath, TreeNode[] children
 
     // public bool ShouldRebuild { get; set; }
 
-    /// <summary>Gets the unique identifier for this node.</summary>
     public string Id { get; } = id;
-    /// <summary>Gets the index position of this node among its siblings.</summary>
     public int Index { get; } = index;
-    /// <summary>Gets the path from the root to this node's parent.</summary>
     public Path ParentPath { get; } = parentPath;
-    /// <summary>Gets the child nodes of this node.</summary>
     public TreeNode[] Children { get; } = children;
-    /// <summary>Gets the hash code for memoization optimization, if applicable.</summary>
     public int? MemoizedHashCode { get; } = memoizedHashCode;
-    /// <summary>Gets the widget instance if this node represents a widget.</summary>
     public IWidget? Widget { get; } = widget;
-    /// <summary>Gets the view instance if this node represents a view.</summary>
     public IView? View { get; } = view;
-    /// <summary>Gets the view context associated with this node.</summary>
     public IViewContext? Context { get; } = context;
-    /// <summary>Gets the ancestor view context for context hierarchy.</summary>
     public IViewContext? AncestorContext { get; } = ancestorContext;
 
     /// <summary>
@@ -164,35 +152,24 @@ public class TreeNode(string id, int index, Path parentPath, TreeNode[] children
     // }
 }
 
-/// <summary>
-/// Represents a change notification for widget tree updates, containing the view ID, target indices, and JSON patch data.
-/// Used to efficiently communicate incremental changes to the client-side React components.
-/// </summary>
+/// <summary>Represents a change notification for widget tree updates, containing the view ID, target indices, and JSON patch data. Used to efficiently communicate incremental changes to the client-side React components.</summary>
 /// <param name="viewId">The ID of the view that changed.</param>
 /// <param name="indices">The indices path to the changed widget in the flattened tree.</param>
 /// <param name="patch">The JSON patch describing the changes to apply.</param>
 public class WidgetTreeChanged(string viewId, int[] indices, JsonNode? patch)
 {
-    /// <summary>Gets the ID of the view that changed.</summary>
     public string ViewId { get; } = viewId;
-    /// <summary>Gets the indices path to the changed widget in the flattened tree.</summary>
     public int[] Indices { get; } = indices;
-    /// <summary>Gets the JSON patch describing the changes to apply.</summary>
     public JsonNode? Patch { get; } = patch;
 }
 
-/// <summary>
-/// Manages the hierarchical widget tree structure, handling building, updating, and change notifications for efficient client-side rendering.
-/// Implements reactive patterns with memoization, batched updates, and JSON patch-based change detection.
-/// </summary>
+/// <summary>Manages the hierarchical widget tree structure, handling building, updating, and change notifications for efficient client-side rendering. Implements reactive patterns with memoization, batched updates, and JSON patch-based change detection.</summary>
 public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
 {
     private readonly Dictionary<string, TreeNode> _nodes = new();
     private readonly Dictionary<string, string> _parents = new();
 
-    /// <summary>Gets the root view that serves as the entry point for the entire widget hierarchy.</summary>
     public IView RootView { get; }
-    /// <summary>Gets the root node of the built tree structure.</summary>
     public TreeNode? NodeTree { get; private set; }
 
     private readonly Subject<WidgetTreeChanged[]> _treeChangedSubject = new();

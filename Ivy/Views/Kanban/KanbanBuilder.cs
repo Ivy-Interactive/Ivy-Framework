@@ -86,7 +86,6 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
         return this;
     }
 
-    /// <summary>Sets the order of columns in the kanban board by sorting based on a field expression.</summary>
     /// <param name="orderBySelector">Expression that selects the field to sort columns by.</param>
     /// <param name="descending">Whether to sort in descending order. Default is false (ascending).</param>
     public KanbanBuilder<TModel, TGroupKey> ColumnOrder<TOrderKey>(Expression<Func<TModel, TOrderKey>> orderBySelector, bool descending = false)
@@ -96,7 +95,6 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
         return this;
     }
 
-    /// <summary>Sets the order of cards within each column by sorting based on a field expression.</summary>
     /// <param name="orderBySelector">Expression that selects the field to sort cards by.</param>
     /// <param name="descending">Whether to sort in descending order. Default is false (ascending).</param>
     public KanbanBuilder<TModel, TGroupKey> CardOrder<TOrderKey>(Expression<Func<TModel, TOrderKey>> orderBySelector, bool descending = false)
@@ -106,7 +104,6 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
         return this;
     }
 
-    /// <summary>Sets the event handler called when a card is added to a column.</summary>
     /// <param name="onAdd">Event handler that receives the column key (TGroupKey) when a card is added.</param>
     public KanbanBuilder<TModel, TGroupKey> HandleAdd(Func<Event<KanbanColumn, TGroupKey>, ValueTask> onAdd)
     {
@@ -114,7 +111,6 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
         return this;
     }
 
-    /// <summary>Sets the event handler called when a card is added to a column.</summary>
     /// <param name="onAdd">Event handler that receives the column key (TGroupKey) when a card is added.</param>
     public KanbanBuilder<TModel, TGroupKey> HandleAdd(Action<Event<KanbanColumn, TGroupKey>> onAdd)
     {
@@ -122,7 +118,6 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
         return this;
     }
 
-    /// <summary>Sets a simple event handler called when a card is added to a column.</summary>
     /// <param name="onAdd">Simple action that receives the column key (TGroupKey) when a card is added.</param>
     public KanbanBuilder<TModel, TGroupKey> HandleAdd(Action<TGroupKey> onAdd)
     {
@@ -130,7 +125,6 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
         return this;
     }
 
-    /// <summary>Sets the event handler called when a card is deleted.</summary>
     /// <param name="onDelete">Event handler that receives the card ID when a card is deleted.</param>
     public KanbanBuilder<TModel, TGroupKey> HandleDelete(Func<Event<Ivy.Kanban, object?>, ValueTask> onDelete)
     {
@@ -138,7 +132,6 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
         return this;
     }
 
-    /// <summary>Sets the event handler called when a card is deleted.</summary>
     /// <param name="onDelete">Event handler that receives the card ID when a card is deleted.</param>
     public KanbanBuilder<TModel, TGroupKey> HandleDelete(Action<Event<Ivy.Kanban, object?>> onDelete)
     {
@@ -146,7 +139,6 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
         return this;
     }
 
-    /// <summary>Sets a simple event handler called when a card is deleted.</summary>
     /// <param name="onDelete">Simple action that receives the card ID when a card is deleted.</param>
     public KanbanBuilder<TModel, TGroupKey> HandleDelete(Action<object?> onDelete)
     {
@@ -154,7 +146,6 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
         return this;
     }
 
-    /// <summary>Sets the event handler called when a card is moved between columns or reordered within a column.</summary>
     /// <param name="onMove">Event handler that receives the card ID, from column key, to column key, and target index when a card is moved.</param>
     public KanbanBuilder<TModel, TGroupKey> HandleMove(Func<Event<Ivy.Kanban, (object? CardId, TGroupKey FromColumn, TGroupKey ToColumn, int? TargetIndex)>, ValueTask> onMove)
     {
@@ -162,7 +153,6 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
         return this;
     }
 
-    /// <summary>Sets the event handler called when a card is moved between columns or reordered within a column.</summary>
     /// <param name="onMove">Event handler that receives the card ID, from column key, to column key, and target index when a card is moved.</param>
     public KanbanBuilder<TModel, TGroupKey> HandleMove(Action<Event<Ivy.Kanban, (object? CardId, TGroupKey FromColumn, TGroupKey ToColumn, int? TargetIndex)>> onMove)
     {
@@ -170,7 +160,6 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
         return this;
     }
 
-    /// <summary>Sets a simple event handler called when a card is moved between columns or reordered within a column.</summary>
     /// <param name="onMove">Simple action that receives a tuple with (CardId, FromColumn, ToColumn, TargetIndex) when a card is moved.</param>
     public KanbanBuilder<TModel, TGroupKey> HandleMove(Action<(object? CardId, TGroupKey FromColumn, TGroupKey ToColumn, int? TargetIndex)> onMove)
     {
@@ -178,7 +167,6 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
         return this;
     }
 
-    /// <summary>Sets the event handler called when a card is clicked.</summary>
     /// <param name="onClick">Event handler that receives the card ID when a card is clicked.</param>
     public KanbanBuilder<TModel, TGroupKey> HandleClick(Func<Event<KanbanCard, object?>, ValueTask> onClick)
     {
@@ -186,7 +174,6 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
         return this;
     }
 
-    /// <summary>Sets the event handler called when a card is clicked.</summary>
     /// <param name="onClick">Event handler that receives the card ID when a card is clicked.</param>
     public KanbanBuilder<TModel, TGroupKey> HandleClick(Action<Event<KanbanCard, object?>> onClick)
     {
@@ -194,7 +181,6 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
         return this;
     }
 
-    /// <summary>Sets a simple event handler called when a card is clicked.</summary>
     /// <param name="onClick">Simple action that receives the card ID when a card is clicked.</param>
     public KanbanBuilder<TModel, TGroupKey> HandleClick(Action<object?> onClick)
     {
@@ -202,7 +188,6 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
         return this;
     }
 
-    /// <summary>Sets content to display when the kanban board has no data.</summary>
     /// <param name="content">The content to display for empty kanban boards.</param>
     public KanbanBuilder<TModel, TGroupKey> Empty(object content)
     {
@@ -210,7 +195,6 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
         return this;
     }
 
-    /// <summary>Sets the width of the kanban board.</summary>
     /// <param name="width">The width of the kanban board.</param>
     public KanbanBuilder<TModel, TGroupKey> Width(Size? width)
     {
@@ -218,7 +202,6 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
         return this;
     }
 
-    /// <summary>Sets the width of the kanban board in units.</summary>
     /// <param name="units">The width of the kanban board in units.</param>
     public KanbanBuilder<TModel, TGroupKey> Width(int units)
     {
@@ -226,7 +209,6 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
         return this;
     }
 
-    /// <summary>Sets the width of the kanban board as a fraction.</summary>
     /// <param name="fraction">The width of the kanban board as a fraction.</param>
     public KanbanBuilder<TModel, TGroupKey> Width(float fraction)
     {
@@ -234,7 +216,6 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
         return this;
     }
 
-    /// <summary>Sets the width of the kanban board as a percentage.</summary>
     /// <param name="percent">The width of the kanban board as a percentage string (e.g., "50%").</param>
     public KanbanBuilder<TModel, TGroupKey> Width(string percent)
     {
@@ -254,7 +235,6 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
         return this;
     }
 
-    /// <summary>Sets the height of the kanban board in units.</summary>
     /// <param name="units">The height of the kanban board in units.</param>
     public KanbanBuilder<TModel, TGroupKey> Height(int units)
     {

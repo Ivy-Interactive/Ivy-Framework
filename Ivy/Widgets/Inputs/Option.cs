@@ -55,7 +55,6 @@ public class Option<TValue>(string label, TValue value, string? group = null, st
 /// <summary>Extension methods for creating and converting option collections.</summary>
 public static class OptionExtensions
 {
-    /// <summary>Converts enumerable collection of values to array of strongly-typed options.</summary>
     /// <typeparam name="TValue">Type of values in collection.</typeparam>
     /// <param name="options">Collection of values to convert to options.</param>
     public static Option<TValue>[] ToOptions<TValue>(this IEnumerable<TValue> options)
@@ -63,7 +62,6 @@ public static class OptionExtensions
         return options.Select(e => new Option<TValue>(e)).ToArray();
     }
 
-    /// <summary>Converts enum type to array of options with intelligent label generation.</summary>
     /// <param name="enumType">Enum type to convert to options.</param>
     /// <exception cref="ArgumentException">Thrown when provided type is not an enum.</exception>
     public static IAnyOption[] ToOptions(this Type enumType)
@@ -89,7 +87,6 @@ public static class OptionExtensions
         return Enum.GetValues(enumType).Cast<object>().Select(MakeOption).ToArray();
     }
 
-    /// <summary>Converts collection of options to menu items for use in menu controls.</summary>
     /// <param name="options">Collection of options to convert to menu items.</param>
     public static MenuItem[] ToMenuItems(this IEnumerable<IAnyOption> options)
     {

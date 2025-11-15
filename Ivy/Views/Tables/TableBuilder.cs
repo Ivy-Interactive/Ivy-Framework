@@ -71,7 +71,6 @@ public class TableBuilder<TModel> : ViewBase, IStateless
     private bool _removeHeader;
     private object? _empty;
 
-    /// <summary>Creates a table builder with automatic column scaffolding from the model type.</summary>
     /// <param name="records">The data records to display in the table.</param>
     public TableBuilder(IEnumerable<TModel> records)
     {
@@ -269,7 +268,6 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         return this;
     }
 
-    /// <summary>Removes columns from the table.</summary>
     /// <param name="fields">Expressions identifying the columns to remove.</param>
     public TableBuilder<TModel> Remove(params IEnumerable<Expression<Func<TModel, object>>> fields)
     {
@@ -294,7 +292,6 @@ public class TableBuilder<TModel> : ViewBase, IStateless
     }
 
 
-    /// <summary>Adds a previously removed column back to the table.</summary>
     /// <param name="field">Expression identifying the column to add back.</param>
     public TableBuilder<TModel> Add(Expression<Func<TModel, object>> field)
     {
@@ -303,7 +300,6 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         return this;
     }
 
-    /// <summary>Removes all columns from the table.</summary>
     public TableBuilder<TModel> Clear()
     {
         foreach (var field in _columns.Values)
@@ -325,7 +321,6 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         return this;
     }
 
-    /// <summary>Adds a footer with custom aggregate calculation for a column.</summary>
     /// <param name="field">Expression identifying the column to add footer to.</param>
     /// <param name="summaryMethod">Function to calculate the footer value from all records.</param>
     public TableBuilder<TModel> Totals(Expression<Func<TModel, object>> field, Func<IEnumerable<TModel>, object> summaryMethod)
@@ -335,7 +330,6 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         return this;
     }
 
-    /// <summary>Adds a footer with automatic sum calculation for a column.</summary>
     /// <param name="field">Expression identifying the column to add sum footer to.</param>
     public TableBuilder<TModel> Totals(Expression<Func<TModel, object>> field)
     {
@@ -347,7 +341,6 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         return Totals(field, FooterAggregate);
     }
 
-    /// <summary>Removes the table header row.</summary>
     public TableBuilder<TModel> RemoveHeader()
     {
         _removeHeader = true;
@@ -369,7 +362,6 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         return this;
     }
 
-    /// <summary>Builds the complete table with headers, data rows, and optional footers.</summary>
     public override object? Build()
     {
         if (!_records.Any()) return _empty!;
@@ -466,7 +458,6 @@ public class TableBuilder<TModel> : ViewBase, IStateless
 /// <summary>Factory for creating table builders from generic collections.</summary>
 public static class TableBuilderFactory
 {
-    /// <summary>Creates a table view from any enumerable collection with automatic type detection.</summary>
     /// <param name="enumerable">The collection to create a table from.</param>
     public static ViewBase FromEnumerable(IEnumerable enumerable)
     {

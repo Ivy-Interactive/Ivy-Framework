@@ -73,7 +73,6 @@ public record Sheet : WidgetBase<Sheet>
 /// <summary>Extension methods for Sheet widget providing fluent API for creating and configuring sheets with common patterns.</summary>
 public static class SheetExtensions
 {
-    /// <summary>Creates sheet triggered by button click with automatic state management.</summary>
     /// <param name="trigger">Button that triggers sheet to open when clicked.</param>
     /// <param name="contentFactory">Function creating content to display in sheet.</param>
     /// <param name="title">Optional title text for sheet header.</param>

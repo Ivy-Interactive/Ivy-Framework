@@ -272,7 +272,6 @@ public class FormBuilder<TModel> : ViewBase
         return null;
     }
 
-    /// <summary>Configures custom input factory for specified field (convenience overload without view context).</summary>
     /// <param name="field">Expression identifying field to configure.</param>
     /// <param name="factory">Input factory function to use for creating input control.</param>
     /// <returns>Form builder instance for method chaining.</returns>
@@ -281,7 +280,6 @@ public class FormBuilder<TModel> : ViewBase
         return Builder(field, (state, _) => factory(state));
     }
 
-    /// <summary>Configures custom input factory for specified field with automatic scaffolding wrapper.</summary>
     /// <param name="field">Expression identifying field to configure.</param>
     /// <param name="factory">Input factory function that receives both state and view context.</param>
     /// <returns>Form builder instance for method chaining.</returns>
@@ -320,7 +318,6 @@ public class FormBuilder<TModel> : ViewBase
         return this;
     }
 
-    /// <summary>Configures custom input factory for all fields of specified type (convenience overload without view context).</summary>
     /// <typeparam name="TU">Type of fields to configure.</typeparam>
     /// <param name="input">Input factory function to use for all fields of this type.</param>
     /// <returns>Form builder instance for method chaining.</returns>
@@ -329,7 +326,6 @@ public class FormBuilder<TModel> : ViewBase
         return Builder<TU>((state, _) => input(state));
     }
 
-    /// <summary>Configures custom input factory for all fields of specified type.</summary>
     /// <typeparam name="TU">Type of fields to configure.</typeparam>
     /// <param name="input">Input factory function that receives both state and view context.</param>
     /// <returns>Form builder instance for method chaining.</returns>
@@ -475,7 +471,6 @@ public class FormBuilder<TModel> : ViewBase
         return this;
     }
 
-    /// <summary>Removes specified fields from form so they will not be rendered.</summary>
     /// <param name="fields">Fields to remove from form.</param>
     /// <returns>Form builder instance for method chaining.</returns>
     public FormBuilder<TModel> Remove(params Expression<Func<TModel, object>>[] fields)
@@ -488,7 +483,6 @@ public class FormBuilder<TModel> : ViewBase
         return this;
     }
 
-    /// <summary>Adds previously removed field back to form.</summary>
     /// <param name="field">Field to add back to form.</param>
     /// <returns>Form builder instance for method chaining.</returns>
     public FormBuilder<TModel> Add(Expression<Func<TModel, object>> field)
@@ -498,7 +492,6 @@ public class FormBuilder<TModel> : ViewBase
         return this;
     }
 
-    /// <summary>Removes all fields from form, creating blank form that can be selectively populated.</summary>
     /// <returns>Form builder instance for method chaining.</returns>
     public FormBuilder<TModel> Clear()
     {
@@ -550,7 +543,6 @@ public class FormBuilder<TModel> : ViewBase
         return this;
     }
 
-    /// <summary>Adds custom validation rule to specified field.</summary>
     /// <typeparam name="T">Type of field value for type-safe validation.</typeparam>
     /// <param name="field">Field to add validation to.</param>
     /// <param name="validator">Function validating field value and returning result and error message.</param>
@@ -624,7 +616,6 @@ public class FormBuilder<TModel> : ViewBase
         return Expression.Lambda<Func<TModel, object>>(converted, parameter);
     }
 
-    /// <summary>Creates form instance with validation, data binding, and submission handling for use in custom layouts.</summary>
     /// <param name="context">View context for state management and signal handling.</param>
     /// <returns>Tuple containing submit handler, form view, validation view, and loading state.</returns>
     public (Func<Task<bool>> onSubmit, IView formView, IView validationView, bool loading) UseForm(IViewContext context)
@@ -699,7 +690,6 @@ public class FormBuilder<TModel> : ViewBase
         return (OnSubmit, formView, validationView, false);
     }
 
-    /// <summary>Builds complete form with automatic layout, validation, and submission handling.</summary>
     /// <returns>Complete form widget with fields, validation messages, and submit button.</returns>
     public override object? Build()
     {

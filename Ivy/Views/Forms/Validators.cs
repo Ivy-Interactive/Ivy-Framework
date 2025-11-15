@@ -5,7 +5,6 @@ namespace Ivy.Views.Forms;
 /// <summary>Utility methods for creating form field validators.</summary>
 public static class Validators
 {
-    /// <summary>Creates an email validator using EmailAddressAttribute for proper email validation.</summary>
     public static Func<object?, (bool, string)> CreateEmailValidator(string fieldName)
     {
         var emailValidator = new EmailAddressAttribute();

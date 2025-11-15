@@ -3,11 +3,7 @@ using Ivy.Shared;
 
 namespace Ivy.Widgets.Inputs;
 
-/// <summary>
-/// Provides extension methods for automatic input control creation based on state types.
-/// Enables intelligent input control selection by analyzing the generic type parameter
-/// and creating the most appropriate input control for the data type.
-/// </summary>
+/// <summary>Provides extension methods for automatic input control creation based on state types. Enables intelligent input control selection by analyzing the generic type parameter and creating the most appropriate input control for the data type.</summary>
 public static class InputExtensions
 {
     /// <summary>

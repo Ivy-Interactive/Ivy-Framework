@@ -104,7 +104,6 @@ public static class ButtonExtensions
         return new Button(null, onClick?.ToValueTask(), icon: icon, variant: variant);
     }
 
-    /// <summary>Converts button into trigger controlling dynamic content display for dropdowns, modals, or expandable sections.</summary>
     /// <param name="trigger">Button that triggers content display.</param>
     /// <param name="action">Function creating content to display when triggered.</param>
     /// <returns>IView managing trigger button and conditional content display.</returns>

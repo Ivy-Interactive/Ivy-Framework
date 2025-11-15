@@ -11,9 +11,7 @@ using Ivy.Client;
 
 namespace Ivy.Helpers;
 
-/// <summary>
-/// Helper class for auth token extraction and validation.
-/// </summary>
+/// <summary>Helper class for auth token extraction and validation.</summary>
 public static class AuthHelper
 {
     /// <summary>

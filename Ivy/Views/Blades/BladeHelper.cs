@@ -1,8 +1,6 @@
 ﻿namespace Ivy.Views.Blades;
 
-/// <summary>
-/// Helper methods for creating blade layouts with custom headers and toolbars.
-/// </summary>
+/// <summary>Helper methods for creating blade layouts with custom headers and toolbars.</summary>
 public static class BladeHelper
 {
     /// <summary>
