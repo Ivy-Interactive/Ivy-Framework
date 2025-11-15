@@ -70,4 +70,5 @@ public enum Colors
     Warning,
     /// <summary>Info color for informational states and messages.</summary>
     Info,
+    Muted
 }

@@ -1,5 +1,6 @@
 using Ivy.Core;
 using Ivy.Shared;
+using Ivy.Views;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy;
@@ -23,19 +24,14 @@ public record Card : WidgetBase<Card>
     /// </summary>
     /// <param name="content">The main content to display in the card body.</param>
     /// <param name="footer">Optional footer content displayed at the bottom.</param>
-    public Card(object? content = null, object? footer = null) : base([new Slot("Content", content), new Slot("Footer", footer!)])
+    public Card(object? content = null, object? footer = null, object? header = null) : base([new Slot("Content", content), new Slot("Footer", footer!), new Slot("Header", header!)])
     {
         Width = Ivy.Shared.Size.Full();
     }
 
-    /// <summary>Gets or sets the title text displayed at the top of the card.</summary>
-    [Prop] public string? Title { get; set; }
-
-    /// <summary>Gets or sets the description text displayed below the title.</summary>
-    [Prop] public string? Description { get; set; }
-
-    /// <summary>Gets or sets the icon displayed alongside the title and description.</summary>
-    [Prop] public Icons? Icon { get; set; }
+    internal object? Title { get; set; }
+    internal object? Description { get; set; }
+    internal object? Icon { get; set; }
 
     /// <summary>Gets or sets the thickness of the card's border.</summary>
     [Prop] public Thickness? BorderThickness { get; set; }
@@ -71,27 +67,46 @@ public record Card : WidgetBase<Card>
         {
             throw new NotSupportedException("Cards does not support multiple children.");
         }
-
-        return widget with { Children = [new Slot("Content", child), new Slot("Footer", null!)] };
+        return widget with { Children = [new Slot("Content", child), widget.GetSlot("Footer"), widget.GetSlot("Header")] };
     }
 }
 
 /// <summary>Extension methods for configuring Card widget properties. </summary>
 public static class CardExtensions
 {
+    internal static Slot GetSlot(this Card card, string name) => card.Children.FirstOrDefault(e => e is Slot slot && slot.Name == name) as Slot ?? new Slot(name, null!);
+
+    public static Card Header(this Card card, object? title = null, object? description = null, object? icon = null)
+    {
+        object? header = Layout.Horizontal()
+                         | (Layout.Vertical().Gap(0) | title | description)
+                         | icon!;
+        return card with
+        {
+            Children = [card.GetSlot("Content"), card.GetSlot("Footer"), new Slot("Header", header)],
+            Title = title,
+            Description = description,
+            Icon = icon
+        };
+    }
+
     public static Card Title(this Card card, string title)
     {
-        return card with { Title = title };
+        return card.Header(Text.Block(title), card.Description, card.Icon);
     }
 
     public static Card Description(this Card card, string description)
     {
-        return card with { Description = description };
+        return card.Header(card.Title, Text.Muted(description), card.Icon);
     }
 
-    public static Card Icon(this Card card, Icons? icon)
+    public static Card Icon(this Card card, object? icon)
     {
-        return card with { Icon = icon };
+        if (icon is Icons iconsValue)
+        {
+            icon = iconsValue.ToIcon().Color(Colors.Black);
+        }
+        return card.Header(card.Title, card.Description, icon);
     }
 
     public static Card BorderThickness(this Card card, int thickness) => card with { BorderThickness = new(thickness) };

@@ -14,8 +14,6 @@ searchHints:
 Configure and bootstrap your Ivy application with dependency injection, services, and middleware for production-ready deployment.
 </Ingress>
 
-## Overview
-
 The `Program.cs` file is the entry point for your Ivy application. It configures and starts the Ivy server using the `Server` class, which provides a fluent API for setting up apps, authentication, middleware, and other services.
 
 ## Basic Structure
@@ -34,8 +32,6 @@ await server.RunAsync();
 ```
 
 ## Server Configuration
-
-### Creating a Server Instance
 
 The `Server` class accepts optional `ServerArgs` for configuration:
 
@@ -101,9 +97,7 @@ server.AddApp(new AppDescriptor
 });
 ```
 
-## Development Features
-
-### Hot Reload
+## Hot Reload
 
 Enable hot reload for development:
 
@@ -113,48 +107,7 @@ server.UseHotReload();
 
 This automatically refreshes the browser when C# code changes during development.
 
-### Chrome Configuration
-
-You can add custom elements to both the header and footer sections of the sidebar using `ChromeSettings`:
-
-```csharp
-var chromeSettings = new ChromeSettings()
-    .Header(
-        Layout.Vertical().Gap(2)
-        | new IvyLogo()
-        | Text.Lead("Enterprise Management System")
-        | Text.Muted("Comprehensive business application suite")
-    )
-    .Footer(
-        Layout.Vertical().Gap(2)
-        | new Button("Support")
-            .HandleClick(_ => { })
-        | Text.Small("Enterprise Application Framework")
-    )
-    .DefaultApp<MyApp>()
-    .UseTabs(preventDuplicates: true);
-
-server.UseChrome(() => new DefaultSidebarChrome(chromeSettings));
-```
-
-Additional ChromeSettings options:
-
-- **DefaultAppId(string? appId)** - Sets the default app to load by ID.
-
-- **DefaultApp<T>()** - Sets the default app using a type (recommended for compile-time safety).
-
-- **UseTabs(bool preventDuplicates)** - Enables tab navigation. When `preventDuplicates` is `true`, prevents duplicate tabs.
-
-- **UsePages()** - Switches to page navigation (replaces content instead of opening tabs).
-
-- **UseFooterMenuItemsTransformer(`Func<IEnumerable<MenuItem>, INavigator, IEnumerable<MenuItem>>` transformer)** - Provides a way to dynamically transform the footer menu items. Useful for adding, removing, or re-ordering links based on runtime context such as user roles or navigation state. See the [Footer transformer documentation](app://onboarding/concepts/footermenuitemstransformer).
-- **WallpaperAppId(string? appId)** / **WallpaperApp<T>()** - Sets a dedicated *wallpaper* app that is shown whenever the tab list is empty. Handy for welcome screens or branded backgrounds. See the [Wallpaper documentation](Wallpaper.md).
-
-<Callout Type="tip">
-Use `server.UseDefaultApp(typeof(AppName))` instead of `UseChrome()` for single-purpose applications, embedded views, or minimal interfaces where sidebar navigation isn't needed.
-</Callout>
-
-For more information about SideBar, check its [documentation](../../02_Widgets/04_Layouts/SidebarLayout.md)
+For more information about configuring the application chrome (sidebar, header, footer), see [Chrome Configuration](./Chrome.md).
 
 ## Authentication
 

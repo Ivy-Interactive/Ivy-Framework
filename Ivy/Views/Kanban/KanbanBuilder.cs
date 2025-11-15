@@ -33,8 +33,8 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
     private Func<Event<Ivy.Kanban, (object? CardId, TGroupKey FromColumn, TGroupKey ToColumn, int? TargetIndex)>, ValueTask>? _onMove;
     private Func<Event<KanbanCard, object?>, ValueTask>? _onClick;
     private object? _empty;
-    private Size? _width;
-    private Size? _height;
+    private Size? _width = Size.Fit();
+    private Size? _height = Size.Full();
     private readonly Dictionary<TGroupKey, Size> _columnWidths = new();
 
     /// <summary>

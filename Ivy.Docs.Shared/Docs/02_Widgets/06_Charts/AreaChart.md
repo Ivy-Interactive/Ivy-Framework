@@ -34,7 +34,8 @@ public class BasicAreaChart : ViewBase
                     .CartesianGrid(new CartesianGrid().Horizontal())
                     .Tooltip()
                     .XAxis(new XAxis("Month").TickLine(false).AxisLine(false))
-                    .Legend();
+                    .Legend()
+                    .Toolbox();
    }
 }
 ```
@@ -75,6 +76,7 @@ public class Covid19Demo : ViewBase
                 .Dimension("Month", e => e.Month)
                 .Measure("Cases", e => e.Sum(f => f.Cases))
                 .Measure("Deaths", e => e.Sum(f => f.Deaths))
+                .Toolbox()
         ;
     }
 }
@@ -137,7 +139,8 @@ public class ImmigrationToEurope : ViewBase
                         .FillOpacity(0.55))   
                     .XAxis(new XAxis("Month").TickLine(false).AxisLine(false))
                     .Tooltip()
-                    .Legend();        
+                    .Legend()
+                    .Toolbox();        
     }
 }
 ```

@@ -10,6 +10,7 @@ import React from 'react';
 interface ExpandableWidgetProps {
   id: string;
   disabled?: boolean;
+  open?: boolean;
   slots?: {
     Header: React.ReactNode;
     Content: React.ReactNode;
@@ -19,9 +20,14 @@ interface ExpandableWidgetProps {
 export const ExpandableWidget: React.FC<ExpandableWidgetProps> = ({
   id,
   disabled,
+  open = false,
   slots,
 }) => {
-  const [isOpen, setIsOpen] = React.useState(false);
+  const [isOpen, setIsOpen] = React.useState(open);
+
+  React.useEffect(() => {
+    setIsOpen(open);
+  }, [open]);
 
   React.useEffect(() => {
     if (disabled && isOpen) {

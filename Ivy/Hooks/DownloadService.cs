@@ -7,12 +7,12 @@ namespace Ivy.Hooks;
 
 public class DownloadController(AppSessionStore sessionStore, Server server) : Controller
 {
-    [Route("download/{connectionId}/{downloadId}")]
+    [Route("ivy/download/{connectionId}/{downloadId}")]
     public async Task<IActionResult> Download(string connectionId, string downloadId)
     {
         if (!sessionStore.Sessions.TryGetValue(connectionId, out var session))
         {
-            throw new Exception($"Download 'download/{connectionId}/{downloadId}' not found.");
+            throw new Exception($"Download 'ivy/download/{connectionId}/{downloadId}' not found.");
         }
 
         if (await this.ValidateAuthIfRequired(server, session.AppServices) is { } errorResult)
@@ -39,7 +39,7 @@ public class DownloadService(string connectionId) : IDownloadService, IDisposabl
             _downloads.Remove(downloadId);
         });
 
-        return (cleanup, $"/download/{connectionId}/{downloadId}");
+        return (cleanup, $"/ivy/download/{connectionId}/{downloadId}");
     }
 
     public async Task<IActionResult> Download(string downloadId)

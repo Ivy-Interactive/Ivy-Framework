@@ -195,7 +195,8 @@ public abstract record AbstractWidget : IWidget
     {
         var valueType = eventType.GetGenericArguments()[1];
         var value = ConvertToValue(valueType, args);
-        return value != null ? Activator.CreateInstance(eventType, eventName, sender, value) : null;
+        // Create the event even if value is null - null is a valid value for nullable types
+        return Activator.CreateInstance(eventType, eventName, sender, value);
     }
 
     private static object? ConvertToValue(Type valueType, JsonArray args)

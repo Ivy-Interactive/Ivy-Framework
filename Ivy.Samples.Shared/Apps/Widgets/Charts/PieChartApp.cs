@@ -45,6 +45,7 @@ public class PieChart0View : ViewBase
                     e => e.Sum(f => f.Value),
                     PieChartStyles.Default
                 )
+                .Toolbox()
         ;
     }
 }
@@ -68,6 +69,7 @@ public class PieChart1View : ViewBase
                     e => e.Sum(f => f.Users),
                     PieChartStyles.Dashboard
                 )
+                .Toolbox()
         ;
     }
 }
@@ -93,6 +95,7 @@ public class PieChart2View : ViewBase
                     e => e.Sum(f => f.Sales),
                     PieChartStyles.Default
                 )
+                .Toolbox()
         ;
     }
 }
@@ -117,6 +120,7 @@ public class PieChart3View : ViewBase
                     e => e.Sum(f => f.Budget),
                     PieChartStyles.Dashboard
                 )
+                .Toolbox()
         ;
     }
 }
@@ -140,6 +144,7 @@ public class PieChart4View : ViewBase
                     e => e.Sum(f => f.Revenue),
                     PieChartStyles.Default
                 )
+                .Toolbox()
         ;
     }
 }
@@ -165,6 +170,7 @@ public class PieChart5View : ViewBase
                     e => e.Sum(f => f.Customers),
                     PieChartStyles.Dashboard
                 )
+                .Toolbox()
         ;
     }
 }
@@ -192,6 +198,7 @@ public class PieChart6View : ViewBase
                     e => e.Sum(f => f.Users),
                     PieChartStyles.Donut
                 )
+                .Toolbox()
         ;
     }
 }
@@ -217,6 +224,7 @@ public class PieChart7View : ViewBase
                     e => e.Sum(f => f.Budget),
                     PieChartStyles.Default
                 )
+                .Toolbox()
         ;
     }
 }
@@ -241,6 +249,7 @@ public class PieChart8View : ViewBase
                     e => e.Sum(f => f.Tasks),
                     PieChartStyles.Dashboard
                 )
+                .Toolbox()
         ;
     }
 }
@@ -267,6 +276,7 @@ public class PieChart9View : ViewBase
                     e => e.Sum(f => f.Developers),
                     PieChartStyles.Default
                 )
+                .Toolbox()
         ;
     }
 }
@@ -295,6 +305,7 @@ public class PieChart10View : ViewBase
                     e => e.Sum(f => f.Amount),
                     PieChartStyles.Donut
                 )
+                .Toolbox()
         ;
     }
 }
@@ -320,6 +331,7 @@ public class PieChart11View : ViewBase
                     e => e.Sum(f => f.Users),
                     PieChartStyles.Dashboard
                 )
+                .Toolbox()
         ;
     }
 }

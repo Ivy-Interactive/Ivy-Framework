@@ -70,191 +70,38 @@
   --color-scheme: light;
 }
 
+/* Hardcoded CSS variables removed - now using Ivy Design System flat CSS imports above */
+
+/* Additional theme customization variables */
 @layer base {
   :root {
-    --background: #ffffff;
-    --foreground: #000000;
-    --card: oklch(1 0 0);
-    --card-foreground: oklch(0.26 0 0);
-    --popover: oklch(1 0 0);
-    --popover-foreground: oklch(0.26 0 0);
-    --primary: #00cc92;
-    --primary-foreground: #000000;
-    --secondary: #dfe7e3;
-    --secondary-foreground: oklch(0 0 0);
-    --muted: #f8f8f8;
-    --muted-foreground: #8f8f8f;
-    --accent: #eaebeb;
-    --accent-foreground: oklch(0.33 0 0);
-    --destructive: oklch(0.69 0.2 23.69);
-    --destructive-foreground: oklch(0 0 0);
-    --success: #86d26f;
-    --success-foreground: #000000;
-    --warning: #deb145;
-    --warning-foreground: #000000;
-    --info: #4469c0;
-    --info-foreground: #ffffff;
-    --border: #d1d5db;
-    --input: #d1d5db;
-    --ring: oklch(0.77 0 0);
-    --toolbox: #38363a;
-    --sidebar: oklch(0.99 0 0);
-    --sidebar-foreground: oklch(0.26 0 0);
+    /* Fonts */
+    --font-sans: 'Geist';
+    --font-serif: 'Geist';
+    --font-mono: 'Geist Mono';
 
-    /* Custom color palette with variants */
-    --black: #000000;
-    --black-foreground: #ffffff;
-    --white: #ffffff;
-    --white-foreground: #000000;
-    --slate: #6a7489;
-    --slate-foreground: #000000;
-    --gray: #6e727f;
-    --gray-foreground: #000000;
-    --zinc: #717179;
-    --zinc-foreground: #ffffff;
-    --neutral: #737373;
-    --neutral-foreground: #ffffff;
-    --stone: #76716d;
-    --stone-foreground: #ffffff;
+    /* Chromatic color palette for charts and UI elements */
     --red: #dd5860;
-    --red-foreground: #000000;
     --orange: #dc824d;
-    --orange-foreground: #000000;
     --amber: #deb145;
-    --amber-foreground: #000000;
     --yellow: #e5e04c;
-    --yellow-foreground: #000000;
     --lime: #afd953;
-    --lime-foreground: #000000;
     --green: #86d26f;
-    --green-foreground: #000000;
     --emerald: #76cd94;
-    --emerald-foreground: #000000;
     --teal: #5b9ba8;
-    --teal-foreground: #000000;
     --cyan: #4469c0;
-    --cyan-foreground: #ffffff;
     --sky: #373bda;
-    --sky-foreground: #ffffff;
     --blue: #381ff4;
-    --blue-foreground: #ffffff;
     --indigo: #4b28e2;
-    --indigo-foreground: #ffffff;
     --violet: #6637d1;
-    --violet-foreground: #ffffff;
     --purple: #844cc0;
-    --purple-foreground: #ffffff;
     --fuchsia: #a361af;
-    --fuchsia-foreground: #000000;
     --pink: #c377a0;
-    --pink-foreground: #000000;
     --rose: #e48e91;
-    --rose-foreground: #000000;
-    --primary: #00cc92;
-    --primary-foreground: #000000;
-    --secondary: #c2cbc7;
-    --secondary-foreground: #000000;
-    --destructive: #dd5860;
-    --destructive-foreground: #000000;
 
-    /* Typography System - Geist Only */
-    --font-sans: 'Geist';
-    --font-serif: 'Geist';
-    --font-mono: 'Geist Mono';
-
-    /* Typography Sizes from the images */
-    --font-size-60: 60px;
-    --font-size-40: 40px;
-    --font-size-30: 30px;
-    --font-size-25: 25px;
-    --font-size-20: 20px;
-    --font-size-15: 15px;
-    --font-size-12: 12px;
-    --font-size-10: 10px;
-    --font-size-8: 8px;
-    --font-size-5: 5px;
-
-    /* Line Heights from the images */
-    --line-height-60: 60px;
-    --line-height-41: 41px;
-    --line-height-32: 32px;
-    --line-height-27: 27px;
-    --line-height-22: 22px;
-    --line-height-24: 24px;
-    --line-height-15: 15px;
-    --line-height-14: 14px;
-    --line-height-13: 13px;
-    --line-height-16: 16px;
-    --line-height-12: 12px;
-
-    /* Letter Spacing from the images */
-    --letter-spacing-neg-5: -5%;
-    --letter-spacing-neg-4: -4%;
-    --letter-spacing-neg-3: -3%;
-    --letter-spacing-neg-2: -2%;
-    --letter-spacing-0: 0%;
-    --letter-spacing-1: 1%;
-    --letter-spacing-2: 2%;
-    --letter-spacing-4: 4%;
-    --letter-spacing-8: 8%;
-    --letter-spacing-14: 14%;
-
-    --radius: 0.5rem;
-    --shadow-2xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
-    --shadow-xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
-    --shadow-sm:
-      0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
-    --shadow:
-      0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
-    --shadow-md:
-      0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 2px 4px -1px hsl(0 0% 0% / 0.1);
-    --shadow-lg:
-      0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 4px 6px -1px hsl(0 0% 0% / 0.1);
-    --shadow-xl:
-      0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 8px 10px -1px hsl(0 0% 0% / 0.1);
-    --shadow-2xl: 0 1px 3px 0px hsl(0 0% 0% / 0.25);
-    --tracking-normal: -0.025em;
+    /* Additional variables not in design system yet */
+    --toolbox: #38363a;
     --spacing: 0.27rem;
-  }
-  .dark {
-    /* Global dark background color per spec */
-    --background: #000000;
-    --foreground: #f8f8f8;
-    --card: #171717;
-    --card-foreground: #f8f8f8;
-    --popover: var(--background);
-    --popover-foreground: #f8f8f8;
-    --primary: #00cc92;
-    --primary-foreground: #18181d;
-    --secondary: #26262b;
-    --secondary-foreground: #f8f8f8;
-    --muted: #26262b;
-    --muted-foreground: oklch(0.71 0.01 286.07);
-    --accent: #26262b;
-    --accent-foreground: #f8f8f8;
-    --destructive: oklch(0.4 0.13 25.72);
-    --destructive-foreground: oklch(0.97 0.01 17.38);
-    --success: #86d26f;
-    --success-foreground: #000000;
-    --warning: #deb145;
-    --warning-foreground: #000000;
-    --info: #4469c0;
-    --info-foreground: #ffffff;
-    --border: #404045;
-    --input: #404045;
-    --ring: oklch(0.87 0.01 286.29);
-    --toolbox: #edeaf1;
-    --sidebar: #18181d;
-    --sidebar-foreground: oklch(0.97 0 286.38);
-    --sidebar-primary: oklch(0.49 0.22 264.39);
-    --sidebar-primary-foreground: oklch(1 0 0);
-    --sidebar-accent-foreground: oklch(0.97 0 286.38);
-    --sidebar-border: #26262b;
-
-    /* Keep docs palette consistent in dark mode */
-    --font-sans: 'Geist';
-    --font-serif: 'Geist';
-    --font-mono: 'Geist Mono';
     --radius: 0.5rem;
     --shadow-2xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
     --shadow-xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
@@ -269,8 +116,16 @@
     --shadow-xl:
       0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 8px 10px -1px hsl(0 0% 0% / 0.1);
     --shadow-2xl: 0 1px 3px 0px hsl(0 0% 0% / 0.25);
+  }
+
+  /* Dark theme variables now come from design system dark-flat.css import */
+  .dark {
+    /* Additional dark theme overrides not in design system yet */
+    --toolbox: #edeaf1;
   }
   @theme inline {
+    /* Semantic color mappings for Tailwind utility classes */
+    /* These reference CSS variables injected by the backend */
     --color-background: var(--background);
     --color-foreground: var(--foreground);
     --color-card: var(--card);
@@ -297,41 +152,13 @@
     --color-input: var(--input);
     --color-ring: var(--ring);
 
+    /* Typography */
     --text-body: 14px;
     --text-large-body: 14px;
     --text-large-label: 14px;
     --text-small-label: 12px;
-    --color-sidebar: var(--sidebar);
-    --color-sidebar-foreground: var(--sidebar-foreground);
-    /* Custom color palette - using variables from :root */
-    --color-black: var(--black);
-    --color-white: var(--white);
-    --color-slate: var(--slate);
-    --color-gray: var(--gray);
-    --color-zinc: var(--zinc);
-    --color-neutral: var(--neutral);
-    --color-stone: var(--stone);
-    --color-red: var(--red);
-    --color-orange: var(--orange);
-    --color-amber: var(--amber);
-    --color-yellow: var(--yellow);
-    --color-lime: var(--lime);
-    --color-green: var(--green);
-    --color-emerald: var(--emerald);
-    --color-teal: var(--teal);
-    --color-cyan: var(--cyan);
-    --color-sky: var(--sky);
-    --color-blue: var(--blue);
-    --color-indigo: var(--indigo);
-    --color-violet: var(--violet);
-    --color-purple: var(--purple);
-    --color-fuchsia: var(--fuchsia);
-    --color-pink: var(--pink);
-    --color-rose: var(--rose);
-    --color-primary: var(--primary);
-    --color-secondary: var(--secondary);
-    --color-destructive: var(--destructive);
-    /* Border radius */
+
+    /* Spacing */
     --radius-sm: calc(var(--radius) - 4px);
     --radius-md: calc(var(--radius) - 2px);
     --radius-lg: var(--radius);

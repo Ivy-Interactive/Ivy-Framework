@@ -13,15 +13,6 @@ public class CellClickEventArgs
     public object? CellValue { get; set; }
 }
 
-/// <summary>Configuration for a row action button.</summary>
-public class RowAction
-{
-    public string Id { get; set; } = "";
-    public string Icon { get; set; } = "";
-    public string EventName { get; set; } = "";
-    public string? Tooltip { get; set; }
-}
-
 /// <summary>Event arguments for row action click events.</summary>
 public class RowActionClickEventArgs
 {
@@ -29,6 +20,15 @@ public class RowActionClickEventArgs
     public string EventName { get; set; } = "";
     public int RowIndex { get; set; }
     public Dictionary<string, object?> RowData { get; set; } = new();
+}
+
+/// <summary>Configuration for a row action button.</summary>
+public record RowAction
+{
+    public string Id { get; set; } = "";
+    public string Icon { get; set; } = "";
+    public string EventName { get; set; } = "";
+    public string? Tooltip { get; set; }
 }
 
 public record DataTable : WidgetBase<DataTable>

@@ -66,7 +66,7 @@ export const SheetWidget: React.FC<SheetWidgetProps> = ({
             {description && <SheetDescription>{description}</SheetDescription>}
           </SheetHeader>
         )}
-        <div className="flex-1 pb-0 pt-0 pl-4 pr-4 mt-4 overflow-y-auto">
+        <div className="flex-1 pb-0 pt-1 pl-4 pr-4 mt-4 overflow-y-auto">
           {slots.Content}
         </div>
       </SheetContent>
