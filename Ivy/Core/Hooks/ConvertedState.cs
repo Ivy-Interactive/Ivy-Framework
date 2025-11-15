@@ -39,12 +39,8 @@ public class ConvertedState<TFrom, TTo>(IState<TFrom> originalState, Func<TFrom,
 
     public IDisposable SubscribeAny(Action<object?> action) => originalState.SubscribeAny(action);
 
-    /// <summary>Gets the converted state type.</summary>
     public Type GetStateType() => typeof(TTo);
 
-    /// <summary>
-    /// Gets or sets the converted state value, applying transformations as needed.
-    /// </summary>
     public TTo Value
     {
         get => forward(originalState.Value);

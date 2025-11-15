@@ -45,7 +45,6 @@ public static class PieChartStyleHelpers
     }
 }
 
-/// <summary>Default pie chart style with full pie, legend, and tooltip for comprehensive data visualization.</summary>
 /// <typeparam name="TSource">The type of the source data objects.</typeparam>
 public class DefaultPieChartStyle<TSource> : IPieChartStyle<TSource>
 {

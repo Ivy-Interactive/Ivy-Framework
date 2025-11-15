@@ -32,7 +32,6 @@ public record Card : WidgetBase<Card>
 
     [Prop] public Colors? BorderColor { get; set; }
 
-    /// <summary>Style variant to apply on cursor hover. Default is <see cref="CardHoverVariant.None"/> when no click listener is applied, and <see cref="CardHoverVariant.PointerAndTranslate"/> when a click listener is applied.</summary>
     [Prop] public CardHoverVariant HoverVariant { get; set; }
 
     [Event] public Func<Event<Card>, ValueTask>? OnClick { get; set; }

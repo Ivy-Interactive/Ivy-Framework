@@ -196,14 +196,11 @@ public class FormFieldBinding<TModel>(
     }
 }
 
-/// <summary>Interface for form field views with layout information.</summary>
 public interface IFormFieldView : IView
 {
-    /// <summary>Layout configuration for this field.</summary>
     public FormFieldLayoutOptions Layout { get; }
 }
 
-/// <summary>Interface for binding form fields to model properties.</summary>
 public interface IFormFieldBinding<TModel>
 {
     (IFormFieldView fieldView, IDisposable disposable) Bind(IState<TModel> model);

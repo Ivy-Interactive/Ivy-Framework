@@ -19,7 +19,6 @@ public interface IThemeService
     string GenerateThemeMetaTag();
 }
 
-/// <summary>Default implementation of <see cref="IThemeService"/> for managing theme configurations.</summary>
 public class ThemeService : IThemeService
 {
     private Theme _currentTheme = Theme.Default;

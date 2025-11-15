@@ -4,19 +4,16 @@ using System.Runtime.CompilerServices;
 
 namespace Ivy.Views.Charts;
 
-/// <summary>Represents a dimension (grouping column) in a pivot table with a name and selector expression.</summary>
 /// <typeparam name="T">The type of the source data objects.</typeparam>
 /// <param name="Name">The display name for the dimension column.</param>
 /// <param name="Selector">Expression to select the dimension value from source objects.</param>
 public record Dimension<T>(string Name, Expression<Func<T, object>> Selector);
 
-/// <summary>Represents a measure (aggregated value) in a pivot table with a name and aggregation expression.</summary>
 /// <typeparam name="T">The type of the source data objects.</typeparam>
 /// <param name="Name">The display name for the measure column.</param>
 /// <param name="Aggregator">Expression to aggregate values from grouped data (e.g., Sum, Count, Average).</param>
 public record Measure<T>(string Name, Expression<Func<IQueryable<T>, object>> Aggregator);
 
-/// <summary>Represents a table calculation that performs post-aggregation computations on pivot table results.</summary>
 /// <param name="Name">The name of the calculated column.</param>
 /// <param name="MeasureNames">Array of measure names that this calculation depends on.</param>
 /// <param name="Calculation">Action that performs the calculation on the pivot table data.</param>
@@ -48,9 +45,6 @@ public class PivotTable<T>
         }
     }
 
-    /// <summary>
-    /// Executes the pivot table transformation asynchronously, grouping data by dimensions and aggregating measures.
-    /// </summary>
     /// <param name="data">The source data to transform.</param>
     /// <param name="cancellationToken">Token to cancel the operation.</param>
     /// <returns>An array of dictionaries representing the pivot table rows with dimension and measure columns.</returns>
@@ -149,14 +143,8 @@ public class PivotTable<T>
         return new ParameterReplacer(oldParam, newParam).Visit(expr);
     }
 
-    /// <summary>
-    /// Expression visitor that replaces parameter references in expressions.
-    /// </summary>
     private class ParameterReplacer(ParameterExpression oldParam, ParameterExpression newParam) : ExpressionVisitor
     {
-        /// <summary>
-        /// Visits parameter expressions and replaces matching parameters.
-        /// </summary>
         /// <param name="node">The parameter expression to visit.</param>
         /// <returns>The replacement parameter or the original if no match.</returns>
         protected override Expression VisitParameter(ParameterExpression node)
@@ -175,9 +163,6 @@ public class PivotTableBuilder<TSource>(IQueryable<TSource> data)
     private List<TableCalculation> _calculations { get; } = new();
     private IQueryable<TSource> Data { get; } = data;
 
-    /// <summary>
-    /// Adds a dimension (grouping column) to the pivot table with the specified name and selector.
-    /// </summary>
     /// <param name="name">The display name for the dimension column.</param>
     /// <param name="selector">Expression to select the dimension value from source objects.</param>
     /// <returns>The builder instance for method chaining.</returns>
@@ -187,9 +172,6 @@ public class PivotTableBuilder<TSource>(IQueryable<TSource> data)
         return this;
     }
 
-    /// <summary>
-    /// Adds a pre-configured dimension to the pivot table.
-    /// </summary>
     /// <param name="dimension">The dimension configuration to add.</param>
     /// <returns>The builder instance for method chaining.</returns>
     public PivotTableBuilder<TSource> Dimension(Dimension<TSource> dimension)
@@ -198,9 +180,6 @@ public class PivotTableBuilder<TSource>(IQueryable<TSource> data)
         return this;
     }
 
-    /// <summary>
-    /// Adds a measure (aggregated value) to the pivot table with the specified name and aggregator.
-    /// </summary>
     /// <param name="name">The display name for the measure column.</param>
     /// <param name="aggregator">Expression to aggregate values from grouped data (e.g., Sum, Count, Average).</param>
     /// <returns>The builder instance for method chaining.</returns>
@@ -210,9 +189,6 @@ public class PivotTableBuilder<TSource>(IQueryable<TSource> data)
         return this;
     }
 
-    /// <summary>
-    /// Adds a pre-configured measure to the pivot table.
-    /// </summary>
     /// <param name="measure">The measure configuration to add.</param>
     /// <returns>The builder instance for method chaining.</returns>
     public PivotTableBuilder<TSource> Measure(Measure<TSource> measure)
@@ -221,9 +197,6 @@ public class PivotTableBuilder<TSource>(IQueryable<TSource> data)
         return this;
     }
 
-    /// <summary>
-    /// Adds multiple measures to the pivot table.
-    /// </summary>
     /// <param name="measure">The collection of measure configurations to add.</param>
     /// <returns>The builder instance for method chaining.</returns>
     public PivotTableBuilder<TSource> Measures(IEnumerable<Measure<TSource>> measure)
@@ -233,9 +206,6 @@ public class PivotTableBuilder<TSource>(IQueryable<TSource> data)
         return this;
     }
 
-    /// <summary>
-    /// Adds a table calculation for post-aggregation computations.
-    /// </summary>
     /// <param name="calculation">The table calculation configuration to add.</param>
     /// <returns>The builder instance for method chaining.</returns>
     public PivotTableBuilder<TSource> TableCalculation(TableCalculation calculation)
@@ -244,9 +214,6 @@ public class PivotTableBuilder<TSource>(IQueryable<TSource> data)
         return this;
     }
 
-    /// <summary>
-    /// Adds multiple table calculations for post-aggregation computations.
-    /// </summary>
     /// <param name="calculations">The collection of table calculation configurations to add.</param>
     /// <returns>The builder instance for method chaining.</returns>
     public PivotTableBuilder<TSource> TableCalculations(IEnumerable<TableCalculation> calculations)
@@ -256,9 +223,6 @@ public class PivotTableBuilder<TSource>(IQueryable<TSource> data)
         return this;
     }
 
-    /// <summary>
-    /// Creates a mapper for producing typed results from the pivot table.
-    /// </summary>
     /// <typeparam name="TDestination">The target type for the pivot table results.</typeparam>
     /// <returns>A mapper that can transform pivot table results to the specified type.</returns>
     public PivotTableMapper<TSource, TDestination> Produces<TDestination>()
@@ -266,9 +230,6 @@ public class PivotTableBuilder<TSource>(IQueryable<TSource> data)
         return new PivotTableMapper<TSource, TDestination>(this);
     }
 
-    /// <summary>
-    /// Executes the pivot table transformation and returns raw dictionary results.
-    /// </summary>
     /// <param name="cancellationToken">Token to cancel the operation.</param>
     /// <returns>An array of dictionaries representing the pivot table rows.</returns>
     public Task<Dictionary<string, object>[]> ExecuteAsync(CancellationToken cancellationToken = default)
@@ -278,16 +239,12 @@ public class PivotTableBuilder<TSource>(IQueryable<TSource> data)
     }
 }
 
-/// <summary>Mapper for transforming pivot table results into strongly-typed objects.</summary>
 /// <typeparam name="TSource">The type of the source data objects.</typeparam>
 /// <typeparam name="TDestination">The target type for the pivot table results.</typeparam>
 public class PivotTableMapper<TSource, TDestination>(PivotTableBuilder<TSource> builder)
 {
     public PivotTableBuilder<TSource> Builder { get; } = builder;
 
-    /// <summary>
-    /// Adds a dimension mapping from source expression to destination property.
-    /// </summary>
     /// <param name="from">Expression to select the dimension value from source objects.</param>
     /// <param name="to">Expression indicating the destination property for the dimension.</param>
     /// <returns>The mapper instance for method chaining.</returns>
@@ -297,9 +254,6 @@ public class PivotTableMapper<TSource, TDestination>(PivotTableBuilder<TSource> 
         return this;
     }
 
-    /// <summary>
-    /// Adds a measure mapping from source aggregation to destination property.
-    /// </summary>
     /// <param name="from">Expression to aggregate values from grouped data.</param>
     /// <param name="to">Expression indicating the destination property for the measure.</param>
     /// <returns>The mapper instance for method chaining.</returns>
@@ -309,9 +263,6 @@ public class PivotTableMapper<TSource, TDestination>(PivotTableBuilder<TSource> 
         return this;
     }
 
-    /// <summary>
-    /// Adds a table calculation to the mapped pivot table.
-    /// </summary>
     /// <param name="calculation">The table calculation configuration to add.</param>
     /// <returns>The mapper instance for method chaining.</returns>
     public PivotTableMapper<TSource, TDestination> TableCalculation(TableCalculation calculation)
@@ -320,9 +271,6 @@ public class PivotTableMapper<TSource, TDestination>(PivotTableBuilder<TSource> 
         return this;
     }
 
-    /// <summary>
-    /// Executes the pivot table transformation and returns strongly-typed results.
-    /// </summary>
     /// <param name="cancellationToken">Token to cancel the operation.</param>
     /// <returns>An async enumerable of strongly-typed objects created from the pivot table results.</returns>
     /// <exception cref="Exception">Thrown when required constructor parameters are missing from the pivot table results.</exception>
@@ -352,12 +300,8 @@ public class PivotTableMapper<TSource, TDestination>(PivotTableBuilder<TSource> 
     }
 }
 
-/// <summary>Extension methods for creating pivot table builders from data collections.</summary>
 public static class PivotTableBuilderExtensions
 {
-    /// <summary>
-    /// Creates a pivot table builder from an enumerable data source.
-    /// </summary>
     /// <typeparam name="TSource">The type of the source data objects.</typeparam>
     /// <param name="data">The enumerable data source.</param>
     /// <returns>A PivotTableBuilder for configuring the pivot table transformation.</returns>
@@ -366,9 +310,6 @@ public static class PivotTableBuilderExtensions
         return new PivotTableBuilder<TSource>(data.AsQueryable());
     }
 
-    /// <summary>
-    /// Creates a pivot table builder from a queryable data source.
-    /// </summary>
     /// <typeparam name="TSource">The type of the source data objects.</typeparam>
     /// <param name="data">The queryable data source.</param>
     /// <returns>A PivotTableBuilder for configuring the pivot table transformation.</returns>

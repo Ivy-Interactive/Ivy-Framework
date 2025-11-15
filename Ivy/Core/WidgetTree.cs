@@ -11,7 +11,7 @@ using Ivy.Core.Hooks;
 
 namespace Ivy.Core;
 
-/// <summary>Represents a node in the widget tree hierarchy, containing either a widget or view with its associated context and children. Manages the hierarchical structure and provides methods for tree traversal and widget extraction.</summary>
+/// <summary>Node in the widget tree hierarchy containing either a widget or view with its associated context and children.</summary>
 /// <param name="id">The unique identifier for this node.</param>
 /// <param name="index">The index position of this node among its siblings.</param>
 /// <param name="parentPath">The path from the root to this node's parent.</param>
@@ -23,9 +23,6 @@ namespace Ivy.Core;
 /// <param name="ancestorContext">The ancestor view context for context hierarchy.</param>
 public class TreeNode(string id, int index, Path parentPath, TreeNode[] children, int? memoizedHashCode, IWidget? widget, IView? view, IViewContext? context, IViewContext? ancestorContext) : IDisposable
 {
-    /// <summary>
-    /// Creates a TreeNode from a widget instance.
-    /// </summary>
     /// <param name="widget">The widget to create the node from.</param>
     /// <param name="index">The index position among siblings.</param>
     /// <param name="path">The path to this node.</param>
@@ -37,9 +34,6 @@ public class TreeNode(string id, int index, Path parentPath, TreeNode[] children
         return new TreeNode(widget.Id!, index, path, children, null, widget, null, null, ancestorContext);
     }
 
-    /// <summary>
-    /// Creates a TreeNode from a view instance.
-    /// </summary>
     /// <param name="view">The view to create the node from.</param>
     /// <param name="index">The index position among siblings.</param>
     /// <param name="path">The path to this node.</param>
@@ -66,10 +60,6 @@ public class TreeNode(string id, int index, Path parentPath, TreeNode[] children
     public IViewContext? Context { get; } = context;
     public IViewContext? AncestorContext { get; } = ancestorContext;
 
-    /// <summary>
-    /// Recursively builds the widget tree by extracting widgets from the node hierarchy.
-    /// Views are collapsed and only widgets are included in the final tree structure.
-    /// </summary>
     /// <returns>The widget tree rooted at this node, or null if no widgets exist.</returns>
     public IWidget? GetWidgetTree()
     {
@@ -98,14 +88,9 @@ public class TreeNode(string id, int index, Path parentPath, TreeNode[] children
         throw new NotSupportedException("Node must be either an IWidget or an IView.");
     }
 
-    /// <summary>Gets whether this node represents a widget.</summary>
     public bool IsWidget => Widget != null;
-    /// <summary>Gets whether this node represents a view.</summary>
     public bool IsView => View != null;
 
-    /// <summary>
-    /// Disposes the node and its associated resources including view and context.
-    /// </summary>
     public void Dispose()
     {
         View?.Dispose();

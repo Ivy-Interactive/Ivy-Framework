@@ -5,10 +5,8 @@ namespace Ivy.Core.Hooks;
 /// </summary>
 public class EffectTrigger : IEffectTrigger
 {
-    /// <summary>Gets the type of trigger that determines when the effect executes.</summary>
     public EffectTriggerType Type { get; }
 
-    /// <summary>Gets the state object associated with this trigger, if any.</summary>
     public IAnyState? State { get; }
 
     /// <summary>
@@ -95,7 +93,6 @@ public static class EffectExtensions
             return _observable.Subscribe(x => action(x));
         }
 
-        /// <summary>Gets the observable's value type.</summary>
         public Type GetStateType()
         {
             return typeof(T);

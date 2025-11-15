@@ -40,7 +40,6 @@ public static class AreaChartStyleHelpers
     }
 }
 
-/// <summary>Default area chart style with full axes, legend, and grid for comprehensive data visualization.</summary>
 /// <typeparam name="TSource">The type of the source data objects.</typeparam>
 public class DefaultAreaChartStyle<TSource> : IAreaChartStyle<TSource>
 {

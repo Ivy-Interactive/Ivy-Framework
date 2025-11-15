@@ -31,7 +31,6 @@ public abstract record PrefixSuffix
     public sealed record Icon(Icons Value) : PrefixSuffix;
 }
 
-/// <summary> JSON converter factory for PrefixSuffix discriminated union. </summary>
 internal class PrefixSuffixJsonConverterFactory : JsonConverterFactory
 {
     public override bool CanConvert(Type typeToConvert)
@@ -45,7 +44,6 @@ internal class PrefixSuffixJsonConverterFactory : JsonConverterFactory
     }
 }
 
-/// <summary> JSON converter for PrefixSuffix discriminated union. </summary>
 internal class PrefixSuffixJsonConverter : JsonConverter<PrefixSuffix>
 {
     public override PrefixSuffix? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)

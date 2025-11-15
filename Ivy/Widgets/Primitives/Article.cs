@@ -28,7 +28,6 @@ public record Article : WidgetBase<Article>
     [Event] public Func<Event<Article, string>, ValueTask>? OnLinkClick { get; set; }
 }
 
-/// <summary>Extension methods for configuring article widgets with fluent syntax.</summary>
 public static class ArticleExtensions
 {
     public static Article ShowToc(this Article article, bool showToc = true) => article with { ShowToc = showToc };

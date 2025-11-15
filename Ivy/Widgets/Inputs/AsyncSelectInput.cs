@@ -348,24 +348,16 @@ public static class AsyncSelectInputViewExtensions
     }
 }
 
-/// <summary>Internal widget that represents the visual async select input control.</summary>
 internal record AsyncSelectInput : WidgetBase<AsyncSelectInput>
 {
-    /// <summary>Gets the placeholder text displayed when no option is selected.</summary>
     [Prop] public string? Placeholder { get; init; }
 
-    /// <summary>Gets whether the input is disabled.</summary>
     [Prop] public bool Disabled { get; init; }
 
-    /// <summary>Gets the validation error message.</summary>
     [Prop] public string? Invalid { get; init; }
 
-    /// <summary>Gets the display text for the currently selected option.</summary>
     [Prop] public string? DisplayValue { get; init; }
-
-    /// <summary>Gets whether the input is currently loading option data.</summary>
     [Prop] public bool Loading { get; init; }
 
-    /// <summary>Gets the event handler called when the user triggers option selection.</summary>
     [Event] public Func<Event<AsyncSelectInput>, ValueTask>? OnSelect { get; init; }
 }

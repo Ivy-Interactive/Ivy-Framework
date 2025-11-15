@@ -41,7 +41,6 @@ public static class BarChartStyleHelpers
     }
 }
 
-/// <summary>Default bar chart style with full axes, legend, and grid for comprehensive data visualization.</summary>
 /// <typeparam name="TSource">The type of the source data objects.</typeparam>
 public class DefaultBarChartStyle<TSource> : IBarChartStyle<TSource>
 {

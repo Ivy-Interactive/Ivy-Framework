@@ -32,29 +32,21 @@ public record Pagination : WidgetBase<Pagination>
         Disabled = disabled;
     }
 
-    /// <summary>Page value starting from 1. When null, no page highlighted.</summary>
     [Prop] public int? Page { get; set; }
 
-    /// <summary>Total number of pages to display. When null, only previous and next buttons displayed.</summary>
     [Prop] public int? NumPages { get; set; }
 
-    /// <summary>Number of siblings controlling page numbers displayed adjacent to current page. Defaults to 1.</summary>
     [Prop] public int? Siblings { get; set; }
 
-    /// <summary>Number of boundaries controlling page numbers displayed at beginning and end of pagination. Defaults to 1.</summary>
     [Prop] public int? Boundaries { get; set; }
 
-    /// <summary>Whether pagination widget is disabled and cannot be interacted with.</summary>
     [Prop] public bool Disabled { get; set; } = false;
 
-    /// <summary>Gets the event handler called when the page value changes.</summary>
     [Event] public Func<Event<Pagination, int>, ValueTask>? OnChange { get; }
 }
 
-/// <summary>Extension methods for Pagination widget.</summary>
 public static class PaginationExtensions
 {
-    /// <summary>Sets Siblings property of pagination widget.</summary>
     /// <param name="widget">The pagination widget to configure.</param>
     /// <param name="siblings">Number of siblings to show.</param>
     /// <returns>Pagination instance for method chaining.</returns>
@@ -64,7 +56,6 @@ public static class PaginationExtensions
         return widget;
     }
 
-    /// <summary>Sets Boundaries property of pagination widget.</summary>
     /// <param name="widget">The pagination widget to configure.</param>
     /// <param name="boundaries">Number of boundaries to show.</param>
     /// <returns>Pagination instance for method chaining.</returns>
@@ -74,7 +65,6 @@ public static class PaginationExtensions
         return widget;
     }
 
-    /// <summary>Sets disabled state of pagination widget. When disabled, page cannot be changed and buttons greyed out.</summary>
     /// <param name="widget">The pagination widget to configure.</param>
     /// <param name="disabled">Whether widget should be disabled.</param>
     /// <returns>Pagination instance for method chaining.</returns>

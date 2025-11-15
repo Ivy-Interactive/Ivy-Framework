@@ -39,7 +39,6 @@ public record AudioRecorder : WidgetBase<AudioRecorder>
     [Prop] public Sizes Size { get; set; } = Sizes.Medium;
 }
 
-/// <summary>Extension methods for configuring audio recorders.</summary>
 public static class AudioRecorderExtensions
 {
     public static AudioRecorder Label(this AudioRecorder widget, string label)

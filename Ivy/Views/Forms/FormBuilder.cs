@@ -425,7 +425,6 @@ public class FormBuilder<TModel> : ViewBase
         return _Place(0, Guid.NewGuid(), fields);
     }
 
-    /// <summary>Places specified fields in a specific column, optionally arranging them horizontally side-by-side.</summary>
     /// <param name="col">Zero-based column index where fields should be placed.</param>
     /// <param name="row">True to arrange fields side-by-side in the same row; false to stack vertically in the column.</param>
     /// <param name="fields">Fields to place in the specified column. When row is true, fields will share the same row.</param>

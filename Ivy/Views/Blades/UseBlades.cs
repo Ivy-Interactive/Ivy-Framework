@@ -5,7 +5,6 @@ using Ivy.Shared;
 
 namespace Ivy.Views.Blades;
 
-/// <summary>Interface for controlling blade navigation stack operations.</summary>
 public interface IBladeController
 {
     IState<ImmutableArray<BladeItem>> Blades { get; }
@@ -35,7 +34,6 @@ public interface IBladeController
     int GetIndex(IView bladeView);
 }
 
-/// <summary>Default implementation of the blade controller for managing blade navigation stacks.</summary>
 public class BladeController : IBladeController
 {
     public BladeController()
@@ -97,7 +95,6 @@ public class BladeController : IBladeController
     }
 }
 
-/// <summary>Represents a single blade item in the navigation stack with its associated metadata.</summary>
 public class BladeItem(IView view, int index, string? title, Size? width = null)
 {
     public string Key { get; } = Guid.NewGuid().ToString();
@@ -113,7 +110,6 @@ public class BladeItem(IView view, int index, string? title, Size? width = null)
     public Size? Width { get; set; } = width;
 }
 
-/// <summary>Extension methods for creating and managing blade navigation systems.</summary>
 public static class UseBladesExtensions
 {
     /// <typeparam name="TView">The type of view that will use the blade system.</typeparam>

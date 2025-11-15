@@ -179,16 +179,11 @@ public record FileInput<TValue> : FileInputBase, IInput<TValue>, IAnyFileInput
         Height = Ivy.Shared.Size.Units(50);
     }
 
-    /// <summary>Gets the current file value.</summary>
     [Prop] public TValue Value { get; } = default!;
 
-    /// <summary>OnChange event is not used - file state is managed by the server.</summary>
     [Event] public Func<Event<IInput<TValue>, TValue>, ValueTask>? OnChange => null;
 }
 
-/// <summary>
-/// Provides extension methods for creating, configuring, and working with file inputs.
-/// </summary>
 public static class FileInputExtensions
 {
     [Obsolete("ToFileInput now requires an UploadContext. Use state.ToFileInput(uploadContext, ...).", true)]

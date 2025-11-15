@@ -63,41 +63,23 @@ public enum AnimationDirection
 /// </summary>
 public enum AnimationEasing
 {
-    /// <summary>Animation starts slowly and accelerates toward the end.</summary>
     EaseIn,
-    /// <summary>Animation starts quickly and decelerates toward the end.</summary>
     EaseOut,
-    /// <summary>Animation starts slowly, accelerates in the middle, then decelerates at the end.</summary>
     EaseInOut,
-    /// <summary>Animation progresses at a constant speed throughout.</summary>
     Linear,
-    /// <summary>Circular easing that starts slowly and accelerates.</summary>
     CircIn,
-    /// <summary>Circular easing that starts quickly and decelerates.</summary>
     CircOut,
-    /// <summary>Circular easing that combines CircIn and CircOut.</summary>
     CircInOut,
-    /// <summary>Back easing that pulls back before moving forward (anticipation).</summary>
     BackIn,
-    /// <summary>Back easing that overshoots the target then settles back.</summary>
     BackOut,
-    /// <summary>Back easing that combines BackIn and BackOut behaviors.</summary>
     BackInOut,
-    /// <summary>Anticipation easing that pulls back before the main motion.</summary>
     Anticipate,
-    /// <summary>Anticipation easing that overshoots then settles back.</summary>
     AnticipateOut,
-    /// <summary>Bounce easing that starts with bouncing motion.</summary>
     BounceIn,
-    /// <summary>Bounce easing that ends with bouncing motion.</summary>
     BounceOut,
-    /// <summary>Bounce easing that combines BounceIn and BounceOut.</summary>
     BounceInOut,
-    /// <summary>Elastic easing that starts with elastic oscillation.</summary>
     ElasticIn,
-    /// <summary>Elastic easing that ends with elastic oscillation.</summary>
     ElasticOut,
-    /// <summary>Elastic easing that combines ElasticIn and ElasticOut.</summary>
     ElasticInOut
 }
 

@@ -36,7 +36,6 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         public Size? Width { get; set; }
         public Func<IEnumerable<TModel>, object>? FooterAggregate { get; set; }
 
-        /// <summary>Gets the value of this column from a model object using reflection.</summary>
         public object? GetValue(TModel obj)
         {
             if (obj == null) return null;

@@ -3,10 +3,8 @@ using Ivy.Shared;
 
 namespace Ivy.Widgets.Inputs;
 
-/// <summary>Interface for option items used in select inputs, dropdowns, and other choice-based controls.</summary>
 public interface IAnyOption
 {
-    /// <summary>Gets type of option's value for type checking and validation in generic selection controls.</summary>
     public Type GetOptionType();
 
     public string Label { get; set; }
@@ -18,7 +16,6 @@ public interface IAnyOption
     public object Value { get; set; }
 }
 
-/// <summary>Generic option class providing type-safe option items for selection controls.</summary>
 /// <typeparam name="TValue">Type of option's value.</typeparam>
 public class Option<TValue>(string label, TValue value, string? group = null, string? description = null) : IAnyOption
 {
@@ -26,7 +23,6 @@ public class Option<TValue>(string label, TValue value, string? group = null, st
     {
     }
 
-    /// <summary>Gets type of option's value returning generic type parameter TValue for type checking and validation.</summary>
     public Type GetOptionType()
     {
         return typeof(TValue);
@@ -43,7 +39,6 @@ public class Option<TValue>(string label, TValue value, string? group = null, st
     public string? Group { get; set; } = group;
 }
 
-/// <summary>Extension methods for creating and converting option collections.</summary>
 public static class OptionExtensions
 {
     /// <typeparam name="TValue">Type of values in collection.</typeparam>

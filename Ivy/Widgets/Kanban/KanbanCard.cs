@@ -3,7 +3,6 @@ using Ivy.Core;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
-/// <summary>Kanban card widget representing an individual item within a kanban column.</summary>
 public record KanbanCard : WidgetBase<KanbanCard>
 {
     /// <param name="content">Content to display within kanban card.</param>
