@@ -517,7 +517,7 @@ public class AppHub(
                             {
                                 // This case should only ever happen if the auth provider implementation is bad (i.e. it returns the same invalid token on refresh).
                                 // It is still good to handle it here to avoid an infinite loop.
-                                logger.LogInformation("AuthRefreshLoop: invalid token object unchanged after refresh for {ConnectionId}.", connectionId);
+                                logger.LogInformation("AuthRefreshLoop: Invalid token object unchanged after refresh for {ConnectionId}.", connectionId);
                                 newToken = null;
                             }
                             if (token != newToken)
