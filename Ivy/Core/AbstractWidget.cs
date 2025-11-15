@@ -16,7 +16,6 @@ public abstract record AbstractWidget : IWidget
         Children = children;
     }
 
-    /// <summary>Sets attached property value for this widget used by parent widgets to store layout or behavior information.</summary>
     /// <param name="parentType">Type of parent widget defining attached property.</param>
     /// <param name="name">Name of attached property.</param>
     /// <param name="value">Value to set for attached property.</param>

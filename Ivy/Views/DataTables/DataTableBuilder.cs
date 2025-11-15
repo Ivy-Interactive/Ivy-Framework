@@ -276,14 +276,12 @@ public class DataTableBuilder<TModel> : ViewBase, IMemoized
         return this;
     }
 
-    /// <summary>Sets the event handler for cell clicks (single-click).</summary>
     public DataTableBuilder<TModel> OnCellClick(Func<Event<DataTable, CellClickEventArgs>, ValueTask> handler)
     {
         _onCellClick = handler;
         return this;
     }
 
-    /// <summary>Sets the event handler for cell activation (double-click).</summary>
     public DataTableBuilder<TModel> OnCellActivated(Func<Event<DataTable, CellClickEventArgs>, ValueTask> handler)
     {
         _onCellActivated = handler;
@@ -314,7 +312,6 @@ public class DataTableBuilder<TModel> : ViewBase, IMemoized
         return this;
     }
 
-    /// <summary>Sets the event handler for row action button clicks.</summary>
     public DataTableBuilder<TModel> OnRowAction(Func<Event<DataTable, RowActionClickEventArgs>, ValueTask> handler)
     {
         //todo: remove

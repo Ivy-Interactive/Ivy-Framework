@@ -17,7 +17,6 @@ public enum LineChartStyles
     Custom
 }
 
-/// <summary>Interface for defining line chart visual styles and configurations.</summary>
 /// <typeparam name="TSource">The type of the source data objects.</typeparam>
 public interface ILineChartStyle<TSource>
 {

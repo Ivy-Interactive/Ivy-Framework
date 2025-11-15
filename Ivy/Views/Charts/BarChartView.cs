@@ -17,7 +17,6 @@ public enum BarChartStyles
     Dashboard
 }
 
-/// <summary>Interface for defining bar chart visual styles and configurations.</summary>
 /// <typeparam name="TSource">The type of the source data objects.</typeparam>
 public interface IBarChartStyle<TSource>
 {

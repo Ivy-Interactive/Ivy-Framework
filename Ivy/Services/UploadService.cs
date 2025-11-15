@@ -115,7 +115,6 @@ public record FileUpload<T> : FileUpload
     }
 }
 
-/// <summary>Interface for handling file uploads with custom logic.</summary>
 public interface IUploadHandler
 {
     /// <summary>
@@ -153,7 +152,6 @@ public static class FileUploadExtensions
 public delegate Task UploadDelegate(FileUpload fileUpload, Stream stream, CancellationToken cancellationToken);
 
 
-/// <summary>Interface for managing file upload state. Sinks are simple state controllers that update FileUpload state for single or multiple files. Cleanup logic should be handled by the upload handler, not the sink.</summary>
 public interface IFileUploadSink<in TContent>
 {
     Guid Start(FileUpload file);

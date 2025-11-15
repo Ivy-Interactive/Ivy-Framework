@@ -107,52 +107,23 @@ public class AsyncSelectInputView<TValue> : ViewBase, IAnyAsyncSelectInputBase, 
         Disabled = disabled;
     }
 
-    /// <summary>
-    /// Gets the delegate used for querying options based on user search input.
-    /// </summary>
     public AsyncSelectQueryDelegate<TValue> Query { get; }
 
-    /// <summary>
-    /// Gets the delegate used for looking up option display information by value.
-    /// </summary>
     public AsyncSelectLookupDelegate<TValue> Lookup { get; }
 
-    /// <summary>
-    /// Gets the currently selected value.
-    /// </summary>
     public TValue Value { get; private set; } = typeof(TValue).IsValueType ? Activator.CreateInstance<TValue>() : default!;
 
-    /// <summary>
-    /// Gets or sets whether the input accepts null values.
-    /// </summary>
     public bool Nullable { get; set; } = typeof(TValue).IsNullableType();
 
-    /// <summary>
-    /// Gets the event handler called when the selected value changes.
-    /// </summary>
     public Func<Event<IInput<TValue>, TValue>, ValueTask>? OnChange { get; }
 
-    /// <summary>
-    /// Gets or sets the event handler called when the input loses focus.
-    /// </summary>
     public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
 
-    /// <summary>
-    /// Gets or sets whether the input is disabled.
-    /// </summary>
     public bool Disabled { get; set; }
 
-    /// <summary>
-    /// Gets or sets the validation error message.
-    /// </summary>
     public string? Invalid { get; set; }
 
-    /// <summary> Gets or sets the size of the async select input. </summary>
     public Sizes Size { get; set; }
-
-    /// <summary>
-    /// Gets or sets the placeholder text displayed when no option is selected.
-    /// </summary>
     public string? Placeholder { get; set; }
 
     public override object? Build()

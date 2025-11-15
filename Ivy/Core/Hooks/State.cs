@@ -34,7 +34,6 @@ public interface IAnyState : IDisposable, IEffectTriggerConvertible
 /// <typeparam name="T">The type of the state value.</typeparam>
 public interface IState<T> : IObservable<T>, IAnyState
 {
-    /// <summary>Gets or sets the current state value.</summary>
     public T Value { get; set; }
 
     /// <summary>

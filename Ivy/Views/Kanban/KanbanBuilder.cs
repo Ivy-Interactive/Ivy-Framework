@@ -227,7 +227,6 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
         return this;
     }
 
-    /// <summary>Sets the height of the kanban board.</summary>
     /// <param name="height">The height of the kanban board.</param>
     public KanbanBuilder<TModel, TGroupKey> Height(Size? height)
     {
@@ -242,7 +241,6 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
         return this;
     }
 
-    /// <summary>Sets the height of the kanban board as a fraction.</summary>
     /// <param name="fraction">The height of the kanban board as a fraction.</param>
     public KanbanBuilder<TModel, TGroupKey> Height(float fraction)
     {
@@ -250,7 +248,6 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
         return this;
     }
 
-    /// <summary>Sets the height of the kanban board as a percentage.</summary>
     /// <param name="percent">The height of the kanban board as a percentage string (e.g., "50%").</param>
     public KanbanBuilder<TModel, TGroupKey> Height(string percent)
     {
@@ -262,7 +259,6 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
         return this;
     }
 
-    /// <summary>Sets the width of columns based on their group key value.</summary>
     /// <param name="groupKeySelector">Expression that selects the group key field (same as used in ToKanban grouping).</param>
     /// <param name="width">The width to set for columns matching the group key.</param>
     public KanbanBuilder<TModel, TGroupKey> Width(Expression<Func<TModel, TGroupKey>> groupKeySelector, Size width)
@@ -277,7 +273,6 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
         return this;
     }
 
-    /// <summary>Sets the width of a specific column identified by the group key.</summary>
     /// <param name="groupKey">The group key that identifies the column.</param>
     /// <param name="width">The width to set for the column.</param>
     public KanbanBuilder<TModel, TGroupKey> Width(TGroupKey groupKey, Size width)

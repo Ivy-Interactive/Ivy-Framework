@@ -20,7 +20,6 @@ public enum PieChartStyles
     Donut
 }
 
-/// <summary>Interface for defining pie chart visual styles and configurations.</summary>
 /// <typeparam name="TSource">The type of the source data objects.</typeparam>
 public interface IPieChartStyle<TSource>
 {
