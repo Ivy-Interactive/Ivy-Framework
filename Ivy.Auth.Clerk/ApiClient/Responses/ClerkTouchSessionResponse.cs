@@ -2,11 +2,11 @@ using System.Text.Json.Serialization;
 
 namespace Ivy.Auth.Clerk.ApiClient.Responses;
 
-public class ClerkClientResponse
+public class ClerkTouchSessionResponse
 {
     [JsonPropertyName("response")]
-    public ClerkClient? Response { get; set; }
+    public ClerkSession Response { get; set; } = default!;
 
     [JsonPropertyName("client")]
-    public object? Client { get; set; }
+    public ClerkClient Client { get; set; } = default!;
 }

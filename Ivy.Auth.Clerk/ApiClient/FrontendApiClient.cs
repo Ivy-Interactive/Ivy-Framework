@@ -4,28 +4,13 @@ using Ivy.Auth.Clerk.ApiClient.Responses;
 
 namespace Ivy.Auth.Clerk.ApiClient;
 
-public class FrontendApiClient
+public class FrontendApiClient(string? frontendApiDomain)
 {
-    private readonly string? _frontendApiDomain;
-    private readonly HttpClient _httpClient;
+    private readonly string? _frontendApiDomain = frontendApiDomain;
+    private readonly HttpClient _httpClient = new HttpClient();
     private readonly JsonSerializerOptions _jsonSerializerOptions = new() { PropertyNameCaseInsensitive = true };
 
     private const string ApiVersion = "2025-11-10";
-
-    public FrontendApiClient(string? frontendApiDomain, string secretKey)
-    {
-        _frontendApiDomain = frontendApiDomain;
-        _httpClient = new HttpClient();
-    }
-
-    public async Task RecreateFrontendPackageApiCalls(string origin, CancellationToken cancellationToken = default)
-    {
-        var browserToken = await CreateDevBrowserTokenAsync(cancellationToken);
-        var environment = await UpdateEnvironmentAsync(browserToken.Id, origin, cancellationToken);
-        var client = await GetCurrentClient(browserToken.Id, cancellationToken);
-        // var sessionId = client.Sessions.First().Id;
-        // var sessionToken = await CreateSessionTokenAsync(sessionId, browserToken.Id, cancellationToken);
-    }
 
     public async Task<ClerkDevBrowserTokenResponse> CreateDevBrowserTokenAsync(CancellationToken cancellationToken = default)
     {
@@ -64,6 +49,12 @@ public class FrontendApiClient
 
         var response = await _httpClient.PostAsync($"https://{_frontendApiDomain}.clerk.accounts.dev/v1/client/sessions/{sessionId}/tokens?__clerk_api_version={ApiVersion}&__clerk_db_jwt={devBrowserJwt}", content, cancellationToken);
         return await ParseResponse<ClerkTokenResponse>(response);
+    }
+
+    public async Task<ClerkTouchSessionResponse> TouchSessionAsync(string sessionId, string devBrowserJwt, CancellationToken cancellationToken = default)
+    {
+        var response = await _httpClient.PostAsync($"https://{_frontendApiDomain}.clerk.accounts.dev/v1/client/sessions/{sessionId}/touch?__clerk_api_version={ApiVersion}&__clerk_db_jwt={devBrowserJwt}", null, cancellationToken);
+        return await ParseResponse<ClerkTouchSessionResponse>(response);
     }
 
     private async Task<T> ParseResponse<T>(HttpResponseMessage response)
