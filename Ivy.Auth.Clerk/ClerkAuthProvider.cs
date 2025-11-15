@@ -47,7 +47,7 @@ public class ClerkAuthProvider : IAuthProvider
             return _signingKeys;
         }
 
-        var jwksUrl = $"https://{_frontendApiDomain}.accounts.dev/.well-known/jwks.json";
+        var jwksUrl = $"https://{_frontendApiDomain}.clerk.accounts.dev/.well-known/jwks.json";
         var jwksJson = await _httpClient.GetStringAsync(jwksUrl, cancellationToken);
         var jwks = new JsonWebKeySet(jwksJson);
 
@@ -94,7 +94,6 @@ public class ClerkAuthProvider : IAuthProvider
 
         var parameters = new TokenValidationParameters
         {
-            TryAllIssuerSigningKeys = true,
             ValidateIssuerSigningKey = true,
             IssuerSigningKeys = signingKeys,
             ValidAlgorithms = [SecurityAlgorithms.RsaSha256],
@@ -198,7 +197,8 @@ public class ClerkAuthProvider : IAuthProvider
                 ValidateIssuerSigningKey = true,
                 IssuerSigningKeys = signingKeys,
                 ValidAlgorithms = [SecurityAlgorithms.RsaSha256],
-                ValidateIssuer = false,
+                ValidateIssuer = true,
+                ValidIssuer = $"https://{_frontendApiDomain}.clerk.accounts.dev",
                 ValidateAudience = false,
                 ClockSkew = TimeSpan.Zero
             };
@@ -219,10 +219,12 @@ public class ClerkAuthProvider : IAuthProvider
             var tokenHandler = new JwtSecurityTokenHandler();
             var jsonToken = tokenHandler.ReadJwtToken(token);
 
-            var userId = jsonToken.Claims.FirstOrDefault(x => x.Type == "sub")?.Value ?? "";
-            var email = jsonToken.Claims.FirstOrDefault(x => x.Type == "email")?.Value ?? "";
-            var name = jsonToken.Claims.FirstOrDefault(x => x.Type == "name")?.Value ?? "";
-            var picture = jsonToken.Claims.FirstOrDefault(x => x.Type == "picture")?.Value ?? "";
+            var claims = jsonToken.Claims;
+
+            var userId = claims.FirstOrDefault(x => x.Type == "sub")?.Value ?? "";
+            var email = claims.FirstOrDefault(x => x.Type == "email")?.Value ?? "";
+            var name = claims.FirstOrDefault(x => x.Type == "name")?.Value ?? "";
+            var picture = claims.FirstOrDefault(x => x.Type == "picture")?.Value ?? "";
 
             return new UserInfo(userId, email, name, picture);
         }
