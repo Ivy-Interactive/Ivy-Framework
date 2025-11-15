@@ -3,20 +3,12 @@ using Microsoft.OpenApi.Models;
 
 namespace Ivy.Shared;
 
-/// <summary>
-/// Specifies the visual and behavioral variant of a menu item.
-/// </summary>
 public enum MenuItemVariant
 {
-    /// <summary>Standard clickable menu item.</summary>
     Default,
-    /// <summary>Visual separator line between menu sections.</summary>
     Separator,
-    /// <summary>Checkable menu item with toggle state.</summary>
     Checkbox,
-    /// <summary>Radio button menu item for exclusive selection.</summary>
     Radio,
-    /// <summary>Group header for organizing related menu items.</summary>
     Group
 }
 

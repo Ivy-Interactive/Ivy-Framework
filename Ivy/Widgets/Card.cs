@@ -5,14 +5,10 @@ using Ivy.Views;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
-/// <summary>Card style variants applied on cursor hover.</summary>
 public enum CardHoverVariant
 {
-    /// <summary>No styling applied on hover.</summary>
     None,
-    /// <summary>Applies "cursor: pointer".</summary>
     Pointer,
-    /// <summary>Applies "cursor: pointer" and adds a minor translate effect on hover.</summary>
     PointerAndTranslate,
 }
 

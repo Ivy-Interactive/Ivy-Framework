@@ -13,12 +13,6 @@ namespace Ivy.Views.Forms;
 /// </remarks>
 public static class FormExtensions
 {
-    /// <summary>
-    /// Creates a form builder from a reactive state object with automatic field scaffolding.
-    /// </summary>
-    /// <typeparam name="T">The type of the model object contained in the state.</typeparam>
-    /// <param name="obj">The reactive state object containing the model to be edited by the form.</param>
-    /// <param name="submitTitle">The text displayed on the form's submit button. Default is "Save".</param>
     /// <returns>A new FormBuilder instance configured for the specified model type with automatic field discovery.</returns>
     /// <remarks>
     /// <para>This extension method provides a fluent entry point for form creation by converting

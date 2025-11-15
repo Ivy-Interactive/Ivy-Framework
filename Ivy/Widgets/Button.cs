@@ -11,28 +11,17 @@ using Ivy.Views;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
-/// <summary>Visual style variants for button widgets controlling appearance, color scheme, and emphasis.</summary>
 public enum ButtonVariant
 {
-    /// <summary>Primary button style with prominent emphasis for main actions.</summary>
     Primary,
-    /// <summary>Destructive button style for critical actions like delete operations.</summary>
     Destructive,
-    /// <summary>Outline button style with borders for secondary actions.</summary>
     Outline,
-    /// <summary>Secondary button style with reduced emphasis for supporting actions.</summary>
     Secondary,
-    /// <summary>Success button style for confirming actions or indicating success.</summary>
     Success,
-    /// <summary>Warning button style for alerting users to potential issues.</summary>
     Warning,
-    /// <summary>Info button style for providing additional context or guidance.</summary>
     Info,
-    /// <summary>Ghost button style with minimal styling for subtle actions.</summary>
     Ghost,
-    /// <summary>Link button style appearing as clickable link for navigation.</summary>
     Link,
-    /// <summary>Inline button style integrating seamlessly with text content.</summary>
     Inline,
 }
 
