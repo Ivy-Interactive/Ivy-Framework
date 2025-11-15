@@ -14,10 +14,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Ivy.Services;
 
-/// <summary>
-/// Context for an upload endpoint created by UseUpload, providing the client-facing URL
-/// and a server-side cancel function to abort an in-flight upload by fileId.
-/// </summary>
+/// <summary>Context for an upload endpoint created by UseUpload, providing the client-facing URL and a server-side cancel function to abort an in-flight upload by fileId.</summary>
 public record UploadContext(string UploadUrl, Action<Guid> Cancel)
 {
     /// <summary>Gets or sets the accepted file types using MIME types or file extensions.</summary>
@@ -30,9 +27,7 @@ public record UploadContext(string UploadUrl, Action<Guid> Cancel)
     public int? MaxFiles { get; init; }
 }
 
-/// <summary>
-/// Extension methods for configuring UploadContext.
-/// </summary>
+/// <summary>Extension methods for configuring UploadContext.</summary>
 public static class UploadContextExtensions
 {
     /// <summary>Sets the accepted file types for the upload state using MIME types or file extensions.</summary>
@@ -73,9 +68,7 @@ public enum FileUploadStatus
     Finished
 }
 
-/// <summary>
-/// Common contract for uploaded file metadata used by both generic and non-generic file upload records.
-/// </summary>
+/// <summary>Common contract for uploaded file metadata used by both generic and non-generic file upload records.</summary>
 public interface IFileUpload
 {
     Guid Id { get; }
@@ -86,9 +79,7 @@ public interface IFileUpload
     FileUploadStatus Status { get; set; }
 }
 
-/// <summary>
-/// Represents a file uploaded through a file input control.
-/// </summary>
+/// <summary>Represents a file uploaded through a file input control.</summary>
 public record FileUpload : IFileUpload
 {
     /// <summary>Gets the identifier for this file upload, set by the server.</summary>
@@ -114,9 +105,7 @@ public record FileUpload : IFileUpload
     public FileUploadStatus Status { get; set; } = FileUploadStatus.Pending;
 }
 
-/// <summary>
-/// Generic variant of FileUpload allowing an associated typed payload to be tracked alongside the upload metadata.
-/// </summary>
+/// <summary>Generic variant of FileUpload allowing an associated typed payload to be tracked alongside the upload metadata.</summary>
 /// <typeparam name="T">The type of the associated payload.</typeparam>
 public record FileUpload<T> : FileUpload
 {
@@ -136,9 +125,7 @@ public record FileUpload<T> : FileUpload
     }
 }
 
-/// <summary>
-/// Interface for handling file uploads with custom logic.
-/// </summary>
+/// <summary>Interface for handling file uploads with custom logic.</summary>
 public interface IUploadHandler
 {
     /// <summary>
@@ -171,8 +158,7 @@ public static class FileUploadExtensions
     }
 }
 
-/// <summary>
-/// Delegate for handling file uploads with stream and cancellation support.
+/// <summary>Delegate for handling file uploads with stream and cancellation support.</summary>
 /// </summary>
 public delegate Task UploadDelegate(FileUpload fileUpload, Stream stream, CancellationToken cancellationToken);
 

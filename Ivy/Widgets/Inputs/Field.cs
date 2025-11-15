@@ -55,9 +55,7 @@ public record Field : WidgetBase<Field>
     }
 }
 
-/// <summary>
-/// Provides extension methods for creating and configuring field with fluent syntax.
-/// </summary>
+/// <summary>Provides extension methods for creating and configuring field with fluent syntax.</summary>
 public static class FieldExtensions
 {
 

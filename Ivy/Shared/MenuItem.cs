@@ -39,17 +39,10 @@ public record MenuItem(
     string[]? SearchHints = null)
 {
 
-    /// <summary>Creates a separator menu item for visual grouping.</summary>
     public static MenuItem Separator() => new(Variant: MenuItemVariant.Separator);
 
-    /// <summary>Creates checkbox menu item with toggle functionality.</summary>
-    /// <param name="label">Display text for checkbox item.</param>
-    /// <param name="tag">Optional tag for identification, defaults to label if null.</param>
     public static MenuItem Checkbox(string label, object? tag = null) => new(Variant: MenuItemVariant.Checkbox, Label: label, Tag: tag ?? label);
 
-    /// <summary>Creates standard clickable menu item.</summary>
-    /// <param name="label">Display text for menu item.</param>
-    /// <param name="tag">Optional tag for identification, defaults to label if null.</param>
     public static MenuItem Default(string label, object? tag = null)
         => new(Variant: MenuItemVariant.Default, Label: label, Tag: tag ?? label);
 
@@ -81,8 +74,6 @@ public record MenuItem(
 /// <summary>Extension methods for MenuItem manipulation and fluent configuration.</summary>
 public static class MenuItemExtensions
 {
-    /// <summary>Flattens hierarchical menu structure into flat enumerable sequence.</summary>
-    /// <param name="menuItem">Menu items to flatten.</param>
     /// <returns>All menu items including nested children in depth-first order.</returns>
     public static IEnumerable<MenuItem> Flatten(this IEnumerable<MenuItem> menuItem)
     {
@@ -99,9 +90,6 @@ public static class MenuItemExtensions
         }
     }
 
-    /// <summary>Finds and returns selection handler for menu item matching specified value.</summary>
-    /// <param name="menuItem">Menu items to search through.</param>
-    /// <param name="value">Tag or label value to match against.</param>
     /// <returns>Selection handler action, or null if no matching item found.</returns>
     public static Action? GetSelectHandler(this MenuItem[] menuItem, object value)
     {
@@ -126,73 +114,61 @@ public static class MenuItemExtensions
         return null;
     }
 
-    /// <summary>Sets the disabled state of the menu item.</summary>
     public static MenuItem Disabled(this MenuItem menuItem, bool disabled = true)
     {
         return menuItem with { Disabled = disabled };
     }
 
-    /// <summary>Sets the checked state for checkbox and radio menu items.</summary>
     public static MenuItem Checked(this MenuItem menuItem, bool isChecked = true)
     {
         return menuItem with { Checked = isChecked };
     }
 
-    /// <summary>Sets the keyboard shortcut text to display.</summary>
     public static MenuItem Shortcut(this MenuItem menuItem, string shortcut)
     {
         return menuItem with { Shortcut = shortcut };
     }
 
-    /// <summary>Sets the icon to display alongside the menu item.</summary>
     public static MenuItem Icon(this MenuItem menuItem, Icons icon)
     {
         return menuItem with { Icon = icon };
     }
 
-    /// <summary>Sets the tag object for identification and event handling.</summary>
     public static MenuItem Tag(this MenuItem menuItem, object tag)
     {
         return menuItem with { Tag = tag };
     }
 
-    /// <summary>Sets the display label text.</summary>
     public static MenuItem Label(this MenuItem menuItem, string label)
     {
         return menuItem with { Label = label };
     }
 
-    /// <summary>Sets the tooltip text for the menu item.</summary>
     public static MenuItem Tooltip(this MenuItem menuItem, string tooltip)
     {
         return menuItem with { Tooltip = tooltip };
     }
 
-    /// <summary>Sets whether child menu items are expanded in hierarchical menus.</summary>
     public static MenuItem Expanded(this MenuItem menuItem, bool expanded = true)
     {
         return menuItem with { Expanded = expanded };
     }
 
-    /// <summary>Sets the child menu items for creating hierarchical menus.</summary>
     public static MenuItem Children(this MenuItem menuItem, params MenuItem[] children)
     {
         return menuItem with { Children = children };
     }
 
-    /// <summary>Sets the selection handler that receives the menu item when selected.</summary>
     public static MenuItem HandleSelect(this MenuItem menuItem, Action<MenuItem> onSelect)
     {
         return menuItem with { OnSelect = onSelect };
     }
 
-    /// <summary>Sets the selection handler with a simple action callback.</summary>
     public static MenuItem HandleSelect(this MenuItem menuItem, Action onSelect)
     {
         return menuItem with { OnSelect = _ => onSelect() };
     }
 
-    /// <summary>Sets the search tags for this app</summary>
     public static MenuItem SearchHints(this MenuItem menuItem, string[] searchHints)
     {
         return menuItem with { SearchHints = searchHints };

@@ -6,9 +6,7 @@ using Ivy.Views.Builders;
 
 namespace Ivy.Views.Kanban;
 
-/// <summary>
-/// Fluent builder for creating kanban boards from data collections with automatic grouping and card rendering.
-/// </summary>
+/// <summary>Fluent builder for creating kanban boards from data collections with automatic grouping and card rendering.</summary>
 /// <typeparam name="TModel">The type of data objects to display in kanban cards.</typeparam>
 /// <typeparam name="TGroupKey">The type of the grouping key used to organize items into columns.</typeparam>
 public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
@@ -287,10 +285,6 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
     /// <summary>Sets the width of columns based on their group key value.</summary>
     /// <param name="groupKeySelector">Expression that selects the group key field (same as used in ToKanban grouping).</param>
     /// <param name="width">The width to set for columns matching the group key.</param>
-    /// <remarks>
-    /// This method sets the width for all columns that have the same group key value as the first record.
-    /// For more precise control, use Width(TGroupKey, Size) with specific group key values.
-    /// </remarks>
     public KanbanBuilder<TModel, TGroupKey> Width(Expression<Func<TModel, TGroupKey>> groupKeySelector, Size width)
     {
         // Evaluate the selector on all unique group keys to set widths for all matching columns

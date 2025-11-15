@@ -4,10 +4,7 @@ using Utf8JsonWriter = System.Text.Json.Utf8JsonWriter;
 
 namespace Ivy.Shared;
 
-/// <summary>
-/// Predefined color palette with light/dark theme support and WCAG accessibility compliance.
-/// Includes neutral, chromatic, and semantic colors for consistent UI theming.
-/// </summary>
+/// <summary>Predefined color palette with light/dark theme support and WCAG accessibility compliance. Includes neutral, chromatic, and semantic colors for consistent UI theming.</summary>
 public enum Colors
 {
     Black,

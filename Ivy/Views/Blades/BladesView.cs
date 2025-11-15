@@ -3,14 +3,7 @@ using Ivy.Shared;
 
 namespace Ivy.Views.Blades;
 
-/// <summary>
-/// A view that renders the blade navigation interface by managing blade items from the blade controller.
-/// </summary>
-/// <remarks>
-/// This view is typically created automatically by the UseBlades extension and manages the rendering
-/// of all blades in the navigation stack. It connects to the IBladeController to get blade state
-/// and handles close/refresh events for each blade in the stack.
-/// </remarks>
+/// <summary>A view that renders the blade navigation interface by managing blade items from the blade controller.</summary>
 public class BladesView : ViewBase
 {
     /// <summary>
@@ -42,13 +35,7 @@ public class BladesView : ViewBase
     }
 }
 
-/// <summary>
-/// A memoized wrapper for individual blade instances that optimizes rendering performance.
-/// </summary>
-/// <remarks>
-/// This view wraps each blade with memoization based on index and refresh token,
-/// preventing unnecessary re-renders when blade content hasn't changed.
-/// </remarks>
+/// <summary>A memoized wrapper for individual blade instances that optimizes rendering performance.</summary>
 public class BladeView(IView bladeView, int index, long refreshToken, string? title, Size? width, Action<Event<Blade>>? onClose, Action<Event<Blade>>? onRefresh) : ViewBase, IMemoized
 {
     /// <summary>

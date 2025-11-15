@@ -5,10 +5,7 @@ using Size = Ivy.Shared.Size;
 
 namespace Ivy.Views;
 
-/// <summary>
-/// Provides static factory methods for creating text views with different
-/// variants including headings, paragraphs, code blocks, and semantic text styles.
-/// </summary>
+/// <summary>Provides static factory methods for creating text views with different variants including headings, paragraphs, code blocks, and semantic text styles.</summary>
 public static class Text
 {
     public static TextBuilder Literal(string content)
@@ -194,11 +191,7 @@ public static class Text
     public static TextBuilder Latex(IAnyState state) => Latex(state.ToString() ?? "");
 }
 
-/// <summary>
-/// A builder class for creating and configuring text views with various
-/// styling options including width, color, text wrapping, and overflow handling.
-/// This class provides a fluent API for text customization.
-/// </summary>
+/// <summary>A builder class for creating and configuring text views with various styling options including width, color, text wrapping, and overflow handling. This class provides a fluent API for text customization.</summary>
 public class TextBuilder(string content, TextVariant variant, Languages codeLanguage = Languages.Csharp) : ViewBase, IStateless
 {
     private bool _strikeThrough;

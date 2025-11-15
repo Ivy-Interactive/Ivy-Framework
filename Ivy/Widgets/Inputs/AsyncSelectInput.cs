@@ -13,9 +13,7 @@ using Ivy.Widgets.Inputs;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
-/// <summary>
-/// Base interface for asynchronous select input controls.
-/// </summary>
+/// <summary>Base interface for asynchronous select input controls.</summary>
 public interface IAnyAsyncSelectInputBase : IAnyInput
 {
     /// <summary>
@@ -24,25 +22,19 @@ public interface IAnyAsyncSelectInputBase : IAnyInput
     public string? Placeholder { get; set; }
 }
 
-/// <summary>
-/// Delegate for asynchronously querying and filtering options.
-/// </summary>
+/// <summary>Delegate for asynchronously querying and filtering options.</summary>
 /// <typeparam name="T">The type of the option values.</typeparam>
 /// <param name="query">The search query string entered by the user.</param>
 /// <returns>A task that resolves to an array of matching options.</returns>
 public delegate Task<Option<T>[]> AsyncSelectQueryDelegate<T>(string query);
 
-/// <summary>
-/// Delegate for asynchronously looking up a specific option by its value.
-/// </summary>
+/// <summary>Delegate for asynchronously looking up a specific option by its value.</summary>
 /// <typeparam name="T">The type of the option value.</typeparam>
 /// <param name="id">The value to look up.</param>
 /// <returns>A task that resolves to the option, or null if not found.</returns>
 public delegate Task<Option<T>?> AsyncSelectLookupDelegate<T>(T id);
 
-/// <summary>
-/// Asynchronous select input control.
-/// </summary>
+/// <summary>Asynchronous select input control.</summary>
 /// <typeparam name="TValue">The type of the selected value.</typeparam>
 public class AsyncSelectInputView<TValue> : ViewBase, IAnyAsyncSelectInputBase, IInput<TValue>
 {
@@ -230,9 +222,7 @@ public class AsyncSelectInputView<TValue> : ViewBase, IAnyAsyncSelectInputBase, 
     }
 }
 
-/// <summary>
-/// Sheet view that displays a searchable list of options.
-/// </summary>
+/// <summary>Sheet view that displays a searchable list of options.</summary>
 /// <typeparam name="T">The type of the option values.</typeparam>
 /// <param name="refreshToken">Token used to communicate selection back to the parent input.</param>
 /// <param name="query">Delegate for querying options based on search input.</param>
@@ -269,9 +259,7 @@ public class AsyncSelectListSheet<T>(RefreshToken refreshToken, AsyncSelectQuery
     }
 }
 
-/// <summary>
-/// Provides extension methods for creating async select inputs.
-/// </summary>
+/// <summary>Provides extension methods for creating async select inputs.</summary>
 public static class AsyncSelectInputViewExtensions
 {
     /// <summary>
@@ -360,9 +348,7 @@ public static class AsyncSelectInputViewExtensions
     }
 }
 
-/// <summary>
-/// Internal widget that represents the visual async select input control.
-/// </summary>
+/// <summary>Internal widget that represents the visual async select input control.</summary>
 internal record AsyncSelectInput : WidgetBase<AsyncSelectInput>
 {
     /// <summary>Gets the placeholder text displayed when no option is selected.</summary>

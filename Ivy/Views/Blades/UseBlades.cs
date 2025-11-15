@@ -5,13 +5,7 @@ using Ivy.Shared;
 
 namespace Ivy.Views.Blades;
 
-/// <summary>
-/// Interface for controlling blade navigation stack operations.
-/// </summary>
-/// <remarks>
-/// Provides methods to manage a stack of blade views with push/pop operations,
-/// enabling stacked navigation patterns for master-detail interfaces and drill-down experiences.
-/// </remarks>
+/// <summary>Interface for controlling blade navigation stack operations.</summary>
 public interface IBladeController
 {
     /// <summary>Gets the reactive state containing all blade items in the navigation stack.</summary>
@@ -58,13 +52,7 @@ public interface IBladeController
     int GetIndex(IView bladeView);
 }
 
-/// <summary>
-/// Default implementation of the blade controller for managing blade navigation stacks.
-/// </summary>
-/// <remarks>
-/// Manages an immutable array of blade items with reactive state updates,
-/// providing push/pop operations for stacked navigation patterns.
-/// </remarks>
+/// <summary>Default implementation of the blade controller for managing blade navigation stacks.</summary>
 public class BladeController : IBladeController
 {
     /// <summary>
@@ -146,13 +134,7 @@ public class BladeController : IBladeController
     }
 }
 
-/// <summary>
-/// Represents a single blade item in the navigation stack with its associated metadata.
-/// </summary>
-/// <remarks>
-/// Contains the view, positioning, and display information for a blade in the navigation stack,
-/// including refresh token for cache invalidation and unique key for rendering optimization.
-/// </remarks>
+/// <summary>Represents a single blade item in the navigation stack with its associated metadata.</summary>
 public class BladeItem(IView view, int index, string? title, Size? width = null)
 {
     /// <summary>Gets the unique key for this blade item used for rendering optimization.</summary>
@@ -180,13 +162,7 @@ public class BladeItem(IView view, int index, string? title, Size? width = null)
     public Size? Width { get; set; } = width;
 }
 
-/// <summary>
-/// Extension methods for creating and managing blade navigation systems.
-/// </summary>
-/// <remarks>
-/// Provides convenient methods to set up blade navigation with automatic controller creation
-/// and context management for stacked navigation patterns.
-/// </remarks>
+/// <summary>Extension methods for creating and managing blade navigation systems.</summary>
 public static class UseBladesExtensions
 {
     /// <summary>
@@ -209,13 +185,6 @@ public static class UseBladesExtensions
     /// <param name="title">Optional title for the root blade.</param>
     /// <param name="width">Optional width constraint for the root blade.</param>
     /// <returns>A BladesView that manages the blade navigation interface.</returns>
-    /// <remarks>
-    /// This method sets up the complete blade navigation system including:
-    /// - Creating reactive state for the blade stack
-    /// - Initializing the blade controller
-    /// - Setting up the context for blade management
-    /// - Returning a BladesView to render the interface
-    /// </remarks>
     public static IView UseBlades(this IViewContext context, Func<IView> rootBlade, string? title = null, Size? width = null)
     {
         var blades = context.UseState<ImmutableArray<BladeItem>>(() => [new BladeItem(rootBlade(), 0, title, width)]);

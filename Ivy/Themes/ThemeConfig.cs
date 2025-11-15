@@ -1,8 +1,6 @@
 namespace Ivy.Themes;
 
-/// <summary>
-/// Represents a complete theme configuration that can be applied to the frontend.
-/// </summary>
+/// <summary>Represents a complete theme configuration that can be applied to the frontend.</summary>
 public class Theme
 {
     public string Name { get; set; } = "Default";
@@ -31,9 +29,7 @@ public class Theme
     };
 }
 
-/// <summary>
-/// Color scheme supporting both light and dark variants.
-/// </summary>
+/// <summary>Color scheme supporting both light and dark variants.</summary>
 public class ThemeColorScheme
 {
     public ThemeColors Light { get; set; } = new();

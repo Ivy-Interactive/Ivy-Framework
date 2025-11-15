@@ -11,34 +11,23 @@ using Ivy.Shared;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
-/// <summary> Defines the visual and functional variants available for text input controls. </summary>
 public enum TextInputs
 {
-    /// <summary>Standard single-line text input for general text entry.</summary>
     Text,
-    /// <summary>Multi-line textarea input for longer text content and descriptions.</summary>
     Textarea,
-    /// <summary>Email input with email-specific validation and keyboard optimization.</summary>
     Email,
-    /// <summary>Telephone input optimized for phone number entry with appropriate keyboard.</summary>
     Tel,
-    /// <summary>URL input with URL validation and web address formatting.</summary>
     Url,
-    /// <summary>Password input with masked character display for secure text entry.</summary>
     Password,
-    /// <summary>Search input optimized for search queries with search-specific styling and behavior.</summary>
     Search
 }
 
-/// <summary> Represents a prefix or suffix that can be either text or an icon, but not both. </summary>
 public abstract record PrefixSuffix
 {
     private PrefixSuffix() { } // Prevent external inheritance
 
-    /// <summary>Represents a text-based prefix or suffix.</summary>
     public sealed record Text(string Value) : PrefixSuffix;
 
-    /// <summary>Represents an icon-based prefix or suffix.</summary>
     public sealed record Icon(Icons Value) : PrefixSuffix;
 }
 
@@ -199,9 +188,7 @@ public record TextInput<TString> : TextInputBase, IInput<TString>
     [Event] public Func<Event<IInput<TString>, TString>, ValueTask>? OnChange { get; }
 }
 
-/// <summary>
-/// Concrete text input control for string values that provides convenient string-specific text entry functionality.
-/// </summary>
+/// <summary>Concrete text input control for string values that provides convenient string-specific text entry functionality.</summary>
 public record TextInput : TextInput<string>
 {
     /// <summary>

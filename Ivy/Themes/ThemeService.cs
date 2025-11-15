@@ -2,19 +2,13 @@ using System.Text;
 
 namespace Ivy.Themes;
 
-/// <summary>
-/// Service for managing and applying custom theme configurations.
-/// </summary>
+/// <summary>Service for managing and applying custom theme configurations.</summary>
 public interface IThemeService
 {
-    /// <summary>
-    /// Gets the currently active theme configuration.
-    /// </summary>
+    /// <summary>Gets the currently active theme configuration.</summary>
     Theme CurrentTheme { get; }
 
-    /// <summary>
-    /// Sets the active theme configuration.
-    /// </summary>
+    /// <summary>Sets the active theme configuration.</summary>
     /// <param name="theme">The theme configuration to apply. If null, defaults to the default theme.</param>
     void SetTheme(Theme theme);
 
@@ -33,9 +27,7 @@ public interface IThemeService
     string GenerateThemeMetaTag();
 }
 
-/// <summary>
-/// Default implementation of <see cref="IThemeService"/> for managing theme configurations.
-/// </summary>
+/// <summary>Default implementation of <see cref="IThemeService"/> for managing theme configurations.</summary>
 public class ThemeService : IThemeService
 {
     private Theme _currentTheme = Theme.Default;

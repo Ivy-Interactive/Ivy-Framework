@@ -20,17 +20,6 @@ public static class InputExtensions
     /// <param name="placeholder">Optional placeholder text displayed when the input is empty.</param>
     /// <param name="disabled">Whether the input should be disabled initially.</param>
     /// <exception cref="InvalidOperationException">Thrown when no suitable input control exists for the specified type.</exception>
-    /// <remarks>
-    /// <para>Supported type mappings:</para>
-    /// <list type="bullet">
-    /// <item><description><strong>Numeric types:</strong> int, double, long, short, float, decimal (and nullable variants) → NumberInput</description></item>
-    /// <item><description><strong>Boolean types:</strong> bool, bool? → BoolInput</description></item>
-    /// <item><description><strong>String type:</strong> string → TextInput</description></item>
-    /// <item><description><strong>Date/Time types:</strong> DateTime, DateOnly, DateTimeOffset (and nullable variants) → DateTimeInput</description></item>
-    /// <item><description><strong>Color types:</strong> Colors, Colors? → ColorInput</description></item>
-    /// </list>
-    /// <para>Future enhancements may include support for enums and IEnumerable types.</para>
-    /// </remarks>
     public static IInput<T> ToInput<T>(this IState<T> state, string? placeholder = null, bool disabled = false)
     {
         //todo: Can we detect the name of the state using [?] attribute

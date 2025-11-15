@@ -118,56 +118,24 @@ public class LabelsDisplayRenderer : IDataTableColumnRenderer
 /// <summary>
 /// Glide Data Grid compatible icon names for DataTableColumn.
 /// These icon names correspond to the icons defined in the frontend headerIcons.ts file.
-/// All icons are rendered as SVG paths compatible with Glide Data Grid's SpriteMap format.
 /// </summary>
 public static class DataTableIcons
 {
-    /// <summary>User icon - person silhouette</summary>
     public const string User = "User";
-
-    /// <summary>Mail/Email envelope icon</summary>
     public const string Mail = "Mail";
-
-    /// <summary>Hash/Number symbol (#)</summary>
     public const string Hash = "Hash";
-
-    /// <summary>Calendar icon - date picker</summary>
     public const string Calendar = "Calendar";
-
-    /// <summary>Clock icon - time indicator</summary>
     public const string Clock = "Clock";
-
-    /// <summary>Activity icon - line chart/heartbeat</summary>
     public const string Activity = "Activity";
-
-    /// <summary>Flag icon - marker or priority indicator</summary>
     public const string Flag = "Flag";
-
-    /// <summary>Zap/Lightning bolt icon - action or power</summary>
     public const string Zap = "Zap";
-
-    /// <summary>Info icon - information circle</summary>
     public const string Info = "Info";
-
-    /// <summary>ChevronUp - upward pointing arrow</summary>
     public const string ChevronUp = "ChevronUp";
-
-    /// <summary>ChevronDown - downward pointing arrow</summary>
     public const string ChevronDown = "ChevronDown";
-
-    /// <summary>Filter icon - funnel for filtering data</summary>
     public const string Filter = "Filter";
-
-    /// <summary>Search icon - magnifying glass</summary>
     public const string Search = "Search";
-
-    /// <summary>Settings icon - gear or cog</summary>
     public const string Settings = "Settings";
-
-    /// <summary>MoreVertical icon - three vertical dots menu</summary>
     public const string MoreVertical = "MoreVertical";
-
-    /// <summary>HelpCircle icon - question mark in circle</summary>
     public const string HelpCircle = "HelpCircle";
 }
 

@@ -3,10 +3,7 @@ using Ivy.Core;
 
 namespace Ivy.Views;
 
-/// <summary>
-/// Provides utility methods for common view operations including widget labeling
-/// and error handling.
-/// </summary>
+/// <summary>Provides utility methods for common view operations including widget labeling and error handling.</summary>
 public static class ViewHelpers
 {
     /// <returns>A ViewBase containing the labeled widget in a vertical layout.</returns>

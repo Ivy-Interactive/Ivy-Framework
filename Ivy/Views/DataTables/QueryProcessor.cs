@@ -29,15 +29,6 @@ public class ValuesResult
 /// Processes table queries by applying sorting and pagination to IQueryable data sources,
 /// then converts the results to Apache Arrow format for efficient data transfer.
 /// </summary>
-/// <remarks>
-/// The QueryProcessor handles the following operations:
-/// - Sorting: Supports multi-column sorting with ascending/descending directions
-/// - Pagination: Implements offset and limit for result set pagination
-/// - Data conversion: Converts .NET objects to Apache Arrow table format for optimal performance
-/// 
-/// The processor works with any IQueryable&lt;T&gt; data source and returns serialized Arrow data
-/// that can be efficiently transmitted and processed by client applications.
-/// </remarks>
 public class QueryProcessor(ILogger<QueryProcessor>? logger = null, IDistributedCache? cache = null)
 {
     public QueryResult ProcessQuery(IQueryable queryable, DataTableQuery query)

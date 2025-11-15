@@ -1,8 +1,6 @@
 namespace Ivy.Auth;
 
-/// <summary>
-/// Base exception for authentication-related errors.
-/// </summary>
+/// <summary>Base exception for authentication-related errors.</summary>
 public class AuthException : Exception
 {
     public AuthException(string message) : base(message) { }

@@ -32,10 +32,6 @@ public record TableCalculation(string Name, string[] MeasureNames, Action<List<D
 /// Core pivot table engine that transforms data by grouping dimensions and aggregating measures.
 /// </summary>
 /// <typeparam name="T">The type of the source data objects.</typeparam>
-/// <remarks>
-/// Supports 1-2 dimensions with multiple measures and table calculations. Groups data by dimensions,
-/// applies measure aggregations to each group, executes table calculations, and sorts results by the first dimension.
-/// </remarks>
 public class PivotTable<T>
 {
     /// <summary>Gets the collection of dimensions (grouping columns) for the pivot table.</summary>
@@ -191,10 +187,6 @@ public class PivotTable<T>
 /// Fluent builder for configuring and executing pivot table transformations.
 /// </summary>
 /// <typeparam name="TSource">The type of the source data objects.</typeparam>
-/// <remarks>
-/// Provides a fluent API for building pivot tables with dimensions, measures, and table calculations.
-/// Supports method chaining for easy configuration and can produce typed results or raw dictionaries.
-/// </remarks>
 public class PivotTableBuilder<TSource>(IQueryable<TSource> data)
 {
     private List<Dimension<TSource>> _dimensions { get; } = new();
@@ -305,15 +297,9 @@ public class PivotTableBuilder<TSource>(IQueryable<TSource> data)
     }
 }
 
-/// <summary>
-/// Mapper for transforming pivot table results into strongly-typed objects.
-/// </summary>
+/// <summary>Mapper for transforming pivot table results into strongly-typed objects.</summary>
 /// <typeparam name="TSource">The type of the source data objects.</typeparam>
 /// <typeparam name="TDestination">The target type for the pivot table results.</typeparam>
-/// <remarks>
-/// Provides type-safe mapping from pivot table dictionary results to strongly-typed objects
-/// using constructor parameter matching and automatic type conversion.
-/// </remarks>
 public class PivotTableMapper<TSource, TDestination>(PivotTableBuilder<TSource> builder)
 {
     /// <summary>Gets the underlying pivot table builder.</summary>
