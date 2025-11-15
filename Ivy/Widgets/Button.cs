@@ -39,11 +39,6 @@ public enum ButtonVariant
 /// <summary>Interactive button widget supporting multiple variants, sizes, icons, and states for user actions and navigation.</summary>
 public record Button : WidgetBase<Button>
 {
-    /// <summary>Initializes a Button with specified title, click handler, variant, and icon.</summary>
-    /// <param name="title">Text content to display. When null, creates icon-only button.</param>
-    /// <param name="onClick">Optional click event handler.</param>
-    /// <param name="variant">Visual style variant. Default is <see cref="ButtonVariant.Primary"/>.</param>
-    /// <param name="icon">Icon to display. Default is <see cref="Icons.None"/>.</param>
     [OverloadResolutionPriority(1)]
     public Button(string? title = null, Func<Event<Button>, ValueTask>? onClick = null, ButtonVariant variant = ButtonVariant.Primary, Icons icon = Icons.None)
     {
@@ -69,43 +64,30 @@ public record Button : WidgetBase<Button>
         OnClick = onClick == null ? null : (_ => { onClick(); return ValueTask.CompletedTask; });
     }
 
-    /// <summary>Text content displayed on the button. When null, creates icon-only button. Default is null.</summary>
     [Prop] public string? Title { get; set; }
 
-    /// <summary>Visual style variant controlling appearance and emphasis. Default is <see cref="ButtonVariant.Primary"/>.</summary>
     [Prop] public ButtonVariant Variant { get; set; }
 
-    /// <summary>Icon displayed on the button. Can be positioned on either side of text. Default is <see cref="Icons.None"/>.</summary>
     [Prop] public Icons? Icon { get; set; }
 
-    /// <summary>Position of icon relative to title text. Default is <see cref="Align.Left"/>.</summary>
     [Prop] public Align IconPosition { get; set; } = Align.Left;
 
-    /// <summary>Foreground color for button text and icon. When null, uses variant default colors. Default is null.</summary>
     [Prop] public Colors? Foreground { get; set; }
 
-    /// <summary>URL for navigation when button is clicked. Default is null.</summary>
     [Prop] public string? Url { get; set; }
 
-    /// <summary>Whether the button is disabled and cannot be interacted with. Default is false.</summary>
     [Prop] public bool Disabled { get; set; }
 
-    /// <summary>Tooltip text displayed when hovering over the button. Default is null.</summary>
     [Prop] public string? Tooltip { get; set; }
 
-    /// <summary>Whether the button is in a loading state with progress indicator. Default is false.</summary>
     [Prop] public bool Loading { get; set; }
 
-    /// <summary>Border radius for button corners. Default is <see cref="BorderRadius.Rounded"/>.</summary>
     [Prop] public BorderRadius BorderRadius { get; set; } = BorderRadius.Rounded;
 
-    /// <summary>Size of the button controlling dimensions and visual prominence. Default is <see cref="Sizes.Medium"/>.</summary>
     [Prop] public Sizes Size { get; set; } = Sizes.Medium;
 
-    /// <summary>Event handler called when button is clicked. Default is null.</summary>
     [Event] public Func<Event<Button>, ValueTask>? OnClick { get; set; }
 
-    /// <summary>Custom tag object associated with the button for arbitrary data. Default is null.</summary>
     public object? Tag { get; set; } //not a prop!
 
     /// <summary>Prevents adding children to Button using pipe operator.</summary>
@@ -122,11 +104,6 @@ public record Button : WidgetBase<Button>
 /// <summary>Extension methods for Button widget providing fluent API for configuring appearance, behavior, and interactions.</summary>
 public static class ButtonExtensions
 {
-    /// <summary>Converts an icon to a button with specified click handler and variant.</summary>
-    /// <param name="icon">Icon to display on the button.</param>
-    /// <param name="onClick">Optional click event handler.</param>
-    /// <param name="variant">Visual style variant. Default is <see cref="ButtonVariant.Primary"/>.</param>
-    /// <returns>New Button instance with specified icon and settings.</returns>
     [OverloadResolutionPriority(1)]
     public static Button ToButton(this Icons icon, Func<Event<Button>, ValueTask>? onClick = null, ButtonVariant variant = ButtonVariant.Primary)
     {

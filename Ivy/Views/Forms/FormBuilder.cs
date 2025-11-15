@@ -16,14 +16,6 @@ namespace Ivy.Views.Forms;
 /// <typeparam name="TModel">Type of model object that form is bound to.</typeparam>
 public class FormBuilderField<TModel>
 {
-    /// <summary>Initializes form builder field with specified configuration and metadata.</summary>
-    /// <param name="name">Name of field, typically matching property or field name in model.</param>
-    /// <param name="label">Display label for field, automatically formatted from field name.</param>
-    /// <param name="order">Initial order position for field in form layout.</param>
-    /// <param name="inputFactory">Optional factory function to create input control for this field.</param>
-    /// <param name="fieldInfo">Reflection information for field if it represents class field.</param>
-    /// <param name="propertyInfo">Reflection information for property if it represents class property.</param>
-    /// <param name="required">Whether field is required and should have validation applied.</param>
     public FormBuilderField(
         string name,
         string label,
@@ -70,55 +62,40 @@ public class FormBuilderField<TModel>
 
     //public Func<Control, object> Helper { get; set; }
 
-    /// <summary>Visibility predicate determining whether field should be displayed based on current model state.</summary>
     public Func<TModel, bool> Visible { get; set; }
 
     //public List<(EditorField<T> field, Func<T, object> transformer)> Dependencies = new();
 
-    /// <summary>Name of field, typically matching property or field name in model.</summary>
     public string Name { get; set; }
 
     private FieldInfo? FieldInfo { get; set; }
 
     private PropertyInfo? PropertyInfo { get; set; }
 
-    /// <summary>Type of field or property that this form field represents.</summary>
     public Type Type => (FieldInfo?.FieldType ?? PropertyInfo?.PropertyType)!;
 
-    /// <summary>Whether field should be disabled (read-only) in form. Defaults to true.</summary>
     public bool Disabled { get; set; } = true;
 
-    /// <summary>Order position of field within its column and group. Lower values appear first.</summary>
     public int Order { get; set; }
 
-    /// <summary>Column index for multi-column form layouts.</summary>
     public int Column { get; set; }
 
-    /// <summary>Unique identifier for row containing this field.</summary>
     public Guid RowKey { get; set; }
 
-    /// <summary>Group name for organizing related fields together.</summary>
     public string? Group { get; set; }
 
-    /// <summary>Display label for field shown to users.</summary>
     public string Label { get; set; }
 
-    /// <summary>Optional description text providing additional context for field.</summary>
     public string? Description { get; set; }
 
-    /// <summary>Optional help text displayed as tooltip on info icon next to label.</summary>
     public string? Help { get; set; }
 
-    /// <summary>Factory function creating input control for this field with access to view context.</summary>
     public Func<IAnyState, IViewContext, IAnyInput>? InputFactory { get; set; }
 
-    /// <summary>Whether field has been removed from form and should not be rendered.</summary>
     public bool Removed { get; set; }
 
-    /// <summary>Whether field is required and must have value for form submission.</summary>
     public bool Required { get; set; }
 
-    /// <summary>Collection of validation functions applied to this field's value.</summary>
     public List<Func<object?, (bool, string)>> Validators { get; set; } = new();
 }
 
@@ -130,20 +107,14 @@ public class FormBuilder<TModel> : ViewBase
 
     private readonly IState<TModel> _model;
 
-    /// <summary>The text displayed on the form's submit button.</summary>
     public readonly string SubmitTitle;
     private readonly List<string> _groups = [];
     private readonly Dictionary<string, bool> _groupOpenStates = [];
 
-    /// <summary>The validation strategy for form fields. Default is OnBlur.</summary>
     public FormValidationStrategy ValidationStrategy { get; set; } = FormValidationStrategy.OnBlur;
 
-    /// <summary>The size of the form affecting spacing between fields. Default is Medium.</summary>
     public Sizes Size { get; set; } = Sizes.Medium;
 
-    /// <summary>Initializes form builder for specified model state with automatic field scaffolding.</summary>
-    /// <param name="model">Reactive state containing model object to be edited by form.</param>
-    /// <param name="submitTitle">The text displayed on the form's submit button. Default is "Save".</param>
     public FormBuilder(IState<TModel> model, string submitTitle = "Save")
     {
         _model = model;
