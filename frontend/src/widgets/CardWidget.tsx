@@ -1,11 +1,8 @@
-import Icon from '@/components/Icon';
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
-  CardTitle,
 } from '@/components/ui/card';
 import {
   getHeight,
@@ -26,9 +23,6 @@ import { Sizes } from '@/types/sizes';
 interface CardWidgetProps {
   id: string;
   events: string[];
-  title?: string;
-  description?: string;
-  icon?: string;
   width?: string;
   height?: string;
   borderThickness?: string;
@@ -39,6 +33,7 @@ interface CardWidgetProps {
   size?: Sizes;
   'data-testid'?: string;
   slots?: {
+    Header?: React.ReactNode[];
     Content?: React.ReactNode[];
     Footer?: React.ReactNode[];
   };
@@ -47,9 +42,6 @@ interface CardWidgetProps {
 export const CardWidget: React.FC<CardWidgetProps> = ({
   id,
   events,
-  title,
-  description,
-  icon,
   width,
   height,
   borderThickness,
@@ -112,7 +104,11 @@ export const CardWidget: React.FC<CardWidgetProps> = ({
       node => React.isValidElement(node) && node.type === EmptyWidget
     );
 
-  const headerIsEmpty = !title && !description && !icon;
+  const headerIsEmpty =
+    slots?.Header?.length === 0 ||
+    slots?.Header?.some(
+      node => React.isValidElement(node) && node.type === EmptyWidget
+    );
 
   const handleClick = useCallback(() => {
     if (events.includes('OnClick')) eventHandler('OnClick', id, []);
@@ -134,28 +130,8 @@ export const CardWidget: React.FC<CardWidgetProps> = ({
       onClick={handleClick}
     >
       {!headerIsEmpty ? (
-        <CardHeader
-          className={cn(
-            'flex flex-row items-center justify-between gap-4',
-            sizeClasses.header
-          )}
-        >
-          <div className="flex flex-col">
-            {title && (
-              <CardTitle className={sizeClasses.title}>{title}</CardTitle>
-            )}
-            {description && (
-              <CardDescription className={sizeClasses.description}>
-                {description}
-              </CardDescription>
-            )}
-          </div>
-          {icon && (
-            <Icon
-              name={icon}
-              className={cn(sizeClasses.icon, 'text-muted-foreground')}
-            />
-          )}
+        <CardHeader className={cn('flex-none', sizeClasses.header)}>
+          {slots?.Header}
         </CardHeader>
       ) : (
         <></>

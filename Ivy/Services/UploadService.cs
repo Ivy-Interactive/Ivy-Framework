@@ -321,7 +321,7 @@ public sealed class MultipleFileSink<T>(IState<ImmutableArray<FileUpload<T>>> st
 }
 
 [ApiController]
-[Route("upload")]
+[Route("ivy/upload")]
 public class UploadController(AppSessionStore sessionStore, Server server) : Controller
 {
     [HttpPost("{connectionId}/{uploadId}")]
@@ -369,7 +369,7 @@ public class UploadService(string connectionId, IClientProvider clientProvider) 
             upload.cts?.Dispose();
         });
 
-        return (cleanup, $"/upload/{connectionId}/{uploadId}");
+        return (cleanup, $"/ivy/upload/{connectionId}/{uploadId}");
     }
 
     public (IDisposable cleanup, string url) AddUpload(UploadDelegate handler, Func<(string? accept, long? maxFileSize)> getValidation, string? defaultContentType = null, string? defaultFileName = null)
@@ -384,7 +384,7 @@ public class UploadService(string connectionId, IClientProvider clientProvider) 
             upload.cts?.Dispose();
         });
 
-        return (cleanup, $"/upload/{connectionId}/{uploadId}");
+        return (cleanup, $"/ivy/upload/{connectionId}/{uploadId}");
     }
 
     public async Task<IActionResult> Upload(string uploadId, IFormFile file)

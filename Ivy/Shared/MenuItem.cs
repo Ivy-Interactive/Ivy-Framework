@@ -41,6 +41,7 @@ public record MenuItem(
     bool Disabled = false,
     string? Shortcut = null,
     bool Expanded = false,
+    string? Tooltip = null,
     Action<MenuItem>? OnSelect = null,
     string[]? SearchHints = null)
 {
@@ -58,6 +59,9 @@ public record MenuItem(
     /// <param name="tag">Optional tag for identification, defaults to label if null.</param>
     public static MenuItem Default(string label, object? tag = null)
         => new(Variant: MenuItemVariant.Default, Label: label, Tag: tag ?? label);
+
+    public static MenuItem Default(Icons icon, object? tag = null)
+        => new(Variant: MenuItemVariant.Default, Icon: icon, Tag: tag ?? icon.ToString());
 
     private readonly Action<MenuItem>? _onSelect = OnSelect;
     [System.Text.Json.Serialization.JsonIgnore]
@@ -163,6 +167,12 @@ public static class MenuItemExtensions
     public static MenuItem Label(this MenuItem menuItem, string label)
     {
         return menuItem with { Label = label };
+    }
+
+    /// <summary>Sets the tooltip text for the menu item.</summary>
+    public static MenuItem Tooltip(this MenuItem menuItem, string tooltip)
+    {
+        return menuItem with { Tooltip = tooltip };
     }
 
     /// <summary>Sets whether child menu items are expanded in hierarchical menus.</summary>

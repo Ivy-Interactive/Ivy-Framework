@@ -238,20 +238,7 @@ var server = new Server()
                 Card = ""{lightColors.Card}"",
                 CardForeground = ""{lightColors.CardForeground}"",
                 Popover = ""{lightColors.Popover}"",
-                PopoverForeground = ""{lightColors.PopoverForeground}"",
-                Chart1 = ""{lightColors.Chart1}"",
-                Chart2 = ""{lightColors.Chart2}"",
-                Chart3 = ""{lightColors.Chart3}"",
-                Chart4 = ""{lightColors.Chart4}"",
-                Chart5 = ""{lightColors.Chart5}"",
-                Sidebar = ""{lightColors.Sidebar}"",
-                SidebarForeground = ""{lightColors.SidebarForeground}"",
-                SidebarPrimary = ""{lightColors.SidebarPrimary}"",
-                SidebarPrimaryForeground = ""{lightColors.SidebarPrimaryForeground}"",
-                SidebarAccent = ""{lightColors.SidebarAccent}"",
-                SidebarAccentForeground = ""{lightColors.SidebarAccentForeground}"",
-                SidebarBorder = ""{lightColors.SidebarBorder}"",
-                SidebarRing = ""{lightColors.SidebarRing}""
+                PopoverForeground = ""{lightColors.PopoverForeground}""
             }},
             Dark = new ThemeColors
             {{
@@ -279,20 +266,7 @@ var server = new Server()
                 Card = ""{darkColors.Card}"",
                 CardForeground = ""{darkColors.CardForeground}"",
                 Popover = ""{darkColors.Popover}"",
-                PopoverForeground = ""{darkColors.PopoverForeground}"",
-                Chart1 = ""{darkColors.Chart1}"",
-                Chart2 = ""{darkColors.Chart2}"",
-                Chart3 = ""{darkColors.Chart3}"",
-                Chart4 = ""{darkColors.Chart4}"",
-                Chart5 = ""{darkColors.Chart5}"",
-                Sidebar = ""{darkColors.Sidebar}"",
-                SidebarForeground = ""{darkColors.SidebarForeground}"",
-                SidebarPrimary = ""{darkColors.SidebarPrimary}"",
-                SidebarPrimaryForeground = ""{darkColors.SidebarPrimaryForeground}"",
-                SidebarAccent = ""{darkColors.SidebarAccent}"",
-                SidebarAccentForeground = ""{darkColors.SidebarAccentForeground}"",
-                SidebarBorder = ""{darkColors.SidebarBorder}"",
-                SidebarRing = ""{darkColors.SidebarRing}""
+                PopoverForeground = ""{darkColors.PopoverForeground}""
             }}
         }};
     }});";

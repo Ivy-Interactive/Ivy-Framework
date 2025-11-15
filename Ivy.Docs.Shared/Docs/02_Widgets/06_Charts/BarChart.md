@@ -31,7 +31,8 @@ public class BarChartBasic : ViewBase
             |  data.ToBarChart()
                     .Dimension("Month", e => e.Month)
                         .Measure("Desktop", e => e.Sum(f => f.Desktop))
-                        .Measure("Mobile", e => e.Sum(f => f.Mobile));
+                        .Measure("Mobile", e => e.Sum(f => f.Mobile))
+                        .Toolbox();
     }
 }    
 ```
@@ -247,7 +248,8 @@ public class TiobeIndexDemo : ViewBase
                             .CartesianGrid(new CartesianGrid().Horizontal())
                             .Tooltip()
                             .XAxis(new XAxis("Language").TickLine(false).AxisLine(false))
-                            .Legend();   
+                            .Legend()
+                            .Toolbox();
     }
 }
 ```

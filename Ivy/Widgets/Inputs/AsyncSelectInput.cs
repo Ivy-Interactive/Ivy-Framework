@@ -163,16 +163,12 @@ public class AsyncSelectInputView<TValue> : ViewBase, IAnyAsyncSelectInputBase, 
     /// </summary>
     public string? Placeholder { get; set; }
 
-    /// <summary>
-    /// Builds the UI.
-    /// </summary>
     public override object? Build()
     {
-        IState<string?> displayValue = UseState<string?>((string?)null!);
+        IState<string?> displayValue = UseState<string?>();
         var open = UseState(false);
         var loading = UseState(false);
         var refreshToken = this.UseRefreshToken();
-        var client = UseService<IClientProvider>();
 
         UseEffect(async () =>
         {
@@ -265,7 +261,7 @@ public class AsyncSelectListSheet<T>(RefreshToken refreshToken, AsyncSelectQuery
         });
 
         var items = records.Value.Select(option =>
-            new ListItem(title: option.Label, onClick: onItemClicked, tag: option)).ToArray();
+            new ListItem(title: option.Label, subtitle: option.Description, onClick: onItemClicked, tag: option)).ToArray();
 
         return Layout.Vertical().Gap(2)
             | filter.ToSearchInput().Placeholder("Search").Width(Size.Grow())

@@ -447,9 +447,15 @@ public class FormBuilder<TModel> : ViewBase
     /// <param name="row">True to arrange fields side-by-side in the same row; false to stack vertically.</param>
     /// <param name="fields">Fields to arrange. When row is true, fields will be distributed evenly across the row width.</param>
     /// <returns>Form builder instance for method chaining.</returns>
+    [Obsolete("Use PlaceHorizontal")]
     public FormBuilder<TModel> Place(bool row, params Expression<Func<TModel, object>>[] fields)
     {
         return _Place(0, row ? Guid.NewGuid() : null, fields);
+    }
+
+    public FormBuilder<TModel> PlaceHorizontal(params Expression<Func<TModel, object>>[] fields)
+    {
+        return _Place(0, Guid.NewGuid(), fields);
     }
 
     /// <summary>Places specified fields in a specific column, optionally arranging them horizontally side-by-side.</summary>
