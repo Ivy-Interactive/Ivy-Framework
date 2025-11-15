@@ -203,7 +203,14 @@ export function validateLinkUrl(url: string | null | undefined): string {
   // Allow app:// URLs (Ivy internal navigation)
   if (url.startsWith('app://')) {
     // Validate app:// URLs don't contain dangerous characters
-    if (!/^app:\/\/[^:?#&]*$/.test(url)) {
+    // Allow query parameters (? and &) but prevent fragments (#) and protocol injection (multiple colons)
+    // Pattern: app://[app-id][?query-params] where query-params can contain & but not #
+    if (!/^app:\/\/[^:#]*(\?[^#]*)?$/.test(url)) {
+      return '#';
+    }
+    // Additional check: prevent protocol injection (multiple colons after app://)
+    const afterProtocol = url.substring(7); // After "app://"
+    if (afterProtocol.includes('://') || afterProtocol.match(/:[^?&/]/)) {
       return '#';
     }
     return url;
@@ -212,7 +219,14 @@ export function validateLinkUrl(url: string | null | undefined): string {
   // Allow anchor links (starting with #)
   if (url.startsWith('#')) {
     // Validate anchor links are safe
-    if (!/^#[^:?#&]*$/.test(url)) {
+    // Allow colons in anchor IDs (HTML5 allows this), but prevent query params and fragments
+    // Pattern: #[anchor-id] where anchor-id can contain colons but not ? or &
+    if (!/^#[^?&]*$/.test(url)) {
+      return '#';
+    }
+    // Additional check: prevent protocol injection attempts
+    const afterHash = url.substring(1);
+    if (afterHash.includes('://')) {
       return '#';
     }
     return url;

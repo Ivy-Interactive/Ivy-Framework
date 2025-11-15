@@ -826,10 +826,26 @@ public static class Utils
         if (url.StartsWith("app://", StringComparison.OrdinalIgnoreCase))
         {
             // Validate app:// URLs don't contain dangerous characters
-            if (url.Contains('?') || url.Contains('#') || url.Contains('&') || url.Count(c => c == ':') > 1)
+            // Allow query parameters (? and &) but prevent fragments (#) and protocol injection (multiple colons)
+            // Pattern: app://[app-id][?query-params] where query-params can contain & but not #
+            if (url.Contains('#'))
+            {
+                return null; // Fragments not allowed in app:// URLs
+            }
+
+            // Check for protocol injection (multiple colons after app://)
+            var afterProtocol = url.Substring(7); // After "app://"
+            if (afterProtocol.Contains("://") || Regex.IsMatch(afterProtocol, @":[^?&/]"))
+            {
+                return null; // Protocol injection attempt
+            }
+
+            // Validate format: app://[app-id][?query-params]
+            if (!Regex.IsMatch(url, @"^app://[^:#]*(\?[^#]*)?$", RegexOptions.IgnoreCase))
             {
                 return null;
             }
+
             return url;
         }
 
@@ -837,10 +853,26 @@ public static class Utils
         if (url.StartsWith('#'))
         {
             // Validate anchor links are safe
-            if (url.Contains('?') || url.Contains('&') || url.Count(c => c == ':') > 0)
+            // Allow colons in anchor IDs (HTML5 allows this), but prevent query params and fragments
+            // Pattern: #[anchor-id] where anchor-id can contain colons but not ? or &
+            if (url.Contains('?') || url.Contains('&'))
+            {
+                return null; // Query parameters not allowed in anchor links
+            }
+
+            // Additional check: prevent protocol injection attempts
+            var afterHash = url.Substring(1);
+            if (afterHash.Contains("://"))
+            {
+                return null; // Protocol injection attempt
+            }
+
+            // Validate format: #[anchor-id] where anchor-id can contain colons
+            if (!Regex.IsMatch(url, @"^#[^?&]*$"))
             {
                 return null;
             }
+
             return url;
         }
 

@@ -30,8 +30,12 @@ public class UrlValidationTestApp : SampleBase
                 .Url("/search?q=test")
             | new Button("App Protocol", variant: ButtonVariant.Link)
                 .Url("app://MyApp")
+            | new Button("App Protocol with Query", variant: ButtonVariant.Link)
+                .Url("app://MyApp?param=value")
             | new Button("Anchor Link", variant: ButtonVariant.Link)
                 .Url("#section")
+            | new Button("Anchor with Colon", variant: ButtonVariant.Link)
+                .Url("#section:value")
             | new Button("External URL with Path", variant: ButtonVariant.Link)
                 .Url("https://example.com/path/to/resource")
             | new Button("URL with Query & Fragment", variant: ButtonVariant.Link)
@@ -43,8 +47,7 @@ public class UrlValidationTestApp : SampleBase
             | SafeButtonWithUrl("VBScript Protocol", "vbscript:msgbox('XSS')")
             | SafeButtonWithUrl("File Protocol", "file:///etc/passwd")
             | SafeButtonWithUrl("Malformed URL", "https://example.com:javascript:alert('XSS')")
-            | SafeButtonWithUrl("App Protocol with Query", "app://MyApp?param=value")
-            | SafeButtonWithUrl("Anchor with Colon", "#section:value")
+            | SafeButtonWithUrl("App Protocol with Fragment", "app://MyApp#fragment")
             | SafeButtonWithUrl("Relative Path with Colon", "/path:javascript:alert('XSS')");
 
         var validMarkdown = """
@@ -53,7 +56,9 @@ public class UrlValidationTestApp : SampleBase
 - [Relative Path](/path/to/page)
 - [Relative with Query](/search?q=test)
 - [App Protocol](app://MyApp)
+- [App Protocol with Query](app://MyApp?param=value)
 - [Anchor Link](#section)
+- [Anchor with Colon](#section:value)
 - [External with Path](https://example.com/path/to/resource)
 - [URL with Query & Fragment](https://example.com/search?q=test&sort=date#results)
 """;
@@ -64,8 +69,7 @@ public class UrlValidationTestApp : SampleBase
 - [VBScript Protocol](vbscript:msgbox('XSS'))
 - [File Protocol](file:///etc/passwd)
 - [Malformed URL](https://example.com:javascript:alert('XSS'))
-- [App Protocol with Query](app://MyApp?param=value)
-- [Anchor with Colon](#section:value)
+- [App Protocol with Fragment](app://MyApp#fragment)
 - [Relative Path with Colon](/path:javascript:alert('XSS'))
 """;
 

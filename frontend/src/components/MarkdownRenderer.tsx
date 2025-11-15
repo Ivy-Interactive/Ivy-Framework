@@ -220,8 +220,19 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
         /^(https?:\/\/|mailto:|tel:)/i
       );
       const isAnchorLink = validatedHref?.startsWith('#');
+      const isAppProtocol = validatedHref?.startsWith('app://');
+      const isRelativePath = validatedHref?.startsWith('/');
 
-      if (!isExternalLink && !isAnchorLink && onLinkClick && validatedHref) {
+      // Only call backend handler for custom link handling scenarios
+      // Don't call for external links, anchor links, app:// URLs, or relative paths
+      if (
+        !isExternalLink &&
+        !isAnchorLink &&
+        !isAppProtocol &&
+        !isRelativePath &&
+        onLinkClick &&
+        validatedHref
+      ) {
         event.preventDefault();
         onLinkClick(validatedHref);
       }
@@ -365,12 +376,23 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
             /^(https?:\/\/|mailto:|tel:)/i
           );
           const isAnchorLink = safeHref?.startsWith('#');
+          const isAppProtocol = safeHref?.startsWith('app://');
+          const isRelativePath = safeHref?.startsWith('/');
+
+          // Convert app:// URLs to regular paths for href attribute
+          let hrefForNavigation = safeHref;
+          if (isAppProtocol && safeHref) {
+            // Convert app://MyApp to /MyApp, app://MyApp?param=value to /MyApp?param=value
+            const appId = safeHref.substring(7); // Remove "app://"
+            const [appPath, queryString] = appId.split('?');
+            hrefForNavigation = `/${appPath}${queryString ? `?${queryString}` : ''}`;
+          }
 
           return (
             <a
               {...props}
               className="text-primary underline brightness-90 hover:brightness-100"
-              href={safeHref}
+              href={hrefForNavigation}
               target={isExternalLink ? '_blank' : undefined}
               rel={isExternalLink ? 'noopener noreferrer' : undefined}
               onClick={
@@ -398,10 +420,12 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
                         });
                       }
                     }
-                  : e =>
-                      safeHref &&
-                      safeHref !== '#' &&
-                      handleLinkClick(safeHref, e)
+                  : isAppProtocol || isRelativePath
+                    ? undefined // Let browser handle navigation naturally for app:// URLs and relative paths
+                    : e =>
+                        safeHref &&
+                        safeHref !== '#' &&
+                        handleLinkClick(safeHref, e)
               }
             >
               {children}

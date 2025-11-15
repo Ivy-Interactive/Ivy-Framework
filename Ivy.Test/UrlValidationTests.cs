@@ -225,21 +225,41 @@ public class UrlValidationTests
 
     [Theory]
     [InlineData("app://path?query=value")]
+    [InlineData("app://MyApp?param=value")]
+    [InlineData("app://path?param1=value1&param2=value2")]
+    public void ValidateLinkUrl_AppUrlWithQueryParameters_ReturnsUrl(string url)
+    {
+        // Query parameters are now allowed in app:// URLs
+        var result = Utils.ValidateLinkUrl(url);
+        Assert.Equal(url, result);
+    }
+
+    [Theory]
     [InlineData("app://path#fragment")]
-    [InlineData("app://path&evil")]
     [InlineData("app://path:extra:colons")]
     public void ValidateLinkUrl_AppUrlWithDangerousCharacters_ReturnsNull(string url)
     {
+        // Fragments and protocol injection attempts are still blocked
         var result = Utils.ValidateLinkUrl(url);
         Assert.Null(result);
     }
 
     [Theory]
+    [InlineData("#anchor:colons")]
+    [InlineData("#section:value")]
+    public void ValidateLinkUrl_AnchorLinkWithColons_ReturnsUrl(string url)
+    {
+        // Colons are now allowed in anchor links (HTML5 allows this)
+        var result = Utils.ValidateLinkUrl(url);
+        Assert.Equal(url, result);
+    }
+
+    [Theory]
     [InlineData("#anchor?query=value")]
     [InlineData("#anchor&evil")]
-    [InlineData("#anchor:colons")]
     public void ValidateLinkUrl_AnchorLinkWithDangerousCharacters_ReturnsNull(string url)
     {
+        // Query parameters and ampersands are still blocked in anchor links
         var result = Utils.ValidateLinkUrl(url);
         Assert.Null(result);
     }

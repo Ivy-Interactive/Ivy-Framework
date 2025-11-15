@@ -199,16 +199,23 @@ describe('validateLinkUrl', () => {
       expect(utils.validateLinkUrl('app://my-app')).toBe('app://my-app');
     });
 
-    it('should reject app:// URLs with query strings', () => {
-      expect(utils.validateLinkUrl('app://path?query=value')).toBe('#');
+    it('should accept app:// URLs with query strings', () => {
+      expect(utils.validateLinkUrl('app://path?query=value')).toBe(
+        'app://path?query=value'
+      );
+      expect(utils.validateLinkUrl('app://MyApp?param=value')).toBe(
+        'app://MyApp?param=value'
+      );
     });
 
     it('should reject app:// URLs with fragments', () => {
       expect(utils.validateLinkUrl('app://path#fragment')).toBe('#');
     });
 
-    it('should reject app:// URLs with ampersands', () => {
-      expect(utils.validateLinkUrl('app://path&evil')).toBe('#');
+    it('should accept app:// URLs with ampersands in query strings', () => {
+      expect(
+        utils.validateLinkUrl('app://path?param1=value1&param2=value2')
+      ).toBe('app://path?param1=value1&param2=value2');
     });
 
     it('should reject app:// URLs with multiple colons', () => {
@@ -231,8 +238,9 @@ describe('validateLinkUrl', () => {
       expect(utils.validateLinkUrl('#anchor&evil')).toBe('#');
     });
 
-    it('should reject anchor links with colons', () => {
-      expect(utils.validateLinkUrl('#anchor:colons')).toBe('#');
+    it('should accept anchor links with colons', () => {
+      expect(utils.validateLinkUrl('#anchor:colons')).toBe('#anchor:colons');
+      expect(utils.validateLinkUrl('#section:value')).toBe('#section:value');
     });
   });
 
