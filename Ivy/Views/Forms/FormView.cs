@@ -206,7 +206,6 @@ public interface IFormFieldView : IView
 /// <summary>Interface for binding form fields to model properties.</summary>
 public interface IFormFieldBinding<TModel>
 {
-    /// <summary>Binds the field to a model state and returns the view and disposable.</summary>
     (IFormFieldView fieldView, IDisposable disposable) Bind(IState<TModel> model);
 }
 

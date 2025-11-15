@@ -7,7 +7,6 @@ namespace Ivy;
 /// <summary>Container widget with borders, padding, margins, colors, and content alignment. Default: primary border, rounded, centered.</summary>
 public record Box : WidgetBase<Box>
 {
-    /// <summary>Initializes box container.</summary>
     public Box(params IEnumerable<object> content) : base(content.ToArray())
     {
     }

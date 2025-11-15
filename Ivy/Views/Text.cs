@@ -321,7 +321,6 @@ public class TextBuilder(string content, TextVariant variant, Languages codeLang
         return this;
     }
 
-    /// <summary>Applies bold styling to the text.</summary>
     /// <param name="value">True to apply bold.</param>
     /// <returns>The current TextBuilder instance for method chaining.</returns>
     public TextBuilder Bold(bool value = true)
@@ -330,7 +329,6 @@ public class TextBuilder(string content, TextVariant variant, Languages codeLang
         return this;
     }
 
-    /// <summary>Applies italic styling to the text.</summary>
     /// <param name="value">True to apply italic.</param>
     /// <returns>The current TextBuilder instance for method chaining.</returns>
     public TextBuilder Italic(bool value = true)
@@ -339,7 +337,6 @@ public class TextBuilder(string content, TextVariant variant, Languages codeLang
         return this;
     }
 
-    /// <summary>Applies muted styling to the text.</summary>
     /// <param name="value">True to apply muted.</param>
     /// <returns>The current TextBuilder instance for method chaining.</returns>
     public TextBuilder Muted(bool value = true)

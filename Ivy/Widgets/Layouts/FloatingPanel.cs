@@ -49,22 +49,18 @@ public static class FloatingLayerExtensions
     /// <param name="offset">Thickness object containing left, top, right, and bottom offset values.</param>
     public static FloatingPanel Offset(this FloatingPanel floatingButton, Thickness? offset) => floatingButton with { Offset = offset };
 
-    /// <summary>Applies left offset to floating panel's position.</summary>
     /// <param name="floatingButton">Floating panel to configure.</param>
     /// <param name="offset">Number of units to offset panel to right from base position.</param>
     public static FloatingPanel OffsetLeft(this FloatingPanel floatingButton, int offset) => floatingButton with { Offset = new Thickness(offset, 0, 0, 0) };
 
-    /// <summary>Applies top offset to floating panel's position.</summary>
     /// <param name="floatingButton">Floating panel to configure.</param>
     /// <param name="offset">Number of units to offset panel down from base position.</param>
     public static FloatingPanel OffsetTop(this FloatingPanel floatingButton, int offset) => floatingButton with { Offset = new Thickness(0, offset, 0, 0) };
 
-    /// <summary>Applies right offset to floating panel's position.</summary>
     /// <param name="floatingButton">Floating panel to configure.</param>
     /// <param name="offset">Number of units to offset panel to left from base position.</param>
     public static FloatingPanel OffsetRight(this FloatingPanel floatingButton, int offset) => floatingButton with { Offset = new Thickness(0, 0, offset, 0) };
 
-    /// <summary>Applies bottom offset to floating panel's position.</summary>
     /// <param name="floatingButton">Floating panel to configure.</param>
     /// <param name="offset">Number of units to offset panel up from base position.</param>
     public static FloatingPanel OffsetBottom(this FloatingPanel floatingButton, int offset) => floatingButton with { Offset = new Thickness(0, 0, 0, offset) };

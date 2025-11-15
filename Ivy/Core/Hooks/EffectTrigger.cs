@@ -75,7 +75,6 @@ public static class EffectExtensions
             _observable = observable;
         }
 
-        /// <summary>Disposes the observable state (no-op for observables).</summary>
         public void Dispose()
         {
             // Nothing to dispose for observables
@@ -86,13 +85,11 @@ public static class EffectExtensions
             throw new NotImplementedException();
         }
 
-        /// <summary>Subscribes to observable changes without receiving values.</summary>
         public IDisposable SubscribeAny(Action action)
         {
             return _observable.Subscribe(_ => action());
         }
 
-        /// <summary>Subscribes to observable changes and receives values as objects.</summary>
         public IDisposable SubscribeAny(Action<object?> action)
         {
             return _observable.Subscribe(x => action(x));

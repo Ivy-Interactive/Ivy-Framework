@@ -10,10 +10,8 @@ namespace Ivy;
 /// <summary>Sheet widget sliding in from screen side to display additional content with customizable widths, titles, descriptions, and close handling.</summary>
 public record Sheet : WidgetBase<Sheet>
 {
-    /// <summary>Default width for sheet widgets (24rem) providing balanced size for most content.</summary>
     public static Size DefaultWidth => Size.Rem(24);
 
-    /// <summary>Initializes Sheet with specified close handler, content, title, and description.</summary>
     /// <param name="onClose">Event handler called when user closes sheet.</param>
     /// <param name="content">Content to display within sheet.</param>
     /// <param name="title">Optional title text displayed at top of sheet.</param>
@@ -45,16 +43,12 @@ public record Sheet : WidgetBase<Sheet>
         Width = DefaultWidth;
     }
 
-    /// <summary>Title text displayed at top of sheet providing clear heading. When null, no title displayed.</summary>
     [Prop] public string? Title { get; }
 
-    /// <summary>Description text displayed below title providing additional context. When null, no description displayed.</summary>
     [Prop] public string? Description { get; }
 
-    /// <summary>Event handler called when sheet is closed for cleanup and state management.</summary>
     [Event] public Func<Event<Sheet>, ValueTask>? OnClose { get; set; }
 
-    /// <summary>Allows adding single child to Sheet using pipe operator for convenient content construction.</summary>
     /// <param name="widget">Sheet to add child content to.</param>
     /// <param name="child">Child content to add to sheet.</param>
     /// <returns>New Sheet instance with updated content.</returns>

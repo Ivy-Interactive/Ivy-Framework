@@ -6,7 +6,6 @@ namespace Ivy;
 /// <summary>Expandable widget creating collapsible content sections with slot-based architecture for header and content areas.</summary>
 public record Expandable : WidgetBase<Expandable>
 {
-    /// <summary>Initializes Expandable with specified header and content.</summary>
     /// <param name="header">Content to display in header section, remains visible at all times.</param>
     /// <param name="content">Content that can be expanded or collapsed, initially hidden.</param>
     public Expandable(object header, object content) : base([new Slot("Header", header), new Slot("Content", content)])

@@ -9,16 +9,12 @@ public interface IAnyOption
     /// <summary>Gets type of option's value for type checking and validation in generic selection controls.</summary>
     public Type GetOptionType();
 
-    /// <summary>Gets or sets the display label for the option.</summary>
     public string Label { get; set; }
 
-    /// <summary>Gets or sets the description providing additional context for the option.</summary>
     public string? Description { get; set; }
 
-    /// <summary>Gets or sets the group name for organizing related options.</summary>
     public string? Group { get; set; }
 
-    /// <summary>Gets or sets the underlying value of the option.</summary>
     public object Value { get; set; }
 }
 
@@ -36,19 +32,14 @@ public class Option<TValue>(string label, TValue value, string? group = null, st
         return typeof(TValue);
     }
 
-    /// <summary>Gets or sets the display label for the option.</summary>
     public string Label { get; set; } = label;
 
-    /// <summary>Gets or sets the description providing additional context for the option.</summary>
     public string? Description { get; set; } = description;
 
-    /// <summary>Gets or sets the underlying value of the option as an object.</summary>
     public object Value { get; set; } = value!;
 
-    /// <summary>Gets the strongly-typed value of the option.</summary>
     public TValue TypedValue => (TValue)Value;
 
-    /// <summary>Gets or sets the group name for organizing related options.</summary>
     public string? Group { get; set; } = group;
 }
 

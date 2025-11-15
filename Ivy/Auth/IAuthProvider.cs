@@ -9,7 +9,6 @@ public interface IAuthProvider
     /// <returns>An authentication token if successful, null otherwise</returns>
     Task<AuthToken?> LoginAsync(string email, string password, CancellationToken cancellationToken = default);
 
-    /// <summary> Logs out a user by invalidating their access token. </summary>
     Task LogoutAsync(string token, CancellationToken cancellationToken = default);
 
     /// <returns>A new authentication token if successful, null otherwise</returns>

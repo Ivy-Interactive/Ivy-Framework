@@ -31,15 +31,12 @@ public class ConvertedState<TFrom, TTo>(IState<TFrom> originalState, Func<TFrom,
         return originalState.Subscribe(new ForwardingObserver(observer, forward));
     }
 
-    /// <summary>Disposes the original state.</summary>
     public void Dispose() => originalState.Dispose();
 
     public IEffectTrigger ToTrigger() => originalState.ToTrigger();
 
-    /// <summary>Subscribes to any changes in the original state.</summary>
     public IDisposable SubscribeAny(Action action) => originalState.SubscribeAny(action);
 
-    /// <summary>Subscribes to any changes in the original state with value.</summary>
     public IDisposable SubscribeAny(Action<object?> action) => originalState.SubscribeAny(action);
 
     /// <summary>Gets the converted state type.</summary>

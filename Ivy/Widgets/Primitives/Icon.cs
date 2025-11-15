@@ -26,7 +26,6 @@ public record Icon : WidgetBase<Icon>
 /// <summary>Extension methods for Icon widget configuration.</summary>
 public static class IconExtensions
 {
-    /// <summary>Converts Icons enum to Icon widget.</summary>
     public static Icon ToIcon(this Icons icon)
     {
         return new Icon(icon);

@@ -43,7 +43,6 @@ public class ExceptionHandlerPipeline
     /// </summary>
     private class DelegateExceptionHandler(Func<Exception, bool> handlerFunc) : IExceptionHandler
     {
-        /// <summary>Handles exceptions using the provided delegate function.</summary>
         public bool HandleException(Exception exception) => handlerFunc(exception);
     }
 

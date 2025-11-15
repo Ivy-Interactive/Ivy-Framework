@@ -4,37 +4,24 @@ using Ivy.Shared;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
-/// <summary>Supported programming languages for syntax highlighting.</summary>
 public enum Languages
 {
-    /// <summary>C# (.NET)</summary>
     Csharp,
-    /// <summary>JavaScript</summary>
     Javascript,
-    /// <summary>TypeScript</summary>
     Typescript,
-    /// <summary>Python</summary>
     Python,
-    /// <summary>SQL</summary>
     Sql,
-    /// <summary>HTML</summary>
     Html,
-    /// <summary>CSS</summary>
     Css,
-    /// <summary>JSON</summary>
     Json,
-    /// <summary>DBML (Database Markup Language)</summary>
     Dbml,
-    /// <summary>Markdown</summary>
     Markdown,
-    /// <summary>Plain text (no highlighting)</summary>
     Text,
 }
 
 /// <summary>Code display widget with syntax highlighting, line numbers, and copy functionality.</summary>
 public record Code : WidgetBase<Code>
 {
-    /// <summary>Initializes code widget with content and language. Default size: full width, max 800px height.</summary>
     public Code(string content, Languages language = Languages.Csharp)
     {
         Content = content;
@@ -43,19 +30,14 @@ public record Code : WidgetBase<Code>
         Height = Size.MaxContent().Max(Size.Px(800));
     }
 
-    /// <summary>Source code content to display (whitespace preserved).</summary>
     [Prop] public string Content { get; set; }
 
-    /// <summary>Programming language for syntax highlighting.</summary>
     [Prop] public Languages Language { get; set; }
 
-    /// <summary>Whether to show line numbers. Default: false.</summary>
     [Prop] public bool ShowLineNumbers { get; set; }
 
-    /// <summary>Whether to show copy button. Default: true.</summary>
     [Prop] public bool ShowCopyButton { get; set; } = true;
 
-    /// <summary>Whether to show border. Default: true.</summary>
     [Prop] public bool ShowBorder { get; set; } = true;
 }
 

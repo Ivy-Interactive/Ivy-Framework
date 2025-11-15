@@ -4,36 +4,20 @@ using System.Text.Json.Serialization;
 
 namespace Ivy.Shared;
 
-/// <summary>
-/// Specifies the type of size measurement for width and height values.
-/// </summary>
 public enum SizeType
 {
-    /// <summary>Framework-specific units that scale with the design system.</summary>
     Units,
-    /// <summary>Absolute pixel values for precise sizing.</summary>
     Px,
-    /// <summary>Rem units relative to root font size.</summary>
     Rem,
-    /// <summary>Fractional values (0.0 to 1.0) for percentage-based sizing.</summary>
     Fraction,
-    /// <summary>Fractional values with gap consideration for layout spacing.</summary>
     FractionGap,
-    /// <summary>Takes up the full available space.</summary>
     Full,
-    /// <summary>Sizes to fit the content.</summary>
     Fit,
-    /// <summary>Sizes relative to the screen dimensions.</summary>
     Screen,
-    /// <summary>Minimum content size based on intrinsic content width.</summary>
     MinContent,
-    /// <summary>Maximum content size based on intrinsic content width.</summary>
     MaxContent,
-    /// <summary>Automatic sizing based on content and context.</summary>
     Auto,
-    /// <summary>Flexible grow behavior in layout containers.</summary>
     Grow,
-    /// <summary>Flexible shrink behavior in layout containers.</summary>
     Shrink
 }
 
@@ -68,10 +52,8 @@ public record Size
     private SizeType Type { get; set; }
     private float? Value { get; set; }
 
-    /// <summary>Gets the minimum size constraint.</summary>
     public Size? Min { get; init; }
 
-    /// <summary>Gets the maximum size constraint.</summary>
     public Size? Max { get; init; }
 
     private Size(SizeType type, float? value)
@@ -166,37 +148,31 @@ public record Size
 /// </summary>
 public static class SizeExtensions
 {
-    /// <summary>Sets the minimum size constraint.</summary>
     public static Size Min(this Size size, Size min)
     {
         return size with { Min = min };
     }
 
-    /// <summary>Sets the maximum size constraint.</summary>
     public static Size Max(this Size size, Size max)
     {
         return size with { Max = max };
     }
 
-    /// <summary>Sets the maximum size constraint using framework units.</summary>
     public static Size Max(this Size size, int max)
     {
         return size.Max(Size.Units(max));
     }
 
-    /// <summary>Sets the minimum size constraint using framework units.</summary>
     public static Size Min(this Size size, int min)
     {
         return size.Min(Size.Units(min));
     }
 
-    /// <summary>Sets the minimum size constraint using fractional value.</summary>
     public static Size Min(this Size size, float min)
     {
         return size.Min(Size.Fraction(min));
     }
 
-    /// <summary>Sets the maximum size constraint using fractional value.</summary>
     public static Size Max(this Size size, float max)
     {
         return size.Max(Size.Fraction(max));
@@ -209,13 +185,11 @@ public static class SizeExtensions
 /// </summary>
 public class SizeJsonConverter : JsonConverter<Size>
 {
-    /// <summary>Reads Size from JSON (not implemented).</summary>
     public override Size Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         throw new NotImplementedException("Deserialization of SizeJsonConverter not implemented.");
     }
 
-    /// <summary>Writes Size to JSON as string value.</summary>
     public override void Write(Utf8JsonWriter writer, Size value, JsonSerializerOptions options)
     {
         writer.WriteStringValue(value.ToString());

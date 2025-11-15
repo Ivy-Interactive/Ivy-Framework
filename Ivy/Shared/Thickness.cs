@@ -36,13 +36,11 @@ public readonly record struct Thickness(int Left, int Top, int Right, int Bottom
 /// </summary>
 public class ThicknessJsonConverter : JsonConverter<Thickness>
 {
-    /// <summary>Reads Thickness from JSON (not implemented).</summary>
     public override Thickness Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         throw new NotImplementedException("Deserialization of ThicknessConverter not implemented.");
     }
 
-    /// <summary>Writes Thickness to JSON as string value.</summary>
     public override void Write(Utf8JsonWriter writer, Thickness value, JsonSerializerOptions options)
     {
         writer.WriteStringValue(value.ToString());

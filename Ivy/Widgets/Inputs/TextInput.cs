@@ -88,7 +88,6 @@ internal class PrefixSuffixJsonConverter : JsonConverter<PrefixSuffix>
     }
 }
 
-/// <summary> Interface for text input controls that extends IAnyInput with text-specific properties. </summary>
 public interface IAnyTextInput : IAnyInput
 {
     public string? Placeholder { get; set; }
@@ -96,7 +95,6 @@ public interface IAnyTextInput : IAnyInput
     public TextInputs Variant { get; set; }
 }
 
-/// <summary> Abstract base class for text input controls that provides common text input functionality. </summary>
 public abstract record TextInputBase : WidgetBase<TextInputBase>, IAnyTextInput
 {
     [Prop] public bool Disabled { get; set; }
@@ -117,15 +115,12 @@ public abstract record TextInputBase : WidgetBase<TextInputBase>, IAnyTextInput
 
     [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
 
-    /// <summary> Returns the types that this text input can bind to and work with. </summary>
     public Type[] SupportedStateTypes() => [];
 }
 
-/// <summary> Generic text input control that provides type-safe text entry functionality for string-like types. </summary>
 /// <typeparam name="TString">The type of the text value (typically string or string-convertible types).</typeparam>
 public record TextInput<TString> : TextInputBase, IInput<TString>
 {
-    /// <summary> Initializes a new text input bound to a state object for automatic value synchronization. </summary>
     /// <param name="state">The state object to bind the text input to.</param>
     /// <param name="placeholder">Optional placeholder text displayed when the input is empty.</param>
     /// <param name="disabled">Whether the input should be disabled initially.</param>
@@ -138,10 +133,6 @@ public record TextInput<TString> : TextInputBase, IInput<TString>
         OnChange = e => { typedState.Set(e.Value); return ValueTask.CompletedTask; };
     }
 
-    /// <summary>
-    /// Initializes a new text input with an explicit value and change handler.
-    /// Useful for manual state management or when custom change handling is required.
-    /// </summary>
     /// <param name="value">The initial text value.</param>
     /// <param name="onChange">Optional event handler called when the input value changes.</param>
     /// <param name="placeholder">Optional placeholder text displayed when the input is empty.</param>
@@ -162,7 +153,6 @@ public record TextInput<TString> : TextInputBase, IInput<TString>
         Value = value;
     }
 
-    /// <summary> Initializes a new text input with basic configuration. </summary>
     public TextInput(string? placeholder = null, bool disabled = false, TextInputs variant = TextInputs.Text)
     {
         Placeholder = placeholder;
@@ -175,13 +165,8 @@ public record TextInput<TString> : TextInputBase, IInput<TString>
     [Event] public Func<Event<IInput<TString>, TString>, ValueTask>? OnChange { get; }
 }
 
-/// <summary>Concrete text input control for string values that provides convenient string-specific text entry functionality.</summary>
 public record TextInput : TextInput<string>
 {
-    /// <summary>
-    /// Initializes a new string text input bound to a state object for automatic value synchronization.
-    /// The input will display the current state value and update the state when text changes.
-    /// </summary>
     /// <param name="state">The state object to bind to for automatic value updates and change handling.</param>
     /// <param name="placeholder">Optional placeholder text displayed when the input is empty.</param>
     /// <param name="disabled">Whether the input should be disabled initially.</param>
@@ -191,10 +176,6 @@ public record TextInput : TextInput<string>
     {
     }
 
-    /// <summary>
-    /// Initializes a new string text input with an explicit value and change handler.
-    /// Useful for manual state management or when custom change handling is required.
-    /// </summary>
     /// <param name="value">The initial string value.</param>
     /// <param name="onChange">Optional event handler called when the text value changes.</param>
     /// <param name="placeholder">Optional placeholder text displayed when the input is empty.</param>
@@ -212,7 +193,6 @@ public record TextInput : TextInput<string>
     {
     }
 
-    /// <summary> Initializes a new string text input with basic configuration. </summary>
     /// <param name="placeholder">Optional placeholder text displayed when the input is empty.</param>
     /// <param name="disabled">Whether the input should be disabled initially.</param>
     /// <param name="variant">The visual and functional variant of the text input.</param>
@@ -222,10 +202,8 @@ public record TextInput : TextInput<string>
     }
 }
 
-/// <summary> Provides extension methods for creating and configuring text input controls with fluent syntax. </summary>
 public static class TextInputExtensions
 {
-    /// <summary> Creates a text input from a state object with automatic type detection. </summary>
     /// <param name="state">The state object to bind to.</param>
     /// <param name="placeholder">Optional placeholder text displayed when the input is empty.</param>
     /// <param name="disabled">Whether the input should be disabled initially.</param>
@@ -238,37 +216,31 @@ public static class TextInputExtensions
         return input;
     }
 
-    /// <summary> Creates a multi-line textarea input from a state object. </summary>
     /// <param name="state">The state object to bind to.</param>
     /// <param name="placeholder">Optional placeholder text displayed when the input is empty.</param>
     /// <param name="disabled">Whether the input should be disabled initially.</param>
     public static TextInputBase ToTextAreaInput(this IAnyState state, string? placeholder = null, bool disabled = false) => state.ToTextInput(placeholder, disabled, TextInputs.Textarea);
 
-    /// <summary> Creates a search input from a state object. </summary>
     /// <param name="state">The state object to bind to.</param>
     /// <param name="placeholder">Optional placeholder text displayed when the input is empty.</param>
     /// <param name="disabled">Whether the input should be disabled initially.</param>
     public static TextInputBase ToSearchInput(this IAnyState state, string? placeholder = null, bool disabled = false) => state.ToTextInput(placeholder, disabled, TextInputs.Search);
 
-    /// <summary> Creates a password input from a state object. </summary>
     /// <param name="state">The state object to bind to.</param>
     /// <param name="placeholder">Optional placeholder text displayed when the input is empty.</param>
     /// <param name="disabled">Whether the input should be disabled initially.</param>
     public static TextInputBase ToPasswordInput(this IAnyState state, string? placeholder = null, bool disabled = false) => state.ToTextInput(placeholder, disabled, TextInputs.Password);
 
-    /// <summary> Creates an email input from a state object. </summary>
     /// <param name="state">The state object to bind to.</param>
     /// <param name="placeholder">Optional placeholder text displayed when the input is empty.</param>
     /// <param name="disabled">Whether the input should be disabled initially.</param>
     public static TextInputBase ToEmailInput(this IAnyState state, string? placeholder = null, bool disabled = false) => state.ToTextInput(placeholder, disabled, TextInputs.Email);
 
-    /// <summary> Creates a URL input from a state object.</summary>
     /// <param name="state">The state object to bind to.</param>
     /// <param name="placeholder">Optional placeholder text displayed when the input is empty.</param>
     /// <param name="disabled">Whether the input should be disabled initially.</param>
     public static TextInputBase ToUrlInput(this IAnyState state, string? placeholder = null, bool disabled = false) => state.ToTextInput(placeholder, disabled, TextInputs.Url);
 
-    /// <summary> Creates a telephone input from a state object. </summary>
     /// <param name="state">The state object to bind to.</param>
     /// <param name="placeholder">Optional placeholder text displayed when the input is empty.</param>
     /// <param name="disabled">Whether the input should be disabled initially.</param>

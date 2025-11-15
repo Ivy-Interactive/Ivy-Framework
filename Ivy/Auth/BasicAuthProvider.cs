@@ -120,7 +120,6 @@ public class BasicAuthProvider : IAuthProvider
         return new AuthToken(accessToken, refreshToken);
     }
 
-    /// <summary> Logs out a user by invalidating their access token. </summary>
     public Task LogoutAsync(string token, CancellationToken cancellationToken)
     {
         // No server-side state to invalidate
