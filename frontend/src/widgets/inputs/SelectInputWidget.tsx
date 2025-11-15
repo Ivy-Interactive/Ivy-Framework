@@ -825,45 +825,45 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
 
   // Detect ellipsis on the SelectValue span (needs to be before early returns)
   const [isEllipsed, setIsEllipsed] = useState(false);
+  // Track if select dropdown is open to disable tooltip (needs to be before early returns)
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
+    // Skip ellipsis check for multiselect or when no label
+    if (selectMany || !selectedLabel) {
+      requestAnimationFrame(() => setIsEllipsed(false));
+      return;
+    }
+
     const checkEllipsis = () => {
-      if (triggerRef?.current) {
-        // SelectValue renders as the first span child of SelectTrigger
-        const firstSpan = triggerRef.current.querySelector(
-          'span:first-child'
-        ) as HTMLSpanElement;
-        if (firstSpan) {
-          setIsEllipsed(firstSpan.scrollWidth > firstSpan.clientWidth);
-        } else {
-          setIsEllipsed(false);
-        }
+      if (!triggerRef?.current) {
+        return;
+      }
+      // SelectValue renders as the first span child of SelectTrigger
+      const firstSpan = triggerRef.current.querySelector(
+        'span:first-child'
+      ) as HTMLSpanElement;
+      if (firstSpan) {
+        setIsEllipsed(firstSpan.scrollWidth > firstSpan.clientWidth);
+      } else {
+        setIsEllipsed(false);
       }
     };
 
-    checkEllipsis();
-    const timeout = setTimeout(checkEllipsis, 100);
-    const timeout2 = setTimeout(checkEllipsis, 300);
+    // Check after render
+    requestAnimationFrame(checkEllipsis);
 
-    window.addEventListener('resize', checkEllipsis);
-
-    let observer: MutationObserver | null = null;
-    if (triggerRef?.current) {
-      observer = new MutationObserver(checkEllipsis);
-      observer.observe(triggerRef.current, {
-        childList: true,
-        subtree: true,
-        characterData: true,
-      });
-    }
+    // Debounced resize handler
+    let resizeTimeout: NodeJS.Timeout;
+    const handleResize = () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(checkEllipsis, 150);
+    };
+    window.addEventListener('resize', handleResize);
 
     return () => {
-      clearTimeout(timeout);
-      clearTimeout(timeout2);
-      window.removeEventListener('resize', checkEllipsis);
-      if (observer) {
-        observer.disconnect();
-      }
+      clearTimeout(resizeTimeout);
+      window.removeEventListener('resize', handleResize);
     };
   }, [selectedLabel, stringValue, selectMany]);
 
@@ -926,63 +926,61 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
 
   const hasValue = stringValue !== undefined;
 
-  const selectComponent = (
-    <Select
-      key={`${id}-${stringValue ?? 'null'}`}
-      disabled={disabled}
-      value={stringValue}
-      onValueChange={handleValueChange}
-      data-testid={dataTestId}
+  const selectTriggerElement = (
+    <SelectTrigger
+      ref={triggerRef}
+      className={cn('relative', invalid && inputStyles.invalidInput)}
+      size={size}
     >
-      <SelectTrigger
-        ref={triggerRef}
-        className={cn('relative', invalid && inputStyles.invalidInput)}
-        size={size}
-      >
-        <SelectValue placeholder={placeholder} />
-      </SelectTrigger>
-      <SelectContent size={size}>
-        {Object.entries(groupedOptions).map(([group, options]) => (
-          <SelectGroup key={group}>
-            {group !== 'default' && <SelectLabel>{group}</SelectLabel>}
-            {options.map(option => (
-              <SelectItem
-                key={option.value}
-                value={option.value.toString()}
-                size={size}
-              >
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectGroup>
-        ))}
-      </SelectContent>
-    </Select>
+      <SelectValue placeholder={placeholder} />
+    </SelectTrigger>
   );
 
-  // Wrap with tooltip if ellipsed
-  const wrappedSelect =
-    isEllipsed && selectedLabel ? (
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <div className="w-full">{selectComponent}</div>
-          </TooltipTrigger>
-          <TooltipContent className="bg-popover text-popover-foreground shadow-md max-w-sm">
-            <div className="whitespace-pre-wrap break-words">
-              {selectedLabel}
-            </div>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
-    ) : (
-      selectComponent
-    );
+  // Wrap trigger with tooltip if ellipsed (tooltip hidden when dropdown is open)
+  const shouldShowTooltip = isEllipsed && selectedLabel;
+  const selectTrigger = shouldShowTooltip ? (
+    <TooltipProvider>
+      <Tooltip delayDuration={300} open={!isOpen ? undefined : false}>
+        <TooltipTrigger asChild>{selectTriggerElement}</TooltipTrigger>
+        <TooltipContent className="bg-popover text-popover-foreground shadow-md max-w-sm">
+          <div className="whitespace-pre-wrap break-words">{selectedLabel}</div>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  ) : (
+    selectTriggerElement
+  );
 
   return (
     <div className="flex items-center gap-2 w-full" style={styles}>
       <div className="flex-1 relative w-full">
-        {wrappedSelect}
+        <Select
+          key={`${id}-${stringValue ?? 'null'}`}
+          disabled={disabled}
+          value={stringValue}
+          onValueChange={handleValueChange}
+          open={isOpen}
+          onOpenChange={setIsOpen}
+          data-testid={dataTestId}
+        >
+          {selectTrigger}
+          <SelectContent size={size}>
+            {Object.entries(groupedOptions).map(([group, options]) => (
+              <SelectGroup key={group}>
+                {group !== 'default' && <SelectLabel>{group}</SelectLabel>}
+                {options.map(option => (
+                  <SelectItem
+                    key={option.value}
+                    value={option.value.toString()}
+                    size={size}
+                  >
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            ))}
+          </SelectContent>
+        </Select>
         {/* Right-side icon container */}
         {(nullable && hasValue && !disabled) || invalid ? (
           <div
