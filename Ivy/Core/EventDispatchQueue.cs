@@ -2,10 +2,6 @@ using System.Threading.Channels;
 
 namespace Ivy.Core;
 
-/// <summary>
-/// Dedicated event dispatch queue that processes enqueued actions on a long-running
-/// background thread, avoiding consumption of ThreadPool workers during bursts.
-/// </summary>
 public sealed class EventDispatchQueue : IDisposable
 {
     private const int DefaultChannelCapacity = 1024;

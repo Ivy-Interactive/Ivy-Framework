@@ -223,11 +223,6 @@ public class Server
         return this;
     }
 
-    /// <summary>
-    /// Configures the server to use a custom theme configuration.
-    /// This will register a theme service with the specified theme and make it available throughout the application.
-    /// </summary>
-    /// <param name="theme">The theme configuration to use for the application.</param>
     public Server UseTheme(Theme theme)
     {
         var themeService = new ThemeService();
@@ -236,10 +231,6 @@ public class Server
         return this;
     }
 
-    /// <summary>
-    /// Configures the server to use a custom theme configuration with a builder pattern.
-    /// </summary>
-    /// <param name="configureTheme">An action delegate to configure the theme properties.</param>
     public Server UseTheme(Action<Theme> configureTheme)
     {
         var theme = new Theme();
