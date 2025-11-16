@@ -35,7 +35,7 @@ public class FieldApp : SampleBase
                 .Required()
 
                 // Using .WithField() shortcut with help text
-                | emailState.ToTextInput()
+                | emailState.ToEmailInput()
                     .Placeholder("Enter your email")
                     .WithField()
                     .Label("Email")
