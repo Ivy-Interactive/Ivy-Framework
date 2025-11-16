@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -13,6 +14,7 @@ using Ivy.Views.DataTables;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http; //do not remove - used in RELEASE
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -369,7 +371,17 @@ public class Server
         var entryAssembly = Assembly.GetEntryAssembly();
         if (entryAssembly != null && entryAssembly != Assembly.Load("Ivy"))
         {
-            controllersBuilder.AddApplicationPart(entryAssembly);
+            // Check if the assembly contains controllers before adding it
+            // This avoids unnecessary registration if the assembly doesn't have controllers
+            var hasControllers = entryAssembly.GetTypes()
+                .Any(type => type.IsSubclassOf(typeof(ControllerBase)) ||
+                            type.GetCustomAttribute<ApiControllerAttribute>() != null ||
+                            type.GetCustomAttribute<ControllerAttribute>() != null);
+
+            if (hasControllers)
+            {
+                controllersBuilder.AddApplicationPart(entryAssembly);
+            }
         }
         builder.Services.AddGrpc();
         builder.Services.AddSingleton<IQueryableRegistry, QueryableRegistry>();

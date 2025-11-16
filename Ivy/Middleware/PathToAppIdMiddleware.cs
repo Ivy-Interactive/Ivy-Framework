@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.AspNetCore.Routing.Patterns;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using System.Collections.Concurrent;
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -25,6 +27,11 @@ public class PathToAppIdMiddleware(RequestDelegate next, ILogger<PathToAppIdMidd
     }
 
     private static readonly RoutingConstantData RoutingConstants;
+
+    // Cache for route patterns to avoid re-parsing on every request
+    // Key: RouteEndpoint, Value: extracted route path
+    // Note: RouteEndpoint instances are stable across requests, so they can be used as dictionary keys
+    private static readonly ConcurrentDictionary<RouteEndpoint, string?> RoutePathCache = new();
 
     static PathToAppIdMiddleware()
     {
@@ -59,12 +66,15 @@ public class PathToAppIdMiddleware(RequestDelegate next, ILogger<PathToAppIdMidd
         var endpointDataSource = context.RequestServices.GetService<EndpointDataSource>();
         if (endpointDataSource != null)
         {
+            // Use cached route paths for better performance
             // Check if any endpoint matches this path
             foreach (var ep in endpointDataSource.Endpoints)
             {
                 if (ep is RouteEndpoint routeEp)
                 {
-                    var routePath = GetRoutePath(routeEp.RoutePattern);
+                    // Use cached route path or compute and cache it
+                    // RouteEndpoint instances are stable across requests, so they can be used as cache keys
+                    var routePath = RoutePathCache.GetOrAdd(routeEp, endpoint => GetRoutePath(endpoint.RoutePattern));
 
                     // Check if current path matches this endpoint (exact or starts with route + "/")
                     if (!string.IsNullOrEmpty(routePath) &&
