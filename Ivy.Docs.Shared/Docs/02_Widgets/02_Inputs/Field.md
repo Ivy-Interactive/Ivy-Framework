@@ -82,7 +82,8 @@ public class MixedInputsDemo : ViewBase
     public override object? Build()
     {
         var dateState = UseState(DateTime.Today);
-
+        var emailInput = UseState("");
+        var passwordInput = UseState("");
         var accepted = UseState(false);
         var options = new List<string>() { "I read the terms and conditions and I agree"};
         var selectedNotice = UseState(new string[]{});
@@ -91,6 +92,16 @@ public class MixedInputsDemo : ViewBase
                 .Variant(DateTimeInputs.Date)
                 .WithField()
                 .Label("Date of birth")
+            | emailInput.ToEmailInput()
+                .WithField()
+                .Label("Email")
+                .Description("Your email address")
+                .Required()
+            | passwordInput.ToPasswordInput()
+                .WithField()
+                .Label("Password")
+                .Description("Your password")
+                .Required()
             | selectedNotice.ToSelectInput(options.ToOptions())
                 .Variant(SelectInputs.List)
                 .WithField()
@@ -100,6 +111,10 @@ public class MixedInputsDemo : ViewBase
     }
 }
 ```
+
+<Callout Type="tip">
+**Automatic Validation**: When using `.ToEmailInput().WithField()` or `.ToPasswordInput().WithField()`, inputs automatically get validation
+</Callout>
 
 <Callout Tip="Info">
 Use `Field` whenever you want **consistent form layout** across your application with labels, description and required asterisk.
