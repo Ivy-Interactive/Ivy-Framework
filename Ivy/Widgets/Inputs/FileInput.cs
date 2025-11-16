@@ -49,7 +49,6 @@ public abstract record FileInputBase : WidgetBase<FileInputBase>, IAnyFileInput
 
     public Type[] SupportedStateTypes() => [];
 
-    /// <param name="value">The current value to validate.</param>
     public ValidationResult ValidateValue(object? value)
     {
         if (value == null) return ValidationResult.Success();
@@ -97,13 +96,8 @@ public abstract record FileInputBase : WidgetBase<FileInputBase>, IAnyFileInput
     }
 }
 
-/// <typeparam name="TValue">The type of the file value.</typeparam>
 public record FileInput<TValue> : FileInputBase, IInput<TValue>, IAnyFileInput
 {
-    /// <param name="state">The state object to bind to.</param>
-    /// <param name="placeholder">Optional placeholder text displayed when no files are selected.</param>
-    /// <param name="disabled">Whether the input should be disabled initially.</param>
-    /// <param name="variant">The visual variant of the file input.</param>
     [OverloadResolutionPriority(1)]
     public FileInput(IAnyState state, string? placeholder = null, bool disabled = false, FileInputs variant = FileInputs.Drop)
         : this(placeholder, disabled, variant)
@@ -112,10 +106,6 @@ public record FileInput<TValue> : FileInputBase, IInput<TValue>, IAnyFileInput
         Value = typedState.Value;
     }
 
-    /// <param name="value">The initial file value.</param>
-    /// <param name="placeholder">Optional placeholder text displayed when no files are selected.</param>
-    /// <param name="disabled">Whether the input should be disabled initially.</param>
-    /// <param name="variant">The visual variant of the file input.</param>
     [OverloadResolutionPriority(1)]
     public FileInput(TValue value, string? placeholder = null, bool disabled = false, FileInputs variant = FileInputs.Drop)
         : this(placeholder, disabled, variant)
@@ -123,9 +113,6 @@ public record FileInput<TValue> : FileInputBase, IInput<TValue>, IAnyFileInput
         Value = value;
     }
 
-    /// <param name="placeholder">Optional placeholder text displayed when no files are selected.</param>
-    /// <param name="disabled">Whether the input should be disabled initially.</param>
-    /// <param name="variant">The visual variant of the file input.</param>
     public FileInput(string? placeholder = null, bool disabled = false, FileInputs variant = FileInputs.Drop)
     {
         Placeholder = placeholder;
@@ -149,11 +136,7 @@ public static class FileInputExtensions
         throw new NotSupportedException("ToFileInput now requires an UploadContext. Use state.ToFileInput(uploadContext, ...).");
     }
 
-    /// <param name="state">The state to bind the file input to.</param>
-    /// <param name="uploadContext">The upload context state from UseUpload hook.</param>
-    /// <param name="placeholder">Optional placeholder text displayed when no files are selected.</param>
-    /// <param name="disabled">Whether the input should be disabled initially.</param>
-    /// <param name="variant">The visual variant of the file input.</param>
+    /// <summary>The upload context state from UseUpload hook.</summary>
     public static FileInputBase ToFileInput(this IAnyState state, IState<UploadContext> uploadContext, string? placeholder = null, bool disabled = false, FileInputs variant = FileInputs.Drop)
     {
         static bool IsFileUploadType(Type t)
@@ -260,13 +243,11 @@ public static class FileInputExtensions
                     }
                     else
                     {
-                        // Fallback: reset state (works for single-file or unsupported collections)
                         state.As<object>().Reset();
                     }
                 }
                 catch
                 {
-                    // As a last resort, reset
                     state.As<object>().Reset();
                 }
 
@@ -277,43 +258,33 @@ public static class FileInputExtensions
         return input;
     }
 
-    /// <param name="widget">The file input to configure.</param>
-    /// <param name="title">The placeholder text to display when no files are selected.</param>
     public static FileInputBase Placeholder(this FileInputBase widget, string title)
     {
         return widget with { Placeholder = title };
     }
 
-    /// <param name="widget">The file input to configure.</param>
-    /// <param name="disabled">Whether the input should be disabled.</param>
     public static FileInputBase Disabled(this FileInputBase widget, bool disabled = true)
     {
         return widget with { Disabled = disabled };
     }
 
-    /// <param name="widget">The file input to configure.</param>
-    /// <param name="variant">The visual variant (currently only Drop is available).</param>
     public static FileInputBase Variant(this FileInputBase widget, FileInputs variant)
     {
         return widget with { Variant = variant };
     }
 
-    /// <param name="widget">The file input to configure.</param>
-    /// <param name="invalid">The validation error message to display.</param>
     public static FileInputBase Invalid(this FileInputBase widget, string? invalid)
     {
         return widget with { Invalid = invalid };
     }
 
-    /// <param name="widget">The file input to configure.</param>
-    /// <param name="accept">A comma-separated list of accepted file types (e.g., "image/*", ".pdf,.doc", "text/plain").</param>
+    /// <summary>Comma-separated list (e.g., "image/*", ".pdf,.doc", "text/plain").</summary>
     public static FileInputBase Accept(this FileInputBase widget, string accept)
     {
         return widget with { Accept = accept };
     }
 
-    /// <param name="widget">The file input to configure.</param>
-    /// <param name="maxFiles">The maximum number of files allowed.</param>
+    /// <exception cref="InvalidOperationException">MaxFiles can only be set on a multi-file input (IEnumerable<FileInput>). Use a collection state type for multiple files.</exception>
     public static FileInputBase MaxFiles(this FileInputBase widget, int maxFiles)
     {
         if (widget.Multiple != true)
@@ -323,102 +294,79 @@ public static class FileInputExtensions
         return widget with { MaxFiles = maxFiles };
     }
 
-    /// <param name="widget">The file input to configure.</param>
-    /// <param name="maxFileSize">The maximum file size in bytes.</param>
     public static FileInputBase MaxFileSize(this FileInputBase widget, long maxFileSize)
     {
         return widget with { MaxFileSize = maxFileSize };
     }
 
-    /// <param name="widget">The file input to configure.</param>
-    /// <param name="uploadUrl">The upload URL where files should be automatically uploaded.</param>
     public static FileInputBase UploadUrl(this FileInputBase widget, string? uploadUrl)
     {
         return widget with { UploadUrl = uploadUrl };
     }
 
-    /// <param name="widget">The file input to configure.</param>
-    /// <param name="size">The size of the file input.</param>
     public static FileInputBase Size(this FileInputBase widget, Sizes size)
     {
         return widget with { Size = size };
     }
 
-    /// <param name="widget">The file input to configure.</param>
     public static FileInputBase Small(this FileInputBase widget)
     {
         return widget with { Size = Sizes.Small };
     }
 
-    /// <param name="widget">The file input to configure.</param>
     public static FileInputBase Large(this FileInputBase widget)
     {
         return widget with { Size = Sizes.Large };
     }
 
-    /// <param name="widget">The file input widget containing validation rules.</param>
-    /// <param name="file">The file to validate.</param>
     public static ValidationResult ValidateFile(this FileInputBase widget, IFileUpload file)
     {
         return FileInputValidation.ValidateFileType(file, widget.Accept);
     }
 
-    /// <param name="widget">The file input widget containing validation rules.</param>
-    /// <param name="files">The files to validate.</param>
     public static ValidationResult ValidateFiles(this FileInputBase widget, IEnumerable<IFileUpload> files)
     {
         var filesList = files.ToList();
 
-        // Validate file count first
         var countValidation = FileInputValidation.ValidateFileCount(filesList, widget.MaxFiles);
         if (!countValidation.IsValid)
         {
             return countValidation;
         }
 
-        // Then validate file types
         return FileInputValidation.ValidateFileTypes(filesList, widget.Accept);
     }
 
-    /// <param name="widget">The file input to configure.</param>
-    /// <param name="onBlur">The event handler to call when the input loses focus.</param>
     [OverloadResolutionPriority(1)]
     public static FileInputBase HandleBlur(this FileInputBase widget, Func<Event<IAnyInput>, ValueTask> onBlur)
     {
         return widget with { OnBlur = onBlur };
     }
 
-    /// <param name="widget">The file input to configure.</param>
-    /// <param name="onBlur">The event handler to call when the input loses focus.</param>
     public static FileInputBase HandleBlur(this FileInputBase widget, Action<Event<IAnyInput>> onBlur)
     {
         return widget.HandleBlur(onBlur.ToValueTask());
     }
 
-    /// <param name="widget">The file input to configure.</param>
-    /// <param name="onBlur">The simple action to perform when the input loses focus.</param>
     public static FileInputBase HandleBlur(this FileInputBase widget, Action onBlur)
     {
         return widget.HandleBlur(_ => { onBlur(); return ValueTask.CompletedTask; });
     }
 
-    /// <param name="widget">The file input to configure.</param>
-    /// <param name="onCancel">The event handler to call when a file is canceled, receives the FileUpload.Id.</param>
+    /// <summary>Receives the FileUpload.Id.</summary>
     [OverloadResolutionPriority(1)]
     public static FileInputBase HandleCancel(this FileInputBase widget, Func<Event<IAnyInput, Guid>, ValueTask> onCancel)
     {
         return widget with { OnCancel = onCancel };
     }
 
-    /// <param name="widget">The file input to configure.</param>
-    /// <param name="onCancel">The event handler to call when a file is canceled, receives the FileUpload.Id.</param>
+    /// <summary>Receives the FileUpload.Id.</summary>
     public static FileInputBase HandleCancel(this FileInputBase widget, Action<Event<IAnyInput, Guid>> onCancel)
     {
         return widget.HandleCancel(onCancel.ToValueTask());
     }
 
-    /// <param name="widget">The file input to configure.</param>
-    /// <param name="onCancel">The simple action to perform when a file is canceled, receives the FileUpload.Id.</param>
+    /// <summary>Receives the FileUpload.Id.</summary>
     public static FileInputBase HandleCancel(this FileInputBase widget, Action<Guid> onCancel)
     {
         return widget.HandleCancel(e => { onCancel(e.Value); return ValueTask.CompletedTask; });

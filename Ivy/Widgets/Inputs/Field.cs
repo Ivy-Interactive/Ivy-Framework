@@ -10,7 +10,6 @@ using System.Threading.Tasks;
 
 namespace Ivy;
 
-/// <summary>Wrapper widget providing structured layout and metadata for field input controls.</summary>
 public record Field : WidgetBase<Field>
 {
     public Field(IAnyInput input, string? label = null, string? description = null, bool required = false, string? help = null) : base([input])
@@ -18,7 +17,6 @@ public record Field : WidgetBase<Field>
         var labelProp = input.GetType().GetProperty("Label");
         if (labelProp != null && labelProp.PropertyType == typeof(string))
         {
-            //Input handles label on its own
             var inputLabel = (string?)labelProp.GetValue(input);
             labelProp.SetValue(input, inputLabel ?? label);
             label = null;
@@ -27,7 +25,6 @@ public record Field : WidgetBase<Field>
         var descriptionProp = input.GetType().GetProperty("Description");
         if (descriptionProp != null && descriptionProp.PropertyType == typeof(string))
         {
-            //Input handles description on its own
             var inputDescription = (string?)descriptionProp.GetValue(input);
             descriptionProp.SetValue(input, inputDescription ?? description);
             description = null;
@@ -55,7 +52,6 @@ public record Field : WidgetBase<Field>
     }
 }
 
-/// <summary>Provides extension methods for creating and configuring field with fluent syntax.</summary>
 public static class FieldExtensions
 {
 
