@@ -360,9 +360,17 @@ public class Server
         });
         builder.Services.AddSingleton(this);
         builder.Services.AddSingleton<IClientNotifier, ClientNotifier>();
-        builder.Services.AddControllers()
+        // Register controllers from Ivy assembly
+        var controllersBuilder = builder.Services.AddControllers()
             .AddApplicationPart(Assembly.Load("Ivy"))
             .AddControllersAsServices();
+
+        // Also register controllers from the entry assembly (user's application)
+        var entryAssembly = Assembly.GetEntryAssembly();
+        if (entryAssembly != null && entryAssembly != Assembly.Load("Ivy"))
+        {
+            controllersBuilder.AddApplicationPart(entryAssembly);
+        }
         builder.Services.AddGrpc();
         builder.Services.AddSingleton<IQueryableRegistry, QueryableRegistry>();
         builder.Services.AddSingleton(_contentBuilder ?? new DefaultContentBuilder());
@@ -439,10 +447,12 @@ public class Server
 
         var logger = _args.Verbose ? app.Services.GetRequiredService<ILogger<Server>>() : new NullLogger<Server>();
 
+        app.UseRouting();
 
+        // UsePathToAppId should be between UseRouting and MapControllers
+        // This way we can check endpoints in EndpointDataSource before routing executes
         app.UsePathToAppId();
 
-        app.UseRouting();
         app.UseCors();
         app.UseGrpcWeb();
 
@@ -530,6 +540,7 @@ public static class WebApplicationExtensions
                     var ivyLicenseTag = $"<meta name=\"ivy-license\" content=\"{ivyLicense}\" />";
                     html = html.Replace("</head>", $"  {ivyLicenseTag}\n</head>");
                 }
+
 #if DEBUG
                 var ivyLicensePublicKey = configuration["Ivy:LicensePublicKey"] ?? "";
                 if (!string.IsNullOrEmpty(ivyLicensePublicKey))

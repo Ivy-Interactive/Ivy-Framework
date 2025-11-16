@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Reflection;
 using System.Text.Json;
@@ -43,18 +45,64 @@ public class PathToAppIdMiddleware(RequestDelegate next, ILogger<PathToAppIdMidd
             return;
         }
 
-        // Skip if path starts with any excluded pattern (must be exact segment match)
-        if (RoutingConstants.ExcludedPaths.Any(excluded => path == excluded || path.StartsWith(excluded + "/")))
+        // First check if routing already found an endpoint (this works if UseRouting already executed)
+        var endpoint = context.GetEndpoint();
+        if (endpoint != null)
         {
+            logger.LogDebug("Path '{Path}' already has matched endpoint, skipping conversion", originalPath);
             await next(context);
             return;
         }
 
-        // Skip if path has a static file extension
-        if (RoutingConstants.StaticFileExtensions.Any(ext => path.EndsWith(ext)))
+        // If endpoint is not found yet, check EndpointDataSource to see if this path matches any registered endpoint
+        // This is needed because in minimal API, MapControllers() registers endpoints but routing happens later
+        var endpointDataSource = context.RequestServices.GetService<EndpointDataSource>();
+        if (endpointDataSource != null)
         {
-            await next(context);
-            return;
+            // Check if any endpoint matches this path
+            foreach (var ep in endpointDataSource.Endpoints)
+            {
+                if (ep is RouteEndpoint routeEp)
+                {
+                    var routePath = GetRoutePath(routeEp.RoutePattern);
+
+                    // Check if current path matches this endpoint (exact or starts with route + "/")
+                    if (!string.IsNullOrEmpty(routePath) &&
+                        (originalPath.Equals(routePath, StringComparison.OrdinalIgnoreCase) ||
+                         originalPath.StartsWith(routePath + "/", StringComparison.OrdinalIgnoreCase)))
+                    {
+                        logger.LogDebug("Path '{Path}' matches endpoint route '{Route}', skipping conversion",
+                            originalPath, routePath);
+                        await next(context);
+                        return;
+                    }
+                }
+            }
+        }
+
+        // Get all excluded paths from routing-constants.json
+        var excludedPaths = RoutingConstants.ExcludedPaths;
+
+        // Skip if path starts with any excluded pattern (must be exact segment match)
+        foreach (var excluded in excludedPaths)
+        {
+            if (path == excluded || path.StartsWith(excluded + "/"))
+            {
+                logger.LogDebug("Path '{Path}' matches excluded pattern, skipping conversion", originalPath);
+                await next(context);
+                return;
+            }
+        }
+
+        // Skip if path has a static file extension
+        var staticExtensions = RoutingConstants.StaticFileExtensions;
+        foreach (var ext in staticExtensions)
+        {
+            if (path.EndsWith(ext))
+            {
+                await next(context);
+                return;
+            }
         }
 
         // Skip if already has appId query parameter
@@ -84,6 +132,40 @@ public class PathToAppIdMiddleware(RequestDelegate next, ILogger<PathToAppIdMidd
         }
 
         await next(context);
+    }
+
+    /// <summary>
+    /// Extracts the route path from a RoutePattern, building from segments if RawText is empty.
+    /// </summary>
+    private static string? GetRoutePath(RoutePattern routePattern)
+    {
+        var routePath = routePattern.RawText;
+
+        // Build path from segments if RawText is empty
+        if (string.IsNullOrEmpty(routePath))
+        {
+            var segments = new List<string>();
+            foreach (var segment in routePattern.PathSegments)
+            {
+                var segmentType = segment.GetType().Name;
+                if (segmentType == "RoutePatternLiteralSegment")
+                {
+                    var contentProp = segment.GetType().GetProperty("Content");
+                    if (contentProp?.GetValue(segment) is string content)
+                    {
+                        segments.Add(content);
+                    }
+                }
+                else if (segmentType.Contains("Parameter"))
+                {
+                    // For routes with parameters like /test-route/{id}, check if path starts with /test-route
+                    break;
+                }
+            }
+            routePath = segments.Count > 0 ? "/" + string.Join("/", segments) : null;
+        }
+
+        return routePath;
     }
 }
 
