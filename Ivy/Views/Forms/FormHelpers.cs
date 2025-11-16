@@ -27,13 +27,13 @@ public static class FormHelpers
     {
         var displayAttr = propertyInfo.GetCustomAttribute<DisplayAttribute>();
         if (displayAttr == null) return new DisplayInfo();
-        
+
         return new DisplayInfo(
             Name: displayAttr.Name,
             Description: displayAttr.Description,
             GroupName: displayAttr.GroupName,
             Prompt: displayAttr.Prompt,
-            Order: displayAttr.Order
+            Order: displayAttr.GetOrder()
         );
     }
 
@@ -42,13 +42,13 @@ public static class FormHelpers
     {
         var displayAttr = fieldInfo.GetCustomAttribute<DisplayAttribute>();
         if (displayAttr == null) return new DisplayInfo();
-        
+
         return new DisplayInfo(
             Name: displayAttr.Name,
             Description: displayAttr.Description,
             GroupName: displayAttr.GroupName,
             Prompt: displayAttr.Prompt,
-            Order: displayAttr.Order
+            Order: displayAttr.GetOrder()
         );
     }
 

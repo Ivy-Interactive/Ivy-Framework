@@ -8,14 +8,8 @@ using Ivy.Widgets.Inputs;
 
 namespace Ivy.Views.Forms;
 
-/// <summary>Responsible for automatically scaffolding form fields from model types with support for DataAnnotations attributes.</summary>
-public static class FormScaffolder
+internal static class FormScaffolder
 {
-    /// <summary>Scaffolds form fields from a model type with automatic input type detection and DataAnnotations support.</summary>
-    /// <typeparam name="TModel">The model type to scaffold fields from.</typeparam>
-    /// <param name="modelType">The type of the model.</param>
-    /// <param name="size">The size to apply to scaffolded inputs.</param>
-    /// <returns>Dictionary of field names to form builder fields.</returns>
     public static Dictionary<string, FormBuilderField<TModel>> ScaffoldFields<TModel>(Type modelType, Sizes size = Sizes.Medium)
     {
         var fields = GetFieldsAndProperties(modelType);
@@ -63,12 +57,7 @@ public static class FormScaffolder
         return scaffoldedFields;
     }
 
-    /// <summary>Creates an input factory function for a field based on its name and type.</summary>
-    /// <param name="name">The field name.</param>
-    /// <param name="type">The field type.</param>
-    /// <param name="size">The size to apply to the input.</param>
-    /// <returns>Input factory function or null if no suitable input type found.</returns>
-    public static Func<IAnyState, IAnyInput>? ScaffoldInputFactory(string name, Type type, Sizes size)
+    private static Func<IAnyState, IAnyInput>? ScaffoldInputFactory(string name, Type type, Sizes size)
     {
         Type nonNullableType = Nullable.GetUnderlyingType(type) ?? type;
 
@@ -189,8 +178,7 @@ public static class FormScaffolder
 
         return fieldsAndProperties;
     }
-
-    /// <summary>Internal record for holding field/property information during scaffolding.</summary>
+    
     private record FieldPropertyInfo
     {
         public required string Name { get; init; }

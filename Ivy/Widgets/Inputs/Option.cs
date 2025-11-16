@@ -73,15 +73,16 @@ public static class OptionExtensions
 
         IAnyOption MakeOption(object e)
         {
-            var description = enumType.GetField(e.ToString()!)?
+            var label = enumType.GetField(e.ToString()!)?
                 .GetCustomAttributes(typeof(DescriptionAttribute), false)
                 .Cast<DescriptionAttribute>()
                 .FirstOrDefault()?.Description ?? Utils.SplitPascalCase(e.ToString());
 
             return (IAnyOption)Activator.CreateInstance(
                 typeof(Option<>).MakeGenericType(enumType),
-                description,
+                label,
                 Convert.ChangeType(e, enumType),
+                null,
                 null
             )!;
         }
