@@ -2,7 +2,6 @@
 
 namespace Ivy;
 
-/// <summary>A video player control that allows users to play video from a given source.</summary>
 public record VideoPlayer : WidgetBase<VideoPlayer>
 {
     public VideoPlayer(
@@ -36,7 +35,6 @@ public record VideoPlayer : WidgetBase<VideoPlayer>
 
 }
 
-/// <summary>Extension methods for configuring video players.</summary>
 public static class VideoPlayerExtensions
 {
     public static VideoPlayer Source(this VideoPlayer widget, string source)

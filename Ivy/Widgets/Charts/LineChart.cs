@@ -15,9 +15,7 @@ public record LineChart : WidgetBase<LineChart>
         Height = Size.Full();
     }
 
-    /// <summary>
-    /// This constructor automatically creates a basic line configuration with default axes and tooltip.
-    /// </summary>
+    /// <summary>This constructor automatically creates a basic line configuration with default axes and tooltip.</summary>
     public LineChart(object data, string dataKey, string nameKey)
     {
         Data = data;

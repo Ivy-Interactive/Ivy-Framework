@@ -5,7 +5,6 @@ using Ivy.Shared;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
-/// <summary>Progress widget visually representing task completion status with customizable color variants and state binding for dynamic updates.</summary>
 public record Progress : WidgetBase<Progress>
 {
     public enum ColorVariants
@@ -37,7 +36,6 @@ public record Progress : WidgetBase<Progress>
     }
 }
 
-/// <summary>Extension methods for Progress widget providing fluent API for configuring appearance, behavior, and content.</summary>
 public static class ProgressExtensions
 {
     public static Progress Value(this Progress progress, IState<int> value)

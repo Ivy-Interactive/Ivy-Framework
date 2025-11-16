@@ -17,9 +17,7 @@ public record AreaChart : WidgetBase<AreaChart>
 
     [Prop] public object Data { get; init; }
 
-    /// <summary>
-    /// Note: This property is not currently implemented on the frontend.
-    /// </summary>
+    /// <summary>Note: This property is not currently implemented on the frontend.</summary>
     [Prop] public Layouts Layout { get; init; } = Layouts.Vertical; //todo: not implemented on the frontend
 
     [Prop] public ColorScheme ColorScheme { get; init; } = ColorScheme.Default;

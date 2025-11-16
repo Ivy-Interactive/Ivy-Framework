@@ -3,7 +3,6 @@ using Ivy.Core;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
-/// <summary>Tooltip widget providing contextual information when hovering or focusing on trigger element.</summary>
 public record Tooltip : WidgetBase<Tooltip>
 {
     public Tooltip(object trigger, object content) : base([new Slot("Trigger", trigger), new Slot("Content", content)])
@@ -17,7 +16,6 @@ public record Tooltip : WidgetBase<Tooltip>
     }
 }
 
-/// <summary>Extension methods for adding tooltips to widgets and views enabling fluent API for tooltip integration.</summary>
 public static class TooltipExtensions
 {
     public static IWidget WithTooltip(this IWidget widget, string toolTip)

@@ -5,8 +5,6 @@ namespace Ivy;
 
 public record Expandable : WidgetBase<Expandable>
 {
-    /// <param name="header">Content to display in header section, remains visible at all times.</param>
-    /// <param name="content">Content that can be expanded or collapsed, initially hidden.</param>
     public Expandable(object header, object content) : base([new Slot("Header", header), new Slot("Content", content)])
     {
 
@@ -25,9 +23,7 @@ public static class ExpandableExtensions
         return widget;
     }
 
-    /// <param name="widget">Expandable widget to configure.</param>
-    /// <param name="open">True to open by default; false to close by default.</param>
-    /// <returns>Configured expandable widget for method chaining.</returns>
+    /// <summary>True to open by default; false to close by default.</summary>
     public static Expandable Open(this Expandable widget, bool open = true)
     {
         widget.Open = open;

@@ -28,34 +28,16 @@ public record Confetti : WidgetBase<Confetti>
 /// </summary>
 public static class ConfettiExtensions
 {
-    /// <summary>
-    /// Wraps a widget with a confetti effect.
-    /// </summary>
-    /// <param name="widget">The widget to wrap with confetti effect.</param>
-    /// <param name="trigger">The trigger condition for the confetti effect.</param>
-    /// <returns>A Confetti widget.</returns>
     public static Confetti WithConfetti(this IWidget widget, AnimationTrigger trigger = AnimationTrigger.Auto)
     {
         return new Confetti(widget).Trigger(trigger);
     }
 
-    /// <summary>
-    /// Wraps a view with a confetti effect.
-    /// </summary>
-    /// <param name="view">The view to wrap with confetti effect.</param>
-    /// <param name="trigger">The trigger condition for the confetti effect.</param>
-    /// <returns>A Confetti widget.</returns>
     public static Confetti WithConfetti(this IView view, AnimationTrigger trigger = AnimationTrigger.Auto)
     {
         return new Confetti(view).Trigger(trigger);
     }
 
-    /// <summary>
-    /// Sets the trigger condition for when the confetti effect should activate.
-    /// </summary>
-    /// <param name="confetti">The Confetti widget.</param>
-    /// <param name="trigger">The trigger condition.</param>
-    /// <returns>The confetti widget with the specified trigger condition.</returns>
     public static Confetti Trigger(this Confetti confetti, AnimationTrigger trigger)
     {
         return confetti with { Trigger = trigger };

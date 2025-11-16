@@ -32,7 +32,7 @@ public record Blade : WidgetBase<Blade>
 
     [Event] public Func<Event<Blade>, ValueTask>? OnRefresh { get; set; }
 
-    /// <summary>Automatically wraps Action delegates in ValueTask-returning functions for backward compatibility.</summary>
+    /// <summary>Compatibility constructor for Action-based event handlers.</summary>
     public Blade(IView bladeView, int index, string? title, Size? width, Action<Event<Blade>>? onClose, Action<Event<Blade>>? onRefresh)
         : this(bladeView, index, title, width,
                onClose != null ? e => { onClose(e); return ValueTask.CompletedTask; }

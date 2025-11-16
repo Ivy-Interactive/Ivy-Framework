@@ -4,7 +4,6 @@ using Ivy.Shared;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
-/// <summary>Base class for all widgets.</summary>
 public abstract record WidgetBase<T> : AbstractWidget where T : WidgetBase<T>
 {
     protected WidgetBase(params object[] children) : base(children)

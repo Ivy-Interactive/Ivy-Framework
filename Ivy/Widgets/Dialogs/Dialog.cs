@@ -18,7 +18,6 @@ public record Dialog : WidgetBase<Dialog>
 
     [Event] public Func<Event<Dialog>, ValueTask> OnClose { get; set; }
 
-    /// <returns>This method always throws an exception.</returns>
     public static Dialog operator |(Dialog dialog, object child)
     {
         throw new NotSupportedException("Dialog does not support children.");
