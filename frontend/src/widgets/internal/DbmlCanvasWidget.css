@@ -55,6 +55,10 @@
 }
 
 /* ReactFlow Edge styling */
+.react-flow__edge {
+  pointer-events: none !important;
+}
+
 .react-flow__edge-path {
   stroke: var(--foreground) !important;
 }
@@ -78,6 +82,7 @@
 .react-flow__node {
   /* Disable transitions during drag to prevent slow-motion effect */
   transition: none !important;
+  z-index: 1 !important;
 }
 
 /* Only apply transitions to border changes, not position/transform */

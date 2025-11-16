@@ -30,7 +30,24 @@ public static class JobSchedulerExtensions
             (Math.Abs(job.Progress - 1.0) < 0.0001 || job.Progress == 0) ? null
                 : new Progress(Convert.ToInt32(Math.Round(job.Progress * 100.0))).Width(Size.Units(50));
 
-        object? GetError() => job.State != JobState.Failed ? null : new ErrorTeaserView(job.CompletionSource.Task.Exception!);
+        // Only show error if this job failed and it has no children, or if it has children but none of them failed
+        // This prevents showing the error twice (once in parent, once in child)
+        object? GetError()
+        {
+            if (job.State != JobState.Failed)
+                return null;
+
+            // If this job has children, check if any child failed
+            if (job.Children.Any())
+            {
+                var anyChildFailed = job.Children.Any(c => c.State == JobState.Failed);
+                // Only show error in parent if no child failed (meaning parent itself failed)
+                return anyChildFailed ? null : new ErrorTeaserView(job.CompletionSource.Task.Exception!);
+            }
+
+            // No children, show the error
+            return new ErrorTeaserView(job.CompletionSource.Task.Exception!);
+        }
 
         return Layout.Vertical()
                | (Layout.Horizontal().Align(Align.Left).Gap(2)
@@ -39,6 +56,7 @@ public static class JobSchedulerExtensions
                   | new Spacer().Width(Size.Grow())
                   | GetProgress()
                )
+               | job.Display
                | GetError()
                | (job.Children.Any()
                    ? Layout.Horizontal().Gap(2).Visible(job.State != JobState.Finished)

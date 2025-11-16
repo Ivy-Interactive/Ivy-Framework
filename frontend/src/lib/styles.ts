@@ -1,8 +1,8 @@
 export const inputStyles = {
   invalid:
-    'bg-destructive border-destructive text-destructive-foreground placeholder-destructive-foreground focus:ring-destructive focus:border-destructive',
+    'bg-destructive border-destructive text-destructive-foreground placeholder-destructive-foreground focus-visible:border-destructive',
   invalidInput:
-    'border-destructive text-destructive-foreground placeholder-destructive-foreground focus:ring-destructive focus:border-destructive',
+    'border-destructive text-destructive-foreground placeholder-destructive-foreground focus-visible:border-destructive',
 };
 
 export const getWidth = (width?: string): React.CSSProperties => {
@@ -20,9 +20,10 @@ export const getWidth = (width?: string): React.CSSProperties => {
 const _getWantedWidth = (width?: string): React.CSSProperties => {
   if (!width) return {};
   const [sizeType, value] = width.split(':');
+  const remValue = parseFloat(value) * 0.25;
   switch (sizeType.toLowerCase()) {
     case 'units':
-      return { width: `${parseFloat(value) * 0.25}rem` };
+      return { width: `${remValue}rem`, maxWidth: `${remValue}rem` };
     case 'px':
       return { width: `${value}px` };
     case 'rem':

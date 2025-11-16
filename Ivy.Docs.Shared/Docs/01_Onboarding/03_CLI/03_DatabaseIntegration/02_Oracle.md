@@ -41,7 +41,7 @@ For all connection options, see the [Oracle documentation](https://docs.oracle.c
 
 Your connection string will be stored in .NET user secrets.
 
-See [Database Integration Overview](Overview.md) for more information on adding database connections to Ivy.
+See [Database Overview](01_DatabaseOverview.md) for more information on adding database connections to Ivy.
 
 ## Configuration
 
@@ -75,7 +75,7 @@ For detailed troubleshooting, refer to [Oracle Database Error Messages](https://
 
 ## Related Documentation
 
-- [Database Overview](Overview.md)
+- [Database Overview](01_DatabaseOverview.md)
 - [SQL Server Provider](SqlServer.md)
 - [PostgreSQL Provider](PostgreSql.md)
 - [Enterprise Features](../../02_Concepts/Services.md)

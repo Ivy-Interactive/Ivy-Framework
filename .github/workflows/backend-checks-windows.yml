@@ -1,4 +1,6 @@
 name: Backend Checks (Windows)
+permissions:
+  contents: read
 on:
   push:
     branches: [ main, master ]
@@ -19,7 +21,11 @@ jobs:
     # Update workloads
     - name: Update .NET workloads
       run: dotnet workload update
-    
+
+    # Restore packages
+    - name: Restore packages
+      run: dotnet restore
+
     # Check code formatting
     - name: Check code formatting
       run: dotnet format --verify-no-changes

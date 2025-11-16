@@ -153,9 +153,9 @@ public static class DropDownMenuExtensions
     }
 
     /// <summary>Sets menu items enabling dynamic menu content.</summary>
-    public static DropDownMenu Items(this DropDownMenu dropDownMenu, MenuItem[] items)
+    public static DropDownMenu Items(this DropDownMenu dropDownMenu, IEnumerable<MenuItem> items)
     {
-        return dropDownMenu with { Items = items };
+        return dropDownMenu with { Items = items.ToArray() };
     }
 
     /// <summary>Sets selection event handler.</summary>

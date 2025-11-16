@@ -35,8 +35,6 @@ public enum Languages
 public record Code : WidgetBase<Code>
 {
     /// <summary>Initializes code widget with content and language. Default size: full width, max 800px height.</summary>
-    /// <param name="content">Source code to display.</param>
-    /// <param name="language">Programming language. Default: C#.</param>
     public Code(string content, Languages language = Languages.Csharp)
     {
         Content = content;
@@ -64,31 +62,26 @@ public record Code : WidgetBase<Code>
 /// <summary>Extension methods for Code widget configuration.</summary>
 public static class CodeExtensions
 {
-    /// <summary>Sets the source code content.</summary>
     public static Code Content(this Code code, string content)
     {
         return code with { Content = content };
     }
 
-    /// <summary>Sets the programming language for syntax highlighting.</summary>
     public static Code Language(this Code code, Languages language)
     {
         return code with { Language = language };
     }
 
-    /// <summary>Sets whether to show line numbers. Default: true.</summary>
     public static Code ShowLineNumbers(this Code code, bool showLineNumbers = true)
     {
         return code with { ShowLineNumbers = showLineNumbers };
     }
 
-    /// <summary>Sets whether to show copy button. Default: true.</summary>
     public static Code ShowCopyButton(this Code code, bool showCopyButton = true)
     {
         return code with { ShowCopyButton = showCopyButton };
     }
 
-    /// <summary>Sets whether to show border. Default: true.</summary>
     public static Code ShowBorder(this Code code, bool showBorder = true)
     {
         return code with { ShowBorder = showBorder };

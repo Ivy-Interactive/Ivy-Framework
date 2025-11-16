@@ -34,7 +34,7 @@ Before using Microsoft Entra with Ivy, you'll need to register an application an
      - **Accounts in any organizational directory (Multitenant)**: Users in any organization's Entra ID can sign in.
      - **Accounts in any organizational directory (Multitenant) and personal Microsoft accounts**: Both organizational accounts and consumer Microsoft accounts (e.g., Skype, Xbox) can sign in.
      - **Personal Microsoft accounts only**: Only consumer Microsoft accounts can sign in.
-   - **Redirect URI**: Select "Web" and enter `http://localhost:5010/webhook`. Replace the base URL (`http://localhost:5010`) with your application's URL.
+   - **Redirect URI**: Select "Web" and enter `http://localhost:5010/ivy/webhook`. Replace the base URL (`http://localhost:5010`) with your application's URL.
 5. **Click "Register"**
 
 ### Step 2: Get Your Configuration Values
@@ -119,7 +119,7 @@ When deploying an Ivy project without using `ivy deploy`, your local .NET user s
 
 > **Note:** If configuration is present in both .NET user secrets and environment variables, Ivy will use the values in **.NET user secrets over environment variables**.
 
-For more information, see [Authentication Overview](Overview.md).
+For more information, see [Authentication Overview](01_AuthenticationOverview.md).
 
 #### Configuration Parameters
 
@@ -174,7 +174,7 @@ The following parameters are supported via connection string, environment variab
 
 ## Related Documentation
 
-- [Authentication Overview](Overview.md)
+- [Authentication Overview](01_AuthenticationOverview.md)
 - [Auth0 Provider](Auth0.md)
 - [Supabase Provider](Supabase.md)
 - [Microsoft Entra ID Documentation](https://learn.microsoft.com/en-us/entra/identity/)

@@ -152,7 +152,7 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
     >
       {/* Custom Sidebar with Slide Animation */}
       <div
-        className={`flex h-full w-[256px] flex-col bg-sidebar text-sidebar-foreground border-r border-border transition-transform duration-300 ease-in-out relative overflow-hidden ${
+        className={`flex h-full w-[256px] flex-col bg-background text-foreground border-r border-border transition-transform duration-300 ease-in-out relative overflow-hidden ${
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -170,7 +170,7 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
         )}
         {hasContent(slots?.SidebarFooter) && (
           <div className="flex flex-col shrink-0">
-            <div className="flex flex-col px-4 py-3 gap-4 min-h-0">
+            <div className="flex flex-col p-2 gap-4 min-h-0">
               {slots?.SidebarFooter}
             </div>
           </div>
@@ -181,9 +181,10 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
       {showToggleButton && mainAppSidebar && (
         <button
           onClick={handleManualToggle}
-          className="absolute top-2 z-50 p-2 rounded-md bg-background hover:bg-sidebar-accent hover:text-accent-foreground cursor-pointer transition-all duration-200"
+          className="absolute top-0 z-50 p-2 rounded-md bg-background hover:bg-muted hover:text-accent-foreground cursor-pointer transition-all duration-200"
           style={{
-            left: isSidebarOpen ? 'calc(16rem + 8px)' : '8px',
+            left: isSidebarOpen ? 'calc(16rem + 4px)' : '4px',
+            marginTop: '3px',
             transition: 'left 300ms ease-in-out',
             transform: 'translateX(0)', // Ensure button moves with its parent sidebar
           }}
@@ -270,7 +271,7 @@ const CollapsibleMenuItem: React.FC<{
         <li className="relative">
           <CollapsibleTrigger asChild>
             <button
-              className="flex w-full items-center gap-2 rounded-lg p-2 text-large-label hover:bg-sidebar-accent hover:text-accent-foreground cursor-pointer h-8"
+              className="flex w-full items-center gap-2 rounded-lg p-2 text-large-label hover:bg-accent hover:text-accent-foreground cursor-pointer h-8"
               onClick={() => {
                 // For items with children, toggle the collapsible state
                 // Only try to navigate if the item has a tag
@@ -303,7 +304,7 @@ const CollapsibleMenuItem: React.FC<{
     return (
       <li key={item.label}>
         <button
-          className="flex w-full items-center gap-2 rounded-lg p-2 text-large-label hover:bg-sidebar-accent hover:text-accent-foreground cursor-pointer h-8"
+          className="flex w-full items-center gap-2 rounded-lg p-2 text-large-label hover:bg-accent hover:text-accent-foreground cursor-pointer h-8"
           onClick={() => onItemClick(item)}
           onMouseDown={e => onCtrlRightMouseClick(e, item)}
         >
@@ -338,7 +339,7 @@ const renderMenuItems = (
       if (level === 0) {
         return (
           <div key={item.label} className="space-y-1 mt-6 first:mt-0">
-            <h4 className="px-3 py-2 text-small-label text-muted-foreground mb-0">
+            <h4 className="sticky top-0 z-10 bg-background px-3 py-2 text-small-label text-muted-foreground mb-0">
               {item.label}
             </h4>
             <ul className="space-y-1">
@@ -366,7 +367,7 @@ const renderMenuItems = (
         return (
           <li key={item.tag}>
             <button
-              className="flex w-full items-center gap-2 rounded-lg p-2 text-body hover:bg-sidebar-accent hover:text-accent-foreground cursor-pointer h-8"
+              className="flex w-full items-center gap-2 rounded-lg p-2 text-body hover:bg-accent hover:text-accent-foreground cursor-pointer h-8"
               onClick={() => onItemClick(item)}
               onMouseDown={e => onCtrlRightMouseClick(e, item)}
             >
@@ -379,7 +380,7 @@ const renderMenuItems = (
         return (
           <li key={item.tag}>
             <button
-              className="flex w-full items-center gap-2 rounded-lg p-2 text-body hover:bg-sidebar-accent hover:text-accent-foreground cursor-pointer h-8"
+              className="flex w-full items-center gap-2 rounded-lg p-2 text-body hover:bg-accent hover:text-accent-foreground cursor-pointer h-8"
               onClick={() => onItemClick(item)}
               onMouseDown={e => onCtrlRightMouseClick(e, item)}
             >
@@ -448,7 +449,7 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
       if (item.children && item.children.length > 0) {
         return (
           <div key={item.label} className="space-y-1 mt-6 first:mt-0">
-            <h4 className="px-3 py-2 text-small-label text-muted-foreground mb-0">
+            <h4 className="sticky top-0 z-10 bg-background px-3 py-2 text-small-label text-muted-foreground mb-0">
               {item.label}
             </h4>
             <ul className="space-y-1">
@@ -464,13 +465,18 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
         return (
           <li key={item.tag}>
             <button
-              className={`flex w-full items-center gap-2 rounded-lg p-2 text-sm hover:bg-sidebar-accent hover:text-accent-foreground cursor-pointer h-8 ${
+              className={`flex w-full items-center gap-2 rounded-lg p-2 text-sm hover:bg-accent hover:text-accent-foreground cursor-pointer h-8 ${
                 isActive ? 'bg-accent text-accent-foreground' : ''
               }`}
               tabIndex={-1} // Not focusable
-              onClick={() =>
-                item.tag && eventHandler('OnSelect', id, [item.tag])
-              }
+              onClick={() => {
+                if (item.tag) {
+                  if (searchActive && flatIdx !== -1) {
+                    setSelectedIndex(flatIdx);
+                  }
+                  eventHandler('OnSelect', id, [item.tag]);
+                }
+              }}
               onMouseDown={e => onCtrlRightMouseClick(e, item)}
               onMouseEnter={() => {
                 if (searchActive) {

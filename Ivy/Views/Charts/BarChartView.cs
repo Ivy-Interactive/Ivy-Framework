@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Immutable;
 using System.Dynamic;
 using System.Linq.Expressions;
@@ -139,6 +140,8 @@ public class BarChartBuilder<TSource>(
     : ViewBase
 {
     private readonly List<Measure<TSource>> _measures = [.. measures ?? []];
+    private Toolbox? _toolbox;
+    private Func<Toolbox, Toolbox>? _toolboxFactory;
 
     /// <summary>
     /// Builds the bar chart by processing the data and applying the configured style.
@@ -188,7 +191,19 @@ public class BarChartBuilder<TSource>(
             _measures.ToArray()
         );
 
-        return polish?.Invoke(scaffolded) ?? scaffolded;
+        var configuredChart = scaffolded;
+
+        if (_toolbox is not null)
+        {
+            configuredChart = configuredChart.Toolbox(_toolbox);
+        }
+        else if (_toolboxFactory is not null)
+        {
+            var baseToolbox = configuredChart.Toolbox ?? new Toolbox();
+            configuredChart = configuredChart.Toolbox(_toolboxFactory(baseToolbox));
+        }
+
+        return polish?.Invoke(configuredChart) ?? configuredChart;
     }
 
     /// <summary>
@@ -213,6 +228,27 @@ public class BarChartBuilder<TSource>(
     {
         _measures.Add(new Measure<TSource>(name, aggregator));
         return this;
+    }
+
+    public BarChartBuilder<TSource> Toolbox(Toolbox toolbox)
+    {
+        ArgumentNullException.ThrowIfNull(toolbox);
+        _toolbox = toolbox;
+        _toolboxFactory = null;
+        return this;
+    }
+
+    public BarChartBuilder<TSource> Toolbox(Func<Toolbox, Toolbox> configure)
+    {
+        ArgumentNullException.ThrowIfNull(configure);
+        _toolbox = null;
+        _toolboxFactory = configure;
+        return this;
+    }
+
+    public BarChartBuilder<TSource> Toolbox()
+    {
+        return Toolbox(_ => new Toolbox());
     }
 }
 

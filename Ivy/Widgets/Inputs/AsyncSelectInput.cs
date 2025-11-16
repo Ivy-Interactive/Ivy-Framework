@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using System.Reactive.Linq;
 using Ivy.Core;
 using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
@@ -162,16 +163,12 @@ public class AsyncSelectInputView<TValue> : ViewBase, IAnyAsyncSelectInputBase, 
     /// </summary>
     public string? Placeholder { get; set; }
 
-    /// <summary>
-    /// Builds the UI.
-    /// </summary>
     public override object? Build()
     {
-        IState<string?> displayValue = UseState<string?>((string?)null!);
+        IState<string?> displayValue = UseState<string?>();
         var open = UseState(false);
         var loading = UseState(false);
         var refreshToken = this.UseRefreshToken();
-        var client = UseService<IClientProvider>();
 
         UseEffect(async () =>
         {
@@ -246,16 +243,29 @@ public class AsyncSelectListSheet<T>(RefreshToken refreshToken, AsyncSelectQuery
     /// </summary>
     public override object? Build()
     {
+        var records = UseState(Array.Empty<Option<T>>);
+        var filter = UseState("");
+        var loading = UseState(true);
+
+        UseEffect(async () =>
+        {
+            loading.Set(true);
+            records.Set(await query(filter.Value));
+            loading.Set(false);
+        }, [filter.Throttle(TimeSpan.FromMilliseconds(250)).ToTrigger()]);
+
         var onItemClicked = new Action<Event<ListItem>>(e =>
         {
             var option = (Option<T>)e.Sender.Tag!;
             refreshToken.Refresh(option.TypedValue);
         });
 
-        ListItem CreateItem(Option<T> option) =>
-            new(title: option.Label, onClick: onItemClicked, tag: option);
+        var items = records.Value.Select(option =>
+            new ListItem(title: option.Label, subtitle: option.Description, onClick: onItemClicked, tag: option)).ToArray();
 
-        return new FilteredListView<Option<T>>(filter => query(filter), CreateItem);
+        return Layout.Vertical().Gap(2)
+            | filter.ToSearchInput().Placeholder("Search").Width(Size.Grow())
+            | (loading.Value ? Text.Block("Loading...") : new List(items));
     }
 }
 

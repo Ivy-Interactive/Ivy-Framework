@@ -3,7 +3,12 @@ import * as signalR from '@microsoft/signalr';
 import { WidgetEventHandlerType, WidgetNode } from '@/types/widgets';
 import { useToast } from '@/hooks/use-toast';
 import { showError } from '@/hooks/use-error-sheet';
-import { getIvyHost, getMachineId } from '@/lib/utils';
+import {
+  getIvyHost,
+  getMachineId,
+  validateRedirectUrl,
+  validateLinkUrl,
+} from '@/lib/utils';
 import { logger } from '@/lib/logger';
 import { applyPatch, Operation } from 'fast-json-patch';
 import { cloneDeep } from 'lodash';
@@ -151,7 +156,45 @@ export const useBackend = (
   const machineId = getMachineId();
   const connectionId = connection?.connectionId;
   const currentConnectionRef = useRef<signalR.HubConnection | null>(null);
-  const stableAppId = chrome ? '' : appId;
+
+  // Stable values used in dependency arrays - only updated when we want to reconnect
+  const [stableAppId, setStableAppId] = useState(appId);
+  const [stableChrome, setStableChrome] = useState(chrome);
+
+  // Refs to always have latest values in callbacks, without needing to add them to dependency arrays
+  const latestAppIdRef = useRef(appId);
+  const latestChromeRef = useRef(chrome);
+
+  useEffect(() => {
+    latestAppIdRef.current = appId;
+  }, [appId]);
+
+  useEffect(() => {
+    latestChromeRef.current = chrome;
+  }, [chrome]);
+
+  const rootAppIdRef = useRef<string | undefined>(undefined);
+
+  const isRootConnection = parentId === null;
+
+  useEffect(() => {
+    if (!isRootConnection) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setStableAppId(appId);
+      setStableChrome(chrome);
+      return;
+    }
+
+    const rootAppId = rootAppIdRef.current;
+    const shouldReconnect =
+      !rootAppId ||
+      (rootAppId === '$chrome' ? chrome === false : appId !== rootAppId);
+
+    if (shouldReconnect) {
+      setStableAppId(appId);
+      setStableChrome(chrome);
+    }
+  }, [appId, chrome, isRootConnection]);
 
   useEffect(() => {
     if (import.meta.env.DEV && widgetTree) {
@@ -203,7 +246,7 @@ export const useBackend = (
       logger.debug('Processing SetAuthToken request', {
         hasAuthToken: !!message.authToken,
       });
-      const response = await fetch(`${getIvyHost()}/auth/set-auth-token`, {
+      const response = await fetch(`${getIvyHost()}/ivy/auth/set-auth-token`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(message.authToken),
@@ -229,16 +272,24 @@ export const useBackend = (
     logger.debug('Processing Redirect request', message);
     const { url, replaceHistory } = message;
 
-    if (url.startsWith('/')) {
+    // Validate URL to prevent open redirect vulnerabilities
+    // For redirects, only allow relative paths or same-origin URLs
+    const validatedUrl = validateRedirectUrl(url, false);
+    if (!validatedUrl) {
+      logger.warn('Invalid redirect URL rejected', { url });
+      return;
+    }
+
+    if (validatedUrl.startsWith('/')) {
       // For path-based redirects, update the pathname
       if (replaceHistory) {
-        window.history.replaceState(message.state, '', url);
+        window.history.replaceState(message.state, '', validatedUrl);
       } else {
-        window.history.pushState(message.state, '', url);
+        window.history.pushState(message.state, '', validatedUrl);
       }
     } else {
-      // For full URL redirects
-      window.location.href = url;
+      // For full URL redirects (same-origin only)
+      window.location.href = validatedUrl;
     }
   }, []);
 
@@ -279,7 +330,6 @@ export const useBackend = (
   );
 
   useEffect(() => {
-    // Clean up the previous connection before creating a new one
     if (currentConnectionRef.current) {
       currentConnectionRef.current.stop().catch(err => {
         logger.warn('Error stopping previous SignalR connection:', err);
@@ -288,7 +338,7 @@ export const useBackend = (
 
     const newConnection = new signalR.HubConnectionBuilder()
       .withUrl(
-        `${getIvyHost()}/messages?appId=${appId ?? ''}&appArgs=${appArgs ?? ''}&machineId=${machineId}&parentId=${parentId ?? ''}&chrome=${chrome}`
+        `${getIvyHost()}/ivy/messages?appId=${latestAppIdRef.current ?? ''}&appArgs=${appArgs ?? ''}&machineId=${machineId}&parentId=${parentId ?? ''}&chrome=${latestChromeRef.current}`
       )
       .withAutomaticReconnect()
       .build();
@@ -297,15 +347,25 @@ export const useBackend = (
     queueMicrotask(() => setConnection(newConnection));
 
     return () => {
-      // Clean up on component unmount
       if (currentConnectionRef.current === newConnection) {
         newConnection.stop().catch(err => {
           logger.warn('Error stopping SignalR connection during unmount:', err);
         });
         currentConnectionRef.current = null;
       }
+
+      if (isRootConnection) {
+        rootAppIdRef.current = undefined;
+      }
     };
-  }, [appArgs, stableAppId, machineId, parentId]);
+  }, [
+    appArgs,
+    stableAppId,
+    machineId,
+    parentId,
+    stableChrome,
+    isRootConnection,
+  ]);
 
   useEffect(() => {
     if (
@@ -316,7 +376,7 @@ export const useBackend = (
         .start()
         .then(() => {
           logger.info('✅ WebSocket connection established for:', {
-            appId,
+            appId: latestAppIdRef.current,
             parentId,
             connectionId: connection.connectionId,
           });
@@ -346,6 +406,13 @@ export const useBackend = (
             handleSetAuthToken(message);
           });
 
+          connection.on('SetRootAppId', (message: { rootAppId: string }) => {
+            logger.debug(`[${connection.connectionId}] SetRootAppId`, {
+              rootAppId: message.rootAppId,
+            });
+            rootAppIdRef.current = message.rootAppId;
+          });
+
           connection.on('SetTheme', theme => {
             logger.debug(`[${connection.connectionId}] SetTheme`, { theme });
             handleSetTheme(theme);
@@ -358,7 +425,13 @@ export const useBackend = (
 
           connection.on('OpenUrl', (url: string) => {
             logger.debug(`[${connection.connectionId}] OpenUrl`, { url });
-            window.open(url, '_blank');
+            // Validate URL to prevent open redirect vulnerabilities
+            const validatedUrl = validateLinkUrl(url);
+            if (validatedUrl !== '#') {
+              window.open(validatedUrl, '_blank', 'noopener,noreferrer');
+            } else {
+              logger.warn('Invalid OpenUrl request rejected', { url });
+            }
           });
 
           connection.on('Redirect', message => {
@@ -416,6 +489,7 @@ export const useBackend = (
         connection.off('CopyToClipboard');
         connection.off('HotReload');
         connection.off('SetAuthToken');
+        connection.off('SetRootAppId');
         connection.off('SetTheme');
         connection.off('OpenUrl');
         connection.off('Redirect');

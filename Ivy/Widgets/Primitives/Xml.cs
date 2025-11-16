@@ -8,13 +8,11 @@ namespace Ivy;
 public record Xml : WidgetBase<Xml>
 {
     /// <summary>Initializes XML widget from XObject with automatic string conversion.</summary>
-    /// <param name="xml">XObject (XElement, XDocument, etc.) to display as formatted XML.</param>
     public Xml(XObject xml) : this(xml.ToString() ?? string.Empty)
     {
     }
 
     /// <summary>Initializes XML widget with specified XML content string.</summary>
-    /// <param name="content">XML content string to display with syntax highlighting and interactive features.</param>
     public Xml(string content)
     {
         Content = content;

@@ -278,6 +278,25 @@ public class DisabledInputDemo : ViewBase
 Notice, how extension functions `ToTextInput`, and `ToPasswordInput` are used  to generate `TextInput` variants
 needed for the form.
 
+## Prefix and Suffix
+
+In certain scenarios, it is beneficial to prepend or append static content—such as text fragments or icons—to an input field. This practice is particularly useful for displaying the protocol in a URL field, a currency symbol, or an icon that denotes the expected input.
+
+```csharp demo-below
+public class UrlInputDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var domain = UseState("example");
+        return domain.ToTextInput()
+                     .Prefix(Icons.Globe)
+                     .Suffix(".com");
+    }
+}
+```
+
+The `Prefix` and `Suffix` methods accept either a `string` or an `IWidget`, thereby providing complete flexibility for augmenting the contextual information of the input.
+
 ## Shortcuts
 
 We can use associate keyboard shortcuts to text inputs the following way.
@@ -470,14 +489,16 @@ public class LoginForm : ViewBase
         return Layout.Vertical()
             | Text.Label("Login")
             | Layout.Vertical()
-                | Text.Label("Username")
                 | usernameState.ToTextInput()
                     .Placeholder("Enter your username")
-                | Text.Label("Password") 
+                    .WithField()
+                    .Label("Username")
                 | passwordState.ToPasswordInput()
                     .Placeholder("Enter your password")
                      // Disabled when username is empty
                     .Disabled(string.IsNullOrWhiteSpace(usernameState.Value))
+                    .WithField()
+                    .Label("Password")
                 | new Button("Login")
                     .Disabled(string.IsNullOrWhiteSpace(usernameState.Value) || 
                         string.IsNullOrWhiteSpace(passwordState.Value));                             

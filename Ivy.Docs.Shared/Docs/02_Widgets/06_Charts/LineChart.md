@@ -32,10 +32,12 @@ public class BasicLineChartDemo : ViewBase
             new { Month = "May", Desktop = 325, Mobile = 200 }
         };
         return Layout.Vertical()
-                 | data.ToLineChart(style: LineChartStyles.Default)
+                 | data.ToLineChart(
+                        style: LineChartStyles.Default)
                         .Dimension("Month", e => e.Month)
                         .Measure("Desktop", e => e.Sum(f => f.Desktop))
-                        .Measure("Mobile", e => e.Sum(f => f.Mobile));
+                        .Measure("Mobile", e => e.Sum(f => f.Mobile))
+                        .Toolbox();
     }
 }    
 ```
@@ -75,10 +77,12 @@ public class LineStylesDemo: ViewBase
         };
         return Layout.Vertical()
                  | styleInput
-                 | data.ToLineChart(style: style)
+                 | data.ToLineChart(
+                        style: style)
                         .Dimension("Month", e => e.Month)
                         .Measure("Desktop", e => e.Sum(f => f.Desktop))
-                        .Measure("Mobile", e => e.Sum(f => f.Mobile));
+                        .Measure("Mobile", e => e.Sum(f => f.Mobile))
+                        .Toolbox();
     }
 }
 ```
@@ -297,9 +301,11 @@ public class BitcoinChart : ViewBase
                  | Text.Large("Bitcoin Price - Last 100 Days")
                  | Text.Small($"Showing {bitcoinData.Length} days of data")
                  | Text.Html($"<i>From {bitcoinData.First().Date:yyyy-MM-dd} to {bitcoinData.Last().Date:yyyy-MM-dd}</i>")
-                 | bitcoinData.ToLineChart(style:LineChartStyles.Dashboard)
+                 | bitcoinData.ToLineChart(
+                        style: LineChartStyles.Dashboard)
                     .Dimension("Date", e => e.Date)
-                    .Measure("Price", e => e.Sum(f => f.Price));
+                    .Measure("Price", e => e.Sum(f => f.Price))
+                    .Toolbox();
     }
 }
 ```

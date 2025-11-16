@@ -2,6 +2,7 @@ using System.Reflection;
 using Ivy.Core;
 using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
+using Ivy.Services;
 using Ivy.Shared;
 using Ivy.Widgets.Inputs;
 
@@ -22,20 +23,26 @@ public static class FormScaffolder
 
         foreach (var field in fields)
         {
-            var displayInfo = field.PropertyInfo != null 
+            var displayInfo = field.PropertyInfo != null
                 ? FormHelpers.GetDisplayInfo(field.PropertyInfo)
                 : FormHelpers.GetDisplayInfo(field.FieldInfo!);
 
             var label = displayInfo.Name ?? Utils.LabelFor(field.Name, field.Type);
             var order = displayInfo.Order ?? int.MaxValue;
-            
+
+            // Wrap the input factory to match the expected signature
+            var factory = ScaffoldInputFactory(field.Name, field.Type, size);
+            Func<IAnyState, IViewContext, IAnyInput>? wrappedFactory = factory != null
+                ? (state, _) => factory(state)
+                : null;
+
             var scaffoldedField = new FormBuilderField<TModel>(
-                field.Name, 
-                label, 
-                order, 
-                ScaffoldInputFactory(field.Name, field.Type, size),
-                field.FieldInfo, 
-                field.PropertyInfo, 
+                field.Name,
+                label,
+                order,
+                wrappedFactory,
+                field.FieldInfo,
+                field.PropertyInfo,
                 field.Required
             );
 
@@ -65,9 +72,30 @@ public static class FormScaffolder
     {
         Type nonNullableType = Nullable.GetUnderlyingType(type) ?? type;
 
-        if (type == typeof(FileInput))
+        static bool IsFileUploadType(Type t)
         {
-            return (state) => state.ToFileInput().Size(size);
+            if (t == typeof(FileUpload)) return true;
+            if (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(FileUpload<>)) return true;
+            return typeof(IFileUpload).IsAssignableFrom(t);
+        }
+
+        // FileUpload fields are not auto-scaffolded - use .Builder() to configure them manually
+        if (IsFileUploadType(nonNullableType))
+        {
+            return null;
+        }
+
+        // Collections of FileUpload / FileUpload<T>
+        foreach (var it in type.GetInterfaces().Concat([type]))
+        {
+            if (it.IsGenericType && it.GetGenericTypeDefinition() == typeof(IEnumerable<>))
+            {
+                var arg = it.GetGenericArguments()[0];
+                if (IsFileUploadType(arg))
+                {
+                    return null;
+                }
+            }
         }
 
         if (name.EndsWith("Id") && (type == typeof(Guid) || type == typeof(int) || type == typeof(string)))
@@ -135,24 +163,26 @@ public static class FormScaffolder
         var fieldsAndProperties = new List<FieldPropertyInfo>();
 
         // Add fields
-        var fields = type.GetFields().Select(e => new FieldPropertyInfo
-        {
-            Name = e.Name,
-            Type = e.FieldType,
-            FieldInfo = e,
-            PropertyInfo = null,
-            Required = FormHelpers.IsRequired(e)
-        });
+        var fields = type.GetFields()
+            .Select(e => new FieldPropertyInfo
+            {
+                Name = e.Name,
+                Type = e.FieldType,
+                FieldInfo = e,
+                PropertyInfo = null,
+                Required = FormHelpers.IsRequired(e)
+            });
 
         // Add properties
-        var properties = type.GetProperties().Select(e => new FieldPropertyInfo
-        {
-            Name = e.Name,
-            Type = e.PropertyType,
-            FieldInfo = null,
-            PropertyInfo = e,
-            Required = FormHelpers.IsRequired(e)
-        });
+        var properties = type.GetProperties()
+            .Select(e => new FieldPropertyInfo
+            {
+                Name = e.Name,
+                Type = e.PropertyType,
+                FieldInfo = null,
+                PropertyInfo = e,
+                Required = FormHelpers.IsRequired(e)
+            });
 
         fieldsAndProperties.AddRange(fields);
         fieldsAndProperties.AddRange(properties);

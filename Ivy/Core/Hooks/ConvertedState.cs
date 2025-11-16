@@ -57,4 +57,38 @@ public class ConvertedState<TFrom, TTo>(IState<TFrom> originalState, Func<TFrom,
         get => forward(originalState.Value);
         set => originalState.Value = backward(value);
     }
+
+    /// <summary>
+    /// Sets the state value and returns the new value.
+    /// Thread-safe: delegates to the original state's Set method.
+    /// </summary>
+    /// <param name="value">The new value to set.</param>
+    /// <returns>The new state value.</returns>
+    public TTo Set(TTo value)
+    {
+        originalState.Set(backward(value));
+        return value;
+    }
+
+    /// <summary>
+    /// Updates the state value using a setter function and returns the new value.
+    /// Thread-safe: the entire read-modify-write operation is atomic.
+    /// </summary>
+    /// <param name="setter">Function that takes the current value and returns the new value.</param>
+    /// <returns>The new state value.</returns>
+    public TTo Set(Func<TTo, TTo> setter)
+    {
+        var newValue = originalState.Set(from => backward(setter(forward(from))));
+        return forward(newValue);
+    }
+
+    /// <summary>
+    /// Resets the state to its default value.
+    /// Thread-safe: delegates to the original state's Default method.
+    /// </summary>
+    /// <returns>The default value.</returns>
+    public TTo Reset()
+    {
+        return Set(default(TTo)!);
+    }
 }

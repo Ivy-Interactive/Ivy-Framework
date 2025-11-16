@@ -1,9 +1,12 @@
+using System.ComponentModel.DataAnnotations;
 using System.Linq.Expressions;
 using System.Reflection;
+using Ivy.Client;
 using Ivy.Core;
 using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
 using Ivy.Hooks;
+using Ivy.Services;
 using Ivy.Shared;
 using Ivy.Widgets.Inputs;
 
@@ -25,7 +28,7 @@ public class FormBuilderField<TModel>
         string name,
         string label,
         int order,
-        Func<IAnyState, IAnyInput>? inputFactory,
+        Func<IAnyState, IViewContext, IAnyInput>? inputFactory,
         FieldInfo? fieldInfo,
         PropertyInfo? propertyInfo,
         bool required)
@@ -103,8 +106,11 @@ public class FormBuilderField<TModel>
     /// <summary>Optional description text providing additional context for field.</summary>
     public string? Description { get; set; }
 
-    /// <summary>Factory function creating input control for this field.</summary>
-    public Func<IAnyState, IAnyInput>? InputFactory { get; set; }
+    /// <summary>Optional help text displayed as tooltip on info icon next to label.</summary>
+    public string? Help { get; set; }
+
+    /// <summary>Factory function creating input control for this field with access to view context.</summary>
+    public Func<IAnyState, IViewContext, IAnyInput>? InputFactory { get; set; }
 
     /// <summary>Whether field has been removed from form and should not be rendered.</summary>
     public bool Removed { get; set; }
@@ -127,6 +133,7 @@ public class FormBuilder<TModel> : ViewBase
     /// <summary>The text displayed on the form's submit button.</summary>
     public readonly string SubmitTitle;
     private readonly List<string> _groups = [];
+    private readonly Dictionary<string, bool> _groupOpenStates = [];
 
     /// <summary>The validation strategy for form fields. Default is OnBlur.</summary>
     public FormValidationStrategy ValidationStrategy { get; set; } = FormValidationStrategy.OnBlur;
@@ -149,7 +156,7 @@ public class FormBuilder<TModel> : ViewBase
     {
         var type = _model.GetStateType();
         var scaffoldedFields = FormScaffolder.ScaffoldFields<TModel>(type, Size);
-        
+
         foreach (var kvp in scaffoldedFields)
         {
             _fields[kvp.Key] = kvp.Value;
@@ -167,20 +174,28 @@ public class FormBuilder<TModel> : ViewBase
         }
     }
 
-
-    /// <summary>Configures custom input factory for specified field with automatic scaffolding wrapper.</summary>
+    /// <summary>Configures custom input factory for specified field (convenience overload without view context).</summary>
     /// <param name="field">Expression identifying field to configure.</param>
     /// <param name="factory">Input factory function to use for creating input control.</param>
     /// <returns>Form builder instance for method chaining.</returns>
     public FormBuilder<TModel> Builder(Expression<Func<TModel, object>> field, Func<IAnyState, IAnyInput> factory)
     {
+        return Builder(field, (state, _) => factory(state));
+    }
+
+    /// <summary>Configures custom input factory for specified field with automatic scaffolding wrapper.</summary>
+    /// <param name="field">Expression identifying field to configure.</param>
+    /// <param name="factory">Input factory function that receives both state and view context.</param>
+    /// <returns>Form builder instance for method chaining.</returns>
+    public FormBuilder<TModel> Builder(Expression<Func<TModel, object>> field, Func<IAnyState, IViewContext, IAnyInput> factory)
+    {
         var hint = GetField(field);
 
-        Func<IAnyState, IAnyInput> ScaffoldWrapper(Func<IAnyState, IAnyInput> inner)
+        Func<IAnyState, IViewContext, IAnyInput> ScaffoldWrapper(Func<IAnyState, IViewContext, IAnyInput> inner)
         {
-            return (state) =>
+            return (state, context) =>
             {
-                var input = inner(state);
+                var input = inner(state, context);
                 if (input is IAnyBoolInput boolInput)
                 {
                     // Only apply scaffold defaults if no custom label was set
@@ -207,15 +222,24 @@ public class FormBuilder<TModel> : ViewBase
         return this;
     }
 
-    /// <summary>Configures custom input factory for all fields of specified type.</summary>
+    /// <summary>Configures custom input factory for all fields of specified type (convenience overload without view context).</summary>
     /// <typeparam name="TU">Type of fields to configure.</typeparam>
     /// <param name="input">Input factory function to use for all fields of this type.</param>
     /// <returns>Form builder instance for method chaining.</returns>
     public FormBuilder<TModel> Builder<TU>(Func<IAnyState, IAnyInput> input)
     {
+        return Builder<TU>((state, _) => input(state));
+    }
+
+    /// <summary>Configures custom input factory for all fields of specified type.</summary>
+    /// <typeparam name="TU">Type of fields to configure.</typeparam>
+    /// <param name="input">Input factory function that receives both state and view context.</param>
+    /// <returns>Form builder instance for method chaining.</returns>
+    public FormBuilder<TModel> Builder<TU>(Func<IAnyState, IViewContext, IAnyInput> input)
+    {
         foreach (var hint in _fields.Values.Where(e => e.Type is TU))
         {
-            hint.InputFactory = (state) => input(state).Size(Size);
+            hint.InputFactory = (state, context) => input(state, context).Size(Size);
         }
 
         return this;
@@ -229,6 +253,17 @@ public class FormBuilder<TModel> : ViewBase
     {
         var hint = GetField(field);
         hint.Description = description;
+        return this;
+    }
+
+    /// <summary>Sets help text for specified field displayed as tooltip on info icon next to label.</summary>
+    /// <param name="field">Expression identifying field to configure.</param>
+    /// <param name="help">Help text to display in tooltip.</param>
+    /// <returns>Form builder instance for method chaining.</returns>
+    public FormBuilder<TModel> Help(Expression<Func<TModel, object>> field, string help)
+    {
+        var hint = GetField(field);
+        hint.Help = help;
         return this;
     }
 
@@ -285,9 +320,15 @@ public class FormBuilder<TModel> : ViewBase
     /// <param name="row">True to arrange fields side-by-side in the same row; false to stack vertically.</param>
     /// <param name="fields">Fields to arrange. When row is true, fields will be distributed evenly across the row width.</param>
     /// <returns>Form builder instance for method chaining.</returns>
+    [Obsolete("Use PlaceHorizontal")]
     public FormBuilder<TModel> Place(bool row, params Expression<Func<TModel, object>>[] fields)
     {
         return _Place(0, row ? Guid.NewGuid() : null, fields);
+    }
+
+    public FormBuilder<TModel> PlaceHorizontal(params Expression<Func<TModel, object>>[] fields)
+    {
+        return _Place(0, Guid.NewGuid(), fields);
     }
 
     /// <summary>Places specified fields in a specific column, optionally arranging them horizontally side-by-side.</summary>
@@ -300,12 +341,22 @@ public class FormBuilder<TModel> : ViewBase
         return _Place(col, row ? Guid.NewGuid() : null, fields);
     }
 
-    /// <summary>Groups specified fields under named section in specified column.</summary>
-    /// <param name="group">Name of group for organizing related fields.</param>
-    /// <param name="column">Column index where grouped fields should be placed.</param>
-    /// <param name="fields">Fields to include in named group.</param>
-    /// <returns>Form builder instance for method chaining.</returns>
+    public FormBuilder<TModel> Group(string group, params Expression<Func<TModel, object>>[] fields)
+    {
+        return Group(group, 0, false, fields);
+    }
+
+    public FormBuilder<TModel> Group(string group, bool open, params Expression<Func<TModel, object>>[] fields)
+    {
+        return Group(group, 0, open, fields);
+    }
+
     public FormBuilder<TModel> Group(string group, int column, params Expression<Func<TModel, object>>[] fields)
+    {
+        return Group(group, column, false, fields);
+    }
+
+    public FormBuilder<TModel> Group(string group, int column, bool open, params Expression<Func<TModel, object>>[] fields)
     {
         int order = 0;
 
@@ -313,6 +364,8 @@ public class FormBuilder<TModel> : ViewBase
         {
             _groups.Add(group);
         }
+
+        _groupOpenStates[group] = open;
 
         foreach (var expr in fields)
         {
@@ -322,15 +375,6 @@ public class FormBuilder<TModel> : ViewBase
             hint.Column = column;
         }
         return this;
-    }
-
-    /// <summary>Groups specified fields under named section in first column.</summary>
-    /// <param name="group">Name of group for organizing related fields.</param>
-    /// <param name="fields">Fields to include in named group.</param>
-    /// <returns>Form builder instance for method chaining.</returns>
-    public FormBuilder<TModel> Group(string group, params Expression<Func<TModel, object>>[] fields)
-    {
-        return Group(group, 0, fields);
     }
 
     /// <summary>Removes specified fields from form so they will not be rendered.</summary>
@@ -495,21 +539,25 @@ public class FormBuilder<TModel> : ViewBase
 
         var fields = _fields
             .Values
-            .Where(e => e is { Removed: false, InputFactory: not null })
-            .Select(e => new FormFieldBinding<TModel>(
-                CreateSelector(e.Name),
-                e.InputFactory!,
-                () => e.Visible(currentModel.Value),
-                updateSignal,
-                e.Label,
-                e.Description,
-                e.Required,
-                new FormFieldLayoutOptions(e.RowKey, e.Column, e.Order, e.Group),
-                e.Validators.ToArray(),
-                ValidationStrategy,
-                Size
-            ))
-            .Cast<IFormFieldBinding<TModel>>()
+            .Where(e => e is { Removed: false } && e.InputFactory != null)
+            .Select(e =>
+            {
+                IFormFieldBinding<TModel> binding = new FormFieldBinding<TModel>(
+                    CreateSelector(e.Name),
+                    e.InputFactory!,
+                    () => e.Visible(currentModel.Value),
+                    updateSignal,
+                    e.Label,
+                    e.Description,
+                    e.Required,
+                    new FormFieldLayoutOptions(e.RowKey, e.Column, e.Order, e.Group),
+                    e.Validators.ToArray(),
+                    ValidationStrategy,
+                    Size,
+                    e.Help
+                );
+                return binding;
+            })
             .ToArray();
 
         async Task<bool> OnSubmit()
@@ -538,7 +586,8 @@ public class FormBuilder<TModel> : ViewBase
         var formView = new FormView<TModel>(
             fieldViews,
             HandleSubmitEvent,
-            Size
+            Size,
+            _groupOpenStates
         );
 
         var validationView = new WrapperView(Layout.Vertical(
@@ -558,19 +607,92 @@ public class FormBuilder<TModel> : ViewBase
     {
         (Func<Task<bool>> onSubmit, IView formView, IView validationView, bool submitting) = UseForm(this.Context);
 
+        // Track upload state to disable submit button
+        var hasUploading = UseState(false);
+        var client = UseService<IClientProvider>();
+
+        UseEffect(() =>
+        {
+            hasUploading.Set(CheckForLoadingUploads(_model.Value));
+        }, _model);
+
         async ValueTask HandleSubmit()
         {
+            if (hasUploading.Value)
+            {
+                client.Toast(
+                    "File uploads are still in progress. Please wait for them to complete.",
+                    "Uploads in Progress"
+                );
+                return;
+            }
             await onSubmit();
         }
 
         return Layout.Vertical()
                | formView
                | Layout.Horizontal(new Button(SubmitTitle).HandleClick(HandleSubmit)
-                   .Loading(submitting).Disabled(submitting).Size(Size), validationView);
+                   .Loading(submitting).Disabled(submitting || hasUploading.Value).Size(Size), validationView);
     }
 
     private static string InvalidMessage(int invalidFields)
     {
         return invalidFields == 1 ? "There is 1 invalid field." : $"There are {invalidFields} invalid fields.";
+    }
+
+    /// <summary>Recursively checks if any FileUpload fields in the model are currently uploading.</summary>
+    private static bool CheckForLoadingUploads(object? obj)
+    {
+        if (obj == null) return false;
+
+        // Check single file upload
+        if (obj is IFileUpload file)
+            return file.Status == FileUploadStatus.Loading;
+
+        // Check collection of uploads
+        if (obj is IEnumerable<IFileUpload> files)
+            return files.Any(f => f.Status == FileUploadStatus.Loading);
+
+        // Recursively check all properties
+        var type = obj.GetType();
+
+        // Skip primitive types and strings
+        if (type.IsPrimitive || type == typeof(string) || type == typeof(decimal) || type == typeof(DateTime) || type == typeof(DateTimeOffset))
+            return false;
+
+        foreach (var prop in type.GetProperties(BindingFlags.Public | BindingFlags.Instance))
+        {
+            // Skip indexed properties
+            if (prop.GetIndexParameters().Length > 0)
+                continue;
+
+            try
+            {
+                var value = prop.GetValue(obj);
+                if (CheckForLoadingUploads(value))
+                    return true;
+            }
+            catch
+            {
+                // Skip properties that can't be read
+            }
+        }
+
+        // Check fields as well
+        foreach (var field in type.GetFields(BindingFlags.Public | BindingFlags.Instance))
+        {
+            try
+            {
+                var value = field.GetValue(obj);
+                if (CheckForLoadingUploads(value))
+                    return true;
+            }
+            catch
+            {
+                // Skip fields that can't be read
+            }
+        }
+
+        return false;
     }
 }

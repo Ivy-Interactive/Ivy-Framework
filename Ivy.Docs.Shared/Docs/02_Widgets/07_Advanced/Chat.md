@@ -21,7 +21,7 @@ A simple chat with an echo bot that repeats user messages.
 
 This demonstrates the fundamental usage of the Chat widget with basic message handling and state management.
 
-```csharp demo-tabs 
+```csharp demo-tabs
 public class BasicChatDemo : ViewBase
 {   
     public override object? Build()
@@ -32,13 +32,15 @@ public class BasicChatDemo : ViewBase
 
         void OnSendMessage(Event<Chat, string> @event)
         {
-            var currentMessages = messages.Value;
-            messages.Set(currentMessages.Add(new ChatMessage(ChatSender.User, @event.Value)));
-            messages.Set(currentMessages.Add(new ChatMessage(ChatSender.Assistant, $"You said: {@event.Value}")));
+            var messagesWithUser = messages.Value.Add(new ChatMessage(ChatSender.User, @event.Value));
+            messages.Set(messagesWithUser);
+
+            var messagesWithAssistant = messagesWithUser.Add(new ChatMessage(ChatSender.Assistant, $"You said: {@event.Value}"));
+            messages.Set(messagesWithAssistant);
         }
 
         return new Chat(messages.Value.ToArray(), OnSendMessage)
-            .Width(Size.Full().Max(400))
+            .Width(Size.Full())
             .Height(Size.Auto());
     }
 }
@@ -48,9 +50,11 @@ public class BasicChatDemo : ViewBase
 
 A chat that simulates AI processing with loading indicators.
 
-This example shows how to implement async message handling, display loading states using ChatStatus, and manage message updates during processing.
+First, the handler appends the user's message so the transcript updates immediately. It then pushes a `ChatStatus` entry that renders the animated "thinking" indicator while the asynchronous work (a delay in this demo, your AI call in production) runs. When the task completes, the status message is removed and replaced by the assistant's final response so the user never sees an empty gap.
 
-```csharp demo-tabs 
+This example shows how to implement async message handling, display loading states using `ChatStatus`, and manage message updates during processing.
+
+```csharp demo-tabs
 public class LoadingChatDemo : ViewBase
 {   
     public override object? Build()
@@ -61,23 +65,24 @@ public class LoadingChatDemo : ViewBase
 
         async ValueTask OnSendMessage(Event<Chat, string> @event)
         {
-            var currentMessages = messages.Value;
-            messages.Set(currentMessages.Add(new ChatMessage(ChatSender.User, @event.Value)));
+            var messagesWithUser = messages.Value.Add(new ChatMessage(ChatSender.User, @event.Value));
+            messages.Set(messagesWithUser);
             
             // Show loading state
-            messages.Set(currentMessages.Add(new ChatMessage(ChatSender.Assistant, new ChatStatus("Thinking..."))));
+            var messagesWithStatus = messagesWithUser.Add(new ChatMessage(ChatSender.Assistant, new ChatStatus("Thinking...")));
+            messages.Set(messagesWithStatus);
             
             // Simulate processing delay
             await Task.Delay(2000);
             
             // Remove loading and add response
-            var updatedMessages = messages.Value.Take(messages.Value.Length - 1).ToImmutableArray();
-            messages.Set(updatedMessages.Add(new ChatMessage(ChatSender.Assistant, 
+            var withoutStatus = messagesWithStatus.RemoveAt(messagesWithStatus.Length - 1);
+            messages.Set(withoutStatus.Add(new ChatMessage(ChatSender.Assistant, 
                 $"I processed your message: '{@event.Value}'. Here's a thoughtful response based on what you said.")));
         }
 
         return new Chat(messages.Value.ToArray(), OnSendMessage)
-            .Width(Size.Full().Max(400))
+            .Width(Size.Full())
             .Height(Size.Auto());
     }
 }
@@ -89,7 +94,7 @@ A chat that responds with interactive elements like buttons and cards.
 
 This demonstrates how to return complex UI components as chat responses, creating dynamic and engaging conversations with rich media content.
 
-```csharp demo-tabs 
+```csharp demo-tabs
 public class InteractiveChatDemo : ViewBase
 {   
     public override object? Build()
@@ -100,8 +105,8 @@ public class InteractiveChatDemo : ViewBase
 
         void OnSendMessage(Event<Chat, string> @event)
         {
-            var currentMessages = messages.Value;
-            messages.Set(currentMessages.Add(new ChatMessage(ChatSender.User, @event.Value)));
+            var messagesWithUser = messages.Value.Add(new ChatMessage(ChatSender.User, @event.Value));
+            messages.Set(messagesWithUser);
             
             object response = @event.Value.ToLower() switch
             {
@@ -120,11 +125,11 @@ public class InteractiveChatDemo : ViewBase
                 _ => $"You said: '{@event.Value}'. Try sending 'buttons', 'card', or 'form' for interactive responses!"
             };
             
-            messages.Set(currentMessages.Add(new ChatMessage(ChatSender.Assistant, response)));
+            messages.Set(messagesWithUser.Add(new ChatMessage(ChatSender.Assistant, response)));
         }
 
         return new Chat(messages.Value.ToArray(), OnSendMessage)
-            .Width(Size.Full().Max(400))
+            .Width(Size.Full())
             .Height(Size.Auto());
     }
 }
@@ -136,7 +141,7 @@ A chat that demonstrates error handling and different message types.
 
 This example shows how to use the Error widget for different message severities and how to integrate ChatStatus for loading indicators within chat conversations.
 
-```csharp demo-tabs 
+```csharp demo-tabs
 public class ErrorHandlingChatDemo : ViewBase
 {   
     public override object? Build()
@@ -147,8 +152,8 @@ public class ErrorHandlingChatDemo : ViewBase
 
         void OnSendMessage(Event<Chat, string> @event)
         {
-            var currentMessages = messages.Value;
-            messages.Set(currentMessages.Add(new ChatMessage(ChatSender.User, @event.Value)));
+            var messagesWithUser = messages.Value.Add(new ChatMessage(ChatSender.User, @event.Value));
+            messages.Set(messagesWithUser);
             
             object response = @event.Value.ToLower() switch
             {
@@ -163,11 +168,11 @@ public class ErrorHandlingChatDemo : ViewBase
                 _ => $"You said: '{@event.Value}'. Try sending 'error', 'warning', 'success', or 'loading'!"
             };
             
-            messages.Set(currentMessages.Add(new ChatMessage(ChatSender.Assistant, response)));
+            messages.Set(messagesWithUser.Add(new ChatMessage(ChatSender.Assistant, response)));
         }
 
         return new Chat(messages.Value.ToArray(), OnSendMessage)
-            .Width(Size.Full().Max(400))
+            .Width(Size.Full())
             .Height(Size.Auto());
     }
 }
@@ -179,7 +184,7 @@ A sophisticated chat that responds to specific commands with different content t
 
 This example showcasing the full range of Ivy widgets that can be embedded in chat responses.
 
-```csharp demo-tabs 
+```csharp demo-tabs
 public class AdvancedChatDemo : ViewBase
 {   
     public override object? Build()
@@ -196,8 +201,8 @@ public class AdvancedChatDemo : ViewBase
 
         void OnSendMessage(Event<Chat, string> @event)
         {
-            var currentMessages = messages.Value;
-            messages.Set(currentMessages.Add(new ChatMessage(ChatSender.User, @event.Value)));
+            var messagesWithUser = messages.Value.Add(new ChatMessage(ChatSender.User, @event.Value));
+            messages.Set(messagesWithUser);
             
             object response = @event.Value.ToLower() switch
             {
@@ -233,52 +238,27 @@ public class AdvancedChatDemo : ViewBase
                     }, 
                     "Value", 
                     "Month"
-                ).Height(Size.Units(50)),
+                ).Height(Size.Units(50))
+                 .Width(Size.Units(80)),
                 
                 "table data" => new Table(
-                    new TableRow(new TableCell("Name"), new TableCell("Age"), new TableCell("Role")).IsHeader(),
-                    new TableRow(new TableCell("John Doe"), new TableCell("30"), new TableCell("Developer")),
-                    new TableRow(new TableCell("Jane Smith"), new TableCell("25"), new TableCell("Designer"))
-                ),
+                    new TableRow(new TableCell("Name"), new TableCell("Age"), new TableCell("Role"), new TableCell("Department")).IsHeader(),
+                    new TableRow(new TableCell("John Doe"), new TableCell("30"), new TableCell("Developer"), new TableCell("Engineering")),
+                    new TableRow(new TableCell("Jane Smith"), new TableCell("25"), new TableCell("Designer"), new TableCell("Design")),
+                    new TableRow(new TableCell("Bob Johnson"), new TableCell("35"), new TableCell("Manager"), new TableCell("Product")),
+                    new TableRow(new TableCell("Alice Williams"), new TableCell("28"), new TableCell("Developer"), new TableCell("Engineering")),
+                    new TableRow(new TableCell("Charlie Brown"), new TableCell("32"), new TableCell("QA Engineer"), new TableCell("Quality Assurance"))
+                ).Width(Size.Units(100)),
                 
                 _ => $"You said: '{@event.Value}'. Try the commands: 'analyze code', 'create form', 'show chart', or 'table data'!"
             };
             
-            messages.Set(currentMessages.Add(new ChatMessage(ChatSender.Assistant, response)));
-        }
-
-        return new Chat(messages.Value.ToArray(), OnSendMessage)
-            .Width(Size.Full().Max(400))
-            .Height(Size.Auto());
-    }
-}
-```
-
-## Chat with Custom Placeholder
-
-Customize the input placeholder text.
-
-This example shows how to use the Placeholder extension method to provide custom guidance text for users, improving the user experience by making it clear what type of input is expected.
-
-```csharp demo-tabs 
-public class CustomPlaceholderDemo : ViewBase
-{   
-    public override object? Build()
-    {
-        var messages = UseState(ImmutableArray.Create<ChatMessage>(
-            new ChatMessage(ChatSender.Assistant, "This chat has a custom placeholder text. Try typing something!")
-        ));
-
-        void OnSendMessage(Event<Chat, string> @event)
-        {
-            var currentMessages = messages.Value;
-            messages.Set(currentMessages.Add(new ChatMessage(ChatSender.User, @event.Value)));
-            messages.Set(currentMessages.Add(new ChatMessage(ChatSender.Assistant, $"Thanks for your message: {@event.Value}")));
+            messages.Set(messagesWithUser.Add(new ChatMessage(ChatSender.Assistant, response)));
         }
 
         return new Chat(messages.Value.ToArray(), OnSendMessage)
             .Placeholder("Type your message here...")
-            .Width(Size.Full().Max(400))
+            .Width(Size.Full())
             .Height(Size.Auto());
     }
 }

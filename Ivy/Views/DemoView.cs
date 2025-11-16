@@ -25,7 +25,7 @@ public class DemoView : ViewBase
     /// This parameter is automatically populated by the compiler using the
     /// CallerArgumentExpression attribute.</param>
     [OverloadResolutionPriority(1)]
-    public DemoView(FuncBuilder content, [CallerArgumentExpression(nameof(content))] string? code = null)
+    public DemoView(FuncViewBuilder content, [CallerArgumentExpression(nameof(content))] string? code = null)
     {
         _content = content;
         _code = FormatExpression(code!);

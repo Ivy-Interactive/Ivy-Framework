@@ -85,11 +85,20 @@ export const DataTableFilterOption: React.FC<{
     () =>
       columns
         .filter(col => col.filterable ?? true)
-        .map(col => ({
-          name: col.name,
-          type: col.type.toLowerCase(),
-          width: typeof col.width === 'number' ? col.width : 150,
-        })),
+        .map(col => {
+          // Map column types to filter-query-editor supported types
+          let editorType = col.type.toLowerCase();
+          // DateTime should be treated as date for filtering purposes
+          if (editorType === 'datetime') {
+            editorType = 'date';
+          }
+
+          return {
+            name: col.name,
+            type: editorType,
+            width: typeof col.width === 'number' ? col.width : 150,
+          };
+        }),
     [columns]
   );
 
@@ -256,20 +265,25 @@ export const DataTableFilterOption: React.FC<{
     const firstColumn = columns[0];
     const secondColumn = columns[1];
 
+    const getColumnExample = (column: typeof firstColumn) => {
+      if (column.type === ColType.Number) {
+        return `[${column.name}] > 100`;
+      } else if (
+        column.type === ColType.Date ||
+        column.type === ColType.DateTime
+      ) {
+        return `[${column.name}] >= "2024-01-01"`;
+      } else {
+        return `[${column.name}] = "value"`;
+      }
+    };
+
     if (secondColumn) {
-      const firstExample =
-        firstColumn.type === ColType.Number
-          ? `[${firstColumn.name}] > 100`
-          : `[${firstColumn.name}] = "value"`;
-      const secondExample =
-        secondColumn.type === ColType.Number
-          ? `[${secondColumn.name}] < 50`
-          : `[${secondColumn.name}] != "text"`;
+      const firstExample = getColumnExample(firstColumn);
+      const secondExample = getColumnExample(secondColumn);
       return `e.g., ${firstExample} AND ${secondExample}`;
     } else if (firstColumn) {
-      return firstColumn.type === ColType.Number
-        ? `e.g., [${firstColumn.name}] > 100`
-        : `e.g., [${firstColumn.name}] = "value"`;
+      return `e.g., ${getColumnExample(firstColumn)}`;
     }
 
     return 'Enter filter expression';

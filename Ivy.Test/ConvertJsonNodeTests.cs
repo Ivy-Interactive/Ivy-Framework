@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using Ivy.Services;
 
 namespace Ivy.Test;
 
@@ -87,21 +88,17 @@ public class ConvertJsonNodeTests
     {
         var json = JsonNode.Parse("""
                                   {
-                                      "name": "myfile.txt",
-                                      "size": 123,
-                                      "type": "text/plain",
-                                      "lastModified": "2023-03-14T09:30:00+01:00",
-                                      "content": "SGVsbG8="
+                                      "fileName": "myfile.txt",
+                                      "length": 123,
+                                      "contentType": "text/plain"
                                   }
                                   """);
 
-        var result = (FileInput)Core.Utils.ConvertJsonNode(json!, typeof(FileInput))!;
+        var result = (FileUpload)Core.Utils.ConvertJsonNode(json!, typeof(FileUpload))!;
 
-        Assert.Equal("myfile.txt", result.Name);
-        Assert.Equal("text/plain", result.Type);
-        Assert.Equal(123, result.Size);
-        Assert.Equal(DateTime.Parse("2023-03-14T09:30:00+01:00"), result.LastModified);
-        Assert.Equal("Hello", Encoding.UTF8.GetString(result.Content!));
+        Assert.Equal("myfile.txt", result.FileName);
+        Assert.Equal("text/plain", result.ContentType);
+        Assert.Equal(123, result.Length);
     }
 
     private void Test(JsonNode? input, Type type, object? expectedResult)

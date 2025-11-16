@@ -5,6 +5,7 @@ using Ivy.Client;
 using Ivy.Core;
 using Ivy.Core.Hooks;
 using Ivy.Hooks;
+using Ivy.Shared;
 
 namespace Ivy.Chrome;
 
@@ -19,8 +20,10 @@ public record ChromeSettings
     public object? Header { get; init; }
     public object? Footer { get; init; }
     public string? DefaultAppId { get; init; }
+    public string? WallpaperAppId { get; init; }
     public bool PreventTabDuplicates { get; init; }
     public ChromeNavigation Navigation { get; init; }
+    public Func<IEnumerable<MenuItem>, INavigator, IEnumerable<MenuItem>> FooterMenuItemsTransformer { get; init; } = (items, _) => items;
 
     public static ChromeSettings Default() => new()
     {
@@ -40,9 +43,17 @@ public static class ChromeSettingsExtensions
         var descriptor = AppHelpers.GetApp(type);
         return settings with { DefaultAppId = descriptor.Id };
     }
+    public static ChromeSettings WallpaperAppId(this ChromeSettings settings, string? wallpaperAppId) => settings with { WallpaperAppId = wallpaperAppId };
+    public static ChromeSettings WallpaperApp<T>(this ChromeSettings settings)
+    {
+        var type = typeof(T);
+        var descriptor = AppHelpers.GetApp(type);
+        return settings with { WallpaperAppId = descriptor.Id };
+    }
     public static ChromeSettings Navigation(this ChromeSettings settings, ChromeNavigation navigation) => settings with { Navigation = navigation };
     public static ChromeSettings UseTabs(this ChromeSettings settings, bool preventDuplicates = false) => settings with { Navigation = ChromeNavigation.Tabs, PreventTabDuplicates = preventDuplicates };
     public static ChromeSettings UsePages(this ChromeSettings settings) => settings with { Navigation = ChromeNavigation.Pages };
+    public static ChromeSettings UseFooterMenuItemsTransformer(this ChromeSettings settings, Func<IEnumerable<MenuItem>, INavigator, IEnumerable<MenuItem>> transformer) => settings with { FooterMenuItemsTransformer = transformer };
 }
 
 [Signal(BroadcastType.Chrome)]
@@ -68,9 +79,10 @@ public record NavigateArgs(string? AppId, object? AppArgs = null, string? TabId 
 
     public string GetUrl(string? parentId = null)
     {
-        if (this.AppId?.StartsWith('/') == true)
+        // Validate AppId to prevent injection attacks
+        if (!Utils.IsSafeAppId(this.AppId))
         {
-            throw new InvalidOperationException("Cannot get URL: AppId starts with an invalid character.");
+            throw new InvalidOperationException($"Cannot get URL: Invalid AppId '{this.AppId}'. AppId contains unsafe characters.");
         }
 
         // Use path-based URL for better user experience
@@ -133,11 +145,22 @@ public static class NavigateSignalExtensions
         {
             if (uri.StartsWith("http://") || uri.StartsWith("https://"))
             {
-                client.OpenUrl(uri);
+                // Validate external URL to prevent open redirect vulnerabilities
+                var validatedUrl = Utils.ValidateLinkUrl(uri);
+                if (validatedUrl == null)
+                {
+                    throw new ArgumentException($"Invalid external URL: {uri}", nameof(uri));
+                }
+                client.OpenUrl(validatedUrl);
             }
             else if (uri.StartsWith("app://"))
             {
                 var appId = uri[6..];
+                // Validate AppId to prevent injection attacks
+                if (!Utils.IsSafeAppId(appId))
+                {
+                    throw new ArgumentException($"Invalid AppId: {appId}", nameof(uri));
+                }
                 signal.Send(new NavigateArgs(appId, appArgs));
             }
         }
@@ -148,4 +171,8 @@ public interface INavigator
 {
     public void Navigate(Type type, object? appArgs = null);
     public void Navigate(string uri, object? appArgs = null);
+    public void Navigate<T>(object? appArgs = null)
+    {
+        Navigate(typeof(T), appArgs);
+    }
 }

@@ -33,7 +33,7 @@
 
   <ItemGroup>
     <PackageReference Include="Antlr4.Runtime.Standard" Version="4.13.1" />
-    <PackageReference Include="Antlr4BuildTasks" Version="12.10.0" />
+    <PackageReference Include="Antlr4BuildTasks" Version="12.11.0" />
     <PackageReference Include="Google.Protobuf" Version="3.33.0" />
     <PackageReference Include="Microsoft.Extensions.AI" Version="9.10.0" />
     <PackageReference Include="Microsoft.Extensions.AI.Abstractions" Version="9.10.0" />

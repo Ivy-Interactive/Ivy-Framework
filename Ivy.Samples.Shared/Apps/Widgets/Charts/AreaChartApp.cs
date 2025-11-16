@@ -44,6 +44,7 @@ public class AreaChart0View : ViewBase
                 .Dimension("Month", e => e.Month)
                 .Measure("Desktop", e => e.Sum(f => f.Desktop))
                 .Measure("Mobile", e => e.Sum(f => f.Mobile))
+                .Toolbox()
         ;
     }
 }
@@ -68,6 +69,7 @@ public class AreaChart1View : ViewBase
                 .Measure("Desktop", e => e.Sum(f => f.Desktop))
                 .Measure("Mobile", e => e.Sum(f => f.Mobile))
                 .Measure("Tablet", e => e.Sum(f => f.Tablet))
+                .Toolbox()
         ;
     }
 }
@@ -91,6 +93,7 @@ public class AreaChart2View : ViewBase
                 .Dimension("Month", e => e.Month)
                 .Measure("Revenue", e => e.Sum(f => f.Revenue))
                 .Measure("Expenses", e => e.Sum(f => f.Expenses))
+                .Toolbox()
         ;
     }
 }
@@ -113,6 +116,7 @@ public class AreaChart3View : ViewBase
                 .Measure("ProductA", e => e.Sum(f => f.ProductA))
                 .Measure("ProductB", e => e.Sum(f => f.ProductB))
                 .Measure("ProductC", e => e.Sum(f => f.ProductC))
+                .Toolbox()
         ;
     }
 }
@@ -137,6 +141,7 @@ public class AreaChart4View : ViewBase
                 .Measure("South", e => e.Sum(f => f.South))
                 .Measure("East", e => e.Sum(f => f.East))
                 .Measure("West", e => e.Sum(f => f.West))
+                .Toolbox()
         ;
     }
 }
@@ -161,6 +166,7 @@ public class AreaChart5View : ViewBase
                 .Measure("Users", e => e.Sum(f => f.Users))
                 .Measure("Sessions", e => e.Sum(f => f.Sessions))
                 .Measure("Conversions", e => e.Sum(f => f.Conversions))
+                .Toolbox()
         ;
     }
 }
@@ -186,6 +192,7 @@ public class AreaChart6View : ViewBase
                 .Measure("Memory Usage (%)", e => e.Sum(f => f.Memory))
                 .Measure("Disk Usage (%)", e => e.Sum(f => f.Disk))
                 .Measure("Network Usage (%)", e => e.Sum(f => f.Network))
+                .Toolbox()
         ;
     }
 }
@@ -217,6 +224,7 @@ public class AreaChart7View : ViewBase
                 .Measure("Humidity (%)", e => e.Sum(f => f.Humidity))
                 .Measure("Pressure (hPa)", e => e.Sum(f => f.Pressure))
                 .Measure("Wind Speed (km/h)", e => e.Sum(f => f.WindSpeed))
+                .Toolbox()
         ;
     }
 }
@@ -247,6 +255,7 @@ public class AreaChart8View : ViewBase
                 .Measure("High", e => e.Sum(f => f.High))
                 .Measure("Average", e => e.Sum(f => f.Average))
                 .Measure("Low", e => e.Sum(f => f.Low))
+                .Toolbox()
         ;
     }
 }
@@ -272,6 +281,7 @@ public class AreaChart9View : ViewBase
                 .Measure("CompanyB", e => e.Sum(f => f.CompanyB))
                 .Measure("CompanyC", e => e.Sum(f => f.CompanyC))
                 .Measure("Others", e => e.Sum(f => f.Others))
+                .Toolbox()
         ;
     }
 }

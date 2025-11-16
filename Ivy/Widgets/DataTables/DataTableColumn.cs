@@ -44,7 +44,9 @@ public enum ColType
     Boolean,
     Date,
     DateTime,
-    Icon
+    Icon,
+    Labels,
+    Link
 }
 
 public interface IDataTableColumnRenderer
@@ -73,6 +75,11 @@ public class IconDisplayRenderer : IDataTableColumnRenderer
     public bool IsEditable => false;
 }
 
+public class ButtonDisplayRenderer : IDataTableColumnRenderer
+{
+    public bool IsEditable => false;
+}
+
 public class DateTimeDisplayRenderer : IDataTableColumnRenderer
 {
     public string Format { get; set; } = "g"; // General date/time pattern (short time) - should be based on Excel formatting?
@@ -94,10 +101,16 @@ public enum LinkDisplayType
 {
     Url,
     Email,
-    Phone
+    Phone,
+    Button
 }
 
 public class ProgressDisplayRenderer : IDataTableColumnRenderer
+{
+    public bool IsEditable => false;
+}
+
+public class LabelsDisplayRenderer : IDataTableColumnRenderer
 {
     public bool IsEditable => false;
 }

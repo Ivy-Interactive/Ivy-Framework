@@ -85,7 +85,8 @@ public abstract record AbstractWidget : IWidget
             Converters =
             {
                 new JsonEnumConverter(),
-                new ValueTupleConverterFactory()
+                new ValueTupleConverterFactory(),
+                new PrefixSuffixJsonConverterFactory()
             }
         };
 
@@ -151,7 +152,7 @@ public abstract record AbstractWidget : IWidget
     /// <param name="eventName">Name of event to invoke.</param>
     /// <param name="args">Arguments to pass to event handler.</param>
     /// <returns>true if event was successfully invoked; otherwise, false.</returns>
-    public bool InvokeEvent(string eventName, JsonArray args)
+    public async Task<bool> InvokeEventAsync(string eventName, JsonArray args)
     {
         var type = GetType();
         var property = type.GetProperty(eventName);
@@ -181,7 +182,8 @@ public abstract record AbstractWidget : IWidget
             var result = ((Delegate)eventDelegate).DynamicInvoke(eventInstance);
             if (result is ValueTask valueTask)
             {
-                valueTask.AsTask().GetAwaiter().GetResult();
+                // Properly await the async event handler instead of blocking
+                await valueTask;
             }
             return true;
         }
@@ -193,7 +195,8 @@ public abstract record AbstractWidget : IWidget
     {
         var valueType = eventType.GetGenericArguments()[1];
         var value = ConvertToValue(valueType, args);
-        return value != null ? Activator.CreateInstance(eventType, eventName, sender, value) : null;
+        // Create the event even if value is null - null is a valid value for nullable types
+        return Activator.CreateInstance(eventType, eventName, sender, value);
     }
 
     private static object? ConvertToValue(Type valueType, JsonArray args)
@@ -266,4 +269,3 @@ public abstract record AbstractWidget : IWidget
         return widget with { Children = [.. widget.Children, child] };
     }
 }
-

@@ -97,108 +97,67 @@ public class ThemeColors
     public string? Popover { get; set; }
     public string? PopoverForeground { get; set; }
 
-    // Chart colors
-    public string? Chart1 { get; set; }
-    public string? Chart2 { get; set; }
-    public string? Chart3 { get; set; }
-    public string? Chart4 { get; set; }
-    public string? Chart5 { get; set; }
-
-    // Sidebar colors
-    public string? Sidebar { get; set; }
-    public string? SidebarForeground { get; set; }
-    public string? SidebarPrimary { get; set; }
-    public string? SidebarPrimaryForeground { get; set; }
-    public string? SidebarAccent { get; set; }
-    public string? SidebarAccentForeground { get; set; }
-    public string? SidebarBorder { get; set; }
-    public string? SidebarRing { get; set; }
-
     public static ThemeColors DefaultLight => new()
     {
-        Primary = "#00cc92",
-        PrimaryForeground = "#000000",
-        Secondary = "#dfe7e3",
-        SecondaryForeground = "#000000",
-        Background = "#ffffff",
-        Foreground = "#000000",
-        Destructive = "#dd5860",
-        DestructiveForeground = "#000000",
-        Success = "#86d26f",
-        SuccessForeground = "#000000",
-        Warning = "#deb145",
-        WarningForeground = "#000000",
-        Info = "#4469c0",
-        InfoForeground = "#ffffff",
-        Border = "#d1d5db",
-        Input = "#d1d5db",
-        Ring = "#777777",
-        Muted = "#f8f8f8",
-        MutedForeground = "#8f8f8f",
-        Accent = "#f8f8f8",
-        AccentForeground = "#333333",
-        Card = "#ffffff",
-        CardForeground = "#262626",
+        // Semantic colors from Ivy Design System
+        Primary = IvyFrameworkTokens.Color.ColorSemanticPrimaryBase,
+        PrimaryForeground = IvyFrameworkTokens.Color.ColorSemanticPrimaryForeground,
+        Secondary = IvyFrameworkTokens.Color.ColorSemanticSecondaryBase,
+        SecondaryForeground = IvyFrameworkTokens.Color.ColorSemanticSecondaryForeground,
+        Background = IvyFrameworkTokens.Color.ColorUiBackgroundBase,
+        Foreground = IvyFrameworkTokens.Color.ColorUiBackgroundForeground,
+        Destructive = IvyFrameworkTokens.Color.ColorSemanticDestructiveBase,
+        DestructiveForeground = IvyFrameworkTokens.Color.ColorSemanticDestructiveForeground,
+        Success = IvyFrameworkTokens.Color.ColorSemanticSuccessBase,
+        SuccessForeground = IvyFrameworkTokens.Color.ColorSemanticSuccessForeground,
+        Warning = IvyFrameworkTokens.Color.ColorSemanticWarningBase,
+        WarningForeground = IvyFrameworkTokens.Color.ColorSemanticWarningForeground,
+        Info = IvyFrameworkTokens.Color.ColorSemanticInfoBase,
+        InfoForeground = IvyFrameworkTokens.Color.ColorSemanticInfoForeground,
 
-        // Extended colors to match frontend CSS variables
-        Popover = "#ffffff",
-        PopoverForeground = "#000000",
-        Chart1 = "#0077BE",
-        Chart2 = "#DC143C",
-        Chart3 = "#70AD47",
-        Chart4 = "#FFC000",
-        Chart5 = "#5B9BD5",
-        Sidebar = "#f8f8f8",
-        SidebarForeground = "#000000",
-        SidebarPrimary = "#00cc92",
-        SidebarPrimaryForeground = "#ffffff",
-        SidebarAccent = "#f4f6f6",
-        SidebarAccentForeground = "#333333",
-        SidebarBorder = "#d1d5db",
-        SidebarRing = "#777777"
+        // UI element colors from Ivy Design System
+        Border = IvyFrameworkTokens.Color.ColorUiBorder,
+        Input = IvyFrameworkTokens.Color.ColorUiInput,
+        Ring = IvyFrameworkTokens.Color.ColorUiRing,
+        Muted = IvyFrameworkTokens.Color.ColorUiMutedBase,
+        MutedForeground = IvyFrameworkTokens.Color.ColorUiMutedForeground,
+        Accent = IvyFrameworkTokens.Color.ColorUiAccentBase,
+        AccentForeground = IvyFrameworkTokens.Color.ColorUiAccentForeground,
+        Card = IvyFrameworkTokens.Color.ColorUiCardBase,
+        CardForeground = IvyFrameworkTokens.Color.ColorUiCardForeground,
+        Popover = IvyFrameworkTokens.Color.ColorUiPopoverBase,
+        PopoverForeground = IvyFrameworkTokens.Color.ColorUiPopoverForeground
     };
 
     public static ThemeColors DefaultDark => new()
     {
-        Primary = "#00cc92",
-        PrimaryForeground = "#18181d",
-        Secondary = "#26262b",
-        SecondaryForeground = "#f8f8f8",
-        Background = "#000000",
-        Foreground = "#f8f8f8",
-        Destructive = "#dd5860",
-        DestructiveForeground = "#f8f8f8",
-        Success = "#86d26f",
-        SuccessForeground = "#000000",
-        Warning = "#deb145",
-        WarningForeground = "#000000",
-        Info = "#4469c0",
-        InfoForeground = "#ffffff",
-        Border = "#262626",
-        Input = "#262626",
-        Ring = "#777777",
-        Muted = "#1a1a1a",
-        MutedForeground = "#8f8f8f",
-        Accent = "#1a1a1a",
-        AccentForeground = "#f8f8f8",
-        Card = "#171717",
-        CardForeground = "#f8f8f8",
+        // Semantic colors from Ivy Design System (Dark Theme)
+        Primary = DarkThemeTokens.Theme.ThemeDarkPrimaryBase,
+        PrimaryForeground = DarkThemeTokens.Theme.ThemeDarkPrimaryForeground,
+        Secondary = DarkThemeTokens.Theme.ThemeDarkSecondaryBase,
+        SecondaryForeground = DarkThemeTokens.Theme.ThemeDarkSecondaryForeground,
+        Background = DarkThemeTokens.Theme.ThemeDarkBackgroundBase,
+        Foreground = DarkThemeTokens.Theme.ThemeDarkBackgroundForeground,
+        Destructive = DarkThemeTokens.Theme.ThemeDarkDestructiveBase,
+        DestructiveForeground = DarkThemeTokens.Theme.ThemeDarkDestructiveForeground,
+        Success = DarkThemeTokens.Theme.ThemeDarkSuccessBase,
+        SuccessForeground = DarkThemeTokens.Theme.ThemeDarkSuccessForeground,
+        Warning = DarkThemeTokens.Theme.ThemeDarkWarningBase,
+        WarningForeground = DarkThemeTokens.Theme.ThemeDarkWarningForeground,
+        Info = DarkThemeTokens.Theme.ThemeDarkInfoBase,
+        InfoForeground = DarkThemeTokens.Theme.ThemeDarkInfoForeground,
 
-        // Extended colors to match frontend CSS variables
-        Popover = "#000000",
-        PopoverForeground = "#f8f8f8",
-        Chart1 = "#0077BE",
-        Chart2 = "#DC143C",
-        Chart3 = "#70AD47",
-        Chart4 = "#FFC000",
-        Chart5 = "#5B9BD5",
-        Sidebar = "#0a0a0a",
-        SidebarForeground = "#f8f8f8",
-        SidebarPrimary = "#00cc92",
-        SidebarPrimaryForeground = "#000000",
-        SidebarAccent = "#1a1a1a",
-        SidebarAccentForeground = "#f8f8f8",
-        SidebarBorder = "#262626",
-        SidebarRing = "#777777"
+        // UI element colors from Ivy Design System (Dark Theme)
+        Border = DarkThemeTokens.Theme.ThemeDarkUiBorder,
+        Input = DarkThemeTokens.Theme.ThemeDarkUiInput,
+        Ring = DarkThemeTokens.Theme.ThemeDarkUiRing,
+        Muted = DarkThemeTokens.Theme.ThemeDarkUiMutedBase,
+        MutedForeground = DarkThemeTokens.Theme.ThemeDarkUiMutedForeground,
+        Accent = DarkThemeTokens.Theme.ThemeDarkUiAccentBase,
+        AccentForeground = DarkThemeTokens.Theme.ThemeDarkUiAccentForeground,
+        Card = DarkThemeTokens.Theme.ThemeDarkUiCardBase,
+        CardForeground = DarkThemeTokens.Theme.ThemeDarkUiCardForeground,
+        Popover = DarkThemeTokens.Theme.ThemeDarkUiPopoverBase,
+        PopoverForeground = DarkThemeTokens.Theme.ThemeDarkUiPopoverForeground,
     };
 }

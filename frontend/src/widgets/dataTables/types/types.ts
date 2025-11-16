@@ -1,5 +1,5 @@
 export interface DataRow {
-  values: (string | number | boolean | null)[];
+  values: (string | number | boolean | Date | string[] | null)[];
 }
 
 export enum ColType {
@@ -9,6 +9,8 @@ export enum ColType {
   Date = 'Date',
   DateTime = 'DateTime',
   Icon = 'Icon',
+  Labels = 'Labels',
+  Link = 'Link',
 }
 
 export enum SortDirection {
@@ -47,7 +49,7 @@ export interface DataTableConnection {
   sourceId: string;
 }
 
-export interface DataTableConfiguration {
+export interface DataTableConfig {
   filterType?: FilterTypes;
   freezeColumns?: number | null;
   allowSorting?: boolean;
@@ -72,10 +74,11 @@ export interface TableProps {
   id: string;
   columns: DataColumn[];
   connection: DataTableConnection;
-  configuration?: DataTableConfiguration;
+  config?: DataTableConfig;
   editable?: boolean;
   width?: string;
   height?: string;
+  rowActions?: RowAction[];
   onCellUpdate?: (row: number, col: number, value: unknown) => void;
 }
 
@@ -88,4 +91,48 @@ export enum SelectionModes {
   Cells = 'Cells',
   Rows = 'Rows',
   Columns = 'Columns',
+}
+
+/**
+ * Configuration for a single row action button
+ */
+export interface RowAction {
+  /**
+   * Unique identifier for this action
+   */
+  id: string;
+  /**
+   * Icon name (Lucide icon)
+   */
+  icon: string;
+  /**
+   * Event name to trigger when clicked (e.g., "OnEdit", "OnDelete", "OnView")
+   */
+  eventName: string;
+  /**
+   * Tooltip text for the button
+   */
+  tooltip?: string;
+}
+
+/**
+ * Event args for row action click events
+ */
+export interface RowActionClickEventArgs {
+  /**
+   * The ID of the action that was clicked
+   */
+  actionId: string;
+  /**
+   * The event name of the action
+   */
+  eventName: string;
+  /**
+   * The index of the clicked row
+   */
+  rowIndex: number;
+  /**
+   * The data for the clicked row, keyed by column name
+   */
+  rowData: Record<string, unknown>;
 }
