@@ -1,4 +1,5 @@
 using Ivy.Core;
+using Ivy.Shared;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy;
@@ -17,6 +18,8 @@ public record Kanban : WidgetBase<Kanban>
     [Prop] public bool AllowMove { get; set; }
 
     [Prop] public bool AllowDelete { get; set; }
+
+    [Prop] public Dictionary<object, Size>? ColumnWidths { get; set; }
 
     [Event] public Func<Event<Kanban, object?>, ValueTask>? OnDelete { get; set; }
 

@@ -45,27 +45,7 @@ public class KanbanApp : SampleBase
                 .ColumnOrder(e => GetStatusOrder(e.Status))
                 .Width(Size.Full())
                 .Width(e => e.Status, Size.Fraction(0.33f))
-                .ColumnTitle(status => status switch
-                {
-                    "Todo" => "Custom Todo",
-                    "In Progress" => "Custom In Progress",
-                    "Done" => "Custom Done",
-                    _ => status
-                })
-                .HandleAdd(columnKey =>
-                {
-                    var newTask = new Task
-                    {
-                        Id = (tasks.Value.Length + 1).ToString(),
-                        Title = $"New Task in {columnKey}",
-                        Status = columnKey,
-                        Priority = GetNextPriority(columnKey, tasks.Value),
-                        Description = $"Auto-generated task for {columnKey} column",
-                        Assignee = "Unassigned"
-                    };
-                    tasks.Set(tasks.Value.Append(newTask).ToArray());
-                })
-                .HandleMove(moveData =>
+                .HandleCardMove(moveData =>
                 {
                     var taskId = moveData.CardId?.ToString();
                     if (string.IsNullOrEmpty(taskId)) return;
