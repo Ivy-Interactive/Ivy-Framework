@@ -1,4 +1,5 @@
 using Ivy.Shared;
+using Ivy.Views.Builders;
 using Ivy.Views.Kanban;
 
 namespace Ivy.Samples.Shared.Apps.Widgets;
@@ -17,6 +18,17 @@ public class Task
 public class KanbanApp : SampleBase
 {
     protected override object? BuildSample()
+    {
+        return Layout.Tabs(
+            new Tab("Basic Example", new BasicKanbanExample()),
+            new Tab("Builder Example", new KanbanBuilderExample())
+        ).Variant(TabsVariant.Content);
+    }
+}
+
+public class BasicKanbanExample : ViewBase
+{
+    public override object? Build()
     {
         var selectedTaskId = this.UseState((string?)null);
         var tasks = UseState(new[]
@@ -137,10 +149,82 @@ public class KanbanApp : SampleBase
         "Done" => 3,
         _ => 0
     };
+}
 
-    private static int GetNextPriority(string columnKey, Task[] tasks)
+public class KanbanBuilderExample : ViewBase
+{
+    public override object? Build()
     {
-        var tasksInColumn = tasks.Where(t => t.Status == columnKey).ToList();
-        return tasksInColumn.Count + 1;
+        var tasks = UseState(new[]
+        {
+            new Task { Id = "1", Title = "Design Homepage", Status = "Todo", Priority = 2, Description = "Create wireframes and mockups", Assignee = "Alice" },
+            new Task { Id = "2", Title = "Setup Database", Status = "Todo", Priority = 1, Description = "Configure PostgreSQL instance", Assignee = "Bob" },
+            new Task { Id = "3", Title = "Implement Auth", Status = "Todo", Priority = 3, Description = "Add OAuth2 authentication", Assignee = "Charlie" },
+            new Task { Id = "4", Title = "Build API", Status = "In Progress", Priority = 1, Description = "Create REST endpoints", Assignee = "Alice" },
+            new Task { Id = "5", Title = "Write Tests", Status = "In Progress", Priority = 2, Description = "Unit and integration tests", Assignee = "Bob" },
+            new Task { Id = "6", Title = "Deploy to Production", Status = "Done", Priority = 1, Description = "Configure CI/CD pipeline", Assignee = "Charlie" },
+        });
+
+        var kanban = tasks.Value
+                .ToKanban(
+                    groupBySelector: e => e.Status,
+                    idSelector: e => e.Id,
+                    titleSelector: e => e.Title,
+                    descriptionSelector: e => e.Description)
+                .CardBuilder(factory => factory.Func<Task, Task>(task => new Card(
+                    content: task.ToDetails()
+                        .Remove(x => x.Id)
+                        .MultiLine(x => x.Description)
+                )))
+                .ColumnOrder(e => GetStatusOrder(e.Status))
+                .Width(Size.Full())
+                .Width(e => e.Status, Size.Fraction(0.33f))
+                .HandleCardMove(moveData =>
+                {
+                    var taskId = moveData.CardId?.ToString();
+                    if (string.IsNullOrEmpty(taskId)) return;
+
+                    var updatedTasks = tasks.Value.ToList();
+                    var taskToMove = updatedTasks.FirstOrDefault(t => t.Id == taskId);
+                    if (taskToMove == null) return;
+
+                    taskToMove = new Task
+                    {
+                        Id = taskToMove.Id,
+                        Title = taskToMove.Title,
+                        Status = moveData.ToColumn,
+                        Priority = taskToMove.Priority,
+                        Description = taskToMove.Description,
+                        Assignee = taskToMove.Assignee
+                    };
+
+                    updatedTasks.RemoveAll(t => t.Id == taskId);
+                    var tasksInTargetColumn = updatedTasks.Where(t => t.Status == moveData.ToColumn).ToList();
+                    if (moveData.TargetIndex.HasValue && moveData.TargetIndex.Value < tasksInTargetColumn.Count)
+                    {
+                        updatedTasks.InsertRange(moveData.TargetIndex.Value, new[] { taskToMove });
+                    }
+                    else
+                    {
+                        updatedTasks.Add(taskToMove);
+                    }
+
+                    tasks.Set(updatedTasks.ToArray());
+                })
+                .Empty(
+                    new Card()
+                        .Title("No Tasks")
+                        .Description("Create your first task to get started")
+                );
+
+        return kanban;
     }
+
+    private static int GetStatusOrder(string status) => status switch
+    {
+        "Todo" => 1,
+        "In Progress" => 2,
+        "Done" => 3,
+        _ => 0
+    };
 }

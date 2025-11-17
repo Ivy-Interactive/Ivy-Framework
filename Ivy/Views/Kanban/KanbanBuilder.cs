@@ -63,6 +63,12 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
         return this;
     }
 
+    public KanbanBuilder<TModel, TGroupKey> CardBuilder(Func<IBuilderFactory<TModel>, IBuilder<TModel>> builder)
+    {
+        _cardBuilder = builder(_builderFactory);
+        return this;
+    }
+
     public KanbanBuilder<TModel, TGroupKey> ColumnOrder<TOrderKey>(Expression<Func<TModel, TOrderKey>> orderBySelector, bool descending = false)
     {
         _columnOrderBySelector = orderBySelector.Compile() as Func<TModel, object?>;
@@ -268,7 +274,7 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
                     cardWidget = cardWidget.Description(_cardDescriptionSelector(item)?.ToString() ?? "");
                 content = cardWidget;
             }
-            // Fallback to default builder
+            // Use builder (either from Builder() or CardBuilder() with factory)
             else
             {
                 content = _cardBuilder.Build(item, item) ?? "";
