@@ -4,7 +4,7 @@ using Ivy.Shared;
 
 namespace Ivy.Views.Kanban;
 
-public class KanbanView<TModel, TGroupKey>(IEnumerable<TModel> model, Func<TModel, TGroupKey> groupBySelector) : ViewBase, IStateless
+public class KanbanView<TModel, TGroupKey>(IEnumerable<TModel> model) : ViewBase, IStateless
     where TGroupKey : notnull
 {
     public override object? Build()
