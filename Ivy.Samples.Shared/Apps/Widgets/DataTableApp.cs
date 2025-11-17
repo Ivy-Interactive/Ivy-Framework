@@ -53,7 +53,7 @@ public class DataTableApp : SampleBase
             var firstNames = new[] { "John", "Jane", "Mike", "Sarah", "David", "Emily", "Chris", "Lisa", "Tom", "Anna" };
             var lastNames = new[] { "Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis", "Rodriguez", "Martinez" };
 
-            return Enumerable.Range(1, 5).Select(i =>
+            return Enumerable.Range(1, 1000).Select(i =>
             {
                 var firstName = firstNames[random.Next(firstNames.Length)];
                 var lastName = lastNames[random.Next(lastNames.Length)];

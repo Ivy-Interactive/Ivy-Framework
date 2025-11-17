@@ -16,12 +16,8 @@ export const DataTableFooter: React.FC<DataTableFooterProps> = ({
   className,
 }) => {
   return (
-    <div
-      className={cn(className)}
-      style={tableStyles.tableEditor.footer}
-    >
+    <div className={cn(className)} style={tableStyles.tableEditor.footer}>
       {children}
     </div>
   );
 };
-
