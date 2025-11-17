@@ -181,12 +181,17 @@ public class RowActionsDemo : ViewBase
                 MenuItem.Default(Icons.Pencil, "edit").Tooltip("Edit employee"),
                 MenuItem.Default(Icons.Trash, "delete").Tooltip("Delete employee")
             )
-            .HandleRowAction((employee, menuItem) =>
+            .HandleRowAction(async e =>
             {
-                var action = menuItem.Tag?.ToString();
-                client.Toast($"Action: {action} on {employee.Name}");
-            })
-            ;
+                var args = e.Value;
+                var actionId = args.ActionId;
+                var rowIndex = args.RowIndex;
+                var rowData = args.RowData;
+
+                // Access row data by column name
+                var employeeName = rowData.TryGetValue("Name", out var name) ? name?.ToString() : "Unknown";
+                client.Toast($"Action: {actionId} on {employeeName} (row {rowIndex})");
+            });
     }
 }
 ```
@@ -195,7 +200,13 @@ public class RowActionsDemo : ViewBase
 Use <code>Renderer(expr, new LinkDisplayRenderer { Type = LinkDisplayType.Url })</code> to mark a URL string column as a clickable hyperlink. Users can open the link with <kbd>Ctrl</kbd>/<kbd>Cmd</kbd> + click or via the context menu. External links (http/https) open in a new focused tab, while relative URLs navigate in the same tab.
 </Callout>
 
-Use `HandleRowAction` to respond to row action menu selections. The handler receives the strongly-typed row model and the selected `MenuItem`, providing direct access to the row data and action context.
+Use `HandleRowAction` to respond to row action menu selections. The handler receives an `Event<DataTable, RowActionClickEventArgs>` containing:
+
+- **ActionId** - The identifier of the action that was clicked (from the MenuItem tag or label)
+- **RowIndex** - The zero-based index of the row where the action was triggered
+- **RowData** - A dictionary containing the row data, keyed by column name
+
+Access row values from the `RowData` dictionary using column names as keys.
 
 ## Cell Click Events
 
@@ -278,7 +289,7 @@ public class DateFilterDemo : ViewBase
 }
 ```
 
-Try filtering the *Order Date* column with a range such as [OrderDate] >= "2025-11-01" AND [OrderDate] <= "2025-11-31" to see the results update in real time.
+Try filtering the _Order Date_ column with a range such as [OrderDate] >= "2025-11-01" AND [OrderDate] <= "2025-11-31" to see the results update in real time.
 
 ## Performance with Large Datasets
 
@@ -297,8 +308,23 @@ Enumerable.Range(1, 500)
 
 **Performance options:**
 
-- **LoadAllRows(true)** - Load all rows at once for maximum performance with very large datasets
-- **BatchSize(n)** - Load data in batches of n rows for incremental loading
+- **LoadAllRows(true)** - Load all rows at once for maximum performance with very large datasets. Set to `false` to enable incremental loading with batching.
+- **BatchSize(n)** - Load data in batches of n rows for incremental loading. Use this when `LoadAllRows` is `false` to control how many rows are loaded per batch. Default is typically 50 rows per batch.
+
+**Example with performance configuration:**
+
+```csharp demo-tabs
+sampleUsers.ToDataTable()
+    .Header(u => u.Name, "Name")
+    .Header(u => u.Email, "Email")
+    .Header(u => u.Salary, "Salary")
+    .Config(config =>
+    {
+        config.BatchSize = 50;        // Load 50 rows per batch
+        config.LoadAllRows = false;   // Enable incremental loading
+    })
+    .Height(Size.Units(100))
+```
 
 </Body>
 </Details>
