@@ -16,18 +16,20 @@ Sheets slide in from the side of the screen and display additional content while
 
 ## Basic Usage
 
-The `WithSheet` extension on a `Button` provides an easy way to open a sheet:
+Wrap both the trigger button and the `Sheet` inside a `Fragment`, toggling visibility with `UseState`:
 
 ```csharp demo-tabs
 public class BasicSheetExample : ViewBase
 {
     public override object? Build()
     {
-        return new Button("Open Sheet").WithSheet(
-            () => new SheetView(),
-            title: "This is a sheet",
-            description: "Lorem ipsum dolor sit amet",
-            width: Size.Fraction(1/2f)
+        var isSheetOpen = UseState(false);
+        return new Fragment(
+            new Button("Open Sheet").HandleClick(_ => isSheetOpen.Value = true),
+            isSheetOpen.Value
+                ? new Sheet(() => isSheetOpen.Value = false, new SheetView(), title: "This is a sheet", description: "Lorem ipsum dolor sit amet")
+                    .Width(Size.Fraction(1/2f))
+                : null
         );
     }
 }
@@ -54,16 +56,20 @@ public class BasicSheetWithContent : ViewBase
     public override object? Build()
     {
         var client = UseService<IClientProvider>();
-        return new Button("Open Basic Sheet").WithSheet(
-            () => new Fragment(
-                new Card(
-                    "Welcome to the sheet!",
-                    new Button("Action Button", onClick: _ => client.Toast("Button clicked!"))
-                ).Title("Sheet Content").Description("This is a simple sheet with custom content")
-            ),
-            title: "Basic Sheet",
-            description: "A simple example of sheet usage",
-            width: Size.Fraction(1/3f)
+        var isSheetOpen = UseState(false);
+        return new Fragment(
+            new Button("Open Basic Sheet").HandleClick(_ => isSheetOpen.Value = true),
+            isSheetOpen.Value
+                ? new Sheet(() => isSheetOpen.Value = false,
+                new Fragment(
+                    new Card(
+                        "Welcome to the sheet!",
+                        new Button("Action Button", onClick: _ => client.Toast("Button clicked!"))
+                    ).Title("Sheet Content").Description("This is a simple sheet with custom content")
+                ),
+                title: "Basic Sheet",
+                description: "A simple example of sheet usage").Width(Size.Fraction(1/3f))
+                : null
         );
     }
 }
@@ -79,17 +85,21 @@ public class SheetWithFooterActions : ViewBase
     public override object? Build()
     {
         var client = UseService<IClientProvider>();
-        return new Button("Open Sheet with Actions").WithSheet(
-            () => new FooterLayout(
-                Layout.Horizontal().Gap(2)
-                    | new Button("Save").Variant(ButtonVariant.Primary).HandleClick(_ => client.Toast("Profile saved successfully!"))
-                    | new Button("Cancel").Variant(ButtonVariant.Outline).HandleClick(_ => client.Toast("Changes cancelled")),
-                new Card(
-                    "This sheet has action buttons in the footer"
-                ).Title("Content")
-            ),
-            title: "Actions Sheet",
-            width: Size.Fraction(1/2f)
+        var isSheetOpen = UseState(false);
+        return new Fragment(
+            new Button("Open Sheet with Actions").HandleClick(_ => isSheetOpen.Value = true),
+            isSheetOpen.Value
+                ? new Sheet(() => isSheetOpen.Value = false,
+                new FooterLayout(
+                    Layout.Horizontal().Gap(2)
+                        | new Button("Save").Variant(ButtonVariant.Primary).HandleClick(_ => client.Toast("Profile saved successfully!"))
+                        | new Button("Cancel").Variant(ButtonVariant.Outline).HandleClick(_ => client.Toast("Changes cancelled")),
+                    new Card(
+                        "This sheet has action buttons in the footer"
+                    ).Title("Content")
+                ),
+                title: "Actions Sheet").Width(Size.Fraction(1/2f))
+                : null
         );
     }
 }
@@ -105,30 +115,34 @@ public class ComplexSheetLayout : ViewBase
     public override object? Build()
     {
         var client = UseService<IClientProvider>();
-        return new Button("Open Complex Sheet").WithSheet(
-            () => Layout.Vertical()
-                | new Card(
-                    Layout.Horizontal()
-                        | new Avatar("JD").Size(64)
-                        | Layout.Vertical()
-                            | Text.Small("John Doe").NoWrap()
-                            | Text.Small("john.doe@example.com")
-                ).Title("User Information")
-                | new Card(
-                    Layout.Vertical()
-                        | new BoolInput("Dark Mode", true)
-                        | new BoolInput("Notifications", false)
-                        | new SelectInput<string>(options: new[] { "English", "Spanish", "French" }.ToOptions())
-                ).Title("Preferences")
-                | new Card(
-                    Layout.Horizontal().Gap(2)
-                        | new Button("Update Profile").HandleClick(_ => client.Toast("Profile updated!"))
-                        | new Button("Change Password").HandleClick(_ => client.Toast("Password change initiated"))
-                        | new Button("Delete Account").Variant(ButtonVariant.Destructive).HandleClick(_ => client.Toast("Account deletion requested"))
-                ).Title("Actions"),
-            title: "User Profile",
-            description: "Manage your account settings and preferences",
-            width: Size.Fraction(2/3f)
+        var isSheetOpen = UseState(false);
+        return new Fragment(
+            new Button("Open Complex Sheet").HandleClick(_ => isSheetOpen.Value = true),
+            isSheetOpen.Value
+                ? new Sheet(() => isSheetOpen.Value = false,
+                Layout.Vertical()
+                    | new Card(
+                        Layout.Horizontal()
+                            | new Avatar("JD").Size(64)
+                            | Layout.Vertical()
+                                | Text.Small("John Doe").NoWrap()
+                                | Text.Small("john.doe@example.com")
+                    ).Title("User Information")
+                    | new Card(
+                        Layout.Vertical()
+                            | new BoolInput("Dark Mode", true)
+                            | new BoolInput("Notifications", false)
+                            | new SelectInput<string>(options: new[] { "English", "Spanish", "French" }.ToOptions())
+                    ).Title("Preferences")
+                    | new Card(
+                        Layout.Horizontal().Gap(2)
+                            | new Button("Update Profile").HandleClick(_ => client.Toast("Profile updated!"))
+                            | new Button("Change Password").HandleClick(_ => client.Toast("Password change initiated"))
+                            | new Button("Delete Account").Variant(ButtonVariant.Destructive).HandleClick(_ => client.Toast("Account deletion requested"))
+                    ).Title("Actions"),
+                title: "User Profile",
+                description: "Manage your account settings and preferences").Width(Size.Fraction(2/3f))
+                : null
         );
     }
 }
@@ -143,27 +157,45 @@ public class SheetWidthExamples : ViewBase
 {
     public override object? Build()
     {
-        return Layout.Horizontal().Gap(2)
-            | new Button("Small Sheet").WithSheet(
-                () => new Card("This is a small sheet").Title("Small Content"),
-                title: "Small",
-                width: Size.Rem(20)
-            )
-            | new Button("Medium Sheet").WithSheet(
-                () => new Card("This is a medium sheet").Title("Medium Content"),
-                title: "Medium",
-                width: Size.Fraction(1/2f)
-            )
-            | new Button("Large Sheet").WithSheet(
-                () => new Card("This is a large sheet").Title("Large Content"),
-                title: "Large",
-                width: Size.Fraction(2/3f)
-            )
-            | new Button("Full Sheet").WithSheet(
-                () => new Card("This is a full-width sheet").Title("Full Content"),
-                title: "Full Width",
-                width: Size.Full()
-            );
+        var activeSheet = UseState<string?>(() => null);
+
+        Size ResolveWidth(string key) => key switch
+        {
+            "small" => Size.Rem(20),
+            "medium" => Size.Fraction(1/2f),
+            "large" => Size.Fraction(2/3f),
+            "full" => Size.Full(),
+            _ => Sheet.DefaultWidth
+        };
+
+        (string Title, string Message) ResolveContent(string key) => key switch
+        {
+            "small" => ("Small Content", "This is a small sheet"),
+            "medium" => ("Medium Content", "This is a medium sheet"),
+            "large" => ("Large Content", "This is a large sheet"),
+            "full" => ("Full Content", "This is a full-width sheet"),
+            _ => ("Sheet", "Select a sheet size to preview it")
+        };
+
+        return new Fragment(
+            Layout.Horizontal().Gap(2)
+                | new Button("Small Sheet").HandleClick(_ => activeSheet.Value = "small")
+                | new Button("Medium Sheet").HandleClick(_ => activeSheet.Value = "medium")
+                | new Button("Large Sheet").HandleClick(_ => activeSheet.Value = "large")
+                | new Button("Full Sheet").HandleClick(_ => activeSheet.Value = "full"),
+            activeSheet.Value is { } current
+                ? new Sheet(() => activeSheet.Value = null,
+                new Card(ResolveContent(current).Message).Title(ResolveContent(current).Title),
+                title: current switch
+                {
+                    "small" => "Small",
+                    "medium" => "Medium",
+                    "large" => "Large",
+                    "full" => "Full Width",
+                    _ => "Sheet Widths"
+                }).Width(ResolveWidth(current))
+                : null
+        );
     }
 }
 ```
@@ -177,10 +209,14 @@ public class NavigationSheet : ViewBase
 {
     public override object? Build()
     {
-        return new Button("Open Navigation Sheet").WithSheet(
-            () => new NavigationSheetContent(),
-            title: "Navigation Sheet",
-            width: Size.Fraction(1/2f)
+        var isSheetOpen = UseState(false);
+        return new Fragment(
+            new Button("Open Navigation Sheet").HandleClick(_ => isSheetOpen.Value = true),
+            isSheetOpen.Value
+                ? new Sheet(() => isSheetOpen.Value = false,
+                new NavigationSheetContent(),
+                title: "Navigation Sheet").Width(Size.Fraction(1/2f))
+                : null
         );
     }
 }
@@ -255,9 +291,10 @@ public class ConditionalSheetExample : ViewBase
             };
         }
         
-        return Layout.Vertical().Gap(2)
-            | new Button("Open Conditional Sheet").HandleClick(_ => isOpen.Value = true)
-            | (isOpen.Value ? new Sheet((Event<Sheet> _) => isOpen.Value = false,
+        return new Fragment(
+            Layout.Vertical().Gap(2)
+                | new Button("Open Conditional Sheet").HandleClick(_ => isOpen.Value = true),
+            isOpen.Value ? new Sheet((Event<Sheet> _) => isOpen.Value = false,
                 Layout.Vertical().Gap(2)
                     | (Layout.Horizontal().Gap(2)
                         | new Button("List").Variant(viewMode.Value == "list" ? ButtonVariant.Primary : ButtonVariant.Outline)
@@ -278,7 +315,8 @@ public class ConditionalSheetExample : ViewBase
                     | RenderContent(),
                 title: "Conditional Content Sheet",
                 description: "Switch between different view modes"
-            ).Width(Size.Fraction(2/3f)) : null);
+            ).Width(Size.Fraction(2/3f)) : null
+        );
     }
 }
 ```
