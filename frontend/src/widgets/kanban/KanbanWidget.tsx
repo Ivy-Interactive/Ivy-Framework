@@ -29,7 +29,6 @@ export const KanbanWidget: React.FC<KanbanWidgetProps> = ({
   const { handleCardMove, handleCardClick, handleCardDelete } =
     useKanbanHandlers(id, extractedData.tasks);
 
-  // Sort columns by order property to respect backend column order
   const sortedColumns = React.useMemo(() => {
     return [...extractedData.columns].sort((a, b) => {
       const orderA = a.order ?? Number.MAX_SAFE_INTEGER;

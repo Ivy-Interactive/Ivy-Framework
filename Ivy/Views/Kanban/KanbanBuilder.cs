@@ -6,9 +6,6 @@ using Ivy.Views.Builders;
 
 namespace Ivy.Views.Kanban;
 
-/// <summary>Fluent builder for creating kanban boards from data collections with automatic grouping and card rendering.</summary>
-/// <typeparam name="TModel">The type of data objects to display in kanban cards.</typeparam>
-/// <typeparam name="TGroupKey">The type of the grouping key used to organize items into columns.</typeparam>
 public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
     where TGroupKey : notnull
 {
@@ -175,8 +172,6 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
 
     public KanbanBuilder<TModel, TGroupKey> Width(Expression<Func<TModel, TGroupKey>> groupKeySelector, Size width)
     {
-        // Evaluate the selector on all unique group keys to set widths for all matching columns
-        // Cache the enumeration to avoid multiple iterations
         var compiledSelector = groupKeySelector.Compile();
         var uniqueKeys = _records.Select(compiledSelector).Distinct().ToList();
         foreach (var key in uniqueKeys)
@@ -227,10 +222,8 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
             return _empty ?? new Fragment();
         }
 
-        // Group items by their group key
         var grouped = _records.GroupBy(_groupBySelector);
 
-        // Apply column ordering if specified
         IEnumerable<IGrouping<TGroupKey, TModel>> orderedGroups;
         if (_columnOrderBySelector != null)
         {
@@ -243,8 +236,6 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
             orderedGroups = grouped;
         }
 
-        // Flatten groups and apply card ordering within each group
-        // Track group key for each item so we can set Status prop on cards
         var itemsWithGroupKey = orderedGroups.SelectMany(group =>
         {
             var groupKey = group.Key;
@@ -271,17 +262,14 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
 
             object content;
 
-            // Use custom card renderer if provided
             if (_customCardRenderer != null)
             {
                 content = _customCardRenderer(item);
             }
-            // Use builder if explicitly set (CardBuilder takes precedence over title/description selectors)
             else if (_cardBuilder != null)
             {
                 content = _cardBuilder.Build(item, item) ?? "";
             }
-            // Use default Card widget with Title and Description if selectors are provided
             else if (_cardTitleSelector != null || _cardDescriptionSelector != null)
             {
                 var cardWidget = new Card();
@@ -291,7 +279,6 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
                     cardWidget = cardWidget.Description(_cardDescriptionSelector(item)?.ToString() ?? "");
                 content = cardWidget;
             }
-            // Fallback to default builder
             else
             {
                 content = _builderFactory.Default().Build(item, item) ?? "";
@@ -299,20 +286,16 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
 
             var card = new KanbanCard(content);
 
-            // Set card ID if selector is provided
             var cardId = _cardIdSelector?.Invoke(item);
             if (cardId != null)
                 card = card with { CardId = cardId };
 
-            // Set priority if order selector is provided
             var priority = _orderSelector?.Invoke(item);
             if (priority != null)
                 card = card with { Priority = priority };
 
-            // Set column (group key) so frontend knows which column this card belongs to
             card = card with { Column = groupKey };
 
-            // Attach OnClick handler if specified
             if (_onClick != null && cardId != null)
                 card = card with { OnClick = _onClick };
 
@@ -334,13 +317,11 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
             ColumnWidths = columnWidthsDict
         };
 
-        // Attach OnDelete handler if specified
         if (_onDelete != null)
         {
             kanban = kanban with { OnDelete = _onDelete };
         }
 
-        // Attach OnCardMove handler if specified
         if (_onMove != null)
         {
             kanban = kanban with
@@ -350,7 +331,6 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
                     if (e.Value.ToColumn == null)
                         return ValueTask.CompletedTask;
 
-                    // Validate type before casting
                     if (e.Value.ToColumn is TGroupKey groupKey)
                     {
                         return _onMove(new Event<Ivy.Kanban, (object?, TGroupKey, int?)>(
@@ -359,7 +339,6 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
                             (e.Value.CardId, groupKey, e.Value.TargetIndex)));
                     }
 
-                    // If cast fails, try conversion (for string to enum, etc.)
                     try
                     {
                         var convertedKey = (TGroupKey)Convert.ChangeType(e.Value.ToColumn, typeof(TGroupKey));
@@ -370,7 +349,6 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
                     }
                     catch
                     {
-                        // Log or handle conversion failure
                         return ValueTask.CompletedTask;
                     }
                 }

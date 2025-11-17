@@ -12,7 +12,6 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { getWidth } from '@/lib/styles';
 
-// Types
 export interface Task {
   id: string;
   title: string;
@@ -29,7 +28,6 @@ export interface Column {
   color: string;
 }
 
-// Context
 interface KanbanContextType {
   data: Task[];
   columns: Column[];
@@ -55,7 +53,6 @@ const KanbanContext = createContext<KanbanContextType>({
 
 export const useKanbanContext = () => useContext(KanbanContext);
 
-// Main Kanban Component
 interface KanbanProps {
   columns: Column[];
   data: Task[];
@@ -116,7 +113,6 @@ export function Kanban({
   );
 }
 
-// KanbanBoard Component
 interface KanbanBoardProps {
   children: ReactNode;
   className?: string;
@@ -133,7 +129,6 @@ export function KanbanBoard({ children, className }: KanbanBoardProps) {
   );
 }
 
-// KanbanColumn Component
 interface KanbanColumnProps {
   id: string;
   name?: string;
@@ -159,7 +154,6 @@ export function KanbanColumn({
       e.preventDefault();
       e.dataTransfer.dropEffect = 'move';
 
-      // Only show drag over styling if dragging from a different column
       if (draggedCardColumn && draggedCardColumn !== id) {
         setIsDragOver(true);
       }
@@ -168,7 +162,6 @@ export function KanbanColumn({
   );
 
   const handleDragLeave = useCallback((e: React.DragEvent) => {
-    // Only set drag over to false if we're leaving the column entirely
     if (!e.currentTarget.contains(e.relatedTarget as Node)) {
       setIsDragOver(false);
     }
@@ -181,19 +174,14 @@ export function KanbanColumn({
 
       const cardId = e.dataTransfer.getData('text/plain');
       if (!cardId) return;
-      // Find the task to get the source column
       const task = data.find(t => t.id === cardId);
       if (!task) return;
 
-      // Drop on column event
-
-      // Send move event to backend - let backend handle positioning at the end
       onCardMove?.(cardId, task.status, id);
     },
     [id, onCardMove, data]
   );
 
-  // Only show drag-over styling when actively dragging AND hovering over this column
   const showDragOver = isDragOver && draggedCardColumn !== null;
 
   const widthStyles = width ? getWidth(width) : {};
@@ -213,7 +201,6 @@ export function KanbanColumn({
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
     >
-      {/* Column Header */}
       <div className="px-3">
         <h3 className="font-semibold text-foreground flex items-center gap-2">
           {color && (
@@ -230,7 +217,6 @@ export function KanbanColumn({
   );
 }
 
-// KanbanCards Component
 interface KanbanCardsProps {
   id: string;
   children: (task: Task) => ReactNode;
@@ -251,7 +237,6 @@ export function KanbanCards({ id, children }: KanbanCardsProps) {
   );
 }
 
-// KanbanCard Component
 interface KanbanCardProps {
   id: string;
   column: string;
@@ -274,7 +259,6 @@ export function KanbanCard({
 
   const handleDragStart = useCallback(
     (e: React.DragEvent) => {
-      // KanbanCard drag start
       setIsDragging(true);
       justDraggedRef.current = false;
       setDraggedCardColumn(column);
@@ -287,9 +271,7 @@ export function KanbanCard({
   const handleDragEnd = useCallback(() => {
     setIsDragging(false);
     setDraggedCardColumn(null);
-    // Mark that a drag just occurred to prevent click
     justDraggedRef.current = true;
-    // Reset after a short delay to allow click handler to check it
     setTimeout(() => {
       justDraggedRef.current = false;
     }, 100);
@@ -310,23 +292,18 @@ export function KanbanCard({
   const handleDrop = useCallback(
     (e: React.DragEvent) => {
       e.preventDefault();
-      e.stopPropagation(); // Prevent column drop from also triggering
+      e.stopPropagation();
       setIsDragOver(false);
 
       const draggedCardId = e.dataTransfer.getData('text/plain');
       if (!draggedCardId || draggedCardId === id) return;
 
-      // Find the dragged task to get the source column
       const draggedTask = data.find(t => t.id === draggedCardId);
       if (!draggedTask) return;
 
-      // Find the target position - where this card is in the column
       const columnTasks = data.filter(task => task.status === column);
       const targetIndex = columnTasks.findIndex(task => task.id === id);
 
-      // Drop on card event
-
-      // Send move event to backend with precise target index
       onCardMove?.(draggedCardId, draggedTask.status, column, targetIndex);
     },
     [id, column, onCardMove, data]
@@ -343,7 +320,6 @@ export function KanbanCard({
 
   const handleClick = useCallback(
     (e: React.MouseEvent) => {
-      // Don't trigger click if it's a drag operation, if delete button was clicked, or if we just dragged
       if (
         isDragging ||
         justDraggedRef.current ||
@@ -404,7 +380,6 @@ export function KanbanCard({
   );
 }
 
-// KanbanHeader Component
 interface KanbanHeaderProps {
   children: ReactNode;
 }
@@ -413,7 +388,6 @@ export function KanbanHeader({ children }: KanbanHeaderProps) {
   return <>{children}</>;
 }
 
-// KanbanCardContent Component
 interface KanbanCardContentProps {
   children: ReactNode;
 }
