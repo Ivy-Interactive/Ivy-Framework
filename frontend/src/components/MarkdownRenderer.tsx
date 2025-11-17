@@ -51,6 +51,13 @@ const ImageOverlay = ({
     }
   };
 
+  // Validate and sanitize image URL to prevent open redirect vulnerabilities
+  const validatedSrc = src ? validateImageUrl(src) : null;
+  if (!validatedSrc) {
+    // Invalid URL, don't render image
+    return null;
+  }
+
   return (
     <div
       className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 cursor-zoom-out"
@@ -58,7 +65,7 @@ const ImageOverlay = ({
     >
       <div className="relative max-w-[90vw] max-h-[90vh]">
         <img
-          src={src}
+          src={validatedSrc}
           alt={alt}
           className="max-w-full max-h-[90vh] object-contain"
         />
