@@ -82,11 +82,19 @@ public class BasicKanbanExample : ViewBase
 
                     // Insert the task at the desired position within the target column
                     var tasksInTargetColumn = updatedTasks.Where(t => t.Status == moveData.ToColumn).ToList();
-                    if (moveData.TargetIndex.HasValue && moveData.TargetIndex.Value < tasksInTargetColumn.Count)
+                    if (moveData.TargetIndex.HasValue && moveData.TargetIndex.Value >= 0 && moveData.TargetIndex.Value < tasksInTargetColumn.Count)
                     {
-                        // Insert at specific position
+                        // Insert at specific position - validate bounds before inserting
                         var insertIndex = moveData.TargetIndex.Value;
-                        updatedTasks.InsertRange(insertIndex, new[] { taskToMove });
+                        if (insertIndex >= 0 && insertIndex <= updatedTasks.Count)
+                        {
+                            updatedTasks.InsertRange(insertIndex, new[] { taskToMove });
+                        }
+                        else
+                        {
+                            // Fallback to end if index is out of bounds
+                            updatedTasks.Add(taskToMove);
+                        }
                     }
                     else
                     {
@@ -201,9 +209,19 @@ public class KanbanBuilderExample : ViewBase
 
                     updatedTasks.RemoveAll(t => t.Id == taskId);
                     var tasksInTargetColumn = updatedTasks.Where(t => t.Status == moveData.ToColumn).ToList();
-                    if (moveData.TargetIndex.HasValue && moveData.TargetIndex.Value < tasksInTargetColumn.Count)
+                    if (moveData.TargetIndex.HasValue && moveData.TargetIndex.Value >= 0 && moveData.TargetIndex.Value < tasksInTargetColumn.Count)
                     {
-                        updatedTasks.InsertRange(moveData.TargetIndex.Value, new[] { taskToMove });
+                        // Insert at specific position - validate bounds before inserting
+                        var insertIndex = moveData.TargetIndex.Value;
+                        if (insertIndex >= 0 && insertIndex <= updatedTasks.Count)
+                        {
+                            updatedTasks.InsertRange(insertIndex, new[] { taskToMove });
+                        }
+                        else
+                        {
+                            // Fallback to end if index is out of bounds
+                            updatedTasks.Add(taskToMove);
+                        }
                     }
                     else
                     {

@@ -70,14 +70,16 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
 
     public KanbanBuilder<TModel, TGroupKey> ColumnOrder<TOrderKey>(Expression<Func<TModel, TOrderKey>> orderBySelector, bool descending = false)
     {
-        _columnOrderBySelector = orderBySelector.Compile() as Func<TModel, object?>;
+        var compiled = orderBySelector.Compile();
+        _columnOrderBySelector = item => compiled(item);
         _columnOrderDescending = descending;
         return this;
     }
 
     public KanbanBuilder<TModel, TGroupKey> CardOrder<TOrderKey>(Expression<Func<TModel, TOrderKey>> orderBySelector, bool descending = false)
     {
-        _cardOrderBySelector = orderBySelector.Compile() as Func<TModel, object?>;
+        var compiled = orderBySelector.Compile();
+        _cardOrderBySelector = item => compiled(item);
         _cardOrderDescending = descending;
         return this;
     }
@@ -174,8 +176,9 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
     public KanbanBuilder<TModel, TGroupKey> Width(Expression<Func<TModel, TGroupKey>> groupKeySelector, Size width)
     {
         // Evaluate the selector on all unique group keys to set widths for all matching columns
+        // Cache the enumeration to avoid multiple iterations
         var compiledSelector = groupKeySelector.Compile();
-        var uniqueKeys = _records.Select(compiledSelector).Distinct();
+        var uniqueKeys = _records.Select(compiledSelector).Distinct().ToList();
         foreach (var key in uniqueKeys)
         {
             _columnWidths[key] = width;
@@ -219,7 +222,10 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
 
     public override object? Build()
     {
-        if (!_records.Any()) return _empty!;
+        if (!_records.Any())
+        {
+            return _empty ?? new Fragment();
+        }
 
         // Group items by their group key
         var grouped = _records.GroupBy(_groupBySelector);
@@ -339,10 +345,35 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
         {
             kanban = kanban with
             {
-                OnCardMove = e => _onMove(new Event<Ivy.Kanban, (object?, TGroupKey, int?)>(
-                                e.EventName,
-                                e.Sender,
-                                (e.Value.CardId, (TGroupKey)e.Value.ToColumn!, e.Value.TargetIndex)))
+                OnCardMove = e =>
+                {
+                    if (e.Value.ToColumn == null)
+                        return ValueTask.CompletedTask;
+
+                    // Validate type before casting
+                    if (e.Value.ToColumn is TGroupKey groupKey)
+                    {
+                        return _onMove(new Event<Ivy.Kanban, (object?, TGroupKey, int?)>(
+                            e.EventName,
+                            e.Sender,
+                            (e.Value.CardId, groupKey, e.Value.TargetIndex)));
+                    }
+
+                    // If cast fails, try conversion (for string to enum, etc.)
+                    try
+                    {
+                        var convertedKey = (TGroupKey)Convert.ChangeType(e.Value.ToColumn, typeof(TGroupKey));
+                        return _onMove(new Event<Ivy.Kanban, (object?, TGroupKey, int?)>(
+                            e.EventName,
+                            e.Sender,
+                            (e.Value.CardId, convertedKey, e.Value.TargetIndex)));
+                    }
+                    catch
+                    {
+                        // Log or handle conversion failure
+                        return ValueTask.CompletedTask;
+                    }
+                }
             };
         }
 

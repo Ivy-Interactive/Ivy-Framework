@@ -18,6 +18,12 @@ interface WidgetNodeChild {
 }
 
 /**
+ * Offset used to ensure columns not in columnWidths are sorted after those that are
+ * This ensures backend-defined column order takes precedence
+ */
+const FALLBACK_ORDER_OFFSET = 1000;
+
+/**
  * Get status order matching backend's GetStatusOrder function
  * This ensures frontend column order matches backend ColumnOrder
  */
@@ -32,6 +38,19 @@ function getStatusOrder(status: string): number {
     default:
       return 0;
   }
+}
+
+/**
+ * Extract unique column keys from cards
+ */
+function extractColumnKeysFromCards(cards: CardData[]): string[] {
+  const columnSet = new Set<string>();
+  cards.forEach(card => {
+    if (card.columnKey) {
+      columnSet.add(card.columnKey);
+    }
+  });
+  return Array.from(columnSet);
 }
 
 /**
@@ -55,10 +74,10 @@ function sortColumnKeysByBackendOrder(
     return [...columnKeys].sort((a, b) => {
       const orderA = orderMap.has(a)
         ? orderMap.get(a)!
-        : getStatusOrder(a) + 1000;
+        : getStatusOrder(a) + FALLBACK_ORDER_OFFSET;
       const orderB = orderMap.has(b)
         ? orderMap.get(b)!
-        : getStatusOrder(b) + 1000;
+        : getStatusOrder(b) + FALLBACK_ORDER_OFFSET;
       return orderA - orderB;
     });
   }
@@ -106,16 +125,8 @@ export function useKanbanData(
       // Backend sends Column prop on each card with the group key from groupBySelector
       // Each card knows which column it belongs to via the Column prop
       if (extractedCards.length > 0 && tasks.length === 0) {
-        // Collect unique column values from cards to create columns
-        const columnSet = new Set<string>();
-        extractedCards.forEach(card => {
-          if (card.columnKey) {
-            columnSet.add(card.columnKey);
-          }
-        });
-
-        // Get all column keys from cards
-        const allColumnKeys = Array.from(columnSet);
+        // Extract unique column keys from cards
+        const allColumnKeys = extractColumnKeysFromCards(extractedCards);
 
         // Sort by backend order (columnWidths keys preserve backend ColumnOrder)
         const finalColumnKeys = sortColumnKeysByBackendOrder(
