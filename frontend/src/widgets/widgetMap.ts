@@ -135,11 +135,6 @@ export const widgetMap = {
       default: m.KanbanWidget,
     }))
   ),
-  'Ivy.KanbanColumn': React.lazy(() =>
-    import('@/widgets/kanban/KanbanColumnWidget').then(m => ({
-      default: m.KanbanColumnWidget,
-    }))
-  ),
   'Ivy.KanbanCard': React.lazy(() =>
     import('@/widgets/kanban/KanbanCardWidget').then(m => ({
       default: m.KanbanCardWidget,

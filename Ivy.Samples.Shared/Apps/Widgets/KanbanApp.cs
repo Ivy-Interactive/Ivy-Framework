@@ -180,37 +180,37 @@ public class KanbanBuilderExample : ViewBase
                 .Width(Size.Full())
                 .Width(e => e.Status, Size.Fraction(0.33f))
                 .HandleCardMove(moveData =>
-                {
-                    var taskId = moveData.CardId?.ToString();
-                    if (string.IsNullOrEmpty(taskId)) return;
+    {
+        var taskId = moveData.CardId?.ToString();
+        if (string.IsNullOrEmpty(taskId)) return;
 
-                    var updatedTasks = tasks.Value.ToList();
-                    var taskToMove = updatedTasks.FirstOrDefault(t => t.Id == taskId);
-                    if (taskToMove == null) return;
+        var updatedTasks = tasks.Value.ToList();
+        var taskToMove = updatedTasks.FirstOrDefault(t => t.Id == taskId);
+        if (taskToMove == null) return;
 
-                    taskToMove = new Task
-                    {
-                        Id = taskToMove.Id,
-                        Title = taskToMove.Title,
-                        Status = moveData.ToColumn,
-                        Priority = taskToMove.Priority,
-                        Description = taskToMove.Description,
-                        Assignee = taskToMove.Assignee
-                    };
+        taskToMove = new Task
+        {
+            Id = taskToMove.Id,
+            Title = taskToMove.Title,
+            Status = moveData.ToColumn,
+            Priority = taskToMove.Priority,
+            Description = taskToMove.Description,
+            Assignee = taskToMove.Assignee
+        };
 
-                    updatedTasks.RemoveAll(t => t.Id == taskId);
-                    var tasksInTargetColumn = updatedTasks.Where(t => t.Status == moveData.ToColumn).ToList();
-                    if (moveData.TargetIndex.HasValue && moveData.TargetIndex.Value < tasksInTargetColumn.Count)
-                    {
-                        updatedTasks.InsertRange(moveData.TargetIndex.Value, new[] { taskToMove });
-                    }
-                    else
-                    {
-                        updatedTasks.Add(taskToMove);
-                    }
+        updatedTasks.RemoveAll(t => t.Id == taskId);
+        var tasksInTargetColumn = updatedTasks.Where(t => t.Status == moveData.ToColumn).ToList();
+        if (moveData.TargetIndex.HasValue && moveData.TargetIndex.Value < tasksInTargetColumn.Count)
+        {
+            updatedTasks.InsertRange(moveData.TargetIndex.Value, new[] { taskToMove });
+        }
+        else
+        {
+            updatedTasks.Add(taskToMove);
+        }
 
-                    tasks.Set(updatedTasks.ToArray());
-                })
+        tasks.Set(updatedTasks.ToArray());
+    })
                 .Empty(
                     new Card()
                         .Title("No Tasks")
