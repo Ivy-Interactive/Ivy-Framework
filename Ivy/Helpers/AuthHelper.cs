@@ -136,12 +136,20 @@ public static class AuthHelper
         catch (MissingAuthTokenException ex)
         {
             clientProvider.Toast(ex.Message, "Authentication failed");
-            return controller.Unauthorized(ex.Message);
+            return await ErrorPageHelper.RenderErrorPage(
+                controller.HttpContext,
+                ex.Message,
+                401
+            );
         }
         catch (InvalidAuthTokenException ex)
         {
             clientProvider.Toast(ex.Message, "Authentication failed");
-            return controller.Unauthorized(ex.Message);
+            return await ErrorPageHelper.RenderErrorPage(
+                controller.HttpContext,
+                ex.Message,
+                401
+            );
         }
         catch (AuthProviderNotConfiguredException ex)
         {

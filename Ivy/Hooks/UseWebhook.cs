@@ -2,6 +2,7 @@
 using Ivy.Apps;
 using Ivy.Core;
 using Ivy.Core.Hooks;
+using Ivy.Helpers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -93,18 +94,22 @@ public class WebhookController : Controller, IWebhookRegistry
 
     [Route("ivy/webhook")]
     [HttpGet, HttpPost]
-    public Task<IActionResult> HandleWebhookWithIdInStateQueryParameter([FromQuery(Name = "state")] string? id)
+    public async Task<IActionResult> HandleWebhookWithIdInStateQueryParameter([FromQuery(Name = "state")] string? id)
     {
         if (string.IsNullOrEmpty(id))
         {
-            return Task.FromResult<IActionResult>(BadRequest("The 'state' query parameter is required."));
+            return await ErrorPageHelper.RenderErrorPage(
+                HttpContext,
+                "The 'state' query parameter is required.",
+                400
+            );
         }
 
         if (Handlers.TryGetValue(id, out var handler))
         {
-            return handler(Request);
+            return await handler(Request);
         }
-        return Task.FromResult<IActionResult>(NotFound());
+        return NotFound();
     }
 
     public IDisposable Register(string id, Func<HttpRequest, Task<IActionResult>> handler)
