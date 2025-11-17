@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { getHeight, getWidth } from '@/lib/styles';
-import { getIvyHost } from '@/lib/utils';
+import { getIvyHost, validateVideoUrl, validateImageUrl } from '@/lib/utils';
 
 interface VideoPlayerWidgetProps {
   id: string;
@@ -15,16 +15,21 @@ interface VideoPlayerWidgetProps {
   poster?: string; // optional preview image before playback
 }
 
-const getVideoUrl = (url: string): string => {
-  if (
-    url.startsWith('http://') ||
-    url.startsWith('https://') ||
-    url.startsWith('data:')
-  ) {
-    return url;
+const getVideoUrl = (url: string): string | null => {
+  // Validate and sanitize video URL to prevent open redirect vulnerabilities
+  const validatedUrl = validateVideoUrl(url);
+  if (!validatedUrl) {
+    // Invalid URL, return null
+    return null;
   }
 
-  return `${getIvyHost()}${url.startsWith('/') ? '' : '/'}${url}`;
+  // If it's already a full URL (http/https/data/blob/app), return it
+  if (validatedUrl.match(/^(https?:\/\/|data:|blob:|app:)/i)) {
+    return validatedUrl;
+  }
+
+  // Construct relative URL with Ivy host
+  return `${getIvyHost()}${validatedUrl.startsWith('/') ? '' : '/'}${validatedUrl}`;
 };
 
 const isYouTube = (url: string): boolean => {
@@ -71,6 +76,25 @@ export const VideoPlayerWidget: React.FC<VideoPlayerWidgetProps> = ({
     );
   }
 
+  // Validate and sanitize video URL to prevent open redirect vulnerabilities
+  const validatedVideoSrc = getVideoUrl(source);
+  if (!validatedVideoSrc) {
+    return (
+      <div
+        id={id}
+        style={styles}
+        className="flex items-center justify-center bg-destructive/10 text-destructive rounded border-2 border-dashed border-destructive/25 p-4"
+        role="alert"
+        aria-label="Invalid video URL"
+      >
+        <span className="text-sm">Invalid video URL</span>
+      </div>
+    );
+  }
+
+  // Validate poster URL if provided
+  const validatedPoster = poster ? validateImageUrl(poster) : null;
+
   if (hasError) {
     return (
       <div
@@ -85,8 +109,8 @@ export const VideoPlayerWidget: React.FC<VideoPlayerWidgetProps> = ({
     );
   }
 
-  if (isYouTube(source)) {
-    const url = new URL(source);
+  if (isYouTube(validatedVideoSrc)) {
+    const url = new URL(validatedVideoSrc);
     const videoId =
       url.searchParams.get('v') ??
       url.pathname.split('/').filter(Boolean).pop();
@@ -111,17 +135,33 @@ export const VideoPlayerWidget: React.FC<VideoPlayerWidgetProps> = ({
     );
   }
 
+  // Validate the final constructed URL to ensure it's safe
+  const finalValidatedSrc = validateVideoUrl(validatedVideoSrc);
+  if (!finalValidatedSrc) {
+    return (
+      <div
+        id={id}
+        style={styles}
+        className="flex items-center justify-center bg-destructive/10 text-destructive rounded border-2 border-dashed border-destructive/25 p-4"
+        role="alert"
+        aria-label="Invalid video URL"
+      >
+        <span className="text-sm">Invalid video URL</span>
+      </div>
+    );
+  }
+
   return (
     <video
       id={id}
-      src={getVideoUrl(source)}
+      src={finalValidatedSrc}
       style={styles}
       autoPlay={autoplay}
       loop={loop}
       muted={muted}
       preload={preload}
       controls={controls}
-      poster={poster}
+      poster={validatedPoster || undefined}
       className="w-full rounded"
       onError={() => setHasError(true)}
       aria-label="Video player"
