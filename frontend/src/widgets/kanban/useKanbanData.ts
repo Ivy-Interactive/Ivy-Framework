@@ -17,6 +17,58 @@ interface WidgetNodeChild {
   events: string[];
 }
 
+/**
+ * Get status order matching backend's GetStatusOrder function
+ * This ensures frontend column order matches backend ColumnOrder
+ */
+function getStatusOrder(status: string): number {
+  switch (status) {
+    case 'Todo':
+      return 1;
+    case 'In Progress':
+      return 2;
+    case 'Done':
+      return 3;
+    default:
+      return 0;
+  }
+}
+
+/**
+ * Sort column keys by backend order (from columnWidths keys) or fallback to status order
+ */
+function sortColumnKeysByBackendOrder(
+  columnKeys: string[],
+  columnWidths: Record<string, string>
+): string[] {
+  const columnWidthsKeys = Object.keys(columnWidths);
+
+  // If columnWidths has keys, use that order (backend ColumnOrder is preserved in columnWidths keys)
+  if (columnWidthsKeys.length > 0) {
+    // Create a map of columnWidths order
+    const orderMap = new Map<string, number>();
+    columnWidthsKeys.forEach((key, index) => {
+      orderMap.set(key, index);
+    });
+
+    // Sort by columnWidths order, then by status order for missing ones
+    return [...columnKeys].sort((a, b) => {
+      const orderA = orderMap.has(a)
+        ? orderMap.get(a)!
+        : getStatusOrder(a) + 1000;
+      const orderB = orderMap.has(b)
+        ? orderMap.get(b)!
+        : getStatusOrder(b) + 1000;
+      return orderA - orderB;
+    });
+  }
+
+  // Fallback: sort by status order
+  return [...columnKeys].sort((a, b) => {
+    return getStatusOrder(a) - getStatusOrder(b);
+  });
+}
+
 export function useKanbanData(
   slots: { default?: React.ReactNode[] } | undefined,
   tasks: Task[],
@@ -62,19 +114,14 @@ export function useKanbanData(
           }
         });
 
-        // Get column keys - preserve order from columnWidths (backend column order)
-        // then add any missing columns from cards
-        const columnWidthsKeys = Object.keys(columnWidths);
-        const columnKeys = [
-          ...columnWidthsKeys.filter(key => columnSet.has(key)),
-          ...Array.from(columnSet).filter(
-            key => !columnWidthsKeys.includes(key)
-          ),
-        ];
+        // Get all column keys from cards
+        const allColumnKeys = Array.from(columnSet);
 
-        // If no columnWidths, use columns from cards in order they appear
-        const finalColumnKeys =
-          columnKeys.length > 0 ? columnKeys : Array.from(columnSet);
+        // Sort by backend order (columnWidths keys preserve backend ColumnOrder)
+        const finalColumnKeys = sortColumnKeysByBackendOrder(
+          allColumnKeys,
+          columnWidths
+        );
 
         // Create columns from column values, preserving backend order
         const extractedColumns: Column[] = finalColumnKeys.map(
@@ -121,14 +168,11 @@ export function useKanbanData(
         statusMap.get(task.status)!.push(task);
       });
 
-      // Get column keys - preserve order from columnWidths (backend column order)
-      // then add any missing columns from tasks
-      const columnWidthsKeys = Object.keys(columnWidths);
+      // Get all column keys from task statuses
       const statusKeys = Array.from(statusMap.keys());
-      const columnKeys = [
-        ...columnWidthsKeys.filter(key => statusKeys.includes(key)),
-        ...statusKeys.filter(key => !columnWidthsKeys.includes(key)),
-      ];
+
+      // Sort by backend order (columnWidths keys preserve backend ColumnOrder)
+      const columnKeys = sortColumnKeysByBackendOrder(statusKeys, columnWidths);
 
       const extractedColumns: Column[] = columnKeys.map((status, index) => ({
         id: status,
