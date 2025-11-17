@@ -1,6 +1,5 @@
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import type { Task } from '@/components/ui/shadcn-io/kanban';
 import type { CardData } from './types';
 
@@ -20,7 +19,6 @@ interface KanbanCardRendererProps {
 export const KanbanCardRenderer: React.FC<KanbanCardRendererProps> = ({
   task,
   card,
-  onCardClick,
   KanbanCard,
   KanbanHeader,
   KanbanCardContent,
@@ -28,39 +26,21 @@ export const KanbanCardRenderer: React.FC<KanbanCardRendererProps> = ({
   return (
     <KanbanCard key={task.id} id={task.id} column={task.status}>
       {card ? (
-        card.content
+        <div className="w-full">{card.content}</div>
       ) : (
-        <Card>
-          <CardHeader>
+        <Card className="w-full">
+          <CardHeader className="flex-none pb-2">
             <KanbanHeader>
-              <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2">
-                  <CardTitle
-                    className="text-sm cursor-pointer hover:underline hover:text-primary transition-colors"
-                    onClick={(e: React.MouseEvent) => {
-                      e.stopPropagation();
-                      onCardClick(task.id);
-                    }}
-                  >
-                    {task.title}
-                  </CardTitle>
-                </div>
-                {task.priority && (
-                  <Badge variant="secondary">P{task.priority}</Badge>
-                )}
-              </div>
+              <CardTitle className="text-sm leading-tight line-clamp-2">
+                {task.title || 'Untitled Task'}
+              </CardTitle>
             </KanbanHeader>
           </CardHeader>
-          <CardContent>
+          <CardContent className="flex-1 min-h-0 overflow-hidden pt-0">
             <KanbanCardContent>
               {task.description && (
-                <p className="text-xs text-muted-foreground whitespace-pre-line">
+                <p className="text-xs text-muted-foreground line-clamp-4 leading-relaxed overflow-hidden text-ellipsis break-words">
                   {task.description}
-                </p>
-              )}
-              {task.assignee && (
-                <p className="text-xs text-muted-foreground">
-                  Assignee: {task.assignee}
                 </p>
               )}
             </KanbanCardContent>

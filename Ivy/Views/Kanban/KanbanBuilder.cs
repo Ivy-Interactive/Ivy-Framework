@@ -16,6 +16,7 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
     private readonly Func<TModel, TGroupKey> _groupBySelector;
     private readonly BuilderFactory<TModel> _builderFactory;
     private IBuilder<TModel> _cardBuilder;
+    private bool _cardBuilderExplicitlySet;
     private Func<TModel, object?>? _columnOrderBySelector;
     private bool _columnOrderDescending;
     private Func<TModel, object?>? _cardOrderBySelector;
@@ -54,6 +55,7 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
     public KanbanBuilder<TModel, TGroupKey> Builder(Func<IBuilderFactory<TModel>, IBuilder<TModel>> builder)
     {
         _cardBuilder = builder(_builderFactory);
+        _cardBuilderExplicitlySet = true;
         return this;
     }
 
@@ -66,6 +68,7 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
     public KanbanBuilder<TModel, TGroupKey> CardBuilder(Func<IBuilderFactory<TModel>, IBuilder<TModel>> builder)
     {
         _cardBuilder = builder(_builderFactory);
+        _cardBuilderExplicitlySet = true;
         return this;
     }
 
@@ -264,6 +267,12 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
             {
                 content = _customCardRenderer(item);
             }
+            // Use builder (either from Builder() or CardBuilder() with factory) if explicitly set
+            // CardBuilder takes precedence over title/description selectors
+            else if (_cardBuilderExplicitlySet)
+            {
+                content = _cardBuilder.Build(item, item) ?? "";
+            }
             // Use default Card widget with Title and Description if selectors are provided
             else if (_cardTitleSelector != null || _cardDescriptionSelector != null)
             {
@@ -274,7 +283,7 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
                     cardWidget = cardWidget.Description(_cardDescriptionSelector(item)?.ToString() ?? "");
                 content = cardWidget;
             }
-            // Use builder (either from Builder() or CardBuilder() with factory)
+            // Fallback to default builder
             else
             {
                 content = _cardBuilder.Build(item, item) ?? "";
