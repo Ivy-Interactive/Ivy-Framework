@@ -34,12 +34,14 @@ interface TableEditorProps {
   widgetId: string;
   hasOptions?: boolean;
   rowActions?: MenuItem[];
+  footer?: React.ReactNode;
 }
 
 export const DataTableEditor: React.FC<TableEditorProps> = ({
   widgetId,
   hasOptions = false,
   rowActions,
+  footer,
 }) => {
   const {
     data,
@@ -126,6 +128,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
   const gridRef = useRef<DataEditorRef>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState<number>(0);
+  const [containerHeight, setContainerHeight] = useState<number>(0);
   const [gridSelection, setGridSelection] = useState<GridSelection>({
     columns: CompactSelection.empty(),
     rows: CompactSelection.empty(),
@@ -143,13 +146,14 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     return addStandardIcons(baseIcons);
   }, [columns]);
 
-  // Track container width
+  // Track container width and height
   useEffect(() => {
     if (!containerRef.current) return;
 
     const resizeObserver = new ResizeObserver(entries => {
       for (const entry of entries) {
         setContainerWidth(entry.contentRect.width);
+        setContainerHeight(entry.contentRect.height);
       }
     });
 
@@ -212,9 +216,19 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
   // Get cell content
   const getCellContent = useCallback(
     (cell: Item): GridCell => {
+      const [, row] = cell;
+      // If this is an empty filler row, return empty text cell
+      if (row >= visibleRows) {
+        return {
+          kind: GridCellKind.Text,
+          data: '',
+          displayData: '',
+          allowOverlay: false,
+        };
+      }
       return getCellContentUtil(cell, data, columns, columnOrder, editable);
     },
-    [data, columns, columnOrder, editable]
+    [data, columns, columnOrder, editable, visibleRows]
   );
 
   // Handle column header click for sorting
@@ -238,6 +252,15 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
   // Handle selection changes
   const handleGridSelectionChange = useCallback(
     (newSelection: GridSelection) => {
+      // Prevent selection of empty filler rows
+      if (newSelection.current !== undefined) {
+        const [, row] = newSelection.current.cell;
+        if (row >= visibleRows) {
+          // Don't allow selection of empty filler rows
+          return;
+        }
+      }
+
       // Check if the new selection includes link cells and prevent fuzzy effect
       // by clearing the selection if it's a single link cell click
       if (newSelection.current !== undefined) {
@@ -260,7 +283,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
 
       setGridSelection(newSelection);
     },
-    [getCellContent]
+    [getCellContent, visibleRows]
   );
 
   // Get event handler for sending events to backend
@@ -269,6 +292,12 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
   // Handle cell single-clicks (for backend events and link navigation)
   const handleCellClicked = useCallback(
     (cell: Item, args: GridMouseEventArgs) => {
+      const [, row] = cell;
+      // Prevent interactions with empty filler rows
+      if (row >= visibleRows) {
+        return;
+      }
+
       const cellContent = getCellContent(cell);
 
       // Handle Ctrl+Click or Cmd+Click on custom link cells
@@ -338,12 +367,25 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
       }
       // Do NOT prevent default - let selection happen normally!
     },
-    [enableCellClickEvents, eventHandler, widgetId, columns, getCellContent]
+    [
+      enableCellClickEvents,
+      eventHandler,
+      widgetId,
+      columns,
+      getCellContent,
+      visibleRows,
+    ]
   );
 
   // Handle cell double-clicks/activation (for editing)
   const handleCellActivated = useCallback(
     (cell: Item) => {
+      const [, row] = cell;
+      // Prevent interactions with empty filler rows
+      if (row >= visibleRows) {
+        return;
+      }
+
       if (enableCellClickEvents) {
         const cellContent = getCellContent(cell);
         const visibleColumns = columns.filter(c => !c.hidden);
@@ -373,7 +415,14 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
         ]);
       }
     },
-    [enableCellClickEvents, eventHandler, widgetId, columns, getCellContent]
+    [
+      enableCellClickEvents,
+      eventHandler,
+      widgetId,
+      columns,
+      getCellContent,
+      visibleRows,
+    ]
   );
 
   // Handle row hover
@@ -381,6 +430,11 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     (args: GridMouseEventArgs) => {
       if (!enableRowHover) return;
       const [col, row] = args.location;
+      // Don't allow hover on empty filler rows
+      if (args.kind === 'cell' && row >= visibleRows) {
+        setHoverRow(undefined);
+        return;
+      }
       const newHoverRow = args.kind !== 'cell' ? undefined : row;
       setHoverRow(newHoverRow);
 
@@ -410,12 +464,23 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
         }
       }
     },
-    [enableRowHover, rowActions]
+    [enableRowHover, rowActions, visibleRows]
   );
 
-  // Get row theme override for hover effect
+  // Get row theme override for hover effect and empty filler rows
   const getRowThemeOverride = useCallback(
     (row: number) => {
+      // If this is an empty filler row, remove all borders and styling
+      if (row >= visibleRows) {
+        return {
+          bgCell: themeColors.background || (isDark ? '#000000' : '#ffffff'),
+          bgCellMedium:
+            themeColors.background || (isDark ? '#000000' : '#ffffff'),
+          borderColor: 'transparent',
+          horizontalBorderColor: 'transparent',
+        };
+      }
+      // Handle hover effect for data rows
       if (!enableRowHover || row !== hoverRow) return undefined;
       // Use theme-aware colors for hover effect
       return {
@@ -424,7 +489,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
           themeColors.background || (isDark ? '#1f1f23' : '#f0f0f0'),
       };
     },
-    [hoverRow, enableRowHover, themeColors, isDark]
+    [hoverRow, enableRowHover, themeColors, isDark, visibleRows]
   );
 
   // Get row data as a record of column name -> value
@@ -497,6 +562,38 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     ? columnGroupsHook.columns
     : gridColumns;
 
+  // Calculate whitespace height needed to fill container
+  const whitespaceHeight = useMemo(() => {
+    // Only add whitespace when there's no more data to load
+    if (hasMore || containerHeight === 0 || visibleRows === 0) {
+      return 0;
+    }
+
+    // Calculate header height (regular header + group header if enabled)
+    const headerHeight = rowHeight;
+    const groupHeaderHeight = showGroups ? 36 : 0;
+    const totalHeaderHeight = headerHeight + groupHeaderHeight;
+
+    // Calculate total height of visible rows
+    const rowsHeight = visibleRows * rowHeight;
+
+    // Calculate whitespace needed
+    const calculatedWhitespace =
+      containerHeight - totalHeaderHeight - rowsHeight;
+
+    // Only return positive values
+    return Math.max(0, calculatedWhitespace);
+  }, [containerHeight, visibleRows, hasMore, rowHeight, showGroups]);
+
+  // Calculate number of empty rows needed to fill whitespace
+  const emptyRowsCount = useMemo(() => {
+    if (whitespaceHeight <= 0) return 0;
+    return Math.ceil(whitespaceHeight / rowHeight);
+  }, [whitespaceHeight, rowHeight]);
+
+  // Total rows including empty filler rows
+  const totalRows = visibleRows + emptyRowsCount;
+
   if (finalColumns.length === 0) {
     return null;
   }
@@ -514,7 +611,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
         <DataEditor
           ref={gridRef}
           columns={finalColumns}
-          rows={visibleRows}
+          rows={totalRows}
           getCellContent={getCellContent}
           customRenderers={[iconCellRenderer, linkCellRenderer]}
           headerIcons={headerIcons}
@@ -551,7 +648,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
           showSearch={showSearchConfig ? showSearch : false}
           onSearchClose={() => setShowSearch(false)}
           onItemHovered={enableRowHover ? onItemHovered : undefined}
-          getRowThemeOverride={enableRowHover ? getRowThemeOverride : undefined}
+          getRowThemeOverride={getRowThemeOverride}
         />
 
         {/* Row action buttons overlay */}
@@ -563,6 +660,9 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
             onActionClick={handleRowActionClick}
           />
         )}
+
+        {/* Footer overlay */}
+        {footer}
       </div>
     </>
   );
