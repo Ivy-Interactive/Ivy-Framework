@@ -3,9 +3,6 @@
 // ReSharper disable once CheckNamespace
 namespace Ivy.Charts;
 
-/// <summary>
-/// Represents a label list configuration for chart elements.
-/// </summary>
 public record LabelList
 {
     public LabelList(string dataKey)
@@ -13,57 +10,27 @@ public record LabelList
         DataKey = dataKey;
     }
 
-    /// <summary>
-    /// Gets or sets the key that identifies the data property to display in the labels.
-    /// </summary>
     public string DataKey { get; set; }
 
-    /// <summary>
-    /// Gets or sets the offset distance of the labels from their associated chart element in pixels.
-    /// Default is 5 pixels.
-    /// </summary>
     public double Offset { get; set; } = 5;
 
-    /// <summary>
-    /// Gets or sets the rotation angle of the label text in degrees. Positive values rotate clockwise.
-    /// Default is null (no rotation).
-    /// </summary>
+    /// <summary>Positive values rotate clockwise.</summary>
     public double? Angle { get; set; } = null;
 
-    /// <summary>
-    /// Gets or sets the position of the labels relative to their associated chart element.
-    /// </summary>
     public Positions? Position { get; set; } = Positions.Outside;
 
-    /// <summary>
-    /// Gets or sets the fill color of the label text.
-    /// </summary>
     public Colors? Fill { get; set; } = Colors.Black;
 
-    /// <summary>
-    /// Gets or sets the opacity of the fill color for the label text. Value ranges from 0.0 to 1.0.
-    /// </summary>
+    /// <summary>Value ranges from 0.0 to 1.0.</summary>
     public double? FillOpacity { get; set; } = null;
 
-    /// <summary>
-    /// Gets or sets the font size of the label text in pixels.
-    /// </summary>
     public int? FontSize { get; set; } = null;
 
-    /// <summary>
-    /// Gets or sets the font family for the label text.
-    /// </summary>
     public string? FontFamily { get; set; } = null;
 
-    /// <summary>
-    /// Gets or sets the number format string for the label values.
-    /// </summary>
     public string? NumberFormat { get; set; } = null;
 }
 
-/// <summary>
-/// Extension methods for the LabelList class.
-/// </summary>
 public static class LabelListExtensions
 {
     public static LabelList Offset(this LabelList label, double offset)

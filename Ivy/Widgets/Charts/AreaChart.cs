@@ -5,16 +5,8 @@ using Ivy.Shared;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
-/// <summary>
-/// Represents an area chart widget.
-/// </summary>
 public record AreaChart : WidgetBase<AreaChart>
 {
-    /// <summary>
-    /// Initializes a new instance of the AreaChart class.
-    /// </summary>
-    /// <param name="data">The data source.</param>
-    /// <param name="areas">Variable number of Area configurations.</param>
     public AreaChart(object data, params Area[] areas)
     {
         Data = data;
@@ -23,82 +15,35 @@ public record AreaChart : WidgetBase<AreaChart>
         Height = Size.Full();
     }
 
-    /// <summary>
-    /// Gets or sets the data source.
-    /// </summary>
     [Prop] public object Data { get; init; }
 
-    /// <summary>
-    /// Gets or sets the layout orientation.
-    /// Note: This property is not currently implemented on the frontend.
-    /// </summary>
+    /// <summary>Note: This property is not currently implemented on the frontend.</summary>
     [Prop] public Layouts Layout { get; init; } = Layouts.Vertical; //todo: not implemented on the frontend
 
-    /// <summary>
-    /// Gets or sets the color scheme.
-    /// </summary>
     [Prop] public ColorScheme ColorScheme { get; init; } = ColorScheme.Default;
 
-    /// <summary>
-    /// Gets or sets the array of Area configurations.
-    /// </summary>
     [Prop] public Area[] Areas { get; init; }
 
-    /// <summary>
-    /// Gets or sets the Cartesian grid configuration.
-    /// </summary>
     [Prop] public CartesianGrid? CartesianGrid { get; init; }
 
-    /// <summary>
-    /// Gets or sets the tooltip configuration.
-    /// </summary>
     [Prop] public Ivy.Charts.Tooltip? Tooltip { get; init; }
 
-    /// <summary>
-    /// Gets or sets the legend configuration.
-    /// </summary>
     [Prop] public Legend? Legend { get; init; } = null;
 
-    /// <summary>
-    /// Gets or sets the toolbox configuration.
-    /// </summary>
     [Prop] public Toolbox? Toolbox { get; init; } = null;
-    /// <summary>
-    /// Gets or sets the array of X-axis configurations.
-    /// </summary>
+
     [Prop] public XAxis[] XAxis { get; init; } = [];
 
-    /// <summary>
-    /// Gets or sets the array of Y-axis configurations.
-    /// </summary>
     [Prop] public YAxis[] YAxis { get; init; } = [];
 
-    /// <summary>
-    /// Gets or sets the array of reference area configurations.
-    /// </summary>
     [Prop] public ReferenceArea[] ReferenceAreas { get; init; } = [];
 
-    /// <summary>
-    /// Gets or sets the array of reference dot configurations.
-    /// </summary>
     [Prop] public ReferenceDot[] ReferenceDots { get; init; } = [];
 
-    /// <summary>
-    /// Gets or sets the array of reference line configurations.
-    /// </summary>
     [Prop] public ReferenceLine[] ReferenceLines { get; init; } = [];
 
-    /// <summary>
-    /// Gets or sets the stack offset type.
-    /// </summary>
     [Prop] public StackOffsetTypes StackOffset { get; init; } = StackOffsetTypes.None;
 
-    /// <summary>
-    /// Operator overload that prevents AreaChart from accepting child widgets.
-    /// </summary>
-    /// <param name="widget">The AreaChart widget.</param>
-    /// <param name="child">The child widget (not supported).</param>
-    /// <returns>Throws NotSupportedException.</returns>
     /// <exception cref="NotSupportedException">AreaChart does not support children.</exception>
     public static AreaChart operator |(AreaChart widget, object child)
     {
@@ -106,9 +51,6 @@ public record AreaChart : WidgetBase<AreaChart>
     }
 }
 
-/// <summary>
-/// Extension methods for the AreaChart class.
-/// </summary>
 public static class AreaChartExtensions
 {
     public static AreaChart Layout(this AreaChart chart, Layouts layout)

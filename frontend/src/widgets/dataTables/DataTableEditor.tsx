@@ -25,6 +25,7 @@ import { iconCellRenderer, linkCellRenderer } from './utils/customRenderers';
 import { generateHeaderIcons, addStandardIcons } from './utils/headerIcons';
 import { ThemeColors } from '@/lib/color-utils';
 import { useEventHandler } from '@/components/event-handler';
+import { validateLinkUrl, validateRedirectUrl } from '@/lib/utils';
 import { useColumnGroups } from './hooks/useColumnGroups';
 import { RowActionButtons } from './DataTableRowAction';
 import { MenuItem } from '@/types/widgets';
@@ -91,15 +92,19 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
       bgHeaderHasFocus: colors.muted || (isDark ? '#26262b' : '#f3f4f6'),
       bgHeaderHovered: colors.accent || (isDark ? '#26262b' : '#e5e7eb'),
       textHeader: colors.foreground || (isDark ? '#f8f8f8' : '#111827'),
+      // textHeaderSelected needs to contrast with accentColor background (used when column is sorted)
+      textHeaderSelected: colors.foreground || (isDark ? '#f8f8f8' : '#111827'),
       textDark: colors.foreground || (isDark ? '#f8f8f8' : '#111827'),
       textMedium: colors.mutedForeground || (isDark ? '#a1a1aa' : '#6b7280'),
       textLight: colors.mutedForeground || (isDark ? '#71717a' : '#9ca3af'),
       // bgIconHeader is the background color for icon areas, should be subtle
       bgIconHeader: colors.muted || (isDark ? '#26262b' : '#f3f4f6'),
-      // Set accentColor to transparent to remove cell selection border
-      accentColor: 'transparent',
-      // accentLight provides subtle background highlight for selected cells
-      accentLight: colors.accent || (isDark ? '#26262b' : '#f3f4f6'),
+      // accentColor is used as the background for selected cells or highlights
+      accentColor: colors.secondary || (isDark ? '#26262b' : '#e5e7eb'),
+      // accentFg is the foreground/text color used on top of accentColor backgrounds
+      accentFg: colors.muted || (isDark ? '#f8f8f8' : '#18181b'),
+      // column focus bg color
+      accentLight: colors.muted || (isDark ? '#27272a' : '#e4e4e7'),
       horizontalBorderColor: colors.border || (isDark ? '#404045' : '#d1d5db'),
       linkColor:
         colors.primary || colors.accent || (isDark ? '#3b82f6' : '#2563eb'),
@@ -274,17 +279,33 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
       ) {
         const url = (cellContent.data as { url?: string })?.url;
 
-        if (url) {
-          // External URLs (http/https) open in new tab and focus it
-          if (url.startsWith('http://') || url.startsWith('https://')) {
-            const newWindow = window.open(url, '_blank', 'noopener,noreferrer');
-            newWindow?.focus();
-          } else {
-            // Internal relative URLs navigate in same tab
-            window.location.href = url;
-          }
-          return; // Don't proceed with other click handling
+        // Validate URL to prevent open redirect vulnerabilities
+        const validatedUrl = validateLinkUrl(url);
+        if (validatedUrl === '#') {
+          // Invalid URL, don't proceed
+          return;
         }
+
+        // External URLs (http/https) open in new tab
+        if (
+          validatedUrl.startsWith('http://') ||
+          validatedUrl.startsWith('https://')
+        ) {
+          const newWindow = window.open(
+            validatedUrl,
+            '_blank',
+            'noopener,noreferrer'
+          );
+          newWindow?.focus();
+        } else {
+          // Internal relative URLs navigate in same tab
+          // Validate it's safe for redirect (relative path or same-origin)
+          const redirectUrl = validateRedirectUrl(validatedUrl, false);
+          if (redirectUrl) {
+            window.location.href = redirectUrl;
+          }
+        }
+        return; // Don't proceed with other click handling
       }
 
       if (enableCellClickEvents) {
@@ -398,8 +419,9 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
       if (!enableRowHover || row !== hoverRow) return undefined;
       // Use theme-aware colors for hover effect
       return {
-        bgCell: themeColors.accent || (isDark ? '#26262b' : '#f7f7f7'),
-        bgCellMedium: themeColors.muted || (isDark ? '#1f1f23' : '#f0f0f0'),
+        bgCell: themeColors.muted || (isDark ? '#26262b' : '#f7f7f7'),
+        bgCellMedium:
+          themeColors.background || (isDark ? '#1f1f23' : '#f0f0f0'),
       };
     },
     [hoverRow, enableRowHover, themeColors, isDark]
@@ -539,9 +561,6 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
             top={actionButtonsTop}
             visible={hoverRow !== undefined}
             onActionClick={handleRowActionClick}
-            onMouseEnter={() => {
-              // Keep hover state when hovering over buttons
-            }}
           />
         )}
       </div>

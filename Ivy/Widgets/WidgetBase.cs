@@ -4,24 +4,18 @@ using Ivy.Shared;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
-/// <summary>Base class for all widgets.</summary>
 public abstract record WidgetBase<T> : AbstractWidget where T : WidgetBase<T>
 {
-    /// <summary>Constructor for the widget.</summary>
     protected WidgetBase(params object[] children) : base(children)
     {
     }
 
-    /// <summary>The width of the widget.</summary>
     [Prop] public Size? Width { get; set; }
 
-    /// <summary>The height of the widget.</summary>
     [Prop] public Size? Height { get; set; }
 
-    /// <summary>Whether the widget is visible.</summary>
     [Prop] public bool Visible { get; set; } = true;
 
-    /// <summary>The test ID of the widget. Used for finding the widget in the DOM for testing.</summary>
     [Prop] public string? TestId { get; set; }
 }
 

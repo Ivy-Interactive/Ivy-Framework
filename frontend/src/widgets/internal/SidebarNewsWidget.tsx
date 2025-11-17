@@ -1,4 +1,4 @@
-import { cn } from '@/lib/utils';
+import { cn, validateLinkUrl } from '@/lib/utils';
 import { useEffect, useState } from 'react';
 import * as React from 'react';
 import { hasLicensedFeature } from '@/lib/license';
@@ -199,6 +199,9 @@ function NewsCard({
   href?: string;
   active?: boolean;
 }) {
+  // Validate URL to prevent open redirect vulnerabilities
+  const safeHref = validateLinkUrl(href || '#');
+
   //const { isMobile } = useMediaQuery();
   const isMobile = false;
 
@@ -297,7 +300,9 @@ function NewsCard({
       (!drag.current.startTime || Date.now() - drag.current.startTime < 250)
     ) {
       // Touch user didn't drag far or for long, open the link
-      window.open(href, '_blank');
+      if (safeHref !== '#') {
+        window.open(safeHref, '_blank', 'noopener,noreferrer');
+      }
     }
   };
 
@@ -317,7 +322,7 @@ function NewsCard({
       <div className={cn(hideContent && 'invisible')}>
         <div className="flex flex-col gap-1">
           <a
-            href={href}
+            href={safeHref}
             target="_blank"
             rel="noopener noreferrer"
             aria-label="Open article titled '{title}' in new tab"
@@ -332,7 +337,7 @@ function NewsCard({
         </div>
         <div className="relative mt-2 aspect-[16/10] w-full shrink-0 overflow-hidden rounded border bg-muted">
           {image && (
-            <a href={href} target="_blank" rel="noopener noreferrer">
+            <a href={safeHref} target="_blank" rel="noopener noreferrer">
               <img
                 src={BASE_URL + image}
                 alt=""
@@ -350,7 +355,7 @@ function NewsCard({
         >
           <div className="flex items-center justify-between pt-3 text-small-label">
             <a
-              href={href}
+              href={safeHref}
               target="_blank"
               className="font-medium text-muted-foreground hover:text-foreground transition-colors duration-75"
               rel="noopener noreferrer"

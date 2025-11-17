@@ -2,9 +2,7 @@ using System.Linq.Expressions;
 
 namespace Ivy.Views.Kanban;
 
-/// <summary>
-/// Extension methods for converting collections to kanban builders with fluent configuration.
-/// </summary>
+/// <summary>Extension methods for converting collections to kanban builders with fluent configuration.</summary>
 public static class KanbanExtensions
 {
     /// <summary>

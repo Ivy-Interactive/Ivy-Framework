@@ -6,7 +6,7 @@
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <NoWarn>CS1591</NoWarn>
+    <NoWarn>CS1591;CS1573</NoWarn>
     <PackageId>Ivy</PackageId>
     <Company>Ivy</Company>
     <Description>Build Internal Applications with AI and Pure C#</Description>

@@ -74,7 +74,7 @@ public async Task RunAsync()
     var app = _builder.Build();
     
     // Configure SignalR hub
-    app.MapHub<AppHub>("/messages");
+    app.MapHub<AppHub>("/ivy/messages");
     
     // Register applications
     var appRepository = new AppRepository(_appTypes);
@@ -257,7 +257,7 @@ The framework automatically registers core services like `IClientNotifier` for S
 The backend provides real-time communication through SignalR with the `AppHub` class serving as the central message hub. Have a look at the SignalR Hub Architecture:
 
 ```csharp
-app.MapHub<AppHub>("/messages");
+app.MapHub<AppHub>("/ivy/messages");
 
 if (_hotReloadEnabled)
 {
@@ -266,7 +266,7 @@ if (_hotReloadEnabled)
 }
 ```
 
-The SignalR hub is registered at the `/messages` endpoint and handles real-time communication including hot reload notifications during development and widget event processing.
+The SignalR hub is registered at the `/ivy/messages` endpoint and handles real-time communication including hot reload notifications during development and widget event processing.
 
 **Hub Responsibilities:**
 

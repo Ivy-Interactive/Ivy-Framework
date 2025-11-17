@@ -11,9 +11,7 @@ using Ivy.Client;
 
 namespace Ivy.Helpers;
 
-/// <summary>
-/// Helper class for auth token extraction and validation.
-/// </summary>
+/// <summary>Helper class for auth token extraction and validation.</summary>
 public static class AuthHelper
 {
     /// <summary>
@@ -60,9 +58,6 @@ public static class AuthHelper
     /// - The auth provider is not configured when it should be
     /// - An unexpected error occurs during token validation
     /// </exception>
-    /// <remarks>
-    /// This method is a no-op if the server does not require authentication (server.AuthProviderType == null).
-    /// </remarks>
     public static async Task ValidateAuthIfRequired(Server server, AppSessionStore sessionStore, string connectionId, ServerCallContext context)
     {
         // Check if auth is required
@@ -124,11 +119,6 @@ public static class AuthHelper
     /// - InternalServerError (500) for configuration or validation errors
     /// Returns null if authentication is not required or if validation succeeds.
     /// </returns>
-    /// <remarks>
-    /// This is an extension method for Controller that handles authentication validation and automatically
-    /// converts auth exceptions to appropriate HTTP responses. Returns null if the server does not require
-    /// authentication (server.AuthProviderType == null) or if authentication succeeds.
-    /// </remarks>
     public static async Task<IActionResult?> ValidateAuthIfRequired(this Controller controller, Server server, IServiceProvider serviceProvider)
     {
         // Check if auth is required

@@ -56,7 +56,7 @@ The build system uses Vite with custom plugins for seamless integration with the
     server: {
       port: 5173,
       proxy: {
-        "/messages": {
+        "/ivy/messages": {
           target: process.env.IVY_HOST || "http://localhost:5010",
           ws: true,
         },
@@ -428,7 +428,7 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
-      "/messages": {
+      "/ivy/messages": {
         target: process.env.IVY_HOST || "http://localhost:5010",
         ws: true,
       },

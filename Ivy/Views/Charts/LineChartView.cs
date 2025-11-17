@@ -10,46 +10,23 @@ using Ivy.Core.Hooks;
 
 namespace Ivy.Views.Charts;
 
-/// <summary>
-/// Defines the available visual styles for line charts.
-/// </summary>
 public enum LineChartStyles
 {
-    /// <summary>Default line chart style with full axes, legend, and basic line styling.</summary>
     Default,
-    /// <summary>Dashboard-optimized style with natural curves, grid, and minimal axes for compact display.</summary>
     Dashboard,
-    /// <summary>Custom style with rainbow colors, step curves, full grid, and enhanced visual elements.</summary>
     Custom
 }
 
-/// <summary>
-/// Interface for defining line chart visual styles and configurations.
-/// </summary>
 /// <typeparam name="TSource">The type of the source data objects.</typeparam>
 public interface ILineChartStyle<TSource>
 {
-    /// <summary>
-    /// Designs and configures a line chart with the specified data, dimension, measures, and table calculations.
-    /// </summary>
-    /// <param name="data">The processed data in ExpandoObject format for chart rendering.</param>
-    /// <param name="dimension">The dimension configuration for the X-axis.</param>
-    /// <param name="measures">The measure configurations for the data series.</param>
-    /// <param name="calculations">The table calculations for computed series.</param>
     /// <returns>A configured LineChart widget ready for rendering.</returns>
     LineChart Design(ExpandoObject[] data, Dimension<TSource> dimension, Measure<TSource>[] measures, TableCalculation[] calculations);
 }
 
-/// <summary>
-/// Helper methods for creating line chart style instances.
-/// </summary>
+/// <summary>Helper methods for creating line chart style instances.</summary>
 public static class LineChartStyleHelpers
 {
-    /// <summary>
-    /// Gets a line chart style instance for the specified style type.
-    /// </summary>
-    /// <typeparam name="TSource">The type of the source data objects.</typeparam>
-    /// <param name="style">The line chart style to create.</param>
     /// <returns>An instance of the specified line chart style.</returns>
     /// <exception cref="InvalidOperationException">Thrown when the specified style is not found.</exception>
     public static ILineChartStyle<TSource> GetStyle<TSource>(LineChartStyles style)
@@ -64,19 +41,10 @@ public static class LineChartStyleHelpers
     }
 }
 
-/// <summary>
-/// Default line chart style with full axes, legend, and basic line styling for comprehensive data visualization.
-/// </summary>
+/// <summary>Default line chart style with full axes, legend, and basic line styling for comprehensive data visualization.</summary>
 /// <typeparam name="TSource">The type of the source data objects.</typeparam>
 public class DefaultLineChartStyle<TSource> : ILineChartStyle<TSource>
 {
-    /// <summary>
-    /// Designs a default line chart with Y-axis, legend, and animated tooltip.
-    /// </summary>
-    /// <param name="data">The processed data for chart rendering.</param>
-    /// <param name="dimension">The dimension configuration for the X-axis.</param>
-    /// <param name="measures">The measure configurations for the data series.</param>
-    /// <param name="calculations">The table calculations for computed series.</param>
     /// <returns>A fully configured line chart with default styling.</returns>
     public LineChart Design(ExpandoObject[] data, Dimension<TSource> dimension, Measure<TSource>[] measures, TableCalculation[] calculations)
     {
@@ -96,19 +64,10 @@ public class DefaultLineChartStyle<TSource> : ILineChartStyle<TSource>
     }
 }
 
-/// <summary>
-/// Dashboard-optimized line chart style with natural curves, horizontal grid, and minimal axes for compact display.
-/// </summary>
+/// <summary>Dashboard-optimized line chart style with natural curves, horizontal grid, and minimal axes for compact display.</summary>
 /// <typeparam name="TSource">The type of the source data objects.</typeparam>
 public class DashboardLineChartStyle<TSource> : ILineChartStyle<TSource>
 {
-    /// <summary>
-    /// Designs a dashboard line chart with natural curve lines, horizontal grid, and minimal X-axis for compact visualization.
-    /// </summary>
-    /// <param name="data">The processed data for chart rendering.</param>
-    /// <param name="dimension">The dimension configuration for the X-axis.</param>
-    /// <param name="measures">The measure configurations for the data series with natural curves and increased stroke width.</param>
-    /// <param name="calculations">The table calculations for computed series with natural curves.</param>
     /// <returns>A compact line chart optimized for dashboard display with smooth curves and minimal visual clutter.</returns>
     public LineChart Design(ExpandoObject[] data, Dimension<TSource> dimension, Measure<TSource>[] measures, TableCalculation[] calculations)
     {
@@ -123,19 +82,10 @@ public class DashboardLineChartStyle<TSource> : ILineChartStyle<TSource>
     }
 }
 
-/// <summary>
-/// Custom line chart style with rainbow colors, step curves, full grid, and enhanced visual elements for distinctive presentation.
-/// </summary>
+/// <summary>Custom line chart style with rainbow colors, step curves, full grid, and enhanced visual elements for distinctive presentation.</summary>
 /// <typeparam name="TSource">The type of the source data objects.</typeparam>
 public class CustomLineChartStyle<TSource> : ILineChartStyle<TSource>
 {
-    /// <summary>
-    /// Designs a custom line chart with rainbow color scheme, step curves, full grid, and enhanced axes for distinctive visualization.
-    /// </summary>
-    /// <param name="data">The processed data for chart rendering.</param>
-    /// <param name="dimension">The dimension configuration for the X-axis with full styling.</param>
-    /// <param name="measures">The measure configurations for the data series with step curves and thick strokes.</param>
-    /// <param name="calculations">The table calculations for computed series with step curves.</param>
     /// <returns>A visually distinctive line chart with rainbow colors, step curves, and full grid for enhanced data presentation.</returns>
     public LineChart Design(ExpandoObject[] data, Dimension<TSource> dimension, Measure<TSource>[] measures, TableCalculation[] calculations)
     {
@@ -156,15 +106,8 @@ public class CustomLineChartStyle<TSource> : ILineChartStyle<TSource>
     }
 }
 
-/// <summary>
-/// A fluent builder for creating line charts from data sources with dimensions, measures, and table calculations.
-/// </summary>
+/// <summary>A fluent builder for creating line charts from data sources with dimensions, measures, and table calculations.</summary>
 /// <typeparam name="TSource">The type of the source data objects.</typeparam>
-/// <remarks>
-/// Provides a fluent API for configuring line charts with automatic data processing,
-/// asynchronous loading, and customizable styling. Transforms source data into pivot table format
-/// with support for both measures and table calculations, then applies the specified visual style to create the final chart.
-/// </remarks>
 public class LineChartBuilder<TSource>(
     IQueryable<TSource> data,
     Dimension<TSource>? dimension = null,
@@ -179,9 +122,6 @@ public class LineChartBuilder<TSource>(
     private Toolbox? _toolbox;
     private Func<Toolbox, Toolbox>? _toolboxFactory;
 
-    /// <summary>
-    /// Builds the line chart by processing the data and applying the configured style.
-    /// </summary>
     /// <returns>A LineChart widget with the processed data and applied styling, or a loading indicator during data processing.</returns>
     /// <exception cref="InvalidOperationException">Thrown when dimension or measures are not configured.</exception>
     public override object? Build()
@@ -243,11 +183,6 @@ public class LineChartBuilder<TSource>(
         return polish?.Invoke(configuredChart) ?? configuredChart;
     }
 
-    /// <summary>
-    /// Configures the dimension (X-axis) for the line chart.
-    /// </summary>
-    /// <param name="name">The display name for the dimension.</param>
-    /// <param name="selector">Expression to select the dimension value from source objects.</param>
     /// <returns>The builder instance for method chaining.</returns>
     public LineChartBuilder<TSource> Dimension(string name, Expression<Func<TSource, object>> selector)
     {
@@ -255,11 +190,6 @@ public class LineChartBuilder<TSource>(
         return this;
     }
 
-    /// <summary>
-    /// Adds a measure (data series) to the line chart.
-    /// </summary>
-    /// <param name="name">The display name for the measure.</param>
-    /// <param name="aggregator">Expression to aggregate the measure values from the data source.</param>
     /// <returns>The builder instance for method chaining.</returns>
     public LineChartBuilder<TSource> Measure(string name, Expression<Func<IQueryable<TSource>, object>> aggregator)
     {
@@ -267,10 +197,6 @@ public class LineChartBuilder<TSource>(
         return this;
     }
 
-    /// <summary>
-    /// Adds a table calculation (computed series) to the line chart.
-    /// </summary>
-    /// <param name="calculation">The table calculation configuration for computed data series.</param>
     /// <returns>The builder instance for method chaining.</returns>
     public LineChartBuilder<TSource> TableCalculation(TableCalculation calculation)
     {
@@ -300,20 +226,9 @@ public class LineChartBuilder<TSource>(
     }
 }
 
-/// <summary>
-/// Extension methods for creating line charts from data collections.
-/// </summary>
+/// <summary>Extension methods for creating line charts from data collections.</summary>
 public static class LineChartExtensions
 {
-    /// <summary>
-    /// Creates a line chart builder from an enumerable data source.
-    /// </summary>
-    /// <typeparam name="TSource">The type of the source data objects.</typeparam>
-    /// <param name="data">The enumerable data source.</param>
-    /// <param name="dimension">Optional dimension expression for the X-axis.</param>
-    /// <param name="measures">Optional array of measure expressions for data series.</param>
-    /// <param name="style">The visual style to apply to the chart.</param>
-    /// <param name="polish">Optional function to apply final customizations to the chart.</param>
     /// <returns>A LineChartBuilder for fluent configuration.</returns>
     public static LineChartBuilder<TSource> ToLineChart<TSource>(
         this IEnumerable<TSource> data,
@@ -325,15 +240,6 @@ public static class LineChartExtensions
         return data.AsQueryable().ToLineChart(dimension, measures, style, polish);
     }
 
-    /// <summary>
-    /// Creates a line chart builder from a queryable data source.
-    /// </summary>
-    /// <typeparam name="TSource">The type of the source data objects.</typeparam>
-    /// <param name="data">The queryable data source.</param>
-    /// <param name="dimension">Optional dimension expression for the X-axis.</param>
-    /// <param name="measures">Optional array of measure expressions for data series.</param>
-    /// <param name="style">The visual style to apply to the chart.</param>
-    /// <param name="polish">Optional function to apply final customizations to the chart.</param>
     /// <returns>A LineChartBuilder for fluent configuration.</returns>
     [OverloadResolutionPriority(1)]
     public static LineChartBuilder<TSource> ToLineChart<TSource>(

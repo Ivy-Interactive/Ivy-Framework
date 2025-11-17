@@ -36,7 +36,6 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         public Size? Width { get; set; }
         public Func<IEnumerable<TModel>, object>? FooterAggregate { get; set; }
 
-        /// <summary>Gets the value of this column from a model object using reflection.</summary>
         public object? GetValue(TModel obj)
         {
             if (obj == null) return null;
@@ -71,7 +70,6 @@ public class TableBuilder<TModel> : ViewBase, IStateless
     private bool _removeHeader;
     private object? _empty;
 
-    /// <summary>Creates a table builder with automatic column scaffolding from the model type.</summary>
     /// <param name="records">The data records to display in the table.</param>
     public TableBuilder(IEnumerable<TModel> records)
     {
@@ -159,7 +157,6 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         return Size.Units(calculatedWidth);
     }
 
-    /// <summary>Sets the overall table width.</summary>
     /// <param name="width">The width to set for the entire table.</param>
     public TableBuilder<TModel> Width(Size width)
     {
@@ -167,28 +164,24 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         return this;
     }
 
-    /// <summary>Sets the table size to large for prominent display.</summary>
     public TableBuilder<TModel> Large()
     {
         _size = Sizes.Large;
         return this;
     }
 
-    /// <summary>Sets the table size to small for compact display.</summary>
     public TableBuilder<TModel> Small()
     {
         _size = Sizes.Small;
         return this;
     }
 
-    /// <summary>Sets the table size to medium for medium display.</summary>
     public TableBuilder<TModel> Medium()
     {
         _size = Sizes.Medium;
         return this;
     }
 
-    /// <summary>Sets the width of a specific column.</summary>
     /// <param name="field">Expression identifying the column to set width for.</param>
     /// <param name="width">The width to set for the column.</param>
     public TableBuilder<TModel> Width(Expression<Func<TModel, object>> field, Size width)
@@ -204,7 +197,6 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         return _columns[name];
     }
 
-    /// <summary>Sets a custom builder for rendering a specific column's data.</summary>
     /// <param name="field">Expression identifying the column to configure.</param>
     /// <param name="builder">Factory function to create the column builder.</param>
     public TableBuilder<TModel> Builder(Expression<Func<TModel, object>> field, Func<IBuilderFactory<TModel>, IBuilder<TModel>> builder)
@@ -214,7 +206,6 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         return this;
     }
 
-    /// <summary>Sets the builder for all columns of a specific type.</summary>
     /// <param name="builder">Factory function to create the builder for all matching columns.</param>
     public TableBuilder<TModel> Builder<TU>(Func<IBuilderFactory<TModel>, IBuilder<TModel>> builder)
     {
@@ -225,7 +216,6 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         return this;
     }
 
-    /// <summary>Sets the description for a column.</summary>
     /// <param name="field">Expression identifying the column to set description for.</param>
     /// <param name="description">The description text for the column.</param>
     public TableBuilder<TModel> Description(Expression<Func<TModel, object>> field, string description)
@@ -235,9 +225,6 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         return this;
     }
 
-    /// <summary>Sets a custom header text for a column.</summary>
-    /// <param name="field">Expression identifying the column to set header for.</param>
-    /// <param name="label">The header text to display.</param>
     public TableBuilder<TModel> Header(Expression<Func<TModel, object>> field, string label)
     {
         var hint = GetField(field);
@@ -245,9 +232,6 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         return this;
     }
 
-    /// <summary>Sets the text alignment for a column.</summary>
-    /// <param name="field">Expression identifying the column to set alignment for.</param>
-    /// <param name="align">The text alignment to apply.</param>
     public TableBuilder<TModel> Align(Expression<Func<TModel, object>> field, Align align)
     {
         var hint = GetField(field);
@@ -255,7 +239,6 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         return this;
     }
 
-    /// <summary>Sets the display order of columns.</summary>
     /// <param name="fields">Expressions identifying the columns in desired order.</param>
     public TableBuilder<TModel> Order(params Expression<Func<TModel, object>>[] fields)
     {
@@ -269,7 +252,6 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         return this;
     }
 
-    /// <summary>Removes columns from the table.</summary>
     /// <param name="fields">Expressions identifying the columns to remove.</param>
     public TableBuilder<TModel> Remove(params IEnumerable<Expression<Func<TModel, object>>> fields)
     {
@@ -281,7 +263,6 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         return this;
     }
 
-    /// <summary>Sets the multi-line flag for a column.</summary>
     /// <param name="fields">Expressions identifying the columns to set multi-line for.</param>
     public TableBuilder<TModel> MultiLine(params Expression<Func<TModel, object>>[] fields)
     {
@@ -294,7 +275,6 @@ public class TableBuilder<TModel> : ViewBase, IStateless
     }
 
 
-    /// <summary>Adds a previously removed column back to the table.</summary>
     /// <param name="field">Expression identifying the column to add back.</param>
     public TableBuilder<TModel> Add(Expression<Func<TModel, object>> field)
     {
@@ -303,7 +283,6 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         return this;
     }
 
-    /// <summary>Removes all columns from the table.</summary>
     public TableBuilder<TModel> Clear()
     {
         foreach (var field in _columns.Values)
@@ -313,7 +292,6 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         return this;
     }
 
-    /// <summary>Resets all columns to default settings.</summary>
     public TableBuilder<TModel> Reset()
     {
         foreach (var field in _columns.Values)
@@ -325,7 +303,6 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         return this;
     }
 
-    /// <summary>Adds a footer with custom aggregate calculation for a column.</summary>
     /// <param name="field">Expression identifying the column to add footer to.</param>
     /// <param name="summaryMethod">Function to calculate the footer value from all records.</param>
     public TableBuilder<TModel> Totals(Expression<Func<TModel, object>> field, Func<IEnumerable<TModel>, object> summaryMethod)
@@ -335,7 +312,6 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         return this;
     }
 
-    /// <summary>Adds a footer with automatic sum calculation for a column.</summary>
     /// <param name="field">Expression identifying the column to add sum footer to.</param>
     public TableBuilder<TModel> Totals(Expression<Func<TModel, object>> field)
     {
@@ -347,7 +323,6 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         return Totals(field, FooterAggregate);
     }
 
-    /// <summary>Removes the table header row.</summary>
     public TableBuilder<TModel> RemoveHeader()
     {
         _removeHeader = true;
@@ -369,7 +344,6 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         return this;
     }
 
-    /// <summary>Builds the complete table with headers, data rows, and optional footers.</summary>
     public override object? Build()
     {
         if (!_records.Any()) return _empty!;
@@ -466,7 +440,6 @@ public class TableBuilder<TModel> : ViewBase, IStateless
 /// <summary>Factory for creating table builders from generic collections.</summary>
 public static class TableBuilderFactory
 {
-    /// <summary>Creates a table view from any enumerable collection with automatic type detection.</summary>
     /// <param name="enumerable">The collection to create a table from.</param>
     public static ViewBase FromEnumerable(IEnumerable enumerable)
     {

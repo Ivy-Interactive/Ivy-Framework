@@ -79,9 +79,10 @@ public record NavigateArgs(string? AppId, object? AppArgs = null, string? TabId 
 
     public string GetUrl(string? parentId = null)
     {
-        if (this.AppId?.StartsWith('/') == true)
+        // Validate AppId to prevent injection attacks
+        if (!Utils.IsSafeAppId(this.AppId))
         {
-            throw new InvalidOperationException("Cannot get URL: AppId starts with an invalid character.");
+            throw new InvalidOperationException($"Cannot get URL: Invalid AppId '{this.AppId}'. AppId contains unsafe characters.");
         }
 
         // Use path-based URL for better user experience
@@ -144,11 +145,22 @@ public static class NavigateSignalExtensions
         {
             if (uri.StartsWith("http://") || uri.StartsWith("https://"))
             {
-                client.OpenUrl(uri);
+                // Validate external URL to prevent open redirect vulnerabilities
+                var validatedUrl = Utils.ValidateLinkUrl(uri);
+                if (validatedUrl == null)
+                {
+                    throw new ArgumentException($"Invalid external URL: {uri}", nameof(uri));
+                }
+                client.OpenUrl(validatedUrl);
             }
             else if (uri.StartsWith("app://"))
             {
                 var appId = uri[6..];
+                // Validate AppId to prevent injection attacks
+                if (!Utils.IsSafeAppId(appId))
+                {
+                    throw new ArgumentException($"Invalid AppId: {appId}", nameof(uri));
+                }
                 signal.Send(new NavigateArgs(appId, appArgs));
             }
         }

@@ -13,52 +13,21 @@ using Ivy.Widgets.Inputs;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
-/// <summary>
-/// Base interface for asynchronous select input controls.
-/// </summary>
 public interface IAnyAsyncSelectInputBase : IAnyInput
 {
-    /// <summary>
-    /// Gets or sets the placeholder text.
-    /// </summary>
     public string? Placeholder { get; set; }
 }
 
-/// <summary>
-/// Delegate for asynchronously querying and filtering options.
-/// </summary>
-/// <typeparam name="T">The type of the option values.</typeparam>
-/// <param name="query">The search query string entered by the user.</param>
 /// <returns>A task that resolves to an array of matching options.</returns>
 public delegate Task<Option<T>[]> AsyncSelectQueryDelegate<T>(string query);
 
-/// <summary>
-/// Delegate for asynchronously looking up a specific option by its value.
-/// </summary>
-/// <typeparam name="T">The type of the option value.</typeparam>
-/// <param name="id">The value to look up.</param>
-/// <returns>A task that resolves to the option, or null if not found.</returns>
+/// <summary>Returns a task that resolves to the option, or null if not found.</summary>
 public delegate Task<Option<T>?> AsyncSelectLookupDelegate<T>(T id);
 
-/// <summary>
-/// Asynchronous select input control.
-/// </summary>
-/// <typeparam name="TValue">The type of the selected value.</typeparam>
 public class AsyncSelectInputView<TValue> : ViewBase, IAnyAsyncSelectInputBase, IInput<TValue>
 {
-    /// <summary>
-    /// Returns an empty array.
-    /// </summary>
     public Type[] SupportedStateTypes() => [];
 
-    /// <summary>
-    /// Initializes a new instance.
-    /// </summary>
-    /// <param name="state">The state object.</param>
-    /// <param name="query">Delegate for querying options.</param>
-    /// <param name="lookup">Delegate for looking up option by value.</param>
-    /// <param name="placeholder">Optional placeholder text.</param>
-    /// <param name="disabled">Whether the input should be disabled initially.</param>
     public AsyncSelectInputView(IAnyState state, AsyncSelectQueryDelegate<TValue> query, AsyncSelectLookupDelegate<TValue> lookup, string? placeholder = null, bool disabled = false)
         : this(query, lookup, placeholder, disabled)
     {
@@ -67,15 +36,6 @@ public class AsyncSelectInputView<TValue> : ViewBase, IAnyAsyncSelectInputBase, 
         OnChange = e => { typedState.Set(e.Value); return ValueTask.CompletedTask; };
     }
 
-    /// <summary>
-    /// Initializes a new instance.
-    /// </summary>
-    /// <param name="value">The initial selected value.</param>
-    /// <param name="onChange">Event handler called when the selection changes.</param> 
-    /// <param name="query">Delegate for querying options.</param>
-    /// <param name="lookup">Delegate for looking up option by value.</param>
-    /// <param name="placeholder">Optional placeholder text.</param>
-    /// <param name="disabled">Whether the input should be disabled initially.</param>
     [OverloadResolutionPriority(1)]
     public AsyncSelectInputView(TValue value, Func<Event<IInput<TValue>, TValue>, ValueTask>? onChange, AsyncSelectQueryDelegate<TValue> query, AsyncSelectLookupDelegate<TValue> lookup, string? placeholder = null, bool disabled = false)
         : this(query, lookup, placeholder, disabled)
@@ -84,15 +44,6 @@ public class AsyncSelectInputView<TValue> : ViewBase, IAnyAsyncSelectInputBase, 
         Value = value;
     }
 
-    /// <summary>
-    /// Initializes a new instance.
-    /// </summary>
-    /// <param name="value">The initial selected value.</param>
-    /// <param name="onChange">Event handler called when the selection changes.</param>
-    /// <param name="query">Delegate for querying options.</param>
-    /// <param name="lookup">Delegate for looking up option by value.</param>
-    /// <param name="placeholder">Optional placeholder text.</param>
-    /// <param name="disabled">Whether the input should be disabled initially.</param>
     public AsyncSelectInputView(TValue value, Action<Event<IInput<TValue>, TValue>>? onChange, AsyncSelectQueryDelegate<TValue> query, AsyncSelectLookupDelegate<TValue> lookup, string? placeholder = null, bool disabled = false)
         : this(query, lookup, placeholder, disabled)
     {
@@ -100,13 +51,6 @@ public class AsyncSelectInputView<TValue> : ViewBase, IAnyAsyncSelectInputBase, 
         Value = value;
     }
 
-    /// <summary>
-    /// Initializes a new instance.
-    /// </summary>
-    /// <param name="query">Delegate for querying options.</param>
-    /// <param name="lookup">Delegate for looking up option by value.</param>
-    /// <param name="placeholder">Optional placeholder text.</param>
-    /// <param name="disabled">Whether the input should be disabled initially.</param>
     public AsyncSelectInputView(AsyncSelectQueryDelegate<TValue> query, AsyncSelectLookupDelegate<TValue> lookup, string? placeholder = null, bool disabled = false)
     {
         Query = query;
@@ -115,52 +59,23 @@ public class AsyncSelectInputView<TValue> : ViewBase, IAnyAsyncSelectInputBase, 
         Disabled = disabled;
     }
 
-    /// <summary>
-    /// Gets the delegate used for querying options based on user search input.
-    /// </summary>
     public AsyncSelectQueryDelegate<TValue> Query { get; }
 
-    /// <summary>
-    /// Gets the delegate used for looking up option display information by value.
-    /// </summary>
     public AsyncSelectLookupDelegate<TValue> Lookup { get; }
 
-    /// <summary>
-    /// Gets the currently selected value.
-    /// </summary>
     public TValue Value { get; private set; } = typeof(TValue).IsValueType ? Activator.CreateInstance<TValue>() : default!;
 
-    /// <summary>
-    /// Gets or sets whether the input accepts null values.
-    /// </summary>
     public bool Nullable { get; set; } = typeof(TValue).IsNullableType();
 
-    /// <summary>
-    /// Gets the event handler called when the selected value changes.
-    /// </summary>
     public Func<Event<IInput<TValue>, TValue>, ValueTask>? OnChange { get; }
 
-    /// <summary>
-    /// Gets or sets the event handler called when the input loses focus.
-    /// </summary>
     public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
 
-    /// <summary>
-    /// Gets or sets whether the input is disabled.
-    /// </summary>
     public bool Disabled { get; set; }
 
-    /// <summary>
-    /// Gets or sets the validation error message.
-    /// </summary>
     public string? Invalid { get; set; }
 
-    /// <summary> Gets or sets the size of the async select input. </summary>
     public Sizes Size { get; set; }
-
-    /// <summary>
-    /// Gets or sets the placeholder text displayed when no option is selected.
-    /// </summary>
     public string? Placeholder { get; set; }
 
     public override object? Build()
@@ -230,17 +145,9 @@ public class AsyncSelectInputView<TValue> : ViewBase, IAnyAsyncSelectInputBase, 
     }
 }
 
-/// <summary>
-/// Sheet view that displays a searchable list of options.
-/// </summary>
-/// <typeparam name="T">The type of the option values.</typeparam>
-/// <param name="refreshToken">Token used to communicate selection back to the parent input.</param>
-/// <param name="query">Delegate for querying options based on search input.</param>
+/// <summary>Token used to communicate selection back to the parent input.</summary>
 public class AsyncSelectListSheet<T>(RefreshToken refreshToken, AsyncSelectQueryDelegate<T> query) : ViewBase
 {
-    /// <summary>
-    /// Builds the UI.
-    /// </summary>
     public override object? Build()
     {
         var records = UseState(Array.Empty<Option<T>>);
@@ -269,21 +176,8 @@ public class AsyncSelectListSheet<T>(RefreshToken refreshToken, AsyncSelectQuery
     }
 }
 
-/// <summary>
-/// Provides extension methods for creating async select inputs.
-/// </summary>
 public static class AsyncSelectInputViewExtensions
 {
-    /// <summary>
-    /// Creates an async select input bound to the specified state object.
-    /// </summary>
-    /// <typeparam name="TValue">The type of the selected value.</typeparam>
-    /// <param name="state">The state object to bind to.</param>
-    /// <param name="query">Delegate for querying options.</param>
-    /// <param name="lookup">Delegate for looking up option by value.</param>
-    /// <param name="placeholder">Optional placeholder text.</param>
-    /// <param name="disabled">Whether the input should be disabled initially.</param>
-    /// <returns>An async select input.</returns>
     public static IAnyAsyncSelectInputBase ToAsyncSelectInput<TValue>(
         this IAnyState state,
         AsyncSelectQueryDelegate<TValue> query,
@@ -308,12 +202,6 @@ public static class AsyncSelectInputViewExtensions
     }
 
 
-    /// <summary>
-    /// Sets the blur event handler for the async select input.
-    /// </summary>
-    /// <param name="widget">The async select input to configure.</param>
-    /// <param name="onBlur">The event handler to call when the input loses focus.</param>
-    /// <returns>A new async select input.</returns>
     [OverloadResolutionPriority(1)]
     public static IAnyAsyncSelectInputBase HandleBlur(this IAnyAsyncSelectInputBase widget, Func<Event<IAnyInput>, ValueTask> onBlur)
     {
@@ -337,49 +225,27 @@ public static class AsyncSelectInputViewExtensions
         throw new InvalidOperationException("Unable to set blur handler on async select input");
     }
 
-    /// <summary>
-    /// Sets the blur event handler for the async select input.
-    /// </summary>
-    /// <param name="widget">The async select input to configure.</param>
-    /// <param name="onBlur">The event handler to call when the input loses focus.</param>
-    /// <returns>A new async select input.</returns>
     public static IAnyAsyncSelectInputBase HandleBlur(this IAnyAsyncSelectInputBase widget, Action<Event<IAnyInput>> onBlur)
     {
         return widget.HandleBlur(onBlur.ToValueTask());
     }
 
-    /// <summary>
-    /// Sets a simple blur event handler for the async select input.
-    /// </summary>
-    /// <param name="widget">The async select input to configure.</param>
-    /// <param name="onBlur">The simple action to perform when the input loses focus.</param>
-    /// <returns>A new async select input.</returns>
     public static IAnyAsyncSelectInputBase HandleBlur(this IAnyAsyncSelectInputBase widget, Action onBlur)
     {
         return widget.HandleBlur(_ => { onBlur(); return ValueTask.CompletedTask; });
     }
 }
 
-/// <summary>
-/// Internal widget that represents the visual async select input control.
-/// </summary>
 internal record AsyncSelectInput : WidgetBase<AsyncSelectInput>
 {
-    /// <summary>Gets the placeholder text displayed when no option is selected.</summary>
     [Prop] public string? Placeholder { get; init; }
 
-    /// <summary>Gets whether the input is disabled.</summary>
     [Prop] public bool Disabled { get; init; }
 
-    /// <summary>Gets the validation error message.</summary>
     [Prop] public string? Invalid { get; init; }
 
-    /// <summary>Gets the display text for the currently selected option.</summary>
     [Prop] public string? DisplayValue { get; init; }
-
-    /// <summary>Gets whether the input is currently loading option data.</summary>
     [Prop] public bool Loading { get; init; }
 
-    /// <summary>Gets the event handler called when the user triggers option selection.</summary>
     [Event] public Func<Event<AsyncSelectInput>, ValueTask>? OnSelect { get; init; }
 }
