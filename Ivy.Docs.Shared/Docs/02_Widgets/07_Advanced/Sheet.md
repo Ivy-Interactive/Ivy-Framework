@@ -16,7 +16,7 @@ Sheets slide in from the side of the screen and display additional content while
 
 ## Basic Usage
 
-Keep the trigger and sheet in the same `Fragment`. Flip a simple boolean state and render the sheet only when it’s open:
+Here’s the simplest way to use sheets: keep the trigger and the sheet inside a single `Fragment`, flip a boolean state, and render the sheet only when it’s open.
 
 ```csharp demo-tabs
 public class BasicSheetExample : ViewBase
@@ -37,6 +37,10 @@ public class BasicSheetExample : ViewBase
     }
 }
 ```
+
+<Callout Type="info">
+For additional background on fragments, review the [Fragment widget guide](../03_Primitives/Fragment.md).
+</Callout>
 
 ### Custom Content
 
