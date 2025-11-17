@@ -17,8 +17,15 @@ export const KanbanWidget: React.FC<KanbanWidgetProps> = ({
   allowMove = true,
   columnWidths = {},
   slots,
+  widgetNodeChildren,
 }) => {
-  const extractedData = useKanbanData(slots, tasks, columns, columnWidths);
+  const extractedData = useKanbanData(
+    slots,
+    tasks,
+    columns,
+    columnWidths,
+    widgetNodeChildren
+  );
   const { handleCardMove, handleCardClick, handleCardDelete } =
     useKanbanHandlers(id, extractedData.tasks);
 

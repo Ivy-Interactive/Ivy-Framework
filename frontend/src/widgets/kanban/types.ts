@@ -17,7 +17,7 @@ export interface CardData {
   priority?: number;
   widgetId: string;
   content: React.ReactNode;
-  columnKey?: string;
+  columnKey?: string; // Column/group key from backend Column prop
 }
 
 export interface ExtractedKanbanData {
@@ -40,4 +40,13 @@ export interface KanbanWidgetProps {
   slots?: {
     default?: React.ReactNode[];
   };
+  widgetNodeChildren?: Array<{
+    type: string;
+    id: string;
+    props: {
+      [key: string]: unknown;
+    };
+    children?: unknown[];
+    events: string[];
+  }>;
 }

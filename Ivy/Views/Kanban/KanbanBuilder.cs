@@ -238,24 +238,31 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
         }
 
         // Flatten groups and apply card ordering within each group
-        IEnumerable<TModel> orderedItems;
-        if (_cardOrderBySelector != null)
+        // Track group key for each item so we can set Status prop on cards
+        var itemsWithGroupKey = orderedGroups.SelectMany(group =>
         {
-            orderedItems = orderedGroups.SelectMany(group =>
-            {
-                var itemsInGroup = group.AsEnumerable();
-                return _cardOrderDescending
-                    ? itemsInGroup.OrderByDescending(_cardOrderBySelector)
-                    : itemsInGroup.OrderBy(_cardOrderBySelector);
-            });
-        }
-        else
-        {
-            orderedItems = orderedGroups.SelectMany(g => g);
-        }
+            var groupKey = group.Key;
+            IEnumerable<TModel> itemsInGroup;
 
-        var cards = orderedItems.Select(item =>
+            if (_cardOrderBySelector != null)
+            {
+                itemsInGroup = _cardOrderDescending
+                    ? group.OrderByDescending(_cardOrderBySelector)
+                    : group.OrderBy(_cardOrderBySelector);
+            }
+            else
+            {
+                itemsInGroup = group;
+            }
+
+            return itemsInGroup.Select(item => new { Item = item, GroupKey = groupKey });
+        });
+
+        var cards = itemsWithGroupKey.Select(itemWithKey =>
         {
+            var item = itemWithKey.Item;
+            var groupKey = itemWithKey.GroupKey;
+
             object content;
 
             // Use custom card renderer if provided
@@ -295,6 +302,9 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
             var priority = _orderSelector?.Invoke(item);
             if (priority != null)
                 card = card with { Priority = priority };
+
+            // Set column (group key) so frontend knows which column this card belongs to
+            card = card with { Column = groupKey };
 
             // Attach OnClick handler if specified
             if (_onClick != null && cardId != null)

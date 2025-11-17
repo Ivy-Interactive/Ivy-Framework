@@ -7,110 +7,102 @@ import type {
   ExtractedKanbanData,
 } from './types';
 
+interface WidgetNodeChild {
+  type: string;
+  id: string;
+  props: {
+    [key: string]: unknown;
+  };
+  children?: unknown[];
+  events: string[];
+}
+
 export function useKanbanData(
   slots: { default?: React.ReactNode[] } | undefined,
   tasks: Task[],
   columns: Column[],
-  columnWidths: Record<string, string>
+  columnWidths: Record<string, string>,
+  widgetNodeChildren?: WidgetNodeChild[]
 ): ExtractedKanbanData {
   return React.useMemo(() => {
-    if (slots?.default && slots.default.length > 0) {
+    if (widgetNodeChildren && widgetNodeChildren.length > 0) {
       const extractedCards: CardData[] = [];
 
-      slots.default.forEach(cardNode => {
-        if (React.isValidElement(cardNode)) {
-          // Try multiple paths to extract props - widgets can be structured differently
-          const cardProps = cardNode.props as Record<string, unknown>;
+      // Extract data from widget node structure - backend dictates the structure
+      widgetNodeChildren.forEach((widgetNode, index) => {
+        if (widgetNode.type === 'Ivy.KanbanCard') {
+          // Backend serializes CardId as cardId, Priority as priority, Column as column (camelCase)
+          const cardId = widgetNode.props.cardId as string | undefined;
+          const priority = widgetNode.props.priority as number | undefined;
+          const column = widgetNode.props.column as string | undefined;
+          const widgetId = widgetNode.id;
 
-          // Try direct props first (most common case)
-          let cardId = cardProps?.cardId as string | undefined;
-          let priority = cardProps?.priority as number | undefined;
-          let widgetId = cardProps?.id as string | undefined;
-
-          // If not found, try nested structure (some widget renderers nest props)
-          if (!cardId && cardProps?.children) {
-            const childrenProps = (
-              cardProps.children as { props?: Record<string, unknown> }
-            )?.props;
-            if (childrenProps) {
-              cardId = childrenProps.cardId as string | undefined;
-              priority = childrenProps.priority as number | undefined;
-              widgetId = childrenProps.id as string | undefined;
-            }
-          }
-
-          // Extract card if we have at least a widgetId (cardId might be optional)
+          // Use cardId from props, fallback to widgetId if not provided
           if (widgetId) {
             extractedCards.push({
-              cardId: cardId || widgetId, // Use widgetId as fallback for cardId
+              cardId: cardId || widgetId,
               priority,
               widgetId,
-              content: cardNode,
+              content: slots?.default?.[index] || null,
+              columnKey: column, // Backend sends group key as Column prop
             });
           }
         }
       });
 
       // If we have cards but no tasks, create tasks and columns from cards
-      // Cards come grouped by status in order from backend - ColumnWidths keys are the column names
+      // Backend sends Column prop on each card with the group key from groupBySelector
+      // Each card knows which column it belongs to via the Column prop
       if (extractedCards.length > 0 && tasks.length === 0) {
-        const columnKeys = Object.keys(columnWidths);
-
-        const extractedColumns: Column[] =
-          columnKeys.length > 0
-            ? columnKeys.map((key, index) => ({
-                id: key,
-                name: key,
-                color: '',
-                order: index,
-                width: columnWidths[key],
-              }))
-            : [
-                {
-                  id: 'Default',
-                  name: 'Default',
-                  color: '',
-                  order: 0,
-                },
-              ];
-
-        // Cards come grouped by status consecutively from backend
-        // We need to detect group boundaries to distribute correctly
-        // Since cards are grouped consecutively, distribute proportionally
-        // This is a heuristic - ideally backend would send status with each card
-        const extractedTasks: TaskWithWidgetId[] = [];
-        let currentColumnIndex = 0;
-        let cardsInCurrentColumn = 0;
-        const estimatedCardsPerColumn = Math.floor(
-          extractedCards.length / extractedColumns.length
-        );
-        const remainder = extractedCards.length % extractedColumns.length;
-
+        // Collect unique column values from cards to create columns
+        const columnSet = new Set<string>();
         extractedCards.forEach(card => {
-          // Distribute cards: first columns get one extra card if remainder exists
-          const expectedCardsInColumn =
-            estimatedCardsPerColumn + (currentColumnIndex < remainder ? 1 : 0);
-
-          if (
-            cardsInCurrentColumn >= expectedCardsInColumn &&
-            currentColumnIndex < extractedColumns.length - 1
-          ) {
-            currentColumnIndex++;
-            cardsInCurrentColumn = 0;
+          if (card.columnKey) {
+            columnSet.add(card.columnKey);
           }
+        });
 
-          extractedTasks.push({
+        // Get column keys - preserve order from columnWidths (backend column order)
+        // then add any missing columns from cards
+        const columnWidthsKeys = Object.keys(columnWidths);
+        const columnKeys = [
+          ...columnWidthsKeys.filter(key => columnSet.has(key)),
+          ...Array.from(columnSet).filter(
+            key => !columnWidthsKeys.includes(key)
+          ),
+        ];
+
+        // If no columnWidths, use columns from cards in order they appear
+        const finalColumnKeys =
+          columnKeys.length > 0 ? columnKeys : Array.from(columnSet);
+
+        // Create columns from column values, preserving backend order
+        const extractedColumns: Column[] = finalColumnKeys.map(
+          (key, index) => ({
+            id: key,
+            name: key,
+            color: '',
+            order: index,
+            width: columnWidths[key],
+          })
+        );
+
+        // Create tasks from cards using Column prop from backend
+        const extractedTasks: TaskWithWidgetId[] = extractedCards.map(card => {
+          // Use Column prop from backend to determine which column this card belongs to
+          const column = card.columnKey || 'Default';
+          const columnIndex = finalColumnKeys.indexOf(column);
+
+          return {
             id: card.cardId,
-            title: '', // Card widget renders its own content
-            status: extractedColumns[currentColumnIndex].id,
-            statusOrder: currentColumnIndex,
+            title: '',
+            status: column,
+            statusOrder: columnIndex >= 0 ? columnIndex : 0,
             priority: card.priority || 0,
-            description: '', // Card widget renders its own content
+            description: '',
             assignee: '',
             widgetId: card.widgetId,
-          });
-
-          cardsInCurrentColumn++;
+          };
         });
 
         return {
@@ -170,5 +162,5 @@ export function useKanbanData(
       columns,
       cards: [],
     };
-  }, [slots, tasks, columns, columnWidths]);
+  }, [slots, tasks, columns, columnWidths, widgetNodeChildren]);
 }
