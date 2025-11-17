@@ -145,7 +145,6 @@ public class KanbanWithCustomCardsExample : ViewBase
                     .MultiLine(x => x.Description)
             )))
             .ColumnOrder(e => GetStatusOrder(e.Status))
-            .Width(Size.Full())
             .Width(e => e.Status, Size.Fraction(0.33f))
             .HandleCardMove(moveData =>
             {
@@ -299,6 +298,7 @@ public class FullKanbanExample : ViewBase
                 descriptionSelector: t => t.Description,
                 orderSelector: t => t.Priority)
             .ColumnOrder(t => t.ColumnOrder)
+            .Height(Size.Units(400))
             .HandleCardMove(moveData =>
             {
                 var taskId = moveData.CardId?.ToString();
@@ -326,9 +326,7 @@ public class FullKanbanExample : ViewBase
                 new Card()
                     .Title("No Tasks")
                     .Description("Create your first task to get started")
-            )
-            .Width(Size.Full())
-            .Height(Size.Full());
+            );
     }
 }
 ```

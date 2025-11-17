@@ -29,7 +29,7 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
     private Func<Event<Ivy.Kanban, (object? CardId, TGroupKey ToColumn, int? TargetIndex)>, ValueTask>? _onMove;
     private Func<Event<KanbanCard, object?>, ValueTask>? _onClick;
     private object? _empty;
-    private Size? _width = Size.Fit();
+    private Size? _width = Size.Full();
     private Size? _height = Size.Full();
     private readonly Dictionary<TGroupKey, Size> _columnWidths = new();
 
@@ -364,8 +364,8 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
                     {
                         var convertedKey = (TGroupKey)Convert.ChangeType(e.Value.ToColumn, typeof(TGroupKey));
                         return _onMove(new Event<Ivy.Kanban, (object?, TGroupKey, int?)>(
-                            e.EventName,
-                            e.Sender,
+                                e.EventName,
+                                e.Sender,
                             (e.Value.CardId, convertedKey, e.Value.TargetIndex)));
                     }
                     catch

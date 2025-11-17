@@ -47,6 +47,8 @@ export const KanbanWidget: React.FC<KanbanWidgetProps> = ({
     ...getHeight(height),
     overflowY: 'hidden' as const,
     overflowX: 'auto' as const,
+    maxWidth: '100%',
+    boxSizing: 'border-box' as const,
   };
 
   return (
