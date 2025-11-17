@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { getHeight, getWidth } from '@/lib/styles';
-import { getIvyHost } from '@/lib/utils';
+import { getIvyHost, validateAudioUrl } from '@/lib/utils';
 
 interface AudioPlayerWidgetProps {
   id: string;
@@ -15,16 +15,21 @@ interface AudioPlayerWidgetProps {
   'data-testid'?: string;
 }
 
-const getAudioUrl = (url: string): string => {
-  if (
-    url.startsWith('http://') ||
-    url.startsWith('https://') ||
-    url.startsWith('data:')
-  ) {
-    return url;
+const getAudioUrl = (url: string): string | null => {
+  // Validate and sanitize audio URL to prevent open redirect vulnerabilities
+  const validatedUrl = validateAudioUrl(url);
+  if (!validatedUrl) {
+    // Invalid URL, return null
+    return null;
   }
 
-  return `${getIvyHost()}${url.startsWith('/') ? '' : '/'}${url}`;
+  // If it's already a full URL (http/https/data/blob/app), return it
+  if (validatedUrl.match(/^(https?:\/\/|data:|blob:|app:)/i)) {
+    return validatedUrl;
+  }
+
+  // Construct relative URL with Ivy host
+  return `${getIvyHost()}${validatedUrl.startsWith('/') ? '' : '/'}${validatedUrl}`;
 };
 
 export const AudioPlayerWidget: React.FC<AudioPlayerWidgetProps> = ({
@@ -66,6 +71,22 @@ export const AudioPlayerWidget: React.FC<AudioPlayerWidgetProps> = ({
     );
   }
 
+  // Validate and sanitize audio URL to prevent open redirect vulnerabilities
+  const validatedAudioSrc = getAudioUrl(src);
+  if (!validatedAudioSrc) {
+    return (
+      <div
+        key={id}
+        style={styles}
+        className="flex items-center justify-center bg-destructive/10 text-destructive rounded border-2 border-dashed border-destructive/25 p-4"
+        role="alert"
+        aria-label="Invalid audio URL"
+      >
+        <span className="text-sm">Invalid audio URL</span>
+      </div>
+    );
+  }
+
   if (hasError) {
     return (
       <div
@@ -83,7 +104,7 @@ export const AudioPlayerWidget: React.FC<AudioPlayerWidgetProps> = ({
   return (
     <audio
       key={id}
-      src={getAudioUrl(src)}
+      src={validatedAudioSrc}
       style={styles}
       autoPlay={autoplay}
       loop={loop}

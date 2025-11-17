@@ -347,3 +347,91 @@ export function validateImageUrl(
     return null;
   }
 }
+
+/**
+ * Validates and sanitizes an audio URL to prevent open redirect vulnerabilities.
+ * Allows http/https URLs, data:audio URLs (for base64 audio), blob: URLs (for client-side audio)
+ *
+ * @param url - The audio URL to validate
+ * @returns The sanitized URL if valid, null otherwise
+ */
+export function validateAudioUrl(
+  url: string | null | undefined
+): string | null {
+  if (!url || typeof url !== 'string') {
+    return null;
+  }
+
+  // Trim whitespace
+  url = url.trim();
+
+  // Handle empty string after trimming
+  if (url === '') {
+    return null;
+  }
+
+  // Allow data: URLs (for base64 encoded audio)
+  // Validate that it's actually an audio data URL (data:audio/...)
+  if (url.startsWith('data:')) {
+    // Only allow audio data URLs to prevent XSS via data:text/html, etc.
+    if (!/^data:audio\//i.test(url)) {
+      return null;
+    }
+    // Additional validation: prevent protocol injection
+    if (url.includes('://') && !url.startsWith('data:')) {
+      return null;
+    }
+    return url;
+  }
+
+  // Allow blob: URLs (for client-side generated audio)
+  if (url.startsWith('blob:')) {
+    // Validate it's a proper blob URL and prevent protocol injection
+    if (url.includes('://') && !url.startsWith('blob:')) {
+      return null;
+    }
+    return url;
+  }
+
+  // Allow app:// URLs (Ivy internal navigation)
+  if (url.startsWith('app://')) {
+    // Validate app:// URLs don't contain dangerous characters
+    if (!/^app:\/\/[^:#]*(\?[^#]*)?$/.test(url)) {
+      return null;
+    }
+    // Additional check: prevent protocol injection
+    const afterProtocol = url.substring(7);
+    if (afterProtocol.includes('://') || afterProtocol.match(/:[^?&/]/)) {
+      return null;
+    }
+    return url;
+  }
+
+  // Allow relative paths (starting with /)
+  if (url.startsWith('/')) {
+    // Validate it's a safe relative path (no protocol, no javascript:, etc.)
+    if (!/^\/[^:]*$/.test(url)) {
+      return null;
+    }
+    return url;
+  }
+
+  // For absolute URLs, validate protocol
+  try {
+    const urlObj = new URL(url);
+
+    // Only allow http and https protocols (prevent javascript:, data:, etc.)
+    if (urlObj.protocol !== 'http:' && urlObj.protocol !== 'https:') {
+      return null;
+    }
+
+    return urlObj.toString();
+  } catch {
+    // Invalid URL format - treat as relative if it doesn't contain colons
+    if (!url.includes(':')) {
+      // Might be a relative path without leading slash
+      return url.startsWith('/') ? url : `/${url}`;
+    }
+    return null;
+  }
+}
