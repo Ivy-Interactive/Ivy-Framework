@@ -1,11 +1,17 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { renderWidgetTree, loadingState } from '@/widgets/WidgetRenderer';
 import { useBackend } from '@/hooks/use-backend';
 import { Toaster } from '@/components/ui/toaster';
 import { ErrorSheet } from '@/components/ErrorSheet';
 import ErrorBoundary from './ErrorBoundary';
 import MadeWithIvy from './MadeWithIvy';
-import { getAppArgs, getAppId, getChromeParam, getParentId } from '@/lib/utils';
+import {
+  getAppArgs,
+  getAppId,
+  getChromeParam,
+  getParentId,
+  getErrorWidgetFromMeta,
+} from '@/lib/utils';
 import { hasLicensedFeature } from '@/lib/license';
 import { ConnectionModal } from './ConnectionModal';
 import { ThemeProvider } from './theme-provider';
@@ -17,12 +23,19 @@ export function App() {
   const parentId = getParentId();
   const chrome = getChromeParam();
 
+  // Check for error widget in meta tag (for error pages without SignalR)
+  const errorWidget = useMemo(() => getErrorWidgetFromMeta(), []);
+
   const { connection, widgetTree, eventHandler, disconnected } = useBackend(
     appId,
     appArgs,
     parentId,
     chrome
   );
+
+  // Use error widget if present, otherwise use widget tree from backend
+  const displayWidgetTree = errorWidget || widgetTree;
+
   const [removeBranding, setRemoveBranding] = useState(true);
 
   useEffect(() => {
@@ -52,10 +65,10 @@ export function App() {
         <EventHandlerProvider eventHandler={eventHandler}>
           <>
             {!removeBranding && <MadeWithIvy />}
-            {renderWidgetTree(widgetTree || loadingState())}
+            {renderWidgetTree(displayWidgetTree || loadingState())}
             <ErrorSheet />
             <Toaster />
-            {disconnected && <ConnectionModal />}
+            {disconnected && errorWidget === null && <ConnectionModal />}
           </>
         </EventHandlerProvider>
       </ErrorBoundary>

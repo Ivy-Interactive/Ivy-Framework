@@ -49,6 +49,46 @@ export function getAppId(): string | null {
   return null;
 }
 
+/**
+ * Reads the error widget from the ivy-error-widget meta tag if present.
+ * This is used for error pages that don't require SignalR connection.
+ * @returns The error widget JSON as WidgetNode or null if not found
+ */
+export function getErrorWidgetFromMeta():
+  | import('@/types/widgets').WidgetNode
+  | null {
+  const errorWidgetMeta = document.querySelector(
+    'meta[name="ivy-error-widget"]'
+  );
+  if (!errorWidgetMeta) {
+    return null;
+  }
+
+  const encodedJson = errorWidgetMeta.getAttribute('content');
+  if (!encodedJson) {
+    return null;
+  }
+
+  try {
+    // Decode HTML entities (e.g., &quot; -> ")
+    const parser = new DOMParser();
+    const decoded = parser.parseFromString(
+      `<!doctype html><html><body>${encodedJson}</body></html>`,
+      'text/html'
+    ).body.textContent;
+
+    if (!decoded) {
+      return null;
+    }
+
+    // Parse JSON
+    return JSON.parse(decoded);
+  } catch (error) {
+    console.error('Failed to parse error widget from meta tag:', error);
+    return null;
+  }
+}
+
 export function getAppArgs(): string | null {
   const urlParams = new URLSearchParams(window.location.search);
   return urlParams.get('appArgs');

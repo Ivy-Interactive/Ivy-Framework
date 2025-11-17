@@ -8,6 +8,7 @@ import {
   getMachineId,
   validateRedirectUrl,
   validateLinkUrl,
+  getErrorWidgetFromMeta,
 } from '@/lib/utils';
 import { logger } from '@/lib/logger';
 import { applyPatch, Operation } from 'fast-json-patch';
@@ -330,6 +331,13 @@ export const useBackend = (
   );
 
   useEffect(() => {
+    // Don't create connection if error widget is present in meta tag (for error pages)
+    // Only check for root connections to avoid affecting nested apps
+    if (isRootConnection && getErrorWidgetFromMeta() !== null) {
+      queueMicrotask(() => setConnection(null));
+      return;
+    }
+
     if (currentConnectionRef.current) {
       currentConnectionRef.current.stop().catch(err => {
         logger.warn('Error stopping previous SignalR connection:', err);
