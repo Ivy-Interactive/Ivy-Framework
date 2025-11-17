@@ -15,8 +15,7 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
     private readonly IEnumerable<TModel> _records;
     private readonly Func<TModel, TGroupKey> _groupBySelector;
     private readonly BuilderFactory<TModel> _builderFactory;
-    private IBuilder<TModel> _cardBuilder;
-    private bool _cardBuilderExplicitlySet;
+    private IBuilder<TModel>? _cardBuilder;
     private Func<TModel, object?>? _columnOrderBySelector;
     private bool _columnOrderDescending;
     private Func<TModel, object?>? _cardOrderBySelector;
@@ -45,7 +44,6 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
         _records = records;
         _groupBySelector = groupBySelector;
         _builderFactory = new BuilderFactory<TModel>();
-        _cardBuilder = _builderFactory.Default();
         _cardIdSelector = cardIdSelector;
         _cardTitleSelector = cardTitleSelector;
         _cardDescriptionSelector = cardDescriptionSelector;
@@ -55,7 +53,6 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
     public KanbanBuilder<TModel, TGroupKey> Builder(Func<IBuilderFactory<TModel>, IBuilder<TModel>> builder)
     {
         _cardBuilder = builder(_builderFactory);
-        _cardBuilderExplicitlySet = true;
         return this;
     }
 
@@ -68,7 +65,6 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
     public KanbanBuilder<TModel, TGroupKey> CardBuilder(Func<IBuilderFactory<TModel>, IBuilder<TModel>> builder)
     {
         _cardBuilder = builder(_builderFactory);
-        _cardBuilderExplicitlySet = true;
         return this;
     }
 
@@ -267,9 +263,8 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
             {
                 content = _customCardRenderer(item);
             }
-            // Use builder (either from Builder() or CardBuilder() with factory) if explicitly set
-            // CardBuilder takes precedence over title/description selectors
-            else if (_cardBuilderExplicitlySet)
+            // Use builder if explicitly set (CardBuilder takes precedence over title/description selectors)
+            else if (_cardBuilder != null)
             {
                 content = _cardBuilder.Build(item, item) ?? "";
             }
@@ -286,7 +281,7 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
             // Fallback to default builder
             else
             {
-                content = _cardBuilder.Build(item, item) ?? "";
+                content = _builderFactory.Default().Build(item, item) ?? "";
             }
 
             var card = new KanbanCard(content);
