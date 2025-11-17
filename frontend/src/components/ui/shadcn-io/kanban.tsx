@@ -5,6 +5,7 @@ import {
   useContext,
   useState,
   useCallback,
+  useRef,
   ReactNode,
 } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -264,13 +265,15 @@ export function KanbanCard({
   const [isDragging, setIsDragging] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-  const { onCardMove, data, setDraggedCardColumn, onCardDelete } =
+  const justDraggedRef = useRef(false);
+  const { onCardMove, data, setDraggedCardColumn, onCardDelete, onCardClick } =
     useKanbanContext();
 
   const handleDragStart = useCallback(
     (e: React.DragEvent) => {
       // KanbanCard drag start
       setIsDragging(true);
+      justDraggedRef.current = false;
       setDraggedCardColumn(column);
       e.dataTransfer.setData('text/plain', id);
       e.dataTransfer.effectAllowed = 'move';
@@ -281,6 +284,12 @@ export function KanbanCard({
   const handleDragEnd = useCallback(() => {
     setIsDragging(false);
     setDraggedCardColumn(null);
+    // Mark that a drag just occurred to prevent click
+    justDraggedRef.current = true;
+    // Reset after a short delay to allow click handler to check it
+    setTimeout(() => {
+      justDraggedRef.current = false;
+    }, 100);
   }, [setDraggedCardColumn]);
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -329,6 +338,22 @@ export function KanbanCard({
     [id, onCardDelete]
   );
 
+  const handleClick = useCallback(
+    (e: React.MouseEvent) => {
+      // Don't trigger click if it's a drag operation, if delete button was clicked, or if we just dragged
+      if (
+        isDragging ||
+        justDraggedRef.current ||
+        (e.target as HTMLElement).closest('button')
+      ) {
+        return;
+      }
+      e.stopPropagation();
+      onCardClick?.(id);
+    },
+    [id, onCardClick, isDragging]
+  );
+
   return (
     <div
       draggable
@@ -337,11 +362,13 @@ export function KanbanCard({
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
+      onClick={handleClick}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       className={cn(
         'cursor-grab opacity-100 transition-all relative group',
         isDragging && 'opacity-50 cursor-grabbing',
+        !isDragging && onCardClick && 'cursor-pointer',
         isDragOver &&
           'bg-accent border-2 border-accent-foreground border-dashed',
         className
