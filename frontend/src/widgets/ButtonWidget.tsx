@@ -1,7 +1,13 @@
 import React, { useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/Icon';
-import { cn, getIvyHost, camelCase, validateLinkUrl } from '@/lib/utils';
+import {
+  cn,
+  getIvyHost,
+  camelCase,
+  validateLinkUrl,
+  validateRedirectUrl,
+} from '@/lib/utils';
 import { useEventHandler } from '@/components/event-handler';
 import withTooltip from '@/hoc/withTooltip';
 import { Loader2 } from 'lucide-react';
@@ -42,28 +48,48 @@ interface ButtonWidgetProps {
 }
 
 const getUrl = (url: string) => {
-  // Validate the URL first to prevent open redirect vulnerabilities
+  // First validate the URL to prevent dangerous protocols (javascript:, data:, etc.)
   const validatedUrl = validateLinkUrl(url);
   if (validatedUrl === '#') {
     // Invalid URL, return safe fallback
     return '#';
   }
 
-  // If it's already a full URL (http/https), return it
-  if (
-    validatedUrl.startsWith('http://') ||
-    validatedUrl.startsWith('https://')
-  ) {
-    return validatedUrl;
-  }
-
-  // app:// and anchor links should not be prefixed with host
+  // For app:// and anchor links, return as-is (these are safe internal navigation)
   if (validatedUrl.startsWith('app://') || validatedUrl.startsWith('#')) {
     return validatedUrl;
   }
 
-  // Otherwise, construct relative URL with Ivy host
-  return `${getIvyHost()}${validatedUrl.startsWith('/') ? '' : '/'}${validatedUrl}`;
+  // For external URLs (http/https), validate them to prevent open redirect vulnerabilities
+  if (
+    validatedUrl.startsWith('http://') ||
+    validatedUrl.startsWith('https://')
+  ) {
+    // Use validateRedirectUrl to ensure the URL is safe
+    // allowExternal: true because external URLs are opened in new tab with rel="noopener noreferrer"
+    const redirectValidated = validateRedirectUrl(validatedUrl, true);
+    if (redirectValidated) {
+      return redirectValidated;
+    }
+    // If validation fails, return safe fallback
+    return '#';
+  }
+
+  // For relative paths, validate to prevent open redirect vulnerabilities
+  // Use validateRedirectUrl with allowExternal: false to ensure same-origin only
+  const redirectValidated = validateRedirectUrl(validatedUrl, false);
+  if (redirectValidated) {
+    // Construct relative URL with Ivy host
+    const constructedUrl = `${getIvyHost()}${redirectValidated.startsWith('/') ? '' : '/'}${redirectValidated}`;
+    // Validate the final constructed URL to ensure it's same-origin (prevents open redirect)
+    const finalValidated = validateRedirectUrl(constructedUrl, false);
+    if (finalValidated) {
+      return finalValidated;
+    }
+  }
+
+  // If validation fails, return safe fallback
+  return '#';
 };
 
 export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
@@ -133,6 +159,9 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
   const hasChildren = !!children;
   const hasUrl = !!(effectiveUrl && !disabled);
 
+  // Validate and sanitize URL to prevent open redirect vulnerabilities
+  const validatedHref = effectiveUrl && !disabled ? getUrl(effectiveUrl) : null;
+
   // Check if URL is a download link (starts with /ivy/download/)
   const isDownloadUrl = effectiveUrl?.startsWith('/ivy/download/') ?? false;
 
@@ -195,9 +224,9 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
       }
       data-testid={dataTestId}
     >
-      {hasUrl ? (
+      {hasUrl && validatedHref ? (
         <a
-          href={getUrl(effectiveUrl!)}
+          href={validatedHref}
           {...(isDownloadUrl
             ? {}
             : { target: '_blank', rel: 'noopener noreferrer' })}
