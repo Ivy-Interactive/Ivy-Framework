@@ -91,7 +91,7 @@ export const RowActionButtons: React.FC<RowActionButtonsProps> = ({
                       <Icon
                         name={childAction.icon}
                         size={16}
-                        className="mr-2 text-[var(--color-foreground)] "
+                        className="mr-2 text-[var(--color-foreground)]"
                       />
                     )}
                     {childAction.label || childId}
