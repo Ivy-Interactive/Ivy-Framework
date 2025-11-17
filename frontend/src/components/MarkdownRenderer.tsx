@@ -15,7 +15,7 @@ import rehypeKatex from 'rehype-katex';
 import rehypeRaw from 'rehype-raw';
 import rehypeSlug from 'rehype-slug';
 import 'katex/dist/katex.min.css';
-import { cn, getIvyHost, validateLinkUrl } from '@/lib/utils';
+import { cn, getIvyHost, validateLinkUrl, validateImageUrl } from '@/lib/utils';
 import CopyToClipboardButton from './CopyToClipboardButton';
 import { createPrismTheme } from '@/lib/ivy-prism-theme';
 import { textBlockClassMap, textContainerClass } from '@/lib/textBlockClassMap';
@@ -309,29 +309,53 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
         (props: React.ImgHTMLAttributes<HTMLImageElement>) => {
           const [showOverlay, setShowOverlay] = useState(false);
           const src = props.src;
-          const imageSrc =
-            src && !src?.match(/^(https?:\/\/|data:|blob:|app:)/i)
-              ? (() => {
-                  const normalizedSrc = src.startsWith('/') ? src : `/${src}`;
-                  const prefixedSrc = normalizedSrc.startsWith('/ivy/')
-                    ? normalizedSrc
-                    : `/ivy${normalizedSrc}`;
-                  return `${getIvyHost()}${prefixedSrc}`;
-                })()
-              : src;
+
+          // Early validation: if src is missing or invalid, don't render anything
+          if (!src || typeof src !== 'string') {
+            return null;
+          }
+
+          // Validate and sanitize image URL to prevent open redirect vulnerabilities
+          const validatedSrc = validateImageUrl(src);
+          if (!validatedSrc) {
+            // Invalid URL, don't render image (return null to prevent any rendering)
+            return null;
+          }
+
+          // Construct the final image source URL
+          const imageSrc = validatedSrc.match(
+            /^(https?:\/\/|data:|blob:|app:)/i
+          )
+            ? validatedSrc
+            : (() => {
+                const normalizedSrc = validatedSrc.startsWith('/')
+                  ? validatedSrc
+                  : `/${validatedSrc}`;
+                const prefixedSrc = normalizedSrc.startsWith('/ivy/')
+                  ? normalizedSrc
+                  : `/ivy${normalizedSrc}`;
+                return `${getIvyHost()}${prefixedSrc}`;
+              })();
+
+          // Validate the final constructed URL to ensure it's safe
+          const validatedImageSrc = validateImageUrl(imageSrc);
+          if (!validatedImageSrc) {
+            // Invalid constructed URL, don't render image (return null to prevent any rendering)
+            return null;
+          }
 
           return (
             <>
               <img
                 {...props}
-                src={imageSrc}
+                src={validatedImageSrc}
                 className={cn(textBlockClassMap.img, 'cursor-zoom-in')}
                 loading="lazy"
                 onClick={() => setShowOverlay(true)}
               />
               {showOverlay && (
                 <ImageOverlay
-                  src={imageSrc}
+                  src={validatedImageSrc}
                   alt={props.alt}
                   onClose={() => setShowOverlay(false)}
                 />
