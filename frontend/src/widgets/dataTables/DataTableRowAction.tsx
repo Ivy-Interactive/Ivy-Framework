@@ -91,7 +91,7 @@ export const RowActionButtons: React.FC<RowActionButtonsProps> = ({
                       <Icon
                         name={childAction.icon}
                         size={16}
-                        className="mr-2 text-[var(--color-foreground)] "
+                        className="mr-2 text-[var(--color-foreground)]"
                       />
                     )}
                     {childAction.label || childId}
@@ -107,7 +107,7 @@ export const RowActionButtons: React.FC<RowActionButtonsProps> = ({
     return (
       <button
         key={actionId}
-        className="flex items-center  justify-center p-1.5 rounded bg-background hover:bg-[var(--color-muted)] transition-colors cursor-pointer border border-[var(--color-border)]"
+        className="flex items-center justify-center p-1.5 rounded bg-background hover:bg-[var(--color-muted)] transition-colors cursor-pointer border border-[var(--color-border)]"
         onClick={() => onActionClick(action)}
         aria-label={action.label || actionId}
         type="button"
