@@ -91,7 +91,8 @@ public static class ErrorPageHelper
         var ivyLicense = configuration["Ivy:License"] ?? "";
         if (!string.IsNullOrEmpty(ivyLicense))
         {
-            var ivyLicenseTag = $"<meta name=\"ivy-license\" content=\"{ivyLicense}\" />";
+            var encodedLicense = HtmlEncoder.Default.Encode(ivyLicense);
+            var ivyLicenseTag = $"<meta name=\"ivy-license\" content=\"{encodedLicense}\" />";
             html = html.Replace("</head>", $"  {ivyLicenseTag}\n</head>");
         }
 
@@ -99,8 +100,9 @@ public static class ErrorPageHelper
         var ivyLicensePublicKey = configuration["Ivy:LicensePublicKey"] ?? "";
         if (!string.IsNullOrEmpty(ivyLicensePublicKey))
         {
+            var encodedLicensePublicKey = HtmlEncoder.Default.Encode(ivyLicensePublicKey);
             var ivyLicensePublicKeyTag =
-                $"<meta name=\"ivy-license-public-key\" content=\"{ivyLicensePublicKey}\" />";
+                $"<meta name=\"ivy-license-public-key\" content=\"{encodedLicensePublicKey}\" />";
             html = html.Replace("</head>", $"  {ivyLicensePublicKeyTag}\n</head>");
         }
 #endif
