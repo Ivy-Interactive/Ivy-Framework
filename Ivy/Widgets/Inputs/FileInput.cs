@@ -284,7 +284,7 @@ public static class FileInputExtensions
         return widget with { Accept = accept };
     }
 
-    /// <exception cref="InvalidOperationException">MaxFiles can only be set on a multi-file input (IEnumerable<FileInput>). Use a collection state type for multiple files.</exception>
+    /// <exception cref="InvalidOperationException">MaxFiles can only be set on a multi-file input (IEnumerable of FileInput). Use a collection state type for multiple files.</exception>
     public static FileInputBase MaxFiles(this FileInputBase widget, int maxFiles)
     {
         if (widget.Multiple != true)

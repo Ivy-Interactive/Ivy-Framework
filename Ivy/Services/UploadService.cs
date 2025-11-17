@@ -148,7 +148,6 @@ public static class FileUploadExtensions
 }
 
 /// <summary>Delegate for handling file uploads with stream and cancellation support.</summary>
-/// </summary>
 public delegate Task UploadDelegate(FileUpload fileUpload, Stream stream, CancellationToken cancellationToken);
 
 
