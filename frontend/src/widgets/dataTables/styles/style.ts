@@ -153,6 +153,12 @@ export const tableStyles = {
       .cm-tooltip-autocomplete::-webkit-scrollbar-thumb:hover {
         background: var(--muted-foreground);
       }
+
+      /* Disable syntax highlighting when query is invalid */
+      .query-editor-wrapper[data-query-valid="false"] [class^="cm-query-"] {
+        color: currentColor !important;
+        font-weight: normal !important;
+      }
     `,
   },
 } as const;

@@ -306,6 +306,7 @@ export const DataTableFilterOption: React.FC<{
     >
       <div
         className="flex-1 min-w-0 max-w-[350px] query-editor-wrapper cursor-text"
+        data-query-valid={isQueryValid}
         onKeyDownCapture={handleKeyDownCapture}
         onKeyDown={handleKeyDown}
       >
