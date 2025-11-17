@@ -121,15 +121,22 @@ export function useKanbanData(
         statusMap.get(task.status)!.push(task);
       });
 
-      const extractedColumns: Column[] = Array.from(statusMap.keys()).map(
-        (status, index) => ({
-          id: status,
-          name: status,
-          color: '',
-          order: index,
-          width: columnWidths[status],
-        })
-      );
+      // Get column keys - preserve order from columnWidths (backend column order)
+      // then add any missing columns from tasks
+      const columnWidthsKeys = Object.keys(columnWidths);
+      const statusKeys = Array.from(statusMap.keys());
+      const columnKeys = [
+        ...columnWidthsKeys.filter(key => statusKeys.includes(key)),
+        ...statusKeys.filter(key => !columnWidthsKeys.includes(key)),
+      ];
+
+      const extractedColumns: Column[] = columnKeys.map((status, index) => ({
+        id: status,
+        name: status,
+        color: '',
+        order: index,
+        width: columnWidths[status],
+      }));
 
       const cardToTaskMap = new Map<string, Task>();
       tasks.forEach(task => {

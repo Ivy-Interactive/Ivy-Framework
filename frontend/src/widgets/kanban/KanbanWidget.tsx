@@ -29,7 +29,16 @@ export const KanbanWidget: React.FC<KanbanWidgetProps> = ({
   const { handleCardMove, handleCardClick, handleCardDelete } =
     useKanbanHandlers(id, extractedData.tasks);
 
-  if (extractedData.tasks.length === 0 && extractedData.columns.length === 0) {
+  // Sort columns by order property to respect backend column order
+  const sortedColumns = React.useMemo(() => {
+    return [...extractedData.columns].sort((a, b) => {
+      const orderA = a.order ?? Number.MAX_SAFE_INTEGER;
+      const orderB = b.order ?? Number.MAX_SAFE_INTEGER;
+      return orderA - orderB;
+    });
+  }, [extractedData.columns]);
+
+  if (extractedData.tasks.length === 0 && sortedColumns.length === 0) {
     return <KanbanEmptyState />;
   }
 
@@ -58,7 +67,7 @@ export const KanbanWidget: React.FC<KanbanWidgetProps> = ({
           KanbanCardContent,
         }) => (
           <KanbanBoard>
-            {extractedData.columns.map(column => (
+            {sortedColumns.map(column => (
               <KanbanColumn
                 key={column.id}
                 id={column.id}
