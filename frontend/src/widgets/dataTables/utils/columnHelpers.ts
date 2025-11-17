@@ -1,5 +1,6 @@
 import { GridColumn, GridColumnIcon } from '@glideapps/glide-data-grid';
 import type { DataColumn } from '../types/types';
+import { isValidDataTableIcon } from '../types/types';
 
 /**
  * Maps column icon names or types to appropriate icons
@@ -33,8 +34,12 @@ export function mapColumnIcon(
       case 'Zap':
         return GridColumnIcon.HeaderEmoji; // Use emoji for zap
       default:
-        // Try to use custom icon name for headerIcons lookup
-        // But for now, default to a built-in icon
+        // Validate against DataTableIcon enum and use custom icon name if valid
+        if (isValidDataTableIcon(col.icon)) {
+          return col.icon; // Return custom icon name for headerIcons lookup
+        }
+        // Invalid icon, default to built-in icon
+        console.warn(`Invalid DataTable icon: ${col.icon}. Using default icon.`);
         return GridColumnIcon.HeaderString;
     }
   }

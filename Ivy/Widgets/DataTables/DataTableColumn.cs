@@ -114,28 +114,3 @@ public class LabelsDisplayRenderer : IDataTableColumnRenderer
 {
     public bool IsEditable => false;
 }
-
-/// <summary>
-/// Glide Data Grid compatible icon names for DataTableColumn.
-/// These icon names correspond to the icons defined in the frontend headerIcons.ts file.
-/// </summary>
-public static class DataTableIcons
-{
-    public const string User = "User";
-    public const string Mail = "Mail";
-    public const string Hash = "Hash";
-    public const string Calendar = "Calendar";
-    public const string Clock = "Clock";
-    public const string Activity = "Activity";
-    public const string Flag = "Flag";
-    public const string Zap = "Zap";
-    public const string Info = "Info";
-    public const string ChevronUp = "ChevronUp";
-    public const string ChevronDown = "ChevronDown";
-    public const string Filter = "Filter";
-    public const string Search = "Search";
-    public const string Settings = "Settings";
-    public const string MoreVertical = "MoreVertical";
-    public const string HelpCircle = "HelpCircle";
-}
-

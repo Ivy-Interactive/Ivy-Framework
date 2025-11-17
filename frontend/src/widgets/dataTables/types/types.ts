@@ -94,6 +94,39 @@ export enum SelectionModes {
 }
 
 /**
+ * Glide Data Grid compatible icon names for DataTableColumn.
+ * These icon names correspond to the icons defined in the frontend headerIcons.ts file.
+ */
+export enum DataTableIcon {
+  User = 'User',
+  Mail = 'Mail',
+  Hash = 'Hash',
+  Calendar = 'Calendar',
+  Clock = 'Clock',
+  Activity = 'Activity',
+  Flag = 'Flag',
+  Zap = 'Zap',
+  Info = 'Info',
+  ChevronUp = 'ChevronUp',
+  ChevronDown = 'ChevronDown',
+  Filter = 'Filter',
+  Search = 'Search',
+  Settings = 'Settings',
+  MoreVertical = 'MoreVertical',
+  HelpCircle = 'HelpCircle',
+}
+
+/**
+ * Validates if an icon name is a valid DataTable icon
+ * @param iconName - The icon name to validate
+ * @returns true if the icon name is valid, false otherwise
+ */
+export function isValidDataTableIcon(iconName: string | null | undefined): boolean {
+  if (!iconName) return false;
+  return Object.values(DataTableIcon).includes(iconName as DataTableIcon);
+}
+
+/**
  * Configuration for a single row action button
  */
 export interface RowAction {

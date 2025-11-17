@@ -1,4 +1,5 @@
 import type { SpriteMap, SpriteProps } from '@glideapps/glide-data-grid';
+import { isValidDataTableIcon } from '../types/types';
 
 /**
  * Map of Lucide icon paths
@@ -85,8 +86,13 @@ export function generateHeaderIcons(
   // Process all unique icons from columns
   columns.forEach(col => {
     if (col.icon && !processedIcons.has(col.icon)) {
-      processedIcons.add(col.icon);
-      icons[col.icon] = createIconGenerator(col.icon);
+      // Validate icon against DataTableIcon enum
+      if (isValidDataTableIcon(col.icon)) {
+        processedIcons.add(col.icon);
+        icons[col.icon] = createIconGenerator(col.icon);
+      } else {
+        console.warn(`Invalid DataTable icon: ${col.icon}. Icon will be ignored.`);
+      }
     }
   });
   return icons;
