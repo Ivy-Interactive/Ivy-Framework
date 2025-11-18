@@ -93,19 +93,36 @@ const ALLOWED_IVY_HOSTS = [
 
 function isAllowedIvyHost(origin: string): boolean {
   try {
-    // Normalize for comparison (lowercase, no trailing slash)
-    const o = new URL(origin).origin.replace(/\/+$/, '').toLowerCase();
     const url = new URL(origin);
+    const normalizedOrigin = url.origin.replace(/\/+$/, '').toLowerCase();
     const currentUrl = new URL(window.location.origin);
 
+    // Only allow http and https protocols
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+      return false;
+    }
+
+    // Allow if it matches the current origin exactly (protocol, hostname, and port)
+    if (url.origin === currentUrl.origin) {
+      return true;
+    }
+
+    // For development: allow same hostname with different port/protocol
     // This enables development workflows where frontend and backend run on different ports
-    if (url.hostname === currentUrl.hostname) {
+    // Only allow this for localhost/127.0.0.1 to prevent security issues in production
+    const isLocalhost =
+      currentUrl.hostname === 'localhost' ||
+      currentUrl.hostname === '127.0.0.1' ||
+      currentUrl.hostname === '[::1]';
+    if (isLocalhost && url.hostname === currentUrl.hostname) {
       return true;
     }
 
     // Check against the allowlist
     return ALLOWED_IVY_HOSTS.some(
-      allowed => new URL(allowed).origin.replace(/\/+$/, '').toLowerCase() === o
+      allowed =>
+        new URL(allowed).origin.replace(/\/+$/, '').toLowerCase() ===
+        normalizedOrigin
     );
   } catch {
     return false;
@@ -347,8 +364,15 @@ export function validateImageUrl(
 
   // Allow blob: URLs (for client-side generated images)
   if (url.startsWith('blob:')) {
-    // Validate it's a proper blob URL and prevent protocol injection
-    if (url.includes('://') && !url.startsWith('blob:')) {
+    // Additional validation: ensure blob URL's origin matches current origin
+    // This prevents attacks like blob:https://attacker.com/uuid
+    try {
+      const blobUrl = new URL(url);
+      const currentOrigin = _getCurrentOriginRef.getCurrentOrigin();
+      if (blobUrl.origin !== currentOrigin) {
+        return null;
+      }
+    } catch {
       return null;
     }
     return url;
@@ -435,8 +459,15 @@ export function validateAudioUrl(
 
   // Allow blob: URLs (for client-side generated audio)
   if (url.startsWith('blob:')) {
-    // Validate it's a proper blob URL and prevent protocol injection
-    if (url.includes('://') && !url.startsWith('blob:')) {
+    // Additional validation: ensure blob URL's origin matches current origin
+    // This prevents attacks like blob:https://attacker.com/uuid
+    try {
+      const blobUrl = new URL(url);
+      const currentOrigin = _getCurrentOriginRef.getCurrentOrigin();
+      if (blobUrl.origin !== currentOrigin) {
+        return null;
+      }
+    } catch {
       return null;
     }
     return url;
@@ -524,8 +555,15 @@ export function validateVideoUrl(
 
   // Allow blob: URLs (for client-side generated video)
   if (url.startsWith('blob:')) {
-    // Validate it's a proper blob URL and prevent protocol injection
-    if (url.includes('://') && !url.startsWith('blob:')) {
+    // Additional validation: ensure blob URL's origin matches current origin
+    // This prevents attacks like blob:https://attacker.com/uuid
+    try {
+      const blobUrl = new URL(url);
+      const currentOrigin = _getCurrentOriginRef.getCurrentOrigin();
+      if (blobUrl.origin !== currentOrigin) {
+        return null;
+      }
+    } catch {
       return null;
     }
     return url;
