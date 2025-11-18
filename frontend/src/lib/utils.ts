@@ -88,7 +88,34 @@ export function getMachineId(): string {
 export function getIvyHost(): string {
   const urlParams = new URLSearchParams(window.location.search);
   const ivyHost = urlParams.get('ivyHost');
-  if (ivyHost) return ivyHost;
+
+  // Only allow the ivyHost param if it is a valid, trusted absolute URL (https or http and matches window.location.hostname)
+  if (ivyHost) {
+    try {
+      // Parse the ivyHost - it might be a full URL or just a hostname
+      let url: URL;
+      if (ivyHost.includes('://')) {
+        // It's a full URL
+        url = new URL(ivyHost);
+      } else {
+        // It's just a hostname, construct a URL with https protocol
+        url = new URL(`https://${ivyHost}`);
+      }
+
+      // Must be http(s), and must match our hostname or a list of trusted hosts
+      const isTrusted =
+        (url.protocol === 'https:' || url.protocol === 'http:') &&
+        url.hostname ===
+          window.location
+            .hostname; /* add more checks here if multiple trusted hosts */
+
+      if (isTrusted) {
+        return url.origin;
+      }
+    } catch {
+      // Ignore invalid URLs
+    }
+  }
 
   const metaHost = document
     .querySelector('meta[name="ivy-host"]')
