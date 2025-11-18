@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.CodeAnalysis;
@@ -30,6 +31,11 @@ namespace Ivy.Analyser.Analyzers
         private const string TitleSwitch = "Ivy Hook Called in Switch Statement";
         private const string MessageFormatSwitch = "Ivy hook '{0}' cannot be called inside a switch statement. Hooks must be called in the same order on every render.";
         private const string DescriptionSwitch = "Ivy hooks must be called unconditionally at the top level of the Build() method. Do not call hooks inside switch statements.";
+
+        public const string DiagnosticIdNotAtTop = "IVYHOOK005";
+        private const string TitleNotAtTop = "Ivy Hook Not at Top of Build Method";
+        private const string MessageFormatNotAtTop = "Ivy hook '{0}' must be called at the top of the Build() method, before any other statements.";
+        private const string DescriptionNotAtTop = "All hooks must be called at the very top of the Build() method, before any other non-hook statements. This ensures hooks are called in a consistent order on every render.";
 
         private static readonly DiagnosticDescriptor Rule = new DiagnosticDescriptor(
             DiagnosticId,
@@ -67,6 +73,15 @@ namespace Ivy.Analyser.Analyzers
             isEnabledByDefault: true,
             description: DescriptionSwitch);
 
+        private static readonly DiagnosticDescriptor RuleNotAtTop = new DiagnosticDescriptor(
+            DiagnosticIdNotAtTop,
+            TitleNotAtTop,
+            MessageFormatNotAtTop,
+            Category,
+            DiagnosticSeverity.Warning,
+            isEnabledByDefault: true,
+            description: DescriptionNotAtTop);
+
         private static readonly ImmutableHashSet<string> HookNames = ImmutableHashSet.Create(
             "UseState",
             "UseEffect",
@@ -86,7 +101,8 @@ namespace Ivy.Analyser.Analyzers
             Rule,
             RuleConditional,
             RuleLoop,
-            RuleSwitch);
+            RuleSwitch,
+            RuleNotAtTop);
 
         public override void Initialize(AnalysisContext context)
         {
@@ -100,39 +116,43 @@ namespace Ivy.Analyser.Analyzers
         {
             var invocation = (InvocationExpressionSyntax)context.Node;
 
-            // Get the method name
             var methodName = GetMethodName(invocation);
             if (methodName == null || !HookNames.Contains(methodName))
             {
                 return;
             }
 
-            // First check if hook is in Build() method and not in lambdas/local functions
             if (!IsValidHookUsage(invocation))
             {
                 var diagnostic = Diagnostic.Create(Rule, invocation.GetLocation(), methodName);
                 context.ReportDiagnostic(diagnostic);
-                return; // Don't check for other violations if already invalid
+                return;
             }
 
-            // Check for conditional usage (if statements, ternary operators)
             if (IsInConditionalStatement(invocation))
             {
                 var diagnostic = Diagnostic.Create(RuleConditional, invocation.GetLocation(), methodName);
                 context.ReportDiagnostic(diagnostic);
             }
 
-            // Check for loop usage
             if (IsInLoop(invocation))
             {
                 var diagnostic = Diagnostic.Create(RuleLoop, invocation.GetLocation(), methodName);
                 context.ReportDiagnostic(diagnostic);
             }
 
-            // Check for switch statement usage
             if (IsInSwitchStatement(invocation))
             {
                 var diagnostic = Diagnostic.Create(RuleSwitch, invocation.GetLocation(), methodName);
+                context.ReportDiagnostic(diagnostic);
+            }
+
+            if (!IsInConditionalStatement(invocation) && 
+                !IsInLoop(invocation) && 
+                !IsInSwitchStatement(invocation) &&
+                IsNotAtTopOfMethod(invocation))
+            {
+                var diagnostic = Diagnostic.Create(RuleNotAtTop, invocation.GetLocation(), methodName);
                 context.ReportDiagnostic(diagnostic);
             }
         }
@@ -144,10 +164,22 @@ namespace Ivy.Analyser.Analyzers
                 return identifierName.Identifier.Text;
             }
 
-            if (invocation.Expression is MemberAccessExpressionSyntax memberAccess &&
-                memberAccess.Name is IdentifierNameSyntax memberIdentifier)
+            if (invocation.Expression is GenericNameSyntax genericName)
             {
-                return memberIdentifier.Identifier.Text;
+                return genericName.Identifier.Text;
+            }
+
+            if (invocation.Expression is MemberAccessExpressionSyntax memberAccess)
+            {
+                if (memberAccess.Name is IdentifierNameSyntax memberIdentifier)
+                {
+                    return memberIdentifier.Identifier.Text;
+                }
+                
+                if (memberAccess.Name is GenericNameSyntax memberGenericName)
+                {
+                    return memberGenericName.Identifier.Text;
+                }
             }
 
             return null;
@@ -159,7 +191,6 @@ namespace Ivy.Analyser.Analyzers
 
             while (current != null)
             {
-                // Check for invalid contexts
                 if (current is LambdaExpressionSyntax ||
                     current is LocalFunctionStatementSyntax ||
                     current is AnonymousMethodExpressionSyntax)
@@ -167,17 +198,14 @@ namespace Ivy.Analyser.Analyzers
                     return false;
                 }
 
-                // Check if we're in a method declaration
                 if (current is MethodDeclarationSyntax method)
                 {
-                    // Must be in Build() method
                     return method.Identifier.Text == "Build";
                 }
 
                 current = current.Parent;
             }
 
-            // Not in any method
             return false;
         }
 
@@ -187,37 +215,15 @@ namespace Ivy.Analyser.Analyzers
 
             while (current != null)
             {
-                // Check for if statements
-                if (current is IfStatementSyntax)
+                if (current is IfStatementSyntax ||
+                    current is ConditionalExpressionSyntax ||
+                    current is TryStatementSyntax ||
+                    current is CatchClauseSyntax ||
+                    current is UsingStatementSyntax)
                 {
                     return true;
                 }
 
-                // Check for ternary operators (conditional expressions)
-                if (current is ConditionalExpressionSyntax)
-                {
-                    return true;
-                }
-
-                // Check for try-catch blocks (conditional execution)
-                if (current is TryStatementSyntax)
-                {
-                    return true;
-                }
-
-                // Check for catch clauses
-                if (current is CatchClauseSyntax)
-                {
-                    return true;
-                }
-
-                // Check for using statements (conditional execution)
-                if (current is UsingStatementSyntax)
-                {
-                    return true;
-                }
-
-                // Stop checking if we reach the Build() method
                 if (current is MethodDeclarationSyntax method && method.Identifier.Text == "Build")
                 {
                     return false;
@@ -235,7 +241,6 @@ namespace Ivy.Analyser.Analyzers
 
             while (current != null)
             {
-                // Check for various loop types
                 if (current is ForStatementSyntax ||
                     current is ForEachStatementSyntax ||
                     current is WhileStatementSyntax ||
@@ -244,7 +249,6 @@ namespace Ivy.Analyser.Analyzers
                     return true;
                 }
 
-                // Stop checking if we reach the Build() method
                 if (current is MethodDeclarationSyntax method && method.Identifier.Text == "Build")
                 {
                     return false;
@@ -262,19 +266,164 @@ namespace Ivy.Analyser.Analyzers
 
             while (current != null)
             {
-                // Check for switch statements
                 if (current is SwitchStatementSyntax)
                 {
                     return true;
                 }
 
-                // Stop checking if we reach the Build() method
                 if (current is MethodDeclarationSyntax method && method.Identifier.Text == "Build")
                 {
                     return false;
                 }
 
                 current = current.Parent;
+            }
+
+            return false;
+        }
+
+        private static bool IsNotAtTopOfMethod(InvocationExpressionSyntax invocation)
+        {
+            var current = invocation.Parent;
+            MethodDeclarationSyntax? buildMethod = null;
+
+            while (current != null)
+            {
+                if (current is MethodDeclarationSyntax method && method.Identifier.Text == "Build")
+                {
+                    buildMethod = method;
+                    break;
+                }
+                current = current.Parent;
+            }
+
+            if (buildMethod == null)
+            {
+                return false;
+            }
+
+            var body = buildMethod.Body;
+            if (body == null)
+            {
+                return false;
+            }
+
+            var statements = body.Statements;
+            var invocationSpan = invocation.Span;
+            var statementIndex = -1;
+            
+            for (int i = 0; i < statements.Count; i++)
+            {
+                if (statements[i].Span.Contains(invocationSpan))
+                {
+                    statementIndex = i;
+                    break;
+                }
+            }
+            
+            if (statementIndex < 0)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < statementIndex; i++)
+            {
+                var statement = statements[i];
+                
+                if (statement is ReturnStatementSyntax)
+                {
+                    continue;
+                }
+                
+                if (!IsHookStatement(statement))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static StatementSyntax? FindContainingStatement(SyntaxNode node, SyntaxList<StatementSyntax> statements)
+        {
+            var current = node;
+            while (current != null)
+            {
+                if (current is StatementSyntax statement)
+                {
+                    foreach (var stmt in statements)
+                    {
+                        if (stmt.Span.Contains(statement.Span) || statement.Span.Contains(stmt.Span))
+                        {
+                            return stmt;
+                        }
+                    }
+                }
+                current = current.Parent;
+            }
+            return null;
+        }
+
+        private static bool IsHookStatement(StatementSyntax statement)
+        {
+            if (statement is LocalDeclarationStatementSyntax localDecl)
+            {
+                foreach (var variable in localDecl.Declaration.Variables)
+                {
+                    if (variable.Initializer?.Value is InvocationExpressionSyntax invocation)
+                    {
+                        var methodName = GetMethodName(invocation);
+                        if (methodName != null && HookNames.Contains(methodName))
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+            else if (statement is ExpressionStatementSyntax exprStmt)
+            {
+                if (exprStmt.Expression is InvocationExpressionSyntax invocation)
+                {
+                    var methodName = GetMethodName(invocation);
+                    if (methodName != null && HookNames.Contains(methodName))
+                    {
+                        return true;
+                    }
+                }
+            }
+            
+            return ContainsHookInvocation(statement);
+        }
+
+        private static bool ContainsHookInvocation(SyntaxNode node)
+        {
+            var stack = new Stack<SyntaxNode>();
+            stack.Push(node);
+
+            while (stack.Count > 0)
+            {
+                var current = stack.Pop();
+
+                if (current is InvocationExpressionSyntax invocation)
+                {
+                    var methodName = GetMethodName(invocation);
+                    if (methodName != null && HookNames.Contains(methodName))
+                    {
+                        return true;
+                    }
+                }
+
+                if (current is LambdaExpressionSyntax ||
+                    current is LocalFunctionStatementSyntax ||
+                    current is AnonymousMethodExpressionSyntax)
+                {
+                    continue;
+                }
+
+                foreach (var child in current.ChildNodes())
+                {
+                    stack.Push(child);
+                }
             }
 
             return false;

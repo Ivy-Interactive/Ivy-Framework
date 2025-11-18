@@ -580,14 +580,13 @@ public class TestView : ViewBase
     {
         var state1 = UseState(0);
         var state2 = UseState(""hello"");
+        var state3 = UseState(true);
         
         if (state1 > 0)
         {
             // Using state values is fine, just not calling hooks
             var value = state1;
         }
-        
-        var state3 = UseState(true);
         
         return new Button();
     }
@@ -616,6 +615,7 @@ public class TestView : ViewBase
     public override object? Build()
     {
         var state1 = UseState(0);
+        var state2 = UseState(""done"");
         var items = new[] { 1, 2, 3 };
         
         foreach (var item in items)
@@ -623,8 +623,6 @@ public class TestView : ViewBase
             // Using state values is fine, just not calling hooks
             var value = item;
         }
-        
-        var state2 = UseState(""done"");
         
         return new Button();
     }
@@ -652,9 +650,11 @@ public class TestView : ViewBase
 {
     public override object? Build()
     {
-        var value = UseState(0).Value;
-        var count = UseState(10).Value + 5;
+        var state1 = UseState(0);
+        var state2 = UseState(10);
         UseEffect(() => { });
+        var value = state1.Value;
+        var count = state2.Value + 5;
         return new Button();
     }
 }
@@ -985,6 +985,131 @@ public class TestView : ViewBase
             };
         }
         
+        return new Button();
+    }
+}
+
+public abstract class ViewBase
+{
+    public abstract object? Build();
+    protected T UseState<T>(T initialValue) => default!;
+}
+
+public class Button { }
+";
+
+            await VerifyCS.VerifyAnalyzerAsync(test);
+        }
+
+        [Fact]
+        public async Task HookAfterNonHookStatementShouldWarn()
+        {
+            var test = @"
+using System;
+
+public class TestView : ViewBase
+{
+    public override object? Build()
+    {
+        var x = SomeMethod();
+        var state = {|IVYHOOK005:UseState(0)|};
+        return new Button();
+    }
+
+    private int SomeMethod() => 42;
+}
+
+public abstract class ViewBase
+{
+    public abstract object? Build();
+    protected T UseState<T>(T initialValue) => default!;
+}
+
+public class Button { }
+";
+
+            await VerifyCS.VerifyAnalyzerAsync(test);
+        }
+
+        [Fact]
+        public async Task HookAfterReturnStatementShouldWarn()
+        {
+            var test = @"
+using System;
+
+public class TestView : ViewBase
+{
+    public override object? Build()
+    {
+        if (true)
+        {
+            return new Button();
+        }
+        var state = {|IVYHOOK005:UseState(0)|};
+        return new Button();
+    }
+}
+
+public abstract class ViewBase
+{
+    public abstract object? Build();
+    protected T UseState<T>(T initialValue) => default!;
+}
+
+public class Button { }
+";
+
+            await VerifyCS.VerifyAnalyzerAsync(test);
+        }
+
+        [Fact]
+        public async Task MultipleHooksAtTopShouldPass()
+        {
+            var test = @"
+using System;
+
+public class TestView : ViewBase
+{
+    public override object? Build()
+    {
+        var state1 = UseState(0);
+        var state2 = UseState(""hello"");
+        UseEffect(() => { });
+        var memo = UseMemo(() => 42);
+        
+        var x = SomeMethod();
+        return new Button();
+    }
+
+    private int SomeMethod() => 42;
+}
+
+public abstract class ViewBase
+{
+    public abstract object? Build();
+    protected T UseState<T>(T initialValue) => default!;
+    protected void UseEffect(Action effect) { }
+    protected T UseMemo<T>(Func<T> factory) => default!;
+}
+
+public class Button { }
+";
+
+            await VerifyCS.VerifyAnalyzerAsync(test);
+        }
+
+        [Fact]
+        public async Task HookAfterVariableAssignmentShouldWarn()
+        {
+            var test = @"
+using System;
+
+public class TestView : ViewBase
+{
+    public override object? Build()
+    {
+        int x = 10;
+        var state = {|IVYHOOK005:UseState(0)|};
         return new Button();
     }
 }

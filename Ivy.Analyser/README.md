@@ -174,6 +174,21 @@ public override object? Build()
 }
 ```
 
+#### 8. Hook calls not at the top of Build() method (Warning IVYHOOK005)
+
+```csharp
+public override object? Build()
+{
+    var x = SomeMethod(); // Non-hook statement
+    var state = UseState(false); // ⚠️ Warning IVYHOOK005 - hook must be at the top
+    
+    int y = 10; // Another non-hook statement
+    var state2 = UseState(0); // ⚠️ Warning IVYHOOK005
+    
+    return new Button();
+}
+```
+
 ## Supported Hooks
 
 The analyzer detects improper usage of these hook functions:
@@ -217,6 +232,12 @@ The analyzer detects improper usage of these hook functions:
 **Message:** `Ivy hook '{hookName}' cannot be called inside a switch statement. Hooks must be called in the same order on every render.`  
 **Description:** Hooks must be called unconditionally at the top level of the Build() method. Do not call hooks inside switch statements.
 
+### IVYHOOK005 - Hook Not at Top of Build Method (Warning)
+
+**Severity:** Warning  
+**Message:** `Ivy hook '{hookName}' must be called at the top of the Build() method, before any other statements.`  
+**Description:** All hooks must be called at the very top of the Build() method, before any other non-hook statements. This ensures hooks are called in a consistent order on every render.
+
 ## Configuration
 
 The analyzer runs automatically when you build your project. No additional configuration is needed.
@@ -230,11 +251,13 @@ If you need to suppress the analyzer for specific cases, you can use:
 #pragma warning disable IVYHOOK002  // Suppress conditional warning
 #pragma warning disable IVYHOOK003  // Suppress loop warning
 #pragma warning disable IVYHOOK004  // Suppress switch warning
+#pragma warning disable IVYHOOK005  // Suppress not-at-top warning
 var state = UseState(false); // This will not trigger the analyzer
 #pragma warning restore IVYHOOK001
 #pragma warning restore IVYHOOK002
 #pragma warning restore IVYHOOK003
 #pragma warning restore IVYHOOK004
+#pragma warning restore IVYHOOK005
 ```
 
 However, this is **not recommended** as it may lead to runtime errors.
