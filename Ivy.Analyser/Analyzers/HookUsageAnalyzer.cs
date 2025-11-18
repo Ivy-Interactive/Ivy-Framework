@@ -34,7 +34,7 @@ namespace Ivy.Analyser.Analyzers
 
         public const string DiagnosticIdNotAtTop = "IVYHOOK005";
         private const string TitleNotAtTop = "Ivy Hook Not at Top of Build Method";
-        private const string MessageFormatNotAtTop = "Ivy hook '{0}' must be called at the top of the Build() method, before any other statements.";
+        private const string MessageFormatNotAtTop = "Ivy hook '{0}' must be called at the top of the Build() method, before any other statements";
         private const string DescriptionNotAtTop = "All hooks must be called at the very top of the Build() method, before any other non-hook statements. This ensures hooks are called in a consistent order on every render.";
 
         private static readonly DiagnosticDescriptor Rule = new DiagnosticDescriptor(
@@ -94,7 +94,15 @@ namespace Ivy.Analyser.Analyzers
             "UseSignal",
             "UseTrigger",
             "UseService",
-            "UseArgs"
+            "UseArgs",
+            "UseAlert",
+            "UseForm",
+            "UseUpload",
+            "UseDownload",
+            "UseWebhook",
+            "UseBlades",
+            "UseDataTable",
+            "UseNavigation"
         );
 
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(
@@ -147,8 +155,8 @@ namespace Ivy.Analyser.Analyzers
                 context.ReportDiagnostic(diagnostic);
             }
 
-            if (!IsInConditionalStatement(invocation) && 
-                !IsInLoop(invocation) && 
+            if (!IsInConditionalStatement(invocation) &&
+                !IsInLoop(invocation) &&
                 !IsInSwitchStatement(invocation) &&
                 IsNotAtTopOfMethod(invocation))
             {
@@ -175,7 +183,7 @@ namespace Ivy.Analyser.Analyzers
                 {
                     return memberIdentifier.Identifier.Text;
                 }
-                
+
                 if (memberAccess.Name is GenericNameSyntax memberGenericName)
                 {
                     return memberGenericName.Identifier.Text;
@@ -183,6 +191,11 @@ namespace Ivy.Analyser.Analyzers
             }
 
             return null;
+        }
+
+        private static bool IsValidHookMethod(string methodName)
+        {
+            return methodName == "Build" || methodName == "BuildSample";
         }
 
         private static bool IsValidHookUsage(InvocationExpressionSyntax invocation)
@@ -200,7 +213,7 @@ namespace Ivy.Analyser.Analyzers
 
                 if (current is MethodDeclarationSyntax method)
                 {
-                    return method.Identifier.Text == "Build";
+                    return IsValidHookMethod(method.Identifier.Text);
                 }
 
                 current = current.Parent;
@@ -224,7 +237,7 @@ namespace Ivy.Analyser.Analyzers
                     return true;
                 }
 
-                if (current is MethodDeclarationSyntax method && method.Identifier.Text == "Build")
+                if (current is MethodDeclarationSyntax method && IsValidHookMethod(method.Identifier.Text))
                 {
                     return false;
                 }
@@ -249,7 +262,7 @@ namespace Ivy.Analyser.Analyzers
                     return true;
                 }
 
-                if (current is MethodDeclarationSyntax method && method.Identifier.Text == "Build")
+                if (current is MethodDeclarationSyntax method && IsValidHookMethod(method.Identifier.Text))
                 {
                     return false;
                 }
@@ -271,7 +284,7 @@ namespace Ivy.Analyser.Analyzers
                     return true;
                 }
 
-                if (current is MethodDeclarationSyntax method && method.Identifier.Text == "Build")
+                if (current is MethodDeclarationSyntax method && IsValidHookMethod(method.Identifier.Text))
                 {
                     return false;
                 }
@@ -289,7 +302,7 @@ namespace Ivy.Analyser.Analyzers
 
             while (current != null)
             {
-                if (current is MethodDeclarationSyntax method && method.Identifier.Text == "Build")
+                if (current is MethodDeclarationSyntax method && IsValidHookMethod(method.Identifier.Text))
                 {
                     buildMethod = method;
                     break;
@@ -311,7 +324,7 @@ namespace Ivy.Analyser.Analyzers
             var statements = body.Statements;
             var invocationSpan = invocation.Span;
             var statementIndex = -1;
-            
+
             for (int i = 0; i < statements.Count; i++)
             {
                 if (statements[i].Span.Contains(invocationSpan))
@@ -320,7 +333,7 @@ namespace Ivy.Analyser.Analyzers
                     break;
                 }
             }
-            
+
             if (statementIndex < 0)
             {
                 return false;
@@ -329,12 +342,12 @@ namespace Ivy.Analyser.Analyzers
             for (int i = 0; i < statementIndex; i++)
             {
                 var statement = statements[i];
-                
+
                 if (statement is ReturnStatementSyntax)
                 {
                     continue;
                 }
-                
+
                 if (!IsHookStatement(statement))
                 {
                     return true;
@@ -391,7 +404,7 @@ namespace Ivy.Analyser.Analyzers
                     }
                 }
             }
-            
+
             return ContainsHookInvocation(statement);
         }
 
