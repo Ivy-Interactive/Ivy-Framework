@@ -344,25 +344,18 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
                 return `${getIvyHost()}${prefixedSrc}`;
               })();
 
-          // Validate the final constructed URL to ensure it's safe
-          const validatedImageSrc = validateImageUrl(imageSrc);
-          if (!validatedImageSrc) {
-            // Invalid constructed URL, don't render image (return null to prevent any rendering)
-            return null;
-          }
-
           return (
             <>
               <img
                 {...props}
-                src={validatedImageSrc}
+                src={imageSrc}
                 className={cn(textBlockClassMap.img, 'cursor-zoom-in')}
                 loading="lazy"
                 onClick={() => setShowOverlay(true)}
               />
               {showOverlay && (
                 <ImageOverlay
-                  src={validatedImageSrc}
+                  src={imageSrc}
                   alt={props.alt}
                   onClose={() => setShowOverlay(false)}
                 />

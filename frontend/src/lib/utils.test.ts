@@ -433,7 +433,7 @@ describe.each(mediaValidationCases)(
       );
     });
 
-    it('accepts safe app:// URLs and rejects unsafe ones', () => {
+    it('accepts safe app:// URLs and rejects app:// URLs with colons in the path', () => {
       expect(validate('app://media/resource')).toBe('app://media/resource');
       expect(validate('app://media:fragment#bad')).toBeNull();
     });
