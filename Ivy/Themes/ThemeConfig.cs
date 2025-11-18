@@ -44,15 +44,12 @@ public class ThemeColorScheme
 
 public class ThemeColors
 {
-    // Main theme colors
     public string? Primary { get; set; }
     public string? PrimaryForeground { get; set; }
     public string? Secondary { get; set; }
     public string? SecondaryForeground { get; set; }
     public string? Background { get; set; }
     public string? Foreground { get; set; }
-
-    // Semantic colors
     public string? Destructive { get; set; }
     public string? DestructiveForeground { get; set; }
     public string? Success { get; set; }
@@ -61,8 +58,6 @@ public class ThemeColors
     public string? WarningForeground { get; set; }
     public string? Info { get; set; }
     public string? InfoForeground { get; set; }
-
-    // UI element colors
     public string? Border { get; set; }
     public string? Input { get; set; }
     public string? Ring { get; set; }
@@ -72,14 +67,11 @@ public class ThemeColors
     public string? AccentForeground { get; set; }
     public string? Card { get; set; }
     public string? CardForeground { get; set; }
-
-    // Popover colors
     public string? Popover { get; set; }
     public string? PopoverForeground { get; set; }
 
     public static ThemeColors DefaultLight => new()
     {
-        // Semantic colors from Ivy Design System
         Primary = LightThemeTokens.Color.Primary,
         PrimaryForeground = LightThemeTokens.Color.PrimaryForeground,
         Secondary = LightThemeTokens.Color.Secondary,
@@ -94,8 +86,6 @@ public class ThemeColors
         WarningForeground = LightThemeTokens.Color.WarningForeground,
         Info = LightThemeTokens.Color.Info,
         InfoForeground = LightThemeTokens.Color.InfoForeground,
-
-        // UI element colors from Ivy Design System
         Border = LightThemeTokens.Color.Border,
         Input = LightThemeTokens.Color.Input,
         Ring = LightThemeTokens.Color.Ring,
@@ -111,7 +101,6 @@ public class ThemeColors
 
     public static ThemeColors DefaultDark => new()
     {
-        // Semantic colors from Ivy Design System (Dark Theme)
         Primary = DarkThemeTokens.Color.Primary,
         PrimaryForeground = DarkThemeTokens.Color.PrimaryForeground,
         Secondary = DarkThemeTokens.Color.Secondary,
@@ -126,8 +115,6 @@ public class ThemeColors
         WarningForeground = DarkThemeTokens.Color.WarningForeground,
         Info = DarkThemeTokens.Color.Info,
         InfoForeground = DarkThemeTokens.Color.InfoForeground,
-
-        // UI element colors from Ivy Design System (Dark Theme)
         Border = DarkThemeTokens.Color.Border,
         Input = DarkThemeTokens.Color.Input,
         Ring = DarkThemeTokens.Color.Ring,
@@ -138,6 +125,6 @@ public class ThemeColors
         Card = DarkThemeTokens.Color.Card,
         CardForeground = DarkThemeTokens.Color.CardForeground,
         Popover = DarkThemeTokens.Color.Popover,
-        PopoverForeground = DarkThemeTokens.Color.PopoverForeground,
+        PopoverForeground = DarkThemeTokens.Color.PopoverForeground
     };
 }
