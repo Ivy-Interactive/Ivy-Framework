@@ -135,26 +135,10 @@ export const VideoPlayerWidget: React.FC<VideoPlayerWidgetProps> = ({
     );
   }
 
-  // Validate the final constructed URL to ensure it's safe
-  const finalValidatedSrc = validateVideoUrl(validatedVideoSrc);
-  if (!finalValidatedSrc) {
-    return (
-      <div
-        id={id}
-        style={styles}
-        className="flex items-center justify-center bg-destructive/10 text-destructive rounded border-2 border-dashed border-destructive/25 p-4"
-        role="alert"
-        aria-label="Invalid video URL"
-      >
-        <span className="text-sm">Invalid video URL</span>
-      </div>
-    );
-  }
-
   return (
     <video
       id={id}
-      src={finalValidatedSrc}
+      src={validatedVideoSrc}
       style={styles}
       autoPlay={autoplay}
       loop={loop}
