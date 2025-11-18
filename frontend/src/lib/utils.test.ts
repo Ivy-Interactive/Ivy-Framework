@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import * as utils from './utils';
 
 describe('validateRedirectUrl', () => {
@@ -334,3 +334,120 @@ describe('validateLinkUrl', () => {
     });
   });
 });
+
+describe('getIvyHost', () => {
+  const defaultOrigin = window.location.origin;
+
+  const setIvyHostMeta = (value: string) => {
+    const meta = document.createElement('meta');
+    meta.setAttribute('name', 'ivy-host');
+    meta.setAttribute('content', value);
+    document.head.appendChild(meta);
+  };
+
+  beforeEach(() => {
+    document.head.innerHTML = '';
+  });
+
+  afterEach(() => {
+    document.head.innerHTML = '';
+  });
+
+  it('returns the meta host when it matches the current hostname', () => {
+    setIvyHostMeta('https://localhost:5173');
+    expect(utils.getIvyHost()).toBe('https://localhost:5173');
+  });
+
+  it('supports hostname-only meta values by assuming https', () => {
+    setIvyHostMeta('localhost');
+    expect(utils.getIvyHost()).toBe('https://localhost');
+  });
+
+  it('falls back to the current origin when the meta host is not allowed', () => {
+    setIvyHostMeta('https://malicious.example.com');
+    expect(utils.getIvyHost()).toBe(defaultOrigin);
+  });
+
+  it('falls back when the meta tag contains an invalid value', () => {
+    setIvyHostMeta('not a url');
+    expect(utils.getIvyHost()).toBe(defaultOrigin);
+  });
+
+  it('falls back when no meta tag is present', () => {
+    expect(utils.getIvyHost()).toBe(defaultOrigin);
+  });
+});
+
+const mediaValidationCases = [
+  {
+    name: 'validateImageUrl',
+    validate: utils.validateImageUrl,
+    validDataUrl: 'data:image/png;base64,AAAA',
+    invalidDataUrl: 'data:text/html;base64,AAAA',
+  },
+  {
+    name: 'validateAudioUrl',
+    validate: utils.validateAudioUrl,
+    validDataUrl: 'data:audio/ogg;base64,AAAA',
+    invalidDataUrl: 'data:text/plain;base64,AAAA',
+  },
+  {
+    name: 'validateVideoUrl',
+    validate: utils.validateVideoUrl,
+    validDataUrl: 'data:video/mp4;base64,AAAA',
+    invalidDataUrl: 'data:text/plain;base64,AAAA',
+  },
+] as const;
+
+describe.each(mediaValidationCases)(
+  '$name',
+  ({ validate, validDataUrl, invalidDataUrl }) => {
+    it('returns null for empty or non-string values', () => {
+      expect(validate(null)).toBeNull();
+      expect(validate(undefined)).toBeNull();
+      expect(validate('')).toBeNull();
+      expect(validate('   ')).toBeNull();
+    });
+
+    it('accepts valid https URLs', () => {
+      expect(validate('https://example.com/resource')).toBe(
+        'https://example.com/resource'
+      );
+    });
+
+    it('accepts valid relative paths', () => {
+      expect(validate('/media/resource.ext')).toBe('/media/resource.ext');
+    });
+
+    it('accepts valid data URLs of the correct media type', () => {
+      expect(validate(validDataUrl)).toBe(validDataUrl);
+    });
+
+    it('rejects data URLs that use the wrong media type', () => {
+      expect(validate(invalidDataUrl)).toBeNull();
+    });
+
+    it('accepts blob URLs', () => {
+      expect(validate('blob:https://example.com/1234')).toBe(
+        'blob:https://example.com/1234'
+      );
+    });
+
+    it('accepts safe app:// URLs and rejects unsafe ones', () => {
+      expect(validate('app://media/resource')).toBe('app://media/resource');
+      expect(validate('app://media:fragment#bad')).toBeNull();
+    });
+
+    it('rejects javascript protocol attempts', () => {
+      expect(validate('javascript:alert(1)')).toBeNull();
+    });
+
+    it('rejects relative paths containing colons', () => {
+      expect(validate('/media:bad:path')).toBeNull();
+    });
+
+    it('coerces colon-free relative strings into rooted paths', () => {
+      expect(validate('images/resource.ext')).toBe('/images/resource.ext');
+    });
+  }
+);
