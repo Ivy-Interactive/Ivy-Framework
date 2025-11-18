@@ -95,6 +95,15 @@ function isAllowedIvyHost(origin: string): boolean {
   try {
     // Normalize for comparison (lowercase, no trailing slash)
     const o = new URL(origin).origin.replace(/\/+$/, '').toLowerCase();
+    const url = new URL(origin);
+    const currentUrl = new URL(window.location.origin);
+
+    // This enables development workflows where frontend and backend run on different ports
+    if (url.hostname === currentUrl.hostname) {
+      return true;
+    }
+
+    // Check against the allowlist
     return ALLOWED_IVY_HOSTS.some(
       allowed => new URL(allowed).origin.replace(/\/+$/, '').toLowerCase() === o
     );
