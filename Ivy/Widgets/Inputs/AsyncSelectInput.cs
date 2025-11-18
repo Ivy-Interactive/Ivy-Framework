@@ -170,9 +170,13 @@ public class AsyncSelectListSheet<T>(RefreshToken refreshToken, AsyncSelectQuery
         var items = records.Value.Select(option =>
             new ListItem(title: option.Label, subtitle: option.Description, onClick: onItemClicked, tag: option)).ToArray();
 
-        return Layout.Vertical().Gap(2)
-            | filter.ToSearchInput().Placeholder("Search").Width(Size.Grow())
+        var header = Layout.Vertical().Gap(2)
+            | filter.ToSearchInput().Placeholder("Search").Width(Size.Grow());
+
+        var content = Layout.Vertical().Gap(2)
             | (loading.Value ? Text.Block("Loading...") : new List(items));
+
+        return new HeaderLayout(header, content);
     }
 }
 
