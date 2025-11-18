@@ -81,11 +81,14 @@ const getUrl = (url: string) => {
   if (redirectValidated) {
     // Construct relative URL with Ivy host
     const constructedUrl = `${getIvyHost()}${redirectValidated.startsWith('/') ? '' : '/'}${redirectValidated}`;
-    // Validate the final constructed URL to ensure it's same-origin (prevents open redirect)
+    // Validate the final constructed URL to ensure it's safe
+    // If validation fails, fall back to the validated relative path which is safe
     const finalValidated = validateRedirectUrl(constructedUrl, false);
     if (finalValidated) {
       return finalValidated;
     }
+    // For relative paths, return the validated relative path as-is
+    return redirectValidated;
   }
 
   // If validation fails, return safe fallback
