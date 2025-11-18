@@ -85,42 +85,55 @@ export function getMachineId(): string {
   return id;
 }
 
-export function getIvyHost(): string {
-  const urlParams = new URLSearchParams(window.location.search);
-  const ivyHost = urlParams.get('ivyHost');
+// Allowlist for trusted hosts; update as needed for trusted deployments
+const ALLOWED_IVY_HOSTS = [
+  window.location.origin,
+  // 'https://your-cdn.com', // add extra trusted hostnames here if relevant
+];
 
-  // Only allow the ivyHost param if it is a valid, trusted absolute URL (https or http and matches window.location.hostname)
-  if (ivyHost) {
-    try {
-      // Parse the ivyHost - it might be a full URL or just a hostname
-      let url: URL;
-      if (ivyHost.includes('://')) {
-        // It's a full URL
-        url = new URL(ivyHost);
-      } else {
-        // It's just a hostname, construct a URL with https protocol
-        url = new URL(`https://${ivyHost}`);
-      }
-
-      // Must be http(s), and must match our hostname or a list of trusted hosts
-      const isTrusted =
-        (url.protocol === 'https:' || url.protocol === 'http:') &&
-        url.hostname ===
-          window.location
-            .hostname; /* add more checks here if multiple trusted hosts */
-
-      if (isTrusted) {
-        return url.origin;
-      }
-    } catch {
-      // Ignore invalid URLs
-    }
+function isAllowedIvyHost(origin: string): boolean {
+  try {
+    // Normalize for comparison (lowercase, no trailing slash)
+    const o = new URL(origin).origin.replace(/\/+$/, '').toLowerCase();
+    return ALLOWED_IVY_HOSTS.some(
+      allowed => new URL(allowed).origin.replace(/\/+$/, '').toLowerCase() === o
+    );
+  } catch {
+    return false;
   }
+}
 
+export function getIvyHost(): string {
+  // Never trust user-supplied ivyHost from URL parameters.
+  // Only use meta tag or real origin.
+  // Query parameters are user-controllable and should never be trusted for security-sensitive operations.
   const metaHost = document
     .querySelector('meta[name="ivy-host"]')
     ?.getAttribute('content');
-  if (metaHost) return metaHost;
+
+  if (metaHost) {
+    try {
+      // Parse the metaHost - it might be a full URL or just a hostname
+      let url: URL;
+      if (metaHost.includes('://')) {
+        // It's a full URL
+        url = new URL(metaHost);
+      } else {
+        // It's just a hostname, construct a URL with https protocol
+        url = new URL(`https://${metaHost}`);
+      }
+
+      // Must be http(s) and must be in the allowlist
+      if (url.protocol === 'https:' || url.protocol === 'http:') {
+        const metaOrigin = url.origin;
+        if (isAllowedIvyHost(metaOrigin)) {
+          return metaOrigin;
+        }
+      }
+    } catch {
+      // Ignore parse errors and fall back
+    }
+  }
 
   return window.location.origin;
 }
