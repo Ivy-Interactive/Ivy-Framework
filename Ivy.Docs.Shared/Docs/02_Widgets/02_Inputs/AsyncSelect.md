@@ -384,6 +384,51 @@ public class StylingDemo : ViewBase
 }
 ```
 
+### Long Option Names with Ellipsis
+
+AsyncSelectInput automatically handles long option names by truncating them with ellipsis and showing a tooltip on hover:
+
+```csharp demo-tabs
+public class LongOptionsDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var selectedProduct = this.UseState<string?>(default(string));
+
+        Task<Option<string>[]> QueryProducts(string query)
+        {
+            var products = new[]
+            {
+                "Super Ultra Premium Deluxe Edition Professional Grade Enterprise Solution with Advanced Features Super Ultra Premium Deluxe Edition Professional Grade Enterprise Solution with Advanced Features Super Ultra Premium Deluxe Edition Professional Grade Enterprise Solution with Advanced Features Super Ultra Premium Deluxe Edition Professional Grade Enterprise Solution with Advanced Features",
+                "Standard Edition Basic Package for Small Businesses and Individual Users",
+                "Enterprise Edition Complete Suite with All Premium Features and 24/7 Support",
+                "Professional Edition Advanced Tools for Power Users and Development Teams",
+                "Starter Edition Essential Features for Beginners and Small Projects",
+                "Ultimate Edition Everything You Need Plus Exclusive Beta Access to New Features",
+                "Business Edition Comprehensive Solution for Medium to Large Organizations",
+                "Developer Edition Special Tools and APIs for Software Development Teams"
+            };
+            
+            return Task.FromResult(products
+                .Where(p => p.Contains(query, StringComparison.OrdinalIgnoreCase))
+                .Select(p => new Option<string>(p))
+                .ToArray());
+        }
+
+        Task<Option<string>?> LookupProduct(string product)
+        {
+            return Task.FromResult<Option<string>?>(new Option<string>(product));
+        }
+
+        return Layout.Vertical()
+            | selectedProduct.ToAsyncSelectInput(QueryProducts, LookupProduct, placeholder: "Search products...")
+                .WithField()
+                .Label("Select a product (hover to see full name):")
+            | Text.Small($"Selected: {selectedProduct.Value ?? "None"}");
+    }
+}
+```
+
 <Callout Type="tip">
 AsyncSelectInput automatically handles loading states and provides a smooth user experience. The query function is called as the user types, and the lookup function is called when displaying the selected value.
 </Callout>
