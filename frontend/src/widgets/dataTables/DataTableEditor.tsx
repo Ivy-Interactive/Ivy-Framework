@@ -139,6 +139,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
 
   const scrollThreshold = 10;
   const rowHeight = 38;
+  const GROUP_HEADER_HEIGHT = 36;
 
   // Generate header icons map for all column icons
   const headerIcons = useMemo(() => {
@@ -252,19 +253,18 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
   // Handle selection changes
   const handleGridSelectionChange = useCallback(
     (newSelection: GridSelection) => {
-      // Prevent selection of empty filler rows
+      // Consolidate check for newSelection.current
       if (newSelection.current !== undefined) {
-        const [, row] = newSelection.current.cell;
+        const [col, row] = newSelection.current.cell;
+
+        // Prevent selection of empty filler rows
         if (row >= visibleRows) {
           // Don't allow selection of empty filler rows
           return;
         }
-      }
 
-      // Check if the new selection includes link cells and prevent fuzzy effect
-      // by clearing the selection if it's a single link cell click
-      if (newSelection.current !== undefined) {
-        const [col, row] = newSelection.current.cell;
+        // Check if the new selection includes link cells and prevent fuzzy effect
+        // by clearing the selection if it's a single link cell click
         const cellContent = getCellContent([col, row]);
 
         // If it's a link cell, don't allow it to be selected (prevents fuzzy effect)
@@ -571,7 +571,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
 
     // Calculate header height (regular header + group header if enabled)
     const headerHeight = rowHeight;
-    const groupHeaderHeight = showGroups ? 36 : 0;
+    const groupHeaderHeight = showGroups ? GROUP_HEADER_HEIGHT : 0;
     const totalHeaderHeight = headerHeight + groupHeaderHeight;
 
     // Calculate total height of visible rows
@@ -636,7 +636,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
           onColumnMoved={
             allowColumnReordering ? handleColumnReorder : undefined
           }
-          groupHeaderHeight={showGroups ? 36 : undefined}
+          groupHeaderHeight={showGroups ? GROUP_HEADER_HEIGHT : undefined}
           cellActivationBehavior="double-click"
           onCellClicked={handleCellClicked}
           onCellActivated={handleCellActivated}
@@ -648,7 +648,11 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
           showSearch={showSearchConfig ? showSearch : false}
           onSearchClose={() => setShowSearch(false)}
           onItemHovered={enableRowHover ? onItemHovered : undefined}
-          getRowThemeOverride={getRowThemeOverride}
+          getRowThemeOverride={
+            enableRowHover || emptyRowsCount > 0
+              ? getRowThemeOverride
+              : undefined
+          }
         />
 
         {/* Row action buttons overlay */}
