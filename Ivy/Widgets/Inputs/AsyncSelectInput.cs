@@ -167,12 +167,32 @@ public class AsyncSelectListSheet<T>(RefreshToken refreshToken, AsyncSelectQuery
             refreshToken.Refresh(option.TypedValue);
         });
 
-        var items = records.Value.Select(option =>
-            new ListItem(title: option.Label, subtitle: option.Description, onClick: onItemClicked, tag: option)).ToArray();
+        // Group options by their Group property
+        var groupedOptions = records.Value
+            .GroupBy(option => option.Group ?? "default")
+            .OrderBy(group => group.Key == "default" ? 1 : 0) // Put "default" group last
+            .ThenBy(group => group.Key)
+            .ToList();
+
+        var listItems = new List<object>();
+        foreach (var group in groupedOptions)
+        {
+            // Add header for non-default groups
+            if (group.Key != "default" && !string.IsNullOrWhiteSpace(group.Key))
+            {
+                listItems.Add(Text.Small(group.Key).Bold().Muted());
+            }
+
+            // Add list items for this group
+            foreach (var option in group.OrderBy(o => o.Label))
+            {
+                listItems.Add(new ListItem(title: option.Label, subtitle: option.Description, onClick: onItemClicked, tag: option));
+            }
+        }
 
         return Layout.Vertical().Gap(2)
             | filter.ToSearchInput().Placeholder("Search").Width(Size.Grow())
-            | (loading.Value ? Text.Block("Loading...") : new List(items));
+            | (loading.Value ? Text.Block("Loading...") : new List(listItems.ToArray()));
     }
 }
 

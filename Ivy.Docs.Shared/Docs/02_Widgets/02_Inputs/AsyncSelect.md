@@ -384,6 +384,64 @@ public class StylingDemo : ViewBase
 }
 ```
 
+### Grouped Options with Headers
+
+For selects with a large amount of choices, you can group options into categories using the `Group` property. Headers will automatically appear for each group:
+
+```csharp demo-tabs
+public class GroupedAsyncSelectDemo : ViewBase
+{
+    private static readonly Option<string>[] Products = new[]
+    {
+        // Electronics
+        new Option<string>("Laptop", "laptop", group: "Electronics"),
+        new Option<string>("Smartphone", "smartphone", group: "Electronics"),
+        new Option<string>("Tablet", "tablet", group: "Electronics"),
+        new Option<string>("Headphones", "headphones", group: "Electronics"),
+        new Option<string>("Smart Watch", "smartwatch", group: "Electronics"),
+        
+        // Clothing
+        new Option<string>("T-Shirt", "tshirt", group: "Clothing"),
+        new Option<string>("Jeans", "jeans", group: "Clothing"),
+        new Option<string>("Sneakers", "sneakers", group: "Clothing"),
+        new Option<string>("Jacket", "jacket", group: "Clothing"),
+        new Option<string>("Hat", "hat", group: "Clothing")
+    };
+
+    public override object? Build()
+    {
+        var selectedProduct = this.UseState<string?>(default(string));
+
+        Task<Option<string>[]> QueryProducts(string query)
+        {
+            if (string.IsNullOrEmpty(query))
+                return Task.FromResult(Products.Take(10).ToArray());
+
+            var queryLower = query.ToLowerInvariant();
+            return Task.FromResult(Products
+                .Where(p => p.Label.Contains(queryLower, StringComparison.OrdinalIgnoreCase) ||
+                           (p.Group?.Contains(queryLower, StringComparison.OrdinalIgnoreCase) ?? false))
+                .Take(10)
+                .ToArray());
+        }
+
+        Task<Option<string>?> LookupProduct(string productId)
+        {
+            var product = Products.FirstOrDefault(p => p.TypedValue == productId);
+            return Task.FromResult(product);
+        }
+
+        return Layout.Vertical()
+            | selectedProduct.ToAsyncSelectInput(QueryProducts, LookupProduct, placeholder: "Search products by name or category...")
+                .WithField()
+                .Label("Select a product:")
+            | Text.Small($"Selected: {selectedProduct.Value ?? "None"}");
+    }
+}
+```
+
+When options have a `Group` property set, they will be automatically grouped together with a header displaying the group name. Options without a group will appear in a default section (without a header). Groups are sorted alphabetically, with the default group appearing last.
+
 <Callout Type="tip">
 AsyncSelectInput automatically handles loading states and provides a smooth user experience. The query function is called as the user types, and the lookup function is called when displaying the selected value.
 </Callout>
