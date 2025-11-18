@@ -42,34 +42,6 @@ public class BasicSheetExample : ViewBase
 For additional background on fragments, review the [Fragment widget guide](../03_Primitives/Fragment.md).
 </Callout>
 
-The `WithSheet` extension on a `Button` provides an easy way to open a sheet without managing state yourself:
-
-```csharp demo-tabs
-public class WithSheetExample : ViewBase
-{
-    public override object? Build()
-    {
-        return new Button("Open Sheet").WithSheet(
-            () => new SheetView(),
-            title: "This is a sheet",
-            description: "Lorem ipsum dolor sit amet",
-            width: Size.Fraction(1/2f)
-        );
-    }
-}
-
-public class SheetView : ViewBase
-{
-    public override object? Build()
-    {
-        return new Card(
-            "Welcome to the sheet!",
-            "This is the content inside the sheet"
-        );
-    }
-}
-```
-
 ### Custom Content
 
 The following demonstrates how to create a sheet with custom content using a Fragment and Card. The sheet opens with a title, description, and custom width, showing how to structure content within sheets.
