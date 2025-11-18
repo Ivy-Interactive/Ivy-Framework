@@ -176,7 +176,10 @@ public class AsyncSelectListSheet<T>(RefreshToken refreshToken, AsyncSelectQuery
         var content = Layout.Vertical().Gap(2)
             | (loading.Value ? Text.Block("Loading...") : new List(items));
 
-        return new HeaderLayout(header, content);
+        return new HeaderLayout(header, content)
+        {
+            ShowHeaderDivider = false
+        };
     }
 }
 
