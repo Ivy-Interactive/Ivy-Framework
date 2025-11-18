@@ -40,21 +40,51 @@ export const ImageWidget: React.FC<ImageWidgetProps> = ({
   };
 
   if (!src) {
-    return null;
+    return (
+      <div
+        key={id}
+        style={styles}
+        className="flex items-center justify-center bg-muted text-muted-foreground rounded border-2 border-dashed border-muted-foreground/25 p-4"
+        role="alert"
+        aria-label="Image error"
+      >
+        <span className="text-sm">No image source provided</span>
+      </div>
+    );
   }
 
   // Validate and sanitize image URL to prevent open redirect vulnerabilities
   const validatedImageSrc = getImageUrl(src);
   if (!validatedImageSrc) {
-    // Invalid URL, don't render image
-    return null;
+    // Invalid URL, show error message
+    return (
+      <div
+        key={id}
+        style={styles}
+        className="flex items-center justify-center bg-destructive/10 text-destructive rounded border-2 border-dashed border-destructive/25 p-4"
+        role="alert"
+        aria-label="Invalid image URL"
+      >
+        <span className="text-sm">Invalid image URL</span>
+      </div>
+    );
   }
 
   // Validate the final constructed URL to ensure it's safe
   const finalValidatedSrc = validateImageUrl(validatedImageSrc);
   if (!finalValidatedSrc) {
-    // Invalid constructed URL, don't render image
-    return null;
+    // Invalid constructed URL, show error message
+    return (
+      <div
+        key={id}
+        style={styles}
+        className="flex items-center justify-center bg-destructive/10 text-destructive rounded border-2 border-dashed border-destructive/25 p-4"
+        role="alert"
+        aria-label="Invalid image URL"
+      >
+        <span className="text-sm">Invalid image URL</span>
+      </div>
+    );
   }
 
   return <img src={finalValidatedSrc} key={id} style={styles} />;
