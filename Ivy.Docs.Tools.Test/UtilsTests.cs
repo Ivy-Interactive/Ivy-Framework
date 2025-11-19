@@ -29,8 +29,8 @@ public class UtilsTests
     }
 
     [Theory]
-    [InlineData(@"01_Foo/02_Bar.md", "Foo.BarApp")]
-    [InlineData(@"01_Foo/02_Bar/03_Baz.md", "Foo.Bar.BazApp")]
+    [InlineData(@"01_Onboarding/02_Installation.md", "Onboarding.InstallationApp")]
+    [InlineData(@"01_Onboarding/02_GettingStarted/03_FirstApp.md", "Onboarding.GettingStarted.FirstAppApp")]
     public void GetTypeNameFromPath_ReturnsExpected(string path, string expectedTypeName)
     {
         var result = Utils.GetTypeNameFromPath(path);
@@ -38,8 +38,8 @@ public class UtilsTests
     }
 
     [Theory]
-    [InlineData("Foo.BarApp", "foo/bar")]
-    [InlineData("Foo.Bar.BazApp", "foo/bar/baz")]
+    [InlineData("Onboarding.InstallationApp", "onboarding/installation")]
+    [InlineData("Onboarding.GettingStarted.FirstAppApp", "onboarding/gettingstarted/firstapp")]
     public void GetAppIdFromTypeName_ReturnsExpected(string typeName, string expectedAppId)
     {
         var result = Utils.GetAppIdFromTypeName(typeName);
