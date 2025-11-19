@@ -67,7 +67,7 @@ public class BasicKanbanExample : ViewBase
                     if (taskToMove == null) return;
 
                     // Update the task's status
-                    taskToMove = new Task
+                    var newTask = new Task
                     {
                         Id = taskToMove.Id,
                         Title = taskToMove.Title,
@@ -77,30 +77,32 @@ public class BasicKanbanExample : ViewBase
                         Assignee = taskToMove.Assignee
                     };
 
-                    // Remove the task from its current position
-                    updatedTasks.RemoveAll(t => t.Id == taskId);
+                    // Remove the old task reference directly
+                    updatedTasks.Remove(taskToMove);
 
-                    // Insert the task at the desired position within the target column
-                    var tasksInTargetColumn = updatedTasks.Where(t => t.Status == moveData.ToColumn).ToList();
-                    if (moveData.TargetIndex.HasValue && moveData.TargetIndex.Value >= 0 && moveData.TargetIndex.Value < tasksInTargetColumn.Count)
+                    // Determine insertion index
+                    int insertIndex = updatedTasks.Count;
+
+                    // Try to find the task that is currently at the target index in the target column
+                    var taskAtTargetIndex = updatedTasks
+                        .Where(t => t.Status == moveData.ToColumn)
+                        .ElementAtOrDefault(moveData.TargetIndex ?? -1);
+
+                    if (taskAtTargetIndex != null)
                     {
-                        // Insert at specific position - validate bounds before inserting
-                        var insertIndex = moveData.TargetIndex.Value;
-                        if (insertIndex >= 0 && insertIndex <= updatedTasks.Count)
-                        {
-                            updatedTasks.InsertRange(insertIndex, new[] { taskToMove });
-                        }
-                        else
-                        {
-                            // Fallback to end if index is out of bounds
-                            updatedTasks.Add(taskToMove);
-                        }
+                        insertIndex = updatedTasks.IndexOf(taskAtTargetIndex);
                     }
                     else
                     {
-                        // Add to end of column
-                        updatedTasks.Add(taskToMove);
+                        // If not found (e.g. appended to end), find the last task in that column
+                        var lastTaskInColumn = updatedTasks.LastOrDefault(t => t.Status == moveData.ToColumn);
+                        if (lastTaskInColumn != null)
+                        {
+                            insertIndex = updatedTasks.IndexOf(lastTaskInColumn) + 1;
+                        }
                     }
+
+                    updatedTasks.Insert(insertIndex, newTask);
 
                     tasks.Set(updatedTasks.ToArray());
                 })
@@ -197,7 +199,7 @@ public class KanbanBuilderExample : ViewBase
         var taskToMove = updatedTasks.FirstOrDefault(t => t.Id == taskId);
         if (taskToMove == null) return;
 
-        taskToMove = new Task
+        var newTask = new Task
         {
             Id = taskToMove.Id,
             Title = taskToMove.Title,
@@ -207,26 +209,28 @@ public class KanbanBuilderExample : ViewBase
             Assignee = taskToMove.Assignee
         };
 
-        updatedTasks.RemoveAll(t => t.Id == taskId);
-        var tasksInTargetColumn = updatedTasks.Where(t => t.Status == moveData.ToColumn).ToList();
-        if (moveData.TargetIndex.HasValue && moveData.TargetIndex.Value >= 0 && moveData.TargetIndex.Value < tasksInTargetColumn.Count)
+        updatedTasks.Remove(taskToMove);
+
+        int insertIndex = updatedTasks.Count;
+
+        var taskAtTargetIndex = updatedTasks
+            .Where(t => t.Status == moveData.ToColumn)
+            .ElementAtOrDefault(moveData.TargetIndex ?? -1);
+
+        if (taskAtTargetIndex != null)
         {
-            // Insert at specific position - validate bounds before inserting
-            var insertIndex = moveData.TargetIndex.Value;
-            if (insertIndex >= 0 && insertIndex <= updatedTasks.Count)
-            {
-                updatedTasks.InsertRange(insertIndex, new[] { taskToMove });
-            }
-            else
-            {
-                // Fallback to end if index is out of bounds
-                updatedTasks.Add(taskToMove);
-            }
+            insertIndex = updatedTasks.IndexOf(taskAtTargetIndex);
         }
         else
         {
-            updatedTasks.Add(taskToMove);
+            var lastTaskInColumn = updatedTasks.LastOrDefault(t => t.Status == moveData.ToColumn);
+            if (lastTaskInColumn != null)
+            {
+                insertIndex = updatedTasks.IndexOf(lastTaskInColumn) + 1;
+            }
         }
+
+        updatedTasks.Insert(insertIndex, newTask);
 
         tasks.Set(updatedTasks.ToArray());
     })
