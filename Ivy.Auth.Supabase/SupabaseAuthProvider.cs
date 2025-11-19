@@ -147,7 +147,7 @@ public class SupabaseAuthProvider : IAuthProvider
         return authToken;
     }
 
-    public async Task LogoutAsync(string _, CancellationToken cancellationToken)
+    public async Task LogoutAsync(string _, object? tag, CancellationToken cancellationToken)
     {
         await _client.Auth.SignOut()
             .WaitAsync(cancellationToken);
@@ -178,7 +178,7 @@ public class SupabaseAuthProvider : IAuthProvider
         return await VerifyToken(token, cancellationToken) is not null;
     }
 
-    public async Task<UserInfo?> GetUserInfoAsync(string token, CancellationToken cancellationToken)
+    public async Task<UserInfo?> GetUserInfoAsync(string token, object? tag, CancellationToken cancellationToken)
     {
         if (await VerifyToken(token, cancellationToken) is not var (claims, _))
         {
@@ -230,11 +230,11 @@ public class SupabaseAuthProvider : IAuthProvider
         return _authOptions.ToArray();
     }
 
-    public async Task<DateTimeOffset?> GetTokenExpiration(AuthToken token, CancellationToken cancellationToken)
+    public async Task<TokenLifetime?> GetTokenLifetimeAsync(AuthToken token, CancellationToken cancellationToken)
     {
         if (await VerifyToken(token.AccessToken, cancellationToken) is var (_, expiration))
         {
-            return expiration;
+            return new TokenLifetime(expiration);
         }
         else
         {

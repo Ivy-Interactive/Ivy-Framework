@@ -120,7 +120,7 @@ public class BasicAuthProvider : IAuthProvider
         return new AuthToken(accessToken, refreshToken);
     }
 
-    public Task LogoutAsync(string token, CancellationToken cancellationToken)
+    public Task LogoutAsync(string token, object? tag, CancellationToken cancellationToken)
     {
         // No server-side state to invalidate
         return Task.CompletedTask;
@@ -182,7 +182,7 @@ public class BasicAuthProvider : IAuthProvider
         return ValidateToken(token, _audience, "access") != null;
     }
 
-    public Task<UserInfo?> GetUserInfoAsync(string token, CancellationToken cancellationToken)
+    public Task<UserInfo?> GetUserInfoAsync(string token, object? tag, CancellationToken cancellationToken)
     {
         if (ValidateToken(token, _audience, "access") is not var (principal, _) ||
             principal.FindFirst(ClaimTypes.NameIdentifier)?.Value is not { } user)
@@ -198,15 +198,15 @@ public class BasicAuthProvider : IAuthProvider
         return [new AuthOption(AuthFlow.EmailPassword)];
     }
 
-    public Task<DateTimeOffset?> GetTokenExpiration(AuthToken token, CancellationToken cancellationToken)
+    public Task<TokenLifetime?> GetTokenLifetimeAsync(AuthToken token, CancellationToken cancellationToken)
     {
         if (ValidateToken(token.AccessToken, _audience, "access") is var (_, expiration))
         {
-            return Task.FromResult<DateTimeOffset?>(expiration);
+            return Task.FromResult<TokenLifetime?>(new TokenLifetime(expiration));
         }
         else
         {
-            return Task.FromResult<DateTimeOffset?>(null);
+            return Task.FromResult<TokenLifetime?>(null);
         }
     }
 

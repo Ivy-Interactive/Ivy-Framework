@@ -147,7 +147,7 @@ public class MicrosoftEntraAuthProvider : IAuthProvider
         );
     }
 
-    public Task LogoutAsync(string token, CancellationToken cancellationToken)
+    public Task LogoutAsync(string token, object? tag, CancellationToken cancellationToken)
     {
         _tokenCache = null;
         _app = null;
@@ -231,7 +231,7 @@ public class MicrosoftEntraAuthProvider : IAuthProvider
         return await VerifyToken(token, cancellationToken) is not null;
     }
 
-    public Task<UserInfo?> GetUserInfoAsync(string idToken, CancellationToken cancellationToken)
+    public Task<UserInfo?> GetUserInfoAsync(string idToken, object? tag, CancellationToken cancellationToken)
     {
         try
         {
@@ -267,11 +267,11 @@ public class MicrosoftEntraAuthProvider : IAuthProvider
         return [.. _authOptions];
     }
 
-    public async Task<DateTimeOffset?> GetTokenExpiration(AuthToken token, CancellationToken cancellationToken)
+    public async Task<TokenLifetime?> GetTokenLifetimeAsync(AuthToken token, CancellationToken cancellationToken)
     {
         if (await VerifyToken(token.AccessToken, cancellationToken) is var (_, expiration))
         {
-            return expiration;
+            return new TokenLifetime(expiration);
         }
         else
         {

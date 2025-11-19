@@ -139,7 +139,7 @@ public class Auth0AuthProvider : IAuthProvider
         }
     }
 
-    public Task LogoutAsync(string token, CancellationToken cancellationToken)
+    public Task LogoutAsync(string token, object? tag, CancellationToken cancellationToken)
         => Task.CompletedTask;
 
     public async Task<AuthToken?> RefreshAccessTokenAsync(AuthToken token, CancellationToken cancellationToken)
@@ -204,7 +204,7 @@ public class Auth0AuthProvider : IAuthProvider
         return (await VerifyToken(token, cancellationToken)) is not null;
     }
 
-    public async Task<UserInfo?> GetUserInfoAsync(string token, CancellationToken cancellationToken)
+    public async Task<UserInfo?> GetUserInfoAsync(string token, object? tag, CancellationToken cancellationToken)
     {
         if (await VerifyToken(token, cancellationToken) is not var (claims, _))
         {
@@ -223,11 +223,11 @@ public class Auth0AuthProvider : IAuthProvider
         return _authOptions.ToArray();
     }
 
-    public async Task<DateTimeOffset?> GetTokenExpiration(AuthToken token, CancellationToken cancellationToken)
+    public async Task<TokenLifetime?> GetTokenLifetimeAsync(AuthToken token, CancellationToken cancellationToken)
     {
         if (await VerifyToken(token.AccessToken, cancellationToken) is var (_, expiration))
         {
-            return expiration;
+            return new TokenLifetime(expiration);
         }
         else
         {

@@ -27,6 +27,7 @@ public class AuthService(IAuthProvider authProvider, AuthToken? token = null) : 
     {
         var token = await authProvider.HandleOAuthCallbackAsync(request, cancellationToken);
         _token = token;
+        Console.WriteLine($"OAuth login completed. Token tag: {token?.Tag}");
         return token;
     }
 
@@ -39,7 +40,7 @@ public class AuthService(IAuthProvider authProvider, AuthToken? token = null) : 
             return;
         }
 
-        await authProvider.LogoutAsync(token.AccessToken, cancellationToken);
+        await authProvider.LogoutAsync(token.AccessToken, token.Tag, cancellationToken);
     }
 
     public async Task<UserInfo?> GetUserInfoAsync(CancellationToken cancellationToken)
@@ -53,7 +54,8 @@ public class AuthService(IAuthProvider authProvider, AuthToken? token = null) : 
 
         //todo: cache this!
 
-        return await authProvider.GetUserInfoAsync(token.AccessToken, cancellationToken);
+        Console.WriteLine($"trying to get user info with tag: {token.Tag}");
+        return await authProvider.GetUserInfoAsync(token.AccessToken, token.Tag, cancellationToken);
     }
 
     public AuthOption[] GetAuthOptions()

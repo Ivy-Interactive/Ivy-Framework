@@ -51,10 +51,32 @@ public class FrontendApiClient(string? frontendApiDomain)
         return await ParseResponse<ClerkTokenResponse>(response);
     }
 
-    public async Task<ClerkTouchSessionResponse> TouchSessionAsync(string sessionId, string devBrowserJwt, CancellationToken cancellationToken = default)
+    public async Task<ClerkSessionResponse> TouchSessionAsync(string sessionId, string devBrowserJwt, CancellationToken cancellationToken = default)
     {
         var response = await _httpClient.PostAsync($"https://{_frontendApiDomain}.clerk.accounts.dev/v1/client/sessions/{sessionId}/touch?__clerk_api_version={ApiVersion}&__clerk_db_jwt={devBrowserJwt}", null, cancellationToken);
-        return await ParseResponse<ClerkTouchSessionResponse>(response);
+        return await ParseResponse<ClerkSessionResponse>(response);
+    }
+
+    public async Task<ClerkSessionResponse> GetSessionAsync(string sessionId, string devBrowserJwt, CancellationToken cancellationToken = default)
+    {
+        var request = new HttpRequestMessage(
+            HttpMethod.Get,
+            $"https://{_frontendApiDomain}.clerk.accounts.dev/v1/client/sessions/{sessionId}?__clerk_api_version={ApiVersion}&__clerk_db_jwt={devBrowserJwt}");
+        // request.Headers.Add("__session", sessionToken);
+        var response = await _httpClient.SendAsync(request, cancellationToken);
+        return await ParseResponse<ClerkSessionResponse>(response);
+    }
+
+    public async Task<ClerkSessionResponse> EndSessionAsync(string sessionId, string devBrowserJwt, CancellationToken cancellationToken = default)
+    {
+        var response = await _httpClient.PostAsync($"https://{_frontendApiDomain}.clerk.accounts.dev/v1/client/sessions/{sessionId}/end?__clerk_api_version={ApiVersion}&__clerk_db_jwt={devBrowserJwt}", null, cancellationToken);
+        return await ParseResponse<ClerkSessionResponse>(response);
+    }
+
+    public async Task<ClerkClientResponse> RemoveAllSessionsAsync(string devBrowserJwt, CancellationToken cancellationToken = default)
+    {
+        var response = await _httpClient.DeleteAsync($"https://{_frontendApiDomain}.clerk.accounts.dev/v1/client/sessions?__clerk_api_version={ApiVersion}&__clerk_db_jwt={devBrowserJwt}", cancellationToken);
+        return await ParseResponse<ClerkClientResponse>(response);
     }
 
     private async Task<T> ParseResponse<T>(HttpResponseMessage response)

@@ -51,7 +51,7 @@ public class AutheliaAuthProvider : IAuthProvider
         return null;
     }
 
-    public async Task LogoutAsync(string _, CancellationToken cancellationToken)
+    public async Task LogoutAsync(string _, object? tag, CancellationToken cancellationToken)
     {
         // Instruct Authelia to log out. Then expire the session cookie.
         await _httpClient.PostAsync("/api/logout", new StringContent(string.Empty), cancellationToken);
@@ -88,7 +88,7 @@ public class AutheliaAuthProvider : IAuthProvider
         return response.IsSuccessStatusCode;
     }
 
-    public async Task<UserInfo?> GetUserInfoAsync(string token, CancellationToken cancellationToken)
+    public async Task<UserInfo?> GetUserInfoAsync(string token, object? tag, CancellationToken cancellationToken)
     {
         var request = new HttpRequestMessage(HttpMethod.Get, "/api/user/info");
         request.Headers.Add("Cookie", $"authelia_session={token}");
@@ -111,9 +111,9 @@ public class AutheliaAuthProvider : IAuthProvider
         return [new AuthOption(AuthFlow.EmailPassword)];
     }
 
-    public Task<DateTimeOffset?> GetTokenExpiration(AuthToken token, CancellationToken cancellationToken)
+    public Task<TokenLifetime?> GetTokenLifetimeAsync(AuthToken token, CancellationToken cancellationToken)
     {
-        return Task.FromResult<DateTimeOffset?>(null);
+        return Task.FromResult<TokenLifetime?>(null);
     }
 }
 

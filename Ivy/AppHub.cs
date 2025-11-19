@@ -438,6 +438,7 @@ public class AppHub(
 
                 var token = authService.GetCurrentToken();
 
+                Console.WriteLine($"AuthRefreshLoop: State={state} ConnectionId={connectionId}");
                 switch (state)
                 {
                     case AuthRefreshState.Initial:
@@ -478,18 +479,28 @@ public class AppHub(
                             }
                             else
                             {
-                                var expiresAt = await TimeoutHelper.WithTimeoutAsync(
-                                    ct => authProvider.GetTokenExpiration(token, ct),
+                                var lifetime = await TimeoutHelper.WithTimeoutAsync(
+                                    ct => authProvider.GetTokenLifetimeAsync(token, ct),
                                     cancellationToken);
 
-                                if (expiresAt != null && expiresAt < DateTimeOffset.UtcNow.AddMinutes(2))
+                                TimeSpan renewalMargin;
+                                if (lifetime != null && lifetime.NotBefore != null && lifetime.Expires != null && lifetime.Expires - lifetime.NotBefore is { } duration && duration < TimeSpan.FromMinutes(3))
+                                {
+                                    renewalMargin = duration / 6;
+                                }
+                                else
+                                {
+                                    renewalMargin = TimeSpan.FromMinutes(2);
+                                }
+
+                                if (lifetime?.Expires != null && lifetime.Expires - renewalMargin < DateTimeOffset.UtcNow)
                                 {
                                     state = AuthRefreshState.TokenExpired;
                                 }
                                 else
                                 {
                                     // Token is valid, wait until close to expiration
-                                    var waitUntil = (expiresAt ?? DateTimeOffset.UtcNow.AddMinutes(15)).AddMinutes(-2);
+                                    var waitUntil = (lifetime?.Expires ?? DateTimeOffset.UtcNow.AddMinutes(15)) - renewalMargin;
                                     var delay = waitUntil - DateTimeOffset.UtcNow;
 
                                     // Don't wait more than `maxDelay`
