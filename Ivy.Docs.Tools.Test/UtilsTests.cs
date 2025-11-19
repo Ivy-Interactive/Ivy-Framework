@@ -21,6 +21,7 @@ public class UtilsTests
     [InlineData(@"01_Onboarding/01_Introduction.md", @"../XYZ/02_Foo.md", @"XYZ/02_Foo.md")]
     [InlineData(@"01_Onboarding/ABC/01_Introduction.md", @"./XYZ/02_Foo.md", @"01_Onboarding/ABC/XYZ/02_Foo.md")]
     [InlineData(@"01_Onboarding/ABC/01_Introduction.md", @"XYZ/02_Foo.md", @"01_Onboarding/ABC/XYZ/02_Foo.md")]
+    [InlineData(@"01_Onboarding\ABC\01_Introduction.md", @"../XYZ/02_Foo.md", @"01_Onboarding/XYZ/02_Foo.md")]
     public void GetPathForLink_ReturnsExpected(string source, string link, string expected)
     {
         var result = Utils.GetPathForLink(source, link);
@@ -28,7 +29,8 @@ public class UtilsTests
     }
 
     [Theory]
-    [InlineData(@"01_Onboarding/02_Installation.md", "Onboarding.InstallationApp")]
+    [InlineData(@"01_Foo/02_Bar.md", "Foo.BarApp")]
+    [InlineData(@"01_Foo/02_Bar/03_Baz.md", "Foo.Bar.BazApp")]
     public void GetTypeNameFromPath_ReturnsExpected(string path, string expectedTypeName)
     {
         var result = Utils.GetTypeNameFromPath(path);
@@ -36,7 +38,8 @@ public class UtilsTests
     }
 
     [Theory]
-    [InlineData("Onboarding.InstallationApp", "onboarding/installation")]
+    [InlineData("Foo.BarApp", "foo/bar")]
+    [InlineData("Foo.Bar.BazApp", "foo/bar/baz")]
     public void GetAppIdFromTypeName_ReturnsExpected(string typeName, string expectedAppId)
     {
         var result = Utils.GetAppIdFromTypeName(typeName);
