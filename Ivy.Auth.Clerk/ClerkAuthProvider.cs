@@ -247,15 +247,41 @@ public class ClerkAuthProvider : IAuthProvider
     {
         try
         {
-            // Clerk handles token refresh automatically in most cases
-            // This would typically involve calling Clerk's session refresh APIs
-            await Task.CompletedTask;
+            string? devBrowserJwt = token.Tag switch
+            {
+                string s => s,
+                JsonElement e when e.ValueKind == JsonValueKind.String => e.GetString(),
+                _ => null,
+            };
 
-            // Return the same token or a refreshed one
-            return token;
+            if (devBrowserJwt is null)
+            {
+                Console.WriteLine("No devBrowserJwt provided in tag for GetUserInfo.");
+                return null;
+            }
+
+            var (principal, _) = await ValidateToken(token.AccessToken, cancellationToken)
+                ?? throw new Exception("Failed to validate access token after OAuth callback.");
+
+            if (principal.FindFirst("sid")?.Value is not { } sessionId)
+            {
+                throw new Exception("No session ID found in access token.");
+            }
+
+            Console.WriteLine("refreshing session token...");
+            var newToken = await _frontendClient.CreateSessionTokenAsync(sessionId, devBrowserJwt, cancellationToken);
+            if (string.IsNullOrEmpty(newToken.Jwt))
+            {
+                throw new Exception("Failed to get new JWT from Clerk.");
+            }
+            else
+            {
+                return new AuthToken(newToken.Jwt, token.RefreshToken, devBrowserJwt);
+            }
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            Console.WriteLine($"Error refreshing access token! {ex}");
             return null;
         }
     }
