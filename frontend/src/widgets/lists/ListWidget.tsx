@@ -32,13 +32,13 @@ export const ListWidget = ({ children }: ListWidgetProps) => {
       >
         {rowVirtualizer.getVirtualItems().map((virtualRow, index) => {
           const child = childArray[virtualRow.index];
+          const isLast = index === rowVirtualizer.getVirtualItems().length - 1;
           return (
             <div
               key={virtualRow.key}
               className={cn(
                 'absolute top-0 left-0 w-full flex items-center min-w-0',
-                index !== rowVirtualizer.getVirtualItems().length - 1 &&
-                  'border-b border-border'
+                !isLast && 'border-b border-border'
               )}
               style={{
                 height: `${virtualRow.size}px`,
