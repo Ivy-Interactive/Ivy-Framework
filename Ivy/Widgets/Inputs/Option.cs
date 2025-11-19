@@ -62,6 +62,7 @@ public static class OptionExtensions
                 typeof(Option<>).MakeGenericType(enumType),
                 description,
                 Convert.ChangeType(e, enumType),
+                null,
                 null
             )!;
         }
