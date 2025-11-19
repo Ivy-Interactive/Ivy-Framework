@@ -1,3 +1,5 @@
+import { MenuItem } from '@/types/widgets';
+
 export interface DataRow {
   values: (string | number | boolean | Date | string[] | null)[];
 }
@@ -78,7 +80,7 @@ export interface TableProps {
   editable?: boolean;
   width?: string;
   height?: string;
-  rowActions?: RowAction[];
+  rowActions?: MenuItem[];
   onCellUpdate?: (row: number, col: number, value: unknown) => void;
 }
 
@@ -94,37 +96,15 @@ export enum SelectionModes {
 }
 
 /**
- * Configuration for a single row action button
- */
-export interface RowAction {
-  /**
-   * Unique identifier for this action
-   */
-  id: string;
-  /**
-   * Icon name (Lucide icon)
-   */
-  icon: string;
-  /**
-   * Event name to trigger when clicked (e.g., "OnEdit", "OnDelete", "OnView")
-   */
-  eventName: string;
-  /**
-   * Tooltip text for the button
-   */
-  tooltip?: string;
-}
-
-/**
  * Event args for row action click events
  */
 export interface RowActionClickEventArgs {
   /**
-   * The ID of the action that was clicked
+   * The ID of the action that was clicked (from MenuItem.tag or MenuItem.label)
    */
   actionId: string;
   /**
-   * The event name of the action
+   * The event name of the action (from MenuItem.tag or MenuItem.label)
    */
   eventName: string;
   /**

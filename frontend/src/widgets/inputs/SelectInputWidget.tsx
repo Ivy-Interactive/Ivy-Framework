@@ -22,7 +22,7 @@ import {
   TooltipContent,
 } from '@/components/ui/tooltip';
 import { X } from 'lucide-react';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useRef, useEffect, useState } from 'react';
 import { logger } from '@/lib/logger';
 import {
   MultipleSelector,
@@ -806,6 +806,67 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
     ...getWidth(width),
   };
 
+  // Get string value for both single and multi-select
+  const stringValue =
+    value != null && value.toString().trim() !== ''
+      ? value.toString()
+      : undefined;
+
+  // Get the selected option's label for tooltip (only for single select)
+  const selectedOption = useMemo(() => {
+    if (selectMany || !stringValue) return undefined;
+    return validOptions.find(opt => opt.value.toString() === stringValue);
+  }, [stringValue, validOptions, selectMany]);
+
+  const selectedLabel = selectedOption?.label;
+
+  // Create ref for SelectTrigger (needs to be before early returns)
+  const triggerRef = useRef<HTMLButtonElement>(null);
+
+  // Detect ellipsis on the SelectValue span (needs to be before early returns)
+  const [isEllipsed, setIsEllipsed] = useState(false);
+  // Track if select dropdown is open to disable tooltip (needs to be before early returns)
+  const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    // Skip ellipsis check for multiselect or when no label
+    if (selectMany || !selectedLabel) {
+      requestAnimationFrame(() => setIsEllipsed(false));
+      return;
+    }
+
+    const checkEllipsis = () => {
+      if (!triggerRef?.current) {
+        return;
+      }
+      // SelectValue renders as the first span child of SelectTrigger
+      const firstSpan = triggerRef.current.querySelector(
+        'span:first-child'
+      ) as HTMLSpanElement;
+      if (firstSpan) {
+        setIsEllipsed(firstSpan.scrollWidth > firstSpan.clientWidth);
+      } else {
+        setIsEllipsed(false);
+      }
+    };
+
+    // Check after render
+    requestAnimationFrame(checkEllipsis);
+
+    // Debounced resize handler
+    let resizeTimeout: NodeJS.Timeout;
+    const handleResize = () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(checkEllipsis, 150);
+    };
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      clearTimeout(resizeTimeout);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [selectedLabel, stringValue, selectMany]);
+
   // Handle multiselect case
   if (selectMany) {
     const handleMultiSelectChange = (
@@ -863,12 +924,32 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
     {}
   );
 
-  const stringValue =
-    value != null && value.toString().trim() !== ''
-      ? value.toString()
-      : undefined;
-
   const hasValue = stringValue !== undefined;
+
+  const selectTriggerElement = (
+    <SelectTrigger
+      ref={triggerRef}
+      className={cn('relative', invalid && inputStyles.invalidInput)}
+      size={size}
+    >
+      <SelectValue placeholder={placeholder} />
+    </SelectTrigger>
+  );
+
+  // Wrap trigger with tooltip if ellipsed (tooltip hidden when dropdown is open)
+  const shouldShowTooltip = isEllipsed && selectedLabel;
+  const selectTrigger = shouldShowTooltip ? (
+    <TooltipProvider>
+      <Tooltip delayDuration={300} open={!isOpen ? undefined : false}>
+        <TooltipTrigger asChild>{selectTriggerElement}</TooltipTrigger>
+        <TooltipContent className="bg-popover text-popover-foreground shadow-md max-w-sm">
+          <div className="whitespace-pre-wrap break-words">{selectedLabel}</div>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  ) : (
+    selectTriggerElement
+  );
 
   return (
     <div className="flex items-center gap-2 w-full" style={styles}>
@@ -878,55 +959,11 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
           disabled={disabled}
           value={stringValue}
           onValueChange={handleValueChange}
+          open={isOpen}
+          onOpenChange={setIsOpen}
           data-testid={dataTestId}
         >
-          <SelectTrigger
-            className={cn('relative', invalid && inputStyles.invalidInput)}
-            size={size}
-          >
-            <SelectValue placeholder={placeholder} />
-          </SelectTrigger>
-          {/* Right-side icon container */}
-          {(nullable && hasValue && !disabled) || invalid ? (
-            <div
-              className="absolute top-1/2 -translate-y-1/2 flex items-center gap-1 right-8"
-              style={{ zIndex: 2 }}
-            >
-              {/* Clear (X) button */}
-              {nullable && hasValue && !disabled && (
-                <span
-                  role="button"
-                  tabIndex={-1}
-                  aria-label="Clear"
-                  onClick={e => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    logger.debug(
-                      'Select input clear button clicked (SelectVariant)',
-                      { id }
-                    );
-                    eventHandler('OnChange', id, [null]);
-                  }}
-                  onKeyDown={e => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      eventHandler('OnChange', id, [null]);
-                    }
-                  }}
-                  className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
-                >
-                  <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
-                </span>
-              )}
-              {/* Invalid icon */}
-              {invalid && (
-                <span className="flex items-center">
-                  <InvalidIcon message={invalid} />
-                </span>
-              )}
-            </div>
-          ) : null}
+          {selectTrigger}
           <SelectContent size={size}>
             {Object.entries(groupedOptions).map(([group, options]) => (
               <SelectGroup key={group}>
@@ -944,6 +981,47 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
             ))}
           </SelectContent>
         </Select>
+        {/* Right-side icon container */}
+        {(nullable && hasValue && !disabled) || invalid ? (
+          <div
+            className="absolute top-1/2 -translate-y-1/2 flex items-center gap-1 right-8"
+            style={{ zIndex: 2 }}
+          >
+            {/* Clear (X) button */}
+            {nullable && hasValue && !disabled && (
+              <span
+                role="button"
+                tabIndex={-1}
+                aria-label="Clear"
+                onClick={e => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  logger.debug(
+                    'Select input clear button clicked (SelectVariant)',
+                    { id }
+                  );
+                  eventHandler('OnChange', id, [null]);
+                }}
+                onKeyDown={e => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    eventHandler('OnChange', id, [null]);
+                  }
+                }}
+                className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
+              >
+                <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+              </span>
+            )}
+            {/* Invalid icon */}
+            {invalid && (
+              <span className="flex items-center">
+                <InvalidIcon message={invalid} />
+              </span>
+            )}
+          </div>
+        ) : null}
       </div>
     </div>
   );

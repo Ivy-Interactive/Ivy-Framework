@@ -1,5 +1,6 @@
 import React from 'react';
 import { textBlockClassMap, textContainerClass } from '@/lib/textBlockClassMap';
+import { validateLinkUrl } from '@/lib/utils';
 
 interface HtmlRendererProps {
   content: string;
@@ -115,17 +116,20 @@ export const HtmlRenderer: React.FC<HtmlRendererProps> = ({
             );
           case 'em':
             return <em className={textBlockClassMap.em}>{children}</em>;
-          case 'a':
+          case 'a': {
+            const href = element.getAttribute('href');
+            const safeHref = validateLinkUrl(href);
             return (
               <a
                 className={textBlockClassMap.a}
-                href={element.getAttribute('href') || '#'}
+                href={safeHref}
                 target="_blank"
                 rel="noopener noreferrer"
               >
                 {children}
               </a>
             );
+          }
           case 'blockquote':
             return (
               <blockquote className={textBlockClassMap.blockquote}>

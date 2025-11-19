@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { Mic, Square } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -24,6 +30,16 @@ interface AudioRecorderWidgetProps {
   size?: Sizes;
 }
 
+const supportedMimeTypes = [
+  'audio/webm', // Chromium/Firefox
+  'audio/mp4', // Safari/iOS
+  'audio/ogg', // Older Firefox/desktop
+  'audio/aac', // Safari/iOS
+  'audio/webm;codecs=opus',
+  'audio/ogg;codecs=opus',
+  'audio/wav', // uncompressed fallback (always supported, large files)
+];
+
 export const AudioRecorderWidget: React.FC<AudioRecorderWidgetProps> = ({
   label,
   recordingLabel,
@@ -34,6 +50,23 @@ export const AudioRecorderWidget: React.FC<AudioRecorderWidgetProps> = ({
   chunkInterval,
   size = Sizes.Medium,
 }) => {
+  const normalizedMimeTypes = useMemo(() => {
+    const candidates: string[] = [];
+    const addCandidate = (value?: string) => {
+      const trimmed = value?.trim();
+      if (trimmed && !candidates.includes(trimmed)) {
+        candidates.push(trimmed);
+      }
+    };
+
+    addCandidate(mimeType);
+    supportedMimeTypes.forEach(addCandidate);
+
+    return candidates;
+  }, [mimeType]);
+
+  const selectedMimeTypeRef = useRef<string | null>(null);
+
   const uploadChunk = useCallback(
     async (chunk: Blob): Promise<void> => {
       if (!uploadUrl) return;
@@ -49,8 +82,14 @@ export const AudioRecorderWidget: React.FC<AudioRecorderWidgetProps> = ({
         return uploadUrl;
       };
 
+      const selectedMime =
+        selectedMimeTypeRef.current ??
+        normalizedMimeTypes[0] ??
+        supportedMimeTypes[0];
+
       const formData = new FormData();
       formData.append('file', chunk);
+      formData.append('mimeType', selectedMime);
 
       try {
         const response = await fetch(getUploadUrl(), {
@@ -65,11 +104,12 @@ export const AudioRecorderWidget: React.FC<AudioRecorderWidgetProps> = ({
         logger.error('File upload error:', error);
       }
     },
-    [uploadUrl]
+    [uploadUrl, normalizedMimeTypes]
   );
 
   const [recording, setRecording] = useState(false);
   const [error, setError] = useState(false);
+  const [mimeSupportError, setMimeSupportError] = useState(false);
 
   const [recordingStartedAt, setRecordingStartedAt] = useState<number | null>(
     null
@@ -86,6 +126,7 @@ export const AudioRecorderWidget: React.FC<AudioRecorderWidgetProps> = ({
     }
     setRecordingStartedAt(null);
     setRecordingStoppedAt(null);
+    setMimeSupportError(false);
 
     let cancelled = false;
     let onCancel = () => {};
@@ -97,8 +138,44 @@ export const AudioRecorderWidget: React.FC<AudioRecorderWidgetProps> = ({
         if (cancelled) {
           return;
         }
+        const mediaRecorderAvailable = typeof MediaRecorder !== 'undefined';
+        const canProbeTypeSupport =
+          mediaRecorderAvailable &&
+          typeof MediaRecorder.isTypeSupported === 'function';
+
+        const supportChecks: Array<{ type: string; supported: boolean }> = [];
+        let supportedMimeType: string | null = null;
+
+        if (!canProbeTypeSupport) {
+          supportedMimeType = normalizedMimeTypes[0] ?? null;
+        } else {
+          for (const type of normalizedMimeTypes) {
+            const supported = MediaRecorder.isTypeSupported(type);
+            supportChecks.push({ type, supported });
+            if (supported) {
+              supportedMimeType = type;
+              break;
+            }
+          }
+        }
+
+        if (!supportedMimeType) {
+          logger.error('No supported MIME type found for AudioRecorder', {
+            requestedTypes: normalizedMimeTypes,
+            checks: supportChecks,
+            mediaRecorderAvailable,
+            canProbeTypeSupport,
+          });
+          setError(true);
+          setMimeSupportError(true);
+          setRecording(false);
+          return;
+        }
+
+        selectedMimeTypeRef.current = supportedMimeType;
+
         const mediaRecorder = new MediaRecorder(stream, {
-          mimeType,
+          mimeType: supportedMimeType,
         });
 
         mediaRecorder.ondataavailable = async event => {
@@ -138,10 +215,11 @@ export const AudioRecorderWidget: React.FC<AudioRecorderWidgetProps> = ({
     })();
     return () => {
       cancelled = true;
+      selectedMimeTypeRef.current = null;
       onCancel();
       setRecordingStoppedAt(Date.now());
     };
-  }, [recording, chunkInterval, uploadChunk, mimeType]);
+  }, [recording, chunkInterval, uploadChunk, normalizedMimeTypes]);
 
   const volumePercent = recording ? Math.min(volume / 255, 1) * 100 : 0;
 
@@ -209,7 +287,9 @@ export const AudioRecorderWidget: React.FC<AudioRecorderWidgetProps> = ({
               textSizeVariants({ size })
             )}
           >
-            Failed to record. Check your settings.
+            {mimeSupportError
+              ? 'Recording format not supported in this browser.'
+              : 'Failed to record. Check your settings.'}
           </p>
         )}
       </div>

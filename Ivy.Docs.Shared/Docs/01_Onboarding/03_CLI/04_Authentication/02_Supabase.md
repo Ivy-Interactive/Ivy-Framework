@@ -57,7 +57,7 @@ If your project is still using a legacy JWT secret:
 To customize your authentication settings:
 
 1. **Go to Authentication** in the sidebar
-2. **Click "Settings"**
+2. **Click "URL Configuration"**
 3. **Configure**:
    - **Site URL**: Your application's URL (e.g., `http://localhost:5010`)
    - **Redirect URLs**: Add your callback URLs (e.g., `http://localhost:5010/ivy/webhook/*`)

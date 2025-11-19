@@ -5,25 +5,16 @@ using Ivy.Views;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
-/// <summary>Card style variants applied on cursor hover.</summary>
 public enum CardHoverVariant
 {
-    /// <summary>No styling applied on hover.</summary>
     None,
-    /// <summary>Applies "cursor: pointer".</summary>
     Pointer,
-    /// <summary>Applies "cursor: pointer" and adds a minor translate effect on hover.</summary>
     PointerAndTranslate,
 }
 
 /// <summary>A structured container for organizing related content with optional title, description, and icon.</summary>
 public record Card : WidgetBase<Card>
 {
-    /// <summary>
-    /// Initializes a new Card with the specified content and optional footer.
-    /// </summary>
-    /// <param name="content">The main content to display in the card body.</param>
-    /// <param name="footer">Optional footer content displayed at the bottom.</param>
     public Card(object? content = null, object? footer = null, object? header = null) : base([new Slot("Content", content), new Slot("Footer", footer!), new Slot("Header", header!)])
     {
         Width = Ivy.Shared.Size.Full();
@@ -33,32 +24,20 @@ public record Card : WidgetBase<Card>
     internal object? Description { get; set; }
     internal object? Icon { get; set; }
 
-    /// <summary>Gets or sets the thickness of the card's border.</summary>
     [Prop] public Thickness? BorderThickness { get; set; }
 
-    /// <summary>Gets or sets the border radius for the card's corners.</summary>
     [Prop] public BorderRadius? BorderRadius { get; set; }
 
-    /// <summary>Gets or sets the visual style of the card's border.</summary>
     [Prop] public BorderStyle? BorderStyle { get; set; }
 
-    /// <summary>Gets or sets the color of the card's border.</summary>
     [Prop] public Colors? BorderColor { get; set; }
 
-    /// <summary>Style variant to apply on cursor hover. Default is <see cref="CardHoverVariant.None"/> when no click listener is applied, and <see cref="CardHoverVariant.PointerAndTranslate"/> when a click listener is applied.</summary>
     [Prop] public CardHoverVariant HoverVariant { get; set; }
 
-    /// <summary>Event handler called when card is clicked. Default is null.</summary>
     [Event] public Func<Event<Card>, ValueTask>? OnClick { get; set; }
 
-    /// <summary>Gets or sets the size variant of the card. Default is Medium.</summary>
     [Prop] public Sizes Size { get; set; } = Sizes.Medium;
 
-    /// <summary>
-    /// Adds content to the card's main content area using the pipe operator.
-    /// </summary>
-    /// <param name="widget">The Card widget to add content to.</param>
-    /// <param name="child">The child content to add to the card's main content area.</param>
     /// <returns>A new Card instance with the updated content.</returns>
     /// <exception cref="NotSupportedException">Thrown when attempting to add multiple children at once.</exception>
     public static Card operator |(Card widget, object child)

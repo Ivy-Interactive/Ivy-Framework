@@ -65,6 +65,13 @@ export const renderWidgetTree = (node: WidgetNode): React.ReactNode => {
     {} as Record<string, React.ReactNode[]>
   );
 
+  // For Kanban widget, pass widget node children for structured data extraction
+  if (node.type === 'Ivy.Kanban') {
+    props.widgetNodeChildren = children.filter(
+      child => child.type === 'Ivy.KanbanCard'
+    );
+  }
+
   const content = (
     <Component {...props} slots={slots} key={node.id}>
       {slots.default}

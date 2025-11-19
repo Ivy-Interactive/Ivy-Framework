@@ -8,7 +8,6 @@ namespace Ivy;
 /// <summary>Audio recorder control allowing users to upload audio using microphone with configurable upload intervals.</summary>
 public record AudioRecorder : WidgetBase<AudioRecorder>
 {
-    /// <summary>Initializes AudioRecorder with upload context and optional configuration.</summary>
     /// <param name="upload">Upload context for automatic audio file uploads (from UseUpload).</param>
     /// <param name="label">Label text displayed when no audio is recording.</param>
     /// <param name="recordingLabel">Label text displayed when audio is recording.</param>
@@ -25,29 +24,21 @@ public record AudioRecorder : WidgetBase<AudioRecorder>
         Disabled = disabled;
     }
 
-    /// <summary>Gets or sets whether the widget is disabled.</summary>
     [Prop] public bool Disabled { get; set; }
 
-    /// <summary>Gets or sets the label text displayed when no audio is recording.</summary>
     [Prop] public string? Label { get; set; }
 
-    /// <summary>Gets or sets the label text displayed when audio is recording.</summary>
     [Prop] public string? RecordingLabel { get; set; }
 
-    /// <summary>Gets or sets the mime type used for recorded audio.</summary>
     [Prop] public string MimeType { get; set; }
 
-    /// <summary>Gets or sets the chunk size, in milliseconds, for continuous chunked uploads.</summary>
     [Prop] public int? ChunkInterval { get; set; }
 
-    /// <summary>Gets or sets the upload URL for automatic audio file uploads.</summary>
     [Prop] public string? UploadUrl { get; set; }
 
-    /// <summary>Gets or sets the size of the audio recorder.</summary>
     [Prop] public Sizes Size { get; set; } = Sizes.Medium;
 }
 
-/// <summary>Extension methods for configuring audio recorders.</summary>
 public static class AudioRecorderExtensions
 {
     public static AudioRecorder Label(this AudioRecorder widget, string label)

@@ -6,7 +6,6 @@ namespace Ivy.Views.Forms;
 /// <summary>Utility methods for determining field requirements during form scaffolding. </summary>
 public static class FormHelpers
 {
-    /// <summary> Determines if a property should be required based on [Required] attribute or non-nullable string type.</summary>
     public static bool IsRequired(PropertyInfo propertyInfo)
     {
         if (propertyInfo.GetCustomAttribute<RequiredAttribute>() != null) return true;
@@ -90,7 +89,6 @@ public static class FormHelpers
         return nullabilityInfo.ReadState != NullabilityState.Nullable;
     }
 
-    /// <summary> Determines if a field should be required based on [Required] attribute or non-nullable string type. </summary>
     public static bool IsRequired(FieldInfo fieldInfo)
     {
         if (fieldInfo.GetCustomAttribute<RequiredAttribute>() != null) return true;

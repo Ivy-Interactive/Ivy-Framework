@@ -392,6 +392,7 @@ public class AppHub(
         HasToken,
         HasNoToken,
         TokenExpired,
+        TokenInvalid,
     }
 
     private async Task AuthRefreshLoopAsync(string connectionId, CancellationToken cancellationToken)
@@ -473,7 +474,7 @@ public class AppHub(
 
                             if (!isValid)
                             {
-                                state = AuthRefreshState.TokenExpired;
+                                state = AuthRefreshState.TokenInvalid;
                             }
                             else
                             {
@@ -505,12 +506,20 @@ public class AppHub(
                         break;
 
                     case AuthRefreshState.TokenExpired:
+                    case AuthRefreshState.TokenInvalid:
                         {
                             logger.LogInformation("AuthRefreshLoop: Attempting to refresh token for {ConnectionId}.", connectionId);
 
                             var newToken = await TimeoutHelper.WithTimeoutAsync(
                                 authService.RefreshAccessTokenAsync,
                                 cancellationToken);
+                            if (state == AuthRefreshState.TokenInvalid && token == newToken)
+                            {
+                                // This case should only ever happen if the auth provider implementation is bad (i.e. it returns the same invalid token on refresh).
+                                // It is still good to handle it here to avoid an infinite loop.
+                                logger.LogInformation("AuthRefreshLoop: Invalid token object unchanged after refresh for {ConnectionId}.", connectionId);
+                                newToken = null;
+                            }
                             if (token != newToken)
                             {
                                 logger.LogInformation("AuthRefreshLoop: updating stored token for {ConnectionId}.", connectionId);

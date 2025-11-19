@@ -3,7 +3,12 @@ import * as signalR from '@microsoft/signalr';
 import { WidgetEventHandlerType, WidgetNode } from '@/types/widgets';
 import { useToast } from '@/hooks/use-toast';
 import { showError } from '@/hooks/use-error-sheet';
-import { getIvyHost, getMachineId } from '@/lib/utils';
+import {
+  getIvyHost,
+  getMachineId,
+  validateRedirectUrl,
+  validateLinkUrl,
+} from '@/lib/utils';
 import { logger } from '@/lib/logger';
 import { applyPatch, Operation } from 'fast-json-patch';
 import { cloneDeep } from 'lodash';
@@ -267,16 +272,24 @@ export const useBackend = (
     logger.debug('Processing Redirect request', message);
     const { url, replaceHistory } = message;
 
-    if (url.startsWith('/')) {
+    // Validate URL to prevent open redirect vulnerabilities
+    // For redirects, only allow relative paths or same-origin URLs
+    const validatedUrl = validateRedirectUrl(url, false);
+    if (!validatedUrl) {
+      logger.warn('Invalid redirect URL rejected', { url });
+      return;
+    }
+
+    if (validatedUrl.startsWith('/')) {
       // For path-based redirects, update the pathname
       if (replaceHistory) {
-        window.history.replaceState(message.state, '', url);
+        window.history.replaceState(message.state, '', validatedUrl);
       } else {
-        window.history.pushState(message.state, '', url);
+        window.history.pushState(message.state, '', validatedUrl);
       }
     } else {
-      // For full URL redirects
-      window.location.href = url;
+      // For full URL redirects (same-origin only)
+      window.location.href = validatedUrl;
     }
   }, []);
 
@@ -412,7 +425,13 @@ export const useBackend = (
 
           connection.on('OpenUrl', (url: string) => {
             logger.debug(`[${connection.connectionId}] OpenUrl`, { url });
-            window.open(url, '_blank');
+            // Validate URL to prevent open redirect vulnerabilities
+            const validatedUrl = validateLinkUrl(url);
+            if (validatedUrl !== '#') {
+              window.open(validatedUrl, '_blank', 'noopener,noreferrer');
+            } else {
+              logger.warn('Invalid OpenUrl request rejected', { url });
+            }
           });
 
           connection.on('Redirect', message => {

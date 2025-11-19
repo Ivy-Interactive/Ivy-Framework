@@ -1,6 +1,7 @@
 using Ivy.Auth;
 using Ivy.Core;
 using Ivy.Shared;
+using Ivy;
 
 namespace Ivy.Client;
 
@@ -49,20 +50,39 @@ public static class ClientExtensions
 
     public static void OpenUrl(this IClientProvider client, string url)
     {
-        client.Sender.Send("OpenUrl", url);
+        // Validate URL to prevent open redirect vulnerabilities
+        var validatedUrl = Utils.ValidateLinkUrl(url);
+        if (validatedUrl == null)
+        {
+            throw new ArgumentException($"Invalid URL: {url}", nameof(url));
+        }
+        client.Sender.Send("OpenUrl", validatedUrl);
     }
     public static void OpenUrl(this IClientProvider client, Uri uri)
     {
-        client.Sender.Send("OpenUrl", uri.ToString());
+        // Validate URL to prevent open redirect vulnerabilities
+        var validatedUrl = Utils.ValidateLinkUrl(uri.ToString());
+        if (validatedUrl == null)
+        {
+            throw new ArgumentException($"Invalid URL: {uri}", nameof(uri));
+        }
+        client.Sender.Send("OpenUrl", validatedUrl);
     }
 
     public static void Redirect(this IClientProvider client, string url, bool replaceHistory = false, string? tabId = null)
     {
+        // Validate URL to prevent open redirect vulnerabilities
+        // For redirects, only allow relative paths or same-origin URLs (frontend will enforce same-origin)
+        var validatedUrl = Utils.ValidateRedirectUrl(url, allowExternal: false);
+        if (validatedUrl == null)
+        {
+            throw new ArgumentException($"Invalid redirect URL: {url}. Only relative paths or same-origin URLs are allowed.", nameof(url));
+        }
         client.Sender.Send(
             "Redirect",
             new RedirectMessage
             {
-                Url = url,
+                Url = validatedUrl,
                 ReplaceHistory = replaceHistory,
                 State = new HistoryState { TabId = tabId }
             });
@@ -78,22 +98,11 @@ public static class ClientExtensions
         client.Sender.Send("SetRootAppId", new SetRootAppIdMessage { RootAppId = rootAppId });
     }
 
-    /// <summary>
-    /// Sets the theme mode for the client application (Light, Dark, or System).
-    /// </summary>
-    /// <param name="client">The client provider instance.</param>
-    /// <param name="themeMode">The theme mode to apply (Light, Dark, or System).</param>
     public static void SetThemeMode(this IClientProvider client, ThemeMode themeMode)
     {
         client.Sender.Send("SetTheme", themeMode.ToString());
     }
 
-    /// <summary>
-    /// Applies custom theme CSS to the client application.
-    /// This method injects the provided CSS directly into the page to override default theme styles.
-    /// </summary>
-    /// <param name="client">The client provider instance.</param>
-    /// <param name="css">The CSS content to inject, typically containing CSS custom properties (variables) for theming.</param>
     public static void ApplyTheme(this IClientProvider client, string css)
     {
         client.Sender.Send("ApplyTheme", css);

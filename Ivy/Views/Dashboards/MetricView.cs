@@ -3,28 +3,20 @@ using Ivy.Shared;
 
 namespace Ivy.Views.Dashboards;
 
-/// <summary>Dashboard metric data with formatted value, trend, and goal progress.</summary>
-/// <param name="MetricFormatted">Formatted metric value.</param>
-/// <param name="TrendComparedToPreviousPeriod">Optional trend percentage as decimal.</param>
-/// <param name="GoalAchieved">Optional goal progress from 0 to 1.</param>
-/// <param name="GoalFormatted">Optional formatted goal target.</param>
 public record MetricRecord(
     string MetricFormatted,
     double? TrendComparedToPreviousPeriod,
     double? GoalAchieved,
     string? GoalFormatted);
 
-/// <summary>Dashboard KPI component with async data loading, trends, and goal tracking.</summary>
 public class MetricView(
     string title,
     Icons? icon,
     Func<Task<MetricRecord>> metricData
 ) : ViewBase
 {
-    /// <summary>Fixed height for consistent dashboard layout.</summary>
     private const int Height = 55;
 
-    /// <summary>Builds the metric view with loading, error, or success states.</summary>
     public override object? Build()
     {
         var data = UseState<MetricRecord?>(() => null);

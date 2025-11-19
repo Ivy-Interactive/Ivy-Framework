@@ -17,4 +17,4 @@ export { SlotWidget } from './SlotWidget';
 export { TooltipWidget } from './TooltipWidget';
 
 export { PaginationWidget } from './PaginationWidget';
-export { KanbanWidget, KanbanColumnWidget, KanbanCardWidget } from './kanban';
+export { KanbanWidget, KanbanCardWidget } from './kanban';

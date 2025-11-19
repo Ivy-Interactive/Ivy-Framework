@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/Icon';
-import { cn, getIvyHost, camelCase } from '@/lib/utils';
+import { cn, getIvyHost, camelCase, validateLinkUrl } from '@/lib/utils';
 import { useEventHandler } from '@/components/event-handler';
 import withTooltip from '@/hoc/withTooltip';
 import { Loader2 } from 'lucide-react';
@@ -42,10 +42,28 @@ interface ButtonWidgetProps {
 }
 
 const getUrl = (url: string) => {
-  if (url.startsWith('http://') || url.startsWith('https://')) {
-    return url;
+  // Validate the URL first to prevent open redirect vulnerabilities
+  const validatedUrl = validateLinkUrl(url);
+  if (validatedUrl === '#') {
+    // Invalid URL, return safe fallback
+    return '#';
   }
-  return `${getIvyHost()}${url.startsWith('/') ? '' : '/'}${url}`;
+
+  // If it's already a full URL (http/https), return it
+  if (
+    validatedUrl.startsWith('http://') ||
+    validatedUrl.startsWith('https://')
+  ) {
+    return validatedUrl;
+  }
+
+  // app:// and anchor links should not be prefixed with host
+  if (validatedUrl.startsWith('app://') || validatedUrl.startsWith('#')) {
+    return validatedUrl;
+  }
+
+  // Otherwise, construct relative URL with Ivy host
+  return `${getIvyHost()}${validatedUrl.startsWith('/') ? '' : '/'}${validatedUrl}`;
 };
 
 export const ButtonWidget: React.FC<ButtonWidgetProps> = ({

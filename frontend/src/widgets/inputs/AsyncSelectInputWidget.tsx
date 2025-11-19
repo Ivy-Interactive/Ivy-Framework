@@ -1,8 +1,16 @@
+import React from 'react';
 import { useEventHandler } from '@/components/event-handler';
 import { cn } from '@/lib/utils';
 import { ChevronRight } from 'lucide-react';
 import { inputStyles } from '@/lib/styles';
 import { InvalidIcon } from '@/components/InvalidIcon';
+import {
+  Tooltip,
+  TooltipProvider,
+  TooltipTrigger,
+  TooltipContent,
+} from '@/components/ui/tooltip';
+import { useRef, useEffect, useState } from 'react';
 
 interface AsyncSelectInputWidgetProps {
   id: string;
@@ -26,6 +34,72 @@ export const AsyncSelectInputWidget: React.FC<AsyncSelectInputWidgetProps> = ({
     eventHandler('OnSelect', id, []);
   };
 
+  // Create ref for the display value span
+  const displayValueRef = useRef<HTMLSpanElement>(null);
+
+  // Detect ellipsis on the display value span
+  const [isEllipsed, setIsEllipsed] = useState(false);
+
+  useEffect(() => {
+    // Skip ellipsis check when no display value
+    if (!displayValue) {
+      requestAnimationFrame(() => setIsEllipsed(false));
+      return;
+    }
+
+    const checkEllipsis = () => {
+      if (!displayValueRef?.current) {
+        return;
+      }
+      setIsEllipsed(
+        displayValueRef.current.scrollWidth >
+          displayValueRef.current.clientWidth
+      );
+    };
+
+    // Check after render
+    requestAnimationFrame(checkEllipsis);
+
+    // Debounced resize handler
+    let resizeTimeout: NodeJS.Timeout;
+    const handleResize = () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(checkEllipsis, 150);
+    };
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      clearTimeout(resizeTimeout);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [displayValue]);
+
+  const displayValueSpan = displayValue ? (
+    <span
+      ref={displayValueRef}
+      className="grow text-primary font-semibold text-body ml-3 underline overflow-hidden text-ellipsis whitespace-nowrap"
+    >
+      {displayValue}
+    </span>
+  ) : null;
+
+  // Wrap display value span with tooltip if ellipsed
+  const shouldShowTooltip = isEllipsed && displayValue;
+  const wrappedDisplayValue = shouldShowTooltip ? (
+    <TooltipProvider>
+      <Tooltip delayDuration={300}>
+        <TooltipTrigger asChild>{displayValueSpan}</TooltipTrigger>
+        <TooltipContent className="bg-popover text-popover-foreground shadow-md max-w-sm">
+          <div className="whitespace-pre-wrap wrap-break-word">
+            {displayValue}
+          </div>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  ) : (
+    displayValueSpan
+  );
+
   return (
     <div className="relative">
       <button
@@ -37,13 +111,9 @@ export const AsyncSelectInputWidget: React.FC<AsyncSelectInputWidgetProps> = ({
           invalid && inputStyles.invalidInput
         )}
       >
-        {displayValue && (
-          <span className="flex-grow text-primary font-semibold text-body ml-3 underline">
-            {displayValue}
-          </span>
-        )}
+        {wrappedDisplayValue}
         {!displayValue && (
-          <span className="flex-grow text-muted-foreground text-body ml-3">
+          <span className="grow text-muted-foreground text-body ml-3">
             {placeholder}
           </span>
         )}

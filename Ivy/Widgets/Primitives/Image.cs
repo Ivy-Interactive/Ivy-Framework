@@ -7,7 +7,6 @@ namespace Ivy;
 /// <summary>Image widget with automatic sizing and aspect ratio preservation. Supports JPEG, PNG, GIF, WebP, SVG.</summary>
 public record Image : WidgetBase<Image>
 {
-    /// <summary>Initializes image widget. Default size: min-content (natural dimensions).</summary>
     public Image(string src)
     {
         Src = src;

@@ -107,3 +107,156 @@ export function camelCase(titleCase: unknown): unknown {
 
 // Shared Ivy tag-to-class map for headings, paragraphs, lists, tables, etc.
 export const ivyTagClassMap = textBlockClassMap;
+
+/**
+ * Gets the current origin for same-origin validation.
+ * Exported for testing purposes - can be mocked in tests.
+ */
+export function getCurrentOrigin(): string {
+  if (typeof window === 'undefined' || !window.location) {
+    return '';
+  }
+  return window.location.origin;
+}
+
+// Internal reference to getCurrentOrigin for use within this module
+// Using an object wrapper so it can be modified in tests
+export const _getCurrentOriginRef = {
+  getCurrentOrigin: getCurrentOrigin,
+};
+
+/**
+ * Validates and sanitizes a URL to prevent open redirect vulnerabilities.
+ * Only allows relative paths (starting with /) or absolute URLs with http/https protocol.
+ * For redirects, external URLs are only allowed if they match the current origin.
+ *
+ * @param url - The URL to validate
+ * @param allowExternal - Whether to allow external URLs (default: false for redirects)
+ * @returns The sanitized URL if valid, null otherwise
+ */
+export function validateRedirectUrl(
+  url: string | null | undefined,
+  allowExternal: boolean = false
+): string | null {
+  if (!url || typeof url !== 'string') {
+    return null;
+  }
+
+  // Trim whitespace
+  url = url.trim();
+
+  // Allow relative paths (starting with /)
+  if (url.startsWith('/')) {
+    // Validate it's a safe relative path (no protocol, no javascript:, etc.)
+    if (!/^\/[^:]*$/.test(url)) {
+      return null;
+    }
+    return url;
+  }
+
+  // For external URLs, validate protocol and optionally origin
+  try {
+    const urlObj = new URL(url);
+
+    // Only allow http and https protocols
+    if (urlObj.protocol !== 'http:' && urlObj.protocol !== 'https:') {
+      return null;
+    }
+
+    // If external URLs are not allowed, only allow same-origin
+    if (!allowExternal) {
+      // Use the internal reference which points to the exported function
+      // This allows mocking the exported function to work internally
+      const currentOrigin = _getCurrentOriginRef.getCurrentOrigin();
+      if (!currentOrigin || urlObj.origin !== currentOrigin) {
+        return null;
+      }
+    }
+
+    return urlObj.toString();
+  } catch {
+    // Invalid URL format
+    return null;
+  }
+}
+
+/**
+ * Validates and sanitizes a URL for use in anchor tags or window.open.
+ * Allows relative paths, external http/https URLs, and app:// URLs, but prevents dangerous protocols.
+ *
+ * @param url - The URL to validate
+ * @returns The sanitized URL if valid, '#' otherwise
+ */
+export function validateLinkUrl(url: string | null | undefined): string {
+  if (!url || typeof url !== 'string') {
+    return '#';
+  }
+
+  // Trim whitespace
+  url = url.trim();
+
+  // Handle empty string after trimming
+  if (url === '') {
+    return '#';
+  }
+
+  // Allow app:// URLs (Ivy internal navigation)
+  if (url.startsWith('app://')) {
+    // Validate app:// URLs don't contain dangerous characters
+    // Allow query parameters (? and &) but prevent fragments (#) and protocol injection (multiple colons)
+    // Pattern: app://[app-id][?query-params] where query-params can contain & but not #
+    if (!/^app:\/\/[^:#]*(\?[^#]*)?$/.test(url)) {
+      return '#';
+    }
+    // Additional check: prevent protocol injection (multiple colons after app://)
+    const afterProtocol = url.substring(6); // After "app://"
+    if (afterProtocol.includes('://') || afterProtocol.match(/:[^?&/]/)) {
+      return '#';
+    }
+    return url;
+  }
+
+  // Allow anchor links (starting with #)
+  if (url.startsWith('#')) {
+    // Validate anchor links are safe
+    // Allow colons in anchor IDs (HTML5 allows this), but prevent query params and fragments
+    // Pattern: #[anchor-id] where anchor-id can contain colons but not ? or &
+    if (!/^#[^?&]*$/.test(url)) {
+      return '#';
+    }
+    // Additional check: prevent protocol injection attempts
+    const afterHash = url.substring(1);
+    if (afterHash.includes('://')) {
+      return '#';
+    }
+    return url;
+  }
+
+  // Allow relative paths (starting with /)
+  if (url.startsWith('/')) {
+    // Validate it's a safe relative path
+    if (!/^\/[^:]*$/.test(url)) {
+      return '#';
+    }
+    return url;
+  }
+
+  // For absolute URLs, validate protocol
+  try {
+    const urlObj = new URL(url);
+
+    // Only allow http and https protocols (prevent javascript:, data:, etc.)
+    if (urlObj.protocol !== 'http:' && urlObj.protocol !== 'https:') {
+      return '#';
+    }
+
+    return urlObj.toString();
+  } catch {
+    // Invalid URL format - treat as relative if it doesn't contain colons
+    if (!url.includes(':')) {
+      // Might be a relative path without leading slash
+      return url.startsWith('/') ? url : `/${url}`;
+    }
+    return '#';
+  }
+}

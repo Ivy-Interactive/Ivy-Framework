@@ -60,7 +60,7 @@ export const TabContentRenderer: React.FC<TabContentRendererProps> = ({
               isUserInitiatedChangeRef.current = true;
               safeEvent('OnRefresh', [tabOrder.indexOf(tabId)]);
             }}
-            className="opacity-60 p-1 rounded border border-transparent hover:border-border hover:bg-accent hover:opacity-100 transition-colors cursor-pointer"
+            className="opacity-60 p-1 rounded-full border border-transparent hover:border-border hover:bg-accent hover:opacity-100 transition-colors cursor-pointer"
           >
             <RotateCw className="w-3 h-3" />
           </a>
@@ -73,7 +73,7 @@ export const TabContentRenderer: React.FC<TabContentRendererProps> = ({
               safeEvent('OnClose', [tabOrder.indexOf(tabId)]);
             }}
             className={cn(
-              'opacity-60 p-1 rounded border border-transparent hover:border-border hover:bg-accent hover:opacity-100 transition-colors cursor-pointer',
+              'opacity-60 p-1 rounded-full border border-transparent hover:border-border hover:bg-accent hover:opacity-100 transition-colors cursor-pointer',
               !isActive && 'invisible group-hover:visible'
             )}
           >
