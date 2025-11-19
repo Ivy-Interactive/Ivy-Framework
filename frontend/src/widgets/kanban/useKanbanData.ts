@@ -114,7 +114,11 @@ export function useKanbanData(
             name: key,
             color: '',
             order: index,
-            width: columnWidths[key],
+            width:
+              columnWidths[key] ||
+              Object.entries(columnWidths).find(
+                ([k]) => k.toLowerCase() === key.toLowerCase()
+              )?.[1],
           })
         );
 
@@ -158,7 +162,11 @@ export function useKanbanData(
         name: status,
         color: '',
         order: index,
-        width: columnWidths[status],
+        width:
+          columnWidths[status] ||
+          Object.entries(columnWidths).find(
+            ([k]) => k.toLowerCase() === status.toLowerCase()
+          )?.[1],
       }));
 
       const cardToTaskMap = new Map<string, Task>();

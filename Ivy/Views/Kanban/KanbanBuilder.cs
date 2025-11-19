@@ -28,7 +28,7 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
     private object? _empty;
     private Size? _width = Size.Full();
     private Size? _height = Size.Full();
-    private readonly Dictionary<TGroupKey, Size> _columnWidths = new();
+    private readonly Dictionary<string, Size> _columnWidths = new();
 
     public KanbanBuilder(
         IEnumerable<TModel> records,
@@ -176,14 +176,14 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
         var uniqueKeys = _records.Select(compiledSelector).Distinct().ToList();
         foreach (var key in uniqueKeys)
         {
-            _columnWidths[key] = width;
+            _columnWidths[key?.ToString() ?? ""] = width;
         }
         return this;
     }
 
     public KanbanBuilder<TModel, TGroupKey> Width(TGroupKey groupKey, Size width)
     {
-        _columnWidths[groupKey] = width;
+        _columnWidths[groupKey?.ToString() ?? ""] = width;
         return this;
     }
 
@@ -303,7 +303,7 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
         }).ToArray();
 
         var columnWidthsDict = _columnWidths.Any()
-            ? new Dictionary<object, Size>(_columnWidths.ToDictionary(kvp => (object)kvp.Key!, kvp => kvp.Value))
+            ? _columnWidths.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.ToString())
             : null;
 
         var kanban = new Ivy.Kanban(cards) with

@@ -190,8 +190,8 @@ export function KanbanColumn({
   return (
     <div
       className={cn(
-        hasExplicitWidth ? 'bg-background' : 'flex-1 bg-background',
-        'rounded-lg px-0 py-4 min-h-0 flex flex-col transition-colors min-w-70',
+        hasExplicitWidth ? 'bg-background' : 'flex-1 bg-background min-w-70',
+        'rounded-lg px-0 py-4 min-h-0 flex flex-col transition-colors',
         showDragOver &&
           'bg-accent border-2 border-accent-foreground border-dashed rounded-lg',
         className
