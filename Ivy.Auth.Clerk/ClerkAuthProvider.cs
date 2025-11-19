@@ -190,7 +190,7 @@ public class ClerkAuthProvider : IAuthProvider
 
         try
         {
-            var (principal, _) = await ValidateToken(authToken.AccessToken, cancellationToken)
+            var (principal, _) = await ValidateToken(authToken.AccessToken, lenientLifetimeValidation: false, cancellationToken)
                 ?? throw new Exception("Failed to validate access token after OAuth callback.");
 
             if (principal.FindFirst("sid")?.Value is not { } sessionId)
@@ -227,7 +227,7 @@ public class ClerkAuthProvider : IAuthProvider
 
         try
         {
-            var (principal, _) = await ValidateToken(jwt, cancellationToken)
+            var (principal, _) = await ValidateToken(jwt, lenientLifetimeValidation: true, cancellationToken)
                 ?? throw new Exception("Failed to validate access token.");
 
             if (principal.FindFirst("sid")?.Value is not { } sessionId)
@@ -260,8 +260,8 @@ public class ClerkAuthProvider : IAuthProvider
                 return null;
             }
 
-            var (principal, _) = await ValidateToken(token.AccessToken, cancellationToken)
-                ?? throw new Exception("Failed to validate access token after OAuth callback.");
+            var (principal, _) = await ValidateToken(token.AccessToken, lenientLifetimeValidation: true, cancellationToken)
+                ?? throw new Exception("Failed to validate access token during token refresh.");
 
             if (principal.FindFirst("sid")?.Value is not { } sessionId)
             {
@@ -288,7 +288,7 @@ public class ClerkAuthProvider : IAuthProvider
 
     public async Task<bool> ValidateAccessTokenAsync(string token, CancellationToken cancellationToken = default)
     {
-        return (await ValidateToken(token, cancellationToken)) is not null;
+        return (await ValidateToken(token, lenientLifetimeValidation: false, cancellationToken)) is not null;
     }
 
     public async Task<UserInfo?> GetUserInfoAsync(string token, object? tag, CancellationToken cancellationToken = default)
@@ -350,7 +350,7 @@ public class ClerkAuthProvider : IAuthProvider
 
     public async Task<TokenLifetime?> GetTokenLifetimeAsync(AuthToken token, CancellationToken cancellationToken = default)
     {
-        if (await ValidateToken(token.AccessToken, cancellationToken) is var (_, lifetime))
+        if (await ValidateToken(token.AccessToken, lenientLifetimeValidation: true, cancellationToken) is var (_, lifetime))
         {
             return lifetime;
         }
@@ -401,7 +401,7 @@ public class ClerkAuthProvider : IAuthProvider
         return this;
     }
 
-    private async Task<(ClaimsPrincipal, TokenLifetime)?> ValidateToken(string jwt, CancellationToken cancellationToken)
+    private async Task<(ClaimsPrincipal, TokenLifetime)?> ValidateToken(string jwt, bool lenientLifetimeValidation, CancellationToken cancellationToken)
     {
         var signingKeys = await GetSigningKeysAsync(cancellationToken);
 
@@ -417,7 +417,9 @@ public class ClerkAuthProvider : IAuthProvider
                 ValidateIssuer = true,
                 ValidIssuer = $"https://{_frontendApiDomain}.clerk.accounts.dev",
                 ValidateAudience = false,
-                ClockSkew = TimeSpan.Zero
+                ClockSkew = lenientLifetimeValidation
+                    ? TimeSpan.FromDays(1)
+                    : TimeSpan.Zero,
             }, out SecurityToken validatedToken);
 
             return (principal, new TokenLifetime(validatedToken.ValidTo, validatedToken.ValidFrom));
