@@ -1,3 +1,4 @@
+using System.Linq;
 using Ivy.Core;
 using Ivy.Core.Hooks;
 
@@ -27,7 +28,7 @@ public class AlertView(IState<AlertResult> alertResult, IState<bool> isOpen, Ale
             new DialogHeader(options.Title ?? ""),
             new DialogBody(options.Message ?? ""),
             new DialogFooter(
-                Layout.Horizontal(options.Buttons.Select(CreateButton))
+                options.Buttons.Select(CreateButton).Cast<object>().ToArray()
             )
         );
     }
