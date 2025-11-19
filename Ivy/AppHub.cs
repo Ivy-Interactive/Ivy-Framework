@@ -10,6 +10,7 @@ using Ivy.Core.Exceptions;
 using Ivy.Helpers;
 using Ivy.Hooks;
 using Ivy.Services;
+using Ivy.Shared;
 using Ivy.Views;
 using Ivy.Views.DataTables;
 using Microsoft.AspNetCore.Http;
@@ -52,16 +53,13 @@ public class AppHub(
                 id = null;
             }
 
-            if (id == server.AppRepository.GetAppOrDefault(id).Id)
+            if (chrome)
             {
-                if (chrome)
-                {
-                    navigationAppId = id;
-                }
-                else
-                {
-                    appId = id;
-                }
+                navigationAppId = id;
+            }
+            else
+            {
+                appId = id;
             }
         }
 
@@ -100,6 +98,20 @@ public class AppHub(
         return new AppArgs(connectionId, appId, navigationAppId, appArgs ?? server.Args?.Args, request.Scheme, request.Host.Value!);
     }
 
+    private static AppDescriptor Get404AppDescriptor(string appId)
+    {
+        return new AppDescriptor
+        {
+            Id = appId,
+            Title = "App Not Found",
+            Icon = Icons.CircleAlert,
+            Type = typeof(NotFoundView),
+            ViewFactory = () => new NotFoundView(),
+            IsVisible = false,
+            Path = []
+        };
+    }
+
     public override async Task OnConnectedAsync()
     {
         try
@@ -111,6 +123,8 @@ public class AppHub(
             var chrome = GetChromeParam(httpContext);
             var parentId = GetParentId(httpContext);
             var (appId, navigationAppId) = GetAppId(server, httpContext, chrome);
+
+
 
             var clientProvider = new ClientProvider(new ClientSender(clientNotifier, Context.ConnectionId));
 
@@ -178,6 +192,8 @@ public class AppHub(
                 }
             }
 
+            AppDescriptor appDescriptor;
+
             if (string.IsNullOrEmpty(appId))
             {
                 appId = server.DefaultAppId ?? server.AppRepository.GetAppOrDefault(null).Id;
@@ -198,11 +214,43 @@ public class AppHub(
                         navigationAppId = chromeDefaultAppId;
                     }
                 }
-                appId = server.AppRepository.GetAppOrDefault(appId).Id;
+
+                // Check if the requested navigation app exists
+                AppDescriptor? notFoundApp = null;
+                if (!string.IsNullOrEmpty(navigationAppId))
+                {
+                    var resolvedApp = server.AppRepository.GetAppOrDefault(navigationAppId);
+                    if (resolvedApp.Id != navigationAppId)
+                    {
+                        // App not found, prepare virtual 404 app
+                        notFoundApp = Get404AppDescriptor(navigationAppId);
+                    }
+                }
+
+                appServices.AddSingleton<IAppRepository>(new ScopedAppRepository(server.AppRepository, notFoundApp));
+
+                appDescriptor = server.GetApp(appId);
+            }
+            else
+            {
+                var resolvedApp = server.AppRepository.GetAppOrDefault(appId);
+                if (resolvedApp.Id != appId)
+                {
+                    // App not found, serve 404 as a virtual app
+                    // App not found, serve 404 as a virtual app
+                    appDescriptor = Get404AppDescriptor(appId);
+                    // We also need to scope the repository so that if the view asks for "current app", it gets this one.
+                    // Although NotFoundView doesn't use it, it's safer.
+                    appServices.AddSingleton<IAppRepository>(new ScopedAppRepository(server.AppRepository, appDescriptor));
+                }
+                else
+                {
+                    appServices.AddSingleton(typeof(IAppRepository), server.AppRepository);
+                    appDescriptor = resolvedApp;
+                }
             }
 
             var appArgs = GetAppArgs(Context.ConnectionId, appId, navigationAppId, httpContext);
-            var appDescriptor = server.GetApp(appId);
 
             logger.LogInformation($"Connected: {Context.ConnectionId} [{appId}]");
 
@@ -328,9 +376,7 @@ public class AppHub(
             {
                 await Clients.Caller.SendAsync("Error", new
                 {
-                    title = "Internal Server Error",
-                    description = ex.Message,
-                    stackTrace = ex.StackTrace
+                    viewOverride = new NotFoundView()
                 });
             }
             catch
@@ -738,4 +784,29 @@ public class ClientSender : IClientSender, IDisposable
 public class ClientProvider(IClientSender sender) : IClientProvider
 {
     public IClientSender Sender { get; set; } = sender;
+}
+
+internal class ScopedAppRepository(IAppRepository inner, AppDescriptor? overrideApp) : IAppRepository
+{
+    public MenuItem[] GetMenuItems() => inner.GetMenuItems();
+
+    public AppDescriptor GetAppOrDefault(string? id)
+    {
+        if (overrideApp != null && id == overrideApp.Id)
+        {
+            return overrideApp;
+        }
+        return inner.GetAppOrDefault(id);
+    }
+
+    public AppDescriptor? GetApp(string id)
+    {
+        if (overrideApp != null && id == overrideApp.Id)
+        {
+            return overrideApp;
+        }
+        return inner.GetApp(id);
+    }
+
+    public AppDescriptor? GetApp(Type type) => inner.GetApp(type);
 }
