@@ -438,7 +438,6 @@ public class AppHub(
 
                 var token = authService.GetCurrentToken();
 
-                Console.WriteLine($"AuthRefreshLoop: State={state} ConnectionId={connectionId}");
                 switch (state)
                 {
                     case AuthRefreshState.Initial:

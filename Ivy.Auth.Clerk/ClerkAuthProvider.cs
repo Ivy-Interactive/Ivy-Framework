@@ -89,18 +89,14 @@ public class ClerkAuthProvider : IAuthProvider
         try
         {
             var devBrowserTokenResponse = await _frontendClient.CreateDevBrowserTokenAsync(cancellationToken);
-            Console.WriteLine($"got dev browser token: {JsonSerializer.Serialize(devBrowserTokenResponse)}\n");
             devBrowserJwt = devBrowserTokenResponse.Id;
 
             var updateEnvironmentResponse = await _frontendClient.UpdateEnvironmentAsync(devBrowserTokenResponse.Id, ORIGIN_TEMPORARY_REMOVE_THIS_BEFORE_MERGE, cancellationToken);
-            Console.WriteLine($"updated environment: {JsonSerializer.Serialize(updateEnvironmentResponse)}\n");
 
             var clientResponse = await _frontendClient.GetCurrentClient(devBrowserTokenResponse.Id, cancellationToken);
-            Console.WriteLine($"got client: {JsonSerializer.Serialize(clientResponse)}\n");
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            Console.WriteLine($"Error during frontend API calls: {ex}");
         }
 
         var redirectUri = callback.GetUri(includeIdInPath: true);
@@ -111,12 +107,7 @@ public class ClerkAuthProvider : IAuthProvider
         var authUrl = $"https://{_frontendApiDomain}.accounts.dev/sign-in?redirect_url={Uri.EscapeDataString(redirectUri.ToString())}";
         if (!string.IsNullOrEmpty(devBrowserJwt))
         {
-            Console.WriteLine($"(not) Appending devBrowserJwt to auth URL: {devBrowserJwt}.\n");
-            // authUrl += $"&__clerk_db_jwt={devBrowserJwt}";
-        }
-        else
-        {
-            Console.WriteLine("Warning: devBrowserJwt is null or empty, proceeding without it.\n");
+            authUrl += $"&__clerk_db_jwt={devBrowserJwt}";
         }
 
         return new Uri(authUrl);
@@ -169,7 +160,6 @@ public class ClerkAuthProvider : IAuthProvider
     {
         var handshakeJwt = request.Query["__clerk_handshake"].ToString();
         var devBrowserJwt = request.Query["__clerk_db_jwt"].ToString();
-        Console.WriteLine($"Received dev browser JWT in callback: {devBrowserJwt}\n");
 
         var error = request.Query["error"].ToString();
         var errorDescription = request.Query["error_description"].ToString();
@@ -185,7 +175,6 @@ public class ClerkAuthProvider : IAuthProvider
             throw new Exception("Received no handshake JWT from Clerk.");
         }
 
-        Console.WriteLine("Received handshake JWT!");
         var authToken = await VerifyHandshakeJwtAsync(handshakeJwt, devBrowserJwt, cancellationToken);
 
         try
@@ -198,12 +187,10 @@ public class ClerkAuthProvider : IAuthProvider
                 throw new Exception("No session ID found in access token.");
             }
 
-            Console.WriteLine("Touching session...");
             await _frontendClient.TouchSessionAsync(sessionId, devBrowserJwt, cancellationToken);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            Console.WriteLine($"Error touching session: {ex}");
         }
 
         return authToken;
@@ -220,8 +207,6 @@ public class ClerkAuthProvider : IAuthProvider
 
         if (devBrowserJwt is null)
         {
-            Console.WriteLine("No devBrowserJwt provided in tag for Logout.");
-            Console.WriteLine($"Tag type: {tag?.GetType()}");
             return;
         }
 
@@ -237,9 +222,8 @@ public class ClerkAuthProvider : IAuthProvider
 
             await _frontendClient.EndSessionAsync(sessionId, devBrowserJwt, cancellationToken);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            Console.WriteLine($"Error ending session: {ex}");
         }
     }
 
@@ -256,7 +240,6 @@ public class ClerkAuthProvider : IAuthProvider
 
             if (devBrowserJwt is null)
             {
-                Console.WriteLine("No devBrowserJwt provided in tag for GetUserInfo.");
                 return null;
             }
 
@@ -268,7 +251,6 @@ public class ClerkAuthProvider : IAuthProvider
                 throw new Exception("No session ID found in access token.");
             }
 
-            Console.WriteLine("refreshing session token...");
             var newToken = await _frontendClient.CreateSessionTokenAsync(sessionId, devBrowserJwt, cancellationToken);
             if (string.IsNullOrEmpty(newToken.Jwt))
             {
@@ -279,9 +261,8 @@ public class ClerkAuthProvider : IAuthProvider
                 return new AuthToken(newToken.Jwt, token.RefreshToken, devBrowserJwt);
             }
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            Console.WriteLine($"Error refreshing access token! {ex}");
             return null;
         }
     }
@@ -304,8 +285,6 @@ public class ClerkAuthProvider : IAuthProvider
 
             if (devBrowserJwt is null)
             {
-                Console.WriteLine("No devBrowserJwt provided in tag for GetUserInfo.");
-                Console.WriteLine($"Tag type: {tag?.GetType()}");
                 return null;
             }
 
@@ -316,7 +295,6 @@ public class ClerkAuthProvider : IAuthProvider
             var sessionId = jwt.Claims.FirstOrDefault(c => c.Type == "sid")?.Value;
             if (sessionId is null)
             {
-                Console.WriteLine("No session ID found in token.");
                 return null;
             }
 
@@ -335,7 +313,6 @@ public class ClerkAuthProvider : IAuthProvider
 
             if (email is null)
             {
-                Console.WriteLine("No email address found for user!!!!!!!!!");
                 return null;
             }
 
@@ -343,7 +320,6 @@ public class ClerkAuthProvider : IAuthProvider
         }
         catch (Exception ex)
         {
-            Console.WriteLine("Error getting user info: " + ex.Message);
             return null;
         }
     }
@@ -424,9 +400,8 @@ public class ClerkAuthProvider : IAuthProvider
 
             return (principal, new TokenLifetime(validatedToken.ValidTo, validatedToken.ValidFrom));
         }
-        catch (Exception e)
+        catch (Exception)
         {
-            Console.WriteLine("Token validation failed: " + e.Message);
             return null;
         }
     }
