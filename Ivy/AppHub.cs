@@ -236,11 +236,7 @@ public class AppHub(
                 var resolvedApp = server.AppRepository.GetAppOrDefault(appId);
                 if (resolvedApp.Id != appId)
                 {
-                    // App not found, serve 404 as a virtual app
-                    // App not found, serve 404 as a virtual app
                     appDescriptor = Get404AppDescriptor(appId);
-                    // We also need to scope the repository so that if the view asks for "current app", it gets this one.
-                    // Although NotFoundView doesn't use it, it's safer.
                     appServices.AddSingleton<IAppRepository>(new ScopedAppRepository(server.AppRepository, appDescriptor));
                 }
                 else
