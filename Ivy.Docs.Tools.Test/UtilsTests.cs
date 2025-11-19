@@ -39,7 +39,7 @@ public class UtilsTests
 
     [Theory]
     [InlineData("Onboarding.InstallationApp", "onboarding/installation")]
-    [InlineData("Onboarding.GettingStarted.FirstAppApp", "onboarding/gettingstarted/firstapp")]
+    [InlineData("Onboarding.GettingStarted.FirstAppApp", "onboarding/getting-started/first-app")]
     public void GetAppIdFromTypeName_ReturnsExpected(string typeName, string expectedAppId)
     {
         var result = Utils.GetAppIdFromTypeName(typeName);
