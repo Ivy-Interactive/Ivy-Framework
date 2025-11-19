@@ -27,19 +27,19 @@ public static class AlertOptionHelpers
             ],
             AlertButtonSet.OkCancel =>
             [
-                new AlertButton("Ok", AlertResult.Ok),
-                new AlertButton("Cancel", AlertResult.Cancel, ButtonVariant.Secondary)
+                new AlertButton("Cancel", AlertResult.Cancel, ButtonVariant.Secondary),
+                new AlertButton("Ok", AlertResult.Ok)
             ],
             AlertButtonSet.YesNo =>
             [
-                new AlertButton("Yes", AlertResult.Yes),
-                new AlertButton("No", AlertResult.No, ButtonVariant.Secondary)
+                new AlertButton("No", AlertResult.No, ButtonVariant.Secondary),
+                new AlertButton("Yes", AlertResult.Yes)
             ],
             AlertButtonSet.YesNoCancel =>
             [
-                new AlertButton("Yes", AlertResult.Yes),
+                new AlertButton("Cancel", AlertResult.Cancel, ButtonVariant.Secondary),
                 new AlertButton("No", AlertResult.No),
-                new AlertButton("Cancel", AlertResult.Cancel, ButtonVariant.Secondary)
+                new AlertButton("Yes", AlertResult.Yes)
             ],
             _ => throw new ArgumentOutOfRangeException(nameof(buttonSet), buttonSet, null)
         };
