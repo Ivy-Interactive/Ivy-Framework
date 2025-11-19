@@ -59,11 +59,7 @@ public class FrontendApiClient(string? frontendApiDomain)
 
     public async Task<ClerkSessionResponse> GetSessionAsync(string sessionId, string devBrowserJwt, CancellationToken cancellationToken = default)
     {
-        var request = new HttpRequestMessage(
-            HttpMethod.Get,
-            $"https://{_frontendApiDomain}.clerk.accounts.dev/v1/client/sessions/{sessionId}?__clerk_api_version={ApiVersion}&__clerk_db_jwt={devBrowserJwt}");
-        // request.Headers.Add("__session", sessionToken);
-        var response = await _httpClient.SendAsync(request, cancellationToken);
+        var response = await _httpClient.GetAsync($"https://{_frontendApiDomain}.clerk.accounts.dev/v1/client/sessions/{sessionId}?__clerk_api_version={ApiVersion}&__clerk_db_jwt={devBrowserJwt}", cancellationToken);
         return await ParseResponse<ClerkSessionResponse>(response);
     }
 
