@@ -249,70 +249,27 @@ export interface WidgetNode {
 
 ## Theming and Styling System
 
-The theming system uses CSS custom properties with comprehensive light and dark mode support. The system provides a complete design token set covering colors, typography, spacing, and animations. These default styles can be overridden at runtime using the Theming service, which allows applications to dynamically generate and apply custom CSS variables through `IThemeService.SetTheme()` and `IThemeService.GenerateThemeCss()`.
+The theming system uses CSS custom properties with comprehensive light and dark mode support, built on the **Ivy Design System** tokens. The system provides a complete design token set covering colors, typography, spacing, and animations. These default styles can be overridden at runtime using the Theming service, which allows applications to dynamically generate and apply custom CSS variables through `IThemeService.SetTheme()` and `IThemeService.GenerateThemeCss()`.
 
 **Theme Features:**
 
 - CSS custom properties for all design tokens
 - Automatic theme detection via `MutationObserver`
-- Extended color palette with light/dark variants
+- Semantic color palette with light/dark variants
 - Typography scales with Geist font family
 - Tailwind CSS integration for utility-first styling
+
+**Available Theme Colors:**
+
+| Category | Variables |
+|----------|-----------|
+| Main | `--primary`, `--primary-foreground`, `--secondary`, `--secondary-foreground`, `--background`, `--foreground` |
+| Semantic | `--destructive`, `--success`, `--warning`, `--info` (with `-foreground` variants) |
+| UI Elements | `--border`, `--input`, `--ring`, `--muted`, `--accent`, `--card`, `--popover` (with `-foreground` variants) |
 
 **Font System:** The application uses Geist and Geist Mono fonts with `font-display: swap` for optimal loading performance. Font files are served locally with multiple weights (400, 500, 600, 700).
 
 **Component Integration:** Radix UI components receive theme-aware styling through CSS custom properties, ensuring consistent appearance across light and dark modes.
-
-```css
-@import "tailwindcss";
-
-:root {
-  --background: 0 0% 100%;
-  --foreground: 222.2 84% 4.9%;
-  --card: 0 0% 100%;
-  --card-foreground: 222.2 84% 4.9%;
-  --popover: 0 0% 100%;
-  --popover-foreground: 222.2 84% 4.9%;
-  --primary: 222.2 47.4% 11.2%;
-  --primary-foreground: 210 40% 98%;
-  --secondary: 210 40% 96.1%;
-  --secondary-foreground: 222.2 47.4% 11.2%;
-  --muted: 210 40% 96.1%;
-  --muted-foreground: 215.4 16.3% 46.9%;
-  --accent: 210 40% 96.1%;
-  --accent-foreground: 222.2 47.4% 11.2%;
-  --destructive: 0 84.2% 60.2%;
-  --destructive-foreground: 210 40% 98%;
-  --border: 214.3 31.8% 91.4%;
-  --input: 214.3 31.8% 91.4%;
-  --ring: 222.2 84% 4.9%;
-  --radius: 0.5rem;
-}
-
-.dark {
-  --background: 222.2 84% 4.9%;
-  --foreground: 210 40% 98%;
-  --card: 222.2 84% 4.9%;
-  --card-foreground: 210 40% 98%;
-  --popover: 222.2 84% 4.9%;
-  --popover-foreground: 210 40% 98%;
-  --primary: 210 40% 98%;
-  --primary-foreground: 222.2 47.4% 11.2%;
-  --secondary: 217.2 32.6% 17.5%;
-  --secondary-foreground: 210 40% 98%;
-  --muted: 217.2 32.6% 17.5%;
-  --muted-foreground: 215 20.2% 65.1%;
-  --accent: 217.2 32.6% 17.5%;
-  --accent-foreground: 210 40% 98%;
-  --destructive: 0 62.8% 30.6%;
-  --destructive-foreground: 210 40% 98%;
-  --border: 217.2 32.6% 17.5%;
-  --input: 217.2 32.6% 17.5%;
-  --ring: 212.7 26.8% 83.9%;
-}
-
-// ... more theme definitions ...
-```
 
 ```css
 @font-face {
