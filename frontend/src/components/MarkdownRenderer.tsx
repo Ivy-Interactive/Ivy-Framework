@@ -16,7 +16,15 @@ import rehypeRaw from 'rehype-raw';
 import rehypeSlug from 'rehype-slug';
 import 'katex/dist/katex.min.css';
 import { cn, getIvyHost } from '@/lib/utils';
-import { validateLinkUrl, validateImageUrl } from '@/lib/urlValidation';
+import {
+  validateLinkUrl,
+  validateImageUrl,
+  isExternalUrl,
+  isAnchorLink,
+  isAppProtocol,
+  isRelativePath,
+  isStandardUrl,
+} from '@/lib/urlValidation';
 import CopyToClipboardButton from './CopyToClipboardButton';
 import { createPrismTheme } from '@/lib/ivy-prism-theme';
 import { textBlockClassMap, textContainerClass } from '@/lib/textBlockClassMap';
@@ -227,15 +235,8 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
       // Only call backend handler for custom link handling scenarios
       // validateLinkUrl already handles external links, anchor links, app:// URLs, and relative paths safely
       // If the URL is one of these standard types, the browser will handle it naturally
-      const isStandardUrl =
-        validatedHref.startsWith('http://') ||
-        validatedHref.startsWith('https://') ||
-        validatedHref.startsWith('#') ||
-        validatedHref.startsWith('app://') ||
-        validatedHref.startsWith('/');
-
       // Only call onLinkClick for non-standard URLs that need custom handling
-      if (!isStandardUrl && onLinkClick) {
+      if (!isStandardUrl(validatedHref) && onLinkClick) {
         event.preventDefault();
         onLinkClick(validatedHref);
       }
@@ -396,15 +397,15 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
             return <span {...props}>{children}</span>;
           }
 
-          const isExternalLink =
-            safeHref.startsWith('http://') || safeHref.startsWith('https://');
-          const isAnchorLink = safeHref.startsWith('#');
-          const isAppProtocol = safeHref.startsWith('app://');
-          const isRelativePath = safeHref.startsWith('/');
+          // Use helper functions for URL type detection
+          const isExternalLink = isExternalUrl(safeHref);
+          const isAnchorLinkValue = isAnchorLink(safeHref);
+          const isAppProtocolValue = isAppProtocol(safeHref);
+          const isRelativePathValue = isRelativePath(safeHref);
 
           // Convert app:// URLs to regular paths for href attribute
           let hrefForNavigation = safeHref;
-          if (isAppProtocol) {
+          if (isAppProtocolValue) {
             // Convert app://MyApp to /MyApp, app://MyApp?param=value to /MyApp?param=value
             const appId = safeHref.substring(7); // Remove "app://"
             const [appPath, queryString] = appId.split('?');
@@ -419,7 +420,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
               target={isExternalLink ? '_blank' : undefined}
               rel={isExternalLink ? 'noopener noreferrer' : undefined}
               onClick={
-                isAnchorLink
+                isAnchorLinkValue
                   ? e => {
                       e.preventDefault();
                       const targetId = safeHref.substring(1);
@@ -443,7 +444,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
                         });
                       }
                     }
-                  : isAppProtocol || isRelativePath
+                  : isAppProtocolValue || isRelativePathValue
                     ? undefined // Let browser handle navigation naturally
                     : e => handleLinkClick(safeHref, e)
               }

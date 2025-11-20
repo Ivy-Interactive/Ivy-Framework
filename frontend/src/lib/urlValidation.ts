@@ -16,6 +16,46 @@ export const _getCurrentOriginRef = {
 };
 
 /**
+ * URL type detection helpers
+ */
+export function isExternalUrl(url: string): boolean {
+  return url.startsWith('http://') || url.startsWith('https://');
+}
+
+export function isAnchorLink(url: string): boolean {
+  return url.startsWith('#');
+}
+
+export function isAppProtocol(url: string): boolean {
+  return url.startsWith('app://');
+}
+
+export function isRelativePath(url: string): boolean {
+  return url.startsWith('/');
+}
+
+export function isDataUrl(url: string): boolean {
+  return url.startsWith('data:');
+}
+
+export function isBlobUrl(url: string): boolean {
+  return url.startsWith('blob:');
+}
+
+/**
+ * Determines if a URL is a standard URL type that browsers handle natively
+ * (external http/https, anchor links, app://, or relative paths)
+ */
+export function isStandardUrl(url: string): boolean {
+  return (
+    isExternalUrl(url) ||
+    isAnchorLink(url) ||
+    isAppProtocol(url) ||
+    isRelativePath(url)
+  );
+}
+
+/**
  * Validates and sanitizes a URL to prevent open redirect vulnerabilities.
  * Only allows relative paths (starting with /) or absolute URLs with http/https protocol.
  * For redirects, external URLs are only allowed if they match the current origin.
@@ -212,10 +252,8 @@ export function validateMediaUrl(
       // If no mediaType specified, reject all data URLs
       return null;
     }
-    // Additional validation: prevent protocol injection
-    if (url.includes('://') && !url.startsWith('data:')) {
-      return null;
-    }
+    // Note: No need to check for '://' since we're already in a data: block
+    // and data URLs don't contain '://' in their structure
     return url;
   }
 

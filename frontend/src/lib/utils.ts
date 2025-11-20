@@ -185,4 +185,12 @@ export {
   validateAudioUrl,
   validateVideoUrl,
   type ValidateMediaUrlOptions,
+  // URL type detection helpers
+  isExternalUrl,
+  isAnchorLink,
+  isAppProtocol,
+  isRelativePath,
+  isDataUrl,
+  isBlobUrl,
+  isStandardUrl,
 } from './urlValidation';

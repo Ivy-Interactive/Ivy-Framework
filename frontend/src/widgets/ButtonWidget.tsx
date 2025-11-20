@@ -2,7 +2,12 @@ import React, { useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/Icon';
 import { cn, getIvyHost, camelCase } from '@/lib/utils';
-import { validateLinkUrl } from '@/lib/urlValidation';
+import {
+  validateLinkUrl,
+  isAppProtocol,
+  isAnchorLink,
+  isExternalUrl,
+} from '@/lib/urlValidation';
 import { useEventHandler } from '@/components/event-handler';
 import withTooltip from '@/hoc/withTooltip';
 import { Loader2 } from 'lucide-react';
@@ -47,21 +52,17 @@ const getUrl = (url: string): string => {
   // validateLinkUrl handles app://, anchor links, relative paths, and http/https URLs safely
   const validatedUrl = validateLinkUrl(url);
 
-  // If validation fails, return safe fallback
+  // Early return for invalid URLs
   if (validatedUrl === '#') {
     return '#';
   }
 
-  // For app:// and anchor links, return as-is (already validated and safe)
-  if (validatedUrl.startsWith('app://') || validatedUrl.startsWith('#')) {
+  // Early returns for URLs that don't need host prefixing
+  if (isAppProtocol(validatedUrl) || isAnchorLink(validatedUrl)) {
     return validatedUrl;
   }
 
-  // For external URLs (http/https), return as-is (already validated by validateLinkUrl)
-  if (
-    validatedUrl.startsWith('http://') ||
-    validatedUrl.startsWith('https://')
-  ) {
+  if (isExternalUrl(validatedUrl)) {
     return validatedUrl;
   }
 
