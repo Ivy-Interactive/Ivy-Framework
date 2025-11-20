@@ -399,13 +399,13 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
 
           // Use helper functions for URL type detection
           const isExternalLink = isExternalUrl(safeHref);
-          const isAnchorLinkValue = isAnchorLink(safeHref);
-          const isAppProtocolValue = isAppProtocol(safeHref);
-          const isRelativePathValue = isRelativePath(safeHref);
+          const isAnchor = isAnchorLink(safeHref);
+          const isApp = isAppProtocol(safeHref);
+          const isRelative = isRelativePath(safeHref);
 
           // Convert app:// URLs to regular paths for href attribute
           let hrefForNavigation = safeHref;
-          if (isAppProtocolValue) {
+          if (isApp) {
             // Convert app://MyApp to /MyApp, app://MyApp?param=value to /MyApp?param=value
             const appId = safeHref.substring(7); // Remove "app://"
             const [appPath, queryString] = appId.split('?');
@@ -420,7 +420,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
               target={isExternalLink ? '_blank' : undefined}
               rel={isExternalLink ? 'noopener noreferrer' : undefined}
               onClick={
-                isAnchorLinkValue
+                isAnchor
                   ? e => {
                       e.preventDefault();
                       const targetId = safeHref.substring(1);
@@ -444,7 +444,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
                         });
                       }
                     }
-                  : isAppProtocolValue || isRelativePathValue
+                  : isApp || isRelative
                     ? undefined // Let browser handle navigation naturally
                     : e => handleLinkClick(safeHref, e)
               }

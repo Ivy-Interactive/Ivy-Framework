@@ -193,4 +193,6 @@ export {
   isDataUrl,
   isBlobUrl,
   isStandardUrl,
+  isFullUrl,
+  normalizeRelativePath,
 } from './urlValidation';

@@ -1,6 +1,10 @@
 import { getHeight, getWidth } from '@/lib/styles';
 import { getIvyHost } from '@/lib/utils';
-import { validateImageUrl } from '@/lib/urlValidation';
+import {
+  validateImageUrl,
+  isFullUrl,
+  normalizeRelativePath,
+} from '@/lib/urlValidation';
 import React from 'react';
 
 interface ImageWidgetProps {
@@ -20,15 +24,13 @@ const getImageUrl = (url: string | undefined | null): string | null => {
   }
 
   // If it's already a full URL (http/https/data/blob/app), return it
-  if (validatedUrl.match(/^(https?:\/\/|data:|blob:|app:)/i)) {
+  if (isFullUrl(validatedUrl)) {
     return validatedUrl;
   }
 
   // For relative paths, construct full URL with Ivy host
   // validatedUrl is already a safe relative path (starts with / or was normalized)
-  const relativePath = validatedUrl.startsWith('/')
-    ? validatedUrl
-    : `/${validatedUrl}`;
+  const relativePath = normalizeRelativePath(validatedUrl);
   return `${getIvyHost()}${relativePath}`;
 };
 

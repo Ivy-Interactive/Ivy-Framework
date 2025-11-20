@@ -7,6 +7,7 @@ import {
   isAppProtocol,
   isAnchorLink,
   isExternalUrl,
+  normalizeRelativePath,
 } from '@/lib/urlValidation';
 import { useEventHandler } from '@/components/event-handler';
 import withTooltip from '@/hoc/withTooltip';
@@ -68,9 +69,7 @@ const getUrl = (url: string): string => {
 
   // For relative paths, construct full URL with Ivy host
   // validatedUrl is already a safe relative path (starts with / or was normalized)
-  const relativePath = validatedUrl.startsWith('/')
-    ? validatedUrl
-    : `/${validatedUrl}`;
+  const relativePath = normalizeRelativePath(validatedUrl);
   return `${getIvyHost()}${relativePath}`;
 };
 

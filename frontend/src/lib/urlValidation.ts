@@ -56,6 +56,21 @@ export function isStandardUrl(url: string): boolean {
 }
 
 /**
+ * Checks if a URL is a full URL (http/https, data:, blob:, or app:)
+ * as opposed to a relative path
+ */
+export function isFullUrl(url: string): boolean {
+  return /^(https?:\/\/|data:|blob:|app:)/i.test(url);
+}
+
+/**
+ * Normalizes a relative path by ensuring it starts with a leading slash
+ */
+export function normalizeRelativePath(path: string): string {
+  return path.startsWith('/') ? path : `/${path}`;
+}
+
+/**
  * Validates and sanitizes a URL to prevent open redirect vulnerabilities.
  * Only allows relative paths (starting with /) or absolute URLs with http/https protocol.
  * For redirects, external URLs are only allowed if they match the current origin.

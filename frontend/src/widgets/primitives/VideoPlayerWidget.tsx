@@ -1,7 +1,12 @@
 import React, { useState } from 'react';
 import { getHeight, getWidth } from '@/lib/styles';
 import { getIvyHost } from '@/lib/utils';
-import { validateVideoUrl, validateImageUrl } from '@/lib/urlValidation';
+import {
+  validateVideoUrl,
+  validateImageUrl,
+  isFullUrl,
+  normalizeRelativePath,
+} from '@/lib/urlValidation';
 
 interface VideoPlayerWidgetProps {
   id: string;
@@ -24,15 +29,13 @@ const getVideoUrl = (url: string): string | null => {
   }
 
   // If it's already a full URL (http/https/data/blob/app), return it
-  if (validatedUrl.match(/^(https?:\/\/|data:|blob:|app:)/i)) {
+  if (isFullUrl(validatedUrl)) {
     return validatedUrl;
   }
 
   // For relative paths, construct full URL with Ivy host
   // validatedUrl is already a safe relative path (starts with / or was normalized)
-  const relativePath = validatedUrl.startsWith('/')
-    ? validatedUrl
-    : `/${validatedUrl}`;
+  const relativePath = normalizeRelativePath(validatedUrl);
   return `${getIvyHost()}${relativePath}`;
 };
 
