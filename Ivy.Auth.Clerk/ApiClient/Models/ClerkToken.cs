@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace Ivy.Auth.Clerk.ApiClient;
+namespace Ivy.Auth.Clerk.ApiClient.Models;
 
 public class ClerkToken
 {

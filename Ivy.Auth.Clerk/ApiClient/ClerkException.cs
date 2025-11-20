@@ -1,4 +1,5 @@
 using Ivy.Auth.Clerk.ApiClient.Responses;
+using Ivy.Auth.Clerk.ApiClient.Models;
 
 namespace Ivy.Auth.Clerk.ApiClient;
 

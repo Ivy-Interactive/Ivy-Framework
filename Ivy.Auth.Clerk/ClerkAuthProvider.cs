@@ -318,7 +318,7 @@ public class ClerkAuthProvider : IAuthProvider
 
             return new UserInfo(user.Id, email ?? "", name, user.ProfileImageUrl);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             return null;
         }
