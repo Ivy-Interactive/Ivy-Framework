@@ -289,11 +289,10 @@ public class ClerkAuthProvider : IAuthProvider
             }
 
             // TODO: cache user info to avoid excessive touch calls
-            // TODO: use ValidateToken instead of only parsing the JWT
-            var handler = new JwtSecurityTokenHandler();
-            var jwt = handler.ReadJwtToken(token);
-            var sessionId = jwt.Claims.FirstOrDefault(c => c.Type == "sid")?.Value;
-            if (sessionId is null)
+            var (principal, _) = await ValidateToken(token, lenientLifetimeValidation: true, cancellationToken)
+                ?? throw new Exception("Failed to validate access token in GetUserInfoAsync.");
+
+            if (principal.FindFirst("sid")?.Value is not { } sessionId)
             {
                 return null;
             }
