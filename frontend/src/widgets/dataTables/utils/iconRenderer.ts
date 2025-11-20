@@ -1,6 +1,6 @@
 import { icons } from 'lucide-react';
 import { createElement } from 'react';
-import { renderToStaticMarkup } from 'react-dom/server';
+import { createRoot } from 'react-dom/client';
 
 // Cache for SVG strings
 const svgCache = new Map<string, string>();
@@ -43,15 +43,32 @@ export function getIconSVG(
   }
 
   try {
-    // Render to static SVG string
+    // Create a temporary container
+    const container = document.createElement('div');
     const element = createElement(IconComponent, {
       size,
       color,
       strokeWidth,
     });
 
-    const svgString = renderToStaticMarkup(element);
+    // Render using createRoot (React 19 compatible)
+    const root = createRoot(container);
+    root.render(element);
+
+    // Get the SVG string synchronously (works because Lucide icons are simple SVGs)
+    const svgElement = container.querySelector('svg');
+    if (!svgElement) {
+      console.warn(`Failed to render SVG for icon ${iconName}`);
+      root.unmount();
+      return null;
+    }
+
+    const svgString = svgElement.outerHTML;
     svgCache.set(cacheKey, svgString);
+
+    // Clean up
+    root.unmount();
+
     return svgString;
   } catch (error) {
     console.error(`Error rendering icon ${iconName}:`, error);

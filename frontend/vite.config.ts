@@ -77,6 +77,17 @@ export default defineConfig(({ mode }) => ({
     alias: {
       '@': path.resolve(__dirname, './src'),
     },
+    dedupe: [
+      'react',
+      'react-dom',
+      '@codemirror/state',
+      '@codemirror/view',
+      '@codemirror/language',
+      '@codemirror/commands',
+      '@codemirror/autocomplete',
+      '@codemirror/lint',
+    ],
+    conditions: ['browser', 'import', 'module', 'default'],
   },
   build: {
     target: 'es2020',
