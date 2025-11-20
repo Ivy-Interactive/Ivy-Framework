@@ -106,8 +106,10 @@ public class ClerkAuthProvider : IAuthProvider
                 _ => throw new Exception($"Unsupported OAuth strategy: {option.Id}"),
             };
 
-            var signInResponse = await _frontendClient.CreateSignInAsync(devBrowserJwt, ORIGIN_TEMPORARY_REMOVE_THIS_BEFORE_MERGE, strategy, callback.GetUri(includeIdInPath: true).ToString(), null, cancellationToken);
-            Console.WriteLine($"Created sign-in: {signInResponse.Response?.Id}");
+            var redirectUrl = callback.GetUri(includeIdInPath: true).ToString();
+            var signInResponse = await _frontendClient.CreateSignInAsync(devBrowserJwt, ORIGIN_TEMPORARY_REMOVE_THIS_BEFORE_MERGE, strategy, redirectUrl, null, cancellationToken);
+            var firstFactorVerificationResponse = await _frontendClient.PrepareFirstFactorVerificationAsync(devBrowserJwt, ORIGIN_TEMPORARY_REMOVE_THIS_BEFORE_MERGE, signInResponse.Response!.Id, strategy, redirectUrl, null, cancellationToken);
+            Console.WriteLine($"First factor verification response: {firstFactorVerificationResponse}");
         }
         catch (Exception e)
         {

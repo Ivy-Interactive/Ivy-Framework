@@ -90,8 +90,27 @@ public class FrontendApiClient(string? frontendApiDomain)
             content.Add(new StringContent(actionCompleteRedirectUrl), "action_complete_redirect_url");
         }
 
-        var response = await _httpClient.PostAsync($"https://{_frontendApiDomain}.clerk.accounts.dev/v1/client/sign_ins?__clerk_api_version={ApiVersion}&__clerk_db_jwt={devBrowserJwt}", null, cancellationToken);
+        var response = await _httpClient.PostAsync($"https://{_frontendApiDomain}.clerk.accounts.dev/v1/client/sign_ins?__clerk_api_version={ApiVersion}&__clerk_db_jwt={devBrowserJwt}", content, cancellationToken);
         return await ParseResponse<ClerkSignInResponse>(response);
+    }
+
+    public async Task<string> PrepareFirstFactorVerificationAsync(string devBrowserJwt, string origin, string signInId, string strategy, string redirectUrl, string? actionCompleteRedirectUrl, CancellationToken cancellationToken = default)
+    {
+        var content = new MultipartFormDataContent
+        {
+            Headers = { ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded") },
+        };
+        content.Headers.Add("Origin", origin);
+
+        content.Add(new StringContent(strategy), "strategy");
+        content.Add(new StringContent(redirectUrl), "redirect_url");
+        if (actionCompleteRedirectUrl is not null)
+        {
+            content.Add(new StringContent(actionCompleteRedirectUrl), "action_complete_redirect_url");
+        }
+
+        var response = await _httpClient.PostAsync($"https://{_frontendApiDomain}.clerk.accounts.dev/v1/client/sign_ins/{signInId}/prepare_first_factor?__clerk_api_version={ApiVersion}&__clerk_db_jwt={devBrowserJwt}", content, cancellationToken);
+        return await ProcessResponse(response);
     }
 
     private async Task<string> ProcessResponse(HttpResponseMessage response)
