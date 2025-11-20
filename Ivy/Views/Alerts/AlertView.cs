@@ -1,4 +1,3 @@
-using System.Linq;
 using Ivy.Core;
 using Ivy.Core.Hooks;
 
