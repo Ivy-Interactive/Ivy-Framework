@@ -249,133 +249,39 @@ export interface WidgetNode {
 
 ## Theming and Styling System
 
-The theming system uses CSS custom properties with comprehensive light and dark mode support. The system provides a complete design token set covering colors, typography, spacing, and animations. These default styles can be overridden at runtime using the Theming service, which allows applications to dynamically generate and apply custom CSS variables through `IThemeService.SetTheme()` and `IThemeService.GenerateThemeCss()`.
+The theming system uses CSS custom properties with light and dark mode support. Built on the Ivy Design System, it provides design tokens for colors, typography, spacing, and animations. Themes can be customized via backend `IThemeService` or switched dynamically using the frontend `ThemeProvider`.
 
-**Theme Features:**
+**Theme Modes:** `light`, `dark`, and `system` (matches OS preference). The `ThemeProvider` component persists preferences in localStorage and exposes theme state via the `useTheme()` hook. The `useThemeWithMonitoring()` hook provides MutationObserver-based theme detection and system preference monitoring.
 
-- CSS custom properties for all design tokens
-- Automatic theme detection via `MutationObserver`
-- Extended color palette with light/dark variants
-- Typography scales with Geist font family
-- Tailwind CSS integration for utility-first styling
+**Backend Customization:** The `IThemeService` allows runtime theme generation with support for separate light/dark color palettes, custom typography (`FontFamily`, `FontSize`), border radius, and 20+ semantic color tokens (primary, secondary, destructive, success, warning, info, muted, accent, card, popover, border, input, ring).
 
-**Font System:** The application uses Geist and Geist Mono fonts with `font-display: swap` for optimal loading performance. Font files are served locally with multiple weights (400, 500, 600, 700).
-
-**Component Integration:** Radix UI components receive theme-aware styling through CSS custom properties, ensuring consistent appearance across light and dark modes.
-
-```css
-@import "tailwindcss";
-
-:root {
-  --background: 0 0% 100%;
-  --foreground: 222.2 84% 4.9%;
-  --card: 0 0% 100%;
-  --card-foreground: 222.2 84% 4.9%;
-  --popover: 0 0% 100%;
-  --popover-foreground: 222.2 84% 4.9%;
-  --primary: 222.2 47.4% 11.2%;
-  --primary-foreground: 210 40% 98%;
-  --secondary: 210 40% 96.1%;
-  --secondary-foreground: 222.2 47.4% 11.2%;
-  --muted: 210 40% 96.1%;
-  --muted-foreground: 215.4 16.3% 46.9%;
-  --accent: 210 40% 96.1%;
-  --accent-foreground: 222.2 47.4% 11.2%;
-  --destructive: 0 84.2% 60.2%;
-  --destructive-foreground: 210 40% 98%;
-  --border: 214.3 31.8% 91.4%;
-  --input: 214.3 31.8% 91.4%;
-  --ring: 222.2 84% 4.9%;
-  --radius: 0.5rem;
-}
-
-.dark {
-  --background: 222.2 84% 4.9%;
-  --foreground: 210 40% 98%;
-  --card: 222.2 84% 4.9%;
-  --card-foreground: 210 40% 98%;
-  --popover: 222.2 84% 4.9%;
-  --popover-foreground: 210 40% 98%;
-  --primary: 210 40% 98%;
-  --primary-foreground: 222.2 47.4% 11.2%;
-  --secondary: 217.2 32.6% 17.5%;
-  --secondary-foreground: 210 40% 98%;
-  --muted: 217.2 32.6% 17.5%;
-  --muted-foreground: 215 20.2% 65.1%;
-  --accent: 217.2 32.6% 17.5%;
-  --accent-foreground: 210 40% 98%;
-  --destructive: 0 62.8% 30.6%;
-  --destructive-foreground: 210 40% 98%;
-  --border: 217.2 32.6% 17.5%;
-  --input: 217.2 32.6% 17.5%;
-  --ring: 212.7 26.8% 83.9%;
-}
-
-// ... more theme definitions ...
+```csharp
+.UseTheme(theme => {
+    theme.Colors.Light.Primary = "220 90% 56%";
+    theme.Colors.Dark.Primary = "217 91% 60%";
+    theme.FontFamily = "Inter, sans-serif";
+    theme.BorderRadius = "0.75rem";
+})
 ```
 
-```css
-@font-face {
-  font-family: "Geist";
-  src: url("/fonts/Geist-Regular.woff2") format("woff2");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
+**Styling Stack:**
 
-@font-face {
-  font-family: "Geist";
-  src: url("/fonts/Geist-Medium.woff2") format("woff2");
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
+- **Typography**: Geist and Geist Mono fonts (weights 400, 500, 600, 700) with `font-display: swap`. shadcn/ui typography utilities (`typography-h1` through `typography-h4`, `typography-p`, `typography-lead`, etc.)
+- **Colors**: Semantic tokens mapped to Tailwind classes (`bg-primary`, `text-muted-foreground`). 16 chromatic colors for charts/visualization (red, orange, amber, yellow, lime, green, emerald, teal, cyan, sky, blue, indigo, violet, purple, fuchsia, pink, rose)
+- **Animations**: Accordion, sheet/dialog slides, toast, alert, and overlay animations integrated with Radix UI `data-state` attributes
+- **Components**: Radix UI primitives styled via CSS custom properties. Tailwind utility classes with custom theme extension. Native scrollbars, autofill, and form elements themed
 
-// ... more font definitions ...
-```
+**Component Usage:**
 
 ```typescript
-export function MermaidRenderer({ content }: { content: string }) {
-  const [svg, setSvg] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const theme = useTheme();
+import { useTheme } from '@/components/theme-provider';
 
-  useEffect(() => {
-    const renderDiagram = async () => {
-      try {
-        setError(null);
-        const mermaid = (await import("mermaid")).default;
-        
-        mermaid.initialize({
-          startOnLoad: false,
-          theme: theme === "dark" ? "dark" : "default",
-          securityLevel: "loose",
-        });
-
-        const id = `mermaid-${Math.random().toString(36).substr(2, 9)}`;
-        const { svg: renderedSvg } = await mermaid.render(id, content);
-        setSvg(renderedSvg);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to render diagram");
-      }
-    };
-
-    renderDiagram();
-  }, [content, theme]);
-
-  if (error) {
-    return <div className="text-destructive">Error: {error}</div>;
-  }
-
-  if (!svg) {
-    return <LoadingScreen />;
-  }
-
+function ThemeToggle() {
+  const { theme, setTheme } = useTheme();
   return (
-    <div
-      className="mermaid-container"
-      dangerouslySetInnerHTML={{ __html: svg }}
-    />
+    <button onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
+      Current: {theme}
+    </button>
   );
 }
 ```
