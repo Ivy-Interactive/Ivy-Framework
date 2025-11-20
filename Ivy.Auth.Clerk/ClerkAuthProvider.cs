@@ -28,6 +28,7 @@ public class ClerkAuthProvider : IAuthProvider
     private DateTime _signingKeysLastFetched = DateTime.MinValue;
     private readonly FrontendApiClient _frontendClient;
 
+    // TODO: remove this before merge
     private const string ORIGIN_TEMPORARY_REMOVE_THIS_BEFORE_MERGE = "http://localhost:5010";
 
     public ClerkAuthProvider()
@@ -94,9 +95,23 @@ public class ClerkAuthProvider : IAuthProvider
             var updateEnvironmentResponse = await _frontendClient.UpdateEnvironmentAsync(devBrowserTokenResponse.Id, ORIGIN_TEMPORARY_REMOVE_THIS_BEFORE_MERGE, cancellationToken);
 
             var clientResponse = await _frontendClient.GetCurrentClient(devBrowserTokenResponse.Id, cancellationToken);
+
+            var strategy = option.Id switch
+            {
+                "google" => "oauth_google",
+                "github" => "oauth_github",
+                "twitter" => "oauth_twitter",
+                "apple" => "oauth_apple",
+                "microsoft" => "oauth_microsoft",
+                _ => throw new Exception($"Unsupported OAuth strategy: {option.Id}"),
+            };
+
+            var signInResponse = await _frontendClient.CreateSignInAsync(devBrowserJwt, ORIGIN_TEMPORARY_REMOVE_THIS_BEFORE_MERGE, strategy, callback.GetUri(includeIdInPath: true).ToString(), null, cancellationToken);
+            Console.WriteLine($"Created sign-in: {signInResponse.Response?.Id}");
         }
-        catch (Exception)
+        catch (Exception e)
         {
+            Console.WriteLine($"Error creating OAuth URI: {e}");
         }
 
         var redirectUri = callback.GetUri(includeIdInPath: true);

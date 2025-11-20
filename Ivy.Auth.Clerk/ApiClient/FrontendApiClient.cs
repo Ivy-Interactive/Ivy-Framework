@@ -75,14 +75,32 @@ public class FrontendApiClient(string? frontendApiDomain)
         return await ParseResponse<ClerkClientResponse>(response);
     }
 
-    private async Task<T> ParseResponse<T>(HttpResponseMessage response)
+    public async Task<ClerkSignInResponse> CreateSignInAsync(string devBrowserJwt, string origin, string strategy, string redirectUrl, string? actionCompleteRedirectUrl, CancellationToken cancellationToken = default)
+    {
+        var content = new MultipartFormDataContent
+        {
+            Headers = { ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded") },
+        };
+        content.Headers.Add("Origin", origin);
+
+        content.Add(new StringContent(strategy), "strategy");
+        content.Add(new StringContent(redirectUrl), "redirect_url");
+        if (actionCompleteRedirectUrl is not null)
+        {
+            content.Add(new StringContent(actionCompleteRedirectUrl), "action_complete_redirect_url");
+        }
+
+        var response = await _httpClient.PostAsync($"https://{_frontendApiDomain}.clerk.accounts.dev/v1/client/sign_ins?__clerk_api_version={ApiVersion}&__clerk_db_jwt={devBrowserJwt}", null, cancellationToken);
+        return await ParseResponse<ClerkSignInResponse>(response);
+    }
+
+    private async Task<string> ProcessResponse(HttpResponseMessage response)
     {
         var json = await response.Content.ReadAsStringAsync();
 
         if (response.IsSuccessStatusCode)
         {
-            return JsonSerializer.Deserialize<T>(json, _jsonSerializerOptions)
-                ?? throw new InvalidOperationException("Clerk returned an empty or invalid response.");
+            return json;
         }
         else
         {
@@ -93,5 +111,13 @@ public class FrontendApiClient(string? frontendApiDomain)
 
             throw new ClerkException($"HTTP {(int)response.StatusCode} ({response.ReasonPhrase}): {json}");
         }
+    }
+
+    private async Task<T> ParseResponse<T>(HttpResponseMessage response)
+    {
+        var json = await ProcessResponse(response);
+
+        return JsonSerializer.Deserialize<T>(json, _jsonSerializerOptions)
+            ?? throw new InvalidOperationException("Clerk returned an empty or invalid response.");
     }
 }

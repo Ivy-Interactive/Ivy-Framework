@@ -14,7 +14,7 @@ public class ClerkClient
     public required List<ClerkSession> Sessions { get; init; }
 
     [JsonPropertyName("sign_in")]
-    public object? SignIn { get; init; }
+    public ClerkSignInAttempt? SignIn { get; init; }
 
     [JsonPropertyName("sign_up")]
     public object? SignUp { get; init; }
