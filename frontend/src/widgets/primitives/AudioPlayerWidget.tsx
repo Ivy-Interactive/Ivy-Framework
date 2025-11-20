@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { getHeight, getWidth } from '@/lib/styles';
-import { getIvyHost, validateAudioUrl } from '@/lib/utils';
+import { getIvyHost } from '@/lib/utils';
+import { validateAudioUrl } from '@/lib/urlValidation';
 
 interface AudioPlayerWidgetProps {
   id: string;
@@ -19,7 +20,6 @@ const getAudioUrl = (url: string): string | null => {
   // Validate and sanitize audio URL to prevent open redirect vulnerabilities
   const validatedUrl = validateAudioUrl(url);
   if (!validatedUrl) {
-    // Invalid URL, return null
     return null;
   }
 
@@ -28,8 +28,12 @@ const getAudioUrl = (url: string): string | null => {
     return validatedUrl;
   }
 
-  // Construct relative URL with Ivy host
-  return `${getIvyHost()}${validatedUrl.startsWith('/') ? '' : '/'}${validatedUrl}`;
+  // For relative paths, construct full URL with Ivy host
+  // validatedUrl is already a safe relative path (starts with / or was normalized)
+  const relativePath = validatedUrl.startsWith('/')
+    ? validatedUrl
+    : `/${validatedUrl}`;
+  return `${getIvyHost()}${relativePath}`;
 };
 
 export const AudioPlayerWidget: React.FC<AudioPlayerWidgetProps> = ({

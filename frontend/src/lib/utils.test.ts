@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import * as utils from './utils';
+import * as urlValidation from './urlValidation';
 
 describe('validateRedirectUrl', () => {
   let getCurrentOriginSpy: ReturnType<typeof vi.fn>;
@@ -7,7 +8,7 @@ describe('validateRedirectUrl', () => {
   beforeEach(() => {
     // Create a mock function and replace the internal reference
     const mockFn = vi.fn(() => 'https://example.com');
-    utils._getCurrentOriginRef.getCurrentOrigin = mockFn;
+    urlValidation._getCurrentOriginRef.getCurrentOrigin = mockFn;
     getCurrentOriginSpy = mockFn;
   });
 

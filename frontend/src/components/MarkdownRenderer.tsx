@@ -15,7 +15,8 @@ import rehypeKatex from 'rehype-katex';
 import rehypeRaw from 'rehype-raw';
 import rehypeSlug from 'rehype-slug';
 import 'katex/dist/katex.min.css';
-import { cn, getIvyHost, validateLinkUrl, validateImageUrl } from '@/lib/utils';
+import { cn, getIvyHost } from '@/lib/utils';
+import { validateLinkUrl, validateImageUrl } from '@/lib/urlValidation';
 import CopyToClipboardButton from './CopyToClipboardButton';
 import { createPrismTheme } from '@/lib/ivy-prism-theme';
 import { textBlockClassMap, textContainerClass } from '@/lib/textBlockClassMap';
@@ -216,30 +217,25 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
 
   const handleLinkClick = useCallback(
     (href: string, event: React.MouseEvent<HTMLAnchorElement>) => {
-      // URL is already validated in the link component, but validate again for safety
+      // Validate URL to prevent open redirect vulnerabilities
       const validatedHref = validateLinkUrl(href);
-      if (validatedHref === '#') {
+      if (validatedHref === '#' || !validatedHref) {
         event.preventDefault();
         return;
       }
 
-      const isExternalLink = validatedHref?.match(
-        /^(https?:\/\/|mailto:|tel:)/i
-      );
-      const isAnchorLink = validatedHref?.startsWith('#');
-      const isAppProtocol = validatedHref?.startsWith('app://');
-      const isRelativePath = validatedHref?.startsWith('/');
-
       // Only call backend handler for custom link handling scenarios
-      // Don't call for external links, anchor links, app:// URLs, or relative paths
-      if (
-        !isExternalLink &&
-        !isAnchorLink &&
-        !isAppProtocol &&
-        !isRelativePath &&
-        onLinkClick &&
-        validatedHref
-      ) {
+      // validateLinkUrl already handles external links, anchor links, app:// URLs, and relative paths safely
+      // If the URL is one of these standard types, the browser will handle it naturally
+      const isStandardUrl =
+        validatedHref.startsWith('http://') ||
+        validatedHref.startsWith('https://') ||
+        validatedHref.startsWith('#') ||
+        validatedHref.startsWith('app://') ||
+        validatedHref.startsWith('/');
+
+      // Only call onLinkClick for non-standard URLs that need custom handling
+      if (!isStandardUrl && onLinkClick) {
         event.preventDefault();
         onLinkClick(validatedHref);
       }
@@ -396,16 +392,19 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
         }: React.AnchorHTMLAttributes<HTMLAnchorElement>) => {
           // Validate URL to prevent open redirect vulnerabilities
           const safeHref = validateLinkUrl(href);
-          const isExternalLink = safeHref?.match(
-            /^(https?:\/\/|mailto:|tel:)/i
-          );
-          const isAnchorLink = safeHref?.startsWith('#');
-          const isAppProtocol = safeHref?.startsWith('app://');
-          const isRelativePath = safeHref?.startsWith('/');
+          if (!safeHref || safeHref === '#') {
+            return <span {...props}>{children}</span>;
+          }
+
+          const isExternalLink =
+            safeHref.startsWith('http://') || safeHref.startsWith('https://');
+          const isAnchorLink = safeHref.startsWith('#');
+          const isAppProtocol = safeHref.startsWith('app://');
+          const isRelativePath = safeHref.startsWith('/');
 
           // Convert app:// URLs to regular paths for href attribute
           let hrefForNavigation = safeHref;
-          if (isAppProtocol && safeHref) {
+          if (isAppProtocol) {
             // Convert app://MyApp to /MyApp, app://MyApp?param=value to /MyApp?param=value
             const appId = safeHref.substring(7); // Remove "app://"
             const [appPath, queryString] = appId.split('?');
@@ -423,7 +422,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
                 isAnchorLink
                   ? e => {
                       e.preventDefault();
-                      const targetId = safeHref?.substring(1);
+                      const targetId = safeHref.substring(1);
                       if (targetId) {
                         // Small delay to ensure content is rendered
                         requestAnimationFrame(() => {
@@ -445,11 +444,8 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
                       }
                     }
                   : isAppProtocol || isRelativePath
-                    ? undefined // Let browser handle navigation naturally for app:// URLs and relative paths
-                    : e =>
-                        safeHref &&
-                        safeHref !== '#' &&
-                        handleLinkClick(safeHref, e)
+                    ? undefined // Let browser handle navigation naturally
+                    : e => handleLinkClick(safeHref, e)
               }
             >
               {children}

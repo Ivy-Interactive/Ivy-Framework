@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { getHeight, getWidth } from '@/lib/styles';
-import { getIvyHost, validateVideoUrl, validateImageUrl } from '@/lib/utils';
+import { getIvyHost } from '@/lib/utils';
+import { validateVideoUrl, validateImageUrl } from '@/lib/urlValidation';
 
 interface VideoPlayerWidgetProps {
   id: string;
@@ -19,7 +20,6 @@ const getVideoUrl = (url: string): string | null => {
   // Validate and sanitize video URL to prevent open redirect vulnerabilities
   const validatedUrl = validateVideoUrl(url);
   if (!validatedUrl) {
-    // Invalid URL, return null
     return null;
   }
 
@@ -28,8 +28,12 @@ const getVideoUrl = (url: string): string | null => {
     return validatedUrl;
   }
 
-  // Construct relative URL with Ivy host
-  return `${getIvyHost()}${validatedUrl.startsWith('/') ? '' : '/'}${validatedUrl}`;
+  // For relative paths, construct full URL with Ivy host
+  // validatedUrl is already a safe relative path (starts with / or was normalized)
+  const relativePath = validatedUrl.startsWith('/')
+    ? validatedUrl
+    : `/${validatedUrl}`;
+  return `${getIvyHost()}${relativePath}`;
 };
 
 const isYouTube = (url: string): boolean => {

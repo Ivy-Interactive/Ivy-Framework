@@ -1,13 +1,8 @@
 import React, { useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/Icon';
-import {
-  cn,
-  getIvyHost,
-  camelCase,
-  validateLinkUrl,
-  validateRedirectUrl,
-} from '@/lib/utils';
+import { cn, getIvyHost, camelCase } from '@/lib/utils';
+import { validateLinkUrl } from '@/lib/urlValidation';
 import { useEventHandler } from '@/components/event-handler';
 import withTooltip from '@/hoc/withTooltip';
 import { Loader2 } from 'lucide-react';
@@ -47,52 +42,35 @@ interface ButtonWidgetProps {
   'data-testid'?: string;
 }
 
-const getUrl = (url: string) => {
-  // First validate the URL to prevent dangerous protocols (javascript:, data:, etc.)
+const getUrl = (url: string): string => {
+  // Validate URL to prevent dangerous protocols (javascript:, data:, etc.)
+  // validateLinkUrl handles app://, anchor links, relative paths, and http/https URLs safely
   const validatedUrl = validateLinkUrl(url);
+
+  // If validation fails, return safe fallback
   if (validatedUrl === '#') {
-    // Invalid URL, return safe fallback
     return '#';
   }
 
-  // For app:// and anchor links, return as-is (these are safe internal navigation)
+  // For app:// and anchor links, return as-is (already validated and safe)
   if (validatedUrl.startsWith('app://') || validatedUrl.startsWith('#')) {
     return validatedUrl;
   }
 
-  // For external URLs (http/https), validate them to prevent open redirect vulnerabilities
+  // For external URLs (http/https), return as-is (already validated by validateLinkUrl)
   if (
     validatedUrl.startsWith('http://') ||
     validatedUrl.startsWith('https://')
   ) {
-    // Use validateRedirectUrl to ensure the URL is safe
-    // allowExternal: true because external URLs are opened in new tab with rel="noopener noreferrer"
-    const redirectValidated = validateRedirectUrl(validatedUrl, true);
-    if (redirectValidated) {
-      return redirectValidated;
-    }
-    // If validation fails, return safe fallback
-    return '#';
+    return validatedUrl;
   }
 
-  // For relative paths, validate to prevent open redirect vulnerabilities
-  // Use validateRedirectUrl with allowExternal: false to ensure same-origin only
-  const redirectValidated = validateRedirectUrl(validatedUrl, false);
-  if (redirectValidated) {
-    // Construct relative URL with Ivy host
-    const constructedUrl = `${getIvyHost()}${redirectValidated.startsWith('/') ? '' : '/'}${redirectValidated}`;
-    // Validate the final constructed URL to ensure it's safe
-    // If validation fails, fall back to the validated relative path which is safe
-    const finalValidated = validateRedirectUrl(constructedUrl, false);
-    if (finalValidated) {
-      return finalValidated;
-    }
-    // For relative paths, return the validated relative path as-is
-    return redirectValidated;
-  }
-
-  // If validation fails, return safe fallback
-  return '#';
+  // For relative paths, construct full URL with Ivy host
+  // validatedUrl is already a safe relative path (starts with / or was normalized)
+  const relativePath = validatedUrl.startsWith('/')
+    ? validatedUrl
+    : `/${validatedUrl}`;
+  return `${getIvyHost()}${relativePath}`;
 };
 
 export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
