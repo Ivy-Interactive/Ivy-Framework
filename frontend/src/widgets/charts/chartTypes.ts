@@ -305,3 +305,22 @@ export interface PieLegendProps {
   layout?: string;
   verticalAlign?: string;
 }
+
+export interface CohortDataPoint {
+  cohort: string;
+  period: number;
+  value: number;
+  label?: string;
+}
+
+export interface CohortChartWidgetProps {
+  id: string;
+  data: CohortDataPoint[];
+  width?: string;
+  height?: string;
+  metricType?: 'currency' | 'percentage' | 'number';
+  title?: string;
+  loading?: boolean;
+  showTotal?: boolean;
+  toolbox?: ToolboxProps;
+}
