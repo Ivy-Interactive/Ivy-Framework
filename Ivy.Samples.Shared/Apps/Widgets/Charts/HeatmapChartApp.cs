@@ -4,7 +4,7 @@ using Ivy.Shared;
 namespace Ivy.Samples.Shared.Apps.Widgets.Charts;
 
 [App(icon: Icons.ChartLine, searchHints: ["cohort", "retention", "churn", "ltv", "heatmap"])]
-public class CohortChartApp : ViewBase
+public class HeatmapChartApp : ViewBase
 {
     public override object? Build()
     {
@@ -83,22 +83,22 @@ public class CohortChartApp : ViewBase
 
         return Layout.Grid().Columns(2)
             | (new Card()
-                | new CohortChart(retentionData)
+                | new HeatmapChart(retentionData)
                     .Title("Retention Rate")
                     .MetricType("percentage")
                     .ShowTotal())
             | (new Card()
-                | new CohortChart(ltvData)
+                | new HeatmapChart(ltvData)
                     .Title("LTV per User")
                     .MetricType("currency")
                     .ShowTotal())
             | (new Card()
-                | new CohortChart(churnData)
+                | new HeatmapChart(churnData)
                     .Title("Churn Rate")
                     .MetricType("percentage")
                     .ShowTotal())
             | (new Card()
-                | new CohortChart(mrrData)
+                | new HeatmapChart(mrrData)
                     .Title("MRR per Cohort")
                     .MetricType("currency")
                     .ShowTotal())

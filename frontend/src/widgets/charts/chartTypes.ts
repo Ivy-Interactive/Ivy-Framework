@@ -306,16 +306,16 @@ export interface PieLegendProps {
   verticalAlign?: string;
 }
 
-export interface CohortDataPoint {
+export interface HeatmapDataPoint {
   cohort: string;
   period: number;
   value: number;
   label?: string;
 }
 
-export interface CohortChartWidgetProps {
+export interface HeatmapChartWidgetProps {
   id: string;
-  data: CohortDataPoint[];
+  data: HeatmapDataPoint[];
   width?: string;
   height?: string;
   metricType?: 'currency' | 'percentage' | 'number';

@@ -5,9 +5,9 @@ using Ivy.Shared;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
-public record CohortChart : WidgetBase<CohortChart>
+public record HeatmapChart : WidgetBase<HeatmapChart>
 {
-    public CohortChart(object data)
+    public HeatmapChart(object data)
     {
         Data = data;
         Width = Size.Full();
@@ -21,29 +21,29 @@ public record CohortChart : WidgetBase<CohortChart>
     [Prop] public Toolbox? Toolbox { get; init; }
 }
 
-public static class CohortChartExtensions
+public static class HeatmapChartExtensions
 {
-    public static CohortChart Title(this CohortChart chart, string title)
+    public static HeatmapChart Title(this HeatmapChart chart, string title)
     {
         return chart with { Title = title };
     }
 
-    public static CohortChart MetricType(this CohortChart chart, string metricType)
+    public static HeatmapChart MetricType(this HeatmapChart chart, string metricType)
     {
         return chart with { MetricType = metricType };
     }
 
-    public static CohortChart ShowTotal(this CohortChart chart, bool showTotal = true)
+    public static HeatmapChart ShowTotal(this HeatmapChart chart, bool showTotal = true)
     {
         return chart with { ShowTotal = showTotal };
     }
 
-    public static CohortChart Toolbox(this CohortChart chart, Toolbox toolbox)
+    public static HeatmapChart Toolbox(this HeatmapChart chart, Toolbox toolbox)
     {
         return chart with { Toolbox = toolbox };
     }
 
-    public static CohortChart Toolbox(this CohortChart chart)
+    public static HeatmapChart Toolbox(this HeatmapChart chart)
     {
         return chart with { Toolbox = new Toolbox() };
     }

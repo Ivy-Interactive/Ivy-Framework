@@ -3,14 +3,14 @@ import ReactECharts from 'echarts-for-react';
 import { getHeight, getWidth } from '@/lib/styles';
 import { useThemeWithMonitoring } from '@/components/theme-provider';
 import { getChartThemeColors } from './styles';
-import { CohortChartWidgetProps } from './chartTypes';
+import { HeatmapChartWidgetProps } from './chartTypes';
 
 interface EChartsCallbackParams {
   data: [number, number, number, string];
   name: string;
 }
 
-const CohortChartWidget: React.FC<CohortChartWidgetProps> = ({
+const HeatmapChartWidget: React.FC<HeatmapChartWidgetProps> = ({
   data,
   width,
   height,
@@ -257,4 +257,4 @@ const CohortChartWidget: React.FC<CohortChartWidgetProps> = ({
   );
 };
 
-export default CohortChartWidget;
+export default HeatmapChartWidget;

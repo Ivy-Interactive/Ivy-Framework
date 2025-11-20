@@ -209,8 +209,8 @@ export const widgetMap = {
   'Ivy.PieChart': React.lazy(() => import('@/widgets/charts/PieChartWidget')),
   'Ivy.AreaChart': React.lazy(() => import('@/widgets/charts/AreaChartWidget')),
   'Ivy.BarChart': React.lazy(() => import('@/widgets/charts/BarChartWidget')),
-  'Ivy.CohortChart': React.lazy(
-    () => import('@/widgets/charts/CohortChartWidget')
+  'Ivy.HeatmapChart': React.lazy(
+    () => import('@/widgets/charts/HeatmapChartWidget')
   ),
 
   // Effects
