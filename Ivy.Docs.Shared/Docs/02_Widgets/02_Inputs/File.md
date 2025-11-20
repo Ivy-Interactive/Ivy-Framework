@@ -207,9 +207,11 @@ public class MaxFilesDemo : ViewBase
 
 Validation errors are automatically shown to the user via toast notifications.
 
-## File Content Types
+## File Content Types and Configuration
 
-The upload handler supports both binary and text content. `MemoryStreamUploadHandler` automatically detects the state type and configures itself accordingly:
+`MemoryStreamUploadHandler` automatically manages file uploads by reading the file stream into memory and updating your state. It handles progress tracking, cancellation, and error states automatically. The handler automatically detects the state type and configures itself accordingly.
+
+The upload handler supports both binary and text content. `MemoryStreamUploadHandler.Create()` supports optional configuration parameters:
 
 ```csharp
 // Binary content (default) - use FileUpload<byte[]>
@@ -227,21 +229,6 @@ var filesUpload = this.UseUpload(MemoryStreamUploadHandler.Create(filesState));
 // Multiple text files
 var textFilesState = UseState(ImmutableArray.Create<FileUpload<string>>());
 var textFilesUpload = this.UseUpload(MemoryStreamUploadHandler.Create(textFilesState, Encoding.UTF8));
-```
-
-### MemoryStreamUploadHandler Configuration
-
-`MemoryStreamUploadHandler` automatically manages file uploads by reading the file stream into memory and updating your state. It handles progress tracking, cancellation, and error states automatically.
-
-`MemoryStreamUploadHandler.Create()` supports optional configuration parameters:
-
-```csharp
-// Default configuration (binary file)
-var upload = this.UseUpload(MemoryStreamUploadHandler.Create(fileState));
-
-// Text file with encoding (encoding parameter only available for FileUpload<string>)
-var textState = UseState<FileUpload<string>?>();
-var upload = this.UseUpload(MemoryStreamUploadHandler.Create(textState, System.Text.Encoding.UTF8));
 
 // Binary file with custom chunk size (default: 8192 bytes)
 // Larger chunks = fewer progress updates but potentially better performance
