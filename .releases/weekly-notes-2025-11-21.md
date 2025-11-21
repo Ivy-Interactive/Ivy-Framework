@@ -320,7 +320,6 @@ Removed `Chart` (Chart1-5) and `Sidebar` color properties from `ThemeColors`. Th
 - **Blade Widget**: Optional `title` prop for custom header slots
 - **Optional Blade Title**: Prevents rendering empty header elements when no title provided
 
-
 ## Breaking Changes
 
 ### Framework Routes Now Use `/ivy` Prefix
@@ -451,55 +450,6 @@ bool isSafe = Utils.IsSafeAppId(appId);
 - `LinkBuilder` returns disabled buttons for invalid URLs
 - `client.Redirect()` validates URLs and throws for invalid destinations
 - `NavigateArgs.AppId` validates app IDs and throws for unsafe characters
-
-## CLI & Tooling
-
-### Headless Database Generation
-
-The `ivy db generate` command now supports console mode with `--use-console` flag for headless operation. Requires `--prompt`, `--dbml`, or STDIN input, `--yes-to-all`, and `--skip-debug`.
-
-### Automatic EF Migration Creation
-
-The command now automatically creates Entity Framework migrations after building the database generator project.
-
-### Database Generation Bug Fix
-
-Fixed issue where NuGet package references were being lost during database generation. The generator now properly preserves references like `Ivy.Database.Generator.Toolkit` and `Microsoft.EntityFrameworkCore.Design`.
-
-### Improved Error Reporting
-
-Better error handling with specific exit codes:
-
-- `20`: DBML validation error
-- `30`: Database generator build error
-- `40`: EF migration error
-- `50`: Database generator run error
-- `60`: Project build error
-
-### Dashboard App No Longer Auto-Generated
-
-The database generator no longer automatically adds a Dashboard app. Only apps explicitly returned by the AI agent are included.
-
-### Custom AI Model Selection
-
-```bash
-ivy db generate --model-id claude-3-5-sonnet-20241022
-```
-
-### Model Cache Control
-
-Hidden `--model-disable-cache` flag available in `ivy db generate`, `ivy app create`, and `ivy fix` commands for advanced scenarios.
-
-### Parallel App Generation
-
-Apps are now generated concurrently, significantly improving performance.
-
-### Better CLI Exit Codes for App Creation Failures
-
-Both `ivy app create` and `ivy db generate` now properly return non-zero exit codes when app generation fails:
-
-- `ivy app create` returns exit code `1` if any app fails
-- `ivy db generate` returns exit code `55` if any app fails
 
 ## Bug Fixes
 
