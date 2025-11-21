@@ -69,14 +69,6 @@ form.PlaceHorizontal(m => m.FirstName, m => m.LastName) // Side-by-side
 
 All form input fields now have consistent sizing across different input types.
 
-**Field Widget Dimensions:**
-
-```csharp
-state.ToTextInput()
-    .Width("300px")
-    .Height("40px");
-```
-
 **Form Groups Open by Default:**
 
 ```csharp
@@ -144,7 +136,7 @@ data.ToDataTable()
 
 **Footer Support:**
 
-DataTable now supports footer content that overlays the bottom of the table, with smart whitespace handling and proper z-index management.
+DataTable now supports footer content that overlays the bottom of the table, with smart whitespace handling and proper layering.
 
 **Configuration:**
 
@@ -176,8 +168,8 @@ All chart builders support three `.Toolbox()` overloads for customization.
 **Performance Improvements:**
 
 - Eliminated content re-renders on tab reorder using hash-based children stability check
-- Smooth drag-and-drop with `translate3d()` instead of CSS scale transforms
-- Better responsive overflow calculation with debouncing, resize observers, and mutation observers
+- Smooth drag-and-drop with improved transform handling
+- Better responsive overflow calculation with optimized event handling
 
 **UX Enhancements:**
 
@@ -188,19 +180,16 @@ All chart builders support three `.Toolbox()` overloads for customization.
 
 **Code Architecture:**
 
-The monolithic `TabsLayoutWidget.tsx` (1080 lines) has been split into a well-organized module structure with hooks, components, and utilities, each with comprehensive unit tests.
-
 ### DBML Editor UI Improvements
 
-- Fixed table width (240px) for consistent layout
 - Field name tooltips for long names/types
-- Improved connection handles visibility and z-index handling
-- Better pointer event handling for smooth dragging
+- Improved connection handles visibility and layering
+- Better interaction handling for smooth dragging
 
 ### Sidebar Improvements
 
 - Toggle button repositioned for better alignment
-- Scrollbar visibility improved with z-index handling (`z-20`)
+- Scrollbar visibility improved with better layering
 - User avatar images now properly displayed (previously only showed initials)
 
 ### Footer Menu Items Transformer
@@ -317,7 +306,7 @@ The framework now uses the **Ivy Design System** - a centralized, token-based th
 **Frontend:**
 
 - Imports `ivy-design-system` npm package
-- CSS variables from flat CSS files provided by design system
+- Theme variables provided by design system
 
 **Breaking Change:**
 
@@ -326,40 +315,11 @@ Removed `Chart` (Chart1-5) and `Sidebar` color properties from `ThemeColors`. Th
 ### UI Refinements
 
 - **Sheet Widget**: Improved vertical spacing
-- **Copy-to-Clipboard Button**: Refined to better integrate with shadcn/ui design system
+- **Copy-to-Clipboard Button**: Refined styling for better visual integration
 - **Audio Recorder**: Automatic MIME type fallback with browser compatibility detection
 - **Blade Widget**: Optional `title` prop for custom header slots
-- **Optional Blade Title**: Prevents rendering empty `<h2>` tag when no title provided
+- **Optional Blade Title**: Prevents rendering empty header elements when no title provided
 
-## New Features
-
-### DataTable Row Actions with Nested Menus
-
-Row actions now support nested dropdowns using `MenuItem.Children()`, providing better organization for related actions under a "more actions" menu.
-
-### DataTable Cell Actions
-
-Attach click handlers to specific cells using `HandleCellAction` method.
-
-### DataTable Footer Support
-
-Footer content overlays the bottom of the table with fixed positioning, smart whitespace handling, and proper z-index management.
-
-### Kanban Card Builder
-
-Custom card content through `.CardBuilder()` API, enabling rich card layouts with any widgets.
-
-### Option Descriptions in Select Inputs
-
-Options can include descriptions that display as subtitles in dropdown lists.
-
-### Clickable Links in Callouts
-
-Callout widgets automatically detect and convert markdown links to clickable navigation elements.
-
-### Card Header Slot System
-
-Flexible header system supporting custom layouts while maintaining backward compatibility.
 
 ## Breaking Changes
 
