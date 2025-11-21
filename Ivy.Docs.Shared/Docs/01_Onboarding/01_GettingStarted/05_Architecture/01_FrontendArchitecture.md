@@ -20,14 +20,14 @@ For information about the backend C# framework that defines widgets and handles 
 
 The Ivy frontend is built using modern web technologies optimized for development speed and runtime performance:
 
-| Component | Technology | Purpose |
-|-----------|------------|---------|
-| UI Framework | React | UI library |
-| Language | TypeScript | Type safety |
-| Build Tool | Vite | Build tool and dev server |
-| Styling | Tailwind CSS | Utility-first styling |
-| UI Components | Radix UI | Accessible component primitives |
-| Communication | SignalR | Real-time communication |
+| Component     | Technology   | Purpose                         |
+| ------------- | ------------ | ------------------------------- |
+| UI Framework  | React        | UI library                      |
+| Language      | TypeScript   | Type safety                     |
+| Build Tool    | Vite         | Build tool and dev server       |
+| Styling       | Tailwind CSS | Utility-first styling           |
+| UI Components | Radix UI     | Accessible component primitives |
+| Communication | SignalR      | Real-time communication         |
 
 The application uses Vite as the primary build tool, providing fast hot module replacement during development and optimized production builds. React 19 with concurrent features enables responsive UI updates, while TypeScript provides compile-time type safety for the entire codebase.
 
@@ -39,12 +39,12 @@ The build system uses Vite with custom plugins for seamless integration with the
 
 **Development Workflow:**
 
-| Service | Configuration | Purpose |
-|---------|---------------|---------|
-| Frontend Dev Server | Port 5173 via `npm run dev` | Development server with HMR |
-| Backend Server | Port 5010 via `dotnet watch` | C# backend with hot reload |
-| Metadata Injection | `injectMeta` plugin | Synchronizes page metadata from backend to frontend |
-| Hot Reload | State preservation | Preserves application state during code changes |
+| Service             | Configuration                | Purpose                                             |
+| ------------------- | ---------------------------- | --------------------------------------------------- |
+| Frontend Dev Server | Port 5173 via `npm run dev`  | Development server with HMR                         |
+| Backend Server      | Port 5010 via `dotnet watch` | C# backend with hot reload                          |
+| Metadata Injection  | `injectMeta` plugin          | Synchronizes page metadata from backend to frontend |
+| Hot Reload          | State preservation           | Preserves application state during code changes     |
 
 ```typescript
     plugins: [
@@ -86,7 +86,7 @@ graph TD
     A --> C[Update Messages]
     A --> D[Event Messages]
     A --> E[Authentication Messages]
-    
+
     B --> B1[Complete Widget Trees]
     C --> C1[JSON Patches]
     D --> D1[User Interactions]
@@ -98,8 +98,11 @@ The hook applies JSON patches using `fast-json-patch` and `lodash.cloneDeep` to 
 ```typescript
 export function useBackend(appId: string, appArgs?: string) {
   const [widgetTree, setWidgetTree] = useState<Widget | null>(null);
-  const [connectionState, setConnectionState] = useState<ConnectionState>("disconnected");
-  const [hubConnection, setHubConnection] = useState<HubConnection | null>(null);
+  const [connectionState, setConnectionState] =
+    useState<ConnectionState>("disconnected");
+  const [hubConnection, setHubConnection] = useState<HubConnection | null>(
+    null
+  );
   const machineId = useMachineId();
   const { parentId } = useSearchParams();
 
@@ -115,7 +118,9 @@ const handleMessage = (message: BackendMessage) => {
       break;
     case "update":
       if (widgetTree) {
-        setWidgetTree(applyPatch(cloneDeep(widgetTree), message.patches).newDocument);
+        setWidgetTree(
+          applyPatch(cloneDeep(widgetTree), message.patches).newDocument
+        );
       }
       break;
     case "toast":
@@ -212,7 +217,9 @@ export function renderWidgetTree(
     Object.keys(widget.slots).forEach((slotName) => {
       const slotContent = widget.slots![slotName];
       props[slotName] = Array.isArray(slotContent)
-        ? slotContent.map((child) => renderWidgetTree(child, onEvent, depth + 1))
+        ? slotContent.map((child) =>
+            renderWidgetTree(child, onEvent, depth + 1)
+          )
         : renderWidgetTree(slotContent, onEvent, depth + 1);
     });
   }
@@ -220,7 +227,9 @@ export function renderWidgetTree(
   // Handle children (non-slot content)
   if (widget.children) {
     props.children = Array.isArray(widget.children)
-      ? widget.children.map((child) => renderWidgetTree(child, onEvent, depth + 1))
+      ? widget.children.map((child) =>
+          renderWidgetTree(child, onEvent, depth + 1)
+        )
       : renderWidgetTree(widget.children, onEvent, depth + 1);
   }
 
@@ -274,11 +283,11 @@ The theming system uses CSS custom properties with comprehensive light and dark 
 
 **Available Theme Colors:**
 
-| Category | Variables |
-|----------|-----------|
-| Main | `--primary`, `--primary-foreground`, `--secondary`, `--secondary-foreground`, `--background`, `--foreground` |
-| Semantic | `--destructive`, `--success`, `--warning`, `--info` (with `-foreground` variants) |
-| UI Elements | `--border`, `--input`, `--ring`, `--muted`, `--accent`, `--card`, `--popover` (with `-foreground` variants) |
+| Category    | Variables                                                                                                    |
+| ----------- | ------------------------------------------------------------------------------------------------------------ |
+| Main        | `--primary`, `--primary-foreground`, `--secondary`, `--secondary-foreground`, `--background`, `--foreground` |
+| Semantic    | `--destructive`, `--success`, `--warning`, `--info` (with `-foreground` variants)                            |
+| UI Elements | `--border`, `--input`, `--ring`, `--muted`, `--accent`, `--card`, `--popover` (with `-foreground` variants)  |
 
 **Font System:** The application uses Geist and Geist Mono fonts with `font-display: swap` for optimal loading performance. Font files are served locally with multiple weights (400, 500, 600, 700).
 
@@ -302,12 +311,12 @@ The theming system uses CSS custom properties with comprehensive light and dark 
 **Component Usage:**
 
 ```typescript
-import { useTheme } from '@/components/theme-provider';
+import { useTheme } from "@/components/theme-provider";
 
 function ThemeToggle() {
   const { theme, setTheme } = useTheme();
   return (
-    <button onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
+    <button onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>
       Current: {theme}
     </button>
   );
@@ -332,12 +341,12 @@ graph LR
 
 **Development Commands:**
 
-| Command | Purpose |
-|---------|---------|
-| `npm run dev` | Start development server with HMR |
-| `npm run build` | Production build with optimization |
-| `npm run lint` | ESLint code analysis |
-| `npm run format` | Prettier code formatting |
+| Command          | Purpose                            |
+| ---------------- | ---------------------------------- |
+| `npm run dev`    | Start development server with HMR  |
+| `npm run build`  | Production build with optimization |
+| `npm run lint`   | ESLint code analysis               |
+| `npm run format` | Prettier code formatting           |
 
 **Backend Integration:** The development server connects to the backend via environment variable `IVY_HOST` (defaults to `http://localhost:5010`). The `injectMeta` plugin synchronizes metadata between frontend and backend during development.
 
@@ -383,13 +392,13 @@ export default defineConfig({
 ```
 
 ```typescript
-    connection.on("refresh", (message: RefreshMessage) => {
-      handleMessage({ type: "refresh", widget: message.widget });
-    });
+connection.on("refresh", (message: RefreshMessage) => {
+  handleMessage({ type: "refresh", widget: message.widget });
+});
 
-    connection.on("update", (message: UpdateMessage) => {
-      handleMessage({ type: "update", patches: message.patches });
-    });
+connection.on("update", (message: UpdateMessage) => {
+  handleMessage({ type: "update", patches: message.patches });
+});
 ```
 
 ```typescript
