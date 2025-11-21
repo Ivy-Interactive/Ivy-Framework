@@ -258,20 +258,13 @@ export interface WidgetNode {
 
 ## Theming and Styling System
 
-The theming system uses CSS custom properties with comprehensive light and dark mode support, built on the **Ivy Design System** tokens. The system provides a complete design token set covering colors, typography, spacing, and animations. These default styles can be overridden at runtime using the Theming service, which allows applications to dynamically generate and apply custom CSS variables through `IThemeService.SetTheme()` and `IThemeService.GenerateThemeCss()`. Themes can be customized via backend `IThemeService` or switched dynamically using the frontend `ThemeProvider`.
+The theming system uses CSS custom properties with comprehensive light and dark mode support, built on the **Ivy Design System** tokens. The system provides a complete design token set covering colors, typography, spacing, and animations.
 
-**Theme Modes:** `light`, `dark`, and `system` (matches OS preference). The `ThemeProvider` component persists preferences in localStorage and exposes theme state via the `useTheme()` hook. The `useThemeWithMonitoring()` hook provides MutationObserver-based theme detection and system preference monitoring.
+**CSS Custom Properties Structure:** Theme variables are defined in two CSS scopes: `:root` contains light theme variables, while `.dark` contains dark theme variants. When the `dark` class is applied to the document element, dark theme variables take precedence. The backend `IThemeService.GenerateThemeCss()` method generates a `<style>` block with both `:root` and `.dark` selectors containing all theme variables.
 
-**Backend Customization:** The `IThemeService` allows runtime theme generation with support for separate light/dark color palettes, custom typography (`FontFamily`, `FontSize`), border radius, and 20+ semantic color tokens (primary, secondary, destructive, success, warning, info, muted, accent, card, popover, border, input, ring).
+**ThemeProvider Implementation:** The `ThemeProvider` component manages theme state and persistence. It stores the current theme mode (`light`, `dark`, or `system`) in localStorage using the key `ivy-ui-theme`. When the theme changes, it manipulates the `documentElement.classList` to add or remove the `dark` class, which triggers CSS cascade to use dark theme variables. For `system` mode, it uses `window.matchMedia('(prefers-color-scheme: dark)')` to detect OS preference.
 
-```csharp
-.UseTheme(theme => {
-    theme.Colors.Light.Primary = "220 90% 56%";
-    theme.Colors.Dark.Primary = "217 91% 60%";
-    theme.FontFamily = "Inter, sans-serif";
-    theme.BorderRadius = "0.75rem";
-})
-```
+**Theme Update Flow:** When the backend calls `IClientProvider.ApplyTheme(css)`, it sends a `setTheme` message via SignalR. The frontend receives this message in the `useBackend` hook's message handler and injects the generated CSS into the document. The `useThemeWithMonitoring()` hook uses a `MutationObserver` to watch for class changes on `documentElement`, automatically detecting theme switches and updating component state.
 
 **Styling Stack:**
 
@@ -308,20 +301,7 @@ The theming system uses CSS custom properties with comprehensive light and dark 
 - **Animations**: Accordion, sheet/dialog slides, toast, alert, and overlay animations integrated with Radix UI `data-state` attributes
 - **Components**: Radix UI primitives styled via CSS custom properties. Tailwind utility classes with custom theme extension. Native scrollbars, autofill, and form elements themed
 
-**Component Usage:**
-
-```typescript
-import { useTheme } from "@/components/theme-provider";
-
-function ThemeToggle() {
-  const { theme, setTheme } = useTheme();
-  return (
-    <button onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>
-      Current: {theme}
-    </button>
-  );
-}
-```
+**Component Theme Consumption:** React components access theme variables through CSS custom properties. Tailwind's theme configuration extends to read these variables, allowing utility classes like `bg-primary` to resolve to `var(--primary)`. The `useThemeWithMonitoring()` hook extracts computed CSS variable values from the DOM using `getComputedStyle()`, enabling components to reactively respond to theme changes.
 
 ## Development Tools and Hot Reload
 
