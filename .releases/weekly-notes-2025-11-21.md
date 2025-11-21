@@ -235,7 +235,6 @@ var options = new[]
 
 state.ToAsyncSelectInput()
     .Placeholder("Select shipping method")
-    .Load(async () => options);
 ```
 
 **AsyncSelectInput HeaderLayout:**
