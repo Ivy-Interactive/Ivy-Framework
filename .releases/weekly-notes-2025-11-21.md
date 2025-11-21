@@ -4,43 +4,17 @@
 
 ### Headless Database Generation
 
-The `ivy db generate` command now supports a console mode with the `--use-console` flag, enabling headless database generation without launching the UI. This is perfect for CI/CD pipelines and automated workflows.
-
-**Usage:**
-
-```bash
-# Generate database from prompt in console mode
-ivy db generate --use-console --yes-to-all --skip-debug -p "Create a blog with posts and comments"
-
-# Generate from DBML file in console mode
-ivy db generate --use-console --yes-to-all --skip-debug --dbml schema.dbml
-
-# Pipe from stdin
-cat schema.dbml | ivy db generate --use-console --yes-to-all --skip-debug
-```
+The `ivy db generate` command now supports a console mode with the `--use-console` flag, enabling headless database generation without launching the UI.
 
 **Requirements:**
+
 - Must provide either `--prompt`, `--dbml`, or input via STDIN
 - Must use `--yes-to-all` (no interactive prompts)
 - Must use `--skip-debug` (no UI debugging)
 
-The console mode performs the full database generation workflow:
-1. Converts prompt to DBML (if needed)
-2. Validates the DBML schema
-3. Plans and generates suggested apps
-4. Creates the database generator project
-5. Runs migrations and seeds data
-6. Adds database to your project
-7. Generates all planned apps
-8. Verifies with a final build
-
 ### Automatic EF Migration Creation
 
-The `ivy db generate` command now automatically creates an Entity Framework migration after building the database generator project. Previously, you had to manually run `dotnet ef migrations add` after generation - now it's handled automatically as part of the workflow.
-
-The migration step includes intelligent retry logic with up to 3 attempts. If a migration fails and debugging is enabled (`--skip-debug` not set), the system will automatically attempt to fix the issue using `ivy fix` before retrying. This makes the migration process more resilient to transient errors.
-
-This streamlines the database setup process by ensuring your initial migration (`InitialCreate`) is ready to go immediately after generation.
+The `ivy db generate` command now automatically creates an Entity Framework migration after building the database generator project.
 
 ### Database Generation Bug Fix
 
@@ -48,96 +22,45 @@ Fixed an issue where package references were being lost during database generati
 
 ### Improved Error Reporting
 
-The `ivy db generate` command now provides better error handling and specific exit codes for different failure scenarios. This makes it easier to diagnose issues and automate database generation in CI/CD pipelines.
+The `ivy db generate` command now provides better error handling and specific exit codes for different failure scenarios.
 
 **Exit codes:**
+
 - `20`: DBML validation error
 - `30`: Database generator build error
 - `40`: EF migration error
 - `50`: Database generator run error
 - `60`: Project build error
 
-Each error now includes a descriptive message indicating which step failed, making troubleshooting faster and more straightforward.
-
-When DBML validation fails, the command now displays the DBML content that failed validation in muted text below the error message. This makes it much easier to debug schema issues by seeing exactly what input was being validated, without needing to track down the source file or regenerate the output.
-
 ### Dashboard App No Longer Auto-Generated
 
-The database generator no longer automatically adds a Dashboard app to your generated applications. Previously, when converting DBML to an app plan, the generator would always inject a dashboard app alongside the apps suggested by the AI agent. Now, only the apps explicitly returned by the agent are included in the generation plan.
-
-This gives you cleaner, more predictable results that match exactly what the AI agent recommends based on your database schema, without unexpected additions.
+The database generator no longer automatically adds a Dashboard app to your generated applications. Previously, when converting DBML to an app plan, the generator would always inject a dashboard app alongside the apps suggested by the AI agent. Now, only the apps explicitly returned by the agent are included in the generation plan..
 
 ### Custom AI Model Selection
 
-You can now specify which AI model to use during database generation with the new `--model-id` argument. This gives you control over which model powers the app generation process, allowing you to choose models based on your preferences for speed, quality, or cost.
+You can now specify which AI model to use during database generation with the new `--model-id` argument.
 
 **Usage:**
 
 ```bash
 # Use a specific model for database generation
 ivy db generate --model-id claude-3-5-sonnet-20241022
-
-# Works with console mode too
-ivy db generate --use-console --model-id claude-3-5-sonnet-20241022 -p "Create a blog"
 ```
-
-The model ID is passed through the entire generation workflow and used by the AI agent when generating apps from your database schema.
 
 ### Model Cache Control
 
 For advanced scenarios, you can now control whether the AI model uses caching during generation and debugging with the `--model-disable-cache` flag. This hidden option is available in `ivy db generate`, `ivy app create`, and `ivy fix` commands.
 
-**Usage:**
-
-```bash
-# Disable model caching during database generation
-ivy db generate --model-disable-cache -p "Create a blog"
-
-# Disable caching when creating an app
-ivy app create --model-disable-cache
-
-# Disable caching when debugging with ivy fix
-ivy fix --model-disable-cache
-```
-
-This flag is passed through the entire generation workflow and affects how the AI agent processes requests. Disabling the cache can be useful when you want to ensure fresh responses or when debugging caching-related issues.
-
 ### Parallel App Generation
 
-The `ivy db generate` command now generates apps concurrently, significantly improving performance when generating multiple apps from your database schema. Previously, apps were generated sequentially one at a time - now they all generate in parallel.
-
-This means if you're generating a project with multiple apps (e.g., a blog with Posts, Comments, and Users apps), they'll all be created simultaneously rather than waiting for each to complete before starting the next. The command includes proper error handling for individual app generation tasks, ensuring that if one app fails, you'll get clear feedback about which app encountered issues.
+The `ivy db generate` command now generates apps concurrently, significantly improving performance when generating multiple apps from your database schema.
 
 ### Better CLI Exit Codes for App Creation Failures
 
-Both `ivy app create` and `ivy db generate` commands now properly return non-zero exit codes when app generation fails. This is a critical improvement for CI/CD pipelines and scripting scenarios where you need reliable error detection.
-
-Previously, these commands would return a success exit code (0) even if some or all apps failed to generate. Now:
+Both `ivy app create` and `ivy db generate` commands now properly return non-zero exit codes when app generation fails.
 
 - `ivy app create` returns exit code `1` if any app fails to generate
 - `ivy db generate` returns exit code `55` if any app fails to generate
-
-This works across all modes:
-- **Verbose mode** (`--verbose`): Tracks failures for each app generated synchronously
-- **Normal mode**: Monitors parallel app generation with progress table and reports failures
-- **Console mode** (`--use-console`): Properly detects and reports failures in headless scenarios
-
-The commands now properly track `FailedMessage` events from the agent pipeline and aggregate failures across all apps being generated. This means your build scripts can now reliably detect when something went wrong and take appropriate action.
-
-**Example:**
-
-```bash
-# In a CI/CD pipeline script
-ivy db generate --use-console --yes-to-all --skip-debug -p "Create a blog"
-
-# Check exit code
-if [ $? -ne 0 ]; then
-    echo "Database generation failed!"
-    exit 1
-fi
-```
-
-Additionally, unused command options in `ivy db generate` (`--yes-to-all` and `--use-console`) have been marked as hidden to reduce clutter in help output while maintaining backward compatibility.
 
 ## Framework Improvements
 
@@ -175,7 +98,7 @@ This enhancement simplifies async button interactions by letting you bind the lo
 
 ### Breaking Change: Framework Routes Now Use `/ivy` Prefix
 
-**This is a breaking change** that affects routing and configuration in existing applications. All Ivy framework endpoints have been reorganized under a single `/ivy` prefix for better namespace isolation and clearer separation between framework routes and your application routes.
+All Ivy framework endpoints have been reorganized under a single `/ivy` prefix for better namespace isolation and clearer separation between framework routes and your application routes.
 
 **What Changed:**
 
@@ -192,6 +115,7 @@ All framework endpoints now use the `/ivy` prefix:
 **What You Need to Update:**
 
 1. **Authentication Callback URLs** - If you're using OAuth providers, update your redirect URIs:
+
    ```
    Before: http://localhost:5010/webhook
    After:  http://localhost:5010/ivy/webhook
@@ -199,26 +123,8 @@ All framework endpoints now use the `/ivy` prefix:
 
    This applies to Auth0, Microsoft Entra, Supabase, and other OAuth providers. You'll need to update your application configuration in the provider's dashboard.
 
-2. **Vite Proxy Configuration** - If you have a custom `vite.config.ts`, update the proxy path:
-   ```typescript
-   // Before
-   proxy: {
-     "/messages": {
-       target: "http://localhost:5010",
-       ws: true
-     }
-   }
+2. **Image Paths** - If you're referencing assets in markdown or code, update paths:
 
-   // After
-   proxy: {
-     "/ivy/messages": {
-       target: "http://localhost:5010",
-       ws: true
-     }
-   }
-   ```
-
-3. **Image Paths** - If you're referencing assets in markdown or code, update paths:
    ```csharp
    // Before
    new Image("/assets/logo.png")
@@ -227,25 +133,14 @@ All framework endpoints now use the `/ivy` prefix:
    new Image("/ivy/assets/logo.png")
    ```
 
-4. **Health Check Monitoring** - Update any health check URLs in your monitoring tools or load balancers:
+3. **Health Check Monitoring** - Update any health check URLs in your monitoring tools or load balancers:
+
    ```
    Before: http://localhost:5010/health
    After:  http://localhost:5010/ivy/health
    ```
 
-**Why This Change?**
-
-The `/ivy` prefix provides:
-- **Clearer Namespace Isolation** - Framework routes are clearly separated from your application routes
-- **Easier Proxy Configuration** - You can now forward all `/ivy/*` requests to the backend with a single rule
-- **Reduced Routing Conflicts** - Less chance of your application routes conflicting with framework routes
-- **Simplified Route Exclusions** - Frontend routing can now exclude the entire `/ivy` prefix instead of maintaining a list of individual framework routes
-
-The framework automatically handles all internal routing updates - this change primarily affects external integrations like OAuth callback URLs and proxy configurations.
-
 ### Tooltip Support for Menu Items and DataTable Row Actions
-
-Menu items and DataTable row actions now support tooltips, making it easier to provide contextual help for buttons and actions throughout your application.
 
 **MenuItem Tooltips:**
 
@@ -296,8 +191,6 @@ data.ToDataTable()
     });
 ```
 
-This makes it easier for users to understand what each action button does, especially when using icon-only buttons where the purpose might not be immediately clear.
-
 **API Changes:**
 
 - Added `Tooltip` property to `MenuItem` record (nullable string)
@@ -307,7 +200,7 @@ This makes it easier for users to understand what each action button does, espec
 
 ### Simplified UseTrigger Hook
 
-The `UseTrigger` hook now includes simpler overloads for common use cases where you don't need to pass data to the triggered view. Previously, you always had to use the generic `UseTrigger<T>` even for simple dialogs or sheets that don't need trigger values.
+The `UseTrigger` hook now includes simpler overloads for common use cases where you don't need to pass data to the triggered view.
 
 **New Simple Overload:**
 
@@ -323,85 +216,31 @@ return Layout.Vertical()
     | dialogView;
 ```
 
-**Previous Approach:**
-
-```csharp
-// Old approach - had to use generic even without needing trigger values
-var (dialogView, showDialog) = this.UseTrigger<object>((open, _) =>
-    new Dialog("Confirm", "Are you sure?")
-        .OnClose(() => open.Set(false))
-);
-
-return Layout.Vertical()
-    | Button.Primary("Show Dialog", () => showDialog(null!))
-    | dialogView;
-```
-
 **API Changes:**
 
 - Added `UseTrigger(Func<IState<bool>, object?> factory)` overload on `IViewContext`
 - Added `UseTrigger<TView>(Func<IState<bool>, object?> viewFactory)` extension method on `ViewBase`
 - Existing generic `UseTrigger<T>` overloads remain unchanged for when you need to pass data
 
-**When to Use Each:**
-
-```csharp
-// Simple UseTrigger - for dialogs/sheets that don't need data
-var (view, show) = this.UseTrigger(open =>
-    new Dialog("Title", "Content").OnClose(() => open.Set(false))
-);
-Button.Primary("Show", () => show());
-
-// Generic UseTrigger<T> - when you need to pass data to the triggered view
-var (editView, showEdit) = this.UseTrigger<User>((open, user) =>
-    new Sheet($"Edit {user.Name}")
-        .Body(/* edit form */)
-        .OnClose(() => open.Set(false))
-);
-Button.Primary("Edit User", () => showEdit(selectedUser));
-```
-
-This simplification reduces boilerplate and makes the common case of triggering dialogs and sheets much cleaner without needing to pass `null!` or dummy values.
-
 ### Horizontal Field Placement in Forms
 
 The `FormBuilder` now includes a new `PlaceHorizontal()` method that provides a cleaner API for arranging form fields side-by-side. This replaces the confusing `Place(bool row, ...)` overload.
 
-**Before:**
-```csharp
-// Old API - unclear what true/false meant
-form.Place(true, m => m.FirstName, m => m.LastName)
-    .Place(false, m => m.Email);
-```
-
 **After:**
+
 ```csharp
 // New API - clear intent
 form.PlaceHorizontal(m => m.FirstName, m => m.LastName) // Side-by-side
     .Place(m => m.Email); // Stacked vertically (default)
 ```
 
-The old `Place(bool row, ...)` method is now marked as `[Obsolete]` and will be removed in a future version. Update your code to use `PlaceHorizontal()` for better readability and maintainability.
-
 ### Form Input Size Consistency
 
-All form input fields now have consistent sizing across different input types (text inputs, date-time inputs, and password inputs). This fix ensures that when mixing different input types in the same form, they all align properly with matching heights and padding.
-
-**What Changed:**
-
-The sizing system has been standardized across all input variants:
-- **Small** - Height of `1.75rem` (h-7), compact padding
-- **Medium** - Height of `2.25rem` (h-9), standard padding (default)
-- **Large** - Height of `2.75rem` (h-11), generous padding
-
-Previously, date-time inputs and standard text inputs had slightly different sizing, which could cause visual misalignment when used together in forms. Now all input types share the same size specifications, providing a more polished and professional appearance.
-
-This improvement is automatic - existing forms will now render with improved consistency without any code changes.
+All form input fields now have consistent sizing across different input types.
 
 ### Width and Height Support for Field Widgets
 
-The `FieldWidget` component now supports explicit `width` and `height` properties, giving you precise control over form field dimensions. This is particularly useful when you need fields with specific sizes or when building custom layouts that don't follow the default flex behavior.
-
+The `FieldWidget` component now supports explicit `width` and `height` properties, giving you precise control over form field dimensions.
 **Usage:**
 
 ```csharp
@@ -416,55 +255,13 @@ var form = model.ToForm()
     .Builder(m => m.Email, state => state.ToTextInput().Width("300px"));
 ```
 
-**How It Works:**
-
-When you specify `width` or `height`, the framework:
-- Applies the dimensions using CSS custom properties via the `getWidth()` and `getHeight()` utility functions
-- Removes the default `flex-1` class to prevent flex container behavior from overriding your explicit sizing
-- Maintains proper layout with the `min-w-0` class to ensure text truncation works correctly
-
-This enhancement is particularly useful for:
-- Creating compact forms with narrower fields for codes or IDs
-- Building responsive layouts where certain fields need fixed widths
-- Designing custom form layouts that don't follow the default full-width behavior
-- Matching field widths to specific design requirements
-
 ### Fixed Table Column Width Handling
 
-Table column widths using `Size.Units()` now work correctly when only some columns have explicit widths set. Previously, the browser's automatic table layout algorithm would ignore explicit column widths, making it impossible to control individual column sizes reliably.
-
-**What was fixed:**
-
-The framework now uses `table-layout: fixed` instead of `table-layout: auto`, ensuring that your explicit column widths are respected. Additionally, `Size.Units()` values now properly set both `width` and `maxWidth` constraints to prevent columns from expanding beyond their specified size.
-
-**Usage:**
-
-```csharp
-// Column widths now work as expected
-data.ToTable()
-    .Column("ID", e => e.Id).Width(Size.Units(5))           // Narrow column
-    .Column("Name", e => e.Name).Width(Size.Units(20))      // Wide column
-    .Column("Status", e => e.Status);                        // Auto-width (fills remaining space)
-
-// Mix Size.Units() with Size.Fraction() for precise layouts
-data.ToTable()
-    .Column("ID", e => e.Id).Width(Size.Units(5))          // Fixed 5 units (1.25rem)
-    .Column("Name", e => e.Name).Width(Size.Fraction(0.3f)) // 30% of table width
-    .Column("Email", e => e.Email);                         // Auto-distributes remaining space
-```
-
-**Technical details:**
-
-- Tables now use `table-layout: fixed` for predictable width calculations
-- `Size.Units(n)` now generates `width: ${n * 0.25}rem` AND `maxWidth: ${n * 0.25}rem`
-- Columns without explicit widths automatically share the remaining table width
-- This change applies to both `Table` and `DataTable` widgets
-
-This fix ensures consistent column sizing across different browsers and content types, giving you precise control over your table layouts.
+Table column widths using `Size.Units()` now work correctly when only some columns have explicit widths set.
 
 ### DataTable Row Actions with Menu Items and Nested Dropdowns
 
-DataTable row actions have been significantly enhanced with support for nested menus, better styling, and improved event handling. Row actions now use `MenuItem` instead of the old `RowAction` class, providing the same flexibility as the rest of the framework's menu system.
+DataTable row actions have been significantly enhanced with support for nested menus, better styling, and improved event handling. Row actions now use `MenuItem` instead of the old `RowAction` class.
 
 **New API with MenuItem:**
 
@@ -538,11 +335,9 @@ data.ToDataTable()
     });
 ```
 
-This provides a cleaner alternative to using `OnCellActivated` with manual column name checks.
-
 ### DataTable Link Rendering Improvements
 
-The DataTable now uses a dedicated custom link renderer instead of relying on the generic `GridCellKind.Uri` cell type. This provides better control over link appearance and behavior.
+The DataTable now uses a dedicated custom link renderer instead of relying on the generic `GridCellKind.Uri` cell type.
 
 **New Link Rendering API:**
 
@@ -551,15 +346,6 @@ The DataTable now uses a dedicated custom link renderer instead of relying on th
 data.ToDataTable()
     .Header(e => e.ProfileUrl, "Profile")
     .Renderer(e => e.ProfileUrl, new LinkDisplayRenderer { Type = LinkDisplayType.Url })
-```
-
-**Old API (deprecated):**
-
-```csharp
-// Old approach - type hint
-data.ToDataTable()
-    .Header(e => e.ProfileUrl, "Profile")
-    .DataTypeHint(e => e.ProfileUrl, ColType.Link)
 ```
 
 **Features:**
@@ -575,19 +361,18 @@ data.ToDataTable()
 - **Relative URLs** navigate in the same tab
 - **Ctrl+Click / Cmd+Click** opens links without triggering cell selection
 
-The custom link renderer eliminates the fuzzy selection effect that previously occurred when clicking URI cells, providing a smoother interaction experience.
-
 ### DataTable Visual Refinements
 
 The DataTable widget has received several visual improvements for a more polished appearance:
 
 **Sorted Column Headers:**
 
-Sorted columns now have a subtle light gray background that matches the header hover effect, providing better visual feedback about which column is currently sorted. The styling uses theme-aware colors (`secondary` for background, `muted` for foreground) that properly adapt to light and dark modes.
+Sorted columns now have a subtle light gray background that matches the header hover effect
 
 **Row Action Buttons:**
 
 Row action buttons now feature refined styling with improved visual hierarchy:
+
 - Clean white backgrounds with subtle borders (`bg-background` with `border-[var(--color-border)]`)
 - Smooth hover effects using theme-aware muted colors (`hover:bg-[var(--color-muted)]`)
 - Better spacing and alignment (positioned 5px from top instead of -1.5px)
@@ -639,6 +424,7 @@ DataTable now supports footer content that overlays the bottom of the table. Thi
 **Technical Details:**
 
 The DataTable now:
+
 - Calculates whitespace needed to fill the container based on visible rows, header heights, and container dimensions
 - Adds empty filler rows as needed to maintain footer positioning
 - Prevents all interactions with empty filler rows (selection, hover, clicks)
@@ -839,6 +625,7 @@ var chromeSettings = ChromeSettings.Default()
 ```
 
 The transformer receives:
+
 - **items** - The menu items produced by Ivy from discovered apps
 - **navigator** - A helper for building MenuItem actions that navigate to URIs or apps
 - **return value** - The new collection to render (reordered, filtered, or with additions)
@@ -982,6 +769,7 @@ Comprehensive documentation has been added for the `JobScheduler` API in `Ivy.He
 The new documentation includes:
 
 **Core Concepts:**
+
 - Job lifecycle and state transitions (Waiting → Running → Finished/Failed/Cancelled)
 - Dependency management with `DependsOn()` for prerequisite enforcement
 - Real-time UI rendering with `ToView()` extension method
@@ -990,6 +778,7 @@ The new documentation includes:
 **Common Patterns:**
 
 *Basic job creation:*
+
 ```csharp
 var scheduler = new JobScheduler(maxParallelJobs: 2);
 
@@ -1012,6 +801,7 @@ scheduler.CreateJob("Load Data")
 ```
 
 *Fluent job chaining with `.Then()`:*
+
 ```csharp
 scheduler.CreateJob("Step 1: Extract")
     .WithAction(async (_, _, progress, token) => { /* ... */ })
@@ -1021,6 +811,7 @@ scheduler.CreateJob("Step 1: Extract")
 ```
 
 *Dynamic child jobs:*
+
 ```csharp
 scheduler.CreateJob("Generate Reports")
     .WithAction(async (job, sched, _, token) =>
@@ -1061,6 +852,7 @@ const appId = safeHref.substring(6); // Correctly strips 6 chars from "app://"
 ```
 
 This bug affected:
+
 - Navigation using `app://` links in markdown and UI components
 - The MarkdownRenderer component when processing app protocol links
 - URL validation logic for app:// URLs
@@ -1172,6 +964,7 @@ Select inputs now properly handle long option labels with text truncation and au
 **Technical Details:**
 
 The select component now:
+
 - Uses responsive CSS classes (`[&>span:first-child]:flex-1 [&>span:first-child]:min-w-0 [&>span:first-child]:truncate`) to enable proper text truncation
 - Applies `flex-shrink-0` to the chevron icon to prevent it from being compressed
 - Monitors DOM changes with ResizeObserver to detect when ellipsis becomes necessary
@@ -1258,6 +1051,7 @@ The underlying `Expandable` widget has also been updated with a new `Open` prope
 Comprehensive architecture documentation has been added to the Getting Started guide, providing deep technical insights into how Ivy Framework works internally. This new section includes three detailed guides:
 
 **[Frontend Architecture](https://docs.ivyframework.dev/onboarding/getting-started/architecture/frontend-architecture)** - Deep dive into the React/TypeScript frontend:
+
 - Technology stack (React 19, Vite, TypeScript, Tailwind CSS, Radix UI)
 - Build system and development environment configuration
 - Real-time communication with SignalR and the `useBackend` hook
@@ -1266,6 +1060,7 @@ Comprehensive architecture documentation has been added to the Getting Started g
 - Development tools including hot reload and XML debugging
 
 **[Backend Architecture](https://docs.ivyframework.dev/onboarding/getting-started/architecture/backend-architecture)** - Server-side C# framework:
+
 - Core `Server` class and startup flow
 - Application system with `ViewBase` and `AppDescriptor`
 - Widget system architecture and serialization with `[Prop]` attributes
@@ -1274,6 +1069,7 @@ Comprehensive architecture documentation has been added to the Getting Started g
 - Real-time communication infrastructure with `AppHub`
 
 **[Communication](https://docs.ivyframework.dev/onboarding/getting-started/architecture/communication)** - Frontend-backend protocol:
+
 - SignalR connection management and lifecycle
 - Message types (Refresh, Update, Error, Auth tokens, Widget events)
 - Widget event system for user interactions
@@ -1282,6 +1078,7 @@ Comprehensive architecture documentation has been added to the Getting Started g
 - Development features including hot reload support and connection state monitoring
 
 These guides are perfect for developers who want to understand:
+
 - How Ivy achieves real-time updates without writing frontend code
 - The widget tree synchronization mechanism using JSON patches
 - How the frontend rendering pipeline works
@@ -1309,6 +1106,7 @@ The documentation for configuring the application chrome (sidebar, header, foote
 The unified Chrome guide now covers all chrome-related configuration in one place:
 
 **ChromeSettings Options:**
+
 - `DefaultAppId()` / `DefaultApp<T>()` - Set the default app to load
 - `UseTabs()` / `UsePages()` - Configure navigation mode
 - `Header()` / `Footer()` - Customize sidebar sections
@@ -1316,6 +1114,7 @@ The unified Chrome guide now covers all chrome-related configuration in one plac
 - `UseFooterMenuItemsTransformer()` - Dynamically transform footer menu items
 
 **Wallpaper Configuration:**
+
 ```csharp
 // Set a welcome screen that appears when no tabs are open
 var chromeSettings = ChromeSettings.Default()
@@ -1326,6 +1125,7 @@ server.UseChrome(() => new DefaultSidebarChrome(chromeSettings));
 ```
 
 **Footer Transformer:**
+
 ```csharp
 // Dynamically customize footer links based on user roles
 var chromeSettings = ChromeSettings.Default()
@@ -1344,30 +1144,36 @@ This consolidation makes it much easier to find all chrome-related configuration
 The [Installation](https://docs.ivyframework.dev/onboarding/getting-started/installation) documentation has been significantly expanded from a simple CLI installation guide to a comprehensive project setup reference. The updated guide now covers:
 
 **Prerequisites:**
+
 - .NET 9.0 SDK requirement
 - Optional dependencies (Git, database systems)
 - Code editor recommendations
 
 **Installation Methods:**
+
 - **Quick Start with CLI** - Using `ivy init` for automatic project scaffolding
 - **Manual Setup** - Step-by-step instructions for creating projects without the CLI
 
 **Package Management:**
+
 - Core Ivy package installation
 - Optional extension packages (authentication providers, database tools)
 - Package dependency overview with diagrams
 
 **Project Structure:**
+
 - Basic project layout for single-app projects
 - Multi-project solution structure for larger applications
 - File organization best practices
 
 **Server Configuration:**
+
 - Basic server setup in `Program.cs`
 - Development vs production environment differences
 - Configuration options overview with links to detailed guides
 
 **Manual Setup Example:**
+
 ```csharp
 // Minimal Program.cs for manual setup
 using Ivy;
@@ -1387,18 +1193,21 @@ The guide includes visual diagrams (using Mermaid) showing prerequisite relation
 Several improvements have been made to the Getting Started documentation to better guide new users:
 
 **Reorganized Content:**
+
 - Tutorial files have been renumbered to accommodate the new Architecture section
 - `05_TodoTutorial.md` moved to `06_TodoTutorial.md`
 - `06_ChatTutorial.md` moved to `07_ChatTutorial.md`
 - New Architecture section added as `05_Architecture/`
 
 **Enhanced How Ivy Works Guide:**
+
 - Moved the "Why This Approach Works" section content to the Introduction page where it fits better contextually
 - Added prominent note emphasizing that in production, you only work with the backend - the frontend is pre-built and embedded
 - Added links to the new detailed Architecture documentation for developers who want deeper technical understanding
 - Improved section headings for better scanability
 
 **Better Cross-Linking:**
+
 - Installation guide now links to CLI Tools, Core Concepts, and Basics documentation
 - Basics guide includes links to Widgets documentation
 - How Ivy Works guide links to all three Architecture guides
@@ -1411,14 +1220,17 @@ These refinements create a clearer learning path for new Ivy developers, from qu
 The [Introduction](https://docs.ivyframework.dev/onboarding/getting-started/introduction) page has been refined with better content organization and more accurate descriptions:
 
 **Repositioned Content:**
+
 - The "Why Ivy Exists" section now opens with a clear positioning statement: "The Ivy Framework is a comprehensive solution for building internal business applications. The framework targets scenarios where rapid development, maintainability, and integration with existing enterprise systems are prioritized."
 - Removed the separate "Open-Source & Cloud-Native" section, consolidating this information into other areas
 
 **Enhanced Security & Architecture Section:**
+
 - Updated to mention specific authentication providers: "Multiple authentication providers (Supabase, Authelia, Basic Auth) with RBAC"
 - Updated to mention specific database support: "Database integration (SQL Server, PostgreSQL, SQLite, MySQL) via Entity Framework Core"
 
 **Improved Deployment & Tooling Section:**
+
 - Reordered bullet points to emphasize rich CLI tooling before deployment
 - Updated deployment description to be more specific: "One-command container deployment to AWS, Azure, GCP, or your own infrastructure"
 
@@ -1496,6 +1308,7 @@ state.ToAudioRecorder()
 **Technical Details:**
 
 The widget now:
+
 - Uses `MediaRecorder.isTypeSupported()` to probe format compatibility before recording
 - Tracks the selected MIME type and includes it in upload requests via the `mimeType` form field
 - Prevents infinite loops when MIME types are invalid by detecting unchanged tokens
@@ -1647,6 +1460,7 @@ data.ToKanban(groupBySelector: e => e.Status, ...)
 **Frontend Improvements:**
 
 The frontend Kanban implementation has been completely rewritten:
+
 - Improved drag-and-drop performance and reliability
 - Better card ordering and positioning
 - Fixed edge cases with card movement between columns
@@ -1655,6 +1469,7 @@ The frontend Kanban implementation has been completely rewritten:
 **Default Sizing:**
 
 The `KanbanBuilder` now includes sensible default sizing:
+
 - **Width** defaults to `Size.Full()` - Takes up available horizontal space
 - **Height** defaults to `Size.Full()` - Takes up available vertical space
 
@@ -1667,6 +1482,7 @@ Fixed a critical bug in the Kanban widget's card reordering logic that could cau
 **What was fixed:**
 
 The Kanban `HandleCardMove` handler now:
+
 - **Correctly calculates insertion index** - Finds the actual index of the task at the target position, rather than trying to calculate it from column-relative indices
 - **Optimized list operations** - Uses `Remove()` instead of `RemoveAll()` for better performance
 - **Creates new task instances** - Properly clones tasks when moving them to prevent reference mutation issues
@@ -1727,6 +1543,7 @@ Callout widgets now support clickable links in their content. Previously, if you
 **How it works:**
 
 When you create a callout with markdown links, the framework automatically:
+
 1. Converts markdown links to `app://` format during documentation generation
 2. Attaches a link click handler using the new `HandleLinkClick()` extension method
 3. Triggers navigation when users click the links
@@ -1818,6 +1635,7 @@ The framework has been enhanced with the **Ivy Design System** - a centralized, 
 **What Changed:**
 
 **Backend:**
+
 - The framework now includes a NuGet package reference to `Ivy.DesignSystem` (updated to v1.1.5)
 - All color definitions in `ThemeConfig.cs` now use design system tokens instead of hardcoded hex values
 - 47+ hardcoded colors replaced with semantic token references
@@ -1825,6 +1643,7 @@ The framework has been enhanced with the **Ivy Design System** - a centralized, 
 - Theme token paths have been simplified to use shorter, cleaner references (`LightThemeTokens.Color.*` and `DarkThemeTokens.Color.*`)
 
 **Before:**
+
 ```csharp
 Primary = "#00cc92",
 PrimaryForeground = "#000000",
@@ -1833,6 +1652,7 @@ Secondary = "#dfe7e3",
 ```
 
 **After:**
+
 ```csharp
 Primary = LightThemeTokens.Color.Primary,
 PrimaryForeground = LightThemeTokens.Color.PrimaryForeground,
@@ -1841,18 +1661,21 @@ Secondary = LightThemeTokens.Color.Secondary,
 ```
 
 **Frontend:**
+
 - The frontend now imports the `ivy-design-system` npm package
 - Removed ~150 lines of hardcoded CSS variables from `index.css`
 - CSS variables now come from flat CSS files (`ivy-framework-flat.css`, `dark-flat.css`) provided by the design system
 - Only framework-specific variables (shadows, spacing, toolbox colors) remain in the codebase
 
 **Chart and Sidebar Colors Removed:**
+
 - Simplified the theme system by removing `Chart` (Chart1-5) and `Sidebar` color properties from `ThemeColors`
 - These properties were framework-specific and not part of the core design system
 - Existing sidebar colors now use the muted color tokens from the design system
 - This change is breaking if you were customizing chart or sidebar colors directly
 
 **Benefits:**
+
 - **Consistency** - Backend-generated themes and frontend CSS are always in sync
 - **Maintainability** - Change a color once in the design system, and it updates everywhere
 - **Customization** - Easier to create custom themes by overriding design tokens
@@ -1863,6 +1686,7 @@ Secondary = LightThemeTokens.Color.Secondary,
 If you have custom theme configurations that reference the removed properties (`Chart1-5`, `Sidebar*` colors), you'll need to remove these from your `ThemeColors` definitions. The framework will work without them, using the design system defaults instead.
 
 **Example - Remove these properties:**
+
 ```csharp
 // Remove these from your ThemeColors configuration:
 Chart1 = "#0077BE",
@@ -1883,6 +1707,7 @@ The framework now includes comprehensive URL validation and sanitization to prot
 **What's Protected:**
 
 The following components now validate URLs before using them:
+
 - **Button Links** - `Button.Url()` validates URLs and throws `ArgumentException` for dangerous protocols
 - **Link Builder** - `LinkBuilder` creates disabled buttons when URLs are invalid
 - **Navigation** - `Navigate()` and `Redirect()` validate destination URLs
@@ -1893,6 +1718,7 @@ The following components now validate URLs before using them:
 **Allowed URL Types:**
 
 The validation system allows these safe URL patterns:
+
 - **HTTP/HTTPS URLs** - `https://example.com`, `http://localhost:5000`
 - **Relative Paths** - `/dashboard`, `/users/profile`
 - **App Protocol** - `app://dashboard`, `app://MyApp?param=value`
@@ -1901,6 +1727,7 @@ The validation system allows these safe URL patterns:
 **Blocked Patterns:**
 
 Dangerous URL patterns are rejected:
+
 - `javascript:alert('xss')` - JavaScript protocol injection
 - `data:text/html,<script>` - Data URI XSS
 - `file:///etc/passwd` - File protocol access
