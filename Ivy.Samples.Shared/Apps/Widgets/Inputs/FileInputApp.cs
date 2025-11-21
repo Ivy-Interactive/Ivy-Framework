@@ -22,6 +22,7 @@ public class FileInputApp : SampleBase
                    new Tab("Type Restrictions", new FileInputTypeRestrictions()),
                    new Tab("Count Limits", new FileInputCountLimits()),
                    new Tab("Content Display", new FileInputContentDisplay()),
+                   new Tab("Event Handlers", new FileInputEventHandlersExample()),
                    new Tab("Integration", new FileInputIntegrationExample()),
                    new Tab("Validation", new FileInputValidationExample())
                ).Variant(TabsVariant.Content);
@@ -233,6 +234,63 @@ public class FileInputContentDisplay : ViewBase
                // | singleFile.ToFileInput(singleFileUpload).Placeholder("Select a file to view as plain text")
                // | (singleFile.Value?.ToPlainText() ?? (object)Text.Block("No file selected"))
                );
+    }
+}
+
+public class FileInputEventHandlersExample : ViewBase
+{
+    public override object? Build()
+    {
+        var files = UseState(ImmutableArray.Create<FileUpload<byte[]>>());
+        var blurMessage = UseState("");
+        var blurCount = UseState(0);
+        var cancelCount = UseState(0);
+        var upload = this.UseUpload(MemoryStreamUploadHandler.Create(files));
+
+        return Layout.Vertical()
+               | Text.H2("Event Handlers")
+               | Text.P("Demonstrate OnBlur and OnCancel event handlers. OnBlur fires when the file dialog closes or input loses focus. OnCancel fires when the cancel button is clicked on a file.")
+               | files.ToFileInput(upload)
+                   .Placeholder("Choose files - try selecting, canceling the dialog, or clicking the X button")
+                   .HandleBlur((Event<IAnyInput> e) =>
+                   {
+                       blurCount.Set(blurCount.Value + 1);
+                       if (files.Value.Length > 0)
+                           blurMessage.Set($"Blur event #{blurCount.Value}: {files.Value.Length} file(s) selected");
+                       else
+                           blurMessage.Set($"Blur event #{blurCount.Value}: No file selected (dialog cancelled)");
+                   })
+                   .HandleCancel((Guid fileId) =>
+                   {
+                       upload.Value.Cancel(fileId);
+                       files.Set(list => list.Where(f => f.Id != fileId).ToImmutableArray());
+                       cancelCount.Set(cancelCount.Value + 1);
+                   })
+               | Layout.Vertical().Gap(4)
+                   | new Card(
+                       Layout.Vertical().Gap(2)
+                           | Text.Small("The blur event fires when you close the file dialog or click away from the input.")
+                           | (blurMessage.Value != ""
+                               ? Callout.Success(blurMessage.Value)
+                               : Callout.Info("Interact with the file input above to see blur events"))
+                           | Text.Small($"Total blur events: {blurCount.Value}").Color(Colors.Muted)
+                   ).Title("OnBlur Handler")
+                   | new Card(
+                       Layout.Vertical().Gap(2)
+                           | Text.Small("The cancel event fires when you click the X button next to a file in the list.")
+                           | (files.Value.Length > 0
+                               ? files.Value.ToTable()
+                                   .Width(Size.Full())
+                                   .Builder(e => e.FileName, e => e.Func((string x) => x))
+                                   .Builder(e => e.Progress, e => e.Func((float x) => x.ToString("P0")))
+                                   .Remove(e => e.Id)
+                               : Text.P("Upload files above to see the cancel button (X) next to each file").Color(Colors.Muted))
+                           | (cancelCount.Value > 0
+                               ? Callout.Success($"Cancelled {cancelCount.Value} file(s)")
+                               : files.Value.Length > 0
+                                   ? Callout.Info("Click the X button next to any file to trigger the cancel event")
+                                   : null)
+                   ).Title("OnCancel Handler");
     }
 }
 
