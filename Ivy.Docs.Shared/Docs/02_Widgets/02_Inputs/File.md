@@ -75,6 +75,32 @@ if (uploadState.Value != null)
 }
 ```
 
+Choose a handler that matches your scenario:
+
+- `MemoryStreamUploadHandler`: Reads the entire upload into memory and updates state automatically.
+- `ChunkedMemoryStreamUploadHandler`: Accumulates chunked uploads when data arrives in segments, such as audio capture.
+
+<Callout Type="info">
+In the docs we also use `SlowMemoryStreamUploadHandler` to simulate ~1 MB/s uploads for demos and progress tracking. It is documentation-only and not meant for production use.
+</Callout>
+
+### FileUpload Record
+
+The `FileUpload<TContent>` record contains all file information:
+
+```csharp
+public record FileUpload<TContent>
+{
+    public Guid Id { get; init; }           // Unique identifier
+    public string FileName { get; init; }   // Original file name
+    public string ContentType { get; init; } // MIME type
+    public long Length { get; init; }        // File size in bytes
+    public float Progress { get; init; }     // Upload progress (0.0 to 1.0)
+    public TContent Content { get; init; }   // File content (byte[] or string)
+    public FileUploadStatus Status { get; init; } // Pending, Uploading, Completed, Failed, Aborted
+}
+```
+
 ## Single vs Multiple Files
 
 The type of state determines whether single or multiple files can be selected:
@@ -86,17 +112,27 @@ public class SingleVsMultipleDemo : ViewBase
     {
         // Single file - use nullable FileUpload<byte[]>
         var singleFile = UseState<FileUpload<byte[]>?>();
-        var singleUpload = this.UseUpload(MemoryStreamUploadHandler.Create(singleFile));
+        var singleUpload = this.UseUpload(
+            MemoryStreamUploadHandler.Create(singleFile)
+            );
 
         // Multiple files - use ImmutableArray<FileUpload<byte[]>>
-        var multipleFiles = UseState(ImmutableArray.Create<FileUpload<byte[]>>());
-        var multipleUpload = this.UseUpload(MemoryStreamUploadHandler.Create(multipleFiles));
+        var multipleFiles = UseState(
+            ImmutableArray.Create<FileUpload<byte[]>>()
+            );
+        var multipleUpload = this.UseUpload(
+            MemoryStreamUploadHandler.Create(multipleFiles)
+            );
 
         return Layout.Vertical()
                 | Text.H2("Single File")
-                | singleFile.ToFileInput(singleUpload).Placeholder("Choose one file")
+                | singleFile
+                    .ToFileInput(singleUpload)
+                    .Placeholder("Choose one file")
                 | Text.H2("Multiple Files")
-                | multipleFiles.ToFileInput(multipleUpload).Placeholder("Choose multiple files");
+                | multipleFiles
+                    .ToFileInput(multipleUpload)
+                    .Placeholder("Choose multiple files");
     }
 }
 ```
@@ -112,14 +148,19 @@ public class FileUploadValidation : ViewBase
 {
     public override object? Build()
     {
-        var selectedFiles = UseState(ImmutableArray.Create<FileUpload<byte[]>>());
-        var upload = this.UseUpload(MemoryStreamUploadHandler.Create(selectedFiles))
+        var selectedFiles = UseState(
+            ImmutableArray.Create<FileUpload<byte[]>>()
+            );
+        var upload = this.UseUpload(
+            MemoryStreamUploadHandler.Create(selectedFiles))
             .Accept("image/*")                    // Only images
             .MaxFileSize(FileSize.FromMegabytes(5))        // 5 MB per file
             .MaxFiles(3);                         // Maximum 3 files total
 
         return Layout.Vertical()
-               | selectedFiles.ToFileInput(upload).Placeholder("Choose up to 3 images (max 5 MB each)")
+               | selectedFiles
+                    .ToFileInput(upload)
+                    .Placeholder("Choose up to 3 images (max 5 MB each)")
                | selectedFiles.Value.ToTable()
                    .Width(Size.Full())
                    .Builder(e => e.Length, e => e.Func((long x) => Utils.FormatBytes(x)))
@@ -139,18 +180,24 @@ public class FileTypeFilteringDemo : ViewBase
     public override object? Build()
     {
         var imageFile = UseState<FileUpload<byte[]>?>();
-        var imageUpload = this.UseUpload(MemoryStreamUploadHandler.Create(imageFile))
+        var imageUpload = this.UseUpload(
+            MemoryStreamUploadHandler.Create(imageFile))
             .Accept("image/*");  // Only images
 
         var documentFile = UseState<FileUpload<byte[]>?>();
-        var documentUpload = this.UseUpload(MemoryStreamUploadHandler.Create(documentFile))
+        var documentUpload = this.UseUpload(
+            MemoryStreamUploadHandler.Create(documentFile))
             .Accept(".pdf,.doc,.docx");  // Specific file extensions
 
         return Layout.Vertical()
                 | Text.H2("Images Only")
-                | imageFile.ToFileInput(imageUpload).Placeholder("Choose an image")
+                | imageFile
+                    .ToFileInput(imageUpload)
+                    .Placeholder("Choose an image")
                 | Text.H2("Documents Only")
-                | documentFile.ToFileInput(documentUpload).Placeholder("Choose a document");
+                | documentFile
+                    .ToFileInput(documentUpload)
+                    .Placeholder("Choose a document");
     }
 }
 ```
@@ -165,12 +212,15 @@ public class FileSizeLimitDemo : ViewBase
     public override object? Build()
     {
         var file = UseState<FileUpload<byte[]>?>();
-        var upload = this.UseUpload(MemoryStreamUploadHandler.Create(file))
+        var upload = this.UseUpload(
+            MemoryStreamUploadHandler.Create(file))
             .MaxFileSize(FileSize.FromMegabytes(2));
 
         return Layout.Vertical()
                 | Text.H2("2 MB Size Limit")
-                | file.ToFileInput(upload).Placeholder("Max 2 MB")
+                | file
+                    .ToFileInput(upload)
+                    .Placeholder("Max 2 MB")
                 | (file.Value != null
                     ? Text.P($"Selected: {file.Value.FileName} ({Utils.FormatBytes(file.Value.Length)})")
                     : null);
@@ -192,14 +242,19 @@ public class MaxFilesDemo : ViewBase
 {
     public override object? Build()
     {
-        var files = UseState(ImmutableArray.Create<FileUpload<byte[]>>());
-        var upload = this.UseUpload(MemoryStreamUploadHandler.Create(files))
+        var files = UseState(
+                ImmutableArray.Create<FileUpload<byte[]>>()
+                );
+        var upload = this.UseUpload(
+            MemoryStreamUploadHandler.Create(files))
             .MaxFiles(3)  // Maximum 3 files
             .MaxFileSize(FileSize.FromMegabytes(5));
 
         return Layout.Vertical()
                 | Text.H2("Maximum 3 Files")
-                | files.ToFileInput(upload).Placeholder("Choose up to 3 files")
+                | files
+                    .ToFileInput(upload)
+                    .Placeholder("Choose up to 3 files")
                 | Text.P($"{files.Value.Length} file(s) selected");
     }
 }
@@ -207,48 +262,29 @@ public class MaxFilesDemo : ViewBase
 
 Validation errors are automatically shown to the user via toast notifications.
 
-## File Content Types and Configuration
+## File Content Types
 
 `MemoryStreamUploadHandler` automatically manages file uploads by reading the file stream into memory and updating your state. It handles progress tracking, cancellation, and error states automatically. The handler automatically detects the state type and configures itself accordingly.
 
-The upload handler supports both binary and text content. `MemoryStreamUploadHandler.Create()` supports optional configuration parameters:
+The upload handler supports both binary and text content. Use `FileUpload<byte[]>` for binary files and `FileUpload<string>` for text files. `MemoryStreamUploadHandler.Create()` supports optional configuration parameters:
 
 ```csharp
-// Binary content (default) - use FileUpload<byte[]>
+// Binary content (default)
 var binaryState = UseState<FileUpload<byte[]>?>();
 var binaryUpload = this.UseUpload(MemoryStreamUploadHandler.Create(binaryState));
 
-// Text content - use FileUpload<string> with optional encoding
+// Text content
+// encoding: text encoding (default: UTF-8, only for FileUpload<string>)
+// chunkSize: buffer size in bytes (default: 8192) 
+// larger chunks = fewer progress updates but potentially better performance
+// progressThreshold: minimum progress change to report (default: 0.05 = 5%)
 var textState = UseState<FileUpload<string>?>();
-var textUpload = this.UseUpload(MemoryStreamUploadHandler.Create(textState, Encoding.UTF8));
-
-// Multiple binary files
-var filesState = UseState(ImmutableArray.Create<FileUpload<byte[]>>());
-var filesUpload = this.UseUpload(MemoryStreamUploadHandler.Create(filesState));
-
-// Multiple text files
-var textFilesState = UseState(ImmutableArray.Create<FileUpload<string>>());
-var textFilesUpload = this.UseUpload(MemoryStreamUploadHandler.Create(textFilesState, Encoding.UTF8));
-
-// Binary file with custom chunk size (default: 8192 bytes)
-// Larger chunks = fewer progress updates but potentially better performance
-var upload = this.UseUpload(MemoryStreamUploadHandler.Create(fileState, chunkSize: 16384));
-
-// Binary file with custom chunk size and progress threshold
-// Progress threshold (default: 0.05 = 5%) - only reports progress when it changes by this amount
-var upload = this.UseUpload(MemoryStreamUploadHandler.Create(
-    fileState, 
-    chunkSize: 16384, 
-    progressThreshold: 0.1f
-));
-
-// Text file with all options
-var textState = UseState<FileUpload<string>?>();
-var upload = this.UseUpload(MemoryStreamUploadHandler.Create(
-    textState, 
-    encoding: System.Text.Encoding.UTF8,
-    chunkSize: 16384,
-    progressThreshold: 0.1f
+var textUpload = this.UseUpload(
+    MemoryStreamUploadHandler.Create(
+        textState, 
+        encoding: System.Text.Encoding.UTF8,
+        chunkSize: 16384,
+        progressThreshold: 0.1f
 ));
 ```
 
@@ -265,41 +301,15 @@ public class UploadProgressDemo : ViewBase
         var upload = this.UseUpload(MemoryStreamUploadHandler.Create(files));
 
         return Layout.Vertical()
-                | files.ToFileInput(upload).Placeholder("Choose files")
+                | files
+                    .ToFileInput(upload)
+                    .Placeholder("Choose files")
                 | files.Value.ToTable()
                     .Width(Size.Full())
                     .Builder(e => e.Length, e => e.Func((long x) => Utils.FormatBytes(x)))
                     .Builder(e => e.Progress, e => e.Func((float x) => x.ToString("P0")))
                     .Remove(e => e.Id);
     }
-}
-```
-
-## Upload Handlers Overview
-
-Choose a handler that matches your scenario:
-
-- `MemoryStreamUploadHandler`: Reads the entire upload into memory and updates state automatically.
-- `ChunkedMemoryStreamUploadHandler`: Accumulates chunked uploads when data arrives in segments, such as audio capture.
-
-<Callout Type="info">
-In the docs we also use `SlowMemoryStreamUploadHandler` to simulate ~1 MB/s uploads for demos and progress tracking. It is documentation-only and not meant for production use.
-</Callout>
-
-## FileUpload Record
-
-The `FileUpload<TContent>` record contains all file information:
-
-```csharp
-public record FileUpload<TContent>
-{
-    public Guid Id { get; init; }           // Unique identifier
-    public string FileName { get; init; }   // Original file name
-    public string ContentType { get; init; } // MIME type
-    public long Length { get; init; }        // File size in bytes
-    public float Progress { get; init; }     // Upload progress (0.0 to 1.0)
-    public TContent Content { get; init; }   // File content (byte[] or string)
-    public FileUploadStatus Status { get; init; } // Pending, Uploading, Completed, Failed, Aborted
 }
 ```
 
@@ -318,7 +328,8 @@ public class DialogFileUpload : ViewBase
 
         // Ephemeral state used inside the dialog while picking a file
         var dialogFile = UseState<FileUpload<byte[]>?>();
-        var uploadContext = this.UseUpload(MemoryStreamUploadHandler.Create(dialogFile))
+        var uploadContext = this.UseUpload(
+                MemoryStreamUploadHandler.Create(dialogFile))
             .Accept("*/*")
             .MaxFileSize(FileSize.FromMegabytes(10));
 
@@ -329,10 +340,14 @@ public class DialogFileUpload : ViewBase
                 _ => { isOpen.Value = false; dialogFile.Reset(); return ValueTask.CompletedTask; },
                 new DialogHeader("Select File"),
                 new DialogBody(
-                    dialogFile.ToFileInput(uploadContext).Placeholder("Choose a file to upload")
+                    dialogFile
+                        .ToFileInput(uploadContext)
+                        .Placeholder("Choose a file to upload")
                 ),
                 new DialogFooter(
-                    new Button("Cancel", _ => { isOpen.Value = false; dialogFile.Reset(); }, variant: ButtonVariant.Outline),
+                    new Button("Cancel", 
+                        _ => { isOpen.Value = false; dialogFile.Reset(); },
+                        variant: ButtonVariant.Outline),
                     new Button("Ok", _ =>
                     {
                         if (dialogFile.Value != null)
@@ -345,7 +360,8 @@ public class DialogFileUpload : ViewBase
             : null;
 
         return Layout.Vertical()
-               | new Button("Open Dialog", _ => { dialogFile.Reset(); isOpen.Value = true; })
+               | new Button("Open Dialog", 
+                    _ => { dialogFile.Reset(); isOpen.Value = true; })
                | (selectedFile.Value != null
                    ? selectedFile.ToDetails()
                    : Text.P("No file selected"))
@@ -376,7 +392,8 @@ public class FormFileUpload : ViewBase
         var form = model.ToForm()
             .Builder(e => e.Attachment1, (state, view) =>
             {
-                var uploadContext = view.UseUpload(MemoryStreamUploadHandler.Create(state))
+                var uploadContext = view.UseUpload(
+                    MemoryStreamUploadHandler.Create(state))
                     .Accept("image/jpeg")
                     .MaxFileSize(FileSize.FromMegabytes(1));
                 return state.ToFileInput(uploadContext);
@@ -384,7 +401,8 @@ public class FormFileUpload : ViewBase
             .Label(x => x.Attachment1, "Attachment1 image/jpeg (Required)")
             .Builder(e => e.Attachment2, (state, view) =>
             {
-                var uploadContext = view.UseUpload(MemoryStreamUploadHandler.Create(state))
+                var uploadContext = view.UseUpload(
+                    MemoryStreamUploadHandler.Create(state))
                     .Accept("application/pdf")
                     .MaxFileSize(FileSize.FromMegabytes(5));
                 return state.ToFileInput(uploadContext);
@@ -409,7 +427,9 @@ public class FileInputDisabledDemo : ViewBase
     public override object? Build()
     {
         var fileState = UseState<FileUpload<byte[]>?>();
-        var upload = this.UseUpload(MemoryStreamUploadHandler.Create(fileState));
+        var upload = this.UseUpload(
+            MemoryStreamUploadHandler.Create(fileState)
+            );
 
         return fileState.ToFileInput(upload)
                     .Placeholder("This file input is disabled")
