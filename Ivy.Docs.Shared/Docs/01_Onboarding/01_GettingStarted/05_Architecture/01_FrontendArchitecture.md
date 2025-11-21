@@ -249,7 +249,7 @@ export interface WidgetNode {
 
 ## Theming and Styling System
 
-The theming system uses CSS custom properties with light and dark mode support. Built on the Ivy Design System, it provides design tokens for colors, typography, spacing, and animations. Themes can be customized via backend `IThemeService` or switched dynamically using the frontend `ThemeProvider`.
+The theming system uses CSS custom properties with comprehensive light and dark mode support, built on the **Ivy Design System** tokens. The system provides a complete design token set covering colors, typography, spacing, and animations. These default styles can be overridden at runtime using the Theming service, which allows applications to dynamically generate and apply custom CSS variables through `IThemeService.SetTheme()` and `IThemeService.GenerateThemeCss()`. Themes can be customized via backend `IThemeService` or switched dynamically using the frontend `ThemeProvider`.
 
 **Theme Modes:** `light`, `dark`, and `system` (matches OS preference). The `ThemeProvider` component persists preferences in localStorage and exposes theme state via the `useTheme()` hook. The `useThemeWithMonitoring()` hook provides MutationObserver-based theme detection and system preference monitoring.
 
@@ -265,6 +265,34 @@ The theming system uses CSS custom properties with light and dark mode support. 
 ```
 
 **Styling Stack:**
+
+- CSS custom properties for all design tokens
+- Automatic theme detection via `MutationObserver`
+- Semantic color palette with light/dark variants
+- Typography scales with Geist font family
+- Tailwind CSS integration for utility-first styling
+
+**Available Theme Colors:**
+
+| Category | Variables |
+|----------|-----------|
+| Main | `--primary`, `--primary-foreground`, `--secondary`, `--secondary-foreground`, `--background`, `--foreground` |
+| Semantic | `--destructive`, `--success`, `--warning`, `--info` (with `-foreground` variants) |
+| UI Elements | `--border`, `--input`, `--ring`, `--muted`, `--accent`, `--card`, `--popover` (with `-foreground` variants) |
+
+**Font System:** The application uses Geist and Geist Mono fonts with `font-display: swap` for optimal loading performance. Font files are served locally with multiple weights (400, 500, 600, 700).
+
+**Component Integration:** Radix UI components receive theme-aware styling through CSS custom properties, ensuring consistent appearance across light and dark modes.
+
+```css
+@font-face {
+  font-family: "Geist";
+  src: url("/fonts/Geist-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+```
 
 - **Typography**: Geist and Geist Mono fonts (weights 400, 500, 600, 700) with `font-display: swap`. shadcn/ui typography utilities (`typography-h1` through `typography-h4`, `typography-p`, `typography-lead`, etc.)
 - **Colors**: Semantic tokens mapped to Tailwind classes (`bg-primary`, `text-muted-foreground`). 16 chromatic colors for charts/visualization (red, orange, amber, yellow, lime, green, emerald, teal, cyan, sky, blue, indigo, violet, purple, fuchsia, pink, rose)
