@@ -11,9 +11,9 @@ namespace Ivy.Middleware;
 /// Middleware that converts path-based URLs to appId query parameters for backward compatibility.
 /// For example: /onboarding/getting-started/chat-tutorial-app -> /?appId=onboarding/getting-started/chat-tutorial-app
 /// </summary>
-public class PathToAppIdMiddleware(RequestDelegate next, ILogger<PathToAppIdMiddleware> logger)
+public class PathToAppIdMiddleware(RequestDelegate next, ILogger<PathToAppIdMiddleware> logger, Server server)
 {
-    private class RoutingConstantData
+    public class RoutingConstantData
     {
         [JsonPropertyName("excludedPaths")]
         public string[] ExcludedPaths { get; set; } = [];
@@ -21,6 +21,8 @@ public class PathToAppIdMiddleware(RequestDelegate next, ILogger<PathToAppIdMidd
         [JsonPropertyName("staticFileExtensions")]
         public string[] StaticFileExtensions { get; set; } = [];
     }
+
+    public static string[] ExcludedPaths => RoutingConstants.ExcludedPaths;
 
     private static readonly RoutingConstantData RoutingConstants;
 
@@ -44,7 +46,8 @@ public class PathToAppIdMiddleware(RequestDelegate next, ILogger<PathToAppIdMidd
         }
 
         // Skip if path starts with any excluded pattern (must be exact segment match)
-        if (RoutingConstants.ExcludedPaths.Any(excluded => path == excluded || path.StartsWith(excluded + "/")))
+        if (RoutingConstants.ExcludedPaths.Any(excluded => path == excluded || path.StartsWith(excluded + "/")) ||
+            server.ReservedPaths.Any(reserved => path == reserved || path.StartsWith(reserved + "/")))
         {
             await next(context);
             return;
