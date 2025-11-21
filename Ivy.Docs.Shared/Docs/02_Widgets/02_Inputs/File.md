@@ -439,6 +439,60 @@ public class FileInputDisabledDemo : ViewBase
 }
 ```
 
+## Event Handlers
+
+FileInput supports event handlers to respond to user interactions:
+
+```mermaid
+graph LR
+    A[User Action] --> B{Event Type}
+    B -->|File dialog closes| C[OnBlur]
+    B -->|Cancel clicked| D[OnCancel]
+    C --> E[Handler]
+    D --> F[Handler]
+```
+
+```csharp demo-below
+public class FileInputEventHandlersDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var files = UseState(ImmutableArray.Create<FileUpload<byte[]>>());
+        var blurMessage = UseState("");
+        var cancelCount = UseState(0);
+        var upload = this.UseUpload(MemoryStreamUploadHandler.Create(files));
+
+        return Layout.Vertical()
+                | files.ToFileInput(upload)
+                    .Placeholder("Choose files")
+                    .HandleBlur((Event<IAnyInput> e) =>
+                    {
+                        if (files.Value.Length > 0)
+                            blurMessage.Set($"Blur: {files.Value.Length} file(s) selected");
+                        else
+                            blurMessage.Set("Blur: No file selected");
+                    })
+                    .HandleCancel((Guid fileId) =>
+                    {
+                        upload.Value.Cancel(fileId);
+                        files.Set(list => list.Where(f => f.Id != fileId).ToImmutableArray());
+                        cancelCount.Set(cancelCount.Value + 1);
+                    })
+                | (blurMessage.Value != "" 
+                    ? Text.P(blurMessage.Value).Color(Colors.Success)
+                    : null)
+                | files.Value.ToTable()
+                    .Width(Size.Full())
+                    .Builder(e => e.FileName, e => e.Func((string x) => x))
+                    .Builder(e => e.Progress, e => e.Func((float x) => x.ToString("P0")))
+                    .Remove(e => e.Id)
+                | (cancelCount.Value > 0
+                    ? Text.P($"Cancelled {cancelCount.Value} file(s)").Color(Colors.Info)
+                    : null);
+    }
+}
+```
+
 ## Best Practices
 
 1. **Choose the Right Content Type**: Use `byte[]` for binary files, `string` for text files
