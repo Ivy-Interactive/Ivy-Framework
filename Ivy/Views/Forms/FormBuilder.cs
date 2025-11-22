@@ -9,11 +9,10 @@ using Ivy.Hooks;
 using Ivy.Services;
 using Ivy.Shared;
 using Ivy.Widgets.Inputs;
+using static Ivy.Views.Forms.FormHelpers;
 
 namespace Ivy.Views.Forms;
 
-/// <summary>Field configuration within form builder containing metadata, validation rules, and layout information.</summary>
-/// <typeparam name="TModel">Type of model object that form is bound to.</typeparam>
 public class FormBuilderField<TModel>
 {
     public FormBuilderField(
@@ -50,11 +49,11 @@ public class FormBuilderField<TModel>
         // Add validators from DataAnnotations attributes
         if (propertyInfo != null)
         {
-            Validators.AddRange(FormHelpers.GetValidators(propertyInfo));
+            Validators.AddRange(GetValidators(propertyInfo));
         }
         else if (fieldInfo != null)
         {
-            Validators.AddRange(FormHelpers.GetValidators(fieldInfo));
+            Validators.AddRange(GetValidators(fieldInfo));
         }
 
         Visible = _ => true;
@@ -143,104 +142,6 @@ public class FormBuilder<TModel> : ViewBase
                 field.Validators.Add(Validators.CreateEmailValidator(field.Name));
             }
         }
-    }
-
-    private Func<IAnyState, IViewContext, IAnyInput>? ScaffoldEditor(string name, Type type)
-    {
-        Type nonNullableType = Nullable.GetUnderlyingType(type) ?? type;
-
-        static bool IsFileUploadType(Type t)
-        {
-            if (t == typeof(FileUpload)) return true;
-            if (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(FileUpload<>)) return true;
-            return typeof(IFileUpload).IsAssignableFrom(t);
-        }
-
-        // FileUpload fields are not auto-scaffolded - use .Builder() to configure them manually
-        if (IsFileUploadType(nonNullableType))
-        {
-            return null;
-        }
-
-        // Collections of FileUpload / FileUpload<T>
-        foreach (var it in type.GetInterfaces().Concat([type]))
-        {
-            if (it.IsGenericType && it.GetGenericTypeDefinition() == typeof(IEnumerable<>))
-            {
-                var arg = it.GetGenericArguments()[0];
-                if (IsFileUploadType(arg))
-                {
-                    return null;
-                }
-            }
-        }
-
-        if (name.EndsWith("Id") && (type == typeof(Guid) || type == typeof(int) || type == typeof(string)))
-        {
-            return (state, _) => state.ToReadOnlyInput().Size(Size);
-        }
-
-        if (name.EndsWith("Email") && nonNullableType == typeof(string))
-        {
-            return (state, _) => state.ToEmailInput().Size(Size);
-        }
-
-        if ((name.EndsWith("Color") || name.EndsWith("Colour")) && nonNullableType == typeof(string))
-        {
-            return (state, _) => state.ToColorInput().Size(Size);
-        }
-
-        if (nonNullableType == typeof(bool))
-        {
-            return (state, _) =>
-            {
-                var input = state.ToBoolInput();
-                // Only apply scaffold defaults if no custom label was set
-                if (_fields.TryGetValue(name, out var field) && HasCustomLabel(field.Label, name))
-                {
-                    // Custom label was set, don't override it
-                    input.Label = field.Label;
-                }
-                else
-                {
-                    // Use scaffold defaults
-                    input.ScaffoldDefaults(name, type);
-                }
-                return input.Size(Size);
-            };
-        }
-
-        if (nonNullableType == typeof(string))
-        {
-            if (name.EndsWith("Password"))
-            {
-                return (state, _) => state.ToPasswordInput().Size(Size);
-            }
-
-            return (state, _) => state.ToTextInput().Size(Size);
-        }
-
-        if (nonNullableType.IsEnum)
-        {
-            return (state, _) => state.ToSelectInput().Size(Size);
-        }
-
-        if (type.IsCollectionType() && type.GetCollectionTypeParameter() is { IsEnum: true })
-        {
-            return (state, _) => state.ToSelectInput().List().Size(Size);
-        }
-
-        if (type.IsNumeric())
-        {
-            return (state, _) => state.ToNumberInput().ScaffoldDefaults(name, type).Size(Size);
-        }
-
-        if (type.IsDate())
-        {
-            return (state, _) => state.ToDateTimeInput().Size(Size);
-        }
-
-        return null;
     }
 
     /// <summary>Configures custom input factory for specified field (convenience overload without view context).</summary>
@@ -696,61 +597,5 @@ public class FormBuilder<TModel> : ViewBase
     private static string InvalidMessage(int invalidFields)
     {
         return invalidFields == 1 ? "There is 1 invalid field." : $"There are {invalidFields} invalid fields.";
-    }
-
-    /// <summary>Recursively checks if any FileUpload fields in the model are currently uploading.</summary>
-    private static bool CheckForLoadingUploads(object? obj)
-    {
-        if (obj == null) return false;
-
-        // Check single file upload
-        if (obj is IFileUpload file)
-            return file.Status == FileUploadStatus.Loading;
-
-        // Check collection of uploads
-        if (obj is IEnumerable<IFileUpload> files)
-            return files.Any(f => f.Status == FileUploadStatus.Loading);
-
-        // Recursively check all properties
-        var type = obj.GetType();
-
-        // Skip primitive types and strings
-        if (type.IsPrimitive || type == typeof(string) || type == typeof(decimal) || type == typeof(DateTime) || type == typeof(DateTimeOffset))
-            return false;
-
-        foreach (var prop in type.GetProperties(BindingFlags.Public | BindingFlags.Instance))
-        {
-            // Skip indexed properties
-            if (prop.GetIndexParameters().Length > 0)
-                continue;
-
-            try
-            {
-                var value = prop.GetValue(obj);
-                if (CheckForLoadingUploads(value))
-                    return true;
-            }
-            catch
-            {
-                // Skip properties that can't be read
-            }
-        }
-
-        // Check fields as well
-        foreach (var field in type.GetFields(BindingFlags.Public | BindingFlags.Instance))
-        {
-            try
-            {
-                var value = field.GetValue(obj);
-                if (CheckForLoadingUploads(value))
-                    return true;
-            }
-            catch
-            {
-                // Skip fields that can't be read
-            }
-        }
-
-        return false;
     }
 }

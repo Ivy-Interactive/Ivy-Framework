@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Reflection;
+using Ivy.Services;
 
 namespace Ivy.Views.Forms;
 
@@ -140,6 +141,61 @@ public static class FormHelpers
         var nullabilityContext = new NullabilityInfoContext();
         var nullabilityInfo = nullabilityContext.Create(fieldInfo);
         return nullabilityInfo.ReadState != NullabilityState.Nullable;
+    }
+
+    public static bool CheckForLoadingUploads(object? obj)
+    {
+        if (obj == null) return false;
+
+        // Check single file upload
+        if (obj is IFileUpload file)
+            return file.Status == FileUploadStatus.Loading;
+
+        // Check collection of uploads
+        if (obj is IEnumerable<IFileUpload> files)
+            return files.Any(f => f.Status == FileUploadStatus.Loading);
+
+        // Recursively check all properties
+        var type = obj.GetType();
+
+        // Skip primitive types and strings
+        if (type.IsPrimitive || type == typeof(string) || type == typeof(decimal) || type == typeof(DateTime) || type == typeof(DateTimeOffset))
+            return false;
+
+        foreach (var prop in type.GetProperties(BindingFlags.Public | BindingFlags.Instance))
+        {
+            // Skip indexed properties
+            if (prop.GetIndexParameters().Length > 0)
+                continue;
+
+            try
+            {
+                var value = prop.GetValue(obj);
+                if (CheckForLoadingUploads(value))
+                    return true;
+            }
+            catch
+            {
+                // Skip properties that can't be read
+            }
+        }
+
+        // Check fields as well
+        foreach (var field in type.GetFields(BindingFlags.Public | BindingFlags.Instance))
+        {
+            try
+            {
+                var value = field.GetValue(obj);
+                if (CheckForLoadingUploads(value))
+                    return true;
+            }
+            catch
+            {
+                // Skip fields that can't be read
+            }
+        }
+
+        return false;
     }
 }
 
