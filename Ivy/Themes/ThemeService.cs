@@ -116,5 +116,10 @@ public class ThemeService : IThemeService
         {
             sb.AppendLine($"  {variableName}: {colorValue};");
         }
+        else
+        {
+            // Log warning for missing color values (helps debug theme token issues)
+            System.Diagnostics.Debug.WriteLine($"Warning: Theme color '{variableName}' is null or empty. CSS variable will not be set.");
+        }
     }
 }

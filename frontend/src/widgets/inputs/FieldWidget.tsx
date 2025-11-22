@@ -1,5 +1,6 @@
 import React from 'react';
 import { Sizes } from '@/types/sizes';
+import { getWidth, getHeight } from '@/lib/styles';
 import Icon from '@/components/Icon';
 import {
   Tooltip,
@@ -16,6 +17,8 @@ interface FieldWidgetProps {
   help?: string;
   children?: React.ReactNode;
   size?: Sizes;
+  width?: string;
+  height?: string;
 }
 
 export const FieldWidget: React.FC<FieldWidgetProps> = ({
@@ -25,6 +28,8 @@ export const FieldWidget: React.FC<FieldWidgetProps> = ({
   help,
   children,
   size = Sizes.Medium,
+  width,
+  height,
 }) => {
   const labelSizeClass =
     size === Sizes.Small
@@ -42,8 +47,18 @@ export const FieldWidget: React.FC<FieldWidgetProps> = ({
   const gapClass =
     size === Sizes.Small ? 'gap-2' : size === Sizes.Large ? 'gap-4' : 'gap-3';
 
+  const styles: React.CSSProperties = {
+    ...getWidth(width),
+    ...getHeight(height),
+  };
+
+  const flexClass = width || height ? '' : 'flex-1';
+
   return (
-    <div className={`flex flex-col ${gapClass} flex-1 min-w-0`}>
+    <div
+      className={`flex flex-col ${gapClass} ${flexClass} min-w-0`}
+      style={styles}
+    >
       {label && (
         <div className="flex items-center gap-1.5">
           <label

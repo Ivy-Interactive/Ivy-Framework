@@ -5,9 +5,9 @@ export const dateTimeInputVariants = cva(
   {
     variants: {
       size: {
-        Small: 'h-8 px-3 text-xs',
-        Medium: 'h-9 px-4 py-2 text-sm',
-        Large: 'h-10 px-5 py-2 text-base',
+        Small: 'h-7 px-2 text-xs',
+        Medium: 'h-9 px-3 py-2 text-sm',
+        Large: 'h-11 px-4 py-2 text-base',
       },
     },
     defaultVariants: {

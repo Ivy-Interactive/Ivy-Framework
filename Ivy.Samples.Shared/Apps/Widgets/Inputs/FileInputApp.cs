@@ -1,8 +1,10 @@
-﻿using Ivy.Hooks;
+﻿using Ivy.Core.Helpers;
+using Ivy.Hooks;
 using Ivy.Services;
 using Ivy.Shared;
 using Ivy.Views.Builders;
 using Ivy.Views.Forms;
+using Ivy.Views.Tables;
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Inputs;
 
@@ -17,10 +19,12 @@ public class FileInputApp : SampleBase
                    new Tab("Variants", new FileInputVariants()),
                    new Tab("Size Variants", new FileInputSizeVariants()),
                    new Tab("Data Binding", new FileInputDataBinding()),
-                   new Tab("File Type Restrictions", new FileInputTypeRestrictions()),
-                   new Tab("File Count Limits", new FileInputCountLimits()),
-                   new Tab("File Content Display", new FileInputContentDisplay()),
-                   new Tab("Form Example", new FileInputFormExample())
+                   new Tab("Type Restrictions", new FileInputTypeRestrictions()),
+                   new Tab("Count Limits", new FileInputCountLimits()),
+                   new Tab("Content Display", new FileInputContentDisplay()),
+                   new Tab("Event Handlers", new FileInputEventHandlersExample()),
+                   new Tab("Integration", new FileInputIntegrationExample()),
+                   new Tab("Validation", new FileInputValidationExample())
                ).Variant(TabsVariant.Content);
     }
 }
@@ -233,14 +237,75 @@ public class FileInputContentDisplay : ViewBase
     }
 }
 
-public class FileInputFormExample : ViewBase
+public class FileInputEventHandlersExample : ViewBase
+{
+    public override object? Build()
+    {
+        var files = UseState(ImmutableArray.Create<FileUpload<byte[]>>());
+        var blurMessage = UseState("");
+        var blurCount = UseState(0);
+        var cancelCount = UseState(0);
+        var upload = this.UseUpload(MemoryStreamUploadHandler.Create(files));
+
+        return Layout.Vertical()
+               | Text.H2("Event Handlers")
+               | Text.P("Demonstrate OnBlur and OnCancel event handlers. OnBlur fires when the file dialog closes or input loses focus. OnCancel fires when the cancel button is clicked on a file.")
+               | files.ToFileInput(upload)
+                   .Placeholder("Choose files - try selecting, canceling the dialog, or clicking the X button")
+                   .HandleBlur((Event<IAnyInput> e) =>
+                   {
+                       blurCount.Set(blurCount.Value + 1);
+                       if (files.Value.Length > 0)
+                           blurMessage.Set($"Blur event #{blurCount.Value}: {files.Value.Length} file(s) selected");
+                       else
+                           blurMessage.Set($"Blur event #{blurCount.Value}: No file selected (dialog cancelled)");
+                   })
+                   .HandleCancel((Guid fileId) =>
+                   {
+                       upload.Value.Cancel(fileId);
+                       files.Set(list => list.Where(f => f.Id != fileId).ToImmutableArray());
+                       cancelCount.Set(cancelCount.Value + 1);
+                   })
+               | Layout.Vertical().Gap(4)
+                   | new Card(
+                       Layout.Vertical().Gap(2)
+                           | Text.Small("The blur event fires when you close the file dialog or click away from the input.")
+                           | (blurMessage.Value != ""
+                               ? Callout.Success(blurMessage.Value)
+                               : Callout.Info("Interact with the file input above to see blur events"))
+                           | Text.Small($"Total blur events: {blurCount.Value}").Color(Colors.Muted)
+                   ).Title("OnBlur Handler")
+                   | new Card(
+                       Layout.Vertical().Gap(2)
+                           | Text.Small("The cancel event fires when you click the X button next to a file in the list.")
+                           | (files.Value.Length > 0
+                               ? files.Value.ToTable()
+                                   .Width(Size.Full())
+                                   .Builder(e => e.FileName, e => e.Func((string x) => x))
+                                   .Builder(e => e.Progress, e => e.Func((float x) => x.ToString("P0")))
+                                   .Remove(e => e.Id)
+                               : Text.P("Upload files above to see the cancel button (X) next to each file").Color(Colors.Muted))
+                           | (cancelCount.Value > 0
+                               ? Callout.Success($"Cancelled {cancelCount.Value} file(s)")
+                               : files.Value.Length > 0
+                                   ? Callout.Info("Click the X button next to any file to trigger the cancel event")
+                                   : null)
+                   ).Title("OnCancel Handler");
+    }
+}
+
+public class FileInputIntegrationExample : ViewBase
 {
     public override object? Build()
     {
         return Layout.Vertical()
-               | Text.H2("Form Example")
-               | Text.P("Example of integrating file inputs into a form with different sizes, file type restrictions, and size limits.")
-               | new SizingExample();
+               | Text.H2("Integration")
+               | Text.P("Examples of integrating file inputs with forms and dialogs.")
+               | Layout.Vertical().Gap(4)
+                   | Text.H3("Form Integration")
+                   | new SizingExample()
+                   | Text.H3("Dialog Integration")
+                   | new DialogFileUploadExample();
     }
 }
 
@@ -300,5 +365,115 @@ public class SizingExample : ViewBase
             )
             .Width(Size.Full())
             .Title("File Upload Form with Different Sizes");
+    }
+}
+
+public class DialogFileUploadExample : ViewBase
+{
+    public override object? Build()
+    {
+        var selectedFile = UseState<FileUpload<byte[]>?>();
+
+        // Ephemeral state used inside the dialog while picking a file
+        var dialogFile = UseState<FileUpload<byte[]>?>();
+        var uploadContext = this.UseUpload(MemoryStreamUploadHandler.Create(dialogFile)).Accept("*/*").MaxFileSize(10 * 1024 * 1024);
+
+        // Dialog visibility state
+        var isOpen = UseState(false);
+
+        ValueTask OnDialogClose(Event<Dialog> _)
+        {
+            isOpen.Value = false;
+            dialogFile.Reset();
+            return ValueTask.CompletedTask;
+        }
+
+        var openButton = new Button("Open Dialog", _ =>
+        {
+            dialogFile.Reset();
+            isOpen.Value = true;
+        });
+
+        var dialog = isOpen.Value
+            ? new Dialog(
+                OnDialogClose,
+                new DialogHeader("Select File"),
+                new DialogBody(
+                    Layout.Vertical()
+                        | dialogFile.ToFileInput(uploadContext)
+                            .Accept("*/*")
+                            .Placeholder("Choose a file to upload")
+                ),
+                new DialogFooter(
+                    new Button("Cancel", _ =>
+                    {
+                        isOpen.Value = false;
+                        dialogFile.Reset();
+                    }, variant: ButtonVariant.Outline),
+                    new Button("Ok", _ =>
+                    {
+                        if (dialogFile.Value != null)
+                        {
+                            selectedFile.Set(dialogFile.Value);
+                        }
+                        isOpen.Value = false;
+                        dialogFile.Reset();
+                    })
+                )
+            )
+            : null;
+
+        return Layout.Vertical()
+               | Text.P("Upload files through a dialog interface, allowing users to select files in a modal window.")
+               | openButton
+               | (selectedFile.Value != null
+                    ? selectedFile.ToDetails()
+                    : Text.P("No file selected"))
+               | dialog;
+    }
+}
+
+public class FileInputValidationExample : ViewBase
+{
+    public override object? Build()
+    {
+        var settings = UseState(new FileUploadValidationSettings());
+        return Layout.Vertical()
+               | Text.H2("Validation")
+               | Text.P("Configure and test file upload validation rules including file size limits, file count limits, and accepted file types.")
+               | (Layout.Horizontal()
+                   | new FileUploadValidationUploader(settings.Value).Key(settings)
+                   | settings.ToForm(submitTitle: "Update").WithLayout().Width(120));
+    }
+}
+
+public record FileUploadValidationSettings
+{
+    public long MaxFileSize { get; init; } = 5 * 1024 * 1024; // 5 MB
+
+    public int MaxFiles { get; init; } = 3;
+
+    public string? Accept { get; init; }
+
+    public string? Placeholder { get; init; } = null!;
+}
+
+public class FileUploadValidationUploader(FileUploadValidationSettings settings) : ViewBase
+{
+    public override object? Build()
+    {
+        var selectedFiles = UseState(ImmutableArray.Create<FileUpload<byte[]>>());
+        var upload = this.UseUpload(MemoryStreamUploadHandler.Create(selectedFiles))
+            .Accept(settings.Accept!)
+            .MaxFileSize(settings.MaxFileSize)
+            .MaxFiles(settings.MaxFiles);
+
+        return Layout.Vertical()
+                    | selectedFiles.ToFileInput(upload).Placeholder(settings.Placeholder!)
+                    | selectedFiles.Value.ToTable()
+                        .Width(Size.Full())
+                        .Builder(e => e.Length, e => e.Func((long x) => Ivy.Utils.FormatBytes(x)))
+                        .Builder(e => e.Progress, e => e.Func((float x) => x.ToString("P0")))
+                        .Remove(e => e.Id);
     }
 }

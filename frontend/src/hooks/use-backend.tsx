@@ -156,6 +156,7 @@ export const useBackend = (
   const machineId = getMachineId();
   const connectionId = connection?.connectionId;
   const currentConnectionRef = useRef<signalR.HubConnection | null>(null);
+  const authChannelRef = useRef<BroadcastChannel | null>(null);
 
   // Stable values used in dependency arrays - only updated when we want to reconnect
   const [stableAppId, setStableAppId] = useState(appId);
@@ -260,6 +261,13 @@ export const useBackend = (
           statusText: response.statusText,
         });
       }
+
+      // Notify other tabs about logout
+      if (message.authToken === null && authChannelRef.current) {
+        logger.info('Broadcasting logout event to other tabs');
+        authChannelRef.current.postMessage({ type: 'logout' });
+      }
+
       if (message.reloadPage) {
         logger.info('Reloading page.');
         window.location.reload();
@@ -346,12 +354,36 @@ export const useBackend = (
     currentConnectionRef.current = newConnection;
     queueMicrotask(() => setConnection(newConnection));
 
+    // Set up Broadcast Channel for cross-tab logout synchronization
+    if (typeof BroadcastChannel !== 'undefined') {
+      const authChannel = new BroadcastChannel('ivy-auth-channel');
+      authChannelRef.current = authChannel;
+
+      authChannel.onmessage = event => {
+        if (event.data?.type === 'logout') {
+          logger.info('Received logout event from another tab, reloading...');
+          window.location.reload();
+        }
+      };
+
+      logger.debug('Broadcast Channel initialized for auth synchronization');
+    } else {
+      logger.warn('BroadcastChannel API not supported in this browser');
+    }
+
     return () => {
       if (currentConnectionRef.current === newConnection) {
         newConnection.stop().catch(err => {
           logger.warn('Error stopping SignalR connection during unmount:', err);
         });
         currentConnectionRef.current = null;
+      }
+
+      // Close Broadcast Channel
+      if (authChannelRef.current) {
+        authChannelRef.current.close();
+        authChannelRef.current = null;
+        logger.debug('Broadcast Channel closed');
       }
 
       if (isRootConnection) {
