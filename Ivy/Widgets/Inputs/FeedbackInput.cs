@@ -19,8 +19,6 @@ public enum FeedbackInputs
 
 public interface IAnyFeedbackInput : IAnyInput
 {
-    public string? Placeholder { get; set; }
-
     public FeedbackInputs Variant { get; set; }
 }
 

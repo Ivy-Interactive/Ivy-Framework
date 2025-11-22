@@ -30,13 +30,10 @@ internal static class FormFieldViewHelpers
     }
 }
 
-/// <summary>Signal for coordinating form validation across all fields.</summary>
 public class FormValidateSignal : AbstractSignal<Unit, bool>;
 
-/// <summary>Signal for notifying form field updates.</summary>
 public class FormUpdateSignal : AbstractSignal<Unit, Unit>;
 
-/// <summary>Validation timing strategy for form fields.</summary>
 public enum FormValidationStrategy
 {
     /// <summary>Validate when field loses focus.</summary>
@@ -45,51 +42,23 @@ public enum FormValidationStrategy
     OnSubmit
 }
 
-/// <summary>Form field view with validation, data binding, and visibility control.</summary>
-public class FormFieldView : ViewBase, IFormFieldView
+public class FormFieldView(
+    IAnyState bindingState,
+    Func<IAnyState, IViewContext, IAnyInput> inputFactory,
+    Func<bool> visible,
+    ISignalSender<Unit, Unit> updateSender,
+    string? label = null,
+    string? description = null,
+    string? help = null,
+    string? placeholder = null,
+    bool required = false,
+    FormFieldLayoutOptions? layoutOptions = null,
+    Func<object?, (bool, string)>[]? validators = null,
+    FormValidationStrategy validationStrategy = FormValidationStrategy.OnBlur,
+    Sizes size = Sizes.Medium)
+    : ViewBase, IFormFieldView
 {
-    private readonly IAnyState bindingState;
-    private readonly Func<IAnyState, IViewContext, IAnyInput> inputFactory;
-    private readonly Func<bool> visible;
-    private readonly ISignalSender<Unit, Unit> updateSender;
-    private readonly string? label;
-    private readonly string? description;
-    private readonly bool required;
-    private readonly Func<object?, (bool, string)>[]? validators;
-    private readonly FormValidationStrategy validationStrategy;
-    private readonly Sizes size;
-    private readonly string? help;
-
-    /// <summary>Layout configuration for positioning this field in the form.</summary>
-    public FormFieldLayoutOptions Layout { get; }
-
-    public FormFieldView(
-        IAnyState bindingState,
-        Func<IAnyState, IViewContext, IAnyInput> inputFactory,
-        Func<bool> visible,
-        ISignalSender<Unit, Unit> updateSender,
-        string? label = null,
-        string? description = null,
-        bool required = false,
-        FormFieldLayoutOptions? layoutOptions = null,
-        Func<object?, (bool, string)>[]? validators = null,
-        FormValidationStrategy validationStrategy = FormValidationStrategy.OnBlur,
-        Sizes size = Sizes.Medium,
-        string? help = null)
-    {
-        this.bindingState = bindingState;
-        this.inputFactory = inputFactory;
-        this.visible = visible;
-        this.updateSender = updateSender;
-        this.label = label;
-        this.description = description;
-        this.required = required;
-        this.Layout = layoutOptions ?? new FormFieldLayoutOptions(Guid.NewGuid());
-        this.validators = validators;
-        this.validationStrategy = validationStrategy;
-        this.size = size;
-        this.help = help;
-    }
+    public FormFieldLayoutOptions Layout { get; } = layoutOptions ?? new FormFieldLayoutOptions(Guid.NewGuid());
 
     private bool Validate<T>(T value, IState<string> invalid)
     {
@@ -161,6 +130,12 @@ public class FormFieldView : ViewBase, IFormFieldView
             input.HandleBlur(OnBlur);
         }
 
+        // Set placeholder if the input supports it
+        if (!string.IsNullOrEmpty(placeholder))
+        {
+            input.Placeholder = placeholder;
+        }
+
         return visibleState.Value ? new Field(input, label, description, required, help) { Size = size } : null;
     }
 }
@@ -185,13 +160,14 @@ public class FormFieldBinding<TModel>(
     Func<object?, (bool, string)>[]? validators = null,
     FormValidationStrategy validationStrategy = FormValidationStrategy.OnBlur,
     Sizes size = Sizes.Medium,
-    string? help = null
+    string? help = null,
+    string? placeholder = null
     ) : IFormFieldBinding<TModel>
 {
     public (IFormFieldView, IDisposable) Bind(IState<TModel> model)
     {
         var (fieldState, disposable) = StateHelpers.MemberState(model, selector);
-        var fieldView = new FormFieldView(fieldState, factory, visible, updateSignal, label, description, required, layoutOptions, validators, validationStrategy, size, help);
+        var fieldView = new FormFieldView(fieldState, factory, visible, updateSignal, label, description, help, placeholder, required, layoutOptions, validators, validationStrategy, size);
         return (fieldView, disposable);
     }
 }

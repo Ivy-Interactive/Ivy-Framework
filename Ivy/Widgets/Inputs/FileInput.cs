@@ -16,8 +16,6 @@ public enum FileInputs
 
 public interface IAnyFileInput : IAnyInput
 {
-    public string? Placeholder { get; set; }
-
     public FileInputs Variant { get; set; }
 }
 

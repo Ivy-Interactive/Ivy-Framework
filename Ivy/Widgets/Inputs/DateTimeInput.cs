@@ -21,8 +21,6 @@ public interface IAnyDateTimeInput : IAnyInput
 {
     public DateTimeInputs Variant { get; set; }
 
-    public string? Placeholder { get; set; }
-
     public string? Format { get; set; }
 }
 

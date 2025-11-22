@@ -16,8 +16,6 @@ public enum CodeInputs
 
 public interface IAnyCodeInput : IAnyInput
 {
-    public string? Placeholder { get; set; }
-
     public CodeInputs Variant { get; set; }
 }
 

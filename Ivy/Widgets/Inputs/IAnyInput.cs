@@ -9,6 +9,8 @@ public interface IAnyInput
 {
     [Prop] public bool Disabled { get; set; }
 
+    [Prop] public string? Placeholder { get; set; }
+
     [Prop] public string? Invalid { get; set; }
 
     [Prop] public Sizes Size { get; set; }
@@ -33,6 +35,12 @@ public static class AnyInputExtensions
     public static IAnyInput Invalid(this IAnyInput input, string? invalid)
     {
         input.Invalid = invalid;
+        return input;
+    }
+
+    public static IAnyInput Placeholder(this IAnyInput input, string? placeholder)
+    {
+        input.Placeholder = placeholder;
         return input;
     }
 

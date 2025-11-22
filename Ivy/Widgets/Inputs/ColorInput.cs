@@ -18,8 +18,6 @@ public enum ColorInputs
 
 public interface IAnyColorInput : IAnyInput
 {
-    public string? Placeholder { get; set; }
-
     public ColorInputs Variant { get; set; }
 }
 

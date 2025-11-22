@@ -25,8 +25,6 @@ public enum NumberFormatStyle
 
 public interface IAnyNumberInput : IAnyInput
 {
-    public string? Placeholder { get; set; }
-
     public double? Min { get; set; }
 
     public double? Max { get; set; }

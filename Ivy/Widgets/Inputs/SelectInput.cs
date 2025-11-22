@@ -19,8 +19,6 @@ public enum SelectInputs
 
 public interface IAnySelectInput : IAnyInput
 {
-    public string? Placeholder { get; set; }
-
     public SelectInputs Variant { get; set; }
 }
 

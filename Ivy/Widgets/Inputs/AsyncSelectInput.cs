@@ -15,7 +15,6 @@ namespace Ivy;
 
 public interface IAnyAsyncSelectInputBase : IAnyInput
 {
-    public string? Placeholder { get; set; }
 }
 
 /// <returns>A task that resolves to an array of matching options.</returns>

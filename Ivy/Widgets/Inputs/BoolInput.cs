@@ -1,5 +1,4 @@
 using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
 using Ivy.Core;
 using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
@@ -44,6 +43,8 @@ public abstract record BoolInputBase : WidgetBase<BoolInputBase>, IAnyBoolInput
     [Prop] public Icons Icon { get; set; }
 
     [Prop] public Sizes Size { get; set; } = Sizes.Medium;
+
+    [Prop] public string? Placeholder { get; set; } //not really used but included to consistency with IAnyInput
 
     [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
 

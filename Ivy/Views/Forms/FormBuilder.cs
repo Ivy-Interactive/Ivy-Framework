@@ -244,6 +244,18 @@ public class FormBuilder<TModel> : ViewBase
         hint.Label = label;
         return this;
     }
+
+    /// <summary>Sets placeholder text for specified field shown when field is empty.</summary>
+    /// <param name="field">Expression identifying field to configure.</param>
+    /// <param name="placeholder">Placeholder text to display when field is empty.</param>
+    /// <returns>Form builder instance for method chaining.</returns>
+    public FormBuilder<TModel> Placeholder(Expression<Func<TModel, object>> field, string placeholder)
+    {
+        var hint = GetField(field);
+        hint.Placeholder = placeholder;
+        return this;
+    }
+
     private FormBuilder<TModel> _Place(int col, Guid? row, params Expression<Func<TModel, object>>[] fields)
     {
         int order = _fields.Values
@@ -514,7 +526,8 @@ public class FormBuilder<TModel> : ViewBase
                     e.Validators.ToArray(),
                     ValidationStrategy,
                     Size,
-                    e.Help
+                    e.Help,
+                    e.Placeholder
                 );
                 return binding;
             })

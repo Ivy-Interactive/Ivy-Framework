@@ -11,8 +11,6 @@ namespace Ivy;
 
 public interface IAnyDateRangeInput : IAnyInput
 {
-    public string? Placeholder { get; set; }
-
     public string? Format { get; set; }
 }
 

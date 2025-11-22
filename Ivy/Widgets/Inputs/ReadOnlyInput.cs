@@ -47,6 +47,8 @@ public record ReadOnlyInput<TValue> : WidgetBase<ReadOnlyInput<TValue>>, IInput<
 
     [Prop] public bool ShowCopyButton { get; set; } = true;
 
+    [Prop] public string? Placeholder { get; set; } //not really used but included to consistency with IAnyInput    
+
     [Event] public Func<Event<IInput<TValue>, TValue>, ValueTask>? OnChange { get; }
 
     [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }

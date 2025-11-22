@@ -48,4 +48,9 @@ public static class BoxExtensions
     public static Box Content(this Box box, params object[] content) => box with { Children = content };
 
     public static Box ContentAlign(this Box box, Align? align) => box with { ContentAlign = align };
+
+    public static Box WithBox(this object anything)
+    {
+        return new Box(anything);
+    }
 }
