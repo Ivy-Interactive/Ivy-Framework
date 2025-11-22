@@ -24,14 +24,13 @@ namespace Ivy.Samples.Shared.Apps.Concepts;
 
 public class DisplayExample
 {
-    [Display(Name = "Custom Name", Description = "This is a custom description.", Order = 2, GroupName = "Group A", Prompt = "Enter value here")]
-    public string CustomDisplayString { get; set; } = "Display Example";
-
-    [Display(Name = "Another Name", Order = 1, GroupName = "Group A")]
-    public string AnotherDisplayString { get; set; } = "Another Display Example";
-
-    [Display(Name = "Different Group", GroupName = "Group B")]
-    public string DifferentGroupString { get; set; } = "Different Group Example";
+    [Display(
+            Name = "Custom Name",
+            Description = "This is a custom description.",
+            Order = 2,
+            Prompt = "Enter value here") //Should be shown as placeholder
+    ]
+    public string CustomDisplayString { get; set; } = "";
 }
 
 public class StringsExample
@@ -53,7 +52,7 @@ public class StringsExample
     public string RequiredString2 { get; set; }
 }
 
-[App(icon: Icons.Clipboard, searchHints: ["forms", "scaffolding"])]
+[App(icon: Icons.Brain, searchHints: ["forms", "scaffolding"])]
 public class FormScaffoldingApp : SampleBase
 {
     protected override object? BuildSample()

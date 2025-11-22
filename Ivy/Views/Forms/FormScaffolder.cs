@@ -24,8 +24,8 @@ internal static class FormScaffolder
             var label = displayInfo.Name ?? Utils.LabelFor(field.Name, field.Type);
             var order = displayInfo.Order ?? int.MaxValue;
 
-            // Wrap the input factory to match the expected signature
             var factory = ScaffoldInputFactory(field.Name, field.Type, size);
+
             Func<IAnyState, IViewContext, IAnyInput>? wrappedFactory = factory != null
                 ? (state, _) => factory(state)
                 : null;
@@ -40,7 +40,6 @@ internal static class FormScaffolder
                 field.Required
             );
 
-            // Apply display information
             if (!string.IsNullOrEmpty(displayInfo.Description))
             {
                 scaffoldedField.Description = displayInfo.Description;
@@ -49,6 +48,11 @@ internal static class FormScaffolder
             if (!string.IsNullOrEmpty(displayInfo.GroupName))
             {
                 scaffoldedField.Group = displayInfo.GroupName;
+            }
+
+            if (!string.IsNullOrEmpty(displayInfo.Prompt)) //We use prompt as a placeholder
+            {
+                scaffoldedField.Placeholder = displayInfo.Prompt;
             }
 
             scaffoldedFields[field.Name] = scaffoldedField;
@@ -178,7 +182,7 @@ internal static class FormScaffolder
 
         return fieldsAndProperties;
     }
-    
+
     private record FieldPropertyInfo
     {
         public required string Name { get; init; }

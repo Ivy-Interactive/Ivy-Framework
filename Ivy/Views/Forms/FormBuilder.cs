@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using System.Linq.Expressions;
 using System.Reflection;
 using Ivy.Client;
@@ -6,7 +5,6 @@ using Ivy.Core;
 using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
 using Ivy.Hooks;
-using Ivy.Services;
 using Ivy.Shared;
 using Ivy.Widgets.Inputs;
 using static Ivy.Views.Forms.FormHelpers;
@@ -88,6 +86,8 @@ public class FormBuilderField<TModel>
     public string? Description { get; set; }
 
     public string? Help { get; set; }
+
+    public string? Placeholder { get; set; }
 
     public Func<IAnyState, IViewContext, IAnyInput>? InputFactory { get; set; }
 
