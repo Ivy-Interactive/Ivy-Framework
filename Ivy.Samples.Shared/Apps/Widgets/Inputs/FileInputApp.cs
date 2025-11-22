@@ -243,7 +243,6 @@ public class FileInputEventHandlersExample : ViewBase
     {
         var files = UseState(ImmutableArray.Create<FileUpload<byte[]>>());
         var blurMessage = UseState("");
-        var blurCount = UseState(0);
         var cancelCount = UseState(0);
         var upload = this.UseUpload(MemoryStreamUploadHandler.Create(files));
 
@@ -254,11 +253,10 @@ public class FileInputEventHandlersExample : ViewBase
                    .Placeholder("Choose files - try selecting, canceling the dialog, or clicking the X button")
                    .HandleBlur((Event<IAnyInput> e) =>
                    {
-                       blurCount.Set(blurCount.Value + 1);
                        if (files.Value.Length > 0)
-                           blurMessage.Set($"Blur event #{blurCount.Value}: {files.Value.Length} file(s) selected");
+                           blurMessage.Set($"Blur: {files.Value.Length} file(s) selected");
                        else
-                           blurMessage.Set($"Blur event #{blurCount.Value}: No file selected (dialog cancelled)");
+                           blurMessage.Set("Blur: No file selected (dialog cancelled)");
                    })
                    .HandleCancel((Guid fileId) =>
                    {
@@ -273,7 +271,6 @@ public class FileInputEventHandlersExample : ViewBase
                            | (blurMessage.Value != ""
                                ? Callout.Success(blurMessage.Value)
                                : Callout.Info("Interact with the file input above to see blur events"))
-                           | Text.Small($"Total blur events: {blurCount.Value}").Color(Colors.Muted)
                    ).Title("OnBlur Handler")
                    | new Card(
                        Layout.Vertical().Gap(2)
@@ -455,7 +452,7 @@ public record FileUploadValidationSettings
 
     public string? Accept { get; init; }
 
-    public string? Placeholder { get; init; } = null!;
+    public string Placeholder { get; init; } = "Choose files to upload";
 }
 
 public class FileUploadValidationUploader(FileUploadValidationSettings settings) : ViewBase
@@ -469,7 +466,7 @@ public class FileUploadValidationUploader(FileUploadValidationSettings settings)
             .MaxFiles(settings.MaxFiles);
 
         return Layout.Vertical()
-                    | selectedFiles.ToFileInput(upload).Placeholder(settings.Placeholder!)
+                    | selectedFiles.ToFileInput(upload).Placeholder(settings.Placeholder)
                     | selectedFiles.Value.ToTable()
                         .Width(Size.Full())
                         .Builder(e => e.Length, e => e.Func((long x) => Ivy.Utils.FormatBytes(x)))
