@@ -65,6 +65,7 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
   const handleEvent = useEventHandler();
   const [isDragging, setIsDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const filesSelectedInCurrentDialogRef = useRef(false);
 
   // Be defensive in case events is undefined at runtime
   const hasCancelHandler = Array.isArray(events) && events.includes('OnCancel');
@@ -146,9 +147,13 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
       const files = e.target.files;
       if (!files || files.length === 0) {
         // No files selected - dialog was likely cancelled
-        // Blur will be handled by the input's blur event
+        // Blur will be handled by the window focus event listener
+        filesSelectedInCurrentDialogRef.current = false;
         return;
       }
+
+      // Mark that files were selected in this dialog session
+      filesSelectedInCurrentDialogRef.current = true;
 
       // Check max files limit (including already uploaded files)
       const currentFileCount = Array.isArray(value)
@@ -179,45 +184,49 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
       // Reset the input so selecting the same file again triggers onChange
       e.target.value = '';
 
-      // Dialog closed after file selection - trigger blur
-      if (hasBlurHandler) {
-        handleBlur();
-      }
+      // Dialog closed after file selection - trigger blur after upload completes
+      // This ensures the server state is updated before blur fires
+      handleBlur();
     },
-    [multiple, uploadFile, maxFiles, value, hasBlurHandler, handleBlur]
+    [multiple, uploadFile, maxFiles, value, handleBlur]
   );
 
-  // Detect when file dialog closes (for cancel case)
+  // Detect when file dialog closes without selection (cancel case only)
   useEffect(() => {
     if (!hasBlurHandler) return;
 
     const inputElement = inputRef.current;
     let dialogWasOpen = false;
 
-    const handleInputFocus = () => {
+    const handleInputClick = () => {
+      // Track when input is clicked (dialog will open)
       dialogWasOpen = true;
+      filesSelectedInCurrentDialogRef.current = false;
     };
 
     const handleWindowFocus = () => {
       if (dialogWasOpen) {
         dialogWasOpen = false;
-        // Dialog closed - fire blur
-        handleBlur();
+        // Only fire blur if no files were selected (cancel case)
+        // If files were selected, blur will be handled by handleChange after upload
+        if (!filesSelectedInCurrentDialogRef.current) {
+          handleEvent('OnBlur', id, []);
+        }
       }
     };
 
     if (inputElement) {
-      inputElement.addEventListener('focus', handleInputFocus);
+      inputElement.addEventListener('click', handleInputClick);
     }
     window.addEventListener('focus', handleWindowFocus);
 
     return () => {
       if (inputElement) {
-        inputElement.removeEventListener('focus', handleInputFocus);
+        inputElement.removeEventListener('click', handleInputClick);
       }
       window.removeEventListener('focus', handleWindowFocus);
     };
-  }, [hasBlurHandler, handleBlur]);
+  }, [hasBlurHandler, handleEvent, id]);
 
   const handleCancel = useCallback(
     (fileId: string) => {
