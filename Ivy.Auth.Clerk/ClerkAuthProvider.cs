@@ -42,7 +42,6 @@ public class ClerkAuthProvider : IAuthProvider
         _frontendApiDomain = configuration.GetValue<string>("Clerk:FrontendApiDomain") ?? throw new Exception("Clerk:FrontendApiDomain is required");
 
         _httpClient = new HttpClient();
-        _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_secretKey}");
 
         _frontendClient = new FrontendApiClient(_frontendApiDomain);
     }
@@ -86,48 +85,31 @@ public class ClerkAuthProvider : IAuthProvider
 
     public async Task<Uri> GetOAuthUriAsync(AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken = default)
     {
-        string? devBrowserJwt = null;
-        try
+        var devBrowserTokenResponse = await _frontendClient.CreateDevBrowserTokenAsync(cancellationToken);
+        var devBrowserJwt = devBrowserTokenResponse.Id;
+
+        var updateEnvironmentResponse = await _frontendClient.UpdateEnvironmentAsync(devBrowserTokenResponse.Id, ORIGIN_TEMPORARY_REMOVE_THIS_BEFORE_MERGE, cancellationToken);
+
+        var clientResponse = await _frontendClient.GetCurrentClient(devBrowserTokenResponse.Id, cancellationToken);
+
+        var strategy = option.Id switch
         {
-            var devBrowserTokenResponse = await _frontendClient.CreateDevBrowserTokenAsync(cancellationToken);
-            devBrowserJwt = devBrowserTokenResponse.Id;
+            "google" => "oauth_google",
+            "github" => "oauth_github",
+            "twitter" => "oauth_twitter",
+            "apple" => "oauth_apple",
+            "microsoft" => "oauth_microsoft",
+            _ => throw new Exception($"Unsupported OAuth strategy: {option.Id}"),
+        };
 
-            var updateEnvironmentResponse = await _frontendClient.UpdateEnvironmentAsync(devBrowserTokenResponse.Id, ORIGIN_TEMPORARY_REMOVE_THIS_BEFORE_MERGE, cancellationToken);
-
-            var clientResponse = await _frontendClient.GetCurrentClient(devBrowserTokenResponse.Id, cancellationToken);
-
-            var strategy = option.Id switch
-            {
-                "google" => "oauth_google",
-                "github" => "oauth_github",
-                "twitter" => "oauth_twitter",
-                "apple" => "oauth_apple",
-                "microsoft" => "oauth_microsoft",
-                _ => throw new Exception($"Unsupported OAuth strategy: {option.Id}"),
-            };
-
-            var redirectUrl = callback.GetUri(includeIdInPath: true).ToString();
-            var signInResponse = await _frontendClient.CreateSignInAsync(devBrowserJwt, ORIGIN_TEMPORARY_REMOVE_THIS_BEFORE_MERGE, strategy, redirectUrl, null, cancellationToken);
-            var firstFactorVerificationResponse = await _frontendClient.PrepareFirstFactorVerificationAsync(devBrowserJwt, ORIGIN_TEMPORARY_REMOVE_THIS_BEFORE_MERGE, signInResponse.Response!.Id, strategy, redirectUrl, null, cancellationToken);
-            Console.WriteLine($"First factor verification response: {firstFactorVerificationResponse}");
-        }
-        catch (Exception e)
+        var redirectUrl = callback.GetUri(includeIdInPath: true).ToString();
+        var signInResponse = await _frontendClient.CreateSignInAsync(devBrowserJwt, ORIGIN_TEMPORARY_REMOVE_THIS_BEFORE_MERGE, strategy, redirectUrl, null, cancellationToken);
+        var firstFactorVerificationResponse = await _frontendClient.PrepareFirstFactorVerificationAsync(devBrowserJwt, ORIGIN_TEMPORARY_REMOVE_THIS_BEFORE_MERGE, signInResponse.Response!.Id, strategy, redirectUrl, null, cancellationToken);
+        if (firstFactorVerificationResponse.Response?.FirstFactorVerification?.ExternalVerificationRedirectUrl is not { } oauthUri)
         {
-            Console.WriteLine($"Error creating OAuth URI: {e}");
+            throw new Exception("Failed to get OAuth redirect URL from Clerk.");
         }
-
-        var redirectUri = callback.GetUri(includeIdInPath: true);
-
-        // TODO: use the correct sign-in URL. This is the default, but it is configurable in Clerk dashboard.
-        // Also we may want to just take complete control of the sign-in flow:
-        // https://clerk.com/docs/reference/frontend-api/tag/sign-ins/post/v1/client/sign_ins
-        var authUrl = $"https://{_frontendApiDomain}.accounts.dev/sign-in?redirect_url={Uri.EscapeDataString(redirectUri.ToString())}";
-        if (!string.IsNullOrEmpty(devBrowserJwt))
-        {
-            authUrl += $"&__clerk_db_jwt={devBrowserJwt}";
-        }
-
-        return new Uri(authUrl);
+        return new Uri(oauthUri);
     }
 
     public async Task<AuthToken> VerifyHandshakeJwtAsync(string jwt, string devBrowserJwt, CancellationToken cancellationToken = default)
@@ -175,42 +157,53 @@ public class ClerkAuthProvider : IAuthProvider
 
     public async Task<AuthToken?> HandleOAuthCallbackAsync(HttpRequest request, CancellationToken cancellationToken = default)
     {
-        var handshakeJwt = request.Query["__clerk_handshake"].ToString();
-        var devBrowserJwt = request.Query["__clerk_db_jwt"].ToString();
-
-        var error = request.Query["error"].ToString();
-        var errorDescription = request.Query["error_description"].ToString();
-
-        if (!string.IsNullOrEmpty(error) || !string.IsNullOrEmpty(errorDescription))
-        {
-            throw new ClerkOAuthException(error, errorDescription);
-        }
-
-        if (string.IsNullOrEmpty(handshakeJwt))
-        {
-            await _frontendClient.RemoveAllSessionsAsync(devBrowserJwt, cancellationToken);
-            throw new Exception("Received no handshake JWT from Clerk.");
-        }
-
-        var authToken = await VerifyHandshakeJwtAsync(handshakeJwt, devBrowserJwt, cancellationToken);
+        var sessionId = request.Query["created_session"].ToString();
 
         try
         {
-            var (principal, _) = await ValidateToken(authToken.AccessToken, lenientLifetimeValidation: false, cancellationToken)
-                ?? throw new Exception("Failed to validate access token after OAuth callback.");
-
-            if (principal.FindFirst("sid")?.Value is not { } sessionId)
-            {
-                throw new Exception("No session ID found in access token.");
-            }
-
-            await _frontendClient.TouchSessionAsync(sessionId, devBrowserJwt, cancellationToken);
+            await _frontendClient.GetSessionAsync(sessionId, "", cancellationToken);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            Console.WriteLine($"Error fetching session: {ex.Message}");
+            return null;
         }
 
-        return authToken;
+        return null;
+
+        // var error = request.Query["error"].ToString();
+        // var errorDescription = request.Query["error_description"].ToString();
+
+        // if (!string.IsNullOrEmpty(error) || !string.IsNullOrEmpty(errorDescription))
+        // {
+        //     throw new ClerkOAuthException(error, errorDescription);
+        // }
+
+        // if (string.IsNullOrEmpty(handshakeJwt))
+        // {
+        //     await _frontendClient.RemoveAllSessionsAsync(devBrowserJwt, cancellationToken);
+        //     throw new Exception("Received no handshake JWT from Clerk.");
+        // }
+
+        // var authToken = await VerifyHandshakeJwtAsync(handshakeJwt, devBrowserJwt, cancellationToken);
+
+        // try
+        // {
+        //     var (principal, _) = await ValidateToken(authToken.AccessToken, lenientLifetimeValidation: false, cancellationToken)
+        //         ?? throw new Exception("Failed to validate access token after OAuth callback.");
+
+        //     if (principal.FindFirst("sid")?.Value is not { } sessionId)
+        //     {
+        //         throw new Exception("No session ID found in access token.");
+        //     }
+
+        //     await _frontendClient.TouchSessionAsync(sessionId, devBrowserJwt, cancellationToken);
+        // }
+        // catch (Exception)
+        // {
+        // }
+
+        // return authToken;
     }
 
     public async Task LogoutAsync(string jwt, object? tag, CancellationToken cancellationToken = default)

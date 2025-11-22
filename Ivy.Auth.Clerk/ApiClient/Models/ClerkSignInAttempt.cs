@@ -23,10 +23,10 @@ public class ClerkSignInAttempt
     public List<ClerkSupportedFactor>? SupportedSecondFactors { get; init; }
 
     [JsonPropertyName("first_factor_verification")]
-    public object? FirstFactorVerification { get; init; }
+    public ClerkVerificationOAuth? FirstFactorVerification { get; init; }
 
     [JsonPropertyName("second_factor_verification")]
-    public object? SecondFactorVerification { get; init; }
+    public ClerkVerificationOAuth? SecondFactorVerification { get; init; }
 
     [JsonPropertyName("identifier")]
     public string? Identifier { get; init; }
