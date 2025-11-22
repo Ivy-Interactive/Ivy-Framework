@@ -1,4 +1,5 @@
 using Ivy.Shared;
+using Ivy.Views.Builders;
 using Ivy.Views.Kanban;
 
 namespace Ivy.Samples.Shared.Apps.Widgets;
@@ -17,6 +18,17 @@ public class Task
 public class KanbanApp : SampleBase
 {
     protected override object? BuildSample()
+    {
+        return Layout.Tabs(
+            new Tab("Basic Example", new BasicKanbanExample()),
+            new Tab("Builder Example", new KanbanBuilderExample())
+        ).Variant(TabsVariant.Content);
+    }
+}
+
+public class BasicKanbanExample : ViewBase
+{
+    public override object? Build()
     {
         var selectedTaskId = this.UseState((string?)null);
         var tasks = UseState(new[]
@@ -45,27 +57,7 @@ public class KanbanApp : SampleBase
                 .ColumnOrder(e => GetStatusOrder(e.Status))
                 .Width(Size.Full())
                 .Width(e => e.Status, Size.Fraction(0.33f))
-                .ColumnTitle(status => status switch
-                {
-                    "Todo" => "Custom Todo",
-                    "In Progress" => "Custom In Progress",
-                    "Done" => "Custom Done",
-                    _ => status
-                })
-                .HandleAdd(columnKey =>
-                {
-                    var newTask = new Task
-                    {
-                        Id = (tasks.Value.Length + 1).ToString(),
-                        Title = $"New Task in {columnKey}",
-                        Status = columnKey,
-                        Priority = GetNextPriority(columnKey, tasks.Value),
-                        Description = $"Auto-generated task for {columnKey} column",
-                        Assignee = "Unassigned"
-                    };
-                    tasks.Set(tasks.Value.Append(newTask).ToArray());
-                })
-                .HandleMove(moveData =>
+                .HandleCardMove(moveData =>
                 {
                     var taskId = moveData.CardId?.ToString();
                     if (string.IsNullOrEmpty(taskId)) return;
@@ -75,7 +67,7 @@ public class KanbanApp : SampleBase
                     if (taskToMove == null) return;
 
                     // Update the task's status
-                    taskToMove = new Task
+                    var newTask = new Task
                     {
                         Id = taskToMove.Id,
                         Title = taskToMove.Title,
@@ -85,22 +77,32 @@ public class KanbanApp : SampleBase
                         Assignee = taskToMove.Assignee
                     };
 
-                    // Remove the task from its current position
-                    updatedTasks.RemoveAll(t => t.Id == taskId);
+                    // Remove the old task reference directly
+                    updatedTasks.Remove(taskToMove);
 
-                    // Insert the task at the desired position within the target column
-                    var tasksInTargetColumn = updatedTasks.Where(t => t.Status == moveData.ToColumn).ToList();
-                    if (moveData.TargetIndex.HasValue && moveData.TargetIndex.Value < tasksInTargetColumn.Count)
+                    // Determine insertion index
+                    int insertIndex = updatedTasks.Count;
+
+                    // Try to find the task that is currently at the target index in the target column
+                    var taskAtTargetIndex = updatedTasks
+                        .Where(t => t.Status == moveData.ToColumn)
+                        .ElementAtOrDefault(moveData.TargetIndex ?? -1);
+
+                    if (taskAtTargetIndex != null)
                     {
-                        // Insert at specific position
-                        var insertIndex = moveData.TargetIndex.Value;
-                        updatedTasks.InsertRange(insertIndex, new[] { taskToMove });
+                        insertIndex = updatedTasks.IndexOf(taskAtTargetIndex);
                     }
                     else
                     {
-                        // Add to end of column
-                        updatedTasks.Add(taskToMove);
+                        // If not found (e.g. appended to end), find the last task in that column
+                        var lastTaskInColumn = updatedTasks.LastOrDefault(t => t.Status == moveData.ToColumn);
+                        if (lastTaskInColumn != null)
+                        {
+                            insertIndex = updatedTasks.IndexOf(lastTaskInColumn) + 1;
+                        }
                     }
+
+                    updatedTasks.Insert(insertIndex, newTask);
 
                     tasks.Set(updatedTasks.ToArray());
                 })
@@ -157,10 +159,124 @@ public class KanbanApp : SampleBase
         "Done" => 3,
         _ => 0
     };
+}
 
-    private static int GetNextPriority(string columnKey, Task[] tasks)
+public class KanbanBuilderExample : ViewBase
+{
+    public override object? Build()
     {
-        var tasksInColumn = tasks.Where(t => t.Status == columnKey).ToList();
-        return tasksInColumn.Count + 1;
+        var selectedTaskId = this.UseState((string?)null);
+        var tasks = UseState(new[]
+        {
+            new Task { Id = "1", Title = "Design Homepage", Status = "Todo", Priority = 2, Description = "Create wireframes and mockups", Assignee = "Alice" },
+            new Task { Id = "2", Title = "Setup Database", Status = "Todo", Priority = 1, Description = "Configure PostgreSQL instance", Assignee = "Bob" },
+            new Task { Id = "3", Title = "Implement Auth", Status = "Todo", Priority = 3, Description = "Add OAuth2 authentication", Assignee = "Charlie" },
+            new Task { Id = "4", Title = "Build API", Status = "In Progress", Priority = 1, Description = "Create REST endpoints", Assignee = "Alice" },
+            new Task { Id = "5", Title = "Write Tests", Status = "In Progress", Priority = 2, Description = "Unit and integration tests", Assignee = "Bob" },
+            new Task { Id = "6", Title = "Deploy to Production", Status = "Done", Priority = 1, Description = "Configure CI/CD pipeline", Assignee = "Charlie" },
+        });
+
+        var kanban = tasks.Value
+                .ToKanban(
+                    groupBySelector: e => e.Status,
+                    idSelector: e => e.Id,
+                    titleSelector: e => e.Title,
+                    descriptionSelector: e => e.Description)
+                .CardBuilder(task => new Card(
+                    content: task.ToDetails()
+                        .Remove(x => x.Id)
+                        .MultiLine(x => x.Description)
+                ))
+                .ColumnOrder(e => GetStatusOrder(e.Status))
+                .Width(Size.Full())
+                .Width(e => e.Status, Size.Fraction(0.33f))
+                .HandleCardMove(moveData =>
+    {
+        var taskId = moveData.CardId?.ToString();
+        if (string.IsNullOrEmpty(taskId)) return;
+
+        var updatedTasks = tasks.Value.ToList();
+        var taskToMove = updatedTasks.FirstOrDefault(t => t.Id == taskId);
+        if (taskToMove == null) return;
+
+        var newTask = new Task
+        {
+            Id = taskToMove.Id,
+            Title = taskToMove.Title,
+            Status = moveData.ToColumn,
+            Priority = taskToMove.Priority,
+            Description = taskToMove.Description,
+            Assignee = taskToMove.Assignee
+        };
+
+        updatedTasks.Remove(taskToMove);
+
+        int insertIndex = updatedTasks.Count;
+
+        var taskAtTargetIndex = updatedTasks
+            .Where(t => t.Status == moveData.ToColumn)
+            .ElementAtOrDefault(moveData.TargetIndex ?? -1);
+
+        if (taskAtTargetIndex != null)
+        {
+            insertIndex = updatedTasks.IndexOf(taskAtTargetIndex);
+        }
+        else
+        {
+            var lastTaskInColumn = updatedTasks.LastOrDefault(t => t.Status == moveData.ToColumn);
+            if (lastTaskInColumn != null)
+            {
+                insertIndex = updatedTasks.IndexOf(lastTaskInColumn) + 1;
+            }
+        }
+
+        updatedTasks.Insert(insertIndex, newTask);
+
+        tasks.Set(updatedTasks.ToArray());
+    })
+                .HandleClick(cardId =>
+                {
+                    var taskId = cardId?.ToString();
+                    if (taskId != null)
+                        selectedTaskId.Set(taskId);
+                })
+                .Empty(
+                    new Card()
+                        .Title("No Tasks")
+                        .Description("Create your first task to get started")
+                );
+
+        return new Fragment(
+            kanban,
+            selectedTaskId.Value != null ? BuildTaskSheet(selectedTaskId as IState<string?>, tasks) : null
+        );
     }
+
+    private object BuildTaskSheet(IState<string?>? selectedTaskId, IState<Task[]> tasks)
+    {
+        var task = tasks.Value.FirstOrDefault(t => t.Id == selectedTaskId?.Value);
+        if (task == null) return new Fragment();
+
+        return new Sheet(
+            onClose: () => selectedTaskId?.Set((string?)null),
+            content: Layout.Vertical()
+                | new Card()
+                    .Title(task.Title)
+                    .Description(task.Description)
+                | Layout.Horizontal()
+                    | new Card().Title("Priority").Description($"P{task.Priority}")
+                    | new Card().Title("Assignee").Description(task.Assignee)
+                    | new Card().Title("Status").Description(task.Status),
+            title: task.Title,
+            description: "Task Details"
+        ).Width(Size.Rem(32));
+    }
+
+    private static int GetStatusOrder(string status) => status switch
+    {
+        "Todo" => 1,
+        "In Progress" => 2,
+        "Done" => 3,
+        _ => 0
+    };
 }

@@ -5,10 +5,8 @@ namespace Ivy.Core.Hooks;
 /// </summary>
 public class EffectTrigger : IEffectTrigger
 {
-    /// <summary>Gets the type of trigger that determines when the effect executes.</summary>
     public EffectTriggerType Type { get; }
 
-    /// <summary>Gets the state object associated with this trigger, if any.</summary>
     public IAnyState? State { get; }
 
     /// <summary>
@@ -75,31 +73,26 @@ public static class EffectExtensions
             _observable = observable;
         }
 
-        /// <summary>Disposes the observable state (no-op for observables).</summary>
         public void Dispose()
         {
             // Nothing to dispose for observables
         }
 
-        /// <summary>Creates an effect trigger (not implemented for observables).</summary>
         public IEffectTrigger ToTrigger()
         {
             throw new NotImplementedException();
         }
 
-        /// <summary>Subscribes to observable changes without receiving values.</summary>
         public IDisposable SubscribeAny(Action action)
         {
             return _observable.Subscribe(_ => action());
         }
 
-        /// <summary>Subscribes to observable changes and receives values as objects.</summary>
         public IDisposable SubscribeAny(Action<object?> action)
         {
             return _observable.Subscribe(x => action(x));
         }
 
-        /// <summary>Gets the observable's value type.</summary>
         public Type GetStateType()
         {
             return typeof(T);

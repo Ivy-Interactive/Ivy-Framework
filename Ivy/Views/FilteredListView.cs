@@ -7,10 +7,7 @@ using Ivy.Views.Blades;
 
 namespace Ivy.Views;
 
-/// <summary>
-/// Represents a filtered list view that provides search functionality and
-/// dynamic data fetching based on filter criteria.
-/// </summary>
+/// <summary>Represents a filtered list view that provides search functionality and dynamic data fetching based on filter criteria.</summary>
 /// <typeparam name="T">The type of data records to display in the filtered list.</typeparam>
 public class FilteredListView<T>(
     Func<string, Task<T[]>> fetchRecords,

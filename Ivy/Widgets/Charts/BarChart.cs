@@ -5,9 +5,6 @@ using Ivy.Shared;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
-/// <summary>
-/// Represents a bar chart widget.
-/// </summary>
 public record BarChart : WidgetBase<BarChart>
 {
     public BarChart(object data, params Bar[] bars)
@@ -18,102 +15,42 @@ public record BarChart : WidgetBase<BarChart>
         Height = Size.Full();
     }
 
-    /// <summary>
-    /// Gets or sets the data source.
-    /// </summary>
     [Prop] public object Data { get; init; }
 
-    /// <summary>
-    /// Gets or sets the layout orientation.
-    /// </summary>
     [Prop] public Layouts Layout { get; init; } = Layouts.Horizontal;
 
-    /// <summary>
-    /// Gets or sets the color scheme.
-    /// </summary>
     [Prop] public ColorScheme ColorScheme { get; init; } = ColorScheme.Default;
 
-    /// <summary>
-    /// Gets or sets the array of Bar configurations.
-    /// </summary>
     [Prop] public Bar[] Bars { get; init; }
 
-    /// <summary>
-    /// Gets or sets the Cartesian grid configuration.
-    /// </summary>
     [Prop] public CartesianGrid? CartesianGrid { get; init; }
 
-    /// <summary>
-    /// Gets or sets the tooltip configuration.
-    /// </summary>
     [Prop] public Ivy.Charts.Tooltip? Tooltip { get; init; }
 
-    /// <summary>
-    /// Gets or sets the legend configuration.
-    /// </summary>
     [Prop] public Legend? Legend { get; init; } = null;
 
-    /// <summary>
-    /// Gets or sets the toolbox configuration.
-    /// </summary>
     [Prop] public Toolbox? Toolbox { get; init; } = null;
 
-    /// <summary>
-    /// Gets or sets the array of X-axis configurations.
-    /// </summary>
     [Prop] public XAxis[] XAxis { get; init; } = [];
 
-    /// <summary>
-    /// Gets or sets the array of Y-axis configurations.
-    /// </summary>
     [Prop] public YAxis[] YAxis { get; init; } = [];
 
-    /// <summary>
-    /// Gets or sets the array of reference area configurations.
-    /// </summary>
     [Prop] public ReferenceArea[] ReferenceAreas { get; init; } = [];
 
-    /// <summary>
-    /// Gets or sets the array of reference dot configurations.
-    /// </summary>
     [Prop] public ReferenceDot[] ReferenceDots { get; init; } = [];
 
-    /// <summary>
-    /// Gets or sets the array of reference line configurations.
-    /// </summary>
     [Prop] public ReferenceLine[] ReferenceLines { get; init; } = [];
 
-    /// <summary>
-    /// Gets or sets the stack offset type.
-    /// </summary>
     [Prop] public StackOffsetTypes StackOffset { get; init; } = StackOffsetTypes.None;
 
-    /// <summary>
-    /// Gets or sets the gap between bars within the same category.
-    /// </summary>
     [Prop] public int BarGap { get; init; } = 4;
 
-    /// <summary>
-    /// Gets or sets the gap between bar categories.
-    /// </summary>
     [Prop] public object? BarCategoryGap { get; init; } = "10%";
 
-    /// <summary>
-    /// Gets or sets the maximum size.
-    /// </summary>
     [Prop] public int? MaxBarSize { get; init; } = null;
 
-    /// <summary>
-    /// Gets or sets whether the stacking order of bars should be reversed.
-    /// </summary>
     [Prop] public bool ReverseStackOrder { get; init; } = false;
 
-    /// <summary>
-    /// Operator overload that prevents BarChart from accepting child widgets.
-    /// </summary>
-    /// <param name="widget">The BarChart widget.</param>
-    /// <param name="child">The child widget (not supported).</param>
-    /// <returns>Throws NotSupportedException.</returns>
     /// <exception cref="NotSupportedException">BarChart does not support children.</exception>
     public static BarChart operator |(BarChart widget, object child)
     {
@@ -121,9 +58,6 @@ public record BarChart : WidgetBase<BarChart>
     }
 }
 
-/// <summary>
-/// Extension methods for the BarChart class.
-/// </summary>
 public static class BarChartExtensions
 {
     public static BarChart Layout(this BarChart chart, Layouts layout)

@@ -383,7 +383,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
           let hrefForNavigation = safeHref;
           if (isAppProtocol && safeHref) {
             // Convert app://MyApp to /MyApp, app://MyApp?param=value to /MyApp?param=value
-            const appId = safeHref.substring(7); // Remove "app://"
+            const appId = safeHref.substring(6); // Remove "app://"
             const [appPath, queryString] = appId.split('?');
             hrefForNavigation = `/${appPath}${queryString ? `?${queryString}` : ''}`;
           }

@@ -4,27 +4,11 @@ using Ivy.Core.Hooks;
 
 namespace Ivy.Services;
 
-/// <summary>
-/// Upload handler that accumulates multiple chunks into a single file.
-/// Useful for audio recording or streaming uploads where data arrives in pieces.
-/// </summary>
 public static class ChunkedMemoryStreamUploadHandler
 {
-    /// <summary>
-    /// Creates a chunked upload handler that accumulates byte array chunks into a single file.
-    /// Each upload appends to the previous content, building up the complete file over time.
-    /// </summary>
-    /// <param name="singleState">State holding the accumulated file</param>
-    /// <param name="chunkSize">Buffer size for reading chunks (default 8192)</param>
     public static IUploadHandler Create(IState<FileUpload<byte[]>?> singleState, int chunkSize = 8192)
         => new ChunkedMemoryStreamUploadHandlerImpl(singleState, chunkSize);
 
-    /// <summary>
-    /// Creates a chunked upload handler that stores each chunk as a separate file in an array.
-    /// Useful when you want to process or display individual chunks.
-    /// </summary>
-    /// <param name="arrayState">State holding all received chunks</param>
-    /// <param name="chunkSize">Buffer size for reading chunks (default 8192)</param>
     public static IUploadHandler CreateArray(IState<ImmutableArray<FileUpload<byte[]>>> arrayState, int chunkSize = 8192)
         => new ChunkedArrayUploadHandlerImpl(arrayState, chunkSize);
 }

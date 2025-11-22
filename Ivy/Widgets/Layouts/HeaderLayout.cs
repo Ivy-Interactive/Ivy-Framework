@@ -18,6 +18,8 @@ public record HeaderLayout : WidgetBase<HeaderLayout>
     {
     }
 
+    [Prop] public bool ShowHeaderDivider { get; init; } = true;
+
     /// <summary>
     /// Operator overload that prevents adding children to the HeaderLayout using the pipe operator. 
     /// HeaderLayout uses a predefined two-slot system (Header and Content) and does not support additional children beyond the initial header and content parameters. 

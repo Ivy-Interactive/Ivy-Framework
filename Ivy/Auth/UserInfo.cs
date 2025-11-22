@@ -1,17 +1,8 @@
 ﻿namespace Ivy.Auth;
 
-/// <summary>
-/// Represents user information retrieved from an authentication provider.
-/// </summary>
-/// <param name="Id">Unique user identifier</param>
-/// <param name="Email">User's email address</param>
-/// <param name="FullName">User's full name</param>
-/// <param name="AvatarUrl">URL to the user's avatar image</param>
+/// <summary> Represents user information retrieved from an authentication provider. </summary>
 public record UserInfo(string Id, string Email, string? FullName, string? AvatarUrl)
 {
-    /// <summary>
-    /// Gets the user's initials derived from their full name or email.
-    /// </summary>
     public string Initials
     {
         get

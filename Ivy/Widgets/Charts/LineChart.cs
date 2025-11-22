@@ -5,16 +5,8 @@ using Ivy.Shared;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
-/// <summary>
-/// Represents a line chart widget.
-/// </summary>
 public record LineChart : WidgetBase<LineChart>
 {
-    /// <summary>
-    /// Initializes a new instance of the LineChart class.
-    /// </summary>
-    /// <param name="data">The data source.</param>
-    /// <param name="lines">Variable number of Line configurations.</param>
     public LineChart(object data, params Line[] lines)
     {
         Data = data;
@@ -23,13 +15,7 @@ public record LineChart : WidgetBase<LineChart>
         Height = Size.Full();
     }
 
-    /// <summary>
-    /// Initializes a new instance of the LineChart class with the specified data, data key, and name key.
-    /// This constructor automatically creates a basic line configuration with default axes and tooltip.
-    /// </summary>
-    /// <param name="data">The data source containing the values to be displayed in the line chart.</param>
-    /// <param name="dataKey">The key that identifies the data property containing the numerical values.</param>
-    /// <param name="nameKey">The key that identifies the property containing the names/labels for data points.</param>
+    /// <summary>This constructor automatically creates a basic line configuration with default axes and tooltip.</summary>
     public LineChart(object data, string dataKey, string nameKey)
     {
         Data = data;
@@ -41,77 +27,32 @@ public record LineChart : WidgetBase<LineChart>
         Height = Size.Full();
     }
 
-    /// <summary>
-    /// Gets or sets the data source.
-    /// </summary>
     [Prop] public object Data { get; init; }
 
-    /// <summary>
-    /// Gets or sets the layout orientation.
-    /// </summary>
     [Prop] public Layouts Layout { get; init; } = Layouts.Vertical; //todo: not implemented on the frontend
 
-    /// <summary>
-    /// Gets or sets the color scheme.
-    /// </summary>
     [Prop] public ColorScheme ColorScheme { get; init; } = ColorScheme.Default;
 
-    /// <summary>
-    /// Gets or sets the array of Line configurations.
-    /// </summary>
     [Prop] public Line[] Lines { get; init; }
 
-    /// <summary>
-    /// Gets or sets the Cartesian grid configuration.
-    /// </summary>
     [Prop] public CartesianGrid? CartesianGrid { get; init; }
 
-    /// <summary>
-    /// Gets or sets the tooltip configuration.
-    /// </summary>
     [Prop] public Ivy.Charts.Tooltip? Tooltip { get; init; }
 
-    /// <summary>
-    /// Gets or sets the legend configuration.
-    /// </summary>
     [Prop] public Legend? Legend { get; init; } = null;
 
-    /// <summary>
-    /// Gets or sets the toolbox configuration.
-    /// </summary>
     [Prop] public Toolbox? Toolbox { get; init; } = new Toolbox();
 
-    /// <summary>
-    /// Gets or sets the array of X-axis configurations.
-    /// </summary>
     [Prop] public XAxis[] XAxis { get; init; } = [];
 
-    /// <summary>
-    /// Gets or sets the array of Y-axis configurations.
-    /// </summary>
     [Prop] public YAxis[] YAxis { get; init; } = [];
 
-    /// <summary>
-    /// Gets or sets the array of reference area configurations.
-    /// </summary>
     [Prop] public ReferenceArea[] ReferenceAreas { get; init; } = [];
 
-    /// <summary>
-    /// Gets or sets the array of reference dot configurations.
-    /// </summary>
     [Prop] public ReferenceDot[] ReferenceDots { get; init; } = [];
 
-    /// <summary>
-    /// Gets or sets the array of reference line configurations.
-    /// </summary>
     [Prop] public ReferenceLine[] ReferenceLines { get; init; } = [];
 
-    /// <summary>
-    /// Operator overload that prevents LineChart from accepting child widgets.
-    /// </summary>
-    /// <param name="widget">The LineChart widget.</param>
-    /// <param name="child">The child widget (not supported).</param>
-    /// <returns>Throws NotSupportedException.</returns>
     /// <exception cref="NotSupportedException">LineChart does not support children.</exception>
     public static LineChart operator |(LineChart widget, object child)
     {
@@ -119,9 +60,6 @@ public record LineChart : WidgetBase<LineChart>
     }
 }
 
-/// <summary>
-/// Extension methods for the LineChart class.
-/// </summary>
 public static class LineChartExtensions
 {
     public static LineChart Layout(this LineChart chart, Layouts layout)

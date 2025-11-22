@@ -209,7 +209,7 @@ export function validateLinkUrl(url: string | null | undefined): string {
       return '#';
     }
     // Additional check: prevent protocol injection (multiple colons after app://)
-    const afterProtocol = url.substring(7); // After "app://"
+    const afterProtocol = url.substring(6); // After "app://"
     if (afterProtocol.includes('://') || afterProtocol.match(/:[^?&/]/)) {
       return '#';
     }

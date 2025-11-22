@@ -14,16 +14,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Ivy.Auth;
 
-/// <summary>
-/// Default authentication application that provides login UI for various auth flows.
-/// </summary>
 [App()]
 public class DefaultAuthApp : ViewBase
 {
-    /// <summary>
-    /// Builds the authentication UI based on available auth options.
-    /// </summary>
-    /// <returns>The authentication UI layout</returns>
     public override object Build()
     {
         var auth = this.UseService<IAuthService>();
@@ -75,18 +68,10 @@ public class DefaultAuthApp : ViewBase
     }
 }
 
-/// <summary>
-/// View component for email/password authentication flow.
-/// </summary>
-/// <param name="errorMessage">State for displaying error messages</param>
 public class PasswordEmailFlowView(IState<string?> errorMessage) : ViewBase
 {
     private record LoginFormModel(string User, string Password);
 
-    /// <summary>
-    /// Builds the email/password login form.
-    /// </summary>
-    /// <returns>The login form UI</returns>
     public override object Build()
     {
         var credentials = this.UseState(() => new LoginFormModel("", ""));
@@ -162,17 +147,8 @@ public class PasswordEmailFlowView(IState<string?> errorMessage) : ViewBase
 }
 
 
-/// <summary>
-/// View component for OAuth authentication flow.
-/// </summary>
-/// <param name="option">The OAuth authentication option</param>
-/// <param name="errorMessage">State for displaying error messages</param>
 public class OAuthFlowView(AuthOption option, IState<string?> errorMessage) : ViewBase
 {
-    /// <summary>
-    /// Builds the OAuth authentication button.
-    /// </summary>
-    /// <returns>The OAuth login button UI</returns>
     public override object? Build()
     {
         var client = this.UseService<IClientProvider>();

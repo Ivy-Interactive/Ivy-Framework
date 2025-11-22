@@ -18,8 +18,9 @@ public class DataTableBuilder<TModel> : ViewBase, IMemoized
     private readonly DataTableConfig _configuration = new();
     private Func<Event<DataTable, CellClickEventArgs>, ValueTask>? _onCellClick;
     private Func<Event<DataTable, CellClickEventArgs>, ValueTask>? _onCellActivated;
-    private RowAction[]? _rowActions;
+    private MenuItem[]? _menuItemRowActions;
     private Func<Event<DataTable, RowActionClickEventArgs>, ValueTask>? _onRowAction;
+    private readonly Dictionary<string, Action<object>> _cellActions = new();
 
     private class InternalColumn
     {
@@ -226,6 +227,7 @@ public class DataTableBuilder<TModel> : ViewBase, IMemoized
     {
         var column = GetColumn(field);
         column.Column.Renderer = renderer;
+        column.Column.ColType = renderer.ColType;
         return this;
     }
 
@@ -276,50 +278,34 @@ public class DataTableBuilder<TModel> : ViewBase, IMemoized
         return this;
     }
 
-    /// <summary>Sets the event handler for cell clicks (single-click).</summary>
     public DataTableBuilder<TModel> OnCellClick(Func<Event<DataTable, CellClickEventArgs>, ValueTask> handler)
     {
         _onCellClick = handler;
         return this;
     }
 
-    /// <summary>Sets the event handler for cell activation (double-click).</summary>
     public DataTableBuilder<TModel> OnCellActivated(Func<Event<DataTable, CellClickEventArgs>, ValueTask> handler)
     {
         _onCellActivated = handler;
         return this;
     }
 
-    /// <summary>Configures row action buttons that appear on hover.</summary>
-    public DataTableBuilder<TModel> RowActions(params RowAction[] actions)
+    public DataTableBuilder<TModel> RowActions(params MenuItem[] actions)
     {
-        _rowActions = actions;
+        _menuItemRowActions = actions;
         return this;
     }
 
-    public DataTableBuilder<TModel> HandleRowAction(Action<TModel, MenuItem> handler)
+    public DataTableBuilder<TModel> HandleRowAction(Func<Event<DataTable, RowActionClickEventArgs>, ValueTask> handler)
     {
-        //todo: Implement
-        return this;
-    }
-
-    public DataTableBuilder<TModel> RowActions2(params MenuItem[] actions)
-    {
-        //todo: Implement and rename to RowActions
+        _onRowAction = handler;
         return this;
     }
 
     public DataTableBuilder<TModel> HandleCellAction(Expression<Func<TModel, object>> field, Action<object> action)
     {
-        //todo: Implement
-        return this;
-    }
-
-    /// <summary>Sets the event handler for row action button clicks.</summary>
-    public DataTableBuilder<TModel> OnRowAction(Func<Event<DataTable, RowActionClickEventArgs>, ValueTask> handler)
-    {
-        //todo: remove
-        _onRowAction = handler;
+        var columnName = Utils.GetNameFromMemberExpression(field.Body);
+        _cellActions[columnName] = action;
         return this;
     }
 
@@ -341,12 +327,33 @@ public class DataTableBuilder<TModel> : ViewBase, IMemoized
         }
 
         // Automatically enable cell click events if handlers are provided
-        if (_onCellClick != null || _onCellActivated != null)
+        if (_onCellClick != null || _onCellActivated != null || _cellActions.Count > 0)
         {
             configuration = configuration with { EnableCellClickEvents = true };
         }
 
-        return new DataTableView(queryable, width, _height, columns, configuration, _onCellClick, _onCellActivated, _rowActions, _onRowAction);
+        // Wire up cell actions to OnCellActivated
+        Func<Event<DataTable, CellClickEventArgs>, ValueTask>? onCellActivated = _onCellActivated;
+        if (_cellActions.Count > 0)
+        {
+            var originalHandler = _onCellActivated;
+            onCellActivated = async (Event<DataTable, CellClickEventArgs> e) =>
+            {
+                var args = e.Value;
+                if (_cellActions.TryGetValue(args.ColumnName, out var action))
+                {
+                    action(args.CellValue!);
+                }
+
+                // Call original handler if it exists
+                if (originalHandler != null)
+                {
+                    await originalHandler(e);
+                }
+            };
+        }
+
+        return new DataTableView(queryable, width, _height, columns, configuration, _onCellClick, onCellActivated, _menuItemRowActions, _onRowAction);
     }
 
     public object[] GetMemoValues()

@@ -163,7 +163,7 @@ public class RequiredFieldsExample : ViewBase
 
 ### Field Placement
 
-Control field placement using `.Place()` methods for custom layouts.
+Control field placement using `.Place()` and `.PlaceHorizontal()` methods for custom layouts.
 
 ```csharp demo-tabs
 public class LayoutControlExample : ViewBase
@@ -182,8 +182,8 @@ public class LayoutControlExample : ViewBase
         
         return address.ToForm()
             .Place(m => m.Street)                    // Single field spans full width
-            .Place(true, m => m.City, m => m.State)  // Two fields side-by-side, sharing row width
-            .Place(true, m => m.ZipCode, m => m.Country) // Two fields side-by-side, sharing row width
+            .PlaceHorizontal(m => m.City, m => m.State)  // Two fields side-by-side, sharing row width
+            .PlaceHorizontal(m => m.ZipCode, m => m.Country) // Two fields side-by-side, sharing row width
             .Label(m => m.Street, "Street Address")
             .Label(m => m.City, "City")
             .Label(m => m.State, "State/Province")

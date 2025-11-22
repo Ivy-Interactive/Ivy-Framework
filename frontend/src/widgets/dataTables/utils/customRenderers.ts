@@ -20,6 +20,20 @@ export interface IconCellData {
 export type IconCell = CustomCell<IconCellData>;
 
 /**
+ * Data structure for link cells
+ */
+export interface LinkCellData {
+  kind: 'link-cell';
+  url: string;
+  align?: 'left' | 'center' | 'right';
+}
+
+/**
+ * Type definition for link custom cells
+ */
+export type LinkCell = CustomCell<LinkCellData>;
+
+/**
  * Custom cell renderer for displaying Lucide icons in table cells
  */
 export const iconCellRenderer: CustomRenderer<IconCell> = {
@@ -113,6 +127,73 @@ export const iconCellRenderer: CustomRenderer<IconCell> = {
         iconName: value,
       };
     }
+    return undefined;
+  },
+};
+
+/**
+ * Custom cell renderer for displaying links with underline in table cells
+ */
+export const linkCellRenderer: CustomRenderer<LinkCell> = {
+  kind: GridCellKind.Custom,
+
+  isMatch: (cell: CustomCell): cell is LinkCell =>
+    cell.kind === GridCellKind.Custom &&
+    (cell.data as LinkCellData | undefined)?.kind === 'link-cell',
+
+  draw: (args, cell) => {
+    const { ctx, rect, theme } = args;
+    const url = cell.data?.url;
+    const align = cell.data?.align || 'left';
+
+    if (!url) return false;
+
+    // Use linkColor from theme (should be blue)
+    const linkColor = theme.linkColor || theme.accentColor || '#2563eb';
+    const padding = theme.cellHorizontalPadding ?? 8;
+
+    ctx.save();
+    ctx.font = `${theme.baseFontStyle} ${theme.fontFamily}`;
+    ctx.fillStyle = linkColor;
+    ctx.textBaseline = 'middle';
+
+    // Calculate text position based on alignment
+    const textMetrics = ctx.measureText(url);
+    let textX: number;
+
+    switch (align) {
+      case 'center':
+        textX = rect.x + (rect.width - textMetrics.width) / 2;
+        break;
+      case 'right':
+        textX = rect.x + rect.width - textMetrics.width - padding;
+        break;
+      case 'left':
+      default:
+        textX = rect.x + padding;
+    }
+
+    const textY = rect.y + rect.height / 2;
+
+    // Draw the text
+    ctx.fillText(url, textX, textY);
+
+    // Draw underline
+    const underlineY = textY + 8;
+    ctx.strokeStyle = linkColor;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(textX, underlineY);
+    ctx.lineTo(textX + textMetrics.width, underlineY);
+    ctx.stroke();
+
+    ctx.restore();
+
+    return true;
+  },
+
+  onClick: () => {
+    // Return undefined to let the parent handle click
     return undefined;
   },
 };

@@ -11,43 +11,22 @@ using Ivy.Shared;
 
 namespace Ivy.Views.Charts;
 
-/// <summary>
-/// Defines the available visual styles for bar charts.
-/// </summary>
 public enum BarChartStyles
 {
-    /// <summary>Default bar chart style with full axes, legend, and grid.</summary>
     Default,
-    /// <summary>Dashboard-optimized style with vertical layout, rounded bars, labels, and hidden axes for compact display.</summary>
     Dashboard
 }
 
-/// <summary>
-/// Interface for defining bar chart visual styles and configurations.
-/// </summary>
 /// <typeparam name="TSource">The type of the source data objects.</typeparam>
 public interface IBarChartStyle<TSource>
 {
-    /// <summary>
-    /// Designs and configures a bar chart with the specified data, dimension, and measures.
-    /// </summary>
-    /// <param name="data">The processed data in ExpandoObject format for chart rendering.</param>
-    /// <param name="dimension">The dimension configuration for the category axis.</param>
-    /// <param name="measures">The measure configurations for the data series.</param>
     /// <returns>A configured BarChart widget ready for rendering.</returns>
     BarChart Design(ExpandoObject[] data, Dimension<TSource> dimension, Measure<TSource>[] measures);
 }
 
-/// <summary>
-/// Helper methods for creating bar chart style instances.
-/// </summary>
+/// <summary>Helper methods for creating bar chart style instances.</summary>
 public static class BarChartStyleHelpers
 {
-    /// <summary>
-    /// Gets a bar chart style instance for the specified style type.
-    /// </summary>
-    /// <typeparam name="TSource">The type of the source data objects.</typeparam>
-    /// <param name="style">The bar chart style to create.</param>
     /// <returns>An instance of the specified bar chart style.</returns>
     /// <exception cref="InvalidOperationException">Thrown when the specified style is not found.</exception>
     public static IBarChartStyle<TSource> GetStyle<TSource>(BarChartStyles style)
@@ -61,18 +40,9 @@ public static class BarChartStyleHelpers
     }
 }
 
-/// <summary>
-/// Default bar chart style with full axes, legend, and grid for comprehensive data visualization.
-/// </summary>
 /// <typeparam name="TSource">The type of the source data objects.</typeparam>
 public class DefaultBarChartStyle<TSource> : IBarChartStyle<TSource>
 {
-    /// <summary>
-    /// Designs a default bar chart with Y-axis, legend, grid, and animated tooltip.
-    /// </summary>
-    /// <param name="data">The processed data for chart rendering.</param>
-    /// <param name="dimension">The dimension configuration for the X-axis.</param>
-    /// <param name="measures">The measure configurations for the data series.</param>
     /// <returns>A fully configured bar chart with default styling.</returns>
     public BarChart Design(ExpandoObject[] data, Dimension<TSource> dimension, Measure<TSource>[] measures)
     {
@@ -91,18 +61,10 @@ public class DefaultBarChartStyle<TSource> : IBarChartStyle<TSource>
     }
 }
 
-/// <summary>
-/// Dashboard-optimized bar chart style with vertical layout, rounded bars, and embedded labels for compact display.
-/// </summary>
+/// <summary>Dashboard-optimized bar chart style with vertical layout, rounded bars, and embedded labels for compact display.</summary>
 /// <typeparam name="TSource">The type of the source data objects.</typeparam>
 public class DashboardBarChartStyle<TSource> : IBarChartStyle<TSource>
 {
-    /// <summary>
-    /// Designs a dashboard bar chart with vertical layout, rounded bars, embedded labels, and hidden axes for compact visualization.
-    /// </summary>
-    /// <param name="data">The processed data for chart rendering.</param>
-    /// <param name="dimension">The dimension configuration for the Y-axis categories.</param>
-    /// <param name="measures">The measure configurations for the data series.</param>
     /// <returns>A compact bar chart optimized for dashboard display with vertical layout and embedded labels.</returns>
     public BarChart Design(ExpandoObject[] data, Dimension<TSource> dimension, Measure<TSource>[] measures)
     {
@@ -122,15 +84,8 @@ public class DashboardBarChartStyle<TSource> : IBarChartStyle<TSource>
     }
 }
 
-/// <summary>
-/// A fluent builder for creating bar charts from data sources with dimensions and measures.
-/// </summary>
+/// <summary>A fluent builder for creating bar charts from data sources with dimensions and measures.</summary>
 /// <typeparam name="TSource">The type of the source data objects.</typeparam>
-/// <remarks>
-/// Provides a fluent API for configuring bar charts with automatic data processing,
-/// asynchronous loading, and customizable styling. Transforms source data into pivot table format
-/// and applies the specified visual style to create the final chart.
-/// </remarks>
 public class BarChartBuilder<TSource>(
     IQueryable<TSource> data,
     Dimension<TSource>? dimension = null,
@@ -143,9 +98,6 @@ public class BarChartBuilder<TSource>(
     private Toolbox? _toolbox;
     private Func<Toolbox, Toolbox>? _toolboxFactory;
 
-    /// <summary>
-    /// Builds the bar chart by processing the data and applying the configured style.
-    /// </summary>
     /// <returns>A BarChart widget with the processed data and applied styling, or a loading indicator during data processing.</returns>
     /// <exception cref="InvalidOperationException">Thrown when dimension or measures are not configured.</exception>
     public override object? Build()
@@ -206,11 +158,6 @@ public class BarChartBuilder<TSource>(
         return polish?.Invoke(configuredChart) ?? configuredChart;
     }
 
-    /// <summary>
-    /// Configures the dimension (category axis) for the bar chart.
-    /// </summary>
-    /// <param name="name">The display name for the dimension.</param>
-    /// <param name="selector">Expression to select the dimension value from source objects.</param>
     /// <returns>The builder instance for method chaining.</returns>
     public BarChartBuilder<TSource> Dimension(string name, Expression<Func<TSource, object>> selector)
     {
@@ -218,11 +165,6 @@ public class BarChartBuilder<TSource>(
         return this;
     }
 
-    /// <summary>
-    /// Adds a measure (data series) to the bar chart.
-    /// </summary>
-    /// <param name="name">The display name for the measure.</param>
-    /// <param name="aggregator">Expression to aggregate the measure values from the data source.</param>
     /// <returns>The builder instance for method chaining.</returns>
     public BarChartBuilder<TSource> Measure(string name, Expression<Func<IQueryable<TSource>, object>> aggregator)
     {
@@ -252,20 +194,9 @@ public class BarChartBuilder<TSource>(
     }
 }
 
-/// <summary>
-/// Extension methods for creating bar charts from data collections.
-/// </summary>
+/// <summary>Extension methods for creating bar charts from data collections.</summary>
 public static class BarChartExtensions
 {
-    /// <summary>
-    /// Creates a bar chart builder from an enumerable data source.
-    /// </summary>
-    /// <typeparam name="TSource">The type of the source data objects.</typeparam>
-    /// <param name="data">The enumerable data source.</param>
-    /// <param name="dimension">Optional dimension expression for the category axis.</param>
-    /// <param name="measures">Optional array of measure expressions for data series.</param>
-    /// <param name="style">The visual style to apply to the chart.</param>
-    /// <param name="polish">Optional function to apply final customizations to the chart.</param>
     /// <returns>A BarChartBuilder for fluent configuration.</returns>
     public static BarChartBuilder<TSource> ToBarChart<TSource>(
         this IEnumerable<TSource> data,
@@ -277,15 +208,6 @@ public static class BarChartExtensions
         return data.AsQueryable().ToBarChart(dimension, measures, style, polish);
     }
 
-    /// <summary>
-    /// Creates a bar chart builder from a queryable data source.
-    /// </summary>
-    /// <typeparam name="TSource">The type of the source data objects.</typeparam>
-    /// <param name="data">The queryable data source.</param>
-    /// <param name="dimension">Optional dimension expression for the category axis.</param>
-    /// <param name="measures">Optional array of measure expressions for data series.</param>
-    /// <param name="style">The visual style to apply to the chart.</param>
-    /// <param name="polish">Optional function to apply final customizations to the chart.</param>
     /// <returns>A BarChartBuilder for fluent configuration.</returns>
     [OverloadResolutionPriority(1)]
     public static BarChartBuilder<TSource> ToBarChart<TSource>(

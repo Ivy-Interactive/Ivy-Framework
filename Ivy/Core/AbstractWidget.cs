@@ -11,14 +11,11 @@ public abstract record AbstractWidget : IWidget
     private string? _id;
     private readonly Dictionary<(Type, string), object?> _attachedProps = new();
 
-    /// <summary>Initializes AbstractWidget with specified child widgets.</summary>
-    /// <param name="children">Child widgets to be contained within this widget.</param>
     protected AbstractWidget(params object[] children)
     {
         Children = children;
     }
 
-    /// <summary>Sets attached property value for this widget used by parent widgets to store layout or behavior information.</summary>
     /// <param name="parentType">Type of parent widget defining attached property.</param>
     /// <param name="name">Name of attached property.</param>
     /// <param name="value">Value to set for attached property.</param>
@@ -27,10 +24,6 @@ public abstract record AbstractWidget : IWidget
         _attachedProps[(parentType, name)] = value;
     }
 
-    /// <summary>Gets attached property value for this widget. Returns null if not set.</summary>
-    /// <param name="t">Type of parent widget defining attached property.</param>
-    /// <param name="name">Name of attached property to retrieve.</param>
-    /// <returns>Value of attached property, or null if not set.</returns>
     public object? GetAttachedValue(Type t, string name)
     {
         return _attachedProps.GetValueOrDefault((t, name));
@@ -51,13 +44,10 @@ public abstract record AbstractWidget : IWidget
         set => _id = value;
     }
 
-    /// <summary>Optional key for widget identification and optimization during rendering and updates.</summary>
     public string? Key { get; set; }
 
-    /// <summary>Child widgets contained within this widget.</summary>
     public object[] Children { get; set; }
 
-    /// <summary>Serializes widget and children to JSON processing properties marked with <see cref="PropAttribute"/> and events marked with <see cref="EventAttribute"/>.</summary>
     /// <returns>JSON node representing serialized widget.</returns>
     /// <exception cref="InvalidOperationException">Thrown when children contain non-widget objects.</exception>
     public JsonNode Serialize()
@@ -116,8 +106,6 @@ public abstract record AbstractWidget : IWidget
         return json;
     }
 
-    /// <summary>Gets property value for serialization handling regular and attached properties.</summary>
-    /// <param name="property">Property to get value for.</param>
     /// <returns>Property value, or array of values for attached properties.</returns>
     /// <exception cref="InvalidOperationException">Thrown when attached properties are not arrays of nullable types.</exception>
     private object? GetPropertyValue(PropertyInfo property)
@@ -148,9 +136,6 @@ public abstract record AbstractWidget : IWidget
         return value;
     }
 
-    /// <summary>Invokes event handler on widget with specified arguments supporting Event&lt;T&gt; and Event&lt;T, TValue&gt; patterns.</summary>
-    /// <param name="eventName">Name of event to invoke.</param>
-    /// <param name="args">Arguments to pass to event handler.</param>
     /// <returns>true if event was successfully invoked; otherwise, false.</returns>
     public async Task<bool> InvokeEventAsync(string eventName, JsonArray args)
     {
@@ -250,9 +235,6 @@ public abstract record AbstractWidget : IWidget
         return true;
     }
 
-    /// <summary>Overloads | operator for convenient syntax to add children supporting single objects, arrays, or enumerables.</summary>
-    /// <param name="widget">Widget to add children to.</param>
-    /// <param name="child">Child object, array, or enumerable to add.</param>
     /// <returns>New widget instance with additional children.</returns>
     public static AbstractWidget operator |(AbstractWidget widget, object child)
     {

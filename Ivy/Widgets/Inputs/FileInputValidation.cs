@@ -5,11 +5,6 @@ namespace Ivy.Widgets.Inputs;
 
 public static class FileInputValidation
 {
-    /// <summary>
-    /// Validates file count for multiple file inputs
-    /// </summary>
-    /// <param name="files">The files to validate</param>
-    /// <param name="maxFiles">Maximum number of files allowed</param>
     public static ValidationResult ValidateFileCount(IEnumerable<IFileUpload> files, int? maxFiles)
     {
         if (maxFiles == null) return ValidationResult.Success();
@@ -23,11 +18,7 @@ public static class FileInputValidation
         return ValidationResult.Success();
     }
 
-    /// <summary>
-    /// Validates file types based on the accept pattern
-    /// </summary>
-    /// <param name="files">The files to validate</param>
-    /// <param name="accept">The accept pattern (e.g., ".txt,.pdf" or "image/*")</param>
+    /// <summary>Accept pattern (e.g., ".txt,.pdf" or "image/*").</summary>
     public static ValidationResult ValidateFileTypes(IEnumerable<IFileUpload> files, string? accept)
     {
         if (string.IsNullOrWhiteSpace(accept)) return ValidationResult.Success();
@@ -52,11 +43,6 @@ public static class FileInputValidation
         return ValidationResult.Success();
     }
 
-    /// <summary>
-    /// Validates a single file's type
-    /// </summary>
-    /// <param name="file">The file to validate</param>
-    /// <param name="accept">The accept pattern</param>
     public static ValidationResult ValidateFileType(IFileUpload file, string? accept)
     {
         if (string.IsNullOrWhiteSpace(accept)) return ValidationResult.Success();
@@ -71,11 +57,7 @@ public static class FileInputValidation
         return ValidationResult.Success();
     }
 
-    /// <summary>
-    /// Validates file size against maximum allowed size
-    /// </summary>
-    /// <param name="file">The file to validate</param>
-    /// <param name="maxFileSize">Maximum file size in bytes</param>
+    /// <summary>Maximum file size in bytes.</summary>
     public static ValidationResult ValidateFileSize(IFileUpload file, long? maxFileSize)
     {
         if (maxFileSize == null) return ValidationResult.Success();
@@ -112,40 +94,34 @@ public static class FileInputValidation
 
     private static bool IsFileTypeMatch(IFileUpload file, string pattern)
     {
-        // Handle special case: accept all files
         if (pattern == "*/*" || pattern == "*")
         {
             return true;
         }
 
-        // Handle MIME type patterns (e.g., "image/*", "text/plain")
         if (pattern.Contains("/"))
         {
             if (pattern.EndsWith("/*"))
             {
-                // Wildcard MIME type (e.g., "image/*")
                 var baseType = pattern[..^2];
                 return file.ContentType?.StartsWith(baseType, StringComparison.OrdinalIgnoreCase) ?? false;
             }
             else
             {
-                // Exact MIME type (e.g., "text/plain")
                 return string.Equals(file.ContentType, pattern, StringComparison.OrdinalIgnoreCase);
             }
         }
 
-        // Handle file extension patterns (e.g., ".txt", ".pdf")
         if (pattern.StartsWith("."))
         {
             var fileExtension = Path.GetExtension(file.FileName);
             return string.Equals(fileExtension, pattern, StringComparison.OrdinalIgnoreCase);
         }
 
-        // Handle extension without dot (e.g., "txt", "pdf")
         var extension = Path.GetExtension(file.FileName);
         if (!string.IsNullOrEmpty(extension))
         {
-            extension = extension[1..]; // Remove the dot
+            extension = extension[1..];
             return string.Equals(extension, pattern, StringComparison.OrdinalIgnoreCase);
         }
 

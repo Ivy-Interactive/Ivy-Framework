@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import {
   Collapsible,
   CollapsibleContent,
@@ -51,17 +50,16 @@ export const ExpandableWidget: React.FC<ExpandableWidgetProps> = ({
         <div className="flex-1 ml-2 min-w-0" role="summary">
           {slots?.Header}
         </div>
-        <Button
-          variant="ghost"
-          className="p-0 h-9 w-9 shrink-0 hover:bg-transparent pointer-events-none"
-          tabIndex={-1}
+        <span
+          className="p-0 h-9 w-9 shrink-0 pointer-events-none flex items-center justify-center"
+          aria-hidden="true"
         >
           <ChevronRight
             className={`h-4 w-4 transition-transform duration-200 ease-in-out ${
               isOpen ? 'rotate-90' : 'rotate-0'
             }`}
           />
-        </Button>
+        </span>
       </CollapsibleTrigger>
       <CollapsibleContent className="overflow-hidden transition-all data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
         <div className="space-y-4 p-2">{slots?.Content}</div>

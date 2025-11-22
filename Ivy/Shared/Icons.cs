@@ -1,15 +1,7 @@
 namespace Ivy.Shared;
 
-/// <summary>
-/// Utility methods for working with Icons enum values.
-/// </summary>
 public static class IconsHelper
 {
-    /// <summary>
-    /// Converts a string representation to an Icons enum value.
-    /// </summary>
-    /// <param name="iconName">The string name of the icon (case-insensitive).</param>
-    /// <returns>The corresponding Icons enum value, or null if not found.</returns>
     public static Icons? FromString(string? iconName)
     {
         if (string.IsNullOrEmpty(iconName)) return null;
@@ -21,34 +13,19 @@ public static class IconsHelper
     }
 }
 
-/// <summary>
-/// Comprehensive icon library based on Lucide icons with additional brand icons.
-/// Provides 1000+ scalable vector icons for UI elements, navigation, and visual communication.
-/// Frequently used icons are: Search, Menu, Home, Settings, User, Lock, Eye, Bell, Trash, Upload, Download, ChevronRight, ChevronDown, Mail, Calendar
-/// </summary>
 public enum Icons
 {
-    /// <summary>No icon - used when no icon should be displayed.</summary>
     None,
 
     // Brand Icons:
-    /// <summary>Google brand icon.</summary>
     Google, //<FaGoogle />
-    /// <summary>Microsoft Azure brand icon.</summary>
     Azure,  //<VscAzure />
-    /// <summary>Amazon brand icon.</summary>
     Amazon, //<FaAmazon />
-    /// <summary>Microsoft brand icon.</summary>
     Microsoft, //<FaMicrosoft />
-    /// <summary>Bitbucket brand icon.</summary>
     Bitbucket, //<FaBitbucket />
-    /// <summary>Discord brand icon.</summary>
     Discord, //<FaDiscord />
-    /// <summary>Vimeo brand icon.</summary>
     Vimeo, //<FaVimeo />
-    /// <summary>Spotify brand icon.</summary>
     Spotify, //<FaSpotify />
-    /// <summary>Notion brand icon.</summary>
     Notion, //<FaNotion />
 
     // Lucide Icons (1000+ scalable vector icons):
