@@ -42,15 +42,8 @@ type RedirectMessage = {
   state: HistoryState;
 };
 
-type AuthToken = {
-  accessToken: string;
-  refreshToken?: string;
-  expiresAt?: string;
-  tag?: unknown;
-};
-
 type SetAuthTokenMessage = {
-  authToken: AuthToken | null;
+  tokenId: string;
   reloadPage: boolean;
 };
 
@@ -245,12 +238,12 @@ export const useBackend = (
   const handleSetAuthToken = useCallback(
     async (message: SetAuthTokenMessage) => {
       logger.debug('Processing SetAuthToken request', {
-        hasAuthToken: !!message.authToken,
+        hasAuthToken: !!message.tokenId,
       });
       const response = await fetch(`${getIvyHost()}/ivy/auth/set-auth-token`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(message.authToken),
+        headers: { 'Content-Type': 'text/plain' },
+        body: message.tokenId,
         credentials: 'include',
       });
       if (response.ok) {
@@ -262,11 +255,11 @@ export const useBackend = (
         });
       }
 
-      // Notify other tabs about logout
-      if (message.authToken === null && authChannelRef.current) {
-        logger.info('Broadcasting logout event to other tabs');
-        authChannelRef.current.postMessage({ type: 'logout' });
-      }
+      // // Notify other tabs about logout
+      // if (message.authToken === null && authChannelRef.current) {
+      //   logger.info('Broadcasting logout event to other tabs');
+      //   authChannelRef.current.postMessage({ type: 'logout' });
+      // }
 
       if (message.reloadPage) {
         logger.info('Reloading page.');

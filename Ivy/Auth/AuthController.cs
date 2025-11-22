@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.Collections.Concurrent;
+using System.Net;
 using System.Text.Json;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -7,10 +8,17 @@ namespace Ivy.Auth;
 
 public class AuthController() : Controller
 {
+    private static readonly ConcurrentDictionary<string, AuthToken?> TokenValues = new();
+
     [Route("ivy/auth/set-auth-token")]
     [HttpPatch]
-    public IActionResult SetAuthToken([FromBody] AuthToken? token)
+    public IActionResult SetAuthToken([FromBody] string id)
     {
+        if (!TokenValues.TryRemove(id, out var token))
+        {
+            return BadRequest("Invalid or expired token id.");
+        }
+
         var cookies = HttpContext.Response.Cookies;
         if (string.IsNullOrEmpty(token?.AccessToken))
         {
@@ -54,5 +62,27 @@ public class AuthController() : Controller
             cookies.Append("auth_token", tokenJson, cookieOptions);
         }
         return Ok();
+    }
+
+    public IDisposable Register(string id, AuthToken? authToken)
+    {
+        if (!TokenValues.TryAdd(id, authToken))
+            throw new InvalidOperationException($"Token already registered for id '{id}'");
+
+        return new TokenUnsubscriber(id);
+    }
+
+    private sealed class TokenUnsubscriber(string id) : IDisposable
+    {
+        private bool _disposed;
+
+        public void Dispose()
+        {
+            if (!_disposed)
+            {
+                TokenValues.TryRemove(id, out _);
+                _disposed = true;
+            }
+        }
     }
 }
