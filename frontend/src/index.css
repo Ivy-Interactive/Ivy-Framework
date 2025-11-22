@@ -534,12 +534,9 @@
     overflow: auto;
   }
 }
-
-:has(> .remove-parent-padding),
 :has(.remove-parent-padding) {
   padding: 0px !important;
 }
-
 :has(> DIV.remove-ancestor-padding) {
   padding: 0 !important;
 }

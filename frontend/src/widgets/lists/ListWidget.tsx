@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { cn } from '@/lib/utils';
+import './ListWidget.css';
 
 type ListWidgetProps = {
   children: React.ReactNode;
