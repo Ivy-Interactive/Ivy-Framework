@@ -227,15 +227,42 @@ public class KanbanWithSheetExample : ViewBase
         });
         
         var client = UseService<IClientProvider>();
+        var isSheetOpen = UseState(false);
+        var taskForm = UseState(() => new KanbanTask(
+            Guid.NewGuid().ToString(), "", "Todo",
+            taskState.Value.Count(t => t.Status == "Todo") + 1, "", "Unassigned"));
+        
         var statusOptions = new[] { "Todo", "In Progress", "Done" }.ToOptions();
         
-        return Layout.Vertical().Gap(2)
+        // Track when form is submitted to add task
+        var wasSheetOpen = UseState(false);
+        UseEffect(() =>
+        {
+            if (!isSheetOpen.Value && wasSheetOpen.Value && !string.IsNullOrEmpty(taskForm.Value.Title))
+            {
+                var updatedTasks = taskState.Value.ToList();
+                updatedTasks.Add(taskForm.Value);
+                taskState.Set(updatedTasks.ToArray());
+                client.Toast($"Added: {taskForm.Value.Title}");
+                
+                // Reset form
+                taskForm.Set(new KanbanTask(
+                    Guid.NewGuid().ToString(), "", "Todo",
+                    taskState.Value.Count(t => t.Status == "Todo") + 1, "", "Unassigned"));
+            }
+            wasSheetOpen.Set(isSheetOpen.Value);
+        }, [isSheetOpen, taskForm]);
+        
+        var body = Layout.Vertical().Gap(2)
             | new Button("Add New Task")
-                .WithSheet(
-                    () => new TaskFormSheet(taskState, client, statusOptions),
-                    title: "Add New Task",
-                    description: "Create a new task",
-                    width: Size.Fraction(1/3f))
+                .HandleClick(_ =>
+                {
+                    taskForm.Set(new KanbanTask(
+                        Guid.NewGuid().ToString(), "", "Todo",
+                        taskState.Value.Count(t => t.Status == "Todo") + 1, "", "Unassigned"));
+                    isSheetOpen.Set(true);
+                    return ValueTask.CompletedTask;
+                })
             | taskState.Value
                 .ToKanban(
                     groupBySelector: t => t.Status,
@@ -264,52 +291,19 @@ public class KanbanWithSheetExample : ViewBase
                         client.Toast($"Deleted: {task.Title}");
                     }
                 });
-    }
-}
-
-public class TaskFormSheet : ViewBase
-{
-    private readonly IState<KanbanTask[]> _taskState;
-    private readonly IClientProvider _client;
-    private readonly Option<string>[] _statusOptions;
-    
-    public TaskFormSheet(IState<KanbanTask[]> taskState, IClientProvider client, Option<string>[] statusOptions)
-    {
-        _taskState = taskState;
-        _client = client;
-        _statusOptions = statusOptions;
-    }
-    
-    public override object? Build()
-    {
-        var taskForm = UseState(() => new KanbanTask(
-            Guid.NewGuid().ToString(), "", "Todo",
-            _taskState.Value.Count(t => t.Status == "Todo") + 1, "", "Unassigned"));
         
-        var (onSubmit, formView, validationView, _) = taskForm.ToForm()
+        var editSheet = taskForm.ToForm()
             .Required(m => m.Title, m => m.Description)
-            .Builder(m => m.Status, s => s.ToSelectInput(_statusOptions))
+            .Builder(m => m.Status, s => s.ToSelectInput(statusOptions))
             .Builder(m => m.Description, s => s.ToTextAreaInput())
             .Remove(m => m.Id)
-            .UseForm(this.Context);
+            .ToSheet(isSheetOpen,
+                title: "Add New Task",
+                description: "Create a new task",
+                submitTitle: "Create Task",
+                width: Size.Fraction(1/3f));
         
-        return new FooterLayout(
-            Layout.Horizontal().Gap(2)
-                | new Button("Create Task")
-                    .HandleClick(async _ =>
-                    {
-                        if (await onSubmit())
-                        {
-                            var updatedTasks = _taskState.Value.ToList();
-                            updatedTasks.Add(taskForm.Value);
-                            _taskState.Set(updatedTasks.ToArray());
-                            _client.Toast($"Added: {taskForm.Value.Title}");
-                        }
-                    })
-                | new Button("Cancel").Variant(ButtonVariant.Outline)
-                | validationView,
-            formView
-        );
+        return new Fragment(body, editSheet);
     }
 }
 ```
