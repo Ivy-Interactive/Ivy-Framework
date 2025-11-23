@@ -66,6 +66,7 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
   const [isDragging, setIsDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const filesSelectedInCurrentDialogRef = useRef(false);
+  const dialogWasOpenRef = useRef(false);
 
   // Be defensive in case events is undefined at runtime
   const hasCancelHandler = Array.isArray(events) && events.includes('OnCancel');
@@ -195,18 +196,9 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
   useEffect(() => {
     if (!hasBlurHandler) return;
 
-    const inputElement = inputRef.current;
-    let dialogWasOpen = false;
-
-    const handleInputClick = () => {
-      // Track when input is clicked (dialog will open)
-      dialogWasOpen = true;
-      filesSelectedInCurrentDialogRef.current = false;
-    };
-
     const handleWindowFocus = () => {
-      if (dialogWasOpen) {
-        dialogWasOpen = false;
+      if (dialogWasOpenRef.current) {
+        dialogWasOpenRef.current = false;
         // Only fire blur if no files were selected (cancel case)
         // If files were selected, blur will be handled by handleChange after upload
         if (!filesSelectedInCurrentDialogRef.current) {
@@ -215,15 +207,9 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
       }
     };
 
-    if (inputElement) {
-      inputElement.addEventListener('click', handleInputClick);
-    }
     window.addEventListener('focus', handleWindowFocus);
 
     return () => {
-      if (inputElement) {
-        inputElement.removeEventListener('click', handleInputClick);
-      }
       window.removeEventListener('focus', handleWindowFocus);
     };
   }, [hasBlurHandler, handleEvent, id]);
@@ -311,10 +297,15 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
       }
 
       if (!disabled && inputRef.current) {
+        // Track when dialog opens (for cancel detection)
+        if (hasBlurHandler) {
+          dialogWasOpenRef.current = true;
+          filesSelectedInCurrentDialogRef.current = false;
+        }
         inputRef.current.click();
       }
     },
-    [disabled]
+    [disabled, hasBlurHandler]
   );
 
   // Render individual file item for multiple files view
@@ -397,7 +388,6 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
           accept={accept}
           multiple={multiple}
           onChange={handleChange}
-          onBlur={hasBlurHandler ? handleBlur : undefined}
           disabled={disabled}
           className="hidden"
         />
