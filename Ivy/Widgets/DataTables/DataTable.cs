@@ -53,15 +53,12 @@ public record DataTable : WidgetBase<DataTable>
 
     [Prop] public MenuItem[]? RowActions { get; set; }
 
-    /// <summary>Called when a cell is clicked (single-click).</summary>
     [Event] public Func<Event<DataTable, CellClickEventArgs>, ValueTask>? OnCellClick { get; set; }
 
-    /// <summary>Called when a cell is activated (double-clicked).</summary>
     [Event] public Func<Event<DataTable, CellClickEventArgs>, ValueTask>? OnCellActivated { get; set; }
 
     [Event] public Func<Event<DataTable, RowActionClickEventArgs>, ValueTask>? OnRowAction { get; set; }
 
-    /// <exception cref="NotSupportedException">DataTable does not support children.</exception>
     public static Detail operator |(DataTable widget, object child)
     {
         throw new NotSupportedException("DataTable does not support children.");

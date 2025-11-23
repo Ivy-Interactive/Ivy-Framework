@@ -7,10 +7,6 @@ using System.Text.Json.Serialization;
 
 namespace Ivy.Middleware;
 
-/// <summary>
-/// Middleware that converts path-based URLs to appId query parameters for backward compatibility.
-/// For example: /onboarding/getting-started/chat-tutorial-app -> /?appId=onboarding/getting-started/chat-tutorial-app
-/// </summary>
 public class PathToAppIdMiddleware(RequestDelegate next, ILogger<PathToAppIdMiddleware> logger)
 {
     private class RoutingConstantData

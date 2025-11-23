@@ -39,7 +39,6 @@ public record Field : WidgetBase<Field>
 
     [Prop] public string? Help { get; set; }
 
-    /// <exception cref="NotSupportedException">Field widgets wrap single input control.</exception>
     public static Field operator |(Field widget, object child)
     {
         throw new NotSupportedException("Field does not support children.");

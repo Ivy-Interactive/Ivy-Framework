@@ -1,4 +1,4 @@
-﻿
+
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Ivy.Core;
@@ -31,6 +31,8 @@ public abstract record FeedbackInputBase : WidgetBase<FeedbackInputBase>, IAnyFe
     [Prop] public string? Placeholder { get; set; }
 
     [Prop] public FeedbackInputs Variant { get; set; }
+
+    [Prop] public new Scale? Scale { get; set; }
 
     [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
 
@@ -82,7 +84,6 @@ public record FeedbackInput<TNumber> : FeedbackInputBase, IInput<TNumber>
 
 public static class FeedbackInputExtensions
 {
-    /// <summary>Optional explicit variant selection.</summary>
     public static FeedbackInputBase ToFeedbackInput(this IAnyState state, string? placeholder = null, bool disabled = false, FeedbackInputs? variant = null)
     {
         var type = state.GetStateType();

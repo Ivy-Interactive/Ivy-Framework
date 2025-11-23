@@ -1,4 +1,4 @@
-﻿using System.Runtime.CompilerServices;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Ivy.Shared;
 using Ivy.Core;
@@ -7,7 +7,6 @@ using Ivy.Core.Docs;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
-/// <summary>Dropdown menu widget with customizable positioning and selection handling.</summary>
 public record DropDownMenu : WidgetBase<DropDownMenu>
 {
     public enum SideOptions
@@ -32,7 +31,6 @@ public record DropDownMenu : WidgetBase<DropDownMenu>
         Items = items.ToArray();
     }
 
-    /// <summary>Provides default selection handler that processes menu selections automatically.</summary>
     public static Func<Event<DropDownMenu, object>, ValueTask> DefaultSelectHandler()
     {
         return (@evt) =>
@@ -57,7 +55,6 @@ public record DropDownMenu : WidgetBase<DropDownMenu>
 
     [Event] public Func<Event<DropDownMenu, object>, ValueTask> OnSelect { get; set; }
 
-    /// <exception cref="NotSupportedException">Thrown for non-MenuItem children.</exception>
     public static DropDownMenu operator |(DropDownMenu widget, object child)
     {
         if (child is MenuItem menuItem)
@@ -69,7 +66,6 @@ public record DropDownMenu : WidgetBase<DropDownMenu>
     }
 }
 
-/// <summary>Extension methods for DropDownMenu providing fluent API for configuration.</summary>
 public static class DropDownMenuExtensions
 {
     public static DropDownMenu WithDropDown(this Button button, params MenuItem[] items)

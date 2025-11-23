@@ -1,4 +1,4 @@
-﻿using Ivy.Shared;
+using Ivy.Shared;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy.Charts;
@@ -33,15 +33,12 @@ public record Pie
 
     public object? Cy { get; set; }
 
-    /// <summary>Creating a donut chart effect.</summary>
     public object? InnerRadius { get; set; }
 
     public object? OuterRadius { get; set; }
 
-    /// <summary>This controls where the first slice begins.</summary>
     public int StartAngle { get; set; } = 0;
 
-    /// <summary>This controls where the last slice ends.</summary>
     public int EndAngle { get; set; } = 360;
 
     public LabelList[] LabelLists { get; set; } = [];

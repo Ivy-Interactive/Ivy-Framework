@@ -15,7 +15,6 @@ public enum BadgeVariant
     Info
 }
 
-/// <summary>Badge widget displaying small pieces of information like counts, statuses, or labels with multiple variants, sizes, and icon integration.</summary>
 public record Badge : WidgetBase<Badge>
 {
     public Badge(string? title = null, BadgeVariant variant = BadgeVariant.Primary, Icons icon = Icons.None)
@@ -33,14 +32,12 @@ public record Badge : WidgetBase<Badge>
 
     [Prop] public Align IconPosition { get; set; } = Align.Left;
 
-    /// <exception cref="NotSupportedException">Badge does not support children.</exception>
     public static Badge operator |(Badge badge, object child)
     {
         throw new NotSupportedException("Badge does not support children.");
     }
 }
 
-/// <summary>Extension methods for Badge widget providing fluent API for configuring appearance and behavior.</summary>
 public static class BadgeExtensions
 {
     public static Badge Icon(this Badge badge, Icons? icon, Align position = Align.Left)

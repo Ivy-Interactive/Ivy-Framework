@@ -36,12 +36,13 @@ public abstract record DateTimeInputBase : WidgetBase<DateTimeInputBase>, IAnyDa
 
     [Prop] public string? Invalid { get; set; }
 
+    [Prop] public new Scale? Scale { get; set; }
+
     [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
 
-    /// <summary>Supports various .NET date and time types with automatic conversion between them.</summary>
     public Type[] SupportedStateTypes() =>
-    [
-        typeof(DateTime), typeof(DateTime?),
+[
+    typeof(DateTime), typeof(DateTime?),
         typeof(DateTimeOffset), typeof(DateTimeOffset?),
         typeof(DateOnly), typeof(DateOnly?),
         typeof(TimeOnly), typeof(TimeOnly?),
@@ -87,12 +88,10 @@ public record DateTimeInput<TDate> : DateTimeInputBase, IInput<TDate>
 
 public static class DateTimeInputExtensions
 {
-    /// <summary>Convenience method that creates a date input with the Date variant.</summary>
     public static DateTimeInputBase ToDateInput(this IAnyState state, string? placeholder = null, bool disabled = false,
-        DateTimeInputs variant = DateTimeInputs.Date)
-        => ToDateTimeInput(state, placeholder, disabled, variant);
+    DateTimeInputs variant = DateTimeInputs.Date)
+    => ToDateTimeInput(state, placeholder, disabled, variant);
 
-    /// <summary>Creates a date/time input with type conversion and nullable handling.</summary>
     public static DateTimeInputBase ToDateTimeInput(this IAnyState state, string? placeholder = null, bool disabled = false, DateTimeInputs variant = DateTimeInputs.DateTime)
     {
         var stateType = state.GetStateType();
@@ -208,9 +207,8 @@ public static class DateTimeInputExtensions
         return TimeOnly.FromDateTime(DateTime.Now);
     }
 
-    /// <summary>This is the recommended way to create a time input.</summary>
     public static DateTimeInputBase ToTimeInput(this IAnyState state, string? placeholder = null, bool disabled = false)
-        => state.ToDateTimeInput(placeholder, disabled, DateTimeInputs.Time);
+    => state.ToDateTimeInput(placeholder, disabled, DateTimeInputs.Time);
 
     internal static IAnyDateTimeInput ScaffoldDefaults(this IAnyDateTimeInput input, string? name, Type type)
     {
@@ -229,7 +227,6 @@ public static class DateTimeInputExtensions
 
     public static DateTimeInputBase Placeholder(this DateTimeInputBase widget, string placeholder) => widget with { Placeholder = placeholder };
 
-    /// <summary>Format string (e.g., "yyyy-MM-dd", "HH:mm:ss") for displaying and parsing values.</summary>
     public static DateTimeInputBase Format(this DateTimeInputBase widget, string format) => widget with { Format = format };
 
     public static DateTimeInputBase Invalid(this DateTimeInputBase widget, string? invalid) => widget with { Invalid = invalid };

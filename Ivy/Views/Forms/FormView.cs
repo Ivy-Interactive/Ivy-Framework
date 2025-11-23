@@ -127,8 +127,6 @@ public class FormFieldView(
             input.HandleBlur(OnBlur);
         }
 
-        input.Scale = scale;
-
         // Set placeholder if the input supports it
         if (!string.IsNullOrEmpty(placeholder))
         {

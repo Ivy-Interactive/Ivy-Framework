@@ -1,25 +1,15 @@
 namespace Ivy.Themes;
 
-/// <summary>Represents a complete theme configuration that can be applied to the frontend.</summary>
 public class Theme
 {
     public string Name { get; set; } = "Default";
 
     public ThemeColorScheme Colors { get; set; } = new();
 
-    /// <summary>
-    /// Should be a valid CSS font-family value (e.g., "Inter, sans-serif").
-    /// </summary>
     public string? FontFamily { get; set; }
 
-    /// <summary>
-    /// Should be a valid CSS font-size value (e.g., "14px", "1rem").
-    /// </summary>
     public string? FontSize { get; set; }
 
-    /// <summary>
-    /// Should be a valid CSS border-radius value (e.g., "8px", "0.5rem").
-    /// </summary>
     public string? BorderRadius { get; set; }
 
     public static Theme Default => new()
@@ -29,7 +19,6 @@ public class Theme
     };
 }
 
-/// <summary>Color scheme supporting both light and dark variants.</summary>
 public class ThemeColorScheme
 {
     public ThemeColors Light { get; set; } = new();

@@ -11,7 +11,6 @@ public record Form : WidgetBase<Form>
 
     }
 
-    /// <summary>Event handler called when form is submitted via Enter key on last field.</summary>
     [Event] public Func<Event<Form>, ValueTask>? OnSubmit { get; set; }
 }
 

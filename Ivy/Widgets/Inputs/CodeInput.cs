@@ -1,4 +1,4 @@
-﻿using System.Runtime.CompilerServices;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Ivy.Core;
 using Ivy.Core.Helpers;
@@ -25,6 +25,8 @@ public abstract record CodeInputBase : WidgetBase<CodeInputBase>, IAnyCodeInput
 
     [Prop] public string? Invalid { get; set; }
 
+    [Prop] public new Scale? Scale { get; set; }
+
     [Prop] public string? Placeholder { get; set; }
 
     [Prop] public CodeInputs Variant { get; set; }
@@ -38,7 +40,6 @@ public abstract record CodeInputBase : WidgetBase<CodeInputBase>, IAnyCodeInput
     public Type[] SupportedStateTypes() => [typeof(string)];
 }
 
-/// <typeparam name="TString">Typically string.</typeparam>
 public record CodeInput<TString> : CodeInputBase, IInput<TString>
 {
     [OverloadResolutionPriority(1)]
@@ -81,7 +82,6 @@ public record CodeInput<TString> : CodeInputBase, IInput<TString>
 
 public static class CodeInputExtensions
 {
-    /// <summary>Creates a code input from a state object with automatic type binding.</summary>
     public static CodeInputBase ToCodeInput(this IAnyState state, string? placeholder = null, bool disabled = false, CodeInputs variant = CodeInputs.Default, Languages language = Languages.Json)
     {
         var type = state.GetStateType();

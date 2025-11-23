@@ -13,7 +13,6 @@ public interface IAnyReadOnlyInput : IAnyInput
 {
 }
 
-/// <typeparam name="TValue">Can be any type with string representation.</typeparam>
 public record ReadOnlyInput<TValue> : WidgetBase<ReadOnlyInput<TValue>>, IInput<TValue>, IAnyReadOnlyInput
 {
     [OverloadResolutionPriority(1)]
@@ -46,6 +45,8 @@ public record ReadOnlyInput<TValue> : WidgetBase<ReadOnlyInput<TValue>>, IInput<
     [Prop] public bool ShowCopyButton { get; set; } = true;
 
     [Prop] public string? Placeholder { get; set; } //not really used but included to consistency with IAnyInput    
+
+    [Prop] public new Scale? Scale { get; set; }
 
     [Event] public Func<Event<IInput<TValue>, TValue>, ValueTask>? OnChange { get; }
 

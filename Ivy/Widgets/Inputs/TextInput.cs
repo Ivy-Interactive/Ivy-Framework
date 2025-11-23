@@ -43,12 +43,13 @@ public abstract record TextInputBase : WidgetBase<TextInputBase>, IAnyTextInput
 
     [Prop] public PrefixSuffix? Suffix { get; set; }
 
+    [Prop] public new Scale? Scale { get; set; }
+
     [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
 
     public Type[] SupportedStateTypes() => [];
 }
 
-/// <typeparam name="TString">Typically string or string-convertible types.</typeparam>
 public record TextInput<TString> : TextInputBase, IInput<TString>
 {
     public TextInput(IAnyState state, string? placeholder = null, bool disabled = false, TextInputs variant = TextInputs.Text)

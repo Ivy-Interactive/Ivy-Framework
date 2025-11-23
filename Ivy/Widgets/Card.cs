@@ -12,7 +12,6 @@ public enum CardHoverVariant
     PointerAndTranslate,
 }
 
-/// <summary>A structured container for organizing related content with optional title, description, and icon.</summary>
 public record Card : WidgetBase<Card>
 {
     public Card(object? content = null, object? footer = null, object? header = null) : base([new Slot("Content", content), new Slot("Footer", footer!), new Slot("Header", header!)])
@@ -36,8 +35,6 @@ public record Card : WidgetBase<Card>
 
     [Event] public Func<Event<Card>, ValueTask>? OnClick { get; set; }
 
-    /// <returns>A new Card instance with the updated content.</returns>
-    /// <exception cref="NotSupportedException">Thrown when attempting to add multiple children at once.</exception>
     public static Card operator |(Card widget, object child)
     {
         if (child is IEnumerable<object> _)
@@ -48,7 +45,6 @@ public record Card : WidgetBase<Card>
     }
 }
 
-/// <summary>Extension methods for configuring Card widget properties. </summary>
 public static class CardExtensions
 {
     internal static Slot GetSlot(this Card card, string name) => card.Children.FirstOrDefault(e => e is Slot slot && slot.Name == name) as Slot ?? new Slot(name, null!);

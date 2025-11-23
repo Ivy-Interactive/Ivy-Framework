@@ -1,4 +1,4 @@
-﻿using System.Runtime.CompilerServices;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Ivy.Core;
 using Ivy.Shared;
@@ -26,9 +26,8 @@ public record Chat : WidgetBase<Chat>
 
     [Prop] public string Placeholder { get; set; } = "Type a message...";
 
-    /// <summary>Compatibility constructor for Action-based event handlers.</summary>
     public Chat(ChatMessage[] messages, Action<Event<Chat, string>> onSendMessage)
-        : this(messages, e => { onSendMessage(e); return ValueTask.CompletedTask; })
+    : this(messages, e => { onSendMessage(e); return ValueTask.CompletedTask; })
     {
     }
 }

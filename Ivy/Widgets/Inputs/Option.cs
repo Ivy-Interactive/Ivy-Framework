@@ -45,7 +45,6 @@ public static class OptionExtensions
         return options.Select(e => new Option<TValue>(e)).ToArray();
     }
 
-    /// <exception cref="ArgumentException">Thrown when provided type is not an enum.</exception>
     public static IAnyOption[] ToOptions(this Type enumType)
     {
         if (!enumType.IsEnum)

@@ -23,16 +23,16 @@ public interface IAnyBoolInput : IAnyInput
 
     public BoolInputs Variant { get; set; }
 
-    /// <summary>Primarily for Toggle variant.</summary>
     public Icons Icon { get; set; }
 }
 
-/// <summary>Supports automatic conversion between boolean values and various numeric types for flexible state binding.</summary>
 public abstract record BoolInputBase : WidgetBase<BoolInputBase>, IAnyBoolInput
 {
     [Prop] public bool Disabled { get; set; }
 
     [Prop] public string? Invalid { get; set; }
+
+    [Prop] public new Scale? Scale { get; set; }
 
     [Prop] public string? Label { get; set; }
 
@@ -134,9 +134,8 @@ public record BoolInput : BoolInput<bool>
 
 public static class BoolInputExtensions
 {
-    /// <summary>Creates a boolean input from a state object with automatic type conversion.</summary>
     public static BoolInputBase ToBoolInput(this IAnyState state, string? label = null, bool disabled = false,
-        BoolInputs variant = BoolInputs.Checkbox)
+    BoolInputs variant = BoolInputs.Checkbox)
     {
         var stateType = state.GetStateType();
         var isNullable = stateType.IsNullableType();
@@ -276,7 +275,6 @@ public static class BoolInputExtensions
     public static BoolInputBase Description(this BoolInputBase widget, string description) =>
         widget with { Description = description };
 
-    /// <summary>Or null to clear the error.</summary>
     public static BoolInputBase Invalid(this BoolInputBase widget, string? invalid) =>
         widget with { Invalid = invalid };
 

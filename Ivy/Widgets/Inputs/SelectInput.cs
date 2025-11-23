@@ -34,15 +34,15 @@ public abstract record SelectInputBase : WidgetBase<SelectInputBase>, IAnySelect
 
     [Prop] public bool SelectMany { get; set; } = false;
 
-    /// <summary>Character used to separate multiple selected values in display and serialization.</summary>
     [Prop] public char Separator { get; set; } = ';';
+
+    [Prop] public new Scale? Scale { get; set; }
 
     [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
 
     public Type[] SupportedStateTypes() => [];
 }
 
-/// <typeparam name="TValue">Can be single values or collections for multi-select.</typeparam>
 public record SelectInput<TValue> : SelectInputBase, IInput<TValue>, IAnySelectInput
 {
     [OverloadResolutionPriority(1)]
@@ -54,10 +54,9 @@ public record SelectInput<TValue> : SelectInputBase, IInput<TValue>, IAnySelectI
         OnChange = e => { typedState.Set(e.Value); return ValueTask.CompletedTask; };
     }
 
-    /// <summary>Useful for manual state management or when custom change handling is required.</summary>
     [OverloadResolutionPriority(1)]
     public SelectInput(TValue value, Func<Event<IInput<TValue>, TValue>, ValueTask>? onChange, IEnumerable<IAnyOption> options, string? placeholder = null, bool disabled = false, SelectInputs variant = SelectInputs.Select, bool selectMany = false)
-        : this(options, placeholder, disabled, variant, selectMany)
+    : this(options, placeholder, disabled, variant, selectMany)
     {
         OnChange = onChange;
         Value = value;
@@ -70,7 +69,6 @@ public record SelectInput<TValue> : SelectInputBase, IInput<TValue>, IAnySelectI
         Value = value;
     }
 
-    /// <summary>Requires separate value and change handler assignment for functionality.</summary>
     public SelectInput(IEnumerable<IAnyOption> options, string? placeholder = null, bool disabled = false, SelectInputs variant = SelectInputs.Select, bool selectMany = false)
     {
         Placeholder = placeholder;
@@ -91,8 +89,6 @@ public record SelectInput<TValue> : SelectInputBase, IInput<TValue>, IAnySelectI
 
 public static class SelectInputExtensions
 {
-    /// <summary>If null, attempts automatic generation for enums and collections.</summary>
-    /// <exception cref="ArgumentException">Thrown when options are null and cannot be automatically generated for the state type.</exception>
     public static SelectInputBase ToSelectInput(this IAnyState state, IEnumerable<IAnyOption>? options = null, string? placeholder = null, bool disabled = false, SelectInputs variant = SelectInputs.Select)
     {
         var type = state.GetStateType();
@@ -131,12 +127,10 @@ public static class SelectInputExtensions
 
     public static SelectInputBase Variant(this SelectInputBase widget, SelectInputs variant) => widget with { Variant = variant };
 
-    /// <summary>Or null to clear the error.</summary>
     public static SelectInputBase Invalid(this SelectInputBase widget, string? invalid) => widget with { Invalid = invalid };
 
     public static SelectInputBase Separator(this SelectInputBase widget, char separator) => widget with { Separator = separator };
 
-    /// <summary>Convenience method that sets the variant to SelectInputs.List.</summary>
     public static SelectInputBase List(this SelectInputBase widget) => widget with { Variant = SelectInputs.List };
 
     [OverloadResolutionPriority(1)]

@@ -5,15 +5,8 @@ using Ivy.Shared;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
-/// <summary>Audio recorder control allowing users to upload audio using microphone with configurable upload intervals.</summary>
 public record AudioRecorder : WidgetBase<AudioRecorder>
 {
-    /// <param name="upload">Upload context for automatic audio file uploads (from UseUpload).</param>
-    /// <param name="label">Label text displayed when no audio is recording.</param>
-    /// <param name="recordingLabel">Label text displayed when audio is recording.</param>
-    /// <param name="mimeType">Mime type of recorded audio data (e.g., "audio/webm").</param>
-    /// <param name="chunkInterval">Chunk size in milliseconds for continuous uploads. If null, uploads when recording stops.</param>
-    /// <param name="disabled">Whether widget should be disabled initially.</param>
     public AudioRecorder(UploadContext upload, string? label = null, string? recordingLabel = null, string mimeType = "audio/webm", int? chunkInterval = null, bool disabled = false)
     {
         UploadUrl = upload.UploadUrl;

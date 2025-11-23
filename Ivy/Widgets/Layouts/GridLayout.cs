@@ -8,9 +8,7 @@ public enum AutoFlow
 {
     Row,
     Column,
-    /// <summary>Try to fill gaps with later items for more efficient space usage.</summary>
     RowDense,
-    /// <summary>Try to fill gaps with later items for more efficient space usage.</summary>
     ColumnDense
 }
 

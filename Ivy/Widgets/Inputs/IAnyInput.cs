@@ -21,16 +21,12 @@ public interface IAnyInput
 
 public static class AnyInputExtensions
 {
-    /// <param name="input">The input control to configure.</param>
-    /// <param name="disabled">true to disable the input; false to enable it. Default is true.</param>
     public static IAnyInput Disabled(this IAnyInput input, bool disabled = true)
     {
         input.Disabled = disabled;
         return input;
     }
 
-    /// <param name="input">The input control to configure.</param>
-    /// <param name="invalid">The validation error message, or null to clear any existing error.</param>
     public static IAnyInput Invalid(this IAnyInput input, string? invalid)
     {
         input.Invalid = invalid;
@@ -43,8 +39,6 @@ public static class AnyInputExtensions
         return input;
     }
 
-    /// <param name="input">The input control to configure.</param>
-    /// <param name="onBlur">The event handler to call when the input loses focus, or null to remove the handler.</param>
     [OverloadResolutionPriority(1)]
     public static IAnyInput HandleBlur(this IAnyInput input, Func<Event<IAnyInput>, ValueTask>? onBlur)
     {
@@ -52,16 +46,12 @@ public static class AnyInputExtensions
         return input;
     }
 
-    /// <param name="input">The input control to configure.</param>
-    /// <param name="onBlur">The event handler to call when the input loses focus.</param>
     public static IAnyInput HandleBlur(this IAnyInput input, Action<Event<IAnyInput>> onBlur)
     {
         input.OnBlur = onBlur.ToValueTask();
         return input;
     }
 
-    /// <param name="input">The input control to configure.</param>
-    /// <param name="onBlur">The simple action to perform when the input loses focus.</param>
     public static IAnyInput HandleBlur(this IAnyInput input, Action onBlur)
     {
         input.OnBlur = _ => { onBlur(); return ValueTask.CompletedTask; };
