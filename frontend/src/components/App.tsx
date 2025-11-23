@@ -10,8 +10,13 @@ import { hasLicensedFeature } from '@/lib/license';
 import { ConnectionModal } from './ConnectionModal';
 import { ThemeProvider } from './theme-provider';
 import { EventHandlerProvider } from './event-handler';
+import { ErrorPage } from './ErrorPage';
 
 export function App() {
+  // Check if error meta tags are present
+  const hasError =
+    document.querySelector('meta[name="ivy-error-title"]') !== null;
+
   const appId = getAppId();
   const appArgs = getAppArgs();
   const parentId = getParentId();
@@ -45,6 +50,15 @@ export function App() {
       window.removeEventListener('popstate', handlePopState);
     };
   }, [connection]);
+
+  // Render error page if meta tags exist
+  if (hasError) {
+    return (
+      <ThemeProvider defaultTheme="light" storageKey="ivy-ui-theme">
+        <ErrorPage />
+      </ThemeProvider>
+    );
+  }
 
   return (
     <ThemeProvider defaultTheme="light" storageKey="ivy-ui-theme">

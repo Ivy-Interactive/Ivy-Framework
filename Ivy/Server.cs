@@ -360,7 +360,7 @@ public class Server
         });
         builder.Services.AddSingleton(this);
         builder.Services.AddSingleton<IClientNotifier, ClientNotifier>();
-        builder.Services.AddControllers()
+        builder.Services.AddControllers(options => { options.Filters.Add<IvyErrorFilter>(); })
             .AddApplicationPart(Assembly.Load("Ivy"))
             .AddControllersAsServices();
         builder.Services.AddGrpc();
@@ -412,22 +412,37 @@ public class Server
         {
             error.Run(async context =>
             {
-                context.Response.StatusCode = 500;
-                context.Response.ContentType = "application/json";
                 var errorFeature = context.Features.Get<Microsoft.AspNetCore.Diagnostics.IExceptionHandlerFeature>();
-                if (errorFeature != null)
-                {
-                    var ex = errorFeature.Error;
+                var ex = errorFeature?.Error;
 
+                if (ex != null)
+                {
                     var logger = app.Services.GetRequiredService<ILogger<Server>>();
                     logger.LogError(ex, "An unhandled exception occurred.");
+                }
 
-                    var result = System.Text.Json.JsonSerializer.Serialize(new
+                if (context.Request.Headers.Accept.ToString().Contains("text/html"))
+                {
+                    context.Response.StatusCode = 500;
+                    context.Response.ContentType = "text/html";
+                    var title = "Internal Server Error";
+                    var message = ex?.Message ?? "An unexpected error occurred.";
+                    var html = await WebApplicationExtensions.GetIndexHtmlWithError(title, message);
+                    await context.Response.WriteAsync(html);
+                }
+                else
+                {
+                    context.Response.StatusCode = 500;
+                    context.Response.ContentType = "application/json";
+                    if (ex != null)
                     {
-                        error = ex.Message,
-                        detail = ex.StackTrace
-                    });
-                    await context.Response.WriteAsync(result);
+                        var result = System.Text.Json.JsonSerializer.Serialize(new
+                        {
+                            error = ex.Message,
+                            detail = ex.StackTrace
+                        });
+                        await context.Response.WriteAsync(result);
+                    }
                 }
             });
         });
@@ -628,5 +643,27 @@ public static class WebApplicationExtensions
 #endif
             }
         };
+    }
+
+    public static async Task<string> GetIndexHtmlWithError(string title, string message)
+    {
+        var assembly = typeof(WebApplicationExtensions).Assembly;
+        var resourceName = $"{assembly.GetName().Name}.index.html";
+
+        await using var stream = assembly.GetManifestResourceStream(resourceName);
+        if (stream == null)
+        {
+            return "<html><body>Error loading index.html</body></html>";
+        }
+
+        using var reader = new StreamReader(stream);
+        var html = await reader.ReadToEndAsync();
+
+        // Inject error meta tags
+        var errorTitleTag = $"<meta name=\"ivy-error-title\" content=\"{System.Web.HttpUtility.HtmlEncode(title)}\" />";
+        var errorMessageTag = $"<meta name=\"ivy-error-message\" content=\"{System.Web.HttpUtility.HtmlEncode(message)}\" />";
+        html = html.Replace("</head>", $"  {errorTitleTag}\n  {errorMessageTag}\n</head>");
+
+        return html;
     }
 }
