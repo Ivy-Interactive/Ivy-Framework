@@ -206,6 +206,141 @@ public class NavigationSheetContent : ViewBase
 }
 ```
 
+### Complex Layout Structure
+
+When building complex interfaces with HeaderLayout or other structured layouts, you can manage the sheet separately and return both the main body and the sheet in a Fragment. This pattern is useful when the sheet needs to be opened from multiple places or based on complex state.
+
+```csharp demo-tabs
+public record KanbanTask(string Id, string Title, string Status, int Priority, string Description, string Assignee);
+
+public class KanbanWithSheetExample : ViewBase
+{
+    public override object? Build()
+    {
+        var taskState = UseState(new[]
+        {
+            new KanbanTask("1", "Design Homepage", "Todo", 1, "Create wireframes and mockups", "Alice"),
+            new KanbanTask("2", "Setup Database", "Todo", 2, "Configure PostgreSQL instance", "Bob"),
+            new KanbanTask("5", "Code Review", "In Progress", 1, "Review pull requests", "Charlie"),
+            new KanbanTask("6", "Performance Optimization", "In Progress", 2, "Optimize database queries", "Alice"),
+            new KanbanTask("8", "Unit Tests", "Done", 1, "Write comprehensive test suite", "Bob"),
+        });
+        
+        var client = UseService<IClientProvider>();
+        
+        // Status options for the form
+        var statusOptions = new[] { "Todo", "In Progress", "Done" }.ToOptions();
+        
+        return Layout.Vertical().Gap(2)
+            | new Button("Add New Task")
+                .WithSheet(
+                    () => new TaskFormSheet(taskState, client, statusOptions),
+                    title: "Add New Task",
+                    description: "Create a new task",
+                    width: Size.Rem(28))
+            | taskState.Value
+                    .ToKanban(
+                        groupBySelector: t => t.Status,
+                        idSelector: t => t.Id,
+                        titleSelector: t => t.Title,
+                        descriptionSelector: t => t.Description)
+                    .HandleCardMove(moveData =>
+                    {
+                        // Update task status when card is moved between columns
+                        var taskId = moveData.CardId?.ToString();
+                        var updatedTasks = taskState.Value.ToList();
+                        var taskToMove = updatedTasks.FirstOrDefault(t => t.Id == taskId);
+                        
+                        if (taskToMove != null)
+                        {
+                            var updated = taskToMove with { Status = moveData.ToColumn };
+                            updatedTasks.RemoveAll(t => t.Id == taskId);
+                            updatedTasks.Add(updated);
+                            taskState.Set(updatedTasks.ToArray());
+                        }
+                    })
+                    .HandleDelete(cardId =>
+                    {
+                        // Remove task when delete action is triggered
+                        var taskId = cardId?.ToString();
+                        var taskToDelete = taskState.Value.FirstOrDefault(t => t.Id == taskId);
+                        if (taskToDelete != null)
+                        {
+                            taskState.Set(taskState.Value.Where(t => t.Id != taskId).ToArray());
+                            client.Toast($"Deleted: {taskToDelete.Title}");
+                        }
+                    });
+    }
+}
+
+public class TaskFormSheet : ViewBase
+{
+    private readonly IState<KanbanTask[]> _taskState;
+    private readonly IClientProvider _client;
+    private readonly Option<string>[] _statusOptions;
+    
+    public TaskFormSheet(IState<KanbanTask[]> taskState, IClientProvider client, Option<string>[] statusOptions)
+    {
+        _taskState = taskState;
+        _client = client;
+        _statusOptions = statusOptions;
+    }
+    
+    public override object? Build()
+    {
+        // Create a new task when sheet opens
+        var newTask = new KanbanTask(
+            Guid.NewGuid().ToString(),
+            "",
+            "Todo",
+            _taskState.Value.Count(t => t.Status == "Todo") + 1,
+            "",
+            "Unassigned"
+        );
+        
+        var taskForm = UseState(() => newTask);
+        
+        // Build the form with validation
+        var formBuilder = taskForm.ToForm()
+            .Required(m => m.Title, m => m.Description)
+            .Builder(m => m.Status, s => s.ToSelectInput(_statusOptions))
+            .Builder(m => m.Description, s => s.ToTextAreaInput())
+            .Remove(m => m.Id) // Remove Id field - it's auto-generated
+            .Label(m => m.Priority, "Priority")
+            .Label(m => m.Assignee, "Assignee");
+        
+        var (onSubmit, formView, validationView, loading) = formBuilder.UseForm(this.Context);
+        
+        // Handle form submission
+        async ValueTask HandleSheetSubmit()
+        {
+            // Validate form first
+            if (await onSubmit())
+            {
+                var formTask = taskForm.Value;
+                var updatedTasks = _taskState.Value.ToList();
+                
+                // Add new task
+                updatedTasks.Add(formTask);
+                _taskState.Set(updatedTasks.ToArray());
+                _client.Toast($"Added: {formTask.Title}");
+            }
+        }
+        
+        return new FooterLayout(
+            Layout.Horizontal().Gap(2)
+                | new Button("Create Task")
+                    .HandleClick(_ => HandleSheetSubmit())
+                    .Loading(loading).Disabled(loading)
+                | new Button("Cancel")
+                    .Variant(ButtonVariant.Outline)
+                | validationView,
+            formView
+        );
+    }
+}
+```
+
 <WidgetDocs Type="Ivy.Sheet" ExtensionTypes="Ivy.SheetExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Sheet.cs"/>
 
 ## Examples
