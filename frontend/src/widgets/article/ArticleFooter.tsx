@@ -1,6 +1,7 @@
 import { InternalLink } from '@/types/widgets';
 import { Github } from 'lucide-react';
 import React from 'react';
+import { convertAppUrlToPath, getChromeParam } from '@/lib/utils';
 
 interface ArticleFooterProps {
   id: string;
@@ -17,6 +18,22 @@ export const ArticleFooter: React.FC<ArticleFooterProps> = ({
   documentSource,
   onLinkClick,
 }) => {
+  const isChromeFalse = !getChromeParam();
+
+  const handleLinkClick = (
+    appId: string,
+    event: React.MouseEvent<HTMLAnchorElement>
+  ) => {
+    // When chrome=false, let the browser handle navigation naturally
+    if (isChromeFalse) {
+      // Don't prevent default - let browser navigate
+      return;
+    }
+    // When chrome=true, use the backend event handler
+    event.preventDefault();
+    onLinkClick('OnLinkClick', id, ['app://' + appId]);
+  };
+
   return (
     <footer className="border-t py-8 mt-20">
       <div className="flex flex-col gap-6">
@@ -24,10 +41,8 @@ export const ArticleFooter: React.FC<ArticleFooterProps> = ({
           <div className="flex-1">
             {previous && (
               <a
-                onClick={() =>
-                  onLinkClick('OnLinkClick', id, ['app://' + previous.appId])
-                }
-                href={'app://' + previous.appId}
+                onClick={e => handleLinkClick(previous.appId, e)}
+                href={convertAppUrlToPath('app://' + previous.appId)}
                 className="group flex flex-col gap-2 hover:text-primary transition-colors"
               >
                 <div className="text-body">← Previous</div>
@@ -40,10 +55,8 @@ export const ArticleFooter: React.FC<ArticleFooterProps> = ({
           <div className="flex-1 flex justify-end">
             {next && (
               <a
-                onClick={() =>
-                  onLinkClick('OnLinkClick', id, ['app://' + next.appId])
-                }
-                href={'app://' + next.appId}
+                onClick={e => handleLinkClick(next.appId, e)}
+                href={convertAppUrlToPath('app://' + next.appId)}
                 className="group flex flex-col text-right gap-2 hover:text-primary transition-colors"
               >
                 <div className="text-body">Next →</div>
