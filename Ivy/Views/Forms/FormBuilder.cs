@@ -16,8 +16,8 @@ public class FormBuilder<TModel> : ViewBase
     private readonly IState<TModel> _model;
     private readonly List<string> _groups = [];
     private readonly Dictionary<string, bool> _groupOpenStates = [];
-    internal Scale _scale = Scale.Medium;
 
+    public Scale Scale = Scale.Medium;
     public readonly string SubmitTitle;
     public FormValidationStrategy ValidationStrategy { get; set; } = FormValidationStrategy.OnBlur;
 
@@ -263,7 +263,7 @@ public class FormBuilder<TModel> : ViewBase
 
     private FormBuilder<TModel> _SetScale(Scale scale)
     {
-        _scale = scale;
+        Scale = scale;
         return this;
     }
 
@@ -309,7 +309,7 @@ public class FormBuilder<TModel> : ViewBase
                     new FormFieldLayoutOptions(e.RowKey, e.Column, e.Order, e.Group),
                     e.Validators.ToArray(),
                     ValidationStrategy,
-                    _scale,
+                    Scale,
                     e.Help,
                     e.Placeholder
                 );
@@ -343,7 +343,7 @@ public class FormBuilder<TModel> : ViewBase
         var formView = new FormView<TModel>(
             fieldViews,
             HandleSubmitEvent,
-            _scale,
+            Scale,
             _groupOpenStates
         );
 
@@ -390,7 +390,7 @@ public class FormBuilder<TModel> : ViewBase
                    .HandleClick(HandleSubmit)
                    .Loading(submitting)
                    .Disabled(submitting || hasUploading.Value)
-                   .Scale(_scale), validationView);
+                   .Scale(Scale), validationView);
     }
 
     private static string InvalidMessage(int invalidFields)

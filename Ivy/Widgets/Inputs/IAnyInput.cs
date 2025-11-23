@@ -1,5 +1,6 @@
 using System.Runtime.CompilerServices;
 using Ivy.Core;
+using Ivy.Shared;
 
 namespace Ivy.Widgets.Inputs;
 
@@ -10,6 +11,8 @@ public interface IAnyInput
     [Prop] public string? Placeholder { get; set; }
 
     [Prop] public string? Invalid { get; set; }
+
+    [Prop] public Scale? Scale { get; set; }
 
     [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
 

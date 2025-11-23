@@ -127,13 +127,15 @@ public class FormFieldView(
             input.HandleBlur(OnBlur);
         }
 
+        input.Scale = scale;
+
         // Set placeholder if the input supports it
         if (!string.IsNullOrEmpty(placeholder))
         {
             input.Placeholder = placeholder;
         }
 
-        return visibleState.Value ? new Field(input, label, description, required, help) { Scale = scale } : null;
+        return visibleState.Value ? new Field(input, label, description, required, help, scale) : null;
     }
 }
 
