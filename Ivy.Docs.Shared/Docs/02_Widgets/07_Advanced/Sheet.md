@@ -221,14 +221,12 @@ public class KanbanWithSheetExample : ViewBase
         {
             new KanbanTask("1", "Design Homepage", "Todo", 1, "Create wireframes and mockups", "Alice"),
             new KanbanTask("2", "Setup Database", "Todo", 2, "Configure PostgreSQL instance", "Bob"),
-            new KanbanTask("5", "Code Review", "In Progress", 1, "Review pull requests", "Charlie"),
-            new KanbanTask("6", "Performance Optimization", "In Progress", 2, "Optimize database queries", "Alice"),
-            new KanbanTask("8", "Unit Tests", "Done", 1, "Write comprehensive test suite", "Bob"),
+            new KanbanTask("3", "Code Review", "In Progress", 1, "Review pull requests", "Charlie"),
+            new KanbanTask("4", "Performance Optimization", "In Progress", 2, "Optimize database queries", "Alice"),
+            new KanbanTask("5", "Unit Tests", "Done", 1, "Write comprehensive test suite", "Bob"),
         });
         
         var client = UseService<IClientProvider>();
-        
-        // Status options for the form
         var statusOptions = new[] { "Todo", "In Progress", "Done" }.ToOptions();
         
         return Layout.Vertical().Gap(2)
@@ -237,39 +235,35 @@ public class KanbanWithSheetExample : ViewBase
                     () => new TaskFormSheet(taskState, client, statusOptions),
                     title: "Add New Task",
                     description: "Create a new task",
-                    width: Size.Rem(28))
+                    width: Size.Fraction(1/3f))
             | taskState.Value
-                    .ToKanban(
-                        groupBySelector: t => t.Status,
-                        idSelector: t => t.Id,
-                        titleSelector: t => t.Title,
-                        descriptionSelector: t => t.Description)
-                    .HandleCardMove(moveData =>
+                .ToKanban(
+                    groupBySelector: t => t.Status,
+                    idSelector: t => t.Id,
+                    titleSelector: t => t.Title,
+                    descriptionSelector: t => t.Description)
+                .HandleCardMove(moveData =>
+                {
+                    var taskId = moveData.CardId?.ToString();
+                    var task = taskState.Value.FirstOrDefault(t => t.Id == taskId);
+                    if (task != null)
                     {
-                        // Update task status when card is moved between columns
-                        var taskId = moveData.CardId?.ToString();
-                        var updatedTasks = taskState.Value.ToList();
-                        var taskToMove = updatedTasks.FirstOrDefault(t => t.Id == taskId);
-                        
-                        if (taskToMove != null)
-                        {
-                            var updated = taskToMove with { Status = moveData.ToColumn };
-                            updatedTasks.RemoveAll(t => t.Id == taskId);
-                            updatedTasks.Add(updated);
-                            taskState.Set(updatedTasks.ToArray());
-                        }
-                    })
-                    .HandleDelete(cardId =>
+                        taskState.Set(taskState.Value
+                            .Where(t => t.Id != taskId)
+                            .Append(task with { Status = moveData.ToColumn })
+                            .ToArray());
+                    }
+                })
+                .HandleDelete(cardId =>
+                {
+                    var taskId = cardId?.ToString();
+                    var task = taskState.Value.FirstOrDefault(t => t.Id == taskId);
+                    if (task != null)
                     {
-                        // Remove task when delete action is triggered
-                        var taskId = cardId?.ToString();
-                        var taskToDelete = taskState.Value.FirstOrDefault(t => t.Id == taskId);
-                        if (taskToDelete != null)
-                        {
-                            taskState.Set(taskState.Value.Where(t => t.Id != taskId).ToArray());
-                            client.Toast($"Deleted: {taskToDelete.Title}");
-                        }
-                    });
+                        taskState.Set(taskState.Value.Where(t => t.Id != taskId).ToArray());
+                        client.Toast($"Deleted: {task.Title}");
+                    }
+                });
     }
 }
 
@@ -288,52 +282,31 @@ public class TaskFormSheet : ViewBase
     
     public override object? Build()
     {
-        // Create a new task when sheet opens
-        var newTask = new KanbanTask(
-            Guid.NewGuid().ToString(),
-            "",
-            "Todo",
-            _taskState.Value.Count(t => t.Status == "Todo") + 1,
-            "",
-            "Unassigned"
-        );
+        var taskForm = UseState(() => new KanbanTask(
+            Guid.NewGuid().ToString(), "", "Todo",
+            _taskState.Value.Count(t => t.Status == "Todo") + 1, "", "Unassigned"));
         
-        var taskForm = UseState(() => newTask);
-        
-        // Build the form with validation
-        var formBuilder = taskForm.ToForm()
+        var (onSubmit, formView, validationView, _) = taskForm.ToForm()
             .Required(m => m.Title, m => m.Description)
             .Builder(m => m.Status, s => s.ToSelectInput(_statusOptions))
             .Builder(m => m.Description, s => s.ToTextAreaInput())
-            .Remove(m => m.Id) // Remove Id field - it's auto-generated
-            .Label(m => m.Priority, "Priority")
-            .Label(m => m.Assignee, "Assignee");
-        
-        var (onSubmit, formView, validationView, loading) = formBuilder.UseForm(this.Context);
-        
-        // Handle form submission
-        async ValueTask HandleSheetSubmit()
-        {
-            // Validate form first
-            if (await onSubmit())
-            {
-                var formTask = taskForm.Value;
-                var updatedTasks = _taskState.Value.ToList();
-                
-                // Add new task
-                updatedTasks.Add(formTask);
-                _taskState.Set(updatedTasks.ToArray());
-                _client.Toast($"Added: {formTask.Title}");
-            }
-        }
+            .Remove(m => m.Id)
+            .UseForm(this.Context);
         
         return new FooterLayout(
             Layout.Horizontal().Gap(2)
                 | new Button("Create Task")
-                    .HandleClick(_ => HandleSheetSubmit())
-                    .Loading(loading).Disabled(loading)
-                | new Button("Cancel")
-                    .Variant(ButtonVariant.Outline)
+                    .HandleClick(async _ =>
+                    {
+                        if (await onSubmit())
+                        {
+                            var updatedTasks = _taskState.Value.ToList();
+                            updatedTasks.Add(taskForm.Value);
+                            _taskState.Set(updatedTasks.ToArray());
+                            _client.Toast($"Added: {taskForm.Value.Title}");
+                        }
+                    })
+                | new Button("Cancel").Variant(ButtonVariant.Outline)
                 | validationView,
             formView
         );
