@@ -47,28 +47,7 @@ internal static class FormScaffolder
                 field.Required
             );
 
-            // Add required field validator
-            if (field.Required)
-            {
-                scaffoldedField.Validators.Add(e => (Utils.IsValidRequired(e), "Required field"));
-            }
-
-            // Add validators from DataAnnotations attributes
-            if (field.PropertyInfo != null)
-            {
-                scaffoldedField.Validators.AddRange(FormHelpers.GetValidators(field.PropertyInfo));
-            }
-            else if (field.FieldInfo != null)
-            {
-                scaffoldedField.Validators.AddRange(FormHelpers.GetValidators(field.FieldInfo));
-            }
-
-            // Add automatic email validation for fields ending with "Email"
-            var nonNullableType = Nullable.GetUnderlyingType(field.Type) ?? field.Type;
-            if (field.Name.EndsWith("Email") && nonNullableType == typeof(string))
-            {
-                scaffoldedField.Validators.Add(Validators.CreateEmailValidator(field.Name));
-            }
+            scaffoldedField.Validators.AddRange(ScaffoldValidators(field));
 
             if (!string.IsNullOrEmpty(displayInfo.Description))
             {
@@ -95,30 +74,15 @@ internal static class FormScaffolder
     {
         Type nonNullableType = Nullable.GetUnderlyingType(type) ?? type;
 
-        static bool IsFileUploadType(Type t)
-        {
-            if (t == typeof(FileUpload)) return true;
-            if (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(FileUpload<>)) return true;
-            return typeof(IFileUpload).IsAssignableFrom(t);
-        }
-
         // FileUpload fields are not auto-scaffolded - use .Builder() to configure them manually
         if (IsFileUploadType(nonNullableType))
         {
             return null;
         }
 
-        // Collections of FileUpload / FileUpload<T>
-        foreach (var it in type.GetInterfaces().Concat([type]))
+        if (type.GetCollectionTypeParameter() is { } elementType && IsFileUploadType(elementType))
         {
-            if (it.IsGenericType && it.GetGenericTypeDefinition() == typeof(IEnumerable<>))
-            {
-                var arg = it.GetGenericArguments()[0];
-                if (IsFileUploadType(arg))
-                {
-                    return null;
-                }
-            }
+            return null;
         }
 
         if (name.EndsWith("Id") && (type == typeof(Guid) || type == typeof(int) || type == typeof(string)))
@@ -138,12 +102,7 @@ internal static class FormScaffolder
 
         if (nonNullableType == typeof(bool))
         {
-            return (state) =>
-            {
-                var input = state.ToBoolInput();
-                input.ScaffoldDefaults(name, type);
-                return input.Size(size);
-            };
+            return (state) => state.ToBoolInput().ScaffoldDefaults(name, type).Size(size);
         }
 
         if (nonNullableType == typeof(string))
@@ -177,6 +136,13 @@ internal static class FormScaffolder
         }
 
         return null;
+
+        static bool IsFileUploadType(Type t)
+        {
+            if (t == typeof(FileUpload)) return true;
+            if (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(FileUpload<>)) return true;
+            return typeof(IFileUpload).IsAssignableFrom(t);
+        }
     }
 
     /// <summary>Gets all fields and properties from a type with their metadata.</summary>
@@ -218,6 +184,37 @@ internal static class FormScaffolder
     {
         var scaffoldColumnAttr = member.GetCustomAttribute<System.ComponentModel.DataAnnotations.ScaffoldColumnAttribute>();
         return scaffoldColumnAttr == null || scaffoldColumnAttr.Scaffold;
+    }
+
+    /// <summary>Collects all validators for a field including required, DataAnnotations, and convention-based validators.</summary>
+    private static List<Func<object?, (bool, string)>> ScaffoldValidators(FieldPropertyInfo field)
+    {
+        var validators = new List<Func<object?, (bool, string)>>();
+
+        // Add required field validator
+        if (field.Required)
+        {
+            validators.Add(e => (Utils.IsValidRequired(e), "Required field"));
+        }
+
+        // Add validators from DataAnnotations attributes
+        if (field.PropertyInfo != null)
+        {
+            validators.AddRange(FormHelpers.GetValidators(field.PropertyInfo));
+        }
+        else if (field.FieldInfo != null)
+        {
+            validators.AddRange(FormHelpers.GetValidators(field.FieldInfo));
+        }
+
+        // Add automatic email validation for fields ending with "Email"
+        var nonNullableType = Nullable.GetUnderlyingType(field.Type) ?? field.Type;
+        if (field.Name.EndsWith("Email") && nonNullableType == typeof(string))
+        {
+            validators.Add(Validators.CreateEmailValidator(field.Name));
+        }
+
+        return validators;
     }
 
     private record FieldPropertyInfo

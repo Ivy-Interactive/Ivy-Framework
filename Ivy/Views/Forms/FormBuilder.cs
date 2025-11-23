@@ -468,7 +468,7 @@ public class FormBuilder<TModel> : ViewBase
 
         var fields = _fields
             .Values
-            .Where(e => e is { Removed: false } && e.InputFactory != null)
+            .Where(e => e is { Removed: false, InputFactory: not null })
             .Select(e =>
             {
                 IFormFieldBinding<TModel> binding = new FormFieldBinding<TModel>(
