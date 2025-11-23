@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using Ivy.Samples.Shared.Apps.Concepts.Models;
 using Ivy.Shared;
 using Ivy.Views.Builders;
 using Ivy.Views.Forms;
@@ -22,36 +23,6 @@ namespace Ivy.Samples.Shared.Apps.Concepts;
 [Display(...)] - Controls field display properties (Name, Description, Order, GroupName, Prompt)
  */
 
-public class DisplayExample
-{
-    [Display(
-            Name = "Custom Name",
-            Description = "This is a custom description.",
-            Order = 2,
-            Prompt = "Enter value here") //Should be shown as placeholder
-    ]
-    public string CustomDisplayString { get; set; } = "";
-}
-
-public class StringsExample
-{
-    [ScaffoldColumn(false)]
-    public string IgnoredString1 { get; set; } = "This string will be ignored.";
-
-    //[Ignore]
-    //public string IgnoredString2 { get; set; } = "This string will also be ignored.";
-
-    public string NormalString { get; set; } = "This is a normal string.";
-
-    public string? NullableString { get; set; } = null;
-
-    [Required]
-    public string RequiredString1 { get; set; }
-
-    [Required]
-    public string RequiredString2 { get; set; }
-}
-
 [App(icon: Icons.Brain, searchHints: ["forms", "scaffolding"])]
 public class FormScaffoldingApp : SampleBase
 {
@@ -59,15 +30,23 @@ public class FormScaffoldingApp : SampleBase
     {
         var displayExample = UseState(() => new DisplayExample());
         var displayForm = displayExample.ToForm();
-        var displayGrid = Layout.Grid().Columns(3)
-                          | displayForm
-                          | displayExample.ToDetails();
+        var displayGrid = Layout.Vertical()
+                          | new CodeView(typeof(DisplayExample))
+                          | (Layout.Grid().Columns(3).Gap(10)
+                              | displayForm
+                              | displayExample.ToDetails())
+
+            ;
 
         var stringsExample = UseState(() => new StringsExample());
         var stringsForm = stringsExample.ToForm();
-        var stringsGrid = Layout.Grid().Columns(3)
-                          | stringsForm
-                          | stringsExample.ToDetails();
+        var stringsGrid = Layout.Vertical()
+                          | new CodeView(typeof(StringsExample))
+                          | (Layout.Grid().Columns(3).Gap(10)
+                            | stringsForm
+                            | stringsExample.ToDetails())
+
+            ;
 
         return Layout.Vertical()
                | Text.H1("Form Scaffolding")

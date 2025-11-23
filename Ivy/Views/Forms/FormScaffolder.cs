@@ -157,6 +157,7 @@ internal static class FormScaffolder
 
         // Add fields
         var fields = type.GetFields()
+            .Where(ShouldScaffold)
             .Select(e => new FieldPropertyInfo
             {
                 Name = e.Name,
@@ -168,6 +169,7 @@ internal static class FormScaffolder
 
         // Add properties
         var properties = type.GetProperties()
+            .Where(ShouldScaffold)
             .Select(e => new FieldPropertyInfo
             {
                 Name = e.Name,
@@ -181,6 +183,12 @@ internal static class FormScaffolder
         fieldsAndProperties.AddRange(properties);
 
         return fieldsAndProperties;
+    }
+
+    private static bool ShouldScaffold(MemberInfo member)
+    {
+        var scaffoldColumnAttr = member.GetCustomAttribute<System.ComponentModel.DataAnnotations.ScaffoldColumnAttribute>();
+        return scaffoldColumnAttr == null || scaffoldColumnAttr.Scaffold;
     }
 
     private record FieldPropertyInfo

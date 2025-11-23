@@ -57,11 +57,7 @@ public class FormBuilderField<TModel>
         Visible = _ => true;
     }
 
-    //public Func<Control, object> Helper { get; set; }
-
     public Func<TModel, bool> Visible { get; set; }
-
-    //public List<(EditorField<T> field, Func<T, object> transformer)> Dependencies = new();
 
     public string Name { get; set; }
 
@@ -98,20 +94,15 @@ public class FormBuilderField<TModel>
     public List<Func<object?, (bool, string)>> Validators { get; set; } = new();
 }
 
-/// <summary>Fluent form builder automatically scaffolding forms from model types with intelligent input selection, validation, and layout management.</summary>
-/// <typeparam name="TModel">Type of model object that form will edit.</typeparam>
 public class FormBuilder<TModel> : ViewBase
 {
     private readonly Dictionary<string, FormBuilderField<TModel>> _fields;
-
     private readonly IState<TModel> _model;
-
-    public readonly string SubmitTitle;
     private readonly List<string> _groups = [];
     private readonly Dictionary<string, bool> _groupOpenStates = [];
 
+    public readonly string SubmitTitle;
     public FormValidationStrategy ValidationStrategy { get; set; } = FormValidationStrategy.OnBlur;
-
     public Sizes Size { get; set; } = Sizes.Medium;
 
     public FormBuilder(IState<TModel> model, string submitTitle = "Save")
