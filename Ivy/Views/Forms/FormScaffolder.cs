@@ -1,9 +1,6 @@
 using System.Reflection;
-using Ivy.Core;
-using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
 using Ivy.Services;
-using Ivy.Shared;
 using Ivy.Widgets.Inputs;
 
 namespace Ivy.Views.Forms;
@@ -17,9 +14,7 @@ internal static class FormScaffolder
 
         foreach (var field in fields)
         {
-            var displayInfo = field.PropertyInfo != null
-                ? FormHelpers.GetDisplayInfo(field.PropertyInfo)
-                : FormHelpers.GetDisplayInfo(field.FieldInfo!);
+            var displayInfo = field.GetDisplayInfo();
 
             var label = displayInfo.Name ?? Utils.LabelFor(field.Name, field.Type);
 
@@ -31,7 +26,7 @@ internal static class FormScaffolder
 
             var order = displayInfo.Order ?? int.MaxValue;
 
-            var factory = ScaffoldInputFactory(field.Name, field.Type);
+            var factory = ScaffoldInputFactory(field);
 
             Func<IAnyState, IViewContext, IAnyInput>? wrappedFactory = factory != null
                 ? (state, _) => factory(state)
@@ -70,8 +65,11 @@ internal static class FormScaffolder
         return scaffoldedFields;
     }
 
-    private static Func<IAnyState, IAnyInput>? ScaffoldInputFactory(string name, Type type)
+    private static Func<IAnyState, IAnyInput>? ScaffoldInputFactory(FieldPropertyInfo field)
     {
+        var type = field.Type;
+        var name = field.Name;
+
         Type nonNullableType = Nullable.GetUnderlyingType(type) ?? type;
 
         // FileUpload fields are not auto-scaffolded. Use .Builder() to configure them manually.
@@ -127,7 +125,19 @@ internal static class FormScaffolder
 
         if (type.IsNumeric())
         {
-            return (state) => state.ToNumberInput().ScaffoldDefaults(name, type);
+            return (state) =>
+            {
+                var input = state.ToNumberInput();
+                if (field.GetRangeInfo().Min is { } min)
+                {
+                    input = input.Min(min);
+                }
+                if (field.GetRangeInfo().Max is { } max)
+                {
+                    input = input.Max(max);
+                }
+                return input.ScaffoldDefaults(name, type);
+            };
         }
 
         if (type.IsDate())
@@ -222,5 +232,8 @@ internal static class FormScaffolder
         public FieldInfo? FieldInfo { get; init; }
         public PropertyInfo? PropertyInfo { get; init; }
         public required bool Required { get; init; }
+
+        public FormHelpers.DisplayInfo GetDisplayInfo() => PropertyInfo != null ? FormHelpers.GetDisplayInfo(PropertyInfo) : FormHelpers.GetDisplayInfo(FieldInfo!);
+        public FormHelpers.RangeInfo GetRangeInfo() => PropertyInfo != null ? FormHelpers.GetRangeInfo(PropertyInfo) : FormHelpers.GetRangeInfo(FieldInfo!);
     }
 }

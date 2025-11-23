@@ -7,7 +7,6 @@ using Ivy.Views.Forms;
 namespace Ivy.Samples.Shared.Apps.Concepts;
 
 /*
-[Required] - Field must have a value
 [MinLength(n)] - Minimum string length
 [MaxLength(n)] - Maximum string length
 [StringLength(max, MinimumLength = min)] - String length constraints
@@ -20,7 +19,6 @@ namespace Ivy.Samples.Shared.Apps.Concepts;
 [RegularExpression(pattern)] - Match a regex pattern
 [AllowedValues(...)] - Value must be from specified list
 [DataType(...)] - Specifies data type (Password, Date, DateTime, MultilineText, etc.)
-[Display(...)] - Controls field display properties (Name, Description, Order, GroupName, Prompt)
  */
 
 [App(icon: Icons.Brain, searchHints: ["forms", "scaffolding"])]
@@ -45,16 +43,25 @@ public class FormScaffoldingApp : SampleBase
                           | (Layout.Grid().Columns(3).Gap(10)
                             | stringsForm
                             | stringsExample.ToDetails())
+            ;
 
+        var numbersExample = UseState(() => new NumbersExample());
+        var numbersForm = numbersExample.ToForm();
+        var numbersGrid = Layout.Vertical()
+                          | new CodeView(typeof(NumbersExample))
+                          | (Layout.Grid().Columns(3).Gap(10)
+                            | numbersForm
+                            | numbersExample.ToDetails())
             ;
 
         return Layout.Vertical()
                | Text.H1("Form Scaffolding")
                | Text.H2("Display")
                | displayGrid
-
                | Text.H2("Strings")
-               | stringsGrid;
-
+               | stringsGrid
+               | Text.H2("Numbers")
+               | numbersGrid
+            ;
     }
 }

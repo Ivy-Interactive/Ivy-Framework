@@ -17,15 +17,19 @@ public class FormBuilder<TModel> : ViewBase
     private readonly List<string> _groups = [];
     private readonly Dictionary<string, bool> _groupOpenStates = [];
 
-    public Scale Scale = Scale.Medium;
-    public readonly string SubmitTitle;
-    public FormValidationStrategy ValidationStrategy { get; set; } = FormValidationStrategy.OnBlur;
+    public Scale Scale { get; private set; } = Scale.Medium;
+    public string SubmitTitle { get; init; }
+    public FormValidationStrategy ValidationStrategy { get; set; }
 
-    public FormBuilder(IState<TModel> model, string submitTitle = "Save")
+    public FormBuilder(
+        IState<TModel> model,
+        string submitTitle = "Save",
+        FormValidationStrategy validationStrategy = FormValidationStrategy.OnBlur)
     {
         _model = model;
-        SubmitTitle = submitTitle;
         _fields = FormScaffolder.ScaffoldFields<TModel>(_model.GetStateType());
+        SubmitTitle = submitTitle;
+        ValidationStrategy = validationStrategy;
     }
 
     public FormBuilder<TModel> Builder(Expression<Func<TModel, object>> field, Func<IAnyState, IAnyInput> factory)
@@ -33,14 +37,11 @@ public class FormBuilder<TModel> : ViewBase
         return Builder(field, (state, _) => factory(state));
     }
 
-    //todo: this looks like a hack that should be fixed properly
-    private static bool HasCustomLabel(string label, string name)
-        => label != Utils.SplitPascalCase(name);
-
     public FormBuilder<TModel> Builder(Expression<Func<TModel, object>> field, Func<IAnyState, IViewContext, IAnyInput> factory)
     {
         var fieldInfo = GetField(field);
 
+        //todo: why is this needed? hack?
         Func<IAnyState, IViewContext, IAnyInput> ScaffoldWrapper(Func<IAnyState, IViewContext, IAnyInput> inner)
         {
             return (state, context) =>
@@ -71,6 +72,8 @@ public class FormBuilder<TModel> : ViewBase
 
         fieldInfo.InputFactory = ScaffoldWrapper(factory);
         return this;
+
+        bool HasCustomLabel(string label, string name) => label != Utils.SplitPascalCase(name);
     }
 
     public FormBuilder<TModel> Builder<TU>(Func<IAnyState, IAnyInput> input)

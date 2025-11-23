@@ -4,48 +4,12 @@ using Ivy.Services;
 
 namespace Ivy.Views.Forms;
 
-public record DisplayInfo(
-    string? Name = null,
-    string? Description = null,
-    string? GroupName = null,
-    string? Prompt = null,
-    int? Order = null
-);
-
 public static class FormHelpers
 {
     public static bool IsRequired(PropertyInfo propertyInfo)
     {
         if (propertyInfo.GetCustomAttribute<RequiredAttribute>() != null) return true;
         return IsNonNullableString(propertyInfo);
-    }
-
-    public static DisplayInfo GetDisplayInfo(PropertyInfo propertyInfo)
-    {
-        var displayAttr = propertyInfo.GetCustomAttribute<DisplayAttribute>();
-        if (displayAttr == null) return new DisplayInfo();
-
-        return new DisplayInfo(
-            Name: displayAttr.Name,
-            Description: displayAttr.Description,
-            GroupName: displayAttr.GroupName,
-            Prompt: displayAttr.Prompt,
-            Order: displayAttr.GetOrder()
-        );
-    }
-
-    public static DisplayInfo GetDisplayInfo(FieldInfo fieldInfo)
-    {
-        var displayAttr = fieldInfo.GetCustomAttribute<DisplayAttribute>();
-        if (displayAttr == null) return new DisplayInfo();
-
-        return new DisplayInfo(
-            Name: displayAttr.Name,
-            Description: displayAttr.Description,
-            GroupName: displayAttr.GroupName,
-            Prompt: displayAttr.Prompt,
-            Order: displayAttr.GetOrder()
-        );
     }
 
     public static List<Func<object?, (bool, string)>> GetValidators(PropertyInfo propertyInfo)
@@ -190,6 +154,58 @@ public static class FormHelpers
         }
 
         return false;
+    }
+
+    public record DisplayInfo(
+        string? Name = null,
+        string? Description = null,
+        string? GroupName = null,
+        string? Prompt = null,
+        int? Order = null
+    );
+
+    public static DisplayInfo GetDisplayInfo(PropertyInfo propertyInfo)
+    {
+        var displayAttr = propertyInfo.GetCustomAttribute<DisplayAttribute>();
+        if (displayAttr == null) return new DisplayInfo();
+
+        return new DisplayInfo(
+            Name: displayAttr.Name,
+            Description: displayAttr.Description,
+            GroupName: displayAttr.GroupName,
+            Prompt: displayAttr.Prompt,
+            Order: displayAttr.GetOrder()
+        );
+    }
+
+    public static DisplayInfo GetDisplayInfo(FieldInfo fieldInfo)
+    {
+        var displayAttr = fieldInfo.GetCustomAttribute<DisplayAttribute>();
+        if (displayAttr == null) return new DisplayInfo();
+
+        return new DisplayInfo(
+            Name: displayAttr.Name,
+            Description: displayAttr.Description,
+            GroupName: displayAttr.GroupName,
+            Prompt: displayAttr.Prompt,
+            Order: displayAttr.GetOrder()
+        );
+    }
+
+    public record RangeInfo(double? Min, double? Max);
+
+    public static RangeInfo GetRangeInfo(PropertyInfo propertyInfo)
+    {
+        var rangeAttr = propertyInfo.GetCustomAttribute<RangeAttribute>();
+        if (rangeAttr == null) return new(null, null);
+        return new RangeInfo(Convert.ToDouble(rangeAttr.Minimum), Convert.ToDouble(rangeAttr.Maximum));
+    }
+
+    public static RangeInfo GetRangeInfo(FieldInfo fieldInfo)
+    {
+        var rangeAttr = fieldInfo.GetCustomAttribute<RangeAttribute>();
+        if (rangeAttr == null) return new(null, null);
+        return new RangeInfo(Convert.ToDouble(rangeAttr.Minimum), Convert.ToDouble(rangeAttr.Maximum));
     }
 }
 
