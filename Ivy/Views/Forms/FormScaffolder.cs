@@ -22,6 +22,13 @@ internal static class FormScaffolder
                 : FormHelpers.GetDisplayInfo(field.FieldInfo!);
 
             var label = displayInfo.Name ?? Utils.LabelFor(field.Name, field.Type);
+
+            // Trim "Id" suffix from labels (except "GovId" and plain "Id")
+            if (!field.Name.EndsWith("GovId") && field.Name != "Id" && field.Name.EndsWith("Id"))
+            {
+                label = label[..^3];
+            }
+
             var order = displayInfo.Order ?? int.MaxValue;
 
             var factory = ScaffoldInputFactory(field.Name, field.Type, size);
@@ -39,6 +46,29 @@ internal static class FormScaffolder
                 field.PropertyInfo,
                 field.Required
             );
+
+            // Add required field validator
+            if (field.Required)
+            {
+                scaffoldedField.Validators.Add(e => (Utils.IsValidRequired(e), "Required field"));
+            }
+
+            // Add validators from DataAnnotations attributes
+            if (field.PropertyInfo != null)
+            {
+                scaffoldedField.Validators.AddRange(FormHelpers.GetValidators(field.PropertyInfo));
+            }
+            else if (field.FieldInfo != null)
+            {
+                scaffoldedField.Validators.AddRange(FormHelpers.GetValidators(field.FieldInfo));
+            }
+
+            // Add automatic email validation for fields ending with "Email"
+            var nonNullableType = Nullable.GetUnderlyingType(field.Type) ?? field.Type;
+            if (field.Name.EndsWith("Email") && nonNullableType == typeof(string))
+            {
+                scaffoldedField.Validators.Add(Validators.CreateEmailValidator(field.Name));
+            }
 
             if (!string.IsNullOrEmpty(displayInfo.Description))
             {

@@ -24,36 +24,13 @@ public class FormBuilderField<TModel>
     {
         Name = name;
         Label = label;
-
-        if (!name.EndsWith("GovId") && name != "Id" && name.EndsWith("Id"))
-        {
-            Label = Label[..^3];
-        }
-
-        Order = order;
+        Order = int.MaxValue;
         InputFactory = inputFactory;
         FieldInfo = fieldInfo;
         PropertyInfo = propertyInfo;
         Column = 0;
-        Order = int.MaxValue;
         RowKey = Guid.NewGuid();
         Required = required;
-
-        if (Required)
-        {
-            Validators.Add(e => (Utils.IsValidRequired(e), "Required field"));
-        }
-
-        // Add validators from DataAnnotations attributes
-        if (propertyInfo != null)
-        {
-            Validators.AddRange(GetValidators(propertyInfo));
-        }
-        else if (fieldInfo != null)
-        {
-            Validators.AddRange(GetValidators(fieldInfo));
-        }
-
         Visible = _ => true;
     }
 
@@ -121,17 +98,6 @@ public class FormBuilder<TModel> : ViewBase
         foreach (var kvp in scaffoldedFields)
         {
             _fields[kvp.Key] = kvp.Value;
-        }
-
-        // Add automatic validators after fields are created
-        foreach (var field in _fields.Values)
-        {
-            // Automatic email validation for fields ending with "Email"
-            var nonNullableType = Nullable.GetUnderlyingType(field.Type) ?? field.Type;
-            if (field.Name.EndsWith("Email") && nonNullableType == typeof(string))
-            {
-                field.Validators.Add(Validators.CreateEmailValidator(field.Name));
-            }
         }
     }
 
