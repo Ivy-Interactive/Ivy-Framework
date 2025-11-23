@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { getWidth } from '@/lib/styles';
 import { InvalidIcon } from '@/components/InvalidIcon';
-import { Sizes } from '@/types/sizes';
+import { Scale } from '@/types/scale';
 import { useEventHandler } from '@/components/event-handler';
 import { toast } from '@/hooks/use-toast';
 import {
@@ -44,7 +44,7 @@ interface FileInputWidgetProps {
   maxFiles?: number;
   placeholder?: string;
   uploadUrl?: string;
-  size?: Sizes;
+  scale?: Scale;
 }
 
 export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
@@ -60,7 +60,7 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
   maxFiles,
   placeholder,
   uploadUrl,
-  size = Sizes.Medium,
+  scale = Scale.Medium,
 }) => {
   const handleEvent = useEventHandler();
   const [isDragging, setIsDragging] = useState(false);
@@ -371,7 +371,7 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
       )}
       <div
         className={cn(
-          fileInputVariants({ size }),
+          fileInputVariants({ scale }),
           isDragging && !disabled
             ? 'border-primary bg-primary/5'
             : 'border-muted-foreground/25',
@@ -395,9 +395,9 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
 
         {/* Always show upload icon */}
         <div className="flex flex-col items-center justify-center text-center w-full">
-          <Upload className={uploadIconVariants({ size })} />
+          <Upload className={uploadIconVariants({ scale })} />
           {!hasFiles && (
-            <p className={textVariants({ size })}>
+            <p className={textVariants({ scale })}>
               {placeholder ||
                 `Drag and drop your ${multiple ? 'files' : 'file'} here or click to select`}
             </p>

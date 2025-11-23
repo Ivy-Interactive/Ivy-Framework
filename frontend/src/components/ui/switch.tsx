@@ -9,8 +9,8 @@ const Switch = React.forwardRef<
   React.ElementRef<typeof SwitchPrimitives.Root>,
   React.ComponentPropsWithoutRef<typeof SwitchPrimitives.Root> &
     VariantProps<typeof switchVariants>
->(({ className, size, ...props }, ref) => {
-  const baseClass = switchVariants({ size });
+>(({ className, scale, ...props }, ref) => {
+  const baseClass = switchVariants({ scale });
   const finalClass = className?.includes('bg-red-50')
     ? baseClass.replace('data-[state=checked]:bg-primary', '')
     : baseClass;
@@ -20,7 +20,7 @@ const Switch = React.forwardRef<
       {...props}
       ref={ref}
     >
-      <SwitchPrimitives.Thumb className={cn(switchThumbVariants({ size }))} />
+      <SwitchPrimitives.Thumb className={cn(switchThumbVariants({ scale }))} />
     </SwitchPrimitives.Root>
   );
 });

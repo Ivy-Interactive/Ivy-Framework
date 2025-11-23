@@ -145,7 +145,6 @@ internal static class FormScaffolder
         }
     }
 
-    /// <summary>Gets all fields and properties from a type with their metadata.</summary>
     private static List<FieldPropertyInfo> GetFieldsAndProperties(Type type)
     {
         var fieldsAndProperties = new List<FieldPropertyInfo>();
@@ -186,7 +185,6 @@ internal static class FormScaffolder
         return scaffoldColumnAttr == null || scaffoldColumnAttr.Scaffold;
     }
 
-    /// <summary>Collects all validators for a field including required, DataAnnotations, and convention-based validators.</summary>
     private static List<Func<object?, (bool, string)>> ScaffoldValidators(FieldPropertyInfo field)
     {
         var validators = new List<Func<object?, (bool, string)>>();

@@ -9,7 +9,6 @@ using Ivy.Widgets.Inputs;
 
 namespace Ivy.Views.Forms;
 
-/// <summary>Internal helpers for form field state management.</summary>
 internal static class FormFieldViewHelpers
 {
     public static IAnyState UseClonedAnyState(this IViewContext context, IAnyState state, bool renderOnChange = true)
@@ -36,9 +35,7 @@ public class FormUpdateSignal : AbstractSignal<Unit, Unit>;
 
 public enum FormValidationStrategy
 {
-    /// <summary>Validate when field loses focus.</summary>
     OnBlur,
-    /// <summary>Validate when form is submitted.</summary>
     OnSubmit
 }
 
@@ -140,14 +137,8 @@ public class FormFieldView(
     }
 }
 
-/// <summary>Layout configuration for form field positioning and grouping.</summary>
-/// <param name="RowKey">Unique identifier for grouping fields in the same row.</param>
-/// <param name="Column">Column index for multi-column layouts.</param>
-/// <param name="Order">Sort order within the column/group.</param>
-/// <param name="Group">Optional group name for sectioning fields.</param>
 public record FormFieldLayoutOptions(Guid RowKey, int Column = 0, int Order = 0, string? Group = null);
 
-/// <summary>Binds a form field to a model property with validation and layout configuration.</summary>
 public class FormFieldBinding<TModel>(
     Expression<Func<TModel, object>> selector,
     Func<IAnyState, IViewContext, IAnyInput> factory,
@@ -182,8 +173,7 @@ public interface IFormFieldBinding<TModel>
     (IFormFieldView fieldView, IDisposable disposable) Bind(IState<TModel> model);
 }
 
-/// <summary>Renders form fields in a structured layout with columns, rows, and groups.</summary>
-public class FormView<TModel>(IFormFieldView[] fieldViews, Func<Event<Form>, ValueTask>? handleSubmit = null, Scale size = Scale.Medium, Dictionary<string, bool>? groupOpenStates = null) : ViewBase
+public class FormView<TModel>(IFormFieldView[] fieldViews, Func<Event<Form>, ValueTask>? handleSubmit = null, Scale scale = Scale.Medium, Dictionary<string, bool>? groupOpenStates = null) : ViewBase
 {
     public override object? Build()
     {
@@ -196,7 +186,7 @@ public class FormView<TModel>(IFormFieldView[] fieldViews, Func<Event<Form>, Val
 
         object RenderRows(IFormFieldView[] fs)
         {
-            var gap = size switch
+            var gap = scale switch
             {
                 Scale.Small => 4,
                 Scale.Medium => 6,
@@ -222,8 +212,7 @@ public class FormView<TModel>(IFormFieldView[] fieldViews, Func<Event<Form>, Val
                                 ? RenderRows(f.Select(g => g).ToArray())
                                 : new Expandable(f.Key, RenderRows(f.ToArray()))
                                     .Open(groupOpenStates?.GetValueOrDefault(f.Key, false) ?? false)
-                        )).Cast<object>().ToArray()
-                    .ToArray()));
+                        )).Cast<object>().ToArray()));
 
         var form = new Form(Layout.Horizontal(columns));
         if (handleSubmit != null)

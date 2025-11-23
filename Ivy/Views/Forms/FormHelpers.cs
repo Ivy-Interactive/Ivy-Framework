@@ -1,10 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 using Ivy.Services;
 
 namespace Ivy.Views.Forms;
 
-/// <summary>Display information extracted from DataAnnotations Display attribute.</summary>
 public record DisplayInfo(
     string? Name = null,
     string? Description = null,
@@ -13,7 +12,6 @@ public record DisplayInfo(
     int? Order = null
 );
 
-/// <summary>Utility methods for determining field requirements during form scaffolding. </summary>
 public static class FormHelpers
 {
     public static bool IsRequired(PropertyInfo propertyInfo)
@@ -22,7 +20,6 @@ public static class FormHelpers
         return IsNonNullableString(propertyInfo);
     }
 
-    /// <summary> Extracts Display attribute information from a property.</summary>
     public static DisplayInfo GetDisplayInfo(PropertyInfo propertyInfo)
     {
         var displayAttr = propertyInfo.GetCustomAttribute<DisplayAttribute>();
@@ -37,7 +34,6 @@ public static class FormHelpers
         );
     }
 
-    /// <summary> Extracts Display attribute information from a field.</summary>
     public static DisplayInfo GetDisplayInfo(FieldInfo fieldInfo)
     {
         var displayAttr = fieldInfo.GetCustomAttribute<DisplayAttribute>();
@@ -52,7 +48,6 @@ public static class FormHelpers
         );
     }
 
-    /// <summary> Gets all validators from DataAnnotations ValidationAttributes on a property. </summary> 
     public static List<Func<object?, (bool, string)>> GetValidators(PropertyInfo propertyInfo)
     {
         var validators = new List<Func<object?, (bool, string)>>();
@@ -86,7 +81,6 @@ public static class FormHelpers
         return validators;
     }
 
-    /// <summary> Gets all validators from DataAnnotations ValidationAttributes on a field. </summary>
     public static List<Func<object?, (bool, string)>> GetValidators(FieldInfo fieldInfo)
     {
         var validators = new List<Func<object?, (bool, string)>>();

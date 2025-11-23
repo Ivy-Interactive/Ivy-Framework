@@ -9,7 +9,7 @@ export const toggleVariants = cva(
         outline:
           'border border-input bg-transparent shadow-sm hover:bg-accent hover:text-accent-foreground',
       },
-      size: {
+      scale: {
         Small: 'h-8 px-1.5 min-w-8 [&_svg]:size-3',
         Medium: 'h-9 px-2 min-w-9 [&_svg]:size-4',
         Large: 'h-10 px-2.5 min-w-10 [&_svg]:size-6',
@@ -17,7 +17,7 @@ export const toggleVariants = cva(
     },
     defaultVariants: {
       variant: 'default',
-      size: 'Medium',
+      scale: 'Medium',
     },
   }
 );

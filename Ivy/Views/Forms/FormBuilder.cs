@@ -1,5 +1,4 @@
 using System.Linq.Expressions;
-using System.Reflection;
 using Ivy.Client;
 using Ivy.Core;
 using Ivy.Core.Helpers;
@@ -10,66 +9,6 @@ using Ivy.Widgets.Inputs;
 using static Ivy.Views.Forms.FormHelpers;
 
 namespace Ivy.Views.Forms;
-
-public class FormBuilderField<TModel>
-{
-    public FormBuilderField(
-        string name,
-        string label,
-        int order,
-        Func<IAnyState, IViewContext, IAnyInput>? inputFactory,
-        FieldInfo? fieldInfo,
-        PropertyInfo? propertyInfo,
-        bool required)
-    {
-        Name = name;
-        Label = label;
-        Order = int.MaxValue;
-        InputFactory = inputFactory;
-        FieldInfo = fieldInfo;
-        PropertyInfo = propertyInfo;
-        Column = 0;
-        RowKey = Guid.NewGuid();
-        Required = required;
-        Visible = _ => true;
-    }
-
-    public Func<TModel, bool> Visible { get; set; }
-
-    public string Name { get; set; }
-
-    private FieldInfo? FieldInfo { get; set; }
-
-    private PropertyInfo? PropertyInfo { get; set; }
-
-    public Type Type => (FieldInfo?.FieldType ?? PropertyInfo?.PropertyType)!;
-
-    public bool Disabled { get; set; } = true;
-
-    public int Order { get; set; }
-
-    public int Column { get; set; }
-
-    public Guid RowKey { get; set; }
-
-    public string? Group { get; set; }
-
-    public string Label { get; set; }
-
-    public string? Description { get; set; }
-
-    public string? Help { get; set; }
-
-    public string? Placeholder { get; set; }
-
-    public Func<IAnyState, IViewContext, IAnyInput>? InputFactory { get; set; }
-
-    public bool Removed { get; set; }
-
-    public bool Required { get; set; }
-
-    public List<Func<object?, (bool, string)>> Validators { get; set; } = new();
-}
 
 public class FormBuilder<TModel> : ViewBase
 {
@@ -89,10 +28,6 @@ public class FormBuilder<TModel> : ViewBase
         _fields = FormScaffolder.ScaffoldFields<TModel>(_model.GetStateType());
     }
 
-    /// <summary>Configures custom input factory for specified field (convenience overload without view context).</summary>
-    /// <param name="field">Expression identifying field to configure.</param>
-    /// <param name="factory">Input factory function to use for creating input control.</param>
-    /// <returns>Form builder instance for method chaining.</returns>
     public FormBuilder<TModel> Builder(Expression<Func<TModel, object>> field, Func<IAnyState, IAnyInput> factory)
     {
         return Builder(field, (state, _) => factory(state));
@@ -102,9 +37,6 @@ public class FormBuilder<TModel> : ViewBase
     private static bool HasCustomLabel(string label, string name)
         => label != Utils.SplitPascalCase(name);
 
-    /// <param name="field">Expression identifying field to configure.</param>
-    /// <param name="factory">Input factory function that receives both state and view context.</param>
-    /// <returns>Form builder instance for method chaining.</returns>
     public FormBuilder<TModel> Builder(Expression<Func<TModel, object>> field, Func<IAnyState, IViewContext, IAnyInput> factory)
     {
         var fieldInfo = GetField(field);
@@ -141,17 +73,11 @@ public class FormBuilder<TModel> : ViewBase
         return this;
     }
 
-    /// <typeparam name="TU">Type of fields to configure.</typeparam>
-    /// <param name="input">Input factory function to use for all fields of this type.</param>
-    /// <returns>Form builder instance for method chaining.</returns>
     public FormBuilder<TModel> Builder<TU>(Func<IAnyState, IAnyInput> input)
     {
         return Builder<TU>((state, _) => input(state));
     }
 
-    /// <typeparam name="TU">Type of fields to configure.</typeparam>
-    /// <param name="input">Input factory function that receives both state and view context.</param>
-    /// <returns>Form builder instance for method chaining.</returns>
     public FormBuilder<TModel> Builder<TU>(Func<IAnyState, IViewContext, IAnyInput> input)
     {
         foreach (var hint in _fields.Values.Where(e => e.Type is TU))
@@ -162,10 +88,6 @@ public class FormBuilder<TModel> : ViewBase
         return this;
     }
 
-    /// <summary>Sets description text for specified field.</summary>
-    /// <param name="field">Expression identifying field to configure.</param>
-    /// <param name="description">Description text to display below field.</param>
-    /// <returns>Form builder instance for method chaining.</returns>
     public FormBuilder<TModel> Description(Expression<Func<TModel, object>> field, string description)
     {
         var hint = GetField(field);
@@ -173,10 +95,6 @@ public class FormBuilder<TModel> : ViewBase
         return this;
     }
 
-    /// <summary>Sets help text for specified field displayed as tooltip on info icon next to label.</summary>
-    /// <param name="field">Expression identifying field to configure.</param>
-    /// <param name="help">Help text to display in tooltip.</param>
-    /// <returns>Form builder instance for method chaining.</returns>
     public FormBuilder<TModel> Help(Expression<Func<TModel, object>> field, string help)
     {
         var hint = GetField(field);
@@ -184,10 +102,6 @@ public class FormBuilder<TModel> : ViewBase
         return this;
     }
 
-    /// <summary>Sets custom label for specified field, overriding automatically generated label.</summary>
-    /// <param name="field">Expression identifying field to configure.</param>
-    /// <param name="label">Custom label text to display for field.</param>
-    /// <returns>Form builder instance for method chaining.</returns>
     public FormBuilder<TModel> Label(Expression<Func<TModel, object>> field, string label)
     {
         var hint = GetField(field);
@@ -195,10 +109,6 @@ public class FormBuilder<TModel> : ViewBase
         return this;
     }
 
-    /// <summary>Sets placeholder text for specified field shown when field is empty.</summary>
-    /// <param name="field">Expression identifying field to configure.</param>
-    /// <param name="placeholder">Placeholder text to display when field is empty.</param>
-    /// <returns>Form builder instance for method chaining.</returns>
     public FormBuilder<TModel> Placeholder(Expression<Func<TModel, object>> field, string placeholder)
     {
         var hint = GetField(field);
@@ -228,27 +138,16 @@ public class FormBuilder<TModel> : ViewBase
         return this;
     }
 
-    /// <summary>Places specified fields vertically in the given column with automatic ordering.</summary>
-    /// <param name="col">Zero-based column index where fields should be placed.</param>
-    /// <param name="fields">Fields to place vertically in the specified column.</param>
-    /// <returns>Form builder instance for method chaining.</returns>
     public FormBuilder<TModel> Place(int col, params Expression<Func<TModel, object>>[] fields)
     {
         return _Place(col, null, fields);
     }
 
-    /// <summary>Places specified fields vertically in the first column (column 0) with automatic ordering.</summary>
-    /// <param name="fields">Fields to place vertically in the first column.</param>
-    /// <returns>Form builder instance for method chaining.</returns>
     public FormBuilder<TModel> Place(params Expression<Func<TModel, object>>[] fields)
     {
         return _Place(0, null, fields);
     }
 
-    /// <summary>Places specified fields horizontally side-by-side when row is true, or vertically when false.</summary>
-    /// <param name="row">True to arrange fields side-by-side in the same row; false to stack vertically.</param>
-    /// <param name="fields">Fields to arrange. When row is true, fields will be distributed evenly across the row width.</param>
-    /// <returns>Form builder instance for method chaining.</returns>
     [Obsolete("Use PlaceHorizontal")]
     public FormBuilder<TModel> Place(bool row, params Expression<Func<TModel, object>>[] fields)
     {
@@ -260,10 +159,6 @@ public class FormBuilder<TModel> : ViewBase
         return _Place(0, Guid.NewGuid(), fields);
     }
 
-    /// <param name="col">Zero-based column index where fields should be placed.</param>
-    /// <param name="row">True to arrange fields side-by-side in the same row; false to stack vertically in the column.</param>
-    /// <param name="fields">Fields to place in the specified column. When row is true, fields will share the same row.</param>
-    /// <returns>Form builder instance for method chaining.</returns>
     public FormBuilder<TModel> Place(int col, bool row, params Expression<Func<TModel, object>>[] fields)
     {
         return _Place(col, row ? Guid.NewGuid() : null, fields);
@@ -305,8 +200,6 @@ public class FormBuilder<TModel> : ViewBase
         return this;
     }
 
-    /// <param name="fields">Fields to remove from form.</param>
-    /// <returns>Form builder instance for method chaining.</returns>
     public FormBuilder<TModel> Remove(params Expression<Func<TModel, object>>[] fields)
     {
         foreach (var field in fields)
@@ -317,8 +210,6 @@ public class FormBuilder<TModel> : ViewBase
         return this;
     }
 
-    /// <param name="field">Field to add back to form.</param>
-    /// <returns>Form builder instance for method chaining.</returns>
     public FormBuilder<TModel> Add(Expression<Func<TModel, object>> field)
     {
         var hint = GetField(field);
@@ -326,7 +217,6 @@ public class FormBuilder<TModel> : ViewBase
         return this;
     }
 
-    /// <returns>Form builder instance for method chaining.</returns>
     public FormBuilder<TModel> Clear()
     {
         foreach (var field in _fields.Values)
@@ -336,10 +226,6 @@ public class FormBuilder<TModel> : ViewBase
         return this;
     }
 
-    /// <summary>Sets conditional visibility predicate for specified field based on current model state.</summary>
-    /// <param name="field">Field to configure conditional visibility for.</param>
-    /// <param name="predicate">Function determining field visibility based on current model state.</param>
-    /// <returns>Form builder instance for method chaining.</returns>
     public FormBuilder<TModel> Visible(Expression<Func<TModel, object>> field, Func<TModel, bool> predicate)
     {
         var hint = GetField(field);
@@ -347,10 +233,6 @@ public class FormBuilder<TModel> : ViewBase
         return this;
     }
 
-    /// <summary>Sets disabled state for specified fields.</summary>
-    /// <param name="disabled">Whether fields should be disabled (read-only).</param>
-    /// <param name="fields">Fields to enable or disable.</param>
-    /// <returns>Form builder instance for method chaining.</returns>
     public FormBuilder<TModel> Disabled(bool disabled, params Expression<Func<TModel, object>>[] fields)
     {
         foreach (var expr in fields)
@@ -361,10 +243,6 @@ public class FormBuilder<TModel> : ViewBase
         return this;
     }
 
-    /// <typeparam name="T">Type of field value for type-safe validation.</typeparam>
-    /// <param name="field">Field to add validation to.</param>
-    /// <param name="validator">Function validating field value and returning result and error message.</param>
-    /// <returns>Form builder instance for method chaining.</returns>
     public FormBuilder<TModel> Validate<T>(Expression<Func<TModel, object>> field, Func<T, (bool, string)> validator)
     {
         var hint = GetField(field);
@@ -372,9 +250,6 @@ public class FormBuilder<TModel> : ViewBase
         return this;
     }
 
-    /// <summary>Marks specified fields as required, adding automatic required field validation.</summary>
-    /// <param name="fields">Fields to mark as required.</param>
-    /// <returns>Form builder instance for method chaining.</returns>
     public FormBuilder<TModel> Required(params Expression<Func<TModel, object>>[] fields)
     {
         foreach (var expr in fields)
@@ -410,8 +285,6 @@ public class FormBuilder<TModel> : ViewBase
         return Expression.Lambda<Func<TModel, object>>(converted, parameter);
     }
 
-    /// <param name="context">View context for state management and signal handling.</param>
-    /// <returns>Tuple containing submit handler, form view, validation view, and loading state.</returns>
     public (Func<Task<bool>> onSubmit, IView formView, IView validationView, bool loading) UseForm(IViewContext context)
     {
         var currentModel = context.UseState(() => StateHelpers.DeepClone(_model.Value), buildOnChange: false);
@@ -485,7 +358,6 @@ public class FormBuilder<TModel> : ViewBase
         return (OnSubmit, formView, validationView, false);
     }
 
-    /// <returns>Complete form widget with fields, validation messages, and submit button.</returns>
     public override object? Build()
     {
         (Func<Task<bool>> onSubmit, IView formView, IView validationView, bool submitting) = UseForm(this.Context);
