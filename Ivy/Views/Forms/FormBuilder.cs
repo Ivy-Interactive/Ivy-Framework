@@ -86,19 +86,7 @@ public class FormBuilder<TModel> : ViewBase
     {
         _model = model;
         SubmitTitle = submitTitle;
-        _fields = [];
-        _Scaffold();
-    }
-
-    private void _Scaffold()
-    {
-        var type = _model.GetStateType();
-        var scaffoldedFields = FormScaffolder.ScaffoldFields<TModel>(type, Size);
-
-        foreach (var kvp in scaffoldedFields)
-        {
-            _fields[kvp.Key] = kvp.Value;
-        }
+        _fields = FormScaffolder.ScaffoldFields<TModel>(_model.GetStateType(), Size);
     }
 
     /// <summary>Configures custom input factory for specified field (convenience overload without view context).</summary>
