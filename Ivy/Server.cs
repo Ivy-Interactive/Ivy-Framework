@@ -50,7 +50,7 @@ public class Server
     private bool _useHotReload;
     private bool _useHttpRedirection;
     private readonly List<Action<WebApplicationBuilder>> _builderMods = new();
-    private readonly List<string> _reservedPaths = new();
+    private List<string> _reservedPaths = new();
     public IReadOnlyList<string> ReservedPaths => _reservedPaths;
     public string? DefaultAppId { get; private set; }
     public AppRepository AppRepository { get; } = new();
@@ -510,25 +510,41 @@ public class Server
     {
         var actionDescriptorCollectionProvider = app.Services.GetRequiredService<Microsoft.AspNetCore.Mvc.Infrastructure.IActionDescriptorCollectionProvider>();
 
+        // Use a local HashSet to collect paths (handles duplicates automatically)
+        var reservedPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        // 1. Add existing reserved paths (from fluent API)
+        foreach (var path in _reservedPaths)
+        {
+            reservedPaths.Add(path);
+        }
+
+        // 2. Add auto-discovered controller routes
         foreach (var actionDescriptor in actionDescriptorCollectionProvider.ActionDescriptors.Items)
         {
             if (actionDescriptor.AttributeRouteInfo?.Template is { } template)
             {
-                var firstSegment = template.Split('/').FirstOrDefault();
-                if (!string.IsNullOrEmpty(firstSegment))
+                var segments = template.Split('/', StringSplitOptions.RemoveEmptyEntries);
+                var firstSegment = segments.FirstOrDefault();
+
+                // Ignore dynamic segments (e.g. "{id}" or "user-{id}")
+                if (!string.IsNullOrEmpty(firstSegment) && !firstSegment.Contains('{'))
                 {
-                    _reservedPaths.Add("/" + firstSegment);
+                    reservedPaths.Add("/" + firstSegment);
                 }
             }
         }
 
-        var reservedPaths = _reservedPaths.Distinct().ToHashSet(StringComparer.OrdinalIgnoreCase);
-
+        // 3. Add system excluded paths
         foreach (var path in PathToAppIdMiddleware.ExcludedPaths)
         {
             reservedPaths.Add(path.StartsWith("/") ? path : "/" + path);
         }
 
+        // Atomically update the shared list (thread safety for startup)
+        _reservedPaths = reservedPaths.ToList();
+
+        // 4. Check for collisions
         foreach (var appDescriptor in AppRepository.All())
         {
             var appIdPath = "/" + appDescriptor.Id;
