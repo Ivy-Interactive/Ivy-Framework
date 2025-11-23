@@ -67,6 +67,7 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const filesSelectedInCurrentDialogRef = useRef(false);
   const dialogWasOpenRef = useRef(false);
+  const blurFiredRef = useRef(false);
 
   // Be defensive in case events is undefined at runtime
   const hasCancelHandler = Array.isArray(events) && events.includes('OnCancel');
@@ -187,7 +188,11 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
 
       // Dialog closed after file selection - trigger blur after upload completes
       // This ensures the server state is updated before blur fires
-      handleBlur();
+      // Only fire blur if window focus handler hasn't already fired it
+      if (!blurFiredRef.current) {
+        blurFiredRef.current = true;
+        handleBlur();
+      }
     },
     [multiple, uploadFile, maxFiles, value, handleBlur]
   );
@@ -199,11 +204,20 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
     const handleWindowFocus = () => {
       if (dialogWasOpenRef.current) {
         dialogWasOpenRef.current = false;
-        // Only fire blur if no files were selected (cancel case)
-        // If files were selected, blur will be handled by handleChange after upload
-        if (!filesSelectedInCurrentDialogRef.current) {
-          handleEvent('OnBlur', id, []);
-        }
+        // Use queueMicrotask to allow onChange to run first
+        // This prevents double blur when files are selected
+        queueMicrotask(() => {
+          // Check if files were actually selected by looking at the flag
+          // If files were selected, blur will be handled by handleChange after upload
+          // Only fire blur if no files were selected (cancel case) and we haven't already fired
+          if (
+            !filesSelectedInCurrentDialogRef.current &&
+            !blurFiredRef.current
+          ) {
+            blurFiredRef.current = true;
+            handleEvent('OnBlur', id, []);
+          }
+        });
       }
     };
 
@@ -301,6 +315,7 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
         if (hasBlurHandler) {
           dialogWasOpenRef.current = true;
           filesSelectedInCurrentDialogRef.current = false;
+          blurFiredRef.current = false;
         }
         inputRef.current.click();
       }

@@ -244,6 +244,7 @@ public class FileInputEventHandlersExample : ViewBase
         var files = UseState(ImmutableArray.Create<FileUpload<byte[]>>());
         var blurMessage = UseState("");
         var cancelCount = UseState(0);
+        var blurCount = UseState(0);
         var upload = this.UseUpload(MemoryStreamUploadHandler.Create(files));
 
         return Layout.Vertical()
@@ -253,10 +254,13 @@ public class FileInputEventHandlersExample : ViewBase
                    .Placeholder("Choose files - try selecting, canceling the dialog, or clicking the X button")
                    .HandleBlur((Event<IAnyInput> e) =>
                    {
+                       blurCount.Set(blurCount.Value + 1);
                        if (files.Value.Length > 0)
-                           blurMessage.Set($"Blur: {files.Value.Length} file(s) selected");
+                       {
+                           blurMessage.Set($"Blur Event #{blurCount.Value}: {files.Value.Length} file(s) selected");
+                       }
                        else
-                           blurMessage.Set("Blur: No file selected (dialog cancelled)");
+                           blurMessage.Set($"Blur Event #{blurCount.Value}: No file selected (dialog cancelled)");
                    })
                    .HandleCancel((Guid fileId) =>
                    {
