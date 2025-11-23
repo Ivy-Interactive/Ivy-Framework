@@ -16,31 +16,33 @@ Sheets slide in from the side of the screen and display additional content while
 
 ## Basic Usage
 
-Here's the simplest way to use sheets: keep the trigger and the sheet inside a single `Fragment`, flip a boolean state, and render the sheet only when it's open.
+The `WithSheet` extension on a `Button` provides an easy way to open a sheet:
 
 ```csharp demo-tabs
 public class BasicSheetExample : ViewBase
 {
     public override object? Build()
     {
-        var isSheetOpen = UseState(false);
-        var sheet = isSheetOpen.Value
-            ? new Sheet(() => isSheetOpen.Set(false),
-                "Hello from the sheet!"
-            )
-            : null;
+        return new Button("Open Sheet").WithSheet(
+            () => new SheetView(),
+            title: "This is a sheet",
+            description: "Lorem ipsum dolor sit amet",
+            width: Size.Fraction(1/2f)
+        );
+    }
+}
 
-        return new Fragment(
-            new Button("Open Sheet").HandleClick(() => isSheetOpen.Set(true)),
-            sheet
+public class SheetView : ViewBase
+{
+    public override object? Build()
+    {
+        return new Card(
+            "Welcome to the sheet!",
+            "This is the content inside the sheet"
         );
     }
 }
 ```
-
-<Callout Type="info">
-For additional background on fragments, review the [Fragment widget guide](../03_Primitives/Fragment.md).
-</Callout>
 
 ### Custom Content
 
@@ -52,267 +54,159 @@ public class BasicSheetWithContent : ViewBase
     public override object? Build()
     {
         var client = UseService<IClientProvider>();
-        var isSheetOpen = UseState(false);
-        var sheet = isSheetOpen.Value
-            ? new Sheet(() => isSheetOpen.Set(false),
-                new Fragment(
-                    new Card(
-                        "Welcome to the sheet!",
-                        new Button("Action Button", onClick: _ => client.Toast("Button clicked!"))
-                    ).Title("Sheet Content").Description("This is a simple sheet with custom content")
-                ),
-                title: "Basic Sheet",
-                description: "A simple example of sheet usage"
-            ).Width(Size.Fraction(1/3f))
-            : null;
-
-        return new Fragment(
-            new Button("Open Basic Sheet").HandleClick(() => isSheetOpen.Set(true)),
-            sheet
+        return new Button("Open Basic Sheet").WithSheet(
+            () => new Fragment(
+                new Card(
+                    "Welcome to the sheet!",
+                    new Button("Action Button", onClick: _ => client.Toast("Button clicked!"))
+                ).Title("Sheet Content").Description("This is a simple sheet with custom content")
+            ),
+            title: "Basic Sheet",
+            description: "A simple example of sheet usage",
+            width: Size.Fraction(1/3f)
         );
-    }
-}
-```
-
-### Using ToTrigger
-
-The `.ToTrigger()` extension method provides a convenient way to open sheets without manually managing state. This pattern is useful when you want to encapsulate the sheet logic in a separate component.
-
-```csharp demo-tabs
-public class TriggerSheetExample : ViewBase
-{
-    public override object? Build()
-    {
-        var refreshToken = this.UseRefreshToken();
-        
-        var openBtn = new Button("Open Details Sheet")
-            .Icon(Icons.Plus)
-            .Outline()
-            .ToTrigger((isOpen) => new DetailsSheet(isOpen, refreshToken));
-
-        return openBtn;
-    }
-}
-
-public class DetailsSheet(IState<bool> isOpen, RefreshToken refreshToken) : ViewBase
-{
-    public override object? Build()
-    {
-        var client = this.UseService<IClientProvider>();
-        
-        return isOpen.Value
-            ? new Sheet(() => isOpen.Set(false),
-                Layout.Vertical().Gap(2)
-                    | new Card(
-                        Layout.Vertical().Gap(2)
-                            | Text.H3("Sheet Details")
-                            | Text.P("This sheet was opened using .ToTrigger()")
-                            | new Button("Perform Action")
-                                .Variant(ButtonVariant.Primary)
-                                .HandleClick(_ =>
-                                {
-                                    client.Toast("Action performed!");
-                                    refreshToken.Refresh();
-                                })
-                    ).Title("Content")
-                | new Card("Additional information can go here")
-                    .Title("More Details"),
-                title: "Details Sheet",
-                description: "An example of using ToTrigger with sheets"
-            ).Width(Size.Fraction(1/2f))
-            : null;
-    }
-}
-```
-
-### Conditional Rendering with Selection
-
-Display items inside a sheet and conditionally render different content based on the selected item. This pattern is commonly used in list views, tables, or kanban boards where items are shown in a sheet and clicking an item shows its details.
-
-```csharp demo-tabs
-public record Item(
-    Guid Id,
-    string Name,
-    string Description
-);
-
-public class SelectionSheetExample : ViewBase
-{
-    public override object? Build()
-    {
-        var refreshToken = this.UseRefreshToken();
-        var items = UseState<Item[]>(() => new[]
-        {
-            new Item(Guid.NewGuid(), "Item 1", "Description for item 1"),
-            new Item(Guid.NewGuid(), "Item 2", "Description for item 2"),
-            new Item(Guid.NewGuid(), "Item 3", "Description for item 3")
-        });
-        var selectedItemId = UseState((Guid?)null);
-        var isSheetOpen = UseState(false);
-
-        // Close sheet after action completes
-        UseEffect(() =>
-        {
-            if (refreshToken.ReturnValue != null)
-            {
-                isSheetOpen.Set(false);
-                selectedItemId.Set((Guid?)null);
-            }
-        }, [refreshToken]);
-
-        var itemsSheet = isSheetOpen.Value
-            ? new ItemsSheet(
-                isSheetOpen,
-                refreshToken,
-                items,
-                selectedItemId
-            )
-            : null;
-
-        return new Fragment(
-            new Button("View Items")
-                .Variant(ButtonVariant.Outline)
-                .HandleClick(() => isSheetOpen.Set(true)),
-            itemsSheet
-        );
-    }
-}
-
-public class ItemsSheet(
-    IState<bool> isOpen,
-    RefreshToken refreshToken,
-    IState<Item[]> items,
-    IState<Guid?> selectedItemId
-) : ViewBase
-{
-    public override object? Build()
-    {
-        var client = this.UseService<IClientProvider>();
-
-        void HandleItemAction(Item item)
-        {
-            // Perform action on item
-            client.Toast($"Action performed on '{item.Name}'!");
-            refreshToken.Refresh();
-        }
-
-        object RenderContent()
-        {
-            if (selectedItemId.Value.HasValue)
-            {
-                var item = items.Value.First(i => i.Id == selectedItemId.Value!.Value);
-                return Layout.Vertical().Gap(2)
-                    | new Card(
-                        Layout.Vertical().Gap(2)
-                            | Text.H3(item.Name)
-                            | Text.P(item.Description)
-                            | new Button("Perform Action")
-                                .Variant(ButtonVariant.Primary)
-                                .HandleClick(_ => HandleItemAction(item))
-                    ).Title("Item Details")
-                    | new Button("Back to List")
-                        .Variant(ButtonVariant.Outline)
-                        .HandleClick(() => selectedItemId.Set((Guid?)null));
-            }
-
-            return Layout.Vertical().Gap(2)
-                | items.Value.Select(item =>
-                    new Card(item.Name, item.Description)
-                        .HandleClick(() => selectedItemId.Set(item.Id))
-                ).ToArray();
-        }
-
-        return isOpen.Value
-            ? new Sheet(() => isOpen.Set(false),
-                RenderContent(),
-                title: selectedItemId.Value.HasValue 
-                    ? items.Value.First(i => i.Id == selectedItemId.Value!.Value).Name
-                    : "Items",
-                description: selectedItemId.Value.HasValue
-                    ? "View and manage item details"
-                    : "Select an item to view details"
-            ).Width(Size.Fraction(1/2f))
-            : null;
     }
 }
 ```
 
 ### Footer Actions
 
-For sheets with custom footer actions, use `FooterLayout` to create a fixed footer with action buttons while allowing the main content to scroll. This pattern is useful for forms with multiple actions or when you need custom button behavior.
+You can also create a sheet with action buttons in the footer using FooterLayout.
 
 ```csharp demo-tabs
-public class FooterActionsExample : ViewBase
+public class SheetWithFooterActions : ViewBase
 {
     public override object? Build()
     {
-        var refreshToken = this.UseRefreshToken();
-        
-        var openBtn = new Button("Open Article Editor")
-            .Icon(Icons.Plus)
-            .Outline()
-            .ToTrigger((isOpen) => new ArticleEditorSheet(isOpen, refreshToken));
+        var client = UseService<IClientProvider>();
+        return new Button("Open Sheet with Actions").WithSheet(
+            () => new FooterLayout(
+                Layout.Horizontal().Gap(2)
+                    | new Button("Save").Variant(ButtonVariant.Primary).HandleClick(_ => client.Toast("Profile saved successfully!"))
+                    | new Button("Cancel").Variant(ButtonVariant.Outline).HandleClick(_ => client.Toast("Changes cancelled")),
+                new Card(
+                    "This sheet has action buttons in the footer"
+                ).Title("Content")
+            ),
+            title: "Actions Sheet",
+            width: Size.Fraction(1/2f)
+        );
+    }
+}
+```
 
-        return openBtn;
+### Complex Layout
+
+This example shows how to organize complex content within sheets using nested layouts and various input controls.
+
+```csharp demo-tabs
+public class ComplexSheetLayout : ViewBase
+{
+    public override object? Build()
+    {
+        var client = UseService<IClientProvider>();
+        return new Button("Open Complex Sheet").WithSheet(
+            () => Layout.Vertical()
+                | new Card(
+                    Layout.Horizontal()
+                        | new Avatar("JD").Size(64)
+                        | Layout.Vertical()
+                            | Text.Small("John Doe").NoWrap()
+                            | Text.Small("john.doe@example.com")
+                ).Title("User Information")
+                | new Card(
+                    Layout.Vertical()
+                        | new BoolInput("Dark Mode", true)
+                        | new BoolInput("Notifications", false)
+                        | new SelectInput<string>(options: new[] { "English", "Spanish", "French" }.ToOptions())
+                ).Title("Preferences")
+                | new Card(
+                    Layout.Horizontal().Gap(2)
+                        | new Button("Update Profile").HandleClick(_ => client.Toast("Profile updated!"))
+                        | new Button("Change Password").HandleClick(_ => client.Toast("Password change initiated"))
+                        | new Button("Delete Account").Variant(ButtonVariant.Destructive).HandleClick(_ => client.Toast("Account deletion requested"))
+                ).Title("Actions"),
+            title: "User Profile",
+            description: "Manage your account settings and preferences",
+            width: Size.Fraction(2/3f)
+        );
+    }
+}
+```
+
+### Different Widths
+
+The following demonstrates different sheet width options, from small to full-screen layouts.
+
+```csharp demo-tabs
+public class SheetWidthExamples : ViewBase
+{
+    public override object? Build()
+    {
+        return Layout.Horizontal().Gap(2)
+            | new Button("Small Sheet").WithSheet(
+                () => new Card("This is a small sheet").Title("Small Content"),
+                title: "Small",
+                width: Size.Rem(20)
+            )
+            | new Button("Medium Sheet").WithSheet(
+                () => new Card("This is a medium sheet").Title("Medium Content"),
+                title: "Medium",
+                width: Size.Fraction(1/2f)
+            )
+            | new Button("Large Sheet").WithSheet(
+                () => new Card("This is a large sheet").Title("Large Content"),
+                title: "Large",
+                width: Size.Fraction(2/3f)
+            )
+            | new Button("Full Sheet").WithSheet(
+                () => new Card("This is a full-width sheet").Title("Full Content"),
+                title: "Full Width",
+                width: Size.Full()
+            );
+    }
+}
+```
+
+### Sheet with Navigation
+
+This example shows a sheet with internal navigation between multiple pages using state management.
+
+```csharp demo-tabs
+public class NavigationSheet : ViewBase
+{
+    public override object? Build()
+    {
+        return new Button("Open Navigation Sheet").WithSheet(
+            () => new NavigationSheetContent(),
+            title: "Navigation Sheet",
+            width: Size.Fraction(1/2f)
+        );
     }
 }
 
-public class ArticleEditorSheet(IState<bool> isOpen, RefreshToken refreshToken) : ViewBase
+public class NavigationSheetContent : ViewBase
 {
     public override object? Build()
     {
-        var client = this.UseService<IClientProvider>();
-        var title = this.UseState("Getting Started with Ivy Framework");
-        var content = this.UseState("Write your article content here...");
-        var isPublished = this.UseState(false);
-
-        void HandleSaveDraft()
-        {
-            // Save draft logic here
-            client.Toast("Draft saved!");
-        }
-
-        void HandlePublish()
-        {
-            // Publish logic here
-            isPublished.Set(true);
-            client.Toast("Article published!");
-            refreshToken.Refresh();
-        }
-
-        var sheetContent = new FooterLayout(
-            footer: Layout.Horizontal().Gap(2).Align(Align.Right)
-                | new Button("Save Draft").HandleClick(_ => HandleSaveDraft())
-                | new Button("Publish")
-                    .Variant(ButtonVariant.Primary)
-                    .HandleClick(_ => HandlePublish()),
-            content: Layout.Vertical().Gap(2)
-                | new Card(
-                    Layout.Vertical().Gap(2)
-                        | title.ToTextInput("Article Title")
-                        | content.ToTextInput("Article Content")
-                            .Variant(TextInputs.Textarea)
-                ).Title("Article Details")
-                | new Card("Article preview will appear here as you type...")
-                    .Title("Preview")
-        );
-
-        return isOpen.Value
-            ? new Sheet(() => isOpen.Set(false),
-                sheetContent,
-                title: "Article Editor",
-                description: "Create and edit your articles"
-            ).Width(Size.Fraction(2/3f))
-            : null;
+        var currentPage = UseState<int>(0);
+        var pages = new[] { "Home", "Profile", "Settings", "Help" };
+        
+        return Layout.Vertical()
+            | (Layout.Horizontal().Gap(2)
+                | pages.Select((page, index) => 
+                    new Button(page)
+                        .Variant(currentPage.Value == index ? ButtonVariant.Primary : ButtonVariant.Outline)
+                        .HandleClick(_ => currentPage.Value = index)
+                ).ToArray())
+            | new Card(
+                $"This is the {pages[currentPage.Value]} page content"
+            ).Title("Page Content");
     }
 }
 ```
 
 <WidgetDocs Type="Ivy.Sheet" ExtensionTypes="Ivy.SheetExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Sheet.cs"/>
-
-<Callout Type="info">
-For examples of using forms in sheets, see the [Forms documentation](../../01_Onboarding/02_Concepts/Forms.md).
-</Callout>
 
 ## Examples
 
@@ -329,7 +223,7 @@ public class ConditionalSheetExample : ViewBase
     public override object? Build()
     {
         var client = UseService<IClientProvider>();
-        var isOpen = UseState(false);
+        var isOpen = UseState<bool>(false);
         var viewMode = UseState<string>("list"); // "list", "grid", "details"
         
         object RenderContent()
@@ -361,35 +255,30 @@ public class ConditionalSheetExample : ViewBase
             };
         }
         
-        var body = Layout.Vertical().Gap(2)
-            | new Button("Open Conditional Sheet").HandleClick(() => isOpen.Set(true));
-
-        var sheet = isOpen.Value
-            ? new Sheet(() => isOpen.Set(false),
+        return Layout.Vertical().Gap(2)
+            | new Button("Open Conditional Sheet").HandleClick(_ => isOpen.Value = true)
+            | (isOpen.Value ? new Sheet((Event<Sheet> _) => isOpen.Value = false,
                 Layout.Vertical().Gap(2)
                     | (Layout.Horizontal().Gap(2)
                         | new Button("List").Variant(viewMode.Value == "list" ? ButtonVariant.Primary : ButtonVariant.Outline)
                             .HandleClick(_ => {
-                                viewMode.Set("list");
+                                viewMode.Value = "list";
                                 client.Toast("Switched to List view");
                             })
                         | new Button("Grid").Variant(viewMode.Value == "grid" ? ButtonVariant.Primary : ButtonVariant.Outline)
                             .HandleClick(_ => {
-                                viewMode.Set("grid");
+                                viewMode.Value = "grid";
                                 client.Toast("Switched to Grid view");
                             })
                         | new Button("Details").Variant(viewMode.Value == "details" ? ButtonVariant.Primary : ButtonVariant.Outline)
                             .HandleClick(_ => {
-                                viewMode.Set("details");
+                                viewMode.Value = "details";
                                 client.Toast("Switched to Details view");
                             }))
                     | RenderContent(),
                 title: "Conditional Content Sheet",
                 description: "Switch between different view modes"
-            ).Width(Size.Fraction(2/3f))
-            : null;
-
-        return new Fragment(body, sheet);
+            ).Width(Size.Fraction(2/3f)) : null);
     }
 }
 ```
