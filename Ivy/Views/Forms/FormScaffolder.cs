@@ -141,7 +141,6 @@ internal static class FormScaffolder
             return (state) =>
             {
                 var input = state.ToBoolInput();
-                // Apply scaffold defaults
                 input.ScaffoldDefaults(name, type);
                 return input.Size(size);
             };

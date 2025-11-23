@@ -110,12 +110,16 @@ public class FormBuilder<TModel> : ViewBase
         return Builder(field, (state, _) => factory(state));
     }
 
+    //todo: this looks like a hack that should be fixed properly
+    private static bool HasCustomLabel(string label, string name)
+        => label != Utils.SplitPascalCase(name);
+
     /// <param name="field">Expression identifying field to configure.</param>
     /// <param name="factory">Input factory function that receives both state and view context.</param>
     /// <returns>Form builder instance for method chaining.</returns>
     public FormBuilder<TModel> Builder(Expression<Func<TModel, object>> field, Func<IAnyState, IViewContext, IAnyInput> factory)
     {
-        var hint = GetField(field);
+        var fieldInfo = GetField(field);
 
         Func<IAnyState, IViewContext, IAnyInput> ScaffoldWrapper(Func<IAnyState, IViewContext, IAnyInput> inner)
         {
@@ -125,26 +129,26 @@ public class FormBuilder<TModel> : ViewBase
                 if (input is IAnyBoolInput boolInput)
                 {
                     // Only apply scaffold defaults if no custom label was set
-                    if (HasCustomLabel(hint.Label, hint.Name))
+                    if (HasCustomLabel(fieldInfo.Label, fieldInfo.Name))
                     {
                         // Custom label was set, don't override it
-                        boolInput.Label = hint.Label;
+                        boolInput.Label = fieldInfo.Label;
                     }
                     else
                     {
                         // Use scaffold defaults
-                        boolInput.ScaffoldDefaults(hint.Name, hint.Type);
+                        boolInput.ScaffoldDefaults(fieldInfo.Name, fieldInfo.Type);
                     }
                 }
                 else if (input is IAnyNumberInput numberInput)
                 {
-                    numberInput.ScaffoldDefaults(hint.Name, hint.Type);
+                    numberInput.ScaffoldDefaults(fieldInfo.Name, fieldInfo.Type);
                 }
                 return input.Size(Size);
             };
         }
 
-        hint.InputFactory = ScaffoldWrapper(factory);
+        fieldInfo.InputFactory = ScaffoldWrapper(factory);
         return this;
     }
 
@@ -437,10 +441,6 @@ public class FormBuilder<TModel> : ViewBase
     {
         return SetSize(Sizes.Large);
     }
-
-    //todo: this looks like a hack that should be fixed properly
-    private static bool HasCustomLabel(string label, string name)
-        => label != Utils.SplitPascalCase(name);
 
     private FormBuilderField<TModel> GetField<TU>(Expression<Func<TModel, TU>> field)
     {
