@@ -234,11 +234,10 @@ public class KanbanWithSheetExample : ViewBase
         
         var statusOptions = new[] { "Todo", "In Progress", "Done" }.ToOptions();
         
-        // Track when form is submitted to add task
-        var wasSheetOpen = UseState(false);
+        // Add task when sheet closes after successful submission
         UseEffect(() =>
         {
-            if (!isSheetOpen.Value && wasSheetOpen.Value && !string.IsNullOrEmpty(taskForm.Value.Title))
+            if (!isSheetOpen.Value && !string.IsNullOrEmpty(taskForm.Value.Title))
             {
                 var updatedTasks = taskState.Value.ToList();
                 updatedTasks.Add(taskForm.Value);
@@ -250,7 +249,6 @@ public class KanbanWithSheetExample : ViewBase
                     Guid.NewGuid().ToString(), "", "Todo",
                     taskState.Value.Count(t => t.Status == "Todo") + 1, "", "Unassigned"));
             }
-            wasSheetOpen.Set(isSheetOpen.Value);
         }, [isSheetOpen, taskForm]);
         
         var body = Layout.Vertical().Gap(2)
