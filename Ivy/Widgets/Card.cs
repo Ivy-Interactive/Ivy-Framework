@@ -36,8 +36,6 @@ public record Card : WidgetBase<Card>
 
     [Event] public Func<Event<Card>, ValueTask>? OnClick { get; set; }
 
-    [Prop] public Sizes Size { get; set; } = Sizes.Medium;
-
     /// <returns>A new Card instance with the updated content.</returns>
     /// <exception cref="NotSupportedException">Thrown when attempting to add multiple children at once.</exception>
     public static Card operator |(Card widget, object child)
@@ -97,14 +95,6 @@ public static class CardExtensions
     public static Card BorderStyle(this Card card, BorderStyle style) => card with { BorderStyle = style };
 
     public static Card BorderColor(this Card card, Colors color) => card with { BorderColor = color };
-
-    public static Card Size(this Card card, Sizes size) => card with { Size = size };
-
-    public static Card Small(this Card card) => card with { Size = Sizes.Small };
-
-    public static Card Medium(this Card card) => card with { Size = Sizes.Medium };
-
-    public static Card Large(this Card card) => card with { Size = Sizes.Large };
 
     public static Card Hover(this Card card, CardHoverVariant variant)
     {

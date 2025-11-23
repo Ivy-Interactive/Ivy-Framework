@@ -19,8 +19,6 @@ public record TableCell : WidgetBase<TableCell>
 
     /// <summary>Default is false (single-line).</summary>
     [Prop] public bool MultiLine { get; set; }
-
-    [Prop] public Sizes Size { get; set; } = Sizes.Medium;
 }
 
 public static class TableCellExtensions
@@ -44,12 +42,4 @@ public static class TableCellExtensions
     {
         return cell with { MultiLine = multiLine };
     }
-
-    public static TableCell Size(this TableCell cell, Sizes size) => cell with { Size = size };
-
-    public static TableCell Large(this TableCell cell) => cell.Size(Sizes.Large);
-
-    public static TableCell Small(this TableCell cell) => cell.Size(Sizes.Small);
-
-    public static TableCell Medium(this TableCell cell) => cell.Size(Sizes.Medium);
 }

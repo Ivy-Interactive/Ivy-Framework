@@ -62,11 +62,11 @@ public class TableBuilder<TModel> : ViewBase, IStateless
     }
 
     private Size? _width;
-    private Sizes? _size;
+    private Scale _scale = Scale.Medium;
     private readonly IEnumerable<TModel> _records;
     private readonly Dictionary<string, TableBuilderColumn> _columns;
     private readonly BuilderFactory<TModel> _builderFactory;
-    private bool _removeEmptyColumns = false;
+    private bool _removeEmptyColumns;
     private bool _removeHeader;
     private object? _empty;
 
@@ -166,19 +166,19 @@ public class TableBuilder<TModel> : ViewBase, IStateless
 
     public TableBuilder<TModel> Large()
     {
-        _size = Sizes.Large;
+        _scale = Scale.Large;
         return this;
     }
 
     public TableBuilder<TModel> Small()
     {
-        _size = Sizes.Small;
+        _scale = Scale.Small;
         return this;
     }
 
     public TableBuilder<TModel> Medium()
     {
-        _size = Sizes.Medium;
+        _scale = Scale.Medium;
         return this;
     }
 
@@ -353,11 +353,7 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         Table RenderTable(TableRow[] tableRows)
         {
             var tableWidth = _width ?? CalculateSmartTableWidth();
-            var table = new Table(tableRows).Width(tableWidth);
-            if (_size.HasValue)
-            {
-                table = table.Size(_size.Value);
-            }
+            var table = new Table(tableRows).Width(tableWidth).Scale(_scale);
             return table;
         }
 

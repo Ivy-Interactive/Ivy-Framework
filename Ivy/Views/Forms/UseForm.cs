@@ -49,9 +49,9 @@ public static class UseFormExtensions
                 var layout = new FooterLayout(
                     Layout.Horizontal().Gap(2)
                         | new Button(submitTitle ?? formBuilder.SubmitTitle).HandleClick(_ => HandleSubmit())
-                            .Loading(loading).Disabled(loading).Size(formBuilder.Size)
+                            .Loading(loading).Disabled(loading).Scale(formBuilder._scale)
                         | new Button("Cancel").Variant(ButtonVariant.Outline).HandleClick(_ => isOpen.Set(false))
-                            .Size(formBuilder.Size)
+                            .Scale(formBuilder._scale)
                         | validationView,
                     formView
                 );
@@ -78,7 +78,8 @@ public static class UseFormExtensions
     {
         return new FuncView((context) =>
             {
-                (Func<Task<bool>> onSubmit, IView formView, IView validationView, bool loading) = formBuilder.UseForm(context);
+                (Func<Task<bool>> onSubmit, IView formView, IView validationView, bool loading) =
+                    formBuilder.UseForm(context);
 
                 if (!isOpen.Value) return null; //shouldn't happen
 
@@ -95,18 +96,17 @@ public static class UseFormExtensions
                     new DialogHeader(title ?? ""),
                     new DialogBody(
                         Layout.Vertical()
-                            | description!
-                            | formView
+                        | description!
+                        | formView
                     ),
                     new DialogFooter(
                         validationView,
-                        new Button("Cancel", _ => isOpen.Value = false, variant: ButtonVariant.Outline).Size(formBuilder.Size),
+                        new Button("Cancel", _ => isOpen.Value = false, variant: ButtonVariant.Outline).Scale(formBuilder._scale),
                         new Button(submitTitle ?? formBuilder.SubmitTitle).HandleClick(_ => HandleSubmit())
-                            .Loading(loading).Disabled(loading).Size(formBuilder.Size)
+                            .Loading(loading).Disabled(loading).Scale(formBuilder._scale)
                     )
                 ).Width(width ?? Dialog.DefaultWidth);
             }
         );
-
     }
 }

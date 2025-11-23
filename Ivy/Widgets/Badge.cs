@@ -31,8 +31,6 @@ public record Badge : WidgetBase<Badge>
 
     [Prop] public Icons? Icon { get; set; }
 
-    [Prop] public Sizes Size { get; set; } = Sizes.Medium;
-
     [Prop] public Align IconPosition { get; set; } = Align.Left;
 
     /// <exception cref="NotSupportedException">Badge does not support children.</exception>
@@ -53,23 +51,6 @@ public static class BadgeExtensions
     public static Badge Variant(this Badge badge, BadgeVariant variant)
     {
         return badge with { Variant = variant };
-    }
-
-    public static Badge Size(this Badge badge, Sizes size)
-    {
-        return badge with { Size = size };
-    }
-
-    [RelatedTo(nameof(Badge.Size))]
-    public static Badge Large(this Badge badge)
-    {
-        return badge.Size(Sizes.Large);
-    }
-
-    [RelatedTo(nameof(Badge.Size))]
-    public static Badge Small(this Badge badge)
-    {
-        return badge.Size(Sizes.Small);
     }
 
     [RelatedTo(nameof(Badge.Variant))]

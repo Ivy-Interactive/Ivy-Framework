@@ -74,7 +74,6 @@ public class AsyncSelectInputView<TValue> : ViewBase, IAnyAsyncSelectInputBase, 
 
     public string? Invalid { get; set; }
 
-    public Sizes Size { get; set; }
     public string? Placeholder { get; set; }
 
     public override object? Build()

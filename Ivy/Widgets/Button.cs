@@ -73,8 +73,6 @@ public record Button : WidgetBase<Button>
 
     [Prop] public BorderRadius BorderRadius { get; set; } = BorderRadius.Rounded;
 
-    [Prop] public Sizes Size { get; set; } = Sizes.Medium;
-
     [Event] public Func<Event<Button>, ValueTask>? OnClick { get; set; }
 
     public object? Tag { get; set; } //not a prop!
@@ -257,22 +255,5 @@ public static class ButtonExtensions
     public static Button BorderRadius(this Button button, BorderRadius radius)
     {
         return button with { BorderRadius = radius };
-    }
-
-    public static Button Size(this Button button, Sizes size)
-    {
-        return button with { Size = size };
-    }
-
-    [RelatedTo(nameof(Button.Size))]
-    public static Button Large(this Button button)
-    {
-        return button.Size(Sizes.Large);
-    }
-
-    [RelatedTo(nameof(Button.Size))]
-    public static Button Small(this Button button)
-    {
-        return button.Size(Sizes.Small);
     }
 }

@@ -20,8 +20,6 @@ public abstract record DateRangeInputBase : WidgetBase<DateRangeInputBase>, IAny
 
     [Prop] public string? Format { get; set; }
 
-    [Prop] public Sizes Size { get; set; } = Sizes.Medium;
-
     [Prop] public bool Disabled { get; set; }
 
     [Prop] public string? Invalid { get; set; }
@@ -132,20 +130,5 @@ public static class DateRangeInputExtensions
     public static DateRangeInputBase HandleBlur(this DateRangeInputBase widget, Action onBlur)
     {
         return widget.HandleBlur(_ => { onBlur(); return ValueTask.CompletedTask; });
-    }
-
-    public static DateRangeInputBase Size(this DateRangeInputBase widget, Sizes size)
-    {
-        return widget with { Size = size };
-    }
-
-    public static DateRangeInputBase Large(this DateRangeInputBase widget)
-    {
-        return widget.Size(Sizes.Large);
-    }
-
-    public static DateRangeInputBase Small(this DateRangeInputBase widget)
-    {
-        return widget.Size(Sizes.Small);
     }
 }

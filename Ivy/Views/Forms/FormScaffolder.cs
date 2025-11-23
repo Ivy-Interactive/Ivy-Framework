@@ -10,7 +10,7 @@ namespace Ivy.Views.Forms;
 
 internal static class FormScaffolder
 {
-    public static Dictionary<string, FormBuilderField<TModel>> ScaffoldFields<TModel>(Type modelType, Sizes size = Sizes.Medium)
+    public static Dictionary<string, FormBuilderField<TModel>> ScaffoldFields<TModel>(Type modelType)
     {
         var fields = GetFieldsAndProperties(modelType);
         var scaffoldedFields = new Dictionary<string, FormBuilderField<TModel>>();
@@ -31,7 +31,7 @@ internal static class FormScaffolder
 
             var order = displayInfo.Order ?? int.MaxValue;
 
-            var factory = ScaffoldInputFactory(field.Name, field.Type, size);
+            var factory = ScaffoldInputFactory(field.Name, field.Type);
 
             Func<IAnyState, IViewContext, IAnyInput>? wrappedFactory = factory != null
                 ? (state, _) => factory(state)
@@ -70,11 +70,11 @@ internal static class FormScaffolder
         return scaffoldedFields;
     }
 
-    private static Func<IAnyState, IAnyInput>? ScaffoldInputFactory(string name, Type type, Sizes size)
+    private static Func<IAnyState, IAnyInput>? ScaffoldInputFactory(string name, Type type)
     {
         Type nonNullableType = Nullable.GetUnderlyingType(type) ?? type;
 
-        // FileUpload fields are not auto-scaffolded - use .Builder() to configure them manually
+        // FileUpload fields are not auto-scaffolded. Use .Builder() to configure them manually.
         if (IsFileUploadType(nonNullableType))
         {
             return null;
@@ -87,52 +87,52 @@ internal static class FormScaffolder
 
         if (name.EndsWith("Id") && (type == typeof(Guid) || type == typeof(int) || type == typeof(string)))
         {
-            return (state) => state.ToReadOnlyInput().Size(size);
+            return (state) => state.ToReadOnlyInput();
         }
 
         if (name.EndsWith("Email") && nonNullableType == typeof(string))
         {
-            return (state) => state.ToEmailInput().Size(size);
+            return (state) => state.ToEmailInput();
         }
 
         if ((name.EndsWith("Color") || name.EndsWith("Colour")) && nonNullableType == typeof(string))
         {
-            return (state) => state.ToColorInput().Size(size);
+            return (state) => state.ToColorInput();
         }
 
         if (nonNullableType == typeof(bool))
         {
-            return (state) => state.ToBoolInput().ScaffoldDefaults(name, type).Size(size);
+            return (state) => state.ToBoolInput().ScaffoldDefaults(name, type);
         }
 
         if (nonNullableType == typeof(string))
         {
             if (name.EndsWith("Password"))
             {
-                return (state) => state.ToPasswordInput().Size(size);
+                return (state) => state.ToPasswordInput();
             }
 
-            return (state) => state.ToTextInput().Size(size);
+            return (state) => state.ToTextInput();
         }
 
         if (nonNullableType.IsEnum)
         {
-            return (state) => state.ToSelectInput().Size(size);
+            return (state) => state.ToSelectInput();
         }
 
         if (type.IsCollectionType() && type.GetCollectionTypeParameter() is { IsEnum: true })
         {
-            return (state) => state.ToSelectInput().List().Size(size);
+            return (state) => state.ToSelectInput().List();
         }
 
         if (type.IsNumeric())
         {
-            return (state) => state.ToNumberInput().ScaffoldDefaults(name, type).Size(size);
+            return (state) => state.ToNumberInput().ScaffoldDefaults(name, type);
         }
 
         if (type.IsDate())
         {
-            return (state) => state.ToDateTimeInput().Size(size);
+            return (state) => state.ToDateTimeInput();
         }
 
         return null;

@@ -33,8 +33,6 @@ public abstract record ColorInputBase : WidgetBase<ColorInputBase>, IAnyColorInp
 
     [Prop] public ColorInputs Variant { get; set; } = ColorInputs.TextAndPicker;
 
-    [Prop] public Sizes Size { get; set; } = Sizes.Medium;
-
     [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
 
     public Type[] SupportedStateTypes() => [
@@ -137,21 +135,6 @@ public static class ColorInputExtensions
     public static ColorInputBase Variant(this ColorInputBase widget, ColorInputs variant)
     {
         return widget with { Variant = variant };
-    }
-
-    public static ColorInputBase Size(this ColorInputBase widget, Sizes size)
-    {
-        return widget with { Size = size };
-    }
-
-    public static ColorInputBase Large(this ColorInputBase widget)
-    {
-        return widget.Size(Sizes.Large);
-    }
-
-    public static ColorInputBase Small(this ColorInputBase widget)
-    {
-        return widget.Size(Sizes.Small);
     }
 
     [OverloadResolutionPriority(1)]

@@ -33,8 +33,6 @@ public abstract record CodeInputBase : WidgetBase<CodeInputBase>, IAnyCodeInput
 
     [Prop] public bool ShowCopyButton { get; set; } = false;
 
-    [Prop] public Sizes Size { get; set; }
-
     [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
 
     public Type[] SupportedStateTypes() => [typeof(string)];
@@ -72,9 +70,8 @@ public record CodeInput<TString> : CodeInputBase, IInput<TString>
         Placeholder = placeholder;
         Variant = variant;
         Disabled = disabled;
-        Size = Sizes.Medium;
-        Width = Ivy.Shared.Size.Full();
-        Height = Ivy.Shared.Size.Units(25);
+        Width = Size.Full();
+        Height = Size.Units(25);
     }
 
     [Prop] public TString Value { get; } = default!;
@@ -121,21 +118,6 @@ public static class CodeInputExtensions
     public static CodeInputBase ShowCopyButton(this CodeInputBase widget, bool showCopyButton = true)
     {
         return widget with { ShowCopyButton = showCopyButton };
-    }
-
-    public static CodeInputBase Size(this CodeInputBase widget, Sizes size)
-    {
-        return widget with { Size = size };
-    }
-
-    public static CodeInputBase Large(this CodeInputBase widget)
-    {
-        return widget.Size(Sizes.Large);
-    }
-
-    public static CodeInputBase Small(this CodeInputBase widget)
-    {
-        return widget.Size(Sizes.Small);
     }
 
     [OverloadResolutionPriority(1)]

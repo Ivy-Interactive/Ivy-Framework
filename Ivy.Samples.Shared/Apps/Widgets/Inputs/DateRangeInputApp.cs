@@ -30,9 +30,9 @@ public class DateRangeInputApp : SampleBase
             | disabledNullableDateOnlyState.ToDateRangeInput().Placeholder("Select date range").Format("yyyy-MM-dd").Small().Disabled().TestId("daterange-input-dateonly-small-disabled")
 
             | Text.InlineCode("Medium")
-            | nullableDateOnlyState.ToDateRangeInput().Placeholder("Select date range").Format("yyyy-MM-dd").Size(Sizes.Medium).TestId("daterange-input-dateonly-medium")
-            | nullableDateOnlyState.ToDateRangeInput().Placeholder("Select date range").Format("yyyy-MM-dd").Size(Sizes.Medium).TestId("daterange-input-dateonly-medium-nullable")
-            | disabledNullableDateOnlyState.ToDateRangeInput().Placeholder("Select date range").Format("yyyy-MM-dd").Size(Sizes.Medium).Disabled().TestId("daterange-input-dateonly-medium-disabled")
+            | nullableDateOnlyState.ToDateRangeInput().Placeholder("Select date range").Format("yyyy-MM-dd").Scale(Scale.Medium).TestId("daterange-input-dateonly-medium")
+            | nullableDateOnlyState.ToDateRangeInput().Placeholder("Select date range").Format("yyyy-MM-dd").Scale(Scale.Medium).TestId("daterange-input-dateonly-medium-nullable")
+            | disabledNullableDateOnlyState.ToDateRangeInput().Placeholder("Select date range").Format("yyyy-MM-dd").Scale(Scale.Medium).Disabled().TestId("daterange-input-dateonly-medium-disabled")
 
             | Text.InlineCode("Large")
             | nullableDateOnlyState.ToDateRangeInput().Placeholder("Select date range").Format("yyyy-MM-dd").Large().TestId("daterange-input-dateonly-large")

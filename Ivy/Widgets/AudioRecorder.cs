@@ -35,8 +35,6 @@ public record AudioRecorder : WidgetBase<AudioRecorder>
     [Prop] public int? ChunkInterval { get; set; }
 
     [Prop] public string? UploadUrl { get; set; }
-
-    [Prop] public Sizes Size { get; set; } = Sizes.Medium;
 }
 
 public static class AudioRecorderExtensions
@@ -69,20 +67,5 @@ public static class AudioRecorderExtensions
     public static AudioRecorder UploadUrl(this AudioRecorder widget, string? uploadUrl)
     {
         return widget with { UploadUrl = uploadUrl };
-    }
-
-    public static AudioRecorder Size(this AudioRecorder widget, Sizes size)
-    {
-        return widget with { Size = size };
-    }
-
-    public static AudioRecorder Large(this AudioRecorder widget)
-    {
-        return widget.Size(Sizes.Large);
-    }
-
-    public static AudioRecorder Small(this AudioRecorder widget)
-    {
-        return widget.Size(Sizes.Small);
     }
 }

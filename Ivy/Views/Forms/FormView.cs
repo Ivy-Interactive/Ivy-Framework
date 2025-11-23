@@ -55,7 +55,7 @@ public class FormFieldView(
     FormFieldLayoutOptions? layoutOptions = null,
     Func<object?, (bool, string)>[]? validators = null,
     FormValidationStrategy validationStrategy = FormValidationStrategy.OnBlur,
-    Sizes size = Sizes.Medium)
+    Scale scale = Scale.Medium)
     : ViewBase, IFormFieldView
 {
     public FormFieldLayoutOptions Layout { get; } = layoutOptions ?? new FormFieldLayoutOptions(Guid.NewGuid());
@@ -136,7 +136,7 @@ public class FormFieldView(
             input.Placeholder = placeholder;
         }
 
-        return visibleState.Value ? new Field(input, label, description, required, help) { Size = size } : null;
+        return visibleState.Value ? new Field(input, label, description, required, help) { Scale = scale } : null;
     }
 }
 
@@ -159,7 +159,7 @@ public class FormFieldBinding<TModel>(
     FormFieldLayoutOptions? layoutOptions = null,
     Func<object?, (bool, string)>[]? validators = null,
     FormValidationStrategy validationStrategy = FormValidationStrategy.OnBlur,
-    Sizes size = Sizes.Medium,
+    Scale scale = Scale.Medium,
     string? help = null,
     string? placeholder = null
     ) : IFormFieldBinding<TModel>
@@ -167,7 +167,7 @@ public class FormFieldBinding<TModel>(
     public (IFormFieldView, IDisposable) Bind(IState<TModel> model)
     {
         var (fieldState, disposable) = StateHelpers.MemberState(model, selector);
-        var fieldView = new FormFieldView(fieldState, factory, visible, updateSignal, label, description, help, placeholder, required, layoutOptions, validators, validationStrategy, size);
+        var fieldView = new FormFieldView(fieldState, factory, visible, updateSignal, label, description, help, placeholder, required, layoutOptions, validators, validationStrategy, scale);
         return (fieldView, disposable);
     }
 }
@@ -183,7 +183,7 @@ public interface IFormFieldBinding<TModel>
 }
 
 /// <summary>Renders form fields in a structured layout with columns, rows, and groups.</summary>
-public class FormView<TModel>(IFormFieldView[] fieldViews, Func<Event<Form>, ValueTask>? handleSubmit = null, Sizes size = Sizes.Medium, Dictionary<string, bool>? groupOpenStates = null) : ViewBase
+public class FormView<TModel>(IFormFieldView[] fieldViews, Func<Event<Form>, ValueTask>? handleSubmit = null, Scale size = Scale.Medium, Dictionary<string, bool>? groupOpenStates = null) : ViewBase
 {
     public override object? Build()
     {
@@ -198,9 +198,9 @@ public class FormView<TModel>(IFormFieldView[] fieldViews, Func<Event<Form>, Val
         {
             var gap = size switch
             {
-                Sizes.Small => 4,
-                Sizes.Medium => 6,
-                Sizes.Large => 8,
+                Scale.Small => 4,
+                Scale.Medium => 6,
+                Scale.Large => 8,
                 _ => 8
             };
 

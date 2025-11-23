@@ -39,8 +39,6 @@ public abstract record TextInputBase : WidgetBase<TextInputBase>, IAnyTextInput
 
     [Prop] public string? ShortcutKey { get; set; }
 
-    [Prop] public Sizes Size { get; set; } = Sizes.Medium;
-
     [Prop] public PrefixSuffix? Prefix { get; set; }
 
     [Prop] public PrefixSuffix? Suffix { get; set; }
@@ -143,12 +141,6 @@ public static class TextInputExtensions
     public static TextInputBase Invalid(this TextInputBase widget, string invalid) => widget with { Invalid = invalid };
 
     public static TextInputBase ShortcutKey(this TextInputBase widget, string shortcutKey) => widget with { ShortcutKey = shortcutKey };
-
-    public static TextInputBase Size(this TextInputBase widget, Sizes size) => widget with { Size = size };
-
-    public static TextInputBase Large(this TextInputBase widget) => widget.Size(Sizes.Large);
-
-    public static TextInputBase Small(this TextInputBase widget) => widget.Size(Sizes.Small);
 
     public static TextInputBase Prefix(this TextInputBase widget, string prefixText)
         => widget with { Prefix = new PrefixSuffix.Text(prefixText) };

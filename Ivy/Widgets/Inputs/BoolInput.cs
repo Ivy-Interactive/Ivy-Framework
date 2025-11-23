@@ -42,8 +42,6 @@ public abstract record BoolInputBase : WidgetBase<BoolInputBase>, IAnyBoolInput
 
     [Prop] public Icons Icon { get; set; }
 
-    [Prop] public Sizes Size { get; set; } = Sizes.Medium;
-
     [Prop] public string? Placeholder { get; set; } //not really used but included to consistency with IAnyInput
 
     [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
@@ -173,7 +171,7 @@ public static class BoolInputExtensions
 
             // Numeric types - convert to boolean (0 = false, non-zero = true)
             // Expression value==null should always be null (suggestion by IntelliJ), but in this case it is a valid check.
-            // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+            // ReSharper disables once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
             _ when stateType.IsNumeric() && stateType.IsNullableType() => value == null ? null : Convert.ToBoolean(value),
             _ when stateType.IsNumeric() => Convert.ToBoolean(value),
 
@@ -277,15 +275,6 @@ public static class BoolInputExtensions
 
     public static BoolInputBase Description(this BoolInputBase widget, string description) =>
         widget with { Description = description };
-
-    public static BoolInputBase Size(this BoolInputBase widget, Sizes size) =>
-        widget with { Size = size };
-
-    public static BoolInputBase Large(this BoolInputBase widget) =>
-        widget.Size(Sizes.Large);
-
-    public static BoolInputBase Small(this BoolInputBase widget) =>
-        widget.Size(Sizes.Small);
 
     /// <summary>Or null to clear the error.</summary>
     public static BoolInputBase Invalid(this BoolInputBase widget, string? invalid) =>

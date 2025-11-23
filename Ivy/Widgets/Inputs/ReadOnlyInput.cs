@@ -43,8 +43,6 @@ public record ReadOnlyInput<TValue> : WidgetBase<ReadOnlyInput<TValue>>, IInput<
 
     [Prop] public string? Invalid { get; set; }
 
-    [Prop] public Sizes Size { get; set; }
-
     [Prop] public bool ShowCopyButton { get; set; } = true;
 
     [Prop] public string? Placeholder { get; set; } //not really used but included to consistency with IAnyInput    

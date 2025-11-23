@@ -77,16 +77,16 @@ public class FormBuilder<TModel> : ViewBase
     private readonly IState<TModel> _model;
     private readonly List<string> _groups = [];
     private readonly Dictionary<string, bool> _groupOpenStates = [];
+    internal Scale _scale = Scale.Medium;
 
     public readonly string SubmitTitle;
     public FormValidationStrategy ValidationStrategy { get; set; } = FormValidationStrategy.OnBlur;
-    public Sizes Size { get; set; } = Sizes.Medium;
 
     public FormBuilder(IState<TModel> model, string submitTitle = "Save")
     {
         _model = model;
         SubmitTitle = submitTitle;
-        _fields = FormScaffolder.ScaffoldFields<TModel>(_model.GetStateType(), Size);
+        _fields = FormScaffolder.ScaffoldFields<TModel>(_model.GetStateType());
     }
 
     /// <summary>Configures custom input factory for specified field (convenience overload without view context).</summary>
@@ -132,7 +132,8 @@ public class FormBuilder<TModel> : ViewBase
                 {
                     numberInput.ScaffoldDefaults(fieldInfo.Name, fieldInfo.Type);
                 }
-                return input.Size(Size);
+
+                return input;
             };
         }
 
@@ -155,7 +156,7 @@ public class FormBuilder<TModel> : ViewBase
     {
         foreach (var hint in _fields.Values.Where(e => e.Type is TU))
         {
-            hint.InputFactory = (state, context) => input(state, context).Size(Size);
+            hint.InputFactory = input;
         }
 
         return this;
@@ -335,22 +336,6 @@ public class FormBuilder<TModel> : ViewBase
         return this;
     }
 
-    // public EntityEditor<T> Helper(Expression<Func<T, object>> field, Func<Control, object> helper)
-    // {
-    //     var hint = GetField(field);
-    //     hint.Helper = helper;
-    //     return this;
-    // }
-    //
-
-    // public EntityEditor<T> Derived<TU, TV>(Expression<Func<T, TU>> field, Expression<Func<T, TV>> derivedFrom, Func<T, TU> transformer)
-    // {
-    //     var _derivedFrom = GetField(derivedFrom);
-    //     var _field = GetField(field);
-    //     _derivedFrom.Dependencies.Add((_field, x => transformer(x)));
-    //     return this;
-    // }
-
     /// <summary>Sets conditional visibility predicate for specified field based on current model state.</summary>
     /// <param name="field">Field to configure conditional visibility for.</param>
     /// <param name="predicate">Function determining field visibility based on current model state.</param>
@@ -401,34 +386,15 @@ public class FormBuilder<TModel> : ViewBase
         return this;
     }
 
-    /// <param name="size">The size of the form (Small, Medium, Large).</param>
-    /// <returns>Form builder instance for method chaining.</returns>
-    internal FormBuilder<TModel> SetSize(Sizes size)
+    private FormBuilder<TModel> _SetScale(Scale scale)
     {
-        Size = size;
+        _scale = scale;
         return this;
     }
 
-    /// <summary>Sets form size to small for compact display.</summary>
-    /// <returns>Form builder instance with small size applied.</returns>
-    public FormBuilder<TModel> Small()
-    {
-        return SetSize(Sizes.Small);
-    }
-
-    /// <summary>Sets form size to medium for standard display.</summary>
-    /// <returns>Form builder instance with medium size applied.</returns>
-    public FormBuilder<TModel> Medium()
-    {
-        return SetSize(Sizes.Medium);
-    }
-
-    /// <summary>Sets form size to large for prominent display.</summary>
-    /// <returns>Form builder instance with large size applied.</returns>
-    public FormBuilder<TModel> Large()
-    {
-        return SetSize(Sizes.Large);
-    }
+    public FormBuilder<TModel> Small() => _SetScale(Scale.Small);
+    public FormBuilder<TModel> Medium() => _SetScale(Scale.Medium);
+    public FormBuilder<TModel> Large() => _SetScale(Scale.Large);
 
     private FormBuilderField<TModel> GetField<TU>(Expression<Func<TModel, TU>> field)
     {
@@ -470,7 +436,7 @@ public class FormBuilder<TModel> : ViewBase
                     new FormFieldLayoutOptions(e.RowKey, e.Column, e.Order, e.Group),
                     e.Validators.ToArray(),
                     ValidationStrategy,
-                    Size,
+                    _scale,
                     e.Help,
                     e.Placeholder
                 );
@@ -504,7 +470,7 @@ public class FormBuilder<TModel> : ViewBase
         var formView = new FormView<TModel>(
             fieldViews,
             HandleSubmitEvent,
-            Size,
+            _scale,
             _groupOpenStates
         );
 
@@ -548,8 +514,11 @@ public class FormBuilder<TModel> : ViewBase
 
         return Layout.Vertical()
                | formView
-               | Layout.Horizontal(new Button(SubmitTitle).HandleClick(HandleSubmit)
-                   .Loading(submitting).Disabled(submitting || hasUploading.Value).Size(Size), validationView);
+               | Layout.Horizontal(new Button(SubmitTitle)
+                   .HandleClick(HandleSubmit)
+                   .Loading(submitting)
+                   .Disabled(submitting || hasUploading.Value)
+                   .Scale(_scale), validationView);
     }
 
     private static string InvalidMessage(int invalidFields)

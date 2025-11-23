@@ -39,8 +39,6 @@ public abstract record FileInputBase : WidgetBase<FileInputBase>, IAnyFileInput
 
     [Prop] public string? UploadUrl { get; set; }
 
-    [Prop] public Sizes Size { get; set; }
-
     [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
 
     [Event] public Func<Event<IAnyInput, Guid>, ValueTask>? OnCancel { get; set; }
@@ -116,7 +114,6 @@ public record FileInput<TValue> : FileInputBase, IInput<TValue>, IAnyFileInput
         Placeholder = placeholder;
         Variant = variant;
         Disabled = disabled;
-        Size = Sizes.Medium;
         Width = Ivy.Shared.Size.Full();
         Height = Ivy.Shared.Size.Units(50);
     }
@@ -300,21 +297,6 @@ public static class FileInputExtensions
     public static FileInputBase UploadUrl(this FileInputBase widget, string? uploadUrl)
     {
         return widget with { UploadUrl = uploadUrl };
-    }
-
-    public static FileInputBase Size(this FileInputBase widget, Sizes size)
-    {
-        return widget with { Size = size };
-    }
-
-    public static FileInputBase Small(this FileInputBase widget)
-    {
-        return widget with { Size = Sizes.Small };
-    }
-
-    public static FileInputBase Large(this FileInputBase widget)
-    {
-        return widget with { Size = Sizes.Large };
     }
 
     public static ValidationResult ValidateFile(this FileInputBase widget, IFileUpload file)

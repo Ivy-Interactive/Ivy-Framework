@@ -32,8 +32,6 @@ public abstract record SelectInputBase : WidgetBase<SelectInputBase>, IAnySelect
 
     [Prop] public SelectInputs Variant { get; set; }
 
-    [Prop] public Sizes Size { get; set; }
-
     [Prop] public bool SelectMany { get; set; } = false;
 
     /// <summary>Character used to separate multiple selected values in display and serialization.</summary>
@@ -127,54 +125,19 @@ public static class SelectInputExtensions
         return input;
     }
 
-    public static SelectInputBase Placeholder(this SelectInputBase widget, string title)
-    {
-        return widget with { Placeholder = title };
-    }
+    public static SelectInputBase Placeholder(this SelectInputBase widget, string title) => widget with { Placeholder = title };
 
-    public static SelectInputBase Disabled(this SelectInputBase widget, bool disabled = true)
-    {
-        return widget with { Disabled = disabled };
-    }
+    public static SelectInputBase Disabled(this SelectInputBase widget, bool disabled = true) => widget with { Disabled = disabled };
 
-    public static SelectInputBase Variant(this SelectInputBase widget, SelectInputs variant)
-    {
-        return widget with { Variant = variant };
-    }
-
-    public static SelectInputBase Size(this SelectInputBase widget, Sizes size)
-    {
-        return widget with { Size = size };
-    }
-
-    [RelatedTo(nameof(SelectInputBase.Size))]
-    public static SelectInputBase Large(this SelectInputBase widget)
-    {
-        return widget.Size(Sizes.Large);
-    }
-
-    [RelatedTo(nameof(SelectInputBase.Size))]
-    public static SelectInputBase Small(this SelectInputBase widget)
-    {
-        return widget.Size(Sizes.Small);
-    }
+    public static SelectInputBase Variant(this SelectInputBase widget, SelectInputs variant) => widget with { Variant = variant };
 
     /// <summary>Or null to clear the error.</summary>
-    public static SelectInputBase Invalid(this SelectInputBase widget, string? invalid)
-    {
-        return widget with { Invalid = invalid };
-    }
+    public static SelectInputBase Invalid(this SelectInputBase widget, string? invalid) => widget with { Invalid = invalid };
 
-    public static SelectInputBase Separator(this SelectInputBase widget, char separator)
-    {
-        return widget with { Separator = separator };
-    }
+    public static SelectInputBase Separator(this SelectInputBase widget, char separator) => widget with { Separator = separator };
 
     /// <summary>Convenience method that sets the variant to SelectInputs.List.</summary>
-    public static SelectInputBase List(this SelectInputBase widget)
-    {
-        return widget with { Variant = SelectInputs.List };
-    }
+    public static SelectInputBase List(this SelectInputBase widget) => widget with { Variant = SelectInputs.List };
 
     [OverloadResolutionPriority(1)]
     public static SelectInputBase HandleBlur(this SelectInputBase widget, Func<Event<IAnyInput>, ValueTask> onBlur)

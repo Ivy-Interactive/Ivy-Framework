@@ -69,8 +69,6 @@ public abstract record NumberInputBase : WidgetBase<NumberInputBase>, IAnyNumber
 
     [Prop] public string? TargetType { get; set; }
 
-    [Prop] public Sizes Size { get; set; }
-
     [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
 
     /// <summary>Supports all standard .NET numeric types including signed, unsigned, and floating-point types.</summary>
@@ -223,23 +221,6 @@ public static class NumberInputExtensions
     public static NumberInputBase Invalid(this NumberInputBase widget, string invalid)
     {
         return widget with { Invalid = invalid };
-    }
-
-    public static NumberInputBase Size(this NumberInputBase widget, Sizes size)
-    {
-        return widget with { Size = size };
-    }
-
-    [RelatedTo(nameof(NumberInputBase.Size))]
-    public static NumberInputBase Large(this NumberInputBase widget)
-    {
-        return widget.Size(Sizes.Large);
-    }
-
-    [RelatedTo(nameof(NumberInputBase.Size))]
-    public static NumberInputBase Small(this NumberInputBase widget)
-    {
-        return widget.Size(Sizes.Small);
     }
 
     [OverloadResolutionPriority(1)]

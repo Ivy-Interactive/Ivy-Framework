@@ -32,8 +32,6 @@ public abstract record DateTimeInputBase : WidgetBase<DateTimeInputBase>, IAnyDa
 
     [Prop] public string? Format { get; set; }
 
-    [Prop] public Sizes Size { get; set; }
-
     [Prop] public bool Disabled { get; set; }
 
     [Prop] public string? Invalid { get; set; }
@@ -250,22 +248,5 @@ public static class DateTimeInputExtensions
     public static DateTimeInputBase HandleBlur(this DateTimeInputBase widget, Action onBlur)
     {
         return widget.HandleBlur(_ => { onBlur(); return ValueTask.CompletedTask; });
-    }
-
-    public static DateTimeInputBase Size(this DateTimeInputBase widget, Sizes size)
-    {
-        return widget with { Size = size };
-    }
-
-    [RelatedTo(nameof(DateTimeInputBase.Size))]
-    public static DateTimeInputBase Large(this DateTimeInputBase widget)
-    {
-        return widget.Size(Sizes.Large);
-    }
-
-    [RelatedTo(nameof(DateTimeInputBase.Size))]
-    public static DateTimeInputBase Small(this DateTimeInputBase widget)
-    {
-        return widget.Size(Sizes.Small);
     }
 }

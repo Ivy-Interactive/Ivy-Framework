@@ -1,7 +1,5 @@
 using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
 using Ivy.Core;
-using Ivy.Shared;
 
 namespace Ivy.Widgets.Inputs;
 
@@ -12,8 +10,6 @@ public interface IAnyInput
     [Prop] public string? Placeholder { get; set; }
 
     [Prop] public string? Invalid { get; set; }
-
-    [Prop] public Sizes Size { get; set; }
 
     [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
 
@@ -45,14 +41,6 @@ public static class AnyInputExtensions
     }
 
     /// <param name="input">The input control to configure.</param>
-    /// <param name="size">The size of the input control.</param>
-    public static IAnyInput Size(this IAnyInput input, Sizes size)
-    {
-        input.Size = size;
-        return input;
-    }
-
-    /// <param name="input">The input control to configure.</param>
     /// <param name="onBlur">The event handler to call when the input loses focus, or null to remove the handler.</param>
     [OverloadResolutionPriority(1)]
     public static IAnyInput HandleBlur(this IAnyInput input, Func<Event<IAnyInput>, ValueTask>? onBlur)
@@ -74,20 +62,6 @@ public static class AnyInputExtensions
     public static IAnyInput HandleBlur(this IAnyInput input, Action onBlur)
     {
         input.OnBlur = _ => { onBlur(); return ValueTask.CompletedTask; };
-        return input;
-    }
-
-    /// <param name="input">The input control to configure.</param>
-    public static IAnyInput Small(this IAnyInput input)
-    {
-        input.Size = Sizes.Small;
-        return input;
-    }
-
-    /// <param name="input">The input control to configure.</param>
-    public static IAnyInput Large(this IAnyInput input)
-    {
-        input.Size = Sizes.Large;
         return input;
     }
 }
