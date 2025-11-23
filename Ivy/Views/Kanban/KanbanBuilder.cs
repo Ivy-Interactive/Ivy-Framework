@@ -303,7 +303,7 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
         }).ToArray();
 
         var columnWidthsDict = _columnWidths.Any()
-            ? _columnWidths.ToDictionary(kvp => kvp.Key, kvp => kvp.Value?.ToString() ?? "")
+            ? _columnWidths.ToDictionary(kvp => kvp.Key, kvp => kvp.Value)
             : null;
 
         var kanban = new Ivy.Kanban(cards) with

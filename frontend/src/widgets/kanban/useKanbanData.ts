@@ -77,6 +77,15 @@ export function useKanbanData(
   columnWidths: Record<string, string>,
   widgetNodeChildren?: WidgetNodeChild[]
 ): ExtractedKanbanData {
+  const normalizedWidths = React.useMemo(() => {
+    const map = new Map<string, string>();
+    Object.entries(columnWidths).forEach(([k, v]) => {
+      map.set(k, v);
+      map.set(k.toLowerCase(), v);
+    });
+    return map;
+  }, [columnWidths]);
+
   return React.useMemo(() => {
     if (widgetNodeChildren && widgetNodeChildren.length > 0) {
       const extractedCards: CardData[] = [];
@@ -114,11 +123,7 @@ export function useKanbanData(
             name: key,
             color: '',
             order: index,
-            width:
-              columnWidths[key] ||
-              Object.entries(columnWidths).find(
-                ([k]) => k.toLowerCase() === key.toLowerCase()
-              )?.[1],
+            width: columnWidths[key] || normalizedWidths.get(key.toLowerCase()),
           })
         );
 
@@ -163,10 +168,7 @@ export function useKanbanData(
         color: '',
         order: index,
         width:
-          columnWidths[status] ||
-          Object.entries(columnWidths).find(
-            ([k]) => k.toLowerCase() === status.toLowerCase()
-          )?.[1],
+          columnWidths[status] || normalizedWidths.get(status.toLowerCase()),
       }));
 
       const cardToTaskMap = new Map<string, Task>();
@@ -199,5 +201,12 @@ export function useKanbanData(
       columns,
       cards: [],
     };
-  }, [slots, tasks, columns, columnWidths, widgetNodeChildren]);
+  }, [
+    slots,
+    tasks,
+    columns,
+    columnWidths,
+    widgetNodeChildren,
+    normalizedWidths,
+  ]);
 }
