@@ -11,6 +11,15 @@ public class FormScaffoldingApp : SampleBase
 {
     protected override object? BuildSample()
     {
+        var formatsExample = UseState(() => new FormatsExample());
+        var formatsForm = formatsExample.ToForm();
+        var formatsGrid = Layout.Vertical()
+                          | new CodeView(typeof(FormatsExample))
+                          | (Layout.Grid().Columns(3).Gap(10)
+                              | formatsForm
+                              | formatsExample.ToDetails())
+            ;
+
         var displayExample = UseState(() => new DisplayExample());
         var displayForm = displayExample.ToForm();
         var displayGrid = Layout.Vertical()
@@ -41,6 +50,8 @@ public class FormScaffoldingApp : SampleBase
 
         return Layout.Vertical()
                | Text.H1("Form Scaffolding")
+               | Text.H2("Formats")
+               | formatsGrid
                | Text.H2("Display")
                | displayGrid
                | Text.H2("Strings")

@@ -45,7 +45,7 @@ public abstract record TextInputBase : WidgetBase<TextInputBase>, IAnyTextInput
 
     [Prop] public new Scale? Scale { get; set; }
 
-    [Prop] public int MaxLength { get; set; }
+    [Prop] public int? MaxLength { get; set; }
 
     [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
 
