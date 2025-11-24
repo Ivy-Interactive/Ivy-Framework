@@ -48,6 +48,7 @@ interface TextInputWidgetProps {
   scale?: Scale;
   prefix?: PrefixSuffix;
   suffix?: PrefixSuffix;
+  maxLength?: number;
   'data-testid'?: string;
 }
 
@@ -151,6 +152,58 @@ const useEnterKeyBlur = () => {
 };
 
 /**
+ * Hook to handle paste events with maxLength enforcement.
+ * Prevents default paste and manually inserts truncated text if needed.
+ */
+const usePasteHandler = (
+  maxLength?: number,
+  onChange?: (value: string) => void
+) => {
+  return useCallback(
+    (e: React.ClipboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      if (!maxLength) return;
+
+      const target = e.currentTarget;
+      const pastedText = e.clipboardData.getData('text');
+
+      // Get current value, selection start and end
+      const currentValue = target.value;
+      const selectionStart = target.selectionStart ?? 0;
+      const selectionEnd = target.selectionEnd ?? 0;
+
+      // Calculate the new value after paste
+      const beforeSelection = currentValue.slice(0, selectionStart);
+      const afterSelection = currentValue.slice(selectionEnd);
+      const newValue = beforeSelection + pastedText + afterSelection;
+
+      // If the new value exceeds maxLength, prevent default and handle manually
+      if (newValue.length > maxLength) {
+        e.preventDefault();
+
+        // Truncate the pasted text to fit within maxLength
+        const availableSpace =
+          maxLength - beforeSelection.length - afterSelection.length;
+        const truncatedPaste = pastedText.slice(0, Math.max(0, availableSpace));
+        const finalValue = beforeSelection + truncatedPaste + afterSelection;
+
+        // Update the value
+        target.value = finalValue;
+
+        // Set cursor position after the pasted content
+        const newCursorPos = beforeSelection.length + truncatedPaste.length;
+        target.setSelectionRange(newCursorPos, newCursorPos);
+
+        // Trigger onChange
+        if (onChange) {
+          onChange(finalValue);
+        }
+      }
+    },
+    [maxLength, onChange]
+  );
+};
+
+/**
  * Renders either text or icon for prefix/suffix display.
  * Uses discriminated union type to ensure only one type can be set.
  */
@@ -191,6 +244,14 @@ const DefaultVariant: React.FC<{
     onChange(e);
   };
 
+  const handlePaste = usePasteHandler(props.maxLength, value => {
+    const syntheticEvent = {
+      target: { value },
+      currentTarget: { value },
+    } as React.ChangeEvent<HTMLInputElement>;
+    onChange(syntheticEvent);
+  });
+
   const styles: React.CSSProperties = {
     ...getWidth(props.width),
   };
@@ -227,10 +288,12 @@ const DefaultVariant: React.FC<{
             value={props.value}
             type={type}
             disabled={props.disabled}
+            maxLength={props.maxLength}
             onChange={handleChange}
             onBlur={onBlur}
             onFocus={onFocus}
             onKeyDown={handleKeyDown}
+            onPaste={handlePaste}
             className={cn(
               textInputSizeVariants({ scale }),
               props.invalid && inputStyles.invalidInput,
@@ -299,6 +362,14 @@ const TextareaVariant: React.FC<{
     onChange(e);
   };
 
+  const handlePaste = usePasteHandler(props.maxLength, value => {
+    const syntheticEvent = {
+      target: { value },
+      currentTarget: { value },
+    } as React.ChangeEvent<HTMLTextAreaElement>;
+    onChange(syntheticEvent);
+  });
+
   const styles: React.CSSProperties = {
     ...getWidth(props.width),
     ...getHeight(props.height),
@@ -316,9 +387,11 @@ const TextareaVariant: React.FC<{
         placeholder={props.placeholder}
         value={props.value}
         disabled={props.disabled}
+        maxLength={props.maxLength}
         onChange={handleChange}
         onBlur={onBlur}
         onFocus={onFocus}
+        onPaste={handlePaste}
         className={cn(
           textInputSizeVariants({ scale }),
           props.invalid && inputStyles.invalidInput,
@@ -383,6 +456,14 @@ const PasswordVariant: React.FC<{
     onChange(e);
   };
 
+  const handlePaste = usePasteHandler(props.maxLength, value => {
+    const syntheticEvent = {
+      target: { value },
+      currentTarget: { value },
+    } as React.ChangeEvent<HTMLInputElement>;
+    onChange(syntheticEvent);
+  });
+
   const handleKeyDown = useEnterKeyBlur();
 
   const styles: React.CSSProperties = {
@@ -405,10 +486,12 @@ const PasswordVariant: React.FC<{
         value={props.value}
         type={showPassword ? 'text' : 'password'}
         disabled={props.disabled}
+        maxLength={props.maxLength}
         onChange={handleChange}
         onBlur={onBlur}
         onFocus={onFocus}
         onKeyDown={handleKeyDown}
+        onPaste={handlePaste}
         className={cn(
           textInputSizeVariants({ scale }),
           props.invalid && inputStyles.invalidInput,
@@ -482,6 +565,14 @@ const SearchVariant: React.FC<{
     onChange(e);
   };
 
+  const handlePaste = usePasteHandler(props.maxLength, value => {
+    const syntheticEvent = {
+      target: { value },
+      currentTarget: { value },
+    } as React.ChangeEvent<HTMLInputElement>;
+    onChange(syntheticEvent);
+  });
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Enter') {
       shouldFocusMenuRef.current = true;
@@ -539,10 +630,12 @@ const SearchVariant: React.FC<{
         placeholder={props.placeholder}
         value={props.value}
         disabled={props.disabled}
+        maxLength={props.maxLength}
         onChange={handleChange}
         onBlur={handleBlur}
         onFocus={onFocus}
         onKeyDown={handleKeyDown}
+        onPaste={handlePaste}
         autoComplete="off"
         className={cn(
           textInputSizeVariants({ scale }),
@@ -601,6 +694,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
   scale,
   prefix,
   suffix,
+  maxLength,
   'data-testid': dataTestId,
 }) => {
   const eventHandler = useEventHandler();
@@ -686,6 +780,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
       scale,
       prefix,
       suffix,
+      maxLength,
       'data-testid': dataTestId,
     }),
     [
@@ -701,6 +796,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
       scale,
       prefix,
       suffix,
+      maxLength,
       dataTestId,
     ]
   );

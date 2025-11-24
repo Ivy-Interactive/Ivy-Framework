@@ -207,6 +207,52 @@ public static class FormHelpers
         if (rangeAttr == null) return new(null, null);
         return new RangeInfo(Convert.ToDouble(rangeAttr.Minimum), Convert.ToDouble(rangeAttr.Maximum));
     }
+
+    public static int? GetMaxLength(PropertyInfo propertyInfo)
+    {
+        var maxLengthAttr = propertyInfo.GetCustomAttribute<MaxLengthAttribute>();
+        if (maxLengthAttr is { Length: > 0 })
+        {
+            return maxLengthAttr.Length;
+        }
+
+        var stringLengthAttr = propertyInfo.GetCustomAttribute<StringLengthAttribute>();
+        if (stringLengthAttr is { MaximumLength: > 0 })
+        {
+            return stringLengthAttr.MaximumLength;
+        }
+
+        var lengthAttr = propertyInfo.GetCustomAttribute<LengthAttribute>();
+        if (lengthAttr is { MaximumLength: > 0 })
+        {
+            return lengthAttr.MaximumLength;
+        }
+
+        return null;
+    }
+
+    public static int? GetMaxLength(FieldInfo fieldInfo)
+    {
+        var maxLengthAttr = fieldInfo.GetCustomAttribute<MaxLengthAttribute>();
+        if (maxLengthAttr is { Length: > 0 })
+        {
+            return maxLengthAttr.Length;
+        }
+
+        var stringLengthAttr = fieldInfo.GetCustomAttribute<StringLengthAttribute>();
+        if (stringLengthAttr is { MaximumLength: > 0 })
+        {
+            return stringLengthAttr.MaximumLength;
+        }
+
+        var lengthAttr = fieldInfo.GetCustomAttribute<LengthAttribute>();
+        if (lengthAttr is { MaximumLength: > 0 })
+        {
+            return lengthAttr.MaximumLength;
+        }
+
+        return null;
+    }
 }
 
 

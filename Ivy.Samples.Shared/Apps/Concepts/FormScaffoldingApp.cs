@@ -6,21 +6,6 @@ using Ivy.Views.Forms;
 
 namespace Ivy.Samples.Shared.Apps.Concepts;
 
-/*
-[MinLength(n)] - Minimum string length
-[MaxLength(n)] - Maximum string length
-[StringLength(max, MinimumLength = min)] - String length constraints
-[Length(min, max)] - Length constraints for strings and collections
-[Range(min, max)] - Value must be within range
-[EmailAddress] - Valid email format
-[Phone] - Valid phone number format
-[Url] - Valid URL format
-[CreditCard] - Valid credit card number format
-[RegularExpression(pattern)] - Match a regex pattern
-[AllowedValues(...)] - Value must be from specified list
-[DataType(...)] - Specifies data type (Password, Date, DateTime, MultilineText, etc.)
- */
-
 [App(icon: Icons.Brain, searchHints: ["forms", "scaffolding"])]
 public class FormScaffoldingApp : SampleBase
 {

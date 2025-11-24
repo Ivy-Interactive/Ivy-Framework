@@ -65,6 +65,15 @@ internal static class FormScaffolder
         return scaffoldedFields;
     }
 
+    private static TextInputBase ApplyMaxLength(TextInputBase input, FieldPropertyInfo field)
+    {
+        if (field.GetMaxLength() is { } maxLength)
+        {
+            input = input.MaxLength(maxLength);
+        }
+        return input;
+    }
+
     private static Func<IAnyState, IAnyInput>? ScaffoldInputFactory(FieldPropertyInfo field)
     {
         var type = field.Type;
@@ -88,11 +97,6 @@ internal static class FormScaffolder
             return (state) => state.ToReadOnlyInput();
         }
 
-        if (name.EndsWith("Email") && nonNullableType == typeof(string))
-        {
-            return (state) => state.ToEmailInput();
-        }
-
         if ((name.EndsWith("Color") || name.EndsWith("Colour")) && nonNullableType == typeof(string))
         {
             return (state) => state.ToColorInput();
@@ -103,14 +107,19 @@ internal static class FormScaffolder
             return (state) => state.ToBoolInput().ScaffoldDefaults(name, type);
         }
 
+        if (name.EndsWith("Email") && nonNullableType == typeof(string))
+        {
+            return (state) => ApplyMaxLength(state.ToEmailInput(), field);
+        }
+
         if (nonNullableType == typeof(string))
         {
             if (name.EndsWith("Password"))
             {
-                return (state) => state.ToPasswordInput();
+                return (state) => ApplyMaxLength(state.ToPasswordInput(), field);
             }
 
-            return (state) => state.ToTextInput();
+            return (state) => ApplyMaxLength(state.ToTextInput(), field);
         }
 
         if (nonNullableType.IsEnum)
@@ -199,13 +208,11 @@ internal static class FormScaffolder
     {
         var validators = new List<Func<object?, (bool, string)>>();
 
-        // Add required field validator
         if (field.Required)
         {
             validators.Add(e => (Utils.IsValidRequired(e), "Required field"));
         }
 
-        // Add validators from DataAnnotations attributes
         if (field.PropertyInfo != null)
         {
             validators.AddRange(FormHelpers.GetValidators(field.PropertyInfo));
@@ -215,7 +222,6 @@ internal static class FormScaffolder
             validators.AddRange(FormHelpers.GetValidators(field.FieldInfo));
         }
 
-        // Add automatic email validation for fields ending with "Email"
         var nonNullableType = Nullable.GetUnderlyingType(field.Type) ?? field.Type;
         if (field.Name.EndsWith("Email") && nonNullableType == typeof(string))
         {
@@ -235,5 +241,6 @@ internal static class FormScaffolder
 
         public FormHelpers.DisplayInfo GetDisplayInfo() => PropertyInfo != null ? FormHelpers.GetDisplayInfo(PropertyInfo) : FormHelpers.GetDisplayInfo(FieldInfo!);
         public FormHelpers.RangeInfo GetRangeInfo() => PropertyInfo != null ? FormHelpers.GetRangeInfo(PropertyInfo) : FormHelpers.GetRangeInfo(FieldInfo!);
+        public int? GetMaxLength() => PropertyInfo != null ? FormHelpers.GetMaxLength(PropertyInfo) : FormHelpers.GetMaxLength(FieldInfo!);
     }
 }

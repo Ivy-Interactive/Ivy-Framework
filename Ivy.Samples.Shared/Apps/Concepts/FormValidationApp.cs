@@ -132,7 +132,7 @@ public class FormValidationApp : SampleBase
             .Builder(m => m.Website, s => s.ToUrlInput())
             .Builder(m => m.PhoneNumber, s => s.ToTelInput())
             // Custom validation
-            .Validate<DateTime?>(m => m.BirthDate, birthDate => 
+            .Validate<DateTime?>(m => m.BirthDate, birthDate =>
                 (birthDate == null || birthDate <= DateTime.Now, "Birth date cannot be in the future"))
             .Validate<string>(m => m.Bio, bio =>
                 (string.IsNullOrEmpty(bio) || !bio.Contains("spam"), "Bio cannot contain spam content"));

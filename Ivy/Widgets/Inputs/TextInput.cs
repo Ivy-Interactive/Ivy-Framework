@@ -45,6 +45,8 @@ public abstract record TextInputBase : WidgetBase<TextInputBase>, IAnyTextInput
 
     [Prop] public new Scale? Scale { get; set; }
 
+    [Prop] public int MaxLength { get; set; }
+
     [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
 
     public Type[] SupportedStateTypes() => [];
@@ -142,6 +144,8 @@ public static class TextInputExtensions
     public static TextInputBase Invalid(this TextInputBase widget, string invalid) => widget with { Invalid = invalid };
 
     public static TextInputBase ShortcutKey(this TextInputBase widget, string shortcutKey) => widget with { ShortcutKey = shortcutKey };
+
+    public static TextInputBase MaxLength(this TextInputBase widget, int maxLength) => widget with { MaxLength = maxLength };
 
     public static TextInputBase Prefix(this TextInputBase widget, string prefixText)
         => widget with { Prefix = new PrefixSuffix.Text(prefixText) };
