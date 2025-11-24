@@ -14,7 +14,7 @@ public abstract record WidgetBase<T> : AbstractWidget where T : WidgetBase<T>
 
     [Prop] public Size? Height { get; set; }
 
-    [Prop] public Scale Scale { get; set; } = Scale.Medium;
+    [Prop] public Scale? Scale { get; set; }
 
     [Prop] public bool Visible { get; set; } = true;
 
