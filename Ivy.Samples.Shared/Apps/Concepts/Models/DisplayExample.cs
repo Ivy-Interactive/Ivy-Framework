@@ -8,7 +8,9 @@ public class DisplayExample
         Order = 2,
         Prompt = "Enter value here") //Shown as placeholder
     ]
-    public string CustomDisplayString { get; set; } = "";
+    public string CustomDisplayString { get; set; } = "Foo";
+
+    public string? Foo2 { get; set; }
 
     [Display(GroupName = "Extras")]
     public string Foo { get; set; } = "Foo Value";

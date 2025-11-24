@@ -120,11 +120,33 @@ public class DetailsBuilder<TModel> : ViewBase, IStateless
 
     public DetailsBuilder<TModel> Builder<TU>(Func<IBuilderFactory<TModel>, IBuilder<TModel>> builder)
     {
-        foreach (var column in _items.Values.Where(e => e.Type is TU))
+        foreach (var column in _items.Values.Where(e => e.Type == typeof(TU)))
         {
             column.Builder = builder(_builderFactory);
         }
         return this;
+    }
+
+    public DetailsBuilder<TModel> Builder<TU>(Func<TU, object> builder)
+    {
+        foreach (var column in _items.Values.Where(e => e.Type == typeof(TU)))
+        {
+            column.Builder = Outer(_builderFactory);
+        }
+        return this;
+
+        IBuilder<TModel> Outer(IBuilderFactory<TModel> e) => e.Func(builder);
+    }
+
+    public DetailsBuilder<TModel> Builder(Func<object?, object?> builder)
+    {
+        foreach (var column in _items.Values)
+        {
+            column.Builder = Outer(_builderFactory);
+        }
+        return this;
+
+        IBuilder<TModel> Outer(IBuilderFactory<TModel> e) => e.Func(builder);
     }
 
     private Item GetField<TU>(Expression<Func<TModel, TU>> field)

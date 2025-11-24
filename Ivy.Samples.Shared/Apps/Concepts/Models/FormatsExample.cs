@@ -14,6 +14,6 @@ public class FormatsExample
     [Phone(ErrorMessage = "Custom: Invalid phone number")]
     public string? Field4 { get; set; }
 
-    [RegularExpression("/d{4,5}", ErrorMessage = "Custom: Invalid format")]
+    [RegularExpression(@"\d{4,5}", ErrorMessage = "Custom: Invalid format")]
     public string? Field5 { get; set; }
 }
