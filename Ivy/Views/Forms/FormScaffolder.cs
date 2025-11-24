@@ -65,14 +65,7 @@ internal static class FormScaffolder
         return scaffoldedFields;
     }
 
-    private static TextInputBase ApplyMaxLength(TextInputBase input, FieldPropertyInfo field)
-    {
-        if (field.GetMaxLength() is { } maxLength)
-        {
-            input = input.MaxLength(maxLength);
-        }
-        return input;
-    }
+
 
     private static Func<IAnyState, IAnyInput>? ScaffoldInputFactory(FieldPropertyInfo field)
     {
@@ -81,23 +74,18 @@ internal static class FormScaffolder
 
         Type nonNullableType = Nullable.GetUnderlyingType(type) ?? type;
 
-        // FileUpload fields are not auto-scaffolded. Use .Builder() to configure them manually.
-        if (IsFileUploadType(nonNullableType))
+        if (field.IsFileUpload())
         {
+            // FileUpload fields are not auto-scaffolded. Use .Builder() to configure them manually.
             return null;
         }
 
-        if (type.GetCollectionTypeParameter() is { } elementType && IsFileUploadType(elementType))
-        {
-            return null;
-        }
-
-        if (name.EndsWith("Id") && (type == typeof(Guid) || type == typeof(int) || type == typeof(string)))
+        if (field.IsIdentity())
         {
             return (state) => state.ToReadOnlyInput();
         }
 
-        if ((name.EndsWith("Color") || name.EndsWith("Colour")) && nonNullableType == typeof(string))
+        if (field.IsColor())
         {
             return (state) => state.ToColorInput();
         }
@@ -107,18 +95,28 @@ internal static class FormScaffolder
             return (state) => state.ToBoolInput().ScaffoldDefaults(name, type);
         }
 
-        if (name.EndsWith("Email") && nonNullableType == typeof(string))
+        if (field.IsEmail())
         {
             return (state) => ApplyMaxLength(state.ToEmailInput(), field);
         }
 
+        if (field.IsPhone())
+        {
+            return (state) => ApplyMaxLength(state.ToTelInput(), field);
+        }
+
+        if (field.IsUrl())
+        {
+            return (state) => ApplyMaxLength(state.ToUrlInput(), field);
+        }
+
+        if (field.IsPassword())
+        {
+            return (state) => ApplyMaxLength(state.ToPasswordInput(), field);
+        }
+
         if (nonNullableType == typeof(string))
         {
-            if (name.EndsWith("Password"))
-            {
-                return (state) => ApplyMaxLength(state.ToPasswordInput(), field);
-            }
-
             return (state) => ApplyMaxLength(state.ToTextInput(), field);
         }
 
@@ -155,13 +153,6 @@ internal static class FormScaffolder
         }
 
         return null;
-
-        static bool IsFileUploadType(Type t)
-        {
-            if (t == typeof(FileUpload)) return true;
-            if (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(FileUpload<>)) return true;
-            return typeof(IFileUpload).IsAssignableFrom(t);
-        }
     }
 
     private static List<FieldPropertyInfo> GetFieldsAndProperties(Type type)
@@ -231,6 +222,15 @@ internal static class FormScaffolder
         return validators;
     }
 
+    private static TextInputBase ApplyMaxLength(TextInputBase input, FieldPropertyInfo field)
+    {
+        if (field.GetMaxLength() is { } maxLength)
+        {
+            input = input.MaxLength(maxLength);
+        }
+        return input;
+    }
+
     private record FieldPropertyInfo
     {
         public required string Name { get; init; }
@@ -242,5 +242,55 @@ internal static class FormScaffolder
         public FormHelpers.DisplayInfo GetDisplayInfo() => PropertyInfo != null ? FormHelpers.GetDisplayInfo(PropertyInfo) : FormHelpers.GetDisplayInfo(FieldInfo!);
         public FormHelpers.RangeInfo GetRangeInfo() => PropertyInfo != null ? FormHelpers.GetRangeInfo(PropertyInfo) : FormHelpers.GetRangeInfo(FieldInfo!);
         public int? GetMaxLength() => PropertyInfo != null ? FormHelpers.GetMaxLength(PropertyInfo) : FormHelpers.GetMaxLength(FieldInfo!);
+
+        public bool IsEmail() =>
+            NonNullableType == typeof(string) &&
+            (HasAttribute<System.ComponentModel.DataAnnotations.EmailAddressAttribute>() ||
+             Name.EndsWith("email", StringComparison.OrdinalIgnoreCase));
+
+        public bool IsPhone() =>
+            NonNullableType == typeof(string) &&
+            (HasAttribute<System.ComponentModel.DataAnnotations.PhoneAttribute>() ||
+             Name.EndsWith("phone", StringComparison.OrdinalIgnoreCase));
+
+        public bool IsUrl() =>
+            NonNullableType == typeof(string) &&
+            (HasAttribute<System.ComponentModel.DataAnnotations.UrlAttribute>() ||
+             Name.EndsWith("url", StringComparison.OrdinalIgnoreCase));
+
+        public bool IsCreditCard() =>
+            NonNullableType == typeof(string) &&
+            (HasAttribute<System.ComponentModel.DataAnnotations.UrlAttribute>() ||
+             Name.EndsWith("url", StringComparison.OrdinalIgnoreCase));
+
+        public bool IsFileUpload() =>
+            IsFileUploadType(NonNullableType) ||
+            Type.GetCollectionTypeParameter() is { } elementType && IsFileUploadType(elementType);
+
+        public bool IsIdentity() =>
+            (Name.EndsWith("Id") && (NonNullableType == typeof(Guid) || NonNullableType == typeof(int) || NonNullableType == typeof(string)));
+
+        public bool IsColor() =>
+            (Name.EndsWith("Color") || Name.EndsWith("Colour")) && NonNullableType == typeof(string);
+
+        public bool IsPassword() =>
+            NonNullableType == typeof(string) && Name.EndsWith("Password");
+
+        private Type NonNullableType => Nullable.GetUnderlyingType(Type) ?? Type;
+
+        private bool HasAttribute<T>() where T : Attribute
+        {
+            return PropertyInfo != null
+                ? PropertyInfo.GetCustomAttribute<T>() != null
+                : FieldInfo!.GetCustomAttribute<T>() != null;
+        }
+
+        private bool IsFileUploadType(Type t)
+        {
+            if (t == typeof(FileUpload)) return true;
+            if (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(FileUpload<>)) return true;
+            return typeof(IFileUpload).IsAssignableFrom(t);
+        }
     }
+
 }
