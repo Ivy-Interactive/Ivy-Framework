@@ -10,8 +10,6 @@ public class DisplayExample
     ]
     public string CustomDisplayString { get; set; } = "Foo";
 
-    public string? Foo2 { get; set; }
-
     [Display(GroupName = "Extras")]
     public string Foo { get; set; } = "Foo Value";
 

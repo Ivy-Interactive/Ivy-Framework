@@ -133,6 +133,8 @@ public class FormFieldView(
             input.Placeholder = placeholder;
         }
 
+        input.Scale = scale;
+
         return visibleState.Value ? new Field(input, label, description, required, help, scale) : null;
     }
 }
@@ -190,7 +192,6 @@ public class FormView<TModel>(IFormFieldView[] fieldViews, Func<Event<Form>, Val
             {
                 Scale.Small => 4,
                 Scale.Medium => 6,
-                Scale.Large => 8,
                 _ => 8
             };
 

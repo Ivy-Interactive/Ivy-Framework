@@ -212,7 +212,7 @@ internal static class FormScaffolder
 
     private static bool ShouldScaffold(MemberInfo member)
     {
-        var scaffoldColumnAttr = member.GetCustomAttribute<System.ComponentModel.DataAnnotations.ScaffoldColumnAttribute>();
+        var scaffoldColumnAttr = member.GetCustomAttribute<ScaffoldColumnAttribute>();
         return scaffoldColumnAttr == null || scaffoldColumnAttr.Scaffold;
     }
 
@@ -266,26 +266,20 @@ internal static class FormScaffolder
 
         public bool IsEmail() =>
             NonNullableType == typeof(string) &&
-            (HasAttribute<System.ComponentModel.DataAnnotations.EmailAddressAttribute>() ||
+            (HasAttribute<EmailAddressAttribute>() ||
              HasDataTypeAttribute(DataType.EmailAddress) ||
              Name.EndsWith("email", StringComparison.OrdinalIgnoreCase));
 
         public bool IsPhone() =>
             NonNullableType == typeof(string) &&
-            (HasAttribute<System.ComponentModel.DataAnnotations.PhoneAttribute>() ||
+            (HasAttribute<PhoneAttribute>() ||
              HasDataTypeAttribute(DataType.PhoneNumber) ||
              Name.EndsWith("phone", StringComparison.OrdinalIgnoreCase));
 
         public bool IsUrl() =>
             NonNullableType == typeof(string) &&
-            (HasAttribute<System.ComponentModel.DataAnnotations.UrlAttribute>() ||
+            (HasAttribute<UrlAttribute>() ||
              HasDataTypeAttribute(DataType.Url) ||
-             Name.EndsWith("url", StringComparison.OrdinalIgnoreCase));
-
-        public bool IsCreditCard() =>
-            NonNullableType == typeof(string) &&
-            (HasAttribute<System.ComponentModel.DataAnnotations.UrlAttribute>() ||
-             HasDataTypeAttribute(DataType.CreditCard) ||
              Name.EndsWith("url", StringComparison.OrdinalIgnoreCase));
 
         public bool IsFileUpload() =>
@@ -306,7 +300,7 @@ internal static class FormScaffolder
 
         public Type NonNullableType => Nullable.GetUnderlyingType(Type) ?? Type;
 
-        public bool HasAttribute<T>() where T : Attribute
+        private bool HasAttribute<T>() where T : Attribute
         {
             return PropertyInfo != null
                 ? PropertyInfo.GetCustomAttribute<T>() != null

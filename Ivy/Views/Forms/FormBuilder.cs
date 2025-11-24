@@ -41,7 +41,7 @@ public class FormBuilder<TModel> : ViewBase
     {
         var fieldInfo = GetField(field);
 
-        //todo: why is this needed? hack?
+        //todo: Why is this needed? Can we solve this differently in the scaffolding step?
         Func<IAnyState, IViewContext, IAnyInput> ScaffoldWrapper(Func<IAnyState, IViewContext, IAnyInput> inner)
         {
             return (state, context) =>
@@ -365,7 +365,6 @@ public class FormBuilder<TModel> : ViewBase
     {
         (Func<Task<bool>> onSubmit, IView formView, IView validationView, bool submitting) = UseForm(this.Context);
 
-        // Track upload state to disable submit button
         var hasUploading = UseState(false);
         var client = UseService<IClientProvider>();
 
