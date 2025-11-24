@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 using Ivy.Core.Hooks;
 using Ivy.Services;
@@ -65,14 +66,11 @@ internal static class FormScaffolder
         return scaffoldedFields;
     }
 
-
-
     private static Func<IAnyState, IAnyInput>? ScaffoldInputFactory(FieldPropertyInfo field)
     {
         var type = field.Type;
         var name = field.Name;
-
-        Type nonNullableType = Nullable.GetUnderlyingType(type) ?? type;
+        Type nonNullableType = field.NonNullableType;
 
         if (field.IsFileUpload())
         {
@@ -117,7 +115,17 @@ internal static class FormScaffolder
 
         if (nonNullableType == typeof(string))
         {
-            return (state) => ApplyMaxLength(state.ToTextInput(), field);
+            return (state) =>
+            {
+                var input = ApplyMaxLength(state.ToTextInput(), field);
+
+                if (field.HasDataTypeAttribute(DataType.MultilineText))
+                {
+                    input = input.Variant(TextInputs.Textarea);
+                }
+
+                return input;
+            };
         }
 
         if (nonNullableType.IsEnum)
@@ -149,7 +157,20 @@ internal static class FormScaffolder
 
         if (type.IsDate())
         {
-            return (state) => state.ToDateTimeInput();
+            return (state) =>
+            {
+                var input = state.ToDateTimeInput();
+
+                if (field.HasDataTypeAttribute(DataType.Date))
+                {
+                    input = input.Variant(DateTimeInputs.Date);
+                }
+                else if (field.HasDataTypeAttribute(DataType.Time))
+                {
+                    input = input.Variant(DateTimeInputs.Time);
+                }
+                return input;
+            };
         }
 
         return null;
@@ -246,21 +267,25 @@ internal static class FormScaffolder
         public bool IsEmail() =>
             NonNullableType == typeof(string) &&
             (HasAttribute<System.ComponentModel.DataAnnotations.EmailAddressAttribute>() ||
+             HasDataTypeAttribute(DataType.EmailAddress) ||
              Name.EndsWith("email", StringComparison.OrdinalIgnoreCase));
 
         public bool IsPhone() =>
             NonNullableType == typeof(string) &&
             (HasAttribute<System.ComponentModel.DataAnnotations.PhoneAttribute>() ||
+             HasDataTypeAttribute(DataType.PhoneNumber) ||
              Name.EndsWith("phone", StringComparison.OrdinalIgnoreCase));
 
         public bool IsUrl() =>
             NonNullableType == typeof(string) &&
             (HasAttribute<System.ComponentModel.DataAnnotations.UrlAttribute>() ||
+             HasDataTypeAttribute(DataType.Url) ||
              Name.EndsWith("url", StringComparison.OrdinalIgnoreCase));
 
         public bool IsCreditCard() =>
             NonNullableType == typeof(string) &&
             (HasAttribute<System.ComponentModel.DataAnnotations.UrlAttribute>() ||
+             HasDataTypeAttribute(DataType.CreditCard) ||
              Name.EndsWith("url", StringComparison.OrdinalIgnoreCase));
 
         public bool IsFileUpload() =>
@@ -274,15 +299,27 @@ internal static class FormScaffolder
             (Name.EndsWith("Color") || Name.EndsWith("Colour")) && NonNullableType == typeof(string);
 
         public bool IsPassword() =>
-            NonNullableType == typeof(string) && Name.EndsWith("Password");
+            NonNullableType == typeof(string) && (
+                Name.EndsWith("Password") ||
+                HasDataTypeAttribute(DataType.Password)
+            );
 
-        private Type NonNullableType => Nullable.GetUnderlyingType(Type) ?? Type;
+        public Type NonNullableType => Nullable.GetUnderlyingType(Type) ?? Type;
 
-        private bool HasAttribute<T>() where T : Attribute
+        public bool HasAttribute<T>() where T : Attribute
         {
             return PropertyInfo != null
                 ? PropertyInfo.GetCustomAttribute<T>() != null
                 : FieldInfo!.GetCustomAttribute<T>() != null;
+        }
+
+        public bool HasDataTypeAttribute(DataType dataType)
+        {
+            var dataTypeAttr = PropertyInfo != null
+                ? PropertyInfo.GetCustomAttribute<DataTypeAttribute>()
+                : FieldInfo!.GetCustomAttribute<DataTypeAttribute>();
+
+            return dataTypeAttr != null && dataTypeAttr.DataType == dataType;
         }
 
         private bool IsFileUploadType(Type t)
