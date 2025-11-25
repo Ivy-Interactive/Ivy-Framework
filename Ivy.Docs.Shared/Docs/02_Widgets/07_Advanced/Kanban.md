@@ -42,6 +42,7 @@ Create a Kanban board from any collection using the `.ToKanban()` extension meth
 tasks.ToKanban(
     groupBySelector: t => t.Status,
     idSelector: t => t.Id,
+    orderSelector: t => t.Priority,
     titleSelector: t => t.Title,
     descriptionSelector: t => t.Description
 )
@@ -76,6 +77,7 @@ public class KanbanWithMoveExample : ViewBase
             .ToKanban(
                 groupBySelector: t => t.Status,
                 idSelector: t => t.Id,
+                orderSelector: t => t.Priority,
                 titleSelector: t => t.Title,
                 descriptionSelector: t => t.Description)
             .HandleCardMove(moveData =>
@@ -137,6 +139,7 @@ public class KanbanWithCustomCardsExample : ViewBase
             .ToKanban(
                 groupBySelector: e => e.Status,
                 idSelector: e => e.Id,
+                orderSelector: e => e.Priority,
                 titleSelector: e => e.Title,
                 descriptionSelector: e => e.Description)
             .CardBuilder(task => new Card(
@@ -211,6 +214,7 @@ public class KanbanWithAllEventsExample : ViewBase
             .ToKanban(
                 groupBySelector: t => t.Status,
                 idSelector: t => t.Id,
+                orderSelector: t => t.Priority,
                 titleSelector: t => t.Title,
                 descriptionSelector: t => t.Description)
             .HandleClick(cardId =>
@@ -298,7 +302,7 @@ public class FullKanbanExample : ViewBase
                 descriptionSelector: t => t.Description,
                 orderSelector: t => t.Priority)
             .ColumnOrder(t => t.ColumnOrder)
-            .Height(Size.Units(400))
+            .Height(Size.Units(200))
             .HandleCardMove(moveData =>
             {
                 var taskId = moveData.CardId?.ToString();
@@ -364,6 +368,7 @@ public class SimpleStatusBoard : ViewBase
         return issueState.Value.ToKanban(
             groupBySelector: i => i.Status,
             idSelector: i => i.Id,
+            orderSelector: i => i.Id,
             titleSelector: i => i.Title,
             descriptionSelector: i => i.Id
         ).HandleCardMove(moveData =>
