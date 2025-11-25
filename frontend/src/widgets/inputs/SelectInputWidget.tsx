@@ -29,7 +29,7 @@ import {
   Option as MultiSelectOption,
 } from '@/components/ui/multiselect';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle';
-import { Sizes } from '@/types/sizes';
+import { Scales } from '@/types/scale';
 import { cva } from 'class-variance-authority';
 
 // variants for SelectInputWidget container
@@ -37,14 +37,14 @@ const selectContainerVariants = cva(
   'relative border border-input bg-transparent rounded-md shadow-sm focus-within:ring-1 focus-within:ring-ring',
   {
     variants: {
-      size: {
+      scale: {
         Small: 'px-2 py-1',
         Medium: 'px-3 py-2',
         Large: 'px-4 py-3',
       },
     },
     defaultVariants: {
-      size: 'Medium',
+      scale: 'Medium',
     },
   }
 );
@@ -88,7 +88,7 @@ interface SelectInputWidgetProps {
   selectMany: boolean;
   separator: string;
   'data-testid'?: string;
-  size?: Sizes;
+  scale?: Scales;
   width?: string;
 }
 
@@ -215,8 +215,8 @@ const ToggleOptionItem: React.FC<{
   option: Option;
   isSelected: boolean;
   invalid?: string;
-  size?: Sizes;
-}> = ({ option, isSelected, invalid, size = Sizes.Medium }) => {
+  scale?: Scales;
+}> = ({ option, isSelected, invalid, scale = Scales.Medium }) => {
   const isInvalid = !!invalid && isSelected;
 
   const sizeClasses = {
@@ -232,7 +232,7 @@ const ToggleOptionItem: React.FC<{
       aria-label={option.label}
       className={cn(
         'hover:text-foreground',
-        sizeClasses[size],
+        sizeClasses[scale],
         isInvalid
           ? cn(
               inputStyles.invalidInput,
@@ -273,7 +273,7 @@ const ToggleVariant: React.FC<SelectInputWidgetProps> = ({
   selectMany = false,
   separator = ',',
   nullable = false,
-  size = Sizes.Medium,
+  scale = Scales.Medium,
   'data-testid': dataTestId,
   width,
 }) => {
@@ -324,7 +324,7 @@ const ToggleVariant: React.FC<SelectInputWidgetProps> = ({
   const container = (
     <div
       className={cn(
-        selectContainerVariants({ size }),
+        selectContainerVariants({ scale }),
         invalid && 'border-destructive focus-within:ring-destructive'
       )}
       style={styles}
@@ -348,7 +348,7 @@ const ToggleVariant: React.FC<SelectInputWidgetProps> = ({
                     option={option}
                     isSelected={isSelected}
                     invalid={invalid}
-                    size={size}
+                    scale={scale}
                   />
                 );
               })}
@@ -370,7 +370,7 @@ const ToggleVariant: React.FC<SelectInputWidgetProps> = ({
                     option={option}
                     isSelected={isSelected}
                     invalid={invalid}
-                    size={size}
+                    scale={scale}
                   />
                 );
               })}
@@ -422,7 +422,7 @@ const RadioVariant: React.FC<SelectInputWidgetProps> = ({
   options = [],
   eventHandler,
   nullable = false,
-  size = Sizes.Medium,
+  scale = Scales.Medium,
   'data-testid': dataTestId,
   width,
 }) => {
@@ -450,7 +450,7 @@ const RadioVariant: React.FC<SelectInputWidgetProps> = ({
   const container = (
     <div
       className={cn(
-        selectContainerVariants({ size }),
+        selectContainerVariants({ scale }),
         invalid && 'border-destructive focus-within:ring-destructive'
       )}
       style={styles}
@@ -472,7 +472,7 @@ const RadioVariant: React.FC<SelectInputWidgetProps> = ({
                     id={`${id}-${option.value}`}
                     className={cn(
                       'border-input text-input',
-                      circleSizeVariants[size],
+                      circleSizeVariants[scale],
                       stringValue === option.value.toString() && !invalid
                         ? 'border-primary text-primary'
                         : undefined,
@@ -485,7 +485,7 @@ const RadioVariant: React.FC<SelectInputWidgetProps> = ({
                     htmlFor={`${id}-${option.value}`}
                     className={cn(
                       'cursor-pointer leading-none',
-                      selectTextVariants[size],
+                      selectTextVariants[scale],
                       stringValue === option.value.toString() && invalid
                         ? inputStyles.invalidInput
                         : undefined
@@ -537,7 +537,7 @@ const CheckboxVariant: React.FC<SelectInputWidgetProps> = ({
   eventHandler,
   separator = ',',
   nullable = false,
-  size = Sizes.Medium,
+  scale = Scales.Medium,
   'data-testid': dataTestId,
   width,
 }) => {
@@ -653,7 +653,7 @@ const CheckboxVariant: React.FC<SelectInputWidgetProps> = ({
                             className={cn(
                               inputStyles.invalidInput,
                               'bg-destructive/10 border-destructive text-destructive',
-                              selectTextVariants[size]
+                              selectTextVariants[scale]
                             )}
                           />
                         </TooltipTrigger>
@@ -672,7 +672,7 @@ const CheckboxVariant: React.FC<SelectInputWidgetProps> = ({
                       disabled={disabled}
                       className={cn(
                         'data-[state=unchecked]:bg-transparent data-[state=unchecked]:border-border',
-                        selectTextVariants[size],
+                        selectTextVariants[scale],
                         isSelected
                           ? 'data-[state=checked]:bg-primary data-[state=checked]:border-primary data-[state=checked]:text-primary-foreground'
                           : undefined
@@ -683,7 +683,7 @@ const CheckboxVariant: React.FC<SelectInputWidgetProps> = ({
                     htmlFor={`${id}-${option.value}`}
                     className={cn(
                       'flex-1 cursor-pointer',
-                      selectTextVariants[size],
+                      selectTextVariants[scale],
                       isInvalid ? inputStyles.invalidInput : undefined
                     )}
                   >
@@ -736,7 +736,7 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
   eventHandler,
   nullable = false,
   selectMany = false,
-  size = Sizes.Medium,
+  scale = Scales.Medium,
   'data-testid': dataTestId,
   width,
 }) => {
@@ -895,7 +895,7 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
             invalid={!!invalid}
             hideClearAllButton={!nullable}
             hidePlaceholderWhenSelected
-            size={size}
+            scale={scale}
             data-testid={dataTestId}
             emptyIndicator={
               <p className="text-center text-large-body">No results found</p>
@@ -930,7 +930,7 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
     <SelectTrigger
       ref={triggerRef}
       className={cn('relative', invalid && inputStyles.invalidInput)}
-      size={size}
+      scale={scale}
     >
       <SelectValue placeholder={placeholder} />
     </SelectTrigger>
@@ -964,7 +964,7 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
           data-testid={dataTestId}
         >
           {selectTrigger}
-          <SelectContent size={size}>
+          <SelectContent scale={scale}>
             {Object.entries(groupedOptions).map(([group, options]) => (
               <SelectGroup key={group}>
                 {group !== 'default' && <SelectLabel>{group}</SelectLabel>}
@@ -972,7 +972,7 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
                   <SelectItem
                     key={option.value}
                     value={option.value.toString()}
-                    size={size}
+                    scale={scale}
                   >
                     {option.label}
                   </SelectItem>

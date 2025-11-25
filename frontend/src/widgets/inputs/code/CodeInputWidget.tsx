@@ -21,7 +21,7 @@ import CopyToClipboardButton from '@/components/CopyToClipboardButton';
 import { cpp } from '@codemirror/lang-cpp';
 import { dbml } from './dbml-language';
 import { createIvyCodeTheme } from './theme';
-import { Sizes } from '@/types/sizes';
+import { Scales } from '@/types/scale';
 import {
   keymap,
   EditorView,
@@ -41,7 +41,7 @@ interface CodeInputWidgetProps {
   events: string[];
   width?: string;
   height?: string;
-  size?: Sizes;
+  scale?: Scales;
 }
 
 const languageExtensions = {
@@ -69,7 +69,7 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
   showCopyButton = false,
   width,
   height,
-  size = Sizes.Medium,
+  scale = Scales.Medium,
   events,
 }) => {
   const eventHandler = useEventHandler();
@@ -112,7 +112,7 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
   };
 
   // Create theme extension once and reuse it
-  const themeExtension = useMemo(() => createIvyCodeTheme(size), [size]);
+  const themeExtension = useMemo(() => createIvyCodeTheme(scale), [scale]);
 
   // Minimal setup without search features
   const minimalSetup = useMemo(() => {

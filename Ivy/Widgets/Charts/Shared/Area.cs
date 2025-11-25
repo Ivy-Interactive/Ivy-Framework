@@ -1,11 +1,10 @@
-﻿using Ivy.Shared;
+using Ivy.Shared;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy.Charts;
 
 public record Area
 {
-    /// <param name="name">If not provided, will be auto-generated from dataKey.</param>
     public Area(string dataKey, object? stackId = null, string? name = null)
     {
         DataKey = dataKey;
@@ -19,15 +18,12 @@ public record Area
 
     public LegendTypes LegendType { get; set; } = LegendTypes.Line;
 
-    /// <summary>If null, no stroke is applied.</summary>
     public Colors? Stroke { get; set; } = null;
 
     public int StrokeWidth { get; set; } = 1;
 
-    /// <summary>If null, no fill is applied.</summary>
     public Colors? Fill { get; set; } = null;
 
-    /// <summary>Value ranges from 0.0 (transparent) to 1.0 (opaque).</summary>
     public double? FillOpacity { get; set; } = null;
 
     public string? StrokeDashArray { get; set; }
@@ -107,7 +103,6 @@ public static class AreaExtensions
         return area with { StackId = stackId };
     }
 
-    /// <param name="fillOpacity">Value ranges from 0.0 (transparent) to 1.0 (opaque).</param>
     public static Area FillOpacity(this Area area, double fillOpacity)
     {
         return area with { FillOpacity = fillOpacity };

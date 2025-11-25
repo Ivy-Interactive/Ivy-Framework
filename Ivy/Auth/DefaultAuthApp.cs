@@ -22,9 +22,7 @@ public class DefaultAuthApp : ViewBase
         var auth = this.UseService<IAuthService>();
         var errorMessage = this.UseState<string?>();
         var serverArgs = this.UseService<ServerArgs>();
-        var appName = serverArgs.MetaTitle.NullIfEmpty()
-                      ?? Assembly.GetEntryAssembly()?.GetName().Name.NullIfEmpty()
-                      ?? "Ivy Application";
+        var appName = serverArgs.MetaTitle.NullIfEmpty() ?? Assembly.GetEntryAssembly()?.GetName().Name.NullIfEmpty() ?? "Ivy";
 
         var options = auth.GetAuthOptions();
 
@@ -141,7 +139,7 @@ public class PasswordEmailFlowView(IState<string?> errorMessage) : ViewBase
                    .HandleClick(HandleSubmit)
                    .Loading(isBusy)
                    .Disabled(isBusy)
-                   .Size(formBuilder.Size)
+                   .Scale(formBuilder.Scale)
                    .Width(Size.Full());
     }
 }

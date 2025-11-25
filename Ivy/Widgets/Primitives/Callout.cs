@@ -1,4 +1,4 @@
-﻿using Ivy.Core;
+using Ivy.Core;
 using Ivy.Shared;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
@@ -14,7 +14,6 @@ public enum CalloutVariant
     Success
 }
 
-/// <summary>Prominent message widget for info, warnings, errors, and success notifications. Strings auto-convert to Markdown.</summary>
 public record Callout : WidgetBase<Callout>
 {
     public Callout(object? description = null, string? title = null, CalloutVariant variant = CalloutVariant.Info, Icons? icon = null)

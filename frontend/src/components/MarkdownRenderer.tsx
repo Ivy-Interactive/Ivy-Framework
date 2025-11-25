@@ -25,6 +25,12 @@ import {
   isRelativePath,
   isStandardUrl,
 } from '@/lib/urlValidation';
+import {
+  cn,
+  getIvyHost,
+  validateLinkUrl,
+  convertAppUrlToPath,
+} from '@/lib/utils';
 import CopyToClipboardButton from './CopyToClipboardButton';
 import { createPrismTheme } from '@/lib/ivy-prism-theme';
 import { textBlockClassMap, textContainerClass } from '@/lib/textBlockClassMap';
@@ -405,11 +411,9 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
 
           // Convert app:// URLs to regular paths for href attribute
           let hrefForNavigation = safeHref;
-          if (isApp) {
-            // Convert app://MyApp to /MyApp, app://MyApp?param=value to /MyApp?param=value
-            const appId = safeHref.substring(7); // Remove "app://"
-            const [appPath, queryString] = appId.split('?');
-            hrefForNavigation = `/${appPath}${queryString ? `?${queryString}` : ''}`;
+          if (isAppProtocol && safeHref) {
+            // Use the utility function to convert app:// URLs, preserving chrome=false
+            hrefForNavigation = convertAppUrlToPath(safeHref);
           }
 
           return (

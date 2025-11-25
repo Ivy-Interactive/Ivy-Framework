@@ -12,14 +12,14 @@ export const labelSizeVariants = cva(
   'text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70',
   {
     variants: {
-      size: {
+      scale: {
         Small: 'text-xs',
         Medium: 'text-sm',
         Large: 'text-base',
       },
     },
     defaultVariants: {
-      size: 'Medium',
+      scale: 'Medium',
     },
   }
 );
@@ -27,13 +27,13 @@ export const labelSizeVariants = cva(
 // Description size variants
 export const descriptionSizeVariants = cva('text-muted-foreground', {
   variants: {
-    size: {
+    scale: {
       Small: 'text-xs',
       Medium: 'text-sm',
       Large: 'text-base',
     },
   },
   defaultVariants: {
-    size: 'Medium',
+    scale: 'Medium',
   },
 });

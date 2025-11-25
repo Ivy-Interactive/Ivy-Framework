@@ -50,6 +50,8 @@ public class Server
     private bool _useHotReload;
     private bool _useHttpRedirection;
     private readonly List<Action<WebApplicationBuilder>> _builderMods = new();
+    private List<string> _reservedPaths = new();
+    public IReadOnlyList<string> ReservedPaths => _reservedPaths;
     public string? DefaultAppId { get; private set; }
     public AppRepository AppRepository { get; } = new();
     public IServiceCollection Services { get; } = new ServiceCollection();
@@ -163,6 +165,11 @@ public class Server
         return UseChrome(() => new DefaultSidebarChrome(settings));
     }
 
+    public Server UseChrome<T>() where T : ViewBase
+    {
+        return UseChrome((() => (ViewBase)Activator.CreateInstance(typeof(T))!));
+    }
+
     public Server UseChrome(Func<ViewBase>? viewFactory = null)
     {
         AddApp(new AppDescriptor
@@ -208,6 +215,12 @@ public class Server
     public Server UseBuilder(Action<WebApplicationBuilder> modify)
     {
         _builderMods.Add(modify);
+        return this;
+    }
+
+    public Server ReservePaths(params string[] paths)
+    {
+        _reservedPaths.AddRange(paths);
         return this;
     }
 
@@ -488,12 +501,63 @@ public class Server
 
         try
         {
+            CheckForAppIdCollisions(app);
             await app.StartAsync(cts.Token);
             await app.WaitForShutdownAsync(cts.Token);
         }
         catch (IOException)
         {
             Console.WriteLine($@"Failed to start Ivy server. Is the port already in use?");
+        }
+    }
+
+    private void CheckForAppIdCollisions(WebApplication app)
+    {
+        var actionDescriptorCollectionProvider = app.Services.GetRequiredService<Microsoft.AspNetCore.Mvc.Infrastructure.IActionDescriptorCollectionProvider>();
+
+        // Use a local HashSet to collect paths (handles duplicates automatically)
+        var reservedPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        // 1. Add existing reserved paths (from fluent API)
+        foreach (var path in _reservedPaths)
+        {
+            reservedPaths.Add(path);
+        }
+
+        // 2. Add auto-discovered controller routes
+        foreach (var actionDescriptor in actionDescriptorCollectionProvider.ActionDescriptors.Items)
+        {
+            if (actionDescriptor.AttributeRouteInfo?.Template is { } template)
+            {
+                var segments = template.Split('/', StringSplitOptions.RemoveEmptyEntries);
+                var firstSegment = segments.FirstOrDefault();
+
+                // Ignore dynamic segments (e.g. "{id}" or "user-{id}")
+                if (!string.IsNullOrEmpty(firstSegment) && !firstSegment.Contains('{'))
+                {
+                    reservedPaths.Add("/" + firstSegment);
+                }
+            }
+        }
+
+        // 3. Add system excluded paths
+        foreach (var path in PathToAppIdMiddleware.ExcludedPaths)
+        {
+            reservedPaths.Add(path.StartsWith("/") ? path : "/" + path);
+        }
+
+        // Atomically update the shared list (thread safety for startup)
+        _reservedPaths = reservedPaths.ToList();
+
+        // 4. Check for collisions
+        foreach (var appDescriptor in AppRepository.All())
+        {
+            var appIdPath = "/" + appDescriptor.Id;
+
+            if (reservedPaths.Contains(appIdPath))
+            {
+                throw new InvalidOperationException($"App ID '{appDescriptor.Id}' collides with a reserved path '{appIdPath}'. Please choose a different App ID.");
+            }
         }
     }
 }

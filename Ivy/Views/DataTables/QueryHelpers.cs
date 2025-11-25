@@ -5,9 +5,6 @@ using SystemType = System.Type;
 
 namespace Ivy.Views.DataTables;
 
-/// <summary>
-/// Helper methods for query processing and Arrow data type conversions.
-/// </summary>
 public static class QueryHelpers
 {
     public static IArrowArray CreateEmptyArrowArray(IArrowType arrowType)

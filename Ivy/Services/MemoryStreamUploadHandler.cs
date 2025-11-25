@@ -7,10 +7,6 @@ namespace Ivy.Services;
 
 public static class MemoryStreamUploadHandler
 {
-    /// <summary>
-    /// Creates an upload handler from an IAnyState by automatically detecting the state type.
-    /// Supports: FileUpload&lt;byte[]&gt;?, FileUpload&lt;string&gt;?, ImmutableArray&lt;FileUpload&lt;byte[]&gt;&gt;, ImmutableArray&lt;FileUpload&lt;string&gt;&gt;
-    /// </summary>
     public static IUploadHandler Create(IAnyState anyState, Encoding? encoding = null, int chunkSize = 8192, float progressThreshold = 0.05f)
     {
         var stateType = anyState.GetStateType();

@@ -1,4 +1,4 @@
-﻿using Ivy.Charts;
+using Ivy.Charts;
 using Ivy.Core;
 using Ivy.Shared;
 
@@ -51,7 +51,6 @@ public record BarChart : WidgetBase<BarChart>
 
     [Prop] public bool ReverseStackOrder { get; init; } = false;
 
-    /// <exception cref="NotSupportedException">BarChart does not support children.</exception>
     public static BarChart operator |(BarChart widget, object child)
     {
         throw new NotSupportedException("BarChart does not support children.");

@@ -68,11 +68,11 @@ public class TableApp : SampleBase
                 .Width(Size.Full())
                 .MultiLine(e => e.Name)
                 // Add explicit column widths to test overflow
-                .Width(e => e.Sku, Size.Fraction(0.15f))      // 15% for SKU
-                .Width(e => e.Foo, Size.Fraction(0.1f))       // 10% for Foo  
-                .Width(e => e.Name, Size.Fraction(0.3f))      // 30% for Name
-                .Width(e => e.Price, Size.Fraction(0.15f))    // 15% for Price
-                .Width(e => e.Url, Size.Fraction(0.3f)),      // 30% for URL
+                .ColumnWidth(e => e.Sku, Size.Fraction(0.15f))      // 15% for SKU
+                .ColumnWidth(e => e.Foo, Size.Fraction(0.1f))       // 10% for Foo  
+                .ColumnWidth(e => e.Name, Size.Fraction(0.3f))      // 30% for Name
+                .ColumnWidth(e => e.Price, Size.Fraction(0.15f))    // 15% for Price
+                .ColumnWidth(e => e.Url, Size.Fraction(0.3f)),      // 30% for URL
 
             Text.Label("Medium Size:"),
             products
@@ -81,11 +81,11 @@ public class TableApp : SampleBase
                 .Width(Size.Full())
                 .MultiLine(e => e.Name)
                 // Add explicit column widths to test overflow
-                .Width(e => e.Sku, Size.Fraction(0.15f))      // 15% for SKU
-                .Width(e => e.Foo, Size.Fraction(0.1f))       // 10% for Foo  
-                .Width(e => e.Name, Size.Fraction(0.3f))      // 30% for Name
-                .Width(e => e.Price, Size.Fraction(0.15f))    // 15% for Price
-                .Width(e => e.Url, Size.Fraction(0.3f)),      // 30% for URL
+                .ColumnWidth(e => e.Sku, Size.Fraction(0.15f))      // 15% for SKU
+                .ColumnWidth(e => e.Foo, Size.Fraction(0.1f))       // 10% for Foo  
+                .ColumnWidth(e => e.Name, Size.Fraction(0.3f))      // 30% for Name
+                .ColumnWidth(e => e.Price, Size.Fraction(0.15f))    // 15% for Price
+                .ColumnWidth(e => e.Url, Size.Fraction(0.3f)),      // 30% for URL
 
             Text.Label("Large Size:"),
             products
@@ -94,11 +94,11 @@ public class TableApp : SampleBase
                 .Width(Size.Full())
                 .MultiLine(e => e.Name)
                 // Add explicit column widths to test overflow
-                .Width(e => e.Sku, Size.Fraction(0.15f))      // 15% for SKU
-                .Width(e => e.Foo, Size.Fraction(0.1f))       // 10% for Foo  
-                .Width(e => e.Name, Size.Fraction(0.3f))      // 30% for Name
-                .Width(e => e.Price, Size.Fraction(0.15f))    // 15% for Price
-                .Width(e => e.Url, Size.Fraction(0.3f)),      // 30% for URL
+                .ColumnWidth(e => e.Sku, Size.Fraction(0.15f))      // 15% for SKU
+                .ColumnWidth(e => e.Foo, Size.Fraction(0.1f))       // 10% for Foo  
+                .ColumnWidth(e => e.Name, Size.Fraction(0.3f))      // 30% for Name
+                .ColumnWidth(e => e.Price, Size.Fraction(0.15f))    // 15% for Price
+                .ColumnWidth(e => e.Url, Size.Fraction(0.3f)),      // 30% for URL
 
 
             Text.H3("Long Headers Table (Test Overflow & Tooltips)"),

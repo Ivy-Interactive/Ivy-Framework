@@ -64,6 +64,42 @@ export function getChromeParam(): boolean {
   return urlParams.get('chrome')?.toLowerCase() !== 'false';
 }
 
+/**
+ * Converts an app:// URL to a regular browser path.
+ * Preserves query parameters from the current URL (especially chrome=false) when in chrome=false mode.
+ *
+ * @param appUrl - The app:// URL to convert (e.g., "app://MyApp" or "app://MyApp?param=value")
+ * @returns The converted path (e.g., "/MyApp" or "/MyApp?param=value&chrome=false")
+ */
+export function convertAppUrlToPath(appUrl: string): string {
+  if (!appUrl.startsWith('app://')) {
+    return appUrl;
+  }
+
+  // Extract app ID and any existing query string
+  const appId = appUrl.substring(6); // Remove "app://"
+  const [appPath, existingQueryString] = appId.split('?');
+
+  // Build the path
+  let path = `/${appPath}`;
+
+  // Preserve chrome=false if we're currently in chrome=false mode
+  const isChromeFalse = !getChromeParam();
+  const queryParams = new URLSearchParams(existingQueryString || '');
+
+  if (isChromeFalse && !queryParams.has('chrome')) {
+    queryParams.set('chrome', 'false');
+  }
+
+  // Combine existing query params with chrome param
+  const finalQueryString = queryParams.toString();
+  if (finalQueryString) {
+    path += `?${finalQueryString}`;
+  }
+
+  return path;
+}
+
 function generateUUID(): string {
   if (typeof crypto.randomUUID === 'function') {
     return crypto.randomUUID();

@@ -3,28 +3,28 @@ import { cva } from 'class-variance-authority';
 // Size variants for TextInputWidget
 export const textInputSizeVariants = cva('w-full', {
   variants: {
-    size: {
+    scale: {
       Small: 'text-xs px-2 h-7',
       Medium: 'text-sm px-3 h-9',
       Large: 'text-base px-4 h-11',
     },
   },
   defaultVariants: {
-    size: 'Medium',
+    scale: 'Medium',
   },
 });
 
 // Size variants for search icon
 export const searchIconVariants = cva('absolute text-muted-foreground', {
   variants: {
-    size: {
+    scale: {
       Small: 'left-3 top-2 h-3 w-3',
       Medium: 'left-2.5 top-2.5 h-4 w-4',
       Large: 'left-2 top-3 h-5 w-5',
     },
   },
   defaultVariants: {
-    size: 'Medium',
+    scale: 'Medium',
   },
 });
 
@@ -33,14 +33,14 @@ export const xIconVariants = cva(
   'text-muted-foreground hover:text-foreground',
   {
     variants: {
-      size: {
+      scale: {
         Small: 'h-3 w-3',
         Medium: 'h-4 w-4',
         Large: 'h-5 w-5',
       },
     },
     defaultVariants: {
-      size: 'Medium',
+      scale: 'Medium',
     },
   }
 );
@@ -48,13 +48,13 @@ export const xIconVariants = cva(
 // Size variants for eye icons (password toggle)
 export const eyeIconVariants = cva('', {
   variants: {
-    size: {
+    scale: {
       Small: 'h-3 w-3',
       Medium: 'h-4 w-4',
       Large: 'h-5 w-5',
     },
   },
   defaultVariants: {
-    size: 'Medium',
+    scale: 'Medium',
   },
 });

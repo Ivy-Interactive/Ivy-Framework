@@ -4,27 +4,32 @@ import type { VariantProps } from 'class-variance-authority';
 
 import { cn } from '@/lib/utils';
 import { toggleVariants } from './toggle-variants';
-import { Sizes } from '@/types/sizes';
+import { Scales } from '@/types/scale';
 const Toggle = React.forwardRef<
   React.ElementRef<typeof TogglePrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof TogglePrimitive.Root> &
     VariantProps<typeof toggleVariants> & {
       dataTestId?: string;
     }
->(({ className, variant, size = Sizes.Medium, dataTestId, ...props }, ref) => {
-  let toggleClass = toggleVariants({ variant, size, className });
-  if (className?.includes('bg-red-50')) {
-    toggleClass = toggleClass.replace('data-[state=on]:bg-accent', '');
+>(
+  (
+    { className, variant, scale = Scales.Medium, dataTestId, ...props },
+    ref
+  ) => {
+    let toggleClass = toggleVariants({ variant, scale, className });
+    if (className?.includes('bg-red-50')) {
+      toggleClass = toggleClass.replace('data-[state=on]:bg-accent', '');
+    }
+    return (
+      <TogglePrimitive.Root
+        ref={ref}
+        className={cn(toggleClass, className)}
+        data-testid={dataTestId}
+        {...props}
+      />
+    );
   }
-  return (
-    <TogglePrimitive.Root
-      ref={ref}
-      className={cn(toggleClass, className)}
-      data-testid={dataTestId}
-      {...props}
-    />
-  );
-});
+);
 
 Toggle.displayName = TogglePrimitive.Root.displayName;
 
