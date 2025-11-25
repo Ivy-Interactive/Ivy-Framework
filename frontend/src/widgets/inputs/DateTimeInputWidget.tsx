@@ -14,7 +14,7 @@ import { cn } from '@/lib/utils';
 import { useEventHandler } from '@/components/event-handler';
 import { inputStyles } from '@/lib/styles';
 import { InvalidIcon } from '@/components/InvalidIcon';
-import { Sizes } from '@/types/sizes';
+import { Scales } from '@/types/scale';
 import {
   dateTimeInputVariants,
   dateTimeInputIconVariants,
@@ -32,7 +32,7 @@ interface DateTimeInputWidgetProps {
   nullable?: boolean;
   invalid?: string;
   format?: string;
-  size?: Sizes;
+  scale?: Scales;
   'data-testid'?: string;
 }
 
@@ -44,7 +44,7 @@ interface BaseVariantProps {
   nullable?: boolean;
   invalid?: string;
   format?: string;
-  size?: Sizes;
+  scale?: Scales;
   'data-testid'?: string;
 }
 
@@ -69,7 +69,7 @@ const DateVariant: React.FC<DateVariantProps> = ({
   invalid,
   onDateChange,
   format: formatProp,
-  size = Sizes.Medium,
+  scale = Scales.Medium,
   'data-testid': dataTestId,
 }) => {
   const [open, setOpen] = useState(false);
@@ -98,7 +98,7 @@ const DateVariant: React.FC<DateVariantProps> = ({
             disabled={disabled}
             variant="outline"
             className={cn(
-              dateTimeInputVariants({ size }),
+              dateTimeInputVariants({ scale }),
               invalid && inputStyles.invalidInput,
               disabled && 'cursor-not-allowed'
             )}
@@ -107,7 +107,7 @@ const DateVariant: React.FC<DateVariantProps> = ({
             <CalendarIcon
               className={cn(
                 'mr-3 flex-shrink-0',
-                dateTimeInputIconVariants({ size })
+                dateTimeInputIconVariants({ scale })
               )}
             />
             <span className={cn('truncate', (showClear || invalid) && 'pr-10')}>
@@ -136,7 +136,7 @@ const DateVariant: React.FC<DateVariantProps> = ({
                   >
                     <X
                       className={cn(
-                        dateTimeInputIconVariants({ size }),
+                        dateTimeInputIconVariants({ scale }),
                         'text-muted-foreground hover:text-foreground'
                       )}
                     />
@@ -153,7 +153,7 @@ const DateVariant: React.FC<DateVariantProps> = ({
             selected={date}
             onSelect={handleSelect}
             initialFocus
-            size={size}
+            scale={scale}
           />
         </PopoverContent>
       </Popover>
@@ -170,7 +170,7 @@ const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
   onDateChange,
   onTimeChange,
   format: formatProp,
-  size = Sizes.Medium,
+  scale = Scales.Medium,
   'data-testid': dataTestId,
 }) => {
   const [open, setOpen] = useState(false);
@@ -292,7 +292,7 @@ const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
             disabled={disabled}
             variant="outline"
             className={cn(
-              dateTimeInputVariants({ size }),
+              dateTimeInputVariants({ scale }),
               invalid && inputStyles.invalidInput,
               disabled && 'cursor-not-allowed'
             )}
@@ -301,7 +301,7 @@ const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
             <CalendarIcon
               className={cn(
                 'mr-3 flex-shrink-0',
-                dateTimeInputIconVariants({ size })
+                dateTimeInputIconVariants({ scale })
               )}
             />
             <span className={cn('truncate', (showClear || invalid) && 'pr-10')}>
@@ -323,7 +323,7 @@ const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
                   >
                     <X
                       className={cn(
-                        dateTimeInputIconVariants({ size }),
+                        dateTimeInputIconVariants({ scale }),
                         'text-muted-foreground hover:text-foreground'
                       )}
                     />
@@ -341,12 +341,12 @@ const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
               selected={date}
               onSelect={handleDateSelect}
               initialFocus
-              size={size}
+              scale={scale}
             />
             <div className="flex items-center gap-2">
               <Clock
                 className={cn(
-                  dateTimeInputIconVariants({ size }),
+                  dateTimeInputIconVariants({ scale }),
                   'text-muted-foreground'
                 )}
               />
@@ -361,7 +361,7 @@ const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
                 disabled={disabled}
                 className={cn(
                   'bg-background appearance-none [&::-webkit-calendar-picker-indicator]:hidden',
-                  dateTimeInputTextVariants({ size }),
+                  dateTimeInputTextVariants({ scale }),
                   invalid && inputStyles.invalidInput
                 )}
                 data-testid={dataTestId ? `${dataTestId}-time` : undefined}
@@ -381,7 +381,7 @@ const TimeVariant: React.FC<TimeVariantProps> = ({
   nullable,
   invalid,
   onTimeChange,
-  size = Sizes.Medium,
+  scale = Scales.Medium,
   'data-testid': dataTestId,
 }) => {
   // Use local state for the input value to make it uncontrolled
@@ -466,7 +466,7 @@ const TimeVariant: React.FC<TimeVariantProps> = ({
       <Clock
         className={cn(
           'mr-3 flex-shrink-0',
-          dateTimeInputIconVariants({ size }),
+          dateTimeInputIconVariants({ scale }),
           'text-muted-foreground'
         )}
       />
@@ -482,7 +482,7 @@ const TimeVariant: React.FC<TimeVariantProps> = ({
           placeholder={placeholder || 'Select time'}
           className={cn(
             'bg-background appearance-none [&::-webkit-calendar-picker-indicator]:hidden cursor-pointer w-full',
-            dateTimeInputTextVariants({ size }),
+            dateTimeInputTextVariants({ scale }),
             (showClear || invalid) && 'pr-20',
             invalid && inputStyles.invalidInput,
             disabled && 'cursor-not-allowed'
@@ -501,7 +501,7 @@ const TimeVariant: React.FC<TimeVariantProps> = ({
               >
                 <X
                   className={cn(
-                    dateTimeInputIconVariants({ size }),
+                    dateTimeInputIconVariants({ scale }),
                     'text-muted-foreground hover:text-foreground'
                   )}
                 />
@@ -530,7 +530,7 @@ export const DateTimeInputWidget: React.FC<DateTimeInputWidgetProps> = ({
   nullable = false,
   invalid,
   format: formatProp,
-  size = Sizes.Medium,
+  scale = Scales.Medium,
   'data-testid': dataTestId,
 }) => {
   const eventHandler = useEventHandler();
@@ -577,7 +577,7 @@ export const DateTimeInputWidget: React.FC<DateTimeInputWidgetProps> = ({
       nullable={nullable}
       invalid={invalid}
       format={formatProp}
-      size={size}
+      scale={scale}
       onDateChange={handleDateChange}
       onTimeChange={handleTimeChange}
       data-testid={dataTestId}

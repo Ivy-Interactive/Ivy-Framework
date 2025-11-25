@@ -1,18 +1,13 @@
 using Ivy.Core;
 using Ivy.Shared;
 using Ivy.Widgets.Inputs;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-
+// ReSharper disable once CheckNamespace
 namespace Ivy;
 
 public record Field : WidgetBase<Field>
 {
-    public Field(IAnyInput input, string? label = null, string? description = null, bool required = false, string? help = null) : base([input])
+    public Field(IAnyInput input, string? label = null, string? description = null, bool required = false, string? help = null, Scale scale = Shared.Scale.Medium) : base([input])
     {
         var labelProp = input.GetType().GetProperty("Label");
         if (labelProp != null && labelProp.PropertyType == typeof(string))
@@ -33,6 +28,7 @@ public record Field : WidgetBase<Field>
         Description = description;
         Required = required;
         Help = help;
+        Scale = scale;
     }
 
     [Prop] public string? Label { get; set; }
@@ -43,9 +39,6 @@ public record Field : WidgetBase<Field>
 
     [Prop] public string? Help { get; set; }
 
-    [Prop] public Sizes Size { get; set; } = Sizes.Medium;
-
-    /// <exception cref="NotSupportedException">Field widgets wrap single input control.</exception>
     public static Field operator |(Field widget, object child)
     {
         throw new NotSupportedException("Field does not support children.");
@@ -54,7 +47,6 @@ public record Field : WidgetBase<Field>
 
 public static class FieldExtensions
 {
-
     public static Field Label(this Field field, string label) => field with { Label = label };
 
     public static Field Description(this Field field, string description) => field with { Description = description };
@@ -63,9 +55,6 @@ public static class FieldExtensions
 
     public static Field Required(this Field field) => field with { Required = true };
 
-    public static Field Size(this Field field, Sizes size) => field with { Size = size };
-
     public static Field WithField(this IAnyInput input) => new Field(input);
-
 }
 

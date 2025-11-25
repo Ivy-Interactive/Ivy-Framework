@@ -166,12 +166,12 @@ public class SelectSliderControlDemo : ViewBase
         var mixedSizes = UseState(false);
 
         // Convert size selection to badge size
-        Sizes GetBadgeSize(string size) => size switch
+        Scale GetBadgeSize(string size) => size switch
         {
-            "Small" => Sizes.Small,
-            "Medium" => Sizes.Medium,
-            "Large" => Sizes.Large,
-            _ => Sizes.Medium
+            "Small" => Scale.Small,
+            "Medium" => Scale.Medium,
+            "Large" => Scale.Large,
+            _ => Scale.Medium
         };
 
         // Create badges
@@ -199,12 +199,12 @@ public class SelectSliderControlDemo : ViewBase
                     var sizeIndex = index % 3;
                     var size = sizeIndex switch
                     {
-                        0 => Sizes.Small,
-                        1 => Sizes.Medium,
-                        _ => Sizes.Large
+                        0 => Scale.Small,
+                        1 => Scale.Medium,
+                        _ => Scale.Large
                     };
                     return new Badge(tech.Item1)
-                        .Size(size)
+                        .Scale(size)
                         .Variant(tech.Item2);
                 }).Cast<object>().ToArray();
             }
@@ -214,7 +214,7 @@ public class SelectSliderControlDemo : ViewBase
                 var uniformSize = GetBadgeSize(selectedSize.Value);
                 return technologies.Select(tech => 
                     new Badge(tech.Item1)
-                        .Size(uniformSize)
+                        .Scale(uniformSize)
                         .Variant(tech.Item2)
                 ).Cast<object>().ToArray();
             }

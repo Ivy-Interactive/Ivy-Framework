@@ -2,7 +2,6 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Ivy.Views.Forms;
 
-/// <summary>Utility methods for creating form field validators.</summary>
 public static class Validators
 {
     public static Func<object?, (bool, string)> CreateEmailValidator(string fieldName)

@@ -1,4 +1,4 @@
-﻿using System.Runtime.CompilerServices;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Ivy.Core;
 using Ivy.Core.Helpers;
@@ -16,8 +16,6 @@ public enum CodeInputs
 
 public interface IAnyCodeInput : IAnyInput
 {
-    public string? Placeholder { get; set; }
-
     public CodeInputs Variant { get; set; }
 }
 
@@ -27,6 +25,8 @@ public abstract record CodeInputBase : WidgetBase<CodeInputBase>, IAnyCodeInput
 
     [Prop] public string? Invalid { get; set; }
 
+    [Prop] public new Scale? Scale { get; set; }
+
     [Prop] public string? Placeholder { get; set; }
 
     [Prop] public CodeInputs Variant { get; set; }
@@ -35,14 +35,11 @@ public abstract record CodeInputBase : WidgetBase<CodeInputBase>, IAnyCodeInput
 
     [Prop] public bool ShowCopyButton { get; set; } = false;
 
-    [Prop] public Sizes Size { get; set; }
-
     [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
 
     public Type[] SupportedStateTypes() => [typeof(string)];
 }
 
-/// <typeparam name="TString">Typically string.</typeparam>
 public record CodeInput<TString> : CodeInputBase, IInput<TString>
 {
     [OverloadResolutionPriority(1)]
@@ -74,9 +71,8 @@ public record CodeInput<TString> : CodeInputBase, IInput<TString>
         Placeholder = placeholder;
         Variant = variant;
         Disabled = disabled;
-        Size = Sizes.Medium;
-        Width = Ivy.Shared.Size.Full();
-        Height = Ivy.Shared.Size.Units(25);
+        Width = Size.Full();
+        Height = Size.Units(25);
     }
 
     [Prop] public TString Value { get; } = default!;
@@ -86,7 +82,6 @@ public record CodeInput<TString> : CodeInputBase, IInput<TString>
 
 public static class CodeInputExtensions
 {
-    /// <summary>Creates a code input from a state object with automatic type binding.</summary>
     public static CodeInputBase ToCodeInput(this IAnyState state, string? placeholder = null, bool disabled = false, CodeInputs variant = CodeInputs.Default, Languages language = Languages.Json)
     {
         var type = state.GetStateType();
@@ -123,21 +118,6 @@ public static class CodeInputExtensions
     public static CodeInputBase ShowCopyButton(this CodeInputBase widget, bool showCopyButton = true)
     {
         return widget with { ShowCopyButton = showCopyButton };
-    }
-
-    public static CodeInputBase Size(this CodeInputBase widget, Sizes size)
-    {
-        return widget with { Size = size };
-    }
-
-    public static CodeInputBase Large(this CodeInputBase widget)
-    {
-        return widget.Size(Sizes.Large);
-    }
-
-    public static CodeInputBase Small(this CodeInputBase widget)
-    {
-        return widget.Size(Sizes.Small);
     }
 
     [OverloadResolutionPriority(1)]

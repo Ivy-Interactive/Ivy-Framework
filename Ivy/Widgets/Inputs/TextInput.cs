@@ -22,74 +22,8 @@ public enum TextInputs
     Search
 }
 
-public abstract record PrefixSuffix
-{
-    private PrefixSuffix() { } // Prevent external inheritance
-
-    public sealed record Text(string Value) : PrefixSuffix;
-
-    public sealed record Icon(Icons Value) : PrefixSuffix;
-}
-
-internal class PrefixSuffixJsonConverterFactory : JsonConverterFactory
-{
-    public override bool CanConvert(Type typeToConvert)
-    {
-        return typeof(PrefixSuffix).IsAssignableFrom(typeToConvert);
-    }
-
-    public override JsonConverter? CreateConverter(Type typeToConvert, JsonSerializerOptions options)
-    {
-        return new PrefixSuffixJsonConverter();
-    }
-}
-
-internal class PrefixSuffixJsonConverter : JsonConverter<PrefixSuffix>
-{
-    public override PrefixSuffix? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-    {
-        using var doc = JsonDocument.ParseValue(ref reader);
-        var root = doc.RootElement;
-
-        if (!root.TryGetProperty("type", out var typeElement) || !root.TryGetProperty("value", out var valueElement))
-        {
-            return null;
-        }
-
-        var type = typeElement.GetString();
-
-        return type switch
-        {
-            "text" => new PrefixSuffix.Text(valueElement.GetString() ?? string.Empty),
-            "icon" => Enum.TryParse<Icons>(valueElement.GetString(), out var iconValue) ? new PrefixSuffix.Icon(iconValue) : null,
-            _ => null
-        };
-    }
-
-    public override void Write(Utf8JsonWriter writer, PrefixSuffix value, JsonSerializerOptions options)
-    {
-        writer.WriteStartObject();
-
-        switch (value)
-        {
-            case PrefixSuffix.Text text:
-                writer.WriteString("type", "text");
-                writer.WriteString("value", text.Value);
-                break;
-            case PrefixSuffix.Icon icon:
-                writer.WriteString("type", "icon");
-                writer.WriteString("value", icon.Value.ToString());
-                break;
-        }
-
-        writer.WriteEndObject();
-    }
-}
-
 public interface IAnyTextInput : IAnyInput
 {
-    public string? Placeholder { get; set; }
-
     public TextInputs Variant { get; set; }
 }
 
@@ -105,18 +39,19 @@ public abstract record TextInputBase : WidgetBase<TextInputBase>, IAnyTextInput
 
     [Prop] public string? ShortcutKey { get; set; }
 
-    [Prop] public Sizes Size { get; set; } = Sizes.Medium;
-
     [Prop] public PrefixSuffix? Prefix { get; set; }
 
     [Prop] public PrefixSuffix? Suffix { get; set; }
+
+    [Prop] public new Scale? Scale { get; set; }
+
+    [Prop] public int? MaxLength { get; set; }
 
     [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
 
     public Type[] SupportedStateTypes() => [];
 }
 
-/// <typeparam name="TString">Typically string or string-convertible types.</typeparam>
 public record TextInput<TString> : TextInputBase, IInput<TString>
 {
     public TextInput(IAnyState state, string? placeholder = null, bool disabled = false, TextInputs variant = TextInputs.Text)
@@ -210,11 +145,7 @@ public static class TextInputExtensions
 
     public static TextInputBase ShortcutKey(this TextInputBase widget, string shortcutKey) => widget with { ShortcutKey = shortcutKey };
 
-    public static TextInputBase Size(this TextInputBase widget, Sizes size) => widget with { Size = size };
-
-    public static TextInputBase Large(this TextInputBase widget) => widget.Size(Sizes.Large);
-
-    public static TextInputBase Small(this TextInputBase widget) => widget.Size(Sizes.Small);
+    public static TextInputBase MaxLength(this TextInputBase widget, int maxLength) => widget with { MaxLength = maxLength };
 
     public static TextInputBase Prefix(this TextInputBase widget, string prefixText)
         => widget with { Prefix = new PrefixSuffix.Text(prefixText) };

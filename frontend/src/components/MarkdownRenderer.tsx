@@ -15,7 +15,12 @@ import rehypeKatex from 'rehype-katex';
 import rehypeRaw from 'rehype-raw';
 import rehypeSlug from 'rehype-slug';
 import 'katex/dist/katex.min.css';
-import { cn, getIvyHost, validateLinkUrl } from '@/lib/utils';
+import {
+  cn,
+  getIvyHost,
+  validateLinkUrl,
+  convertAppUrlToPath,
+} from '@/lib/utils';
 import CopyToClipboardButton from './CopyToClipboardButton';
 import { createPrismTheme } from '@/lib/ivy-prism-theme';
 import { textBlockClassMap, textContainerClass } from '@/lib/textBlockClassMap';
@@ -382,10 +387,8 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
           // Convert app:// URLs to regular paths for href attribute
           let hrefForNavigation = safeHref;
           if (isAppProtocol && safeHref) {
-            // Convert app://MyApp to /MyApp, app://MyApp?param=value to /MyApp?param=value
-            const appId = safeHref.substring(6); // Remove "app://"
-            const [appPath, queryString] = appId.split('?');
-            hrefForNavigation = `/${appPath}${queryString ? `?${queryString}` : ''}`;
+            // Use the utility function to convert app:// URLs, preserving chrome=false
+            hrefForNavigation = convertAppUrlToPath(safeHref);
           }
 
           return (

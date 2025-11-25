@@ -19,7 +19,6 @@ public enum Languages
     Text,
 }
 
-/// <summary>Code display widget with syntax highlighting, line numbers, and copy functionality.</summary>
 public record Code : WidgetBase<Code>
 {
     public Code(string content, Languages language = Languages.Csharp)
@@ -41,7 +40,6 @@ public record Code : WidgetBase<Code>
     [Prop] public bool ShowBorder { get; set; } = true;
 }
 
-/// <summary>Extension methods for Code widget configuration.</summary>
 public static class CodeExtensions
 {
     public static Code Content(this Code code, string content)

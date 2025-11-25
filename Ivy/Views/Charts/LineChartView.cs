@@ -17,18 +17,13 @@ public enum LineChartStyles
     Custom
 }
 
-/// <typeparam name="TSource">The type of the source data objects.</typeparam>
 public interface ILineChartStyle<TSource>
 {
-    /// <returns>A configured LineChart widget ready for rendering.</returns>
     LineChart Design(ExpandoObject[] data, Dimension<TSource> dimension, Measure<TSource>[] measures, TableCalculation[] calculations);
 }
 
-/// <summary>Helper methods for creating line chart style instances.</summary>
 public static class LineChartStyleHelpers
 {
-    /// <returns>An instance of the specified line chart style.</returns>
-    /// <exception cref="InvalidOperationException">Thrown when the specified style is not found.</exception>
     public static ILineChartStyle<TSource> GetStyle<TSource>(LineChartStyles style)
     {
         return style switch
@@ -41,11 +36,8 @@ public static class LineChartStyleHelpers
     }
 }
 
-/// <summary>Default line chart style with full axes, legend, and basic line styling for comprehensive data visualization.</summary>
-/// <typeparam name="TSource">The type of the source data objects.</typeparam>
 public class DefaultLineChartStyle<TSource> : ILineChartStyle<TSource>
 {
-    /// <returns>A fully configured line chart with default styling.</returns>
     public LineChart Design(ExpandoObject[] data, Dimension<TSource> dimension, Measure<TSource>[] measures, TableCalculation[] calculations)
     {
 
@@ -64,11 +56,8 @@ public class DefaultLineChartStyle<TSource> : ILineChartStyle<TSource>
     }
 }
 
-/// <summary>Dashboard-optimized line chart style with natural curves, horizontal grid, and minimal axes for compact display.</summary>
-/// <typeparam name="TSource">The type of the source data objects.</typeparam>
 public class DashboardLineChartStyle<TSource> : ILineChartStyle<TSource>
 {
-    /// <returns>A compact line chart optimized for dashboard display with smooth curves and minimal visual clutter.</returns>
     public LineChart Design(ExpandoObject[] data, Dimension<TSource> dimension, Measure<TSource>[] measures, TableCalculation[] calculations)
     {
         return new LineChart(data)
@@ -82,11 +71,8 @@ public class DashboardLineChartStyle<TSource> : ILineChartStyle<TSource>
     }
 }
 
-/// <summary>Custom line chart style with rainbow colors, step curves, full grid, and enhanced visual elements for distinctive presentation.</summary>
-/// <typeparam name="TSource">The type of the source data objects.</typeparam>
 public class CustomLineChartStyle<TSource> : ILineChartStyle<TSource>
 {
-    /// <returns>A visually distinctive line chart with rainbow colors, step curves, and full grid for enhanced data presentation.</returns>
     public LineChart Design(ExpandoObject[] data, Dimension<TSource> dimension, Measure<TSource>[] measures, TableCalculation[] calculations)
     {
         return new LineChart(data)
@@ -106,8 +92,6 @@ public class CustomLineChartStyle<TSource> : ILineChartStyle<TSource>
     }
 }
 
-/// <summary>A fluent builder for creating line charts from data sources with dimensions, measures, and table calculations.</summary>
-/// <typeparam name="TSource">The type of the source data objects.</typeparam>
 public class LineChartBuilder<TSource>(
     IQueryable<TSource> data,
     Dimension<TSource>? dimension = null,
@@ -122,8 +106,6 @@ public class LineChartBuilder<TSource>(
     private Toolbox? _toolbox;
     private Func<Toolbox, Toolbox>? _toolboxFactory;
 
-    /// <returns>A LineChart widget with the processed data and applied styling, or a loading indicator during data processing.</returns>
-    /// <exception cref="InvalidOperationException">Thrown when dimension or measures are not configured.</exception>
     public override object? Build()
     {
         if (dimension is null)
@@ -183,21 +165,18 @@ public class LineChartBuilder<TSource>(
         return polish?.Invoke(configuredChart) ?? configuredChart;
     }
 
-    /// <returns>The builder instance for method chaining.</returns>
     public LineChartBuilder<TSource> Dimension(string name, Expression<Func<TSource, object>> selector)
     {
         dimension = new Dimension<TSource>(name, selector);
         return this;
     }
 
-    /// <returns>The builder instance for method chaining.</returns>
     public LineChartBuilder<TSource> Measure(string name, Expression<Func<IQueryable<TSource>, object>> aggregator)
     {
         _measures.Add(new Measure<TSource>(name, aggregator));
         return this;
     }
 
-    /// <returns>The builder instance for method chaining.</returns>
     public LineChartBuilder<TSource> TableCalculation(TableCalculation calculation)
     {
         _calculations.Add(calculation);
@@ -226,28 +205,25 @@ public class LineChartBuilder<TSource>(
     }
 }
 
-/// <summary>Extension methods for creating line charts from data collections.</summary>
 public static class LineChartExtensions
 {
-    /// <returns>A LineChartBuilder for fluent configuration.</returns>
     public static LineChartBuilder<TSource> ToLineChart<TSource>(
-        this IEnumerable<TSource> data,
-        Expression<Func<TSource, object>>? dimension = null,
-        Expression<Func<IQueryable<TSource>, object>>[]? measures = null,
-        LineChartStyles style = LineChartStyles.Default,
-        Func<LineChart, LineChart>? polish = null)
+    this IEnumerable<TSource> data,
+    Expression<Func<TSource, object>>? dimension = null,
+    Expression<Func<IQueryable<TSource>, object>>[]? measures = null,
+    LineChartStyles style = LineChartStyles.Default,
+    Func<LineChart, LineChart>? polish = null)
     {
         return data.AsQueryable().ToLineChart(dimension, measures, style, polish);
     }
 
-    /// <returns>A LineChartBuilder for fluent configuration.</returns>
     [OverloadResolutionPriority(1)]
     public static LineChartBuilder<TSource> ToLineChart<TSource>(
-        this IQueryable<TSource> data,
-        Expression<Func<TSource, object>>? dimension = null,
-        Expression<Func<IQueryable<TSource>, object>>[]? measures = null,
-        LineChartStyles style = LineChartStyles.Default,
-        Func<LineChart, LineChart>? polish = null)
+    this IQueryable<TSource> data,
+    Expression<Func<TSource, object>>? dimension = null,
+    Expression<Func<IQueryable<TSource>, object>>[]? measures = null,
+    LineChartStyles style = LineChartStyles.Default,
+    Func<LineChart, LineChart>? polish = null)
     {
         return new LineChartBuilder<TSource>(data,
             dimension != null ? new Dimension<TSource>(ExpressionNameHelper.SuggestName(dimension) ?? "Dimension", dimension) : null,

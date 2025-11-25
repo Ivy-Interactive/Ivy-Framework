@@ -1,5 +1,5 @@
 import { Input } from '@/components/ui/input';
-import { Sizes } from '@/types/sizes';
+import { Scales } from '@/types/scale';
 import React, {
   useState,
   useCallback,
@@ -23,8 +23,7 @@ interface NumberInputProps {
   format?: Intl.NumberFormatOptions;
   allowNegative?: boolean;
   className?: string;
-  size?: Sizes;
-
+  scale?: Scales;
   'data-testid'?: string;
 }
 
@@ -55,7 +54,7 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
       },
       allowNegative = true,
       className = '',
-      size = Sizes.Medium,
+      scale = Scales.Medium,
       'data-testid': dataTestId,
       ...props
     },
@@ -302,7 +301,7 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
           step={step}
           disabled={disabled}
           placeholder={placeholder}
-          size={size}
+          scale={scale}
           className={`${className} ${
             !isValid ? 'border-red-500' : ''
           } ${dragState?.isDragging ? 'select-none' : ''} cursor-pointer`}

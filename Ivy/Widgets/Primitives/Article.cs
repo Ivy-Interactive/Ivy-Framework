@@ -1,4 +1,4 @@
-﻿using Ivy.Core;
+using Ivy.Core;
 using Ivy.Core.Docs;
 using Ivy.Shared;
 using System.Runtime.CompilerServices;
@@ -7,10 +7,8 @@ using System.Threading.Tasks;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
-/// <summary>Structured document widget for long-form content with navigation, table of contents, and interactive link handling.</summary>
 public record Article : WidgetBase<Article>
 {
-    /// <param name="content">Content elements to include in article. Can be text, headings, paragraphs, images, or other widgets.</param>
     public Article(params IEnumerable<object> content) : base(content)
     {
     }

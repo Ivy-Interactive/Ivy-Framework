@@ -6,21 +6,22 @@ using Ivy.Views.Builders;
 
 namespace Ivy.Views.Kanban;
 
-public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
+public class KanbanBuilder<TModel, TGroupKey>(
+    IEnumerable<TModel> records,
+    Func<TModel, TGroupKey> groupBySelector,
+    Func<TModel, object?>? cardIdSelector = null,
+    Func<TModel, object?>? cardOrderSelector = null,
+    Func<TModel, object?>? cardTitleSelector = null,
+    Func<TModel, object?>? cardDescriptionSelector = null)
+    : ViewBase, IStateless
     where TGroupKey : notnull
 {
-    private readonly IEnumerable<TModel> _records;
-    private readonly Func<TModel, TGroupKey> _groupBySelector;
-    private readonly BuilderFactory<TModel> _builderFactory;
+    private readonly BuilderFactory<TModel> _builderFactory = new();
     private IBuilder<TModel>? _cardBuilder;
     private Func<TModel, object?>? _columnOrderBySelector;
     private bool _columnOrderDescending;
     private Func<TModel, object?>? _cardOrderBySelector;
     private bool _cardOrderDescending;
-    private readonly Func<TModel, object?>? _cardIdSelector;
-    private readonly Func<TModel, object?>? _cardTitleSelector;
-    private readonly Func<TModel, object?>? _cardDescriptionSelector;
-    private readonly Func<TModel, object?>? _orderSelector;
     private Func<TModel, object>? _customCardRenderer;
     private Func<Event<Ivy.Kanban, object?>, ValueTask>? _onDelete;
     private Func<Event<Ivy.Kanban, (object? CardId, TGroupKey ToColumn, int? TargetIndex)>, ValueTask>? _onMove;
@@ -29,23 +30,6 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
     private Size? _width = Size.Full();
     private Size? _height = Size.Full();
     private readonly Dictionary<TGroupKey, Size> _columnWidths = new();
-
-    public KanbanBuilder(
-        IEnumerable<TModel> records,
-        Func<TModel, TGroupKey> groupBySelector,
-        Func<TModel, object?>? cardIdSelector = null,
-        Func<TModel, object?>? cardTitleSelector = null,
-        Func<TModel, object?>? cardDescriptionSelector = null,
-        Func<TModel, object?>? orderSelector = null)
-    {
-        _records = records;
-        _groupBySelector = groupBySelector;
-        _builderFactory = new BuilderFactory<TModel>();
-        _cardIdSelector = cardIdSelector;
-        _cardTitleSelector = cardTitleSelector;
-        _cardDescriptionSelector = cardDescriptionSelector;
-        _orderSelector = orderSelector;
-    }
 
     public KanbanBuilder<TModel, TGroupKey> Builder(Func<IBuilderFactory<TModel>, IBuilder<TModel>> builder)
     {
@@ -173,7 +157,7 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
     public KanbanBuilder<TModel, TGroupKey> Width(Expression<Func<TModel, TGroupKey>> groupKeySelector, Size width)
     {
         var compiledSelector = groupKeySelector.Compile();
-        var uniqueKeys = _records.Select(compiledSelector).Distinct().ToList();
+        var uniqueKeys = records.Select(compiledSelector).Distinct().ToList();
         foreach (var key in uniqueKeys)
         {
             _columnWidths[key] = width;
@@ -217,12 +201,12 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
 
     public override object? Build()
     {
-        if (!_records.Any())
+        if (!records.Any())
         {
             return _empty ?? new Fragment();
         }
 
-        var grouped = _records.GroupBy(_groupBySelector);
+        var grouped = records.GroupBy(groupBySelector);
 
         IEnumerable<IGrouping<TGroupKey, TModel>> orderedGroups;
         if (_columnOrderBySelector != null)
@@ -270,13 +254,13 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
             {
                 content = _cardBuilder.Build(item, item) ?? "";
             }
-            else if (_cardTitleSelector != null || _cardDescriptionSelector != null)
+            else if (cardTitleSelector != null || cardDescriptionSelector != null)
             {
                 var cardWidget = new Card();
-                if (_cardTitleSelector != null)
-                    cardWidget = cardWidget.Title(_cardTitleSelector(item)?.ToString() ?? "");
-                if (_cardDescriptionSelector != null)
-                    cardWidget = cardWidget.Description(_cardDescriptionSelector(item)?.ToString() ?? "");
+                if (cardTitleSelector != null)
+                    cardWidget = cardWidget.Title(cardTitleSelector(item)?.ToString() ?? "");
+                if (cardDescriptionSelector != null)
+                    cardWidget = cardWidget.Description(cardDescriptionSelector(item)?.ToString() ?? "");
                 content = cardWidget;
             }
             else
@@ -286,11 +270,11 @@ public class KanbanBuilder<TModel, TGroupKey> : ViewBase, IStateless
 
             var card = new KanbanCard(content);
 
-            var cardId = _cardIdSelector?.Invoke(item);
+            var cardId = cardIdSelector?.Invoke(item);
             if (cardId != null)
                 card = card with { CardId = cardId };
 
-            var priority = _orderSelector?.Invoke(item);
+            var priority = cardOrderSelector?.Invoke(item);
             if (priority != null)
                 card = card with { Priority = priority };
 

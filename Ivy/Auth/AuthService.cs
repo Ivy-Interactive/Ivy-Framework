@@ -1,4 +1,4 @@
-﻿using Ivy.Hooks;
+using Ivy.Hooks;
 using Ivy.Shared;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -9,7 +9,6 @@ public class AuthService(IAuthProvider authProvider, AuthToken? token = null) : 
 {
     private volatile AuthToken? _token = token;
 
-    /// <returns>An authentication token if successful, null otherwise</returns>
     public async Task<AuthToken?> LoginAsync(string email, string password, CancellationToken cancellationToken)
     {
         var token = await authProvider.LoginAsync(email, password, cancellationToken);
@@ -22,7 +21,6 @@ public class AuthService(IAuthProvider authProvider, AuthToken? token = null) : 
         return authProvider.GetOAuthUriAsync(option, callback, cancellationToken);
     }
 
-    /// <returns>An authentication token if successful, null otherwise</returns>
     public async Task<AuthToken?> HandleOAuthCallbackAsync(HttpRequest request, CancellationToken cancellationToken)
     {
         var token = await authProvider.HandleOAuthCallbackAsync(request, cancellationToken);
@@ -61,7 +59,6 @@ public class AuthService(IAuthProvider authProvider, AuthToken? token = null) : 
         return authProvider.GetAuthOptions();
     }
 
-    /// <returns>The refreshed authentication token if successful; otherwise, null.</returns>
     public async Task<AuthToken?> RefreshAccessTokenAsync(CancellationToken cancellationToken)
     {
         var token = _token;

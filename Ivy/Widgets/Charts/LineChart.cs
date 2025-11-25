@@ -1,4 +1,4 @@
-﻿using Ivy.Charts;
+using Ivy.Charts;
 using Ivy.Core;
 using Ivy.Shared;
 
@@ -15,7 +15,6 @@ public record LineChart : WidgetBase<LineChart>
         Height = Size.Full();
     }
 
-    /// <summary>This constructor automatically creates a basic line configuration with default axes and tooltip.</summary>
     public LineChart(object data, string dataKey, string nameKey)
     {
         Data = data;
@@ -53,7 +52,6 @@ public record LineChart : WidgetBase<LineChart>
 
     [Prop] public ReferenceLine[] ReferenceLines { get; init; } = [];
 
-    /// <exception cref="NotSupportedException">LineChart does not support children.</exception>
     public static LineChart operator |(LineChart widget, object child)
     {
         throw new NotSupportedException("LineChart does not support children.");

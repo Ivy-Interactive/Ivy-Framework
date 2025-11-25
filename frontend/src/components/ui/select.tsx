@@ -20,10 +20,10 @@ const SelectTrigger = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Trigger>,
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger> &
     VariantProps<typeof selectTriggerVariants>
->(({ className, size, children, ...props }, ref) => (
+>(({ className, scale, children, ...props }, ref) => (
   <SelectPrimitive.Trigger
     ref={ref}
-    className={cn(selectTriggerVariants({ size, className }))}
+    className={cn(selectTriggerVariants({ scale, className }))}
     {...props}
   >
     {children}
@@ -73,12 +73,12 @@ const SelectContent = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.Content> &
     VariantProps<typeof selectContentVariants>
->(({ className, size, children, position = 'popper', ...props }, ref) => (
+>(({ className, scale, children, position = 'popper', ...props }, ref) => (
   <SelectPrimitive.Portal>
     <SelectPrimitive.Content
       ref={ref}
       className={cn(
-        selectContentVariants({ size }),
+        selectContentVariants({ scale }),
         position === 'popper' &&
           'data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1',
         className
@@ -118,10 +118,10 @@ const SelectItem = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Item>,
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.Item> &
     VariantProps<typeof selectItemVariants>
->(({ className, size, children, ...props }, ref) => (
+>(({ className, scale, children, ...props }, ref) => (
   <SelectPrimitive.Item
     ref={ref}
-    className={cn(selectItemVariants({ size, className }))}
+    className={cn(selectItemVariants({ scale, className }))}
     {...props}
   >
     <span className="absolute right-2 flex h-3.5 w-3.5 items-center justify-center">

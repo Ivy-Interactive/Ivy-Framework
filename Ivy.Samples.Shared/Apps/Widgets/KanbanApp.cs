@@ -180,13 +180,14 @@ public class KanbanBuilderExample : ViewBase
                 .ToKanban(
                     groupBySelector: e => e.Status,
                     idSelector: e => e.Id,
+                    orderSelector: e => e.Priority,
                     titleSelector: e => e.Title,
                     descriptionSelector: e => e.Description)
-                .CardBuilder(factory => factory.Func<Task, Task>(task => new Card(
+                .CardBuilder(task => new Card(
                     content: task.ToDetails()
                         .Remove(x => x.Id)
                         .MultiLine(x => x.Description)
-                )))
+                ))
                 .ColumnOrder(e => GetStatusOrder(e.Status))
                 .Width(Size.Full())
                 .Width(e => e.Status, Size.Fraction(0.33f))

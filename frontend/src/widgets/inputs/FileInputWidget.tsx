@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { getWidth } from '@/lib/styles';
 import { InvalidIcon } from '@/components/InvalidIcon';
-import { Sizes } from '@/types/sizes';
+import { Scales } from '@/types/scale';
 import { useEventHandler } from '@/components/event-handler';
 import { toast } from '@/hooks/use-toast';
 import {
@@ -44,7 +44,7 @@ interface FileInputWidgetProps {
   maxFiles?: number;
   placeholder?: string;
   uploadUrl?: string;
-  size?: Sizes;
+  scale?: Scales;
 }
 
 export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
@@ -60,11 +60,14 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
   maxFiles,
   placeholder,
   uploadUrl,
-  size = Sizes.Medium,
+  scale = Scales.Medium,
 }) => {
   const handleEvent = useEventHandler();
   const [isDragging, setIsDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const filesSelectedInCurrentDialogRef = useRef(false);
+  const dialogWasOpenRef = useRef(false);
+  const blurFiredRef = useRef(false);
 
   // Be defensive in case events is undefined at runtime
   const hasCancelHandler = Array.isArray(events) && events.includes('OnCancel');
@@ -146,9 +149,13 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
       const files = e.target.files;
       if (!files || files.length === 0) {
         // No files selected - dialog was likely cancelled
-        // Blur will be handled by the input's blur event
+        // Blur will be handled by the window focus event listener
+        filesSelectedInCurrentDialogRef.current = false;
         return;
       }
+
+      // Mark that files were selected in this dialog session
+      filesSelectedInCurrentDialogRef.current = true;
 
       // Check max files limit (including already uploaded files)
       const currentFileCount = Array.isArray(value)
@@ -179,45 +186,47 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
       // Reset the input so selecting the same file again triggers onChange
       e.target.value = '';
 
-      // Dialog closed after file selection - trigger blur
-      if (hasBlurHandler) {
+      // Dialog closed after file selection - trigger blur after upload completes
+      // This ensures the server state is updated before blur fires
+      // Only fire blur if window focus handler hasn't already fired it
+      if (!blurFiredRef.current) {
+        blurFiredRef.current = true;
         handleBlur();
       }
     },
-    [multiple, uploadFile, maxFiles, value, hasBlurHandler, handleBlur]
+    [multiple, uploadFile, maxFiles, value, handleBlur]
   );
 
-  // Detect when file dialog closes (for cancel case)
+  // Detect when file dialog closes without selection (cancel case only)
   useEffect(() => {
     if (!hasBlurHandler) return;
 
-    const inputElement = inputRef.current;
-    let dialogWasOpen = false;
-
-    const handleInputFocus = () => {
-      dialogWasOpen = true;
-    };
-
     const handleWindowFocus = () => {
-      if (dialogWasOpen) {
-        dialogWasOpen = false;
-        // Dialog closed - fire blur
-        handleBlur();
+      if (dialogWasOpenRef.current) {
+        dialogWasOpenRef.current = false;
+        // Use queueMicrotask to allow onChange to run first
+        // This prevents double blur when files are selected
+        queueMicrotask(() => {
+          // Check if files were actually selected by looking at the flag
+          // If files were selected, blur will be handled by handleChange after upload
+          // Only fire blur if no files were selected (cancel case) and we haven't already fired
+          if (
+            !filesSelectedInCurrentDialogRef.current &&
+            !blurFiredRef.current
+          ) {
+            blurFiredRef.current = true;
+            handleEvent('OnBlur', id, []);
+          }
+        });
       }
     };
 
-    if (inputElement) {
-      inputElement.addEventListener('focus', handleInputFocus);
-    }
     window.addEventListener('focus', handleWindowFocus);
 
     return () => {
-      if (inputElement) {
-        inputElement.removeEventListener('focus', handleInputFocus);
-      }
       window.removeEventListener('focus', handleWindowFocus);
     };
-  }, [hasBlurHandler, handleBlur]);
+  }, [hasBlurHandler, handleEvent, id]);
 
   const handleCancel = useCallback(
     (fileId: string) => {
@@ -302,10 +311,16 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
       }
 
       if (!disabled && inputRef.current) {
+        // Track when dialog opens (for cancel detection)
+        if (hasBlurHandler) {
+          dialogWasOpenRef.current = true;
+          filesSelectedInCurrentDialogRef.current = false;
+          blurFiredRef.current = false;
+        }
         inputRef.current.click();
       }
     },
-    [disabled]
+    [disabled, hasBlurHandler]
   );
 
   // Render individual file item for multiple files view
@@ -371,7 +386,7 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
       )}
       <div
         className={cn(
-          fileInputVariants({ size }),
+          fileInputVariants({ scale }),
           isDragging && !disabled
             ? 'border-primary bg-primary/5'
             : 'border-muted-foreground/25',
@@ -388,16 +403,15 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
           accept={accept}
           multiple={multiple}
           onChange={handleChange}
-          onBlur={hasBlurHandler ? handleBlur : undefined}
           disabled={disabled}
           className="hidden"
         />
 
         {/* Always show upload icon */}
         <div className="flex flex-col items-center justify-center text-center w-full">
-          <Upload className={uploadIconVariants({ size })} />
+          <Upload className={uploadIconVariants({ scale })} />
           {!hasFiles && (
-            <p className={textVariants({ size })}>
+            <p className={textVariants({ scale })}>
               {placeholder ||
                 `Drag and drop your ${multiple ? 'files' : 'file'} here or click to select`}
             </p>

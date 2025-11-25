@@ -1,4 +1,4 @@
-﻿
+
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Ivy.Core;
@@ -19,8 +19,6 @@ public enum FeedbackInputs
 
 public interface IAnyFeedbackInput : IAnyInput
 {
-    public string? Placeholder { get; set; }
-
     public FeedbackInputs Variant { get; set; }
 }
 
@@ -34,7 +32,7 @@ public abstract record FeedbackInputBase : WidgetBase<FeedbackInputBase>, IAnyFe
 
     [Prop] public FeedbackInputs Variant { get; set; }
 
-    [Prop] public Sizes Size { get; set; }
+    [Prop] public new Scale? Scale { get; set; }
 
     [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
 
@@ -86,7 +84,6 @@ public record FeedbackInput<TNumber> : FeedbackInputBase, IInput<TNumber>
 
 public static class FeedbackInputExtensions
 {
-    /// <summary>Optional explicit variant selection.</summary>
     public static FeedbackInputBase ToFeedbackInput(this IAnyState state, string? placeholder = null, bool disabled = false, FeedbackInputs? variant = null)
     {
         var type = state.GetStateType();
@@ -105,12 +102,6 @@ public static class FeedbackInputExtensions
     public static FeedbackInputBase Variant(this FeedbackInputBase widget, FeedbackInputs variant) => widget with { Variant = variant };
 
     public static FeedbackInputBase Invalid(this FeedbackInputBase widget, string invalid) => widget with { Invalid = invalid };
-
-    public static FeedbackInputBase Size(this FeedbackInputBase widget, Sizes size) => widget with { Size = size };
-
-    public static FeedbackInputBase Large(this FeedbackInputBase widget) => widget.Size(Sizes.Large);
-
-    public static FeedbackInputBase Small(this FeedbackInputBase widget) => widget.Size(Sizes.Small);
 
     [OverloadResolutionPriority(1)]
     public static FeedbackInputBase HandleBlur(this FeedbackInputBase widget, Func<Event<IAnyInput>, ValueTask> onBlur)
