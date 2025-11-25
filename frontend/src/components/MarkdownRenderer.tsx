@@ -24,6 +24,7 @@ import {
   isAppProtocol,
   isRelativePath,
   isStandardUrl,
+  extractAnchorId,
 } from '@/lib/urlValidation';
 import CopyToClipboardButton from './CopyToClipboardButton';
 import { createPrismTheme } from '@/lib/ivy-prism-theme';
@@ -423,7 +424,8 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
                 isAnchor
                   ? e => {
                       e.preventDefault();
-                      const targetId = safeHref.substring(1);
+                      // Extract anchor ID by removing the '#' prefix
+                      const targetId = extractAnchorId(safeHref);
                       if (targetId) {
                         // Small delay to ensure content is rendered
                         requestAnimationFrame(() => {

@@ -71,13 +71,22 @@ export function getChromeParam(): boolean {
  * @param appUrl - The app:// URL to convert (e.g., "app://MyApp" or "app://MyApp?param=value")
  * @returns The converted path (e.g., "/MyApp" or "/MyApp?param=value&chrome=false")
  */
+/**
+ * Extracts the content after the app:// protocol prefix using regex.
+ */
+function extractAppProtocolContent(url: string): string {
+  const match = url.match(/^app:\/\/(.+)$/);
+  return match ? match[1] : '';
+}
+
 export function convertAppUrlToPath(appUrl: string): string {
-  if (!appUrl.startsWith('app://')) {
+  // Use inline regex pattern matching
+  if (!/^app:\/\//.test(appUrl)) {
     return appUrl;
   }
 
-  // Extract app ID and any existing query string
-  const appId = appUrl.substring(6); // Remove "app://"
+  // Extract app ID and any existing query string using regex
+  const appId = extractAppProtocolContent(appUrl);
   const [appPath, existingQueryString] = appId.split('?');
 
   // Build the path

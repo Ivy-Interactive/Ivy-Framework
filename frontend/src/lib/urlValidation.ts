@@ -1,4 +1,24 @@
 /**
+ * Extracts the content after the app:// protocol prefix using regex.
+ * @param url - URL starting with app://
+ * @returns Content after app://, or empty string if not an app:// URL
+ */
+function extractAppProtocolContent(url: string): string {
+  const match = url.match(/^app:\/\/(.+)$/);
+  return match ? match[1] : '';
+}
+
+/**
+ * Extracts the anchor ID (content after the # symbol) using regex.
+ * @param url - URL starting with #
+ * @returns Anchor ID without the #, or empty string if not an anchor link
+ */
+export function extractAnchorId(url: string): string {
+  const match = url.match(/^#(.+)$/);
+  return match ? match[1] : '';
+}
+
+/**
  * Gets the current origin for same-origin validation.
  * Exported for testing purposes - can be mocked in tests.
  */
@@ -23,11 +43,11 @@ export function isExternalUrl(url: string): boolean {
 }
 
 export function isAnchorLink(url: string): boolean {
-  return url.startsWith('#');
+  return /^#/.test(url);
 }
 
 export function isAppProtocol(url: string): boolean {
-  return url.startsWith('app://');
+  return /^app:\/\//.test(url);
 }
 
 export function isRelativePath(url: string): boolean {
@@ -146,7 +166,7 @@ export function validateLinkUrl(url: string | null | undefined): string {
   }
 
   // Allow app:// URLs (Ivy internal navigation)
-  if (url.startsWith('app://')) {
+  if (/^app:\/\//.test(url)) {
     // Validate app:// URLs don't contain dangerous characters
     // Allow query parameters (? and &) but prevent fragments (#) and protocol injection (multiple colons)
     // Pattern: app://[app-id][?query-params] where query-params can contain & but not #
@@ -154,7 +174,7 @@ export function validateLinkUrl(url: string | null | undefined): string {
       return '#';
     }
     // Additional check: prevent protocol injection (multiple colons after app://)
-    const afterProtocol = url.substring(7); // After "app://"
+    const afterProtocol = extractAppProtocolContent(url);
     if (afterProtocol.includes('://') || afterProtocol.match(/:[^?&/]/)) {
       return '#';
     }
@@ -162,7 +182,8 @@ export function validateLinkUrl(url: string | null | undefined): string {
   }
 
   // Allow anchor links (starting with #)
-  if (url.startsWith('#')) {
+  // Use inline regex pattern matching
+  if (/^#/.test(url)) {
     // Validate anchor links are safe
     // Allow colons in anchor IDs (HTML5 allows this), but prevent query params and fragments
     // Pattern: #[anchor-id] where anchor-id can contain colons but not ? or &
@@ -170,7 +191,7 @@ export function validateLinkUrl(url: string | null | undefined): string {
       return '#';
     }
     // Additional check: prevent protocol injection attempts
-    const afterHash = url.substring(1);
+    const afterHash = extractAnchorId(url);
     if (afterHash.includes('://')) {
       return '#';
     }
@@ -289,13 +310,14 @@ export function validateMediaUrl(
   }
 
   // Allow app:// URLs (Ivy internal navigation)
-  if (url.startsWith('app://')) {
+  // Use inline regex pattern matching
+  if (/^app:\/\//.test(url)) {
     // Validate app:// URLs don't contain dangerous characters
     if (!/^app:\/\/[^:#]*(\?[^#]*)?$/.test(url)) {
       return null;
     }
     // Additional check: prevent protocol injection
-    const afterProtocol = url.substring(7);
+    const afterProtocol = extractAppProtocolContent(url);
     if (afterProtocol.includes('://') || afterProtocol.match(/:[^?&/]/)) {
       return null;
     }
