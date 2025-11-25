@@ -13,7 +13,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { Scale } from '@/types/scale';
+import { Scales } from '@/types/scale';
 import {
   labelSizeVariants,
   descriptionSizeVariants,
@@ -31,7 +31,7 @@ interface BoolInputWidgetProps {
   invalid?: string;
   variant: VariantType;
   icon?: string;
-  scale?: Scale;
+  scale?: Scales;
   'data-testid'?: string;
 }
 
@@ -43,7 +43,7 @@ interface BaseVariantProps {
   nullable?: boolean;
   value: NullableBoolean;
   disabled: boolean;
-  scale?: Scale;
+  scale?: Scales;
   'data-testid'?: string;
 }
 
@@ -65,8 +65,8 @@ const InputLabel: React.FC<{
   id: string;
   label?: string;
   description?: string;
-  scale?: Scale;
-}> = React.memo(({ id, label, description, scale = Scale.Medium }) => {
+  scale?: Scales;
+}> = React.memo(({ id, label, description, scale = Scales.Medium }) => {
   if (!label && !description) return null;
 
   return (
@@ -108,7 +108,7 @@ const VariantComponents = {
       disabled,
       nullable,
       invalid,
-      scale = Scale.Medium,
+      scale = Scales.Medium,
       onCheckedChange,
       'data-testid': dataTestId,
     }: CheckboxVariantProps) => {
@@ -152,7 +152,7 @@ const VariantComponents = {
       value,
       disabled,
       invalid,
-      scale = Scale.Medium,
+      scale = Scales.Medium,
       onCheckedChange,
       'data-testid': dataTestId,
     }: SwitchVariantProps) => {
@@ -196,7 +196,7 @@ const VariantComponents = {
       disabled,
       icon,
       invalid,
-      scale = Scale.Medium,
+      scale = Scales.Medium,
       onPressedChange,
       'data-testid': dataTestId,
     }: ToggleVariantProps) => {
@@ -245,7 +245,7 @@ export const BoolInputWidget: React.FC<BoolInputWidgetProps> = ({
   nullable = false,
   variant,
   icon,
-  scale = Scale.Medium,
+  scale = Scales.Medium,
   'data-testid': dataTestId,
 }) => {
   const eventHandler = useEventHandler();

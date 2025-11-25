@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { getWidth } from '@/lib/styles';
 import { logger } from '@/lib/logger';
-import { Scale } from '@/types/scale';
+import { Scales } from '@/types/scale';
 import {
   audioRecorderVariants,
   textSizeVariants,
@@ -27,7 +27,7 @@ interface AudioRecorderWidgetProps {
   width?: string;
   uploadUrl: string;
   chunkInterval: number;
-  scale?: Scale;
+  scale?: Scales;
 }
 
 const supportedMimeTypes = [
@@ -48,7 +48,7 @@ export const AudioRecorderWidget: React.FC<AudioRecorderWidgetProps> = ({
   width,
   uploadUrl,
   chunkInterval,
-  scale = Scale.Medium,
+  scale = Scales.Medium,
 }) => {
   const normalizedMimeTypes = useMemo(() => {
     const candidates: string[] = [];
@@ -300,7 +300,7 @@ export const AudioRecorderWidget: React.FC<AudioRecorderWidgetProps> = ({
 function SecondsCounter(props: {
   start: number | null;
   stopped: number | null;
-  scale?: Scale;
+  scale?: Scales;
 }) {
   const [seconds, setSeconds] = useState(0);
   useEffect(() => {

@@ -14,7 +14,7 @@ import { cn } from '@/lib/utils';
 import { useEventHandler } from '@/components/event-handler';
 import { inputStyles } from '@/lib/styles';
 import { InvalidIcon } from '@/components/InvalidIcon';
-import { Scale } from '@/types/scale';
+import { Scales } from '@/types/scale';
 import {
   dateTimeInputVariants,
   dateTimeInputIconVariants,
@@ -32,7 +32,7 @@ interface DateTimeInputWidgetProps {
   nullable?: boolean;
   invalid?: string;
   format?: string;
-  scale?: Scale;
+  scale?: Scales;
   'data-testid'?: string;
 }
 
@@ -44,7 +44,7 @@ interface BaseVariantProps {
   nullable?: boolean;
   invalid?: string;
   format?: string;
-  scale?: Scale;
+  scale?: Scales;
   'data-testid'?: string;
 }
 
@@ -69,7 +69,7 @@ const DateVariant: React.FC<DateVariantProps> = ({
   invalid,
   onDateChange,
   format: formatProp,
-  scale = Scale.Medium,
+  scale = Scales.Medium,
   'data-testid': dataTestId,
 }) => {
   const [open, setOpen] = useState(false);
@@ -170,7 +170,7 @@ const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
   onDateChange,
   onTimeChange,
   format: formatProp,
-  scale = Scale.Medium,
+  scale = Scales.Medium,
   'data-testid': dataTestId,
 }) => {
   const [open, setOpen] = useState(false);
@@ -381,7 +381,7 @@ const TimeVariant: React.FC<TimeVariantProps> = ({
   nullable,
   invalid,
   onTimeChange,
-  scale = Scale.Medium,
+  scale = Scales.Medium,
   'data-testid': dataTestId,
 }) => {
   // Use local state for the input value to make it uncontrolled
@@ -530,7 +530,7 @@ export const DateTimeInputWidget: React.FC<DateTimeInputWidgetProps> = ({
   nullable = false,
   invalid,
   format: formatProp,
-  scale = Scale.Medium,
+  scale = Scales.Medium,
   'data-testid': dataTestId,
 }) => {
   const eventHandler = useEventHandler();

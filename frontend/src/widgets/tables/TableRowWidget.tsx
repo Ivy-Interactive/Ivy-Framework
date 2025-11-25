@@ -1,12 +1,12 @@
 import React from 'react';
 import { TableRow } from '@/components/ui/table';
-import { Scale } from '@/types/scale';
+import { Scales } from '@/types/scale';
 
 interface TableRowWidgetProps {
   id: string;
   isHeader?: boolean;
   isFooter?: boolean;
-  scale?: Scale;
+  scale?: Scales;
   children?: React.ReactNode;
 }
 

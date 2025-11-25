@@ -3,7 +3,7 @@ import { useEventHandler } from '@/components/event-handler';
 import { StarRating } from '@/components/StarRating';
 import { ThumbsEnum, ThumbsRating } from '@/components/ui/thumbs-rating';
 import React, { useCallback, useMemo } from 'react';
-import { Scale } from '@/types/scale';
+import { Scales } from '@/types/scale';
 
 interface FeedbackInputWidgetProps {
   id: string;
@@ -13,7 +13,7 @@ interface FeedbackInputWidgetProps {
   invalid?: string;
   events: string[];
   nullable?: boolean;
-  scale?: Scale;
+  scale?: Scales;
 }
 
 export const FeedbackInputWidget: React.FC<FeedbackInputWidgetProps> = ({
@@ -24,7 +24,7 @@ export const FeedbackInputWidget: React.FC<FeedbackInputWidgetProps> = ({
   invalid,
   events,
   nullable = false,
-  scale = Scale.Medium,
+  scale = Scales.Medium,
 }) => {
   const eventHandler = useEventHandler();
 

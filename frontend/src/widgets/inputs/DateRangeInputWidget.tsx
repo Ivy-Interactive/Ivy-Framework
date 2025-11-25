@@ -23,7 +23,7 @@ import {
 } from 'date-fns';
 import { useEventHandler } from '@/components/event-handler';
 import { InvalidIcon } from '@/components/InvalidIcon';
-import { Scale } from '@/types/scale';
+import { Scales } from '@/types/scale';
 import {
   dateRangeInputVariants,
   dateRangeInputIconVariants,
@@ -41,7 +41,7 @@ interface DateRangeInputWidgetProps {
   format?: string;
   invalid?: string;
   nullable?: boolean;
-  scale?: Scale;
+  scale?: Scales;
   events: string[];
   'data-testid'?: string;
 }
@@ -54,7 +54,7 @@ export const DateRangeInputWidget: React.FC<DateRangeInputWidgetProps> = ({
   format: formatProp,
   invalid,
   nullable = false,
-  scale = Scale.Medium,
+  scale = Scales.Medium,
   events,
   'data-testid': dataTestId,
 }) => {

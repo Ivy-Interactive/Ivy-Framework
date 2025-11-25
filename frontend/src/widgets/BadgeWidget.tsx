@@ -3,14 +3,14 @@ import Icon from '@/components/Icon';
 import { camelCase } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { Scale } from '@/types/scale';
+import { Scales } from '@/types/scale';
 
 interface BadgeWidgetProps {
   title: string;
   icon?: string;
   iconPosition?: 'Left' | 'Right';
   variant?: string;
-  scale?: Scale;
+  scale?: Scales;
 }
 
 export const BadgeWidget: React.FC<BadgeWidgetProps> = ({
@@ -18,17 +18,17 @@ export const BadgeWidget: React.FC<BadgeWidgetProps> = ({
   icon = undefined,
   iconPosition = 'Left',
   variant = 'primary',
-  scale = Scale.Medium,
+  scale = Scales.Medium,
 }) => {
   let badgeClasses = 'badge-text-primary';
   let iconClasses = 'h-3 w-3';
 
   switch (scale) {
-    case Scale.Small:
+    case Scales.Small:
       badgeClasses = 'badge-text-small';
       iconClasses = 'h-2.5 w-2.5';
       break;
-    case Scale.Large:
+    case Scales.Large:
       badgeClasses = 'badge-text-large';
       iconClasses = 'h-4 w-4';
       break;

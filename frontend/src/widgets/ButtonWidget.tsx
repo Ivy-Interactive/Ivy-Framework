@@ -11,7 +11,7 @@ import {
   getColor,
   getWidth,
 } from '@/lib/styles';
-import { Scale } from '@/types/scale';
+import { Scales } from '@/types/scale';
 
 const ButtonWithTooltip = withTooltip(Button);
 
@@ -20,7 +20,7 @@ interface ButtonWidgetProps {
   title: string;
   icon?: string;
   iconPosition?: 'Left' | 'Right';
-  scale?: Scale;
+  scale?: Scales;
   variant?:
     | 'Primary'
     | 'Inline'
@@ -80,7 +80,7 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
   width,
   children,
   borderRadius,
-  scale = Scale.Medium,
+  scale = Scales.Medium,
   'data-testid': dataTestId,
 }) => {
   const eventHandler = useEventHandler();
@@ -99,12 +99,12 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
     buttonSize = 'icon';
   }
 
-  if (scale == Scale.Small) {
+  if (scale == Scales.Small) {
     buttonSize = 'sm';
     iconSize = 3;
   }
 
-  if (scale == Scale.Large) {
+  if (scale == Scales.Large) {
     buttonSize = 'lg';
     iconSize = 5;
   }

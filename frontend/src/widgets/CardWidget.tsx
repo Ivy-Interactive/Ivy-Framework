@@ -18,7 +18,7 @@ import { cn } from '@/lib/utils';
 import { useEventHandler } from '@/components/event-handler';
 import React, { useCallback } from 'react';
 import { EmptyWidget } from './primitives/EmptyWidget';
-import { Scale } from '@/types/scale';
+import { Scales } from '@/types/scale';
 
 interface CardWidgetProps {
   id: string;
@@ -30,7 +30,7 @@ interface CardWidgetProps {
   borderStyle?: BorderStyle;
   borderColor?: string;
   hoverVariant?: 'None' | 'Pointer' | 'PointerAndTranslate';
-  scale?: Scale;
+  scale?: Scales;
   'data-testid'?: string;
   slots?: {
     Header?: React.ReactNode[];
@@ -49,15 +49,15 @@ export const CardWidget: React.FC<CardWidgetProps> = ({
   borderStyle,
   borderColor,
   hoverVariant,
-  scale = Scale.Medium,
+  scale = Scales.Medium,
   slots,
   'data-testid': testId,
 }) => {
   const eventHandler = useEventHandler();
 
-  const getSizeClasses = (scale?: Scale) => {
+  const getSizeClasses = (scale?: Scales) => {
     switch (scale) {
-      case Scale.Small:
+      case Scales.Small:
         return {
           header: 'px-3 pt-3 pb-1',
           content: 'p-3 pt-0 [&_*]:text-xs',
@@ -66,7 +66,7 @@ export const CardWidget: React.FC<CardWidgetProps> = ({
           description: 'text-xs mt-1',
           icon: 'h-4 w-4',
         };
-      case Scale.Large:
+      case Scales.Large:
         return {
           header: 'px-8 pt-8 pb-2',
           content: 'p-8 pt-0 [&_*]:text-base',

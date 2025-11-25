@@ -15,7 +15,7 @@ import {
   calendarWeekdayVariants,
   calendarDayVariants,
 } from './calendar-variants';
-import { Scale } from '@/types/scale';
+import { Scales } from '@/types/scale';
 
 export function Calendar({
   className,
@@ -25,11 +25,11 @@ export function Calendar({
   buttonVariant = 'ghost',
   formatters,
   components,
-  scale = Scale.Medium,
+  scale = Scales.Medium,
   ...props
 }: React.ComponentProps<typeof DayPicker> & {
   buttonVariant?: React.ComponentProps<typeof Button>['variant'];
-  scale?: Scale;
+  scale?: Scales;
 }) {
   const defaultClassNames = getDefaultClassNames();
 
@@ -181,10 +181,10 @@ function CalendarDayButton({
   className,
   day,
   modifiers,
-  scale = Scale.Medium,
+  scale = Scales.Medium,
   ...props
 }: React.ComponentProps<typeof DayButton> & {
-  scale?: Scale;
+  scale?: Scales;
 }) {
   const defaultClassNames = getDefaultClassNames();
 

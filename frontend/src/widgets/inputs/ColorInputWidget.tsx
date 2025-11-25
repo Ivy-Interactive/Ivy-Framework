@@ -9,7 +9,7 @@ import {
   colorInputVariants,
   colorInputPickerVariants,
 } from '@/components/ui/input/color-input-variants';
-import { Scale } from '@/types/scale';
+import { Scales } from '@/types/scale';
 interface ColorInputWidgetProps {
   id: string;
   value: string | null;
@@ -19,7 +19,7 @@ interface ColorInputWidgetProps {
   nullable?: boolean;
   events?: string[];
   variant?: 'Text' | 'Picker' | 'TextAndPicker';
-  scale?: Scale;
+  scale?: Scales;
 }
 
 // Hoisted color map for backend Colors enum
@@ -62,7 +62,7 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
   nullable = false,
   events = [],
   variant = 'TextAndPicker',
-  scale = Scale.Medium,
+  scale = Scales.Medium,
 }) => {
   const eventHandler = useEventHandler();
   // Use derived state for display and input values

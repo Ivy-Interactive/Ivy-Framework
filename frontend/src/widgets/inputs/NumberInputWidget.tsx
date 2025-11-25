@@ -7,7 +7,7 @@ import { inputStyles } from '@/lib/styles';
 import { InvalidIcon } from '@/components/InvalidIcon';
 import { X } from 'lucide-react';
 import React from 'react';
-import { Scale } from '@/types/scale';
+import { Scales } from '@/types/scale';
 
 const formatStyleMap = {
   Decimal: 'decimal',
@@ -49,7 +49,7 @@ interface NumberInputBaseProps {
   'data-testid'?: string;
   // Add type information for validation
   targetType?: string;
-  scale?: Scale;
+  scale?: Scales;
 }
 
 interface NumberInputWidgetProps
@@ -113,7 +113,7 @@ const SliderVariant = memo(
     disabled = false,
     invalid,
     currency,
-    scale = Scale.Medium,
+    scale = Scales.Medium,
     onValueChange,
     'data-testid': dataTestId,
   }: NumberInputBaseProps) => {
@@ -201,7 +201,7 @@ const NumberVariant = memo(
     nullable = false,
     onValueChange,
     currency,
-    scale = Scale.Medium,
+    scale = Scales.Medium,
     'data-testid': dataTestId,
   }: NumberInputBaseProps) => {
     const formatConfig = useMemo(

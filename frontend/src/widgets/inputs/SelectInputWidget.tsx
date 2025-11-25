@@ -29,7 +29,7 @@ import {
   Option as MultiSelectOption,
 } from '@/components/ui/multiselect';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle';
-import { Scale } from '@/types/scale';
+import { Scales } from '@/types/scale';
 import { cva } from 'class-variance-authority';
 
 // variants for SelectInputWidget container
@@ -88,7 +88,7 @@ interface SelectInputWidgetProps {
   selectMany: boolean;
   separator: string;
   'data-testid'?: string;
-  scale?: Scale;
+  scale?: Scales;
   width?: string;
 }
 
@@ -215,8 +215,8 @@ const ToggleOptionItem: React.FC<{
   option: Option;
   isSelected: boolean;
   invalid?: string;
-  scale?: Scale;
-}> = ({ option, isSelected, invalid, scale = Scale.Medium }) => {
+  scale?: Scales;
+}> = ({ option, isSelected, invalid, scale = Scales.Medium }) => {
   const isInvalid = !!invalid && isSelected;
 
   const sizeClasses = {
@@ -273,7 +273,7 @@ const ToggleVariant: React.FC<SelectInputWidgetProps> = ({
   selectMany = false,
   separator = ',',
   nullable = false,
-  scale = Scale.Medium,
+  scale = Scales.Medium,
   'data-testid': dataTestId,
   width,
 }) => {
@@ -422,7 +422,7 @@ const RadioVariant: React.FC<SelectInputWidgetProps> = ({
   options = [],
   eventHandler,
   nullable = false,
-  scale = Scale.Medium,
+  scale = Scales.Medium,
   'data-testid': dataTestId,
   width,
 }) => {
@@ -537,7 +537,7 @@ const CheckboxVariant: React.FC<SelectInputWidgetProps> = ({
   eventHandler,
   separator = ',',
   nullable = false,
-  scale = Scale.Medium,
+  scale = Scales.Medium,
   'data-testid': dataTestId,
   width,
 }) => {
@@ -736,7 +736,7 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
   eventHandler,
   nullable = false,
   selectMany = false,
-  scale = Scale.Medium,
+  scale = Scales.Medium,
   'data-testid': dataTestId,
   width,
 }) => {

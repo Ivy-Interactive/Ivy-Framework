@@ -8,8 +8,8 @@ import {
   tableSizeVariants,
 } from './table/table-variants';
 import { TableProvider } from './table/TableContext';
-import { useTableSize } from './table/useTableSize';
-import { Scale } from '@/types/scale';
+import { useTableScale } from './table/useTableSize';
+import { Scales } from '@/types/scale';
 
 export interface TableProps
   extends Omit<React.HTMLAttributes<HTMLTableElement>, 'size'>,
@@ -17,7 +17,7 @@ export interface TableProps
 
 const Table = React.forwardRef<HTMLTableElement, TableProps>(
   ({ className, scale, children, ...props }, ref) => (
-    <TableProvider scale={scale as Scale}>
+    <TableProvider scale={scale as Scales}>
       <div className="relative w-full overflow-auto">
         <table
           ref={ref}
@@ -92,7 +92,7 @@ export interface TableHeadProps
 
 const TableHead = React.forwardRef<HTMLTableCellElement, TableHeadProps>(
   ({ className, scale: propScale, ...props }, ref) => {
-    const contextScale = useTableSize();
+    const contextScale = useTableScale();
     const scale = propScale ?? contextScale;
 
     return (
@@ -116,7 +116,7 @@ export interface TableCellProps
 
 const TableCell = React.forwardRef<HTMLTableCellElement, TableCellProps>(
   ({ className, scale: propScale, ...props }, ref) => {
-    const contextScale = useTableSize();
+    const contextScale = useTableScale();
     const scale = propScale ?? contextScale;
 
     return (

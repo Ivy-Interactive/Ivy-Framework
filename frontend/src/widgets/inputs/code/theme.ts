@@ -2,19 +2,19 @@ import { Extension } from '@codemirror/state';
 import { EditorView } from '@codemirror/view';
 import { HighlightStyle, syntaxHighlighting } from '@codemirror/language';
 import { tags } from '@lezer/highlight';
-import { Scale } from '@/types/scale';
+import { Scales } from '@/types/scale';
 
 /**
  * Creates a CodeMirror theme that uses CSS variables for dynamic theming.
  * This replaces the massive CSS file with a proper theme system.
  */
-export function createIvyCodeTheme(scale: Scale = Scale.Medium): Extension {
+export function createIvyCodeTheme(scale: Scales = Scales.Medium): Extension {
   // Get font size based on scale
-  const getFontSize = (scale: Scale) => {
+  const getFontSize = (scale: Scales) => {
     switch (scale) {
-      case Scale.Small:
+      case Scales.Small:
         return '12px';
-      case Scale.Large:
+      case Scales.Large:
         return '16px';
       default:
         return '14px';

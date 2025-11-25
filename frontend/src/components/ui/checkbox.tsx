@@ -3,14 +3,14 @@ import { cn } from '@/lib/utils';
 import * as CheckboxPrimitive from '@radix-ui/react-checkbox';
 import { Check, Minus } from 'lucide-react';
 import * as React from 'react';
-import { Scale } from '@/types/scale';
+import { Scales } from '@/types/scale';
 export type NullableBoolean = boolean | null | undefined;
 
-const getSizeClasses = (scale?: Scale): string => {
+const getSizeClasses = (scale?: Scales): string => {
   switch (scale) {
-    case Scale.Small:
+    case Scales.Small:
       return 'h-3 w-3';
-    case Scale.Large:
+    case Scales.Large:
       return 'h-5 w-5';
     default:
       return 'h-4 w-4';
@@ -24,7 +24,7 @@ type AppCheckboxProps = {
   disabled?: boolean;
   nullable?: boolean;
   className?: string;
-  scale?: Scale;
+  scale?: Scales;
 };
 
 const Checkbox = React.forwardRef<
@@ -39,7 +39,7 @@ const Checkbox = React.forwardRef<
       disabled,
       nullable = false,
       className = '',
-      scale = Scale.Medium,
+      scale = Scales.Medium,
       ...props
     },
     ref

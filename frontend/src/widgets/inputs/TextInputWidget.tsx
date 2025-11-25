@@ -14,7 +14,7 @@ import { InvalidIcon } from '@/components/InvalidIcon';
 import { useFocusable } from '@/hooks/use-focus-management';
 import { useEventHandler } from '@/components/event-handler';
 import { sidebarMenuRef } from '../layouts/sidebar';
-import { Scale } from '@/types/scale';
+import { Scales } from '@/types/scale';
 import Icon from '@/components/Icon';
 import {
   textInputSizeVariants,
@@ -45,7 +45,7 @@ interface TextInputWidgetProps {
   width?: string;
   height?: string;
   shortcutKey?: string;
-  scale?: Scale;
+  scale?: Scales;
   prefix?: PrefixSuffix;
   suffix?: PrefixSuffix;
   maxLength?: number;
@@ -225,7 +225,7 @@ const DefaultVariant: React.FC<{
   onFocus: (e: React.FocusEvent<HTMLInputElement>) => void;
   inputRef?: React.RefObject<HTMLInputElement | HTMLTextAreaElement | null>;
   isFocused: boolean;
-  scale?: Scale;
+  scale?: Scales;
 }> = ({
   type,
   props,
@@ -234,7 +234,7 @@ const DefaultVariant: React.FC<{
   onFocus,
   inputRef,
   isFocused,
-  scale = Scale.Medium,
+  scale = Scales.Medium,
 }) => {
   const { elementRef, savePosition } = useCursorPosition(props.value, inputRef);
   const handleKeyDown = useEnterKeyBlur();
@@ -345,7 +345,7 @@ const TextareaVariant: React.FC<{
   width?: string;
   inputRef?: React.RefObject<HTMLInputElement | HTMLTextAreaElement | null>;
   isFocused: boolean;
-  scale?: Scale;
+  scale?: Scales;
 }> = ({
   props,
   onChange,
@@ -353,7 +353,7 @@ const TextareaVariant: React.FC<{
   onFocus,
   inputRef,
   isFocused,
-  scale = Scale.Medium,
+  scale = Scales.Medium,
 }) => {
   const { elementRef, savePosition } = useCursorPosition(props.value, inputRef);
 
@@ -426,8 +426,15 @@ const PasswordVariant: React.FC<{
   onFocus: (e: React.FocusEvent<HTMLInputElement>) => void;
   width?: string;
   inputRef?: React.RefObject<HTMLInputElement | HTMLTextAreaElement | null>;
-  scale?: Scale;
-}> = ({ props, onChange, onBlur, onFocus, inputRef, scale = Scale.Medium }) => {
+  scale?: Scales;
+}> = ({
+  props,
+  onChange,
+  onBlur,
+  onFocus,
+  inputRef,
+  scale = Scales.Medium,
+}) => {
   const [showPassword, setShowPassword] = useState(false);
   const [hasLastPass, setHasLastPass] = useState(false);
   const { elementRef: elementRefGeneric, savePosition } = useCursorPosition(
@@ -543,7 +550,7 @@ const SearchVariant: React.FC<{
   width?: string;
   inputRef?: React.RefObject<HTMLInputElement | HTMLTextAreaElement | null>;
   isFocused: boolean;
-  scale?: Scale;
+  scale?: Scales;
 }> = ({
   props,
   onChange,
@@ -551,7 +558,7 @@ const SearchVariant: React.FC<{
   onFocus,
   inputRef,
   isFocused,
-  scale = Scale.Medium,
+  scale = Scales.Medium,
 }) => {
   const { savePosition } = useCursorPosition(props.value, inputRef) as {
     savePosition: () => void;

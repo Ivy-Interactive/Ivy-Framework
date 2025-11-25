@@ -21,7 +21,7 @@ import CopyToClipboardButton from '@/components/CopyToClipboardButton';
 import { cpp } from '@codemirror/lang-cpp';
 import { dbml } from './dbml-language';
 import { createIvyCodeTheme } from './theme';
-import { Scale } from '@/types/scale';
+import { Scales } from '@/types/scale';
 import {
   keymap,
   EditorView,
@@ -41,7 +41,7 @@ interface CodeInputWidgetProps {
   events: string[];
   width?: string;
   height?: string;
-  scale?: Scale;
+  scale?: Scales;
 }
 
 const languageExtensions = {
@@ -69,7 +69,7 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
   showCopyButton = false,
   width,
   height,
-  scale = Scale.Medium,
+  scale = Scales.Medium,
   events,
 }) => {
   const eventHandler = useEventHandler();

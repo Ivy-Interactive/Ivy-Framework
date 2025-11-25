@@ -5,7 +5,7 @@ import { Command, CommandGroup, CommandItem } from '@/components/ui/command';
 import { Command as CommandPrimitive } from 'cmdk';
 import { cn } from '@/lib/utils';
 import { cva } from 'class-variance-authority';
-import { Scale } from '@/types/scale';
+import { Scales } from '@/types/scale';
 
 // Variants for MultipleSelector
 const multipleSelectorVariants = cva(
@@ -86,7 +86,7 @@ interface MultipleSelectorProps {
   hidePlaceholderWhenSelected?: boolean;
   emptyIndicator?: React.ReactNode;
   invalid?: boolean;
-  scale?: Scale;
+  scale?: Scales;
 }
 
 const MultipleSelector = React.forwardRef<
@@ -106,7 +106,7 @@ const MultipleSelector = React.forwardRef<
       hidePlaceholderWhenSelected = false,
       emptyIndicator,
       invalid = false,
-      scale = Scale.Medium,
+      scale = Scales.Medium,
     },
     ref
   ) => {

@@ -5,13 +5,13 @@ import { Star } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { InvalidIcon } from '@/components/InvalidIcon';
-import { Scale } from '@/types/scale';
+import { Scales } from '@/types/scale';
 
 interface StarRatingProps {
   totalStars?: number;
   value: number;
   onRate?: (rating: number) => void;
-  scale?: Scale;
+  scale?: Scales;
   className?: string;
   disabled?: boolean;
   invalid?: string;
@@ -21,7 +21,7 @@ export function StarRating({
   totalStars = 5,
   value = 0,
   onRate,
-  scale = Scale.Medium,
+  scale = Scales.Medium,
   className,
   disabled = false,
   invalid,
