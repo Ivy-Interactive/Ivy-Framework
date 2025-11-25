@@ -441,7 +441,7 @@ public class AppHub(
                 switch (state)
                 {
                     case AuthRefreshState.Initial:
-                        logger.LogInformation("AuthRefreshLoop: initialized for {ConnectionId}.", connectionId);
+                        logger.LogInformation("AuthRefreshLoop: Initialized for {ConnectionId}.", connectionId);
                         state = token == null
                             ? AuthRefreshState.HasNoToken
                             : AuthRefreshState.HasToken;
