@@ -180,6 +180,7 @@ public class KanbanBuilderExample : ViewBase
                 .ToKanban(
                     groupBySelector: e => e.Status,
                     idSelector: e => e.Id,
+                    orderSelector: e => e.Priority,
                     titleSelector: e => e.Title,
                     descriptionSelector: e => e.Description)
                 .CardBuilder(task => new Card(

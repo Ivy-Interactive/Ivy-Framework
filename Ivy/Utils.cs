@@ -720,6 +720,26 @@ public static class Utils
         return $"{len:0.##} {sizes[order]}";
     }
 
+    public static string FormatNumber(double number, int decimalPlaces = 2)
+    {
+        static string TrimInvariant(double value, int decimalPlaces)
+        {
+            string format = decimalPlaces > 0 ? "0." + new string('#', Math.Max(0, decimalPlaces)) : "0";
+            var s = value.ToString(format, System.Globalization.CultureInfo.InvariantCulture);
+            if (s.Contains('.'))
+                s = s.TrimEnd('0').TrimEnd('.');
+            return s;
+        }
+
+        if (number >= 1_000_000_000)
+            return TrimInvariant(number / 1_000_000_000D, decimalPlaces) + "B";
+        if (number >= 1_000_000)
+            return TrimInvariant(number / 1_000_000D, decimalPlaces) + "M";
+        if (number >= 1_000)
+            return TrimInvariant(number / 1_000D, decimalPlaces) + "K";
+        return TrimInvariant(number, decimalPlaces);
+    }
+
     public static string? ValidateRedirectUrl(string? url, bool allowExternal = false, string? currentOrigin = null)
     {
         if (string.IsNullOrWhiteSpace(url))
