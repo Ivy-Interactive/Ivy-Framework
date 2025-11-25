@@ -377,6 +377,222 @@ describe('getIvyHost', () => {
   it('falls back when no meta tag is present', () => {
     expect(utils.getIvyHost()).toBe(defaultOrigin);
   });
+
+  describe('localhost variant matching for development', () => {
+    // Store original location properties for cleanup
+    const originalOrigin = window.location.origin;
+    const originalHostname = window.location.hostname;
+
+    beforeEach(() => {
+      // Reset to original before each test
+      Object.defineProperty(window, 'location', {
+        value: {
+          ...window.location,
+          origin: originalOrigin,
+          hostname: originalHostname,
+        },
+        writable: true,
+        configurable: true,
+      });
+    });
+
+    afterEach(() => {
+      // Restore original location
+      Object.defineProperty(window, 'location', {
+        value: {
+          ...window.location,
+          origin: originalOrigin,
+          hostname: originalHostname,
+        },
+        writable: true,
+        configurable: true,
+      });
+    });
+
+    it('allows localhost with different ports when current origin is localhost', () => {
+      // Mock current origin as localhost
+      Object.defineProperty(window, 'location', {
+        value: {
+          ...window.location,
+          origin: 'http://localhost:5173',
+          hostname: 'localhost',
+        },
+        writable: true,
+        configurable: true,
+      });
+
+      setIvyHostMeta('http://localhost:8080');
+      expect(utils.getIvyHost()).toBe('http://localhost:8080');
+    });
+
+    it('allows localhost with different protocols when current origin is localhost', () => {
+      Object.defineProperty(window, 'location', {
+        value: {
+          ...window.location,
+          origin: 'http://localhost:5173',
+          hostname: 'localhost',
+        },
+        writable: true,
+        configurable: true,
+      });
+
+      setIvyHostMeta('https://localhost:5173');
+      expect(utils.getIvyHost()).toBe('https://localhost:5173');
+    });
+
+    it('allows 127.0.0.1 with different ports when current origin is 127.0.0.1', () => {
+      Object.defineProperty(window, 'location', {
+        value: {
+          ...window.location,
+          origin: 'http://127.0.0.1:5173',
+          hostname: '127.0.0.1',
+        },
+        writable: true,
+        configurable: true,
+      });
+
+      setIvyHostMeta('http://127.0.0.1:8080');
+      expect(utils.getIvyHost()).toBe('http://127.0.0.1:8080');
+    });
+
+    it('allows localhost and 127.0.0.1 to match (same logical host)', () => {
+      Object.defineProperty(window, 'location', {
+        value: {
+          ...window.location,
+          origin: 'http://localhost:5173',
+          hostname: 'localhost',
+        },
+        writable: true,
+        configurable: true,
+      });
+
+      setIvyHostMeta('http://127.0.0.1:8080');
+      expect(utils.getIvyHost()).toBe('http://127.0.0.1:8080');
+    });
+
+    it('allows 127.0.0.1 and localhost to match (reverse direction)', () => {
+      Object.defineProperty(window, 'location', {
+        value: {
+          ...window.location,
+          origin: 'http://127.0.0.1:5173',
+          hostname: '127.0.0.1',
+        },
+        writable: true,
+        configurable: true,
+      });
+
+      setIvyHostMeta('http://localhost:8080');
+      expect(utils.getIvyHost()).toBe('http://localhost:8080');
+    });
+
+    it('allows [::1] (IPv6 localhost) with different ports', () => {
+      Object.defineProperty(window, 'location', {
+        value: {
+          ...window.location,
+          origin: 'http://[::1]:5173',
+          hostname: '[::1]',
+        },
+        writable: true,
+        configurable: true,
+      });
+
+      setIvyHostMeta('http://[::1]:8080');
+      expect(utils.getIvyHost()).toBe('http://[::1]:8080');
+    });
+
+    it('allows localhost and [::1] to match (same logical host)', () => {
+      Object.defineProperty(window, 'location', {
+        value: {
+          ...window.location,
+          origin: 'http://localhost:5173',
+          hostname: 'localhost',
+        },
+        writable: true,
+        configurable: true,
+      });
+
+      setIvyHostMeta('http://[::1]:8080');
+      expect(utils.getIvyHost()).toBe('http://[::1]:8080');
+    });
+
+    it('rejects non-localhost hosts even with same hostname pattern', () => {
+      Object.defineProperty(window, 'location', {
+        value: {
+          ...window.location,
+          origin: 'https://example.com',
+          hostname: 'example.com',
+        },
+        writable: true,
+        configurable: true,
+      });
+
+      setIvyHostMeta('http://example.com:8080');
+      // Should fall back to default origin, not allow the different port
+      expect(utils.getIvyHost()).toBe('https://example.com');
+    });
+
+    it('rejects localhost when current origin is not localhost (security)', () => {
+      Object.defineProperty(window, 'location', {
+        value: {
+          ...window.location,
+          origin: 'https://example.com',
+          hostname: 'example.com',
+        },
+        writable: true,
+        configurable: true,
+      });
+
+      setIvyHostMeta('http://localhost:8080');
+      // Should fall back to default origin, not allow localhost
+      expect(utils.getIvyHost()).toBe('https://example.com');
+    });
+
+    it('rejects non-localhost when current origin is localhost (security)', () => {
+      Object.defineProperty(window, 'location', {
+        value: {
+          ...window.location,
+          origin: 'http://localhost:5173',
+          hostname: 'localhost',
+        },
+        writable: true,
+        configurable: true,
+      });
+
+      setIvyHostMeta('http://example.com:8080');
+      // Should fall back to default origin, not allow external host
+      expect(utils.getIvyHost()).toBe('http://localhost:5173');
+    });
+
+    it('handles case-insensitive localhost matching', () => {
+      Object.defineProperty(window, 'location', {
+        value: {
+          ...window.location,
+          origin: 'http://LOCALHOST:5173',
+          hostname: 'LOCALHOST',
+        },
+        writable: true,
+        configurable: true,
+      });
+
+      setIvyHostMeta('http://localhost:8080');
+      expect(utils.getIvyHost()).toBe('http://localhost:8080');
+    });
+
+    it('allows exact origin match to take precedence over localhost variant check', () => {
+      Object.defineProperty(window, 'location', {
+        value: {
+          ...window.location,
+          origin: 'http://localhost:5173',
+          hostname: 'localhost',
+        },
+        writable: true,
+        configurable: true,
+      });
+
+      setIvyHostMeta('http://localhost:5173');
+      expect(utils.getIvyHost()).toBe('http://localhost:5173');
+    });
+  });
 });
 
 const mediaValidationCases = [

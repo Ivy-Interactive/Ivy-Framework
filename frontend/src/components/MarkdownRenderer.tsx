@@ -15,7 +15,7 @@ import rehypeKatex from 'rehype-katex';
 import rehypeRaw from 'rehype-raw';
 import rehypeSlug from 'rehype-slug';
 import 'katex/dist/katex.min.css';
-import { cn, getIvyHost } from '@/lib/utils';
+import { cn, getIvyHost, convertAppUrlToPath } from '@/lib/utils';
 import {
   validateLinkUrl,
   validateImageUrl,
@@ -25,12 +25,6 @@ import {
   isRelativePath,
   isStandardUrl,
 } from '@/lib/urlValidation';
-import {
-  cn,
-  getIvyHost,
-  validateLinkUrl,
-  convertAppUrlToPath,
-} from '@/lib/utils';
 import CopyToClipboardButton from './CopyToClipboardButton';
 import { createPrismTheme } from '@/lib/ivy-prism-theme';
 import { textBlockClassMap, textContainerClass } from '@/lib/textBlockClassMap';
@@ -232,8 +226,9 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
   const handleLinkClick = useCallback(
     (href: string, event: React.MouseEvent<HTMLAnchorElement>) => {
       // Validate URL to prevent open redirect vulnerabilities
+      // validateLinkUrl always returns a string ('#' for invalid URLs)
       const validatedHref = validateLinkUrl(href);
-      if (validatedHref === '#' || !validatedHref) {
+      if (validatedHref === '#') {
         event.preventDefault();
         return;
       }
@@ -398,8 +393,9 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
           ...props
         }: React.AnchorHTMLAttributes<HTMLAnchorElement>) => {
           // Validate URL to prevent open redirect vulnerabilities
+          // validateLinkUrl always returns a string ('#' for invalid URLs)
           const safeHref = validateLinkUrl(href);
-          if (!safeHref || safeHref === '#') {
+          if (safeHref === '#') {
             return <span {...props}>{children}</span>;
           }
 
@@ -411,7 +407,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
 
           // Convert app:// URLs to regular paths for href attribute
           let hrefForNavigation = safeHref;
-          if (isAppProtocol && safeHref) {
+          if (isApp) {
             // Use the utility function to convert app:// URLs, preserving chrome=false
             hrefForNavigation = convertAppUrlToPath(safeHref);
           }
@@ -488,11 +484,9 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
       return url;
     }
     // Validate URL before transforming to prevent open redirect vulnerabilities
+    // validateLinkUrl always returns a string ('#' for invalid URLs)
     const validatedUrl = validateLinkUrl(url);
-    if (validatedUrl === '#') {
-      // Invalid URL, return safe fallback
-      return '#';
-    }
+    // defaultUrlTransform handles all valid URLs, and '#' for invalid URLs
     return defaultUrlTransform(validatedUrl);
   }, []);
 

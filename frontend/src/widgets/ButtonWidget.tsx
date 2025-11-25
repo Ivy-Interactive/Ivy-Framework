@@ -53,12 +53,8 @@ const getUrl = (url: string): string => {
   // validateLinkUrl handles app://, anchor links, relative paths, and http/https URLs safely
   const validatedUrl = validateLinkUrl(url);
 
-  // Early return for invalid URLs
-  if (validatedUrl === '#') {
-    return '#';
-  }
-
   // Early returns for URLs that don't need host prefixing
+  // Invalid URLs (marked with '#') are also caught by isAnchorLink since '#' starts with '#'
   if (isAppProtocol(validatedUrl) || isAnchorLink(validatedUrl)) {
     return validatedUrl;
   }

@@ -146,20 +146,34 @@ function isAllowedIvyHost(origin: string): boolean {
     // For development: allow same hostname with different port/protocol
     // This enables development workflows where frontend and backend run on different ports
     // Only allow this for localhost/127.0.0.1 to prevent security issues in production
-    const isLocalhost =
-      currentUrl.hostname === 'localhost' ||
-      currentUrl.hostname === '127.0.0.1' ||
-      currentUrl.hostname === '[::1]';
-    if (isLocalhost && url.hostname === currentUrl.hostname) {
+    const localhostVariants = ['localhost', '127.0.0.1', '[::1]', '::1'];
+    const isCurrentLocalhost = localhostVariants.includes(
+      currentUrl.hostname.toLowerCase()
+    );
+    const isUrlLocalhost = localhostVariants.includes(
+      url.hostname.toLowerCase()
+    );
+
+    // Allow if both are localhost variants (they represent the same logical host)
+    // This allows different ports/protocols during development
+    if (isCurrentLocalhost && isUrlLocalhost) {
       return true;
     }
 
     // Check against the allowlist
-    return ALLOWED_IVY_HOSTS.some(
-      allowed =>
-        new URL(allowed).origin.replace(/\/+$/, '').toLowerCase() ===
-        normalizedOrigin
-    );
+    // Normalize each allowed origin and compare (avoid creating URL objects in loop)
+    return ALLOWED_IVY_HOSTS.some(allowed => {
+      try {
+        const allowedUrl = new URL(allowed);
+        const normalizedAllowed = allowedUrl.origin
+          .replace(/\/+$/, '')
+          .toLowerCase();
+        return normalizedAllowed === normalizedOrigin;
+      } catch {
+        // Skip invalid URLs in allowlist
+        return false;
+      }
+    });
   } catch {
     return false;
   }
