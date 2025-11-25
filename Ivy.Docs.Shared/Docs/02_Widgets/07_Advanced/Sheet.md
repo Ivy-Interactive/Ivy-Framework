@@ -208,7 +208,7 @@ public class NavigationSheetContent : ViewBase
 
 ### Complex Layout Structure
 
-When building complex interfaces with HeaderLayout or other structured layouts, you can manage the sheet separately and return both the main body and the sheet in a Fragment. This pattern is useful when the sheet needs to be opened from multiple places or based on complex state.
+This pattern demonstrates how to integrate sheets with stateful widgets, where the sheet needs to interact with the parent component's state. By returning both the body and sheet in a Fragment, you can create complex interactions between the sheet form and the main content.
 
 ```csharp demo-tabs
 public record KanbanTask(string Id, string Title, string Status, int Priority, string Description, string Assignee);
