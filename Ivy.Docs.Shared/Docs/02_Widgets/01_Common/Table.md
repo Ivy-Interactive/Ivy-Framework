@@ -50,9 +50,9 @@ public class BasicRowTable : ViewBase
 
 **Width(Size.Full())** - sets the overall table width
 
-**Width(p => p.ColumnName, Size.Units())** – sets the column width
+**ColumnWidth(p => p.ColumnName, Size.Units())** – sets the column width
 
-**Width(p => p.ColumnName, Size.Fraction())** – sets the column width as a fraction (percentage) of available space
+**ColumnWidth(p => p.ColumnName, Size.Fraction())** – sets the column width as a fraction (percentage) of available space
 
 Long text in cells automatically gets truncated with ellipsis (...) and shows full content in tooltips on hover
 
@@ -80,10 +80,10 @@ public class CustomBuilderTable : ViewBase
 
         return products.ToTable()
             .Width(Size.Full())
-            .Width(p => p.Price, Size.Units(100))
-            .Width(p => p.Sku, Size.Fraction(0.15f))
-            .Width(p => p.Name, Size.Fraction(0.3f))
-            .Width(p => p.Url, Size.Fraction(0.55f))
+            .ColumnWidth(p => p.Price, Size.Units(100))
+            .ColumnWidth(p => p.Sku, Size.Fraction(0.15f))
+            .ColumnWidth(p => p.Name, Size.Fraction(0.3f))
+            .ColumnWidth(p => p.Url, Size.Fraction(0.55f))
             .Header(p => p.Price, "Unit Price")
             .Header(p => p._hiddenNotes, "Internal Notes") // underscore + letter hidden automatically
             .Align(p => p.Price, Align.Right)
@@ -253,11 +253,11 @@ public class CustomBuildersTable : ViewBase
 
         return products.ToTable()
             .Width(Size.Full())
-            .Width(p => p.Sku, Size.Fraction(0.15f))          // 15% for SKU
-            .Width(p => p.Name, Size.Fraction(0.25f))         // 25% for Name
-            .Width(p => p.Price, Size.Fraction(0.15f))        // 15% for Price
-            .Width(p => p.Url, Size.Fraction(0.2f))           // 20% for URL
-            .Width(p => p.Description, Size.Fraction(0.25f))  // 25% for Description
+            .ColumnWidth(p => p.Sku, Size.Fraction(0.15f))          // 15% for SKU
+            .ColumnWidth(p => p.Name, Size.Fraction(0.25f))         // 25% for Name
+            .ColumnWidth(p => p.Price, Size.Fraction(0.15f))        // 15% for Price
+            .ColumnWidth(p => p.Url, Size.Fraction(0.2f))           // 20% for URL
+            .ColumnWidth(p => p.Description, Size.Fraction(0.25f))  // 25% for Description
             .MultiLine(p => p.Description)                    // Enable multiline for the Description column
             .Builder(p => p.Url, f => f.Link())               // Link builder
             .Builder(p => p.Description, f => f.Text())       // Text builder
