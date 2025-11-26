@@ -193,12 +193,12 @@ export function validateLinkUrl(url: string | null | undefined): string {
   // Allow app:// URLs (Ivy internal navigation)
   if (/^app:\/\//.test(url)) {
     // Validate app:// URLs don't contain dangerous characters
-    // Allow query parameters (? and &) but prevent fragments (#) and protocol injection (multiple colons)
-    // Pattern: app://[app-id][?query-params] where query-params can contain & but not #
+    // Pattern: app://[app-id][?query-params] where app-id has no colons/hashes, query-params have no #
     if (!/^app:\/\/[^:#]*(\?[^#]*)?$/.test(url)) {
       return '#';
     }
-    // Additional check: prevent protocol injection (multiple colons after app://)
+    // Additional check: prevent protocol injection attempts
+    // Catches '://' in query params and colons that could be used for protocol injection
     const afterProtocol = extractAppProtocolContent(url);
     if (afterProtocol.includes('://') || afterProtocol.match(/:[^?&/]/)) {
       return '#';
@@ -313,8 +313,6 @@ export function validateMediaUrl(
       // If no mediaType specified, reject all data URLs
       return null;
     }
-    // Note: No need to check for '://' since we're already in a data: block
-    // and data URLs don't contain '://' in their structure
     return url;
   }
 
@@ -374,13 +372,14 @@ export function validateMediaUrl(
   }
 
   // Allow app:// URLs (Ivy internal navigation)
-  // Use inline regex pattern matching
   if (/^app:\/\//.test(url)) {
     // Validate app:// URLs don't contain dangerous characters
+    // Pattern: app://[app-id][?query-params] where app-id has no colons/hashes, query-params have no #
     if (!/^app:\/\/[^:#]*(\?[^#]*)?$/.test(url)) {
       return null;
     }
-    // Additional check: prevent protocol injection
+    // Additional check: prevent protocol injection attempts
+    // Catches '://' in query params and colons that could be used for protocol injection
     const afterProtocol = extractAppProtocolContent(url);
     if (afterProtocol.includes('://') || afterProtocol.match(/:[^?&/]/)) {
       return null;
