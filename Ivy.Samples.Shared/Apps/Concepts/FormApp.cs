@@ -66,6 +66,37 @@ public record TestModel(
     string? Website,
     string? Color
 );
+
+public record ComprehensiveInputModel(
+    // Text inputs
+    string TextField,
+    string EmailField,
+    string PasswordField,
+    string SearchField,
+    string TelField,
+    string UrlField,
+    string TextAreaField,
+    // Number inputs
+    int IntegerField,
+    double DecimalField,
+    // Bool inputs
+    bool CheckboxField,
+    bool SwitchField,
+    bool ToggleField,
+    // DateTime inputs
+    DateTime DateField,
+    DateTime DateTimeField,
+    DateTime TimeField,
+    // Select inputs
+    UserRole SelectField,
+    List<Fruits> MultiSelectField,
+    // Other inputs
+    string ColorField,
+    string CodeField,
+    int RatingField,
+    bool ThumbsField,
+    int EmojiField
+);
 public record DatabaseGeneratorModel(
     ViewState ViewState,
     string Prompt,
@@ -162,49 +193,79 @@ public class FormApp : SampleBase
                 settingsForm.ToDetails()
             ).Width(1 / 2f)
         );
-        var smallModel = UseState(() => new TestModel(
+        var smallModel = UseState(() => new ComprehensiveInputModel(
             "John Doe",
             "john@example.com",
             "password123",
-            "A small form example with all input types",
-            true,
-            25,
-            75000.50,
-            DateTime.Parse("1999-01-01"),
-            UserRole.User,
+            "Search query",
             "+1-555-0123",
             "https://johndoe.com",
-            "#3B82F6"
+            "A small form example with all input types",
+            25,
+            75000.50,
+            true,
+            false,
+            true,
+            DateTime.Parse("1999-01-01"),
+            DateTime.Parse("1999-01-01 14:30:00"),
+            DateTime.Parse("1999-01-01 14:30:00"),
+            UserRole.User,
+            new List<Fruits> { Fruits.Apple, Fruits.Banana },
+            "#3B82F6",
+            "{\"key\": \"value\"}",
+            4,
+            true,
+            3
         ));
 
-        var mediumModel = UseState(() => new TestModel(
+        var mediumModel = UseState(() => new ComprehensiveInputModel(
             "Jane Smith",
             "jane@example.com",
             "password456",
-            "A medium form example with all input types",
-            false,
-            30,
-            85000.75,
-            DateTime.Parse("1994-06-15"),
-            UserRole.Admin,
+            "Search query",
             "+1-555-0456",
             "https://janesmith.com",
-            "#10B981"
+            "A medium form example with all input types",
+            30,
+            85000.75,
+            false,
+            true,
+            false,
+            DateTime.Parse("1994-06-15"),
+            DateTime.Parse("1994-06-15 10:20:00"),
+            DateTime.Parse("1994-06-15 10:20:00"),
+            UserRole.Admin,
+            new List<Fruits> { Fruits.Orange },
+            "#10B981",
+            "console.log('hello');",
+            5,
+            false,
+            4
         ));
 
-        var largeModel = UseState(() => new TestModel(
+        var largeModel = UseState(() => new ComprehensiveInputModel(
             "Bob Johnson",
             "bob@example.com",
             "password789",
-            "A large form example with all input types",
-            true,
-            35,
-            95000.25,
-            DateTime.Parse("1989-12-25"),
-            UserRole.Guest,
+            "Search query",
             "+1-555-0789",
             "https://bobjohnson.com",
-            "#F59E0B"
+            "A large form example with all input types",
+            35,
+            95000.25,
+            true,
+            true,
+            true,
+            DateTime.Parse("1989-12-25"),
+            DateTime.Parse("1989-12-25 18:45:00"),
+            DateTime.Parse("1989-12-25 18:45:00"),
+            UserRole.Guest,
+            new List<Fruits> { Fruits.Pear, Fruits.Strawberry },
+            "#F59E0B",
+            "SELECT * FROM users;",
+            3,
+            true,
+            5
         ));
 
         return Layout.Vertical()
@@ -217,47 +278,170 @@ public class FormApp : SampleBase
                | Text.H3("Database Generator Form Test")
                | databaseForm
                | Text.H2("Form Size Demonstration")
-               | Text.P("This demonstrates how form sizes affect spacing between fields.")
+               | Text.P("This demonstrates how form sizes affect spacing between fields. All input types are shown with Small, Medium, and Large scales.")
                | (Layout.Horizontal()
                 | new Card(
                     smallModel.ToForm()
                         .Small()
-                        .Group("Personal Information", open: true, m => m.Name, m => m.Email, m => m.Age)
-                        .Group("Contact Details", m => m.PhoneNumber, m => m.Website)
-                        .Builder(m => m.Description, s => s.ToTextAreaInput())
-                        .Builder(m => m.Password, s => s.ToPasswordInput())
-                        .Builder(m => m.PhoneNumber, s => s.ToTelInput())
-                        .Builder(m => m.Website, s => s.ToUrlInput())
-                        .Builder(m => m.Color, s => s.ToColorInput())
+                        .Group("Text Inputs", open: true,
+                            m => m.TextField,
+                            m => m.EmailField,
+                            m => m.PasswordField,
+                            m => m.SearchField,
+                            m => m.TelField,
+                            m => m.UrlField,
+                            m => m.TextAreaField)
+                        .Group("Number Inputs",
+                            m => m.IntegerField,
+                            m => m.DecimalField)
+                        .Group("Bool Inputs",
+                            m => m.CheckboxField,
+                            m => m.SwitchField,
+                            m => m.ToggleField)
+                        .Group("DateTime Inputs",
+                            m => m.DateField,
+                            m => m.DateTimeField,
+                            m => m.TimeField)
+                        .Group("Select Inputs",
+                            m => m.SelectField,
+                            m => m.MultiSelectField)
+                        .Group("Other Inputs",
+                            m => m.ColorField,
+                            m => m.CodeField,
+                            m => m.RatingField,
+                            m => m.ThumbsField,
+                            m => m.EmojiField)
+                        .Builder(m => m.TextField, s => s.ToTextInput())
+                        .Builder(m => m.EmailField, s => s.ToEmailInput())
+                        .Builder(m => m.PasswordField, s => s.ToPasswordInput())
+                        .Builder(m => m.SearchField, s => s.ToSearchInput())
+                        .Builder(m => m.TelField, s => s.ToTelInput())
+                        .Builder(m => m.UrlField, s => s.ToUrlInput())
+                        .Builder(m => m.TextAreaField, s => s.ToTextAreaInput())
+                        .Builder(m => m.CheckboxField, s => s.ToBoolInput().Variant(BoolInputs.Checkbox))
+                        .Builder(m => m.SwitchField, s => s.ToBoolInput().Variant(BoolInputs.Switch))
+                        .Builder(m => m.ToggleField, s => s.ToBoolInput().Variant(BoolInputs.Toggle))
+                        .Builder(m => m.DateField, s => s.ToDateTimeInput().Variant(DateTimeInputs.Date))
+                        .Builder(m => m.DateTimeField, s => s.ToDateTimeInput().Variant(DateTimeInputs.DateTime))
+                        .Builder(m => m.TimeField, s => s.ToDateTimeInput().Variant(DateTimeInputs.Time))
+                        .Builder(m => m.SelectField, s => s.ToSelectInput())
+                        .Builder(m => m.MultiSelectField, s => s.ToSelectInput().List())
+                        .Builder(m => m.ColorField, s => s.ToColorInput())
+                        .Builder(m => m.CodeField, s => s.ToCodeInput().Language(Languages.Json))
+                        .Builder(m => m.RatingField, s => s.ToFeedbackInput().Variant(FeedbackInputs.Stars))
+                        .Builder(m => m.ThumbsField, s => s.ToFeedbackInput().Variant(FeedbackInputs.Thumbs))
+                        .Builder(m => m.EmojiField, s => s.ToFeedbackInput().Variant(FeedbackInputs.Emojis))
                 )
                 .Width(1 / 3f)
-                .Title("Small Form (with Groups)")
+                .Title("Small Scale - All Inputs")
                 | new Card(
                     mediumModel.ToForm()
                         .Medium()
-                        .Group("Account", open: true, m => m.Name, m => m.Email, m => m.Password)
-                        .Group("Profile", m => m.Age, m => m.BirthDate, m => m.Role)
-                        .Builder(m => m.Description, s => s.ToTextAreaInput())
-                        .Builder(m => m.Password, s => s.ToPasswordInput())
-                        .Builder(m => m.PhoneNumber, s => s.ToTelInput())
-                        .Builder(m => m.Website, s => s.ToUrlInput())
-                        .Builder(m => m.Color, s => s.ToColorInput())
+                        .Group("Text Inputs", open: true,
+                            m => m.TextField,
+                            m => m.EmailField,
+                            m => m.PasswordField,
+                            m => m.SearchField,
+                            m => m.TelField,
+                            m => m.UrlField,
+                            m => m.TextAreaField)
+                        .Group("Number Inputs",
+                            m => m.IntegerField,
+                            m => m.DecimalField)
+                        .Group("Bool Inputs",
+                            m => m.CheckboxField,
+                            m => m.SwitchField,
+                            m => m.ToggleField)
+                        .Group("DateTime Inputs",
+                            m => m.DateField,
+                            m => m.DateTimeField,
+                            m => m.TimeField)
+                        .Group("Select Inputs",
+                            m => m.SelectField,
+                            m => m.MultiSelectField)
+                        .Group("Other Inputs",
+                            m => m.ColorField,
+                            m => m.CodeField,
+                            m => m.RatingField,
+                            m => m.ThumbsField,
+                            m => m.EmojiField)
+                        .Builder(m => m.TextField, s => s.ToTextInput())
+                        .Builder(m => m.EmailField, s => s.ToEmailInput())
+                        .Builder(m => m.PasswordField, s => s.ToPasswordInput())
+                        .Builder(m => m.SearchField, s => s.ToSearchInput())
+                        .Builder(m => m.TelField, s => s.ToTelInput())
+                        .Builder(m => m.UrlField, s => s.ToUrlInput())
+                        .Builder(m => m.TextAreaField, s => s.ToTextAreaInput())
+                        .Builder(m => m.CheckboxField, s => s.ToBoolInput().Variant(BoolInputs.Checkbox))
+                        .Builder(m => m.SwitchField, s => s.ToBoolInput().Variant(BoolInputs.Switch))
+                        .Builder(m => m.ToggleField, s => s.ToBoolInput().Variant(BoolInputs.Toggle))
+                        .Builder(m => m.DateField, s => s.ToDateTimeInput().Variant(DateTimeInputs.Date))
+                        .Builder(m => m.DateTimeField, s => s.ToDateTimeInput().Variant(DateTimeInputs.DateTime))
+                        .Builder(m => m.TimeField, s => s.ToDateTimeInput().Variant(DateTimeInputs.Time))
+                        .Builder(m => m.SelectField, s => s.ToSelectInput())
+                        .Builder(m => m.MultiSelectField, s => s.ToSelectInput().List())
+                        .Builder(m => m.ColorField, s => s.ToColorInput())
+                        .Builder(m => m.CodeField, s => s.ToCodeInput().Language(Languages.Javascript))
+                        .Builder(m => m.RatingField, s => s.ToFeedbackInput().Variant(FeedbackInputs.Stars))
+                        .Builder(m => m.ThumbsField, s => s.ToFeedbackInput().Variant(FeedbackInputs.Thumbs))
+                        .Builder(m => m.EmojiField, s => s.ToFeedbackInput().Variant(FeedbackInputs.Emojis))
                 )
                 .Width(1 / 3f)
-                .Title("Medium Form (with Groups)")
+                .Title("Medium Scale - All Inputs")
                 | new Card(
                     largeModel.ToForm()
                         .Large()
-                        .Group("Basic Info", open: true, m => m.Name, m => m.Email)
-                        .Group("Details", m => m.Description, m => m.Color)
-                        .Builder(m => m.Description, s => s.ToTextAreaInput())
-                        .Builder(m => m.Password, s => s.ToPasswordInput())
-                        .Builder(m => m.PhoneNumber, s => s.ToTelInput())
-                        .Builder(m => m.Website, s => s.ToUrlInput())
-                        .Builder(m => m.Color, s => s.ToColorInput())
+                        .Group("Text Inputs", open: true,
+                            m => m.TextField,
+                            m => m.EmailField,
+                            m => m.PasswordField,
+                            m => m.SearchField,
+                            m => m.TelField,
+                            m => m.UrlField,
+                            m => m.TextAreaField)
+                        .Group("Number Inputs",
+                            m => m.IntegerField,
+                            m => m.DecimalField)
+                        .Group("Bool Inputs",
+                            m => m.CheckboxField,
+                            m => m.SwitchField,
+                            m => m.ToggleField)
+                        .Group("DateTime Inputs",
+                            m => m.DateField,
+                            m => m.DateTimeField,
+                            m => m.TimeField)
+                        .Group("Select Inputs",
+                            m => m.SelectField,
+                            m => m.MultiSelectField)
+                        .Group("Other Inputs",
+                            m => m.ColorField,
+                            m => m.CodeField,
+                            m => m.RatingField,
+                            m => m.ThumbsField,
+                            m => m.EmojiField)
+                        .Builder(m => m.TextField, s => s.ToTextInput())
+                        .Builder(m => m.EmailField, s => s.ToEmailInput())
+                        .Builder(m => m.PasswordField, s => s.ToPasswordInput())
+                        .Builder(m => m.SearchField, s => s.ToSearchInput())
+                        .Builder(m => m.TelField, s => s.ToTelInput())
+                        .Builder(m => m.UrlField, s => s.ToUrlInput())
+                        .Builder(m => m.TextAreaField, s => s.ToTextAreaInput())
+                        .Builder(m => m.CheckboxField, s => s.ToBoolInput().Variant(BoolInputs.Checkbox))
+                        .Builder(m => m.SwitchField, s => s.ToBoolInput().Variant(BoolInputs.Switch))
+                        .Builder(m => m.ToggleField, s => s.ToBoolInput().Variant(BoolInputs.Toggle))
+                        .Builder(m => m.DateField, s => s.ToDateTimeInput().Variant(DateTimeInputs.Date))
+                        .Builder(m => m.DateTimeField, s => s.ToDateTimeInput().Variant(DateTimeInputs.DateTime))
+                        .Builder(m => m.TimeField, s => s.ToDateTimeInput().Variant(DateTimeInputs.Time))
+                        .Builder(m => m.SelectField, s => s.ToSelectInput())
+                        .Builder(m => m.MultiSelectField, s => s.ToSelectInput().List())
+                        .Builder(m => m.ColorField, s => s.ToColorInput())
+                        .Builder(m => m.CodeField, s => s.ToCodeInput().Language(Languages.Sql))
+                        .Builder(m => m.RatingField, s => s.ToFeedbackInput().Variant(FeedbackInputs.Stars))
+                        .Builder(m => m.ThumbsField, s => s.ToFeedbackInput().Variant(FeedbackInputs.Thumbs))
+                        .Builder(m => m.EmojiField, s => s.ToFeedbackInput().Variant(FeedbackInputs.Emojis))
                 )
                 .Width(1 / 3f)
-                .Title("Large Form (with Groups)"))
+                .Title("Large Scale - All Inputs"))
             ;
         ;
     }
