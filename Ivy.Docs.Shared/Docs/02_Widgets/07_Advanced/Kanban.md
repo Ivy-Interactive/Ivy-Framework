@@ -50,7 +50,7 @@ tasks.ToKanban(
 
 ## Drag and Drop
 
-Enable drag-and-drop functionality by providing a `HandleCardMove` handler. Users can drag cards between columns to update their status:
+Enable drag-and-drop functionality by providing a `HandleMove` handler. Users can drag cards between columns to update their status:
 
 ```csharp demo-tabs
 public class KanbanWithMoveExample : ViewBase
@@ -80,7 +80,7 @@ public class KanbanWithMoveExample : ViewBase
                 orderSelector: t => t.Priority,
                 titleSelector: t => t.Title,
                 descriptionSelector: t => t.Description)
-            .HandleCardMove(moveData =>
+            .HandleMove(moveData =>
             {
                 var taskId = moveData.CardId?.ToString();
                 var updatedTasks = taskState.Value.ToList();
@@ -149,7 +149,7 @@ public class KanbanWithCustomCardsExample : ViewBase
             ))
             .ColumnOrder(e => GetStatusOrder(e.Status))
             .Width(e => e.Status, Size.Fraction(0.33f))
-            .HandleCardMove(moveData =>
+            .HandleMove(moveData =>
             {
                 var taskId = moveData.CardId?.ToString();
                 if (string.IsNullOrEmpty(taskId)) return;
@@ -227,7 +227,7 @@ public class KanbanWithAllEventsExample : ViewBase
                     client.Toast($"Clicked: {clickedTask.Title} - {clickedTask.Description}");
                 }
             })
-            .HandleCardMove(moveData =>
+            .HandleMove(moveData =>
             {
                 // Update task status when card is moved between columns
                 var taskId = moveData.CardId?.ToString();
@@ -303,7 +303,7 @@ public class FullKanbanExample : ViewBase
                 orderSelector: t => t.Priority)
             .ColumnOrder(t => t.ColumnOrder)
             .Height(Size.Units(200))
-            .HandleCardMove(moveData =>
+            .HandleMove(moveData =>
             {
                 var taskId = moveData.CardId?.ToString();
                 var updatedTasks = taskState.Value.ToList();
@@ -371,7 +371,7 @@ public class SimpleStatusBoard : ViewBase
             orderSelector: i => i.Id,
             titleSelector: i => i.Title,
             descriptionSelector: i => i.Id
-        ).HandleCardMove(moveData =>
+        ).HandleMove(moveData =>
         {
             var issueId = moveData.CardId?.ToString();
             var updatedIssues = issueState.Value.ToList();

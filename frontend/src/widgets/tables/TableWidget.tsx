@@ -14,7 +14,7 @@ interface TableWidgetProps {
 export const TableWidget: React.FC<TableWidgetProps> = ({
   children,
   width,
-  scale,
+  scale = Scales.Medium,
 }) => {
   const styles = {
     ...getWidth(width),
