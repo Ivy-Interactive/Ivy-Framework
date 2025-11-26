@@ -32,7 +32,7 @@ public class RedirectMessage
 
 public class SetAuthTokenMessage
 {
-    public required AuthToken? AuthToken { get; set; }
+    public required string TokenId { get; set; }
     public required bool ReloadPage { get; set; }
 }
 
@@ -88,9 +88,9 @@ public static class ClientExtensions
             });
     }
 
-    public static void SetAuthToken(this IClientProvider client, AuthToken? authToken, bool reloadPage = true)
+    public static void SetAuthToken(this IClientProvider client, string tokenId, bool reloadPage = true)
     {
-        client.Sender.Send("SetAuthToken", new SetAuthTokenMessage { AuthToken = authToken, ReloadPage = reloadPage });
+        client.Sender.Send("SetAuthToken", new SetAuthTokenMessage { TokenId = tokenId, ReloadPage = reloadPage });
     }
 
     public static void SetRootAppId(this IClientProvider client, string rootAppId)
