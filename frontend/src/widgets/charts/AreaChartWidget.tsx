@@ -225,7 +225,7 @@ const AreaChartWidget: React.FC<AreaChartWidgetProps> = ({
       <ReactECharts
         option={option}
         style={chartStyles}
-        notMerge={true} // Merge changes instead of full rebuild for better performance
+        notMerge={false} // Merge changes instead of full rebuild for better performance
         lazyUpdate={true}
       />
     </div>
