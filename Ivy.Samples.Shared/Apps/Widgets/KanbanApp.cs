@@ -21,7 +21,8 @@ public class KanbanApp : SampleBase
     {
         return Layout.Tabs(
             new Tab("Basic Example", new BasicKanbanExample()),
-            new Tab("Builder Example", new KanbanBuilderExample())
+            new Tab("Builder Example", new KanbanBuilderExample()),
+            new Tab("Width Examples", new KanbanWidthExamples())
         ).Variant(TabsVariant.Content);
     }
 }
@@ -51,12 +52,12 @@ public class BasicKanbanExample : ViewBase
                 .ToKanban(
                     groupBySelector: e => e.Status,
                     idSelector: e => e.Id,
-                    titleSelector: e => e.Title,
-                    descriptionSelector: e => e.Description,
                     orderSelector: e => e.Priority)
+                .CardBuilder(task => new Card()
+                    .Title(task.Title)
+                    .Description(task.Description))
                 .ColumnOrder(e => GetStatusOrder(e.Status))
                 .Width(Size.Full())
-                .Width(e => e.Status, Size.Fraction(0.33f))
                 .HandleMove(moveData =>
                 {
                     var taskId = moveData.CardId?.ToString();
@@ -105,20 +106,6 @@ public class BasicKanbanExample : ViewBase
                     updatedTasks.Insert(insertIndex, newTask);
 
                     tasks.Set(updatedTasks.ToArray());
-                })
-                .HandleDelete(cardId =>
-                {
-                    var taskId = cardId?.ToString();
-                    if (string.IsNullOrEmpty(taskId)) return;
-
-                    var updatedTasks = tasks.Value.Where(task => task.Id != taskId).ToArray();
-                    tasks.Set(updatedTasks);
-                })
-                .HandleClick(cardId =>
-                {
-                    var taskId = cardId?.ToString();
-                    if (taskId != null)
-                        selectedTaskId.Set(taskId);
                 })
                 .Empty(
                     new Card()
@@ -180,9 +167,7 @@ public class KanbanBuilderExample : ViewBase
                 .ToKanban(
                     groupBySelector: e => e.Status,
                     idSelector: e => e.Id,
-                    orderSelector: e => e.Priority,
-                    titleSelector: e => e.Title,
-                    descriptionSelector: e => e.Description)
+                    orderSelector: e => e.Priority)
                 .CardBuilder(task => new Card(
                     content: task.ToDetails()
                         .Remove(x => x.Id)
@@ -190,7 +175,6 @@ public class KanbanBuilderExample : ViewBase
                 ))
                 .ColumnOrder(e => GetStatusOrder(e.Status))
                 .Width(Size.Full())
-                .Width(e => e.Status, Size.Fraction(0.33f))
                 .HandleMove(moveData =>
     {
         var taskId = moveData.CardId?.ToString();
@@ -235,12 +219,6 @@ public class KanbanBuilderExample : ViewBase
 
         tasks.Set(updatedTasks.ToArray());
     })
-                .HandleClick(cardId =>
-                {
-                    var taskId = cardId?.ToString();
-                    if (taskId != null)
-                        selectedTaskId.Set(taskId);
-                })
                 .Empty(
                     new Card()
                         .Title("No Tasks")
@@ -271,6 +249,97 @@ public class KanbanBuilderExample : ViewBase
             title: task.Title,
             description: "Task Details"
         ).Width(Size.Rem(32));
+    }
+
+    private static int GetStatusOrder(string status) => status switch
+    {
+        "Todo" => 1,
+        "In Progress" => 2,
+        "Done" => 3,
+        _ => 0
+    };
+}
+
+public class KanbanWidthExamples : ViewBase
+{
+    public override object? Build()
+    {
+        var tasks = UseState(new[]
+        {
+            new Task { Id = "1", Title = "Design Homepage", Status = "Todo", Priority = 2, Description = "Create wireframes", Assignee = "Alice" },
+            new Task { Id = "2", Title = "Setup Database", Status = "Todo", Priority = 1, Description = "Configure PostgreSQL", Assignee = "Bob" },
+            new Task { Id = "3", Title = "Implement Auth", Status = "In Progress", Priority = 1, Description = "Add OAuth2", Assignee = "Charlie" },
+            new Task { Id = "4", Title = "Write Tests", Status = "In Progress", Priority = 2, Description = "Unit tests", Assignee = "Bob" },
+            new Task { Id = "5", Title = "Deploy to Production", Status = "Done", Priority = 1, Description = "CI/CD pipeline", Assignee = "Charlie" },
+        });
+
+        return Layout.Vertical()
+            | Layout.Horizontal()
+                | new Card()
+                    .Title("Narrow Kanban (50rem width)")
+                    .Description("Kanban with narrow overall width")
+                    .Width(Size.Full())
+            | tasks.Value
+                .ToKanban(
+                    groupBySelector: e => e.Status,
+                    idSelector: e => e.Id,
+                    orderSelector: e => e.Priority)
+                .CardBuilder(task => new Card()
+                    .Title(task.Title)
+                    .Description(task.Description))
+                .ColumnOrder(e => GetStatusOrder(e.Status))
+                .Width(Size.Rem(50))
+                .Empty(new Card().Title("No Tasks").Description("Empty state"))
+            | Layout.Horizontal()
+                | new Card()
+                    .Title("Wide Kanban (80rem width)")
+                    .Description("Kanban with wide overall width")
+                    .Width(Size.Full())
+            | tasks.Value
+                .ToKanban(
+                    groupBySelector: e => e.Status,
+                    idSelector: e => e.Id,
+                    orderSelector: e => e.Priority)
+                .CardBuilder(task => new Card()
+                    .Title(task.Title)
+                    .Description(task.Description))
+                .ColumnOrder(e => GetStatusOrder(e.Status))
+                .Width(Size.Rem(80))
+                .Empty(new Card().Title("No Tasks").Description("Empty state"))
+            | Layout.Horizontal()
+                | new Card()
+                    .Title("Narrow Columns (12rem per column)")
+                    .Description("Kanban with narrow column width")
+                    .Width(Size.Full())
+            | tasks.Value
+                .ToKanban(
+                    groupBySelector: e => e.Status,
+                    idSelector: e => e.Id,
+                    orderSelector: e => e.Priority)
+                .CardBuilder(task => new Card()
+                    .Title(task.Title)
+                    .Description(task.Description))
+                .ColumnOrder(e => GetStatusOrder(e.Status))
+                .Width(Size.Full())
+                .ColumnWidth(Size.Rem(12))
+                .Empty(new Card().Title("No Tasks").Description("Empty state"))
+            | Layout.Horizontal()
+                | new Card()
+                    .Title("Wide Columns (25rem per column)")
+                    .Description("Kanban with wide column width")
+                    .Width(Size.Full())
+            | tasks.Value
+                .ToKanban(
+                    groupBySelector: e => e.Status,
+                    idSelector: e => e.Id,
+                    orderSelector: e => e.Priority)
+                .CardBuilder(task => new Card()
+                    .Title(task.Title)
+                    .Description(task.Description))
+                .ColumnOrder(e => GetStatusOrder(e.Status))
+                .Width(Size.Full())
+                .ColumnWidth(Size.Rem(25))
+                .Empty(new Card().Title("No Tasks").Description("Empty state"));
     }
 
     private static int GetStatusOrder(string status) => status switch
