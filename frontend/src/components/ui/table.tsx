@@ -16,7 +16,7 @@ export interface TableProps
     VariantProps<typeof tableSizeVariants> {}
 
 const Table = React.forwardRef<HTMLTableElement, TableProps>(
-  ({ className, scale, children, ...props }, ref) => (
+  ({ className, scale = Scales.Medium, children, ...props }, ref) => (
     <TableProvider scale={scale as Scales}>
       <div className="relative w-full overflow-auto">
         <table
