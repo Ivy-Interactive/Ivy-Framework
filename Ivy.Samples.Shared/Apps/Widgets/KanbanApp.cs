@@ -22,7 +22,8 @@ public class KanbanApp : SampleBase
         return Layout.Tabs(
             new Tab("Basic Example", new BasicKanbanExample()),
             new Tab("Builder Example", new KanbanBuilderExample()),
-            new Tab("Width Examples", new KanbanWidthExamples())
+            new Tab("Width Examples", new KanbanWidthExamples()),
+            new Tab("Header Layout Example", new KanbanHeaderLayoutExample())
         ).Variant(TabsVariant.Content);
     }
 }
@@ -340,6 +341,120 @@ public class KanbanWidthExamples : ViewBase
                 .Width(Size.Full())
                 .ColumnWidth(Size.Rem(25))
                 .Empty(new Card().Title("No Tasks").Description("Empty state"));
+    }
+
+    private static int GetStatusOrder(string status) => status switch
+    {
+        "Todo" => 1,
+        "In Progress" => 2,
+        "Done" => 3,
+        _ => 0
+    };
+}
+
+public class KanbanHeaderLayoutExample : ViewBase
+{
+    public override object? Build()
+    {
+        var tasks = UseState(new[]
+        {
+            new Task { Id = "1", Title = "Design Homepage", Status = "Todo", Priority = 2, Description = "Create wireframes and mockups", Assignee = "Alice" },
+            new Task { Id = "2", Title = "Setup Database", Status = "Todo", Priority = 1, Description = "Configure PostgreSQL instance", Assignee = "Bob" },
+            new Task { Id = "3", Title = "Implement Auth", Status = "Todo", Priority = 3, Description = "Add OAuth2 authentication", Assignee = "Charlie" },
+            new Task { Id = "4", Title = "Build API", Status = "In Progress", Priority = 1, Description = "Create REST endpoints", Assignee = "Alice" },
+            new Task { Id = "5", Title = "Write Tests", Status = "In Progress", Priority = 2, Description = "Unit and integration tests", Assignee = "Bob" },
+            new Task { Id = "6", Title = "Code Review", Status = "In Progress", Priority = 3, Description = "Review pull requests", Assignee = "Charlie" },
+            new Task { Id = "7", Title = "Deploy to Production", Status = "Done", Priority = 1, Description = "Configure CI/CD pipeline", Assignee = "Alice" },
+            new Task { Id = "8", Title = "User Training", Status = "Done", Priority = 2, Description = "Train users on new features", Assignee = "Bob" },
+        });
+
+        var client = UseService<IClientProvider>();
+
+        void OnAddTask(Event<Button> @event)
+        {
+            var newTask = new Task
+            {
+                Id = Guid.NewGuid().ToString(),
+                Title = $"New Task {tasks.Value.Length + 1}",
+                Status = "Todo",
+                Priority = 1,
+                Description = "A newly created task",
+                Assignee = "Unassigned"
+            };
+            tasks.Set(tasks.Value.Append(newTask).ToArray());
+            client.Toast($"Added task: {newTask.Title}");
+        }
+
+        var createBtn = new Button("Add Task")
+            .Icon(Icons.Plus)
+            .Variant(ButtonVariant.Primary)
+            .HandleClick(OnAddTask);
+
+        var kanban = tasks.Value
+            .ToKanban(
+                groupBySelector: e => e.Status,
+                idSelector: e => e.Id,
+                orderSelector: e => e.Priority)
+            .CardBuilder(task => new Card()
+                .Title(task.Title)
+                .Description(task.Description))
+            .ColumnOrder(e => GetStatusOrder(e.Status))
+            .Width(Size.Full())
+            .Height(Size.Full())
+            .HandleMove(moveData =>
+            {
+                var taskId = moveData.CardId?.ToString();
+                if (string.IsNullOrEmpty(taskId)) return;
+
+                var updatedTasks = tasks.Value.ToList();
+                var taskToMove = updatedTasks.FirstOrDefault(t => t.Id == taskId);
+                if (taskToMove == null) return;
+
+                var newTask = new Task
+                {
+                    Id = taskToMove.Id,
+                    Title = taskToMove.Title,
+                    Status = moveData.ToColumn,
+                    Priority = taskToMove.Priority,
+                    Description = taskToMove.Description,
+                    Assignee = taskToMove.Assignee
+                };
+
+                updatedTasks.Remove(taskToMove);
+
+                int insertIndex = updatedTasks.Count;
+
+                var taskAtTargetIndex = updatedTasks
+                    .Where(t => t.Status == moveData.ToColumn)
+                    .ElementAtOrDefault(moveData.TargetIndex ?? -1);
+
+                if (taskAtTargetIndex != null)
+                {
+                    insertIndex = updatedTasks.IndexOf(taskAtTargetIndex);
+                }
+                else
+                {
+                    var lastTaskInColumn = updatedTasks.LastOrDefault(t => t.Status == moveData.ToColumn);
+                    if (lastTaskInColumn != null)
+                    {
+                        insertIndex = updatedTasks.IndexOf(lastTaskInColumn) + 1;
+                    }
+                }
+
+                updatedTasks.Insert(insertIndex, newTask);
+                tasks.Set(updatedTasks.ToArray());
+            })
+            .Empty(
+                new Card()
+                    .Title("No Tasks")
+                    .Description("Create your first task to get started")
+            );
+
+        var header = Layout.Horizontal() | createBtn;
+
+        var body = new HeaderLayout(header, kanban).Height(Size.Units(600));
+
+        return body;
     }
 
     private static int GetStatusOrder(string status) => status switch
