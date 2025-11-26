@@ -152,8 +152,10 @@ function isAllowedIvyHost(origin: string): boolean {
       return true;
     }
 
-    // For development: allow same hostname with different port/protocol
+    // For development: allow same hostname with different port, but require same protocol
     // This enables development workflows where frontend and backend run on different ports
+    // SECURITY: We require protocol matching to prevent protocol downgrade attacks
+    // (e.g., preventing http://localhost:3000 from being accepted when current origin is https://localhost:5000)
     // Only allow this for localhost/127.0.0.1 to prevent security issues in production
     const localhostVariants = ['localhost', '127.0.0.1', '[::1]', '::1'];
     const isCurrentLocalhost = localhostVariants.includes(
@@ -163,10 +165,17 @@ function isAllowedIvyHost(origin: string): boolean {
       url.hostname.toLowerCase()
     );
 
-    // Allow if both are localhost variants (they represent the same logical host)
-    // This allows different ports/protocols during development
+    // Allow if both are localhost variants AND protocols match
+    // This allows different ports during development but prevents protocol downgrade attacks
     if (isCurrentLocalhost && isUrlLocalhost) {
-      return true;
+      // Require protocol matching to prevent security vulnerabilities
+      // An attacker controlling a different localhost port should not be able to
+      // downgrade from HTTPS to HTTP or vice versa
+      if (url.protocol === currentUrl.protocol) {
+        return true;
+      }
+      // Reject if protocols don't match (security: prevent protocol downgrade)
+      return false;
     }
 
     // Check against the allowlist
