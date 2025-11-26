@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { ColorScheme, generateEChartToolbox } from './sharedUtils';
 import { getHeight, getWidth } from '@/lib/styles';
 import { useThemeWithMonitoring } from '@/components/theme-provider';
@@ -75,6 +75,9 @@ const AreaChartWidget: React.FC<AreaChartWidgetProps> = ({
     () => getChartThemeColors(colors, isDark),
     [colors, isDark]
   );
+
+  // Track mouse hover state on the chart
+  const [isHovered, setIsHovered] = useState(false);
 
   // When height is Full (100%), use flex to expand. Otherwise use explicit height.
   const heightStyle = height ? getHeight(height) : {};
@@ -161,7 +164,7 @@ const AreaChartWidget: React.FC<AreaChartWidgetProps> = ({
         foreground: themeColors.foreground,
         fontSans: themeColors.fontSans,
       }),
-      toolbox: generateEChartToolbox(toolbox),
+      toolbox: generateEChartToolbox(toolbox, isHovered),
       textStyle: generateTextStyle(
         themeColors.foreground,
         themeColors.fontSans
@@ -201,6 +204,7 @@ const AreaChartWidget: React.FC<AreaChartWidgetProps> = ({
       themeColors.mutedForeground,
       legend,
       toolbox,
+      isHovered,
       categories,
       xAxis,
       largeSpread,
@@ -213,7 +217,11 @@ const AreaChartWidget: React.FC<AreaChartWidgetProps> = ({
   );
 
   return (
-    <div style={styles}>
+    <div
+      style={styles}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
       <ReactECharts
         option={option}
         style={chartStyles}

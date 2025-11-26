@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import ReactECharts from 'echarts-for-react';
 import { getHeight, getWidth } from '@/lib/styles';
 import { useThemeWithMonitoring } from '@/components/theme-provider';
@@ -45,6 +45,9 @@ const LineChartWidget: React.FC<LineChartWidgetProps> = ({
     () => getChartThemeColors(colors, isDark),
     [colors, isDark]
   );
+
+  // Track mouse hover state on the chart
+  const [isHovered, setIsHovered] = useState(false);
 
   // When height is Full (100%), use flex to expand. Otherwise use explicit height.
   const heightStyle = height ? getHeight(height) : {};
@@ -107,7 +110,7 @@ const LineChartWidget: React.FC<LineChartWidgetProps> = ({
         fontSans: themeColors.fontSans,
         background: themeColors.background,
       }),
-      toolbox: generateEChartToolbox(toolbox),
+      toolbox: generateEChartToolbox(toolbox, isHovered),
       legend: generateEChartLegend(legend, {
         foreground: themeColors.foreground,
         fontSans: themeColors.fontSans,
@@ -147,11 +150,16 @@ const LineChartWidget: React.FC<LineChartWidgetProps> = ({
       referenceLines,
       referenceAreas,
       toolbox,
+      isHovered,
     ]
   );
 
   return (
-    <div style={styles}>
+    <div
+      style={styles}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
       <ReactECharts
         option={option}
         style={chartStyles}

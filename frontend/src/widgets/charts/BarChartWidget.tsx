@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   ColorScheme,
   generateTooltip,
@@ -88,6 +88,9 @@ const BarChartWidget: React.FC<BarChartWidgetProps> = ({
     () => getChartThemeColors(colors, isDark),
     [colors, isDark]
   );
+
+  // Track mouse hover state on the chart
+  const [isHovered, setIsHovered] = useState(false);
 
   // When height is Full (100%), use flex to expand. Otherwise use explicit height.
   const heightStyle = height ? getHeight(height) : {};
@@ -193,7 +196,7 @@ const BarChartWidget: React.FC<BarChartWidgetProps> = ({
         fontSans: themeColors.fontSans,
         background: themeColors.background,
       }),
-      toolbox: generateEChartToolbox(toolbox),
+      toolbox: generateEChartToolbox(toolbox, isHovered),
     }),
     [
       cartesianGrid,
@@ -211,11 +214,16 @@ const BarChartWidget: React.FC<BarChartWidgetProps> = ({
       legend,
       tooltip,
       toolbox,
+      isHovered,
     ]
   );
 
   return (
-    <div style={styles}>
+    <div
+      style={styles}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
       <ReactECharts
         option={option}
         style={chartStyles}

@@ -303,8 +303,15 @@ export const generateTooltip = (
   borderWidth: 1,
 });
 
-export const generateEChartToolbox = (toolbox?: ToolboxProps) => {
+export const generateEChartToolbox = (
+  toolbox?: ToolboxProps,
+  isHovered?: boolean
+) => {
   if (!toolbox || toolbox.enabled === false) {
+    return { show: false };
+  }
+
+  if (isHovered === false) {
     return { show: false };
   }
 

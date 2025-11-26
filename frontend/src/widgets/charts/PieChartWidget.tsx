@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { getHeight, getWidth } from '@/lib/styles';
 import { useThemeWithMonitoring } from '@/components/theme-provider';
 import ReactECharts from 'echarts-for-react';
@@ -33,6 +33,9 @@ const PieChartWidget: React.FC<PieChartWidgetProps> = ({
     () => getChartThemeColors(colors, isDark),
     [colors, isDark]
   );
+
+  // Track mouse hover state on the chart
+  const [isHovered, setIsHovered] = useState(false);
 
   // When height is Full (100%), use flex to expand. Otherwise use explicit height.
   const heightStyle = height ? getHeight(height) : {};
@@ -173,13 +176,17 @@ const PieChartWidget: React.FC<PieChartWidgetProps> = ({
         borderWidth: 1,
       },
       series: series,
-      toolbox: generateEChartToolbox(toolbox),
+      toolbox: generateEChartToolbox(toolbox, isHovered),
     }),
-    [chartColors, legend, themeColors, tooltip, series, toolbox]
+    [chartColors, legend, themeColors, tooltip, series, toolbox, isHovered]
   );
 
   return (
-    <div style={styles}>
+    <div
+      style={styles}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
       <ReactECharts
         option={option}
         style={chartStyles}
