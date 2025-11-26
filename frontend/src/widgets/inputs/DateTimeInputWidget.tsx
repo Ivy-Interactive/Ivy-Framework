@@ -478,7 +478,8 @@ const TimeVariant: React.FC<TimeVariantProps> = ({
         <Clock
           className={cn(
             'absolute left-3 top-1/2 -translate-y-1/2 shrink-0',
-            dateTimeInputIconVariants({ scale })
+            dateTimeInputIconVariants({ scale }),
+            disabled && 'opacity-50'
           )}
         />
         <Input
