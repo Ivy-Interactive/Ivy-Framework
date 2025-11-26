@@ -1,4 +1,4 @@
-﻿using Ivy.Core;
+using Ivy.Core;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy;
@@ -11,7 +11,6 @@ public record Confetti : WidgetBase<Confetti>
 
     [Prop] public AnimationTrigger Trigger { get; init; } = AnimationTrigger.Auto;
 
-    /// <exception cref="NotSupportedException">Thrown when attempting to add multiple children.</exception>
     public static Confetti operator |(Confetti widget, object child)
     {
         if (child is IEnumerable<object> _)
@@ -23,9 +22,6 @@ public record Confetti : WidgetBase<Confetti>
     }
 }
 
-/// <summary>
-/// Provides extension methods for creating and configuring Confetti widgets.
-/// </summary>
 public static class ConfettiExtensions
 {
     public static Confetti WithConfetti(this IWidget widget, AnimationTrigger trigger = AnimationTrigger.Auto)

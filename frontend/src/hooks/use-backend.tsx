@@ -246,9 +246,7 @@ export const useBackend = (
         body: message.tokenId,
         credentials: 'include',
       });
-      if (response.ok) {
-        logger.info('Auth token set successfully');
-      } else {
+      if (!response.ok) {
         logger.error('Failed to set auth token', {
           status: response.status,
           statusText: response.statusText,
@@ -257,12 +255,10 @@ export const useBackend = (
 
       // // Notify other tabs about logout
       // if (message.authToken === null && authChannelRef.current) {
-      //   logger.info('Broadcasting logout event to other tabs');
       //   authChannelRef.current.postMessage({ type: 'logout' });
       // }
 
       if (message.reloadPage) {
-        logger.info('Reloading page.');
         window.location.reload();
       }
     },
@@ -358,8 +354,6 @@ export const useBackend = (
           window.location.reload();
         }
       };
-
-      logger.debug('Broadcast Channel initialized for auth synchronization');
     } else {
       logger.warn('BroadcastChannel API not supported in this browser');
     }
@@ -376,7 +370,6 @@ export const useBackend = (
       if (authChannelRef.current) {
         authChannelRef.current.close();
         authChannelRef.current = null;
-        logger.debug('Broadcast Channel closed');
       }
 
       if (isRootConnection) {

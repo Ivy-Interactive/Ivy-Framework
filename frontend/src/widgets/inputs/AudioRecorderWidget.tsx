@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { getWidth } from '@/lib/styles';
 import { logger } from '@/lib/logger';
-import { Sizes } from '@/types/sizes';
+import { Scales } from '@/types/scale';
 import {
   audioRecorderVariants,
   textSizeVariants,
@@ -27,7 +27,7 @@ interface AudioRecorderWidgetProps {
   width?: string;
   uploadUrl: string;
   chunkInterval: number;
-  size?: Sizes;
+  scale?: Scales;
 }
 
 const supportedMimeTypes = [
@@ -48,7 +48,7 @@ export const AudioRecorderWidget: React.FC<AudioRecorderWidgetProps> = ({
   width,
   uploadUrl,
   chunkInterval,
-  size = Sizes.Medium,
+  scale = Scales.Medium,
 }) => {
   const normalizedMimeTypes = useMemo(() => {
     const candidates: string[] = [];
@@ -227,7 +227,7 @@ export const AudioRecorderWidget: React.FC<AudioRecorderWidgetProps> = ({
     <div className="relative" style={{ ...getWidth(width) }}>
       <div
         className={cn(
-          audioRecorderVariants({ size }),
+          audioRecorderVariants({ scale }),
           disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
         )}
         onClick={
@@ -260,21 +260,21 @@ export const AudioRecorderWidget: React.FC<AudioRecorderWidgetProps> = ({
           className={'mt-2 h-6 w-fit z-10 mx-auto block'}
         >
           {recording ? (
-            <Square className={iconSizeVariants({ size })} />
+            <Square className={iconSizeVariants({ scale })} />
           ) : (
-            <Mic className={iconSizeVariants({ size })} />
+            <Mic className={iconSizeVariants({ scale })} />
           )}
         </Button>
         <SecondsCounter
           start={recordingStartedAt}
           stopped={recordingStoppedAt}
-          size={size}
+          scale={scale}
         />
         {(label || recordingLabel) && (
           <p
             className={cn(
               'text-center mt-1 text-muted-foreground',
-              textSizeVariants({ size })
+              textSizeVariants({ scale })
             )}
           >
             {recording ? recordingLabel : label}
@@ -284,7 +284,7 @@ export const AudioRecorderWidget: React.FC<AudioRecorderWidgetProps> = ({
           <p
             className={cn(
               'text-muted-foreground text-center',
-              textSizeVariants({ size })
+              textSizeVariants({ scale })
             )}
           >
             {mimeSupportError
@@ -300,7 +300,7 @@ export const AudioRecorderWidget: React.FC<AudioRecorderWidgetProps> = ({
 function SecondsCounter(props: {
   start: number | null;
   stopped: number | null;
-  size: Sizes;
+  scale?: Scales;
 }) {
   const [seconds, setSeconds] = useState(0);
   useEffect(() => {
@@ -325,7 +325,7 @@ function SecondsCounter(props: {
     };
   }, [props.start, props.stopped]);
   return (
-    <p className={cn('text-center', timerSizeVariants({ size: props.size }))}>
+    <p className={cn('text-center', timerSizeVariants({ scale: props.scale }))}>
       {Math.floor(seconds / 60)
         .toString()
         .padStart(2, '0')}

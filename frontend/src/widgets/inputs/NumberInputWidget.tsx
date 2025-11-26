@@ -7,7 +7,7 @@ import { inputStyles } from '@/lib/styles';
 import { InvalidIcon } from '@/components/InvalidIcon';
 import { X } from 'lucide-react';
 import React from 'react';
-import { Sizes } from '@/types/sizes';
+import { Scales } from '@/types/scale';
 
 const formatStyleMap = {
   Decimal: 'decimal',
@@ -49,7 +49,7 @@ interface NumberInputBaseProps {
   'data-testid'?: string;
   // Add type information for validation
   targetType?: string;
-  size?: Sizes;
+  scale?: Scales;
 }
 
 interface NumberInputWidgetProps
@@ -113,7 +113,7 @@ const SliderVariant = memo(
     disabled = false,
     invalid,
     currency,
-    size = Sizes.Medium,
+    scale = Scales.Medium,
     onValueChange,
     'data-testid': dataTestId,
   }: NumberInputBaseProps) => {
@@ -155,7 +155,7 @@ const SliderVariant = memo(
           value={[sliderValue]}
           disabled={disabled}
           currency={currency}
-          size={size}
+          scale={scale}
           onValueChange={handleSliderChange}
           onValueCommit={handleSliderCommit}
           className={cn(invalid && inputStyles.invalidInput)}
@@ -164,7 +164,7 @@ const SliderVariant = memo(
         <span
           className={cn(
             'flex w-full items-center justify-between gap-1',
-            sizeVariants[String(size)].text
+            sizeVariants[String(scale)].text
           )}
           aria-hidden="true"
         >
@@ -201,7 +201,7 @@ const NumberVariant = memo(
     nullable = false,
     onValueChange,
     currency,
-    size = Sizes.Medium,
+    scale = Scales.Medium,
     'data-testid': dataTestId,
   }: NumberInputBaseProps) => {
     const formatConfig = useMemo(
@@ -238,7 +238,7 @@ const NumberVariant = memo(
           placeholder={placeholder}
           value={value}
           disabled={disabled}
-          size={size}
+          scale={scale}
           onChange={handleNumberChange}
           className={cn(
             invalid && inputStyles.invalidInput,

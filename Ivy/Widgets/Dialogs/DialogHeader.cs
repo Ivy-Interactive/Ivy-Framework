@@ -13,7 +13,6 @@ public record DialogHeader : WidgetBase<DialogHeader>
     [Prop]
     public string Title { get; set; }
 
-    /// <exception cref="NotSupportedException">DialogHeader does not support children.</exception>
     public static DialogHeader operator |(DialogHeader widget, object child)
     {
         throw new NotSupportedException("DialogHeader does not support children.");

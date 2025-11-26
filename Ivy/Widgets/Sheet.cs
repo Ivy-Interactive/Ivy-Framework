@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
-/// <summary>Sheet widget sliding in from screen side to display additional content with customizable widths, titles, descriptions, and close handling.</summary>
 public record Sheet : WidgetBase<Sheet>
 {
     public static Size DefaultWidth => Size.Rem(24);
@@ -45,7 +44,6 @@ public record Sheet : WidgetBase<Sheet>
 
     [Event] public Func<Event<Sheet>, ValueTask>? OnClose { get; set; }
 
-    /// <exception cref="NotSupportedException">Thrown when adding multiple children at once.</exception>
     public static Sheet operator |(Sheet widget, object child)
     {
         if (child is IEnumerable<object> _)
@@ -59,7 +57,6 @@ public record Sheet : WidgetBase<Sheet>
 
 public static class SheetExtensions
 {
-    /// <param name="width">When null, uses default width.</param>
     public static IView WithSheet(this Button trigger, Func<object> contentFactory, string? title = null, string? description = null, Size? width = null)
     {
         return new WithSheetView(trigger, contentFactory, title, description, width);

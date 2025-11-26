@@ -1,4 +1,4 @@
-﻿using Ivy.Shared;
+using Ivy.Shared;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy.Charts;
@@ -11,7 +11,6 @@ public record Label
 
     public double Offset { get; set; } = 5;
 
-    /// <summary>Positive values rotate clockwise.</summary>
     public double? Angle { get; set; } = null;
 
     public Positions? Position { get; set; } = null;

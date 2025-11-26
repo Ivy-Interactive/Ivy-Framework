@@ -1,6 +1,5 @@
-﻿namespace Ivy.Auth;
+namespace Ivy.Auth;
 
-/// <summary> Represents user information retrieved from an authentication provider. </summary>
 public record UserInfo(string Id, string Email, string? FullName, string? AvatarUrl)
 {
     public string Initials

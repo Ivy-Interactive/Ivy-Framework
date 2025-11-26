@@ -9,7 +9,6 @@ public record Tooltip : WidgetBase<Tooltip>
     {
     }
 
-    /// <exception cref="NotSupportedException">Tooltip does not support children.</exception>
     public static Tooltip operator |(Tooltip widget, object child)
     {
         throw new NotSupportedException("Tooltip does not support children.");

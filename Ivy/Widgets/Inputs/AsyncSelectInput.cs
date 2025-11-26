@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Reactive.Linq;
@@ -15,13 +15,10 @@ namespace Ivy;
 
 public interface IAnyAsyncSelectInputBase : IAnyInput
 {
-    public string? Placeholder { get; set; }
 }
 
-/// <returns>A task that resolves to an array of matching options.</returns>
 public delegate Task<Option<T>[]> AsyncSelectQueryDelegate<T>(string query);
 
-/// <summary>Returns a task that resolves to the option, or null if not found.</summary>
 public delegate Task<Option<T>?> AsyncSelectLookupDelegate<T>(T id);
 
 public class AsyncSelectInputView<TValue> : ViewBase, IAnyAsyncSelectInputBase, IInput<TValue>
@@ -69,13 +66,14 @@ public class AsyncSelectInputView<TValue> : ViewBase, IAnyAsyncSelectInputBase, 
 
     public Func<Event<IInput<TValue>, TValue>, ValueTask>? OnChange { get; }
 
+    public Scale? Scale { get; set; }
+
     public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
 
     public bool Disabled { get; set; }
 
     public string? Invalid { get; set; }
 
-    public Sizes Size { get; set; }
     public string? Placeholder { get; set; }
 
     public override object? Build()
@@ -145,7 +143,6 @@ public class AsyncSelectInputView<TValue> : ViewBase, IAnyAsyncSelectInputBase, 
     }
 }
 
-/// <summary>Token used to communicate selection back to the parent input.</summary>
 public class AsyncSelectListSheet<T>(RefreshToken refreshToken, AsyncSelectQueryDelegate<T> query) : ViewBase
 {
     public override object? Build()

@@ -42,6 +42,7 @@ Create a Kanban board from any collection using the `.ToKanban()` extension meth
 tasks.ToKanban(
     groupBySelector: t => t.Status,
     idSelector: t => t.Id,
+    orderSelector: t => t.Priority,
     titleSelector: t => t.Title,
     descriptionSelector: t => t.Description
 )
@@ -49,7 +50,7 @@ tasks.ToKanban(
 
 ## Drag and Drop
 
-Enable drag-and-drop functionality by providing a `HandleCardMove` handler. Users can drag cards between columns to update their status:
+Enable drag-and-drop functionality by providing a `HandleMove` handler. Users can drag cards between columns to update their status:
 
 ```csharp demo-tabs
 public class KanbanWithMoveExample : ViewBase
@@ -76,9 +77,10 @@ public class KanbanWithMoveExample : ViewBase
             .ToKanban(
                 groupBySelector: t => t.Status,
                 idSelector: t => t.Id,
+                orderSelector: t => t.Priority,
                 titleSelector: t => t.Title,
                 descriptionSelector: t => t.Description)
-            .HandleCardMove(moveData =>
+            .HandleMove(moveData =>
             {
                 var taskId = moveData.CardId?.ToString();
                 var updatedTasks = taskState.Value.ToList();
@@ -137,6 +139,7 @@ public class KanbanWithCustomCardsExample : ViewBase
             .ToKanban(
                 groupBySelector: e => e.Status,
                 idSelector: e => e.Id,
+                orderSelector: e => e.Priority,
                 titleSelector: e => e.Title,
                 descriptionSelector: e => e.Description)
             .CardBuilder(task => new Card(
@@ -146,7 +149,7 @@ public class KanbanWithCustomCardsExample : ViewBase
             ))
             .ColumnOrder(e => GetStatusOrder(e.Status))
             .Width(e => e.Status, Size.Fraction(0.33f))
-            .HandleCardMove(moveData =>
+            .HandleMove(moveData =>
             {
                 var taskId = moveData.CardId?.ToString();
                 if (string.IsNullOrEmpty(taskId)) return;
@@ -211,6 +214,7 @@ public class KanbanWithAllEventsExample : ViewBase
             .ToKanban(
                 groupBySelector: t => t.Status,
                 idSelector: t => t.Id,
+                orderSelector: t => t.Priority,
                 titleSelector: t => t.Title,
                 descriptionSelector: t => t.Description)
             .HandleClick(cardId =>
@@ -223,7 +227,7 @@ public class KanbanWithAllEventsExample : ViewBase
                     client.Toast($"Clicked: {clickedTask.Title} - {clickedTask.Description}");
                 }
             })
-            .HandleCardMove(moveData =>
+            .HandleMove(moveData =>
             {
                 // Update task status when card is moved between columns
                 var taskId = moveData.CardId?.ToString();
@@ -298,8 +302,8 @@ public class FullKanbanExample : ViewBase
                 descriptionSelector: t => t.Description,
                 orderSelector: t => t.Priority)
             .ColumnOrder(t => t.ColumnOrder)
-            .Height(Size.Units(400))
-            .HandleCardMove(moveData =>
+            .Height(Size.Units(200))
+            .HandleMove(moveData =>
             {
                 var taskId = moveData.CardId?.ToString();
                 var updatedTasks = taskState.Value.ToList();
@@ -364,9 +368,10 @@ public class SimpleStatusBoard : ViewBase
         return issueState.Value.ToKanban(
             groupBySelector: i => i.Status,
             idSelector: i => i.Id,
+            orderSelector: i => i.Id,
             titleSelector: i => i.Title,
             descriptionSelector: i => i.Id
-        ).HandleCardMove(moveData =>
+        ).HandleMove(moveData =>
         {
             var issueId = moveData.CardId?.ToString();
             var updatedIssues = issueState.Value.ToList();

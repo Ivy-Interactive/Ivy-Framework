@@ -12,7 +12,6 @@ public enum CardHoverVariant
     PointerAndTranslate,
 }
 
-/// <summary>A structured container for organizing related content with optional title, description, and icon.</summary>
 public record Card : WidgetBase<Card>
 {
     public Card(object? content = null, object? footer = null, object? header = null) : base([new Slot("Content", content), new Slot("Footer", footer!), new Slot("Header", header!)])
@@ -36,10 +35,6 @@ public record Card : WidgetBase<Card>
 
     [Event] public Func<Event<Card>, ValueTask>? OnClick { get; set; }
 
-    [Prop] public Sizes Size { get; set; } = Sizes.Medium;
-
-    /// <returns>A new Card instance with the updated content.</returns>
-    /// <exception cref="NotSupportedException">Thrown when attempting to add multiple children at once.</exception>
     public static Card operator |(Card widget, object child)
     {
         if (child is IEnumerable<object> _)
@@ -50,7 +45,6 @@ public record Card : WidgetBase<Card>
     }
 }
 
-/// <summary>Extension methods for configuring Card widget properties. </summary>
 public static class CardExtensions
 {
     internal static Slot GetSlot(this Card card, string name) => card.Children.FirstOrDefault(e => e is Slot slot && slot.Name == name) as Slot ?? new Slot(name, null!);
@@ -69,15 +63,9 @@ public static class CardExtensions
         };
     }
 
-    public static Card Title(this Card card, string title)
-    {
-        return card.Header(Text.Block(title), card.Description, card.Icon);
-    }
+    public static Card Title(this Card card, string title) => card.Header(Text.Block(title), card.Description, card.Icon);
 
-    public static Card Description(this Card card, string description)
-    {
-        return card.Header(card.Title, Text.Muted(description), card.Icon);
-    }
+    public static Card Description(this Card card, string description) => card.Header(card.Title, Text.Muted(description), card.Icon);
 
     public static Card Icon(this Card card, object? icon)
     {
@@ -98,23 +86,9 @@ public static class CardExtensions
 
     public static Card BorderColor(this Card card, Colors color) => card with { BorderColor = color };
 
-    public static Card Size(this Card card, Sizes size) => card with { Size = size };
+    public static Card Hover(this Card card, CardHoverVariant variant) => card with { HoverVariant = variant };
 
-    public static Card Small(this Card card) => card with { Size = Sizes.Small };
-
-    public static Card Medium(this Card card) => card with { Size = Sizes.Medium };
-
-    public static Card Large(this Card card) => card with { Size = Sizes.Large };
-
-    public static Card Hover(this Card card, CardHoverVariant variant)
-    {
-        return card with { HoverVariant = variant };
-    }
-
-    private static CardHoverVariant HoverVariantWithClick(this Card card)
-    {
-        return card.HoverVariant == CardHoverVariant.None ? CardHoverVariant.PointerAndTranslate : card.HoverVariant;
-    }
+    private static CardHoverVariant HoverVariantWithClick(this Card card) => card.HoverVariant == CardHoverVariant.None ? CardHoverVariant.PointerAndTranslate : card.HoverVariant;
 
     public static Card HandleClick(this Card card, Func<Event<Card>, ValueTask> onClick)
     {

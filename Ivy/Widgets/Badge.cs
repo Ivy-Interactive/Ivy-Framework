@@ -15,7 +15,6 @@ public enum BadgeVariant
     Info
 }
 
-/// <summary>Badge widget displaying small pieces of information like counts, statuses, or labels with multiple variants, sizes, and icon integration.</summary>
 public record Badge : WidgetBase<Badge>
 {
     public Badge(string? title = null, BadgeVariant variant = BadgeVariant.Primary, Icons icon = Icons.None)
@@ -31,18 +30,14 @@ public record Badge : WidgetBase<Badge>
 
     [Prop] public Icons? Icon { get; set; }
 
-    [Prop] public Sizes Size { get; set; } = Sizes.Medium;
-
     [Prop] public Align IconPosition { get; set; } = Align.Left;
 
-    /// <exception cref="NotSupportedException">Badge does not support children.</exception>
     public static Badge operator |(Badge badge, object child)
     {
         throw new NotSupportedException("Badge does not support children.");
     }
 }
 
-/// <summary>Extension methods for Badge widget providing fluent API for configuring appearance and behavior.</summary>
 public static class BadgeExtensions
 {
     public static Badge Icon(this Badge badge, Icons? icon, Align position = Align.Left)
@@ -53,23 +48,6 @@ public static class BadgeExtensions
     public static Badge Variant(this Badge badge, BadgeVariant variant)
     {
         return badge with { Variant = variant };
-    }
-
-    public static Badge Size(this Badge badge, Sizes size)
-    {
-        return badge with { Size = size };
-    }
-
-    [RelatedTo(nameof(Badge.Size))]
-    public static Badge Large(this Badge badge)
-    {
-        return badge.Size(Sizes.Large);
-    }
-
-    [RelatedTo(nameof(Badge.Size))]
-    public static Badge Small(this Badge badge)
-    {
-        return badge.Size(Sizes.Small);
     }
 
     [RelatedTo(nameof(Badge.Variant))]

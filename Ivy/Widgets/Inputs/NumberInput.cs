@@ -25,13 +25,10 @@ public enum NumberFormatStyle
 
 public interface IAnyNumberInput : IAnyInput
 {
-    public string? Placeholder { get; set; }
-
     public double? Min { get; set; }
 
     public double? Max { get; set; }
 
-    /// <summary>Used for sliders and increment/decrement buttons.</summary>
     public double? Step { get; set; }
 
     public int? Precision { get; set; }
@@ -40,10 +37,8 @@ public interface IAnyNumberInput : IAnyInput
 
     public NumberFormatStyle FormatStyle { get; set; }
 
-    /// <summary>Currency code (e.g., "USD", "EUR").</summary>
     public string? Currency { get; set; }
 
-    /// <summary>Target type name for frontend validation and formatting.</summary>
     public string? TargetType { get; set; }
 }
 
@@ -71,23 +66,21 @@ public abstract record NumberInputBase : WidgetBase<NumberInputBase>, IAnyNumber
 
     [Prop] public string? TargetType { get; set; }
 
-    [Prop] public Sizes Size { get; set; }
+    [Prop] public new Scale? Scale { get; set; }
 
     [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
 
-    /// <summary>Supports all standard .NET numeric types including signed, unsigned, and floating-point types.</summary>
     public Type[] SupportedStateTypes() => [
-        typeof(short), typeof(short?),
+    typeof(short), typeof(short?),
         typeof(int), typeof(int?),
         typeof(long), typeof(long?),
         typeof(float), typeof(float?),
         typeof(double), typeof(double?),
         typeof(decimal), typeof(decimal?),
         typeof(byte), typeof(byte?)
-    ];
+];
 }
 
-/// <typeparam name="TNumber">int, double, decimal, float, long, short, byte, or their nullable variants.</typeparam>
 public record NumberInput<TNumber> : NumberInputBase, IInput<TNumber>, IAnyNumberInput
 {
     [OverloadResolutionPriority(1)]
@@ -136,7 +129,6 @@ public static class NumberInputExtensions
         return state.ToNumberInput(placeholder, disabled, NumberInputs.Slider, formatStyle);
     }
 
-    /// <summary>Creates a number input with automatic type detection.</summary>
     public static NumberInputBase ToNumberInput(this IAnyState state, string? placeholder = null, bool disabled = false, NumberInputs variant = NumberInputs.Number, NumberFormatStyle formatStyle = NumberFormatStyle.Decimal)
     {
         var type = state.GetStateType();
@@ -146,11 +138,9 @@ public static class NumberInputExtensions
         return input;
     }
 
-    /// <summary>Currency code (e.g., "USD", "EUR").</summary>
     public static NumberInputBase ToMoneyInput(this IAnyState state, string? placeholder = null, bool disabled = false, NumberInputs variant = NumberInputs.Number, string currency = "USD")
-        => state.ToNumberInput(placeholder, disabled, variant, NumberFormatStyle.Currency).Currency(currency);
+    => state.ToNumberInput(placeholder, disabled, variant, NumberFormatStyle.Currency).Currency(currency);
 
-    /// <summary>Property name (currently unused, reserved for future label generation).</summary>
     internal static IAnyNumberInput ScaffoldDefaults(this IAnyNumberInput input, string? name, Type type)
     {
         input.Precision ??= type.SuggestPrecision();
@@ -181,7 +171,6 @@ public static class NumberInputExtensions
         return widget with { Placeholder = placeholder };
     }
 
-    /// <summary>Note: parameter name suggests enabled but sets disabled state.</summary>
     public static NumberInputBase Disabled(this NumberInputBase widget, bool enabled = true)
     {
         return widget with { Disabled = enabled };
@@ -225,23 +214,6 @@ public static class NumberInputExtensions
     public static NumberInputBase Invalid(this NumberInputBase widget, string invalid)
     {
         return widget with { Invalid = invalid };
-    }
-
-    public static NumberInputBase Size(this NumberInputBase widget, Sizes size)
-    {
-        return widget with { Size = size };
-    }
-
-    [RelatedTo(nameof(NumberInputBase.Size))]
-    public static NumberInputBase Large(this NumberInputBase widget)
-    {
-        return widget.Size(Sizes.Large);
-    }
-
-    [RelatedTo(nameof(NumberInputBase.Size))]
-    public static NumberInputBase Small(this NumberInputBase widget)
-    {
-        return widget.Size(Sizes.Small);
     }
 
     [OverloadResolutionPriority(1)]

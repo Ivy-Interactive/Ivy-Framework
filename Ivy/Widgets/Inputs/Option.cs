@@ -45,7 +45,6 @@ public static class OptionExtensions
         return options.Select(e => new Option<TValue>(e)).ToArray();
     }
 
-    /// <exception cref="ArgumentException">Thrown when provided type is not an enum.</exception>
     public static IAnyOption[] ToOptions(this Type enumType)
     {
         if (!enumType.IsEnum)
@@ -53,14 +52,14 @@ public static class OptionExtensions
 
         IAnyOption MakeOption(object e)
         {
-            var description = enumType.GetField(e.ToString()!)?
+            var label = enumType.GetField(e.ToString()!)?
                 .GetCustomAttributes(typeof(DescriptionAttribute), false)
                 .Cast<DescriptionAttribute>()
                 .FirstOrDefault()?.Description ?? Utils.SplitPascalCase(e.ToString());
 
             return (IAnyOption)Activator.CreateInstance(
                 typeof(Option<>).MakeGenericType(enumType),
-                description,
+                label,
                 Convert.ChangeType(e, enumType),
                 null,
                 null

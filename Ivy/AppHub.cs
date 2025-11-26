@@ -441,7 +441,7 @@ public class AppHub(
                 switch (state)
                 {
                     case AuthRefreshState.Initial:
-                        logger.LogInformation("AuthRefreshLoop: Starting for {ConnectionId}", connectionId);
+                        logger.LogInformation("AuthRefreshLoop: Initialized for {ConnectionId}.", connectionId);
                         state = token == null
                             ? AuthRefreshState.HasNoToken
                             : AuthRefreshState.HasToken;
@@ -508,8 +508,6 @@ public class AppHub(
                     case AuthRefreshState.TokenExpired:
                     case AuthRefreshState.TokenInvalid:
                         {
-                            logger.LogInformation("AuthRefreshLoop: Attempting to refresh token for {ConnectionId}.", connectionId);
-
                             var newToken = await TimeoutHelper.WithTimeoutAsync(
                                 authService.RefreshAccessTokenAsync,
                                 cancellationToken);
@@ -517,12 +515,11 @@ public class AppHub(
                             {
                                 // This case should only ever happen if the auth provider implementation is bad (i.e. it returns the same invalid token on refresh).
                                 // It is still good to handle it here to avoid an infinite loop.
-                                logger.LogInformation("AuthRefreshLoop: Invalid token object unchanged after refresh for {ConnectionId}.", connectionId);
+                                logger.LogError("AuthRefreshLoop: Invalid token object unchanged after refresh for {ConnectionId}.", connectionId);
                                 newToken = null;
                             }
                             if (token != newToken)
                             {
-                                logger.LogInformation("AuthRefreshLoop: updating stored token for {ConnectionId}.", connectionId);
                                 clientProvider.SetAuthToken(newToken, reloadPage: string.IsNullOrEmpty(newToken?.AccessToken));
                             }
                             if (newToken == null)

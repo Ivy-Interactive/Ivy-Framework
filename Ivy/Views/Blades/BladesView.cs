@@ -5,7 +5,6 @@ namespace Ivy.Views.Blades;
 
 public class BladesView : ViewBase
 {
-    /// <returns>A BladeContainer containing all active blades with their event handlers.</returns>
     public override object? Build()
     {
         var controller = UseContext<IBladeController>();
@@ -33,13 +32,11 @@ public class BladesView : ViewBase
 
 public class BladeView(IView bladeView, int index, long refreshToken, string? title, Size? width, Action<Event<Blade>>? onClose, Action<Event<Blade>>? onRefresh) : ViewBase, IMemoized
 {
-    /// <returns>A Blade widget configured with the view content and event handlers.</returns>
     public override object? Build()
     {
         return new Blade(bladeView, index, title, width, onClose, onRefresh).Key($"{index}:{refreshToken}");
     }
 
-    /// <returns>An array containing the index and refresh token for memoization comparison.</returns>
     public object[] GetMemoValues()
     {
         return [index, refreshToken];

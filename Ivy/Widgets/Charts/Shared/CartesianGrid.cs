@@ -1,4 +1,4 @@
-﻿// ReSharper disable once CheckNamespace
+// ReSharper disable once CheckNamespace
 
 using Ivy.Shared;
 
@@ -20,7 +20,6 @@ public record CartesianGrid
 
     public Colors? Fill { get; set; } = null;
 
-    /// <summary>Value ranges from 0.0 to 1.0.</summary>
     public double? FillOpacity { get; set; } = null;
 
     public string? StrokeDashArray { get; set; }
@@ -48,13 +47,11 @@ public static class CartesianGridExtensions
         return cartesianGrid with { Height = height };
     }
 
-    /// <summary>Enables only horizontal grid lines and disables vertical grid lines.</summary>
     public static CartesianGrid Horizontal(this CartesianGrid cartesianGrid)
     {
         return cartesianGrid with { Horizontal = true, Vertical = false };
     }
 
-    /// <summary>Enables only vertical grid lines and disables horizontal grid lines.</summary>
     public static CartesianGrid Vertical(this CartesianGrid cartesianGrid)
     {
         return cartesianGrid with { Vertical = true, Horizontal = false };
@@ -65,7 +62,6 @@ public static class CartesianGridExtensions
         return cartesianGrid with { Fill = fill };
     }
 
-    /// <param name="fillOpacity">Value ranges from 0.0 (transparent) to 1.0 (opaque).</param>
     public static CartesianGrid FillOpacity(this CartesianGrid cartesianGrid, double fillOpacity)
     {
         return cartesianGrid with { FillOpacity = fillOpacity };

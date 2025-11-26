@@ -1,4 +1,4 @@
-﻿using System.Reactive.Linq;
+using System.Reactive.Linq;
 using Ivy.Core;
 using Ivy.Core.Hooks;
 using Ivy.Helpers;
@@ -7,8 +7,6 @@ using Ivy.Views.Blades;
 
 namespace Ivy.Views;
 
-/// <summary>Represents a filtered list view that provides search functionality and dynamic data fetching based on filter criteria.</summary>
-/// <typeparam name="T">The type of data records to display in the filtered list.</typeparam>
 public class FilteredListView<T>(
     Func<string, Task<T[]>> fetchRecords,
     Func<T, ListItem> createItem,
@@ -17,12 +15,6 @@ public class FilteredListView<T>(
     Action<string>? onFilterChanged = null
 ) : ViewBase
 {
-    /// <summary>
-    /// Builds the filtered list view layout, including search input,
-    /// tool buttons, and the filtered list of items with loading states.
-    /// </summary>
-    /// <returns>A blade layout containing search input, tool buttons,
-    /// and the filtered list with appropriate loading indicators.</returns>
     public override object? Build()
     {
         var records = UseState(Array.Empty<T>);

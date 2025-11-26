@@ -6,7 +6,7 @@ using Ivy.Views.Tables;
 
 namespace Ivy.Samples.Shared.Apps.Tests;
 
-[App(icon: Icons.Table, path: ["Tests"], isVisible: true, searchHints: ["table", "cropping", "layout", "blade", "truncation"])]
+[App(icon: Icons.Table, path: ["Tests"], isVisible: false, searchHints: ["table", "cropping", "layout", "blade", "truncation"])]
 public class TableCroppingTestApp : ViewBase
 {
     public override object? Build()

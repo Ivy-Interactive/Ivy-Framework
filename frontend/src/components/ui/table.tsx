@@ -8,22 +8,22 @@ import {
   tableSizeVariants,
 } from './table/table-variants';
 import { TableProvider } from './table/TableContext';
-import { useTableSize } from './table/useTableSize';
-import { Sizes } from '@/types/sizes';
+import { useTableScale } from './table/useTableSize';
+import { Scales } from '@/types/scale';
 
 export interface TableProps
   extends Omit<React.HTMLAttributes<HTMLTableElement>, 'size'>,
     VariantProps<typeof tableSizeVariants> {}
 
 const Table = React.forwardRef<HTMLTableElement, TableProps>(
-  ({ className, size, children, ...props }, ref) => (
-    <TableProvider size={size as Sizes}>
+  ({ className, scale, children, ...props }, ref) => (
+    <TableProvider scale={scale as Scales}>
       <div className="relative w-full overflow-auto">
         <table
           ref={ref}
           className={cn(
             'w-full caption-bottom',
-            tableSizeVariants({ size }),
+            tableSizeVariants({ scale }),
             className
           )}
           {...props}
@@ -91,15 +91,15 @@ export interface TableHeadProps
     VariantProps<typeof tableHeadSizeVariants> {}
 
 const TableHead = React.forwardRef<HTMLTableCellElement, TableHeadProps>(
-  ({ className, size: propSize, ...props }, ref) => {
-    const contextSize = useTableSize();
-    const size = propSize ?? contextSize;
+  ({ className, scale: propScale, ...props }, ref) => {
+    const contextScale = useTableScale();
+    const scale = propScale ?? contextScale;
 
     return (
       <th
         ref={ref}
         className={cn(
-          tableHeadSizeVariants({ size }),
+          tableHeadSizeVariants({ scale }),
           'text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]',
           className
         )}
@@ -115,15 +115,15 @@ export interface TableCellProps
     VariantProps<typeof tableCellSizeVariants> {}
 
 const TableCell = React.forwardRef<HTMLTableCellElement, TableCellProps>(
-  ({ className, size: propSize, ...props }, ref) => {
-    const contextSize = useTableSize();
-    const size = propSize ?? contextSize;
+  ({ className, scale: propScale, ...props }, ref) => {
+    const contextScale = useTableScale();
+    const scale = propScale ?? contextScale;
 
     return (
       <td
         ref={ref}
         className={cn(
-          tableCellSizeVariants({ size }),
+          tableCellSizeVariants({ scale }),
           'align-middle [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]',
           className
         )}

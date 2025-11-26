@@ -23,7 +23,6 @@ public static class ExpandableExtensions
         return widget;
     }
 
-    /// <summary>True to open by default; false to close by default.</summary>
     public static Expandable Open(this Expandable widget, bool open = true)
     {
         widget.Open = open;

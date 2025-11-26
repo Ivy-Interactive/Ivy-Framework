@@ -5,22 +5,22 @@ import { cn, getIvyHost, camelCase, validateLinkUrl } from '@/lib/utils';
 import { useEventHandler } from '@/components/event-handler';
 import withTooltip from '@/hoc/withTooltip';
 import { Loader2 } from 'lucide-react';
-
-// Create tooltip-wrapped button outside of component
-const ButtonWithTooltip = withTooltip(Button);
 import {
   BorderRadius,
   getBorderRadius,
   getColor,
   getWidth,
 } from '@/lib/styles';
+import { Scales } from '@/types/scale';
+
+const ButtonWithTooltip = withTooltip(Button);
 
 interface ButtonWidgetProps {
   id: string;
   title: string;
   icon?: string;
   iconPosition?: 'Left' | 'Right';
-  size?: 'Default' | 'Small' | 'Large';
+  scale?: Scales;
   variant?:
     | 'Primary'
     | 'Inline'
@@ -80,7 +80,7 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
   width,
   children,
   borderRadius,
-  size,
+  scale = Scales.Medium,
   'data-testid': dataTestId,
 }) => {
   const eventHandler = useEventHandler();
@@ -99,12 +99,12 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
     buttonSize = 'icon';
   }
 
-  if (size == 'Small') {
+  if (scale == Scales.Small) {
     buttonSize = 'sm';
     iconSize = 3;
   }
 
-  if (size == 'Large') {
+  if (scale == Scales.Large) {
     buttonSize = 'lg';
     iconSize = 5;
   }

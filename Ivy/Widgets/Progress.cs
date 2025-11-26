@@ -29,7 +29,6 @@ public record Progress : WidgetBase<Progress>
 
     [Prop] public ColorVariants ColorVariant { get; set; } = ColorVariants.Primary;
 
-    /// <exception cref="NotSupportedException">Progress does not support children.</exception>
     public static Progress operator |(Progress widget, object child)
     {
         throw new NotSupportedException("Progress does not support children.");
