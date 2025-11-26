@@ -21,7 +21,9 @@ interface VideoPlayerWidgetProps {
   poster?: string; // optional preview image before playback
 }
 
-const getVideoUrl = (url: string): string | null => {
+const getVideoUrl = (url: string | undefined | null): string | null => {
+  if (!url) return null;
+
   // Validate and sanitize video URL to prevent open redirect vulnerabilities
   const validatedUrl = validateVideoUrl(url);
   if (!validatedUrl) {
@@ -69,23 +71,10 @@ export const VideoPlayerWidget: React.FC<VideoPlayerWidgetProps> = ({
     ...getHeight(height),
   };
 
-  if (!source) {
-    return (
-      <div
-        id={id}
-        style={styles}
-        className="flex items-center justify-center bg-muted text-muted-foreground rounded border-2 border-dashed border-muted-foreground/25 p-4"
-        role="alert"
-        aria-label="Video player error"
-      >
-        <span className="text-sm">No video source provided</span>
-      </div>
-    );
-  }
-
-  // Validate and sanitize video URL to prevent open redirect vulnerabilities
+  // getVideoUrl handles null/undefined and validates the URL internally
   const validatedVideoSrc = getVideoUrl(source);
   if (!validatedVideoSrc) {
+    // Show error message for missing or invalid URLs
     return (
       <div
         id={id}
@@ -94,7 +83,9 @@ export const VideoPlayerWidget: React.FC<VideoPlayerWidgetProps> = ({
         role="alert"
         aria-label="Invalid video URL"
       >
-        <span className="text-sm">Invalid video URL</span>
+        <span className="text-sm">
+          {!source ? 'No video source provided' : 'Invalid video URL'}
+        </span>
       </div>
     );
   }

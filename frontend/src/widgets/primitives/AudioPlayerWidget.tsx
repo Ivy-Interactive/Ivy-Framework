@@ -20,7 +20,9 @@ interface AudioPlayerWidgetProps {
   'data-testid'?: string;
 }
 
-const getAudioUrl = (url: string): string | null => {
+const getAudioUrl = (url: string | undefined | null): string | null => {
+  if (!url) return null;
+
   // Validate and sanitize audio URL to prevent open redirect vulnerabilities
   const validatedUrl = validateAudioUrl(url);
   if (!validatedUrl) {
@@ -63,23 +65,10 @@ export const AudioPlayerWidget: React.FC<AudioPlayerWidgetProps> = ({
     ...getHeight(height),
   };
 
-  if (!src) {
-    return (
-      <div
-        key={id}
-        style={styles}
-        className="flex items-center justify-center bg-muted text-muted-foreground rounded border-2 border-dashed border-muted-foreground/25 p-4"
-        role="alert"
-        aria-label="Audio player error"
-      >
-        <span className="text-sm">No audio source provided</span>
-      </div>
-    );
-  }
-
-  // Validate and sanitize audio URL to prevent open redirect vulnerabilities
+  // getAudioUrl handles null/undefined and validates the URL internally
   const validatedAudioSrc = getAudioUrl(src);
   if (!validatedAudioSrc) {
+    // Show error message for missing or invalid URLs
     return (
       <div
         key={id}
@@ -88,7 +77,9 @@ export const AudioPlayerWidget: React.FC<AudioPlayerWidgetProps> = ({
         role="alert"
         aria-label="Invalid audio URL"
       >
-        <span className="text-sm">Invalid audio URL</span>
+        <span className="text-sm">
+          {!src ? 'No audio source provided' : 'Invalid audio URL'}
+        </span>
       </div>
     );
   }
