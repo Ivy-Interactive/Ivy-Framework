@@ -644,10 +644,171 @@ describe.each(mediaValidationCases)(
       expect(validate(invalidDataUrl)).toBeNull();
     });
 
-    it('accepts blob URLs', () => {
-      expect(validate('blob:https://example.com/1234')).toBe(
-        'blob:https://example.com/1234'
-      );
+    describe('blob URL validation', () => {
+      let getCurrentOriginSpy: ReturnType<typeof vi.fn>;
+
+      beforeEach(() => {
+        // Create a mock function and replace the internal reference
+        const mockFn = vi.fn(() => 'https://example.com');
+        urlValidation._getCurrentOriginRef.getCurrentOrigin = mockFn;
+        getCurrentOriginSpy = mockFn;
+      });
+
+      it('accepts blob URLs with matching origin', () => {
+        getCurrentOriginSpy.mockReturnValue('https://example.com');
+        expect(validate('blob:https://example.com/1234-5678-90ab-cdef')).toBe(
+          'blob:https://example.com/1234-5678-90ab-cdef'
+        );
+      });
+
+      it('rejects blob URLs with different origin', () => {
+        getCurrentOriginSpy.mockReturnValue('https://example.com');
+        expect(
+          validate('blob:https://attacker.com/1234-5678-90ab-cdef')
+        ).toBeNull();
+      });
+
+      it('rejects blob URLs with different protocol', () => {
+        getCurrentOriginSpy.mockReturnValue('https://example.com');
+        expect(
+          validate('blob:http://example.com/1234-5678-90ab-cdef')
+        ).toBeNull();
+      });
+
+      it('rejects blob URLs with different port', () => {
+        getCurrentOriginSpy.mockReturnValue('https://example.com:443');
+        expect(
+          validate('blob:https://example.com:8080/1234-5678-90ab-cdef')
+        ).toBeNull();
+      });
+
+      it('accepts blob URLs with same origin but default port normalized', () => {
+        getCurrentOriginSpy.mockReturnValue('https://example.com');
+        // Blob URL with explicit :443 should match origin without port
+        expect(
+          validate('blob:https://example.com:443/1234-5678-90ab-cdef')
+        ).toBe('blob:https://example.com:443/1234-5678-90ab-cdef');
+      });
+
+      it('accepts blob URLs when both have default ports normalized', () => {
+        getCurrentOriginSpy.mockReturnValue('https://example.com:443');
+        expect(validate('blob:https://example.com/1234-5678-90ab-cdef')).toBe(
+          'blob:https://example.com/1234-5678-90ab-cdef'
+        );
+      });
+
+      it('rejects blob URLs when current origin is missing (SSR scenario)', () => {
+        getCurrentOriginSpy.mockReturnValue('');
+        expect(
+          validate('blob:https://example.com/1234-5678-90ab-cdef')
+        ).toBeNull();
+      });
+
+      it('rejects blob URLs with invalid format (no slash)', () => {
+        getCurrentOriginSpy.mockReturnValue('https://example.com');
+        expect(validate('blob:https://example.com')).toBeNull();
+      });
+
+      it('rejects blob URLs with invalid format (no origin)', () => {
+        getCurrentOriginSpy.mockReturnValue('https://example.com');
+        expect(validate('blob:/1234-5678-90ab-cdef')).toBeNull();
+      });
+
+      it('handles blob URLs with complex UUIDs', () => {
+        getCurrentOriginSpy.mockReturnValue('https://example.com');
+        const complexBlobUrl =
+          'blob:https://example.com/550e8400-e29b-41d4-a716-446655440000';
+        expect(validate(complexBlobUrl)).toBe(complexBlobUrl);
+      });
+
+      it('handles blob URLs with paths after UUID', () => {
+        getCurrentOriginSpy.mockReturnValue('https://example.com');
+        // Blob URLs typically have format blob:origin/uuid, but we only extract up to first slash
+        const blobUrl = 'blob:https://example.com/uuid-123';
+        expect(validate(blobUrl)).toBe(blobUrl);
+      });
+
+      it('handles http origins correctly', () => {
+        getCurrentOriginSpy.mockReturnValue('http://localhost:8080');
+        expect(validate('blob:http://localhost:8080/1234-5678-90ab-cdef')).toBe(
+          'blob:http://localhost:8080/1234-5678-90ab-cdef'
+        );
+      });
+
+      it('rejects blob URLs with http when current origin is https', () => {
+        getCurrentOriginSpy.mockReturnValue('https://example.com');
+        expect(
+          validate('blob:http://example.com/1234-5678-90ab-cdef')
+        ).toBeNull();
+      });
+
+      it('handles default http port normalization', () => {
+        getCurrentOriginSpy.mockReturnValue('http://example.com');
+        // Blob URL with explicit :80 should match origin without port
+        expect(validate('blob:http://example.com:80/1234-5678-90ab-cdef')).toBe(
+          'blob:http://example.com:80/1234-5678-90ab-cdef'
+        );
+      });
+
+      // Additional edge cases for comprehensive coverage
+      it('rejects blob URLs with different subdomain', () => {
+        getCurrentOriginSpy.mockReturnValue('https://example.com');
+        expect(validate('blob:https://subdomain.example.com/uuid')).toBeNull();
+      });
+
+      it('rejects blob URLs with malformed origin (no protocol)', () => {
+        getCurrentOriginSpy.mockReturnValue('https://example.com');
+        expect(validate('blob:example.com/uuid')).toBeNull();
+      });
+
+      it('rejects blob URLs with malformed origin (invalid protocol)', () => {
+        getCurrentOriginSpy.mockReturnValue('https://example.com');
+        // The validateMediaUrl function should reject javascript: protocol
+        expect(validate('blob:javascript://example.com/uuid')).toBeNull();
+      });
+
+      it('handles blob URLs with custom ports correctly', () => {
+        getCurrentOriginSpy.mockReturnValue('https://example.com:8443');
+        expect(validate('blob:https://example.com:8443/uuid-123')).toBe(
+          'blob:https://example.com:8443/uuid-123'
+        );
+      });
+
+      it('rejects blob URLs with same host but different port', () => {
+        getCurrentOriginSpy.mockReturnValue('https://example.com:8443');
+        expect(validate('blob:https://example.com:9443/uuid-123')).toBeNull();
+      });
+
+      it('handles blob URLs with IPv4 addresses', () => {
+        getCurrentOriginSpy.mockReturnValue('http://192.168.1.1:8080');
+        expect(validate('blob:http://192.168.1.1:8080/uuid-123')).toBe(
+          'blob:http://192.168.1.1:8080/uuid-123'
+        );
+      });
+
+      it('rejects blob URLs with different IPv4 address', () => {
+        getCurrentOriginSpy.mockReturnValue('http://192.168.1.1:8080');
+        expect(validate('blob:http://192.168.1.2:8080/uuid-123')).toBeNull();
+      });
+
+      it('handles blob URLs with localhost variants', () => {
+        getCurrentOriginSpy.mockReturnValue('http://localhost:3000');
+        expect(validate('blob:http://localhost:3000/uuid-123')).toBe(
+          'blob:http://localhost:3000/uuid-123'
+        );
+      });
+
+      it('rejects blob URLs when blob origin is empty (double slash)', () => {
+        getCurrentOriginSpy.mockReturnValue('https://example.com');
+        // This should be caught by the invalid format check
+        expect(validate('blob://uuid-123')).toBeNull();
+      });
+
+      it('rejects blob URLs with protocol injection attempt', () => {
+        getCurrentOriginSpy.mockReturnValue('https://example.com');
+        // Attempt to inject javascript: protocol
+        expect(validate('blob:javascript:alert(1)')).toBeNull();
+      });
     });
 
     it('accepts safe app:// URLs and rejects app:// URLs with colons in the path', () => {

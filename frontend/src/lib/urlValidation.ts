@@ -36,6 +36,31 @@ export const _getCurrentOriginRef = {
 };
 
 /**
+ * Normalizes an origin string by removing default ports.
+ * This ensures that https://example.com and https://example.com:443 are treated as equal.
+ * The URL.origin property already handles default port normalization, so we use it directly.
+ * @param origin - The origin string to normalize (e.g., "https://example.com" or "https://example.com:443")
+ * @returns The normalized origin string
+ */
+function normalizeOrigin(origin: string): string {
+  if (!origin) return origin;
+
+  try {
+    // Ensure the origin has a protocol for parsing
+    const originWithProtocol = origin.includes('://')
+      ? origin
+      : `https://${origin}`;
+
+    const url = new URL(originWithProtocol);
+    // url.origin already excludes default ports (443 for https, 80 for http)
+    return url.origin;
+  } catch {
+    // If parsing fails, return as-is
+    return origin;
+  }
+}
+
+/**
  * URL type detection helpers
  */
 export function isExternalUrl(url: string): boolean {
@@ -297,10 +322,49 @@ export function validateMediaUrl(
   if (url.startsWith('blob:')) {
     // Additional validation: ensure blob URL's origin matches current origin
     // This prevents attacks like blob:https://attacker.com/uuid
+    // Blob URLs have format: blob:<origin>/<uuid>
+    // Note: new URL() returns origin as "null" for blob URLs (opaque origin),
+    // so we must extract the origin from the blob URL string itself
     try {
-      const blobUrl = new URL(url);
       const currentOrigin = _getCurrentOriginRef.getCurrentOrigin();
-      if (blobUrl.origin !== currentOrigin) {
+      if (!currentOrigin) {
+        // Cannot validate without current origin (e.g., SSR)
+        return null;
+      }
+
+      // Extract origin from blob URL: blob:<origin>/<uuid>
+      // Format is blob:<protocol>://<host>/<uuid>
+      // We need to extract the origin part (protocol + host + optional port)
+      const blobUrlWithoutPrefix = url.substring(5); // Remove "blob:"
+
+      // Find the protocol separator "://"
+      const protocolIndex = blobUrlWithoutPrefix.indexOf('://');
+      if (protocolIndex === -1) {
+        // Invalid blob URL format (no protocol)
+        return null;
+      }
+
+      // Find the first "/" after the protocol and hostname
+      // The origin ends at the first "/" that comes after "://"
+      const afterProtocol = blobUrlWithoutPrefix.substring(protocolIndex + 3);
+      const firstSlashIndex = afterProtocol.indexOf('/');
+
+      if (firstSlashIndex === -1) {
+        // Invalid blob URL format (no slash after origin)
+        return null;
+      }
+
+      // Extract origin: protocol + "://" + hostname (and optional port)
+      const blobOrigin = blobUrlWithoutPrefix.substring(
+        0,
+        protocolIndex + 3 + firstSlashIndex
+      );
+
+      // Normalize origins for comparison (handle default ports)
+      const normalizedBlobOrigin = normalizeOrigin(blobOrigin);
+      const normalizedCurrentOrigin = normalizeOrigin(currentOrigin);
+
+      if (normalizedBlobOrigin !== normalizedCurrentOrigin) {
         return null;
       }
     } catch {
