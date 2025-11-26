@@ -452,7 +452,8 @@ public class KanbanHeaderLayoutExample : ViewBase
 
         var header = Layout.Horizontal() | createBtn;
 
-        var body = new HeaderLayout(header, kanban).Height(Size.Units(600));
+        var body = new HeaderLayout(header, kanban)
+            .Scroll(Scroll.None);
 
         return body;
     }
