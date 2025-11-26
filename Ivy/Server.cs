@@ -1,3 +1,4 @@
+using Ivy.Shared;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -78,6 +79,17 @@ public class Server
 
         Services.AddSingleton(_args);
         Services.AddSingleton(Configuration);
+
+        AddApp(new AppDescriptor
+        {
+            Id = AppIds.NotFound,
+            Title = "App Not Found",
+            Icon = Icons.CircleAlert,
+            Type = typeof(NotFoundView),
+            ViewFactory = () => new NotFoundView(),
+            Path = [],
+            IsVisible = false
+        });
     }
 
     public Server(FuncViewBuilder viewFactory) : this()
@@ -202,6 +214,21 @@ public class Server
     public Server UseDefaultApp(Type appType)
     {
         DefaultAppId = AppHelpers.GetApp(appType).Id;
+        return this;
+    }
+
+    public Server UseNotFoundApp<T>(Func<ViewBase>? viewFactory = null) where T : ViewBase
+    {
+        AddApp(new AppDescriptor
+        {
+            Id = AppIds.NotFound,
+            Title = "App Not Found",
+            Icon = Icons.CircleAlert,
+            Type = typeof(T),
+            ViewFactory = viewFactory ?? (() => (ViewBase)Activator.CreateInstance(typeof(T))!),
+            Path = [],
+            IsVisible = false
+        });
         return this;
     }
 

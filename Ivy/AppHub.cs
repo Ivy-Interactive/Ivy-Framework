@@ -98,19 +98,7 @@ public class AppHub(
         return new AppArgs(connectionId, appId, navigationAppId, appArgs ?? server.Args?.Args, request.Scheme, request.Host.Value!);
     }
 
-    private static AppDescriptor Get404AppDescriptor(string appId)
-    {
-        return new AppDescriptor
-        {
-            Id = appId,
-            Title = "App Not Found",
-            Icon = Icons.CircleAlert,
-            Type = typeof(NotFoundView),
-            ViewFactory = () => new NotFoundView(),
-            IsVisible = false,
-            Path = []
-        };
-    }
+
 
     public override async Task OnConnectedAsync()
     {
@@ -216,28 +204,56 @@ public class AppHub(
                 }
 
                 // Check if the requested navigation app exists
-                AppDescriptor? notFoundApp = null;
                 if (!string.IsNullOrEmpty(navigationAppId))
                 {
                     var resolvedApp = server.AppRepository.GetAppOrDefault(navigationAppId);
                     if (resolvedApp.Id != navigationAppId)
                     {
-                        // App not found, prepare virtual 404 app
-                        notFoundApp = Get404AppDescriptor(navigationAppId);
+                        // App not found, try to find registered 404 app
+                        var notFoundApp = server.AppRepository.GetAppOrDefault(AppIds.NotFound);
+                        if (notFoundApp.Id == AppIds.NotFound)
+                        {
+                            appServices.AddSingleton<IAppRepository>(new ScopedAppRepository(server.AppRepository, navigationAppId, notFoundApp));
+                        }
+                        else
+                        {
+                            // Fallback: register default repository if 404 app not found
+                            appServices.AddSingleton(typeof(IAppRepository), server.AppRepository);
+                        }
+                    }
+                    else
+                    {
+                        // App found, use default repository
+                        appServices.AddSingleton(typeof(IAppRepository), server.AppRepository);
                     }
                 }
+                else
+                {
+                    // No navigation app requested, use default repository
+                    appServices.AddSingleton(typeof(IAppRepository), server.AppRepository);
+                }
 
-                appServices.AddSingleton<IAppRepository>(new ScopedAppRepository(server.AppRepository, notFoundApp));
-
-                appDescriptor = server.GetApp(appId);
+                appDescriptor = server.GetApp(appId ?? AppIds.Default);
             }
             else
             {
                 var resolvedApp = server.AppRepository.GetAppOrDefault(appId);
                 if (resolvedApp.Id != appId)
                 {
-                    appDescriptor = Get404AppDescriptor(appId);
-                    appServices.AddSingleton<IAppRepository>(new ScopedAppRepository(server.AppRepository, appDescriptor));
+                    // App not found
+                    var notFoundApp = server.AppRepository.GetAppOrDefault(AppIds.NotFound);
+                    if (notFoundApp.Id == AppIds.NotFound)
+                    {
+                        appDescriptor = notFoundApp;
+                        // We also need to scope the repository so that if the view asks for "current app", it gets this one.
+                        appServices.AddSingleton<IAppRepository>(new ScopedAppRepository(server.AppRepository, appId, appDescriptor));
+                    }
+                    else
+                    {
+                        // Fallback to default behavior if no 404 app registered (shouldn't happen with default registration)
+                        appServices.AddSingleton(typeof(IAppRepository), server.AppRepository);
+                        appDescriptor = resolvedApp;
+                    }
                 }
                 else
                 {
@@ -246,7 +262,7 @@ public class AppHub(
                 }
             }
 
-            var appArgs = GetAppArgs(Context.ConnectionId, appId, navigationAppId, httpContext);
+            var appArgs = GetAppArgs(Context.ConnectionId, appId ?? AppIds.Default, navigationAppId, httpContext);
 
             logger.LogInformation($"Connected: {Context.ConnectionId} [{appId}]");
 
@@ -264,7 +280,7 @@ public class AppHub(
 
             var appState = new AppSession
             {
-                AppId = appId,
+                AppId = appId ?? AppIds.Default,
                 MachineId = GetMachineId(httpContext),
                 ParentId = parentId,
                 AppDescriptor = appDescriptor,
@@ -281,7 +297,7 @@ public class AppHub(
 
             if (parentId == null)
             {
-                clientProvider.SetRootAppId(appId);
+                clientProvider.SetRootAppId(appId ?? AppIds.Default);
                 if (appId != AppIds.Chrome)
                 {
                     var navigateArgs = new NavigateArgs(appId, Chrome: chrome);
@@ -782,13 +798,13 @@ public class ClientProvider(IClientSender sender) : IClientProvider
     public IClientSender Sender { get; set; } = sender;
 }
 
-internal class ScopedAppRepository(IAppRepository inner, AppDescriptor? overrideApp) : IAppRepository
+internal class ScopedAppRepository(IAppRepository inner, string targetId, AppDescriptor? overrideApp) : IAppRepository
 {
     public MenuItem[] GetMenuItems() => inner.GetMenuItems();
 
     public AppDescriptor GetAppOrDefault(string? id)
     {
-        if (overrideApp != null && id == overrideApp.Id)
+        if (overrideApp != null && id == targetId)
         {
             return overrideApp;
         }
@@ -797,7 +813,7 @@ internal class ScopedAppRepository(IAppRepository inner, AppDescriptor? override
 
     public AppDescriptor? GetApp(string id)
     {
-        if (overrideApp != null && id == overrideApp.Id)
+        if (overrideApp != null && id == targetId)
         {
             return overrideApp;
         }

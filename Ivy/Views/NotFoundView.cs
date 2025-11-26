@@ -12,7 +12,6 @@ public class NotFoundView : ViewBase
                    .Gap(4)
                    .Center()
                    | Text.H1("Ouch! :|").Bold()
-                   | Text.H3("Sorry, this app does not exist.")
                    | Text.Muted("Apologies, the app you were looking for was not found")
                );
     }

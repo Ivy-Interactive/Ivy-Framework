@@ -10,6 +10,7 @@ public static class AppIds
     public const string Auth = "$auth";
     public const string Chrome = "$chrome";
     public const string Default = "$default";
+    public const string NotFound = "$not-found";
 }
 
 public class AppDescriptor : IAppRepositoryNode
