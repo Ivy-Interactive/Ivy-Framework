@@ -18,18 +18,16 @@ export const ArticleFooter: React.FC<ArticleFooterProps> = ({
   documentSource,
   onLinkClick,
 }) => {
-  const isChromeFalse = !getChromeParam();
-
   const handleLinkClick = (
     appId: string,
     event: React.MouseEvent<HTMLAnchorElement>
   ) => {
-    // When chrome=false, let the browser handle navigation naturally
-    if (isChromeFalse) {
-      // Don't prevent default - let browser navigate
+    // When chrome is disabled, use browser navigation
+    if (!getChromeParam()) {
       return;
     }
-    // When chrome=true, use the backend event handler
+
+    // When chrome is enabled, use the backend event handler
     event.preventDefault();
     onLinkClick('OnLinkClick', id, ['app://' + appId]);
   };
