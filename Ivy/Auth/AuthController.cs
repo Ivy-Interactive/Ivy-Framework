@@ -1,7 +1,10 @@
 using System.Net;
 using System.Text.Json;
+using Ivy.Apps;
+using Ivy.Core;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace Ivy.Auth;
 
@@ -9,7 +12,11 @@ public class AuthController() : Controller
 {
     [Route("ivy/auth/set-auth-token")]
     [HttpPatch]
-    public IActionResult SetAuthToken([FromBody] string id)
+    public async Task<IActionResult> SetAuthToken(
+        [FromBody] string id,
+        [FromServices] AppSessionStore sessionStore,
+        [FromServices] IContentBuilder contentBuilder,
+        [FromServices] ILogger<AuthController> logger)
     {
         if (!AuthTokenRegistry.TryRemove(id, out var token))
         {
@@ -21,6 +28,13 @@ public class AuthController() : Controller
         {
             cookies.Delete("auth_token");
             cookies.Delete("auth_ext_refresh_token");
+
+            // Trigger logout for all sessions with the same machineId
+            if (HttpContext.Request.Headers.TryGetValue("X-Machine-Id", out var headerValue))
+            {
+                var machineId = headerValue.ToString();
+                await TriggerMachineLogout(sessionStore, machineId, contentBuilder, logger);
+            }
         }
         else
         {
@@ -59,5 +73,22 @@ public class AuthController() : Controller
             cookies.Append("auth_token", tokenJson, cookieOptions);
         }
         return Ok();
+    }
+
+    private static async Task TriggerMachineLogout(
+        AppSessionStore sessionStore,
+        string machineId,
+        IContentBuilder contentBuilder,
+        ILogger logger)
+    {
+        // Find all sessions with this machineId and trigger logout
+        var sessionsToLogout = sessionStore.Sessions.Values
+            .Where(s => !s.IsDisposed() && s.MachineId == machineId)
+            .ToList();
+
+        foreach (var session in sessionsToLogout)
+        {
+            await SessionHelpers.AbandonSessionAsync(session, contentBuilder, resetTokenAndReload: true, logger, "TriggerMachineLogout");
+        }
     }
 }

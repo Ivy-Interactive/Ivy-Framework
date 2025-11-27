@@ -242,7 +242,10 @@ export const useBackend = (
       });
       const response = await fetch(`${getIvyHost()}/ivy/auth/set-auth-token`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Machine-Id': getMachineId(),
+        },
         body: JSON.stringify(message.tokenId),
         credentials: 'include',
       });
@@ -252,11 +255,6 @@ export const useBackend = (
           statusText: response.statusText,
         });
       }
-
-      // // Notify other tabs about logout
-      // if (message.authToken === null && authChannelRef.current) {
-      //   authChannelRef.current.postMessage({ type: 'logout' });
-      // }
 
       if (message.reloadPage) {
         window.location.reload();
