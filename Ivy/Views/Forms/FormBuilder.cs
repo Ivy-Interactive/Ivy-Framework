@@ -393,13 +393,13 @@ public class FormBuilder<TModel> : ViewBase
             _ => 12  // Larger gap for Large scale
         };
 
-        return Layout.Vertical()
-               | formView
-               | Layout.Horizontal(new Button(SubmitTitle)
+        return Layout.Vertical(
+               formView,
+               Layout.Horizontal(new Button(SubmitTitle)
                    .HandleClick(HandleSubmit)
                    .Loading(submitting)
                    .Disabled(submitting || hasUploading.Value)
-                   .Scale(Scale), validationView)
+                   .Scale(Scale), validationView))
                .Gap(buttonGap);
     }
 
