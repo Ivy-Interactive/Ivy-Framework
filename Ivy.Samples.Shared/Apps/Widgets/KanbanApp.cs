@@ -1,3 +1,4 @@
+using Ivy.Hooks;
 using Ivy.Shared;
 using Ivy.Views.Builders;
 using Ivy.Views.Kanban;
@@ -266,7 +267,6 @@ public class KanbanBuilderWithClickExample : ViewBase
 {
     public override object? Build()
     {
-        var selectedTaskId = this.UseState((string?)null);
         var tasks = UseState(new[]
         {
             new Task { Id = "1", Title = "Design Homepage", Status = "Todo", Priority = 2, Description = "Create wireframes and mockups", Assignee = "Alice" },
@@ -276,6 +276,9 @@ public class KanbanBuilderWithClickExample : ViewBase
             new Task { Id = "5", Title = "Write Tests", Status = "In Progress", Priority = 2, Description = "Unit and integration tests", Assignee = "Bob" },
             new Task { Id = "6", Title = "Deploy to Production", Status = "Done", Priority = 1, Description = "Configure CI/CD pipeline", Assignee = "Charlie" },
         });
+
+        var (taskSheetView, showTaskSheet) = this.UseTrigger((IState<bool> isOpen, string taskId)
+            => BuildTaskSheet(isOpen, taskId, tasks));
 
         var kanban = tasks.Value
                 .ToKanban(
@@ -287,7 +290,7 @@ public class KanbanBuilderWithClickExample : ViewBase
                         .Remove(x => x.Id)
                         .MultiLine(x => x.Description)
                 )
-                .HandleClick(() => selectedTaskId.Set(task.Id)))
+                .HandleClick(() => showTaskSheet(task.Id)))
                 .ColumnOrder(e => GetStatusOrder(e.Status))
                 .Width(Size.Full())
                 .HandleMove(moveData =>
@@ -342,17 +345,17 @@ public class KanbanBuilderWithClickExample : ViewBase
 
         return new Fragment(
             kanban,
-            selectedTaskId.Value != null ? BuildTaskSheet(selectedTaskId as IState<string?>, tasks) : null
+            taskSheetView
         );
     }
 
-    private object BuildTaskSheet(IState<string?>? selectedTaskId, IState<Task[]> tasks)
+    private object BuildTaskSheet(IState<bool> isOpen, string taskId, IState<Task[]> tasks)
     {
-        var task = tasks.Value.FirstOrDefault(t => t.Id == selectedTaskId?.Value);
+        var task = tasks.Value.FirstOrDefault(t => t.Id == taskId);
         if (task == null) return new Fragment();
 
         return new Sheet(
-            onClose: () => selectedTaskId?.Set((string?)null),
+            onClose: () => isOpen.Set(false),
             content: Layout.Vertical()
                 | new Card()
                     .Title(task.Title)
