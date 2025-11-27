@@ -389,7 +389,7 @@ public class FormBuilder<TModel> : ViewBase
         var buttonGap = Scale switch
         {
             Scale.Small => 4,
-            Scale.Large => 12,
+            Scale.Large => 8,
             _ => 6
         };
 
