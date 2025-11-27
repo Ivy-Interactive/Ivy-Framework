@@ -311,10 +311,6 @@ export const generateEChartToolbox = (
     return { show: false };
   }
 
-  if (isHovered === false) {
-    return { show: false };
-  }
-
   const features: ToolboxFeatures = {};
 
   if (toolbox.dataView !== false) {
@@ -338,7 +334,7 @@ export const generateEChartToolbox = (
   }
 
   return {
-    show: true,
+    show: isHovered !== false, // Show only when hovered (or when isHovered is undefined/true)
     orient:
       toolbox.orientation?.toLowerCase() === 'vertical'
         ? 'vertical'

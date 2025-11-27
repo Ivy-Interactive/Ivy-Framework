@@ -1,8 +1,9 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { ColorScheme, generateEChartToolbox } from './sharedUtils';
 import { getHeight, getWidth } from '@/lib/styles';
 import { useThemeWithMonitoring } from '@/components/theme-provider';
 import ReactECharts from 'echarts-for-react';
+import type { ECharts } from 'echarts';
 import {
   generateDataProps,
   getColors,
@@ -75,9 +76,6 @@ const AreaChartWidget: React.FC<AreaChartWidgetProps> = ({
     () => getChartThemeColors(colors, isDark),
     [colors, isDark]
   );
-
-  // Track mouse hover state on the chart
-  const [isHovered, setIsHovered] = useState(false);
 
   // When height is Full (100%), use flex to expand. Otherwise use explicit height.
   const heightStyle = height ? getHeight(height) : {};
@@ -164,7 +162,7 @@ const AreaChartWidget: React.FC<AreaChartWidgetProps> = ({
         foreground: themeColors.foreground,
         fontSans: themeColors.fontSans,
       }),
-      toolbox: generateEChartToolbox(toolbox, isHovered),
+      toolbox: generateEChartToolbox(toolbox, false),
       textStyle: generateTextStyle(
         themeColors.foreground,
         themeColors.fontSans
@@ -204,7 +202,6 @@ const AreaChartWidget: React.FC<AreaChartWidgetProps> = ({
       themeColors.mutedForeground,
       legend,
       toolbox,
-      isHovered,
       categories,
       xAxis,
       largeSpread,
@@ -215,18 +212,33 @@ const AreaChartWidget: React.FC<AreaChartWidgetProps> = ({
       series,
     ]
   );
+  // Show/hide toolbox on hover (directly via ECharts, no React re-renders)
+  const onChartReady = (instance: ECharts) => {
+    if (!toolbox) return;
+    const dom = instance.getDom();
+    if (!dom) return;
 
+    dom.addEventListener('mouseenter', () =>
+      instance.setOption(
+        { toolbox: generateEChartToolbox(toolbox, true) },
+        { replaceMerge: ['toolbox'], notMerge: false }
+      )
+    );
+    dom.addEventListener('mouseleave', () =>
+      instance.setOption(
+        { toolbox: generateEChartToolbox(toolbox, false) },
+        { replaceMerge: ['toolbox'], notMerge: false }
+      )
+    );
+  };
   return (
-    <div
-      style={styles}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
+    <div style={styles}>
       <ReactECharts
         option={option}
         style={chartStyles}
-        notMerge={false} // Merge changes instead of full rebuild for better performance
+        notMerge={true}
         lazyUpdate={true}
+        onChartReady={onChartReady}
       />
     </div>
   );
