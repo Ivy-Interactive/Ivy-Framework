@@ -389,8 +389,8 @@ public class FormBuilder<TModel> : ViewBase
         var buttonGap = Scale switch
         {
             Scale.Small => 4,
-            Scale.Medium => 6,
-            _ => 12  // Larger gap for Large scale
+            Scale.Large => 12,
+            _ => 6
         };
 
         return Layout.Vertical(
