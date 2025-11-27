@@ -421,7 +421,11 @@ public class Server
                     logger.LogError(ex, "An unhandled exception occurred.");
                 }
 
-                if (context.Request.Headers.Accept.ToString().Contains("text/html"))
+                var acceptHeader = context.Request.Headers.Accept;
+                var acceptsHtml = Microsoft.Net.Http.Headers.MediaTypeHeaderValue.ParseList(acceptHeader)
+                    .Any(h => h.IsSubsetOf(new Microsoft.Net.Http.Headers.MediaTypeHeaderValue("text/html")));
+
+                if (acceptsHtml)
                 {
                     context.Response.StatusCode = 500;
                     context.Response.ContentType = "text/html";

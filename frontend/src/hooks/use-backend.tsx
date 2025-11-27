@@ -145,7 +145,8 @@ export const useBackend = (
   appId: string | null,
   appArgs: string | null,
   parentId: string | null,
-  chrome: boolean
+  chrome: boolean,
+  options: { enabled?: boolean } = { enabled: true }
 ) => {
   const [connection, setConnection] = useState<signalR.HubConnection | null>(
     null
@@ -344,6 +345,10 @@ export const useBackend = (
       });
     }
 
+    if (!options.enabled) {
+      return;
+    }
+
     const newConnection = new signalR.HubConnectionBuilder()
       .withUrl(
         `${getIvyHost()}/ivy/messages?appId=${latestAppIdRef.current ?? ''}&appArgs=${appArgs ?? ''}&machineId=${machineId}&parentId=${parentId ?? ''}&chrome=${latestChromeRef.current}`
@@ -397,6 +402,7 @@ export const useBackend = (
     parentId,
     stableChrome,
     isRootConnection,
+    options.enabled,
   ]);
 
   useEffect(() => {

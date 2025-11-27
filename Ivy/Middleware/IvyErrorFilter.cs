@@ -8,7 +8,11 @@ public class IvyErrorFilter : IAlwaysRunResultFilter
     public void OnResultExecuting(ResultExecutingContext context)
     {
         // Only handle requests expecting HTML
-        if (!context.HttpContext.Request.Headers.Accept.ToString().Contains("text/html"))
+        var acceptHeader = context.HttpContext.Request.Headers.Accept;
+        var acceptsHtml = Microsoft.Net.Http.Headers.MediaTypeHeaderValue.ParseList(acceptHeader)
+            .Any(h => h.IsSubsetOf(new Microsoft.Net.Http.Headers.MediaTypeHeaderValue("text/html")));
+
+        if (!acceptsHtml)
         {
             return;
         }

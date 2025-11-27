@@ -26,7 +26,8 @@ export function App() {
     appId,
     appArgs,
     parentId,
-    chrome
+    chrome,
+    { enabled: !hasError }
   );
   const [removeBranding, setRemoveBranding] = useState(true);
 
