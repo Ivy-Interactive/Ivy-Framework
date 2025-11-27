@@ -90,6 +90,7 @@ public record ComprehensiveInputModel(
     // Select inputs
     UserRole SelectField,
     List<Fruits> MultiSelectField,
+    string? AsyncSelectField,
     // Other inputs
     string ColorField,
     string CodeField,
@@ -211,6 +212,7 @@ public class FormApp : SampleBase
             DateTime.Parse("1999-01-01 14:30:00"),
             UserRole.User,
             new List<Fruits> { Fruits.Apple, Fruits.Banana },
+            null,
             "#3B82F6",
             "{\"key\": \"value\"}",
             4,
@@ -236,6 +238,7 @@ public class FormApp : SampleBase
             DateTime.Parse("1994-06-15 10:20:00"),
             UserRole.Admin,
             new List<Fruits> { Fruits.Orange },
+            null,
             "#10B981",
             "console.log('hello');",
             5,
@@ -261,6 +264,7 @@ public class FormApp : SampleBase
             DateTime.Parse("1989-12-25 18:45:00"),
             UserRole.Guest,
             new List<Fruits> { Fruits.Pear, Fruits.Strawberry },
+            null,
             "#F59E0B",
             "SELECT * FROM users;",
             3,
@@ -279,7 +283,32 @@ public class FormApp : SampleBase
                | databaseForm
                | Text.H2("Form Size Demonstration")
                | Text.P("This demonstrates how form sizes affect spacing between fields. All input types are shown with Small, Medium, and Large scales.")
-               | (Layout.Horizontal()
+               | BuildFormSizeDemo(smallModel, mediumModel, largeModel)
+            ;
+        ;
+    }
+
+    private object BuildFormSizeDemo(IState<ComprehensiveInputModel> smallModel, IState<ComprehensiveInputModel> mediumModel, IState<ComprehensiveInputModel> largeModel)
+    {
+        // Sample data for async select
+        var sampleOptions = new[] { "Option 1", "Option 2", "Option 3", "Option 4", "Option 5", "Another Option", "Yet Another Option", "Final Option" };
+
+        Task<Option<string?>[]> QueryOptions(string query)
+        {
+            var lowerQuery = query.ToLowerInvariant();
+            return Task.FromResult(sampleOptions
+                .Where(o => o.Contains(lowerQuery, StringComparison.OrdinalIgnoreCase))
+                .Select(o => new Option<string?>(o, o))
+                .ToArray());
+        }
+
+        Task<Option<string?>?> LookupOption(string? value)
+        {
+            if (value == null) return Task.FromResult<Option<string?>?>(null);
+            return Task.FromResult<Option<string?>?>(new Option<string?>(value, value));
+        }
+
+        return Layout.Horizontal()
                 | new Card(
                     smallModel.ToForm()
                         .Small()
@@ -304,7 +333,8 @@ public class FormApp : SampleBase
                             m => m.TimeField)
                         .Group("Select Inputs",
                             m => m.SelectField,
-                            m => m.MultiSelectField)
+                            m => m.MultiSelectField,
+                            m => m.AsyncSelectField)
                         .Group("Other Inputs",
                             m => m.ColorField,
                             m => m.CodeField,
@@ -326,6 +356,7 @@ public class FormApp : SampleBase
                         .Builder(m => m.TimeField, s => s.ToDateTimeInput().Variant(DateTimeInputs.Time))
                         .Builder(m => m.SelectField, s => s.ToSelectInput())
                         .Builder(m => m.MultiSelectField, s => s.ToSelectInput().List())
+                        .Builder(m => m.AsyncSelectField, s => s.ToAsyncSelectInput(QueryOptions, LookupOption, "Search options..."))
                         .Builder(m => m.ColorField, s => s.ToColorInput())
                         .Builder(m => m.CodeField, s => s.ToCodeInput().Language(Languages.Json))
                         .Builder(m => m.RatingField, s => s.ToFeedbackInput().Variant(FeedbackInputs.Stars))
@@ -358,7 +389,8 @@ public class FormApp : SampleBase
                             m => m.TimeField)
                         .Group("Select Inputs",
                             m => m.SelectField,
-                            m => m.MultiSelectField)
+                            m => m.MultiSelectField,
+                            m => m.AsyncSelectField)
                         .Group("Other Inputs",
                             m => m.ColorField,
                             m => m.CodeField,
@@ -380,6 +412,7 @@ public class FormApp : SampleBase
                         .Builder(m => m.TimeField, s => s.ToDateTimeInput().Variant(DateTimeInputs.Time))
                         .Builder(m => m.SelectField, s => s.ToSelectInput())
                         .Builder(m => m.MultiSelectField, s => s.ToSelectInput().List())
+                        .Builder(m => m.AsyncSelectField, s => s.ToAsyncSelectInput(QueryOptions, LookupOption, "Search options..."))
                         .Builder(m => m.ColorField, s => s.ToColorInput())
                         .Builder(m => m.CodeField, s => s.ToCodeInput().Language(Languages.Javascript))
                         .Builder(m => m.RatingField, s => s.ToFeedbackInput().Variant(FeedbackInputs.Stars))
@@ -412,7 +445,8 @@ public class FormApp : SampleBase
                             m => m.TimeField)
                         .Group("Select Inputs",
                             m => m.SelectField,
-                            m => m.MultiSelectField)
+                            m => m.MultiSelectField,
+                            m => m.AsyncSelectField)
                         .Group("Other Inputs",
                             m => m.ColorField,
                             m => m.CodeField,
@@ -434,6 +468,7 @@ public class FormApp : SampleBase
                         .Builder(m => m.TimeField, s => s.ToDateTimeInput().Variant(DateTimeInputs.Time))
                         .Builder(m => m.SelectField, s => s.ToSelectInput())
                         .Builder(m => m.MultiSelectField, s => s.ToSelectInput().List())
+                        .Builder(m => m.AsyncSelectField, s => s.ToAsyncSelectInput(QueryOptions, LookupOption, "Search options..."))
                         .Builder(m => m.ColorField, s => s.ToColorInput())
                         .Builder(m => m.CodeField, s => s.ToCodeInput().Language(Languages.Sql))
                         .Builder(m => m.RatingField, s => s.ToFeedbackInput().Variant(FeedbackInputs.Stars))
@@ -441,8 +476,6 @@ public class FormApp : SampleBase
                         .Builder(m => m.EmojiField, s => s.ToFeedbackInput().Variant(FeedbackInputs.Emojis))
                 )
                 .Width(1 / 3f)
-                .Title("Large Scale - All Inputs"))
-            ;
-        ;
+                .Title("Large Scale - All Inputs");
     }
 }

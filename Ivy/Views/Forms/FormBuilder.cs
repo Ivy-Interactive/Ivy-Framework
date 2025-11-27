@@ -386,13 +386,21 @@ public class FormBuilder<TModel> : ViewBase
             await onSubmit();
         }
 
+        var buttonGap = Scale switch
+        {
+            Scale.Small => 4,
+            Scale.Medium => 6,
+            _ => 12  // Larger gap for Large scale
+        };
+
         return Layout.Vertical()
                | formView
                | Layout.Horizontal(new Button(SubmitTitle)
                    .HandleClick(HandleSubmit)
                    .Loading(submitting)
                    .Disabled(submitting || hasUploading.Value)
-                   .Scale(Scale), validationView);
+                   .Scale(Scale), validationView)
+               .Gap(buttonGap);
     }
 
     private static string InvalidMessage(int invalidFields)
