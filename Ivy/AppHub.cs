@@ -131,6 +131,9 @@ public class AppHub(
             appServices.AddSingleton(typeof(IClientProvider), clientProvider);
             appServices.AddSingleton(typeof(IUploadService), new UploadService(Context.ConnectionId, clientProvider));
 
+            var tokenRegistry = new AuthTokenRegistry();
+            appServices.AddSingleton<IAuthTokenRegistry>(tokenRegistry);
+
             if (server.AuthProviderType != null)
             {
                 var authProvider = server.Services.BuildServiceProvider().GetService<IAuthProvider>() ?? throw new Exception("IAuthProvider not found");
@@ -169,7 +172,8 @@ public class AppHub(
 
                 if (authToken != oldAuthToken || parentId != null)
                 {
-                    clientProvider.SetAuthToken(authToken, reloadPage: parentId != null && authToken == null);
+                    var tokenId = tokenRegistry.Register(authToken);
+                    clientProvider.SetAuthToken(tokenId, reloadPage: parentId != null && authToken == null);
                 }
 
                 if (authToken == null)
@@ -231,6 +235,9 @@ public class AppHub(
                 AppServices = serviceProvider,
                 LastInteraction = DateTime.UtcNow,
             };
+
+            // Track token registry for cleanup
+            appState.TrackDisposable(tokenRegistry);
 
             var connectionAborted = Context.ConnectionAborted;
             appState.EventQueue = new EventDispatchQueue(connectionAborted);
@@ -412,7 +419,9 @@ public class AppHub(
                 var clientProvider = session.AppServices.GetRequiredService<IClientProvider>();
                 if (resetTokenAndReload)
                 {
-                    clientProvider.SetAuthToken(null, reloadPage: true);
+                    var tokenRegistry = session.AppServices.GetRequiredService<IAuthTokenRegistry>();
+                    var tokenId = tokenRegistry.Register(null);
+                    clientProvider.SetAuthToken(tokenId, reloadPage: true);
                 }
                 session.WidgetTree = new WidgetTree(new ErrorView(displayException), contentBuilder, session.AppServices);
                 await session.WidgetTree.BuildAsync();
@@ -520,7 +529,9 @@ public class AppHub(
                             }
                             if (token != newToken)
                             {
-                                clientProvider.SetAuthToken(newToken, reloadPage: string.IsNullOrEmpty(newToken?.AccessToken));
+                                var tokenRegistry = session.AppServices.GetRequiredService<IAuthTokenRegistry>();
+                                var tokenId = tokenRegistry.Register(newToken);
+                                clientProvider.SetAuthToken(tokenId, reloadPage: string.IsNullOrEmpty(newToken?.AccessToken));
                             }
                             if (newToken == null)
                             {

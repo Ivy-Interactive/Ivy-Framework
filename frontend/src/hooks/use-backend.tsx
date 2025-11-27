@@ -242,8 +242,8 @@ export const useBackend = (
       });
       const response = await fetch(`${getIvyHost()}/ivy/auth/set-auth-token`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'text/plain' },
-        body: message.tokenId,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(message.tokenId),
         credentials: 'include',
       });
       if (!response.ok) {

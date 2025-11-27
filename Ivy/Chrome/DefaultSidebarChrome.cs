@@ -28,6 +28,7 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
         var appRepository = UseService<IAppRepository>();
         var client = UseService<IClientProvider>();
         var auth = UseService<IAuthService?>();
+        var authTokenRegistry = this.UseService<IAuthTokenRegistry>();
         var user = UseState<UserInfo?>();
         var currentApp = UseState<AppHost?>();
         var search = UseState("");
@@ -383,7 +384,8 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
                     if (auth == null) return;
 
                     await TimeoutHelper.WithTimeoutAsync(auth.LogoutAsync);
-                    client.SetAuthToken(null!);
+                    var tokenId = authTokenRegistry.Register(null);
+                    client.SetAuthToken(tokenId);
                 }
                 catch (Exception)
                 {
