@@ -23,11 +23,15 @@ public record Box : WidgetBase<Box>
     [Prop] public Thickness Margin { get; set; } = new(0);
 
     [Prop] public Align? ContentAlign { get; set; } = Align.Center;
+
+    [Prop] public float? ColorPercentage { get; set; }
 }
 
 public static class BoxExtensions
 {
     public static Box Color(this Box box, Colors color) => box with { Color = color };
+
+    public static Box Color(this Box box, Colors color, float opacity) => box with { Color = color, ColorPercentage = (1.0f - opacity) * 100 };
 
     public static Box BorderThickness(this Box box, int thickness) => box with { BorderThickness = new(thickness) };
 

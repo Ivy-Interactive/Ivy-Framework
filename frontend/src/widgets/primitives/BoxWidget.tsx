@@ -27,6 +27,7 @@ interface BoxWidgetProps {
   width?: string;
   height?: string;
   contentAlign: Align;
+  colorPercentage?: number;
   className?: string;
 }
 
@@ -41,6 +42,7 @@ export const BoxWidget: React.FC<BoxWidgetProps> = ({
   padding,
   margin,
   contentAlign,
+  colorPercentage,
   className,
 }) => {
   const styles: React.CSSProperties = {
@@ -53,8 +55,8 @@ export const BoxWidget: React.FC<BoxWidgetProps> = ({
     ...getBorderStyle(borderStyle),
     ...getBorderThickness(borderThickness),
     ...getBorderRadius(borderRadius),
-    ...getColor(color, 'backgroundColor', 'background'),
-    ...getColor(color, 'borderColor', 'background'),
+    ...getColor(color, 'backgroundColor', 'background', colorPercentage),
+    ...getColor(color, 'borderColor', 'background', colorPercentage),
     ...getColor(color, 'color', 'foreground'),
   };
 
