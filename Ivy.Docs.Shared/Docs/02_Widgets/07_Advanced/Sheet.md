@@ -228,36 +228,37 @@ public class KanbanWithSheetExample : ViewBase
         
         var client = UseService<IClientProvider>();
         var isSheetOpen = UseState(false);
-        var taskForm = UseState(() => new KanbanTask(
-            Guid.NewGuid().ToString(), "", "Todo",
-            taskState.Value.Count(t => t.Status == "Todo") + 1, "", "Unassigned"));
         
+        KanbanTask CreateNewTask() => new KanbanTask(
+            Guid.NewGuid().ToString(), "", "Todo",
+            taskState.Value.Count(t => t.Status == "Todo") + 1, "", "Unassigned");
+        
+        var taskForm = UseState(CreateNewTask);
         var statusOptions = new[] { "Todo", "In Progress", "Done" }.ToOptions();
         
-        // Add task when sheet closes after successful submission
+        // Add task when sheet closes if form has valid required fields
+        // Note: This pattern works because ToSheet only closes on successful validation
         UseEffect(() =>
         {
-            if (!isSheetOpen.Value && !string.IsNullOrEmpty(taskForm.Value.Title))
+            if (!isSheetOpen.Value && 
+                !string.IsNullOrEmpty(taskForm.Value.Title) && 
+                !string.IsNullOrEmpty(taskForm.Value.Description))
             {
                 var updatedTasks = taskState.Value.ToList();
                 updatedTasks.Add(taskForm.Value);
                 taskState.Set(updatedTasks.ToArray());
                 client.Toast($"Added: {taskForm.Value.Title}");
                 
-                // Reset form
-                taskForm.Set(new KanbanTask(
-                    Guid.NewGuid().ToString(), "", "Todo",
-                    taskState.Value.Count(t => t.Status == "Todo") + 1, "", "Unassigned"));
+                // Reset form for next use
+                taskForm.Set(CreateNewTask());
             }
-        }, [isSheetOpen, taskForm]);
+        }, [isSheetOpen]);
         
         var body = Layout.Vertical().Gap(2)
             | new Button("Add New Task")
                 .HandleClick(_ =>
                 {
-                    taskForm.Set(new KanbanTask(
-                        Guid.NewGuid().ToString(), "", "Todo",
-                        taskState.Value.Count(t => t.Status == "Todo") + 1, "", "Unassigned"));
+                    taskForm.Set(CreateNewTask());
                     isSheetOpen.Set(true);
                     return ValueTask.CompletedTask;
                 })
