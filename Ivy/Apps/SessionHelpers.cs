@@ -1,3 +1,4 @@
+using System.Text.Json.Nodes;
 using Ivy.Auth;
 using Ivy.Client;
 using Ivy.Core;
@@ -16,6 +17,7 @@ public static class SessionHelpers
         AppSession session,
         IContentBuilder contentBuilder,
         bool resetTokenAndReload,
+        bool triggerRecursiveReload,
         ILogger logger,
         string logContext = "AbandonSession")
     {
@@ -28,11 +30,20 @@ public static class SessionHelpers
             {
                 var tokenRegistry = session.AppServices.GetRequiredService<IAuthTokenRegistry>();
                 var tokenId = tokenRegistry.Register(null);
-                clientProvider.SetAuthToken(tokenId, reloadPage: true);
+                clientProvider.SetAuthToken(tokenId, reloadPage: true, triggerRecursiveReload: triggerRecursiveReload);
             }
 
             session.WidgetTree = new WidgetTree(new ErrorView(displayException), contentBuilder, session.AppServices);
             await session.WidgetTree.BuildAsync();
+            JsonNode widgets;
+            try
+            {
+                session.WidgetTree.GetWidgets().Serialize();
+            }
+            catch (NotSupportedException)
+            {
+                widgets = JsonValue.Create("Error: Unable to serialize widgets due to unsupported content.");
+            }
             clientProvider.Sender.Send("Refresh", new
             {
                 Widgets = session.WidgetTree.GetWidgets().Serialize()

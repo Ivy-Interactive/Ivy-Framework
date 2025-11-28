@@ -34,6 +34,7 @@ public class SetAuthTokenMessage
 {
     public required string TokenId { get; set; }
     public required bool ReloadPage { get; set; }
+    public required bool TriggerRecursiveReload { get; set; }
 }
 
 public class SetRootAppIdMessage
@@ -88,9 +89,9 @@ public static class ClientExtensions
             });
     }
 
-    public static void SetAuthToken(this IClientProvider client, string tokenId, bool reloadPage = true)
+    public static void SetAuthToken(this IClientProvider client, string tokenId, bool reloadPage = true, bool triggerRecursiveReload = true)
     {
-        client.Sender.Send("SetAuthToken", new SetAuthTokenMessage { TokenId = tokenId, ReloadPage = reloadPage });
+        client.Sender.Send("SetAuthToken", new SetAuthTokenMessage { TokenId = tokenId, ReloadPage = reloadPage, TriggerRecursiveReload = triggerRecursiveReload });
     }
 
     public static void SetRootAppId(this IClientProvider client, string rootAppId)

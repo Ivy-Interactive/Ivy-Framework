@@ -8,17 +8,19 @@ using Microsoft.Extensions.Logging;
 
 namespace Ivy.Auth;
 
+public record SetAuthTokenRequest(string TokenId, string? ConnectionId, bool TriggerRecursiveReload);
+
 public class AuthController() : Controller
 {
     [Route("ivy/auth/set-auth-token")]
     [HttpPatch]
     public async Task<IActionResult> SetAuthToken(
-        [FromBody] string id,
+        [FromBody] SetAuthTokenRequest request,
         [FromServices] AppSessionStore sessionStore,
         [FromServices] IContentBuilder contentBuilder,
         [FromServices] ILogger<AuthController> logger)
     {
-        if (!AuthTokenRegistry.TryRemove(id, out var token))
+        if (!AuthTokenRegistry.TryRemove(request.TokenId, out var token))
         {
             return BadRequest("Invalid or expired token id.");
         }
@@ -33,7 +35,10 @@ public class AuthController() : Controller
             if (HttpContext.Request.Headers.TryGetValue("X-Machine-Id", out var headerValue))
             {
                 var machineId = headerValue.ToString();
-                await TriggerMachineLogout(sessionStore, machineId, contentBuilder, logger);
+                if (request.TriggerRecursiveReload)
+                {
+                    await TriggerMachineLogout(sessionStore, machineId, request.ConnectionId, contentBuilder, logger);
+                }
             }
         }
         else
@@ -75,20 +80,47 @@ public class AuthController() : Controller
         return Ok();
     }
 
+    private static string FindRootAncestor(AppSessionStore sessionStore, string connectionId)
+    {
+        var current = connectionId;
+        while (sessionStore.Sessions.TryGetValue(current, out var session) && session.ParentId != null)
+        {
+            current = session.ParentId;
+        }
+        return current;
+    }
+
     private static async Task TriggerMachineLogout(
         AppSessionStore sessionStore,
         string machineId,
+        string? excludeConnectionId,
         IContentBuilder contentBuilder,
         ILogger logger)
     {
-        // Find all sessions with this machineId and trigger logout
-        var sessionsToLogout = sessionStore.Sessions.Values
+        var processedRoots = new HashSet<string>();
+        if (!string.IsNullOrEmpty(excludeConnectionId))
+        {
+            var excludedRoot = FindRootAncestor(sessionStore, excludeConnectionId);
+            processedRoots.Add(excludedRoot);
+        }
+
+        // Find all sessions with this machineId
+        var allSessions = sessionStore.Sessions.Values
             .Where(s => !s.IsDisposed() && s.MachineId == machineId)
             .ToList();
 
-        foreach (var session in sessionsToLogout)
+        foreach (var session in allSessions)
         {
-            await SessionHelpers.AbandonSessionAsync(session, contentBuilder, resetTokenAndReload: true, logger, "TriggerMachineLogout");
+            // Find root for this session
+            var sessionRoot = FindRootAncestor(sessionStore, session.ConnectionId);
+
+            // Skip if we've already processed this root (includes the excluded root)
+            if (!processedRoots.Add(sessionRoot))
+            {
+                continue;
+            }
+
+            await SessionHelpers.AbandonSessionAsync(session, contentBuilder, resetTokenAndReload: true, triggerRecursiveReload: false, logger, "TriggerMachineLogout");
         }
     }
 }

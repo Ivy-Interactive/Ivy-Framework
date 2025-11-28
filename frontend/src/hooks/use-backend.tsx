@@ -45,6 +45,7 @@ type RedirectMessage = {
 type SetAuthTokenMessage = {
   tokenId: string;
   reloadPage: boolean;
+  triggerRecursiveReload: boolean;
 };
 
 const widgetTreeToXml = (node: WidgetNode) => {
@@ -151,6 +152,12 @@ export const useBackend = (
   const currentConnectionRef = useRef<signalR.HubConnection | null>(null);
   const authChannelRef = useRef<BroadcastChannel | null>(null);
 
+  // Use a ref that gets updated with the latest connection so we always have it in the callback
+  const latestConnectionRef = useRef(connection);
+  useEffect(() => {
+    latestConnectionRef.current = connection;
+  }, [connection]);
+
   // Stable values used in dependency arrays - only updated when we want to reconnect
   const [stableAppId, setStableAppId] = useState(appId);
   const [stableChrome, setStableChrome] = useState(chrome);
@@ -237,8 +244,10 @@ export const useBackend = (
 
   const handleSetAuthToken = useCallback(
     async (message: SetAuthTokenMessage) => {
+      const currentConnectionId = latestConnectionRef.current?.connectionId;
       logger.debug('Processing SetAuthToken request', {
         hasAuthToken: !!message.tokenId,
+        connectionId: currentConnectionId,
       });
       const response = await fetch(`${getIvyHost()}/ivy/auth/set-auth-token`, {
         method: 'PATCH',
@@ -246,7 +255,11 @@ export const useBackend = (
           'Content-Type': 'application/json',
           'X-Machine-Id': getMachineId(),
         },
-        body: JSON.stringify(message.tokenId),
+        body: JSON.stringify({
+          tokenId: message.tokenId,
+          connectionId: currentConnectionId ?? null,
+          triggerRecursiveReload: message.triggerRecursiveReload,
+        }),
         credentials: 'include',
       });
       if (!response.ok) {
