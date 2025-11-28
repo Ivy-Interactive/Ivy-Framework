@@ -53,4 +53,17 @@ public static class BoxExtensions
     {
         return new Box(anything);
     }
+
+    public static Box WithCell(this object anything)
+    {
+        return new Box(anything)
+        {
+            BorderRadius = Shared.BorderRadius.None,
+            BorderStyle = Shared.BorderStyle.None,
+            BorderThickness = new(0),
+            Padding = new(0),
+            Color = null,
+            ContentAlign = Align.Left
+        }.Width(Size.Full()).Height(Size.Full());
+    }
 }
