@@ -1,4 +1,4 @@
-﻿using System.Runtime.CompilerServices;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Ivy.Core;
 using Ivy.Core.Helpers;
@@ -11,8 +11,6 @@ namespace Ivy;
 
 public interface IAnyDateRangeInput : IAnyInput
 {
-    public string? Placeholder { get; set; }
-
     public string? Format { get; set; }
 }
 
@@ -22,24 +20,22 @@ public abstract record DateRangeInputBase : WidgetBase<DateRangeInputBase>, IAny
 
     [Prop] public string? Format { get; set; }
 
-    [Prop] public Sizes Size { get; set; } = Sizes.Medium;
-
     [Prop] public bool Disabled { get; set; }
 
     [Prop] public string? Invalid { get; set; }
 
     [Prop] public bool Nullable { get; set; }
 
+    [Prop] public new Scale? Scale { get; set; }
+
     [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
 
-    /// <summary>Only DateOnly tuple types.</summary>
     public Type[] SupportedStateTypes() =>
-    [
-        typeof((DateOnly, DateOnly)), typeof((DateOnly?, DateOnly?)),
+[
+    typeof((DateOnly, DateOnly)), typeof((DateOnly?, DateOnly?)),
     ];
 }
 
-/// <typeparam name="TDateRange">(DateOnly, DateOnly) or (DateOnly?, DateOnly?).</typeparam>
 public record DateRangeInput<TDateRange> : DateRangeInputBase, IInput<TDateRange>
 {
     [OverloadResolutionPriority(1)]
@@ -79,7 +75,6 @@ public record DateRangeInput<TDateRange> : DateRangeInputBase, IInput<TDateRange
 
 public static class DateRangeInputExtensions
 {
-    /// <summary>Creates a date range input from a state object with automatic tuple type validation.</summary>
     public static DateRangeInputBase ToDateRangeInput(this IAnyState state, string? placeholder = null, bool disabled = false)
     {
         var type = state.GetStateType();
@@ -104,7 +99,6 @@ public static class DateRangeInputExtensions
         return widget with { Placeholder = placeholder };
     }
 
-    /// <summary>Format string (e.g., "yyyy-MM-dd", "MM/dd/yyyy") for displaying and parsing dates.</summary>
     public static DateRangeInputBase Format(this DateRangeInputBase widget, string format)
     {
         return widget with { Format = format };
@@ -134,20 +128,5 @@ public static class DateRangeInputExtensions
     public static DateRangeInputBase HandleBlur(this DateRangeInputBase widget, Action onBlur)
     {
         return widget.HandleBlur(_ => { onBlur(); return ValueTask.CompletedTask; });
-    }
-
-    public static DateRangeInputBase Size(this DateRangeInputBase widget, Sizes size)
-    {
-        return widget with { Size = size };
-    }
-
-    public static DateRangeInputBase Large(this DateRangeInputBase widget)
-    {
-        return widget.Size(Sizes.Large);
-    }
-
-    public static DateRangeInputBase Small(this DateRangeInputBase widget)
-    {
-        return widget.Size(Sizes.Small);
     }
 }

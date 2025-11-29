@@ -17,18 +17,13 @@ public enum BarChartStyles
     Dashboard
 }
 
-/// <typeparam name="TSource">The type of the source data objects.</typeparam>
 public interface IBarChartStyle<TSource>
 {
-    /// <returns>A configured BarChart widget ready for rendering.</returns>
     BarChart Design(ExpandoObject[] data, Dimension<TSource> dimension, Measure<TSource>[] measures);
 }
 
-/// <summary>Helper methods for creating bar chart style instances.</summary>
 public static class BarChartStyleHelpers
 {
-    /// <returns>An instance of the specified bar chart style.</returns>
-    /// <exception cref="InvalidOperationException">Thrown when the specified style is not found.</exception>
     public static IBarChartStyle<TSource> GetStyle<TSource>(BarChartStyles style)
     {
         return style switch
@@ -40,10 +35,8 @@ public static class BarChartStyleHelpers
     }
 }
 
-/// <typeparam name="TSource">The type of the source data objects.</typeparam>
 public class DefaultBarChartStyle<TSource> : IBarChartStyle<TSource>
 {
-    /// <returns>A fully configured bar chart with default styling.</returns>
     public BarChart Design(ExpandoObject[] data, Dimension<TSource> dimension, Measure<TSource>[] measures)
     {
         return new BarChart(data)
@@ -61,11 +54,8 @@ public class DefaultBarChartStyle<TSource> : IBarChartStyle<TSource>
     }
 }
 
-/// <summary>Dashboard-optimized bar chart style with vertical layout, rounded bars, and embedded labels for compact display.</summary>
-/// <typeparam name="TSource">The type of the source data objects.</typeparam>
 public class DashboardBarChartStyle<TSource> : IBarChartStyle<TSource>
 {
-    /// <returns>A compact bar chart optimized for dashboard display with vertical layout and embedded labels.</returns>
     public BarChart Design(ExpandoObject[] data, Dimension<TSource> dimension, Measure<TSource>[] measures)
     {
         return new BarChart(data)
@@ -84,8 +74,6 @@ public class DashboardBarChartStyle<TSource> : IBarChartStyle<TSource>
     }
 }
 
-/// <summary>A fluent builder for creating bar charts from data sources with dimensions and measures.</summary>
-/// <typeparam name="TSource">The type of the source data objects.</typeparam>
 public class BarChartBuilder<TSource>(
     IQueryable<TSource> data,
     Dimension<TSource>? dimension = null,
@@ -98,8 +86,6 @@ public class BarChartBuilder<TSource>(
     private Toolbox? _toolbox;
     private Func<Toolbox, Toolbox>? _toolboxFactory;
 
-    /// <returns>A BarChart widget with the processed data and applied styling, or a loading indicator during data processing.</returns>
-    /// <exception cref="InvalidOperationException">Thrown when dimension or measures are not configured.</exception>
     public override object? Build()
     {
         if (dimension is null)
@@ -158,14 +144,12 @@ public class BarChartBuilder<TSource>(
         return polish?.Invoke(configuredChart) ?? configuredChart;
     }
 
-    /// <returns>The builder instance for method chaining.</returns>
     public BarChartBuilder<TSource> Dimension(string name, Expression<Func<TSource, object>> selector)
     {
         dimension = new Dimension<TSource>(name, selector);
         return this;
     }
 
-    /// <returns>The builder instance for method chaining.</returns>
     public BarChartBuilder<TSource> Measure(string name, Expression<Func<IQueryable<TSource>, object>> aggregator)
     {
         _measures.Add(new Measure<TSource>(name, aggregator));
@@ -194,28 +178,25 @@ public class BarChartBuilder<TSource>(
     }
 }
 
-/// <summary>Extension methods for creating bar charts from data collections.</summary>
 public static class BarChartExtensions
 {
-    /// <returns>A BarChartBuilder for fluent configuration.</returns>
     public static BarChartBuilder<TSource> ToBarChart<TSource>(
-        this IEnumerable<TSource> data,
-        Expression<Func<TSource, object>>? dimension = null,
-        Expression<Func<IQueryable<TSource>, object>>[]? measures = null,
-        BarChartStyles style = BarChartStyles.Default,
-        Func<BarChart, BarChart>? polish = null)
+    this IEnumerable<TSource> data,
+    Expression<Func<TSource, object>>? dimension = null,
+    Expression<Func<IQueryable<TSource>, object>>[]? measures = null,
+    BarChartStyles style = BarChartStyles.Default,
+    Func<BarChart, BarChart>? polish = null)
     {
         return data.AsQueryable().ToBarChart(dimension, measures, style, polish);
     }
 
-    /// <returns>A BarChartBuilder for fluent configuration.</returns>
     [OverloadResolutionPriority(1)]
     public static BarChartBuilder<TSource> ToBarChart<TSource>(
-        this IQueryable<TSource> data,
-        Expression<Func<TSource, object>>? dimension = null,
-        Expression<Func<IQueryable<TSource>, object>>[]? measures = null,
-        BarChartStyles style = BarChartStyles.Default,
-        Func<BarChart, BarChart>? polish = null)
+    this IQueryable<TSource> data,
+    Expression<Func<TSource, object>>? dimension = null,
+    Expression<Func<IQueryable<TSource>, object>>[]? measures = null,
+    BarChartStyles style = BarChartStyles.Default,
+    Func<BarChart, BarChart>? polish = null)
     {
         return new BarChartBuilder<TSource>(data,
             dimension != null ? new Dimension<TSource>(ExpressionNameHelper.SuggestName(dimension) ?? "Dimension", dimension) : null,

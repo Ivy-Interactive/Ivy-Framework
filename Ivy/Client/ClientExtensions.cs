@@ -1,7 +1,6 @@
 using Ivy.Auth;
 using Ivy.Core;
 using Ivy.Shared;
-using Ivy;
 
 namespace Ivy.Client;
 
@@ -32,8 +31,9 @@ public class RedirectMessage
 
 public class SetAuthTokenMessage
 {
-    public required AuthToken? AuthToken { get; set; }
+    public required string TokenId { get; set; }
     public required bool ReloadPage { get; set; }
+    public required bool TriggerMachineReload { get; set; }
 }
 
 public class SetRootAppIdMessage
@@ -88,9 +88,15 @@ public static class ClientExtensions
             });
     }
 
-    public static void SetAuthToken(this IClientProvider client, AuthToken? authToken, bool reloadPage = true)
+    public static void SetAuthToken(this IClientProvider client, IAuthTokenRegistry tokenRegistry, AuthToken? authToken, bool reloadPage = true, bool? triggerMachineReload = null)
     {
-        client.Sender.Send("SetAuthToken", new SetAuthTokenMessage { AuthToken = authToken, ReloadPage = reloadPage });
+        var tokenId = tokenRegistry.Register(authToken);
+        client.Sender.Send("SetAuthToken", new SetAuthTokenMessage { TokenId = tokenId.Value, ReloadPage = reloadPage, TriggerMachineReload = triggerMachineReload ?? reloadPage });
+    }
+
+    public static void ReloadPage(this IClientProvider client)
+    {
+        client.Sender.Send("ReloadPage", new { });
     }
 
     public static void SetRootAppId(this IClientProvider client, string rootAppId)

@@ -1,21 +1,48 @@
-﻿using System.Net;
+using System.Net;
 using System.Text.Json;
+using Ivy.Apps;
+using Ivy.Client;
+using Ivy.Core;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace Ivy.Auth;
+
+public record SetAuthTokenRequest(string TokenId, string? ConnectionId, bool TriggerMachineReload);
 
 public class AuthController() : Controller
 {
     [Route("ivy/auth/set-auth-token")]
     [HttpPatch]
-    public IActionResult SetAuthToken([FromBody] AuthToken? token)
+    public async Task<IActionResult> SetAuthToken(
+        [FromBody] SetAuthTokenRequest request,
+        [FromServices] IGlobalAuthTokenRegistry globalTokenRegistry,
+        [FromServices] AppSessionStore sessionStore,
+        [FromServices] IContentBuilder contentBuilder,
+        [FromServices] ILogger<AuthController> logger)
     {
+        if (!globalTokenRegistry.TryRemove(new AuthTokenId(request.TokenId), out var token))
+        {
+            return BadRequest("Invalid or expired token id.");
+        }
+
         var cookies = HttpContext.Response.Cookies;
         if (string.IsNullOrEmpty(token?.AccessToken))
         {
             cookies.Delete("auth_token");
             cookies.Delete("auth_ext_refresh_token");
+
+            // Trigger logout for all sessions with the same machineId
+            if (HttpContext.Request.Headers.TryGetValue("X-Machine-Id", out var headerValue))
+            {
+                var machineId = headerValue.ToString();
+                if (request.TriggerMachineReload)
+                {
+                    await TriggerMachineLogout(sessionStore, machineId, request.ConnectionId, contentBuilder, logger);
+                }
+            }
         }
         else
         {
@@ -52,7 +79,85 @@ public class AuthController() : Controller
                 cookies.Delete("auth_ext_refresh_token");
             }
             cookies.Append("auth_token", tokenJson, cookieOptions);
+
+            // Trigger reload for all sessions with the same machineId on login
+            if (HttpContext.Request.Headers.TryGetValue("X-Machine-Id", out var loginHeaderValue))
+            {
+                var machineId = loginHeaderValue.ToString();
+                if (request.TriggerMachineReload)
+                {
+                    TriggerMachineReload(sessionStore, machineId, request.ConnectionId);
+                }
+            }
         }
         return Ok();
+    }
+
+    private static string FindRootAncestor(AppSessionStore sessionStore, string connectionId)
+    {
+        var current = connectionId;
+        while (sessionStore.Sessions.TryGetValue(current, out var session) && session.ParentId != null)
+        {
+            current = session.ParentId;
+        }
+        return current;
+    }
+
+    private static IEnumerable<AppSession> GetMachineSessions(
+        AppSessionStore sessionStore,
+        string machineId,
+        string? excludeConnectionId)
+    {
+        var processedRoots = new HashSet<string>();
+        if (!string.IsNullOrEmpty(excludeConnectionId))
+        {
+            var excludedRoot = FindRootAncestor(sessionStore, excludeConnectionId);
+            processedRoots.Add(excludedRoot);
+        }
+
+        // Find all sessions with this machineId
+        var allSessions = sessionStore.Sessions.Values
+            .Where(s => !s.IsDisposed() && s.MachineId == machineId)
+            .ToList();
+
+        foreach (var session in allSessions)
+        {
+            // Find root for this session
+            var sessionRoot = FindRootAncestor(sessionStore, session.ConnectionId);
+
+            // Skip if we've already processed this root (includes the excluded root)
+            if (!processedRoots.Add(sessionRoot))
+            {
+                continue;
+            }
+
+            yield return session;
+        }
+    }
+
+    private static void TriggerMachineReload(
+        AppSessionStore sessionStore,
+        string machineId,
+        string? excludeConnectionId)
+    {
+        foreach (var session in GetMachineSessions(sessionStore, machineId, excludeConnectionId))
+        {
+            // Just trigger page reload to pick up new auth cookies
+            var clientProvider = session.AppServices.GetRequiredService<IClientProvider>();
+            clientProvider.ReloadPage();
+        }
+    }
+
+    private static async Task TriggerMachineLogout(
+        AppSessionStore sessionStore,
+        string machineId,
+        string? excludeConnectionId,
+        IContentBuilder contentBuilder,
+        ILogger logger)
+    {
+        foreach (var session in GetMachineSessions(sessionStore, machineId, excludeConnectionId))
+        {
+            await SessionHelpers.AbandonSessionAsync(session, contentBuilder, resetTokenAndReload: true, triggerMachineReload: false, logger, "TriggerMachineLogout");
+        }
     }
 }

@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -21,10 +21,6 @@ public enum SizeType
     Shrink
 }
 
-/// <summary>
-/// Represents width or height values with support for various measurement types and constraints.
-/// Provides a comprehensive sizing system for responsive layouts and precise dimensional control.
-/// </summary>
 [JsonConverter(typeof(SizeJsonConverter))]
 public record Size
 {
@@ -143,9 +139,6 @@ public record Size
     }
 }
 
-/// <summary>
-/// Extension methods for adding size constraints to Size objects.
-/// </summary>
 public static class SizeExtensions
 {
     public static Size Min(this Size size, Size min)
@@ -180,9 +173,6 @@ public static class SizeExtensions
 }
 
 
-/// <summary>
-/// JSON converter for Size objects that serializes them as string representations.
-/// </summary>
 public class SizeJsonConverter : JsonConverter<Size>
 {
     public override Size Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)

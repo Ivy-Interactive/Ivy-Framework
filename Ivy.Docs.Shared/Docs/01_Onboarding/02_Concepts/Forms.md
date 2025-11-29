@@ -354,11 +354,91 @@ This example demonstrates:
 - `[Required]` - Field must have a value
 - `[MinLength(n)]` - Minimum string length
 - `[MaxLength(n)]` - Maximum string length
+- `[StringLength(max, MinimumLength = min)]` - String length constraints
+- `[Length(min, max)]` - Length constraints for strings and collections
 - `[Range(min, max)]` - Value must be within range
 - `[EmailAddress]` - Valid email format
 - `[Phone]` - Valid phone number format
 - `[Url]` - Valid URL format
+- `[CreditCard]` - Valid credit card number format
 - `[RegularExpression(pattern)]` - Match a regex pattern
+- `[AllowedValues(...)]` - Value must be from specified list
+- `[DataType(...)]` - Specifies data type (Password, Date, DateTime, MultilineText, etc.)
+- `[Display(...)]` - Controls field display properties (Name, Description, Order, GroupName, Prompt)
+
+### Display Attributes
+
+The `[Display]` attribute provides powerful control over how fields appear in your forms without requiring additional configuration code.
+
+```csharp demo-tabs
+public class DisplayAttributeExample : ViewBase
+{
+    public class UserRegistrationModel
+    {
+        [Display(Name = "Full Name", Description = "Enter your complete legal name", Order = 1)]
+        [Required(ErrorMessage = "Full name is required")]
+        [StringLength(100, MinimumLength = 2)]
+        public string Name { get; set; } = "";
+
+        [Display(Name = "Email Address", Description = "We'll use this for account verification", Order = 2)]
+        [Required]
+        [EmailAddress]
+        public string Email { get; set; } = "";
+
+        [Display(Name = "Phone Number", Description = "For account security purposes", Prompt = "+1-234-567-8900", Order = 3)]
+        [Phone]
+        public string? PhoneNumber { get; set; }
+
+        [Display(GroupName = "Account Security", Name = "Password", Order = 4)]
+        [Required]
+        [StringLength(100, MinimumLength = 8)]
+        [DataType(DataType.Password)]
+        public string Password { get; set; } = "";
+
+        [Display(GroupName = "Account Security", Name = "Confirm Password", Order = 5)]
+        [Required]
+        [DataType(DataType.Password)]
+        public string ConfirmPassword { get; set; } = "";
+
+        [Display(GroupName = "Preferences", Name = "Newsletter Subscription", Description = "Receive weekly updates", Order = 6)]
+        public bool SubscribeToNewsletter { get; set; } = false;
+
+        [Display(GroupName = "Preferences", Name = "Preferred Theme", Order = 7)]
+        [AllowedValues("Light", "Dark", "Auto")]
+        public string Theme { get; set; } = "Auto";
+    }
+
+    public override object? Build()
+    {
+        var user = UseState(() => new UserRegistrationModel());
+        var client = UseService<IClientProvider>();
+        
+        UseEffect(() =>
+        {
+            if (!string.IsNullOrEmpty(user.Value.Name))
+            {
+                client.Toast($"Registration completed for {user.Value.Name}!");
+            }
+        }, user);
+
+        var themeOptions = new[] { "Light", "Dark", "Auto" }.ToOptions();
+        
+        return user.ToForm("Create Account")
+            .Builder(m => m.Theme, s => s.ToSelectInput(themeOptions))
+            .Builder(m => m.Password, s => s.ToPasswordInput())
+            .Builder(m => m.ConfirmPassword, s => s.ToPasswordInput())
+            .Validate<string>(m => m.ConfirmPassword, confirmPassword =>
+                (confirmPassword == user.Value.Password, "Passwords must match"));
+    }
+}
+```
+
+The `[Display]` attribute supports these properties:
+- **Name**: Custom field label (overrides automatic label generation)
+- **Description**: Help text shown below the field
+- **Order**: Field ordering (lower numbers appear first)
+- **GroupName**: Groups related fields together
+- **Prompt**: Placeholder text for input fields
 
 ## Form Submission
 

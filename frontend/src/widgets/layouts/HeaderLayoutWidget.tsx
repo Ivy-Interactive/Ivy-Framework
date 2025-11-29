@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 interface HeaderLayoutWidgetProps {
   width?: string;
   showHeaderDivider?: boolean;
+  contentScroll?: 'None' | 'Auto';
   slots?: {
     Header?: React.ReactNode[];
     Content?: React.ReactNode[];
@@ -16,6 +17,7 @@ export const HeaderLayoutWidget: React.FC<HeaderLayoutWidgetProps> = ({
   slots,
   width,
   showHeaderDivider = true,
+  contentScroll = 'Auto',
 }) => {
   if (!slots?.Header || !slots?.Content) {
     return (
@@ -28,6 +30,9 @@ export const HeaderLayoutWidget: React.FC<HeaderLayoutWidgetProps> = ({
   const styles: React.CSSProperties = {
     ...getWidth(width),
   };
+
+  // When Scroll.None is set, contentScroll will be 'None', otherwise 'Auto' or undefined
+  const shouldScroll = contentScroll !== 'None';
 
   return (
     <div
@@ -43,9 +48,13 @@ export const HeaderLayoutWidget: React.FC<HeaderLayoutWidgetProps> = ({
         {slots.Header}
       </div>
       <div className="flex-1 min-h-0 w-full overflow-hidden">
-        <ScrollArea className="h-full w-full">
-          <div className="p-4 w-full">{slots.Content}</div>
-        </ScrollArea>
+        {shouldScroll ? (
+          <ScrollArea className="h-full w-full">
+            <div className="p-4 w-full">{slots.Content}</div>
+          </ScrollArea>
+        ) : (
+          <div className="h-full w-full">{slots.Content}</div>
+        )}
       </div>
     </div>
   );

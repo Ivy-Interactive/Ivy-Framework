@@ -42,16 +42,10 @@ type RedirectMessage = {
   state: HistoryState;
 };
 
-type AuthToken = {
-  accessToken: string;
-  refreshToken?: string;
-  expiresAt?: string;
-  tag?: unknown;
-};
-
 type SetAuthTokenMessage = {
-  authToken: AuthToken | null;
+  tokenId: string;
   reloadPage: boolean;
+  triggerMachineReload: boolean;
 };
 
 const widgetTreeToXml = (node: WidgetNode) => {
@@ -156,7 +150,12 @@ export const useBackend = (
   const machineId = getMachineId();
   const connectionId = connection?.connectionId;
   const currentConnectionRef = useRef<signalR.HubConnection | null>(null);
-  const authChannelRef = useRef<BroadcastChannel | null>(null);
+
+  // Use a ref that gets updated with the latest connection so we always have it in the callback
+  const latestConnectionRef = useRef(connection);
+  useEffect(() => {
+    latestConnectionRef.current = connection;
+  }, [connection]);
 
   // Stable values used in dependency arrays - only updated when we want to reconnect
   const [stableAppId, setStableAppId] = useState(appId);
@@ -244,32 +243,32 @@ export const useBackend = (
 
   const handleSetAuthToken = useCallback(
     async (message: SetAuthTokenMessage) => {
+      const currentConnectionId = latestConnectionRef.current?.connectionId;
       logger.debug('Processing SetAuthToken request', {
-        hasAuthToken: !!message.authToken,
+        hasAuthToken: !!message.tokenId,
+        connectionId: currentConnectionId,
       });
       const response = await fetch(`${getIvyHost()}/ivy/auth/set-auth-token`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(message.authToken),
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Machine-Id': getMachineId(),
+        },
+        body: JSON.stringify({
+          tokenId: message.tokenId,
+          connectionId: currentConnectionId ?? null,
+          triggerMachineReload: message.triggerMachineReload,
+        }),
         credentials: 'include',
       });
-      if (response.ok) {
-        logger.info('Auth token set successfully');
-      } else {
+      if (!response.ok) {
         logger.error('Failed to set auth token', {
           status: response.status,
           statusText: response.statusText,
         });
       }
 
-      // Notify other tabs about logout
-      if (message.authToken === null && authChannelRef.current) {
-        logger.info('Broadcasting logout event to other tabs');
-        authChannelRef.current.postMessage({ type: 'logout' });
-      }
-
       if (message.reloadPage) {
-        logger.info('Reloading page.');
         window.location.reload();
       }
     },
@@ -354,36 +353,12 @@ export const useBackend = (
     currentConnectionRef.current = newConnection;
     queueMicrotask(() => setConnection(newConnection));
 
-    // Set up Broadcast Channel for cross-tab logout synchronization
-    if (typeof BroadcastChannel !== 'undefined') {
-      const authChannel = new BroadcastChannel('ivy-auth-channel');
-      authChannelRef.current = authChannel;
-
-      authChannel.onmessage = event => {
-        if (event.data?.type === 'logout') {
-          logger.info('Received logout event from another tab, reloading...');
-          window.location.reload();
-        }
-      };
-
-      logger.debug('Broadcast Channel initialized for auth synchronization');
-    } else {
-      logger.warn('BroadcastChannel API not supported in this browser');
-    }
-
     return () => {
       if (currentConnectionRef.current === newConnection) {
         newConnection.stop().catch(err => {
           logger.warn('Error stopping SignalR connection during unmount:', err);
         });
         currentConnectionRef.current = null;
-      }
-
-      // Close Broadcast Channel
-      if (authChannelRef.current) {
-        authChannelRef.current.close();
-        authChannelRef.current = null;
-        logger.debug('Broadcast Channel closed');
       }
 
       if (isRootConnection) {
@@ -494,6 +469,11 @@ export const useBackend = (
             handleHotReloadMessage();
           });
 
+          connection.on('ReloadPage', () => {
+            logger.debug(`[${connection.connectionId}] ReloadPage`);
+            window.location.reload();
+          });
+
           connection.onreconnecting(() => {
             logger.warn(`[${connection.connectionId}] Reconnecting`);
             setDisconnected(true);
@@ -520,6 +500,7 @@ export const useBackend = (
         connection.off('Error');
         connection.off('CopyToClipboard');
         connection.off('HotReload');
+        connection.off('ReloadPage');
         connection.off('SetAuthToken');
         connection.off('SetRootAppId');
         connection.off('SetTheme');

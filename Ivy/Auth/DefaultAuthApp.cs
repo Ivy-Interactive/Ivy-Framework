@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Reflection;
 using Ivy.Apps;
 using Ivy.Client;
@@ -22,9 +22,7 @@ public class DefaultAuthApp : ViewBase
         var auth = this.UseService<IAuthService>();
         var errorMessage = this.UseState<string?>();
         var serverArgs = this.UseService<ServerArgs>();
-        var appName = serverArgs.MetaTitle.NullIfEmpty()
-                      ?? Assembly.GetEntryAssembly()?.GetName().Name.NullIfEmpty()
-                      ?? "Ivy Application";
+        var appName = serverArgs.MetaTitle.NullIfEmpty() ?? Assembly.GetEntryAssembly()?.GetName().Name.NullIfEmpty() ?? "Ivy";
 
         var options = auth.GetAuthOptions();
 
@@ -78,6 +76,7 @@ public class PasswordEmailFlowView(IState<string?> errorMessage) : ViewBase
         var loading = this.UseState<bool>();
         var auth = this.UseService<IAuthService>();
         var client = this.UseService<IClientProvider>();
+        var authTokenRegistry = this.UseService<IAuthTokenRegistry>();
 
         var formBuilder = credentials.ToForm("Login")
             .Required(m => m.User, m => m.Password)
@@ -118,7 +117,7 @@ public class PasswordEmailFlowView(IState<string?> errorMessage) : ViewBase
 
                 if (token != null)
                 {
-                    client.SetAuthToken(token);
+                    client.SetAuthToken(authTokenRegistry, token);
                 }
                 else
                 {
@@ -141,7 +140,7 @@ public class PasswordEmailFlowView(IState<string?> errorMessage) : ViewBase
                    .HandleClick(HandleSubmit)
                    .Loading(isBusy)
                    .Disabled(isBusy)
-                   .Size(formBuilder.Size)
+                   .Scale(formBuilder.Scale)
                    .Width(Size.Full());
     }
 }
@@ -153,11 +152,12 @@ public class OAuthFlowView(AuthOption option, IState<string?> errorMessage) : Vi
     {
         var client = this.UseService<IClientProvider>();
         var auth = this.UseService<IAuthService>();
+        var authTokenRegistry = this.UseService<IAuthTokenRegistry>();
         var callback = this.UseWebhook(async (request) =>
         {
             var token = await TimeoutHelper.WithTimeoutAsync(
                 ct => auth.HandleOAuthCallbackAsync(request, ct));
-            client.SetAuthToken(token);
+            client.SetAuthToken(authTokenRegistry, token);
             return new RedirectResult("/");
         });
 

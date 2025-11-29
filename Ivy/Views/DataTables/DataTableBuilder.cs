@@ -35,9 +35,6 @@ public class DataTableBuilder<TModel> : ViewBase, IMemoized
         _Scaffold();
     }
 
-    /// <summary>
-    /// Determines the appropriate DataTypeHint based on the .NET type
-    /// </summary>
     private static Ivy.ColType GetDataTypeHint(Type type)
     {
         var underlyingType = Nullable.GetUnderlyingType(type) ?? type;
@@ -132,22 +129,12 @@ public class DataTableBuilder<TModel> : ViewBase, IMemoized
         }
     }
 
-    /// <summary>
-    /// Sets the overall width of the DataTable. For column-specific widths, use Width(Expression, Size).
-    /// </summary>
-    /// <param name="width">The desired width for the table.</param>
-    /// <returns>The builder for method chaining.</returns>
     public DataTableBuilder<TModel> Width(Size width)
     {
         _width = width;
         return this;
     }
 
-    /// <summary>
-    /// Sets the overall height of the DataTable.
-    /// </summary>
-    /// <param name="height">The desired height for the table.</param>
-    /// <returns>The builder for method chaining.</returns>
     public DataTableBuilder<TModel> Height(Size height)
     {
         _height = height;

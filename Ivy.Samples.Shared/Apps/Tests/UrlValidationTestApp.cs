@@ -2,7 +2,7 @@ using Ivy.Shared;
 
 namespace Ivy.Samples.Shared.Apps.Tests;
 
-[App(path: ["Tests"], isVisible: true, searchHints: ["url", "validation", "security", "redirect", "link", "button", "markdown", "xss", "phishing"])]
+[App(path: ["Tests"], isVisible: false, searchHints: ["url", "validation", "security", "redirect", "link", "button", "markdown", "xss", "phishing"])]
 public class UrlValidationTestApp : SampleBase
 {
     private static Button SafeButtonWithUrl(string label, string url, ButtonVariant variant = ButtonVariant.Link)
