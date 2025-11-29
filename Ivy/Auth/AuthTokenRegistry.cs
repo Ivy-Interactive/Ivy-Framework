@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Security.Cryptography;
 
 namespace Ivy.Auth;
 
@@ -15,7 +16,9 @@ public class AuthTokenRegistry : IAuthTokenRegistry, IDisposable
 
     public string Register(AuthToken? token)
     {
-        var id = Guid.NewGuid().ToString();
+        var bytes = RandomNumberGenerator.GetBytes(32);
+        var id = Convert.ToBase64String(bytes)
+            .Replace("+", "-").Replace("/", "_").TrimEnd('=');
         var entry = new TokenEntry { Token = token, LastAccessed = DateTime.UtcNow };
 
         if (!GlobalTokens.TryAdd(id, entry))
