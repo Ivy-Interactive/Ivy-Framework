@@ -173,8 +173,7 @@ public class AppHub(
                 if (authToken != oldAuthToken)
                 {
                     var tokenId = tokenRegistry.Register(authToken);
-                    var reloadPage = parentId != null && authToken == null;
-                    clientProvider.SetAuthToken(tokenId, reloadPage: reloadPage, triggerRecursiveReload: reloadPage);
+                    clientProvider.SetAuthToken(tokenId, reloadPage: parentId != null && authToken == null);
                 }
                 else if (parentId != null && authToken == null)
                 {
@@ -410,7 +409,7 @@ public class AppHub(
     async Task AbandonConnection(string connectionId, bool resetTokenAndReload)
     {
         var session = sessionStore.Sessions[connectionId];
-        await SessionHelpers.AbandonSessionAsync(session, contentBuilder, resetTokenAndReload, triggerRecursiveReload: true, logger, "AuthRefreshLoop");
+        await SessionHelpers.AbandonSessionAsync(session, contentBuilder, resetTokenAndReload, triggerMachineReload: true, logger, "AuthRefreshLoop");
     }
 
     private async Task AuthRefreshLoopAsync(string connectionId, CancellationToken cancellationToken)
@@ -513,8 +512,7 @@ public class AppHub(
                             {
                                 var tokenRegistry = session.AppServices.GetRequiredService<IAuthTokenRegistry>();
                                 var tokenId = tokenRegistry.Register(newToken);
-                                var reloadPage = string.IsNullOrEmpty(newToken?.AccessToken);
-                                clientProvider.SetAuthToken(tokenId, reloadPage: reloadPage, triggerRecursiveReload: reloadPage);
+                                clientProvider.SetAuthToken(tokenId, reloadPage: string.IsNullOrEmpty(newToken?.AccessToken));
                             }
                             if (newToken == null)
                             {

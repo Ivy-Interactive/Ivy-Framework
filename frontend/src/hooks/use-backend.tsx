@@ -45,7 +45,7 @@ type RedirectMessage = {
 type SetAuthTokenMessage = {
   tokenId: string;
   reloadPage: boolean;
-  triggerRecursiveReload: boolean;
+  triggerMachineReload: boolean;
 };
 
 const widgetTreeToXml = (node: WidgetNode) => {
@@ -150,7 +150,6 @@ export const useBackend = (
   const machineId = getMachineId();
   const connectionId = connection?.connectionId;
   const currentConnectionRef = useRef<signalR.HubConnection | null>(null);
-  const authChannelRef = useRef<BroadcastChannel | null>(null);
 
   // Use a ref that gets updated with the latest connection so we always have it in the callback
   const latestConnectionRef = useRef(connection);
@@ -258,7 +257,7 @@ export const useBackend = (
         body: JSON.stringify({
           tokenId: message.tokenId,
           connectionId: currentConnectionId ?? null,
-          triggerRecursiveReload: message.triggerRecursiveReload,
+          triggerMachineReload: message.triggerMachineReload,
         }),
         credentials: 'include',
       });
@@ -354,33 +353,12 @@ export const useBackend = (
     currentConnectionRef.current = newConnection;
     queueMicrotask(() => setConnection(newConnection));
 
-    // Set up Broadcast Channel for cross-tab logout synchronization
-    if (typeof BroadcastChannel !== 'undefined') {
-      const authChannel = new BroadcastChannel('ivy-auth-channel');
-      authChannelRef.current = authChannel;
-
-      authChannel.onmessage = event => {
-        if (event.data?.type === 'logout') {
-          logger.info('Received logout event from another tab, reloading...');
-          window.location.reload();
-        }
-      };
-    } else {
-      logger.warn('BroadcastChannel API not supported in this browser');
-    }
-
     return () => {
       if (currentConnectionRef.current === newConnection) {
         newConnection.stop().catch(err => {
           logger.warn('Error stopping SignalR connection during unmount:', err);
         });
         currentConnectionRef.current = null;
-      }
-
-      // Close Broadcast Channel
-      if (authChannelRef.current) {
-        authChannelRef.current.close();
-        authChannelRef.current = null;
       }
 
       if (isRootConnection) {

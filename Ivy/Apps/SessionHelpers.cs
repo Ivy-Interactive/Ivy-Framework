@@ -17,7 +17,7 @@ public static class SessionHelpers
         AppSession session,
         IContentBuilder contentBuilder,
         bool resetTokenAndReload,
-        bool triggerRecursiveReload,
+        bool triggerMachineReload,
         ILogger logger,
         string logContext = "AbandonSession")
     {
@@ -30,7 +30,7 @@ public static class SessionHelpers
             {
                 var tokenRegistry = session.AppServices.GetRequiredService<IAuthTokenRegistry>();
                 var tokenId = tokenRegistry.Register(null);
-                clientProvider.SetAuthToken(tokenId, reloadPage: true, triggerRecursiveReload: triggerRecursiveReload);
+                clientProvider.SetAuthToken(tokenId, reloadPage: true, triggerMachineReload: triggerMachineReload);
             }
 
             session.WidgetTree = new WidgetTree(new ErrorView(displayException), contentBuilder, session.AppServices);

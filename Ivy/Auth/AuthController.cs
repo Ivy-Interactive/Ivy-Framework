@@ -10,7 +10,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Ivy.Auth;
 
-public record SetAuthTokenRequest(string TokenId, string? ConnectionId, bool TriggerRecursiveReload);
+public record SetAuthTokenRequest(string TokenId, string? ConnectionId, bool TriggerMachineReload);
 
 public class AuthController() : Controller
 {
@@ -37,7 +37,7 @@ public class AuthController() : Controller
             if (HttpContext.Request.Headers.TryGetValue("X-Machine-Id", out var headerValue))
             {
                 var machineId = headerValue.ToString();
-                if (request.TriggerRecursiveReload)
+                if (request.TriggerMachineReload)
                 {
                     await TriggerMachineLogout(sessionStore, machineId, request.ConnectionId, contentBuilder, logger);
                 }
@@ -83,9 +83,9 @@ public class AuthController() : Controller
             if (HttpContext.Request.Headers.TryGetValue("X-Machine-Id", out var loginHeaderValue))
             {
                 var machineId = loginHeaderValue.ToString();
-                if (request.TriggerRecursiveReload)
+                if (request.TriggerMachineReload)
                 {
-                    await TriggerMachineReload(sessionStore, machineId, request.ConnectionId);
+                    TriggerMachineReload(sessionStore, machineId, request.ConnectionId);
                 }
             }
         }
@@ -102,7 +102,7 @@ public class AuthController() : Controller
         return current;
     }
 
-    private static Task TriggerMachineReload(
+    private static IEnumerable<AppSession> GetMachineSessions(
         AppSessionStore sessionStore,
         string machineId,
         string? excludeConnectionId)
@@ -130,12 +130,21 @@ public class AuthController() : Controller
                 continue;
             }
 
+            yield return session;
+        }
+    }
+
+    private static void TriggerMachineReload(
+        AppSessionStore sessionStore,
+        string machineId,
+        string? excludeConnectionId)
+    {
+        foreach (var session in GetMachineSessions(sessionStore, machineId, excludeConnectionId))
+        {
             // Just trigger page reload to pick up new auth cookies
             var clientProvider = session.AppServices.GetRequiredService<IClientProvider>();
             clientProvider.ReloadPage();
         }
-
-        return Task.CompletedTask;
     }
 
     private static async Task TriggerMachineLogout(
@@ -145,30 +154,9 @@ public class AuthController() : Controller
         IContentBuilder contentBuilder,
         ILogger logger)
     {
-        var processedRoots = new HashSet<string>();
-        if (!string.IsNullOrEmpty(excludeConnectionId))
+        foreach (var session in GetMachineSessions(sessionStore, machineId, excludeConnectionId))
         {
-            var excludedRoot = FindRootAncestor(sessionStore, excludeConnectionId);
-            processedRoots.Add(excludedRoot);
-        }
-
-        // Find all sessions with this machineId
-        var allSessions = sessionStore.Sessions.Values
-            .Where(s => !s.IsDisposed() && s.MachineId == machineId)
-            .ToList();
-
-        foreach (var session in allSessions)
-        {
-            // Find root for this session
-            var sessionRoot = FindRootAncestor(sessionStore, session.ConnectionId);
-
-            // Skip if we've already processed this root (includes the excluded root)
-            if (!processedRoots.Add(sessionRoot))
-            {
-                continue;
-            }
-
-            await SessionHelpers.AbandonSessionAsync(session, contentBuilder, resetTokenAndReload: true, triggerRecursiveReload: false, logger, "TriggerMachineLogout");
+            await SessionHelpers.AbandonSessionAsync(session, contentBuilder, resetTokenAndReload: true, triggerMachineReload: false, logger, "TriggerMachineLogout");
         }
     }
 }
