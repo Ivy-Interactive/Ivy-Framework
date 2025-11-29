@@ -25,7 +25,7 @@ public interface IAuthTokenRegistry
 public class AuthTokenRegistry : IAuthTokenRegistry, IDisposable
 {
     private static readonly ConcurrentDictionary<string, TokenEntry> GlobalTokens = new();
-    private static readonly TimeSpan TokenExpiration = TimeSpan.FromMinutes(2);
+    private static readonly TimeSpan TokenExpiration = TimeSpan.FromMinutes(1);
     private static readonly Timer CleanupTimer;
     private readonly ConcurrentBag<string> _sessionTokenIds = new();
 
