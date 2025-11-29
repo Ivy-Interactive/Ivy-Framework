@@ -12,15 +12,7 @@ public record Kanban : WidgetBase<Kanban>
 
     [Prop] public bool ShowCounts { get; set; } = true;
 
-    [Prop] public bool AllowAdd { get; set; }
-
-    [Prop] public bool AllowMove { get; set; }
-
-    [Prop] public bool AllowDelete { get; set; }
-
-    [Prop] public Dictionary<object, Size>? ColumnWidths { get; set; }
-
-    [Event] public Func<Event<Kanban, object?>, ValueTask>? OnDelete { get; set; }
+    [Prop] public Size? ColumnWidth { get; set; }
 
     [Event] public Func<Event<Kanban, (object? CardId, object? ToColumn, int? TargetIndex)>, ValueTask>? OnCardMove { get; set; }
 

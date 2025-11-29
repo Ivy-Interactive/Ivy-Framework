@@ -132,18 +132,19 @@ public class AsyncSelectInputView<TValue> : ViewBase, IAnyAsyncSelectInputBase, 
                 Invalid = Invalid,
                 DisplayValue = displayValue.Value,
                 OnSelect = HandleSelect,
-                Loading = loading.Value
+                Loading = loading.Value,
+                Scale = Scale
             },
             open.Value ? new Sheet(
                 OnClose,
-                new AsyncSelectListSheet<TValue>(refreshToken, Query),
+                new AsyncSelectListSheet<TValue>(refreshToken, Query, Scale),
                 title: Placeholder
                 ) : null
         );
     }
 }
 
-public class AsyncSelectListSheet<T>(RefreshToken refreshToken, AsyncSelectQueryDelegate<T> query) : ViewBase
+public class AsyncSelectListSheet<T>(RefreshToken refreshToken, AsyncSelectQueryDelegate<T> query, Scale? scale = null) : ViewBase
 {
     public override object? Build()
     {
@@ -167,8 +168,14 @@ public class AsyncSelectListSheet<T>(RefreshToken refreshToken, AsyncSelectQuery
         var items = records.Value.Select(option =>
             new ListItem(title: option.Label, subtitle: option.Description, onClick: onItemClicked, tag: option)).ToArray();
 
+        var searchInput = filter.ToSearchInput().Placeholder("Search").Width(Size.Grow());
+        if (scale.HasValue)
+        {
+            searchInput.Scale = scale.Value;
+        }
+
         var header = Layout.Vertical().Gap(2)
-            | filter.ToSearchInput().Placeholder("Search").Width(Size.Grow());
+            | searchInput;
 
         var content = Layout.Vertical().Gap(2)
             | (loading.Value ? Text.Block("Loading...") : new List(items));

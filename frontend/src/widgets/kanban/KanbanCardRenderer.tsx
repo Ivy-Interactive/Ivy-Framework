@@ -6,7 +6,6 @@ import type { CardData } from './types';
 interface KanbanCardRendererProps {
   task: Task;
   card: CardData | undefined;
-  onCardClick: (cardId: string) => void;
   KanbanCard: React.ComponentType<{
     id: string;
     column: string;

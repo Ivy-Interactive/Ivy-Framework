@@ -36,16 +36,17 @@ The `Kanban` widget provides a powerful way to organize and track items through 
 
 ## Basic Usage
 
-Create a Kanban board from any collection using the `.ToKanban()` extension method. Specify which field determines the column grouping:
+Create a Kanban board from any collection using the `.ToKanban()` extension method. You must provide a `.CardBuilder()` to specify how cards are rendered:
 
 ```csharp demo-below
 tasks.ToKanban(
     groupBySelector: t => t.Status,
     idSelector: t => t.Id,
-    orderSelector: t => t.Priority,
-    titleSelector: t => t.Title,
-    descriptionSelector: t => t.Description
+    orderSelector: t => t.Priority
 )
+.CardBuilder(task => new Card()
+    .Title(task.Title)
+    .Description(task.Description))
 ```
 
 ## Drag and Drop
@@ -77,9 +78,10 @@ public class KanbanWithMoveExample : ViewBase
             .ToKanban(
                 groupBySelector: t => t.Status,
                 idSelector: t => t.Id,
-                orderSelector: t => t.Priority,
-                titleSelector: t => t.Title,
-                descriptionSelector: t => t.Description)
+                orderSelector: t => t.Priority)
+            .CardBuilder(task => new Card()
+                .Title(task.Title)
+                .Description(task.Description))
             .HandleMove(moveData =>
             {
                 var taskId = moveData.CardId?.ToString();
@@ -101,7 +103,7 @@ public class KanbanWithMoveExample : ViewBase
 
 ## Custom Card Content
 
-Customize card appearance beyond the default title and description using `.CardBuilder()`. This allows you to create rich, custom card layouts with additional fields, formatting, or widgets:
+Use `.CardBuilder()` to create custom card layouts with additional fields, formatting, or widgets. This is required - you must provide a CardBuilder for each kanban board:
 
 ```csharp demo-tabs
 public class KanbanWithCustomCardsExample : ViewBase
@@ -139,16 +141,15 @@ public class KanbanWithCustomCardsExample : ViewBase
             .ToKanban(
                 groupBySelector: e => e.Status,
                 idSelector: e => e.Id,
-                orderSelector: e => e.Priority,
-                titleSelector: e => e.Title,
-                descriptionSelector: e => e.Description)
+                orderSelector: e => e.Priority)
             .CardBuilder(task => new Card(
                 content: task.ToDetails()
                     .Remove(x => x.Id)
                     .MultiLine(x => x.Description)
             ))
             .ColumnOrder(e => GetStatusOrder(e.Status))
-            .Width(e => e.Status, Size.Fraction(0.33f))
+            .Width(Size.Full())
+            .ColumnWidth(Size.Fraction(0.33f))
             .HandleMove(moveData =>
             {
                 var taskId = moveData.CardId?.ToString();
@@ -171,11 +172,6 @@ public class KanbanWithCustomCardsExample : ViewBase
                 updatedTasks.RemoveAll(t => t.Id == taskId);
                 updatedTasks.Add(taskToMove);
                 tasks.Set(updatedTasks.ToArray());
-            })
-            .HandleClick(cardId =>
-            {
-                var taskId = cardId?.ToString();
-                // Handle card click - show details, open modal, etc.
             });
     }
 }
@@ -183,53 +179,36 @@ public class KanbanWithCustomCardsExample : ViewBase
 
 The `.CardBuilder()` method accepts a builder factory function that creates a custom card widget. You can use `.ToDetails()` to automatically generate a details view from your model, or create completely custom card layouts with any widgets you need.
 
-## Card Click Events
+## Width and Column Sizing
 
-Handle card click interactions by providing a `HandleClick` handler. This enables opening detail views, modals, or navigating to specific pages when users click on cards:
+The kanban widget supports the standard `.Width()` and `.Height()` methods inherited from `WidgetBase` to control the size of the entire kanban board. Additionally, you can use `.ColumnWidth()` to set the same width for all columns, which enables horizontal scrolling when columns exceed the container width:
 
 ```csharp demo-tabs
-public class KanbanWithAllEventsExample : ViewBase
+public class KanbanWithColumnWidthExample : ViewBase
 {
-    record Task(string Id, string Title, string Status, int Priority, string Description, string Assignee);
+    record Task(string Id, string Title, string Status, int Priority);
     
     public override object? Build()
     {
         var taskState = UseState(new[]
         {
-            new Task("1", "Design Homepage", "Todo", 1, "Create wireframes and mockups", "Alice"),
-            new Task("2", "Setup Database", "Todo", 2, "Configure PostgreSQL instance", "Bob"),
-            new Task("3", "Implement Auth", "Todo", 3, "Add OAuth2 authentication", "Charlie"),
-            new Task("4", "Build API", "Todo", 4, "Create REST endpoints", "Alice"),
-            new Task("5", "Code Review", "In Progress", 1, "Review pull requests", "Charlie"),
-            new Task("6", "Performance Optimization", "In Progress", 2, "Optimize database queries", "Alice"),
-            new Task("7", "Bug Fixes", "In Progress", 3, "Fix reported bugs", "Bob"),
-            new Task("8", "Unit Tests", "Done", 1, "Write comprehensive test suite", "Bob"),
-            new Task("9", "Deploy to Production", "Done", 2, "Configure CI/CD pipeline", "Charlie"),
-            new Task("10", "User Training", "Done", 3, "Train users on new features", "Alice"),
+            new Task("1", "Design Homepage", "Todo", 1),
+            new Task("2", "Setup Database", "Todo", 2),
+            new Task("3", "Code Review", "In Progress", 1),
+            new Task("4", "Unit Tests", "Done", 1),
         });
-        
-        var client = UseService<IClientProvider>();
         
         return taskState.Value
             .ToKanban(
                 groupBySelector: t => t.Status,
                 idSelector: t => t.Id,
-                orderSelector: t => t.Priority,
-                titleSelector: t => t.Title,
-                descriptionSelector: t => t.Description)
-            .HandleClick(cardId =>
-            {
-                // Handle card click - show details, open modal, navigate, etc.
-                var taskId = cardId?.ToString();
-                var clickedTask = taskState.Value.FirstOrDefault(t => t.Id == taskId);
-                if (clickedTask != null)
-                {
-                    client.Toast($"Clicked: {clickedTask.Title} - {clickedTask.Description}");
-                }
-            })
+                orderSelector: t => t.Priority)
+            .CardBuilder(task => new Card()
+                .Title(task.Title))
+            .Width(Size.Full())  // Full width kanban board
+            .ColumnWidth(Size.Units(300))  // Each column is 300 units wide - enables horizontal scroll
             .HandleMove(moveData =>
             {
-                // Update task status when card is moved between columns
                 var taskId = moveData.CardId?.ToString();
                 var updatedTasks = taskState.Value.ToList();
                 var taskToMove = updatedTasks.FirstOrDefault(t => t.Id == taskId);
@@ -240,17 +219,6 @@ public class KanbanWithAllEventsExample : ViewBase
                     updatedTasks.RemoveAll(t => t.Id == taskId);
                     updatedTasks.Add(updated);
                     taskState.Set(updatedTasks.ToArray());
-                }
-            })
-            .HandleDelete(cardId =>
-            {
-                // Remove task when delete action is triggered
-                var taskId = cardId?.ToString();
-                var taskToDelete = taskState.Value.FirstOrDefault(t => t.Id == taskId);
-                if (taskToDelete != null)
-                {
-                    taskState.Set(taskState.Value.Where(t => t.Id != taskId).ToArray());
-                    client.Toast($"Deleted: {taskToDelete.Title}");
                 }
             });
     }
@@ -298,10 +266,12 @@ public class FullKanbanExample : ViewBase
             .ToKanban(
                 groupBySelector: t => t.Status,
                 idSelector: t => t.Id,
-                titleSelector: t => t.Title,
-                descriptionSelector: t => t.Description,
                 orderSelector: t => t.Priority)
+            .CardBuilder(task => new Card()
+                .Title(task.Title)
+                .Description(task.Description))
             .ColumnOrder(t => t.ColumnOrder)
+            .Width(Size.Full())
             .Height(Size.Units(200))
             .HandleMove(moveData =>
             {
@@ -320,11 +290,6 @@ public class FullKanbanExample : ViewBase
                     updatedTasks.Add(updated);
                     taskState.Set(updatedTasks.ToArray());
                 }
-            })
-            .HandleDelete(cardId =>
-            {
-                var taskId = cardId?.ToString();
-                taskState.Set(taskState.Value.Where(t => t.Id != taskId).ToArray());
             })
             .Empty(
                 new Card()
@@ -368,10 +333,11 @@ public class SimpleStatusBoard : ViewBase
         return issueState.Value.ToKanban(
             groupBySelector: i => i.Status,
             idSelector: i => i.Id,
-            orderSelector: i => i.Id,
-            titleSelector: i => i.Title,
-            descriptionSelector: i => i.Id
-        ).HandleMove(moveData =>
+            orderSelector: i => i.Id
+        )
+        .CardBuilder(issue => new Card()
+            .Title(issue.Title))
+        .HandleMove(moveData =>
         {
             var issueId = moveData.CardId?.ToString();
             var updatedIssues = issueState.Value.ToList();

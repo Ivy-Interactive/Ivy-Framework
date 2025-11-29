@@ -1034,6 +1034,7 @@ export const SelectInputWidget: React.FC<SelectInputWidgetProps> = props => {
   const normalizedProps = {
     ...props,
     value: props.nullable && props.value === undefined ? null : props.value,
+    scale: props.scale ?? Scales.Medium,
   };
 
   switch (normalizedProps.variant) {

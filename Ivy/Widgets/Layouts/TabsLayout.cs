@@ -27,12 +27,29 @@ public record TabsLayout : WidgetBase<TabsLayout>
         RemoveParentPadding = true;
     }
 
+    public TabsLayout(Action<Event<TabsLayout, int>>? onSelect, Action<Event<TabsLayout, int>>? onClose, Action<Event<TabsLayout, int>>? onRefresh, Action<Event<TabsLayout, int[]>>? onReorder, int? selectedIndex, params Tab[] tabs)
+        : this(
+            onSelect != null ? e => { onSelect(e); return ValueTask.CompletedTask; }
+    : null,
+            onClose != null ? e => { onClose(e); return ValueTask.CompletedTask; }
+    : null,
+            onRefresh != null ? e => { onRefresh(e); return ValueTask.CompletedTask; }
+    : null,
+            onReorder != null ? e => { onReorder(e); return ValueTask.CompletedTask; }
+    : null,
+            selectedIndex, tabs)
+    {
+    }
+
     [Prop] public int? SelectedIndex { get; set; }
 
     [Prop] public TabsVariant Variant { get; set; } = TabsVariant.Content;
 
     [Prop] public bool RemoveParentPadding { get; set; }
+
     [Prop] public Thickness? Padding { get; set; } = new Thickness(4);
+
+    [Prop] public string? AddButtonText { get; set; }
 
     [Event] public Func<Event<TabsLayout, int>, ValueTask>? OnSelect { get; set; }
 
@@ -42,23 +59,7 @@ public record TabsLayout : WidgetBase<TabsLayout>
 
     [Event] public Func<Event<TabsLayout, int[]>, ValueTask>? OnReorder { get; set; }
 
-    [Prop] public string? AddButtonText { get; set; }
-
     [Event] public Func<Event<TabsLayout, int>, ValueTask>? OnAddButtonClick { get; set; }
-
-    public TabsLayout(Action<Event<TabsLayout, int>>? onSelect, Action<Event<TabsLayout, int>>? onClose, Action<Event<TabsLayout, int>>? onRefresh, Action<Event<TabsLayout, int[]>>? onReorder, int? selectedIndex, params Tab[] tabs)
-    : this(
-        onSelect != null ? e => { onSelect(e); return ValueTask.CompletedTask; }
-    : null,
-        onClose != null ? e => { onClose(e); return ValueTask.CompletedTask; }
-    : null,
-        onRefresh != null ? e => { onRefresh(e); return ValueTask.CompletedTask; }
-    : null,
-        onReorder != null ? e => { onReorder(e); return ValueTask.CompletedTask; }
-    : null,
-        selectedIndex, tabs)
-    {
-    }
 }
 
 public static class TabsLayoutExtensions

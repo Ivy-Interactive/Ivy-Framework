@@ -698,7 +698,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
   height,
   events,
   shortcutKey,
-  scale,
+  scale = Scales.Medium,
   prefix,
   suffix,
   maxLength,

@@ -213,6 +213,7 @@ public class FormView<TModel>(IFormFieldView[] fieldViews, Func<Event<Form>, Val
                                 ? RenderRows(f.Select(g => g).ToArray())
                                 : new Expandable(f.Key, RenderRows(f.ToArray()))
                                     .Open(groupOpenStates?.GetValueOrDefault(f.Key, false) ?? false)
+                                    .Scale(scale)
                         )).Cast<object>().ToArray()));
 
         var form = new Form(Layout.Horizontal(columns));

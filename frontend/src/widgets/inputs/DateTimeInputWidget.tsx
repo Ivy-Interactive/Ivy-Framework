@@ -91,7 +91,7 @@ const DateVariant: React.FC<DateVariantProps> = ({
   );
 
   return (
-    <div className="relative flex items-center gap-2">
+    <div className="relative w-full select-none">
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button
@@ -100,51 +100,28 @@ const DateVariant: React.FC<DateVariantProps> = ({
             className={cn(
               dateTimeInputVariants({ scale }),
               invalid && inputStyles.invalidInput,
-              disabled && 'cursor-not-allowed'
+              disabled && 'cursor-not-allowed',
+              showClear && invalid
+                ? 'pr-16'
+                : showClear || invalid
+                  ? 'pr-8'
+                  : ''
             )}
             data-testid={dataTestId}
           >
             <CalendarIcon
               className={cn(
-                'mr-3 flex-shrink-0',
+                'mr-2 shrink-0',
                 dateTimeInputIconVariants({ scale })
               )}
             />
-            <span className={cn('truncate', (showClear || invalid) && 'pr-10')}>
+            <span
+              className={cn('truncate', dateTimeInputTextVariants({ scale }))}
+            >
               {date
                 ? format(date, formatProp || 'yyyy-MM-dd')
                 : placeholder || 'Pick a date'}
             </span>
-            {/* Icons absolutely positioned inside the button */}
-            {(showClear || invalid) && (
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 pointer-events-auto">
-                {showClear && (
-                  <span
-                    role="button"
-                    tabIndex={-1}
-                    aria-label="Clear"
-                    onClick={e => handleClear(e)}
-                    onKeyDown={e => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        handleClear();
-                      }
-                    }}
-                    className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
-                    style={{ pointerEvents: 'auto' }}
-                  >
-                    <X
-                      className={cn(
-                        dateTimeInputIconVariants({ scale }),
-                        'text-muted-foreground hover:text-foreground'
-                      )}
-                    />
-                  </span>
-                )}
-                {invalid && <InvalidIcon message={invalid} />}
-              </span>
-            )}
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start">
@@ -157,6 +134,28 @@ const DateVariant: React.FC<DateVariantProps> = ({
           />
         </PopoverContent>
       </Popover>
+      {/* Icons absolutely positioned */}
+      {(showClear || invalid) && (
+        <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-2">
+          {showClear && (
+            <button
+              type="button"
+              tabIndex={-1}
+              aria-label="Clear"
+              onClick={handleClear}
+              className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
+            >
+              <X
+                className={cn(
+                  dateTimeInputIconVariants({ scale }),
+                  'text-muted-foreground hover:text-foreground'
+                )}
+              />
+            </button>
+          )}
+          {invalid && <InvalidIcon message={invalid} />}
+        </div>
+      )}
     </div>
   );
 };
@@ -285,7 +284,7 @@ const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
   }, []);
 
   return (
-    <div className="relative flex items-center gap-2">
+    <div className="relative w-full select-none">
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button
@@ -294,44 +293,34 @@ const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
             className={cn(
               dateTimeInputVariants({ scale }),
               invalid && inputStyles.invalidInput,
-              disabled && 'cursor-not-allowed'
+              disabled && 'cursor-not-allowed',
+              showClear && invalid
+                ? 'pr-16'
+                : showClear || invalid
+                  ? 'pr-8'
+                  : ''
             )}
             data-testid={dataTestId}
           >
             <CalendarIcon
               className={cn(
-                'mr-3 flex-shrink-0',
+                'mr-2 shrink-0',
                 dateTimeInputIconVariants({ scale })
               )}
             />
-            <span className={cn('truncate', (showClear || invalid) && 'pr-10')}>
+            <Clock
+              className={cn(
+                'mr-2 shrink-0',
+                dateTimeInputIconVariants({ scale })
+              )}
+            />
+            <span
+              className={cn('truncate', dateTimeInputTextVariants({ scale }))}
+            >
               {date
                 ? format(date, formatProp || 'yyyy-MM-dd')
                 : placeholder || 'Pick a date & time'}
             </span>
-            {/* Icons absolutely positioned inside the button */}
-            {(showClear || invalid) && (
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 pointer-events-auto">
-                {showClear && (
-                  <button
-                    type="button"
-                    tabIndex={-1}
-                    aria-label="Clear"
-                    onClick={handleClear}
-                    className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
-                    style={{ pointerEvents: 'auto' }}
-                  >
-                    <X
-                      className={cn(
-                        dateTimeInputIconVariants({ scale }),
-                        'text-muted-foreground hover:text-foreground'
-                      )}
-                    />
-                  </button>
-                )}
-                {invalid && <InvalidIcon message={invalid} />}
-              </span>
-            )}
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start">
@@ -360,7 +349,7 @@ const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
                 onKeyDown={handleTimeKeyDown}
                 disabled={disabled}
                 className={cn(
-                  'bg-background appearance-none [&::-webkit-calendar-picker-indicator]:hidden',
+                  'bg-transparent appearance-none [&::-webkit-calendar-picker-indicator]:hidden',
                   dateTimeInputTextVariants({ scale }),
                   invalid && inputStyles.invalidInput
                 )}
@@ -370,6 +359,28 @@ const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
           </div>
         </PopoverContent>
       </Popover>
+      {/* Icons absolutely positioned */}
+      {(showClear || invalid) && (
+        <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-2">
+          {showClear && (
+            <button
+              type="button"
+              tabIndex={-1}
+              aria-label="Clear"
+              onClick={handleClear}
+              className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
+            >
+              <X
+                className={cn(
+                  dateTimeInputIconVariants({ scale }),
+                  'text-muted-foreground hover:text-foreground'
+                )}
+              />
+            </button>
+          )}
+          {invalid && <InvalidIcon message={invalid} />}
+        </div>
+      )}
     </div>
   );
 };
@@ -462,15 +473,15 @@ const TimeVariant: React.FC<TimeVariantProps> = ({
   );
 
   return (
-    <div className="relative flex items-center" data-testid={dataTestId}>
-      <Clock
-        className={cn(
-          'mr-3 flex-shrink-0',
-          dateTimeInputIconVariants({ scale }),
-          'text-muted-foreground'
-        )}
-      />
-      <div className="relative flex-1">
+    <div className="relative w-full select-none" data-testid={dataTestId}>
+      <div className="relative">
+        <Clock
+          className={cn(
+            'absolute left-3 top-1/2 -translate-y-1/2 shrink-0',
+            dateTimeInputIconVariants({ scale }),
+            disabled && 'opacity-50'
+          )}
+        />
         <Input
           type="time"
           step="1"
@@ -481,36 +492,36 @@ const TimeVariant: React.FC<TimeVariantProps> = ({
           disabled={disabled}
           placeholder={placeholder || 'Select time'}
           className={cn(
-            'bg-background appearance-none [&::-webkit-calendar-picker-indicator]:hidden cursor-pointer w-full',
+            'bg-transparent appearance-none [&::-webkit-calendar-picker-indicator]:hidden cursor-pointer w-full pl-10',
             dateTimeInputTextVariants({ scale }),
-            (showClear || invalid) && 'pr-20',
             invalid && inputStyles.invalidInput,
-            disabled && 'cursor-not-allowed'
+            disabled && 'cursor-not-allowed',
+            showClear && invalid ? 'pr-16' : showClear || invalid ? 'pr-8' : ''
           )}
         />
-        {(showClear || invalid) && (
-          <span className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 pointer-events-auto">
-            {showClear && (
-              <button
-                type="button"
-                tabIndex={-1}
-                aria-label="Clear"
-                onClick={handleClear}
-                className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
-                style={{ pointerEvents: 'auto' }}
-              >
-                <X
-                  className={cn(
-                    dateTimeInputIconVariants({ scale }),
-                    'text-muted-foreground hover:text-foreground'
-                  )}
-                />
-              </button>
-            )}
-            {invalid && <InvalidIcon message={invalid} />}
-          </span>
-        )}
       </div>
+      {/* Icons absolutely positioned */}
+      {(showClear || invalid) && (
+        <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-2">
+          {showClear && (
+            <button
+              type="button"
+              tabIndex={-1}
+              aria-label="Clear"
+              onClick={handleClear}
+              className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
+            >
+              <X
+                className={cn(
+                  dateTimeInputIconVariants({ scale }),
+                  'text-muted-foreground hover:text-foreground'
+                )}
+              />
+            </button>
+          )}
+          {invalid && <InvalidIcon message={invalid} />}
+        </div>
+      )}
     </div>
   );
 };

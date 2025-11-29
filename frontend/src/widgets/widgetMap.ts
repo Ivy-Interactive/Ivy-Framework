@@ -113,6 +113,7 @@ export const widgetMap = {
   'Ivy.AppHost': AppHostWidget,
   'Ivy.Audio': AudioPlayerWidget,
   'Ivy.VideoPlayer': VideoPlayerWidget,
+  'Ivy.Stepper': React.lazy(() => import('@/widgets/primitives/StepperWidget')),
 
   // Widgets
   'Ivy.Article': ArticleWidget,

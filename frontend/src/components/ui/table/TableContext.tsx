@@ -12,7 +12,7 @@ export const TableContext = createContext<TableContextValue>({
 export const TableProvider: React.FC<{
   scale?: Scales;
   children: React.ReactNode;
-}> = ({ scale, children }) => {
+}> = ({ scale = Scales.Medium, children }) => {
   return (
     <TableContext.Provider value={{ scale }}>{children}</TableContext.Provider>
   );
