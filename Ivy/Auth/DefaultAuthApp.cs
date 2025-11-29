@@ -76,6 +76,7 @@ public class PasswordEmailFlowView(IState<string?> errorMessage) : ViewBase
         var loading = this.UseState<bool>();
         var auth = this.UseService<IAuthService>();
         var client = this.UseService<IClientProvider>();
+        var authTokenRegistry = this.UseService<IAuthTokenRegistry>();
 
         var formBuilder = credentials.ToForm("Login")
             .Required(m => m.User, m => m.Password)
@@ -116,7 +117,6 @@ public class PasswordEmailFlowView(IState<string?> errorMessage) : ViewBase
 
                 if (token != null)
                 {
-                    var authTokenRegistry = this.UseService<IAuthTokenRegistry>();
                     var tokenId = authTokenRegistry.Register(token);
                     client.SetAuthToken(tokenId);
                 }
