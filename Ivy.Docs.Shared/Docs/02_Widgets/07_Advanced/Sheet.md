@@ -208,7 +208,7 @@ public class NavigationSheetContent : ViewBase
 
 ### Complex Layout Structure
 
-This pattern demonstrates how to integrate sheets with stateful widgets, where the sheet needs to interact with the parent component's state. By returning both the body and sheet in a Fragment, you can create complex interactions between the sheet form and the main content.
+This pattern demonstrates how to integrate sheets with stateful widgets using triggers, where the sheet needs to interact with the parent component's state. By using `UseTrigger` and handling form submission directly, you can create clean interactions between the sheet form and the main content without relying on `UseEffect`.
 
 ```csharp demo-tabs
 public record KanbanTask(string Id, string Title, string Status, int Priority, string Description, string Assignee);
@@ -227,7 +227,6 @@ public class KanbanWithSheetExample : ViewBase
         });
         
         var client = UseService<IClientProvider>();
-        var isSheetOpen = UseState(false);
         
         KanbanTask CreateNewTask() => new KanbanTask(
             Guid.NewGuid().ToString(), "", "Todo",
@@ -236,32 +235,60 @@ public class KanbanWithSheetExample : ViewBase
         var taskForm = UseState(CreateNewTask);
         var statusOptions = new[] { "Todo", "In Progress", "Done" }.ToOptions();
         
-        // Add task when sheet closes if form has valid required fields
-        // Note: This pattern works because ToSheet only closes on successful validation
-        UseEffect(() =>
+        // Use trigger pattern instead of boolean state for sheet activation
+        var context = Context; // Capture context for use in trigger factory
+        var (sheetView, openSheet) = context.UseTrigger((IState<bool> isOpen) =>
         {
-            if (!isSheetOpen.Value && 
-                !string.IsNullOrEmpty(taskForm.Value.Title) && 
-                !string.IsNullOrEmpty(taskForm.Value.Description))
+            // Reset form when sheet opens
+            taskForm.Set(CreateNewTask());
+            
+            // Get form components using UseForm for custom submission handling
+            var formBuilder = taskForm.ToForm()
+                .Required(m => m.Title, m => m.Description)
+                .Builder(m => m.Status, s => s.ToSelectInput(statusOptions))
+                .Builder(m => m.Description, s => s.ToTextAreaInput())
+                .Remove(m => m.Id);
+            
+            var (onSubmit, formView, validationView, loading) = context.UseForm(() => formBuilder);
+            
+            // Handle form submission directly - onSubmit already validates required fields
+            async ValueTask HandleSubmit()
             {
-                var updatedTasks = taskState.Value.ToList();
-                updatedTasks.Add(taskForm.Value);
-                taskState.Set(updatedTasks.ToArray());
-                client.Toast($"Added: {taskForm.Value.Title}");
-                
-                // Reset form for next use
-                taskForm.Set(CreateNewTask());
+                if (await onSubmit())
+                {
+                    // Form validation passed - add the task
+                    var updatedTasks = taskState.Value.ToList();
+                    updatedTasks.Add(taskForm.Value);
+                    taskState.Set(updatedTasks.ToArray());
+                    client.Toast($"Added: {taskForm.Value.Title}");
+                    
+                    // Close the sheet
+                    isOpen.Set(false);
+                }
             }
-        }, [isSheetOpen]);
+            
+            var layout = new FooterLayout(
+                Layout.Horizontal().Gap(2)
+                    | new Button("Create Task").HandleClick(_ => HandleSubmit())
+                        .Loading(loading).Disabled(loading).Size(formBuilder.Size)
+                    | new Button("Cancel").Variant(ButtonVariant.Outline).HandleClick(_ => isOpen.Set(false))
+                        .Size(formBuilder.Size)
+                    | validationView,
+                formView
+            );
+            
+            return new Sheet(_ => isOpen.Set(false), layout, 
+                title: "Add New Task",
+                description: "Create a new task")
+                .Width(Size.Fraction(1/3f));
+        });
         
         var body = Layout.Vertical().Gap(2)
-            | new Button("Add New Task")
-                .HandleClick(_ =>
-                {
-                    taskForm.Set(CreateNewTask());
-                    isSheetOpen.Set(true);
-                    return ValueTask.CompletedTask;
-                })
+            | new Button("Add New Task").HandleClick(_ =>
+            {
+                openSheet();
+                return ValueTask.CompletedTask;
+            })
             | taskState.Value
                 .ToKanban(
                     groupBySelector: t => t.Status,
@@ -291,18 +318,7 @@ public class KanbanWithSheetExample : ViewBase
                     }
                 });
         
-        var editSheet = taskForm.ToForm()
-            .Required(m => m.Title, m => m.Description)
-            .Builder(m => m.Status, s => s.ToSelectInput(statusOptions))
-            .Builder(m => m.Description, s => s.ToTextAreaInput())
-            .Remove(m => m.Id)
-            .ToSheet(isSheetOpen,
-                title: "Add New Task",
-                description: "Create a new task",
-                submitTitle: "Create Task",
-                width: Size.Fraction(1/3f));
-        
-        return new Fragment(body, editSheet);
+        return new Fragment(body, sheetView);
     }
 }
 ```
