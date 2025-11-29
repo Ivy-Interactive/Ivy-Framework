@@ -1,4 +1,4 @@
-using Ivy.Auth;
+using Ivy.Cookies;
 using Ivy.Client;
 using Ivy.Core;
 using Ivy.Views;
@@ -27,8 +27,8 @@ public static class SessionHelpers
 
             if (resetTokenAndReload)
             {
-                var tokenRegistry = session.AppServices.GetRequiredService<IAuthTokenRegistry>();
-                clientProvider.SetAuthToken(tokenRegistry, null, reloadPage: true, triggerMachineReload: triggerMachineReload);
+                var cookieRegistry = session.AppServices.GetRequiredService<ICookieRegistry>();
+                clientProvider.SetAuthToken(cookieRegistry, null, reloadPage: true, triggerMachineReload: triggerMachineReload);
             }
 
             session.WidgetTree = new WidgetTree(new ErrorView(displayException), contentBuilder, session.AppServices);

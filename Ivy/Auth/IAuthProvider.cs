@@ -5,6 +5,10 @@ namespace Ivy.Auth;
 
 public interface IAuthProvider
 {
+    Task InitializeAsync(HttpContext context, CancellationToken cancellationToken = default)
+    {
+        return Task.CompletedTask;
+    }
 
     Task<AuthToken?> LoginAsync(string email, string password, CancellationToken cancellationToken = default);
 
@@ -23,8 +27,4 @@ public interface IAuthProvider
     Task<AuthToken?> HandleOAuthCallbackAsync(HttpRequest request, CancellationToken cancellationToken = default);
 
     Task<DateTimeOffset?> GetTokenExpiration(AuthToken token, CancellationToken cancellationToken = default);
-
-    void SetHttpContext(HttpContext context)
-    {
-    }
 }

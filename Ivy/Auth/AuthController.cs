@@ -1,5 +1,3 @@
-using System.Net;
-using System.Text.Json;
 using Ivy.Apps;
 using Ivy.Client;
 using Ivy.Core;
@@ -7,10 +5,11 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Ivy.Cookies;
 
 namespace Ivy.Auth;
 
-public record SetAuthTokenRequest(string TokenId, string? ConnectionId, bool TriggerMachineReload);
+public record SetAuthTokenRequest(string CookieJarId, string? ConnectionId, bool TriggerMachineReload);
 
 public class AuthController() : Controller
 {
@@ -18,68 +17,20 @@ public class AuthController() : Controller
     [HttpPatch]
     public async Task<IActionResult> SetAuthToken(
         [FromBody] SetAuthTokenRequest request,
-        [FromServices] IGlobalAuthTokenRegistry globalTokenRegistry,
+        [FromServices] IGlobalCookieRegistry globalCookieRegistry,
         [FromServices] AppSessionStore sessionStore,
         [FromServices] IContentBuilder contentBuilder,
         [FromServices] ILogger<AuthController> logger)
     {
-        if (!globalTokenRegistry.TryRemove(new AuthTokenId(request.TokenId), out var token))
+        if (!globalCookieRegistry.TryRemove(new CookieJarId(request.CookieJarId), out var cookies))
         {
-            return BadRequest("Invalid or expired token id.");
+            return BadRequest("Invalid or expired cookie jar id.");
         }
 
-        var cookies = HttpContext.Response.Cookies;
-        if (string.IsNullOrEmpty(token?.AccessToken))
+        cookies.WriteToResponse(HttpContext.Response);
+
+        if (cookies.TryGet("auth_token", out var authTokenValue) && !string.IsNullOrEmpty(authTokenValue))
         {
-            cookies.Delete("auth_token");
-            cookies.Delete("auth_ext_refresh_token");
-
-            // Trigger logout for all sessions with the same machineId
-            if (HttpContext.Request.Headers.TryGetValue("X-Machine-Id", out var headerValue))
-            {
-                var machineId = headerValue.ToString();
-                if (request.TriggerMachineReload)
-                {
-                    await TriggerMachineLogout(sessionStore, machineId, request.ConnectionId, contentBuilder, logger);
-                }
-            }
-        }
-        else
-        {
-            var isProduction = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Production";
-            var cookieOptions = new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = isProduction, // Enable Secure flag in production
-                SameSite = SameSiteMode.Strict,
-                Expires = DateTimeOffset.UtcNow.AddYears(1),
-            };
-
-            var tokenJson = JsonSerializer.Serialize(token);
-
-            // Calculate url-encoded token length
-            var tokenJsonLength = WebUtility.UrlEncode(tokenJson).Length;
-            var refreshTokenLength = token.RefreshToken != null
-                ? WebUtility.UrlEncode(token.RefreshToken).Length
-                : 0;
-
-            // If the token is too big, try putting the refresh token into its own cookie.
-            // I'm not trying to be overly precise here.
-            const int CookieSizeLimit = 4000;
-
-            if (tokenJsonLength > CookieSizeLimit && tokenJsonLength - refreshTokenLength < CookieSizeLimit)
-            {
-                var refreshToken = token.RefreshToken!; // non-nullness implied by condition above
-                var modifiedToken = token with { RefreshToken = null };
-                tokenJson = JsonSerializer.Serialize(modifiedToken);
-                cookies.Append("auth_ext_refresh_token", refreshToken, cookieOptions);
-            }
-            else
-            {
-                cookies.Delete("auth_ext_refresh_token");
-            }
-            cookies.Append("auth_token", tokenJson, cookieOptions);
-
             // Trigger reload for all sessions with the same machineId on login
             if (HttpContext.Request.Headers.TryGetValue("X-Machine-Id", out var loginHeaderValue))
             {
@@ -90,6 +41,19 @@ public class AuthController() : Controller
                 }
             }
         }
+        else
+        {
+            // Trigger logout for all sessions with the same machineId on logout
+            if (HttpContext.Request.Headers.TryGetValue("X-Machine-Id", out var headerValue))
+            {
+                var machineId = headerValue.ToString();
+                if (request.TriggerMachineReload)
+                {
+                    await TriggerMachineLogout(sessionStore, machineId, request.ConnectionId, contentBuilder, logger);
+                }
+            }
+        }
+
         return Ok();
     }
 

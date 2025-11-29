@@ -1,8 +1,7 @@
-using System.Diagnostics;
-using System.Text.Json;
 using System.Text.Json.Nodes;
 using Ivy.Apps;
 using Ivy.Auth;
+using Ivy.Cookies;
 using Ivy.Chrome;
 using Ivy.Client;
 using Ivy.Core;
@@ -26,7 +25,7 @@ public class AppHub(
     AppSessionStore sessionStore,
     ILogger<AppHub> logger,
     IQueryableRegistry queryableRegistry,
-    IGlobalAuthTokenRegistry globalAuthTokenRegistry
+    IGlobalCookieRegistry globalCookieRegistry
     ) : Hub
 {
     private static bool GetChromeParam(HttpContext httpContext)
@@ -132,13 +131,15 @@ public class AppHub(
             appServices.AddSingleton(typeof(IClientProvider), clientProvider);
             appServices.AddSingleton(typeof(IUploadService), new UploadService(Context.ConnectionId, clientProvider));
 
-            var tokenRegistry = new AuthTokenRegistry(globalAuthTokenRegistry);
-            appServices.AddSingleton<IAuthTokenRegistry>(tokenRegistry);
+            var cookieRegistry = new CookieRegistry(globalCookieRegistry);
+            appServices.AddSingleton<ICookieRegistry>(cookieRegistry);
 
             if (server.AuthProviderType != null)
             {
                 var authProvider = server.Services.BuildServiceProvider().GetService<IAuthProvider>() ?? throw new Exception("IAuthProvider not found");
-                authProvider.SetHttpContext(httpContext);
+                await TimeoutHelper.WithTimeoutAsync(
+                    ct => authProvider.InitializeAsync(httpContext, ct),
+                    Context.ConnectionAborted);
 
                 var oldAuthToken = AuthHelper.GetAuthToken(httpContext);
                 var authService = new AuthService(authProvider!, oldAuthToken);
@@ -173,7 +174,7 @@ public class AppHub(
 
                 if (authToken != oldAuthToken)
                 {
-                    clientProvider.SetAuthToken(tokenRegistry, authToken, reloadPage: parentId != null && authToken == null);
+                    clientProvider.SetAuthToken(cookieRegistry, authToken, reloadPage: parentId != null && authToken == null);
                 }
                 else if (parentId != null && authToken == null)
                 {
@@ -240,8 +241,8 @@ public class AppHub(
                 LastInteraction = DateTime.UtcNow,
             };
 
-            // Track token registry for cleanup
-            appState.TrackDisposable(tokenRegistry);
+            // Track cookie registry for cleanup
+            appState.TrackDisposable(cookieRegistry);
 
             var connectionAborted = Context.ConnectionAborted;
             appState.EventQueue = new EventDispatchQueue(connectionAborted);
@@ -510,8 +511,8 @@ public class AppHub(
                             }
                             if (token != newToken)
                             {
-                                var tokenRegistry = session.AppServices.GetRequiredService<IAuthTokenRegistry>();
-                                clientProvider.SetAuthToken(tokenRegistry, newToken, reloadPage: string.IsNullOrEmpty(newToken?.AccessToken));
+                                var cookieRegistry = session.AppServices.GetRequiredService<ICookieRegistry>();
+                                clientProvider.SetAuthToken(cookieRegistry, newToken, reloadPage: string.IsNullOrEmpty(newToken?.AccessToken));
                             }
                             if (newToken == null)
                             {

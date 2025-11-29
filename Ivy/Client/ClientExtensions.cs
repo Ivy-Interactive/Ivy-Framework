@@ -1,4 +1,5 @@
 using Ivy.Auth;
+using Ivy.Cookies;
 using Ivy.Core;
 using Ivy.Shared;
 
@@ -31,7 +32,7 @@ public class RedirectMessage
 
 public class SetAuthTokenMessage
 {
-    public required string TokenId { get; set; }
+    public required string CookieJarId { get; set; }
     public required bool ReloadPage { get; set; }
     public required bool TriggerMachineReload { get; set; }
 }
@@ -88,10 +89,10 @@ public static class ClientExtensions
             });
     }
 
-    public static void SetAuthToken(this IClientProvider client, IAuthTokenRegistry tokenRegistry, AuthToken? authToken, bool reloadPage = true, bool? triggerMachineReload = null)
+    public static void SetAuthToken(this IClientProvider client, ICookieRegistry cookieRegistry, AuthToken? authToken, bool reloadPage = true, bool? triggerMachineReload = null)
     {
-        var tokenId = tokenRegistry.Register(authToken);
-        client.Sender.Send("SetAuthToken", new SetAuthTokenMessage { TokenId = tokenId.Value, ReloadPage = reloadPage, TriggerMachineReload = triggerMachineReload ?? reloadPage });
+        var cookieJarId = cookieRegistry.Register(authToken);
+        client.Sender.Send("SetAuthToken", new SetAuthTokenMessage { CookieJarId = cookieJarId.Value, ReloadPage = reloadPage, TriggerMachineReload = triggerMachineReload ?? reloadPage });
     }
 
     public static void ReloadPage(this IClientProvider client)

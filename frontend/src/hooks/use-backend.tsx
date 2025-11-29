@@ -43,7 +43,7 @@ type RedirectMessage = {
 };
 
 type SetAuthTokenMessage = {
-  tokenId: string;
+  cookieJarId: string;
   reloadPage: boolean;
   triggerMachineReload: boolean;
 };
@@ -245,7 +245,7 @@ export const useBackend = (
     async (message: SetAuthTokenMessage) => {
       const currentConnectionId = latestConnectionRef.current?.connectionId;
       logger.debug('Processing SetAuthToken request', {
-        hasAuthToken: !!message.tokenId,
+        hasAuthToken: !!message.cookieJarId,
         connectionId: currentConnectionId,
       });
       const response = await fetch(`${getIvyHost()}/ivy/auth/set-auth-token`, {
@@ -255,7 +255,7 @@ export const useBackend = (
           'X-Machine-Id': getMachineId(),
         },
         body: JSON.stringify({
-          tokenId: message.tokenId,
+          cookieJarId: message.cookieJarId,
           connectionId: currentConnectionId ?? null,
           triggerMachineReload: message.triggerMachineReload,
         }),

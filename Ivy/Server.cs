@@ -3,6 +3,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Ivy.Apps;
 using Ivy.Auth;
+using Ivy.Cookies;
 using Ivy.Chrome;
 using Ivy.Connections;
 using Ivy.Core;
@@ -373,7 +374,7 @@ public class Server
         });
         builder.Services.AddSingleton(this);
         builder.Services.AddSingleton<IClientNotifier, ClientNotifier>();
-        builder.Services.AddSingleton<IGlobalAuthTokenRegistry, GlobalAuthTokenRegistry>();
+        builder.Services.AddSingleton<IGlobalCookieRegistry, GlobalCookieRegistry>();
         builder.Services.AddControllers()
             .AddApplicationPart(Assembly.Load("Ivy"))
             .AddControllersAsServices();

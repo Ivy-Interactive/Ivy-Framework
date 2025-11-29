@@ -60,7 +60,11 @@ public class MicrosoftEntraAuthProvider : IAuthProvider
         );
     }
 
-    public void SetHttpContext(HttpContext context) => _httpContext = context;
+    public Task InitializeAsync(HttpContext context, CancellationToken cancellationToken = default)
+    {
+        _httpContext = context;
+        return Task.CompletedTask;
+    }
 
     private IConfidentialClientApplication GetApp()
     {
@@ -71,7 +75,7 @@ public class MicrosoftEntraAuthProvider : IAuthProvider
 
         if (_httpContext == null)
         {
-            throw new InvalidOperationException("SetHttpContext() must be called before GetApp()");
+            throw new InvalidOperationException("InitializeAsync() must be called before GetApp()");
         }
 
         // Create a confidential client application for OAuth flow
