@@ -491,6 +491,11 @@ export const useBackend = (
             handleHotReloadMessage();
           });
 
+          connection.on('ReloadPage', () => {
+            logger.debug(`[${connection.connectionId}] ReloadPage`);
+            window.location.reload();
+          });
+
           connection.onreconnecting(() => {
             logger.warn(`[${connection.connectionId}] Reconnecting`);
             setDisconnected(true);
@@ -517,6 +522,7 @@ export const useBackend = (
         connection.off('Error');
         connection.off('CopyToClipboard');
         connection.off('HotReload');
+        connection.off('ReloadPage');
         connection.off('SetAuthToken');
         connection.off('SetRootAppId');
         connection.off('SetTheme');

@@ -89,9 +89,14 @@ public static class ClientExtensions
             });
     }
 
-    public static void SetAuthToken(this IClientProvider client, string tokenId, bool reloadPage = true, bool triggerRecursiveReload = true)
+    public static void SetAuthToken(this IClientProvider client, string tokenId, bool reloadPage = true, bool triggerRecursiveReload = false)
     {
         client.Sender.Send("SetAuthToken", new SetAuthTokenMessage { TokenId = tokenId, ReloadPage = reloadPage, TriggerRecursiveReload = triggerRecursiveReload });
+    }
+
+    public static void ReloadPage(this IClientProvider client)
+    {
+        client.Sender.Send("ReloadPage", new { });
     }
 
     public static void SetRootAppId(this IClientProvider client, string rootAppId)

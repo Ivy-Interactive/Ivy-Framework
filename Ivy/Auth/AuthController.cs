@@ -1,9 +1,11 @@
 using System.Net;
 using System.Text.Json;
 using Ivy.Apps;
+using Ivy.Client;
 using Ivy.Core;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace Ivy.Auth;
@@ -76,6 +78,16 @@ public class AuthController() : Controller
                 cookies.Delete("auth_ext_refresh_token");
             }
             cookies.Append("auth_token", tokenJson, cookieOptions);
+
+            // Trigger reload for all sessions with the same machineId on login
+            if (HttpContext.Request.Headers.TryGetValue("X-Machine-Id", out var loginHeaderValue))
+            {
+                var machineId = loginHeaderValue.ToString();
+                if (request.TriggerRecursiveReload)
+                {
+                    await TriggerMachineReload(sessionStore, machineId, request.ConnectionId);
+                }
+            }
         }
         return Ok();
     }
@@ -88,6 +100,42 @@ public class AuthController() : Controller
             current = session.ParentId;
         }
         return current;
+    }
+
+    private static Task TriggerMachineReload(
+        AppSessionStore sessionStore,
+        string machineId,
+        string? excludeConnectionId)
+    {
+        var processedRoots = new HashSet<string>();
+        if (!string.IsNullOrEmpty(excludeConnectionId))
+        {
+            var excludedRoot = FindRootAncestor(sessionStore, excludeConnectionId);
+            processedRoots.Add(excludedRoot);
+        }
+
+        // Find all sessions with this machineId
+        var allSessions = sessionStore.Sessions.Values
+            .Where(s => !s.IsDisposed() && s.MachineId == machineId)
+            .ToList();
+
+        foreach (var session in allSessions)
+        {
+            // Find root for this session
+            var sessionRoot = FindRootAncestor(sessionStore, session.ConnectionId);
+
+            // Skip if we've already processed this root (includes the excluded root)
+            if (!processedRoots.Add(sessionRoot))
+            {
+                continue;
+            }
+
+            // Just trigger page reload to pick up new auth cookies
+            var clientProvider = session.AppServices.GetRequiredService<IClientProvider>();
+            clientProvider.ReloadPage();
+        }
+
+        return Task.CompletedTask;
     }
 
     private static async Task TriggerMachineLogout(
