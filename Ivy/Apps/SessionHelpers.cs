@@ -1,4 +1,3 @@
-using System.Text.Json.Nodes;
 using Ivy.Auth;
 using Ivy.Client;
 using Ivy.Core;
@@ -34,14 +33,13 @@ public static class SessionHelpers
 
             session.WidgetTree = new WidgetTree(new ErrorView(displayException), contentBuilder, session.AppServices);
             await session.WidgetTree.BuildAsync();
-            JsonNode widgets;
             try
             {
                 session.WidgetTree.GetWidgets().Serialize();
             }
             catch (NotSupportedException)
             {
-                widgets = JsonValue.Create("Error: Unable to serialize widgets due to unsupported content.");
+                logger.LogError("{Context}: Unable to serialize widgets for session {ConnectionId} due to unsupported content.", logContext, session.ConnectionId);
             }
             clientProvider.Sender.Send("Refresh", new
             {

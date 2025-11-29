@@ -25,7 +25,8 @@ public class AppHub(
     IContentBuilder contentBuilder,
     AppSessionStore sessionStore,
     ILogger<AppHub> logger,
-    IQueryableRegistry queryableRegistry
+    IQueryableRegistry queryableRegistry,
+    IGlobalAuthTokenRegistry globalAuthTokenRegistry
     ) : Hub
 {
     private static bool GetChromeParam(HttpContext httpContext)
@@ -131,7 +132,7 @@ public class AppHub(
             appServices.AddSingleton(typeof(IClientProvider), clientProvider);
             appServices.AddSingleton(typeof(IUploadService), new UploadService(Context.ConnectionId, clientProvider));
 
-            var tokenRegistry = new AuthTokenRegistry();
+            var tokenRegistry = new AuthTokenRegistry(globalAuthTokenRegistry);
             appServices.AddSingleton<IAuthTokenRegistry>(tokenRegistry);
 
             if (server.AuthProviderType != null)

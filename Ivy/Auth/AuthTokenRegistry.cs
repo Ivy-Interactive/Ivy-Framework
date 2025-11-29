@@ -17,22 +17,22 @@ public readonly struct AuthTokenId
     public override string ToString() => _value;
 }
 
-public interface IAuthTokenRegistry
+public interface IGlobalAuthTokenRegistry : IDisposable
 {
     AuthTokenId Register(AuthToken? token);
+    bool TryRemove(AuthTokenId tokenId, out AuthToken? token);
 }
 
-public class AuthTokenRegistry : IAuthTokenRegistry, IDisposable
+public class GlobalAuthTokenRegistry : IGlobalAuthTokenRegistry, IDisposable
 {
-    private static readonly ConcurrentDictionary<string, TokenEntry> GlobalTokens = new();
-    private static readonly TimeSpan TokenExpiration = TimeSpan.FromMinutes(1);
-    private static readonly Timer CleanupTimer;
-    private readonly ConcurrentBag<string> _sessionTokenIds = new();
+    private readonly ConcurrentDictionary<string, TokenEntry> _tokens = new();
+    private readonly TimeSpan _tokenExpiration = TimeSpan.FromMinutes(1);
+    private readonly Timer _cleanupTimer;
 
-    static AuthTokenRegistry()
+    public GlobalAuthTokenRegistry()
     {
         // Run cleanup every minute
-        CleanupTimer = new Timer(
+        _cleanupTimer = new Timer(
             _ => CleanupExpiredTokens(),
             null,
             TimeSpan.FromMinutes(1),
@@ -46,16 +46,15 @@ public class AuthTokenRegistry : IAuthTokenRegistry, IDisposable
             .Replace("+", "-").Replace("/", "_").TrimEnd('=');
         var entry = new TokenEntry { Token = token, LastAccessed = DateTime.UtcNow };
 
-        if (!GlobalTokens.TryAdd(id, entry))
+        if (!_tokens.TryAdd(id, entry))
             throw new InvalidOperationException($"Token already registered for id '{id}'");
 
-        _sessionTokenIds.Add(id);
         return new AuthTokenId(id);
     }
 
-    public static bool TryRemove(AuthTokenId tokenId, out AuthToken? token)
+    public bool TryRemove(AuthTokenId tokenId, out AuthToken? token)
     {
-        if (GlobalTokens.TryRemove(tokenId.Value, out var entry))
+        if (_tokens.TryRemove(tokenId.Value, out var entry))
         {
             token = entry.Token;
             return true;
@@ -65,25 +64,48 @@ public class AuthTokenRegistry : IAuthTokenRegistry, IDisposable
         return false;
     }
 
-    private static void CleanupExpiredTokens()
+    private void CleanupExpiredTokens()
     {
         var now = DateTime.UtcNow;
-        var expiredKeys = GlobalTokens
-            .Where(kvp => now - kvp.Value.LastAccessed > TokenExpiration)
+        var expiredKeys = _tokens
+            .Where(kvp => now - kvp.Value.LastAccessed > _tokenExpiration)
             .Select(kvp => kvp.Key)
             .ToList();
 
         foreach (var key in expiredKeys)
         {
-            GlobalTokens.TryRemove(key, out _);
+            _tokens.TryRemove(key, out _);
         }
+    }
+
+    public void Dispose()
+    {
+        _cleanupTimer?.Dispose();
+    }
+}
+
+public interface IAuthTokenRegistry
+{
+    AuthTokenId Register(AuthToken? token);
+}
+
+public class AuthTokenRegistry(IGlobalAuthTokenRegistry global) : IAuthTokenRegistry, IDisposable
+{
+    private readonly IGlobalAuthTokenRegistry _global = global;
+    private readonly ConcurrentBag<string> _sessionTokenIds = [];
+
+    public AuthTokenId Register(AuthToken? token)
+    {
+        var tokenId = _global.Register(token);
+        _sessionTokenIds.Add(tokenId.Value);
+        return tokenId;
     }
 
     public void Dispose()
     {
         foreach (var tokenId in _sessionTokenIds)
         {
-            GlobalTokens.TryRemove(tokenId, out _);
+            _global.TryRemove(new AuthTokenId(tokenId), out _);
         }
     }
 }

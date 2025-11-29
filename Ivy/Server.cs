@@ -373,6 +373,7 @@ public class Server
         });
         builder.Services.AddSingleton(this);
         builder.Services.AddSingleton<IClientNotifier, ClientNotifier>();
+        builder.Services.AddSingleton<IGlobalAuthTokenRegistry, GlobalAuthTokenRegistry>();
         builder.Services.AddControllers()
             .AddApplicationPart(Assembly.Load("Ivy"))
             .AddControllersAsServices();

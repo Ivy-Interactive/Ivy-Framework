@@ -18,11 +18,12 @@ public class AuthController() : Controller
     [HttpPatch]
     public async Task<IActionResult> SetAuthToken(
         [FromBody] SetAuthTokenRequest request,
+        [FromServices] IGlobalAuthTokenRegistry globalTokenRegistry,
         [FromServices] AppSessionStore sessionStore,
         [FromServices] IContentBuilder contentBuilder,
         [FromServices] ILogger<AuthController> logger)
     {
-        if (!AuthTokenRegistry.TryRemove(new AuthTokenId(request.TokenId), out var token))
+        if (!globalTokenRegistry.TryRemove(new AuthTokenId(request.TokenId), out var token))
         {
             return BadRequest("Invalid or expired token id.");
         }
