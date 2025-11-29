@@ -26,7 +26,18 @@ public class AuthTokenRegistry : IAuthTokenRegistry, IDisposable
 {
     private static readonly ConcurrentDictionary<string, TokenEntry> GlobalTokens = new();
     private static readonly TimeSpan TokenExpiration = TimeSpan.FromMinutes(2);
+    private static readonly Timer CleanupTimer;
     private readonly ConcurrentBag<string> _sessionTokenIds = new();
+
+    static AuthTokenRegistry()
+    {
+        // Run cleanup every minute
+        CleanupTimer = new Timer(
+            _ => CleanupExpiredTokens(),
+            null,
+            TimeSpan.FromMinutes(1),
+            TimeSpan.FromMinutes(1));
+    }
 
     public AuthTokenId Register(AuthToken? token)
     {
@@ -44,8 +55,6 @@ public class AuthTokenRegistry : IAuthTokenRegistry, IDisposable
 
     public static bool TryRemove(AuthTokenId tokenId, out AuthToken? token)
     {
-        CleanupExpiredTokens();
-
         if (GlobalTokens.TryRemove(tokenId.Value, out var entry))
         {
             token = entry.Token;
