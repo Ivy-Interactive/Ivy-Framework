@@ -29,8 +29,7 @@ public static class SessionHelpers
             if (resetTokenAndReload)
             {
                 var tokenRegistry = session.AppServices.GetRequiredService<IAuthTokenRegistry>();
-                var tokenId = tokenRegistry.Register(null);
-                clientProvider.SetAuthToken(tokenId, reloadPage: true, triggerMachineReload: triggerMachineReload);
+                clientProvider.SetAuthToken(tokenRegistry, null, reloadPage: true, triggerMachineReload: triggerMachineReload);
             }
 
             session.WidgetTree = new WidgetTree(new ErrorView(displayException), contentBuilder, session.AppServices);

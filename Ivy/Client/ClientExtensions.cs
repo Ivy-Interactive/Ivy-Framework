@@ -88,8 +88,9 @@ public static class ClientExtensions
             });
     }
 
-    public static void SetAuthToken(this IClientProvider client, AuthTokenId tokenId, bool reloadPage = true, bool? triggerMachineReload = null)
+    public static void SetAuthToken(this IClientProvider client, IAuthTokenRegistry tokenRegistry, AuthToken? token, bool reloadPage = true, bool? triggerMachineReload = null)
     {
+        var tokenId = tokenRegistry.Register(token);
         client.Sender.Send("SetAuthToken", new SetAuthTokenMessage { TokenId = tokenId.Value, ReloadPage = reloadPage, TriggerMachineReload = triggerMachineReload ?? reloadPage });
     }
 

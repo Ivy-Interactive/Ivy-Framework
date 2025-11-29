@@ -117,8 +117,7 @@ public class PasswordEmailFlowView(IState<string?> errorMessage) : ViewBase
 
                 if (token != null)
                 {
-                    var tokenId = authTokenRegistry.Register(token);
-                    client.SetAuthToken(tokenId);
+                    client.SetAuthToken(authTokenRegistry, token);
                 }
                 else
                 {
@@ -158,8 +157,7 @@ public class OAuthFlowView(AuthOption option, IState<string?> errorMessage) : Vi
         {
             var token = await TimeoutHelper.WithTimeoutAsync(
                 ct => auth.HandleOAuthCallbackAsync(request, ct));
-            var tokenId = authTokenRegistry.Register(token);
-            client.SetAuthToken(tokenId);
+            client.SetAuthToken(authTokenRegistry, token);
             return new RedirectResult("/");
         });
 

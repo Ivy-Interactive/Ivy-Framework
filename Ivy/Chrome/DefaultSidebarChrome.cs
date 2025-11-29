@@ -384,8 +384,7 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
                     if (auth == null) return;
 
                     await TimeoutHelper.WithTimeoutAsync(auth.LogoutAsync);
-                    var tokenId = authTokenRegistry.Register(null);
-                    client.SetAuthToken(tokenId);
+                    client.SetAuthToken(authTokenRegistry, null);
                 }
                 catch (Exception)
                 {

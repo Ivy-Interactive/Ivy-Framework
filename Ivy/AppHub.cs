@@ -172,8 +172,7 @@ public class AppHub(
 
                 if (authToken != oldAuthToken)
                 {
-                    var tokenId = tokenRegistry.Register(authToken);
-                    clientProvider.SetAuthToken(tokenId, reloadPage: parentId != null && authToken == null);
+                    clientProvider.SetAuthToken(tokenRegistry, authToken, reloadPage: parentId != null && authToken == null);
                 }
                 else if (parentId != null && authToken == null)
                 {
@@ -511,8 +510,7 @@ public class AppHub(
                             if (token != newToken)
                             {
                                 var tokenRegistry = session.AppServices.GetRequiredService<IAuthTokenRegistry>();
-                                var tokenId = tokenRegistry.Register(newToken);
-                                clientProvider.SetAuthToken(tokenId, reloadPage: string.IsNullOrEmpty(newToken?.AccessToken));
+                                clientProvider.SetAuthToken(tokenRegistry, newToken, reloadPage: string.IsNullOrEmpty(newToken?.AccessToken));
                             }
                             if (newToken == null)
                             {
