@@ -1,7 +1,6 @@
 using Ivy.Auth;
 using Ivy.Core;
 using Ivy.Shared;
-using Ivy;
 
 namespace Ivy.Client;
 
@@ -89,9 +88,9 @@ public static class ClientExtensions
             });
     }
 
-    public static void SetAuthToken(this IClientProvider client, string tokenId, bool reloadPage = true, bool? triggerMachineReload = null)
+    public static void SetAuthToken(this IClientProvider client, AuthTokenId tokenId, bool reloadPage = true, bool? triggerMachineReload = null)
     {
-        client.Sender.Send("SetAuthToken", new SetAuthTokenMessage { TokenId = tokenId, ReloadPage = reloadPage, TriggerMachineReload = triggerMachineReload ?? reloadPage });
+        client.Sender.Send("SetAuthToken", new SetAuthTokenMessage { TokenId = tokenId.Value, ReloadPage = reloadPage, TriggerMachineReload = triggerMachineReload ?? reloadPage });
     }
 
     public static void ReloadPage(this IClientProvider client)

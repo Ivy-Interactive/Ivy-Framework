@@ -22,7 +22,7 @@ public class AuthController() : Controller
         [FromServices] IContentBuilder contentBuilder,
         [FromServices] ILogger<AuthController> logger)
     {
-        if (!AuthTokenRegistry.TryRemove(request.TokenId, out var token))
+        if (!AuthTokenRegistry.TryRemove(new AuthTokenId(request.TokenId), out var token))
         {
             return BadRequest("Invalid or expired token id.");
         }

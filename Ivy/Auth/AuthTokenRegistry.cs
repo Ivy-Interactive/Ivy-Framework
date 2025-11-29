@@ -3,9 +3,23 @@ using System.Security.Cryptography;
 
 namespace Ivy.Auth;
 
+public readonly struct AuthTokenId
+{
+    private readonly string _value;
+
+    internal AuthTokenId(string value)
+    {
+        _value = value ?? throw new ArgumentNullException(nameof(value));
+    }
+
+    internal string Value => _value;
+
+    public override string ToString() => _value;
+}
+
 public interface IAuthTokenRegistry
 {
-    string Register(AuthToken? token);
+    AuthTokenId Register(AuthToken? token);
 }
 
 public class AuthTokenRegistry : IAuthTokenRegistry, IDisposable
@@ -14,7 +28,7 @@ public class AuthTokenRegistry : IAuthTokenRegistry, IDisposable
     private static readonly TimeSpan TokenExpiration = TimeSpan.FromMinutes(2);
     private readonly ConcurrentBag<string> _sessionTokenIds = new();
 
-    public string Register(AuthToken? token)
+    public AuthTokenId Register(AuthToken? token)
     {
         var bytes = RandomNumberGenerator.GetBytes(32);
         var id = Convert.ToBase64String(bytes)
@@ -25,14 +39,14 @@ public class AuthTokenRegistry : IAuthTokenRegistry, IDisposable
             throw new InvalidOperationException($"Token already registered for id '{id}'");
 
         _sessionTokenIds.Add(id);
-        return id;
+        return new AuthTokenId(id);
     }
 
-    public static bool TryRemove(string id, out AuthToken? token)
+    public static bool TryRemove(AuthTokenId tokenId, out AuthToken? token)
     {
         CleanupExpiredTokens();
 
-        if (GlobalTokens.TryRemove(id, out var entry))
+        if (GlobalTokens.TryRemove(tokenId.Value, out var entry))
         {
             token = entry.Token;
             return true;
