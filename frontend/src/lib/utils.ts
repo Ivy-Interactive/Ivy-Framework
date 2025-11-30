@@ -71,13 +71,22 @@ export function getChromeParam(): boolean {
  * @param appUrl - The app:// URL to convert (e.g., "app://MyApp" or "app://MyApp?param=value")
  * @returns The converted path (e.g., "/MyApp" or "/MyApp?param=value&chrome=false")
  */
+/**
+ * Extracts the content after the app:// protocol prefix using regex.
+ */
+function extractAppProtocolContent(url: string): string {
+  const match = url.match(/^app:\/\/(.+)$/);
+  return match ? match[1] : '';
+}
+
 export function convertAppUrlToPath(appUrl: string): string {
-  if (!appUrl.startsWith('app://')) {
+  // Use inline regex pattern matching
+  if (!/^app:\/\//.test(appUrl)) {
     return appUrl;
   }
 
-  // Extract app ID and any existing query string
-  const appId = appUrl.substring(6); // Remove "app://"
+  // Extract app ID and any existing query string using regex
+  const appId = extractAppProtocolContent(appUrl);
   const [appPath, existingQueryString] = appId.split('?');
 
   // Build the path
@@ -121,15 +130,104 @@ export function getMachineId(): string {
   return id;
 }
 
-export function getIvyHost(): string {
-  const urlParams = new URLSearchParams(window.location.search);
-  const ivyHost = urlParams.get('ivyHost');
-  if (ivyHost) return ivyHost;
+// Allowlist for trusted hosts; update as needed for trusted deployments
+const ALLOWED_IVY_HOSTS = [
+  window.location.origin,
+  // 'https://your-cdn.com', // add extra trusted hostnames here if relevant
+];
 
+function isAllowedIvyHost(origin: string): boolean {
+  try {
+    const url = new URL(origin);
+    const normalizedOrigin = url.origin.replace(/\/+$/, '').toLowerCase();
+    const currentUrl = new URL(window.location.origin);
+
+    // Only allow http and https protocols
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+      return false;
+    }
+
+    // Allow if it matches the current origin exactly (protocol, hostname, and port)
+    if (url.origin === currentUrl.origin) {
+      return true;
+    }
+
+    // For development: allow same hostname with different port, but require same protocol
+    // This enables development workflows where frontend and backend run on different ports
+    // SECURITY: We require protocol matching to prevent protocol downgrade attacks
+    // (e.g., preventing http://localhost:3000 from being accepted when current origin is https://localhost:5000)
+    // Only allow this for localhost/127.0.0.1 to prevent security issues in production
+    const localhostVariants = ['localhost', '127.0.0.1', '[::1]', '::1'];
+    const isCurrentLocalhost = localhostVariants.includes(
+      currentUrl.hostname.toLowerCase()
+    );
+    const isUrlLocalhost = localhostVariants.includes(
+      url.hostname.toLowerCase()
+    );
+
+    // Allow if both are localhost variants AND protocols match
+    // This allows different ports during development but prevents protocol downgrade attacks
+    if (isCurrentLocalhost && isUrlLocalhost) {
+      // Require protocol matching to prevent security vulnerabilities
+      // An attacker controlling a different localhost port should not be able to
+      // downgrade from HTTPS to HTTP or vice versa
+      if (url.protocol === currentUrl.protocol) {
+        return true;
+      }
+      // Reject if protocols don't match (security: prevent protocol downgrade)
+      return false;
+    }
+
+    // Check against the allowlist
+    // Normalize each allowed origin and compare (avoid creating URL objects in loop)
+    return ALLOWED_IVY_HOSTS.some(allowed => {
+      try {
+        const allowedUrl = new URL(allowed);
+        const normalizedAllowed = allowedUrl.origin
+          .replace(/\/+$/, '')
+          .toLowerCase();
+        return normalizedAllowed === normalizedOrigin;
+      } catch {
+        // Skip invalid URLs in allowlist
+        return false;
+      }
+    });
+  } catch {
+    return false;
+  }
+}
+
+export function getIvyHost(): string {
+  // Never trust user-supplied ivyHost from URL parameters.
+  // Only use meta tag or real origin.
+  // Query parameters are user-controllable and should never be trusted for security-sensitive operations.
   const metaHost = document
     .querySelector('meta[name="ivy-host"]')
     ?.getAttribute('content');
-  if (metaHost) return metaHost;
+
+  if (metaHost) {
+    try {
+      // Parse the metaHost - it might be a full URL or just a hostname
+      let url: URL;
+      if (metaHost.includes('://')) {
+        // It's a full URL
+        url = new URL(metaHost);
+      } else {
+        // It's just a hostname, construct a URL with https protocol
+        url = new URL(`https://${metaHost}`);
+      }
+
+      // Must be http(s) and must be in the allowlist
+      if (url.protocol === 'https:' || url.protocol === 'http:') {
+        const metaOrigin = url.origin;
+        if (isAllowedIvyHost(metaOrigin)) {
+          return metaOrigin;
+        }
+      }
+    } catch {
+      // Ignore parse errors and fall back
+    }
+  }
 
   return window.location.origin;
 }
@@ -144,155 +242,25 @@ export function camelCase(titleCase: unknown): unknown {
 // Shared Ivy tag-to-class map for headings, paragraphs, lists, tables, etc.
 export const ivyTagClassMap = textBlockClassMap;
 
-/**
- * Gets the current origin for same-origin validation.
- * Exported for testing purposes - can be mocked in tests.
- */
-export function getCurrentOrigin(): string {
-  if (typeof window === 'undefined' || !window.location) {
-    return '';
-  }
-  return window.location.origin;
-}
-
-// Internal reference to getCurrentOrigin for use within this module
-// Using an object wrapper so it can be modified in tests
-export const _getCurrentOriginRef = {
-  getCurrentOrigin: getCurrentOrigin,
-};
-
-/**
- * Validates and sanitizes a URL to prevent open redirect vulnerabilities.
- * Only allows relative paths (starting with /) or absolute URLs with http/https protocol.
- * For redirects, external URLs are only allowed if they match the current origin.
- *
- * @param url - The URL to validate
- * @param allowExternal - Whether to allow external URLs (default: false for redirects)
- * @returns The sanitized URL if valid, null otherwise
- */
-export function validateRedirectUrl(
-  url: string | null | undefined,
-  allowExternal: boolean = false
-): string | null {
-  if (!url || typeof url !== 'string') {
-    return null;
-  }
-
-  // Trim whitespace
-  url = url.trim();
-
-  // Allow relative paths (starting with /)
-  if (url.startsWith('/')) {
-    // Validate it's a safe relative path (no protocol, no javascript:, etc.)
-    if (!/^\/[^:]*$/.test(url)) {
-      return null;
-    }
-    return url;
-  }
-
-  // For external URLs, validate protocol and optionally origin
-  try {
-    const urlObj = new URL(url);
-
-    // Only allow http and https protocols
-    if (urlObj.protocol !== 'http:' && urlObj.protocol !== 'https:') {
-      return null;
-    }
-
-    // If external URLs are not allowed, only allow same-origin
-    if (!allowExternal) {
-      // Use the internal reference which points to the exported function
-      // This allows mocking the exported function to work internally
-      const currentOrigin = _getCurrentOriginRef.getCurrentOrigin();
-      if (!currentOrigin || urlObj.origin !== currentOrigin) {
-        return null;
-      }
-    }
-
-    return urlObj.toString();
-  } catch {
-    // Invalid URL format
-    return null;
-  }
-}
-
-/**
- * Validates and sanitizes a URL for use in anchor tags or window.open.
- * Allows relative paths, external http/https URLs, and app:// URLs, but prevents dangerous protocols.
- *
- * @param url - The URL to validate
- * @returns The sanitized URL if valid, '#' otherwise
- */
-export function validateLinkUrl(url: string | null | undefined): string {
-  if (!url || typeof url !== 'string') {
-    return '#';
-  }
-
-  // Trim whitespace
-  url = url.trim();
-
-  // Handle empty string after trimming
-  if (url === '') {
-    return '#';
-  }
-
-  // Allow app:// URLs (Ivy internal navigation)
-  if (url.startsWith('app://')) {
-    // Validate app:// URLs don't contain dangerous characters
-    // Allow query parameters (? and &) but prevent fragments (#) and protocol injection (multiple colons)
-    // Pattern: app://[app-id][?query-params] where query-params can contain & but not #
-    if (!/^app:\/\/[^:#]*(\?[^#]*)?$/.test(url)) {
-      return '#';
-    }
-    // Additional check: prevent protocol injection (multiple colons after app://)
-    const afterProtocol = url.substring(6); // After "app://"
-    if (afterProtocol.includes('://') || afterProtocol.match(/:[^?&/]/)) {
-      return '#';
-    }
-    return url;
-  }
-
-  // Allow anchor links (starting with #)
-  if (url.startsWith('#')) {
-    // Validate anchor links are safe
-    // Allow colons in anchor IDs (HTML5 allows this), but prevent query params and fragments
-    // Pattern: #[anchor-id] where anchor-id can contain colons but not ? or &
-    if (!/^#[^?&]*$/.test(url)) {
-      return '#';
-    }
-    // Additional check: prevent protocol injection attempts
-    const afterHash = url.substring(1);
-    if (afterHash.includes('://')) {
-      return '#';
-    }
-    return url;
-  }
-
-  // Allow relative paths (starting with /)
-  if (url.startsWith('/')) {
-    // Validate it's a safe relative path
-    if (!/^\/[^:]*$/.test(url)) {
-      return '#';
-    }
-    return url;
-  }
-
-  // For absolute URLs, validate protocol
-  try {
-    const urlObj = new URL(url);
-
-    // Only allow http and https protocols (prevent javascript:, data:, etc.)
-    if (urlObj.protocol !== 'http:' && urlObj.protocol !== 'https:') {
-      return '#';
-    }
-
-    return urlObj.toString();
-  } catch {
-    // Invalid URL format - treat as relative if it doesn't contain colons
-    if (!url.includes(':')) {
-      // Might be a relative path without leading slash
-      return url.startsWith('/') ? url : `/${url}`;
-    }
-    return '#';
-  }
-}
+// Re-export URL validation functions from dedicated module
+export {
+  getCurrentOrigin,
+  _getCurrentOriginRef,
+  validateRedirectUrl,
+  validateLinkUrl,
+  validateMediaUrl,
+  validateImageUrl,
+  validateAudioUrl,
+  validateVideoUrl,
+  type ValidateMediaUrlOptions,
+  // URL type detection helpers
+  isExternalUrl,
+  isAnchorLink,
+  isAppProtocol,
+  isRelativePath,
+  isDataUrl,
+  isBlobUrl,
+  isStandardUrl,
+  isFullUrl,
+  normalizeRelativePath,
+} from './urlValidation';

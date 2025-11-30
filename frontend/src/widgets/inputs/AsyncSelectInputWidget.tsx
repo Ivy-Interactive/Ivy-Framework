@@ -36,6 +36,24 @@ const asyncSelectTextVariants = {
   Large: 'text-base',
 };
 
+const asyncSelectIconContainerVariants = {
+  Small: 'w-7',
+  Medium: 'w-9',
+  Large: 'w-11',
+};
+
+const asyncSelectIconVariants = {
+  Small: 'h-3 w-3',
+  Medium: 'h-4 w-4',
+  Large: 'h-5 w-5',
+};
+
+const asyncSelectInvalidIconVariants = {
+  Small: 'right-7 top-1.5',
+  Medium: 'right-11 top-2.5',
+  Large: 'right-11 top-3.5',
+};
+
 interface AsyncSelectInputWidgetProps {
   id: string;
   placeholder?: string;
@@ -153,22 +171,14 @@ export const AsyncSelectInputWidget: React.FC<AsyncSelectInputWidgetProps> = ({
         )}
         <div
           className={cn(
-            'absolute top-0 bottom-0 border-l flex items-center justify-end shrink-0',
-            scale === Scales.Small
-              ? 'right-2.5 w-5'
-              : scale === Scales.Large
-                ? 'right-2.5 w-7'
-                : 'right-2.5 w-6'
+            'flex items-center justify-center h-full border-l',
+            asyncSelectIconContainerVariants[scale]
           )}
         >
           <ChevronRight
             className={cn(
               'opacity-50 shrink-0',
-              scale === Scales.Small
-                ? 'h-3 w-3'
-                : scale === Scales.Large
-                  ? 'h-5 w-5'
-                  : 'h-4 w-4'
+              asyncSelectIconVariants[scale]
             )}
           />
         </div>
@@ -177,11 +187,7 @@ export const AsyncSelectInputWidget: React.FC<AsyncSelectInputWidgetProps> = ({
         <div
           className={cn(
             'absolute h-4 w-4',
-            scale === Scales.Small
-              ? 'right-5 top-1.5'
-              : scale === Scales.Large
-                ? 'right-9 top-3.5'
-                : 'right-7 top-2.5'
+            asyncSelectInvalidIconVariants[scale]
           )}
         >
           <InvalidIcon message={invalid} />

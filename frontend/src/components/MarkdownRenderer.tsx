@@ -15,12 +15,17 @@ import rehypeKatex from 'rehype-katex';
 import rehypeRaw from 'rehype-raw';
 import rehypeSlug from 'rehype-slug';
 import 'katex/dist/katex.min.css';
+import { cn, getIvyHost, convertAppUrlToPath } from '@/lib/utils';
 import {
-  cn,
-  getIvyHost,
   validateLinkUrl,
-  convertAppUrlToPath,
-} from '@/lib/utils';
+  validateImageUrl,
+  isExternalUrl,
+  isAnchorLink,
+  isAppProtocol,
+  isRelativePath,
+  isStandardUrl,
+  extractAnchorId,
+} from '@/lib/urlValidation';
 import CopyToClipboardButton from './CopyToClipboardButton';
 import { createPrismTheme } from '@/lib/ivy-prism-theme';
 import { textBlockClassMap, textContainerClass } from '@/lib/textBlockClassMap';
@@ -56,6 +61,13 @@ const ImageOverlay = ({
     }
   };
 
+  // Validate and sanitize image URL to prevent open redirect vulnerabilities
+  const validatedSrc = src ? validateImageUrl(src) : null;
+  if (!validatedSrc) {
+    // Invalid URL, don't render image
+    return null;
+  }
+
   return (
     <div
       className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 cursor-zoom-out"
@@ -63,7 +75,7 @@ const ImageOverlay = ({
     >
       <div className="relative max-w-[90vw] max-h-[90vh]">
         <img
-          src={src}
+          src={validatedSrc}
           alt={alt}
           className="max-w-full max-h-[90vh] object-contain"
         />
@@ -214,30 +226,19 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
 
   const handleLinkClick = useCallback(
     (href: string, event: React.MouseEvent<HTMLAnchorElement>) => {
-      // URL is already validated in the link component, but validate again for safety
+      // Validate URL to prevent open redirect vulnerabilities
+      // validateLinkUrl always returns a string ('#' for invalid URLs)
       const validatedHref = validateLinkUrl(href);
       if (validatedHref === '#') {
         event.preventDefault();
         return;
       }
 
-      const isExternalLink = validatedHref?.match(
-        /^(https?:\/\/|mailto:|tel:)/i
-      );
-      const isAnchorLink = validatedHref?.startsWith('#');
-      const isAppProtocol = validatedHref?.startsWith('app://');
-      const isRelativePath = validatedHref?.startsWith('/');
-
       // Only call backend handler for custom link handling scenarios
-      // Don't call for external links, anchor links, app:// URLs, or relative paths
-      if (
-        !isExternalLink &&
-        !isAnchorLink &&
-        !isAppProtocol &&
-        !isRelativePath &&
-        onLinkClick &&
-        validatedHref
-      ) {
+      // validateLinkUrl already handles external links, anchor links, app:// URLs, and relative paths safely
+      // If the URL is one of these standard types, the browser will handle it naturally
+      // Only call onLinkClick for non-standard URLs that need custom handling
+      if (!isStandardUrl(validatedHref) && onLinkClick) {
         event.preventDefault();
         onLinkClick(validatedHref);
       }
@@ -314,16 +315,33 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
         (props: React.ImgHTMLAttributes<HTMLImageElement>) => {
           const [showOverlay, setShowOverlay] = useState(false);
           const src = props.src;
-          const imageSrc =
-            src && !src?.match(/^(https?:\/\/|data:|blob:|app:)/i)
-              ? (() => {
-                  const normalizedSrc = src.startsWith('/') ? src : `/${src}`;
-                  const prefixedSrc = normalizedSrc.startsWith('/ivy/')
-                    ? normalizedSrc
-                    : `/ivy${normalizedSrc}`;
-                  return `${getIvyHost()}${prefixedSrc}`;
-                })()
-              : src;
+
+          // Early validation: if src is missing or invalid, don't render anything
+          if (!src || typeof src !== 'string') {
+            return null;
+          }
+
+          // Validate and sanitize image URL to prevent open redirect vulnerabilities
+          const validatedSrc = validateImageUrl(src);
+          if (!validatedSrc) {
+            // Invalid URL, don't render image (return null to prevent any rendering)
+            return null;
+          }
+
+          // Construct the final image source URL
+          const imageSrc = validatedSrc.match(
+            /^(https?:\/\/|data:|blob:|app:)/i
+          )
+            ? validatedSrc
+            : (() => {
+                const normalizedSrc = validatedSrc.startsWith('/')
+                  ? validatedSrc
+                  : `/${validatedSrc}`;
+                const prefixedSrc = normalizedSrc.startsWith('/ivy/')
+                  ? normalizedSrc
+                  : `/ivy${normalizedSrc}`;
+                return `${getIvyHost()}${prefixedSrc}`;
+              })();
 
           return (
             <>
@@ -376,17 +394,21 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
           ...props
         }: React.AnchorHTMLAttributes<HTMLAnchorElement>) => {
           // Validate URL to prevent open redirect vulnerabilities
+          // validateLinkUrl always returns a string ('#' for invalid URLs)
           const safeHref = validateLinkUrl(href);
-          const isExternalLink = safeHref?.match(
-            /^(https?:\/\/|mailto:|tel:)/i
-          );
-          const isAnchorLink = safeHref?.startsWith('#');
-          const isAppProtocol = safeHref?.startsWith('app://');
-          const isRelativePath = safeHref?.startsWith('/');
+          if (safeHref === '#') {
+            return <span {...props}>{children}</span>;
+          }
+
+          // Use helper functions for URL type detection
+          const isExternalLink = isExternalUrl(safeHref);
+          const isAnchor = isAnchorLink(safeHref);
+          const isApp = isAppProtocol(safeHref);
+          const isRelative = isRelativePath(safeHref);
 
           // Convert app:// URLs to regular paths for href attribute
           let hrefForNavigation = safeHref;
-          if (isAppProtocol && safeHref) {
+          if (isApp) {
             // Use the utility function to convert app:// URLs, preserving chrome=false
             hrefForNavigation = convertAppUrlToPath(safeHref);
           }
@@ -399,10 +421,11 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
               target={isExternalLink ? '_blank' : undefined}
               rel={isExternalLink ? 'noopener noreferrer' : undefined}
               onClick={
-                isAnchorLink
+                isAnchor
                   ? e => {
                       e.preventDefault();
-                      const targetId = safeHref?.substring(1);
+                      // Extract anchor ID by removing the '#' prefix
+                      const targetId = extractAnchorId(safeHref);
                       if (targetId) {
                         // Small delay to ensure content is rendered
                         requestAnimationFrame(() => {
@@ -423,12 +446,9 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
                         });
                       }
                     }
-                  : isAppProtocol || isRelativePath
-                    ? undefined // Let browser handle navigation naturally for app:// URLs and relative paths
-                    : e =>
-                        safeHref &&
-                        safeHref !== '#' &&
-                        handleLinkClick(safeHref, e)
+                  : isApp || isRelative
+                    ? undefined // Let browser handle navigation naturally
+                    : e => handleLinkClick(safeHref, e)
               }
             >
               {children}
@@ -466,11 +486,9 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
       return url;
     }
     // Validate URL before transforming to prevent open redirect vulnerabilities
+    // validateLinkUrl always returns a string ('#' for invalid URLs)
     const validatedUrl = validateLinkUrl(url);
-    if (validatedUrl === '#') {
-      // Invalid URL, return safe fallback
-      return '#';
-    }
+    // defaultUrlTransform handles all valid URLs, and '#' for invalid URLs
     return defaultUrlTransform(validatedUrl);
   }, []);
 
