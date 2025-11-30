@@ -104,7 +104,7 @@ export const AsyncSelectInputWidget: React.FC<AsyncSelectInputWidgetProps> = ({
     <span
       ref={displayValueRef}
       className={cn(
-        'grow text-primary font-semibold ml-3 underline overflow-hidden text-ellipsis whitespace-nowrap',
+        'grow text-primary font-semibold underline overflow-hidden text-ellipsis whitespace-nowrap',
         asyncSelectTextVariants[scale]
       )}
     >
@@ -144,7 +144,7 @@ export const AsyncSelectInputWidget: React.FC<AsyncSelectInputWidgetProps> = ({
         {!displayValue && (
           <span
             className={cn(
-              'grow text-muted-foreground ml-3',
+              'grow text-muted-foreground',
               asyncSelectTextVariants[scale]
             )}
           >
@@ -153,21 +153,22 @@ export const AsyncSelectInputWidget: React.FC<AsyncSelectInputWidgetProps> = ({
         )}
         <div
           className={cn(
-            'flex items-center justify-center h-full border-l',
+            'flex items-center justify-end h-full border-l flex-shrink-0 ml-auto',
             scale === Scales.Small
-              ? 'w-7'
+              ? 'w-5'
               : scale === Scales.Large
-                ? 'w-11'
-                : 'w-9'
+                ? 'w-9'
+                : 'w-7'
           )}
         >
           <ChevronRight
             className={cn(
+              'opacity-50 flex-shrink-0',
               scale === Scales.Small
-                ? 'h-3 w-3'
+                ? 'h-3 w-3 mr-0.5'
                 : scale === Scales.Large
-                  ? 'h-5 w-5'
-                  : 'h-4 w-4'
+                  ? 'h-5 w-5 mr-1'
+                  : 'h-4 w-4 mr-0.5'
             )}
           />
         </div>
@@ -177,10 +178,10 @@ export const AsyncSelectInputWidget: React.FC<AsyncSelectInputWidgetProps> = ({
           className={cn(
             'absolute h-4 w-4',
             scale === Scales.Small
-              ? 'right-7 top-1.5'
+              ? 'right-5 top-1.5'
               : scale === Scales.Large
-                ? 'right-11 top-3.5'
-                : 'right-11 top-2.5'
+                ? 'right-9 top-3.5'
+                : 'right-7 top-2.5'
           )}
         >
           <InvalidIcon message={invalid} />
