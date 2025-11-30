@@ -68,7 +68,7 @@ public static partial class MarkdownConverter
             .UseYamlFrontMatter()
             .Build();
 
-        var document = Markdown.Parse(markdownContent, pipeline);
+        var document = Markdig.Markdown.Parse(markdownContent, pipeline);
 
         var documentSource = Utils.GetGitFileUrl(absolutePath);
 
@@ -97,8 +97,11 @@ public static partial class MarkdownConverter
         codeBuilder.AppendLine("using Ivy.Apps;");
         codeBuilder.AppendLine("using Ivy.Shared;");
         codeBuilder.AppendLine("using Ivy.Core;");
+        codeBuilder.AppendLine("using Ivy.Views.Tables;");
+        codeBuilder.AppendLine("using Ivy.Views.Kanban;");
         codeBuilder.AppendLine("using static Ivy.Views.Layout;");
         codeBuilder.AppendLine("using static Ivy.Views.Text;");
+        codeBuilder.AppendLine("using Ivy.Docs.Tools;");
         if (appMeta.Imports != null)
         {
             foreach (var import in appMeta.Imports)
@@ -390,7 +393,7 @@ public static partial class MarkdownConverter
             .UsePreciseSourceLocation()
             .Build();
 
-        var bodyDocument = Markdown.Parse(bodyContent, pipeline);
+        var bodyDocument = Markdig.Markdown.Parse(bodyContent, pipeline);
 
         // Create a temporary builder for the body content
         var bodyCodeBuilder = new StringBuilder();
@@ -557,13 +560,13 @@ StringBuilder viewBuilder, HashSet<string> usedClassNames, bool isNestedContent 
 
         void AppendDemoContent(StringBuilder cb, int tabs, string insert)
         {
-            cb.AppendTab(tabs).AppendLine($"{(isNestedContent ? ", " : "| ")}new DemoBox().Content({insert})");
+            cb.AppendTab(tabs).AppendLine($"{(isNestedContent ? ", " : "| ")}new Box().Plain().Content({insert})");
         }
 
         void AppendTabbedDemo(StringBuilder cb, string code, string insert, string lang)
         {
             cb.AppendTab(baseIndentLevel).AppendLine((isNestedContent ? ", " : "| ") + "Tabs( ");
-            cb.AppendTab(baseIndentLevel + 1).AppendLine($"new Tab(\"Demo\", new DemoBox().Content({insert})),");
+            cb.AppendTab(baseIndentLevel + 1).AppendLine($"new Tab(\"Demo\", new Box().Plain().Content({insert})),");
             AppendAsMultiLineStringIfNecessary(baseIndentLevel + 1, code, cb, "new Tab(\"Code\", new Code(", $",{MapLanguageToEnum(lang)}))")
                 ;
             cb.AppendTab(baseIndentLevel).AppendLine(").Height(Size.Fit()).Padding(0, 8, 0, 0).Variant(TabsVariant.Content)");
