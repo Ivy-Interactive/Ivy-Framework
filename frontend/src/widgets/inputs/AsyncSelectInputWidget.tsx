@@ -37,9 +37,9 @@ const asyncSelectTextVariants = {
 };
 
 const asyncSelectIconContainerVariants = {
-  Small: 'w-7',
-  Medium: 'w-9',
-  Large: 'w-11',
+  Small: 'w-5',
+  Medium: 'w-6',
+  Large: 'w-8',
 };
 
 const asyncSelectIconVariants = {
@@ -49,9 +49,9 @@ const asyncSelectIconVariants = {
 };
 
 const asyncSelectInvalidIconVariants = {
-  Small: 'right-7 top-1.5',
-  Medium: 'right-11 top-2.5',
-  Large: 'right-11 top-3.5',
+  Small: 'right-5 top-1.5',
+  Medium: 'right-6 top-2.5',
+  Large: 'right-8 top-3.5',
 };
 
 interface AsyncSelectInputWidgetProps {
@@ -171,7 +171,8 @@ export const AsyncSelectInputWidget: React.FC<AsyncSelectInputWidgetProps> = ({
         )}
         <div
           className={cn(
-            'flex items-center justify-center h-full border-l',
+            'absolute top-0 bottom-0 border-l flex items-center justify-end shrink-0',
+            'right-2.5',
             asyncSelectIconContainerVariants[scale]
           )}
         >
