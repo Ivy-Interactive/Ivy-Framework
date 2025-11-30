@@ -45,7 +45,6 @@ public class LineChart0View : ViewBase
                 .Dimension("Month", e => e.Month)
                 .Measure("Desktop", e => e.Sum(f => f.Desktop))
                 .Measure("Mobile", e => e.Sum(f => f.Mobile))
-                .Toolbox()
         ;
     }
 }
@@ -70,7 +69,6 @@ public class LineChart1View : ViewBase
                 .Measure("Sales", e => e.Sum(f => f.Sales))
                 .Measure("Marketing", e => e.Sum(f => f.Marketing))
                 .Measure("Development", e => e.Sum(f => f.Development))
-                .Toolbox()
         ;
     }
 }
@@ -93,7 +91,6 @@ public class LineChart2View : ViewBase
                 .Dimension("Year", e => e.Year)
                 .Measure("Revenue", e => e.Sum(f => f.Revenue))
                 .Measure("Profit", e => e.Sum(f => f.Profit))
-                .Toolbox()
         ;
     }
 }
