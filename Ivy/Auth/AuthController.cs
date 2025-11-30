@@ -11,8 +11,31 @@ namespace Ivy.Auth;
 
 public record SetAuthTokenRequest(string CookieJarId, string? ConnectionId, bool TriggerMachineReload);
 
+public record SetAuthSessionDataRequest(string CookieJarId);
+
 public class AuthController() : Controller
 {
+    [Route("ivy/auth/set-session-data")]
+    [HttpPatch]
+    public async Task<IActionResult> SetAuthSessionData(
+        [FromBody] SetAuthSessionDataRequest request,
+        [FromServices] IGlobalCookieRegistry globalCookieRegistry,
+        [FromServices] AppSessionStore sessionStore,
+        [FromServices] IContentBuilder contentBuilder,
+        [FromServices] ILogger<AuthController> logger)
+    {
+        if (this.WriteCookiesToResponse(
+            globalCookieRegistry,
+            new CookieJarId(request.CookieJarId),
+            CookieJarIntents.SetAuthSessionData,
+            out var cookies) is { } errorResponse)
+        {
+            return errorResponse;
+        }
+
+        return Ok();
+    }
+
     [Route("ivy/auth/set-auth-token")]
     [HttpPatch]
     public async Task<IActionResult> SetAuthToken(
@@ -22,12 +45,14 @@ public class AuthController() : Controller
         [FromServices] IContentBuilder contentBuilder,
         [FromServices] ILogger<AuthController> logger)
     {
-        if (!globalCookieRegistry.TryRemove(new CookieJarId(request.CookieJarId), out var cookies))
+        if (this.WriteCookiesToResponse(
+            globalCookieRegistry,
+            new CookieJarId(request.CookieJarId),
+            CookieJarIntents.SetAuthToken,
+            out var cookies) is { } errorResponse)
         {
-            return BadRequest("Invalid or expired cookie jar id.");
+            return errorResponse;
         }
-
-        cookies.WriteToResponse(HttpContext.Response);
 
         if (cookies.TryGet("auth_token", out var authTokenValue) && !string.IsNullOrEmpty(authTokenValue))
         {

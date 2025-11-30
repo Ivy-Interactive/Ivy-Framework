@@ -6,26 +6,14 @@ namespace Ivy.Cookies;
 public static class CookieJarIntents
 {
     public const string SetAuthToken = "set-auth-token";
+    public const string SetAuthSessionData = "set-session-data";
 }
 
-public readonly struct CookieJarId
+class CookieJarEntry
 {
-    private readonly string _value;
-
-    internal CookieJarId(string value)
-    {
-        _value = value ?? throw new ArgumentNullException(nameof(value));
-    }
-
-    internal string Value => _value;
-
-    public override string ToString() => _value;
-}
-
-public interface IGlobalCookieRegistry : IDisposable
-{
-    CookieJarId Register(CookieJar cookieJar, string intent);
-    bool TryRemove(CookieJarId cookieJarId, out CookieJar cookieJar);
+    public required CookieJar CookieJar { get; set; }
+    public required string Intent { get; set; }
+    public required DateTime LastAccessed { get; set; }
 }
 
 public class GlobalCookieRegistry : IGlobalCookieRegistry, IDisposable
@@ -57,9 +45,9 @@ public class GlobalCookieRegistry : IGlobalCookieRegistry, IDisposable
         return new CookieJarId(id);
     }
 
-    public bool TryRemove(CookieJarId cookieJarId, out CookieJar cookieJar)
+    public bool TryRemove(CookieJarId cookieJarId, string intent, out CookieJar cookieJar)
     {
-        if (_entries.TryRemove(cookieJarId.Value, out var entry))
+        if (_entries.TryRemove(cookieJarId.Value, out var entry) && entry.Intent == intent)
         {
             cookieJar = entry.CookieJar;
             return true;
@@ -68,6 +56,9 @@ public class GlobalCookieRegistry : IGlobalCookieRegistry, IDisposable
         cookieJar = null!;
         return false;
     }
+
+    public bool TryRemove(CookieJarId cookieJarId)
+        => _entries.TryRemove(cookieJarId.Value, out _);
 
     private void CleanupExpiredCookieJars()
     {
@@ -89,11 +80,6 @@ public class GlobalCookieRegistry : IGlobalCookieRegistry, IDisposable
     }
 }
 
-public interface ICookieRegistry
-{
-    CookieJarId Register(CookieJar cookieJar, string intent);
-}
-
 public class CookieRegistry(IGlobalCookieRegistry global) : ICookieRegistry, IDisposable
 {
     private readonly IGlobalCookieRegistry _global = global;
@@ -110,14 +96,7 @@ public class CookieRegistry(IGlobalCookieRegistry global) : ICookieRegistry, IDi
     {
         foreach (var cookieJarId in _sessionCookieJarIds)
         {
-            _global.TryRemove(new CookieJarId(cookieJarId), out _);
+            _global.TryRemove(new CookieJarId(cookieJarId));
         }
     }
-}
-
-internal class CookieJarEntry
-{
-    public required CookieJar CookieJar { get; set; }
-    public required string Intent { get; set; }
-    public required DateTime LastAccessed { get; set; }
 }

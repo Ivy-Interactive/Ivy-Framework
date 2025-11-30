@@ -48,6 +48,10 @@ type SetAuthTokenMessage = {
   triggerMachineReload: boolean;
 };
 
+type SetAuthSessionDataMessage = {
+  cookieJarId: string;
+};
+
 const widgetTreeToXml = (node: WidgetNode) => {
   const tagName = node.type.replace('Ivy.', '');
   const attributes: string[] = [`Id="${escapeXml(node.id)}"`];
@@ -275,6 +279,37 @@ export const useBackend = (
     []
   );
 
+  const handleSetAuthSessionData = useCallback(
+    async (message: SetAuthSessionDataMessage) => {
+      const currentConnectionId = latestConnectionRef.current?.connectionId;
+      logger.debug('Processing SetAuthSessionData request', {
+        hasAuthToken: !!message.cookieJarId,
+        connectionId: currentConnectionId,
+      });
+      const response = await fetch(
+        `${getIvyHost()}/ivy/auth/set-session-data`,
+        {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Machine-Id': getMachineId(),
+          },
+          body: JSON.stringify({
+            cookieJarId: message.cookieJarId,
+          }),
+          credentials: 'include',
+        }
+      );
+      if (!response.ok) {
+        logger.error('Failed to set session data', {
+          status: response.status,
+          statusText: response.statusText,
+        });
+      }
+    },
+    []
+  );
+
   const handleRedirect = useCallback((message: RedirectMessage) => {
     logger.debug('Processing Redirect request', message);
     const { url, replaceHistory } = message;
@@ -411,6 +446,11 @@ export const useBackend = (
           connection.on('SetAuthToken', message => {
             logger.debug(`[${connection.connectionId}] SetAuthToken`);
             handleSetAuthToken(message);
+          });
+
+          connection.on('SetAuthSessionData', message => {
+            logger.debug(`[${connection.connectionId}] SetAuthSessionData`);
+            handleSetAuthSessionData(message);
           });
 
           connection.on('SetRootAppId', (message: { rootAppId: string }) => {

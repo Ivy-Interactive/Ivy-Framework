@@ -2,11 +2,23 @@ using System.Net;
 using System.Text.Json;
 using Ivy.Cookies;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Ivy.Auth;
 
 public static class CookieRegistryExtensions
 {
+    public static IActionResult? WriteCookiesToResponse(this Controller controller, IGlobalCookieRegistry globalCookieRegistry, CookieJarId cookieJarId, string intent, out CookieJar cookies)
+    {
+        if (!globalCookieRegistry.TryRemove(cookieJarId, intent, out cookies))
+        {
+            return controller.BadRequest("Invalid or expired cookie jar ID, or intent mismatch.");
+        }
+
+        cookies.WriteToResponse(controller.HttpContext.Response);
+        return null;
+    }
+
     public static CookieJarId Register(this ICookieRegistry cookieRegistry, AuthToken? authToken)
     {
         var cookies = new CookieJar();
@@ -52,5 +64,36 @@ public static class CookieRegistryExtensions
             cookies.Append("auth_token", tokenJson, cookieOptions);
         }
         return cookieRegistry.Register(cookies, CookieJarIntents.SetAuthToken);
+    }
+
+    public static CookieJarId RegisterAuthSessionData(this ICookieRegistry cookieRegistry, string? authSessionData)
+    {
+        var cookies = new CookieJar();
+        if (authSessionData == null)
+        {
+            cookies.Delete("auth_session_data");
+        }
+        else
+        {
+            var isProduction = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Production";
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = isProduction, // Enable Secure flag in production
+                SameSite = SameSiteMode.Strict,
+                Expires = DateTimeOffset.UtcNow.AddYears(1),
+            };
+
+            if (authSessionData is string sessionDataString)
+            {
+                cookies.Append("auth_session_data", sessionDataString, cookieOptions);
+            }
+            else
+            {
+                var sessionDataJson = JsonSerializer.Serialize(authSessionData);
+                cookies.Append("auth_session_data", sessionDataJson, cookieOptions);
+            }
+        }
+        return cookieRegistry.Register(cookies, CookieJarIntents.SetAuthSessionData);
     }
 }

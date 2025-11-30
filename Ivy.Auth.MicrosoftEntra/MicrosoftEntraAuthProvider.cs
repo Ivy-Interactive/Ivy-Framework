@@ -26,7 +26,7 @@ public class MicrosoftEntraOAuthException(string? error, string? errorCode, stri
 public class MicrosoftEntraAuthProvider : IAuthProvider
 {
     private IConfidentialClientApplication? _app;
-    private HttpContext? _httpContext = null;
+    private string? _baseUrl = null;
     private readonly string[] _scopes = ["User.Read", "openid", "profile", "email", "offline_access"];
 
     private readonly List<AuthOption> _authOptions = [];
@@ -60,9 +60,9 @@ public class MicrosoftEntraAuthProvider : IAuthProvider
         );
     }
 
-    public Task InitializeAsync(HttpContext context, CancellationToken cancellationToken = default)
+    public Task InitializeAsync(AuthSession authSession, string requestScheme, string requestHost, CancellationToken cancellationToken = default)
     {
-        _httpContext = context;
+        _baseUrl = WebhookEndpoint.BuildBaseUrl(requestScheme, requestHost);
         return Task.CompletedTask;
     }
 
@@ -73,19 +73,17 @@ public class MicrosoftEntraAuthProvider : IAuthProvider
             return _app;
         }
 
-        if (_httpContext == null)
+        if (_baseUrl == null)
         {
             throw new InvalidOperationException("InitializeAsync() must be called before GetApp()");
         }
 
         // Create a confidential client application for OAuth flow
-        var baseUrl = WebhookEndpoint.BuildBaseUrl(_httpContext.Request.Scheme, _httpContext.Request.Host.Value!);
-
         _app = ConfidentialClientApplicationBuilder
             .Create(_clientId)
             .WithClientSecret(_clientSecret)
             .WithAuthority(new Uri($"https://login.microsoftonline.com/{_tenantId}"))
-            .WithRedirectUri(baseUrl)
+            .WithRedirectUri(_baseUrl)
             .Build();
 
         _app.UserTokenCache.SetAfterAccess(args =>

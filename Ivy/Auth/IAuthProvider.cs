@@ -5,7 +5,7 @@ namespace Ivy.Auth;
 
 public interface IAuthProvider
 {
-    Task InitializeAsync(HttpContext context, CancellationToken cancellationToken = default)
+    Task InitializeAsync(IAuthSession authSession, string requestScheme, string requestHost, CancellationToken cancellationToken = default)
     {
         return Task.CompletedTask;
     }

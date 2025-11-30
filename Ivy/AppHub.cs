@@ -137,11 +137,13 @@ public class AppHub(
             if (server.AuthProviderType != null)
             {
                 var authProvider = server.Services.BuildServiceProvider().GetService<IAuthProvider>() ?? throw new Exception("IAuthProvider not found");
+                var authSession = AuthHelper.GetAuthSession(httpContext);
+                var oldAuthToken = authSession.AuthToken;
                 await TimeoutHelper.WithTimeoutAsync(
-                    ct => authProvider.InitializeAsync(httpContext, ct),
+                    ct => authProvider.InitializeAsync(authSession, httpContext.Request.Scheme, httpContext.Request.Host.Value!, ct),
                     Context.ConnectionAborted);
+                clientProvider.SetAuthSessionData(cookieRegistry, authSession.AuthSessionData);
 
-                var oldAuthToken = AuthHelper.GetAuthToken(httpContext);
                 var authService = new AuthService(authProvider!, oldAuthToken);
                 appServices.AddSingleton<IAuthService>(s => authService);
 

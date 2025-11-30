@@ -37,6 +37,11 @@ public class SetAuthTokenMessage
     public required bool TriggerMachineReload { get; set; }
 }
 
+public class SetAuthSessionDataMessage
+{
+    public required string CookieJarId { get; set; }
+}
+
 public class SetRootAppIdMessage
 {
     public required string RootAppId { get; set; }
@@ -93,6 +98,12 @@ public static class ClientExtensions
     {
         var cookieJarId = cookieRegistry.Register(authToken);
         client.Sender.Send("SetAuthToken", new SetAuthTokenMessage { CookieJarId = cookieJarId.Value, ReloadPage = reloadPage, TriggerMachineReload = triggerMachineReload ?? reloadPage });
+    }
+
+    public static void SetAuthSessionData(this IClientProvider client, ICookieRegistry cookieRegistry, string? authSessionData)
+    {
+        var cookieJarId = cookieRegistry.RegisterAuthSessionData(authSessionData);
+        client.Sender.Send("SetAuthSessionData", new SetAuthSessionDataMessage { CookieJarId = cookieJarId.Value });
     }
 
     public static void ReloadPage(this IClientProvider client)
