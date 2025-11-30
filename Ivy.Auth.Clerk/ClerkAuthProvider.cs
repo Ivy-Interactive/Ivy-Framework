@@ -68,12 +68,7 @@ public class ClerkAuthProvider : IAuthProvider
     {
         try
         {
-            // Clerk doesn't support direct email/password authentication through the server SDK
-            // This would typically be handled on the client side with Clerk's client libraries
-            // For server-side authentication, we would need to validate a session token
-            // that was created by the client-side Clerk authentication flow
-
-            // For now, return null to indicate this flow is not supported server-side
+            // TODO
             await Task.CompletedTask;
             return null;
         }
