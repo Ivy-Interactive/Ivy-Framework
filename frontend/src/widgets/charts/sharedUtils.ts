@@ -303,10 +303,7 @@ export const generateTooltip = (
   borderWidth: 1,
 });
 
-export const generateEChartToolbox = (
-  toolbox?: ToolboxProps,
-  isHovered?: boolean
-) => {
+export const generateEChartToolbox = (toolbox?: ToolboxProps) => {
   if (!toolbox || toolbox.enabled === false) {
     return { show: false };
   }
@@ -334,7 +331,7 @@ export const generateEChartToolbox = (
   }
 
   return {
-    show: isHovered !== false, // Show only when hovered (or when isHovered is undefined/true)
+    show: true,
     orient:
       toolbox.orientation?.toLowerCase() === 'vertical'
         ? 'vertical'

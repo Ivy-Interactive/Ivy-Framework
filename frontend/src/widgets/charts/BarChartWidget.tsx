@@ -16,7 +16,6 @@ import {
 import { useThemeWithMonitoring } from '@/components/theme-provider';
 import { getHeight, getWidth } from '@/lib/styles';
 import ReactECharts from 'echarts-for-react';
-import type { ECharts } from 'echarts';
 import { getChartThemeColors } from './styles';
 import {
   BarProps,
@@ -194,7 +193,7 @@ const BarChartWidget: React.FC<BarChartWidgetProps> = ({
         fontSans: themeColors.fontSans,
         background: themeColors.background,
       }),
-      toolbox: generateEChartToolbox(toolbox, false),
+      toolbox: generateEChartToolbox(toolbox),
     }),
     [
       cartesianGrid,
@@ -215,34 +214,13 @@ const BarChartWidget: React.FC<BarChartWidgetProps> = ({
     ]
   );
 
-  // Show/hide toolbox on hover (directly via ECharts, no React re-renders)
-  const onChartReady = (instance: ECharts) => {
-    if (!toolbox) return;
-    const dom = instance.getDom();
-    if (!dom) return;
-
-    dom.addEventListener('mouseenter', () =>
-      instance.setOption(
-        { toolbox: generateEChartToolbox(toolbox, true) },
-        { replaceMerge: ['toolbox'], notMerge: false }
-      )
-    );
-    dom.addEventListener('mouseleave', () =>
-      instance.setOption(
-        { toolbox: generateEChartToolbox(toolbox, false) },
-        { replaceMerge: ['toolbox'], notMerge: false }
-      )
-    );
-  };
-
   return (
     <div style={styles}>
       <ReactECharts
         option={option}
         style={chartStyles}
-        notMerge={true}
+        notMerge={true} // Merge changes instead of full rebuild for better performance
         lazyUpdate={true}
-        onChartReady={onChartReady}
       />
     </div>
   );

@@ -3,7 +3,6 @@ import { ColorScheme, generateEChartToolbox } from './sharedUtils';
 import { getHeight, getWidth } from '@/lib/styles';
 import { useThemeWithMonitoring } from '@/components/theme-provider';
 import ReactECharts from 'echarts-for-react';
-import type { ECharts } from 'echarts';
 import {
   generateDataProps,
   getColors,
@@ -162,7 +161,7 @@ const AreaChartWidget: React.FC<AreaChartWidgetProps> = ({
         foreground: themeColors.foreground,
         fontSans: themeColors.fontSans,
       }),
-      toolbox: generateEChartToolbox(toolbox, false),
+      toolbox: generateEChartToolbox(toolbox),
       textStyle: generateTextStyle(
         themeColors.foreground,
         themeColors.fontSans
@@ -212,33 +211,13 @@ const AreaChartWidget: React.FC<AreaChartWidgetProps> = ({
       series,
     ]
   );
-  // Show/hide toolbox on hover (directly via ECharts, no React re-renders)
-  const onChartReady = (instance: ECharts) => {
-    if (!toolbox) return;
-    const dom = instance.getDom();
-    if (!dom) return;
-
-    dom.addEventListener('mouseenter', () =>
-      instance.setOption(
-        { toolbox: generateEChartToolbox(toolbox, true) },
-        { replaceMerge: ['toolbox'], notMerge: false }
-      )
-    );
-    dom.addEventListener('mouseleave', () =>
-      instance.setOption(
-        { toolbox: generateEChartToolbox(toolbox, false) },
-        { replaceMerge: ['toolbox'], notMerge: false }
-      )
-    );
-  };
   return (
     <div style={styles}>
       <ReactECharts
         option={option}
         style={chartStyles}
-        notMerge={true}
+        notMerge={true} // Merge changes instead of full rebuild for better performance
         lazyUpdate={true}
-        onChartReady={onChartReady}
       />
     </div>
   );
