@@ -17,7 +17,7 @@ public class AuthController() : Controller
 {
     [Route("ivy/auth/set-session-data")]
     [HttpPatch]
-    public async Task<IActionResult> SetAuthSessionData(
+    public IActionResult SetAuthSessionData(
         [FromBody] SetAuthSessionDataRequest request,
         [FromServices] IGlobalCookieRegistry globalCookieRegistry,
         [FromServices] AppSessionStore sessionStore,

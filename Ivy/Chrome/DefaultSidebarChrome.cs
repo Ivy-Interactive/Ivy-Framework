@@ -384,8 +384,14 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
                 {
                     if (auth == null) return;
 
+                    var oldSessionData = auth.GetCurrentSessionData();
                     await TimeoutHelper.WithTimeoutAsync(auth.LogoutAsync);
                     client.SetAuthToken(cookieRegistry, null);
+                    var sessionData = auth.GetCurrentSessionData();
+                    if (sessionData != oldSessionData)
+                    {
+                        client.SetAuthSessionData(cookieRegistry, sessionData);
+                    }
                 }
                 catch (Exception)
                 {

@@ -122,7 +122,7 @@ public static class AuthHelper
 
         try
         {
-            var isValid = await authProvider.ValidateAccessTokenAsync(authSession.AuthToken.AccessToken, cancellationToken);
+            var isValid = await authProvider.ValidateAccessTokenAsync(authSession, cancellationToken);
             if (!isValid)
             {
                 throw new InvalidAuthTokenException();

@@ -154,9 +154,15 @@ public class OAuthFlowView(AuthOption option, IState<string?> errorMessage) : Vi
         var cookieRegistry = this.UseService<ICookieRegistry>();
         var callback = this.UseWebhook(async (request) =>
         {
+            var oldSessionData = auth.GetCurrentSessionData();
             var token = await TimeoutHelper.WithTimeoutAsync(
                 ct => auth.HandleOAuthCallbackAsync(request, ct));
             client.SetAuthToken(cookieRegistry, token);
+            var sessionData = auth.GetCurrentSessionData();
+            if (sessionData != oldSessionData)
+            {
+                client.SetAuthSessionData(cookieRegistry, sessionData);
+            }
             return new RedirectResult("/");
         });
 
@@ -164,8 +170,14 @@ public class OAuthFlowView(AuthOption option, IState<string?> errorMessage) : Vi
         {
             try
             {
+                var oldSessionData = auth.GetCurrentSessionData();
                 var uri = await TimeoutHelper.WithTimeoutAsync(
                     ct => auth.GetOAuthUriAsync(option, callback, ct));
+                var sessionData = auth.GetCurrentSessionData();
+                if (sessionData != oldSessionData)
+                {
+                    client.SetAuthSessionData(cookieRegistry, sessionData);
+                }
                 client.OpenUrl(uri);
             }
             catch (Exception e)

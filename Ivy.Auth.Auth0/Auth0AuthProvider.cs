@@ -57,7 +57,7 @@ public class Auth0AuthProvider : IAuthProvider
         );
     }
 
-    public async Task<AuthToken?> LoginAsync(string email, string password, CancellationToken cancellationToken)
+    public async Task<AuthToken?> LoginAsync(IAuthSession authSession, string email, string password, CancellationToken cancellationToken)
     {
         var request = new ResourceOwnerTokenRequest
         {
@@ -74,7 +74,7 @@ public class Auth0AuthProvider : IAuthProvider
         return new AuthToken(response.AccessToken, response.RefreshToken);
     }
 
-    public Task<Uri> GetOAuthUriAsync(AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken)
+    public Task<Uri> GetOAuthUriAsync(IAuthSession authSession, AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken)
     {
         var connection = option.Id switch
         {
@@ -103,7 +103,7 @@ public class Auth0AuthProvider : IAuthProvider
         return Task.FromResult(authorizationUrl.Build());
     }
 
-    public async Task<AuthToken?> HandleOAuthCallbackAsync(HttpRequest request, CancellationToken cancellationToken)
+    public async Task<AuthToken?> HandleOAuthCallbackAsync(IAuthSession authSession, HttpRequest request, CancellationToken cancellationToken)
     {
         var code = request.Query["code"].ToString();
         var error = request.Query["error"].ToString();
@@ -139,12 +139,12 @@ public class Auth0AuthProvider : IAuthProvider
         }
     }
 
-    public Task LogoutAsync(string token, CancellationToken cancellationToken)
+    public Task LogoutAsync(IAuthSession authSession, CancellationToken cancellationToken)
         => Task.CompletedTask;
 
-    public async Task<AuthToken?> RefreshAccessTokenAsync(AuthToken token, CancellationToken cancellationToken)
+    public async Task<AuthToken?> RefreshAccessTokenAsync(IAuthSession authSession, CancellationToken cancellationToken)
     {
-        if (token.RefreshToken == null)
+        if (authSession.AuthToken is not { } token || token.RefreshToken == null)
         {
             return null;
         }
@@ -167,8 +167,13 @@ public class Auth0AuthProvider : IAuthProvider
         }
     }
 
-    private async Task<(ClaimsPrincipal, DateTimeOffset)?> VerifyToken(string jwt, CancellationToken cancellationToken)
+    private async Task<(ClaimsPrincipal, DateTimeOffset)?> VerifyToken(string? jwt, CancellationToken cancellationToken)
     {
+        if (string.IsNullOrEmpty(jwt))
+        {
+            return null;
+        }
+
         try
         {
             var discoveryDocument = await _configurationManager.GetConfigurationAsync(cancellationToken);
@@ -199,14 +204,14 @@ public class Auth0AuthProvider : IAuthProvider
         }
     }
 
-    public async Task<bool> ValidateAccessTokenAsync(string token, CancellationToken cancellationToken)
+    public async Task<bool> ValidateAccessTokenAsync(IAuthSession authSession, CancellationToken cancellationToken)
     {
-        return (await VerifyToken(token, cancellationToken)) is not null;
+        return (await VerifyToken(authSession.AuthToken?.AccessToken, cancellationToken)) is not null;
     }
 
-    public async Task<UserInfo?> GetUserInfoAsync(string token, CancellationToken cancellationToken)
+    public async Task<UserInfo?> GetUserInfoAsync(IAuthSession authSession, CancellationToken cancellationToken)
     {
-        if (await VerifyToken(token, cancellationToken) is not var (claims, _))
+        if (await VerifyToken(authSession.AuthToken?.AccessToken, cancellationToken) is not var (claims, _))
         {
             return null;
         }
@@ -223,9 +228,14 @@ public class Auth0AuthProvider : IAuthProvider
         return _authOptions.ToArray();
     }
 
-    public async Task<DateTimeOffset?> GetTokenExpiration(AuthToken token, CancellationToken cancellationToken)
+    public async Task<DateTimeOffset?> GetAccessTokenExpirationAsync(IAuthSession authSession, CancellationToken cancellationToken)
     {
-        if (await VerifyToken(token.AccessToken, cancellationToken) is var (_, expiration))
+        if (authSession.AuthToken?.AccessToken is not { } accessToken)
+        {
+            return null;
+        }
+
+        if (await VerifyToken(accessToken, cancellationToken) is var (_, expiration))
         {
             return expiration;
         }

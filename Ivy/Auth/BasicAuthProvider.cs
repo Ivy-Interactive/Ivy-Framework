@@ -59,7 +59,7 @@ public class BasicAuthProvider : IAuthProvider
         }
     }
 
-    public Task<AuthToken?> LoginAsync(string user, string password, CancellationToken cancellationToken)
+    public Task<AuthToken?> LoginAsync(IAuthSession authSession, string user, string password, CancellationToken cancellationToken)
     {
         var found = _users.Any(u => u.user == user && PasswordMatches(user, password, u.hash));
         if (!found) return Task.FromResult<AuthToken?>(null);
@@ -119,22 +119,22 @@ public class BasicAuthProvider : IAuthProvider
         return new AuthToken(accessToken, refreshToken);
     }
 
-    public Task LogoutAsync(string token, CancellationToken cancellationToken)
+    public Task LogoutAsync(IAuthSession authSession, CancellationToken cancellationToken)
     {
         // No server-side state to invalidate
         return Task.CompletedTask;
     }
 
-    public Task<AuthToken?> RefreshAccessTokenAsync(AuthToken token, CancellationToken cancellationToken)
+    public Task<AuthToken?> RefreshAccessTokenAsync(IAuthSession authSession, CancellationToken cancellationToken)
     {
         // Check that refresh token is provided
-        if (string.IsNullOrEmpty(token.RefreshToken))
+        if (string.IsNullOrEmpty(authSession.AuthToken?.RefreshToken))
         {
             return Task.FromResult<AuthToken?>(null);
         }
 
         // Validate refresh token
-        if (ValidateToken(token.RefreshToken, "oauth2/token", "refresh") is not var (principal, _))
+        if (ValidateToken(authSession.AuthToken.RefreshToken, "oauth2/token", "refresh") is not var (principal, _))
         {
             return Task.FromResult<AuthToken?>(null);
         }
@@ -160,27 +160,27 @@ public class BasicAuthProvider : IAuthProvider
         return Task.FromResult<AuthToken?>(newToken);
     }
 
-    public Task<Uri> GetOAuthUriAsync(AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken)
+    public Task<Uri> GetOAuthUriAsync(IAuthSession authSession, AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }
 
-    public Task<AuthToken?> HandleOAuthCallbackAsync(HttpRequest request, CancellationToken cancellationToken)
+    public Task<AuthToken?> HandleOAuthCallbackAsync(IAuthSession authSession, HttpRequest request, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }
 
-    public Task<bool> ValidateAccessTokenAsync(string token, CancellationToken cancellationToken)
-    => Task.FromResult(ValidateAccessToken(token));
+    public Task<bool> ValidateAccessTokenAsync(IAuthSession authSession, CancellationToken cancellationToken)
+    => Task.FromResult(ValidateAccessToken(authSession.AuthToken?.AccessToken));
 
-    private bool ValidateAccessToken(string token)
+    private bool ValidateAccessToken(string? token)
     {
         return ValidateToken(token, _audience, "access") != null;
     }
 
-    public Task<UserInfo?> GetUserInfoAsync(string token, CancellationToken cancellationToken)
+    public Task<UserInfo?> GetUserInfoAsync(IAuthSession authSession, CancellationToken cancellationToken)
     {
-        if (ValidateToken(token, _audience, "access") is not var (principal, _) ||
+        if (ValidateToken(authSession.AuthToken?.AccessToken, _audience, "access") is not var (principal, _) ||
             principal.FindFirst(ClaimTypes.NameIdentifier)?.Value is not { } user)
         {
             return Task.FromResult<UserInfo?>(null);
@@ -194,9 +194,14 @@ public class BasicAuthProvider : IAuthProvider
         return [new AuthOption(AuthFlow.EmailPassword)];
     }
 
-    public Task<DateTimeOffset?> GetTokenExpiration(AuthToken token, CancellationToken cancellationToken)
+    public Task<DateTimeOffset?> GetAccessTokenExpirationAsync(IAuthSession authSession, CancellationToken cancellationToken)
     {
-        if (ValidateToken(token.AccessToken, _audience, "access") is var (_, expiration))
+        if (authSession.AuthToken?.AccessToken is not { } accessToken)
+        {
+            return Task.FromResult<DateTimeOffset?>(null);
+        }
+
+        if (ValidateToken(accessToken, _audience, "access") is var (_, expiration))
         {
             return Task.FromResult<DateTimeOffset?>(expiration);
         }
@@ -206,8 +211,13 @@ public class BasicAuthProvider : IAuthProvider
         }
     }
 
-    private (ClaimsPrincipal, DateTimeOffset)? ValidateToken(string jwt, string audience, string tokenUse)
+    private (ClaimsPrincipal, DateTimeOffset)? ValidateToken(string? jwt, string audience, string tokenUse)
     {
+        if (string.IsNullOrEmpty(jwt))
+        {
+            return null;
+        }
+
         var handler = new JwtSecurityTokenHandler();
         try
         {

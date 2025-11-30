@@ -20,4 +20,8 @@ public interface IAuthService
     Task<AuthToken?> RefreshAccessTokenAsync(CancellationToken cancellationToken = default);
 
     AuthToken? GetCurrentToken();
+
+    string? GetCurrentSessionData();
+
+    IAuthSession GetCurrentAuthSession();
 }
