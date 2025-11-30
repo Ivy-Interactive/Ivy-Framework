@@ -107,7 +107,7 @@ public class GridView : ViewBase, IStateless
             int footerEnd = -1;
             if (transformedCells.Count > columnsCount)
             {
-                int lastRowStart = (transformedCells.Count / columnsCount) * columnsCount;
+                int lastRowStart = ((transformedCells.Count - 1) / columnsCount) * columnsCount;
                 // Only treat as footer if it's a complete row
                 if (lastRowStart + columnsCount <= transformedCells.Count)
                 {
