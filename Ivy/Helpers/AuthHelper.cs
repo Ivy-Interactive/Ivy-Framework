@@ -13,15 +13,15 @@ namespace Ivy.Helpers;
 
 public static class AuthHelper
 {
-    public static AuthToken? GetAuthToken(HttpContext context)
-    => GetAuthCookies(context) is (var authTokenValue, var extRefreshTokenValue)
-        ? GetAuthToken(authTokenValue, extRefreshTokenValue)
-        : null;
+    public static AuthSession GetAuthSession(HttpContext context)
+    => GetAuthCookies(context) is (var authToken, var extRefreshToken, var authSessionData)
+        ? GetAuthSession(authToken, extRefreshToken, authSessionData)
+        : new AuthSession();
 
-    public static AuthToken? GetAuthToken(ServerCallContext context)
-    => GetAuthCookies(context) is (var authTokenValue, var extRefreshTokenValue)
-        ? GetAuthToken(authTokenValue, extRefreshTokenValue)
-        : null;
+    public static AuthSession GetAuthSession(ServerCallContext context)
+    => GetAuthCookies(context) is (var authToken, var extRefreshToken, var authSessionData)
+        ? GetAuthSession(authToken, extRefreshToken, authSessionData)
+        : new AuthSession();
 
     public static async Task ValidateAuthIfRequired(Server server, AppSessionStore sessionStore, string connectionId, ServerCallContext context)
     {
@@ -41,13 +41,13 @@ public static class AuthHelper
             throw new RpcException(new Status(StatusCode.NotFound, $"Connection '{connectionId}' not found."));
         }
 
-        var authToken = GetAuthToken(context);
+        var authSession = GetAuthSession(context);
 
         var serviceProvider = session.AppServices;
         var clientProvider = serviceProvider.GetRequiredService<IClientProvider>();
         try
         {
-            await ValidateAuth(serviceProvider, authToken, context.CancellationToken);
+            await ValidateAuth(serviceProvider, authSession, context.CancellationToken);
         }
         catch (MissingAuthTokenException ex)
         {
@@ -82,8 +82,8 @@ public static class AuthHelper
         var clientProvider = serviceProvider.GetRequiredService<IClientProvider>();
         try
         {
-            var authToken = GetAuthToken(controller.HttpContext);
-            await ValidateAuth(serviceProvider, authToken, controller.HttpContext.RequestAborted);
+            var authSession = GetAuthSession(controller.HttpContext);
+            await ValidateAuth(serviceProvider, authSession, controller.HttpContext.RequestAborted);
         }
         catch (MissingAuthTokenException ex)
         {
@@ -109,9 +109,9 @@ public static class AuthHelper
         return null;
     }
 
-    private static async Task ValidateAuth(IServiceProvider serviceProvider, AuthToken? authToken, CancellationToken cancellationToken)
+    private static async Task ValidateAuth(IServiceProvider serviceProvider, AuthSession authSession, CancellationToken cancellationToken)
     {
-        if (authToken == null || string.IsNullOrEmpty(authToken.AccessToken))
+        if (authSession.AuthToken == null || string.IsNullOrEmpty(authSession.AuthToken.AccessToken))
         {
             throw new MissingAuthTokenException();
         }
@@ -122,7 +122,7 @@ public static class AuthHelper
 
         try
         {
-            var isValid = await authProvider.ValidateAccessTokenAsync(authToken.AccessToken, cancellationToken);
+            var isValid = await authProvider.ValidateAccessTokenAsync(authSession, cancellationToken);
             if (!isValid)
             {
                 throw new InvalidAuthTokenException();
@@ -138,69 +138,67 @@ public static class AuthHelper
         }
     }
 
-    private static (string AuthToken, string? ExtRefreshToken)? GetAuthCookies(HttpContext context)
+    private static (string? AuthToken, string? ExtRefreshToken, string? AuthSessionData) GetAuthCookies(HttpContext context)
     {
         var cookies = context.Request.Cookies;
         var authTokenValue = cookies["auth_token"].NullIfEmpty();
-        if (authTokenValue == null)
-        {
-            return null;
-        }
-
         var extRefreshTokenValue = cookies["auth_ext_refresh_token"].NullIfEmpty();
-        return (authTokenValue, extRefreshTokenValue);
+        var authSessionDataValue = cookies["auth_session_data"].NullIfEmpty();
+        return (authTokenValue, extRefreshTokenValue, authSessionDataValue);
     }
 
-    private static (string AuthToken, string? ExtRefreshToken)? GetAuthCookies(ServerCallContext context)
+    private static (string? AuthToken, string? ExtRefreshToken, string? AuthSessionData) GetAuthCookies(ServerCallContext context)
     {
         var cookies = context.RequestHeaders.GetValue("cookie") ?? string.Empty;
         if (string.IsNullOrEmpty(cookies))
         {
-            return null;
+            return (null, null, null);
         }
 
         var cookieHeader = CookieHeaderValue.ParseList([cookies]).ToList();
-        var rawAuthTokenValue = cookieHeader
-            .FirstOrDefault(c => c.Name.Equals("auth_token", StringComparison.OrdinalIgnoreCase))?.Value.Value;
 
-        if (string.IsNullOrEmpty(rawAuthTokenValue))
+        string? GetCookie(string name)
         {
-            return null;
+            var rawValue = cookieHeader
+                .FirstOrDefault(c => c.Name.Equals(name, StringComparison.OrdinalIgnoreCase))?.Value.Value;
+            return !string.IsNullOrEmpty(rawValue)
+                ? WebUtility.UrlDecode(rawValue)
+                : null;
         }
 
-        var authTokenValue = WebUtility.UrlDecode(rawAuthTokenValue);
+        var authTokenValue = GetCookie("auth_token");
+        var extRefreshTokenValue = GetCookie("auth_ext_refresh_token");
+        var authSessionDataValue = GetCookie("auth_session_data");
 
-        var rawExtRefreshTokenValue = cookieHeader
-            .FirstOrDefault(c => c.Name.Equals("auth_ext_refresh_token", StringComparison.OrdinalIgnoreCase))?.Value.Value;
-
-        var extRefreshTokenValue = !string.IsNullOrEmpty(rawExtRefreshTokenValue)
-            ? WebUtility.UrlDecode(rawExtRefreshTokenValue)
-            : null;
-
-        return (authTokenValue, extRefreshTokenValue);
+        return (authTokenValue, extRefreshTokenValue, authSessionDataValue);
     }
 
-    private static AuthToken? GetAuthToken(string authTokenValue, string? extRefreshTokenValue)
+    private static AuthSession GetAuthSession(string? authTokenValue, string? extRefreshTokenValue, string? authSessionDataValue)
     {
+        if (authTokenValue == null)
+        {
+            return new(authSessionData: authSessionDataValue);
+        }
+
         try
         {
             var token = JsonSerializer.Deserialize<AuthToken>(authTokenValue);
             if (token == null)
             {
-                return null;
+                return new(authSessionData: authSessionDataValue);
             }
 
             // Check if refresh token is in a separate cookie
             if (token.RefreshToken == null)
             {
-                return token with { RefreshToken = extRefreshTokenValue };
+                token = token with { RefreshToken = extRefreshTokenValue };
             }
 
-            return token;
+            return new(token, authSessionDataValue);
         }
         catch (Exception)
         {
-            return null;
+            return new(authSessionData: authSessionDataValue);
         }
     }
 }

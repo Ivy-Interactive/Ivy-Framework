@@ -64,7 +64,7 @@ public class ClerkAuthProvider : IAuthProvider
         return _signingKeys;
     }
 
-    public async Task<AuthToken?> LoginAsync(string email, string password, CancellationToken cancellationToken = default)
+    public async Task<AuthToken?> LoginAsync(IAuthSession authSession, string email, string password, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -83,7 +83,7 @@ public class ClerkAuthProvider : IAuthProvider
         }
     }
 
-    public async Task<Uri> GetOAuthUriAsync(AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken = default)
+    public async Task<Uri> GetOAuthUriAsync(IAuthSession authSession, AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken = default)
     {
         var devBrowserTokenResponse = await _frontendClient.CreateDevBrowserTokenAsync(cancellationToken);
         var devBrowserJwt = devBrowserTokenResponse.Id;
@@ -155,7 +155,7 @@ public class ClerkAuthProvider : IAuthProvider
         return new AuthToken(sessionCookie, refreshCookie, devBrowserJwt);
     }
 
-    public async Task<AuthToken?> HandleOAuthCallbackAsync(HttpRequest request, CancellationToken cancellationToken = default)
+    public async Task<AuthToken?> HandleOAuthCallbackAsync(IAuthSession authSession, HttpRequest request, CancellationToken cancellationToken = default)
     {
         var sessionId = request.Query["created_session"].ToString();
 
@@ -206,8 +206,10 @@ public class ClerkAuthProvider : IAuthProvider
         // return authToken;
     }
 
-    public async Task LogoutAsync(string jwt, object? tag, CancellationToken cancellationToken = default)
+    public async Task LogoutAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
     {
+        var jwt = authSession.AuthToken?.AccessToken;
+        var tag = authSession.AuthToken?.Tag;
         string? devBrowserJwt = tag switch
         {
             string s => s,
@@ -237,11 +239,12 @@ public class ClerkAuthProvider : IAuthProvider
         }
     }
 
-    public async Task<AuthToken?> RefreshAccessTokenAsync(AuthToken token, CancellationToken cancellationToken = default)
+    public async Task<AuthToken?> RefreshAccessTokenAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
     {
         try
         {
-            string? devBrowserJwt = token.Tag switch
+            var token = authSession.AuthToken;
+            string? devBrowserJwt = authSession.AuthToken?.Tag switch
             {
                 string s => s,
                 JsonElement e when e.ValueKind == JsonValueKind.String => e.GetString(),
@@ -253,7 +256,7 @@ public class ClerkAuthProvider : IAuthProvider
                 return null;
             }
 
-            var (principal, _) = await ValidateToken(token.AccessToken, lenientLifetimeValidation: true, cancellationToken)
+            var (principal, _) = await ValidateToken(token?.AccessToken, lenientLifetimeValidation: true, cancellationToken)
                 ?? throw new Exception("Failed to validate access token during token refresh.");
 
             if (principal.FindFirst("sid")?.Value is not { } sessionId)
@@ -268,7 +271,7 @@ public class ClerkAuthProvider : IAuthProvider
             }
             else
             {
-                return new AuthToken(newToken.Jwt, token.RefreshToken, devBrowserJwt);
+                return new AuthToken(newToken.Jwt, token?.RefreshToken, devBrowserJwt);
             }
         }
         catch (Exception)
@@ -277,16 +280,16 @@ public class ClerkAuthProvider : IAuthProvider
         }
     }
 
-    public async Task<bool> ValidateAccessTokenAsync(string token, CancellationToken cancellationToken = default)
+    public async Task<bool> ValidateAccessTokenAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
     {
-        return (await ValidateToken(token, lenientLifetimeValidation: false, cancellationToken)) is not null;
+        return (await ValidateToken(authSession.AuthToken?.AccessToken, lenientLifetimeValidation: false, cancellationToken)) is not null;
     }
 
-    public async Task<UserInfo?> GetUserInfoAsync(string token, object? tag, CancellationToken cancellationToken = default)
+    public async Task<UserInfo?> GetUserInfoAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
     {
         try
         {
-            string? devBrowserJwt = tag switch
+            string? devBrowserJwt = authSession.AuthToken?.Tag switch
             {
                 string s => s,
                 JsonElement e when e.ValueKind == JsonValueKind.String => e.GetString(),
@@ -299,7 +302,7 @@ public class ClerkAuthProvider : IAuthProvider
             }
 
             // TODO: cache user info to avoid excessive touch calls
-            var (principal, _) = await ValidateToken(token, lenientLifetimeValidation: true, cancellationToken)
+            var (principal, _) = await ValidateToken(authSession.AuthToken?.AccessToken, lenientLifetimeValidation: true, cancellationToken)
                 ?? throw new Exception("Failed to validate access token in GetUserInfoAsync.");
 
             if (principal.FindFirst("sid")?.Value is not { } sessionId)
@@ -333,9 +336,9 @@ public class ClerkAuthProvider : IAuthProvider
         }
     }
 
-    public async Task<TokenLifetime?> GetTokenLifetimeAsync(AuthToken token, CancellationToken cancellationToken = default)
+    public async Task<TokenLifetime?> GetAccessTokenLifetimeAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
     {
-        if (await ValidateToken(token.AccessToken, lenientLifetimeValidation: true, cancellationToken) is var (_, lifetime))
+        if (await ValidateToken(authSession.AuthToken?.AccessToken, lenientLifetimeValidation: true, cancellationToken) is var (_, lifetime))
         {
             return lifetime;
         }
@@ -386,8 +389,13 @@ public class ClerkAuthProvider : IAuthProvider
         return this;
     }
 
-    private async Task<(ClaimsPrincipal, TokenLifetime)?> ValidateToken(string jwt, bool lenientLifetimeValidation, CancellationToken cancellationToken)
+    private async Task<(ClaimsPrincipal, TokenLifetime)?> ValidateToken(string? jwt, bool lenientLifetimeValidation, CancellationToken cancellationToken)
     {
+        if (string.IsNullOrEmpty(jwt))
+        {
+            return null;
+        }
+
         var signingKeys = await GetSigningKeysAsync(cancellationToken);
 
         var handler = new JwtSecurityTokenHandler();

@@ -1,5 +1,6 @@
 using Ivy.Apps;
 using Ivy.Auth;
+using Ivy.Cookies;
 using Ivy.Client;
 using Ivy.Core;
 using Ivy.Helpers;
@@ -28,7 +29,7 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
         var appRepository = UseService<IAppRepository>();
         var client = UseService<IClientProvider>();
         var auth = UseService<IAuthService?>();
-        var authTokenRegistry = this.UseService<IAuthTokenRegistry>();
+        var cookieRegistry = this.UseService<ICookieRegistry>();
         var user = UseState<UserInfo?>();
         var currentApp = UseState<AppHost?>();
         var search = UseState("");
@@ -383,12 +384,17 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
                 {
                     if (auth == null) return;
 
+                    var oldSessionData = auth.GetCurrentSessionData();
                     await TimeoutHelper.WithTimeoutAsync(auth.LogoutAsync);
-                    client.SetAuthToken(authTokenRegistry, null);
+                    var sessionData = auth.GetCurrentSessionData();
+                    if (sessionData != oldSessionData)
+                    {
+                        client.SetAuthSessionData(cookieRegistry, sessionData);
+                    }
+                    client.SetAuthToken(cookieRegistry, null);
                 }
                 catch (Exception)
                 {
-                    //ignore
                 }
             });
 

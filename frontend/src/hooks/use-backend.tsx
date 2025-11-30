@@ -43,9 +43,13 @@ type RedirectMessage = {
 };
 
 type SetAuthTokenMessage = {
-  tokenId: string;
+  cookieJarId: string;
   reloadPage: boolean;
   triggerMachineReload: boolean;
+};
+
+type SetAuthSessionDataMessage = {
+  cookieJarId: string;
 };
 
 const widgetTreeToXml = (node: WidgetNode) => {
@@ -245,7 +249,7 @@ export const useBackend = (
     async (message: SetAuthTokenMessage) => {
       const currentConnectionId = latestConnectionRef.current?.connectionId;
       logger.debug('Processing SetAuthToken request', {
-        hasAuthToken: !!message.tokenId,
+        hasAuthToken: !!message.cookieJarId,
         connectionId: currentConnectionId,
       });
       const response = await fetch(`${getIvyHost()}/ivy/auth/set-auth-token`, {
@@ -255,7 +259,7 @@ export const useBackend = (
           'X-Machine-Id': getMachineId(),
         },
         body: JSON.stringify({
-          tokenId: message.tokenId,
+          cookieJarId: message.cookieJarId,
           connectionId: currentConnectionId ?? null,
           triggerMachineReload: message.triggerMachineReload,
         }),
@@ -270,6 +274,37 @@ export const useBackend = (
 
       if (message.reloadPage) {
         window.location.reload();
+      }
+    },
+    []
+  );
+
+  const handleSetAuthSessionData = useCallback(
+    async (message: SetAuthSessionDataMessage) => {
+      const currentConnectionId = latestConnectionRef.current?.connectionId;
+      logger.debug('Processing SetAuthSessionData request', {
+        hasAuthToken: !!message.cookieJarId,
+        connectionId: currentConnectionId,
+      });
+      const response = await fetch(
+        `${getIvyHost()}/ivy/auth/set-session-data`,
+        {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Machine-Id': getMachineId(),
+          },
+          body: JSON.stringify({
+            cookieJarId: message.cookieJarId,
+          }),
+          credentials: 'include',
+        }
+      );
+      if (!response.ok) {
+        logger.error('Failed to set session data', {
+          status: response.status,
+          statusText: response.statusText,
+        });
       }
     },
     []
@@ -411,6 +446,11 @@ export const useBackend = (
           connection.on('SetAuthToken', message => {
             logger.debug(`[${connection.connectionId}] SetAuthToken`);
             handleSetAuthToken(message);
+          });
+
+          connection.on('SetAuthSessionData', message => {
+            logger.debug(`[${connection.connectionId}] SetAuthSessionData`);
+            handleSetAuthSessionData(message);
           });
 
           connection.on('SetRootAppId', (message: { rootAppId: string }) => {

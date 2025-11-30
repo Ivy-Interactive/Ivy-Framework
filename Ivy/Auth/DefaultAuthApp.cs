@@ -1,15 +1,14 @@
-using System.Collections.Generic;
 using System.Reflection;
 using Ivy.Apps;
 using Ivy.Client;
 using Ivy.Core;
+using Ivy.Cookies;
 using Ivy.Core.Hooks;
 using Ivy.Helpers;
 using Ivy.Hooks;
 using Ivy.Shared;
 using Ivy.Views;
 using Ivy.Views.Forms;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Ivy.Auth;
@@ -76,7 +75,7 @@ public class PasswordEmailFlowView(IState<string?> errorMessage) : ViewBase
         var loading = this.UseState<bool>();
         var auth = this.UseService<IAuthService>();
         var client = this.UseService<IClientProvider>();
-        var authTokenRegistry = this.UseService<IAuthTokenRegistry>();
+        var cookieRegistry = this.UseService<ICookieRegistry>();
 
         var formBuilder = credentials.ToForm("Login")
             .Required(m => m.User, m => m.Password)
@@ -117,7 +116,7 @@ public class PasswordEmailFlowView(IState<string?> errorMessage) : ViewBase
 
                 if (token != null)
                 {
-                    client.SetAuthToken(authTokenRegistry, token);
+                    client.SetAuthToken(cookieRegistry, token);
                 }
                 else
                 {
@@ -152,12 +151,18 @@ public class OAuthFlowView(AuthOption option, IState<string?> errorMessage) : Vi
     {
         var client = this.UseService<IClientProvider>();
         var auth = this.UseService<IAuthService>();
-        var authTokenRegistry = this.UseService<IAuthTokenRegistry>();
+        var cookieRegistry = this.UseService<ICookieRegistry>();
         var callback = this.UseWebhook(async (request) =>
         {
+            var oldSessionData = auth.GetCurrentSessionData();
             var token = await TimeoutHelper.WithTimeoutAsync(
                 ct => auth.HandleOAuthCallbackAsync(request, ct));
-            client.SetAuthToken(authTokenRegistry, token);
+            var sessionData = auth.GetCurrentSessionData();
+            if (sessionData != oldSessionData)
+            {
+                client.SetAuthSessionData(cookieRegistry, sessionData);
+            }
+            client.SetAuthToken(cookieRegistry, token);
             return new RedirectResult("/");
         });
 
@@ -165,8 +170,14 @@ public class OAuthFlowView(AuthOption option, IState<string?> errorMessage) : Vi
         {
             try
             {
+                var oldSessionData = auth.GetCurrentSessionData();
                 var uri = await TimeoutHelper.WithTimeoutAsync(
                     ct => auth.GetOAuthUriAsync(option, callback, ct));
+                var sessionData = auth.GetCurrentSessionData();
+                if (sessionData != oldSessionData)
+                {
+                    client.SetAuthSessionData(cookieRegistry, sessionData);
+                }
                 client.OpenUrl(uri);
             }
             catch (Exception e)
