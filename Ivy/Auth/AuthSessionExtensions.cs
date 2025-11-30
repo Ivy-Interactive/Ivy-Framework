@@ -9,6 +9,17 @@ public static class AuthSessionExtensions
         => new(authSession);
 #endif
 
+    public static AuthSessionSnapshot TakeSnapshot(this IAuthSession authSession)
+        => new()
+        {
+            AuthToken = authSession.AuthToken,
+            AuthSessionData = authSession.AuthSessionData,
+        };
+
+    public static bool HasChangedSince(this IAuthSession authSession, AuthSessionSnapshot snapshot)
+        => authSession.AuthToken != snapshot.AuthToken ||
+           authSession.AuthSessionData != snapshot.AuthSessionData;
+
     public static T? GetAuthSessionData<T>(this IAuthSession authSession)
     {
         if (string.IsNullOrEmpty(authSession.AuthSessionData))

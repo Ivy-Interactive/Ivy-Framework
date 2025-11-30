@@ -111,14 +111,17 @@ public class PasswordEmailFlowView(IState<string?> errorMessage) : ViewBase
                 loading.Set(true);
                 errorMessage.Set((string?)null);
 
-                var token = await TimeoutHelper.WithTimeoutAsync(
+                var authSession = auth.GetAuthSession();
+                var oldSession = authSession.TakeSnapshot();
+                await TimeoutHelper.WithTimeoutAsync(
                     ct => auth.LoginAsync(credentials.Value.User, credentials.Value.Password, ct));
 
-                if (token != null)
+                if (authSession.HasChangedSince(oldSession))
                 {
-                    client.SetAuthToken(cookieRegistry, token);
+                    client.SetAuthCookies(cookieRegistry, authSession, reloadPage: authSession.AuthToken != oldSession.AuthToken);
                 }
-                else
+
+                if (authSession.AuthToken == null)
                 {
                     errorMessage.Set("Login failed. Please check your credentials.");
                 }
@@ -154,15 +157,14 @@ public class OAuthFlowView(AuthOption option, IState<string?> errorMessage) : Vi
         var cookieRegistry = this.UseService<ICookieRegistry>();
         var callback = this.UseWebhook(async (request) =>
         {
-            var oldSessionData = auth.GetCurrentSessionData();
+            var authSession = auth.GetAuthSession();
+            var oldSession = authSession.TakeSnapshot();
             var token = await TimeoutHelper.WithTimeoutAsync(
                 ct => auth.HandleOAuthCallbackAsync(request, ct));
-            var sessionData = auth.GetCurrentSessionData();
-            if (sessionData != oldSessionData)
+            if (authSession.HasChangedSince(oldSession))
             {
-                client.SetAuthSessionData(cookieRegistry, sessionData);
+                client.SetAuthCookies(cookieRegistry, authSession);
             }
-            client.SetAuthToken(cookieRegistry, token);
             return new RedirectResult("/");
         });
 
@@ -170,13 +172,13 @@ public class OAuthFlowView(AuthOption option, IState<string?> errorMessage) : Vi
         {
             try
             {
-                var oldSessionData = auth.GetCurrentSessionData();
+                var authSession = auth.GetAuthSession();
+                var oldSession = authSession.TakeSnapshot();
                 var uri = await TimeoutHelper.WithTimeoutAsync(
                     ct => auth.GetOAuthUriAsync(option, callback, ct));
-                var sessionData = auth.GetCurrentSessionData();
-                if (sessionData != oldSessionData)
+                if (authSession.AuthSessionData != oldSession.AuthSessionData)
                 {
-                    client.SetAuthSessionData(cookieRegistry, sessionData);
+                    client.SetAuthSessionData(cookieRegistry, authSession.AuthSessionData);
                 }
                 client.OpenUrl(uri);
             }

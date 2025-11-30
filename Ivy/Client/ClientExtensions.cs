@@ -94,16 +94,27 @@ public static class ClientExtensions
             });
     }
 
+    public static void SetAuthCookies(this IClientProvider client, CookieJarId cookieJarId, bool reloadPage, bool? triggerMachineReload = null)
+    {
+        client.Sender.Send("SetAuthCookies", new SetAuthTokenMessage { CookieJarId = cookieJarId.Value, ReloadPage = reloadPage, TriggerMachineReload = triggerMachineReload ?? reloadPage });
+    }
+
+    public static void SetAuthCookies(this IClientProvider client, ICookieRegistry cookieRegistry, IAuthSession authSession, bool reloadPage = true, bool? triggerMachineReload = null)
+    {
+        var cookieJarId = cookieRegistry.Register(authSession);
+        client.SetAuthCookies(cookieJarId, reloadPage, triggerMachineReload);
+    }
+
     public static void SetAuthToken(this IClientProvider client, ICookieRegistry cookieRegistry, AuthToken? authToken, bool reloadPage = true, bool? triggerMachineReload = null)
     {
         var cookieJarId = cookieRegistry.Register(authToken);
-        client.Sender.Send("SetAuthToken", new SetAuthTokenMessage { CookieJarId = cookieJarId.Value, ReloadPage = reloadPage, TriggerMachineReload = triggerMachineReload ?? reloadPage });
+        client.SetAuthCookies(cookieJarId, reloadPage, triggerMachineReload);
     }
 
-    public static void SetAuthSessionData(this IClientProvider client, ICookieRegistry cookieRegistry, string? authSessionData)
+    public static void SetAuthSessionData(this IClientProvider client, ICookieRegistry cookieRegistry, string? authSessionData, bool reloadPage = false, bool? triggerMachineReload = null)
     {
         var cookieJarId = cookieRegistry.RegisterAuthSessionData(authSessionData);
-        client.Sender.Send("SetAuthSessionData", new SetAuthSessionDataMessage { CookieJarId = cookieJarId.Value });
+        client.SetAuthCookies(cookieJarId, reloadPage, triggerMachineReload);
     }
 
     public static void ReloadPage(this IClientProvider client)

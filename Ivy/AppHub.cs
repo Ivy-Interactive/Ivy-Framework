@@ -150,10 +150,10 @@ public class AppHub(
                 var authService = new AuthService(authProvider, authSession);
                 appServices.AddSingleton<IAuthService>(s => authService);
 
-                var oldAuthToken = authSession.AuthToken;
+                var oldSession = authSession.TakeSnapshot();
                 try
                 {
-                    if (!string.IsNullOrEmpty(oldAuthToken?.AccessToken))
+                    if (!string.IsNullOrEmpty(oldSession.AuthToken?.AccessToken))
                     {
                         var isValid = await TimeoutHelper.WithTimeoutAsync(
                             ct => authProvider.ValidateAccessTokenAsync(authSession, ct),
@@ -161,7 +161,7 @@ public class AppHub(
 
                         if (!isValid)
                         {
-                            authSession.AuthToken = await TimeoutHelper.WithTimeoutAsync(
+                            await TimeoutHelper.WithTimeoutAsync(
                                 authService.RefreshAccessTokenAsync,
                                 Context.ConnectionAborted);
                         }
@@ -177,9 +177,12 @@ public class AppHub(
                     authSession.AuthToken = null;
                 }
 
-                if (authSession.AuthToken != oldAuthToken)
+                if (authSession.HasChangedSince(oldSession))
                 {
-                    clientProvider.SetAuthToken(cookieRegistry, authSession.AuthToken, reloadPage: parentId != null && authSession.AuthToken == null);
+                    var reloadPage = authSession.AuthToken != oldSession.AuthToken &&
+                        parentId != null &&
+                        authSession.AuthToken == null;
+                    clientProvider.SetAuthCookies(cookieRegistry, authSession, reloadPage: reloadPage);
                 }
                 else if (parentId != null && authSession.AuthToken == null)
                 {
@@ -431,8 +434,9 @@ public class AppHub(
                 var authService = session.AppServices.GetRequiredService<IAuthService>();
                 var authProvider = session.AppServices.GetRequiredService<IAuthProvider>();
                 var clientProvider = session.AppServices.GetRequiredService<IClientProvider>();
+                var cookieRegistry = session.AppServices.GetRequiredService<ICookieRegistry>();
 
-                var authSession = authService.GetCurrentAuthSession();
+                var authSession = authService.GetAuthSession();
 
                 switch (state)
                 {
@@ -514,22 +518,23 @@ public class AppHub(
                     case AuthRefreshState.TokenExpired:
                     case AuthRefreshState.TokenInvalid:
                         {
-                            var newToken = await TimeoutHelper.WithTimeoutAsync(
+                            var oldSession = authSession.TakeSnapshot();
+                            await TimeoutHelper.WithTimeoutAsync(
                                 authService.RefreshAccessTokenAsync,
                                 cancellationToken);
-                            if (state == AuthRefreshState.TokenInvalid && authSession.AuthToken == newToken)
+                            if (state == AuthRefreshState.TokenInvalid && authSession.AuthToken == oldSession.AuthToken)
                             {
                                 // This case should only ever happen if the auth provider implementation is bad (i.e. it returns the same invalid token on refresh).
                                 // It is still good to handle it here to avoid an infinite loop.
                                 logger.LogError("AuthRefreshLoop: Invalid token object unchanged after refresh for {ConnectionId}.", connectionId);
-                                newToken = null;
+                                authSession.AuthToken = null;
                             }
-                            if (authSession.AuthToken != newToken)
+                            if (authSession.HasChangedSince(oldSession))
                             {
-                                var cookieRegistry = session.AppServices.GetRequiredService<ICookieRegistry>();
-                                clientProvider.SetAuthToken(cookieRegistry, newToken, reloadPage: string.IsNullOrEmpty(newToken?.AccessToken));
+                                var reloadPage = authSession.AuthToken != oldSession.AuthToken && string.IsNullOrEmpty(authSession.AuthToken?.AccessToken);
+                                clientProvider.SetAuthCookies(cookieRegistry, authSession, reloadPage: reloadPage);
                             }
-                            if (newToken == null)
+                            if (authSession.AuthToken == null)
                             {
                                 logger.LogError("AuthRefreshLoop: Token refresh failed for {ConnectionId}, aborting connection.", connectionId);
                                 // Setting the token and reloading will have already happened above if null.

@@ -23,5 +23,5 @@ public interface IAuthService
 
     string? GetCurrentSessionData();
 
-    IAuthSession GetCurrentAuthSession();
+    IAuthSession GetAuthSession();
 }
