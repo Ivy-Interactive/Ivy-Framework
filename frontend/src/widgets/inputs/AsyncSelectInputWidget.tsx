@@ -153,22 +153,22 @@ export const AsyncSelectInputWidget: React.FC<AsyncSelectInputWidgetProps> = ({
         )}
         <div
           className={cn(
-            'flex items-center justify-end h-full border-l flex-shrink-0 ml-auto',
+            'absolute top-0 bottom-0 border-l flex items-center justify-end shrink-0',
             scale === Scales.Small
-              ? 'w-5'
+              ? 'right-2.5 w-5'
               : scale === Scales.Large
-                ? 'w-9'
-                : 'w-7'
+                ? 'right-2.5 w-7'
+                : 'right-2.5 w-6'
           )}
         >
           <ChevronRight
             className={cn(
-              'opacity-50 flex-shrink-0',
+              'opacity-50 shrink-0',
               scale === Scales.Small
-                ? 'h-3 w-3 mr-0.5'
+                ? 'h-3 w-3'
                 : scale === Scales.Large
-                  ? 'h-5 w-5 mr-1'
-                  : 'h-4 w-4 mr-0.5'
+                  ? 'h-5 w-5'
+                  : 'h-4 w-4'
             )}
           />
         </div>
