@@ -3,7 +3,6 @@ import {
   ArticleWidget,
   BadgeWidget,
   ButtonWidget,
-  SignInButtonWidget,
   CardWidget,
   ChatLoadingWidget,
   ChatMessageWidget,
@@ -119,7 +118,6 @@ export const widgetMap = {
   // Widgets
   'Ivy.Article': ArticleWidget,
   'Ivy.Button': ButtonWidget,
-  'Ivy.SignInButton': SignInButtonWidget,
   'Ivy.Progress': ProgressWidget,
   'Ivy.Tooltip': TooltipWidget,
   'Ivy.Slot': SlotWidget,
