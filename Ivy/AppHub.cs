@@ -298,7 +298,9 @@ public class AppHub(
             if (parentId == null)
             {
                 clientProvider.SetRootAppId(appId ?? AppIds.Default);
-                if (appId != AppIds.Chrome)
+                bool isNotFoundPage = appDescriptor.Id == AppIds.NotFound;
+
+                if (appId != AppIds.Chrome && !isNotFoundPage)
                 {
                     var navigateArgs = new NavigateArgs(appId, Chrome: chrome);
                     clientProvider.Redirect(navigateArgs.GetUrl(), replaceHistory: true);
