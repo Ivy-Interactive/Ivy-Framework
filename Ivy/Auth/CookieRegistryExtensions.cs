@@ -57,6 +57,7 @@ public static class CookieRegistryExtensions
                 Secure = isProduction, // Enable Secure flag in production
                 SameSite = SameSiteMode.Strict,
                 Expires = DateTimeOffset.UtcNow.AddYears(1),
+                Path = "/",
             };
 
             var tokenJson = JsonSerializer.Serialize(authToken);
@@ -101,17 +102,10 @@ public static class CookieRegistryExtensions
                 Secure = isProduction, // Enable Secure flag in production
                 SameSite = SameSiteMode.Strict,
                 Expires = DateTimeOffset.UtcNow.AddYears(1),
+                Path = "/",
             };
 
-            if (authSessionData is string sessionDataString)
-            {
-                cookies.Append("auth_session_data", sessionDataString, cookieOptions);
-            }
-            else
-            {
-                var sessionDataJson = JsonSerializer.Serialize(authSessionData);
-                cookies.Append("auth_session_data", sessionDataJson, cookieOptions);
-            }
+            cookies.Append("auth_session_data", authSessionData, cookieOptions);
         }
     }
 }

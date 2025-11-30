@@ -9,14 +9,14 @@ using Ivy.Cookies;
 
 namespace Ivy.Auth;
 
-public record SetAuthTokenRequest(string CookieJarId, string? ConnectionId, bool TriggerMachineReload);
+public record SetAuthCookiesRequest(string CookieJarId, string? ConnectionId, bool TriggerMachineReload);
 
 public class AuthController() : Controller
 {
     [Route("ivy/auth/set-auth-cookies")]
     [HttpPatch]
     public async Task<IActionResult> SetAuthCookies(
-        [FromBody] SetAuthTokenRequest request,
+        [FromBody] SetAuthCookiesRequest request,
         [FromServices] IGlobalCookieRegistry globalCookieRegistry,
         [FromServices] AppSessionStore sessionStore,
         [FromServices] IContentBuilder contentBuilder,

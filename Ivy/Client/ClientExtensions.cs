@@ -30,16 +30,11 @@ public class RedirectMessage
     public HistoryState? State { get; set; }
 }
 
-public class SetAuthTokenMessage
+public class SetAuthCookiesMessage
 {
     public required string CookieJarId { get; set; }
     public required bool ReloadPage { get; set; }
     public required bool TriggerMachineReload { get; set; }
-}
-
-public class SetAuthSessionDataMessage
-{
-    public required string CookieJarId { get; set; }
 }
 
 public class SetRootAppIdMessage
@@ -96,7 +91,14 @@ public static class ClientExtensions
 
     public static void SetAuthCookies(this IClientProvider client, CookieJarId cookieJarId, bool reloadPage, bool? triggerMachineReload = null)
     {
-        client.Sender.Send("SetAuthCookies", new SetAuthTokenMessage { CookieJarId = cookieJarId.Value, ReloadPage = reloadPage, TriggerMachineReload = triggerMachineReload ?? reloadPage });
+        client.Sender.Send(
+            "SetAuthCookies",
+            new SetAuthCookiesMessage
+            {
+                CookieJarId = cookieJarId.Value,
+                ReloadPage = reloadPage,
+                TriggerMachineReload = triggerMachineReload ?? reloadPage
+            });
     }
 
     public static void SetAuthCookies(this IClientProvider client, ICookieRegistry cookieRegistry, IAuthSession authSession, bool reloadPage = true, bool? triggerMachineReload = null)
