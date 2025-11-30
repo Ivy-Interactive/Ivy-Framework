@@ -27,14 +27,9 @@ public static class AuthSessionExtensions
             return default;
         }
 
-        if (typeof(T) == typeof(string))
-        {
-            return (T)(object)authSession.AuthSessionData;
-        }
-        else
-        {
-            return JsonSerializer.Deserialize<T>(authSession.AuthSessionData);
-        }
+        return typeof(T) == typeof(string)
+            ? (T)(object)authSession.AuthSessionData
+            : JsonSerializer.Deserialize<T>(authSession.AuthSessionData);
     }
 
     public static void SetAuthSessionData<T>(this IAuthSession authSession, T? data)

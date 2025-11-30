@@ -218,7 +218,7 @@ export const widgetMap = {
   ),
 
   // Internal
-  'Ivy.DemoBox': React.lazy(() => import('@/widgets/internal/DemoBoxWidget')),
+
   'Ivy.Widgets.Internal.DbmlCanvas': React.lazy(
     () => import('@/widgets/internal/DbmlCanvasWidget')
   ),

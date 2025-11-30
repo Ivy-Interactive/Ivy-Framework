@@ -1,7 +1,14 @@
 import React, { useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/Icon';
-import { cn, getIvyHost, camelCase, validateLinkUrl } from '@/lib/utils';
+import { cn, getIvyHost, camelCase } from '@/lib/utils';
+import {
+  validateLinkUrl,
+  isAppProtocol,
+  isAnchorLink,
+  isExternalUrl,
+  normalizeRelativePath,
+} from '@/lib/urlValidation';
 import { useEventHandler } from '@/components/event-handler';
 import withTooltip from '@/hoc/withTooltip';
 import { Loader2 } from 'lucide-react';
@@ -41,29 +48,40 @@ interface ButtonWidgetProps {
   'data-testid'?: string;
 }
 
-const getUrl = (url: string) => {
-  // Validate the URL first to prevent open redirect vulnerabilities
+const getUrl = (
+  url: string
+): { url: string; isValid: boolean; isAnchorLink: boolean } => {
+  // Validate URL to prevent dangerous protocols (javascript:, data:, etc.)
+  // validateLinkUrl handles app://, anchor links, relative paths, and http/https URLs safely
   const validatedUrl = validateLinkUrl(url);
-  if (validatedUrl === '#') {
-    // Invalid URL, return safe fallback
-    return '#';
+
+  // Check if the original URL was an anchor link (starts with #)
+  const wasAnchorLink = url.trim().startsWith('#');
+
+  // If validateLinkUrl returned '#' and the original wasn't an anchor link, it's invalid
+  const isValid = validatedUrl !== '#' || wasAnchorLink;
+
+  // Early returns for URLs that don't need host prefixing
+  if (isAppProtocol(validatedUrl) || isAnchorLink(validatedUrl)) {
+    return {
+      url: validatedUrl,
+      isValid,
+      isAnchorLink: isAnchorLink(validatedUrl),
+    };
   }
 
-  // If it's already a full URL (http/https), return it
-  if (
-    validatedUrl.startsWith('http://') ||
-    validatedUrl.startsWith('https://')
-  ) {
-    return validatedUrl;
+  if (isExternalUrl(validatedUrl)) {
+    return { url: validatedUrl, isValid, isAnchorLink: false };
   }
 
-  // app:// and anchor links should not be prefixed with host
-  if (validatedUrl.startsWith('app://') || validatedUrl.startsWith('#')) {
-    return validatedUrl;
-  }
-
-  // Otherwise, construct relative URL with Ivy host
-  return `${getIvyHost()}${validatedUrl.startsWith('/') ? '' : '/'}${validatedUrl}`;
+  // For relative paths, construct full URL with Ivy host
+  // validatedUrl is already a safe relative path (starts with / or was normalized)
+  const relativePath = normalizeRelativePath(validatedUrl);
+  return {
+    url: `${getIvyHost()}${relativePath}`,
+    isValid,
+    isAnchorLink: false,
+  };
 };
 
 export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
@@ -133,8 +151,30 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
   const hasChildren = !!children;
   const hasUrl = !!(effectiveUrl && !disabled);
 
+  // Validate and sanitize URL to prevent open redirect vulnerabilities
+  const urlResult = effectiveUrl && !disabled ? getUrl(effectiveUrl) : null;
+  const validatedHref = urlResult?.isValid ? urlResult.url : null;
+  const isInvalidUrl = urlResult && !urlResult.isValid;
+
   // Check if URL is a download link (starts with /ivy/download/)
   const isDownloadUrl = effectiveUrl?.startsWith('/ivy/download/') ?? false;
+
+  // Show error message for invalid URLs (standardized error handling)
+  if (isInvalidUrl) {
+    return (
+      <div
+        key={id}
+        style={styles}
+        className="flex items-center justify-center bg-destructive/10 text-destructive rounded border-2 border-dashed border-destructive/25 p-4"
+        role="alert"
+        aria-label="Invalid button URL"
+      >
+        <span className="text-sm">
+          {!effectiveUrl ? 'No URL provided' : 'Invalid button URL'}
+        </span>
+      </div>
+    );
+  }
 
   const buttonContent = (
     <>
@@ -195,9 +235,9 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
       }
       data-testid={dataTestId}
     >
-      {hasUrl ? (
+      {hasUrl && validatedHref ? (
         <a
-          href={getUrl(effectiveUrl!)}
+          href={validatedHref}
           {...(isDownloadUrl
             ? {}
             : { target: '_blank', rel: 'noopener noreferrer' })}
