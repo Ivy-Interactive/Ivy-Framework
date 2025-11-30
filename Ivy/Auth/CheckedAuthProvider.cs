@@ -19,7 +19,7 @@ public class CheckedAuthProvider(IAuthProvider innerAuthProvider) : IAuthProvide
     public Task<AuthToken?> LoginAsync(IAuthSession authSession, string email, string password, CancellationToken cancellationToken = default)
     {
         authSession = authSession.WithCheckedAccess()
-            .WithSessionDataAccess(AuthSessionAccessMode.ReadOnly)
+            .WithSessionDataAccess(AuthSessionAccessMode.ReadWrite)
             .Build();
         return _innerAuthProvider.LoginAsync(authSession, email, password, cancellationToken);
     }
@@ -47,7 +47,7 @@ public class CheckedAuthProvider(IAuthProvider innerAuthProvider) : IAuthProvide
 
         authSession = authSession.WithCheckedAccess()
             .WithTokenAccess(AuthSessionAccessMode.ReadOnly)
-            .WithSessionDataAccess(AuthSessionAccessMode.ReadOnly)
+            .WithSessionDataAccess(AuthSessionAccessMode.ReadWrite)
             .Build();
         return _innerAuthProvider.RefreshAccessTokenAsync(authSession, cancellationToken);
     }

@@ -42,14 +42,10 @@ type RedirectMessage = {
   state: HistoryState;
 };
 
-type SetAuthTokenMessage = {
+type SetAuthCookiesMessage = {
   cookieJarId: string;
   reloadPage: boolean;
   triggerMachineReload: boolean;
-};
-
-type SetAuthSessionDataMessage = {
-  cookieJarId: string;
 };
 
 const widgetTreeToXml = (node: WidgetNode) => {
@@ -245,49 +241,15 @@ export const useBackend = (
     });
   }, [connection]);
 
-  const handleSetAuthToken = useCallback(
-    async (message: SetAuthTokenMessage) => {
+  const handleSetAuthCookies = useCallback(
+    async (message: SetAuthCookiesMessage) => {
       const currentConnectionId = latestConnectionRef.current?.connectionId;
-      logger.debug('Processing SetAuthToken request', {
-        hasAuthToken: !!message.cookieJarId,
-        connectionId: currentConnectionId,
-      });
-      const response = await fetch(`${getIvyHost()}/ivy/auth/set-auth-token`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Machine-Id': getMachineId(),
-        },
-        body: JSON.stringify({
-          cookieJarId: message.cookieJarId,
-          connectionId: currentConnectionId ?? null,
-          triggerMachineReload: message.triggerMachineReload,
-        }),
-        credentials: 'include',
-      });
-      if (!response.ok) {
-        logger.error('Failed to set auth token', {
-          status: response.status,
-          statusText: response.statusText,
-        });
-      }
-
-      if (message.reloadPage) {
-        window.location.reload();
-      }
-    },
-    []
-  );
-
-  const handleSetAuthSessionData = useCallback(
-    async (message: SetAuthSessionDataMessage) => {
-      const currentConnectionId = latestConnectionRef.current?.connectionId;
-      logger.debug('Processing SetAuthSessionData request', {
+      logger.debug('Processing SetAuthCookies request', {
         hasAuthToken: !!message.cookieJarId,
         connectionId: currentConnectionId,
       });
       const response = await fetch(
-        `${getIvyHost()}/ivy/auth/set-session-data`,
+        `${getIvyHost()}/ivy/auth/set-auth-cookies`,
         {
           method: 'PATCH',
           headers: {
@@ -296,15 +258,21 @@ export const useBackend = (
           },
           body: JSON.stringify({
             cookieJarId: message.cookieJarId,
+            connectionId: currentConnectionId ?? null,
+            triggerMachineReload: message.triggerMachineReload,
           }),
           credentials: 'include',
         }
       );
       if (!response.ok) {
-        logger.error('Failed to set session data', {
+        logger.error('Failed to set auth cookies', {
           status: response.status,
           statusText: response.statusText,
         });
+      }
+
+      if (message.reloadPage) {
+        window.location.reload();
       }
     },
     []
@@ -443,14 +411,9 @@ export const useBackend = (
             handleError(message);
           });
 
-          connection.on('SetAuthToken', message => {
-            logger.debug(`[${connection.connectionId}] SetAuthToken`);
-            handleSetAuthToken(message);
-          });
-
-          connection.on('SetAuthSessionData', message => {
-            logger.debug(`[${connection.connectionId}] SetAuthSessionData`);
-            handleSetAuthSessionData(message);
+          connection.on('SetAuthCookies', message => {
+            logger.debug(`[${connection.connectionId}] SetAuthCookies`);
+            handleSetAuthCookies(message);
           });
 
           connection.on('SetRootAppId', (message: { rootAppId: string }) => {
@@ -541,7 +504,7 @@ export const useBackend = (
         connection.off('CopyToClipboard');
         connection.off('HotReload');
         connection.off('ReloadPage');
-        connection.off('SetAuthToken');
+        connection.off('SetAuthCookies');
         connection.off('SetRootAppId');
         connection.off('SetTheme');
         connection.off('OpenUrl');
@@ -568,7 +531,7 @@ export const useBackend = (
     handleUpdateMessage,
     handleHotReloadMessage,
     toast,
-    handleSetAuthToken,
+    handleSetAuthCookies,
     handleRedirect,
     handleSetTheme,
     handleError,

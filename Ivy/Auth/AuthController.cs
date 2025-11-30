@@ -11,34 +11,11 @@ namespace Ivy.Auth;
 
 public record SetAuthTokenRequest(string CookieJarId, string? ConnectionId, bool TriggerMachineReload);
 
-public record SetAuthSessionDataRequest(string CookieJarId);
-
 public class AuthController() : Controller
 {
-    [Route("ivy/auth/set-session-data")]
+    [Route("ivy/auth/set-auth-cookies")]
     [HttpPatch]
-    public IActionResult SetAuthSessionData(
-        [FromBody] SetAuthSessionDataRequest request,
-        [FromServices] IGlobalCookieRegistry globalCookieRegistry,
-        [FromServices] AppSessionStore sessionStore,
-        [FromServices] IContentBuilder contentBuilder,
-        [FromServices] ILogger<AuthController> logger)
-    {
-        if (this.WriteCookiesToResponse(
-            globalCookieRegistry,
-            new CookieJarId(request.CookieJarId),
-            CookieJarIntents.SetAuthSessionData,
-            out var cookies) is { } errorResponse)
-        {
-            return errorResponse;
-        }
-
-        return Ok();
-    }
-
-    [Route("ivy/auth/set-auth-token")]
-    [HttpPatch]
-    public async Task<IActionResult> SetAuthToken(
+    public async Task<IActionResult> SetAuthCookies(
         [FromBody] SetAuthTokenRequest request,
         [FromServices] IGlobalCookieRegistry globalCookieRegistry,
         [FromServices] AppSessionStore sessionStore,
@@ -48,32 +25,29 @@ public class AuthController() : Controller
         if (this.WriteCookiesToResponse(
             globalCookieRegistry,
             new CookieJarId(request.CookieJarId),
-            CookieJarIntents.SetAuthToken,
+            CookieJarIntents.SetAuthCookies,
             out var cookies) is { } errorResponse)
         {
             return errorResponse;
         }
 
-        if (cookies.TryGet("auth_token", out var authTokenValue) && !string.IsNullOrEmpty(authTokenValue))
+        if (request.TriggerMachineReload)
         {
-            // Trigger reload for all sessions with the same machineId on login
-            if (HttpContext.Request.Headers.TryGetValue("X-Machine-Id", out var loginHeaderValue))
+            if (cookies.TryGet("auth_token", out var authTokenValue) && !string.IsNullOrEmpty(authTokenValue))
             {
-                var machineId = loginHeaderValue.ToString();
-                if (request.TriggerMachineReload)
+                // Trigger reload for all sessions with the same machineId on login
+                if (HttpContext.Request.Headers.TryGetValue("X-Machine-Id", out var loginHeaderValue))
                 {
+                    var machineId = loginHeaderValue.ToString();
                     TriggerMachineReload(sessionStore, machineId, request.ConnectionId);
                 }
             }
-        }
-        else
-        {
-            // Trigger logout for all sessions with the same machineId on logout
-            if (HttpContext.Request.Headers.TryGetValue("X-Machine-Id", out var headerValue))
+            else
             {
-                var machineId = headerValue.ToString();
-                if (request.TriggerMachineReload)
+                // Trigger logout for all sessions with the same machineId on logout
+                if (HttpContext.Request.Headers.TryGetValue("X-Machine-Id", out var headerValue))
                 {
+                    var machineId = headerValue.ToString();
                     await TriggerMachineLogout(sessionStore, machineId, request.ConnectionId, contentBuilder, logger);
                 }
             }

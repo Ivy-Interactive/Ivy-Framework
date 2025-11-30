@@ -5,8 +5,7 @@ namespace Ivy.Cookies;
 
 public static class CookieJarIntents
 {
-    public const string SetAuthToken = "set-auth-token";
-    public const string SetAuthSessionData = "set-session-data";
+    public const string SetAuthCookies = "set-auth-cookies";
 }
 
 class CookieJarEntry

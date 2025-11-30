@@ -73,5 +73,5 @@ public class AuthService(IAuthProvider authProvider, IAuthSession authSession) :
 
     public string? GetCurrentSessionData() => authSession.AuthSessionData;
 
-    public IAuthSession GetCurrentAuthSession() => authSession;
+    public IAuthSession GetAuthSession() => authSession;
 }

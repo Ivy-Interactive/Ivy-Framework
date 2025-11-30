@@ -19,9 +19,30 @@ public static class CookieRegistryExtensions
         return null;
     }
 
+    public static CookieJarId Register(this ICookieRegistry cookieRegistry, IAuthSession authSession)
+    {
+        var cookies = new CookieJar();
+        cookies.AddCookiesForAuthToken(authSession.AuthToken);
+        cookies.AddCookiesForAuthSessionData(authSession.AuthSessionData);
+        return cookieRegistry.Register(cookies, CookieJarIntents.SetAuthCookies);
+    }
+
     public static CookieJarId Register(this ICookieRegistry cookieRegistry, AuthToken? authToken)
     {
         var cookies = new CookieJar();
+        cookies.AddCookiesForAuthToken(authToken);
+        return cookieRegistry.Register(cookies, CookieJarIntents.SetAuthCookies);
+    }
+
+    public static CookieJarId RegisterAuthSessionData(this ICookieRegistry cookieRegistry, string? authSessionData)
+    {
+        var cookies = new CookieJar();
+        cookies.AddCookiesForAuthSessionData(authSessionData);
+        return cookieRegistry.Register(cookies, CookieJarIntents.SetAuthCookies);
+    }
+
+    private static void AddCookiesForAuthToken(this CookieJar cookies, AuthToken? authToken)
+    {
         if (string.IsNullOrEmpty(authToken?.AccessToken))
         {
             cookies.Delete("auth_token");
@@ -63,12 +84,10 @@ public static class CookieRegistryExtensions
             }
             cookies.Append("auth_token", tokenJson, cookieOptions);
         }
-        return cookieRegistry.Register(cookies, CookieJarIntents.SetAuthToken);
     }
 
-    public static CookieJarId RegisterAuthSessionData(this ICookieRegistry cookieRegistry, string? authSessionData)
+    private static void AddCookiesForAuthSessionData(this CookieJar cookies, string? authSessionData)
     {
-        var cookies = new CookieJar();
         if (authSessionData == null)
         {
             cookies.Delete("auth_session_data");
@@ -94,6 +113,5 @@ public static class CookieRegistryExtensions
                 cookies.Append("auth_session_data", sessionDataJson, cookieOptions);
             }
         }
-        return cookieRegistry.Register(cookies, CookieJarIntents.SetAuthSessionData);
     }
 }
