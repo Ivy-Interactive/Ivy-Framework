@@ -46,6 +46,26 @@ public class ClerkAuthProvider : IAuthProvider
         _frontendClient = new FrontendApiClient(_frontendApiDomain);
     }
 
+    private async Task<string> GetDevBrowserJwtAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
+    {
+        if (authSession.AuthSessionData is { } devBrowserJwt && devBrowserJwt.StartsWith("dvb_"))
+        {
+            return devBrowserJwt;
+        }
+        var devBrowserTokenResponse = await _frontendClient.CreateDevBrowserTokenAsync(cancellationToken);
+        authSession.AuthSessionData = devBrowserTokenResponse.Id;
+        return devBrowserTokenResponse.Id;
+    }
+
+    public async Task InitializeAsync(IAuthSession authSession, string requestScheme, string requestHost, CancellationToken cancellationToken = default)
+    {
+        var devBrowserJwt = await GetDevBrowserJwtAsync(authSession, cancellationToken);
+
+        var updateEnvironmentResponse = await _frontendClient.UpdateEnvironmentAsync(devBrowserJwt, ORIGIN_TEMPORARY_REMOVE_THIS_BEFORE_MERGE, cancellationToken);
+
+        var clientResponse = await _frontendClient.GetCurrentClient(devBrowserJwt, cancellationToken);
+    }
+
     private async Task<ICollection<SecurityKey>> GetSigningKeysAsync(CancellationToken cancellationToken = default)
     {
         // Cache keys for 1 hour
@@ -80,12 +100,7 @@ public class ClerkAuthProvider : IAuthProvider
 
     public async Task<Uri> GetOAuthUriAsync(IAuthSession authSession, AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken = default)
     {
-        var devBrowserTokenResponse = await _frontendClient.CreateDevBrowserTokenAsync(cancellationToken);
-        var devBrowserJwt = devBrowserTokenResponse.Id;
-
-        var updateEnvironmentResponse = await _frontendClient.UpdateEnvironmentAsync(devBrowserTokenResponse.Id, ORIGIN_TEMPORARY_REMOVE_THIS_BEFORE_MERGE, cancellationToken);
-
-        var clientResponse = await _frontendClient.GetCurrentClient(devBrowserTokenResponse.Id, cancellationToken);
+        var devBrowserJwt = await GetDevBrowserJwtAsync(authSession, cancellationToken);
 
         var strategy = option.Id switch
         {
@@ -107,115 +122,33 @@ public class ClerkAuthProvider : IAuthProvider
         return new Uri(oauthUri);
     }
 
-    public async Task<AuthToken> VerifyHandshakeJwtAsync(string jwt, string devBrowserJwt, CancellationToken cancellationToken = default)
-    {
-        var signingKeys = await GetSigningKeysAsync(cancellationToken);
-
-        var parameters = new TokenValidationParameters
-        {
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKeys = signingKeys,
-            ValidAlgorithms = [SecurityAlgorithms.RsaSha256],
-
-            ValidateLifetime = false,
-            ValidateAudience = false,
-            ValidateIssuer = false,
-        };
-
-        var handler = new JwtSecurityTokenHandler();
-        var principal = handler.ValidateToken(jwt, parameters, out var validatedToken);
-
-        // This handshake claim contains HTTP-style cookie assignments.
-        var handshakeClaims = principal.FindAll("handshake");
-        var cookieValues = new List<(string, string)>();
-        foreach (var claim in handshakeClaims)
-        {
-            var parts = claim.Value.Split(';', StringSplitOptions.TrimEntries);
-            if (parts.Length < 2)
-            {
-                throw new Exception("Invalid handshake claim format.");
-            }
-
-            var cookieAssignment = parts[0];
-            var cookieParts = cookieAssignment.Split('=', 2, StringSplitOptions.TrimEntries);
-            if (cookieParts.Length < 2)
-            {
-                throw new Exception("Invalid cookie assignment format in handshake claim.");
-            }
-
-            cookieValues.Add((cookieParts[0], cookieParts[1]));
-        }
-        var sessionCookie = cookieValues.First(c => c.Item1 == "__session").Item2;
-        var refreshCookie = cookieValues.First(c => c.Item1.StartsWith("__refresh")).Item2;
-        return new AuthToken(sessionCookie, refreshCookie, devBrowserJwt);
-    }
-
     public async Task<AuthToken?> HandleOAuthCallbackAsync(IAuthSession authSession, HttpRequest request, CancellationToken cancellationToken = default)
     {
-        var sessionId = request.Query["created_session"].ToString();
-
+        var sessionId = request.Query["created_session_id"].ToString();
+        var devBrowserJwt = await GetDevBrowserJwtAsync(authSession, cancellationToken);
         try
         {
-            await _frontendClient.GetSessionAsync(sessionId, "", cancellationToken);
+            var sessionResponse = await _frontendClient.TouchSessionAsync(sessionId, devBrowserJwt, cancellationToken);
+            var newToken = await _frontendClient.CreateSessionTokenAsync(sessionId, devBrowserJwt, cancellationToken);
+            if (string.IsNullOrEmpty(newToken.Jwt))
+            {
+                throw new Exception("Failed to get new JWT from Clerk.");
+            }
+            else
+            {
+                return new AuthToken(newToken.Jwt);
+            }
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            Console.WriteLine($"Error fetching session: {ex.Message}");
             return null;
         }
-
-        return null;
-
-        // var error = request.Query["error"].ToString();
-        // var errorDescription = request.Query["error_description"].ToString();
-
-        // if (!string.IsNullOrEmpty(error) || !string.IsNullOrEmpty(errorDescription))
-        // {
-        //     throw new ClerkOAuthException(error, errorDescription);
-        // }
-
-        // if (string.IsNullOrEmpty(handshakeJwt))
-        // {
-        //     await _frontendClient.RemoveAllSessionsAsync(devBrowserJwt, cancellationToken);
-        //     throw new Exception("Received no handshake JWT from Clerk.");
-        // }
-
-        // var authToken = await VerifyHandshakeJwtAsync(handshakeJwt, devBrowserJwt, cancellationToken);
-
-        // try
-        // {
-        //     var (principal, _) = await ValidateToken(authToken.AccessToken, lenientLifetimeValidation: false, cancellationToken)
-        //         ?? throw new Exception("Failed to validate access token after OAuth callback.");
-
-        //     if (principal.FindFirst("sid")?.Value is not { } sessionId)
-        //     {
-        //         throw new Exception("No session ID found in access token.");
-        //     }
-
-        //     await _frontendClient.TouchSessionAsync(sessionId, devBrowserJwt, cancellationToken);
-        // }
-        // catch (Exception)
-        // {
-        // }
-
-        // return authToken;
     }
 
     public async Task LogoutAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
     {
         var jwt = authSession.AuthToken?.AccessToken;
-        var tag = authSession.AuthToken?.Tag;
-        string? devBrowserJwt = tag switch
-        {
-            string s => s,
-            JsonElement e when e.ValueKind == JsonValueKind.String => e.GetString(),
-            _ => null,
-        };
-
-        if (devBrowserJwt is null)
-        {
-            return;
-        }
+        var devBrowserJwt = await GetDevBrowserJwtAsync(authSession, cancellationToken);
 
         try
         {
@@ -239,17 +172,7 @@ public class ClerkAuthProvider : IAuthProvider
         try
         {
             var token = authSession.AuthToken;
-            string? devBrowserJwt = authSession.AuthToken?.Tag switch
-            {
-                string s => s,
-                JsonElement e when e.ValueKind == JsonValueKind.String => e.GetString(),
-                _ => null,
-            };
-
-            if (devBrowserJwt is null)
-            {
-                return null;
-            }
+            var devBrowserJwt = await GetDevBrowserJwtAsync(authSession, cancellationToken);
 
             var (principal, _) = await ValidateToken(token?.AccessToken, lenientLifetimeValidation: true, cancellationToken)
                 ?? throw new Exception("Failed to validate access token during token refresh.");
@@ -266,7 +189,7 @@ public class ClerkAuthProvider : IAuthProvider
             }
             else
             {
-                return new AuthToken(newToken.Jwt, token?.RefreshToken, devBrowserJwt);
+                return new AuthToken(newToken.Jwt);
             }
         }
         catch (Exception)
@@ -284,19 +207,8 @@ public class ClerkAuthProvider : IAuthProvider
     {
         try
         {
-            string? devBrowserJwt = authSession.AuthToken?.Tag switch
-            {
-                string s => s,
-                JsonElement e when e.ValueKind == JsonValueKind.String => e.GetString(),
-                _ => null,
-            };
+            var devBrowserJwt = await GetDevBrowserJwtAsync(authSession, cancellationToken);
 
-            if (devBrowserJwt is null)
-            {
-                return null;
-            }
-
-            // TODO: cache user info to avoid excessive touch calls
             var (principal, _) = await ValidateToken(authSession.AuthToken?.AccessToken, lenientLifetimeValidation: true, cancellationToken)
                 ?? throw new Exception("Failed to validate access token in GetUserInfoAsync.");
 

@@ -135,7 +135,15 @@ public class FrontendApiClient(string? frontendApiDomain)
         }
         else
         {
-            var errorResponse = JsonSerializer.Deserialize<ClerkErrorResponse>(json, _jsonSerializerOptions);
+            ClerkErrorResponse? errorResponse;
+            try
+            {
+                errorResponse = JsonSerializer.Deserialize<ClerkErrorResponse>(json, _jsonSerializerOptions);
+            }
+            catch (JsonException)
+            {
+                errorResponse = null;
+            }
 
             if (errorResponse is not null)
                 throw new ClerkException(errorResponse);
@@ -148,7 +156,14 @@ public class FrontendApiClient(string? frontendApiDomain)
     {
         var json = await ProcessResponse(response);
 
-        return JsonSerializer.Deserialize<T>(json, _jsonSerializerOptions)
-            ?? throw new InvalidOperationException("Clerk returned an empty or invalid response.");
+        try
+        {
+            return JsonSerializer.Deserialize<T>(json, _jsonSerializerOptions)
+                ?? throw new InvalidOperationException("Clerk returned an empty or invalid response.");
+        }
+        catch (JsonException ex)
+        {
+            throw new ClerkException($"Failed to deserialize Clerk response: {json}", ex);
+        }
     }
 }
