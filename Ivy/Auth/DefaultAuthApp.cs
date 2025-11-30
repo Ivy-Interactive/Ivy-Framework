@@ -157,12 +157,12 @@ public class OAuthFlowView(AuthOption option, IState<string?> errorMessage) : Vi
             var oldSessionData = auth.GetCurrentSessionData();
             var token = await TimeoutHelper.WithTimeoutAsync(
                 ct => auth.HandleOAuthCallbackAsync(request, ct));
-            client.SetAuthToken(cookieRegistry, token);
             var sessionData = auth.GetCurrentSessionData();
             if (sessionData != oldSessionData)
             {
                 client.SetAuthSessionData(cookieRegistry, sessionData);
             }
+            client.SetAuthToken(cookieRegistry, token);
             return new RedirectResult("/");
         });
 

@@ -27,7 +27,6 @@ public class AuthService(IAuthProvider authProvider, IAuthSession authSession) :
     public async Task LogoutAsync(CancellationToken cancellationToken)
     {
         var token = authSession.AuthToken;
-        authSession.AuthToken = null;
 
         if (string.IsNullOrWhiteSpace(token?.AccessToken))
         {
@@ -35,6 +34,7 @@ public class AuthService(IAuthProvider authProvider, IAuthSession authSession) :
         }
 
         await authProvider.LogoutAsync(authSession, cancellationToken);
+        authSession.AuthToken = null;
     }
 
     public async Task<UserInfo?> GetUserInfoAsync(CancellationToken cancellationToken)
