@@ -177,52 +177,7 @@ public class SizeJsonConverter : JsonConverter<Size>
 {
     public override Size Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
-        var s = reader.GetString();
-        if (string.IsNullOrEmpty(s))
-        {
-            return null!;
-        }
-
-        var parts = s.Split(',');
-        var main = ParseSize(parts[0]);
-        var size = main;
-
-        if (parts.Length > 1 && !string.IsNullOrWhiteSpace(parts[1]))
-        {
-            size = size.Min(ParseSize(parts[1]));
-        }
-
-        if (parts.Length > 2 && !string.IsNullOrWhiteSpace(parts[2]))
-        {
-            size = size.Max(ParseSize(parts[2]));
-        }
-
-        return size;
-    }
-
-    private Size ParseSize(string s)
-    {
-        var parts = s.Split(':');
-        var type = Enum.Parse<SizeType>(parts[0]);
-        float? value = parts.Length > 1 ? float.Parse(parts[1], System.Globalization.CultureInfo.InvariantCulture) : null;
-
-        return type switch
-        {
-            SizeType.Px => Size.Px((int)value!.Value),
-            SizeType.Rem => Size.Rem((int)value!.Value),
-            SizeType.Units => Size.Units((int)value!.Value),
-            SizeType.Fraction => Size.Fraction(value!.Value),
-            SizeType.FractionGap => Size.FractionGap(value!.Value),
-            SizeType.Full => Size.Full(),
-            SizeType.Fit => Size.Fit(),
-            SizeType.Screen => Size.Screen(),
-            SizeType.MinContent => Size.MinContent(),
-            SizeType.MaxContent => Size.MaxContent(),
-            SizeType.Auto => Size.Auto(),
-            SizeType.Grow => Size.Grow((int)(value ?? 1)),
-            SizeType.Shrink => Size.Shrink((int)(value ?? 1)),
-            _ => throw new NotImplementedException($"Deserialization for SizeType {type} is not implemented.")
-        };
+        throw new NotImplementedException("Deserialization of SizeJsonConverter not implemented.");
     }
 
     public override void Write(Utf8JsonWriter writer, Size value, JsonSerializerOptions options)
