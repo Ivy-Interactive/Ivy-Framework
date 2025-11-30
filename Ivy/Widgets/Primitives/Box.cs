@@ -49,16 +49,6 @@ public static class BoxExtensions
 
     public static Box ContentAlign(this Box box, Align? align) => box with { ContentAlign = align };
 
-    public static Box Plain(this Box box) => box with
-    {
-        BorderThickness = new(1),
-        Padding = new(4),
-        BorderRadius = Ivy.Shared.BorderRadius.Rounded,
-        BorderStyle = Ivy.Shared.BorderStyle.Solid,
-        ContentAlign = Align.TopLeft,
-        Color = null
-    };
-
     public static Box WithBox(this object anything)
     {
         return new Box(anything);

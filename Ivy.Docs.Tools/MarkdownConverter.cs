@@ -68,7 +68,7 @@ public static partial class MarkdownConverter
             .UseYamlFrontMatter()
             .Build();
 
-        var document = Markdown.Parse(markdownContent, pipeline);
+        var document = Markdig.Markdown.Parse(markdownContent, pipeline);
 
         var documentSource = Utils.GetGitFileUrl(absolutePath);
 
@@ -99,6 +99,7 @@ public static partial class MarkdownConverter
         codeBuilder.AppendLine("using Ivy.Core;");
         codeBuilder.AppendLine("using static Ivy.Views.Layout;");
         codeBuilder.AppendLine("using static Ivy.Views.Text;");
+        codeBuilder.AppendLine("using Ivy.Docs.Tools;");
         if (appMeta.Imports != null)
         {
             foreach (var import in appMeta.Imports)
@@ -390,7 +391,7 @@ public static partial class MarkdownConverter
             .UsePreciseSourceLocation()
             .Build();
 
-        var bodyDocument = Markdown.Parse(bodyContent, pipeline);
+        var bodyDocument = Markdig.Markdown.Parse(bodyContent, pipeline);
 
         // Create a temporary builder for the body content
         var bodyCodeBuilder = new StringBuilder();
