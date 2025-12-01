@@ -33,6 +33,8 @@ interface KanbanContextType {
   columns: Column[];
   draggedCardColumn: string | null;
   setDraggedCardColumn: (column: string | null) => void;
+  dragOverColumn: string | null;
+  setDragOverColumn: (column: string | null) => void;
   onCardMove?: (
     cardId: string,
     fromColumn: string,
@@ -48,6 +50,8 @@ const KanbanContext = createContext<KanbanContextType>({
   columns: [],
   draggedCardColumn: null,
   setDraggedCardColumn: () => {},
+  dragOverColumn: null,
+  setDragOverColumn: () => {},
 });
 
 export const useKanbanContext = () => useContext(KanbanContext);
@@ -84,12 +88,15 @@ export function Kanban({
   const [draggedCardColumn, setDraggedCardColumn] = useState<string | null>(
     null
   );
+  const [dragOverColumn, setDragOverColumn] = useState<string | null>(null);
 
   const contextValue: KanbanContextType = {
     data,
     columns,
     draggedCardColumn,
     setDraggedCardColumn,
+    dragOverColumn,
+    setDragOverColumn,
     onCardMove,
     onCardReorder,
     showCounts,
@@ -142,9 +149,14 @@ export function KanbanColumn({
   children,
   className,
 }: KanbanColumnProps) {
-  const [isDragOver, setIsDragOver] = useState(false);
-  const { onCardMove, data, draggedCardColumn, showCounts } =
-    useKanbanContext();
+  const {
+    onCardMove,
+    data,
+    draggedCardColumn,
+    dragOverColumn,
+    setDragOverColumn,
+    showCounts,
+  } = useKanbanContext();
 
   const columnTaskCount = data.filter(task => task.status === id).length;
 
@@ -153,23 +165,30 @@ export function KanbanColumn({
       e.preventDefault();
       e.dataTransfer.dropEffect = 'move';
 
-      if (draggedCardColumn && draggedCardColumn !== id) {
-        setIsDragOver(true);
+      if (
+        draggedCardColumn &&
+        draggedCardColumn !== id &&
+        dragOverColumn !== id
+      ) {
+        setDragOverColumn(id);
       }
     },
-    [id, draggedCardColumn]
+    [id, draggedCardColumn, dragOverColumn, setDragOverColumn]
   );
 
-  const handleDragLeave = useCallback((e: React.DragEvent) => {
-    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
-      setIsDragOver(false);
-    }
-  }, []);
+  const handleDragLeave = useCallback(
+    (e: React.DragEvent) => {
+      if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+        setDragOverColumn(null);
+      }
+    },
+    [setDragOverColumn]
+  );
 
   const handleDrop = useCallback(
     (e: React.DragEvent) => {
       e.preventDefault();
-      setIsDragOver(false);
+      setDragOverColumn(null);
 
       const cardId = e.dataTransfer.getData('text/plain');
       if (!cardId) return;
@@ -178,10 +197,10 @@ export function KanbanColumn({
 
       onCardMove?.(cardId, task.status, id);
     },
-    [id, onCardMove, data]
+    [id, onCardMove, data, setDragOverColumn]
   );
 
-  const showDragOver = isDragOver && draggedCardColumn !== null;
+  const showDragOver = dragOverColumn === id && draggedCardColumn !== null;
 
   const widthStyles = width ? getWidth(width) : {};
   const hasExplicitWidth = width && Object.keys(widthStyles).length > 0;
@@ -257,7 +276,8 @@ export function KanbanCard({
   const [isDragging, setIsDragging] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
   const justDraggedRef = useRef(false);
-  const { onCardMove, data, setDraggedCardColumn } = useKanbanContext();
+  const { onCardMove, data, setDraggedCardColumn, setDragOverColumn } =
+    useKanbanContext();
 
   const handleDragStart = useCallback(
     (e: React.DragEvent) => {
@@ -273,11 +293,12 @@ export function KanbanCard({
   const handleDragEnd = useCallback(() => {
     setIsDragging(false);
     setDraggedCardColumn(null);
+    setDragOverColumn(null);
     justDraggedRef.current = true;
     setTimeout(() => {
       justDraggedRef.current = false;
     }, 100);
-  }, [setDraggedCardColumn]);
+  }, [setDraggedCardColumn, setDragOverColumn]);
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
