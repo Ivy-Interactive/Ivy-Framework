@@ -45,6 +45,14 @@ export const ExpandableWidget: React.FC<ExpandableWidgetProps> = ({
     }
   }, [disabled, isOpen]);
 
+  const handleOpenChange = (newOpen: boolean) => {
+    // Prevent toggle if disabled
+    if (disabled) {
+      return;
+    }
+    setIsOpen(newOpen);
+  };
+
   const handleTriggerClick = (e: React.MouseEvent) => {
     // If clicking on an interactive element, stop propagation so it doesn't toggle
     const target = e.target as HTMLElement;
@@ -60,13 +68,19 @@ export const ExpandableWidget: React.FC<ExpandableWidgetProps> = ({
     if (isInteractiveElement) {
       e.stopPropagation();
     }
+
+    // Prevent toggle if disabled
+    if (disabled) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
   };
 
   return (
     <Collapsible
       key={id}
       open={isOpen}
-      onOpenChange={setIsOpen}
+      onOpenChange={handleOpenChange}
       className={cn(
         'w-full rounded-md border border-border shadow-sm data-[disabled=true]:cursor-not-allowed data-[disabled=true]:opacity-50',
         'p-0'
@@ -75,7 +89,7 @@ export const ExpandableWidget: React.FC<ExpandableWidgetProps> = ({
       role="details"
     >
       <CollapsibleTrigger
-        disabled={disabled}
+        disabled={false}
         className={cn(expandableTriggerVariants({ scale }), 'relative')}
         onClick={handleTriggerClick}
         data-collapsible-trigger
@@ -86,7 +100,6 @@ export const ExpandableWidget: React.FC<ExpandableWidgetProps> = ({
         <span
           className={expandableChevronContainerVariants({ scale })}
           aria-hidden="true"
-          style={{ position: 'absolute' }}
         >
           <ChevronRight
             className={cn(
