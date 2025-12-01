@@ -21,9 +21,9 @@ export const expandableHeaderVariants = cva(
   {
     variants: {
       scale: {
-        Small: 'ml-1 [&_*]:text-xs',
-        Medium: '[&_*]:text-sm',
-        Large: '[&_*]:text-base',
+        Small: 'ml-1 pr-7 [&_*]:text-xs',
+        Medium: 'pr-9 [&_*]:text-sm',
+        Large: 'pr-11 [&_*]:text-base',
       },
     },
     defaultVariants: {
@@ -33,7 +33,7 @@ export const expandableHeaderVariants = cva(
 );
 
 export const expandableChevronContainerVariants = cva(
-  'absolute top-0 bottom-0 right-0 flex items-center justify-center pointer-events-none shrink-0',
+  'absolute top-0 bottom-0 right-0 flex items-center justify-center pointer-events-none shrink-0 z-10',
   {
     variants: {
       scale: {

@@ -86,6 +86,7 @@ export const ExpandableWidget: React.FC<ExpandableWidgetProps> = ({
         <span
           className={expandableChevronContainerVariants({ scale })}
           aria-hidden="true"
+          style={{ position: 'absolute' }}
         >
           <ChevronRight
             className={cn(
