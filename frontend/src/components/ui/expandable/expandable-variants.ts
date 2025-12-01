@@ -21,7 +21,7 @@ export const expandableHeaderVariants = cva(
   {
     variants: {
       scale: {
-        Small: '[&_*]:text-xs',
+        Small: 'ml-1 [&_*]:text-xs',
         Medium: '[&_*]:text-sm',
         Large: '[&_*]:text-base',
       },
