@@ -94,7 +94,11 @@ export const ExpandableWidget: React.FC<ExpandableWidgetProps> = ({
         onClick={handleTriggerClick}
         data-collapsible-trigger
       >
-        <div className={expandableHeaderVariants({ scale })} role="summary">
+        <div
+          className={expandableHeaderVariants({ scale })}
+          role="summary"
+          onClick={handleHeaderClick}
+        >
           {slots?.Header}
         </div>
         <span

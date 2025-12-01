@@ -49,7 +49,7 @@ export const expandableChevronContainerVariants = cva(
 );
 
 export const expandableChevronVariants = cva(
-  'transition-transform duration-200 ease-in-out',
+  'opacity-50 shrink-0 transition-transform duration-200 ease-in-out',
   {
     variants: {
       scale: {
