@@ -30,7 +30,7 @@ export const expandableHeaderVariants = cva('flex-1 min-w-0', {
 });
 
 export const expandableChevronContainerVariants = cva(
-  'absolute top-0 bottom-0 border-l flex items-center justify-end shrink-0 right-2.5 pointer-events-none',
+  'absolute top-0 bottom-0 flex items-center justify-end shrink-0 right-2.5',
   {
     variants: {
       scale: {
