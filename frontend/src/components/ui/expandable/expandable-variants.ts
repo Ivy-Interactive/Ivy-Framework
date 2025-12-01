@@ -19,9 +19,9 @@ export const expandableTriggerVariants = cva(
 export const expandableHeaderVariants = cva('flex-1 min-w-0', {
   variants: {
     scale: {
-      Small: 'ml-1.5 pr-8 [&_*]:text-xs',
-      Medium: 'ml-2 pr-9 [&_*]:text-sm',
-      Large: 'ml-2.5 pr-11 [&_*]:text-base',
+      Small: 'pr-8 [&_*]:text-xs',
+      Medium: 'pr-9 [&_*]:text-sm',
+      Large: 'pr-11 [&_*]:text-base',
     },
   },
   defaultVariants: {
