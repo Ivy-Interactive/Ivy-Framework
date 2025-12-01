@@ -33,13 +33,13 @@ export const expandableHeaderVariants = cva(
 );
 
 export const expandableChevronContainerVariants = cva(
-  'p-0 shrink-0 pointer-events-none flex items-center justify-center ml-auto',
+  'absolute top-0 bottom-0 right-0 flex items-center justify-center pointer-events-none shrink-0',
   {
     variants: {
       scale: {
-        Small: 'h-7 w-7',
-        Medium: 'h-9 w-9',
-        Large: 'h-11 w-11',
+        Small: 'w-7',
+        Medium: 'w-9',
+        Large: 'w-11',
       },
     },
     defaultVariants: {
