@@ -16,15 +16,12 @@ export const expandableTriggerVariants = cva(
   }
 );
 
-export const expandableHeaderVariants = cva(
-  'flex-1 min-w-0 [&_button]:pointer-events-auto [&_input]:pointer-events-auto [&_select]:pointer-events-auto [&_[role="button"]]:pointer-events-auto [&_[role="switch"]]:pointer-events-auto [&_[role="checkbox"]]:pointer-events-auto [&_a[href]]:pointer-events-auto',
-  {
-    variants: {
-      scale: {
-        Small: 'pr-8 [&_*]:text-xs',
-        Medium: 'pr-9 [&_*]:text-sm',
-        Large: 'pr-11 [&_*]:text-base',
-      },
+export const expandableHeaderVariants = cva('flex-1 min-w-0', {
+  variants: {
+    scale: {
+      Small: 'ml-1.5 pr-8 [&_*]:text-xs',
+      Medium: 'ml-2 pr-9 [&_*]:text-sm',
+      Large: 'ml-2.5 pr-11 [&_*]:text-base',
     },
     defaultVariants: {
       scale: 'Medium',
