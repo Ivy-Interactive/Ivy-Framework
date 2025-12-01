@@ -59,7 +59,7 @@ export const ExpandableWidget: React.FC<ExpandableWidgetProps> = ({
     >
       <CollapsibleTrigger
         disabled={disabled}
-        className={expandableTriggerVariants({ scale })}
+        className={cn(expandableTriggerVariants({ scale }), 'relative')}
       >
         <div className={expandableHeaderVariants({ scale })} role="summary">
           {slots?.Header}

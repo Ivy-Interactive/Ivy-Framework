@@ -19,9 +19,9 @@ export const expandableTriggerVariants = cva(
 export const expandableHeaderVariants = cva('flex-1 min-w-0', {
   variants: {
     scale: {
-      Small: 'ml-1.5 [&_*]:text-xs',
-      Medium: 'ml-2 [&_*]:text-sm',
-      Large: 'ml-2.5 [&_*]:text-base',
+      Small: 'ml-1.5 pr-8 [&_*]:text-xs',
+      Medium: 'ml-2 pr-9 [&_*]:text-sm',
+      Large: 'ml-2.5 pr-11 [&_*]:text-base',
     },
   },
   defaultVariants: {
@@ -30,13 +30,13 @@ export const expandableHeaderVariants = cva('flex-1 min-w-0', {
 });
 
 export const expandableChevronContainerVariants = cva(
-  'p-0 shrink-0 pointer-events-none flex items-center justify-center',
+  'absolute top-0 bottom-0 border-l flex items-center justify-end shrink-0 right-2.5 pointer-events-none',
   {
     variants: {
       scale: {
-        Small: 'h-7 w-7',
-        Medium: 'h-9 w-9',
-        Large: 'h-11 w-11',
+        Small: 'w-5',
+        Medium: 'w-6',
+        Large: 'w-8',
       },
     },
     defaultVariants: {
@@ -46,7 +46,7 @@ export const expandableChevronContainerVariants = cva(
 );
 
 export const expandableChevronVariants = cva(
-  'transition-transform duration-200 ease-in-out',
+  'opacity-50 shrink-0 transition-transform duration-200 ease-in-out',
   {
     variants: {
       scale: {
