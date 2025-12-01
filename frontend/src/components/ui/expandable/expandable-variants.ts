@@ -69,7 +69,7 @@ export const expandableContentVariants = cva('overflow-hidden transition-all', {
     scale: {
       Small: 'px-3 py-2 space-y-2 [&_*]:text-xs',
       Medium: 'px-3 py-4 space-y-4 [&_*]:text-sm',
-      Large: 'px-4 py-6 space-y-5 [&_*]:text-base',
+      Large: 'px-3 py-6 space-y-5 [&_*]:text-base',
     },
   },
   defaultVariants: {
