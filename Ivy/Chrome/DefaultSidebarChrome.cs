@@ -89,8 +89,12 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
                     : null;
 
                 currentApp.Set(appHost);
-                // Update browser URL for page navigation
-                if (navigateArgs.Purpose is NavigationPurpose.NewDestination && previousApp != navigateArgs.AppId)
+
+                // Check if the resolved app is NotFound
+                var app = appRepository!.GetAppOrDefault(navigateArgs.AppId);
+
+                // Update browser URL for page navigation, but not for 404 pages
+                if (navigateArgs.Purpose is NavigationPurpose.NewDestination && previousApp != navigateArgs.AppId && app.Id != AppIds.NotFound)
                 {
                     client.Redirect(navigateArgs.GetUrl(), replaceHistory);
                 }
@@ -107,7 +111,9 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
 
                         // Update browser URL when switching to existing tab
                         var tab = tabs.Value[tabIndex];
-                        if (navigateArgs.Purpose is NavigationPurpose.NewDestination)
+                        bool isNotFoundTab = tab.AppId == AppIds.NotFound;
+
+                        if (navigateArgs.Purpose is NavigationPurpose.NewDestination && !isNotFoundTab)
                         {
                             client.Redirect(navigateArgs.GetUrl(), replaceHistory, tabId: tab.Id);
                         }
@@ -148,8 +154,13 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
                         var previousSelectedIndex = selectedIndex.Value;
                         selectedIndex.Set(existingTabIndex);
                         tabId = tabs.Value[existingTabIndex].Id;
-                        // Update browser URL when switching to existing tab
-                        if (navigateArgs.Purpose is NavigationPurpose.NewDestination && previousSelectedIndex != existingTabIndex)
+
+                        // Check if tab shows 404 page
+                        var existingTab = tabs.Value[existingTabIndex];
+                        bool isNotFoundTab = existingTab.AppId == AppIds.NotFound;
+
+                        // Update browser URL when switching to existing tab, but not for 404 pages
+                        if (navigateArgs.Purpose is NavigationPurpose.NewDestination && previousSelectedIndex != existingTabIndex && !isNotFoundTab)
                         {
                             client.Redirect(navigateArgs.GetUrl(), replaceHistory, tabId: tabId);
                         }
@@ -164,8 +175,12 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
                     tabs.Set(newTabs);
                     selectedIndex.Set(newTabs.Length - 1);
 
-                    // Update browser URL when new tab is opened
-                    client.Redirect(navigateArgs.GetUrl(), replaceHistory, tabId: tabId);
+                    // Don't redirect for 404 pages - preserve the invalid URL
+                    if (app.Id != AppIds.NotFound)
+                    {
+                        // Update browser URL when new tab is opened
+                        client.Redirect(navigateArgs.GetUrl(), replaceHistory, tabId: tabId);
+                    }
                 }
             }
         }
