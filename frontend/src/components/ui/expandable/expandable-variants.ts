@@ -22,8 +22,8 @@ export const expandableHeaderVariants = cva(
     variants: {
       scale: {
         Small: 'ml-1 pr-7 [&_*]:text-xs',
-        Medium: 'pr-9 [&_*]:text-sm',
-        Large: 'pr-11 [&_*]:text-base',
+        Medium: 'ml-1 pr-9 [&_*]:text-sm',
+        Large: 'ml-1 pr-11 [&_*]:text-base',
       },
     },
     defaultVariants: {
@@ -67,9 +67,9 @@ export const expandableChevronVariants = cva(
 export const expandableContentVariants = cva('overflow-hidden transition-all', {
   variants: {
     scale: {
-      Small: 'px-3 py-2 space-y-2 [&_*]:text-xs',
-      Medium: 'px-3 py-4 space-y-4 [&_*]:text-sm',
-      Large: 'px-3 py-6 space-y-5 [&_*]:text-base',
+      Small: 'pl-3 pr-2 py-2 space-y-2 [&_*]:text-xs',
+      Medium: 'pl-4 pr-3 py-4 space-y-4 [&_*]:text-sm',
+      Large: 'pl-5 pr-4 py-6 space-y-5 [&_*]:text-base',
     },
   },
   defaultVariants: {
