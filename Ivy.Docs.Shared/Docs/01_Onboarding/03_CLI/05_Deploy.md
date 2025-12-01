@@ -201,7 +201,7 @@ ASPNETCORE_ENVIRONMENT="Production"
 
 ### Monitoring and Logging
 
-**Application Monitoring** - Ivy sets up monitoring for your deployed application: health checks, performance and resource metrics, centralized log collection, and automated alerting for issues.
+**Application Monitoring** - Ivy sets up monitoring for your deployed application: health checks (available at `/ivy/health`), performance and resource metrics, centralized log collection, and automated alerting for issues.
 
 **Cloud Provider Monitoring** - Each cloud provider offers specific monitoring tools: AWS CloudWatch, Azure Application Insights, and GCP Cloud Monitoring.
 

@@ -89,7 +89,7 @@ public class WelcomeScreenApp : ViewBase
 {
     public override object? Build()
         => Layout.Center(
-            new Image("/img/brand-logo.svg").AltText("My Brand"),
+            new Image("/ivy/img/brand-logo.svg").AltText("My Brand"),
             Text.H1("Welcome to My System")
         );
 }
