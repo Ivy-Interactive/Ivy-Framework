@@ -120,3 +120,9 @@ If you want to work on the framework itself, you need to set up the following:
 Changes in /frontend will be hot-reloaded by Vite and changes in /Ivy.Samples will be hot-reloaded by Ivy.
 
 For detailed contribution guidelines, see [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## Troubleshooting
+
+### Apple Silicon Mac: "Bad CPU type in executable" due to Google Protobuf & ARM 
+
+Install Rosetta 2: `/usr/sbin/softwareupdate --install-rosetta --agree-to-license`

@@ -53,7 +53,7 @@
     <PackageReference Include="Grpc.AspNetCore" Version="2.64.0" />
     <PackageReference Include="Apache.Arrow" Version="15.0.0" />
     <PackageReference Include="ExcelNumberFormat" Version="1.1.0" />
-    <PackageReference Include="Google.Protobuf" Version="3.33.0" />
+    <PackageReference Include="Google.Protobuf" Version="3.33.1" />
     <PackageReference Include="Grpc.AspNetCore.Web" Version="2.71.0" />
     <PackageReference Include="Microsoft.Extensions.AI.Abstractions" Version="9.10.2" />
     <PackageReference Include="Isopoh.Cryptography.Argon2" Version="2.0.0" />
