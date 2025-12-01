@@ -24,7 +24,7 @@ Here's a simple example of a `DropDownMenu` that shows a toast message when an i
 new DropDownMenu(@evt => client.Toast("Selected: " + @evt.Value), 
     new Button("Basic Menu"),
     MenuItem.Default("Profile"), 
-    MenuItem.Default("Settings").Tooltip("Set up Your settings here"), 
+    MenuItem.Default("Settings"), 
     MenuItem.Default("Logout"))
 ```
 
