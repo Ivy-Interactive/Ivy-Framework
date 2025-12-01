@@ -16,18 +16,21 @@ export const expandableTriggerVariants = cva(
   }
 );
 
-export const expandableHeaderVariants = cva('flex-1 min-w-0', {
-  variants: {
-    scale: {
-      Small: 'ml-1.5 [&_*]:text-xs',
-      Medium: 'ml-2 [&_*]:text-sm',
-      Large: 'ml-2.5 [&_*]:text-base',
+export const expandableHeaderVariants = cva(
+  'flex-1 min-w-0 pointer-events-none [&_button]:pointer-events-auto [&_input]:pointer-events-auto [&_select]:pointer-events-auto [&_[role="button"]]:pointer-events-auto [&_[role="switch"]]:pointer-events-auto [&_[role="checkbox"]]:pointer-events-auto [&_a[href]]:pointer-events-auto',
+  {
+    variants: {
+      scale: {
+        Small: 'ml-1.5 [&_*]:text-xs',
+        Medium: 'ml-2 [&_*]:text-sm',
+        Large: 'ml-2.5 [&_*]:text-base',
+      },
     },
-  },
-  defaultVariants: {
-    scale: 'Medium',
-  },
-});
+    defaultVariants: {
+      scale: 'Medium',
+    },
+  }
+);
 
 export const expandableChevronContainerVariants = cva(
   'p-0 shrink-0 pointer-events-none flex items-center justify-center',
