@@ -45,11 +45,36 @@ export const ExpandableWidget: React.FC<ExpandableWidgetProps> = ({
     }
   }, [disabled, isOpen]);
 
+  const handleHeaderClick = (e: React.MouseEvent) => {
+    // Stop propagation if clicking on interactive elements (buttons, inputs, etc.)
+    const target = e.target as HTMLElement;
+    const isInteractiveElement =
+      target.closest('button') ||
+      target.closest('input') ||
+      target.closest('select') ||
+      target.closest('[role="button"]') ||
+      target.closest('[role="switch"]') ||
+      target.closest('[role="checkbox"]') ||
+      target.closest('a[href]') ||
+      target.closest('[onclick]') ||
+      target.closest('[data-interactive]');
+
+    if (isInteractiveElement) {
+      e.stopPropagation();
+    }
+  };
+
+  const handleOpenChange = (newOpen: boolean) => {
+    if (!disabled) {
+      setIsOpen(newOpen);
+    }
+  };
+
   return (
     <Collapsible
       key={id}
       open={isOpen}
-      onOpenChange={setIsOpen}
+      onOpenChange={handleOpenChange}
       className={cn(
         'w-full rounded-md border border-border shadow-sm data-[disabled=true]:cursor-not-allowed data-[disabled=true]:opacity-50',
         'p-0'
@@ -58,10 +83,14 @@ export const ExpandableWidget: React.FC<ExpandableWidgetProps> = ({
       role="details"
     >
       <CollapsibleTrigger
-        disabled={disabled}
+        disabled={false}
         className={cn(expandableTriggerVariants({ scale }), 'relative')}
       >
-        <div className={expandableHeaderVariants({ scale })} role="summary">
+        <div
+          className={expandableHeaderVariants({ scale })}
+          role="summary"
+          onClick={handleHeaderClick}
+        >
           {slots?.Header}
         </div>
         <span

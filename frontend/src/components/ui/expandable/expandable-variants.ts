@@ -1,7 +1,7 @@
 import { cva } from 'class-variance-authority';
 
 export const expandableTriggerVariants = cva(
-  'w-full flex justify-between items-center cursor-pointer hover:bg-accent/50 rounded-sm transition-colors data-[disabled=true]:cursor-not-allowed data-[disabled=true]:hover:bg-transparent overflow-hidden box-border shrink-0',
+  'w-full flex justify-between items-center cursor-pointer hover:bg-accent/50 rounded-sm transition-colors data-[disabled=true]:cursor-not-allowed data-[disabled=true]:hover:bg-transparent overflow-hidden box-border shrink-0 data-[disabled=true]:[&_*]:pointer-events-none data-[disabled=true]:[&_button]:pointer-events-auto data-[disabled=true]:[&_input]:pointer-events-auto data-[disabled=true]:[&_select]:pointer-events-auto data-[disabled=true]:[&_[role="button"]]:pointer-events-auto data-[disabled=true]:[&_[role="switch"]]:pointer-events-auto data-[disabled=true]:[&_[role="checkbox"]]:pointer-events-auto data-[disabled=true]:[&_a[href]]:pointer-events-auto',
   {
     variants: {
       scale: {
@@ -16,18 +16,21 @@ export const expandableTriggerVariants = cva(
   }
 );
 
-export const expandableHeaderVariants = cva('flex-1 min-w-0', {
-  variants: {
-    scale: {
-      Small: 'pr-8 [&_*]:text-xs',
-      Medium: 'pr-9 [&_*]:text-sm',
-      Large: 'pr-11 [&_*]:text-base',
+export const expandableHeaderVariants = cva(
+  'flex-1 min-w-0 [&_button]:pointer-events-auto [&_input]:pointer-events-auto [&_select]:pointer-events-auto [&_[role="button"]]:pointer-events-auto [&_[role="switch"]]:pointer-events-auto [&_[role="checkbox"]]:pointer-events-auto [&_a[href]]:pointer-events-auto',
+  {
+    variants: {
+      scale: {
+        Small: 'pr-8 [&_*]:text-xs',
+        Medium: 'pr-9 [&_*]:text-sm',
+        Large: 'pr-11 [&_*]:text-base',
+      },
     },
-  },
-  defaultVariants: {
-    scale: 'Medium',
-  },
-});
+    defaultVariants: {
+      scale: 'Medium',
+    },
+  }
+);
 
 export const expandableChevronContainerVariants = cva(
   'absolute top-0 bottom-0 flex items-center justify-end shrink-0 right-2.5',
