@@ -1,7 +1,7 @@
 import { cva } from 'class-variance-authority';
 
 export const expandableTriggerVariants = cva(
-  'w-full flex justify-between items-center cursor-pointer hover:bg-accent/50 rounded-sm transition-colors data-[disabled=true]:cursor-not-allowed data-[disabled=true]:hover:bg-transparent overflow-hidden box-border shrink-0',
+  'w-full flex justify-between items-center cursor-pointer hover:bg-accent/50 rounded-sm transition-colors disabled:cursor-not-allowed disabled:hover:bg-transparent overflow-hidden box-border shrink-0',
   {
     variants: {
       scale: {
@@ -17,7 +17,7 @@ export const expandableTriggerVariants = cva(
 );
 
 export const expandableHeaderVariants = cva(
-  'flex-1 min-w-0 pointer-events-none [&_button]:pointer-events-auto [&_input]:pointer-events-auto [&_select]:pointer-events-auto [&_[role="button"]]:pointer-events-auto [&_[role="switch"]]:pointer-events-auto [&_[role="checkbox"]]:pointer-events-auto [&_a[href]]:pointer-events-auto',
+  'flex-1 min-w-0 pointer-events-none [&_button]:pointer-events-auto [&_input]:pointer-events-auto [&_select]:pointer-events-auto [&_[role="button"]]:pointer-events-auto [&_[role="switch"]]:pointer-events-auto [&_[role="checkbox"]]:pointer-events-auto [&_a[href]]:pointer-events-auto [&_button]:cursor-pointer [&_input]:cursor-default [&_[role="switch"]]:cursor-pointer [&_[role="checkbox"]]:cursor-pointer',
   {
     variants: {
       scale: {
