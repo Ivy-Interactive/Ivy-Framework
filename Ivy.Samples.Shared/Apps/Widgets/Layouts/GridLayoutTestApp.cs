@@ -2,7 +2,7 @@ using Ivy.Shared;
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Layouts;
 
-[App(icon: Icons.Grid3x3, searchHints: ["layout", "grid", "heatmap", "cohort", "opacity"])]
+[App(icon: Icons.Grid3x3, searchHints: ["layout", "grid", "heatmap", "cohort", "opacity"], isVisible: false)]
 public class GridLayoutTestApp : ViewBase
 {
     public override object? Build()
