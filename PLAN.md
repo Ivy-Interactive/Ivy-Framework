@@ -1,252 +1,252 @@
-# Plan: Backend-Generated LLM Markdown Files
+# План: LLM-ориентированные Markdown-файлы, генерируемые на бэкенде
 
-## Overview
+## Обзор
 
-The frontend has copy/download functionality that extracts rendered markdown page contents (including runtime-rendered results like API sections), but this functionality doesn't exist in the backend. The goal is to compute this during the `.Regenerate` execution, creating `.llm.md` files for each `.md` file that contain all the information similar to the copy/md feature, and serve these files in Ivy.Docs for LLMs over an endpoint.
+Во фронтенде уже есть функциональность копирования/скачивания, которая извлекает содержимое отрендеренной markdown‑страницы (включая результаты, сформированные на лету — секции API). В бэкенде такой функциональности пока нет. Цель — вычислять это содержимое во время выполнения `.Regenerate`, создавая для каждого `.md` файла отдельный `.llm.md` файл, который содержит всю информацию, аналогичную функции copy/md во фронтенде, и затем отдавать эти файлы через Ivy.Docs по отдельному endpoint для LLM.
 
-## Current State
+## Текущее состояние
 
-### Frontend Copy/Download Feature (`DocumentTools.tsx`)
-- Expands all details/expandable sections
-- Loads all tabs
-- Extracts API sections from rendered DOM:
-  - Headings (h1-h6)
-  - Paragraphs
-  - Lists (ul, ol)
-  - Tables
-  - Code blocks (including terminal blocks)
-  - API sections (Constructors, Properties, Events, Supported Types)
-  - Details/expandable sections
-- Converts rendered HTML/DOM back to markdown format
-- Provides copy to clipboard and download as `.md` file
+### Функциональность копирования/скачивания во фронтенде (`DocumentTools.tsx`)
+- Разворачивает все блоки с подробностями (`details` / раскрывающиеся секции)
+- Загружает содержимое всех вкладок
+- Извлекает API‑секции из отрендеренного DOM:
+  - Заголовки (h1–h6)
+  - Параграфы
+  - Списки (ul, ol)
+  - Таблицы
+  - Блоки кода (включая терминальные блоки)
+  - API‑секции (Constructors, Properties, Events, Supported Types)
+  - Блоки с подробностями/раскрывающиеся секции
+- Конвертирует отрендеренный HTML/DOM обратно в markdown
+- Позволяет скопировать в буфер обмена и скачать как `.md` файл
 
-### Backend Regeneration Process
-- `Regenerate.sh`/`Regenerate.ps1` scripts run `Ivy.Docs.Tools`
-- `ConvertCommand` processes all `.md` files in `Docs/` directory
-- `MarkdownConverter.ConvertAsync()` converts each `.md` to `.g.cs` C# file
-- Generated files placed in `Generated/` directory
-- MSBuild target `TransformMarkdown` runs this during build
+### Процесс регенерации на бэкенде
+- Скрипты `Regenerate.sh` / `Regenerate.ps1` запускают `Ivy.Docs.Tools`
+- `ConvertCommand` обрабатывает все `.md` файлы в директории `Docs/`
+- `MarkdownConverter.ConvertAsync()` конвертирует каждый `.md` файл в C#‑файл `.g.cs`
+- Сгенерированные файлы попадают в директорию `Generated/`
+- Цель MSBuild `TransformMarkdown` запускает это во время сборки
 
-### Runtime API Generation (`WidgetDocsView.cs`)
-- Generates API sections at runtime using reflection:
-  - **Constructors**: Extracted from type constructors and extension methods
-  - **Supported Types**: For input widgets, shows supported state types
-  - **Properties**: Properties with `[Prop]` attribute
-  - **Events**: Properties with `[Event]` attribute
-- These sections are rendered as tables and markdown in the UI
-- Currently only available at runtime, not during regeneration
+### Генерация API во время выполнения (`WidgetDocsView.cs`)
+- Во время выполнения с помощью reflection генерируются секции API:
+  - **Constructors**: извлекаются из конструкторов типов и extension‑методов
+  - **Supported Types**: для input‑виджетов отображаются поддерживаемые типы состояния
+  - **Properties**: свойства с атрибутом `[Prop]`
+  - **Events**: свойства с атрибутом `[Event]`
+- Эти секции рендерятся как таблицы и markdown в UI
+- Сейчас они доступны только во время выполнения, но не во время регенерации
 
-## Goals
+## Цели
 
-1. **Backend Computation**: Generate `.llm.md` files during `.Regenerate` execution that include:
-   - Original markdown content from `.md` files
-   - Runtime-rendered API sections (Constructors, Properties, Events, Supported Types)
-   - All expandable/details sections expanded
-   - All tab content included
-   - Code blocks and terminal blocks
-   - Tables with associated content
+1. **Вычисления на бэкенде**: генерировать `.llm.md` файлы во время выполнения `.Regenerate`, которые включают:
+   - Исходное markdown‑содержимое из `.md` файлов
+   - Секции API, сгенерированные на основе runtime‑логики (Constructors, Properties, Events, Supported Types)
+   - Полностью развёрнутые блоки подробностей (`details`)
+   - Содержимое всех вкладок
+   - Блоки кода и терминальные блоки
+   - Таблицы с привязанным к ним контентом
 
-2. **File Generation**: For each `.md` file in `Docs/`, create a corresponding `.llm.md` file in the same location (or a designated output directory)
+2. **Генерация файлов**: для каждого `.md` файла в `Docs/` создавать соответствующий `.llm.md` файл в той же директории (либо в отдельной выходной директории)
 
-3. **Serving**: Add an endpoint in `Ivy.Docs` to serve these `.llm.md` files for LLM consumption
+3. **Отдача файлов**: добавить endpoint в `Ivy.Docs`, который будет отдавать `.llm.md` файлы для потребления LLM
 
-## Implementation Strategy
+## Стратегия реализации
 
-### Phase 1: Extend MarkdownConverter
+### Фаза 1: Расширение `MarkdownConverter`
 
-**File**: `Ivy.Docs.Tools/MarkdownConverter.cs`
+**Файл**: `Ivy.Docs.Tools/MarkdownConverter.cs`
 
-1. **Add LLM Markdown Generation Method**
-   - Create `GenerateLlmMarkdownAsync()` method
-   - Takes the same inputs as `ConvertAsync()` (name, paths, etc.)
-   - Outputs to `.llm.md` file alongside the `.g.cs` file
+1. **Метод генерации LLM‑Markdown**
+   - Создать метод `GenerateLlmMarkdownAsync()`
+   - Принимать те же параметры, что и `ConvertAsync()` (имя, пути и т.п.)
+   - Записывать результат в `.llm.md` рядом с соответствующим `.g.cs` файлом
 
-2. **Extract Original Markdown Content**
-   - Read and preserve the original markdown content
-   - Process through markdown pipeline to understand structure
-   - Handle YAML front matter appropriately
+2. **Извлечение исходного markdown**
+   - Прочитать и сохранить исходное markdown‑содержимое
+   - Пропустить через markdown‑pipeline, чтобы получить структуру документа
+   - Корректно обработать YAML‑front matter
 
-3. **Generate API Sections**
-   - For widgets referenced in markdown (via `WidgetDocsView` pattern):
-     - Use reflection to get type information
-     - Generate Constructors section (similar to `WidgetDocsView.cs` lines 22-38)
-     - Generate Supported Types section (lines 40-89)
-     - Generate Properties section (lines 92-101)
-     - Generate Events section (lines 103-117)
-   - Convert these sections to markdown format:
-     - Headings (`## API`, `### Constructors`, etc.)
-     - Tables in markdown format
-     - Code blocks for examples
+3. **Генерация API‑секций**
+   - Для виджетов, на которые ссылается markdown (через паттерн `WidgetDocsView`):
+     - Использовать reflection для получения информации о типах
+     - Сгенерировать секцию Constructors (аналогично `WidgetDocsView.cs`, строки 22–38)
+     - Сгенерировать секцию Supported Types (строки 40–89)
+     - Сгенерировать секцию Properties (строки 92–101)
+     - Сгенерировать секцию Events (строки 103–117)
+   - Конвертировать эти секции в markdown‑формат:
+     - Заголовки (`## API`, `### Constructors` и т.п.)
+     - Таблицы в markdown‑формате
+     - Блоки кода с примерами
 
-4. **Process Markdown Blocks**
-   - Expand all `<details>` blocks (extract summary and body)
-   - Include all tab content (process tab structures)
-   - Preserve code blocks with language identifiers
-   - Preserve terminal blocks with `terminal` language tag
-   - Convert tables to markdown format
-   - Preserve lists, headings, paragraphs
+4. **Обработка markdown‑блоков**
+   - Развернуть все блоки `<details>` (извлечь summary и тело)
+   - Включить содержимое всех вкладок (обработать структуры табов)
+   - Сохранить блоки кода с их language‑идентификаторами
+   - Сохранить терминальные блоки с тегом языка `terminal`
+   - Конвертировать таблицы в markdown‑формат
+   - Сохранить списки, заголовки и параграфы
 
-5. **Combine Content**
-   - Merge original markdown with generated API sections
-   - Ensure proper markdown formatting
-   - Add metadata header if needed
+5. **Объединение содержимого**
+   - Объединить исходный markdown и сгенерированные API‑секции
+   - Обеспечить корректное markdown‑форматирование
+   - При необходимости добавить заголовок с метаданными
 
-### Phase 2: Integrate into ConvertCommand
+### Фаза 2: Интеграция в `ConvertCommand`
 
-**File**: `Ivy.Docs.Tools/ConvertCommand.cs`
+**Файл**: `Ivy.Docs.Tools/ConvertCommand.cs`
 
-1. **Add LLM Generation Step**
-   - After `MarkdownConverter.ConvertAsync()` succeeds
-   - Call `MarkdownConverter.GenerateLlmMarkdownAsync()`
-   - Generate `.llm.md` file in same directory as `.g.cs` file
-   - Or in a parallel `GeneratedLlm/` directory structure
+1. **Шаг генерации LLM‑файлов**
+   - После успешного выполнения `MarkdownConverter.ConvertAsync()`
+   - Вызывать `MarkdownConverter.GenerateLlmMarkdownAsync()`
+   - Генерировать `.llm.md` в той же директории, где находится `.g.cs` файл
+   - Либо в параллельной структуре директорий `GeneratedLlm/`
 
-2. **Handle File Paths**
-   - Determine output path for `.llm.md` files
-   - Consider: same directory as source, or separate output directory
-   - Preserve directory structure
+2. **Обработка путей**
+   - Определить выходной путь для `.llm.md` файлов
+   - Рассмотреть варианты: та же директория, что и исходник, либо отдельная выходная папка
+   - Сохранить структуру директорий
 
-### Phase 3: Widget Type Detection
+### Фаза 3: Определение типов виджетов
 
-**File**: `Ivy.Docs.Tools/MarkdownConverter.cs` (or new helper)
+**Файл**: `Ivy.Docs.Tools/MarkdownConverter.cs` (или отдельный helper)
 
-1. **Detect Widget References**
-   - Parse markdown for widget references
-   - Look for patterns like `WidgetDocsView` usage
-   - Extract type names from markdown or YAML front matter
-   - May need to parse generated `.g.cs` files to find widget types
+1. **Обнаружение ссылок на виджеты**
+   - Разбирать markdown в поиске ссылок на виджеты
+   - Ищать паттерны использования `WidgetDocsView`
+   - Извлекать имена типов из markdown или YAML‑front matter
+   - При необходимости разбирать сгенерированные `.g.cs` файлы, чтобы найти типы виджетов
 
-2. **Type Resolution**
-   - Use `TypeUtils.GetTypeFromName()` (similar to `WidgetDocsView`)
-   - Handle extension types
-   - Resolve types from Ivy assemblies
+2. **Разрешение типов**
+   - Использовать `TypeUtils.GetTypeFromName()` (аналогично `WidgetDocsView`)
+   - Обрабатывать extension‑типы
+   - Разрешать типы из сборок Ivy
 
-3. **API Section Generation**
-   - Reuse logic from `WidgetDocsView.cs`
-   - Convert Ivy view objects to markdown:
-     - Tables → markdown tables
-     - Headings → markdown headings
-     - Code blocks → markdown code blocks
+3. **Генерация API‑секций**
+   - Переиспользовать логику из `WidgetDocsView.cs`
+   - Конвертировать Ivy‑view‑объекты в markdown:
+     - Таблицы → markdown‑таблицы
+     - Заголовки → markdown‑заголовки
+     - Блоки кода → markdown‑код‑блоки
 
-### Phase 4: Markdown Conversion Utilities
+### Фаза 4: Утилиты конвертации в markdown
 
-**New File**: `Ivy.Docs.Tools/LlmMarkdownGenerator.cs`
+**Новый файл**: `Ivy.Docs.Tools/LlmMarkdownGenerator.cs`
 
-1. **Ivy View to Markdown Converter**
-   - Convert `Table` widgets to markdown tables
-   - Convert `Text.H2()`, `Text.H3()` to markdown headings
-   - Convert `Code()` blocks to markdown code fences
-   - Handle `Layout.Vertical()` and other layout structures
+1. **Конвертер Ivy‑view → markdown**
+   - Конвертация виджетов `Table` в markdown‑таблицы
+   - Конвертация `Text.H2()`, `Text.H3()` в markdown‑заголовки
+   - Конвертация `Code()` в markdown‑код‑блоки (fenced code blocks)
+   - Обработка `Layout.Vertical()` и других layout‑структур
 
-2. **Table Conversion**
-   - Extract table headers and rows
-   - Handle complex cells (like the Supported Types table with nested layouts)
-   - Convert to markdown table format with proper alignment
+2. **Конвертация таблиц**
+   - Извлекать заголовки и строки таблиц
+   - Обрабатывать сложные ячейки (например, в таблице Supported Types с вложенными layout‑структурами)
+   - Конвертировать в markdown‑таблицу с корректным выравниванием
 
-3. **Code Block Handling**
-   - Preserve language identifiers
-   - Handle terminal blocks specially
-   - Preserve formatting
+3. **Обработка блоков кода**
+   - Сохранять идентификаторы языков
+   - Отдельно обрабатывать терминальные блоки
+   - Сохранять форматирование
 
-### Phase 5: Details and Tabs Processing
+### Фаза 5: Обработка details и вкладок
 
-**File**: `Ivy.Docs.Tools/MarkdownConverter.cs`
+**Файл**: `Ivy.Docs.Tools/MarkdownConverter.cs`
 
-1. **Details Block Expansion**
-   - Parse `<details>` blocks in markdown
-   - Extract `<summary>` content as heading
-   - Extract `<Body>` content and process recursively
-   - Expand all details blocks (don't leave any collapsed)
+1. **Разворачивание блоков details**
+   - Парсить блоки `<details>` в markdown
+   - Извлекать содержимое `<summary>` как заголовок/подзаголовок
+   - Извлекать содержимое `<Body>` и рекурсивно его обрабатывать
+   - Разворачивать все `details` (не оставлять скрытых блоков)
 
-2. **Tab Processing**
-   - Detect tab structures in markdown or generated code
-   - Extract content from all tabs
-   - Include all tab content in output (not just active tab)
-   - Format as sections or use markdown conventions
+2. **Обработка вкладок**
+   - Определять структуры табов в markdown или сгенерированном коде
+   - Извлекать содержимое всех вкладок
+   - Включать в результат контент всех вкладок, а не только активной
+   - При необходимости форматировать как отдельные секции либо применять markdown‑конвенции для табов
 
-### Phase 6: Serving Endpoint
+### Фаза 6: Endpoint для LLM‑markdown
 
-**File**: `Ivy.Docs.Shared/DocsServer.cs` or new endpoint handler
+**Файл**: `Ivy.Docs.Shared/DocsServer.cs` или новый обработчик endpoint
 
-1. **Add LLM Markdown Endpoint**
-   - Route: `/api/llm/{path}` or `/llm/{path}`
-   - Maps to `.llm.md` files in `Generated/` or source directory
-   - Returns markdown content with appropriate content-type
+1. **Добавление endpoint для LLM‑markdown**
+   - Маршрут: `/api/llm/{path}` или `/llm/{path}`
+   - Отображение на `.llm.md` файлы в `Generated/` или директории исходников
+   - Возврат markdown‑контента с корректным `content-type`
 
-2. **File Resolution**
-   - Map URL path to file system path
-   - Handle directory structure preservation
-   - Return 404 for non-existent files
+2. **Разрешение файлов**
+   - Картировать URL‑путь в файловый путь
+   - Сохранять структуру директорий
+   - Возвращать 404 для несуществующих файлов
 
-3. **Content-Type Headers**
-   - Set `Content-Type: text/markdown` or `text/plain`
-   - Consider CORS headers if needed for LLM access
+3. **Заголовки Content-Type**
+   - Устанавливать `Content-Type: text/markdown` или `text/plain`
+   - При необходимости учитывать CORS‑заголовки для доступа LLM
 
-## Technical Considerations
+## Технические детали и ограничения
 
-### Type Resolution Challenges
-- Widget types may be referenced indirectly
-- Need to parse generated `.g.cs` files or markdown to find widget types
-- May need to maintain a mapping of markdown files to widget types
+### Сложности с разрешением типов
+- Типы виджетов могут ссылаться не напрямую
+- Может потребоваться разбор сгенерированных `.g.cs` файлов или markdown для поиска типов
+- Возможно, придётся поддерживать словарь соответствия «markdown‑файл → тип(ы) виджетов»
 
-### Markdown Conversion Complexity
-- Ivy view objects are complex and may contain nested structures
-- Tables with complex cells (like Supported Types) need special handling
-- Need to convert layout structures to appropriate markdown
+### Сложность конвертации markdown
+- Объекты Ivy‑view могут иметь сложную и вложенную структуру
+- Таблицы со сложными ячейками (например, Supported Types) требуют специальной обработки
+- Нужно корректно сворачивать layout‑структуры в подходящий markdown
 
-### Performance
-- Reflection-based API generation may be slow for many files
-- Consider caching type information
-- Parallel processing already exists in `ConvertCommand`
+### Производительность
+- Генерация API через reflection может быть медленной при большом количестве файлов
+- Имеет смысл кешировать информацию о типах
+- В `ConvertCommand` уже есть параллельная обработка
 
-### File Organization
-- Options:
-  1. `.llm.md` files alongside `.md` files in `Docs/`
-  2. `.llm.md` files in `Generated/` directory mirroring structure
-  3. Separate `GeneratedLlm/` directory
-- Recommendation: Option 2 (in `Generated/`) to keep generated files together
+### Организация файлов
+- Варианты:
+  1. `.llm.md` рядом с `.md` в `Docs/`
+  2. `.llm.md` в `Generated/` с зеркальной структурой директорий
+  3. Отдельная директория `GeneratedLlm/`
+- Рекомендация: вариант 2 (в `Generated/`), чтобы все сгенерированные файлы были собраны вместе
 
-## Implementation Steps
+## Шаги реализации
 
-1. **Create `LlmMarkdownGenerator.cs`**
-   - Implement Ivy view to markdown conversion
-   - Handle tables, headings, code blocks
-   - Test with sample widget types
+1. **Создать `LlmMarkdownGenerator.cs`**
+   - Реализовать конвертацию Ivy‑view в markdown
+   - Обработать таблицы, заголовки и блоки кода
+   - Протестировать на примерах с виджетами
 
-2. **Extend `MarkdownConverter.cs`**
-   - Add `GenerateLlmMarkdownAsync()` method
-   - Integrate API section generation
-   - Process details blocks and tabs
+2. **Расширить `MarkdownConverter.cs`**
+   - Добавить метод `GenerateLlmMarkdownAsync()`
+   - Интегрировать генерацию API‑секций
+   - Добавить обработку `details` и табов
 
-3. **Update `ConvertCommand.cs`**
-   - Call LLM markdown generation after C# conversion
-   - Handle output paths
+3. **Обновить `ConvertCommand.cs`**
+   - После C#‑конверсии вызывать генерацию LLM‑markdown
+   - Настроить пути вывода
 
-4. **Add Serving Endpoint**
-   - Create endpoint handler in `Ivy.Docs`
-   - Map paths to `.llm.md` files
-   - Test serving files
+4. **Добавить endpoint в Ivy.Docs**
+   - Реализовать обработчик endpoint в `Ivy.Docs`
+   - Настроить маппинг путей на `.llm.md` файлы
+   - Протестировать отдачу файлов
 
-5. **Testing**
-   - Test with various markdown files
-   - Verify API sections are generated correctly
-   - Verify details/tabs are expanded
-   - Test endpoint serves files correctly
+5. **Тестирование**
+   - Протестировать на разных markdown‑файлах
+   - Проверить корректность генерации API‑секций
+   - Убедиться, что details/табы корректно разворачиваются
+   - Проверить, что endpoint корректно отдаёт файлы
 
-## Success Criteria
+## Критерии успеха
 
-- ✅ For each `.md` file, a corresponding `.llm.md` file is generated during regeneration
-- ✅ `.llm.md` files contain original markdown content plus runtime-rendered API sections
-- ✅ All expandable sections are expanded in `.llm.md` files
-- ✅ All tab content is included in `.llm.md` files
-- ✅ API sections (Constructors, Properties, Events, Supported Types) are correctly generated
-- ✅ `.llm.md` files are served via endpoint in `Ivy.Docs`
-- ✅ Files are accessible to LLMs for consumption
+- ✅ Для каждого `.md` файла во время регенерации создаётся соответствующий `.llm.md`
+- ✅ `.llm.md` содержит исходный markdown плюс сгенерированные API‑секции времени выполнения
+- ✅ Во всех `.llm.md` файлах развёрнуты все блоки с подробностями
+- ✅ В `.llm.md` включено содержимое всех вкладок
+- ✅ API‑секции (Constructors, Properties, Events, Supported Types) генерируются корректно
+- ✅ `.llm.md` файлы отдаются через endpoint в `Ivy.Docs`
+- ✅ Файлы доступны для потребления LLM
 
-## Future Enhancements
+## Возможные будущие улучшения
 
-- Add metadata to `.llm.md` files (last updated, source file, etc.)
-- Support incremental updates (only regenerate changed files)
-- Add validation to ensure `.llm.md` files are complete
-- Consider adding LLM-specific optimizations (token limits, formatting, etc.)
+- Добавить в `.llm.md` метаданные (дата обновления, исходный файл и т.п.)
+- Поддержать инкрементальную регенерацию (перегенерировать только изменившиеся файлы)
+- Добавить валидацию полноты `.llm.md` файлов
+- Добавить LLM‑специфичные оптимизации (лимиты токенов, дополнительные правила форматирования и т.д.)
 
