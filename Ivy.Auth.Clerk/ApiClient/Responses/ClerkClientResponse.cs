@@ -9,5 +9,5 @@ public class ClerkClientResponse
     public ClerkClient? Response { get; set; }
 
     [JsonPropertyName("client")]
-    public object? Client { get; set; }
+    public ClerkClient? Client { get; set; }
 }
