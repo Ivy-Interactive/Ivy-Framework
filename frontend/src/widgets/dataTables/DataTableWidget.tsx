@@ -4,7 +4,7 @@ import React from 'react';
 import { TableProvider, useTable } from './DataTableContext';
 import { ErrorDisplay } from '@/components/ErrorDisplay';
 import { Loading } from '@/components/Loading';
-import { DataTableEditor } from './DataTableEditor';
+import { DataTableEditor } from './DataTableEditor/index';
 import { DataTableHeader } from './DataTableHeader';
 import { DataTableFooter } from './DataTableFooter';
 import { DataTableOption } from './DataTableOption';

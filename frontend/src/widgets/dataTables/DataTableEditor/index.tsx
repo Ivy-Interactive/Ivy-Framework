@@ -1,18 +1,9 @@
-import {
-  CustomRenderer,
-  DataEditorRef,
-  GridCell,
-  GridCellKind,
-  Item,
-} from '@glideapps/glide-data-grid';
-import React, { useMemo, useCallback, useRef } from 'react';
-import { useTable } from './DataTableContext';
-import { getSelectionProps } from './utils/selectionModes';
-import { getCellContent as getCellContentUtil } from './utils/cellContent';
-import { convertToGridColumns } from './utils/columnHelpers';
-import { iconCellRenderer, linkCellRenderer } from './utils/customRenderers';
-import { generateHeaderIcons, addStandardIcons } from './utils/headerIcons';
-import { useColumnGroups } from './hooks/useColumnGroups';
+import React, { useMemo, useRef } from 'react';
+import { CustomRenderer, DataEditorRef } from '@glideapps/glide-data-grid';
+import { useTable } from '../DataTableContext';
+import { getSelectionProps } from '../utils/selectionModes';
+import { iconCellRenderer, linkCellRenderer } from '../utils/customRenderers';
+import { generateHeaderIcons, addStandardIcons } from '../utils/headerIcons';
 import {
   useContainerSize,
   useSearch,
@@ -22,9 +13,11 @@ import {
   useRowHover,
   useEmptyRows,
   useDataLoading,
-} from './hooks';
-import { GridContainer } from './components/GridContainer';
+} from '../hooks';
+import { GridContainer } from '../components/GridContainer';
 import { MenuItem } from '@/types/widgets';
+import { ROW_HEIGHT, GROUP_HEADER_HEIGHT } from './constants';
+import { useCellContent, useGridColumns, useHeaderMenu } from './hooks';
 
 interface TableEditorProps {
   widgetId: string;
@@ -32,9 +25,6 @@ interface TableEditorProps {
   rowActions?: MenuItem[];
   footer?: React.ReactNode;
 }
-
-const rowHeight = 38;
-const GROUP_HEADER_HEIGHT = 36;
 
 export const DataTableEditor: React.FC<TableEditorProps> = ({
   widgetId,
@@ -85,29 +75,14 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
   // Grid ref
   const gridRef = useRef<DataEditorRef | null>(null);
 
-  // Get cell content
-  const getCellContent = useCallback(
-    (cell: Item): GridCell => {
-      const [, row] = cell;
-      // If this is an empty filler row, return empty text cell
-      if (row >= visibleRows) {
-        return {
-          kind: GridCellKind.Text,
-          data: '',
-          displayData: '',
-          allowOverlay: false,
-        };
-      }
-      return getCellContentUtil(
-        cell,
-        columns,
-        columnOrder,
-        editable,
-        getRowData
-      );
-    },
-    [columns, columnOrder, editable, visibleRows, getRowData]
-  );
+  // Cell content
+  const { getCellContent } = useCellContent({
+    columns,
+    columnOrder,
+    editable,
+    visibleRows,
+    getRowData,
+  });
 
   // Grid selection
   const { gridSelection, handleGridSelectionChange } = useGridSelection({
@@ -151,7 +126,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     visibleRows,
     hasMore,
     showGroups: showGroups ?? false,
-    rowHeight,
+    rowHeight: ROW_HEIGHT,
   });
 
   // Data loading
@@ -161,7 +136,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     isLoading,
     hasMore,
     loadMoreData,
-    rowHeight,
+    rowHeight: ROW_HEIGHT,
   });
 
   // Generate header icons map for all column icons
@@ -170,54 +145,26 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     return addStandardIcons(baseIcons);
   }, [columns]);
 
-  // Handle column header click for sorting
-  const handleHeaderMenuClick = useCallback(
-    (col: number) => {
-      // Only handle sorting if it's enabled globally
-      if (!allowSorting) return;
+  // Header menu handling
+  const { handleHeaderMenuClick } = useHeaderMenu({
+    columns,
+    allowSorting: allowSorting ?? true,
+    handleSort,
+  });
 
-      // Get visible columns to map the correct column index
-      const visibleColumns = columns.filter(c => !c.hidden);
-      const column = visibleColumns[col];
-
-      // Check if this specific column is sortable (defaults to true if not specified)
-      if (column && (column.sortable ?? true)) {
-        handleSort(column.name);
-      }
-    },
-    [columns, handleSort, allowSorting]
-  );
-
-  // Convert columns to grid format with proper widths
-  // Memoize to prevent recalculation on every render
-  const gridColumns = useMemo(
-    () =>
-      convertToGridColumns(
-        columns,
-        columnOrder,
-        columnWidths,
-        containerWidth,
-        showGroups ?? false,
-        showColumnTypeIcons ?? true
-      ),
-    [
-      columns,
-      columnOrder,
-      columnWidths,
-      containerWidth,
-      showGroups,
-      showColumnTypeIcons,
-    ]
-  );
-
-  // Use column groups hook when showGroups is enabled
-  const columnGroupsHook = useColumnGroups(gridColumns);
-  const shouldUseColumnGroups = showGroups ?? false;
-
-  // Use grouped columns if showGroups is enabled, otherwise use regular columns
-  const finalColumns = shouldUseColumnGroups
-    ? columnGroupsHook.columns
-    : gridColumns;
+  // Grid columns configuration
+  const {
+    columns: finalColumns,
+    shouldUseColumnGroups,
+    onGroupHeaderClicked,
+  } = useGridColumns({
+    columns,
+    columnOrder,
+    columnWidths,
+    containerWidth,
+    showGroups: showGroups ?? false,
+    showColumnTypeIcons: showColumnTypeIcons ?? true,
+  });
 
   if (finalColumns.length === 0) {
     return null;
@@ -242,8 +189,8 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
       onVisibleRegionChanged={handleVisibleRegionChanged}
       onHeaderClicked={allowSorting ? handleHeaderMenuClick : undefined}
       theme={tableTheme}
-      rowHeight={rowHeight}
-      headerHeight={rowHeight}
+      rowHeight={ROW_HEIGHT}
+      headerHeight={ROW_HEIGHT}
       freezeColumns={freezeColumns ?? 0}
       getCellsForSelection={(allowCopySelection ?? true) ? true : undefined}
       rowSelect={selectionProps.rowSelect}
@@ -258,9 +205,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
       onCellClicked={handleCellClicked}
       onCellActivated={handleCellActivated}
       onGroupHeaderClicked={
-        shouldUseColumnGroups
-          ? columnGroupsHook.onGroupHeaderClicked
-          : undefined
+        shouldUseColumnGroups ? onGroupHeaderClicked : undefined
       }
       showSearch={showSearchConfig ? showSearch : false}
       onSearchClose={() => setShowSearch(false)}
