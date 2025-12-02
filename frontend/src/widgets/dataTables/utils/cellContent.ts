@@ -302,13 +302,14 @@ export function getOrderedColumns(
 /**
  * Main function to get cell content for a grid cell
  * Filters out hidden columns and applies column ordering
+ * Uses Arrow table via getRowData for efficient access to gRPC data
  */
 export function getCellContent(
   cell: Item,
-  data: DataRow[],
   columns: DataColumn[],
   columnOrder: number[],
-  editable: boolean
+  editable: boolean,
+  getRowData: (rowIndex: number) => DataRow | null
 ): GridCell {
   const [col, row] = cell;
 
@@ -324,12 +325,13 @@ export function getCellContent(
     orderedCols = columns.filter(col => !col.hidden);
   }
 
+  // Get row data from Arrow table via getRowData
+  const rowData = getRowData(row);
+
   // Safety check
-  if (row >= data.length || col >= orderedCols.length) {
+  if (!rowData || col >= orderedCols.length) {
     return createEmptyCell();
   }
-
-  const rowData = data[row];
   const column = orderedCols[col];
   const originalColumnIndex = columns.indexOf(column);
   const cellValue = rowData.values[originalColumnIndex];

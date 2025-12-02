@@ -1,10 +1,12 @@
 import { Filter, SortOrder } from '@/services/grpcTableService';
 import { GridColumn } from '@glideapps/glide-data-grid';
+import * as arrow from 'apache-arrow';
 import React, {
   createContext,
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from 'react';
@@ -39,7 +41,6 @@ function parseSize(size: number | string | undefined): number {
 
 interface TableContextType {
   // State
-  data: DataRow[];
   columns: DataColumn[];
   columnWidths: Record<string, number>;
   visibleRows: number;
@@ -52,6 +53,8 @@ interface TableContextType {
   activeFilter: Filter | null;
   activeSort: SortOrder[] | null;
   columnOrder: number[];
+  // Arrow table accessor - data is accessed directly from Arrow table via gRPC
+  getRowData: (rowIndex: number) => DataRow | null;
 
   // Methods
   loadMoreData: () => Promise<void>;
@@ -82,7 +85,6 @@ export const TableProvider: React.FC<TableProviderProps> = ({
   config,
   editable = false,
 }) => {
-  const [data, setData] = useState<DataRow[]>([]);
   const [columns, setColumns] = useState<DataColumn[]>(columnsProp);
   const [columnWidths, setColumnWidths] = useState<Record<string, number>>({});
   const [visibleRows, setVisibleRows] = useState(0);
@@ -96,6 +98,9 @@ export const TableProvider: React.FC<TableProviderProps> = ({
   const loadingRef = useRef(false);
   const currentRowCountRef = useRef(0);
   const isReorderingRef = useRef(false);
+  // Store Arrow tables in ref for efficient access without storing millions of rows in state
+  // Arrow tables are columnar and memory-efficient
+  const arrowTableRef = useRef<arrow.Table | null>(null);
   const batchSize = config.batchSize ?? 20;
 
   const { allowColumnResizing, allowSorting } = config;
@@ -175,9 +180,14 @@ export const TableProvider: React.FC<TableProviderProps> = ({
         });
 
         setColumns(mergedColumns);
-        setData(result.rows);
-        setVisibleRows(result.rows.length);
-        currentRowCountRef.current = result.rows.length;
+        // Store Arrow table in ref for efficient access (columnar, memory-efficient)
+        // This avoids storing millions of rows in React state - data is accessed directly from Arrow table
+        if (result.arrowTable) {
+          arrowTableRef.current = result.arrowTable;
+          const rowCount = result.arrowTable.numRows;
+          setVisibleRows(rowCount);
+          currentRowCountRef.current = rowCount;
+        }
         setHasMore(result.hasMore);
 
         // Initialize column order when columns are first loaded
@@ -237,18 +247,30 @@ export const TableProvider: React.FC<TableProviderProps> = ({
     setIsLoading(true);
 
     try {
+      const currentRowCount = arrowTableRef.current?.numRows ?? 0;
       const result = await fetchTableData(
         connection,
-        data.length,
+        currentRowCount,
         batchSize,
         activeFilter,
         activeSort
       );
 
-      if (result.rows.length > 0) {
-        setData(prev => [...prev, ...result.rows]);
-        setVisibleRows(prev => prev + result.rows.length);
-        currentRowCountRef.current += result.rows.length;
+      if (result.arrowTable && result.arrowTable.numRows > 0) {
+        // Concatenate Arrow tables for efficient columnar storage
+        if (arrowTableRef.current) {
+          // Use RecordBatch.concat to combine tables
+          const batches = [
+            ...arrowTableRef.current.batches,
+            ...result.arrowTable.batches,
+          ];
+          arrowTableRef.current = new arrow.Table(batches);
+        } else {
+          arrowTableRef.current = result.arrowTable;
+        }
+        const newRowCount = arrowTableRef.current.numRows;
+        setVisibleRows(newRowCount);
+        currentRowCountRef.current = newRowCount;
       }
 
       setHasMore(result.hasMore);
@@ -260,7 +282,14 @@ export const TableProvider: React.FC<TableProviderProps> = ({
       setIsLoading(false);
       loadingRef.current = false;
     }
-  }, [connection, data.length, hasMore, activeFilter, activeSort]);
+  }, [
+    connection,
+    hasMore,
+    activeFilter,
+    activeSort,
+    batchSize,
+    config.loadAllRows,
+  ]);
 
   // Handle column resize
   const handleColumnResize = useCallback(
@@ -350,8 +379,49 @@ export const TableProvider: React.FC<TableProviderProps> = ({
     [columns]
   );
 
-  const value: TableContextType = {
-    data,
+  // Helper function to get row data from Arrow table
+  // Stable function reference - doesn't need to be in dependency array
+  const getRowData = useCallback((rowIndex: number): DataRow | null => {
+    const table = arrowTableRef.current;
+    if (!table || rowIndex < 0 || rowIndex >= table.numRows) {
+      return null;
+    }
+
+    const values: (string | number | boolean | Date | string[] | null)[] = [];
+    for (let j = 0; j < table.numCols; j++) {
+      const column = table.getChildAt(j);
+      if (column) {
+        const value = column.get(rowIndex);
+        values.push(value);
+      }
+    }
+    return { values };
+  }, []);
+
+  const value: TableContextType = useMemo(() => {
+    const contextValue: TableContextType = {
+      columns,
+      columnWidths,
+      visibleRows,
+      isLoading,
+      hasMore,
+      error,
+      editable,
+      connection,
+      config,
+      activeFilter,
+      activeSort,
+      columnOrder,
+      getRowData,
+      loadMoreData,
+      handleColumnResize,
+      handleSort,
+      setActiveFilter,
+      setError,
+      handleColumnReorder,
+    };
+    return contextValue;
+  }, [
     columns,
     columnWidths,
     visibleRows,
@@ -364,13 +434,14 @@ export const TableProvider: React.FC<TableProviderProps> = ({
     activeFilter,
     activeSort,
     columnOrder,
+    getRowData,
     loadMoreData,
     handleColumnResize,
     handleSort,
     setActiveFilter,
     setError,
     handleColumnReorder,
-  };
+  ]);
 
   return (
     <TableContext.Provider value={value}>{children}</TableContext.Provider>

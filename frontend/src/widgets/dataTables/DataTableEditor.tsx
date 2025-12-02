@@ -43,7 +43,6 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
   footer,
 }) => {
   const {
-    data,
     columns,
     columnWidths,
     visibleRows,
@@ -52,6 +51,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     editable,
     config,
     columnOrder,
+    getRowData,
     loadMoreData,
     handleColumnResize,
     handleSort,
@@ -98,9 +98,15 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
           allowOverlay: false,
         };
       }
-      return getCellContentUtil(cell, data, columns, columnOrder, editable);
+      return getCellContentUtil(
+        cell,
+        columns,
+        columnOrder,
+        editable,
+        getRowData
+      );
     },
-    [data, columns, columnOrder, editable, visibleRows]
+    [columns, columnOrder, editable, visibleRows, getRowData]
   );
 
   // Grid selection
@@ -183,13 +189,25 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
   );
 
   // Convert columns to grid format with proper widths
-  const gridColumns = convertToGridColumns(
-    columns,
-    columnOrder,
-    columnWidths,
-    containerWidth,
-    showGroups ?? false,
-    showColumnTypeIcons ?? true
+  // Memoize to prevent recalculation on every render
+  const gridColumns = useMemo(
+    () =>
+      convertToGridColumns(
+        columns,
+        columnOrder,
+        columnWidths,
+        containerWidth,
+        showGroups ?? false,
+        showColumnTypeIcons ?? true
+      ),
+    [
+      columns,
+      columnOrder,
+      columnWidths,
+      containerWidth,
+      showGroups,
+      showColumnTypeIcons,
+    ]
   );
 
   // Use column groups hook when showGroups is enabled
