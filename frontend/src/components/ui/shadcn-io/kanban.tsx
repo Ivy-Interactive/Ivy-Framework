@@ -156,7 +156,7 @@ interface KanbanBoardProps {
 export function KanbanBoard({ children, className }: KanbanBoardProps) {
   return (
     <div
-      className={cn('flex h-full bg-background', className)}
+      className={cn('flex h-full bg-background flex-row gap-3', className)}
       style={{ minWidth: 'fit-content', maxWidth: '100%' }}
     >
       {children}
@@ -254,8 +254,7 @@ export function KanbanColumn({
       className={cn(
         hasExplicitWidth ? 'bg-background' : 'flex-1 bg-background',
         'rounded-lg px-0 py-4 min-h-0 flex flex-col transition-colors min-w-70',
-        showDragOver &&
-          'bg-accent border-2 border-accent-foreground border-dashed rounded-lg',
+        showDragOver && 'bg-accent rounded-lg',
         className
       )}
       style={widthStyles}
@@ -301,7 +300,7 @@ export function KanbanCards({ id, children }: KanbanCardsProps) {
 
   return (
     <ScrollArea className="flex-1 min-h-0">
-      <div className="flex flex-col gap-3 p-2">
+      <div className="flex flex-col gap-2 p-1">
         {columnTasks.map((task, index) => {
           const isDraggedCard = task.id === draggedCardId;
           const shouldShift =
@@ -321,7 +320,7 @@ export function KanbanCards({ id, children }: KanbanCardsProps) {
           return (
             <div key={task.id} className="relative">
               {showLineBefore && (
-                <Separator className="absolute -top-1.5 left-0 right-0 h-0.5 bg-muted-foreground/40 z-10" />
+                <Separator className="absolute -top-1 left-0 right-0 h-0.5 bg-muted-foreground/40 z-10" />
               )}
               <div
                 style={{
@@ -334,7 +333,7 @@ export function KanbanCards({ id, children }: KanbanCardsProps) {
                 {children(task, index)}
               </div>
               {showLineAfter && (
-                <Separator className="absolute -bottom-1.5 left-0 right-0 h-0.5 bg-muted-foreground/40 z-10" />
+                <Separator className="absolute -bottom-1 left-0 right-0 h-0.5 bg-muted-foreground/40 z-10" />
               )}
             </div>
           );
