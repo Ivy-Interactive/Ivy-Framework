@@ -14,6 +14,4 @@ public record KanbanCard : WidgetBase<KanbanCard>
     [Prop] public object? Priority { get; set; }
 
     [Prop] public object? Column { get; set; }
-
-    [Event] public Func<Event<KanbanCard, object?>, ValueTask>? OnClick { get; set; }
 }

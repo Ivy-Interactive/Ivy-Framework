@@ -5,7 +5,6 @@ using Size = Ivy.Shared.Size;
 
 namespace Ivy.Views;
 
-/// <summary>Provides static factory methods for creating text views with different variants including headings, paragraphs, code blocks, and semantic text styles.</summary>
 public static class Text
 {
     public static TextBuilder Literal(string content)
@@ -191,7 +190,6 @@ public static class Text
     public static TextBuilder Latex(IAnyState state) => Latex(state.ToString() ?? "");
 }
 
-/// <summary>A builder class for creating and configuring text views with various styling options including width, color, text wrapping, and overflow handling. This class provides a fluent API for text customization.</summary>
 public class TextBuilder(string content, TextVariant variant, Languages codeLanguage = Languages.Csharp) : ViewBase, IStateless
 {
     private bool _strikeThrough;
@@ -203,12 +201,6 @@ public class TextBuilder(string content, TextVariant variant, Languages codeLang
     private bool _italic;
     private bool _muted;
 
-    /// <summary>
-    /// Builds the final text widget based on the variant and configuration.
-    /// Special variants like Code, Markdown, JSON, XML, HTML, and LaTeX
-    /// create specialized widgets, while other variants create TextBlock widgets.
-    /// </summary>
-    /// <returns>A text widget configured with the current settings and variant.</returns>
     public override object? Build()
     {
         switch (variant)
@@ -234,111 +226,66 @@ public class TextBuilder(string content, TextVariant variant, Languages codeLang
         }
     }
 
-    /// <summary>
-    /// Sets whether the text should be displayed with a strikethrough effect.
-    /// </summary>
-    /// <param name="value">True to apply strikethrough, false to remove it (defaults to true).</param>
-    /// <returns>The current TextBuilder instance for method chaining.</returns>
     public TextBuilder StrikeThrough(bool value = true)
     {
         _strikeThrough = value;
         return this;
     }
 
-    /// <summary>
-    /// Sets the width of the text using a Size value.
-    /// </summary>
-    /// <param name="width">The Size value that determines the text's width.</param>
-    /// <returns>The current TextBuilder instance for method chaining.</returns>
     public TextBuilder Width(Size width)
     {
         _width = width;
         return this;
     }
 
-    /// <summary>
-    /// Sets the width of the text in units.
-    /// </summary>
-    /// <param name="units">The width in units.</param>
-    /// <returns>The current TextBuilder instance for method chaining.</returns>
     public TextBuilder Width(int units)
     {
         _width = Size.Units(units);
         return this;
     }
 
-    /// <summary>
-    /// Sets the width of the text as a fraction of available space.
-    /// </summary>
-    /// <param name="fraction">The width as a fraction (0.0 to 1.0).</param>
-    /// <returns>The current TextBuilder instance for method chaining.</returns>
     public TextBuilder Width(float fraction)
     {
         _width = Size.Fraction(fraction);
         return this;
     }
 
-    /// <summary>
-    /// Sets the width of the text as a fraction of available space.
-    /// </summary>
-    /// <param name="fraction">The width as a fraction (0.0 to 1.0).</param>
-    /// <returns>The current TextBuilder instance for method chaining.</returns>
     public TextBuilder Width(double fraction)
     {
         _width = Size.Fraction(Convert.ToSingle(fraction));
         return this;
     }
 
-    /// <summary>
-    /// Sets the color of the text.
-    /// </summary>
-    /// <param name="color">The Colors value for the text color.</param>
-    /// <returns>The current TextBuilder instance for method chaining.</returns>
     public TextBuilder Color(Colors color)
     {
         _color = color;
         return this;
     }
 
-    /// <summary>
-    /// Prevents the text from wrapping to new lines.
-    /// </summary>
-    /// <returns>The current TextBuilder instance for method chaining.</returns>
     public TextBuilder NoWrap()
     {
         _noWrap = true;
         return this;
     }
 
-    /// <summary>
-    /// Sets the overflow behavior for text that exceeds its container.
-    /// </summary>
-    /// <param name="overflow">The Overflow value that determines how text overflow is handled.</param>
-    /// <returns>The current TextBuilder instance for method chaining.</returns>
     public TextBuilder Overflow(Overflow overflow)
     {
         _overflow = overflow;
         return this;
     }
 
-    /// <param name="value">True to apply bold.</param>
-    /// <returns>The current TextBuilder instance for method chaining.</returns>
     public TextBuilder Bold(bool value = true)
     {
         _bold = value;
         return this;
     }
 
-    /// <param name="value">True to apply italic.</param>
-    /// <returns>The current TextBuilder instance for method chaining.</returns>
     public TextBuilder Italic(bool value = true)
     {
         _italic = value;
         return this;
     }
 
-    /// <param name="value">True to apply muted.</param>
-    /// <returns>The current TextBuilder instance for method chaining.</returns>
     public TextBuilder Muted(bool value = true)
     {
         _muted = value;

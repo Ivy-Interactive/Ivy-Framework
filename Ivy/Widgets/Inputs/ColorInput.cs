@@ -18,8 +18,6 @@ public enum ColorInputs
 
 public interface IAnyColorInput : IAnyInput
 {
-    public string? Placeholder { get; set; }
-
     public ColorInputs Variant { get; set; }
 }
 
@@ -29,13 +27,13 @@ public abstract record ColorInputBase : WidgetBase<ColorInputBase>, IAnyColorInp
 
     [Prop] public string? Invalid { get; set; }
 
+    [Prop] public new Scale? Scale { get; set; }
+
     [Prop] public string? Placeholder { get; set; }
 
     [Prop] public bool Nullable { get; set; }
 
     [Prop] public ColorInputs Variant { get; set; } = ColorInputs.TextAndPicker;
-
-    [Prop] public Sizes Size { get; set; } = Sizes.Medium;
 
     [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
 
@@ -45,7 +43,6 @@ public abstract record ColorInputBase : WidgetBase<ColorInputBase>, IAnyColorInp
         ];
 }
 
-/// <typeparam name="TColor">string, Colors, or Colors?.</typeparam>
 public record ColorInput<TColor> : ColorInputBase, IInput<TColor>
 {
     [OverloadResolutionPriority(1)]
@@ -111,7 +108,6 @@ public record ColorInput : ColorInput<string>
 
 public static class ColorInputExtensions
 {
-    /// <summary>Creates a color input from a state object with automatic type binding and nullable detection.</summary>
     public static ColorInputBase ToColorInput(this IAnyState state, string? placeholder = null, bool disabled = false, ColorInputs variant = ColorInputs.TextAndPicker)
     {
         var type = state.GetStateType();
@@ -139,21 +135,6 @@ public static class ColorInputExtensions
     public static ColorInputBase Variant(this ColorInputBase widget, ColorInputs variant)
     {
         return widget with { Variant = variant };
-    }
-
-    public static ColorInputBase Size(this ColorInputBase widget, Sizes size)
-    {
-        return widget with { Size = size };
-    }
-
-    public static ColorInputBase Large(this ColorInputBase widget)
-    {
-        return widget.Size(Sizes.Large);
-    }
-
-    public static ColorInputBase Small(this ColorInputBase widget)
-    {
-        return widget.Size(Sizes.Small);
     }
 
     [OverloadResolutionPriority(1)]

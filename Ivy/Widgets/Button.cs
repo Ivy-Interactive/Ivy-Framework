@@ -25,7 +25,6 @@ public enum ButtonVariant
     Inline,
 }
 
-/// <summary>Interactive button widget supporting multiple variants, sizes, icons, and states for user actions and navigation.</summary>
 public record Button : WidgetBase<Button>
 {
     [OverloadResolutionPriority(1)]
@@ -73,24 +72,16 @@ public record Button : WidgetBase<Button>
 
     [Prop] public BorderRadius BorderRadius { get; set; } = BorderRadius.Rounded;
 
-    [Prop] public Sizes Size { get; set; } = Sizes.Medium;
-
     [Event] public Func<Event<Button>, ValueTask>? OnClick { get; set; }
 
     public object? Tag { get; set; } //not a prop!
 
-    /// <summary>Prevents adding children to Button using pipe operator.</summary>
-    /// <param name="widget">The Button widget.</param>
-    /// <param name="child">The child content to add (not supported).</param>
-    /// <returns>Always throws NotSupportedException.</returns>
-    /// <exception cref="NotSupportedException">Button does not support children.</exception>
     public static Button operator |(Button widget, object child)
     {
         throw new NotSupportedException("Button does not support children.");
     }
 }
 
-/// <summary>Extension methods for Button widget providing fluent API for configuring appearance, behavior, and interactions.</summary>
 public static class ButtonExtensions
 {
     [OverloadResolutionPriority(1)]
@@ -104,9 +95,6 @@ public static class ButtonExtensions
         return new Button(null, onClick?.ToValueTask(), icon: icon, variant: variant);
     }
 
-    /// <param name="trigger">Button that triggers content display.</param>
-    /// <param name="action">Function creating content to display when triggered.</param>
-    /// <returns>IView managing trigger button and conditional content display.</returns>
     public static IView ToTrigger(this Button trigger, Func<IState<bool>, object> action)
     {
         return new FuncView((context) =>
@@ -257,22 +245,5 @@ public static class ButtonExtensions
     public static Button BorderRadius(this Button button, BorderRadius radius)
     {
         return button with { BorderRadius = radius };
-    }
-
-    public static Button Size(this Button button, Sizes size)
-    {
-        return button with { Size = size };
-    }
-
-    [RelatedTo(nameof(Button.Size))]
-    public static Button Large(this Button button)
-    {
-        return button.Size(Sizes.Large);
-    }
-
-    [RelatedTo(nameof(Button.Size))]
-    public static Button Small(this Button button)
-    {
-        return button.Size(Sizes.Small);
     }
 }

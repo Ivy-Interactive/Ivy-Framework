@@ -23,9 +23,8 @@ public record Dialog : WidgetBase<Dialog>
         throw new NotSupportedException("Dialog does not support children.");
     }
 
-    /// <summary>Compatibility constructor.</summary>
     public Dialog(Action<Event<Dialog>> onClose, DialogHeader header, DialogBody body, DialogFooter footer)
-        : this(e => { onClose(e); return ValueTask.CompletedTask; }, header, body, footer)
+    : this(e => { onClose(e); return ValueTask.CompletedTask; }, header, body, footer)
     {
     }
 }

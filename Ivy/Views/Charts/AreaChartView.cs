@@ -16,18 +16,13 @@ public enum AreaChartStyles
     Dashboard
 }
 
-/// <typeparam name="TSource">The type of the source data objects.</typeparam>
 public interface IAreaChartStyle<TSource>
 {
-    /// <returns>A configured AreaChart widget ready for rendering.</returns>
     AreaChart Design(ExpandoObject[] data, Dimension<TSource> dimension, Measure<TSource>[] measures);
 }
 
-/// <summary>Helper methods for creating area chart style instances.</summary>
 public static class AreaChartStyleHelpers
 {
-    /// <returns>An instance of the specified area chart style.</returns>
-    /// <exception cref="InvalidOperationException">Thrown when the specified style is not found.</exception>
     public static IAreaChartStyle<TSource> GetStyle<TSource>(AreaChartStyles style)
     {
         return style switch
@@ -39,10 +34,8 @@ public static class AreaChartStyleHelpers
     }
 }
 
-/// <typeparam name="TSource">The type of the source data objects.</typeparam>
 public class DefaultAreaChartStyle<TSource> : IAreaChartStyle<TSource>
 {
-    /// <returns>A fully configured area chart with default styling.</returns>
     public AreaChart Design(ExpandoObject[] data, Dimension<TSource> dimension, Measure<TSource>[] measures)
     {
         return new AreaChart(data)
@@ -56,11 +49,8 @@ public class DefaultAreaChartStyle<TSource> : IAreaChartStyle<TSource>
     }
 }
 
-/// <summary>Dashboard-optimized area chart style with minimal visual elements for compact display.</summary>
-/// <typeparam name="TSource">The type of the source data objects.</typeparam>
 public class DashboardAreaChartStyle<TSource> : IAreaChartStyle<TSource>
 {
-    /// <returns>A compact area chart optimized for dashboard display.</returns>
     public AreaChart Design(ExpandoObject[] data, Dimension<TSource> dimension, Measure<TSource>[] measures)
     {
         return new AreaChart(data)
@@ -73,8 +63,6 @@ public class DashboardAreaChartStyle<TSource> : IAreaChartStyle<TSource>
     }
 }
 
-/// <summary>A fluent builder for creating area charts from data sources with dimensions and measures.</summary>
-/// <typeparam name="TSource">The type of the source data objects.</typeparam>
 public class AreaChartBuilder<TSource>(
     IQueryable<TSource> data,
     Dimension<TSource>? dimension = null,
@@ -87,8 +75,6 @@ public class AreaChartBuilder<TSource>(
     private Toolbox? _toolbox;
     private Func<Toolbox, Toolbox>? _toolboxFactory;
 
-    /// <returns>An AreaChart widget with the processed data and applied styling, or a loading indicator during data processing.</returns>
-    /// <exception cref="InvalidOperationException">Thrown when dimension or measures are not configured.</exception>
     public override object? Build()
     {
         if (dimension is null)
@@ -147,14 +133,12 @@ public class AreaChartBuilder<TSource>(
         return polish?.Invoke(configuredChart) ?? configuredChart;
     }
 
-    /// <returns>The builder instance for method chaining.</returns>
     public AreaChartBuilder<TSource> Dimension(string name, Expression<Func<TSource, object>> selector)
     {
         dimension = new Dimension<TSource>(name, selector);
         return this;
     }
 
-    /// <returns>The builder instance for method chaining.</returns>
     public AreaChartBuilder<TSource> Measure(string name, Expression<Func<IQueryable<TSource>, object>> aggregator)
     {
         _measures.Add(new Measure<TSource>(name, aggregator));
@@ -183,28 +167,25 @@ public class AreaChartBuilder<TSource>(
     }
 }
 
-/// <summary>Extension methods for creating area charts from data collections.</summary>
 public static class AreaChartExtensions
 {
-    /// <returns>An AreaChartBuilder for fluent configuration.</returns>
     public static AreaChartBuilder<TSource> ToAreaChart<TSource>(
-        this IEnumerable<TSource> data,
-        Expression<Func<TSource, object>>? dimension = null,
-        Expression<Func<IQueryable<TSource>, object>>[]? measures = null,
-        AreaChartStyles style = AreaChartStyles.Default,
-        Func<AreaChart, AreaChart>? polish = null)
+    this IEnumerable<TSource> data,
+    Expression<Func<TSource, object>>? dimension = null,
+    Expression<Func<IQueryable<TSource>, object>>[]? measures = null,
+    AreaChartStyles style = AreaChartStyles.Default,
+    Func<AreaChart, AreaChart>? polish = null)
     {
         return data.AsQueryable().ToAreaChart(dimension, measures, style, polish);
     }
 
-    /// <returns>An AreaChartBuilder for fluent configuration.</returns>
     [OverloadResolutionPriority(1)]
     public static AreaChartBuilder<TSource> ToAreaChart<TSource>(
-        this IQueryable<TSource> data,
-        Expression<Func<TSource, object>>? dimension = null,
-        Expression<Func<IQueryable<TSource>, object>>[]? measures = null,
-        AreaChartStyles style = AreaChartStyles.Default,
-        Func<AreaChart, AreaChart>? polish = null)
+    this IQueryable<TSource> data,
+    Expression<Func<TSource, object>>? dimension = null,
+    Expression<Func<IQueryable<TSource>, object>>[]? measures = null,
+    AreaChartStyles style = AreaChartStyles.Default,
+    Func<AreaChart, AreaChart>? polish = null)
     {
         return new AreaChartBuilder<TSource>(data,
             dimension != null ? new Dimension<TSource>(ExpressionNameHelper.SuggestName(dimension) ?? "Dimension", dimension) : null,

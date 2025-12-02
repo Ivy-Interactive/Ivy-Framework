@@ -11,11 +11,7 @@ public record Form : WidgetBase<Form>
 
     }
 
-    /// <summary>Event handler called when form is submitted via Enter key on last field.</summary>
     [Event] public Func<Event<Form>, ValueTask>? OnSubmit { get; set; }
-
-    /// <summary>Default is Medium.</summary>
-    [Prop] public Sizes Size { get; set; } = Sizes.Medium;
 }
 
 public static class FormExtensions
@@ -38,10 +34,5 @@ public static class FormExtensions
     public static Form HandleSubmit(this Form form, Func<ValueTask> onSubmit)
     {
         return form with { OnSubmit = _ => onSubmit() };
-    }
-
-    public static Form Size(this Form form, Sizes size)
-    {
-        return form with { Size = size };
     }
 }

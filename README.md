@@ -12,7 +12,7 @@ Ivy - The ultimate framework for building internal tools with LLM code generatio
 
 <https://github.com/user-attachments/assets/ba2bf5a5-8dc7-4501-9072-6af7483be4f7>
 
-The code should be familiar to React developers. Views → Components, Build → Render, Widgets → Element. 
+The code should be familiar to React developers. Views → Components, Build → Render, Widgets → Element.
 
 ![3g829iF9gmsQUX](https://github.com/user-attachments/assets/c475d90f-4cca-4e46-8a8e-4ee3f2545751)
 
@@ -23,19 +23,19 @@ The code should be familiar to React developers. Views → Components, Build →
 - 🗄️ **Databases**: Easy integration with SQL Server, Postgres, Supabase, MariaDB, MySQL, Airtable, Oracle, Google Spanner, Clickhouse, Snowflake, and BigQuery.
 - 🤖 **LLM Code Agent**: Generate an entire back office application based on your database schema.
 - 🕵️ **Secrets Management**
-- 🚀 **Container Deployment**: Easily deploy to Azure, AWS, or Google Cloud or Sliplane. 
-- 🔥 Full support for **Hot-Reloading** with maintained state as much as possible (suck on that Blazor). 
+- 🚀 **Container Deployment**: Easily deploy to Azure, AWS, or Google Cloud or Sliplane.
+- 🔥 Full support for **Hot-Reloading** with maintained state as much as possible (suck on that Blazor).
 - 🧩 **Dependency Injection**
 - 📍 **State Management**: State is managed on the server, making this very secure.
 - 🧱 **Building Blocks**: Extensive set of widgets to build any app. An external widget framework is coming soon, where you can integrate any React, Angular, or Vue component.
-- 🧱 **External Widget Framework**: 
+- 🧱 **External Widget Framework**:
 - 🔢 **Data Tables**: Sort, filter, and paginate data. (coming soon)
 
 We optimise for the 3 X:s - UX (love your end users), DX (let Ivy love you) - LX (minimise LLMs mistakes)
 
 Ivy maintains state on the server and sends updates over WebSocket. The frontend consists of a pre-built React-based rendering engine. With Ivy, you never need to touch any HTML, CSS, or JavaScript. Only if you want to add you’re own widgets.
 
-The whole framework is built around strict enterprise security constraints. As the state is fully maintained on the BE, we can minimise the risk of secrets leakage. This is a major problem with prototype tools like Lovable/vo/Bolt. All authentication integrations are handcrafted and audited. 
+The whole framework is built around strict enterprise security constraints. As the state is fully maintained on the BE, we can minimise the risk of secrets leakage. This is a major problem with prototype tools like Lovable/vo/Bolt. All authentication integrations are handcrafted and audited.
 
 ## Usage
 
@@ -120,3 +120,9 @@ If you want to work on the framework itself, you need to set up the following:
 Changes in /frontend will be hot-reloaded by Vite and changes in /Ivy.Samples will be hot-reloaded by Ivy.
 
 For detailed contribution guidelines, see [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## Troubleshooting
+
+### Apple Silicon Mac: "Bad CPU type in executable" due to Google Protobuf & ARM
+
+Install Rosetta 2: `/usr/sbin/softwareupdate --install-rosetta --agree-to-license`

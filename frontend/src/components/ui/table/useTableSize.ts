@@ -1,7 +1,7 @@
 import { useContext } from 'react';
 import { TableContext } from './TableContext';
 
-export const useTableSize = () => {
+export const useTableScale = () => {
   const context = useContext(TableContext);
-  return context.size;
+  return context.scale;
 };

@@ -1,4 +1,4 @@
-﻿
+
 // ReSharper disable once CheckNamespace
 namespace Ivy.Charts;
 
@@ -24,9 +24,7 @@ public enum Positions
     InsideBottomLeft,
     InsideTopRight,
     InsideBottomRight,
-    /// <summary>At the start of the data flow (left for LTR, right for RTL).</summary>
     InsideStart,
-    /// <summary>At the end of the data flow (right for LTR, left for RTL).</summary>
     InsideEnd,
     End,
     Center
@@ -93,11 +91,8 @@ public enum Scales
 
 public enum StackOffsetTypes
 {
-    /// <summary>Stacks series and normalizes them to fill the full height (0-100%).</summary>
     Expand,
     None,
-    /// <summary>Stacks series with a wiggle effect that minimizes the change in slope.</summary>
     Wiggle,
-    /// <summary>Stacks series and centers them around the middle line for balanced visualization.</summary>
     Silhouette
 }

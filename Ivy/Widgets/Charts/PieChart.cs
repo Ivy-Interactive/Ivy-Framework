@@ -1,4 +1,4 @@
-﻿using Ivy.Charts;
+using Ivy.Charts;
 using Ivy.Core;
 using Ivy.Shared;
 
@@ -30,7 +30,6 @@ public record PieChart : WidgetBase<PieChart>
 
     [Prop] public PieChartTotal? Total { get; init; }
 
-    /// <exception cref="NotSupportedException">PieChart does not support children.</exception>
     public static PieChart operator |(PieChart widget, object child)
     {
         throw new NotSupportedException("PieChart does not support children.");

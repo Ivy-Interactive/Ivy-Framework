@@ -1,4 +1,4 @@
-﻿using System.Runtime.CompilerServices;
+using System.Runtime.CompilerServices;
 using Ivy.Core;
 using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
@@ -16,8 +16,6 @@ public enum FileInputs
 
 public interface IAnyFileInput : IAnyInput
 {
-    public string? Placeholder { get; set; }
-
     public FileInputs Variant { get; set; }
 }
 
@@ -41,7 +39,7 @@ public abstract record FileInputBase : WidgetBase<FileInputBase>, IAnyFileInput
 
     [Prop] public string? UploadUrl { get; set; }
 
-    [Prop] public Sizes Size { get; set; }
+    [Prop] public new Scale? Scale { get; set; }
 
     [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
 
@@ -118,7 +116,6 @@ public record FileInput<TValue> : FileInputBase, IInput<TValue>, IAnyFileInput
         Placeholder = placeholder;
         Variant = variant;
         Disabled = disabled;
-        Size = Sizes.Medium;
         Width = Ivy.Shared.Size.Full();
         Height = Ivy.Shared.Size.Units(50);
     }
@@ -136,7 +133,6 @@ public static class FileInputExtensions
         throw new NotSupportedException("ToFileInput now requires an UploadContext. Use state.ToFileInput(uploadContext, ...).");
     }
 
-    /// <summary>The upload context state from UseUpload hook.</summary>
     public static FileInputBase ToFileInput(this IAnyState state, IState<UploadContext> uploadContext, string? placeholder = null, bool disabled = false, FileInputs variant = FileInputs.Drop)
     {
         static bool IsFileUploadType(Type t)
@@ -278,13 +274,11 @@ public static class FileInputExtensions
         return widget with { Invalid = invalid };
     }
 
-    /// <summary>Comma-separated list (e.g., "image/*", ".pdf,.doc", "text/plain").</summary>
     public static FileInputBase Accept(this FileInputBase widget, string accept)
     {
         return widget with { Accept = accept };
     }
 
-    /// <exception cref="InvalidOperationException">MaxFiles can only be set on a multi-file input (IEnumerable of FileInput). Use a collection state type for multiple files.</exception>
     public static FileInputBase MaxFiles(this FileInputBase widget, int maxFiles)
     {
         if (widget.Multiple != true)
@@ -302,21 +296,6 @@ public static class FileInputExtensions
     public static FileInputBase UploadUrl(this FileInputBase widget, string? uploadUrl)
     {
         return widget with { UploadUrl = uploadUrl };
-    }
-
-    public static FileInputBase Size(this FileInputBase widget, Sizes size)
-    {
-        return widget with { Size = size };
-    }
-
-    public static FileInputBase Small(this FileInputBase widget)
-    {
-        return widget with { Size = Sizes.Small };
-    }
-
-    public static FileInputBase Large(this FileInputBase widget)
-    {
-        return widget with { Size = Sizes.Large };
     }
 
     public static ValidationResult ValidateFile(this FileInputBase widget, IFileUpload file)
@@ -353,20 +332,17 @@ public static class FileInputExtensions
         return widget.HandleBlur(_ => { onBlur(); return ValueTask.CompletedTask; });
     }
 
-    /// <summary>Receives the FileUpload.Id.</summary>
     [OverloadResolutionPriority(1)]
     public static FileInputBase HandleCancel(this FileInputBase widget, Func<Event<IAnyInput, Guid>, ValueTask> onCancel)
     {
         return widget with { OnCancel = onCancel };
     }
 
-    /// <summary>Receives the FileUpload.Id.</summary>
     public static FileInputBase HandleCancel(this FileInputBase widget, Action<Event<IAnyInput, Guid>> onCancel)
     {
         return widget.HandleCancel(onCancel.ToValueTask());
     }
 
-    /// <summary>Receives the FileUpload.Id.</summary>
     public static FileInputBase HandleCancel(this FileInputBase widget, Action<Guid> onCancel)
     {
         return widget.HandleCancel(e => { onCancel(e.Value); return ValueTask.CompletedTask; });

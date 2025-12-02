@@ -58,23 +58,34 @@ AsyncSelectInput supports various data types. Here are examples for different sc
 ```csharp demo-tabs
 public class StringAsyncSelectDemo : ViewBase
 {
+    private static readonly Dictionary<string, string> CountryRegions = new()
+    {
+        { "Germany", "Europe" },
+        { "France", "Europe" },
+        { "Japan", "Asia" },
+        { "China", "Asia" },
+        { "USA", "North America" },
+        { "Canada", "North America" },
+        { "Australia", "Oceania" },
+        { "Brazil", "South America" }
+    };
+
     public override object? Build()
     {
         var selectedCountry = this.UseState<string?>(default(string));
 
         Task<Option<string>[]> QueryCountries(string query)
         {
-            var countries = new[] { "Germany", "France", "Japan", "China", "USA", "Canada", "Australia", "Brazil" };
-            return Task.FromResult(countries
+            return Task.FromResult(CountryRegions.Keys
                 .Where(c => c.Contains(query, StringComparison.OrdinalIgnoreCase))
-                .Select(c => new Option<string>(c))
+                .Select(c => new Option<string>(c, c, description: CountryRegions[c]))
                 .ToArray());
         }
 
         Task<Option<string>?> LookupCountry(string country)
         {
             if (string.IsNullOrEmpty(country)) return Task.FromResult<Option<string>?>(null);
-            return Task.FromResult<Option<string>?>(new Option<string>(country));
+            return Task.FromResult<Option<string>?>(new Option<string>(country, country, description: CountryRegions.GetValueOrDefault(country)));
         }
 
         return Layout.Vertical()
@@ -246,7 +257,9 @@ public class AdvancedQueryDemo : ViewBase
         Task<Option<Guid>[]> QueryUsers(string query)
         {
             if (string.IsNullOrEmpty(query))
-                return Task.FromResult(Users.Where(u => u.IsActive).Take(5).Select(u => new Option<Guid>($"{u.Name} ({u.Department})", u.Id)).ToArray());
+                return Task.FromResult(Users.Where(u => u.IsActive).Take(5)
+                    .Select(u => new Option<Guid>($"{u.Name} ({u.Department})", u.Id, description: u.Email))
+                    .ToArray());
 
             var queryLower = query.ToLowerInvariant();
             return Task.FromResult(Users
@@ -255,14 +268,16 @@ public class AdvancedQueryDemo : ViewBase
                             u.Email.ToLowerInvariant().Contains(queryLower) ||
                             u.Department.ToLowerInvariant().Contains(queryLower)))
                 .Take(10)
-                .Select(u => new Option<Guid>($"{u.Name} ({u.Department})", u.Id))
+                .Select(u => new Option<Guid>($"{u.Name} ({u.Department})", u.Id, description: u.Email))
                 .ToArray());
         }
 
         Task<Option<Guid>?> LookupUser(Guid id)
         {
             var user = Users.FirstOrDefault(u => u.Id == id);
-            return Task.FromResult(user != null ? new Option<Guid>($"{user.Name} ({user.Department})", user.Id) : null);
+            return Task.FromResult(user != null 
+                ? new Option<Guid>($"{user.Name} ({user.Department})", user.Id, description: user.Email) 
+                : null);
         }
 
         var customAsyncSelect = new AsyncSelectInputView<Guid>(
@@ -443,7 +458,9 @@ public class UserSearchDemo : ViewBase
         Task<Option<Guid>[]> QueryUsers(string query)
         {
             if (string.IsNullOrEmpty(query))
-                return Task.FromResult(Users.Take(5).Select(u => new Option<Guid>($"{u.Name} ({u.Department})", u.Id)).ToArray());
+                return Task.FromResult(Users.Take(5)
+                    .Select(u => new Option<Guid>($"{u.Name} ({u.Department})", u.Id, description: u.Email))
+                    .ToArray());
             
             var queryLower = query.ToLowerInvariant();
             return Task.FromResult(Users
@@ -452,14 +469,16 @@ public class UserSearchDemo : ViewBase
                             u.Email.ToLowerInvariant().Contains(queryLower) ||
                             u.Department.ToLowerInvariant().Contains(queryLower)))
                 .Take(10)
-                .Select(u => new Option<Guid>($"{u.Name} ({u.Department})", u.Id))
+                .Select(u => new Option<Guid>($"{u.Name} ({u.Department})", u.Id, description: u.Email))
                 .ToArray());
         }
 
         Task<Option<Guid>?> LookupUser(Guid id)
         {
             var user = Users.FirstOrDefault(u => u.Id == id);
-            return Task.FromResult(user != null ? new Option<Guid>($"{user.Name} ({user.Department})", user.Id) : null);
+            return Task.FromResult(user != null 
+                ? new Option<Guid>($"{user.Name} ({user.Department})", user.Id, description: user.Email) 
+                : null);
         }
 
         var customAsyncSelect = new AsyncSelectInputView<Guid>(

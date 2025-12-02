@@ -121,20 +121,7 @@ var server = new Server()
                 Card = "#FFFFFF",
                 CardForeground = "#1A1A1A",
                 Popover = "#FFFFFF",
-                PopoverForeground = "#1A1A1A",
-                Chart1 = "#0077BE",
-                Chart2 = "#DC143C",
-                Chart3 = "#20B2AA",
-                Chart4 = "#FFD700",
-                Chart5 = "#4682B4",
-                Sidebar = "#E0E8F0",
-                SidebarForeground = "#1A1A1A",
-                SidebarPrimary = "#0077BE",
-                SidebarPrimaryForeground = "#FFFFFF",
-                SidebarAccent = "#87CEEB",
-                SidebarAccentForeground = "#1A1A1A",
-                SidebarBorder = "#B0C4DE",
-                SidebarRing = "#0077BE"
+                PopoverForeground = "#1A1A1A"
             },
             Dark = new ThemeColors
             {
@@ -162,20 +149,7 @@ var server = new Server()
                 Card = "#0F2A4A",
                 CardForeground = "#E8F4FD",
                 Popover = "#001122",
-                PopoverForeground = "#E8F4FD",
-                Chart1 = "#4A9EFF",
-                Chart2 = "#FF6B7D",
-                Chart3 = "#4ECDC4",
-                Chart4 = "#FFE066",
-                Chart5 = "#87CEEB",
-                Sidebar = "#0F2A4A",
-                SidebarForeground = "#E8F4FD",
-                SidebarPrimary = "#4A9EFF",
-                SidebarPrimaryForeground = "#001122",
-                SidebarAccent = "#1A3A5C",
-                SidebarAccentForeground = "#E8F4FD",
-                SidebarBorder = "#1A3A5C",
-                SidebarRing = "#4A9EFF"
+                PopoverForeground = "#E8F4FD"
             }
         };
     });

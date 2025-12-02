@@ -33,6 +33,8 @@ interface KanbanContextType {
   columns: Column[];
   draggedCardColumn: string | null;
   setDraggedCardColumn: (column: string | null) => void;
+  dragOverColumn: string | null;
+  setDragOverColumn: (column: string | null) => void;
   onCardMove?: (
     cardId: string,
     fromColumn: string,
@@ -40,8 +42,7 @@ interface KanbanContextType {
     targetIndex?: number
   ) => void;
   onCardReorder?: (cardId: string, fromIndex: number, toIndex: number) => void;
-  onCardClick?: (cardId: string) => void;
-  onCardDelete?: (cardId: string) => void;
+  showCounts?: boolean;
 }
 
 const KanbanContext = createContext<KanbanContextType>({
@@ -49,6 +50,8 @@ const KanbanContext = createContext<KanbanContextType>({
   columns: [],
   draggedCardColumn: null,
   setDraggedCardColumn: () => {},
+  dragOverColumn: null,
+  setDragOverColumn: () => {},
 });
 
 export const useKanbanContext = () => useContext(KanbanContext);
@@ -63,8 +66,7 @@ interface KanbanProps {
     targetIndex?: number
   ) => void;
   onCardReorder?: (cardId: string, fromIndex: number, toIndex: number) => void;
-  onCardClick?: (cardId: string) => void;
-  onCardDelete?: (cardId: string) => void;
+  showCounts?: boolean;
   children: (components: {
     KanbanBoard: typeof KanbanBoard;
     KanbanColumn: typeof KanbanColumn;
@@ -80,23 +82,24 @@ export function Kanban({
   data,
   onCardMove,
   onCardReorder,
-  onCardClick,
-  onCardDelete,
+  showCounts = true,
   children,
 }: KanbanProps) {
   const [draggedCardColumn, setDraggedCardColumn] = useState<string | null>(
     null
   );
+  const [dragOverColumn, setDragOverColumn] = useState<string | null>(null);
 
   const contextValue: KanbanContextType = {
     data,
     columns,
     draggedCardColumn,
     setDraggedCardColumn,
+    dragOverColumn,
+    setDragOverColumn,
     onCardMove,
     onCardReorder,
-    onCardClick,
-    onCardDelete,
+    showCounts,
   };
 
   return (
@@ -121,7 +124,7 @@ interface KanbanBoardProps {
 export function KanbanBoard({ children, className }: KanbanBoardProps) {
   return (
     <div
-      className={cn('flex gap-4 h-full bg-background', className)}
+      className={cn('flex h-full bg-background', className)}
       style={{ minWidth: 'fit-content', maxWidth: '100%' }}
     >
       {children}
@@ -146,31 +149,46 @@ export function KanbanColumn({
   children,
   className,
 }: KanbanColumnProps) {
-  const [isDragOver, setIsDragOver] = useState(false);
-  const { onCardMove, data, draggedCardColumn } = useKanbanContext();
+  const {
+    onCardMove,
+    data,
+    draggedCardColumn,
+    dragOverColumn,
+    setDragOverColumn,
+    showCounts,
+  } = useKanbanContext();
+
+  const columnTaskCount = data.filter(task => task.status === id).length;
 
   const handleDragOver = useCallback(
     (e: React.DragEvent) => {
       e.preventDefault();
       e.dataTransfer.dropEffect = 'move';
 
-      if (draggedCardColumn && draggedCardColumn !== id) {
-        setIsDragOver(true);
+      if (
+        draggedCardColumn &&
+        draggedCardColumn !== id &&
+        dragOverColumn !== id
+      ) {
+        setDragOverColumn(id);
       }
     },
-    [id, draggedCardColumn]
+    [id, draggedCardColumn, dragOverColumn, setDragOverColumn]
   );
 
-  const handleDragLeave = useCallback((e: React.DragEvent) => {
-    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
-      setIsDragOver(false);
-    }
-  }, []);
+  const handleDragLeave = useCallback(
+    (e: React.DragEvent) => {
+      if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+        setDragOverColumn(null);
+      }
+    },
+    [setDragOverColumn]
+  );
 
   const handleDrop = useCallback(
     (e: React.DragEvent) => {
       e.preventDefault();
-      setIsDragOver(false);
+      setDragOverColumn(null);
 
       const cardId = e.dataTransfer.getData('text/plain');
       if (!cardId) return;
@@ -179,10 +197,10 @@ export function KanbanColumn({
 
       onCardMove?.(cardId, task.status, id);
     },
-    [id, onCardMove, data]
+    [id, onCardMove, data, setDragOverColumn]
   );
 
-  const showDragOver = isDragOver && draggedCardColumn !== null;
+  const showDragOver = dragOverColumn === id && draggedCardColumn !== null;
 
   const widthStyles = width ? getWidth(width) : {};
   const hasExplicitWidth = width && Object.keys(widthStyles).length > 0;
@@ -201,7 +219,7 @@ export function KanbanColumn({
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
     >
-      <div className="px-3">
+      <div className="px-2">
         <h3 className="font-semibold text-foreground flex items-center gap-2">
           {color && (
             <div
@@ -210,6 +228,11 @@ export function KanbanColumn({
             />
           )}
           {name || id}
+          {showCounts && (
+            <span className="text-muted-foreground text-sm font-normal">
+              ({columnTaskCount})
+            </span>
+          )}
         </h3>
       </div>
       {children}
@@ -228,7 +251,7 @@ export function KanbanCards({ id, children }: KanbanCardsProps) {
 
   return (
     <ScrollArea className="flex-1 min-h-0">
-      <div className="flex flex-col gap-3 p-3">
+      <div className="flex flex-col gap-3 p-2">
         {columnTasks.map(task => (
           <div key={task.id}>{children(task)}</div>
         ))}
@@ -252,9 +275,8 @@ export function KanbanCard({
 }: KanbanCardProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
   const justDraggedRef = useRef(false);
-  const { onCardMove, data, setDraggedCardColumn, onCardDelete, onCardClick } =
+  const { onCardMove, data, setDraggedCardColumn, setDragOverColumn } =
     useKanbanContext();
 
   const handleDragStart = useCallback(
@@ -271,11 +293,12 @@ export function KanbanCard({
   const handleDragEnd = useCallback(() => {
     setIsDragging(false);
     setDraggedCardColumn(null);
+    setDragOverColumn(null);
     justDraggedRef.current = true;
     setTimeout(() => {
       justDraggedRef.current = false;
     }, 100);
-  }, [setDraggedCardColumn]);
+  }, [setDraggedCardColumn, setDragOverColumn]);
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -309,72 +332,23 @@ export function KanbanCard({
     [id, column, onCardMove, data]
   );
 
-  const handleDelete = useCallback(
-    (e: React.MouseEvent) => {
-      e.stopPropagation();
-      e.preventDefault();
-      onCardDelete?.(id);
-    },
-    [id, onCardDelete]
-  );
-
-  const handleClick = useCallback(
-    (e: React.MouseEvent) => {
-      if (
-        isDragging ||
-        justDraggedRef.current ||
-        (e.target as HTMLElement).closest('button')
-      ) {
-        return;
-      }
-      e.stopPropagation();
-      onCardClick?.(id);
-    },
-    [id, onCardClick, isDragging]
-  );
-
   return (
     <div
-      draggable
+      draggable={!!onCardMove}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
-      onClick={handleClick}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
       className={cn(
-        'cursor-grab opacity-100 transition-all relative group',
+        'opacity-100 transition-all relative group',
+        onCardMove && 'cursor-grab',
         isDragging && 'opacity-50 cursor-grabbing',
-        !isDragging && onCardClick && 'cursor-pointer',
         isDragOver &&
           'bg-accent border-2 border-accent-foreground border-dashed',
         className
       )}
     >
-      {onCardDelete && isHovered && !isDragging && (
-        <button
-          onClick={handleDelete}
-          className="absolute top-1.5 right-1.5 z-10 h-5 w-5 rounded-sm bg-muted/80 hover:bg-destructive text-muted-foreground hover:text-destructive-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all cursor-pointer"
-          aria-label="Delete card"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="h-3 w-3"
-          >
-            <path d="M3 6h18" />
-            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-          </svg>
-        </button>
-      )}
       {children}
     </div>
   );

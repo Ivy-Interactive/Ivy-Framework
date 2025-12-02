@@ -52,6 +52,36 @@ public class GridView : ViewBase, IStateless
         return this;
     }
 
+    public GridView ColumnWidths(params Size[] widths)
+    {
+        _definition.ColumnWidths = widths;
+        return this;
+    }
+
+    public GridView RowHeights(params Size[] heights)
+    {
+        _definition.RowHeights = heights;
+        return this;
+    }
+
+    public GridView HeaderBuilder(Func<int, object, object> builder)
+    {
+        _definition.HeaderBuilder = builder;
+        return this;
+    }
+
+    public GridView FooterBuilder(Func<int, object, object> builder)
+    {
+        _definition.FooterBuilder = builder;
+        return this;
+    }
+
+    public GridView CellBuilder(Func<object, object> builder)
+    {
+        _definition.CellBuilder = builder;
+        return this;
+    }
+
     public GridView Add(object cell)
     {
         _cells.Add(cell);
@@ -60,7 +90,60 @@ public class GridView : ViewBase, IStateless
 
     public override object? Build()
     {
-        return new GridLayout(_definition, _cells.ToArray());
+        var cells = _cells.ToArray();
+        var columnsCount = _definition.Columns ?? 1;
+
+        // Apply builders to transform cells before creating GridLayout
+        if (_definition.HeaderBuilder != null || _definition.FooterBuilder != null || _definition.CellBuilder != null)
+        {
+            var transformedCells = new List<object>(cells);
+
+            // Determine header range (first row)
+            int headerStart = 0;
+            int headerEnd = Math.Min(columnsCount, transformedCells.Count);
+
+            // Determine footer range (last complete row)
+            int footerStart = -1;
+            int footerEnd = -1;
+            if (transformedCells.Count > columnsCount)
+            {
+                int lastRowStart = ((transformedCells.Count - 1) / columnsCount) * columnsCount;
+                // Only treat as footer if it's a complete row
+                if (lastRowStart + columnsCount <= transformedCells.Count)
+                {
+                    footerStart = lastRowStart;
+                    footerEnd = lastRowStart + columnsCount;
+                }
+            }
+
+            // Apply transformations
+            for (int i = 0; i < transformedCells.Count; i++)
+            {
+                var cell = transformedCells[i];
+
+                // Header
+                if (_definition.HeaderBuilder != null && i >= headerStart && i < headerEnd)
+                {
+                    int columnIndex = i - headerStart;
+                    transformedCells[i] = _definition.HeaderBuilder(columnIndex, cell);
+                }
+                // Footer
+                else if (_definition.FooterBuilder != null && footerStart != -1 && i >= footerStart && i < footerEnd)
+                {
+                    int columnIndex = i - footerStart;
+                    transformedCells[i] = _definition.FooterBuilder(columnIndex, cell);
+                }
+                // Regular cells
+                else if (_definition.CellBuilder != null)
+                {
+                    transformedCells[i] = _definition.CellBuilder(cell);
+                }
+            }
+
+            cells = transformedCells.ToArray();
+        }
+
+        return new GridLayout(_definition, cells);
     }
 
     public static GridView operator |(GridView view, object child)

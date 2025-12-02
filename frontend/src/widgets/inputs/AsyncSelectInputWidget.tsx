@@ -11,6 +11,48 @@ import {
   TooltipContent,
 } from '@/components/ui/tooltip';
 import { useRef, useEffect, useState } from 'react';
+import { Scales } from '@/types/scale';
+import { cva } from 'class-variance-authority';
+
+const asyncSelectContainerVariants = cva(
+  'hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed flex text-left w-full items-center rounded-md border border-input bg-transparent shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring cursor-pointer',
+  {
+    variants: {
+      scale: {
+        Small: 'h-7 px-2 py-1',
+        Medium: 'h-9 px-3 py-2',
+        Large: 'h-11 px-4 py-3',
+      },
+    },
+    defaultVariants: {
+      scale: 'Medium',
+    },
+  }
+);
+
+const asyncSelectTextVariants = {
+  Small: 'text-xs',
+  Medium: 'text-sm',
+  Large: 'text-base',
+};
+
+const asyncSelectIconContainerVariants = {
+  Small: 'w-5',
+  Medium: 'w-6',
+  Large: 'w-8',
+};
+
+const asyncSelectIconVariants = {
+  Small: 'h-3 w-3',
+  Medium: 'h-4 w-4',
+  Large: 'h-5 w-5',
+};
+
+const asyncSelectInvalidIconVariants = {
+  Small: 'right-5 top-1.5',
+  Medium: 'right-6 top-2.5',
+  Large: 'right-8 top-3.5',
+};
 
 interface AsyncSelectInputWidgetProps {
   id: string;
@@ -19,6 +61,7 @@ interface AsyncSelectInputWidgetProps {
   disabled: boolean;
   loading: boolean;
   invalid?: string;
+  scale?: Scales;
 }
 
 export const AsyncSelectInputWidget: React.FC<AsyncSelectInputWidgetProps> = ({
@@ -27,6 +70,7 @@ export const AsyncSelectInputWidget: React.FC<AsyncSelectInputWidgetProps> = ({
   displayValue,
   disabled,
   invalid,
+  scale = Scales.Medium,
 }) => {
   const eventHandler = useEventHandler();
 
@@ -77,7 +121,10 @@ export const AsyncSelectInputWidget: React.FC<AsyncSelectInputWidgetProps> = ({
   const displayValueSpan = displayValue ? (
     <span
       ref={displayValueRef}
-      className="grow text-primary font-semibold text-body ml-3 underline overflow-hidden text-ellipsis whitespace-nowrap"
+      className={cn(
+        'grow text-primary font-semibold underline overflow-hidden text-ellipsis whitespace-nowrap',
+        asyncSelectTextVariants[scale]
+      )}
     >
       {displayValue}
     </span>
@@ -107,22 +154,43 @@ export const AsyncSelectInputWidget: React.FC<AsyncSelectInputWidgetProps> = ({
         disabled={disabled}
         onClick={handleSelect}
         className={cn(
-          'hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed flex h-9 text-left w-full items-center rounded-md border border-input bg-background text-base shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring cursor-pointer',
+          asyncSelectContainerVariants({ scale }),
           invalid && inputStyles.invalidInput
         )}
       >
         {wrappedDisplayValue}
         {!displayValue && (
-          <span className="grow text-muted-foreground text-body ml-3">
+          <span
+            className={cn(
+              'grow text-muted-foreground',
+              asyncSelectTextVariants[scale]
+            )}
+          >
             {placeholder}
           </span>
         )}
-        <div className="flex items-center justify-center h-full w-9 border-l">
-          <ChevronRight className="h-4 w-4" />
+        <div
+          className={cn(
+            'absolute top-0 bottom-0 border-l flex items-center justify-end shrink-0',
+            'right-2.5',
+            asyncSelectIconContainerVariants[scale]
+          )}
+        >
+          <ChevronRight
+            className={cn(
+              'opacity-50 shrink-0',
+              asyncSelectIconVariants[scale]
+            )}
+          />
         </div>
       </button>
       {invalid && (
-        <div className="absolute right-11 top-2.5 h-4 w-4">
+        <div
+          className={cn(
+            'absolute h-4 w-4',
+            asyncSelectInvalidIconVariants[scale]
+          )}
+        >
           <InvalidIcon message={invalid} />
         </div>
       )}

@@ -1,6 +1,11 @@
 import React, { useState } from 'react';
 import { getHeight, getWidth } from '@/lib/styles';
 import { getIvyHost } from '@/lib/utils';
+import {
+  validateAudioUrl,
+  isFullUrl,
+  normalizeRelativePath,
+} from '@/lib/urlValidation';
 
 interface AudioPlayerWidgetProps {
   id: string;
@@ -15,16 +20,24 @@ interface AudioPlayerWidgetProps {
   'data-testid'?: string;
 }
 
-const getAudioUrl = (url: string): string => {
-  if (
-    url.startsWith('http://') ||
-    url.startsWith('https://') ||
-    url.startsWith('data:')
-  ) {
-    return url;
+const getAudioUrl = (url: string | undefined | null): string | null => {
+  if (!url) return null;
+
+  // Validate and sanitize audio URL to prevent open redirect vulnerabilities
+  const validatedUrl = validateAudioUrl(url);
+  if (!validatedUrl) {
+    return null;
   }
 
-  return `${getIvyHost()}${url.startsWith('/') ? '' : '/'}${url}`;
+  // If it's already a full URL (http/https/data/blob/app), return it
+  if (isFullUrl(validatedUrl)) {
+    return validatedUrl;
+  }
+
+  // For relative paths, construct full URL with Ivy host
+  // validatedUrl is already a safe relative path (starts with / or was normalized)
+  const relativePath = normalizeRelativePath(validatedUrl);
+  return `${getIvyHost()}${relativePath}`;
 };
 
 export const AudioPlayerWidget: React.FC<AudioPlayerWidgetProps> = ({
@@ -52,16 +65,21 @@ export const AudioPlayerWidget: React.FC<AudioPlayerWidgetProps> = ({
     ...getHeight(height),
   };
 
-  if (!src) {
+  // getAudioUrl handles null/undefined and validates the URL internally
+  const validatedAudioSrc = getAudioUrl(src);
+  if (!validatedAudioSrc) {
+    // Show error message for missing or invalid URLs
     return (
       <div
         key={id}
         style={styles}
-        className="flex items-center justify-center bg-muted text-muted-foreground rounded border-2 border-dashed border-muted-foreground/25 p-4"
+        className="flex items-center justify-center bg-destructive/10 text-destructive rounded border-2 border-dashed border-destructive/25 p-4"
         role="alert"
-        aria-label="Audio player error"
+        aria-label="Invalid audio URL"
       >
-        <span className="text-sm">No audio source provided</span>
+        <span className="text-sm">
+          {!src ? 'No audio source provided' : 'Invalid audio URL'}
+        </span>
       </div>
     );
   }
@@ -83,7 +101,7 @@ export const AudioPlayerWidget: React.FC<AudioPlayerWidgetProps> = ({
   return (
     <audio
       key={id}
-      src={getAudioUrl(src)}
+      src={validatedAudioSrc}
       style={styles}
       autoPlay={autoplay}
       loop={loop}

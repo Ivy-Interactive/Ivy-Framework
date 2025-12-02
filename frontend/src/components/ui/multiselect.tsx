@@ -5,21 +5,21 @@ import { Command, CommandGroup, CommandItem } from '@/components/ui/command';
 import { Command as CommandPrimitive } from 'cmdk';
 import { cn } from '@/lib/utils';
 import { cva } from 'class-variance-authority';
-import { Sizes } from '@/types/sizes';
+import { Scales } from '@/types/scale';
 
 // Variants for MultipleSelector
 const multipleSelectorVariants = cva(
   'group border border-input bg-transparent shadow-sm ring-offset-background rounded-md focus-within:ring-1 focus-within:ring-ring',
   {
     variants: {
-      size: {
+      scale: {
         Small: 'px-2 py-1 text-xs',
         Medium: 'px-3 py-2 text-sm',
         Large: 'px-4 py-3 text-base',
       },
     },
     defaultVariants: {
-      size: 'Medium',
+      scale: 'Medium',
     },
   }
 );
@@ -27,42 +27,42 @@ const multipleSelectorVariants = cva(
 // Variants for menu items
 const menuItemVariants = cva('cursor-pointer', {
   variants: {
-    size: {
+    scale: {
       Small: 'px-2 py-1 text-xs',
       Medium: 'px-3 py-2 text-sm',
       Large: 'px-4 py-3 text-base',
     },
   },
   defaultVariants: {
-    size: 'Medium',
+    scale: 'Medium',
   },
 });
 
 // Variants for Badge components
 const badgeVariants = cva('hover:bg-secondary', {
   variants: {
-    size: {
+    scale: {
       Small: 'text-xs',
       Medium: 'text-sm',
       Large: 'text-base',
     },
   },
   defaultVariants: {
-    size: 'Medium',
+    scale: 'Medium',
   },
 });
 
 // Variants for close icon
 const closeIconVariants = cva('text-muted-foreground hover:text-foreground', {
   variants: {
-    size: {
+    scale: {
       Small: 'h-3 w-3',
       Medium: 'h-4 w-4',
       Large: 'h-5 w-5',
     },
   },
   defaultVariants: {
-    size: 'Medium',
+    scale: 'Medium',
   },
 });
 
@@ -86,7 +86,7 @@ interface MultipleSelectorProps {
   hidePlaceholderWhenSelected?: boolean;
   emptyIndicator?: React.ReactNode;
   invalid?: boolean;
-  size?: Sizes;
+  scale?: Scales;
 }
 
 const MultipleSelector = React.forwardRef<
@@ -106,7 +106,7 @@ const MultipleSelector = React.forwardRef<
       hidePlaceholderWhenSelected = false,
       emptyIndicator,
       invalid = false,
-      size = Sizes.Medium,
+      scale = Scales.Medium,
     },
     ref
   ) => {
@@ -152,7 +152,7 @@ const MultipleSelector = React.forwardRef<
       >
         <div
           className={cn(
-            multipleSelectorVariants({ size }),
+            multipleSelectorVariants({ scale }),
             invalid
               ? 'border-destructive text-destructive-foreground focus-within:ring-destructive focus-within:border-destructive'
               : undefined
@@ -164,7 +164,7 @@ const MultipleSelector = React.forwardRef<
                 key={option.value}
                 variant="secondary"
                 className={cn(
-                  badgeVariants({ size }),
+                  badgeVariants({ scale }),
                   invalid &&
                     'bg-destructive/10 border-destructive text-destructive'
                 )}
@@ -183,7 +183,7 @@ const MultipleSelector = React.forwardRef<
                   }}
                   onClick={() => handleUnselect(option)}
                 >
-                  <X className={closeIconVariants({ size })} />
+                  <X className={closeIconVariants({ scale })} />
                 </button>
               </Badge>
             ))}
@@ -219,7 +219,7 @@ const MultipleSelector = React.forwardRef<
                         setInputValue('');
                         onValueChange?.([...value, option]);
                       }}
-                      className={menuItemVariants({ size })}
+                      className={menuItemVariants({ scale })}
                       disabled={option.disable}
                     >
                       {option.label}
