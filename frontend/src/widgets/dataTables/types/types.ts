@@ -82,6 +82,7 @@ export interface TableProps {
   height?: string;
   rowActions?: MenuItem[];
   onCellUpdate?: (row: number, col: number, value: unknown) => void;
+  'data-testid'?: string;
 }
 
 export enum FilterTypes {

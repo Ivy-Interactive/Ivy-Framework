@@ -43,6 +43,7 @@ export const DataTable: React.FC<TableProps> = ({
   width,
   height,
   rowActions,
+  'data-testid': dataTestId,
 }) => {
   // Apply default config values
   const finalConfig = {
@@ -73,7 +74,7 @@ export const DataTable: React.FC<TableProps> = ({
   };
 
   return (
-    <div style={containerStyle}>
+    <div style={containerStyle} data-testid={dataTestId}>
       <TableProvider
         columns={columns}
         connection={connection}
