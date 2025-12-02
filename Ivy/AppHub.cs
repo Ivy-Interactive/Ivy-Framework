@@ -180,7 +180,7 @@ public class AppHub(
                 }
             }
 
-            AppDescriptor appDescriptor;
+            AppDescriptor? appDescriptor = null;
 
             if (string.IsNullOrEmpty(appId))
             {
@@ -214,6 +214,11 @@ public class AppHub(
                         if (notFoundApp.Id == AppIds.NotFound)
                         {
                             appServices.AddSingleton<IAppRepository>(new ScopedAppRepository(server.AppRepository, navigationAppId, notFoundApp));
+
+                            if (chromeApp?.Id != AppIds.Chrome)
+                            {
+                                appDescriptor = notFoundApp;
+                            }
                         }
                         else
                         {
@@ -233,7 +238,10 @@ public class AppHub(
                     appServices.AddSingleton(typeof(IAppRepository), server.AppRepository);
                 }
 
-                appDescriptor = server.GetApp(appId ?? AppIds.Default);
+                if (appDescriptor == null)
+                {
+                    appDescriptor = server.GetApp(appId ?? AppIds.Default);
+                }
             }
             else
             {
