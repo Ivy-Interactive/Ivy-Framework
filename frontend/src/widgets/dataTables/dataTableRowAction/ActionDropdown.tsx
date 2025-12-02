@@ -7,7 +7,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { ActionButton } from './ActionButton';
+import { ActionButton } from './actionButton';
 import { getActionId } from './utils';
 
 interface ActionDropdownProps {

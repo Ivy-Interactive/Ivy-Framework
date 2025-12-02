@@ -1,7 +1,7 @@
 import React, { useMemo, useRef } from 'react';
 import * as arrow from 'apache-arrow';
 import { Filter } from '@/services/grpcTableService';
-import { TableContext } from './TableContext';
+import { TableContext } from './tableContext';
 import { TableProviderProps, TableContextType } from './types';
 import {
   useDataLoading,

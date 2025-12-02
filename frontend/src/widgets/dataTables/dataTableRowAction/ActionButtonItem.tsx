@@ -1,6 +1,6 @@
 import React from 'react';
 import { MenuItem } from '@/types/widgets';
-import { ActionButton } from './ActionButton';
+import { ActionButton } from './actionButton';
 
 interface ActionButtonItemProps {
   action: MenuItem;

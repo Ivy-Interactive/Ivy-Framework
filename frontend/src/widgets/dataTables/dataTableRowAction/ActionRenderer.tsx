@@ -1,7 +1,7 @@
 import React from 'react';
 import { MenuItem } from '@/types/widgets';
-import { ActionDropdown } from './ActionDropdown';
-import { ActionButtonItem } from './ActionButtonItem';
+import { ActionDropdown } from './actionDropdown';
+import { ActionButtonItem } from './actionButtonItem';
 import { getActionId } from './utils';
 
 interface ActionRendererProps {
