@@ -1,4 +1,5 @@
 import {
+  CustomRenderer,
   DataEditorRef,
   GridCell,
   GridCellKind,
@@ -212,7 +213,12 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
       columns={finalColumns}
       rows={totalRows}
       getCellContent={getCellContent}
-      customRenderers={[iconCellRenderer, linkCellRenderer]}
+      customRenderers={
+        [
+          iconCellRenderer,
+          linkCellRenderer,
+        ] as unknown as readonly CustomRenderer[]
+      }
       headerIcons={headerIcons}
       onColumnResize={allowColumnResizing ? handleColumnResize : undefined}
       onVisibleRegionChanged={handleVisibleRegionChanged}
