@@ -3,10 +3,8 @@ using Ivy.Core;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
-/// <summary>Pagination control allowing users to navigate through pages of content with page numbers and next/previous buttons.</summary>
 public record Pagination : WidgetBase<Pagination>
 {
-    /// <param name="page">Initial page, starting from 1.</param>
     public Pagination(int? page, int? numPages, Func<Event<Pagination, int>, ValueTask> onChange, bool disabled = false)
     {
         Page = page;
@@ -15,7 +13,6 @@ public record Pagination : WidgetBase<Pagination>
         Disabled = disabled;
     }
 
-    /// <param name="page">Initial page, starting from 1.</param>
     public Pagination(int? page, int? numPages, Action<Event<Pagination, int>> onChange, bool disabled = false)
     {
         Page = page;

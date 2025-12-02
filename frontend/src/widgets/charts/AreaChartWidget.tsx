@@ -211,7 +211,6 @@ const AreaChartWidget: React.FC<AreaChartWidgetProps> = ({
       series,
     ]
   );
-
   return (
     <div style={styles}>
       <ReactECharts

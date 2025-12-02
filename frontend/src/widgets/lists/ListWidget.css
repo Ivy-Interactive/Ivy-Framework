@@ -1,0 +1,5 @@
+/* Component-specific CSS for ListWidget */
+/* Removes padding from parent element that contains .remove-parent-padding */
+:has(.remove-parent-padding) {
+  padding: 0px !important;
+}

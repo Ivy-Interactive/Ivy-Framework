@@ -18,7 +18,6 @@ public static class FileInputValidation
         return ValidationResult.Success();
     }
 
-    /// <summary>Accept pattern (e.g., ".txt,.pdf" or "image/*").</summary>
     public static ValidationResult ValidateFileTypes(IEnumerable<IFileUpload> files, string? accept)
     {
         if (string.IsNullOrWhiteSpace(accept)) return ValidationResult.Success();
@@ -57,7 +56,6 @@ public static class FileInputValidation
         return ValidationResult.Success();
     }
 
-    /// <summary>Maximum file size in bytes.</summary>
     public static ValidationResult ValidateFileSize(IFileUpload file, long? maxFileSize)
     {
         if (maxFileSize == null) return ValidationResult.Success();

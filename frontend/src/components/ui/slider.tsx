@@ -1,17 +1,17 @@
 import * as React from 'react';
 import * as SliderPrimitive from '@radix-ui/react-slider';
 import { cn } from '@/lib/utils';
-import { Sizes } from '@/types/sizes';
+import { Scales } from '@/types/scale';
 
 interface SliderWithCurrencyProps
   extends React.ComponentPropsWithoutRef<typeof SliderPrimitive.Root> {
   currency?: string;
-  size?: Sizes;
+  scale?: Scales;
 }
 const Slider = React.forwardRef<
   React.ElementRef<typeof SliderPrimitive.Root>,
   SliderWithCurrencyProps
->(({ className, currency, size = Sizes.Medium, ...props }, ref) => {
+>(({ className, currency, scale = Scales.Medium, ...props }, ref) => {
   const currentValue = props.value?.[0] ?? props.defaultValue?.[0] ?? 0;
 
   const formattedValue = React.useMemo(() => {
@@ -50,7 +50,7 @@ const Slider = React.forwardRef<
     },
   };
 
-  const variant = sizeVariants[String(size)];
+  const variant = sizeVariants[String(scale)];
 
   return (
     <SliderPrimitive.Root

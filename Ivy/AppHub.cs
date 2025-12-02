@@ -204,7 +204,7 @@ public class AppHub(
             var appArgs = GetAppArgs(Context.ConnectionId, appId, navigationAppId, httpContext);
             var appDescriptor = server.GetApp(appId);
 
-            logger.LogInformation($"Connected: {Context.ConnectionId} [{appId}]");
+            logger.LogInformation("Connected: {ConnectionId} [{AppId}]", Context.ConnectionId, appId);
 
             appServices.AddSingleton(appArgs);
             appServices.AddSingleton(appDescriptor);
@@ -299,7 +299,7 @@ public class AppHub(
             try
             {
                 await widgetTree.BuildAsync();
-                logger.LogInformation($"Refresh: {Context.ConnectionId} [{appId}]");
+                logger.LogInformation("Refresh: {ConnectionId} [{AppId}]", Context.ConnectionId, appId);
                 await Clients.Caller.SendAsync("Refresh", new
                 {
                     Widgets = widgetTree.GetWidgets().Serialize()
@@ -441,7 +441,7 @@ public class AppHub(
                 switch (state)
                 {
                     case AuthRefreshState.Initial:
-                        logger.LogInformation("AuthRefreshLoop: Starting for {ConnectionId}", connectionId);
+                        logger.LogInformation("AuthRefreshLoop: Initialized for {ConnectionId}.", connectionId);
                         state = token == null
                             ? AuthRefreshState.HasNoToken
                             : AuthRefreshState.HasToken;
@@ -508,8 +508,6 @@ public class AppHub(
                     case AuthRefreshState.TokenExpired:
                     case AuthRefreshState.TokenInvalid:
                         {
-                            logger.LogInformation("AuthRefreshLoop: Attempting to refresh token for {ConnectionId}.", connectionId);
-
                             var newToken = await TimeoutHelper.WithTimeoutAsync(
                                 authService.RefreshAccessTokenAsync,
                                 cancellationToken);
@@ -517,12 +515,11 @@ public class AppHub(
                             {
                                 // This case should only ever happen if the auth provider implementation is bad (i.e. it returns the same invalid token on refresh).
                                 // It is still good to handle it here to avoid an infinite loop.
-                                logger.LogInformation("AuthRefreshLoop: Invalid token object unchanged after refresh for {ConnectionId}.", connectionId);
+                                logger.LogError("AuthRefreshLoop: Invalid token object unchanged after refresh for {ConnectionId}.", connectionId);
                                 newToken = null;
                             }
                             if (token != newToken)
                             {
-                                logger.LogInformation("AuthRefreshLoop: updating stored token for {ConnectionId}.", connectionId);
                                 clientProvider.SetAuthToken(newToken, reloadPage: string.IsNullOrEmpty(newToken?.AccessToken));
                             }
                             if (newToken == null)
@@ -569,7 +566,7 @@ public class AppHub(
         if (sessionStore.Sessions.TryGetValue(Context.ConnectionId, out var appSession))
         {
             appSession.LastInteraction = DateTime.UtcNow;
-            logger.LogInformation($"HotReload: {Context.ConnectionId} [{appSession.AppId}]");
+            logger.LogInformation("HotReload: {ConnectionId} [{AppId}]", Context.ConnectionId, appSession.AppId);
             try
             {
                 appSession.WidgetTree.HotReload();
@@ -581,16 +578,16 @@ public class AppHub(
         }
         else
         {
-            logger.LogWarning($"HotReload: {Context.ConnectionId} [Not Found]");
+            logger.LogWarning("HotReload: {ConnectionId} [Not Found]", Context.ConnectionId);
         }
     }
 
     public Task Event(string eventName, string widgetId, JsonArray? args)
     {
-        logger.LogDebug($"Event: {eventName} {widgetId} {args}");
+        logger.LogDebug("Event: {EventName} {WidgetId} {Args}", eventName, widgetId, args);
         if (!sessionStore.Sessions.TryGetValue(Context.ConnectionId, out var appSession))
         {
-            logger.LogWarning($"Event: {eventName} {widgetId} [AppSession Not Found]");
+            logger.LogWarning("Event: {EventName} {WidgetId} [AppSession Not Found]", eventName, widgetId);
             return Task.CompletedTask;
         }
 
@@ -602,7 +599,7 @@ public class AppHub(
                 appSession.LastInteraction = DateTime.UtcNow;
                 if (!await appSession.WidgetTree.TriggerEventAsync(widgetId, eventName, args ?? new JsonArray()))
                 {
-                    logger.LogWarning($"Event '{eventName}' for Widget '{widgetId}' not found.");
+                    logger.LogWarning("Event '{EventName}' for Widget '{WidgetId}' not found.", eventName, widgetId);
                 }
             }
             catch (Exception e)

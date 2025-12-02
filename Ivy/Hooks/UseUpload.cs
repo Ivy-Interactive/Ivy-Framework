@@ -31,25 +31,9 @@ public static class UseUploadExtensions
         return ctxState;
     }
 
-    /// <summary>
-    /// Creates an upload endpoint using an IUploadHandler for custom upload logic.
-    /// </summary>
-    /// <param name="view">The view context.</param>
-    /// <param name="handler">The upload handler to process uploaded files.</param>
-    /// <param name="defaultContentType">Optional default content type for uploaded files.</param>
-    /// <param name="defaultFileName">Optional default file name for uploaded files.</param>
-    /// <returns>A state containing the upload URL.</returns>
     public static IState<UploadContext> UseUpload<TView>(this TView view, IUploadHandler handler, string? defaultContentType = null, string? defaultFileName = null) where TView : ViewBase =>
-        view.Context.UseUpload(handler, defaultContentType, defaultFileName);
+    view.Context.UseUpload(handler, defaultContentType, defaultFileName);
 
-    /// <summary>
-    /// Creates an upload endpoint using an IUploadHandler for custom upload logic.
-    /// </summary>
-    /// <param name="context">The view context.</param>
-    /// <param name="handler">The upload handler to process uploaded files.</param>
-    /// <param name="defaultContentType">Optional default content type for uploaded files.</param>
-    /// <param name="defaultFileName">Optional default file name for uploaded files.</param>
-    /// <returns>A state containing the upload URL.</returns>
     public static IState<UploadContext> UseUpload(this IViewContext context, IUploadHandler handler, string? defaultContentType = null, string? defaultFileName = null)
     {
         return context.UseUpload(handler.HandleUploadAsync, defaultContentType, defaultFileName);

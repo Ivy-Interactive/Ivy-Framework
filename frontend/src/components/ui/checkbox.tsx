@@ -3,14 +3,14 @@ import { cn } from '@/lib/utils';
 import * as CheckboxPrimitive from '@radix-ui/react-checkbox';
 import { Check, Minus } from 'lucide-react';
 import * as React from 'react';
-import { Sizes } from '@/types/sizes';
+import { Scales } from '@/types/scale';
 export type NullableBoolean = boolean | null | undefined;
 
-const getSizeClasses = (size: Sizes): string => {
-  switch (size) {
-    case Sizes.Small:
+const getSizeClasses = (scale?: Scales): string => {
+  switch (scale) {
+    case Scales.Small:
       return 'h-3 w-3';
-    case Sizes.Large:
+    case Scales.Large:
       return 'h-5 w-5';
     default:
       return 'h-4 w-4';
@@ -24,7 +24,7 @@ type AppCheckboxProps = {
   disabled?: boolean;
   nullable?: boolean;
   className?: string;
-  size?: Sizes;
+  scale?: Scales;
 };
 
 const Checkbox = React.forwardRef<
@@ -39,7 +39,7 @@ const Checkbox = React.forwardRef<
       disabled,
       nullable = false,
       className = '',
-      size = Sizes.Medium,
+      scale = Scales.Medium,
       ...props
     },
     ref
@@ -69,7 +69,7 @@ const Checkbox = React.forwardRef<
       }
     };
 
-    const baseClass = `peer ${getSizeClasses(size)} shrink-0 rounded-sm border border-border shadow focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground data-[state=checked]:border-border`;
+    const baseClass = `peer ${getSizeClasses(scale)} shrink-0 rounded-sm border border-border shadow focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground data-[state=checked]:border-border`;
     const finalClass = className?.includes('bg-red-50')
       ? baseClass.replace('data-[state=checked]:bg-primary', '')
       : baseClass;
@@ -88,9 +88,9 @@ const Checkbox = React.forwardRef<
           className={cn('flex items-center justify-center text-current')}
         >
           {uiChecked === 'indeterminate' ? (
-            <Minus className={getSizeClasses(size)} />
+            <Minus className={getSizeClasses(scale)} />
           ) : (
-            <Check className={getSizeClasses(size)} />
+            <Check className={getSizeClasses(scale)} />
           )}
         </CheckboxPrimitive.Indicator>
       </CheckboxPrimitive.Root>

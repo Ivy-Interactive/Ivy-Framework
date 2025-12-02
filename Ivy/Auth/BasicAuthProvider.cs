@@ -1,4 +1,4 @@
-﻿using System.IdentityModel.Tokens.Jwt;
+using System.IdentityModel.Tokens.Jwt;
 using System.Reflection;
 using System.Security.Claims;
 using System.Text;
@@ -10,7 +10,6 @@ using Isopoh.Cryptography.Argon2;
 
 namespace Ivy.Auth;
 
-/// <summary> Basic authentication provider that uses JWT tokens and in-memory user storage. </summary>
 public class BasicAuthProvider : IAuthProvider
 {
     private readonly List<(string user, string hash)> _users = [];
@@ -126,7 +125,6 @@ public class BasicAuthProvider : IAuthProvider
         return Task.CompletedTask;
     }
 
-    /// <returns>A new authentication token if successful, null otherwise</returns>
     public Task<AuthToken?> RefreshAccessTokenAsync(AuthToken token, CancellationToken cancellationToken)
     {
         // Check that refresh token is provided
@@ -167,15 +165,13 @@ public class BasicAuthProvider : IAuthProvider
         throw new NotImplementedException();
     }
 
-    /// <returns>An authentication token if successful, null otherwise</returns>
     public Task<AuthToken?> HandleOAuthCallbackAsync(HttpRequest request, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }
 
-    /// <returns>True if the token is valid, false otherwise</returns>
     public Task<bool> ValidateAccessTokenAsync(string token, CancellationToken cancellationToken)
-        => Task.FromResult(ValidateAccessToken(token));
+    => Task.FromResult(ValidateAccessToken(token));
 
     private bool ValidateAccessToken(string token)
     {

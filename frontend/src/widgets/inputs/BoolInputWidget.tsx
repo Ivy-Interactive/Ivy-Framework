@@ -13,7 +13,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { Sizes } from '@/types/sizes';
+import { Scales } from '@/types/scale';
 import {
   labelSizeVariants,
   descriptionSizeVariants,
@@ -31,7 +31,7 @@ interface BoolInputWidgetProps {
   invalid?: string;
   variant: VariantType;
   icon?: string;
-  size?: Sizes;
+  scale?: Scales;
   'data-testid'?: string;
 }
 
@@ -43,7 +43,7 @@ interface BaseVariantProps {
   nullable?: boolean;
   value: NullableBoolean;
   disabled: boolean;
-  size?: Sizes;
+  scale?: Scales;
   'data-testid'?: string;
 }
 
@@ -65,19 +65,19 @@ const InputLabel: React.FC<{
   id: string;
   label?: string;
   description?: string;
-  size?: Sizes;
-}> = React.memo(({ id, label, description, size = Sizes.Medium }) => {
+  scale?: Scales;
+}> = React.memo(({ id, label, description, scale = Scales.Medium }) => {
   if (!label && !description) return null;
 
   return (
     <div>
       {label && (
-        <Label htmlFor={id} className={labelSizeVariants({ size })}>
+        <Label htmlFor={id} className={labelSizeVariants({ scale })}>
           {label}
         </Label>
       )}
       {description && (
-        <p className={descriptionSizeVariants({ size })}>{description}</p>
+        <p className={descriptionSizeVariants({ scale })}>{description}</p>
       )}
     </div>
   );
@@ -108,7 +108,7 @@ const VariantComponents = {
       disabled,
       nullable,
       invalid,
-      size = Sizes.Medium,
+      scale = Scales.Medium,
       onCheckedChange,
       'data-testid': dataTestId,
     }: CheckboxVariantProps) => {
@@ -121,7 +121,7 @@ const VariantComponents = {
           nullable={nullable}
           className={cn(invalid && inputStyles.invalid)}
           data-testid={dataTestId}
-          size={size}
+          scale={scale}
         />
       );
 
@@ -135,7 +135,7 @@ const VariantComponents = {
             id={id}
             label={label}
             description={description}
-            size={size}
+            scale={scale}
           />
         </div>
       );
@@ -152,7 +152,7 @@ const VariantComponents = {
       value,
       disabled,
       invalid,
-      size = Sizes.Medium,
+      scale = Scales.Medium,
       onCheckedChange,
       'data-testid': dataTestId,
     }: SwitchVariantProps) => {
@@ -162,7 +162,7 @@ const VariantComponents = {
           checked={!!value}
           onCheckedChange={onCheckedChange}
           disabled={disabled}
-          size={size}
+          scale={scale}
           className={cn(invalid && inputStyles.invalid)}
           data-testid={dataTestId}
         />
@@ -178,7 +178,7 @@ const VariantComponents = {
             id={id}
             label={label}
             description={description}
-            size={size}
+            scale={scale}
           />
         </div>
       );
@@ -196,7 +196,7 @@ const VariantComponents = {
       disabled,
       icon,
       invalid,
-      size = Sizes.Medium,
+      scale = Scales.Medium,
       onPressedChange,
       'data-testid': dataTestId,
     }: ToggleVariantProps) => {
@@ -208,7 +208,7 @@ const VariantComponents = {
           disabled={disabled}
           aria-label={label}
           className={cn(invalid && inputStyles.invalid)}
-          size={size}
+          scale={scale}
           data-testid={dataTestId}
         >
           {icon && <Icon name={icon} />}
@@ -225,7 +225,7 @@ const VariantComponents = {
             id={id}
             label={label}
             description={description}
-            size={size}
+            scale={scale}
           />
         </div>
       );
@@ -245,7 +245,7 @@ export const BoolInputWidget: React.FC<BoolInputWidgetProps> = ({
   nullable = false,
   variant,
   icon,
-  size = Sizes.Medium,
+  scale = Scales.Medium,
   'data-testid': dataTestId,
 }) => {
   const eventHandler = useEventHandler();
@@ -273,7 +273,7 @@ export const BoolInputWidget: React.FC<BoolInputWidgetProps> = ({
       nullable={nullable}
       icon={icon}
       invalid={invalid}
-      size={size}
+      scale={scale}
       onCheckedChange={handleChange}
       onPressedChange={handleChange}
       data-testid={dataTestId}

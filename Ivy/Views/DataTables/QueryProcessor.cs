@@ -25,7 +25,6 @@ public class ValuesResult
     public int TotalValues { get; set; }
 }
 
-/// <summary>Processes table queries by applying sorting and pagination to IQueryable data sources, then converts the results to Apache Arrow format for efficient data transfer.</summary>
 public class QueryProcessor(ILogger<QueryProcessor>? logger = null, IDistributedCache? cache = null)
 {
     public QueryResult ProcessQuery(IQueryable queryable, DataTableQuery query)

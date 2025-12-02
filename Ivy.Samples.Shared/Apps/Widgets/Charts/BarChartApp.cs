@@ -41,7 +41,6 @@ public class BarChart0 : ViewBase
                 .Tooltip()
                 .XAxis(new XAxis("Month").TickLine(false).AxisLine(false))
                 .Legend()
-                .Toolbox()
         ;
     }
 }
@@ -69,7 +68,6 @@ public class BarChart1 : ViewBase
                 .Tooltip()
                 .XAxis(new XAxis("Month").TickLine(false).AxisLine(false))
                 .Legend()
-                .Toolbox()
         ;
     }
 }
@@ -97,7 +95,6 @@ public class BarChart2 : ViewBase
                 .Tooltip()
                 .XAxis(new XAxis("Month").TickLine(false).AxisLine(false))
                 .Legend()
-                .Toolbox()
         ;
     }
 }

@@ -4,11 +4,8 @@ using Ivy.Shared;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
-/// <summary>Scalable vector icon widget with theming support.</summary>
 public record Icon : WidgetBase<Icon>
 {
-    /// <param name="name">Icon to display.</param>
-    /// <param name="color">Optional color override. Default: theme color.</param>
     public Icon(Icons name, Colors? color = null)
     {
         Name = name;

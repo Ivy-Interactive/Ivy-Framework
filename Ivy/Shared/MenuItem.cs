@@ -12,19 +12,6 @@ public enum MenuItemVariant
     Group
 }
 
-/// <summary>Menu item with hierarchical structure, icons, shortcuts, and selection handling.</summary>
-/// <param name="Label">Display text for menu item.</param>
-/// <param name="Children">Child menu items for creating hierarchical menus.</param>
-/// <param name="Icon">Optional icon to display alongside label.</param>
-/// <param name="Tag">Associated data object for identification and event handling.</param>
-/// <param name="Variant">Visual and behavioral variant of menu item.</param>
-/// <param name="Checked">Whether item is checked (for Checkbox and Radio variants).</param>
-/// <param name="Disabled">Whether item is disabled and non-interactive.</param>
-/// <param name="Shortcut">Keyboard shortcut text to display.</param>
-/// <param name="Expanded">Whether child items are expanded in hierarchical menus.</param>
-/// <param name="Tooltip">Tooltip text to display on hover.</param>
-/// <param name="OnSelect">Event handler called when item is selected.</param>
-/// <param name="SearchHints">Tags used for the search functionality.</param>
 public record MenuItem(
     string? Label = null,
     MenuItem[]? Children = null,
@@ -72,10 +59,8 @@ public record MenuItem(
 
 }
 
-/// <summary>Extension methods for MenuItem manipulation and fluent configuration.</summary>
 public static class MenuItemExtensions
 {
-    /// <returns>All menu items including nested children in depth-first order.</returns>
     public static IEnumerable<MenuItem> Flatten(this IEnumerable<MenuItem> menuItem)
     {
         foreach (var item in menuItem)
@@ -91,7 +76,6 @@ public static class MenuItemExtensions
         }
     }
 
-    /// <returns>Selection handler action, or null if no matching item found.</returns>
     public static Action? GetSelectHandler(this MenuItem[] menuItem, object value)
     {
         foreach (var item in menuItem)

@@ -9,7 +9,6 @@ searchHints:
 
 # JobScheduler
 
-<!-- markdownlint-disable-next-line MD033 -->
 <Ingress>
 Coordinate complex async work with declarative job graphs, dependency-aware scheduling, and built-in UI status reporting.
 </Ingress>

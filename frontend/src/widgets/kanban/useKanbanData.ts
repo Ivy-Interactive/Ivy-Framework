@@ -17,8 +17,6 @@ interface WidgetNodeChild {
   events: string[];
 }
 
-const FALLBACK_ORDER_OFFSET = 1000;
-
 function getStatusOrder(status: string): number {
   switch (status) {
     case 'Todo':
@@ -42,29 +40,7 @@ function extractColumnKeysFromCards(cards: CardData[]): string[] {
   return Array.from(columnSet);
 }
 
-function sortColumnKeysByBackendOrder(
-  columnKeys: string[],
-  columnWidths: Record<string, string>
-): string[] {
-  const columnWidthsKeys = Object.keys(columnWidths);
-
-  if (columnWidthsKeys.length > 0) {
-    const orderMap = new Map<string, number>();
-    columnWidthsKeys.forEach((key, index) => {
-      orderMap.set(key, index);
-    });
-
-    return [...columnKeys].sort((a, b) => {
-      const orderA = orderMap.has(a)
-        ? orderMap.get(a)!
-        : getStatusOrder(a) + FALLBACK_ORDER_OFFSET;
-      const orderB = orderMap.has(b)
-        ? orderMap.get(b)!
-        : getStatusOrder(b) + FALLBACK_ORDER_OFFSET;
-      return orderA - orderB;
-    });
-  }
-
+function sortColumnKeysByBackendOrder(columnKeys: string[]): string[] {
   return [...columnKeys].sort((a, b) => {
     return getStatusOrder(a) - getStatusOrder(b);
   });
@@ -74,7 +50,6 @@ export function useKanbanData(
   slots: { default?: React.ReactNode[] } | undefined,
   tasks: Task[],
   columns: Column[],
-  columnWidths: Record<string, string>,
   widgetNodeChildren?: WidgetNodeChild[]
 ): ExtractedKanbanData {
   return React.useMemo(() => {
@@ -103,10 +78,7 @@ export function useKanbanData(
       if (extractedCards.length > 0 && tasks.length === 0) {
         const allColumnKeys = extractColumnKeysFromCards(extractedCards);
 
-        const finalColumnKeys = sortColumnKeysByBackendOrder(
-          allColumnKeys,
-          columnWidths
-        );
+        const finalColumnKeys = sortColumnKeysByBackendOrder(allColumnKeys);
 
         const extractedColumns: Column[] = finalColumnKeys.map(
           (key, index) => ({
@@ -114,7 +86,6 @@ export function useKanbanData(
             name: key,
             color: '',
             order: index,
-            width: columnWidths[key],
           })
         );
 
@@ -151,14 +122,13 @@ export function useKanbanData(
 
       const statusKeys = Array.from(statusMap.keys());
 
-      const columnKeys = sortColumnKeysByBackendOrder(statusKeys, columnWidths);
+      const columnKeys = sortColumnKeysByBackendOrder(statusKeys);
 
       const extractedColumns: Column[] = columnKeys.map((status, index) => ({
         id: status,
         name: status,
         color: '',
         order: index,
-        width: columnWidths[status],
       }));
 
       const cardToTaskMap = new Map<string, Task>();
@@ -191,5 +161,5 @@ export function useKanbanData(
       columns,
       cards: [],
     };
-  }, [slots, tasks, columns, columnWidths, widgetNodeChildren]);
+  }, [slots, tasks, columns, widgetNodeChildren]);
 }

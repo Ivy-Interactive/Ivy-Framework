@@ -4,7 +4,6 @@ using Ivy.Shared;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
-/// <summary>Defines the visual style and semantic meaning of text content.</summary>
 public enum TextVariant
 {
     Literal,
@@ -35,7 +34,6 @@ public enum TextVariant
     Strong
 }
 
-/// <summary>Low-level text widget rendering text content with customizable styling and variants. Rarely used directly - use Text helper instead.</summary>
 public record TextBlock : WidgetBase<TextBlock>
 {
     internal TextBlock(string content = "", TextVariant variant = TextVariant.Literal, Size? width = null,

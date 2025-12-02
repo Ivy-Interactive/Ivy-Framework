@@ -1,4 +1,4 @@
-﻿using Ivy.Shared;
+using Ivy.Shared;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy.Charts;
@@ -14,14 +14,12 @@ public record LabelList
 
     public double Offset { get; set; } = 5;
 
-    /// <summary>Positive values rotate clockwise.</summary>
     public double? Angle { get; set; } = null;
 
     public Positions? Position { get; set; } = Positions.Outside;
 
     public Colors? Fill { get; set; } = Colors.Black;
 
-    /// <summary>Value ranges from 0.0 to 1.0.</summary>
     public double? FillOpacity { get; set; } = null;
 
     public int? FontSize { get; set; } = null;
