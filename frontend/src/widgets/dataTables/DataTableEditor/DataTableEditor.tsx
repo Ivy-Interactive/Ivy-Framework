@@ -1,6 +1,6 @@
 import React, { useMemo, useRef } from 'react';
 import { CustomRenderer, DataEditorRef } from '@glideapps/glide-data-grid';
-import { useTable } from '../DataTableContext';
+import { useTable } from '../DataTableContext/exports';
 import { getSelectionProps } from '../utils/selectionModes';
 import { iconCellRenderer, linkCellRenderer } from '../utils/customRenderers';
 import { generateHeaderIcons, addStandardIcons } from '../utils/headerIcons';
