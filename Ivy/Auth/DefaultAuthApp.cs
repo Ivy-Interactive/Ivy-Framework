@@ -3,7 +3,6 @@ using Ivy.Apps;
 using Ivy.Client;
 using Ivy.Core;
 using Ivy.Core.Hooks;
-using Ivy.Helpers;
 using Ivy.Hooks;
 using Ivy.Shared;
 using Ivy.Views;
@@ -113,8 +112,7 @@ public class PasswordEmailFlowView(IState<string?> errorMessage) : ViewBase
                 var authSession = auth.GetAuthSession();
                 var oldSession = authSession.TakeSnapshot();
 
-                await TimeoutHelper.WithTimeoutAsync(
-                    ct => auth.LoginAsync(credentials.Value.User, credentials.Value.Password, ct));
+                await auth.LoginAsync(credentials.Value.User, credentials.Value.Password);
 
                 if (authSession.HasChangedSince(oldSession))
                 {
@@ -159,7 +157,7 @@ public class OAuthFlowView(AuthOption option, IState<string?> errorMessage) : Vi
         {
             var authSession = auth.GetAuthSession();
             var oldSession = authSession.TakeSnapshot();
-            var token = await TimeoutHelper.WithTimeoutAsync(ct => auth.HandleOAuthCallbackAsync(request, ct));
+            var token = await auth.HandleOAuthCallbackAsync(request);
             if (authSession.HasChangedSince(oldSession))
             {
                 client.SetAuthCookies(sessionStore, authSession);
@@ -173,7 +171,7 @@ public class OAuthFlowView(AuthOption option, IState<string?> errorMessage) : Vi
             {
                 var authSession = auth.GetAuthSession();
                 var oldSession = authSession.TakeSnapshot();
-                var uri = await TimeoutHelper.WithTimeoutAsync(ct => auth.GetOAuthUriAsync(option, callback, ct));
+                var uri = await auth.GetOAuthUriAsync(option, callback);
                 if (authSession.AuthSessionData != oldSession.AuthSessionData)
                 {
                     client.SetAuthSessionData(sessionStore, authSession.AuthSessionData);

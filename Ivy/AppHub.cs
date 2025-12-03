@@ -95,9 +95,7 @@ public class AppHub(
 
                         if (!isValid)
                         {
-                            await TimeoutHelper.WithTimeoutAsync(
-                                authService.RefreshAccessTokenAsync,
-                                Context.ConnectionAborted);
+                            await authService.RefreshAccessTokenAsync(Context.ConnectionAborted);
                         }
                     }
                     else
@@ -430,9 +428,7 @@ public class AppHub(
                     case AuthRefreshState.TokenInvalid:
                         {
                             var oldSession = authSession.TakeSnapshot();
-                            await TimeoutHelper.WithTimeoutAsync(
-                                authService.RefreshAccessTokenAsync,
-                                cancellationToken);
+                            await authService.RefreshAccessTokenAsync(cancellationToken);
                             if (state == AuthRefreshState.TokenInvalid && authSession.AuthToken == oldSession.AuthToken)
                             {
                                 // This case should only ever happen if the auth provider implementation is bad (i.e. it returns the same invalid token on refresh).

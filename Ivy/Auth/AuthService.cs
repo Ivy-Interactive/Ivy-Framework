@@ -1,3 +1,4 @@
+using Ivy.Helpers;
 using Ivy.Hooks;
 using Microsoft.AspNetCore.Http;
 
@@ -7,19 +8,22 @@ public class AuthService(IAuthProvider authProvider, IAuthSession authSession) :
 {
     public async Task<AuthToken?> LoginAsync(string email, string password, CancellationToken cancellationToken)
     {
-        var token = await authProvider.LoginAsync(authSession, email, password, cancellationToken);
+        var token = await TimeoutHelper.WithTimeoutAsync(ct =>
+            authProvider.LoginAsync(authSession, email, password, ct), cancellationToken);
         authSession.AuthToken = token;
         return token;
     }
 
     public Task<Uri> GetOAuthUriAsync(AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken)
     {
-        return authProvider.GetOAuthUriAsync(authSession, option, callback, cancellationToken);
+        return TimeoutHelper.WithTimeoutAsync(ct =>
+            authProvider.GetOAuthUriAsync(authSession, option, callback, ct), cancellationToken);
     }
 
     public async Task<AuthToken?> HandleOAuthCallbackAsync(HttpRequest request, CancellationToken cancellationToken)
     {
-        var token = await authProvider.HandleOAuthCallbackAsync(authSession, request, cancellationToken);
+        var token = await TimeoutHelper.WithTimeoutAsync(ct =>
+            authProvider.HandleOAuthCallbackAsync(authSession, request, ct), cancellationToken);
         authSession.AuthToken = token;
         return token;
     }
@@ -33,7 +37,8 @@ public class AuthService(IAuthProvider authProvider, IAuthSession authSession) :
             return;
         }
 
-        await authProvider.LogoutAsync(authSession, cancellationToken);
+        await TimeoutHelper.WithTimeoutAsync(ct =>
+            authProvider.LogoutAsync(authSession, ct), cancellationToken);
         authSession.AuthToken = null;
     }
 
@@ -48,7 +53,8 @@ public class AuthService(IAuthProvider authProvider, IAuthSession authSession) :
 
         //todo: cache this!
 
-        return await authProvider.GetUserInfoAsync(authSession, cancellationToken);
+        return await TimeoutHelper.WithTimeoutAsync(ct =>
+            authProvider.GetUserInfoAsync(authSession, ct), cancellationToken);
     }
 
     public AuthOption[] GetAuthOptions()
@@ -64,7 +70,8 @@ public class AuthService(IAuthProvider authProvider, IAuthSession authSession) :
             return null;
         }
 
-        var refreshedToken = await authProvider.RefreshAccessTokenAsync(authSession, cancellationToken);
+        var refreshedToken = await TimeoutHelper.WithTimeoutAsync(ct =>
+            authProvider.RefreshAccessTokenAsync(authSession, ct), cancellationToken);
         authSession.AuthToken = refreshedToken;
         return refreshedToken;
     }
