@@ -2,7 +2,6 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq.Expressions;
 using System.Reflection;
 using Ivy.Core;
-using Ivy.Core.Hooks;
 using Ivy.Helpers;
 using Ivy.Shared;
 using Microsoft.Extensions.AI;
@@ -41,45 +40,45 @@ public class DataTableBuilder<TModel> : ViewBase, IMemoized
         var underlyingType = Nullable.GetUnderlyingType(type) ?? type;
 
         if (underlyingType == typeof(Icons))
-            return Ivy.ColType.Icon;
+            return ColType.Icon;
 
         if (underlyingType == typeof(string) || underlyingType == typeof(char))
-            return Ivy.ColType.Text;
+            return ColType.Text;
 
         if (underlyingType == typeof(int) || underlyingType == typeof(long) ||
             underlyingType == typeof(short) || underlyingType == typeof(byte) ||
             underlyingType == typeof(uint) || underlyingType == typeof(ulong) ||
             underlyingType == typeof(ushort) || underlyingType == typeof(sbyte))
-            return Ivy.ColType.Number;
+            return ColType.Number;
 
         if (underlyingType == typeof(decimal) || underlyingType == typeof(double) ||
             underlyingType == typeof(float))
-            return Ivy.ColType.Number;
+            return ColType.Number;
 
         if (underlyingType == typeof(bool))
-            return Ivy.ColType.Boolean;
+            return ColType.Boolean;
 
         if (underlyingType == typeof(DateTime) || underlyingType == typeof(DateTimeOffset))
-            return Ivy.ColType.DateTime;
+            return ColType.DateTime;
 
         if (underlyingType == typeof(DateOnly))
-            return Ivy.ColType.Date;
+            return ColType.Date;
 
         if (underlyingType == typeof(TimeSpan) || underlyingType == typeof(TimeOnly))
-            return Ivy.ColType.Text;
+            return ColType.Text;
 
         if (underlyingType == typeof(Guid) || underlyingType.IsEnum)
-            return Ivy.ColType.Text;
+            return ColType.Text;
 
         // Handle string arrays as Labels type
         if (underlyingType.IsArray && underlyingType.GetElementType() == typeof(string))
-            return Ivy.ColType.Labels;
+            return ColType.Labels;
 
         // Handle other arrays and collections as Text
         if (underlyingType.IsArray || typeof(System.Collections.IEnumerable).IsAssignableFrom(underlyingType))
-            return Ivy.ColType.Text;
+            return ColType.Text;
 
-        return Ivy.ColType.Text;
+        return ColType.Text;
     }
 
     private void _Scaffold()
