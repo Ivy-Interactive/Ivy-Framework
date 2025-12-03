@@ -21,6 +21,7 @@ public class DataTableBuilder<TModel> : ViewBase, IMemoized
     private MenuItem[]? _menuItemRowActions;
     private Func<Event<DataTable, RowActionClickEventArgs>, ValueTask>? _onRowAction;
     private readonly Dictionary<string, Action<object>> _cellActions = new();
+    private Func<TModel, object?>? _rowIdSelector;
 
     private class InternalColumn
     {
@@ -296,6 +297,12 @@ public class DataTableBuilder<TModel> : ViewBase, IMemoized
         return this;
     }
 
+    public DataTableBuilder<TModel> RowIdSelector(Func<TModel, object?> rowIdSelector)
+    {
+        _rowIdSelector = rowIdSelector;
+        return this;
+    }
+
     public override object? Build()
     {
         var chatClient = this.UseService<IChatClient?>();
@@ -340,7 +347,13 @@ public class DataTableBuilder<TModel> : ViewBase, IMemoized
             };
         }
 
-        return new DataTableView(queryable, width, _height, columns, configuration, _onCellClick, onCellActivated, _menuItemRowActions, _onRowAction);
+        Func<object, object?>? rowIdSelector = null;
+        if (_rowIdSelector != null)
+        {
+            rowIdSelector = obj => _rowIdSelector((TModel)obj);
+        }
+
+        return new DataTableView(queryable, width, _height, columns, configuration, _onCellClick, onCellActivated, _menuItemRowActions, _onRowAction, rowIdSelector);
     }
 
     public object[] GetMemoValues()
