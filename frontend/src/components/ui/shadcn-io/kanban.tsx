@@ -156,7 +156,7 @@ interface KanbanBoardProps {
 export function KanbanBoard({ children, className }: KanbanBoardProps) {
   return (
     <div
-      className={cn('flex h-full bg-background flex-row gap-3', className)}
+      className={cn('flex h-full bg-background flex-row', className)}
       style={{ minWidth: 'fit-content', maxWidth: '100%' }}
     >
       {children}
@@ -253,7 +253,7 @@ export function KanbanColumn({
     <div
       className={cn(
         hasExplicitWidth ? 'bg-background' : 'flex-1 bg-background',
-        'rounded-lg px-0 py-4 min-h-0 flex flex-col transition-colors min-w-70',
+        'rounded-lg px-0 pt-2 min-h-0 flex flex-col transition-colors min-w-70',
         showDragOver && 'bg-accent rounded-lg',
         className
       )}
@@ -300,7 +300,7 @@ export function KanbanCards({ id, children }: KanbanCardsProps) {
 
   return (
     <ScrollArea className="flex-1 min-h-0">
-      <div className="flex flex-col gap-2 p-1">
+      <div className="flex flex-col gap-2 p-2 pt-3">
         {columnTasks.map((task, index) => {
           const isDraggedCard = task.id === draggedCardId;
           const shouldShift =
