@@ -10,7 +10,6 @@ using Ivy.Core.Exceptions;
 using Ivy.Helpers;
 using Ivy.Hooks;
 using Ivy.Services;
-using Ivy.Shared;
 using Ivy.Views;
 using Ivy.Views.DataTables;
 using Microsoft.AspNetCore.Http;
@@ -29,7 +28,7 @@ public class AppHub(
     IQueryableRegistry queryableRegistry
     ) : Hub
 {
-    private static bool GetChromeParam(HttpContext httpContext)
+    private static bool GetChrome(HttpContext httpContext)
     {
         bool chrome = true;
         if (httpContext.Request.Query.TryGetValue("chrome", out var chromeParam))
@@ -108,7 +107,7 @@ public class AppHub(
 
             var httpContext = Context.GetHttpContext()!;
 
-            var chrome = GetChromeParam(httpContext);
+            var chrome = GetChrome(httpContext);
             var parentId = GetParentId(httpContext);
             var (appId, navigationAppId) = GetAppId(server, httpContext, chrome);
 
@@ -178,101 +177,15 @@ public class AppHub(
                 }
             }
 
-            AppDescriptor? appDescriptor = null;
+            var appRouter = new AppRouter(server);
+            var routeResult = appRouter.Resolve(appId, navigationAppId, parentId, chrome);
 
-            //todo claude: I'm  not a fan of this code block - needs refactoring into something cleaner 
-            //to much logic in one place
-            //break it out into a separate class if needed? AppRouter or something
+            appId = routeResult.AppId;
+            navigationAppId = routeResult.NavigationAppId;
+            var appDescriptor = routeResult.AppDescriptor;
+            appServices.AddSingleton(typeof(IAppRepository), routeResult.AppRepository);
 
-            if (string.IsNullOrEmpty(appId))
-            {
-                appId = server.DefaultAppId ?? server.AppRepository.GetAppOrDefault(null).Id;
-                var chromeApp = server.AppRepository.GetAppOrDefault(AppIds.Chrome);
-                if (chromeApp?.Id == AppIds.Chrome)
-                {
-                    string? chromeDefaultAppId = null;
-                    if (chromeApp.CreateApp() is DefaultSidebarChrome chromeView)
-                    {
-                        chromeDefaultAppId = chromeView.Settings.DefaultAppId;
-                    }
-                    if (appId == AppIds.Chrome && (parentId != null || !chrome))
-                    {
-                        appId = chromeDefaultAppId;
-                    }
-                    else if (chrome && navigationAppId == null)
-                    {
-                        navigationAppId = chromeDefaultAppId;
-                    }
-                }
-
-                // Check if the requested navigation app exists
-                if (!string.IsNullOrEmpty(navigationAppId))
-                {
-                    var resolvedApp = server.AppRepository.GetAppOrDefault(navigationAppId);
-                    if (resolvedApp.Id != navigationAppId)
-                    {
-                        // App not found, try to find registered 404 app
-                        var notFoundApp = server.AppRepository.GetAppOrDefault(AppIds.ErrorNotFound);
-                        if (notFoundApp.Id == AppIds.ErrorNotFound)
-                        {
-                            appServices.AddSingleton<IAppRepository>(new ScopedAppRepository(server.AppRepository, navigationAppId, notFoundApp));
-
-                            if (chromeApp?.Id != AppIds.Chrome)
-                            {
-                                appDescriptor = notFoundApp;
-                            }
-                        }
-                        else
-                        {
-                            // Fallback: register default repository if 404 app not found
-                            appServices.AddSingleton(typeof(IAppRepository), server.AppRepository);
-                        }
-                    }
-                    else
-                    {
-                        // App found, use default repository
-                        appServices.AddSingleton(typeof(IAppRepository), server.AppRepository);
-                    }
-                }
-                else
-                {
-                    // No navigation app requested, use default repository
-                    appServices.AddSingleton(typeof(IAppRepository), server.AppRepository);
-                }
-
-                if (appDescriptor == null)
-                {
-                    appDescriptor = server.GetApp(appId ?? AppIds.Default);
-                }
-            }
-            else
-            {
-                var resolvedApp = server.AppRepository.GetAppOrDefault(appId);
-                if (resolvedApp.Id != appId)
-                {
-                    // App not found
-                    var notFoundApp = server.AppRepository.GetAppOrDefault(AppIds.ErrorNotFound);
-                    if (notFoundApp.Id == AppIds.ErrorNotFound)
-                    {
-                        appDescriptor = notFoundApp;
-                        // We also need to scope the repository so that if the view asks for "current app", it gets this one.
-                        appServices.AddSingleton<IAppRepository>(new ScopedAppRepository(server.AppRepository, appId, appDescriptor));
-                    }
-                    else
-                    {
-                        // Fallback to default behavior if no 404 app registered (shouldn't happen with default registration)
-                        appServices.AddSingleton(typeof(IAppRepository), server.AppRepository);
-                        appDescriptor = resolvedApp;
-                    }
-                }
-                else
-                {
-                    appServices.AddSingleton(typeof(IAppRepository), server.AppRepository);
-                    appDescriptor = resolvedApp;
-                }
-            }
-
-            var appArgs = GetAppArgs(Context.ConnectionId, appId ?? AppIds.Default, navigationAppId, httpContext);
+            var appArgs = GetAppArgs(Context.ConnectionId, appId, navigationAppId, httpContext);
 
             logger.LogInformation("Connected: {ConnectionId} [{AppId}]", Context.ConnectionId, appId);
 
@@ -290,7 +203,7 @@ public class AppHub(
 
             var appState = new AppSession
             {
-                AppId = appId ?? AppIds.Default,
+                AppId = appId,
                 MachineId = GetMachineId(httpContext),
                 ParentId = parentId,
                 AppDescriptor = appDescriptor,
@@ -307,7 +220,7 @@ public class AppHub(
 
             if (parentId == null)
             {
-                clientProvider.SetRootAppId(appId ?? AppIds.Default);
+                clientProvider.SetRootAppId(appId);
                 bool isNotFoundPage = appDescriptor.Id == AppIds.ErrorNotFound;
 
                 if (appId != AppIds.Chrome && !isNotFoundPage)
@@ -805,29 +718,4 @@ public class ClientSender : IClientSender, IDisposable
 public class ClientProvider(IClientSender sender) : IClientProvider
 {
     public IClientSender Sender { get; set; } = sender;
-}
-
-internal class ScopedAppRepository(IAppRepository inner, string targetId, AppDescriptor? overrideApp) : IAppRepository
-{
-    public MenuItem[] GetMenuItems() => inner.GetMenuItems();
-
-    public AppDescriptor GetAppOrDefault(string? id)
-    {
-        if (overrideApp != null && id == targetId)
-        {
-            return overrideApp;
-        }
-        return inner.GetAppOrDefault(id);
-    }
-
-    public AppDescriptor? GetApp(string id)
-    {
-        if (overrideApp != null && id == targetId)
-        {
-            return overrideApp;
-        }
-        return inner.GetApp(id);
-    }
-
-    public AppDescriptor? GetApp(Type type) => inner.GetApp(type);
 }
