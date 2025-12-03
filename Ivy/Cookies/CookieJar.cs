@@ -2,10 +2,15 @@ using Microsoft.AspNetCore.Http;
 
 namespace Ivy.Cookies;
 
-public record struct CookieAssignment(string Name, string Value, CookieOptions Options);
+public static class CookieJarIntents
+{
+    public const string SetAuthCookies = "set-auth-cookies";
+}
 
 public class CookieJar
 {
+    private readonly record struct CookieAssignment(string Name, string Value, CookieOptions Options);
+
     private readonly List<CookieAssignment> _assignments = [];
 
     public void Append(string name, string value, CookieOptions options)
@@ -42,4 +47,18 @@ public class CookieJar
             response.Cookies.Append(assignment.Name, assignment.Value, assignment.Options);
         }
     }
+}
+
+public readonly struct CookieJarId
+{
+    private readonly string _value;
+
+    internal CookieJarId(string value)
+    {
+        _value = value ?? throw new ArgumentNullException(nameof(value));
+    }
+
+    internal string Value => _value;
+
+    public override string ToString() => _value;
 }

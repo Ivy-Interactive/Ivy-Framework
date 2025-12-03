@@ -27,9 +27,9 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
         var tabs = UseState(ImmutableArray.Create<TabState>);
         var selectedIndex = UseState<int?>();
         var appRepository = UseService<IAppRepository>();
+        var sessionStore = UseService<AppSessionStore>();
         var client = UseService<IClientProvider>();
         var auth = UseService<IAuthService?>();
-        var cookieRegistry = this.UseService<ICookieRegistry>();
         var user = UseState<UserInfo?>();
         var currentApp = UseState<AppHost?>();
         var search = UseState("");
@@ -389,7 +389,7 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
                     await TimeoutHelper.WithTimeoutAsync(auth.LogoutAsync);
                     if (authSession.HasChangedSince(oldSession))
                     {
-                        client.SetAuthCookies(cookieRegistry, authSession);
+                        client.SetAuthCookies(sessionStore, authSession);
                     }
                 }
                 catch (Exception)

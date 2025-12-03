@@ -25,8 +25,7 @@ public class AppHub(
     IContentBuilder contentBuilder,
     AppSessionStore sessionStore,
     ILogger<AppHub> logger,
-    IQueryableRegistry queryableRegistry,
-    IGlobalCookieRegistry globalCookieRegistry
+    IQueryableRegistry queryableRegistry
     ) : Hub
 {
     private static bool GetChromeParam(HttpContext httpContext)
@@ -132,9 +131,6 @@ public class AppHub(
             appServices.AddSingleton(typeof(IClientProvider), clientProvider);
             appServices.AddSingleton(typeof(IUploadService), new UploadService(Context.ConnectionId, clientProvider));
 
-            var cookieRegistry = new CookieRegistry(globalCookieRegistry);
-            appServices.AddSingleton<ICookieRegistry>(cookieRegistry);
-
             if (server.AuthProviderType != null)
             {
                 var authProvider = server.Services.BuildServiceProvider().GetService<IAuthProvider>() ?? throw new Exception("IAuthProvider not found");
@@ -147,7 +143,7 @@ public class AppHub(
                 await TimeoutHelper.WithTimeoutAsync(
                     ct => authProvider.InitializeAsync(authSession, httpContext.Request.Scheme, httpContext.Request.Host.Value!, ct),
                     Context.ConnectionAborted);
-                clientProvider.SetAuthSessionData(cookieRegistry, authSession.AuthSessionData);
+                clientProvider.SetAuthSessionData(sessionStore, authSession.AuthSessionData);
 
                 var authService = new AuthService(authProvider, authSession);
                 appServices.AddSingleton<IAuthService>(s => authService);
@@ -184,7 +180,7 @@ public class AppHub(
                     var reloadPage = authSession.AuthToken != oldSession.AuthToken &&
                         parentId != null &&
                         authSession.AuthToken == null;
-                    clientProvider.SetAuthCookies(cookieRegistry, authSession, reloadPage: reloadPage);
+                    clientProvider.SetAuthCookies(sessionStore, authSession, reloadPage: reloadPage);
                 }
                 else if (parentId != null && authSession.AuthToken == null)
                 {
@@ -250,9 +246,6 @@ public class AppHub(
                 AppServices = serviceProvider,
                 LastInteraction = DateTime.UtcNow,
             };
-
-            // Track cookie registry for cleanup
-            appState.TrackDisposable(cookieRegistry);
 
             var connectionAborted = Context.ConnectionAborted;
             appState.EventQueue = new EventDispatchQueue(connectionAborted);
@@ -420,7 +413,7 @@ public class AppHub(
     async Task AbandonConnection(string connectionId, bool resetTokenAndReload)
     {
         var session = sessionStore.Sessions[connectionId];
-        await SessionHelpers.AbandonSessionAsync(session, contentBuilder, resetTokenAndReload, triggerMachineReload: true, logger, "AuthRefreshLoop");
+        await SessionHelpers.AbandonSessionAsync(sessionStore, session, contentBuilder, resetTokenAndReload, triggerMachineReload: true, logger, "AuthRefreshLoop");
     }
 
     private async Task AuthRefreshLoopAsync(string connectionId, CancellationToken cancellationToken)
@@ -436,7 +429,6 @@ public class AppHub(
                 var authService = session.AppServices.GetRequiredService<IAuthService>();
                 var authProvider = session.AppServices.GetRequiredService<IAuthProvider>();
                 var clientProvider = session.AppServices.GetRequiredService<IClientProvider>();
-                var cookieRegistry = session.AppServices.GetRequiredService<ICookieRegistry>();
 
                 var authSession = authService.GetAuthSession();
 
@@ -524,7 +516,7 @@ public class AppHub(
                             if (authSession.HasChangedSince(oldSession))
                             {
                                 var reloadPage = authSession.AuthToken != oldSession.AuthToken && string.IsNullOrEmpty(authSession.AuthToken?.AccessToken);
-                                clientProvider.SetAuthCookies(cookieRegistry, authSession, reloadPage: reloadPage);
+                                clientProvider.SetAuthCookies(sessionStore, authSession, reloadPage: reloadPage);
                             }
                             if (authSession.AuthToken == null)
                             {

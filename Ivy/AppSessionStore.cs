@@ -1,12 +1,82 @@
 ﻿using System.Collections.Concurrent;
 using Ivy.Apps;
 using Ivy.Helpers.Tui;
+using Ivy.Cookies;
+using System.Security.Cryptography;
 
 namespace Ivy;
 
-public class AppSessionStore
+class CookieJarEntry
+{
+    public required CookieJar CookieJar { get; set; }
+    public required string Intent { get; set; }
+    public required DateTime LastAccessed { get; set; }
+}
+
+public class AppSessionStore : IDisposable
 {
     public readonly ConcurrentDictionary<string, AppSession> Sessions = new();
+
+    private readonly ConcurrentDictionary<string, CookieJarEntry> _cookieJarEntries = new();
+    private readonly TimeSpan _cookieJarLifetime = TimeSpan.FromMinutes(1);
+    private readonly Timer _cookieJarCleanupTimer;
+
+    public AppSessionStore()
+    {
+        // Run cleanup every minute
+        _cookieJarCleanupTimer = new Timer(
+            _ => CleanupExpiredCookieJars(),
+            null,
+            TimeSpan.FromMinutes(1),
+            TimeSpan.FromMinutes(1));
+    }
+
+    public CookieJarId RegisterCookies(CookieJar cookieJar, string intent)
+    {
+        var bytes = RandomNumberGenerator.GetBytes(32);
+        var id = Convert.ToBase64String(bytes)
+            .Replace("+", "-").Replace("/", "_").TrimEnd('=');
+        var entry = new CookieJarEntry { CookieJar = cookieJar, Intent = intent, LastAccessed = DateTime.UtcNow };
+
+        if (!_cookieJarEntries.TryAdd(id, entry))
+            throw new InvalidOperationException($"Cookie jar already registered for id '{id}'");
+
+        return new CookieJarId(id);
+    }
+
+    public bool TryRemoveCookies(CookieJarId cookieJarId, string intent, out CookieJar cookieJar)
+    {
+        if (_cookieJarEntries.TryRemove(cookieJarId.Value, out var entry) && entry.Intent == intent)
+        {
+            cookieJar = entry.CookieJar;
+            return true;
+        }
+
+        cookieJar = null!;
+        return false;
+    }
+
+    public bool TryRemoveCookies(CookieJarId cookieJarId)
+        => _cookieJarEntries.TryRemove(cookieJarId.Value, out _);
+
+    private void CleanupExpiredCookieJars()
+    {
+        var now = DateTime.UtcNow;
+        var expiredKeys = _cookieJarEntries
+            .Where(kvp => now - kvp.Value.LastAccessed > _cookieJarLifetime)
+            .Select(kvp => kvp.Key)
+            .ToList();
+
+        foreach (var key in expiredKeys)
+        {
+            _cookieJarEntries.TryRemove(key, out _);
+        }
+    }
+
+    public void Dispose()
+    {
+        _cookieJarCleanupTimer?.Dispose();
+    }
 
     public AppSession? FindChrome(AppSession session)
     {

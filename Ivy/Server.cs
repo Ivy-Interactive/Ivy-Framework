@@ -258,6 +258,7 @@ public class Server
     public async Task RunAsync(CancellationTokenSource? cts = null)
     {
         var sessionStore = new AppSessionStore();
+        Services.AddSingleton(sessionStore);
 
         cts ??= new CancellationTokenSource();
         Console.CancelKeyPress += (_, e) =>
@@ -374,7 +375,6 @@ public class Server
         });
         builder.Services.AddSingleton(this);
         builder.Services.AddSingleton<IClientNotifier, ClientNotifier>();
-        builder.Services.AddSingleton<IGlobalCookieRegistry, GlobalCookieRegistry>();
         builder.Services.AddControllers()
             .AddApplicationPart(Assembly.Load("Ivy"))
             .AddControllersAsServices();
