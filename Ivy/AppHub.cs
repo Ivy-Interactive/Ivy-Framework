@@ -71,7 +71,6 @@ public class AppHub(
             {
                 var authProvider = server.Services.BuildServiceProvider().GetService<IAuthProvider>() ?? throw new Exception("IAuthProvider not found");
 #if DEBUG
-                // Wrap in CheckedAuthProvider for debug builds
                 authProvider = new CheckedAuthProvider(authProvider);
 #endif
 
@@ -81,7 +80,7 @@ public class AppHub(
                     Context.ConnectionAborted);
                 clientProvider.SetAuthSessionData(sessionStore, authSession.AuthSessionData);
 
-                var authService = new AuthService(authProvider, authSession);
+                var authService = new AuthService(authProvider, authSession, clientProvider, sessionStore);
                 appServices.AddSingleton<IAuthService>(s => authService);
 
                 var oldSession = authSession.TakeSnapshot();
@@ -109,16 +108,9 @@ public class AppHub(
                     authSession.AuthToken = null;
                 }
 
-                if (authSession.HasChangedSince(oldSession))
+                if (authSession.AuthToken != oldSession.AuthToken && authSession.AuthToken == null)
                 {
-                    var reloadPage = authSession.AuthToken != oldSession.AuthToken &&
-                        parentId != null &&
-                        authSession.AuthToken == null;
-                    clientProvider.SetAuthCookies(sessionStore, authSession, reloadPage: reloadPage);
-                }
-                else if (parentId != null && authSession.AuthToken == null)
-                {
-                    clientProvider.ReloadPage();
+                    await authService.LogoutAsync(Context.ConnectionAborted);
                 }
             }
 
@@ -434,12 +426,7 @@ public class AppHub(
                                 // This case should only ever happen if the auth provider implementation is bad (i.e. it returns the same invalid token on refresh).
                                 // It is still good to handle it here to avoid an infinite loop.
                                 logger.LogError("AuthRefreshLoop: Invalid token object unchanged after refresh for {ConnectionId}.", connectionId);
-                                authSession.AuthToken = null;
-                            }
-                            if (authSession.HasChangedSince(oldSession))
-                            {
-                                var reloadPage = authSession.AuthToken != oldSession.AuthToken && string.IsNullOrEmpty(authSession.AuthToken?.AccessToken);
-                                clientProvider.SetAuthCookies(sessionStore, authSession, reloadPage: reloadPage);
+                                await authService.LogoutAsync(cancellationToken);
                             }
                             if (authSession.AuthToken == null)
                             {

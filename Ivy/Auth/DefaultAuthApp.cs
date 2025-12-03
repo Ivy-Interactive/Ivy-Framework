@@ -73,7 +73,6 @@ public class PasswordEmailFlowView(IState<string?> errorMessage) : ViewBase
         var loading = this.UseState<bool>();
         var auth = this.UseService<IAuthService>();
         var client = this.UseService<IClientProvider>();
-        var sessionStore = this.UseService<AppSessionStore>();
 
         var formBuilder = credentials.ToForm("Login")
             .Required(m => m.User, m => m.Password)
@@ -109,15 +108,7 @@ public class PasswordEmailFlowView(IState<string?> errorMessage) : ViewBase
                 loading.Set(true);
                 errorMessage.Set((string?)null);
 
-                var authSession = auth.GetAuthSession();
-                var oldSession = authSession.TakeSnapshot();
-
                 await auth.LoginAsync(credentials.Value.User, credentials.Value.Password);
-
-                if (authSession.HasChangedSince(oldSession))
-                {
-                    client.SetAuthCookies(sessionStore, authSession, reloadPage: authSession.AuthToken != oldSession.AuthToken);
-                }
 
                 if (authSession.AuthToken == null)
                 {
@@ -152,16 +143,10 @@ public class OAuthFlowView(AuthOption option, IState<string?> errorMessage) : Vi
     {
         var client = this.UseService<IClientProvider>();
         var auth = this.UseService<IAuthService>();
-        var sessionStore = this.UseService<AppSessionStore>();
         var callback = this.UseWebhook(async (request) =>
         {
             var authSession = auth.GetAuthSession();
-            var oldSession = authSession.TakeSnapshot();
             var token = await auth.HandleOAuthCallbackAsync(request);
-            if (authSession.HasChangedSince(oldSession))
-            {
-                client.SetAuthCookies(sessionStore, authSession);
-            }
             return new RedirectResult("/");
         });
 
@@ -170,12 +155,7 @@ public class OAuthFlowView(AuthOption option, IState<string?> errorMessage) : Vi
             try
             {
                 var authSession = auth.GetAuthSession();
-                var oldSession = authSession.TakeSnapshot();
                 var uri = await auth.GetOAuthUriAsync(option, callback);
-                if (authSession.AuthSessionData != oldSession.AuthSessionData)
-                {
-                    client.SetAuthSessionData(sessionStore, authSession.AuthSessionData);
-                }
                 client.OpenUrl(uri);
             }
             catch (Exception e)

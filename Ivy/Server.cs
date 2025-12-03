@@ -283,7 +283,6 @@ public class Server
     public async Task RunAsync(CancellationTokenSource? cts = null)
     {
         var sessionStore = new AppSessionStore();
-        Services.AddSingleton(sessionStore);
 
         cts ??= new CancellationTokenSource();
         Console.CancelKeyPress += (_, e) =>

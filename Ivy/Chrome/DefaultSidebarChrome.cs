@@ -25,7 +25,6 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
         var tabs = UseState(ImmutableArray.Create<TabState>);
         var selectedIndex = UseState<int?>();
         var appRepository = UseService<IAppRepository>();
-        var sessionStore = UseService<AppSessionStore>();
         var client = UseService<IClientProvider>();
         var auth = UseService<IAuthService?>();
         var user = UseState<UserInfo?>();
@@ -383,12 +382,7 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
                     if (auth == null) return;
 
                     var authSession = auth.GetAuthSession();
-                    var oldSession = authSession.TakeSnapshot();
                     await auth.LogoutAsync();
-                    if (authSession.HasChangedSince(oldSession))
-                    {
-                        client.SetAuthCookies(sessionStore, authSession);
-                    }
                 }
                 catch (Exception)
                 {
