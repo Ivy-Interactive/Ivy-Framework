@@ -35,7 +35,7 @@ public class DataTableBuilder<TModel> : ViewBase, IMemoized
         _Scaffold();
     }
 
-    private static Ivy.ColType GetDataTypeHint(Type type)
+    private static ColType GetDataTypeHint(Type type)
     {
         var underlyingType = Nullable.GetUnderlyingType(type) ?? type;
 
@@ -97,7 +97,7 @@ public class DataTableBuilder<TModel> : ViewBase, IMemoized
             )
             .ToList();
 
-        int order = fields.Count();
+        int order = fields.Count;
         foreach (var field in fields)
         {
             var align = Shared.Align.Left;
@@ -218,7 +218,7 @@ public class DataTableBuilder<TModel> : ViewBase, IMemoized
         return this;
     }
 
-    public DataTableBuilder<TModel> DataTypeHint(Expression<Func<TModel, object>> field, Ivy.ColType colType)
+    public DataTableBuilder<TModel> DataTypeHint(Expression<Func<TModel, object>> field, ColType colType)
     {
         var column = GetColumn(field);
         column.Column.ColType = colType;

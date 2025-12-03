@@ -12,7 +12,7 @@ public static class UseDataTableExtensions
     {
         // DON'T trigger rebuild when connection changes - we handle it manually
         var connection = context.UseState<DataTableConnection?>(buildOnChange: false);
-        var hasRun = context.UseState<bool>(false, buildOnChange: false);
+        var hasRun = context.UseState(false, buildOnChange: false);
         var dataTableService = context.UseService<IDataTableService>();
 
         // Only create connection once - check hasRun flag

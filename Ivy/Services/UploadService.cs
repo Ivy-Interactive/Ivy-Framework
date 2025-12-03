@@ -25,19 +25,19 @@ public record UploadContext(string UploadUrl, Action<Guid> Cancel)
 
 public static class UploadContextExtensions
 {
-    public static Core.Hooks.IState<UploadContext> Accept(this Core.Hooks.IState<UploadContext> state, string accept)
+    public static IState<UploadContext> Accept(this IState<UploadContext> state, string accept)
     {
         state.Set(state.Value with { Accept = accept });
         return state;
     }
 
-    public static Core.Hooks.IState<UploadContext> MaxFileSize(this Core.Hooks.IState<UploadContext> state, long maxFileSize)
+    public static IState<UploadContext> MaxFileSize(this IState<UploadContext> state, long maxFileSize)
     {
         state.Set(state.Value with { MaxFileSize = maxFileSize });
         return state;
     }
 
-    public static Core.Hooks.IState<UploadContext> MaxFiles(this Core.Hooks.IState<UploadContext> state, int maxFiles)
+    public static IState<UploadContext> MaxFiles(this IState<UploadContext> state, int maxFiles)
     {
         state.Set(state.Value with { MaxFiles = maxFiles });
         return state;

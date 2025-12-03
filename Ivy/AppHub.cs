@@ -53,7 +53,7 @@ public class AppHub(
 
             if (server.Services.All(sd => sd.ServiceType != typeof(IExceptionHandler)))
             {
-                appServices.AddSingleton<IExceptionHandler>(_ => new ExceptionHandlerPipeline()
+                appServices.AddSingleton(_ => new ExceptionHandlerPipeline()
                     .Use(new ConsoleExceptionHandler()).Use(new ClientExceptionHandler(clientProvider))
                     .Build());
             }
@@ -138,7 +138,7 @@ public class AppHub(
             appServices.AddSingleton(routeResult.AppDescriptor);
 
             appServices.AddTransient<IWebhookRegistry, WebhookController>();
-            appServices.AddTransient<SignalRouter>(_ => new SignalRouter(sessionStore));
+            appServices.AddTransient(_ => new SignalRouter(sessionStore));
 
             var serviceProvider = new CompositeServiceProvider(appServices, server.Services);
 

@@ -3,7 +3,7 @@ using Ivy.Core.Hooks;
 
 namespace Ivy.Views;
 
-public class ErrorView(System.Exception e) : ViewBase, IStateless
+public class ErrorView(Exception e) : ViewBase, IStateless
 {
     public override object? Build()
     {
