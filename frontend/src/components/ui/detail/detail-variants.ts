@@ -6,9 +6,9 @@ export const detailLabelSizeVariants = cva(
   {
     variants: {
       scale: {
-        Small: 'p-2 pl-0 text-xs',
-        Medium: 'p-3 pl-0 text-sm',
-        Large: 'p-4 pl-0 text-base',
+        Small: 'p-2 text-xs',
+        Medium: 'p-3 text-sm',
+        Large: 'p-4 text-base',
       },
     },
     defaultVariants: {
@@ -21,7 +21,7 @@ export const detailLabelSizeVariants = cva(
 export const detailValueSizeVariants = cva('align-middle min-w-0', {
   variants: {
     scale: {
-      Small: 'p-2 pl-1  text-xs',
+      Small: 'p-2 pl-1 text-xs',
       Medium: 'p-3 pl-2 text-sm',
       Large: 'p-4 pl-3 text-base',
     },
@@ -35,7 +35,7 @@ export const detailValueSizeVariants = cva('align-middle min-w-0', {
 export const detailValueMultiLinePaddingVariants = cva('', {
   variants: {
     scale: {
-      Small: 'pb-1',
+      Small: 'pb-2',
       Medium: 'pb-3',
       Large: 'pb-4',
     },
