@@ -114,7 +114,10 @@ function News({ articles }: { articles: NewsArticle[] }) {
   if (cards.length === 0 && showCompleted) return null;
 
   return cards.length > 0 ? (
-    <div className="group overflow-hidden px-2" data-active={cardCount !== 0}>
+    <div
+      className="group overflow-hidden px-2 w-[240px]"
+      data-active={cardCount !== 0}
+    >
       <div className="relative size-full">
         {[...cards]
           .reverse()
