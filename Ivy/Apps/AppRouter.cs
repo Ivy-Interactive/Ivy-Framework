@@ -1,4 +1,6 @@
+using System.Net;
 using Ivy.Chrome;
+using Microsoft.AspNetCore.Http;
 
 namespace Ivy.Apps;
 
@@ -6,18 +8,91 @@ public record AppRouteResult(
     string AppId,
     string? NavigationAppId,
     AppDescriptor AppDescriptor,
-    IAppRepository AppRepository
+    IAppRepository AppRepository,
+    bool ShowChrome,
+    int? HttpStatusCode
 );
 
 public class AppRouter(Server server)
 {
-    public AppRouteResult Resolve(string? appId, string? navigationAppId, string? parentId, bool chrome)
+    public AppRouteResult Resolve(HttpContext httpContext)
+    {
+        var chrome = GetChrome(httpContext);
+        var parentId = GetParentId(httpContext);
+        var (appId, navigationAppId) = GetAppId(httpContext, chrome);
+
+        return Resolve(appId, navigationAppId, parentId, chrome);
+    }
+
+    private AppRouteResult Resolve(string? appId, string? navigationAppId, string? parentId, bool chrome)
     {
         if (string.IsNullOrEmpty(appId))
         {
             return ResolveDefaultApp(navigationAppId, parentId, chrome);
         }
-        return ResolveExplicitApp(appId);
+
+        return ResolveExplicitApp(appId, chrome);
+    }
+
+    private static bool GetChrome(HttpContext httpContext)
+    {
+        if (httpContext.Request.Query.TryGetValue("chrome", out var chromeParam))
+        {
+            return !chromeParam.ToString().Equals("false", StringComparison.OrdinalIgnoreCase);
+        }
+
+        return true;
+    }
+
+    public static string? GetParentId(HttpContext httpContext)
+    {
+        if (httpContext.Request.Query.TryGetValue("parentId", out var parentIdParam))
+        {
+            var value = parentIdParam.ToString();
+            return string.IsNullOrEmpty(value) ? null : value;
+        }
+
+        return null;
+    }
+
+    private static (string? AppId, string? NavigationAppId) GetAppId(HttpContext httpContext, bool chrome)
+    {
+        string? appId = null;
+        string? navigationAppId = null;
+
+        if (httpContext.Request.Query.TryGetValue("appId", out var appIdParam))
+        {
+            var id = appIdParam.ToString();
+            if (string.IsNullOrEmpty(id) || id == AppIds.Chrome || id == AppIds.Auth || id == AppIds.Default)
+            {
+                id = null;
+            }
+
+            if (chrome)
+            {
+                navigationAppId = id;
+            }
+            else
+            {
+                appId = id;
+            }
+        }
+
+        return (appId, navigationAppId);
+    }
+
+    public static string GetMachineId(HttpContext httpContext)
+    {
+        if (httpContext.Request.Query.TryGetValue("machineId", out var machineIdParam))
+        {
+            var value = machineIdParam.ToString();
+            if (!string.IsNullOrEmpty(value))
+            {
+                return value;
+            }
+        }
+
+        throw new InvalidOperationException("Missing machineId in request.");
     }
 
     private AppRouteResult ResolveDefaultApp(string? navigationAppId, string? parentId, bool chrome)
@@ -41,103 +116,99 @@ public class AppRouter(Server server)
             }
         }
 
-        // Check if the requested navigation app exists
         if (!string.IsNullOrEmpty(resolvedNavigationAppId))
         {
-            return ResolveNavigationApp(appId, resolvedNavigationAppId, chromeApp);
+            return ResolveNavigationApp(appId, resolvedNavigationAppId, chromeApp, chrome);
         }
 
-        // No navigation app requested, use default repository
         var appDescriptor = server.GetApp(appId ?? AppIds.Default);
+
         return new AppRouteResult(
             appId ?? AppIds.Default,
             resolvedNavigationAppId,
             appDescriptor,
-            server.AppRepository
+            server.AppRepository,
+            chrome,
+            null
         );
     }
 
-    private AppRouteResult ResolveNavigationApp(string? appId, string navigationAppId, AppDescriptor? chromeApp)
+    private AppRouteResult ResolveNavigationApp(string? appId, string navigationAppId, AppDescriptor? chromeApp, bool chrome)
     {
         var resolvedApp = server.AppRepository.GetAppOrDefault(navigationAppId);
 
         if (resolvedApp.Id != navigationAppId)
         {
-            // App not found, try to find registered 404 app
             var notFoundApp = server.AppRepository.GetAppOrDefault(AppIds.ErrorNotFound);
 
             if (notFoundApp.Id == AppIds.ErrorNotFound)
             {
                 var scopedRepository = new ScopedAppRepository(server.AppRepository, navigationAppId, notFoundApp);
 
-                // If there's no Chrome shell, show the 404 app directly
                 if (chromeApp?.Id != AppIds.Chrome)
                 {
                     return new AppRouteResult(
                         appId ?? AppIds.Default,
                         navigationAppId,
                         notFoundApp,
-                        scopedRepository
+                        scopedRepository,
+                        chrome,
+                        (int)HttpStatusCode.NotFound
                     );
                 }
 
-                // With Chrome shell, let Chrome handle displaying the 404
                 var appDescriptor = server.GetApp(appId ?? AppIds.Default);
                 return new AppRouteResult(
                     appId ?? AppIds.Default,
                     navigationAppId,
                     appDescriptor,
-                    scopedRepository
+                    scopedRepository,
+                    chrome,
+                    (int)HttpStatusCode.NotFound
                 );
             }
         }
 
-        // App found or no 404 app registered, use default repository
         var descriptor = server.GetApp(appId ?? AppIds.Default);
         return new AppRouteResult(
             appId ?? AppIds.Default,
             navigationAppId,
             descriptor,
-            server.AppRepository
+            server.AppRepository,
+            chrome,
+            null
         );
     }
 
-    private AppRouteResult ResolveExplicitApp(string appId)
+    private AppRouteResult ResolveExplicitApp(string appId, bool chrome)
     {
         var resolvedApp = server.AppRepository.GetAppOrDefault(appId);
 
         if (resolvedApp.Id != appId)
         {
-            // App not found
             var notFoundApp = server.AppRepository.GetAppOrDefault(AppIds.ErrorNotFound);
 
             if (notFoundApp.Id == AppIds.ErrorNotFound)
             {
-                // Scope the repository so that if the view asks for "current app", it gets the 404 app
                 var scopedRepository = new ScopedAppRepository(server.AppRepository, appId, notFoundApp);
                 return new AppRouteResult(
                     appId,
                     null,
                     notFoundApp,
-                    scopedRepository
+                    scopedRepository,
+                    chrome,
+                    (int)HttpStatusCode.NotFound
                 );
             }
-
-            // Fallback to default behavior if no 404 app registered
-            return new AppRouteResult(
-                appId,
-                null,
-                resolvedApp,
-                server.AppRepository
-            );
         }
 
-        // App found
         return new AppRouteResult(
             appId,
             null,
             resolvedApp,
-            server.AppRepository
+            server.AppRepository,
+            chrome,
+            null
         );
     }
 

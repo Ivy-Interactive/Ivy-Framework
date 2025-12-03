@@ -28,15 +28,15 @@ public class AppHub(
     IQueryableRegistry queryableRegistry
     ) : Hub
 {
-    public AppArgs GetAppArgs(string connectionId, string appId, string? navigationAppId, HttpContext httpContext)
+    private AppArgs GetAppArgs(string connectionId, string appId, string? navigationAppId, HttpContext httpContext)
     {
         string? appArgs = null;
-        if (httpContext!.Request.Query.TryGetValue("appArgs", out var appArgsParam))
+        if (httpContext.Request.Query.TryGetValue("appArgs", out var appArgsParam))
         {
             appArgs = appArgsParam.ToString().NullIfEmpty();
         }
 
-        HttpRequest request = httpContext.Request;
+        var request = httpContext.Request;
         return new AppArgs(connectionId, appId, navigationAppId, appArgs ?? server.Args?.Args, request.Scheme, request.Host.Value!);
     }
 
@@ -47,10 +47,7 @@ public class AppHub(
             var appServices = new ServiceCollection();
 
             var httpContext = Context.GetHttpContext()!;
-
-            var chrome = GetChrome(httpContext);
-            var parentId = GetParentId(httpContext);
-            var (appId, navigationAppId) = GetAppId(server, httpContext, chrome);
+            var parentId = AppRouter.GetParentId(httpContext);
 
             var clientProvider = new ClientProvider(new ClientSender(clientNotifier, Context.ConnectionId));
 
@@ -111,21 +108,31 @@ public class AppHub(
                 {
                     clientProvider.SetAuthToken(authToken, reloadPage: parentId != null && authToken == null);
                 }
-
-                if (authToken == null)
-                {
-                    appId = AppIds.Auth;
-                }
             }
 
             var appRouter = new AppRouter(server);
-            var routeResult = appRouter.Resolve(appId, navigationAppId, parentId, chrome);
+            var routeResult = appRouter.Resolve(httpContext);
+
+            // Override to Auth app if authentication failed
+            if (server.AuthProviderType != null)
+            {
+                var authService = appServices.BuildServiceProvider().GetService<IAuthService>();
+                if (authService?.GetCurrentToken() == null)
+                {
+                    var authApp = server.AppRepository.GetAppOrDefault(AppIds.Auth);
+                    routeResult = routeResult with
+                    {
+                        AppId = AppIds.Auth,
+                        AppDescriptor = authApp
+                    };
+                }
+            }
 
             appServices.AddSingleton(typeof(IAppRepository), routeResult.AppRepository);
 
-            var appArgs = GetAppArgs(Context.ConnectionId, appId, navigationAppId, httpContext);
+            var appArgs = GetAppArgs(Context.ConnectionId, routeResult.AppId, routeResult.NavigationAppId, httpContext);
 
-            logger.LogInformation("Connected: {ConnectionId} [{AppId}]", Context.ConnectionId, appId);
+            logger.LogInformation("Connected: {ConnectionId} [{AppId}]", Context.ConnectionId, routeResult.AppId);
 
             appServices.AddSingleton(appArgs);
             appServices.AddSingleton(routeResult.AppDescriptor);
@@ -141,8 +148,8 @@ public class AppHub(
 
             var appState = new AppSession
             {
-                AppId = appId,
-                MachineId = GetMachineId(httpContext),
+                AppId = routeResult.AppId,
+                MachineId = AppRouter.GetMachineId(httpContext),
                 ParentId = parentId,
                 AppDescriptor = routeResult.AppDescriptor,
                 App = app,
@@ -158,12 +165,12 @@ public class AppHub(
 
             if (parentId == null)
             {
-                clientProvider.SetRootAppId(appId);
+                clientProvider.SetRootAppId(routeResult.AppId);
                 bool isNotFoundPage = routeResult.AppDescriptor.Id == AppIds.ErrorNotFound;
 
-                if (appId != AppIds.Chrome && !isNotFoundPage)
+                if (routeResult.AppId != AppIds.Chrome && !isNotFoundPage)
                 {
-                    var navigateArgs = new NavigateArgs(appId, Chrome: chrome);
+                    var navigateArgs = new NavigateArgs(routeResult.AppId, Chrome: routeResult.ShowChrome);
                     clientProvider.Redirect(navigateArgs.GetUrl(), replaceHistory: true);
                 }
             }
@@ -222,7 +229,7 @@ public class AppHub(
             try
             {
                 await widgetTree.BuildAsync();
-                logger.LogInformation("Refresh: {ConnectionId} [{AppId}]", Context.ConnectionId, appId);
+                logger.LogInformation("Refresh: {ConnectionId} [{AppId}]", Context.ConnectionId, routeResult.AppId);
                 await Clients.Caller.SendAsync("Refresh", new
                 {
                     Widgets = widgetTree.GetWidgets().Serialize()
@@ -238,7 +245,7 @@ public class AppHub(
                 }, cancellationToken: connectionAborted);
             }
 
-            if (server.AuthProviderType != null && appId != AppIds.Auth)
+            if (server.AuthProviderType != null && routeResult.AppId != AppIds.Auth)
             {
                 _ = Task.Run(() => AuthRefreshLoopAsync(connectionId, connectionAborted), connectionAborted);
             }
@@ -568,62 +575,6 @@ public class AppHub(
         }
     }
 
-    private static bool GetChrome(HttpContext httpContext)
-    {
-        bool chrome = true;
-        if (httpContext.Request.Query.TryGetValue("chrome", out var chromeParam))
-        {
-            chrome = !chromeParam.ToString().Equals("false", StringComparison.InvariantCultureIgnoreCase);
-        }
-
-        return chrome;
-    }
-
-    public static (string? AppId, string? NavigationAppId) GetAppId(Server server, HttpContext httpContext, bool chrome)
-    {
-        string? appId = null;
-        string? navigationAppId = null;
-
-        if (httpContext!.Request.Query.TryGetValue("appId", out var appIdParam))
-        {
-            var id = appIdParam.ToString();
-            if (string.IsNullOrEmpty(id) || id == AppIds.Chrome || id == AppIds.Auth || id == AppIds.Default)
-            {
-                id = null;
-            }
-
-            if (chrome)
-            {
-                navigationAppId = id;
-            }
-            else
-            {
-                appId = id;
-            }
-        }
-
-        return (appId, navigationAppId);
-    }
-
-    public static string GetMachineId(HttpContext httpContext)
-    {
-        if (httpContext!.Request.Query.TryGetValue("machineId", out var machineIdParam))
-        {
-            return machineIdParam.ToString().NullIfEmpty() ?? throw new Exception("Missing machineId in request.");
-        }
-
-        throw new Exception("Missing machineId in request.");
-    }
-
-    public static string? GetParentId(HttpContext httpContext)
-    {
-        if (httpContext!.Request.Query.TryGetValue("parentId", out var parentIdParam))
-        {
-            return parentIdParam.ToString().NullIfEmpty();
-        }
-
-        return null;
-    }
 }
 
 public class ClientSender : IClientSender, IDisposable

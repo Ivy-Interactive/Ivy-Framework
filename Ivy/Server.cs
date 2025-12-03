@@ -606,6 +606,10 @@ public static class WebApplicationExtensions
                 context.Response.Headers["ivy-version"] = version;
             }
 
+            // Determine HTTP status code based on app routing
+            var server = app.Services.GetRequiredService<Server>();
+            var httpStatusCode = GetHttpStatusCodeForRequest(server, context);
+
             await using var stream = assembly.GetManifestResourceStream(resourceName);
             if (stream != null)
             {
@@ -653,7 +657,7 @@ public static class WebApplicationExtensions
                 }
 
                 context.Response.ContentType = "text/html";
-                context.Response.StatusCode = 200;
+                context.Response.StatusCode = httpStatusCode;
                 var bytes = Encoding.UTF8.GetBytes(html);
                 await context.Response.Body.WriteAsync(bytes);
             }
@@ -718,5 +722,12 @@ public static class WebApplicationExtensions
 #endif
             }
         };
+    }
+
+    private static int GetHttpStatusCodeForRequest(Server server, HttpContext context)
+    {
+        var appRouter = new AppRouter(server);
+        var routeResult = appRouter.Resolve(context);
+        return routeResult.HttpStatusCode ?? 200;
     }
 }
