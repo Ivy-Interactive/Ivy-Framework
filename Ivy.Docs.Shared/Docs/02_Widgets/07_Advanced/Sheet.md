@@ -270,9 +270,9 @@ public class KanbanWithSheetExample : ViewBase
             var layout = new FooterLayout(
                 Layout.Horizontal().Gap(2)
                     | new Button("Create Task").HandleClick(_ => HandleSubmit())
-                        .Loading(loading).Disabled(loading).Size(formBuilder.Size)
+                        .Loading(loading).Disabled(loading).Scale(formBuilder.Scale)
                     | new Button("Cancel").Variant(ButtonVariant.Outline).HandleClick(_ => isOpen.Set(false))
-                        .Size(formBuilder.Size)
+                        .Scale(formBuilder.Scale)
                     | validationView,
                 formView
             );
@@ -293,9 +293,12 @@ public class KanbanWithSheetExample : ViewBase
                 .ToKanban(
                     groupBySelector: t => t.Status,
                     idSelector: t => t.Id,
-                    titleSelector: t => t.Title,
-                    descriptionSelector: t => t.Description)
-                .HandleCardMove(moveData =>
+                    orderSelector: t => t.Priority)
+                .CardBuilder(task => new Card(
+                    task.Title,
+                    task.Description
+                ))
+                .HandleMove(moveData =>
                 {
                     var taskId = moveData.CardId?.ToString();
                     var task = taskState.Value.FirstOrDefault(t => t.Id == taskId);
@@ -305,16 +308,6 @@ public class KanbanWithSheetExample : ViewBase
                             .Where(t => t.Id != taskId)
                             .Append(task with { Status = moveData.ToColumn })
                             .ToArray());
-                    }
-                })
-                .HandleDelete(cardId =>
-                {
-                    var taskId = cardId?.ToString();
-                    var task = taskState.Value.FirstOrDefault(t => t.Id == taskId);
-                    if (task != null)
-                    {
-                        taskState.Set(taskState.Value.Where(t => t.Id != taskId).ToArray());
-                        client.Toast($"Deleted: {task.Title}");
                     }
                 });
         
