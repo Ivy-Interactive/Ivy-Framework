@@ -35,49 +35,6 @@ public class DataTableBuilder<TModel> : ViewBase, IMemoized
         _Scaffold();
     }
 
-    private static ColType GetDataTypeHint(Type type)
-    {
-        var underlyingType = Nullable.GetUnderlyingType(type) ?? type;
-
-        if (underlyingType == typeof(Icons))
-            return ColType.Icon;
-
-        if (underlyingType == typeof(string) || underlyingType == typeof(char))
-            return ColType.Text;
-
-        if (underlyingType == typeof(int) || underlyingType == typeof(long) ||
-            underlyingType == typeof(short) || underlyingType == typeof(byte) ||
-            underlyingType == typeof(uint) || underlyingType == typeof(ulong) ||
-            underlyingType == typeof(ushort) || underlyingType == typeof(sbyte))
-            return ColType.Number;
-
-        if (underlyingType == typeof(decimal) || underlyingType == typeof(double) ||
-            underlyingType == typeof(float))
-            return ColType.Number;
-
-        if (underlyingType == typeof(bool))
-            return ColType.Boolean;
-
-        if (underlyingType == typeof(DateTime) || underlyingType == typeof(DateTimeOffset))
-            return ColType.DateTime;
-
-        if (underlyingType == typeof(DateOnly))
-            return ColType.Date;
-
-        if (underlyingType == typeof(TimeSpan) || underlyingType == typeof(TimeOnly) || underlyingType == typeof(Guid) || underlyingType.IsEnum)
-            return ColType.Text;
-
-        // Handle string arrays as Labels type
-        if (underlyingType.IsArray && underlyingType.GetElementType() == typeof(string))
-            return ColType.Labels;
-
-        // Handle other arrays and collections as Text
-        if (underlyingType.IsArray || typeof(System.Collections.IEnumerable).IsAssignableFrom(underlyingType))
-            return ColType.Text;
-
-        return ColType.Text;
-    }
-
     private void _Scaffold()
     {
         var type = typeof(TModel);
@@ -117,7 +74,7 @@ public class DataTableBuilder<TModel> : ViewBase, IMemoized
                 {
                     Name = field.Name,
                     Header = Utils.LabelFor(field.Name, field.Type) ?? field.Name,
-                    ColType = GetDataTypeHint(field.Type),
+                    ColType = DataTableBuilderHelpers.GetDataTypeHint(field.Type),
                     Align = align,
                     Order = order++
                 },
@@ -323,7 +280,7 @@ public class DataTableBuilder<TModel> : ViewBase, IMemoized
         }
 
         // Wire up cell actions to OnCellActivated
-        Func<Event<DataTable, CellClickEventArgs>, ValueTask>? onCellActivated = _onCellActivated;
+        var onCellActivated = _onCellActivated;
         if (_cellActions.Count > 0)
         {
             var originalHandler = _onCellActivated;
