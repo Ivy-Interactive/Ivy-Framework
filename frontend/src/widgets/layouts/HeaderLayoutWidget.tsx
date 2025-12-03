@@ -36,7 +36,7 @@ export const HeaderLayoutWidget: React.FC<HeaderLayoutWidgetProps> = ({
 
   return (
     <div
-      className="remove-ancestor-padding flex flex-col w-full h-full"
+      className="remove-parent-padding flex flex-col w-full h-full"
       style={styles}
     >
       <div

@@ -7,16 +7,18 @@ public interface IAnyOption
 {
     public Type GetOptionType();
 
-    public string Label { get; set; }
+    public string? Label { get; set; }
 
     public string? Description { get; set; }
 
     public string? Group { get; set; }
 
     public object Value { get; set; }
+
+    public Icons? Icon { get; set; }
 }
 
-public class Option<TValue>(string label, TValue value, string? group = null, string? description = null) : IAnyOption
+public class Option<TValue>(string? label, TValue value, string? group = null, string? description = null, Icons? icon = null) : IAnyOption
 {
     public Option(TValue value) : this(value?.ToString() ?? "?", value, null)
     {
@@ -27,7 +29,7 @@ public class Option<TValue>(string label, TValue value, string? group = null, st
         return typeof(TValue);
     }
 
-    public string Label { get; set; } = label;
+    public string? Label { get; set; } = label;
 
     public string? Description { get; set; } = description;
 
@@ -36,6 +38,8 @@ public class Option<TValue>(string label, TValue value, string? group = null, st
     public TValue TypedValue => (TValue)Value;
 
     public string? Group { get; set; } = group;
+
+    public Icons? Icon { get; set; } = icon;
 }
 
 public static class OptionExtensions
@@ -73,5 +77,4 @@ public static class OptionExtensions
     {
         return options.Select(e => MenuItem.Default(e.Label, e.Value)).ToArray();
     }
-
 }

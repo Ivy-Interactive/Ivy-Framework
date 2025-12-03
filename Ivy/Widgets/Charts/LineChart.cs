@@ -40,7 +40,7 @@ public record LineChart : WidgetBase<LineChart>
 
     [Prop] public Legend? Legend { get; init; } = null;
 
-    [Prop] public Toolbox? Toolbox { get; init; } = new Toolbox();
+    [Prop] public Toolbox? Toolbox { get; init; } = null;
 
     [Prop] public XAxis[] XAxis { get; init; } = [];
 

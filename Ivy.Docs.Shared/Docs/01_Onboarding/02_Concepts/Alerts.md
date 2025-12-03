@@ -59,7 +59,7 @@ public class AlertButtonSetsDemo : ViewBase
         var (alertView, showAlert) = this.UseAlert();
         var client = UseService<IClientProvider>();
 
-        return Layout.Vertical(
+        return Layout.Horizontal(
             new Button("Ok Only", _ => 
                 showAlert("This is an info message", _ => {}, "Information", AlertButtonSet.Ok)
             ),
@@ -97,7 +97,7 @@ public class BasicToastDemo : ViewBase
     {
         var client = UseService<IClientProvider>();
 
-        return Layout.Vertical(
+        return Layout.Horizontal(
             new Button("Success Toast", _ => 
                 client.Toast("Operation completed successfully!", "Success")
             ),
@@ -121,7 +121,7 @@ public class ToastExceptionDemo : ViewBase
     {
         var client = UseService<IClientProvider>();
 
-        return Layout.Vertical(
+        return Layout.Horizontal(
             new Button("Simulate Error", _ => {
                 try {
                     throw new InvalidOperationException("Something went wrong!");

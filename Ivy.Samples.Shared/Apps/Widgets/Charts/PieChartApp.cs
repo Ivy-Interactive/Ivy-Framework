@@ -45,7 +45,6 @@ public class PieChart0View : ViewBase
                     e => e.Sum(f => f.Value),
                     PieChartStyles.Default
                 )
-                .Toolbox()
         ;
     }
 }
@@ -69,7 +68,6 @@ public class PieChart1View : ViewBase
                     e => e.Sum(f => f.Users),
                     PieChartStyles.Dashboard
                 )
-                .Toolbox()
         ;
     }
 }
@@ -95,7 +93,6 @@ public class PieChart2View : ViewBase
                     e => e.Sum(f => f.Sales),
                     PieChartStyles.Default
                 )
-                .Toolbox()
         ;
     }
 }

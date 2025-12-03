@@ -34,9 +34,9 @@ public class RootView(string someId) : ViewBase
             bladeController.Push(this, new WideTableBlade(), "Wide Table");
         }
 
-        void OnClickLongDataTable(Event<Button> @event)
+        void OnClickLongContentTable(Event<Button> @event)
         {
-            bladeController.Push(this, new LongDataTableBlade(), "Long Data Table");
+            bladeController.Push(this, new LongContentTableBlade(), "Long Content Table");
         }
 
         return Layout.Vertical(
@@ -48,7 +48,7 @@ public class RootView(string someId) : ViewBase
             new Button("Push C", OnClick).Tag("C"),
             new Button("Blade With Error", OnClickWithError),
             new Button("Wide Table", OnClickWideTable),
-            new Button("Long Data Table", OnClickLongDataTable)
+            new Button("Long Content Table", OnClickLongContentTable)
         );
     }
 }
@@ -98,7 +98,7 @@ public class WideTableBlade : ViewBase
     }
 }
 
-public class LongDataTableBlade : ViewBase
+public class LongContentTableBlade : ViewBase
 {
     public override object? Build()
     {

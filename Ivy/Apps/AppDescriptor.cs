@@ -10,6 +10,7 @@ public static class AppIds
     public const string Auth = "$auth";
     public const string Chrome = "$chrome";
     public const string Default = "$default";
+    public const string ErrorNotFound = "$error-not-found";
 }
 
 public class AppDescriptor : IAppRepositoryNode
@@ -43,6 +44,7 @@ public class AppDescriptor : IAppRepositoryNode
     public bool GroupExpanded { get; set; }
 
     public InternalLink? Next { get; set; }
+
     public InternalLink? Previous { get; set; }
 
     public string? DocumentSource { get; set; }

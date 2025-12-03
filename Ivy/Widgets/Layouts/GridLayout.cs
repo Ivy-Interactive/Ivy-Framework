@@ -27,6 +27,16 @@ public class GridDefinition
     public Size? Width { get; set; } = null;
 
     public Size? Height { get; set; } = null;
+
+    public Size?[]? ColumnWidths { get; set; } = null;
+
+    public Size?[]? RowHeights { get; set; } = null;
+
+    public Func<int, object, object>? HeaderBuilder { get; set; } = null;
+
+    public Func<int, object, object>? FooterBuilder { get; set; } = null;
+
+    public Func<object, object>? CellBuilder { get; set; } = null;
 }
 
 public record GridLayout : WidgetBase<GridLayout>
@@ -40,6 +50,8 @@ public record GridLayout : WidgetBase<GridLayout>
         AutoFlow = def.AutoFlow;
         Width = def.Width;
         Height = def.Height;
+        ColumnWidths = def.ColumnWidths;
+        RowHeights = def.RowHeights;
     }
 
     [Prop] public int? Columns { get; set; }
@@ -51,6 +63,10 @@ public record GridLayout : WidgetBase<GridLayout>
     [Prop] public int Padding { get; set; }
 
     [Prop] public AutoFlow? AutoFlow { get; set; }
+
+    [Prop] public Size?[]? ColumnWidths { get; set; }
+
+    [Prop] public Size?[]? RowHeights { get; set; }
 
     [Prop(attached: nameof(GridExtensions.GridColumn))] public int?[] ChildColumn { get; set; } = null!;
 

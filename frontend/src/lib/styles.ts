@@ -521,3 +521,46 @@ export const getColor = (
     [cssProperty]: 'var(--' + varName + ')',
   };
 };
+
+/**
+ * Converts Ivy Size format to CSS Grid column/row value
+ * Example: "Px:100" -> "100px", "Fraction:1" -> "1fr"
+ */
+export const convertSizeToGridValue = (size?: string): string => {
+  if (!size) return 'minmax(0, 1fr)';
+
+  const [sizeType, value] = size.split(':');
+
+  switch (sizeType.toLowerCase()) {
+    case 'px':
+      return `${value}px`;
+
+    case 'rem':
+      return `${value}rem`;
+
+    case 'units':
+      return `${parseFloat(value) * 0.25}rem`;
+
+    case 'fraction':
+      return `${value}fr`;
+
+    case 'full':
+      return '100%';
+
+    case 'fit':
+      return 'fit-content';
+
+    case 'mincontent':
+      return 'min-content';
+
+    case 'maxcontent':
+      return 'max-content';
+
+    case 'auto':
+      return 'auto';
+
+    default:
+      console.warn(`Unknown size type for grid: ${sizeType}`);
+      return 'minmax(0, 1fr)';
+  }
+};

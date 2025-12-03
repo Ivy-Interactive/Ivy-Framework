@@ -49,7 +49,7 @@ export const ResizeablePanelGroupWidget: React.FC<
   );
 
   if (panelWidgets.length === 0)
-    return <div className="remove-ancestor-padding"></div>;
+    return <div className="remove-parent-padding"></div>;
 
   const style = {
     ...getWidth(width),
@@ -60,7 +60,7 @@ export const ResizeablePanelGroupWidget: React.FC<
     <ResizablePanelGroup
       style={style}
       direction={camelCase(direction) as 'horizontal' | 'vertical'}
-      className="remove-ancestor-padding"
+      className="remove-parent-padding"
       id={id}
     >
       {panelWidgets.map((panelWidget, index) => {

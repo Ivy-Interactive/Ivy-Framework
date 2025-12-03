@@ -156,7 +156,7 @@ sampleUsers.ToDataTable()
 
 ## Row Actions
 
-Add contextual actions to each row using `RowActions()` and handle them via `OnRowAction()`. Actions are rendered as icons or buttons within a dedicated column.
+Add contextual actions to each row using `RowActions()` and handle them via `OnRowAction()`. Actions are rendered as icons or buttons within a dedicated column. Row actions support nested menus.
 
 ```csharp demo-tabs
 public class RowActionsDemo : ViewBase
@@ -179,7 +179,11 @@ public class RowActionsDemo : ViewBase
             .Renderer(e => e.ProfileLink, new LinkDisplayRenderer { Type = LinkDisplayType.Url })
             .RowActions(
                 MenuItem.Default(Icons.Pencil, "edit").Tooltip("Edit employee"),
-                MenuItem.Default(Icons.Trash, "delete").Tooltip("Delete employee")
+                MenuItem.Default(Icons.EllipsisVertical, "menu")
+                    .Children([
+                        MenuItem.Default(Icons.Archive, "archive").Label("Archive"),
+                        MenuItem.Default(Icons.Download, "export").Label("Export")
+                    ])
             )
             .HandleRowAction(async e =>
             {
