@@ -43,7 +43,7 @@ public static class ApiDocGenerator
         var type = GetTypeFromName(typeName);
         if (type == null)
         {
-            return $"\n\n> ⚠️ Unable to find type `{typeName}` for API documentation.\n\n";
+            return $"\n\n> WARNING: Unable to find type `{typeName}` for API documentation.\n\n";
         }
 
         var extensionTypes = ParseExtensionTypes(extensionTypesString);
@@ -57,7 +57,7 @@ public static class ApiDocGenerator
         if (!string.IsNullOrEmpty(sourceUrl))
         {
             var fileName = System.IO.Path.GetFileName(sourceUrl);
-            sb.AppendLine($"📄 [View Source: {fileName}]({sourceUrl})");
+            sb.AppendLine($"[View Source: {fileName}]({sourceUrl})");
             sb.AppendLine();
         }
 
