@@ -191,9 +191,4 @@ export const linkCellRenderer: CustomRenderer<LinkCell> = {
 
     return true;
   },
-
-  onClick: () => {
-    // Return undefined to let the parent handle click
-    return undefined;
-  },
 };
