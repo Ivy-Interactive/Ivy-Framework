@@ -10,7 +10,7 @@ class CookieJarEntry
 {
     public required CookieJar CookieJar { get; set; }
     public required string Intent { get; set; }
-    public required DateTime LastAccessed { get; set; }
+    public required DateTime RegisteredAt { get; set; }
 }
 
 public class AppSessionStore : IDisposable
@@ -36,7 +36,7 @@ public class AppSessionStore : IDisposable
         var bytes = RandomNumberGenerator.GetBytes(32);
         var id = Convert.ToBase64String(bytes)
             .Replace("+", "-").Replace("/", "_").TrimEnd('=');
-        var entry = new CookieJarEntry { CookieJar = cookieJar, Intent = intent, LastAccessed = DateTime.UtcNow };
+        var entry = new CookieJarEntry { CookieJar = cookieJar, Intent = intent, RegisteredAt = DateTime.UtcNow };
 
         if (!_cookieJarEntries.TryAdd(id, entry))
             throw new InvalidOperationException($"Cookie jar already registered for id '{id}'");
@@ -46,7 +46,9 @@ public class AppSessionStore : IDisposable
 
     public bool TryRemoveCookies(CookieJarId cookieJarId, string intent, out CookieJar cookieJar)
     {
-        if (_cookieJarEntries.TryRemove(cookieJarId.Value, out var entry) && entry.Intent == intent)
+        if (_cookieJarEntries.TryRemove(cookieJarId.Value, out var entry) &&
+            entry.Intent == intent &&
+            DateTime.UtcNow - entry.RegisteredAt <= _cookieJarLifetime)
         {
             cookieJar = entry.CookieJar;
             return true;
@@ -56,14 +58,11 @@ public class AppSessionStore : IDisposable
         return false;
     }
 
-    public bool TryRemoveCookies(CookieJarId cookieJarId)
-        => _cookieJarEntries.TryRemove(cookieJarId.Value, out _);
-
     private void CleanupExpiredCookieJars()
     {
         var now = DateTime.UtcNow;
         var expiredKeys = _cookieJarEntries
-            .Where(kvp => now - kvp.Value.LastAccessed > _cookieJarLifetime)
+            .Where(kvp => now - kvp.Value.RegisteredAt > _cookieJarLifetime)
             .Select(kvp => kvp.Key)
             .ToList();
 
