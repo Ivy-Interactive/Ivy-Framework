@@ -20,7 +20,7 @@ The `AsyncSelectInput` widget provides a select dropdown that loads options asyn
 
 Here's a simple example of an `AsyncSelectInput` that fetches categories:
 
-```csharp demo-tabs
+```csharp demo-below
 public class AsyncSelectBasicDemo : ViewBase
 {
     private static readonly string[] Categories = { "Electronics", "Clothing", "Books", "Home & Garden", "Sports" };
@@ -50,12 +50,12 @@ public class AsyncSelectBasicDemo : ViewBase
 }
 ```
 
-AsyncSelectInput supports various data types. Here are examples for different scenarios:
+## Data Types
 
-### String-based AsyncSelect
+AsyncSelectInput supports various data types. Here's an example showing String, Integer, and Enum-based AsyncSelects:
 
 ```csharp demo-tabs
-public class StringAsyncSelectDemo : ViewBase
+public class DataTypesDemo : ViewBase
 {
     private static readonly Dictionary<string, string> CountryRegions = new()
     {
@@ -69,9 +69,25 @@ public class StringAsyncSelectDemo : ViewBase
         { "Brazil", "South America" }
     };
 
+    private enum ProgrammingLanguage
+    {
+        CSharp,
+        Java,
+        Python,
+        JavaScript,
+        Go,
+        Rust,
+        FSharp,
+        Kotlin,
+        Swift,
+        TypeScript
+    }
+
     public override object? Build()
     {
         var selectedCountry = this.UseState<string?>(default(string));
+        var selectedYear = this.UseState<int?>(default(int));
+        var selectedLanguage = this.UseState(ProgrammingLanguage.CSharp);
 
         Task<Option<string>[]> QueryCountries(string query)
         {
@@ -86,23 +102,6 @@ public class StringAsyncSelectDemo : ViewBase
             if (string.IsNullOrEmpty(country)) return Task.FromResult<Option<string>?>(null);
             return Task.FromResult<Option<string>?>(new Option<string>(country, country, description: CountryRegions.GetValueOrDefault(country)));
         }
-
-        return selectedCountry.ToAsyncSelectInput(QueryCountries, LookupCountry, placeholder: "Search countries...")
-                .WithField()
-                .Label("Select a country:")
-                .Width(Size.Full());
-    }
-}
-```
-
-### Integer-based AsyncSelect
-
-```csharp demo-tabs
-public class IntegerAsyncSelectDemo : ViewBase
-{
-    public override object? Build()
-    {
-        var selectedYear = this.UseState<int?>(default(int));
 
         Task<Option<int>[]> QueryYears(string query)
         {
@@ -133,40 +132,8 @@ public class IntegerAsyncSelectDemo : ViewBase
             return Task.FromResult<Option<int>?>(new Option<int>(year.ToString(), year));
         }
 
-        return selectedYear.ToAsyncSelectInput(QueryYears, LookupYear, placeholder: "Search years...")
-                .WithField()
-                .Label("Select a year:")
-                .Width(Size.Full());
-    }
-}
-```
-
-### Enum-based AsyncSelect
-
-```csharp demo-tabs
-public class EnumAsyncSelectDemo : ViewBase
-{
-    private enum ProgrammingLanguage
-    {
-        CSharp,
-        Java,
-        Python,
-        JavaScript,
-        Go,
-        Rust,
-        FSharp,
-        Kotlin,
-        Swift,
-        TypeScript
-    }
-
-    public override object? Build()
-    {
-        var selectedLanguage = this.UseState(ProgrammingLanguage.CSharp);
-
         Task<Option<ProgrammingLanguage>[]> QueryLanguages(string query)
         {
-            // Create a static array of languages to avoid runtime issues
             var languages = new[] 
             { 
                 ProgrammingLanguage.CSharp, 
@@ -195,9 +162,20 @@ public class EnumAsyncSelectDemo : ViewBase
             return Task.FromResult<Option<ProgrammingLanguage>?>(new Option<ProgrammingLanguage>(language.ToString(), language));
         }
 
-        return selectedLanguage.ToAsyncSelectInput(QueryLanguages, LookupLanguage, placeholder: "Search languages...")
+        return Layout.Vertical()
+            | selectedCountry.ToAsyncSelectInput(QueryCountries, LookupCountry, placeholder: "Search countries...")
                 .WithField()
-                .Label("Select a programming language:")
+                .Label("String-based AsyncSelect:")
+                .Width(Size.Full())
+            
+            | selectedYear.ToAsyncSelectInput(QueryYears, LookupYear, placeholder: "Search years...")
+                .WithField()
+                .Label("Integer-based AsyncSelect:")
+                .Width(Size.Full())
+            
+            | selectedLanguage.ToAsyncSelectInput(QueryLanguages, LookupLanguage, placeholder: "Search languages...")
+                .WithField()
+                .Label("Enum-based AsyncSelect:")
                 .Width(Size.Full());
     }
 }
