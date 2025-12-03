@@ -28,63 +28,6 @@ public class AppHub(
     IQueryableRegistry queryableRegistry
     ) : Hub
 {
-    private static bool GetChrome(HttpContext httpContext)
-    {
-        bool chrome = true;
-        if (httpContext.Request.Query.TryGetValue("chrome", out var chromeParam))
-        {
-            chrome = !chromeParam.ToString().Equals("false", StringComparison.InvariantCultureIgnoreCase);
-        }
-
-        return chrome;
-    }
-
-    public static (string? AppId, string? NavigationAppId) GetAppId(Server server, HttpContext httpContext, bool chrome)
-    {
-        string? appId = null;
-        string? navigationAppId = null;
-
-        if (httpContext!.Request.Query.TryGetValue("appId", out var appIdParam))
-        {
-            var id = appIdParam.ToString();
-            if (string.IsNullOrEmpty(id) || id == AppIds.Chrome || id == AppIds.Auth || id == AppIds.Default)
-            {
-                id = null;
-            }
-
-            if (chrome)
-            {
-                navigationAppId = id;
-            }
-            else
-            {
-                appId = id;
-            }
-        }
-
-        return (appId, navigationAppId);
-    }
-
-    public static string GetMachineId(HttpContext httpContext)
-    {
-        if (httpContext!.Request.Query.TryGetValue("machineId", out var machineIdParam))
-        {
-            return machineIdParam.ToString().NullIfEmpty() ?? throw new Exception("Missing machineId in request.");
-        }
-
-        throw new Exception("Missing machineId in request.");
-    }
-
-    public static string? GetParentId(HttpContext httpContext)
-    {
-        if (httpContext!.Request.Query.TryGetValue("parentId", out var parentIdParam))
-        {
-            return parentIdParam.ToString().NullIfEmpty();
-        }
-
-        return null;
-    }
-
     public AppArgs GetAppArgs(string connectionId, string appId, string? navigationAppId, HttpContext httpContext)
     {
         string? appArgs = null;
@@ -96,8 +39,6 @@ public class AppHub(
         HttpRequest request = httpContext.Request;
         return new AppArgs(connectionId, appId, navigationAppId, appArgs ?? server.Args?.Args, request.Scheme, request.Host.Value!);
     }
-
-
 
     public override async Task OnConnectedAsync()
     {
@@ -626,20 +567,73 @@ public class AppHub(
             logger.LogError(ex, "Failed to send navigate signal: {ConnectionId} to [{AppId}]", Context.ConnectionId, appId);
         }
     }
+
+    private static bool GetChrome(HttpContext httpContext)
+    {
+        bool chrome = true;
+        if (httpContext.Request.Query.TryGetValue("chrome", out var chromeParam))
+        {
+            chrome = !chromeParam.ToString().Equals("false", StringComparison.InvariantCultureIgnoreCase);
+        }
+
+        return chrome;
+    }
+
+    public static (string? AppId, string? NavigationAppId) GetAppId(Server server, HttpContext httpContext, bool chrome)
+    {
+        string? appId = null;
+        string? navigationAppId = null;
+
+        if (httpContext!.Request.Query.TryGetValue("appId", out var appIdParam))
+        {
+            var id = appIdParam.ToString();
+            if (string.IsNullOrEmpty(id) || id == AppIds.Chrome || id == AppIds.Auth || id == AppIds.Default)
+            {
+                id = null;
+            }
+
+            if (chrome)
+            {
+                navigationAppId = id;
+            }
+            else
+            {
+                appId = id;
+            }
+        }
+
+        return (appId, navigationAppId);
+    }
+
+    public static string GetMachineId(HttpContext httpContext)
+    {
+        if (httpContext!.Request.Query.TryGetValue("machineId", out var machineIdParam))
+        {
+            return machineIdParam.ToString().NullIfEmpty() ?? throw new Exception("Missing machineId in request.");
+        }
+
+        throw new Exception("Missing machineId in request.");
+    }
+
+    public static string? GetParentId(HttpContext httpContext)
+    {
+        if (httpContext!.Request.Query.TryGetValue("parentId", out var parentIdParam))
+        {
+            return parentIdParam.ToString().NullIfEmpty();
+        }
+
+        return null;
+    }
 }
 
 public class ClientSender : IClientSender, IDisposable
 {
-    private readonly IClientNotifier _clientNotifier;
-    private readonly string _connectionId;
     private readonly System.Threading.Channels.Channel<(string method, object? data)> _channel;
     private readonly CancellationTokenSource _cts = new();
     private readonly Task _worker;
 
     public ClientSender(IClientNotifier clientNotifier, string connectionId)
     {
-        _clientNotifier = clientNotifier;
-        _connectionId = connectionId;
         var options = new System.Threading.Channels.BoundedChannelOptions(2048)
         {
             SingleReader = true,
@@ -658,11 +652,11 @@ public class ClientSender : IClientSender, IDisposable
                     {
                         try
                         {
-                            await _clientNotifier.NotifyClientAsync(_connectionId, msg.method, msg.data).ConfigureAwait(false);
+                            await clientNotifier.NotifyClientAsync(connectionId, msg.method, msg.data).ConfigureAwait(false);
                         }
                         catch (Exception ex)
                         {
-                            Console.WriteLine($"[ERROR] Failed to send {msg.method} to client {_connectionId}: {ex.Message}");
+                            Console.WriteLine($"[ERROR] Failed to send {msg.method} to client {connectionId}: {ex.Message}");
                         }
                     }
                 }
