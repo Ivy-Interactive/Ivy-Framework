@@ -5,6 +5,7 @@ using Ivy.Cookies;
 using Ivy.Chrome;
 using Ivy.Client;
 using Ivy.Core;
+using Ivy.Core.Helpers;
 using Ivy.Core.Exceptions;
 using Ivy.Helpers;
 using Ivy.Hooks;

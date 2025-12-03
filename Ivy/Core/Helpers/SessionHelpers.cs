@@ -1,11 +1,11 @@
 using Ivy.Cookies;
 using Ivy.Client;
-using Ivy.Core;
+using Ivy.Apps;
 using Ivy.Views;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace Ivy.Apps;
+namespace Ivy.Core.Helpers;
 
 public static class SessionHelpers
 {

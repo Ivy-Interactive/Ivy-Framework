@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Ivy.Cookies;
+using Ivy.Core.Helpers;
 
 namespace Ivy.Auth;
 
