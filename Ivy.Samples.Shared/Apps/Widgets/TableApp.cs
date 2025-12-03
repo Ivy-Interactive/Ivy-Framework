@@ -28,7 +28,8 @@ public class TableApp : SampleBase
     {
         return Layout.Tabs(
             new Tab("Table Sizes", new TableSizesExample()),
-            new Tab("Column Widths", new ColumnWidthsExample())
+            new Tab("Column Widths", new ColumnWidthsExample()),
+            new Tab("Alignment", new AlignmentExample())
         ).Variant(TabsVariant.Content);
     }
 }
@@ -223,5 +224,79 @@ public class ColumnWidthsExample : ViewBase
                 .ColumnWidth(e => e.Contact, Size.Fraction(0.5f))
                 .ColumnWidth(e => e.Views, Size.Fit())
                 .ColumnWidth(e => e.Actions, Size.Fit());
+    }
+}
+
+public class AlignmentExample : ViewBase
+{
+    public override object? Build()
+    {
+        var records = new[]
+        {
+            new Record { Reference = "REF-001", Contact = "John Doe", Views = 1250 },
+            new Record { Reference = "REF-002", Contact = "Jane Smith", Views = 890 },
+            new Record { Reference = "REF-003", Contact = "Bob Johnson", Views = 2100 },
+            new Record { Reference = "REF-004", Contact = "Alice Williams", Views = 567 },
+            new Record { Reference = "REF-005", Contact = "Charlie Brown", Views = 3450 }
+        };
+
+        return Layout.Vertical()
+            | Text.H3("Column Alignment with Different Widths")
+            | Text.P("Alignment applies to both headers and data cells (rows). Use .Align() to control how content is aligned within cells.")
+
+            | Text.Label("Example 1: Narrow Column (Fit) - Right Aligned Numbers")
+            | Text.P("Views column uses Fit() width with Right alignment to show numbers clearly")
+            | records
+                .ToTable()
+                .Width(Size.Full())
+                .ColumnWidth(e => e.Reference, Size.Fraction(0.4f))
+                .ColumnWidth(e => e.Contact, Size.Fraction(0.4f))
+                .ColumnWidth(e => e.Views, Size.Fit())
+                .Align(e => e.Views, Align.Right)
+
+            | Text.Label("Example 2: Wide Column (Fraction) - Center Aligned Text")
+            | Text.P("Contact column uses Fraction(0.6) width with Center alignment")
+            | records
+                .ToTable()
+                .Width(Size.Full())
+                .ColumnWidth(e => e.Reference, Size.Fraction(0.2f))
+                .ColumnWidth(e => e.Contact, Size.Fraction(0.6f))
+                .ColumnWidth(e => e.Views, Size.Fraction(0.2f))
+                .Align(e => e.Contact, Align.Center)
+                .Align(e => e.Views, Align.Right)
+
+            | Text.Label("Example 3: Mixed Alignments with Fixed Widths")
+            | Text.P("Reference: Left (default), Contact: Center, Views: Right")
+            | records
+                .ToTable()
+                .Width(Size.Units(100))
+                .ColumnWidth(e => e.Reference, Size.Units(25))
+                .ColumnWidth(e => e.Contact, Size.Fraction(1.0f))
+                .ColumnWidth(e => e.Views, Size.Units(20))
+                .Align(e => e.Contact, Align.Center)
+                .Align(e => e.Views, Align.Right)
+
+            | Text.Label("Example 4: All Right Aligned in Narrow Columns")
+            | Text.P("All columns right-aligned with narrow widths to demonstrate alignment effect")
+            | records
+                .ToTable()
+                .Width(Size.Units(80))
+                .ColumnWidth(e => e.Reference, Size.Fraction(0.33f))
+                .ColumnWidth(e => e.Contact, Size.Fraction(0.33f))
+                .ColumnWidth(e => e.Views, Size.Fraction(0.34f))
+                .Align(e => e.Reference, Align.Right)
+                .Align(e => e.Contact, Align.Right)
+                .Align(e => e.Views, Align.Right)
+
+            | Text.Label("Example 5: Wide Center Column with Narrow Side Columns")
+            | Text.P("Center column (Contact) uses Fraction(0.7) with Center alignment, side columns are narrow")
+            | records
+                .ToTable()
+                .Width(Size.Full())
+                .ColumnWidth(e => e.Reference, Size.Fraction(0.15f))
+                .ColumnWidth(e => e.Contact, Size.Fraction(0.7f))
+                .ColumnWidth(e => e.Views, Size.Fraction(0.15f))
+                .Align(e => e.Contact, Align.Center)
+                .Align(e => e.Views, Align.Right);
     }
 }

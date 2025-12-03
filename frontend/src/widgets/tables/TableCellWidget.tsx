@@ -1,7 +1,7 @@
 import React from 'react';
 import { TableCell } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
-import { Align, getAlign, getWidth } from '@/lib/styles';
+import { Align, getWidth } from '@/lib/styles';
 import {
   Tooltip,
   TooltipContent,
@@ -20,6 +20,27 @@ interface TableCellWidgetProps {
   children?: React.ReactNode;
 }
 
+// Convert Align enum to text-align CSS property for table cells
+const getTextAlign = (align: Align): React.CSSProperties => {
+  // Extract horizontal alignment from the Align enum
+  switch (align) {
+    case 'TopLeft':
+    case 'Left':
+    case 'BottomLeft':
+      return { textAlign: 'left' };
+    case 'TopRight':
+    case 'Right':
+    case 'BottomRight':
+      return { textAlign: 'right' };
+    case 'TopCenter':
+    case 'Center':
+    case 'BottomCenter':
+      return { textAlign: 'center' };
+    default:
+      return { textAlign: 'left' };
+  }
+};
+
 export const TableCellWidget: React.FC<TableCellWidgetProps> = ({
   children,
   isHeader,
@@ -28,14 +49,11 @@ export const TableCellWidget: React.FC<TableCellWidgetProps> = ({
   width,
   multiLine,
 }) => {
-  const alignStyles = {
-    ...getAlign('Horizontal', align),
-    ...getAlign('Vertical', align),
-  };
-
   const cellStyles = {
     ...getWidth(width),
   };
+
+  const textAlignStyle = getTextAlign(align);
 
   const content = (
     <div
@@ -44,10 +62,13 @@ export const TableCellWidget: React.FC<TableCellWidgetProps> = ({
         multiLine && 'whitespace-normal wrap-break-word',
         !multiLine && 'min-w-0'
       )}
-      style={alignStyles}
+      style={textAlignStyle}
     >
       {!multiLine ? (
-        <span className="block overflow-hidden text-ellipsis whitespace-nowrap w-full">
+        <span
+          className="inline-block overflow-hidden text-ellipsis whitespace-nowrap max-w-full"
+          style={textAlignStyle}
+        >
           {children}
         </span>
       ) : (
