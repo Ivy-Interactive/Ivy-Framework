@@ -180,9 +180,6 @@ public class AppHub(
             var appRouter = new AppRouter(server);
             var routeResult = appRouter.Resolve(appId, navigationAppId, parentId, chrome);
 
-            appId = routeResult.AppId;
-            navigationAppId = routeResult.NavigationAppId;
-            var appDescriptor = routeResult.AppDescriptor;
             appServices.AddSingleton(typeof(IAppRepository), routeResult.AppRepository);
 
             var appArgs = GetAppArgs(Context.ConnectionId, appId, navigationAppId, httpContext);
@@ -190,14 +187,14 @@ public class AppHub(
             logger.LogInformation("Connected: {ConnectionId} [{AppId}]", Context.ConnectionId, appId);
 
             appServices.AddSingleton(appArgs);
-            appServices.AddSingleton(appDescriptor);
+            appServices.AddSingleton(routeResult.AppDescriptor);
 
             appServices.AddTransient<IWebhookRegistry, WebhookController>();
             appServices.AddTransient<SignalRouter>(_ => new SignalRouter(sessionStore));
 
             var serviceProvider = new CompositeServiceProvider(appServices, server.Services);
 
-            var app = appDescriptor.CreateApp();
+            var app = routeResult.AppDescriptor.CreateApp();
 
             var widgetTree = new WidgetTree(app, contentBuilder, serviceProvider);
 
@@ -206,7 +203,7 @@ public class AppHub(
                 AppId = appId,
                 MachineId = GetMachineId(httpContext),
                 ParentId = parentId,
-                AppDescriptor = appDescriptor,
+                AppDescriptor = routeResult.AppDescriptor,
                 App = app,
                 ConnectionId = Context.ConnectionId,
                 WidgetTree = widgetTree,
@@ -221,7 +218,7 @@ public class AppHub(
             if (parentId == null)
             {
                 clientProvider.SetRootAppId(appId);
-                bool isNotFoundPage = appDescriptor.Id == AppIds.ErrorNotFound;
+                bool isNotFoundPage = routeResult.AppDescriptor.Id == AppIds.ErrorNotFound;
 
                 if (appId != AppIds.Chrome && !isNotFoundPage)
                 {
