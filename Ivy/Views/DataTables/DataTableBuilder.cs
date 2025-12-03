@@ -64,10 +64,7 @@ public class DataTableBuilder<TModel> : ViewBase, IMemoized
         if (underlyingType == typeof(DateOnly))
             return ColType.Date;
 
-        if (underlyingType == typeof(TimeSpan) || underlyingType == typeof(TimeOnly))
-            return ColType.Text;
-
-        if (underlyingType == typeof(Guid) || underlyingType.IsEnum)
+        if (underlyingType == typeof(TimeSpan) || underlyingType == typeof(TimeOnly) || underlyingType == typeof(Guid) || underlyingType.IsEnum)
             return ColType.Text;
 
         // Handle string arrays as Labels type
@@ -97,7 +94,7 @@ public class DataTableBuilder<TModel> : ViewBase, IMemoized
             )
             .ToList();
 
-        int order = fields.Count;
+        var order = fields.Count;
         foreach (var field in fields)
         {
             var align = Shared.Align.Left;
@@ -112,7 +109,7 @@ public class DataTableBuilder<TModel> : ViewBase, IMemoized
                 align = Shared.Align.Center;
             }
 
-            var removed = field.Name.StartsWith("_") && field.Name.Length > 1 && char.IsLetter(field.Name[1]);
+            var removed = field.Name.StartsWith($"_") && field.Name.Length > 1 && char.IsLetter(field.Name[1]);
 
             _columns[field.Name] = new InternalColumn()
             {
@@ -304,7 +301,7 @@ public class DataTableBuilder<TModel> : ViewBase, IMemoized
 
     public override object? Build()
     {
-        var chatClient = this.UseService<IChatClient?>();
+        var chatClient = UseService<IChatClient?>();
 
         var columns = _columns.Values.Where(e => !e.Removed).OrderBy(c => c.Column.Order).Select(e => e.Column).ToArray();
         var removedColumns = _columns.Values.Where(e => e.Removed).Select(c => c.Column.Name).ToArray();
@@ -330,7 +327,7 @@ public class DataTableBuilder<TModel> : ViewBase, IMemoized
         if (_cellActions.Count > 0)
         {
             var originalHandler = _onCellActivated;
-            onCellActivated = async (Event<DataTable, CellClickEventArgs> e) =>
+            onCellActivated = async e =>
             {
                 var args = e.Value;
                 if (_cellActions.TryGetValue(args.ColumnName, out var action))
