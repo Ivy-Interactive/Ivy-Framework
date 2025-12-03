@@ -1,14 +1,21 @@
 import React from 'react';
+import { Details } from '@/components/ui/detail';
+import { Scales } from '@/types/scale';
 
 type DetailsWidgetProps = {
   id: string;
   children: React.ReactNode;
+  scale?: Scales;
 };
 
-export const DetailsWidget = ({ id, children }: DetailsWidgetProps) => {
+export const DetailsWidget = ({
+  id,
+  children,
+  scale = Scales.Medium,
+}: DetailsWidgetProps) => {
   return (
-    <div className="w-full [&>:last-child]:border-0" key={id}>
+    <Details scale={scale} key={id}>
       {children}
-    </div>
+    </Details>
   );
 };

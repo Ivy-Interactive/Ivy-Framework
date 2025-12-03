@@ -39,9 +39,21 @@ public class DetailsApp : SampleBase
             EmptyField3 = (string)null!,
         };
 
-        return Layout.Vertical()
-                | new Card(record.ToDetails().RemoveEmpty())
-                | new Card(record_2.ToDetails().MultiLine(x => x.LastName).RemoveEmpty())
+        return Layout.Vertical().Gap(2)
+                | Text.H1("Details Size")
+                | (Layout.Horizontal().Gap(2)
+                    | (Layout.Vertical()
+                        | Text.Label("Small Size").Bold()
+                        | new Card(record.ToDetails().RemoveEmpty().Small())
+                        | new Card(record_2.ToDetails().MultiLine(x => x.LastName).RemoveEmpty().Small()))
+                    | (Layout.Vertical()
+                        | Text.Label("Medium Size").Bold()
+                        | new Card(record.ToDetails().RemoveEmpty().Medium())
+                        | new Card(record_2.ToDetails().MultiLine(x => x.LastName).RemoveEmpty().Medium()))
+                    | (Layout.Vertical()
+                        | Text.Label("Large Size").Bold()
+                        | new Card(record.ToDetails().RemoveEmpty().Large())
+                        | new Card(record_2.ToDetails().MultiLine(x => x.LastName).RemoveEmpty().Large())))
                 ;
     }
 }
