@@ -539,10 +539,6 @@
   padding: 0px !important;
 }
 
-:has(> DIV.remove-ancestor-padding) {
-  padding: 0 !important;
-}
-
 .invisible-scrollbar {
   opacity: 0 !important;
   pointer-events: none !important;
