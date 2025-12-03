@@ -138,7 +138,8 @@ public class AppHub(
             {
                 var authProvider = server.Services.BuildServiceProvider().GetService<IAuthProvider>() ?? throw new Exception("IAuthProvider not found");
 #if DEBUG
-                authProvider = new CheckedAuthProvider(authProvider);
+                // Wrap in CheckedAuthProvider for debug builds
+                authProvider = new Ivy.Core.Auth.CheckedAuthProvider(authProvider);
 #endif
 
                 var authSession = AuthHelper.GetAuthSession(httpContext);
