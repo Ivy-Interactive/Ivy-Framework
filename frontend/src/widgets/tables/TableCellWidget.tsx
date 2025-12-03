@@ -41,7 +41,7 @@ export const TableCellWidget: React.FC<TableCellWidgetProps> = ({
     <div
       className={cn(
         'align-middle force-text-inherit',
-        multiLine && 'whitespace-normal break-words',
+        multiLine && 'whitespace-normal wrap-break-word',
         !multiLine && 'min-w-0'
       )}
       style={alignStyles}
@@ -56,23 +56,34 @@ export const TableCellWidget: React.FC<TableCellWidgetProps> = ({
     </div>
   );
 
+  // Apply max-w-0 overflow-hidden for truncation when:
+  // 1. We have an explicit width (for column width control), OR
+  // 2. It's a header cell (headers should truncate)
+  // Don't apply to data cells without widths - they need to size naturally
+  const shouldTruncate = width || isHeader;
+
+  // Only show tooltip for string children to avoid "[object Object]" issues
+  const shouldShowTooltip = !multiLine && typeof children === 'string';
+
   return (
     <TableCell
       className={cn(
         isHeader && 'header-cell bg-muted font-semibold',
         isFooter && 'footer-cell bg-muted font-semibold',
         'border-border force-text-inherit',
-        // Ensure proper width constraints for truncation
-        'max-w-0 overflow-hidden'
+        // Apply max-w-0 overflow-hidden for truncation
+        shouldTruncate && 'max-w-0 overflow-hidden'
       )}
       style={cellStyles}
     >
-      {!multiLine && typeof children === 'string' ? (
+      {shouldShowTooltip ? (
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>{content}</TooltipTrigger>
             <TooltipContent className="bg-popover text-popover-foreground shadow-md max-w-sm">
-              <div className="whitespace-pre-wrap break-words">{children}</div>
+              <div className="whitespace-pre-wrap wrap-break-word">
+                {children}
+              </div>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>

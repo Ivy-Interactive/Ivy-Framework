@@ -23,7 +23,7 @@ For information about core Ivy concepts like Views and state management, see [Co
 
 The easiest way to set up an Ivy project is using the Ivy CLI. This will automatically create the project structure, configuration files, and necessary setup.
 
-### 1. Install Ivy Globally
+### Install Ivy Globally
 
 Run the following command in your terminal to install Ivy as a global tool:
 
@@ -36,7 +36,7 @@ If you're using a specific operating system, read the instructions in your termi
 You can always see all available commands by using `ivy --help`.
 </Callout>
 
-### 2. Create a New Ivy Project
+### Create a New Ivy Project
 
 Use the Ivy CLI to scaffold a new project:
 
