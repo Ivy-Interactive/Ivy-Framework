@@ -50,6 +50,7 @@ public class Server
     private bool _useHotReload;
     private bool _useHttpRedirection;
     private readonly List<Action<WebApplicationBuilder>> _builderMods = new();
+    private readonly List<Action<WebApplication>> _appMods = new();
     private List<string> _reservedPaths = new();
     public IReadOnlyList<string> ReservedPaths => _reservedPaths;
     public string? DefaultAppId { get; private set; }
@@ -215,6 +216,12 @@ public class Server
     public Server UseBuilder(Action<WebApplicationBuilder> modify)
     {
         _builderMods.Add(modify);
+        return this;
+    }
+
+    public Server UseApp(Action<WebApplication> modify)
+    {
+        _appMods.Add(modify);
         return this;
     }
 
@@ -458,6 +465,12 @@ public class Server
         app.UseRouting();
         app.UseCors();
         app.UseGrpcWeb();
+
+        // Apply custom app modifications (middleware, etc.)
+        foreach (var mod in _appMods)
+        {
+            mod(app);
+        }
 
         app.MapControllers();
         app.MapHub<AppHub>("/ivy/messages");
