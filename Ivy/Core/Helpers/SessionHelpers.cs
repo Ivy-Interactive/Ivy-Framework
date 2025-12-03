@@ -1,4 +1,3 @@
-using Ivy.Cookies;
 using Ivy.Client;
 using Ivy.Apps;
 using Ivy.Views;

@@ -2,7 +2,6 @@ using System.Reflection;
 using Ivy.Apps;
 using Ivy.Client;
 using Ivy.Core;
-using Ivy.Cookies;
 using Ivy.Core.Hooks;
 using Ivy.Helpers;
 using Ivy.Hooks;
@@ -18,9 +17,9 @@ public class DefaultAuthApp : ViewBase
 {
     public override object Build()
     {
-        var auth = this.UseService<IAuthService>();
-        var errorMessage = this.UseState<string?>();
-        var serverArgs = this.UseService<ServerArgs>();
+        var auth = UseService<IAuthService>();
+        var errorMessage = UseState<string?>();
+        var serverArgs = UseService<ServerArgs>();
         var appName = serverArgs.MetaTitle.NullIfEmpty() ?? Assembly.GetEntryAssembly()?.GetName().Name.NullIfEmpty() ?? "Ivy";
 
         var options = auth.GetAuthOptions();
@@ -113,6 +112,7 @@ public class PasswordEmailFlowView(IState<string?> errorMessage) : ViewBase
 
                 var authSession = auth.GetAuthSession();
                 var oldSession = authSession.TakeSnapshot();
+
                 await TimeoutHelper.WithTimeoutAsync(
                     ct => auth.LoginAsync(credentials.Value.User, credentials.Value.Password, ct));
 
@@ -159,8 +159,7 @@ public class OAuthFlowView(AuthOption option, IState<string?> errorMessage) : Vi
         {
             var authSession = auth.GetAuthSession();
             var oldSession = authSession.TakeSnapshot();
-            var token = await TimeoutHelper.WithTimeoutAsync(
-                ct => auth.HandleOAuthCallbackAsync(request, ct));
+            var token = await TimeoutHelper.WithTimeoutAsync(ct => auth.HandleOAuthCallbackAsync(request, ct));
             if (authSession.HasChangedSince(oldSession))
             {
                 client.SetAuthCookies(sessionStore, authSession);
@@ -174,8 +173,7 @@ public class OAuthFlowView(AuthOption option, IState<string?> errorMessage) : Vi
             {
                 var authSession = auth.GetAuthSession();
                 var oldSession = authSession.TakeSnapshot();
-                var uri = await TimeoutHelper.WithTimeoutAsync(
-                    ct => auth.GetOAuthUriAsync(option, callback, ct));
+                var uri = await TimeoutHelper.WithTimeoutAsync(ct => auth.GetOAuthUriAsync(option, callback, ct));
                 if (authSession.AuthSessionData != oldSession.AuthSessionData)
                 {
                     client.SetAuthSessionData(sessionStore, authSession.AuthSessionData);

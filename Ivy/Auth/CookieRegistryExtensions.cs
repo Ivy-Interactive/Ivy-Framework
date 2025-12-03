@@ -1,11 +1,9 @@
 using System.Net;
 using System.Text.Json;
-using Ivy.Cookies;
-using Ivy.Auth;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Ivy.Core.Auth;
+namespace Ivy.Auth;
 
 public static class CookieRegistryExtensions
 {

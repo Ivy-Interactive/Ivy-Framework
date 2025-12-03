@@ -1,6 +1,5 @@
 using Ivy.Apps;
 using Ivy.Auth;
-using Ivy.Cookies;
 using Ivy.Client;
 using Ivy.Core;
 using Ivy.Helpers;

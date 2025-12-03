@@ -4,6 +4,11 @@ namespace Ivy.Auth;
 
 public static class AuthSessionExtensions
 {
+#if DEBUG
+    internal static CheckedAuthSessionBuilder WithCheckedAccess(this IAuthSession authSession)
+        => new(authSession);
+#endif
+
     public static AuthSessionSnapshot TakeSnapshot(this IAuthSession authSession)
         => new()
         {

@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Http;
 
-namespace Ivy.Cookies;
+namespace Ivy.Auth;
 
 public static class CookieJarIntents
 {

@@ -1,8 +1,8 @@
 ﻿using System.Collections.Concurrent;
 using Ivy.Apps;
 using Ivy.Helpers.Tui;
-using Ivy.Cookies;
 using System.Security.Cryptography;
+using Ivy.Auth;
 
 namespace Ivy;
 
@@ -16,7 +16,6 @@ class CookieJarEntry
 public class AppSessionStore : IDisposable
 {
     public readonly ConcurrentDictionary<string, AppSession> Sessions = new();
-
     private readonly ConcurrentDictionary<string, CookieJarEntry> _cookieJarEntries = new();
     private readonly TimeSpan _cookieJarLifetime = TimeSpan.FromMinutes(1);
     private readonly Timer _cookieJarCleanupTimer;

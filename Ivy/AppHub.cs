@@ -1,7 +1,6 @@
 using System.Text.Json.Nodes;
 using Ivy.Apps;
 using Ivy.Auth;
-using Ivy.Cookies;
 using Ivy.Chrome;
 using Ivy.Client;
 using Ivy.Core;
@@ -136,7 +135,7 @@ public class AppHub(
                 var authProvider = server.Services.BuildServiceProvider().GetService<IAuthProvider>() ?? throw new Exception("IAuthProvider not found");
 #if DEBUG
                 // Wrap in CheckedAuthProvider for debug builds
-                authProvider = new Ivy.Core.Auth.CheckedAuthProvider(authProvider);
+                authProvider = new CheckedAuthProvider(authProvider);
 #endif
 
                 var authSession = AuthHelper.GetAuthSession(httpContext);

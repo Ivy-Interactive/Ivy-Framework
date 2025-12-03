@@ -1,9 +1,8 @@
 #if DEBUG
-using Ivy.Auth;
 using Ivy.Hooks;
 using Microsoft.AspNetCore.Http;
 
-namespace Ivy.Core.Auth;
+namespace Ivy.Auth;
 
 public class CheckedAuthProvider(IAuthProvider innerAuthProvider) : IAuthProvider
 {
