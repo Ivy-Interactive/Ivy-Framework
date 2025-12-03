@@ -231,28 +231,29 @@ public class KanbanWithSheetExample : ViewBase
         var (sheetView, showEdit) = this.UseTrigger((IState<bool> isOpen, string taskId) =>
             new TaskFormSheet(isOpen, taskId, tasks, client));
         
-        return new Fragment(
-            tasks.Value
-                .ToKanban(
-                    groupBySelector: t => t.Status,
-                    idSelector: t => t.Id,
-                    orderSelector: t => t.Priority)
-                .CardBuilder(task => new Card(task.Title, task.Description)
-                    .HandleClick(() => showEdit(task.Id)))
-                .HandleMove(moveData =>
+        var kanban = tasks.Value
+            .ToKanban(
+                groupBySelector: t => t.Status,
+                idSelector: t => t.Id,
+                orderSelector: t => t.Priority)
+            .CardBuilder(task => new Card(task.Title, task.Description)
+                .HandleClick(() => showEdit(task.Id)))
+            .HandleMove(moveData =>
+            {
+                var taskId = moveData.CardId?.ToString();
+                var task = tasks.Value.FirstOrDefault(t => t.Id == taskId);
+                if (task != null)
                 {
-                    var taskId = moveData.CardId?.ToString();
-                    var task = tasks.Value.FirstOrDefault(t => t.Id == taskId);
-                    if (task != null)
-                    {
-                        tasks.Set(tasks.Value
-                            .Where(t => t.Id != taskId)
-                            .Append(task with { Status = moveData.ToColumn })
-                            .ToArray());
-                    }
-                }),
-            sheetView
-        );
+                    tasks.Set(tasks.Value
+                        .Where(t => t.Id != taskId)
+                        .Append(task with { Status = moveData.ToColumn })
+                        .ToArray());
+                }
+            });
+        
+        return new Fragment()
+            | kanban
+            | sheetView;
     }
 }
 
