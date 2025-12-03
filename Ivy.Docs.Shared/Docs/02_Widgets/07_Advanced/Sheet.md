@@ -208,110 +208,109 @@ public class NavigationSheetContent : ViewBase
 
 ### Complex Layout Structure
 
-This pattern demonstrates how to integrate sheets with stateful widgets using triggers, where the sheet needs to interact with the parent component's state. By using `UseTrigger` and handling form submission directly, you can create clean interactions between the sheet form and the main content without relying on `UseEffect`.
+This pattern demonstrates how to integrate sheets with stateful widgets using triggers. Click on any card to edit it in a sheet.
 
 ```csharp demo-tabs
-public record KanbanTask(string Id, string Title, string Status, int Priority, string Description, string Assignee);
+public record TaskItem(string Id, string Title, string Status, int Priority, string Description);
 
 public class KanbanWithSheetExample : ViewBase
 {
     public override object? Build()
     {
-        var taskState = UseState(new[]
+        var tasks = UseState(new[]
         {
-            new KanbanTask("1", "Design Homepage", "Todo", 1, "Create wireframes and mockups", "Alice"),
-            new KanbanTask("2", "Setup Database", "Todo", 2, "Configure PostgreSQL instance", "Bob"),
-            new KanbanTask("3", "Code Review", "In Progress", 1, "Review pull requests", "Charlie"),
-            new KanbanTask("4", "Performance Optimization", "In Progress", 2, "Optimize database queries", "Alice"),
-            new KanbanTask("5", "Unit Tests", "Done", 1, "Write comprehensive test suite", "Bob"),
+            new TaskItem("1", "Design Homepage", "Todo", 1, "Create wireframes and mockups"),
+            new TaskItem("2", "Setup Database", "Todo", 2, "Configure PostgreSQL instance"),
+            new TaskItem("3", "Code Review", "In Progress", 1, "Review pull requests"),
+            new TaskItem("4", "Performance Optimization", "In Progress", 2, "Optimize database queries"),
+            new TaskItem("5", "Unit Tests", "Done", 1, "Write comprehensive test suite"),
         });
         
         var client = UseService<IClientProvider>();
         
-        KanbanTask CreateNewTask() => new KanbanTask(
-            Guid.NewGuid().ToString(), "", "Todo",
-            taskState.Value.Count(t => t.Status == "Todo") + 1, "", "Unassigned");
+        var (sheetView, showEdit) = this.UseTrigger((IState<bool> isOpen, string taskId) =>
+            new TaskFormSheet(isOpen, taskId, tasks, client));
         
-        var taskForm = UseState(CreateNewTask);
-        var statusOptions = new[] { "Todo", "In Progress", "Done" }.ToOptions();
-        
-        // Use trigger pattern instead of boolean state for sheet activation
-        var context = Context; // Capture context for use in trigger factory
-        var (sheetView, openSheet) = context.UseTrigger((IState<bool> isOpen) =>
-        {
-            // Reset form when sheet opens
-            taskForm.Set(CreateNewTask());
-            
-            // Get form components using UseForm for custom submission handling
-            var formBuilder = taskForm.ToForm()
-                .Required(m => m.Title, m => m.Description)
-                .Builder(m => m.Status, s => s.ToSelectInput(statusOptions))
-                .Builder(m => m.Description, s => s.ToTextAreaInput())
-                .Remove(m => m.Id);
-            
-            var (onSubmit, formView, validationView, loading) = context.UseForm(() => formBuilder);
-            
-            // Handle form submission directly - onSubmit already validates required fields
-            async ValueTask HandleSubmit()
-            {
-                if (await onSubmit())
-                {
-                    // Form validation passed - add the task
-                    var updatedTasks = taskState.Value.ToList();
-                    updatedTasks.Add(taskForm.Value);
-                    taskState.Set(updatedTasks.ToArray());
-                    client.Toast($"Added: {taskForm.Value.Title}");
-                    
-                    // Close the sheet
-                    isOpen.Set(false);
-                }
-            }
-            
-            var layout = new FooterLayout(
-                Layout.Horizontal().Gap(2)
-                    | new Button("Create Task").HandleClick(_ => HandleSubmit())
-                        .Loading(loading).Disabled(loading).Scale(formBuilder.Scale)
-                    | new Button("Cancel").Variant(ButtonVariant.Outline).HandleClick(_ => isOpen.Set(false))
-                        .Scale(formBuilder.Scale)
-                    | validationView,
-                formView
-            );
-            
-            return new Sheet(_ => isOpen.Set(false), layout, 
-                title: "Add New Task",
-                description: "Create a new task")
-                .Width(Size.Fraction(1/3f));
-        });
-        
-        var body = Layout.Vertical().Gap(2)
-            | new Button("Add New Task").HandleClick(_ =>
-            {
-                openSheet();
-                return ValueTask.CompletedTask;
-            })
-            | taskState.Value
+        return new Fragment(
+            tasks.Value
                 .ToKanban(
                     groupBySelector: t => t.Status,
                     idSelector: t => t.Id,
                     orderSelector: t => t.Priority)
-                .CardBuilder(task => new Card(
-                    task.Title,
-                    task.Description
-                ))
+                .CardBuilder(task => new Card(task.Title, task.Description)
+                    .HandleClick(() => showEdit(task.Id)))
                 .HandleMove(moveData =>
                 {
                     var taskId = moveData.CardId?.ToString();
-                    var task = taskState.Value.FirstOrDefault(t => t.Id == taskId);
+                    var task = tasks.Value.FirstOrDefault(t => t.Id == taskId);
                     if (task != null)
                     {
-                        taskState.Set(taskState.Value
+                        tasks.Set(tasks.Value
                             .Where(t => t.Id != taskId)
                             .Append(task with { Status = moveData.ToColumn })
                             .ToArray());
                     }
-                });
+                }),
+            sheetView
+        );
+    }
+}
+
+public class TaskFormSheet : ViewBase
+{
+    private readonly IState<bool> _isOpen;
+    private readonly string _taskId;
+    private readonly IState<TaskItem[]> _tasks;
+    private readonly IClientProvider _client;
+    
+    public TaskFormSheet(IState<bool> isOpen, string taskId, IState<TaskItem[]> tasks, IClientProvider client)
+    {
+        _isOpen = isOpen;
+        _taskId = taskId;
+        _tasks = tasks;
+        _client = client;
+    }
+    
+    public override object? Build()
+    {
+        var task = UseState(() => _tasks.Value.FirstOrDefault(t => t.Id == _taskId) ?? 
+            new TaskItem(_taskId, "", "Todo", 1, ""));
         
-        return new Fragment(body, sheetView);
+        var (onSubmit, formView, validationView, loading) = Context.UseForm(() => task.ToForm()
+            .Required(m => m.Title, m => m.Description)
+            .Builder(m => m.Status, s => s.ToSelectInput(new[] { "Todo", "In Progress", "Done" }.ToOptions()))
+            .Builder(m => m.Description, s => s.ToTextAreaInput())
+            .Remove(m => m.Id));
+        
+        async ValueTask HandleSubmit()
+        {
+            if (await onSubmit())
+            {
+                var updatedTasks = _tasks.Value.ToList();
+                var index = updatedTasks.FindIndex(t => t.Id == _taskId);
+                if (index >= 0)
+                {
+                    updatedTasks[index] = task.Value;
+                }
+                _tasks.Set(updatedTasks.ToArray());
+                _client.Toast($"Updated: {task.Value.Title}");
+                _isOpen.Set(false);
+            }
+        }
+        
+        var layout = new FooterLayout(
+            Layout.Horizontal().Gap(2)
+                | new Button("Save").HandleClick(_ => HandleSubmit())
+                    .Loading(loading).Disabled(loading)
+                | new Button("Cancel").Variant(ButtonVariant.Outline).HandleClick(_ => _isOpen.Set(false))
+                | validationView,
+            formView
+        );
+        
+        return new Sheet(_ => _isOpen.Set(false), layout, 
+            title: "Edit Task",
+            description: "Update task details")
+            .Width(Size.Fraction(1/3f));
     }
 }
 ```
