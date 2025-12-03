@@ -42,11 +42,10 @@ public class AsyncSelectBasicDemo : ViewBase
             return Task.FromResult(category != null ? new Option<string>(category) : null);
         }
 
-        return Layout.Vertical()
-            | selectedCategory.ToAsyncSelectInput(QueryCategories, LookupCategory, "Search categories...")
+        return selectedCategory.ToAsyncSelectInput(QueryCategories, LookupCategory, "Search categories...")
                 .WithField()
                 .Label("Select a category:")
-            | Text.Small($"Selected: {selectedCategory.Value ?? "None"}");
+                .Width(Size.Full());
     }
 }
 ```
@@ -88,11 +87,10 @@ public class StringAsyncSelectDemo : ViewBase
             return Task.FromResult<Option<string>?>(new Option<string>(country, country, description: CountryRegions.GetValueOrDefault(country)));
         }
 
-        return Layout.Vertical()
-            | selectedCountry.ToAsyncSelectInput(QueryCountries, LookupCountry, placeholder: "Search countries...")
+        return selectedCountry.ToAsyncSelectInput(QueryCountries, LookupCountry, placeholder: "Search countries...")
                 .WithField()
                 .Label("Select a country:")
-            | Text.Small($"Selected: {selectedCountry.Value ?? "None"}");
+                .Width(Size.Full());
     }
 }
 ```
@@ -135,11 +133,10 @@ public class IntegerAsyncSelectDemo : ViewBase
             return Task.FromResult<Option<int>?>(new Option<int>(year.ToString(), year));
         }
 
-        return Layout.Vertical()
-            | selectedYear.ToAsyncSelectInput(QueryYears, LookupYear, placeholder: "Search years...")
+        return selectedYear.ToAsyncSelectInput(QueryYears, LookupYear, placeholder: "Search years...")
                 .WithField()
                 .Label("Select a year:")
-            | Text.Small($"Selected: {selectedYear.Value?.ToString() ?? "None"}");
+                .Width(Size.Full());
     }
 }
 ```
@@ -198,11 +195,10 @@ public class EnumAsyncSelectDemo : ViewBase
             return Task.FromResult<Option<ProgrammingLanguage>?>(new Option<ProgrammingLanguage>(language.ToString(), language));
         }
 
-        return Layout.Vertical()
-            | selectedLanguage.ToAsyncSelectInput(QueryLanguages, LookupLanguage, placeholder: "Search languages...")
+        return selectedLanguage.ToAsyncSelectInput(QueryLanguages, LookupLanguage, placeholder: "Search languages...")
                 .WithField()
                 .Label("Select a programming language:")
-            | Text.Small($"Selected: {selectedLanguage.Value.ToString()}");
+                .Width(Size.Full());
     }
 }
 ```
@@ -288,11 +284,10 @@ public class AdvancedQueryDemo : ViewBase
             placeholder: "Search by name, email, or department..."
         );
 
-        return Layout.Vertical()
-            | customAsyncSelect
+        return customAsyncSelect
                 .WithField()
                 .Label("Search and select a user:")
-            | Text.Small($"Selected: {selectedUserInfo.Value}");
+                .Width(Size.Full());
     }
 }
 ```
