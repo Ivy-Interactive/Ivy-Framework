@@ -1,9 +1,10 @@
 using Ivy.Core;
-using Ivy.Shared;
+using Ivy.Views;
 
-namespace Ivy.Views;
+namespace Ivy.Apps;
 
-public class NotFoundView : ViewBase
+[App]
+public class NotFoundApp : ViewBase
 {
     public override object? Build()
     {
@@ -12,7 +13,7 @@ public class NotFoundView : ViewBase
                    .Gap(4)
                    .Center()
                    | Text.H1("Ouch! :|").Bold()
-                   | Text.Muted("Apologies, the app you were looking for was not found")
+                   | Text.Muted("Apologies, the app you were looking for was not found.")
                );
     }
 }

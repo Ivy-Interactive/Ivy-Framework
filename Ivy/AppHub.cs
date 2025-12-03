@@ -112,8 +112,6 @@ public class AppHub(
             var parentId = GetParentId(httpContext);
             var (appId, navigationAppId) = GetAppId(server, httpContext, chrome);
 
-
-
             var clientProvider = new ClientProvider(new ClientSender(clientNotifier, Context.ConnectionId));
 
             if (server.Services.All(sd => sd.ServiceType != typeof(IExceptionHandler)))
@@ -182,6 +180,10 @@ public class AppHub(
 
             AppDescriptor? appDescriptor = null;
 
+            //todo claude: I'm  not a fan of this code block - needs refactoring into something cleaner 
+            //to much logic in one place
+            //break it out into a separate class if needed? AppRouter or something
+
             if (string.IsNullOrEmpty(appId))
             {
                 appId = server.DefaultAppId ?? server.AppRepository.GetAppOrDefault(null).Id;
@@ -210,8 +212,8 @@ public class AppHub(
                     if (resolvedApp.Id != navigationAppId)
                     {
                         // App not found, try to find registered 404 app
-                        var notFoundApp = server.AppRepository.GetAppOrDefault(AppIds.NotFound);
-                        if (notFoundApp.Id == AppIds.NotFound)
+                        var notFoundApp = server.AppRepository.GetAppOrDefault(AppIds.ErrorNotFound);
+                        if (notFoundApp.Id == AppIds.ErrorNotFound)
                         {
                             appServices.AddSingleton<IAppRepository>(new ScopedAppRepository(server.AppRepository, navigationAppId, notFoundApp));
 
@@ -249,8 +251,8 @@ public class AppHub(
                 if (resolvedApp.Id != appId)
                 {
                     // App not found
-                    var notFoundApp = server.AppRepository.GetAppOrDefault(AppIds.NotFound);
-                    if (notFoundApp.Id == AppIds.NotFound)
+                    var notFoundApp = server.AppRepository.GetAppOrDefault(AppIds.ErrorNotFound);
+                    if (notFoundApp.Id == AppIds.ErrorNotFound)
                     {
                         appDescriptor = notFoundApp;
                         // We also need to scope the repository so that if the view asks for "current app", it gets this one.
@@ -306,7 +308,7 @@ public class AppHub(
             if (parentId == null)
             {
                 clientProvider.SetRootAppId(appId ?? AppIds.Default);
-                bool isNotFoundPage = appDescriptor.Id == AppIds.NotFound;
+                bool isNotFoundPage = appDescriptor.Id == AppIds.ErrorNotFound;
 
                 if (appId != AppIds.Chrome && !isNotFoundPage)
                 {
@@ -398,7 +400,7 @@ public class AppHub(
             {
                 await Clients.Caller.SendAsync("Error", new
                 {
-                    viewOverride = new NotFoundView()
+                    viewOverride = new NotFoundApp()
                 });
             }
             catch

@@ -82,16 +82,12 @@ public class Server
         Services.AddSingleton(_args);
         Services.AddSingleton(Configuration);
 
-        AddApp(new AppDescriptor
-        {
-            Id = AppIds.NotFound,
-            Title = "App Not Found",
-            Icon = Icons.CircleAlert,
-            Type = typeof(NotFoundView),
-            ViewFactory = () => new NotFoundView(),
-            Path = [],
-            IsVisible = false
-        });
+        AddDefaultApps();
+    }
+
+    private void AddDefaultApps()
+    {
+        this.UseErrorNotFound<NotFoundApp>();
     }
 
     public Server(FuncViewBuilder viewFactory) : this()
@@ -224,15 +220,18 @@ public class Server
         return this;
     }
 
-    public Server UseNotFoundApp<T>(Func<ViewBase>? viewFactory = null) where T : ViewBase
+    public Server UseErrorNotFound<T>() where T : ViewBase
+    {
+        return UseErrorNotFound((() => (ViewBase)Activator.CreateInstance(typeof(T))!));
+    }
+
+    public Server UseErrorNotFound(Func<ViewBase>? viewFactory = null)
     {
         AddApp(new AppDescriptor
         {
-            Id = AppIds.NotFound,
+            Id = AppIds.ErrorNotFound,
             Title = "App Not Found",
-            Icon = Icons.CircleAlert,
-            Type = typeof(T),
-            ViewFactory = viewFactory ?? (() => (ViewBase)Activator.CreateInstance(typeof(T))!),
+            ViewFactory = viewFactory,
             Path = [],
             IsVisible = false
         });
