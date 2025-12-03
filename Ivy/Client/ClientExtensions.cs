@@ -1,6 +1,7 @@
 using Ivy.Auth;
 using Ivy.Cookies;
 using Ivy.Core;
+using Ivy.Core.Auth;
 using Ivy.Shared;
 
 namespace Ivy.Client;

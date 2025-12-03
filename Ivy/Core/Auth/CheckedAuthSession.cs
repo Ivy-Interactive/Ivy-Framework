@@ -1,5 +1,6 @@
 #if DEBUG
 using Ivy.Auth;
+
 namespace Ivy.Core.Auth;
 
 public enum AuthSessionProperty

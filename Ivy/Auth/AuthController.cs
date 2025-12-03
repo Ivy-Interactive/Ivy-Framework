@@ -1,6 +1,7 @@
 using Ivy.Apps;
 using Ivy.Client;
 using Ivy.Core;
+using Ivy.Core.Auth;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
