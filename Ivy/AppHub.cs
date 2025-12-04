@@ -109,7 +109,7 @@ public class AppHub(
                     authSession.AuthToken = null;
                 }
 
-                if (authSession.AuthToken != oldSession.AuthToken && authSession.AuthToken == null)
+                if (authSession.AuthToken == null && parentId != null)
                 {
                     await authService.LogoutAsync(Context.ConnectionAborted);
                 }

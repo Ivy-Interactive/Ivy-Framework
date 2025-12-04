@@ -56,21 +56,14 @@ public class AuthService(IAuthProvider authProvider, IAuthSession authSession, I
 
     public async Task LogoutAsync(CancellationToken cancellationToken)
     {
-        var oldSession = authSession.TakeSnapshot();
-
-        if (string.IsNullOrWhiteSpace(oldSession.AuthToken?.AccessToken))
+        if (!string.IsNullOrWhiteSpace(authSession.AuthToken?.AccessToken))
         {
-            return;
+            await TimeoutHelper.WithTimeoutAsync(ct =>
+                authProvider.LogoutAsync(authSession, ct), cancellationToken);
         }
 
-        await TimeoutHelper.WithTimeoutAsync(ct =>
-            authProvider.LogoutAsync(authSession, ct), cancellationToken);
         authSession.AuthToken = null;
-
-        if (authSession.HasChangedSince(oldSession))
-        {
-            SetAuthCookies();
-        }
+        SetAuthCookies();
     }
 
     public async Task<UserInfo?> GetUserInfoAsync(CancellationToken cancellationToken)
