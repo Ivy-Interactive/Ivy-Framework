@@ -189,12 +189,9 @@ public class RowActionsDemo : ViewBase
             {
                 var args = e.Value;
                 var actionId = args.ActionId;
-                var rowIndex = args.RowIndex;
-                var rowData = args.RowData;
+                var rowId = args.RowId;
 
-                // Access row data by column name
-                var employeeName = rowData.TryGetValue("Name", out var name) ? name?.ToString() : "Unknown";
-                client.Toast($"Action: {actionId} on {employeeName} (row {rowIndex})");
+                client.Toast($"Action: {actionId} on row ID: {rowId}");
             });
     }
 }
@@ -207,10 +204,9 @@ Use <code>Renderer(expr, new LinkDisplayRenderer { Type = LinkDisplayType.Url })
 Use `HandleRowAction` to respond to row action menu selections. The handler receives an `Event<DataTable, RowActionClickEventArgs>` containing:
 
 - **ActionId** - The identifier of the action that was clicked (from the MenuItem tag or label)
-- **RowIndex** - The zero-based index of the row where the action was triggered
-- **RowData** - A dictionary containing the row data, keyed by column name
+- **RowId** - The ID of the row (extracted using the `idSelector` parameter passed to the DataTableBuilder constructor)
 
-Access row values from the `RowData` dictionary using column names as keys.
+To use row IDs, specify the ID field when creating the DataTable: `.ToDataTable(x => x.Id)` where `Id` is the property/field that uniquely identifies each row.
 
 ## Cell Click Events
 

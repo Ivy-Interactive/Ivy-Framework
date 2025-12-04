@@ -15,9 +15,8 @@ public class CellClickEventArgs
 public class RowActionClickEventArgs
 {
     public string ActionId { get; set; } = "";
-    public string EventName { get; set; } = "";
     public int RowIndex { get; set; }
-    public Dictionary<string, object?> RowData { get; set; } = new();
+    public object? RowId { get; set; }
 }
 
 public record RowAction

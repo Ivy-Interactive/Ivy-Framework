@@ -1,23 +1,15 @@
 import { useCallback, useState } from 'react';
-import {
-  DataEditorRef,
-  GridCell,
-  GridMouseEventArgs,
-  Item,
-} from '@glideapps/glide-data-grid';
+import { DataEditorRef, GridMouseEventArgs } from '@glideapps/glide-data-grid';
 import { useEventHandler } from '@/components/event-handler';
 import { MenuItem } from '@/types/widgets';
-import { DataColumn } from '../types/types';
 
 interface UseRowHoverProps {
   widgetId: string;
-  columns: DataColumn[];
   visibleRows: number;
   enableRowHover: boolean | undefined;
   rowActions?: MenuItem[];
   gridRef: React.RefObject<DataEditorRef | null>;
   containerRef: React.RefObject<HTMLDivElement | null>;
-  getCellContent: (cell: Item) => GridCell;
 }
 
 /**
@@ -25,13 +17,11 @@ interface UseRowHoverProps {
  */
 export const useRowHover = ({
   widgetId,
-  columns,
   visibleRows,
   enableRowHover,
   rowActions,
   gridRef,
   containerRef,
-  getCellContent,
 }: UseRowHoverProps) => {
   const [hoverRow, setHoverRow] = useState<number | undefined>(undefined);
   const [actionButtonsTop, setActionButtonsTop] = useState<number>(0);
@@ -79,55 +69,24 @@ export const useRowHover = ({
     [enableRowHover, rowActions, visibleRows, gridRef, containerRef]
   );
 
-  // Get row data as a record of column name -> value
-  const getRowData = useCallback(
-    (rowIndex: number): Record<string, unknown> => {
-      const rowData: Record<string, unknown> = {};
-      const visibleColumns = columns.filter(c => !c.hidden);
-
-      visibleColumns.forEach((column, colIndex) => {
-        const cell = getCellContent([colIndex, rowIndex]);
-        let cellValue: unknown = null;
-
-        if (
-          cell.kind === 'text' ||
-          cell.kind === 'number' ||
-          cell.kind === 'boolean'
-        ) {
-          cellValue = cell.data;
-        } else if ('data' in cell) {
-          cellValue = (cell as unknown as { data: unknown }).data;
-        }
-
-        rowData[column.name] = cellValue;
-      });
-
-      return rowData;
-    },
-    [columns, getCellContent]
-  );
-
   // Handle row action button click
   const handleRowActionClick = useCallback(
     (action: MenuItem) => {
       if (hoverRow === undefined) return;
 
-      const rowData = getRowData(hoverRow);
-
       // Get action identifier from tag or label
       const actionId = action.tag?.toString() || action.label || '';
 
       // Send event to backend's OnRowAction event
+      // Backend will look up the row ID using the idSelector
       eventHandler('OnRowAction', widgetId, [
         {
           actionId: actionId,
-          eventName: actionId,
           rowIndex: hoverRow,
-          rowData: rowData,
         },
       ]);
     },
-    [hoverRow, getRowData, eventHandler, widgetId]
+    [hoverRow, eventHandler, widgetId]
   );
 
   return {

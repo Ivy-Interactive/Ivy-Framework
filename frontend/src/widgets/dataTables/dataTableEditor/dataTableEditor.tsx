@@ -103,13 +103,11 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
   const { hoverRow, actionButtonsTop, onItemHovered, handleRowActionClick } =
     useRowHover({
       widgetId,
-      columns,
       visibleRows,
       enableRowHover: enableRowHover ?? false,
       rowActions,
       gridRef,
       containerRef,
-      getCellContent,
     });
 
   // Table theme

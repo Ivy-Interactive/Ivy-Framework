@@ -8,19 +8,23 @@ using Microsoft.Extensions.AI;
 
 namespace Ivy.Views.DataTables;
 
-public class DataTableBuilder<TModel> : ViewBase, IMemoized
+public class DataTableBuilder<TModel>(
+    IQueryable<TModel> queryable,
+    Expression<Func<TModel, object?>>? idSelector = null)
+    : ViewBase, IMemoized
 {
-    private readonly IQueryable<TModel> _queryable;
+    private readonly IQueryable<TModel> _queryable = queryable;
     private Size? _width;
     private Size? _height;
-    private readonly Dictionary<string, InternalColumn> _columns;
+    private readonly Dictionary<string, InternalColumn> _columns = new();
     private readonly DataTableConfig _configuration = new();
     private Func<Event<DataTable, CellClickEventArgs>, ValueTask>? _onCellClick;
     private Func<Event<DataTable, CellClickEventArgs>, ValueTask>? _onCellActivated;
     private MenuItem[]? _menuItemRowActions;
     private Func<Event<DataTable, RowActionClickEventArgs>, ValueTask>? _onRowAction;
     private readonly Dictionary<string, Action<object>> _cellActions = new();
-    private Func<TModel, object?>? _rowIdSelector;
+    private readonly string? _idColumnName = idSelector != null ? Utils.GetNameFromMemberExpression(idSelector.Body) : null;
+    private readonly Func<TModel, object?>? _idSelectorFunc = idSelector != null ? idSelector.Compile() : null;
 
     private class InternalColumn
     {
@@ -28,11 +32,17 @@ public class DataTableBuilder<TModel> : ViewBase, IMemoized
         public bool Removed { get; set; }
     }
 
-    public DataTableBuilder(IQueryable<TModel> queryable)
+    public DataTableBuilder(IQueryable<TModel> queryable) : this(queryable, null)
     {
-        _queryable = queryable;
-        _columns = new Dictionary<string, InternalColumn>();
         _Scaffold();
+    }
+
+    internal void Initialize()
+    {
+        if (_columns.Count == 0)
+        {
+            _Scaffold();
+        }
     }
 
     private void _Scaffold()
@@ -250,12 +260,6 @@ public class DataTableBuilder<TModel> : ViewBase, IMemoized
         return this;
     }
 
-    public DataTableBuilder<TModel> RowIdSelector(Func<TModel, object?> rowIdSelector)
-    {
-        _rowIdSelector = rowIdSelector;
-        return this;
-    }
-
     public override object? Build()
     {
         var chatClient = UseService<IChatClient?>();
@@ -279,6 +283,12 @@ public class DataTableBuilder<TModel> : ViewBase, IMemoized
             configuration = configuration with { EnableCellClickEvents = true };
         }
 
+        // Set ID column name if idSelector was provided
+        if (_idColumnName != null)
+        {
+            configuration = configuration with { IdColumnName = _idColumnName };
+        }
+
         // Wire up cell actions to OnCellActivated
         var onCellActivated = _onCellActivated;
         if (_cellActions.Count > 0)
@@ -300,13 +310,39 @@ public class DataTableBuilder<TModel> : ViewBase, IMemoized
             };
         }
 
-        Func<object, object?>? rowIdSelector = null;
-        if (_rowIdSelector != null)
+        // Wrap OnRowAction to populate RowId from queryable if idSelector is provided
+        Func<Event<DataTable, RowActionClickEventArgs>, ValueTask>? onRowAction = _onRowAction;
+        if (_onRowAction != null && _idSelectorFunc != null)
         {
-            rowIdSelector = obj => _rowIdSelector((TModel)obj);
+            var originalHandler = _onRowAction;
+            // Capture the original queryable during Build() time
+            // Use the queryable before field removal to ensure we have all fields including the ID field
+            var originalQueryable = _queryable;
+            onRowAction = async e =>
+            {
+                var args = e.Value;
+                try
+                {
+                    // Materialize the queryable to get the row at the specified index
+                    // Note: rowIndex is relative to the currently displayed page/batch
+                    // Without access to current filter/sort/offset state, this is a best-effort approach
+                    var row = originalQueryable.Skip(args.RowIndex).Take(1).FirstOrDefault();
+                    if (row != null)
+                    {
+                        // Apply the idSelector to the materialized row to get the ID
+                        args.RowId = _idSelectorFunc(row);
+                    }
+                }
+                catch
+                {
+                    // If lookup fails, RowId will remain null
+                }
+
+                await originalHandler(e);
+            };
         }
 
-        return new DataTableView(queryable, width, _height, columns, configuration, _onCellClick, onCellActivated, _menuItemRowActions, _onRowAction, rowIdSelector);
+        return new DataTableView(queryable, width, _height, columns, configuration, _onCellClick, onCellActivated, _menuItemRowActions, onRowAction);
     }
 
     public object[] GetMemoValues()

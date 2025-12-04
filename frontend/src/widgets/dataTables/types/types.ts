@@ -70,6 +70,7 @@ export interface DataTableConfig {
   enableCellClickEvents?: boolean;
   showSearch?: boolean;
   enableRowHover?: boolean;
+  idColumnName?: string | null;
 }
 
 export interface TableProps {
@@ -105,15 +106,7 @@ export interface RowActionClickEventArgs {
    */
   actionId: string;
   /**
-   * The event name of the action (from MenuItem.tag or MenuItem.label)
-   */
-  eventName: string;
-  /**
-   * The index of the clicked row
+   * The index of the clicked row (used by backend to look up the row ID)
    */
   rowIndex: number;
-  /**
-   * The data for the clicked row, keyed by column name
-   */
-  rowData: Record<string, unknown>;
 }
