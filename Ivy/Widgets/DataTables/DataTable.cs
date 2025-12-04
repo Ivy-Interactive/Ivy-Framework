@@ -14,7 +14,9 @@ public class CellClickEventArgs
 
 public class RowActionClickEventArgs
 {
+    /// <summary> Id of the row where the event was fired. </summary>
     public object? Id { get; set; }
+    /// <summary> Tag of the menu item that was clicked. </summary>
     public object? Tag { get; set; }
 }
 
