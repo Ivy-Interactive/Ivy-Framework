@@ -13,18 +13,20 @@ public class DataTableBuilder<TModel>(
     Expression<Func<TModel, object?>>? idSelector = null)
     : ViewBase, IMemoized
 {
-    private readonly IQueryable<TModel> _queryable = queryable;
     private Size? _width;
     private Size? _height;
-    private readonly Dictionary<string, InternalColumn> _columns = new();
+    private readonly Dictionary<string, InternalColumn> _columns = [];
     private readonly DataTableConfig _configuration = new();
     private Func<Event<DataTable, CellClickEventArgs>, ValueTask>? _onCellClick;
     private Func<Event<DataTable, CellClickEventArgs>, ValueTask>? _onCellActivated;
     private MenuItem[]? _menuItemRowActions;
     private Func<Event<DataTable, RowActionClickEventArgs>, ValueTask>? _onRowAction;
-    private readonly Dictionary<string, Action<object>> _cellActions = new();
-    private readonly string? _idColumnName = idSelector != null ? Utils.GetNameFromMemberExpression(idSelector.Body) : null;
-    private readonly Func<TModel, object?>? _idSelectorFunc = idSelector != null ? idSelector.Compile() : null;
+    private readonly Dictionary<string, Action<object>> _cellActions = [];
+
+    private readonly string? _idColumnName =
+        idSelector != null ? Utils.GetNameFromMemberExpression(idSelector.Body) : null;
+
+    private readonly Func<TModel, object?>? _idSelectorFunc = idSelector?.Compile();
 
     private class InternalColumn
     {
@@ -76,14 +78,15 @@ public class DataTableBuilder<TModel>(
                 align = Shared.Align.Center;
             }
 
-            var removed = field.Name.StartsWith($"_") && field.Name.Length > 1 && char.IsLetter(field.Name[1]) || field.Name == "_hiddenKey";
+            var removed = field.Name.StartsWith($"_") && field.Name.Length > 1 && char.IsLetter(field.Name[1]) ||
+                          field.Name == "_hiddenKey";
 
             _columns[field.Name] = new InternalColumn()
             {
                 Column = new DataTableColumn()
                 {
                     Name = field.Name,
-                    Header = Utils.LabelFor(field.Name, field.Type) ?? field.Name,
+                    Header = Utils.LabelFor(field.Name, field.Type),
                     ColType = DataTableBuilderHelpers.GetDataTypeHint(field.Type),
                     Align = align,
                     Order = order++
@@ -198,6 +201,7 @@ public class DataTableBuilder<TModel>(
             hint.Removed = false;
             hint.Column.Order = order++;
         }
+
         return this;
     }
 
@@ -208,6 +212,7 @@ public class DataTableBuilder<TModel>(
             var hint = GetColumn(field);
             hint.Column.Hidden = true;
         }
+
         return this;
     }
 
@@ -264,9 +269,10 @@ public class DataTableBuilder<TModel>(
     {
         var chatClient = UseService<IChatClient?>();
 
-        var columns = _columns.Values.Where(e => !e.Removed).OrderBy(c => c.Column.Order).Select(e => e.Column).ToArray();
+        var columns = _columns.Values.Where(e => !e.Removed).OrderBy(c => c.Column.Order).Select(e => e.Column)
+            .ToArray();
         var removedColumns = _columns.Values.Where(e => e.Removed).Select(c => c.Column.Name).ToArray();
-        var queryable = _queryable.RemoveFields(removedColumns);
+        var queryable1 = queryable.RemoveFields(removedColumns);
 
         // Default to full width if not explicitly set
         var width = _width ?? Size.Full();
@@ -317,7 +323,8 @@ public class DataTableBuilder<TModel>(
             idSelectorForView = obj => _idSelectorFunc((TModel)obj);
         }
 
-        return new DataTableView(queryable, width, _height, columns, configuration, _onCellClick, onCellActivated, _menuItemRowActions, _onRowAction, idSelectorForView);
+        return new DataTableView(queryable1, width, _height, columns, configuration, _onCellClick, onCellActivated,
+            _menuItemRowActions, _onRowAction, idSelectorForView);
     }
 
     public object[] GetMemoValues()
