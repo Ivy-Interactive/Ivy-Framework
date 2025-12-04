@@ -19,14 +19,6 @@ public class RowActionClickEventArgs
     public object? RowId { get; set; }
 }
 
-public record RowAction
-{
-    public string Id { get; set; } = "";
-    public string Icon { get; set; } = "";
-    public string EventName { get; set; } = "";
-    public string? Tooltip { get; set; }
-}
-
 public record DataTable : WidgetBase<DataTable>
 {
     public DataTable(
