@@ -67,7 +67,7 @@ public class ValidationAttributesTestModel
 /// <summary>
 /// Model to test Display attribute properties.
 /// </summary>
-public class DisplayAttributeTestModel
+public class FormDisplayAttributeTestModel
 {
     [Display(Name = "Custom Name")]
     public string NameField { get; set; } = string.Empty;
@@ -471,7 +471,7 @@ public class FormValidationAttributesTest
     [Fact]
     public void Display_ShouldExtractName()
     {
-        var displayInfo = GetDisplayInfo<DisplayAttributeTestModel>(nameof(DisplayAttributeTestModel.NameField));
+        var displayInfo = GetDisplayInfo<FormDisplayAttributeTestModel>(nameof(FormDisplayAttributeTestModel.NameField));
 
         Assert.Equal("Custom Name", displayInfo.Name);
     }
@@ -479,7 +479,7 @@ public class FormValidationAttributesTest
     [Fact]
     public void Display_ShouldExtractDescription()
     {
-        var displayInfo = GetDisplayInfo<DisplayAttributeTestModel>(nameof(DisplayAttributeTestModel.DescriptionField));
+        var displayInfo = GetDisplayInfo<FormDisplayAttributeTestModel>(nameof(FormDisplayAttributeTestModel.DescriptionField));
 
         Assert.Equal("This is a description", displayInfo.Description);
     }
@@ -487,7 +487,7 @@ public class FormValidationAttributesTest
     [Fact]
     public void Display_ShouldExtractGroupName()
     {
-        var displayInfo = GetDisplayInfo<DisplayAttributeTestModel>(nameof(DisplayAttributeTestModel.GroupNameField));
+        var displayInfo = GetDisplayInfo<FormDisplayAttributeTestModel>(nameof(FormDisplayAttributeTestModel.GroupNameField));
 
         Assert.Equal("Group A", displayInfo.GroupName);
     }
@@ -495,7 +495,7 @@ public class FormValidationAttributesTest
     [Fact]
     public void Display_ShouldExtractPrompt()
     {
-        var displayInfo = GetDisplayInfo<DisplayAttributeTestModel>(nameof(DisplayAttributeTestModel.PromptField));
+        var displayInfo = GetDisplayInfo<FormDisplayAttributeTestModel>(nameof(FormDisplayAttributeTestModel.PromptField));
 
         Assert.Equal("Enter placeholder", displayInfo.Prompt);
     }
@@ -503,7 +503,7 @@ public class FormValidationAttributesTest
     [Fact]
     public void Display_ShouldExtractOrder()
     {
-        var displayInfo = GetDisplayInfo<DisplayAttributeTestModel>(nameof(DisplayAttributeTestModel.OrderField));
+        var displayInfo = GetDisplayInfo<FormDisplayAttributeTestModel>(nameof(FormDisplayAttributeTestModel.OrderField));
 
         Assert.Equal(5, displayInfo.Order);
     }
@@ -511,7 +511,7 @@ public class FormValidationAttributesTest
     [Fact]
     public void Display_ShouldExtractAllProperties()
     {
-        var displayInfo = GetDisplayInfo<DisplayAttributeTestModel>(nameof(DisplayAttributeTestModel.AllPropertiesField));
+        var displayInfo = GetDisplayInfo<FormDisplayAttributeTestModel>(nameof(FormDisplayAttributeTestModel.AllPropertiesField));
 
         Assert.Equal("Full Display", displayInfo.Name);
         Assert.Equal("All properties", displayInfo.Description);
@@ -523,7 +523,7 @@ public class FormValidationAttributesTest
     [Fact]
     public void Display_ShouldReturnEmptyWhenNoAttribute()
     {
-        var displayInfo = GetDisplayInfo<DisplayAttributeTestModel>(nameof(DisplayAttributeTestModel.NoDisplayField));
+        var displayInfo = GetDisplayInfo<FormDisplayAttributeTestModel>(nameof(FormDisplayAttributeTestModel.NoDisplayField));
 
         Assert.Null(displayInfo.Name);
         Assert.Null(displayInfo.Description);
