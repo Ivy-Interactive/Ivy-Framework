@@ -5,7 +5,7 @@ import React, {
   useEffect,
   useRef,
 } from 'react';
-import { useTable } from '../dataTableContext/exports';
+import { useTable } from '../dataTableContext';
 import { tableStyles } from '../styles/style';
 import {
   QueryEditor,
