@@ -1,6 +1,6 @@
 export { BoolInputWidget } from './BoolInputWidget';
 export { TextInputWidget } from './TextInputWidget';
-export { DateTimeInputWidget } from './DateTimeInputWidget';
+export { DateTimeInputWidget } from './DateTimeInputWidget/';
 export { NumberInputWidget } from './NumberInputWidget';
 export { SelectInputWidget } from './SelectInputWidget';
 export { ReadOnlyInputWidget } from './ReadOnlyInputWidget';
