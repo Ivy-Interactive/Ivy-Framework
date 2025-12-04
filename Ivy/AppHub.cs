@@ -58,15 +58,15 @@ public class AppHub(
                     .Build());
             }
 
-            appServices.AddSingleton(typeof(IContentBuilder), contentBuilder);
-            appServices.AddSingleton(typeof(IAppRepository), server.AppRepository);
-            appServices.AddSingleton(typeof(IDownloadService), new DownloadService(Context.ConnectionId));
-            appServices.AddSingleton(typeof(IDataTableService), new DataTableConnectionService(
+            appServices.AddSingleton(contentBuilder);
+            appServices.AddSingleton<IAppRepository>(server.AppRepository);
+            appServices.AddSingleton<IDownloadService>(new DownloadService(Context.ConnectionId));
+            appServices.AddSingleton<IDataTableService>(new DataTableConnectionService(
                 queryableRegistry,
                 server.Args,
                 Context.ConnectionId));
-            appServices.AddSingleton(typeof(IClientProvider), clientProvider);
-            appServices.AddSingleton(typeof(IUploadService), new UploadService(Context.ConnectionId, clientProvider));
+            appServices.AddSingleton<IClientProvider>(clientProvider);
+            appServices.AddSingleton<IUploadService>(new UploadService(Context.ConnectionId, clientProvider));
 
             if (server.AuthProviderType != null)
             {
@@ -128,7 +128,7 @@ public class AppHub(
                 }
             }
 
-            appServices.AddSingleton(typeof(IAppRepository), routeResult.AppRepository);
+            appServices.AddSingleton(routeResult.AppRepository);
 
             var appArgs = GetAppArgs(Context.ConnectionId, routeResult.AppId, routeResult.NavigationAppId, httpContext);
 
