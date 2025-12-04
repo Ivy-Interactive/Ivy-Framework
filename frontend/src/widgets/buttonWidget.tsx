@@ -7,6 +7,7 @@ import {
   isAppProtocol,
   isAnchorLink,
   isExternalUrl,
+  isMailtoUrl,
   normalizeRelativePath,
 } from '@/lib/urlValidation';
 import { useEventHandler } from '@/components/event-handler';
@@ -35,6 +36,7 @@ interface ButtonWidgetProps {
     | 'Outline'
     | 'Secondary'
     | 'Ghost'
+    | 'SkinnyGhost'
     | 'Link'
     | 'Inline';
   disabled: boolean;
@@ -70,7 +72,7 @@ const getUrl = (
     };
   }
 
-  if (isExternalUrl(validatedUrl)) {
+  if (isExternalUrl(validatedUrl) || isMailtoUrl(validatedUrl)) {
     return { url: validatedUrl, isValid, isAnchorLink: false };
   }
 
@@ -159,6 +161,9 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
   // Check if URL is a download link (starts with /ivy/download/)
   const isDownloadUrl = effectiveUrl?.startsWith('/ivy/download/') ?? false;
 
+  // Check if URL is a mailto link (should not open in new tab)
+  const isMailto = validatedHref ? isMailtoUrl(validatedHref) : false;
+
   // Show error message for invalid URLs (standardized error handling)
   if (isInvalidUrl) {
     return (
@@ -216,6 +221,7 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
           | 'outline'
           | 'secondary'
           | 'ghost'
+          | 'skinnyGhost'
           | 'link'
           | 'inline'
       }
@@ -238,7 +244,7 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
       {hasUrl && validatedHref ? (
         <a
           href={validatedHref}
-          {...(isDownloadUrl
+          {...(isDownloadUrl || isMailto
             ? {}
             : { target: '_blank', rel: 'noopener noreferrer' })}
         >

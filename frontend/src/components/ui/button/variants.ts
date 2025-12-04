@@ -19,6 +19,7 @@ export const buttonVariants = cva(
           'bg-warning text-warning-foreground shadow-sm hover:brightness-90',
         info: 'bg-info text-info-foreground shadow-sm hover:brightness-90',
         ghost: 'hover:bg-accent',
+        skinnyGhost: 'hover:bg-accent !p-1 !h-auto',
         link: 'text-primary underline-offset-4 hover:underline brightness-90 hover:brightness-100',
         inline: 'text-primary underline hover:no-underline !p-0 !h-auto',
       },

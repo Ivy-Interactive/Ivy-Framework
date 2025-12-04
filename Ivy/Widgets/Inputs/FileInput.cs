@@ -211,12 +211,12 @@ public static class FileInputExtensions
                 try
                 {
                     // Handle common immutable collection cases by removing the canceled file
-                    if (stateType == typeof(System.Collections.Immutable.ImmutableArray<Ivy.Services.FileUpload>))
+                    if (stateType == typeof(System.Collections.Immutable.ImmutableArray<FileUpload>))
                     {
-                        var s = state.As<System.Collections.Immutable.ImmutableArray<Ivy.Services.FileUpload>>();
+                        var s = state.As<System.Collections.Immutable.ImmutableArray<FileUpload>>();
                         s.Set(list =>
                         {
-                            var builder = System.Collections.Immutable.ImmutableArray.CreateBuilder<Ivy.Services.FileUpload>(list.Length);
+                            var builder = System.Collections.Immutable.ImmutableArray.CreateBuilder<FileUpload>(list.Length);
                             foreach (var f in list)
                             {
                                 if (f.Id != fileId) builder.Add(f);
@@ -224,12 +224,12 @@ public static class FileInputExtensions
                             return builder.ToImmutable();
                         });
                     }
-                    else if (stateType == typeof(System.Collections.Immutable.ImmutableArray<Ivy.Services.FileUpload<byte[]>>))
+                    else if (stateType == typeof(System.Collections.Immutable.ImmutableArray<FileUpload<byte[]>>))
                     {
-                        var s = state.As<System.Collections.Immutable.ImmutableArray<Ivy.Services.FileUpload<byte[]>>>();
+                        var s = state.As<System.Collections.Immutable.ImmutableArray<FileUpload<byte[]>>>();
                         s.Set(list =>
                         {
-                            var builder = System.Collections.Immutable.ImmutableArray.CreateBuilder<Ivy.Services.FileUpload<byte[]>>(list.Length);
+                            var builder = System.Collections.Immutable.ImmutableArray.CreateBuilder<FileUpload<byte[]>>(list.Length);
                             foreach (var f in list)
                             {
                                 if (f.Id != fileId) builder.Add(f);

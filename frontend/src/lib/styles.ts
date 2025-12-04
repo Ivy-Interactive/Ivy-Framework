@@ -514,7 +514,7 @@ export const getColor = (
     color.toLowerCase() + (role === 'background' ? '' : '-foreground');
   if (percentage && percentage > -100 && percentage < 100) {
     return {
-      [cssProperty]: `color-mix(in srgb, var(--${varName}),${percentage > 0 ? 'white' : 'black'} ${Math.abs(percentage)}%)`,
+      [cssProperty]: `color-mix(in srgb, var(--${varName}), var(--background) ${Math.abs(percentage)}%)`,
     };
   }
   return {

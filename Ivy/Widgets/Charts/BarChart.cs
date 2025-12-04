@@ -25,7 +25,7 @@ public record BarChart : WidgetBase<BarChart>
 
     [Prop] public CartesianGrid? CartesianGrid { get; init; }
 
-    [Prop] public Ivy.Charts.Tooltip? Tooltip { get; init; }
+    [Prop] public Charts.Tooltip? Tooltip { get; init; }
 
     [Prop] public Legend? Legend { get; init; } = null;
 
@@ -127,14 +127,14 @@ public static class BarChartExtensions
         return chart with { YAxis = [.. chart.YAxis, new YAxis()] };
     }
 
-    public static BarChart Tooltip(this BarChart chart, Ivy.Charts.Tooltip? tooltip)
+    public static BarChart Tooltip(this BarChart chart, Charts.Tooltip? tooltip)
     {
         return chart with { Tooltip = tooltip };
     }
 
     public static BarChart Tooltip(this BarChart chart)
     {
-        return chart with { Tooltip = new Ivy.Charts.Tooltip() };
+        return chart with { Tooltip = new Charts.Tooltip() };
     }
 
     public static BarChart Legend(this BarChart chart, Legend legend)

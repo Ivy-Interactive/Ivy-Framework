@@ -139,7 +139,7 @@ public class PasswordEmailFlowView(IState<string?> errorMessage) : ViewBase
                    .HandleClick(HandleSubmit)
                    .Loading(isBusy)
                    .Disabled(isBusy)
-                   .Scale(formBuilder.Scale)
+                   .Scale(formBuilder._scale)
                    .Width(Size.Full());
     }
 }

@@ -14,18 +14,10 @@ public class CellClickEventArgs
 
 public class RowActionClickEventArgs
 {
-    public string ActionId { get; set; } = "";
-    public string EventName { get; set; } = "";
-    public int RowIndex { get; set; }
-    public Dictionary<string, object?> RowData { get; set; } = new();
-}
-
-public record RowAction
-{
-    public string Id { get; set; } = "";
-    public string Icon { get; set; } = "";
-    public string EventName { get; set; } = "";
-    public string? Tooltip { get; set; }
+    /// <summary> Id of the row where the event was fired. </summary>
+    public object? Id { get; set; }
+    /// <summary> Tag of the menu item that was clicked. </summary>
+    public object? Tag { get; set; }
 }
 
 public record DataTable : WidgetBase<DataTable>
