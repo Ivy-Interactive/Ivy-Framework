@@ -137,7 +137,7 @@ export const AsyncSelectInputWidget: React.FC<AsyncSelectInputWidgetProps> = ({
       <Tooltip delayDuration={300}>
         <TooltipTrigger asChild>{displayValueSpan}</TooltipTrigger>
         <TooltipContent className="bg-popover text-popover-foreground shadow-md max-w-sm">
-          <div className="whitespace-pre-wrap wrap-break-word">
+          <div className="whitespace-pre-wrap break-words">
             {displayValue}
           </div>
         </TooltipContent>

@@ -11,32 +11,106 @@ interface TableWidgetProps {
   scale?: Scales;
 }
 
+/**
+ * Structured width config detected from the width string.
+ * Prevents fragile string.includes() checks.
+ */
+interface WidthConfig {
+  type: 'full' | 'units' | 'px' | 'rem' | 'unknown';
+  value?: number;
+}
+
+/**
+ * Parse width definition into structured config.
+ * Matches Ivy's patterns like:
+ * - Full()
+ * - Units:100
+ * - Px:300
+ * - Rem:20
+ */
+const parseWidth = (width: string | undefined): WidthConfig => {
+  if (!width) return { type: 'unknown' };
+
+  if (width.includes('Full')) {
+    return { type: 'full' };
+  }
+  if (width.includes('Units:')) {
+    const num = Number(width.split('Units:')[1]);
+    return { type: 'units', value: num };
+  }
+  if (width.includes('Px:')) {
+    const num = Number(width.split('Px:')[1]);
+    return { type: 'px', value: num };
+  }
+  if (width.includes('Rem:')) {
+    const num = Number(width.split('Rem:')[1]);
+    return { type: 'rem', value: num };
+  }
+
+  return { type: 'unknown' };
+};
+
+/**
+ * Whether width is fixed pixel/rem/units.
+ */
+const isFixedWidth = (cfg: WidthConfig) =>
+  cfg.type === 'units' || cfg.type === 'px' || cfg.type === 'rem';
+
+/**
+ * Base width styles from Ivy’s getWidth()
+ */
+const getBaseStyles = (width: string | undefined): React.CSSProperties => {
+  return {
+    ...getWidth(width),
+  };
+};
+
+/**
+ * Remove maxWidth constraint (for fixed-width tables)
+ */
+const omitMaxWidth = (styles: React.CSSProperties): React.CSSProperties => {
+  const clone = { ...styles };
+  delete clone.maxWidth;
+  return clone;
+};
+
+/**
+ * Ensure maxWidth:100% for Full() width types
+ */
+const applyMaxWidthConstraint = (
+  styles: React.CSSProperties
+): React.CSSProperties => ({
+  ...styles,
+  maxWidth: '100%',
+});
+
+/**
+ * Final table style builder
+ */
+const buildTableStyles = (
+  width: string | undefined
+): React.CSSProperties => {
+  const cfg = parseWidth(width);
+  const baseStyles = getBaseStyles(width);
+
+  if (isFixedWidth(cfg)) {
+    return omitMaxWidth(baseStyles);
+  }
+
+  if (cfg.type === 'full') {
+    return applyMaxWidthConstraint(baseStyles);
+  }
+
+  return baseStyles;
+};
+
 export const TableWidget: React.FC<TableWidgetProps> = ({
   children,
   width,
   scale = Scales.Medium,
 }) => {
-  const widthStyles = getWidth(width);
-
-  // For Full() width, use fixed layout and ensure maxWidth to prevent horizontal scroll
-  // For fixed widths (Units, Px, Rem), remove maxWidth to allow expansion if needed
-  const isFullWidth = width?.includes('Full');
-  const isFixedWidth =
-    width &&
-    (width.includes('Units:') ||
-      width.includes('Px:') ||
-      width.includes('Rem:'));
-
-  // For fixed widths, create new object without maxWidth property
-  const tableStyles = isFixedWidth
-    ? (Object.fromEntries(
-        Object.entries(widthStyles).filter(([key]) => key !== 'maxWidth')
-      ) as React.CSSProperties)
-    : {
-        ...widthStyles,
-        // Ensure Full() width tables don't exceed container
-        maxWidth: isFullWidth ? '100%' : widthStyles.maxWidth,
-      };
+  const cfg = parseWidth(width);
+  const tableStyles = buildTableStyles(width);
 
   return (
     <Table
@@ -44,12 +118,12 @@ export const TableWidget: React.FC<TableWidgetProps> = ({
       className={cn('w-full caption-bottom')}
       style={{
         ...tableStyles,
-        // Use fixed layout for Full() width to respect width constraints and prevent overflow
-        // Use auto layout for fixed widths to allow natural sizing
-        tableLayout: isFullWidth ? 'fixed' : 'auto',
+        tableLayout: cfg.type === 'full' ? 'fixed' : 'auto',
       }}
     >
       <TableBody>{children}</TableBody>
     </Table>
   );
 };
+
+export default TableWidget;
