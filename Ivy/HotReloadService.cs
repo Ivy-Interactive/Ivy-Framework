@@ -1,4 +1,4 @@
-[assembly: System.Reflection.Metadata.MetadataUpdateHandler(typeof(Ivy.HotReloadService))]
+[assembly: System.Reflection.Metadata.MetadataUpdateHandlerAttribute(typeof(Ivy.HotReloadService))]
 namespace Ivy
 {
     public class HotReloadService
