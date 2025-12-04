@@ -76,7 +76,7 @@ public class DataTableBuilder<TModel>(
                 align = Shared.Align.Center;
             }
 
-            var removed = field.Name.StartsWith($"_") && field.Name.Length > 1 && char.IsLetter(field.Name[1]);
+            var removed = field.Name.StartsWith($"_") && field.Name.Length > 1 && char.IsLetter(field.Name[1]) || field.Name == "_hiddenKey";
 
             _columns[field.Name] = new InternalColumn()
             {
@@ -310,39 +310,14 @@ public class DataTableBuilder<TModel>(
             };
         }
 
-        // Wrap OnRowAction to populate RowId from queryable if idSelector is provided
-        Func<Event<DataTable, RowActionClickEventArgs>, ValueTask>? onRowAction = _onRowAction;
-        if (_onRowAction != null && _idSelectorFunc != null)
+        // Convert idSelector function to work with object instead of TModel
+        Func<object, object?>? idSelectorForView = null;
+        if (_idSelectorFunc != null)
         {
-            var originalHandler = _onRowAction;
-            // Capture the original queryable during Build() time
-            // Use the queryable before field removal to ensure we have all fields including the ID field
-            var originalQueryable = _queryable;
-            onRowAction = async e =>
-            {
-                var args = e.Value;
-                try
-                {
-                    // Materialize the queryable to get the row at the specified index
-                    // Note: rowIndex is relative to the currently displayed page/batch
-                    // Without access to current filter/sort/offset state, this is a best-effort approach
-                    var row = originalQueryable.Skip(args.RowIndex).Take(1).FirstOrDefault();
-                    if (row != null)
-                    {
-                        // Apply the idSelector to the materialized row to get the ID
-                        args.RowId = _idSelectorFunc(row);
-                    }
-                }
-                catch
-                {
-                    // If lookup fails, RowId will remain null
-                }
-
-                await originalHandler(e);
-            };
+            idSelectorForView = obj => _idSelectorFunc((TModel)obj);
         }
 
-        return new DataTableView(queryable, width, _height, columns, configuration, _onCellClick, onCellActivated, _menuItemRowActions, onRowAction);
+        return new DataTableView(queryable, width, _height, columns, configuration, _onCellClick, onCellActivated, _menuItemRowActions, _onRowAction, idSelectorForView);
     }
 
     public object[] GetMemoValues()

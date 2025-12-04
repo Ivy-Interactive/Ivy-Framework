@@ -42,6 +42,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
     config,
     columnOrder,
     getRowData,
+    arrowTableRef,
     loadMoreData,
     handleColumnResize,
     handleSort,
@@ -108,6 +109,7 @@ export const DataTableEditor: React.FC<TableEditorProps> = ({
       rowActions,
       gridRef,
       containerRef,
+      arrowTableRef,
     });
 
   // Table theme

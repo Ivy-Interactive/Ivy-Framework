@@ -106,7 +106,11 @@ export interface RowActionClickEventArgs {
    */
   actionId: string;
   /**
-   * The index of the clicked row (used by backend to look up the row ID)
+   * The ID of the row (extracted from _hiddenKey column if available)
+   */
+  rowId: string | number | null;
+  /**
+   * The index of the clicked row (kept for backwards compatibility)
    */
   rowIndex: number;
 }

@@ -174,7 +174,7 @@ public class RowActionsDemo : ViewBase
         }.AsQueryable();
 
         return employees
-            .ToDataTable()
+            .ToDataTable(e => e.Id)
             .Header(e => e.ProfileLink, "Profile")
             .Renderer(e => e.ProfileLink, new LinkDisplayRenderer { Type = LinkDisplayType.Url })
             .RowActions(

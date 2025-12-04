@@ -2,6 +2,7 @@ import { useCallback, useState } from 'react';
 import { DataEditorRef, GridMouseEventArgs } from '@glideapps/glide-data-grid';
 import { useEventHandler } from '@/components/event-handler';
 import { MenuItem } from '@/types/widgets';
+import * as arrow from 'apache-arrow';
 
 interface UseRowHoverProps {
   widgetId: string;
@@ -10,6 +11,7 @@ interface UseRowHoverProps {
   rowActions?: MenuItem[];
   gridRef: React.RefObject<DataEditorRef | null>;
   containerRef: React.RefObject<HTMLDivElement | null>;
+  arrowTableRef: React.RefObject<arrow.Table | null>;
 }
 
 /**
@@ -22,10 +24,48 @@ export const useRowHover = ({
   rowActions,
   gridRef,
   containerRef,
+  arrowTableRef,
 }: UseRowHoverProps) => {
   const [hoverRow, setHoverRow] = useState<number | undefined>(undefined);
   const [actionButtonsTop, setActionButtonsTop] = useState<number>(0);
   const eventHandler = useEventHandler();
+
+  // Extract _hiddenKey value directly from Arrow table
+  const getHiddenKeyValue = useCallback(
+    (rowIndex: number): string | number | null => {
+      const table = arrowTableRef.current;
+      if (!table) return null;
+
+      // Access schema fields directly to find _hiddenKey
+      const schema = table.schema;
+      if (!schema || !schema.fields) return null;
+
+      // Find the _hiddenKey column index
+      let hiddenKeyIndex = -1;
+      for (let i = 0; i < schema.fields.length; i++) {
+        const field = schema.fields[i];
+        if (field && field.name === '_hiddenKey') {
+          hiddenKeyIndex = i;
+          break;
+        }
+      }
+
+      if (hiddenKeyIndex === -1) return null;
+
+      // Get the column directly from the Arrow table
+      const column = table.getChildAt(hiddenKeyIndex);
+      if (!column) return null;
+
+      // Get the value for this row
+      const value = column.get(rowIndex);
+      if (value === null || value === undefined || value === '') {
+        return null;
+      }
+
+      return String(value);
+    },
+    [arrowTableRef]
+  );
 
   // Handle row hover
   const onItemHovered = useCallback(
@@ -77,16 +117,20 @@ export const useRowHover = ({
       // Get action identifier from tag or label
       const actionId = action.tag?.toString() || action.label || '';
 
+      // Extract _hiddenKey directly from Arrow table
+      const rowId = getHiddenKeyValue(hoverRow);
+
       // Send event to backend's OnRowAction event
-      // Backend will look up the row ID using the idSelector
+      // If _hiddenKey is available, send it as rowId; otherwise fall back to rowIndex
       eventHandler('OnRowAction', widgetId, [
         {
           actionId: actionId,
-          rowIndex: hoverRow,
+          rowId: rowId !== null ? rowId : hoverRow,
+          rowIndex: hoverRow, // Keep for backwards compatibility
         },
       ]);
     },
-    [hoverRow, eventHandler, widgetId]
+    [hoverRow, eventHandler, widgetId, getHiddenKeyValue]
   );
 
   return {

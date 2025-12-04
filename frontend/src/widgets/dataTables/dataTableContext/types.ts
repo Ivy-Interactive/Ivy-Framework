@@ -1,4 +1,5 @@
 import React from 'react';
+import * as arrow from 'apache-arrow';
 import { Filter, SortOrder } from '@/services/grpcTableService';
 import { GridColumn } from '@glideapps/glide-data-grid';
 import {
@@ -24,6 +25,7 @@ export interface TableContextType {
   columnOrder: number[];
   // Arrow table accessor - data is accessed directly from Arrow table via gRPC
   getRowData: (rowIndex: number) => DataRow | null;
+  arrowTableRef: React.RefObject<arrow.Table | null>;
 
   // Methods
   loadMoreData: () => Promise<void>;
