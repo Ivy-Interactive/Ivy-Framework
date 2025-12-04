@@ -97,7 +97,7 @@ public record FormValidationExamples
     public string? Comments { get; init; }
 }
 
-[App(icon: Icons.Clipboard, searchHints: ["validation", "attributes", "forms", "dataannotations", "display", "required"])]
+[App(icon: Icons.Clipboard, path: ["Concepts", "Forms"], searchHints: ["validation", "attributes", "forms", "dataannotations", "display", "required"])]
 public class FormValidationApp : SampleBase
 {
     protected override object? BuildSample()

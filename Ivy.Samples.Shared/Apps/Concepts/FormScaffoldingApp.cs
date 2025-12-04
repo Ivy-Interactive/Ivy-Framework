@@ -6,7 +6,7 @@ using Ivy.Views.Forms;
 
 namespace Ivy.Samples.Shared.Apps.Concepts;
 
-[App(icon: Icons.Brain, searchHints: ["forms", "scaffolding"])]
+[App(icon: Icons.Brain, path: ["Concepts", "Forms"], searchHints: ["forms", "scaffolding"])]
 public class FormScaffoldingApp : SampleBase
 {
     protected override object? BuildSample()
