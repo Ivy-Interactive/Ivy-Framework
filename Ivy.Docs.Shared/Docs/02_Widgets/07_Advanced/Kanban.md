@@ -51,11 +51,6 @@ tasks.ToKanban(
 
 ## Drag and Drop
 
-Enable drag-and-drop functionality by providing a `HandleMove` handler. Users can drag cards between columns to update their status. The `HandleMove` event provides:
-- `CardId`: The identifier of the card being moved
-- `ToColumn`: The target column/group key where the card is being moved
-- `TargetIndex`: The optional target index within the column (useful for maintaining card order)
-
 ```csharp demo-tabs
 public class KanbanWithMoveExample : ViewBase
 {
@@ -96,22 +91,6 @@ public class KanbanWithMoveExample : ViewBase
                     // Update task status to match new column
                     var updated = taskToMove with { Status = moveData.ToColumn };
                     updatedTasks.RemoveAll(t => t.Id == taskId);
-                    
-                    // Use TargetIndex to maintain card order when moving
-                    if (moveData.TargetIndex.HasValue)
-                    {
-                        var tasksInTargetColumn = updatedTasks
-                            .Where(t => t.Status == moveData.ToColumn)
-                            .ToList();
-                        var insertIndex = moveData.TargetIndex.Value < tasksInTargetColumn.Count
-                            ? updatedTasks.IndexOf(tasksInTargetColumn[moveData.TargetIndex.Value])
-                            : updatedTasks.Count;
-                        updatedTasks.Insert(insertIndex, updated);
-                    }
-                    else
-                    {
-                        updatedTasks.Add(updated);
-                    }
                     
                     taskState.Set(updatedTasks.ToArray());
                 }
