@@ -20,7 +20,7 @@ export const FooterLayoutWidget: React.FC<FooterLayoutWidgetProps> = ({
   }
 
   return (
-    <div className="h-full flex flex-col remove-parent-padding">
+    <div className="h-full flex flex-col relative remove-parent-padding">
       <div className="flex-1 min-h-0 overflow-hidden">
         <ScrollArea className="h-full">
           <div className="p-4">{slots.Content}</div>

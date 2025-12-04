@@ -35,6 +35,7 @@ interface ButtonWidgetProps {
     | 'Outline'
     | 'Secondary'
     | 'Ghost'
+    | 'SkinnyGhost'
     | 'Link'
     | 'Inline';
   disabled: boolean;
@@ -216,6 +217,7 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
           | 'outline'
           | 'secondary'
           | 'ghost'
+          | 'skinnyGhost'
           | 'link'
           | 'inline'
       }

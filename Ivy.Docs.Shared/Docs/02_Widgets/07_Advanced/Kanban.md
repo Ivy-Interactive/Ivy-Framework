@@ -51,8 +51,6 @@ tasks.ToKanban(
 
 ## Drag and Drop
 
-Enable drag-and-drop functionality by providing a `HandleMove` handler. Users can drag cards between columns to update their status:
-
 ```csharp demo-tabs
 public class KanbanWithMoveExample : ViewBase
 {
@@ -93,7 +91,6 @@ public class KanbanWithMoveExample : ViewBase
                     // Update task status to match new column
                     var updated = taskToMove with { Status = moveData.ToColumn };
                     updatedTasks.RemoveAll(t => t.Id == taskId);
-                    updatedTasks.Add(updated);
                     taskState.Set(updatedTasks.ToArray());
                 }
             });
@@ -116,6 +113,8 @@ public class KanbanWithCustomCardsExample : ViewBase
         public required int Priority { get; set; }
         public required string Description { get; set; }
         public required string Assignee { get; set; }
+        public required DateTime DueDate { get; set; }
+        public required DateTime CreatedDate { get; set; }
     }
     
     private static int GetStatusOrder(string status) => status switch
@@ -130,11 +129,11 @@ public class KanbanWithCustomCardsExample : ViewBase
     {
         var tasks = UseState(new[]
         {
-            new Task { Id = "1", Title = "Design Homepage", Status = "Todo", Priority = 2, Description = "Create wireframes and mockups", Assignee = "Alice" },
-            new Task { Id = "2", Title = "Setup Database", Status = "Todo", Priority = 1, Description = "Configure PostgreSQL instance", Assignee = "Bob" },
-            new Task { Id = "3", Title = "Build API", Status = "In Progress", Priority = 1, Description = "Create REST endpoints", Assignee = "Alice" },
-            new Task { Id = "4", Title = "Write Tests", Status = "In Progress", Priority = 2, Description = "Unit and integration tests", Assignee = "Bob" },
-            new Task { Id = "5", Title = "Deploy to Production", Status = "Done", Priority = 1, Description = "Configure CI/CD pipeline", Assignee = "Charlie" },
+            new Task { Id = "1", Title = "Design Homepage", Status = "Todo", Priority = 2, Description = "Create wireframes and mockups", Assignee = "Alice", DueDate = DateTime.Now.AddDays(7), CreatedDate = DateTime.Now.AddDays(-5) },
+            new Task { Id = "2", Title = "Setup Database", Status = "Todo", Priority = 1, Description = "Configure PostgreSQL instance", Assignee = "Bob", DueDate = DateTime.Now.AddDays(3), CreatedDate = DateTime.Now.AddDays(-2) },
+            new Task { Id = "3", Title = "Build API", Status = "In Progress", Priority = 1, Description = "Create REST endpoints", Assignee = "Alice", DueDate = DateTime.Now.AddDays(5), CreatedDate = DateTime.Now.AddDays(-10) },
+            new Task { Id = "4", Title = "Write Tests", Status = "In Progress", Priority = 2, Description = "Unit and integration tests", Assignee = "Bob", DueDate = DateTime.Now.AddDays(10), CreatedDate = DateTime.Now.AddDays(-1) },
+            new Task { Id = "5", Title = "Deploy to Production", Status = "Done", Priority = 1, Description = "Configure CI/CD pipeline", Assignee = "Charlie", DueDate = DateTime.Now.AddDays(-2), CreatedDate = DateTime.Now.AddDays(-15) },
         });
 
         return tasks.Value
@@ -146,8 +145,10 @@ public class KanbanWithCustomCardsExample : ViewBase
                 content: task.ToDetails()
                     .Remove(x => x.Id)
                     .MultiLine(x => x.Description)
+                    .Builder<DateTime>(d => d.ToString("MMM dd, yyyy"))
             ))
             .ColumnOrder(e => GetStatusOrder(e.Status))
+            .CardOrder(e => e.DueDate)  // Order cards by due date - upcoming deadlines first
             .Width(Size.Full())
             .ColumnWidth(Size.Fraction(0.33f))
             .HandleMove(moveData =>
@@ -166,7 +167,9 @@ public class KanbanWithCustomCardsExample : ViewBase
                     Status = moveData.ToColumn,
                     Priority = taskToMove.Priority,
                     Description = taskToMove.Description,
-                    Assignee = taskToMove.Assignee
+                    Assignee = taskToMove.Assignee,
+                    DueDate = taskToMove.DueDate,
+                    CreatedDate = taskToMove.CreatedDate
                 };
 
                 updatedTasks.RemoveAll(t => t.Id == taskId);
@@ -178,6 +181,10 @@ public class KanbanWithCustomCardsExample : ViewBase
 ```
 
 The `.CardBuilder()` method accepts a builder factory function that creates a custom card widget. You can use `.ToDetails()` to automatically generate a details view from your model, or create completely custom card layouts with any widgets you need.
+
+<Callout Tip="Info">
+Use `.CardOrder()` to control how cards are sorted within each column. This is separate from the `orderSelector` in `.ToKanban()` and allows you to override or refine the card ordering.
+</Callout>
 
 ## Width and Column Sizing
 

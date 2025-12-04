@@ -94,14 +94,15 @@ export const TableCellWidget: React.FC<TableCellWidgetProps> = ({
   return (
     <TableCell className={cellClasses} style={cellStyles}>
       {shouldShowTooltip ? (
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>{content}</TooltipTrigger>
-            <TooltipContent className="bg-popover text-popover-foreground shadow-md max-w-sm">
-              <div className="whitespace-pre-wrap break-words">{children}</div>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+       <TooltipProvider>
+  <Tooltip>
+    <TooltipTrigger asChild>{content}</TooltipTrigger>
+    <TooltipContent className="bg-popover text-popover-foreground shadow-md max-w-sm">
+      <div className="whitespace-pre-wrap break-words">{children}</div>
+    </TooltipContent>
+  </Tooltip>
+</TooltipProvider>
+
       ) : (
         content
       )}
