@@ -116,16 +116,12 @@
     --shadow-xl:
       0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 8px 10px -1px hsl(0 0% 0% / 0.1);
     --shadow-2xl: 0 1px 3px 0px hsl(0 0% 0% / 0.25);
-
-    --opacity-mix-color: white;
   }
 
   /* Dark theme variables now come from design system dark-flat.css import */
   .dark {
     /* Additional dark theme overrides not in design system yet */
     --toolbox: #edeaf1;
-
-    --opacity-mix-color: black;
   }
   @theme inline {
     /* Semantic color mappings for Tailwind utility classes */
