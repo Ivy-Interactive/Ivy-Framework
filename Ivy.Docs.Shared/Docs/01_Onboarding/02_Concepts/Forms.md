@@ -686,7 +686,7 @@ public class DialogFormExample : ViewBase
             | user.ToForm()
                 .Required(m => m.FirstName, m => m.LastName, m => m.Email)
                 .ToDialog(isDialogOpen, "Create New User", "Please provide user information", 
-                         width: Size.Units(500));
+                         width: Size.Units(125));
     }
 }
 ```
@@ -789,7 +789,7 @@ public class CrudFormExample : ViewBase
                         }
                     })
                 )
-            ).Width(Size.Units(500))
+            ).Width(Size.Units(125))
             : null;
         
         // Create dialog content for editing product
@@ -816,7 +816,7 @@ public class CrudFormExample : ViewBase
                         }
                     })
                 )
-            ).Width(Size.Units(500))
+            ).Width(Size.Units(125))
             : null;
         
         return Layout.Vertical()
