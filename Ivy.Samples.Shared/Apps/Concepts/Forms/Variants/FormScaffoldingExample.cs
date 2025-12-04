@@ -1,15 +1,16 @@
-using System.Collections.Immutable;
 using Ivy.Samples.Shared.Apps.Concepts.Models;
 using Ivy.Shared;
 using Ivy.Views.Builders;
 using Ivy.Views.Forms;
 
-namespace Ivy.Samples.Shared.Apps.Concepts;
+namespace Ivy.Samples.Shared.Apps.Concepts.Forms.Variants;
 
-[App(icon: Icons.Brain, path: ["Concepts", "Forms"], searchHints: ["forms", "scaffolding"])]
-public class FormScaffoldingApp : SampleBase
+/// <summary>
+/// Demonstrates form scaffolding capabilities with different data types.
+/// </summary>
+public class FormScaffoldingExample : ViewBase
 {
-    protected override object? BuildSample()
+    public override object? Build()
     {
         var formatsExample = UseState(() => new FormatsExample());
         var formatsForm = formatsExample.ToForm();
@@ -59,12 +60,12 @@ public class FormScaffoldingApp : SampleBase
                | Text.H2("Numbers")
                | numbersGrid
             ;
+    }
 
-        object? NullBuilder(object? e)
-        {
-            if (e == null) return Text.Muted("(null)");
-            if (e is string s && string.IsNullOrEmpty(s)) return Text.Muted("(empty string)");
-            return e;
-        }
+    private static object? NullBuilder(object? e)
+    {
+        if (e == null) return Text.Muted("(null)");
+        if (e is string s && string.IsNullOrEmpty(s)) return Text.Muted("(empty string)");
+        return e;
     }
 }

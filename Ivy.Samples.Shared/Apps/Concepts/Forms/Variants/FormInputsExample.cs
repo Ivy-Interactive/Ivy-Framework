@@ -3,128 +3,14 @@ using Ivy.Shared;
 using Ivy.Views.Builders;
 using Ivy.Views.Forms;
 
-namespace Ivy.Samples.Shared.Apps.Concepts;
+namespace Ivy.Samples.Shared.Apps.Concepts.Forms.Variants;
 
-public enum Gender
+/// <summary>
+/// Demonstrates various form input types and configurations.
+/// </summary>
+public class FormInputsExample : ViewBase
 {
-    Male,
-    Female,
-    Other
-}
-public enum UserRole
-{
-    Admin,
-    User,
-    Guest
-}
-public enum Fruits
-{
-    Banana,
-    Apple,
-    Orange,
-    Pear,
-    Strawberry
-}
-
-public enum DatabaseProvider
-{
-    Sqlite,
-    SqlServer,
-    Postgres,
-    MySql,
-    MariaDb
-}
-
-public enum DatabaseNamingConvention
-{
-    PascalCase,
-    CamelCase,
-    SnakeCase,
-    KebabCase
-}
-
-public enum ViewState
-{
-    Idle,
-    Loading,
-    Success,
-    Error
-}
-
-public record AppSpec(string Name, string Description);
-public record TestModel(
-    string Name,
-    string Email,
-    string Password,
-    string Description,
-    bool IsActive,
-    int Age,
-    double Salary,
-    DateTime BirthDate,
-    UserRole Role,
-    string? PhoneNumber,
-    string? Website,
-    string? Color
-);
-
-public record ComprehensiveInputModel(
-    // Text inputs
-    string TextField,
-    string EmailField,
-    string PasswordField,
-    string SearchField,
-    string TelField,
-    string UrlField,
-    string TextAreaField,
-    // Number inputs
-    int IntegerField,
-    double DecimalField,
-    // Bool inputs
-    bool CheckboxField,
-    bool SwitchField,
-    bool ToggleField,
-    // DateTime inputs
-    DateTime DateField,
-    DateTime DateTimeField,
-    DateTime TimeField,
-    // Select inputs
-    UserRole SelectField,
-    List<Fruits> MultiSelectField,
-    string? AsyncSelectField,
-    // Other inputs
-    string ColorField,
-    string CodeField,
-    int RatingField,
-    bool ThumbsField,
-    int EmojiField
-);
-public record DatabaseGeneratorModel(
-    ViewState ViewState,
-    string Prompt,
-    string? Dbml,
-    string Namespace,
-    string ProjectDirectory,
-    string GeneratorDirectory,
-    DatabaseProvider DatabaseProvider,
-    DatabaseNamingConvention DatabaseNamingConvention,
-    bool RunGenerator,
-    bool DeleteDatabase,
-    bool SeedDatabase,
-    string ConnectionString,
-    string DataContextClassName,
-    string DataSeederClassName,
-    ImmutableArray<AppSpec> Apps,
-    Guid SessionId,
-    bool SkipDebug = false
-);
-
-public record UserModel(
-    string Name, string Password, bool IsAwesome, DateTime BirthDate, int Height, int UserId = 123, Gender Gender = Gender.Male, string Json = "{}", List<Fruits> FavoriteFruits = null!);
-
-[App(icon: Icons.Clipboard, path: ["Concepts", "Forms"], searchHints: ["inputs", "fields", "validation", "submission", "data-entry", "controls"])]
-public class FormApp : SampleBase
-{
-    protected override object? BuildSample()
+    public override object? Build()
     {
         var model = UseState(() => new UserModel("Niels Bosma", "1234156", true, DateTime.Parse("1982-07-17"), 183));
 
@@ -194,6 +80,7 @@ public class FormApp : SampleBase
                 settingsForm.ToDetails()
             ).Width(1 / 2f)
         );
+
         var smallModel = UseState(() => new ComprehensiveInputModel(
             "John Doe",
             "john@example.com",
@@ -285,7 +172,6 @@ public class FormApp : SampleBase
                | Text.P("This demonstrates how form sizes affect spacing between fields. All input types are shown with Small, Medium, and Large scales.")
                | BuildFormSizeDemo(smallModel, mediumModel, largeModel)
             ;
-        ;
     }
 
     private object BuildFormSizeDemo(IState<ComprehensiveInputModel> smallModel, IState<ComprehensiveInputModel> mediumModel, IState<ComprehensiveInputModel> largeModel)

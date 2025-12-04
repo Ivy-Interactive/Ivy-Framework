@@ -1,11 +1,144 @@
+using System.Collections.Immutable;
 using System.ComponentModel.DataAnnotations;
-using Ivy.Shared;
-using Ivy.Views.Builders;
-using Ivy.Views.Forms;
 
-namespace Ivy.Samples.Shared.Apps.Concepts;
+namespace Ivy.Samples.Shared.Apps.Concepts.Forms.Variants;
 
-public record FormValidationExamples
+#region Enums
+
+public enum Gender
+{
+    Male,
+    Female,
+    Other
+}
+
+public enum UserRole
+{
+    Admin,
+    User,
+    Guest
+}
+
+public enum Fruits
+{
+    Banana,
+    Apple,
+    Orange,
+    Pear,
+    Strawberry
+}
+
+public enum DatabaseProvider
+{
+    Sqlite,
+    SqlServer,
+    Postgres,
+    MySql,
+    MariaDb
+}
+
+public enum DatabaseNamingConvention
+{
+    PascalCase,
+    CamelCase,
+    SnakeCase,
+    KebabCase
+}
+
+public enum ViewState
+{
+    Idle,
+    Loading,
+    Success,
+    Error
+}
+
+#endregion
+
+#region Records
+
+public record AppSpec(string Name, string Description);
+
+public record TestModel(
+    string Name,
+    string Email,
+    string Password,
+    string Description,
+    bool IsActive,
+    int Age,
+    double Salary,
+    DateTime BirthDate,
+    UserRole Role,
+    string? PhoneNumber,
+    string? Website,
+    string? Color
+);
+
+public record ComprehensiveInputModel(
+    // Text inputs
+    string TextField,
+    string EmailField,
+    string PasswordField,
+    string SearchField,
+    string TelField,
+    string UrlField,
+    string TextAreaField,
+    // Number inputs
+    int IntegerField,
+    double DecimalField,
+    // Bool inputs
+    bool CheckboxField,
+    bool SwitchField,
+    bool ToggleField,
+    // DateTime inputs
+    DateTime DateField,
+    DateTime DateTimeField,
+    DateTime TimeField,
+    // Select inputs
+    UserRole SelectField,
+    List<Fruits> MultiSelectField,
+    string? AsyncSelectField,
+    // Other inputs
+    string ColorField,
+    string CodeField,
+    int RatingField,
+    bool ThumbsField,
+    int EmojiField
+);
+
+public record DatabaseGeneratorModel(
+    ViewState ViewState,
+    string Prompt,
+    string? Dbml,
+    string Namespace,
+    string ProjectDirectory,
+    string GeneratorDirectory,
+    DatabaseProvider DatabaseProvider,
+    DatabaseNamingConvention DatabaseNamingConvention,
+    bool RunGenerator,
+    bool DeleteDatabase,
+    bool SeedDatabase,
+    string ConnectionString,
+    string DataContextClassName,
+    string DataSeederClassName,
+    ImmutableArray<AppSpec> Apps,
+    Guid SessionId,
+    bool SkipDebug = false
+);
+
+public record UserModel(
+    string Name,
+    string Password,
+    bool IsAwesome,
+    DateTime BirthDate,
+    int Height,
+    int UserId = 123,
+    Gender Gender = Gender.Male,
+    string Json = "{}",
+    List<Fruits> FavoriteFruits = null!
+);
+
+public record FormValidationModel
 {
     [Display(Name = "User Name", Description = "Enter your full name", Prompt = "John Doe", Order = 1)]
     [Required(ErrorMessage = "Name is required")]
@@ -97,55 +230,4 @@ public record FormValidationExamples
     public string? Comments { get; init; }
 }
 
-[App(icon: Icons.Clipboard, path: ["Concepts", "Forms"], searchHints: ["validation", "attributes", "forms", "dataannotations", "display", "required"])]
-public class FormValidationApp : SampleBase
-{
-    protected override object? BuildSample()
-    {
-        var model = UseState(() => new FormValidationExamples());
-        var client = UseService<IClientProvider>();
-
-        UseEffect(() =>
-        {
-            if (!string.IsNullOrEmpty(model.Value.Name))
-            {
-                client.Toast($"Form submitted successfully for {model.Value.Name}!");
-            }
-        }, model);
-
-        var countryOptions = new[] { "USA", "Canada", "UK", "Germany", "France" }.ToOptions();
-        var interestOptions = new[] { "Technology", "Sports", "Music", "Art", "Travel" }.ToOptions();
-        var themeOptions = new[] { "Light", "Dark", "Auto" }.ToOptions();
-        var imageTypeOptions = new[] { "image/png", "image/jpeg", "image/webp" }.ToOptions();
-
-        var form = model.ToForm("Submit Registration")
-            // Custom builders for specific field types
-            .Builder(m => m.Bio, s => s.ToTextAreaInput())
-            .Builder(m => m.Country, s => s.ToSelectInput(countryOptions))
-            .Builder(m => m.Interests, s => s.ToSelectInput(interestOptions).List())
-            .Builder(m => m.Theme, s => s.ToSelectInput(themeOptions))
-            .Builder(m => m.AcceptedImageTypes, s => s.ToSelectInput(imageTypeOptions))
-            .Builder(m => m.Comments, s => s.ToTextAreaInput())
-            .Builder(m => m.BirthDate, s => s.ToDateTimeInput())
-            .Builder(m => m.AppointmentDateTime, s => s.ToDateTimeInput())
-            .Builder(m => m.Password, s => s.ToPasswordInput())
-            .Builder(m => m.Website, s => s.ToUrlInput())
-            .Builder(m => m.PhoneNumber, s => s.ToTelInput())
-            // Custom validation
-            .Validate<DateTime?>(m => m.BirthDate, birthDate =>
-                (birthDate == null || birthDate <= DateTime.Now, "Birth date cannot be in the future"))
-            .Validate<string>(m => m.Bio, bio =>
-                (string.IsNullOrEmpty(bio) || !bio.Contains("spam"), "Bio cannot contain spam content"));
-
-        return Layout.Horizontal()
-            | new Card(form)
-                .Width(1 / 2f)
-                .Title("Enhanced Form Validation")
-            | new Card(
-                Layout.Vertical()
-                    | Text.H4("Current Form Data")
-                    | model.ToDetails()
-            ).Width(1 / 2f)
-                .Title("Form State");
-    }
-}
+#endregion
