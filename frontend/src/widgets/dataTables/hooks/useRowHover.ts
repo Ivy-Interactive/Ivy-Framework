@@ -110,19 +110,23 @@ export const useRowHover = ({
   );
 
   // Handle row action button click
-  const handleRowActionClick = useCallback(() => {
-    if (hoverRow === undefined) return;
+  const handleRowActionClick = useCallback(
+    (action: MenuItem) => {
+      if (hoverRow === undefined) return;
 
-    // Extract _hiddenKey directly from Arrow table
-    const rowId = getHiddenKeyValue(hoverRow);
+      // Extract _hiddenKey directly from Arrow table
+      const rowId = getHiddenKeyValue(hoverRow);
 
-    // Send event to backend's OnRowAction event with just the row ID
-    eventHandler('OnRowAction', widgetId, [
-      {
-        id: rowId !== null ? rowId : hoverRow,
-      },
-    ]);
-  }, [hoverRow, eventHandler, widgetId, getHiddenKeyValue]);
+      // Send event to backend's OnRowAction event with row ID and menu item tag
+      eventHandler('OnRowAction', widgetId, [
+        {
+          id: rowId !== null ? rowId : hoverRow,
+          tag: action.tag ?? null,
+        },
+      ]);
+    },
+    [hoverRow, eventHandler, widgetId, getHiddenKeyValue]
+  );
 
   return {
     hoverRow,

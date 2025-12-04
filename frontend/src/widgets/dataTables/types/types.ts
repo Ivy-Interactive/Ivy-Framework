@@ -105,4 +105,8 @@ export interface RowActionClickEventArgs {
    * The ID of the row (extracted from _hiddenKey column if available)
    */
   id: string | number | null;
+  /**
+   * The tag of the menu item that was clicked
+   */
+  tag?: string | null;
 }

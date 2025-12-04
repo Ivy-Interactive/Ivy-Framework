@@ -15,6 +15,7 @@ public class CellClickEventArgs
 public class RowActionClickEventArgs
 {
     public object? Id { get; set; }
+    public object? Tag { get; set; }
 }
 
 public record DataTable : WidgetBase<DataTable>
