@@ -188,10 +188,9 @@ public class RowActionsDemo : ViewBase
             .HandleRowAction(async e =>
             {
                 var args = e.Value;
-                var actionId = args.ActionId;
-                var rowId = args.RowId;
+                var id = args.Id;
 
-                client.Toast($"Action: {actionId} on row ID: {rowId}");
+                client.Toast($"Action on row ID: {id}");
             });
     }
 }
@@ -203,8 +202,7 @@ Use <code>Renderer(expr, new LinkDisplayRenderer { Type = LinkDisplayType.Url })
 
 Use `HandleRowAction` to respond to row action menu selections. The handler receives an `Event<DataTable, RowActionClickEventArgs>` containing:
 
-- **ActionId** - The identifier of the action that was clicked (from the MenuItem tag or label)
-- **RowId** - The ID of the row (extracted using the `idSelector` parameter passed to the DataTableBuilder constructor)
+- **Id** - The ID of the row (extracted using the `idSelector` parameter passed to the DataTableBuilder constructor)
 
 To use row IDs, specify the ID field when creating the DataTable: `.ToDataTable(x => x.Id)` where `Id` is the property/field that uniquely identifies each row.
 

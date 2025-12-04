@@ -14,9 +14,7 @@ public class CellClickEventArgs
 
 public class RowActionClickEventArgs
 {
-    public string ActionId { get; set; } = "";
-    public int RowIndex { get; set; }
-    public object? RowId { get; set; }
+    public object? Id { get; set; }
 }
 
 public record DataTable : WidgetBase<DataTable>

@@ -102,15 +102,7 @@ export enum SelectionModes {
  */
 export interface RowActionClickEventArgs {
   /**
-   * The ID of the action that was clicked (from MenuItem.tag or MenuItem.label)
-   */
-  actionId: string;
-  /**
    * The ID of the row (extracted from _hiddenKey column if available)
    */
-  rowId: string | number | null;
-  /**
-   * The index of the clicked row (kept for backwards compatibility)
-   */
-  rowIndex: number;
+  id: string | number | null;
 }

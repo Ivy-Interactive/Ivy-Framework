@@ -238,7 +238,7 @@ public class DataTableApp : SampleBase
             .HandleRowAction(async e =>
             {
                 var args = e.Value;
-                client.Toast($"Row action: {args.ActionId} at row {args.RowIndex}, ID: {args.RowId}");
+                client.Toast($"Row action: ID {args.Id}");
                 await ValueTask.CompletedTask;
             });
 
