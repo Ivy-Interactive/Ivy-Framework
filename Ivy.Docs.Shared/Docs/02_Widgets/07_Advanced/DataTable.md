@@ -156,7 +156,7 @@ sampleUsers.ToDataTable()
 
 ## Row Actions
 
-Add contextual actions to each row using `RowActions()` and handle them via `OnRowAction()`. Actions are rendered as icons or buttons within a dedicated column. Row actions support nested menus.
+Add contextual actions to each row using `RowActions()` and handle them via `HandleRowAction()`. Actions are rendered as icons or buttons within a dedicated column. Row actions support nested menus.
 
 ```csharp demo-tabs
 public class RowActionsDemo : ViewBase
@@ -203,8 +203,23 @@ Use <code>Renderer(expr, new LinkDisplayRenderer { Type = LinkDisplayType.Url })
 Use `HandleRowAction` to respond to row action menu selections. The handler receives an `Event<DataTable, RowActionClickEventArgs>` containing:
 
 - **Id** - The ID of the row (extracted using the `idSelector` parameter passed to the DataTableBuilder constructor)
+- **Tag** - The tag of the menu item that was clicked (useful for identifying which action was selected, especially with nested menus)
 
 To use row IDs, specify the ID field when creating the DataTable: `.ToDataTable(x => x.Id)` where `Id` is the property/field that uniquely identifies each row.
+
+**Example accessing both Id and Tag:**
+
+```csharp demo-tabs
+.HandleRowAction(async e =>
+{
+    var args = e.Value;
+    var id = args.Id;
+    var tag = args.Tag?.ToString();
+    
+    client.Toast($"Row action: ID: {id}, Tag: {tag}");
+    await ValueTask.CompletedTask;
+});
+```
 
 ## Cell Click Events
 
