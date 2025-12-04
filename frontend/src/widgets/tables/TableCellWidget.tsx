@@ -20,16 +20,11 @@ interface TableCellWidgetProps {
   children?: React.ReactNode;
 }
 
-/**
- * Safe type guard for textual content.
- * More robust than typeof children === 'string'.
- */
 const isStringContent = (
   content: React.ReactNode
 ): content is string | number =>
   typeof content === 'string' || typeof content === 'number';
 
-// Convert Align enum to CSS
 const getTextAlign = (align: Align): React.CSSProperties => {
   switch (align) {
     case 'TopLeft':
@@ -63,13 +58,6 @@ export const TableCellWidget: React.FC<TableCellWidgetProps> = ({
 
   const textAlignStyle = getTextAlign(align);
 
-  /**
-   * Build inner content
-   * - Wrapping
-   * - Truncation
-   * - Alignment
-   * - Text safety
-   */
   const content = (
     <div
       className={cn(
@@ -91,22 +79,9 @@ export const TableCellWidget: React.FC<TableCellWidgetProps> = ({
     </div>
   );
 
-  /**
-   * Truncation logic:
-   * - Always truncate headers
-   * - Truncate when explicit width is set
-   */
   const shouldTruncate = isHeader || Boolean(width);
-
-  /**
-   * Tooltip logic:
-   * Only show tooltip for string | number (safe type check)
-   */
   const shouldShowTooltip = !multiLine && isStringContent(children);
 
-  /**
-   * Cell classes (cleaned using cn)
-   */
   const cellClasses = cn(
     'border-border force-text-inherit',
     {
