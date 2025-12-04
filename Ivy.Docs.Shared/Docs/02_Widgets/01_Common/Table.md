@@ -58,7 +58,7 @@ Long text in cells automatically gets truncated with ellipsis (...) and shows fu
 
 **Header(p => p.ColumnName)** is used to show custom header text of the table
 
-**Align(p => p.ColumnName)** - right alignment for selected column
+**Align(p => p.ColumnName, Align.Left|Center|Right)** - sets the alignment for both the header and data cells in the selected column. The alignment applies to the content within cells, not the entire column structure.
 
 **Order(p => p.ColumnNameFirst, p.ColumnNameSecond, p.ColumnNameThird, ...)** - is used to order columns in a specific way
 

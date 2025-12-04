@@ -338,7 +338,10 @@ public class TableBuilder<TModel> : ViewBase, IStateless
 
         TableCell RenderCell(int index, TableBuilderColumn column, object? content, bool isHeader, bool isFooter)
         {
-            var cell = new TableCell(content).IsHeader(isHeader).IsFooter(isFooter).Align(column.Align);
+            var cell = new TableCell(content)
+                .IsHeader(isHeader)
+                .IsFooter(isFooter)
+                .Align(column.Align);
 
             if (column.IsMultiLine)
             {

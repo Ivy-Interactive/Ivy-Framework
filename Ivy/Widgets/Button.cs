@@ -21,6 +21,7 @@ public enum ButtonVariant
     Warning,
     Info,
     Ghost,
+    SkinnyGhost,
     Link,
     Inline,
 }
@@ -135,115 +136,55 @@ public static class ButtonExtensions
         return button with { Url = validatedUrl };
     }
 
-    public static Button Disabled(this Button button, bool disabled = true)
-    {
-        return button with { Disabled = disabled };
-    }
+    public static Button Disabled(this Button button, bool disabled = true) => button with { Disabled = disabled };
 
-    public static Button Icon(this Button button, Icons? icon, Align position = Align.Left)
-    {
-        return button with { Icon = icon, IconPosition = position };
-    }
+    public static Button Icon(this Button button, Icons? icon, Align position = Align.Left) => button with { Icon = icon, IconPosition = position };
 
-    public static Button Variant(this Button button, ButtonVariant variant)
-    {
-        return button with { Variant = variant };
-    }
+    public static Button Variant(this Button button, ButtonVariant variant) => button with { Variant = variant };
 
-    public static Button Foreground(this Button button, Colors color)
-    {
-        return button with { Foreground = color };
-    }
+    public static Button Foreground(this Button button, Colors color) => button with { Foreground = color };
 
-    public static Button Tooltip(this Button button, string tooltip)
-    {
-        return button with { Tooltip = tooltip };
-    }
+    public static Button Tooltip(this Button button, string tooltip) => button with { Tooltip = tooltip };
 
-    public static Button Loading(this Button button, bool loading = true)
-    {
-        return button with { Loading = loading };
-    }
+    public static Button Loading(this Button button, bool loading = true) => button with { Loading = loading };
 
-    public static Button Loading(this Button button, IState<bool> loading)
-    {
-        return button.Loading(loading.Value);
-    }
+    public static Button Loading(this Button button, IState<bool> loading) => button.Loading(loading.Value);
 
-    public static Button HandleClick(this Button button, Func<Event<Button>, ValueTask> onClick)
-    {
-        return button with { OnClick = onClick };
-    }
+    public static Button HandleClick(this Button button, Func<Event<Button>, ValueTask> onClick) => button with { OnClick = onClick };
 
-    public static Button HandleClick(this Button button, Action<Event<Button>> onClick)
-    {
-        return button with { OnClick = onClick.ToValueTask() };
-    }
+    public static Button HandleClick(this Button button, Action<Event<Button>> onClick) => button with { OnClick = onClick.ToValueTask() };
 
-    public static Button HandleClick(this Button button, Action onClick)
-    {
-        return button with { OnClick = _ => { onClick(); return ValueTask.CompletedTask; } };
-    }
+    public static Button HandleClick(this Button button, Action onClick) => button with { OnClick = _ => { onClick(); return ValueTask.CompletedTask; } };
 
-    public static Button HandleClick(this Button button, Func<ValueTask> onClick)
-    {
-        return button with { OnClick = _ => onClick() };
-    }
+    public static Button HandleClick(this Button button, Func<ValueTask> onClick) => button with { OnClick = _ => onClick() };
 
-    public static Button Tag(this Button button, object tag)
-    {
-        return button with { Tag = tag };
-    }
+    public static Button Tag(this Button button, object tag) => button with { Tag = tag };
 
-    public static Button Content(this Button button, object child)
-    {
-        return button with { Children = [child] };
-    }
+    public static Button Content(this Button button, object child) => button with { Children = [child] };
 
     [RelatedTo(nameof(Button.Variant))]
-    public static Button Primary(this Button button)
-    {
-        return button.Variant(ButtonVariant.Primary);
-    }
+    public static Button Primary(this Button button) => button.Variant(ButtonVariant.Primary);
 
     [RelatedTo(nameof(Button.Variant))]
-    public static Button Secondary(this Button button)
-    {
-        return button.Variant(ButtonVariant.Secondary);
-    }
+    public static Button Secondary(this Button button) => button.Variant(ButtonVariant.Secondary);
 
     [RelatedTo(nameof(Button.Variant))]
-    public static Button Outline(this Button button)
-    {
-        return button.Variant(ButtonVariant.Outline);
-    }
+    public static Button Outline(this Button button) => button.Variant(ButtonVariant.Outline);
 
     [RelatedTo(nameof(Button.Variant))]
-    public static Button Destructive(this Button button)
-    {
-        return button.Variant(ButtonVariant.Destructive);
-    }
+    public static Button Destructive(this Button button) => button.Variant(ButtonVariant.Destructive);
 
     [RelatedTo(nameof(Button.Variant))]
-    public static Button Ghost(this Button button)
-    {
-        return button.Variant(ButtonVariant.Ghost);
-    }
+    public static Button Ghost(this Button button) => button.Variant(ButtonVariant.Ghost);
 
     [RelatedTo(nameof(Button.Variant))]
-    public static Button Link(this Button button)
-    {
-        return button.Variant(ButtonVariant.Link);
-    }
+    public static Button SkinnyGhost(this Button button) => button.Variant(ButtonVariant.SkinnyGhost);
 
     [RelatedTo(nameof(Button.Variant))]
-    public static Button Inline(this Button button)
-    {
-        return button.Variant(ButtonVariant.Inline);
-    }
+    public static Button Link(this Button button) => button.Variant(ButtonVariant.Link);
 
-    public static Button BorderRadius(this Button button, BorderRadius radius)
-    {
-        return button with { BorderRadius = radius };
-    }
+    [RelatedTo(nameof(Button.Variant))]
+    public static Button Inline(this Button button) => button.Variant(ButtonVariant.Inline);
+
+    public static Button BorderRadius(this Button button, BorderRadius radius) => button with { BorderRadius = radius };
 }
