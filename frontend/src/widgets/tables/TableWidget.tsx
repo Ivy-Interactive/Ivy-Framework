@@ -50,33 +50,23 @@ const parseWidth = (width: string | undefined): WidthConfig => {
   return { type: 'unknown' };
 };
 
-/**
- * Whether width is fixed pixel/rem/units.
- */
+/** Whether width is fixed pixel/rem/units. */
 const isFixedWidth = (cfg: WidthConfig) =>
   cfg.type === 'units' || cfg.type === 'px' || cfg.type === 'rem';
 
-/**
- * Base width styles from Ivy’s getWidth()
- */
-const getBaseStyles = (width: string | undefined): React.CSSProperties => {
-  return {
-    ...getWidth(width),
-  };
-};
+/** Base width styles from Ivy’s getWidth() */
+const getBaseStyles = (width: string | undefined): React.CSSProperties => ({
+  ...getWidth(width),
+});
 
-/**
- * Remove maxWidth constraint (for fixed-width tables)
- */
+/** Remove maxWidth (for fixed-width tables) */
 const omitMaxWidth = (styles: React.CSSProperties): React.CSSProperties => {
   const clone = { ...styles };
   delete clone.maxWidth;
   return clone;
 };
 
-/**
- * Ensure maxWidth:100% for Full() width types
- */
+/** Ensure maxWidth:100% for Full() width */
 const applyMaxWidthConstraint = (
   styles: React.CSSProperties
 ): React.CSSProperties => ({
@@ -84,9 +74,7 @@ const applyMaxWidthConstraint = (
   maxWidth: '100%',
 });
 
-/**
- * Final table style builder
- */
+/** Final table style builder */
 const buildTableStyles = (
   width: string | undefined
 ): React.CSSProperties => {
@@ -125,5 +113,3 @@ export const TableWidget: React.FC<TableWidgetProps> = ({
     </Table>
   );
 };
-
-export default TableWidget;
