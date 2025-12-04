@@ -91,7 +91,6 @@ public class KanbanWithMoveExample : ViewBase
                     // Update task status to match new column
                     var updated = taskToMove with { Status = moveData.ToColumn };
                     updatedTasks.RemoveAll(t => t.Id == taskId);
-                    
                     taskState.Set(updatedTasks.ToArray());
                 }
             });
