@@ -17,10 +17,24 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
   actionId,
   onClick,
 }) => {
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    // Always stop propagation to prevent grid interactions
+    e.stopPropagation();
+    // Only call onClick if provided (for regular buttons)
+    // When used as dropdown trigger, onClick is undefined and trigger handles it
+    onClick?.();
+  };
+
+  const handleMouseDown = (e: React.MouseEvent<HTMLButtonElement>) => {
+    // Always stop propagation to prevent grid from handling mousedown
+    e.stopPropagation();
+  };
+
   return (
     <button
       className={ACTION_BUTTON_CLASSES}
-      onClick={onClick}
+      onClick={handleClick}
+      onMouseDown={handleMouseDown}
       aria-label={action.label || actionId}
       type="button"
     >

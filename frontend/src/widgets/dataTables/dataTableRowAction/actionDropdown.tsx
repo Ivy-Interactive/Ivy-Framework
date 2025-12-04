@@ -7,14 +7,52 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { ActionButton } from './actionButton';
-import { getActionId } from './utils';
+import { getActionId, ACTION_BUTTON_CLASSES } from './utils';
 
 interface ActionDropdownProps {
   action: MenuItem;
   actionId: string;
   onActionClick: (action: MenuItem) => void;
 }
+
+interface TriggerButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  action: MenuItem;
+  actionId: string;
+}
+
+/**
+ * Custom trigger button that stops propagation but allows dropdown to work
+ */
+const TriggerButton = React.forwardRef<HTMLButtonElement, TriggerButtonProps>(
+  ({ action, actionId, ...props }, ref) => {
+    const handleMouseDown = (e: React.MouseEvent<HTMLButtonElement>) => {
+      // Stop propagation to prevent grid interactions
+      e.stopPropagation();
+      props.onMouseDown?.(e);
+    };
+
+    return (
+      <button
+        ref={ref}
+        className={ACTION_BUTTON_CLASSES}
+        {...props}
+        onMouseDown={handleMouseDown}
+        aria-label={action.label || actionId}
+        type="button"
+      >
+        {action.icon && (
+          <Icon
+            name={action.icon}
+            size={16}
+            className="text-(--color-foreground)"
+          />
+        )}
+      </button>
+    );
+  }
+);
+TriggerButton.displayName = 'TriggerButton';
 
 /**
  * Dropdown menu action with nested children
@@ -30,7 +68,7 @@ export const ActionDropdown: React.FC<ActionDropdownProps> = ({
   return (
     <DropdownMenu key={actionId}>
       <DropdownMenuTrigger asChild>
-        <ActionButton action={action} actionId={actionId} />
+        <TriggerButton action={action} actionId={actionId} />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         {validChildren.map(childAction => {
@@ -38,7 +76,10 @@ export const ActionDropdown: React.FC<ActionDropdownProps> = ({
           return (
             <DropdownMenuItem
               key={childId}
-              onClick={() => onActionClick(childAction)}
+              onClick={e => {
+                e.stopPropagation();
+                onActionClick(childAction);
+              }}
             >
               {childAction.icon && (
                 <Icon
