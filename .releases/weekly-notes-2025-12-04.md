@@ -23,11 +23,13 @@ users.ToTable()
 ```
 
 The SkinnyGhost variant features:
+
 - **Minimal Padding**: Uses `p-1` with auto height for the smallest possible footprint
 - **Subtle Hover**: Shows accent background on hover (same as Ghost variant)
 - **Compact Design**: Ideal for icon-only buttons or actions where space is at a premium
 
 This variant is particularly useful for:
+
 - Action buttons in table rows
 - Toolbar buttons with dense layouts
 - Icon-only controls in compact interfaces
@@ -38,16 +40,19 @@ This variant is particularly useful for:
 The DateTimeInput widget has received visual polish to improve consistency and usability:
 
 **Icon Positioning:**
+
 - The calendar and clock icons are now positioned inside the input field for a more compact, modern appearance
 - Icons maintain consistent spacing and alignment across all date/time input variants (Date, DateTime, Time)
 - The clock icon now appears inside the Time input field, matching the pattern used by other input types
 
 **Disabled State:**
+
 - Disabled date/time inputs now display with consistent styling that matches DateRange inputs
 - Icons in disabled inputs show reduced opacity for clear visual feedback
 - The cursor properly changes to `not-allowed` when hovering over disabled inputs
 
 **Clear and Error Icon Layout:**
+
 - Clear (X) and validation error icons are now positioned using absolute positioning for more reliable placement
 - Icon spacing has been optimized to prevent overlap with input text
 - The layout automatically adjusts padding based on which icons are visible (clear only, error only, or both)
@@ -95,6 +100,7 @@ selectedOption.ToAsyncSelectInput(QueryOptions, LookupOption, "Search...")
 ```
 
 The scale affects multiple aspects of the async select input:
+
 - **Height**: Small (28px), Medium (36px), Large (44px)
 - **Padding**: Proportional spacing that increases with scale
 - **Text size**: Small (xs), Medium (sm), Large (base)
@@ -109,11 +115,13 @@ When you use AsyncSelectInput in forms with `.Scale()`, the component automatica
 The AsyncSelect component has received visual refinements that improve how it integrates with other form elements:
 
 **Icon Positioning:**
+
 - The chevron icon now uses absolute positioning with optimized sizing (w-5/6/8 instead of w-7/9/11)
 - Icon spacing has been refined to prevent the button from appearing too wide compared to other inputs
 - The chevron icon now displays with reduced opacity (50%) for a more subtle appearance
 
 **Text Alignment:**
+
 - Text content now has better alignment without excessive left margin
 - The layout automatically adjusts to use available space more efficiently
 
@@ -165,6 +173,7 @@ Task<Option<Guid>[]> QueryUsers(string query)
 ```
 
 Descriptions appear in a smaller, muted font below the option label in both the dropdown list and the lookup result. This is particularly useful for:
+
 - Showing categories or classifications (e.g., country regions)
 - Displaying secondary identifiers (e.g., email addresses, IDs)
 - Providing additional context without overwhelming the primary label
@@ -201,6 +210,7 @@ selectedCountry.ToAsyncSelectInput(QueryCountries, LookupCountry);
 ```
 
 Icons appear next to the option label in both the dropdown list and the selected value display, providing quick visual identification of options. This is particularly useful for:
+
 - Status indicators (completed, pending, failed)
 - Category markers (documents, images, videos)
 - Priority levels (high, medium, low)
@@ -272,6 +282,7 @@ The file upload documentation has been significantly improved and consolidated. 
 - **Real-World Patterns**: Validation examples demonstrate common use cases like file type restrictions and size limits
 
 The consolidated documentation covers:
+
 - How the upload system works (`UseState` → `UseUpload` → `MemoryStreamUploadHandler`)
 - Single and multiple file uploads with progress tracking
 - File validation (type, size, count limits)
@@ -499,6 +510,7 @@ This makes it easy to create task boards where cards are sorted by urgency, prio
 We've fixed an issue with the Kanban widget's drag-and-drop reordering functionality. Cards now correctly reorder when dragged to different positions within the same column or moved between columns.
 
 The fix addresses several edge cases:
+
 - Cards dropped at the end of a column are now properly positioned
 - Moving cards between columns maintains the correct order
 - Insertion positions are calculated more accurately based on the target drop location
@@ -528,6 +540,7 @@ The Kanban widget now provides precise, visual feedback during drag-and-drop ope
 **Drop Position Indicators:**
 
 When dragging a card, you'll now see a visual line indicating exactly where the card will be inserted when you drop it. This works for both:
+
 - Moving cards within the same column (reordering)
 - Moving cards between different columns
 
@@ -540,6 +553,7 @@ Cards automatically shift smoothly out of the way when you drag a card from anot
 **Improved Column Styling:**
 
 When dragging a card over a different column:
+
 - The target column now shows a subtle accent background (rather than a dashed border)
 - Columns have better spacing with a consistent 3-unit gap between them
 - The visual feedback is cleaner and less intrusive
@@ -571,6 +585,7 @@ tasks.ToKanban(...)
 ```
 
 This change centralizes size handling logic and provides a more consistent API across the framework. The `Size` class offers:
+
 - `Size.Units(int)` - Fixed pixel values
 - `Size.Fraction(float)` - Percentage-based sizing (0.0 to 1.0)
 
@@ -596,6 +611,7 @@ new HeaderLayout(
 ```
 
 **When to use `.Scroll(Scroll.None)`:**
+
 - When content widgets (like Kanban, complex layouts) need to manage their own scrolling behavior
 - When you want to prevent nested scroll containers
 - When building full-height layouts where the content should fill available space without a scroll wrapper
@@ -654,6 +670,7 @@ This change affects all alert dialogs in your application automatically - no cod
 The theming system documentation has been updated to reflect the actual color variables available in the Ivy Design System. We've removed documentation for unused color variables that were previously listed but not actively used by the framework:
 
 **Removed variables:**
+
 - Chart colors (`Chart1` through `Chart5`)
 - Sidebar-specific colors (`Sidebar`, `SidebarForeground`, `SidebarPrimary`, etc.)
 
@@ -702,6 +719,7 @@ This change simplifies theming by focusing on the colors that are actually used 
 The Article widget's previous/next navigation links now work correctly when your application runs in `chrome=false` mode (without the Ivy chrome wrapper). Previously, clicking these navigation links would lose the `chrome=false` query parameter, causing the page to reload with chrome enabled.
 
 This fix ensures that:
+
 - Navigation links preserve the `chrome=false` parameter when navigating between articles
 - Browser-native navigation is used in `chrome=false` mode for better compatibility
 - Backend event handlers are still used for navigation in normal chrome mode
@@ -715,10 +733,12 @@ If you're building documentation or article-based applications that run without 
 Tooltips now properly handle long text content with improved wrapping and width constraints:
 
 **Maximum Width:**
+
 - Tooltips are now constrained to a maximum width of `max-w-sm` (24rem/384px)
 - Long text automatically wraps to multiple lines instead of creating extremely wide tooltips
 
 **Long String Handling:**
+
 - Very long strings without spaces (like URLs or file paths) now use `break-all` to wrap properly
 - This prevents horizontal overflow and ensures tooltips remain readable regardless of content
 
@@ -730,6 +750,7 @@ table.ToTable()
 ```
 
 **Table Cell Tooltips:**
+
 - Table cell tooltips specifically use `break-all` for consistent wrapping behavior
 - Multi-line content is displayed with proper whitespace preservation using `whitespace-pre-wrap`
 
@@ -754,6 +775,7 @@ Utils.FormatNumber(1234567, 3);     // "1.235M"
 ```
 
 The function automatically:
+
 - Formats numbers 1,000+ with "K" suffix
 - Formats numbers 1,000,000+ with "M" suffix
 - Formats numbers 1,000,000,000+ with "B" suffix
@@ -795,6 +817,7 @@ When you submit a form that contains file uploads, the framework automatically c
 ```
 
 This applies to all form contexts:
+
 - Standard forms created with `.ToForm()`
 - Sheet forms created with `.ToSheet()`
 - Dialog forms created with `.ToDialog()`
@@ -821,6 +844,7 @@ model.ToForm()
 **Visual Feedback:**
 
 While uploads are in progress:
+
 - Submit button shows a loading state (spinner)
 - Submit button is disabled to prevent premature submission
 - Clicking the disabled submit button shows a toast notification explaining the wait
@@ -920,11 +944,13 @@ These changes make form configuration more flexible and consistent with other wi
 Forms now apply scale-appropriate spacing between the form fields and the submit button section, along with improved button text sizing:
 
 **Spacing:**
+
 - **Small**: 4px gap
 - **Medium**: 6px gap (default)
 - **Large**: 8px gap
 
 **Button Text Sizes:**
+
 - **Small**: `text-xs` (extra small text)
 - **Medium**: `text-sm` (small text, default)
 - **Large**: `text-base` (base text size)
@@ -975,6 +1001,7 @@ model.ToForm()
 ```
 
 The FormBuilder extracts:
+
 - **Name**: Custom label for the field
 - **Description**: Help text shown below the field
 - **Prompt**: Placeholder text in the input
@@ -1042,6 +1069,7 @@ public class Product
 ```
 
 **Supported validation attributes:**
+
 - `[Required]` - Makes field mandatory
 - `[StringLength]` / `[MaxLength]` / `[MinLength]` - String length limits with frontend enforcement
 - `[Range]` - Numeric min/max values (enforced on number inputs)
@@ -1108,6 +1136,7 @@ public class UserForm
 ```
 
 **The fix:**
+
 - If you explicitly set a label with `[Display(Name = "...")]`, that label is now used exactly as written
 - Only auto-generated labels (from property names) have the "Id" suffix trimmed
 - This ensures your carefully chosen display names are respected by the form scaffolding system
@@ -1154,6 +1183,7 @@ textState.ToTextInput().Small();
 ```
 
 **Affected components:**
+
 - TextInput and all text input variants (email, password, search, tel, url, textarea)
 - SelectInput (both single and multi-select)
 - Table widget
@@ -1187,6 +1217,7 @@ new Expandable(
 ```
 
 The scale affects multiple aspects of the expandable:
+
 - **Height**: Small (28px), Medium (36px), Large (44px)
 - **Padding**: Proportional spacing that increases with scale
 - **Text size**: Small (xs), Medium (sm), Large (base)
@@ -1202,12 +1233,14 @@ Scale also automatically propagates to expandables within forms when using FormB
 The Expandable widget's chevron icon now uses absolute positioning to match the visual pattern established by AsyncSelectInput and other form inputs:
 
 **Icon Positioning:**
+
 - The chevron icon now uses absolute positioning with right-alignment
 - Icon widths have been optimized (w-5/6/8 instead of w-7/9/11) for better visual integration
 - The chevron displays with reduced opacity (50%) for a more subtle appearance
 - The vertical border line that previously separated the chevron from the header has been removed for a cleaner look
 
 **Text Layout:**
+
 - Header content now has proper right padding (pr-8/9/11) to prevent text overlap with the chevron
 - The layout automatically adjusts spacing based on scale
 - Text content has better alignment without excessive margins
@@ -1237,6 +1270,7 @@ new Expandable(
 ```
 
 Interactive elements that remain functional in disabled expandables include:
+
 - Buttons and action buttons
 - Switches and checkboxes
 - Input fields and selects
@@ -1252,6 +1286,7 @@ The Expandable widget now has more intelligent click handling that properly dist
 **How it works:**
 
 When you click on the expandable header:
+
 - Clicking blank areas of the header toggles the expandable open/closed as expected
 - Clicking interactive elements (buttons, switches, inputs, links) triggers those elements without toggling the expandable
 - The toggle behavior is prevented when the expandable is disabled, showing the proper `not-allowed` cursor
@@ -1261,6 +1296,7 @@ This fix ensures that complex headers with multiple interactive controls work in
 **Visual refinements:**
 
 The click handling improvements also come with refined visual alignment:
+
 - Content padding now properly aligns with the header text across all scale variants
 - The chevron icon is positioned absolutely at the far right with proper z-indexing
 - Header text has appropriate right padding to prevent overlap with the chevron
@@ -1357,11 +1393,13 @@ records.ToTable()
 **How it works:**
 
 The alignment applies consistently to:
+
 - Header cells (column names)
 - All data cells in that column
 - Both truncated and multi-line content
 
 The implementation now uses proper `text-align` CSS properties, ensuring text content aligns correctly within cells regardless of the column width. This is particularly useful for:
+
 - Right-aligning numeric columns (prices, counts, percentages)
 - Center-aligning status indicators or badges
 - Creating visually balanced tables with mixed content types
@@ -1450,6 +1488,7 @@ The new structure makes it easier to handle row actions by providing direct acce
 - **Simplified Event Handling**: Direct access to row ID and menu tag instead of dictionary lookups
 
 This is particularly useful when you have many row actions and want to:
+
 - Group related actions together (e.g., all export options under one menu)
 - Keep the row actions column compact
 - Provide better organization for complex workflows
@@ -1506,10 +1545,12 @@ Both approaches are still supported, but the generic version is recommended for 
 Chart toolbox controls (save, zoom, data view, restore) now only appear when you hover over the chart, providing a cleaner, less cluttered appearance:
 
 **Before:**
+
 - Toolbox controls were always visible in the top-right corner of charts
 - This could be distracting, especially for dashboard views with multiple charts
 
 **After:**
+
 - Toolbox controls appear only when you hover over the chart area
 - Charts have a cleaner look by default
 - Controls remain fully functional when you need them
@@ -1541,10 +1582,12 @@ Charts now correctly handle negative values by automatically adjusting the Y-axi
 **What changed:**
 
 The Y-axis now dynamically adjusts its minimum value based on your data:
+
 - If your data has a large spread, the axis min/max is calculated from the data range (as before)
 - If your data has a small spread, the axis minimum is now `Math.min(minValue, 0)` instead of always `0`
 
 This means:
+
 - Charts with all positive values: Y-axis still starts at 0 (no change)
 - Charts with negative values: Y-axis now extends below 0 to show all data points
 - Charts with mixed positive/negative values: Y-axis spans the full range
@@ -1625,6 +1668,7 @@ new StepperItem(
 ```
 
 The Stepper widget automatically handles:
+
 - Hover effects for clickable steps
 - Smooth transitions between states
 - Responsive layout with proper text alignment
@@ -1674,10 +1718,12 @@ return new Fragment()
 ```
 
 **How it works:**
+
 - `.True(func)` returns the result of `func()` when the state is `true`, otherwise returns `null`
 - `.False(func)` returns the result of `func()` when the state is `false`, otherwise returns `null`
 
 This pattern is particularly useful for:
+
 - Toggling loading indicators or spinners
 - Showing/hiding error messages or alerts
 - Conditional rendering based on feature flags
@@ -1696,6 +1742,7 @@ The loading indicator now appears in a fixed, full-screen overlay with a semi-tr
 
 **200ms Display Delay:**
 To prevent jarring flashes for quick operations, the loading spinner now has a 200ms delay before becoming visible. This means:
+
 - Operations completing in under 200ms won't show a loading indicator at all
 - Longer operations will show smooth loading feedback without flickering
 
@@ -1730,6 +1777,7 @@ Layout.TopCenter(
 ```
 
 This is particularly useful for:
+
 - Header navigation elements that need to be centered but aligned to the top of their container
 - Action buttons or controls in top bars
 - Any horizontal layout where you need top-center positioning
@@ -1745,6 +1793,7 @@ Ivy Framework now includes comprehensive URL validation across all components to
 **What's Protected:**
 
 All URL-accepting components now validate and sanitize URLs automatically:
+
 - Links in markdown content
 - Images, audio, and video players
 - Button widgets with URL targets
@@ -1753,6 +1802,7 @@ All URL-accepting components now validate and sanitize URLs automatically:
 **Validation Rules:**
 
 The framework now enforces strict URL validation:
+
 - ✅ **Allowed**: Relative paths (`/path/to/resource`), http/https URLs, data URLs (for appropriate media types), blob URLs (with origin validation), `app://` protocol URLs, and anchor links (`#section`)
 - ❌ **Blocked**: `javascript:` protocol, malformed URLs, protocol injection attempts, and other dangerous URL patterns
 
@@ -1763,6 +1813,7 @@ Blob URLs are now validated to ensure they match the current origin, preventing 
 **Error Handling:**
 
 Invalid URLs now show clear, user-friendly error messages:
+
 - **Images/Audio/Video**: Display a bordered error box with the message "Invalid [media type] URL" or "No [media type] source provided"
 - **Buttons**: Show "Invalid button URL" in a destructive-styled container
 - **Links**: Convert to safe anchor links (`#`) that won't navigate
@@ -1770,6 +1821,7 @@ Invalid URLs now show clear, user-friendly error messages:
 **No Code Changes Required:**
 
 This is a transparent security enhancement. Your existing code will continue to work exactly as before, but with added protection against URL-based vulnerabilities. The framework now includes:
+
 - Dedicated `urlValidation.ts` module with comprehensive validation utilities
 - Helper functions for URL type detection (`isExternalUrl`, `isAnchorLink`, `isAppProtocol`, `isRelativePath`, etc.)
 - Extensive test coverage for all validation scenarios including localhost development, production environments, and edge cases
@@ -1926,6 +1978,7 @@ new Box("20% opacity").Color(Colors.Blue, 0.2f)
 ```
 
 The opacity value controls the transparency of the box's background color. This is particularly useful for:
+
 - Creating visual hierarchies with subtle color variations
 - Building heatmaps where color intensity represents data values
 - Designing layered UI elements with semi-transparent backgrounds
@@ -1965,6 +2018,7 @@ server.UseErrorNotFound(() => new MyCustomNotFoundApp());
 ```
 
 Your custom 404 app can include:
+
 - Branded error messaging that matches your application's tone
 - Search functionality to help users find what they were looking for
 - Navigation links to popular sections of your app
@@ -1973,6 +2027,7 @@ Your custom 404 app can include:
 **How it works:**
 
 The routing system now:
+
 - Detects when an app ID doesn't exist in the app repository
 - Displays the 404 app (default or custom) in place of the missing app
 - Preserves the invalid URL in the address bar (no redirects)
@@ -1986,6 +2041,7 @@ This improvement provides a better user experience when navigation errors occur,
 All framework-provided routes and resources now use the `/ivy` prefix for better organization and to prevent conflicts with your application routes:
 
 **Updated Routes:**
+
 - SignalR hub: `/ivy/messages` (previously `/messages`)
 - Health checks: `/ivy/health` (previously `/health`)
 - Static resources: `/ivy/img/`, `/ivy/css/`, etc.
@@ -2059,6 +2115,7 @@ server.ReservePaths("/admin", "/reports", "/dashboard")
 ```
 
 This is particularly useful when:
+
 - You're planning to add routes in the future and want to reserve the paths ahead of time
 - You have static file directories that should never be treated as app IDs
 - You want to prevent apps from being registered with conflicting names
