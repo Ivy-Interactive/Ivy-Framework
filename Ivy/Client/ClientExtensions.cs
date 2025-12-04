@@ -100,24 +100,6 @@ public static class ClientExtensions
             });
     }
 
-    public static void SetAuthCookies(this IClientProvider client, AppSessionStore sessionStore, IAuthSession authSession, bool reloadPage = true, bool? triggerMachineReload = null)
-    {
-        var cookieJarId = sessionStore.RegisterAuthSessionCookies(authSession);
-        client.SetAuthCookies(cookieJarId, reloadPage, triggerMachineReload);
-    }
-
-    public static void SetAuthToken(this IClientProvider client, AppSessionStore sessionStore, AuthToken? authToken, bool reloadPage = true, bool? triggerMachineReload = null)
-    {
-        var cookieJarId = sessionStore.RegisterAuthTokenCookies(authToken);
-        client.SetAuthCookies(cookieJarId, reloadPage, triggerMachineReload);
-    }
-
-    public static void SetAuthSessionData(this IClientProvider client, AppSessionStore sessionStore, string? authSessionData, bool reloadPage = false, bool? triggerMachineReload = null)
-    {
-        var cookieJarId = sessionStore.RegisterAuthSessionDataCookies(authSessionData);
-        client.SetAuthCookies(cookieJarId, reloadPage, triggerMachineReload);
-    }
-
     public static void ReloadPage(this IClientProvider client)
     {
         client.Sender.Send("ReloadPage", new { });

@@ -110,7 +110,7 @@ public class PasswordEmailFlowView(IState<string?> errorMessage) : ViewBase
 
                 await auth.LoginAsync(credentials.Value.User, credentials.Value.Password);
 
-                if (authSession.AuthToken == null)
+                if (auth.GetCurrentToken() == null)
                 {
                     errorMessage.Set("Login failed. Please check your credentials.");
                 }

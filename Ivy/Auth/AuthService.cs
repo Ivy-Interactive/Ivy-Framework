@@ -18,7 +18,7 @@ public class AuthService(IAuthProvider authProvider, IAuthSession authSession, I
 
         if (authSession.HasChangedSince(oldSession))
         {
-            client.SetAuthCookies(sessionStore, authSession, reloadPage: authSession.AuthToken != oldSession.AuthToken);
+            SetAuthCookies(reloadPage: authSession.AuthToken != oldSession.AuthToken);
         }
         return token;
     }
@@ -32,7 +32,7 @@ public class AuthService(IAuthProvider authProvider, IAuthSession authSession, I
 
         if (authSession.AuthSessionData != oldSession.AuthSessionData)
         {
-            client.SetAuthSessionData(sessionStore, authSession.AuthSessionData);
+            SetAuthSessionDataCookies();
         }
 
         return uri;
@@ -48,7 +48,7 @@ public class AuthService(IAuthProvider authProvider, IAuthSession authSession, I
 
         if (authSession.HasChangedSince(oldSession))
         {
-            client.SetAuthCookies(sessionStore, authSession);
+            SetAuthCookies();
         }
 
         return token;
@@ -69,7 +69,7 @@ public class AuthService(IAuthProvider authProvider, IAuthSession authSession, I
 
         if (authSession.HasChangedSince(oldSession))
         {
-            client.SetAuthCookies(sessionStore, authSession);
+            SetAuthCookies();
         }
     }
 
@@ -107,7 +107,7 @@ public class AuthService(IAuthProvider authProvider, IAuthSession authSession, I
 
         if (authSession.HasChangedSince(oldSession))
         {
-            client.SetAuthCookies(sessionStore, authSession, reloadPage: authSession.AuthToken == null);
+            SetAuthCookies(reloadPage: authSession.AuthToken == null);
         }
 
         return refreshedToken;
@@ -118,4 +118,22 @@ public class AuthService(IAuthProvider authProvider, IAuthSession authSession, I
     public string? GetCurrentSessionData() => authSession.AuthSessionData;
 
     public IAuthSession GetAuthSession() => authSession;
+
+    public void SetAuthCookies(bool reloadPage = true, bool? triggerMachineReload = null)
+    {
+        var cookieJarId = sessionStore.RegisterAuthSessionCookies(authSession);
+        client.SetAuthCookies(cookieJarId, reloadPage, triggerMachineReload);
+    }
+
+    public void SetAuthTokenCookies(bool reloadPage = true, bool? triggerMachineReload = null)
+    {
+        var cookieJarId = sessionStore.RegisterAuthTokenCookies(authSession.AuthToken);
+        client.SetAuthCookies(cookieJarId, reloadPage, triggerMachineReload);
+    }
+
+    public void SetAuthSessionDataCookies(bool reloadPage = false, bool? triggerMachineReload = null)
+    {
+        var cookieJarId = sessionStore.RegisterAuthSessionDataCookies(authSession.AuthSessionData);
+        client.SetAuthCookies(cookieJarId, reloadPage, triggerMachineReload);
+    }
 }

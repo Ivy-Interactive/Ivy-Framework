@@ -24,4 +24,10 @@ public interface IAuthService
     string? GetCurrentSessionData();
 
     IAuthSession GetAuthSession();
+
+    internal void SetAuthCookies(bool reloadPage = true, bool? triggerMachineReload = null);
+
+    internal void SetAuthTokenCookies(bool reloadPage = true, bool? triggerMachineReload = null);
+
+    internal void SetAuthSessionDataCookies(bool reloadPage = false, bool? triggerMachineReload = null);
 }

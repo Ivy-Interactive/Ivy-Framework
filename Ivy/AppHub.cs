@@ -75,12 +75,13 @@ public class AppHub(
 #endif
 
                 var authSession = AuthHelper.GetAuthSession(httpContext);
+                var authService = new AuthService(authProvider, authSession, clientProvider, sessionStore);
+
                 await TimeoutHelper.WithTimeoutAsync(
                     ct => authProvider.InitializeAsync(authSession, httpContext.Request.Scheme, httpContext.Request.Host.Value!, ct),
                     Context.ConnectionAborted);
-                clientProvider.SetAuthSessionData(sessionStore, authSession.AuthSessionData);
+                authService.SetAuthSessionDataCookies();
 
-                var authService = new AuthService(authProvider, authSession, clientProvider, sessionStore);
                 appServices.AddSingleton<IAuthService>(s => authService);
 
                 var oldSession = authSession.TakeSnapshot();

@@ -3,6 +3,7 @@ using Ivy.Apps;
 using Ivy.Views;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Ivy.Auth;
 
 namespace Ivy.Core.Helpers;
 
@@ -24,10 +25,12 @@ public static class SessionHelpers
         {
             var displayException = new Exception("Your session is no longer valid. Please log in again.");
             var clientProvider = session.AppServices.GetRequiredService<IClientProvider>();
+            var authService = session.AppServices.GetRequiredService<IAuthService>();
 
             if (resetTokenAndReload)
             {
-                clientProvider.SetAuthToken(sessionStore, null, reloadPage: true, triggerMachineReload: triggerMachineReload);
+                authService.GetAuthSession().AuthToken = null;
+                authService.SetAuthTokenCookies(reloadPage: true, triggerMachineReload: triggerMachineReload);
             }
 
             session.WidgetTree = new WidgetTree(new ErrorView(displayException), contentBuilder, session.AppServices);
