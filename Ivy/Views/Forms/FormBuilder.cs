@@ -1,5 +1,4 @@
 using System.Linq.Expressions;
-using Ivy.Client;
 using Ivy.Core;
 using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
@@ -17,9 +16,10 @@ public class FormBuilder<TModel> : ViewBase
     private readonly List<string> _groups = [];
     private readonly Dictionary<string, bool> _groupOpenStates = [];
 
-    public Scale Scale { get; private set; } = Scale.Medium;
-    public string SubmitTitle { get; init; }
-    public FormValidationStrategy ValidationStrategy { get; set; }
+    internal Scale _scale = Shared.Scale.Medium;
+    internal Func<bool, Button> _submitBuilder = DefaultSubmitBuilder("Save");
+    internal FormValidationStrategy _validationStrategy;
+    internal Func<TModel, Task>? _onSubmit;
 
     public FormBuilder(
         IState<TModel> model,
@@ -28,8 +28,40 @@ public class FormBuilder<TModel> : ViewBase
     {
         _model = model;
         _fields = FormScaffolder.ScaffoldFields<TModel>(_model.GetStateType());
-        SubmitTitle = submitTitle;
-        ValidationStrategy = validationStrategy;
+        SubmitTitle(submitTitle);
+        _validationStrategy = validationStrategy;
+    }
+
+    internal static Func<bool, Button> DefaultSubmitBuilder(string title) => (isLoading) => new Button(title).Loading(isLoading).Disabled(isLoading);
+
+    public FormBuilder<TModel> SubmitBuilder(Func<bool, Button> builder)
+    {
+        _submitBuilder = builder;
+        return this;
+    }
+
+    public FormBuilder<TModel> SubmitTitle(string title)
+    {
+        _submitBuilder = DefaultSubmitBuilder(title);
+        return this;
+    }
+
+    public FormBuilder<TModel> ValidationStrategy(FormValidationStrategy strategy)
+    {
+        _validationStrategy = strategy;
+        return this;
+    }
+
+    internal IState<TModel> GetModel() => _model;
+
+    /// <summary>
+    /// Sets a callback that is invoked after the form passes validation but before the model state is updated.
+    /// Use this for async operations like saving to a database.
+    /// </summary>
+    public FormBuilder<TModel> HandleSubmit(Func<TModel, Task> onSubmit)
+    {
+        _onSubmit = onSubmit;
+        return this;
     }
 
     public FormBuilder<TModel> Builder(Expression<Func<TModel, object>> field, Func<IAnyState, IAnyInput> factory)
@@ -264,15 +296,15 @@ public class FormBuilder<TModel> : ViewBase
         return this;
     }
 
-    private FormBuilder<TModel> _SetScale(Scale scale)
+    public FormBuilder<TModel> Scale(Scale scale)
     {
-        Scale = scale;
+        _scale = scale;
         return this;
     }
 
-    public FormBuilder<TModel> Small() => _SetScale(Scale.Small);
-    public FormBuilder<TModel> Medium() => _SetScale(Scale.Medium);
-    public FormBuilder<TModel> Large() => _SetScale(Scale.Large);
+    public FormBuilder<TModel> Small() => Scale(Shared.Scale.Small);
+    public FormBuilder<TModel> Medium() => Scale(Shared.Scale.Medium);
+    public FormBuilder<TModel> Large() => Scale(Shared.Scale.Large);
 
     private FormBuilderField<TModel> GetField<TU>(Expression<Func<TModel, TU>> field)
     {
@@ -311,8 +343,8 @@ public class FormBuilder<TModel> : ViewBase
                     e.Required,
                     new FormFieldLayoutOptions(e.RowKey, e.Column, e.Order, e.Group),
                     e.Validators.ToArray(),
-                    ValidationStrategy,
-                    Scale,
+                    _validationStrategy,
+                    _scale,
                     e.Help,
                     e.Placeholder
                 );
@@ -325,6 +357,10 @@ public class FormBuilder<TModel> : ViewBase
             var results = await validationSignal.Send(new Unit());
             if (results.All(e => e))
             {
+                if (_onSubmit != null)
+                {
+                    await _onSubmit(currentModel.Value);
+                }
                 _model.Set(StateHelpers.DeepClone(currentModel.Value)!);
                 invalidFields.Set(0);
                 return true;
@@ -346,7 +382,7 @@ public class FormBuilder<TModel> : ViewBase
         var formView = new FormView<TModel>(
             fieldViews,
             HandleSubmitEvent,
-            Scale,
+            _scale,
             _groupOpenStates
         );
 
@@ -365,42 +401,21 @@ public class FormBuilder<TModel> : ViewBase
     {
         (Func<Task<bool>> onSubmit, IView formView, IView validationView, bool submitting) = UseForm(this.Context);
 
-        var hasUploading = UseState(false);
-        var client = UseService<IClientProvider>();
+        var (handleSubmit, isUploading) = Context.UseUploadAwareSubmit(_model, onSubmit);
 
-        UseEffect(() =>
+        var buttonGap = _scale switch
         {
-            hasUploading.Set(CheckForLoadingUploads(_model.Value));
-        }, _model);
-
-        async ValueTask HandleSubmit()
-        {
-            if (hasUploading.Value)
-            {
-                client.Toast(
-                    "File uploads are still in progress. Please wait for them to complete.",
-                    "Uploads in Progress"
-                );
-                return;
-            }
-            await onSubmit();
-        }
-
-        var buttonGap = Scale switch
-        {
-            Scale.Small => 4,
-            Scale.Large => 8,
+            Shared.Scale.Small => 4,
+            Shared.Scale.Large => 8,
             _ => 6
         };
 
-        return Layout.Vertical(
-               formView,
-               Layout.Horizontal(new Button(SubmitTitle)
-                   .HandleClick(HandleSubmit)
-                   .Loading(submitting)
-                   .Disabled(submitting || hasUploading.Value)
-                   .Scale(Scale), validationView))
-               .Gap(buttonGap);
+        return Layout.Vertical().Gap(buttonGap)
+               | formView
+               | Layout.Horizontal(
+                   _submitBuilder(submitting || isUploading).HandleClick(_ => handleSubmit()).Scale(_scale),
+                   validationView
+                );
     }
 
     private static string InvalidMessage(int invalidFields)
