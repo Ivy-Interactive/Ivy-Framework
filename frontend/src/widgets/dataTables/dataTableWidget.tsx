@@ -5,7 +5,7 @@ import { TableProvider } from './dataTableContext';
 import { useTable } from './dataTableContext';
 import { ErrorDisplay } from '@/components/ErrorDisplay';
 import { Loading } from '@/components/Loading';
-import { DataTableEditor } from './dataTableEditor/index';
+import { DataTableEditor } from './dataTableEditor';
 import { DataTableHeader } from './dataTableHeader';
 import { DataTableFooter } from './dataTableFooter';
 import { DataTableOption } from './dataTableOption';
