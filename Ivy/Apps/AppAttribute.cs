@@ -2,7 +2,7 @@ using Ivy.Shared;
 
 namespace Ivy.Apps;
 
-[AttributeUsage(System.AttributeTargets.Class)]
+[AttributeUsage(AttributeTargets.Class)]
 public class AppAttribute(
     string? id = null,
     string? title = null,
