@@ -9,296 +9,47 @@ This release introduces major improvements to form scaffolding with comprehensiv
 
 ## Improvements
 
-### Button Variants
+### New Widgets
 
-**SkinnyGhost Variant:**
+#### Stepper Widget
 
-A new `SkinnyGhost` button variant provides ultra-compact button layouts for tight spaces:
-
-```csharp
-new Button("Edit")
-    .SkinnyGhost()
-    .Icon(Icons.Pencil);
-```
-
-Features minimal padding (`p-1`) with auto height, ideal for table rows, toolbars, or icon-only buttons.
-
-### DateTime Input Visual Improvements
-
-**Icon Positioning:**
-- Calendar and clock icons now positioned inside input fields
-- Consistent spacing across all date/time variants
-- Clock icon appears inside Time input field
-
-**Disabled State:**
-- Consistent styling matching DateRange inputs
-- Reduced opacity for icons in disabled inputs
-- Proper `not-allowed` cursor on hover
-
-**Clear and Error Icon Layout:**
-- Absolute positioning for reliable placement
-- Optimized spacing to prevent text overlap
-- Automatic padding adjustment based on visible icons
-
-### Form Input Size Consistency
-
-All form inputs now follow a unified sizing system:
-- **Small**: `h-7` with `px-2` padding
-- **Medium**: `h-9` with `px-3` padding  
-- **Large**: `h-11` with `px-4` padding
-
-Size variants simplified from enum-based to string literals for easier usage.
-
-### AsyncSelectInput Enhancements
-
-**Scale Support:**
-
-AsyncSelectInput now fully supports the standard scale system:
+New `Stepper` widget for multi-step processes:
 
 ```csharp
-selectedOption.ToAsyncSelectInput(QueryOptions, LookupOption, "Search...")
-    .Small();   // h-7
-    .Medium();  // h-9 (default)
-    .Large();   // h-11
-```
+var currentStep = UseState(0);
 
-Scale affects height, padding, text size, icon size, and search sheet styling.
+var steps = new[]
+{
+    new StepperItem("1", Icons.Check, "Company", "Basic info"),
+    new StepperItem("2", null, "Raise", "Funding details"),
+    new StepperItem("3", null, "Deck", "Presentation"),
+    new StepperItem("4", null, "Founders", "Team info")
+};
 
-**Visual Integration:**
-- Chevron icon uses absolute positioning with optimized sizing
-- Reduced opacity (50%) for subtle appearance
-- Better text alignment without excessive margins
-
-**Full-Width Dividers:**
-
-Dropdown dividers now extend to full width for cleaner appearance.
-
-**Option Descriptions:**
-
-Options support optional descriptions appearing below labels:
-
-```csharp
-new Option<string>(
-    label: "Germany",
-    value: "DE",
-    description: "Europe"  // Appears below label
+new Stepper(
+    onSelect: async e => currentStep.Set(e.Value),
+    selectedIndex: currentStep.Value,
+    items: steps
 )
+.AllowSelectForward();  // Allow jumping ahead
 ```
 
-**Option Icons:**
+**Features:**
 
-Options now support icons for visual indicators:
+- Visual states: completed (checkmark), current (highlighted), upcoming (muted)
+- Selective navigation: by default, only completed steps clickable
+- Forward navigation: use `.AllowSelectForward()` to allow jumping ahead
+- Icons, labels, and descriptions per step
+- Connected design with highlighted progress lines
 
-```csharp
-new Option<string>("Active", "active", icon: Icons.CheckCircle)
-```
+### Form System
 
-**Optional Labels:**
-
-The `Label` property is now nullable - when omitted, uses `value.ToString()` as fallback.
-
-### File Input Improvements
-
-**Enhanced Event Handlers:**
-
-**OnBlur Handler:**
-Fires when file dialog closes (whether files selected or cancelled):
-
-```csharp
-files.ToFileInput(upload)
-    .HandleBlur((Event<IAnyInput> e) =>
-    {
-        if (files.Value.Length > 0)
-            Console.WriteLine($"{files.Value.Length} file(s) selected");
-    });
-```
-
-**OnCancel Handler:**
-Fires when user clicks X button on a file:
-
-```csharp
-files.ToFileInput(upload)
-    .HandleCancel((Guid fileId) =>
-    {
-        upload.Value.Cancel(fileId);
-        files.Set(list => list.Where(f => f.Id != fileId).ToImmutableArray());
-    });
-```
-
-**Consolidated Documentation:**
-
-File upload documentation merged into comprehensive FileInput widget documentation with unified examples and patterns.
-
-### Field Widget
-
-**Width and Height Support:**
-
-FieldWidget now supports custom width and height properties:
-
-```csharp
-<FieldWidget
-  label="Username"
-  width="300px"
-  height="auto"
->
-  {/* Your input component */}
-</FieldWidget>
-```
-
-When not specified, maintains default flexible behavior for backward compatibility.
-
-### Kanban Improvements
-
-**CardBuilder Now Required:**
-
-The Kanban widget now requires `.CardBuilder()` - simple `titleSelector` and `descriptionSelector` parameters removed:
-
-```csharp
-// Before - no longer supported
-tasks.ToKanban(
-    groupBySelector: e => e.Status,
-    titleSelector: e => e.Title,
-    descriptionSelector: e => e.Description)
-
-// After - CardBuilder required
-tasks.ToKanban(
-    groupBySelector: e => e.Status,
-    idSelector: e => e.Id,
-    orderSelector: e => e.Priority)
-.CardBuilder(task => new Card()
-    .Title(task.Title)
-    .Description(task.Description))
-```
-
-**HandleMove Renamed:**
-
-`.HandleCardMove()` renamed to `.HandleMove()` for consistency:
-
-```csharp
-tasks.ToKanban(...)
-    .HandleMove(moveData => {
-        // Handle card movement
-    });
-```
-
-**Removed Event Handlers:**
-
-`.HandleClick()` and `.HandleDelete()` removed. Implement click/delete functionality within `.CardBuilder()` instead.
-
-**Column Width Changes:**
-
-Column width configuration simplified - use `.ColumnWidth()` for uniform width across all columns:
-
-```csharp
-tasks.ToKanban(...)
-    .Width(Size.Full())              // Overall board width
-    .ColumnWidth(Size.Rem(20))       // Uniform column width (enables horizontal scroll)
-```
-
-**Custom Card Ordering:**
-
-Use `.CardOrder()` to sort cards within columns independently of global `orderSelector`:
-
-```csharp
-tasks.ToKanban(...)
-    .CardOrder(e => e.DueDate)  // Sort by due date within each column
-```
-
-**Fixed Card Reordering Logic:**
-
-Cards now correctly reorder when dragged within same column or between columns. Fix addresses edge cases with end-of-column positioning and insertion index calculation.
-
-**Improved Drag Visual Feedback:**
-
-Column highlights properly clear after drag operations complete. Drag-over state centralized in Kanban context.
-
-**Enhanced Drag-and-Drop Interactions:**
-
-- Drop position indicators show exact insertion point
-- Smooth animations (0.2s ease) when cards shift
-- Improved column styling with accent background on drag-over
-- Refined scrollbars (1.5 units instead of 2.5)
-
-**Simplified Width and Height Methods:**
-
-Methods now accept only `Size` parameters - use `Size.Units()`, `Size.Fraction()`, etc.:
-
-```csharp
-// Before
-tasks.ToKanban(...).Width(800).Height(600);
-
-// After
-tasks.ToKanban(...).Width(Size.Units(800)).Height(Size.Units(600));
-```
-
-### HeaderLayout Widget
-
-**Scroll Control:**
-
-Disable automatic ScrollArea wrapper for custom scrolling:
-
-```csharp
-new HeaderLayout(header, content)
-    .Scroll(Scroll.None)  // Content handles its own scrolling
-```
-
-When `.Scroll(Scroll.None)` is set, HeaderLayout automatically sets height to `Size.Full()` if no explicit height provided.
-
-### Alert Dialogs
-
-**Improved Button Layout:**
-
-Alert dialog buttons now follow standard UI conventions:
-- All buttons right-aligned in footer
-- Button order: Cancel (secondary) | No | Yes (primary)
-- Primary actions consistently on the right
-
-### Theming System
-
-**Streamlined Color Palette:**
-
-Documentation updated to reflect actual color variables in Ivy Design System. Removed documentation for unused variables (`Chart1-5`, `Sidebar`, `SidebarForeground`).
-
-Current supported theme colors focus on Main, Semantic, and UI Elements categories.
-
-### Article Widget
-
-**Fixed Navigation in Chrome=False Mode:**
-
-Previous/next navigation links now preserve `chrome=false` parameter when navigating between articles, preventing unexpected chrome mode toggling.
-
-### Tooltips
-
-**Multiline Text Support:**
-
-- Maximum width constrained to `max-w-sm` (24rem/384px)
-- Long strings without spaces use `break-all` for proper wrapping
-- Table cell tooltips use `whitespace-pre-wrap` for proper formatting
-
-### Utilities
-
-**Number Formatting:**
-
-New `Utils.FormatNumber()` utility for formatting large numbers:
-
-```csharp
-Utils.FormatNumber(1500);           // "1.5K"
-Utils.FormatNumber(2500000);        // "2.5M"
-Utils.FormatNumber(3800000000);     // "3.8B"
-Utils.FormatNumber(1234567, 1);     // "1.2M" (1 decimal place)
-```
-
-### Authentication
-
-**Cross-Tab Logout Synchronization:**
-
-When logging out in one browser tab, all other tabs automatically reload and reflect logged-out state using Broadcast Channel API. Works in all modern browsers (Chrome, Firefox, Edge, Safari 15.4+).
-
-### Form Scaffolding
+#### Form Scaffolding
 
 **Upload-Aware Form Submission:**
 
 Forms automatically prevent submission while file uploads are in progress:
+
 - Submit button disabled during uploads
 - Toast notification: "File uploads are still in progress. Please wait for them to complete."
 - Applies to standard forms, sheet forms, and dialog forms
@@ -357,6 +108,7 @@ model.ToForm()
 **Improved Form Spacing and Typography:**
 
 Scale-appropriate spacing between fields and submit button:
+
 - Small: 4px gap, `text-xs`
 - Medium: 6px gap, `text-sm` (default)
 - Large: 8px gap, `text-base`
@@ -374,6 +126,7 @@ public string Name { get; set; }
 **Input Type Detection:**
 
 Automatically detects input type from `[DataType]` attributes:
+
 - `[DataType(DataType.EmailAddress)]` → Email input
 - `[DataType(DataType.Password)]` → Password input
 - `[DataType(DataType.Url)]` → URL input
@@ -382,6 +135,7 @@ Automatically detects input type from `[DataType]` attributes:
 **Validation Attributes:**
 
 All major validation attributes supported:
+
 - `[Required]`, `[StringLength]`, `[Range]`, `[RegularExpression]`
 - `[EmailAddress]`, `[Phone]`, `[Url]`, `[CreditCard]`
 - `[AllowedValues]`, `[Compare]`
@@ -405,7 +159,431 @@ dateState.ToDateTimeInput().Placeholder("Select a date");
 
 **Fixed Label Generation:**
 
-Custom labels specified with `[Display]` attributes now correctly preserved when field names end with "Id".
+Improved logic for handling label generation when field names end with "Id":
+
+- Custom labels specified with `[Display]` attributes are now correctly preserved without modification
+- Only trims "Id" suffix from auto-generated labels (not from Display attribute names)
+- Checks if the label itself ends with "Id" before trimming, preventing incorrect truncation
+- Preserves labels like "User ID", "Government ID", and "Id" when specified via Display attributes
+
+#### Form Input Size Consistency
+
+All form inputs now follow a unified sizing system:
+
+- **Small**: `h-7` with `px-2` padding
+- **Medium**: `h-9` with `px-3` padding  
+- **Large**: `h-11` with `px-4` padding
+
+Size variants simplified from enum-based to string literals for easier usage.
+
+### Input Widgets
+
+#### AsyncSelectInput Enhancements
+
+**Scale Support:**
+
+AsyncSelectInput now fully supports the standard scale system:
+
+```csharp
+selectedOption.ToAsyncSelectInput(QueryOptions, LookupOption, "Search...")
+    .Small();   // h-7
+    .Medium();  // h-9 (default)
+    .Large();   // h-11
+```
+
+Scale affects height, padding, text size, icon size, and search sheet styling.
+
+**Visual Integration:**
+
+New styles that look good when mixed with other elements:
+
+- Chevron icon uses absolute positioning with optimized sizing
+- Reduced opacity (50%) for subtle appearance
+- Better text alignment without excessive margins
+
+**Full-Width Dividers:**
+
+Dropdown dividers now extend to full width for cleaner appearance.
+
+**Option Descriptions:**
+
+Options support optional descriptions appearing below labels:
+
+```csharp
+new Option<string>(
+    label: "Germany",
+    value: "DE",
+    description: "Europe"  // Appears below label
+)
+```
+
+**Option Icons:**
+
+Options now support icons for visual indicators:
+
+```csharp
+new Option<string>("Active", "active", icon: Icons.CheckCircle)
+```
+
+**Optional Labels:**
+
+The `Label` property is now nullable - when omitted, uses `value.ToString()` as fallback.
+
+#### DateTime Input Visual Improvements
+
+**Icon Positioning:**
+
+- Calendar and clock icons now positioned inside input fields
+- Consistent spacing across all date/time variants
+- Clock icon appears inside Time input field
+
+**Disabled State:**
+
+- Consistent styling matching DateRange inputs
+- Reduced opacity for icons in disabled inputs
+- Proper `not-allowed` cursor on hover
+
+**Clear and Error Icon Layout:**
+
+- Absolute positioning for reliable placement
+- Optimized spacing to prevent text overlap
+- Automatic padding adjustment based on visible icons
+
+#### File Input Improvements
+
+**Enhanced Event Handlers:**
+
+**OnBlur Handler:**
+Fires when file dialog closes (whether files selected or cancelled):
+
+```csharp
+files.ToFileInput(upload)
+    .HandleBlur((Event<IAnyInput> e) =>
+    {
+        if (files.Value.Length > 0)
+            Console.WriteLine($"{files.Value.Length} file(s) selected");
+    });
+```
+
+**OnCancel Handler:**
+Fires when user clicks X button on a file:
+
+```csharp
+files.ToFileInput(upload)
+    .HandleCancel((Guid fileId) =>
+    {
+        upload.Value.Cancel(fileId);
+        files.Set(list => list.Where(f => f.Id != fileId).ToImmutableArray());
+    });
+```
+
+**Consolidated Documentation:**
+
+File upload documentation merged into comprehensive FileInput widget documentation with unified examples and patterns.
+
+#### Field Widget
+
+**Width and Height Support:**
+
+FieldWidget now supports custom width and height properties:
+
+```csharp
+<FieldWidget
+  label="Username"
+  width="300px"
+  height="auto"
+>
+  {/* Your input component */}
+</FieldWidget>
+```
+
+When not specified, maintains default flexible behavior for backward compatibility.
+
+Field widgets also support explicit width and height directly:
+
+```csharp
+state.ToTextInput()
+    .Width("300px")
+    .Height("40px");
+```
+
+### Kanban Widget
+
+**CardBuilder Now Required:**
+
+The Kanban widget now requires `.CardBuilder()` - simple `titleSelector` and `descriptionSelector` parameters removed:
+
+```csharp
+// Before - no longer supported
+tasks.ToKanban(
+    groupBySelector: e => e.Status,
+    titleSelector: e => e.Title,
+    descriptionSelector: e => e.Description)
+
+// After - CardBuilder required
+tasks.ToKanban(
+    groupBySelector: e => e.Status,
+    idSelector: e => e.Id,
+    orderSelector: e => e.Priority)
+.CardBuilder(task => new Card()
+    .Title(task.Title)
+    .Description(task.Description)
+    .HandleClick(() => showTaskSheet(task.Id)))  // Card click example
+```
+
+**HandleMove Renamed:**
+
+`.HandleCardMove()` renamed to `.HandleMove()` for consistency:
+
+```csharp
+tasks.ToKanban(...)
+    .HandleMove(moveData => {
+        // Handle card movement
+    });
+```
+
+**Removed Event Handlers:**
+
+`.HandleClick()` and `.HandleDelete()` removed from Kanban API. Implement click/delete functionality within `.CardBuilder()` instead using Card's `.HandleClick()` method.
+
+**Column Width Changes:**
+
+Column width configuration simplified - use `.ColumnWidth()` for uniform width across all columns:
+
+```csharp
+tasks.ToKanban(...)
+    .Width(Size.Full())              // Overall board width
+    .ColumnWidth(Size.Rem(20))       // Uniform column width (enables horizontal scroll)
+```
+
+**Custom Card Ordering:**
+
+Use `.CardOrder()` to sort cards within columns independently of global `orderSelector`. This allows you to override or refine the card ordering within each column:
+
+```csharp
+tasks.ToKanban(
+    groupBySelector: e => e.Status,
+    idSelector: e => e.Id,
+    orderSelector: e => e.Priority)  // Global ordering
+.CardBuilder(task => new Card()
+    .Title(task.Title)
+    .Description(task.Description))
+.CardOrder(e => e.DueDate)  // Order cards by due date within each column - upcoming deadlines first
+```
+
+The `.CardOrder()` method is separate from the `orderSelector` parameter in `.ToKanban()` and provides fine-grained control over how cards are sorted within each column.
+
+**Fixed Card Reordering Logic:**
+
+Cards now correctly reorder when dragged within same column or between columns. Fix addresses edge cases with end-of-column positioning and insertion index calculation.
+
+**Improved Drag Visual Feedback:**
+
+Column highlights properly clear after drag operations complete. Drag-over state centralized in Kanban context.
+
+**Enhanced Drag-and-Drop Interactions:**
+
+- Drop position indicators show exact insertion point
+- Smooth animations (0.2s ease) when cards shift
+- Improved column styling with accent background on drag-over
+- Refined scrollbars (1.5 units instead of 2.5)
+
+**Visual Refinements:**
+
+- Improved scroll bar padding and rounded corners for better visual consistency
+- Adjusted column and card container padding for optimal spacing
+- Reduced border radius for more subtle appearance
+
+**Simplified Width and Height Methods:**
+
+Methods now accept only `Size` parameters - use `Size.Units()`, `Size.Fraction()`, etc.:
+
+```csharp
+// Before
+tasks.ToKanban(...).Width(800).Height(600);
+
+// After
+tasks.ToKanban(...).Width(Size.Units(800)).Height(Size.Units(600));
+```
+
+### HeaderLayout Widget
+
+**Scroll Control:**
+
+Disable automatic ScrollArea wrapper for custom scrolling:
+
+```csharp
+new HeaderLayout(header, content)
+    .Scroll(Scroll.None)  // Content handles its own scrolling
+```
+
+When `.Scroll(Scroll.None)` is set, HeaderLayout automatically sets height to `Size.Full()` if no explicit height provided.
+
+**Kanban Integration:**
+
+Kanban boards can now be used in HeaderLayout with scrolling disabled:
+
+```csharp
+var header = Layout.Horizontal() | new Button("Add Task");
+var kanban = tasks.ToKanban(...).CardBuilder(...);
+
+return new HeaderLayout(header, kanban)
+    .Scroll(Scroll.None); // Disable HeaderLayout scrolling for Kanban
+```
+
+### Table Widget
+
+**API Change: Width → ColumnWidth:**
+
+The `.Width()` method for setting column widths renamed to `.ColumnWidth()`:
+
+```csharp
+// Before
+products.ToTable()
+    .Width(e => e.Sku, Size.Fraction(0.15f));
+
+// After
+products.ToTable()
+    .ColumnWidth(e => e.Sku, Size.Fraction(0.15f));
+```
+
+**Improved Column Width and Text Wrapping:**
+
+- Full width tables use `table-layout: fixed` to respect column constraints and prevent overflow
+- Fixed width tables use `table-layout: auto` for natural sizing and expansion when needed
+- Multi-line cells use `break-words` for better wrapping
+- Header cells always truncate with tooltips
+- Data cells only truncate when explicit column width is set, allowing natural sizing otherwise
+
+**Enhanced Column Alignment API:**
+
+The `.Align()` method now properly aligns content within both header and data cells using `text-align` CSS properties:
+
+```csharp
+records.ToTable()
+    .ColumnWidth(e => e.Views, Size.Fit())
+    .Align(e => e.Views, Align.Right);  // Right-align numbers
+```
+
+### DataTable Widget
+
+**Complete Frontend Solution Rework:**
+
+The DataTable widget has undergone a comprehensive frontend rework, focusing on improved row identification, event handling, and code organization.
+
+**Row Action Improvements:**
+
+Row actions enhanced with better event handling. **Important**: You must specify `idSelector` when using row actions to properly identify rows:
+
+```csharp
+users.ToDataTable(idSelector: e => e.Id)
+    .Column(e => e.Name)
+    .RowActions(
+        MenuItem.Default(Icons.Pencil, "edit").Tooltip("Edit employee"),
+        MenuItem.Default(Icons.EllipsisVertical, "menu")
+            .Children([
+                MenuItem.Default(Icons.Archive, "archive").Label("Archive")
+            ])
+    )
+    .HandleRowAction(async e =>
+    {
+        var userId = e.Value.Id;   // Direct access to row ID
+        var action = e.Value.Tag;  // Menu item tag
+    });
+```
+
+**Key Changes:**
+
+`RowActionClickEventArgs` simplified:
+
+- **New**: `Id` (row's unique identifier), `Tag` (menu item's tag)
+- **Removed**: `ActionId`, `EventName`, `RowIndex`, `RowData`
+
+**Event Handling Improvements:**
+
+DataTable event handling now uses row IDs throughout, replacing less reliable row index and data dictionary access. Toast messages and event arguments now consistently use row IDs for more robust event tracking.
+
+**Improved Performance with Arrow Tables:**
+
+DataTable now uses Apache Arrow's columnar storage format internally for better memory efficiency and performance with large datasets. Transparent to existing code - no changes required.
+
+**Column Resizing:**
+
+DataTable now supports column resizing out of the box. Users can drag column borders to adjust widths. Column widths preserved during session.
+
+To disable:
+
+```csharp
+users.ToDataTable()
+    .Config(c => c.AllowColumnResizing = false);
+```
+
+### Charts
+
+**Toolbox on Hover:**
+
+Chart toolbox controls now only appear when hovering over chart (if enabled), providing cleaner appearance by default.
+
+**Fixed Y-Axis Rendering with Negative Values:**
+
+Charts now correctly handle negative values by automatically adjusting Y-axis minimum to include negative ranges. Previously, Y-axis would always start at 0, cutting off negative data points.
+
+### Grid Layout
+
+**Improved Dark Mode Contrast:**
+
+Grid layouts now have improved text contrast in dark mode when using opacity. Previously, text was unreadable on boxes with opacity because `color-mix` always mixed towards white, making backgrounds lighter while text remained white.
+
+The fix uses a CSS variable `--opacity-mix-color` that switches between white (light mode) and black (dark mode), ensuring text stays readable in both themes. Color-mix for opacity now always blends with the current `--background` variable, providing context-aware transparency without extra global or theme-specific variables.
+
+**Enhanced Grid API:**
+
+**Column and Row Sizing:**
+
+```csharp
+Layout.Grid()
+    .Columns(3)
+    .ColumnWidths(Size.Px(100), Size.Fraction(1), Size.Px(150))
+    .RowHeights(Size.Px(60), Size.Fraction(1), Size.Fraction(1))
+```
+
+**Header and Footer Builders:**
+
+```csharp
+Layout.Grid()
+    .Columns(4)
+    .HeaderBuilder((columnIndex, cell) =>
+        cell.WithCell().Color(Colors.Green).Content($"Header {columnIndex}"))
+    .FooterBuilder((columnIndex, cell) =>
+        cell.WithCell().Color(Colors.Blue).Content($"Total: {cell}"))
+```
+
+**Cell Builder:**
+
+```csharp
+Layout.Grid()
+    .Columns(3)
+    .CellBuilder(cell => cell.WithCell().Color(Colors.Gray))
+```
+
+**WithCell() Extension:**
+
+Creates borderless boxes that fill entire grid cell:
+
+```csharp
+"Fills cell".WithCell()
+"No borders".WithCell().Color(Colors.Blue)
+```
+
+**Color Opacity Support:**
+
+Box widget now supports color opacity (0.0 to 1.0):
+
+```csharp
+new Box("50% opacity").Color(Colors.Blue, 0.5f)
+```
+
+Perfect for heatmaps, cohort analysis, and visual hierarchies.
 
 ### Component Sizing
 
@@ -461,139 +639,89 @@ When Expandable is disabled, interactive elements within header (buttons, switch
 
 **Improved Click Handling:**
 
-Click handling properly distinguishes between clicking interactive elements and clicking expandable header itself.
+Click handling properly distinguishes between clicking interactive elements (buttons, switches, links) and clicking expandable header itself. Switches and other interactive elements in the header remain fully functional and don't trigger the expandable toggle.
 
-### Table Widget
+### Box Widget
 
-**API Change: Width → ColumnWidth:**
+**Plain() Extension Method:**
 
-The `.Width()` method for setting column widths renamed to `.ColumnWidth()`:
+New `Box.Plain()` extension method provides a reusable preset for demo/documentation styling:
 
 ```csharp
-// Before
-products.ToTable()
-    .Width(e => e.Sku, Size.Fraction(0.15f));
-
-// After
-products.ToTable()
-    .ColumnWidth(e => e.Sku, Size.Fraction(0.15f));
+new Box().Plain().Content(content)
 ```
 
-**Improved Column Width and Text Wrapping:**
+Applies DemoBox-style settings: 1px border, 16px padding, neutral color, top-left alignment. This replaces the removed `DemoBox` widget for a more consistent API.
 
-- Full width tables use `table-layout: fixed` to respect column constraints
-- Fixed width tables use `table-layout: auto` for natural sizing
-- Multi-line cells use `wrap-break-word` for better wrapping
-- Header cells always truncate with tooltips
+### Button Variants
 
-**Enhanced Column Alignment API:**
+**SkinnyGhost Variant:**
 
-The `.Align()` method now properly aligns content within both header and data cells using `text-align` CSS properties:
+A new `SkinnyGhost` button variant provides ultra-compact button layouts for tight spaces:
 
 ```csharp
-records.ToTable()
-    .ColumnWidth(e => e.Views, Size.Fit())
-    .Align(e => e.Views, Align.Right);  // Right-align numbers
+new Button("Edit")
+    .SkinnyGhost()
+    .Icon(Icons.Pencil);
 ```
 
-### DataTable Widget
+Features minimal padding (`p-1`) with auto height, ideal for table rows, toolbars, or icon-only buttons.
 
-**Row Action Improvements:**
+### Alert Dialogs
 
-Row actions enhanced with better event handling. **Important**: You must specify `idSelector` when using row actions to properly identify rows:
+**Improved Button Layout:**
+
+Alert dialog buttons now follow standard UI conventions:
+
+- All buttons right-aligned in footer
+- Button order: Cancel (secondary) | No | Yes (primary)
+- Primary actions consistently on the right
+
+### Tooltips
+
+**Multiline Text Support:**
+
+- Maximum width constrained to `max-w-sm` (24rem/384px)
+- Long strings without spaces use `break-all` for proper wrapping
+- Table cell tooltips use `whitespace-pre-wrap` for proper formatting
+
+### List Widget
+
+**Full-Width Dividers:**
+
+List widget dividers now extend the full width of the container for better visual separation.
+
+### Loading Widget
+
+**Enhanced Visual Presentation:**
+
+- Fixed, full-screen overlay with semi-transparent dark background
+- 200ms display delay to prevent jarring flashes for quick operations
+- Operations completing in under 200ms won't show loading indicator
+
+**State-Based Visibility:**
+
+Loading widget can now be conditionally rendered based on state:
 
 ```csharp
-users.ToDataTable(idSelector: e => e.Id)
-    .Column(e => e.Name)
-    .RowActions(
-        MenuItem.Default(Icons.Pencil, "edit").Tooltip("Edit employee"),
-        MenuItem.Default(Icons.EllipsisVertical, "menu")
-            .Children([
-                MenuItem.Default(Icons.Archive, "archive").Label("Archive")
-            ])
-    )
-    .HandleRowAction(async e =>
-    {
-        var userId = e.Value.Id;   // Direct access to row ID
-        var action = e.Value.Tag;  // Menu item tag
-    });
+var isLoading = UseState(false);
+
+return isLoading.True(() => new Loading())!;
 ```
 
-**Key Changes:**
+### Layout System
 
-`RowActionClickEventArgs` simplified:
-- **New**: `Id` (row's unique identifier), `Tag` (menu item's tag)
-- **Removed**: `ActionId`, `EventName`, `RowIndex`, `RowData`
+**TopCenter Alignment:**
 
-**Improved Performance with Arrow Tables:**
-
-DataTable now uses Apache Arrow's columnar storage format internally for better memory efficiency and performance with large datasets. Transparent to existing code - no changes required.
-
-**Column Resizing:**
-
-DataTable now supports column resizing out of the box. Users can drag column borders to adjust widths. Column widths preserved during session.
-
-To disable:
-```csharp
-users.ToDataTable()
-    .Config(c => c.AllowColumnResizing = false);
-```
-
-### Chrome Customization
-
-**Generic UseChrome Method:**
-
-Simpler generic syntax for custom chrome:
+New `Layout.TopCenter()` method for horizontally-aligned layouts with top-center alignment:
 
 ```csharp
-// Before
-server.UseChrome(() => new MyCustomChrome());
-
-// After
-server.UseChrome<MyCustomChrome>();
-```
-
-### Charts
-
-**Toolbox on Hover:**
-
-Chart toolbox controls now only appear when hovering over chart, providing cleaner appearance by default.
-
-**Fixed Y-Axis Rendering with Negative Values:**
-
-Charts now correctly handle negative values by automatically adjusting Y-axis minimum to include negative ranges. Previously, Y-axis would always start at 0, cutting off negative data points.
-
-### Stepper Widget
-
-**New Component:**
-
-New `Stepper` widget for multi-step processes:
-
-```csharp
-var currentStep = UseState(0);
-
-var steps = new[]
-{
-    new StepperItem("1", Icons.Check, "Company", "Basic info"),
-    new StepperItem("2", null, "Raise", "Funding details"),
-    new StepperItem("3", null, "Deck", "Presentation"),
-    new StepperItem("4", null, "Founders", "Team info")
-};
-
-new Stepper(
-    onSelect: async e => currentStep.Set(e.Value),
-    selectedIndex: currentStep.Value,
-    items: steps
+Layout.TopCenter(
+    new Button("Action 1"),
+    new Button("Action 2"),
+    new Button("Action 3")
 )
-.AllowSelectForward();  // Allow jumping ahead
 ```
-
-**Features:**
-- Visual states: completed (checkmark), current (highlighted), upcoming (muted)
-- Selective navigation: by default, only completed steps clickable
-- Forward navigation: use `.AllowSelectForward()` to allow jumping ahead
-- Icons, labels, and descriptions per step
-- Connected design with highlighted progress lines
 
 ### State Management
 
@@ -619,82 +747,24 @@ return new Fragment()
     | isLoading.False(() => new Button("Load Data"));
 ```
 
-### Loading Widget
+### Utilities
 
-**Enhanced Visual Presentation:**
+**Number Formatting:**
 
-- Fixed, full-screen overlay with semi-transparent dark background
-- 200ms display delay to prevent jarring flashes for quick operations
-- Operations completing in under 200ms won't show loading indicator
-
-### Layout System
-
-**TopCenter Alignment:**
-
-New `Layout.TopCenter()` method for horizontally-aligned layouts with top-center alignment:
+New `Utils.FormatNumber()` utility for formatting large numbers:
 
 ```csharp
-Layout.TopCenter(
-    new Button("Action 1"),
-    new Button("Action 2"),
-    new Button("Action 3")
-)
+Utils.FormatNumber(1500);           // "1.5K"
+Utils.FormatNumber(2500000);        // "2.5M"
+Utils.FormatNumber(3800000000);     // "3.8B"
+Utils.FormatNumber(1234567, 1);     // "1.2M" (1 decimal place)
 ```
 
-### Grid Layout
+### Authentication
 
-**Improved Dark Mode Contrast:**
+**Cross-Tab Logout Synchronization:**
 
-Grid layouts now have improved text contrast in dark mode. Colors blended with background color instead of pure white/black.
-
-**Enhanced Grid API:**
-
-**Column and Row Sizing:**
-
-```csharp
-Layout.Grid()
-    .Columns(3)
-    .ColumnWidths(Size.Px(100), Size.Fraction(1), Size.Px(150))
-    .RowHeights(Size.Px(60), Size.Fraction(1), Size.Fraction(1))
-```
-
-**Header and Footer Builders:**
-
-```csharp
-Layout.Grid()
-    .Columns(4)
-    .HeaderBuilder((columnIndex, cell) =>
-        cell.WithCell().Color(Colors.Green).Content($"Header {columnIndex}"))
-    .FooterBuilder((columnIndex, cell) =>
-        cell.WithCell().Color(Colors.Blue).Content($"Total: {cell}"))
-```
-
-**Cell Builder:**
-
-```csharp
-Layout.Grid()
-    .Columns(3)
-    .CellBuilder(cell => cell.WithCell().Color(Colors.Gray))
-```
-
-**WithCell() Extension:**
-
-Creates borderless boxes that fill entire grid cell:
-
-```csharp
-"Fills cell".WithCell()
-"No borders".WithCell().Color(Colors.Blue)
-```
-
-**Color Opacity Support:**
-
-Box widget now supports color opacity (0.0 to 1.0):
-
-```csharp
-new Box("50% opacity").Color(Colors.Blue, 0.5f)
-```
-
-Perfect for heatmaps, cohort analysis, and visual hierarchies.
+When logging out in one browser tab, all other tabs automatically reload and reflect logged-out state using Broadcast Channel API. Works in all modern browsers (Chrome, Firefox, Edge, Safari 15.4+).
 
 ### Routing
 
@@ -718,6 +788,7 @@ server.UseErrorNotFound(() => new MyCustomNotFoundApp());
 **Framework Routes Now Use /ivy Prefix:**
 
 All framework-provided routes use `/ivy` prefix:
+
 - SignalR hub: `/ivy/messages`
 - Health checks: `/ivy/health`
 - Static resources: `/ivy/img/`, `/ivy/css/`, etc.
@@ -725,6 +796,7 @@ All framework-provided routes use `/ivy` prefix:
 **App ID Collision Detection:**
 
 Ivy automatically detects and prevents routing conflicts between app IDs and framework routes. Checks for collisions with:
+
 - System paths (`/_framework`, `/api`, `/ivy`)
 - Controller routes (auto-discovered from ASP.NET Core controllers)
 - Explicitly reserved paths
@@ -739,6 +811,34 @@ server.ReservePaths("/admin", "/reports", "/dashboard")
 ```
 
 Path comparison is case-insensitive.
+
+### Chrome Customization
+
+**Generic UseChrome Method:**
+
+Simpler generic syntax for custom chrome:
+
+```csharp
+// Before
+server.UseChrome(() => new MyCustomChrome());
+
+// After
+server.UseChrome<MyCustomChrome>();
+```
+
+### Article Widget
+
+**Fixed Navigation in Chrome=False Mode:**
+
+Previous/next navigation links now preserve `chrome=false` parameter when navigating between articles, preventing unexpected chrome mode toggling.
+
+### Theming System
+
+**Streamlined Color Palette:**
+
+Documentation updated to reflect actual color variables in Ivy Design System. Removed documentation for unused variables (`Chart1-5`, `Sidebar`, `SidebarForeground`).
+
+Current supported theme colors focus on Main, Semantic, and UI Elements categories.
 
 ## Breaking Changes
 
@@ -777,7 +877,7 @@ tasks.ToKanban(...).HandleMove(moveData => { /* ... */ });
 
 **Removed Event Handlers:**
 
-The `.HandleClick()` and `.HandleDelete()` methods have been removed. Implement click/delete functionality within your `.CardBuilder()` instead.
+The `.HandleClick()` and `.HandleDelete()` methods have been removed from Kanban API. Implement click/delete functionality within your `.CardBuilder()` instead using Card's `.HandleClick()` method.
 
 **Column Width Changes:**
 
@@ -842,6 +942,7 @@ The `RowActionClickEventArgs` structure has been simplified:
 ```
 
 **Removed Properties:**
+
 - `ActionId` → Use `Tag` instead
 - `EventName` → Removed
 - `RowIndex` → Removed
@@ -887,6 +988,7 @@ Ivy Framework now includes comprehensive URL validation across all components to
 **What's Protected:**
 
 All URL-accepting components validate and sanitize URLs automatically:
+
 - Links in markdown content
 - Images, audio, and video players
 - Button widgets with URL targets
@@ -897,6 +999,16 @@ All URL-accepting components validate and sanitize URLs automatically:
 - ✅ **Allowed**: Relative paths, http/https URLs, data URLs (for appropriate media types), blob URLs (with origin validation), `app://` protocol URLs, anchor links
 - ❌ **Blocked**: `javascript:` protocol, malformed URLs, protocol injection attempts, dangerous URL patterns
 
+**Validation Functions:**
+
+The framework uses centralized validation functions for different URL types:
+
+- `validateLinkUrl()` - For anchor tags and navigation
+- `validateImageUrl()` - For image sources
+- `validateAudioUrl()` - For audio sources
+- `validateVideoUrl()` - For video sources
+- `validateRedirectUrl()` - For redirect operations
+
 **Blob URL Security:**
 
 Blob URLs validated to ensure they match current origin, preventing attacks where malicious blob URLs from other origins could be injected. Properly handles default ports and localhost development scenarios.
@@ -904,6 +1016,7 @@ Blob URLs validated to ensure they match current origin, preventing attacks wher
 **Error Handling:**
 
 Invalid URLs show clear, user-friendly error messages:
+
 - Images/Audio/Video: Bordered error box with message
 - Buttons: "Invalid button URL" in destructive-styled container
 - Links: Converted to safe anchor links (`#`)
@@ -912,11 +1025,35 @@ Invalid URLs show clear, user-friendly error messages:
 
 - **Kanban Card Reordering**: Fixed bug causing cards to be inserted at incorrect positions when dragging between columns
 - **Kanban Drag Visual Feedback**: Fixed column highlights persisting after drag operations complete
+- **Kanban Build Error**: Fixed build error in documentation examples
 - **Table Column Widths**: Fixed handling of `Size.Units()` when only some columns have explicit widths set
+- **Table Layout**: Improved table layout logic - fixed layout for Full() width tables, auto layout for fixed width tables to allow natural expansion
+- **Table Cell Truncation**: Fixed truncation logic to only apply when explicit column width is set or for header cells, allowing natural sizing for data cells without widths
 - **DataTable Row Actions**: Fixed event handling requiring `idSelector` for proper row identification
 - **Article Navigation**: Fixed navigation links losing `chrome=false` parameter when navigating between articles
 - **Tooltip Wrapping**: Fixed tooltips not properly wrapping long strings without spaces
 - **Chart Y-Axis**: Fixed Y-axis always starting at 0, cutting off negative data points
-- **Form Label Generation**: Fixed custom labels specified with `[Display]` attributes being incorrectly trimmed when field names end with "Id"
-- **Grid Dark Mode**: Fixed text contrast issues in dark mode when using color mixing
+- **Form Label Generation**: Fixed label generation logic - now only trims "Id" suffix from auto-generated labels, preserves custom Display attribute names, and checks if label itself ends with "Id" before trimming
+- **Grid Dark Mode**: Fixed text contrast issues in dark mode when using opacity for proper text readability
 - **Loading Widget**: Fixed missing overlay and delay timing for better UX
+- **Logging Templates**: Fixed inconsistent logging message templates that caused warnings
+- **Codex Logging**: Cleaned up unnecessary logging statements
+- **FileInput OnBlur**: Fixed double-firing of blur events when files are selected. Blur now fires correctly when dialog closes
+- **Form Scale Application**: Fixed issue where form scale wasn't being applied to async select inputs and submit buttons
+- **List Widget Dividers**: Fixed dividers not extending full width of container
+- **Option Enum Description**: Fixed missing null parameter in Option enum extension method
+- **Field Widget Dimensions**: Fixed width and height not being applied to field widgets
+- **Routing Collisions**: Fixed app ID collisions with custom routes. Server now validates app IDs don't conflict with reserved paths
+- **URL Validation**: Fixed various edge cases in URL validation for images, audio, video, and links
+- **Padding Removal**: Updated padding removal class from `remove-ancestor-padding` to `remove-parent-padding` for more predictable and maintainable padding behavior across widgets
+- **Option Constructor**: Fixed missing parameter in Option constructor when creating enum options - now properly passes all 5 parameters (label, value, group, description, icon)
+
+## Documentation Updates
+
+- Updated Kanban documentation to reflect new CardBuilder API
+- Updated Table documentation to use `ColumnWidth` instead of `Width`
+- Added HeaderLayout documentation for scroll control
+- Added troubleshooting section for Apple Silicon Mac Protobuf issues
+- Fixed dialog form width in form examples
+- Updated alert dialog examples to show horizontal button layout
+- Refactored Select and AsyncSelect documentation - simplified examples, consolidated redundant sections, and improved clarity
