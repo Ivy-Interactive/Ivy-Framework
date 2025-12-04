@@ -30,6 +30,18 @@ new Stepper(
 )
 ```
 
+The `Stepper` constructor takes three main parameters:
+
+```mermaid
+graph LR
+    A[Stepper] --> B[onSelect<br/>Event Handler]
+    A --> C[selectedIndex<br/>Active Step Index]
+    A --> D[items<br/>StepperItem Array]
+    B --> B1["null = disabled<br/>handler = enabled"]
+    C --> C1["Zero-based index<br/>Controls highlighting"]
+    D --> D1["Symbol, Icon<br/>Label, Description"]
+```
+
 ## Configuration Options
 
 ### Allow Forward Selection
@@ -72,8 +84,7 @@ public class StepperDynamicStatesDemo : ViewBase
     [
         new("1", selectedIndex > 0 ? Icons.Check : null, "Company", "Setup company"),
         new("2", selectedIndex > 1 ? Icons.Check : null, "Raise", "Raise capital"),
-        new("3", selectedIndex > 2 ? Icons.Check : null, "Deck", "Create pitch deck"),
-        new("4", null, "Founders", "Add founders"),
+        new("3", null, "Founders", "Add founders"),
     ];
     
     public override object? Build()
@@ -83,9 +94,7 @@ public class StepperDynamicStatesDemo : ViewBase
         var items = GetItems(selectedIndex.Value);
         
         return Layout.Vertical()
-            | new Stepper(OnSelect, selectedIndex.Value, items).Width(200)
-            | Text.H3("With AllowSelectForward")
-            | new Stepper(OnSelect, selectedIndex.Value, items).Width(200).AllowSelectForward()
+            | new Stepper(OnSelect, selectedIndex.Value, items)
             | (Layout.Horizontal().Gap(0)
                 | new Button("Previous").Link().HandleClick(() =>
                 {
