@@ -21,9 +21,9 @@ export const detailLabelSizeVariants = cva(
 export const detailValueSizeVariants = cva('align-middle min-w-0', {
   variants: {
     scale: {
-      Small: 'p-2 pl-1 text-xs',
-      Medium: 'p-3 pl-2 text-sm',
-      Large: 'p-4 pl-3 text-base',
+      Small: 'p-2 pl-1 pr-0 text-xs',
+      Medium: 'p-3 pl-2 pr-0 text-sm',
+      Large: 'p-4 pl-3 pr-0 text-base',
     },
   },
   defaultVariants: {
