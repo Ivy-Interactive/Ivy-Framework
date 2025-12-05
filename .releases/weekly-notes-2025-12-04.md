@@ -32,7 +32,7 @@ new Stepper(
 .AllowSelectForward();
 ```
 
-Learn more about the Stepper widget in the [documentation](LINK).
+Learn more about the Stepper widget in the [documentation](https://docs.ivy.app/widgets/primitives/stepper).
 
 ### Form Scaffolding
 
@@ -569,7 +569,7 @@ See [Alert Dialogs documentation](https://docs.ivy.app/onboarding/concepts/alert
 
 List widget dividers now extend the full width of the container for better visual separation.
 
-Explore the [List documentation](LINK) for more features.
+Explore the [List documentation](https://docs.ivy.app/widgets/common/list) for more features.
 
 ### Loading Widget
 
