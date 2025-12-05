@@ -1,23 +1,17 @@
 ﻿namespace Ivy.Services;
 
 using System;
-using System.Collections.Generic;
-using Microsoft.Extensions.DependencyInjection;
 
 public class CompositeServiceProvider : IServiceProvider
 {
-    private readonly List<IServiceProvider> _serviceProviders;
+    private readonly IServiceProvider[] _serviceProviders;
 
-    public CompositeServiceProvider(params IServiceCollection[] serviceCollections)
+    public CompositeServiceProvider(params IServiceProvider[] serviceProviders)
     {
-        if (serviceCollections == null || serviceCollections.Length == 0)
-            throw new ArgumentNullException(nameof(serviceCollections));
+        if (serviceProviders == null || serviceProviders.Length == 0)
+            throw new ArgumentNullException(nameof(serviceProviders));
 
-        _serviceProviders = new List<IServiceProvider>();
-        foreach (var collection in serviceCollections)
-        {
-            _serviceProviders.Add(collection.BuildServiceProvider());
-        }
+        _serviceProviders = serviceProviders;
     }
 
     public object GetService(Type serviceType)
@@ -29,6 +23,6 @@ public class CompositeServiceProvider : IServiceProvider
                 return service;
         }
 
-        return null!; // Service not found in any collection
+        return null!;
     }
 }

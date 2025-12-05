@@ -47,11 +47,6 @@ public record ServerArgs
 
 public class Server
 {
-    private IContentBuilder? _contentBuilder;
-    private bool _useHotReload;
-    private bool _useHttpRedirection;
-    private readonly List<Action<WebApplicationBuilder>> _builderMods = new();
-    private List<string> _reservedPaths = new();
     public IReadOnlyList<string> ReservedPaths => _reservedPaths;
     public string? DefaultAppId { get; private set; }
     public AppRepository AppRepository { get; } = new();
@@ -59,6 +54,13 @@ public class Server
     public IConfiguration Configuration { get; private set; } = ServerUtils.GetConfiguration();
     public Type? AuthProviderType { get; private set; } = null;
     public ServerArgs Args => _args;
+
+    private IContentBuilder? _contentBuilder;
+    private bool _useHotReload;
+    private bool _useHttpRedirection;
+    internal IServiceProvider? ServiceProvider;
+    private readonly List<Action<WebApplicationBuilder>> _builderMods = new();
+    private List<string> _reservedPaths = new();
     private ServerArgs _args;
 
     public Server(ServerArgs? args = null)
@@ -446,6 +448,7 @@ public class Server
         builder.Logging.SetMinimumLevel(!_args.Verbose ? LogLevel.Warning : LogLevel.Debug);
 
         var app = builder.Build();
+        ServiceProvider = app.Services;
 
         app.UseExceptionHandler(error =>
         {

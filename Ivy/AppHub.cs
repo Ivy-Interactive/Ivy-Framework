@@ -69,7 +69,7 @@ public class AppHub(
 
             if (server.AuthProviderType != null)
             {
-                var authProvider = server.Services.BuildServiceProvider().GetService<IAuthProvider>() ?? throw new Exception("IAuthProvider not found");
+                var authProvider = server.ServiceProvider!.GetService<IAuthProvider>() ?? throw new Exception("IAuthProvider not found");
 #if DEBUG
                 authProvider = new CheckedAuthProvider(authProvider);
 #endif
@@ -145,7 +145,7 @@ public class AppHub(
             appServices.AddTransient<IWebhookRegistry, WebhookController>();
             appServices.AddTransient(_ => new SignalRouter(sessionStore));
 
-            var serviceProvider = new CompositeServiceProvider(appServices, server.Services);
+            var serviceProvider = new CompositeServiceProvider(appServices.BuildServiceProvider(), server.ServiceProvider!);
 
             var app = routeResult.AppDescriptor.CreateApp();
 
