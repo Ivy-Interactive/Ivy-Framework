@@ -5,7 +5,7 @@
 
 ## Overview
 
-This release introduces major improvements to form scaffolding with comprehensive DataAnnotations support, a new Stepper widget for multi-step workflows, enhanced Grid layout system with advanced control APIs, significant Kanban widget API simplifications, DataTable performance optimizations using Apache Arrow, improved authentication with cross-tab logout synchronization, and extensive UI refinements across buttons, inputs, tables, and charts. The framework now includes better routing collision detection and custom 404 error page support.
+This release introduces major improvements to form scaffolding with comprehensive DataAnnotations support, a new Stepper widget for multi-step workflows, enhanced Grid layout system with advanced control APIs, significant Kanban widget API simplifications, a major authentication security refactoring that moves tokens completely out of the frontend with a new `IAuthSession` interface and improved cross-tab authentication synchronization. The framework now includes better routing collision detection and custom 404 error page support.
 
 ## Improvements
 
@@ -29,7 +29,7 @@ new Stepper(
     selectedIndex: currentStep.Value,
     items: steps
 )
-.AllowSelectForward();  // Allow jumping ahead
+.AllowSelectForward();
 ```
 
 ### Form Scaffolding
@@ -591,9 +591,17 @@ Utils.FormatNumber(3800000000); // "3.8B"
 
 ### Authentication
 
+**Tokens Moved Out of Frontend:**
+
+Authentication tokens are now completely managed server-side and no longer exposed to the frontend. New `IAuthSession` interface encapsulates authentication state. All `IAuthProvider` methods now accept `IAuthSession` instead of token strings or `AuthToken` objects. New cookie registry system provides secure server-side cookie management with automatic cleanup. Token registry IDs now use ~256 bits of strong entropy (up from 122 bits).
+
 **Cross-Tab Logout Synchronization:**
 
 Logout events are synchronized across browser tabs using the Broadcast Channel API. When a user logs out in one tab, all other tabs automatically reload to reflect the logout state.
+
+**Cross-Tab Login Synchronization:**
+
+When a user logs in one tab, all other tabs with the same `machineId` automatically reload to pick up the new authentication state.
 
 ### Routing
 
@@ -765,6 +773,36 @@ button.Medium();
 **Medium Scale as Default:**
 
 All form inputs and tables now default to `Scale.Medium` when no scale explicitly specified. If you previously relied on undefined scale behavior, components will now render at Medium scale.
+
+### Authentication API Changes
+
+**IAuthProvider Interface Breaking Changes:**
+
+All `IAuthProvider` implementations must be updated to use the new `IAuthSession` interface. All methods now accept `IAuthSession` instead of token strings or `AuthToken` objects:
+
+```csharp
+public async Task<AuthToken?> LoginAsync(IAuthSession authSession, string email, string password, CancellationToken cancellationToken)
+public Task LogoutAsync(IAuthSession authSession, CancellationToken cancellationToken)
+public async Task<AuthToken?> RefreshAccessTokenAsync(IAuthSession authSession, CancellationToken cancellationToken)
+public Task<bool> ValidateAccessTokenAsync(IAuthSession authSession, CancellationToken cancellationToken)
+public Task<UserInfo?> GetUserInfoAsync(IAuthSession authSession, CancellationToken cancellationToken)
+public Task<Uri> GetOAuthUriAsync(IAuthSession authSession, AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken)
+public Task<AuthToken?> HandleOAuthCallbackAsync(IAuthSession authSession, HttpRequest request, CancellationToken cancellationToken)
+```
+
+**Method Signature Changes:**
+
+- `GetTokenExpiration(AuthToken, ...)` → `GetAccessTokenExpirationAsync(IAuthSession, ...)`
+- `SetHttpContext(HttpContext)` → `InitializeAsync(IAuthSession, string requestScheme, string requestHost, ...)`
+
+**AuthService Constructor:**
+
+`AuthService` constructor now requires `IAuthSession`, `IClientProvider`, and `AppSessionStore`:
+
+```csharp
+var authSession = AuthHelper.GetAuthSession(httpContext);
+var authService = new AuthService(authProvider, authSession, clientProvider, sessionStore);
+```
 
 ## Security Improvements
 
