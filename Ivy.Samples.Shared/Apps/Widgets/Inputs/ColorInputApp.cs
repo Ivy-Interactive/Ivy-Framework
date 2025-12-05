@@ -242,19 +242,19 @@ public class ColorInputApp : SampleBase
             | Text.InlineCode("Text and Picker")
 
             | Text.InlineCode("Small")
-            | smallTextState.ToColorInput().Variant(ColorInputs.Text).Scale(Scale.Small)
-            | smallPickerState.ToColorInput().Variant(ColorInputs.Picker).Scale(Scale.Small)
-            | smallBothState.ToColorInput().Variant(ColorInputs.TextAndPicker).Scale(Scale.Small)
+            | smallTextState.ToColorInput().Variant(ColorInputs.Text).Scale(Scales.Small)
+            | smallPickerState.ToColorInput().Variant(ColorInputs.Picker).Scale(Scales.Small)
+            | smallBothState.ToColorInput().Variant(ColorInputs.TextAndPicker).Scale(Scales.Small)
 
             | Text.InlineCode("Medium")
-            | mediumTextState.ToColorInput().Variant(ColorInputs.Text).Scale(Scale.Medium)
-            | mediumPickerState.ToColorInput().Variant(ColorInputs.Picker).Scale(Scale.Medium)
-            | mediumBothState.ToColorInput().Variant(ColorInputs.TextAndPicker).Scale(Scale.Medium)
+            | mediumTextState.ToColorInput().Variant(ColorInputs.Text).Scale(Scales.Medium)
+            | mediumPickerState.ToColorInput().Variant(ColorInputs.Picker).Scale(Scales.Medium)
+            | mediumBothState.ToColorInput().Variant(ColorInputs.TextAndPicker).Scale(Scales.Medium)
 
             | Text.InlineCode("Large")
-            | largeTextState.ToColorInput().Variant(ColorInputs.Text).Scale(Scale.Large)
-            | largePickerState.ToColorInput().Variant(ColorInputs.Picker).Scale(Scale.Large)
-            | largeBothState.ToColorInput().Variant(ColorInputs.TextAndPicker).Scale(Scale.Large);
+            | largeTextState.ToColorInput().Variant(ColorInputs.Text).Scale(Scales.Large)
+            | largePickerState.ToColorInput().Variant(ColorInputs.Picker).Scale(Scales.Large)
+            | largeBothState.ToColorInput().Variant(ColorInputs.TextAndPicker).Scale(Scales.Large);
     }
 
     private static string ConvertToHex(string? colorValue)

@@ -16,7 +16,7 @@ public record Card : WidgetBase<Card>
 {
     public Card(object? content = null, object? footer = null, object? header = null) : base([new Slot("Content", content), new Slot("Footer", footer!), new Slot("Header", header!)])
     {
-        Width = Ivy.Shared.Size.Full();
+        Width = Size.Full();
     }
 
     internal object? Title { get; set; }

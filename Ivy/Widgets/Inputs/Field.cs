@@ -7,7 +7,7 @@ namespace Ivy;
 
 public record Field : WidgetBase<Field>
 {
-    public Field(IAnyInput input, string? label = null, string? description = null, bool required = false, string? help = null, Scale scale = Shared.Scale.Medium) : base([input])
+    public Field(IAnyInput input, string? label = null, string? description = null, bool required = false, string? help = null, Scales scale = Scales.Medium) : base([input])
     {
         var labelProp = input.GetType().GetProperty("Label");
         if (labelProp != null && labelProp.PropertyType == typeof(string))

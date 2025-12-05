@@ -52,7 +52,7 @@ public class FormFieldView(
     FormFieldLayoutOptions? layoutOptions = null,
     Func<object?, (bool, string)>[]? validators = null,
     FormValidationStrategy validationStrategy = FormValidationStrategy.OnBlur,
-    Scale scale = Scale.Medium)
+    Scales scale = Scales.Medium)
     : ViewBase, IFormFieldView
 {
     public FormFieldLayoutOptions Layout { get; } = layoutOptions ?? new FormFieldLayoutOptions(Guid.NewGuid());
@@ -133,8 +133,8 @@ public class FormFieldView(
             input.Placeholder = placeholder;
         }
 
-        input.Scale = scale;
-
+        //todo: FIX THIS
+        // input.Scale = scale;
         return visibleState.Value ? new Field(input, label, description, required, help, scale) : null;
     }
 }
@@ -152,7 +152,7 @@ public class FormFieldBinding<TModel>(
     FormFieldLayoutOptions? layoutOptions = null,
     Func<object?, (bool, string)>[]? validators = null,
     FormValidationStrategy validationStrategy = FormValidationStrategy.OnBlur,
-    Scale scale = Scale.Medium,
+    Scales scale = Scales.Medium,
     string? help = null,
     string? placeholder = null
     ) : IFormFieldBinding<TModel>
@@ -175,7 +175,7 @@ public interface IFormFieldBinding<TModel>
     (IFormFieldView fieldView, IDisposable disposable) Bind(IState<TModel> model);
 }
 
-public class FormView<TModel>(IFormFieldView[] fieldViews, Func<Event<Form>, ValueTask>? handleSubmit = null, Scale scale = Scale.Medium, Dictionary<string, bool>? groupOpenStates = null) : ViewBase
+public class FormView<TModel>(IFormFieldView[] fieldViews, Func<Event<Form>, ValueTask>? handleSubmit = null, Scales scale = Scales.Medium, Dictionary<string, bool>? groupOpenStates = null) : ViewBase
 {
     public override object? Build()
     {
@@ -190,8 +190,8 @@ public class FormView<TModel>(IFormFieldView[] fieldViews, Func<Event<Form>, Val
         {
             var gap = scale switch
             {
-                Scale.Small => 4,
-                Scale.Medium => 6,
+                Scales.Small => 4,
+                Scales.Medium => 6,
                 _ => 8
             };
 

@@ -14,7 +14,7 @@ public abstract record WidgetBase<T> : AbstractWidget where T : WidgetBase<T>
 
     [Prop] public Size? Height { get; set; }
 
-    [Prop] public Scale? Scale { get; set; }
+    [Prop] public Scales? Scale { get; set; }
 
     [Prop] public bool Visible { get; set; } = true;
 
@@ -80,13 +80,13 @@ public static class WidgetBaseExtensions
         throw new ArgumentException("Invalid percentage value.");
     }
 
-    public static T Scale<T>(this T widget, Scale scale) where T : WidgetBase<T> => widget with { Scale = scale };
+    public static T Scale<T>(this T widget, Scales scale) where T : WidgetBase<T> => widget with { Scale = scale };
 
-    public static T Small<T>(this T widget) where T : WidgetBase<T> => widget with { Scale = Shared.Scale.Small };
+    public static T Small<T>(this T widget) where T : WidgetBase<T> => widget with { Scale = Scales.Small };
 
-    public static T Medium<T>(this T widget) where T : WidgetBase<T> => widget with { Scale = Shared.Scale.Medium };
+    public static T Medium<T>(this T widget) where T : WidgetBase<T> => widget with { Scale = Scales.Medium };
 
-    public static T Large<T>(this T widget) where T : WidgetBase<T> => widget with { Scale = Shared.Scale.Large };
+    public static T Large<T>(this T widget) where T : WidgetBase<T> => widget with { Scale = Scales.Large };
 
     public static T Visible<T>(this T widget, bool visible = true) where T : WidgetBase<T> => widget with { Visible = visible };
 

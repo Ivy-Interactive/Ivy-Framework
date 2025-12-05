@@ -1,4 +1,5 @@
-﻿using System.Linq.Expressions;
+﻿
+using System.Linq.Expressions;
 
 namespace Ivy.Core.Helpers;
 
@@ -75,7 +76,7 @@ public static class ConversionDelegateFactory
         {
             return Expression.Convert(
                 Expression.Call(
-                    typeof(Convert).GetMethod(nameof(System.Convert.ChangeType), [typeof(object), typeof(Type)])!,
+                    typeof(Convert).GetMethod(nameof(Convert.ChangeType), [typeof(object), typeof(Type)])!,
                     Expression.Convert(param, typeof(object)),
                     Expression.Constant(underlyingType)),
                 toType);
@@ -121,7 +122,7 @@ public static class ConversionDelegateFactory
     {
         return Expression.Convert(
             Expression.Call(
-                typeof(Convert).GetMethod(nameof(System.Convert.ChangeType), [typeof(object), typeof(Type)])!,
+                typeof(Convert).GetMethod(nameof(Convert.ChangeType), [typeof(object), typeof(Type)])!,
                 Expression.Convert(param, typeof(object)),
                 Expression.Constant(underlyingType)),
             toType);

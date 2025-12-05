@@ -13,15 +13,15 @@ using Ivy.Widgets.Inputs;
 // ReSharper disable once CheckNamespace
 namespace Ivy;
 
-public interface IAnyAsyncSelectInputBase : IAnyInput
-{
-}
-
 public delegate Task<Option<T>[]> AsyncSelectQueryDelegate<T>(string query);
 
 public delegate Task<Option<T>?> AsyncSelectLookupDelegate<T>(T id);
 
-public class AsyncSelectInputView<TValue> : ViewBase, IAnyAsyncSelectInputBase, IInput<TValue>
+public interface IAnyAsyncSelectInput : IAnyInput
+{
+}
+
+public class AsyncSelectInputView<TValue> : ViewBase, IAnyAsyncSelectInput, IInput<TValue>
 {
     public Type[] SupportedStateTypes() => [];
 
@@ -62,19 +62,17 @@ public class AsyncSelectInputView<TValue> : ViewBase, IAnyAsyncSelectInputBase, 
 
     public TValue Value { get; private set; } = typeof(TValue).IsValueType ? Activator.CreateInstance<TValue>() : default!;
 
-    public bool Nullable { get; set; } = typeof(TValue).IsNullableType();
-
     public Func<Event<IInput<TValue>, TValue>, ValueTask>? OnChange { get; }
-
-    public Scale? Scale { get; set; }
-
-    public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
 
     public bool Disabled { get; set; }
 
+    public string? Placeholder { get; set; }
+
     public string? Invalid { get; set; }
 
-    public string? Placeholder { get; set; }
+    public Scales? Scale { get; set; }
+
+    public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
 
     public override object? Build()
     {
@@ -144,7 +142,7 @@ public class AsyncSelectInputView<TValue> : ViewBase, IAnyAsyncSelectInputBase, 
     }
 }
 
-public class AsyncSelectListSheet<T>(RefreshToken refreshToken, AsyncSelectQueryDelegate<T> query, Scale? scale = null) : ViewBase
+public class AsyncSelectListSheet<T>(RefreshToken refreshToken, AsyncSelectQueryDelegate<T> query, Scales? scale = null) : ViewBase
 {
     public override object? Build()
     {
@@ -187,9 +185,9 @@ public class AsyncSelectListSheet<T>(RefreshToken refreshToken, AsyncSelectQuery
     }
 }
 
-public static class AsyncSelectInputViewExtensions
+public static class AsyncSelectInputExtensions
 {
-    public static IAnyAsyncSelectInputBase ToAsyncSelectInput<TValue>(
+    public static IAnyAsyncSelectInput ToAsyncSelectInput<TValue>(
         this IAnyState state,
         AsyncSelectQueryDelegate<TValue> query,
         AsyncSelectLookupDelegate<TValue> lookup,
@@ -202,7 +200,7 @@ public static class AsyncSelectInputViewExtensions
 
         try
         {
-            IAnyAsyncSelectInputBase input = (IAnyAsyncSelectInputBase)Activator
+            IAnyAsyncSelectInput input = (IAnyAsyncSelectInput)Activator
                 .CreateInstance(genericType, state, query, lookup, placeholder, disabled)!;
             return input;
         }
@@ -212,36 +210,59 @@ public static class AsyncSelectInputViewExtensions
         }
     }
 
+    public static IAnyAsyncSelectInput Placeholder(this IAnyAsyncSelectInput widget, string placeholder)
+    {
+        widget.Placeholder = placeholder;
+        return widget;
+    }
 
-    [OverloadResolutionPriority(1)]
-    public static IAnyAsyncSelectInputBase HandleBlur(this IAnyAsyncSelectInputBase widget, Func<Event<IAnyInput>, ValueTask> onBlur)
+    public static IAnyAsyncSelectInput Disabled(this IAnyAsyncSelectInput widget, bool disabled = true)
+    {
+        widget.Disabled = disabled;
+        return widget;
+    }
+
+    public static IAnyAsyncSelectInput Invalid(this IAnyAsyncSelectInput widget, string? invalid)
+    {
+        widget.Invalid = invalid;
+        return widget;
+    }
+
+    public static IAnyAsyncSelectInput Scale(this IAnyAsyncSelectInput widget, Scales scale)
     {
         if (widget is AsyncSelectInputView<object> typedWidget)
         {
-            typedWidget.OnBlur = onBlur;
+            typedWidget.Scale = scale;
             return typedWidget;
         }
 
         var widgetType = widget.GetType();
         if (widgetType.IsGenericType && widgetType.GetGenericTypeDefinition() == typeof(AsyncSelectInputView<>))
         {
-            var onBlurProperty = widgetType.GetProperty("OnBlur");
-            if (onBlurProperty != null)
+            var scaleProperty = widgetType.GetProperty("Scale");
+            if (scaleProperty != null)
             {
-                onBlurProperty.SetValue(widget, onBlur);
+                scaleProperty.SetValue(widget, scale);
                 return widget;
             }
         }
 
-        throw new InvalidOperationException("Unable to set blur handler on async select input");
+        throw new InvalidOperationException("Unable to set scale on async select input");
     }
 
-    public static IAnyAsyncSelectInputBase HandleBlur(this IAnyAsyncSelectInputBase widget, Action<Event<IAnyInput>> onBlur)
+    [OverloadResolutionPriority(1)]
+    public static IAnyAsyncSelectInput HandleBlur(this IAnyAsyncSelectInput widget, Func<Event<IAnyInput>, ValueTask> onBlur)
+    {
+        widget.OnBlur = onBlur;
+        return widget;
+    }
+
+    public static IAnyAsyncSelectInput HandleBlur(this IAnyAsyncSelectInput widget, Action<Event<IAnyInput>> onBlur)
     {
         return widget.HandleBlur(onBlur.ToValueTask());
     }
 
-    public static IAnyAsyncSelectInputBase HandleBlur(this IAnyAsyncSelectInputBase widget, Action onBlur)
+    public static IAnyAsyncSelectInput HandleBlur(this IAnyAsyncSelectInput widget, Action onBlur)
     {
         return widget.HandleBlur(_ => { onBlur(); return ValueTask.CompletedTask; });
     }
@@ -256,6 +277,7 @@ internal record AsyncSelectInput : WidgetBase<AsyncSelectInput>
     [Prop] public string? Invalid { get; init; }
 
     [Prop] public string? DisplayValue { get; init; }
+
     [Prop] public bool Loading { get; init; }
 
     [Event] public Func<Event<AsyncSelectInput>, ValueTask>? OnSelect { get; init; }

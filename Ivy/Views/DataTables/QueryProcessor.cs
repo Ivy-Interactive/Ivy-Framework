@@ -211,11 +211,11 @@ public class QueryProcessor(ILogger<QueryProcessor>? logger = null, IDistributed
             string methodName;
             if (i == 0)
             {
-                methodName = sortOrder.Direction == Ivy.Protos.DataTable.SortDirection.Asc ? "OrderBy" : "OrderByDescending";
+                methodName = sortOrder.Direction == Protos.DataTable.SortDirection.Asc ? "OrderBy" : "OrderByDescending";
             }
             else
             {
-                methodName = sortOrder.Direction == Ivy.Protos.DataTable.SortDirection.Asc ? "ThenBy" : "ThenByDescending";
+                methodName = sortOrder.Direction == Protos.DataTable.SortDirection.Asc ? "ThenBy" : "ThenByDescending";
             }
 
             var method = typeof(Queryable).GetMethods()
@@ -414,7 +414,7 @@ public class QueryProcessor(ILogger<QueryProcessor>? logger = null, IDistributed
             {
                 logger?.LogDebug("Converting non-string property to string first");
                 // Convert to string first, then apply case-insensitive contains
-                var toStringMethod = property.Type.GetMethod("ToString", System.Type.EmptyTypes);
+                var toStringMethod = property.Type.GetMethod("ToString", SystemType.EmptyTypes);
                 if (toStringMethod != null)
                 {
                     var toStringCall = System.Linq.Expressions.Expression.Call(property, toStringMethod);
@@ -990,7 +990,7 @@ public class QueryProcessor(ILogger<QueryProcessor>? logger = null, IDistributed
             if (!string.IsNullOrEmpty(query.Search))
             {
                 // Convert to string and filter
-                var toStringMethod = propertyInfo.PropertyType.GetMethod("ToString", System.Type.EmptyTypes);
+                var toStringMethod = propertyInfo.PropertyType.GetMethod("ToString", SystemType.EmptyTypes);
                 if (toStringMethod != null || propertyInfo.PropertyType == typeof(string))
                 {
                     var searchParameter = System.Linq.Expressions.Expression.Parameter(propertyInfo.PropertyType, "v");

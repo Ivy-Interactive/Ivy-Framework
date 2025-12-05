@@ -16,7 +16,7 @@ public class FormBuilder<TModel> : ViewBase
     private readonly List<string> _groups = [];
     private readonly Dictionary<string, bool> _groupOpenStates = [];
 
-    internal Scale _scale = Shared.Scale.Medium;
+    internal Scales _scale = Scales.Medium;
     internal Func<bool, Button> _submitBuilder = DefaultSubmitBuilder("Save");
     internal FormValidationStrategy _validationStrategy;
     internal Func<TModel, Task>? _onSubmit;
@@ -296,15 +296,15 @@ public class FormBuilder<TModel> : ViewBase
         return this;
     }
 
-    public FormBuilder<TModel> Scale(Scale scale)
+    public FormBuilder<TModel> Scale(Scales scale)
     {
         _scale = scale;
         return this;
     }
 
-    public FormBuilder<TModel> Small() => Scale(Shared.Scale.Small);
-    public FormBuilder<TModel> Medium() => Scale(Shared.Scale.Medium);
-    public FormBuilder<TModel> Large() => Scale(Shared.Scale.Large);
+    public FormBuilder<TModel> Small() => Scale(Scales.Small);
+    public FormBuilder<TModel> Medium() => Scale(Scales.Medium);
+    public FormBuilder<TModel> Large() => Scale(Scales.Large);
 
     private FormBuilderField<TModel> GetField<TU>(Expression<Func<TModel, TU>> field)
     {
@@ -405,8 +405,8 @@ public class FormBuilder<TModel> : ViewBase
 
         var buttonGap = _scale switch
         {
-            Shared.Scale.Small => 4,
-            Shared.Scale.Large => 8,
+            Scales.Small => 4,
+            Scales.Large => 8,
             _ => 6
         };
 

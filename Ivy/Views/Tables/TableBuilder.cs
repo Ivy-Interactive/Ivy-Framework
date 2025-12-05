@@ -60,7 +60,7 @@ public class TableBuilder<TModel> : ViewBase, IStateless
     }
 
     private Size? _width;
-    private Scale _scale = Scale.Medium;
+    private Scales _scale = Scales.Medium;
     private readonly IEnumerable<TModel> _records;
     private readonly Dictionary<string, TableBuilderColumn> _columns;
     private readonly BuilderFactory<TModel> _builderFactory;
@@ -162,19 +162,19 @@ public class TableBuilder<TModel> : ViewBase, IStateless
 
     public TableBuilder<TModel> Large()
     {
-        _scale = Scale.Large;
+        _scale = Scales.Large;
         return this;
     }
 
     public TableBuilder<TModel> Small()
     {
-        _scale = Scale.Small;
+        _scale = Scales.Small;
         return this;
     }
 
     public TableBuilder<TModel> Medium()
     {
-        _scale = Scale.Medium;
+        _scale = Scales.Medium;
         return this;
     }
 
