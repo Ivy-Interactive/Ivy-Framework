@@ -5,7 +5,8 @@ import { getWidth, inputStyles } from '@/lib/styles';
 import { InvalidIcon } from '@/components/InvalidIcon';
 import { Scales } from '@/types/scale';
 import { textInputSizeVariants } from '@/components/ui/input/text-input-variants';
-import { TextInputWidgetProps, renderPrefixSuffix } from '../types';
+import { TextInputWidgetProps } from '../types';
+import { renderPrefixSuffix } from '../utils/renderPrefixSuffix';
 import {
   useCursorPosition,
   useEnterKeyBlur,

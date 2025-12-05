@@ -1,14 +1,8 @@
-import React, {
-  useState,
-  useCallback,
-  useMemo,
-  useRef,
-  useEffect,
-} from 'react';
+import React, { useState, useCallback, useMemo, useRef } from 'react';
 import { useEventHandler } from '@/components/event-handler';
 import { Scales } from '@/types/scale';
-import { TextInputWidgetProps } from './types';
-import { parseShortcut } from './hooks';
+import { TextInputWidgetProps, TextInputVariant } from './types';
+import { useSyncServerValue, useShortcutKey } from './hooks';
 import {
   DefaultVariant,
   TextareaVariant,
@@ -38,50 +32,16 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
   const [isFocused, setIsFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement | null>(null);
 
-  // Update local value when server value changes and control is not focused
-  useEffect(() => {
-    if (!isFocused && value !== localValue) {
-      queueMicrotask(() => setLocalValue(value));
-    }
-  }, [value, isFocused, localValue]);
+  useSyncServerValue(value, localValue, isFocused, setLocalValue);
 
-  // Handle keyboard shortcut
-  useEffect(() => {
-    if (!shortcutKey) return;
-
-    const shortcutObj = parseShortcut(shortcutKey);
-    if (!shortcutObj) return;
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      // Check if the required modifier keys match exactly what was defined in the shortcut
-      const modifierMatch =
-        (shortcutObj.meta && event.metaKey) ||
-        (shortcutObj.ctrl && event.ctrlKey) ||
-        (!shortcutObj.meta &&
-          !shortcutObj.ctrl &&
-          !event.metaKey &&
-          !event.ctrlKey);
-
-      const isShortcutPressed =
-        modifierMatch &&
-        event.shiftKey === shortcutObj.shift &&
-        event.altKey === shortcutObj.alt &&
-        event.key.toLowerCase() === shortcutObj.key.toLowerCase();
-      if (isShortcutPressed) {
-        event.preventDefault();
-        if (inputRef.current) {
-          inputRef.current.focus();
-          setIsFocused(true);
-          if (events.includes('OnFocus')) eventHandler('OnFocus', id, []);
-        }
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [shortcutKey, id, events, eventHandler]);
+  useShortcutKey({
+    shortcutKey,
+    inputRef,
+    setIsFocused,
+    id,
+    events,
+    eventHandler,
+  });
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
@@ -138,7 +98,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
   );
 
   switch (variant) {
-    case 'Password':
+    case TextInputVariant.Password:
       return (
         <PasswordVariant
           props={commonProps}
@@ -149,7 +109,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
           scale={scale}
         />
       );
-    case 'Textarea':
+    case TextInputVariant.Textarea:
       return (
         <TextareaVariant
           props={commonProps}
@@ -161,7 +121,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
           scale={scale}
         />
       );
-    case 'Search':
+    case TextInputVariant.Search:
       return (
         <SearchVariant
           props={commonProps}
@@ -176,9 +136,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
     default:
       return (
         <DefaultVariant
-          type={
-            variant.toLowerCase() as Lowercase<TextInputWidgetProps['variant']>
-          }
+          type={variant.toLowerCase() as Lowercase<TextInputVariant>}
           props={commonProps}
           onChange={handleChange}
           onBlur={handleBlur}
