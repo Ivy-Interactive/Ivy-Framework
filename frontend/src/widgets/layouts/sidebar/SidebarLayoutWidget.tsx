@@ -31,7 +31,41 @@ interface SidebarLayoutWidgetProps {
   autoCollapseThreshold?: number; // Width threshold for auto-collapse (default: 768px)
   mainAppSidebar?: boolean;
   mainContentPadding?: number; // Padding for main content area (default: 2)
+  width?: string; // Width specification in format "wanted,min,max" e.g. "Px:256,Px:200,Px:480"
 }
+
+// Helper function to parse Size string and extract pixel value
+const parseSizeToPixels = (size?: string): number | undefined => {
+  if (!size) return undefined;
+  const [sizeType, value] = size.split(':');
+  switch (sizeType?.toLowerCase()) {
+    case 'px':
+      return parseFloat(value);
+    case 'rem':
+      return parseFloat(value) * 16; // Assume 16px base font
+    case 'units':
+      return parseFloat(value) * 4; // 0.25rem = 4px
+    default:
+      return undefined;
+  }
+};
+
+// Helper function to parse width prop and extract min/max values
+const parseWidthConstraints = (
+  width?: string
+): { minWidth: number; maxWidth: number } => {
+  const defaults = { minWidth: 256, maxWidth: 480 };
+  if (!width) return defaults;
+
+  const [, minWidth, maxWidth] = width.split(',');
+  const parsedMin = parseSizeToPixels(minWidth);
+  const parsedMax = parseSizeToPixels(maxWidth);
+
+  return {
+    minWidth: parsedMin ?? defaults.minWidth,
+    maxWidth: parsedMax ?? defaults.maxWidth,
+  };
+};
 
 // Helper function to check if a slot has meaningful content by checking props.children
 const hasContent = (slot?: React.ReactNode[]): boolean => {
@@ -59,7 +93,14 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
   autoCollapseThreshold = 768,
   mainAppSidebar = false,
   mainContentPadding,
+  width,
 }) => {
+  // Parse width constraints from the width prop
+  const { minWidth, maxWidth } = useMemo(
+    () => parseWidthConstraints(width),
+    [width]
+  );
+
   // Initialize sidebar state based on current window width (only for main app sidebar)
   const getInitialSidebarState = () => {
     if (!mainAppSidebar) return true;
@@ -74,6 +115,8 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(getInitialSidebarState);
   const [isManuallyToggled, setIsManuallyToggled] = useState(false);
+  const [sidebarWidth, setSidebarWidth] = useState(minWidth);
+  const [isResizing, setIsResizing] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const resizeObserverRef = useRef<ResizeObserver | null>(null);
 
@@ -82,6 +125,36 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
     setIsSidebarOpen(prev => !prev);
     setIsManuallyToggled(true);
   }, []);
+
+  // Handle resize drag
+  const handleResizeMouseDown = useCallback(
+    (event: React.MouseEvent) => {
+      event.preventDefault();
+      setIsResizing(true);
+
+      const startX = event.clientX;
+      const startWidth = sidebarWidth;
+
+      const handleMouseMove = (e: MouseEvent) => {
+        const delta = e.clientX - startX;
+        const newWidth = Math.min(
+          maxWidth,
+          Math.max(minWidth, startWidth + delta)
+        );
+        setSidebarWidth(newWidth);
+      };
+
+      const handleMouseUp = () => {
+        setIsResizing(false);
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+      };
+
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+    },
+    [sidebarWidth, minWidth, maxWidth]
+  );
 
   // Auto-collapse/expand based on width (only for main app sidebar)
   useEffect(() => {
@@ -146,15 +219,21 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
       ref={containerRef}
       className="grid h-full w-full remove-parent-padding"
       style={{
-        gridTemplateColumns: isSidebarOpen ? '16rem 1fr' : '0 1fr',
-        transition: 'grid-template-columns 300ms ease-in-out',
+        gridTemplateColumns: isSidebarOpen ? `${sidebarWidth}px 1fr` : '0 1fr',
+        transition: isResizing
+          ? 'none'
+          : 'grid-template-columns 300ms ease-in-out',
       }}
     >
       {/* Custom Sidebar with Slide Animation */}
       <div
-        className={`flex h-full w-[256px] flex-col bg-background text-foreground border-r border-border transition-transform duration-300 ease-in-out relative overflow-hidden ${
+        className={`flex h-full flex-col bg-background text-foreground border-r border-border relative overflow-hidden ${
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
+        style={{
+          width: `${sidebarWidth}px`,
+          transition: isResizing ? 'none' : 'transform 300ms ease-in-out',
+        }}
       >
         {hasContent(slots?.SidebarHeader) && (
           <div className="flex flex-col shrink-0 p-2 space-y-4">
@@ -177,15 +256,25 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
         )}
       </div>
 
+      {/* Resize Handle - positioned outside sidebar to avoid overflow clipping */}
+      {isSidebarOpen && (
+        <div
+          onMouseDown={handleResizeMouseDown}
+          className="absolute top-0 w-2 h-full cursor-ew-resize hover:bg-border transition-colors z-20"
+          style={{ left: `${sidebarWidth - 4}px` }}
+          title="Drag to resize"
+        />
+      )}
+
       {/* Toggle Button - Only show for main app sidebar */}
       {showToggleButton && mainAppSidebar && (
         <button
           onClick={handleManualToggle}
           className="absolute top-0 z-50 p-2 rounded-md bg-background hover:bg-muted hover:text-accent-foreground cursor-pointer transition-all duration-200"
           style={{
-            left: isSidebarOpen ? 'calc(16rem + 4px)' : '4px',
+            left: isSidebarOpen ? `${sidebarWidth + 4}px` : '4px',
             marginTop: '3px',
-            transition: 'left 300ms ease-in-out',
+            transition: isResizing ? 'none' : 'left 300ms ease-in-out',
             transform: 'translateX(0)', // Ensure button moves with its parent sidebar
           }}
           aria-label={isSidebarOpen ? 'Close sidebar' : 'Open sidebar'}
