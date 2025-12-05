@@ -425,8 +425,13 @@ describe('cellContent utilities', () => {
       },
     ];
 
+    // Helper function to get row data from array (for testing)
+    const getRowData = (rowIndex: number): DataRow | null => {
+      return rowIndex >= 0 && rowIndex < data.length ? data[rowIndex] : null;
+    };
+
     it('should return empty cell for out-of-bounds requests', () => {
-      const cell = getCellContent([10, 10], data, columns, [], true);
+      const cell = getCellContent([10, 10], columns, [], true, getRowData);
       expect(cell.kind).toBe(GridCellKind.Text);
       if (cell.kind === GridCellKind.Text) {
         expect(cell.data).toBe('');
@@ -435,7 +440,7 @@ describe('cellContent utilities', () => {
     });
 
     it('should return null cell for null values', () => {
-      const cell = getCellContent([1, 1], data, columns, [], true);
+      const cell = getCellContent([1, 1], columns, [], true, getRowData);
       if (cell.kind === GridCellKind.Text) {
         expect(cell.displayData).toBe(''); // Changed to empty string
         expect(cell.style).toBe('faded');
@@ -443,7 +448,7 @@ describe('cellContent utilities', () => {
     });
 
     it('should return text cell for string values', () => {
-      const cell = getCellContent([0, 0], data, columns, [], true);
+      const cell = getCellContent([0, 0], columns, [], true, getRowData);
       expect(cell.kind).toBe(GridCellKind.Text);
       if (cell.kind === GridCellKind.Text) {
         expect(cell.data).toBe('john doe');
@@ -451,7 +456,7 @@ describe('cellContent utilities', () => {
     });
 
     it('should return number cell for numeric values', () => {
-      const cell = getCellContent([1, 0], data, columns, [], true);
+      const cell = getCellContent([1, 0], columns, [], true, getRowData);
       expect(cell.kind).toBe(GridCellKind.Number);
       if (cell.kind === GridCellKind.Number) {
         expect(cell.data).toBe(30);
@@ -459,7 +464,7 @@ describe('cellContent utilities', () => {
     });
 
     it('should return boolean cell for boolean values', () => {
-      const cell = getCellContent([2, 0], data, columns, [], false);
+      const cell = getCellContent([2, 0], columns, [], false, getRowData);
       expect(cell.kind).toBe(GridCellKind.Boolean);
       if (cell.kind === GridCellKind.Boolean) {
         expect(cell.data).toBe(true);
@@ -468,7 +473,7 @@ describe('cellContent utilities', () => {
     });
 
     it('should return date cell for timestamp values', () => {
-      const cell = getCellContent([3, 0], data, columns, [], true);
+      const cell = getCellContent([3, 0], columns, [], true, getRowData);
       expect(cell.kind).toBe(GridCellKind.Text);
       if (cell.kind === GridCellKind.Text) {
         expect(cell.allowOverlay).toBe(true);
@@ -478,7 +483,7 @@ describe('cellContent utilities', () => {
     it('should return text cell for icon-like values without Icon type', () => {
       // Column 4 has type ColType.Text, not ColType.Icon
       // So even though value looks like an icon, it renders as text (no heuristic)
-      const cell = getCellContent([4, 0], data, columns, [], true);
+      const cell = getCellContent([4, 0], columns, [], true, getRowData);
       expect(cell.kind).toBe(GridCellKind.Text);
       if (cell.kind === GridCellKind.Text) {
         expect(cell.data).toBe('UserCircle');
@@ -486,7 +491,7 @@ describe('cellContent utilities', () => {
     });
 
     it('should return text cell for non-icon strings', () => {
-      const cell = getCellContent([4, 1], data, columns, [], true);
+      const cell = getCellContent([4, 1], columns, [], true, getRowData);
       expect(cell.kind).toBe(GridCellKind.Text);
       if (cell.kind === GridCellKind.Text) {
         expect(cell.data).toBe('not-icon');
@@ -495,7 +500,13 @@ describe('cellContent utilities', () => {
 
     it('should respect column ordering', () => {
       const columnOrder = [1, 0, 2, 3, 4]; // Age, Name, Active, ...
-      const cell = getCellContent([0, 0], data, columns, columnOrder, true);
+      const cell = getCellContent(
+        [0, 0],
+        columns,
+        columnOrder,
+        true,
+        getRowData
+      );
       // With reordering, col 0 should now be Age (index 1 in original)
       expect(cell.kind).toBe(GridCellKind.Number);
       if (cell.kind === GridCellKind.Number) {
@@ -511,14 +522,19 @@ describe('cellContent utilities', () => {
       ];
 
       const testData: DataRow[] = [{ values: ['text1', 999, true] }];
+      const getTestRowData = (rowIndex: number): DataRow | null => {
+        return rowIndex >= 0 && rowIndex < testData.length
+          ? testData[rowIndex]
+          : null;
+      };
 
       // Request col 0 - should be Visible1
       const cell0 = getCellContent(
         [0, 0],
-        testData,
         columnsWithHidden,
         [],
-        true
+        true,
+        getTestRowData
       );
       expect(cell0.kind).toBe(GridCellKind.Text);
       if (cell0.kind === GridCellKind.Text) {
@@ -528,10 +544,10 @@ describe('cellContent utilities', () => {
       // Request col 1 - should be Visible2 (Hidden column skipped)
       const cell1 = getCellContent(
         [1, 0],
-        testData,
         columnsWithHidden,
         [],
-        true
+        true,
+        getTestRowData
       );
       expect(cell1.kind).toBe(GridCellKind.Boolean);
       if (cell1.kind === GridCellKind.Boolean) {
@@ -545,8 +561,19 @@ describe('cellContent utilities', () => {
       ];
 
       const iconData: DataRow[] = [{ values: ['Settings'] }];
+      const getIconRowData = (rowIndex: number): DataRow | null => {
+        return rowIndex >= 0 && rowIndex < iconData.length
+          ? iconData[rowIndex]
+          : null;
+      };
 
-      const cell = getCellContent([0, 0], iconData, iconColumns, [], true);
+      const cell = getCellContent(
+        [0, 0],
+        iconColumns,
+        [],
+        true,
+        getIconRowData
+      );
       expect(cell.kind).toBe(GridCellKind.Custom);
       if (cell.kind === GridCellKind.Custom) {
         expect(cell.data).toEqual({
@@ -566,8 +593,20 @@ describe('cellContent utilities', () => {
         { values: ['app://concepts/links-app'] },
       ];
 
+      const getLinkRowData = (rowIndex: number): DataRow | null => {
+        return rowIndex >= 0 && rowIndex < linkData.length
+          ? linkData[rowIndex]
+          : null;
+      };
+
       // Test external URL
-      const cell1 = getCellContent([0, 0], linkData, linkColumns, [], false);
+      const cell1 = getCellContent(
+        [0, 0],
+        linkColumns,
+        [],
+        false,
+        getLinkRowData
+      );
       expect(cell1.kind).toBe(GridCellKind.Custom);
       if (cell1.kind === GridCellKind.Custom) {
         const linkData1 = cell1.data as { kind: string; url: string };
@@ -578,7 +617,13 @@ describe('cellContent utilities', () => {
       }
 
       // Test internal app:// link
-      const cell2 = getCellContent([0, 1], linkData, linkColumns, [], false);
+      const cell2 = getCellContent(
+        [0, 1],
+        linkColumns,
+        [],
+        false,
+        getLinkRowData
+      );
       expect(cell2.kind).toBe(GridCellKind.Custom);
       if (cell2.kind === GridCellKind.Custom) {
         const linkData2 = cell2.data as { kind: string; url: string };
@@ -588,7 +633,7 @@ describe('cellContent utilities', () => {
     });
 
     it('should handle editable=false', () => {
-      const cell = getCellContent([0, 0], data, columns, [], false);
+      const cell = getCellContent([0, 0], columns, [], false, getRowData);
       if (cell.kind === GridCellKind.Text) {
         expect(cell.allowOverlay).toBe(false);
         expect(cell.readonly).toBe(true);
@@ -650,31 +695,36 @@ describe('cellContent utilities', () => {
       const alignData: DataRow[] = [
         { values: ['left text', 42, 'right text'] },
       ];
+      const getAlignRowData = (rowIndex: number): DataRow | null => {
+        return rowIndex >= 0 && rowIndex < alignData.length
+          ? alignData[rowIndex]
+          : null;
+      };
 
       const leftCell = getCellContent(
         [0, 0],
-        alignData,
         alignedColumns,
         [],
-        true
+        true,
+        getAlignRowData
       );
       expect(leftCell.contentAlign).toBe('left');
 
       const centerCell = getCellContent(
         [1, 0],
-        alignData,
         alignedColumns,
         [],
-        true
+        true,
+        getAlignRowData
       );
       expect(centerCell.contentAlign).toBe('center');
 
       const rightCell = getCellContent(
         [2, 0],
-        alignData,
         alignedColumns,
         [],
-        true
+        true,
+        getAlignRowData
       );
       expect(rightCell.contentAlign).toBe('right');
     });
@@ -769,8 +819,19 @@ describe('cellContent utilities', () => {
       const labelsData: DataRow[] = [
         { values: [['Important', 'Urgent', 'Review']] },
       ];
+      const getLabelsRowData = (rowIndex: number): DataRow | null => {
+        return rowIndex >= 0 && rowIndex < labelsData.length
+          ? labelsData[rowIndex]
+          : null;
+      };
 
-      const cell = getCellContent([0, 0], labelsData, labelsColumns, [], true);
+      const cell = getCellContent(
+        [0, 0],
+        labelsColumns,
+        [],
+        true,
+        getLabelsRowData
+      );
       expect(cell.kind).toBe(GridCellKind.Bubble);
       if (cell.kind === GridCellKind.Bubble) {
         expect(cell.data).toEqual(['Important', 'Urgent', 'Review']);
@@ -785,8 +846,19 @@ describe('cellContent utilities', () => {
       const labelsData: DataRow[] = [
         { values: ['Bug, Feature, Documentation'] },
       ];
+      const getLabelsRowData2 = (rowIndex: number): DataRow | null => {
+        return rowIndex >= 0 && rowIndex < labelsData.length
+          ? labelsData[rowIndex]
+          : null;
+      };
 
-      const cell = getCellContent([0, 0], labelsData, labelsColumns, [], true);
+      const cell = getCellContent(
+        [0, 0],
+        labelsColumns,
+        [],
+        true,
+        getLabelsRowData2
+      );
       expect(cell.kind).toBe(GridCellKind.Bubble);
       if (cell.kind === GridCellKind.Bubble) {
         expect(cell.data).toEqual(['Bug', 'Feature', 'Documentation']);
@@ -799,8 +871,19 @@ describe('cellContent utilities', () => {
       ];
 
       const labelsData: DataRow[] = [{ values: [['Tag1', 'Tag2']] }];
+      const getLabelsRowData3 = (rowIndex: number): DataRow | null => {
+        return rowIndex >= 0 && rowIndex < labelsData.length
+          ? labelsData[rowIndex]
+          : null;
+      };
 
-      const cell = getCellContent([0, 0], labelsData, labelsColumns, [], true);
+      const cell = getCellContent(
+        [0, 0],
+        labelsColumns,
+        [],
+        true,
+        getLabelsRowData3
+      );
       expect(cell.contentAlign).toBe('right');
     });
   });

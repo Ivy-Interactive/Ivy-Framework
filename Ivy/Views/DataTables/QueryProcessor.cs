@@ -3,6 +3,7 @@ using System.Security.Cryptography;
 using System.Text;
 using Apache.Arrow;
 using Apache.Arrow.Ipc;
+using Apache.Arrow.Types;
 using Ivy.Protos.DataTable;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
@@ -27,7 +28,7 @@ public class ValuesResult
 
 public class QueryProcessor(ILogger<QueryProcessor>? logger = null, IDistributedCache? cache = null)
 {
-    public QueryResult ProcessQuery(IQueryable queryable, DataTableQuery query)
+    public QueryResult ProcessQuery(IQueryable queryable, DataTableQuery query, Func<object, object?>? idSelector = null)
     {
         try
         {
@@ -100,7 +101,7 @@ public class QueryProcessor(ILogger<QueryProcessor>? logger = null, IDistributed
 
             // Convert to Arrow table
             logger?.LogDebug("Converting to Arrow table");
-            var arrowData = ConvertToArrowTable(results, query.SelectColumns, queryable.ElementType);
+            var arrowData = ConvertToArrowTable(results, query.SelectColumns, queryable.ElementType, idSelector);
             logger?.LogInformation("Arrow conversion complete, {ByteCount} bytes", arrowData.Length);
 
             var result = new QueryResult
@@ -855,7 +856,7 @@ public class QueryProcessor(ILogger<QueryProcessor>? logger = null, IDistributed
         }
     }
 
-    private byte[] ConvertToArrowTable(List<object> data, IEnumerable<string> selectColumns, SystemType elementType)
+    private byte[] ConvertToArrowTable(List<object> data, IEnumerable<string> selectColumns, SystemType elementType, Func<object, object?>? idSelector = null)
     {
         logger?.LogDebug("Converting {DataCount} items to Arrow table", data.Count);
 
@@ -884,6 +885,28 @@ public class QueryProcessor(ILogger<QueryProcessor>? logger = null, IDistributed
             else
             {
                 arrays.Add(QueryHelpers.CreateArrowArray(prop, data, arrowType));
+            }
+        }
+
+        // Add _hiddenKey column if idSelector is provided
+        const string HiddenKeyColumnName = "_hiddenKey";
+        if (idSelector != null)
+        {
+            var hiddenKeyType = StringType.Default;
+            fields.Add(new ArrowField(HiddenKeyColumnName, hiddenKeyType, nullable: true));
+
+            if (!data.Any())
+            {
+                arrays.Add(QueryHelpers.CreateEmptyArrowArray(hiddenKeyType));
+            }
+            else
+            {
+                var hiddenKeyValues = data.Select(row =>
+                {
+                    var id = idSelector(row);
+                    return id?.ToString() ?? null;
+                }).ToList();
+                arrays.Add(QueryHelpers.CreateStringArray(hiddenKeyValues.Cast<object?>().ToList()));
             }
         }
 

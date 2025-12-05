@@ -48,24 +48,6 @@ sampleUsers.ToDataTable()
     .Height(Size.Units(100))
 ```
 
-## Table Sizing
-
-Control the overall dimensions of the DataTable using `Width()` and `Height()` methods:
-
-```csharp demo-tabs
-sampleUsers.ToDataTable()
-    .Header(u => u.Name, "Full Name")
-    .Header(u => u.Email, "Email Address")
-    .Header(u => u.Salary, "Salary")
-    .Width(Size.Px(800))
-    .Height(Size.Units(100))
-```
-
-**Table sizing methods:**
-
-- **Width** - Set the overall width of the table using `Size.Px()`, `Size.Units()`, `Size.Fraction()`, etc. For column-specific widths, use `Width(expression, size)`.
-- **Height** - Set the overall height of the table
-
 ## Column Configuration
 
 Customize column appearance and behavior with a fluent API:
@@ -156,101 +138,35 @@ sampleUsers.ToDataTable()
 
 ## Row Actions
 
-Add contextual actions to each row using `RowActions()` and handle them via `OnRowAction()`. Actions are rendered as icons or buttons within a dedicated column. Row actions support nested menus.
+Add contextual actions to each row using `RowActions()` and handle them via `HandleRowAction()`. Actions are rendered as icons or buttons that appear when hovering over a row. Row actions support both simple menu items and nested dropdown menus.
 
-```csharp demo-tabs
-public class RowActionsDemo : ViewBase
-{
-    public record Employee(int Id, string Name, string Title, string ProfileLink);
+Use `RowActions()` to define one or more `MenuItem` objects. Each menu item can have an icon, label, tooltip, and tag. For nested menus, use `.Children()` to create a dropdown menu with sub-items. For example, you can create individual action buttons like edit, delete, or view, as well as a menu button with a dropdown containing additional actions like archive, export, or share.
 
-    public override object? Build()
-    {
-        var client = UseService<IClientProvider>();
-        var employees = new[]
-        {
-            new Employee(1, "Alice", "Designer", "https://github.com/Ivy-Interactive/Ivy-Framework"),
-            new Employee(2, "Bob", "Developer", "https://github.com/Ivy-Interactive"),
-            new Employee(3, "Charlie", "Project Manager", "https://github.com/Ivy-Interactive/Ivy-Examples")
-        }.AsQueryable();
+When creating the DataTable, specify an ID selector using `.ToDataTable(idSelector: e => e.Id)` where `Id` is the property that uniquely identifies each row. This allows the row action handler to identify which row was clicked.
 
-        return employees
-            .ToDataTable()
-            .Header(e => e.ProfileLink, "Profile")
-            .Renderer(e => e.ProfileLink, new LinkDisplayRenderer { Type = LinkDisplayType.Url })
-            .RowActions(
-                MenuItem.Default(Icons.Pencil, "edit").Tooltip("Edit employee"),
-                MenuItem.Default(Icons.EllipsisVertical, "menu")
-                    .Children([
-                        MenuItem.Default(Icons.Archive, "archive").Label("Archive"),
-                        MenuItem.Default(Icons.Download, "export").Label("Export")
-                    ])
-            )
-            .HandleRowAction(async e =>
-            {
-                var args = e.Value;
-                var actionId = args.ActionId;
-                var rowIndex = args.RowIndex;
-                var rowData = args.RowData;
+Use `HandleRowAction()` to respond to row action menu selections. The handler receives an `Event<DataTable, RowActionClickEventArgs>` containing:
 
-                // Access row data by column name
-                var employeeName = rowData.TryGetValue("Name", out var name) ? name?.ToString() : "Unknown";
-                client.Toast($"Action: {actionId} on {employeeName} (row {rowIndex})");
-            });
-    }
-}
-```
+- **Id** - The ID of the row (extracted using the `idSelector` parameter passed to `ToDataTable()`)
+- **Tag** - The tag of the menu item that was clicked (useful for identifying which action was selected, especially with nested menus)
+
+The handler can access both properties: `args.Id` to identify the row and `args.Tag` to determine which action was selected. This is particularly useful when handling nested menu items, as each child menu item can have its own tag.
 
 <Callout Type="tip">
 Use <code>Renderer(expr, new LinkDisplayRenderer { Type = LinkDisplayType.Url })</code> to mark a URL string column as a clickable hyperlink. Users can open the link with <kbd>Ctrl</kbd>/<kbd>Cmd</kbd> + click or via the context menu. External links (http/https) open in a new focused tab, while relative URLs navigate in the same tab.
 </Callout>
 
-Use `HandleRowAction` to respond to row action menu selections. The handler receives an `Event<DataTable, RowActionClickEventArgs>` containing:
-
-- **ActionId** - The identifier of the action that was clicked (from the MenuItem tag or label)
-- **RowIndex** - The zero-based index of the row where the action was triggered
-- **RowData** - A dictionary containing the row data, keyed by column name
-
-Access row values from the `RowData` dictionary using column names as keys.
-
 ## Cell Click Events
 
-Enable single- and double-click handlers for any cell by turning on `EnableCellClickEvents` in the table configuration and wiring up `.OnCellClick()` / `.OnCellActivated()` delegates.
+Enable single- and double-click handlers for any cell by setting `EnableCellClickEvents = true` in the table configuration and wiring up `.OnCellClick()` and `.OnCellActivated()` delegates.
 
-```csharp demo-tabs
-public class CellClickDemo : ViewBase
-{
-    public record Employee(int Id, string Name, string Department);
+The `OnCellClick()` handler is triggered on a single click, while `OnCellActivated()` is triggered on a double-click. Both handlers receive an `Event<DataTable, CellClickEventArgs>` containing:
 
-    public override object? Build()
-    {
-        var client = UseService<IClientProvider>();
-        var employees = new[]
-        {
-            new Employee(1, "Alice", "Design"),
-            new Employee(2, "Bob", "Development"),
-            new Employee(3, "Charlie", "QA")
-        }.AsQueryable();
+- **RowIndex** - The zero-based index of the row that was clicked
+- **ColumnIndex** - The zero-based index of the column that was clicked
+- **ColumnName** - The name of the column that was clicked
+- **CellValue** - The value of the cell that was clicked
 
-        return employees
-            .ToDataTable()
-            .Config(c => c.EnableCellClickEvents = true)
-            .OnCellClick(e =>
-            {
-                var args = e.Value;
-                client.Toast($"Clicked: {args.ColumnName} (row {args.RowIndex})");
-                return ValueTask.CompletedTask;
-            })
-            .OnCellActivated(e =>
-            {
-                var args = e.Value;
-                client.Toast($"Double-clicked: {args.ColumnName} (row {args.RowIndex})");
-                return ValueTask.CompletedTask;
-            });
-    }
-}
-```
-
-`CellClickEventArgs` exposes `RowIndex`, `ColumnIndex`, `ColumnName`, and `CellValue`, allowing you to perform any context-specific action.
+These properties allow you to perform context-specific actions based on which cell was interacted with. For example, you can display a toast notification with the column name and row index, or navigate to a detail view based on the cell's value.
 
 ## DateTime Filtering
 

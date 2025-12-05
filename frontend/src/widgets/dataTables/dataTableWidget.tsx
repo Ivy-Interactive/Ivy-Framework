@@ -1,14 +1,15 @@
 import '@glideapps/glide-data-grid/dist/index.css';
 import './styles/checkbox.css';
 import React from 'react';
-import { TableProvider, useTable } from './DataTableContext';
+import { TableProvider } from './dataTableContext';
+import { useTable } from './dataTableContext';
 import { ErrorDisplay } from '@/components/ErrorDisplay';
 import { Loading } from '@/components/Loading';
-import { DataTableEditor } from './DataTableEditor';
-import { DataTableHeader } from './DataTableHeader';
-import { DataTableFooter } from './DataTableFooter';
-import { DataTableOption } from './DataTableOption';
-import { DataTableFilterOption } from './options/DataTableFilterOption';
+import { DataTableEditor } from './dataTableEditor';
+import { DataTableHeader } from './dataTableHeader';
+import { DataTableFooter } from './dataTableFooter';
+import { DataTableOption } from './dataTableOption';
+import { DataTableFilterOption } from './options/dataTableFilterOption';
 import { Filter as FilterIcon } from 'lucide-react';
 import { tableStyles } from './styles/style';
 import { TableProps } from './types/types';
@@ -42,6 +43,7 @@ export const DataTable: React.FC<TableProps> = ({
   width,
   height,
   rowActions,
+  'data-testid': dataTestId,
 }) => {
   // Apply default config values
   const finalConfig = {
@@ -72,7 +74,7 @@ export const DataTable: React.FC<TableProps> = ({
   };
 
   return (
-    <div style={containerStyle}>
+    <div style={containerStyle} data-testid={dataTestId}>
       <TableProvider
         columns={columns}
         connection={connection}

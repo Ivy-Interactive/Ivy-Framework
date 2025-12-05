@@ -22,7 +22,7 @@ public record HeaderLayout : WidgetBase<HeaderLayout>
 
 public static class HeaderLayoutExtensions
 {
-    public static HeaderLayout Scroll(this HeaderLayout headerLayout, Shared.Scroll scroll = Shared.Scroll.Auto)
+    public static HeaderLayout Scroll(this HeaderLayout headerLayout, Scroll scroll = Shared.Scroll.Auto)
     {
         var result = headerLayout with { ContentScroll = scroll };
 

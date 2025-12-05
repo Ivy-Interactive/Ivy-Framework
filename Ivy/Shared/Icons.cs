@@ -27,6 +27,7 @@ public enum Icons
     Vimeo, //<FaVimeo />
     Spotify, //<FaSpotify />
     Notion, //<FaNotion />
+    XTwitter, //<FaXTwitter />
 
     // Lucide Icons (1000+ scalable vector icons):
     AArrowDown,

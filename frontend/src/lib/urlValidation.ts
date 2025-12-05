@@ -75,6 +75,10 @@ export function isAppProtocol(url: string): boolean {
   return /^app:\/\//.test(url);
 }
 
+export function isMailtoUrl(url: string): boolean {
+  return /^mailto:/i.test(url);
+}
+
 export function isRelativePath(url: string): boolean {
   return url.startsWith('/');
 }
@@ -188,6 +192,26 @@ export function validateLinkUrl(url: string | null | undefined): string {
   // Handle empty string after trimming
   if (url === '') {
     return '#';
+  }
+
+  // Allow mailto: URLs for email links
+  if (/^mailto:/i.test(url)) {
+    // Basic validation: must have at least one character after mailto:
+    // and should not contain dangerous characters or protocol injection
+    const afterProtocol = url.substring(7); // After "mailto:"
+    if (!afterProtocol || afterProtocol.trim() === '') {
+      return '#';
+    }
+    // Check for protocol injection
+    if (afterProtocol.includes('://')) {
+      return '#';
+    }
+    // Validate mailto format: mailto:email@domain.com[?subject=...&body=...]
+    // Allow query parameters for subject, body, cc, bcc but disallow fragments
+    if (!/^mailto:[^#]+$/i.test(url)) {
+      return '#';
+    }
+    return url;
   }
 
   // Allow app:// URLs (Ivy internal navigation)

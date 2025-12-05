@@ -535,8 +535,8 @@
   }
 }
 
-:has(> .remove-parent-padding) {
-  padding: 0px !important;
+:has(> DIV.remove-parent-padding) {
+  padding: 0 !important;
 }
 
 .invisible-scrollbar {

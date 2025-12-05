@@ -36,7 +36,7 @@ public record LineChart : WidgetBase<LineChart>
 
     [Prop] public CartesianGrid? CartesianGrid { get; init; }
 
-    [Prop] public Ivy.Charts.Tooltip? Tooltip { get; init; }
+    [Prop] public Charts.Tooltip? Tooltip { get; init; }
 
     [Prop] public Legend? Legend { get; init; } = null;
 
@@ -125,14 +125,14 @@ public static class LineChartExtensions
         return chart with { YAxis = [.. chart.YAxis, new YAxis()] };
     }
 
-    public static LineChart Tooltip(this LineChart chart, Ivy.Charts.Tooltip? tooltip)
+    public static LineChart Tooltip(this LineChart chart, Charts.Tooltip? tooltip)
     {
         return chart with { Tooltip = tooltip };
     }
 
     public static LineChart Tooltip(this LineChart chart)
     {
-        return chart with { Tooltip = new Ivy.Charts.Tooltip() };
+        return chart with { Tooltip = new Charts.Tooltip() };
     }
 
     public static LineChart Legend(this LineChart chart, Legend legend)

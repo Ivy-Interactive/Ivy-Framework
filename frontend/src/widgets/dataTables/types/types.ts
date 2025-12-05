@@ -70,6 +70,7 @@ export interface DataTableConfig {
   enableCellClickEvents?: boolean;
   showSearch?: boolean;
   enableRowHover?: boolean;
+  idColumnName?: string | null;
 }
 
 export interface TableProps {
@@ -82,6 +83,7 @@ export interface TableProps {
   height?: string;
   rowActions?: MenuItem[];
   onCellUpdate?: (row: number, col: number, value: unknown) => void;
+  'data-testid'?: string;
 }
 
 export enum FilterTypes {
@@ -100,19 +102,11 @@ export enum SelectionModes {
  */
 export interface RowActionClickEventArgs {
   /**
-   * The ID of the action that was clicked (from MenuItem.tag or MenuItem.label)
+   * The ID of the row (extracted from _hiddenKey column if available)
    */
-  actionId: string;
+  id: string | number | null;
   /**
-   * The event name of the action (from MenuItem.tag or MenuItem.label)
+   * The tag of the menu item that was clicked
    */
-  eventName: string;
-  /**
-   * The index of the clicked row
-   */
-  rowIndex: number;
-  /**
-   * The data for the clicked row, keyed by column name
-   */
-  rowData: Record<string, unknown>;
+  tag?: string | null;
 }
