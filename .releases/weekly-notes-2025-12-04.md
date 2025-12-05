@@ -9,9 +9,7 @@ This release introduces major improvements to form scaffolding with comprehensiv
 
 ## Improvements
 
-### New Widgets
-
-#### Stepper Widget
+### Stepper Widget
 
 New `Stepper` widget for multi-step processes:
 
@@ -34,17 +32,7 @@ new Stepper(
 .AllowSelectForward();  // Allow jumping ahead
 ```
 
-**Features:**
-
-- Visual states: completed (checkmark), current (highlighted), upcoming (muted)
-- Selective navigation: by default, only completed steps clickable
-- Forward navigation: use `.AllowSelectForward()` to allow jumping ahead
-- Icons, labels, and descriptions per step
-- Connected design with highlighted progress lines
-
-### Form System
-
-#### Form Scaffolding
+### Form Scaffolding
 
 **Upload-Aware Form Submission:**
 
@@ -107,12 +95,6 @@ model.ToForm()
 
 **Improved Form Spacing and Typography:**
 
-Scale-appropriate spacing between fields and submit button:
-
-- Small: 4px gap, `text-xs`
-- Medium: 6px gap, `text-sm` (default)
-- Large: 8px gap, `text-base`
-
 **Comprehensive DataAnnotations Support:**
 
 **Display Attributes:**
@@ -147,16 +129,6 @@ All major validation attributes supported:
 public Guid Id { get; set; }  // Hidden from form
 ```
 
-**Universal Placeholder Support:**
-
-All input widgets support `.Placeholder()` method:
-
-```csharp
-textState.ToTextInput().Placeholder("Enter your name");
-numberState.ToNumberInput().Placeholder("0.00");
-dateState.ToDateTimeInput().Placeholder("Select a date");
-```
-
 **Fixed Label Generation:**
 
 Improved logic for handling label generation when field names end with "Id":
@@ -166,19 +138,15 @@ Improved logic for handling label generation when field names end with "Id":
 - Checks if the label itself ends with "Id" before trimming, preventing incorrect truncation
 - Preserves labels like "User ID", "Government ID", and "Id" when specified via Display attributes
 
-#### Form Input Size Consistency
+### Form Input Size Consistency
 
-All form inputs now follow a unified sizing system:
-
-- **Small**: `h-7` with `px-2` padding
-- **Medium**: `h-9` with `px-3` padding  
-- **Large**: `h-11` with `px-4` padding
+All form inputs now follow a unified sizing system.
 
 Size variants simplified from enum-based to string literals for easier usage.
 
-### Input Widgets
+## Input Widgets
 
-#### AsyncSelectInput Enhancements
+### AsyncSelectInput Enhancements
 
 **Scale Support:**
 
@@ -195,15 +163,7 @@ Scale affects height, padding, text size, icon size, and search sheet styling.
 
 **Visual Integration:**
 
-New styles that look good when mixed with other elements:
-
-- Chevron icon uses absolute positioning with optimized sizing
-- Reduced opacity (50%) for subtle appearance
-- Better text alignment without excessive margins
-
 **Full-Width Dividers:**
-
-Dropdown dividers now extend to full width for cleaner appearance.
 
 **Option Descriptions:**
 
@@ -229,77 +189,30 @@ new Option<string>("Active", "active", icon: Icons.CheckCircle)
 
 The `Label` property is now nullable - when omitted, uses `value.ToString()` as fallback.
 
-#### DateTime Input Visual Improvements
+### DateTime Input Visual Improvements
 
-**Icon Positioning:**
+- Calendar and clock icons positioned inside input fields
+- Consistent disabled state styling matching DateRange inputs
+- Clear and error icons use absolute positioning with optimized spacing
 
-- Calendar and clock icons now positioned inside input fields
-- Consistent spacing across all date/time variants
-- Clock icon appears inside Time input field
+### File Input Improvements
 
-**Disabled State:**
-
-- Consistent styling matching DateRange inputs
-- Reduced opacity for icons in disabled inputs
-- Proper `not-allowed` cursor on hover
-
-**Clear and Error Icon Layout:**
-
-- Absolute positioning for reliable placement
-- Optimized spacing to prevent text overlap
-- Automatic padding adjustment based on visible icons
-
-#### File Input Improvements
-
-**Enhanced Event Handlers:**
-
-**OnBlur Handler:**
-Fires when file dialog closes (whether files selected or cancelled):
+**Event Handlers:**
 
 ```csharp
 files.ToFileInput(upload)
-    .HandleBlur((Event<IAnyInput> e) =>
-    {
-        if (files.Value.Length > 0)
-            Console.WriteLine($"{files.Value.Length} file(s) selected");
-    });
-```
-
-**OnCancel Handler:**
-Fires when user clicks X button on a file:
-
-```csharp
-files.ToFileInput(upload)
-    .HandleCancel((Guid fileId) =>
-    {
+    .HandleBlur((Event<IAnyInput> e) => {
+        // Fires when file dialog closes (selected or cancelled)
+    })
+    .HandleCancel((Guid fileId) => {
+        // Fires when user clicks X button on a file
         upload.Value.Cancel(fileId);
-        files.Set(list => list.Where(f => f.Id != fileId).ToImmutableArray());
     });
 ```
 
-**Consolidated Documentation:**
+### Field Widget
 
-File upload documentation merged into comprehensive FileInput widget documentation with unified examples and patterns.
-
-#### Field Widget
-
-**Width and Height Support:**
-
-FieldWidget now supports custom width and height properties:
-
-```csharp
-<FieldWidget
-  label="Username"
-  width="300px"
-  height="auto"
->
-  {/* Your input component */}
-</FieldWidget>
-```
-
-When not specified, maintains default flexible behavior for backward compatibility.
-
-Field widgets also support explicit width and height directly:
+FieldWidget now supports custom width and height properties. Field widgets also support explicit width and height directly:
 
 ```csharp
 state.ToTextInput()
@@ -358,7 +271,7 @@ tasks.ToKanban(...)
 
 **Custom Card Ordering:**
 
-Use `.CardOrder()` to sort cards within columns independently of global `orderSelector`. This allows you to override or refine the card ordering within each column:
+Use `.CardOrder()` to sort cards within columns independently of global `orderSelector`:
 
 ```csharp
 tasks.ToKanban(
@@ -368,31 +281,16 @@ tasks.ToKanban(
 .CardBuilder(task => new Card()
     .Title(task.Title)
     .Description(task.Description))
-.CardOrder(e => e.DueDate)  // Order cards by due date within each column - upcoming deadlines first
+.CardOrder(e => e.DueDate)  // Order cards by due date within each column
 ```
 
-The `.CardOrder()` method is separate from the `orderSelector` parameter in `.ToKanban()` and provides fine-grained control over how cards are sorted within each column.
+**Drag-and-Drop Improvements:**
 
-**Fixed Card Reordering Logic:**
-
-Cards now correctly reorder when dragged within same column or between columns. Fix addresses edge cases with end-of-column positioning and insertion index calculation.
-
-**Improved Drag Visual Feedback:**
-
-Column highlights properly clear after drag operations complete. Drag-over state centralized in Kanban context.
-
-**Enhanced Drag-and-Drop Interactions:**
-
+- Cards correctly reorder when dragged within same column or between columns
+- Column highlights properly clear after drag operations complete
 - Drop position indicators show exact insertion point
-- Smooth animations (0.2s ease) when cards shift
-- Improved column styling with accent background on drag-over
-- Refined scrollbars (1.5 units instead of 2.5)
-
-**Visual Refinements:**
-
-- Improved scroll bar padding and rounded corners for better visual consistency
-- Adjusted column and card container padding for optimal spacing
-- Reduced border radius for more subtle appearance
+- Smooth animations when cards shift
+- Improved scroll bar padding and rounded corners
 
 **Simplified Width and Height Methods:**
 
@@ -408,28 +306,14 @@ tasks.ToKanban(...).Width(Size.Units(800)).Height(Size.Units(600));
 
 ### HeaderLayout Widget
 
-**Scroll Control:**
-
 Disable automatic ScrollArea wrapper for custom scrolling:
 
 ```csharp
 new HeaderLayout(header, content)
-    .Scroll(Scroll.None)  // Content handles its own scrolling
+    .Scroll(Scroll.None);  // Content handles its own scrolling
 ```
 
-When `.Scroll(Scroll.None)` is set, HeaderLayout automatically sets height to `Size.Full()` if no explicit height provided.
-
-**Kanban Integration:**
-
-Kanban boards can now be used in HeaderLayout with scrolling disabled:
-
-```csharp
-var header = Layout.Horizontal() | new Button("Add Task");
-var kanban = tasks.ToKanban(...).CardBuilder(...);
-
-return new HeaderLayout(header, kanban)
-    .Scroll(Scroll.None); // Disable HeaderLayout scrolling for Kanban
-```
+Kanban boards can now be used in HeaderLayout with scrolling disabled.
 
 ### Table Widget
 
@@ -447,22 +331,14 @@ products.ToTable()
     .ColumnWidth(e => e.Sku, Size.Fraction(0.15f));
 ```
 
-**Improved Column Width and Text Wrapping:**
+**Column Width and Alignment:**
 
-- Full width tables use `table-layout: fixed` to respect column constraints and prevent overflow
-- Fixed width tables use `table-layout: auto` for natural sizing and expansion when needed
-- Multi-line cells use `break-words` for better wrapping
-- Header cells always truncate with tooltips
-- Data cells only truncate when explicit column width is set, allowing natural sizing otherwise
-
-**Enhanced Column Alignment API:**
-
-The `.Align()` method now properly aligns content within both header and data cells using `text-align` CSS properties:
+The `.Align()` method properly aligns content within both header and data cells:
 
 ```csharp
 records.ToTable()
     .ColumnWidth(e => e.Views, Size.Fit())
-    .Align(e => e.Views, Align.Right);  // Right-align numbers
+    .Align(e => e.Views, Align.Right);
 ```
 
 ### DataTable Widget
@@ -520,21 +396,14 @@ users.ToDataTable()
 
 ### Charts
 
-**Toolbox on Hover:**
-
-Chart toolbox controls now only appear when hovering over chart (if enabled), providing cleaner appearance by default.
-
-**Fixed Y-Axis Rendering with Negative Values:**
-
-Charts now correctly handle negative values by automatically adjusting Y-axis minimum to include negative ranges. Previously, Y-axis would always start at 0, cutting off negative data points.
+- Chart toolbox controls now only appear when hovering over chart (if enabled)
+- Charts now correctly handle negative values by automatically adjusting Y-axis minimum to include negative ranges
 
 ### Grid Layout
 
 **Improved Dark Mode Contrast:**
 
-Grid layouts now have improved text contrast in dark mode when using opacity. Previously, text was unreadable on boxes with opacity because `color-mix` always mixed towards white, making backgrounds lighter while text remained white.
-
-The fix uses a CSS variable `--opacity-mix-color` that switches between white (light mode) and black (dark mode), ensuring text stays readable in both themes. Color-mix for opacity now always blends with the current `--background` variable, providing context-aware transparency without extra global or theme-specific variables.
+Grid layouts now have improved text contrast in dark mode when using opacity. The fix uses a CSS variable `--opacity-mix-color` that switches between white (light mode) and black (dark mode), ensuring text stays readable in both themes.
 
 **Enhanced Grid API:**
 
@@ -615,31 +484,18 @@ All form inputs and tables now default to `Scale.Medium` when no scale explicitl
 
 **Scale Support:**
 
-Expandable now supports standard scale system:
-
 ```csharp
 new Expandable(header, content)
-    .Small()   // Compact (h-7)
-    .Medium()  // Default (h-9)
-    .Large()   // Emphasized (h-11)
+    .Small()   // Compact
+    .Medium()  // Default
+    .Large()   // Emphasized
 ```
 
-Scale affects height, padding, text size, chevron icon size, and content spacing.
+**Improvements:**
 
-**Improved Icon Positioning:**
-
-- Chevron icon uses absolute positioning with right-alignment
-- Optimized icon widths (w-5/6/8 instead of w-7/9/11)
-- Reduced opacity (50%) for subtle appearance
-- Removed vertical border line separating chevron
-
-**Interactive Elements in Disabled Expandables:**
-
-When Expandable is disabled, interactive elements within header (buttons, switches, links) remain clickable. Only the expandable toggle is disabled.
-
-**Improved Click Handling:**
-
-Click handling properly distinguishes between clicking interactive elements (buttons, switches, links) and clicking expandable header itself. Switches and other interactive elements in the header remain fully functional and don't trigger the expandable toggle.
+- Chevron icon uses absolute positioning with optimized sizing
+- Interactive elements (buttons, switches, links) in header remain clickable when expandable is disabled
+- Click handling properly distinguishes between interactive elements and expandable toggle
 
 ### Box Widget
 
@@ -679,9 +535,7 @@ Alert dialog buttons now follow standard UI conventions:
 
 ### Tooltips
 
-**Multiline Text Support:**
-
-- Maximum width constrained to `max-w-sm` (24rem/384px)
+- Multiline text support with maximum width constraint
 - Long strings without spaces use `break-all` for proper wrapping
 - Table cell tooltips use `whitespace-pre-wrap` for proper formatting
 
@@ -693,21 +547,9 @@ List widget dividers now extend the full width of the container for better visua
 
 ### Loading Widget
 
-**Enhanced Visual Presentation:**
-
 - Fixed, full-screen overlay with semi-transparent dark background
 - 200ms display delay to prevent jarring flashes for quick operations
-- Operations completing in under 200ms won't show loading indicator
-
-**State-Based Visibility:**
-
-Loading widget can now be conditionally rendered based on state:
-
-```csharp
-var isLoading = UseState(false);
-
-return isLoading.True(() => new Loading())!;
-```
+- Can be conditionally rendered based on state: `isLoading.True(() => new Loading())!`
 
 ### Layout System
 
@@ -725,120 +567,65 @@ Layout.TopCenter(
 
 ### State Management
 
-**Increment and Decrement Helpers:**
-
-New `Incr()` and `Decr()` extension methods for `IState<int>`:
+New convenience methods for state:
 
 ```csharp
 var counter = UseState(0);
-new Button("Increment").HandleClick(() => counter.Incr());
-new Button("Decrement").HandleClick(() => counter.Decr());
-```
+counter.Incr(); // Increment by 1
+counter.Decr(); // Decrement by 1
 
-**Conditional Rendering with Boolean State:**
-
-New `True()` and `False()` extension methods for `IState<bool>`:
-
-```csharp
 var isLoading = UseState(false);
-
-return new Fragment()
-    | isLoading.True(() => new Loading())
-    | isLoading.False(() => new Button("Load Data"));
+return isLoading.True(() => new Loading())!;  // Show when true
+return isLoading.False(() => new Button("Load Data"))!; // Show when false
 ```
 
 ### Utilities
 
-**Number Formatting:**
-
 New `Utils.FormatNumber()` utility for formatting large numbers:
 
 ```csharp
-Utils.FormatNumber(1500);           // "1.5K"
-Utils.FormatNumber(2500000);        // "2.5M"
-Utils.FormatNumber(3800000000);     // "3.8B"
-Utils.FormatNumber(1234567, 1);     // "1.2M" (1 decimal place)
+Utils.FormatNumber(1500);      // "1.5K"
+Utils.FormatNumber(2500000);    // "2.5M"
+Utils.FormatNumber(3800000000); // "3.8B"
 ```
 
 ### Authentication
 
 **Cross-Tab Logout Synchronization:**
 
-When logging out in one browser tab, all other tabs automatically reload and reflect logged-out state using Broadcast Channel API. Works in all modern browsers (Chrome, Firefox, Edge, Safari 15.4+).
+Logout events are synchronized across browser tabs using the Broadcast Channel API. When a user logs out in one tab, all other tabs automatically reload to reflect the logout state.
 
 ### Routing
 
-**404 Not Found Page for Invalid Apps:**
+**404 Not Found Page:**
 
-When users navigate to non-existent app, Ivy displays proper 404 error page instead of failing silently.
-
-**Default Behavior:**
-
-Shows friendly error message: "Ouch! :| Apologies, the app you were looking for was not found." Returns HTTP 404 status code.
-
-**Customizing the 404 Page:**
-
-```csharp
-var server = new Server();
-server.UseErrorNotFound<MyCustomNotFoundApp>();
-// Or use factory function
-server.UseErrorNotFound(() => new MyCustomNotFoundApp());
-```
-
-**Framework Routes Now Use /ivy Prefix:**
-
-All framework-provided routes use `/ivy` prefix:
-
-- SignalR hub: `/ivy/messages`
-- Health checks: `/ivy/health`
-- Static resources: `/ivy/img/`, `/ivy/css/`, etc.
+When users navigate to non-existent app, Ivy displays proper 404 error page. Customize with `server.UseErrorNotFound<MyCustomNotFoundApp>()`.
 
 **App ID Collision Detection:**
 
-Ivy automatically detects and prevents routing conflicts between app IDs and framework routes. Checks for collisions with:
-
-- System paths (`/_framework`, `/api`, `/ivy`)
-- Controller routes (auto-discovered from ASP.NET Core controllers)
-- Explicitly reserved paths
-
-**Reserving Custom Paths:**
+Ivy automatically detects and prevents routing conflicts between app IDs and framework routes. Reserve custom paths:
 
 ```csharp
-var server = new Server();
 server.ReservePaths("/admin", "/reports", "/dashboard")
-    .RegisterApp<MyApp>("users")  // ✅ Works fine
+    .RegisterApp<MyApp>("users")
     .Start();
 ```
 
-Path comparison is case-insensitive.
-
 ### Chrome Customization
-
-**Generic UseChrome Method:**
 
 Simpler generic syntax for custom chrome:
 
 ```csharp
-// Before
-server.UseChrome(() => new MyCustomChrome());
-
-// After
 server.UseChrome<MyCustomChrome>();
 ```
 
 ### Article Widget
 
-**Fixed Navigation in Chrome=False Mode:**
-
-Previous/next navigation links now preserve `chrome=false` parameter when navigating between articles, preventing unexpected chrome mode toggling.
+Previous/next navigation links now preserve `chrome=false` parameter when navigating between articles.
 
 ### Theming System
 
-**Streamlined Color Palette:**
-
 Documentation updated to reflect actual color variables in Ivy Design System. Removed documentation for unused variables (`Chart1-5`, `Sidebar`, `SidebarForeground`).
-
-Current supported theme colors focus on Main, Semantic, and UI Elements categories.
 
 ## Breaking Changes
 
