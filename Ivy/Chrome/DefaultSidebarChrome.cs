@@ -2,7 +2,6 @@ using Ivy.Apps;
 using Ivy.Auth;
 using Ivy.Client;
 using Ivy.Core;
-using Ivy.Helpers;
 using Ivy.Hooks;
 using Ivy.Shared;
 using Ivy.Views;
@@ -174,7 +173,7 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
         {
             if (auth != null)
             {
-                var userInfo = await TimeoutHelper.WithTimeoutAsync(auth.GetUserInfoAsync);
+                var userInfo = await auth.GetUserInfoAsync();
                 user.Set(userInfo);
             }
 
@@ -382,12 +381,11 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
                 {
                     if (auth == null) return;
 
-                    await TimeoutHelper.WithTimeoutAsync(auth.LogoutAsync);
-                    client.SetAuthToken(null!);
+                    var authSession = auth.GetAuthSession();
+                    await auth.LogoutAsync();
                 }
                 catch (Exception)
                 {
-                    //ignore
                 }
             });
 
