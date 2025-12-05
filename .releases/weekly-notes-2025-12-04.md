@@ -44,6 +44,8 @@ Forms automatically prevent submission while file uploads are in progress:
 
 **Enhanced Form Configuration API:**
 
+Forms now offer more flexible configuration options for submit buttons, validation strategies, scaling, and comprehensive DataAnnotations support.
+
 **Submit Button Customization:**
 
 ```csharp
@@ -89,21 +91,19 @@ model.ToForm()
     .SubmitTitle("Save");
 ```
 
-**Scale Configuration:**
-
-`.Scale()` method now part of public API.
-
-**Improved Form Spacing and Typography:**
-
-**Comprehensive DataAnnotations Support:**
-
-**Display Attributes:**
+- `Scale Configuration` – the `.Scale()` method is now part of the public API:
 
 ```csharp
-[Display(Name = "Full Name", Description = "Enter your name",
-         Prompt = "John Doe", Order = 1, GroupName = "Personal Info")]
-public string Name { get; set; }
+model.ToForm()
+    .Scale(Scale.Small)   // or .Medium(), .Large()
+    .SubmitTitle("Save");
 ```
+
+- `Improved Form Spacing and Typography` – Enhanced spacing and typography for better readability and visual hierarchy
+
+- `Comprehensive DataAnnotations Support` - full support for DataAnnotations for automatic field configuration and validation
+
+- `Display Attributes` - use `[Display]` attributes to control field labels, descriptions, placeholders, ordering, and grouping:
 
 **Input Type Detection:**
 
@@ -161,13 +161,11 @@ selectedOption.ToAsyncSelectInput(QueryOptions, LookupOption, "Search...")
 
 Scale affects height, padding, text size, icon size, and search sheet styling.
 
-**Visual Integration:**
+**Additional Enhancements:**
 
-**Full-Width Dividers:**
-
-**Option Descriptions:**
-
-Options support optional descriptions appearing below labels:
+- **Visual Integration:** Styling now matches other form inputs with consistent borders, shadows, and hover states for seamless integration in forms
+- **Full-Width Dividers:** Search sheet list items use full-width dividers for better visual separation
+- **Option Descriptions:** Options support optional descriptions appearing below labels:
 
 ```csharp
 new Option<string>(
@@ -317,7 +315,7 @@ Kanban boards can now be used in HeaderLayout with scrolling disabled.
 
 ### Table Widget
 
-**API Change: Width → ColumnWidth:**
+**API Change: Width to ColumnWidth:**
 
 The `.Width()` method for setting column widths renamed to `.ColumnWidth()`:
 
@@ -644,13 +642,13 @@ Documentation updated to reflect actual color variables in Ivy Design System. Re
 The simple `titleSelector` and `descriptionSelector` parameters have been removed. You must now use `.CardBuilder()`:
 
 ```csharp
-// ❌ Old API - no longer supported
+// Old API - no longer supported
 tasks.ToKanban(
     groupBySelector: e => e.Status,
     titleSelector: e => e.Title,
     descriptionSelector: e => e.Description)
 
-// ✅ New API - CardBuilder required
+// New API - CardBuilder required
 tasks.ToKanban(
     groupBySelector: e => e.Status,
     idSelector: e => e.Id,
@@ -679,11 +677,11 @@ The `.HandleClick()` and `.HandleDelete()` methods have been removed from Kanban
 Per-column width configuration removed. Use `.ColumnWidth()` for uniform width:
 
 ```csharp
-// ❌ Old API - per-column widths
+// Old API - per-column widths
 tasks.ToKanban(...)
     .Width(e => e.Status, Size.Fraction(0.33f))
 
-// ✅ New API - uniform column width
+// New API - uniform column width
 tasks.ToKanban(...)
     .ColumnWidth(Size.Rem(20))
 ```
@@ -821,8 +819,8 @@ All URL-accepting components validate and sanitize URLs automatically:
 
 **Validation Rules:**
 
-- ✅ **Allowed**: Relative paths, http/https URLs, data URLs (for appropriate media types), blob URLs (with origin validation), `app://` protocol URLs, anchor links
-- ❌ **Blocked**: `javascript:` protocol, malformed URLs, protocol injection attempts, dangerous URL patterns
+- **Allowed**: Relative paths, http/https URLs, data URLs (for appropriate media types), blob URLs (with origin validation), `app://` protocol URLs, anchor links
+- **Blocked**: `javascript:` protocol, malformed URLs, protocol injection attempts, dangerous URL patterns
 
 **Validation Functions:**
 
