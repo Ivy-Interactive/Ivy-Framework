@@ -109,10 +109,10 @@ model.ToForm()
 
 Automatically detects input type from `[DataType]` attributes:
 
-- `[DataType(DataType.EmailAddress)]` → Email input
-- `[DataType(DataType.Password)]` → Password input
-- `[DataType(DataType.Url)]` → URL input
-- `[DataType(DataType.CreditCard)]` → Credit card input
+- `[DataType(DataType.EmailAddress)]` for Email input
+- `[DataType(DataType.Password)]` for Password input
+- `[DataType(DataType.Url)]` for URL input
+- `[DataType(DataType.CreditCard)]` for Credit card input
 
 **Validation Attributes:**
 
@@ -340,10 +340,6 @@ records.ToTable()
 ```
 
 ### DataTable Widget
-
-**Complete Frontend Solution Rework:**
-
-The DataTable widget has undergone a comprehensive frontend rework, focusing on improved row identification, event handling, and code organization.
 
 **Row Action Improvements:**
 
@@ -700,7 +696,7 @@ tasks.ToKanban(...).Width(Size.Units(800)).Height(Size.Units(600));
 
 ### Table Widget API Change
 
-**Width → ColumnWidth:**
+**Width to ColumnWidth:**
 
 The `.Width()` method for setting column widths has been renamed to `.ColumnWidth()`:
 
@@ -736,10 +732,10 @@ The `RowActionClickEventArgs` structure has been simplified:
 
 **Removed Properties:**
 
-- `ActionId` → Use `Tag` instead
-- `EventName` → Removed
-- `RowIndex` → Removed
-- `RowData` → Use `Id` instead
+- `ActionId` - Use `Tag` instead
+- `EventName` - Removed
+- `RowIndex` - Removed
+- `RowData` - Use `Id` instead
 
 **idSelector Required for Row Actions:**
 
@@ -790,8 +786,8 @@ public Task<AuthToken?> HandleOAuthCallbackAsync(IAuthSession authSession, HttpR
 
 **Method Signature Changes:**
 
-- `GetTokenExpiration(AuthToken, ...)` → `GetAccessTokenExpirationAsync(IAuthSession, ...)`
-- `SetHttpContext(HttpContext)` → `InitializeAsync(IAuthSession, string requestScheme, string requestHost, ...)`
+- `GetTokenExpiration(AuthToken, ...)` - `GetAccessTokenExpirationAsync(IAuthSession, ...)`
+- `SetHttpContext(HttpContext)` - `InitializeAsync(IAuthSession, string requestScheme, string requestHost, ...)`
 
 **AuthService Constructor:**
 
