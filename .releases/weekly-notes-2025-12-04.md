@@ -32,6 +32,8 @@ new Stepper(
 .AllowSelectForward();
 ```
 
+Learn more about the Stepper widget in the [documentation](LINK).
+
 ### Form Scaffolding
 
 **Upload-Aware Form Submission:**
@@ -138,6 +140,8 @@ Improved logic for handling label generation when field names end with "Id":
 - Checks if the label itself ends with "Id" before trimming, preventing incorrect truncation
 - Preserves labels like "User ID", "Government ID", and "Id" when specified via Display attributes
 
+See the [Forms documentation](https://docs.ivy.app/onboarding/concepts/forms) for complete details.
+
 ### Form Input Size Consistency
 
 All form inputs now follow a unified sizing system.
@@ -187,11 +191,15 @@ new Option<string>("Active", "active", icon: Icons.CheckCircle)
 
 The `Label` property is now nullable - when omitted, uses `value.ToString()` as fallback.
 
+Read more in the [AsyncSelectInput documentation](https://docs.ivy.app/widgets/inputs/async-select).
+
 ### DateTime Input Visual Improvements
 
 - Calendar and clock icons positioned inside input fields
 - Consistent disabled state styling matching DateRange inputs
 - Clear and error icons use absolute positioning with optimized spacing
+
+Full details available in the [DateTime Input documentation](https://docs.ivy.app/widgets/inputs/date-time).
 
 ### File Input Improvements
 
@@ -208,6 +216,8 @@ files.ToFileInput(upload)
     });
 ```
 
+Explore the [FileInput documentation](https://docs.ivy.app/widgets/inputs/file) for complete API reference.
+
 ### Field Widget
 
 FieldWidget now supports custom width and height properties. Field widgets also support explicit width and height directly:
@@ -217,6 +227,8 @@ state.ToTextInput()
     .Width("300px")
     .Height("40px");
 ```
+
+Refer to the [Field Widget documentation](https://docs.ivy.app/widgets/inputs/field) for additional details.
 
 ### Kanban Widget
 
@@ -302,6 +314,8 @@ tasks.ToKanban(...).Width(800).Height(600);
 tasks.ToKanban(...).Width(Size.Units(800)).Height(Size.Units(600));
 ```
 
+See the [Kanban documentation](https://docs.ivy.app/widgets/advanced/kanban) for a complete guide.
+
 ### HeaderLayout Widget
 
 Disable automatic ScrollArea wrapper for custom scrolling:
@@ -312,6 +326,8 @@ new HeaderLayout(header, content)
 ```
 
 Kanban boards can now be used in HeaderLayout with scrolling disabled.
+
+Documentation: [HeaderLayout](https://docs.ivy.app/widgets/layouts/header-layout).
 
 ### Table Widget
 
@@ -338,6 +354,8 @@ records.ToTable()
     .ColumnWidth(e => e.Views, Size.Fit())
     .Align(e => e.Views, Align.Right);
 ```
+
+More information in the [Table documentation](https://docs.ivy.app/widgets/common/table).
 
 ### DataTable Widget
 
@@ -387,6 +405,8 @@ To disable:
 users.ToDataTable()
     .Config(c => c.AllowColumnResizing = false);
 ```
+
+Complete API reference: [DataTable documentation](https://docs.ivy.app/widgets/advanced/data-table).
 
 ### Charts
 
@@ -448,6 +468,8 @@ new Box("50% opacity").Color(Colors.Blue, 0.5f)
 
 Perfect for heatmaps, cohort analysis, and visual hierarchies.
 
+Learn more: [Grid Layout documentation](https://docs.ivy.app/widgets/layouts/grid-layout).
+
 ### Component Sizing
 
 **Sizes Renamed to Scale:**
@@ -491,6 +513,8 @@ new Expandable(header, content)
 - Interactive elements (buttons, switches, links) in header remain clickable when expandable is disabled
 - Click handling properly distinguishes between interactive elements and expandable toggle
 
+Check the [Expandable documentation](https://docs.ivy.app/widgets/common/expandable) for more examples.
+
 ### Box Widget
 
 **Plain() Extension Method:**
@@ -502,6 +526,8 @@ new Box().Plain().Content(content)
 ```
 
 Applies DemoBox-style settings: 1px border, 16px padding, neutral color, top-left alignment. This replaces the removed `DemoBox` widget for a more consistent API.
+
+Documentation: [Box widget](https://docs.ivy.app/widgets/primitives/box).
 
 ### Button Variants
 
@@ -517,6 +543,8 @@ new Button("Edit")
 
 Features minimal padding (`p-1`) with auto height, ideal for table rows, toolbars, or icon-only buttons.
 
+Read the [Button documentation](https://docs.ivy.app/widgets/common/button) for all variants and options.
+
 ### Alert Dialogs
 
 **Improved Button Layout:**
@@ -526,6 +554,8 @@ Alert dialog buttons now follow standard UI conventions:
 - All buttons right-aligned in footer
 - Button order: Cancel (secondary) | No | Yes (primary)
 - Primary actions consistently on the right
+
+See [Alert Dialogs documentation](https://docs.ivy.app/onboarding/concepts/alerts) for usage examples.
 
 ### Tooltips
 
@@ -539,11 +569,15 @@ Alert dialog buttons now follow standard UI conventions:
 
 List widget dividers now extend the full width of the container for better visual separation.
 
+Explore the [List documentation](LINK) for more features.
+
 ### Loading Widget
 
 - Fixed, full-screen overlay with semi-transparent dark background
 - 200ms display delay to prevent jarring flashes for quick operations
 - Can be conditionally rendered based on state: `isLoading.True(() => new Loading())!`
+
+Refer to the [Loading documentation](https://docs.ivy.app/widgets/common/list) for configuration options.
 
 ### Layout System
 
@@ -572,6 +606,8 @@ var isLoading = UseState(false);
 return isLoading.True(() => new Loading())!;  // Show when true
 return isLoading.False(() => new Button("Load Data"))!; // Show when false
 ```
+
+See the [State Management documentation](https://docs.ivy.app/onboarding/concepts/state) for best practices.
 
 ### Utilities
 
@@ -620,6 +656,8 @@ Simpler generic syntax for custom chrome:
 ```csharp
 server.UseChrome<MyCustomChrome>();
 ```
+
+See [Chrome Customization documentation](https://docs.ivy.app/onboarding/concepts/chrome) for examples.
 
 ### Article Widget
 
