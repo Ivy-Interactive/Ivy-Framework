@@ -33,7 +33,7 @@ var dataUri = "data:image/png;base64,iVBORw0KGgoAAAANS...";
 new Image(dataUri);
 
 new Image("https://example.com/image.jpg");  // External URL
-new Image("/images/logo.png");               // Local file
+new Image("/ivy/images/logo.png");           // Local file
 ```
 
 <WidgetDocs Type="Ivy.Image" ExtensionTypes="Ivy.ImageExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Primitives/Image.cs"/>

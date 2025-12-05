@@ -23,11 +23,15 @@ public record Box : WidgetBase<Box>
     [Prop] public Thickness Margin { get; set; } = new(0);
 
     [Prop] public Align? ContentAlign { get; set; } = Align.Center;
+
+    [Prop] public float? Opacity { get; set; }
 }
 
 public static class BoxExtensions
 {
     public static Box Color(this Box box, Colors color) => box with { Color = color };
+
+    public static Box Color(this Box box, Colors color, float opacity) => box with { Color = color, Opacity = (1.0f - opacity) * 100 };
 
     public static Box BorderThickness(this Box box, int thickness) => box with { BorderThickness = new(thickness) };
 
@@ -52,5 +56,18 @@ public static class BoxExtensions
     public static Box WithBox(this object anything)
     {
         return new Box(anything);
+    }
+
+    public static Box WithCell(this object anything)
+    {
+        return new Box(anything)
+        {
+            BorderRadius = Shared.BorderRadius.None,
+            BorderStyle = Shared.BorderStyle.None,
+            BorderThickness = new(0),
+            Padding = new(0),
+            Color = null,
+            ContentAlign = Align.Left
+        }.Width(Size.Full()).Height(Size.Full());
     }
 }

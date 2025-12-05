@@ -805,6 +805,33 @@ public static class Utils
 
         url = url.Trim();
 
+        // Allow mailto: URLs for email links
+        if (url.StartsWith("mailto:", StringComparison.OrdinalIgnoreCase))
+        {
+            // Basic validation: must have at least one character after mailto:
+            // and should not contain dangerous characters or protocol injection
+            var afterProtocol = url.Substring(7); // After "mailto:"
+            if (string.IsNullOrWhiteSpace(afterProtocol))
+            {
+                return null;
+            }
+
+            // Check for protocol injection
+            if (afterProtocol.Contains("://"))
+            {
+                return null;
+            }
+
+            // Validate mailto format: mailto:email@domain.com[?subject=...&body=...]
+            // Allow query parameters for subject, body, cc, bcc
+            if (!Regex.IsMatch(url, @"^mailto:[^#]+$", RegexOptions.IgnoreCase))
+            {
+                return null;
+            }
+
+            return url;
+        }
+
         // Allow app:// URLs (Ivy internal navigation)
         if (url.StartsWith("app://", StringComparison.OrdinalIgnoreCase))
         {

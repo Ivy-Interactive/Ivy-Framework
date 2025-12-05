@@ -108,7 +108,7 @@ public class DataTableApp : SampleBase
         });
 
         // The DataTable builder will be recreated each time, but use the cached employee data
-        var dataTable = employees.Value.AsQueryable().ToDataTable()
+        var dataTable = employees.Value.AsQueryable().ToDataTable(idSelector: e => e.Id)
             // Table dimensions (fix for issue #1311)
             .Width(Size.Full()) // Table width set to 120 units (30rem)
             .Height(Size.Full()) // Table height set to 120 units (30rem)
@@ -238,7 +238,7 @@ public class DataTableApp : SampleBase
             .HandleRowAction(async e =>
             {
                 var args = e.Value;
-                client.Toast($"Row action: {args.ActionId} at row {args.RowIndex}");
+                client.Toast($"Row action: ID: {args.Id}, Tag: {args.Tag}");
                 await ValueTask.CompletedTask;
             });
 

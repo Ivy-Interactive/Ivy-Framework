@@ -5,10 +5,12 @@ import type { CardData } from './types';
 
 interface KanbanCardRendererProps {
   task: Task;
+  index: number;
   card: CardData | undefined;
   KanbanCard: React.ComponentType<{
     id: string;
     column: string;
+    index: number;
     children: React.ReactNode;
   }>;
   KanbanHeader: React.ComponentType<{ children: React.ReactNode }>;
@@ -17,13 +19,14 @@ interface KanbanCardRendererProps {
 
 export const KanbanCardRenderer: React.FC<KanbanCardRendererProps> = ({
   task,
+  index,
   card,
   KanbanCard,
   KanbanHeader,
   KanbanCardContent,
 }) => {
   return (
-    <KanbanCard key={task.id} id={task.id} column={task.status}>
+    <KanbanCard key={task.id} id={task.id} column={task.status} index={index}>
       {card ? (
         <div className="w-full">{card.content}</div>
       ) : (

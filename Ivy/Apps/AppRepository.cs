@@ -57,6 +57,7 @@ public class AppRepository : IAppRepository
     private readonly List<Func<AppDescriptor[]>> _factories = [];
 
     private IAppRepositoryNode? Root { get; set; }
+
     private Dictionary<string, AppDescriptor> Apps { get; } = new();
 
     public void Reload()

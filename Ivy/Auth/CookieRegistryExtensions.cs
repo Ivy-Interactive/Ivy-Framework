@@ -1,6 +1,5 @@
 using System.Net;
 using System.Text.Json;
-using Ivy.Cookies;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,9 +7,9 @@ namespace Ivy.Auth;
 
 public static class CookieRegistryExtensions
 {
-    public static IActionResult? WriteCookiesToResponse(this Controller controller, IGlobalCookieRegistry globalCookieRegistry, CookieJarId cookieJarId, string intent, out CookieJar cookies)
+    public static IActionResult? WriteCookiesToResponse(this Controller controller, AppSessionStore sessionStore, CookieJarId cookieJarId, string intent, out CookieJar cookies)
     {
-        if (!globalCookieRegistry.TryRemove(cookieJarId, intent, out cookies))
+        if (!sessionStore.TryRemoveCookies(cookieJarId, intent, out cookies))
         {
             return controller.BadRequest("Invalid or expired cookie jar ID, or intent mismatch.");
         }
@@ -19,26 +18,26 @@ public static class CookieRegistryExtensions
         return null;
     }
 
-    public static CookieJarId Register(this ICookieRegistry cookieRegistry, IAuthSession authSession)
+    public static CookieJarId RegisterAuthSessionCookies(this AppSessionStore sessionStore, IAuthSession authSession)
     {
         var cookies = new CookieJar();
         cookies.AddCookiesForAuthToken(authSession.AuthToken);
         cookies.AddCookiesForAuthSessionData(authSession.AuthSessionData);
-        return cookieRegistry.Register(cookies, CookieJarIntents.SetAuthCookies);
+        return sessionStore.RegisterCookies(cookies, CookieJarIntents.SetAuthCookies);
     }
 
-    public static CookieJarId Register(this ICookieRegistry cookieRegistry, AuthToken? authToken)
+    public static CookieJarId RegisterAuthTokenCookies(this AppSessionStore sessionStore, AuthToken? authToken)
     {
         var cookies = new CookieJar();
         cookies.AddCookiesForAuthToken(authToken);
-        return cookieRegistry.Register(cookies, CookieJarIntents.SetAuthCookies);
+        return sessionStore.RegisterCookies(cookies, CookieJarIntents.SetAuthCookies);
     }
 
-    public static CookieJarId RegisterAuthSessionData(this ICookieRegistry cookieRegistry, string? authSessionData)
+    public static CookieJarId RegisterAuthSessionDataCookies(this AppSessionStore sessionStore, string? authSessionData)
     {
         var cookies = new CookieJar();
         cookies.AddCookiesForAuthSessionData(authSessionData);
-        return cookieRegistry.Register(cookies, CookieJarIntents.SetAuthCookies);
+        return sessionStore.RegisterCookies(cookies, CookieJarIntents.SetAuthCookies);
     }
 
     private static void AddCookiesForAuthToken(this CookieJar cookies, AuthToken? authToken)

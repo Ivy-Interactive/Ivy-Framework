@@ -59,9 +59,14 @@ export function convertArrowTableToData(
   rows: DataRow[];
   hasMore: boolean;
 } {
-  const columns: DataColumn[] = table.schema.fields.map(
-    (field: arrow.Field, index: number) => {
-      const columnData = table.getChildAt(index);
+  const columns: DataColumn[] = table.schema.fields
+    .filter((field: arrow.Field) => field.name !== '_hiddenKey')
+    .map((field: arrow.Field) => {
+      // Find the actual index in the original table (accounting for filtered _hiddenKey)
+      const originalIndex = table.schema.fields.findIndex(
+        f => f.name === field.name
+      );
+      const columnData = table.getChildAt(originalIndex);
       const width = columnData
         ? calculateColumnWidth(field.name, columnData)
         : 150;
@@ -74,8 +79,7 @@ export function convertArrowTableToData(
         type,
         width,
       };
-    }
-  );
+    });
 
   const rows: DataRow[] = [];
   for (let i = 0; i < table.numRows; i++) {

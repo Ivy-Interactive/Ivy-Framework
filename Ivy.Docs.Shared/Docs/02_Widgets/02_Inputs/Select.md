@@ -21,7 +21,7 @@ and multiple selections, option grouping, and custom rendering of option items.
 
 Here's a simple example of a `SelectInput` with a few options:
 
-```csharp demo-tabs
+```csharp demo-below
 public class SelectVariantDemo : ViewBase
 {
     public override object? Build()
@@ -29,11 +29,11 @@ public class SelectVariantDemo : ViewBase
         var langs = new string[]{"C#","Java","Go","JavaScript","F#","Kotlin","VB.NET","Rust"};
         
         var favLang = UseState("C#");
-        return Layout.Vertical() 
-                | favLang.ToSelectInput(langs.ToOptions())
+        return favLang.ToSelectInput(langs.ToOptions())
                          .Variant(SelectInputs.Select)
                          .WithField()
-                         .Label("Select your favourite programming language");
+                         .Label("Select your favourite programming language")
+                         .Width(Size.Full());
     }    
 }
 ```
@@ -72,17 +72,14 @@ public class MultiSelectDemo : ViewBase
             | languagesSelect.ToSelectInput(languageOptions)
                 .Variant(SelectInputs.Select)
                 .Placeholder("Choose languages...")
-            | Text.Small($"Selected: {string.Join(", ", languagesSelect.Value)}")
             
             | Text.InlineCode("List Variant (String Array)")
             | stringArray.ToSelectInput(stringOptions)
                 .Variant(SelectInputs.List)
-            | Text.Small($"Count: {stringArray.Value.Length}")
             
             | Text.InlineCode("Toggle Variant (Integer Array)")
             | intArray.ToSelectInput(intOptions)
-                .Variant(SelectInputs.Toggle)
-            | Text.Small($"Count: {intArray.Value.Length}");
+                .Variant(SelectInputs.Toggle);
     }
 }
 ```
@@ -140,10 +137,6 @@ public class EventHandlingDemo : ViewBase
 
 Customize the `SelectInput` with various styling options:
 
-### Invalid State
-
-Display validation errors using the `Invalid` function:
-
 ```csharp demo-tabs
 public class SelectStylingDemo : ViewBase
 {
@@ -172,38 +165,6 @@ public class SelectStylingDemo : ViewBase
                 .Disabled(true)
                 .WithField()
                 .Label("Disabled SelectInput:");
-    }
-}
-```
-
-### Nullable Support
-
-Handle nullable types with automatic null handling:
-
-```csharp demo-tabs
-public class NullableSelectDemo : ViewBase
-{
-    public override object? Build()
-    {
-        var nullableString = UseState<string?>(() => null);
-        var nullableArray = UseState<string[]?>(() => null);
-        
-        var options = new[]{"Red", "Green", "Blue"}.ToOptions();
-        
-        return Layout.Vertical()
-            | nullableString.ToSelectInput(options)
-                .Placeholder("Choose a color (optional)")
-                .WithField()
-                .Label("Nullable Single Select:")
-            
-            | nullableArray.ToSelectInput(options)
-                .Variant(SelectInputs.List)
-                .Placeholder("Choose colors (optional)")
-                .WithField()
-                .Label("Nullable Multi-Select:")
-            
-            | Text.Small($"Single: {nullableString.Value ?? "None"}")
-            | Text.Small($"Multiple: {nullableArray.Value?.Length ?? 0} selected");
     }
 }
 ```

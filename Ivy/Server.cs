@@ -1,9 +1,9 @@
+using Ivy.Shared;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using Ivy.Apps;
 using Ivy.Auth;
-using Ivy.Cookies;
 using Ivy.Chrome;
 using Ivy.Connections;
 using Ivy.Core;
@@ -81,6 +81,13 @@ public class Server
 
         Services.AddSingleton(_args);
         Services.AddSingleton(Configuration);
+
+        AddDefaultApps();
+    }
+
+    private void AddDefaultApps()
+    {
+        this.UseErrorNotFound<NotFoundApp>();
     }
 
     public Server(FuncViewBuilder viewFactory) : this()
@@ -210,6 +217,24 @@ public class Server
     public Server UseDefaultApp(Type appType)
     {
         DefaultAppId = AppHelpers.GetApp(appType).Id;
+        return this;
+    }
+
+    public Server UseErrorNotFound<T>() where T : ViewBase
+    {
+        return UseErrorNotFound((() => (ViewBase)Activator.CreateInstance(typeof(T))!));
+    }
+
+    public Server UseErrorNotFound(Func<ViewBase>? viewFactory = null)
+    {
+        AddApp(new AppDescriptor
+        {
+            Id = AppIds.ErrorNotFound,
+            Title = "App Not Found",
+            ViewFactory = viewFactory,
+            Path = [],
+            IsVisible = false
+        });
         return this;
     }
 
@@ -374,7 +399,6 @@ public class Server
         });
         builder.Services.AddSingleton(this);
         builder.Services.AddSingleton<IClientNotifier, ClientNotifier>();
-        builder.Services.AddSingleton<IGlobalCookieRegistry, GlobalCookieRegistry>();
         builder.Services.AddControllers()
             .AddApplicationPart(Assembly.Load("Ivy"))
             .AddControllersAsServices();
@@ -582,6 +606,10 @@ public static class WebApplicationExtensions
                 context.Response.Headers["ivy-version"] = version;
             }
 
+            // Determine HTTP status code based on app routing
+            var server = app.Services.GetRequiredService<Server>();
+            var httpStatusCode = GetHttpStatusCodeForRequest(server, context);
+
             await using var stream = assembly.GetManifestResourceStream(resourceName);
             if (stream != null)
             {
@@ -629,7 +657,7 @@ public static class WebApplicationExtensions
                 }
 
                 context.Response.ContentType = "text/html";
-                context.Response.StatusCode = 200;
+                context.Response.StatusCode = httpStatusCode;
                 var bytes = Encoding.UTF8.GetBytes(html);
                 await context.Response.Body.WriteAsync(bytes);
             }
@@ -694,5 +722,12 @@ public static class WebApplicationExtensions
 #endif
             }
         };
+    }
+
+    private static int GetHttpStatusCodeForRequest(Server server, HttpContext context)
+    {
+        var appRouter = new AppRouter(server);
+        var routeResult = appRouter.Resolve(context);
+        return routeResult.HttpStatusCode ?? 200;
     }
 }

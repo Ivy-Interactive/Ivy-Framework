@@ -2,9 +2,7 @@ using System.Reflection;
 using Ivy.Apps;
 using Ivy.Client;
 using Ivy.Core;
-using Ivy.Cookies;
 using Ivy.Core.Hooks;
-using Ivy.Helpers;
 using Ivy.Hooks;
 using Ivy.Shared;
 using Ivy.Views;
@@ -18,9 +16,9 @@ public class DefaultAuthApp : ViewBase
 {
     public override object Build()
     {
-        var auth = this.UseService<IAuthService>();
-        var errorMessage = this.UseState<string?>();
-        var serverArgs = this.UseService<ServerArgs>();
+        var auth = UseService<IAuthService>();
+        var errorMessage = UseState<string?>();
+        var serverArgs = UseService<ServerArgs>();
         var appName = serverArgs.MetaTitle.NullIfEmpty() ?? Assembly.GetEntryAssembly()?.GetName().Name.NullIfEmpty() ?? "Ivy";
 
         var options = auth.GetAuthOptions();
@@ -75,7 +73,6 @@ public class PasswordEmailFlowView(IState<string?> errorMessage) : ViewBase
         var loading = this.UseState<bool>();
         var auth = this.UseService<IAuthService>();
         var client = this.UseService<IClientProvider>();
-        var cookieRegistry = this.UseService<ICookieRegistry>();
 
         var formBuilder = credentials.ToForm("Login")
             .Required(m => m.User, m => m.Password)
@@ -111,17 +108,9 @@ public class PasswordEmailFlowView(IState<string?> errorMessage) : ViewBase
                 loading.Set(true);
                 errorMessage.Set((string?)null);
 
-                var authSession = auth.GetAuthSession();
-                var oldSession = authSession.TakeSnapshot();
-                await TimeoutHelper.WithTimeoutAsync(
-                    ct => auth.LoginAsync(credentials.Value.User, credentials.Value.Password, ct));
+                await auth.LoginAsync(credentials.Value.User, credentials.Value.Password);
 
-                if (authSession.HasChangedSince(oldSession))
-                {
-                    client.SetAuthCookies(cookieRegistry, authSession, reloadPage: authSession.AuthToken != oldSession.AuthToken);
-                }
-
-                if (authSession.AuthToken == null)
+                if (auth.GetCurrentToken() == null)
                 {
                     errorMessage.Set("Login failed. Please check your credentials.");
                 }
@@ -142,7 +131,7 @@ public class PasswordEmailFlowView(IState<string?> errorMessage) : ViewBase
                    .HandleClick(HandleSubmit)
                    .Loading(isBusy)
                    .Disabled(isBusy)
-                   .Scale(formBuilder.Scale)
+                   .Scale(formBuilder._scale)
                    .Width(Size.Full());
     }
 }
@@ -154,17 +143,10 @@ public class OAuthFlowView(AuthOption option, IState<string?> errorMessage) : Vi
     {
         var client = this.UseService<IClientProvider>();
         var auth = this.UseService<IAuthService>();
-        var cookieRegistry = this.UseService<ICookieRegistry>();
         var callback = this.UseWebhook(async (request) =>
         {
             var authSession = auth.GetAuthSession();
-            var oldSession = authSession.TakeSnapshot();
-            var token = await TimeoutHelper.WithTimeoutAsync(
-                ct => auth.HandleOAuthCallbackAsync(request, ct));
-            if (authSession.HasChangedSince(oldSession))
-            {
-                client.SetAuthCookies(cookieRegistry, authSession);
-            }
+            var token = await auth.HandleOAuthCallbackAsync(request);
             return new RedirectResult("/");
         });
 
@@ -173,13 +155,7 @@ public class OAuthFlowView(AuthOption option, IState<string?> errorMessage) : Vi
             try
             {
                 var authSession = auth.GetAuthSession();
-                var oldSession = authSession.TakeSnapshot();
-                var uri = await TimeoutHelper.WithTimeoutAsync(
-                    ct => auth.GetOAuthUriAsync(option, callback, ct));
-                if (authSession.AuthSessionData != oldSession.AuthSessionData)
-                {
-                    client.SetAuthSessionData(cookieRegistry, authSession.AuthSessionData);
-                }
+                var uri = await auth.GetOAuthUriAsync(option, callback);
                 client.OpenUrl(uri);
             }
             catch (Exception e)

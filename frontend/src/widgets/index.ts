@@ -1,19 +1,19 @@
 export { ArticleWidget } from './article';
-export { BadgeWidget } from './BadgeWidget';
-export { ButtonWidget } from './ButtonWidget';
-export { CardWidget } from './CardWidget';
+export { BadgeWidget } from './badgeWidget';
+export { ButtonWidget } from './buttonWidget';
+export { CardWidget } from './cardWidget';
 export {
   ChatLoadingWidget,
   ChatMessageWidget,
   ChatStatusWidget,
   ChatWidget,
-} from './ChatWidget';
-export { DropDownMenuWidget } from './DropDownMenuWidget';
-export { ExpandableWidget } from './ExpandableWidget';
-export { ProgressWidget } from './ProgressWidget';
-export { SheetWidget } from './SheetWidget';
-export { SlotWidget } from './SlotWidget';
-export { TooltipWidget } from './TooltipWidget';
+} from './chatWidget';
+export { DropDownMenuWidget } from './dropDownMenuWidget';
+export { ExpandableWidget } from './expandableWidget';
+export { ProgressWidget } from './progressWidget';
+export { SheetWidget } from './sheetWidget';
+export { SlotWidget } from './slotWidget';
+export { TooltipWidget } from './tooltipWidget';
 
-export { PaginationWidget } from './PaginationWidget';
+export { PaginationWidget } from './paginationWidget';
 export { KanbanWidget, KanbanCardWidget } from './kanban';

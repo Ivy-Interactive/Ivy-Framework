@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Ivy.Cookies;
+using Ivy.Core.Helpers;
 
 namespace Ivy.Auth;
 
@@ -17,13 +17,12 @@ public class AuthController() : Controller
     [HttpPatch]
     public async Task<IActionResult> SetAuthCookies(
         [FromBody] SetAuthCookiesRequest request,
-        [FromServices] IGlobalCookieRegistry globalCookieRegistry,
         [FromServices] AppSessionStore sessionStore,
         [FromServices] IContentBuilder contentBuilder,
         [FromServices] ILogger<AuthController> logger)
     {
         if (this.WriteCookiesToResponse(
-            globalCookieRegistry,
+            sessionStore,
             new CookieJarId(request.CookieJarId),
             CookieJarIntents.SetAuthCookies,
             out var cookies) is { } errorResponse)
@@ -120,7 +119,7 @@ public class AuthController() : Controller
     {
         foreach (var session in GetMachineSessions(sessionStore, machineId, excludeConnectionId))
         {
-            await SessionHelpers.AbandonSessionAsync(session, contentBuilder, resetTokenAndReload: true, triggerMachineReload: false, logger, "TriggerMachineLogout");
+            await SessionHelpers.AbandonSessionAsync(sessionStore, session, contentBuilder, resetTokenAndReload: true, triggerMachineReload: false, logger, "TriggerMachineLogout");
         }
     }
 }

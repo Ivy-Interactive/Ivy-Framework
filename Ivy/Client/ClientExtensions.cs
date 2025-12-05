@@ -1,5 +1,4 @@
 using Ivy.Auth;
-using Ivy.Cookies;
 using Ivy.Core;
 using Ivy.Shared;
 
@@ -99,24 +98,6 @@ public static class ClientExtensions
                 ReloadPage = reloadPage,
                 TriggerMachineReload = triggerMachineReload ?? reloadPage
             });
-    }
-
-    public static void SetAuthCookies(this IClientProvider client, ICookieRegistry cookieRegistry, IAuthSession authSession, bool reloadPage = true, bool? triggerMachineReload = null)
-    {
-        var cookieJarId = cookieRegistry.Register(authSession);
-        client.SetAuthCookies(cookieJarId, reloadPage, triggerMachineReload);
-    }
-
-    public static void SetAuthToken(this IClientProvider client, ICookieRegistry cookieRegistry, AuthToken? authToken, bool reloadPage = true, bool? triggerMachineReload = null)
-    {
-        var cookieJarId = cookieRegistry.Register(authToken);
-        client.SetAuthCookies(cookieJarId, reloadPage, triggerMachineReload);
-    }
-
-    public static void SetAuthSessionData(this IClientProvider client, ICookieRegistry cookieRegistry, string? authSessionData, bool reloadPage = false, bool? triggerMachineReload = null)
-    {
-        var cookieJarId = cookieRegistry.RegisterAuthSessionData(authSessionData);
-        client.SetAuthCookies(cookieJarId, reloadPage, triggerMachineReload);
     }
 
     public static void ReloadPage(this IClientProvider client)

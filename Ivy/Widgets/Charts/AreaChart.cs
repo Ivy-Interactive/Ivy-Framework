@@ -25,7 +25,7 @@ public record AreaChart : WidgetBase<AreaChart>
 
     [Prop] public CartesianGrid? CartesianGrid { get; init; }
 
-    [Prop] public Ivy.Charts.Tooltip? Tooltip { get; init; }
+    [Prop] public Charts.Tooltip? Tooltip { get; init; }
 
     [Prop] public Legend? Legend { get; init; } = null;
 
@@ -106,14 +106,14 @@ public static class AreaChartExtensions
         return chart with { YAxis = [.. chart.YAxis, new YAxis(dataKey)] };
     }
 
-    public static AreaChart Tooltip(this AreaChart chart, Ivy.Charts.Tooltip? tooltip)
+    public static AreaChart Tooltip(this AreaChart chart, Charts.Tooltip? tooltip)
     {
         return chart with { Tooltip = tooltip };
     }
 
     public static AreaChart Tooltip(this AreaChart chart)
     {
-        return chart with { Tooltip = new Ivy.Charts.Tooltip() };
+        return chart with { Tooltip = new Charts.Tooltip() };
     }
 
     public static AreaChart Legend(this AreaChart chart, Legend legend)
