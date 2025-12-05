@@ -38,7 +38,15 @@ public record ReadOnlyInput<TValue> : WidgetBase<ReadOnlyInput<TValue>>, IInput<
 
     [Prop] public TValue Value { get; }
 
+    [Prop]
+    public new Scale? Scale
+    {
+        get => base.Scale;
+        set => base.Scale = value;
+    }
+
     [Prop] public bool Disabled { get; set; }
+
 
     [Prop] public string? Invalid { get; set; }
 
@@ -46,7 +54,6 @@ public record ReadOnlyInput<TValue> : WidgetBase<ReadOnlyInput<TValue>>, IInput<
 
     [Prop] public string? Placeholder { get; set; } //not really used but included to consistency with IAnyInput    
 
-    [Prop] public new Scale? Scale { get; set; }
 
     [Event] public Func<Event<IInput<TValue>, TValue>, ValueTask>? OnChange { get; }
 

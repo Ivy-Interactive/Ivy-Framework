@@ -43,9 +43,17 @@ public abstract record TextInputBase : WidgetBase<TextInputBase>, IAnyTextInput
 
     [Prop] public PrefixSuffix? Suffix { get; set; }
 
-    [Prop] public new Scale? Scale { get; set; }
+
+
+    [Prop]
+    public new Scale? Scale
+    {
+        get => base.Scale;
+        set => base.Scale = value;
+    }
 
     [Prop] public int? MaxLength { get; set; }
+
 
     [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
 

@@ -64,9 +64,16 @@ public abstract record NumberInputBase : WidgetBase<NumberInputBase>, IAnyNumber
 
     [Prop] public string? Currency { get; set; }
 
+    [Prop]
+    public new Scale? Scale
+    {
+        get => base.Scale;
+        set => base.Scale = value;
+    }
+
     [Prop] public string? TargetType { get; set; }
 
-    [Prop] public new Scale? Scale { get; set; }
+
 
     [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
 

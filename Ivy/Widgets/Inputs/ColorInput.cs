@@ -27,13 +27,20 @@ public abstract record ColorInputBase : WidgetBase<ColorInputBase>, IAnyColorInp
 
     [Prop] public string? Invalid { get; set; }
 
-    [Prop] public new Scale? Scale { get; set; }
 
     [Prop] public string? Placeholder { get; set; }
 
     [Prop] public bool Nullable { get; set; }
 
+    [Prop]
+    public new Scale? Scale
+    {
+        get => base.Scale;
+        set => base.Scale = value;
+    }
+
     [Prop] public ColorInputs Variant { get; set; } = ColorInputs.TextAndPicker;
+
 
     [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
 

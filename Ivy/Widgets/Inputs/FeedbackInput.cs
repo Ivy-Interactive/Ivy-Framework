@@ -30,9 +30,16 @@ public abstract record FeedbackInputBase : WidgetBase<FeedbackInputBase>, IAnyFe
 
     [Prop] public string? Placeholder { get; set; }
 
+    [Prop]
+    public new Scale? Scale
+    {
+        get => base.Scale;
+        set => base.Scale = value;
+    }
+
     [Prop] public FeedbackInputs Variant { get; set; }
 
-    [Prop] public new Scale? Scale { get; set; }
+
 
     [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
 

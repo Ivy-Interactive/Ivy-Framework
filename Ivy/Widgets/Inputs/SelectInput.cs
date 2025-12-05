@@ -34,9 +34,16 @@ public abstract record SelectInputBase : WidgetBase<SelectInputBase>, IAnySelect
 
     [Prop] public bool SelectMany { get; set; } = false;
 
+    [Prop]
+    public new Scale? Scale
+    {
+        get => base.Scale;
+        set => base.Scale = value;
+    }
+
     [Prop] public char Separator { get; set; } = ';';
 
-    [Prop] public new Scale? Scale { get; set; }
+
 
     [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
 

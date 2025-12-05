@@ -32,9 +32,16 @@ public abstract record BoolInputBase : WidgetBase<BoolInputBase>, IAnyBoolInput
 
     [Prop] public string? Invalid { get; set; }
 
-    [Prop] public new Scale? Scale { get; set; }
+
+    [Prop]
+    public new Scale? Scale
+    {
+        get => base.Scale;
+        set => base.Scale = value;
+    }
 
     [Prop] public string? Label { get; set; }
+
 
     [Prop] public string? Description { get; set; }
 

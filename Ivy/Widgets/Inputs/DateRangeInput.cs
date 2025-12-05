@@ -24,9 +24,16 @@ public abstract record DateRangeInputBase : WidgetBase<DateRangeInputBase>, IAny
 
     [Prop] public string? Invalid { get; set; }
 
+    [Prop]
+    public new Scale? Scale
+    {
+        get => base.Scale;
+        set => base.Scale = value;
+    }
+
     [Prop] public bool Nullable { get; set; }
 
-    [Prop] public new Scale? Scale { get; set; }
+
 
     [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
 
