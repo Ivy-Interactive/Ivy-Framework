@@ -61,16 +61,18 @@ public class FrontendApiClient(string? frontendApiDomain)
             "client",
             cancellationToken: cancellationToken);
         string? clientToken = null;
+
+        var clientResponse = await ParseResponseAsync<ClerkClientResponse>(response);
+
         if (response.Headers.TryGetValues("Authorization", out var locations))
         {
             clientToken = locations.FirstOrDefault();
         }
+
         if (string.IsNullOrEmpty(clientToken))
         {
             throw new ClerkException("Clerk did not return a client token in the Authorization header.");
         }
-
-        var clientResponse = await ParseResponseAsync<ClerkClientResponse>(response);
 
         return new ClerkNewClientResponse(clientToken, clientResponse);
     }
