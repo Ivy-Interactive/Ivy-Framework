@@ -101,7 +101,7 @@ public class CheckedAuthProvider(IAuthProvider innerAuthProvider) : IAuthProvide
         return _innerAuthProvider.HandleOAuthCallbackAsync(authSession, request, cancellationToken);
     }
 
-    public Task<DateTimeOffset?> GetAccessTokenExpirationAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
+    public Task<TokenLifetime?> GetAccessTokenLifetimeAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
     {
         if (authSession.AuthToken?.AccessToken == null)
         {
@@ -112,7 +112,7 @@ public class CheckedAuthProvider(IAuthProvider innerAuthProvider) : IAuthProvide
             .WithTokenAccess(AuthSessionAccessMode.ReadOnly)
             .WithSessionDataAccess(AuthSessionAccessMode.ReadOnly)
             .Build();
-        return _innerAuthProvider.GetAccessTokenExpirationAsync(authSession, cancellationToken);
+        return _innerAuthProvider.GetAccessTokenLifetimeAsync(authSession, cancellationToken);
     }
 }
 #endif
