@@ -214,7 +214,7 @@ public class FrontendApiClient(string? frontendApiDomain)
         return await _httpClient.SendAsync(request, cancellationToken);
     }
 
-    private string ConstructBaseRequestUrl(string endpoint) => $"https://{_frontendApiDomain}.clerk.accounts.dev/v1/{endpoint}?__clerk_api_version={ApiVersion}";
+    private string ConstructBaseRequestUrl(string endpoint) => $"https://{_frontendApiDomain}/v1/{endpoint}?__clerk_api_version={ApiVersion}";
 
     private async Task<string> ProcessResponseAsync(HttpResponseMessage response)
     {

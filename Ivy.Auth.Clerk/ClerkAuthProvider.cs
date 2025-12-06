@@ -8,6 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Ivy.Auth.Clerk.ApiClient;
 using System.Text;
 using System.Security.Claims;
+using Microsoft.AspNetCore.WebUtilities;
 
 namespace Ivy.Auth.Clerk;
 
@@ -32,12 +33,12 @@ public class ClerkAuthProvider : IAuthProvider
     // TODO: remove this before merge
     private const string ORIGIN_TEMPORARY_REMOVE_THIS_BEFORE_MERGE = "http://localhost:5010";
 
-    private static (bool IsProduction, string Key) ParseKey(string type, string key)
+    private static (bool IsProduction, string Key) ParseKey(string name, string type, string key)
     {
         var tokens = key.Split('_', 3);
         if (tokens.Length != 3 || tokens[0] != type || (tokens[1] != "test" && tokens[1] != "live"))
         {
-            throw new Exception("Clerk:PublishableKey is invalid");
+            throw new Exception($"{name} is invalid");
         }
         return (tokens[1] == "live", tokens[2]);
     }
@@ -52,8 +53,8 @@ public class ClerkAuthProvider : IAuthProvider
         _secretKey = configuration.GetValue<string>("Clerk:SecretKey") ?? throw new Exception("Clerk:SecretKey is required");
         var publishableKey = configuration.GetValue<string>("Clerk:PublishableKey") ?? throw new Exception("Clerk:PublishableKey is required");
 
-        var (secretIsProduction, _) = ParseKey("sk", _secretKey);
-        var (publishableIsProduction, publishableKeyValue) = ParseKey("pk", publishableKey);
+        var (secretIsProduction, _) = ParseKey("Clerk:SecretKey", "sk", _secretKey);
+        var (publishableIsProduction, publishableKeyValue) = ParseKey("Clerk:PublishableKey", "pk", publishableKey);
         _isProduction = secretIsProduction;
 
         if (secretIsProduction != publishableIsProduction)
@@ -63,14 +64,14 @@ public class ClerkAuthProvider : IAuthProvider
 
         try
         {
-            var base64Decoded = Convert.FromBase64String(publishableKeyValue);
+            var base64Decoded = WebEncoders.Base64UrlDecode(publishableKeyValue);
             var base64DecodedString = Encoding.UTF8.GetString(base64Decoded);
 
             _frontendApiDomain = base64DecodedString.Split('$', 2)[0];
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            throw new Exception("Clerk:PublishableKey contains an invalid base64 string");
+            throw new Exception("Clerk:PublishableKey contains an invalid base64 string", ex);
         }
 
         _httpClient = new HttpClient();
@@ -108,7 +109,7 @@ public class ClerkAuthProvider : IAuthProvider
             return _signingKeys;
         }
 
-        var jwksUrl = $"https://{_frontendApiDomain}.clerk.accounts.dev/.well-known/jwks.json";
+        var jwksUrl = $"https://{_frontendApiDomain}/.well-known/jwks.json";
         var jwksJson = await _httpClient.GetStringAsync(jwksUrl, cancellationToken);
         var jwks = new JsonWebKeySet(jwksJson);
 
@@ -350,7 +351,7 @@ public class ClerkAuthProvider : IAuthProvider
                 IssuerSigningKeys = signingKeys,
                 ValidAlgorithms = [SecurityAlgorithms.RsaSha256],
                 ValidateIssuer = true,
-                ValidIssuer = $"https://{_frontendApiDomain}.clerk.accounts.dev",
+                ValidIssuer = $"https://{_frontendApiDomain}",
                 ValidateAudience = false,
                 ClockSkew = lenientLifetimeValidation
                     ? TimeSpan.FromDays(1)
