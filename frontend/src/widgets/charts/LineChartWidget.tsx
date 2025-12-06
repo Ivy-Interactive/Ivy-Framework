@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef, useEffect, useState } from 'react';
 import ReactECharts from 'echarts-for-react';
 import { getHeight, getWidth } from '@/lib/styles';
 import { useThemeWithMonitoring } from '@/components/theme-provider';
@@ -46,9 +46,147 @@ const LineChartWidget: React.FC<LineChartWidgetProps> = ({
     [colors, isDark]
   );
 
-  const styles: React.CSSProperties = {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [explicitDimensions, setExplicitDimensions] = useState<{
+    width: number;
+    height: number;
+  } | null>(null);
+  const [isReady, setIsReady] = useState(false);
+
+  // Measure container and set explicit height before rendering chart
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    let timeoutId: NodeJS.Timeout | null = null;
+    let resizeObserver: ResizeObserver | null = null;
+
+    const measureAndSetHeight = () => {
+      if (isReady) return; // Already ready, skip
+
+      const rect = container.getBoundingClientRect();
+      const computedStyle = window.getComputedStyle(container);
+
+      // Get available height from container or parent
+      let measuredHeight = rect.height;
+
+      // If container has no height yet, check parent for percentage-based heights
+      if (measuredHeight === 0 && container.parentElement) {
+        const parentRect = container.parentElement.getBoundingClientRect();
+        const parentHeight = parentRect.height;
+
+        // Check computed style to see if we're using percentage-based height
+        const heightValue = computedStyle.height;
+        if (
+          heightValue &&
+          (heightValue === '100%' || heightValue.includes('%'))
+        ) {
+          // For percentage heights, use parent's available height
+          if (parentHeight > 0) {
+            measuredHeight = parentHeight;
+          }
+        }
+      }
+
+      // Set dimensions and render if we have valid dimensions
+      if (rect.width > 0 && measuredHeight > 0) {
+        // Only render when we have BOTH valid width and height
+        const finalHeight = measuredHeight;
+        // Set dimensions first - this will update the container div's height
+        setExplicitDimensions({
+          width: rect.width,
+          height: finalHeight,
+        });
+        // Wait for React to apply the explicit height to container, then render chart
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            setIsReady(true);
+          });
+        });
+        if (timeoutId) clearTimeout(timeoutId);
+        // Keep resizeObserver active to handle dimension changes
+        return true;
+      }
+      return false;
+    };
+
+    // Use ResizeObserver to detect when container gets dimensions
+    // Keep it active to handle dimension changes (e.g., when switching tabs)
+    resizeObserver = new ResizeObserver(() => {
+      if (!isReady) {
+        measureAndSetHeight();
+      } else {
+        // If already ready, check if dimensions changed significantly
+        const rect = container.getBoundingClientRect();
+        const currentHeight = rect.height > 0 ? rect.height : 400;
+        setExplicitDimensions(prev => {
+          if (!prev) return null;
+          // Only update if dimensions changed significantly (>5px difference)
+          if (
+            Math.abs(prev.width - rect.width) > 5 ||
+            Math.abs(prev.height - currentHeight) > 5
+          ) {
+            return {
+              width: rect.width,
+              height: currentHeight,
+            };
+          }
+          return prev;
+        });
+      }
+    });
+
+    resizeObserver.observe(container);
+    if (container.parentElement) {
+      resizeObserver.observe(container.parentElement);
+    }
+
+    // Check immediately and aggressively
+    const tryMeasure = () => {
+      if (measureAndSetHeight()) return;
+      // Try again on next frame
+      requestAnimationFrame(() => {
+        if (measureAndSetHeight()) return;
+        // One more time after another frame
+        requestAnimationFrame(measureAndSetHeight);
+      });
+    };
+
+    tryMeasure();
+
+    // Very fast fallback: render almost immediately
+    timeoutId = setTimeout(() => {
+      if (!isReady) {
+        const rect = container.getBoundingClientRect();
+        if (rect.width > 0) {
+          const fallbackHeight = rect.height > 0 ? rect.height : 400;
+          setExplicitDimensions({
+            width: rect.width,
+            height: fallbackHeight,
+          });
+          setIsReady(true);
+        }
+      }
+    }, 50); // Reduced to 50ms
+
+    return () => {
+      if (resizeObserver) resizeObserver.disconnect();
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, [height, isReady]);
+
+  // Build container styles with explicit dimensions once measured
+  const containerStyles: React.CSSProperties = {
     ...getWidth(width),
-    ...getHeight(height),
+    ...(explicitDimensions
+      ? { height: `${explicitDimensions.height}px` }
+      : getHeight(height)),
+  };
+
+  // ReactECharts needs explicit sizing to fill its container
+  const chartStyles: React.CSSProperties = {
+    width: '100%',
+    height: '100%',
   };
 
   const { categories, valueKeys } = generateDataProps(data);
@@ -138,12 +276,20 @@ const LineChartWidget: React.FC<LineChartWidgetProps> = ({
   );
 
   return (
-    <div style={styles}>
-      <ReactECharts
-        option={option}
-        notMerge={true} // Merge changes instead of full rebuild for better performance
-        lazyUpdate={true}
-      />
+    <div ref={containerRef} style={containerStyles}>
+      {isReady && explicitDimensions && (
+        <ReactECharts
+          key={`chart-${explicitDimensions.width}-${explicitDimensions.height}`}
+          option={option}
+          style={chartStyles}
+          opts={{
+            width: explicitDimensions.width,
+            height: explicitDimensions.height,
+          }}
+          notMerge={true}
+          lazyUpdate={true}
+        />
+      )}
     </div>
   );
 };
