@@ -1,4 +1,4 @@
-﻿using Ivy.Charts;
+using Ivy.Charts;
 using Ivy.Core;
 using Ivy.Shared;
 
@@ -17,7 +17,6 @@ public record AreaChart : WidgetBase<AreaChart>
 
     [Prop] public object Data { get; init; }
 
-    /// <summary>Note: This property is not currently implemented on the frontend.</summary>
     [Prop] public Layouts Layout { get; init; } = Layouts.Vertical; //todo: not implemented on the frontend
 
     [Prop] public ColorScheme ColorScheme { get; init; } = ColorScheme.Default;
@@ -26,7 +25,7 @@ public record AreaChart : WidgetBase<AreaChart>
 
     [Prop] public CartesianGrid? CartesianGrid { get; init; }
 
-    [Prop] public Ivy.Charts.Tooltip? Tooltip { get; init; }
+    [Prop] public Charts.Tooltip? Tooltip { get; init; }
 
     [Prop] public Legend? Legend { get; init; } = null;
 
@@ -44,7 +43,6 @@ public record AreaChart : WidgetBase<AreaChart>
 
     [Prop] public StackOffsetTypes StackOffset { get; init; } = StackOffsetTypes.None;
 
-    /// <exception cref="NotSupportedException">AreaChart does not support children.</exception>
     public static AreaChart operator |(AreaChart widget, object child)
     {
         throw new NotSupportedException("AreaChart does not support children.");
@@ -108,14 +106,14 @@ public static class AreaChartExtensions
         return chart with { YAxis = [.. chart.YAxis, new YAxis(dataKey)] };
     }
 
-    public static AreaChart Tooltip(this AreaChart chart, Ivy.Charts.Tooltip? tooltip)
+    public static AreaChart Tooltip(this AreaChart chart, Charts.Tooltip? tooltip)
     {
         return chart with { Tooltip = tooltip };
     }
 
     public static AreaChart Tooltip(this AreaChart chart)
     {
-        return chart with { Tooltip = new Ivy.Charts.Tooltip() };
+        return chart with { Tooltip = new Charts.Tooltip() };
     }
 
     public static AreaChart Legend(this AreaChart chart, Legend legend)

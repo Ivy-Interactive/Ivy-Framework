@@ -42,16 +42,10 @@ type RedirectMessage = {
   state: HistoryState;
 };
 
-type AuthToken = {
-  accessToken: string;
-  refreshToken?: string;
-  expiresAt?: string;
-  tag?: unknown;
-};
-
-type SetAuthTokenMessage = {
-  authToken: AuthToken | null;
+type SetAuthCookiesMessage = {
+  cookieJarId: string;
   reloadPage: boolean;
+  triggerMachineReload: boolean;
 };
 
 const widgetTreeToXml = (node: WidgetNode) => {
@@ -157,6 +151,12 @@ export const useBackend = (
   const connectionId = connection?.connectionId;
   const currentConnectionRef = useRef<signalR.HubConnection | null>(null);
 
+  // Use a ref that gets updated with the latest connection so we always have it in the callback
+  const latestConnectionRef = useRef(connection);
+  useEffect(() => {
+    latestConnectionRef.current = connection;
+  }, [connection]);
+
   // Stable values used in dependency arrays - only updated when we want to reconnect
   const [stableAppId, setStableAppId] = useState(appId);
   const [stableChrome, setStableChrome] = useState(chrome);
@@ -241,27 +241,37 @@ export const useBackend = (
     });
   }, [connection]);
 
-  const handleSetAuthToken = useCallback(
-    async (message: SetAuthTokenMessage) => {
-      logger.debug('Processing SetAuthToken request', {
-        hasAuthToken: !!message.authToken,
+  const handleSetAuthCookies = useCallback(
+    async (message: SetAuthCookiesMessage) => {
+      const currentConnectionId = latestConnectionRef.current?.connectionId;
+      logger.debug('Processing SetAuthCookies request', {
+        hasAuthToken: !!message.cookieJarId,
+        connectionId: currentConnectionId,
       });
-      const response = await fetch(`${getIvyHost()}/ivy/auth/set-auth-token`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(message.authToken),
-        credentials: 'include',
-      });
-      if (response.ok) {
-        logger.info('Auth token set successfully');
-      } else {
-        logger.error('Failed to set auth token', {
+      const response = await fetch(
+        `${getIvyHost()}/ivy/auth/set-auth-cookies`,
+        {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Machine-Id': getMachineId(),
+          },
+          body: JSON.stringify({
+            cookieJarId: message.cookieJarId,
+            connectionId: currentConnectionId ?? null,
+            triggerMachineReload: message.triggerMachineReload,
+          }),
+          credentials: 'include',
+        }
+      );
+      if (!response.ok) {
+        logger.error('Failed to set auth cookies', {
           status: response.status,
           statusText: response.statusText,
         });
       }
+
       if (message.reloadPage) {
-        logger.info('Reloading page.');
         window.location.reload();
       }
     },
@@ -401,9 +411,9 @@ export const useBackend = (
             handleError(message);
           });
 
-          connection.on('SetAuthToken', message => {
-            logger.debug(`[${connection.connectionId}] SetAuthToken`);
-            handleSetAuthToken(message);
+          connection.on('SetAuthCookies', message => {
+            logger.debug(`[${connection.connectionId}] SetAuthCookies`);
+            handleSetAuthCookies(message);
           });
 
           connection.on('SetRootAppId', (message: { rootAppId: string }) => {
@@ -462,6 +472,11 @@ export const useBackend = (
             handleHotReloadMessage();
           });
 
+          connection.on('ReloadPage', () => {
+            logger.debug(`[${connection.connectionId}] ReloadPage`);
+            window.location.reload();
+          });
+
           connection.onreconnecting(() => {
             logger.warn(`[${connection.connectionId}] Reconnecting`);
             setDisconnected(true);
@@ -488,7 +503,8 @@ export const useBackend = (
         connection.off('Error');
         connection.off('CopyToClipboard');
         connection.off('HotReload');
-        connection.off('SetAuthToken');
+        connection.off('ReloadPage');
+        connection.off('SetAuthCookies');
         connection.off('SetRootAppId');
         connection.off('SetTheme');
         connection.off('OpenUrl');
@@ -515,7 +531,7 @@ export const useBackend = (
     handleUpdateMessage,
     handleHotReloadMessage,
     toast,
-    handleSetAuthToken,
+    handleSetAuthCookies,
     handleRedirect,
     handleSetTheme,
     handleError,

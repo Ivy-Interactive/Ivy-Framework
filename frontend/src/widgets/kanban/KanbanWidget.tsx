@@ -13,9 +13,8 @@ export const KanbanWidget: React.FC<KanbanWidgetProps> = ({
   tasks = [],
   width,
   height,
-  allowDelete = false,
-  allowMove = true,
-  columnWidths = {},
+  columnWidth,
+  showCounts = true,
   slots,
   widgetNodeChildren,
 }) => {
@@ -23,11 +22,9 @@ export const KanbanWidget: React.FC<KanbanWidgetProps> = ({
     slots,
     tasks,
     columns,
-    columnWidths,
     widgetNodeChildren
   );
-  const { handleCardMove, handleCardClick, handleCardDelete } =
-    useKanbanHandlers(id, extractedData.tasks);
+  const { handleCardMove } = useKanbanHandlers(id);
 
   const sortedColumns = React.useMemo(() => {
     return [...extractedData.columns].sort((a, b) => {
@@ -55,9 +52,8 @@ export const KanbanWidget: React.FC<KanbanWidgetProps> = ({
       <Kanban
         data={extractedData.tasks}
         columns={extractedData.columns}
-        onCardMove={allowMove ? handleCardMove : undefined}
-        onCardClick={handleCardClick}
-        onCardDelete={allowDelete ? handleCardDelete : undefined}
+        onCardMove={handleCardMove}
+        showCounts={showCounts}
       >
         {({
           KanbanBoard,
@@ -74,10 +70,10 @@ export const KanbanWidget: React.FC<KanbanWidgetProps> = ({
                 id={column.id}
                 name={column.name}
                 color={column.color}
-                width={column.width}
+                width={columnWidth}
               >
                 <KanbanCards id={column.id}>
-                  {(task: Task) => {
+                  {(task: Task, index: number) => {
                     const card = extractedData.cards.find(
                       c => c.cardId === task.id
                     );
@@ -86,8 +82,8 @@ export const KanbanWidget: React.FC<KanbanWidgetProps> = ({
                       <KanbanCardRenderer
                         key={task.id}
                         task={task}
+                        index={index}
                         card={card}
-                        onCardClick={handleCardClick}
                         KanbanCard={KanbanCard}
                         KanbanHeader={KanbanHeader}
                         KanbanCardContent={KanbanCardContent}

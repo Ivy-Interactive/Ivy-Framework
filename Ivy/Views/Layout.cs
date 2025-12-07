@@ -23,6 +23,12 @@ public static class Layout
             .RemoveParentPadding().Align(Align.Center);
     }
 
+    public static LayoutView TopCenter(params IEnumerable<object?> elements)
+    {
+        return Horizontal(elements.Where(e => e != null).Cast<object>().ToArray())
+            .RemoveParentPadding().Align(Align.TopCenter);
+    }
+
     public static LayoutView Wrap(params IEnumerable<object?> elements)
     {
         return (new LayoutView()).Wrap(elements.Where(e => e != null).Cast<object>().ToArray());

@@ -8,9 +8,6 @@ using Ivy.Core.Hooks;
 
 namespace Ivy.Views.Charts;
 
-/// <summary>Represents the data structure for pie chart segments with dimension and measure values.</summary>
-/// <param name="Dimension">The category or label for the pie segment.</param>
-/// <param name="Measure">The numerical value determining the size of the pie segment.</param>
 public record PieChartData(string? Dimension, double Measure);
 
 public enum PieChartStyles
@@ -20,18 +17,13 @@ public enum PieChartStyles
     Donut
 }
 
-/// <typeparam name="TSource">The type of the source data objects.</typeparam>
 public interface IPieChartStyle<TSource>
 {
-    /// <returns>A configured PieChart widget ready for rendering.</returns>
     PieChart Design(PieChartData[] data, PieChartTotal? total);
 }
 
-/// <summary>Helper methods for creating pie chart style instances.</summary>
 public static class PieChartStyleHelpers
 {
-    /// <returns>An instance of the specified pie chart style.</returns>
-    /// <exception cref="InvalidOperationException">Thrown when the specified style is not found.</exception>
     public static IPieChartStyle<TSource> GetStyle<TSource>(PieChartStyles style)
     {
         return style switch
@@ -44,10 +36,8 @@ public static class PieChartStyleHelpers
     }
 }
 
-/// <typeparam name="TSource">The type of the source data objects.</typeparam>
 public class DefaultPieChartStyle<TSource> : IPieChartStyle<TSource>
 {
-    /// <returns>A fully configured pie chart with default styling.</returns>
     public PieChart Design(PieChartData[] data, PieChartTotal? total)
     {
         return new PieChart(data)
@@ -61,11 +51,8 @@ public class DefaultPieChartStyle<TSource> : IPieChartStyle<TSource>
     }
 }
 
-/// <summary>Dashboard-optimized pie chart style with conditional donut appearance, total display, and rectangular legend icons.</summary>
-/// <typeparam name="TSource">The type of the source data objects.</typeparam>
 public class DashboardPieChartStyle<TSource> : IPieChartStyle<TSource>
 {
-    /// <returns>A dashboard-optimized pie chart with conditional donut styling and total display.</returns>
     public PieChart Design(PieChartData[] data, PieChartTotal? total)
     {
         return new PieChart(data)
@@ -84,11 +71,8 @@ public class DashboardPieChartStyle<TSource> : IPieChartStyle<TSource>
     }
 }
 
-/// <summary>Donut pie chart style with fixed inner radius, rainbow colors, and animation for distinctive presentation.</summary>
-/// <typeparam name="TSource">The type of the source data objects.</typeparam>
 public class DonutPieChartStyle<TSource> : IPieChartStyle<TSource>
 {
-    /// <returns>A donut chart with rainbow colors, fixed dimensions, and animation effects.</returns>
     public PieChart Design(PieChartData[] data, PieChartTotal? total)
     {
         return new PieChart(data)
@@ -107,8 +91,6 @@ public class DonutPieChartStyle<TSource> : IPieChartStyle<TSource>
     }
 }
 
-/// <summary>A builder for creating pie charts from data sources with a single dimension and measure.</summary>
-/// <typeparam name="TSource">The type of the source data objects.</typeparam>
 public class PieChartBuilder<TSource>(
     IQueryable<TSource> data,
     Dimension<TSource> dimension,
@@ -121,7 +103,6 @@ public class PieChartBuilder<TSource>(
     private Toolbox? _toolbox;
     private Func<Toolbox, Toolbox>? _toolboxFactory;
 
-    /// <returns>A PieChart widget with the processed data and applied styling, an error view if processing fails, or a loading indicator during data processing.</returns>
     public override object? Build()
     {
         var pieChartData = UseState(ImmutableArray.Create<PieChartData>);
@@ -203,30 +184,27 @@ public class PieChartBuilder<TSource>(
 }
 
 
-/// <summary>Extension methods for creating pie charts from data collections.</summary>
 public static class PieChartExtensions
 {
-    /// <returns>A PieChartBuilder for creating the pie chart.</returns>
     public static PieChartBuilder<TSource> ToPieChart<TSource>(
-        this IEnumerable<TSource> data,
-        Expression<Func<TSource, object>> dimension,
-        Expression<Func<IQueryable<TSource>, object>> measure,
-        PieChartStyles style = PieChartStyles.Default,
-        PieChartTotal? total = null,
-        Func<PieChart, PieChart>? polish = null)
+    this IEnumerable<TSource> data,
+    Expression<Func<TSource, object>> dimension,
+    Expression<Func<IQueryable<TSource>, object>> measure,
+    PieChartStyles style = PieChartStyles.Default,
+    PieChartTotal? total = null,
+    Func<PieChart, PieChart>? polish = null)
     {
         return data.AsQueryable().ToPieChart(dimension, measure, style, total, polish);
     }
 
-    /// <returns>A PieChartBuilder for creating the pie chart.</returns>
     [OverloadResolutionPriority(1)]
     public static PieChartBuilder<TSource> ToPieChart<TSource>(
-        this IQueryable<TSource> data,
-        Expression<Func<TSource, object>> dimension,
-        Expression<Func<IQueryable<TSource>, object>> measure,
-        PieChartStyles style = PieChartStyles.Default,
-        PieChartTotal? total = null,
-        Func<PieChart, PieChart>? polish = null)
+    this IQueryable<TSource> data,
+    Expression<Func<TSource, object>> dimension,
+    Expression<Func<IQueryable<TSource>, object>> measure,
+    PieChartStyles style = PieChartStyles.Default,
+    PieChartTotal? total = null,
+    Func<PieChart, PieChart>? polish = null)
     {
         return new PieChartBuilder<TSource>(data,
             new Dimension<TSource>(nameof(PieChartData.Dimension), dimension),

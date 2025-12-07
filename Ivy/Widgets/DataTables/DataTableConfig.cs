@@ -19,6 +19,7 @@ public record DataTableConfig
     public bool LoadAllRows { get; set; } = false;
     public bool EnableCellClickEvents { get; set; } = false;
     public bool ShowSearch { get; set; } = false;
+    public string? IdColumnName { get; set; } = null;
 }
 
 public enum SelectionModes

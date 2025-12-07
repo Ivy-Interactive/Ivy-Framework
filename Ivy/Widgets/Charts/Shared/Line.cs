@@ -1,4 +1,4 @@
-﻿using Ivy.Shared;
+using Ivy.Shared;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy.Charts;
@@ -48,7 +48,6 @@ public static class LineExtensions
         return line with { LegendType = legendType };
     }
 
-    /// <summary>This overrides the chart's default color scheme.</summary>
     public static Line Stroke(this Line line, Colors stroke)
     {
         return line with { Stroke = stroke };

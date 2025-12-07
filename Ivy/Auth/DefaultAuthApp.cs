@@ -1,15 +1,12 @@
-﻿using System.Collections.Generic;
 using System.Reflection;
 using Ivy.Apps;
 using Ivy.Client;
 using Ivy.Core;
 using Ivy.Core.Hooks;
-using Ivy.Helpers;
 using Ivy.Hooks;
 using Ivy.Shared;
 using Ivy.Views;
 using Ivy.Views.Forms;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Ivy.Auth;
@@ -19,12 +16,10 @@ public class DefaultAuthApp : ViewBase
 {
     public override object Build()
     {
-        var auth = this.UseService<IAuthService>();
-        var errorMessage = this.UseState<string?>();
-        var serverArgs = this.UseService<ServerArgs>();
-        var appName = serverArgs.MetaTitle.NullIfEmpty()
-                      ?? Assembly.GetEntryAssembly()?.GetName().Name.NullIfEmpty()
-                      ?? "Ivy Application";
+        var auth = UseService<IAuthService>();
+        var errorMessage = UseState<string?>();
+        var serverArgs = UseService<ServerArgs>();
+        var appName = serverArgs.MetaTitle.NullIfEmpty() ?? Assembly.GetEntryAssembly()?.GetName().Name.NullIfEmpty() ?? "Ivy";
 
         var options = auth.GetAuthOptions();
 
@@ -113,14 +108,9 @@ public class PasswordEmailFlowView(IState<string?> errorMessage) : ViewBase
                 loading.Set(true);
                 errorMessage.Set((string?)null);
 
-                var token = await TimeoutHelper.WithTimeoutAsync(
-                    ct => auth.LoginAsync(credentials.Value.User, credentials.Value.Password, ct));
+                await auth.LoginAsync(credentials.Value.User, credentials.Value.Password);
 
-                if (token != null)
-                {
-                    client.SetAuthToken(token);
-                }
-                else
+                if (auth.GetCurrentToken() == null)
                 {
                     errorMessage.Set("Login failed. Please check your credentials.");
                 }
@@ -141,7 +131,7 @@ public class PasswordEmailFlowView(IState<string?> errorMessage) : ViewBase
                    .HandleClick(HandleSubmit)
                    .Loading(isBusy)
                    .Disabled(isBusy)
-                   .Size(formBuilder.Size)
+                   .Scale(formBuilder._scale)
                    .Width(Size.Full());
     }
 }
@@ -155,9 +145,8 @@ public class OAuthFlowView(AuthOption option, IState<string?> errorMessage) : Vi
         var auth = this.UseService<IAuthService>();
         var callback = this.UseWebhook(async (request) =>
         {
-            var token = await TimeoutHelper.WithTimeoutAsync(
-                ct => auth.HandleOAuthCallbackAsync(request, ct));
-            client.SetAuthToken(token);
+            var authSession = auth.GetAuthSession();
+            var token = await auth.HandleOAuthCallbackAsync(request);
             return new RedirectResult("/");
         });
 
@@ -165,8 +154,8 @@ public class OAuthFlowView(AuthOption option, IState<string?> errorMessage) : Vi
         {
             try
             {
-                var uri = await TimeoutHelper.WithTimeoutAsync(
-                    ct => auth.GetOAuthUriAsync(option, callback, ct));
+                var authSession = auth.GetAuthSession();
+                var uri = await auth.GetOAuthUriAsync(option, callback);
                 client.OpenUrl(uri);
             }
             catch (Exception e)

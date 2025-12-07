@@ -5,9 +5,9 @@ namespace Ivy.Views.Dashboards;
 
 public record MetricRecord(
     string MetricFormatted,
-    double? TrendComparedToPreviousPeriod,
-    double? GoalAchieved,
-    string? GoalFormatted);
+    double? TrendComparedToPreviousPeriod = null,
+    double? GoalAchieved = null,
+    string? GoalFormatted = null);
 
 public class MetricView(
     string title,

@@ -5,7 +5,6 @@ export interface Column {
   name: string;
   color: string;
   order: number;
-  width?: string;
 }
 
 export interface TaskWithWidgetId extends Task {
@@ -33,9 +32,8 @@ export interface KanbanWidgetProps {
   events?: Record<string, unknown>;
   width?: string;
   height?: string;
-  allowDelete?: boolean;
-  allowMove?: boolean;
-  columnWidths?: Record<string, string>;
+  columnWidth?: string;
+  showCounts?: boolean;
   children?: React.ReactNode;
   slots?: {
     default?: React.ReactNode[];

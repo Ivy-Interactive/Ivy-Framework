@@ -258,6 +258,7 @@ The backend provides real-time communication through SignalR with the `AppHub` c
 
 ```csharp
 app.MapHub<AppHub>("/ivy/messages");
+app.MapHealthChecks("/ivy/health");
 
 if (_hotReloadEnabled)
 {
@@ -267,6 +268,8 @@ if (_hotReloadEnabled)
 ```
 
 The SignalR hub is registered at the `/ivy/messages` endpoint and handles real-time communication including hot reload notifications during development and widget event processing.
+
+Health checks are available at the `/ivy/health` endpoint, which can be used by monitoring tools and load balancers to verify application availability.
 
 **Hub Responsibilities:**
 

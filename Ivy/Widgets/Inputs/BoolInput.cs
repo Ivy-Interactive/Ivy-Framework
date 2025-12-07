@@ -1,5 +1,4 @@
 using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
 using Ivy.Core;
 using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
@@ -24,16 +23,16 @@ public interface IAnyBoolInput : IAnyInput
 
     public BoolInputs Variant { get; set; }
 
-    /// <summary>Primarily for Toggle variant.</summary>
     public Icons Icon { get; set; }
 }
 
-/// <summary>Supports automatic conversion between boolean values and various numeric types for flexible state binding.</summary>
 public abstract record BoolInputBase : WidgetBase<BoolInputBase>, IAnyBoolInput
 {
     [Prop] public bool Disabled { get; set; }
 
     [Prop] public string? Invalid { get; set; }
+
+    [Prop] public new Scale? Scale { get; set; }
 
     [Prop] public string? Label { get; set; }
 
@@ -43,7 +42,7 @@ public abstract record BoolInputBase : WidgetBase<BoolInputBase>, IAnyBoolInput
 
     [Prop] public Icons Icon { get; set; }
 
-    [Prop] public Sizes Size { get; set; } = Sizes.Medium;
+    [Prop] public string? Placeholder { get; set; } //not really used but included to consistency with IAnyInput
 
     [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
 
@@ -135,9 +134,8 @@ public record BoolInput : BoolInput<bool>
 
 public static class BoolInputExtensions
 {
-    /// <summary>Creates a boolean input from a state object with automatic type conversion.</summary>
     public static BoolInputBase ToBoolInput(this IAnyState state, string? label = null, bool disabled = false,
-        BoolInputs variant = BoolInputs.Checkbox)
+    BoolInputs variant = BoolInputs.Checkbox)
     {
         var stateType = state.GetStateType();
         var isNullable = stateType.IsNullableType();
@@ -172,7 +170,7 @@ public static class BoolInputExtensions
 
             // Numeric types - convert to boolean (0 = false, non-zero = true)
             // Expression value==null should always be null (suggestion by IntelliJ), but in this case it is a valid check.
-            // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+            // ReSharper disables once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
             _ when stateType.IsNumeric() && stateType.IsNullableType() => value == null ? null : Convert.ToBoolean(value),
             _ when stateType.IsNumeric() => Convert.ToBoolean(value),
 
@@ -277,16 +275,6 @@ public static class BoolInputExtensions
     public static BoolInputBase Description(this BoolInputBase widget, string description) =>
         widget with { Description = description };
 
-    public static BoolInputBase Size(this BoolInputBase widget, Sizes size) =>
-        widget with { Size = size };
-
-    public static BoolInputBase Large(this BoolInputBase widget) =>
-        widget.Size(Sizes.Large);
-
-    public static BoolInputBase Small(this BoolInputBase widget) =>
-        widget.Size(Sizes.Small);
-
-    /// <summary>Or null to clear the error.</summary>
     public static BoolInputBase Invalid(this BoolInputBase widget, string? invalid) =>
         widget with { Invalid = invalid };
 

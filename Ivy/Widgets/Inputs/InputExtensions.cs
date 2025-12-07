@@ -5,8 +5,6 @@ namespace Ivy.Widgets.Inputs;
 
 public static class InputExtensions
 {
-    /// <summary>Automatically selects appropriate input control based on state type (NumberInput, BoolInput, TextInput, DateTimeInput, ColorInput).</summary>
-    /// <exception cref="InvalidOperationException">Thrown when no suitable input control exists for the specified type.</exception>
     public static IInput<T> ToInput<T>(this IState<T> state, string? placeholder = null, bool disabled = false)
     {
         //todo: Can we detect the name of the state using [?] attribute

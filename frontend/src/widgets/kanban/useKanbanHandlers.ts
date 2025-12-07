@@ -1,7 +1,6 @@
 import { useEventHandler } from '@/components/event-handler';
-import type { TaskWithWidgetId } from './types';
 
-export function useKanbanHandlers(widgetId: string, tasks: TaskWithWidgetId[]) {
+export function useKanbanHandlers(widgetId: string) {
   const eventHandler = useEventHandler();
 
   const handleCardMove = (
@@ -13,20 +12,7 @@ export function useKanbanHandlers(widgetId: string, tasks: TaskWithWidgetId[]) {
     eventHandler('OnCardMove', widgetId, [cardId, toColumn, targetIndex]);
   };
 
-  const handleCardClick = (cardId: string) => {
-    const task = tasks.find(t => t.id === cardId);
-    if (task?.widgetId) {
-      eventHandler('OnClick', task.widgetId, [cardId]);
-    }
-  };
-
-  const handleCardDelete = (cardId: string) => {
-    eventHandler('OnDelete', widgetId, [cardId]);
-  };
-
   return {
     handleCardMove,
-    handleCardClick,
-    handleCardDelete,
   };
 }

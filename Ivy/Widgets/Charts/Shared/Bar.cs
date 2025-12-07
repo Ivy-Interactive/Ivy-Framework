@@ -1,12 +1,10 @@
-﻿using Ivy.Shared;
+using Ivy.Shared;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy.Charts;
 
 public record Bar
 {
-    /// <param name="stackId">Bars with the same stack ID will be grouped vertically.</param>
-    /// <param name="name">If not provided, will use the dataKey value.</param>
     public Bar(string dataKey, object? stackId = null, string? name = null)
     {
         DataKey = dataKey;
@@ -18,15 +16,12 @@ public record Bar
 
     public LegendTypes LegendType { get; set; } = LegendTypes.Line;
 
-    /// <summary>If null, no stroke is applied.</summary>
     public Colors? Stroke { get; set; } = null;
 
     public int StrokeWidth { get; set; } = 1;
 
-    /// <summary>If null, a default color from the chart's color scheme will be used.</summary>
     public Colors? Fill { get; set; } = null;
 
-    /// <summary>Value ranges from 0.0 (transparent) to 1.0 (opaque).</summary>
     public double? FillOpacity { get; set; } = null;
 
     public string? StrokeDashArray { get; set; }
@@ -39,7 +34,6 @@ public record Bar
 
     public string? StackId { get; set; }
 
-    /// <summary>The array contains [topLeft, topRight, bottomRight, bottomLeft] values.</summary>
     public int[] Radius { get; set; } = [0, 0, 0, 0];
 
     public LabelList[] LabelLists { get; set; } = [];

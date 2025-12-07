@@ -35,10 +35,11 @@ public class DataTableService(
                 throw new RpcException(new Status(StatusCode.NotFound, $"Queryable '{request.SourceId}' not found."));
             }
 
+            var idSelector = queryableRegistry.GetIdSelector(request.SourceId);
             DataTableQuery queryToUse = request;
 
             var queryProcessor = new QueryProcessor(logger: null, cache: cache);
-            var queryResult = queryProcessor.ProcessQuery(queryable, queryToUse);
+            var queryResult = queryProcessor.ProcessQuery(queryable, queryToUse, idSelector);
 
             var tableResult = new DataTableResult
             {

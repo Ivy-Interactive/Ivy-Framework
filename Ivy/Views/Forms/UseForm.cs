@@ -1,58 +1,79 @@
-﻿using Ivy.Core;
+using Ivy.Client;
+using Ivy.Core;
 using Ivy.Core.Hooks;
 using Ivy.Shared;
+using static Ivy.Views.Forms.FormHelpers;
 
 namespace Ivy.Views.Forms;
 
-/// <summary>
-/// Extension methods for form presentation in modals and custom layouts.
-/// </summary>
 public static class UseFormExtensions
 {
-    /// <summary>
-    /// Creates form components for custom layouts with cached form builder.
-    /// </summary>
-    /// <param name="context">View context for state management.</param>
-    /// <param name="factory">Factory function to create the form builder.</param>
-    /// <returns>Tuple with submit handler, form view, validation view, and loading state.</returns>
     public static (Func<Task<bool>> onSubmit, IView formView, IView validationView, bool loading) UseForm<TModel>(this IViewContext context, Func<FormBuilder<TModel>> factory)
     {
         return context.UseState(factory, buildOnChange: false).Value.UseForm(context);
     }
 
     /// <summary>
-    /// Displays the form in a sheet modal with submit/cancel buttons.
+    /// Creates upload-aware form submission handling with toast notifications for in-progress uploads.
     /// </summary>
-    /// <param name="formBuilder">The form builder to display.</param>
-    /// <param name="isOpen">State controlling sheet visibility.</param>
-    /// <param name="title">Optional sheet title.</param>
-    /// <param name="description">Optional description text.</param>
-    /// <param name="submitTitle">Optional custom submit button text.</param>
-    /// <param name="width">Optional sheet width.</param>
-    /// <returns>Sheet modal view that closes on successful submission.</returns>
+    internal static (Func<ValueTask<bool>> handleSubmit, bool isUploading) UseUploadAwareSubmit<TModel>(
+        this IViewContext context,
+        IState<TModel> model,
+        Func<Task<bool>> onSubmit)
+    {
+        var hasUploading = context.UseState(false);
+        var client = context.UseService<IClientProvider>();
+
+        context.UseEffect(() =>
+        {
+            hasUploading.Set(CheckForLoadingUploads(model.Value));
+        }, model);
+
+        async ValueTask<bool> HandleSubmit()
+        {
+            if (hasUploading.Value)
+            {
+                client.Toast(
+                    "File uploads are still in progress. Please wait for them to complete.",
+                    "Uploads in Progress"
+                );
+                return false;
+            }
+            return await onSubmit();
+        }
+
+        return (HandleSubmit, hasUploading.Value);
+    }
+
     public static IView ToSheet<TModel>(this FormBuilder<TModel> formBuilder, IState<bool> isOpen, string? title = null, string? description = null, string? submitTitle = null, Size? width = null)
     {
         return new FuncView((context) =>
             {
-                (Func<Task<bool>> onSubmit, IView formView, IView validationView, bool loading) = formBuilder.UseForm(context);
+                (Func<Task<bool>> onSubmit, IView formView, IView validationView, bool loading) =
+                    formBuilder.UseForm(context);
+
+                var (handleSubmit, isUploading) = context.UseUploadAwareSubmit(formBuilder.GetModel(), onSubmit);
 
                 if (!isOpen.Value) return null; //shouldn't happen
 
-                async ValueTask HandleSubmit()
+                async ValueTask HandleSubmitAndClose()
                 {
-                    if (await onSubmit())
+                    if (await handleSubmit())
                     {
                         isOpen.Value = false;
                     }
                 }
 
+                var isLoading = loading || isUploading;
+
                 var layout = new FooterLayout(
                     Layout.Horizontal().Gap(2)
-                        | new Button(submitTitle ?? formBuilder.SubmitTitle).HandleClick(_ => HandleSubmit())
-                            .Loading(loading).Disabled(loading).Size(formBuilder.Size)
-                        | new Button("Cancel").Variant(ButtonVariant.Outline).HandleClick(_ => isOpen.Set(false))
-                            .Size(formBuilder.Size)
-                        | validationView,
+                    | FormBuilder<TModel>.DefaultSubmitBuilder(submitTitle ?? "Save")(isLoading)
+                        .HandleClick(_ => HandleSubmitAndClose())
+                        .Scale(formBuilder._scale)
+                    | new Button("Cancel").Variant(ButtonVariant.Outline).HandleClick(_ => isOpen.Set(false))
+                        .Scale(formBuilder._scale)
+                    | validationView,
                     formView
                 );
 
@@ -64,49 +85,44 @@ public static class UseFormExtensions
         );
     }
 
-    /// <summary>
-    /// Displays the form in a dialog modal with header, body, and footer structure.
-    /// </summary>
-    /// <param name="formBuilder">The form builder to display.</param>
-    /// <param name="isOpen">State controlling dialog visibility.</param>
-    /// <param name="title">Optional dialog title.</param>
-    /// <param name="description">Optional description text.</param>
-    /// <param name="submitTitle">Optional custom submit button text.</param>
-    /// <param name="width">Optional dialog width.</param>
-    /// <returns>Dialog modal view that closes on successful submission.</returns>
     public static IView ToDialog<TModel>(this FormBuilder<TModel> formBuilder, IState<bool> isOpen, string? title = null, string? description = null, string? submitTitle = null, Size? width = null)
     {
         return new FuncView((context) =>
             {
-                (Func<Task<bool>> onSubmit, IView formView, IView validationView, bool loading) = formBuilder.UseForm(context);
+                (Func<Task<bool>> onSubmit, IView formView, IView validationView, bool loading) =
+                    formBuilder.UseForm(context);
+
+                var (handleSubmit, isUploading) = context.UseUploadAwareSubmit(formBuilder.GetModel(), onSubmit);
 
                 if (!isOpen.Value) return null; //shouldn't happen
 
-                async ValueTask HandleSubmit()
+                async ValueTask HandleSubmitAndClose()
                 {
-                    if (await onSubmit())
+                    if (await handleSubmit())
                     {
                         isOpen.Value = false;
                     }
                 }
+
+                var isLoading = loading || isUploading;
 
                 return new Dialog(
                     _ => isOpen.Set(false),
                     new DialogHeader(title ?? ""),
                     new DialogBody(
                         Layout.Vertical()
-                            | description!
-                            | formView
+                        | description!
+                        | formView
                     ),
                     new DialogFooter(
                         validationView,
-                        new Button("Cancel", _ => isOpen.Value = false, variant: ButtonVariant.Outline).Size(formBuilder.Size),
-                        new Button(submitTitle ?? formBuilder.SubmitTitle).HandleClick(_ => HandleSubmit())
-                            .Loading(loading).Disabled(loading).Size(formBuilder.Size)
+                        new Button("Cancel", _ => isOpen.Value = false, variant: ButtonVariant.Outline).Scale(formBuilder._scale),
+                        FormBuilder<TModel>.DefaultSubmitBuilder(submitTitle ?? "Save")(isLoading)
+                            .HandleClick(_ => HandleSubmitAndClose())
+                            .Scale(formBuilder._scale)
                     )
                 ).Width(width ?? Dialog.DefaultWidth);
             }
         );
-
     }
 }

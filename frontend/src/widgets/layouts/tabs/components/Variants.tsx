@@ -111,7 +111,11 @@ export const ContentVariant: React.FC<ContentVariantProps> = ({
         removeParentPadding && 'remove-parent-padding'
       )}
     >
-      <div ref={containerRef} className="relative" style={getWidth(width)}>
+      <div
+        ref={containerRef}
+        className="relative pb-[6px]"
+        style={getWidth(width)}
+      >
         {/* Hover Highlight */}
         <div
           className="absolute h-[26px] transition-all duration-300 ease-out bg-accent/20 rounded-[6px] flex items-center"
@@ -123,7 +127,7 @@ export const ContentVariant: React.FC<ContentVariantProps> = ({
         {/* Active Indicator */}
         <div
           className={cn(
-            'absolute bottom-[-6px] h-[2px] bg-foreground',
+            'absolute bottom-0 h-[2px] bg-foreground',
             !isInitialRender && 'transition-all duration-300 ease-out',
             activeTabId && !visibleTabs.includes(activeTabId) && 'opacity-0'
           )}

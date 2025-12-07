@@ -1,4 +1,4 @@
-﻿using Ivy.Charts;
+using Ivy.Charts;
 using Ivy.Core;
 using Ivy.Shared;
 
@@ -15,7 +15,6 @@ public record LineChart : WidgetBase<LineChart>
         Height = Size.Full();
     }
 
-    /// <summary>This constructor automatically creates a basic line configuration with default axes and tooltip.</summary>
     public LineChart(object data, string dataKey, string nameKey)
     {
         Data = data;
@@ -37,11 +36,11 @@ public record LineChart : WidgetBase<LineChart>
 
     [Prop] public CartesianGrid? CartesianGrid { get; init; }
 
-    [Prop] public Ivy.Charts.Tooltip? Tooltip { get; init; }
+    [Prop] public Charts.Tooltip? Tooltip { get; init; }
 
     [Prop] public Legend? Legend { get; init; } = null;
 
-    [Prop] public Toolbox? Toolbox { get; init; } = new Toolbox();
+    [Prop] public Toolbox? Toolbox { get; init; } = null;
 
     [Prop] public XAxis[] XAxis { get; init; } = [];
 
@@ -53,7 +52,6 @@ public record LineChart : WidgetBase<LineChart>
 
     [Prop] public ReferenceLine[] ReferenceLines { get; init; } = [];
 
-    /// <exception cref="NotSupportedException">LineChart does not support children.</exception>
     public static LineChart operator |(LineChart widget, object child)
     {
         throw new NotSupportedException("LineChart does not support children.");
@@ -127,14 +125,14 @@ public static class LineChartExtensions
         return chart with { YAxis = [.. chart.YAxis, new YAxis()] };
     }
 
-    public static LineChart Tooltip(this LineChart chart, Ivy.Charts.Tooltip? tooltip)
+    public static LineChart Tooltip(this LineChart chart, Charts.Tooltip? tooltip)
     {
         return chart with { Tooltip = tooltip };
     }
 
     public static LineChart Tooltip(this LineChart chart)
     {
-        return chart with { Tooltip = new Ivy.Charts.Tooltip() };
+        return chart with { Tooltip = new Charts.Tooltip() };
     }
 
     public static LineChart Legend(this LineChart chart, Legend legend)

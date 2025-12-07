@@ -1,4 +1,4 @@
-﻿// ReSharper disable once CheckNamespace
+// ReSharper disable once CheckNamespace
 namespace Ivy.Charts;
 
 public record Legend
@@ -23,7 +23,6 @@ public record Legend
         Bottom
     }
 
-    /// <summary>Icon types determine how data series are displayed in the legend, affecting both appearance and user understanding.</summary>
     public enum IconTypes
     {
         Line,

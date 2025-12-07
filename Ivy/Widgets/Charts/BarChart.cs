@@ -1,4 +1,4 @@
-﻿using Ivy.Charts;
+using Ivy.Charts;
 using Ivy.Core;
 using Ivy.Shared;
 
@@ -25,7 +25,7 @@ public record BarChart : WidgetBase<BarChart>
 
     [Prop] public CartesianGrid? CartesianGrid { get; init; }
 
-    [Prop] public Ivy.Charts.Tooltip? Tooltip { get; init; }
+    [Prop] public Charts.Tooltip? Tooltip { get; init; }
 
     [Prop] public Legend? Legend { get; init; } = null;
 
@@ -51,7 +51,6 @@ public record BarChart : WidgetBase<BarChart>
 
     [Prop] public bool ReverseStackOrder { get; init; } = false;
 
-    /// <exception cref="NotSupportedException">BarChart does not support children.</exception>
     public static BarChart operator |(BarChart widget, object child)
     {
         throw new NotSupportedException("BarChart does not support children.");
@@ -128,14 +127,14 @@ public static class BarChartExtensions
         return chart with { YAxis = [.. chart.YAxis, new YAxis()] };
     }
 
-    public static BarChart Tooltip(this BarChart chart, Ivy.Charts.Tooltip? tooltip)
+    public static BarChart Tooltip(this BarChart chart, Charts.Tooltip? tooltip)
     {
         return chart with { Tooltip = tooltip };
     }
 
     public static BarChart Tooltip(this BarChart chart)
     {
-        return chart with { Tooltip = new Ivy.Charts.Tooltip() };
+        return chart with { Tooltip = new Charts.Tooltip() };
     }
 
     public static BarChart Legend(this BarChart chart, Legend legend)

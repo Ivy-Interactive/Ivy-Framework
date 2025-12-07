@@ -126,10 +126,6 @@ public class LabelsDisplayRenderer : IDataTableColumnRenderer
     public ColType ColType => ColType.Labels;
 }
 
-/// <summary>
-/// Glide Data Grid compatible icon names for DataTableColumn.
-/// These icon names correspond to the icons defined in the frontend headerIcons.ts file.
-/// </summary>
 public static class DataTableIcons
 {
     public const string User = "User";

@@ -19,11 +19,6 @@ public abstract class ViewBase() : IView, IViewContextOwner
 
     private readonly Disposables _disposables = new();
 
-    /// <summary>
-    /// Gets the view context that provides access to hooks like UseState, UseEffect, and services.
-    /// Only accessible during the Build method execution.
-    /// </summary>
-    /// <exception cref="InvalidOperationException">Thrown when accessed outside the Build method or on stateless views.</exception>
     public IViewContext Context
     {
         get

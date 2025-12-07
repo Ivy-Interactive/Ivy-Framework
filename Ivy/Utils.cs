@@ -214,11 +214,6 @@ public static class Utils
         return titleCase;
     }
 
-    /// <summary>
-    /// FooBar => Foo Bar
-    /// </summary>
-    /// <param name="input"></param>
-    /// <returns></returns>
     public static string? SplitPascalCase(string? input)
     {
         if (input == null) return null;
@@ -230,11 +225,6 @@ public static class Utils
         return string.Join(" ", words);
     }
 
-    /// <summary>
-    /// FooBar => foo-bar
-    /// </summary>
-    /// <param name="input"></param>
-    /// <returns></returns>
     public static string TitleCaseToFriendlyUrl(string input)
     {
         if (string.IsNullOrWhiteSpace(input))
@@ -267,11 +257,6 @@ public static class Utils
         return normalized;
     }
 
-    /// <summary>
-    /// FooBarApp => Foo Bar
-    /// </summary>
-    /// <param name="input"></param>
-    /// <returns></returns>
     public static string TitleCaseToReadable(string input)
     {
         if (string.IsNullOrWhiteSpace(input))
@@ -599,13 +584,6 @@ public static class Utils
         return exception;
     }
 
-    /// <summary>
-    /// Unwraps an AggregateException to return the single inner exception if it contains only one.
-    /// If the exception is not an AggregateException or contains multiple inner exceptions,
-    /// it is returned as-is.
-    /// </summary>
-    /// <param name="e">The exception to unwrap.</param>
-    /// <returns>The unwrapped exception, or the original exception if it cannot be unwrapped.</returns>
     public static Exception UnwrapAggregate(this Exception e)
     {
         if (e is AggregateException aggregateException && aggregateException.InnerExceptions.Count == 1)
@@ -742,15 +720,26 @@ public static class Utils
         return $"{len:0.##} {sizes[order]}";
     }
 
-    /// <summary>
-    /// Validates and sanitizes a URL to prevent open redirect vulnerabilities.
-    /// Only allows relative paths (starting with /) or absolute URLs with http/https protocol.
-    /// For redirects, external URLs are only allowed if they match the current origin.
-    /// </summary>
-    /// <param name="url">The URL to validate</param>
-    /// <param name="allowExternal">Whether to allow external URLs (default: false for redirects)</param>
-    /// <param name="currentOrigin">The current origin to compare against for same-origin validation</param>
-    /// <returns>The sanitized URL if valid, null otherwise</returns>
+    public static string FormatNumber(double number, int decimalPlaces = 2)
+    {
+        static string TrimInvariant(double value, int decimalPlaces)
+        {
+            string format = decimalPlaces > 0 ? "0." + new string('#', Math.Max(0, decimalPlaces)) : "0";
+            var s = value.ToString(format, System.Globalization.CultureInfo.InvariantCulture);
+            if (s.Contains('.'))
+                s = s.TrimEnd('0').TrimEnd('.');
+            return s;
+        }
+
+        if (number >= 1_000_000_000)
+            return TrimInvariant(number / 1_000_000_000D, decimalPlaces) + "B";
+        if (number >= 1_000_000)
+            return TrimInvariant(number / 1_000_000D, decimalPlaces) + "M";
+        if (number >= 1_000)
+            return TrimInvariant(number / 1_000D, decimalPlaces) + "K";
+        return TrimInvariant(number, decimalPlaces);
+    }
+
     public static string? ValidateRedirectUrl(string? url, bool allowExternal = false, string? currentOrigin = null)
     {
         if (string.IsNullOrWhiteSpace(url))
@@ -807,12 +796,6 @@ public static class Utils
         }
     }
 
-    /// <summary>
-    /// Validates and sanitizes a URL for use in anchor tags or window.open.
-    /// Allows relative paths, external http/https URLs, and app:// URLs, but prevents dangerous protocols.
-    /// </summary>
-    /// <param name="url">The URL to validate</param>
-    /// <returns>The sanitized URL if valid, null otherwise</returns>
     public static string? ValidateLinkUrl(string? url)
     {
         if (string.IsNullOrWhiteSpace(url))
@@ -821,6 +804,33 @@ public static class Utils
         }
 
         url = url.Trim();
+
+        // Allow mailto: URLs for email links
+        if (url.StartsWith("mailto:", StringComparison.OrdinalIgnoreCase))
+        {
+            // Basic validation: must have at least one character after mailto:
+            // and should not contain dangerous characters or protocol injection
+            var afterProtocol = url.Substring(7); // After "mailto:"
+            if (string.IsNullOrWhiteSpace(afterProtocol))
+            {
+                return null;
+            }
+
+            // Check for protocol injection
+            if (afterProtocol.Contains("://"))
+            {
+                return null;
+            }
+
+            // Validate mailto format: mailto:email@domain.com[?subject=...&body=...]
+            // Allow query parameters for subject, body, cc, bcc
+            if (!Regex.IsMatch(url, @"^mailto:[^#]+$", RegexOptions.IgnoreCase))
+            {
+                return null;
+            }
+
+            return url;
+        }
 
         // Allow app:// URLs (Ivy internal navigation)
         if (url.StartsWith("app://", StringComparison.OrdinalIgnoreCase))
@@ -912,12 +922,6 @@ public static class Utils
         }
     }
 
-    /// <summary>
-    /// Validates that an AppId is safe for use in URLs.
-    /// Prevents injection of malicious characters or protocols.
-    /// </summary>
-    /// <param name="appId">The AppId to validate</param>
-    /// <returns>True if the AppId is safe, false otherwise</returns>
     public static bool IsSafeAppId(string? appId)
     {
         if (string.IsNullOrWhiteSpace(appId))

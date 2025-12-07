@@ -9,6 +9,7 @@ import {
   ReactNode,
 } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { getWidth } from '@/lib/styles';
 
@@ -28,20 +29,29 @@ export interface Column {
   color: string;
 }
 
+interface DropTarget {
+  column: string;
+  index: number;
+}
+
 interface KanbanContextType {
   data: Task[];
   columns: Column[];
   draggedCardColumn: string | null;
   setDraggedCardColumn: (column: string | null) => void;
+  draggedCardId: string | null;
+  setDraggedCardId: (id: string | null) => void;
+  dragOverColumn: string | null;
+  setDragOverColumn: (column: string | null) => void;
+  dropTarget: DropTarget | null;
+  setDropTarget: (target: DropTarget | null) => void;
   onCardMove?: (
     cardId: string,
     fromColumn: string,
     toColumn: string,
     targetIndex?: number
   ) => void;
-  onCardReorder?: (cardId: string, fromIndex: number, toIndex: number) => void;
-  onCardClick?: (cardId: string) => void;
-  onCardDelete?: (cardId: string) => void;
+  showCounts?: boolean;
 }
 
 const KanbanContext = createContext<KanbanContextType>({
@@ -49,9 +59,31 @@ const KanbanContext = createContext<KanbanContextType>({
   columns: [],
   draggedCardColumn: null,
   setDraggedCardColumn: () => {},
+  draggedCardId: null,
+  setDraggedCardId: () => {},
+  dragOverColumn: null,
+  setDragOverColumn: () => {},
+  dropTarget: null,
+  setDropTarget: () => {},
 });
 
-export const useKanbanContext = () => useContext(KanbanContext);
+const useKanbanContext = () => useContext(KanbanContext);
+
+const GAP_HEIGHT = 70;
+
+function adjustIndexForSameColumnMove(
+  data: Task[],
+  cardId: string,
+  column: string,
+  targetIndex: number
+): number {
+  const columnTasks = data.filter(t => t.status === column);
+  const draggedIndex = columnTasks.findIndex(t => t.id === cardId);
+  if (draggedIndex !== -1 && draggedIndex < targetIndex) {
+    return targetIndex - 1;
+  }
+  return targetIndex;
+}
 
 interface KanbanProps {
   columns: Column[];
@@ -62,9 +94,7 @@ interface KanbanProps {
     toColumn: string,
     targetIndex?: number
   ) => void;
-  onCardReorder?: (cardId: string, fromIndex: number, toIndex: number) => void;
-  onCardClick?: (cardId: string) => void;
-  onCardDelete?: (cardId: string) => void;
+  showCounts?: boolean;
   children: (components: {
     KanbanBoard: typeof KanbanBoard;
     KanbanColumn: typeof KanbanColumn;
@@ -79,28 +109,33 @@ export function Kanban({
   columns,
   data,
   onCardMove,
-  onCardReorder,
-  onCardClick,
-  onCardDelete,
+  showCounts = true,
   children,
 }: KanbanProps) {
   const [draggedCardColumn, setDraggedCardColumn] = useState<string | null>(
     null
   );
-
-  const contextValue: KanbanContextType = {
-    data,
-    columns,
-    draggedCardColumn,
-    setDraggedCardColumn,
-    onCardMove,
-    onCardReorder,
-    onCardClick,
-    onCardDelete,
-  };
+  const [draggedCardId, setDraggedCardId] = useState<string | null>(null);
+  const [dragOverColumn, setDragOverColumn] = useState<string | null>(null);
+  const [dropTarget, setDropTarget] = useState<DropTarget | null>(null);
 
   return (
-    <KanbanContext.Provider value={contextValue}>
+    <KanbanContext.Provider
+      value={{
+        data,
+        columns,
+        draggedCardColumn,
+        setDraggedCardColumn,
+        draggedCardId,
+        setDraggedCardId,
+        dragOverColumn,
+        setDragOverColumn,
+        dropTarget,
+        setDropTarget,
+        onCardMove,
+        showCounts,
+      }}
+    >
       {children({
         KanbanBoard,
         KanbanColumn,
@@ -121,7 +156,7 @@ interface KanbanBoardProps {
 export function KanbanBoard({ children, className }: KanbanBoardProps) {
   return (
     <div
-      className={cn('flex gap-4 h-full bg-background', className)}
+      className={cn('flex h-full bg-background flex-row', className)}
       style={{ minWidth: 'fit-content', maxWidth: '100%' }}
     >
       {children}
@@ -146,54 +181,80 @@ export function KanbanColumn({
   children,
   className,
 }: KanbanColumnProps) {
-  const [isDragOver, setIsDragOver] = useState(false);
-  const { onCardMove, data, draggedCardColumn } = useKanbanContext();
+  const {
+    onCardMove,
+    data,
+    draggedCardColumn,
+    dragOverColumn,
+    setDragOverColumn,
+    setDropTarget,
+    dropTarget,
+    showCounts,
+  } = useKanbanContext();
+
+  const columnTaskCount = data.filter(task => task.status === id).length;
+  const showDragOver = dragOverColumn === id && draggedCardColumn !== null;
+  const widthStyles = width ? getWidth(width) : {};
+  const hasExplicitWidth = width && Object.keys(widthStyles).length > 0;
 
   const handleDragOver = useCallback(
     (e: React.DragEvent) => {
       e.preventDefault();
       e.dataTransfer.dropEffect = 'move';
-
-      if (draggedCardColumn && draggedCardColumn !== id) {
-        setIsDragOver(true);
+      if (
+        draggedCardColumn &&
+        draggedCardColumn !== id &&
+        dragOverColumn !== id
+      ) {
+        setDragOverColumn(id);
       }
     },
-    [id, draggedCardColumn]
+    [id, draggedCardColumn, dragOverColumn, setDragOverColumn]
   );
 
-  const handleDragLeave = useCallback((e: React.DragEvent) => {
-    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
-      setIsDragOver(false);
-    }
-  }, []);
+  const handleDragLeave = useCallback(
+    (e: React.DragEvent) => {
+      if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+        setDragOverColumn(null);
+        setDropTarget(null);
+      }
+    },
+    [setDragOverColumn, setDropTarget]
+  );
 
   const handleDrop = useCallback(
     (e: React.DragEvent) => {
       e.preventDefault();
-      setIsDragOver(false);
+      setDragOverColumn(null);
 
       const cardId = e.dataTransfer.getData('text/plain');
-      if (!cardId) return;
       const task = data.find(t => t.id === cardId);
-      if (!task) return;
+      if (!cardId || !task) return;
 
-      onCardMove?.(cardId, task.status, id);
+      let targetIndex =
+        dropTarget?.column === id ? dropTarget.index : undefined;
+
+      if (targetIndex !== undefined && task.status === id) {
+        targetIndex = adjustIndexForSameColumnMove(
+          data,
+          cardId,
+          id,
+          targetIndex
+        );
+      }
+
+      onCardMove?.(cardId, task.status, id, targetIndex);
+      setDropTarget(null);
     },
-    [id, onCardMove, data]
+    [id, onCardMove, data, setDragOverColumn, dropTarget, setDropTarget]
   );
-
-  const showDragOver = isDragOver && draggedCardColumn !== null;
-
-  const widthStyles = width ? getWidth(width) : {};
-  const hasExplicitWidth = width && Object.keys(widthStyles).length > 0;
 
   return (
     <div
       className={cn(
         hasExplicitWidth ? 'bg-background' : 'flex-1 bg-background',
-        'rounded-lg px-0 py-4 min-h-0 flex flex-col transition-colors min-w-70',
-        showDragOver &&
-          'bg-accent border-2 border-accent-foreground border-dashed rounded-lg',
+        'rounded-lg px-0 pt-2 min-h-0 flex flex-col transition-colors min-w-70',
+        showDragOver && 'bg-accent rounded-lg',
         className
       )}
       style={widthStyles}
@@ -201,7 +262,7 @@ export function KanbanColumn({
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
     >
-      <div className="px-3">
+      <div className="px-2">
         <h3 className="font-semibold text-foreground flex items-center gap-2">
           {color && (
             <div
@@ -210,6 +271,11 @@ export function KanbanColumn({
             />
           )}
           {name || id}
+          {showCounts && (
+            <span className="text-muted-foreground text-sm font-normal">
+              ({columnTaskCount})
+            </span>
+          )}
         </h3>
       </div>
       {children}
@@ -219,19 +285,59 @@ export function KanbanColumn({
 
 interface KanbanCardsProps {
   id: string;
-  children: (task: Task) => ReactNode;
+  children: (task: Task, index: number) => ReactNode;
 }
 
 export function KanbanCards({ id, children }: KanbanCardsProps) {
-  const { data } = useKanbanContext();
+  const { data, dropTarget, draggedCardId } = useKanbanContext();
   const columnTasks = data.filter(task => task.status === id);
+
+  const isTargetColumn = dropTarget?.column === id;
+  const dropIndex = dropTarget?.index ?? -1;
+  const draggedCardIndex = columnTasks.findIndex(t => t.id === draggedCardId);
+  const isSameColumnDrag = draggedCardIndex !== -1;
+  const showLineIndicator = isTargetColumn && isSameColumnDrag;
 
   return (
     <ScrollArea className="flex-1 min-h-0">
-      <div className="flex flex-col gap-3 p-3">
-        {columnTasks.map(task => (
-          <div key={task.id}>{children(task)}</div>
-        ))}
+      <div className="flex flex-col gap-2 p-2 pt-3">
+        {columnTasks.map((task, index) => {
+          const isDraggedCard = task.id === draggedCardId;
+          const shouldShift =
+            isTargetColumn &&
+            !isSameColumnDrag &&
+            !isDraggedCard &&
+            index >= dropIndex;
+          const showLineBefore =
+            showLineIndicator &&
+            index === dropIndex &&
+            dropIndex !== draggedCardIndex;
+          const showLineAfter =
+            showLineIndicator &&
+            index === columnTasks.length - 1 &&
+            dropIndex === columnTasks.length;
+
+          return (
+            <div key={task.id} className="relative">
+              {showLineBefore && (
+                <Separator className="absolute -top-1 left-0 right-0 h-0.5 bg-muted-foreground/40 z-10" />
+              )}
+              <div
+                style={{
+                  transform: shouldShift
+                    ? `translateY(${GAP_HEIGHT}px)`
+                    : undefined,
+                  transition: 'transform 0.2s ease',
+                }}
+              >
+                {children(task, index)}
+              </div>
+              {showLineAfter && (
+                <Separator className="absolute -bottom-1 left-0 right-0 h-0.5 bg-muted-foreground/40 z-10" />
+              )}
+            </div>
+          );
+        })}
       </div>
     </ScrollArea>
   );
@@ -240,6 +346,7 @@ export function KanbanCards({ id, children }: KanbanCardsProps) {
 interface KanbanCardProps {
   id: string;
   column: string;
+  index: number;
   children: ReactNode;
   className?: string;
 }
@@ -247,151 +354,125 @@ interface KanbanCardProps {
 export function KanbanCard({
   id,
   column,
+  index,
   children,
   className,
 }: KanbanCardProps) {
   const [isDragging, setIsDragging] = useState(false);
-  const [isDragOver, setIsDragOver] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
-  const justDraggedRef = useRef(false);
-  const { onCardMove, data, setDraggedCardColumn, onCardDelete, onCardClick } =
-    useKanbanContext();
+  const cardRef = useRef<HTMLDivElement>(null);
+  const {
+    onCardMove,
+    data,
+    setDraggedCardColumn,
+    setDraggedCardId,
+    setDragOverColumn,
+    setDropTarget,
+    dropTarget,
+    draggedCardId,
+  } = useKanbanContext();
 
   const handleDragStart = useCallback(
     (e: React.DragEvent) => {
       setIsDragging(true);
-      justDraggedRef.current = false;
       setDraggedCardColumn(column);
+      setDraggedCardId(id);
       e.dataTransfer.setData('text/plain', id);
       e.dataTransfer.effectAllowed = 'move';
     },
-    [id, column, setDraggedCardColumn]
+    [id, column, setDraggedCardColumn, setDraggedCardId]
   );
 
   const handleDragEnd = useCallback(() => {
     setIsDragging(false);
     setDraggedCardColumn(null);
-    justDraggedRef.current = true;
-    setTimeout(() => {
-      justDraggedRef.current = false;
-    }, 100);
-  }, [setDraggedCardColumn]);
+    setDraggedCardId(null);
+    setDragOverColumn(null);
+    setDropTarget(null);
+  }, [
+    setDraggedCardColumn,
+    setDraggedCardId,
+    setDragOverColumn,
+    setDropTarget,
+  ]);
 
-  const handleDragOver = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-    setIsDragOver(true);
-  }, []);
+  const handleDragOver = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
 
-  const handleDragLeave = useCallback((e: React.DragEvent) => {
-    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
-      setIsDragOver(false);
-    }
-  }, []);
+      if (id === draggedCardId) return;
+
+      const rect = cardRef.current?.getBoundingClientRect();
+      if (!rect) return;
+
+      const insertIndex =
+        e.clientY < rect.top + rect.height / 2 ? index : index + 1;
+
+      if (dropTarget?.column !== column || dropTarget?.index !== insertIndex) {
+        setDropTarget({ column, index: insertIndex });
+      }
+    },
+    [id, column, index, draggedCardId, dropTarget, setDropTarget]
+  );
 
   const handleDrop = useCallback(
     (e: React.DragEvent) => {
       e.preventDefault();
       e.stopPropagation();
-      setIsDragOver(false);
 
-      const draggedCardId = e.dataTransfer.getData('text/plain');
-      if (!draggedCardId || draggedCardId === id) return;
-
-      const draggedTask = data.find(t => t.id === draggedCardId);
-      if (!draggedTask) return;
-
-      const columnTasks = data.filter(task => task.status === column);
-      const targetIndex = columnTasks.findIndex(task => task.id === id);
-
-      onCardMove?.(draggedCardId, draggedTask.status, column, targetIndex);
-    },
-    [id, column, onCardMove, data]
-  );
-
-  const handleDelete = useCallback(
-    (e: React.MouseEvent) => {
-      e.stopPropagation();
-      e.preventDefault();
-      onCardDelete?.(id);
-    },
-    [id, onCardDelete]
-  );
-
-  const handleClick = useCallback(
-    (e: React.MouseEvent) => {
-      if (
-        isDragging ||
-        justDraggedRef.current ||
-        (e.target as HTMLElement).closest('button')
-      ) {
+      const droppedCardId = e.dataTransfer.getData('text/plain');
+      if (!droppedCardId || droppedCardId === id) {
+        setDropTarget(null);
         return;
       }
-      e.stopPropagation();
-      onCardClick?.(id);
+
+      const draggedTask = data.find(t => t.id === droppedCardId);
+      if (!draggedTask) {
+        setDropTarget(null);
+        return;
+      }
+
+      let targetIndex = dropTarget?.index ?? index;
+
+      if (draggedTask.status === column) {
+        targetIndex = adjustIndexForSameColumnMove(
+          data,
+          droppedCardId,
+          column,
+          targetIndex
+        );
+      }
+
+      onCardMove?.(droppedCardId, draggedTask.status, column, targetIndex);
+      setDropTarget(null);
     },
-    [id, onCardClick, isDragging]
+    [id, column, index, onCardMove, data, dropTarget, setDropTarget]
   );
 
   return (
     <div
-      draggable
+      ref={cardRef}
+      draggable={!!onCardMove}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
       onDragOver={handleDragOver}
-      onDragLeave={handleDragLeave}
       onDrop={handleDrop}
-      onClick={handleClick}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
       className={cn(
-        'cursor-grab opacity-100 transition-all relative group',
+        'opacity-100 relative group',
+        onCardMove && 'cursor-grab',
         isDragging && 'opacity-50 cursor-grabbing',
-        !isDragging && onCardClick && 'cursor-pointer',
-        isDragOver &&
-          'bg-accent border-2 border-accent-foreground border-dashed',
         className
       )}
     >
-      {onCardDelete && isHovered && !isDragging && (
-        <button
-          onClick={handleDelete}
-          className="absolute top-1.5 right-1.5 z-10 h-5 w-5 rounded-sm bg-muted/80 hover:bg-destructive text-muted-foreground hover:text-destructive-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all cursor-pointer"
-          aria-label="Delete card"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="h-3 w-3"
-          >
-            <path d="M3 6h18" />
-            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-          </svg>
-        </button>
-      )}
       {children}
     </div>
   );
 }
 
-interface KanbanHeaderProps {
-  children: ReactNode;
-}
-
-export function KanbanHeader({ children }: KanbanHeaderProps) {
+export function KanbanHeader({ children }: { children: ReactNode }) {
   return <>{children}</>;
 }
 
-interface KanbanCardContentProps {
-  children: ReactNode;
-}
-
-export function KanbanCardContent({ children }: KanbanCardContentProps) {
+export function KanbanCardContent({ children }: { children: ReactNode }) {
   return <>{children}</>;
 }

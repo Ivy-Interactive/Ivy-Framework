@@ -257,7 +257,7 @@ export const generateYAxis = (
       ),
     },
     splitNumber: largeSpread ? 3 : 5,
-    min: largeSpread ? safeTransform(minValue) : 0,
+    min: largeSpread ? safeTransform(minValue) : Math.min(minValue, 0),
     ...(largeSpread && { max: safeTransform(maxValue) }),
     position: yAxis?.[0]?.orientation === 'Right' ? 'right' : 'left',
     axisLine: {

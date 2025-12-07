@@ -1,7 +1,7 @@
 import React from 'react';
 import { TableCell } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
-import { Align, getAlign, getWidth } from '@/lib/styles';
+import { Align, getWidth } from '@/lib/styles';
 import {
   Tooltip,
   TooltipContent,
@@ -20,6 +20,27 @@ interface TableCellWidgetProps {
   children?: React.ReactNode;
 }
 
+// Convert Align enum to text-align CSS property for table cells
+const getTextAlign = (align: Align): React.CSSProperties => {
+  // Extract horizontal alignment from the Align enum
+  switch (align) {
+    case 'TopLeft':
+    case 'Left':
+    case 'BottomLeft':
+      return { textAlign: 'left' };
+    case 'TopRight':
+    case 'Right':
+    case 'BottomRight':
+      return { textAlign: 'right' };
+    case 'TopCenter':
+    case 'Center':
+    case 'BottomCenter':
+      return { textAlign: 'center' };
+    default:
+      return { textAlign: 'left' };
+  }
+};
+
 export const TableCellWidget: React.FC<TableCellWidgetProps> = ({
   children,
   isHeader,
@@ -28,26 +49,26 @@ export const TableCellWidget: React.FC<TableCellWidgetProps> = ({
   width,
   multiLine,
 }) => {
-  const alignStyles = {
-    ...getAlign('Horizontal', align),
-    ...getAlign('Vertical', align),
-  };
-
   const cellStyles = {
     ...getWidth(width),
   };
+
+  const textAlignStyle = getTextAlign(align);
 
   const content = (
     <div
       className={cn(
         'align-middle force-text-inherit',
-        multiLine && 'whitespace-normal break-words',
+        multiLine && 'whitespace-normal wrap-break-word',
         !multiLine && 'min-w-0'
       )}
-      style={alignStyles}
+      style={textAlignStyle}
     >
       {!multiLine ? (
-        <span className="block overflow-hidden text-ellipsis whitespace-nowrap w-full">
+        <span
+          className="inline-block overflow-hidden text-ellipsis whitespace-nowrap max-w-full"
+          style={textAlignStyle}
+        >
           {children}
         </span>
       ) : (
@@ -56,23 +77,32 @@ export const TableCellWidget: React.FC<TableCellWidgetProps> = ({
     </div>
   );
 
+  // Apply max-w-0 overflow-hidden for truncation when:
+  // 1. We have an explicit width (for column width control), OR
+  // 2. It's a header cell (headers should truncate)
+  // Don't apply to data cells without widths - they need to size naturally
+  const shouldTruncate = width || isHeader;
+
+  // Only show tooltip for string children to avoid "[object Object]" issues
+  const shouldShowTooltip = !multiLine && typeof children === 'string';
+
   return (
     <TableCell
       className={cn(
         isHeader && 'header-cell bg-muted font-semibold',
         isFooter && 'footer-cell bg-muted font-semibold',
         'border-border force-text-inherit',
-        // Ensure proper width constraints for truncation
-        'max-w-0 overflow-hidden'
+        // Apply max-w-0 overflow-hidden for truncation
+        shouldTruncate && 'max-w-0 overflow-hidden'
       )}
       style={cellStyles}
     >
-      {!multiLine && typeof children === 'string' ? (
+      {shouldShowTooltip ? (
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>{content}</TooltipTrigger>
-            <TooltipContent className="bg-popover text-popover-foreground shadow-md max-w-sm">
-              <div className="whitespace-pre-wrap break-words">{children}</div>
+            <TooltipContent className="bg-popover text-popover-foreground shadow-md">
+              <div className="whitespace-pre-wrap break-all">{children}</div>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>

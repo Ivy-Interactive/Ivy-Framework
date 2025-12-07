@@ -1,11 +1,11 @@
-﻿using System.Reflection;
+using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using Ivy.Core.Helpers;
+using Ivy.Widgets.Inputs;
 
 namespace Ivy.Core;
 
-/// <summary>Abstract base class for all widgets providing core functionality for serialization, event handling, attached properties, and child management.</summary>
 public abstract record AbstractWidget : IWidget
 {
     private string? _id;
@@ -16,9 +16,6 @@ public abstract record AbstractWidget : IWidget
         Children = children;
     }
 
-    /// <param name="parentType">Type of parent widget defining attached property.</param>
-    /// <param name="name">Name of attached property.</param>
-    /// <param name="value">Value to set for attached property.</param>
     public void SetAttachedValue(Type parentType, string name, object? value)
     {
         _attachedProps[(parentType, name)] = value;
@@ -29,8 +26,6 @@ public abstract record AbstractWidget : IWidget
         return _attachedProps.GetValueOrDefault((t, name));
     }
 
-    /// <summary>Unique identifier for widget instance required for serialization. Must be set before accessing.</summary>
-    /// <exception cref="InvalidOperationException">Thrown when trying to access uninitialized Id.</exception>
     public string? Id
     {
         get
@@ -48,8 +43,6 @@ public abstract record AbstractWidget : IWidget
 
     public object[] Children { get; set; }
 
-    /// <returns>JSON node representing serialized widget.</returns>
-    /// <exception cref="InvalidOperationException">Thrown when children contain non-widget objects.</exception>
     public JsonNode Serialize()
     {
         if (Children.Any(e => e is not IWidget))
@@ -106,8 +99,6 @@ public abstract record AbstractWidget : IWidget
         return json;
     }
 
-    /// <returns>Property value, or array of values for attached properties.</returns>
-    /// <exception cref="InvalidOperationException">Thrown when attached properties are not arrays of nullable types.</exception>
     private object? GetPropertyValue(PropertyInfo property)
     {
         var attribute = property.GetCustomAttribute<PropAttribute>()!;
@@ -136,7 +127,6 @@ public abstract record AbstractWidget : IWidget
         return value;
     }
 
-    /// <returns>true if event was successfully invoked; otherwise, false.</returns>
     public async Task<bool> InvokeEventAsync(string eventName, JsonArray args)
     {
         var type = GetType();
@@ -235,7 +225,6 @@ public abstract record AbstractWidget : IWidget
         return true;
     }
 
-    /// <returns>New widget instance with additional children.</returns>
     public static AbstractWidget operator |(AbstractWidget widget, object child)
     {
         if (child is object[] array)

@@ -3,7 +3,7 @@ using Ivy.Widgets.Inputs;
 
 namespace Ivy.Samples.Shared.Apps.Tests;
 
-[App(icon: Icons.Image, path: ["Tests"], isVisible: true, searchHints: ["sidebar", "layout", "scrolling", "forms", "generator", "testing"])]
+[App(icon: Icons.Image, path: ["Tests"], isVisible: false, searchHints: ["sidebar", "layout", "scrolling", "forms", "generator", "testing"])]
 public class LongSidebarTestApp : SampleBase
 {
     protected override object? BuildSample()
