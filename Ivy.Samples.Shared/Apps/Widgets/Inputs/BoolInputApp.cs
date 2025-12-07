@@ -89,7 +89,7 @@ public class BoolInputApp : SampleBase
                            .Description("Description")
                            .Invalid("Invalid")
                            .TestId("switch-true-state-width-description-invalid")
-                       | new Box("N/A")
+                       | new Box("N/A").Styled()
                        | null!
                        | trueState
                            .ToSwitchInput()
@@ -109,7 +109,7 @@ public class BoolInputApp : SampleBase
                            .Label("Label")
                            .Invalid("Invalid")
                            .TestId("switch-true-state-width-invalid")
-                       | new Box("N/A")
+                       | new Box("N/A").Styled()
                        | Text.InlineCode("BoolInputs.Toggle")
                        | trueState
                            .ToToggleInput(Icons.Magnet)
@@ -135,7 +135,7 @@ public class BoolInputApp : SampleBase
                            .Description("Description")
                            .Invalid("Invalid")
                            .TestId("toggle-true-state-width-description-invalid")
-                       | new Box("N/A")
+                       | new Box("N/A").Styled()
                        | null!
                        | trueState
                            .ToToggleInput(Icons.Baby)
@@ -154,7 +154,7 @@ public class BoolInputApp : SampleBase
                            .Label("Label")
                            .Invalid("Invalid")
                            .TestId("toggle-true-state-width-invalid")
-                       | new Box("N/A")
+                       | new Box("N/A").Styled()
 
             ;
 

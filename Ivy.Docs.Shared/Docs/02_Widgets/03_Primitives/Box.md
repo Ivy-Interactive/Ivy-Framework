@@ -25,13 +25,13 @@ public class BasicBoxExample : ViewBase
 {
     public override object? Build()
     {
-        return new Box("Simple content");
+        return new Box("Simple content").Styled();
     }
 }
 ```
 
 <Callout Type="tip">
-Box widgets come with sensible defaults: Primary color, 2-unit borders with rounded corners, 2-unit padding, centered content, and no margin.
+By default, Box is created without styling (no color, border, or padding). Use `.Styled()` to apply the classic styled appearance with Primary color, 2-unit borders, rounded corners, 2-unit padding, and centered content.
 </Callout>
 
 ### Border Styling
@@ -44,10 +44,10 @@ public class BorderStyleExamplesView : ViewBase
     public override object? Build()
     {
         return Layout.Vertical().Gap(4)
-            | new Box("Solid Border").BorderStyle(BorderStyle.Solid).Padding(8)
-            | new Box("Dashed Border").BorderStyle(BorderStyle.Dashed).Padding(8)
-            | new Box("Dotted Border").BorderStyle(BorderStyle.Dotted).Padding(8)
-            | new Box("No Border").BorderStyle(BorderStyle.None).Padding(8);
+            | new Box("Solid Border").Styled().BorderStyle(BorderStyle.Solid).Padding(8)
+            | new Box("Dashed Border").Styled().BorderStyle(BorderStyle.Dashed).Padding(8)
+            | new Box("Dotted Border").Styled().BorderStyle(BorderStyle.Dotted).Padding(8)
+            | new Box("No Border").Styled().BorderStyle(BorderStyle.None).Padding(8);
     }
 }
 ```
@@ -62,15 +62,15 @@ public class BorderThicknessExamplesView : ViewBase
     public override object? Build()
     {
         return Layout.Horizontal().Gap(4)
-            | new Box("Thin Border")
+            | new Box("Thin Border").Styled()
                 .BorderThickness(1)
                 .Padding(8)
                 .Width(Size.Fraction(1/3f))
-            | new Box("Medium Border")
+            | new Box("Medium Border").Styled()
                 .BorderThickness(2)
                 .Padding(8)
                 .Width(Size.Fraction(1/3f))
-            | new Box("Thick Border")
+            | new Box("Thick Border").Styled()
                 .BorderThickness(4)
                 .Padding(8)
                 .Width(Size.Fraction(1/3f));
@@ -88,15 +88,15 @@ public class BorderRadiusExamplesView : ViewBase
     public override object? Build()
     {
         return Layout.Horizontal().Gap(4)
-            | new Box("No Radius")
+            | new Box("No Radius").Styled()
                 .BorderRadius(BorderRadius.None)
                 .Padding(8)
                 .Width(Size.Fraction(1/3f))
-            | new Box("Rounded")
+            | new Box("Rounded").Styled()
                 .BorderRadius(BorderRadius.Rounded)
                 .Padding(8)
                 .Width(Size.Fraction(1/3f))
-            | new Box("Full Radius")
+            | new Box("Full Radius").Styled()
                 .BorderRadius(BorderRadius.Full)
                 .Padding(8)
                 .Width(Size.Fraction(1/3f));
@@ -114,10 +114,10 @@ public class SpacingExamplesView : ViewBase
     public override object? Build()
     {
         return Layout.Vertical().Gap(4)
-            | new Box("No Padding").Padding(0)
-            | new Box("Small Padding").Padding(4)
-            | new Box("Large Padding").Padding(10)
-            | new Box("With Margin").Margin(8).Padding(8);
+            | new Box("No Padding").Styled().Padding(0)
+            | new Box("Small Padding").Styled().Padding(4)
+            | new Box("Large Padding").Styled().Padding(10)
+            | new Box("With Margin").Styled().Padding(8).Margin(8);
     }
 }
 ```
@@ -133,16 +133,17 @@ public class AdvancedSpacingView : ViewBase
     {
         return Layout.Vertical().Gap(8)
             | Layout.Horizontal().Gap(4)
-                | new Box("No Padding")
+                | new Box("No Padding").Styled()
+                    .Padding(0)
                     .Width(Size.Fraction(1/2f))
-                | new Box("Uniform Padding (8)")
+                | new Box("Uniform Padding (8)").Styled()
                     .Padding(new Thickness(8))
                     .Width(Size.Fraction(1/2f))
             | Layout.Horizontal().Gap(4)
-                | new Box("Horizontal/Vertical (16,8)")
+                | new Box("Horizontal/Vertical (16,8)").Styled()
                     .Padding(new Thickness(16, 8))
                     .Width(Size.Fraction(1/2f))
-                | new Box("Asymmetric (24,12,6,18)")
+                | new Box("Asymmetric (24,12,6,18)").Styled()
                     .Padding(new Thickness(24, 12, 6, 18))
                     .Width(Size.Fraction(1/2f));
     }
@@ -159,32 +160,32 @@ public class ContentAlignmentView : ViewBase
     public override object? Build()
     {
         return Layout.Vertical().Gap(8)
-            | new Box("Top Left Alignment")
+            | new Box("Top Left Alignment").Styled()
                 .ContentAlign(Align.TopLeft)
                 .Height(Size.Units(30))
                 .Width(Size.Full())
                 .Padding(8)
                 .Content(
-                    new Box("Small").Color(Colors.White),
-                    new Box("Medium").Width(Size.Units(20)).Height(Size.Units(8)).Color(Colors.White)
+                    new Box("Small").Styled().Color(Colors.White),
+                    new Box("Medium").Styled().Color(Colors.White).Width(Size.Units(20)).Height(Size.Units(8))
                 )
-            | new Box("Center Alignment")
+            | new Box("Center Alignment").Styled()
                 .ContentAlign(Align.Center)
                 .Height(Size.Units(30))
                 .Width(Size.Full())
                 .Padding(8)
                 .Content(
-                    new Box("Small").Color(Colors.White),
-                    new Box("Medium").Width(Size.Units(20)).Height(Size.Units(8)).Color(Colors.White)
+                    new Box("Small").Styled().Color(Colors.White),
+                    new Box("Medium").Styled().Color(Colors.White).Width(Size.Units(20)).Height(Size.Units(8))
                 )
-            | new Box("Bottom Right Alignment")
+            | new Box("Bottom Right Alignment").Styled()
                 .ContentAlign(Align.BottomRight)
                 .Height(Size.Units(30))
                 .Width(Size.Full())
                 .Padding(8)
                 .Content(
-                    new Box("Small").Color(Colors.White),
-                    new Box("Medium").Width(Size.Units(20)).Height(Size.Units(8)).Color(Colors.White)
+                    new Box("Small").Styled().Color(Colors.White),
+                    new Box("Medium").Styled().Color(Colors.White).Width(Size.Units(20)).Height(Size.Units(8))
                 );
     }
 }
@@ -200,16 +201,16 @@ public class SizingExamplesView : ViewBase
     public override object? Build()
     {
         return Layout.Vertical().Gap(4)
-            | new Box("Auto Width")
+            | new Box("Auto Width").Styled()
                 .Width(Size.Auto())
                 .Padding(8)
-            | new Box("Fixed Width")
+            | new Box("Fixed Width").Styled()
                 .Width(Size.Units(45))
                 .Padding(8)
-            | new Box("Full Width")
+            | new Box("Full Width").Styled()
                 .Width(Size.Full())
                 .Padding(8)
-            | new Box("Fixed Size")
+            | new Box("Fixed Size").Styled()
                 .Width(Size.Units(60))
                 .Height(Size.Units(10))
                 .Padding(8);
@@ -227,7 +228,7 @@ public class ColorExamplesView : ViewBase
     public override object? Build()
     {
         return Layout.Vertical().Gap(4)
-            | new Box("Primary Color").Color(Colors.Primary).Padding(8);
+            | new Box("Primary Color").Styled().Color(Colors.Primary).Padding(8);
     }
 }
 ```

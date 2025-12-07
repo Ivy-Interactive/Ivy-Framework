@@ -20,7 +20,7 @@ public class BoxApp : SampleBase
             )
         );
 
-        var box = new Box().Height(10).Width(Size.Fit()).Padding(2);
+        var box = new Box().Styled().Height(10).Width(Size.Fit()).Padding(2);
 
         return Layout.Vertical()
                | Text.H1("Box Widget")
@@ -28,7 +28,7 @@ public class BoxApp : SampleBase
                | colorView
 
                | Text.H2("Width and Height")
-               | new DemoView(_ => new Box()
+               | new DemoView(_ => new Box().Styled()
                    .Height(20)
                    .Width(20))
 

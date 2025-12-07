@@ -10,19 +10,19 @@ public record Box : WidgetBase<Box>
     {
     }
 
-    [Prop] public Colors? Color { get; set; } = Colors.Primary;
+    [Prop] public Colors? Color { get; set; }
 
-    [Prop] public Thickness BorderThickness { get; set; } = new(2);
+    [Prop] public Thickness BorderThickness { get; set; } = new(0);
 
-    [Prop] public BorderRadius BorderRadius { get; set; } = BorderRadius.Rounded;
+    [Prop] public BorderRadius BorderRadius { get; set; } = BorderRadius.None;
 
-    [Prop] public BorderStyle BorderStyle { get; set; } = BorderStyle.Solid;
+    [Prop] public BorderStyle BorderStyle { get; set; } = BorderStyle.None;
 
-    [Prop] public Thickness Padding { get; set; } = new(2);
+    [Prop] public Thickness Padding { get; set; } = new(0);
 
     [Prop] public Thickness Margin { get; set; } = new(0);
 
-    [Prop] public Align? ContentAlign { get; set; } = Align.Center;
+    [Prop] public Align? ContentAlign { get; set; }
 
     [Prop] public float? Opacity { get; set; }
 }
@@ -53,6 +53,17 @@ public static class BoxExtensions
 
     public static Box ContentAlign(this Box box, Align? align) => box with { ContentAlign = align };
 
+
+    public static Box Styled(this Box box) => box with
+    {
+        Color = Colors.Primary,
+        BorderThickness = new(2),
+        BorderRadius = Shared.BorderRadius.Rounded,
+        BorderStyle = Shared.BorderStyle.Solid,
+        Padding = new(2),
+        ContentAlign = Align.Center
+    };
+
     public static Box WithBox(this object anything)
     {
         return new Box(anything);
@@ -62,11 +73,6 @@ public static class BoxExtensions
     {
         return new Box(anything)
         {
-            BorderRadius = Shared.BorderRadius.None,
-            BorderStyle = Shared.BorderStyle.None,
-            BorderThickness = new(0),
-            Padding = new(0),
-            Color = null,
             ContentAlign = Align.Left
         }.Width(Size.Full()).Height(Size.Full());
     }
