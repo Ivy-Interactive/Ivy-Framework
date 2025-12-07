@@ -88,6 +88,62 @@ public class LoadingChatDemo : ViewBase
 }
 ```
 
+## Interactive Chat with Streaming Output
+
+A chat that demonstrates real-time streaming responses, where the assistant's message appears word by word as it's being generated.
+
+This example shows how to implement streaming chat responses. The user's message is added immediately, followed by a loading state. Then, the assistant's response streams in word by word from a simple array, updating the UI in real-time. This pattern is useful for AI assistants that generate responses incrementally, providing immediate feedback to users.
+
+```csharp demo-tabs
+public class StreamingChatDemo : ViewBase
+{   
+    public override object? Build()
+    {
+        var messages = UseState(ImmutableArray.Create<ChatMessage>(
+            new ChatMessage(ChatSender.Assistant, "I'm a streaming assistant! Ask me anything and I'll respond with streaming text.")
+        ));
+
+        void OnSendMessage(Event<Chat, string> @event)
+        {
+            // Add user message immediately
+            var messagesWithUser = messages.Value.Add(new ChatMessage(ChatSender.User, @event.Value));
+            messages.Set(messagesWithUser);
+            
+            // Add loading state immediately
+            var assistantMessageIndex = messagesWithUser.Length;
+            var messagesWithLoading = messagesWithUser.Add(new ChatMessage(ChatSender.Assistant, new ChatStatus("Thinking...")));
+            messages.Set(messagesWithLoading);
+            
+            // Start streaming after a delay
+            _ = Task.Run(async () =>
+            {
+                await Task.Delay(2000);
+                
+                var words = new[] { "I'm", "processing", "your", "message:", $"'{@event.Value}'.", 
+                    "This", "is", "a", "streaming", "response", "that", "appears", "word", "by", "word." };
+                
+                var collectedWords = new List<string>();
+                foreach (var word in words)
+                {
+                    collectedWords.Add(word);
+                    var text = string.Join(" ", collectedWords);
+                    
+                    var all = messages.Value.ToList();
+                    all[assistantMessageIndex] = new ChatMessage(ChatSender.Assistant, text);
+                    messages.Set(all.ToImmutableArray());
+                    
+                    await Task.Delay(300);
+                }
+            });
+        }
+
+        return new Chat(messages.Value.ToArray(), OnSendMessage)
+            .Width(Size.Full())
+            .Height(Size.Auto());
+    }
+}
+```
+
 ## Interactive Chat with Rich Content
 
 A chat that responds with interactive elements like buttons and cards.
