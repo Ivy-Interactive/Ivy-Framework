@@ -25,7 +25,7 @@ public class BasicBoxExample : ViewBase
 {
     public override object? Build()
     {
-        return new Box("Simple content").Styled();
+        return new Box("Simple content").Styled().Width(Size.Fit());
     }
 }
 ```
