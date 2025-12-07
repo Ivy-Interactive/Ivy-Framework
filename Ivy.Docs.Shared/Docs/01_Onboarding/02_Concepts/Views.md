@@ -87,12 +87,8 @@ public class CounterView : ViewBase
 
 ### Rules of Hooks
 
-To ensure correct state management and rendering, Ivy hooks (methods starting with `Use...`) must follow these rules:
-
-1. **Call hooks at the top level** of your `Build` method. Don't call them inside loops, conditions, or nested functions.
-2. **Call hooks unconditionally**. Hooks must be called in the same order each time a component renders.
-
-The analyzer package automatically enforces these rules at compile time.
+To ensure correct state management, Ivy hooks must follow specific rules.
+Read the full guide on **[Rules of Hooks](RulesOfHooks.md)** to learn more and troubleshoot common errors.
 
 ### State Initialization
 
