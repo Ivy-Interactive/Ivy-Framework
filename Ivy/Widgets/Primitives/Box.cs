@@ -54,15 +54,6 @@ public static class BoxExtensions
     public static Box ContentAlign(this Box box, Align? align) => box with { ContentAlign = align };
 
 
-    public static Box Styled(this Box box) => box with
-    {
-        Color = Colors.Primary,
-        BorderThickness = new(2),
-        BorderRadius = Shared.BorderRadius.Rounded,
-        BorderStyle = Shared.BorderStyle.Solid,
-        Padding = new(2),
-        ContentAlign = Align.Center
-    };
 
     public static Box WithBox(this object anything)
     {

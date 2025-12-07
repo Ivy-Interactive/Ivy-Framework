@@ -7,13 +7,13 @@ public class StackLayoutApp : ViewBase
 {
     public override object? Build()
     {
-        var squareBox = new Box().Styled().Width(5).Height(5);
-        var tallBox = new Box().Styled().Width(5).Height(7);
-        var tallestBox = new Box().Styled().Width(5).Height(10);
-        var wideBox = new Box().Styled().Width(7).Height(5);
-        var widestBox = new Box().Styled().Width(10).Height(5);
+        var squareBox = new Box().Color(Colors.Primary).BorderRadius(BorderRadius.Rounded).Width(5).Height(5);
+        var tallBox = new Box().Color(Colors.Primary).BorderRadius(BorderRadius.Rounded).Width(5).Height(7);
+        var tallestBox = new Box().Color(Colors.Primary).BorderRadius(BorderRadius.Rounded).Width(5).Height(10);
+        var wideBox = new Box().Color(Colors.Primary).BorderRadius(BorderRadius.Rounded).Width(7).Height(5);
+        var widestBox = new Box().Color(Colors.Primary).BorderRadius(BorderRadius.Rounded).Width(10).Height(5);
 
-        var container = new Box().Styled().Width(32).Height(32).Color(Colors.Pink).Padding(0).ContentAlign(null);
+        var container = new Box().Width(32).Height(32).Color(Colors.Pink).Padding(0).ContentAlign(null);
 
         object AlignHorizontalTest(Align align) =>
             Layout.Vertical(
