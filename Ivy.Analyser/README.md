@@ -205,6 +205,14 @@ The analyzer detects improper usage of these hook functions:
 - `UseTrigger`
 - `UseService`
 - `UseArgs`
+- `UseAlert`
+- `UseForm`
+- `UseUpload`
+- `UseDownload`
+- `UseWebhook`
+- `UseBlades`
+- `UseDataTable`
+- `UseNavigation`
 
 ## Diagnostic Details
 

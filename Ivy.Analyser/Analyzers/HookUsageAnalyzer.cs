@@ -137,28 +137,30 @@ namespace Ivy.Analyser.Analyzers
                 return;
             }
 
-            if (IsInConditionalStatement(invocation))
+            // Cache results to avoid redundant syntax tree traversals
+            var isInConditional = IsInConditionalStatement(invocation);
+            var isInLoop = IsInLoop(invocation);
+            var isInSwitch = IsInSwitchStatement(invocation);
+
+            if (isInConditional)
             {
                 var diagnostic = Diagnostic.Create(RuleConditional, invocation.GetLocation(), methodName);
                 context.ReportDiagnostic(diagnostic);
             }
 
-            if (IsInLoop(invocation))
+            if (isInLoop)
             {
                 var diagnostic = Diagnostic.Create(RuleLoop, invocation.GetLocation(), methodName);
                 context.ReportDiagnostic(diagnostic);
             }
 
-            if (IsInSwitchStatement(invocation))
+            if (isInSwitch)
             {
                 var diagnostic = Diagnostic.Create(RuleSwitch, invocation.GetLocation(), methodName);
                 context.ReportDiagnostic(diagnostic);
             }
 
-            if (!IsInConditionalStatement(invocation) &&
-                !IsInLoop(invocation) &&
-                !IsInSwitchStatement(invocation) &&
-                IsNotAtTopOfMethod(invocation))
+            if (!isInConditional && !isInLoop && !isInSwitch && IsNotAtTopOfMethod(invocation))
             {
                 var diagnostic = Diagnostic.Create(RuleNotAtTop, invocation.GetLocation(), methodName);
                 context.ReportDiagnostic(diagnostic);
@@ -345,7 +347,8 @@ namespace Ivy.Analyser.Analyzers
 
                 if (statement is ReturnStatementSyntax)
                 {
-                    continue;
+                    // If a return statement appears before the hook, the hook is unreachable
+                    return false;
                 }
 
                 if (!IsHookStatement(statement))
@@ -357,51 +360,31 @@ namespace Ivy.Analyser.Analyzers
             return false;
         }
 
-        private static StatementSyntax? FindContainingStatement(SyntaxNode node, SyntaxList<StatementSyntax> statements)
-        {
-            var current = node;
-            while (current != null)
-            {
-                if (current is StatementSyntax statement)
-                {
-                    foreach (var stmt in statements)
-                    {
-                        if (stmt.Span.Contains(statement.Span) || statement.Span.Contains(stmt.Span))
-                        {
-                            return stmt;
-                        }
-                    }
-                }
-                current = current.Parent;
-            }
-            return null;
-        }
+
 
         private static bool IsHookStatement(StatementSyntax statement)
         {
             if (statement is LocalDeclarationStatementSyntax localDecl)
             {
-                foreach (var variable in localDecl.Declaration.Variables)
-                {
-                    if (variable.Initializer?.Value is InvocationExpressionSyntax invocation)
+                // Use LINQ for cleaner filtering
+                if (localDecl.Declaration.Variables
+                    .Where(v => v.Initializer?.Value is InvocationExpressionSyntax)
+                    .Any(v =>
                     {
+                        var invocation = (InvocationExpressionSyntax)v.Initializer!.Value;
                         var methodName = GetMethodName(invocation);
-                        if (methodName != null && HookNames.Contains(methodName))
-                        {
-                            return true;
-                        }
-                    }
+                        return methodName != null && HookNames.Contains(methodName);
+                    }))
+                {
+                    return true;
                 }
             }
-            else if (statement is ExpressionStatementSyntax exprStmt)
+            else if (statement is ExpressionStatementSyntax { Expression: InvocationExpressionSyntax invocation })
             {
-                if (exprStmt.Expression is InvocationExpressionSyntax invocation)
+                var methodName = GetMethodName(invocation);
+                if (methodName != null && HookNames.Contains(methodName))
                 {
-                    var methodName = GetMethodName(invocation);
-                    if (methodName != null && HookNames.Contains(methodName))
-                    {
-                        return true;
-                    }
+                    return true;
                 }
             }
 
