@@ -184,29 +184,6 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
         )}
       </div>
 
-      {/* Toggle Button - Only show for main app sidebar */}
-      {showToggleButton && mainAppSidebar && (
-        <button
-          onClick={handleManualToggle}
-          className="absolute top-0 z-50 p-2 rounded-md bg-background hover:bg-muted hover:text-accent-foreground cursor-pointer transition-all duration-200"
-          style={{
-            left: isSidebarOpen ? `calc(${sidebarWidth} + 4px)` : '4px',
-            marginTop: '3px',
-            transition: 'left 300ms ease-in-out',
-            transform: 'translateX(0)', // Ensure button moves with its parent sidebar
-          }}
-          aria-label={isSidebarOpen ? 'Close sidebar' : 'Open sidebar'}
-        >
-          <div className="transition-transform duration-300 ease-in-out">
-            {isSidebarOpen ? (
-              <PanelLeftClose className="h-4 w-4" />
-            ) : (
-              <PanelLeftOpen className="h-4 w-4" />
-            )}
-          </div>
-        </button>
-      )}
-
       {/* Main Content - Always takes full remaining width */}
       <div
         className={cn(
@@ -214,6 +191,21 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
           !mainAppSidebar ? `p-${mainContentPadding}` : ''
         )}
       >
+        {/* Toggle Button - Only show for main app sidebar */}
+        {showToggleButton && mainAppSidebar && (
+          <button
+            onClick={handleManualToggle}
+            className="absolute top-0 left-1 z-50 p-2 rounded-md bg-background hover:bg-muted hover:text-accent-foreground cursor-pointer"
+            style={{ marginTop: '3px' }}
+            aria-label={isSidebarOpen ? 'Close sidebar' : 'Open sidebar'}
+          >
+            {isSidebarOpen ? (
+              <PanelLeftClose className="h-4 w-4" />
+            ) : (
+              <PanelLeftOpen className="h-4 w-4" />
+            )}
+          </button>
+        )}
         {slots?.MainContent}
       </div>
     </div>
