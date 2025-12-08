@@ -59,61 +59,141 @@ public class ThemeColors
     public string? Popover { get; set; }
     public string? PopoverForeground { get; set; }
 
+    // Neutral colors
+    public string? Black { get; set; }
+    public string? White { get; set; }
+    public string? Slate { get; set; }
+    public string? Gray { get; set; }
+    public string? Zinc { get; set; }
+    public string? Neutral { get; set; }
+    public string? Stone { get; set; }
+
+    // Chromatic colors
+    public string? Red { get; set; }
+    public string? Orange { get; set; }
+    public string? Amber { get; set; }
+    public string? Yellow { get; set; }
+    public string? Lime { get; set; }
+    public string? Green { get; set; }
+    public string? Emerald { get; set; }
+    public string? Teal { get; set; }
+    public string? Cyan { get; set; }
+    public string? Sky { get; set; }
+    public string? Blue { get; set; }
+    public string? Indigo { get; set; }
+    public string? Violet { get; set; }
+    public string? Purple { get; set; }
+    public string? Fuchsia { get; set; }
+    public string? Pink { get; set; }
+    public string? Rose { get; set; }
+
     public static ThemeColors DefaultLight => new()
     {
-        Primary = LightThemeTokens.Color.Primary,
-        PrimaryForeground = LightThemeTokens.Color.PrimaryForeground,
-        Secondary = LightThemeTokens.Color.Secondary,
-        SecondaryForeground = LightThemeTokens.Color.SecondaryForeground,
-        Background = LightThemeTokens.Color.Background,
-        Foreground = LightThemeTokens.Color.Foreground,
-        Destructive = LightThemeTokens.Color.Destructive,
-        DestructiveForeground = LightThemeTokens.Color.DestructiveForeground,
-        Success = LightThemeTokens.Color.Success,
-        SuccessForeground = LightThemeTokens.Color.SuccessForeground,
-        Warning = LightThemeTokens.Color.Warning,
-        WarningForeground = LightThemeTokens.Color.WarningForeground,
-        Info = LightThemeTokens.Color.Info,
-        InfoForeground = LightThemeTokens.Color.InfoForeground,
-        Border = LightThemeTokens.Color.Border,
-        Input = LightThemeTokens.Color.Input,
-        Ring = LightThemeTokens.Color.Ring,
-        Muted = LightThemeTokens.Color.Muted,
-        MutedForeground = LightThemeTokens.Color.MutedForeground,
-        Accent = LightThemeTokens.Color.Accent,
-        AccentForeground = LightThemeTokens.Color.AccentForeground,
-        Card = LightThemeTokens.Color.Card,
-        CardForeground = LightThemeTokens.Color.CardForeground,
-        Popover = LightThemeTokens.Color.Popover,
-        PopoverForeground = LightThemeTokens.Color.PopoverForeground
+        Primary = IvyFrameworkLightThemeTokens.Color.Primary,
+        PrimaryForeground = IvyFrameworkLightThemeTokens.Color.PrimaryForeground,
+        Secondary = IvyFrameworkLightThemeTokens.Color.Secondary,
+        SecondaryForeground = IvyFrameworkLightThemeTokens.Color.SecondaryForeground,
+        Background = IvyFrameworkLightThemeTokens.Color.Background,
+        Foreground = IvyFrameworkLightThemeTokens.Color.Foreground,
+        Destructive = IvyFrameworkLightThemeTokens.Color.Destructive,
+        DestructiveForeground = IvyFrameworkLightThemeTokens.Color.DestructiveForeground,
+        Success = IvyFrameworkLightThemeTokens.Color.Success,
+        SuccessForeground = IvyFrameworkLightThemeTokens.Color.SuccessForeground,
+        Warning = IvyFrameworkLightThemeTokens.Color.Warning,
+        WarningForeground = IvyFrameworkLightThemeTokens.Color.WarningForeground,
+        Info = IvyFrameworkLightThemeTokens.Color.Info,
+        InfoForeground = IvyFrameworkLightThemeTokens.Color.InfoForeground,
+        Border = IvyFrameworkLightThemeTokens.Color.Border,
+        Input = IvyFrameworkLightThemeTokens.Color.Input,
+        Ring = IvyFrameworkLightThemeTokens.Color.Ring,
+        Muted = IvyFrameworkLightThemeTokens.Color.Muted,
+        MutedForeground = IvyFrameworkLightThemeTokens.Color.MutedForeground,
+        Accent = IvyFrameworkLightThemeTokens.Color.Accent,
+        AccentForeground = IvyFrameworkLightThemeTokens.Color.AccentForeground,
+        Card = IvyFrameworkLightThemeTokens.Color.Card,
+        CardForeground = IvyFrameworkLightThemeTokens.Color.CardForeground,
+        Popover = IvyFrameworkLightThemeTokens.Color.Popover,
+        PopoverForeground = IvyFrameworkLightThemeTokens.Color.PopoverForeground,
+        // Neutral colors
+        Black = IvyFrameworkNeutralTokens.Color.Black,
+        White = IvyFrameworkNeutralTokens.Color.White,
+        Slate = IvyFrameworkNeutralTokens.Color.Slate,
+        Gray = IvyFrameworkNeutralTokens.Color.Gray,
+        Zinc = IvyFrameworkNeutralTokens.Color.Zinc,
+        Neutral = IvyFrameworkNeutralTokens.Color.Neutral,
+        Stone = IvyFrameworkNeutralTokens.Color.Stone,
+        // Chromatic colors
+        Red = IvyFrameworkChromaticTokens.Color.Red,
+        Orange = IvyFrameworkChromaticTokens.Color.Orange,
+        Amber = IvyFrameworkChromaticTokens.Color.Amber,
+        Yellow = IvyFrameworkChromaticTokens.Color.Yellow,
+        Lime = IvyFrameworkChromaticTokens.Color.Lime,
+        Green = IvyFrameworkChromaticTokens.Color.Green,
+        Emerald = IvyFrameworkChromaticTokens.Color.Emerald,
+        Teal = IvyFrameworkChromaticTokens.Color.Teal,
+        Cyan = IvyFrameworkChromaticTokens.Color.Cyan,
+        Sky = IvyFrameworkChromaticTokens.Color.Sky,
+        Blue = IvyFrameworkChromaticTokens.Color.Blue,
+        Indigo = IvyFrameworkChromaticTokens.Color.Indigo,
+        Violet = IvyFrameworkChromaticTokens.Color.Violet,
+        Purple = IvyFrameworkChromaticTokens.Color.Purple,
+        Fuchsia = IvyFrameworkChromaticTokens.Color.Fuchsia,
+        Pink = IvyFrameworkChromaticTokens.Color.Pink,
+        Rose = IvyFrameworkChromaticTokens.Color.Rose
     };
 
     public static ThemeColors DefaultDark => new()
     {
-        Primary = DarkThemeTokens.Color.Primary,
-        PrimaryForeground = DarkThemeTokens.Color.PrimaryForeground,
-        Secondary = DarkThemeTokens.Color.Secondary,
-        SecondaryForeground = DarkThemeTokens.Color.SecondaryForeground,
-        Background = DarkThemeTokens.Color.Background,
-        Foreground = DarkThemeTokens.Color.Foreground,
-        Destructive = DarkThemeTokens.Color.Destructive,
-        DestructiveForeground = DarkThemeTokens.Color.DestructiveForeground,
-        Success = DarkThemeTokens.Color.Success,
-        SuccessForeground = DarkThemeTokens.Color.SuccessForeground,
-        Warning = DarkThemeTokens.Color.Warning,
-        WarningForeground = DarkThemeTokens.Color.WarningForeground,
-        Info = DarkThemeTokens.Color.Info,
-        InfoForeground = DarkThemeTokens.Color.InfoForeground,
-        Border = DarkThemeTokens.Color.Border,
-        Input = DarkThemeTokens.Color.Input,
-        Ring = DarkThemeTokens.Color.Ring,
-        Muted = DarkThemeTokens.Color.Muted,
-        MutedForeground = DarkThemeTokens.Color.MutedForeground,
-        Accent = DarkThemeTokens.Color.Accent,
-        AccentForeground = DarkThemeTokens.Color.AccentForeground,
-        Card = DarkThemeTokens.Color.Card,
-        CardForeground = DarkThemeTokens.Color.CardForeground,
-        Popover = DarkThemeTokens.Color.Popover,
-        PopoverForeground = DarkThemeTokens.Color.PopoverForeground
+        Primary = IvyFrameworkDarkThemeTokens.Color.Primary,
+        PrimaryForeground = IvyFrameworkDarkThemeTokens.Color.PrimaryForeground,
+        Secondary = IvyFrameworkDarkThemeTokens.Color.Secondary,
+        SecondaryForeground = IvyFrameworkDarkThemeTokens.Color.SecondaryForeground,
+        Background = IvyFrameworkDarkThemeTokens.Color.Background,
+        Foreground = IvyFrameworkDarkThemeTokens.Color.Foreground,
+        Destructive = IvyFrameworkDarkThemeTokens.Color.Destructive,
+        DestructiveForeground = IvyFrameworkDarkThemeTokens.Color.DestructiveForeground,
+        Success = IvyFrameworkDarkThemeTokens.Color.Success,
+        SuccessForeground = IvyFrameworkDarkThemeTokens.Color.SuccessForeground,
+        Warning = IvyFrameworkDarkThemeTokens.Color.Warning,
+        WarningForeground = IvyFrameworkDarkThemeTokens.Color.WarningForeground,
+        Info = IvyFrameworkDarkThemeTokens.Color.Info,
+        InfoForeground = IvyFrameworkDarkThemeTokens.Color.InfoForeground,
+        Border = IvyFrameworkDarkThemeTokens.Color.Border,
+        Input = IvyFrameworkDarkThemeTokens.Color.Input,
+        Ring = IvyFrameworkDarkThemeTokens.Color.Ring,
+        Muted = IvyFrameworkDarkThemeTokens.Color.Muted,
+        MutedForeground = IvyFrameworkDarkThemeTokens.Color.MutedForeground,
+        Accent = IvyFrameworkDarkThemeTokens.Color.Accent,
+        AccentForeground = IvyFrameworkDarkThemeTokens.Color.AccentForeground,
+        Card = IvyFrameworkDarkThemeTokens.Color.Card,
+        CardForeground = IvyFrameworkDarkThemeTokens.Color.CardForeground,
+        Popover = IvyFrameworkDarkThemeTokens.Color.Popover,
+        PopoverForeground = IvyFrameworkDarkThemeTokens.Color.PopoverForeground,
+        // Neutral colors
+        Black = IvyFrameworkNeutralTokens.Color.Black,
+        White = IvyFrameworkNeutralTokens.Color.White,
+        Slate = IvyFrameworkNeutralTokens.Color.Slate,
+        Gray = IvyFrameworkNeutralTokens.Color.Gray,
+        Zinc = IvyFrameworkNeutralTokens.Color.Zinc,
+        Neutral = IvyFrameworkNeutralTokens.Color.Neutral,
+        Stone = IvyFrameworkNeutralTokens.Color.Stone,
+        // Chromatic colors
+        Red = IvyFrameworkChromaticTokens.Color.Red,
+        Orange = IvyFrameworkChromaticTokens.Color.Orange,
+        Amber = IvyFrameworkChromaticTokens.Color.Amber,
+        Yellow = IvyFrameworkChromaticTokens.Color.Yellow,
+        Lime = IvyFrameworkChromaticTokens.Color.Lime,
+        Green = IvyFrameworkChromaticTokens.Color.Green,
+        Emerald = IvyFrameworkChromaticTokens.Color.Emerald,
+        Teal = IvyFrameworkChromaticTokens.Color.Teal,
+        Cyan = IvyFrameworkChromaticTokens.Color.Cyan,
+        Sky = IvyFrameworkChromaticTokens.Color.Sky,
+        Blue = IvyFrameworkChromaticTokens.Color.Blue,
+        Indigo = IvyFrameworkChromaticTokens.Color.Indigo,
+        Violet = IvyFrameworkChromaticTokens.Color.Violet,
+        Purple = IvyFrameworkChromaticTokens.Color.Purple,
+        Fuchsia = IvyFrameworkChromaticTokens.Color.Fuchsia,
+        Pink = IvyFrameworkChromaticTokens.Color.Pink,
+        Rose = IvyFrameworkChromaticTokens.Color.Rose
     };
 }

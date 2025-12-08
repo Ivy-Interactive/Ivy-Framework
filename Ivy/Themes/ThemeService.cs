@@ -85,6 +85,34 @@ public class ThemeService : IThemeService
         // Popover colors
         AppendColorVariable(sb, "--popover", colors.Popover);
         AppendColorVariable(sb, "--popover-foreground", colors.PopoverForeground);
+
+        // Neutral colors
+        AppendColorVariable(sb, "--black", colors.Black);
+        AppendColorVariable(sb, "--white", colors.White);
+        AppendColorVariable(sb, "--slate", colors.Slate);
+        AppendColorVariable(sb, "--gray", colors.Gray);
+        AppendColorVariable(sb, "--zinc", colors.Zinc);
+        AppendColorVariable(sb, "--neutral", colors.Neutral);
+        AppendColorVariable(sb, "--stone", colors.Stone);
+
+        // Chromatic colors
+        AppendColorVariable(sb, "--red", colors.Red);
+        AppendColorVariable(sb, "--orange", colors.Orange);
+        AppendColorVariable(sb, "--amber", colors.Amber);
+        AppendColorVariable(sb, "--yellow", colors.Yellow);
+        AppendColorVariable(sb, "--lime", colors.Lime);
+        AppendColorVariable(sb, "--green", colors.Green);
+        AppendColorVariable(sb, "--emerald", colors.Emerald);
+        AppendColorVariable(sb, "--teal", colors.Teal);
+        AppendColorVariable(sb, "--cyan", colors.Cyan);
+        AppendColorVariable(sb, "--sky", colors.Sky);
+        AppendColorVariable(sb, "--blue", colors.Blue);
+        AppendColorVariable(sb, "--indigo", colors.Indigo);
+        AppendColorVariable(sb, "--violet", colors.Violet);
+        AppendColorVariable(sb, "--purple", colors.Purple);
+        AppendColorVariable(sb, "--fuchsia", colors.Fuchsia);
+        AppendColorVariable(sb, "--pink", colors.Pink);
+        AppendColorVariable(sb, "--rose", colors.Rose);
     }
 
     private void AppendOtherThemeProperties(StringBuilder sb)
