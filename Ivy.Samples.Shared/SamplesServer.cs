@@ -42,6 +42,8 @@ public static class SamplesServer
             server.Services.AddSingleton<IChatClient>(chatClient);
         }
 
+        server.Services.AddSingleton<Apps.Tests.MockPipelineService>();
+
         await server.RunAsync();
     }
 }
