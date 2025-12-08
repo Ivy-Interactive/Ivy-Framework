@@ -490,11 +490,11 @@ public class SmallMetricView : ViewBase
     {
         return new Card(
                 (Layout.Horizontal().Align(Align.Left).Gap(1)
-                 | Text.H4("$12.5K")
+                 | Text.Strong("$12.5K")
                  | Icons.TrendingUp.ToIcon().Color(Colors.Emerald)
                  | Text.Small("+5%").Color(Colors.Emerald)),
                 new Progress(25).Goal("$50K target")
-            ).Title("Small Revenue").Icon(Icons.DollarSign).Small()
+            ).Title(Text.H4("Small Revenue")).Icon(Icons.DollarSign).Small()
             ;
     }
 }
@@ -505,11 +505,11 @@ public class MediumMetricView : ViewBase
     {
         return new Card(
                 (Layout.Horizontal().Align(Align.Left).Gap(2)
-                 | Text.H4("$84,250")
+                 | Text.Strong("$84,250")
                  | Icons.TrendingUp.ToIcon().Color(Colors.Emerald)
                  | Text.Small("21%").Color(Colors.Emerald)),
                 new Progress(21).Goal("$400K target")
-            ).Title("Medium Revenue").Icon(Icons.DollarSign)
+            ).Title(Text.H4("Medium Revenue")).Icon(Icons.DollarSign)
             ;
     }
 }
@@ -520,11 +520,11 @@ public class LargeMetricView : ViewBase
     {
         return new Card(
                 (Layout.Horizontal().Align(Align.Left).Gap(3)
-                 | Text.H4("$1,234,567")
+                 | Text.Strong("$1,234,567")
                  | Icons.TrendingUp.ToIcon().Color(Colors.Emerald)
                  | Text.Small("+45%").Color(Colors.Emerald)),
                 new Progress(75).Goal("$1.5M target")
-            ).Title("Large Revenue").Icon(Icons.DollarSign).Large()
+            ).Title(Text.H4("Large Revenue")).Icon(Icons.DollarSign).Large()
             ;
     }
 }
