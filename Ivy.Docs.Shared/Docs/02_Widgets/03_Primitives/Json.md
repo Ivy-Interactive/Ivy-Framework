@@ -188,7 +188,7 @@ public class ComplexJsonExample : ViewBase
 
 ## Error Handling and Validation
 
-Showcases robust error handling, input validation, and seamless integration with the JSON viewer for reliable and user-friendly interactions.
+Demonstrates robust error handling, input validation, and seamless integration with the JSON viewer for reliable and user-friendly interactions.
 
 ```csharp demo-tabs 
 public class JsonValidationExample : ViewBase
