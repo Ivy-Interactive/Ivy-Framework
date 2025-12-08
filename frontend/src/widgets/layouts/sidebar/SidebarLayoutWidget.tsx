@@ -19,6 +19,7 @@ import { useFocusable } from '@/hooks/use-focus-management';
 import { sidebarMenuRef } from './sidebar-refs';
 import { useEventHandler } from '@/components/event-handler';
 import { cn } from '@/lib/utils';
+import { getWidth } from '@/lib/styles';
 
 interface SidebarLayoutWidgetProps {
   slots?: {
@@ -31,6 +32,7 @@ interface SidebarLayoutWidgetProps {
   autoCollapseThreshold?: number; // Width threshold for auto-collapse (default: 768px)
   mainAppSidebar?: boolean;
   mainContentPadding?: number; // Padding for main content area (default: 2)
+  width?: string; // Width of the sidebar (default: 256px)
 }
 
 // Helper function to check if a slot has meaningful content by checking props.children
@@ -59,7 +61,11 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
   autoCollapseThreshold = 768,
   mainAppSidebar = false,
   mainContentPadding,
+  width,
 }) => {
+  // Get sidebar width from the width prop (default set in backend)
+  const sidebarWidthStyles = getWidth(width);
+  const sidebarWidth = sidebarWidthStyles.width as string;
   // Initialize sidebar state based on current window width (only for main app sidebar)
   const getInitialSidebarState = () => {
     if (!mainAppSidebar) return true;
@@ -146,15 +152,16 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
       ref={containerRef}
       className="grid h-full w-full remove-parent-padding"
       style={{
-        gridTemplateColumns: isSidebarOpen ? '16rem 1fr' : '0 1fr',
+        gridTemplateColumns: isSidebarOpen ? `${sidebarWidth} 1fr` : '0 1fr',
         transition: 'grid-template-columns 300ms ease-in-out',
       }}
     >
       {/* Custom Sidebar with Slide Animation */}
       <div
-        className={`flex h-full w-[256px] flex-col bg-background text-foreground border-r border-border transition-transform duration-300 ease-in-out relative overflow-hidden ${
+        className={`flex h-full flex-col bg-background text-foreground border-r border-border transition-transform duration-300 ease-in-out relative overflow-hidden ${
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
+        style={{ width: sidebarWidth }}
       >
         {hasContent(slots?.SidebarHeader) && (
           <div className="flex flex-col shrink-0 p-2 space-y-4">
@@ -183,7 +190,7 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
           onClick={handleManualToggle}
           className="absolute top-0 z-50 p-2 rounded-md bg-background hover:bg-muted hover:text-accent-foreground cursor-pointer transition-all duration-200"
           style={{
-            left: isSidebarOpen ? 'calc(16rem + 4px)' : '4px',
+            left: isSidebarOpen ? `calc(${sidebarWidth} + 4px)` : '4px',
             marginTop: '3px',
             transition: 'left 300ms ease-in-out',
             transform: 'translateX(0)', // Ensure button moves with its parent sidebar
