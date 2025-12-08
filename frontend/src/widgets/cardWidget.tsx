@@ -71,7 +71,7 @@ export const CardWidget: React.FC<CardWidgetProps> = ({
         return {
           header:
             'px-8 pt-8 pb-2 [&_*]:!text-lg [&_:is(h1,h2,h3,h4,h5,h6)]:!my-0 [&_:is(h1,h2,h3,h4,h5,h6)]:!font-normal',
-          content: 'p-8 pt-0 [&_*]:!text-lg',
+          content: 'p-8 pt-0',
           footer: 'p-8 pt-0',
           title: 'text-lg',
           description: 'text-base mt-3',
@@ -81,7 +81,7 @@ export const CardWidget: React.FC<CardWidgetProps> = ({
         return {
           header:
             'px-6 pt-6 pb-2 [&_*]:!text-base [&_:is(h1,h2,h3,h4,h5,h6)]:!my-0 [&_:is(h1,h2,h3,h4,h5,h6)]:!font-normal',
-          content: 'p-6 pt-0 [&_*]:!text-base',
+          content: 'p-6 pt-0',
           footer: 'p-6 pt-0',
           title: 'text-base',
           description: 'text-sm mt-2',

@@ -63,7 +63,7 @@ public class MetricView(
         return new Card(
                 Layout.Vertical().Gap(2)
                 | (Layout.Horizontal().Align(Align.Left).Gap(2)
-                    | Text.Strong(x.MetricFormatted).NoWrap().Overflow(Overflow.Clip)
+                    | Text.Large(x.MetricFormatted).NoWrap().Overflow(Overflow.Clip)
                     | (x.TrendComparedToPreviousPeriod != null
                         ? x.TrendComparedToPreviousPeriod >= 0
                             ? Icons.TrendingUp.ToIcon().Color(Colors.Success)
