@@ -2,6 +2,7 @@ using Ivy.Shared;
 
 namespace Ivy.Samples.Shared.Apps.Tests;
 
+#pragma warning disable IVYHOOK001, IVYHOOK002, IVYHOOK003, IVYHOOK004, IVYHOOK005
 [App(icon: Icons.Bug, searchHints: ["analyzer", "hooks", "rules", "warnings", "test"])]
 public class HookAnalyzerTestApp : ViewBase
 {
@@ -71,4 +72,5 @@ public class HookNotAtTopView : ViewBase
 
     private int SomeMethod() => 42;
 }
+#pragma warning restore IVYHOOK001, IVYHOOK002, IVYHOOK003, IVYHOOK004, IVYHOOK005
 

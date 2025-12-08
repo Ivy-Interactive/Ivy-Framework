@@ -12,6 +12,10 @@ public class FormScaffoldingApp : SampleBase
     protected override object? BuildSample()
     {
         var formatsExample = UseState(() => new FormatsExample());
+        var displayExample = UseState(() => new DisplayExample());
+        var stringsExample = UseState(() => new StringsExample());
+        var numbersExample = UseState(() => new NumbersExample());
+
         var formatsForm = formatsExample.ToForm();
         var formatsGrid = Layout.Vertical()
                           | new Expandable("Code", new CodeView(typeof(FormatsExample)))
@@ -20,7 +24,6 @@ public class FormScaffoldingApp : SampleBase
                               | formatsExample.ToDetails().Builder(NullBuilder))
             ;
 
-        var displayExample = UseState(() => new DisplayExample());
         var displayForm = displayExample.ToForm();
         var displayGrid = Layout.Vertical()
                           | new Expandable("Code", new CodeView(typeof(DisplayExample)))
@@ -30,7 +33,6 @@ public class FormScaffoldingApp : SampleBase
 
             ;
 
-        var stringsExample = UseState(() => new StringsExample());
         var stringsForm = stringsExample.ToForm();
         var stringsGrid = Layout.Vertical()
                           | new Expandable("Code", new CodeView(typeof(StringsExample)))
@@ -39,7 +41,6 @@ public class FormScaffoldingApp : SampleBase
                             | stringsExample.ToDetails().Builder(NullBuilder))
             ;
 
-        var numbersExample = UseState(() => new NumbersExample());
         var numbersForm = numbersExample.ToForm();
         var numbersGrid = Layout.Vertical()
                           | new Expandable("Code", new CodeView(typeof(NumbersExample)))

@@ -8,11 +8,13 @@ public class JobsApp : ViewBase
 {
     public override object? Build()
     {
+#pragma warning disable IVYHOOK005
         var scheduler = this.UseStatic(CreateJobs);
         var refreshToken = this.UseRefreshToken();
 
         UseEffect(() => scheduler.Subscribe(_ => refreshToken.Refresh()));
         UseEffect(async () => await scheduler.RunAsync());
+#pragma warning restore IVYHOOK005
 
         return Layout.Horizontal(scheduler.ToView()).Width(100);
     }

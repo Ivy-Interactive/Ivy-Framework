@@ -26,11 +26,15 @@ public class ProductsListBlade : ViewBase
     {
         //This blade will display a list of products - we choose to include the name and department of the product as these are the most relevant fields for the user.
 
-        var blades = this.UseContext<IBladeController>();
-        var factory = this.UseService<SampleDbContextFactory>();
+        var blades = UseContext<IBladeController>();
+        var factory = UseService<SampleDbContextFactory>();
+
+#pragma warning disable IVYHOOK005
         var refreshToken = this.UseRefreshToken();
 
-        this.UseEffect(() =>
+
+
+        UseEffect(() =>
         {
             if (refreshToken.ReturnValue is Guid productId)
             {
@@ -38,6 +42,7 @@ public class ProductsListBlade : ViewBase
                 blades.Push(this, new ProductDetailsBlade(productId));
             }
         }, [refreshToken]);
+#pragma warning restore IVYHOOK005
 
         var onItemClicked = new Action<Event<ListItem>>(e =>
         {
@@ -64,6 +69,8 @@ public class ProductsListBlade : ViewBase
         );
     }
 
+
+
     private async Task<ProductListRecord[]> FetchProducts(SampleDbContextFactory factory, string filter)
     {
         await using var db = factory.CreateDbContext();
@@ -87,12 +94,15 @@ public class ProductDetailsBlade(Guid productId) : ViewBase
 {
     public override object? Build()
     {
-        var factory = this.UseService<SampleDbContextFactory>();
-        var blades = this.UseContext<IBladeController>();
+#pragma warning disable IVYHOOK005
+        var product = UseState<Product?>(() => null!);
+        var factory = UseService<SampleDbContextFactory>();
+        var blades = UseContext<IBladeController>();
         var refreshToken = this.UseRefreshToken();
-        var product = this.UseState<Product?>(() => null!);
 
-        this.UseEffect(async () =>
+
+
+        UseEffect(async () =>
         {
             product.Set((await factory.CreateDbContext().Products.Include(e => e.Category).SingleOrDefaultAsync(e => e.Id == productId))!);
         }, [EffectTrigger.AfterInit(), refreshToken]);
@@ -141,7 +151,10 @@ public class ProductDetailsBlade(Guid productId) : ViewBase
             productCard,
             productCard
         };
+#pragma warning restore IVYHOOK005
     }
+
+
 
     private void Delete(SampleDbContextFactory dbFactory)
     {
@@ -169,10 +182,10 @@ public class ProductCreateDialog(IState<bool> isOpen, RefreshToken refreshToken)
 {
     public override object? Build()
     {
-        var factory = this.UseService<SampleDbContextFactory>();
-        var customer = this.UseState(() => new ProductCreateRequest());
+        var factory = UseService<SampleDbContextFactory>();
+        var customer = UseState(() => new ProductCreateRequest());
 
-        this.UseEffect(() =>
+        UseEffect(() =>
         {
             var productId = CreateProduct(factory, customer.Value);
             refreshToken.Refresh(productId);
@@ -211,10 +224,10 @@ public class ProductEditSheet(IState<bool> isOpen, Guid id, RefreshToken refresh
 {
     public override object? Build()
     {
-        var factory = this.UseService<SampleDbContextFactory>();
-        var product = this.UseState(() => factory.CreateDbContext().Products.Find(id)!);
+        var factory = UseService<SampleDbContextFactory>();
+        var product = UseState(() => factory.CreateDbContext().Products.Find(id)!);
 
-        this.UseEffect(() =>
+        UseEffect(() =>
         {
             var db = factory.CreateDbContext();
             product.Value.UpdatedAt = DateTime.UtcNow;

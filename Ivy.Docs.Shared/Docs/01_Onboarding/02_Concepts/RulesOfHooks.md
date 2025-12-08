@@ -111,3 +111,20 @@ public override object Build()
     // ...
 }
 ```
+
+## Supported Hooks
+
+The following hooks are automatically detected by the analyzer:
+
+- `UseState`
+- `UseEffect`
+- `UseContext`
+- `UseService`
+- `UseAlert`
+- `UseForm`
+- `UseUpload`
+- `UseDownload`
+- `UseWebhook`
+- `UseBlades`
+- `UseDataTable`
+- `UseNavigation`

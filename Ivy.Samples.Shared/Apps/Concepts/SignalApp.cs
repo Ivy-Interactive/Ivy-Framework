@@ -10,8 +10,8 @@ public class SignalApp : SampleBase
 {
     protected override object? BuildSample()
     {
-        var signal = Context.CreateSignal<MySignal, int, string>();
         var output = UseState<string>("");
+        var signal = Context.CreateSignal<MySignal, int, string>();
 
         async void OnClick(Event<Button> _)
         {

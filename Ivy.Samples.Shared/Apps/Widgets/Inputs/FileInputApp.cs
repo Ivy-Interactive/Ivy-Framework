@@ -316,57 +316,71 @@ public class SizingExample : ViewBase
 
     public override object? Build()
     {
-        var fileModel = UseState(() => new FileModel(null, null, null));
-
-        // Profile Photo: 5 MB max, Large size
-        const long profilePhotoMaxSize = 5 * 1024 * 1024; // 5 MB
-
-        // Document: 10 MB max, Medium size (default)
-        const long documentMaxSize = 10 * 1024 * 1024; // 10 MB
-
-        // Certificate: 2 MB max, Small size
-        const long certificateMaxSize = 2 * 1024 * 1024; // 2 MB
+        var profilePhoto = UseState<FileUpload<byte[]>?>(() => null);
+        var document = UseState<FileUpload<byte[]>?>(() => null);
+        var certificate = UseState<FileUpload<byte[]>?>(() => null);
 
         return Layout.Vertical()
             | new Card(
-                fileModel.ToForm()
-                    .Builder(m => m.ProfilePhoto, (state, view) =>
-                    {
-                        var uploadContext = view.UseUpload(MemoryStreamUploadHandler.Create(state))
-                            .Accept("image/*")
-                            .MaxFileSize(profilePhotoMaxSize);
-                        return state.ToFileInput(uploadContext)
-                            .Large()
-                            .Placeholder($"Upload profile photo (max {Utils.FormatBytes(profilePhotoMaxSize)})");
-                    })
-                    .Builder(m => m.Document, (state, view) =>
-                    {
-                        var uploadContext = view.UseUpload(MemoryStreamUploadHandler.Create(state))
-                            .Accept(".pdf,.doc,.docx")
-                            .MaxFileSize(documentMaxSize);
-                        return state.ToFileInput(uploadContext)
-                            .Placeholder($"Upload document (max {Utils.FormatBytes(documentMaxSize)})");
-                    })
-                    .Builder(m => m.Certificate, (state, view) =>
-                    {
-                        var uploadContext = view.UseUpload(MemoryStreamUploadHandler.Create(state))
-                            .Accept(".pdf")
-                            .MaxFileSize(certificateMaxSize);
-                        return state.ToFileInput(uploadContext)
-                            .Small()
-                            .Placeholder($"Upload certificate (max {Utils.FormatBytes(certificateMaxSize)})");
-                    })
-                    .Label(m => m.ProfilePhoto, "Profile Photo")
-                    .Label(m => m.Document, "Document")
-                    .Label(m => m.Certificate, "Certificate")
-                    .Description(m => m.ProfilePhoto, "Upload your profile picture")
-                    .Description(m => m.Document, "Upload your resume or document")
-                    .Description(m => m.Certificate, "Upload certificate (optional)")
-                    .Required(m => m.ProfilePhoto, m => m.Document)
+                Layout.Vertical().Gap(4)
+                | Layout.Vertical().Gap(2)
+                    | Text.Label("Profile Photo *")
+                    | new ProfilePhotoUpload(profilePhoto)
+                    | Text.Muted("Upload your profile picture")
+                | Layout.Vertical().Gap(2)
+                    | Text.Label("Document *")
+                    | new DocumentUpload(document)
+                    | Text.Muted("Upload your resume or document")
+                | Layout.Vertical().Gap(2)
+                    | Text.Label("Certificate")
+                    | new CertificateUpload(certificate)
+                    | Text.Muted("Upload certificate (optional)")
             )
             .Width(Size.Full())
             .Title("File Upload Form with Different Sizes");
     }
+}
+
+public class ProfilePhotoUpload(IState<FileUpload<byte[]>?> state) : ViewBase
+{
+    public override object Build()
+    {
+        var uploadContext = this.UseUpload(MemoryStreamUploadHandler.Create(state))
+            .Accept("image/*")
+            .MaxFileSize(5 * 1024 * 1024); // 5 MB
+        const long maxSize = 5 * 1024 * 1024;
+        return state.ToFileInput(uploadContext)
+            .Large()
+            .Placeholder($"Upload profile photo (max {Utils.FormatBytes(maxSize)})");
+    }
+}
+
+public class DocumentUpload(IState<FileUpload<byte[]>?> state) : ViewBase
+{
+    public override object Build()
+    {
+        var uploadContext = this.UseUpload(MemoryStreamUploadHandler.Create(state))
+            .Accept(".pdf,.doc,.docx")
+            .MaxFileSize(10 * 1024 * 1024); // 10 MB
+        const long maxSize = 10 * 1024 * 1024;
+        return state.ToFileInput(uploadContext)
+            .Placeholder($"Upload document (max {Utils.FormatBytes(maxSize)})");
+    }
+}
+
+public class CertificateUpload(IState<FileUpload<byte[]>?> state) : ViewBase
+{
+    public override object Build()
+    {
+        var uploadContext = this.UseUpload(MemoryStreamUploadHandler.Create(state))
+            .Accept(".pdf")
+            .MaxFileSize(2 * 1024 * 1024); // 2 MB
+        const long maxSize = 2 * 1024 * 1024;
+        return state.ToFileInput(uploadContext)
+            .Small()
+            .Placeholder($"Upload certificate (max {Utils.FormatBytes(maxSize)})");
+    }
+
 }
 
 public class DialogFileUploadExample : ViewBase
@@ -377,10 +391,12 @@ public class DialogFileUploadExample : ViewBase
 
         // Ephemeral state used inside the dialog while picking a file
         var dialogFile = UseState<FileUpload<byte[]>?>();
-        var uploadContext = this.UseUpload(MemoryStreamUploadHandler.Create(dialogFile)).Accept("*/*").MaxFileSize(10 * 1024 * 1024);
-
         // Dialog visibility state
         var isOpen = UseState(false);
+
+        var uploadContext = this.UseUpload(MemoryStreamUploadHandler.Create(dialogFile)).Accept("*/*").MaxFileSize(10 * 1024 * 1024);
+
+
 
         ValueTask OnDialogClose(Event<Dialog> _)
         {
