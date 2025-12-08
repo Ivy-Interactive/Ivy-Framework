@@ -309,14 +309,6 @@ users.ToDataTable(idSelector: e => e.Id)
 - **New**: `Id` (row's unique identifier), `Tag` (menu item's tag)
 - **Removed**: `ActionId`, `EventName`, `RowIndex`, `RowData`
 
-**Event Handling Improvements:**
-
-DataTable event handling now uses row IDs throughout, replacing less reliable row index and data dictionary access. Toast messages and event arguments now consistently use row IDs for more robust event tracking.
-
-**Improved Performance with Arrow Tables:**
-
-DataTable now uses Apache Arrow's columnar storage format internally for better memory efficiency and performance with large datasets. Transparent to existing code - no changes required.
-
 **Column Resizing:**
 
 DataTable now supports column resizing out of the box. Users can drag column borders to adjust widths. Column widths preserved during session.
@@ -331,8 +323,6 @@ users.ToDataTable()
 Complete API reference: [DataTable documentation](https://docs.ivy.app/widgets/advanced/data-table).
 
 ### Grid Layout
-
-**Enhanced Grid API:**
 
 **Column and Row Sizing:**
 
@@ -400,10 +390,6 @@ button.Small();
 button.Medium();
 button.Large();
 ```
-
-**Medium Scale as Default:**
-
-All form inputs and tables now default to `Scale.Medium` when no scale explicitly specified.
 
 ### Expandable Widget
 
@@ -519,10 +505,6 @@ server.UseChrome<MyCustomChrome>();
 ```
 
 See [Chrome Customization documentation](https://docs.ivy.app/onboarding/concepts/chrome) for examples.
-
-### Theming System
-
-Documentation updated to reflect actual color variables in Ivy Design System. Removed documentation for unused variables (`Chart1-5`, `Sidebar`, `SidebarForeground`).
 
 ## Breaking Changes
 
