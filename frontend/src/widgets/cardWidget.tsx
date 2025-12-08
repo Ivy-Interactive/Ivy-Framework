@@ -60,8 +60,8 @@ export const CardWidget: React.FC<CardWidgetProps> = ({
       case Scales.Small:
         return {
           header:
-            'px-3 pt-3 pb-1 [&_*]:!text-sm [&_h4]:!my-0 [&_h4]:!font-normal',
-          content: 'p-3 pt-0 [&_*]:!text-md [&_h4]:!my-0 [&_h4]:!font-normal',
+            'px-3 pt-3 pb-1 [&_*]:!text-sm [&_:is(h1,h2,h3,h4,h5,h6)]:!my-0 [&_:is(h1,h2,h3,h4,h5,h6)]:!font-normal',
+          content: 'p-3 pt-0 [&_*]:!text-sm',
           footer: 'p-3 pt-0',
           title: 'text-sm',
           description: 'text-xs mt-1',
@@ -70,8 +70,8 @@ export const CardWidget: React.FC<CardWidgetProps> = ({
       case Scales.Large:
         return {
           header:
-            'px-8 pt-8 pb-2 [&_*]:!text-lg [&_h4]:!my-0 [&_h4]:!font-normal',
-          content: 'p-8 pt-0 [&_*]:!text-xl [&_h4]:!my-0 [&_h4]:!font-normal',
+            'px-8 pt-8 pb-2 [&_*]:!text-lg [&_:is(h1,h2,h3,h4,h5,h6)]:!my-0 [&_:is(h1,h2,h3,h4,h5,h6)]:!font-normal',
+          content: 'p-8 pt-0 [&_*]:!text-lg',
           footer: 'p-8 pt-0',
           title: 'text-lg',
           description: 'text-base mt-3',
@@ -80,8 +80,8 @@ export const CardWidget: React.FC<CardWidgetProps> = ({
       default:
         return {
           header:
-            'px-6 pt-6 pb-2 [&_*]:!text-base [&_h4]:!my-0 [&_h4]:!font-normal',
-          content: 'p-6 pt-0 [&_*]:!text-lg [&_h4]:!my-0 [&_h4]:!font-normal',
+            'px-6 pt-6 pb-2 [&_*]:!text-base [&_:is(h1,h2,h3,h4,h5,h6)]:!my-0 [&_:is(h1,h2,h3,h4,h5,h6)]:!font-normal',
+          content: 'p-6 pt-0 [&_*]:!text-mg',
           footer: 'p-6 pt-0',
           title: 'text-base',
           description: 'text-sm mt-2',

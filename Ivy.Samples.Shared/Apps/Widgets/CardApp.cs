@@ -12,12 +12,11 @@ public class CardApp : SampleBase
         var card1 = new Card(
             "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec nunc",
             new Button("Sign Me Up", _ => client.Toast("You have signed up!")).TestId("card-app-signup-button")
-        ).Title("Card App").Description("This is a card app.").TestId("card-app");
+        ).Header("Card App", "This is a card app.").TestId("card-app");
 
         var card2 = new Card(
             "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec nunc"
-        ).Title("Card with Border")
-         .Description("This card has a custom border.")
+        ).Header("Card with Border", "This card has a custom border.")
          .BorderThickness(3)
          .BorderStyle(BorderStyle.Dashed)
          .BorderColor(Colors.Primary)
@@ -26,8 +25,7 @@ public class CardApp : SampleBase
 
         var card3 = new Card(
             "This card demonstrates the border color fix with a thick red border."
-        ).Title("Border Color Test")
-         .Description("Should now display with a red border")
+        ).Header("Border Color Test", "Should now display with a red border")
          .BorderThickness(4)
          .BorderStyle(BorderStyle.Solid)
          .BorderColor(Colors.Red)
@@ -36,8 +34,7 @@ public class CardApp : SampleBase
 
         var card4 = new Card(
            "This card demonstrates OnClick handlers."
-       ).Title("OnClick test")
-        .Description("Click me!")
+       ).Header("OnClick test", "Click me!")
         .TestId("card-onclick")
         .HandleClick(_ =>
         {
@@ -45,22 +42,19 @@ public class CardApp : SampleBase
         });
         var smallCard = new Card(
          "This is a small card with elements."
-        ).Title("Small Card with Elements")
-        .Description("This is a small card with elements.")
+        ).Header("Small Card with Elements", "This is a small card with elements.")
         .Icon(Icons.Info)
         .Small()
         .TestId("card-small-with-elements");
         var mediumCard = new Card(
          "This is a medium card with elements."
-        ).Title("Medium Card with Elements")
-        .Description("This is a medium card with elements.")
+        ).Header("Medium Card with Elements", "This is a medium card with elements.")
         .Icon(Icons.Info)
         .Medium()
         .TestId("card-medium-with-elements");
         var largeCard = new Card(
          "This is a large card with elements."
-        ).Title("Large Card with Elements")
-        .Description("This is a large card with elements.")
+        ).Header("Large Card with Elements", "This is a large card with elements.")
         .Icon(Icons.Info)
         .Large();
 
@@ -135,7 +129,7 @@ public class MetricView(string title) : ViewBase
                  | Icons.TrendingUp.ToIcon().Color(Colors.Emerald)
                  | Text.Small("21%").Color(Colors.Emerald)),
                 new Progress(21).Goal(800_000.ToString("C0"))
-            ).Title(title).Icon(Icons.DollarSign).TestId("card-total-sales")
+            ).Header(title).Icon(Icons.DollarSign).TestId("card-total-sales")
             ;
     }
 }
@@ -150,7 +144,7 @@ public class LongNumberMetricView : ViewBase
                  | Icons.TrendingUp.ToIcon().Color(Colors.Emerald)
                  | Text.Small("1,234.5%").Color(Colors.Emerald)),
                 new Progress(85).Goal("$100,000,000")
-            ).Title("Very Long Revenue Number").Icon(Icons.DollarSign)
+            ).Header("Very Long Revenue Number").Icon(Icons.DollarSign)
             ;
     }
 }
@@ -165,7 +159,7 @@ public class HighPercentageMetricView : ViewBase
                  | Icons.TrendingUp.ToIcon().Color(Colors.Emerald)
                  | Text.Small("38.1%").Color(Colors.Emerald)),
                 new Progress(125).Goal("806.67%")
-            ).Title("Post Engagement Rate").Icon(Icons.Activity)
+            ).Header("Post Engagement Rate").Icon(Icons.Activity)
             ;
     }
 }
@@ -180,7 +174,7 @@ public class VeryLongTitleMetricView : ViewBase
                  | Icons.TrendingUp.ToIcon().Color(Colors.Emerald)
                  | Text.Small("38.1%").Color(Colors.Emerald)),
                 new Progress(90).Goal("2.50")
-            ).Title("Total Comments per Author in This Period").Icon(Icons.MessageCircle)
+            ).Header("Total Comments per Author in This Period").Icon(Icons.MessageCircle)
             ;
     }
 }
@@ -195,7 +189,7 @@ public class TotalCommentsPerAuthorMetricView : ViewBase
                  | Icons.TrendingUp.ToIcon().Color(Colors.Emerald)
                  | Text.Small("38.1%").Color(Colors.Emerald)),
                 new Progress(90).Goal("2.50")
-            ).Title("Total Comments per Author").Icon(Icons.UserCheck)
+            ).Header("Total Comments per Author").Icon(Icons.UserCheck)
             ;
     }
 }
@@ -217,7 +211,7 @@ public class UserEngagementWidget : ViewBase
                    | Text.Small("+12.5%").Color(Colors.Emerald)
                    | Text.Small("vs last month").Color(Colors.Gray))
                 | new Progress(75).Goal("1,500 users")
-            ).Title("User Engagement").Icon(Icons.Users)
+            ).Header("User Engagement").Icon(Icons.Users)
             ;
     }
 }
@@ -236,7 +230,7 @@ public class TaskCompletionWidget : ViewBase
                    | Icons.Clock.ToIcon().Color(Colors.Orange)
                    | Text.Small("23 tasks remaining").Color(Colors.Orange))
                 | new Progress(87).Goal("100% completion")
-            ).Title("Task Progress").Icon(Icons.Check)
+            ).Header("Task Progress").Icon(Icons.Check)
             ;
     }
 }
@@ -257,7 +251,7 @@ public class SystemHealthWidget : ViewBase
                    | Icons.HardDrive.ToIcon().Color(Colors.Purple)
                    | Text.Small("RAM: 67%").Color(Colors.Purple))
                 | new Progress(99).Goal("100% uptime")
-            ).Title("System Health").Icon(Icons.Activity)
+            ).Header("System Health").Icon(Icons.Activity)
             ;
     }
 }
@@ -278,7 +272,7 @@ public class RevenueGrowthWidget : ViewBase
                    | Icons.Calendar.ToIcon().Color(Colors.Blue)
                    | Text.Small("vs last month").Color(Colors.Blue))
                 | new Progress(65).Goal("$70,000 target")
-            ).Title("Revenue Growth").Icon(Icons.TrendingUp)
+            ).Header("Revenue Growth").Icon(Icons.TrendingUp)
             ;
     }
 }
@@ -305,7 +299,7 @@ public class IconTextShowcaseWidget : ViewBase
                    | Icons.Eye.ToIcon().Color(Colors.Orange)
                    | Text.Large("Views").Color(Colors.Gray)
                    | Text.H4("12,456").Color(Colors.Orange))
-            ).Title("Social Engagement").Icon(Icons.Star)
+            ).Header("Social Engagement").Icon(Icons.Star)
             ;
     }
 }
@@ -331,7 +325,7 @@ public class ProgressBarVariationsWidget : ViewBase
                 | (Layout.Horizontal().Align(Align.Left).Gap(2)
                    | Icons.Target.ToIcon().Color(Colors.Emerald)
                    | Text.Small("Average: 70%").Color(Colors.Emerald))
-            ).Title("Progress Variations").Icon(Icons.Star)
+            ).Header("Progress Variations").Icon(Icons.Star)
             ;
     }
 }
@@ -355,7 +349,7 @@ public class LayoutTestWidget : ViewBase
                    | Icons.ThumbsDown.ToIcon().Color(Colors.Red)
                    | Text.Large("Poor").Color(Colors.Red))
                 | new Progress(96).Goal("5.0 rating")
-            ).Title("Layout Testing").Icon(Icons.LayoutDashboard)
+            ).Header("Layout Testing").Icon(Icons.LayoutDashboard)
             ;
     }
 }
@@ -381,7 +375,7 @@ public class MixedContentWidget : ViewBase
                       | Text.Small("Desktop").Color(Colors.Gray)
                       | Text.H4("856").Color(Colors.Blue)))
                 | new Progress(78).Goal("2,500 total")
-            ).Title("Download Analytics").Icon(Icons.Download)
+            ).Header("Download Analytics").Icon(Icons.Download)
             ;
     }
 }
@@ -413,7 +407,7 @@ public class ResponsiveLayoutWidget : ViewBase
                       | Text.Small("APAC").Color(Colors.Gray)
                       | Text.Large("37%").Color(Colors.Green)))
                 | new Progress(85).Goal("50 countries")
-            ).Title("Global Distribution").Icon(Icons.Globe)
+            ).Header("Global Distribution").Icon(Icons.Globe)
             ;
     }
 }
@@ -436,7 +430,7 @@ public class TextSpacingDemoWidget : ViewBase
                    | Icons.Info.ToIcon().Color(Colors.Blue)
                    | Text.Small("Compact layout").Color(Colors.Gray))
                 | new Progress(60).Goal("Tight spacing")
-            ).Title("Text Spacing Demo").Icon(Icons.Type)
+            ).Header("Text Spacing Demo").Icon(Icons.Type)
             ;
     }
 }
@@ -457,7 +451,7 @@ public class CardPaddingOverrideWidget : ViewBase
                    | Icons.Zap.ToIcon().Color(Colors.Orange)
                    | Text.Small("Compact card content").Color(Colors.Gray))
                 | new Progress(75).Goal("Dense layout")
-            ).Title("Zero Spacing").Icon(Icons.Zap)
+            ).Header("Zero Spacing").Icon(Icons.Zap)
             ;
     }
 }
@@ -478,7 +472,7 @@ public class LayoutSpacingControlWidget : ViewBase
                    | Icons.Settings.ToIcon().Color(Colors.Purple)
                    | Text.Small("Precise layout").Color(Colors.Gray))
                 | new Progress(90).Goal("Custom control")
-            ).Title("Spacing Control").Icon(Icons.Settings)
+            ).Header("Spacing Control").Icon(Icons.Settings)
             ;
     }
 }
@@ -489,12 +483,12 @@ public class SmallMetricView : ViewBase
     public override object? Build()
     {
         return new Card(
-                (Layout.Horizontal().Align(Align.Left).Gap(1)
+                Layout.Horizontal().Align(Align.Left).Gap(1)
                  | Text.Strong("$12.5K")
                  | Icons.TrendingUp.ToIcon().Color(Colors.Emerald)
-                 | Text.Small("+5%").Color(Colors.Emerald)),
+                 | Text.Small("+5%").Color(Colors.Emerald),
                 new Progress(25).Goal("$50K target")
-            ).Title(Text.H4("Small Revenue")).Icon(Icons.DollarSign).Small()
+            ).Header(Text.H4("Small Revenue")).Icon(Icons.DollarSign).Small()
             ;
     }
 }
@@ -504,12 +498,12 @@ public class MediumMetricView : ViewBase
     public override object? Build()
     {
         return new Card(
-                (Layout.Horizontal().Align(Align.Left).Gap(2)
+                Layout.Horizontal().Align(Align.Left).Gap(2)
                  | Text.Strong("$84,250")
                  | Icons.TrendingUp.ToIcon().Color(Colors.Emerald)
-                 | Text.Small("21%").Color(Colors.Emerald)),
+                 | Text.Small("21%").Color(Colors.Emerald),
                 new Progress(21).Goal("$400K target")
-            ).Title(Text.H4("Medium Revenue")).Icon(Icons.DollarSign)
+            ).Header(Text.H4("Medium Revenue")).Icon(Icons.DollarSign).Medium()
             ;
     }
 }
@@ -519,12 +513,12 @@ public class LargeMetricView : ViewBase
     public override object? Build()
     {
         return new Card(
-                (Layout.Horizontal().Align(Align.Left).Gap(3)
+                Layout.Horizontal().Align(Align.Left).Gap(3)
                  | Text.Strong("$1,234,567")
                  | Icons.TrendingUp.ToIcon().Color(Colors.Emerald)
-                 | Text.Small("+45%").Color(Colors.Emerald)),
+                 | Text.Small("+45%").Color(Colors.Emerald),
                 new Progress(75).Goal("$1.5M target")
-            ).Title(Text.H4("Large Revenue")).Icon(Icons.DollarSign).Large()
+            ).Header(Text.H4("Large Revenue"), null, Icons.DollarSign).Large()
             ;
     }
 }
