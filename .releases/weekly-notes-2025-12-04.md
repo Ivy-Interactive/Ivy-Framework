@@ -165,10 +165,6 @@ selectedOption.ToAsyncSelectInput(QueryOptions, LookupOption, "Search...")
 
 Scale affects height, padding, text size, icon size, and search sheet styling.
 
-**Additional Enhancements:**
-
-- **Visual Integration:** Styling now matches other form inputs with consistent borders, shadows, and hover states for seamless integration in forms
-- **Full-Width Dividers:** Search sheet list items use full-width dividers for better visual separation
 - **Option Descriptions:** Options support optional descriptions appearing below labels:
 
 ```csharp
@@ -186,20 +182,6 @@ Options now support icons for visual indicators:
 ```csharp
 new Option<string>("Active", "active", icon: Icons.CheckCircle)
 ```
-
-**Optional Labels:**
-
-The `Label` property is now nullable - when omitted, uses `value.ToString()` as fallback.
-
-Read more in the [AsyncSelectInput documentation](https://docs.ivy.app/widgets/inputs/async-select).
-
-### DateTime Input Visual Improvements
-
-- Calendar and clock icons positioned inside input fields
-- Consistent disabled state styling matching DateRange inputs
-- Clear and error icons use absolute positioning with optimized spacing
-
-Full details available in the [DateTime Input documentation](https://docs.ivy.app/widgets/inputs/date-time).
 
 ### File Input Improvements
 
@@ -237,13 +219,6 @@ Refer to the [Field Widget documentation](https://docs.ivy.app/widgets/inputs/fi
 The Kanban widget now requires `.CardBuilder()` - simple `titleSelector` and `descriptionSelector` parameters removed:
 
 ```csharp
-// Before - no longer supported
-tasks.ToKanban(
-    groupBySelector: e => e.Status,
-    titleSelector: e => e.Title,
-    descriptionSelector: e => e.Description)
-
-// After - CardBuilder required
 tasks.ToKanban(
     groupBySelector: e => e.Status,
     idSelector: e => e.Id,
@@ -256,28 +231,11 @@ tasks.ToKanban(
 
 **HandleMove Renamed:**
 
-`.HandleCardMove()` renamed to `.HandleMove()` for consistency:
-
-```csharp
-tasks.ToKanban(...)
-    .HandleMove(moveData => {
-        // Handle card movement
-    });
-```
+`.HandleCardMove()` renamed to `.HandleMove()` for consistency.
 
 **Removed Event Handlers:**
 
 `.HandleClick()` and `.HandleDelete()` removed from Kanban API. Implement click/delete functionality within `.CardBuilder()` instead using Card's `.HandleClick()` method.
-
-**Column Width Changes:**
-
-Column width configuration simplified - use `.ColumnWidth()` for uniform width across all columns:
-
-```csharp
-tasks.ToKanban(...)
-    .Width(Size.Full())              // Overall board width
-    .ColumnWidth(Size.Rem(20))       // Uniform column width (enables horizontal scroll)
-```
 
 **Custom Card Ordering:**
 
@@ -294,26 +252,6 @@ tasks.ToKanban(
 .CardOrder(e => e.DueDate)  // Order cards by due date within each column
 ```
 
-**Drag-and-Drop Improvements:**
-
-- Cards correctly reorder when dragged within same column or between columns
-- Column highlights properly clear after drag operations complete
-- Drop position indicators show exact insertion point
-- Smooth animations when cards shift
-- Improved scroll bar padding and rounded corners
-
-**Simplified Width and Height Methods:**
-
-Methods now accept only `Size` parameters - use `Size.Units()`, `Size.Fraction()`, etc.:
-
-```csharp
-// Before
-tasks.ToKanban(...).Width(800).Height(600);
-
-// After
-tasks.ToKanban(...).Width(Size.Units(800)).Height(Size.Units(600));
-```
-
 See the [Kanban documentation](https://docs.ivy.app/widgets/advanced/kanban) for a complete guide.
 
 ### HeaderLayout Widget
@@ -325,25 +263,9 @@ new HeaderLayout(header, content)
     .Scroll(Scroll.None);  // Content handles its own scrolling
 ```
 
-Kanban boards can now be used in HeaderLayout with scrolling disabled.
-
 Documentation: [HeaderLayout](https://docs.ivy.app/widgets/layouts/header-layout).
 
 ### Table Widget
-
-**API Change: Width to ColumnWidth:**
-
-The `.Width()` method for setting column widths renamed to `.ColumnWidth()`:
-
-```csharp
-// Before
-products.ToTable()
-    .Width(e => e.Sku, Size.Fraction(0.15f));
-
-// After
-products.ToTable()
-    .ColumnWidth(e => e.Sku, Size.Fraction(0.15f));
-```
 
 **Column Width and Alignment:**
 
@@ -408,16 +330,7 @@ users.ToDataTable()
 
 Complete API reference: [DataTable documentation](https://docs.ivy.app/widgets/advanced/data-table).
 
-### Charts
-
-- Chart toolbox controls now only appear when hovering over chart (if enabled)
-- Charts now correctly handle negative values by automatically adjusting Y-axis minimum to include negative ranges
-
 ### Grid Layout
-
-**Improved Dark Mode Contrast:**
-
-Grid layouts now have improved text contrast in dark mode when using opacity. The fix uses a CSS variable `--opacity-mix-color` that switches between white (light mode) and black (dark mode), ensuring text stays readable in both themes.
 
 **Enhanced Grid API:**
 
@@ -426,8 +339,8 @@ Grid layouts now have improved text contrast in dark mode when using opacity. Th
 ```csharp
 Layout.Grid()
     .Columns(3)
-    .ColumnWidths(Size.Px(100), Size.Fraction(1), Size.Px(150))
-    .RowHeights(Size.Px(60), Size.Fraction(1), Size.Fraction(1))
+    .ColumnWidths(Size.Px(100), Size.Fraction(0.5f), Size.Px(150))
+    .RowHeights(Size.Px(60), Size.Fraction(0.5f), Size.Fraction(1))
 ```
 
 **Header and Footer Builders:**
@@ -488,10 +401,6 @@ button.Medium();
 button.Large();
 ```
 
-**Nullable Scale Property:**
-
-The `Scale` property on `WidgetBase` is now nullable, allowing widgets to inherit size from parent components.
-
 **Medium Scale as Default:**
 
 All form inputs and tables now default to `Scale.Medium` when no scale explicitly specified.
@@ -507,12 +416,6 @@ new Expandable(header, content)
     .Large()   // Emphasized
 ```
 
-**Improvements:**
-
-- Chevron icon uses absolute positioning with optimized sizing
-- Interactive elements (buttons, switches, links) in header remain clickable when expandable is disabled
-- Click handling properly distinguishes between interactive elements and expandable toggle
-
 Check the [Expandable documentation](https://docs.ivy.app/widgets/common/expandable) for more examples.
 
 ### Box Widget
@@ -524,8 +427,6 @@ New `Box.Plain()` extension method provides a reusable preset for demo/documenta
 ```csharp
 new Box().Plain().Content(content)
 ```
-
-Applies DemoBox-style settings: 1px border, 16px padding, neutral color, top-left alignment. This replaces the removed `DemoBox` widget for a more consistent API.
 
 Documentation: [Box widget](https://docs.ivy.app/widgets/primitives/box).
 
@@ -541,43 +442,7 @@ new Button("Edit")
     .Icon(Icons.Pencil);
 ```
 
-Features minimal padding (`p-1`) with auto height, ideal for table rows, toolbars, or icon-only buttons.
-
 Read the [Button documentation](https://docs.ivy.app/widgets/common/button) for all variants and options.
-
-### Alert Dialogs
-
-**Improved Button Layout:**
-
-Alert dialog buttons now follow standard UI conventions:
-
-- All buttons right-aligned in footer
-- Button order: Cancel (secondary) | No | Yes (primary)
-- Primary actions consistently on the right
-
-See [Alert Dialogs documentation](https://docs.ivy.app/onboarding/concepts/alerts) for usage examples.
-
-### Tooltips
-
-- Multiline text support with maximum width constraint
-- Long strings without spaces use `break-all` for proper wrapping
-- Table cell tooltips use `whitespace-pre-wrap` for proper formatting
-
-### List Widget
-
-**Full-Width Dividers:**
-
-List widget dividers now extend the full width of the container for better visual separation.
-
-Explore the [List documentation](https://docs.ivy.app/widgets/common/list) for more features.
-
-### Loading Widget
-
-- Fixed, full-screen overlay with semi-transparent dark background
-- 200ms display delay to prevent jarring flashes for quick operations
-- Can be conditionally rendered based on state: `isLoading.True(() => new Loading())!`
-
-Refer to the [Loading documentation](https://docs.ivy.app/widgets/common/list) for configuration options.
 
 ### Layout System
 
@@ -621,10 +486,6 @@ Utils.FormatNumber(3800000000); // "3.8B"
 
 ### Authentication
 
-**Tokens Moved Out of Frontend:**
-
-Authentication tokens are now completely managed server-side and no longer exposed to the frontend. New `IAuthSession` interface encapsulates authentication state. All `IAuthProvider` methods now accept `IAuthSession` instead of token strings or `AuthToken` objects. New cookie registry system provides secure server-side cookie management with automatic cleanup. Token registry IDs now use ~256 bits of strong entropy (up from 122 bits).
-
 **Cross-Tab Logout Synchronization:**
 
 Logout events are synchronized across browser tabs using the Broadcast Channel API. When a user logs out in one tab, all other tabs automatically reload to reflect the logout state.
@@ -659,132 +520,62 @@ server.UseChrome<MyCustomChrome>();
 
 See [Chrome Customization documentation](https://docs.ivy.app/onboarding/concepts/chrome) for examples.
 
-### Article Widget
-
-Previous/next navigation links now preserve `chrome=false` parameter when navigating between articles.
-
 ### Theming System
 
 Documentation updated to reflect actual color variables in Ivy Design System. Removed documentation for unused variables (`Chart1-5`, `Sidebar`, `SidebarForeground`).
 
 ## Breaking Changes
 
+### Component Sizing API Changes
+
+**Size Parameters Required:**
+
+All width/height methods now require `Size` parameters instead of numeric values:
+
+```csharp
+widget.Width(Size.Units(800)).Height(Size.Units(600));
+kanban.ColumnWidth(Size.Rem(20));  // Uniform width
+```
+
+**Method Renames:**
+
+- **Table**: `.Width()` → `.ColumnWidth()` for column-specific widths
+- **Kanban**: Per-column `.Width()` removed, use `.ColumnWidth()` for uniform width
+
+```csharp
+// Table
+products.ToTable().ColumnWidth(e => e.Sku, Size.Fraction(0.15f));  // Was .Width()
+
+// Kanban
+tasks.ToKanban(...).ColumnWidth(Size.Rem(20));  // Uniform width
+```
+
 ### Kanban Widget API Simplification
 
-**CardBuilder Now Required:**
-
-The simple `titleSelector` and `descriptionSelector` parameters have been removed. You must now use `.CardBuilder()`:
-
-```csharp
-// Old API - no longer supported
-tasks.ToKanban(
-    groupBySelector: e => e.Status,
-    titleSelector: e => e.Title,
-    descriptionSelector: e => e.Description)
-
-// New API - CardBuilder required
-tasks.ToKanban(
-    groupBySelector: e => e.Status,
-    idSelector: e => e.Id,
-    orderSelector: e => e.Priority)
-.CardBuilder(task => new Card()
-    .Title(task.Title)
-    .Description(task.Description))
-```
-
-**HandleCardMove Renamed to HandleMove:**
+- **CardBuilder required**: `titleSelector`/`descriptionSelector` removed. Use `.CardBuilder()` instead
+- **`.HandleCardMove()` - `.HandleMove()`**: Method renamed
+- **Removed handlers**: `.HandleClick()` and `.HandleDelete()` removed. Use Card's `.HandleClick()` within `.CardBuilder()`
 
 ```csharp
-// Before
-tasks.ToKanban(...).HandleCardMove(moveData => { /* ... */ });
-
-// After
-tasks.ToKanban(...).HandleMove(moveData => { /* ... */ });
-```
-
-**Removed Event Handlers:**
-
-The `.HandleClick()` and `.HandleDelete()` methods have been removed from Kanban API. Implement click/delete functionality within your `.CardBuilder()` instead using Card's `.HandleClick()` method.
-
-**Column Width Changes:**
-
-Per-column width configuration removed. Use `.ColumnWidth()` for uniform width:
-
-```csharp
-// Old API - per-column widths
-tasks.ToKanban(...)
-    .Width(e => e.Status, Size.Fraction(0.33f))
-
-// New API - uniform column width
-tasks.ToKanban(...)
-    .ColumnWidth(Size.Rem(20))
-```
-
-**Simplified Width and Height Methods:**
-
-Methods now accept only `Size` parameters:
-
-```csharp
-// Before
-tasks.ToKanban(...).Width(800).Height(600);
-
-// After
-tasks.ToKanban(...).Width(Size.Units(800)).Height(Size.Units(600));
-```
-
-### Table Widget API Change
-
-**Width to ColumnWidth:**
-
-The `.Width()` method for setting column widths has been renamed to `.ColumnWidth()`:
-
-```csharp
-// Before
-products.ToTable()
-    .Width(e => e.Sku, Size.Fraction(0.15f));
-
-// After
-products.ToTable()
-    .ColumnWidth(e => e.Sku, Size.Fraction(0.15f));
+tasks.ToKanban(..., idSelector: e => e.Id, orderSelector: e => e.Priority)
+    .CardBuilder(task => new Card().Title(task.Title).Description(task.Description))
+    .HandleMove(...);
 ```
 
 ### DataTable Row Actions API Change
 
-**Simplified Event Arguments:**
-
-The `RowActionClickEventArgs` structure has been simplified:
-
-```csharp
-// Before
-.HandleRowAction(async e => {
-    var userId = e.Value.RowData["Id"];
-    var action = e.Value.ActionId;
-});
-
-// After
-.HandleRowAction(async e => {
-    var userId = e.Value.Id;   // Direct access
-    var action = e.Value.Tag;   // Menu item tag
-});
-```
-
-**Removed Properties:**
-
-- `ActionId` - Use `Tag` instead
-- `EventName` - Removed
-- `RowIndex` - Removed
-- `RowData` - Use `Id` instead
-
-**idSelector Required for Row Actions:**
-
-When using row actions, you must specify `idSelector` to properly identify rows:
+- **Simplified event args**: `e.Value.Id` and `e.Value.Tag` instead of `e.Value.RowData["Id"]` and `e.Value.ActionId`
+- **Removed**: `ActionId` (use `Tag`), `EventName`, `RowIndex`, `RowData` (use `Id`)
+- **`idSelector` required**: Must specify when using row actions
 
 ```csharp
-users.ToDataTable(idSelector: e => e.Id)  // Required when using row actions
+users.ToDataTable(idSelector: e => e.Id)  // Required
     .RowActions(...)
+    .HandleRowAction(async e => {
+        var userId = e.Value.Id;   // Direct access
+        var action = e.Value.Tag;   // Was ActionId
+    });
 ```
-
-Without `idSelector`, the `Id` property in `RowActionClickEventArgs` will be null.
 
 ### Component Sizing Changes
 
@@ -840,43 +631,13 @@ var authService = new AuthService(authProvider, authSession, clientProvider, ses
 
 ### Enhanced URL Validation
 
-Ivy Framework now includes comprehensive URL validation across all components to prevent open redirect vulnerabilities and other URL-based security issues.
+Comprehensive URL validation across all components to prevent open redirect vulnerabilities and XSS attacks.
 
-**What's Protected:**
-
-All URL-accepting components validate and sanitize URLs automatically:
-
-- Links in markdown content
-- Images, audio, and video players
-- Button widgets with URL targets
-- Any redirect or navigation URLs
-
-**Validation Rules:**
-
-- **Allowed**: Relative paths, http/https URLs, data URLs (for appropriate media types), blob URLs (with origin validation), `app://` protocol URLs, anchor links
-- **Blocked**: `javascript:` protocol, malformed URLs, protocol injection attempts, dangerous URL patterns
-
-**Validation Functions:**
-
-The framework uses centralized validation functions for different URL types:
-
-- `validateLinkUrl()` - For anchor tags and navigation
-- `validateImageUrl()` - For image sources
-- `validateAudioUrl()` - For audio sources
-- `validateVideoUrl()` - For video sources
-- `validateRedirectUrl()` - For redirect operations
-
-**Blob URL Security:**
-
-Blob URLs validated to ensure they match current origin, preventing attacks where malicious blob URLs from other origins could be injected. Properly handles default ports and localhost development scenarios.
-
-**Error Handling:**
-
-Invalid URLs show clear, user-friendly error messages:
-
-- Images/Audio/Video: Bordered error box with message
-- Buttons: "Invalid button URL" in destructive-styled container
-- Links: Converted to safe anchor links (`#`)
+- **Protected components**: Links, images, audio/video players, buttons, redirects
+- **Allowed**: Relative paths, http/https URLs, data URLs, blob URLs (origin-validated), `app://` protocol, anchor links
+- **Blocked**: `javascript:` protocol, malformed URLs, protocol injection attempts
+- **Blob URL security**: Validates origin matching to prevent cross-origin attacks
+- **Error handling**: Invalid URLs show user-friendly error messages or are converted to safe fallbacks
 
 ## Bug Fixes
 
