@@ -1,5 +1,4 @@
 using Ivy.Samples.Shared.Apps.Demos;
-using Ivy.Shared;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
 using OpenAI;
@@ -25,8 +24,7 @@ public static class SamplesServer
                 | Text.Muted($"Version {version}")
             )
             .DefaultApp<HelloApp>()
-            .UseTabs(preventDuplicates: true)
-            .Width(Size.Rem(8));
+            .UseTabs(preventDuplicates: true);
         server.UseChrome(() => new DefaultSidebarChrome(chromeSettings));
 
         server.Services.AddSingleton<SampleDbContextFactory>();
