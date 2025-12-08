@@ -64,8 +64,7 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
   width,
 }) => {
   // Get sidebar width from the width prop (default set in backend)
-  const sidebarWidthStyles = getWidth(width);
-  const sidebarWidth = sidebarWidthStyles.width as string;
+  const sidebarWidth = getWidth(width).width as string;
   // Initialize sidebar state based on current window width (only for main app sidebar)
   const getInitialSidebarState = () => {
     if (!mainAppSidebar) return true;
