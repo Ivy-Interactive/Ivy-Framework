@@ -188,7 +188,7 @@ public class ComplexJsonExample : ViewBase
 
 ## Error Handling and Validation
 
-It shows error handling patterns and how to integrate the Json widget with other input components for a complete user experience.
+Showcases robust error handling, input validation, and seamless integration with the JSON viewer for reliable and user-friendly interactions.
 
 ```csharp demo-tabs 
 public class JsonValidationExample : ViewBase
