@@ -474,10 +474,10 @@ const TimeVariant: React.FC<TimeVariantProps> = ({
 
   return (
     <div className="relative w-full select-none" data-testid={dataTestId}>
-      <div className="relative">
+      <div className="relative flex items-center rounded-md border border-input shadow-sm focus-within:ring-1 focus-within:ring-ring">
         <Clock
           className={cn(
-            'absolute left-3 top-1/2 -translate-y-1/2 shrink-0',
+            'ml-3 shrink-0',
             dateTimeInputIconVariants({ scale }),
             disabled && 'opacity-50'
           )}
@@ -485,6 +485,7 @@ const TimeVariant: React.FC<TimeVariantProps> = ({
         <Input
           type="time"
           step="1"
+          scale={scale}
           value={localTimeValue}
           onChange={handleTimeChange}
           onBlur={handleTimeBlur}
@@ -492,7 +493,7 @@ const TimeVariant: React.FC<TimeVariantProps> = ({
           disabled={disabled}
           placeholder={placeholder || 'Select time'}
           className={cn(
-            'bg-transparent appearance-none [&::-webkit-calendar-picker-indicator]:hidden cursor-pointer w-full pl-10',
+            'bg-transparent appearance-none [&::-webkit-calendar-picker-indicator]:hidden cursor-pointer w-full border-0 shadow-none focus-visible:ring-0',
             dateTimeInputTextVariants({ scale }),
             invalid && inputStyles.invalidInput,
             disabled && 'cursor-not-allowed',
