@@ -58,28 +58,6 @@ public class CardApp : SampleBase
         .Icon(Icons.Info)
         .Large();
 
-        // Example: Card with header (title + buttons), content, and footer
-        var linkedin = Icons.Linkedin.ToButton(_ => client.Toast("LinkedIn clicked!")).Ghost();
-        var dropDown = Icons.Ellipsis
-            .ToButton()
-            .Ghost()
-            .WithDropDown(
-                MenuItem.Default("Delete").Icon(Icons.Trash).HandleSelect(_ => client.Toast("Delete selected")),
-                MenuItem.Default("Edit").Icon(Icons.Pencil).HandleSelect(_ => client.Toast("Edit selected"))
-            );
-        var addDealBtn = new Button("Add Deal", _ => client.Toast("Add Deal clicked!"));
-        var addContactBtn = new Button("Add Contact", _ => client.Toast("Add Contact clicked!")).Outline();
-        var details = Layout.Vertical().Gap(2)
-            | Text.Small("This is an example card with a custom header containing a title and action buttons.")
-            | Text.Small("The footer contains action buttons aligned to the right.");
-
-        var cardWithHeaderFooter = new Card(
-            header: Layout.Horizontal().Align(Align.Center)
-                    | Text.H4("Investor Details").WithLayout().Grow()
-                    | linkedin
-                    | dropDown
-        );
-
         return Layout.Vertical()
          | Text.H1("Card")
          | Text.H2("Basic Examples")
@@ -128,8 +106,6 @@ public class CardApp : SampleBase
             | mediumCard
             | largeCard
             )
-         | Text.H2("Header and Footer Example")
-         | cardWithHeaderFooter
       ;
     }
 }

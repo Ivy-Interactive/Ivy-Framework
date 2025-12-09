@@ -21,7 +21,6 @@ public enum ButtonVariant
     Warning,
     Info,
     Ghost,
-    SkinnyGhost,
     Link,
     Inline,
 }
@@ -176,9 +175,6 @@ public static class ButtonExtensions
 
     [RelatedTo(nameof(Button.Variant))]
     public static Button Ghost(this Button button) => button.Variant(ButtonVariant.Ghost);
-
-    [RelatedTo(nameof(Button.Variant))]
-    public static Button SkinnyGhost(this Button button) => button.Variant(ButtonVariant.SkinnyGhost);
 
     [RelatedTo(nameof(Button.Variant))]
     public static Button Link(this Button button) => button.Variant(ButtonVariant.Link);
