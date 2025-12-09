@@ -36,84 +36,25 @@ Learn more about the Stepper widget in the [documentation](https://docs.ivy.app/
 
 ### Form Scaffolding
 
-**Upload-Aware Form Submission:**
+**Configuration & Submission:**
 
-Forms automatically prevent submission while file uploads are in progress:
-
-- Submit button disabled during uploads
-- Toast notification: "File uploads are still in progress. Please wait for them to complete."
-- Applies to standard forms, sheet forms, and dialog forms
-
-**Enhanced Form Configuration API:**
-
-Forms now offer more flexible configuration options for submit buttons, validation strategies, scaling, and comprehensive DataAnnotations support.
-
-**Submit Button Customization:**
-
-```csharp
-// Simple title change
-model.ToForm()
-    .SubmitTitle("Create Account")
-    .HandleSubmit(async (user) => await CreateAsync(user));
-
-// Full button customization
-model.ToForm()
-    .SubmitBuilder(isLoading => new Button("Save Changes")
-        .Variant(ButtonVariant.Primary)
-        .Loading(isLoading)
-        .Icon(Icons.Save))
-    .HandleSubmit(async (user) => await SaveAsync(user));
-```
-
-**Default Submit Button:**
-
-Forms now automatically get a default "Save" button if none specified.
-
-**Async Submit Handler:**
-
-`.HandleSubmit()` accepts async callback receiving validated model:
-
-```csharp
-model.ToForm()
-    .HandleSubmit(async (user) =>
-    {
-        await _database.SaveUserAsync(user);
-    });
-```
-
-**Validation Strategy:**
-
-Chainable `.ValidationStrategy()` method:
+Forms now support async submit handlers, upload awareness (auto-disabling submit during uploads), and flexible button customization.
 
 ```csharp
 model.ToForm()
     .ValidationStrategy(FormValidationStrategy.OnSubmit)
-    .SubmitTitle("Save");
+    .SubmitBuilder(isLoading => new Button("Save Changes").Loading(isLoading))
+    .HandleSubmit(async (user) => await SaveAsync(user));
 ```
 
-- `Improved Form Spacing and Typography` – Enhanced spacing and typography for better readability and visual hierarchy
+**Comprehensive DataAnnotations Support:**
 
-- `Comprehensive DataAnnotations Support` - full support for DataAnnotations for automatic field configuration and validation
+Full support for standard attributes to configure fields automatically:
 
-- `Display Attributes` - use `[Display]` attributes to control field labels, descriptions, placeholders, ordering, and grouping:
-
-**Input Type Detection:**
-
-Automatically detects input type from `[DataType]` attributes:
-
-- `[DataType(DataType.EmailAddress)]` for Email input
-- `[DataType(DataType.Password)]` for Password input
-- `[DataType(DataType.Url)]` for URL input
-- `[DataType(DataType.CreditCard)]` for Credit card input
-
-**Validation Attributes:**
-
-All major validation attributes supported:
-
-- `[Required]`, `[StringLength]`, `[Range]`, `[RegularExpression]`
-- `[EmailAddress]`, `[Phone]`, `[Url]`, `[CreditCard]`
-- `[AllowedValues]`, `[Compare]`
-- `Smart Label Generation` - Improved "Id" suffix handling that correctly preserves explicit `[Display]` names like "User ID".
+- **Display & Labels:** `[Display]` for labels/grouping. Smart generation logic preserves explicit names like "User ID" while correctly trimming suffixes for others.
+- **Input Types:** `[DataType]` automatically selects widgets (Email, Password, Url, CreditCard).
+- **Validation:** Supports `[Required]`, `[StringLength]`, `[Range]`, `[EmailAddress]`, `[AllowedValues]`, and more.
+- **Control:** `[ScaffoldColumn(false)]` to hide fields.
 
 See the [Forms documentation](https://docs.ivy.app/onboarding/concepts/forms) for complete details.
 
