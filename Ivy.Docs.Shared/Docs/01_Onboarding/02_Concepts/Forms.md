@@ -352,10 +352,10 @@ This example demonstrates:
 **Supported DataAnnotations:**
 
 - `[Required]` - Field must have a value
+- `[Length(min, max)]` - Length constraints for strings and collections (preferred over `[StringLength]`)
 - `[MinLength(n)]` - Minimum string length
 - `[MaxLength(n)]` - Maximum string length
-- `[StringLength(max, MinimumLength = min)]` - String length constraints
-- `[Length(min, max)]` - Length constraints for strings and collections
+- `[StringLength(max, MinimumLength = min)]` - String length constraints (use `[Length]` instead)
 - `[Range(min, max)]` - Value must be within range
 - `[EmailAddress]` - Valid email format
 - `[Phone]` - Valid phone number format
@@ -377,7 +377,7 @@ public class DisplayAttributeExample : ViewBase
     {
         [Display(Name = "Full Name", Description = "Enter your complete legal name", Order = 1)]
         [Required(ErrorMessage = "Full name is required")]
-        [StringLength(100, MinimumLength = 2)]
+        [Length(2, 100)]
         public string Name { get; set; } = "";
 
         [Display(Name = "Email Address", Description = "We'll use this for account verification", Order = 2)]
@@ -391,7 +391,7 @@ public class DisplayAttributeExample : ViewBase
 
         [Display(GroupName = "Account Security", Name = "Password", Order = 4)]
         [Required]
-        [StringLength(100, MinimumLength = 8)]
+        [Length(8, 100)]
         [DataType(DataType.Password)]
         public string Password { get; set; } = "";
 
