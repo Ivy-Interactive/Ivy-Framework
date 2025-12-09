@@ -77,9 +77,7 @@ Forms now automatically get a default "Save" button if none specified.
 model.ToForm()
     .HandleSubmit(async (user) =>
     {
-        // Runs after validation passes
         await _database.SaveUserAsync(user);
-        // Model state updated after callback completes
     });
 ```
 
@@ -90,14 +88,6 @@ Chainable `.ValidationStrategy()` method:
 ```csharp
 model.ToForm()
     .ValidationStrategy(FormValidationStrategy.OnSubmit)
-    .SubmitTitle("Save");
-```
-
-- `Scale Configuration` – the `.Scale()` method is now part of the public API:
-
-```csharp
-model.ToForm()
-    .Scale(Scale.Small)   // or .Medium(), .Large()
     .SubmitTitle("Save");
 ```
 
@@ -123,47 +113,13 @@ All major validation attributes supported:
 - `[Required]`, `[StringLength]`, `[Range]`, `[RegularExpression]`
 - `[EmailAddress]`, `[Phone]`, `[Url]`, `[CreditCard]`
 - `[AllowedValues]`, `[Compare]`
-
-**ScaffoldColumn Control:**
-
-```csharp
-[ScaffoldColumn(false)]
-public Guid Id { get; set; }  // Hidden from form
-```
-
-**Fixed Label Generation:**
-
-Improved logic for handling label generation when field names end with "Id":
-
-- Custom labels specified with `[Display]` attributes are now correctly preserved without modification
-- Only trims "Id" suffix from auto-generated labels (not from Display attribute names)
-- Checks if the label itself ends with "Id" before trimming, preventing incorrect truncation
-- Preserves labels like "User ID", "Government ID", and "Id" when specified via Display attributes
+- `Smart Label Generation` - Improved "Id" suffix handling that correctly preserves explicit `[Display]` names like "User ID".
 
 See the [Forms documentation](https://docs.ivy.app/onboarding/concepts/forms) for complete details.
-
-### Form Input Size Consistency
-
-All form inputs now follow a unified sizing system.
-
-Size variants simplified from enum-based to string literals for easier usage.
 
 ## Input Widgets
 
 ### AsyncSelectInput Enhancements
-
-**Scale Support:**
-
-AsyncSelectInput now fully supports the standard scale system:
-
-```csharp
-selectedOption.ToAsyncSelectInput(QueryOptions, LookupOption, "Search...")
-    .Small();   // h-7
-    .Medium();  // h-9 (default)
-    .Large();   // h-11
-```
-
-Scale affects height, padding, text size, icon size, and search sheet styling.
 
 - **Option Descriptions:** Options support optional descriptions appearing below labels:
 
@@ -199,18 +155,6 @@ files.ToFileInput(upload)
 ```
 
 Explore the [FileInput documentation](https://docs.ivy.app/widgets/inputs/file) for complete API reference.
-
-### Field Widget
-
-FieldWidget now supports custom width and height properties. Field widgets also support explicit width and height directly:
-
-```csharp
-state.ToTextInput()
-    .Width("300px")
-    .Height("40px");
-```
-
-Refer to the [Field Widget documentation](https://docs.ivy.app/widgets/inputs/field) for additional details.
 
 ### Kanban Widget
 
@@ -373,34 +317,11 @@ Perfect for heatmaps, cohort analysis, and visual hierarchies.
 
 Learn more: [Grid Layout documentation](https://docs.ivy.app/widgets/layouts/grid-layout).
 
-### Component Sizing
+### Standardized Scale API
 
-**Sizes Renamed to Scale:**
-
-The `Sizes` enum renamed to `Scale` throughout framework:
-
-```csharp
-// Before
-button.Size(Sizes.Medium);
-
-// After
-button.Scale(Scale.Medium);
-// Or use convenience methods
-button.Small();
-button.Medium();
-button.Large();
-```
+The `Sizes` enum has been renamed to `Scale` throughout the framework. All components (Forms, Inputs, Tables, Expandables) now support consistent `.Small()`, `.Medium()`, and `.Large()` configuration methods. Form inputs default to `Medium` if unspecified.
 
 ### Expandable Widget
-
-**Scale Support:**
-
-```csharp
-new Expandable(header, content)
-    .Small()   // Compact
-    .Medium()  // Default
-    .Large()   // Emphasized
-```
 
 Check the [Expandable documentation](https://docs.ivy.app/widgets/common/expandable) for more examples.
 
@@ -558,26 +479,6 @@ users.ToDataTable(idSelector: e => e.Id)  // Required
         var action = e.Value.Tag;   // Was ActionId
     });
 ```
-
-### Component Sizing Changes
-
-**Sizes Renamed to Scale:**
-
-The `Sizes` enum has been renamed to `Scale`:
-
-```csharp
-// Before
-button.Size(Sizes.Medium);
-
-// After
-button.Scale(Scale.Medium);
-// Or use convenience methods
-button.Medium();
-```
-
-**Medium Scale as Default:**
-
-All form inputs and tables now default to `Scale.Medium` when no scale explicitly specified. If you previously relied on undefined scale behavior, components will now render at Medium scale.
 
 ### Authentication API Changes
 
