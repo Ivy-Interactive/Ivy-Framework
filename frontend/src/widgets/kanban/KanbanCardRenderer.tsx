@@ -38,7 +38,7 @@ export const KanbanCardRenderer: React.FC<KanbanCardRendererProps> = ({
               </CardTitle>
             </KanbanHeader>
           </CardHeader>
-          <CardContent className="flex-1 min-h-0 overflow-hidden pt-0">
+          <CardContent className="flex-1 min-h-0 overflow-hidden pt-2">
             <KanbanCardContent>
               {task.description && (
                 <p className="text-xs text-muted-foreground line-clamp-4 leading-relaxed overflow-hidden text-ellipsis break-words">

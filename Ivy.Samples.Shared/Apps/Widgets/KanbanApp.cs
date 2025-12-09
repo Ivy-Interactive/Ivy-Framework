@@ -57,8 +57,8 @@ public class BasicKanbanExample : ViewBase
                     idSelector: e => e.Id,
                     orderSelector: e => e.Priority)
                 .CardBuilder(task => new Card()
-                    .Title(task.Title)
-                    .Description(task.Description))
+                    .Title(Text.P(task.Title))
+                    .Description(Text.Muted(task.Description)))
                 .ColumnOrder(e => GetStatusOrder(e.Status))
                 .Width(Size.Full())
                 .HandleMove(moveData =>
