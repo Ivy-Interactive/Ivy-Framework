@@ -32,6 +32,7 @@
   <Target Name="TransformMarkdown" BeforeTargets="CoreCompile">
     <Exec Command="dotnet run --project ../Ivy.Docs.Tools/Ivy.Docs.Tools.csproj -- convert $(MSBuildProjectDirectory)/Docs/*.md $(MSBuildProjectDirectory)/Generated --skip-if-not-changed" />
     <ItemGroup>
+      <Compile Remove="Generated/**/*.g.cs" />
       <Compile Include="Generated/**/*.g.cs" />
     </ItemGroup>
   </Target>

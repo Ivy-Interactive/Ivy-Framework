@@ -48,6 +48,10 @@
   <ItemGroup>
     <Protobuf Include="Protos\datatable.proto" GrpcServices="Server" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="obj/**/*.cs;bin/**/*.cs" />
+  </ItemGroup>
   
   <ItemGroup>
     <PackageReference Include="Grpc.AspNetCore" Version="2.64.0" />
