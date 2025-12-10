@@ -5,7 +5,13 @@ import { Toaster } from '@/components/ui/toaster';
 import { ErrorSheet } from '@/components/ErrorSheet';
 import ErrorBoundary from './ErrorBoundary';
 import MadeWithIvy from './MadeWithIvy';
-import { getAppArgs, getAppId, getChromeParam, getParentId } from '@/lib/utils';
+import {
+  getAppArgs,
+  getAppId,
+  getChromeParam,
+  getParentId,
+  wrapAppContent,
+} from '@/lib/utils';
 import { hasLicensedFeature } from '@/lib/license';
 import { ConnectionModal } from './ConnectionModal';
 import { ThemeProvider } from './theme-provider';
@@ -52,7 +58,10 @@ export function App() {
         <EventHandlerProvider eventHandler={eventHandler}>
           <>
             {!removeBranding && <MadeWithIvy />}
-            {renderWidgetTree(widgetTree || loadingState())}
+            {wrapAppContent(
+              renderWidgetTree(widgetTree || loadingState()),
+              chrome
+            )}
             <ErrorSheet />
             <Toaster />
             {disconnected && <ConnectionModal />}
