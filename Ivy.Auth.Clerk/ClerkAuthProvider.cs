@@ -79,26 +79,57 @@ public class ClerkAuthProvider : IAuthProvider
         _frontendClient = new FrontendApiClient(_frontendApiDomain);
     }
 
-    private async Task<string> GetDevBrowserJwtAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
+    private async Task<ClerkCredentials> GetClerkCredentialsAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
     {
-        if (authSession.AuthSessionData is { } devBrowserJwt && devBrowserJwt.StartsWith("dvb_"))
+        var credentials = new ClerkCredentials()
         {
-            return devBrowserJwt;
+            SessionToken = authSession.AuthToken?.AccessToken,
+        };
+
+        if (_isProduction)
+        {
+            if (authSession.AuthSessionData is { } clientToken && new JwtSecurityTokenHandler().CanReadToken(clientToken))
+            {
+                credentials.ClientToken = clientToken;
+            }
+            else
+            {
+                authSession.AuthSessionData = null;
+                var clientResponse = await _frontendClient.GetCurrentClientAsync(credentials, cancellationToken);
+                authSession.AuthSessionData = credentials.ClientToken;
+            }
+            return credentials;
         }
-        var devBrowserTokenResponse = await _frontendClient.CreateDevBrowserTokenAsync(cancellationToken);
-        authSession.AuthSessionData = devBrowserTokenResponse.Id;
-        return devBrowserTokenResponse.Id;
+        else
+        {
+            if (authSession.AuthSessionData is { } devBrowserJwt && devBrowserJwt.StartsWith("dvb_"))
+            {
+                credentials.DevBrowserToken = devBrowserJwt;
+            }
+            else
+            {
+                authSession.AuthSessionData = null;
+                var devBrowserTokenResponse = await _frontendClient.CreateDevBrowserTokenAsync(cancellationToken);
+                devBrowserJwt = devBrowserTokenResponse.Id;
+                authSession.AuthSessionData = devBrowserJwt;
+                credentials.DevBrowserToken = devBrowserJwt;
+            }
+            return credentials;
+        }
     }
 
     public async Task InitializeAsync(IAuthSession authSession, string requestScheme, string requestHost, CancellationToken cancellationToken = default)
     {
-        var clientResponse = await _frontendClient.CreateNewClientAsync(cancellationToken);
-
-        var devBrowserJwt = await GetDevBrowserJwtAsync(authSession, cancellationToken);
-
-        var updateEnvironmentResponse = await _frontendClient.UpdateEnvironmentAsync(ClerkApiClientToken.FromDevBrowserToken(devBrowserJwt), ORIGIN_TEMPORARY_REMOVE_THIS_BEFORE_MERGE, cancellationToken);
-
-        var existingClientResponse = await _frontendClient.GetCurrentClientAsync(ClerkApiClientToken.FromDevBrowserToken(devBrowserJwt), cancellationToken);
+        if (_isProduction)
+        {
+            var environmentResponse = await _frontendClient.GetEnvironmentAsync(cancellationToken: cancellationToken);
+            await GetClerkCredentialsAsync(authSession, cancellationToken);
+        }
+        else
+        {
+            var credentials = await GetClerkCredentialsAsync(authSession, cancellationToken);
+            var updateEnvironmentResponse = await _frontendClient.UpdateEnvironmentAsync(credentials, ORIGIN_TEMPORARY_REMOVE_THIS_BEFORE_MERGE, cancellationToken);
+        }
     }
 
     private async Task<ICollection<SecurityKey>> GetSigningKeysAsync(CancellationToken cancellationToken = default)
@@ -135,7 +166,7 @@ public class ClerkAuthProvider : IAuthProvider
 
     public async Task<Uri> GetOAuthUriAsync(IAuthSession authSession, AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken = default)
     {
-        var devBrowserJwt = await GetDevBrowserJwtAsync(authSession, cancellationToken);
+        var credentials = await GetClerkCredentialsAsync(authSession, cancellationToken);
 
         var strategy = option.Id switch
         {
@@ -148,9 +179,8 @@ public class ClerkAuthProvider : IAuthProvider
         };
 
         var redirectUrl = callback.GetUri(includeIdInPath: true).ToString();
-        var clientToken = ClerkApiClientToken.FromDevBrowserToken(devBrowserJwt);
-        var signInResponse = await _frontendClient.CreateSignInAsync(clientToken, ORIGIN_TEMPORARY_REMOVE_THIS_BEFORE_MERGE, strategy, redirectUrl, null, cancellationToken);
-        var firstFactorVerificationResponse = await _frontendClient.PrepareFirstFactorVerificationAsync(clientToken, ORIGIN_TEMPORARY_REMOVE_THIS_BEFORE_MERGE, signInResponse.Response!.Id, strategy, redirectUrl, null, cancellationToken);
+        var signInResponse = await _frontendClient.CreateSignInAsync(credentials, ORIGIN_TEMPORARY_REMOVE_THIS_BEFORE_MERGE, strategy, redirectUrl, null, cancellationToken);
+        var firstFactorVerificationResponse = await _frontendClient.PrepareFirstFactorVerificationAsync(credentials, ORIGIN_TEMPORARY_REMOVE_THIS_BEFORE_MERGE, signInResponse.Response!.Id, strategy, redirectUrl, null, cancellationToken);
         if (firstFactorVerificationResponse.Response?.FirstFactorVerification?.ExternalVerificationRedirectUrl is not { } oauthUri)
         {
             throw new Exception("Failed to get OAuth redirect URL from Clerk.");
@@ -160,12 +190,36 @@ public class ClerkAuthProvider : IAuthProvider
 
     public async Task<AuthToken?> HandleOAuthCallbackAsync(IAuthSession authSession, HttpRequest request, CancellationToken cancellationToken = default)
     {
+        Console.WriteLine("Request Headers:");
+        foreach (var header in request.Headers)
+        {
+            // For debugging purposes
+            Console.WriteLine($"    {header.Key}: {header.Value}");
+        }
+        Console.WriteLine();
+
+        Console.WriteLine("Cookies:");
+        foreach (var cookie in request.Cookies)
+        {
+            // For debugging purposes
+            Console.WriteLine($"    {cookie.Key}: {cookie.Value}");
+        }
+        Console.WriteLine();
+
+        Console.WriteLine("Query Params:");
+        foreach (var queryParam in request.Query)
+        {
+            // For debugging purposes
+            Console.WriteLine($"    {queryParam.Key}: {queryParam.Value}");
+        }
+        Console.WriteLine();
+
         var sessionId = request.Query["created_session_id"].ToString();
-        var devBrowserJwt = await GetDevBrowserJwtAsync(authSession, cancellationToken);
+        var credentials = await GetClerkCredentialsAsync(authSession, cancellationToken);
         try
         {
-            var sessionResponse = await _frontendClient.TouchSessionAsync(sessionId, ClerkApiSessionToken.FromDevBrowserToken(devBrowserJwt), cancellationToken);
-            var newToken = await _frontendClient.CreateSessionTokenAsync(sessionId, ClerkApiClientToken.FromDevBrowserToken(devBrowserJwt), cancellationToken);
+            var sessionResponse = await _frontendClient.TouchSessionAsync(sessionId, credentials, cancellationToken);
+            var newToken = await _frontendClient.CreateSessionTokenAsync(sessionId, credentials, cancellationToken);
             if (string.IsNullOrEmpty(newToken.Jwt))
             {
                 throw new Exception("Failed to get new JWT from Clerk.");
@@ -184,7 +238,7 @@ public class ClerkAuthProvider : IAuthProvider
     public async Task LogoutAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
     {
         var jwt = authSession.AuthToken?.AccessToken;
-        var devBrowserJwt = await GetDevBrowserJwtAsync(authSession, cancellationToken);
+        var credentials = await GetClerkCredentialsAsync(authSession, cancellationToken);
 
         try
         {
@@ -196,7 +250,7 @@ public class ClerkAuthProvider : IAuthProvider
                 throw new Exception("No session ID found in access token.");
             }
 
-            await _frontendClient.EndSessionAsync(sessionId, ClerkApiSessionToken.FromDevBrowserToken(devBrowserJwt), cancellationToken);
+            await _frontendClient.EndSessionAsync(sessionId, credentials, cancellationToken);
         }
         catch (Exception)
         {
@@ -208,7 +262,7 @@ public class ClerkAuthProvider : IAuthProvider
         try
         {
             var token = authSession.AuthToken;
-            var devBrowserJwt = await GetDevBrowserJwtAsync(authSession, cancellationToken);
+            var credentials = await GetClerkCredentialsAsync(authSession, cancellationToken);
 
             var (principal, _) = await ValidateToken(token?.AccessToken, lenientLifetimeValidation: true, cancellationToken)
                 ?? throw new Exception("Failed to validate access token during token refresh.");
@@ -218,7 +272,7 @@ public class ClerkAuthProvider : IAuthProvider
                 throw new Exception("No session ID found in access token.");
             }
 
-            var newToken = await _frontendClient.CreateSessionTokenAsync(sessionId, ClerkApiClientToken.FromDevBrowserToken(devBrowserJwt), cancellationToken);
+            var newToken = await _frontendClient.CreateSessionTokenAsync(sessionId, credentials, cancellationToken);
             if (string.IsNullOrEmpty(newToken.Jwt))
             {
                 throw new Exception("Failed to get new JWT from Clerk.");
@@ -243,7 +297,7 @@ public class ClerkAuthProvider : IAuthProvider
     {
         try
         {
-            var devBrowserJwt = await GetDevBrowserJwtAsync(authSession, cancellationToken);
+            var credentials = await GetClerkCredentialsAsync(authSession, cancellationToken);
 
             var (principal, _) = await ValidateToken(authSession.AuthToken?.AccessToken, lenientLifetimeValidation: true, cancellationToken)
                 ?? throw new Exception("Failed to validate access token in GetUserInfoAsync.");
@@ -253,7 +307,7 @@ public class ClerkAuthProvider : IAuthProvider
                 return null;
             }
 
-            var session = await _frontendClient.GetSessionAsync(sessionId, ClerkApiSessionToken.FromDevBrowserToken(devBrowserJwt), cancellationToken);
+            var session = await _frontendClient.GetSessionAsync(sessionId, credentials, cancellationToken);
             var user = session.Response.User;
 
             string name = user.FirstName ?? "";
