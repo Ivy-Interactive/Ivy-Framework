@@ -17,7 +17,6 @@
 
   <ItemGroup Condition="'$(IvyPackageVersion)' == ''">
     <ProjectReference Include="../Ivy/Ivy.csproj" />
-    <ProjectReference Include="../Ivy.Docs.Tools/Ivy.Docs.Tools.csproj" />
   </ItemGroup>
 
   <ItemGroup>

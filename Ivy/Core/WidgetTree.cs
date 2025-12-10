@@ -307,6 +307,14 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
         {
             var update = partial.GetWidgetTree()?.Serialize();
             var patch = previous.Diff(update, new JsonPatchDeltaFormatter());
+
+#if DEBUG
+            if (Environment.GetEnvironmentVariable("IVY_DUMP_WIDGET_TREES") == "1")
+            {
+                DebugHelpers.LogUpdatedTree(previous, update, patch);
+            }
+#endif
+
             return new WidgetTreeChanged(viewId, indices, patch);
         }
         catch (ObjectDisposedException)

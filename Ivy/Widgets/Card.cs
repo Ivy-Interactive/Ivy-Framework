@@ -63,7 +63,7 @@ public static class CardExtensions
         };
     }
 
-    public static Card Title(this Card card, string title) => card.Header(Text.Block(title), card.Description, card.Icon);
+    public static Card Title(this Card card, object? title) => card.Header(title, card.Description, card.Icon);
 
     public static Card Description(this Card card, string description) => card.Header(card.Title, Text.Muted(description), card.Icon);
 

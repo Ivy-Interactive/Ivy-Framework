@@ -12,8 +12,6 @@ public interface IAnyInput
 
     [Prop] public string? Invalid { get; set; }
 
-    [Prop] public Scale? Scale { get; set; }
-
     [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
 
     public Type[] SupportedStateTypes();

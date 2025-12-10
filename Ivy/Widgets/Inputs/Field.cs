@@ -24,6 +24,7 @@ public record Field : WidgetBase<Field>
             descriptionProp.SetValue(input, inputDescription ?? description);
             description = null;
         }
+
         Label = label;
         Description = description;
         Required = required;

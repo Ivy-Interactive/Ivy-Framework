@@ -8,15 +8,6 @@
 - Run `dotnet build` to verify - build errors are source of truth
 - PascalCase for classes/methods/properties, _camelCase for private fields, camelCase for parameters/locals
 
-**XML Documentation (Required for Public APIs):**
-```csharp
-/// <summary>Processes user input and validates against rules.</summary>
-/// <param name="input">The user input to process.</param>
-/// <param name="rules">The validation rules to apply.</param>
-/// <returns>A validation result indicating success or failure.</returns>
-public ValidationResult ProcessInput(string input, ValidationRules rules) { }
-```
-
 ## TypeScript/React Conventions
 
 **Core Rules:**

@@ -1,3 +1,4 @@
+using System.Reflection;
 using Ivy.Core;
 using Ivy.Shared;
 
@@ -95,4 +96,19 @@ public static class WidgetBaseExtensions
     public static T Hide<T>(this T widget) where T : WidgetBase<T> => widget with { Visible = false };
 
     public static T TestId<T>(this T widget, string testId) where T : WidgetBase<T> => widget with { TestId = testId };
+
+    internal static void SetScaleViaReflection(object input, Scale? scale)
+    {
+        var type = input.GetType();
+        var prop = type.GetProperty(
+            nameof(Scale),
+            BindingFlags.Instance | BindingFlags.Public
+        );
+
+        if (prop is null) return;
+        if (!prop.CanWrite) return;
+        if (!prop.PropertyType.IsAssignableFrom(typeof(Scale))) return;
+
+        prop.SetValue(input, scale);
+    }
 }

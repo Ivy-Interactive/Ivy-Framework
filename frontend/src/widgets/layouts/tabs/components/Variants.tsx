@@ -111,7 +111,11 @@ export const ContentVariant: React.FC<ContentVariantProps> = ({
         removeParentPadding && 'remove-parent-padding'
       )}
     >
-      <div ref={containerRef} className="relative" style={getWidth(width)}>
+      <div
+        ref={containerRef}
+        className="relative pb-[6px]"
+        style={getWidth(width)}
+      >
         {/* Hover Highlight */}
         <div
           className="absolute h-[26px] transition-all duration-300 ease-out bg-accent/20 rounded-[6px] flex items-center"
@@ -123,7 +127,7 @@ export const ContentVariant: React.FC<ContentVariantProps> = ({
         {/* Active Indicator */}
         <div
           className={cn(
-            'absolute bottom-[-6px] h-[2px] bg-foreground',
+            'absolute bottom-0 h-[2px] bg-foreground',
             !isInitialRender && 'transition-all duration-300 ease-out',
             activeTabId && !visibleTabs.includes(activeTabId) && 'opacity-0'
           )}
@@ -316,9 +320,9 @@ export const TabsVariant: React.FC<TabsVariantProps> = ({
                       className={cn(
                         'group overflow-hidden h-full data-[state=active]:z-10 data-[state=active]:shadow-none border-x border-t border-b border-border flex-shrink-0',
                         // Inactive tab styling - pure black in dark mode
-                        'bg-muted dark:bg-background hover:bg-muted-foreground/20 dark:hover:bg-muted-foreground/20',
+                        'bg-background hover:bg-muted-foreground/10 dark:hover:bg-muted-foreground/20',
                         // Active tab styling (overrides inactive)
-                        'data-[state=active]:bg-card data-[state=active]:hover:bg-card',
+                        'data-[state=active]:bg-background data-[state=active]:hover:bg-card',
                         (variant as string) === 'Content' &&
                           'border-b-2 border-b-transparent data-[state=active]:border-b-primary'
                       )}

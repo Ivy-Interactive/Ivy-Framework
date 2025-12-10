@@ -66,8 +66,6 @@ public class AsyncSelectInputView<TValue> : ViewBase, IAnyAsyncSelectInputBase, 
 
     public Func<Event<IInput<TValue>, TValue>, ValueTask>? OnChange { get; }
 
-    public Scale? Scale { get; set; }
-
     public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
 
     public bool Disabled { get; set; }
@@ -75,6 +73,8 @@ public class AsyncSelectInputView<TValue> : ViewBase, IAnyAsyncSelectInputBase, 
     public string? Invalid { get; set; }
 
     public string? Placeholder { get; set; }
+
+    public Scale Scale { get; set; } = Scale.Medium;
 
     public override object? Build()
     {
@@ -137,14 +137,14 @@ public class AsyncSelectInputView<TValue> : ViewBase, IAnyAsyncSelectInputBase, 
             },
             open.Value ? new Sheet(
                 OnClose,
-                new AsyncSelectListSheet<TValue>(refreshToken, Query, Scale),
+                new AsyncSelectListSheet<TValue>(refreshToken, Query),
                 title: Placeholder
                 ) : null
         );
     }
 }
 
-public class AsyncSelectListSheet<T>(RefreshToken refreshToken, AsyncSelectQueryDelegate<T> query, Scale? scale = null) : ViewBase
+public class AsyncSelectListSheet<T>(RefreshToken refreshToken, AsyncSelectQueryDelegate<T> query) : ViewBase
 {
     public override object? Build()
     {
@@ -169,10 +169,6 @@ public class AsyncSelectListSheet<T>(RefreshToken refreshToken, AsyncSelectQuery
             new ListItem(title: option.Label, subtitle: option.Description, onClick: onItemClicked, tag: option)).ToArray();
 
         var searchInput = filter.ToSearchInput().Placeholder("Search").Width(Size.Grow());
-        if (scale.HasValue)
-        {
-            searchInput.Scale = scale.Value;
-        }
 
         var header = Layout.Vertical().Gap(2)
             | searchInput;
@@ -256,6 +252,7 @@ internal record AsyncSelectInput : WidgetBase<AsyncSelectInput>
     [Prop] public string? Invalid { get; init; }
 
     [Prop] public string? DisplayValue { get; init; }
+
     [Prop] public bool Loading { get; init; }
 
     [Event] public Func<Event<AsyncSelectInput>, ValueTask>? OnSelect { get; init; }

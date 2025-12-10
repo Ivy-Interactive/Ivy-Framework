@@ -12,3 +12,12 @@ public class FuncView(FuncViewBuilder viewFactory) : ViewBase
         return viewFactory(Context);
     }
 }
+public class MemoizedFuncView(FuncViewBuilder viewFactory, object[] memoValues) : ViewBase, IMemoized
+{
+    public override object? Build()
+    {
+        return viewFactory(Context);
+    }
+
+    public object[] GetMemoValues() => memoValues;
+}

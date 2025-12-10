@@ -133,7 +133,10 @@ public class FormFieldView(
             input.Placeholder = placeholder;
         }
 
-        input.Scale = scale;
+        if (scale != Scale.Medium)
+        {
+            WidgetBaseExtensions.SetScaleViaReflection(input, scale);
+        }
 
         return visibleState.Value ? new Field(input, label, description, required, help, scale) : null;
     }

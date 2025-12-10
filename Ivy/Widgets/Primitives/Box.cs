@@ -10,9 +10,9 @@ public record Box : WidgetBase<Box>
     {
     }
 
-    [Prop] public Colors? Color { get; set; } = Colors.Primary;
+    [Prop] public Colors? Color { get; set; } = null;
 
-    [Prop] public Thickness BorderThickness { get; set; } = new(2);
+    [Prop] public Thickness BorderThickness { get; set; } = new(1);
 
     [Prop] public BorderRadius BorderRadius { get; set; } = BorderRadius.Rounded;
 
@@ -22,7 +22,7 @@ public record Box : WidgetBase<Box>
 
     [Prop] public Thickness Margin { get; set; } = new(0);
 
-    [Prop] public Align? ContentAlign { get; set; } = Align.Center;
+    [Prop] public Align? ContentAlign { get; set; } = Align.TopLeft;
 
     [Prop] public float? Opacity { get; set; }
 }

@@ -263,7 +263,9 @@ public class AppHub(
             {
                 await Clients.Caller.SendAsync("Error", new
                 {
-                    viewOverride = new NotFoundApp()
+                    title = "Internal Server Error",
+                    description = ex.Message,
+                    stackTrace = ex.StackTrace,
                 });
             }
             catch

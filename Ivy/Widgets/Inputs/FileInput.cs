@@ -39,8 +39,6 @@ public abstract record FileInputBase : WidgetBase<FileInputBase>, IAnyFileInput
 
     [Prop] public string? UploadUrl { get; set; }
 
-    [Prop] public new Scale? Scale { get; set; }
-
     [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
 
     [Event] public Func<Event<IAnyInput, Guid>, ValueTask>? OnCancel { get; set; }
