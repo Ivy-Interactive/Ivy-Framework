@@ -6,8 +6,6 @@ using Ivy.Views.Forms;
 
 namespace Ivy.Samples.Shared.Apps.Concepts;
 
-#region Enums
-
 public enum Gender
 {
     Male,
@@ -55,10 +53,6 @@ public enum ViewState
     Success,
     Error
 }
-
-#endregion
-
-#region Models
 
 public record AppSpec(string Name, string Description);
 
@@ -135,10 +129,6 @@ public record UserModel(
     List<Fruits> FavoriteFruits = null!
 );
 
-#endregion
-
-#region Scaffolding Models
-
 public class DisplayExample
 {
     [Display(
@@ -210,10 +200,6 @@ public class StringsExample
     [Display(Description = "Must be between 5 and 10 characters long")]
     public string LengthString { get; set; } = "";
 }
-
-#endregion
-
-#region Validation Model
 
 public record FormValidationExamples
 {
@@ -306,8 +292,6 @@ public record FormValidationExamples
     [MaxLength(1000)]
     public string? Comments { get; init; }
 }
-
-#endregion
 
 [App(icon: Icons.Clipboard, path: ["Concepts"], searchHints: ["inputs", "fields", "validation", "submission", "data-entry", "controls", "scaffolding", "forms"])]
 public class FormApp : SampleBase
