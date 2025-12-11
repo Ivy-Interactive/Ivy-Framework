@@ -4,13 +4,19 @@ using Ivy.Auth.Clerk.ApiClient.Responses;
 
 namespace Ivy.Auth.Clerk.ApiClient;
 
-public class FrontendApiClient(string? frontendApiDomain)
+public class FrontendApiClient
 {
-    private readonly string? _frontendApiDomain = frontendApiDomain;
-    private readonly HttpClient _httpClient = new();
+    private readonly string? _frontendApiDomain;
+    private readonly HttpClient _httpClient;
     private readonly JsonSerializerOptions _jsonSerializerOptions = new() { PropertyNameCaseInsensitive = true };
 
     private const string ApiVersion = "2025-11-10";
+
+    public FrontendApiClient(string? frontendApiDomain, HttpMessageHandler messageHandler)
+    {
+        _frontendApiDomain = frontendApiDomain;
+        _httpClient = new HttpClient(messageHandler, disposeHandler: false);
+    }
 
     public async Task<ClerkDevBrowserTokenResponse> CreateDevBrowserTokenAsync(CancellationToken cancellationToken = default)
     {
