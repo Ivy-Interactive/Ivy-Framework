@@ -2,7 +2,6 @@ using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using Ivy.Core.Helpers;
-using Ivy.Widgets.Inputs;
 
 namespace Ivy.Core;
 
@@ -68,8 +67,7 @@ public abstract record AbstractWidget : IWidget
             Converters =
             {
                 new JsonEnumConverter(),
-                new ValueTupleConverterFactory(),
-                new PrefixSuffixJsonConverterFactory()
+                new ValueTupleConverterFactory()
             }
         };
 

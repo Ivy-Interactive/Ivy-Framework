@@ -1,15 +1,22 @@
 using System.Runtime.CompilerServices;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Ivy.Core;
 using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
-using Ivy.Widgets.Inputs;
 using Ivy.Shared;
+using Ivy.Widgets.Inputs;
 
 // ReSharper disable once CheckNamespace
 namespace Ivy;
+
+public record Affix
+{
+    public Icons? Icon { get; init; }
+    public string? Text { get; init; }
+
+    public static Affix ToIcon(Icons icon) => new() { Icon = icon };
+    public static Affix ToText(string text) => new() { Text = text };
+}
 
 public enum TextInputs
 {
@@ -39,9 +46,9 @@ public abstract record TextInputBase : WidgetBase<TextInputBase>, IAnyTextInput
 
     [Prop] public string? ShortcutKey { get; set; }
 
-    [Prop] public PrefixSuffix? Prefix { get; set; }
+    [Prop] public Affix? Prefix { get; set; }
 
-    [Prop] public PrefixSuffix? Suffix { get; set; }
+    [Prop] public Affix? Suffix { get; set; }
 
     [Prop] public int? MaxLength { get; set; }
 
@@ -146,16 +153,16 @@ public static class TextInputExtensions
     public static TextInputBase MaxLength(this TextInputBase widget, int maxLength) => widget with { MaxLength = maxLength };
 
     public static TextInputBase Prefix(this TextInputBase widget, string prefixText)
-        => widget with { Prefix = new PrefixSuffix.Text(prefixText) };
+        => widget with { Prefix = Affix.ToText(prefixText) };
 
     public static TextInputBase Prefix(this TextInputBase widget, Icons prefixIcon)
-        => widget with { Prefix = new PrefixSuffix.Icon(prefixIcon) };
+        => widget with { Prefix = Affix.ToIcon(prefixIcon) };
 
     public static TextInputBase Suffix(this TextInputBase widget, string suffixText)
-        => widget with { Suffix = new PrefixSuffix.Text(suffixText) };
+        => widget with { Suffix = Affix.ToText(suffixText) };
 
     public static TextInputBase Suffix(this TextInputBase widget, Icons suffixIcon)
-        => widget with { Suffix = new PrefixSuffix.Icon(suffixIcon) };
+        => widget with { Suffix = Affix.ToIcon(suffixIcon) };
 
     [OverloadResolutionPriority(1)]
     public static TextInputBase HandleBlur(this TextInputBase widget, Func<Event<IAnyInput>, ValueTask> onBlur)

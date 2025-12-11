@@ -6,7 +6,7 @@ import { InvalidIcon } from '@/components/InvalidIcon';
 import { Scales } from '@/types/scale';
 import { textInputSizeVariants } from '@/components/ui/input/text-input-variants';
 import { TextInputWidgetProps } from '../types';
-import { renderPrefixSuffix } from '../utils/renderPrefixSuffix';
+import { renderAffix } from '../utils/renderAffix';
 import {
   useCursorPosition,
   useEnterKeyBlur,
@@ -57,9 +57,8 @@ export const DefaultVariant: React.FC<DefaultVariantProps> = ({
 
   const shortcutDisplay = formatShortcutForDisplay(props.shortcutKey);
   const hasValue = props.value && props.value.toString().trim() !== '';
-  const prefixContent = renderPrefixSuffix(props.prefix);
-  const suffixContent = renderPrefixSuffix(props.suffix);
-
+  const prefixContent = renderAffix(props.prefix);
+  const suffixContent = renderAffix(props.suffix);
   const hasAffixes = prefixContent || suffixContent;
 
   return (
