@@ -31,13 +31,13 @@ public class ThemeService : IThemeService
 
         // Generate :root (light theme) variables
         sb.AppendLine(":root {");
-        AppendThemeColors(sb, _currentTheme.Colors.Light);
+        AppendAllTokens(sb, isLightTheme: true);
         AppendOtherThemeProperties(sb);
         sb.AppendLine("}");
 
         // Generate .dark theme variables
         sb.AppendLine(".dark {");
-        AppendThemeColors(sb, _currentTheme.Colors.Dark);
+        AppendAllTokens(sb, isLightTheme: false);
         sb.AppendLine("}");
 
         sb.AppendLine("</style>");
@@ -51,68 +51,95 @@ public class ThemeService : IThemeService
         return $"<meta name=\"ivy-theme\" content=\"{encodedTheme}\" />";
     }
 
-    private void AppendThemeColors(StringBuilder sb, ThemeColors colors)
+    private void AppendAllTokens(StringBuilder sb, bool isLightTheme)
     {
-        // Main theme colors
-        AppendColorVariable(sb, "--primary", colors.Primary);
-        AppendColorVariable(sb, "--primary-foreground", colors.PrimaryForeground);
-        AppendColorVariable(sb, "--secondary", colors.Secondary);
-        AppendColorVariable(sb, "--secondary-foreground", colors.SecondaryForeground);
-        AppendColorVariable(sb, "--background", colors.Background);
-        AppendColorVariable(sb, "--foreground", colors.Foreground);
+        // Get all tokens from design system
+        var themeTokens = isLightTheme
+            ? IvyFrameworkLightThemeTokens.GetAllTokens()
+            : IvyFrameworkDarkThemeTokens.GetAllTokens();
+        var neutralTokens = IvyFrameworkNeutralTokens.GetAllTokens();
+        var chromaticTokens = IvyFrameworkChromaticTokens.GetAllTokens();
 
-        // Semantic colors
-        AppendColorVariable(sb, "--destructive", colors.Destructive);
-        AppendColorVariable(sb, "--destructive-foreground", colors.DestructiveForeground);
-        AppendColorVariable(sb, "--success", colors.Success);
-        AppendColorVariable(sb, "--success-foreground", colors.SuccessForeground);
-        AppendColorVariable(sb, "--warning", colors.Warning);
-        AppendColorVariable(sb, "--warning-foreground", colors.WarningForeground);
-        AppendColorVariable(sb, "--info", colors.Info);
-        AppendColorVariable(sb, "--info-foreground", colors.InfoForeground);
+        // Get custom overrides
+        var customColors = isLightTheme ? _currentTheme.Colors.Light : _currentTheme.Colors.Dark;
 
-        // UI element colors
-        AppendColorVariable(sb, "--border", colors.Border);
-        AppendColorVariable(sb, "--input", colors.Input);
-        AppendColorVariable(sb, "--ring", colors.Ring);
-        AppendColorVariable(sb, "--muted", colors.Muted);
-        AppendColorVariable(sb, "--muted-foreground", colors.MutedForeground);
-        AppendColorVariable(sb, "--accent", colors.Accent);
-        AppendColorVariable(sb, "--accent-foreground", colors.AccentForeground);
-        AppendColorVariable(sb, "--card", colors.Card);
-        AppendColorVariable(sb, "--card-foreground", colors.CardForeground);
+        // Append theme tokens (primary, secondary, background, etc.)
+        // Custom overrides take precedence over design system defaults
+        foreach (var (name, value) in themeTokens)
+        {
+            var cssVarName = ToCssVariableName(name);
+            var customValue = GetCustomColorValue(customColors, name);
+            sb.AppendLine($"  {cssVarName}: {customValue ?? value};");
+        }
 
-        // Popover colors
-        AppendColorVariable(sb, "--popover", colors.Popover);
-        AppendColorVariable(sb, "--popover-foreground", colors.PopoverForeground);
+        // Append neutral tokens (black, white, slate, gray, etc.)
+        foreach (var (name, value) in neutralTokens)
+        {
+            var cssVarName = ToCssVariableName(name);
+            sb.AppendLine($"  {cssVarName}: {value};");
+        }
 
-        // Neutral colors
-        AppendColorVariable(sb, "--black", colors.Black);
-        AppendColorVariable(sb, "--white", colors.White);
-        AppendColorVariable(sb, "--slate", colors.Slate);
-        AppendColorVariable(sb, "--gray", colors.Gray);
-        AppendColorVariable(sb, "--zinc", colors.Zinc);
-        AppendColorVariable(sb, "--neutral", colors.Neutral);
-        AppendColorVariable(sb, "--stone", colors.Stone);
+        // Append chromatic tokens (red, orange, amber, etc.)
+        foreach (var (name, value) in chromaticTokens)
+        {
+            var cssVarName = ToCssVariableName(name);
+            sb.AppendLine($"  {cssVarName}: {value};");
+        }
+    }
 
-        // Chromatic colors
-        AppendColorVariable(sb, "--red", colors.Red);
-        AppendColorVariable(sb, "--orange", colors.Orange);
-        AppendColorVariable(sb, "--amber", colors.Amber);
-        AppendColorVariable(sb, "--yellow", colors.Yellow);
-        AppendColorVariable(sb, "--lime", colors.Lime);
-        AppendColorVariable(sb, "--green", colors.Green);
-        AppendColorVariable(sb, "--emerald", colors.Emerald);
-        AppendColorVariable(sb, "--teal", colors.Teal);
-        AppendColorVariable(sb, "--cyan", colors.Cyan);
-        AppendColorVariable(sb, "--sky", colors.Sky);
-        AppendColorVariable(sb, "--blue", colors.Blue);
-        AppendColorVariable(sb, "--indigo", colors.Indigo);
-        AppendColorVariable(sb, "--violet", colors.Violet);
-        AppendColorVariable(sb, "--purple", colors.Purple);
-        AppendColorVariable(sb, "--fuchsia", colors.Fuchsia);
-        AppendColorVariable(sb, "--pink", colors.Pink);
-        AppendColorVariable(sb, "--rose", colors.Rose);
+    private static string? GetCustomColorValue(ThemeColors colors, string tokenName)
+    {
+        return tokenName switch
+        {
+            "Primary" => colors.Primary,
+            "PrimaryForeground" => colors.PrimaryForeground,
+            "Secondary" => colors.Secondary,
+            "SecondaryForeground" => colors.SecondaryForeground,
+            "Background" => colors.Background,
+            "Foreground" => colors.Foreground,
+            "Destructive" => colors.Destructive,
+            "DestructiveForeground" => colors.DestructiveForeground,
+            "Success" => colors.Success,
+            "SuccessForeground" => colors.SuccessForeground,
+            "Warning" => colors.Warning,
+            "WarningForeground" => colors.WarningForeground,
+            "Info" => colors.Info,
+            "InfoForeground" => colors.InfoForeground,
+            "Border" => colors.Border,
+            "Input" => colors.Input,
+            "Ring" => colors.Ring,
+            "Muted" => colors.Muted,
+            "MutedForeground" => colors.MutedForeground,
+            "Accent" => colors.Accent,
+            "AccentForeground" => colors.AccentForeground,
+            "Card" => colors.Card,
+            "CardForeground" => colors.CardForeground,
+            "Popover" => colors.Popover,
+            "PopoverForeground" => colors.PopoverForeground,
+            _ => null
+        };
+    }
+
+    private static string ToCssVariableName(string tokenName)
+    {
+        // Convert PascalCase token names to kebab-case CSS variable names
+        // e.g., "Primary" -> "--primary", "PrimaryForeground" -> "--primary-foreground"
+        var sb = new StringBuilder("--");
+        for (int i = 0; i < tokenName.Length; i++)
+        {
+            var c = tokenName[i];
+            if (char.IsUpper(c))
+            {
+                if (i > 0)
+                    sb.Append('-');
+                sb.Append(char.ToLowerInvariant(c));
+            }
+            else
+            {
+                sb.Append(c);
+            }
+        }
+        return sb.ToString();
     }
 
     private void AppendOtherThemeProperties(StringBuilder sb)
@@ -126,18 +153,5 @@ public class ThemeService : IThemeService
 
         if (!string.IsNullOrEmpty(_currentTheme.BorderRadius))
             sb.AppendLine($"  --radius: {_currentTheme.BorderRadius};");
-    }
-
-    private void AppendColorVariable(StringBuilder sb, string variableName, string? colorValue)
-    {
-        if (!string.IsNullOrEmpty(colorValue))
-        {
-            sb.AppendLine($"  {variableName}: {colorValue};");
-        }
-        else
-        {
-            // Log warning for missing color values (helps debug theme token issues)
-            System.Diagnostics.Debug.WriteLine($"Warning: Theme color '{variableName}' is null or empty. CSS variable will not be set.");
-        }
     }
 }
