@@ -31,13 +31,17 @@ public class ThemeService : IThemeService
 
         // Generate :root (light theme) variables
         sb.AppendLine(":root {");
-        AppendAllTokens(sb, isLightTheme: true);
+        AppendThemeColors(sb, _currentTheme.Colors.Light);
+        AppendNeutralColors(sb);
+        AppendChromaticColors(sb);
         AppendOtherThemeProperties(sb);
         sb.AppendLine("}");
 
         // Generate .dark theme variables
         sb.AppendLine(".dark {");
-        AppendAllTokens(sb, isLightTheme: false);
+        AppendThemeColors(sb, _currentTheme.Colors.Dark);
+        AppendNeutralColors(sb);
+        AppendChromaticColors(sb);
         sb.AppendLine("}");
 
         sb.AppendLine("</style>");
@@ -51,95 +55,98 @@ public class ThemeService : IThemeService
         return $"<meta name=\"ivy-theme\" content=\"{encodedTheme}\" />";
     }
 
-    private void AppendAllTokens(StringBuilder sb, bool isLightTheme)
+    private void AppendThemeColors(StringBuilder sb, ThemeColors colors)
     {
-        // Get all tokens from design system
-        var themeTokens = isLightTheme
-            ? IvyFrameworkLightThemeTokens.GetAllTokens()
-            : IvyFrameworkDarkThemeTokens.GetAllTokens();
-        var neutralTokens = IvyFrameworkNeutralTokens.GetAllTokens();
-        var chromaticTokens = IvyFrameworkChromaticTokens.GetAllTokens();
+        // Main theme colors
+        AppendColorVariable(sb, "--primary", colors.Primary);
+        AppendColorVariable(sb, "--primary-foreground", colors.PrimaryForeground);
+        AppendColorVariable(sb, "--secondary", colors.Secondary);
+        AppendColorVariable(sb, "--secondary-foreground", colors.SecondaryForeground);
+        AppendColorVariable(sb, "--background", colors.Background);
+        AppendColorVariable(sb, "--foreground", colors.Foreground);
 
-        // Get custom overrides
-        var customColors = isLightTheme ? _currentTheme.Colors.Light : _currentTheme.Colors.Dark;
+        // Semantic colors
+        AppendColorVariable(sb, "--destructive", colors.Destructive);
+        AppendColorVariable(sb, "--destructive-foreground", colors.DestructiveForeground);
+        AppendColorVariable(sb, "--success", colors.Success);
+        AppendColorVariable(sb, "--success-foreground", colors.SuccessForeground);
+        AppendColorVariable(sb, "--warning", colors.Warning);
+        AppendColorVariable(sb, "--warning-foreground", colors.WarningForeground);
+        AppendColorVariable(sb, "--info", colors.Info);
+        AppendColorVariable(sb, "--info-foreground", colors.InfoForeground);
 
-        // Append theme tokens (primary, secondary, background, etc.)
-        // Custom overrides take precedence over design system defaults
-        foreach (var (name, value) in themeTokens)
-        {
-            var cssVarName = ToCssVariableName(name);
-            var customValue = GetCustomColorValue(customColors, name);
-            sb.AppendLine($"  {cssVarName}: {customValue ?? value};");
-        }
+        // UI element colors
+        AppendColorVariable(sb, "--border", colors.Border);
+        AppendColorVariable(sb, "--input", colors.Input);
+        AppendColorVariable(sb, "--ring", colors.Ring);
+        AppendColorVariable(sb, "--muted", colors.Muted);
+        AppendColorVariable(sb, "--muted-foreground", colors.MutedForeground);
+        AppendColorVariable(sb, "--accent", colors.Accent);
+        AppendColorVariable(sb, "--accent-foreground", colors.AccentForeground);
+        AppendColorVariable(sb, "--card", colors.Card);
+        AppendColorVariable(sb, "--card-foreground", colors.CardForeground);
 
-        // Append neutral tokens (black, white, slate, gray, etc.)
-        foreach (var (name, value) in neutralTokens)
-        {
-            var cssVarName = ToCssVariableName(name);
-            sb.AppendLine($"  {cssVarName}: {value};");
-        }
-
-        // Append chromatic tokens (red, orange, amber, etc.)
-        foreach (var (name, value) in chromaticTokens)
-        {
-            var cssVarName = ToCssVariableName(name);
-            sb.AppendLine($"  {cssVarName}: {value};");
-        }
+        // Popover colors
+        AppendColorVariable(sb, "--popover", colors.Popover);
+        AppendColorVariable(sb, "--popover-foreground", colors.PopoverForeground);
     }
 
-    private static string? GetCustomColorValue(ThemeColors colors, string tokenName)
+    private void AppendNeutralColors(StringBuilder sb)
     {
-        return tokenName switch
-        {
-            "Primary" => colors.Primary,
-            "PrimaryForeground" => colors.PrimaryForeground,
-            "Secondary" => colors.Secondary,
-            "SecondaryForeground" => colors.SecondaryForeground,
-            "Background" => colors.Background,
-            "Foreground" => colors.Foreground,
-            "Destructive" => colors.Destructive,
-            "DestructiveForeground" => colors.DestructiveForeground,
-            "Success" => colors.Success,
-            "SuccessForeground" => colors.SuccessForeground,
-            "Warning" => colors.Warning,
-            "WarningForeground" => colors.WarningForeground,
-            "Info" => colors.Info,
-            "InfoForeground" => colors.InfoForeground,
-            "Border" => colors.Border,
-            "Input" => colors.Input,
-            "Ring" => colors.Ring,
-            "Muted" => colors.Muted,
-            "MutedForeground" => colors.MutedForeground,
-            "Accent" => colors.Accent,
-            "AccentForeground" => colors.AccentForeground,
-            "Card" => colors.Card,
-            "CardForeground" => colors.CardForeground,
-            "Popover" => colors.Popover,
-            "PopoverForeground" => colors.PopoverForeground,
-            _ => null
-        };
+        // Neutral colors with foreground variants
+        AppendColorVariable(sb, "--slate", IvyFrameworkNeutralTokens.Color.Slate);
+        AppendColorVariable(sb, "--slate-foreground", IvyFrameworkNeutralTokens.Color.SlateForeground);
+        AppendColorVariable(sb, "--gray", IvyFrameworkNeutralTokens.Color.Gray);
+        AppendColorVariable(sb, "--gray-foreground", IvyFrameworkNeutralTokens.Color.GrayForeground);
+        AppendColorVariable(sb, "--zinc", IvyFrameworkNeutralTokens.Color.Zinc);
+        AppendColorVariable(sb, "--zinc-foreground", IvyFrameworkNeutralTokens.Color.ZincForeground);
+        AppendColorVariable(sb, "--neutral", IvyFrameworkNeutralTokens.Color.Neutral);
+        AppendColorVariable(sb, "--neutral-foreground", IvyFrameworkNeutralTokens.Color.NeutralForeground);
+        AppendColorVariable(sb, "--stone", IvyFrameworkNeutralTokens.Color.Stone);
+        AppendColorVariable(sb, "--stone-foreground", IvyFrameworkNeutralTokens.Color.StoneForeground);
+        AppendColorVariable(sb, "--black", IvyFrameworkNeutralTokens.Color.Black);
+        AppendColorVariable(sb, "--black-foreground", IvyFrameworkNeutralTokens.Color.BlackForeground);
+        AppendColorVariable(sb, "--white", IvyFrameworkNeutralTokens.Color.White);
+        AppendColorVariable(sb, "--white-foreground", IvyFrameworkNeutralTokens.Color.WhiteForeground);
     }
 
-    private static string ToCssVariableName(string tokenName)
+    private void AppendChromaticColors(StringBuilder sb)
     {
-        // Convert PascalCase token names to kebab-case CSS variable names
-        // e.g., "Primary" -> "--primary", "PrimaryForeground" -> "--primary-foreground"
-        var sb = new StringBuilder("--");
-        for (int i = 0; i < tokenName.Length; i++)
-        {
-            var c = tokenName[i];
-            if (char.IsUpper(c))
-            {
-                if (i > 0)
-                    sb.Append('-');
-                sb.Append(char.ToLowerInvariant(c));
-            }
-            else
-            {
-                sb.Append(c);
-            }
-        }
-        return sb.ToString();
+        // Chromatic colors with foreground variants
+        AppendColorVariable(sb, "--red", IvyFrameworkChromaticTokens.Color.Red);
+        AppendColorVariable(sb, "--red-foreground", IvyFrameworkChromaticTokens.Color.RedForeground);
+        AppendColorVariable(sb, "--orange", IvyFrameworkChromaticTokens.Color.Orange);
+        AppendColorVariable(sb, "--orange-foreground", IvyFrameworkChromaticTokens.Color.OrangeForeground);
+        AppendColorVariable(sb, "--amber", IvyFrameworkChromaticTokens.Color.Amber);
+        AppendColorVariable(sb, "--amber-foreground", IvyFrameworkChromaticTokens.Color.AmberForeground);
+        AppendColorVariable(sb, "--yellow", IvyFrameworkChromaticTokens.Color.Yellow);
+        AppendColorVariable(sb, "--yellow-foreground", IvyFrameworkChromaticTokens.Color.YellowForeground);
+        AppendColorVariable(sb, "--lime", IvyFrameworkChromaticTokens.Color.Lime);
+        AppendColorVariable(sb, "--lime-foreground", IvyFrameworkChromaticTokens.Color.LimeForeground);
+        AppendColorVariable(sb, "--green", IvyFrameworkChromaticTokens.Color.Green);
+        AppendColorVariable(sb, "--green-foreground", IvyFrameworkChromaticTokens.Color.GreenForeground);
+        AppendColorVariable(sb, "--emerald", IvyFrameworkChromaticTokens.Color.Emerald);
+        AppendColorVariable(sb, "--emerald-foreground", IvyFrameworkChromaticTokens.Color.EmeraldForeground);
+        AppendColorVariable(sb, "--teal", IvyFrameworkChromaticTokens.Color.Teal);
+        AppendColorVariable(sb, "--teal-foreground", IvyFrameworkChromaticTokens.Color.TealForeground);
+        AppendColorVariable(sb, "--cyan", IvyFrameworkChromaticTokens.Color.Cyan);
+        AppendColorVariable(sb, "--cyan-foreground", IvyFrameworkChromaticTokens.Color.CyanForeground);
+        AppendColorVariable(sb, "--sky", IvyFrameworkChromaticTokens.Color.Sky);
+        AppendColorVariable(sb, "--sky-foreground", IvyFrameworkChromaticTokens.Color.SkyForeground);
+        AppendColorVariable(sb, "--blue", IvyFrameworkChromaticTokens.Color.Blue);
+        AppendColorVariable(sb, "--blue-foreground", IvyFrameworkChromaticTokens.Color.BlueForeground);
+        AppendColorVariable(sb, "--indigo", IvyFrameworkChromaticTokens.Color.Indigo);
+        AppendColorVariable(sb, "--indigo-foreground", IvyFrameworkChromaticTokens.Color.IndigoForeground);
+        AppendColorVariable(sb, "--violet", IvyFrameworkChromaticTokens.Color.Violet);
+        AppendColorVariable(sb, "--violet-foreground", IvyFrameworkChromaticTokens.Color.VioletForeground);
+        AppendColorVariable(sb, "--purple", IvyFrameworkChromaticTokens.Color.Purple);
+        AppendColorVariable(sb, "--purple-foreground", IvyFrameworkChromaticTokens.Color.PurpleForeground);
+        AppendColorVariable(sb, "--fuchsia", IvyFrameworkChromaticTokens.Color.Fuchsia);
+        AppendColorVariable(sb, "--fuchsia-foreground", IvyFrameworkChromaticTokens.Color.FuchsiaForeground);
+        AppendColorVariable(sb, "--pink", IvyFrameworkChromaticTokens.Color.Pink);
+        AppendColorVariable(sb, "--pink-foreground", IvyFrameworkChromaticTokens.Color.PinkForeground);
+        AppendColorVariable(sb, "--rose", IvyFrameworkChromaticTokens.Color.Rose);
+        AppendColorVariable(sb, "--rose-foreground", IvyFrameworkChromaticTokens.Color.RoseForeground);
     }
 
     private void AppendOtherThemeProperties(StringBuilder sb)
@@ -153,5 +160,11 @@ public class ThemeService : IThemeService
 
         if (!string.IsNullOrEmpty(_currentTheme.BorderRadius))
             sb.AppendLine($"  --radius: {_currentTheme.BorderRadius};");
+    }
+
+    private void AppendColorVariable(StringBuilder sb, string variableName, string? colorValue)
+    {
+        if (!string.IsNullOrEmpty(colorValue))
+            sb.AppendLine($"  {variableName}: {colorValue};");
     }
 }

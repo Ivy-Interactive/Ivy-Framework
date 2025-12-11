@@ -12,18 +12,27 @@ public class Theme
 
     public string? BorderRadius { get; set; }
 
-    public static Theme Default => new() { Name = "Default" };
+    public static Theme Default => new()
+    {
+        Name = "Default",
+        Colors = ThemeColorScheme.Default
+    };
 }
 
 public class ThemeColorScheme
 {
     public ThemeColors Light { get; set; } = new();
     public ThemeColors Dark { get; set; } = new();
+
+    public static ThemeColorScheme Default => new()
+    {
+        Light = ThemeColors.DefaultLight,
+        Dark = ThemeColors.DefaultDark
+    };
 }
 
 public class ThemeColors
 {
-    // Semantic theme colors
     public string? Primary { get; set; }
     public string? PrimaryForeground { get; set; }
     public string? Secondary { get; set; }
@@ -49,4 +58,62 @@ public class ThemeColors
     public string? CardForeground { get; set; }
     public string? Popover { get; set; }
     public string? PopoverForeground { get; set; }
+
+    public static ThemeColors DefaultLight => new()
+    {
+        Primary = IvyFrameworkLightThemeTokens.Color.Primary,
+        PrimaryForeground = IvyFrameworkLightThemeTokens.Color.PrimaryForeground,
+        Secondary = IvyFrameworkLightThemeTokens.Color.Secondary,
+        SecondaryForeground = IvyFrameworkLightThemeTokens.Color.SecondaryForeground,
+        Background = IvyFrameworkLightThemeTokens.Color.Background,
+        Foreground = IvyFrameworkLightThemeTokens.Color.Foreground,
+        Destructive = IvyFrameworkLightThemeTokens.Color.Destructive,
+        DestructiveForeground = IvyFrameworkLightThemeTokens.Color.DestructiveForeground,
+        Success = IvyFrameworkLightThemeTokens.Color.Success,
+        SuccessForeground = IvyFrameworkLightThemeTokens.Color.SuccessForeground,
+        Warning = IvyFrameworkLightThemeTokens.Color.Warning,
+        WarningForeground = IvyFrameworkLightThemeTokens.Color.WarningForeground,
+        Info = IvyFrameworkLightThemeTokens.Color.Info,
+        InfoForeground = IvyFrameworkLightThemeTokens.Color.InfoForeground,
+        Border = IvyFrameworkLightThemeTokens.Color.Border,
+        Input = IvyFrameworkLightThemeTokens.Color.Input,
+        Ring = IvyFrameworkLightThemeTokens.Color.Ring,
+        Muted = IvyFrameworkLightThemeTokens.Color.Muted,
+        MutedForeground = IvyFrameworkLightThemeTokens.Color.MutedForeground,
+        Accent = IvyFrameworkLightThemeTokens.Color.Accent,
+        AccentForeground = IvyFrameworkLightThemeTokens.Color.AccentForeground,
+        Card = IvyFrameworkLightThemeTokens.Color.Card,
+        CardForeground = IvyFrameworkLightThemeTokens.Color.CardForeground,
+        Popover = IvyFrameworkLightThemeTokens.Color.Popover,
+        PopoverForeground = IvyFrameworkLightThemeTokens.Color.PopoverForeground
+    };
+
+    public static ThemeColors DefaultDark => new()
+    {
+        Primary = IvyFrameworkDarkThemeTokens.Color.Primary,
+        PrimaryForeground = IvyFrameworkDarkThemeTokens.Color.PrimaryForeground,
+        Secondary = IvyFrameworkDarkThemeTokens.Color.Secondary,
+        SecondaryForeground = IvyFrameworkDarkThemeTokens.Color.SecondaryForeground,
+        Background = IvyFrameworkDarkThemeTokens.Color.Background,
+        Foreground = IvyFrameworkDarkThemeTokens.Color.Foreground,
+        Destructive = IvyFrameworkDarkThemeTokens.Color.Destructive,
+        DestructiveForeground = IvyFrameworkDarkThemeTokens.Color.DestructiveForeground,
+        Success = IvyFrameworkDarkThemeTokens.Color.Success,
+        SuccessForeground = IvyFrameworkDarkThemeTokens.Color.SuccessForeground,
+        Warning = IvyFrameworkDarkThemeTokens.Color.Warning,
+        WarningForeground = IvyFrameworkDarkThemeTokens.Color.WarningForeground,
+        Info = IvyFrameworkDarkThemeTokens.Color.Info,
+        InfoForeground = IvyFrameworkDarkThemeTokens.Color.InfoForeground,
+        Border = IvyFrameworkDarkThemeTokens.Color.Border,
+        Input = IvyFrameworkDarkThemeTokens.Color.Input,
+        Ring = IvyFrameworkDarkThemeTokens.Color.Ring,
+        Muted = IvyFrameworkDarkThemeTokens.Color.Muted,
+        MutedForeground = IvyFrameworkDarkThemeTokens.Color.MutedForeground,
+        Accent = IvyFrameworkDarkThemeTokens.Color.Accent,
+        AccentForeground = IvyFrameworkDarkThemeTokens.Color.AccentForeground,
+        Card = IvyFrameworkDarkThemeTokens.Color.Card,
+        CardForeground = IvyFrameworkDarkThemeTokens.Color.CardForeground,
+        Popover = IvyFrameworkDarkThemeTokens.Color.Popover,
+        PopoverForeground = IvyFrameworkDarkThemeTokens.Color.PopoverForeground
+    };
 }
