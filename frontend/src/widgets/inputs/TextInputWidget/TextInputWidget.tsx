@@ -17,6 +17,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
   variant,
   disabled,
   invalid,
+  nullable = false,
   width,
   height,
   events,
@@ -62,6 +63,18 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
     if (events.includes('OnFocus')) eventHandler('OnFocus', id, []);
   }, [eventHandler, id, events]);
 
+  const handleClear = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (!events.includes('OnChange')) return;
+      if (disabled) return;
+      setLocalValue('');
+      eventHandler('OnChange', id, ['']);
+    },
+    [eventHandler, id, events, disabled]
+  );
+
   const commonProps = useMemo(
     () => ({
       id,
@@ -69,6 +82,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
       value: localValue,
       disabled,
       invalid,
+      nullable,
       width,
       height,
       events,
@@ -85,6 +99,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
       localValue,
       disabled,
       invalid,
+      nullable,
       events,
       width,
       height,
@@ -105,6 +120,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
           onChange={handleChange}
           onBlur={handleBlur}
           onFocus={handleFocus}
+          onClear={handleClear}
           inputRef={inputRef}
           scale={scale}
         />
@@ -116,6 +132,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
           onChange={handleChange}
           onBlur={handleBlur}
           onFocus={handleFocus}
+          onClear={handleClear}
           inputRef={inputRef}
           isFocused={isFocused}
           scale={scale}
@@ -128,6 +145,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
           onChange={handleChange}
           onBlur={handleBlur}
           onFocus={handleFocus}
+          onClear={handleClear}
           inputRef={inputRef}
           isFocused={isFocused}
           scale={scale}
@@ -141,6 +159,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
           onChange={handleChange}
           onBlur={handleBlur}
           onFocus={handleFocus}
+          onClear={handleClear}
           inputRef={inputRef}
           isFocused={isFocused}
           scale={scale}

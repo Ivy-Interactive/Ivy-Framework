@@ -13,6 +13,7 @@ import {
   usePasteHandler,
   formatShortcutForDisplay,
 } from '../hooks';
+import { X } from 'lucide-react';
 
 interface DefaultVariantProps {
   type: Lowercase<TextInputWidgetProps['variant']>;
@@ -20,6 +21,7 @@ interface DefaultVariantProps {
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onBlur: (e: React.FocusEvent<HTMLInputElement>) => void;
   onFocus: (e: React.FocusEvent<HTMLInputElement>) => void;
+  onClear: (e: React.MouseEvent) => void;
   inputRef?: React.RefObject<HTMLInputElement | HTMLTextAreaElement | null>;
   isFocused: boolean;
   scale?: Scales;
@@ -31,6 +33,7 @@ export const DefaultVariant: React.FC<DefaultVariantProps> = ({
   onChange,
   onBlur,
   onFocus,
+  onClear,
   inputRef,
   isFocused,
   scale = Scales.Medium,
@@ -61,6 +64,7 @@ export const DefaultVariant: React.FC<DefaultVariantProps> = ({
   const suffixContent = renderPrefixSuffix(props.suffix);
 
   const hasAffixes = prefixContent || suffixContent;
+  const showClear = props.nullable && !props.disabled && hasValue;
 
   return (
     <div className="relative w-full select-none" style={styles}>
@@ -96,8 +100,17 @@ export const DefaultVariant: React.FC<DefaultVariantProps> = ({
             className={cn(
               textInputSizeVariants({ scale }),
               props.invalid && inputStyles.invalidInput,
-              props.invalid && 'pr-8',
-              props.shortcutKey && !isFocused && !hasValue && 'pr-16',
+              (props.invalid || showClear) && 'pr-8',
+              props.shortcutKey &&
+                !isFocused &&
+                !hasValue &&
+                !showClear &&
+                !props.invalid &&
+                'pr-16',
+              showClear && props.invalid && 'pr-16',
+              !hasValue &&
+                props.nullable &&
+                'placeholder:text-muted-foreground',
               'border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0',
               prefixContent && 'rounded-l-none',
               suffixContent && 'rounded-r-none',
@@ -106,15 +119,30 @@ export const DefaultVariant: React.FC<DefaultVariantProps> = ({
             data-testid={props['data-testid']}
           />
 
-          {/* Right side container: shortcut (if any), then invalid (if any) */}
-          {(props.shortcutKey || props.invalid) && (
+          {/* Right side container: shortcut (if any), clear (if nullable), then invalid (if any) */}
+          {(props.shortcutKey || showClear || props.invalid) && (
             <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none h-6">
-              {props.shortcutKey && !isFocused && !hasValue && (
-                <div className="pointer-events-auto flex items-center h-6">
-                  <kbd className="px-1 py-0.5 text-small-label font-medium text-foreground bg-muted border border-border rounded-md">
-                    {shortcutDisplay}
-                  </kbd>
-                </div>
+              {props.shortcutKey &&
+                !isFocused &&
+                !hasValue &&
+                !showClear &&
+                !props.invalid && (
+                  <div className="pointer-events-auto flex items-center h-6">
+                    <kbd className="px-1 py-0.5 text-small-label font-medium text-foreground bg-muted border border-border rounded-md">
+                      {shortcutDisplay}
+                    </kbd>
+                  </div>
+                )}
+              {showClear && (
+                <button
+                  type="button"
+                  tabIndex={-1}
+                  aria-label="Clear"
+                  onClick={onClear}
+                  className="pointer-events-auto p-1 rounded hover:bg-accent focus:outline-none cursor-pointer flex items-center h-6"
+                >
+                  <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+                </button>
               )}
               {props.invalid && (
                 <div className="pointer-events-auto flex items-center h-6">

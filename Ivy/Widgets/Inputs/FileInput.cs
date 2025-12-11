@@ -39,6 +39,8 @@ public abstract record FileInputBase : WidgetBase<FileInputBase>, IAnyFileInput
 
     [Prop] public string? UploadUrl { get; set; }
 
+    [Prop] public bool Nullable { get; set; }
+
     [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
 
     [Event] public Func<Event<IAnyInput, Guid>, ValueTask>? OnCancel { get; set; }
@@ -119,6 +121,8 @@ public record FileInput<TValue> : FileInputBase, IInput<TValue>, IAnyFileInput
     }
 
     [Prop] public TValue Value { get; } = default!;
+
+    [Prop] public new bool Nullable { get; set; } = typeof(TValue).IsNullableType();
 
     [Event] public Func<Event<IInput<TValue>, TValue>, ValueTask>? OnChange => null;
 }
@@ -270,6 +274,11 @@ public static class FileInputExtensions
     public static FileInputBase Invalid(this FileInputBase widget, string? invalid)
     {
         return widget with { Invalid = invalid };
+    }
+
+    public static FileInputBase Nullable(this FileInputBase widget, bool? nullable = true)
+    {
+        return widget with { Nullable = nullable ?? true };
     }
 
     public static FileInputBase Accept(this FileInputBase widget, string accept)

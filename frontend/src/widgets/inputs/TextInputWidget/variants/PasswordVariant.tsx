@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
-import { EyeIcon, EyeOffIcon } from 'lucide-react';
+import { EyeIcon, EyeOffIcon, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getWidth, inputStyles } from '@/lib/styles';
 import { InvalidIcon } from '@/components/InvalidIcon';
@@ -22,6 +22,7 @@ interface PasswordVariantProps {
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onBlur: (e: React.FocusEvent<HTMLInputElement>) => void;
   onFocus: (e: React.FocusEvent<HTMLInputElement>) => void;
+  onClear: (e: React.MouseEvent) => void;
   width?: string;
   inputRef?: React.RefObject<HTMLInputElement | HTMLTextAreaElement | null>;
   scale?: Scales;
@@ -32,6 +33,7 @@ export const PasswordVariant: React.FC<PasswordVariantProps> = ({
   onChange,
   onBlur,
   onFocus,
+  onClear,
   inputRef,
   scale = Scales.Medium,
 }) => {
@@ -79,6 +81,7 @@ export const PasswordVariant: React.FC<PasswordVariantProps> = ({
 
   const shortcutDisplay = formatShortcutForDisplay(props.shortcutKey);
   const hasValue = props.value && props.value.toString().trim() !== '';
+  const showClear = props.nullable && !props.disabled && hasValue;
 
   return (
     <div
@@ -102,13 +105,20 @@ export const PasswordVariant: React.FC<PasswordVariantProps> = ({
         className={cn(
           textInputSizeVariants({ scale }),
           props.invalid && inputStyles.invalidInput,
-          props.invalid ? 'pr-14' : 'pr-8',
+          props.invalid || showClear ? 'pr-14' : 'pr-8',
           hasLastPass && 'pr-3',
-          props.shortcutKey && !hasLastPass && !hasValue && 'pr-24'
+          props.shortcutKey &&
+            !hasLastPass &&
+            !hasValue &&
+            !showClear &&
+            !props.invalid &&
+            'pr-24',
+          showClear && props.invalid && !hasLastPass && 'pr-20',
+          !hasValue && props.nullable && 'placeholder:text-muted-foreground'
         )}
         data-testid={props['data-testid']}
       />
-      {/* Icons container: password toggle, shortcut (if any), then invalid (if any) */}
+      {/* Icons container: password toggle, clear (if nullable), shortcut (if any), then invalid (if any) */}
       {!hasLastPass && (
         <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none h-6">
           <div className="pointer-events-auto flex items-center h-6">
@@ -124,7 +134,18 @@ export const PasswordVariant: React.FC<PasswordVariantProps> = ({
               )}
             </button>
           </div>
-          {props.shortcutKey && !hasValue && (
+          {showClear && (
+            <button
+              type="button"
+              tabIndex={-1}
+              aria-label="Clear"
+              onClick={onClear}
+              className="pointer-events-auto p-1 rounded hover:bg-accent focus:outline-none cursor-pointer flex items-center h-6"
+            >
+              <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+            </button>
+          )}
+          {props.shortcutKey && !hasValue && !showClear && !props.invalid && (
             <div className="pointer-events-auto flex items-center h-6">
               <kbd className="ml-2 px-1 py-0.5 text-small-label font-medium text-foreground bg-muted border border-border rounded-md">
                 {shortcutDisplay}

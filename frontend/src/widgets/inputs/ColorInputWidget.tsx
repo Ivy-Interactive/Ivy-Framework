@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { X } from 'lucide-react';
 import React from 'react';
 import { logger } from '@/lib/logger';
+import { cn } from '@/lib/utils';
 import {
   colorInputVariants,
   colorInputPickerVariants,
@@ -159,7 +160,11 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
             onKeyDown={handleInputKeyDown}
             placeholder={placeholder || 'Enter color'}
             disabled={disabled}
-            className={`${colorInputVariants({ scale })} ${invalid ? inputStyles.invalidInput + ' pr-8' : ''}`}
+            className={cn(
+              colorInputVariants({ scale }),
+              invalid && inputStyles.invalidInput,
+              (invalid || (nullable && value !== null && !disabled)) && 'pr-8'
+            )}
           />
           {(invalid || (nullable && value !== null && !disabled)) && (
             <div
@@ -230,7 +235,11 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
           onKeyDown={handleInputKeyDown}
           placeholder={placeholder || 'Enter color'}
           disabled={disabled}
-          className={`${colorInputVariants({ scale })} ${invalid ? inputStyles.invalidInput + ' pr-8' : ''}`}
+          className={cn(
+            colorInputVariants({ scale }),
+            invalid && inputStyles.invalidInput,
+            (invalid || (nullable && value !== null && !disabled)) && 'pr-8'
+          )}
         />
         {(invalid || (nullable && value !== null && !disabled)) && (
           <div

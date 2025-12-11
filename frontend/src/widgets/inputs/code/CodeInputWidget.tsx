@@ -22,6 +22,7 @@ import { cpp } from '@codemirror/lang-cpp';
 import { dbml } from './dbml-language';
 import { createIvyCodeTheme } from './theme';
 import { Scales } from '@/types/scale';
+import { X } from 'lucide-react';
 import {
   keymap,
   EditorView,
@@ -37,6 +38,7 @@ interface CodeInputWidgetProps {
   language?: string;
   disabled: boolean;
   invalid?: string;
+  nullable?: boolean;
   showCopyButton?: boolean;
   events: string[];
   width?: string;
@@ -66,6 +68,7 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
   language,
   disabled,
   invalid,
+  nullable = false,
   showCopyButton = false,
   width,
   height,
@@ -105,6 +108,21 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
   const handleFocus = useCallback(() => {
     setIsFocused(true);
   }, []);
+
+  const handleClear = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (!events.includes('OnChange')) return;
+      if (disabled) return;
+      setLocalValue('');
+      eventHandler('OnChange', id, ['']);
+    },
+    [eventHandler, id, events, disabled]
+  );
+
+  const hasValue = localValue && localValue.toString().trim() !== '';
+  const showClear = nullable && !disabled && hasValue;
 
   const styles: React.CSSProperties = {
     ...getWidth(width),
@@ -166,14 +184,25 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
         height="100%"
         basicSetup={false}
       />
-      {invalid && (
+      {(showClear || invalid) && (
         <div
           className={cn(
-            'absolute top-2.5',
+            'absolute top-2.5 flex items-center gap-2',
             showCopyButton ? 'right-14' : 'right-4'
           )}
         >
-          <InvalidIcon message={invalid} />
+          {showClear && (
+            <button
+              type="button"
+              tabIndex={-1}
+              aria-label="Clear"
+              onClick={handleClear}
+              className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
+            >
+              <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+            </button>
+          )}
+          {invalid && <InvalidIcon message={invalid} />}
         </div>
       )}
     </div>

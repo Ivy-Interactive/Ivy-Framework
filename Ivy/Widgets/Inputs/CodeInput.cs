@@ -27,6 +27,8 @@ public abstract record CodeInputBase : WidgetBase<CodeInputBase>, IAnyCodeInput
 
     [Prop] public string? Placeholder { get; set; }
 
+    [Prop] public bool Nullable { get; set; }
+
     [Prop] public CodeInputs Variant { get; set; }
 
     [Prop] public Languages? Language { get; set; } = null;
@@ -75,6 +77,8 @@ public record CodeInput<TString> : CodeInputBase, IInput<TString>
 
     [Prop] public TString Value { get; } = default!;
 
+    [Prop] public new bool Nullable { get; set; } = typeof(TString).IsNullableType();
+
     [Event] public Func<Event<IInput<TString>, TString>, ValueTask>? OnChange { get; }
 }
 
@@ -91,6 +95,11 @@ public static class CodeInputExtensions
     public static CodeInputBase Placeholder(this CodeInputBase widget, string placeholder)
     {
         return widget with { Placeholder = placeholder };
+    }
+
+    public static CodeInputBase Nullable(this CodeInputBase widget, bool? nullable = true)
+    {
+        return widget with { Nullable = nullable ?? true };
     }
 
     public static CodeInputBase Disabled(this CodeInputBase widget, bool disabled = true)

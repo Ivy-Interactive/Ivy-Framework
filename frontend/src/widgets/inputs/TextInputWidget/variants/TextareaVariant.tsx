@@ -11,12 +11,14 @@ import {
   usePasteHandler,
   formatShortcutForDisplay,
 } from '../hooks';
+import { X } from 'lucide-react';
 
 interface TextareaVariantProps {
   props: Omit<TextInputWidgetProps, 'variant'>;
   onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   onBlur: (e: React.FocusEvent<HTMLTextAreaElement>) => void;
   onFocus: (e: React.FocusEvent<HTMLTextAreaElement>) => void;
+  onClear: (e: React.MouseEvent) => void;
   width?: string;
   inputRef?: React.RefObject<HTMLInputElement | HTMLTextAreaElement | null>;
   isFocused: boolean;
@@ -28,6 +30,7 @@ export const TextareaVariant: React.FC<TextareaVariantProps> = ({
   onChange,
   onBlur,
   onFocus,
+  onClear,
   inputRef,
   isFocused,
   scale = Scales.Medium,
@@ -54,6 +57,7 @@ export const TextareaVariant: React.FC<TextareaVariantProps> = ({
 
   const shortcutDisplay = formatShortcutForDisplay(props.shortcutKey);
   const hasValue = props.value && props.value.toString().trim() !== '';
+  const showClear = props.nullable && !props.disabled && hasValue;
 
   return (
     <div className="relative w-full select-none">
@@ -72,26 +76,50 @@ export const TextareaVariant: React.FC<TextareaVariantProps> = ({
         className={cn(
           textInputSizeVariants({ scale }),
           props.invalid && inputStyles.invalidInput,
-          props.invalid && 'pr-8',
-          props.shortcutKey && !isFocused && !hasValue && 'pr-16'
+          (props.invalid || showClear) && 'pr-8',
+          props.shortcutKey &&
+            !isFocused &&
+            !hasValue &&
+            !showClear &&
+            !props.invalid &&
+            'pr-16',
+          showClear && props.invalid && 'pr-16',
+          !hasValue && props.nullable && 'placeholder:text-muted-foreground'
         )}
         data-testid={props['data-testid']}
       />
-      {/* Icons container: shortcut (if any), then invalid (if any) */}
-      <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none h-6">
-        {props.shortcutKey && !isFocused && !hasValue && (
-          <div className="pointer-events-auto flex items-center h-6">
-            <kbd className="px-1 py-0.5 text-small-label font-medium text-foreground bg-muted border border-border rounded-md">
-              {shortcutDisplay}
-            </kbd>
-          </div>
-        )}
-        {props.invalid && (
-          <div className="pointer-events-auto flex items-center h-6">
-            <InvalidIcon message={props.invalid} />
-          </div>
-        )}
-      </div>
+      {/* Icons container: shortcut (if any), clear (if nullable), then invalid (if any) */}
+      {(props.shortcutKey || showClear || props.invalid) && (
+        <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none h-6">
+          {props.shortcutKey &&
+            !isFocused &&
+            !hasValue &&
+            !showClear &&
+            !props.invalid && (
+              <div className="pointer-events-auto flex items-center h-6">
+                <kbd className="px-1 py-0.5 text-small-label font-medium text-foreground bg-muted border border-border rounded-md">
+                  {shortcutDisplay}
+                </kbd>
+              </div>
+            )}
+          {showClear && (
+            <button
+              type="button"
+              tabIndex={-1}
+              aria-label="Clear"
+              onClick={onClear}
+              className="pointer-events-auto p-1 rounded hover:bg-accent focus:outline-none cursor-pointer flex items-center h-6"
+            >
+              <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+            </button>
+          )}
+          {props.invalid && (
+            <div className="pointer-events-auto flex items-center h-6">
+              <InvalidIcon message={props.invalid} />
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };

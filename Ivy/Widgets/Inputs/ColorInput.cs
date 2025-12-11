@@ -130,6 +130,11 @@ public static class ColorInputExtensions
         return widget with { Invalid = invalid };
     }
 
+    public static ColorInputBase Nullable(this ColorInputBase widget, bool? nullable = true)
+    {
+        return widget with { Nullable = nullable ?? true };
+    }
+
     public static ColorInputBase Variant(this ColorInputBase widget, ColorInputs variant)
     {
         return widget with { Variant = variant };

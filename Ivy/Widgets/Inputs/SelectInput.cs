@@ -36,6 +36,8 @@ public abstract record SelectInputBase : WidgetBase<SelectInputBase>, IAnySelect
 
     [Prop] public char Separator { get; set; } = ';';
 
+    [Prop] public bool Nullable { get; set; }
+
     [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
 
     public Type[] SupportedStateTypes() => [];
@@ -78,7 +80,7 @@ public record SelectInput<TValue> : SelectInputBase, IInput<TValue>, IAnySelectI
 
     [Prop] public TValue Value { get; } = default!;
 
-    [Prop] public bool Nullable { get; set; } = typeof(TValue).IsNullableType();
+    [Prop] public new bool Nullable { get; set; } = typeof(TValue).IsNullableType();
 
     [Prop] public IAnyOption[] Options { get; set; }
 
@@ -95,7 +97,7 @@ public static class SelectInputExtensions
 
         if (options == null)
         {
-            var nonNullableType = Nullable.GetUnderlyingType(type) ?? type;
+            var nonNullableType = System.Nullable.GetUnderlyingType(type) ?? type;
             if (nonNullableType.IsEnum)
             {
                 options = nonNullableType.ToOptions();
@@ -126,6 +128,8 @@ public static class SelectInputExtensions
     public static SelectInputBase Variant(this SelectInputBase widget, SelectInputs variant) => widget with { Variant = variant };
 
     public static SelectInputBase Invalid(this SelectInputBase widget, string? invalid) => widget with { Invalid = invalid };
+
+    public static SelectInputBase Nullable(this SelectInputBase widget, bool? nullable = true) => widget with { Nullable = nullable ?? true };
 
     public static SelectInputBase Separator(this SelectInputBase widget, char separator) => widget with { Separator = separator };
 

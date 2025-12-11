@@ -5,7 +5,6 @@ import { cn } from '@/lib/utils';
 import { getWidth, inputStyles } from '@/lib/styles';
 import { InvalidIcon } from '@/components/InvalidIcon';
 import { useFocusable } from '@/hooks/use-focus-management';
-import { useEventHandler } from '@/components/event-handler';
 import { sidebarMenuRef } from '@/widgets/layouts/sidebar';
 import { Scales } from '@/types/scale';
 import {
@@ -25,6 +24,7 @@ interface SearchVariantProps {
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onBlur: (e: React.FocusEvent<HTMLInputElement>) => void;
   onFocus: (e: React.FocusEvent<HTMLInputElement>) => void;
+  onClear: (e: React.MouseEvent) => void;
   width?: string;
   inputRef?: React.RefObject<HTMLInputElement | HTMLTextAreaElement | null>;
   isFocused: boolean;
@@ -36,6 +36,7 @@ export const SearchVariant: React.FC<SearchVariantProps> = ({
   onChange,
   onBlur,
   onFocus,
+  onClear,
   inputRef,
   isFocused,
   scale = Scales.Medium,
@@ -45,7 +46,6 @@ export const SearchVariant: React.FC<SearchVariantProps> = ({
   };
   const { ref: focusRef } = useFocusable('sidebar-navigation', 0);
   const shouldFocusMenuRef = useRef(false);
-  const eventHandler = useEventHandler();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     savePosition();
@@ -76,18 +76,13 @@ export const SearchVariant: React.FC<SearchVariantProps> = ({
     onBlur(e);
   };
 
-  const handleClear = () => {
-    if (props.events.includes('OnChange')) {
-      eventHandler('OnChange', props.id, ['']);
-    }
-  };
-
   const styles: React.CSSProperties = {
     ...getWidth(props.width),
   };
 
   const shortcutDisplay = formatShortcutForDisplay(props.shortcutKey);
   const hasValue = props.value && props.value.trim() !== '';
+  const showClear = props.nullable && !props.disabled && hasValue;
 
   // Merge focusRef and inputRef
   const mergedRef = useCallback(
@@ -128,41 +123,53 @@ export const SearchVariant: React.FC<SearchVariantProps> = ({
           textInputSizeVariants({ scale }),
           'pl-8 cursor-pointer',
           props.invalid && inputStyles.invalidInput,
-          props.invalid && 'pr-8',
-          hasValue && 'pr-8',
-          props.shortcutKey && !isFocused && !hasValue && 'pr-16',
+          (props.invalid || showClear) && 'pr-8',
+          props.shortcutKey &&
+            !isFocused &&
+            !hasValue &&
+            !showClear &&
+            !props.invalid &&
+            'pr-16',
+          showClear && props.invalid && 'pr-16',
+          !hasValue && props.nullable && 'placeholder:text-muted-foreground',
           // Hide browser's default search input X icon
           '[&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-cancel-button]:hidden'
         )}
         data-testid={props['data-testid']}
       />
-      {/* Icons container: clear (if any), shortcut (if any), then invalid (if any) */}
-      <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none z-10 h-6">
-        {hasValue && !props.disabled && (
-          <button
-            type="button"
-            tabIndex={-1}
-            aria-label="Clear search"
-            onClick={handleClear}
-            className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer pointer-events-auto flex items-center h-6"
-            style={{ pointerEvents: 'auto' }}
-          >
-            <X className={xIconVariants({ scale })} />
-          </button>
-        )}
-        {props.shortcutKey && !isFocused && !hasValue && (
-          <div className="pointer-events-auto flex items-center h-4">
-            <kbd className="badge-text-primary text-foreground bg-muted border border-border rounded-sm px-1 py-0.25">
-              {shortcutDisplay}
-            </kbd>
-          </div>
-        )}
-        {props.invalid && (
-          <div className="pointer-events-auto flex items-center h-6">
-            <InvalidIcon message={props.invalid} />
-          </div>
-        )}
-      </div>
+      {/* Icons container: clear (if nullable), shortcut (if any), then invalid (if any) */}
+      {(showClear || props.shortcutKey || props.invalid) && (
+        <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none z-10 h-6">
+          {showClear && (
+            <button
+              type="button"
+              tabIndex={-1}
+              aria-label="Clear search"
+              onClick={onClear}
+              className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer pointer-events-auto flex items-center h-6"
+              style={{ pointerEvents: 'auto' }}
+            >
+              <X className={xIconVariants({ scale })} />
+            </button>
+          )}
+          {props.shortcutKey &&
+            !isFocused &&
+            !hasValue &&
+            !showClear &&
+            !props.invalid && (
+              <div className="pointer-events-auto flex items-center h-4">
+                <kbd className="badge-text-primary text-foreground bg-muted border border-border rounded-sm px-1 py-0.25">
+                  {shortcutDisplay}
+                </kbd>
+              </div>
+            )}
+          {props.invalid && (
+            <div className="pointer-events-auto flex items-center h-6">
+              <InvalidIcon message={props.invalid} />
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };

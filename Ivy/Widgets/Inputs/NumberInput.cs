@@ -50,6 +50,8 @@ public abstract record NumberInputBase : WidgetBase<NumberInputBase>, IAnyNumber
 
     [Prop] public string? Placeholder { get; set; }
 
+    [Prop] public bool Nullable { get; set; }
+
     [Prop] public double? Min { get; set; }
 
     [Prop] public double? Max { get; set; }
@@ -115,7 +117,7 @@ public record NumberInput<TNumber> : NumberInputBase, IInput<TNumber>, IAnyNumbe
 
     [Prop] public TNumber Value { get; } = default!;
 
-    [Prop] public bool Nullable { get; set; } = typeof(TNumber).IsNullableType();
+    [Prop] public new bool Nullable { get; set; } = typeof(TNumber).IsNullableType();
 
     [Event] public Func<Event<IInput<TNumber>, TNumber>, ValueTask>? OnChange { get; }
 }
@@ -158,7 +160,7 @@ public static class NumberInputExtensions
 
     private static string GetTargetTypeName(Type type)
     {
-        var underlyingType = Nullable.GetUnderlyingType(type);
+        var underlyingType = System.Nullable.GetUnderlyingType(type);
         var actualType = underlyingType ?? type;
 
         return actualType.Name.ToLowerInvariant();
@@ -167,6 +169,10 @@ public static class NumberInputExtensions
     public static NumberInputBase Placeholder(this NumberInputBase widget, string placeholder)
     {
         return widget with { Placeholder = placeholder };
+    }
+    public static NumberInputBase Nullable(this NumberInputBase widget, bool? nullable = true)
+    {
+        return widget with { Nullable = nullable ?? true };
     }
 
     public static NumberInputBase Disabled(this NumberInputBase widget, bool enabled = true)

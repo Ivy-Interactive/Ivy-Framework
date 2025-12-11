@@ -929,7 +929,11 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
   const selectTriggerElement = (
     <SelectTrigger
       ref={triggerRef}
-      className={cn('relative', invalid && inputStyles.invalidInput)}
+      className={cn(
+        'relative',
+        invalid && inputStyles.invalidInput,
+        !hasValue && 'text-muted-foreground'
+      )}
       scale={scale}
     >
       <SelectValue placeholder={placeholder} />
