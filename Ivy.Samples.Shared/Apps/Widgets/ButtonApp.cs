@@ -118,6 +118,17 @@ public class ButtonApp() : SampleBase
                        .Url("https://github.com/Ivy-Interactive/Ivy-Framework")
                )
 
+               | Text.H2("AI Button")
+               | (Layout.Horizontal().Gap(8)
+                   | new Button("AI Button", eventHandler, variant: ButtonVariant.Ai)
+                   | new Button("With Icon", eventHandler, variant: ButtonVariant.Ai).Icon(Icons.Sparkles)
+               )
+               | (Layout.Horizontal().Gap(8)
+                   | new Button("Small", eventHandler, variant: ButtonVariant.Ai).Small()
+                   | new Button("Large", eventHandler, variant: ButtonVariant.Ai).Large()
+                   | new Button("Full Rounded", eventHandler, variant: ButtonVariant.Ai).BorderRadius(BorderRadius.Full)
+               )
+
                | Text.H2("Interactive Demo")
                | Text.Literal(label.Value)
             ;

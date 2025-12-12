@@ -23,6 +23,7 @@ public enum ButtonVariant
     Ghost,
     Link,
     Inline,
+    Ai,
 }
 
 public record Button : WidgetBase<Button>
@@ -181,6 +182,9 @@ public static class ButtonExtensions
 
     [RelatedTo(nameof(Button.Variant))]
     public static Button Inline(this Button button) => button.Variant(ButtonVariant.Inline);
+
+    [RelatedTo(nameof(Button.Variant))]
+    public static Button Ai(this Button button) => button.Variant(ButtonVariant.Ai);
 
     public static Button BorderRadius(this Button button, BorderRadius radius) => button with { BorderRadius = radius };
 }

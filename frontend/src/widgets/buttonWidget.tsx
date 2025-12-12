@@ -1,4 +1,5 @@
 import React, { useCallback } from 'react';
+import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/Icon';
 import { cn, getIvyHost, camelCase } from '@/lib/utils';
@@ -37,7 +38,8 @@ interface ButtonWidgetProps {
     | 'Secondary'
     | 'Ghost'
     | 'Link'
-    | 'Inline';
+    | 'Inline'
+    | 'Ai';
   disabled: boolean;
   tooltip?: string;
   foreground?: string;
@@ -206,6 +208,81 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
       {children}
     </>
   );
+
+  // AI Button variant with rotating RGB border
+  if (variant === 'Ai') {
+    const aiButtonContent =
+      hasUrl && validatedHref ? (
+        <a
+          href={validatedHref}
+          {...(isDownloadUrl || isMailto
+            ? {}
+            : { target: '_blank', rel: 'noopener noreferrer' })}
+          className="relative z-10 flex items-center gap-1"
+        >
+          {buttonContent}
+        </a>
+      ) : (
+        <span className="relative z-10 flex items-center gap-1">
+          {buttonContent}
+        </span>
+      );
+
+    // Determine border radius classes based on borderRadius prop
+    const getBorderRadiusClass = () => {
+      if (borderRadius === 'Full') {
+        return { container: 'rounded-full', button: 'rounded-full' };
+      }
+      if (borderRadius === 'Rounded') {
+        return { container: 'rounded-lg', button: 'rounded-md' };
+      }
+      return { container: 'rounded-lg', button: 'rounded-[6px]' };
+    };
+
+    const borderRadiusClasses = getBorderRadiusClass();
+
+    return (
+      <div
+        className={cn(
+          'relative p-[2px] w-fit overflow-hidden',
+          borderRadiusClasses.container,
+          disabled && 'opacity-50'
+        )}
+      >
+        {/* Rotating RGB gradient border - scaled up to cover entire button */}
+        <motion.div
+          className="absolute inset-[-50%] aspect-square"
+          style={{
+            background:
+              'conic-gradient(from 0deg, #ff0000, #ff8000, #ffff00, #80ff00, #00ff00, #00ff80, #00ffff, #0080ff, #0000ff, #8000ff, #ff00ff, #ff0080, #ff0000)',
+          }}
+          animate={{ rotate: 360 }}
+          transition={{
+            duration: 3,
+            repeat: Infinity,
+            ease: 'linear',
+          }}
+        />
+        <motion.button
+          onClick={hasUrl ? undefined : handleClick}
+          disabled={disabled}
+          style={styles}
+          className={cn(
+            'relative flex items-center justify-center h-9 px-4 text-sm bg-background text-foreground font-medium cursor-pointer whitespace-nowrap',
+            borderRadiusClasses.button,
+            'disabled:cursor-not-allowed hover:bg-accent hover:text-accent-foreground',
+            buttonSize === 'sm' && 'h-8 px-3 text-xs',
+            buttonSize === 'lg' && 'h-10 px-8 text-base'
+          )}
+          whileTap={disabled ? undefined : { scale: 0.98 }}
+          data-testid={dataTestId}
+          title={tooltip}
+        >
+          {aiButtonContent}
+        </motion.button>
+      </div>
+    );
+  }
 
   return (
     <ButtonWithTooltip
