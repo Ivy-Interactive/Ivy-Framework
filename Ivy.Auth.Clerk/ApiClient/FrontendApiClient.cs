@@ -36,7 +36,7 @@ public class FrontendApiClient
 
     public async Task<ClerkEnvironmentResponse> UpdateEnvironmentAsync(ClerkCredentials credentials, string origin, CancellationToken cancellationToken = default)
     {
-        var response = await AuthenticatedRequestAsync(
+        var response = await RequestAsync(
             HttpMethod.Post,
             "environment",
             credentials,
@@ -72,31 +72,31 @@ public class FrontendApiClient
             Headers = { ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded") },
         };
 
-        var response = await AuthenticatedRequestAsync(HttpMethod.Post, $"client/sessions/{sessionId}/tokens", credentials, content: content, cancellationToken: cancellationToken);
+        var response = await RequestAsync(HttpMethod.Post, $"client/sessions/{sessionId}/tokens", credentials, content: content, cancellationToken: cancellationToken);
         return await ParseResponseAsync<ClerkTokenResponse>(response, credentials, cancellationToken);
     }
 
     public async Task<ClerkSessionResponse> TouchSessionAsync(string sessionId, ClerkCredentials credentials, CancellationToken cancellationToken = default)
     {
-        var response = await AuthenticatedRequestAsync(HttpMethod.Post, $"client/sessions/{sessionId}/touch", credentials, cancellationToken: cancellationToken);
+        var response = await RequestAsync(HttpMethod.Post, $"client/sessions/{sessionId}/touch", credentials, cancellationToken: cancellationToken);
         return await ParseResponseAsync<ClerkSessionResponse>(response, credentials, cancellationToken);
     }
 
     public async Task<ClerkSessionResponse> GetSessionAsync(string sessionId, ClerkCredentials credentials, CancellationToken cancellationToken = default)
     {
-        var response = await AuthenticatedRequestAsync(HttpMethod.Get, $"client/sessions/{sessionId}", credentials, cancellationToken: cancellationToken);
+        var response = await RequestAsync(HttpMethod.Get, $"client/sessions/{sessionId}", credentials, cancellationToken: cancellationToken);
         return await ParseResponseAsync<ClerkSessionResponse>(response, credentials, cancellationToken);
     }
 
     public async Task<ClerkSessionResponse> EndSessionAsync(string sessionId, ClerkCredentials credentials, CancellationToken cancellationToken = default)
     {
-        var response = await AuthenticatedRequestAsync(HttpMethod.Post, $"client/sessions/{sessionId}/end", credentials, cancellationToken: cancellationToken);
+        var response = await RequestAsync(HttpMethod.Post, $"client/sessions/{sessionId}/end", credentials, cancellationToken: cancellationToken);
         return await ParseResponseAsync<ClerkSessionResponse>(response, credentials, cancellationToken);
     }
 
     public async Task<ClerkClientResponse> RemoveAllSessionsAsync(ClerkCredentials credentials, CancellationToken cancellationToken = default)
     {
-        var response = await AuthenticatedRequestAsync(HttpMethod.Delete, "client/sessions", credentials, cancellationToken: cancellationToken);
+        var response = await RequestAsync(HttpMethod.Delete, "client/sessions", credentials, cancellationToken: cancellationToken);
         return await ParseResponseAsync<ClerkClientResponse>(response, credentials, cancellationToken);
     }
 
@@ -115,7 +115,7 @@ public class FrontendApiClient
 
         var content = new FormUrlEncodedContent(formData);
 
-        var response = await AuthenticatedRequestAsync(HttpMethod.Post, "client/sign_ins", credentials, setHeaders: headers => headers.Add("Origin", origin), content: content, cancellationToken: cancellationToken);
+        var response = await RequestAsync(HttpMethod.Post, "client/sign_ins", credentials, setHeaders: headers => headers.Add("Origin", origin), content: content, cancellationToken: cancellationToken);
         return await ParseResponseAsync<ClerkSignInResponse>(response, credentials, cancellationToken);
     }
 
@@ -138,23 +138,8 @@ public class FrontendApiClient
         return await ParseResponseAsync<ClerkSignInResponse>(response, credentials, cancellationToken);
     }
 
-    private async Task<HttpResponseMessage> AuthenticatedRequestAsync(HttpMethod method, string endpoint, ClerkCredentials credentials, bool sendSessionToken = false, string? additionalQueryParameters = null, Action<HttpRequestHeaders>? setHeaders = null, HttpContent? content = null, CancellationToken cancellationToken = default)
+    private async Task<HttpResponseMessage> RequestAsync(HttpMethod method, string endpoint, ClerkCredentials? credentials = null, bool sendSessionToken = true, string? additionalQueryParameters = null, Action<HttpRequestHeaders>? setHeaders = null, HttpContent? content = null, CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrEmpty(credentials.DevBrowserToken) && string.IsNullOrEmpty(credentials.ClientToken))
-        {
-            throw new InvalidOperationException("Either DevBrowserToken or ClientToken must be provided.");
-        }
-
-        return await RequestAsync(method, endpoint, credentials, sendSessionToken, additionalQueryParameters, setHeaders, content, cancellationToken);
-    }
-
-    private async Task<HttpResponseMessage> RequestAsync(HttpMethod method, string endpoint, ClerkCredentials? credentials = null, bool sendSessionToken = false, string? additionalQueryParameters = null, Action<HttpRequestHeaders>? setHeaders = null, HttpContent? content = null, CancellationToken cancellationToken = default)
-    {
-        if (credentials != null && !string.IsNullOrEmpty(credentials.DevBrowserToken) && !string.IsNullOrEmpty(credentials.ClientToken))
-        {
-            throw new InvalidOperationException("Cannot use both DevBrowserToken and ClientToken simultaneously.");
-        }
-
         if (credentials?.DevBrowserToken != null)
         {
             additionalQueryParameters = string.IsNullOrEmpty(additionalQueryParameters)
@@ -168,18 +153,12 @@ public class FrontendApiClient
             requestUrl += $"&{additionalQueryParameters}";
         }
 
-        Console.WriteLine("Making request to: " + requestUrl);
-
         var request = new HttpRequestMessage(method, requestUrl)
         {
             Content = content
         };
 
         setHeaders?.Invoke(request.Headers);
-        if (credentials?.ClientToken != null)
-        {
-            request.Headers.Add("__client", credentials.ClientToken);
-        }
         if (sendSessionToken && credentials?.SessionToken != null)
         {
             request.Headers.Add("__session", credentials.SessionToken);
@@ -191,22 +170,6 @@ public class FrontendApiClient
     private async Task<string> ProcessResponseAsync(HttpResponseMessage response, ClerkCredentials? credentials, CancellationToken cancellationToken)
     {
         var json = await response.Content.ReadAsStringAsync(cancellationToken);
-
-        string? authorization = null;
-        if (response.Headers.TryGetValues("Authorization", out var locations))
-        {
-            authorization = locations.FirstOrDefault();
-        }
-        if (response.Headers.TryGetValues("Set-Cookie", out var cookies))
-        {
-            var cookieValues = Microsoft.Net.Http.Headers.SetCookieHeaderValue.ParseList(cookies.ToList()).ToList();
-            var clientCookie = cookieValues.FirstOrDefault(cookie => cookie.Name.Equals("__client", StringComparison.OrdinalIgnoreCase));
-            if (clientCookie != null && credentials != null)
-            {
-                credentials.ClientToken = clientCookie.Value.Value;
-                credentials.MarkClientTokenAsDirty();
-            }
-        }
 
         if (response.IsSuccessStatusCode)
         {

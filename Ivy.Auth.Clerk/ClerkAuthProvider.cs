@@ -95,18 +95,8 @@ public class ClerkAuthProvider : IAuthProvider
 
         if (_isProduction)
         {
-            if (authSession.AuthSessionData is { } clientToken && new JwtSecurityTokenHandler().CanReadToken(clientToken))
-            {
-                credentials.ClientToken = clientToken;
-            }
-            else
-            {
-                authSession.AuthSessionData = null;
-                var frontendClient = GetFrontendApiClient(authSession);
-                var clientResponse = await frontendClient.GetCurrentClientAsync(credentials, cancellationToken);
-                authSession.AuthSessionData = credentials.ClientToken;
-            }
-            return credentials;
+            var frontendClient = GetFrontendApiClient(authSession);
+            var clientResponse = await frontendClient.GetCurrentClientAsync(credentials, cancellationToken);
         }
         else
         {
@@ -123,8 +113,9 @@ public class ClerkAuthProvider : IAuthProvider
                 authSession.AuthSessionData = devBrowserJwt;
                 credentials.DevBrowserToken = devBrowserJwt;
             }
-            return credentials;
         }
+
+        return credentials;
     }
 
     public async Task InitializeAsync(IAuthSession authSession, string requestScheme, string requestHost, CancellationToken cancellationToken = default)
@@ -145,7 +136,6 @@ public class ClerkAuthProvider : IAuthProvider
         {
             var credentials = await GetClerkCredentialsAsync(authSession, cancellationToken: cancellationToken);
             var updateEnvironmentResponse = await frontendClient.UpdateEnvironmentAsync(credentials, _origin, cancellationToken);
-            UpdateClientTokenIfNecessary(authSession, credentials);
         }
     }
 
@@ -181,14 +171,6 @@ public class ClerkAuthProvider : IAuthProvider
         }
     }
 
-    private void UpdateClientTokenIfNecessary(IAuthSession authSession, ClerkCredentials credentials)
-    {
-        if (credentials.ClearClientTokenDirtyFlag())
-        {
-            authSession.AuthSessionData = credentials.ClientToken;
-        }
-    }
-
     public async Task<Uri> GetOAuthUriAsync(IAuthSession authSession, AuthOption option, WebhookEndpoint callback, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrEmpty(_origin))
@@ -211,10 +193,8 @@ public class ClerkAuthProvider : IAuthProvider
         var redirectUrl = callback.GetUri(includeIdInPath: true).ToString();
         var frontendClient = GetFrontendApiClient(authSession);
         var signInResponse = await frontendClient.CreateSignInAsync(credentials, _origin, strategy, redirectUrl, null, cancellationToken);
-        UpdateClientTokenIfNecessary(authSession, credentials);
 
         var firstFactorVerificationResponse = await frontendClient.PrepareFirstFactorVerificationAsync(credentials, _origin, signInResponse.Response!.Id, strategy, redirectUrl, null, cancellationToken);
-        UpdateClientTokenIfNecessary(authSession, credentials);
 
         if (firstFactorVerificationResponse.Response?.FirstFactorVerification?.ExternalVerificationRedirectUrl is not { } oauthUri)
         {
@@ -255,10 +235,7 @@ public class ClerkAuthProvider : IAuthProvider
         try
         {
             var sessionResponse = await frontendClient.TouchSessionAsync(sessionId, credentials, cancellationToken);
-            UpdateClientTokenIfNecessary(authSession, credentials);
-
             var newToken = await frontendClient.CreateSessionTokenAsync(sessionId, credentials, cancellationToken);
-            UpdateClientTokenIfNecessary(authSession, credentials);
 
             if (string.IsNullOrEmpty(newToken.Jwt))
             {
@@ -292,7 +269,6 @@ public class ClerkAuthProvider : IAuthProvider
 
             var frontendClient = GetFrontendApiClient(authSession);
             await frontendClient.EndSessionAsync(sessionId, credentials, cancellationToken);
-            UpdateClientTokenIfNecessary(authSession, credentials);
         }
         catch (Exception)
         {
@@ -316,7 +292,6 @@ public class ClerkAuthProvider : IAuthProvider
 
             var frontendClient = GetFrontendApiClient(authSession);
             var newToken = await frontendClient.CreateSessionTokenAsync(sessionId, credentials, cancellationToken);
-            UpdateClientTokenIfNecessary(authSession, credentials);
             if (string.IsNullOrEmpty(newToken.Jwt))
             {
                 throw new Exception("Failed to get new JWT from Clerk.");
@@ -353,7 +328,6 @@ public class ClerkAuthProvider : IAuthProvider
 
             var frontendClient = GetFrontendApiClient(authSession);
             var session = await frontendClient.GetSessionAsync(sessionId, credentials, cancellationToken);
-            UpdateClientTokenIfNecessary(authSession, credentials);
             var user = session.Response.User;
 
             string name = user.FirstName ?? "";

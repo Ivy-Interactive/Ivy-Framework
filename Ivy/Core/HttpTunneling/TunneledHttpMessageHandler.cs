@@ -1,6 +1,5 @@
 using System.Collections.Concurrent;
 using System.Net.Http.Headers;
-using System.Text;
 
 namespace Ivy.Core.HttpTunneling;
 
@@ -35,10 +34,7 @@ public class TunneledHttpMessageHandler : HttpMessageHandler, IHttpTunnelRequest
         {
             var requestDto = await BuildRequestDtoAsync(requestId, request, cancellationToken);
 
-            // Send to frontend via ClientProvider
             _clientProvider.Sender.Send("HttpRequest", requestDto);
-
-            Console.WriteLine($"Sent tunneled HTTP request {requestId} to frontend: {System.Text.Json.JsonSerializer.Serialize(requestDto)}");
 
             // Await response
             var response = await pendingRequest.CompletionSource.Task;
