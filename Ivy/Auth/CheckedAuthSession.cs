@@ -86,7 +86,7 @@ public readonly struct CheckedAuthSession(IAuthSession innerAuthSession, Diction
         }
     }
 
-    public readonly HttpMessageHandler? HttpMessageHandler
+    public readonly HttpMessageHandler HttpMessageHandler
     {
         get => _innerAuthSession.HttpMessageHandler;
         set => _innerAuthSession.HttpMessageHandler = value;

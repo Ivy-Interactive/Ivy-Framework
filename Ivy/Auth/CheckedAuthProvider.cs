@@ -11,6 +11,7 @@ public class CheckedAuthProvider(IAuthProvider innerAuthProvider) : IAuthProvide
     public Task InitializeAsync(IAuthSession authSession, string requestScheme, string requestHost, CancellationToken cancellationToken = default)
     {
         authSession = authSession.WithCheckedAccess()
+            .WithTokenAccess(AuthSessionAccessMode.ReadWrite)
             .WithSessionDataAccess(AuthSessionAccessMode.ReadWrite)
             .Build();
         return _innerAuthProvider.InitializeAsync(authSession, requestScheme, requestHost, cancellationToken);

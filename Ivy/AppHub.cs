@@ -84,8 +84,7 @@ public class AppHub(
                 authProvider = new CheckedAuthProvider(authProvider);
 #endif
 
-                var authSession = AuthHelper.GetAuthSession(httpContext);
-                authSession.HttpMessageHandler = tunneledHttpHandler;
+                var authSession = AuthHelper.GetAuthSession(httpContext, tunneledHttpHandler);
                 var authService = new AuthService(authProvider, authSession, clientProvider, sessionStore);
 
                 await TimeoutHelper.WithTimeoutAsync(
