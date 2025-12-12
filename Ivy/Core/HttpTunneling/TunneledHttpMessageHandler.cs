@@ -33,11 +33,12 @@ public class TunneledHttpMessageHandler : HttpMessageHandler, IHttpTunnelRequest
 
         try
         {
-            // Build request DTO
             var requestDto = await BuildRequestDtoAsync(requestId, request, cancellationToken);
 
             // Send to frontend via ClientProvider
             _clientProvider.Sender.Send("HttpRequest", requestDto);
+
+            Console.WriteLine($"Sent tunneled HTTP request {requestId} to frontend: {System.Text.Json.JsonSerializer.Serialize(requestDto)}");
 
             // Await response
             var response = await pendingRequest.CompletionSource.Task;

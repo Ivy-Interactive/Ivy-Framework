@@ -396,9 +396,28 @@ export const useBackend = (
           contentType: response.headers.get('Content-Type') || undefined,
         };
 
-        connection?.invoke('HttpResponse', tunnelResponse).catch(err => {
-          logger.error('SignalR Error when sending HttpResponse:', err);
-        });
+        const httpResponse = await fetch(
+          `${getIvyHost()}/ivy/http-tunnel/response`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Connection-Id': connection?.connectionId ?? '',
+            },
+            body: JSON.stringify(tunnelResponse),
+          }
+        );
+
+        if (!httpResponse.ok) {
+          logger.error('Failed to send HttpResponse via HTTP', {
+            status: httpResponse.status,
+            statusText: httpResponse.statusText,
+          });
+        } else {
+          logger.debug('Sent HttpResponse back to backend via HTTP', {
+            requestId: request.requestId,
+          });
+        }
       } catch (error) {
         logger.error('Error processing HttpRequest:', error);
 
@@ -409,9 +428,31 @@ export const useBackend = (
             error instanceof Error ? error.message : 'Unknown error',
         };
 
-        connection?.invoke('HttpResponse', errorResponse).catch(err => {
-          logger.error('SignalR Error when sending error HttpResponse:', err);
+        const httpResponse = await fetch(
+          `${getIvyHost()}/ivy/http-tunnel/response`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Connection-Id': connection?.connectionId ?? '',
+            },
+            body: JSON.stringify(errorResponse),
+          }
+        ).catch(err => {
+          logger.error('Failed to send error HttpResponse via HTTP:', err);
+          return null;
         });
+
+        if (httpResponse && !httpResponse.ok) {
+          logger.error('Failed to send error HttpResponse via HTTP', {
+            status: httpResponse.status,
+            statusText: httpResponse.statusText,
+          });
+        } else if (httpResponse) {
+          logger.debug('Sent error HttpResponse back to backend via HTTP', {
+            requestId: request.requestId,
+          });
+        }
       }
     },
     [connection]

@@ -71,6 +71,9 @@ public class AppHub(
             appServices.AddSingleton<IHttpTunnelRequestManager>(tunneledHttpHandler);
             appServices.AddSingleton<HttpMessageHandler>(tunneledHttpHandler);
 
+            // Register tunnel handler in static dictionary so HttpTunnelingController can access it during auth init
+            HttpTunnelingController.TunnelHandlers[Context.ConnectionId] = tunneledHttpHandler;
+
             var request = httpContext.Request;
             var requestScheme = request.Scheme;
             if (request.Headers.TryGetValue("X-Forwarded-Proto", out var forwardedProto))
@@ -299,6 +302,9 @@ public class AppHub(
             {
                 logger.LogInformation("Client {ConnectionId} disconnected normally", Context.ConnectionId);
             }
+
+            // Clean up tunnel handler from static dictionary
+            HttpTunnelingController.TunnelHandlers.TryRemove(Context.ConnectionId, out _);
 
             if (sessionStore.Sessions.TryRemove(Context.ConnectionId, out var appState))
             {
@@ -591,6 +597,7 @@ public class AppHub(
 
     public Task HttpResponse(HttpTunnelResponseDto response)
     {
+        Console.WriteLine("Received response: " + System.Text.Json.JsonSerializer.Serialize(response));
         logger.LogDebug("HttpResponse: {RequestId} with status {StatusCode}",
             response.RequestId, response.StatusCode);
 
