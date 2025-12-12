@@ -87,7 +87,7 @@ export const TextareaVariant: React.FC<TextareaVariantProps> = ({
           </div>
         )}
         {props.invalid && (
-          <div className="pointer-events-auto flex items-center h-6">
+          <div className="flex items-center h-6">
             <InvalidIcon message={props.invalid} />
           </div>
         )}

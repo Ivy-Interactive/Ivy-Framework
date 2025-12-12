@@ -381,9 +381,7 @@ export const FileInputWidget: React.FC<FileInputWidgetProps> = ({
       {/* Invalid icon in top right corner - only for required field validation */}
       {invalid && (
         <div className="absolute top-2 right-2 z-20 pointer-events-none">
-          <div className="pointer-events-auto">
-            <InvalidIcon message={invalid} />
-          </div>
+          <InvalidIcon message={invalid} />
         </div>
       )}
       <div
