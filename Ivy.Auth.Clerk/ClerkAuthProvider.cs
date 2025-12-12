@@ -205,30 +205,6 @@ public class ClerkAuthProvider : IAuthProvider
 
     public async Task<AuthToken?> HandleOAuthCallbackAsync(IAuthSession authSession, HttpRequest request, CancellationToken cancellationToken = default)
     {
-        Console.WriteLine("Request Headers:");
-        foreach (var header in request.Headers)
-        {
-            // For debugging purposes
-            Console.WriteLine($"    {header.Key}: {header.Value}");
-        }
-        Console.WriteLine();
-
-        Console.WriteLine("Cookies:");
-        foreach (var cookie in request.Cookies)
-        {
-            // For debugging purposes
-            Console.WriteLine($"    {cookie.Key}: {cookie.Value}");
-        }
-        Console.WriteLine();
-
-        Console.WriteLine("Query Params:");
-        foreach (var queryParam in request.Query)
-        {
-            // For debugging purposes
-            Console.WriteLine($"    {queryParam.Key}: {queryParam.Value}");
-        }
-        Console.WriteLine();
-
         var sessionId = request.Query["created_session_id"].ToString();
         var credentials = await GetClerkCredentialsAsync(authSession, cancellationToken: cancellationToken);
         var frontendClient = GetFrontendApiClient(authSession);
