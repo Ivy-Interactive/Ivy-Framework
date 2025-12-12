@@ -1,11 +1,11 @@
 namespace Ivy.Core.HttpTunneling;
 
-public class HttpTunnelRequestDto
+public class HttpTunnelResponse
 {
     public string RequestId { get; set; } = null!;
-    public string Method { get; set; } = null!;
-    public string Url { get; set; } = null!;
+    public int StatusCode { get; set; }
     public Dictionary<string, string[]>? Headers { get; set; }
     public string? Body { get; set; }
     public string? ContentType { get; set; }
+    public string? ErrorMessage { get; set; }
 }

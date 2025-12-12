@@ -1,6 +1,6 @@
 namespace Ivy.Core.HttpTunneling;
 
-internal class PendingHttpRequest : IDisposable
+public class PendingHttpRequest : IDisposable
 {
     public TaskCompletionSource<HttpResponseMessage> CompletionSource { get; }
     public CancellationTokenSource TimeoutCts { get; }

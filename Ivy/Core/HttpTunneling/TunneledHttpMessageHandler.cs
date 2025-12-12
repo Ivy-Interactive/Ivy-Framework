@@ -1,16 +1,24 @@
-using System.Collections.Concurrent;
-using System.Net.Http.Headers;
-
 namespace Ivy.Core.HttpTunneling;
 
-public class TunneledHttpMessageHandler : HttpMessageHandler, IHttpTunnelRequestManager
+public class HttpTunnelRequest
+{
+    public string RequestId { get; set; } = null!;
+    public string Method { get; set; } = null!;
+    public string Url { get; set; } = null!;
+    public Dictionary<string, string[]>? Headers { get; set; }
+    public string? Body { get; set; }
+    public string? ContentType { get; set; }
+}
+
+public class TunneledHttpMessageHandler : HttpMessageHandler
 {
     private readonly IClientProvider _clientProvider;
-    private readonly ConcurrentDictionary<string, PendingHttpRequest> _pendingRequests = new();
+    private readonly string _connectionId;
 
-    public TunneledHttpMessageHandler(IClientProvider clientProvider)
+    public TunneledHttpMessageHandler(IClientProvider clientProvider, string connectionId)
     {
         _clientProvider = clientProvider ?? throw new ArgumentNullException(nameof(clientProvider));
+        _connectionId = connectionId ?? throw new ArgumentNullException(nameof(connectionId));
     }
 
     protected override async Task<HttpResponseMessage> SendAsync(
@@ -18,58 +26,32 @@ public class TunneledHttpMessageHandler : HttpMessageHandler, IHttpTunnelRequest
         CancellationToken cancellationToken)
     {
         // Generate unique request ID
-        var requestId = Guid.NewGuid().ToString();
+        var requestGuid = Guid.NewGuid().ToString();
+        var requestId = $"{_connectionId}:{requestGuid}";
 
-        // Create pending request with timeout and cancellation
         var pendingRequest = new PendingHttpRequest(cancellationToken);
 
-        // Add to pending requests dictionary
-        if (!_pendingRequests.TryAdd(requestId, pendingRequest))
-        {
-            pendingRequest.Dispose();
-            throw new InvalidOperationException($"Failed to register request {requestId}");
-        }
+        using var registration = HttpTunnelingController.Register(requestId, pendingRequest);
 
-        try
-        {
-            var requestDto = await BuildRequestDtoAsync(requestId, request, cancellationToken);
+        var tunnelRequest = await BuildRequestAsync(requestGuid, request, cancellationToken);
 
-            _clientProvider.Sender.Send("HttpRequest", requestDto);
+        _clientProvider.Sender.Send("HttpRequest", tunnelRequest);
 
-            // Await response
-            var response = await pendingRequest.CompletionSource.Task;
-
-            return response;
-        }
-        catch
-        {
-            // Clean up on error
-            _pendingRequests.TryRemove(requestId, out _);
-            throw;
-        }
-        finally
-        {
-            // Always dispose the pending request to clean up resources
-            if (_pendingRequests.TryRemove(requestId, out var removedRequest))
-            {
-                removedRequest.Dispose();
-            }
-        }
+        return await pendingRequest.CompletionSource.Task;
     }
 
-    private async Task<HttpTunnelRequestDto> BuildRequestDtoAsync(
+    private async Task<HttpTunnelRequest> BuildRequestAsync(
         string requestId,
         HttpRequestMessage request,
         CancellationToken cancellationToken)
     {
-        var dto = new HttpTunnelRequestDto
+        var tunnelRequest = new HttpTunnelRequest
         {
             RequestId = requestId,
             Method = request.Method.Method,
             Url = request.RequestUri?.ToString() ?? throw new InvalidOperationException("Request URI is null"),
         };
 
-        // Convert headers
         var headers = new Dictionary<string, string[]>();
         foreach (var header in request.Headers)
         {
@@ -77,126 +59,29 @@ public class TunneledHttpMessageHandler : HttpMessageHandler, IHttpTunnelRequest
         }
         if (headers.Count > 0)
         {
-            dto.Headers = headers;
+            tunnelRequest.Headers = headers;
         }
 
-        // Handle request content
         if (request.Content != null)
         {
-            // Add content headers
             foreach (var header in request.Content.Headers)
             {
                 headers[header.Key] = header.Value.ToArray();
             }
 
-            // Set content type
             if (request.Content.Headers.ContentType != null)
             {
-                dto.ContentType = request.Content.Headers.ContentType.ToString();
+                tunnelRequest.ContentType = request.Content.Headers.ContentType.ToString();
             }
 
-            // Read and encode body as base64
             var contentBytes = await request.Content.ReadAsByteArrayAsync(cancellationToken);
             if (contentBytes.Length > 0)
             {
-                dto.Body = Convert.ToBase64String(contentBytes);
+                tunnelRequest.Body = Convert.ToBase64String(contentBytes);
             }
         }
 
-        return dto;
+        return tunnelRequest;
     }
 
-    private HttpResponseMessage BuildResponseMessage(HttpTunnelResponseDto response)
-    {
-        // Handle network errors
-        if (response.StatusCode == 0)
-        {
-            throw new HttpRequestException(
-                response.ErrorMessage ?? "Network error occurred during tunneled HTTP request");
-        }
-
-        var responseMessage = new HttpResponseMessage((System.Net.HttpStatusCode)response.StatusCode);
-
-        // Set response headers
-        if (response.Headers != null)
-        {
-            foreach (var header in response.Headers)
-            {
-                // Try to add to response headers first
-                if (!responseMessage.Headers.TryAddWithoutValidation(header.Key, header.Value))
-                {
-                    // If it fails, it might be a content header, we'll add it after creating content
-                }
-            }
-        }
-
-        // Set response body
-        if (!string.IsNullOrEmpty(response.Body))
-        {
-            var bodyBytes = Convert.FromBase64String(response.Body);
-            var content = new ByteArrayContent(bodyBytes);
-
-            // Set content type
-            if (!string.IsNullOrEmpty(response.ContentType))
-            {
-                content.Headers.ContentType = MediaTypeHeaderValue.Parse(response.ContentType);
-            }
-
-            // Add content headers
-            if (response.Headers != null)
-            {
-                foreach (var header in response.Headers)
-                {
-                    // Try to add headers that might be content headers
-                    content.Headers.TryAddWithoutValidation(header.Key, header.Value);
-                }
-            }
-
-            responseMessage.Content = content;
-        }
-
-        return responseMessage;
-    }
-
-    public bool TryCompleteRequest(string requestId, HttpTunnelResponseDto response)
-    {
-        if (!_pendingRequests.TryGetValue(requestId, out var pendingRequest))
-        {
-            return false;
-        }
-
-        try
-        {
-            var responseMessage = BuildResponseMessage(response);
-            pendingRequest.CompletionSource.TrySetResult(responseMessage);
-            return true;
-        }
-        catch (Exception ex)
-        {
-            pendingRequest.CompletionSource.TrySetException(ex);
-            return true;
-        }
-    }
-
-    public void CancelAllPendingRequests(string reason)
-    {
-        var exception = new Exception($"HTTP tunnel request cancelled: {reason}");
-
-        foreach (var kvp in _pendingRequests)
-        {
-            kvp.Value.CompletionSource.TrySetException(exception);
-        }
-
-        _pendingRequests.Clear();
-    }
-
-    protected override void Dispose(bool disposing)
-    {
-        if (disposing)
-        {
-            CancelAllPendingRequests("HttpMessageHandler disposed");
-        }
-
-        base.Dispose(disposing);
-    }
 }

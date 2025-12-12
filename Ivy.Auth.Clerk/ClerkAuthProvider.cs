@@ -5,7 +5,6 @@ using Ivy.Hooks;
 using Ivy.Shared;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Ivy.Auth.Clerk.ApiClient;
 using System.Text;
 using System.Security.Claims;

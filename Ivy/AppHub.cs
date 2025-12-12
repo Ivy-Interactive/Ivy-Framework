@@ -67,12 +67,8 @@ public class AppHub(
             appServices.AddSingleton<IClientProvider>(clientProvider);
             appServices.AddSingleton<IUploadService>(new UploadService(Context.ConnectionId, clientProvider));
 
-            var tunneledHttpHandler = new TunneledHttpMessageHandler(clientProvider);
-            appServices.AddSingleton<IHttpTunnelRequestManager>(tunneledHttpHandler);
+            var tunneledHttpHandler = new TunneledHttpMessageHandler(clientProvider, Context.ConnectionId);
             appServices.AddSingleton<HttpMessageHandler>(tunneledHttpHandler);
-
-            // Register tunnel handler in static dictionary so HttpTunnelingController can access it during auth init
-            HttpTunnelingController.TunnelHandlers[Context.ConnectionId] = tunneledHttpHandler;
 
             var request = httpContext.Request;
             var requestScheme = request.Scheme;
@@ -303,23 +299,13 @@ public class AppHub(
                 logger.LogInformation("Client {ConnectionId} disconnected normally", Context.ConnectionId);
             }
 
-            // Clean up tunnel handler from static dictionary
-            HttpTunnelingController.TunnelHandlers.TryRemove(Context.ConnectionId, out _);
+            // Cancel all pending HTTP tunnel requests for this connection
+            HttpTunnelingController.CancelRequestsForConnection(Context.ConnectionId, "SignalR connection closed");
 
             if (sessionStore.Sessions.TryRemove(Context.ConnectionId, out var appState))
             {
                 try
                 {
-                    // Cancel all pending HTTP tunnel requests
-                    try
-                    {
-                        var requestManager = appState.AppServices.GetService<IHttpTunnelRequestManager>();
-                        requestManager?.CancelAllPendingRequests("SignalR connection closed");
-                    }
-                    catch
-                    {
-                        // ignored
-                    }
 
                     try
                     {
@@ -593,35 +579,6 @@ public class AppHub(
         {
             logger.LogError(ex, "Failed to send navigate signal: {ConnectionId} to [{AppId}]", Context.ConnectionId, appId);
         }
-    }
-
-    public Task HttpResponse(HttpTunnelResponseDto response)
-    {
-        Console.WriteLine("Received response: " + System.Text.Json.JsonSerializer.Serialize(response));
-        logger.LogDebug("HttpResponse: {RequestId} with status {StatusCode}",
-            response.RequestId, response.StatusCode);
-
-        if (!sessionStore.Sessions.TryGetValue(Context.ConnectionId, out var appSession))
-        {
-            logger.LogWarning("HttpResponse: {ConnectionId} [AppSession not found]",
-                Context.ConnectionId);
-            return Task.CompletedTask;
-        }
-
-        var requestManager = appSession.AppServices.GetService<IHttpTunnelRequestManager>();
-        if (requestManager == null)
-        {
-            logger.LogWarning("HttpResponse: No IHttpTunnelRequestManager found");
-            return Task.CompletedTask;
-        }
-
-        if (!requestManager.TryCompleteRequest(response.RequestId, response))
-        {
-            logger.LogWarning("HttpResponse: Request {RequestId} not found or already completed",
-                response.RequestId);
-        }
-
-        return Task.CompletedTask;
     }
 
 }

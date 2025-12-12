@@ -1,22 +1,43 @@
 using System.Collections.Concurrent;
-using Ivy.Apps;
+using System.Net.Http.Headers;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace Ivy.Core.HttpTunneling;
 
 public class HttpTunnelingController : Controller
 {
-    // Track tunnel handlers by connection ID so they can be accessed during OnConnectedAsync
-    internal static readonly ConcurrentDictionary<string, IHttpTunnelRequestManager> TunnelHandlers = new();
+    private static readonly ConcurrentDictionary<string, PendingHttpRequest> _pendingRequests = new();
+
+    public static IDisposable Register(string requestId, PendingHttpRequest pendingRequest)
+    {
+        if (!_pendingRequests.TryAdd(requestId, pendingRequest))
+        {
+            throw new InvalidOperationException($"Request {requestId} is already registered");
+        }
+
+        return new RequestUnsubscriber(requestId);
+    }
+
+    public static void CancelRequestsForConnection(string connectionId, string reason)
+    {
+        var exception = new Exception($"HTTP tunnel request cancelled: {reason}");
+
+        foreach (var kvp in _pendingRequests)
+        {
+            if (kvp.Key.StartsWith($"{connectionId}:"))
+            {
+                kvp.Value.CompletionSource.TrySetException(exception);
+                _pendingRequests.TryRemove(kvp.Key, out _);
+            }
+        }
+    }
 
     [Route("ivy/http-tunnel/response")]
     [HttpPost]
     public IActionResult HttpResponse(
-        [FromBody] HttpTunnelResponseDto response,
+        [FromBody] HttpTunnelResponse response,
         [FromHeader(Name = "X-Connection-Id")] string connectionId,
-        [FromServices] AppSessionStore sessionStore,
         [FromServices] ILogger<HttpTunnelingController> logger)
     {
         if (string.IsNullOrEmpty(connectionId))
@@ -28,29 +49,87 @@ public class HttpTunnelingController : Controller
         logger.LogDebug("HttpResponse: {RequestId} with status {StatusCode} for connection {ConnectionId}",
             response.RequestId, response.StatusCode, connectionId);
 
-        // Try to get the tunnel handler from the session store first
-        IHttpTunnelRequestManager? requestManager = null;
-        if (sessionStore.Sessions.TryGetValue(connectionId, out var appSession))
-        {
-            requestManager = appSession.AppServices.GetService<IHttpTunnelRequestManager>();
-        }
+        var fullRequestId = $"{connectionId}:{response.RequestId}";
 
-        // Fall back to the static dictionary if not in session store yet (during OnConnectedAsync)
-        requestManager ??= TunnelHandlers.TryGetValue(connectionId, out var handler) ? handler : null;
-
-        if (requestManager == null)
-        {
-            logger.LogWarning("HttpResponse: No IHttpTunnelRequestManager found for connection {ConnectionId}", connectionId);
-            return NotFound("Connection not found");
-        }
-
-        if (!requestManager.TryCompleteRequest(response.RequestId, response))
+        if (!_pendingRequests.TryGetValue(fullRequestId, out var pendingRequest))
         {
             logger.LogWarning("HttpResponse: Request {RequestId} not found or already completed", response.RequestId);
             return NotFound("Request not found");
         }
 
+        try
+        {
+            var responseMessage = BuildResponseMessage(response);
+            pendingRequest.CompletionSource.TrySetResult(responseMessage);
+        }
+        catch (Exception ex)
+        {
+            pendingRequest.CompletionSource.TrySetException(ex);
+        }
+
         logger.LogDebug("HttpResponse: Successfully completed request {RequestId}", response.RequestId);
         return Ok();
+    }
+
+    private static HttpResponseMessage BuildResponseMessage(HttpTunnelResponse response)
+    {
+        if (response.StatusCode == 0)
+        {
+            throw new HttpRequestException(
+                response.ErrorMessage ?? "Network error occurred during tunneled HTTP request");
+        }
+
+        var responseMessage = new HttpResponseMessage((System.Net.HttpStatusCode)response.StatusCode);
+
+        if (response.Headers != null)
+        {
+            foreach (var header in response.Headers)
+            {
+                if (!responseMessage.Headers.TryAddWithoutValidation(header.Key, header.Value))
+                {
+                    // Content header, will be added after creating content
+                }
+            }
+        }
+
+        if (!string.IsNullOrEmpty(response.Body))
+        {
+            var bodyBytes = Convert.FromBase64String(response.Body);
+            var content = new ByteArrayContent(bodyBytes);
+
+            if (!string.IsNullOrEmpty(response.ContentType))
+            {
+                content.Headers.ContentType = MediaTypeHeaderValue.Parse(response.ContentType);
+            }
+
+            if (response.Headers != null)
+            {
+                foreach (var header in response.Headers)
+                {
+                    content.Headers.TryAddWithoutValidation(header.Key, header.Value);
+                }
+            }
+
+            responseMessage.Content = content;
+        }
+
+        return responseMessage;
+    }
+
+    private sealed class RequestUnsubscriber(string requestId) : IDisposable
+    {
+        private bool _disposed;
+
+        public void Dispose()
+        {
+            if (!_disposed)
+            {
+                if (_pendingRequests.TryRemove(requestId, out var pendingRequest))
+                {
+                    pendingRequest.Dispose();
+                }
+                _disposed = true;
+            }
+        }
     }
 }
