@@ -87,13 +87,18 @@ public class AppHub(
                 var authSession = AuthHelper.GetAuthSession(httpContext, tunneledHttpHandler);
                 var authService = new AuthService(authProvider, authSession, clientProvider, sessionStore);
 
+                var oldSession = authSession.TakeSnapshot();
                 await TimeoutHelper.WithTimeoutAsync(
                     ct => authProvider.InitializeAsync(authSession, requestScheme, request.Host.Value!, ct),
                     Context.ConnectionAborted);
-                authService.SetAuthSessionDataCookies();
+                if (authSession.HasChangedSince(oldSession))
+                {
+                    authService.SetAuthCookies(reloadPage: false);
+                }
+
                 appServices.AddSingleton<IAuthService>(s => authService);
 
-                var oldSession = authSession.TakeSnapshot();
+                oldSession = authSession.TakeSnapshot();
                 try
                 {
                     if (!string.IsNullOrEmpty(oldSession.AuthToken?.AccessToken))

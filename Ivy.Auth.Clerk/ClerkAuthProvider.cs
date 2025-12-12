@@ -79,23 +79,20 @@ public class ClerkAuthProvider : IAuthProvider
 
     private async Task<ClerkCredentials> GetClerkCredentialsAsync(IAuthSession authSession, bool includeSessionToken = false, CancellationToken cancellationToken = default)
     {
-        var credentials = new ClerkCredentials()
-        {
-            SessionToken = includeSessionToken
-                // GetClerkCredentialsAsync might be called from a context where we are not allowed to read the access token,
-                // so only try to include it if explicitly requested
-                ? authSession.AuthToken?.AccessToken
-                : null,
-        };
+        var credentials = new ClerkCredentials();
+
+        var frontendClient = MakeFrontendApiClient(authSession);
 
         if (_isProduction)
         {
-            var frontendClient = MakeFrontendApiClient(authSession);
-            var clientResponse = await frontendClient.GetCurrentClientAsync(credentials, cancellationToken);
-            var session = clientResponse.Response?.Sessions.FirstOrDefault(session => session.Status == "active");
-            if (includeSessionToken && session?.LastActiveToken.Jwt is { } sessionToken)
+            if (await ValidateToken(authSession.AuthToken?.AccessToken, lenientLifetimeValidation: false, cancellationToken) == null)
             {
-                authSession.AuthToken = new AuthToken(sessionToken);
+                var clientResponse = await frontendClient.GetCurrentClientAsync(credentials, cancellationToken);
+                var session = clientResponse.Response?.Sessions.FirstOrDefault(session => session.Status == "active");
+                if (includeSessionToken && session?.LastActiveToken.Jwt is { } sessionToken)
+                {
+                    authSession.AuthToken = new AuthToken(sessionToken);
+                }
             }
         }
         else
@@ -107,13 +104,18 @@ public class ClerkAuthProvider : IAuthProvider
             else
             {
                 authSession.AuthSessionData = null;
-                var frontendClient = MakeFrontendApiClient(authSession);
                 var devBrowserTokenResponse = await frontendClient.CreateDevBrowserTokenAsync(cancellationToken);
                 devBrowserJwt = devBrowserTokenResponse.Id;
                 authSession.AuthSessionData = devBrowserJwt;
                 credentials.DevBrowserToken = devBrowserJwt;
             }
         }
+
+        if (includeSessionToken && credentials.SessionToken == null)
+        {
+            credentials.SessionToken = authSession.AuthToken?.AccessToken;
+        }
+        ;
 
         return credentials;
     }
@@ -130,7 +132,7 @@ public class ClerkAuthProvider : IAuthProvider
         }
         else
         {
-            var credentials = await GetClerkCredentialsAsync(authSession, includeSessionToken: true, cancellationToken: cancellationToken);
+            var credentials = await GetClerkCredentialsAsync(authSession, includeSessionToken: false, cancellationToken: cancellationToken);
             var updateEnvironmentResponse = await frontendClient.UpdateEnvironmentAsync(credentials, _origin, cancellationToken);
         }
     }
