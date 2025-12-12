@@ -107,11 +107,11 @@ public class TreeNode(string id, int index, Path parentPath, TreeNode[] children
     // }
 }
 
-public class WidgetTreeChanged(string viewId, int[] indices, JsonNode? patch)
+public class WidgetTreeChanged(string viewId, int[] indices, JsonNode patch)
 {
     public string ViewId { get; } = viewId;
     public int[] Indices { get; } = indices;
-    public JsonNode? Patch { get; } = patch;
+    public JsonNode Patch { get; } = patch;
 }
 
 public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
@@ -307,6 +307,11 @@ public class WidgetTree : IWidgetTree, IObservable<WidgetTreeChanged[]>
         {
             var update = partial.GetWidgetTree()?.Serialize();
             var patch = previous.Diff(update, new JsonPatchDeltaFormatter());
+
+            if (patch == null || patch.IsEmptyArray())
+            {
+                return null!;
+            }
 
 #if DEBUG
             if (Environment.GetEnvironmentVariable("IVY_DUMP_WIDGET_TREES") == "1")

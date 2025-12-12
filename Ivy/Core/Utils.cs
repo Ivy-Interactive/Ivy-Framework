@@ -339,4 +339,9 @@ public static class Utils
         // Match pattern: any characters followed by a backtick and numbers
         return System.Text.RegularExpressions.Regex.Replace(typeName, @"`[\d]+", string.Empty);
     }
+
+    public static bool IsEmptyArray(this JsonNode node)
+    {
+        return node is JsonArray { Count: 0 };
+    }
 }

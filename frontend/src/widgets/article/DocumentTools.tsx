@@ -449,6 +449,8 @@ export const DocumentTools: React.FC<DocumentToolsProps> = ({
         cellText = cellText.replace(/::-webkit-scrollbar[^;]*;?/g, '');
         cellText = cellText.replace(/[a-zA-Z-]+\s*:\s*[^;]*;?/g, '');
         cellText = cellText.trim().replace(/\s+/g, ' ');
+        // Escape backslashes first, then pipes (for markdown table cells) to prevent injection attacks
+        cellText = cellText.replace(/\\/g, '\\\\');
         return cellText.replace(/\|/g, '\\|');
       });
       tableData.push(cellTexts);

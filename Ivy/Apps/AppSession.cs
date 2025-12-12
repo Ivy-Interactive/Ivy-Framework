@@ -38,10 +38,6 @@ public class AppSession : IDisposable
 
     public EventDispatchQueue? EventQueue { get; set; }
 
-    internal volatile bool UpdateScheduled;
-
-    internal object? PendingUpdate;
-
     public void Dispose()
     {
         _isDisposed = true;
