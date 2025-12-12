@@ -60,7 +60,7 @@ export const CardWidget: React.FC<CardWidgetProps> = ({
       case Scales.Small:
         return {
           header:
-            'px-3 pt-3 pb-1 [&_*]:!text-sm [&_:is(h1,h2,h3,h4,h5,h6)]:!my-0 [&_:is(h1,h2,h3,h4,h5,h6)]:!font-normal',
+            'px-3 py-1 items-center [&_:is(p,span)]:!pt-1 [&_:is(h1,h2,h3,h4,h5,h6)]:!text-sm [&_:is(h1,h2,h3,h4,h5,h6)]:!my-0 [&_:is(h1,h2,h3,h4,h5,h6)]:!font-normal [&_:is(h1,h2,h3,h4,h5,h6)]:!h-9 [&_:is(h1,h2,h3,h4,h5,h6)]:!flex [&_:is(h1,h2,h3,h4,h5,h6)]:!items-center',
           content: 'p-3 pt-0 [&_*]:!text-sm',
           footer: 'p-3 pt-0',
           title: 'text-sm',
@@ -70,7 +70,7 @@ export const CardWidget: React.FC<CardWidgetProps> = ({
       case Scales.Large:
         return {
           header:
-            'px-8 pt-8 pb-2 [&_*]:!text-lg [&_:is(h1,h2,h3,h4,h5,h6)]:!my-0 [&_:is(h1,h2,h3,h4,h5,h6)]:!font-normal',
+            'px-8 py-5 items-center [&_:is(p,span)]:!pt-1 [&_:is(h1,h2,h3,h4,h5,h6)]:!text-lg [&_:is(h1,h2,h3,h4,h5,h6)]:!my-0 [&_:is(h1,h2,h3,h4,h5,h6)]:!font-normal [&_:is(h1,h2,h3,h4,h5,h6)]:!h-9 [&_:is(h1,h2,h3,h4,h5,h6)]:!flex [&_:is(h1,h2,h3,h4,h5,h6)]:!items-center',
           content: 'p-8 pt-0',
           footer: 'p-8 pt-0',
           title: 'text-lg',
@@ -80,11 +80,11 @@ export const CardWidget: React.FC<CardWidgetProps> = ({
       default:
         return {
           header:
-            'px-6 pt-6 pb-2 [&_*]:!text-base [&_:is(h1,h2,h3,h4,h5,h6)]:!my-0 [&_:is(h1,h2,h3,h4,h5,h6)]:!font-normal',
+            'px-6 py-4 items-center [&_:is(p,span)]:!pt-1 [&_:is(h1,h2,h3,h4,h5,h6,p)]:!text-base [&_:is(h1,h2,h3,h4,h5,h6)]:!my-0 [&_:is(h1,h2,h3,h4,h5,h6)]:!font-normal [&_:is(h1,h2,h3,h4,h5,h6)]:!h-9 [&_:is(h1,h2,h3,h4,h5,h6)]:!flex [&_:is(h1,h2,h3,h4,h5,h6)]:!items-center',
           content: 'p-6 pt-0',
           footer: 'p-6 pt-0',
           title: 'text-base',
-          description: 'text-sm mt-2',
+          description: 'text-sm',
           icon: 'h-5 w-5',
         };
     }

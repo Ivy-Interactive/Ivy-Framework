@@ -92,7 +92,6 @@ public class AppHub(
                     ct => authProvider.InitializeAsync(authSession, requestScheme, request.Host.Value!, ct),
                     Context.ConnectionAborted);
                 authService.SetAuthSessionDataCookies();
-
                 appServices.AddSingleton<IAuthService>(s => authService);
 
                 var oldSession = authSession.TakeSnapshot();
@@ -196,37 +195,7 @@ public class AppHub(
                 try
                 {
                     logger.LogDebug("> Update");
-                    appState.PendingUpdate = changes;
-                    if (appState.UpdateScheduled) return;
-                    appState.UpdateScheduled = true;
-
-                    // Use Task.Run instead of EventQueue to prevent UI updates from being blocked by long-running event handlers
-                    _ = Task.Run(async () =>
-                    {
-                        try { await Task.Delay(16, connectionAborted); }
-                        catch
-                        {
-                            // ignored
-                        }
-
-                        try
-                        {
-                            var payload = appState.PendingUpdate;
-                            if (payload != null)
-                            {
-                                clientProvider.Sender.Send("Update", payload);
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            logger.LogError(ex, "{ConnectionId}", appState.ConnectionId);
-                        }
-                        finally
-                        {
-                            appState.UpdateScheduled = false;
-                            appState.PendingUpdate = null;
-                        }
-                    });
+                    clientProvider.Sender.Send("Update", changes);
                 }
                 catch (Exception e)
                 {
@@ -363,7 +332,6 @@ public class AppHub(
                 var session = sessionStore.Sessions[connectionId];
                 var authService = session.AppServices.GetRequiredService<IAuthService>();
                 var authProvider = session.AppServices.GetRequiredService<IAuthProvider>();
-                var clientProvider = session.AppServices.GetRequiredService<IClientProvider>();
 
                 var authSession = authService.GetAuthSession();
 

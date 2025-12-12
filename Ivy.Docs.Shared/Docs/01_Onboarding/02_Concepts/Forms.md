@@ -38,6 +38,10 @@ public class BasicFormExample : ViewBase
 }
 ```
 
+<Callout Type="tip">
+**Automatic Email Validation**: Fields ending with "Email" (like `UserEmail`, `ContactEmail`) automatically get email validation, even without the `[EmailAddress]` attribute.
+</Callout>
+
 ### Automatic Field Generation
 
 The FormBuilder automatically maps C# types to appropriate input widgets:
@@ -301,17 +305,38 @@ public class ValidationExample : ViewBase
 {
     public class UserModel
     {
-        [Required, MinLength(3)]
+        [Required(ErrorMessage = "Username is required")]
+        [Length(3, 50, ErrorMessage = "Username must be between 3 and 50 characters")]
         public string Username { get; set; } = "";
         
-        [Required, EmailAddress]
+        [Required]
+        [EmailAddress(ErrorMessage = "Please enter a valid email address")]
+        [MaxLength(100)]
         public string Email { get; set; } = "";
         
-        [Required, MinLength(8)]
+        [Required]
+        [Length(8, 100, ErrorMessage = "Password must be between 8 and 100 characters")]
+        [DataType(DataType.Password)]
         public string Password { get; set; } = "";
         
-        [Range(13, 120)]
+        [Range(13, 120, ErrorMessage = "Age must be between 13 and 120")]
         public int Age { get; set; } = 18;
+        
+        [Phone(ErrorMessage = "Please enter a valid phone number")]
+        public string? PhoneNumber { get; set; }
+        
+        [Url(ErrorMessage = "Please enter a valid URL")]
+        public string? Website { get; set; }
+        
+        [AllowedValues("USA", "Canada", "UK", ErrorMessage = "Please select a valid country")]
+        public string Country { get; set; } = "USA";
+        
+        [RegularExpression(@"^\d{5}(-\d{4})?$", ErrorMessage = "ZIP code must be in format 12345 or 12345-6789")]
+        public string? ZipCode { get; set; }
+        
+        [CreditCard(ErrorMessage = "Please enter a valid credit card number")]
+        [Length(13, 19, ErrorMessage = "Credit card number must be between 13 and 19 digits")]
+        public string? CreditCardNumber { get; set; }
         
         public DateTime BirthDate { get; set; } = DateTime.Now;
     }
@@ -330,7 +355,10 @@ public class ValidationExample : ViewBase
             }
         }, user);
         
+        var countryOptions = new[] { "USA", "Canada", "UK" }.ToOptions();
+        
         return user.ToForm("Create Account")
+            .Builder(m => m.Country, s => s.ToSelectInput(countryOptions))
             // Custom validation: birth date cannot be in the future
             .Validate<DateTime>(m => m.BirthDate, birthDate => 
                 (birthDate <= DateTime.Now, "Birth date cannot be in the future"))
@@ -341,30 +369,9 @@ public class ValidationExample : ViewBase
 }
 ```
 
-This example demonstrates:
-- **DataAnnotations** for standard validation (Required, MinLength, EmailAddress, Range)
-- **Custom `.Validate()`** for business logic that operates on individual field values
-
-<Callout Type="tip">
-**Automatic Email Validation**: Fields ending with "Email" (like `UserEmail`, `ContactEmail`) automatically get email validation, even without the `[EmailAddress]` attribute.
+<Callout Type="info">
+**Supported DataAnnotations**: Forms support all standard .NET DataAnnotations including `[Required]`, `[Length]`, `[MinLength]`, `[MaxLength]`, `[Range]`, `[EmailAddress]`, `[Phone]`, `[Url]`, `[CreditCard]`, `[RegularExpression]`, `[AllowedValues]`, and `[DataType]`. All attributes support custom error messages via the `ErrorMessage` parameter.
 </Callout>
-
-**Supported DataAnnotations:**
-
-- `[Required]` - Field must have a value
-- `[MinLength(n)]` - Minimum string length
-- `[MaxLength(n)]` - Maximum string length
-- `[StringLength(max, MinimumLength = min)]` - String length constraints
-- `[Length(min, max)]` - Length constraints for strings and collections
-- `[Range(min, max)]` - Value must be within range
-- `[EmailAddress]` - Valid email format
-- `[Phone]` - Valid phone number format
-- `[Url]` - Valid URL format
-- `[CreditCard]` - Valid credit card number format
-- `[RegularExpression(pattern)]` - Match a regex pattern
-- `[AllowedValues(...)]` - Value must be from specified list
-- `[DataType(...)]` - Specifies data type (Password, Date, DateTime, MultilineText, etc.)
-- `[Display(...)]` - Controls field display properties (Name, Description, Order, GroupName, Prompt)
 
 ### Display Attributes
 
@@ -377,7 +384,7 @@ public class DisplayAttributeExample : ViewBase
     {
         [Display(Name = "Full Name", Description = "Enter your complete legal name", Order = 1)]
         [Required(ErrorMessage = "Full name is required")]
-        [StringLength(100, MinimumLength = 2)]
+        [Length(2, 100)]
         public string Name { get; set; } = "";
 
         [Display(Name = "Email Address", Description = "We'll use this for account verification", Order = 2)]
@@ -391,7 +398,7 @@ public class DisplayAttributeExample : ViewBase
 
         [Display(GroupName = "Account Security", Name = "Password", Order = 4)]
         [Required]
-        [StringLength(100, MinimumLength = 8)]
+        [Length(8, 100)]
         [DataType(DataType.Password)]
         public string Password { get; set; } = "";
 
@@ -434,11 +441,123 @@ public class DisplayAttributeExample : ViewBase
 ```
 
 The `[Display]` attribute supports these properties:
+
 - **Name**: Custom field label (overrides automatic label generation)
 - **Description**: Help text shown below the field
 - **Order**: Field ordering (lower numbers appear first)
 - **GroupName**: Groups related fields together
 - **Prompt**: Placeholder text for input fields
+
+### Programmatic Validation
+
+In addition to DataAnnotations, you can add validation programmatically using FormBuilder methods:
+
+```csharp demo-tabs
+public class ProgrammaticValidationExample : ViewBase
+{
+    public record ProductModel(
+        string Name,
+        string? Description,
+        decimal Price,
+        int Stock
+    );
+
+    public override object? Build()
+    {
+        var product = UseState(() => new ProductModel("", null, 0.0m, 0));
+        
+        return product.ToForm()
+            // Mark fields as required programmatically
+            .Required(m => m.Name, m => m.Price)
+            // Add custom validation logic
+            .Validate<string>(m => m.Name, name =>
+                (name.Length >= 3, "Product name must be at least 3 characters"))
+            .Validate<decimal>(m => m.Price, price =>
+                (price > 0, "Price must be greater than zero"))
+            .Validate<int>(m => m.Stock, stock =>
+                (stock >= 0, "Stock cannot be negative"))
+            .Label(m => m.Name, "Product Name")
+            .Label(m => m.Description, "Description")
+            .Label(m => m.Price, "Price")
+            .Label(m => m.Stock, "Stock Quantity");
+    }
+}
+```
+
+**Programmatic Validation Methods:**
+
+- `.Required(params Expression<Func<TModel, object>>[] fields)` - Mark fields as required
+- `.Validate<T>(Expression<Func<TModel, object>> field, Func<T, (bool, string)> validator)` - Add custom validation with custom error message
+
+### Validation Examples
+
+#### Collections and Arrays
+
+```csharp demo-tabs
+public class CollectionValidationExample : ViewBase
+{
+    public class SurveyModel
+    {
+        [Display(Name = "Interests", Description = "Select at least one interest")]
+        [Required(ErrorMessage = "Please select at least one interest")]
+        [MinLength(1, ErrorMessage = "You must select at least one interest")]
+        [AllowedValues("Technology", "Sports", "Music", "Art", "Travel")]
+        public string[] Interests { get; set; } = Array.Empty<string>();
+        
+        [Display(Name = "Tags")]
+        [Length(1, 5, ErrorMessage = "Select between 1 and 5 tags")]
+        public List<string> Tags { get; set; } = new();
+    }
+
+    public override object? Build()
+    {
+        var survey = UseState(() => new SurveyModel());
+        var interestOptions = new[] { "Technology", "Sports", "Music", "Art", "Travel" }.ToOptions();
+        var tagOptions = new[] { "New", "Popular", "Featured", "Sale", "Limited" }.ToOptions();
+        
+        return survey.ToForm()
+            .Builder(m => m.Interests, s => s.ToSelectInput(interestOptions).List())
+            .Builder(m => m.Tags, s => s.ToSelectInput(tagOptions).List());
+    }
+}
+```
+
+#### Combining Multiple Validators
+
+```csharp demo-tabs
+public class MultipleValidatorsExample : ViewBase
+{
+    public class AccountModel
+    {
+        [Display(Name = "Username")]
+        [Required(ErrorMessage = "Username is required")]
+        [Length(3, 20, ErrorMessage = "Username must be between 3 and 20 characters")]
+        [RegularExpression(@"^[a-zA-Z0-9_]+$", ErrorMessage = "Username can only contain letters, numbers, and underscores")]
+        public string Username { get; set; } = "";
+        
+        [Display(Name = "Email")]
+        [Required]
+        [EmailAddress(ErrorMessage = "Invalid email format")]
+        [MaxLength(100, ErrorMessage = "Email cannot exceed 100 characters")]
+        public string Email { get; set; } = "";
+        
+        [Display(Name = "Password")]
+        [Required]
+        [Length(8, 128, ErrorMessage = "Password must be between 8 and 128 characters")]
+        [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)", ErrorMessage = "Password must contain uppercase, lowercase, and a number")]
+        [DataType(DataType.Password)]
+        public string Password { get; set; } = "";
+    }
+
+    public override object? Build()
+    {
+        var account = UseState(() => new AccountModel());
+        
+        return account.ToForm("Create Account")
+            .Builder(m => m.Password, s => s.ToPasswordInput());
+    }
+}
+```
 
 ## Form Submission
 

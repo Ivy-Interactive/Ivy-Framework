@@ -10,53 +10,64 @@ public class CardApp : SampleBase
         var client = UseService<IClientProvider>();
 
         var card1 = new Card(
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec nunc",
-            new Button("Sign Me Up", _ => client.Toast("You have signed up!")).TestId("card-app-signup-button")
-        ).Header("Card App", "This is a card app.").TestId("card-app");
+            content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec nunc",
+            footer: new Button("Sign Me Up", _ => client.Toast("You have signed up!")).TestId("card-app-signup-button"),
+            header: Layout.Horizontal().Align(Align.Center)
+                    | Text.H4("Card App").WithLayout().Grow()
+        ).TestId("card-app");
 
         var card2 = new Card(
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec nunc"
-        ).Header("Card with Border", "This card has a custom border.")
-         .BorderThickness(3)
+            content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec nunc",
+            header: Layout.Horizontal().Align(Align.Center)
+                    | Text.H4("Card with Border").WithLayout().Grow()
+        ).BorderThickness(3)
          .BorderStyle(BorderStyle.Dashed)
          .BorderColor(Colors.Primary)
          .BorderRadius(BorderRadius.Rounded)
          .TestId("card-border");
 
         var card3 = new Card(
-            "This card demonstrates the border color fix with a thick red border."
-        ).Header("Border Color Test", "Should now display with a red border")
-         .BorderThickness(4)
+            content: "This card demonstrates the border color fix with a thick red border.",
+            header: Layout.Horizontal().Align(Align.Center)
+                    | Text.H4("Border Color Test").WithLayout().Grow()
+        ).BorderThickness(4)
          .BorderStyle(BorderStyle.Solid)
          .BorderColor(Colors.Red)
          .BorderRadius(BorderRadius.Rounded)
          .TestId("card-border-color");
 
         var card4 = new Card(
-           "This card demonstrates OnClick handlers."
-       ).Header("OnClick test", "Click me!")
-        .TestId("card-onclick")
+            content: "This card demonstrates OnClick handlers.",
+            header: Layout.Horizontal().Align(Align.Center)
+                    | Text.H4("OnClick test").WithLayout().Grow()
+        ).TestId("card-onclick")
         .HandleClick(_ =>
         {
             client.Toast("Clicked!");
         });
+
         var smallCard = new Card(
-         "This is a small card with elements."
-        ).Header("Small Card with Elements", "This is a small card with elements.")
-        .Icon(Icons.Info)
-        .Small()
+            content: "This is a small card with elements.",
+            header: Layout.Horizontal().Align(Align.Center)
+                    | Text.H4("Small Card with Elements").WithLayout().Grow()
+                    | Icons.Info.ToIcon().Color(Colors.Black)
+        ).Small()
         .TestId("card-small-with-elements");
+
         var mediumCard = new Card(
-         "This is a medium card with elements."
-        ).Header("Medium Card with Elements", "This is a medium card with elements.")
-        .Icon(Icons.Info)
-        .Medium()
+            content: "This is a medium card with elements.",
+            header: Layout.Horizontal().Align(Align.Center)
+                    | Text.H4("Medium Card with Elements").WithLayout().Grow()
+                    | Icons.Info.ToIcon().Color(Colors.Black)
+        ).Medium()
         .TestId("card-medium-with-elements");
+
         var largeCard = new Card(
-         "This is a large card with elements."
-        ).Header("Large Card with Elements", "This is a large card with elements.")
-        .Icon(Icons.Info)
-        .Large();
+            content: "This is a large card with elements.",
+            header: Layout.Horizontal().Align(Align.Center)
+                    | Text.H4("Large Card with Elements").WithLayout().Grow()
+                    | Icons.Info.ToIcon().Color(Colors.Black)
+        ).Large();
 
         return Layout.Vertical()
          | Text.H1("Card")
@@ -124,13 +135,15 @@ public class MetricView(string title) : ViewBase
     public override object? Build()
     {
         return new Card(
-                (Layout.Horizontal().Align(Align.Left).Gap(2)
-                 | Text.Large("$84,250")
-                 | Icons.TrendingUp.ToIcon().Color(Colors.Emerald)
-                 | Text.Small("21%").Color(Colors.Emerald)),
-                new Progress(21).Goal(800_000.ToString("C0"))
-            ).Header(Text.H4(title)).Icon(Icons.DollarSign).TestId("card-total-sales")
-            ;
+                content: (Layout.Horizontal().Align(Align.Left).Gap(2)
+                         | Text.Large("$84,250")
+                         | Icons.TrendingUp.ToIcon().Color(Colors.Emerald)
+                         | Text.Small("21%").Color(Colors.Emerald)),
+                footer: new Progress(21).Goal(800_000.ToString("C0")),
+                header: Layout.Horizontal().Align(Align.Center)
+                        | Text.H4(title).WithLayout().Grow()
+                        | Icons.DollarSign.ToIcon().Color(Colors.Black)
+            ).TestId("card-total-sales");
     }
 }
 
@@ -139,13 +152,15 @@ public class LongNumberMetricView : ViewBase
     public override object? Build()
     {
         return new Card(
-                (Layout.Horizontal().Align(Align.Left).Gap(2)
-                 | Text.Large("$123,456,789.99")
-                 | Icons.TrendingUp.ToIcon().Color(Colors.Emerald)
-                 | Text.Small("1,234.5%").Color(Colors.Emerald)),
-                new Progress(85).Goal("$100,000,000")
-            ).Header(Text.H4("Very Long Revenue Number")).Icon(Icons.DollarSign)
-            ;
+                content: (Layout.Horizontal().Align(Align.Left).Gap(2)
+                         | Text.Large("$123,456,789.99")
+                         | Icons.TrendingUp.ToIcon().Color(Colors.Emerald)
+                         | Text.Small("1,234.5%").Color(Colors.Emerald)),
+                footer: new Progress(85).Goal("$100,000,000"),
+                header: Layout.Horizontal().Align(Align.Center)
+                        | Text.H4("Very Long Revenue Number").WithLayout().Grow()
+                        | Icons.DollarSign.ToIcon().Color(Colors.Black)
+            );
     }
 }
 
@@ -154,13 +169,15 @@ public class HighPercentageMetricView : ViewBase
     public override object? Build()
     {
         return new Card(
-                (Layout.Horizontal().Align(Align.Left).Gap(2)
-                 | Text.Large("1,012.50%")
-                 | Icons.TrendingUp.ToIcon().Color(Colors.Emerald)
-                 | Text.Small("38.1%").Color(Colors.Emerald)),
-                new Progress(125).Goal("806.67%")
-            ).Header(Text.H4("Post Engagement Rate")).Icon(Icons.Activity)
-            ;
+                content: (Layout.Horizontal().Align(Align.Left).Gap(2)
+                         | Text.Large("1,012.50%")
+                         | Icons.TrendingUp.ToIcon().Color(Colors.Emerald)
+                         | Text.Small("38.1%").Color(Colors.Emerald)),
+                footer: new Progress(125).Goal("806.67%"),
+                header: Layout.Horizontal().Align(Align.Center)
+                        | Text.H4("Post Engagement Rate").WithLayout().Grow()
+                        | Icons.Activity.ToIcon().Color(Colors.Black)
+            );
     }
 }
 
@@ -169,13 +186,15 @@ public class VeryLongTitleMetricView : ViewBase
     public override object? Build()
     {
         return new Card(
-                (Layout.Horizontal().Align(Align.Left).Gap(2)
-                 | Text.Large("2.25")
-                 | Icons.TrendingUp.ToIcon().Color(Colors.Emerald)
-                 | Text.Small("38.1%").Color(Colors.Emerald)),
-                new Progress(90).Goal("2.50")
-            ).Header(Text.H4("Total Comments per Author in This Period")).Icon(Icons.MessageCircle)
-            ;
+                content: (Layout.Horizontal().Align(Align.Left).Gap(2)
+                         | Text.Large("2.25")
+                         | Icons.TrendingUp.ToIcon().Color(Colors.Emerald)
+                         | Text.Small("38.1%").Color(Colors.Emerald)),
+                footer: new Progress(90).Goal("2.50"),
+                header: Layout.Horizontal().Align(Align.Center)
+                        | Text.H4("Total Comments per Author in This Period").WithLayout().Grow()
+                        | Icons.MessageCircle.ToIcon().Color(Colors.Black)
+            );
     }
 }
 
@@ -184,13 +203,15 @@ public class TotalCommentsPerAuthorMetricView : ViewBase
     public override object? Build()
     {
         return new Card(
-                (Layout.Horizontal().Align(Align.Left).Gap(2)
-                 | Text.Large("2.25")
-                 | Icons.TrendingUp.ToIcon().Color(Colors.Emerald)
-                 | Text.Small("38.1%").Color(Colors.Emerald)),
-                new Progress(90).Goal("2.50")
-            ).Header(Text.H4("Total Comments per Author")).Icon(Icons.UserCheck)
-            ;
+                content: (Layout.Horizontal().Align(Align.Left).Gap(2)
+                         | Text.Large("2.25")
+                         | Icons.TrendingUp.ToIcon().Color(Colors.Emerald)
+                         | Text.Small("38.1%").Color(Colors.Emerald)),
+                footer: new Progress(90).Goal("2.50"),
+                header: Layout.Horizontal().Align(Align.Center)
+                        | Text.H4("Total Comments per Author").WithLayout().Grow()
+                        | Icons.UserCheck.ToIcon().Color(Colors.Black)
+            );
     }
 }
 
@@ -201,18 +222,20 @@ public class UserEngagementWidget : ViewBase
     public override object? Build()
     {
         return new Card(
-                Layout.Vertical().Gap(3)
-                | (Layout.Horizontal().Align(Align.Left).Gap(2)
-                   | Icons.Users.ToIcon().Color(Colors.Blue)
-                   | Text.Large("1,247")
-                   | Text.Small("Active Users").Color(Colors.Gray))
-                | (Layout.Horizontal().Align(Align.Left).Gap(2)
-                   | Icons.TrendingUp.ToIcon().Color(Colors.Emerald)
-                   | Text.Small("+12.5%").Color(Colors.Emerald)
-                   | Text.Small("vs last month").Color(Colors.Gray))
-                | new Progress(75).Goal("1,500 users")
-            ).Header(Text.H4("User Engagement")).Icon(Icons.Users)
-            ;
+                content: Layout.Vertical().Gap(3)
+                        | (Layout.Horizontal().Align(Align.Left).Gap(2)
+                           | Icons.Users.ToIcon().Color(Colors.Blue)
+                           | Text.Large("1,247")
+                           | Text.Small("Active Users").Color(Colors.Gray))
+                        | (Layout.Horizontal().Align(Align.Left).Gap(2)
+                           | Icons.TrendingUp.ToIcon().Color(Colors.Emerald)
+                           | Text.Small("+12.5%").Color(Colors.Emerald)
+                           | Text.Small("vs last month").Color(Colors.Gray)),
+                footer: new Progress(75).Goal("1,500 users"),
+                header: Layout.Horizontal().Align(Align.Center)
+                        | Text.H4("User Engagement").WithLayout().Grow()
+                        | Icons.Users.ToIcon().Color(Colors.Black)
+            );
     }
 }
 
@@ -221,17 +244,19 @@ public class TaskCompletionWidget : ViewBase
     public override object? Build()
     {
         return new Card(
-                Layout.Vertical().Gap(3)
-                | (Layout.Horizontal().Align(Align.Left).Gap(2)
-                   | Icons.Check.ToIcon().Color(Colors.Emerald)
-                   | Text.Large("87%")
-                   | Text.Small("Completed").Color(Colors.Gray))
-                | (Layout.Horizontal().Align(Align.Left).Gap(2)
-                   | Icons.Clock.ToIcon().Color(Colors.Orange)
-                   | Text.Small("23 tasks remaining").Color(Colors.Orange))
-                | new Progress(87).Goal("100% completion")
-            ).Header(Text.H4("Task Progress")).Icon(Icons.Check)
-            ;
+                content: Layout.Vertical().Gap(3)
+                        | (Layout.Horizontal().Align(Align.Left).Gap(2)
+                           | Icons.Check.ToIcon().Color(Colors.Emerald)
+                           | Text.Large("87%")
+                           | Text.Small("Completed").Color(Colors.Gray))
+                        | (Layout.Horizontal().Align(Align.Left).Gap(2)
+                           | Icons.Clock.ToIcon().Color(Colors.Orange)
+                           | Text.Small("23 tasks remaining").Color(Colors.Orange)),
+                footer: new Progress(87).Goal("100% completion"),
+                header: Layout.Horizontal().Align(Align.Center)
+                        | Text.H4("Task Progress").WithLayout().Grow()
+                        | Icons.Check.ToIcon().Color(Colors.Black)
+            );
     }
 }
 
@@ -240,19 +265,21 @@ public class SystemHealthWidget : ViewBase
     public override object? Build()
     {
         return new Card(
-                Layout.Vertical().Gap(3)
-                | (Layout.Horizontal().Align(Align.Left).Gap(2)
-                   | Icons.Server.ToIcon().Color(Colors.Emerald)
-                   | Text.Large("99.9%")
-                   | Text.Small("Uptime").Color(Colors.Gray))
-                | (Layout.Horizontal().Align(Align.Left).Gap(2)
-                   | Icons.Cpu.ToIcon().Color(Colors.Blue)
-                   | Text.Small("CPU: 45%").Color(Colors.Blue)
-                   | Icons.HardDrive.ToIcon().Color(Colors.Purple)
-                   | Text.Small("RAM: 67%").Color(Colors.Purple))
-                | new Progress(99).Goal("100% uptime")
-            ).Header(Text.H4("System Health")).Icon(Icons.Activity)
-            ;
+                content: Layout.Vertical().Gap(3)
+                        | (Layout.Horizontal().Align(Align.Left).Gap(2)
+                           | Icons.Server.ToIcon().Color(Colors.Emerald)
+                           | Text.Large("99.9%")
+                           | Text.Small("Uptime").Color(Colors.Gray))
+                        | (Layout.Horizontal().Align(Align.Left).Gap(2)
+                           | Icons.Cpu.ToIcon().Color(Colors.Blue)
+                           | Text.Small("CPU: 45%").Color(Colors.Blue)
+                           | Icons.HardDrive.ToIcon().Color(Colors.Purple)
+                           | Text.Small("RAM: 67%").Color(Colors.Purple)),
+                footer: new Progress(99).Goal("100% uptime"),
+                header: Layout.Horizontal().Align(Align.Center)
+                        | Text.H4("System Health").WithLayout().Grow()
+                        | Icons.Activity.ToIcon().Color(Colors.Black)
+            );
     }
 }
 
@@ -261,19 +288,21 @@ public class RevenueGrowthWidget : ViewBase
     public override object? Build()
     {
         return new Card(
-                Layout.Vertical().Gap(3)
-                | (Layout.Horizontal().Align(Align.Left).Gap(2)
-                   | Icons.DollarSign.ToIcon().Color(Colors.Emerald)
-                   | Text.Large("$45,230")
-                   | Text.Small("This Month").Color(Colors.Gray))
-                | (Layout.Horizontal().Align(Align.Left).Gap(2)
-                   | Icons.TrendingUp.ToIcon().Color(Colors.Emerald)
-                   | Text.Small("+18.3%").Color(Colors.Emerald)
-                   | Icons.Calendar.ToIcon().Color(Colors.Blue)
-                   | Text.Small("vs last month").Color(Colors.Blue))
-                | new Progress(65).Goal("$70,000 target")
-            ).Header(Text.H4("Revenue Growth")).Icon(Icons.TrendingUp)
-            ;
+                content: Layout.Vertical().Gap(3)
+                        | (Layout.Horizontal().Align(Align.Left).Gap(2)
+                           | Icons.DollarSign.ToIcon().Color(Colors.Emerald)
+                           | Text.Large("$45,230")
+                           | Text.Small("This Month").Color(Colors.Gray))
+                        | (Layout.Horizontal().Align(Align.Left).Gap(2)
+                           | Icons.TrendingUp.ToIcon().Color(Colors.Emerald)
+                           | Text.Small("+18.3%").Color(Colors.Emerald)
+                           | Icons.Calendar.ToIcon().Color(Colors.Blue)
+                           | Text.Small("vs last month").Color(Colors.Blue)),
+                footer: new Progress(65).Goal("$70,000 target"),
+                header: Layout.Horizontal().Align(Align.Center)
+                        | Text.H4("Revenue Growth").WithLayout().Grow()
+                        | Icons.TrendingUp.ToIcon().Color(Colors.Black)
+            );
     }
 }
 
@@ -282,25 +311,27 @@ public class IconTextShowcaseWidget : ViewBase
     public override object? Build()
     {
         return new Card(
-                Layout.Vertical().Gap(4)
-                | (Layout.Horizontal().Align(Align.Left).Gap(3)
-                   | Icons.Heart.ToIcon().Color(Colors.Red)
-                   | Text.Large("Likes").Color(Colors.Gray)
-                   | Text.Large("2,847").Color(Colors.Red))
-                | (Layout.Horizontal().Align(Align.Left).Gap(3)
-                   | Icons.MessageCircle.ToIcon().Color(Colors.Blue)
-                   | Text.Large("Comments").Color(Colors.Gray)
-                   | Text.Large("156").Color(Colors.Blue))
-                | (Layout.Horizontal().Align(Align.Left).Gap(3)
-                   | Icons.Share.ToIcon().Color(Colors.Purple)
-                   | Text.Large("Shares").Color(Colors.Gray)
-                   | Text.Large("89").Color(Colors.Purple))
-                | (Layout.Horizontal().Align(Align.Left).Gap(3)
-                   | Icons.Eye.ToIcon().Color(Colors.Orange)
-                   | Text.Large("Views").Color(Colors.Gray)
-                   | Text.Large("12,456").Color(Colors.Orange))
-            ).Header(Text.H4("Social Engagement")).Icon(Icons.Star)
-            ;
+                content: Layout.Vertical().Gap(4)
+                        | (Layout.Horizontal().Align(Align.Left).Gap(3)
+                           | Icons.Heart.ToIcon().Color(Colors.Red)
+                           | Text.Large("Likes").Color(Colors.Gray)
+                           | Text.Large("2,847").Color(Colors.Red))
+                        | (Layout.Horizontal().Align(Align.Left).Gap(3)
+                           | Icons.MessageCircle.ToIcon().Color(Colors.Blue)
+                           | Text.Large("Comments").Color(Colors.Gray)
+                           | Text.Large("156").Color(Colors.Blue))
+                        | (Layout.Horizontal().Align(Align.Left).Gap(3)
+                           | Icons.Share.ToIcon().Color(Colors.Purple)
+                           | Text.Large("Shares").Color(Colors.Gray)
+                           | Text.Large("89").Color(Colors.Purple))
+                        | (Layout.Horizontal().Align(Align.Left).Gap(3)
+                           | Icons.Eye.ToIcon().Color(Colors.Orange)
+                           | Text.Large("Views").Color(Colors.Gray)
+                           | Text.Large("12,456").Color(Colors.Orange)),
+                header: Layout.Horizontal().Align(Align.Center)
+                        | Text.H4("Social Engagement").WithLayout().Grow()
+                        | Icons.Star.ToIcon().Color(Colors.Black)
+            );
     }
 }
 
@@ -309,24 +340,26 @@ public class ProgressBarVariationsWidget : ViewBase
     public override object? Build()
     {
         return new Card(
-                Layout.Vertical().Gap(4)
-                | (Layout.Vertical().Gap(1)
-                   | Text.Small("Low Progress").Color(Colors.Gray)
-                   | new Progress(25).Goal("25%"))
-                | (Layout.Vertical().Gap(1)
-                   | Text.Small("Medium Progress").Color(Colors.Gray)
-                   | new Progress(50).Goal("50%"))
-                | (Layout.Vertical().Gap(1)
-                   | Text.Small("High Progress").Color(Colors.Gray)
-                   | new Progress(85).Goal("85%"))
-                | (Layout.Vertical().Gap(1)
-                   | Text.Small("Overflow Progress").Color(Colors.Gray)
-                   | new Progress(120).Goal("100%"))
-                | (Layout.Horizontal().Align(Align.Left).Gap(2)
-                   | Icons.Target.ToIcon().Color(Colors.Emerald)
-                   | Text.Small("Average: 70%").Color(Colors.Emerald))
-            ).Header(Text.H4("Progress Variations")).Icon(Icons.Star)
-            ;
+                content: Layout.Vertical().Gap(4)
+                        | (Layout.Vertical().Gap(1)
+                           | Text.Small("Low Progress").Color(Colors.Gray)
+                           | new Progress(25).Goal("25%"))
+                        | (Layout.Vertical().Gap(1)
+                           | Text.Small("Medium Progress").Color(Colors.Gray)
+                           | new Progress(50).Goal("50%"))
+                        | (Layout.Vertical().Gap(1)
+                           | Text.Small("High Progress").Color(Colors.Gray)
+                           | new Progress(85).Goal("85%"))
+                        | (Layout.Vertical().Gap(1)
+                           | Text.Small("Overflow Progress").Color(Colors.Gray)
+                           | new Progress(120).Goal("100%"))
+                        | (Layout.Horizontal().Align(Align.Left).Gap(2)
+                           | Icons.Target.ToIcon().Color(Colors.Emerald)
+                           | Text.Small("Average: 70%").Color(Colors.Emerald)),
+                header: Layout.Horizontal().Align(Align.Center)
+                        | Text.H4("Progress Variations").WithLayout().Grow()
+                        | Icons.Star.ToIcon().Color(Colors.Black)
+            );
     }
 }
 
@@ -335,22 +368,24 @@ public class LayoutTestWidget : ViewBase
     public override object? Build()
     {
         return new Card(
-                Layout.Vertical().Gap(3)
-                | (Layout.Horizontal().Align(Align.Left)
-                   | (Layout.Vertical().Gap(1)
-                      | Icons.Star.ToIcon().Color(Colors.Yellow)
-                      | Text.Small("Rating").Color(Colors.Gray))
-                   | (Layout.Vertical().Gap(1)
-                      | Text.Large("4.8")
-                      | Text.Small("out of 5").Color(Colors.Gray)))
-                | (Layout.Horizontal().Align(Align.Center).Gap(2)
-                   | Icons.ThumbsUp.ToIcon().Color(Colors.Emerald)
-                   | Text.Large("Excellent").Color(Colors.Emerald)
-                   | Icons.ThumbsDown.ToIcon().Color(Colors.Red)
-                   | Text.Large("Poor").Color(Colors.Red))
-                | new Progress(96).Goal("5.0 rating")
-            ).Header(Text.H4("Layout Testing")).Icon(Icons.LayoutDashboard)
-            ;
+                content: Layout.Vertical().Gap(3)
+                        | (Layout.Horizontal().Align(Align.Left)
+                           | (Layout.Vertical().Gap(1)
+                              | Icons.Star.ToIcon().Color(Colors.Yellow)
+                              | Text.Small("Rating").Color(Colors.Gray))
+                           | (Layout.Vertical().Gap(1)
+                              | Text.Large("4.8")
+                              | Text.Small("out of 5").Color(Colors.Gray)))
+                        | (Layout.Horizontal().Align(Align.Center).Gap(2)
+                           | Icons.ThumbsUp.ToIcon().Color(Colors.Emerald)
+                           | Text.Large("Excellent").Color(Colors.Emerald)
+                           | Icons.ThumbsDown.ToIcon().Color(Colors.Red)
+                           | Text.Large("Poor").Color(Colors.Red)),
+                footer: new Progress(96).Goal("5.0 rating"),
+                header: Layout.Horizontal().Align(Align.Center)
+                        | Text.H4("Layout Testing").WithLayout().Grow()
+                        | Icons.LayoutDashboard.ToIcon().Color(Colors.Black)
+            );
     }
 }
 
@@ -359,24 +394,26 @@ public class MixedContentWidget : ViewBase
     public override object? Build()
     {
         return new Card(
-                Layout.Vertical().Gap(4)
-                | (Layout.Horizontal().Align(Align.Left).Gap(3)
-                   | Icons.Download.ToIcon().Color(Colors.Blue)
-                   | Text.Large("Downloads").Color(Colors.Blue)
-                   | Icons.TrendingUp.ToIcon().Color(Colors.Emerald)
-                   | Text.Small("+25%").Color(Colors.Emerald))
-                | (Layout.Grid().Columns(2).Gap(3)
-                   | (Layout.Vertical().Gap(1)
-                      | Icons.Smartphone.ToIcon().Color(Colors.Purple)
-                      | Text.Small("Mobile").Color(Colors.Gray)
-                      | Text.Large("1,234").Color(Colors.Purple))
-                   | (Layout.Vertical().Gap(1)
-                      | Icons.Monitor.ToIcon().Color(Colors.Blue)
-                      | Text.Small("Desktop").Color(Colors.Gray)
-                      | Text.Large("856").Color(Colors.Blue)))
-                | new Progress(78).Goal("2,500 total")
-            ).Header(Text.H4("Download Analytics")).Icon(Icons.Download)
-            ;
+                content: Layout.Vertical().Gap(4)
+                        | (Layout.Horizontal().Align(Align.Left).Gap(3)
+                           | Icons.Download.ToIcon().Color(Colors.Blue)
+                           | Text.Large("Downloads").Color(Colors.Blue)
+                           | Icons.TrendingUp.ToIcon().Color(Colors.Emerald)
+                           | Text.Small("+25%").Color(Colors.Emerald))
+                        | (Layout.Grid().Columns(2).Gap(3)
+                           | (Layout.Vertical().Gap(1)
+                              | Icons.Smartphone.ToIcon().Color(Colors.Purple)
+                              | Text.Small("Mobile").Color(Colors.Gray)
+                              | Text.Large("1,234").Color(Colors.Purple))
+                           | (Layout.Vertical().Gap(1)
+                              | Icons.Monitor.ToIcon().Color(Colors.Blue)
+                              | Text.Small("Desktop").Color(Colors.Gray)
+                              | Text.Large("856").Color(Colors.Blue))),
+                footer: new Progress(78).Goal("2,500 total"),
+                header: Layout.Horizontal().Align(Align.Center)
+                        | Text.H4("Download Analytics").WithLayout().Grow()
+                        | Icons.Download.ToIcon().Color(Colors.Black)
+            );
     }
 }
 
@@ -385,30 +422,32 @@ public class ResponsiveLayoutWidget : ViewBase
     public override object? Build()
     {
         return new Card(
-                Layout.Vertical().Gap(4)
-                | (Layout.Horizontal().Align(Align.Left)
-                   | (Layout.Vertical().Gap(1)
-                      | Icons.Globe.ToIcon().Color(Colors.Blue)
-                      | Text.Small("Global Reach").Color(Colors.Gray))
-                   | (Layout.Vertical().Gap(1)
-                      | Text.Large("47")
-                      | Text.Small("Countries").Color(Colors.Gray)))
-                | (Layout.Grid().Columns(3).Gap(2)
-                   | (Layout.Vertical().Gap(1)
-                      | Icons.Flag.ToIcon().Color(Colors.Red)
-                      | Text.Small("US").Color(Colors.Gray)
-                      | Text.Large("35%").Color(Colors.Red))
-                   | (Layout.Vertical().Gap(1)
-                      | Icons.Flag.ToIcon().Color(Colors.Blue)
-                      | Text.Small("EU").Color(Colors.Gray)
-                      | Text.Large("28%").Color(Colors.Blue))
-                   | (Layout.Vertical().Gap(1)
-                      | Icons.Flag.ToIcon().Color(Colors.Green)
-                      | Text.Small("APAC").Color(Colors.Gray)
-                      | Text.Large("37%").Color(Colors.Green)))
-                | new Progress(85).Goal("50 countries")
-            ).Header(Text.H4("Global Distribution")).Icon(Icons.Globe)
-            ;
+                content: Layout.Vertical().Gap(4)
+                        | (Layout.Horizontal().Align(Align.Left)
+                           | (Layout.Vertical().Gap(1)
+                              | Icons.Globe.ToIcon().Color(Colors.Blue)
+                              | Text.Small("Global Reach").Color(Colors.Gray))
+                           | (Layout.Vertical().Gap(1)
+                              | Text.Large("47")
+                              | Text.Small("Countries").Color(Colors.Gray)))
+                        | (Layout.Grid().Columns(3).Gap(2)
+                           | (Layout.Vertical().Gap(1)
+                              | Icons.Flag.ToIcon().Color(Colors.Red)
+                              | Text.Small("US").Color(Colors.Gray)
+                              | Text.Large("35%").Color(Colors.Red))
+                           | (Layout.Vertical().Gap(1)
+                              | Icons.Flag.ToIcon().Color(Colors.Blue)
+                              | Text.Small("EU").Color(Colors.Gray)
+                              | Text.Large("28%").Color(Colors.Blue))
+                           | (Layout.Vertical().Gap(1)
+                              | Icons.Flag.ToIcon().Color(Colors.Green)
+                              | Text.Small("APAC").Color(Colors.Gray)
+                              | Text.Large("37%").Color(Colors.Green))),
+                footer: new Progress(85).Goal("50 countries"),
+                header: Layout.Horizontal().Align(Align.Center)
+                        | Text.H4("Global Distribution").WithLayout().Grow()
+                        | Icons.Globe.ToIcon().Color(Colors.Black)
+            );
     }
 }
 
@@ -419,19 +458,21 @@ public class TextSpacingDemoWidget : ViewBase
     public override object? Build()
     {
         return new Card(
-                Layout.Vertical().Gap(2)
-                | (Layout.Horizontal().Align(Align.Left).Gap(1)
-                   | Icons.Info.ToIcon().Color(Colors.Blue)
-                   | Text.Small("No spacing").Color(Colors.Gray))
-                | (Layout.Horizontal().Align(Align.Left).Gap(1)
-                   | Icons.Info.ToIcon().Color(Colors.Blue)
-                   | Text.Small("Minimal gaps").Color(Colors.Gray))
-                | (Layout.Horizontal().Align(Align.Left).Gap(1)
-                   | Icons.Info.ToIcon().Color(Colors.Blue)
-                   | Text.Small("Compact layout").Color(Colors.Gray))
-                | new Progress(60).Goal("Tight spacing")
-            ).Header(Text.H4("Text Spacing Demo")).Icon(Icons.Type)
-            ;
+                content: Layout.Vertical().Gap(2)
+                        | (Layout.Horizontal().Align(Align.Left).Gap(1)
+                           | Icons.Info.ToIcon().Color(Colors.Blue)
+                           | Text.Small("No spacing").Color(Colors.Gray))
+                        | (Layout.Horizontal().Align(Align.Left).Gap(1)
+                           | Icons.Info.ToIcon().Color(Colors.Blue)
+                           | Text.Small("Minimal gaps").Color(Colors.Gray))
+                        | (Layout.Horizontal().Align(Align.Left).Gap(1)
+                           | Icons.Info.ToIcon().Color(Colors.Blue)
+                           | Text.Small("Compact layout").Color(Colors.Gray)),
+                footer: new Progress(60).Goal("Tight spacing"),
+                header: Layout.Horizontal().Align(Align.Center)
+                        | Text.H4("Text Spacing Demo").WithLayout().Grow()
+                        | Icons.Type.ToIcon().Color(Colors.Black)
+            );
     }
 }
 
@@ -440,19 +481,21 @@ public class CardPaddingOverrideWidget : ViewBase
     public override object? Build()
     {
         return new Card(
-                Layout.Vertical().Gap(0)
-                | (Layout.Horizontal().Align(Align.Left).Gap(0)
-                   | Icons.Zap.ToIcon().Color(Colors.Orange)
-                   | Text.Large("Zero Gap").Color(Colors.Orange))
-                | (Layout.Horizontal().Align(Align.Left).Gap(0)
-                   | Icons.Zap.ToIcon().Color(Colors.Orange)
-                   | Text.Small("No spacing between elements").Color(Colors.Gray))
-                | (Layout.Horizontal().Align(Align.Left).Gap(0)
-                   | Icons.Zap.ToIcon().Color(Colors.Orange)
-                   | Text.Small("Compact card content").Color(Colors.Gray))
-                | new Progress(75).Goal("Dense layout")
-            ).Header(Text.H4("Zero Spacing")).Icon(Icons.Zap)
-            ;
+                content: Layout.Vertical().Gap(0)
+                        | (Layout.Horizontal().Align(Align.Left).Gap(0)
+                           | Icons.Zap.ToIcon().Color(Colors.Orange)
+                           | Text.Large("Zero Gap").Color(Colors.Orange))
+                        | (Layout.Horizontal().Align(Align.Left).Gap(0)
+                           | Icons.Zap.ToIcon().Color(Colors.Orange)
+                           | Text.Small("No spacing between elements").Color(Colors.Gray))
+                        | (Layout.Horizontal().Align(Align.Left).Gap(0)
+                           | Icons.Zap.ToIcon().Color(Colors.Orange)
+                           | Text.Small("Compact card content").Color(Colors.Gray)),
+                footer: new Progress(75).Goal("Dense layout"),
+                header: Layout.Horizontal().Align(Align.Center)
+                        | Text.H4("Zero Spacing").WithLayout().Grow()
+                        | Icons.Zap.ToIcon().Color(Colors.Black)
+            );
     }
 }
 
@@ -461,19 +504,21 @@ public class LayoutSpacingControlWidget : ViewBase
     public override object? Build()
     {
         return new Card(
-                Layout.Vertical().Gap(1)
-                | (Layout.Horizontal().Align(Align.Left).Gap(1)
-                   | Icons.Settings.ToIcon().Color(Colors.Purple)
-                   | Text.Small("Custom spacing").Color(Colors.Gray))
-                | (Layout.Horizontal().Align(Align.Left).Gap(1)
-                   | Icons.Settings.ToIcon().Color(Colors.Purple)
-                   | Text.Small("Controlled gaps").Color(Colors.Gray))
-                | (Layout.Horizontal().Align(Align.Left).Gap(1)
-                   | Icons.Settings.ToIcon().Color(Colors.Purple)
-                   | Text.Small("Precise layout").Color(Colors.Gray))
-                | new Progress(90).Goal("Custom control")
-            ).Header(Text.H4("Spacing Control")).Icon(Icons.Settings)
-            ;
+                content: Layout.Vertical().Gap(1)
+                        | (Layout.Horizontal().Align(Align.Left).Gap(1)
+                           | Icons.Settings.ToIcon().Color(Colors.Purple)
+                           | Text.Small("Custom spacing").Color(Colors.Gray))
+                        | (Layout.Horizontal().Align(Align.Left).Gap(1)
+                           | Icons.Settings.ToIcon().Color(Colors.Purple)
+                           | Text.Small("Controlled gaps").Color(Colors.Gray))
+                        | (Layout.Horizontal().Align(Align.Left).Gap(1)
+                           | Icons.Settings.ToIcon().Color(Colors.Purple)
+                           | Text.Small("Precise layout").Color(Colors.Gray)),
+                footer: new Progress(90).Goal("Custom control"),
+                header: Layout.Horizontal().Align(Align.Center)
+                        | Text.H4("Spacing Control").WithLayout().Grow()
+                        | Icons.Settings.ToIcon().Color(Colors.Black)
+            );
     }
 }
 
@@ -483,13 +528,15 @@ public class SmallMetricView : ViewBase
     public override object? Build()
     {
         return new Card(
-                Layout.Horizontal().Align(Align.Left).Gap(1)
-                 | Text.Strong("$12.5K")
-                 | Icons.TrendingUp.ToIcon().Color(Colors.Emerald)
-                 | Text.Small("+5%").Color(Colors.Emerald),
-                new Progress(25).Goal("$50K target")
-            ).Header(Text.H4("Small Revenue")).Icon(Icons.DollarSign).Small()
-            ;
+                content: Layout.Horizontal().Align(Align.Left).Gap(1)
+                         | Text.Strong("$12.5K")
+                         | Icons.TrendingUp.ToIcon().Color(Colors.Emerald)
+                         | Text.Small("+5%").Color(Colors.Emerald),
+                footer: new Progress(25).Goal("$50K target"),
+                header: Layout.Horizontal().Align(Align.Center)
+                        | Text.H4("Small Revenue").WithLayout().Grow()
+                        | Icons.DollarSign.ToIcon().Color(Colors.Black)
+            ).Small();
     }
 }
 
@@ -498,13 +545,15 @@ public class MediumMetricView : ViewBase
     public override object? Build()
     {
         return new Card(
-                Layout.Horizontal().Align(Align.Left).Gap(2)
-                 | Text.Strong("$84,250")
-                 | Icons.TrendingUp.ToIcon().Color(Colors.Emerald)
-                 | Text.Small("21%").Color(Colors.Emerald),
-                new Progress(21).Goal("$400K target")
-            ).Header(Text.H4("Medium Revenue")).Icon(Icons.DollarSign).Medium()
-            ;
+                content: Layout.Horizontal().Align(Align.Left).Gap(2)
+                         | Text.Strong("$84,250")
+                         | Icons.TrendingUp.ToIcon().Color(Colors.Emerald)
+                         | Text.Small("21%").Color(Colors.Emerald),
+                footer: new Progress(21).Goal("$400K target"),
+                header: Layout.Horizontal().Align(Align.Center)
+                        | Text.H4("Medium Revenue").WithLayout().Grow()
+                        | Icons.DollarSign.ToIcon().Color(Colors.Black)
+            ).Medium();
     }
 }
 
@@ -513,12 +562,14 @@ public class LargeMetricView : ViewBase
     public override object? Build()
     {
         return new Card(
-                Layout.Horizontal().Align(Align.Left).Gap(3)
-                 | Text.Large("$1,234,567")
-                 | Icons.TrendingUp.ToIcon().Color(Colors.Emerald)
-                 | Text.Literal("+45%").Color(Colors.Emerald),
-                new Progress(75).Goal("$1.5M target")
-            ).Header(Text.H4("Large Revenue"), null, Icons.DollarSign).Large()
-            ;
+                content: Layout.Horizontal().Align(Align.Left).Gap(3)
+                         | Text.Large("$1,234,567")
+                         | Icons.TrendingUp.ToIcon().Color(Colors.Emerald)
+                         | Text.Literal("+45%").Color(Colors.Emerald),
+                footer: new Progress(75).Goal("$1.5M target"),
+                header: Layout.Horizontal().Align(Align.Center)
+                        | Text.H4("Large Revenue").WithLayout().Grow()
+                        | Icons.DollarSign.ToIcon().Color(Colors.Black)
+            ).Large();
     }
 }
