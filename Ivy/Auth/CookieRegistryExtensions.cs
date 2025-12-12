@@ -54,7 +54,7 @@ public static class CookieRegistryExtensions
             {
                 HttpOnly = true,
                 Secure = isProduction, // Enable Secure flag in production
-                SameSite = SameSiteMode.Strict,
+                SameSite = SameSiteMode.Lax,
                 Expires = DateTimeOffset.UtcNow.AddYears(1),
                 Path = "/",
             };
@@ -99,7 +99,7 @@ public static class CookieRegistryExtensions
             {
                 HttpOnly = true,
                 Secure = isProduction, // Enable Secure flag in production
-                SameSite = SameSiteMode.Strict,
+                SameSite = SameSiteMode.Lax,
                 Expires = DateTimeOffset.UtcNow.AddYears(1),
                 Path = "/",
             };
