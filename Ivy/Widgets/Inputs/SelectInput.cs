@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Ivy.Core;
@@ -118,6 +119,7 @@ public static class SelectInputExtensions
         }
 
         SelectInputBase input = (SelectInputBase)Activator.CreateInstance(genericType, state, options, placeholder, disabled, variant, selectMany)!;
+        input.Nullable = type.IsNullableType();
         return input;
     }
 
@@ -129,7 +131,17 @@ public static class SelectInputExtensions
 
     public static SelectInputBase Invalid(this SelectInputBase widget, string? invalid) => widget with { Invalid = invalid };
 
-    public static SelectInputBase Nullable(this SelectInputBase widget, bool? nullable = true) => widget with { Nullable = nullable ?? true };
+    public static SelectInputBase Nullable(this SelectInputBase widget, bool? nullable = true)
+    {
+        var property = widget.GetType().GetProperty("Nullable", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+        if (property != null && property.CanWrite)
+        {
+            property.SetValue(widget, nullable ?? true);
+            return widget;
+        }
+        // Fallback to 'with' if reflection doesn't work (shouldn't happen, but safe fallback)
+        return widget with { Nullable = nullable ?? true };
+    }
 
     public static SelectInputBase Separator(this SelectInputBase widget, char separator) => widget with { Separator = separator };
 

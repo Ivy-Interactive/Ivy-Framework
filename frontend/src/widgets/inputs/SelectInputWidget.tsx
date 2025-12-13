@@ -385,15 +385,18 @@ const ToggleVariant: React.FC<SelectInputWidgetProps> = ({
                 tabIndex={-1}
                 aria-label={selectMany ? 'Clear All' : 'Clear'}
                 onClick={() => {
+                  // For nullable inputs, send null; for non-nullable, send empty array for multi-select or null for single
+                  const clearedValue = nullable ? null : selectMany ? [] : null;
                   logger.debug(
                     'Select input clear button clicked (ToggleVariant)',
                     {
                       id,
                       selectMany,
-                      clearValue: selectMany ? [] : null,
+                      nullable,
+                      clearValue: clearedValue,
                     }
                   );
-                  eventHandler('OnChange', id, [selectMany ? [] : null]);
+                  eventHandler('OnChange', id, [clearedValue]);
                 }}
                 className="flex-shrink-0 p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
               >
@@ -702,11 +705,13 @@ const CheckboxVariant: React.FC<SelectInputWidgetProps> = ({
                 tabIndex={-1}
                 aria-label="Clear All"
                 onClick={() => {
+                  // For nullable inputs, send null; for non-nullable, send empty array
+                  const clearedValue = nullable ? null : [];
                   logger.debug(
                     'Select input clear button clicked (CheckboxVariant)',
-                    { id }
+                    { id, nullable, clearValue: clearedValue }
                   );
-                  eventHandler('OnChange', id, [[]]);
+                  eventHandler('OnChange', id, [clearedValue]);
                 }}
                 className="flex-shrink-0 p-1 rounded hover:bg-accent focus:outline-none"
               >
