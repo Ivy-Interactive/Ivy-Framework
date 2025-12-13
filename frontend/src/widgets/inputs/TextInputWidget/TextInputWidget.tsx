@@ -29,11 +29,18 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
   'data-testid': dataTestId,
 }) => {
   const eventHandler = useEventHandler();
-  const [localValue, setLocalValue] = useState(value);
+  // Normalize null/undefined to empty string for display (HTML inputs can't have null values)
+  const [localValue, setLocalValue] = useState(value ?? '');
   const [isFocused, setIsFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement | null>(null);
 
-  useSyncServerValue(value, localValue, isFocused, setLocalValue);
+  // Wrapper to normalize null/undefined to empty string for useSyncServerValue
+  const setLocalValueNormalized = useCallback(
+    (val: string | undefined) => setLocalValue(val ?? ''),
+    []
+  );
+
+  useSyncServerValue(value, localValue, isFocused, setLocalValueNormalized);
 
   useShortcutKey({
     shortcutKey,
@@ -69,10 +76,12 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
       e.stopPropagation();
       if (!events.includes('OnChange')) return;
       if (disabled) return;
-      setLocalValue('');
-      eventHandler('OnChange', id, ['']);
+      // For nullable inputs, set to null; otherwise set to empty string
+      const clearedValue = nullable ? null : '';
+      setLocalValue(clearedValue ?? '');
+      eventHandler('OnChange', id, [clearedValue]);
     },
-    [eventHandler, id, events, disabled]
+    [eventHandler, id, events, disabled, nullable]
   );
 
   const commonProps = useMemo(
