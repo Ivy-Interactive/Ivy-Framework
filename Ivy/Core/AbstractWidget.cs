@@ -59,7 +59,14 @@ public abstract record AbstractWidget : IWidget
             ["children"] = new JsonArray(Children.Cast<IWidget>().Select(c => c.Serialize()).ToArray())
         };
 
-        var propProperties = GetType().GetProperties().Where(p => p.GetCustomAttribute<PropAttribute>() != null);
+        // Get properties, prioritizing the most derived property when there are name conflicts (e.g., 'new' properties)
+        var allProperties = GetType().GetProperties().Where(p => p.GetCustomAttribute<PropAttribute>() != null).ToList();
+        var propProperties = allProperties
+            .GroupBy(p => p.Name)
+            .Select(g => g.OrderByDescending(p => p.DeclaringType == GetType() ? 1 : 0)
+                         .ThenByDescending(p => p.DeclaringType?.BaseType == null ? 1 : 0)
+                         .First())
+            .ToList();
 
         var options = new JsonSerializerOptions
         {
@@ -123,6 +130,17 @@ public abstract record AbstractWidget : IWidget
             return attachedValues.ToArray();
         }
 
+        // For properties that might be hidden by 'new' keyword in derived classes,
+        // ensure we get the value from the actual runtime type's property
+        var runtimeType = GetType();
+        var runtimeProperty = runtimeType.GetProperty(property.Name, BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+        if (runtimeProperty != null && runtimeProperty.DeclaringType == runtimeType)
+        {
+            // Use the most derived property if it exists
+            return runtimeProperty.GetValue(this);
+        }
+
+        // Fall back to the provided property
         var value = property.GetValue(this);
         return value;
     }

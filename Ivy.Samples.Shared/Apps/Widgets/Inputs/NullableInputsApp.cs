@@ -260,6 +260,22 @@ public class NullableInputsApp : SampleBase
                   | nonNullableInt.ToNumberInput().Placeholder("Non-nullable int...")
                   | Text.Block(nonNullableInt.Value.ToString())
                )
+
+               | Text.H2("🔍 DEBUG: Nullable Property Comparison")
+               | Text.P("Compare these two inputs - one WITHOUT .Nullable() and one WITH .Nullable(). Check the browser console/network tab to see the difference in their serialized props.")
+               | (Layout.Grid().Columns(3)
+                  | Text.InlineCode("Description")
+                  | Text.InlineCode("Input")
+                  | Text.InlineCode("Current Value")
+
+                  | Text.Block("TextInput WITHOUT .Nullable()")
+                  | nullableText.ToTextInput().Placeholder("No .Nullable() called...")
+                  | (nullableText.Value == null ? Text.InlineCode("null") : Text.Block(nullableText.Value))
+
+                  | Text.Block("TextInput WITH .Nullable()")
+                  | nullableText.ToTextInput().Placeholder("With .Nullable() called...").Nullable()
+                  | (nullableText.Value == null ? Text.InlineCode("null") : Text.Block(nullableText.Value))
+               )
             ;
     }
 }
