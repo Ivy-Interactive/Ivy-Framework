@@ -22,6 +22,7 @@ interface TextareaVariantProps {
   width?: string;
   inputRef?: React.RefObject<HTMLInputElement | HTMLTextAreaElement | null>;
   isFocused: boolean;
+  nullable?: boolean;
   scale?: Scales;
 }
 

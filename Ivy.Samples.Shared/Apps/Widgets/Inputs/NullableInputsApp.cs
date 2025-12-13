@@ -44,6 +44,9 @@ public class NullableInputsApp : SampleBase
         var nullableFeedback = UseState((int?)null);
         var nullableFeedbackBool = UseState((bool?)null);
 
+        var nonNullableText = UseState("Hello");
+        var nonNullableInt = UseState(42);
+
         return Layout.Vertical()
                | Text.H1("Nullable Inputs")
                | Text.P("This app demonstrates nullable input functionality. When an input is nullable and has a value, you'll see a clear (X) button to reset it to null.")
@@ -206,16 +209,56 @@ public class NullableInputsApp : SampleBase
                   | Text.InlineCode("Nullable")
 
                   | Text.Block("Text Input")
-                  | UseState("Hello").ToTextInput()
+                  | nonNullableText.ToTextInput()
                   | nullableText.ToTextInput().Placeholder("Can be cleared").Nullable()
 
                   | Text.Block("Number Input")
-                  | UseState(42).ToNumberInput()
+                  | nonNullableInt.ToNumberInput()
                   | nullableInt.ToNumberInput().Placeholder("Can be cleared").Nullable()
 
                   | Text.Block("Date Input")
                   | UseState(DateOnly.FromDateTime(DateTime.Today)).ToDateInput()
                   | nullableDate.ToDateInput().Placeholder("Can be cleared").Nullable()
+               )
+
+               | Text.H2("Automatic Nullable Detection Test")
+               | Text.P("These inputs are created from nullable states WITHOUT explicitly calling .Nullable(). The Nullable property should be automatically set to true based on the state type.")
+               | (Layout.Grid().Columns(3)
+                  | Text.InlineCode("Type")
+                  | Text.InlineCode("Input (Auto-Detected Nullable)")
+                  | Text.InlineCode("Current Value")
+
+                  | Text.Block("Text (string?) - Auto")
+                  | nullableText.ToTextInput().Placeholder("Auto-detected nullable...")
+                  | (nullableText.Value == null ? Text.InlineCode("null") : Text.Block(nullableText.Value))
+
+                  | Text.Block("Number (int?) - Auto")
+                  | nullableInt.ToNumberInput().Placeholder("Auto-detected nullable...")
+                  | (nullableInt.Value == null ? Text.InlineCode("null") : Text.Block(nullableInt.Value?.ToString() ?? "null"))
+
+                  | Text.Block("Decimal (decimal?) - Auto")
+                  | nullableDecimal.ToNumberInput().Placeholder("Auto-detected nullable...")
+                  | (nullableDecimal.Value == null ? Text.InlineCode("null") : Text.Block(nullableDecimal.Value?.ToString() ?? "null"))
+
+                  | Text.Block("Date (DateOnly?) - Auto")
+                  | nullableDate.ToDateInput().Placeholder("Auto-detected nullable...")
+                  | (nullableDate.Value == null ? Text.InlineCode("null") : Text.Block(nullableDate.Value?.ToString("yyyy-MM-dd") ?? "null"))
+               )
+
+               | Text.H2("Non-Nullable States (Should Not Be Nullable)")
+               | Text.P("These inputs are created from non-nullable states. The Nullable property should be automatically set to false.")
+               | (Layout.Grid().Columns(3)
+                  | Text.InlineCode("Type")
+                  | Text.InlineCode("Input (Non-Nullable)")
+                  | Text.InlineCode("Current Value")
+
+                  | Text.Block("Text (string) - Non-Nullable")
+                  | nonNullableText.ToTextInput().Placeholder("Non-nullable string...")
+                  | Text.Block(nonNullableText.Value)
+
+                  | Text.Block("Number (int) - Non-Nullable")
+                  | nonNullableInt.ToNumberInput().Placeholder("Non-nullable int...")
+                  | Text.Block(nonNullableInt.Value.ToString())
                )
             ;
     }

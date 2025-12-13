@@ -86,7 +86,7 @@ public record TextInput<TString> : TextInputBase, IInput<TString>
 
     [Prop] public TString Value { get; } = default!;
 
-    [Prop] public new bool Nullable { get; set; } = typeof(TString).IsNullableType();
+    [Prop] public new bool Nullable { get; set; } = typeof(TString).IsNullableType() || !typeof(TString).IsValueType;
 
     [Event] public Func<Event<IInput<TString>, TString>, ValueTask>? OnChange { get; }
 }
@@ -122,7 +122,7 @@ public static class TextInputExtensions
         var type = state.GetStateType();
         Type genericType = typeof(TextInput<>).MakeGenericType(type);
         TextInputBase input = (TextInputBase)Activator.CreateInstance(genericType, state, placeholder, disabled, variant)!;
-        input.Nullable = type.IsNullableType();
+        input.Nullable = type.IsNullableType() || !type.IsValueType;
         return input;
     }
 
