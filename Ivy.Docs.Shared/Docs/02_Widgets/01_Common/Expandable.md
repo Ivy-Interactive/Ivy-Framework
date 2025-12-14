@@ -25,21 +25,6 @@ new Expandable("Click to expand",
     "This is the hidden content that appears when you expand the widget.")
 ```
 
-### Rich Content
-
-You can include more complex content like formatted text, icons, and other widgets.
-
-```csharp demo-tabs
-new Expandable(
-    "Rich Content Example", 
-    Layout.Vertical().Gap(2)
-        | Text.H3("Welcome to Ivy Framework")
-        | Text.Muted("This expandable contains multiple elements")
-        | new Badge("New").Secondary()
-        | Text.Small("Click to collapse this content")
-)
-```
-
 ### Nested Expandables
 
 Create hierarchical structures by nesting expandable widgets.
@@ -55,30 +40,18 @@ new Expandable("Main Section",
 )
 ```
 
-### Disabled
+### Disabled, Open and Closed
 
 <Callout Type="info">
-The Disabled property allows you to prevent users from expanding content when it's not available or relevant, improving the overall user experience.
+You can also disable an expandable, or set it to be open by default.
 </Callout>
-
-Set to `true` to disable the expandable functionality
 
 ```csharp demo-tabs
 Layout.Vertical().Gap(2)
     | new Expandable("Normal", "This expandable works normally")
-    | new Expandable("Disabled", "This expandable is disabled").Disabled(true)
+    | new Expandable("Disabled", "This expandable is disabled").Disabled()
+    | new Expandable("Open", "This expandable is open").Open()
 ```
-
-### Default Open
-
-You can set an expandable to be open by default using the `Open()` method.
-
-```csharp demo-tabs
-Layout.Vertical().Gap(2)
-    | new Expandable("Closed", "This is closed by default")
-    | new Expandable("Open", "This is open by default").Open()
-```
-
 
 <WidgetDocs Type="Ivy.Expandable" ExtensionTypes="Ivy.ExpandableExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Expandable.cs"/>
 
