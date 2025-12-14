@@ -8,7 +8,7 @@ public class TableBuilderTests
 {
     private class TestModel
     {
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
         public int Age { get; set; }
         public bool IsActive { get; set; }
     }
@@ -39,23 +39,23 @@ public class TableBuilderTests
 
         // Use reflection to inspect the private _columns field for verification
         var columnsField = typeof(TableBuilder<TestModel>).GetField("_columns", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-        var columns = (System.Collections.IDictionary)columnsField.GetValue(builder);
+        var columns = (System.Collections.IDictionary)columnsField!.GetValue(builder)!;
 
         // Helper to get property value from the private TableBuilderColumn instance
         object GetProp(object obj, string propName) =>
-            obj.GetType().GetProperty(propName).GetValue(obj);
+            obj.GetType().GetProperty(propName)!.GetValue(obj)!;
 
         // Check Age column (Numeric) - Should be Right aligned by default scaffolding
         // Reset() sets it to Left currently.
 
         var ageColumn = columns["Age"];
-        Assert.False((bool)GetProp(ageColumn, "Removed"), "Age column should be visible after Reset");
-        Assert.Equal(Align.Right, (Align)GetProp(ageColumn, "Align")); // This is expected to FAIL if Reset sets it to Left
+        Assert.False((bool)GetProp(ageColumn!, "Removed"), "Age column should be visible after Reset");
+        Assert.Equal(Align.Right, (Align)GetProp(ageColumn!, "Align")); // This is expected to FAIL if Reset sets it to Left
 
         var nameColumn = columns["Name"];
-        Assert.Equal(Align.Left, (Align)GetProp(nameColumn, "Align")); // Name is string, default Left. Modified to Right. Reset should back to Left.
+        Assert.Equal(Align.Left, (Align)GetProp(nameColumn!, "Align")); // Name is string, default Left. Modified to Right. Reset should back to Left.
 
         var activeColumn = columns["IsActive"];
-        Assert.Equal(Align.Center, (Align)GetProp(activeColumn, "Align")); // Bool is Center default. Reset sets to Left. expected FAIL.
+        Assert.Equal(Align.Center, (Align)GetProp(activeColumn!, "Align")); // Bool is Center default. Reset sets to Left. expected FAIL.
     }
 }
