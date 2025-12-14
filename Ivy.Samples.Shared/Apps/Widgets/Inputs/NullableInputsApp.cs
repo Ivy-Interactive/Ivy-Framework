@@ -47,9 +47,149 @@ public class NullableInputsApp : SampleBase
         var nonNullableText = UseState("Hello");
         var nonNullableInt = UseState(42);
 
+        // States for scale examples - set initial values so X button appears
+        var scaleText = UseState((string?)"Sample text");
+        var scaleTextarea = UseState((string?)"Multiline text");
+        var scalePassword = UseState((string?)"password123");
+        var scaleSearch = UseState((string?)"Search query");
+        var scaleEmail = UseState((string?)"user@example.com");
+        var scaleCode = UseState((string?)"const x = 1;");
+        var scaleNumber = UseState((int?)123);
+        var scaleDecimal = UseState((decimal?)123.45m);
+        var scaleDouble = UseState((double?)123.45);
+        var scaleDate = UseState((DateOnly?)DateOnly.FromDateTime(DateTime.Today));
+        var scaleDateTime = UseState((DateTime?)DateTime.Now);
+        var scaleTime = UseState((TimeOnly?)TimeOnly.FromDateTime(DateTime.Now));
+        var scaleSelect = UseState((string?)"option1");
+        var scaleMultiSelect = UseState((string[]?)new[] { "option1", "option2" });
+        var scaleColor = UseState((string?)"#FF0000");
+        var scaleBool = UseState((bool?)true);
+        var scaleFeedback = UseState((int?)4);
+        var scaleFeedbackBool = UseState((bool?)true);
+
         return Layout.Vertical()
                | Text.H1("Nullable Inputs")
                | Text.P("This app demonstrates nullable input functionality. When an input is nullable and has a value, you'll see a clear (X) button to reset it to null.")
+
+               | Text.H2("Scale Examples with Nullable Inputs")
+               | Text.P("These inputs demonstrate how the X button appears at different scales (Small, Medium, Large). All inputs have values and are nullable.")
+
+               | Text.H3("Text Inputs - Scale Comparison")
+               | (Layout.Grid().Columns(4)
+                  | Text.InlineCode("Scale")
+                  | Text.InlineCode("Text")
+                  | Text.InlineCode("Textarea")
+                  | Text.InlineCode("Search")
+
+                  | Text.Block("Small")
+                  | scaleText.ToTextInput().Placeholder("Small...").Nullable().Small()
+                  | scaleTextarea.ToTextAreaInput().Placeholder("Small...").Nullable().Small()
+                  | scaleSearch.ToSearchInput().Placeholder("Small...").Nullable().Small()
+
+                  | Text.Block("Medium")
+                  | scaleText.ToTextInput().Placeholder("Medium...").Nullable().Medium()
+                  | scaleTextarea.ToTextAreaInput().Placeholder("Medium...").Nullable().Medium()
+                  | scaleSearch.ToSearchInput().Placeholder("Medium...").Nullable().Medium()
+
+                  | Text.Block("Large")
+                  | scaleText.ToTextInput().Placeholder("Large...").Nullable().Large()
+                  | scaleTextarea.ToTextAreaInput().Placeholder("Large...").Nullable().Large()
+                  | scaleSearch.ToSearchInput().Placeholder("Large...").Nullable().Large()
+               )
+
+               | Text.H3("Number Inputs - Scale Comparison")
+               | (Layout.Grid().Columns(4)
+                  | Text.InlineCode("Scale")
+                  | Text.InlineCode("Integer")
+                  | Text.InlineCode("Decimal")
+                  | Text.InlineCode("Slider")
+
+                  | Text.Block("Small")
+                  | scaleNumber.ToNumberInput().Placeholder("Small...").Nullable().Small()
+                  | scaleDecimal.ToNumberInput().Placeholder("Small...").Nullable().Small()
+                  | scaleNumber.ToSliderInput().Placeholder("Small...").Nullable().Small()
+
+                  | Text.Block("Medium")
+                  | scaleNumber.ToNumberInput().Placeholder("Medium...").Nullable().Medium()
+                  | scaleDecimal.ToNumberInput().Placeholder("Medium...").Nullable().Medium()
+                  | scaleNumber.ToSliderInput().Placeholder("Medium...").Nullable().Medium()
+
+                  | Text.Block("Large")
+                  | scaleNumber.ToNumberInput().Placeholder("Large...").Nullable().Large()
+                  | scaleDecimal.ToNumberInput().Placeholder("Large...").Nullable().Large()
+                  | scaleNumber.ToSliderInput().Placeholder("Large...").Nullable().Large()
+               )
+
+               | Text.H3("DateTime Inputs - Scale Comparison")
+               | (Layout.Grid().Columns(4)
+                  | Text.InlineCode("Scale")
+                  | Text.InlineCode("Date")
+                  | Text.InlineCode("DateTime")
+                  | Text.InlineCode("Time")
+
+                  | Text.Block("Small")
+                  | scaleDate.ToDateInput().Placeholder("Small...").Nullable().Small()
+                  | scaleDateTime.ToDateTimeInput().Placeholder("Small...").Nullable().Small()
+                  | scaleTime.ToTimeInput().Placeholder("Small...").Nullable().Small()
+
+                  | Text.Block("Medium")
+                  | scaleDate.ToDateInput().Placeholder("Medium...").Nullable().Medium()
+                  | scaleDateTime.ToDateTimeInput().Placeholder("Medium...").Nullable().Medium()
+                  | scaleTime.ToTimeInput().Placeholder("Medium...").Nullable().Medium()
+
+                  | Text.Block("Large")
+                  | scaleDate.ToDateInput().Placeholder("Large...").Nullable().Large()
+                  | scaleDateTime.ToDateTimeInput().Placeholder("Large...").Nullable().Large()
+                  | scaleTime.ToTimeInput().Placeholder("Large...").Nullable().Large()
+               )
+
+               | Text.H3("Select & Other Inputs - Scale Comparison")
+               | (Layout.Grid().Columns(5)
+                  | Text.InlineCode("Scale")
+                  | Text.InlineCode("Select")
+                  | Text.InlineCode("Color")
+                  | Text.InlineCode("Boolean")
+                  | Text.InlineCode("Feedback")
+
+                  | Text.Block("Small")
+                  | scaleSelect.ToSelectInput(
+                      new[]
+                      {
+                          new Option<string>("option1", "Option 1"),
+                          new Option<string>("option2", "Option 2"),
+                          new Option<string>("option3", "Option 3")
+                      },
+                      "Small...").Nullable().Small()
+                  | scaleColor.ToColorInput().Placeholder("Small...").Nullable().Small()
+                  | scaleBool.ToBoolInput("Small").Nullable().Small()
+                  | scaleFeedback.ToFeedbackInput(placeholder: "Small...").Nullable().Small()
+
+                  | Text.Block("Medium")
+                  | scaleSelect.ToSelectInput(
+                      new[]
+                      {
+                          new Option<string>("option1", "Option 1"),
+                          new Option<string>("option2", "Option 2"),
+                          new Option<string>("option3", "Option 3")
+                      },
+                      "Medium...").Nullable().Medium()
+                  | scaleColor.ToColorInput().Placeholder("Medium...").Nullable().Medium()
+                  | scaleBool.ToBoolInput("Medium").Nullable().Medium()
+                  | scaleFeedback.ToFeedbackInput(placeholder: "Medium...").Nullable().Medium()
+
+                  | Text.Block("Large")
+                  | scaleSelect.ToSelectInput(
+                      new[]
+                      {
+                          new Option<string>("option1", "Option 1"),
+                          new Option<string>("option2", "Option 2"),
+                          new Option<string>("option3", "Option 3")
+                      },
+                      "Large...").Nullable().Large()
+                  | scaleColor.ToColorInput().Placeholder("Large...").Nullable().Large()
+                  | scaleBool.ToBoolInput("Large").Nullable().Large()
+                  | scaleFeedback.ToFeedbackInput(placeholder: "Large...").Nullable().Large()
+               )
 
                | Text.H2("Text Inputs")
                | (Layout.Grid().Columns(3)
