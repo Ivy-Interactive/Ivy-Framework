@@ -31,7 +31,7 @@ import {
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle';
 import { Scales } from '@/types/scale';
 import { cva } from 'class-variance-authority';
-
+import { xIconVariants } from '@/components/ui/input/text-input-variants';
 // variants for SelectInputWidget container
 const selectContainerVariants = cva(
   'relative border border-input bg-transparent rounded-md shadow-sm focus-within:ring-1 focus-within:ring-ring',
@@ -400,7 +400,7 @@ const ToggleVariant: React.FC<SelectInputWidgetProps> = ({
                 }}
                 className="flex-shrink-0 p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
               >
-                <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+                <X className={xIconVariants({ scale })} />
               </button>
             )}
             {invalid && (
@@ -514,7 +514,7 @@ const RadioVariant: React.FC<SelectInputWidgetProps> = ({
                 }}
                 className="flex-shrink-0 p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
               >
-                <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+                <X className={xIconVariants({ scale })} />
               </button>
             )}
             {invalid && (
@@ -715,7 +715,7 @@ const CheckboxVariant: React.FC<SelectInputWidgetProps> = ({
                 }}
                 className="flex-shrink-0 p-1 rounded hover:bg-accent focus:outline-none"
               >
-                <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+                <X className={xIconVariants({ scale })} />
               </button>
             )}
             {invalid && (
@@ -1020,7 +1020,7 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
                 }}
                 className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
               >
-                <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+                <X className={xIconVariants({ scale })} />
               </span>
             )}
             {/* Invalid icon */}

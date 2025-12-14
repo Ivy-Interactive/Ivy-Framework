@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Ivy.Core;
@@ -89,6 +90,7 @@ public static class CodeInputExtensions
         var type = state.GetStateType();
         Type genericType = typeof(CodeInput<>).MakeGenericType(type);
         CodeInputBase input = (CodeInputBase)Activator.CreateInstance(genericType, state, placeholder, disabled, variant)!;
+        input.Nullable = type.IsNullableType();
         return input;
     }
 
@@ -99,6 +101,12 @@ public static class CodeInputExtensions
 
     public static CodeInputBase Nullable(this CodeInputBase widget, bool? nullable = true)
     {
+        var property = widget.GetType().GetProperty("Nullable", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+        if (property != null && property.CanWrite)
+        {
+            property.SetValue(widget, nullable ?? true);
+            return widget;
+        }
         return widget with { Nullable = nullable ?? true };
     }
 

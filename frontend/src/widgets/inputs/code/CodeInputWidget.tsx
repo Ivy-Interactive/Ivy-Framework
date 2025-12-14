@@ -23,6 +23,7 @@ import { dbml } from './dbml-language';
 import { createIvyCodeTheme } from './theme';
 import { Scales } from '@/types/scale';
 import { X } from 'lucide-react';
+import { xIconVariants } from '@/components/ui/input/text-input-variants';
 import {
   keymap,
   EditorView,
@@ -39,7 +40,6 @@ interface CodeInputWidgetProps {
   disabled: boolean;
   invalid?: string;
   nullable?: boolean;
-  showCopyButton?: boolean;
   events: string[];
   width?: string;
   height?: string;
@@ -69,7 +69,6 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
   disabled,
   invalid,
   nullable = false,
-  showCopyButton = false,
   width,
   height,
   scale = Scales.Medium,
@@ -115,14 +114,18 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
       e.stopPropagation();
       if (!events.includes('OnChange')) return;
       if (disabled) return;
-      setLocalValue('');
-      eventHandler('OnChange', id, ['']);
+      // For nullable inputs, set to null; otherwise set to empty string
+      const clearedValue = nullable ? null : '';
+      setLocalValue(clearedValue ?? '');
+      eventHandler('OnChange', id, [clearedValue]);
     },
-    [eventHandler, id, events, disabled]
+    [eventHandler, id, events, disabled, nullable]
   );
 
   const hasValue = localValue && localValue.toString().trim() !== '';
   const showClear = nullable && !disabled && hasValue;
+  // Copy button always shows when there's a value (doesn't depend on showCopyButton prop)
+  const showCopy = hasValue;
 
   const styles: React.CSSProperties = {
     ...getWidth(width),
@@ -158,12 +161,26 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
 
   return (
     <div style={styles} className="relative w-full h-full overflow-hidden">
-      {showCopyButton && (
-        <div className="absolute top-2 right-2 z-10 rounded-md">
-          <CopyToClipboardButton
-            textToCopy={localValue}
-            aria-label="Copy to clipboard"
-          />
+      {(showCopy || showClear || invalid) && (
+        <div className="absolute top-2 right-2 z-50 flex items-center">
+          {showCopy && (
+            <CopyToClipboardButton
+              textToCopy={localValue}
+              aria-label="Copy to clipboard"
+            />
+          )}
+          {showClear && (
+            <button
+              type="button"
+              tabIndex={-1}
+              aria-label="Clear"
+              onClick={handleClear}
+              className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
+            >
+              <X className={xIconVariants({ scale })} />
+            </button>
+          )}
+          {invalid && <InvalidIcon message={invalid} />}
         </div>
       )}
       <CodeMirror
@@ -184,27 +201,6 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
         height="100%"
         basicSetup={false}
       />
-      {(showClear || invalid) && (
-        <div
-          className={cn(
-            'absolute top-2.5 flex items-center gap-2',
-            showCopyButton ? 'right-14' : 'right-4'
-          )}
-        >
-          {showClear && (
-            <button
-              type="button"
-              tabIndex={-1}
-              aria-label="Clear"
-              onClick={handleClear}
-              className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
-            >
-              <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
-            </button>
-          )}
-          {invalid && <InvalidIcon message={invalid} />}
-        </div>
-      )}
     </div>
   );
 };

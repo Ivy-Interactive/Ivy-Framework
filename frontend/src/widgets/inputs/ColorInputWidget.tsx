@@ -11,6 +11,7 @@ import {
   colorInputPickerVariants,
 } from '@/components/ui/input/color-input-variants';
 import { Scales } from '@/types/scale';
+import { xIconVariants } from '@/components/ui/input/text-input-variants';
 interface ColorInputWidgetProps {
   id: string;
   value: string | null;
@@ -259,7 +260,7 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
                 onClick={handleClear}
                 className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
               >
-                <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+                <X className={xIconVariants({ scale })} />
               </button>
             )}
           </div>
