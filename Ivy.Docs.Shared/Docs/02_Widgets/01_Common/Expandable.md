@@ -69,43 +69,16 @@ Layout.Vertical().Gap(2)
     | new Expandable("Disabled", "This expandable is disabled").Disabled(true)
 ```
 
-## Layout Integration
+### Default Open
 
-### In Vertical Layouts
-
-Expandables work seamlessly with vertical layouts for organized content presentation.
+You can set an expandable to be open by default using the `Open()` method.
 
 ```csharp demo-tabs
 Layout.Vertical().Gap(2)
-    | new Expandable("Getting Started", "Follow these steps to get started with Ivy Framework...")
-    | new Expandable("Configuration", "Configure your application with these settings...")
-    | new Expandable("Deployment", "Learn how to deploy your Ivy application...")
-    | new Expandable("Troubleshooting", "Common issues and their solutions...")
+    | new Expandable("Closed", "This is closed by default")
+    | new Expandable("Open", "This is open by default").Open()
 ```
 
-### In Grid Layouts
-
-Use expandables in grid layouts for organized information display.
-
-```csharp demo-tabs
-Layout.Grid().Columns(2).Gap(2)
-    | new Expandable("Features", "Discover all the amazing features of Ivy Framework")
-    | new Expandable("Performance", "Learn about performance optimizations and best practices")
-    | new Expandable("Security", "Security considerations and best practices")
-    | new Expandable("Scalability", "How to scale your Ivy applications")
-```
-
-### In Cards
-
-Combine expandables with cards for enhanced visual presentation.
-
-```csharp demo-tabs
-Layout.Grid().Columns(2).Gap(2)
-    | new Card(new Expandable("Documentation", "Access comprehensive documentation and guides"))
-    | new Card(new Expandable("Examples", "Browse through practical examples and use cases"))
-    | new Card(new Expandable("API Reference", "Detailed API documentation and examples"))
-    | new Card(new Expandable("Community", "Join our community and get support"))
-```
 
 <WidgetDocs Type="Ivy.Expandable" ExtensionTypes="Ivy.ExpandableExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Expandable.cs"/>
 
