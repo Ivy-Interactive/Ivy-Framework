@@ -1,3 +1,4 @@
+using System.Collections;
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 using Ivy.Services;
@@ -20,6 +21,26 @@ public static class FormHelpers
         foreach (var attr in attributes)
         {
             var capturedAttr = attr; // Capture for closure
+
+            if (attr is AllowedValuesAttribute && propertyInfo.PropertyType != typeof(string) && typeof(IEnumerable).IsAssignableFrom(propertyInfo.PropertyType))
+            {
+                validators.Add(value =>
+                {
+                    if (value is IEnumerable collection)
+                    {
+                        foreach (var item in collection)
+                        {
+                            if (!capturedAttr.IsValid(item))
+                            {
+                                return (false, capturedAttr.ErrorMessage ?? $"Value '{item}' is not allowed.");
+                            }
+                        }
+                    }
+                    return (true, "");
+                });
+                continue;
+            }
+
             validators.Add(value =>
             {
                 try
@@ -53,6 +74,26 @@ public static class FormHelpers
         foreach (var attr in attributes)
         {
             var capturedAttr = attr; // Capture for closure
+
+            if (attr is AllowedValuesAttribute && fieldInfo.FieldType != typeof(string) && typeof(IEnumerable).IsAssignableFrom(fieldInfo.FieldType))
+            {
+                validators.Add(value =>
+                {
+                    if (value is IEnumerable collection)
+                    {
+                        foreach (var item in collection)
+                        {
+                            if (!capturedAttr.IsValid(item))
+                            {
+                                return (false, capturedAttr.ErrorMessage ?? $"Value '{item}' is not allowed.");
+                            }
+                        }
+                    }
+                    return (true, "");
+                });
+                continue;
+            }
+
             validators.Add(value =>
             {
                 try
