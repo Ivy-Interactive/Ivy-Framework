@@ -106,11 +106,11 @@ public class MicrosoftEntraAuthProvider : IAuthProvider
         var authUrl = await GetApp()
             .GetAuthorizationRequestUrl(_scopes)
             .WithRedirectUri(callback.GetUri(includeIdInPath: false).ToString())
-            .WithExtraQueryParameters(new Dictionary<string, string>
+            .WithExtraQueryParameters(new Dictionary<string, (string, bool)>
             {
-                ["code_challenge"] = codeChallenge,
-                ["code_challenge_method"] = "S256",
-                ["state"] = callback.Id,
+                ["code_challenge"] = (codeChallenge, false),
+                ["code_challenge_method"] = ("S256", false),
+                ["state"] = (callback.Id, false),
             })
             .ExecuteAsync(cancellationToken);
 
