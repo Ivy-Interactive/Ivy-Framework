@@ -73,7 +73,7 @@ export const BadgeWidget: React.FC<BadgeWidgetProps> = ({
   return (
     <Badge
       variant={getBadgeVariant(variant)}
-      className={cn('w-min whitespace-nowrap', badgeClasses)}
+      className={cn('w-min whitespace-nowrap gap-1', badgeClasses)}
     >
       {iconPosition === 'Left' && icon && icon !== 'None' && (
         <Icon style={iconStyles} name={icon} />
