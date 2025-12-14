@@ -98,6 +98,7 @@ public class WidgetDocsView(string typeName, string? extensionsTypeName, string?
         var propertySection = Layout.Vertical().Gap(2)
                               | Text.H3("Properties")
                               | properties.ToTable().Width(Size.Full())
+                                  .ColumnWidth(p => p.Setters, Size.Fraction(0.4f))
             ;
 
         var events = type.GetProperties()

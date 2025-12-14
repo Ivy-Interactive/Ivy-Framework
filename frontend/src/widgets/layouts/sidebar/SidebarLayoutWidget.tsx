@@ -19,6 +19,7 @@ import { useFocusable } from '@/hooks/use-focus-management';
 import { sidebarMenuRef } from './sidebar-refs';
 import { useEventHandler } from '@/components/event-handler';
 import { cn } from '@/lib/utils';
+import { getWidth } from '@/lib/styles';
 
 interface SidebarLayoutWidgetProps {
   slots?: {
@@ -31,6 +32,7 @@ interface SidebarLayoutWidgetProps {
   autoCollapseThreshold?: number; // Width threshold for auto-collapse (default: 768px)
   mainAppSidebar?: boolean;
   mainContentPadding?: number; // Padding for main content area (default: 2)
+  width?: string; // Width of the sidebar (default: 256px)
 }
 
 // Helper function to check if a slot has meaningful content by checking props.children
@@ -59,7 +61,10 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
   autoCollapseThreshold = 768,
   mainAppSidebar = false,
   mainContentPadding,
+  width,
 }) => {
+  // Get sidebar width from the width prop (default set in backend)
+  const sidebarWidth = getWidth(width).width as string;
   // Initialize sidebar state based on current window width (only for main app sidebar)
   const getInitialSidebarState = () => {
     if (!mainAppSidebar) return true;
@@ -146,15 +151,16 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
       ref={containerRef}
       className="grid h-full w-full remove-parent-padding"
       style={{
-        gridTemplateColumns: isSidebarOpen ? '16rem 1fr' : '0 1fr',
+        gridTemplateColumns: isSidebarOpen ? `${sidebarWidth} 1fr` : '0 1fr',
         transition: 'grid-template-columns 300ms ease-in-out',
       }}
     >
       {/* Custom Sidebar with Slide Animation */}
       <div
-        className={`flex h-full w-[256px] flex-col bg-background text-foreground border-r border-border transition-transform duration-300 ease-in-out relative overflow-hidden ${
+        className={`flex h-full flex-col bg-background text-foreground border-r border-border transition-transform duration-300 ease-in-out relative overflow-hidden ${
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
+        style={{ width: sidebarWidth }}
       >
         {hasContent(slots?.SidebarHeader) && (
           <div className="flex flex-col shrink-0 p-2 space-y-4">
@@ -177,29 +183,6 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
         )}
       </div>
 
-      {/* Toggle Button - Only show for main app sidebar */}
-      {showToggleButton && mainAppSidebar && (
-        <button
-          onClick={handleManualToggle}
-          className="absolute top-0 z-50 p-2 rounded-md bg-background hover:bg-muted hover:text-accent-foreground cursor-pointer transition-all duration-200"
-          style={{
-            left: isSidebarOpen ? 'calc(16rem + 4px)' : '4px',
-            marginTop: '3px',
-            transition: 'left 300ms ease-in-out',
-            transform: 'translateX(0)', // Ensure button moves with its parent sidebar
-          }}
-          aria-label={isSidebarOpen ? 'Close sidebar' : 'Open sidebar'}
-        >
-          <div className="transition-transform duration-300 ease-in-out">
-            {isSidebarOpen ? (
-              <PanelLeftClose className="h-4 w-4" />
-            ) : (
-              <PanelLeftOpen className="h-4 w-4" />
-            )}
-          </div>
-        </button>
-      )}
-
       {/* Main Content - Always takes full remaining width */}
       <div
         className={cn(
@@ -207,6 +190,21 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
           !mainAppSidebar ? `p-${mainContentPadding}` : ''
         )}
       >
+        {/* Toggle Button - Only show for main app sidebar */}
+        {showToggleButton && mainAppSidebar && (
+          <button
+            onClick={handleManualToggle}
+            className="absolute top-0 left-1 z-50 p-2 rounded-md bg-background hover:bg-muted hover:text-accent-foreground cursor-pointer"
+            style={{ marginTop: '3px' }}
+            aria-label={isSidebarOpen ? 'Close sidebar' : 'Open sidebar'}
+          >
+            {isSidebarOpen ? (
+              <PanelLeftClose className="h-4 w-4" />
+            ) : (
+              <PanelLeftOpen className="h-4 w-4" />
+            )}
+          </button>
+        )}
         {slots?.MainContent}
       </div>
     </div>
@@ -271,7 +269,7 @@ const CollapsibleMenuItem: React.FC<{
         <li className="relative">
           <CollapsibleTrigger asChild>
             <button
-              className="flex w-full items-center gap-2 rounded-lg p-2 text-large-label hover:bg-accent hover:text-accent-foreground cursor-pointer h-8"
+              className="flex w-full items-center gap-2 rounded-lg p-2 text-large-label hover:bg-accent hover:text-accent-foreground cursor-pointer h-8 text-left"
               onClick={() => {
                 // For items with children, toggle the collapsible state
                 // Only try to navigate if the item has a tag
@@ -304,7 +302,7 @@ const CollapsibleMenuItem: React.FC<{
     return (
       <li key={item.label}>
         <button
-          className="flex w-full items-center gap-2 rounded-lg p-2 text-large-label hover:bg-accent hover:text-accent-foreground cursor-pointer h-8"
+          className="flex w-full items-center gap-2 rounded-lg p-2 text-large-label hover:bg-accent hover:text-accent-foreground cursor-pointer h-8 text-left"
           onClick={() => onItemClick(item)}
           onMouseDown={e => onCtrlRightMouseClick(e, item)}
         >
@@ -367,7 +365,7 @@ const renderMenuItems = (
         return (
           <li key={item.tag}>
             <button
-              className="flex w-full items-center gap-2 rounded-lg p-2 text-body hover:bg-accent hover:text-accent-foreground cursor-pointer h-8"
+              className="flex w-full items-center gap-2 rounded-lg p-2 text-body hover:bg-accent hover:text-accent-foreground cursor-pointer h-8 text-left"
               onClick={() => onItemClick(item)}
               onMouseDown={e => onCtrlRightMouseClick(e, item)}
             >
@@ -380,7 +378,7 @@ const renderMenuItems = (
         return (
           <li key={item.tag}>
             <button
-              className="flex w-full items-center gap-2 rounded-lg p-2 text-body hover:bg-accent hover:text-accent-foreground cursor-pointer h-8"
+              className="flex w-full items-center gap-2 rounded-lg p-2 text-body hover:bg-accent hover:text-accent-foreground cursor-pointer h-8 text-left"
               onClick={() => onItemClick(item)}
               onMouseDown={e => onCtrlRightMouseClick(e, item)}
             >
@@ -465,7 +463,7 @@ export const SidebarMenuWidget: React.FC<SidebarMenuWidgetProps> = ({
         return (
           <li key={item.tag}>
             <button
-              className={`flex w-full items-center gap-2 rounded-lg p-2 text-sm hover:bg-accent hover:text-accent-foreground cursor-pointer h-8 ${
+              className={`flex w-full items-center gap-2 rounded-lg p-2 text-sm hover:bg-accent hover:text-accent-foreground cursor-pointer h-8 text-left ${
                 isActive ? 'bg-accent text-accent-foreground' : ''
               }`}
               tabIndex={-1} // Not focusable

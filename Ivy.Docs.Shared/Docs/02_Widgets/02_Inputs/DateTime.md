@@ -18,18 +18,17 @@ The `DateTimeInput` widget provides a comprehensive date and time picker interfa
 
 ## Basic Usage
 
-Here's a simple example of a DateTimeInput that allows users to select a date and time:
+Here's a simple example of a DateTimeInput that allows users to select a date:
 
 ```csharp demo-below
-public class BasicDateTimeUsageDemo : ViewBase
+public class BasicDateUsageDemo : ViewBase
 {
     public override object? Build()
     {
         var dateState = UseState(DateTime.Today);
         var daysBetween = dateState.Value.Subtract(DateTime.Today).Days;
         return Layout.Vertical() 
-                | dateState.ToDateTimeInput()
-                           .Variant(DateTimeInputs.Date)
+                | dateState.ToDateInput()
                            .WithField()
                            .Label("When is your birthday?")
                 | Text.Html($"<i>That's <b>{daysBetween}</b> days from now!");
@@ -39,39 +38,13 @@ public class BasicDateTimeUsageDemo : ViewBase
 
 ## Variants
 
-`DateTimeInput` supports three variants to suit different use cases:
+`DateTimeInput` supports three variants: Date, DateTime, and Time. The following extension methods are available for each:
 
-### Date Variant
+- `ToDateInput()`: Calendar picker for dates only.
+- `ToDateTimeInput()`: Calendar picker with time input.
+- `ToTimeInput()`: Time picker only.
 
-The Date variant provides a calendar picker for selecting dates only.
-
-```csharp
-dateState.ToDateTimeInput().Variant(DateTimeInputs.Date)
-```
-
-Instead of using `DateTimeInputs.Date` the function `ToDateInput` should generally be used.
-
-### DateTime Variant
-
-The DateTime variant combines a calendar picker with a time input field.
-
-```csharp
-dateState.ToDateTimeInput().Variant(DateTimeInputs.DateTime)
-```
-
-Instead of using `DateTimeInputs.DateTime` the function `ToDateTimeInput` should generally be used.
-
-### Time Variant
-
-The Time variant provides a time picker for selecting time only.
-
-```csharp
-dateState.ToDateTimeInput().Variant(DateTimeInputs.Time)
-```
-
-Instead of using `DateTimeInputs.Time` the function `ToTimeInput` should generally be used.  
-
-The following demo shows all of these in action.
+The following demo shows all of these in action:
 
 ```csharp demo-below
 public class DateTimeVariantsDemo : ViewBase
@@ -121,8 +94,6 @@ var onChangeHandler = (Event<IInput<DateTime>, DateTime> e) =>
 return dateState.ToDateTimeInput().OnChange(onChangeHandler);
 ```
 
-## Styling
-
 ## Format
 
 `DateTimeInput` can be customized with various formats. So the captured value can be
@@ -150,92 +121,4 @@ public class FormatDemo : ViewBase
 }    
 ```
 
-### Invalid
-
-To represent that something might be wrong with a date input the function `Invalid`
-should be used. The following code shows a demonstration.
-
-```csharp demo-below
-public class InvalidDateTimeDemo : ViewBase
-{
-    public override object? Build()
-    {
-        var thisDate = UseState(DateTime.Today.Date.AddDays(8));
-        return Layout.Vertical()
-                | thisDate.ToDateInput()
-                          .Invalid("Date is beyond the last approved date!")
-                          .WithField()
-                          .Label("Return date");
-    }
-}
-
-```
-
-### Disabled
-
-To disable a `DateTimeInput` the `Disabled` function should be used.
-
-```csharp demo-below
-public class DisabledDateTimeDemo : ViewBase
-{
-    public override object? Build()
-    {
-        var disabledDate = UseState(DateTime.Today.Date);
-        return Layout.Vertical()
-                | disabledDate.ToDateInput()
-                              .Disabled();
-    }
-}
-```
-
 <WidgetDocs Type="Ivy.DateTimeInput" ExtensionTypes="Ivy.DateTimeInputExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Inputs/DateTimeInput.cs"/>
-
-## Examples
-
-<Details>
-<Summary>
-DateTime Input with Validation and Disabled States
-</Summary>
-<Body>
-
-```csharp demo-tabs
-public class LibraryBookReturnDemo : ViewBase
-{
-
-    public override object? Build()
-    {
-        var issueDate = UseState(DateTime.Today.Date);
-        // Library book returns must be within a week 
-        var returnDate = UseState(DateTime.Today.AddDays(7).Date);
-        var actualReturnDate = UseState(DateTime.Today.Date);
-        var fineDays = actualReturnDate.Value.Subtract(returnDate.Value).Days;
-        var invalidMessage = UseState(String.Empty);
-        if(fineDays > 0)
-        {
-            invalidMessage.Set($"Book is <b>{fineDays}<b> days overdue!");
-        }
-        else
-        {
-            invalidMessage.Set(String.Empty);
-        }
-        return Layout.Vertical()
-                | Icons.Book    
-                | H3("Library Book Return")
-                | Text.Small("Library book returns must be within a week")
-                | issueDate.ToDateInput()
-                           .Disabled()
-                           .WithField()
-                           .Label("Issue Date")
-                | returnDate.ToDateInput()
-                            .Disabled()
-                            .WithField()
-                            .Label("Return Date")
-                | actualReturnDate.ToDateInput()
-                                    .Invalid(invalidMessage.Value);
-    }    
-}
-
-```
-
-</Body>
-</Details>

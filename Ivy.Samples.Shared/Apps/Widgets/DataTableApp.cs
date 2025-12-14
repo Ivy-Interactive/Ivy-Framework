@@ -80,7 +80,7 @@ public class DataTableApp : SampleBase
                     .ToArray();
 
                 // Generate link URLs
-                var widgetLink = "/widgets/charts/area-chart-app"; // Internal widget link - relative URL works on any domain
+                var widgetLink = "/widgets/charts/area-chart"; // Internal widget link - relative URL works on any domain
                 var profileLink = $"https://linkedin.com/in/{firstName.ToLower()}{lastName.ToLower()}{i}"; // External LinkedIn profile
 
                 return new EmployeeRecord(

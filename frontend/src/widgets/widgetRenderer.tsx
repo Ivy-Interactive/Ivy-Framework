@@ -38,7 +38,7 @@ export const renderWidgetTree = (node: WidgetNode): React.ReactNode => {
   const props: Record<string, unknown> = {
     ...node.props,
     id: node.id,
-    events: node.events,
+    events: node.events || [],
   };
 
   if ('testId' in props && props.testId) {

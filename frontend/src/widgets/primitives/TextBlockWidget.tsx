@@ -147,10 +147,7 @@ const variantMap: VariantMap = {
     </p>
   ),
   Large: ({ children, className, style }) => (
-    <div
-      className={cn('text-semi-lead font-semibold', className)}
-      style={style}
-    >
+    <div className={cn('text-lg font-semibold', className)} style={style}>
       {children}
     </div>
   ),

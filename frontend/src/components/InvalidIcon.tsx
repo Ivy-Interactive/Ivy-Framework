@@ -15,7 +15,7 @@ export const InvalidIcon: React.FC<{ message: string; className?: string }> = ({
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger
-          className={cn(className, 'cursor-pointer')}
+          className={cn(className, 'cursor-pointer pointer-events-auto')}
           data-invalid-icon="true"
         >
           <InfoIcon className="h-4 w-4 text-red-900 hover:text-red-400 transition-colors duration-200" />

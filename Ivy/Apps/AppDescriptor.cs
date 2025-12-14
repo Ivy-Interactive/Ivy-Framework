@@ -7,6 +7,14 @@ namespace Ivy.Apps;
 
 public static class AppIds
 {
+    //See GetAppOrDefault
+    internal static readonly string[] ShouldNotBeAutoDefaultApps =
+    [
+        Auth,
+        Chrome, //only default if we use chrome 
+        ErrorNotFound
+    ];
+
     public const string Auth = "$auth";
     public const string Chrome = "$chrome";
     public const string Default = "$default";

@@ -62,12 +62,8 @@ public class MetricView(
 
         return new Card(
                 Layout.Vertical().Gap(2)
-                | (Layout.Horizontal().Gap(2)
-                   | Text.Small(title).NoWrap().Overflow(Overflow.Ellipsis).Color(Colors.Gray)
-                   | new Spacer().Width(Size.Grow())
-                   | (icon?.ToIcon().Color(Colors.Gray)))
                 | (Layout.Horizontal().Align(Align.Left).Gap(2)
-                    | Text.H4(x.MetricFormatted).NoWrap().Overflow(Overflow.Clip)
+                    | Text.Large(x.MetricFormatted).NoWrap().Overflow(Overflow.Clip)
                     | (x.TrendComparedToPreviousPeriod != null
                         ? x.TrendComparedToPreviousPeriod >= 0
                             ? Icons.TrendingUp.ToIcon().Color(Colors.Success)
@@ -77,9 +73,9 @@ public class MetricView(
                         ? x.TrendComparedToPreviousPeriod >= 0
                             ? Text.Small(x.TrendComparedToPreviousPeriod.Value.ToString("P1")).Color(Colors.Success)
                             : Text.Small(x.TrendComparedToPreviousPeriod.Value.ToString("P1")).Color(Colors.Destructive)
-                        : null))
-                | (x.GoalAchieved != null ? new Progress((int)Math.Round(x.GoalAchieved.Value * 100.0)).ColorVariant(Progress.ColorVariants.EmeraldGradient).Goal(x.GoalFormatted) : null)
-            ).Height(Size.Units(Height))
+                        : null)),
+                 x.GoalAchieved != null ? new Progress((int)Math.Round(x.GoalAchieved.Value * 100.0)).ColorVariant(Progress.ColorVariants.EmeraldGradient).Goal(x.GoalFormatted) : null
+            ).Header(Text.H4(title).NoWrap().Overflow(Overflow.Ellipsis).Color(Colors.Gray)).Height(Size.Units(Height))
             ;
     }
 }

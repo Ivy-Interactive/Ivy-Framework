@@ -12,6 +12,10 @@ public interface IViewContext : IDisposable
 
     IState<T> UseState<T>(Func<T> buildInitialValue, bool buildOnChange = true);
 
+    IState<T> UseRef<T>(T? initialValue = default) => UseState<T>(initialValue, buildOnChange: false);
+
+    IState<T> UseRef<T>(Func<T> buildInitialValue) => UseState<T>(buildInitialValue, buildOnChange: false);
+
     void UseEffect(Func<Task> handler, params IEffectTriggerConvertible[] triggers);
 
     void UseEffect(Func<Task<IDisposable>> handler, params IEffectTriggerConvertible[] triggers);

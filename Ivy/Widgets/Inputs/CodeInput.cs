@@ -25,8 +25,6 @@ public abstract record CodeInputBase : WidgetBase<CodeInputBase>, IAnyCodeInput
 
     [Prop] public string? Invalid { get; set; }
 
-    [Prop] public new Scale? Scale { get; set; }
-
     [Prop] public string? Placeholder { get; set; }
 
     [Prop] public CodeInputs Variant { get; set; }

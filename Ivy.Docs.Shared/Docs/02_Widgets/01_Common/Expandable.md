@@ -25,21 +25,6 @@ new Expandable("Click to expand",
     "This is the hidden content that appears when you expand the widget.")
 ```
 
-### Rich Content
-
-You can include more complex content like formatted text, icons, and other widgets.
-
-```csharp demo-tabs
-new Expandable(
-    "Rich Content Example", 
-    Layout.Vertical().Gap(2)
-        | Text.H3("Welcome to Ivy Framework")
-        | Text.Muted("This expandable contains multiple elements")
-        | new Badge("New").Secondary()
-        | Text.Small("Click to collapse this content")
-)
-```
-
 ### Nested Expandables
 
 Create hierarchical structures by nesting expandable widgets.
@@ -55,56 +40,17 @@ new Expandable("Main Section",
 )
 ```
 
-### Disabled
+### Disabled, Open and Closed
 
 <Callout Type="info">
-The Disabled property allows you to prevent users from expanding content when it's not available or relevant, improving the overall user experience.
+You can also disable an expandable, or set it to be open by default.
 </Callout>
-
-Set to `true` to disable the expandable functionality
 
 ```csharp demo-tabs
 Layout.Vertical().Gap(2)
     | new Expandable("Normal", "This expandable works normally")
-    | new Expandable("Disabled", "This expandable is disabled").Disabled(true)
-```
-
-## Layout Integration
-
-### In Vertical Layouts
-
-Expandables work seamlessly with vertical layouts for organized content presentation.
-
-```csharp demo-tabs
-Layout.Vertical().Gap(2)
-    | new Expandable("Getting Started", "Follow these steps to get started with Ivy Framework...")
-    | new Expandable("Configuration", "Configure your application with these settings...")
-    | new Expandable("Deployment", "Learn how to deploy your Ivy application...")
-    | new Expandable("Troubleshooting", "Common issues and their solutions...")
-```
-
-### In Grid Layouts
-
-Use expandables in grid layouts for organized information display.
-
-```csharp demo-tabs
-Layout.Grid().Columns(2).Gap(2)
-    | new Expandable("Features", "Discover all the amazing features of Ivy Framework")
-    | new Expandable("Performance", "Learn about performance optimizations and best practices")
-    | new Expandable("Security", "Security considerations and best practices")
-    | new Expandable("Scalability", "How to scale your Ivy applications")
-```
-
-### In Cards
-
-Combine expandables with cards for enhanced visual presentation.
-
-```csharp demo-tabs
-Layout.Grid().Columns(2).Gap(2)
-    | new Card(new Expandable("Documentation", "Access comprehensive documentation and guides"))
-    | new Card(new Expandable("Examples", "Browse through practical examples and use cases"))
-    | new Card(new Expandable("API Reference", "Detailed API documentation and examples"))
-    | new Card(new Expandable("Community", "Join our community and get support"))
+    | new Expandable("Disabled", "This expandable is disabled").Disabled()
+    | new Expandable("Open", "This expandable is open").Open()
 ```
 
 <WidgetDocs Type="Ivy.Expandable" ExtensionTypes="Ivy.ExpandableExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Expandable.cs"/>

@@ -14,35 +14,37 @@ public static class UseAlertExtensions
 
     public static (IView? alertView, ShowAlertDelegate showAlert) UseAlert(this IViewContext context)
     {
-        var alertResult = context.UseState(AlertResult.Undecided);
-        var isOpen = context.UseState(false);
-        var alertOptions = context.UseState<AlertOptions?>();
-        var alertCallback = context.UseState<Action<AlertResult>?>();
-        var client = context.UseService<IClientProvider>();
+        var open = context.UseRef(false);
+        var alertResult = context.UseRef(AlertResult.Undecided);
+        var alertOptions = context.UseRef<AlertOptions?>();
+        var alertCallback = context.UseRef<Action<AlertResult>?>();
 
         context.UseEffect(() =>
         {
             if (alertResult.Value != AlertResult.Undecided && alertCallback.Value != null)
             {
-                try
-                {
-                    alertCallback.Value(alertResult.Value);
-                }
-                catch (Exception ex)
-                {
-                    client.Toast(ex);
-                }
+                alertCallback.Value(alertResult.Value);
             }
         }, [alertResult, alertCallback]);
 
-        var view = isOpen.Value && alertOptions.Value != null ? new AlertView(alertResult, isOpen, alertOptions.Value) : null;
+        var view = new FuncView(context2 =>
+        {
+            var openInternal = context2.UseState(false);
+
+            context2.UseEffect(() =>
+            {
+                openInternal.Set(open.Value);
+            }, open);
+
+            return openInternal.Value && alertOptions.Value != null ? new AlertView(alertResult, open, alertOptions.Value) : null;
+        });
 
         var showAlert = new ShowAlertDelegate((message, callback, title, buttonSet) =>
         {
             alertOptions.Set(new AlertOptions(title, message, buttonSet));
             alertResult.Set(AlertResult.Undecided);
             alertCallback.Set(callback);
-            isOpen.Set(true);
+            open.Set(true);
         });
 
         return (view, showAlert);

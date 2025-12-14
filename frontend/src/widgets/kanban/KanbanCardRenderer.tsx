@@ -34,11 +34,11 @@ export const KanbanCardRenderer: React.FC<KanbanCardRendererProps> = ({
           <CardHeader className="flex-none pb-2">
             <KanbanHeader>
               <CardTitle className="text-sm leading-tight line-clamp-2">
-                {task.title || 'Untitled Task'}
+                <p>{task.title || 'Untitled Task'}</p>
               </CardTitle>
             </KanbanHeader>
           </CardHeader>
-          <CardContent className="flex-1 min-h-0 overflow-hidden pt-0">
+          <CardContent className="flex-1 min-h-0 overflow-hidden pt-2">
             <KanbanCardContent>
               {task.description && (
                 <p className="text-xs text-muted-foreground line-clamp-4 leading-relaxed overflow-hidden text-ellipsis break-words">

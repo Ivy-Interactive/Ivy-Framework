@@ -57,8 +57,8 @@ public class BasicKanbanExample : ViewBase
                     idSelector: e => e.Id,
                     orderSelector: e => e.Priority)
                 .CardBuilder(task => new Card()
-                    .Title(task.Title)
-                    .Description(task.Description))
+                    .Title(Text.P(task.Title))
+                    .Description(Text.Muted(task.Description)))
                 .ColumnOrder(e => GetStatusOrder(e.Status))
                 .Width(Size.Full())
                 .HandleMove(moveData =>
@@ -224,7 +224,7 @@ public class KanbanBuilderExample : ViewBase
     })
                 .Empty(
                     new Card()
-                        .Title("No Tasks")
+                        .Title(Text.P("No Tasks"))
                         .Description("Create your first task to get started")
                 );
 
@@ -339,7 +339,7 @@ public class KanbanBuilderWithClickExample : ViewBase
                 })
                 .Empty(
                     new Card()
-                        .Title("No Tasks")
+                        .Title(Text.P("No Tasks"))
                         .Description("Create your first task to get started")
                 );
 
@@ -394,7 +394,7 @@ public class KanbanWidthExamples : ViewBase
         return Layout.Vertical()
             | Layout.Horizontal()
                 | new Card()
-                    .Title("Narrow Kanban (50rem width)")
+                    .Title(Text.P("Narrow Kanban (50rem width)"))
                     .Description("Kanban with narrow overall width")
                     .Width(Size.Full())
             | tasks.Value
@@ -403,14 +403,14 @@ public class KanbanWidthExamples : ViewBase
                     idSelector: e => e.Id,
                     orderSelector: e => e.Priority)
                 .CardBuilder(task => new Card()
-                    .Title(task.Title)
+                    .Title(Text.P(task.Title))
                     .Description(task.Description))
                 .ColumnOrder(e => GetStatusOrder(e.Status))
                 .Width(Size.Rem(50))
-                .Empty(new Card().Title("No Tasks").Description("Empty state"))
+                .Empty(new Card().Title(Text.P("No Tasks")).Description("Empty state"))
             | Layout.Horizontal()
                 | new Card()
-                    .Title("Wide Kanban (80rem width)")
+                    .Title(Text.P("Wide Kanban (80rem width)"))
                     .Description("Kanban with wide overall width")
                     .Width(Size.Full())
             | tasks.Value
@@ -419,14 +419,14 @@ public class KanbanWidthExamples : ViewBase
                     idSelector: e => e.Id,
                     orderSelector: e => e.Priority)
                 .CardBuilder(task => new Card()
-                    .Title(task.Title)
+                    .Title(Text.P(task.Title))
                     .Description(task.Description))
                 .ColumnOrder(e => GetStatusOrder(e.Status))
                 .Width(Size.Rem(80))
-                .Empty(new Card().Title("No Tasks").Description("Empty state"))
+                .Empty(new Card().Title(Text.P("No Tasks")).Description("Empty state"))
             | Layout.Horizontal()
                 | new Card()
-                    .Title("Narrow Columns (12rem per column)")
+                    .Title(Text.P("Narrow Columns (12rem per column)"))
                     .Description("Kanban with narrow column width")
                     .Width(Size.Full())
             | tasks.Value
@@ -435,15 +435,15 @@ public class KanbanWidthExamples : ViewBase
                     idSelector: e => e.Id,
                     orderSelector: e => e.Priority)
                 .CardBuilder(task => new Card()
-                    .Title(task.Title)
+                    .Title(Text.P(task.Title))
                     .Description(task.Description))
                 .ColumnOrder(e => GetStatusOrder(e.Status))
                 .Width(Size.Full())
                 .ColumnWidth(Size.Rem(12))
-                .Empty(new Card().Title("No Tasks").Description("Empty state"))
+                .Empty(new Card().Title(Text.P("No Tasks")).Description("Empty state"))
             | Layout.Horizontal()
                 | new Card()
-                    .Title("Wide Columns (25rem per column)")
+                    .Title(Text.P("Wide Columns (25rem per column)"))
                     .Description("Kanban with wide column width")
                     .Width(Size.Full())
             | tasks.Value
@@ -452,12 +452,12 @@ public class KanbanWidthExamples : ViewBase
                     idSelector: e => e.Id,
                     orderSelector: e => e.Priority)
                 .CardBuilder(task => new Card()
-                    .Title(task.Title)
+                    .Title(Text.P(task.Title))
                     .Description(task.Description))
                 .ColumnOrder(e => GetStatusOrder(e.Status))
                 .Width(Size.Full())
                 .ColumnWidth(Size.Rem(25))
-                .Empty(new Card().Title("No Tasks").Description("Empty state"));
+                .Empty(new Card().Title(Text.P("No Tasks")).Description("Empty state"));
     }
 
     private static int GetStatusOrder(string status) => status switch
@@ -513,7 +513,7 @@ public class KanbanHeaderLayoutExample : ViewBase
                 idSelector: e => e.Id,
                 orderSelector: e => e.Priority)
             .CardBuilder(task => new Card()
-                .Title(task.Title)
+                .Title(Text.P(task.Title))
                 .Description(task.Description))
             .ColumnOrder(e => GetStatusOrder(e.Status))
             .Width(Size.Full())
@@ -563,7 +563,7 @@ public class KanbanHeaderLayoutExample : ViewBase
             })
             .Empty(
                 new Card()
-                    .Title("No Tasks")
+                    .Title(Text.P("No Tasks"))
                     .Description("Create your first task to get started")
             );
 

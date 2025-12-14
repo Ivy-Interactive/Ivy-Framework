@@ -23,6 +23,7 @@ public record ChromeSettings
     public string? WallpaperAppId { get; init; }
     public bool PreventTabDuplicates { get; init; }
     public ChromeNavigation Navigation { get; init; }
+    public Size? Width { get; init; }
     public Func<IEnumerable<MenuItem>, INavigator, IEnumerable<MenuItem>> FooterMenuItemsTransformer { get; init; } = (items, _) => items;
 
     public static ChromeSettings Default() => new()
@@ -54,6 +55,7 @@ public static class ChromeSettingsExtensions
     public static ChromeSettings UseTabs(this ChromeSettings settings, bool preventDuplicates = false) => settings with { Navigation = ChromeNavigation.Tabs, PreventTabDuplicates = preventDuplicates };
     public static ChromeSettings UsePages(this ChromeSettings settings) => settings with { Navigation = ChromeNavigation.Pages };
     public static ChromeSettings UseFooterMenuItemsTransformer(this ChromeSettings settings, Func<IEnumerable<MenuItem>, INavigator, IEnumerable<MenuItem>> transformer) => settings with { FooterMenuItemsTransformer = transformer };
+    public static ChromeSettings Width(this ChromeSettings settings, Size width) => settings with { Width = width };
 }
 
 [Signal(BroadcastType.Chrome)]

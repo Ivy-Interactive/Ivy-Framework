@@ -19,7 +19,6 @@ export const buttonVariants = cva(
           'bg-warning text-warning-foreground shadow-sm hover:brightness-90',
         info: 'bg-info text-info-foreground shadow-sm hover:brightness-90',
         ghost: 'hover:bg-accent',
-        skinnyGhost: 'hover:bg-accent !p-1 !h-auto',
         link: 'text-primary underline-offset-4 hover:underline brightness-90 hover:brightness-100',
         inline: 'text-primary underline hover:no-underline !p-0 !h-auto',
       },
@@ -27,7 +26,7 @@ export const buttonVariants = cva(
         default: 'h-9 px-4 py-2 text-sm',
         sm: 'h-8 rounded-md px-3 text-xs',
         lg: 'h-10 rounded-md px-8 text-base',
-        icon: 'h-9 w-9',
+        icon: 'h-9 w-9 shrink-0',
       },
     },
     defaultVariants: {

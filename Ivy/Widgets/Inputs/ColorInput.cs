@@ -27,8 +27,6 @@ public abstract record ColorInputBase : WidgetBase<ColorInputBase>, IAnyColorInp
 
     [Prop] public string? Invalid { get; set; }
 
-    [Prop] public new Scale? Scale { get; set; }
-
     [Prop] public string? Placeholder { get; set; }
 
     [Prop] public bool Nullable { get; set; }

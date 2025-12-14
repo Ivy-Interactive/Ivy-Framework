@@ -185,7 +185,8 @@ public class AppRepository : IAppRepository
             ? Apps.GetValueOrDefault(id)
             : null;
 
-        return app ?? Apps.Values.First(app => app.Id != AppIds.Auth && app.Id != AppIds.Chrome);
+        return app ?? Apps.Values.FirstOrDefault(x => !AppIds.ShouldNotBeAutoDefaultApps.Contains(x.Id))
+            ?? throw new InvalidOperationException("No serviceable apps are registered on this server.");
     }
 
     public AppDescriptor? GetApp(string id)
