@@ -122,7 +122,6 @@ public class DependentEffectView : ViewBase
             var currentLog = log.Value;
             var newLog = currentLog.ToList();
             newLog.Add($"Count changed to: {count.Value}");
-            // Keep only the last 5 entries to prevent endless growth
             if (newLog.Count > 3) newLog = newLog.TakeLast(3).ToList();
             log.Set(newLog);
         }, count); // Dependency on count state
