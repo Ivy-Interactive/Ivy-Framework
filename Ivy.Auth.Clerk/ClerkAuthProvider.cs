@@ -159,9 +159,24 @@ public class ClerkAuthProvider : IAuthProvider
     {
         try
         {
-            // TODO
-            await Task.CompletedTask;
-            return null;
+            var credentials = await GetClerkCredentialsAsync(authSession, cancellationToken: cancellationToken);
+            var frontendClient = MakeFrontendApiClient(authSession);
+
+            var signInResponse = await frontendClient.CreatePasswordSignInAsync(credentials, email, password, cancellationToken);
+
+            if (signInResponse.Response?.CreatedSessionId is not { } sessionId)
+            {
+                return null;
+            }
+
+            var newToken = await frontendClient.CreateSessionTokenAsync(sessionId, credentials, cancellationToken);
+
+            if (string.IsNullOrEmpty(newToken.Jwt))
+            {
+                return null;
+            }
+
+            return new AuthToken(newToken.Jwt);
         }
         catch (Exception)
         {

@@ -138,6 +138,21 @@ public class FrontendApiClient
         return await ParseResponseAsync<ClerkSignInResponse>(response, credentials, cancellationToken);
     }
 
+    public async Task<ClerkSignInResponse> CreatePasswordSignInAsync(ClerkCredentials credentials, string identifier, string password, CancellationToken cancellationToken = default)
+    {
+        var formData = new Dictionary<string, string>
+        {
+            { "identifier", identifier },
+            { "password", password },
+            { "strategy", "password" }
+        };
+
+        var content = new FormUrlEncodedContent(formData);
+
+        var response = await RequestAsync(HttpMethod.Post, "client/sign_ins", credentials, content: content, cancellationToken: cancellationToken);
+        return await ParseResponseAsync<ClerkSignInResponse>(response, credentials, cancellationToken);
+    }
+
     private async Task<HttpResponseMessage> RequestAsync(HttpMethod method, string endpoint, ClerkCredentials? credentials = null, bool sendSessionToken = true, string? additionalQueryParameters = null, Action<HttpRequestHeaders>? setHeaders = null, HttpContent? content = null, CancellationToken cancellationToken = default)
     {
         if (credentials?.DevBrowserToken != null)
