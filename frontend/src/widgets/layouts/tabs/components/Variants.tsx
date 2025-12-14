@@ -7,6 +7,42 @@ import { SortableContext } from '@dnd-kit/sortable';
 import { SortableTabTrigger } from './Sortable';
 import type { TabWidgetProps } from '../types';
 
+function useWidgetCache(widgets: React.ReactElement[]) {
+  const [cache, setCache] = React.useState(
+    () => new Map<string, React.ReactElement>()
+  );
+
+  React.useLayoutEffect(() => {
+    setCache(prev => {
+      const newCache = new Map(prev);
+      let changed = false;
+      const currentIds = new Set<string>();
+
+      for (const widget of widgets) {
+        const id = (widget.props as Partial<TabWidgetProps>).id;
+        if (id) {
+          currentIds.add(id);
+          if (!newCache.has(id)) {
+            newCache.set(id, widget);
+            changed = true;
+          }
+        }
+      }
+
+      for (const id of newCache.keys()) {
+        if (!currentIds.has(id)) {
+          newCache.delete(id);
+          changed = true;
+        }
+      }
+
+      return changed ? newCache : prev;
+    });
+  }, [widgets]);
+
+  return cache;
+}
+
 interface ContentVariantProps {
   removeParentPadding?: boolean;
   width?: string;
@@ -104,6 +140,8 @@ export const ContentVariant: React.FC<ContentVariantProps> = ({
   safeEvent,
   dropdownMenu,
 }) => {
+  const widgetCache = useWidgetCache(orderedTabWidgets);
+
   return (
     <div
       className={cn(
@@ -216,7 +254,7 @@ export const ContentVariant: React.FC<ContentVariantProps> = ({
               )}
               style={paddingStyle}
             >
-              {tabWidget}
+              {widgetCache.get(id) || tabWidget}
             </div>
           );
         })}
@@ -256,6 +294,7 @@ export const TabsVariant: React.FC<TabsVariantProps> = ({
   dropdownMenu,
 }) => {
   const useRadix = (variant as string) === 'Content';
+  const widgetCache = useWidgetCache(tabWidgets);
 
   return (
     <Tabs
@@ -352,47 +391,44 @@ export const TabsVariant: React.FC<TabsVariantProps> = ({
       </div>
 
       <div className="flex-1 overflow-hidden">
-        {React.useMemo(() => {
-          return tabWidgets.map(tabWidget => {
-            if (!React.isValidElement(tabWidget)) return null;
-            const props = tabWidget.props as Partial<TabWidgetProps>;
-            if (!props.id) return null;
-            const { id } = props;
+        {tabWidgets.map(tabWidget => {
+          if (!React.isValidElement(tabWidget)) return null;
+          const props = tabWidget.props as Partial<TabWidgetProps>;
+          if (!props.id) return null;
+          const { id } = props;
 
-            if (!loadedTabs.has(id)) return null;
+          if (!loadedTabs.has(id)) return null;
 
-            const paddingStyle = getPadding(padding);
+          const paddingStyle = getPadding(padding);
+          const cachedWidget = widgetCache.get(id) || tabWidget;
 
-            if (useRadix) {
-              // Use TabsContent for Radix version (Content variant)
-              return (
-                <TabsContent
-                  key={id}
-                  value={id}
-                  useRadix={useRadix}
-                  className={cn('h-full overflow-auto border-none mt-0')}
-                  style={paddingStyle}
-                >
-                  {tabWidget}
-                </TabsContent>
-              );
-            }
-
-            // Use custom div-based content for non-Radix version (Tabs variant)
+          if (useRadix) {
             return (
-              <div
+              <TabsContent
                 key={id}
-                className={cn(
-                  'h-full overflow-auto',
-                  activeTabId === id ? 'block' : 'hidden'
-                )}
+                value={id}
+                useRadix={useRadix}
+                className={cn('h-full overflow-auto border-none mt-0')}
                 style={paddingStyle}
               >
-                {tabWidget}
-              </div>
+                {cachedWidget}
+              </TabsContent>
             );
-          });
-        }, [tabWidgets, loadedTabs, activeTabId, padding, useRadix])}
+          }
+
+          return (
+            <div
+              key={id}
+              className={cn(
+                'h-full overflow-auto',
+                activeTabId === id ? 'block' : 'hidden'
+              )}
+              style={paddingStyle}
+            >
+              {cachedWidget}
+            </div>
+          );
+        })}
       </div>
     </Tabs>
   );
