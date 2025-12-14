@@ -139,7 +139,7 @@ export const SearchVariant: React.FC<SearchVariantProps> = ({
       />
       {/* Icons container: clear (if nullable), shortcut (if any), then invalid (if any) */}
       {(showClear || props.shortcutKey || props.invalid) && (
-        <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none z-10 h-6">
+        <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-row items-center gap-1 pointer-events-none z-10 h-6">
           {showClear && (
             <button
               type="button"
@@ -163,10 +163,12 @@ export const SearchVariant: React.FC<SearchVariantProps> = ({
                 </kbd>
               </div>
             )}
+          {/* Invalid icon - rightmost */}
           {props.invalid && (
-            <div className="pointer-events-auto flex items-center h-6">
-              <InvalidIcon message={props.invalid} />
-            </div>
+            <InvalidIcon
+              message={props.invalid}
+              className="pointer-events-auto"
+            />
           )}
         </div>
       )}

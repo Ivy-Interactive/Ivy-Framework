@@ -121,7 +121,7 @@ export const PasswordVariant: React.FC<PasswordVariantProps> = ({
       />
       {/* Icons container: password toggle, clear (if nullable), shortcut (if any), then invalid (if any) */}
       {!hasLastPass && (
-        <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none h-6">
+        <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-row items-center gap-1 pointer-events-none h-6">
           <div className="pointer-events-auto flex items-center h-6">
             <button
               type="button"
@@ -153,10 +153,12 @@ export const PasswordVariant: React.FC<PasswordVariantProps> = ({
               </kbd>
             </div>
           )}
+          {/* Invalid icon - rightmost */}
           {props.invalid && (
-            <div className="pointer-events-auto flex items-center h-6 ml-2">
-              <InvalidIcon message={props.invalid} />
-            </div>
+            <InvalidIcon
+              message={props.invalid}
+              className="pointer-events-auto"
+            />
           )}
         </div>
       )}

@@ -94,7 +94,7 @@ export const TextareaVariant: React.FC<TextareaVariantProps> = ({
       />
       {/* Icons container: shortcut (if any), clear (if nullable), then invalid (if any) */}
       {(props.shortcutKey || showClear || props.invalid) && (
-        <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none h-6">
+        <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-row items-center gap-1 pointer-events-none h-6">
           {props.shortcutKey &&
             !isFocused &&
             !hasValue &&
@@ -117,10 +117,12 @@ export const TextareaVariant: React.FC<TextareaVariantProps> = ({
               <X className={xIconVariants({ scale })} />
             </button>
           )}
+          {/* Invalid icon - rightmost */}
           {props.invalid && (
-            <div className="pointer-events-auto flex items-center h-6">
-              <InvalidIcon message={props.invalid} />
-            </div>
+            <InvalidIcon
+              message={props.invalid}
+              className="pointer-events-auto"
+            />
           )}
         </div>
       )}

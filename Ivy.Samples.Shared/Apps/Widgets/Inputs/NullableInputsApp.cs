@@ -354,11 +354,74 @@ public class NullableInputsApp : SampleBase
                 | nullableText.ToTextInput().Placeholder("Required field").Invalid("This field is required").Nullable()
                 | Text.Block("Nullable text input with validation error")
 
+                | nullableTextarea.ToTextAreaInput().Placeholder("Required field").Invalid("This field is required").Nullable()
+                | Text.Block("Nullable textarea input with validation error")
+
+                | nullablePassword.ToPasswordInput().Placeholder("Required field").Invalid("This field is required").Nullable()
+                | Text.Block("Nullable password input with validation error")
+
+                | nullableSearch.ToSearchInput().Placeholder("Required field").Invalid("This field is required").Nullable()
+                | Text.Block("Nullable search input with validation error")
+
+                | nullableEmail.ToEmailInput().Placeholder("Required field").Invalid("This field is required").Nullable()
+                | Text.Block("Nullable email input with validation error")
+
                 | nullableInt.ToNumberInput().Placeholder("Enter number").Invalid("Invalid number").Nullable()
                 | Text.Block("Nullable number input with validation error")
 
+                | nullableDecimal.ToNumberInput().Placeholder("Enter decimal").Invalid("Invalid decimal").Nullable()
+                | Text.Block("Nullable decimal input with validation error")
+
+                | nullableDouble.ToNumberInput().Placeholder("Enter number").Invalid("Invalid number").Nullable()
+                | Text.Block("Nullable double input with validation error")
+
                 | nullableDate.ToDateInput().Placeholder("Select date").Invalid("Date is required").Nullable()
                 | Text.Block("Nullable date input with validation error")
+
+                | nullableDateTime.ToDateTimeInput().Placeholder("Select date/time").Invalid("Date/time is required").Nullable()
+                | Text.Block("Nullable datetime input with validation error")
+
+                | nullableTime.ToTimeInput().Placeholder("Select time").Invalid("Time is required").Nullable()
+                | Text.Block("Nullable time input with validation error")
+
+                | nullableSelect.ToSelectInput(
+                    new[]
+                    {
+                        new Option<string>("option1", "Option 1"),
+                        new Option<string>("option2", "Option 2"),
+                        new Option<string>("option3", "Option 3")
+                    },
+                    "Select an option...")
+                    .Invalid("Selection is required")
+                    .Nullable()
+                | Text.Block("Nullable select input with validation error")
+
+                | nullableMultiSelect.ToSelectInput(
+                    new[]
+                    {
+                        new Option<string>("option1", "Option 1"),
+                        new Option<string>("option2", "Option 2"),
+                        new Option<string>("option3", "Option 3")
+                    },
+                    "Select options...")
+                    .Invalid("Selection is required")
+                    .Nullable()
+                | Text.Block("Nullable multi-select input with validation error")
+
+                | nullableCode.ToCodeInput().Placeholder("Enter code").Invalid("Code is required").Nullable()
+                | Text.Block("Nullable code input with validation error")
+
+                | nullableColor.ToColorInput().Placeholder("Select color").Invalid("Color is required").Nullable()
+                | Text.Block("Nullable color input with validation error")
+
+                | nullableBool.ToBoolInput("Required field").Invalid("This field is required").Nullable()
+                | Text.Block("Nullable boolean input with validation error")
+
+                | nullableFeedback.ToFeedbackInput(placeholder: "Rate us...").Invalid("Rating is required").Nullable()
+                | Text.Block("Nullable feedback stars input with validation error")
+
+                | nullableFeedbackBool.ToFeedbackInput(placeholder: "Give feedback...", variant: FeedbackInputs.Thumbs).Invalid("Feedback is required").Nullable()
+                | Text.Block("Nullable feedback thumbs input with validation error")
              )
 
              | Text.H2("Non-Nullable vs Nullable Comparison")

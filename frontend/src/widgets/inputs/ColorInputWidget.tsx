@@ -247,10 +247,9 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
             className="absolute top-1/2 -translate-y-1/2 flex items-center gap-1 right-2"
             style={{ zIndex: 2 }}
           >
+            {/* Invalid icon - rightmost */}
             {invalid && (
-              <span className="flex items-center">
-                <InvalidIcon message={invalid} />
-              </span>
+              <InvalidIcon message={invalid} className="pointer-events-auto" />
             )}
             {nullable && value !== null && !disabled && (
               <button

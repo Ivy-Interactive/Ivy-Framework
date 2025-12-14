@@ -180,7 +180,10 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
               <X className={xIconVariants({ scale })} />
             </button>
           )}
-          {invalid && <InvalidIcon message={invalid} />}
+          {/* Invalid icon - rightmost */}
+          {invalid && (
+            <InvalidIcon message={invalid} className="pointer-events-auto" />
+          )}
         </div>
       )}
       <CodeMirror

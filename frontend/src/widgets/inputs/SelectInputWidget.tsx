@@ -403,10 +403,9 @@ const ToggleVariant: React.FC<SelectInputWidgetProps> = ({
                 <X className={xIconVariants({ scale })} />
               </button>
             )}
+            {/* Invalid icon - rightmost */}
             {invalid && (
-              <div className="flex items-center">
-                <InvalidIcon message={invalid} />
-              </div>
+              <InvalidIcon message={invalid} className="pointer-events-auto" />
             )}
           </div>
         )}
@@ -517,10 +516,9 @@ const RadioVariant: React.FC<SelectInputWidgetProps> = ({
                 <X className={xIconVariants({ scale })} />
               </button>
             )}
+            {/* Invalid icon - rightmost */}
             {invalid && (
-              <div className="flex items-center">
-                <InvalidIcon message={invalid} />
-              </div>
+              <InvalidIcon message={invalid} className="pointer-events-auto" />
             )}
           </div>
         )}
@@ -718,10 +716,9 @@ const CheckboxVariant: React.FC<SelectInputWidgetProps> = ({
                 <X className={xIconVariants({ scale })} />
               </button>
             )}
+            {/* Invalid icon - rightmost */}
             {invalid && (
-              <div className="flex items-center">
-                <InvalidIcon message={invalid} />
-              </div>
+              <InvalidIcon message={invalid} className="pointer-events-auto" />
             )}
           </div>
         )}
@@ -1023,11 +1020,9 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
                 <X className={xIconVariants({ scale })} />
               </span>
             )}
-            {/* Invalid icon */}
+            {/* Invalid icon - rightmost */}
             {invalid && (
-              <span className="flex items-center">
-                <InvalidIcon message={invalid} />
-              </span>
+              <InvalidIcon message={invalid} className="pointer-events-auto" />
             )}
           </div>
         ) : null}

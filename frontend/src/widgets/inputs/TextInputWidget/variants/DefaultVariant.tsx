@@ -124,7 +124,7 @@ export const DefaultVariant: React.FC<DefaultVariantProps> = ({
 
           {/* Right side container: shortcut (if any), clear (if nullable), then invalid (if any) */}
           {(props.shortcutKey || showClear || props.invalid) && (
-            <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none h-6">
+            <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-row items-center gap-1 pointer-events-none">
               {props.shortcutKey &&
                 !isFocused &&
                 !hasValue &&
@@ -142,15 +142,17 @@ export const DefaultVariant: React.FC<DefaultVariantProps> = ({
                   tabIndex={-1}
                   aria-label="Clear"
                   onClick={onClear}
-                  className="pointer-events-auto p-1 rounded hover:bg-accent focus:outline-none cursor-pointer flex items-center h-6"
+                  className="pointer-events-auto p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
                 >
                   <X className={xIconVariants({ scale })} />
                 </button>
               )}
+              {/* Invalid icon - rightmost */}
               {props.invalid && (
-                <div className="pointer-events-auto flex items-center h-6">
-                  <InvalidIcon message={props.invalid} />
-                </div>
+                <InvalidIcon
+                  message={props.invalid}
+                  className="pointer-events-auto"
+                />
               )}
             </div>
           )}

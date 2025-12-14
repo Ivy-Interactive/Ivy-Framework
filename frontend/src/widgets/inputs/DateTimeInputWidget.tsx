@@ -141,7 +141,7 @@ const DateVariant: React.FC<DateVariantProps> = ({
       </Popover>
       {/* Icons absolutely positioned */}
       {(showClear || invalid) && (
-        <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-2">
+        <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-row items-center gap-1">
           {showClear && (
             <button
               type="button"
@@ -158,7 +158,10 @@ const DateVariant: React.FC<DateVariantProps> = ({
               />
             </button>
           )}
-          {invalid && <InvalidIcon message={invalid} />}
+          {/* Invalid icon - rightmost */}
+          {invalid && (
+            <InvalidIcon message={invalid} className="pointer-events-auto" />
+          )}
         </div>
       )}
     </div>
@@ -374,7 +377,7 @@ const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
       </Popover>
       {/* Icons absolutely positioned */}
       {(showClear || invalid) && (
-        <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-2">
+        <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-row items-center gap-1">
           {showClear && (
             <button
               type="button"
@@ -391,7 +394,10 @@ const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
               />
             </button>
           )}
-          {invalid && <InvalidIcon message={invalid} />}
+          {/* Invalid icon - rightmost */}
+          {invalid && (
+            <InvalidIcon message={invalid} className="pointer-events-auto" />
+          )}
         </div>
       )}
     </div>
@@ -517,7 +523,7 @@ const TimeVariant: React.FC<TimeVariantProps> = ({
       </div>
       {/* Icons absolutely positioned */}
       {(showClear || invalid) && (
-        <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-2">
+        <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-row items-center gap-1">
           {showClear && (
             <button
               type="button"
@@ -534,7 +540,10 @@ const TimeVariant: React.FC<TimeVariantProps> = ({
               />
             </button>
           )}
-          {invalid && <InvalidIcon message={invalid} />}
+          {/* Invalid icon - rightmost */}
+          {invalid && (
+            <InvalidIcon message={invalid} className="pointer-events-auto" />
+          )}
         </div>
       )}
     </div>
