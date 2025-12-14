@@ -22,22 +22,9 @@ public static class FormHelpers
         {
             var capturedAttr = attr; // Capture for closure
 
-            if (attr is AllowedValuesAttribute && propertyInfo.PropertyType != typeof(string) && typeof(IEnumerable).IsAssignableFrom(propertyInfo.PropertyType))
+            if (TryCreateCollectionValidator(attr, propertyInfo.PropertyType, out var collectionValidator))
             {
-                validators.Add(value =>
-                {
-                    if (value is IEnumerable collection)
-                    {
-                        foreach (var item in collection)
-                        {
-                            if (!capturedAttr.IsValid(item))
-                            {
-                                return (false, capturedAttr.ErrorMessage ?? $"Value '{item}' is not allowed.");
-                            }
-                        }
-                    }
-                    return (true, "");
-                });
+                validators.Add(collectionValidator!);
                 continue;
             }
 
@@ -75,22 +62,9 @@ public static class FormHelpers
         {
             var capturedAttr = attr; // Capture for closure
 
-            if (attr is AllowedValuesAttribute && fieldInfo.FieldType != typeof(string) && typeof(IEnumerable).IsAssignableFrom(fieldInfo.FieldType))
+            if (TryCreateCollectionValidator(attr, fieldInfo.FieldType, out var collectionValidator))
             {
-                validators.Add(value =>
-                {
-                    if (value is IEnumerable collection)
-                    {
-                        foreach (var item in collection)
-                        {
-                            if (!capturedAttr.IsValid(item))
-                            {
-                                return (false, capturedAttr.ErrorMessage ?? $"Value '{item}' is not allowed.");
-                            }
-                        }
-                    }
-                    return (true, "");
-                });
+                validators.Add(collectionValidator!);
                 continue;
             }
 
@@ -293,6 +267,33 @@ public static class FormHelpers
         }
 
         return null;
+    }
+
+
+    private static bool TryCreateCollectionValidator(ValidationAttribute attr, Type type, out Func<object?, (bool, string)>? validator)
+    {
+        if (attr is AllowedValuesAttribute && type != typeof(string) && typeof(IEnumerable).IsAssignableFrom(type))
+        {
+            var capturedAttr = attr;
+            validator = value =>
+            {
+                if (value is IEnumerable collection)
+                {
+                    foreach (var item in collection)
+                    {
+                        if (!capturedAttr.IsValid(item))
+                        {
+                            return (false, capturedAttr.ErrorMessage ?? $"Value '{item}' is not allowed.");
+                        }
+                    }
+                }
+                return (true, "");
+            };
+            return true;
+        }
+
+        validator = null;
+        return false;
     }
 }
 
