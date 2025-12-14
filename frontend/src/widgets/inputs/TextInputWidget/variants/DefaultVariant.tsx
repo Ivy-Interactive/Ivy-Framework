@@ -4,7 +4,10 @@ import { cn } from '@/lib/utils';
 import { getWidth, inputStyles } from '@/lib/styles';
 import { InvalidIcon } from '@/components/InvalidIcon';
 import { Scales } from '@/types/scale';
-import { textInputSizeVariants } from '@/components/ui/input/text-input-variants';
+import {
+  textInputSizeVariants,
+  xIconVariants,
+} from '@/components/ui/input/text-input-variants';
 import { TextInputWidgetProps } from '../types';
 import { renderPrefixSuffix } from '../utils/renderPrefixSuffix';
 import {
@@ -141,7 +144,7 @@ export const DefaultVariant: React.FC<DefaultVariantProps> = ({
                   onClick={onClear}
                   className="pointer-events-auto p-1 rounded hover:bg-accent focus:outline-none cursor-pointer flex items-center h-6"
                 >
-                  <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+                  <X className={xIconVariants({ scale })} />
                 </button>
               )}
               {props.invalid && (
