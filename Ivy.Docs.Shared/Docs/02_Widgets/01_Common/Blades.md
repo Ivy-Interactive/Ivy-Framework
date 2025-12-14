@@ -36,13 +36,14 @@ public class NavigationRootView : ViewBase
         var blades = this.UseContext<IBladeController>();
         var index = blades.GetIndex(this);
 
-        return Layout.Vertical()
+        return Layout.Horizontal().Height(Size.Units(50))
+        | (Layout.Vertical()
             | Text.Block($"This is blade level {index}")
             | new Button($"Push Blade {index + 1}", onClick: _ =>
                 blades.Push(this, new NavigationRootView(), $"Level {index + 1}"))
             | new Button($"Push Wide Blade", onClick: _ =>
                 blades.Push(this, new NavigationRootView(), $"Wide Level {index + 1}", width: Size.Units(100)))
-            | (index > 0 ? new Button("Go Back", onClick: _ => blades.Pop()) : null);
+            | (index > 0 ? new Button("Go Back", onClick: _ => blades.Pop()) : null));
     }
 }
 ```
@@ -94,10 +95,12 @@ public class ProductDetailView(string productName) : ViewBase
 {
     public override object? Build()
     {
-        return new Card($"Details for {productName}")
+        return Layout.Horizontal().Height(Size.Units(66))
+        | (Layout.Vertical()
+        | new Card($"Details for {productName}")
             | Text.Block($"This is the detail view for {productName}")
             | Text.Block("Price: $999")
-            | Text.Block("In Stock: Yes");
+            | Text.Block("In Stock: Yes"));
     }
 }
 ```
@@ -112,7 +115,8 @@ public class BladeRefreshDemo : ViewBase
 {
     public override object? Build()
     {
-        return this.UseBlades(() => new RefreshRootView(), "Items List");
+        return Layout.Horizontal().Height(Size.Units(100))
+            | this.UseBlades(() => new RefreshRootView(), "Items List");
     }
 }
 
@@ -170,7 +174,8 @@ public class BladeErrorDemo : ViewBase
 {
     public override object? Build()
     {
-        return this.UseBlades(() => new ErrorRootView(), "Error Demo");
+        return Layout.Horizontal().Height(Size.Units(100))
+        | (this.UseBlades(() => new ErrorRootView(), "Error Demo"));
     }
 }
 
