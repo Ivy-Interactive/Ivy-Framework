@@ -21,7 +21,7 @@ The `Progress` widget is used to visually represent the completion status of a t
 ## Example
 
 ```csharp demo-tabs
-public class ProgressApp : ViewBase
+public class ProgressDemo : ViewBase
 {
     public override object? Build()
     {
