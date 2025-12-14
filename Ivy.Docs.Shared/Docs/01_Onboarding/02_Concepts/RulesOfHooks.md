@@ -118,8 +118,16 @@ The following hooks are automatically detected by the analyzer:
 
 - `UseState`
 - `UseEffect`
+- `UseMemo`
+- `UseRef`
 - `UseContext`
+- `UseCallback`
+- `UseReducer`
+- `UseStatic`
+- `UseSignal`
+- `UseTrigger`
 - `UseService`
+- `UseArgs`
 - `UseAlert`
 - `UseForm`
 - `UseUpload`
@@ -128,3 +136,4 @@ The following hooks are automatically detected by the analyzer:
 - `UseBlades`
 - `UseDataTable`
 - `UseNavigation`
+- `UseRefreshToken`

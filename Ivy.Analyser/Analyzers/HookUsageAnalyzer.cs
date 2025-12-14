@@ -102,7 +102,8 @@ namespace Ivy.Analyser.Analyzers
             "UseWebhook",
             "UseBlades",
             "UseDataTable",
-            "UseNavigation"
+            "UseNavigation",
+            "UseRefreshToken"
         );
 
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(

@@ -1,4 +1,4 @@
-﻿using Ivy.Hooks;
+using Ivy.Hooks;
 using Ivy.Samples.Shared.Helpers;
 using Ivy.Shared;
 using Ivy.Views.Alerts;
@@ -28,11 +28,7 @@ public class ProductsListBlade : ViewBase
 
         var blades = UseContext<IBladeController>();
         var factory = UseService<SampleDbContextFactory>();
-
-#pragma warning disable IVYHOOK005
         var refreshToken = this.UseRefreshToken();
-
-
 
         UseEffect(() =>
         {
@@ -42,7 +38,6 @@ public class ProductsListBlade : ViewBase
                 blades.Push(this, new ProductDetailsBlade(productId));
             }
         }, [refreshToken]);
-#pragma warning restore IVYHOOK005
 
         var onItemClicked = new Action<Event<ListItem>>(e =>
         {
@@ -94,13 +89,10 @@ public class ProductDetailsBlade(Guid productId) : ViewBase
 {
     public override object? Build()
     {
-#pragma warning disable IVYHOOK005
         var product = UseState<Product?>(() => null!);
         var factory = UseService<SampleDbContextFactory>();
         var blades = UseContext<IBladeController>();
         var refreshToken = this.UseRefreshToken();
-
-
 
         UseEffect(async () =>
         {
@@ -151,7 +143,6 @@ public class ProductDetailsBlade(Guid productId) : ViewBase
             productCard,
             productCard
         };
-#pragma warning restore IVYHOOK005
     }
 
 
