@@ -6,7 +6,7 @@
   src: url('/fonts/Geist/webfonts/Geist-Regular.woff2') format('woff2');
   font-weight: 400;
   font-style: normal;
-  font-display: fallback;
+  font-display: swap;
 }
 
 @font-face {
@@ -14,7 +14,7 @@
   src: url('/fonts/Geist/webfonts/Geist-Medium.woff2') format('woff2');
   font-weight: 500;
   font-style: normal;
-  font-display: fallback;
+  font-display: swap;
 }
 
 @font-face {
@@ -22,7 +22,7 @@
   src: url('/fonts/Geist/webfonts/Geist-SemiBold.woff2') format('woff2');
   font-weight: 600;
   font-style: normal;
-  font-display: fallback;
+  font-display: swap;
 }
 
 @font-face {
@@ -30,7 +30,7 @@
   src: url('/fonts/Geist/webfonts/Geist-Bold.woff2') format('woff2');
   font-weight: 700;
   font-style: normal;
-  font-display: fallback;
+  font-display: swap;
 }
 
 /* Geist Mono Font Family */
@@ -39,7 +39,7 @@
   src: url('/fonts/GeistMono/webfonts/GeistMono-Regular.woff2') format('woff2');
   font-weight: 400;
   font-style: normal;
-  font-display: fallback;
+  font-display: swap;
 }
 
 @font-face {
@@ -47,7 +47,7 @@
   src: url('/fonts/GeistMono/webfonts/GeistMono-Medium.woff2') format('woff2');
   font-weight: 500;
   font-style: normal;
-  font-display: fallback;
+  font-display: swap;
 }
 
 @font-face {
@@ -55,7 +55,7 @@
   src: url('/fonts/GeistMono/webfonts/GeistMono-SemiBold.woff2') format('woff2');
   font-weight: 600;
   font-style: normal;
-  font-display: fallback;
+  font-display: swap;
 }
 
 @font-face {
@@ -63,7 +63,7 @@
   src: url('/fonts/GeistMono/webfonts/GeistMono-Bold.woff2') format('woff2');
   font-weight: 700;
   font-style: normal;
-  font-display: fallback;
+  font-display: swap;
 }
 
 @theme {
