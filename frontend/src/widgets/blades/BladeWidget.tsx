@@ -78,7 +78,7 @@ export function BladeWidget({
           type="hover"
           className="blade-container h-full [&>div>div[style]]:block!"
         >
-          <div className="p-4">{children}</div>
+          <div className="p-2">{children}</div>
         </ScrollArea>
       </div>
     </div>
