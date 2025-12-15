@@ -32,12 +32,16 @@ public class ThemeService : IThemeService
         // Generate :root (light theme) variables
         sb.AppendLine(":root {");
         AppendThemeColors(sb, _currentTheme.Colors.Light);
+        AppendNeutralColors(sb);
+        AppendChromaticColors(sb);
         AppendOtherThemeProperties(sb);
         sb.AppendLine("}");
 
         // Generate .dark theme variables
         sb.AppendLine(".dark {");
         AppendThemeColors(sb, _currentTheme.Colors.Dark);
+        AppendNeutralColors(sb);
+        AppendChromaticColors(sb);
         sb.AppendLine("}");
 
         sb.AppendLine("</style>");
@@ -87,6 +91,64 @@ public class ThemeService : IThemeService
         AppendColorVariable(sb, "--popover-foreground", colors.PopoverForeground);
     }
 
+    private void AppendNeutralColors(StringBuilder sb)
+    {
+        // Neutral colors with foreground variants
+        AppendColorVariable(sb, "--slate", IvyFrameworkNeutralTokens.Color.Slate);
+        AppendColorVariable(sb, "--slate-foreground", IvyFrameworkNeutralTokens.Color.SlateForeground);
+        AppendColorVariable(sb, "--gray", IvyFrameworkNeutralTokens.Color.Gray);
+        AppendColorVariable(sb, "--gray-foreground", IvyFrameworkNeutralTokens.Color.GrayForeground);
+        AppendColorVariable(sb, "--zinc", IvyFrameworkNeutralTokens.Color.Zinc);
+        AppendColorVariable(sb, "--zinc-foreground", IvyFrameworkNeutralTokens.Color.ZincForeground);
+        AppendColorVariable(sb, "--neutral", IvyFrameworkNeutralTokens.Color.Neutral);
+        AppendColorVariable(sb, "--neutral-foreground", IvyFrameworkNeutralTokens.Color.NeutralForeground);
+        AppendColorVariable(sb, "--stone", IvyFrameworkNeutralTokens.Color.Stone);
+        AppendColorVariable(sb, "--stone-foreground", IvyFrameworkNeutralTokens.Color.StoneForeground);
+        AppendColorVariable(sb, "--black", IvyFrameworkNeutralTokens.Color.Black);
+        AppendColorVariable(sb, "--black-foreground", IvyFrameworkNeutralTokens.Color.BlackForeground);
+        AppendColorVariable(sb, "--white", IvyFrameworkNeutralTokens.Color.White);
+        AppendColorVariable(sb, "--white-foreground", IvyFrameworkNeutralTokens.Color.WhiteForeground);
+    }
+
+    private void AppendChromaticColors(StringBuilder sb)
+    {
+        // Chromatic colors with foreground variants
+        AppendColorVariable(sb, "--red", IvyFrameworkChromaticTokens.Color.Red);
+        AppendColorVariable(sb, "--red-foreground", IvyFrameworkChromaticTokens.Color.RedForeground);
+        AppendColorVariable(sb, "--orange", IvyFrameworkChromaticTokens.Color.Orange);
+        AppendColorVariable(sb, "--orange-foreground", IvyFrameworkChromaticTokens.Color.OrangeForeground);
+        AppendColorVariable(sb, "--amber", IvyFrameworkChromaticTokens.Color.Amber);
+        AppendColorVariable(sb, "--amber-foreground", IvyFrameworkChromaticTokens.Color.AmberForeground);
+        AppendColorVariable(sb, "--yellow", IvyFrameworkChromaticTokens.Color.Yellow);
+        AppendColorVariable(sb, "--yellow-foreground", IvyFrameworkChromaticTokens.Color.YellowForeground);
+        AppendColorVariable(sb, "--lime", IvyFrameworkChromaticTokens.Color.Lime);
+        AppendColorVariable(sb, "--lime-foreground", IvyFrameworkChromaticTokens.Color.LimeForeground);
+        AppendColorVariable(sb, "--green", IvyFrameworkChromaticTokens.Color.Green);
+        AppendColorVariable(sb, "--green-foreground", IvyFrameworkChromaticTokens.Color.GreenForeground);
+        AppendColorVariable(sb, "--emerald", IvyFrameworkChromaticTokens.Color.Emerald);
+        AppendColorVariable(sb, "--emerald-foreground", IvyFrameworkChromaticTokens.Color.EmeraldForeground);
+        AppendColorVariable(sb, "--teal", IvyFrameworkChromaticTokens.Color.Teal);
+        AppendColorVariable(sb, "--teal-foreground", IvyFrameworkChromaticTokens.Color.TealForeground);
+        AppendColorVariable(sb, "--cyan", IvyFrameworkChromaticTokens.Color.Cyan);
+        AppendColorVariable(sb, "--cyan-foreground", IvyFrameworkChromaticTokens.Color.CyanForeground);
+        AppendColorVariable(sb, "--sky", IvyFrameworkChromaticTokens.Color.Sky);
+        AppendColorVariable(sb, "--sky-foreground", IvyFrameworkChromaticTokens.Color.SkyForeground);
+        AppendColorVariable(sb, "--blue", IvyFrameworkChromaticTokens.Color.Blue);
+        AppendColorVariable(sb, "--blue-foreground", IvyFrameworkChromaticTokens.Color.BlueForeground);
+        AppendColorVariable(sb, "--indigo", IvyFrameworkChromaticTokens.Color.Indigo);
+        AppendColorVariable(sb, "--indigo-foreground", IvyFrameworkChromaticTokens.Color.IndigoForeground);
+        AppendColorVariable(sb, "--violet", IvyFrameworkChromaticTokens.Color.Violet);
+        AppendColorVariable(sb, "--violet-foreground", IvyFrameworkChromaticTokens.Color.VioletForeground);
+        AppendColorVariable(sb, "--purple", IvyFrameworkChromaticTokens.Color.Purple);
+        AppendColorVariable(sb, "--purple-foreground", IvyFrameworkChromaticTokens.Color.PurpleForeground);
+        AppendColorVariable(sb, "--fuchsia", IvyFrameworkChromaticTokens.Color.Fuchsia);
+        AppendColorVariable(sb, "--fuchsia-foreground", IvyFrameworkChromaticTokens.Color.FuchsiaForeground);
+        AppendColorVariable(sb, "--pink", IvyFrameworkChromaticTokens.Color.Pink);
+        AppendColorVariable(sb, "--pink-foreground", IvyFrameworkChromaticTokens.Color.PinkForeground);
+        AppendColorVariable(sb, "--rose", IvyFrameworkChromaticTokens.Color.Rose);
+        AppendColorVariable(sb, "--rose-foreground", IvyFrameworkChromaticTokens.Color.RoseForeground);
+    }
+
     private void AppendOtherThemeProperties(StringBuilder sb)
     {
         // Apply other theme properties only to :root
@@ -103,13 +165,6 @@ public class ThemeService : IThemeService
     private void AppendColorVariable(StringBuilder sb, string variableName, string? colorValue)
     {
         if (!string.IsNullOrEmpty(colorValue))
-        {
             sb.AppendLine($"  {variableName}: {colorValue};");
-        }
-        else
-        {
-            // Log warning for missing color values (helps debug theme token issues)
-            System.Diagnostics.Debug.WriteLine($"Warning: Theme color '{variableName}' is null or empty. CSS variable will not be set.");
-        }
     }
 }

@@ -18,7 +18,10 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         Align align,
         FieldInfo fieldInfo,
         PropertyInfo? propertyInfo,
-        bool removed)
+        bool removed,
+        IBuilder<TModel> initialBuilder,
+        bool initialRemoved,
+        Align initialAlign)
     {
         public string Name { get; set; } = name;
         private FieldInfo? FieldInfo { get; set; } = fieldInfo;
@@ -29,6 +32,16 @@ public class TableBuilder<TModel> : ViewBase, IStateless
         public string Header { get; set; } = Utils.LabelFor(name, fieldInfo?.FieldType ?? propertyInfo?.PropertyType);
         public string? Description { get; set; }
         public bool Removed { get; set; } = removed;
+        private readonly IBuilder<TModel> _initialBuilder = initialBuilder;
+        private readonly bool _initialRemoved = initialRemoved;
+        private readonly Align _initialAlign = initialAlign;
+
+        public void Reset()
+        {
+            Builder = _initialBuilder;
+            Removed = _initialRemoved;
+            Align = _initialAlign;
+        }
         public bool IsMultiLine { get; set; }
         public Align Align { get; set; } = align;
         public Size? Width { get; set; }
@@ -118,7 +131,7 @@ public class TableBuilder<TModel> : ViewBase, IStateless
 
             var removed = field.Name.StartsWith("_") && field.Name.Length > 1 && char.IsLetter(field.Name[1]);
 
-            var column = new TableBuilderColumn(field.Name, order++, cellBuilder, cellAlignment, field.FieldInfo, field.PropertyInfo, removed);
+            var column = new TableBuilderColumn(field.Name, order++, cellBuilder, cellAlignment, field.FieldInfo, field.PropertyInfo, removed, cellBuilder, removed, cellAlignment);
             column.Width = CalculateSmartDefaultWidth(column);
             _columns[field.Name] = column;
         }
@@ -281,9 +294,7 @@ public class TableBuilder<TModel> : ViewBase, IStateless
     {
         foreach (var field in _columns.Values)
         {
-            field.Removed = false;
-            field.Align = Shared.Align.Left;
-            field.Builder = _builderFactory.Text();
+            field.Reset();
         }
         return this;
     }

@@ -33,36 +33,25 @@ public class BasicPaginationApp : ViewBase
 }
 ```
 
-## Siblings
+## Configuration
 
-Siblings control the number of pages visible adjacent to the current page.
+You can configure the number of visible pages adjacent to the current page (siblings) and at the start/end of the range (boundaries).
 
-```csharp demo-tabs 
-public class SiblingsPaginationApp : ViewBase
+```csharp demo-tabs
+public class PaginationConfigurationApp : ViewBase
 {
     public override object? Build() {
         var page = UseState(5);
 
-        return Layout.Vertical()
-            | new Pagination(page.Value, 20, newPage => page.Set(newPage.Value)).Siblings(1)
-            | new Pagination(page.Value, 20, newPage => page.Set(newPage.Value)).Siblings(2);
-    }
-}
-```
-
-## Boundaries
-
-Boundaries control the number of pages visible at the start and end of the range of pages.
-
-```csharp demo-tabs 
-public class SiblingsPaginationApp : ViewBase
-{
-    public override object? Build() {
-        var page = UseState(5);
-
-        return Layout.Vertical()
-            | new Pagination(page.Value, 20, newPage => page.Set(newPage.Value)).Boundaries(1)
-            | new Pagination(page.Value, 20, newPage => page.Set(newPage.Value)).Boundaries(2);
+        return Layout.Vertical().Gap(4)
+            | Text.Large("Siblings")
+            | (Layout.Vertical()
+                | new Pagination(page.Value, 20, newPage => page.Set(newPage.Value)).Siblings(1)
+                | new Pagination(page.Value, 20, newPage => page.Set(newPage.Value)).Siblings(2))
+            | Text.Large("Boundaries")
+            | (Layout.Vertical()
+                | new Pagination(page.Value, 20, newPage => page.Set(newPage.Value)).Boundaries(1)
+                | new Pagination(page.Value, 20, newPage => page.Set(newPage.Value)).Boundaries(2));
     }
 }
 ```

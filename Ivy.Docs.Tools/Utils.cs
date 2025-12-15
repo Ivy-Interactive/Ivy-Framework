@@ -19,6 +19,7 @@ public static class Utils
         // Normalize the source path to handle cross-platform separators
         var normalizedSource = source.Replace('\\', '/');
         var sourceDir = Path.GetDirectoryName(normalizedSource) ?? "";
+        sourceDir = sourceDir.Replace('\\', '/');
 
         // Handle relative paths
         if (link.StartsWith("./"))
