@@ -1,2 +1,2 @@
 export { TextInputWidget } from './TextInputWidget';
-export type { TextInputWidgetProps, PrefixSuffix } from './types';
+export type { TextInputWidgetProps, Affix } from './types';

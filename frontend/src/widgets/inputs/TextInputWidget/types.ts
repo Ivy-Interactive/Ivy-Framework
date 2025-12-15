@@ -10,7 +10,7 @@ export enum TextInputVariant {
   Search = 'Search',
 }
 
-export interface PrefixSuffix {
+export interface Affix {
   icon?: string;
   text?: string;
 }
@@ -27,8 +27,8 @@ export interface TextInputWidgetProps {
   height?: string;
   shortcutKey?: string;
   scale?: Scales;
-  prefix?: PrefixSuffix;
-  suffix?: PrefixSuffix;
+  prefix?: Affix;
+  suffix?: Affix;
   maxLength?: number;
   'data-testid'?: string;
 }
