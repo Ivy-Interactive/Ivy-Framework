@@ -16,6 +16,10 @@ The Ivy frontend is a single-page React application built with TypeScript and Vi
 
 For information about the backend C# framework that defines widgets and handles business logic, see [Backend Architecture](./02_BackendArchitecture.md). For details on how frontend and backend communicate via SignalR, see [Communication](./03_Communication.md).
 
+<Callout Type="warn">
+This page is meant to be read by developers of Ivy-Framework. In production, you will not deal with code in this page. This helps understand how the frontend in Ivy works.
+</Callout>
+
 ## Technology Stack
 
 The Ivy frontend is built using modern web technologies optimized for development speed and runtime performance:
