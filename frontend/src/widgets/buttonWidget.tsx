@@ -209,24 +209,23 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
     </>
   );
 
-  // AI Button variant with rotating RGB border
   if (variant === 'Ai') {
-    const aiButtonContent =
-      hasUrl && validatedHref ? (
-        <a
-          href={validatedHref}
-          {...(isDownloadUrl || isMailto
-            ? {}
-            : { target: '_blank', rel: 'noopener noreferrer' })}
-          className="relative z-10 flex items-center gap-1"
-        >
-          {buttonContent}
-        </a>
-      ) : (
-        <span className="relative z-10 flex items-center gap-1">
-          {buttonContent}
-        </span>
-      );
+    // const aiButtonContent =
+    //   hasUrl && validatedHref ? (
+    //     <a
+    //       href={validatedHref}
+    //       {...(isDownloadUrl || isMailto
+    //         ? {}
+    //         : { target: '_blank', rel: 'noopener noreferrer' })}
+    //       className="relative z-10 flex items-center gap-1"
+    //     >
+    //       {buttonContent}
+    //     </a>
+    //   ) : (
+    //     <span className="relative z-10 flex items-center gap-1">
+    //       {buttonContent}
+    //     </span>
+    //   );
 
     // Determine border radius classes based on borderRadius prop
     const getBorderRadiusClass = () => {
@@ -241,10 +240,19 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
 
     const borderRadiusClasses = getBorderRadiusClass();
 
+    // Determine container height based on button size
+    const getContainerHeight = () => {
+      if (buttonSize === 'icon') return 'h-10';
+      if (buttonSize === 'sm') return 'h-9';
+      if (buttonSize === 'lg') return 'h-11';
+      return 'h-10';
+    };
+
     return (
       <div
         className={cn(
           'relative p-[2px] w-fit overflow-hidden',
+          getContainerHeight(),
           borderRadiusClasses.container,
           disabled && 'opacity-50'
         )}
@@ -263,23 +271,35 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
             ease: 'linear',
           }}
         />
-        <motion.button
-          onClick={hasUrl ? undefined : handleClick}
-          disabled={disabled}
+        <ButtonWithTooltip
+          asChild={hasUrl}
           style={styles}
+          size={buttonSize}
+          onClick={hasUrl ? undefined : handleClick}
+          variant={'ai'}
+          disabled={disabled}
           className={cn(
-            'relative flex items-center justify-center h-9 px-4 text-sm bg-background text-foreground font-medium cursor-pointer whitespace-nowrap',
-            borderRadiusClasses.button,
-            'disabled:cursor-not-allowed hover:bg-accent hover:text-accent-foreground',
-            buttonSize === 'sm' && 'h-8 px-3 text-xs',
-            buttonSize === 'lg' && 'h-10 px-8 text-base'
+            'relative z-10 flex items-center gap-1',
+            buttonSize !== 'icon' && 'w-min',
+            hasChildren &&
+              'p-2 h-auto items-start justify-start text-left inline-block'
           )}
-          whileTap={disabled ? undefined : { scale: 0.98 }}
+          tooltipText={tooltip || undefined}
           data-testid={dataTestId}
-          title={tooltip}
         >
-          {aiButtonContent}
-        </motion.button>
+          {hasUrl && validatedHref ? (
+            <a
+              href={validatedHref}
+              {...(isDownloadUrl || isMailto
+                ? {}
+                : { target: '_blank', rel: 'noopener noreferrer' })}
+            >
+              {buttonContent}
+            </a>
+          ) : (
+            buttonContent
+          )}
+        </ButtonWithTooltip>
       </div>
     );
   }
