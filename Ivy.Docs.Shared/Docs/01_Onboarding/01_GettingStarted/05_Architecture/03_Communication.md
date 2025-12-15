@@ -14,7 +14,7 @@ searchHints:
 The Ivy Framework uses SignalR to establish persistent WebSocket connections between the frontend and backend, enabling real-time bidirectional communication. The frontend sends widget events to the backend, while the backend sends widget tree updates, user interface commands, and system notifications to the frontend.
 </Ingress>
 
-For information about the frontend architecture and widget rendering system, see [Frontend Architecture](./01_FrontendArchitecture.md). For details about the backend server framework and application hosting, see [Backend Architecture](./02_BackendArchitecture.md).
+For information about the UI design system and theming, see [Framework Design](./01_FrameworkDesign.md). For details about the backend server framework and application hosting, see [Backend Architecture](./02_BackendArchitecture.md).
 
 ## Communication Architecture Overview
 
