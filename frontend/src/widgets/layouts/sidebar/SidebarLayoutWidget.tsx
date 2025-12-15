@@ -194,7 +194,7 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
         {showToggleButton && mainAppSidebar && (
           <button
             onClick={handleManualToggle}
-            className="absolute top-0 left-2 z-50 p-2 rounded-md bg-background hover:bg-muted hover:text-accent-foreground cursor-pointer"
+            className="absolute top-0 left-1 z-50 p-2 rounded-md bg-background hover:bg-muted hover:text-accent-foreground cursor-pointer"
             style={{ marginTop: '3px' }}
             aria-label={isSidebarOpen ? 'Close sidebar' : 'Open sidebar'}
           >
