@@ -6,7 +6,7 @@ import { InvalidIcon } from '@/components/InvalidIcon';
 import { Scales } from '@/types/scale';
 import { textInputSizeVariants } from '@/components/ui/input/text-input-variants';
 import { TextInputWidgetProps } from '../types';
-import { renderAffix } from '../utils/renderAffix';
+import { renderPrefixSuffix } from '../utils/renderPrefixSuffix';
 import {
   useCursorPosition,
   useEnterKeyBlur,
@@ -57,9 +57,9 @@ export const DefaultVariant: React.FC<DefaultVariantProps> = ({
 
   const shortcutDisplay = formatShortcutForDisplay(props.shortcutKey);
   const hasValue = props.value && props.value.toString().trim() !== '';
-  const prefixContent = renderAffix(props.prefix);
-  const suffixContent = renderAffix(props.suffix);
-  const hasAffixes = prefixContent || suffixContent;
+  const prefixContent = renderPrefixSuffix(props.prefix);
+  const suffixContent = renderPrefixSuffix(props.suffix);
+  const hasPrefixSuffix = prefixContent || suffixContent;
 
   return (
     <div className="relative w-full select-none" style={styles}>
@@ -100,7 +100,7 @@ export const DefaultVariant: React.FC<DefaultVariantProps> = ({
               'border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0',
               prefixContent && 'rounded-l-none',
               suffixContent && 'rounded-r-none',
-              !hasAffixes && 'rounded-md'
+              !hasPrefixSuffix && 'rounded-md'
             )}
             data-testid={props['data-testid']}
           />

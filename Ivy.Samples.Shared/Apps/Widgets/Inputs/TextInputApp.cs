@@ -78,8 +78,8 @@ public class TextInputApp : SampleBase
                   | withValue.ToSearchInput().Invalid("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec eros")
                )
 
-                | Text.H2("Affixes")
-                | CreateAffixSection()
+                | Text.H2("Prefix/Suffix")
+                | CreatePrefixSuffixSection()
 
                //Data Binding:
 
@@ -140,7 +140,7 @@ public class TextInputApp : SampleBase
                | searchState.ToSearchInput().Large();
     }
 
-    private object CreateAffixSection()
+    private object CreatePrefixSuffixSection()
     {
         var textState = UseState("example");
         var nullableState = UseState<string?>((string?)null);
