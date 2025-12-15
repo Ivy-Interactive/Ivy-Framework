@@ -14,8 +14,8 @@ public record Affix
     public Icons? Icon { get; init; }
     public string? Text { get; init; }
 
-    public static Affix ToIcon(Icons icon) => new() { Icon = icon };
-    public static Affix ToText(string text) => new() { Text = text };
+    public static Affix Icon(Icons icon) => new() { Icon = icon };
+    public static Affix Text(string text) => new() { Text = text };
 }
 
 public enum TextInputs
@@ -153,16 +153,16 @@ public static class TextInputExtensions
     public static TextInputBase MaxLength(this TextInputBase widget, int maxLength) => widget with { MaxLength = maxLength };
 
     public static TextInputBase Prefix(this TextInputBase widget, string prefixText)
-        => widget with { Prefix = Affix.ToText(prefixText) };
+        => widget with { Prefix = Affix.Text(prefixText) };
 
     public static TextInputBase Prefix(this TextInputBase widget, Icons prefixIcon)
-        => widget with { Prefix = Affix.ToIcon(prefixIcon) };
+        => widget with { Prefix = Affix.Icon(prefixIcon) };
 
     public static TextInputBase Suffix(this TextInputBase widget, string suffixText)
-        => widget with { Suffix = Affix.ToText(suffixText) };
+        => widget with { Suffix = Affix.Text(suffixText) };
 
     public static TextInputBase Suffix(this TextInputBase widget, Icons suffixIcon)
-        => widget with { Suffix = Affix.ToIcon(suffixIcon) };
+        => widget with { Suffix = Affix.Icon(suffixIcon) };
 
     [OverloadResolutionPriority(1)]
     public static TextInputBase HandleBlur(this TextInputBase widget, Func<Event<IAnyInput>, ValueTask> onBlur)
