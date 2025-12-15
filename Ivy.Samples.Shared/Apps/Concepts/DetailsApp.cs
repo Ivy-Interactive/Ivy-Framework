@@ -78,18 +78,18 @@ public class DetailsApp : SampleBase
         };
 
         return Layout.Vertical().Gap(2)
-                | Text.H1("Details Size")
+                | Text.H1("Details Scale")
                 | (Layout.Horizontal().Gap(2)
                     | (Layout.Vertical()
-                        | Text.Label("Small Size").Bold()
+                        | Text.Label("Small Scale").Bold()
                         | new Card(record_small.ToDetails().RemoveEmpty().Small())
                         | new Card(record_2.ToDetails().MultiLine(x => x.LastName).RemoveEmpty().Small()))
                     | (Layout.Vertical()
-                        | Text.Label("Medium Size").Bold()
+                        | Text.Label("Medium Scale").Bold()
                         | new Card(record.ToDetails().RemoveEmpty())
                         | new Card(record_2.ToDetails().MultiLine(x => x.LastName).RemoveEmpty()))
                     | (Layout.Vertical()
-                        | Text.Label("Large Size").Bold()
+                        | Text.Label("Large Scale").Bold()
                         | new Card(record_large.ToDetails().RemoveEmpty().Large())
                         | new Card(record_2.ToDetails().MultiLine(x => x.LastName).RemoveEmpty().Large())))
                 ;
