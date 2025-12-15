@@ -162,6 +162,7 @@ const PieChartWidget: React.FC<PieChartWidgetProps> = ({
       ),
       tooltip: {
         trigger: 'item',
+        appendToBody: true,
         formatter: '{a} <br/>{b}: {c} ({d}%)',
         animated: tooltip?.animated ?? true,
         textStyle: generateTextStyle(

@@ -292,6 +292,7 @@ export const generateTooltip = (
   themeColors?: { foreground: string; fontSans: string; background: string }
 ) => ({
   trigger: 'axis',
+  appendToBody: true,
   axisPointer: {
     type: type ?? 'cross',
     animated: tooltip?.animated ?? true,
