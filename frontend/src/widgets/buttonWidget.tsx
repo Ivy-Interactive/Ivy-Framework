@@ -210,23 +210,6 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
   );
 
   if (variant === 'Ai') {
-    // const aiButtonContent =
-    //   hasUrl && validatedHref ? (
-    //     <a
-    //       href={validatedHref}
-    //       {...(isDownloadUrl || isMailto
-    //         ? {}
-    //         : { target: '_blank', rel: 'noopener noreferrer' })}
-    //       className="relative z-10 flex items-center gap-1"
-    //     >
-    //       {buttonContent}
-    //     </a>
-    //   ) : (
-    //     <span className="relative z-10 flex items-center gap-1">
-    //       {buttonContent}
-    //     </span>
-    //   );
-
     // Determine border radius classes based on borderRadius prop
     const getBorderRadiusClass = () => {
       if (borderRadius === 'Full') {
@@ -235,24 +218,24 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
       if (borderRadius === 'Rounded') {
         return { container: 'rounded-lg', button: 'rounded-md' };
       }
-      return { container: 'rounded-lg', button: 'rounded-[6px]' };
+      return { container: 'rounded-none', button: 'rounded-md' };
     };
 
     const borderRadiusClasses = getBorderRadiusClass();
 
     // Determine container height based on button size
     const getContainerHeight = () => {
-      if (buttonSize === 'icon') return 'h-10';
-      if (buttonSize === 'sm') return 'h-9';
-      if (buttonSize === 'lg') return 'h-11';
-      return 'h-10';
+      if (buttonSize === 'icon') return { container: 'h-10', button: 'h-9' };
+      if (buttonSize === 'sm') return { container: 'h-9', button: 'h-[35px]' };
+      if (buttonSize === 'lg') return { container: 'h-11', button: 'h-10' };
+      return { container: 'h-10', button: 'h-9' };
     };
 
     return (
       <div
         className={cn(
           'relative p-[2px] w-fit overflow-hidden',
-          getContainerHeight(),
+          getContainerHeight().container,
           borderRadiusClasses.container,
           disabled && 'opacity-50'
         )}
@@ -263,6 +246,7 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
           style={{
             background:
               'conic-gradient(from 0deg, #ff0000, #ff8000, #ffff00, #80ff00, #00ff00, #00ff80, #00ffff, #0080ff, #0000ff, #8000ff, #ff00ff, #ff0080, #ff0000)',
+            filter: 'blur(10px)',
           }}
           animate={{ rotate: 360 }}
           transition={{
@@ -273,13 +257,14 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
         />
         <ButtonWithTooltip
           asChild={hasUrl}
-          style={styles}
           size={buttonSize}
           onClick={hasUrl ? undefined : handleClick}
           variant={'ai'}
           disabled={disabled}
           className={cn(
             'relative z-10 flex items-center gap-1',
+            getContainerHeight().button,
+            borderRadiusClasses.button,
             buttonSize !== 'icon' && 'w-min',
             hasChildren &&
               'p-2 h-auto items-start justify-start text-left inline-block'
