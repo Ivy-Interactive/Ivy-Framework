@@ -69,7 +69,7 @@ public class PasswordCaptureDemo: ViewBase
 
 ### TextArea
 
-When a multiline text is needed, `TextInputs.Textarea` variant should be used. A common use-case is for capturing address
+When a multiline text is needed, `TextInputs.TextArea` variant should be used. A common use-case is for capturing address
 that typically spans over multiple lines. The following demo shows how to use it.
 
 See it in action here.
@@ -82,7 +82,7 @@ public class CaptureAddressDemo: ViewBase
         var address = UseState("");
         return new TextInput(address)
                                .Placeholder("Åkervägen 9, \n132 39 Saltsjö-Boo, \nSweden")
-                               .Variant(TextInputs.Textarea)
+                               .Variant(TextInputs.TextArea)
                                .Height(30)
                                .Width(100)
                                .WithField()
@@ -331,7 +331,7 @@ public class ShortCutDemo : ViewBase
                 | new TextInput(message)
                       .Placeholder("Message (Ctrl+M)")
                       .ShortcutKey("Ctrl+M")
-                      .Variant(TextInputs.Textarea);
+                      .Variant(TextInputs.TextArea);
     }
 }
 ```

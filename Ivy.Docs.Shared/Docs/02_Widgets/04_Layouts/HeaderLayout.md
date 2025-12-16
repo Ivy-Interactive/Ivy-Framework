@@ -236,7 +236,7 @@ public class FormHeaderExample : ViewBase
                     | Text.Small("Personal Information")
                     | name.ToTextInput().Placeholder("Full Name")
                     | email.ToTextInput().Placeholder("Email")
-                    | bio.ToTextInput().Placeholder("Bio").Variant(TextInputs.Textarea)
+                    | bio.ToTextInput().Placeholder("Bio").Variant(TextInputs.TextArea)
             )
             | new Card(
                 Layout.Vertical().Gap(3)

@@ -14,7 +14,7 @@ namespace Ivy;
 public enum TextInputs
 {
     Text,
-    Textarea,
+    TextArea,
     Email,
     Tel,
     Url,
@@ -121,7 +121,7 @@ public static class TextInputExtensions
         return input;
     }
 
-    public static TextInputBase ToTextAreaInput(this IAnyState state, string? placeholder = null, bool disabled = false) => state.ToTextInput(placeholder, disabled, TextInputs.Textarea);
+    public static TextInputBase ToTextAreaInput(this IAnyState state, string? placeholder = null, bool disabled = false) => state.ToTextInput(placeholder, disabled, TextInputs.TextArea);
 
     public static TextInputBase ToSearchInput(this IAnyState state, string? placeholder = null, bool disabled = false) => state.ToTextInput(placeholder, disabled, TextInputs.Search);
 

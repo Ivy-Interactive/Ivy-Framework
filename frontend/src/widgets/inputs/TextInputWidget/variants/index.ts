@@ -1,4 +1,4 @@
 export { DefaultVariant } from './DefaultVariant';
-export { TextareaVariant } from './TextareaVariant';
+export { TextAreaVariant } from './TextAreaVariant';
 export { PasswordVariant } from './PasswordVariant';
 export { SearchVariant } from './SearchVariant';

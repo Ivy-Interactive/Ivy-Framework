@@ -2,7 +2,7 @@ import { Scales } from '@/types/scale';
 
 export enum TextInputVariant {
   Text = 'Text',
-  Textarea = 'Textarea',
+  TextArea = 'TextArea',
   Email = 'Email',
   Tel = 'Tel',
   Url = 'Url',

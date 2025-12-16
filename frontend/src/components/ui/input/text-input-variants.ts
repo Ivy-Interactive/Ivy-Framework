@@ -15,7 +15,7 @@ export const textInputSizeVariants = cva('w-full', {
 });
 
 // Size variants for TextArea
-export const textareaSizeVariants = cva('w-full', {
+export const textAreaSizeVariants = cva('w-full', {
   variants: {
     scale: {
       Small: 'text-xs px-2 min-h-15',

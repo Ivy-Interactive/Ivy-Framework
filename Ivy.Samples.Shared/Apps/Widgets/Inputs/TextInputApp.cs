@@ -110,7 +110,7 @@ public class TextInputApp : SampleBase
     {
         var textState = UseState("Hello");
         var passwordState = UseState("Hello");
-        var textareaState = UseState("Hello");
+        var textAreaState = UseState("Hello");
         var searchState = UseState("Hello");
 
         return Layout.Grid().Columns(4)
@@ -130,9 +130,9 @@ public class TextInputApp : SampleBase
                | passwordState.ToPasswordInput().Large()
 
                | Text.InlineCode("TextInputs.TextArea")
-               | textareaState.ToTextAreaInput().Small()
-               | textareaState.ToTextAreaInput()
-               | textareaState.ToTextAreaInput().Large()
+               | textAreaState.ToTextAreaInput().Small()
+               | textAreaState.ToTextAreaInput()
+               | textAreaState.ToTextAreaInput().Large()
 
                | Text.InlineCode("TextInputs.Search")
                | searchState.ToSearchInput().Small()

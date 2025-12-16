@@ -5,7 +5,7 @@ import { TextInputWidgetProps, TextInputVariant } from './types';
 import { useSyncServerValue, useShortcutKey } from './hooks';
 import {
   DefaultVariant,
-  TextareaVariant,
+  TextAreaVariant,
   PasswordVariant,
   SearchVariant,
 } from './variants';
@@ -109,9 +109,9 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
           scale={scale}
         />
       );
-    case TextInputVariant.Textarea:
+    case TextInputVariant.TextArea:
       return (
-        <TextareaVariant
+        <TextAreaVariant
           props={commonProps}
           onChange={handleChange}
           onBlur={handleBlur}

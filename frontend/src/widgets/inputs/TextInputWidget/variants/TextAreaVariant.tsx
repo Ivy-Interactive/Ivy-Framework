@@ -1,10 +1,10 @@
 import React from 'react';
-import { Textarea } from '@/components/ui/textarea';
+import { TextArea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { getWidth, getHeight, inputStyles } from '@/lib/styles';
 import { InvalidIcon } from '@/components/InvalidIcon';
 import { Scales } from '@/types/scale';
-import { textareaSizeVariants } from '@/components/ui/input/text-input-variants';
+import { textAreaSizeVariants } from '@/components/ui/input/text-input-variants';
 import { TextInputWidgetProps } from '../types';
 import {
   useCursorPosition,
@@ -12,7 +12,7 @@ import {
   formatShortcutForDisplay,
 } from '../hooks';
 
-interface TextareaVariantProps {
+interface TextAreaVariantProps {
   props: Omit<TextInputWidgetProps, 'variant'>;
   onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   onBlur: (e: React.FocusEvent<HTMLTextAreaElement>) => void;
@@ -23,7 +23,7 @@ interface TextareaVariantProps {
   scale?: Scales;
 }
 
-export const TextareaVariant: React.FC<TextareaVariantProps> = ({
+export const TextAreaVariant: React.FC<TextAreaVariantProps> = ({
   props,
   onChange,
   onBlur,
@@ -57,7 +57,7 @@ export const TextareaVariant: React.FC<TextareaVariantProps> = ({
 
   return (
     <div className="relative w-full select-none" style={styles}>
-      <Textarea
+      <TextArea
         ref={elementRef as React.RefObject<HTMLTextAreaElement>}
         id={props.id}
         placeholder={props.placeholder}
@@ -69,7 +69,7 @@ export const TextareaVariant: React.FC<TextareaVariantProps> = ({
         onFocus={onFocus}
         onPaste={handlePaste}
         className={cn(
-          textareaSizeVariants({ scale }),
+          textAreaSizeVariants({ scale }),
           props.invalid && inputStyles.invalidInput,
           props.invalid && 'pr-8',
           props.shortcutKey && !isFocused && !hasValue && 'pr-16'

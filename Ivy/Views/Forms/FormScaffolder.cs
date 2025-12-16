@@ -120,7 +120,7 @@ internal static class FormScaffolder
 
                 if (field.HasDataTypeAttribute(DataType.MultilineText))
                 {
-                    input = input.Variant(TextInputs.Textarea);
+                    input = input.Variant(TextInputs.TextArea);
                 }
 
                 return input;

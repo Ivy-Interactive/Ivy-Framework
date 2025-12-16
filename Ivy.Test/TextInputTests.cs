@@ -74,7 +74,7 @@ public class TextInputTests
 
     [Theory]
     [InlineData(TextInputs.Text)]
-    [InlineData(TextInputs.Textarea)]
+    [InlineData(TextInputs.TextArea)]
     [InlineData(TextInputs.Email)]
     [InlineData(TextInputs.Tel)]
     [InlineData(TextInputs.Url)]
