@@ -23,7 +23,7 @@ export const ListItemWidget: React.FC<ListItemWidgetProps> = ({
   return (
     <button
       onClick={() => eventHandler('OnClick', id, [])}
-      className="pl-4 pr-4 w-full h-full flex-left flex items-center rounded-none hover:bg-accent focus:bg-accent focus:outline-none cursor-pointer min-w-0"
+      className="pl-2 pr-2 py-2 w-full h-full flex-left flex items-center rounded-none hover:bg-accent focus:bg-accent focus:outline-none cursor-pointer min-w-0"
     >
       <div className="flex flex-col items-start text-body w-full flex-1 min-w-0 text-left">
         <span className="block w-full truncate text-left">{title}</span>

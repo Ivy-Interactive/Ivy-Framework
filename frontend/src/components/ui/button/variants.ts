@@ -21,6 +21,7 @@ export const buttonVariants = cva(
         ghost: 'hover:bg-accent',
         link: 'text-primary underline-offset-4 hover:underline brightness-90 hover:brightness-100',
         inline: 'text-primary underline hover:no-underline !p-0 !h-auto',
+        ai: 'bg-background  hover:bg-accent hover:text-accent-foreground',
       },
       size: {
         default: 'h-9 px-4 py-2 text-sm',

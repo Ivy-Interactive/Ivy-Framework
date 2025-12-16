@@ -108,34 +108,29 @@ new DropDownMenu(@evt => client.Toast("Selected: " + @evt.Value),
         )
 ```
 
-## Positioning Options
-
-### Side Positioning
+## Positioning
 
 Control which side of the trigger the menu appears on:
 
 ```csharp demo-tabs
-Layout.Vertical().Gap(2)
-    | Text.H4("Side Positioning")
-    | Text.P("Control which side of the trigger button the menu appears on:")
-    | (Layout.Horizontal().Gap(2).Center()
-        | new DropDownMenu(@evt => client.Toast("Selected: " + @evt.Value), 
-            new Button("Top"), MenuItem.Default("Item 1"), MenuItem.Default("Item 2"))
-            .Top()
-        | new DropDownMenu(@evt => client.Toast("Selected: " + @evt.Value), 
-            new Button("Right"), MenuItem.Default("Item 1"), MenuItem.Default("Item 2"))
-            .Right()
-        | new DropDownMenu(@evt => client.Toast("Selected: " + @evt.Value), 
-            new Button("Bottom"), MenuItem.Default("Item 1"), MenuItem.Default("Item 2"))
-            .Bottom()
-        | new DropDownMenu(@evt => client.Toast("Selected: " + @evt.Value), 
-            new Button("Left"), MenuItem.Default("Item 1"), MenuItem.Default("Item 2"))
-            .Left())
+Layout.Horizontal().Gap(2).Center()
+    | new DropDownMenu(@evt => client.Toast("Selected: " + @evt.Value), 
+        new Button("Top"), MenuItem.Default("Item 1"), MenuItem.Default("Item 2"))
+        .Top()
+    | new DropDownMenu(@evt => client.Toast("Selected: " + @evt.Value), 
+        new Button("Right"), MenuItem.Default("Item 1"), MenuItem.Default("Item 2"))
+        .Right()
+    | new DropDownMenu(@evt => client.Toast("Selected: " + @evt.Value), 
+        new Button("Bottom"), MenuItem.Default("Item 1"), MenuItem.Default("Item 2"))
+        .Bottom()
+    | new DropDownMenu(@evt => client.Toast("Selected: " + @evt.Value), 
+        new Button("Left"), MenuItem.Default("Item 1"), MenuItem.Default("Item 2"))
+        .Left()
 ```
 
 ## Advanced Features
 
-### Headers
+### Menu Headers
 
 Headers provide context and user information, making menus more informative and professional-looking.
 
@@ -156,7 +151,7 @@ Layout.Horizontal().Gap(2).Center()
         .Header(Text.Label("John Doe - Administrator"))
 ```
 
-### Button Integration
+### Fluent Syntax
 
 The `WithDropDown` extension method provides a clean, fluent API for quickly adding dropdown functionality to existing buttons.
 

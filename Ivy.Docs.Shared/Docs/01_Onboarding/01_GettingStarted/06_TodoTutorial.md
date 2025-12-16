@@ -173,4 +173,4 @@ services:
      lifetime: Scoped
 ```
 
-You can find the source code for the app at <https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy.Samples.Shared/Apps/Demos/TodosApp.cs>.
+You can find the source code for the app at [GitHub](https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy.Samples.Shared/Apps/Demos/TodosApp.cs).

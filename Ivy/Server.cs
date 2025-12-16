@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Ivy.Shared;
 using System.Reflection;
 using System.Text;
@@ -513,7 +514,7 @@ public class Server
             var localUrl = $"http://localhost:{port}";
             if (!_args.Silent)
             {
-                Console.WriteLine($@"Ivy is running on {localUrl}. Press Ctrl+C to stop.");
+                Console.WriteLine($@"Ivy is running on {localUrl} [{Process.GetCurrentProcess().Id}]. Press Ctrl+C to stop.");
             }
             if (_args.Browse)
             {

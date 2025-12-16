@@ -423,7 +423,8 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
                 new SidebarNews("https://ivy.app/news.json"),
                 settings.Footer,
                 footer
-            )
+            ),
+            settings.Width
         ).MainAppSidebar(true);
     }
 }

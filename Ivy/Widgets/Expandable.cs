@@ -17,7 +17,7 @@ public record Expandable : WidgetBase<Expandable>
 
 public static class ExpandableExtensions
 {
-    public static Expandable Disabled(this Expandable widget, bool disabled)
+    public static Expandable Disabled(this Expandable widget, bool disabled = true)
     {
         widget.Disabled = disabled;
         return widget;

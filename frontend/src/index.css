@@ -80,25 +80,6 @@
     --font-serif: 'Geist';
     --font-mono: 'Geist Mono';
 
-    /* Chromatic color palette for charts and UI elements */
-    --red: #dd5860;
-    --orange: #dc824d;
-    --amber: #deb145;
-    --yellow: #e5e04c;
-    --lime: #afd953;
-    --green: #86d26f;
-    --emerald: #76cd94;
-    --teal: #5b9ba8;
-    --cyan: #4469c0;
-    --sky: #373bda;
-    --blue: #381ff4;
-    --indigo: #4b28e2;
-    --violet: #6637d1;
-    --purple: #844cc0;
-    --fuchsia: #a361af;
-    --pink: #c377a0;
-    --rose: #e48e91;
-
     /* Additional variables not in design system yet */
     --toolbox: #38363a;
     --spacing: 0.27rem;
@@ -118,7 +99,6 @@
     --shadow-2xl: 0 1px 3px 0px hsl(0 0% 0% / 0.25);
   }
 
-  /* Dark theme variables now come from design system dark-flat.css import */
   .dark {
     /* Additional dark theme overrides not in design system yet */
     --toolbox: #edeaf1;
@@ -151,6 +131,58 @@
     --color-border: var(--border);
     --color-input: var(--input);
     --color-ring: var(--ring);
+
+    /* Neutral colors - reference CSS variables injected by the backend */
+    --color-black: var(--black);
+    --color-black-foreground: var(--black-foreground);
+    --color-white: var(--white);
+    --color-white-foreground: var(--white-foreground);
+    --color-slate: var(--slate);
+    --color-slate-foreground: var(--slate-foreground);
+    --color-gray: var(--gray);
+    --color-gray-foreground: var(--gray-foreground);
+    --color-zinc: var(--zinc);
+    --color-zinc-foreground: var(--zinc-foreground);
+    --color-neutral: var(--neutral);
+    --color-neutral-foreground: var(--neutral-foreground);
+    --color-stone: var(--stone);
+    --color-stone-foreground: var(--stone-foreground);
+
+    /* Chromatic colors - reference CSS variables injected by the backend */
+    --color-red: var(--red);
+    --color-red-foreground: var(--red-foreground);
+    --color-orange: var(--orange);
+    --color-orange-foreground: var(--orange-foreground);
+    --color-amber: var(--amber);
+    --color-amber-foreground: var(--amber-foreground);
+    --color-yellow: var(--yellow);
+    --color-yellow-foreground: var(--yellow-foreground);
+    --color-lime: var(--lime);
+    --color-lime-foreground: var(--lime-foreground);
+    --color-green: var(--green);
+    --color-green-foreground: var(--green-foreground);
+    --color-emerald: var(--emerald);
+    --color-emerald-foreground: var(--emerald-foreground);
+    --color-teal: var(--teal);
+    --color-teal-foreground: var(--teal-foreground);
+    --color-cyan: var(--cyan);
+    --color-cyan-foreground: var(--cyan-foreground);
+    --color-sky: var(--sky);
+    --color-sky-foreground: var(--sky-foreground);
+    --color-blue: var(--blue);
+    --color-blue-foreground: var(--blue-foreground);
+    --color-indigo: var(--indigo);
+    --color-indigo-foreground: var(--indigo-foreground);
+    --color-violet: var(--violet);
+    --color-violet-foreground: var(--violet-foreground);
+    --color-purple: var(--purple);
+    --color-purple-foreground: var(--purple-foreground);
+    --color-fuchsia: var(--fuchsia);
+    --color-fuchsia-foreground: var(--fuchsia-foreground);
+    --color-pink: var(--pink);
+    --color-pink-foreground: var(--pink-foreground);
+    --color-rose: var(--rose);
+    --color-rose-foreground: var(--rose-foreground);
 
     /* Typography */
     --text-body: 14px;

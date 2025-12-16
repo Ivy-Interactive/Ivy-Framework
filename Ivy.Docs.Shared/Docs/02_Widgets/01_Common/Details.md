@@ -85,15 +85,7 @@ new { Name = "John Doe", Website = "https://example.com" }
     .Builder(x => x.Website, b => b.Link())
 ```
 
-### Text Formatting
 
-Control how text values are displayed. Use this when you want to ensure consistent text formatting or apply specific styling to text fields:
-
-```csharp demo-tabs
-new { Name = "John Doe", Description = "Long description" }
-    .ToDetails()
-    .Builder(x => x.Description, b => b.Text())
-```
 
 ## Nested Objects
 

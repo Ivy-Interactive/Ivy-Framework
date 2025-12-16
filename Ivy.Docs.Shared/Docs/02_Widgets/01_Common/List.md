@@ -37,78 +37,43 @@ public class BasicListDemo : ViewBase
 }
 ```
 
-## ListItem Properties
+## ListItem Configuration
 
-### Title and Subtitle
-
-Each `ListItem` can have a title and subtitle for hierarchical information display:
+`ListItem`s are highly customizable, supporting titles, subtitles, icons, and badges.
 
 ```csharp demo-tabs
-public class TitleSubtitleDemo : ViewBase
+public class ListConfigDemo : ViewBase
 {
     public override object? Build()
     {
-        var users = new[]
-        {
-            new ListItem("John Doe", subtitle: "Software Engineer"),
-            new ListItem("Jane Smith", subtitle: "Product Manager"),
-            new ListItem("Bob Johnson", subtitle: "Designer"),
-            new ListItem("Alice Brown", subtitle: "Developer")
-        };
-        
-        return new List(users);
-    }
-}
-```
-
-### Icons
-
-Add visual indicators with icons to make lists more intuitive:
-
-```csharp demo-tabs
-public class IconListDemo : ViewBase
-{
-    public override object? Build()
-    {
-        var menuItems = new[]
-        {
-            new ListItem("Dashboard", icon: Icons.House, subtitle: "Main overview"),
-            new ListItem("Users", icon: Icons.Users, subtitle: "Manage users"),
-            new ListItem("Settings", icon: Icons.Settings, subtitle: "Configuration"),
-            new ListItem("Reports", icon: Icons.ChartBar, subtitle: "Analytics")
-        };
-        
-        return new List(menuItems);
-    }
-}
-```
-
-### Badges
-
-Use badges to show additional information like counts, status, or labels:
-
-```csharp demo-tabs
-public class BadgeListDemo : ViewBase
-{
-    public override object? Build()
-    {
-        var notifications = new[]
-        {
-            new ListItem("New Message", subtitle: "From John Doe", badge: "3"),
-            new ListItem("System Update", subtitle: "Available now", badge: "!"),
-            new ListItem("Task Reminder", subtitle: "Due tomorrow", badge: "5")
-        };
-        
-        return new List(notifications);
+        return Layout.Vertical().Gap(4)
+            | Text.Large("Title and Subtitle")
+            | new List(new[]
+            {
+                new ListItem("John Doe", subtitle: "Software Engineer"),
+                new ListItem("Jane Smith", subtitle: "Product Manager")
+            })
+            | Text.Large("Icons")
+            | new List(new[]
+            {
+                new ListItem("Dashboard", icon: Icons.House, subtitle: "Main overview"),
+                new ListItem("Settings", icon: Icons.Settings, subtitle: "Configuration")
+            })
+            | Text.Large("Badges")
+            | new List(new[]
+            {
+                new ListItem("New Message", subtitle: "From John Doe", badge: "3"),
+                new ListItem("System Update", subtitle: "Available now", badge: "!")
+            });
     }
 }
 ```
 
 ## Interactive Lists
 
-### Clickable Items
+Make list items interactive with click handlers and dynamic updates.
 
-Make list items interactive by adding click handlers:
+### Clickable Items
 
 ```csharp demo-tabs
 public class InteractiveListDemo : ViewBase
@@ -136,7 +101,7 @@ public class InteractiveListDemo : ViewBase
 
 ### Dynamic Content
 
-Create lists from dynamic data sources:
+Create lists from dynamic data sources using `UseState`.
 
 ```csharp demo-tabs
 public class DynamicListDemo : ViewBase
@@ -206,26 +171,19 @@ public class SearchableListDemo : ViewBase
 
 ## Examples
 
-<Details>
-<Summary>
-Custom Item Rendering
-</Summary>
-<Body>
-Use the `items` parameter to create complex list items with custom layouts:
-
 ```csharp demo-tabs
-public class CustomItemDemo : ViewBase
+public class ExamplesListDemo : ViewBase
 {
     public override object? Build()
     {
+        // Custom Item Rendering Data
         var products = new[]
         {
             new { Name = "Laptop", Price = 999.99m, Stock = 15 },
-            new { Name = "Mouse", Price = 29.99m, Stock = 50 },
-            new { Name = "Keyboard", Price = 89.99m, Stock = 25 }
+            new { Name = "Mouse", Price = 29.99m, Stock = 50 }
         };
         
-        var listItems = products.Select(product => new ListItem(
+        var customItems = products.Select(product => new ListItem(
             title: product.Name,
             subtitle: $"${product.Price} - {product.Stock} in stock",
             items: new object[]
@@ -235,97 +193,18 @@ public class CustomItemDemo : ViewBase
                     | new Badge(product.Stock.ToString()).Variant(BadgeVariant.Secondary)
             }
         ));
-        
-        return new List(listItems);
+
+        // Time Rendering Data
+        var timeItem = new ListItem(
+            title: "Task created",
+            subtitle: $"Created at {DateTime.Now:HH:mm:ss}"
+        );
+
+        return Layout.Vertical().Gap(4)
+            | Text.Large("Custom Item Rendering")
+            | new List(customItems)
+            | Text.Large("Time Rendering")
+            | new List(new[] { timeItem });
     }
 }
 ```
-
-</Body>
-</Details>
-
-<Details>
-<Summary>
-Simple Dynamic List
-</Summary>
-<Body>
-A basic example showing how to add and remove list items:
-
-```csharp demo-tabs
-public class SimpleListDemo : ViewBase
-{
-    public override object? Build()
-    {
-        var items = UseState(new[] { "First Item" });
-        
-        var addItem = new Action<Event<Button>>(e =>
-        {
-            var newItems = items.Value.Append($"Item {items.Value.Length + 1}").ToArray();
-            items.Set(newItems);
-        });
-        
-        var removeItem = new Action<Event<Button>>(e =>
-        {
-            if (items.Value.Length > 1)
-            {
-                var newItems = items.Value.Take(items.Value.Length - 1).ToArray();
-                items.Set(newItems);
-            }
-        });
-        
-        var listItems = items.Value.Select(item => new ListItem(item));
-        
-        return Layout.Vertical().Gap(2)
-            | (Layout.Horizontal().Gap(2)
-                | new Button("Add Item", addItem)
-                | new Button("Remove Item", removeItem))
-            | new List(listItems);
-    }
-}
-```
-
-</Body>
-</Details>
-
-<Details>
-<Summary>
-List with Time Rendering
-</Summary>
-<Body>
-Show when each item was created:
-
-```csharp demo-tabs
-public class TimeListDemo : ViewBase
-{
-    public override object? Build()
-    {
-        var items = UseState(new[] { new { Text = "Item 1", CreatedAt = DateTime.Now } });
-        
-        var addItem = new Action<Event<Button>>(e =>
-        {
-            var newItem = new { Text = $"Item {items.Value.Length + 1}", CreatedAt = DateTime.Now };
-            var newItems = items.Value.Append(newItem).ToArray();
-            items.Set(newItems);
-        });
-        
-        var clearItems = new Action<Event<Button>>(e =>
-        {
-            items.Set(new[] { new { Text = "Item 1", CreatedAt = DateTime.Now } });
-        });
-        
-        var listItems = items.Value.Select(item => new ListItem(
-            title: item.Text,
-            subtitle: $"Created at {item.CreatedAt:HH:mm:ss}"
-        ));
-        
-        return Layout.Vertical().Gap(2)
-            | (Layout.Horizontal().Gap(2)
-                | new Button("Add Item", addItem)
-                | new Button("Clear All", clearItems).Variant(ButtonVariant.Destructive))
-            | new List(listItems);
-    }
-}
-```
-
-</Body>
-</Details>

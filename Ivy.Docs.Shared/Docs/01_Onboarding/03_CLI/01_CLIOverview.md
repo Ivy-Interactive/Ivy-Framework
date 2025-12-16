@@ -39,7 +39,7 @@ You can always see all available commands by using `ivy --help`.
 
 ## Key Features
 
-### 🗄️ Database Support
+### Database Support
 
 - **SQL Server** - Microsoft's enterprise database
 - **PostgreSQL** - Advanced open-source database
@@ -52,14 +52,14 @@ You can always see all available commands by using `ivy --help`.
 - **ClickHouse** - Column-oriented database
 - **Snowflake** - Cloud data platform
 
-### 🔐 Authentication Providers
+### Authentication Providers
 
 - **Auth0** - Universal authentication platform
 - **Supabase Auth** - Built-in authentication
 - **Authelia** - Open-source identity provider
 - **Basic Auth** - Simple username/password authentication
 
-### ☁️ Deployment Options
+### Deployment Options
 
 - **AWS** - Amazon Web Services
 - **Azure** - Microsoft Azure
@@ -100,7 +100,7 @@ Most Ivy commands require authentication. Use `ivy login` to authenticate with y
 
 For detailed information on each feature, see the specific documentation files:
 
-- [Init.md](Init.md) - Project initialization guide
-- [DatabaseIntegration/01_DatabaseOverview.md](DatabaseIntegration/01_DatabaseOverview.md) - Database integration guide
-- [Authentication/01_AuthenticationOverview.md](Authentication/01_AuthenticationOverview.md) - Authentication setup guide
-- [Deploy.md](Deploy.md) - Deployment guide
+- [Project Initialization](Init.md)
+- [Database Integration](DatabaseIntegration/01_DatabaseOverview.md)
+- [Authentication Setup](Authentication/01_AuthenticationOverview.md)
+- [Deployment Guide](Deploy.md)
