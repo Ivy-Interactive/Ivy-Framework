@@ -2,176 +2,294 @@
 searchHints:
   - design system
   - theming
-  - colors
-  - typography
-  - styling
-  - ui framework
+  - css variables
+  - tokens
+  - styling internals
 ---
 
 # Framework Design
 
 <Ingress>
-Ivy provides a complete UI framework with a modern design system, accessible components, and flexible theming. You write C# code, and Ivy handles rendering a polished, responsive interface.
+A technical deep-dive into how Ivy's design system and theming architecture works under the hood - from token generation to CSS injection.
 </Ingress>
 
-For information about the backend C# framework, see [Backend Architecture](./02_BackendArchitecture.md). For details on real-time communication, see [Communication](./03_Communication.md).
+This page is for developers who want to understand the internals of Ivy's UI framework. For basic theming usage, see [Theming](../../02_Concepts/Theming.md).
 
-## Design Philosophy
+## Architecture Overview
 
-Ivy is built around a few core principles:
+Ivy's design system follows a token-based architecture where design decisions are centralized and distributed to the frontend via CSS custom properties:
 
-| Principle | What It Means |
-| --- | --- |
-| **C# First** | You never write frontend code - all UI is defined in C# |
-| **Accessible by Default** | Components use Radix UI primitives with built-in ARIA support |
-| **Consistent Design** | A unified design system ensures visual coherence |
-| **Themeable** | Full light/dark mode support with customizable color schemes |
-
-The frontend is pre-built and embedded in the framework. In production, you deploy only your C# backend - no npm, no bundling, no frontend build process.
-
-## Ivy Design System
-
-The Ivy Design System provides a complete set of design tokens that ensure visual consistency across all widgets.
-
-### Color Palette
-
-Ivy uses a semantic color system where colors have meaning, not just appearance:
-
-| Token | Purpose | Example Use |
-| --- | --- | --- |
-| `primary` | Main brand/action color | Buttons, links, focus states |
-| `secondary` | Supporting elements | Secondary buttons, badges |
-| `destructive` | Dangerous actions | Delete buttons, error states |
-| `success` | Positive feedback | Success messages, checkmarks |
-| `warning` | Caution states | Warning alerts, pending items |
-| `info` | Informational | Info callouts, help text |
-| `muted` | De-emphasized content | Placeholder text, disabled states |
-| `accent` | Highlights | Hover states, selections |
-
-Each semantic color includes a `-foreground` variant for text that appears on that color (e.g., `primary-foreground` for text on a `primary` background).
-
-### Typography
-
-Ivy uses the [Geist](https://vercel.com/font) font family:
-
-| Font | Use |
-| --- | --- |
-| **Geist** | UI text, headings, body copy |
-| **Geist Mono** | Code blocks, technical content |
-
-Available weights: 400 (regular), 500 (medium), 600 (semibold), 700 (bold).
-
-### Component Library
-
-All Ivy widgets are built on [Radix UI](https://www.radix-ui.com/) primitives, providing:
-
-- **Accessibility**: Full keyboard navigation, screen reader support, ARIA attributes
-- **Composition**: Components work together predictably
-- **Customization**: Styling via the design system tokens
-
-## Theming
-
-Ivy supports three theme modes out of the box:
-
-```csharp
-var client = UseService<IClientProvider>();
-
-// Set theme mode
-client.SetThemeMode(ThemeMode.Light);  // Always light
-client.SetThemeMode(ThemeMode.Dark);   // Always dark
-client.SetThemeMode(ThemeMode.System); // Follow OS preference
+```mermaid
+graph TD
+    A["Ivy.DesignSystem Package"] --> B["C# Token Classes"]
+    B --> C["ThemeService"]
+    C --> D["CSS Generation"]
+    D --> E["HTML Injection"]
+    D --> F["SignalR Runtime Updates"]
+    E --> G["Frontend CSS Variables"]
+    F --> G
+    G --> H["Tailwind @theme inline"]
+    H --> I["Component Styling"]
 ```
 
-### Custom Themes
+## Ivy Design System Package
 
-You can customize the entire color palette using `IThemeService`:
+The design tokens are defined in a separate NuGet package: [`Ivy.DesignSystem`](https://github.com/Ivy-Interactive/Ivy-Design-System).
+
+```xml
+<!-- Ivy.csproj -->
+<PackageReference Include="Ivy.DesignSystem" Version="1.1.11" />
+```
+
+The package provides C# static classes with all color values:
+
+| Token Class                    | Purpose                             |
+| ------------------------------ | ----------------------------------- |
+| `IvyFrameworkLightThemeTokens` | Semantic colors for light mode      |
+| `IvyFrameworkDarkThemeTokens`  | Semantic colors for dark mode       |
+| `IvyFrameworkChromaticTokens`  | Chromatic palette (red, blue, etc.) |
+| `IvyFrameworkNeutralTokens`    | Neutral palette (slate, gray, etc.) |
+
+These tokens are consumed by `ThemeConfig.cs` to build default theme values:
 
 ```csharp
+public static ThemeColors DefaultLight => new()
+{
+    Primary = IvyFrameworkLightThemeTokens.Color.Primary,
+    PrimaryForeground = IvyFrameworkLightThemeTokens.Color.PrimaryForeground,
+    // ... all semantic colors
+};
+```
+
+## Theme Service
+
+`IThemeService` is responsible for managing the current theme and generating CSS:
+
+```csharp
+public interface IThemeService
+{
+    Theme CurrentTheme { get; }
+    void SetTheme(Theme theme);
+    string GenerateThemeCss();
+    string GenerateThemeMetaTag();
+}
+```
+
+### CSS Generation
+
+`GenerateThemeCss()` produces a `<style>` block with CSS custom properties for both light and dark modes:
+
+```csharp
+public string GenerateThemeCss()
+{
+    var sb = new StringBuilder();
+    sb.AppendLine("<style id=\"ivy-custom-theme\">");
+
+    // Light theme (default)
+    sb.AppendLine(":root {");
+    AppendThemeColors(sb, _currentTheme.Colors.Light);
+    AppendNeutralColors(sb);    // From IvyFrameworkNeutralTokens
+    AppendChromaticColors(sb);  // From IvyFrameworkChromaticTokens
+    sb.AppendLine("}");
+
+    // Dark theme
+    sb.AppendLine(".dark {");
+    AppendThemeColors(sb, _currentTheme.Colors.Dark);
+    AppendNeutralColors(sb);
+    AppendChromaticColors(sb);
+    sb.AppendLine("}");
+
+    sb.AppendLine("</style>");
+    return sb.ToString();
+}
+```
+
+**Generated output example:**
+
+```css
+<style id="ivy-custom-theme">
+:root {
+  --primary: #18181b;
+  --primary-foreground: #fafafa;
+  --background: #ffffff;
+  --foreground: #09090b;
+  /* ... 40+ variables */
+}
+.dark {
+  --primary: #fafafa;
+  --primary-foreground: #18181b;
+  --background: #09090b;
+  --foreground: #fafafa;
+  /* ... */
+}
+</style>
+```
+
+## CSS Injection
+
+Theme CSS reaches the frontend through two mechanisms:
+
+### 1. Initial Page Load
+
+During development, the Vite `injectMeta` plugin fetches the HTML from the backend and transfers the theme style tag:
+
+```typescript
+// vite.config.ts
+const themeStyleMatch = htmlServer.match(
+  /<style id="ivy-custom-theme">[\s\S]*?<\/style>/i
+);
+
+if (themeStyleMatch) {
+  // Insert into local HTML <head>
+  result =
+    result.slice(0, headEndIndex) +
+    themeStyleMatch[0] +
+    result.slice(headEndIndex);
+}
+```
+
+In production, the backend serves the full HTML with theme CSS already embedded in `<head>`.
+
+### 2. Runtime Updates via SignalR
+
+When a theme is changed at runtime, the backend sends the new CSS via SignalR:
+
+```csharp
+// Backend - applying a theme change
 var themeService = UseService<IThemeService>();
 var client = UseService<IClientProvider>();
-
-var customTheme = new Theme
-{
-    Name = "Ocean",
-    Colors = new ThemeColorScheme
-    {
-        Light = new ThemeColors
-        {
-            Primary = "#0077BE",
-            Background = "#F0F8FF",
-            Foreground = "#1A1A1A",
-            // ... other colors
-        },
-        Dark = new ThemeColors
-        {
-            Primary = "#4A9EFF",
-            Background = "#001122",
-            Foreground = "#E8F4FD",
-            // ... other colors
-        }
-    }
-};
 
 themeService.SetTheme(customTheme);
 client.ApplyTheme(themeService.GenerateThemeCss());
 ```
 
-For complete theming documentation, see [Theming](../../02_Concepts/Theming.md).
+The frontend handles the `ApplyTheme` message:
 
-## Technology Choices
+```typescript
+// use-backend.tsx
+connection.on("ApplyTheme", (css: string) => {
+  // Remove existing custom theme style
+  const existingStyle = document.getElementById("ivy-custom-theme");
+  if (existingStyle) {
+    existingStyle.remove();
+  }
 
-The UI layer uses carefully selected technologies:
+  // Inject new style element
+  const styleElement = document.createElement("style");
+  styleElement.id = "ivy-custom-theme";
+  styleElement.innerHTML = css
+    .replace('<style id="ivy-custom-theme">', "")
+    .replace("</style>", "");
+  document.head.appendChild(styleElement);
+});
+```
 
-| Technology | Why We Chose It |
-| --- | --- |
-| **React** | Mature ecosystem, excellent dev tools, concurrent rendering |
-| **Radix UI** | Best-in-class accessibility, unstyled primitives |
-| **Tailwind CSS** | Consistent utility classes, design token integration |
-| **Geist Fonts** | Clean, modern typography designed for interfaces |
+## Frontend Integration
 
-These choices are implementation details - you interact only with the C# widget API.
+### Tailwind Theme Mapping
+
+The frontend uses Tailwind CSS 4 with `@theme inline` to map backend-injected CSS variables to Tailwind's color system:
+
+```css
+/* index.css */
+@theme inline {
+  /* Semantic colors reference backend variables */
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-destructive: var(--destructive);
+  /* ... */
+
+  /* Chromatic colors */
+  --color-red: var(--red);
+  --color-blue: var(--blue);
+  /* ... 16 chromatic colors */
+}
+```
+
+This allows components to use Tailwind utility classes that resolve to theme values:
+
+```tsx
+// bg-primary resolves to var(--primary)
+<button className="bg-primary text-primary-foreground">Click me</button>
+```
+
+### Theme Mode Switching
+
+`ThemeProvider` manages light/dark mode by toggling the `.dark` class on `<html>`:
+
+```typescript
+// ThemeProvider.tsx
+useEffect(() => {
+  const root = window.document.documentElement;
+  root.classList.remove("light", "dark");
+
+  if (theme === "system") {
+    const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
+      .matches
+      ? "dark"
+      : "light";
+    root.classList.add(systemTheme);
+    return;
+  }
+
+  root.classList.add(theme);
+}, [theme]);
+```
+
+When `.dark` is present, CSS cascade causes `.dark { --primary: ... }` to override `:root { --primary: ... }`.
+
+## Design Token Categories
+
+### Semantic Tokens
+
+Purpose-driven colors that adapt to light/dark mode:
+
+| Token         | Purpose                      |
+| ------------- | ---------------------------- |
+| `primary`     | Main brand/action color      |
+| `secondary`   | Supporting elements          |
+| `destructive` | Dangerous actions            |
+| `success`     | Positive feedback            |
+| `warning`     | Caution states               |
+| `info`        | Informational elements       |
+| `muted`       | De-emphasized content        |
+| `accent`      | Highlights and selections    |
+| `card`        | Card backgrounds             |
+| `popover`     | Popover/dropdown backgrounds |
+
+Each has a `-foreground` variant for text on that background.
+
+### Chromatic Tokens
+
+Fixed color palette for data visualization and decorative use:
+
+`red`, `orange`, `amber`, `yellow`, `lime`, `green`, `emerald`, `teal`, `cyan`, `sky`, `blue`, `indigo`, `violet`, `purple`, `fuchsia`, `pink`, `rose`
+
+### Neutral Tokens
+
+Grayscale variants: `slate`, `gray`, `zinc`, `neutral`, `stone`, `black`, `white`
+
+## Component Library
+
+Widgets are built on [Radix UI](https://www.radix-ui.com/) primitives styled with theme-aware CSS:
+
+```tsx
+// Button component using theme variables
+<button
+  className={cn(
+    "bg-primary text-primary-foreground",
+    "hover:bg-primary/90",
+    "focus-visible:ring-ring"
+  )}
+>
+  {children}
+</button>
+```
 
 ## Additional Resources
 
-- [Theming](../../02_Concepts/Theming.md) - Complete theming guide with examples
-- [Widgets](../../02_Concepts/Widgets.md) - Widget system overview
-- [Widget Reference](/docs/widgets) - Full widget API documentation
-
----
-
-## Technical Reference
-
-<Callout variant="Info">
-The following section covers internal implementation details for contributors and advanced users. Most Ivy developers don't need this information.
-</Callout>
-
-### How Widgets Render
-
-Your C# widgets are serialized to JSON and sent to the frontend via WebSocket. The frontend maps each widget type to a React component:
-
-```mermaid
-graph LR
-    A["C# Widget"] --> B["JSON"]
-    B --> C["WebSocket"]
-    C --> D["React Component"]
-    D --> E["DOM"]
-```
-
-### Theme System Internals
-
-Themes work via CSS custom properties:
-
-1. Backend generates CSS with `:root` (light) and `.dark` (dark) selectors
-2. CSS is injected into the document via SignalR message
-3. Theme mode toggles the `dark` class on `<html>`
-4. Components read values via Tailwind classes (`bg-primary` → `var(--primary)`)
-
-### State Updates
-
-The framework uses JSON patches for efficient updates:
-
-1. Backend detects state changes in your views
-2. Only changed parts are serialized as JSON patches
-3. Frontend applies patches to the widget tree
-4. React reconciles and updates only affected DOM nodes
-
+- [Ivy Design System Repository](https://github.com/Ivy-Interactive/Ivy-Design-System)
+- [Theming Concepts](../../02_Concepts/Theming.md) - User-facing theming guide
+- [Communication](./03_Communication.md) - SignalR protocol details
