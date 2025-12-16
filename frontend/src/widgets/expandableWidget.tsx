@@ -14,12 +14,16 @@ import { ChevronRight } from 'lucide-react';
 import React from 'react';
 import { Scales } from '@/types/scale';
 import { cn } from '@/lib/utils';
+import { Switch } from '@/components/ui/switch';
+import { useEventHandler } from '@/components/event-handler';
 
 interface ExpandableWidgetProps {
   id: string;
   disabled?: boolean;
   open?: boolean;
   scale?: Scales;
+  /** When true, shows a switch in the header that controls whether the expandable is enabled. */
+  enableToggle?: boolean;
   slots?: {
     Header: React.ReactNode;
     Content: React.ReactNode;
@@ -31,9 +35,12 @@ export const ExpandableWidget: React.FC<ExpandableWidgetProps> = ({
   disabled,
   open = false,
   scale = Scales.Medium,
+  enableToggle,
   slots,
 }) => {
   const [isOpen, setIsOpen] = React.useState(open);
+  const hasEnableToggle = enableToggle === true;
+  const eventHandler = useEventHandler();
 
   React.useEffect(() => {
     setIsOpen(open);
@@ -46,11 +53,31 @@ export const ExpandableWidget: React.FC<ExpandableWidgetProps> = ({
   }, [disabled, isOpen]);
 
   const handleOpenChange = (newOpen: boolean) => {
-    // Prevent toggle if disabled
     if (disabled) {
       return;
     }
     setIsOpen(newOpen);
+  };
+
+  const handleEnableToggleChange = (checked: boolean | null) => {
+    eventHandler('OnEnableToggleChange', id, [!!checked]);
+  };
+
+  const renderEnableToggle = () => {
+    if (!hasEnableToggle) return null;
+
+    const toggleId = `${id}-enable-toggle`;
+
+    return (
+      <div onClick={e => e.stopPropagation()} className="mr-2">
+        <Switch
+          id={toggleId}
+          checked={!disabled}
+          onCheckedChange={handleEnableToggleChange}
+          scale={scale}
+        />
+      </div>
+    );
   };
 
   const handleTriggerClick = (e: React.MouseEvent) => {
@@ -67,9 +94,9 @@ export const ExpandableWidget: React.FC<ExpandableWidgetProps> = ({
 
     if (isInteractiveElement) {
       e.stopPropagation();
+      return;
     }
 
-    // Prevent toggle if disabled
     if (disabled) {
       e.preventDefault();
       e.stopPropagation();
@@ -82,23 +109,38 @@ export const ExpandableWidget: React.FC<ExpandableWidgetProps> = ({
       open={isOpen}
       onOpenChange={handleOpenChange}
       className={cn(
-        'w-full rounded-md border border-border shadow-sm data-[disabled=true]:cursor-not-allowed data-[disabled=true]:opacity-50',
+        'w-full rounded-md border border-border shadow-sm data-[disabled=true]:cursor-not-allowed',
         'p-0'
       )}
       data-disabled={disabled}
       role="details"
     >
       <CollapsibleTrigger
-        disabled={false}
-        className={cn(expandableTriggerVariants({ scale }), 'relative')}
+        aria-disabled={disabled}
+        className={cn(
+          expandableTriggerVariants({ scale }),
+          'relative',
+          disabled && 'cursor-not-allowed'
+        )}
         onClick={handleTriggerClick}
         data-collapsible-trigger
       >
-        <div className={expandableHeaderVariants({ scale })} role="summary">
+        <div
+          className={cn(
+            expandableHeaderVariants({ scale }),
+            disabled && 'expandable-header-disabled',
+            'flex items-center'
+          )}
+          role="summary"
+        >
+          {renderEnableToggle()}
           {slots?.Header}
         </div>
         <span
-          className={expandableChevronContainerVariants({ scale })}
+          className={cn(
+            expandableChevronContainerVariants({ scale }),
+            disabled && 'opacity-50'
+          )}
           aria-hidden="true"
         >
           <ChevronRight
