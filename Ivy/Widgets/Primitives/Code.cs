@@ -17,6 +17,7 @@ public enum Languages
     Dbml,
     Markdown,
     Text,
+    Xml,
 }
 
 public record Code : WidgetBase<Code>
