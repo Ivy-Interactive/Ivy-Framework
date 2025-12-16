@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 import { getWidth, getHeight, inputStyles } from '@/lib/styles';
 import { InvalidIcon } from '@/components/InvalidIcon';
 import { Scales } from '@/types/scale';
-import { textInputSizeVariants } from '@/components/ui/input/text-input-variants';
+import { textareaSizeVariants } from '@/components/ui/input/text-input-variants';
 import { TextInputWidgetProps } from '../types';
 import {
   useCursorPosition,
@@ -56,9 +56,8 @@ export const TextareaVariant: React.FC<TextareaVariantProps> = ({
   const hasValue = props.value && props.value.toString().trim() !== '';
 
   return (
-    <div className="relative w-full select-none">
+    <div className="relative w-full select-none" style={styles}>
       <Textarea
-        style={styles}
         ref={elementRef as React.RefObject<HTMLTextAreaElement>}
         id={props.id}
         placeholder={props.placeholder}
@@ -70,7 +69,7 @@ export const TextareaVariant: React.FC<TextareaVariantProps> = ({
         onFocus={onFocus}
         onPaste={handlePaste}
         className={cn(
-          textInputSizeVariants({ scale }),
+          textareaSizeVariants({ scale }),
           props.invalid && inputStyles.invalidInput,
           props.invalid && 'pr-8',
           props.shortcutKey && !isFocused && !hasValue && 'pr-16'
