@@ -13,9 +13,12 @@ public record Affix
 {
     public Icons? Icon { get; init; }
     public string? Text { get; init; }
+}
 
-    public static Affix Icon(Icons icon) => new() { Icon = icon };
-    public static Affix Text(string text) => new() { Text = text };
+public static class AffixExtensions
+{
+    public static Affix ToAffix(this Icons icon) => new() { Icon = icon };
+    public static Affix ToAffix(this string text) => new() { Text = text };
 }
 
 public enum TextInputs
@@ -153,16 +156,16 @@ public static class TextInputExtensions
     public static TextInputBase MaxLength(this TextInputBase widget, int maxLength) => widget with { MaxLength = maxLength };
 
     public static TextInputBase Prefix(this TextInputBase widget, string prefixText)
-        => widget with { Prefix = Affix.Text(prefixText) };
+        => widget with { Prefix = prefixText.ToAffix() };
 
     public static TextInputBase Prefix(this TextInputBase widget, Icons prefixIcon)
-        => widget with { Prefix = Affix.Icon(prefixIcon) };
+        => widget with { Prefix = prefixIcon.ToAffix() };
 
     public static TextInputBase Suffix(this TextInputBase widget, string suffixText)
-        => widget with { Suffix = Affix.Text(suffixText) };
+        => widget with { Suffix = suffixText.ToAffix() };
 
     public static TextInputBase Suffix(this TextInputBase widget, Icons suffixIcon)
-        => widget with { Suffix = Affix.Icon(suffixIcon) };
+        => widget with { Suffix = suffixIcon.ToAffix() };
 
     [OverloadResolutionPriority(1)]
     public static TextInputBase HandleBlur(this TextInputBase widget, Func<Event<IAnyInput>, ValueTask> onBlur)
