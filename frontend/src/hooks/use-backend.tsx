@@ -443,15 +443,17 @@ export const useBackend = (
           return null;
         });
 
-        if (httpResponse && !httpResponse.ok) {
-          logger.error('Failed to send error HttpResponse via HTTP', {
-            status: httpResponse.status,
-            statusText: httpResponse.statusText,
-          });
-        } else if (httpResponse) {
-          logger.debug('Sent error HttpResponse back to backend via HTTP', {
-            requestId: request.requestId,
-          });
+        if (httpResponse) {
+          if (!httpResponse.ok) {
+            logger.error('Failed to send error HttpResponse via HTTP', {
+              status: httpResponse.status,
+              statusText: httpResponse.statusText,
+            });
+          } else {
+            logger.debug('Sent error HttpResponse back to backend via HTTP', {
+              requestId: request.requestId,
+            });
+          }
         }
       }
     },
