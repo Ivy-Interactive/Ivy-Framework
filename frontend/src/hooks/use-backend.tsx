@@ -354,7 +354,7 @@ export const useBackend = (
         const fetchOptions: RequestInit = {
           method: request.method,
           headers,
-          credentials: 'include', // Important for Clerk cookies
+          credentials: 'include',
         };
 
         if (request.body) {
