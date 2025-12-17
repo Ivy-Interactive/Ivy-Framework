@@ -112,28 +112,15 @@ public override object Build()
 }
 ```
 
-## Supported Hooks
+## Hook Detection
 
-The following hooks are automatically detected by the analyzer:
+The analyzer automatically detects hooks by their naming convention:
 
-- `UseState`
-- `UseEffect`
-- `UseMemo`
-- `UseRef`
-- `UseContext`
-- `UseCallback`
-- `UseReducer`
-- `UseStatic`
-- `UseSignal`
-- `UseTrigger`
-- `UseService`
-- `UseArgs`
-- `UseAlert`
-- `UseForm`
-- `UseUpload`
-- `UseDownload`
-- `UseWebhook`
-- `UseBlades`
-- `UseDataTable`
-- `UseNavigation`
-- `UseRefreshToken`
+- Method name must start with `Use`
+- The fourth character must be an uppercase letter
+
+**Examples:**
+- ✅ `UseState`, `UseEffect`, `UseCustomHook`, `UseMyFeature`
+- ❌ `Use`, `Useless`, `useState`, `useEffect`
+
+This means any custom hooks you create following the `UseX` pattern will be automatically validated by the analyzer.

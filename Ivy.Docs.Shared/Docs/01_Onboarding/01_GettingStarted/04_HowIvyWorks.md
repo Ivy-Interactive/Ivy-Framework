@@ -92,6 +92,17 @@ public override object? Build()
 }
 ```
 
+### Hook Guidelines
+
+Hooks rely on a strict call order to function correctly. Following these rules ensures that Ivy can properly track state between renders:
+
+1. **Call hooks at the top level** - Don't call hooks inside loops, conditions, or nested functions
+2. **Call hooks from Views only** - Hooks must be used inside the `Build()` method
+
+The **Ivy.Analyser** package automatically enforces these rules at compile time, catching violations before your code runs.
+
+For detailed examples and troubleshooting, see [Rules of Hooks](../02_Concepts/RulesOfHooks.md).
+
 ### Widget Library
 
 Ivy ships with a comprehensive set of strongly-typed widgets:
