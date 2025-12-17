@@ -82,29 +82,12 @@ namespace Ivy.Analyser.Analyzers
             isEnabledByDefault: true,
             description: DescriptionNotAtTop);
 
-        private static readonly ImmutableHashSet<string> HookNames = ImmutableHashSet.Create(
-            "UseState",
-            "UseEffect",
-            "UseMemo",
-            "UseRef",
-            "UseContext",
-            "UseCallback",
-            "UseReducer",
-            "UseStatic",
-            "UseSignal",
-            "UseTrigger",
-            "UseService",
-            "UseArgs",
-            "UseAlert",
-            "UseForm",
-            "UseUpload",
-            "UseDownload",
-            "UseWebhook",
-            "UseBlades",
-            "UseDataTable",
-            "UseNavigation",
-            "UseRefreshToken"
-        );
+        private static bool IsHookName(string methodName)
+        {
+            return methodName.Length > 3
+                && methodName.StartsWith("Use")
+                && char.IsUpper(methodName[3]);
+        }
 
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(
             Rule,
@@ -126,7 +109,7 @@ namespace Ivy.Analyser.Analyzers
             var invocation = (InvocationExpressionSyntax)context.Node;
 
             var methodName = GetMethodName(invocation);
-            if (methodName == null || !HookNames.Contains(methodName))
+            if (methodName == null || !IsHookName(methodName))
             {
                 return;
             }
@@ -374,7 +357,7 @@ namespace Ivy.Analyser.Analyzers
                     {
                         var invocation = (InvocationExpressionSyntax)v.Initializer!.Value;
                         var methodName = GetMethodName(invocation);
-                        return methodName != null && HookNames.Contains(methodName);
+                        return methodName != null && IsHookName(methodName);
                     }))
                 {
                     return true;
@@ -383,7 +366,7 @@ namespace Ivy.Analyser.Analyzers
             else if (statement is ExpressionStatementSyntax { Expression: InvocationExpressionSyntax invocation })
             {
                 var methodName = GetMethodName(invocation);
-                if (methodName != null && HookNames.Contains(methodName))
+                if (methodName != null && IsHookName(methodName))
                 {
                     return true;
                 }
@@ -404,7 +387,7 @@ namespace Ivy.Analyser.Analyzers
                 if (current is InvocationExpressionSyntax invocation)
                 {
                     var methodName = GetMethodName(invocation);
-                    if (methodName != null && HookNames.Contains(methodName))
+                    if (methodName != null && IsHookName(methodName))
                     {
                         return true;
                     }
