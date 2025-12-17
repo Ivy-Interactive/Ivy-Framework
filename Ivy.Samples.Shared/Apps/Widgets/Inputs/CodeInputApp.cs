@@ -49,6 +49,22 @@ public class CodeInputApp : SampleBase
             </html>
             """);
 
+        var emptyCsharpState = UseState("");
+        var emptyJsonState = UseState("");
+        var emptySqlState = UseState("");
+        var emptyHtmlState = UseState("");
+
+        var cardCode = UseState(
+            """
+            public class Example
+            {
+                public void DoWork()
+                {
+                    Console.WriteLine("Code inside Card");
+                }
+            }
+            """);
+
         var firstGrid = Layout.Grid().Columns(4)
                | null!
                | Text.InlineCode("Default")
@@ -84,22 +100,22 @@ public class CodeInputApp : SampleBase
 
                | Text.InlineCode("C#")
                | csharpCode.ToCodeInput().Language(Languages.Csharp).Placeholder("Enter C# code here...")
-               | UseState("").ToCodeInput().Language(Languages.Csharp).Placeholder("Enter C# code here...")
+               | emptyCsharpState.ToCodeInput().Language(Languages.Csharp).Placeholder("Enter C# code here...")
                | csharpCode.ToCodeInput().Language(Languages.Csharp).ShowCopyButton()
 
                | Text.InlineCode("JSON")
                | jsonCode.ToCodeInput().Language(Languages.Json).Placeholder("Enter JSON here...")
-               | UseState("").ToCodeInput().Language(Languages.Json).Placeholder("Enter JSON here...")
+               | emptyJsonState.ToCodeInput().Language(Languages.Json).Placeholder("Enter JSON here...")
                | jsonCode.ToCodeInput().Language(Languages.Json).ShowCopyButton()
 
                | Text.InlineCode("SQL")
                | sqlCode.ToCodeInput().Language(Languages.Sql).Placeholder("Enter SQL query here...")
-               | UseState("").ToCodeInput().Language(Languages.Sql).Placeholder("Enter SQL query here...")
+               | emptySqlState.ToCodeInput().Language(Languages.Sql).Placeholder("Enter SQL query here...")
                | sqlCode.ToCodeInput().Language(Languages.Sql).ShowCopyButton()
 
                | Text.InlineCode("HTML")
                | htmlCode.ToCodeInput().Language(Languages.Html).Placeholder("Enter HTML here...")
-               | UseState("").ToCodeInput().Language(Languages.Html).Placeholder("Enter HTML here...")
+               | emptyHtmlState.ToCodeInput().Language(Languages.Html).Placeholder("Enter HTML here...")
                | htmlCode.ToCodeInput().Language(Languages.Html).ShowCopyButton()
             ;
 
@@ -157,18 +173,9 @@ public class CodeInputApp : SampleBase
                | htmlCode.ToCodeInput().Language(Languages.Html).Large()
             ;
 
-        var dataBinding = CreateStringTypeTests();
+        var dataBinding = new CodeInputDataBindings();
 
-        var cardCode = UseState(
-            """
-            public class Example
-            {
-                public void DoWork()
-                {
-                    Console.WriteLine("Code inside Card");
-                }
-            }
-            """);
+
 
         // Links with copy functionality using one Code block inside Card
         var socialMediaLinksContent = """
@@ -203,7 +210,12 @@ public class CodeInputApp : SampleBase
                ;
     }
 
-    private object CreateStringTypeTests()
+    // Helper methods moved to CodeInputDataBindings class
+}
+
+public class CodeInputDataBindings : ViewBase
+{
+    public override object Build()
     {
         var stringTypes = new (string TypeName, object NonNullableState, object NullableState)[]
         {
@@ -250,16 +262,6 @@ public class CodeInputApp : SampleBase
         }
 
         return Layout.Grid().Columns(6) | gridItems.ToArray();
-
-        object FormatStateValue(string typeName, object? value, bool isNullable)
-        {
-            return value switch
-            {
-                null => isNullable ? Text.InlineCode("Null") : Text.InlineCode("Empty"),
-                string s => s.Length == 0 ? Text.InlineCode("Empty") : Text.InlineCode($"\"{s}\""),
-                _ => Text.InlineCode(value?.ToString() ?? "null")
-            };
-        }
     }
 
     private static object CreateCodeInputVariants(object state)
@@ -281,5 +283,15 @@ public class CodeInputApp : SampleBase
                | anyState.ToCodeInput()
                | anyState.ToCodeInput().Language(Languages.Csharp)
                | anyState.ToCodeInput().Language(Languages.Csharp).ShowCopyButton();
+    }
+
+    private object FormatStateValue(string typeName, object? value, bool isNullable)
+    {
+        return value switch
+        {
+            null => isNullable ? Text.InlineCode("Null") : Text.InlineCode("Empty"),
+            string s => s.Length == 0 ? Text.InlineCode("Empty") : Text.InlineCode($"\"{s}\""),
+            _ => Text.InlineCode(value?.ToString() ?? "null")
+        };
     }
 }

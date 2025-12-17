@@ -38,11 +38,11 @@ public class DataTableApp : SampleBase
     {
         var client = UseService<IClientProvider>();
 
-        var allSkills = new[] { "C#", "JavaScript", "Python", "SQL", "React", "Leadership", "Communication", "Problem Solving", "Team Player", "Agile" };
-
         // Create the employee data once at app level (like Kanban caches its tasks)
         var employees = this.UseState(() =>
         {
+            var allSkills = new[] { "C#", "JavaScript", "Python", "SQL", "React", "Leadership", "Communication", "Problem Solving", "Team Player", "Agile" };
+
             var random = new Random(42);
             var startDate = new DateTime(2020, 1, 1);
 

@@ -9,8 +9,7 @@ public class DbmlEditorApp : ViewBase
 {
     public override object? Build()
     {
-        var sampleDbml =
-            """
+        var dbml = UseState("""
             Enum order_status {
                 pending
                 shipped
@@ -80,9 +79,7 @@ public class DbmlEditorApp : ViewBase
             Ref: order_line.product_id > product.id
             Ref: review.product_id > product.id
             Ref: review.customer_id > customer.id
-            """;
-
-        var dbml = this.UseState(sampleDbml);
+            """);
         return Layout.Horizontal().RemoveParentPadding().Height(Size.Full())
                | dbml.ToCodeInput().Width(90).Height(Size.Full()).Language(Languages.Dbml)
                | new DbmlCanvas(dbml.Value).Width(Size.Grow())
