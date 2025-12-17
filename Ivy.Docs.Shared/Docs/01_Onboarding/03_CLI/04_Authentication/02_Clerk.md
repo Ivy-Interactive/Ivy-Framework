@@ -22,7 +22,7 @@ Clerk offers both **development** and **production** modes, allowing you to test
 
 ## Getting Your Clerk Configuration
 
-Before using Clerk with Ivy, you'll need to create a Clerk application and obtain your API keys:
+Before using Clerk with Ivy, you'll need to create a Clerk application and obtain your API keys.
 
 ### Step 1: Create a Clerk Account and Application
 
@@ -35,14 +35,14 @@ Before using Clerk with Ivy, you'll need to create a Clerk application and obtai
 
 ### Step 2: Get Your API Keys
 
-To find your API keys, go to **Configure → API keys** in your Clerk Dashboard. You'll need two keys:
+To find your API keys, go to **Configure → API keys** in your Clerk Dashboard. You'll need to copy two keys:
 
 - **Publishable key**: Starts with `pk_test_` (development) or `pk_live_` (production)
 - **Secret key**: Starts with `sk_test_` (development) or `sk_live_` (production)
 
 ![Clerk API Keys](assets/clerk_api_keys.webp "Clerk API Keys")
 
-> **Important**: Keep your Secret Key secure. Never commit it to version control or expose it in client-side code.
+> **Important**: Keep your secret key secure. Never commit it to version control or expose it in client-side code.
 
 ### Step 3: Configure Allowed Origins
 
@@ -51,7 +51,7 @@ For development, Clerk automatically allows `localhost` origins. For production:
 1. **Go to "Configure → Developers → Domains"** in your Clerk Dashboard
 2. **Add your production domain** (e.g., `https://myapp.com`)
 3. **Click "Add Domain"**
-4. **Follow the instructions to add**
+4. **Follow the instructions** to add the required CNAME records to your domain
 
 ### Step 4: Enable Authentication Methods
 
@@ -66,15 +66,25 @@ Email and password authentication is enabled by default. To configure:
 3. **Enable or disable "Sign-in with email"** as needed
 4. **Click "Save"**
 
+#### Username and Password
+
+To enable username and password authentication:
+
+1. **Go to "Configure → User & authentication"** in your Clerk Dashboard
+2. **Click "Username"**
+3. **Enable "Sign-in with username"**
+4. **Click "Save"**
+
 #### Social Connections (OAuth)
 
 Clerk supports numerous social authentication providers:
 
-1. **Go to "User & Authentication"** in your Clerk Dashboard
-2. **Click "Social Connections"**
-3. **Enable the providers you want** (Google, GitHub, Microsoft, Apple, etc.)
-4. **Configure OAuth credentials** for each provider if using custom settings
-5. **Click "Apply"**
+1. **Go to "Configure → User & authentication -> SSO connections"** in your Clerk Dashboard
+2. **Click "Add connection", then "For all users"**
+3. **Select a provider you wish to enable** (Google, GitHub, Microsoft, Apple, etc.)
+4. **Configure OAuth credentials** for your provider if using custom settings, as required in production
+5. **Configure other settings for your provider**
+6. **Click "Apply"**
 
 > **Note**: Clerk provides development OAuth credentials for testing. For production, you'll need to configure your own OAuth applications with each provider. See [Clerk's OAuth documentation](https://clerk.com/docs/authentication/social-connections/overview) for detailed setup instructions.
 
@@ -93,8 +103,6 @@ Clerk provides separate API keys for development and production:
   - Require custom OAuth credentials for social providers
   - Must explicitly configure allowed domains and add required CNAME records
   - Separate user database from development
-
-> **Important**: Both your Secret Key and Publishable Key must be from the same environment (both test or both live). Mixing keys from different environments will result in an error.
 
 #### Creating a Production Instance
 
@@ -169,7 +177,7 @@ The following parameters are supported via connection string, environment variab
 
 ## Authentication Flow
 
-Clerk uses a modern authentication flow that works seamlessly with Ivy:
+Clerk uses a modern authentication flow that works seamlessly with Ivy.
 
 ### Session-based Flow
 
@@ -180,32 +188,12 @@ Clerk uses a modern authentication flow that works seamlessly with Ivy:
 5. Clerk handles the authentication and creates a session
 6. Session token is securely stored and used for subsequent requests
 7. Ivy validates the session token on the backend
-
-### Development Mode Flow
-
-In development mode (`sk_test_*` keys):
-
-1. Clerk creates a "development browser" token for local testing
-2. This token is stored in cookies with your local domain
-3. Built-in OAuth credentials allow social login testing
-4. All authentication happens locally without production data
-
-### Production Mode Flow
-
-In production mode (`sk_live_*` keys):
-
-1. Clerk uses production session tokens
-2. Tokens are validated against your production domain
-3. Custom OAuth credentials are used for social logins
-4. Full security features and user management are enabled
+8. Ivy automatically refreshes the session token as needed
 
 ## Clerk-Specific Features
 
 Key features of the Clerk provider:
 
-- **Multiple Authentication Methods**: Support for email/password, social logins, magic links, SMS codes, and more
-- **Passwordless Options**: Email magic links and one-time codes for frictionless authentication
-- **Multi-factor Authentication**: Built-in support for 2FA via SMS, authenticator apps, and backup codes
 - **User Management**: Comprehensive dashboard for managing users, sessions, and authentication settings
 - **Session Management**: Automatic token refresh and secure session handling
 - **Customizable UI**: Pre-built authentication components that can be customized to match your brand
@@ -217,8 +205,7 @@ Key features of the Clerk provider:
 - **Use production keys** (`sk_live_*` and `pk_live_*`) only in deployed environments
 - **Never commit secret keys** to version control
 - **Rotate API keys** if they are ever exposed
-- **Configure allowed domains** properly to prevent unauthorized access
-- **Enable multi-factor authentication** for sensitive applications
+- **Configure domains** properly to prevent unauthorized access
 - **Monitor authentication logs** in the Clerk Dashboard
 - **Use environment-appropriate keys** for testing and production
 
@@ -237,15 +224,13 @@ Key features of the Clerk provider:
 
 - Verify allowed domains are configured in Clerk Dashboard
 - Check that your application's domain matches exactly (including https://)
-- Ensure development origins include `localhost` for local testing
 - Verify no typos in domain configuration
 
 **Authentication Failed**
 
 - Check that your Clerk application is properly configured
-- Verify authentication methods are enabled in Clerk Dashboard
+- Verify required authentication methods are enabled in Clerk Dashboard
 - Ensure users are not blocked or suspended
-- Check browser console for specific error messages
 
 **Session Issues**
 
@@ -270,7 +255,7 @@ Key features of the Clerk provider:
 
 ## Related Documentation
 
-- [Authentication Overview](01_AuthenticationOverview.md)
+- [Authentication Overview](AuthenticationOverview.md)
 - [Auth0 Authentication](Auth0.md)
 - [Supabase Authentication](Supabase.md)
 - [Clerk Official Documentation](https://clerk.com/docs)
