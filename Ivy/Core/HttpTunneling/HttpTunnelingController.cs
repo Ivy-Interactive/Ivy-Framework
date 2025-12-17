@@ -33,13 +33,10 @@ public class HttpTunnelingController : Controller
     {
         var exception = new Exception($"HTTP tunnel request cancelled: {reason}");
 
-        foreach (var kvp in _pendingRequests)
+        foreach (var kvp in _pendingRequests.Where(kvp => kvp.Key.StartsWith($"{connectionId}:")))
         {
-            if (kvp.Key.StartsWith($"{connectionId}:"))
-            {
-                kvp.Value.CompletionSource.TrySetException(exception);
-                _pendingRequests.TryRemove(kvp.Key, out _);
-            }
+            kvp.Value.CompletionSource.TrySetException(exception);
+            _pendingRequests.TryRemove(kvp.Key, out _);
         }
     }
 
@@ -95,10 +92,7 @@ public class HttpTunnelingController : Controller
         {
             foreach (var header in response.Headers)
             {
-                if (!responseMessage.Headers.TryAddWithoutValidation(header.Key, header.Value))
-                {
-                    // Content header, will be added after creating content
-                }
+                responseMessage.Headers.TryAddWithoutValidation(header.Key, header.Value);
             }
         }
 
