@@ -25,7 +25,7 @@ graph LR
     B --> C["WebSocket<br/>Communication"]
     C --> D["React Frontend<br/>(Shadcn/TailwindCSS)"]
     D --> E["Browser<br/>(HTML/CSS)"]
-    
+
     E --> F["User Events<br/>(clicks, input)"]
     F --> C
     C --> G["Event Handlers<br/>(C# methods)"]
@@ -45,7 +45,7 @@ public class TodoApp : ViewBase
     {
         var newTitle = UseState("");
         var todos = UseState(ImmutableArray.Create<Todo>());
-        
+
         return new Card()
             .Title("My Todos")
             .Description("What needs to be done?")
@@ -72,7 +72,7 @@ Ivy provides React-inspired hooks for state management:
 **Available Hooks:**
 
 - `UseState<T>()` - Local component state that triggers re-renders
-- `UseEffect()` - Side effects with dependency tracking  
+- `UseEffect()` - Side effects with dependency tracking
 - `UseService<T>()` - Dependency injection integration
 - `UseSignal()`, `UseDownload()`, `UseWebhook()` - And many more...
 
@@ -81,13 +81,13 @@ public override object? Build()
 {
     // State hook - triggers re-render when changed
     var count = UseState(0);
-    
+
     // Effect hook - runs when count changes
     UseEffect(() => {
         Console.WriteLine($"Count changed to: {count.Value}");
     }, count);
-    
-    return new Button($"Count: {count.Value}", 
+
+    return new Button($"Count: {count.Value}",
         onClick: _ => count.Set(count.Value + 1));
 }
 ```
@@ -96,15 +96,15 @@ public override object? Build()
 
 Ivy ships with a comprehensive set of strongly-typed widgets:
 
-| Category | Examples |
-|----------|----------|
-| Common | `Button`, `Badge`, `Progress`, `Table`, `Card`, `Tooltip`, `Expandable`... |
-| Inputs | `TextInput`, `NumberInput`, `BoolInput`, `DateTimeInput`, `FileInput`... |
-| Primitives | `Text`, `Icon`, `Image`, `Markdown`, `Json`, `Code`, `Avatar`... |
-| Layouts | `Layout.Vertical()`, `GridLayout`, `TabsLayout`, `SidebarLayout`... |
-| Effects | `Animation`, `Confetti`... |
-| Charts | `LineChart`, `BarChart`, `PieChart`, `AreaChart`... |
-| Advanced | `Sheet`, `Chat`... |
+| Category   | Examples                                                                   |
+| ---------- | -------------------------------------------------------------------------- |
+| Common     | `Button`, `Badge`, `Progress`, `Table`, `Card`, `Tooltip`, `Expandable`... |
+| Inputs     | `TextInput`, `NumberInput`, `BoolInput`, `DateTimeInput`, `FileInput`...   |
+| Primitives | `Text`, `Icon`, `Image`, `Markdown`, `Json`, `Code`, `Avatar`...           |
+| Layouts    | `Layout.Vertical()`, `GridLayout`, `TabsLayout`, `SidebarLayout`...        |
+| Effects    | `Animation`, `Confetti`...                                                 |
+| Charts     | `LineChart`, `BarChart`, `PieChart`, `AreaChart`...                        |
+| Advanced   | `Sheet`, `Chat`...                                                         |
 
 ### Real-time Communication
 
@@ -126,7 +126,7 @@ When working with search results in the sidebar (both in Ivy Samples and Docs), 
 
 For a comprehensive technical overview of Ivy's architecture, see:
 
-- **[Frontend Architecture](./05_Architecture/01_FrontendArchitecture.md)** - React/TypeScript frontend, widget rendering pipeline, and build system
+- **[Framework Design](./05_Architecture/01_FrameworkDesign.md)** - Design system, theming, and UI framework choices
 - **[Backend Architecture](./05_Architecture/02_BackendArchitecture.md)** - C# server configuration, application system, and deployment
 - **[Communication](./05_Architecture/03_Communication.md)** - SignalR protocol, message types, and state synchronization
 
@@ -165,10 +165,10 @@ public override object? Build()
     // Use any .NET library
     var db = UseService<MyDbContext>();
     var logger = UseService<ILogger<MyApp>>();
-    
+
     // Async operations work naturally
     var data = await db.Users.ToListAsync();
-    
+
     return new Table(data)
         .Columns(
             col => col.Name,
