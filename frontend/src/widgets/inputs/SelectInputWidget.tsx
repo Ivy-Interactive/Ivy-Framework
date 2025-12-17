@@ -356,7 +356,7 @@ const ToggleVariant: React.FC<SelectInputWidgetProps> = ({
           ) : (
             <ToggleGroup
               type="single"
-              value={selectedValues[0]?.toString()}
+              value={selectedValues[0]?.toString() ?? ''}
               onValueChange={handleValueChange}
               disabled={disabled}
               className="flex flex-wrap gap-2"
