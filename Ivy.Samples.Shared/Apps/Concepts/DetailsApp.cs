@@ -103,11 +103,20 @@ public class DetailsMultilineExample : ViewBase
 
         return Layout.Vertical().Gap(2)
                | Text.H2("Multiline Fields")
-               | Text.P("Demonstrates how to mark specific fields as multiline so long text is wrapped and displayed on multiple lines.")
-               | new Card(
-                   record.ToDetails()
-                         .MultiLine(x => x.Description, x => x.Notes)
-               );
+               | Text.P("Compare the difference: without MultiLine() text is truncated, with MultiLine() it wraps across multiple lines.")
+               | new Spacer().Height(10)
+               | (Layout.Grid().Columns(2).Gap(4)
+                   | (Layout.Vertical().Height(Size.Full())
+                       | Text.Label("With MultiLine()").Bold()
+                       | new Card(
+                           record.ToDetails()
+                                 .MultiLine(x => x.Description, x => x.Notes)
+                       ))
+                   | (Layout.Vertical().Height(Size.Full())
+                       | Text.Label("Without MultiLine()").Bold()
+                       | new Card(record.ToDetails()))
+                    )
+               ;
     }
 }
 
