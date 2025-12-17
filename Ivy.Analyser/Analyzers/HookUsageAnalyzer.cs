@@ -89,6 +89,23 @@ namespace Ivy.Analyser.Analyzers
                 && char.IsUpper(methodName[3]);
         }
 
+        private static bool IsHookInvocation(InvocationExpressionSyntax invocation)
+        {
+            if (invocation.Expression is IdentifierNameSyntax ||
+                invocation.Expression is GenericNameSyntax)
+            {
+                return true;
+            }
+
+            if (invocation.Expression is MemberAccessExpressionSyntax memberAccess &&
+                memberAccess.Expression is ThisExpressionSyntax)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(
             Rule,
             RuleConditional,
@@ -110,6 +127,11 @@ namespace Ivy.Analyser.Analyzers
 
             var methodName = GetMethodName(invocation);
             if (methodName == null || !IsHookName(methodName))
+            {
+                return;
+            }
+
+            if (!IsHookInvocation(invocation))
             {
                 return;
             }

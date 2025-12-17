@@ -331,32 +331,6 @@ public class FormExample : ViewBase
             Guid.NewGuid()
         ));
 
-        FormBuilder<DatabaseGeneratorModel> BuildDatabaseForm(IState<DatabaseGeneratorModel> x) =>
-            x.ToForm()
-                .Label(m => m.DatabaseProvider, "Database:")
-                .Label(m => m.ConnectionString, "Connection String:")
-                .Label(m => m.DeleteDatabase, "Delete Existing Database (Dangerous)")
-                .Label(m => m.SeedDatabase, "Fill Database with Seed Data")
-                .Builder(m => m.ConnectionString, s => s.ToCodeInput())
-                .Visible(m => m.DatabaseProvider, m => m.RunGenerator)
-                .Visible(m => m.ConnectionString, m => m.RunGenerator)
-                .Visible(m => m.DeleteDatabase, m => m.RunGenerator)
-                .Visible(m => m.SeedDatabase, m => m.RunGenerator)
-                .Remove(m => m.ProjectDirectory)
-                .Remove(m => m.GeneratorDirectory)
-                .Remove(m => m.RunGenerator);
-
-        var databaseForm = Layout.Horizontal(
-            new Card(
-                    BuildDatabaseForm(settingsForm)
-                )
-                .Width(1 / 2f)
-                .Title("Database Generator Settings"),
-            new Card(
-                settingsForm.ToDetails()
-            ).Width(1 / 2f)
-        );
-
         var smallModel = UseState(() => new ComprehensiveInputModel(
             "John Doe",
             "john@example.com",
@@ -434,6 +408,32 @@ public class FormExample : ViewBase
             true,
             5
         ));
+
+        FormBuilder<DatabaseGeneratorModel> BuildDatabaseForm(IState<DatabaseGeneratorModel> x) =>
+            x.ToForm()
+                .Label(m => m.DatabaseProvider, "Database:")
+                .Label(m => m.ConnectionString, "Connection String:")
+                .Label(m => m.DeleteDatabase, "Delete Existing Database (Dangerous)")
+                .Label(m => m.SeedDatabase, "Fill Database with Seed Data")
+                .Builder(m => m.ConnectionString, s => s.ToCodeInput())
+                .Visible(m => m.DatabaseProvider, m => m.RunGenerator)
+                .Visible(m => m.ConnectionString, m => m.RunGenerator)
+                .Visible(m => m.DeleteDatabase, m => m.RunGenerator)
+                .Visible(m => m.SeedDatabase, m => m.RunGenerator)
+                .Remove(m => m.ProjectDirectory)
+                .Remove(m => m.GeneratorDirectory)
+                .Remove(m => m.RunGenerator);
+
+        var databaseForm = Layout.Horizontal(
+            new Card(
+                    BuildDatabaseForm(settingsForm)
+                )
+                .Width(1 / 2f)
+                .Title("Database Generator Settings"),
+            new Card(
+                settingsForm.ToDetails()
+            ).Width(1 / 2f)
+        );
 
         FormBuilder<UserModel> BuildForm(IState<UserModel> x) =>
             x.ToForm()
@@ -666,21 +666,22 @@ public class FormScaffoldingExample : ViewBase
     public override object? Build()
     {
         var formatsExample = UseState(() => new FormatsExample());
+        var displayExample = UseState(() => new DisplayExample());
+        var stringsExample = UseState(() => new StringsExample());
+        var numbersExample = UseState(() => new NumbersExample());
+
         var formatsGrid = Layout.Grid().Columns(3).Gap(10)
                           | formatsExample.ToForm()
                           | formatsExample.ToDetails().Builder(NullBuilder);
 
-        var displayExample = UseState(() => new DisplayExample());
         var displayGrid = Layout.Grid().Columns(3).Gap(10)
                           | displayExample.ToForm()
                           | displayExample.ToDetails().Builder(NullBuilder);
 
-        var stringsExample = UseState(() => new StringsExample());
         var stringsGrid = Layout.Grid().Columns(3).Gap(10)
                           | stringsExample.ToForm()
                           | stringsExample.ToDetails().Builder(NullBuilder);
 
-        var numbersExample = UseState(() => new NumbersExample());
         var numbersGrid = Layout.Grid().Columns(3).Gap(10)
                           | numbersExample.ToForm()
                           | numbersExample.ToDetails();
