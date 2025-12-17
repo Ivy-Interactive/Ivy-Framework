@@ -3,7 +3,7 @@
   <Import Project="../../Ivy/Directory.Build.props" Condition="Exists('../../Ivy/Directory.Build.props')" />
   
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <NoWarn>CS1591</NoWarn>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <IncludeBuildOutput>false</IncludeBuildOutput>
