@@ -279,7 +279,6 @@ public class AppHub(
             {
                 try
                 {
-
                     try
                     {
                         var cp = appState.AppServices.GetService<IClientProvider>();
