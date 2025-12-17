@@ -430,11 +430,9 @@ const RadioVariant: React.FC<SelectInputWidgetProps> = ({
     option => option.value != null && option.value.toString().trim() !== ''
   );
   const stringValue =
-    value != null && value.toString().trim() !== ''
-      ? value.toString()
-      : undefined;
+    value != null && value.toString().trim() !== '' ? value.toString() : '';
 
-  const hasValue = stringValue !== undefined;
+  const hasValue = stringValue !== '';
 
   const handleValueChange = useSelectValueHandler(
     id,
