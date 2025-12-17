@@ -9,6 +9,7 @@ using Ivy.Auth.Clerk.ApiClient;
 using System.Text;
 using System.Security.Claims;
 using Microsoft.AspNetCore.WebUtilities;
+using Ivy.Auth.Clerk.ApiClient.Models;
 
 namespace Ivy.Auth.Clerk;
 
@@ -77,7 +78,35 @@ public class ClerkAuthProvider : IAuthProvider
     private FrontendApiClient MakeFrontendApiClient(IAuthSession authSession)
         => new(_frontendApiDomain, authSession.HttpMessageHandler);
 
-    private async Task<ClerkCredentials> GetClerkCredentialsAsync(IAuthSession authSession, bool includeSessionToken = false, CancellationToken cancellationToken = default)
+    private static ClerkSession? GetActiveSession(ClerkClient client)
+    {
+        var activeSessions = client.Sessions.Where(session => session.Status == "active");
+
+        // Prefer the last active session, but don't force it
+        return activeSessions.FirstOrDefault(session => session.Id == client.LastActiveSessionId)
+            ?? activeSessions.FirstOrDefault();
+    }
+
+    private async Task<ClerkSession?> GetActiveSession(FrontendApiClient frontendClient, ClerkCredentials credentials, CancellationToken cancellationToken)
+    {
+        var clientResponse = await frontendClient.GetCurrentClientAsync(credentials, cancellationToken);
+        if (clientResponse.Response is { } client &&
+            GetActiveSession(client) is { } session &&
+            session?.LastActiveToken.Jwt is { } sessionToken &&
+            await ValidateToken(sessionToken, lenientLifetimeValidation: false, cancellationToken) != null)
+        {
+            return session;
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    private Task<ClerkCredentials> GetClerkCredentialsAsync(IAuthSession authSession, CancellationToken cancellationToken)
+        => GetClerkCredentialsAsync(authSession, includeSessionToken: false, cancellationToken);
+
+    private async Task<ClerkCredentials> GetClerkCredentialsAsync(IAuthSession authSession, bool includeSessionToken, CancellationToken cancellationToken)
     {
         var credentials = new ClerkCredentials();
 
@@ -87,11 +116,13 @@ public class ClerkAuthProvider : IAuthProvider
         {
             if (await ValidateToken(authSession.AuthToken?.AccessToken, lenientLifetimeValidation: false, cancellationToken) == null)
             {
-                var clientResponse = await frontendClient.GetCurrentClientAsync(credentials, cancellationToken);
-                var session = clientResponse.Response?.Sessions.FirstOrDefault(session => session.Status == "active");
-                if (includeSessionToken && session?.LastActiveToken.Jwt is { } sessionToken)
+                if (await GetActiveSession(frontendClient, credentials, cancellationToken) is { } session)
                 {
-                    authSession.AuthToken = new AuthToken(sessionToken);
+                    credentials.Session = session;
+                    if (includeSessionToken)
+                    {
+                        authSession.AuthToken = new AuthToken(session.LastActiveToken.Jwt);
+                    }
                 }
             }
         }
@@ -115,7 +146,6 @@ public class ClerkAuthProvider : IAuthProvider
         {
             credentials.SessionToken = authSession.AuthToken?.AccessToken;
         }
-        ;
 
         return credentials;
     }
@@ -137,7 +167,7 @@ public class ClerkAuthProvider : IAuthProvider
         }
     }
 
-    private async Task<ICollection<SecurityKey>> GetSigningKeysAsync(CancellationToken cancellationToken = default)
+    private async Task<ICollection<SecurityKey>> GetSigningKeysAsync(CancellationToken cancellationToken)
     {
         // Cache keys for 1 hour
         if (_signingKeys != null && DateTime.UtcNow - _signingKeysLastFetched < TimeSpan.FromHours(1))
@@ -171,12 +201,12 @@ public class ClerkAuthProvider : IAuthProvider
 
             var newToken = await frontendClient.CreateSessionTokenAsync(sessionId, credentials, cancellationToken);
 
-            if (string.IsNullOrEmpty(newToken.Jwt))
+            if (await ValidateToken(newToken.Jwt, lenientLifetimeValidation: false, cancellationToken) == null)
             {
-                return null;
+                throw new Exception("New JWT from Clerk is invalid.");
             }
 
-            return new AuthToken(newToken.Jwt);
+            return new AuthToken(newToken.Jwt!);
         }
         catch (Exception)
         {
@@ -226,13 +256,13 @@ public class ClerkAuthProvider : IAuthProvider
             var sessionResponse = await frontendClient.TouchSessionAsync(sessionId, credentials, cancellationToken);
             var newToken = await frontendClient.CreateSessionTokenAsync(sessionId, credentials, cancellationToken);
 
-            if (string.IsNullOrEmpty(newToken.Jwt))
+            if (await ValidateToken(newToken.Jwt, lenientLifetimeValidation: false, cancellationToken) == null)
             {
                 throw new Exception("Failed to get new JWT from Clerk.");
             }
             else
             {
-                return new AuthToken(newToken.Jwt);
+                return new AuthToken(newToken.Jwt!);
             }
         }
         catch (Exception)
@@ -243,8 +273,8 @@ public class ClerkAuthProvider : IAuthProvider
 
     public async Task LogoutAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
     {
-        var jwt = authSession.AuthToken?.AccessToken;
         var credentials = await GetClerkCredentialsAsync(authSession, cancellationToken: cancellationToken);
+        var jwt = authSession.AuthToken?.AccessToken;
 
         try
         {
@@ -281,13 +311,13 @@ public class ClerkAuthProvider : IAuthProvider
 
             var frontendClient = MakeFrontendApiClient(authSession);
             var newToken = await frontendClient.CreateSessionTokenAsync(sessionId, credentials, cancellationToken);
-            if (string.IsNullOrEmpty(newToken.Jwt))
+            if (await ValidateToken(newToken.Jwt, lenientLifetimeValidation: false, cancellationToken) == null)
             {
-                throw new Exception("Failed to get new JWT from Clerk.");
+                throw new Exception("New JWT from Clerk is invalid.");
             }
             else
             {
-                return new AuthToken(newToken.Jwt);
+                return new AuthToken(newToken.Jwt!);
             }
         }
         catch (Exception)
@@ -307,17 +337,14 @@ public class ClerkAuthProvider : IAuthProvider
         {
             var credentials = await GetClerkCredentialsAsync(authSession, cancellationToken: cancellationToken);
 
-            var (principal, _) = await ValidateToken(authSession.AuthToken?.AccessToken, lenientLifetimeValidation: true, cancellationToken)
-                ?? throw new Exception("Failed to validate access token in GetUserInfoAsync.");
+            var frontendClient = MakeFrontendApiClient(authSession);
 
-            if (principal.FindFirst("sid")?.Value is not { } sessionId)
+            if ((credentials.Session ?? await GetActiveSession(frontendClient, credentials, cancellationToken)) is not { } session)
             {
                 return null;
             }
 
-            var frontendClient = MakeFrontendApiClient(authSession);
-            var session = await frontendClient.GetSessionAsync(sessionId, credentials, cancellationToken);
-            var user = session.Response.User;
+            var user = session.User;
 
             string name = user.FirstName ?? "";
             if (!string.IsNullOrEmpty(user.LastName))
