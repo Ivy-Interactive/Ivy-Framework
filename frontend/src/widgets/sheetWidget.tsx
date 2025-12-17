@@ -53,7 +53,7 @@ export const SheetWidget: React.FC<SheetWidgetProps> = ({
       <SheetContent
         style={styles}
         className={cn(
-          'h-full flex flex-col p-0 gap-0',
+          'h-auto max-h-full flex flex-col p-0 gap-0',
           isOpen ? 'sheet-animate-enter' : 'sheet-animate-exit'
         )}
         onOpenAutoFocus={e => {
@@ -66,7 +66,7 @@ export const SheetWidget: React.FC<SheetWidgetProps> = ({
             {description && <SheetDescription>{description}</SheetDescription>}
           </SheetHeader>
         )}
-        <div className="flex-1 pb-0 pt-1 pl-4 pr-4 mt-4 overflow-y-auto">
+        <div className="min-h-0 pb-0 pt-1 pl-4 pr-4 mt-4 overflow-y-auto">
           {slots.Content}
         </div>
       </SheetContent>
