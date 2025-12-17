@@ -1,4 +1,5 @@
 import React, { useCallback } from 'react';
+import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/Icon';
 import { cn, getIvyHost, camelCase } from '@/lib/utils';
@@ -37,7 +38,8 @@ interface ButtonWidgetProps {
     | 'Secondary'
     | 'Ghost'
     | 'Link'
-    | 'Inline';
+    | 'Inline'
+    | 'Ai';
   disabled: boolean;
   tooltip?: string;
   foreground?: string;
@@ -206,6 +208,86 @@ export const ButtonWidget: React.FC<ButtonWidgetProps> = ({
       {children}
     </>
   );
+
+  if (variant === 'Ai') {
+    // Determine border radius classes based on borderRadius prop
+    const getBorderRadiusClass = () => {
+      if (borderRadius === 'Full') {
+        return { container: 'rounded-full', button: 'rounded-full' };
+      }
+      if (borderRadius === 'Rounded') {
+        return { container: 'rounded-lg', button: 'rounded-md' };
+      }
+      return { container: 'rounded-none', button: 'rounded-md' };
+    };
+
+    const borderRadiusClasses = getBorderRadiusClass();
+
+    // Determine container height based on button size
+    const getContainerHeight = () => {
+      if (buttonSize === 'icon') return { container: 'h-10', button: 'h-9' };
+      if (buttonSize === 'sm') return { container: 'h-9', button: 'h-[35px]' };
+      if (buttonSize === 'lg') return { container: 'h-11', button: 'h-10' };
+      return { container: 'h-10', button: 'h-9' };
+    };
+
+    return (
+      <div
+        className={cn(
+          'relative p-[2px] w-fit overflow-hidden',
+          getContainerHeight().container,
+          borderRadiusClasses.container,
+          disabled && 'opacity-50'
+        )}
+      >
+        {/* Rotating RGB gradient border - scaled up to cover entire button */}
+        <motion.div
+          className="absolute inset-[-50%] aspect-square"
+          style={{
+            background:
+              'conic-gradient(from 0deg, #ff0000, #ff8000, #ffff00, #80ff00, #00ff00, #00ff80, #00ffff, #0080ff, #0000ff, #8000ff, #ff00ff, #ff0080, #ff0000)',
+            filter: 'blur(10px)',
+          }}
+          animate={{ rotate: 360 }}
+          transition={{
+            duration: 3,
+            repeat: Infinity,
+            ease: 'linear',
+          }}
+        />
+        <ButtonWithTooltip
+          asChild={hasUrl}
+          size={buttonSize}
+          onClick={hasUrl ? undefined : handleClick}
+          variant={'ai'}
+          disabled={disabled}
+          className={cn(
+            'relative z-10 flex items-center gap-1',
+            getContainerHeight().button,
+            borderRadiusClasses.button,
+            buttonSize !== 'icon' && 'w-min',
+            hasChildren &&
+              'p-2 h-auto items-start justify-start text-left inline-block'
+          )}
+          tooltipText={tooltip || undefined}
+          data-testid={dataTestId}
+        >
+          {hasUrl && validatedHref ? (
+            <a
+              href={validatedHref}
+              {...(isDownloadUrl || isMailto
+                ? {}
+                : { target: '_blank', rel: 'noopener noreferrer' })}
+            >
+              {buttonContent}
+            </a>
+          ) : (
+            buttonContent
+          )}
+        </ButtonWithTooltip>
+      </div>
+    );
+  }
 
   return (
     <ButtonWithTooltip

@@ -10,6 +10,12 @@ public class LoadingApp : SampleBase
     {
         var isLoading = UseState(false);
 
+        UseEffect(async () =>
+        {
+            await Task.Delay(2000);
+            isLoading.Set(false);
+        }, [isLoading]);
+
         return new Fragment()
                | Layout.Vertical() | new Button("Show Loading", () => isLoading.Set(true))
                | isLoading.True(() => new Loading())!;

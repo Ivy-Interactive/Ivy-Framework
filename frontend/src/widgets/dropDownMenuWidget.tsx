@@ -168,6 +168,7 @@ export const DropDownMenuWidget: React.FC<DropDownMenuWidgetProps> = ({
         <div>{slots.Trigger}</div>
       </DropdownMenuTrigger>
       <DropdownMenuContent
+        onClick={e => e.stopPropagation()}
         align={camelCase(align) as 'center' | 'end' | 'start' | undefined}
         side={
           camelCase(side) as 'top' | 'right' | 'bottom' | 'left' | undefined

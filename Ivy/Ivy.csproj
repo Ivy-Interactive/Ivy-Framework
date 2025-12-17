@@ -71,8 +71,6 @@
     <PackageReference Include="YamlDotNet" Version="16.3.0" />
 
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
-
-
   </ItemGroup>
 
   <ItemGroup>

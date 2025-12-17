@@ -1,4 +1,5 @@
 ---
+title: CLI Overview
 searchHints:
   - cli
   - command-line
