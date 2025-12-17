@@ -61,7 +61,7 @@ public class HttpTunnelingController : Controller
 
         var fullRequestId = $"{connectionId}:{response.RequestId}";
 
-        if (!_pendingRequests.TryGetValue(fullRequestId, out var pendingRequest))
+        if (!_pendingRequests.TryRemove(fullRequestId, out var pendingRequest))
         {
             logger.LogWarning("HttpResponse: Request {RequestId} not found or already completed", response.RequestId);
             return NotFound("Request not found");
