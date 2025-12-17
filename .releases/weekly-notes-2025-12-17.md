@@ -2,6 +2,22 @@
 
 ## Breaking Changes
 
+### .NET 10 Upgrade
+
+Ivy Framework now targets .NET 10, bringing the latest runtime performance improvements and language features. To upgrade your project:
+
+1. Update your project's target framework:
+
+```xml
+<PropertyGroup>
+  <TargetFramework>net10.0</TargetFramework>
+</PropertyGroup>
+```
+
+2. Install the .NET 10 SDK from [https://dotnet.microsoft.com/download](https://dotnet.microsoft.com/download)
+
+All Ivy packages and dependencies have been updated to support .NET 10.
+
 ### Namespace Simplification
 
 The `AppAttribute` and `ViewBase` classes have been moved to the root `Ivy` namespace for a simpler, cleaner import structure:
@@ -37,6 +53,8 @@ public class MyApp : ViewBase
     }
 }
 ```
+
+**Microsoft Entra authentication users**: If you're using the Microsoft Entra auth provider, the underlying Microsoft.Identity.Client library has been updated, which may include security fixes and performance improvements. No code changes are required on your part.
 
 ## Authentication Improvements
 
@@ -93,6 +111,66 @@ The provider automatically detects whether you're using development or productio
 
 See the [Clerk authentication documentation](https://docs.ivy-framework.com/authentication/clerk) for detailed setup instructions.
 
+### Multi-Tab Authentication Synchronization
+
+Authentication now works seamlessly across multiple tabs and windows. When you sign in or sign out in one tab, all other tabs from the same browser automatically sync.
+
+**Key capabilities:**
+
+- **Sign in once, authenticated everywhere**: Sign in on one tab and all your other open tabs instantly get authenticated without manual refresh
+- **Sign out once, logged out everywhere**: Logging out in one tab immediately logs you out across all tabs for better security
+- **Automatic session recovery**: Opening a new tab picks up your existing authentication state
+
+### New `IAuthSession` Interface
+
+The authentication system now uses `IAuthSession` instead of passing tokens directly. This provides better encapsulation and type safety:
+
+```csharp
+public interface IAuthSession
+{
+    AuthToken? AuthToken { get; set; }
+    string? AuthSessionData { get; set; }
+}
+```
+
+**For custom auth provider implementations**, you'll need to update your method signatures:
+
+```csharp
+// New way
+public Task<AuthToken?> LoginAsync(IAuthSession authSession, string email, string password, CancellationToken cancellationToken)
+{
+    // Access token via authSession.AuthToken
+    // Store additional session data in authSession.AuthSessionData
+}
+```
+
+All `IAuthProvider` methods now receive an `IAuthSession` parameter instead of raw tokens.
+
+### Session Data Storage
+
+You can now store additional authentication-related data beyond just access tokens:
+
+```csharp
+// Store custom session data (automatically serialized to JSON)
+authSession.SetAuthSessionData(new { UserId = "123", Preferences = userPrefs });
+
+// Retrieve session data
+var sessionData = authSession.GetAuthSessionData<MySessionData>();
+```
+
+Session data is stored in cookies and persists across page reloads.
+
+### Centralized JSON Serialization
+
+A new `Ivy.Core.Helpers.JsonHelper` class has been introduced to centralize `JsonSerializerOptions` across the framework. This ensures consistent serialization behavior and improves compatibility with Native AOT and Single-File publishing.
+
+```csharp
+// Use the centralized options for consistent serialization
+var json = JsonSerializer.Serialize(myObject, JsonHelper.DefaultOptions);
+```
+
+This ensures that all parts of the framework use the same serialization settings, reducing subtle bugs related to naming policies or type resolution.
+
 ## Error Handling Improvements
 
 ### Better Exception Details in Development
@@ -123,20 +201,8 @@ ChromeSettings.Default()
 The `Button` widget now includes an eye-catching AI variant with an animated rainbow gradient border, perfect for highlighting AI-powered features and actions:
 
 ```csharp
-// Basic AI button
 new Button("Generate with AI", onClick, variant: ButtonVariant.Ai)
-
-// With icon
-new Button("Ask AI", onClick, variant: ButtonVariant.Ai)
     .Icon(Icons.Sparkles)
-
-// Different sizes
-new Button("Small AI", onClick, variant: ButtonVariant.Ai).Small()
-new Button("Large AI", onClick, variant: ButtonVariant.Ai).Large()
-
-// Fully rounded corners
-new Button("AI Assistant", onClick, variant: ButtonVariant.Ai)
-    .BorderRadius(BorderRadius.Full)
 ```
 
 ## Widget Updates
@@ -284,22 +350,11 @@ The `SelectInput` widget now properly handles nullable values when cleared. Both
 
 ### `UseRef` Hook for Non-Reactive State
 
-Ivy now includes a `UseRef` hook for storing values that persist across renders without triggering re-renders when they change. This is perfect for storing references, cached values, or internal state that doesn't affect the UI:
+Ivy now includes a `UseRef` hook for storing values that persist across renders without triggering re-renders, similar to React's useRef.
 
 ```csharp
-// Store a value without triggering re-renders
 var counterRef = this.UseRef(0);
-
-// Update the value (doesn't cause a re-render)
-counterRef.Set(counterRef.Value + 1);
-
-// Access the current value
-var currentCount = counterRef.Value;
-```
-
-```csharp
-// Initialize with a factory function
-var expensiveRef = this.UseRef(() => CalculateExpensiveValue());
+counterRef.Set(counterRef.Value + 1); // No re-render
 ```
 
 **Key differences from `UseState`:**
@@ -316,7 +371,7 @@ The `UseAlert` and `UseTrigger` hooks have been refactored internally to be more
 
 ### Expanded Color Palette
 
-The design system now includes a comprehensive set of neutral and chromatic colors, all with proper foreground color variants for accessible text. These colors are automatically injected as CSS variables and work seamlessly in both light and dark themes.
+The design system now includes a comprehensive set of neutral and chromatic colors (Slate, Zinc, Red, Emerald, Sky, Indigo, etc.), each with proper foreground variants for accessibility.
 
 **Neutral colors available:**
 
@@ -326,33 +381,11 @@ The design system now includes a comprehensive set of neutral and chromatic colo
 
 - Red, Orange, Amber, Yellow, Lime, Green, Emerald, Teal, Cyan, Sky, Blue, Indigo, Violet, Purple, Fuchsia, Pink, Rose
 
-Each color includes both a background variant and a foreground variant (e.g., `--red` and `--red-foreground`), ensuring text remains readable when placed on colored backgrounds.
-
 ## Performance Improvements
 
 ### Font Loading Optimization
 
 Ivy now preloads all essential Geist and Geist Mono font weights (Regular, Medium, SemiBold, Bold) in the initial HTML document. This eliminates the font flicker that could occur during page load when the browser discovers fonts late in the rendering process.
-
-## Platform Updates
-
-### .NET 10 Upgrade
-
-Ivy Framework now targets .NET 10, bringing the latest runtime performance improvements and language features. To upgrade your project:
-
-1. Update your project's target framework:
-
-```xml
-<PropertyGroup>
-  <TargetFramework>net10.0</TargetFramework>
-</PropertyGroup>
-```
-
-2. Install the .NET 10 SDK from [https://dotnet.microsoft.com/download](https://dotnet.microsoft.com/download)
-
-All Ivy packages and dependencies have been updated to support .NET 10, including Entity Framework Core, Microsoft Identity libraries, and other core dependencies.
-
-**Microsoft Entra authentication users**: If you're using the Microsoft Entra auth provider, the underlying Microsoft.Identity.Client library has been updated, which may include security fixes and performance improvements. No code changes are required on your part.
 
 ## Security Improvements
 
@@ -393,6 +426,58 @@ Fixed a security vulnerability in the document copy-to-markdown functionality wh
 - The escaping order is critical: backslashes must be escaped before other special characters to prevent injection
 
 This security fix applies to the DocumentTools widget's table cell processing and ensures that markdown table generation is safe from injection attacks. The improvement is automatic and requires no code changes in your applications.
+
+## Developer Tools
+
+### Enhanced Roslyn Analyzer for Hook Rules
+
+The `Ivy.Analyser` package now strictly enforces Rules of Hooks at compile time, catching errors like conditional hooks or hooks in loops.
+
+### Widget Tree Debug Logging
+
+You can now enable detailed widget tree update logging by setting `IVY_DUMP_WIDGET_TREES=1` environment variable.
+
+## Layout Improvements
+
+### Loading Widget Simplification
+
+The `Loading` widget has been simplified to render directly without complex internal state. This makes it more lightweight and easier to use for simple loading indicators throughout your application.
+
+### Code Widget XML Language Support
+
+The `Code` widget now supports XML syntax highlighting (`Languages.Xml`).
+
+### Callout Text Color Consistency
+
+The `Callout` widget now uses consistent text colors across all variants, improving readability and accessibility.
+
+### Chart Tooltip Improvements
+
+Chart tooltips now render correctly without being cut off by container boundaries, thanks to improved positioning logic.
+
+### EmbedCard Focus Ring Removal
+
+The `EmbedCard` widget no longer shows a green focus ring when keyboard navigating to embedded links, providing a cleaner visual appearance.
+
+### Details Widget Size Control
+
+The `Details` widget now supports `.Small()`, `.Medium()`, and `.Large()` size variants, with refined padding and typography scaling.
+
+### Enhanced Card Header Layout
+
+Card headers now support full layout widgets for better control over alignment and content.
+
+### Simplified Box Widget Defaults
+
+The `Box` widget now defaults to a cleaner, neutral appearance (no background color, 1px border) instead of the previous primary-colored default.
+
+### SelectInput Nullable Value Handling
+
+The `SelectInput` widget now properly handles nullable values when cleared, setting them to an empty string instead of `undefined`.
+
+### TableBuilder Reset Method
+
+`TableBuilder` now includes a `Reset()` method that restores all columns to their initial defaults.
 
 ## Bug Fixes
 
