@@ -78,7 +78,7 @@ export const ProgressWidget: React.FC<ProgressWidgetProps> = ({
         )}
         <Progress
           value={value}
-          className="bg-muted"
+          className="bg-neutral/10"
           style={
             {
               '--progress-background': colorVariant

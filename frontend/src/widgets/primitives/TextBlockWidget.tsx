@@ -148,7 +148,7 @@ const variantMap: VariantMap = {
     </p>
   ),
   ExtraLarge: ({ children, className, style }) => (
-    <div className={cn('text-2xl font-medium', className)} style={style}>
+    <div className={cn('text-3xl ', className)} style={style}>
       {children}
     </div>
   ),

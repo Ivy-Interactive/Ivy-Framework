@@ -73,6 +73,6 @@ public class MetricView(
                             : Text.Small(x.TrendComparedToPreviousPeriod.Value.ToString("P1")).Color(Colors.Destructive)
                         : null)),
                  x.GoalAchieved != null ? new Progress((int)Math.Round(x.GoalAchieved.Value * 100.0)).ColorVariant(Progress.ColorVariants.EmeraldGradient).Goal(x.GoalFormatted) : null
-            ).Header(Text.H4(title).NoWrap().Overflow(Overflow.Ellipsis).Color(Colors.Gray));
+            ).Header(Text.H4(title).NoWrap().Overflow(Overflow.Ellipsis).Color(Colors.Neutral));
     }
 }

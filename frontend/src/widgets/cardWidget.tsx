@@ -124,9 +124,6 @@ export const CardWidget: React.FC<CardWidgetProps> = ({
         ? 'cursor-pointer'
         : 'cursor-pointer transform hover:-translate-x-[4px] hover:-translate-y-[4px] active:translate-x-[-2px] active:translate-y-[-2px] transition';
 
-  // When scale is set, let the card size itself based on content + scale padding
-  // When scale is NOT set, fill container height (h-full)
-  // Explicit height always takes precedence
   const heightClass = height ? null : scale ? null : 'h-full';
 
   return (
