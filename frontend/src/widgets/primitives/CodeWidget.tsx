@@ -88,8 +88,7 @@ const CodeWidget: React.FC<CodeWidgetProps> = memo(
         {showCopyButton && <MemoizedCopyButton textToCopy={content} />}
         <ScrollArea
           className={cn(
-            'w-full',
-            height && 'h-full',
+            'w-full h-full',
             showBorder && 'border border-border rounded-md',
             showCopyButton && 'pr-16'
           )}
