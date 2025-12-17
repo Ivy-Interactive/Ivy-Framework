@@ -157,13 +157,13 @@ public class ClerkAuthProvider : IAuthProvider
         var frontendClient = MakeFrontendApiClient(authSession);
         if (_isProduction)
         {
-            var environmentResponse = await frontendClient.GetEnvironmentAsync(cancellationToken: cancellationToken);
+            await frontendClient.GetEnvironmentAsync(cancellationToken: cancellationToken);
             await GetClerkCredentialsAsync(authSession, includeSessionToken: true, cancellationToken: cancellationToken);
         }
         else
         {
             var credentials = await GetClerkCredentialsAsync(authSession, includeSessionToken: false, cancellationToken: cancellationToken);
-            var updateEnvironmentResponse = await frontendClient.UpdateEnvironmentAsync(credentials, _origin, cancellationToken);
+            await frontendClient.UpdateEnvironmentAsync(credentials, _origin, cancellationToken);
         }
     }
 
@@ -253,7 +253,7 @@ public class ClerkAuthProvider : IAuthProvider
         var frontendClient = MakeFrontendApiClient(authSession);
         try
         {
-            var sessionResponse = await frontendClient.TouchSessionAsync(sessionId, credentials, cancellationToken);
+            await frontendClient.TouchSessionAsync(sessionId, credentials, cancellationToken);
             var newToken = await frontendClient.CreateSessionTokenAsync(sessionId, credentials, cancellationToken);
 
             if (await ValidateToken(newToken.Jwt, lenientLifetimeValidation: false, cancellationToken) == null)
