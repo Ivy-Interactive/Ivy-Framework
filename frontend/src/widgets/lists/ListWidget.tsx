@@ -24,7 +24,7 @@ export const ListWidget = ({ children }: ListWidgetProps) => {
   const rowVirtualizer = useVirtualizer({
     count: childArray.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => 60,
+    estimateSize: () => 56,
     // Allow dynamic measurement so rows expand to fit multi-line content
     measureElement: el => el.getBoundingClientRect().height,
     overscan: 6,
