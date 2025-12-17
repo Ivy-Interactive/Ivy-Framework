@@ -17,7 +17,7 @@ public class ClerkVerificationOAuth
     public int? Attempts { get; init; }
 
     [JsonPropertyName("expire_at")]
-    public long ExpireAt { get; init; }
+    public long? ExpireAt { get; init; }
 
     [JsonPropertyName("external_verification_redirect_url")]
     public string? ExternalVerificationRedirectUrl { get; init; }

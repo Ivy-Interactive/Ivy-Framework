@@ -114,7 +114,7 @@ public class ClerkAuthProvider : IAuthProvider
 
         if (_isProduction)
         {
-            if (await ValidateToken(authSession.AuthToken?.AccessToken, lenientLifetimeValidation: false, cancellationToken) == null)
+            if (!includeSessionToken || await ValidateToken(authSession.AuthToken?.AccessToken, lenientLifetimeValidation: false, cancellationToken) == null)
             {
                 if (await GetActiveSession(frontendClient, credentials, cancellationToken) is { } session)
                 {
@@ -356,12 +356,14 @@ public class ClerkAuthProvider : IAuthProvider
                 ? user.EmailAddresses.FirstOrDefault(a => a.Id == user.PrimaryEmailAddressId)?.EmailAddress ?? user.EmailAddresses.FirstOrDefault()?.EmailAddress
                 : user.EmailAddresses.FirstOrDefault()?.EmailAddress;
 
-            if (email is null)
+            var emailOrUsername = email ?? user.Username;
+
+            if (emailOrUsername is null)
             {
                 return null;
             }
 
-            return new UserInfo(user.Id, email ?? "", name, user.ProfileImageUrl);
+            return new UserInfo(user.Id, emailOrUsername, name, user.ProfileImageUrl);
         }
         catch (Exception)
         {

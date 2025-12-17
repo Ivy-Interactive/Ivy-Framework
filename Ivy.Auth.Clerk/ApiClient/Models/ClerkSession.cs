@@ -14,13 +14,13 @@ public class ClerkSession
     public string Status { get; set; } = default!;
 
     [JsonPropertyName("expire_at")]
-    public long ExpireAt { get; set; }
+    public long? ExpireAt { get; set; }
 
     [JsonPropertyName("abandon_at")]
-    public long AbandonAt { get; set; }
+    public long? AbandonAt { get; set; }
 
     [JsonPropertyName("last_active_at")]
-    public long LastActiveAt { get; set; }
+    public long? LastActiveAt { get; set; }
 
     [JsonPropertyName("last_active_organization_id")]
     public string? LastActiveOrganizationId { get; set; }
