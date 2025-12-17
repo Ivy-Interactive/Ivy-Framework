@@ -48,6 +48,7 @@ export const useDataLoading = ({
   const loadingRef = useRef(false);
   const currentRowCountRef = useRef(0);
   const batchSize = config.batchSize ?? 20;
+  const connectionKey = `${connection.connectionId}-${connection.sourceId}`;
 
   // Reset currentRowCountRef when filter or sort changes
   useEffect(() => {
@@ -57,7 +58,7 @@ export const useDataLoading = ({
   // Reset row count when connection changes
   useEffect(() => {
     currentRowCountRef.current = 0;
-  }, [connection]);
+  }, [connectionKey]);
 
   // Load initial data
   useEffect(() => {
@@ -135,7 +136,7 @@ export const useDataLoading = ({
     };
     loadInitialData();
   }, [
-    connection,
+    connectionKey,
     activeFilter,
     activeSort,
     columnOrderLength,
@@ -195,7 +196,7 @@ export const useDataLoading = ({
       loadingRef.current = false;
     }
   }, [
-    connection,
+    connectionKey,
     hasMore,
     activeFilter,
     activeSort,
