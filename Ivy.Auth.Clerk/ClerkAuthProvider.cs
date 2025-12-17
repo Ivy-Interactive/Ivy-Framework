@@ -333,42 +333,19 @@ public class ClerkAuthProvider : IAuthProvider
 
     public async Task<UserInfo?> GetUserInfoAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
     {
-        try
-        {
-            var credentials = await GetClerkCredentialsAsync(authSession, cancellationToken: cancellationToken);
-
-            var frontendClient = MakeFrontendApiClient(authSession);
-
-            if ((credentials.Session ?? await GetActiveSession(frontendClient, credentials, cancellationToken)) is not { } session)
-            {
-                return null;
-            }
-
-            var user = session.User;
-
-            string name = user.FirstName ?? "";
-            if (!string.IsNullOrEmpty(user.LastName))
-            {
-                name += " " + user.LastName;
-            }
-
-            var email = user.PrimaryEmailAddressId != null
-                ? user.EmailAddresses.FirstOrDefault(a => a.Id == user.PrimaryEmailAddressId)?.EmailAddress ?? user.EmailAddresses.FirstOrDefault()?.EmailAddress
-                : user.EmailAddresses.FirstOrDefault()?.EmailAddress;
-
-            var emailOrUsername = email ?? user.Username;
-
-            if (emailOrUsername is null)
-            {
-                return null;
-            }
-
-            return new UserInfo(user.Id, emailOrUsername, name, user.ProfileImageUrl);
-        }
-        catch (Exception)
+        if (await ValidateToken(authSession.AuthToken?.AccessToken, lenientLifetimeValidation: false, cancellationToken) is not var (claims, _))
         {
             return null;
         }
+
+        return new UserInfo(
+            claims.FindFirst("sub")?.Value.NullIfEmpty() ?? "",
+            claims.FindFirst("email")?.Value.NullIfEmpty() ?? claims.FindFirst("username")?.Value.NullIfEmpty() ?? "",
+            claims.FindFirst("full_name")?.Value.NullIfEmpty(),
+            claims.FindFirst("has_image")?.Value != "false"
+                ? claims.FindFirst("image_url")?.Value.NullIfEmpty()
+                : null
+        );
     }
 
     public async Task<TokenLifetime?> GetAccessTokenLifetimeAsync(IAuthSession authSession, CancellationToken cancellationToken = default)
@@ -433,7 +410,10 @@ public class ClerkAuthProvider : IAuthProvider
 
         var signingKeys = await GetSigningKeysAsync(cancellationToken);
 
-        var handler = new JwtSecurityTokenHandler();
+        var handler = new JwtSecurityTokenHandler
+        {
+            MapInboundClaims = false
+        };
         try
         {
             var principal = handler.ValidateToken(jwt, new TokenValidationParameters

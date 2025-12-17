@@ -88,6 +88,28 @@ Clerk supports numerous social authentication providers:
 
 > **Note**: Clerk provides development OAuth credentials for testing. For production, you'll need to configure your own OAuth applications with each provider. See [Clerk's OAuth documentation](https://clerk.com/docs/authentication/social-connections/overview) for detailed setup instructions.
 
+### Step 5: Configure Session Token
+
+For Ivy to access user information from Clerk, you need to add custom claims to your session tokens:
+
+1. **Go to "Configure → Sessions"** in your Clerk Dashboard
+2. **Click "Edit" in the "Customize session token" section**
+3. **Add the following JSON configuration:**
+
+```json
+{
+    "email": "{{user.primary_email_address}}",
+    "username": "{{user.username}}",
+    "full_name": "{{user.full_name}}",
+    "image_url": "{{user.image_url}}",
+    "has_image": "{{user.has_image}}"
+}
+```
+
+4. **Click "Save"**
+
+These custom claims allow Ivy to extract user information (email, username, full name, and profile image) from the JWT token for use in your application.
+
 ### Development vs Production Modes
 
 Clerk provides separate API keys for development and production:
