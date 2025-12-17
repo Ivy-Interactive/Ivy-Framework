@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  
+
   <Import Project="../../Ivy/Directory.Build.props" Condition="Exists('../../Ivy/Directory.Build.props')" />
-  
+
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -32,10 +32,6 @@
 
   <ItemGroup>
     <None Update="README.md" Pack="true" PackagePath=""/>
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Clerk.Net" Version="1.15.0" />
   </ItemGroup>
 
 </Project>
