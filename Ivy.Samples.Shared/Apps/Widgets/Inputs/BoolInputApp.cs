@@ -158,22 +158,47 @@ public class BoolInputApp : SampleBase
 
             ;
 
-        var dataBinding = CreateNumericTypeTests();
-
-        var sizes = CreateSizesSection();
-
         return Layout.Vertical()
                | Text.H1("BoolInput")
                | Text.H2("Sizes")
-               | sizes
+               | new BoolInputSizes()
                | Text.H2("Variants")
                | variants
                | Text.H2("Data Binding")
-               | dataBinding
+               | new BoolInputDataBinding()
             ;
     }
 
-    private object CreateNumericTypeTests()
+    private static object CreateBoolInputVariants(object state)
+    {
+        if (state is not IAnyState anyState)
+            return Text.Block("Not an IAnyState");
+
+        var stateType = anyState.GetStateType();
+        var isNullable = stateType.IsNullableType();
+
+        if (isNullable)
+        {
+            // For nullable states, only show checkbox variant
+            return anyState.ToBoolInput();
+        }
+
+        // For non-nullable states, show all three variants
+        return Layout.Vertical()
+               | anyState.ToBoolInput()
+               | anyState
+                   .ToBoolInput()
+                   .Variant(BoolInputs.Switch)
+               | anyState
+                   .ToBoolInput()
+                   .Variant(BoolInputs.Toggle)
+                   .Icon(Icons.Star);
+    }
+}
+
+public class BoolInputDataBinding : ViewBase
+{
+    public override object Build()
     {
         var numericTypes = new (string TypeName, object NonNullableState, object NullableState)[]
         {
@@ -252,7 +277,36 @@ public class BoolInputApp : SampleBase
         }
     }
 
-    private object CreateSizesSection()
+    private static object CreateBoolInputVariants(object state)
+    {
+        if (state is not IAnyState anyState)
+            return Text.Block("Not an IAnyState");
+
+        var stateType = anyState.GetStateType();
+        var isNullable = stateType.IsNullableType();
+
+        if (isNullable)
+        {
+            // For nullable states, only show checkbox variant
+            return anyState.ToBoolInput();
+        }
+
+        // For non-nullable states, show all three variants
+        return Layout.Vertical()
+               | anyState.ToBoolInput()
+               | anyState
+                   .ToBoolInput()
+                   .Variant(BoolInputs.Switch)
+               | anyState
+                   .ToBoolInput()
+                   .Variant(BoolInputs.Toggle)
+                   .Icon(Icons.Star);
+    }
+}
+
+public class BoolInputSizes : ViewBase
+{
+    public override object Build()
     {
         var trueState = UseState(true);
         var falseState = UseState(false);
@@ -304,29 +358,5 @@ public class BoolInputApp : SampleBase
                    .Large();
     }
 
-    private static object CreateBoolInputVariants(object state)
-    {
-        if (state is not IAnyState anyState)
-            return Text.Block("Not an IAnyState");
 
-        var stateType = anyState.GetStateType();
-        var isNullable = stateType.IsNullableType();
-
-        if (isNullable)
-        {
-            // For nullable states, only show checkbox variant
-            return anyState.ToBoolInput();
-        }
-
-        // For non-nullable states, show all three variants
-        return Layout.Vertical()
-               | anyState.ToBoolInput()
-               | anyState
-                   .ToBoolInput()
-                   .Variant(BoolInputs.Switch)
-               | anyState
-                   .ToBoolInput()
-                   .Variant(BoolInputs.Toggle)
-                   .Icon(Icons.Star);
-    }
 }

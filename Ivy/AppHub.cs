@@ -6,6 +6,7 @@ using Ivy.Client;
 using Ivy.Core;
 using Ivy.Core.Helpers;
 using Ivy.Core.Exceptions;
+using Ivy.Core.HttpTunneling;
 using Ivy.Helpers;
 using Ivy.Hooks;
 using Ivy.Services;
@@ -27,7 +28,7 @@ public class AppHub(
     IQueryableRegistry queryableRegistry
     ) : Hub
 {
-    private AppArgs GetAppArgs(string connectionId, string appId, string? navigationAppId, HttpContext httpContext)
+    private AppArgs GetAppArgs(string connectionId, string appId, string? navigationAppId, HttpContext httpContext, string requestScheme)
     {
         string? appArgs = null;
         if (httpContext.Request.Query.TryGetValue("appArgs", out var appArgsParam))
@@ -35,8 +36,7 @@ public class AppHub(
             appArgs = appArgsParam.ToString().NullIfEmpty();
         }
 
-        var request = httpContext.Request;
-        return new AppArgs(connectionId, appId, navigationAppId, appArgs ?? server.Args?.Args, request.Scheme, request.Host.Value!);
+        return new AppArgs(connectionId, appId, navigationAppId, appArgs ?? server.Args?.Args, requestScheme, httpContext.Request.Host.Value!);
     }
 
     public override async Task OnConnectedAsync()
@@ -67,6 +67,16 @@ public class AppHub(
             appServices.AddSingleton<IClientProvider>(clientProvider);
             appServices.AddSingleton<IUploadService>(new UploadService(Context.ConnectionId, clientProvider));
 
+            var tunneledHttpHandler = new TunneledHttpMessageHandler(clientProvider, Context.ConnectionId);
+            appServices.AddSingleton<HttpMessageHandler>(tunneledHttpHandler);
+
+            var request = httpContext.Request;
+            var requestScheme = request.Scheme;
+            if (request.Headers.TryGetValue("X-Forwarded-Proto", out var forwardedProto))
+            {
+                requestScheme = forwardedProto.ToString();
+            }
+
             if (server.AuthProviderType != null)
             {
                 var authProvider = server.ServiceProvider!.GetService<IAuthProvider>() ?? throw new Exception("IAuthProvider not found");
@@ -74,16 +84,21 @@ public class AppHub(
                 authProvider = new CheckedAuthProvider(authProvider);
 #endif
 
-                var authSession = AuthHelper.GetAuthSession(httpContext);
+                var authSession = AuthHelper.GetAuthSession(httpContext, tunneledHttpHandler);
                 var authService = new AuthService(authProvider, authSession, clientProvider, sessionStore);
 
+                var oldSession = authSession.TakeSnapshot();
                 await TimeoutHelper.WithTimeoutAsync(
-                    ct => authProvider.InitializeAsync(authSession, httpContext.Request.Scheme, httpContext.Request.Host.Value!, ct),
+                    ct => authProvider.InitializeAsync(authSession, requestScheme, request.Host.Value!, ct),
                     Context.ConnectionAborted);
-                authService.SetAuthSessionDataCookies();
+                if (authSession.HasChangedSince(oldSession))
+                {
+                    authService.SetAuthCookies(reloadPage: false);
+                }
+
                 appServices.AddSingleton<IAuthService>(s => authService);
 
-                var oldSession = authSession.TakeSnapshot();
+                oldSession = authSession.TakeSnapshot();
                 try
                 {
                     if (!string.IsNullOrEmpty(oldSession.AuthToken?.AccessToken))
@@ -134,7 +149,7 @@ public class AppHub(
 
             appServices.AddSingleton(routeResult.AppRepository);
 
-            var appArgs = GetAppArgs(Context.ConnectionId, routeResult.AppId, routeResult.NavigationAppId, httpContext);
+            var appArgs = GetAppArgs(Context.ConnectionId, routeResult.AppId, routeResult.NavigationAppId, httpContext, requestScheme);
 
             logger.LogInformation("Connected: {ConnectionId} [{AppId}]", Context.ConnectionId, routeResult.AppId);
 
@@ -257,6 +272,9 @@ public class AppHub(
                 logger.LogInformation("Client {ConnectionId} disconnected normally", Context.ConnectionId);
             }
 
+            // Cancel all pending HTTP tunnel requests for this connection
+            HttpTunnelingController.CancelRequestsForConnection(Context.ConnectionId, "SignalR connection closed");
+
             if (sessionStore.Sessions.TryRemove(Context.ConnectionId, out var appState))
             {
                 try
@@ -360,18 +378,28 @@ public class AppHub(
                             }
                             else
                             {
-                                var expiresAt = await TimeoutHelper.WithTimeoutAsync(
-                                    ct => authProvider.GetAccessTokenExpirationAsync(authSession, ct),
+                                var lifetime = await TimeoutHelper.WithTimeoutAsync(
+                                    ct => authProvider.GetAccessTokenLifetimeAsync(authSession, ct),
                                     cancellationToken);
 
-                                if (expiresAt != null && expiresAt < DateTimeOffset.UtcNow.AddMinutes(2))
+                                TimeSpan renewalMargin;
+                                if (lifetime != null && lifetime.NotBefore != null && lifetime.Expires != null && lifetime.Expires - lifetime.NotBefore is { } duration && duration < TimeSpan.FromMinutes(3))
+                                {
+                                    renewalMargin = duration / 6;
+                                }
+                                else
+                                {
+                                    renewalMargin = TimeSpan.FromMinutes(2);
+                                }
+
+                                if (lifetime?.Expires != null && lifetime.Expires - renewalMargin < DateTimeOffset.UtcNow)
                                 {
                                     state = AuthRefreshState.TokenExpired;
                                 }
                                 else
                                 {
                                     // Token is valid, wait until close to expiration
-                                    var waitUntil = (expiresAt ?? DateTimeOffset.UtcNow.AddMinutes(15)).AddMinutes(-2);
+                                    var waitUntil = (lifetime?.Expires ?? DateTimeOffset.UtcNow.AddMinutes(15)) - renewalMargin;
                                     var delay = waitUntil - DateTimeOffset.UtcNow;
 
                                     // Don't wait more than `maxDelay`

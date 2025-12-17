@@ -230,11 +230,11 @@ public class SupabaseAuthProvider : IAuthProvider
         return _authOptions.ToArray();
     }
 
-    public async Task<DateTimeOffset?> GetAccessTokenExpirationAsync(IAuthSession authSession, CancellationToken cancellationToken)
+    public async Task<TokenLifetime?> GetAccessTokenLifetimeAsync(IAuthSession authSession, CancellationToken cancellationToken)
     {
         if (await VerifyToken(authSession.AuthToken?.AccessToken, cancellationToken) is var (_, expiration))
         {
-            return expiration;
+            return new TokenLifetime(expiration);
         }
         else
         {

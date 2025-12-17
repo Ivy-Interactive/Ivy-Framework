@@ -149,73 +149,7 @@ public class AdvancedSpacingView : ViewBase
 }
 ```
 
-### Content Alignment
 
-Control how content is positioned within the box using the `ContentAlign` property.
-
-```csharp demo-tabs
-public class ContentAlignmentView : ViewBase
-{
-    public override object? Build()
-    {
-        return Layout.Vertical().Gap(8)
-            | new Box("Top Left Alignment")
-                .ContentAlign(Align.TopLeft)
-                .Height(Size.Units(30))
-                .Width(Size.Full())
-                .Padding(8)
-                .Content(
-                    new Box("Small").Color(Colors.White),
-                    new Box("Medium").Width(Size.Units(20)).Height(Size.Units(8)).Color(Colors.White)
-                )
-            | new Box("Center Alignment")
-                .ContentAlign(Align.Center)
-                .Height(Size.Units(30))
-                .Width(Size.Full())
-                .Padding(8)
-                .Content(
-                    new Box("Small").Color(Colors.White),
-                    new Box("Medium").Width(Size.Units(20)).Height(Size.Units(8)).Color(Colors.White)
-                )
-            | new Box("Bottom Right Alignment")
-                .ContentAlign(Align.BottomRight)
-                .Height(Size.Units(30))
-                .Width(Size.Full())
-                .Padding(8)
-                .Content(
-                    new Box("Small").Color(Colors.White),
-                    new Box("Medium").Width(Size.Units(20)).Height(Size.Units(8)).Color(Colors.White)
-                );
-    }
-}
-```
-
-### Sizing
-
-Control the dimensions of your boxes.
-
-```csharp demo-tabs
-public class SizingExamplesView : ViewBase
-{
-    public override object? Build()
-    {
-        return Layout.Vertical().Gap(4)
-            | new Box("Auto Width")
-                .Width(Size.Auto())
-                .Padding(8)
-            | new Box("Fixed Width")
-                .Width(Size.Units(45))
-                .Padding(8)
-            | new Box("Full Width")
-                .Width(Size.Full())
-                .Padding(8)
-            | new Box("Fixed Size")
-                .Width(Size.Units(60))
-                .Height(Size.Units(10))
-                .Padding(8);
-    }
-}
-```
 
 ### Colors
 

@@ -1,4 +1,4 @@
-using System.ComponentModel.DataAnnotations;
+using System.Net.Mail;
 
 namespace Ivy.Views.Forms;
 
@@ -6,7 +6,6 @@ public static class Validators
 {
     public static Func<object?, (bool, string)> CreateEmailValidator(string fieldName)
     {
-        var emailValidator = new EmailAddressAttribute();
         return email =>
         {
             if (email is not string emailStr || string.IsNullOrWhiteSpace(emailStr))
@@ -14,17 +13,14 @@ public static class Validators
 
             try
             {
-                var validationContext = new ValidationContext(new { })
-                {
-                    MemberName = fieldName,
-                    DisplayName = fieldName
-                };
-                var result = emailValidator.GetValidationResult(emailStr, validationContext);
-                return result == ValidationResult.Success
-                    ? (true, "")
-                    : (false, result?.ErrorMessage ?? "Please enter a valid email address");
+                var addr = new MailAddress(emailStr);
+
+                if (!addr.Host.Contains('.'))
+                    return (false, "Please enter a valid email address");
+
+                return (true, "");
             }
-            catch
+            catch (FormatException)
             {
                 return (false, "Please enter a valid email address");
             }

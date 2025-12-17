@@ -69,7 +69,7 @@ Long text in cells automatically gets truncated with ellipsis (...) and shows fu
 **Empty(new Card(""))** shows content when the table is empty.
 
 ```csharp demo-tabs
-public class CustomBuilderTable : ViewBase
+public class TableConfigurationExample : ViewBase
 {
     public override object? Build()
     {
@@ -169,17 +169,15 @@ public class EmptyColumnsTable : ViewBase
     public override object? Build()
     {
         var products = new[] {
-            new {Sku = "1234", Name = "T-shirt", Price = 10, Description = "", Notes = "", _hiddenFlag = "internal", _1 = "kept"},
-            new {Sku = "1235", Name = "Jeans", Price = 20, Description = "Blue jeans", Notes = "", _hiddenFlag = "internal", _1 = "kept"},
-            new {Sku = "1236", Name = "Sneakers", Price = 30, Description = "", Notes = "Limited edition", _hiddenFlag = "internal", _1 = "kept"}
+            new {Sku = "1234", Name = "T-shirt", Price = 10, Category = "Clothing", Notes = ""},
+            new {Sku = "1235", Name = "Jeans", Price = 20, Category = "Clothing", Notes = ""},
+            new {Sku = "1236", Name = "Sneakers", Price = 30, Category = "Footwear", Notes = ""}
         };
 
         return products.ToTable()
             .Width(Size.Full())
-            .RemoveEmptyColumns()                      // Hide columns with no data
+            .RemoveEmptyColumns()                      // Automatically hides "Notes" because it's empty in all rows
             .Header(p => p.Price, "Unit Price")
-            .Header(p => p._hiddenFlag, "Hidden Flag") // underscore + letter hidden
-            .Header(p => p._1, "Index Field")          // underscore + digit kept
             .Align(p => p.Price, Align.Right);
     }
 }
@@ -232,7 +230,7 @@ public class ManualTableDemo : ViewBase
                 new TableCell("30").Align(Align.Center),
                 new TableCell("alice@example.com")
             )
-        );
+        ).Width(Size.Full());
     }
 }
 ```
@@ -242,7 +240,7 @@ public class ManualTableDemo : ViewBase
 The `Builder()` method allows you to specify how different data types should be rendered. Use the builder factory methods to create appropriate renderers for your data.
 
 ```csharp demo-tabs
-public class CustomBuildersTable : ViewBase
+public class CellBuildersExample : ViewBase
 {
     public override object? Build()
     {
@@ -345,12 +343,6 @@ public class TableIntegrationExample : ViewBase
 }
 ```
 
-### Missing Context and Examples
 
-- `Empty(object)` - Sets content to display when the table has no data
-
-  ```csharp
-  .Empty(new Card("No products found").Width(Size.Full()))
-  ```
 
 <WidgetDocs Type="Ivy.Table" ExtensionTypes="Ivy.Views.Tables.TableExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Tables/Table.cs"/>

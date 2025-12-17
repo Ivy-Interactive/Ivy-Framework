@@ -157,6 +157,18 @@ public class CodeApp : SampleBase
                     result bigint [not null]
                     calculated_at timestamp [default: `now()`]
                 }
+                """,
+
+            [Languages.Xml] = """
+                <!-- Project file for Fibonacci console application -->
+                <Project Sdk="Microsoft.NET.Sdk">
+                  <PropertyGroup>
+                    <OutputType>Exe</OutputType>
+                    <TargetFramework>net10.0</TargetFramework>
+                    <ImplicitUsings>enable</ImplicitUsings>
+                    <Nullable>enable</Nullable>
+                  </PropertyGroup>
+                </Project>
                 """
         };
 

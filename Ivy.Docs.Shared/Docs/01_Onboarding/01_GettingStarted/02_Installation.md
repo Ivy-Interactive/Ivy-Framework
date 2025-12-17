@@ -101,13 +101,13 @@ This configuration creates a Server instance, enables hot reload for development
 
 ### Project File Configuration
 
-Ensure your `.csproj` targets .NET 9.0:
+Ensure your `.csproj` targets .NET 10.0:
 
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>

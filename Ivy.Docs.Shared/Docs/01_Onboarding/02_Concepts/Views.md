@@ -85,6 +85,11 @@ public class CounterView : ViewBase
 }
 ```
 
+### Rules of Hooks
+
+To ensure correct state management, Ivy hooks must follow specific rules.
+Read the full guide on **[Rules of Hooks](RulesOfHooks.md)** to learn more and troubleshoot common errors.
+
 ### State Initialization
 
 You can initialize state in multiple ways:

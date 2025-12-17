@@ -45,7 +45,6 @@ export const KanbanWidget: React.FC<KanbanWidgetProps> = ({
     overflowX: 'auto' as const,
     maxWidth: '100%',
     boxSizing: 'border-box' as const,
-    marginTop: '3rem',
   };
 
   return (

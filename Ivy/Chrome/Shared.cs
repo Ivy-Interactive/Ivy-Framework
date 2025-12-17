@@ -1,8 +1,8 @@
-﻿using System.Linq;
 using System.Text.Json;
 using Ivy.Apps;
 using Ivy.Client;
 using Ivy.Core;
+using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
 using Ivy.Hooks;
 using Ivy.Shared;
@@ -23,6 +23,7 @@ public record ChromeSettings
     public string? WallpaperAppId { get; init; }
     public bool PreventTabDuplicates { get; init; }
     public ChromeNavigation Navigation { get; init; }
+    public Size? Width { get; init; }
     public Func<IEnumerable<MenuItem>, INavigator, IEnumerable<MenuItem>> FooterMenuItemsTransformer { get; init; } = (items, _) => items;
 
     public static ChromeSettings Default() => new()
@@ -54,6 +55,7 @@ public static class ChromeSettingsExtensions
     public static ChromeSettings UseTabs(this ChromeSettings settings, bool preventDuplicates = false) => settings with { Navigation = ChromeNavigation.Tabs, PreventTabDuplicates = preventDuplicates };
     public static ChromeSettings UsePages(this ChromeSettings settings) => settings with { Navigation = ChromeNavigation.Pages };
     public static ChromeSettings UseFooterMenuItemsTransformer(this ChromeSettings settings, Func<IEnumerable<MenuItem>, INavigator, IEnumerable<MenuItem>> transformer) => settings with { FooterMenuItemsTransformer = transformer };
+    public static ChromeSettings Width(this ChromeSettings settings, Size width) => settings with { Width = width };
 }
 
 [Signal(BroadcastType.Chrome)]
@@ -74,7 +76,7 @@ public record NavigateArgs(string? AppId, object? AppArgs = null, string? TabId 
             throw new InvalidOperationException("Cannot create AppHost: AppId is null.");
         }
 
-        return new AppHost(this.AppId, this.AppArgs != null ? JsonSerializer.Serialize(this.AppArgs) : null, parentId);
+        return new AppHost(this.AppId, this.AppArgs != null ? JsonSerializer.Serialize(this.AppArgs, JsonHelper.DefaultOptions) : null, parentId);
     }
 
     public string GetUrl(string? parentId = null)
@@ -98,7 +100,7 @@ public record NavigateArgs(string? AppId, object? AppArgs = null, string? TabId 
 
         if (this.AppArgs != null)
         {
-            var jsonArgs = JsonSerializer.Serialize(this.AppArgs);
+            var jsonArgs = JsonSerializer.Serialize(this.AppArgs, JsonHelper.DefaultOptions);
             var encodedArgs = System.Web.HttpUtility.UrlEncode(jsonArgs);
             queryParams.Add($"appArgs={encodedArgs}");
         }

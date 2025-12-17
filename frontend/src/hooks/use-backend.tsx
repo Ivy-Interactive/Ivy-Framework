@@ -48,6 +48,24 @@ type SetAuthCookiesMessage = {
   triggerMachineReload: boolean;
 };
 
+type HttpTunnelRequestMessage = {
+  requestId: string;
+  method: string;
+  url: string;
+  headers?: Record<string, string[]>;
+  body?: string; // Base64 encoded
+  contentType?: string;
+};
+
+type HttpTunnelResponseMessage = {
+  requestId: string;
+  statusCode: number;
+  headers?: Record<string, string[]>;
+  body?: string; // Base64 encoded
+  contentType?: string;
+  errorMessage?: string;
+};
+
 const widgetTreeToXml = (node: WidgetNode) => {
   const tagName = node.type.replace('Ivy.', '');
   const attributes: string[] = [`Id="${escapeXml(node.id)}"`];
@@ -314,6 +332,134 @@ export const useBackend = (
     }
   }, []);
 
+  const handleHttpRequest = useCallback(
+    async (request: HttpTunnelRequestMessage) => {
+      logger.debug('Processing HttpRequest', {
+        requestId: request.requestId,
+        method: request.method,
+        url: request.url,
+      });
+
+      try {
+        const headers = new Headers();
+        if (request.headers) {
+          Object.entries(request.headers).forEach(([key, values]) => {
+            values.forEach(value => headers.append(key, value));
+          });
+        }
+        if (request.contentType) {
+          headers.set('Content-Type', request.contentType);
+        }
+
+        const fetchOptions: RequestInit = {
+          method: request.method,
+          headers,
+          credentials: 'include',
+        };
+
+        if (request.body) {
+          // Decode base64 body
+          const binaryString = atob(request.body);
+          const bytes = new Uint8Array(binaryString.length);
+          for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+          }
+          fetchOptions.body = bytes;
+        }
+
+        const response = await fetch(request.url, fetchOptions);
+
+        // Read response body
+        const responseBytes = new Uint8Array(await response.arrayBuffer());
+        let responseBody = '';
+        if (responseBytes.length > 0) {
+          const binaryString = Array.from(responseBytes)
+            .map(b => String.fromCharCode(b))
+            .join('');
+          responseBody = btoa(binaryString);
+        }
+
+        // Extract headers
+        const responseHeaders: Record<string, string[]> = {};
+        response.headers.forEach((value, key) => {
+          if (!responseHeaders[key]) {
+            responseHeaders[key] = [];
+          }
+          responseHeaders[key].push(value);
+        });
+
+        const tunnelResponse: HttpTunnelResponseMessage = {
+          requestId: request.requestId,
+          statusCode: response.status,
+          headers: responseHeaders,
+          body: responseBody || undefined,
+          contentType: response.headers.get('Content-Type') || undefined,
+        };
+
+        const httpResponse = await fetch(
+          `${getIvyHost()}/ivy/http-tunnel/response`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Connection-Id': connection?.connectionId ?? '',
+            },
+            body: JSON.stringify(tunnelResponse),
+          }
+        );
+
+        if (!httpResponse.ok) {
+          logger.error('Failed to send HttpResponse via HTTP', {
+            status: httpResponse.status,
+            statusText: httpResponse.statusText,
+          });
+        } else {
+          logger.debug('Sent HttpResponse back to backend via HTTP', {
+            requestId: request.requestId,
+          });
+        }
+      } catch (error) {
+        logger.error('Error processing HttpRequest:', error);
+
+        const errorResponse: HttpTunnelResponseMessage = {
+          requestId: request.requestId,
+          statusCode: 0,
+          errorMessage:
+            error instanceof Error ? error.message : 'Unknown error',
+        };
+
+        const httpResponse = await fetch(
+          `${getIvyHost()}/ivy/http-tunnel/response`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Connection-Id': connection?.connectionId ?? '',
+            },
+            body: JSON.stringify(errorResponse),
+          }
+        ).catch(err => {
+          logger.error('Failed to send error HttpResponse via HTTP:', err);
+          return null;
+        });
+
+        if (httpResponse) {
+          if (!httpResponse.ok) {
+            logger.error('Failed to send error HttpResponse via HTTP', {
+              status: httpResponse.status,
+              statusText: httpResponse.statusText,
+            });
+          } else {
+            logger.debug('Sent error HttpResponse back to backend via HTTP', {
+              requestId: request.requestId,
+            });
+          }
+        }
+      }
+    },
+    [connection]
+  );
+
   const handleError = useCallback(
     (error: ErrorMessage) => {
       toast({
@@ -477,6 +623,15 @@ export const useBackend = (
             window.location.reload();
           });
 
+          connection.on('HttpRequest', message => {
+            logger.debug(`[${connection.connectionId}] HttpRequest`, {
+              requestId: message.requestId,
+              method: message.method,
+              url: message.url,
+            });
+            handleHttpRequest(message);
+          });
+
           connection.onreconnecting(() => {
             logger.warn(`[${connection.connectionId}] Reconnecting`);
             setDisconnected(true);
@@ -504,6 +659,7 @@ export const useBackend = (
         connection.off('CopyToClipboard');
         connection.off('HotReload');
         connection.off('ReloadPage');
+        connection.off('HttpRequest');
         connection.off('SetAuthCookies');
         connection.off('SetRootAppId');
         connection.off('SetTheme');
@@ -534,6 +690,7 @@ export const useBackend = (
     handleSetAuthCookies,
     handleRedirect,
     handleSetTheme,
+    handleHttpRequest,
     handleError,
     stableAppId,
     parentId,

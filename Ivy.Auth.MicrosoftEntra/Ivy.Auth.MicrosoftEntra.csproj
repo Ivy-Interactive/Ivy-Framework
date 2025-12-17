@@ -3,7 +3,7 @@
   <Import Project="../../Ivy/Directory.Build.props" Condition="Exists('../../Ivy/Directory.Build.props')" />
 
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <NoWarn>CS1591</NoWarn>
@@ -31,13 +31,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Update="README.md" Pack="true" PackagePath=""/>
+    <None Update="README.md" Pack="true" PackagePath="" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Identity.Client" Version="4.77.1" />
-    <PackageReference Include="Microsoft.Graph" Version="5.94.0" />
-    <PackageReference Include="Azure.Identity" Version="1.16.0" />
+    <PackageReference Include="Microsoft.Identity.Client" Version="4.79.2" />
+    <PackageReference Include="Microsoft.Graph" Version="5.98.0" />
+    <PackageReference Include="Azure.Identity" Version="1.17.1" />
   </ItemGroup>
 
 </Project>

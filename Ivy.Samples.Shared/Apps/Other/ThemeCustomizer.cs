@@ -86,26 +86,26 @@ public class ThemeCustomizer : SampleBase
                 // Light theme colors
                 new Card(
                     Layout.Grid().Columns(1)
-                        | RenderColorPreview("Primary", currentTheme.Value.Colors.Light.Primary, currentTheme.Value.Colors.Light.PrimaryForeground)
-                        | RenderColorPreview("Secondary", currentTheme.Value.Colors.Light.Secondary, currentTheme.Value.Colors.Light.SecondaryForeground)
-                        | RenderColorPreview("Success", currentTheme.Value.Colors.Light.Success, currentTheme.Value.Colors.Light.SuccessForeground)
-                        | RenderColorPreview("Destructive", currentTheme.Value.Colors.Light.Destructive, currentTheme.Value.Colors.Light.DestructiveForeground)
-                        | RenderColorPreview("Warning", currentTheme.Value.Colors.Light.Warning, currentTheme.Value.Colors.Light.WarningForeground)
-                        | RenderColorPreview("Info", currentTheme.Value.Colors.Light.Info, currentTheme.Value.Colors.Light.InfoForeground)
-                        | RenderColorPreview("Muted", currentTheme.Value.Colors.Light.Muted, currentTheme.Value.Colors.Light.MutedForeground)
-                        | RenderColorPreview("Accent", currentTheme.Value.Colors.Light.Accent, currentTheme.Value.Colors.Light.AccentForeground)
+                        | new ColorPreview("Primary", currentTheme.Value.Colors.Light.Primary, currentTheme.Value.Colors.Light.PrimaryForeground)
+                        | new ColorPreview("Secondary", currentTheme.Value.Colors.Light.Secondary, currentTheme.Value.Colors.Light.SecondaryForeground)
+                        | new ColorPreview("Success", currentTheme.Value.Colors.Light.Success, currentTheme.Value.Colors.Light.SuccessForeground)
+                        | new ColorPreview("Destructive", currentTheme.Value.Colors.Light.Destructive, currentTheme.Value.Colors.Light.DestructiveForeground)
+                        | new ColorPreview("Warning", currentTheme.Value.Colors.Light.Warning, currentTheme.Value.Colors.Light.WarningForeground)
+                        | new ColorPreview("Info", currentTheme.Value.Colors.Light.Info, currentTheme.Value.Colors.Light.InfoForeground)
+                        | new ColorPreview("Muted", currentTheme.Value.Colors.Light.Muted, currentTheme.Value.Colors.Light.MutedForeground)
+                        | new ColorPreview("Accent", currentTheme.Value.Colors.Light.Accent, currentTheme.Value.Colors.Light.AccentForeground)
                 ).Title("Light Theme"),
                 // Dark theme colors  
                 new Card(
                     Layout.Grid().Columns(1)
-                        | RenderColorPreview("Primary", currentTheme.Value.Colors.Dark.Primary, currentTheme.Value.Colors.Dark.PrimaryForeground)
-                        | RenderColorPreview("Secondary", currentTheme.Value.Colors.Dark.Secondary, currentTheme.Value.Colors.Dark.SecondaryForeground)
-                        | RenderColorPreview("Success", currentTheme.Value.Colors.Dark.Success, currentTheme.Value.Colors.Dark.SuccessForeground)
-                        | RenderColorPreview("Destructive", currentTheme.Value.Colors.Dark.Destructive, currentTheme.Value.Colors.Dark.DestructiveForeground)
-                        | RenderColorPreview("Warning", currentTheme.Value.Colors.Dark.Warning, currentTheme.Value.Colors.Dark.WarningForeground)
-                        | RenderColorPreview("Info", currentTheme.Value.Colors.Dark.Info, currentTheme.Value.Colors.Dark.InfoForeground)
-                        | RenderColorPreview("Muted", currentTheme.Value.Colors.Dark.Muted, currentTheme.Value.Colors.Dark.MutedForeground)
-                        | RenderColorPreview("Accent", currentTheme.Value.Colors.Dark.Accent, currentTheme.Value.Colors.Dark.AccentForeground)
+                        | new ColorPreview("Primary", currentTheme.Value.Colors.Dark.Primary, currentTheme.Value.Colors.Dark.PrimaryForeground)
+                        | new ColorPreview("Secondary", currentTheme.Value.Colors.Dark.Secondary, currentTheme.Value.Colors.Dark.SecondaryForeground)
+                        | new ColorPreview("Success", currentTheme.Value.Colors.Dark.Success, currentTheme.Value.Colors.Dark.SuccessForeground)
+                        | new ColorPreview("Destructive", currentTheme.Value.Colors.Dark.Destructive, currentTheme.Value.Colors.Dark.DestructiveForeground)
+                        | new ColorPreview("Warning", currentTheme.Value.Colors.Dark.Warning, currentTheme.Value.Colors.Dark.WarningForeground)
+                        | new ColorPreview("Info", currentTheme.Value.Colors.Dark.Info, currentTheme.Value.Colors.Dark.InfoForeground)
+                        | new ColorPreview("Muted", currentTheme.Value.Colors.Dark.Muted, currentTheme.Value.Colors.Dark.MutedForeground)
+                        | new ColorPreview("Accent", currentTheme.Value.Colors.Dark.Accent, currentTheme.Value.Colors.Dark.AccentForeground)
                 ).Title("Dark Theme")
             )
 
@@ -164,42 +164,45 @@ public class ThemeCustomizer : SampleBase
         ;
     }
 
-    private object RenderColorPreview(string label, string? bgColor, string? fgColor)
+    private class ColorPreview(string label, string? bgColor, string? fgColor) : ViewBase
     {
-        var bg = bgColor ?? "#000000";
-        var fg = fgColor ?? "#FFFFFF";
-
-        // Map label to appropriate predefined color
-        var previewColor = label switch
+        public override object Build()
         {
-            "Primary" => Colors.Primary,
-            "Secondary" => Colors.Secondary,
-            "Success" => Colors.Green,
-            "Destructive" => Colors.Red,
-            "Warning" => Colors.Orange,
-            "Info" => Colors.Blue,
-            "Muted" => Colors.Gray,
-            "Accent" => Colors.Purple,
-            _ => Colors.Primary
-        };
+            var bgState = UseState(bgColor ?? "#000000");
+            var fgState = UseState(fgColor ?? "#FFFFFF");
 
-        return Layout.Vertical()
-            | Text.Small(label)
-            | Layout.Horizontal(
-                // Color preview box using appropriate predefined color
-                new Box("Preview")
-                    .Width(Size.Px(100))
-                    .Height(Size.Px(60))
-                    .Color(previewColor)
-                    .BorderRadius(BorderRadius.Rounded)
-                    .Padding(3)
-                    .ContentAlign(Align.Center),
-                Layout.Vertical()
-                    | Text.Small("Background:")
-                    | UseState(bg).ToColorInput().Variant(ColorInputs.TextAndPicker).Disabled()
-                    | Text.Small("Foreground:")
-                    | UseState(fg).ToColorInput().Variant(ColorInputs.TextAndPicker).Disabled()
-            );
+            // Map label to appropriate predefined color
+            var previewColor = label switch
+            {
+                "Primary" => Colors.Primary,
+                "Secondary" => Colors.Secondary,
+                "Success" => Colors.Green,
+                "Destructive" => Colors.Red,
+                "Warning" => Colors.Orange,
+                "Info" => Colors.Blue,
+                "Muted" => Colors.Gray,
+                "Accent" => Colors.Purple,
+                _ => Colors.Primary
+            };
+
+            return Layout.Vertical()
+                | Text.Small(label)
+                | Layout.Horizontal(
+                    // Color preview box using appropriate predefined color
+                    new Box("Preview")
+                        .Width(Size.Px(100))
+                        .Height(Size.Px(60))
+                        .Color(previewColor)
+                        .BorderRadius(BorderRadius.Rounded)
+                        .Padding(3)
+                        .ContentAlign(Align.Center),
+                    Layout.Vertical()
+                        | Text.Small("Background:")
+                        | bgState.ToColorInput().Variant(ColorInputs.TextAndPicker).Disabled()
+                        | Text.Small("Foreground:")
+                        | fgState.ToColorInput().Variant(ColorInputs.TextAndPicker).Disabled()
+                );
+        }
     }
 
     private string GenerateCSharpCode(Theme theme)

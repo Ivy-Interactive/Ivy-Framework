@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+using System.Text.Json;
+using Ivy.Core.Helpers;
 
 namespace Ivy.Apps;
 
@@ -33,6 +34,6 @@ public class AppArgs
             return null;
         }
 
-        return JsonSerializer.Deserialize<T>(ArgsJson);
+        return JsonSerializer.Deserialize<T>(ArgsJson, JsonHelper.DefaultOptions);
     }
 }

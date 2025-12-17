@@ -3,6 +3,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using Ivy.Core;
 using Ivy.Core.Hooks;
+using Ivy.Shared;
 
 namespace Ivy.Views.Builders;
 
@@ -47,6 +48,7 @@ public class DetailsBuilder<TModel> : ViewBase, IStateless
     private bool _removeEmpty;
     private readonly Dictionary<string, Item> _items;
     private readonly TModel _model;
+    private Scale _scale = Scale.Medium;
 
     public DetailsBuilder(TModel model)
     {
@@ -88,6 +90,24 @@ public class DetailsBuilder<TModel> : ViewBase, IStateless
     public DetailsBuilder<TModel> RemoveEmpty()
     {
         _removeEmpty = true;
+        return this;
+    }
+
+    public DetailsBuilder<TModel> Large()
+    {
+        _scale = Scale.Large;
+        return this;
+    }
+
+    public DetailsBuilder<TModel> Small()
+    {
+        _scale = Scale.Small;
+        return this;
+    }
+
+    public DetailsBuilder<TModel> Medium()
+    {
+        _scale = Scale.Medium;
         return this;
     }
 
@@ -164,7 +184,9 @@ public class DetailsBuilder<TModel> : ViewBase, IStateless
             items = items.Where(e => !Utils.IsEmptyContent(e.GetValue(_model))).ToArray();
         }
 
-        return new Details(items.Select(BuildDetail).ToArray());
+        var details = new Details(items.Select(BuildDetail).ToArray()).Scale(_scale);
+
+        return details;
 
         Detail BuildDetail(Item item)
         {

@@ -6,6 +6,7 @@ import {
   getColors,
   generateTextStyle,
   generateEChartToolbox,
+  generateTooltip,
 } from './sharedUtils';
 import { ChartType, PieChartWidgetProps } from './chartTypes';
 import { generateDataProps } from './sharedUtils';
@@ -161,16 +162,13 @@ const PieChartWidget: React.FC<PieChartWidgetProps> = ({
         themeColors.fontSans
       ),
       tooltip: {
+        ...generateTooltip(tooltip, undefined, {
+          foreground: themeColors.foreground,
+          fontSans: themeColors.fontSans,
+          background: themeColors.background,
+        }),
         trigger: 'item',
         formatter: '{a} <br/>{b}: {c} ({d}%)',
-        animated: tooltip?.animated ?? true,
-        textStyle: generateTextStyle(
-          themeColors.foreground,
-          themeColors.fontSans
-        ),
-        backgroundColor: themeColors.background,
-        borderColor: themeColors.foreground,
-        borderWidth: 1,
       },
       series: series,
       toolbox: generateEChartToolbox(toolbox),

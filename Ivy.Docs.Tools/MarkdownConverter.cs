@@ -499,6 +499,7 @@ public static partial class MarkdownConverter
             "css" => "Languages.Css",
             "json" => "Languages.Json",
             "dbml" => "Languages.Dbml",
+            "xml" => "Languages.Xml",
             "text" => "Languages.Text",
             _ => "Languages.Text"
         };
