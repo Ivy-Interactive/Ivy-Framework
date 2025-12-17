@@ -64,9 +64,9 @@ public class DetailsNestedExample : ViewBase
             }.ToDetails(),
             Employment = new
             {
-                Company = "Acme Corp",
-                Position = "Senior Developer",
-                Department = "R&D"
+                Company = "Company Name Here",
+                Position = "Position Name Here",
+                Department = "Department Name Here"
             }.ToDetails(),
             EmptyField1 = "",
             EmptyField2 = false,
@@ -89,9 +89,13 @@ public class DetailsMultilineExample : ViewBase
             Title = "Very Long Description Example",
             ShortSummary = "This item has a long description that is better displayed as multiline text.",
             Description =
-                "This is a long description field that contains multiple sentences. " +
-                "Details.MultiLine() allows this text to wrap across multiple lines instead of being truncated. " +
-                "Use this for notes, comments, or any longer pieces of text that should be fully visible to the user.",
+                "This is a long description field that contains multiple sentences and paragraphs of explanatory text. " +
+                "Details.MultiLine() allows this content to wrap across multiple lines instead of being truncated, " +
+                "so users can comfortably read everything without hovering or opening a separate dialog. " +
+                "You can use this pattern for notes, comments, troubleshooting instructions, or domain-specific explanations " +
+                "that would otherwise break the layout if rendered as a single-line value. " +
+                "In real applications this might describe how a record was created, why certain values were chosen, " +
+                "or provide a short change history that helps other team members quickly understand the context.",
             Notes =
                 "Additional notes about this record can also be displayed as multiline content " +
                 "to keep the layout readable and user-friendly.",
