@@ -17,6 +17,7 @@ public enum TextVariant
     Blockquote,
     InlineCode,
     Lead,
+    ExtraLarge,
     Large,
     Small,
     Muted,

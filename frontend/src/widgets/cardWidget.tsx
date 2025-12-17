@@ -49,7 +49,7 @@ export const CardWidget: React.FC<CardWidgetProps> = ({
   borderStyle,
   borderColor,
   hoverVariant,
-  scale = Scales.Medium,
+  scale,
   slots,
   'data-testid': testId,
 }) => {
@@ -60,7 +60,7 @@ export const CardWidget: React.FC<CardWidgetProps> = ({
       case Scales.Small:
         return {
           header:
-            'px-3 py-1 items-center [&_:is(p,span)]:!pt-1 [&_:is(h1,h2,h3,h4,h5,h6)]:!text-sm [&_:is(h1,h2,h3,h4,h5,h6)]:!my-0 [&_:is(h1,h2,h3,h4,h5,h6)]:!font-normal [&_:is(h1,h2,h3,h4,h5,h6)]:!h-9 [&_:is(h1,h2,h3,h4,h5,h6)]:!flex [&_:is(h1,h2,h3,h4,h5,h6)]:!items-center',
+            'px-3 pt-1 pb-0 items-center [&_:is(p,span)]:!pt-1 [&_:is(h1,h2,h3,h4,h5,h6)]:!text-sm [&_:is(h1,h2,h3,h4,h5,h6)]:!my-0 [&_:is(h1,h2,h3,h4,h5,h6)]:!font-normal [&_:is(h1,h2,h3,h4,h5,h6)]:!h-9 [&_:is(h1,h2,h3,h4,h5,h6)]:!flex [&_:is(h1,h2,h3,h4,h5,h6)]:!items-center',
           content: 'p-3 pt-0 [&_*]:!text-sm',
           footer: 'p-3 pt-0',
           title: 'text-sm',
@@ -70,7 +70,7 @@ export const CardWidget: React.FC<CardWidgetProps> = ({
       case Scales.Large:
         return {
           header:
-            'px-8 py-5 items-center [&_:is(p,span)]:!pt-1 [&_:is(h1,h2,h3,h4,h5,h6)]:!text-lg [&_:is(h1,h2,h3,h4,h5,h6)]:!my-0 [&_:is(h1,h2,h3,h4,h5,h6)]:!font-normal [&_:is(h1,h2,h3,h4,h5,h6)]:!h-9 [&_:is(h1,h2,h3,h4,h5,h6)]:!flex [&_:is(h1,h2,h3,h4,h5,h6)]:!items-center',
+            'px-8 pt-5 pb-4 items-center [&_:is(p,span)]:!pt-1 [&_:is(h1,h2,h3,h4,h5,h6)]:!text-lg [&_:is(h1,h2,h3,h4,h5,h6)]:!my-0 [&_:is(h1,h2,h3,h4,h5,h6)]:!font-normal [&_:is(h1,h2,h3,h4,h5,h6)]:!h-9 [&_:is(h1,h2,h3,h4,h5,h6)]:!flex [&_:is(h1,h2,h3,h4,h5,h6)]:!items-center',
           content: 'p-8 pt-0',
           footer: 'p-8 pt-0',
           title: 'text-lg',
@@ -80,7 +80,7 @@ export const CardWidget: React.FC<CardWidgetProps> = ({
       default:
         return {
           header:
-            'px-6 py-4 items-center [&_:is(p,span)]:!pt-1 [&_:is(h1,h2,h3,h4,h5,h6,p)]:!text-base [&_:is(h1,h2,h3,h4,h5,h6)]:!my-0 [&_:is(h1,h2,h3,h4,h5,h6)]:!font-normal [&_:is(h1,h2,h3,h4,h5,h6)]:!h-9 [&_:is(h1,h2,h3,h4,h5,h6)]:!flex [&_:is(h1,h2,h3,h4,h5,h6)]:!items-center',
+            'px-6 pt-4 pb-2 items-center [&_:is(p,span)]:!pt-1 [&_:is(h1,h2,h3,h4,h5,h6,p)]:!text-base [&_:is(h1,h2,h3,h4,h5,h6)]:!my-0 [&_:is(h1,h2,h3,h4,h5,h6)]:!font-normal [&_:is(h1,h2,h3,h4,h5,h6)]:!h-9 [&_:is(h1,h2,h3,h4,h5,h6)]:!flex [&_:is(h1,h2,h3,h4,h5,h6)]:!items-center',
           content: 'p-6 pt-0',
           footer: 'p-6 pt-0',
           title: 'text-base',
@@ -124,12 +124,23 @@ export const CardWidget: React.FC<CardWidgetProps> = ({
         ? 'cursor-pointer'
         : 'cursor-pointer transform hover:-translate-x-[4px] hover:-translate-y-[4px] active:translate-x-[-2px] active:translate-y-[-2px] transition';
 
+  // When scale is set, let the card size itself based on content + scale padding
+  // When scale is NOT set, fill container height (h-full)
+  // Explicit height always takes precedence
+  const heightClass = height ? null : scale ? null : 'h-full';
+
   return (
     <Card
       role="region"
       data-testid={testId}
       style={styles}
-      className={cn('flex', 'flex-col', 'overflow-hidden', hoverClass)}
+      className={cn(
+        'flex',
+        'flex-col',
+        'overflow-hidden',
+        hoverClass,
+        heightClass
+      )}
       onClick={handleClick}
     >
       {!headerIsEmpty ? (

@@ -15,8 +15,6 @@ public class MetricView(
     Func<Task<MetricRecord>> metricData
 ) : ViewBase
 {
-    private const int Height = 55;
-
     public override object? Build()
     {
         var data = UseState<MetricRecord?>(() => null);
@@ -43,7 +41,7 @@ public class MetricView(
                    | new Spacer().Width(Size.Grow())
                    | (icon?.ToIcon().Color(Colors.Gray)))
                 | new ErrorTeaserView(failed.Value)
-            ).Height(Size.Units(Height));
+            );
         }
 
         if (data.Value is null)
@@ -55,7 +53,7 @@ public class MetricView(
                    | new Spacer().Width(Size.Grow())
                    | (icon?.ToIcon().Color(Colors.Gray)))
                 | new Skeleton()
-            ).Height(Size.Units(Height));
+            );
         }
 
         var x = data.Value;
@@ -63,7 +61,7 @@ public class MetricView(
         return new Card(
                 Layout.Vertical().Gap(2)
                 | (Layout.Horizontal().Align(Align.Left).Gap(2)
-                    | Text.Large(x.MetricFormatted).NoWrap().Overflow(Overflow.Clip)
+                    | Text.ExtraLarge(x.MetricFormatted).NoWrap().Overflow(Overflow.Clip)
                     | (x.TrendComparedToPreviousPeriod != null
                         ? x.TrendComparedToPreviousPeriod >= 0
                             ? Icons.TrendingUp.ToIcon().Color(Colors.Success)
@@ -75,7 +73,6 @@ public class MetricView(
                             : Text.Small(x.TrendComparedToPreviousPeriod.Value.ToString("P1")).Color(Colors.Destructive)
                         : null)),
                  x.GoalAchieved != null ? new Progress((int)Math.Round(x.GoalAchieved.Value * 100.0)).ColorVariant(Progress.ColorVariants.EmeraldGradient).Goal(x.GoalFormatted) : null
-            ).Header(Text.H4(title).NoWrap().Overflow(Overflow.Ellipsis).Color(Colors.Gray)).Height(Size.Units(Height))
-            ;
+            ).Header(Text.H4(title).NoWrap().Overflow(Overflow.Ellipsis).Color(Colors.Gray));
     }
 }

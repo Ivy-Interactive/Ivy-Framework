@@ -21,6 +21,7 @@ type TextBlockVariant =
   | 'Blockquote'
   | 'InlineCode'
   | 'Lead'
+  | 'ExtraLarge'
   | 'Large'
   | 'Small'
   | 'Muted'
@@ -145,6 +146,11 @@ const variantMap: VariantMap = {
     <p className={cn(textBlockClassMap.Lead, className)} style={style}>
       {children}
     </p>
+  ),
+  ExtraLarge: ({ children, className, style }) => (
+    <div className={cn('text-2xl font-medium', className)} style={style}>
+      {children}
+    </div>
   ),
   Large: ({ children, className, style }) => (
     <div className={cn('text-lg font-semibold', className)} style={style}>
