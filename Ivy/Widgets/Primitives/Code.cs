@@ -27,7 +27,7 @@ public record Code : WidgetBase<Code>
         Content = content;
         Language = language;
         Width = Size.Full();
-        Height = Size.MaxContent().Max(Size.Px(800));
+        Height = Size.MaxContent();
     }
 
     [Prop] public string Content { get; set; }
