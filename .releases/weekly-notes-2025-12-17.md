@@ -54,6 +54,8 @@ public class MyApp : ViewBase
 }
 ```
 
+https://github.com/user-attachments/assets/0ecebc3b-37f3-47c7-84e0-7778db25036a
+
 **Microsoft Entra authentication users**: If you're using the Microsoft Entra auth provider, the underlying Microsoft.Identity.Client library has been updated, which may include security fixes and performance improvements. No code changes are required on your part.
 
 ## Authentication Improvements
