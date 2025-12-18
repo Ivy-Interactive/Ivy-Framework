@@ -45,9 +45,9 @@ export const StackLayoutWidget: React.FC<StackLayoutWidgetProps> = ({
     ...getPadding(padding),
     ...getMargin(margin),
     ...getGap(gap),
+    ...getAlign(orientation, align),
     ...getWidth(width),
     ...getHeight(height),
-    ...getAlign(orientation, align),
     ...getColor(background, 'backgroundColor', 'background'),
   };
 

@@ -50,7 +50,7 @@ public class CardApp : SampleBase
             content: "This is a small card with elements.",
             header: Layout.Horizontal().Align(Align.Center)
                     | Text.H4("Small Card with Elements").WithLayout().Grow()
-                    | Icons.Info.ToIcon().Color(Colors.Black)
+                    | Icons.Info.ToIcon().Color(Colors.Neutral)
         ).Small()
         .TestId("card-small-with-elements");
 
@@ -58,7 +58,7 @@ public class CardApp : SampleBase
             content: "This is a medium card with elements.",
             header: Layout.Horizontal().Align(Align.Center)
                     | Text.H4("Medium Card with Elements").WithLayout().Grow()
-                    | Icons.Info.ToIcon().Color(Colors.Black)
+                    | Icons.Info.ToIcon().Color(Colors.Neutral)
         ).Medium()
         .TestId("card-medium-with-elements");
 
@@ -66,7 +66,7 @@ public class CardApp : SampleBase
             content: "This is a large card with elements.",
             header: Layout.Horizontal().Align(Align.Center)
                     | Text.H4("Large Card with Elements").WithLayout().Grow()
-                    | Icons.Info.ToIcon().Color(Colors.Black)
+                    | Icons.Info.ToIcon().Color(Colors.Neutral)
         ).Large();
 
         return Layout.Vertical()
@@ -142,7 +142,7 @@ public class MetricView(string title) : ViewBase
                 footer: new Progress(21).Goal(800_000.ToString("C0")),
                 header: Layout.Horizontal().Align(Align.Center)
                         | Text.H4(title).WithLayout().Grow()
-                        | Icons.DollarSign.ToIcon().Color(Colors.Black)
+                        | Icons.DollarSign.ToIcon().Color(Colors.Neutral)
             ).TestId("card-total-sales");
     }
 }
@@ -159,7 +159,7 @@ public class LongNumberMetricView : ViewBase
                 footer: new Progress(85).Goal("$100,000,000"),
                 header: Layout.Horizontal().Align(Align.Center)
                         | Text.H4("Very Long Revenue Number").WithLayout().Grow()
-                        | Icons.DollarSign.ToIcon().Color(Colors.Black)
+                        | Icons.DollarSign.ToIcon().Color(Colors.Neutral)
             );
     }
 }
@@ -176,7 +176,7 @@ public class HighPercentageMetricView : ViewBase
                 footer: new Progress(125).Goal("806.67%"),
                 header: Layout.Horizontal().Align(Align.Center)
                         | Text.H4("Post Engagement Rate").WithLayout().Grow()
-                        | Icons.Activity.ToIcon().Color(Colors.Black)
+                        | Icons.Activity.ToIcon().Color(Colors.Neutral)
             );
     }
 }
@@ -193,7 +193,7 @@ public class VeryLongTitleMetricView : ViewBase
                 footer: new Progress(90).Goal("2.50"),
                 header: Layout.Horizontal().Align(Align.Center)
                         | Text.H4("Total Comments per Author in This Period").WithLayout().Grow()
-                        | Icons.MessageCircle.ToIcon().Color(Colors.Black)
+                        | Icons.MessageCircle.ToIcon().Color(Colors.Neutral)
             );
     }
 }
@@ -210,7 +210,7 @@ public class TotalCommentsPerAuthorMetricView : ViewBase
                 footer: new Progress(90).Goal("2.50"),
                 header: Layout.Horizontal().Align(Align.Center)
                         | Text.H4("Total Comments per Author").WithLayout().Grow()
-                        | Icons.UserCheck.ToIcon().Color(Colors.Black)
+                        | Icons.UserCheck.ToIcon().Color(Colors.Neutral)
             );
     }
 }
@@ -234,7 +234,7 @@ public class UserEngagementWidget : ViewBase
                 footer: new Progress(75).Goal("1,500 users"),
                 header: Layout.Horizontal().Align(Align.Center)
                         | Text.H4("User Engagement").WithLayout().Grow()
-                        | Icons.Users.ToIcon().Color(Colors.Black)
+                        | Icons.Users.ToIcon().Color(Colors.Neutral)
             );
     }
 }
@@ -255,7 +255,7 @@ public class TaskCompletionWidget : ViewBase
                 footer: new Progress(87).Goal("100% completion"),
                 header: Layout.Horizontal().Align(Align.Center)
                         | Text.H4("Task Progress").WithLayout().Grow()
-                        | Icons.Check.ToIcon().Color(Colors.Black)
+                        | Icons.Check.ToIcon().Color(Colors.Neutral)
             );
     }
 }
@@ -278,7 +278,7 @@ public class SystemHealthWidget : ViewBase
                 footer: new Progress(99).Goal("100% uptime"),
                 header: Layout.Horizontal().Align(Align.Center)
                         | Text.H4("System Health").WithLayout().Grow()
-                        | Icons.Activity.ToIcon().Color(Colors.Black)
+                        | Icons.Activity.ToIcon().Color(Colors.Neutral)
             );
     }
 }
@@ -301,7 +301,7 @@ public class RevenueGrowthWidget : ViewBase
                 footer: new Progress(65).Goal("$70,000 target"),
                 header: Layout.Horizontal().Align(Align.Center)
                         | Text.H4("Revenue Growth").WithLayout().Grow()
-                        | Icons.TrendingUp.ToIcon().Color(Colors.Black)
+                        | Icons.TrendingUp.ToIcon().Color(Colors.Neutral)
             );
     }
 }
@@ -330,7 +330,7 @@ public class IconTextShowcaseWidget : ViewBase
                            | Text.Large("12,456").Color(Colors.Orange)),
                 header: Layout.Horizontal().Align(Align.Center)
                         | Text.H4("Social Engagement").WithLayout().Grow()
-                        | Icons.Star.ToIcon().Color(Colors.Black)
+                        | Icons.Star.ToIcon().Color(Colors.Neutral)
             );
     }
 }
@@ -358,7 +358,7 @@ public class ProgressBarVariationsWidget : ViewBase
                            | Text.Small("Average: 70%").Color(Colors.Emerald)),
                 header: Layout.Horizontal().Align(Align.Center)
                         | Text.H4("Progress Variations").WithLayout().Grow()
-                        | Icons.Star.ToIcon().Color(Colors.Black)
+                        | Icons.Star.ToIcon().Color(Colors.Neutral)
             );
     }
 }
@@ -384,7 +384,7 @@ public class LayoutTestWidget : ViewBase
                 footer: new Progress(96).Goal("5.0 rating"),
                 header: Layout.Horizontal().Align(Align.Center)
                         | Text.H4("Layout Testing").WithLayout().Grow()
-                        | Icons.LayoutDashboard.ToIcon().Color(Colors.Black)
+                        | Icons.LayoutDashboard.ToIcon().Color(Colors.Neutral)
             );
     }
 }
@@ -412,7 +412,7 @@ public class MixedContentWidget : ViewBase
                 footer: new Progress(78).Goal("2,500 total"),
                 header: Layout.Horizontal().Align(Align.Center)
                         | Text.H4("Download Analytics").WithLayout().Grow()
-                        | Icons.Download.ToIcon().Color(Colors.Black)
+                        | Icons.Download.ToIcon().Color(Colors.Neutral)
             );
     }
 }
@@ -446,7 +446,7 @@ public class ResponsiveLayoutWidget : ViewBase
                 footer: new Progress(85).Goal("50 countries"),
                 header: Layout.Horizontal().Align(Align.Center)
                         | Text.H4("Global Distribution").WithLayout().Grow()
-                        | Icons.Globe.ToIcon().Color(Colors.Black)
+                        | Icons.Globe.ToIcon().Color(Colors.Neutral)
             );
     }
 }
@@ -471,7 +471,7 @@ public class TextSpacingDemoWidget : ViewBase
                 footer: new Progress(60).Goal("Tight spacing"),
                 header: Layout.Horizontal().Align(Align.Center)
                         | Text.H4("Text Spacing Demo").WithLayout().Grow()
-                        | Icons.Type.ToIcon().Color(Colors.Black)
+                        | Icons.Type.ToIcon().Color(Colors.Neutral)
             );
     }
 }
@@ -494,7 +494,7 @@ public class CardPaddingOverrideWidget : ViewBase
                 footer: new Progress(75).Goal("Dense layout"),
                 header: Layout.Horizontal().Align(Align.Center)
                         | Text.H4("Zero Spacing").WithLayout().Grow()
-                        | Icons.Zap.ToIcon().Color(Colors.Black)
+                        | Icons.Zap.ToIcon().Color(Colors.Neutral)
             );
     }
 }
@@ -517,7 +517,7 @@ public class LayoutSpacingControlWidget : ViewBase
                 footer: new Progress(90).Goal("Custom control"),
                 header: Layout.Horizontal().Align(Align.Center)
                         | Text.H4("Spacing Control").WithLayout().Grow()
-                        | Icons.Settings.ToIcon().Color(Colors.Black)
+                        | Icons.Settings.ToIcon().Color(Colors.Neutral)
             );
     }
 }
@@ -535,7 +535,7 @@ public class SmallMetricView : ViewBase
                 footer: new Progress(25).Goal("$50K target"),
                 header: Layout.Horizontal().Align(Align.Center)
                         | Text.H4("Small Revenue").WithLayout().Grow()
-                        | Icons.DollarSign.ToIcon().Color(Colors.Black)
+                        | Icons.DollarSign.ToIcon().Color(Colors.Neutral)
             ).Small();
     }
 }
@@ -552,7 +552,7 @@ public class MediumMetricView : ViewBase
                 footer: new Progress(21).Goal("$400K target"),
                 header: Layout.Horizontal().Align(Align.Center)
                         | Text.H4("Medium Revenue").WithLayout().Grow()
-                        | Icons.DollarSign.ToIcon().Color(Colors.Black)
+                        | Icons.DollarSign.ToIcon().Color(Colors.Neutral)
             ).Medium();
     }
 }
@@ -569,7 +569,7 @@ public class LargeMetricView : ViewBase
                 footer: new Progress(75).Goal("$1.5M target"),
                 header: Layout.Horizontal().Align(Align.Center)
                         | Text.H4("Large Revenue").WithLayout().Grow()
-                        | Icons.DollarSign.ToIcon().Color(Colors.Black)
+                        | Icons.DollarSign.ToIcon().Color(Colors.Neutral)
             ).Large();
     }
 }
