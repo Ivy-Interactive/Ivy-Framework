@@ -211,28 +211,6 @@ counterRef.Set(counterRef.Value + 1); // No re-render
 
 The `UseAlert` and `UseTrigger` hooks have been refactored internally to be more reliable and consistent. They now use `UseRef` for internal state tracking (instead of `UseState`), which prevents unnecessary re-renders and improves performance.
 
-## Theming & Design System
-
-### Expanded Color Palette
-
-The design system now includes a comprehensive set of neutral and chromatic colors (Slate, Zinc, Red, Emerald, Sky, Indigo, etc.), each with proper foreground variants for accessibility.
-
-**Neutral colors available:**
-
-* Black, White, Slate, Gray, Zinc, Neutral, Stone
-
-**Chromatic colors available:**
-
-* Red, Orange, Amber, Yellow, Lime, Green, Emerald, Teal, Cyan, Sky, Blue, Indigo, Violet, Purple, Fuchsia, Pink, Rose
-
-## Performance Improvements
-
-### Font Loading Optimization
-
-Ivy now preloads all essential Geist and Geist Mono font weights (Regular, Medium, SemiBold, Bold) in the initial HTML document. This eliminates the font flicker that could occur during page load when the browser discovers fonts late in the rendering process.
-
-The `Embed` and `VideoPlayer` widgets now feature enhanced URL validation to automatically protect against hostname-based injection attacks.
-
 ## Developer Tools
 
 * **Beta Roslyn Analyzer**: Strictly enforces Rules of Hooks at compile time, catching conditional hooks or hooks in loops. Implemented in `Ivy.Analyser`, but is currently in beta and subject to change.
