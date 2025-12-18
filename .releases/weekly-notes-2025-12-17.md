@@ -207,6 +207,8 @@ new Button("Generate with AI", onClick, variant: ButtonVariant.Ai)
     .Icon(Icons.Sparkles)
 ```
 
+https://github.com/user-attachments/assets/64d7913e-34b8-4911-a763-b170d0447fe0
+
 ## Widget Updates
 
 ### Code Widget XML Language Support
@@ -228,10 +230,6 @@ new Code("""
     """, Languages.Xml)
 ```
 
-### DropdownMenu Click Handling Fix
-
-Dropdown menus now properly stop click event propagation, preventing clicks inside dropdown content from triggering actions on parent elements. This fixes issues where selecting a dropdown item could unintentionally trigger click handlers on containers or parent widgets.
-
 ### Number Input Width Control
 
 The `NumberInput` widget now supports width customization through the `Width()` extension method, giving you better control over form layouts:
@@ -248,6 +246,9 @@ new Form(model)
         .Label("Quantity")
 ```
 
+<img width="1276" height="312" alt="image" src="https://github.com/user-attachments/assets/efbcf1ab-a5e8-4e6a-9ca2-fd31326d16c5" />
+
+
 ### Details Widget Size Control
 
 The `Details` widget now supports three size variants through the scale API, giving you better control over detail view density and typography:
@@ -262,6 +263,8 @@ record.ToDetails()  // or .Medium()
 // Large size - spacious for important information
 record.ToDetails().Large()
 ```
+<img width="2284" height="775" alt="image" src="https://github.com/user-attachments/assets/ff78f8a8-bf08-4403-a63a-0e610eecc4ee" />
+
 
 **What changed:**
 
@@ -288,20 +291,6 @@ var record = new
 new Card(record.ToDetails().Large())  // Parent details shown larger
 ```
 
-### Enhanced Card Header Layout
-
-The `Card` widget now supports more flexible header layouts with proper alignment between titles, icons, and other content. Headers can now use full layout widgets for better control:
-
-```csharp
-// New approach: Use Layout.Horizontal() for full control
-new Card(
-    content: "Card content here",
-    header: Layout.Horizontal().Align(Align.Center)
-            | Text.H4("Card Title").WithLayout().Grow()
-            | Icons.Info.ToIcon().Color(Colors.Black)
-)
-```
-
 **What changed:**
 
 - Card headers can now contain any widget, not just simple text
@@ -324,17 +313,18 @@ new Card(
 )
 ```
 
+<img width="598" height="235" alt="image" src="https://github.com/user-attachments/assets/3cb4f82a-4a89-4abe-8ebf-4f95c7df9396" />
+
 **Simplified Header API**: The `.Header()` method now provides a more streamlined way to set both title and description:
 
 ```csharp
 // Combined title and description
 new Card("Content here")
     .Header("Card Title", "This is the description")
-
-// With icon
-new Card("Content here")
-    .Header(Text.H4("Card Title"), Text.Muted("Description"), Icons.Info)
 ```
+
+<img width="580" height="192" alt="image" src="https://github.com/user-attachments/assets/b852351d-b6ad-4430-a1f0-9a17fe9c7303" />
+
 
 ### Simplified `Box` Widget Defaults
 
@@ -486,6 +476,11 @@ The `SelectInput` widget now properly handles nullable values when cleared, sett
 ### Improved App Routing and Default App Selection
 
 The framework's app routing system has been improved to prevent certain system apps from being automatically selected as the default app
+
+
+### DropdownMenu Click Handling Fix
+
+Dropdown menus now properly stop click event propagation, preventing clicks inside dropdown content from triggering actions on parent elements. This fixes issues where selecting a dropdown item could unintentionally trigger click handlers on containers or parent widgets.
 
 ## Widget Updates
 
