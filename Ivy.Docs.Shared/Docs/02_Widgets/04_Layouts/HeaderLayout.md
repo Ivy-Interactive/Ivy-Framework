@@ -192,9 +192,9 @@ public class NavigationHeaderExample : ViewBase
                 "advanced" => Layout.Vertical().Gap(4)
                     | Text.Label("Advanced Topics")
                     | Text.P("Advanced usage patterns and techniques for experienced developers.")
-                    | new Card("Custom [components](../../../01_Onboarding/02_Concepts/Widgets.md) and [widgets](../../../01_Onboarding/02_Concepts/Widgets.md)")
+                    | new Card("Custom components and widgets")
                     | new Card("Performance optimization techniques")
-                    | new Card("Advanced [state](../../../01_Onboarding/02_Concepts/State.md) management")
+                    | new Card("Advanced state management")
                     | new Card("Integration with external services")
                     | Text.P("These topics require a solid understanding of the framework basics."),
                 

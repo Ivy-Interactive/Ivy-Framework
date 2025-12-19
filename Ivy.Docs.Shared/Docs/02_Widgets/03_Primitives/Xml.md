@@ -51,7 +51,7 @@ public class TextHelperExample : ViewBase
         return Layout.Vertical().Gap(4)
             | Text.P("Here's an example XML configuration:")
             | Text.Xml("<config><setting>value</setting></config>")
-            | Text.P("You can also use it with [state variables](../../../01_Onboarding/02_Concepts/State.md):")
+            | Text.P("You can also use it with state variables:")
             | Text.Xml(UseState("<root><item>dynamic</item></root>"));
     }
 }

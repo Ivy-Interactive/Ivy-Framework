@@ -104,7 +104,7 @@ public class ArticleDemo : ViewBase
         return Layout.Vertical()
             | Text.H1("Getting Started with Ivy")
             | Text.Lead("Ivy is a powerful framework for building interactive web applications with C#.")
-            | Text.P("This guide will walk you through the basics of creating your first Ivy project. You'll learn about [widgets](../../../01_Onboarding/02_Concepts/Widgets.md), [layouts](../../../01_Onboarding/02_Concepts/Views.md), and how to structure your code effectively.")
+            | Text.P("This guide will walk you through the basics of creating your first Ivy project. You'll learn about widgets, layouts, and how to structure your code effectively.")
             | Text.H2("Prerequisites")
             | Text.P("Before you begin, make sure you have:")
             | Text.Block("• .NET 8.0 SDK installed")

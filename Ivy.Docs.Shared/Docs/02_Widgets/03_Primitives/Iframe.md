@@ -70,9 +70,9 @@ public class ToolsDashboardView : ViewBase
         };
         
         return Layout.Vertical().Gap(4)
-            | Text.P("[Ivy Framework](../../../01_Onboarding/01_GettingStarted/01_Introduction.md) Pages")
+            | Text.P("Ivy Framework Pages")
             | (Layout.Horizontal().Gap(2)
-                | new [Button](../01_Common/Button.md)("Ivy Docs", onClick: _ => selectedTool.Set("docs"))
+                | new Button("Ivy Docs", onClick: _ => selectedTool.Set("docs"))
                 | new Button("Ivy Samples", onClick: _ => selectedTool.Set("samples"))
                 | new Button("Ivy Website", onClick: _ => selectedTool.Set("website")))
             | GetSelectedTool();

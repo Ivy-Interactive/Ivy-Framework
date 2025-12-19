@@ -161,7 +161,7 @@ public class BoolInputDemo : ViewBase
 ### Toggle
 
 `Toggle` is a button-style boolean input that switches between two states (on/off, enabled/disabled) with a single click.
-It appears as a pressable [button](Button.md) that visually indicates its current state through styling and optional icons.
+It appears as a pressable [button](../01_Common/Button.md) that visually indicates its current state through styling and optional icons.
 This is represented by `BoolInputs.Toggle`
 
 `ToToggleInput` extension function can be used to create such a `BoolInput.Toggle` variant.

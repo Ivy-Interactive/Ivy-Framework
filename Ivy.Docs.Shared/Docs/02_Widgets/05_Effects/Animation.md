@@ -451,7 +451,7 @@ Layout.Wrap().Gap(4).Align(Align.Center)
         .WithAnimation(AnimationType.Pulse)
         .Trigger(AnimationTrigger.Click)
         .Duration(0.6)
-    | Icons.[Volume](../../../01_Onboarding/02_Concepts/Volume.md)
+    | Icons.Volume
         .ToIcon()
         .Color(Colors.Purple)
         .WithAnimation(AnimationType.Bounce)

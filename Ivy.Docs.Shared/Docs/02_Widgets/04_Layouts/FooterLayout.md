@@ -29,7 +29,7 @@ public class BasicFooterExample : ViewBase
         
         return Layout.Vertical()
             | new Card("Main Section")
-                    | Text.P("Welcome to [Ivy Framework](../../../01_Onboarding/01_GettingStarted/01_Introduction.md)")
+                    | Text.P("Welcome to Ivy Framework")
             | new FooterLayout(
                 footer: new Button("Save", _ => client.Toast("Content saved!"))
                     .Variant(ButtonVariant.Primary),

@@ -242,7 +242,7 @@ public class ComprehensiveMarkdownView : ViewBase
                 A[Start] --> B[Process] --> C[End]
             ```
             
-            Made with :heart: using [Ivy Framework](../../../01_Onboarding/01_GettingStarted/01_Introduction.md) :rocket:
+            Made with :heart: using Ivy Framework :rocket:
             """;
             
         Action<string> handleLink = url => Console.WriteLine($"Navigate to: {url}");

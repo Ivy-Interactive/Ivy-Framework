@@ -51,7 +51,7 @@ public class HorizontalResizeableView : ViewBase
                 new Card(
                     Layout.Vertical()
                         | Text.Label("Sidebar")
-                        | Text.Block("[Navigation](../../../01_Onboarding/02_Concepts/Navigation.md)")
+                        | Text.Block("Navigation")
                         | Text.Block("• Home")
                         | Text.Block("• Settings")
                 )),

@@ -248,7 +248,7 @@ public class GridLineDemo : ViewBase
                        .Legend()
                  | (Layout.Horizontal()
                      | Text.Large("Height")
-                     | new [NumberInput](../../02_Inputs/Number.md)<int>(
+                     | new NumberInput<int>(
                            height.Value,
                             e => {
                                  height.Set(e); 
@@ -300,7 +300,7 @@ public class BitcoinChart : ViewBase
         return Layout.Vertical()
                  | Text.Large("Bitcoin Price - Last 100 Days")
                  | Text.Small($"Showing {bitcoinData.Length} days of data")
-                 | Text.[Html](../../03_Primitives/Html.md)($"<i>From {bitcoinData.First().Date:yyyy-MM-dd} to {bitcoinData.Last().Date:yyyy-MM-dd}</i>")
+                 | Text.Html($"<i>From {bitcoinData.First().Date:yyyy-MM-dd} to {bitcoinData.Last().Date:yyyy-MM-dd}</i>")
                  | bitcoinData.ToLineChart(
                         style: LineChartStyles.Dashboard)
                     .Dimension("Date", e => e.Date)

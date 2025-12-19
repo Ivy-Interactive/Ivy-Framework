@@ -215,7 +215,7 @@ public class SidebarMenuAdvancedExample : ViewBase
                 .Icon(Icons.Package).Children(
                 MenuItem.Default("Buttons")
                     .Icon(Icons.MousePointer).Tag("buttons"),
-                MenuItem.Default("[Forms](../../../01_Onboarding/02_Concepts/Forms.md)")
+                MenuItem.Default("Forms")
                     .Icon(Icons.FileText).Tag("forms"),
                 MenuItem.Default("Charts")
                     .Icon(Icons.ChartBar).Tag("charts"),
@@ -226,7 +226,7 @@ public class SidebarMenuAdvancedExample : ViewBase
                 .Icon(Icons.Cpu).Children(
                 MenuItem.Default("Hooks")
                 .Icon(Icons.Link).Tag("hooks"),
-                MenuItem.Default("[State](../../../01_Onboarding/02_Concepts/State.md) Management")
+                MenuItem.Default("State Management")
                 .Icon(Icons.Database).Tag("state"),
                 MenuItem.Default("Performance")
                 .Icon(Icons.Gauge).Tag("performance")

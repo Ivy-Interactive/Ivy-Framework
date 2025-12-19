@@ -783,7 +783,7 @@ public class SheetFormExample : ViewBase
 
 ### Dialog Forms
 
-Open forms in modal [dialogs](../../02_Widgets/07_Advanced/Dialog.md) using `.ToDialog()`.
+Open forms in modal [dialogs](./Alerts.md) using `.ToDialog()`.
 
 ```csharp demo-tabs
 public class DialogFormExample : ViewBase
