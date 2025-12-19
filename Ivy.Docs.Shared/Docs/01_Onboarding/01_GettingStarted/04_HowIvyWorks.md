@@ -19,20 +19,6 @@ Ivy is a **server-side web framework** that brings React-like patterns to C#. In
 
 ## Architecture Overview
 
-```mermaid
-graph LR
-    A["C# Views<br/>(ViewBase)"] --> B["Widget Tree<br/>(JSON)"]
-    B --> C["WebSocket<br/>Communication"]
-    C --> D["React Frontend<br/>(Shadcn/TailwindCSS)"]
-    D --> E["Browser<br/>(HTML/CSS)"]
-
-    E --> F["User Events<br/>(clicks, input)"]
-    F --> C
-    C --> G["Event Handlers<br/>(C# methods)"]
-    G --> H["State Updates<br/>(UseState, etc.)"]
-    H --> A
-```
-
 ### Views & Components
 
 Every Ivy app is built from **Views** - C# classes that inherit from `ViewBase`. Each view implements a single `Build()` method that returns widgets or other views:

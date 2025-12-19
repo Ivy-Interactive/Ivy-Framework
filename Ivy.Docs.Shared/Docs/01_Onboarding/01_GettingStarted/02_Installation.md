@@ -51,18 +51,6 @@ This will create a new Ivy project with the necessary structure and configuratio
 
 Ivy Framework requires .NET 9.0 as the target framework. All Ivy projects and packages are built against this version.
 
-```mermaid
-graph TD
-    A[Prerequisites] --> B[Required]
-    A --> C[Optional]
-    
-    B --> B1[.NET 9.0 SDK or later]
-    B --> B2[Code Editor<br/>VS Code / Visual Studio / Rider]
-    
-    C --> C1[Git for version control]
-    C --> C2[Database System<br/>SQL Server / PostgreSQL / SQLite / MySQL]
-```
-
 ## Manual Setup: Creating Your First Project
 
 If you prefer to set up a project manually, follow these steps:
@@ -124,26 +112,7 @@ The primary Ivy Framework package is installed via NuGet:
 >dotnet add package Ivy
 ```
 
-```mermaid
-graph TD
-    A[Ivy Package] --> B[Core Server Framework]
-    A --> C[Widget System]
-    A --> D[SignalR Communication]
-    A --> E[React Frontend Assets]
-    A --> F[Auth Framework Interfaces]
-```
-
 ### Optional Extension Packages
-
-```mermaid
-graph LR
-    A[Ivy Extensions] --> B[Auth Providers]
-    A --> C[Database Tools]
-    
-    B --> B1[Supabase Auth]
-    B --> B2[Authelia Auth]
-    C --> C1[Database Generator Toolkit]
-```
 
 **Authentication Providers:**
 
@@ -162,52 +131,13 @@ graph LR
 
 The main Ivy package includes several key dependencies that enable its functionality:
 
-```mermaid
-graph TD
-    A[Ivy Package] --> B[ASP.NET Core]
-    A --> C[SignalR]
-    A --> D[JWT Tokens]
-    A --> E[System.Reactive]
-    A --> F[JSON Patching]
-    
-    B --> B1[Web Hosting]
-    C --> C1[Real-time Communication]
-    D --> D1[Authentication]
-    E --> E1[Reactive Patterns]
-    F --> F1[State Synchronization]
-```
-
 ## Project Structure Overview
 
 ### Basic Ivy Project Layout
 
-```mermaid
-graph TD
-    A[Ivy Project] --> B[Project.csproj]
-    A --> C[Program.cs]
-    A --> D[Apps/]
-    A --> E[Assets/]
-    
-    B --> B1[.NET 9.0 Target]
-    C --> C1[Server Configuration]
-    D --> D1[ViewBase Classes]
-    E --> E1[Static Files]
-```
-
 ### Multi-Project Solution Structure
 
 Larger projects often use a multi-project structure separating concerns:
-
-```mermaid
-graph LR
-    A[Solution] --> B[Main Project]
-    A --> C[Shared Project]
-    A --> D[Test Project]
-    
-    B --> B1[Program.cs<br/>Server Startup]
-    C --> C1[Apps<br/>Services<br/>Business Logic]
-    D --> D1[Unit Tests<br/>Integration Tests]
-```
 
 ## Server Configuration
 
@@ -218,18 +148,3 @@ For detailed server configuration options, including `ServerArgs` properties and
 ### Development vs Production
 
 The server automatically detects the environment and adjusts behavior:
-
-```mermaid
-graph TD
-    A[Server Environment] --> B[Development Mode]
-    A --> C[Production Mode]
-    
-    B --> B1[Hot Reload Enabled]
-    B --> B2[Detailed Error Messages]
-    B --> B3[No Asset Caching]
-    B --> B4[Port Conflict Detection]
-    
-    C --> C1[Asset Caching with ETags]
-    C --> C2[Compressed Responses]
-    C --> C3[Error Logging Only]
-```
