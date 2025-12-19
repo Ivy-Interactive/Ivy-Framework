@@ -135,11 +135,15 @@ When working with search results in the sidebar (both in Ivy Samples and Docs), 
 
 ## Detailed Architecture
 
+<Callout Type="info">
+The following technical documentation is intended primarily for internal developers of the Ivy-Framework.
+</Callout>
+
 For a comprehensive technical overview of Ivy's architecture, see:
 
-- **[Framework Design](./05_Architecture/01_FrameworkDesign.md)** - Design system, theming, and UI framework choices
-- **[Backend Architecture](./05_Architecture/02_BackendArchitecture.md)** - C# server configuration, application system, and deployment
-- **[Communication](./05_Architecture/03_Communication.md)** - SignalR protocol, message types, and state synchronization
+- **[Framework Design](https://github.com/Ivy-Interactive/Ivy-Framework/wiki/Framework-Design)** - Design system, theming, and UI framework choices
+- **[Backend Architecture](https://github.com/Ivy-Interactive/Ivy-Framework/wiki/Backend-Architecture)** - C# server configuration, application system, and deployment
+- **[Communication](https://github.com/Ivy-Interactive/Ivy-Framework/wiki/BE%E2%80%90FE-communication)** - SignalR protocol, message types, and state synchronization
 
 ## Development Experience
 
