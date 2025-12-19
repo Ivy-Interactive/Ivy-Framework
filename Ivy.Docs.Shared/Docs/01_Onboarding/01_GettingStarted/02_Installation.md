@@ -104,40 +104,60 @@ Ensure your `.csproj` targets .NET 10.0:
 
 ## Core Package Installation
 
-### Main Ivy Package
-
-The primary Ivy Framework package is installed via NuGet:
+The primary Ivy Framework package is installed via NuGet and provides the foundation for your application.
 
 ```terminal
 >dotnet add package Ivy
 ```
 
-### Optional Extension Packages
+| Component | Description |
+| :--- | :--- |
+| **Core Framework** | High-performance server-side engine and application system |
+| **Widget System** | Library of strongly-typed UI components (Shadcn/Tailwind) |
+| **SignalR Hub** | Real-time state synchronization between C# and React |
+| **Embedded Assets** | Pre-built frontend bundle embedded in the DLL |
+| **Auth Interfaces** | extensible framework for security and identity |
 
-**Authentication Providers:**
+Extend Ivy's functionality with official extension packages for authentication and data management.
+
+| Package | Purpose |
+| :--- | :--- |
+| `Ivy.Auth.Supabase` | Identity management via Supabase |
+| `Ivy.Auth.Authelia` | Single Sign-On and 2FA via Authelia |
+| `Ivy.Auth.Entra` | Microsoft Entra ID (Azure AD) integration |
+| `Ivy.Database.Generator.Toolkit` | Utilities for AI-powered schema and code generation |
 
 ```terminal
->dotnet add package Ivy.Auth.Supabase    # For Supabase authentication
->dotnet add package Ivy.Auth.Authelia    # For Authelia authentication
+>dotnet add package Ivy.Auth.Supabase
+>dotnet add package Ivy.Database.Generator.Toolkit
 ```
 
-**Database Tools:**
+The Ivy package abstracts away several modern technologies to provide its seamless developer experience:
 
-```terminal
->dotnet add package Ivy.Database.Generator.Toolkit    # Database generation utilities
-```
-
-### Package Dependencies
-
-The main Ivy package includes several key dependencies that enable its functionality:
+- **ASP.NET Core**: Secure and scalable web hosting
+- **SignalR**: Low-latency, real-time communication
+- **JWT & Auth**: Industrial-grade security protocols
+- **System.Reactive**: Event-driven UI updates
+- **JSON Patch**: Efficient state synchronization
 
 ## Project Structure Overview
 
-### Basic Ivy Project Layout
+A standard Ivy project follows a clean, flattened structure designed for clarity.
 
-### Multi-Project Solution Structure
+| File/Folder | Description |
+| :--- | :--- |
+| **`Project.csproj`** | Matches the .NET 10.0 target and contains Ivy references |
+| **`Program.cs`** | The entry point where you configure and run the Ivy server |
+| **`Apps/`** | Where your Views and business logic reside |
+| **`Assets/`** | Optional static files (images, custom CSS) |
 
-Larger projects often use a multi-project structure separating concerns:
+### Multi-Project Solutions
+
+For enterprise-scale applications, we recommend a multi-project structure to separate concerns:
+
+- **Web Project**: Contains `Program.cs` and server startup configuration.
+- **Shared/Core Project**: Contains the majority of your `ViewBase` classes and domain logic.
+- **Test Project**: Contains unit and integration tests for your UI components.
 
 ## Server Configuration
 
@@ -147,4 +167,12 @@ For detailed server configuration options, including `ServerArgs` properties and
 
 ### Development vs Production
 
-The server automatically detects the environment and adjusts behavior:
+The server automatically optimizes its behavior based on the current environment.
+
+| Feature | Development | Production |
+| :--- | :--- | :--- |
+| **Hot Reload** | Enabled (instant UI updates) | Disabled (optimized performance) |
+| **Error Handling** | Detailed stack traces | Secure, logged exceptions |
+| **Caching** | Disabled for immediate changes | Aggressive ETag & compression |
+| **Logging** | Debug & Information | Warning & Error only |
+| **Port Management** | Conflict detection & auto-shift | Strict port binding |
