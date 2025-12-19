@@ -142,35 +142,4 @@ Now let's run the project.
 >dotnet watch
 ```
 
-Get your application's complete server description
-
-```terminal
-
->dotnet run --describe
-
-Output (YAML format):
-apps:
-   - name: Dashboard
-     id: dashboard
-     isVisible: true
-   - name: Settings
-     id: settings
-     isVisible: true
-connections:
-   - name: MainDatabase
-     connectionType: EntityFramework.SqlServer
-     namespace: MyApp.Data
-   - name: ExternalApi
-     connectionType: OpenAPI
-     namespace: MyApp.Services
-secrets:
-   - ConnectionStrings:Database
-   - Auth0:ClientId
-   - Stripe:ApiKey
-services:
-   - serviceType: IUserService
-     implementationType: UserService
-     lifetime: Scoped
-```
-
 You can find the source code for the app at [GitHub](https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy.Samples.Shared/Apps/Demos/TodosApp.cs).
