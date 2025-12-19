@@ -112,8 +112,6 @@ public class PivotTable<T>
             calculation.Calculation(result);
         }
 
-        //sort by first dimension
-        result.Sort((a, b) => Comparer.Default.Compare(a[Dimensions[0].Name], b[Dimensions[0].Name]));
 
         return result.ToArray();
     }
