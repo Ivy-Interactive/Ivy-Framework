@@ -78,8 +78,8 @@ public class TextInputApp : SampleBase
                   | withValue.ToSearchInput().Invalid("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec eros")
                )
 
-                | Text.H2("Prefix and Suffix")
-                | new TextInputPrefixSuffix()
+               | Text.H2("Affixes")
+               | new TextInputAffixes()
 
                //Data Binding:
 
@@ -146,7 +146,7 @@ public class TextInputSizes : ViewBase
     }
 }
 
-public class TextInputPrefixSuffix : ViewBase
+public class TextInputAffixes : ViewBase
 {
     public override object Build()
     {
