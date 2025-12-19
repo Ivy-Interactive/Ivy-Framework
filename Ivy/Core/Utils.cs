@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Text.Json.Serialization.Metadata;
 
 namespace Ivy.Core;
 
@@ -115,7 +116,8 @@ public static class Utils
         var options = new JsonSerializerOptions
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            DictionaryKeyPolicy = JsonNamingPolicy.CamelCase
+            DictionaryKeyPolicy = JsonNamingPolicy.CamelCase,
+            TypeInfoResolver = JsonTypeInfoResolver.Combine(IvyCoreJsonContext.Default, new DefaultJsonTypeInfoResolver())
         };
 
         return jsonNode.Deserialize(valueType, options);

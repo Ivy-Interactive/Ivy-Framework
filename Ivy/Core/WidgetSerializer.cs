@@ -2,10 +2,19 @@ using System.Collections.Concurrent;
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
 using Ivy.Core.Helpers;
 
 namespace Ivy.Core;
+
+[JsonSerializable(typeof(string))]
+[JsonSerializable(typeof(string[]))]
+[JsonSerializable(typeof(int))]
+[JsonSerializable(typeof(bool))]
+[JsonSerializable(typeof(object))]
+[JsonSerializable(typeof(object[]))]
+internal partial class IvyCoreJsonContext : JsonSerializerContext;
 
 public static class WidgetSerializer
 {
@@ -13,7 +22,7 @@ public static class WidgetSerializer
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         DictionaryKeyPolicy = JsonNamingPolicy.CamelCase,
-        TypeInfoResolver = new DefaultJsonTypeInfoResolver(),
+        TypeInfoResolver = JsonTypeInfoResolver.Combine(IvyCoreJsonContext.Default, new DefaultJsonTypeInfoResolver()),
         Converters =
         {
             new JsonEnumConverter(),
@@ -79,8 +88,8 @@ public static class WidgetSerializer
 
         var json = new JsonObject
         {
-            ["id"] = widget.Id,
-            ["type"] = metadata.TypeName,
+            ["id"] = JsonValue.Create(widget.Id, (JsonTypeInfo<string>)SerializerOptions.GetTypeInfo(typeof(string))),
+            ["type"] = JsonValue.Create(metadata.TypeName, (JsonTypeInfo<string>)SerializerOptions.GetTypeInfo(typeof(string))),
             ["children"] = childrenArray
         };
 
@@ -101,7 +110,7 @@ public static class WidgetSerializer
             foreach (var eventInfo in metadata.EventProperties)
             {
                 if (eventInfo.Property.GetValue(widget) != null)
-                    eventsArray.Add(eventInfo.Property.Name);
+                    eventsArray.Add(JsonValue.Create(eventInfo.Property.Name, (JsonTypeInfo<string>)SerializerOptions.GetTypeInfo(typeof(string))));
             }
             json["events"] = eventsArray;
         }
