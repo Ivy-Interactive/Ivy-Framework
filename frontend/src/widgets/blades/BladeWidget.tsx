@@ -46,7 +46,7 @@ export function BladeWidget({
       className={`flex flex-col bg-background border-r border-border h-full ${flexClass}`}
     >
       <div
-        className="flex items-center justify-between px-2 bg-background text-foreground h-[60px] border-b border-border"
+        className="flex items-center justify-between px-4 bg-background text-foreground h-[70px] border-b border-border"
         onMouseDown={e => handleMouseDown(e)}
       >
         <div className="flex items-center h-[70px]">
@@ -78,7 +78,7 @@ export function BladeWidget({
           type="hover"
           className="blade-container h-full [&>div>div[style]]:block!"
         >
-          <div className="p-2">{children}</div>
+          <div className="p-4">{children}</div>
         </ScrollArea>
       </div>
     </div>

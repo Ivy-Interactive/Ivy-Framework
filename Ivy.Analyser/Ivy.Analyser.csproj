@@ -9,10 +9,14 @@
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <IsPackable>true</IsPackable>
     <PackageId>Ivy.Analyser</PackageId>
+    <Version>1.0.0</Version>
     <Company>Ivy Interactive</Company>
     <Description>Roslyn analyzer for enforcing proper Ivy hook usage</Description>
     <PackageTags>analyzers, roslyn, ivy</PackageTags>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/Ivy-Interactive/Ivy-Framework</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Ivy-Interactive/Ivy-Framework</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
     <DevelopmentDependency>true</DevelopmentDependency>
     <NoPackageAnalysis>true</NoPackageAnalysis>
     <LangVersion>latest</LangVersion>

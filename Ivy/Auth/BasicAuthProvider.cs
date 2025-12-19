@@ -194,20 +194,15 @@ public class BasicAuthProvider : IAuthProvider
         return [new AuthOption(AuthFlow.EmailPassword)];
     }
 
-    public Task<DateTimeOffset?> GetAccessTokenExpirationAsync(IAuthSession authSession, CancellationToken cancellationToken)
+    public Task<TokenLifetime?> GetAccessTokenLifetimeAsync(IAuthSession authSession, CancellationToken cancellationToken)
     {
-        if (authSession.AuthToken?.AccessToken is not { } accessToken)
+        if (ValidateToken(authSession.AuthToken?.AccessToken, _audience, "access") is var (_, expiration))
         {
-            return Task.FromResult<DateTimeOffset?>(null);
-        }
-
-        if (ValidateToken(accessToken, _audience, "access") is var (_, expiration))
-        {
-            return Task.FromResult<DateTimeOffset?>(expiration);
+            return Task.FromResult<TokenLifetime?>(new TokenLifetime(expiration));
         }
         else
         {
-            return Task.FromResult<DateTimeOffset?>(null);
+            return Task.FromResult<TokenLifetime?>(null);
         }
     }
 

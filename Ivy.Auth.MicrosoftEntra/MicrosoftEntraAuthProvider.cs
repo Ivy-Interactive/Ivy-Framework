@@ -279,7 +279,7 @@ public class MicrosoftEntraAuthProvider : IAuthProvider
         return [.. _authOptions];
     }
 
-    public async Task<DateTimeOffset?> GetAccessTokenExpirationAsync(IAuthSession authSession, CancellationToken cancellationToken)
+    public async Task<TokenLifetime?> GetAccessTokenLifetimeAsync(IAuthSession authSession, CancellationToken cancellationToken)
     {
         if (authSession.AuthToken?.AccessToken is not { } accessToken)
         {
@@ -288,7 +288,7 @@ public class MicrosoftEntraAuthProvider : IAuthProvider
 
         if (await VerifyToken(accessToken, cancellationToken) is var (_, expiration))
         {
-            return expiration;
+            return new TokenLifetime(expiration);
         }
         else
         {

@@ -14,15 +14,15 @@ namespace Ivy.Helpers;
 
 public static class AuthHelper
 {
-    public static AuthSession GetAuthSession(HttpContext context)
+    public static AuthSession GetAuthSession(HttpContext context, HttpMessageHandler httpMessageHandler)
     => GetAuthCookies(context) is (var authToken, var extRefreshToken, var authSessionData)
-        ? GetAuthSession(authToken, extRefreshToken, authSessionData)
-        : new AuthSession();
+        ? GetAuthSession(authToken, extRefreshToken, authSessionData, httpMessageHandler)
+        : new AuthSession(httpMessageHandler);
 
-    public static AuthSession GetAuthSession(ServerCallContext context)
+    public static AuthSession GetAuthSession(ServerCallContext context, HttpMessageHandler httpMessageHandler)
     => GetAuthCookies(context) is (var authToken, var extRefreshToken, var authSessionData)
-        ? GetAuthSession(authToken, extRefreshToken, authSessionData)
-        : new AuthSession();
+        ? GetAuthSession(authToken, extRefreshToken, authSessionData, httpMessageHandler)
+        : new AuthSession(httpMessageHandler);
 
     public static async Task ValidateAuthIfRequired(Server server, AppSessionStore sessionStore, string connectionId, ServerCallContext context)
     {
@@ -42,10 +42,11 @@ public static class AuthHelper
             throw new RpcException(new Status(StatusCode.NotFound, $"Connection '{connectionId}' not found."));
         }
 
-        var authSession = GetAuthSession(context);
 
         var serviceProvider = session.AppServices;
         var clientProvider = serviceProvider.GetRequiredService<IClientProvider>();
+        var httpMessageHandler = serviceProvider.GetRequiredService<HttpMessageHandler>();
+        var authSession = GetAuthSession(context, httpMessageHandler);
         try
         {
             await ValidateAuth(serviceProvider, authSession, context.CancellationToken);
@@ -83,7 +84,8 @@ public static class AuthHelper
         var clientProvider = serviceProvider.GetRequiredService<IClientProvider>();
         try
         {
-            var authSession = GetAuthSession(controller.HttpContext);
+            var httpMessageHandler = serviceProvider.GetRequiredService<HttpMessageHandler>();
+            var authSession = GetAuthSession(controller.HttpContext, httpMessageHandler);
             await ValidateAuth(serviceProvider, authSession, controller.HttpContext.RequestAborted);
         }
         catch (MissingAuthTokenException ex)
@@ -174,11 +176,11 @@ public static class AuthHelper
         return (authTokenValue, extRefreshTokenValue, authSessionDataValue);
     }
 
-    private static AuthSession GetAuthSession(string? authTokenValue, string? extRefreshTokenValue, string? authSessionDataValue)
+    private static AuthSession GetAuthSession(string? authTokenValue, string? extRefreshTokenValue, string? authSessionDataValue, HttpMessageHandler httpMessageHandler)
     {
         if (authTokenValue == null)
         {
-            return new(authSessionData: authSessionDataValue);
+            return new(httpMessageHandler, authSessionData: authSessionDataValue);
         }
 
         try
@@ -186,7 +188,7 @@ public static class AuthHelper
             var token = JsonSerializer.Deserialize<AuthToken>(authTokenValue, JsonHelper.DefaultOptions);
             if (token == null)
             {
-                return new(authSessionData: authSessionDataValue);
+                return new(httpMessageHandler, authSessionData: authSessionDataValue);
             }
 
             // Check if refresh token is in a separate cookie
@@ -195,11 +197,11 @@ public static class AuthHelper
                 token = token with { RefreshToken = extRefreshTokenValue };
             }
 
-            return new(token, authSessionDataValue);
+            return new(httpMessageHandler, token, authSessionDataValue);
         }
         catch (Exception)
         {
-            return new(authSessionData: authSessionDataValue);
+            return new(httpMessageHandler, authSessionData: authSessionDataValue);
         }
     }
 }

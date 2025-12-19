@@ -109,9 +109,9 @@ public class AutheliaAuthProvider : IAuthProvider
         return [new AuthOption(AuthFlow.EmailPassword)];
     }
 
-    public Task<DateTimeOffset?> GetAccessTokenExpirationAsync(IAuthSession authSession, CancellationToken cancellationToken)
+    public Task<TokenLifetime?> GetAccessTokenLifetimeAsync(IAuthSession authSession, CancellationToken cancellationToken)
     {
-        return Task.FromResult<DateTimeOffset?>(null);
+        return Task.FromResult<TokenLifetime?>(null);
     }
 }
 
