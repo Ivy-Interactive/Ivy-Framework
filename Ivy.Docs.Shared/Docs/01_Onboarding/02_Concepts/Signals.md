@@ -11,7 +11,7 @@ searchHints:
 # Signals
 
 <Ingress>
-Signals enable inter-component communication in Ivy applications, allowing components to send and receive messages across the component tree.
+Signals enable inter-component communication in Ivy [applications](./Apps.md), allowing components to send and receive messages across the [component tree](../01_GettingStarted/01_Introduction.md).
 They follow a publisher-subscriber pattern where components can send messages through signals and other components can listen for and respond to those messages.
 </Ingress>
 
@@ -244,7 +244,7 @@ UseEffect(() => signal.Receive(input => {
 }));
 ```
 
-**Important**: Always use `UseEffect()` to manage signal subscriptions for proper lifecycle handling.
+**Important**: Always use `UseEffect()` to manage signal subscriptions for proper [lifecycle handling](./Views.md).
 
 ### Signal Types
 
@@ -273,7 +273,7 @@ public class AppSignal : AbstractSignal<string, Unit> { }
 - **`App`** - All sessions running the same application
 - **`Server`** - All active sessions on the server
 - **`Machine`** - All sessions on the same physical machine
-- **`Chrome`** - Parent Chrome session (for embedded apps)
+- **`Chrome`** - Parent [Chrome](./Chrome.md) session (for embedded apps)
 
 ```csharp
 [Signal(BroadcastType.App)]

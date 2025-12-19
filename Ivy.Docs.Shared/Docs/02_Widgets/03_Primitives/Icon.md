@@ -14,13 +14,13 @@ searchHints:
 Display beautiful vector icons from the comprehensive Lucide icon set with customizable colors, sizes, and styling options.
 </Ingress>
 
-The `Icon` widget displays vector icons from Ivy's built-in icon set. Icons enhance visual communication and can be customized with different colors and sizes.
+The `Icon` [widget](../../../01_Onboarding/02_Concepts/Widgets.md) displays vector icons from Ivy's built-in icon set. Icons enhance visual communication and can be customized with different colors and sizes.
 
 ## Lucide Icons
 
 We use the [Lucide Icons](https://lucide.dev/icons/) set, which is a collection of 1000+ free icons. You can find the full set [here](https://lucide.dev/icons/).
 
-```csharp demo-tabs 
+```csharp demo-tabs
 Layout.Horizontal()
     | new Icon(Icons.Clipboard)
     | new Icon(Icons.Settings)
@@ -33,7 +33,7 @@ Layout.Horizontal()
 
 You can customize the color of the icons using the `Color` parameter.
 
-```csharp demo-tabs 
+```csharp demo-tabs
 Layout.Horizontal()
     | new Icon(Icons.Clipboard, Colors.Red)
     | new Icon(Icons.Settings, Colors.Green)
@@ -46,7 +46,7 @@ Layout.Horizontal()
 
 You can also customize the size of the icons using the `Size` parameter.
 
-```csharp demo-tabs 
+```csharp demo-tabs
 Layout.Horizontal()
     | new Icon(Icons.Cloud).Small()
     | new Icon(Icons.Cloud)

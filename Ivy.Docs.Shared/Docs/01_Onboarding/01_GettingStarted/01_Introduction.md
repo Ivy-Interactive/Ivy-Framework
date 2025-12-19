@@ -9,7 +9,7 @@ searchHints:
 # Introduction to Ivy
 
 <Ingress>
-Ivy is a full-stack C# web framework that lets you build interactive data applications without the complexity of separate frontend/backend APIs. Think React patterns, but entirely in C#.
+Ivy is a full-stack C# web framework that lets you build [interactive](../../02_Widgets/01_Common/Button.md) [data](../02_Concepts/Volume.md) applications without the complexity of separate frontend/backend APIs. Think React patterns, but entirely in C#.
 </Ingress>
 
 <Embed Url="https://www.youtube.com/watch?v=pQKSQR9BfD8"/>
@@ -44,13 +44,13 @@ public class UserDashboard : ViewBase
 
 ## Why Ivy Exists
 
-The Ivy Framework is a comprehensive solution for building internal business applications. The framework targets scenarios where rapid development, maintainability, and integration with existing enterprise systems are prioritized.
+The Ivy Framework is a comprehensive solution for building internal business applications. The framework targets scenarios where rapid development, maintainability, and [integration](../../02_Widgets/03_Primitives/Embed.md) with existing [enterprise](../03_CLI/03_DatabaseIntegration/02_Oracle.md) systems are prioritized.
 
 We created Ivy to solve common frustrations with modern web development:
 
 ### Cost & Speed Optimization
 
-Everyday tasks should be simple and idiomatic. Complex requirements should remain possible, but building basic CRUD projects shouldn't require weeks of setup.
+Everyday [tasks](../02_Concepts/TasksAndObservables.md) should be simple and idiomatic. Complex requirements should remain possible, but building basic CRUD projects shouldn't require weeks of setup.
 
 ### Eliminating Boilerplate
 
@@ -66,12 +66,12 @@ Many low-code SaaS products are limited, expensive long-term, and create vendor 
 
 - Full-stack C# development with no separate API layer needed
 - React-like declarative UI patterns using C# syntax
-- Views render into strongly-typed Widgets
+- [Views](03_Basics.md) render into strongly-typed [Widgets](../02_Concepts/Widgets.md)
 - Built-in scaffolding for common patterns (Tables, Forms, CRUD operations)
 
 ### Real-Time & Interactive
 
-- WebSocket-based UI updates (similar to Streamlit)
+- [WebSocket](04_HowIvyWorks.md)-based UI updates (similar to Streamlit)
 - Hot reloading with state preservation during development
 - Any .NET object can be rendered using ContentBuilder pipelines
 - Automatic change detection and selective re-rendering
@@ -85,19 +85,19 @@ Many low-code SaaS products are limited, expensive long-term, and create vendor 
 
 ### Enterprise Ready
 
-- Multiple authentication providers (Supabase, Authelia, Basic Auth) with RBAC
-- Database integration (SQL Server, PostgreSQL, SQLite, MySQL) via Entity Framework Core
-- Secrets management and configuration
+- Multiple [authentication](../03_CLI/04_Authentication/02_BasicAuth.md) providers (Supabase, Authelia, Basic Auth) with RBAC
+- [Database](../03_CLI/03_DatabaseIntegration/01_DatabaseOverview.md) integration (SQL Server, PostgreSQL, SQLite, MySQL) via Entity Framework Core
+- [Secrets](../02_Concepts/Secrets.md) management and configuration
 - Dependency injection throughout
 - Caching and performance optimizations
 - Flexible routing system
 
-### Development & Deployment
+### Development & [Deployment](../03_CLI/05_Deploy.md)
 
-- Rich CLI tooling for project scaffolding and deployment
-- One-command container deployment to AWS, Azure, GCP, or your own infrastructure
-- Unit testing without browser automation complexity
-- Docker-first deployment with environment management
+- Rich [CLI](../03_CLI/01_CLIOverview.md) tooling for project scaffolding and deployment
+- One-command container deployment to [AWS](../03_CLI/05_Deploy.md), [Azure](../03_CLI/05_Deploy.md), GCP, or your own infrastructure
+- Unit testing without [browser](../02_Concepts/Clients.md) automation complexity
+- [Docker](../03_CLI/05_Deploy.md)-first deployment with environment management
 
 ## Getting Started
 

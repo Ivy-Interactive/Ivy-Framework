@@ -13,10 +13,10 @@ searchHints:
 # Progress
 
 <Ingress>
-Show task completion status with customizable progress bars that support dynamic updates and multiple color variants.
+Show task completion status with customizable progress bars that support dynamic updates and multiple [color variants](../../01_Onboarding/02_Concepts/Theming.md).
 </Ingress>
 
-The `Progress` widget is used to visually represent the completion status of a task or process. It displays a visual progress bar that can be customized with different color variants and can be bound to state for dynamic updates.
+The `Progress` [widget](../../01_Onboarding/02_Concepts/Widgets.md) is used to visually represent the completion status of a task or process. It displays a visual progress bar that can be customized with different color variants and can be bound to [state](../../01_Onboarding/02_Concepts/State.md) for dynamic updates.
 
 ## Example
 

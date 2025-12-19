@@ -10,15 +10,13 @@ searchHints:
 
 # State
 
-<Ingress>
-Master reactive state management in Ivy using hooks like UseState, UseSignal, and UseEffect to build dynamic, responsive applications.
-</Ingress>
+Master reactive state management in Ivy using [hooks](./RulesOfHooks.md) like UseState, [UseSignal](./Signals.md), and [UseEffect](./Effects.md) to build dynamic, responsive [applications](./Apps.md).
 
-State management is a fundamental concept in Ivy that allows you to handle and update data within your views. Ivy provides several mechanisms for managing state, each suited for different use cases.
+State management is a fundamental concept in Ivy that allows you to handle and update data within your [views](./Views.md). Ivy provides several mechanisms for managing state, each suited for different use cases.
 
 ## Basic Usage
 
-The `UseState` hook is the primary way to create reactive state in Ivy views:
+The `UseState` hook is the primary way to create reactive state in Ivy [views](./Views.md):
 
 ```csharp demo-below
 public class CounterApp : ViewBase
@@ -51,7 +49,7 @@ public class CounterApp : ViewBase
 
 ### State with Factory Functions
 
-For complex initialization or when you need to defer object creation, use factory functions with UseState. This pattern is useful for expensive computations, dependency injection, and lazy loading:
+For complex initialization or when you need to defer object creation, use factory functions with UseState. This pattern is useful for expensive computations, [dependency injection](./Services.md), [memoization](./Memoization.md), and [lazy loading](./Apps.md):
 
 ```csharp demo-tabs
 public class FactoryStateDemo : ViewBase
@@ -155,9 +153,7 @@ public class User
 }
 ```
 
-### State Updates
-
-State updates in Ivy are handled through the Set method, which can accept direct values or computed values. Updates trigger automatic re-renders of the affected components, ensuring the UI stays synchronized with the current state:
+State updates in Ivy are handled through the Set method, which can accept direct values or computed values. Updates trigger automatic [re-renders](../01_GettingStarted/01_Introduction.md) of the affected components, ensuring the UI stays synchronized with the current state:
 
 ```csharp demo-tabs
 public class StateUpdatesDemo : ViewBase
@@ -241,9 +237,7 @@ public class FormStateDemo : ViewBase
 }
 ```
 
-### State with Effects
-
-The [UseEffect](../../01_Onboarding/02_Concepts/Effects.md) hook allows you to perform side effects when state changes, such as updating derived state, making API calls, or triggering other actions. Effects run automatically when their dependencies change:
+The [UseEffect](../../01_Onboarding/02_Concepts/Effects.md) hook allows you to perform [side effects](./Effects.md) when state changes, such as updating derived state, making API calls, or triggering other actions. Effects run automatically when their [dependencies](./Effects.md) change:
 
 ```csharp demo-tabs
 public class EffectsStateDemo : ViewBase

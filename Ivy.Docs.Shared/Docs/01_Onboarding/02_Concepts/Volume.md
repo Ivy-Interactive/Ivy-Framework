@@ -10,11 +10,11 @@ searchHints:
 
 # Volume
 
-Ivy provides a standardized way to manage application data storage through the `IVolume` interface and `FolderVolume` implementation. This ensures consistent file path handling and proper directory structure for your application's data files.
+Ivy provides a standardized way to manage [application](./Apps.md) data storage through the `IVolume` interface and `FolderVolume` implementation. This ensures consistent file path handling and proper directory structure for your [application's](./Apps.md) data files.
 
 ## Basic Usage
 
-Configure a volume for your application during server startup:
+Configure a volume for your application during [server startup](./Program.md):
 
 ```csharp
 using Ivy.Services;
@@ -46,10 +46,10 @@ public interface IVolume
 The Volume Management system in Ivy provides:
 
 - **Automatic directory creation**: Parent directories are created automatically when you request a path
-- **Namespace isolation**: Files are organized under `Ivy/{YourAppName}/` to prevent conflicts between applications
+- **Namespace isolation**: Files are organized under `Ivy/{YourAppName}/` to prevent conflicts between [applications](./Apps.md)
 - **Fallback to local app data**: If the configured root directory doesn't exist, it falls back to the system's local application data folder
 - **Clean path composition**: Use params array for path parts instead of manual string concatenation
-- **Dependency injection support**: Volumes are registered as services and can be injected into your application components
+- **Dependency injection support**: Volumes are registered as [services](./Services.md) and can be injected into your [application components](./Views.md)
 
 ## FolderVolume Implementation
 
@@ -85,7 +85,7 @@ Where:
 Using Volumes in Services
 </Summary>
 <Body>
-Inject and use the volume in your services:
+Inject and use the volume in your [services](./Services.md):
 
 ```csharp
 using Ivy.Services;
@@ -115,7 +115,7 @@ public class FileService(IVolume volume)
 Using Volumes in Views
 </Summary>
 <Body>
-Access volumes through dependency injection in your views:
+Access volumes through [dependency injection](./Services.md) in your [views](./Views.md):
 
 ```csharp
 public class DataManagementView : ViewBase

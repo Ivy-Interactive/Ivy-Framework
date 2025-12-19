@@ -12,15 +12,15 @@ searchHints:
 # CodeInput
 
 <Ingress>
-Edit code with syntax highlighting, line numbers, and formatting support for multiple programming languages in a specialized input field.
+Edit code with syntax highlighting, line numbers, and formatting support for multiple programming languages in a specialized input [field](Field.md).
 </Ingress>
 
-The `CodeInput` widget provides a specialized text input field for entering and editing code with syntax highlighting.
+The `CodeInput` [widget](../../01_Onboarding/02_Concepts/Widgets.md) provides a specialized text input field for entering and editing code with syntax highlighting.
 It supports various programming languages and offers features like line numbers and code formatting.
 
 ## Supported Languages
 
-### C#
+### C #
 
 ```csharp demo-tabs
 UseState("using System;\n\npublic class Program\n{\n    static void Main()\n    {\n        Console.WriteLine(\"Hello, World!\");\n    }\n}")
@@ -150,7 +150,7 @@ UseState("def calculate_fibonacci(n):\n    if n <= 1:\n        return n\n    ret
 
 ## Event Handling
 
-Event handling enables you to respond to code changes and validate input in real-time. This allows for dynamic behavior like live validation and conditional UI updates.
+Event handling enables you to respond to code changes and validate input in real-time. This allows for dynamic behavior like live validation and [conditional UI updates](../../01_Onboarding/02_Concepts/Views.md).
 
 Handle code changes and validation:
 

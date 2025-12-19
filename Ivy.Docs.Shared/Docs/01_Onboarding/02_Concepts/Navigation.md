@@ -13,7 +13,7 @@ searchHints:
 # Navigation
 
 <Ingress>
-The UseNavigation hook provides a powerful way to navigate between apps and external URLs in Ivy applications, enabling seamless user experiences and deep linking capabilities.
+The UseNavigation hook provides a powerful way to navigate between apps and [external URLs](./Clients.md) in Ivy [applications](./Apps.md), enabling seamless user experiences and [deep linking](./Navigation.md) capabilities.
 </Ingress>
 
 ## Overview
@@ -21,11 +21,11 @@ The UseNavigation hook provides a powerful way to navigate between apps and exte
 Navigation in Ivy is handled through the `UseNavigation()` hook, which returns an `INavigator` interface. This hook enables:
 
 - **App-to-App Navigation** - Navigate between different Ivy apps within your application
-- **External URL Navigation** - Open external websites and resources
-- **Deep Linking** - Navigate to specific apps with parameters and arguments
+- **External URL Navigation** - Open [external URLs](./Clients.md) and resources
+- **Deep Linking** - Navigate to specific apps with [deep linking](./Navigation.md) parameters and arguments
 - **Type-Safe Navigation** - Navigate using strongly-typed app classes
 
-The navigation system is built on top of Ivy's signal system and integrates seamlessly with the Chrome framework for managing app lifecycle and routing.
+The navigation system is built on top of Ivy's [signal system](./Signals.md) and integrates seamlessly with the [Chrome framework](./Chrome.md) for managing app lifecycle and routing.
 
 ## How UseNavigation Works
 
@@ -150,7 +150,6 @@ navigator.Navigate("https://docs.ivy-framework.com");
 navigator.Navigate("https://github.com/ivy-framework/ivy");
 navigator.Navigate("mailto:support@example.com");
 ```
-
 
 ## Navigation Helpers
 
@@ -287,8 +286,8 @@ navigator.Navigate("example.com"); // Incorrect - treated as app URI
 
 - **Memoize Navigation Callbacks**: Use `UseCallback` for navigation handlers to prevent unnecessary re-renders
 - **Lazy App Loading**: Apps are loaded on-demand when navigated to
-- **State Cleanup**: Navigation automatically handles cleanup of previous app state
-- **Memory Management**: The Chrome system manages app lifecycle and memory usage
+- **State Cleanup**: Navigation automatically handles cleanup of previous app [state management](./State.md)
+- **Memory Management**: The [Chrome](./Chrome.md) system manages app lifecycle and memory usage
 
 ## See Also
 

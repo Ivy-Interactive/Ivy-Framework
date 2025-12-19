@@ -11,10 +11,10 @@ searchHints:
 # Spacer
 
 <Ingress>
-Add precise spacing between layout elements for fine-tuned control over alignment and visual balance in your interfaces.
+Add precise spacing between layout elements for fine-tuned control over alignment and visual balance in your [interfaces](../../../01_Onboarding/02_Concepts/Views.md).
 </Ingress>
 
-The `Spacer` widget creates empty space between elements in your layout. It's useful for fine-tuning spacing and alignment.
+The `Spacer` [widget](../../../01_Onboarding/02_Concepts/Widgets.md) creates empty space between elements in your layout. It's useful for fine-tuning spacing and alignment.
 
 ## Basic Usage
 
@@ -109,7 +109,7 @@ public class HeightSpacerView : ViewBase
 ```
 
 <Callout Type="info">
-When using `Spacer().Height()` or `Spacer().Width()`, the values represent units in the Ivy Framework's spacing system, not pixels. The framework automatically converts these units to appropriate spacing based on the current theme and design system.
+When using `Spacer().Height()` or `Spacer().Width()`, the values represent units in the [Ivy Framework's](../../../01_Onboarding/01_GettingStarted/01_Introduction.md) spacing system, not pixels. The framework automatically converts these units to appropriate spacing based on the current [theme](../../../01_Onboarding/02_Concepts/Theming.md) and design system.
 </Callout>
 
 ### Form Layout with Spacing

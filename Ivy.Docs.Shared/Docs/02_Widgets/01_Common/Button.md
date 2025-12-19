@@ -13,14 +13,14 @@ searchHints:
 # Button
 
 <Ingress>
-Create interactive buttons with multiple variants, states, sizes, and styling options for triggering actions in your Ivy applications.
+Create interactive buttons with multiple variants, states, sizes, and styling options for triggering actions in your Ivy [applications](../../01_Onboarding/02_Concepts/Apps.md).
 </Ingress>
 
-The `Button` widget is one of the most fundamental interactive elements in Ivy. It allows users to trigger actions and navigate through your project.
+The `Button` [widget](../../01_Onboarding/02_Concepts/Widgets.md) is one of the most fundamental interactive elements in Ivy. It allows users to [trigger actions](../../01_Onboarding/02_Concepts/EventHandlers.md) and [navigate](../../01_Onboarding/02_Concepts/Navigation.md) through your project.
 
 ## Basic Usage
 
-Here's a simple example of a button that shows a toast message when clicked:
+Here's a simple example of a button that shows a [toast message](../../01_Onboarding/02_Concepts/Clients.md) when clicked:
 
 ```csharp
 var client = this.UseService<IClientProvider>();
@@ -33,7 +33,7 @@ new Button("Click Me", onClick: _ => client.Toast("Hello!"))
 
 ## Semantic Variants
 
-The Button widget includes three new contextual variants to help communicate different types of actions to users: Success, Warning, and Info. These variants complement the existing Primary, Secondary, Destructive, Outline, Ghost, and Link options.
+The Button widget includes three new contextual variants to help communicate different types of actions to users: [Success, Warning, and Info](../../01_Onboarding/02_Concepts/Theming.md). These variants complement the existing Primary, Secondary, Destructive, Outline, Ghost, and Link options.
 
 ```csharp demo-tabs
 Layout.Horizontal()
@@ -75,10 +75,10 @@ Layout.Vertical().Gap(4)
 
 ## Buttons with URLs
 
-Buttons can act as links by providing a URL. When a button has a URL, clicking it will navigate to that URL in a new tab instead of triggering an `onClick` event.
+Buttons can act as links by providing a [URL](../../01_Onboarding/02_Concepts/Navigation.md). When a button has a URL, clicking it will [navigate](../../01_Onboarding/02_Concepts/Navigation.md) to that URL in a new tab instead of triggering an `onClick` event.
 
 <Callout Type="tip">
-Buttons with URLs support right-click actions like "Copy Link" and "Open in New Tab", providing a better user experience than programmatic navigation.
+Buttons with URLs support [right-click actions](../../01_Onboarding/02_Concepts/Navigation.md) like "Copy Link" and "Open in New Tab", providing a better user experience than programmatic navigation.
 </Callout>
 
 ```csharp demo-tabs

@@ -13,12 +13,12 @@ searchHints:
 # DropDownMenu
 
 <Ingress>
-Create interactive dropdown menus with customizable options, actions, and styling for navigation and user choices. DropDownMenu provides a flexible way to display hierarchical menus with various item types including checkboxes, radio buttons, separators, and nested submenus.
+Create interactive dropdown menus with customizable options, actions, and styling for [navigation](../../01_Onboarding/02_Concepts/Navigation.md) and user choices. DropDownMenu provides a flexible way to display [hierarchical menus](../../01_Onboarding/01_GettingStarted/01_Introduction.md) with various item types including checkboxes, radio buttons, separators, and nested [submenus](../../01_Onboarding/01_GettingStarted/01_Introduction.md).
 </Ingress>
 
 ## Basic Usage
 
-Here's a simple example of a `DropDownMenu` that shows a toast message when an item is selected:
+Here's a simple example of a `DropDownMenu` that shows a [toast message](../../01_Onboarding/02_Concepts/Clients.md) when an item is selected:
 
 ```csharp demo-below
 new DropDownMenu(@evt => client.Toast("Selected: " + @evt.Value), 
@@ -30,7 +30,7 @@ new DropDownMenu(@evt => client.Toast("Selected: " + @evt.Value),
 
 ### Default Menu Items
 
-Default menu items are the most common type, providing simple clickable options. The second example shows how to add custom tags for more advanced event handling.
+Default menu items are the most common type, providing simple clickable options. The second example shows how to add custom tags for more advanced [event handling](../../01_Onboarding/02_Concepts/EventHandlers.md).
 
 ```csharp demo-tabs
 Layout.Horizontal().Gap(2).Center()
@@ -51,7 +51,7 @@ Default menu items are the most common type, providing simple clickable options.
 
 ### Checkbox Menu Items
 
-Checkbox menu items allow users to toggle options on/off. The second example demonstrates mixing different menu item types for more complex interfaces.
+Checkbox menu items allow users to toggle options on/off. The second example demonstrates mixing different menu item types for more complex [interfaces](../../01_Onboarding/02_Concepts/Views.md).
 
 ```csharp demo-tabs
 Layout.Horizontal().Gap(2).Center()
@@ -72,7 +72,7 @@ Layout.Horizontal().Gap(2).Center()
 
 ### Separators
 
-Separators help organize menu items into logical groups, making the interface more readable and user-friendly.
+Separators help organize menu items into logical groups, making the [interface](../../01_Onboarding/02_Concepts/Views.md) more readable and user-friendly.
 
 ```csharp demo-tabs
 new DropDownMenu(@evt => client.Toast("Selected: " + @evt.Value), 
@@ -89,7 +89,7 @@ new DropDownMenu(@evt => client.Toast("Selected: " + @evt.Value),
 
 ### Nested Menu Items
 
-Nested menu items create submenus for better organization of complex menu structures.
+Nested menu items create [submenus](../../01_Onboarding/01_GettingStarted/01_Introduction.md) for better organization of complex menu structures.
 
 ```csharp demo-tabs
 new DropDownMenu(@evt => client.Toast("Selected: " + @evt.Value), 
@@ -174,7 +174,7 @@ Layout.Horizontal().Gap(2).Center()
 
 ### Custom Event Handling
 
-Custom event handling allows you to implement complex business logic based on menu selections, making your dropdowns more interactive and useful.
+Custom event handling allows you to implement complex [business logic](../../01_Onboarding/02_Concepts/Services.md) based on menu selections, making your dropdowns more interactive and useful.
 
 ```csharp demo-tabs
 new DropDownMenu(@evt => {

@@ -13,16 +13,16 @@ searchHints:
 # Forms
 
 <Ingress>
-Build robust forms with built-in state management, validation, and submission handling for collecting and processing user input.
+Build robust forms with built-in [state management](./State.md), validation, and submission handling for collecting and processing user input.
 </Ingress>
 
 <Callout Type="important">
-Do not manually create form layouts. Always use `.ToForm()` on your state objects for type safety, automatic state management, and built-in validation.
+Do not manually create form layouts. Always use `.ToForm()` on your state objects for type safety, automatic [state management](./State.md), and built-in validation.
 </Callout>
 
 ## Basic Usage
 
-The simplest way to create a form is to call `.ToForm()` on a state object. The FormBuilder automatically scaffolds appropriate input fields based on your model's property types.
+The simplest way to create a form is to call `.ToForm()` on a state object. The FormBuilder automatically scaffolds appropriate input fields based on your model's property types, providing automatic [state management](./State.md) and validation.
 
 ```csharp demo-tabs
 public class BasicFormExample : ViewBase
@@ -44,7 +44,7 @@ public class BasicFormExample : ViewBase
 
 ### Automatic Field Generation
 
-The FormBuilder automatically maps C# types to appropriate input widgets:
+The FormBuilder automatically maps C# types to appropriate [input widgets](./Widgets.md):
 
 | C# Type | Generated Input | Notes |
 |---------|----------------|-------|
@@ -591,7 +591,7 @@ public class FormSubmissionExample : ViewBase
 
 ### Form Submission with State Updates
 
-React to form submission by watching the model state with `UseEffect`. The form automatically updates the state when submitted successfully.
+React to form submission by watching the model state with `UseEffect`. The form automatically updates the state when submitted successfully, triggering [state changes](./State.md) and UI updates.
 
 ```csharp demo-tabs
 public class FormStatesExample : ViewBase
@@ -669,7 +669,7 @@ public class SimpleFormWithResetExample : ViewBase
 ```
 
 <Callout Type="warning">
-This example works because it uses the form's internal state management. The form maintains its own copy of the data until submission, so programmatic updates using `.Set()` will be reflected in the form fields.
+This example works because it uses the form's internal [state management](./State.md). The form maintains its own copy of the data until submission, so programmatic updates using `.Set()` will be reflected in the form fields.
 </Callout>
 
 ## Advanced Features
@@ -755,7 +755,7 @@ public class DynamicConfigurationExample : ViewBase
 
 ### Sheet Forms
 
-Open forms in slide-out sheets using `.ToSheet()`.
+Open forms in slide-out [sheets](../../02_Widgets/07_Advanced/Sheet.md) using `.ToSheet()`.
 
 ```csharp demo-tabs
 public class SheetFormExample : ViewBase
@@ -783,7 +783,7 @@ public class SheetFormExample : ViewBase
 
 ### Dialog Forms
 
-Open forms in modal dialogs using `.ToDialog()`.
+Open forms in modal [dialogs](../../02_Widgets/07_Advanced/Dialog.md) using `.ToDialog()`.
 
 ```csharp demo-tabs
 public class DialogFormExample : ViewBase

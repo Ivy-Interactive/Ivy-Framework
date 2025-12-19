@@ -32,7 +32,7 @@ searchHints:
 Visualize and manage workflows with interactive kanban boards featuring drag-and-drop cards, customizable columns, and real-time updates for agile project management.
 </Ingress>
 
-The `Kanban` widget provides a powerful way to organize and track items through different stages of a workflow. It automatically groups data into columns and supports drag-and-drop interactions, making it perfect for task management, project tracking, and workflow visualization.
+The `Kanban` [widget](../../../01_Onboarding/02_Concepts/Widgets.md) provides a powerful way to organize and track items through different stages of a workflow. It automatically groups data into columns and supports drag-and-drop interactions, making it perfect for task management, project tracking, and workflow visualization.
 
 ## Basic Usage
 
@@ -180,7 +180,7 @@ public class KanbanWithCustomCardsExample : ViewBase
 }
 ```
 
-The `.CardBuilder()` method accepts a builder factory function that creates a custom card widget. You can use `.ToDetails()` to automatically generate a details view from your model, or create completely custom card layouts with any widgets you need.
+The `.CardBuilder()` method accepts a builder factory function that creates a custom [card](../../01_Common/Card.md) widget. You can use [.ToDetails()](../../01_Common/Details.md) to automatically generate a details view from your model, or create completely custom card layouts with any widgets you need.
 
 <Callout Tip="Info">
 Use `.CardOrder()` to control how cards are sorted within each column. This is separate from the `orderSelector` in `.ToKanban()` and allows you to override or refine the card ordering.

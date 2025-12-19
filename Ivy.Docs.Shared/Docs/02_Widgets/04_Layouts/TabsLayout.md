@@ -12,7 +12,7 @@ searchHints:
 
 # TabsLayout
 
-The TabsLayout widget creates a tabbed interface that allows users to switch between different content sections. It supports both traditional tabs and content-based variants, with features such as closable tabs, badges, icons, and drag-and-drop reordering.
+The TabsLayout [widget](../../../01_Onboarding/02_Concepts/Widgets.md) creates a tabbed [interface](../../../01_Onboarding/02_Concepts/Views.md) that allows users to switch between different content sections. It supports both traditional tabs and content-based variants, with features such as closable tabs, [badges](../../../02_Widgets/01_Common/Badge.md), [icons](../../../02_Widgets/03_Primitives/Icon.md), and drag-and-drop reordering.
 
 ## Basic Usage
 
@@ -65,7 +65,7 @@ new TabsLayout(null, null, null, null, 0,
 - `onReorder`: Enables drag-and-drop tab reordering
 - `selectedIndex`: Sets the initially selected tab
 
-This example demonstrates how to handle all available events. The event handlers receive the tab index and can perform custom actions such as logging, state updates, or API calls.
+This example demonstrates how to handle all available events. The event handlers receive the tab index and can perform custom actions such as logging, [state](../../../01_Onboarding/02_Concepts/State.md) updates, or API calls.
 
 ```csharp demo-tabs
 new TabsLayout(
@@ -96,7 +96,7 @@ new TabsLayout(null, null, null, null, 0,
 
 ### Content Variant
 
-The Content variant emphasizes the content area with subtle tab indicators. This is ideal for content-heavy apps where the focus should be on the displayed information.
+The Content variant emphasizes the content area with subtle tab indicators. This is ideal for content-heavy [apps](../../../01_Onboarding/01_GettingStarted/01_Introduction.md) where the focus should be on the displayed information.
 
 ```csharp demo-tabs
 new TabsLayout(null, null, null, null, 0,

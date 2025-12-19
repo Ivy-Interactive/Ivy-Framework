@@ -222,9 +222,9 @@ public class DrillDownDemo : ViewBase
                             .Distinct()
                             .ToArray();
 
-        var country = this.UseState(countries[0]);
+        var country = this.[UseState](../../../01_Onboarding/02_Concepts/State.md)(countries[0]);
 
-        var countryInput = country.ToSelectInput(countries.ToOptions());
+        var countryInput = country.[ToSelectInput](../../02_Inputs/Select.md)(countries.ToOptions());
 
         // Get states for selected country and convert to PieChartData format
         var selectedCountryStates = populationData

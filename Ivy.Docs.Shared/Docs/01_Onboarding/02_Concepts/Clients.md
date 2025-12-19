@@ -24,7 +24,7 @@ var client = this.UseService<IClientProvider>();
 
 ## Common Use Cases
 
-### Showing Toasts
+### Showing [toasts](./Alerts.md)
 
 ```csharp
 // Simple toast
@@ -34,7 +34,7 @@ client.Toast("Operation successful!");
 client.Toast("Data saved", "Success");
 ```
 
-### Navigation
+### [Navigation](./Navigation.md)
 
 ```csharp
 // Navigate to different pages within the app
@@ -115,16 +115,16 @@ client.ApplyTheme(customCss);
 1. **Dependency Injection**: Always use `UseService<IClientProvider>()` to get the client instance.
 2. **Error Handling**: Wrap client operations in try-catch blocks when appropriate.
 3. **Async Operations**: Use async/await for operations that might take time.
-4. **State Management**: Use clients in combination with state management for reactive updates.
+4. **State Management**: Use clients in combination with [state management](./State.md) for reactive updates.
 
-## UI Refresh & State Management
+## UI Refresh & [State Management](./State.md)
 
 Ivy automatically handles UI refreshes in most cases. You typically **don't need** to manually refresh the UI:
 
-- **Form Submissions**: When forms are submitted successfully, the UI automatically updates
-- **State Changes**: When state values change, the UI automatically re-renders
-- **Sheet Dismissal**: Sheets are automatically closed by the framework when forms are submitted successfully
-- **Navigation**: Page navigation automatically refreshes the UI
+- **[Form Submissions](./Forms.md)**: When forms are submitted successfully, the UI automatically updates
+- **State Changes**: When [state](./State.md) values change, the UI automatically re-renders
+- **Sheet Dismissal**: [Sheets](../../02_Widgets/07_Advanced/Sheet.md) are automatically closed by the framework when forms are submitted successfully
+- **Navigation**: Page [navigation](./Navigation.md) automatically refreshes the UI
 
 ❌ **Don't do this** - The framework handles it automatically:
 
@@ -260,7 +260,7 @@ public class FileOperationsApp : ViewBase
 
 <Details>
 <Summary>
-Navigation and URL Management
+[Navigation](./Navigation.md) and URL Management
 </Summary>
 <Body>
 

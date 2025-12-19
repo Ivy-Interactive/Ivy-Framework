@@ -11,10 +11,10 @@ searchHints:
 # BoolInput
 
 <Ingress>
-Handle boolean input with elegant checkboxes, switches, and toggles for true/false values in forms and interfaces.
+Handle boolean input with elegant checkboxes, switches, and toggles for true/false values in [forms](../../01_Onboarding/02_Concepts/Forms.md) and [interfaces](../../01_Onboarding/02_Concepts/Views.md).
 </Ingress>
 
-The `BoolInput` widget provides a checkbox, switch and toggle for boolean (true/false) input values. It allows users to easily switch between two states in a form or configuration interface.
+The `BoolInput` [widget](../../01_Onboarding/02_Concepts/Widgets.md) provides a checkbox, switch and toggle for boolean (true/false) input values. It allows users to easily switch between two states in a form or configuration [interface](../../01_Onboarding/02_Concepts/Views.md).
 
 ## Basic Usage
 
@@ -49,7 +49,7 @@ var nullableInput = new BoolInput<bool?>(); // For nullable boolean
 var intInput = new BoolInput<int>(); // For integer-based boolean (0/1)
 ```
 
-**Using extension methods from state:**
+**Using extension methods from [state](../../01_Onboarding/02_Concepts/State.md):**
 
 ```csharp
 var state = UseState(false);
@@ -161,7 +161,7 @@ public class BoolInputDemo : ViewBase
 ### Toggle
 
 `Toggle` is a button-style boolean input that switches between two states (on/off, enabled/disabled) with a single click.
-It appears as a pressable button that visually indicates its current state through styling and optional icons.
+It appears as a pressable [button](Button.md) that visually indicates its current state through styling and optional icons.
 This is represented by `BoolInputs.Toggle`
 
 `ToToggleInput` extension function can be used to create such a `BoolInput.Toggle` variant.

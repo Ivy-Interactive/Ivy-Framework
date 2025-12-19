@@ -11,14 +11,14 @@ searchHints:
 # Widgets
 
 <Ingress>
-Discover the fundamental building blocks of Ivy applications - Widgets provide declarative UI components inspired by React's component model.
+Discover the fundamental [building blocks](./Views.md) of Ivy [applications](./Apps.md) - Widgets provide declarative UI components inspired by [React's component model](../01_GettingStarted/01_Introduction.md).
 </Ingress>
 
-Widgets are the fundamental building blocks of the Ivy framework. They represent the smallest unit of UI and are used to construct Views. Inspired by React's component model, Widgets provide a declarative way to build user interfaces.
+Widgets are the fundamental [building blocks](./Views.md) of the Ivy framework. They represent the smallest unit of UI and are used to construct [Views](./Views.md). Inspired by [React's component model](../01_GettingStarted/01_Introduction.md), Widgets provide a declarative way to build user interfaces.
 
 ## Basic usage
 
-Ivy provides a comprehensive set of widgets organized into several categories:
+Ivy provides a comprehensive set of widgets organized into several [categories](../../02_Widgets/_Index.md):
 
 The most frequently used widgets for building user interfaces:
 
@@ -487,7 +487,7 @@ public class ChartWidgetsDemo : ViewBase
 
 ### Effects
 
-Ivy provides a rich collection of built-in effects and animations to enhance your user interfaces. Working with effects in Ivy is incredibly simple and intuitive. For detailed information about specific effects, refer to the animation and confetti documentation pages.
+Ivy provides a rich collection of built-in effects and animations to enhance your user interfaces. Working with effects in Ivy is incredibly simple and intuitive. For detailed information about specific effects, refer to the [animation](./Effects.md) and [confetti](./Effects.md) documentation pages.
 
 ```csharp demo-tabs ivy-bg
 public class EffectWidgetsDemo : ViewBase
@@ -517,7 +517,7 @@ public class EffectWidgetsDemo : ViewBase
 
 ### Advanced
 
-In the Advanced section, we introduce our specialized implementations for working with sheets and chat functionality. These advanced widgets provide sophisticated features for complex user interface requirements.
+In the Advanced section, we introduce our specialized implementations for working with [sheets](../../02_Widgets/07_Advanced/Sheet.md) and [chat functionality](../../02_Widgets/07_Advanced/Chat.md). These advanced widgets provide sophisticated features for complex user interface requirements.
 
 ```csharp demo-tabs
 public class AdvancedWidgetsDemo : ViewBase

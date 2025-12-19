@@ -21,7 +21,7 @@ Ivy is a **server-side web framework** that brings React-like patterns to C#. In
 
 ### Views & Components
 
-Every Ivy app is built from **Views** - C# classes that inherit from `ViewBase`. Each view implements a single `Build()` method that returns widgets or other views:
+Every Ivy app is built from **[Views](../02_Concepts/Views.md)** - C# classes that inherit from [ViewBase](../02_Concepts/Views.md). Each view implements a single `Build()` method that returns widgets or other views:
 
 ```csharp
 [App(icon: Icons.Calendar)]
@@ -51,16 +51,16 @@ public class TodoApp : ViewBase
 }
 ```
 
-### Reactive State Management
+### Reactive [State Management](../02_Concepts/State.md)
 
-Ivy provides React-inspired hooks for state management:
+Ivy provides React-inspired hooks for [state management](../02_Concepts/State.md):
 
 **Available Hooks:**
 
-- `UseState<T>()` - Local component state that triggers re-renders
-- `UseEffect()` - Side effects with dependency tracking
-- `UseService<T>()` - Dependency injection integration
-- `UseSignal()`, `UseDownload()`, `UseWebhook()` - And many more...
+- [UseState<T>()](../02_Concepts/State.md) - Local component state that triggers re-renders
+- [UseEffect()](../02_Concepts/Effects.md) - Side effects with dependency tracking
+- [UseService<T>()](../02_Concepts/Services.md) - Dependency injection integration
+- [UseSignal()](../02_Concepts/Signals.md), [UseDownload()](../02_Concepts/Downloads.md), `UseWebhook()` - And many more...
 
 ```csharp
 public override object? Build()
@@ -89,7 +89,7 @@ The **Ivy.Analyser** package automatically enforces these rules at compile time,
 
 For detailed examples and troubleshooting, see [Rules of Hooks](../02_Concepts/RulesOfHooks.md).
 
-### Widget Library
+### [Widget](../02_Concepts/Widgets.md) Library
 
 Ivy ships with a comprehensive set of strongly-typed widgets:
 

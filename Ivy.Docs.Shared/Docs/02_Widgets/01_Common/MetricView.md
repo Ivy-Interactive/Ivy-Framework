@@ -13,10 +13,10 @@ searchHints:
 # MetricView
 
 <Ingress>
-Display key performance indicators (KPIs) and metrics with trend indicators, goal progress tracking, and async data loading for dashboard applications.
+Display key performance indicators (KPIs) and metrics with trend indicators, goal progress tracking, and async data loading for dashboard [applications](../../01_Onboarding/02_Concepts/Apps.md).
 </Ingress>
 
-The `MetricView` widget is a specialized dashboard component built on top of `Card` that displays business metrics with visual indicators for performance trends and goal achievement. It automatically handles loading states, error handling, and provides a consistent layout for KPI dashboards.
+The `MetricView` [widget](../../01_Onboarding/02_Concepts/Widgets.md) is a specialized dashboard component built on top of [Card](Card.md) that displays business metrics with visual indicators for performance trends and goal achievement. It automatically handles loading states, error handling, and provides a consistent layout for KPI dashboards.
 
 ## Basic Usage
 
@@ -58,7 +58,7 @@ new MetricView(
 
 ### Using MetricView in Layouts
 
-Combine multiple MetricViews in grid layouts to create comprehensive dashboards.
+Combine multiple MetricViews in grid [layouts](../../01_Onboarding/02_Concepts/Views.md) to create comprehensive dashboards.
 
 <Callout Type="Info">
 MetricRecord takes four parameters: MetricFormatted (string) for the value, TrendComparedToPreviousPeriod (decimal, e.g. 0.21 for 21%) for trend arrows, GoalAchieved (0 to 1) for progress bars, and GoalFormatted (string) for goal text. All except MetricFormatted are optional.
@@ -78,7 +78,7 @@ Layout.Grid().Columns(2)
 
 ### Async Data Loading
 
-The MetricView automatically handles async data loading with a skeleton loader. This is useful when fetching metrics from databases or APIs.
+The MetricView automatically handles [async](../../01_Onboarding/02_Concepts/TasksAndObservables.md) data loading with a skeleton loader. This is useful when fetching metrics from [databases](../../01_Onboarding/02_Concepts/Program.md) or APIs.
 
 ```csharp demo-tabs
 new MetricView(
@@ -115,7 +115,7 @@ new MetricView(
 E-Commerce Analytics Dashboard
 </Summary>
 <Body>
-A complete e-commerce dashboard showing sales metrics, customer engagement, and inventory status with async data loading from a database.
+A complete e-commerce dashboard showing sales metrics, customer engagement, and inventory status with async data loading from a [database](../../01_Onboarding/02_Concepts/Program.md).
 
 ```csharp demo-tabs
 public class ECommerceDashboard : ViewBase
@@ -211,7 +211,7 @@ public class ECommerceDashboard : ViewBase
 SaaS Metrics Dashboard
 </Summary>
 <Body>
-Track key SaaS metrics including MRR, churn rate, active users, and customer lifetime value with real-time data updates.
+Track key SaaS metrics including MRR, churn rate, active users, and customer lifetime value with [real-time](../../01_Onboarding/02_Concepts/Signals.md) data updates.
 
 ```csharp demo-tabs
 public class SaaSDashboard : ViewBase

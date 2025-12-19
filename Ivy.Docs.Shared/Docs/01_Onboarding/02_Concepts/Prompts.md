@@ -11,7 +11,7 @@ searchHints:
 # Prompts
 
 <Ingress>
-Interact with users and gather input using Ivy's alert and dialog system.
+Interact with users and gather input using Ivy's [alert system](./Alerts.md) and [dialog system](../../02_Widgets/07_Advanced/Dialog.md).
 </Ingress>
 
 ## Overview
@@ -20,8 +20,8 @@ The alert system in Ivy supports:
 
 - Confirmation dialogs
 - Custom alert buttons
-- Dialog-based prompts
-- Form-based input collection
+- [Dialog](../../02_Widgets/07_Advanced/Dialog.md)-based prompts
+- [Form](./Forms.md)-based input collection
 - Alert chaining
 
 ## Basic Usage
@@ -56,7 +56,7 @@ public class BasicPromptView : ViewBase
 
 ### Text Input Prompts
 
-Collect text input from users using dialogs with forms:
+Collect text input from users using [dialogs](../../02_Widgets/07_Advanced/Dialog.md) with [forms](./Forms.md):
 
 ```csharp demo-tabs
 public record RenameRequest
@@ -98,7 +98,7 @@ public class RenameView : ViewBase
 
 ### Custom Prompts
 
-Create custom dialogs with multiple inputs:
+Create custom [dialogs](../../02_Widgets/07_Advanced/Dialog.md) with multiple inputs:
 
 ```csharp demo-tabs
 public record CustomOptions

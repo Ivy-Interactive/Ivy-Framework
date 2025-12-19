@@ -11,10 +11,10 @@ searchHints:
 # SelectInput
 
 <Ingress>
-Create dropdown menus with single or multiple selection capabilities, option grouping, and custom rendering for user choices.
+Create dropdown [menus](../../01_Onboarding/02_Concepts/Navigation.md) with single or multiple selection capabilities, option grouping, and custom rendering for user choices.
 </Ingress>
 
-The `SelectInput` widget provides a dropdown menu for selecting items from a predefined list of options. It supports single
+The `SelectInput` [widget](../../01_Onboarding/02_Concepts/Widgets.md) provides a dropdown menu for selecting items from a predefined list of options. It supports single
 and multiple selections, option grouping, and custom rendering of option items.
 
 ## Basic Usage
@@ -84,7 +84,7 @@ public class MultiSelectDemo : ViewBase
 }
 ```
 
-## Event Handling
+## [Event Handling](../../01_Onboarding/02_Concepts/EventHandlers.md)
 
 Handle change events and create dynamic option lists that respond to user selections:
 
@@ -170,7 +170,7 @@ public class SelectStylingDemo : ViewBase
 ```
 
 <Callout Type="tip">
-Use Select for single choice dropdowns, List for multiple selection with checkboxes, and Toggle for visual button-based selection. The List variant is particularly useful for forms where users need to select multiple options.
+Use Select for single choice dropdowns, List for multiple selection with checkboxes, and Toggle for visual button-based selection. The List variant is particularly useful for [forms](../../01_Onboarding/02_Concepts/Forms.md) where users need to select multiple options.
 </Callout>
 
 <WidgetDocs Type="Ivy.SelectInput" ExtensionTypes="Ivy.SelectInputExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Inputs/SelectInput.cs"/>
@@ -182,7 +182,7 @@ Use Select for single choice dropdowns, List for multiple selection with checkbo
 Ordering System
 </Summary>
 <Body>
-A comprehensive example showing different SelectInput variants in a real-world scenario:
+A comprehensive example showing different SelectInput [variants](../../01_Onboarding/02_Concepts/Theming.md) in a real-world scenario:
 
 ```csharp demo-tabs
 public class CoffeeShopDemo: ViewBase

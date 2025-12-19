@@ -11,7 +11,7 @@ searchHints:
 # Tasks and Observables
 
 <Ingress>
-Handle asynchronous operations and reactive data streams with Tasks and Observables for responsive application behavior.
+Handle asynchronous operations and reactive data streams with Tasks and Observables for responsive [application](./Apps.md) behavior.
 </Ingress>
 
 Ivy provides powerful abstractions for working with asynchronous operations and reactive data streams. **Tasks** handle one-time asynchronous operations, while **Observables** manage continuous data streams that automatically update the UI when data changes.
@@ -67,7 +67,7 @@ public class TimeBasedObservableExample : ViewBase
 
 ### Observable with State Management
 
-This example demonstrates how to properly manage state with observables by controlling when subscriptions are active. It shows a timer-based counter that only increments when a state flag is active, with proper subscription cleanup.
+This example demonstrates how to properly manage [state](./State.md) with observables by controlling when subscriptions are active. It shows a timer-based counter that only increments when a state flag is active, with proper [UI updates](../01_GettingStarted/01_Introduction.md) and subscription cleanup.
 
 ```csharp demo-tabs
 public class StateManagementExample : ViewBase
@@ -108,7 +108,7 @@ public class StateManagementExample : ViewBase
 
 ### Observable with Throttling
 
-This example demonstrates how to use observables for search functionality with performance optimizations. It shows throttled updates to prevent excessive filtering while typing, and proper state management to avoid duplicate data.
+This example demonstrates how to use observables for search functionality with [performance optimizations](./Memoization.md). It shows throttled updates to prevent excessive filtering while typing, and proper [state management](./State.md) to avoid duplicate data.
 
 ```csharp demo-tabs
 public class ObservableSearchExample : ViewBase
@@ -166,7 +166,7 @@ public class ObservableSearchExample : ViewBase
 
 ### Observable Transformations
 
-This example demonstrates interactive data transformation with immediate feedback. It demonstrates filtering, projection, and limiting operations to create processed results.
+This example demonstrates interactive data transformation with immediate feedback. It demonstrates filtering, projection, and limiting operations to create processed [transformed results](../01_GettingStarted/01_Introduction.md).
 
 ```csharp demo-tabs
 public class TransformationExample : ViewBase

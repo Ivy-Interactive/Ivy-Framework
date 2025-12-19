@@ -26,7 +26,7 @@ The download system in Ivy supports:
 
 ## Basic Usage
 
-Here's a simple example of downloading a file:
+Here's a simple example of using the [client](./Clients.md) to download a file:
 
 ```csharp
 var client = this.UseService<IClientProvider>();
@@ -108,7 +108,7 @@ public class DownloadView : ViewBase
 1. **File Naming**: Use clear, descriptive filenames
 2. **Content Types**: Always specify the correct content type
 3. **Error Handling**: Implement proper error handling for failed downloads
-4. **Progress Feedback**: Show progress for large files
+4. **Progress Feedback**: Show progress [feedback](../../02_Widgets/02_Inputs/Feedback.md) for large files
 5. **Security**: Validate file types and sizes before download
 6. **Caching**: Consider implementing caching for frequently downloaded files
 

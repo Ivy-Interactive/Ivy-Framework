@@ -17,11 +17,11 @@ searchHints:
 This page covers the installation of Ivy Framework components, setting up a new Ivy project, and understanding the basic project structure. It provides the foundational steps needed before building applications with Ivy.
 </Ingress>
 
-For information about core Ivy concepts like Views and state management, see [Core Concepts](../02_Concepts/Views.md). For guidance on building your first application, see [Basics](./03_Basics.md). For development tools and CLI commands, see [CLI Tools](../03_CLI/01_CLIOverview.md).
+For information about core Ivy concepts like [Views](../02_Concepts/Views.md) and [state management](../02_Concepts/State.md), see [Core Concepts](../02_Concepts/Views.md). For guidance on building your first application, see [Basics](./03_Basics.md). For development tools and CLI commands, see [CLI Tools](../03_CLI/01_CLIOverview.md).
 
 ## Quick Start: Using the CLI
 
-The easiest way to set up an Ivy project is using the Ivy CLI. This will automatically create the project structure, configuration files, and necessary setup.
+The easiest way to set up an Ivy project is using the Ivy [CLI](../03_CLI/01_CLIOverview.md). This will automatically create the project structure, configuration files, and necessary setup.
 
 ### Install Ivy Globally
 
@@ -122,9 +122,9 @@ Extend Ivy's functionality with official extension packages for authentication a
 
 | Package | Purpose |
 | :--- | :--- |
-| `Ivy.Auth.Supabase` | Identity management via Supabase |
-| `Ivy.Auth.Authelia` | Single Sign-On and 2FA via Authelia |
-| `Ivy.Auth.Entra` | Microsoft Entra ID (Azure AD) integration |
+| `Ivy.Auth.Supabase` | Identity management via [Supabase](../03_CLI/04_Authentication/02_Supabase.md) |
+| `Ivy.Auth.Authelia` | Single Sign-On and 2FA via [Authelia](../03_CLI/04_Authentication/02_Authelia.md) |
+| `Ivy.Auth.Entra` | Microsoft [Entra](../03_CLI/04_Authentication/02_MicrosoftEntra.md) ID (Azure AD) integration |
 | `Ivy.Database.Generator.Toolkit` | Utilities for AI-powered schema and code generation |
 
 ```terminal

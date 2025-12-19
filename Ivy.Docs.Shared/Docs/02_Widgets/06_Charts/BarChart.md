@@ -236,9 +236,9 @@ public class TiobeIndexDemo : ViewBase
          var year = UseState(2020);
          
          return Layout.Vertical()
-                    | year.ToNumberInput()
+                    | year.[ToNumberInput()](../../02_Inputs/Number.md)
                           .Min(2020).Max(2025).Step(1)
-                          .WithField()
+                          .[WithField()](../../02_Inputs/Field.md)
                           .Label("Select Year (2020-2025)")
                     | new BarChart(tiobeMap[year.Value])
                             .ColorScheme(ColorScheme.Default)

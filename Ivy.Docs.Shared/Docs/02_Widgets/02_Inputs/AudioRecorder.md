@@ -11,14 +11,14 @@ searchHints:
 # Audio Recorder
 
 <Ingress>
-Enable audio recording with a flexible interface for capturing user audio input with automatic upload support.
+Enable audio recording with a flexible [interface](../../01_Onboarding/02_Concepts/Views.md) for capturing user audio input with automatic upload support.
 </Ingress>
 
-The `AudioRecorder` widget allows users to record audio using their microphone. It provides an audio recording interface with options for audio formats, automatic uploads, and chunked streaming. This widget is for recording audio, not playing it.
+The `AudioRecorder` [widget](../../01_Onboarding/02_Concepts/Widgets.md) allows users to record audio using their microphone. It provides an audio recording [interface](../../01_Onboarding/02_Concepts/Views.md) with options for audio formats, automatic uploads, and chunked streaming. This widget is for recording audio, not playing it.
 
 ## Basic Usage
 
-Here's a simple example of an `AudioRecorder` that uploads audio to the server and stores it in state:
+Here's a simple example of an `AudioRecorder` that uploads audio to the server and stores it in [state](../../01_Onboarding/02_Concepts/State.md):
 
 ```csharp demo-below
 public class BasicAudioRecorderDemo : ViewBase

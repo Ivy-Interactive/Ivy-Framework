@@ -14,7 +14,7 @@ searchHints:
 Display error states consistently with standardized messaging, optional details, and recovery options for better user experience.
 </Ingress>
 
-The `Error` widget provides a standardized way to display error states in your app. It's designed to communicate that something went wrong and optionally provide details and recovery options.
+The `Error` [widget](../../../01_Onboarding/02_Concepts/Widgets.md) provides a standardized way to display error states in your [app](../../../01_Onboarding/02_Concepts/Apps.md). It's designed to communicate that something went wrong and optionally provide details and recovery options.
 
 ## Basic Usage
 
@@ -97,11 +97,11 @@ at MyApp.Views.DataView.LoadDataAsync() in /src/Views/DataView.cs:line 23";
 
 ## Alternative Error Display Methods
 
-While the `Error` widget is excellent for detailed error information, Ivy Framework provides several other ways to display errors depending on your needs:
+While the `Error` widget is excellent for detailed error information, [Ivy Framework](../../../01_Onboarding/01_GettingStarted/01_Introduction.md) provides several other ways to display errors depending on your needs:
 
 ### Error Callouts
 
-Use `Callout.Error` for prominent error messages that need attention:
+Use [Callout.Error](Callout.md) for prominent error messages that need attention:
 
 ```csharp demo-tabs
 public class ErrorCalloutExamplesView : ViewBase
@@ -133,7 +133,7 @@ public class ClientErrorExamplesView : ViewBase
 
 ### Text-Based Error Messages
 
-Use `Text.Danger` for inline error text:
+Use [Text.Danger](TextBlock.md) for inline error text:
 
 ```csharp demo-tabs
 public class TextErrorExamplesView : ViewBase
@@ -145,9 +145,7 @@ public class TextErrorExamplesView : ViewBase
 }
 ```
 
-### Form Validation Errors
-
-Display validation errors using the `Invalid` property on form inputs:
+Display [validation errors](../../../01_Onboarding/02_Concepts/Forms.md) using the `Invalid` property on [form inputs](../../../01_Onboarding/02_Concepts/Widgets.md):
 
 ```csharp demo-tabs
 public class FormValidationErrorExamplesView : ViewBase

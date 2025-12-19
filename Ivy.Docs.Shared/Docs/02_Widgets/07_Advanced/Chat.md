@@ -11,7 +11,7 @@ searchHints:
 
 # Chat
 
-The `Chat` widget renders a conversation between a user and an assistant.
+The `Chat` [widget](../../../01_Onboarding/02_Concepts/Widgets.md) renders a conversation between a user and an assistant.
 
 Messages are supplied as `ChatMessage` objects and new messages are sent through the `OnSendMessage` event.
 
@@ -19,7 +19,7 @@ Messages are supplied as `ChatMessage` objects and new messages are sent through
 
 A simple chat with an echo bot that repeats user messages.
 
-This demonstrates the fundamental usage of the Chat widget with basic message handling and state management.
+This demonstrates the fundamental usage of the Chat [widget](../../../01_Onboarding/02_Concepts/Widgets.md) with basic message handling and [state management](../../../01_Onboarding/02_Concepts/State.md).
 
 ```csharp demo-tabs
 public class BasicChatDemo : ViewBase
@@ -146,7 +146,7 @@ public class StreamingChatDemo : ViewBase
 
 ## Interactive Chat with Rich Content
 
-A chat that responds with interactive elements like buttons and cards.
+A chat that responds with interactive elements like [buttons](../../01_Common/Button.md) and [cards](../../01_Common/Card.md).
 
 This demonstrates how to return complex UI components as chat responses, creating dynamic and engaging conversations with rich media content.
 
@@ -195,7 +195,7 @@ public class InteractiveChatDemo : ViewBase
 
 A chat that demonstrates error handling and different message types.
 
-This example shows how to use the Error widget for different message severities and how to integrate ChatStatus for loading indicators within chat conversations.
+This example shows how to use the [Error](../../03_Primitives/Error.md) widget for different message severities and how to integrate ChatStatus for loading indicators within chat conversations.
 
 ```csharp demo-tabs
 public class ErrorHandlingChatDemo : ViewBase
@@ -238,7 +238,7 @@ public class ErrorHandlingChatDemo : ViewBase
 
 A sophisticated chat that responds to specific commands with different content types.
 
-This example showcasing the full range of Ivy widgets that can be embedded in chat responses.
+This example showcasing the full range of Ivy [widgets](../../../01_Onboarding/02_Concepts/Widgets.md) that can be embedded in chat responses.
 
 ```csharp demo-tabs
 public class AdvancedChatDemo : ViewBase

@@ -11,14 +11,14 @@ searchHints:
 # Html
 
 <Ingress>
-Render raw HTML content directly in your Ivy application for external content integration, formatted text, and custom markup control.
+Render raw HTML content directly in your [Ivy application](../../../01_Onboarding/01_GettingStarted/01_Introduction.md) for external content integration, formatted text, and custom markup control.
 </Ingress>
 
-The `Html` widget allows you to render raw HTML content in your Ivy app. This is useful when you need to include content from external sources, display formatted text, or when you want direct control over the markup.
+The `Html` [widget](../../../01_Onboarding/02_Concepts/Widgets.md) allows you to render raw HTML content in your [Ivy app](../../../01_Onboarding/02_Concepts/Apps.md). This is useful when you need to include content from external sources, display formatted text, or when you want direct control over the markup.
 
 ## Basic Usage
 
-```csharp demo-tabs 
+```csharp demo-tabs
 public class BasicHtmlView : ViewBase
 {
     public override object? Build()
@@ -30,12 +30,11 @@ public class BasicHtmlView : ViewBase
 }
 ```
 
-
 ## Content Examples
 
 ### Text Formatting
 
-```csharp demo-tabs 
+```csharp demo-tabs
 public class TextFormattingView : ViewBase
 {
     public override object? Build()
@@ -57,7 +56,7 @@ public class TextFormattingView : ViewBase
 
 ### Lists and Structure
 
-```csharp demo-tabs 
+```csharp demo-tabs
 public class ListsView : ViewBase
 {
     public override object? Build()
@@ -95,11 +94,9 @@ public class ListsView : ViewBase
 }
 ```
 
-
-
 ### Links and Navigation
 
-```csharp demo-tabs 
+```csharp demo-tabs
 public class LinksView : ViewBase
 {
     public override object? Build()
@@ -116,10 +113,9 @@ public class LinksView : ViewBase
 }
 ```
 
-
 ### Tables
 
-```csharp demo-tabs 
+```csharp demo-tabs
 public class TablesView : ViewBase
 {
     public override object? Build()
@@ -157,7 +153,7 @@ public class TablesView : ViewBase
 
 ## Complex Layout Example
 
-```csharp demo-tabs 
+```csharp demo-tabs
 public class ComplexLayoutView : ViewBase
 {
     public override object? Build()
@@ -197,19 +193,21 @@ public class ComplexLayoutView : ViewBase
 }
 ```
 
-
 ## Security Features
 
 The Html widget includes robust security measures to protect against malicious content:
 
 ### Allowed HTML Tags
+
 Only these HTML tags are permitted:
+
 - **Text formatting:** `p`, `div`, `span`, `strong`, `em`, `b`, `i`, `br`
 - **Headings:** `h1`, `h2`, `h3`, `h4`, `h5`, `h6`
 - **Lists:** `ul`, `ol`, `li`
 - **Links:** `a`
 
 ### Security Measures
+
 - **Script removal:** All `<script>` tags are completely removed
 - **Event handler blocking:** All `on*` event handlers (onclick, onload, etc.) are stripped
 - **JavaScript URL blocking:** `javascript:` URLs in href attributes are removed
@@ -374,13 +372,13 @@ public class UserContentView : ViewBase
 - Showing rich text with formatting
 - Rendering documentation or help content
 - Displaying user-generated content (with proper sanitization)
-- Creating complex layouts with custom styling
+- Creating complex [layouts](../../../01_Onboarding/02_Concepts/Views.md) with custom styling
 
 **Don't use Html widget when:**
 
-- You need interactive elements (use Button, Input, etc.)
-- You want to embed external content (use Iframe widget)
+- You need interactive elements (use [Button](../01_Common/Button.md), Input, etc.)
+- You want to embed external content (use [Iframe widget](Iframe.md))
 - You need JavaScript functionality
-- Simple text formatting would suffice (use Text widget)
+- Simple text formatting would suffice (use [Text widget](TextBlock.md))
 
 <WidgetDocs Type="Ivy.Html" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Primitives/Html.cs"/>

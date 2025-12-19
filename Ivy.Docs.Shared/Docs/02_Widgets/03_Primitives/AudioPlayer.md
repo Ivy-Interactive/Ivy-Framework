@@ -14,7 +14,7 @@ searchHints:
 Play audio content with browser controls. Supports common audio formats and provides customizable playback options.
 </Ingress>
 
-The `Audio` widget displays an audio player with browser controls in your app. This widget is for playing audio files, not recording them.
+The `Audio` [widget](../../../01_Onboarding/02_Concepts/Widgets.md) displays an audio player with browser controls in your [app](../../../01_Onboarding/02_Concepts/Apps.md). This widget is for playing audio files, not recording them.
 
 ## Basic Usage
 

@@ -71,7 +71,7 @@ public class Covid19Demo : ViewBase
                 new { Month = "Dec", Cases = 62800, Deaths = 1450 }
         };
 
-        return new Card().Title("COVID-19 cases")
+        return new [Card](../../01_Common/Card.md)().Title("COVID-19 cases")
             | data.ToAreaChart()
                 .Dimension("Month", e => e.Month)
                 .Measure("Cases", e => e.Sum(f => f.Cases))
@@ -114,12 +114,12 @@ public class ImmigrationToEurope : ViewBase
             new { Month = "Nov", Ukraine = 28500, MiddleEast = 20500, Africa = 32000, Asia = 25500, Americas = 9800 },
             new { Month = "Dec", Ukraine = 26000, MiddleEast = 18000, Africa = 28500, Asia = 23000, Americas = 8900 }
         };
-        return new Card().Title("Immigration to Europe")
+        return new [Card](../../01_Common/Card.md)().Title("Immigration to Europe")
             | new AreaChart(data, new Area("Ukraine")
                         .LegendType(LegendTypes.Square)
                         .Fill(Colors.Sky)
                         .FillOpacity(0.55)
-                        .Animated())
+                        .[Animated](../../05_Effects/Animation.md)())
                     .Area(new Area("MiddleEast")
                           .Name("Middle East")
                          .LegendType(LegendTypes.Square)

@@ -19,11 +19,11 @@ Services in Ivy provide dependency injection and service management for clean ap
 The service system in Ivy supports:
 
 - Dependency injection
-- Service registration and configuration
-- Service lifecycle management
+- Service registration and [configuration](./Program.md)
+- Service [lifecycle management](./Views.md)
 - Scoped and singleton services
 - Service interfaces and implementations
-- Service middleware
+- Service [middleware](./Program.md)
 
 ## Basic Usage
 
@@ -42,7 +42,7 @@ public class MyView : ViewBase
 
 ### Service Registration
 
-Register services in your application startup:
+Register services in your [application startup](./Program.md):
 
 ```csharp
 public class Program
@@ -59,7 +59,7 @@ public class Program
 
 ### Service Descriptions
 
-Services can provide custom descriptions by implementing the `IDescribableService` interface. Use `ServerDescriptionReader` to read environment-specific service descriptions from your application.
+Services can provide custom descriptions by implementing the `IDescribableService` interface. Use `ServerDescriptionReader` to read environment-specific service descriptions from your [application](./Apps.md).
 
 ```csharp
 // Implement IDescribableService for custom service descriptions
@@ -138,7 +138,7 @@ Ivy supports different service lifetimes:
 
 ### Service Middleware
 
-Add middleware to services for cross-cutting concerns:
+Add [middleware](./Program.md) to services for cross-cutting concerns:
 
 ```csharp
 public class LoggingServiceMiddleware : IServiceMiddleware

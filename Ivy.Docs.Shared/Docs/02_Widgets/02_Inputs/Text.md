@@ -17,7 +17,7 @@ searchHints:
 Capture user text input with validation, formatting, and interactive features like autocomplete and real-time feedback.
 </Ingress>
 
-The`TextInput` widget provides a standard text entry field. It supports various text input types including single-line text, multi-line text, password fields, email, phone number, URL and offers features like placeholder text, validation, shortcut keys and text formatting.
+The `TextInput` [widget](../../01_Onboarding/02_Concepts/Widgets.md) provides a standard text entry field. It supports various text [input](../../01_Onboarding/02_Concepts/Widgets.md) types including single-line text, multi-line text, password fields, email, phone number, URL and offers features like placeholder text, validation, shortcut keys and text formatting.
 
 ## Basic Usage
 
@@ -179,7 +179,7 @@ public class URLEnterDemo: ViewBase
 }
 ```
 
-## Event Handling
+## [Event Handling](../../01_Onboarding/02_Concepts/EventHandlers.md)
 
 We can get the value of the text entered into any of the `TextInput` variant using the `OnChange` event.
 
@@ -276,7 +276,7 @@ public class DisabledInputDemo : ViewBase
 ```
 
 Notice, how extension functions `ToTextInput`, and `ToPasswordInput` are used  to generate `TextInput` variants
-needed for the form.
+needed for the [form](../../01_Onboarding/02_Concepts/Forms.md).
 
 ## Prefix and Suffix
 
@@ -339,7 +339,7 @@ public class ShortCutDemo : ViewBase
 ## Helper functions
 
 There are several helper functions to create `TextInput` variants from state instances. Instead of employing the constructor to create a
-`TextInput`, these functions should be used. The following is an example of how Ivy can be employed to generate UI idiomatically using
+`TextInput`, these functions should be used. The following is an example of how Ivy can be employed to generate [UI](../../01_Onboarding/02_Concepts/Views.md) idiomatically using
 these functions.
 
 ```csharp demo-below

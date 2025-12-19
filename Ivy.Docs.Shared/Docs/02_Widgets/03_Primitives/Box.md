@@ -11,10 +11,10 @@ searchHints:
 # Box
 
 <Ingress>
-Create versatile container elements with customizable borders, colors, and padding for grouping content and structuring layouts.
+Create versatile container elements with customizable borders, colors, and padding for grouping content and structuring [layouts](../../../01_Onboarding/02_Concepts/Views.md).
 </Ingress>
 
-The `Box` widget is a versatile container element that provides customizable borders, colors, padding, margins, and content alignment. It's perfect for visually grouping related content, creating distinct sections in your UI, and building card-based layouts.
+The `Box` [widget](../../../01_Onboarding/02_Concepts/Widgets.md) is a versatile container element that provides customizable borders, colors, padding, margins, and content alignment. It's perfect for visually grouping related content, creating distinct sections in your [UI](../../../01_Onboarding/02_Concepts/Views.md), and building [card](../01_Common/Card.md)-based [layouts](../../../01_Onboarding/02_Concepts/Views.md).
 
 ## Basic Usage
 
@@ -148,8 +148,6 @@ public class AdvancedSpacingView : ViewBase
     }
 }
 ```
-
-
 
 ### Colors
 

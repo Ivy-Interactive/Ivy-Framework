@@ -30,10 +30,10 @@ searchHints:
 # DataTable
 
 <Ingress>
-Display and interact with large datasets using high-performance data tables with sorting, filtering, pagination, and real-time updates powered by Apache Arrow.
+Display and interact with large datasets using high-performance data tables with sorting, filtering, [pagination](../../01_Common/Pagination.md), and real-time updates powered by Apache Arrow.
 </Ingress>
 
-The `DataTable` widget provides a powerful, high-performance solution for displaying tabular data. Built on Apache Arrow for optimal performance with large datasets, it supports automatic type detection, sorting, filtering, column grouping, and customization.
+The `DataTable` [widget](../../../01_Onboarding/02_Concepts/Widgets.md) provides a powerful, high-performance solution for displaying tabular data. Built on Apache Arrow for optimal performance with large datasets, it supports automatic type detection, sorting, filtering, column grouping, and customization.
 
 ## Basic Usage
 

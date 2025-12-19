@@ -10,13 +10,11 @@ searchHints:
 
 # Refresh Tokens
 
-<Ingress>
-Refresh tokens provide a mechanism to manually trigger UI updates and effect executions in Ivy, enabling you to reload data, refresh components, or trigger actions on demand.
-</Ingress>
+Refresh tokens provide a mechanism to manually trigger [UI updates](../01_GettingStarted/01_Introduction.md) and [effect](./Effects.md) executions in Ivy, enabling you to reload data, refresh components, or trigger actions on demand.
 
 ## Basic Usage
 
-The `UseRefreshToken` hook creates a token that can be manually refreshed to trigger effects:
+The `UseRefreshToken` hook creates a token that can be manually refreshed to trigger [effects](./Effects.md):
 
 ```csharp demo-below
 public class BasicRefreshExample : ViewBase
@@ -44,8 +42,8 @@ public class BasicRefreshExample : ViewBase
 
 Refresh tokens are useful when you need to:
 
-- Trigger effects after async operations complete
-- Pass data from background operations to trigger UI updates
+- Trigger [effects](./Effects.md) after async operations complete
+- Pass data from background operations to trigger [UI updates](../01_GettingStarted/01_Introduction.md)
 - Coordinate updates across different parts of your view
 - Refresh external content like iframes
 
@@ -138,15 +136,15 @@ UseEffect(() =>
 }, [refreshToken]);
 ```
 
-## Refresh Tokens vs Event Handlers
+## Refresh Tokens vs [Event Handlers](./EventHandlers.md)
 
 ### Comparison Table
 
-| Feature | Event Handlers | Refresh Tokens |
+| Feature | [Event Handlers](./EventHandlers.md) | Refresh Tokens |
 |---------|---------------|----------------|
 | **Trigger** | User interaction (click, blur, change) | Programmatic call to `Refresh()` |
-| **Timing** | Synchronous, immediate | Can trigger async effects |
-| **Scope** | Single component/element | Can trigger multiple effects |
+| **Timing** | Synchronous, immediate | Can trigger async [effects](./Effects.md) |
+| **Scope** | Single component/element | Can trigger multiple [effects](./Effects.md) |
 | **Use Case** | Direct UI interactions | Background operations, coordinated updates |
 | **Data Flow** | Event args (e.g., Event<Button>) | Return values via `ReturnValue` |
 

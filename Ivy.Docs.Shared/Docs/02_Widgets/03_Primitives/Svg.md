@@ -11,10 +11,10 @@ searchHints:
 # Svg
 
 <Ingress>
-Create beautiful, scalable vector graphics directly in your app with the `Svg` widget. Perfect for icons, illustrations, charts, and other graphics that need to scale without losing quality.
+Create beautiful, scalable vector graphics directly in your [app](../../../01_Onboarding/02_Concepts/Apps.md) with the `Svg` [widget](../../../01_Onboarding/02_Concepts/Widgets.md). Perfect for icons, illustrations, charts, and other graphics that need to scale without losing quality.
 </Ingress>
 
-The `Svg` widget renders scalable vector graphics directly in your app. SVGs are resolution-independent and perfect for icons, illustrations, charts, and other graphics that need to scale without losing quality.
+The `Svg` widget renders scalable vector graphics directly in your [app](../../../01_Onboarding/02_Concepts/Apps.md). SVGs are resolution-independent and perfect for icons, illustrations, charts, and other graphics that need to scale without losing quality.
 
 ## Basic Usage
 

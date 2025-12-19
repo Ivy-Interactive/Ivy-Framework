@@ -14,9 +14,9 @@ searchHints:
 Create visual dividers between content sections to organize information and improve interface readability with clear content demarcation.
 </Ingress>
 
-The `Separator` widget creates a visual divider between content sections. It helps organize information and improve readability by clearly demarcating different parts of your interface.
+The `Separator` [widget](../../../01_Onboarding/02_Concepts/Widgets.md) creates a visual divider between content sections. It helps organize information and improve readability by clearly demarcating different parts of your interface.
 
-```csharp demo-tabs 
+```csharp demo-tabs
 public class ProfileDetailView : ViewBase
 {
     public override object? Build()

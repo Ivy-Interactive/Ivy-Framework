@@ -13,14 +13,14 @@ searchHints:
 # Card
 
 <Ingress>
-Organize content in visually grouped containers with headers, footers, and actions to create structured, professional layouts.
+Organize content in visually grouped containers with headers, footers, and actions to create structured, professional [layouts](../04_Layouts/_Index.md).
 </Ingress>
 
-The `Card` widget is a versatile container used to group related content and actions in Ivy apps. It can hold text, buttons, charts, and other widgets, making it a fundamental building block for creating structured layouts.
+The `Card` [widget](../../01_Onboarding/02_Concepts/Widgets.md) is a versatile container used to group related content and actions in Ivy [apps](../../01_Onboarding/02_Concepts/Apps.md). It can hold text, buttons, charts, and other [widgets](../../01_Onboarding/02_Concepts/Widgets.md), making it a fundamental [building block](../../01_Onboarding/02_Concepts/Views.md) for creating structured layouts.
 
 ## Basic Usage
 
-Here's a simple example of a card containing text and a button that shows a toast message when clicked.
+Here's a simple example of a card containing text and a button that shows a [toast message](../../01_Onboarding/02_Concepts/Clients.md) when clicked.
 
 ```csharp demo-below
 new Card(
@@ -44,7 +44,7 @@ new Card(
 
 ## Border Customization
 
-Cards support the same border functionality as Box widgets, allowing you to customize the appearance while maintaining the default card styling when no border properties are specified.
+Cards support the same border functionality as [Box widgets](../03_Primitives/Box.md), allowing you to customize the appearance while maintaining the default card styling when no border properties are specified.
 
 ```csharp demo-below
 new Card(

@@ -11,10 +11,10 @@ searchHints:
 # HeaderLayout
 
 <Ingress>
-HeaderLayout provides a fixed header area above scrollable content, perfect for toolbars, navigation, and persistent controls that should remain visible while users scroll through content.
+HeaderLayout provides a fixed header area above scrollable content, perfect for toolbars, [navigation](../../../01_Onboarding/02_Concepts/Navigation.md), and persistent controls that should remain visible while users scroll through content.
 </Ingress>
 
-The `HeaderLayout` widget creates a layout with a fixed header section at the top and a scrollable content area below. Perfect for applications that need persistent navigation, toolbars, or status information while allowing the main content to scroll independently.
+The `HeaderLayout` [widget](../../../01_Onboarding/02_Concepts/Widgets.md) creates a layout with a fixed header section at the top and a scrollable content area below. Perfect for [applications](../../../01_Onboarding/01_GettingStarted/01_Introduction.md) that need persistent [navigation](../../../01_Onboarding/02_Concepts/Navigation.md), toolbars, or status information while allowing the main content to scroll independently.
 
 By default, the content area uses a ScrollArea wrapper that enables scrolling. You can disable this behavior using the `.Scroll()` method when your content (like a Kanban board) needs to handle its own scrolling.
 
@@ -41,7 +41,7 @@ public class BasicHeaderExample : ViewBase
 ## Common Use Cases
 
 <Callout Type="tip">
-For widgets that handle their own scrolling (like Kanban boards), use `.Scroll(Scroll.None)` to disable the HeaderLayout's ScrollArea wrapper. Height is automatically set to `Size.Full()` when scroll is disabled.
+For [widgets](../../../01_Onboarding/02_Concepts/Widgets.md) that handle their own scrolling (like Kanban boards), use `.Scroll(Scroll.None)` to disable the HeaderLayout's ScrollArea wrapper. Height is automatically set to `Size.Full()` when scroll is disabled.
 </Callout>
 
 ### Toolbar with Actions
@@ -192,9 +192,9 @@ public class NavigationHeaderExample : ViewBase
                 "advanced" => Layout.Vertical().Gap(4)
                     | Text.Label("Advanced Topics")
                     | Text.P("Advanced usage patterns and techniques for experienced developers.")
-                    | new Card("Custom components and widgets")
+                    | new Card("Custom [components](../../../01_Onboarding/02_Concepts/Widgets.md) and [widgets](../../../01_Onboarding/02_Concepts/Widgets.md)")
                     | new Card("Performance optimization techniques")
-                    | new Card("Advanced state management")
+                    | new Card("Advanced [state](../../../01_Onboarding/02_Concepts/State.md) management")
                     | new Card("Integration with external services")
                     | Text.P("These topics require a solid understanding of the framework basics."),
                 

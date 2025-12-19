@@ -11,7 +11,7 @@ searchHints:
 # Todo Tutorial
 
 <Ingress>
-Build a complete todo application from scratch to learn essential Ivy concepts including state management, components, and event handling.
+Build a complete todo application from scratch to learn essential Ivy concepts including [state management](../02_Concepts/State.md), [components](../02_Concepts/Widgets.md), and [event handling](../02_Concepts/EventHandlers.md).
 </Ingress>
 
 ## Prerequisites
@@ -24,7 +24,7 @@ Let's create a new todo app step by step.
 
 ### 1. Create a new project
 
-Using the Ivy CLI we can create a new project.
+Using the Ivy [CLI](../../03_CLI/01_CLIOverview.md) we can create a new project.
 
 ```terminal
 >ivy init --namespace Todos
@@ -41,7 +41,7 @@ public record Todo(string Title, bool Done);
 
 ### 3. Create the Main App Class
 
-Create a new class `TodosApp` in the file that inherits from `ViewBase`:
+Create a new class `TodosApp` in the file that inherits from [ViewBase](../02_Concepts/Views.md):
 
 ```csharp
 [App(icon: Icons.Calendar)]
@@ -54,7 +54,7 @@ public class TodosApp : ViewBase
 }
 ```
 
-### 4. Add State Management
+### 4. Add [State Management](../02_Concepts/State.md)
 
 Inside the `Build` method, we'll add state management for our todos and input field:
 
@@ -70,7 +70,7 @@ var client = this.UseService<IClientProvider>();
 
 ### 5. Build the UI
 
-Now let's create the user interface. We'll use Ivy's layout system and components:
+Now let's create the user interface. We'll use Ivy's [layout system](../../02_Widgets/04_Layouts/_Index.md) and [components](../02_Concepts/Widgets.md):
 
 ```csharp
 return new Card().Title("Todos").Description("What do you want to get done today?")

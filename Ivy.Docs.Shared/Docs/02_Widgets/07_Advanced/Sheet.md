@@ -170,7 +170,7 @@ public class SheetWidthExamples : ViewBase
 
 ### Sheet with Navigation
 
-This example shows a sheet with internal navigation between multiple pages using state management.
+This example shows a sheet with internal navigation between multiple pages using [state management](../../../01_Onboarding/02_Concepts/State.md).
 
 ```csharp demo-tabs
 public class NavigationSheet : ViewBase
@@ -208,7 +208,7 @@ public class NavigationSheetContent : ViewBase
 
 ### Complex Layout Structure
 
-This pattern demonstrates how to integrate sheets with stateful widgets using triggers. Click on any card to edit it in a sheet.
+This pattern demonstrates how to integrate sheets with stateful [widgets](../../../01_Onboarding/02_Concepts/Widgets.md) using triggers. Click on any card to edit it in a sheet.
 
 ```csharp demo-tabs
 public record TaskItem(string Id, string Title, string Status, int Priority, string Description);

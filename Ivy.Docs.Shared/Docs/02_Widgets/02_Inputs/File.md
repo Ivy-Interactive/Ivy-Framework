@@ -14,16 +14,16 @@ searchHints:
 # FileInput
 
 <Ingress>
-Enable file uploads with automatic state management, progress tracking, type filtering, size limits, and support for single or multiple file selections.
+Enable file uploads with automatic [state management](../../01_Onboarding/02_Concepts/State.md), progress tracking, type filtering, size limits, and support for single or multiple file selections.
 </Ingress>
 
-The `FileInput` widget provides a file upload interface with built-in validation, progress tracking, and drag-and-drop support. It works seamlessly with the upload system to automatically manage file data in state.
+The `FileInput` [widget](../../01_Onboarding/02_Concepts/Widgets.md) provides a file upload interface with built-in validation, progress tracking, and drag-and-drop support. It works seamlessly with the upload system to automatically manage file data in [state](../../01_Onboarding/02_Concepts/State.md).
 
 ## Basic Usage
 
 The upload system uses three key components working together:
 
-1. **State for Files**: Holds the uploaded file(s) data in memory
+1. **[State](../../01_Onboarding/02_Concepts/State.md) for Files**: Holds the uploaded file(s) data in memory
 2. **UseUpload Hook**: Creates an upload endpoint and returns an upload context
 3. **MemoryStreamUploadHandler**: Automatically manages file data in state
 
@@ -372,7 +372,7 @@ public class DialogFileUpload : ViewBase
 
 ### Form Integration
 
-Integrate file uploads in forms using the context-aware `.Builder()` overload:
+Integrate file uploads in [forms](../../01_Onboarding/02_Concepts/Forms.md) using the context-aware `.Builder()` overload:
 
 ```csharp demo-tabs
 public record FormFileUploadModel

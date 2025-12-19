@@ -11,10 +11,10 @@ searchHints:
 # Blades
 
 <Ingress>
-Create stacked navigation experiences where new views slide in from the right, managed through a blade controller for intuitive drill-down interfaces.
+Create stacked [navigation](../../01_Onboarding/02_Concepts/Navigation.md) experiences where new [views](../../01_Onboarding/02_Concepts/Views.md) slide in from the right, managed through a blade controller for intuitive drill-down interfaces.
 </Ingress>
 
-`Blade`s provide a stacked navigation pattern where new views slide in from the right. Use the `UseBlades` extension to create a root blade and manage a stack of blades through `IBladeController`. Perfect for master-detail interfaces, wizards, and hierarchical navigation.
+`Blade`s provide a stacked [navigation](../../01_Onboarding/02_Concepts/Navigation.md) pattern where new [views](../../01_Onboarding/02_Concepts/Views.md) slide in from the right. Use the `UseBlades` extension to create a root blade and manage a stack of blades through `IBladeController`. Perfect for master-detail [interfaces](../../01_Onboarding/02_Concepts/Views.md), wizards, and hierarchical navigation.
 
 ## Usage
 
@@ -105,10 +105,9 @@ public class ProductDetailView(string productName) : ViewBase
 }
 ```
 
-
 ## Refresh Tokens
 
-You can use Refresh Tokens to trigger updates in parent blades when returning from a child blade. This is common for "save and close" workflows.
+You can use [Refresh Tokens](../../01_Onboarding/02_Concepts/RefreshTokens.md) to trigger updates in parent blades when returning from a child blade. This is common for "save and close" workflows.
 
 ```csharp demo-tabs
 public class BladeRefreshDemo : ViewBase
@@ -167,7 +166,7 @@ public class AddItemView(RefreshToken token) : ViewBase
 
 ## Error Handling
 
-Blades handle errors gracefully, displaying the error message within the blade context without crashing the entire application.
+Blades handle errors gracefully, displaying the error message within the blade context without crashing the entire [application](../../01_Onboarding/02_Concepts/Apps.md).
 
 ```csharp demo-tabs
 public class BladeErrorDemo : ViewBase

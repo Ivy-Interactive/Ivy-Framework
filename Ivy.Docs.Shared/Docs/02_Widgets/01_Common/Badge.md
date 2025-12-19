@@ -13,10 +13,10 @@ searchHints:
 # Badge
 
 <Ingress>
-Display small pieces of information like counts, statuses, or labels in compact, styled badges with various colors and variants.
+Display small pieces of information like counts, statuses, or labels in compact, styled [badges](../../01_Onboarding/02_Concepts/Widgets.md) with various colors and variants.
 </Ingress>
 
-The `Badge` widget is a versatile component used to display small pieces of information, such as counts or statuses, in a compact form.
+The `Badge` [widget](../../01_Onboarding/02_Concepts/Widgets.md) is a versatile component used to display small pieces of information, such as counts or statuses, in a compact form. It is commonly used within [Views](../../01_Onboarding/02_Concepts/Views.md).
 
 ## Basic Usage
 
@@ -28,7 +28,7 @@ new Badge("Primary")
 
 ## Variants
 
-Badges come in several variants to suit different use cases and visual hierarchies.
+Badges come in several variants to suit different use cases and [visual hierarchies](../../01_Onboarding/02_Concepts/Theming.md).
 
 ```csharp demo-tabs
 Layout.Horizontal()
@@ -53,8 +53,6 @@ Layout.Horizontal()
     | new Badge("Secondary").Secondary()
 ```
 
-
-
 ### Icons
 
 `Badge`s can include icons to enhance their visual appearance and meaning. See [Icon](../03_Primitives/Icon.md) for more details.
@@ -75,8 +73,6 @@ Layout.Vertical().Gap(4)
         | new Badge(null, icon:Icons.Bell)
         | new Badge(null, icon:Icons.X, variant:BadgeVariant.Destructive))
 ```
-
-
 
 <WidgetDocs Type="Ivy.Badge" ExtensionTypes="Ivy.BadgeExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Badge.cs"/>
 

@@ -19,15 +19,15 @@ Communicate with users effectively using modal dialog alerts for important confi
 Ivy provides two main types of alerts:
 
 1. **Dialog Alerts** - Modal dialogs for important confirmations and decisions
-2. **Toast Notifications** - Non-blocking notifications for feedback and status updates
+2. **Toast Notifications** - Non-blocking notifications for [feedback](../../02_Widgets/02_Inputs/Feedback.md) and status updates
 
 ## Dialog Alerts
 
-Dialog alerts are modal windows that require user interaction. They're perfect for confirmations, important messages, or collecting user decisions.
+Dialog alerts are modal windows that require [user interaction](./EventHandlers.md). They're perfect for confirmations, important messages, or collecting user decisions.
 
 ### Basic Dialog Alert
 
-```csharp demo-below 
+```csharp demo-below
 public class BasicDialogAlertDemo : ViewBase
 {
     public override object? Build()
@@ -51,7 +51,7 @@ public class BasicDialogAlertDemo : ViewBase
 
 Dialog alerts support different button combinations:
 
-```csharp demo-below 
+```csharp demo-below
 public class AlertButtonSetsDemo : ViewBase
 {
     public override object? Build()
@@ -86,11 +86,11 @@ public class AlertButtonSetsDemo : ViewBase
 
 ## Toast Notifications
 
-Toast notifications are lightweight, non-blocking messages that appear temporarily and then disappear automatically. They're perfect for providing quick feedback about user actions.
+Toast notifications are lightweight, non-blocking messages that appear temporarily and then disappear automatically. They're perfect for providing quick [feedback](../../02_Widgets/02_Inputs/Feedback.md) about user actions.
 
 ### Basic Toast Notifications
 
-```csharp demo-below 
+```csharp demo-below
 public class BasicToastDemo : ViewBase
 {
     public override object? Build()
@@ -114,7 +114,7 @@ public class BasicToastDemo : ViewBase
 
 ### Toast with Exception Handling
 
-```csharp demo-below 
+```csharp demo-below
 public class ToastExceptionDemo : ViewBase
 {
     public override object? Build()
@@ -139,9 +139,9 @@ public class ToastExceptionDemo : ViewBase
 
 ## Examples
 
-### Form Submission with Feedback
+### [Form Submission](./Forms.md) with Feedback
 
-```csharp demo-below 
+```csharp demo-below
 public class FormSubmissionDemo : ViewBase
 {
     public override object? Build()

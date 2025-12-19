@@ -16,10 +16,10 @@ searchHints:
 # Chrome Configuration
 
 <Ingress>
-Configure the application chrome (sidebar, header, footer) using ChromeSettings to customize navigation, branding, and layout behavior.
+Configure the application chrome ([sidebar](../../02_Widgets/04_Layouts/SidebarLayout.md), header, footer) using ChromeSettings to customize [navigation](./Navigation.md), branding, and layout behavior.
 </Ingress>
 
-You can add custom elements to both the header and footer sections of the sidebar using `ChromeSettings`:
+You can add custom elements to both the header and footer sections of the [sidebar](../../02_Widgets/04_Layouts/SidebarLayout.md) using `ChromeSettings`:
 
 ```csharp
 var chromeSettings = new ChromeSettings()
@@ -63,7 +63,7 @@ Use `server.UseDefaultApp(typeof(AppName))` instead of `UseChrome()` for single-
 
 Configure a dedicated background *app* that appears when no other tabs are open. Perfect for welcome screens, dashboards or branded imagery.
 
-The **Wallpaper** is just another Ivy application rendered full-screen by the Chrome host whenever the tab area is empty. This keeps your UI visually engaging instead of showing an empty canvas.
+The **Wallpaper** is just another [Ivy application](./Apps.md) rendered full-screen by the Chrome host whenever the tab area is empty. This keeps your UI visually engaging instead of showing an empty canvas.
 
 ### Configuration
 
@@ -78,8 +78,8 @@ var chromeSettings = ChromeSettings.Default()
 chromeSettings = chromeSettings.WallpaperApp<WelcomeScreenApp>();
 ```
 
-1. Implement a normal Ivy app (derive from `ViewBase`).
-2. Register it like any other app (`server.AddApp<WelcomeScreenApp>()`).
+1. Implement a normal Ivy app (derive from [Views](./Views.md)).
+2. Register it like any other [app](./Apps.md) (`server.AddApp<WelcomeScreenApp>()`).
 3. Reference it in `ChromeSettings` with one of the helpers above.
 
 ### Full Example

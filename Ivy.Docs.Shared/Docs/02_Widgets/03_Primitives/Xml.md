@@ -11,10 +11,10 @@ searchHints:
 # Xml
 
 <Ingress>
-Display and interact with XML data in your Ivy applications with syntax highlighting, collapsible nodes, and real-time validation. Perfect for configuration files, API responses, and data feeds.
+Display and interact with XML data in your [Ivy applications](../../../01_Onboarding/01_GettingStarted/01_Introduction.md) with syntax highlighting, collapsible nodes, and real-time validation. Perfect for configuration files, API responses, and data feeds.
 </Ingress>
 
-The `Xml` widget displays XML data in a formatted, syntax-highlighted view. It's useful for displaying configuration files, data feeds, and other XML-structured content.
+The `Xml` [widget](../../../01_Onboarding/02_Concepts/Widgets.md) displays XML data in a formatted, syntax-highlighted view. It's useful for displaying configuration files, data feeds, and other XML-structured content.
 
 ## Basic Usage
 
@@ -51,7 +51,7 @@ public class TextHelperExample : ViewBase
         return Layout.Vertical().Gap(4)
             | Text.P("Here's an example XML configuration:")
             | Text.Xml("<config><setting>value</setting></config>")
-            | Text.P("You can also use it with state variables:")
+            | Text.P("You can also use it with [state variables](../../../01_Onboarding/02_Concepts/State.md):")
             | Text.Xml(UseState("<root><item>dynamic</item></root>"));
     }
 }

@@ -16,7 +16,7 @@ searchHints:
 Enhance user experience with contextual tooltips that provide helpful information on hover or focus without cluttering the interface.
 </Ingress>
 
-`Tooltip`s provide contextual information when hovering or focusing on a widget. They are essential for improving user experience by offering additional context without cluttering the interface.
+`Tooltip`s provide contextual information when hovering or focusing on a [widget](../../01_Onboarding/02_Concepts/Widgets.md). They are essential for improving user experience by offering additional context without cluttering the interface.
 
 ## Basic Usage
 
@@ -39,7 +39,7 @@ Layout.Vertical()
 
 ### With Icons
 
-Use tooltips to explain the meaning of icons, especially in toolbars or navigation (using icon-only buttons):
+Use tooltips to explain the meaning of icons, especially in toolbars or [navigation](../../01_Onboarding/02_Concepts/Navigation.md) (using icon-only buttons):
 
 ```csharp demo-tabs
 Layout.Horizontal()
@@ -77,7 +77,7 @@ new Button("Advanced Tooltip")
 Various Widgets
 </Summary>
 <Body>
-Tooltips work with any interactive element.
+Tooltips work with any interactive [element](../../01_Onboarding/02_Concepts/Widgets.md).
 
 ```csharp demo-tabs
 Layout.Grid().Columns(2)
@@ -97,7 +97,7 @@ Layout.Grid().Columns(2)
 Navigation
 </Summary>
 <Body>
-Help users understand navigation elements:
+Help users understand [navigation](../../01_Onboarding/02_Concepts/Navigation.md) elements:
 
 ```csharp demo-below
 Layout.Horizontal()
@@ -167,7 +167,7 @@ Layout.Horizontal()
 
 ## Accessibility Considerations
 
-Tooltips enhance accessibility by providing additional context for screen readers and keyboard navigation:
+Tooltips enhance accessibility by providing additional context for screen readers and keyboard [navigation](../../01_Onboarding/02_Concepts/Navigation.md):
 
 ```csharp demo-below
 Layout.Vertical()
