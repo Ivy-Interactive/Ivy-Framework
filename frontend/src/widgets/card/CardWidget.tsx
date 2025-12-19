@@ -17,8 +17,9 @@ import {
 import { cn } from '@/lib/utils';
 import { useEventHandler } from '@/components/event-handler';
 import React, { useCallback } from 'react';
-import { EmptyWidget } from './primitives/EmptyWidget';
+import { EmptyWidget } from '../primitives/EmptyWidget';
 import { Scales } from '@/types/scale';
+import { cardStyles, getSizeClasses } from './styles';
 
 interface CardWidgetProps {
   id: string;
@@ -54,42 +55,6 @@ export const CardWidget: React.FC<CardWidgetProps> = ({
   'data-testid': testId,
 }) => {
   const eventHandler = useEventHandler();
-
-  const getSizeClasses = (scale?: Scales) => {
-    switch (scale) {
-      case Scales.Small:
-        return {
-          header:
-            'px-3 pt-1 pb-0 items-center [&>*]:w-full [&_:is(p,span)]:!pt-1 [&_:is(h1,h2,h3,h4,h5,h6)]:!text-sm [&_:is(h1,h2,h3,h4,h5,h6)]:!my-0 [&_:is(h1,h2,h3,h4,h5,h6)]:!font-normal [&_:is(h1,h2,h3,h4,h5,h6)]:!min-h-9 [&_:is(h1,h2,h3,h4,h5,h6)]:!flex [&_:is(h1,h2,h3,h4,h5,h6)]:!flex-1 [&_:is(h1,h2,h3,h4,h5,h6)]:!items-center',
-          content: 'p-3 pt-0 [&_*]:!text-sm',
-          footer: 'p-3 pt-0',
-          title: 'text-sm',
-          description: 'text-xs mt-1',
-          icon: 'h-4 w-4',
-        };
-      case Scales.Large:
-        return {
-          header:
-            'px-8 pt-5 pb-4 items-center [&>*]:w-full [&_:is(p,span)]:!pt-1 [&_:is(h1,h2,h3,h4,h5,h6)]:!text-lg [&_:is(h1,h2,h3,h4,h5,h6)]:!my-0 [&_:is(h1,h2,h3,h4,h5,h6)]:!font-normal [&_:is(h1,h2,h3,h4,h5,h6)]:!min-h-9 [&_:is(h1,h2,h3,h4,h5,h6)]:!flex [&_:is(h1,h2,h3,h4,h5,h6)]:!flex-1 [&_:is(h1,h2,h3,h4,h5,h6)]:!items-center',
-          content: 'p-8 pt-0',
-          footer: 'p-8 pt-0',
-          title: 'text-lg',
-          description: 'text-base mt-3',
-          icon: 'h-6 w-6',
-        };
-      default:
-        return {
-          header:
-            'px-6 pt-4 pb-2 items-center [&>*]:w-full [&_:is(p,span)]:!pt-1 [&_:is(h1,h2,h3,h4,h5,h6,p)]:!text-base [&_:is(h1,h2,h3,h4,h5,h6)]:!my-0 [&_:is(h1,h2,h3,h4,h5,h6)]:!font-normal [&_:is(h1,h2,h3,h4,h5,h6)]:!min-h-9 [&_:is(h1,h2,h3,h4,h5,h6)]:!flex [&_:is(h1,h2,h3,h4,h5,h6)]:!flex-1 [&_:is(h1,h2,h3,h4,h5,h6)]:!items-center',
-          content: 'p-6 pt-0',
-          footer: 'p-6 pt-0',
-          title: 'text-base',
-          description: 'text-sm',
-          icon: 'h-5 w-5',
-        };
-    }
-  };
-
   const sizeClasses = getSizeClasses(scale);
 
   const styles = {
@@ -119,33 +84,37 @@ export const CardWidget: React.FC<CardWidgetProps> = ({
 
   const hoverClass =
     hoverVariant === 'None'
-      ? null
+      ? cardStyles.hover.none
       : hoverVariant === 'Pointer'
-        ? 'cursor-pointer'
-        : 'cursor-pointer transform hover:-translate-x-[4px] hover:-translate-y-[4px] active:translate-x-[-2px] active:translate-y-[-2px] transition';
+        ? cardStyles.hover.pointer
+        : cardStyles.hover.pointerAndTranslate;
 
   return (
     <Card
       role="region"
       data-testid={testId}
       style={styles}
-      className={cn('flex', 'flex-col', 'overflow-hidden', 'gap-2', hoverClass)}
+      className={cn(cardStyles.container, hoverClass)}
       onClick={handleClick}
     >
       {!headerIsEmpty ? (
-        <CardHeader className={cn('flex-none', sizeClasses.header)}>
+        <CardHeader className={cn(cardStyles.header.base, sizeClasses.header)}>
           {slots?.Header}
         </CardHeader>
       ) : (
         <></>
       )}
       <CardContent
-        className={cn('flex-1', sizeClasses.content, headerIsEmpty && 'pt-6')}
+        className={cn(
+          cardStyles.content.base,
+          sizeClasses.content,
+          headerIsEmpty && cardStyles.content.noHeader
+        )}
       >
         {slots?.Content}
       </CardContent>
       {!footerIsEmpty && (
-        <CardFooter className={cn('flex-none', sizeClasses.footer)}>
+        <CardFooter className={cn(cardStyles.footer.base, sizeClasses.footer)}>
           {slots?.Footer}
         </CardFooter>
       )}
