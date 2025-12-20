@@ -2,7 +2,7 @@ using Ivy.Shared;
 
 namespace Ivy.Samples.Shared.Apps.Widgets.Inputs;
 
-[App(icon: Icons.CircleOff, path: ["Widgets", "Inputs"], searchHints: ["nullable", "null", "clear", "optional"])]
+[App(icon: Icons.CircleOff, path: ["Widgets", "Inputs"], isVisible: false, searchHints: ["nullable", "null", "clear", "optional"])]
 public class NullableInputsApp : SampleBase
 {
     protected override object? BuildSample()
@@ -442,63 +442,6 @@ public class NullableInputsApp : SampleBase
                 | UseState(DateOnly.FromDateTime(DateTime.Today)).ToDateInput()
                 | nullableDate.ToDateInput().Placeholder("Can be cleared").Nullable()
              )
-
-             | Text.H2("Automatic Nullable Detection Test")
-             | Text.P("These inputs are created from nullable states WITHOUT explicitly calling .Nullable(). The Nullable property should be automatically set to true based on the state type.")
-             | (Layout.Grid().Columns(3)
-                | Text.InlineCode("Type")
-                | Text.InlineCode("Input (Auto-Detected Nullable)")
-                | Text.InlineCode("Current Value")
-
-                | Text.Block("Text (string?) - Auto")
-                | nullableText.ToTextInput().Placeholder("Auto-detected nullable...")
-                | (nullableText.Value == null ? Text.InlineCode("null") : Text.Block(nullableText.Value))
-
-                | Text.Block("Number (int?) - Auto")
-                | nullableInt.ToNumberInput().Placeholder("Auto-detected nullable...")
-                | (nullableInt.Value == null ? Text.InlineCode("null") : Text.Block(nullableInt.Value?.ToString() ?? "null"))
-
-                | Text.Block("Decimal (decimal?) - Auto")
-                | nullableDecimal.ToNumberInput().Placeholder("Auto-detected nullable...")
-                | (nullableDecimal.Value == null ? Text.InlineCode("null") : Text.Block(nullableDecimal.Value?.ToString() ?? "null"))
-
-                | Text.Block("Date (DateOnly?) - Auto")
-                | nullableDate.ToDateInput().Placeholder("Auto-detected nullable...")
-                | (nullableDate.Value == null ? Text.InlineCode("null") : Text.Block(nullableDate.Value?.ToString("yyyy-MM-dd") ?? "null"))
-             )
-
-             | Text.H2("Non-Nullable States (Should Not Be Nullable)")
-             | Text.P("These inputs are created from non-nullable states. The Nullable property should be automatically set to false.")
-             | (Layout.Grid().Columns(3)
-                | Text.InlineCode("Type")
-                | Text.InlineCode("Input (Non-Nullable)")
-                | Text.InlineCode("Current Value")
-
-                | Text.Block("Text (string) - Non-Nullable")
-                | nonNullableText.ToTextInput().Placeholder("Non-nullable string...")
-                | Text.Block(nonNullableText.Value)
-
-                | Text.Block("Number (int) - Non-Nullable")
-                | nonNullableInt.ToNumberInput().Placeholder("Non-nullable int...")
-                | Text.Block(nonNullableInt.Value.ToString())
-             )
-
-             | Text.H2("🔍 DEBUG: Nullable Property Comparison")
-             | Text.P("Compare these two inputs - one WITHOUT .Nullable() and one WITH .Nullable(). Check the browser console/network tab to see the difference in their serialized props.")
-             | (Layout.Grid().Columns(3)
-                | Text.InlineCode("Description")
-                | Text.InlineCode("Input")
-                | Text.InlineCode("Current Value")
-
-                | Text.Block("TextInput WITHOUT .Nullable()")
-                | nullableText.ToTextInput().Placeholder("No .Nullable() called...")
-                | (nullableText.Value == null ? Text.InlineCode("null") : Text.Block(nullableText.Value))
-
-                | Text.Block("TextInput WITH .Nullable()")
-                | nullableText.ToTextInput().Placeholder("With .Nullable() called...").Nullable()
-                | (nullableText.Value == null ? Text.InlineCode("null") : Text.Block(nullableText.Value))
-             )
-
           ;
     }
 }
