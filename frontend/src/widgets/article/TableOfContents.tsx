@@ -83,6 +83,8 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
 
       // Filter out headings that are inside example boxes
       const elements = allHeadings.filter(heading => {
+        if (heading.closest('[data-box]')) return false;
+
         // Check if the heading is inside a demo tab
         const isInsideDemoTab = (() => {
           const tabPanel = heading.closest('[role="tabpanel"]');
@@ -219,6 +221,8 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
 
     // Filter out headings that are inside example boxes
     const elements = allHeadings.filter(heading => {
+      if (heading.closest('[data-box]')) return false;
+
       // Check if the heading is inside a demo tab
       const isInsideDemoTab = (() => {
         const tabPanel = heading.closest('[role="tabpanel"]');
