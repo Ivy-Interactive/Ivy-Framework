@@ -144,7 +144,7 @@ export const SearchVariant: React.FC<SearchVariantProps> = ({
             type="button"
             tabIndex={-1}
             aria-label="Clear search"
-            onClick={handleClear}
+            onClick={onClear}
             className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer pointer-events-auto flex items-center h-6"
             style={{ pointerEvents: 'auto' }}
           >
