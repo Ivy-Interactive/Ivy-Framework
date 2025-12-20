@@ -343,7 +343,7 @@ public static partial class MarkdownConverter
         }
         else if (xml.Name.LocalName == "Ingress")
         {
-            HandleIngressBlock(codeBuilder, xml);
+            HandleIngressBlock(codeBuilder, xml, linkConverter, referencedApps);
         }
         else
         {
@@ -476,14 +476,18 @@ public static partial class MarkdownConverter
         codeBuilder.AppendTab(3).AppendLine($"""| new Embed("{url}")""");
     }
 
-    private static void HandleIngressBlock(StringBuilder codeBuilder, XElement xml)
+    private static void HandleIngressBlock(StringBuilder codeBuilder, XElement xml, LinkConverter linkConverter, HashSet<string> referencedApps)
     {
         string content = xml.Value.Trim();
         if (string.IsNullOrEmpty(content))
         {
             throw new Exception("Ingress block must have content.");
         }
-        AppendAsMultiLineStringIfNecessary(3, content, codeBuilder, "| Lead(", ")");
+
+        var (types, convertedContent) = linkConverter.Convert(content);
+        referencedApps.UnionWith(types);
+
+        AppendAsMultiLineStringIfNecessary(3, convertedContent, codeBuilder, "| new Markdown(", ").HandleLinkClick(onLinkClick)");
     }
 
     private static string MapLanguageToEnum(string lang)
