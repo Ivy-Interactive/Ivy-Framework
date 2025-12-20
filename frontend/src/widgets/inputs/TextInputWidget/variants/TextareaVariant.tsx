@@ -92,8 +92,20 @@ export const TextareaVariant: React.FC<TextareaVariantProps> = ({
         )}
         data-testid={props['data-testid']}
       />
-      {/* Icons container: shortcut (if any), then invalid (if any) */}
-      <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none h-6">
+      {/* Icons container: clear (if any), shortcut (if any), then invalid (if any) */}
+      <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none z-10 h-6">
+        {showClear && (
+          <button
+            type="button"
+            tabIndex={-1}
+            aria-label="Clear text"
+            onClick={onClear}
+            className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer pointer-events-auto flex items-center h-6"
+            style={{ pointerEvents: 'auto' }}
+          >
+            <X className={xIconVariants({ scale })} />
+          </button>
+        )}
         {props.shortcutKey && !isFocused && !hasValue && (
           <div className="pointer-events-auto flex items-center h-6">
             <kbd className="px-1 py-0.5 text-small-label font-medium text-foreground bg-muted border border-border rounded-md">
