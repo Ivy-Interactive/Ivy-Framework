@@ -8,9 +8,12 @@ namespace Ivy;
 
 public record SidebarLayout : WidgetBase<SidebarLayout>
 {
-    public SidebarLayout(object mainContent, object sidebarContent, object? sidebarHeader = null, object? sidebarFooter = null)
+    public static Size DefaultWidth => Size.Rem(16);
+
+    public SidebarLayout(object mainContent, object sidebarContent, object? sidebarHeader = null, object? sidebarFooter = null, Size? width = null)
     : base([new Slot("MainContent", mainContent), new Slot("SidebarContent", sidebarContent), new Slot("SidebarHeader", sidebarHeader), new Slot("SidebarFooter", sidebarFooter)])
     {
+        Width = width ?? DefaultWidth;
     }
 
     [Prop] public bool MainAppSidebar { get; set; } = false;

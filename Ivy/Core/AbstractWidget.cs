@@ -1,8 +1,6 @@
 using System.Reflection;
-using System.Text.Json;
 using System.Text.Json.Nodes;
 using Ivy.Core.Helpers;
-using Ivy.Widgets.Inputs;
 
 namespace Ivy.Core;
 
@@ -144,6 +142,7 @@ public abstract record AbstractWidget : IWidget
         var value = property.GetValue(this);
         return value;
     }
+    public JsonNode Serialize() => WidgetSerializer.Serialize(this);
 
     public async Task<bool> InvokeEventAsync(string eventName, JsonArray args)
     {
@@ -195,10 +194,10 @@ public abstract record AbstractWidget : IWidget
     private static object? ConvertToValue(Type valueType, JsonArray args)
     {
         // Handle tuples with multiple arguments
-        if (IsValueTuple(valueType) && args.Count() > 1)
+        if (IsValueTuple(valueType) && args.Count > 1)
         {
             var tupleTypes = valueType.GetGenericArguments();
-            if (args.Count() == tupleTypes.Length)
+            if (args.Count == tupleTypes.Length)
             {
                 var tupleArgs = new object[tupleTypes.Length];
                 for (int i = 0; i < tupleTypes.Length; i++)
@@ -221,6 +220,7 @@ public abstract record AbstractWidget : IWidget
 
     private static bool IsValueTuple(Type t) =>
         t is { IsValueType: true, IsGenericType: true } && t.FullName?.StartsWith("System.ValueTuple") == true;
+
     private static bool IsFunc(object eventDelegate, out Type? eventType, out Type? returnType)
     {
         eventType = null;

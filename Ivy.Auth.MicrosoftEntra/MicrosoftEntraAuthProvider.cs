@@ -106,11 +106,11 @@ public class MicrosoftEntraAuthProvider : IAuthProvider
         var authUrl = await GetApp()
             .GetAuthorizationRequestUrl(_scopes)
             .WithRedirectUri(callback.GetUri(includeIdInPath: false).ToString())
-            .WithExtraQueryParameters(new Dictionary<string, string>
+            .WithExtraQueryParameters(new Dictionary<string, (string, bool)>
             {
-                ["code_challenge"] = codeChallenge,
-                ["code_challenge_method"] = "S256",
-                ["state"] = callback.Id,
+                ["code_challenge"] = (codeChallenge, false),
+                ["code_challenge_method"] = ("S256", false),
+                ["state"] = (callback.Id, false),
             })
             .ExecuteAsync(cancellationToken);
 
@@ -279,7 +279,7 @@ public class MicrosoftEntraAuthProvider : IAuthProvider
         return [.. _authOptions];
     }
 
-    public async Task<DateTimeOffset?> GetAccessTokenExpirationAsync(IAuthSession authSession, CancellationToken cancellationToken)
+    public async Task<TokenLifetime?> GetAccessTokenLifetimeAsync(IAuthSession authSession, CancellationToken cancellationToken)
     {
         if (authSession.AuthToken?.AccessToken is not { } accessToken)
         {
@@ -288,7 +288,7 @@ public class MicrosoftEntraAuthProvider : IAuthProvider
 
         if (await VerifyToken(accessToken, cancellationToken) is var (_, expiration))
         {
-            return expiration;
+            return new TokenLifetime(expiration);
         }
         else
         {

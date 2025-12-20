@@ -3,7 +3,7 @@ import { useEventHandler, EventHandler } from '@/components/event-handler';
 import NumberInput from '@/components/NumberInput';
 import { Slider } from '@/components/ui/slider';
 import { cn } from '@/lib/utils';
-import { inputStyles } from '@/lib/styles';
+import { inputStyles, getWidth } from '@/lib/styles';
 import { InvalidIcon } from '@/components/InvalidIcon';
 import { X } from 'lucide-react';
 import React from 'react';
@@ -57,6 +57,7 @@ interface NumberInputWidgetProps
   extends Omit<NumberInputBaseProps, 'onValueChange'> {
   variant?: 'Default' | 'Slider';
   targetType?: string;
+  width?: string;
 }
 
 // Function to validate and cap values based on target type
@@ -283,6 +284,7 @@ export const NumberInputWidget = memo(
     id,
     variant = 'Default',
     nullable = false,
+    width,
     ...props
   }: NumberInputWidgetProps) => {
     const eventHandler = useEventHandler() as EventHandler;
@@ -319,21 +321,25 @@ export const NumberInputWidget = memo(
       [eventHandler, id, props.min, props.max, props.targetType]
     );
 
-    return variant === 'Slider' ? (
-      <SliderVariant
-        id={id}
-        {...props}
-        value={normalizedValue}
-        onValueChange={handleChange}
-      />
-    ) : (
-      <NumberVariant
-        id={id}
-        {...props}
-        value={normalizedValue}
-        nullable={nullable}
-        onValueChange={handleChange}
-      />
+    return (
+      <div style={{ ...getWidth(width) }}>
+        {variant === 'Slider' ? (
+          <SliderVariant
+            id={id}
+            {...props}
+            value={normalizedValue}
+            onValueChange={handleChange}
+          />
+        ) : (
+          <NumberVariant
+            id={id}
+            {...props}
+            value={normalizedValue}
+            nullable={nullable}
+            onValueChange={handleChange}
+          />
+        )}
+      </div>
     );
   }
 );

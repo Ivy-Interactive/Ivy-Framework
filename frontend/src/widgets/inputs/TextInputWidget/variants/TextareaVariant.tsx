@@ -92,40 +92,21 @@ export const TextareaVariant: React.FC<TextareaVariantProps> = ({
         )}
         data-testid={props['data-testid']}
       />
-      {/* Icons container: shortcut (if any), clear (if nullable), then invalid (if any) */}
-      {(props.shortcutKey || showClear || props.invalid) && (
-        <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-row items-center gap-1 pointer-events-none h-6">
-          {props.shortcutKey &&
-            !isFocused &&
-            !hasValue &&
-            !showClear &&
-            !props.invalid && (
-              <div className="pointer-events-auto flex items-center h-6">
-                <kbd className="px-1 py-0.5 text-small-label font-medium text-foreground bg-muted border border-border rounded-md">
-                  {shortcutDisplay}
-                </kbd>
-              </div>
-            )}
-          {showClear && (
-            <button
-              type="button"
-              tabIndex={-1}
-              aria-label="Clear"
-              onClick={onClear}
-              className="pointer-events-auto p-1 rounded hover:bg-accent focus:outline-none cursor-pointer flex items-center h-6"
-            >
-              <X className={xIconVariants({ scale })} />
-            </button>
-          )}
-          {/* Invalid icon - rightmost */}
-          {props.invalid && (
-            <InvalidIcon
-              message={props.invalid}
-              className="pointer-events-auto"
-            />
-          )}
-        </div>
-      )}
+      {/* Icons container: shortcut (if any), then invalid (if any) */}
+      <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none h-6">
+        {props.shortcutKey && !isFocused && !hasValue && (
+          <div className="pointer-events-auto flex items-center h-6">
+            <kbd className="px-1 py-0.5 text-small-label font-medium text-foreground bg-muted border border-border rounded-md">
+              {shortcutDisplay}
+            </kbd>
+          </div>
+        )}
+        {props.invalid && (
+          <div className="flex items-center h-6">
+            <InvalidIcon message={props.invalid} />
+          </div>
+        )}
+      </div>
     </div>
   );
 };

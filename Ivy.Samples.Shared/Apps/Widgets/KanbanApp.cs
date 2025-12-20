@@ -5,7 +5,7 @@ using Ivy.Views.Kanban;
 
 namespace Ivy.Samples.Shared.Apps.Widgets;
 
-public class Task
+public class KanbanTask
 {
     public required string Id { get; set; }
     public required string Title { get; set; }
@@ -37,18 +37,18 @@ public class BasicKanbanExample : ViewBase
         var selectedTaskId = this.UseState((string?)null);
         var tasks = UseState(new[]
         {
-            new Task { Id = "1", Title = "Design Homepage", Status = "Todo", Priority = 2, Description = "Create wireframes and mockups", Assignee = "Alice" },
-            new Task { Id = "2", Title = "Setup Database", Status = "Todo", Priority = 1, Description = "Configure PostgreSQL instance", Assignee = "Bob" },
-            new Task { Id = "3", Title = "Implement Auth", Status = "Todo", Priority = 3, Description = "Add OAuth2 authentication", Assignee = "Charlie" },
-            new Task { Id = "4", Title = "Build API", Status = "Todo", Priority = 4, Description = "Create REST endpoints", Assignee = "Alice" },
-            new Task { Id = "5", Title = "Write Tests", Status = "Todo", Priority = 5, Description = "Unit and integration tests", Assignee = "Bob" },
-            new Task { Id = "6", Title = "Code Review", Status = "In Progress", Priority = 1, Description = "Review pull requests", Assignee = "Charlie" },
-            new Task { Id = "7", Title = "Performance Optimization", Status = "In Progress", Priority = 2, Description = "Optimize database queries", Assignee = "Alice" },
-            new Task { Id = "8", Title = "Bug Fixes", Status = "In Progress", Priority = 3, Description = "Fix reported bugs", Assignee = "Bob" },
-            new Task { Id = "9", Title = "Documentation", Status = "In Progress", Priority = 4, Description = "Update API documentation", Assignee = "Charlie" },
-            new Task { Id = "10", Title = "Unit Tests", Status = "Done", Priority = 1, Description = "Write comprehensive test suite", Assignee = "Bob" },
-            new Task { Id = "11", Title = "Deploy to Production", Status = "Done", Priority = 2, Description = "Configure CI/CD pipeline", Assignee = "Charlie" },
-            new Task { Id = "12", Title = "User Training", Status = "Done", Priority = 3, Description = "Train users on new features", Assignee = "Alice" },
+            new KanbanTask { Id = "1", Title = "Design Homepage", Status = "Todo", Priority = 2, Description = "Create wireframes and mockups", Assignee = "Alice" },
+            new KanbanTask { Id = "2", Title = "Setup Database", Status = "Todo", Priority = 1, Description = "Configure PostgreSQL instance", Assignee = "Bob" },
+            new KanbanTask { Id = "3", Title = "Implement Auth", Status = "Todo", Priority = 3, Description = "Add OAuth2 authentication", Assignee = "Charlie" },
+            new KanbanTask { Id = "4", Title = "Build API", Status = "Todo", Priority = 4, Description = "Create REST endpoints", Assignee = "Alice" },
+            new KanbanTask { Id = "5", Title = "Write Tests", Status = "Todo", Priority = 5, Description = "Unit and integration tests", Assignee = "Bob" },
+            new KanbanTask { Id = "6", Title = "Code Review", Status = "In Progress", Priority = 1, Description = "Review pull requests", Assignee = "Charlie" },
+            new KanbanTask { Id = "7", Title = "Performance Optimization", Status = "In Progress", Priority = 2, Description = "Optimize database queries", Assignee = "Alice" },
+            new KanbanTask { Id = "8", Title = "Bug Fixes", Status = "In Progress", Priority = 3, Description = "Fix reported bugs", Assignee = "Bob" },
+            new KanbanTask { Id = "9", Title = "Documentation", Status = "In Progress", Priority = 4, Description = "Update API documentation", Assignee = "Charlie" },
+            new KanbanTask { Id = "10", Title = "Unit Tests", Status = "Done", Priority = 1, Description = "Write comprehensive test suite", Assignee = "Bob" },
+            new KanbanTask { Id = "11", Title = "Deploy to Production", Status = "Done", Priority = 2, Description = "Configure CI/CD pipeline", Assignee = "Charlie" },
+            new KanbanTask { Id = "12", Title = "User Training", Status = "Done", Priority = 3, Description = "Train users on new features", Assignee = "Alice" },
         });
 
         var kanban = tasks.Value
@@ -57,8 +57,8 @@ public class BasicKanbanExample : ViewBase
                     idSelector: e => e.Id,
                     orderSelector: e => e.Priority)
                 .CardBuilder(task => new Card()
-                    .Title(task.Title)
-                    .Description(task.Description))
+                    .Title(Text.P(task.Title))
+                    .Description(Text.Muted(task.Description)))
                 .ColumnOrder(e => GetStatusOrder(e.Status))
                 .Width(Size.Full())
                 .HandleMove(moveData =>
@@ -71,7 +71,7 @@ public class BasicKanbanExample : ViewBase
                     if (taskToMove == null) return;
 
                     // Update the task's status
-                    var newTask = new Task
+                    var newTask = new KanbanTask
                     {
                         Id = taskToMove.Id,
                         Title = taskToMove.Title,
@@ -122,7 +122,7 @@ public class BasicKanbanExample : ViewBase
         );
     }
 
-    private object BuildTaskSheet(IState<string?>? selectedTaskId, IState<Task[]> tasks)
+    private object BuildTaskSheet(IState<string?>? selectedTaskId, IState<KanbanTask[]> tasks)
     {
         var task = tasks.Value.FirstOrDefault(t => t.Id == selectedTaskId?.Value);
         if (task == null) return new Fragment();
@@ -158,12 +158,12 @@ public class KanbanBuilderExample : ViewBase
         var selectedTaskId = this.UseState((string?)null);
         var tasks = UseState(new[]
         {
-            new Task { Id = "1", Title = "Design Homepage", Status = "Todo", Priority = 2, Description = "Create wireframes and mockups", Assignee = "Alice" },
-            new Task { Id = "2", Title = "Setup Database", Status = "Todo", Priority = 1, Description = "Configure PostgreSQL instance", Assignee = "Bob" },
-            new Task { Id = "3", Title = "Implement Auth", Status = "Todo", Priority = 3, Description = "Add OAuth2 authentication", Assignee = "Charlie" },
-            new Task { Id = "4", Title = "Build API", Status = "In Progress", Priority = 1, Description = "Create REST endpoints", Assignee = "Alice" },
-            new Task { Id = "5", Title = "Write Tests", Status = "In Progress", Priority = 2, Description = "Unit and integration tests", Assignee = "Bob" },
-            new Task { Id = "6", Title = "Deploy to Production", Status = "Done", Priority = 1, Description = "Configure CI/CD pipeline", Assignee = "Charlie" },
+            new KanbanTask { Id = "1", Title = "Design Homepage", Status = "Todo", Priority = 2, Description = "Create wireframes and mockups", Assignee = "Alice" },
+            new KanbanTask { Id = "2", Title = "Setup Database", Status = "Todo", Priority = 1, Description = "Configure PostgreSQL instance", Assignee = "Bob" },
+            new KanbanTask { Id = "3", Title = "Implement Auth", Status = "Todo", Priority = 3, Description = "Add OAuth2 authentication", Assignee = "Charlie" },
+            new KanbanTask { Id = "4", Title = "Build API", Status = "In Progress", Priority = 1, Description = "Create REST endpoints", Assignee = "Alice" },
+            new KanbanTask { Id = "5", Title = "Write Tests", Status = "In Progress", Priority = 2, Description = "Unit and integration tests", Assignee = "Bob" },
+            new KanbanTask { Id = "6", Title = "Deploy to Production", Status = "Done", Priority = 1, Description = "Configure CI/CD pipeline", Assignee = "Charlie" },
         });
 
         var kanban = tasks.Value
@@ -187,7 +187,7 @@ public class KanbanBuilderExample : ViewBase
         var taskToMove = updatedTasks.FirstOrDefault(t => t.Id == taskId);
         if (taskToMove == null) return;
 
-        var newTask = new Task
+        var newTask = new KanbanTask
         {
             Id = taskToMove.Id,
             Title = taskToMove.Title,
@@ -224,7 +224,7 @@ public class KanbanBuilderExample : ViewBase
     })
                 .Empty(
                     new Card()
-                        .Title("No Tasks")
+                        .Title(Text.P("No Tasks"))
                         .Description("Create your first task to get started")
                 );
 
@@ -234,7 +234,7 @@ public class KanbanBuilderExample : ViewBase
         );
     }
 
-    private object BuildTaskSheet(IState<string?>? selectedTaskId, IState<Task[]> tasks)
+    private object BuildTaskSheet(IState<string?>? selectedTaskId, IState<KanbanTask[]> tasks)
     {
         var task = tasks.Value.FirstOrDefault(t => t.Id == selectedTaskId?.Value);
         if (task == null) return new Fragment();
@@ -269,12 +269,12 @@ public class KanbanBuilderWithClickExample : ViewBase
     {
         var tasks = UseState(new[]
         {
-            new Task { Id = "1", Title = "Design Homepage", Status = "Todo", Priority = 2, Description = "Create wireframes and mockups", Assignee = "Alice" },
-            new Task { Id = "2", Title = "Setup Database", Status = "Todo", Priority = 1, Description = "Configure PostgreSQL instance", Assignee = "Bob" },
-            new Task { Id = "3", Title = "Implement Auth", Status = "Todo", Priority = 3, Description = "Add OAuth2 authentication", Assignee = "Charlie" },
-            new Task { Id = "4", Title = "Build API", Status = "In Progress", Priority = 1, Description = "Create REST endpoints", Assignee = "Alice" },
-            new Task { Id = "5", Title = "Write Tests", Status = "In Progress", Priority = 2, Description = "Unit and integration tests", Assignee = "Bob" },
-            new Task { Id = "6", Title = "Deploy to Production", Status = "Done", Priority = 1, Description = "Configure CI/CD pipeline", Assignee = "Charlie" },
+            new KanbanTask { Id = "1", Title = "Design Homepage", Status = "Todo", Priority = 2, Description = "Create wireframes and mockups", Assignee = "Alice" },
+            new KanbanTask { Id = "2", Title = "Setup Database", Status = "Todo", Priority = 1, Description = "Configure PostgreSQL instance", Assignee = "Bob" },
+            new KanbanTask { Id = "3", Title = "Implement Auth", Status = "Todo", Priority = 3, Description = "Add OAuth2 authentication", Assignee = "Charlie" },
+            new KanbanTask { Id = "4", Title = "Build API", Status = "In Progress", Priority = 1, Description = "Create REST endpoints", Assignee = "Alice" },
+            new KanbanTask { Id = "5", Title = "Write Tests", Status = "In Progress", Priority = 2, Description = "Unit and integration tests", Assignee = "Bob" },
+            new KanbanTask { Id = "6", Title = "Deploy to Production", Status = "Done", Priority = 1, Description = "Configure CI/CD pipeline", Assignee = "Charlie" },
         });
 
         var (taskSheetView, showTaskSheet) = this.UseTrigger((IState<bool> isOpen, string taskId)
@@ -302,7 +302,7 @@ public class KanbanBuilderWithClickExample : ViewBase
                     var taskToMove = updatedTasks.FirstOrDefault(t => t.Id == taskId);
                     if (taskToMove == null) return;
 
-                    var newTask = new Task
+                    var newTask = new KanbanTask
                     {
                         Id = taskToMove.Id,
                         Title = taskToMove.Title,
@@ -339,7 +339,7 @@ public class KanbanBuilderWithClickExample : ViewBase
                 })
                 .Empty(
                     new Card()
-                        .Title("No Tasks")
+                        .Title(Text.P("No Tasks"))
                         .Description("Create your first task to get started")
                 );
 
@@ -349,7 +349,7 @@ public class KanbanBuilderWithClickExample : ViewBase
         );
     }
 
-    private object BuildTaskSheet(IState<bool> isOpen, string taskId, IState<Task[]> tasks)
+    private object BuildTaskSheet(IState<bool> isOpen, string taskId, IState<KanbanTask[]> tasks)
     {
         var task = tasks.Value.FirstOrDefault(t => t.Id == taskId);
         if (task == null) return new Fragment();
@@ -384,17 +384,17 @@ public class KanbanWidthExamples : ViewBase
     {
         var tasks = UseState(new[]
         {
-            new Task { Id = "1", Title = "Design Homepage", Status = "Todo", Priority = 2, Description = "Create wireframes", Assignee = "Alice" },
-            new Task { Id = "2", Title = "Setup Database", Status = "Todo", Priority = 1, Description = "Configure PostgreSQL", Assignee = "Bob" },
-            new Task { Id = "3", Title = "Implement Auth", Status = "In Progress", Priority = 1, Description = "Add OAuth2", Assignee = "Charlie" },
-            new Task { Id = "4", Title = "Write Tests", Status = "In Progress", Priority = 2, Description = "Unit tests", Assignee = "Bob" },
-            new Task { Id = "5", Title = "Deploy to Production", Status = "Done", Priority = 1, Description = "CI/CD pipeline", Assignee = "Charlie" },
+            new KanbanTask { Id = "1", Title = "Design Homepage", Status = "Todo", Priority = 2, Description = "Create wireframes", Assignee = "Alice" },
+            new KanbanTask { Id = "2", Title = "Setup Database", Status = "Todo", Priority = 1, Description = "Configure PostgreSQL", Assignee = "Bob" },
+            new KanbanTask { Id = "3", Title = "Implement Auth", Status = "In Progress", Priority = 1, Description = "Add OAuth2", Assignee = "Charlie" },
+            new KanbanTask { Id = "4", Title = "Write Tests", Status = "In Progress", Priority = 2, Description = "Unit tests", Assignee = "Bob" },
+            new KanbanTask { Id = "5", Title = "Deploy to Production", Status = "Done", Priority = 1, Description = "CI/CD pipeline", Assignee = "Charlie" },
         });
 
         return Layout.Vertical()
             | Layout.Horizontal()
                 | new Card()
-                    .Title("Narrow Kanban (50rem width)")
+                    .Title(Text.P("Narrow Kanban (50rem width)"))
                     .Description("Kanban with narrow overall width")
                     .Width(Size.Full())
             | tasks.Value
@@ -403,14 +403,14 @@ public class KanbanWidthExamples : ViewBase
                     idSelector: e => e.Id,
                     orderSelector: e => e.Priority)
                 .CardBuilder(task => new Card()
-                    .Title(task.Title)
+                    .Title(Text.P(task.Title))
                     .Description(task.Description))
                 .ColumnOrder(e => GetStatusOrder(e.Status))
                 .Width(Size.Rem(50))
-                .Empty(new Card().Title("No Tasks").Description("Empty state"))
+                .Empty(new Card().Title(Text.P("No Tasks")).Description("Empty state"))
             | Layout.Horizontal()
                 | new Card()
-                    .Title("Wide Kanban (80rem width)")
+                    .Title(Text.P("Wide Kanban (80rem width)"))
                     .Description("Kanban with wide overall width")
                     .Width(Size.Full())
             | tasks.Value
@@ -419,14 +419,14 @@ public class KanbanWidthExamples : ViewBase
                     idSelector: e => e.Id,
                     orderSelector: e => e.Priority)
                 .CardBuilder(task => new Card()
-                    .Title(task.Title)
+                    .Title(Text.P(task.Title))
                     .Description(task.Description))
                 .ColumnOrder(e => GetStatusOrder(e.Status))
                 .Width(Size.Rem(80))
-                .Empty(new Card().Title("No Tasks").Description("Empty state"))
+                .Empty(new Card().Title(Text.P("No Tasks")).Description("Empty state"))
             | Layout.Horizontal()
                 | new Card()
-                    .Title("Narrow Columns (12rem per column)")
+                    .Title(Text.P("Narrow Columns (12rem per column)"))
                     .Description("Kanban with narrow column width")
                     .Width(Size.Full())
             | tasks.Value
@@ -435,15 +435,15 @@ public class KanbanWidthExamples : ViewBase
                     idSelector: e => e.Id,
                     orderSelector: e => e.Priority)
                 .CardBuilder(task => new Card()
-                    .Title(task.Title)
+                    .Title(Text.P(task.Title))
                     .Description(task.Description))
                 .ColumnOrder(e => GetStatusOrder(e.Status))
                 .Width(Size.Full())
                 .ColumnWidth(Size.Rem(12))
-                .Empty(new Card().Title("No Tasks").Description("Empty state"))
+                .Empty(new Card().Title(Text.P("No Tasks")).Description("Empty state"))
             | Layout.Horizontal()
                 | new Card()
-                    .Title("Wide Columns (25rem per column)")
+                    .Title(Text.P("Wide Columns (25rem per column)"))
                     .Description("Kanban with wide column width")
                     .Width(Size.Full())
             | tasks.Value
@@ -452,12 +452,12 @@ public class KanbanWidthExamples : ViewBase
                     idSelector: e => e.Id,
                     orderSelector: e => e.Priority)
                 .CardBuilder(task => new Card()
-                    .Title(task.Title)
+                    .Title(Text.P(task.Title))
                     .Description(task.Description))
                 .ColumnOrder(e => GetStatusOrder(e.Status))
                 .Width(Size.Full())
                 .ColumnWidth(Size.Rem(25))
-                .Empty(new Card().Title("No Tasks").Description("Empty state"));
+                .Empty(new Card().Title(Text.P("No Tasks")).Description("Empty state"));
     }
 
     private static int GetStatusOrder(string status) => status switch
@@ -475,21 +475,21 @@ public class KanbanHeaderLayoutExample : ViewBase
     {
         var tasks = UseState(new[]
         {
-            new Task { Id = "1", Title = "Design Homepage", Status = "Todo", Priority = 2, Description = "Create wireframes and mockups", Assignee = "Alice" },
-            new Task { Id = "2", Title = "Setup Database", Status = "Todo", Priority = 1, Description = "Configure PostgreSQL instance", Assignee = "Bob" },
-            new Task { Id = "3", Title = "Implement Auth", Status = "Todo", Priority = 3, Description = "Add OAuth2 authentication", Assignee = "Charlie" },
-            new Task { Id = "4", Title = "Build API", Status = "In Progress", Priority = 1, Description = "Create REST endpoints", Assignee = "Alice" },
-            new Task { Id = "5", Title = "Write Tests", Status = "In Progress", Priority = 2, Description = "Unit and integration tests", Assignee = "Bob" },
-            new Task { Id = "6", Title = "Code Review", Status = "In Progress", Priority = 3, Description = "Review pull requests", Assignee = "Charlie" },
-            new Task { Id = "7", Title = "Deploy to Production", Status = "Done", Priority = 1, Description = "Configure CI/CD pipeline", Assignee = "Alice" },
-            new Task { Id = "8", Title = "User Training", Status = "Done", Priority = 2, Description = "Train users on new features", Assignee = "Bob" },
+            new KanbanTask { Id = "1", Title = "Design Homepage", Status = "Todo", Priority = 2, Description = "Create wireframes and mockups", Assignee = "Alice" },
+            new KanbanTask { Id = "2", Title = "Setup Database", Status = "Todo", Priority = 1, Description = "Configure PostgreSQL instance", Assignee = "Bob" },
+            new KanbanTask { Id = "3", Title = "Implement Auth", Status = "Todo", Priority = 3, Description = "Add OAuth2 authentication", Assignee = "Charlie" },
+            new KanbanTask { Id = "4", Title = "Build API", Status = "In Progress", Priority = 1, Description = "Create REST endpoints", Assignee = "Alice" },
+            new KanbanTask { Id = "5", Title = "Write Tests", Status = "In Progress", Priority = 2, Description = "Unit and integration tests", Assignee = "Bob" },
+            new KanbanTask { Id = "6", Title = "Code Review", Status = "In Progress", Priority = 3, Description = "Review pull requests", Assignee = "Charlie" },
+            new KanbanTask { Id = "7", Title = "Deploy to Production", Status = "Done", Priority = 1, Description = "Configure CI/CD pipeline", Assignee = "Alice" },
+            new KanbanTask { Id = "8", Title = "User Training", Status = "Done", Priority = 2, Description = "Train users on new features", Assignee = "Bob" },
         });
 
         var client = UseService<IClientProvider>();
 
         void OnAddTask(Event<Button> @event)
         {
-            var newTask = new Task
+            var newTask = new KanbanTask
             {
                 Id = Guid.NewGuid().ToString(),
                 Title = $"New Task {tasks.Value.Length + 1}",
@@ -513,7 +513,7 @@ public class KanbanHeaderLayoutExample : ViewBase
                 idSelector: e => e.Id,
                 orderSelector: e => e.Priority)
             .CardBuilder(task => new Card()
-                .Title(task.Title)
+                .Title(Text.P(task.Title))
                 .Description(task.Description))
             .ColumnOrder(e => GetStatusOrder(e.Status))
             .Width(Size.Full())
@@ -527,7 +527,7 @@ public class KanbanHeaderLayoutExample : ViewBase
                 var taskToMove = updatedTasks.FirstOrDefault(t => t.Id == taskId);
                 if (taskToMove == null) return;
 
-                var newTask = new Task
+                var newTask = new KanbanTask
                 {
                     Id = taskToMove.Id,
                     Title = taskToMove.Title,
@@ -563,7 +563,7 @@ public class KanbanHeaderLayoutExample : ViewBase
             })
             .Empty(
                 new Card()
-                    .Title("No Tasks")
+                    .Title(Text.P("No Tasks"))
                     .Description("Create your first task to get started")
             );
 

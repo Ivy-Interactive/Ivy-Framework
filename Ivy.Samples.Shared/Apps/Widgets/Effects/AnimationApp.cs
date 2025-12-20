@@ -18,7 +18,7 @@ public class AnimationApp : ViewBase
             | CreateInteractiveAnimations()
             | CreateAdvancedAnimations()
             | CreateIconAnimations()
-            | CreateButtonAnimations();
+            | CreateButtonAnimations(UseService<IClientProvider>());
     }
 
     private object CreateHeader()
@@ -153,10 +153,8 @@ public class AnimationApp : ViewBase
             | Icons.Headphones.ToIcon().Color(Colors.Gray).WithAnimation(AnimationType.Hover).Trigger(AnimationTrigger.Hover);
     }
 
-    private object CreateButtonAnimations()
+    private object CreateButtonAnimations(IClientProvider client)
     {
-        var client = UseService<IClientProvider>();
-
         return Layout.Vertical()
             .Gap(3)
             .Width(Size.Full())

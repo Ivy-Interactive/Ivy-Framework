@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Ivy.Core.Helpers;
 
 namespace Ivy.Auth;
 
@@ -29,7 +30,7 @@ public static class AuthSessionExtensions
 
         return typeof(T) == typeof(string)
             ? (T)(object)authSession.AuthSessionData
-            : JsonSerializer.Deserialize<T>(authSession.AuthSessionData);
+            : JsonSerializer.Deserialize<T>(authSession.AuthSessionData, JsonHelper.DefaultOptions);
     }
 
     public static void SetAuthSessionData<T>(this IAuthSession authSession, T? data)
@@ -44,7 +45,7 @@ public static class AuthSessionExtensions
         }
         else
         {
-            authSession.AuthSessionData = JsonSerializer.Serialize(data);
+            authSession.AuthSessionData = JsonSerializer.Serialize(data, JsonHelper.DefaultOptions);
         }
     }
 }

@@ -1,6 +1,7 @@
 using System.Reflection;
 using Apache.Arrow;
 using Apache.Arrow.Types;
+using Ivy.Core.Helpers;
 using SystemType = System.Type;
 
 namespace Ivy.Views.DataTables;
@@ -263,7 +264,7 @@ public static class QueryHelpers
             if (value is string[] stringArray)
             {
                 // Serialize array as JSON
-                var json = System.Text.Json.JsonSerializer.Serialize(stringArray);
+                var json = System.Text.Json.JsonSerializer.Serialize(stringArray, JsonHelper.DefaultOptions);
                 builder.Append(json);
             }
             else if (value == null)
@@ -273,7 +274,7 @@ public static class QueryHelpers
             else
             {
                 // Fallback: serialize as single-item array
-                var json = System.Text.Json.JsonSerializer.Serialize(new[] { value.ToString() });
+                var json = System.Text.Json.JsonSerializer.Serialize(new[] { value.ToString() }, JsonHelper.DefaultOptions);
                 builder.Append(json);
             }
         }

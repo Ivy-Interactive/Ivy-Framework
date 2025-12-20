@@ -21,9 +21,9 @@ public enum ButtonVariant
     Warning,
     Info,
     Ghost,
-    SkinnyGhost,
     Link,
     Inline,
+    Ai,
 }
 
 public record Button : WidgetBase<Button>
@@ -178,13 +178,13 @@ public static class ButtonExtensions
     public static Button Ghost(this Button button) => button.Variant(ButtonVariant.Ghost);
 
     [RelatedTo(nameof(Button.Variant))]
-    public static Button SkinnyGhost(this Button button) => button.Variant(ButtonVariant.SkinnyGhost);
-
-    [RelatedTo(nameof(Button.Variant))]
     public static Button Link(this Button button) => button.Variant(ButtonVariant.Link);
 
     [RelatedTo(nameof(Button.Variant))]
     public static Button Inline(this Button button) => button.Variant(ButtonVariant.Inline);
+
+    [RelatedTo(nameof(Button.Variant))]
+    public static Button Ai(this Button button) => button.Variant(ButtonVariant.Ai);
 
     public static Button BorderRadius(this Button button, BorderRadius radius) => button with { BorderRadius = radius };
 }

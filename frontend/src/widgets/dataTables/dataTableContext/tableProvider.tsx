@@ -45,10 +45,12 @@ export const TableProvider: React.FC<TableProviderProps> = ({
     allowSorting: allowSorting ?? true,
   });
 
+  const connectionKey = `${connection.connectionId}-${connection.sourceId}`;
+
   // Reset column widths when connection changes
   React.useEffect(() => {
     resetColumnWidths();
-  }, [connection, resetColumnWidths]);
+  }, [connectionKey, resetColumnWidths]);
 
   // Data loading
   const { isLoading, hasMore, loadMoreData } = useDataLoading({

@@ -15,22 +15,22 @@ interface CalloutWidgetProps {
 const calloutVariants = {
   Info: {
     container:
-      'border-cyan/20 bg-cyan/5 text-cyan-foreground dark:border-cyan/30 dark:bg-cyan/10',
+      'border-cyan/20 bg-cyan/5 text-foreground dark:border-cyan/30 dark:bg-cyan/10',
     icon: '',
   },
   Success: {
     container:
-      'border-emerald/20 bg-emerald/5 text-emerald-foreground dark:border-emerald/30 dark:bg-emerald/10',
+      'border-emerald/20 bg-emerald/5 text-foreground dark:border-emerald/30 dark:bg-emerald/10',
     icon: 'text-emerald dark:text-emerald-light',
   },
   Warning: {
     container:
-      'border-amber/20 bg-amber/5 text-amber-foreground dark:border-amber/30 dark:bg-amber/10',
+      'border-amber/20 bg-amber/5 text-foreground dark:border-amber/30 dark:bg-amber/10',
     icon: 'text-amber dark:text-amber-light',
   },
   Error: {
     container:
-      'border-destructive/20 bg-destructive/5 text-destructive-foreground dark:border-destructive/30 dark:bg-destructive/10',
+      'border-destructive/20 bg-destructive/5 text-foreground dark:border-destructive/30 dark:bg-destructive/10',
     icon: 'text-destructive dark:text-destructive-light',
   },
 };

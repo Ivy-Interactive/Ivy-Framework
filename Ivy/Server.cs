@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Ivy.Shared;
 using System.Reflection;
 using System.Text;
@@ -398,6 +399,9 @@ public class Server
         builder.Services.AddSignalR(options =>
         {
             options.EnableDetailedErrors = _args.Verbose;
+        }).AddJsonProtocol(options =>
+        {
+            options.PayloadSerializerOptions.TypeInfoResolver = new System.Text.Json.Serialization.Metadata.DefaultJsonTypeInfoResolver();
         });
         builder.Services.AddSingleton(this);
         builder.Services.AddSingleton<IClientNotifier, ClientNotifier>();
@@ -468,7 +472,7 @@ public class Server
                     {
                         error = ex.Message,
                         detail = ex.StackTrace
-                    });
+                    }, Ivy.Core.Helpers.JsonHelper.DefaultOptions);
                     await context.Response.WriteAsync(result);
                 }
             });
@@ -513,7 +517,7 @@ public class Server
             var localUrl = $"http://localhost:{port}";
             if (!_args.Silent)
             {
-                Console.WriteLine($@"Ivy is running on {localUrl}. Press Ctrl+C to stop.");
+                Console.WriteLine($@"Ivy is running on {localUrl} [{Process.GetCurrentProcess().Id}]. Press Ctrl+C to stop.");
             }
             if (_args.Browse)
             {

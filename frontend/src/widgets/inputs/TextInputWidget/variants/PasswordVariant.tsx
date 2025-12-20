@@ -155,10 +155,9 @@ export const PasswordVariant: React.FC<PasswordVariantProps> = ({
           )}
           {/* Invalid icon - rightmost */}
           {props.invalid && (
-            <InvalidIcon
-              message={props.invalid}
-              className="pointer-events-auto"
-            />
+            <div className="flex items-center h-6 ml-2">
+              <InvalidIcon message={props.invalid} />
+            </div>
           )}
         </div>
       )}

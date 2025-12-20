@@ -10,6 +10,17 @@ public class FeedbackInputApp : SampleBase
         var zeroState = UseState(0);
         var twoState = UseState(2);
 
+        var sizeState = UseState(3);
+        var sizeBoolState = UseState(true);
+        var sizeIntState = UseState(2);
+
+        var intState = UseState(0);
+        var nullableIntState = UseState((int?)null);
+        var floatState = UseState(0.0f);
+        var nullableFloatState = UseState((float?)null);
+        var boolState = UseState(false);
+        var nullableBoolState = UseState((bool?)null);
+
         var variants = Layout.Grid().Columns(5)
                | Text.InlineCode("var")
                | Text.InlineCode("rating")
@@ -36,9 +47,7 @@ public class FeedbackInputApp : SampleBase
                | twoState.ToFeedbackInput().Variant(FeedbackInputs.Thumbs).Invalid("Invalid feedback")
             ;
 
-        var sizeState = UseState(3);
-        var sizeBoolState = UseState(true);
-        var sizeIntState = UseState(2);
+
 
         var sizeExamples = Layout.Grid().Columns(4)
                           | Text.InlineCode("Variant")
@@ -62,12 +71,7 @@ public class FeedbackInputApp : SampleBase
                           | sizeBoolState.ToFeedbackInput().Variant(FeedbackInputs.Thumbs).Large()
         ;
 
-        var intState = UseState(0);
-        var nullableIntState = UseState((int?)null);
-        var floatState = UseState(0.0f);
-        var nullableFloatState = UseState((float?)null);
-        var boolState = UseState(false);
-        var nullableBoolState = UseState((bool?)null);
+
         var dataBinding = Layout.Grid().Columns(3)
                           | Text.InlineCode("var")
                           | Text.InlineCode("rating")

@@ -22,7 +22,7 @@ Ivy provides a comprehensive set of widgets organized into several categories:
 
 The most frequently used widgets for building user interfaces:
 
-```csharp demo-below
+```csharp demo-tabs
 Layout.Vertical().Gap(2)
     | new Badge("Primary")
     | new Badge("New")
@@ -350,7 +350,7 @@ public class LayoutWidgetsDemo : ViewBase
     public override object? Build()
     {
         var showPanel = UseState(false);
-        var gridLayouts = Layout.Vertical().Gap(4).Width(Size.Full())
+        var singleColumnExamples = Layout.Vertical().Gap(4).Width(Size.Full())
             | new Card(
                 Layout.Grid().Columns(2).Width(Size.Full()).Gap(2)
                     | new Box("1").Width(Size.Full())
@@ -375,7 +375,7 @@ public class LayoutWidgetsDemo : ViewBase
                 )
             ).Title("Footer").Description("Fixed footer").Height(Size.Units(60));
         
-        var verticalLayouts = Layout.Grid().Columns(2).Gap(4).Width(Size.Full())
+        var twoColumnExamples = Layout.Grid().Columns(2).Gap(4).Width(Size.Full())
             | new Card(
                 Layout.Horizontal().Gap(2)
                     | new Box("Item 1").Width(Size.Fraction(1/3f))
@@ -428,8 +428,8 @@ public class LayoutWidgetsDemo : ViewBase
             ).Title("ResizeablePanelGroup").Description("Resizable panels").Height(Size.Units(60));
         
         return Layout.Vertical().Gap(4)
-            | verticalLayouts
-            | gridLayouts;
+            | twoColumnExamples
+            | singleColumnExamples;
     }
 }
 ```

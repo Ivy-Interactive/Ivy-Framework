@@ -137,41 +137,33 @@ export const SearchVariant: React.FC<SearchVariantProps> = ({
         )}
         data-testid={props['data-testid']}
       />
-      {/* Icons container: clear (if nullable), shortcut (if any), then invalid (if any) */}
-      {(showClear || props.shortcutKey || props.invalid) && (
-        <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-row items-center gap-1 pointer-events-none z-10 h-6">
-          {showClear && (
-            <button
-              type="button"
-              tabIndex={-1}
-              aria-label="Clear search"
-              onClick={onClear}
-              className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer pointer-events-auto flex items-center h-6"
-              style={{ pointerEvents: 'auto' }}
-            >
-              <X className={xIconVariants({ scale })} />
-            </button>
-          )}
-          {props.shortcutKey &&
-            !isFocused &&
-            !hasValue &&
-            !showClear &&
-            !props.invalid && (
-              <div className="pointer-events-auto flex items-center h-4">
-                <kbd className="badge-text-primary text-foreground bg-muted border border-border rounded-sm px-1 py-0.25">
-                  {shortcutDisplay}
-                </kbd>
-              </div>
-            )}
-          {/* Invalid icon - rightmost */}
-          {props.invalid && (
-            <InvalidIcon
-              message={props.invalid}
-              className="pointer-events-auto"
-            />
-          )}
-        </div>
-      )}
+      {/* Icons container: clear (if any), shortcut (if any), then invalid (if any) */}
+      <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none z-10 h-6">
+        {hasValue && !props.disabled && (
+          <button
+            type="button"
+            tabIndex={-1}
+            aria-label="Clear search"
+            onClick={handleClear}
+            className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer pointer-events-auto flex items-center h-6"
+            style={{ pointerEvents: 'auto' }}
+          >
+            <X className={xIconVariants({ scale })} />
+          </button>
+        )}
+        {props.shortcutKey && !isFocused && !hasValue && (
+          <div className="pointer-events-auto flex items-center h-4">
+            <kbd className="badge-text-primary text-foreground bg-muted border border-border rounded-sm px-1 py-0.25">
+              {shortcutDisplay}
+            </kbd>
+          </div>
+        )}
+        {props.invalid && (
+          <div className="flex items-center h-6">
+            <InvalidIcon message={props.invalid} />
+          </div>
+        )}
+      </div>
     </div>
   );
 };

@@ -22,13 +22,11 @@ Enhance user experience with contextual tooltips that provide helpful informatio
 
 Here's a simple example of a tooltip on a button:
 
-```csharp
-new Button("Hover Me").WithTooltip("Hello World!");
+```csharp demo-below
+new Button("Hover Me").WithTooltip("Hello World!")
 ```
 
-## Common Use Cases
-
-### Form Validation Messages
+### Form Validation
 
 Tooltips are perfect for displaying validation errors or helpful hints on form inputs:
 
@@ -39,9 +37,9 @@ Layout.Vertical()
     | new NumberInput<int>(placeholder: "Enter age").WithTooltip("Must be between 18 and 100")
 ```
 
-### Icon Explanations
+### With Icons
 
-Use tooltips to explain the meaning of icons, especially in toolbars or navigation:
+Use tooltips to explain the meaning of icons, especially in toolbars or navigation (using icon-only buttons):
 
 ```csharp demo-tabs
 Layout.Horizontal()
@@ -63,53 +61,23 @@ Layout.Horizontal()
     | new Badge("Offline", icon: Icons.Circle).WithTooltip("User is not available")
 ```
 
-### Complex Content
+### Rich Content
 
-Tooltips can contain rich content, not just simple text:
+Tooltips can contain detailed multi-line text to provide comprehensive information.
 
 ```csharp demo-below
 new Button("Advanced Tooltip")
     .WithTooltip("This tooltip contains multiple lines of text and can be quite detailed to provide comprehensive information to the user.")
 ```
 
-### Interactive Elements
-
-Tooltips work with any interactive element:
-
-```csharp demo-tabs
-Layout.Horizontal()
-    | new Button("Button").WithTooltip("Click to perform action")
-    | new Badge("Badge").WithTooltip("This is a status indicator")
-    | new Card("Card Content").WithTooltip("This card contains important information")
-    | Text.Literal("Plain Text").WithTooltip("Even plain text can have tooltips")
-```
-
 ## Examples
 
 <Details>
 <Summary>
-Tooltips with Icons
+Various Widgets
 </Summary>
 <Body>
-Combine tooltips with icons for better visual communication:
-
-```csharp demo-tabs
-Layout.Horizontal()
-    | new Button("Save", icon: Icons.Save).WithTooltip("Save your current work")
-    | new Button("Delete", icon: Icons.Trash).WithTooltip("Permanently delete this item")
-    | new Button("Share", icon: Icons.Share).WithTooltip("Share with others")
-    | new Button("Export", icon: Icons.Download).WithTooltip("Export data to file")
-```
-
-</Body>
-</Details>
-
-<Details>
-<Summary>
-Tooltips on Different Widget Types
-</Summary>
-<Body>
-See how tooltips work across various widget types:
+Tooltips work with any interactive element.
 
 ```csharp demo-tabs
 Layout.Grid().Columns(2)
@@ -126,25 +94,7 @@ Layout.Grid().Columns(2)
 
 <Details>
 <Summary>
-Form Field Help
-</Summary>
-<Body>
-Provide contextual help for form fields:
-
-```csharp demo-below
-Layout.Vertical()
-    | new TextInput(placeholder: "Enter username").WithTooltip("Choose a unique username that will be visible to other users")
-    | new TextInput(placeholder: "Enter email").WithTooltip("We'll use this email for account verification and notifications")
-    | new NumberInput<int>(placeholder: "Enter age").WithTooltip("You must be at least 13 years old to create an account")
-    | new BoolInput("Newsletter").WithTooltip("Receive updates about new features and improvements")
-```
-
-</Body>
-</Details>
-
-<Details>
-<Summary>
-Navigation Help
+Navigation
 </Summary>
 <Body>
 Help users understand navigation elements:
@@ -160,6 +110,25 @@ Layout.Horizontal()
 
 </Body>
 </Details>
+
+<Details>
+<Summary>
+Form Help
+</Summary>
+<Body>
+Provide contextual help for form fields:
+
+```csharp demo-below
+Layout.Vertical()
+    | new TextInput(placeholder: "Enter username").WithTooltip("Choose a unique username that will be visible to other users")
+    | new TextInput(placeholder: "Enter email").WithTooltip("We'll use this email for account verification and notifications")
+    | new NumberInput<int>(placeholder: "Enter age").WithTooltip("You must be at least 13 years old to create an account")
+    | new BoolInput("Newsletter").WithTooltip("Receive updates about new features and improvements")
+```
+
+</Body>
+</Details>
+
 ## Best Practices
 
 ### Keep Tooltips Concise

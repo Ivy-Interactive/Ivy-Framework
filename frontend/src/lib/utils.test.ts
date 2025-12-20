@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import * as utils from './utils';
 import * as urlValidation from './urlValidation';
+import { validateEmbedUrl } from './urlValidation';
 
 describe('validateRedirectUrl', () => {
   let getCurrentOriginSpy: ReturnType<typeof vi.fn>;
@@ -1223,3 +1224,291 @@ describe.each(mediaValidationCases)(
     });
   }
 );
+
+describe('validateEmbedUrl', () => {
+  describe('valid YouTube URLs', () => {
+    it('should accept youtube.com URLs', () => {
+      expect(validateEmbedUrl('https://youtube.com/watch?v=abc123')).toBe(
+        'youtube'
+      );
+      expect(validateEmbedUrl('http://youtube.com/watch?v=abc123')).toBe(
+        'youtube'
+      );
+    });
+
+    it('should accept www.youtube.com URLs', () => {
+      expect(validateEmbedUrl('https://www.youtube.com/watch?v=abc123')).toBe(
+        'youtube'
+      );
+    });
+
+    it('should accept youtu.be URLs', () => {
+      expect(validateEmbedUrl('https://youtu.be/abc123')).toBe('youtube');
+      expect(validateEmbedUrl('https://www.youtu.be/abc123')).toBe('youtube');
+    });
+  });
+
+  describe('valid Twitter/X URLs', () => {
+    it('should accept twitter.com URLs', () => {
+      expect(validateEmbedUrl('https://twitter.com/user/status/123')).toBe(
+        'twitter'
+      );
+      expect(validateEmbedUrl('http://twitter.com/user/status/123')).toBe(
+        'twitter'
+      );
+    });
+
+    it('should accept www.twitter.com URLs', () => {
+      expect(validateEmbedUrl('https://www.twitter.com/user/status/123')).toBe(
+        'twitter'
+      );
+    });
+
+    it('should accept x.com URLs', () => {
+      expect(validateEmbedUrl('https://x.com/user/status/123')).toBe('twitter');
+      expect(validateEmbedUrl('https://www.x.com/user/status/123')).toBe(
+        'twitter'
+      );
+    });
+  });
+
+  describe('valid Facebook URLs', () => {
+    it('should accept facebook.com URLs', () => {
+      expect(validateEmbedUrl('https://facebook.com/post/123')).toBe(
+        'facebook'
+      );
+      expect(validateEmbedUrl('https://www.facebook.com/post/123')).toBe(
+        'facebook'
+      );
+      expect(validateEmbedUrl('http://facebook.com/post/123')).toBe('facebook');
+    });
+  });
+
+  describe('valid Instagram URLs', () => {
+    it('should accept instagram.com URLs', () => {
+      expect(validateEmbedUrl('https://instagram.com/p/abc123')).toBe(
+        'instagram'
+      );
+      expect(validateEmbedUrl('https://www.instagram.com/p/abc123')).toBe(
+        'instagram'
+      );
+      expect(validateEmbedUrl('http://instagram.com/p/abc123')).toBe(
+        'instagram'
+      );
+    });
+  });
+
+  describe('valid TikTok URLs', () => {
+    it('should accept tiktok.com URLs', () => {
+      expect(validateEmbedUrl('https://tiktok.com/@user/video/123')).toBe(
+        'tiktok'
+      );
+      expect(validateEmbedUrl('https://www.tiktok.com/@user/video/123')).toBe(
+        'tiktok'
+      );
+      expect(validateEmbedUrl('http://tiktok.com/@user/video/123')).toBe(
+        'tiktok'
+      );
+    });
+  });
+
+  describe('valid LinkedIn URLs', () => {
+    it('should accept linkedin.com URLs', () => {
+      expect(validateEmbedUrl('https://linkedin.com/post/123')).toBe(
+        'linkedin'
+      );
+      expect(validateEmbedUrl('https://www.linkedin.com/post/123')).toBe(
+        'linkedin'
+      );
+      expect(validateEmbedUrl('http://linkedin.com/post/123')).toBe('linkedin');
+    });
+  });
+
+  describe('valid Pinterest URLs', () => {
+    it('should accept pinterest.com URLs', () => {
+      expect(validateEmbedUrl('https://pinterest.com/pin/123')).toBe(
+        'pinterest'
+      );
+      expect(validateEmbedUrl('https://www.pinterest.com/pin/123')).toBe(
+        'pinterest'
+      );
+      expect(validateEmbedUrl('http://pinterest.com/pin/123')).toBe(
+        'pinterest'
+      );
+    });
+
+    it('should accept pin.it URLs', () => {
+      expect(validateEmbedUrl('https://pin.it/123')).toBe('pinterest');
+      expect(validateEmbedUrl('https://www.pin.it/123')).toBe('pinterest');
+    });
+  });
+
+  describe('valid GitHub URLs', () => {
+    it('should accept github.com URLs', () => {
+      expect(validateEmbedUrl('https://github.com/user/repo')).toBe('github');
+      expect(validateEmbedUrl('https://www.github.com/user/repo')).toBe(
+        'github'
+      );
+      expect(validateEmbedUrl('http://github.com/user/repo')).toBe('github');
+    });
+
+    it('should accept gist.github.com URLs', () => {
+      expect(validateEmbedUrl('https://gist.github.com/user/123')).toBe(
+        'github'
+      );
+      expect(validateEmbedUrl('https://www.gist.github.com/user/123')).toBe(
+        'github'
+      );
+    });
+  });
+
+  describe('valid Reddit URLs', () => {
+    it('should accept reddit.com URLs', () => {
+      expect(validateEmbedUrl('https://reddit.com/r/subreddit/post/123')).toBe(
+        'reddit'
+      );
+      expect(
+        validateEmbedUrl('https://www.reddit.com/r/subreddit/post/123')
+      ).toBe('reddit');
+      expect(validateEmbedUrl('http://reddit.com/r/subreddit/post/123')).toBe(
+        'reddit'
+      );
+    });
+  });
+
+  describe('invalid inputs', () => {
+    it('should return null for null input', () => {
+      expect(validateEmbedUrl(null)).toBeNull();
+    });
+
+    it('should return null for undefined input', () => {
+      expect(validateEmbedUrl(undefined)).toBeNull();
+    });
+
+    it('should return null for empty string', () => {
+      expect(validateEmbedUrl('')).toBeNull();
+    });
+
+    it('should return null for whitespace-only string', () => {
+      expect(validateEmbedUrl('   ')).toBeNull();
+      expect(validateEmbedUrl('\t')).toBeNull();
+    });
+
+    it('should trim whitespace', () => {
+      expect(validateEmbedUrl('  https://youtube.com/watch?v=123  ')).toBe(
+        'youtube'
+      );
+    });
+  });
+
+  describe('dangerous protocols', () => {
+    it('should reject javascript: protocol', () => {
+      expect(validateEmbedUrl("javascript:alert('xss')")).toBeNull();
+    });
+
+    it('should reject data: protocol', () => {
+      expect(
+        validateEmbedUrl("data:text/html,<script>alert('xss')</script>")
+      ).toBeNull();
+    });
+
+    it('should reject file: protocol', () => {
+      expect(validateEmbedUrl('file:///etc/passwd')).toBeNull();
+    });
+
+    it('should reject vbscript: protocol', () => {
+      expect(validateEmbedUrl("vbscript:msgbox('xss')")).toBeNull();
+    });
+
+    it('should reject app: protocol', () => {
+      expect(validateEmbedUrl('app://dashboard')).toBeNull();
+    });
+  });
+
+  describe('security attacks - substring matching', () => {
+    it('should reject URLs where hostname appears in path', () => {
+      expect(validateEmbedUrl('https://evil.com/youtube.com')).toBeNull();
+      expect(
+        validateEmbedUrl('https://attacker.com/youtube.com/watch?v=123')
+      ).toBeNull();
+      expect(validateEmbedUrl('https://malicious.com/youtu.be/abc')).toBeNull();
+    });
+  });
+
+  describe('security attacks - subdomain attacks', () => {
+    it('should reject parent domains of allowed hosts', () => {
+      expect(validateEmbedUrl('https://youtube.com.evil.com')).toBeNull();
+      expect(
+        validateEmbedUrl('https://youtube.com.attacker.com/watch?v=123')
+      ).toBeNull();
+      expect(
+        validateEmbedUrl('https://twitter.com.malicious.com/status/123')
+      ).toBeNull();
+      expect(
+        validateEmbedUrl('https://facebook.com.evil.com/post/123')
+      ).toBeNull();
+    });
+  });
+
+  describe('unsupported platforms', () => {
+    it('should return null for unsupported platforms', () => {
+      expect(validateEmbedUrl('https://example.com')).toBeNull();
+      expect(validateEmbedUrl('https://google.com')).toBeNull();
+      expect(validateEmbedUrl('https://unsupported-platform.com')).toBeNull();
+    });
+  });
+
+  describe('invalid URL formats', () => {
+    it('should return null for malformed URLs', () => {
+      expect(validateEmbedUrl('not-a-url')).toBeNull();
+      expect(validateEmbedUrl('invalid://url')).toBeNull();
+      expect(validateEmbedUrl('://malformed')).toBeNull();
+    });
+  });
+
+  describe('case insensitivity', () => {
+    it('should handle case-insensitive hostnames', () => {
+      expect(validateEmbedUrl('https://YOUTUBE.COM/watch?v=123')).toBe(
+        'youtube'
+      );
+      expect(validateEmbedUrl('https://YouTube.Com/watch?v=123')).toBe(
+        'youtube'
+      );
+      expect(validateEmbedUrl('https://TWITTER.COM/status/123')).toBe(
+        'twitter'
+      );
+      expect(validateEmbedUrl('https://X.COM/status/123')).toBe('twitter');
+    });
+  });
+
+  describe('URLs with query strings and fragments', () => {
+    it('should accept URLs with query strings', () => {
+      expect(validateEmbedUrl('https://youtube.com/watch?v=123&list=abc')).toBe(
+        'youtube'
+      );
+      expect(
+        validateEmbedUrl('https://twitter.com/status/123?ref_src=tw')
+      ).toBe('twitter');
+    });
+
+    it('should accept URLs with fragments', () => {
+      expect(validateEmbedUrl('https://youtube.com/watch?v=123#section')).toBe(
+        'youtube'
+      );
+    });
+  });
+
+  describe('URLs with ports', () => {
+    it('should accept URLs with ports', () => {
+      expect(validateEmbedUrl('https://youtube.com:443/watch?v=123')).toBe(
+        'youtube'
+      );
+      expect(validateEmbedUrl('https://youtube.com:80/watch?v=123')).toBe(
+        'youtube'
+      );
+      expect(validateEmbedUrl('http://youtube.com:8080/watch?v=123')).toBe(
+        'youtube'
+      );
+    });
+  });
+});

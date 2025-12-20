@@ -94,7 +94,7 @@ public class AsyncSelectInputView<TValue> : ViewBase, IAnyAsyncSelectInputBase, 
                     await OnChange(new Event<IInput<TValue>, TValue>("OnChange", this, Value));
             }
 
-            if (!(Value?.Equals(typeof(TValue).IsValueType ? Activator.CreateInstance<TValue>() : default!) ?? true))
+            if (Value is not null)
             {
                 loading.Set(true);
                 try

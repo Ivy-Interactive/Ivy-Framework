@@ -15,13 +15,40 @@ public class NumberInputApp : SampleBase
         var onBlurState = UseState(0);
         var onBlurLabel = UseState("");
 
-        var dataBinding = CreateNumericTypeTests();
-        var currencyExamples = CreateCurrencyExamples();
+        // Moved from CreateCurrencyExamples
+        var usdValue = UseState(1234.56m);
+        var eurValue = UseState(987.65m);
+        var gbpValue = UseState(567.89m);
+        var jpyValue = UseState(12345m);
+        var nullCurrencyValue = UseState<decimal?>(() => null);
 
         var nullIntInvalid = UseState<int?>();
 
         // Create a currency value for size examples
         var sizeExampleCurrency = UseState(1234.56m);
+
+        // Moved from CreateNumericTypeTests
+        var numericTypes = new (string TypeName, object NonNullableState, object NullableState)[]
+        {
+            // Signed integer types
+            ("short", UseState((short)0), UseState((short?)null)),
+            ("int", UseState(0), UseState((int?)null)),
+            ("long", UseState((long)0), UseState((long?)null)),
+
+            // Unsigned integer types
+            ("byte", UseState((byte)0), UseState((byte?)null)),
+
+            // Floating-point types
+            ("float", UseState(0.0f), UseState((float?)null)),
+            ("double", UseState(0.0), UseState((double?)null)),
+            ("decimal", UseState((decimal)0), UseState((decimal?)null))
+        };
+
+        var dataBinding = CreateNumericTypeTests(numericTypes);
+
+        var currencyExamples = CreateCurrencyExamples((IState<decimal>)usdValue, (IState<decimal>)eurValue, (IState<decimal>)gbpValue, (IState<decimal>)jpyValue, (IState<decimal?>)nullCurrencyValue);
+
+
 
         const string loremIpsumString = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec eros";
 
@@ -140,13 +167,13 @@ public class NumberInputApp : SampleBase
             ;
     }
 
-    private object CreateCurrencyExamples()
+    private object CreateCurrencyExamples(
+        IState<decimal> usdValue,
+        IState<decimal> eurValue,
+        IState<decimal> gbpValue,
+        IState<decimal> jpyValue,
+        IState<decimal?> nullCurrencyValue)
     {
-        var usdValue = UseState(1234.56m);
-        var eurValue = UseState(987.65m);
-        var gbpValue = UseState(567.89m);
-        var jpyValue = UseState(12345m);
-        var nullCurrencyValue = UseState<decimal?>(() => null);
 
         return Layout.Vertical()
                | Text.H3("Different Currencies")
@@ -281,23 +308,8 @@ public class NumberInputApp : SampleBase
                );
     }
 
-    private object CreateNumericTypeTests()
+    private object CreateNumericTypeTests((string TypeName, object NonNullableState, object NullableState)[] numericTypes)
     {
-        var numericTypes = new (string TypeName, object NonNullableState, object NullableState)[]
-        {
-            // Signed integer types
-            ("short", UseState((short)0), UseState((short?)null)),
-            ("int", UseState(0), UseState((int?)null)),
-            ("long", UseState((long)0), UseState((long?)null)),
-
-            // Unsigned integer types
-            ("byte", UseState((byte)0), UseState((byte?)null)),
-
-            // Floating-point types
-            ("float", UseState(0.0f), UseState((float?)null)),
-            ("double", UseState(0.0), UseState((double?)null)),
-            ("decimal", UseState((decimal)0), UseState((decimal?)null))
-        };
 
         var gridItems = new List<object>
         {
