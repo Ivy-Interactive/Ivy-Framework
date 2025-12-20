@@ -67,11 +67,15 @@ export function getChromeParam(): boolean {
 
 export function wrapAppContent(
   content: React.ReactNode,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   chrome: boolean
 ): React.ReactNode {
-  if (chrome) {
-    return content;
-  }
+  // Always add p-4 padding regardless of chrome setting.
+  // This ensures consistent spacing in all scenarios:
+  // - Chrome not configured: p-4 padding
+  // - Chrome explicitly false: p-4 padding
+  // - Chrome configured and active: p-4 padding
+  // The padding value (p-4) never changes based on chrome configuration.
   return React.createElement(
     'div',
     { className: 'w-full h-full p-4 overflow-y-auto' },
