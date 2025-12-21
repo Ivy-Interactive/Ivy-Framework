@@ -170,11 +170,9 @@ public class CodeInputWithValidation : ViewBase
                     .Language(Languages.Javascript)
                     .WithField()
                     .Label("Enter Code:")
-            | new Button("Execute Code")
-                .Disabled(!isValid)
             | Text.Small(isValid 
-                ? "Ready to execute!" 
-                : "Enter code to enable the button");
+                ? "Entered code is valid ✅" 
+                : "Enter some code to validate");
     }
 }
 ```
