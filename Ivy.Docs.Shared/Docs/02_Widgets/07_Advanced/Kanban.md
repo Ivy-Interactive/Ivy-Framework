@@ -83,16 +83,37 @@ public class KanbanWithMoveExample : ViewBase
             .HandleMove(moveData =>
             {
                 var taskId = moveData.CardId?.ToString();
+                if (string.IsNullOrEmpty(taskId)) return;
+
                 var updatedTasks = taskState.Value.ToList();
                 var taskToMove = updatedTasks.FirstOrDefault(t => t.Id == taskId);
-                
-                if (taskToMove != null)
+                if (taskToMove == null) return;
+
+                // Update task status to match new column
+                var updated = taskToMove with { Status = moveData.ToColumn };
+                updatedTasks.RemoveAll(t => t.Id == taskId);
+
+                int insertIndex = updatedTasks.Count;
+
+                var taskAtTargetIndex = updatedTasks
+                    .Where(t => t.Status == moveData.ToColumn)
+                    .ElementAtOrDefault(moveData.TargetIndex ?? -1);
+
+                if (taskAtTargetIndex != null)
                 {
-                    // Update task status to match new column
-                    var updated = taskToMove with { Status = moveData.ToColumn };
-                    updatedTasks.RemoveAll(t => t.Id == taskId);
-                    taskState.Set(updatedTasks.ToArray());
+                    insertIndex = updatedTasks.IndexOf(taskAtTargetIndex);
                 }
+                else
+                {
+                    var lastTaskInColumn = updatedTasks.LastOrDefault(t => t.Status == moveData.ToColumn);
+                    if (lastTaskInColumn != null)
+                    {
+                        insertIndex = updatedTasks.IndexOf(lastTaskInColumn) + 1;
+                    }
+                }
+
+                updatedTasks.Insert(insertIndex, updated);
+                taskState.Set(updatedTasks.ToArray());
             });
     }
 }
@@ -148,7 +169,6 @@ public class KanbanWithCustomCardsExample : ViewBase
                     .Builder<DateTime>(d => d.ToString("MMM dd, yyyy"))
             ))
             .ColumnOrder(e => GetStatusOrder(e.Status))
-            .CardOrder(e => e.DueDate)  // Order cards by due date - upcoming deadlines first
             .Width(Size.Full())
             .ColumnWidth(Size.Fraction(0.33f))
             .HandleMove(moveData =>
@@ -160,7 +180,7 @@ public class KanbanWithCustomCardsExample : ViewBase
                 var taskToMove = updatedTasks.FirstOrDefault(t => t.Id == taskId);
                 if (taskToMove == null) return;
 
-                taskToMove = new Task
+                var updated = new Task
                 {
                     Id = taskToMove.Id,
                     Title = taskToMove.Title,
@@ -173,7 +193,27 @@ public class KanbanWithCustomCardsExample : ViewBase
                 };
 
                 updatedTasks.RemoveAll(t => t.Id == taskId);
-                updatedTasks.Add(taskToMove);
+
+                int insertIndex = updatedTasks.Count;
+
+                var taskAtTargetIndex = updatedTasks
+                    .Where(t => t.Status == moveData.ToColumn)
+                    .ElementAtOrDefault(moveData.TargetIndex ?? -1);
+
+                if (taskAtTargetIndex != null)
+                {
+                    insertIndex = updatedTasks.IndexOf(taskAtTargetIndex);
+                }
+                else
+                {
+                    var lastTaskInColumn = updatedTasks.LastOrDefault(t => t.Status == moveData.ToColumn);
+                    if (lastTaskInColumn != null)
+                    {
+                        insertIndex = updatedTasks.IndexOf(lastTaskInColumn) + 1;
+                    }
+                }
+
+                updatedTasks.Insert(insertIndex, updated);
                 tasks.Set(updatedTasks.ToArray());
             });
     }
