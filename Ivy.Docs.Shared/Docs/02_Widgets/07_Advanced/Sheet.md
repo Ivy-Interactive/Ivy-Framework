@@ -241,14 +241,36 @@ public class KanbanWithSheetExample : ViewBase
             .HandleMove(moveData =>
             {
                 var taskId = moveData.CardId?.ToString();
-                var task = tasks.Value.FirstOrDefault(t => t.Id == taskId);
-                if (task != null)
+                if (string.IsNullOrEmpty(taskId)) return;
+
+                var updatedTasks = tasks.Value.ToList();
+                var taskToMove = updatedTasks.FirstOrDefault(t => t.Id == taskId);
+                if (taskToMove == null) return;
+
+                var updated = taskToMove with { Status = moveData.ToColumn };
+                updatedTasks.RemoveAll(t => t.Id == taskId);
+
+                int insertIndex = updatedTasks.Count;
+
+                var taskAtTargetIndex = updatedTasks
+                    .Where(t => t.Status == moveData.ToColumn)
+                    .ElementAtOrDefault(moveData.TargetIndex ?? -1);
+
+                if (taskAtTargetIndex != null)
                 {
-                    tasks.Set(tasks.Value
-                        .Where(t => t.Id != taskId)
-                        .Append(task with { Status = moveData.ToColumn })
-                        .ToArray());
+                    insertIndex = updatedTasks.IndexOf(taskAtTargetIndex);
                 }
+                else
+                {
+                    var lastTaskInColumn = updatedTasks.LastOrDefault(t => t.Status == moveData.ToColumn);
+                    if (lastTaskInColumn != null)
+                    {
+                        insertIndex = updatedTasks.IndexOf(lastTaskInColumn) + 1;
+                    }
+                }
+
+                updatedTasks.Insert(insertIndex, updated);
+                tasks.Set(updatedTasks.ToArray());
             });
         
         return new Fragment()
