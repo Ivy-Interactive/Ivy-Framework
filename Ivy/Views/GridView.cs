@@ -52,6 +52,12 @@ public class GridView : ViewBase, IStateless
         return this;
     }
 
+    public GridView Height(Size height)
+    {
+        _definition.Height = height;
+        return this;
+    }
+
     public GridView ColumnWidths(params Size[] widths)
     {
         _definition.ColumnWidths = widths;
