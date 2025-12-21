@@ -62,7 +62,7 @@ export const BoxWidget: React.FC<BoxWidgetProps> = ({
 
   return (
     <>
-      <div data-box style={styles} className={cn(className)}>
+      <div style={styles} className={cn(className)}>
         {children}
       </div>
     </>
