@@ -345,7 +345,7 @@ export const generateEChartToolbox = (toolbox?: ToolboxProps) => {
           : 'right',
     top:
       toolbox.verticalAlign?.toLowerCase() === 'top'
-        ? 'top'
+        ? -10
         : toolbox.verticalAlign?.toLowerCase() === 'middle'
           ? 'middle'
           : 'bottom',
