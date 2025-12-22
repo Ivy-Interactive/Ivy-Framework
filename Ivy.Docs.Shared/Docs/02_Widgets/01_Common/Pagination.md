@@ -16,7 +16,7 @@ searchHints:
 Display page [navigation](../../01_Onboarding/02_Concepts/Navigation.md) controls for traversing large sets of data, with customizable appearance and dynamic updates.
 </Ingress>
 
-The `Pagination` [widget](../../01_Onboarding/02_Concepts/Widgets.md) is used to provide [navigation](../../01_Onboarding/02_Concepts/Navigation.md) between multiple pages of content, such as [lists](List.md) or [tables](Table.md). It displays a set of page links, previous/next buttons, and optional ellipsis for skipped ranges. The widget can be customized for appearance and supports binding to [state](../../01_Onboarding/02_Concepts/State.md) for dynamic updates.
+The `Pagination` [widget](../../01_Onboarding/02_Concepts/Widgets.md) is used to provide navigation between multiple pages of content, such as [lists](List.md) or [tables](Table.md). It displays a set of page links, previous/next buttons, and optional ellipsis for skipped ranges. The widget can be customized for appearance and supports binding to [state](../../01_Onboarding/02_Concepts/State.md) for dynamic updates.
 
 ## Basic Usage
 

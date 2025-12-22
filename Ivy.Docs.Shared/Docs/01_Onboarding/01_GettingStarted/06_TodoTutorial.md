@@ -56,7 +56,7 @@ public class TodosApp : ViewBase
 
 ### 4. Add State Management
 
-Inside the `Build` method, we'll add [state management](../02_Concepts/State.md) for our todos and input field:
+Inside the `Build` method, we'll add state management for our todos and input field:
 
 ```csharp
 //State for the input field where users type new todo titles
@@ -70,7 +70,7 @@ var client = this.UseService<IClientProvider>();
 
 ### 5. Build the UI
 
-Now let's create the user interface. We'll use Ivy's [layout system](../../02_Widgets/04_Layouts/_Index.md) and [components](../02_Concepts/Widgets.md):
+Now let's create the user interface. We'll use Ivy's [layout system](../../02_Widgets/04_Layouts/_Index.md) and components:
 
 ```csharp
 return new Card().Title("Todos").Description("What do you want to get done today?")

@@ -14,7 +14,7 @@ searchHints:
 
 Understand how Views work as the core building blocks of Ivy [apps](./Apps.md), similar to React components but written entirely in C#.
 
-Views are the fundamental building blocks of Ivy [apps](./Apps.md). They are similar to React components, providing a way to encapsulate UI logic and [state management](./State.md) in a reusable way. Every view inherits from `ViewBase` and implements a `Build()` method that returns the UI structure.
+Views are the fundamental building blocks of Ivy apps. They are similar to React components, providing a way to encapsulate UI logic and [state management](./State.md) in a reusable way. Every view inherits from `ViewBase` and implements a `Build()` method that returns the UI structure.
 
 ## Basic Usage
 
@@ -30,7 +30,7 @@ All views inherit from the abstract `ViewBase` class, which provides:
 
 - **Build() method**: The core method that returns the UI structure
 - **Lifecycle management**: Automatic disposal and cleanup
-- **Hook access**: Built-in [state management](./State.md) and effect [hooks](./RulesOfHooks.md)
+- **Hook access**: Built-in state management and effect [hooks](./RulesOfHooks.md)
 - **Service injection**: Access to [application services](./Services.md)
 - **Context management**: Shared data between parent and child views
 
@@ -185,7 +185,7 @@ The `[App]` attribute supports several properties:
 - `icon`: [Icon](./Apps.md) to display in [navigation](./Navigation.md)
 - `title`: Display name (defaults to class name)
 - `path`: [Navigation](./Navigation.md) path array for hierarchical organization
-- `isVisible`: Whether to show in [navigation](./Navigation.md)
+- `isVisible`: Whether to show in navigation
 - `searchHints`: Alternative keywords for search discoverability
 - `order`: Sort order within group
 - `description`: Brief description of the app

@@ -14,7 +14,7 @@ searchHints:
 Add celebratory confetti effects to any [widget](../../../01_Onboarding/02_Concepts/Widgets.md) with customizable triggers for automatic, click, or hover activation.
 </Ingress>
 
-The `Confetti` animation can be triggered automatically, on click, or when the mouse hovers over the [widget](../../../01_Onboarding/02_Concepts/Widgets.md). Perfect for celebrating user achievements, [form](../../../01_Onboarding/02_Concepts/Forms.md) submissions, or adding delightful interactions to your [interface](../../../01_Onboarding/02_Concepts/Views.md).
+The `Confetti` animation can be triggered automatically, on click, or when the mouse hovers over the widget. Perfect for celebrating user achievements, [form](../../../01_Onboarding/02_Concepts/Forms.md) submissions, or adding delightful interactions to your [interface](../../../01_Onboarding/02_Concepts/Views.md).
 
 ## Basic Usage
 

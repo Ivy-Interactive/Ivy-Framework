@@ -11,10 +11,10 @@ searchHints:
 # Animation
 
 <Ingress>
-The Animation [widget](../../../01_Onboarding/02_Concepts/Widgets.md) provides a comprehensive set of animation effects that can transform any [widget](../../../01_Onboarding/02_Concepts/Widgets.md) with engaging visual feedback. From subtle hover effects to attention-grabbing loading spinners, animations enhance user experience by providing visual cues, feedback, and polish to your [interface](../../../01_Onboarding/02_Concepts/Views.md).
+The Animation [widget](../../../01_Onboarding/02_Concepts/Widgets.md) provides a comprehensive set of animation effects that can transform any widget with engaging visual feedback. From subtle hover effects to attention-grabbing loading spinners, animations enhance user experience by providing visual cues, feedback, and polish to your [interface](../../../01_Onboarding/02_Concepts/Views.md).
 </Ingress>
 
-The `Animation` [widget](../../../01_Onboarding/02_Concepts/Widgets.md) wraps any child [widget](../../../01_Onboarding/02_Concepts/Widgets.md) and animates it using the specified `AnimationType`. Animations can be triggered automatically, on click, or on hover, with extensive customization options for duration, easing, direction, and more.
+The `Animation` widget wraps any child widget and animates it using the specified `AnimationType`. Animations can be triggered automatically, on click, or on hover, with extensive customization options for duration, easing, direction, and more.
 
 ## Basic Usage
 

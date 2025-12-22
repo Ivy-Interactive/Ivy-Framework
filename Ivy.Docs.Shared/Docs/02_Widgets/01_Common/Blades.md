@@ -14,7 +14,7 @@ searchHints:
 Create stacked [navigation](../../01_Onboarding/02_Concepts/Navigation.md) experiences where new [views](../../01_Onboarding/02_Concepts/Views.md) slide in from the right, managed through a blade controller for intuitive drill-down interfaces.
 </Ingress>
 
-`Blade`s provide a stacked [navigation](../../01_Onboarding/02_Concepts/Navigation.md) pattern where new [views](../../01_Onboarding/02_Concepts/Views.md) slide in from the right. Use the `UseBlades` extension to create a root blade and manage a stack of blades through `IBladeController`. Perfect for master-detail [interfaces](../../01_Onboarding/02_Concepts/Views.md), wizards, and hierarchical navigation.
+`Blade`s provide a stacked navigation pattern where new views slide in from the right. Use the `UseBlades` extension to create a root blade and manage a stack of blades through `IBladeController`. Perfect for master-detail [interfaces](../../01_Onboarding/02_Concepts/Views.md), wizards, and hierarchical navigation.
 
 ## Usage
 

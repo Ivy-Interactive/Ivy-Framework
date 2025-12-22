@@ -86,7 +86,7 @@ public class AlertButtonSetsDemo : ViewBase
 
 ## Toast Notifications
 
-Toast notifications are lightweight, non-blocking messages that appear temporarily and then disappear automatically. They're perfect for providing quick [feedback](../../02_Widgets/02_Inputs/Feedback.md) about user actions.
+Toast notifications are lightweight, non-blocking messages that appear temporarily and then disappear automatically. They're perfect for providing quick feedback about user actions.
 
 ### Basic Toast Notifications
 

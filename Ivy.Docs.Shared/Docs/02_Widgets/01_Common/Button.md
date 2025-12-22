@@ -75,7 +75,7 @@ Layout.Vertical().Gap(4)
 
 ## Buttons with URLs
 
-Buttons can act as links by providing a [URL](../../01_Onboarding/02_Concepts/Navigation.md). When a button has a URL, clicking it will [navigate](../../01_Onboarding/02_Concepts/Navigation.md) to that URL in a new tab instead of triggering an `onClick` event.
+Buttons can act as links by providing a [URL](../../01_Onboarding/02_Concepts/Navigation.md). When a button has a URL, clicking it will navigate to that URL in a new tab instead of triggering an `onClick` event.
 
 <Callout Type="tip">
 Buttons with URLs support [right-click actions](../../01_Onboarding/02_Concepts/Navigation.md) like "Copy Link" and "Open in New Tab", providing a better user experience than programmatic navigation.

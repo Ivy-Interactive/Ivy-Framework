@@ -84,4 +84,4 @@ You can override the automatic generation using the `id` or `path` parameters, t
 
 * **Suffix with `App`**: It's common convention to name your app classes ending with `App` (e.g., `ProductsApp`), though the framework will automatically make the title readable (e.g., "Products").
 * **Use `searchHints`**: Add synonyms for your app's functionality to make it easier for users to find via the [Command Palette](./Navigation.md) (Cmd/Ctrl+K).
-* **Organize with Namespaces**: Use namespaces to group related apps. This automatically creates a structured hierarchy in your [navigation](./Navigation.md) menu.
+* **Organize with Namespaces**: Use namespaces to group related apps. This automatically creates a structured hierarchy in your navigation menu.

@@ -71,10 +71,12 @@ From your app registration **Overview** page, copy these values:
 ### Step 5: Set API Permissions
 
 First, check for the `User.Read` permission, required by Ivy:
+
 1. **Go to "API permissions"** in your app registration
 2. **Verify that `User.Read` is shown and enabled under "Microsoft Graph"**
 
 If `User.Read` is not enabled:
+
 1. **Click "Add a permission"**
 2. **Choose "Microsoft Graph"**
 3. **Select "Delegated permissions"**
@@ -115,7 +117,7 @@ For a list of connection string parameters, see [Configuration Parameters](#conf
 
 #### Manual Configuration
 
-When deploying an Ivy project without using `ivy deploy`, your local .NET user secrets are not automatically transferred. In that case, you can configure Entra Auth by setting environment variables or .NET user secrets. See [Configuration Parameters](#configuration-parameters) below.
+When deploying an Ivy project without using `ivy deploy`, your local .NET user secrets are not automatically transferred. In that case, you can configure Entra Auth by setting environment variables or .NET user secrets. See Configuration Parameters below.
 
 > **Note:** If configuration is present in both .NET user secrets and environment variables, Ivy will use the values in **.NET user secrets over environment variables**.
 
@@ -155,21 +157,25 @@ The following parameters are supported via connection string, environment variab
 ### Common Issues
 
 **Invalid Client Credentials**
+
 - Verify Client ID and Client Secret are correct and match your Microsoft Entra application
 - Check that the client secret hasn't expired (secrets have expiration dates)
 - Ensure you're using the secret value, not the secret ID
 
 **Redirect URI Mismatch**
+
 - Verify redirect URIs in Microsoft Entra match your application URLs exactly
 - Check for case sensitivity in URLs
 - Ensure HTTPS is used in production environments
 
 **Authentication Failed**
+
 - Check that your Microsoft Entra application is properly configured
 - Verify users exist in your tenant and are not blocked
 - Ensure the application has appropriate permissions granted
 
 **Token Issues**
+
 - Ensure refresh tokens are working properly for seamless session management
 
 ## Related Documentation

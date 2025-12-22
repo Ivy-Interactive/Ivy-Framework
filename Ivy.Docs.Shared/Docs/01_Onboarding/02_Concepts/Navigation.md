@@ -21,8 +21,8 @@ The UseNavigation hook provides a powerful way to navigate between apps and [ext
 Navigation in Ivy is handled through the `UseNavigation()` hook, which returns an `INavigator` interface. This hook enables:
 
 - **App-to-App Navigation** - Navigate between different Ivy apps within your application
-- **External URL Navigation** - Open [external URLs](./Clients.md) and resources
-- **Deep Linking** - Navigate to specific apps with [deep linking](./Navigation.md) parameters and arguments
+- **External URL Navigation** - Open external URLs and resources
+- **Deep Linking** - Navigate to specific apps with deep linking parameters and arguments
 - **Type-Safe Navigation** - Navigate using strongly-typed app classes
 
 The navigation system is built on top of Ivy's [signal system](./Signals.md) and integrates seamlessly with the [Chrome framework](./Chrome.md) for managing app lifecycle and routing.

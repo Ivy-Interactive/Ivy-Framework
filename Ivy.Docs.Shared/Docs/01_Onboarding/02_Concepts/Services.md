@@ -138,7 +138,7 @@ Ivy supports different service lifetimes:
 
 ### Service Middleware
 
-Add [middleware](./Program.md) to services for cross-cutting concerns:
+Add middleware to services for cross-cutting concerns:
 
 ```csharp
 public class LoggingServiceMiddleware : IServiceMiddleware

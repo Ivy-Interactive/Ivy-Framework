@@ -14,7 +14,7 @@ searchHints:
 Create flexible, responsive [layouts](../../../01_Onboarding/02_Concepts/Views.md) that automatically wrap content to new lines when horizontal space runs out, perfect for tags, buttons, and card grids.
 </Ingress>
 
-The `WrapLayout` [widget](../../../01_Onboarding/02_Concepts/Widgets.md) arranges child elements in rows that automatically wrap to the next line when they reach the end of the available horizontal space. It's perfect for creating responsive [layouts](../../../01_Onboarding/02_Concepts/Views.md) like tag lists, button groups, or card grids that adapt to different screen sizes.
+The `WrapLayout` [widget](../../../01_Onboarding/02_Concepts/Widgets.md) arranges child elements in rows that automatically wrap to the next line when they reach the end of the available horizontal space. It's perfect for creating responsive layouts like tag lists, button groups, or card grids that adapt to different screen sizes.
 
 ## Basic Usage
 

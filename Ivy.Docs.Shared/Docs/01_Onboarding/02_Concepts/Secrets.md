@@ -16,7 +16,7 @@ The Ivy Framework provides a comprehensive secrets management foundation that en
 
 ## Overview
 
-The Ivy Framework now includes a robust foundation for secrets management through the introduction of the `IHaveSecrets` interface and `Secret` record. This infrastructure enables compile-time tracking of required application secrets, making it easier to validate that all necessary [configuration](./Program.md) is in place before deployment.
+The Ivy Framework now includes a robust foundation for secrets management through the introduction of the `IHaveSecrets` interface and `Secret` record. This infrastructure enables compile-time tracking of required application secrets, making it easier to validate that all necessary configuration is in place before deployment.
 
 ### IHaveSecrets Interface
 
@@ -82,7 +82,7 @@ public class ConfigurationService : IHaveSecrets
 
 ### Generated Connection Classes
 
-When you generate a [database connection](../../01_Onboarding/03_CLI/03_DatabaseIntegration/01_DatabaseOverview.md) using the [Ivy CLI](../../01_Onboarding/03_CLI/_Index.md), the generated connection class implements both `IConnection` and `IHaveSecrets`:
+When you generate a [database connection](../../01_Onboarding/03_CLI/03_DatabaseIntegration/01_DatabaseOverview.md) using the Ivy CLI, the generated connection class implements both `IConnection` and `IHaveSecrets`:
 
 ```csharp
 public class MyDatabaseConnection : IConnection, IHaveSecrets
@@ -101,7 +101,7 @@ public class MyDatabaseConnection : IConnection, IHaveSecrets
 
 ### Connection String Format
 
-The connection string secret name follows the colon-separated format (`ConnectionStrings:ConnectionName`) for consistency with .NET [configuration](./Program.md) standards:
+The connection string secret name follows the colon-separated format (`ConnectionStrings:ConnectionName`) for consistency with .NET configuration standards:
 
 ```csharp
 public class UserDatabaseConnection : IConnection, IHaveSecrets

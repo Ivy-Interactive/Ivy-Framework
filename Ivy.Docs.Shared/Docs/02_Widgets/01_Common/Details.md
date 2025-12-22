@@ -14,11 +14,11 @@ searchHints:
 Display structured label-value pairs from models with automatic formatting using the [ToDetails()](../../01_Onboarding/02_Concepts/ContentBuilders.md) extension method.
 </Ingress>
 
-`Detail` [widgets](../../01_Onboarding/02_Concepts/Widgets.md) display label and value pairs. They are usually generated from a model using [ToDetails()](../../01_Onboarding/02_Concepts/ContentBuilders.md).
+`Detail` [widgets](../../01_Onboarding/02_Concepts/Widgets.md) display label and value pairs. They are usually generated from a model using ToDetails().
 
 ## Basic Usage
 
-The simplest way to create details is by calling [ToDetails()](../../01_Onboarding/02_Concepts/ContentBuilders.md) on any object:
+The simplest way to create details is by calling ToDetails() on any object:
 
 ```csharp demo-below
 new { Name = "John Doe", Email = "john@example.com", Age = 30 }

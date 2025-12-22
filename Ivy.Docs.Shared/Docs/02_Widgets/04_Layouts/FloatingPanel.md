@@ -14,7 +14,7 @@ searchHints:
 Create fixed-position [UI](../../../01_Onboarding/02_Concepts/Views.md) elements that remain visible and accessible regardless of scroll position, perfect for [navigation](../../../01_Onboarding/02_Concepts/Navigation.md) buttons, action panels, and floating controls.
 </Ingress>
 
-The `FloatingPanel` [widget](../../../01_Onboarding/02_Concepts/Widgets.md) positions its content at a fixed location on the screen, making it ideal for elements that should remain accessible while users scroll through content. It's commonly used for [navigation](../../../01_Onboarding/02_Concepts/Navigation.md) buttons, action panels, and floating controls that need to stay visible.
+The `FloatingPanel` [widget](../../../01_Onboarding/02_Concepts/Widgets.md) positions its content at a fixed location on the screen, making it ideal for elements that should remain accessible while users scroll through content. It's commonly used for navigation buttons, action panels, and floating controls that need to stay visible.
 
 ## Basic Usage
 

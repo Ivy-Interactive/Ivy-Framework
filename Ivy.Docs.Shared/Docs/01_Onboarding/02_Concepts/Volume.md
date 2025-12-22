@@ -85,7 +85,7 @@ Where:
 Using Volumes in Services
 </Summary>
 <Body>
-Inject and use the volume in your [services](./Services.md):
+Inject and use the volume in your services:
 
 ```csharp
 using Ivy.Services;

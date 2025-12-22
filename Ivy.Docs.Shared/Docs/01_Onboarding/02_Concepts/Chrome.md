@@ -19,7 +19,7 @@ searchHints:
 Configure the application chrome ([sidebar](../../02_Widgets/04_Layouts/SidebarLayout.md), header, footer) using ChromeSettings to customize [navigation](./Navigation.md), branding, and layout behavior.
 </Ingress>
 
-You can add custom elements to both the header and footer sections of the [sidebar](../../02_Widgets/04_Layouts/SidebarLayout.md) using `ChromeSettings`:
+You can add custom elements to both the header and footer sections of the sidebar using `ChromeSettings`:
 
 ```csharp
 var chromeSettings = new ChromeSettings()

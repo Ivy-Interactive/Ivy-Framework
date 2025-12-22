@@ -97,7 +97,7 @@ Layout.Grid().Columns(2)
 Navigation
 </Summary>
 <Body>
-Help users understand [navigation](../../01_Onboarding/02_Concepts/Navigation.md) elements:
+Help users understand navigation elements:
 
 ```csharp demo-below
 Layout.Horizontal()
@@ -167,7 +167,7 @@ Layout.Horizontal()
 
 ## Accessibility Considerations
 
-Tooltips enhance accessibility by providing additional context for screen readers and keyboard [navigation](../../01_Onboarding/02_Concepts/Navigation.md):
+Tooltips enhance accessibility by providing additional context for screen readers and keyboard navigation:
 
 ```csharp demo-below
 Layout.Vertical()

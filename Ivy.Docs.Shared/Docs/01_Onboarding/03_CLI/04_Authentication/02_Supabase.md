@@ -110,7 +110,7 @@ For a list of connection string parameters, see [Configuration Parameters](#conf
 
 #### Manual Configuration
 
-When deploying an Ivy project without using `ivy deploy`, your local .NET user secrets are not automatically transferred. In that case, you can configure basic auth by setting environment variables or .NET user secrets. See [Configuration Parameters](#configuration-parameters) below.
+When deploying an Ivy project without using `ivy deploy`, your local .NET user secrets are not automatically transferred. In that case, you can configure basic auth by setting environment variables or .NET user secrets. See Configuration Parameters below.
 
 > **Note:** If configuration is present in both .NET user secrets and environment variables, Ivy will use the values in **.NET user secrets over environment variables**.
 
@@ -189,6 +189,6 @@ Key features of the Supabase provider:
 
 ## Related Documentation
 
-- [Authentication Overview](01_AuthenticationOverview.md)
+- Authentication Overview
 - [Auth0 Provider](Auth0.md)
 - [Microsoft Entra Provider](MicrosoftEntra.md)

@@ -41,7 +41,7 @@ public class BasicFieldDemo : ViewBase
 ```
 
 <Callout Type="info">
-`Field` does not provide inputs by itself - it always wraps an input [widget](../../01_Onboarding/02_Concepts/Widgets.md) like `TextInput`, `Select`, or `Checkbox`.
+`Field` does not provide inputs by itself - it always wraps an input widget like `TextInput`, `Select`, or `Checkbox`.
 </Callout>
 
 ## Properties

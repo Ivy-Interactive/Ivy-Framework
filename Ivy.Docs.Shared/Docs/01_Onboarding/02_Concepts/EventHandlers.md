@@ -40,7 +40,7 @@ public class BasicBlurExample : ViewBase
 
 ## OnBlur Event Handler
 
-The `OnBlur` event handler is triggered when an input widget loses focus. This is particularly useful for [validation](./Forms.md), auto-saving data, analytics tracking, or performing cleanup operations when a user finishes interacting with a field.
+The `OnBlur` event handler is triggered when an input widget loses focus. This is particularly useful for validation, auto-saving data, analytics tracking, or performing cleanup operations when a user finishes interacting with a field.
 
 ### When OnBlur Fires
 
@@ -73,7 +73,7 @@ The `OnBlur` event handler is available on all input widgets that implement the 
 
 ### Validation Pattern
 
-Validate fields when the user finishes editing using [validation](./Forms.md) patterns:
+Validate fields when the user finishes editing using validation patterns:
 
 ```csharp demo-tabs
 public class ValidationBlurExample : ViewBase

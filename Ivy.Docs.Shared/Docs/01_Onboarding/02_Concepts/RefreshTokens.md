@@ -140,10 +140,10 @@ UseEffect(() =>
 
 ### Comparison Table
 
-| Feature | [Event Handlers](./EventHandlers.md) | Refresh Tokens |
+| Feature | Event Handlers | Refresh Tokens |
 |---------|---------------|----------------|
 | **Trigger** | User interaction (click, blur, change) | Programmatic call to `Refresh()` |
-| **Timing** | Synchronous, immediate | Can trigger async [effects](./Effects.md) |
+| **Timing** | Synchronous, immediate | Can trigger async effects |
 | **Scope** | Single component/element | Can trigger multiple effects |
 | **Use Case** | Direct UI interactions | Background operations, coordinated updates |
 | **Data Flow** | Event args (e.g., Event<Button>) | Return values via `ReturnValue` |
