@@ -564,7 +564,7 @@ StringBuilder viewBuilder, HashSet<string> usedClassNames, bool isNestedContent 
 
         void AppendDemoContent(StringBuilder cb, int tabs, string insert)
         {
-            cb.AppendTab(tabs).AppendLine($"{(isNestedContent ? ", " : "| ")}new Box().Content({insert}).TestId(\"docs-demo-content\")");
+            cb.AppendTab(tabs).AppendLine($"{(isNestedContent ? ", " : "| ")}new Box().Content({insert})");
         }
 
         void AppendTabbedDemo(StringBuilder cb, string code, string insert, string lang)
