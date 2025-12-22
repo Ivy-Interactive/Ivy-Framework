@@ -350,6 +350,11 @@ export const generateEChartToolbox = (toolbox?: ToolboxProps) => {
           ? 'middle'
           : 'bottom',
     feature: features,
+    iconStyle: {
+      borderColor: getComputedStyle(document.documentElement)
+        .getPropertyValue('--toolbox')
+        .trim(),
+    },
     emphasis: {
       iconStyle: {
         color: null,
