@@ -91,17 +91,14 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
   useEffect(() => {
     if (!mainAppSidebar) return;
 
-    // Use matchMedia to track viewport width changes, which is immune to scrollbar changes
     const mql = window.matchMedia(`(min-width: ${autoCollapseThreshold}px)`);
 
     const handleMediaChange = (e: MediaQueryListEvent | MediaQueryList) => {
-      // Only auto-collapse/expand if user hasn't manually toggled
       if (!isManuallyToggled) {
         setIsSidebarOpen(e.matches);
       }
     };
 
-    // Initial check
     handleMediaChange(mql);
 
     mql.addEventListener('change', handleMediaChange);
@@ -112,16 +109,12 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
   useEffect(() => {
     if (!containerRef.current || !mainAppSidebar) return;
 
-    // Use ResizeObserver only for tracking significant width changes to reset manual toggle
-    // This is less sensitive than the collapse logic so it shouldn't cause loops
     const handleResize = (entries: ResizeObserverEntry[]) => {
       const entry = entries[0];
       if (!entry) return;
 
       const containerWidth = entry.contentRect.width;
 
-      // Reset manual toggle flag when width changes significantly
-      // This allows auto-behavior to resume after significant size changes
       if (
         containerWidth < autoCollapseThreshold * 0.8 ||
         containerWidth > autoCollapseThreshold * 1.2
