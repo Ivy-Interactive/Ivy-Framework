@@ -39,7 +39,7 @@ For convenience, you can create a `ColorInput` without specifying the generic ty
 
 ```csharp
 // Using the non-generic constructor (defaults to string)
-var`ColorInput`= new ColorInput();
+var colorInput = new ColorInput();
 
 // With placeholder
 var colorInputWithPlaceholder = new ColorInput("Choose a color");
