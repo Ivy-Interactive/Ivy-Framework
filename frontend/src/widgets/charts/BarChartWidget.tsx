@@ -193,6 +193,7 @@ const BarChartWidget: React.FC<BarChartWidgetProps> = ({
         foreground: themeColors.foreground,
         fontSans: themeColors.fontSans,
         background: themeColors.background,
+        mutedForeground: themeColors.mutedForeground,
       }),
       toolbox: generateEChartToolbox(toolbox),
     }),

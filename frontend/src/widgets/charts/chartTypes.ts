@@ -115,7 +115,15 @@ export type LegendProps = {
   verticalAlign?: 'Top' | 'Middle' | 'Bottom';
 };
 
-type ToolboxFeatureDataView = { show?: boolean; readOnly?: boolean };
+type ToolboxFeatureDataView = {
+  show?: boolean;
+  readOnly?: boolean;
+  backgroundColor?: string;
+  textareaColor?: string;
+  textColor?: string;
+  buttonColor?: string;
+  buttonTextColor?: string;
+};
 type ToolboxFeatureMagicType = { show?: boolean; type?: string[] };
 type ToolboxFeatureSaveAsImage = { show?: boolean };
 

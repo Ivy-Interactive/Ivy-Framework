@@ -107,6 +107,7 @@ const LineChartWidget: React.FC<LineChartWidgetProps> = ({
         foreground: themeColors.foreground,
         fontSans: themeColors.fontSans,
         background: themeColors.background,
+        mutedForeground: themeColors.mutedForeground,
       }),
       toolbox: generateEChartToolbox(toolbox),
       legend: generateEChartLegend(legend, {

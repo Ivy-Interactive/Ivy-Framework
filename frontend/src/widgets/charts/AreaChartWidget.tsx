@@ -157,6 +157,7 @@ const AreaChartWidget: React.FC<AreaChartWidgetProps> = ({
         foreground: themeColors.foreground,
         fontSans: themeColors.fontSans,
         background: themeColors.background,
+        mutedForeground: themeColors.mutedForeground,
       }),
       legend: generateEChartLegend(legend, {
         foreground: themeColors.foreground,
