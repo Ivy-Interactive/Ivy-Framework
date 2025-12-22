@@ -13,6 +13,7 @@ interface ArticleWidgetProps {
   next: InternalLink;
   documentSource?: string;
   title?: string;
+  headings?: { id: string; text: string; level: number }[];
 }
 
 export const ArticleWidget: React.FC<ArticleWidgetProps> = ({
@@ -24,6 +25,7 @@ export const ArticleWidget: React.FC<ArticleWidgetProps> = ({
   showFooter,
   showToc,
   title,
+  headings,
 }) => {
   const eventHandler = useEventHandler();
   const articleRef = useRef<HTMLElement>(null);
@@ -50,6 +52,7 @@ export const ArticleWidget: React.FC<ArticleWidgetProps> = ({
           showToc={showToc}
           documentSource={documentSource}
           title={title}
+          headings={headings}
         />
       </div>
     </div>
