@@ -80,7 +80,6 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
   const [isSidebarOpen, setIsSidebarOpen] = useState(getInitialSidebarState);
   const [isManuallyToggled, setIsManuallyToggled] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-  const resizeObserverRef = useRef<ResizeObserver | null>(null);
 
   // Handle manual toggle
   const handleManualToggle = useCallback(() => {
@@ -90,38 +89,31 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
 
   // Auto-collapse/expand based on width (only for main app sidebar)
   useEffect(() => {
-    if (!containerRef.current || !mainAppSidebar) return;
+    if (!mainAppSidebar) return;
 
-    const handleResize = (entries: ResizeObserverEntry[]) => {
-      const entry = entries[0];
-      if (!entry) return;
+    // Use matchMedia to track viewport width changes, which is immune to scrollbar changes
+    const mql = window.matchMedia(`(min-width: ${autoCollapseThreshold}px)`);
 
-      const containerWidth = entry.contentRect.width;
-
+    const handleMediaChange = (e: MediaQueryListEvent | MediaQueryList) => {
       // Only auto-collapse/expand if user hasn't manually toggled
       if (!isManuallyToggled) {
-        if (containerWidth < autoCollapseThreshold) {
-          setIsSidebarOpen(false);
-        } else {
-          setIsSidebarOpen(true);
-        }
+        setIsSidebarOpen(e.matches);
       }
     };
 
-    resizeObserverRef.current = new ResizeObserver(handleResize);
-    resizeObserverRef.current.observe(containerRef.current);
+    // Initial check
+    handleMediaChange(mql);
 
-    return () => {
-      if (resizeObserverRef.current) {
-        resizeObserverRef.current.disconnect();
-      }
-    };
+    mql.addEventListener('change', handleMediaChange);
+    return () => mql.removeEventListener('change', handleMediaChange);
   }, [autoCollapseThreshold, isManuallyToggled, mainAppSidebar]);
 
   // Reset manual toggle flag when width changes significantly (only for main app sidebar)
   useEffect(() => {
     if (!containerRef.current || !mainAppSidebar) return;
 
+    // Use ResizeObserver only for tracking significant width changes to reset manual toggle
+    // This is less sensitive than the collapse logic so it shouldn't cause loops
     const handleResize = (entries: ResizeObserverEntry[]) => {
       const entry = entries[0];
       if (!entry) return;
