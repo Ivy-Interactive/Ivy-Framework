@@ -305,7 +305,9 @@ var server = new Server()
                 Accent = "#87CEEB",
                 AccentForeground = "#1A1A1A",
                 Card = "#FFFFFF",
-                CardForeground = "#1A1A1A"
+                CardForeground = "#1A1A1A",
+                Popover = "#F0F8FF",
+                PopoverForeground = "#1A1A1A"
             },
             Dark = new ThemeColors
             {
@@ -331,7 +333,9 @@ var server = new Server()
                 Accent = "#1A3A5C",
                 AccentForeground = "#E8F4FD",
                 Card = "#0F2A4A",
-                CardForeground = "#E8F4FD"
+                CardForeground = "#E8F4FD",
+                Popover = "#001122",
+                PopoverForeground = "#E8F4FD"
             }
         }
     };
@@ -365,7 +369,9 @@ var server = new Server()
                 Accent = "#98FB98",
                 AccentForeground = "#1A1A1A",
                 Card = "#FFFFFF",
-                CardForeground = "#1A1A1A"
+                CardForeground = "#1A1A1A",
+                Popover = "#F0FFF0",
+                PopoverForeground = "#1A1A1A"
             },
             Dark = new ThemeColors
             {
@@ -391,7 +397,9 @@ var server = new Server()
                 Accent = "#1A3A1A",
                 AccentForeground = "#E8FFE8",
                 Card = "#0F2A0F",
-                CardForeground = "#E8FFE8"
+                CardForeground = "#E8FFE8",
+                Popover = "#001100",
+                PopoverForeground = "#E8FFE8"
             }
         }
     };
@@ -425,7 +433,9 @@ var server = new Server()
                 Accent = "#FFA07A",
                 AccentForeground = "#1A1A1A",
                 Card = "#FFFFFF",
-                CardForeground = "#1A1A1A"
+                CardForeground = "#1A1A1A",
+                Popover = "#FFF5EE",
+                PopoverForeground = "#1A1A1A"
             },
             Dark = new ThemeColors
             {
@@ -451,7 +461,9 @@ var server = new Server()
                 Accent = "#5D2A1A",
                 AccentForeground = "#FFE8E1",
                 Card = "#3D1F0F",
-                CardForeground = "#FFE8E1"
+                CardForeground = "#FFE8E1",
+                Popover = "#2A1100",
+                PopoverForeground = "#FFE8E1"
             }
         }
     };
@@ -485,7 +497,9 @@ var server = new Server()
                 Accent = "#F3F0FF",
                 AccentForeground = "#1A1A1A",
                 Card = "#FFFFFF",
-                CardForeground = "#1A1A1A"
+                CardForeground = "#1A1A1A",
+                Popover = "#FAFAFA",
+                PopoverForeground = "#1A1A1A"
             },
             Dark = new ThemeColors
             {
@@ -511,7 +525,9 @@ var server = new Server()
                 Accent = "#6366F1",
                 AccentForeground = "#FFFFFF",
                 Card = "#1A1A2E",
-                CardForeground = "#E5E5E5"
+                CardForeground = "#E5E5E5",
+                Popover = "#0F0F23",
+                PopoverForeground = "#E5E5E5"
             }
         }
     };
