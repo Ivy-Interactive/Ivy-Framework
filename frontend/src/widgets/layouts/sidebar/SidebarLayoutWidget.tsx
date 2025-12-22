@@ -105,32 +105,6 @@ export const SidebarLayoutWidget: React.FC<SidebarLayoutWidgetProps> = ({
     return () => mql.removeEventListener('change', handleMediaChange);
   }, [autoCollapseThreshold, isManuallyToggled, mainAppSidebar]);
 
-  // Reset manual toggle flag when width changes significantly (only for main app sidebar)
-  useEffect(() => {
-    if (!containerRef.current || !mainAppSidebar) return;
-
-    const handleResize = (entries: ResizeObserverEntry[]) => {
-      const entry = entries[0];
-      if (!entry) return;
-
-      const containerWidth = entry.contentRect.width;
-
-      if (
-        containerWidth < autoCollapseThreshold * 0.8 ||
-        containerWidth > autoCollapseThreshold * 1.2
-      ) {
-        setIsManuallyToggled(false);
-      }
-    };
-
-    const observer = new ResizeObserver(handleResize);
-    observer.observe(containerRef.current);
-
-    return () => {
-      observer.disconnect();
-    };
-  }, [autoCollapseThreshold, mainAppSidebar]);
-
   return (
     <div
       ref={containerRef}
