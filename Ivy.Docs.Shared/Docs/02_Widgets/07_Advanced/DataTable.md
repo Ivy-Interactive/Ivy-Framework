@@ -168,6 +168,68 @@ The `OnCellClick()` handler is triggered on a single click, while `OnCellActivat
 
 These properties allow you to perform context-specific actions based on which cell was interacted with. For example, you can display a toast notification with the column name and row index, or navigate to a detail view based on the cell's value.
 
+## AI-Powered Filtering
+
+DataTable supports natural language filtering powered by a Large Language Model (LLM). Instead of writing formal filter expressions, users can type conversational queries and the AI will convert them to the appropriate filter syntax.
+
+### Enabling AI Filtering
+
+Enable AI-powered filtering with a single configuration option:
+
+```csharp
+public record Employee(int Id, string Name, decimal Salary, bool IsActive);
+
+[App]
+public class EmployeeTableApp : ViewBase
+{
+    public override object? Build()
+    {
+        var employees = GetEmployees().AsQueryable();
+        return employees.ToDataTable(e => e.Id)
+            .Header(e => e.Name, "Employee Name")
+            .Header(e => e.Salary, "Salary")
+            .Header(e => e.IsActive, "Active")
+            .Width(e => e.Salary, Size.Px(120))
+            .Config(config =>
+            {
+                config.AllowSorting = true;
+                config.AllowFiltering = true;
+                config.AllowLlmFiltering = true;
+                config.BatchSize = 50;
+            });
+    }
+}
+```
+
+### Natural Language Queries
+
+Once enabled with `.Config(config => config.AllowLlmFiltering = true)`, users can filter using conversational phrases:
+
+- "employees older than 30"
+- "salary above 100000"
+- "active managers"
+- "hired in 2023"
+
+### Smart Interpretation
+
+The AI agent provides intelligent query handling:
+
+- **Typo tolerance** - Automatically corrects misspellings
+- **Concept mapping** - Converts phrases like "retirement age" into structured conditions (e.g., `[Age] >= 65`)
+- **Type mismatch resolution** - If a field type doesn't match user intent, the agent identifies appropriate alternative fields
+
+### Supported Filter Grammar
+
+The AI filter agent converts natural language queries to structured filter expressions like `[Age] > 30` or `[Salary] > 100000 AND [IsManager] = true`.
+
+The AI generates filters using these operations:
+
+- **Comparisons:** `=`, `!=`, `>`, `>=`, `<`, `<=`
+- **Text operations:** `contains`, `starts with`, `ends with`
+- **Existence checks:** `IS BLANK`, `IS NOT BLANK`
+- **Logical operators:** `AND`, `OR`, `NOT`
+- **Parenthetical grouping** for complex expressions
+
 ## DateTime Filtering
 
 `DataTable` fully supports filtering `DateTime`, `Date`, and `DateTimeOffset` columns using ISO-8601 date strings. Users can type expressions such as
