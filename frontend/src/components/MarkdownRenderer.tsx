@@ -43,7 +43,6 @@ const MermaidRenderer = lazy(() => import('./MermaidRenderer'));
 interface MarkdownRendererProps {
   content: string;
   onLinkClick?: (url: string) => void;
-  className?: string;
 }
 
 const ImageOverlay = ({
@@ -203,7 +202,6 @@ const CodeBlock = memo(
 const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
   content,
   onLinkClick,
-  className,
 }) => {
   const contentFeatures = useMemo(
     () => ({
@@ -495,7 +493,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
   }, []);
 
   return (
-    <div className={cn(textContainerClass, className)}>
+    <div className={cn(textContainerClass)}>
       <ReactMarkdown
         components={{
           ...componentsParams,
