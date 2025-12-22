@@ -5,6 +5,8 @@ export const textBlockClassMap: Record<string, string> = {
   H2: 'text-3xl font-semibold tracking-tight scroll-m-20 mt-10 mb-2',
   H3: 'text-2xl font-semibold tracking-tight scroll-m-20 mt-6 mb-2',
   H4: 'text-xl font-semibold tracking-tight scroll-m-20 mt-4 mb-4',
+  H5: 'text-lg font-semibold tracking-tight scroll-m-20 mt-4 mb-4',
+  H6: 'text-base font-semibold tracking-tight scroll-m-20 mt-4 mb-4',
 
   // Body Typography
   P: 'text-sm leading-relaxed scroll-m-20',
@@ -24,6 +26,8 @@ export const textBlockClassMap: Record<string, string> = {
   h2: 'text-3xl font-semibold tracking-tight scroll-m-20 mt-10 mb-2',
   h3: 'text-2xl font-semibold tracking-tight scroll-m-20 mt-6 mb-2',
   h4: 'text-xl font-semibold tracking-tight scroll-m-20 mt-6 mb-2',
+  h5: 'text-lg font-semibold tracking-tight scroll-m-20 mt-6 mb-2',
+  h6: 'text-base font-semibold tracking-tight scroll-m-20 mt-6 mb-2',
   p: 'text-sm leading-relaxed scroll-m-20',
   strong: 'font-semibold',
   em: 'italic',

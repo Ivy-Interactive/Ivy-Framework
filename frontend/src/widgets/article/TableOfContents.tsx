@@ -149,7 +149,17 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
             data-toc-link
             className={cn(
               'block text-sm py-1 hover:text-foreground transition-colors',
-              heading.level === 1 ? 'pl-0' : `pl-${(heading.level - 1) * 4}`,
+              heading.level === 1
+                ? 'pl-0'
+                : heading.level === 2
+                  ? 'pl-4'
+                  : heading.level === 3
+                    ? 'pl-8'
+                    : heading.level === 4
+                      ? 'pl-12'
+                      : heading.level === 5
+                        ? 'pl-16'
+                        : 'pl-20',
               activeId === heading.id
                 ? 'text-foreground'
                 : 'text-muted-foreground'
