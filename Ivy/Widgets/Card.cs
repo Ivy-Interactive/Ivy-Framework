@@ -53,7 +53,7 @@ public static class CardExtensions
     {
         object? header = Layout.Vertical().Gap(0)
                          | (Layout.Horizontal().Align(Align.Center)
-                            | title.WithLayout().Grow()
+                            | title?.WithLayout().Grow()
                             | icon!)
                          | description;
         return card with
