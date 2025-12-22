@@ -29,6 +29,7 @@ interface BoxWidgetProps {
   contentAlign: Align;
   opacity?: number;
   className?: string;
+  testId?: string;
 }
 
 export const BoxWidget: React.FC<BoxWidgetProps> = ({
@@ -44,6 +45,7 @@ export const BoxWidget: React.FC<BoxWidgetProps> = ({
   contentAlign,
   opacity,
   className,
+  testId,
 }) => {
   const styles: React.CSSProperties = {
     // Layout and spacing should always apply
@@ -62,7 +64,7 @@ export const BoxWidget: React.FC<BoxWidgetProps> = ({
 
   return (
     <>
-      <div style={styles} className={cn(className)}>
+      <div style={styles} className={cn(className)} data-testid={testId}>
         {children}
       </div>
     </>
