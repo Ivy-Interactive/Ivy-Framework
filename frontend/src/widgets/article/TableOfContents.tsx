@@ -152,14 +152,14 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
               heading.level === 1
                 ? 'pl-0'
                 : heading.level === 2
-                  ? 'pl-4'
+                  ? 'pl-2'
                   : heading.level === 3
-                    ? 'pl-8'
+                    ? 'pl-4'
                     : heading.level === 4
-                      ? 'pl-12'
+                      ? 'pl-6'
                       : heading.level === 5
-                        ? 'pl-16'
-                        : 'pl-20',
+                        ? 'pl-8'
+                        : 'pl-10',
               activeId === heading.id
                 ? 'text-foreground'
                 : 'text-muted-foreground'
