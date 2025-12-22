@@ -11,7 +11,7 @@ searchHints:
 # Signals
 
 <Ingress>
-Signals enable inter-component communication in Ivy [applications](./Apps.md), allowing components to send and receive messages across the [component tree](../01_GettingStarted/01_Introduction.md).
+Signals enable inter-component communication in Ivy [applications](./Apps.md), allowing components to send and receive messages across the component tree.
 They follow a publisher-subscriber pattern where components can send messages through signals and other components can listen for and respond to those messages.
 </Ingress>
 

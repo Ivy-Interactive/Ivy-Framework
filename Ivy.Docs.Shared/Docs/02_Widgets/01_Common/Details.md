@@ -63,7 +63,7 @@ new { Name = "Widget", Description = "Long description text" }
 
 ## Custom Builders
 
-Override the default [rendering](../../01_Onboarding/01_GettingStarted/01_Introduction.md) for specific fields using custom builders. This allows you to customize how individual fields are displayed and add interactive functionality.
+Override the default rendering for specific fields using custom builders. This allows you to customize how individual fields are displayed and add interactive functionality.
 
 ### Copy to Clipboard
 
@@ -87,7 +87,7 @@ new { Name = "John Doe", Website = "https://example.com" }
 
 ## Nested Objects
 
-Details automatically handle nested objects by converting them to their own detail views. This creates a [hierarchical display](../../01_Onboarding/01_GettingStarted/01_Introduction.md) that's perfect for complex data structures with parent-child relationships:
+Details automatically handle nested objects by converting them to their own detail views. This creates a hierarchical display that's perfect for complex data structures with parent-child relationships:
 
 ```csharp demo-tabs
 new { 

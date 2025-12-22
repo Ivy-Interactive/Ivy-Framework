@@ -97,7 +97,7 @@ at MyApp.Views.DataView.LoadDataAsync() in /src/Views/DataView.cs:line 23";
 
 ## Alternative Error Display Methods
 
-While the `Error` widget is excellent for detailed error information, [Ivy Framework](../../../01_Onboarding/01_GettingStarted/01_Introduction.md) provides several other ways to display errors depending on your needs:
+While the `Error` widget is excellent for detailed error information, Ivy Framework provides several other ways to display errors depending on your needs:
 
 ### Error Callouts
 

@@ -11,10 +11,10 @@ searchHints:
 # Widgets
 
 <Ingress>
-Discover the fundamental [building blocks](./Views.md) of Ivy [applications](./Apps.md) - Widgets provide declarative UI components inspired by [React's component model](../01_GettingStarted/01_Introduction.md).
+Discover the fundamental [building blocks](./Views.md) of Ivy [applications](./Apps.md) - Widgets provide declarative UI components inspired by React's component mode;.
 </Ingress>
 
-Widgets are the fundamental [building blocks](./Views.md) of the Ivy framework. They represent the smallest unit of UI and are used to construct [Views](./Views.md). Inspired by [React's component model](../01_GettingStarted/01_Introduction.md), Widgets provide a declarative way to build user interfaces.
+Widgets are the fundamental [building blocks](./Views.md) of the Ivy framework. They represent the smallest unit of UI and are used to construct [Views](./Views.md).
 
 ## Basic usage
 

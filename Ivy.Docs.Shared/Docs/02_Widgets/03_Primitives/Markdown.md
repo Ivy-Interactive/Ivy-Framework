@@ -11,7 +11,7 @@ searchHints:
 # Markdown
 
 <Ingress>
-Render rich Markdown content with syntax highlighting, math support, tables, and interactive features in your [Ivy applications](../../../01_Onboarding/01_GettingStarted/01_Introduction.md).
+Render rich Markdown content with syntax highlighting, math support, tables, and interactive features in your Ivy applications..
 </Ingress>
 
 The `Markdown` [widget](../../../01_Onboarding/02_Concepts/Widgets.md) renders Markdown content as formatted [HTML](Html.md) with syntax highlighting, math support, tables, images, and interactive link handling.

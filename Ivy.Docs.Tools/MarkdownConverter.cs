@@ -487,7 +487,7 @@ public static partial class MarkdownConverter
         var (types, convertedContent) = linkConverter.Convert(content);
         referencedApps.UnionWith(types);
 
-        AppendAsMultiLineStringIfNecessary(3, convertedContent, codeBuilder, "| new Markdown(", ").HandleLinkClick(onLinkClick)");
+        AppendAsMultiLineStringIfNecessary(3, convertedContent, codeBuilder, "| Lead(", ")");
     }
 
     private static string MapLanguageToEnum(string lang)

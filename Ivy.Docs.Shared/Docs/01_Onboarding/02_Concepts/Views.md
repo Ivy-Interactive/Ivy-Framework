@@ -12,9 +12,9 @@ searchHints:
 
 # Views
 
-Understand how Views work as the core building blocks of Ivy [apps](./Apps.md), similar to [React components](../01_GettingStarted/01_Introduction.md) but written entirely in C#.
+Understand how Views work as the core building blocks of Ivy [apps](./Apps.md), similar to React components but written entirely in C#.
 
-Views are the fundamental building blocks of Ivy [apps](./Apps.md). They are similar to [React components](../01_GettingStarted/01_Introduction.md), providing a way to encapsulate UI logic and [state management](./State.md) in a reusable way. Every view inherits from `ViewBase` and implements a `Build()` method that returns the [UI structure](../01_GettingStarted/01_Introduction.md).
+Views are the fundamental building blocks of Ivy [apps](./Apps.md). They are similar to React components, providing a way to encapsulate UI logic and [state management](./State.md) in a reusable way. Every view inherits from `ViewBase` and implements a `Build()` method that returns the UI structure.
 
 ## Basic Usage
 
@@ -28,7 +28,7 @@ Text.P("Hello, World!")
 
 All views inherit from the abstract `ViewBase` class, which provides:
 
-- **Build() method**: The core method that returns the [UI structure](../01_GettingStarted/01_Introduction.md)
+- **Build() method**: The core method that returns the UI structure
 - **Lifecycle management**: Automatic disposal and cleanup
 - **Hook access**: Built-in [state management](./State.md) and effect [hooks](./RulesOfHooks.md)
 - **Service injection**: Access to [application services](./Services.md)

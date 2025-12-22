@@ -14,7 +14,7 @@ searchHints:
 Configure and bootstrap your Ivy [application](./Apps.md) with [dependency injection](./Services.md), [services](./Services.md), and middleware for production-ready deployment.
 </Ingress>
 
-The `Program.cs` file is the entry point for your Ivy [application](./Apps.md). It configures and starts the Ivy server using the `Server` class, which provides a fluent API for setting up apps, authentication, middleware, and other [services](./Services.md).
+The `Program.cs` file is the entry point for your Ivy application. It configures and starts the Ivy server using the `Server` class, which provides a fluent API for setting up apps, authentication, middleware, and other sevices..
 
 ## Basic Structure
 
@@ -107,7 +107,7 @@ server.UseHotReload();
 
 This automatically refreshes the browser when C# code changes during development.
 
-For more information about configuring the application [chrome](./Chrome.md) (sidebar, header, footer), see [Chrome Configuration](./Chrome.md).
+For more information about configuring the application chrome (sidebar, header, footer), see [Chrome Configuration](./Chrome.md).
 
 ## Authentication
 
@@ -133,7 +133,7 @@ server.UseAuth<Auth0AuthProvider>(c =>
 server.UseAuth<MicrosoftEntraAuthProvider>();
 ```
 
-## [Services](./Services.md) and [Dependency Injection](./Services.md)
+## Services and Dependency Injection
 
 Register services for dependency injection:
 
@@ -255,7 +255,7 @@ await server.RunAsync();
 
 ### Production-Ready Configuration
 
-A comprehensive setup with conditional compilation, HTTPS redirection, metadata configuration, and [dependency injection](./Services.md) [services](./Services.md) for production deployment.
+A comprehensive setup with conditional compilation, HTTPS redirection, metadata configuration, and dependency injection services for production deployment.
 
 ```csharp
 using System.Globalization;
@@ -317,7 +317,7 @@ server.UseBuilder(builder =>
 
 ### Connection Management
 
-Automatically discover and register [SignalR](./TasksAndObservables.md) connection classes for real-time communication features.
+Automatically discover and register SignalR connection classes for real-time communication features.
 
 ```csharp
 server.AddConnectionsFromAssembly();

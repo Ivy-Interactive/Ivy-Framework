@@ -14,7 +14,7 @@ searchHints:
 SidebarLayout provides a flexible sidebar [navigation](../../../01_Onboarding/02_Concepts/Navigation.md) layout with a main content area and collapsible sidebar. It supports header and footer sections, responsive behavior, and can be configured as the main application sidebar with toggle functionality.
 </Ingress>
 
-Sidebars are essential [navigation](../../../01_Onboarding/02_Concepts/Navigation.md) [components](../../../01_Onboarding/02_Concepts/Widgets.md) in modern [applications](../../../01_Onboarding/01_GettingStarted/01_Introduction.md), providing users with quick access to different sections while keeping the main content area uncluttered. They can be used for primary navigation, contextual tools, or supplementary information display.
+Sidebars are essential [navigation](../../../01_Onboarding/02_Concepts/Navigation.md) [components](../../../01_Onboarding/02_Concepts/Widgets.md) in modern applications, providing users with quick access to different sections while keeping the main content area uncluttered. They can be used for primary navigation, contextual tools, or supplementary information display.
 
 ## Basic Usage
 

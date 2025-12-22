@@ -56,7 +56,7 @@ public class BasicPromptView : ViewBase
 
 ### Text Input Prompts
 
-Collect text input from users using [dialogs](./Alerts.md) with [forms](./Forms.md):
+Collect text input from users using dialogs with [forms](./Forms.md):
 
 ```csharp demo-tabs
 public record RenameRequest
@@ -98,7 +98,7 @@ public class RenameView : ViewBase
 
 ### Custom Prompts
 
-Create custom [dialogs](./Alerts.md) with multiple inputs:
+Create custom dialogs with multiple inputs:
 
 ```csharp demo-tabs
 public record CustomOptions

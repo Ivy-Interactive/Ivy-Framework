@@ -49,7 +49,7 @@ This will create a new Ivy project with the necessary structure and configuratio
 
 ## Prerequisites
 
-Ivy Framework requires .NET 9.0 as the target framework. All Ivy projects and packages are built against this version.
+Ivy Framework requires .NET 10.0 as the target framework. All Ivy projects and packages are built against this version.
 
 ## Manual Setup: Creating Your First Project
 

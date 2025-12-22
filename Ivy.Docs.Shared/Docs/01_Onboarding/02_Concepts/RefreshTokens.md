@@ -10,7 +10,7 @@ searchHints:
 
 # Refresh Tokens
 
-Refresh tokens provide a mechanism to manually trigger [UI updates](../01_GettingStarted/01_Introduction.md) and [effect](./Effects.md) executions in Ivy, enabling you to reload data, refresh components, or trigger actions on demand.
+Refresh tokens provide a mechanism to manually trigger UI updates and effect executions in Ivy, enabling you to reload data, refresh components, or trigger actions on demand.
 
 ## Basic Usage
 
@@ -42,8 +42,8 @@ public class BasicRefreshExample : ViewBase
 
 Refresh tokens are useful when you need to:
 
-- Trigger [effects](./Effects.md) after async operations complete
-- Pass data from background operations to trigger [UI updates](../01_GettingStarted/01_Introduction.md)
+- Trigger effects after async operations complete
+- Pass data from background operations to trigger UI updates
 - Coordinate updates across different parts of your view
 - Refresh external content like iframes
 
@@ -144,7 +144,7 @@ UseEffect(() =>
 |---------|---------------|----------------|
 | **Trigger** | User interaction (click, blur, change) | Programmatic call to `Refresh()` |
 | **Timing** | Synchronous, immediate | Can trigger async [effects](./Effects.md) |
-| **Scope** | Single component/element | Can trigger multiple [effects](./Effects.md) |
+| **Scope** | Single component/element | Can trigger multiple effects |
 | **Use Case** | Direct UI interactions | Background operations, coordinated updates |
 | **Data Flow** | Event args (e.g., Event<Button>) | Return values via `ReturnValue` |
 

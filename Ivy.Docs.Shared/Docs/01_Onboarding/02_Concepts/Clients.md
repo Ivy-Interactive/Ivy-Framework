@@ -24,7 +24,7 @@ var client = this.UseService<IClientProvider>();
 
 ## Common Use Cases
 
-### Showing [toasts](./Alerts.md)
+You can show [toasts](./Alerts.md):
 
 ```csharp
 // Simple toast
@@ -34,7 +34,7 @@ client.Toast("Operation successful!");
 client.Toast("Data saved", "Success");
 ```
 
-### [Navigation](./Navigation.md)
+You can [navigate](./Navigation.md) to different pages within the app:
 
 ```csharp
 // Navigate to different pages within the app
@@ -48,7 +48,7 @@ client.OpenUrl("https://github.com");
 client.OpenUrl(new Uri("https://stackoverflow.com"));
 ```
 
-### Downloading Files
+You can [download](./Downloads.md) and [upload](../../02_Widgets/02_Inputs/File.md) files:
 
 ```csharp
 // Download CSV data
@@ -59,8 +59,6 @@ client.DownloadFile("users.csv", csvData, "text/csv");
 var progress = UseState(0.0);
 client.DownloadFile("large-file.zip", fileData, onProgress: p => progress.Value = p);
 ```
-
-### Uploading Files
 
 ```csharp
 // Handle single file upload
@@ -73,21 +71,9 @@ client.UploadFiles(async files => {
         client.Toast($"Uploaded {file.FileName}");
     }
 });
-
-// Handle multiple file uploads
-client.UploadFiles(async files => {
-    var uploadTasks = files.Select(async file => {
-        var content = await file.GetContentAsync();
-        await ProcessFileAsync(file.FileName, content);
-        return file.FileName;
-    });
-    
-    var uploadedFiles = await Task.WhenAll(uploadTasks);
-    client.Toast($"Uploaded {uploadedFiles.Length} files");
-});
 ```
 
-### Clipboard Operations
+You can copy text to the clipboard:
 
 ```csharp
 // Copy text to clipboard
@@ -95,7 +81,7 @@ client.CopyToClipboard("Copied to clipboard!");
 client.Toast("Text copied!");
 ```
 
-### Theme Customization
+You can set the [theme mode](./Theming.md) and apply custom CSS:
 
 ```csharp
 // Set theme mode
@@ -117,7 +103,7 @@ client.ApplyTheme(customCss);
 3. **Async Operations**: Use async/await for operations that might take time.
 4. **State Management**: Use clients in combination with [state management](./State.md) for reactive updates.
 
-## UI Refresh & [State Management](./State.md)
+## UI Refresh & State Management
 
 Ivy automatically handles UI refreshes in most cases. You typically **don't need** to manually refresh the UI:
 
@@ -126,14 +112,7 @@ Ivy automatically handles UI refreshes in most cases. You typically **don't need
 - **Sheet Dismissal**: [Sheets](../../02_Widgets/07_Advanced/Sheet.md) are automatically closed by the framework when forms are submitted successfully
 - **Navigation**: Page [navigation](./Navigation.md) automatically refreshes the UI
 
-❌ **Don't do this** - The framework handles it automatically:
-
-```csharp
-// Don't call Refresh() on IClientProvider
-client.Refresh(); // This method doesn't exist and isn't needed
-```
-
-✅ **Do this instead** - Let the framework handle it:
+**Do this instead** - Let the framework handle it:
 
 ```csharp
 // Just update state, UI refreshes automatically

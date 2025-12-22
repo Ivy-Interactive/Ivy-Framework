@@ -14,7 +14,7 @@ searchHints:
 Handle boolean input with elegant checkboxes, switches, and toggles for true/false values in [forms](../../01_Onboarding/02_Concepts/Forms.md) and [interfaces](../../01_Onboarding/02_Concepts/Views.md).
 </Ingress>
 
-The `BoolInput` [widget](../../01_Onboarding/02_Concepts/Widgets.md) provides a checkbox, switch and toggle for boolean (true/false) input values. It allows users to easily switch between two states in a form or configuration [interface](../../01_Onboarding/02_Concepts/Views.md).
+The `BoolInput` [widget](../../01_Onboarding/02_Concepts/Widgets.md) provides a checkbox, switch and toggle for boolean (true/false) input values. It allows users to easily switch between two states in a form or configuration interface.
 
 ## Basic Usage
 

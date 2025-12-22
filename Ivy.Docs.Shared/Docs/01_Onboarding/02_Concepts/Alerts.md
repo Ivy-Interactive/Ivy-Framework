@@ -139,7 +139,7 @@ public class ToastExceptionDemo : ViewBase
 
 ## Examples
 
-### [Form Submission](./Forms.md) with Feedback
+### Form Submission with Feedback
 
 ```csharp demo-below
 public class FormSubmissionDemo : ViewBase
@@ -172,33 +172,3 @@ public class FormSubmissionDemo : ViewBase
     }
 }
 ```
-
-## Best Practices
-
-### When to Use Dialog Alerts
-
-- Confirming destructive actions (delete, reset, etc.)
-- Important decisions that affect data
-- Critical error messages that require acknowledgment
-- Multi-step processes requiring user choice
-
-### When to Use Toast Notifications
-
-- Success confirmations after actions
-- Non-critical error messages
-- Status updates and progress notifications
-- Quick feedback that doesn't require user action
-
-### Writing Good Alert Messages
-
-1. **Be Clear**: Use simple, direct language
-2. **Be Specific**: Explain exactly what will happen
-3. **Be Actionable**: Make it clear what the user needs to do
-4. **Be Concise**: Keep messages as short as possible while staying informative
-
-### Accessibility Considerations
-
-- Alert dialogs automatically focus and trap keyboard navigation
-- Toast messages are announced by screen readers
-- Button labels should be descriptive (avoid just "OK" when possible)
-- Important alerts should be modal to ensure they're not missed

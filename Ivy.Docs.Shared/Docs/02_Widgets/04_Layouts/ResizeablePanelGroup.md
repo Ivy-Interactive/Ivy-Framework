@@ -11,7 +11,7 @@ searchHints:
 # ResizeablePanelGroup
 
 <Ingress>
-Create flexible, resizable layouts with draggable handles that allow users to dynamically adjust panel sizes in your [applications](../../../01_Onboarding/01_GettingStarted/01_Introduction.md).
+Create flexible, resizable layouts with draggable handles that allow users to dynamically adjust panel sizes in your applications.
 </Ingress>
 
 The `ResizeablePanelGroup` [widget](../../../01_Onboarding/02_Concepts/Widgets.md) creates layouts with multiple panels separated by draggable handles, allowing users to resize sections interactively. Panels can be arranged horizontally or vertically and support nesting for complex layouts.

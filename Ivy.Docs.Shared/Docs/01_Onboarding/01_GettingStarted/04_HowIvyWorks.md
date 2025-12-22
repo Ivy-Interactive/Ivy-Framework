@@ -51,7 +51,7 @@ public class TodoApp : ViewBase
 }
 ```
 
-### Reactive [State Management](../02_Concepts/State.md)
+### Reactive State Management
 
 Ivy provides React-inspired hooks for [state management](../02_Concepts/State.md):
 
@@ -89,9 +89,9 @@ The **Ivy.Analyser** package automatically enforces these rules at compile time,
 
 For detailed examples and troubleshooting, see [Rules of Hooks](../02_Concepts/RulesOfHooks.md).
 
-### [Widget](../02_Concepts/Widgets.md) Library
+### Widget Library
 
-Ivy ships with a comprehensive set of strongly-typed widgets:
+Ivy ships with a comprehensive set of strongly-typed [widgets](../02_Concepts/Widgets.md):
 
 | Category   | Examples                                                                   |
 | ---------- | -------------------------------------------------------------------------- |

@@ -11,7 +11,7 @@ searchHints:
 # Memoization
 
 <Ingress>
-Memoization helps Ivy applications run faster by caching results of expensive computations and preventing unnecessary [re-renders](../01_GettingStarted/01_Introduction.md).
+Memoization helps Ivy applications run faster by caching results of expensive computations and preventing unnecessary re-renders.
 </Ingress>
 
 ## Overview
@@ -19,7 +19,7 @@ Memoization helps Ivy applications run faster by caching results of expensive co
 Memoization in Ivy provides several powerful tools to optimize performance:
 
 - **`UseMemo`** - Caches the result of expensive computations
-- **`UseCallback`** - Memoizes callback functions to prevent unnecessary [re-renders](../01_GettingStarted/01_Introduction.md)
+- **`UseCallback`** - Memoizes callback functions to prevent unnecessary re-renders.
 - **`IMemoized`** - Interface for component-level memoization
 
 These hooks work similarly to their React counterparts (`useMemo`, `useCallback`) but are designed specifically for Ivy's architecture.
@@ -182,7 +182,7 @@ public class DashboardView : ViewBase
 
 ## UseCallback Hook
 
-The `UseCallback` hook memoizes callback functions, preventing unnecessary [re-renders](../01_GettingStarted/01_Introduction.md) when the callback is passed as a prop to child components.
+The `UseCallback` hook memoizes callback functions, preventing unnecessary re-renders when the callback is passed as a prop to child components.
 
 <Callout type="Tip">
 `UseCallback` memoizes the function reference itself, while `UseMemo` memoizes the result of calling a function. The memoized callback is only executed when you invoke it.
@@ -345,7 +345,7 @@ public class DataFetcherView : ViewBase
 
 ## Component Memoization with IMemoized
 
-The `IMemoized` interface allows entire components to be memoized, preventing [re-renders](../01_GettingStarted/01_Introduction.md) when their props haven't changed.
+The `IMemoized` interface allows entire components to be memoized, preventing re-renders when their props haven't changed.
 
 ### How IMemoized Works
 

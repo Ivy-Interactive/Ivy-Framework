@@ -9,7 +9,7 @@ searchHints:
 # Introduction to Ivy
 
 <Ingress>
-Ivy is a full-stack C# web framework that lets you build [interactive](../../02_Widgets/01_Common/Button.md) [data](../02_Concepts/Volume.md) applications without the complexity of separate frontend/backend APIs. Think React patterns, but entirely in C#.
+Ivy is a full-stack C# web framework that lets you build interactive data applications without the complexity of separate frontend/backend APIs. Think React patterns, but entirely in C#.
 </Ingress>
 
 <Embed Url="https://www.youtube.com/watch?v=pQKSQR9BfD8"/>
@@ -44,13 +44,13 @@ public class UserDashboard : ViewBase
 
 ## Why Ivy Exists
 
-The Ivy Framework is a comprehensive solution for building internal business applications. The framework targets scenarios where rapid development, maintainability, and [integration](../../02_Widgets/03_Primitives/Embed.md) with existing [enterprise](../03_CLI/03_DatabaseIntegration/02_Oracle.md) systems are prioritized.
+The Ivy Framework is a comprehensive solution for building internal business applications. The framework targets scenarios where rapid development, maintainability, and integration with existing enterprise systems are prioritized.
 
 We created Ivy to solve common frustrations with modern web development:
 
 ### Cost & Speed Optimization
 
-Everyday [tasks](../02_Concepts/TasksAndObservables.md) should be simple and idiomatic. Complex requirements should remain possible, but building basic CRUD projects shouldn't require weeks of setup.
+Everyday tasks should be simple and idiomatic. Complex requirements should remain possible, but building basic CRUD projects shouldn't require weeks of setup.
 
 ### Eliminating Boilerplate
 

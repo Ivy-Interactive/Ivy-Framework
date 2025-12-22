@@ -11,7 +11,7 @@ searchHints:
 # Xml
 
 <Ingress>
-Display and interact with XML data in your [Ivy applications](../../../01_Onboarding/01_GettingStarted/01_Introduction.md) with syntax highlighting, collapsible nodes, and real-time validation. Perfect for configuration files, API responses, and data feeds.
+Display and interact with XML data in your Ivy applications with syntax highlighting, collapsible nodes, and real-time validation. Perfect for configuration files, API responses, and data feeds.
 </Ingress>
 
 The `Xml` [widget](../../../01_Onboarding/02_Concepts/Widgets.md) displays XML data in a formatted, syntax-highlighted view. It's useful for displaying configuration files, data feeds, and other XML-structured content.

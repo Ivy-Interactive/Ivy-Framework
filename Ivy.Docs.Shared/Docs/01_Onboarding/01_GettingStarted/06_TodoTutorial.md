@@ -54,9 +54,9 @@ public class TodosApp : ViewBase
 }
 ```
 
-### 4. Add [State Management](../02_Concepts/State.md)
+### 4. Add State Management
 
-Inside the `Build` method, we'll add state management for our todos and input field:
+Inside the `Build` method, we'll add [state management](../02_Concepts/State.md) for our todos and input field:
 
 ```csharp
 //State for the input field where users type new todo titles

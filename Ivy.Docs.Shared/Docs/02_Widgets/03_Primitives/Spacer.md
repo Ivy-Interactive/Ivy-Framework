@@ -109,7 +109,7 @@ public class HeightSpacerView : ViewBase
 ```
 
 <Callout Type="info">
-When using `Spacer().Height()` or `Spacer().Width()`, the values represent units in the [Ivy Framework's](../../../01_Onboarding/01_GettingStarted/01_Introduction.md) spacing system, not pixels. The framework automatically converts these units to appropriate spacing based on the current [theme](../../../01_Onboarding/02_Concepts/Theming.md) and design system.
+When using `Spacer().Height()` or `Spacer().Width()`, the values represent units in the Ivy Framework's spacing system, not pixels. The framework automatically converts these units to appropriate spacing based on the current [theme](../../../01_Onboarding/02_Concepts/Theming.md) and design system.
 </Callout>
 
 ### Form Layout with Spacing

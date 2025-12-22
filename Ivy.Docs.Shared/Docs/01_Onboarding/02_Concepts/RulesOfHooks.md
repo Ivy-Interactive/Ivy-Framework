@@ -6,9 +6,9 @@ Ivy hooks (functions starting with `Use...`) are a powerful feature that lets yo
 
 ### 1. Only Call Hooks at the Top Level
 
-**Don't call hooks inside loops, conditions, or nested functions.** Instead, always use hooks at the top level of your component's `Build` method (or custom hook). By following this rule, you ensure that hooks are called in the same order each time a component [renders](../01_GettingStarted/01_Introduction.md). That's what allows Ivy to correctly preserve the [state](./State.md) of hooks between multiple `Build` calls.
+**Don't call hooks inside loops, conditions, or nested functions.** Instead, always use hooks at the top level of your component's `Build` method (or custom hook). By following this rule, you ensure that hooks are called in the same order each time a component renders. That's what allows Ivy to correctly preserve the state of hooks between multiple `Build` calls.
 
-### 2. Only Call [Hooks](./RulesOfHooks.md) from Ivy [Views](./Views.md)
+### 2. Only Call Hooks from Ivy Views
 
 **Don't call hooks from regular C# functions.** Instead, you can:
 
@@ -83,7 +83,7 @@ foreach (var item in items) {
 ```
 
 **✅ Good:**
-create a separate [View](./Views.md) component for the item, and use the hook inside that component.
+create a separate View component for the item, and use the hook inside that component.
 
 ```csharp
 foreach (var item in items) {
