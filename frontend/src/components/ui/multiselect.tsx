@@ -1,28 +1,16 @@
 import * as React from 'react';
-import { X } from 'lucide-react';
+import { X, ChevronDown } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Command, CommandGroup, CommandItem } from '@/components/ui/command';
 import { Command as CommandPrimitive } from 'cmdk';
 import { cn } from '@/lib/utils';
 import { cva } from 'class-variance-authority';
 import { Scales } from '@/types/scale';
+import { xIconVariants } from '@/components/ui/input/text-input-variants';
+import { selectTriggerVariants } from '@/components/ui/select/variants';
 
-// Variants for MultipleSelector
-const multipleSelectorVariants = cva(
-  'group border border-input bg-transparent shadow-sm ring-offset-background rounded-md focus-within:ring-1 focus-within:ring-ring',
-  {
-    variants: {
-      scale: {
-        Small: 'px-2 py-1 text-xs',
-        Medium: 'px-3 py-2 text-sm',
-        Large: 'px-4 py-3 text-base',
-      },
-    },
-    defaultVariants: {
-      scale: 'Medium',
-    },
-  }
-);
+// Variants for MultipleSelector - matches selectTriggerVariants exactly
+const multipleSelectorVariants = selectTriggerVariants;
 
 // Variants for menu items
 const menuItemVariants = cva('cursor-pointer', {
@@ -52,20 +40,6 @@ const badgeVariants = cva('hover:bg-secondary', {
   },
 });
 
-// Variants for close icon
-const closeIconVariants = cva('text-muted-foreground hover:text-foreground', {
-  variants: {
-    scale: {
-      Small: 'h-3 w-3',
-      Medium: 'h-4 w-4',
-      Large: 'h-5 w-5',
-    },
-  },
-  defaultVariants: {
-    scale: 'Medium',
-  },
-});
-
 export interface Option {
   label: string;
   value: string;
@@ -82,7 +56,6 @@ interface MultipleSelectorProps {
   commandProps?: {
     label?: string;
   };
-  hideClearAllButton?: boolean;
   hidePlaceholderWhenSelected?: boolean;
   emptyIndicator?: React.ReactNode;
   invalid?: boolean;
@@ -102,7 +75,6 @@ const MultipleSelector = React.forwardRef<
       disabled = false,
       className,
       commandProps,
-      hideClearAllButton = false,
       hidePlaceholderWhenSelected = false,
       emptyIndicator,
       invalid = false,
@@ -153,12 +125,13 @@ const MultipleSelector = React.forwardRef<
         <div
           className={cn(
             multipleSelectorVariants({ scale }),
+            disabled && 'cursor-not-allowed opacity-50',
             invalid
               ? 'border-destructive text-destructive-foreground focus-within:ring-destructive focus-within:border-destructive'
               : undefined
           )}
         >
-          <div className="flex gap-1 flex-wrap">
+          <span className="flex gap-1 flex-wrap items-center flex-1 min-w-0">
             {value.map(option => (
               <Badge
                 key={option.value}
@@ -171,9 +144,13 @@ const MultipleSelector = React.forwardRef<
               >
                 {option.label}
                 <button
-                  className="ml-1 ring-offset-background rounded-full outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 cursor-pointer hover:bg-accent hover:text-accent-foreground"
+                  type="button"
+                  tabIndex={-1}
+                  aria-label="Remove"
+                  className="ml-1 p-1 rounded hover:bg-accent focus:outline-none cursor-pointer flex items-center justify-center h-6 self-center leading-none"
                   onKeyDown={e => {
-                    if (e.key === 'Enter') {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
                       handleUnselect(option);
                     }
                   }}
@@ -183,7 +160,7 @@ const MultipleSelector = React.forwardRef<
                   }}
                   onClick={() => handleUnselect(option)}
                 >
-                  <X className={closeIconVariants({ scale })} />
+                  <X className={xIconVariants({ scale })} />
                 </button>
               </Badge>
             ))}
@@ -199,9 +176,44 @@ const MultipleSelector = React.forwardRef<
                   : placeholder
               }
               disabled={disabled}
-              className="ml-2 bg-transparent outline-none placeholder:text-muted-foreground flex-1"
+              className="ml-2 bg-transparent outline-none placeholder:text-muted-foreground flex-1 min-w-[120px]"
             />
-          </div>
+          </span>
+          <ChevronDown
+            className={cn(
+              'h-4 w-4 opacity-50 shrink-0 cursor-pointer',
+              disabled && 'cursor-not-allowed opacity-50'
+            )}
+            onClick={e => {
+              if (disabled) return;
+              e.preventDefault();
+              e.stopPropagation();
+              if (inputRef.current) {
+                if (open) {
+                  inputRef.current.blur();
+                } else {
+                  inputRef.current.focus();
+                }
+              }
+            }}
+            onKeyDown={e => {
+              if (disabled) return;
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                e.stopPropagation();
+                if (inputRef.current) {
+                  if (open) {
+                    inputRef.current.blur();
+                  } else {
+                    inputRef.current.focus();
+                  }
+                }
+              }
+            }}
+            role="button"
+            tabIndex={disabled ? -1 : 0}
+            aria-label="Toggle dropdown"
+          />
         </div>
         <div className="relative mt-2">
           {open && selectables.length > 0 && (
@@ -230,15 +242,7 @@ const MultipleSelector = React.forwardRef<
             </div>
           )}
         </div>
-        {!hideClearAllButton && value.length > 0 && (
-          <button
-            onClick={() => onValueChange?.([])}
-            className="mt-2 text-xs text-muted-foreground hover:text-foreground"
-          >
-            Clear all
-          </button>
-        )}
-        {selectables.length === 0 && emptyIndicator && (
+        {selectables.length === 0 && emptyIndicator && open && (
           <div className="mt-2">{emptyIndicator}</div>
         )}
       </Command>

@@ -894,19 +894,53 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
             disabled={disabled}
             className="w-full"
             invalid={!!invalid}
-            hideClearAllButton={!nullable}
             hidePlaceholderWhenSelected
             scale={scale}
             data-testid={dataTestId}
-            emptyIndicator={
-              <p className="text-center text-large-body">No results found</p>
-            }
           />
-          {invalid && (
-            <div className="absolute right-2 top-1/2 -translate-y-1/2">
-              <InvalidIcon message={invalid} />
+          {(nullable && selectedMultiSelectOptions.length > 0 && !disabled) ||
+          invalid ? (
+            <div
+              className={selectIconContainerVariants({ scale })}
+              style={{ zIndex: 2 }}
+            >
+              {/* Clear (X) button */}
+              {nullable &&
+                selectedMultiSelectOptions.length > 0 &&
+                !disabled && (
+                  <button
+                    type="button"
+                    tabIndex={-1}
+                    aria-label="Clear All"
+                    onClick={e => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      logger.debug(
+                        'Select input clear button clicked (MultiSelect)',
+                        { id }
+                      );
+                      eventHandler('OnChange', id, [null]);
+                    }}
+                    onKeyDown={e => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        eventHandler('OnChange', id, [null]);
+                      }
+                    }}
+                    className="pointer-events-auto p-1 rounded hover:bg-accent focus:outline-none cursor-pointer flex items-center h-6"
+                  >
+                    <X className={xIconVariants({ scale })} />
+                  </button>
+                )}
+              {/* Invalid icon - rightmost */}
+              {invalid && (
+                <div className="pointer-events-auto flex items-center h-6 p-1">
+                  <InvalidIcon message={invalid} />
+                </div>
+              )}
             </div>
-          )}
+          ) : null}
         </div>
       </div>
     );
