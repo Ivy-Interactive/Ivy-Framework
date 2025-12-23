@@ -384,6 +384,9 @@ public class NullableInputsApp : SampleBase
                 | nullableTime.ToTimeInput().Placeholder("Select time").Invalid("Time is required").Nullable()
                 | Text.Block("Nullable time input with validation error")
 
+                | nullableCode.ToCodeInput().Placeholder("Enter code").Invalid("Code is required").Nullable()
+                | Text.Block("Nullable code input with validation error")
+
                 | nullableSelect.ToSelectInput(
                     new[]
                     {
@@ -407,9 +410,6 @@ public class NullableInputsApp : SampleBase
                     .Invalid("Selection is required")
                     .Nullable()
                 | Text.Block("Nullable multi-select input with validation error")
-
-                | nullableCode.ToCodeInput().Placeholder("Enter code").Invalid("Code is required").Nullable()
-                | Text.Block("Nullable code input with validation error")
 
                 | nullableColor.ToColorInput().Placeholder("Select color").Invalid("Color is required").Nullable()
                 | Text.Block("Nullable color input with validation error")
