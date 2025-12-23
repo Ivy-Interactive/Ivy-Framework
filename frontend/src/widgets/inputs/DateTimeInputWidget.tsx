@@ -495,7 +495,12 @@ const TimeVariant: React.FC<TimeVariantProps> = ({
 
   return (
     <div className="relative w-full select-none" data-testid={dataTestId}>
-      <div className="relative flex items-center rounded-md border border-input shadow-sm focus-within:ring-1 focus-within:ring-ring">
+      <div
+        className={cn(
+          'relative flex items-center rounded-md border border-input shadow-sm focus-within:ring-1 focus-within:ring-ring',
+          invalid && inputStyles.invalidInput
+        )}
+      >
         <Clock
           className={cn(
             'ml-3 shrink-0',
