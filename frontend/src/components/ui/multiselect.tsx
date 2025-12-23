@@ -130,6 +130,7 @@ const MultipleSelector = React.forwardRef<
             className={cn(
               multipleSelectorVariants({ scale }),
               disabled && 'cursor-not-allowed opacity-50',
+              (!value || value.length === 0) && 'text-muted-foreground',
               invalid
                 ? 'border-destructive text-destructive-foreground focus-within:ring-destructive focus-within:border-destructive'
                 : undefined
