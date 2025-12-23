@@ -9,6 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { selectIconContainerVariants } from '@/components/ui/select/variants';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -988,13 +989,13 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
         {/* Right-side icon container */}
         {(nullable && hasValue && !disabled) || invalid ? (
           <div
-            className="absolute top-1/2 -translate-y-1/2 flex items-center gap-1 right-8"
+            className={selectIconContainerVariants({ scale })}
             style={{ zIndex: 2 }}
           >
             {/* Clear (X) button */}
             {nullable && hasValue && !disabled && (
-              <span
-                role="button"
+              <button
+                type="button"
                 tabIndex={-1}
                 aria-label="Clear"
                 onClick={e => {
@@ -1013,14 +1014,16 @@ const SelectVariant: React.FC<SelectInputWidgetProps> = ({
                     eventHandler('OnChange', id, [null]);
                   }
                 }}
-                className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
+                className="pointer-events-auto p-1 rounded hover:bg-accent focus:outline-none cursor-pointer flex items-center h-6"
               >
                 <X className={xIconVariants({ scale })} />
-              </span>
+              </button>
             )}
             {/* Invalid icon - rightmost */}
             {invalid && (
-              <InvalidIcon message={invalid} className="pointer-events-auto" />
+              <div className="pointer-events-auto flex items-center h-6 p-1">
+                <InvalidIcon message={invalid} />
+              </div>
             )}
           </div>
         ) : null}
