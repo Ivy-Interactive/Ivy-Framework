@@ -167,6 +167,7 @@ export const CodeInputWidget: React.FC<CodeInputWidgetProps> = ({
             <CopyToClipboardButton
               textToCopy={localValue}
               aria-label="Copy to clipboard"
+              scale={scale}
             />
           )}
           {showClear && (
