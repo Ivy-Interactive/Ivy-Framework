@@ -67,25 +67,8 @@ const injectMeta = (mode: string): Plugin => {
   };
 };
 
-const fontCacheHeaders = (): Plugin => ({
-  name: 'font-cache-headers',
-  configureServer(server) {
-    server.middlewares.use((req, res, next) => {
-      if (req.url?.includes('/fonts/') && req.url?.endsWith('.woff2')) {
-        res.setHeader('Cache-Control', 'public, max-age=86400, immutable');
-      }
-      next();
-    });
-  },
-});
-
 export default defineConfig(({ mode }) => ({
-  plugins: [
-    react(),
-    tailwindcss(),
-    injectMeta(mode),
-    fontCacheHeaders(),
-  ] as Plugin[],
+  plugins: [react(), tailwindcss(), injectMeta(mode)] as Plugin[],
   esbuild: {
     drop: process.env.NODE_ENV === 'production' ? ['console', 'debugger'] : [],
     legalComments: 'none',

@@ -1,0 +1,10 @@
+{
+  "name": "@ivy/fonts",
+  "version": "1.0.0",
+  "private": true,
+  "main": "index.css",
+  "files": [
+    "*.css",
+    "webfonts/"
+  ]
+}
