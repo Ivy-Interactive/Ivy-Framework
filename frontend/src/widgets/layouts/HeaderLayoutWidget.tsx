@@ -53,7 +53,7 @@ export const HeaderLayoutWidget: React.FC<HeaderLayoutWidgetProps> = ({
             <div className="p-4 w-full">{slots.Content}</div>
           </ScrollArea>
         ) : (
-          <div className="h-full w-full">{slots.Content}</div>
+          <div className="p-4 w-full h-full">{slots.Content}</div>
         )}
       </div>
     </div>
