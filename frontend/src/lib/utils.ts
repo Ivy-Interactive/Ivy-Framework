@@ -65,13 +65,7 @@ export function getChromeParam(): boolean {
   return urlParams.get('chrome')?.toLowerCase() !== 'false';
 }
 
-export function wrapAppContent(
-  content: React.ReactNode,
-  chrome: boolean
-): React.ReactNode {
-  if (chrome) {
-    return content;
-  }
+export function wrapAppContent(content: React.ReactNode): React.ReactNode {
   return React.createElement(
     'div',
     { className: 'w-full h-full p-4 overflow-y-auto' },
