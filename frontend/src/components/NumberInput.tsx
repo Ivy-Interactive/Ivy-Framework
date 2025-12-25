@@ -287,7 +287,7 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
               ref.current = node;
             }
           }}
-          type="text"
+          type="number"
           inputMode="decimal"
           value={displayValueToUse}
           onChange={handleChange}
