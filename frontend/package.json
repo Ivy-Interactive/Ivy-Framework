@@ -18,7 +18,7 @@
     "e2e:samples": "playwright test e2e/samples"
   },
   "dependencies": {
-    "ivy-design-system": "1.1.1",
+    "ivy-design-system": "1.1.12",
     "@codemirror/lang-cpp": "6.0.3",
     "@codemirror/lang-css": "6.3.1",
     "@codemirror/lang-html": "6.4.11",
