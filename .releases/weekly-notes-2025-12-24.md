@@ -72,3 +72,4 @@ The redesigned metric cards now provide clearer visual hierarchy, making it easi
 - Grid View: now supports set explicit Height
 - (chrome): fix padding rendering for none-chrome apps by @ArtemKhvorostianyi in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/1873>
 - Fixed bug where AOT compilation was not working for some file-based apps
+- Performance of widget tree synchronization had been improved, as well as some state bugs were fixed.
