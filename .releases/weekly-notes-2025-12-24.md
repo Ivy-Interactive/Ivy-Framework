@@ -1,5 +1,8 @@
 # Ivy Framework Weekly Notes - Week of 2025-12-24
 
+> [!NOTE]
+> We usually release on Fridays every week. Sign up on [https://ivy.app/](https://ivy.app/auth/sign-up) to get release notes directly to your inbox.
+
 ## API Changes
 
 ### PivotTable Sorting Behavior
@@ -67,9 +70,37 @@ The redesigned metric cards now provide clearer visual hierarchy, making it easi
 
 <img width="2319" height="637" alt="image" src="https://github.com/user-attachments/assets/0a6548b0-d3e2-4e12-9d64-5109952e9bba" />
 
-## What's Changed
+## Other notes
 
 - Grid View: now supports set explicit Height
 - (chrome): fix padding rendering for none-chrome apps by @ArtemKhvorostianyi in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/1873>
 - Fixed bug where AOT compilation was not working for some file-based apps
 - Performance of widget tree synchronization had been improved, as well as some state bugs were fixed.
+- Resolved minor bugs around charts, where x-axis labels were incorrect or badly formatted
+
+## What's Changed
+
+- chore: patchnotes by @rorychatt in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/1857>
+
+- [datatable]: use stable connectionKey instead of object reference to prevent rerender by @defymecobra in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/1844>
+- [Analyzer]: configure nuget package by @defymecobra in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/1861>
+- deps: Update React and ReactDOM to 19.2.3. by @rorychatt in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/1865>
+- chore: remove redundant theming system section in release notes by @ArtemKhvorostianyi in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/1864>
+- Refactored Affixes by @KaiserReich95 in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/1802>
+- [charts]: remove automatic alphabetical sorting in PivotTable by @defymecobra in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/1871>
+- (Card): Update Design of Metric Views by @dcrjodle in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/1860>
+- Feat/docs updates mikael by @rorychatt in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/1867>
+- [Kanban]: fix examples in docs by @defymecobra in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/1877>
+- [CodeInput]: fix example in docs page by @defymecobra in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/1878>
+- [GridView]: add Height by @defymecobra in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/1876>
+- docs improvements batch 2 by @rorychatt in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/1882>
+- (toc): generate compile time instead of frontend runtime by @rorychatt in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/1883>
+- (fix): Added description for allowing LLMs in for querying by @KaiserReich95 in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/1899>
+- (IAnyInput): handle nullable by @ArtemKhvorostianyi in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/1808>
+- docs: improvements by Mikael vol3 by @rorychatt in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/1896>
+- (chrome): fix padding rendering for none-chrome apps by @ArtemKhvorostianyi in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/1873>
+- [NumberInput]: restrict NumberInput to numeric characters only by @ArtemLazarchuk in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/1902>
+- chore: patchnotes by @rorychatt in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/1903>
+- [ECharts]: upgrade to v6 by @defymecobra in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/1890>
+
+**Full Changelog**: <https://github.com/Ivy-Interactive/Ivy-Framework/compare/v1.2.5...v1.2.6>
