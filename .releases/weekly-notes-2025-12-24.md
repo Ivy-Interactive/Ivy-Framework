@@ -39,8 +39,6 @@ The extension methods remain unchanged, so your existing code using `Prefix(stri
 
 Ivy Framework now supports AOT compilation for better performance and faster startup times. This enables native compilation of your Ivy apps, resulting in smaller deployments and improved runtime performance.
 
-**What Changed:**
-
 - Added AOT compatibility to core framework and Ivy.Filters
 - Implemented static YAML context for AOT-safe serialization
 - Updated project files with `IsAotCompatible` and `IsTrimmable` properties
@@ -91,9 +89,9 @@ Users can now filter using conversational phrases:
 
 The AI agent intelligently handles typos, maps concepts (like "retirement age" to `[Age] >= 65`), and resolves type mismatches by suggesting appropriate alternative fields. The AI converts queries to structured filter expressions using comparisons (`=`, `>`, `<`), text operations (`contains`, `starts with`), existence checks (`IS BLANK`), and logical operators (`AND`, `OR`, `NOT`).
 
-**New Text Size:**
+### New Text Size
 
-- Added `Text.ExtraLarge()` for larger text displays, perfect for highlighting key metrics
+Added `Text.ExtraLarge()` for larger text displays, perfect for highlighting key metrics
 
 <img width="614" height="328" alt="image" src="https://github.com/user-attachments/assets/10f36d59-9298-49b9-a3b4-a93006023508" />
 
@@ -109,7 +107,7 @@ var productGrid = new GridView()
     | productCards;
 ```
 
-**Metric View Redesign:**
+### Metric View Redesign
 
 The redesigned metric cards now provide clearer visual hierarchy, making it easier to scan dashboards and focus on key numbers at a glance.
 
