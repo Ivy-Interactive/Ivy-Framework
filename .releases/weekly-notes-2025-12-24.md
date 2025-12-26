@@ -113,25 +113,18 @@ You can download .NET 10.0 from the [official .NET download page](https://dotnet
 
 ## What's Changed
 
-- deps: Update React and ReactDOM to 19.2.3. (#1865) in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/1865>
-- (Card): Update Design of Metric Views (#1860) in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/1860>
-- feat: remove redundant theming system (#1864) in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/1864>
-- Refactored Affixes (#1802) in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/1802>
-- [charts]: remove automatic alphabetical sorting in PivotTable (#1871) in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/1871>
-- Feat/docs updates mikael (#1867) in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/1867>
-- [Kanban]: fix examples in docs (#1877) in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/1877>
-- [CodeInput]: fix example in docs (#1878) in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/1878>
-- [GridView]: add Height (#1876) in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/1876>
-- feat(filters,aot): add AOT support and YAML serialization (#18xx)
-- docs improvements batch 2 (#1882) in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/1882>
-- refactor(aot): improve trimming/AOT support and simplify config (#18xx)
-- (toc): generate compile time instead of frontend runtime (#1883) in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/1883>
-- fix(card,frontend): handle nullable Card title and clean peer flags (#18xx)
-- Simplify bug report template by removing fields (#18xx)
-- feat(core): add widget tree hashing and duplicate ID checks (#18xx)
-- feat(samples): update Kanban and product demos with interactivity (#18xx)
-- Added description for allowing LLMs in for querying (#1899) in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/1899>
-- (IAnyInput): handle nullable (#1808) in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/1808>
-- docs: improvements by Mikael vol3 (#1896) in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/1896>
-- (chrome): fix padding rendering for none-chrome apps (#1873) in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/1873>
-- chore: Reduce commit history download to 7 days and update example paths in prompt.
+- deps: Update React and ReactDOM to 19.2.3. by @rorychatt in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/1865>
+- (Card): Update Design of Metric Views by @joelbystedt in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/1860>
+- feat: remove redundant theming system by @ArtemKhvorostianyi in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/1864>
+- Refactored Affixes by @KaiserReich95 in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/1802>
+- [charts]: remove automatic alphabetical sorting in PivotTable by @rorychatt in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/1871>
+- Feat/docs updates mikael by @rorychatt in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/1867>
+- [Kanban]: fix examples in docs by @NikitaChuiko in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/1877>
+- [CodeInput]: fix example in docs by @NikitaChuiko in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/1878>
+- [GridView]: add Height by @NikitaChuiko in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/1876>
+- docs improvements batch 2 by @rorychatt in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/1882>
+- (toc): generate compile time instead of frontend runtime by @rorychatt in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/1883>
+- Added description for allowing LLMs in for querying by @KaiserReich95 in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/1899>
+- (IAnyInput): handle nullable by @ArtemKhvorostianyi in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/1808>
+- docs: improvements by Mikael vol3 by @rorychatt in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/1896>
+- (chrome): fix padding rendering for none-chrome apps by @ArtemKhvorostianyi in <https://github.com/Ivy-Interactive/Ivy-Framework/pull/1873>
