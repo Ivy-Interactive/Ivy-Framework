@@ -41,6 +41,7 @@ const PieChartWidget: React.FC<PieChartWidgetProps> = ({
 
   const styles: React.CSSProperties = {
     ...getWidth(width),
+    position: 'relative',
     ...(isFull
       ? { display: 'flex', flexDirection: 'column', height: '100%' }
       : {}),
@@ -166,6 +167,7 @@ const PieChartWidget: React.FC<PieChartWidgetProps> = ({
           foreground: themeColors.foreground,
           fontSans: themeColors.fontSans,
           background: themeColors.background,
+          mutedForeground: themeColors.mutedForeground,
         }),
         trigger: 'item',
         formatter: '{a} <br/>{b}: {c} ({d}%)',

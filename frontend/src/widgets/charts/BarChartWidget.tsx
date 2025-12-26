@@ -95,6 +95,7 @@ const BarChartWidget: React.FC<BarChartWidgetProps> = ({
 
   const styles: React.CSSProperties = {
     ...getWidth(width),
+    position: 'relative',
     ...(isFull
       ? { display: 'flex', flexDirection: 'column', height: '100%' }
       : {}),
@@ -192,6 +193,7 @@ const BarChartWidget: React.FC<BarChartWidgetProps> = ({
         foreground: themeColors.foreground,
         fontSans: themeColors.fontSans,
         background: themeColors.background,
+        mutedForeground: themeColors.mutedForeground,
       }),
       toolbox: generateEChartToolbox(toolbox),
     }),

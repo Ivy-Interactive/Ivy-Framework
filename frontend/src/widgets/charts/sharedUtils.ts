@@ -289,7 +289,12 @@ export const generateYAxis = (
 export const generateTooltip = (
   tooltip?: ToolTipProps,
   type?: string,
-  themeColors?: { foreground: string; fontSans: string; background: string }
+  themeColors?: {
+    foreground: string;
+    fontSans: string;
+    background: string;
+    mutedForeground?: string;
+  }
 ) => ({
   trigger: 'axis',
   appendToBody: true,
@@ -297,6 +302,16 @@ export const generateTooltip = (
     type: type ?? 'cross',
     animated: tooltip?.animated ?? true,
     shadowStyle: { opacity: 0.5 },
+    lineStyle: {
+      color: themeColors?.mutedForeground,
+    },
+    crossStyle: {
+      color: themeColors?.mutedForeground,
+    },
+    label: {
+      backgroundColor: themeColors?.mutedForeground,
+      color: 'rgba(255, 255, 255, 0.9)',
+    },
   },
   textStyle: generateTextStyle(themeColors?.foreground, themeColors?.fontSans),
   backgroundColor: themeColors?.background || 'rgba(255, 255, 255, 0.9)',
@@ -312,9 +327,24 @@ export const generateEChartToolbox = (toolbox?: ToolboxProps) => {
   const features: ToolboxFeatures = {};
 
   if (toolbox.dataView !== false) {
+    const cardBg = getComputedStyle(document.documentElement)
+      .getPropertyValue('--card')
+      .trim();
+    const foreground = getComputedStyle(document.documentElement)
+      .getPropertyValue('--foreground')
+      .trim();
+    const mutedForeground = getComputedStyle(document.documentElement)
+      .getPropertyValue('--muted-foreground')
+      .trim();
+
     features.dataView = {
       show: true,
       readOnly: false,
+      backgroundColor: cardBg,
+      textareaColor: cardBg,
+      textColor: foreground,
+      buttonColor: mutedForeground,
+      buttonTextColor: 'rgba(255, 255, 255, 0.9)',
     };
   }
 
@@ -345,11 +375,16 @@ export const generateEChartToolbox = (toolbox?: ToolboxProps) => {
           : 'right',
     top:
       toolbox.verticalAlign?.toLowerCase() === 'top'
-        ? 'top'
+        ? -10
         : toolbox.verticalAlign?.toLowerCase() === 'middle'
           ? 'middle'
           : 'bottom',
     feature: features,
+    iconStyle: {
+      borderColor: getComputedStyle(document.documentElement)
+        .getPropertyValue('--muted-foreground')
+        .trim(),
+    },
     emphasis: {
       iconStyle: {
         color: null,

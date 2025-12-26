@@ -52,6 +52,7 @@ const LineChartWidget: React.FC<LineChartWidgetProps> = ({
 
   const styles: React.CSSProperties = {
     ...getWidth(width),
+    position: 'relative',
     ...(isFull
       ? { display: 'flex', flexDirection: 'column', height: '100%' }
       : {}),
@@ -106,6 +107,7 @@ const LineChartWidget: React.FC<LineChartWidgetProps> = ({
         foreground: themeColors.foreground,
         fontSans: themeColors.fontSans,
         background: themeColors.background,
+        mutedForeground: themeColors.mutedForeground,
       }),
       toolbox: generateEChartToolbox(toolbox),
       legend: generateEChartLegend(legend, {
