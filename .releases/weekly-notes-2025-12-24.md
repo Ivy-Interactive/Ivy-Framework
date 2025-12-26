@@ -13,6 +13,8 @@ var pivot = new PivotTable<SalesData>()
 // Sort explicitly if needed: results.OrderBy(r => r["Category"])
 ```
 
+<img width="2240" height="978" alt="image" src="https://github.com/user-attachments/assets/9ef5c805-f624-428b-bdea-6af8da6eb1ae" />
+
 This change gives you more control over how your pivot table data is presented.
 
 ### TextInput Prefix/Suffix Refactoring
@@ -26,6 +28,8 @@ The `TextInput` widget's prefix and suffix API has been refactored for better si
 widget.Prefix("$")
 widget.Suffix(Icons.Search)
 ```
+
+<img width="2314" height="313" alt="image" src="https://github.com/user-attachments/assets/f55b9250-16b2-4dbe-a4b2-a6998f98c0c5" />
 
 The extension methods remain unchanged, so your existing code using `Prefix(string)` and `Suffix(Icons)` continues to work without modification.
 
@@ -55,6 +59,8 @@ var textInput = optionalText.ToTextInput()
     .Placeholder("Optional field...")
     .Nullable();
 ```
+
+<img width="2327" height="929" alt="image" src="https://github.com/user-attachments/assets/f281d78b-49e3-4764-b1c6-271912853923" />
 
 ### DataTable AI-Powered Filtering
 
@@ -89,6 +95,8 @@ The AI agent intelligently handles typos, maps concepts (like "retirement age" t
 
 - Added `Text.ExtraLarge()` for larger text displays, perfect for highlighting key metrics
 
+<img width="614" height="328" alt="image" src="https://github.com/user-attachments/assets/10f36d59-9298-49b9-a3b4-a93006023508" />
+
 ### GridView Height Control
 
 The `GridView` widget now supports explicit height control through a new `Height()` method. Previously, grid views would automatically size based on their content, but you can now set a specific height when needed.
@@ -104,6 +112,8 @@ var productGrid = new GridView()
 **Metric View Redesign:**
 
 The redesigned metric cards now provide clearer visual hierarchy, making it easier to scan dashboards and focus on key numbers at a glance.
+
+<img width="2319" height="637" alt="image" src="https://github.com/user-attachments/assets/0a6548b0-d3e2-4e12-9d64-5109952e9bba" />
 
 ### .NET 10.0 Required
 
