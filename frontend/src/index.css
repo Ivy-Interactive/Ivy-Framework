@@ -1,5 +1,5 @@
 @import 'tailwindcss';
-@import 'ivy-design-system/css/fonts';
+@import '@ivy-interactive/ivy-design-system/css/fonts';
 
 @theme {
   --color-scheme: light;
