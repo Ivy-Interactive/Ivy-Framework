@@ -174,7 +174,7 @@ const PieChartWidget: React.FC<PieChartWidgetProps> = ({
       },
       series: series,
       toolbox: generateEChartToolbox(
-        toolbox ? { ...toolbox, magicType: false } : undefined
+        toolbox && { ...toolbox, magicType: false }
       ),
     }),
     [chartColors, legend, themeColors, tooltip, series, toolbox]
