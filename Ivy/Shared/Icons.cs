@@ -619,7 +619,7 @@ public enum Icons
     Files,
     Film,
     ListFilterPlus,
-    Fingerprint,
+    FingerprintPattern,
     FireExtinguisher,
     Fish,
     FishOff,
