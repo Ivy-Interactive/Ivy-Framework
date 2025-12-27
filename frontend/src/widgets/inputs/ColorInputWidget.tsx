@@ -24,6 +24,18 @@ interface ColorInputWidgetProps {
   scale?: Scales;
 }
 
+const isValidColorFormat = (value: string): boolean => {
+  if (!value || value.trim() === '') return true;
+
+  const trimmed = value.trim();
+
+  if (/^#([0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$/i.test(trimmed)) {
+    return true;
+  }
+
+  return false;
+};
+
 // Hoisted color map for backend Colors enum
 const enumColorsToCssVar: Record<string, string> = {
   black: 'var(--color-black)',
@@ -148,6 +160,11 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
     return hexValue.startsWith('#') ? hexValue : '#000000';
   };
 
+  const formatIsInvalid = !isValidColorFormat(inputValue);
+  const isInvalid = invalid || formatIsInvalid;
+  const invalidMessage =
+    invalid || (formatIsInvalid ? 'Invalid color format' : undefined);
+
   // --- Variant rendering logic ---
   if (variant === 'Text') {
     return (
@@ -163,18 +180,18 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
             disabled={disabled}
             className={cn(
               colorInputVariants({ scale }),
-              invalid && inputStyles.invalidInput,
-              (invalid || (nullable && value !== null && !disabled)) && 'pr-8'
+              isInvalid && inputStyles.invalidInput,
+              (isInvalid || (nullable && value !== null && !disabled)) && 'pr-8'
             )}
           />
-          {(invalid || (nullable && value !== null && !disabled)) && (
+          {(isInvalid || (nullable && value !== null && !disabled)) && (
             <div
               className="absolute top-1/2 -translate-y-1/2 flex items-center gap-1 right-2"
               style={{ zIndex: 2 }}
             >
-              {invalid && (
+              {invalidMessage && (
                 <span className="flex items-center">
-                  <InvalidIcon message={invalid} />
+                  <InvalidIcon message={invalidMessage} />
                 </span>
               )}
               {nullable && value !== null && !disabled && (
@@ -206,7 +223,7 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
             disabled={disabled}
             className={`${colorInputPickerVariants({ scale })} p-1 rounded-lg border ${
               disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
-            } ${invalid ? inputStyles.invalidInput : 'border-border'}`}
+            } ${isInvalid ? inputStyles.invalidInput : 'border-border'}`}
           />
         </div>
       </div>
@@ -224,7 +241,7 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
           disabled={disabled}
           className={`${colorInputPickerVariants({ scale })} p-1 rounded-lg border ${
             disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
-          } ${invalid ? inputStyles.invalidInput : 'border-border'}`}
+          } ${isInvalid ? inputStyles.invalidInput : 'border-border'}`}
         />
       </div>
       <div className="relative">
@@ -238,18 +255,21 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
           disabled={disabled}
           className={cn(
             colorInputVariants({ scale }),
-            invalid && inputStyles.invalidInput,
-            (invalid || (nullable && value !== null && !disabled)) && 'pr-8'
+            isInvalid && inputStyles.invalidInput,
+            (isInvalid || (nullable && value !== null && !disabled)) && 'pr-8'
           )}
         />
-        {(invalid || (nullable && value !== null && !disabled)) && (
+        {(isInvalid || (nullable && value !== null && !disabled)) && (
           <div
             className="absolute top-1/2 -translate-y-1/2 flex items-center gap-1 right-2"
             style={{ zIndex: 2 }}
           >
             {/* Invalid icon - rightmost */}
-            {invalid && (
-              <InvalidIcon message={invalid} className="pointer-events-auto" />
+            {invalidMessage && (
+              <InvalidIcon
+                message={invalidMessage}
+                className="pointer-events-auto"
+              />
             )}
             {nullable && value !== null && !disabled && (
               <button
