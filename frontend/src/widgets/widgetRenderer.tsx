@@ -1,6 +1,7 @@
 import React, { Suspense } from 'react';
 import { WidgetNode } from '@/types/widgets';
 import { widgetMap } from '@/widgets/widgetMap';
+import { Scales } from '@/types/scale';
 
 const isLazyComponent = (
   component:
@@ -26,7 +27,10 @@ const flattenChildren = (children: WidgetNode[]): WidgetNode[] => {
   });
 };
 
-export const renderWidgetTree = (node: WidgetNode): React.ReactNode => {
+export const renderWidgetTree = (
+  node: WidgetNode,
+  inheritedScale?: Scales
+): React.ReactNode => {
   const Component = widgetMap[
     node.type as keyof typeof widgetMap
   ] as React.ComponentType<Record<string, unknown>>;
@@ -41,6 +45,10 @@ export const renderWidgetTree = (node: WidgetNode): React.ReactNode => {
     events: node.events || [],
   };
 
+  if (inheritedScale) {
+    props.scale = inheritedScale;
+  }
+
   if ('testId' in props && props.testId) {
     props['data-testid'] = props.testId;
     delete props.testId;
@@ -48,17 +56,19 @@ export const renderWidgetTree = (node: WidgetNode): React.ReactNode => {
 
   const children = flattenChildren(node.children || []);
 
+  const scaleForChildren = (props.scale as Scales) || inheritedScale;
+
   // Process children, grouping by Slot widgets (original behavior)
   const slots = children.reduce(
     (acc, child) => {
       if (child.type === 'Ivy.Slot') {
         const slotName = child.props.name as string;
         acc[slotName] = (child.children || []).map(slotChild =>
-          renderWidgetTree(slotChild)
+          renderWidgetTree(slotChild, scaleForChildren)
         );
       } else {
         acc.default = acc.default || [];
-        acc.default.push(renderWidgetTree(child));
+        acc.default.push(renderWidgetTree(child, scaleForChildren));
       }
       return acc;
     },

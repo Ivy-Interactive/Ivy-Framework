@@ -8,11 +8,7 @@ type DetailsWidgetProps = {
   scale?: Scales;
 };
 
-export const DetailsWidget = ({
-  id,
-  children,
-  scale = Scales.Medium,
-}: DetailsWidgetProps) => {
+export const DetailsWidget = ({ id, children, scale }: DetailsWidgetProps) => {
   return (
     <Details scale={scale} key={id}>
       {children}
