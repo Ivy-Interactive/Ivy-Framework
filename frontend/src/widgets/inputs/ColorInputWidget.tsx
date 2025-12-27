@@ -24,18 +24,6 @@ interface ColorInputWidgetProps {
   scale?: Scales;
 }
 
-const isValidColorFormat = (value: string): boolean => {
-  if (!value || value.trim() === '') return true;
-
-  const trimmed = value.trim();
-
-  if (/^#([0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$/i.test(trimmed)) {
-    return true;
-  }
-
-  return false;
-};
-
 // Hoisted color map for backend Colors enum
 const enumColorsToCssVar: Record<string, string> = {
   black: 'var(--color-black)',
@@ -65,6 +53,22 @@ const enumColorsToCssVar: Record<string, string> = {
   primary: 'var(--color-primary)',
   secondary: 'var(--color-secondary)',
   destructive: 'var(--color-destructive)',
+};
+
+const isValidColorFormat = (value: string): boolean => {
+  if (!value || value.trim() === '') return true;
+
+  const trimmed = value.trim();
+
+  if (/^#([0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$/i.test(trimmed)) {
+    return true;
+  }
+
+  if (enumColorsToCssVar[trimmed.toLowerCase()]) {
+    return true;
+  }
+
+  return false;
 };
 
 export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
