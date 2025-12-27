@@ -173,7 +173,9 @@ const PieChartWidget: React.FC<PieChartWidgetProps> = ({
         formatter: '{a} <br/>{b}: {c} ({d}%)',
       },
       series: series,
-      toolbox: generateEChartToolbox(toolbox),
+      toolbox: generateEChartToolbox(
+        toolbox && { ...toolbox, magicType: false }
+      ),
     }),
     [chartColors, legend, themeColors, tooltip, series, toolbox]
   );
