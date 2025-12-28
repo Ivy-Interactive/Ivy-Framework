@@ -73,7 +73,7 @@ public static class CardExtensions
     {
         if (icon is Icons iconsValue)
         {
-            icon = iconsValue.ToIcon().Color(Colors.Muted);
+            icon = iconsValue.ToIcon().Color(Colors.Neutral);
         }
         return card.Header(card.Title, card.Description, icon);
     }
