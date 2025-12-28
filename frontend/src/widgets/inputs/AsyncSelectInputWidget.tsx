@@ -142,7 +142,7 @@ export const AsyncSelectInputWidget: React.FC<AsyncSelectInputWidgetProps> = ({
   );
 
   return (
-    <div className="relative">
+    <div>
       <button
         type="button"
         disabled={disabled}
@@ -163,13 +163,11 @@ export const AsyncSelectInputWidget: React.FC<AsyncSelectInputWidgetProps> = ({
             {placeholder}
           </span>
         )}
-        <div className="flex items-center gap-2 shrink-0 ml-2">
-          {invalid && (
-            <div className="flex items-center">
-              <InvalidIcon message={invalid} />
-            </div>
-          )}
-        </div>
+        {invalid && (
+          <div className="flex items-center shrink-0 ml-2">
+            <InvalidIcon message={invalid} />
+          </div>
+        )}
         <div
           className={cn(
             'absolute top-0 bottom-0 border-l flex items-center justify-center',
