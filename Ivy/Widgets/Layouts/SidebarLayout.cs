@@ -16,6 +16,8 @@ public record SidebarLayout : WidgetBase<SidebarLayout>
         Width = width ?? DefaultWidth;
     }
 
+    internal SidebarLayout() { }
+
     [Prop] public bool MainAppSidebar { get; set; } = false;
 
     [Prop] public int MainContentPadding { get; set; } = 2;

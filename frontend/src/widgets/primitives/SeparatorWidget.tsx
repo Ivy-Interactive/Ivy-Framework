@@ -12,7 +12,7 @@ interface SeparatorWidgetProps {
 }
 
 export const SeparatorWidget: React.FC<SeparatorWidgetProps> = ({
-  orientation,
+  orientation = 'Horizontal',
   text,
   width,
   height,

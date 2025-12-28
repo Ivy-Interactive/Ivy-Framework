@@ -271,9 +271,9 @@ export interface LineChartWidgetProps {
   tooltip?: ToolTipProps;
   toolbox?: ToolboxProps;
   legend?: LegendProps;
-  referenceLines?: MarkLine;
-  referenceAreas?: MarkArea;
-  referenceDots?: ReferenceDot;
+  referenceLines?: MarkLine[];
+  referenceAreas?: MarkArea[];
+  referenceDots?: ReferenceDot[];
   colorScheme: ColorScheme;
 }
 

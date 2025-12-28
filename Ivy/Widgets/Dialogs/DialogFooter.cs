@@ -8,4 +8,6 @@ public record DialogFooter : WidgetBase<DialogFooter>
     public DialogFooter(params object[] children) : base(children)
     {
     }
+
+    internal DialogFooter() { }
 }

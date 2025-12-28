@@ -10,6 +10,10 @@ public record Box : WidgetBase<Box>
     {
     }
 
+    internal Box()
+    {
+    }
+
     [Prop] public Colors? Color { get; set; } = null;
 
     [Prop] public Thickness BorderThickness { get; set; } = new(1);

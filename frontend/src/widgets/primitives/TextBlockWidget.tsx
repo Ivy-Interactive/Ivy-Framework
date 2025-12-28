@@ -220,8 +220,8 @@ const variantMap: VariantMap = {
 };
 
 export const TextBlockWidget: React.FC<TextBlockWidgetProps> = ({
-  content,
-  variant,
+  content = '',
+  variant = 'Literal',
   width,
   color,
   strikeThrough,

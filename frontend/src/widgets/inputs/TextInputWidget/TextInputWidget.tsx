@@ -14,7 +14,7 @@ export const TextInputWidget: React.FC<TextInputWidgetProps> = ({
   id,
   placeholder,
   value,
-  variant,
+  variant = 'Text',
   disabled,
   invalid,
   nullable = false,

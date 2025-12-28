@@ -17,9 +17,13 @@ public record Stepper : WidgetBase<Stepper>
         Items = items.ToArray();
     }
 
+    internal Stepper()
+    {
+    }
+
     [Prop] public int? SelectedIndex { get; set; }
 
-    [Prop] public StepperItem[] Items { get; set; }
+    [Prop] public StepperItem[] Items { get; set; } = [];
 
     [Prop] public bool AllowSelectForward { get; set; } = false;
 

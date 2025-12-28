@@ -11,6 +11,8 @@ public record Form : WidgetBase<Form>
 
     }
 
+    internal Form() { }
+
     [Event] public Func<Event<Form>, ValueTask>? OnSubmit { get; set; }
 }
 

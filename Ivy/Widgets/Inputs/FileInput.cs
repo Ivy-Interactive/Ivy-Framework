@@ -27,7 +27,7 @@ public abstract record FileInputBase : WidgetBase<FileInputBase>, IAnyFileInput
 
     [Prop] public string? Placeholder { get; set; }
 
-    [Prop] public FileInputs Variant { get; set; }
+    [Prop] public FileInputs Variant { get; set; } = FileInputs.Drop;
 
     [Prop] public string? Accept { get; set; }
 
@@ -111,13 +111,17 @@ public record FileInput<TValue> : FileInputBase, IInput<TValue>, IAnyFileInput
         Value = value;
     }
 
-    public FileInput(string? placeholder = null, bool disabled = false, FileInputs variant = FileInputs.Drop)
+    public FileInput(string? placeholder = null, bool disabled = false, FileInputs variant = FileInputs.Drop) : this()
     {
         Placeholder = placeholder;
         Variant = variant;
         Disabled = disabled;
-        Width = Ivy.Shared.Size.Full();
-        Height = Ivy.Shared.Size.Units(50);
+    }
+
+    internal FileInput()
+    {
+        Width = Size.Full();
+        Height = Size.Units(50);
     }
 
     [Prop] public TValue Value { get; } = default!;

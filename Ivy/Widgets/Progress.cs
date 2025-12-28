@@ -17,9 +17,13 @@ public record Progress : WidgetBase<Progress>
     {
     }
 
-    public Progress(int? value = 0)
+    public Progress(int? value = 0) : this()
     {
         Value = value;
+    }
+
+    internal Progress()
+    {
         Width = Size.Full();
     }
 

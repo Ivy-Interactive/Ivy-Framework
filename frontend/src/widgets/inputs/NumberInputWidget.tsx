@@ -55,7 +55,7 @@ interface NumberInputBaseProps {
 
 interface NumberInputWidgetProps
   extends Omit<NumberInputBaseProps, 'onValueChange'> {
-  variant?: 'Default' | 'Slider';
+  variant?: 'Number' | 'Slider';
   targetType?: string;
   width?: string;
 }
@@ -282,7 +282,8 @@ NumberVariant.displayName = 'NumberVariant';
 export const NumberInputWidget = memo(
   ({
     id,
-    variant = 'Default',
+    variant = 'Number',
+    formatStyle = 'Decimal',
     nullable = false,
     width,
     ...props
@@ -334,6 +335,7 @@ export const NumberInputWidget = memo(
           <NumberVariant
             id={id}
             {...props}
+            formatStyle={formatStyle}
             value={normalizedValue}
             nullable={nullable}
             onValueChange={handleChange}

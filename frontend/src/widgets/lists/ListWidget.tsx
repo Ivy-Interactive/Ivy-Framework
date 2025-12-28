@@ -21,6 +21,7 @@ export const ListWidget = ({ children }: ListWidgetProps) => {
     }
   }, []);
 
+  // eslint-disable-next-line react-hooks/incompatible-library
   const rowVirtualizer = useVirtualizer({
     count: childArray.length,
     getScrollElement: () => parentRef.current,

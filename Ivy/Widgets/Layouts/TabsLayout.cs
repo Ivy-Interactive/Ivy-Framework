@@ -22,20 +22,45 @@ public record TabsLayout : WidgetBase<TabsLayout>
         OnRefresh = onRefresh;
         OnReorder = onReorder;
         SelectedIndex = selectedIndex;
-        Width = Size.Full();
-        Height = Size.Full();
-        RemoveParentPadding = true;
     }
 
-    public TabsLayout(Action<Event<TabsLayout, int>>? onSelect, Action<Event<TabsLayout, int>>? onClose, Action<Event<TabsLayout, int>>? onRefresh, Action<Event<TabsLayout, int[]>>? onReorder, int? selectedIndex, params Tab[] tabs)
+    internal TabsLayout()
+    {
+        Width = Size.Full();
+        Height = Size.Full();
+    }
+
+    public TabsLayout(Action<Event<TabsLayout, int>>? onSelect, Action<Event<TabsLayout, int>>? onClose,
+        Action<Event<TabsLayout, int>>? onRefresh, Action<Event<TabsLayout, int[]>>? onReorder, int? selectedIndex,
+        params Tab[] tabs)
         : this(
-            onSelect != null ? e => { onSelect(e); return ValueTask.CompletedTask; }
+            onSelect != null
+                ? e =>
+                {
+                    onSelect(e);
+                    return ValueTask.CompletedTask;
+                }
     : null,
-            onClose != null ? e => { onClose(e); return ValueTask.CompletedTask; }
+            onClose != null
+                ? e =>
+                {
+                    onClose(e);
+                    return ValueTask.CompletedTask;
+                }
     : null,
-            onRefresh != null ? e => { onRefresh(e); return ValueTask.CompletedTask; }
+            onRefresh != null
+                ? e =>
+                {
+                    onRefresh(e);
+                    return ValueTask.CompletedTask;
+                }
     : null,
-            onReorder != null ? e => { onReorder(e); return ValueTask.CompletedTask; }
+            onReorder != null
+                ? e =>
+                {
+                    onReorder(e);
+                    return ValueTask.CompletedTask;
+                }
     : null,
             selectedIndex, tabs)
     {
@@ -45,7 +70,7 @@ public record TabsLayout : WidgetBase<TabsLayout>
 
     [Prop] public TabsVariant Variant { get; set; } = TabsVariant.Content;
 
-    [Prop] public bool RemoveParentPadding { get; set; }
+    [Prop] public bool RemoveParentPadding { get; set; } = false;
 
     [Prop] public Thickness? Padding { get; set; } = new Thickness(4);
 

@@ -1,6 +1,6 @@
 using Ivy.Shared;
 
-namespace Ivy.Samples.Shared.Apps.Widgets;
+namespace Ivy.Samples.Shared.Apps.Widgets.Primitives;
 
 [App(icon: Icons.Volume2, path: ["Widgets"], searchHints: ["sound", "playback", "media", "mp3", "music", "audio"])]
 public class AudioPlayerApp : SampleBase
@@ -11,36 +11,36 @@ public class AudioPlayerApp : SampleBase
 
         // Basic audio player with default settings
 
-        var basicAudio = new Audio("https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3")
+        var basicAudio = new AudioPlayer("https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3")
             .TestId("audio-basic");
 
         // Audio player with custom settings
-        var customAudio = new Audio("https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3")
+        var customAudio = new AudioPlayer("https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3")
             .Loop(true)
             .Preload(AudioPreload.Auto)
             .TestId("audio-looping");
 
         // Muted audio player (useful for autoplay scenarios)
-        var mutedAudio = new Audio("https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3")
+        var mutedAudio = new AudioPlayer("https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3")
             .Muted(true)
             .Autoplay(true)
             .Loop(true)
             .TestId("audio-muted-autoplay");
 
         // Audio without controls (programmatic control only)
-        var noControlsAudio = new Audio("https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3")
+        var noControlsAudio = new AudioPlayer("https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3")
             .Controls(false)
             .Muted(true)
             .TestId("audio-no-controls");
 
         // Custom sized audio player
-        var customSizedAudio = new Audio("https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3")
+        var customSizedAudio = new AudioPlayer("https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3")
             .Width(Size.Fraction(0.5f))
             .Height(Size.Units(12))
             .TestId("audio-custom-sized");
 
         // Theme awareness audio player (separate instance to avoid reuse issues)
-        var themeAudio = new Audio("https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3")
+        var themeAudio = new AudioPlayer("https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3")
             .TestId("audio-theme");
 
         return Layout.Vertical()

@@ -7,32 +7,34 @@ namespace Ivy;
 
 public record LineChart : WidgetBase<LineChart>
 {
-    public LineChart(object data, params Line[] lines)
+    public LineChart(object data, params Line[] lines) : this()
     {
         Data = data;
         Lines = lines;
-        Width = Size.Full();
-        Height = Size.Full();
     }
 
-    public LineChart(object data, string dataKey, string nameKey)
+    public LineChart(object data, string dataKey, string nameKey) : this()
     {
         Data = data;
         Lines = [new Line(dataKey, Utils.SplitPascalCase(dataKey))];
         XAxis = [new XAxis(nameKey)];
         YAxis = [new YAxis(dataKey)];
         Tooltip = new();
+    }
+
+    internal LineChart()
+    {
         Width = Size.Full();
         Height = Size.Full();
     }
 
-    [Prop] public object Data { get; init; }
+    [Prop] public object? Data { get; init; }
 
     [Prop] public Layouts Layout { get; init; } = Layouts.Vertical; //todo: not implemented on the frontend
 
     [Prop] public ColorScheme ColorScheme { get; init; } = ColorScheme.Default;
 
-    [Prop] public Line[] Lines { get; init; }
+    [Prop] public Line[] Lines { get; init; } = [];
 
     [Prop] public CartesianGrid? CartesianGrid { get; init; }
 

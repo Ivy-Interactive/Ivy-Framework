@@ -140,7 +140,16 @@ function applyUpdateMessage(
             return;
           }
           const target = parent.children[index];
-          applyPatch(target, update.patch);
+          if (
+            update.patch.length === 1 &&
+            update.patch[0].op === 'replace' &&
+            update.patch[0].path === ''
+          ) {
+            // Special case: full replacement of the target node
+            parent.children[index] = update.patch[0].value as WidgetNode;
+          } else {
+            applyPatch(target, update.patch);
+          }
         } else {
           if (!parent) {
             logger.error('No parent found in applyUpdateMessage', { update });
@@ -321,10 +330,10 @@ export const useBackend = (
   const handleSetAuthCookies = useCallback(
     async (message: SetAuthCookiesMessage) => {
       const currentConnectionId = latestConnectionRef.current?.connectionId;
-      logger.debug('Processing SetAuthCookies request', {
-        hasAuthToken: !!message.cookieJarId,
-        connectionId: currentConnectionId,
-      });
+      // logger.debug('Processing SetAuthCookies request', {
+      //   hasAuthToken: !!message.cookieJarId,
+      //   connectionId: currentConnectionId,
+      // });
       const response = await fetch(
         `${getIvyHost()}/ivy/auth/set-auth-cookies`,
         {
@@ -356,7 +365,7 @@ export const useBackend = (
   );
 
   const handleRedirect = useCallback((message: RedirectMessage) => {
-    logger.debug('Processing Redirect request', message);
+    //logger.debug('Processing Redirect request', message);
     const { url, replaceHistory } = message;
 
     // Validate URL to prevent open redirect vulnerabilities
@@ -381,7 +390,7 @@ export const useBackend = (
   }, []);
 
   const handleSetTheme = useCallback((theme: string) => {
-    logger.debug('Processing SetTheme request', { theme });
+    // logger.debug('Processing SetTheme request', { theme });
     const normalizedTheme = theme.toLowerCase();
     if (['dark', 'light', 'system'].includes(normalizedTheme)) {
       logger.info('Setting theme globally', { theme: normalizedTheme });
@@ -393,11 +402,11 @@ export const useBackend = (
 
   const handleHttpRequest = useCallback(
     async (request: HttpTunnelRequestMessage) => {
-      logger.debug('Processing HttpRequest', {
-        requestId: request.requestId,
-        method: request.method,
-        url: request.url,
-      });
+      // logger.debug('Processing HttpRequest', {
+      //   requestId: request.requestId,
+      //   method: request.method,
+      //   url: request.url,
+      // });
 
       try {
         const headers = new Headers();

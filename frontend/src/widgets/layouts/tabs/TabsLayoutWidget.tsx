@@ -20,10 +20,10 @@ export const TabsLayoutWidget = ({
   children,
   events,
   selectedIndex,
-  removeParentPadding,
-  variant = 'Tabs',
-  padding,
-  width,
+  removeParentPadding = false,
+  variant = 'Content',
+  padding = '4,4,4,4',
+  width = 'Full',
   addButtonText,
 }: TabsLayoutWidgetProps) => {
   const tabWidgets = React.useMemo(

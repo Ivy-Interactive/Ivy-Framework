@@ -1,6 +1,6 @@
 import '@glideapps/glide-data-grid/dist/index.css';
 import './styles/checkbox.css';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { TableProvider } from './dataTableContext';
 import { useTable } from './dataTableContext';
 import { ErrorDisplay } from '@/components/ErrorDisplay';
@@ -14,6 +14,7 @@ import { Filter as FilterIcon } from 'lucide-react';
 import { tableStyles } from './styles/style';
 import { TableProps } from './types/types';
 import { getWidth, getHeight } from '@/lib/styles';
+import { applyConfigDefaults, applyColumnsDefaults } from './dataTableDefaults';
 
 interface TableLayoutProps {
   children?: React.ReactNode;
@@ -40,32 +41,22 @@ export const DataTable: React.FC<TableProps> = ({
   connection,
   config = {},
   editable = false,
-  width,
-  height,
+  width = 'Full',
+  height = 'Full',
   rowActions,
   'data-testid': dataTestId,
 }) => {
-  // Apply default config values
-  const finalConfig = {
-    filterType: config.filterType,
-    freezeColumns: config.freezeColumns ?? null,
-    allowLlmFiltering: config.allowLlmFiltering ?? false,
-    allowSorting: config.allowSorting ?? true,
-    allowFiltering: config.allowFiltering ?? false,
-    allowColumnReordering: config.allowColumnReordering ?? true,
-    allowColumnResizing: config.allowColumnResizing ?? true,
-    allowCopySelection: config.allowCopySelection ?? false,
-    selectionMode: config.selectionMode,
-    showIndexColumn: config.showIndexColumn ?? false,
-    showGroups: config.showGroups ?? false,
-    showColumnTypeIcons: config.showColumnTypeIcons ?? false,
-    showVerticalBorders: config.showVerticalBorders ?? false,
-    batchSize: config.batchSize,
-    loadAllRows: config.loadAllRows ?? false,
-    showSearch: config.showSearch ?? false,
-    enableRowHover: config.enableRowHover ?? true,
-    enableCellClickEvents: config.enableCellClickEvents ?? false,
-  };
+  const finalConfig = useMemo(
+    () => ({
+      ...applyConfigDefaults(config),
+      // Frontend-only config options (not in backend)
+      filterType: config.filterType,
+      enableRowHover: config.enableRowHover ?? true,
+    }),
+    [config]
+  );
+
+  const finalColumns = useMemo(() => applyColumnsDefaults(columns), [columns]);
 
   // Create styles object with width and height if provided
   const containerStyle: React.CSSProperties = {
@@ -76,7 +67,7 @@ export const DataTable: React.FC<TableProps> = ({
   return (
     <div style={containerStyle} data-testid={dataTestId}>
       <TableProvider
-        columns={columns}
+        columns={finalColumns}
         connection={connection}
         config={finalConfig}
         editable={editable}

@@ -28,8 +28,10 @@ public enum ButtonVariant
 
 public record Button : WidgetBase<Button>
 {
+    internal Button() { }
+
     [OverloadResolutionPriority(1)]
-    public Button(string? title = null, Func<Event<Button>, ValueTask>? onClick = null, ButtonVariant variant = ButtonVariant.Primary, Icons icon = Icons.None)
+    public Button(string? title = null, Func<Event<Button>, ValueTask>? onClick = null, ButtonVariant variant = ButtonVariant.Primary, Icons? icon = null)
     {
         Title = title;
         Variant = variant;
@@ -37,7 +39,7 @@ public record Button : WidgetBase<Button>
         OnClick = onClick;
     }
 
-    public Button(string? title = null, Action<Event<Button>>? onClick = null, ButtonVariant variant = ButtonVariant.Primary, Icons icon = Icons.None)
+    public Button(string? title = null, Action<Event<Button>>? onClick = null, ButtonVariant variant = ButtonVariant.Primary, Icons? icon = null)
     {
         Title = title;
         Variant = variant;
@@ -45,7 +47,7 @@ public record Button : WidgetBase<Button>
         OnClick = onClick?.ToValueTask();
     }
 
-    public Button(string? title = null, Action? onClick = null, ButtonVariant variant = ButtonVariant.Primary, Icons icon = Icons.None)
+    public Button(string? title = null, Action? onClick = null, ButtonVariant variant = ButtonVariant.Primary, Icons? icon = null)
     {
         Title = title;
         Variant = variant;
@@ -55,7 +57,7 @@ public record Button : WidgetBase<Button>
 
     [Prop] public string? Title { get; set; }
 
-    [Prop] public ButtonVariant Variant { get; set; }
+    [Prop] public ButtonVariant Variant { get; set; } = ButtonVariant.Primary;
 
     [Prop] public Icons? Icon { get; set; }
 

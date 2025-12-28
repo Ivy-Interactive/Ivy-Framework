@@ -29,8 +29,10 @@ public abstract record FeedbackInputBase : WidgetBase<FeedbackInputBase>, IAnyFe
     [Prop] public string? Invalid { get; set; }
 
     [Prop] public string? Placeholder { get; set; }
+
     [Prop] public bool Nullable { get; set; }
-    [Prop] public FeedbackInputs Variant { get; set; }
+
+    [Prop] public FeedbackInputs Variant { get; set; } = FeedbackInputs.Stars;
 
     [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
 
@@ -72,6 +74,8 @@ public record FeedbackInput<TNumber> : FeedbackInputBase, IInput<TNumber>
         Disabled = disabled;
         Variant = variant;
     }
+
+    internal FeedbackInput() { }
 
     [Prop] public TNumber Value { get; } = default!;
 

@@ -26,13 +26,17 @@ public record Code : WidgetBase<Code>
     {
         Content = content;
         Language = language;
+    }
+
+    internal Code()
+    {
         Width = Size.Full();
         Height = Size.MaxContent().Max(Size.Px(800));
     }
 
-    [Prop] public string Content { get; set; }
+    [Prop] public string Content { get; set; } = string.Empty;
 
-    [Prop] public Languages Language { get; set; }
+    [Prop] public Languages Language { get; set; } = Languages.Csharp;
 
     [Prop] public bool ShowLineNumbers { get; set; }
 

@@ -36,6 +36,11 @@ public record ReadOnlyInput<TValue> : WidgetBase<ReadOnlyInput<TValue>>, IInput<
         Value = value;
     }
 
+    internal ReadOnlyInput()
+    {
+        Value = default!;
+    }
+
     [Prop] public TValue Value { get; }
 
     [Prop] public bool Disabled { get; set; }

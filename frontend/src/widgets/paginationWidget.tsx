@@ -14,7 +14,7 @@ import { cn } from '@/lib/utils';
 interface PaginationWidgetProps {
   id: string;
   page?: number;
-  numPages?: number;
+  numPages: number;
   siblings?: number;
   boundaries?: number;
   disabled?: boolean;

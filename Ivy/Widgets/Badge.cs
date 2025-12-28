@@ -17,16 +17,18 @@ public enum BadgeVariant
 
 public record Badge : WidgetBase<Badge>
 {
-    public Badge(string? title = null, BadgeVariant variant = BadgeVariant.Primary, Icons icon = Icons.None)
+    public Badge(string? title = null, BadgeVariant variant = BadgeVariant.Primary, Icons? icon = null)
     {
         Title = title;
         Variant = variant;
         Icon = icon;
     }
 
+    internal Badge() { }
+
     [Prop] public string? Title { get; set; }
 
-    [Prop] public BadgeVariant Variant { get; set; }
+    [Prop] public BadgeVariant Variant { get; set; } = BadgeVariant.Primary;
 
     [Prop] public Icons? Icon { get; set; }
 

@@ -7,6 +7,8 @@ public record Slot : WidgetBase<Slot>
 {
     [Prop] public string? Name { get; set; }
 
+    internal Slot() { }
+
     public Slot(params object[] children) : this(null, children)
     {
     }

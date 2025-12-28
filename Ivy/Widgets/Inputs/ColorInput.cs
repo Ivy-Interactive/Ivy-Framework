@@ -74,6 +74,8 @@ public record ColorInput<TColor> : ColorInputBase, IInput<TColor>
         Variant = variant;
     }
 
+    internal ColorInput() { }
+
     [Prop] public TColor Value { get; } = default!;
 
     [Event] public Func<Event<IInput<TColor>, TColor>, ValueTask>? OnChange { get; }

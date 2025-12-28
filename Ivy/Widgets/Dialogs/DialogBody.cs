@@ -8,4 +8,6 @@ public record DialogBody : WidgetBase<DialogBody>
     public DialogBody(params object[] children) : base(children)
     {
     }
+
+    internal DialogBody() { }
 }

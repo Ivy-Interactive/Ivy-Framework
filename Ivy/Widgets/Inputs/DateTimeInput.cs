@@ -26,7 +26,7 @@ public interface IAnyDateTimeInput : IAnyInput
 
 public abstract record DateTimeInputBase : WidgetBase<DateTimeInputBase>, IAnyDateTimeInput
 {
-    [Prop] public DateTimeInputs Variant { get; set; }
+    [Prop] public DateTimeInputs Variant { get; set; } = DateTimeInputs.Date;
 
     [Prop] public string? Placeholder { get; set; }
 
@@ -77,6 +77,8 @@ public record DateTimeInput<TDate> : DateTimeInputBase, IInput<TDate>
         Placeholder = placeholder;
         Disabled = disabled;
     }
+
+    internal DateTimeInput() { }
 
     [Prop] public TDate Value { get; set; } = default!;
 

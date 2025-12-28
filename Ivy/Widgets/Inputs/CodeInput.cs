@@ -30,7 +30,7 @@ public abstract record CodeInputBase : WidgetBase<CodeInputBase>, IAnyCodeInput
 
     [Prop] public bool Nullable { get; set; }
 
-    [Prop] public CodeInputs Variant { get; set; }
+    [Prop] public CodeInputs Variant { get; set; } = CodeInputs.Default;
 
     [Prop] public Languages? Language { get; set; } = null;
 
@@ -67,11 +67,15 @@ public record CodeInput<TString> : CodeInputBase, IInput<TString>
         Value = value;
     }
 
-    public CodeInput(string? placeholder = null, bool disabled = false, CodeInputs variant = CodeInputs.Default)
+    public CodeInput(string? placeholder = null, bool disabled = false, CodeInputs variant = CodeInputs.Default) : this()
     {
         Placeholder = placeholder;
         Variant = variant;
         Disabled = disabled;
+    }
+
+    internal CodeInput()
+    {
         Width = Size.Full();
         Height = Size.Units(25);
     }

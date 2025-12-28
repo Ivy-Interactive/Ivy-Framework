@@ -11,9 +11,9 @@ interface IframeWidgetProps {
 
 export const IframeWidget: React.FC<IframeWidgetProps> = ({
   id,
-  src,
-  width,
-  height,
+  src = '',
+  width = 'Full',
+  height = 'Full',
   refreshToken,
 }) => {
   const [iframeKey, setIframeKey] = useState(id);

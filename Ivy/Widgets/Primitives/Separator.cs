@@ -12,7 +12,11 @@ public record Separator : WidgetBase<Separator>
         Orientation = orientation;
     }
 
-    [Prop] public Orientation Orientation { get; set; }
+    internal Separator()
+    {
+    }
+
+    [Prop] public Orientation Orientation { get; set; } = Orientation.Horizontal;
 
     [Prop] public string? Text { get; set; }
 }

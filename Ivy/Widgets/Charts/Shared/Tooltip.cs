@@ -11,7 +11,6 @@ public record Tooltip
     }
 
     public bool Animated { get; set; } = false;
-
 }
 
 public static class TooltipExtensions

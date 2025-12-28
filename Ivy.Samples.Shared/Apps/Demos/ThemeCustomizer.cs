@@ -1,12 +1,9 @@
-using Ivy.Client;
-using Ivy.Core;
 using Ivy.Shared;
 using Ivy.Themes;
-using Ivy.Views;
 
-namespace Ivy.Samples.Shared.Apps.Other;
+namespace Ivy.Samples.Shared.Apps.Demos;
 
-[App(icon: Icons.Palette, path: ["Other", "UI"], searchHints: ["theming", "customization", "branding", "styling", "appearance", "design"])]
+[App(icon: Icons.Palette, searchHints: ["theming", "customization", "branding", "styling", "appearance", "design"])]
 public class ThemeCustomizer : SampleBase
 {
     protected override object? BuildSample()

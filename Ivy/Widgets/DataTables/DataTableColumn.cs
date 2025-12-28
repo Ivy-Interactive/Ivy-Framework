@@ -6,6 +6,10 @@ namespace Ivy;
 
 public class DataTableColumn
 {
+    public DataTableColumn()
+    {
+    }
+
     public required string Name { get; set; }
     public required string Header { get; set; }
 
@@ -124,25 +128,5 @@ public class LabelsDisplayRenderer : IDataTableColumnRenderer
 {
     public bool IsEditable => false;
     public ColType ColType => ColType.Labels;
-}
-
-public static class DataTableIcons
-{
-    public const string User = "User";
-    public const string Mail = "Mail";
-    public const string Hash = "Hash";
-    public const string Calendar = "Calendar";
-    public const string Clock = "Clock";
-    public const string Activity = "Activity";
-    public const string Flag = "Flag";
-    public const string Zap = "Zap";
-    public const string Info = "Info";
-    public const string ChevronUp = "ChevronUp";
-    public const string ChevronDown = "ChevronDown";
-    public const string Filter = "Filter";
-    public const string Search = "Search";
-    public const string Settings = "Settings";
-    public const string MoreVertical = "MoreVertical";
-    public const string HelpCircle = "HelpCircle";
 }
 

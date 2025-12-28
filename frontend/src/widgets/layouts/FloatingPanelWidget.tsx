@@ -4,13 +4,13 @@ import React from 'react';
 interface FloatingPanelWidgetProps {
   id: string;
   align: Align;
-  offset: string;
+  offset?: string;
   children: React.ReactNode;
 }
 
 export const FloatingPanelWidget = ({
   id,
-  align,
+  align = 'BottomRight',
   offset,
   children,
 }: FloatingPanelWidgetProps) => {

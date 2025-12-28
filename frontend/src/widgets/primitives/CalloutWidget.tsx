@@ -45,7 +45,7 @@ const defaultIcons = {
 export const CalloutWidget: React.FC<CalloutWidgetProps> = ({
   title,
   children,
-  variant,
+  variant = 'Info',
   icon,
   width,
   height,

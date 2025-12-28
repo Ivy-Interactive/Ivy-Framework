@@ -19,7 +19,7 @@ interface FeedbackInputWidgetProps {
 export const FeedbackInputWidget: React.FC<FeedbackInputWidgetProps> = ({
   id,
   value,
-  variant,
+  variant = 'Stars',
   disabled,
   invalid,
   events,

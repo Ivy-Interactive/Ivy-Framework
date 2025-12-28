@@ -46,7 +46,7 @@ public abstract record TextInputBase : WidgetBase<TextInputBase>, IAnyTextInput
 
     [Prop] public string? Placeholder { get; set; }
 
-    [Prop] public TextInputs Variant { get; set; }
+    [Prop] public TextInputs Variant { get; set; } = TextInputs.Text;
 
     [Prop] public string? ShortcutKey { get; set; }
 
@@ -94,6 +94,8 @@ public record TextInput<TString> : TextInputBase, IInput<TString>
         Variant = variant;
         Disabled = disabled;
     }
+
+    internal TextInput() { }
 
     [Prop] public TString Value { get; } = default!;
 

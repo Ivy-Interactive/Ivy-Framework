@@ -22,10 +22,10 @@ export const ArticleWidget: React.FC<ArticleWidgetProps> = ({
   previous,
   next,
   documentSource,
-  showFooter,
-  showToc,
+  showFooter = true,
+  showToc = true,
   title,
-  headings,
+  headings = [],
 }) => {
   const eventHandler = useEventHandler();
   const articleRef = useRef<HTMLElement>(null);

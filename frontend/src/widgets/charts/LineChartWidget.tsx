@@ -20,19 +20,19 @@ import { LineChartWidgetProps, ChartType } from './chartTypes';
 
 const LineChartWidget: React.FC<LineChartWidgetProps> = ({
   data,
-  width,
-  height,
-  lines,
+  width = 'Full',
+  height = 'Full',
+  lines = [],
   cartesianGrid,
-  xAxis,
-  yAxis,
+  xAxis = [],
+  yAxis = [],
   tooltip,
   legend,
   toolbox,
-  referenceLines,
-  referenceAreas,
-  referenceDots,
-  colorScheme,
+  referenceLines = [],
+  referenceAreas = [],
+  referenceDots = [],
+  colorScheme = 'Default',
 }) => {
   // Use enhanced theme hook with automatic monitoring
   const { colors, isDark } = useThemeWithMonitoring({

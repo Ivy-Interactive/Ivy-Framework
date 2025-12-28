@@ -1,6 +1,6 @@
 ﻿using Ivy.Shared;
 
-namespace Ivy.Samples.Shared.Apps.Other;
+namespace Ivy.Samples.Shared.Apps.Demos;
 
 [App(icon: Icons.Palette, searchHints: ["palette", "swatches", "styling", "design", "appearance", "paint"])]
 public class ColorsApp : ViewBase

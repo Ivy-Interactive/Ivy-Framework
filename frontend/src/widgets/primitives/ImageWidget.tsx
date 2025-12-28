@@ -37,8 +37,8 @@ const getImageUrl = (url: string | undefined | null): string | null => {
 export const ImageWidget: React.FC<ImageWidgetProps> = ({
   id,
   src,
-  width,
-  height,
+  width = 'MinContent',
+  height = 'MinContent',
 }) => {
   const styles: React.CSSProperties = {
     ...getWidth(width),

@@ -20,7 +20,7 @@ public class GridDefinition
 
     public int Gap { get; set; } = 4;
 
-    public int Padding { get; set; } = 0;
+    public Thickness Padding { get; set; } = new(0);
 
     public AutoFlow? AutoFlow { get; set; } = null;
 
@@ -54,13 +54,17 @@ public record GridLayout : WidgetBase<GridLayout>
         RowHeights = def.RowHeights;
     }
 
+    internal GridLayout()
+    {
+    }
+
     [Prop] public int? Columns { get; set; }
 
     [Prop] public int? Rows { get; set; }
 
-    [Prop] public int Gap { get; set; }
+    [Prop] public int Gap { get; set; } = 4;
 
-    [Prop] public int Padding { get; set; }
+    [Prop] public Thickness Padding { get; set; } = new(0);
 
     [Prop] public AutoFlow? AutoFlow { get; set; }
 

@@ -10,8 +10,10 @@ public record DialogHeader : WidgetBase<DialogHeader>
         Title = title;
     }
 
+    internal DialogHeader() { }
+
     [Prop]
-    public string Title { get; set; }
+    public string? Title { get; set; }
 
     public static DialogHeader operator |(DialogHeader widget, object child)
     {
