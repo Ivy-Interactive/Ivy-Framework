@@ -34,6 +34,7 @@ public class TextVariantsDemo : ViewBase
             | Text.Blockquote("Blockquote text")
             | Text.InlineCode("InlineCode")
             | Text.Lead("Lead text for prominent display")
+            | Text.ExtraLarge("Extra Large text")
             | Text.Large("Large text")
             | Text.Small("Small text")
             | Text.Label("Label text")
