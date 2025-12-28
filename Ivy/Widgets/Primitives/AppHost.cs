@@ -12,7 +12,9 @@ public record AppHost : WidgetBase<AppHost>
         AppArgs = appArgs;
     }
 
-    [Prop] public string AppId { get; set; }
+    internal AppHost() { }
+
+    [Prop] public string AppId { get; set; } = string.Empty;
 
     [Prop] public string? AppArgs { get; set; }
 
