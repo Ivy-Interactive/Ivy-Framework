@@ -164,7 +164,7 @@ export const AsyncSelectInputWidget: React.FC<AsyncSelectInputWidgetProps> = ({
           </span>
         )}
         {invalid && (
-          <div className="flex items-center shrink-0 ml-2">
+          <div className="flex items-center shrink-0 ml-2 mr-2">
             <InvalidIcon message={invalid} />
           </div>
         )}
