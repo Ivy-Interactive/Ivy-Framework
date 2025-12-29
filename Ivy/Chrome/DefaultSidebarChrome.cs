@@ -394,24 +394,6 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
                 ..commonMenuItems, MenuItem.Default("Logout").Tag("$logout").Icon(Icons.LogOut).HandleSelect(onLogout)
             ], navigator));
         }
-        else if (isLoggedIn)
-        {
-            var trigger = new Button()
-                .Content(
-                    Layout.Horizontal().Align(Align.Left)
-                        | Icons.User.ToIcon()
-                        | Text.Muted("User")
-                    )
-                    .Variant(ButtonVariant.Ghost).Width(Size.Full());
-
-            footer = new DropDownMenu(
-                    DropDownMenu.DefaultSelectHandler(),
-                    trigger)
-                .Top()
-                .Items(settings.FooterMenuItemsTransformer([
-                    ..commonMenuItems, MenuItem.Default("Logout").Tag("$logout").Icon(Icons.LogOut).HandleSelect(onLogout)
-                ], navigator));
-        }
         else
         {
             var trigger = new Button("Settings")
@@ -422,12 +404,16 @@ public class DefaultSidebarChrome(ChromeSettings settings) : ViewBase
                     )
                     .Variant(ButtonVariant.Ghost).Width(Size.Full());
 
+            var footerMenuItems = isLoggedIn
+                ? [.. commonMenuItems, MenuItem.Default("Logout").Tag("$logout").Icon(Icons.LogOut).HandleSelect(onLogout)]
+                : commonMenuItems;
+
             footer = new DropDownMenu(
                     DropDownMenu.DefaultSelectHandler(),
                     trigger)
                 .Top()
                 .Items(
-                    settings.FooterMenuItemsTransformer(commonMenuItems, navigator)
+                    settings.FooterMenuItemsTransformer(footerMenuItems, navigator)
                 );
         }
 
