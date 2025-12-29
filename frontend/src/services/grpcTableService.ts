@@ -1000,5 +1000,22 @@ export class GrpcTableService extends EventEmitter {
   }
 }
 
-// Create a singleton instance that will be configured dynamically
-export const grpcTableService = new GrpcTableService('');
+let _grpcTableServiceInstance: GrpcTableService | null = null;
+
+export function getGrpcTableService(): GrpcTableService {
+  if (!_grpcTableServiceInstance) {
+    _grpcTableServiceInstance = new GrpcTableService('');
+  }
+  return _grpcTableServiceInstance;
+}
+
+export const grpcTableService = new Proxy({} as GrpcTableService, {
+  get(_target, prop) {
+    const instance = getGrpcTableService();
+    const value = instance[prop as keyof GrpcTableService];
+    if (typeof value === 'function') {
+      return value.bind(instance);
+    }
+    return value;
+  },
+});
