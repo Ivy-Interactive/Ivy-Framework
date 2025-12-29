@@ -156,6 +156,26 @@ public class InvalidStyleDemo : ViewBase
         return new ColorInput<string>("#ff0000").Invalid("This is not used now");
     }
 }
+```
+
+### Nullable
+
+When using nullable state types, you can enable the `.Nullable()` option to show a clear button when the input has a value:
+
+```csharp demo-below
+public class NullableColorDemo : ViewBase
+{ 
+    public override object? Build()
+    {    
+        var nullableWithValue = UseState((string?)"#ff0000");
+        
+        return Layout.Vertical()
+            | nullableWithValue.ToColorInput()
+                  .Nullable()
+                  .WithField()
+                  .Label("Nullable with Initial Value");
+    }
+}
 
 ```
 

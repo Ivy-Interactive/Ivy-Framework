@@ -145,6 +145,8 @@ public class SelectStylingDemo : ViewBase
         var normalSelect = UseState("");
         var invalidSelect = UseState("");
         var disabledSelect = UseState("");
+        var nullableSelect = UseState((string?)null);
+        var nullableMultiSelect = UseState((string[]?)null);
         
         var options = new[]{"Option 1", "Option 2", "Option 3"}.ToOptions();
         
@@ -164,7 +166,17 @@ public class SelectStylingDemo : ViewBase
                 .Placeholder("This is disabled...")
                 .Disabled(true)
                 .WithField()
-                .Label("Disabled SelectInput:");
+                .Label("Disabled SelectInput:")
+            | nullableSelect.ToSelectInput(options)
+                  .Placeholder("Choose an option...")
+                  .Nullable()
+                  .WithField()
+                  .Label("Nullable Select")
+            | nullableMultiSelect.ToSelectInput(options)
+                  .Placeholder("Select multiple...")
+                  .Nullable()
+                  .WithField()
+                  .Label("Nullable Multi-Select");
     }
 }
 ```

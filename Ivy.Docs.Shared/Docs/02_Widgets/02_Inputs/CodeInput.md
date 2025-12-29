@@ -135,6 +135,27 @@ UseState("function greet(name) {\n    console.log('Hello, ' + name);\n    return
     .Invalid("Missing closing parenthesis!")
 ```
 
+### Nullable
+
+When using nullable state types, you can enable the `.Nullable()` option to show a clear button when the input has a value:
+
+```csharp demo-tabs
+public class NullableCodeInputDemo : ViewBase
+{
+    public override object? Build()
+    {
+        var nullableWithValue = UseState((string?)"const x = 1;");
+        
+        return Layout.Vertical()
+            | nullableWithValue.ToCodeInput()
+                  .Language(Languages.Javascript)
+                  .Nullable()
+                  .WithField()
+                  .Label("Nullable with Initial Value");
+    }
+}
+```
+
 ### Disabled State
 
 The `Disabled` state prevents editing while allowing users to view the code. It's useful for displaying read-only examples or temporarily preventing modifications.

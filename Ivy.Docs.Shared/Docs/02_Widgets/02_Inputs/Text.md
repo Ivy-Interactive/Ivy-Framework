@@ -250,6 +250,27 @@ public class InvalidInputDemo: ViewBase
 
 Whatever text is provided to the `Invalid` function, shows up when mouse is hovered on the little `i` icon in the box.
 
+### Nullable
+
+When using nullable state types, you can enable the `.Nullable()` option to show a clear button when the input has a value:
+
+```csharp demo-below
+public class NullableInputDemo: ViewBase
+{
+    public override object? Build()
+    {
+        var nullableWithValue = UseState((string?)"Sample text");
+        
+        return Layout.Vertical()
+            | nullableWithValue.ToTextInput()
+                  .Placeholder("Has initial value...")
+                  .Nullable()
+                  .WithField()
+                  .Label("Nullable with Initial Value");
+    }
+}
+```
+
 ### Disabled
 
 When it is necessary to disable a `TextInput` variant, `Disabled` style is needed.

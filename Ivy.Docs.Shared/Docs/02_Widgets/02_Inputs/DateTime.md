@@ -106,17 +106,29 @@ public class FormatDemo : ViewBase
      {    
          var monthDateYear = UseState(DateTime.Today.Date);
          var yearMonthDate = UseState(DateTime.Today.Date);
+         var nullableDateTime = UseState((DateTime?)null);
+         var nullableTime = UseState((TimeOnly?)null);
          
          return Layout.Vertical()
-                 | monthDateYear.ToDateInput()
+                | monthDateYear.ToDateInput()
                                 .Format("MM/dd/yyyy")
                                 .WithField()
                                 .Label("MM/dd/yyyy")
                 | yearMonthDate.ToDateInput()
-                               .Placeholder("yyyy/MMM/dd")
-                               .Format("yyyy/MMM/dd")
-                               .WithField()
-                               .Label("yyyy/MMM/dd");
+                                .Placeholder("yyyy/MMM/dd")
+                                .Format("yyyy/MMM/dd")
+                                .WithField()
+                                .Label("yyyy/MMM/dd")
+                | nullableDateTime.ToDateTimeInput()
+                                .Placeholder("Select date/time...")
+                                .Nullable()
+                                .WithField()
+                                .Label("Nullable DateTime")
+                | nullableTime.ToTimeInput()
+                                .Placeholder("Select time...")
+                                .Nullable()
+                                .WithField()
+                                .Label("Nullable Time");
     }
 }    
 ```
