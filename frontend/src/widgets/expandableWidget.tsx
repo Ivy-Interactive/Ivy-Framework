@@ -10,6 +10,7 @@ import {
   expandableChevronVariants,
   expandableContentVariants,
 } from '@/components/ui/expandable/expandable-variants';
+import { Switch } from '@/components/ui/switch';
 import { ChevronRight } from 'lucide-react';
 import React from 'react';
 import { Scales } from '@/types/scale';
@@ -18,6 +19,7 @@ import { cn } from '@/lib/utils';
 interface ExpandableWidgetProps {
   id: string;
   disabled?: boolean;
+  toggleable?: boolean;
   open?: boolean;
   scale?: Scales;
   slots?: {
@@ -28,49 +30,47 @@ interface ExpandableWidgetProps {
 
 export const ExpandableWidget: React.FC<ExpandableWidgetProps> = ({
   id,
-  disabled,
+  disabled = false,
+  toggleable = false,
   open = false,
   scale = Scales.Medium,
   slots,
 }) => {
   const [isOpen, setIsOpen] = React.useState(open);
+  const [toggledOn, setToggledOn] = React.useState(false);
+
+  const isDisabled = toggleable ? !toggledOn : disabled;
 
   React.useEffect(() => {
     setIsOpen(open);
   }, [open]);
 
   React.useEffect(() => {
-    if (disabled && isOpen) {
+    if (isDisabled && isOpen) {
       setIsOpen(false);
     }
-  }, [disabled, isOpen]);
+  }, [isDisabled, isOpen]);
 
   const handleOpenChange = (newOpen: boolean) => {
-    // Prevent toggle if disabled
-    if (disabled) {
+    if (isDisabled) {
       return;
     }
     setIsOpen(newOpen);
   };
 
-  const handleTriggerClick = (e: React.MouseEvent) => {
-    // If clicking on an interactive element, stop propagation so it doesn't toggle
-    const target = e.target as HTMLElement;
-    const isInteractiveElement =
-      target.closest('button:not([data-collapsible-trigger])') ||
-      target.closest('input') ||
-      target.closest('select') ||
-      target.closest('[role="button"]:not([data-collapsible-trigger])') ||
-      target.closest('[role="switch"]') ||
-      target.closest('[role="checkbox"]') ||
-      target.closest('a[href]');
+  const handleToggleSwitch = (checked: boolean) => {
+    setToggledOn(checked);
+  };
 
-    if (isInteractiveElement) {
+  const handleTriggerClick = (e: React.MouseEvent) => {
+    const target = e.target as HTMLElement;
+
+    if (target.closest('[role="switch"]')) {
       e.stopPropagation();
+      return;
     }
 
-    // Prevent toggle if disabled
-    if (disabled) {
+    if (isDisabled) {
       e.preventDefault();
       e.stopPropagation();
     }
@@ -82,23 +82,50 @@ export const ExpandableWidget: React.FC<ExpandableWidgetProps> = ({
       open={isOpen}
       onOpenChange={handleOpenChange}
       className={cn(
-        'w-full rounded-md border border-border shadow-sm data-[disabled=true]:cursor-not-allowed data-[disabled=true]:opacity-50',
+        'w-full rounded-md border border-border shadow-sm',
+        isDisabled && 'cursor-not-allowed',
         'p-0'
       )}
-      data-disabled={disabled}
+      data-disabled={isDisabled}
       role="details"
     >
       <CollapsibleTrigger
         disabled={false}
-        className={cn(expandableTriggerVariants({ scale }), 'relative')}
+        className={cn(
+          expandableTriggerVariants({ scale }),
+          'relative',
+          isDisabled && 'cursor-not-allowed'
+        )}
         onClick={handleTriggerClick}
         data-collapsible-trigger
       >
-        <div className={expandableHeaderVariants({ scale })} role="summary">
+        {toggleable && (
+          <div
+            className="flex items-center mr-2"
+            onClick={e => e.stopPropagation()}
+          >
+            <Switch
+              checked={!isDisabled}
+              onCheckedChange={handleToggleSwitch}
+              scale={scale}
+            />
+          </div>
+        )}
+        <div
+          className={cn(
+            expandableHeaderVariants({ scale }),
+            isDisabled &&
+              '[&>*:not(:has([role=switch],[role=checkbox],input))]:opacity-50'
+          )}
+          role="summary"
+        >
           {slots?.Header}
         </div>
         <span
-          className={expandableChevronContainerVariants({ scale })}
+          className={cn(
+            expandableChevronContainerVariants({ scale }),
+            isDisabled && 'opacity-50'
+          )}
           aria-hidden="true"
         >
           <ChevronRight

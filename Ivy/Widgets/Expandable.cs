@@ -12,14 +12,17 @@ public record Expandable : WidgetBase<Expandable>
 
     [Prop] public bool Disabled { get; set; } = false;
 
+    [Prop] public bool Toggleable { get; set; } = false;
+
     [Prop] public bool Open { get; set; } = false;
 }
 
 public static class ExpandableExtensions
 {
-    public static Expandable Disabled(this Expandable widget, bool disabled = true)
+    public static Expandable Disabled(this Expandable widget, bool toggleable = false)
     {
-        widget.Disabled = disabled;
+        widget.Disabled = true;
+        widget.Toggleable = toggleable;
         return widget;
     }
 
@@ -29,5 +32,3 @@ public static class ExpandableExtensions
         return widget;
     }
 }
-
-
