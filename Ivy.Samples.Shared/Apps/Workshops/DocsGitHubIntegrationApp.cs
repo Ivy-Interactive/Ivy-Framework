@@ -2,7 +2,7 @@ using Ivy.Shared;
 
 namespace Ivy.Samples.Shared.Apps.Workshops;
 
-[App(icon: Icons.Book, path: ["Workshops"], isVisible: true, title: "Docs GitHub Integration", searchHints: ["documentation", "github", "integration", "workshop", "requirements", "design"])]
+[App(icon: Icons.Book, path: ["Workshops"], isVisible: false, title: "Docs GitHub Integration", searchHints: ["documentation", "github", "integration", "workshop", "requirements", "design"])]
 public class DocsGitHubIntegrationApp : SampleBase
 {
     protected override object? BuildSample()

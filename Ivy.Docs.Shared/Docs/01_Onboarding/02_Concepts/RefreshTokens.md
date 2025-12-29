@@ -10,13 +10,11 @@ searchHints:
 
 # Refresh Tokens
 
-<Ingress>
 Refresh tokens provide a mechanism to manually trigger UI updates and effect executions in Ivy, enabling you to reload data, refresh components, or trigger actions on demand.
-</Ingress>
 
 ## Basic Usage
 
-The `UseRefreshToken` hook creates a token that can be manually refreshed to trigger effects:
+The `UseRefreshToken` hook creates a token that can be manually refreshed to trigger [effects](./Effects.md):
 
 ```csharp demo-below
 public class BasicRefreshExample : ViewBase
@@ -138,7 +136,7 @@ UseEffect(() =>
 }, [refreshToken]);
 ```
 
-## Refresh Tokens vs Event Handlers
+## Refresh Tokens vs [Event Handlers](./EventHandlers.md)
 
 ### Comparison Table
 

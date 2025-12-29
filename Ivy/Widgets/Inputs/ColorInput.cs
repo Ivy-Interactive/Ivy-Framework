@@ -74,6 +74,8 @@ public record ColorInput<TColor> : ColorInputBase, IInput<TColor>
         Variant = variant;
     }
 
+    internal ColorInput() { }
+
     [Prop] public TColor Value { get; } = default!;
 
     [Event] public Func<Event<IInput<TColor>, TColor>, ValueTask>? OnChange { get; }
@@ -128,6 +130,11 @@ public static class ColorInputExtensions
     public static ColorInputBase Invalid(this ColorInputBase widget, string? invalid)
     {
         return widget with { Invalid = invalid };
+    }
+
+    public static ColorInputBase Nullable(this ColorInputBase widget, bool? nullable = true)
+    {
+        return widget with { Nullable = nullable ?? true };
     }
 
     public static ColorInputBase Variant(this ColorInputBase widget, ColorInputs variant)

@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using System.Reflection;
 
@@ -5,7 +6,7 @@ namespace Ivy.Helpers;
 
 public static class QueryableExtensions
 {
-    public static IQueryable RemoveFields<TModel>(this IQueryable<TModel> queryable, string[] fields)
+    public static IQueryable RemoveFields<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] TModel>(this IQueryable<TModel> queryable, string[] fields)
     {
         // If no fields to remove, return as-is
         if (fields == null || fields.Length == 0)

@@ -12,7 +12,11 @@ public record Area
         StackId = stackId?.ToString();
     }
 
-    public string DataKey { get; }
+    internal Area()
+    {
+    }
+
+    public string? DataKey { get; }
 
     public CurveTypes CurveType { get; set; } = CurveTypes.Natural;
 

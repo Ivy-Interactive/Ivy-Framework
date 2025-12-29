@@ -39,9 +39,9 @@ The whole framework is built around strict enterprise security constraints. As t
 
 ### Quick Start
 
-> ⚠️ **Note:** Ivy.Console is still in beta, and the agentic features require an account. [Sign up for our waitlist](https://ivy.app/join-waitlist) to be among the first to get access.
+> ⚠️ **Note:** Ivy.Console is still in beta, and the agentic features require an account. [Register](https://ivy.app/auth/sign-up) for a free account to be among the first to try these features.
 
-Make sure you have the [.NET 9 SDK installed](https://dotnet.microsoft.com/en-us/download/dotnet/9.0).
+Make sure you have the [.NET 10 SDK installed](https://dotnet.microsoft.com/en-us/download/dotnet/10.0).
 
 1. **Install Ivy CLI**:
 
@@ -65,66 +65,11 @@ Make sure you have the [.NET 9 SDK installed](https://dotnet.microsoft.com/en-us
 
 You can also run `ivy samples` to see all the components that Ivy offers and `ivy docs` for documentation.  
 
-## Framework Developer Instructions
+Additional instructions in our [documentation](https://docs.ivy.app). 
 
-If you want to work on the framework itself, you need to set up the following:
+## Want to help build Ivy Framework?
 
-1. **Install dependencies**:
-   - [Node 22.12+ & npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm)
-2. **Fork and clone this repository**.
-3. **Pre-generate documentation files** (first time only):
+Check out our [Internal Developer Wiki)(https://github.com/Ivy-Interactive/Ivy-Framework/wiki).
 
-   **Windows (PowerShell):**
 
-   ```powershell
-   cd Ivy.Docs.Shared
-   .\Regenerate.ps1
-   ```
 
-   **Mac/Linux (Bash):**
-
-   ```bash
-   cd Ivy.Docs.Shared
-   sh ./Regenerate.sh
-   ```
-
-4. **Build the frontend**:
-
-   ```bash
-   cd frontend
-   npm install
-   npm run build
-   npm run dev
-   ```
-
-5. **Run the backend** (choose one):
-
-   **For Ivy.Samples (testing components):**
-
-   ```bash
-   cd Ivy.Samples
-   dotnet watch
-   ```
-
-   **For Ivy.Docs (documentation):**
-
-   ```bash
-   cd Ivy.Docs
-   dotnet watch
-   ```
-
-6. **Open** [http://localhost:5173/](http://localhost:5173/) in your browser.
-
-Changes in /frontend will be hot-reloaded by Vite and changes in /Ivy.Samples will be hot-reloaded by Ivy.
-
-For detailed contribution guidelines, see [CONTRIBUTING.md](CONTRIBUTING.md).
-
-## Troubleshooting
-
-### Apple Silicon Mac: "Bad CPU type in executable" due to Google Protobuf & ARM
-
-Install Rosetta 2: `/usr/sbin/softwareupdate --install-rosetta --agree-to-license`
-
-### Debug Widget Tree Updates
-
-Set the environment variable `IVY_DUMP_WIDGET_TREES` to `1` to log widget tree updates to dump.ljson in the working directory.

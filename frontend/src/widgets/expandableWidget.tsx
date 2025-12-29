@@ -28,7 +28,7 @@ interface ExpandableWidgetProps {
 
 export const ExpandableWidget: React.FC<ExpandableWidgetProps> = ({
   id,
-  disabled,
+  disabled = false,
   open = false,
   scale = Scales.Medium,
   slots,

@@ -1,4 +1,9 @@
+using System.Text.Json.Serialization;
+
 namespace Ivy.Themes;
+
+[JsonSerializable(typeof(Theme))]
+internal partial class ThemeJsonContext : JsonSerializerContext;
 
 public class Theme
 {

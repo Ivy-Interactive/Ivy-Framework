@@ -2,13 +2,13 @@ import { cva } from 'class-variance-authority';
 
 // Size variants for Detail label
 export const detailLabelSizeVariants = cva(
-  'align-middle font-bold whitespace-nowrap',
+  'align-middle font-bold whitespace-nowrap pl-0',
   {
     variants: {
       scale: {
-        Small: 'p-2 text-xs',
-        Medium: 'p-3 text-sm',
-        Large: 'p-4 text-base',
+        Small: 'p-2 pl-0 text-xs',
+        Medium: 'p-3 pl-0 text-sm',
+        Large: 'p-4 pl-0 text-base',
       },
     },
     defaultVariants: {
@@ -21,9 +21,9 @@ export const detailLabelSizeVariants = cva(
 export const detailValueSizeVariants = cva('align-middle min-w-0', {
   variants: {
     scale: {
-      Small: 'p-2 pl-1 pr-0 text-xs',
-      Medium: 'p-3 pl-2 pr-0 text-sm',
-      Large: 'p-4 pl-3 pr-0 text-base',
+      Small: 'p-2 pl-0 pr-0 text-xs',
+      Medium: 'p-3 pl-0 pr-0 text-sm',
+      Large: 'p-4 pl-0 pr-0 text-base',
     },
   },
   defaultVariants: {

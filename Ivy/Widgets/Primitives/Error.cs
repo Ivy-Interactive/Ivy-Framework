@@ -12,14 +12,15 @@ public record Error : WidgetBase<Error>
         StackTrace = stackTrace;
     }
 
-    [Prop]
-    public string? Title { get; set; }
+    internal Error()
+    {
+    }
 
-    [Prop]
-    public string? Message { get; set; }
+    [Prop] public string? Title { get; set; }
 
-    [Prop]
-    public string? StackTrace { get; set; }
+    [Prop] public string? Message { get; set; }
+
+    [Prop] public string? StackTrace { get; set; }
 }
 
 public static class ErrorExtensions

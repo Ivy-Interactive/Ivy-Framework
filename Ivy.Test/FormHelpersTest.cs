@@ -93,6 +93,63 @@ public class FormHelpersTest
     }
 }
 
+public class ValidationTestModel
+{
+    [AllowedValues("A", "B", "C")]
+    public string[] Tags { get; set; } = Array.Empty<string>();
+}
+
+public class ValidationTest
+{
+    [Fact]
+    public void GetValidators_ShouldPass_WhenCollectionContainsAllowedValues()
+    {
+        // Arrange
+        var propertyInfo = typeof(ValidationTestModel).GetProperty(nameof(ValidationTestModel.Tags));
+        var validators = FormHelpers.GetValidators(propertyInfo!);
+        var validValue = new[] { "A", "B" };
+
+        // Act
+        var isValid = true;
+        foreach (var validator in validators)
+        {
+            var (valid, _) = validator(validValue);
+            if (!valid)
+            {
+                isValid = false;
+                break;
+            }
+        }
+
+        // Assert
+        Assert.True(isValid, "Validation should pass for allowed values in collection");
+    }
+
+    [Fact]
+    public void GetValidators_ShouldFail_WhenCollectionContainsDisallowedValue()
+    {
+        // Arrange
+        var propertyInfo = typeof(ValidationTestModel).GetProperty(nameof(ValidationTestModel.Tags));
+        var validators = FormHelpers.GetValidators(propertyInfo!);
+        var invalidValue = new[] { "A", "D" }; // "D" is not allowed
+
+        // Act
+        var isValid = true;
+        foreach (var validator in validators)
+        {
+            var (valid, _) = validator(invalidValue);
+            if (!valid)
+            {
+                isValid = false;
+                break;
+            }
+        }
+
+        // Assert
+        Assert.False(isValid, "Validation should fail when collection contains disallowed values");
+    }
+}
+
 public class FormScaffolderTest
 {
     [Fact]

@@ -11,6 +11,10 @@ public record Detail : WidgetBase<Detail>
         MultiLine = multiLine;
     }
 
+    internal Detail()
+    {
+    }
+
     [Prop] public string? Label { get; set; }
 
     [Prop] public bool MultiLine { get; set; }

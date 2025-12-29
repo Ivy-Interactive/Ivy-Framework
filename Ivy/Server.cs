@@ -399,6 +399,9 @@ public class Server
         builder.Services.AddSignalR(options =>
         {
             options.EnableDetailedErrors = _args.Verbose;
+        }).AddJsonProtocol(options =>
+        {
+            options.PayloadSerializerOptions.TypeInfoResolver = new System.Text.Json.Serialization.Metadata.DefaultJsonTypeInfoResolver();
         });
         builder.Services.AddSingleton(this);
         builder.Services.AddSingleton<IClientNotifier, ClientNotifier>();
@@ -469,7 +472,7 @@ public class Server
                     {
                         error = ex.Message,
                         detail = ex.StackTrace
-                    });
+                    }, Ivy.Core.Helpers.JsonHelper.DefaultOptions);
                     await context.Response.WriteAsync(result);
                 }
             });

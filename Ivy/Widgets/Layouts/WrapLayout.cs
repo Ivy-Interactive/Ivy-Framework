@@ -17,7 +17,11 @@ public record WrapLayout : WidgetBase<WrapLayout>
         RemoveParentPadding = removeParentPadding;
     }
 
-    [Prop] public int Gap { get; set; }
+    internal WrapLayout()
+    {
+    }
+
+    [Prop] public int Gap { get; set; } = 4;
 
     [Prop] public Thickness? Padding { get; set; }
 

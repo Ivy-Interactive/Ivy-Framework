@@ -32,9 +32,13 @@ public record Callout : WidgetBase<Callout>
         Icon = icon;
     }
 
+    internal Callout()
+    {
+    }
+
     [Prop] public string? Title { get; set; }
 
-    [Prop] public CalloutVariant Variant { get; set; }
+    [Prop] public CalloutVariant Variant { get; set; } = CalloutVariant.Info;
 
     [Prop] public Icons? Icon { get; set; }
 

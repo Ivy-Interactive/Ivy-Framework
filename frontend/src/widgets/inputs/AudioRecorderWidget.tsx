@@ -43,7 +43,7 @@ const supportedMimeTypes = [
 export const AudioRecorderWidget: React.FC<AudioRecorderWidgetProps> = ({
   label,
   recordingLabel,
-  mimeType,
+  mimeType = 'audio/webm',
   disabled,
   width,
   uploadUrl,

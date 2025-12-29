@@ -1,5 +1,6 @@
 import React from 'react';
 import { Progress } from '@/components/ui/progress';
+import { Badge } from '@/components/ui/badge';
 import { Check, Target } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getWidth } from '@/lib/styles';
@@ -43,8 +44,8 @@ const SparkleStyles = () => (
 export const ProgressWidget: React.FC<ProgressWidgetProps> = ({
   value,
   goal,
-  colorVariant,
-  width,
+  colorVariant = 'Primary',
+  width = 'Full',
 }) => {
   const isCompleted = value && value >= 100;
   const styles = getWidth(width);
@@ -52,33 +53,32 @@ export const ProgressWidget: React.FC<ProgressWidgetProps> = ({
   return (
     <>
       <SparkleStyles />
-      <div className="w-full" style={styles}>
+      <div className="w-full group relative" style={styles}>
         {goal && (
-          <div
+          <Badge
+            variant="secondary"
             className={cn(
-              'rounded-xl rounded-br-none bg-muted p-2 mb-2 w-fit ml-auto',
-              'text-muted-foreground flex flex-row items-center text-sm',
-              !isCompleted && 'opacity-50 hover:opacity-100',
-              isCompleted && 'sparkle-glow'
+              'px-2 py-1.5 text-sm absolute bottom-full right-0 mb-2 transition-opacity pointer-events-none font-medium',
+              'opacity-0 group-hover:opacity-100'
             )}
           >
             {!isCompleted && (
               <Target size={14} className="mr-1" strokeWidth={1.5} />
             )}
-            <span className="">{goal}</span>
+            {goal}
             {isCompleted && (
               <Check
-                size={14}
+                size={16}
                 className="ml-1"
                 strokeWidth={4}
                 color="var(--primary)"
               />
             )}
-          </div>
+          </Badge>
         )}
         <Progress
           value={value}
-          className="bg-muted"
+          className="bg-neutral/10"
           style={
             {
               '--progress-background': colorVariant

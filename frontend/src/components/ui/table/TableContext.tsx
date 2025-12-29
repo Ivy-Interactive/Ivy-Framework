@@ -5,6 +5,7 @@ import { Scales } from '@/types/scale';
 
 type TableContextValue = VariantProps<typeof tableCellSizeVariants>;
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const TableContext = createContext<TableContextValue>({
   scale: Scales.Medium,
 });

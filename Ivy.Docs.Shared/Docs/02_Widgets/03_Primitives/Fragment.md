@@ -14,7 +14,7 @@ searchHints:
 Group multiple elements without adding extra DOM markup, similar to React Fragments, for clean component composition.
 </Ingress>
 
-The `Fragment` widget is a container component that doesn't produce any HTML elements itself. It's useful for grouping multiple elements without adding extra markup to the DOM, similar to React Fragments. This makes it perfect for conditional rendering, returning multiple widgets from a view, and creating clean component compositions.
+The `Fragment` [widget](../../../01_Onboarding/02_Concepts/Widgets.md) is a container component that doesn't produce any HTML elements itself. It's useful for grouping multiple elements without adding extra markup to the DOM, similar to React Fragments. This makes it perfect for conditional rendering, returning multiple [widgets](../../../01_Onboarding/02_Concepts/Widgets.md) from a [view](../../../01_Onboarding/02_Concepts/Views.md), and creating clean component compositions.
 
 ## Basic Usage
 
@@ -35,7 +35,7 @@ public class BasicFragmentView : ViewBase
 
 ### Conditional Rendering
 
-Fragment is excellent for conditional rendering, allowing you to show or hide content based on state:
+Fragment is excellent for conditional rendering, allowing you to show or hide content based on [state](../../../01_Onboarding/02_Concepts/State.md):
 
 ```csharp demo-tabs
 public class ConditionalRenderingView : ViewBase

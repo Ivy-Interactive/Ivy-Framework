@@ -50,7 +50,7 @@ public class ThemeService : IThemeService
 
     public string GenerateThemeMetaTag()
     {
-        var themeJson = System.Text.Json.JsonSerializer.Serialize(_currentTheme);
+        var themeJson = System.Text.Json.JsonSerializer.Serialize(_currentTheme, ThemeJsonContext.Default.Theme);
         var encodedTheme = System.Web.HttpUtility.HtmlEncode(themeJson);
         return $"<meta name=\"ivy-theme\" content=\"{encodedTheme}\" />";
     }

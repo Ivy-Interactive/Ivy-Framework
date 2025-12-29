@@ -4,22 +4,32 @@ A Roslyn-based .NET analyzer that enforces proper usage of Ivy framework hooks, 
 
 ## Overview
 
-This analyzer ensures that Ivy hook functions (such as `UseState`, `UseEffect`, etc.) are used **only directly inside the `Build()` method** of classes that inherit from `ViewBase`. Violating these rules may cause runtime errors, so they are enforced at compile time.
+This analyzer ensures that Ivy hook functions (such as `UseState`, `UseEffect`, etc.) are used **only directly inside the `Build()` method** of classes that inherit from `ViewBase`, following the same rules as React's Rules of Hooks. Violating these rules may cause runtime errors, so they are enforced at compile time.
+
+The analyzer enforces that hooks must be called:
+
+- ✅ At the top level of the `Build()` method
+- ✅ Unconditionally (not inside if statements, loops, or switch statements)
+- ✅ In the same order on every render
 
 ## Installation
 
 ### Using Package Manager Console
+
 ```powershell
 Install-Package Ivy.Analyser
 ```
 
 ### Using .NET CLI
+
 ```bash
 dotnet add package Ivy.Analyser
 ```
 
 ### Using PackageReference
+
 Add the following to your `.csproj` file:
+
 ```xml
 <PackageReference Include="Ivy.Analyser" Version="1.0.0">
   <PrivateAssets>all</PrivateAssets>
@@ -30,6 +40,7 @@ Add the following to your `.csproj` file:
 ## Rules Enforced
 
 ### ✅ Valid Usage
+
 Hook functions must be invoked **directly inside the top level of the `Build()` method**:
 
 ```csharp
@@ -48,9 +59,10 @@ public class MyView : ViewBase
 
 ### ❌ Invalid Usage
 
-The analyzer will report **IVYHOOK001** errors for these violations:
+The analyzer will report errors and warnings for these violations:
 
-#### 1. Hook calls inside lambdas
+#### 1. Hook calls inside lambdas (Error IVYHOOK001)
+
 ```csharp
 public override object? Build()
 {
@@ -62,7 +74,8 @@ public override object? Build()
 }
 ```
 
-#### 2. Hook calls inside local functions
+#### 2. Hook calls inside local functions (Error IVYHOOK001)
+
 ```csharp
 public override object? Build()
 {
@@ -76,7 +89,8 @@ public override object? Build()
 }
 ```
 
-#### 3. Hook calls in other methods
+#### 3. Hook calls in other methods (Error IVYHOOK001)
+
 ```csharp
 public override object? Build()
 {
@@ -90,7 +104,8 @@ private void Initialize()
 }
 ```
 
-#### 4. Hook calls in anonymous methods
+#### 4. Hook calls in anonymous methods (Error IVYHOOK001)
+
 ```csharp
 public override object? Build()
 {
@@ -103,22 +118,121 @@ public override object? Build()
 }
 ```
 
-## Supported Hooks
+#### 5. Hook calls conditionally (Warning IVYHOOK002)
 
-The analyzer detects improper usage of these hook functions:
+```csharp
+public override object? Build()
+{
+    if (someCondition)
+    {
+        var state = UseState(false); // ⚠️ Warning IVYHOOK002
+    }
+    
+    var result = condition ? UseState(0) : UseState(1); // ⚠️ Warning IVYHOOK002 (ternary)
+    
+    return new Button();
+}
+```
 
-- `UseState`
-- `UseEffect` 
-- `UseMemo`
-- `UseRef`
-- `UseContext`
-- `UseCallback`
+#### 6. Hook calls in loops (Warning IVYHOOK003)
 
-## Error Details
+```csharp
+public override object? Build()
+{
+    for (int i = 0; i < 10; i++)
+    {
+        var state = UseState(i); // ⚠️ Warning IVYHOOK003
+    }
+    
+    foreach (var item in items)
+    {
+        var state = UseState(item); // ⚠️ Warning IVYHOOK003
+    }
+    
+    while (condition)
+    {
+        var state = UseState(false); // ⚠️ Warning IVYHOOK003
+    }
+    
+    return new Button();
+}
+```
 
-**Diagnostic ID:** `IVYHOOK001`  
+#### 7. Hook calls in switch statements (Warning IVYHOOK004)
+
+```csharp
+public override object? Build()
+{
+    switch (value)
+    {
+        case 1:
+            var state = UseState(false); // ⚠️ Warning IVYHOOK004
+            break;
+    }
+    
+    return new Button();
+}
+```
+
+#### 8. Hook calls not at the top of Build() method (Warning IVYHOOK005)
+
+```csharp
+public override object? Build()
+{
+    var x = SomeMethod(); // Non-hook statement
+    var state = UseState(false); // ⚠️ Warning IVYHOOK005 - hook must be at the top
+    
+    int y = 10; // Another non-hook statement
+    var state2 = UseState(0); // ⚠️ Warning IVYHOOK005
+    
+    return new Button();
+}
+```
+
+## Hook Detection
+
+The analyzer automatically detects hooks by their naming convention:
+
+- Method name must start with `Use`
+- The fourth character must be an uppercase letter
+
+**Examples:**
+- ✅ `UseState`, `UseEffect`, `UseCustomHook`, `UseMyFeature`
+- ❌ `Use`, `Useless`, `useState`, `useEffect`
+
+This means any custom hooks you create following the `UseX` pattern will be automatically validated by the analyzer.
+
+## Diagnostic Details
+
+### IVYHOOK001 - Invalid Hook Usage (Error)
+
 **Severity:** Error  
-**Message:** `Ivy hook '{hookName}' can only be used directly inside the Build() method`
+**Message:** `Ivy hook '{hookName}' can only be used directly inside the Build() method`  
+**Description:** Hooks must be called directly inside the Build() method, not inside lambdas, local functions, or other methods.
+
+### IVYHOOK002 - Hook Called Conditionally (Warning)
+
+**Severity:** Warning  
+**Message:** `Ivy hook '{hookName}' cannot be called conditionally. Hooks must be called in the same order on every render.`  
+**Description:** Hooks must be called unconditionally at the top level of the Build() method. Do not call hooks inside if statements, ternary operators, or other conditional logic.
+
+### IVYHOOK003 - Hook Called in Loop (Warning)
+
+**Severity:** Warning  
+**Message:** `Ivy hook '{hookName}' cannot be called inside a loop. Hooks must be called in the same order on every render.`  
+**Description:** Hooks must be called unconditionally at the top level of the Build() method. Do not call hooks inside for, foreach, while, or do-while loops.
+
+### IVYHOOK004 - Hook Called in Switch Statement (Warning)
+
+**Severity:** Warning  
+**Message:** `Ivy hook '{hookName}' cannot be called inside a switch statement. Hooks must be called in the same order on every render.`  
+**Description:** Hooks must be called unconditionally at the top level of the Build() method. Do not call hooks inside switch statements.
+
+### IVYHOOK005 - Hook Not at Top of Build Method (Warning)
+
+**Severity:** Warning  
+**Message:** `Ivy hook '{hookName}' must be called at the top of the Build() method, before any other statements.`  
+**Description:** All hooks must be called at the very top of the Build() method, before any other non-hook statements. This ensures hooks are called in a consistent order on every render.
 
 ## Configuration
 
@@ -129,9 +243,17 @@ The analyzer runs automatically when you build your project. No additional confi
 If you need to suppress the analyzer for specific cases, you can use:
 
 ```csharp
-#pragma warning disable IVYHOOK001
+#pragma warning disable IVYHOOK001  // Suppress error
+#pragma warning disable IVYHOOK002  // Suppress conditional warning
+#pragma warning disable IVYHOOK003  // Suppress loop warning
+#pragma warning disable IVYHOOK004  // Suppress switch warning
+#pragma warning disable IVYHOOK005  // Suppress not-at-top warning
 var state = UseState(false); // This will not trigger the analyzer
 #pragma warning restore IVYHOOK001
+#pragma warning restore IVYHOOK002
+#pragma warning restore IVYHOOK003
+#pragma warning restore IVYHOOK004
+#pragma warning restore IVYHOOK005
 ```
 
 However, this is **not recommended** as it may lead to runtime errors.
@@ -139,6 +261,7 @@ However, this is **not recommended** as it may lead to runtime errors.
 ## IDE Integration
 
 The analyzer works with:
+
 - Visual Studio 2019/2022
 - Visual Studio Code with C# extension
 - JetBrains Rider

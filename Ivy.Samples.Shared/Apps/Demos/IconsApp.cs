@@ -28,8 +28,8 @@ public class IconsApp : SampleBase
 
         Action<Event<Button>> onIconClick = e =>
         {
-            client.CopyToClipboard(e.Sender.Icon?.ToString() ?? "");
-            client.Toast($"Copied '{e.Sender.Icon?.ToString()}' to clipboard", "Icon Copied");
+            client.CopyToClipboard(e.Sender.Icon.ToString() ?? "");
+            client.Toast($"Copied '{e.Sender.Icon.ToString()}' to clipboard", "Icon Copied");
         };
 
         return

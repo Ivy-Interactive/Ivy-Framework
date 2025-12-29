@@ -34,7 +34,7 @@ This project and everyone participating in it is governed by our [Code of Conduc
 
 ### Prerequisites
 
-- [.NET 9 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/9.0)
+- [.NET 10 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/10.0)
 - [Node.js 22.12+ & npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm)
 - **Ivy Console Tool** (for development):
 

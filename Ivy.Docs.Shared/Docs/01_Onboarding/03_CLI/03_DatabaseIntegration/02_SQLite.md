@@ -77,6 +77,7 @@ For more details on volume configuration, see the [Volume documentation](../../0
 ## SQLite-Specific Features
 
 Key advantages:
+
 - **Zero-configuration** - no server setup
 - **Cross-platform** database files
 - **Full-text search** and **JSON support**
@@ -96,10 +97,12 @@ See [SQLite Security Considerations](https://www.sqlite.org/security.html) for m
 ### Common Issues
 
 **File Access Issues**
+
 - Check read/write permissions and directory existence
 - Ensure file isn't locked by another process
 
 **Database Locked Errors**
+
 - Close connections properly and use WAL mode
 
 See the [SQLite FAQ](https://www.sqlite.org/faq.html) for more help.

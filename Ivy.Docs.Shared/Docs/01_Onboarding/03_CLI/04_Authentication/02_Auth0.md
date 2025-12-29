@@ -116,7 +116,7 @@ For more information on setting up Google authentication, see Auth0's [Google do
 7. **Click "Create"**
 8. **Enable the connection** for your application in the "Applications" tab
 
-> **Note**: For testing GitHub authentication, you can use [Auth0 Development Keys](https://auth0.com/docs/authenticate/identity-providers/social-identity-providers/devkeys) by leaving Client ID and Client Secret blank. These keys are not to be used for production.
+> **Note**: For testing GitHub authentication, you can use Auth0 Development Keys by leaving Client ID and Client Secret blank. These keys are not to be used for production.
 
 For more information on setting up GitHub authentication, see Auth0's [GitHub documentation](https://marketplace.auth0.com/integrations/github-social-connection).
 
@@ -131,7 +131,7 @@ For more information on setting up GitHub authentication, see Auth0's [GitHub do
 7. **Click "Create"**
 8. **Enable the connection** for your application in the "Applications" tab
 
-> **Note**: [Auth0 Development Keys](https://auth0.com/docs/authenticate/identity-providers/social-identity-providers/devkeys) can not be used for Microsoft authentication.
+> **Note**: Auth0 Development Keys can not be used for Microsoft authentication.
 
 For more information on setting up Microsoft authentication, see Auth0's [Microsoft documentation](https://marketplace.auth0.com/integrations/microsoft-account-social-connection).
 
@@ -146,7 +146,7 @@ For more information on setting up Microsoft authentication, see Auth0's [Micros
 7. **Click "Create"**
 8. **Enable the connection** for your application in the "Applications" tab
 
-> **Note**: For testing Apple authentication, you can use [Auth0 Development Keys](https://auth0.com/docs/authenticate/identity-providers/social-identity-providers/devkeys) by leaving Client ID, Client Secret Signing Key, Apple Team ID, and Key ID blank. These development keys are not to be used for production.
+> **Note**: For testing Apple authentication, you can use Auth0 Development Keys by leaving Client ID, Client Secret Signing Key, Apple Team ID, and Key ID blank. These development keys are not to be used for production.
 
 For more information on setting up Apple authentication, see Auth0's [Apple documentation](https://marketplace.auth0.com/integrations/apple-social-connection).
 
@@ -160,7 +160,7 @@ For more information on setting up Apple authentication, see Auth0's [Apple docu
 6. **Click "Create"**
 7. **Enable the connection** for your application in the "Applications" tab
 
-> **Note**: For testing Twitter/X authentication, you can use [Auth0 Development Keys](https://auth0.com/docs/authenticate/identity-providers/social-identity-providers/devkeys) by leaving API Key and Secret blank. These development keys are not to be used for production.
+> **Note**: For testing Twitter/X authentication, you can use Auth0 Development Keys by leaving API Key and Secret blank. These development keys are not to be used for production.
 
 For more information on setting up Twitter/X authentication, see Auth0's [Twitter documentation](https://marketplace.auth0.com/integrations/twitter-social-connection).
 
@@ -172,6 +172,7 @@ To allow the Ivy application to properly display the users email, name and avata
 2. **Click "Create Action" > "Create Custom Action"**
 3. **Give it a name like "Add user claims to JWT" and choose "Login / Post Login" as the trigger.**
 4. **Add the following code:**
+
 ```javascript
 exports.onExecutePostLogin = async (event, api) => {
     // You can change this if you want - but then also update the "Auth0:Namespace" configuration in your Ivy project
@@ -186,6 +187,7 @@ exports.onExecutePostLogin = async (event, api) => {
     api.accessToken.setCustomClaim(namespace + 'avatar', event.user.picture);
 };
 ```
+
 5. **Click Deploy**
 6. **Go to Actions > Triggers** in the Auth0 Dashboard
 7. **Click "post-login"**
@@ -239,7 +241,7 @@ For a list of connection string parameters, see [Configuration Parameters](#conf
 
 #### Manual Configuration
 
-When deploying an Ivy project without using `ivy deploy`, your local .NET user secrets are not automatically transferred. In that case, you can configure basic auth by setting environment variables or .NET user secrets. See [Configuration Parameters](#configuration-parameters) below.
+When deploying an Ivy project without using `ivy deploy`, your local .NET user secrets are not automatically transferred. In that case, you can configure basic auth by setting environment variables or .NET user secrets. See Configuration Parameters below.
 
 > **Note:** If configuration is present in both .NET user secrets and environment variables, Ivy will use the values in **.NET user secrets over environment variables**.
 
@@ -253,7 +255,7 @@ The following parameters are supported via connection string, environment variab
 - **Auth0:ClientId**: Required. Your Auth0 application's client ID.
 - **Auth0:ClientSecret**: Required. Your Auth0 application's client secret.
 - **Auth0:Audience**: Required. API identifier for securing API access.
-- **Auth0:Namespace**: Optional. Your JWT claims namespace, as chosen earlier in this guide. If left empty "https://ivy.app/" will be used.
+- **Auth0:Namespace**: Optional. Your JWT claims namespace, as chosen earlier in this guide. If left empty "<https://ivy.app/>" will be used.
 
 ## Authentication Flow
 

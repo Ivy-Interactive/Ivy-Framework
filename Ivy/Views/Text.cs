@@ -84,6 +84,13 @@ public static class Text
 
     public static TextBuilder Lead(IAnyState state) => Lead(state.ToString() ?? "");
 
+    public static TextBuilder ExtraLarge(string content)
+    {
+        return new TextBuilder(content, TextVariant.ExtraLarge);
+    }
+
+    public static TextBuilder ExtraLarge(IAnyState state) => ExtraLarge(state.ToString() ?? "");
+
     public static TextBuilder Large(string content)
     {
         return new TextBuilder(content, TextVariant.Large);

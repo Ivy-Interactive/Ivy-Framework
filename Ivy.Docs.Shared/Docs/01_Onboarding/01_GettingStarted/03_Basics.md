@@ -13,14 +13,14 @@ searchHints:
 # Basics
 
 <Ingress>
-Learn the essential concepts of Ivy development including Views, Widgets, state management, and how to build your first interactive application.
+Learn the essential concepts of Ivy development including [Views](../02_Concepts/Views.md), [Widgets](../02_Concepts/Widgets.md), [state management](../02_Concepts/State.md), and how to build your first interactive application.
 </Ingress>
 
 First, make sure you have [installed Ivy](./02_Installation.md) on your development machine.
 
 ## Create a new project
 
-Using the CLI we can easily create a new project.
+Using the [CLI](../../03_CLI/01_CLIOverview.md) we can easily create a new project.
 
 ```terminal
 >ivy init --namespace YourProjectNamespace
@@ -28,7 +28,7 @@ Using the CLI we can easily create a new project.
 
 ## Views and Widgets
 
-Now let's add our first Ivy app. In the folder `Apps` create a new file `CounterApp.cs` that inherits from `ViewBase`.
+Now let's add our first Ivy app. In the folder `Apps` create a new file `CounterApp.cs` that inherits from [ViewBase](../02_Concepts/Views.md).
 
 ```csharp
 [App(icon: Icons.Box)]
@@ -66,7 +66,7 @@ In this example, you can see how to use an Ivy Button. For more details, check o
 
 ## State Management
 
-Ivy has a built-in state management system through the `UseState` hook (similar to React).
+Ivy has a built-in state management system through the [UseState](../02_Concepts/State.md) hook (similar to React).
 
 ```csharp
 [App(icon: Icons.Box)]

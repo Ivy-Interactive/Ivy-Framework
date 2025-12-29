@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Ivy.Core;
@@ -30,11 +31,13 @@ public abstract record SelectInputBase : WidgetBase<SelectInputBase>, IAnySelect
 
     [Prop] public string? Placeholder { get; set; }
 
-    [Prop] public SelectInputs Variant { get; set; }
+    [Prop] public SelectInputs Variant { get; set; } = SelectInputs.Select;
 
     [Prop] public bool SelectMany { get; set; } = false;
 
     [Prop] public char Separator { get; set; } = ';';
+
+    [Prop] public bool Nullable { get; set; }
 
     [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
 
@@ -76,11 +79,13 @@ public record SelectInput<TValue> : SelectInputBase, IInput<TValue>, IAnySelectI
         SelectMany = selectMany;
     }
 
+    internal SelectInput() { }
+
     [Prop] public TValue Value { get; } = default!;
 
-    [Prop] public bool Nullable { get; set; } = typeof(TValue).IsNullableType();
+    [Prop] public new bool Nullable { get; set; } = typeof(TValue).IsNullableType();
 
-    [Prop] public IAnyOption[] Options { get; set; }
+    [Prop] public IAnyOption[] Options { get; set; } = [];
 
     [Event] public Func<Event<IInput<TValue>, TValue>, ValueTask>? OnChange { get; }
 }
@@ -95,7 +100,7 @@ public static class SelectInputExtensions
 
         if (options == null)
         {
-            var nonNullableType = Nullable.GetUnderlyingType(type) ?? type;
+            var nonNullableType = System.Nullable.GetUnderlyingType(type) ?? type;
             if (nonNullableType.IsEnum)
             {
                 options = nonNullableType.ToOptions();
@@ -116,6 +121,7 @@ public static class SelectInputExtensions
         }
 
         SelectInputBase input = (SelectInputBase)Activator.CreateInstance(genericType, state, options, placeholder, disabled, variant, selectMany)!;
+        input.Nullable = type.IsNullableType();
         return input;
     }
 
@@ -126,6 +132,18 @@ public static class SelectInputExtensions
     public static SelectInputBase Variant(this SelectInputBase widget, SelectInputs variant) => widget with { Variant = variant };
 
     public static SelectInputBase Invalid(this SelectInputBase widget, string? invalid) => widget with { Invalid = invalid };
+
+    public static SelectInputBase Nullable(this SelectInputBase widget, bool? nullable = true)
+    {
+        var property = widget.GetType().GetProperty("Nullable", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+        if (property != null && property.CanWrite)
+        {
+            property.SetValue(widget, nullable ?? true);
+            return widget;
+        }
+        // Fallback to 'with' if reflection doesn't work (shouldn't happen, but safe fallback)
+        return widget with { Nullable = nullable ?? true };
+    }
 
     public static SelectInputBase Separator(this SelectInputBase widget, char separator) => widget with { Separator = separator };
 

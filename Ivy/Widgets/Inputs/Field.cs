@@ -32,6 +32,8 @@ public record Field : WidgetBase<Field>
         Scale = scale;
     }
 
+    internal Field() { }
+
     [Prop] public string? Label { get; set; }
 
     [Prop] public string? Description { get; set; }

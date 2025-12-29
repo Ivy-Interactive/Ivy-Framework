@@ -11,9 +11,13 @@ public record Pie
         NameKey = nameKey;
     }
 
-    public string DataKey { get; }
+    internal Pie()
+    {
+    }
 
-    public string NameKey { get; set; }
+    public string? DataKey { get; }
+
+    public string? NameKey { get; set; }
 
     public LegendTypes LegendType { get; set; } = LegendTypes.Line;
 

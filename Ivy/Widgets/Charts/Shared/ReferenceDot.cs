@@ -12,6 +12,10 @@ public record ReferenceDot
         Label = label;
     }
 
+    internal ReferenceDot()
+    {
+    }
+
     public double X { get; set; }
 
     public double Y { get; set; }

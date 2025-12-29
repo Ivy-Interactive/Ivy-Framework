@@ -11,15 +11,15 @@ searchHints:
 # Table
 
 <Ingress>
-Display structured data in a clean, organized format with powerful table widgets that support sorting, filtering, and custom formatting.
+Display structured data in a clean, organized format with powerful table [widgets](../../01_Onboarding/02_Concepts/Widgets.md) that support sorting, filtering, and custom formatting.
 </Ingress>
 
-The `Table` widget is a layout container designed to render data in a tabular format. It accepts rows composed of `TableRow` elements, making it suitable for structured display of content like data listings, reports, or grids.
+The `Table` [widget](../../01_Onboarding/02_Concepts/Widgets.md) is a layout container designed to render data in a tabular format. It accepts rows composed of `TableRow` elements, making it suitable for structured display of content like data listings, reports, or grids.
 
 ## Basic Usage
 
 There is a recommended way to create tables from data arrays.
-The `ToTable()` extension method automatically converts collections into formatted tables.
+The [ToTable()](../../01_Onboarding/02_Concepts/ContentBuilders.md) extension method automatically converts collections into formatted tables.
 
 ```csharp demo-tabs
 public class BasicRowTable : ViewBase
@@ -66,7 +66,7 @@ Long text in cells automatically gets truncated with ellipsis (...) and shows fu
 
 **Totals(p => p.ColumnName)** calculates the sum of the column if it contains numbers
 
-**Empty(new Card(""))** shows content when the table is empty.
+**Empty(new [Card](Card.md)(""))** shows content when the table is empty.
 
 ```csharp demo-tabs
 public class TableConfigurationExample : ViewBase
@@ -269,7 +269,7 @@ public class CellBuildersExample : ViewBase
 
 ### Automatic Table Conversion
 
-Any `IEnumerable` is automatically converted to a table when returned from a view. This works through the `DefaultContentBuilder` which detects collections and converts them to tables.
+Any `IEnumerable` is automatically converted to a table when returned from a view. This works through the [DefaultContentBuilder](../../01_Onboarding/02_Concepts/ContentBuilders.md) which detects collections and converts them to tables.
 
 ```csharp demo-tabs
 public class AutomaticTableConversion : ViewBase
@@ -293,7 +293,7 @@ public class AutomaticTableConversion : ViewBase
 
 ### Integration with Other Widgets
 
-Tables integrate seamlessly with other Ivy widgets, allowing you to create rich, interactive interfaces.
+Tables integrate seamlessly with other Ivy widgets, allowing you to create rich, interactive [interfaces](../../01_Onboarding/02_Concepts/Views.md).
 
 ```csharp demo-tabs
 public class TableIntegrationExample : ViewBase
@@ -342,7 +342,5 @@ public class TableIntegrationExample : ViewBase
     }
 }
 ```
-
-
 
 <WidgetDocs Type="Ivy.Table" ExtensionTypes="Ivy.Views.Tables.TableExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Tables/Table.cs"/>

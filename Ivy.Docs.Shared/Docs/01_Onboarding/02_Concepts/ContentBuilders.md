@@ -33,13 +33,13 @@ Ivy provides a comprehensive `DefaultContentBuilder` that handles a wide variety
 
 - **Complex Types**:
   - Exceptions → Error views
-  - Tasks → Task views
-  - Observables → Observable views
+  - [Tasks](./TasksAndObservables.md) → Task views
+  - [Observables](./TasksAndObservables.md) → Observable views
   - JSON nodes → JSON views
   - XML objects → XML views
-  - Collections → Tables
-  - Icons → Icon views
-  - Widgets and Views → Direct rendering
+  - Collections → [Tables](../../02_Widgets/01_Common/Table.md)
+  - [Icons](../../03_ApiReference/IvyShared/Icons.md) → Icon views
+  - [Widgets](./Widgets.md) and [Views](./Views.md) → Direct rendering
 
 ## Custom Content Builders
 
@@ -69,7 +69,7 @@ public class CustomContentBuilder : IContentBuilder
 
 ## Using Content Builders
 
-Content Builders are typically used through the Ivy server configuration:
+Content Builders are typically used through the Ivy [server configuration](./Program.md):
 
 ```csharp
 var server = new Server()

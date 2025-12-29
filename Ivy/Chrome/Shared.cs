@@ -1,8 +1,8 @@
-﻿using System.Linq;
 using System.Text.Json;
 using Ivy.Apps;
 using Ivy.Client;
 using Ivy.Core;
+using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
 using Ivy.Hooks;
 using Ivy.Shared;
@@ -76,7 +76,7 @@ public record NavigateArgs(string? AppId, object? AppArgs = null, string? TabId 
             throw new InvalidOperationException("Cannot create AppHost: AppId is null.");
         }
 
-        return new AppHost(this.AppId, this.AppArgs != null ? JsonSerializer.Serialize(this.AppArgs) : null, parentId);
+        return new AppHost(this.AppId, this.AppArgs != null ? JsonSerializer.Serialize(this.AppArgs, JsonHelper.DefaultOptions) : null, parentId);
     }
 
     public string GetUrl(string? parentId = null)
@@ -100,7 +100,7 @@ public record NavigateArgs(string? AppId, object? AppArgs = null, string? TabId 
 
         if (this.AppArgs != null)
         {
-            var jsonArgs = JsonSerializer.Serialize(this.AppArgs);
+            var jsonArgs = JsonSerializer.Serialize(this.AppArgs, JsonHelper.DefaultOptions);
             var encodedArgs = System.Web.HttpUtility.UrlEncode(jsonArgs);
             queryParams.Add($"appArgs={encodedArgs}");
         }

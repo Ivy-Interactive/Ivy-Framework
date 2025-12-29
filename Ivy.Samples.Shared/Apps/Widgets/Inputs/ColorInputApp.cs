@@ -7,27 +7,64 @@ public class ColorInputApp : SampleBase
 {
     protected override object? BuildSample()
     {
-        var variants = CreateVariantsSection();
-        var dataBinding = CreateDataBindingTests();
-        var formatTests = CreateFormatTests();
-        var nonGenericConstructor = CreateNonGenericConstructorSection();
-
         return Layout.Vertical()
                | Text.H2("Size Variants")
-               | CreateSizeVariantsSection()
+               | new ColorInputSizeVariants()
                | Text.H1("ColorInput")
                | Text.H2("Non-Generic Constructor")
-               | nonGenericConstructor
+               | new ColorInputConstructorTests()
                | Text.H2("Variants")
-               | variants
+               | new ColorInputVariants()
                | Text.H2("Format Tests")
-               | formatTests
+               | new ColorInputFormatTests()
                | Text.H2("Data Binding")
-               | dataBinding
+               | new ColorInputDataBindings()
             ;
     }
 
-    private object CreateVariantsSection()
+    // Helper methods moved to respective classes
+}
+
+public class ColorInputSizeVariants : ViewBase
+{
+    public override object Build()
+    {
+        var smallTextState = UseState("#ff6b6b");
+        var mediumTextState = UseState("#4ecdc4");
+        var largeTextState = UseState("#45b7d1");
+        var smallPickerState = UseState("#96ceb4");
+        var mediumPickerState = UseState("#feca57");
+        var largePickerState = UseState("#ff9ff3");
+        var smallBothState = UseState("#54a0ff");
+        var mediumBothState = UseState("#5f27cd");
+        var largeBothState = UseState("#00d2d3");
+
+        return Layout.Grid().Columns(4)
+            | Text.InlineCode("Size")
+            | Text.InlineCode("Text Only")
+            | Text.InlineCode("Picker Only")
+            | Text.InlineCode("Text and Picker")
+
+            | Text.InlineCode("Small")
+            | smallTextState.ToColorInput().Variant(ColorInputs.Text).Scale(Scale.Small)
+            | smallPickerState.ToColorInput().Variant(ColorInputs.Picker).Scale(Scale.Small)
+            | smallBothState.ToColorInput().Variant(ColorInputs.TextAndPicker).Scale(Scale.Small)
+
+            | Text.InlineCode("Medium")
+            | mediumTextState.ToColorInput().Variant(ColorInputs.Text).Scale(Scale.Medium)
+            | mediumPickerState.ToColorInput().Variant(ColorInputs.Picker).Scale(Scale.Medium)
+            | mediumBothState.ToColorInput().Variant(ColorInputs.TextAndPicker).Scale(Scale.Medium)
+
+            | Text.InlineCode("Large")
+            | largeTextState.ToColorInput().Variant(ColorInputs.Text).Scale(Scale.Large)
+            | largePickerState.ToColorInput().Variant(ColorInputs.Picker).Scale(Scale.Large)
+            | largeBothState.ToColorInput().Variant(ColorInputs.TextAndPicker).Scale(Scale.Large);
+    }
+}
+
+public class ColorInputVariants : ViewBase
+{
+    public override object Build()
     {
         var textState = UseState("#381ff4");
         var pickerState = UseState("#dd5860");
@@ -65,8 +102,11 @@ public class ColorInputApp : SampleBase
             | nullBothState.ToColorInput().Variant(ColorInputs.TextAndPicker)
             | nullBothState.ToColorInput().Variant(ColorInputs.TextAndPicker).Invalid("Invalid color");
     }
+}
 
-    private object CreateNonGenericConstructorSection()
+public class ColorInputConstructorTests : ViewBase
+{
+    public override object Build()
     {
         var defaultConstructorState = UseState("#dd5860");
         var placeholderState = UseState<string?>(() => null);
@@ -109,8 +149,11 @@ public class ColorInputApp : SampleBase
                | fullConstructorState.ToColorInput().Placeholder("Choose your color").Variant(ColorInputs.TextAndPicker)
                | Text.InlineCode(fullConstructorState.Value ?? "No state");
     }
+}
 
-    private object CreateFormatTests()
+public class ColorInputFormatTests : ViewBase
+{
+    public override object Build()
     {
         var hexState = UseState("#ff0000");
         var rgbState = UseState("rgb(255, 0, 0)");
@@ -139,7 +182,20 @@ public class ColorInputApp : SampleBase
             ;
     }
 
-    private object CreateDataBindingTests()
+    private static string ConvertToHex(string? colorValue)
+    {
+        if (string.IsNullOrEmpty(colorValue))
+            return "null";
+
+        // Simple conversion for demo purposes
+        // In a real implementation, you'd want proper color parsing
+        return colorValue.StartsWith("#") ? colorValue : $"#{colorValue.GetHashCode():X6}";
+    }
+}
+
+public class ColorInputDataBindings : ViewBase
+{
+    public override object Build()
     {
         var colorTypes = new (string TypeName, object NonNullableState, object NullableState)[]
         {
@@ -221,49 +277,5 @@ public class ColorInputApp : SampleBase
             Colors c => Text.InlineCode(c.ToString()),
             _ => Text.InlineCode(value?.ToString() ?? "null")
         };
-    }
-
-    private object CreateSizeVariantsSection()
-    {
-        var smallTextState = UseState("#ff6b6b");
-        var mediumTextState = UseState("#4ecdc4");
-        var largeTextState = UseState("#45b7d1");
-        var smallPickerState = UseState("#96ceb4");
-        var mediumPickerState = UseState("#feca57");
-        var largePickerState = UseState("#ff9ff3");
-        var smallBothState = UseState("#54a0ff");
-        var mediumBothState = UseState("#5f27cd");
-        var largeBothState = UseState("#00d2d3");
-
-        return Layout.Grid().Columns(4)
-            | Text.InlineCode("Size")
-            | Text.InlineCode("Text Only")
-            | Text.InlineCode("Picker Only")
-            | Text.InlineCode("Text and Picker")
-
-            | Text.InlineCode("Small")
-            | smallTextState.ToColorInput().Variant(ColorInputs.Text).Scale(Scale.Small)
-            | smallPickerState.ToColorInput().Variant(ColorInputs.Picker).Scale(Scale.Small)
-            | smallBothState.ToColorInput().Variant(ColorInputs.TextAndPicker).Scale(Scale.Small)
-
-            | Text.InlineCode("Medium")
-            | mediumTextState.ToColorInput().Variant(ColorInputs.Text).Scale(Scale.Medium)
-            | mediumPickerState.ToColorInput().Variant(ColorInputs.Picker).Scale(Scale.Medium)
-            | mediumBothState.ToColorInput().Variant(ColorInputs.TextAndPicker).Scale(Scale.Medium)
-
-            | Text.InlineCode("Large")
-            | largeTextState.ToColorInput().Variant(ColorInputs.Text).Scale(Scale.Large)
-            | largePickerState.ToColorInput().Variant(ColorInputs.Picker).Scale(Scale.Large)
-            | largeBothState.ToColorInput().Variant(ColorInputs.TextAndPicker).Scale(Scale.Large);
-    }
-
-    private static string ConvertToHex(string? colorValue)
-    {
-        if (string.IsNullOrEmpty(colorValue))
-            return "null";
-
-        // Simple conversion for demo purposes
-        // In a real implementation, you'd want proper color parsing
-        return colorValue.StartsWith("#") ? colorValue : $"#{colorValue.GetHashCode():X6}";
     }
 }

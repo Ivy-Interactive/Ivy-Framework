@@ -3,10 +3,12 @@ using System.Runtime.CompilerServices;
 using System.Text.Json;
 using Ivy.Apps;
 using Ivy.Client;
+using Ivy.Core;
 using Ivy.Core.Helpers;
 using Ivy.Core.Hooks;
 
-namespace Ivy.Core;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 public abstract class ViewBase() : IView, IViewContextOwner
 {

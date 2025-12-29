@@ -11,6 +11,7 @@ public interface IAnyInput
     [Prop] public string? Placeholder { get; set; }
 
     [Prop] public string? Invalid { get; set; }
+    [Prop] public bool Nullable { get; set; }
 
     [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
 
@@ -34,6 +35,11 @@ public static class AnyInputExtensions
     public static IAnyInput Placeholder(this IAnyInput input, string? placeholder)
     {
         input.Placeholder = placeholder;
+        return input;
+    }
+    public static IAnyInput Nullable(this IAnyInput input, bool? nullable = true)
+    {
+        input.Nullable = nullable ?? true;
         return input;
     }
 

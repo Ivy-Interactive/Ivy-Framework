@@ -44,7 +44,7 @@ public class TextInputApp : SampleBase
         return Layout.Vertical()
                | Text.H1("Text Inputs")
                | Text.H2("Sizes")
-               | CreateSizesSection()
+               | new TextInputSizes()
                | Text.H2("Variants")
                | (Layout.Grid().Columns(5)
                   | null!
@@ -78,8 +78,8 @@ public class TextInputApp : SampleBase
                   | withValue.ToSearchInput().Invalid("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec eros")
                )
 
-                | Text.H2("Prefix and Suffix")
-                | CreatePrefixSuffixSection()
+               | Text.H2("Affixes")
+               | new TextInputAffixes()
 
                //Data Binding:
 
@@ -106,7 +106,12 @@ public class TextInputApp : SampleBase
             ;
     }
 
-    private object CreateSizesSection()
+    // Helper methods moved to TextInputSizes and TextInputPrefixSuffix classes
+}
+
+public class TextInputSizes : ViewBase
+{
+    public override object Build()
     {
         var textState = UseState("Hello");
         var passwordState = UseState("Hello");
@@ -139,8 +144,11 @@ public class TextInputApp : SampleBase
                | searchState.ToSearchInput()
                | searchState.ToSearchInput().Large();
     }
+}
 
-    private object CreatePrefixSuffixSection()
+public class TextInputAffixes : ViewBase
+{
+    public override object Build()
     {
         var textState = UseState("example");
         var nullableState = UseState<string?>((string?)null);

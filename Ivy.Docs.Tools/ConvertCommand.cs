@@ -22,7 +22,7 @@ public class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
         public required bool SkipIfNotChanged { get; init; } = false;
     }
 
-    public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
+    public override async Task<int> ExecuteAsync(CommandContext context, Settings settings, CancellationToken cancellationToken)
     {
         var pattern = Path.GetFileName(settings.InputFolder);
 

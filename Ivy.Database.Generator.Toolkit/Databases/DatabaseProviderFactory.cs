@@ -16,10 +16,10 @@ public static class DatabaseProviderFactory
         return provider switch
         {
             DatabaseProvider.SqlServer => new SqlServerDatabaseProvider(),
-            DatabaseProvider.Postgres  => new PostgresDatabaseProvider(),
-            DatabaseProvider.MySql     => new MysqlDatabaseProvider(),
-            DatabaseProvider.MariaDb   => new MariaDbDatabaseProvider(),
-            DatabaseProvider.Sqlite    => new SqliteDatabaseProvider(),
+            DatabaseProvider.Postgres => new PostgresDatabaseProvider(),
+            DatabaseProvider.MySql => new MysqlDatabaseProvider(),
+            DatabaseProvider.MariaDb => new MariaDbDatabaseProvider(),
+            DatabaseProvider.Sqlite => new SqliteDatabaseProvider(),
             _ => throw new ArgumentOutOfRangeException(nameof(provider), provider, "Unsupported database provider.")
         };
     }

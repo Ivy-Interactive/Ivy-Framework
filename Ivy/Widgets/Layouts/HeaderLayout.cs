@@ -10,6 +10,10 @@ public record HeaderLayout : WidgetBase<HeaderLayout>
     {
     }
 
+    internal HeaderLayout()
+    {
+    }
+
     [Prop] public bool ShowHeaderDivider { get; init; } = true;
 
     [Prop] public Scroll ContentScroll { get; init; } = Scroll.Auto;

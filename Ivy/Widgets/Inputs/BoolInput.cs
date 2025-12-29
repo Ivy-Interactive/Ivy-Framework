@@ -36,11 +36,12 @@ public abstract record BoolInputBase : WidgetBase<BoolInputBase>, IAnyBoolInput
 
     [Prop] public string? Description { get; set; }
 
-    [Prop] public BoolInputs Variant { get; set; }
+    [Prop] public BoolInputs Variant { get; set; } = BoolInputs.Checkbox;
 
     [Prop] public Icons Icon { get; set; }
 
     [Prop] public string? Placeholder { get; set; } //not really used but included to consistency with IAnyInput
+    [Prop] public bool Nullable { get; set; }
 
     [Event] public Func<Event<IAnyInput>, ValueTask>? OnBlur { get; set; }
 
@@ -95,9 +96,11 @@ public record BoolInput<TBool> : BoolInputBase, IInput<TBool>
         Variant = variant;
     }
 
+    internal BoolInput() { }
+
     [Prop] public TBool Value { get; } = default!;
 
-    [Prop] public bool Nullable { get; set; } = typeof(TBool) == typeof(bool?);
+    [Prop] public new bool Nullable { get; set; } = typeof(TBool) == typeof(bool?);
 
     [Event] public Func<Event<IInput<TBool>, TBool>, ValueTask>? OnChange { get; }
 }
@@ -219,7 +222,7 @@ public static class BoolInputExtensions
     {
         if (isNullable)
         {
-            var underlyingType = Nullable.GetUnderlyingType(targetType);
+            var underlyingType = System.Nullable.GetUnderlyingType(targetType);
             if (boolValue == null)
             {
                 return null!;
@@ -275,6 +278,8 @@ public static class BoolInputExtensions
 
     public static BoolInputBase Invalid(this BoolInputBase widget, string? invalid) =>
         widget with { Invalid = invalid };
+    public static BoolInputBase Nullable(this BoolInputBase widget, bool? nullable = true) =>
+        widget with { Nullable = nullable ?? true };
 
     [OverloadResolutionPriority(1)]
     public static BoolInputBase HandleBlur(this BoolInputBase widget, Func<Event<IAnyInput>, ValueTask> onBlur)

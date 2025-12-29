@@ -37,8 +37,8 @@ export const ResizeablePanelGroupWidget: React.FC<
   children,
   showHandle = true,
   direction = 'Horizontal',
-  width,
-  height,
+  width = 'Full',
+  height = 'Full',
 }) => {
   const panelWidgets = React.Children.toArray(children).filter(
     child =>

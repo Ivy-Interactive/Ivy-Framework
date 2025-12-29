@@ -68,6 +68,7 @@ Ivy maps Airtable tables to entity classes, handles Airtable's data types, and p
 ## Airtable-Specific Features
 
 Key features Ivy can leverage:
+
 - **Rich field types** (attachments, links, formulas)
 - **Record linking** for relationships
   - _Disclaimer: links are currently exposed as raw record IDs instead of entity references_
@@ -80,12 +81,15 @@ See [Airtable's API Reference](https://airtable.com/developers/web/api/introduct
 ### Common Issues
 
 **Authentication Failed**
+
 - Verify token validity and permissions
 
 **Base Access Issues**
+
 - Confirm Base ID and account access
 
 **Rate Limiting**
+
 - For details on API limits, see [Airtable API Rate Limits](https://airtable.com/developers/web/api/rate-limits).
 
 ## Related Documentation

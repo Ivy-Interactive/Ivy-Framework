@@ -1,166 +1,27 @@
 import { cn } from '@/lib/utils';
 import React, { useEffect, useState, useRef } from 'react';
 
-export type TocItem = {
-  id: string;
-  text: string;
-  level: number;
-};
-
 interface TableOfContentsProps {
   articleRef: React.RefObject<HTMLElement | null>;
   show?: boolean;
   onLoadingChange?: (isLoading: boolean) => void;
-  /** Delay in milliseconds before attempting to extract headings (default: 50ms) */
-  extractionDelay?: number;
-  /** Maximum number of retry attempts for heading extraction (default: 15) */
-  maxExtractionRetries?: number;
+  headings?: { id: string; text: string; level: number }[];
 }
 
 export const TableOfContents: React.FC<TableOfContentsProps> = ({
   articleRef,
   show = true,
   onLoadingChange,
-  extractionDelay = 50,
-  maxExtractionRetries = 15,
+  headings = [],
 }) => {
-  const [tocItems, setTocItems] = useState<TocItem[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [activeId, setActiveId] = useState<string>('');
   const [isUserNavigating, setIsUserNavigating] = useState(false);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const navigationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Extract headings and manage loading state
+  // Notify parent about loading state (always loaded since we use props)
   useEffect(() => {
-    // Clear any existing timeout
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-
-    if (!show) {
-      setTocItems([]);
-      setIsLoading(false);
-      onLoadingChange?.(false);
-      return;
-    }
-
-    // Reset states when starting fresh
-    setTocItems([]);
-    setIsLoading(true);
-    onLoadingChange?.(true);
-
-    const startTime = Date.now();
-    const minLoadingTime = 500; // 0.5 seconds minimum loading time for smooth transition
-    let retryCount = 0;
-
-    const extractHeadings = () => {
-      const articleElement = articleRef.current;
-      if (!articleElement) {
-        // If article ref is not available yet, try again after a short delay
-        if (retryCount < maxExtractionRetries) {
-          retryCount++;
-          timeoutRef.current = setTimeout(extractHeadings, 100);
-        } else {
-          // Stop loading if max retries reached, respecting minimum loading time
-          console.warn(
-            'TableOfContents: Failed to find article element after maximum retries'
-          );
-          const elapsedTime = Date.now() - startTime;
-          const remainingTime = Math.max(0, minLoadingTime - elapsedTime);
-          timeoutRef.current = setTimeout(() => {
-            setIsLoading(false);
-            onLoadingChange?.(false);
-          }, remainingTime);
-        }
-        return;
-      }
-
-      // Get all headings, but exclude those inside example boxes
-      const allHeadings = Array.from(
-        articleElement.querySelectorAll('h1, h2, h3, h4, h5, h6')
-      );
-
-      // Filter out headings that are inside example boxes
-      const elements = allHeadings.filter(heading => {
-        // Check if the heading is inside a demo tab
-        const isInsideDemoTab = (() => {
-          const tabPanel = heading.closest('[role="tabpanel"]');
-          if (!tabPanel) return false;
-
-          // Find the TabsList within the same parent as the tabPanel
-          const tabsList =
-            tabPanel.parentElement?.querySelector('[role="tablist"]');
-          if (!tabsList) return false;
-
-          // Check if any tab button within this TabsList has the text "Demo"
-          const demoTab = Array.from(
-            tabsList.querySelectorAll('[role="tab"]')
-          ).find(tab => tab.textContent?.trim() === 'Demo');
-
-          return demoTab !== undefined;
-        })();
-        return !isInsideDemoTab;
-      });
-
-      // If no headings found but content might still be loading, retry
-      if (elements.length === 0 && retryCount < maxExtractionRetries) {
-        retryCount++;
-        timeoutRef.current = setTimeout(extractHeadings, 100);
-        return;
-      }
-
-      const items = elements.map(element => {
-        // Don't override IDs that already exist (from rehype-slug)
-        // Only generate ID if doesn't exist and use the same algorithm as rehype-slug
-        if (!element.id) {
-          element.id =
-            element.textContent
-              ?.toLowerCase()
-              .trim()
-              .replace(/\s+/g, '-')
-              .replace(/[^\w\u00C0-\u024F\u1E00-\u1EFF-]/g, '') ?? '';
-        }
-
-        return {
-          id: element.id,
-          text: element.textContent ?? '',
-          level: parseInt(element.tagName[1]),
-        };
-      });
-
-      setTocItems(items);
-
-      // Calculate remaining time to show loading for minimum duration
-      const elapsedTime = Date.now() - startTime;
-      const remainingTime = Math.max(0, minLoadingTime - elapsedTime);
-
-      // Show TOC content after minimum loading time has passed
-      timeoutRef.current = setTimeout(() => {
-        setIsLoading(false);
-        onLoadingChange?.(false);
-      }, remainingTime);
-    };
-
-    // Configurable delay to ensure content is rendered
-    timeoutRef.current = setTimeout(extractHeadings, extractionDelay);
-
-    // Cleanup function
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-      if (navigationTimeoutRef.current) {
-        clearTimeout(navigationTimeoutRef.current);
-      }
-    };
-  }, [
-    show,
-    articleRef,
-    onLoadingChange,
-    extractionDelay,
-    maxExtractionRetries,
-  ]);
+    onLoadingChange?.(false);
+  }, [onLoadingChange]);
 
   // Track navigation events to immediately set active state
   useEffect(() => {
@@ -193,10 +54,6 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
 
             // Let the browser handle the default scroll behavior for regular links
             // Don't prevent default - let the browser scroll naturally
-          } else {
-            console.warn(
-              `TableOfContents: Target element with id "${targetId}" not found`
-            );
           }
         }
       }
@@ -208,36 +65,7 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
 
   // Handle active heading highlighting
   useEffect(() => {
-    if (!articleRef.current || tocItems.length === 0) return;
-
-    const articleElement = articleRef.current;
-
-    // Find all heading elements in the DOM, excluding those inside example boxes
-    const allHeadings = Array.from(
-      articleElement.querySelectorAll('h1, h2, h3, h4, h5, h6')
-    );
-
-    // Filter out headings that are inside example boxes
-    const elements = allHeadings.filter(heading => {
-      // Check if the heading is inside a demo tab
-      const isInsideDemoTab = (() => {
-        const tabPanel = heading.closest('[role="tabpanel"]');
-        if (!tabPanel) return false;
-
-        // Find the TabsList within the same parent as the tabPanel
-        const tabsList =
-          tabPanel.parentElement?.querySelector('[role="tablist"]');
-        if (!tabsList) return false;
-
-        // Check if any tab button within this TabsList has the text "Demo"
-        const demoTab = Array.from(
-          tabsList.querySelectorAll('[role="tab"]')
-        ).find(tab => tab.textContent?.trim() === 'Demo');
-
-        return demoTab !== undefined;
-      })();
-      return !isInsideDemoTab;
-    });
+    if (!articleRef.current || headings.length === 0) return;
 
     const observer = new IntersectionObserver(
       entries => {
@@ -253,10 +81,16 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
       { rootMargin: '0px 0px -80% 0px' }
     );
 
-    elements.forEach(element => observer.observe(element));
+    // Observe elements corresponding to the headings
+    headings.forEach(heading => {
+      const element = document.getElementById(heading.id);
+      if (element) {
+        observer.observe(element);
+      }
+    });
 
     return () => observer.disconnect();
-  }, [tocItems, articleRef, isUserNavigating]);
+  }, [headings, articleRef, isUserNavigating]);
 
   // Smart TOC auto-scroll - scroll TOC to show active item
   useEffect(() => {
@@ -265,15 +99,11 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
     // Find the TOC link for the active heading
     const tocContainer = document.querySelector('[data-toc-container]');
     if (!tocContainer) {
-      console.warn('TableOfContents: TOC container not found for auto-scroll');
       return;
     }
 
     const activeElement = tocContainer.querySelector(`a[href="#${activeId}"]`);
     if (!activeElement) {
-      console.warn(
-        `TableOfContents: TOC link for "${activeId}" not found for auto-scroll`
-      );
       return;
     }
 
@@ -300,22 +130,7 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
 
   if (!show) return null;
 
-  if (isLoading) {
-    return (
-      <div className="flex-1 min-h-48 overflow-hidden">
-        <div className="flex flex-col gap-4 pr-2">
-          <div className="h-3 bg-muted rounded animate-pulse w-3/4"></div>
-          <div className="h-3 bg-muted rounded animate-pulse w-full"></div>
-          <div className="h-3 bg-muted rounded animate-pulse w-5/6"></div>
-          <div className="h-3 bg-muted rounded animate-pulse w-2/3"></div>
-          <div className="h-3 bg-muted rounded animate-pulse w-4/5"></div>
-          <div className="h-3 bg-muted rounded animate-pulse w-1/2"></div>
-        </div>
-      </div>
-    );
-  }
-
-  if (tocItems.length === 0) {
+  if (headings.length === 0) {
     return (
       <div className="text-sm text-muted-foreground">No headings found</div>
     );
@@ -327,14 +142,24 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
       data-toc-container
     >
       <nav className="relative pr-2">
-        {tocItems.map(heading => (
+        {headings.map(heading => (
           <a
             key={heading.id}
             href={`#${heading.id}`}
             data-toc-link
             className={cn(
               'block text-sm py-1 hover:text-foreground transition-colors',
-              heading.level === 1 ? 'pl-0' : `pl-${(heading.level - 1) * 4}`,
+              heading.level === 1
+                ? 'pl-0'
+                : heading.level === 2
+                  ? 'pl-2'
+                  : heading.level === 3
+                    ? 'pl-4'
+                    : heading.level === 4
+                      ? 'pl-6'
+                      : heading.level === 5
+                        ? 'pl-8'
+                        : 'pl-10',
               activeId === heading.id
                 ? 'text-foreground'
                 : 'text-muted-foreground'

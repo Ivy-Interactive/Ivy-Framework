@@ -85,5 +85,11 @@ public readonly struct CheckedAuthSession(IAuthSession innerAuthSession, Diction
             _innerAuthSession.AuthSessionData = value;
         }
     }
+
+    public readonly HttpMessageHandler HttpMessageHandler
+    {
+        get => _innerAuthSession.HttpMessageHandler;
+        set => _innerAuthSession.HttpMessageHandler = value;
+    }
 }
 #endif

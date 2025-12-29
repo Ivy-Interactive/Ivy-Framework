@@ -40,6 +40,13 @@ public class SelectInputApp : SampleBase
         Yellow
     }
 
+    private static readonly IAnyOption[] IconOptions =
+    [
+         new Option<string>(null, "bold", icon: Icons.Bold),
+         new Option<string>(null, "italic", icon: Icons.Italic),
+         new Option<string>(null, "underline", icon: Icons.Underline)
+    ];
+
     protected override object? BuildSample()
     {
         var variants = CreateVariantsSection();
@@ -68,9 +75,11 @@ public class SelectInputApp : SampleBase
     {
         var colorState = UseState(Colors.Red);
         var nullableColorState = UseState((Colors?)null);
-        var colorArrayState = UseState(new Colors[0]);
+        var colorArrayState = UseState(Array.Empty<Colors>());
         var nullableColorArrayState = UseState<Colors[]?>(() => null);
         var colorOptions = typeof(Colors).ToOptions();
+        var iconsState = UseState<string>("bold");
+        var nullableIconsState = UseState<string?>();
 
         return Layout.Grid().Columns(7)
                | Text.InlineCode("Variant")
@@ -144,7 +153,33 @@ public class SelectInputApp : SampleBase
                | nullableColorArrayState
                     .ToSelectInput(colorOptions)
                     .Variant(SelectInputs.Toggle)
-                    .Invalid("Invalid");
+                    .Invalid("Invalid")
+
+               | Text.InlineCode("SelectInputs.Toggle with Icons")
+               | iconsState
+                    .ToSelectInput(IconOptions)
+                    .Variant(SelectInputs.Toggle)
+               | iconsState
+                    .ToSelectInput(IconOptions)
+                    .Variant(SelectInputs.Toggle)
+                    .Disabled()
+               | iconsState
+                    .ToSelectInput(IconOptions)
+                    .Variant(SelectInputs.Toggle)
+                    .Invalid("Invalid")
+               | iconsState
+                    .ToSelectInput(IconOptions)
+                    .Variant(SelectInputs.Toggle)
+                    .Placeholder("Select a color")
+               | nullableIconsState
+                    .ToSelectInput(IconOptions)
+                    .Variant(SelectInputs.Toggle)
+               | nullableIconsState
+                    .ToSelectInput(IconOptions)
+                    .Variant(SelectInputs.Toggle)
+                    .Invalid("Invalid")
+             ;
+
     }
 
     private object CreateMultiSelectVariantsSection()

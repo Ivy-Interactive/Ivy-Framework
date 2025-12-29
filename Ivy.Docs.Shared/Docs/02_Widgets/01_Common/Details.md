@@ -11,14 +11,14 @@ searchHints:
 # Details
 
 <Ingress>
-Display structured label-value pairs from models with automatic formatting using the ToDetails() extension method.
+Display structured label-value pairs from models with automatic formatting using the [ToDetails()](../../01_Onboarding/02_Concepts/ContentBuilders.md) extension method.
 </Ingress>
 
-`Detail` widgets display label and value pairs. They are usually generated from a model using `ToDetails()`.
+`Detail` [widgets](../../01_Onboarding/02_Concepts/Widgets.md) display label and value pairs. They are usually generated from a model using ToDetails().
 
 ## Basic Usage
 
-The simplest way to create details is by calling `ToDetails()` on any object:
+The simplest way to create details is by calling ToDetails() on any object:
 
 ```csharp demo-below
 new { Name = "John Doe", Email = "john@example.com", Age = 30 }
@@ -43,7 +43,7 @@ new { FirstName = "John", LastName = "Doe", Age = 30, MiddleName = "" }
 
 ### Custom Field Removal
 
-Selectively remove specific fields using the `Remove()` method. This is useful when you want to hide sensitive information like IDs or internal fields from the user interface:
+Selectively remove specific fields using the `Remove()` method. This is useful when you want to hide sensitive information like IDs or internal fields from the [user interface](../../01_Onboarding/02_Concepts/Views.md):
 
 ```csharp demo-tabs
 new { Id = 123, Name = "John Doe", Email = "john@example.com" }
@@ -77,15 +77,13 @@ new { Id = "ABC-123", Name = "John Doe" }
 
 ### Links
 
-Convert values to clickable links. Automatically transform URLs, email addresses, or any text into clickable links that users can interact with:
+Convert values to clickable [links](../../01_Onboarding/02_Concepts/Navigation.md). Automatically transform URLs, email addresses, or any text into clickable links that users can interact with:
 
 ```csharp demo-tabs
 new { Name = "John Doe", Website = "https://example.com" }
     .ToDetails()
     .Builder(x => x.Website, b => b.Link())
 ```
-
-
 
 ## Nested Objects
 
@@ -100,7 +98,7 @@ new {
 
 ## Working with State
 
-Details work seamlessly with reactive state. When the underlying data changes, the details automatically update to reflect the new values, making it perfect for dynamic, interactive interfaces:
+Details work seamlessly with [reactive state](../../01_Onboarding/02_Concepts/State.md). When the underlying data changes, the details automatically update to reflect the new values, making it perfect for dynamic, interactive interfaces:
 
 ```csharp demo-tabs
 UseState(() => new { Name = "John Doe", Age = 30 })

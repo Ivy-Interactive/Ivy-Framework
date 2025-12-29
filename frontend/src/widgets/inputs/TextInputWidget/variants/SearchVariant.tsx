@@ -5,7 +5,6 @@ import { cn } from '@/lib/utils';
 import { getWidth, inputStyles } from '@/lib/styles';
 import { InvalidIcon } from '@/components/InvalidIcon';
 import { useFocusable } from '@/hooks/use-focus-management';
-import { useEventHandler } from '@/components/event-handler';
 import { sidebarMenuRef } from '@/widgets/layouts/sidebar';
 import { Scales } from '@/types/scale';
 import {
@@ -25,6 +24,7 @@ interface SearchVariantProps {
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onBlur: (e: React.FocusEvent<HTMLInputElement>) => void;
   onFocus: (e: React.FocusEvent<HTMLInputElement>) => void;
+  onClear: (e: React.MouseEvent) => void;
   width?: string;
   inputRef?: React.RefObject<HTMLInputElement | HTMLTextAreaElement | null>;
   isFocused: boolean;
@@ -36,6 +36,7 @@ export const SearchVariant: React.FC<SearchVariantProps> = ({
   onChange,
   onBlur,
   onFocus,
+  onClear,
   inputRef,
   isFocused,
   scale = Scales.Medium,
@@ -45,7 +46,6 @@ export const SearchVariant: React.FC<SearchVariantProps> = ({
   };
   const { ref: focusRef } = useFocusable('sidebar-navigation', 0);
   const shouldFocusMenuRef = useRef(false);
-  const eventHandler = useEventHandler();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     savePosition();
@@ -76,18 +76,13 @@ export const SearchVariant: React.FC<SearchVariantProps> = ({
     onBlur(e);
   };
 
-  const handleClear = () => {
-    if (props.events.includes('OnChange')) {
-      eventHandler('OnChange', props.id, ['']);
-    }
-  };
-
   const styles: React.CSSProperties = {
     ...getWidth(props.width),
   };
 
   const shortcutDisplay = formatShortcutForDisplay(props.shortcutKey);
   const hasValue = props.value && props.value.trim() !== '';
+  const showClear = props.nullable && !props.disabled && hasValue;
 
   // Merge focusRef and inputRef
   const mergedRef = useCallback(
@@ -128,9 +123,15 @@ export const SearchVariant: React.FC<SearchVariantProps> = ({
           textInputSizeVariants({ scale }),
           'pl-8 cursor-pointer',
           props.invalid && inputStyles.invalidInput,
-          props.invalid && 'pr-8',
-          hasValue && 'pr-8',
-          props.shortcutKey && !isFocused && !hasValue && 'pr-16',
+          (props.invalid || showClear) && 'pr-8',
+          props.shortcutKey &&
+            !isFocused &&
+            !hasValue &&
+            !showClear &&
+            !props.invalid &&
+            'pr-16',
+          showClear && props.invalid && 'pr-16',
+          !hasValue && props.nullable && 'placeholder:text-muted-foreground',
           // Hide browser's default search input X icon
           '[&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-cancel-button]:hidden'
         )}
@@ -143,7 +144,7 @@ export const SearchVariant: React.FC<SearchVariantProps> = ({
             type="button"
             tabIndex={-1}
             aria-label="Clear search"
-            onClick={handleClear}
+            onClick={onClear}
             className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer pointer-events-auto flex items-center h-6"
             style={{ pointerEvents: 'auto' }}
           >

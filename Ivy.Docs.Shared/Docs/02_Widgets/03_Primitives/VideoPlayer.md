@@ -14,7 +14,7 @@ searchHints:
 Play video content with browser controls. Supports common video formats (e.g., MP4, WebM) and provides customizable playback options.
 </Ingress>
 
-The `VideoPlayer` widget displays a video player with browser-native controls in your app. This widget is for playing video files.
+The `VideoPlayer` [widget](../../../01_Onboarding/02_Concepts/Widgets.md) displays a video player with browser-native controls in your [app](../../../01_Onboarding/02_Concepts/Apps.md). This widget is for playing video files.
 
 ## Basic Usage
 
@@ -87,4 +87,3 @@ new VideoPlayer("https://www.youtube.com/watch?v=dQw4w9WgXcQ")
 ```
 
 <WidgetDocs Type="Ivy.VideoPlayer" ExtensionTypes="Ivy.VideoPlayerExtensions" SourceUrl="https://github.com/Ivy-Interactive/Ivy-Framework/blob/main/Ivy/Widgets/Primitives/VideoPlayer.cs"/>
-

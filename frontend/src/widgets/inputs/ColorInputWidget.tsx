@@ -5,11 +5,13 @@ import { Input } from '@/components/ui/input';
 import { X } from 'lucide-react';
 import React from 'react';
 import { logger } from '@/lib/logger';
+import { cn } from '@/lib/utils';
 import {
   colorInputVariants,
   colorInputPickerVariants,
 } from '@/components/ui/input/color-input-variants';
 import { Scales } from '@/types/scale';
+import { xIconVariants } from '@/components/ui/input/text-input-variants';
 interface ColorInputWidgetProps {
   id: string;
   value: string | null;
@@ -159,7 +161,11 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
             onKeyDown={handleInputKeyDown}
             placeholder={placeholder || 'Enter color'}
             disabled={disabled}
-            className={`${colorInputVariants({ scale })} ${invalid ? inputStyles.invalidInput + ' pr-8' : ''}`}
+            className={cn(
+              colorInputVariants({ scale }),
+              invalid && inputStyles.invalidInput,
+              (invalid || (nullable && value !== null && !disabled)) && 'pr-8'
+            )}
           />
           {(invalid || (nullable && value !== null && !disabled)) && (
             <div
@@ -230,17 +236,20 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
           onKeyDown={handleInputKeyDown}
           placeholder={placeholder || 'Enter color'}
           disabled={disabled}
-          className={`${colorInputVariants({ scale })} ${invalid ? inputStyles.invalidInput + ' pr-8' : ''}`}
+          className={cn(
+            colorInputVariants({ scale }),
+            invalid && inputStyles.invalidInput,
+            (invalid || (nullable && value !== null && !disabled)) && 'pr-8'
+          )}
         />
         {(invalid || (nullable && value !== null && !disabled)) && (
           <div
             className="absolute top-1/2 -translate-y-1/2 flex items-center gap-1 right-2"
             style={{ zIndex: 2 }}
           >
+            {/* Invalid icon - rightmost */}
             {invalid && (
-              <span className="flex items-center">
-                <InvalidIcon message={invalid} />
-              </span>
+              <InvalidIcon message={invalid} className="pointer-events-auto" />
             )}
             {nullable && value !== null && !disabled && (
               <button
@@ -250,7 +259,7 @@ export const ColorInputWidget: React.FC<ColorInputWidgetProps> = ({
                 onClick={handleClear}
                 className="p-1 rounded hover:bg-accent focus:outline-none cursor-pointer"
               >
-                <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+                <X className={xIconVariants({ scale })} />
               </button>
             )}
           </div>

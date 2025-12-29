@@ -1,6 +1,7 @@
 using Ivy.Shared;
 
-namespace Ivy.Apps;
+// ReSharper disable once CheckNamespace
+namespace Ivy;
 
 [AttributeUsage(AttributeTargets.Class)]
 public class AppAttribute(

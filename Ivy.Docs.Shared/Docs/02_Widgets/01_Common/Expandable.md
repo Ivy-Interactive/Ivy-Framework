@@ -11,10 +11,10 @@ searchHints:
 # Expandable
 
 <Ingress>
-Create collapsible content sections that users can expand and collapse to maintain clean, organized layouts.
+Create collapsible content sections that users can expand and collapse to maintain clean, organized [layouts](../../01_Onboarding/02_Concepts/Views.md).
 </Ingress>
 
-The `Expandable` widget allows you to hide and show content interactively, providing a clean and organized way to present information. It's perfect for organizing content into collapsible sections, FAQs, or any scenario where you want to reduce visual clutter.
+The `Expandable` [widget](../../01_Onboarding/02_Concepts/Widgets.md) allows you to hide and show content interactively, providing a clean and organized way to present information. It's perfect for organizing content into collapsible sections, FAQs, or any scenario where you want to reduce visual clutter.
 
 ## Basic Usage
 
@@ -62,7 +62,7 @@ Layout.Vertical().Gap(2)
 Form Sections
 </Summary>
 <Body>
-Organize forms into logical, collapsible sections.
+Organize [forms](../../01_Onboarding/02_Concepts/Forms.md) into logical, collapsible sections.
 
 ```csharp demo-tabs
 public class SimpleFormExample : ViewBase

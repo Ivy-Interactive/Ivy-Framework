@@ -8,7 +8,7 @@ public class AudioPlayerWidgetTests
     public void Audio_Constructor_SetsDefaultProperties()
     {
         // Arrange & Act
-        var audio = new Audio("test.mp3");
+        var audio = new AudioPlayer("test.mp3");
 
         // Assert
         Assert.Equal("test.mp3", audio.Src);
@@ -25,7 +25,7 @@ public class AudioPlayerWidgetTests
     public void Audio_FluentAPI_ConfiguresProperties()
     {
         // Arrange & Act
-        var audio = new Audio("test.mp3")
+        var audio = new AudioPlayer("test.mp3")
             .Autoplay(true)
             .Loop(true)
             .Muted(true)
@@ -45,7 +45,7 @@ public class AudioPlayerWidgetTests
     public void Audio_Src_Extension_UpdatesSource()
     {
         // Arrange
-        var audio = new Audio("original.mp3");
+        var audio = new AudioPlayer("original.mp3");
 
         // Act
         var updatedAudio = audio.Src("updated.mp3");
@@ -59,7 +59,7 @@ public class AudioPlayerWidgetTests
     public void Audio_Preload_Extension_UpdatesPreloadStrategy()
     {
         // Arrange
-        var audio = new Audio("test.mp3");
+        var audio = new AudioPlayer("test.mp3");
 
         // Act
         var updatedAudio = audio.Preload(AudioPreload.None);
@@ -75,7 +75,7 @@ public class AudioPlayerWidgetTests
     public void Audio_Autoplay_Extension_UpdatesAutoplayState(bool autoplayValue)
     {
         // Arrange
-        var audio = new Audio("test.mp3");
+        var audio = new AudioPlayer("test.mp3");
 
         // Act
         var updatedAudio = audio.Autoplay(autoplayValue);
@@ -90,7 +90,7 @@ public class AudioPlayerWidgetTests
     public void Audio_Loop_Extension_UpdatesLoopState(bool loopValue)
     {
         // Arrange
-        var audio = new Audio("test.mp3");
+        var audio = new AudioPlayer("test.mp3");
 
         // Act
         var updatedAudio = audio.Loop(loopValue);
@@ -105,7 +105,7 @@ public class AudioPlayerWidgetTests
     public void Audio_Muted_Extension_UpdatesMutedState(bool mutedValue)
     {
         // Arrange
-        var audio = new Audio("test.mp3");
+        var audio = new AudioPlayer("test.mp3");
 
         // Act
         var updatedAudio = audio.Muted(mutedValue);
@@ -120,7 +120,7 @@ public class AudioPlayerWidgetTests
     public void Audio_Controls_Extension_UpdatesControlsState(bool controlsValue)
     {
         // Arrange
-        var audio = new Audio("test.mp3");
+        var audio = new AudioPlayer("test.mp3");
 
         // Act
         var updatedAudio = audio.Controls(controlsValue);

@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -17,12 +18,12 @@ public class ValueTupleConverterFactory : JsonConverterFactory
     }
 }
 
-public class ValueTupleConverter<T> : JsonConverter<T>
+public class ValueTupleConverter<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] T> : JsonConverter<T>
 {
     private readonly FieldInfo[] _fields;
     private readonly Dictionary<string, FieldInfo> _fieldMap;
 
-    public ValueTupleConverter(JsonNamingPolicy namingPolicy)
+    public ValueTupleConverter(JsonNamingPolicy? namingPolicy)
     {
         _fields = typeof(T)
             .GetFields(BindingFlags.Instance | BindingFlags.Public)

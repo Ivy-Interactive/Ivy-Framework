@@ -99,6 +99,7 @@ const DateVariant: React.FC<DateVariantProps> = ({
             variant="outline"
             className={cn(
               dateTimeInputVariants({ scale }),
+              !date && 'text-muted-foreground',
               invalid && inputStyles.invalidInput,
               disabled && 'cursor-not-allowed',
               showClear && invalid
@@ -116,7 +117,11 @@ const DateVariant: React.FC<DateVariantProps> = ({
               )}
             />
             <span
-              className={cn('truncate', dateTimeInputTextVariants({ scale }))}
+              className={cn(
+                'truncate',
+                dateTimeInputTextVariants({ scale }),
+                !date && 'text-muted-foreground'
+              )}
             >
               {date
                 ? format(date, formatProp || 'yyyy-MM-dd')
@@ -136,7 +141,7 @@ const DateVariant: React.FC<DateVariantProps> = ({
       </Popover>
       {/* Icons absolutely positioned */}
       {(showClear || invalid) && (
-        <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-2">
+        <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-row items-center gap-1">
           {showClear && (
             <button
               type="button"
@@ -153,7 +158,10 @@ const DateVariant: React.FC<DateVariantProps> = ({
               />
             </button>
           )}
-          {invalid && <InvalidIcon message={invalid} />}
+          {/* Invalid icon - rightmost */}
+          {invalid && (
+            <InvalidIcon message={invalid} className="pointer-events-auto" />
+          )}
         </div>
       )}
     </div>
@@ -199,11 +207,14 @@ const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
       if (date) {
         const newTimeValue = format(date, formatProp || 'HH:mm:ss');
         setLocalTimeValue(newTimeValue);
+      } else if (nullable) {
+        // When nullable and no date, keep input empty instead of defaulting to '00:00:00'
+        setLocalTimeValue('');
       } else {
         setLocalTimeValue('00:00:00');
       }
     }
-  }, [date, formatProp, isEditingTime]);
+  }, [date, formatProp, isEditingTime, nullable]);
 
   const handleDateSelect = useCallback(
     (selectedDate: Date | undefined) => {
@@ -292,6 +303,7 @@ const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
             variant="outline"
             className={cn(
               dateTimeInputVariants({ scale }),
+              !date && 'text-muted-foreground',
               invalid && inputStyles.invalidInput,
               disabled && 'cursor-not-allowed',
               showClear && invalid
@@ -315,7 +327,11 @@ const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
               )}
             />
             <span
-              className={cn('truncate', dateTimeInputTextVariants({ scale }))}
+              className={cn(
+                'truncate',
+                dateTimeInputTextVariants({ scale }),
+                !date && 'text-muted-foreground'
+              )}
             >
               {date
                 ? format(date, formatProp || 'yyyy-MM-dd')
@@ -361,7 +377,7 @@ const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
       </Popover>
       {/* Icons absolutely positioned */}
       {(showClear || invalid) && (
-        <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-2">
+        <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-row items-center gap-1">
           {showClear && (
             <button
               type="button"
@@ -378,7 +394,10 @@ const DateTimeVariant: React.FC<DateTimeVariantProps> = ({
               />
             </button>
           )}
-          {invalid && <InvalidIcon message={invalid} />}
+          {/* Invalid icon - rightmost */}
+          {invalid && (
+            <InvalidIcon message={invalid} className="pointer-events-auto" />
+          )}
         </div>
       )}
     </div>
@@ -414,7 +433,8 @@ const TimeVariant: React.FC<TimeVariantProps> = ({
         }
       }
     }
-    return '00:00:00';
+    // When nullable and no value, return empty string to show placeholder
+    return nullable ? '' : '00:00:00';
   });
 
   // Update local state when value prop changes (from parent)
@@ -437,9 +457,10 @@ const TimeVariant: React.FC<TimeVariantProps> = ({
         }
       }
     } else {
-      setLocalTimeValue('00:00:00');
+      // When nullable and no value, keep input empty instead of defaulting to '00:00:00'
+      setLocalTimeValue(nullable ? '' : '00:00:00');
     }
-  }, [value]);
+  }, [value, nullable]);
 
   const showClear = nullable && !disabled && value != null && value !== '';
 
@@ -474,7 +495,12 @@ const TimeVariant: React.FC<TimeVariantProps> = ({
 
   return (
     <div className="relative w-full select-none" data-testid={dataTestId}>
-      <div className="relative flex items-center rounded-md border border-input shadow-sm focus-within:ring-1 focus-within:ring-ring">
+      <div
+        className={cn(
+          'relative flex items-center rounded-md border border-input shadow-sm focus-within:ring-1 focus-within:ring-ring',
+          invalid && inputStyles.invalidInput
+        )}
+      >
         <Clock
           className={cn(
             'ml-3 shrink-0',
@@ -503,7 +529,7 @@ const TimeVariant: React.FC<TimeVariantProps> = ({
       </div>
       {/* Icons absolutely positioned */}
       {(showClear || invalid) && (
-        <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-2">
+        <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-row items-center gap-1">
           {showClear && (
             <button
               type="button"
@@ -520,7 +546,10 @@ const TimeVariant: React.FC<TimeVariantProps> = ({
               />
             </button>
           )}
-          {invalid && <InvalidIcon message={invalid} />}
+          {/* Invalid icon - rightmost */}
+          {invalid && (
+            <InvalidIcon message={invalid} className="pointer-events-auto" />
+          )}
         </div>
       )}
     </div>
