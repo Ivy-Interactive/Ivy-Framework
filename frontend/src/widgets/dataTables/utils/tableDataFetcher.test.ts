@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { fetchTableData } from './tableDataFetcher';
 import { getIvyHost } from '@/lib/utils';
 import {
-  grpcTableService,
+  getGrpcTableService,
   type Filter,
   type SortOrder,
 } from '@/services/grpcTableService';
@@ -13,14 +13,24 @@ import { ColType } from '../types/types';
 
 // Mock dependencies
 vi.mock('@/lib/utils');
-vi.mock('@/services/grpcTableService');
+vi.mock('@/services/grpcTableService', () => ({
+  getGrpcTableService: vi.fn(),
+}));
 vi.mock('./tableDataMapper');
 vi.mock('apache-arrow');
 
 const mockGetIvyHost = vi.mocked(getIvyHost);
-const mockGrpcTableService = vi.mocked(grpcTableService);
+const mockGetGrpcTableService = vi.mocked(getGrpcTableService);
 const mockConvertArrowTableToData = vi.mocked(convertArrowTableToData);
 const mockArrow = vi.mocked(arrow);
+
+// Create a mock service instance
+const mockQueryTable = vi.fn();
+const mockParseFilter = vi.fn();
+const mockGrpcService = {
+  queryTable: mockQueryTable,
+  parseFilter: mockParseFilter,
+};
 
 describe('tableDataFetcher', () => {
   const mockConnection: DataTableConnection = {
@@ -40,6 +50,8 @@ describe('tableDataFetcher', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockGetIvyHost.mockReturnValue('https://localhost:3000');
+    // Setup getGrpcTableService to return our mock service
+    mockGetGrpcTableService.mockReturnValue(mockGrpcService as never);
   });
 
   describe('fetchTableData', () => {
@@ -52,7 +64,7 @@ describe('tableDataFetcher', () => {
         total_rows: 100,
       };
 
-      mockGrpcTableService.queryTable.mockResolvedValue(mockResult);
+      mockQueryTable.mockResolvedValue(mockResult);
       mockArrow.tableFromIPC.mockReturnValue(mockArrowTable);
       mockConvertArrowTableToData.mockReturnValue({
         columns: mockColumns,
@@ -62,7 +74,7 @@ describe('tableDataFetcher', () => {
 
       const result = await fetchTableData(mockConnection, 0, 10);
 
-      expect(mockGrpcTableService.queryTable).toHaveBeenCalledWith({
+      expect(mockQueryTable).toHaveBeenCalledWith({
         serverUrl: 'https://localhost:3000',
         query: {
           limit: 10,
@@ -103,7 +115,7 @@ describe('tableDataFetcher', () => {
         row_count: 2,
         total_rows: 100,
       };
-      mockGrpcTableService.queryTable.mockResolvedValue(mockResult);
+      mockQueryTable.mockResolvedValue(mockResult);
       mockArrow.tableFromIPC.mockReturnValue({} as arrow.Table);
       mockConvertArrowTableToData.mockReturnValue({
         columns: mockColumns,
@@ -113,7 +125,7 @@ describe('tableDataFetcher', () => {
 
       await fetchTableData(mockConnection, 0, 10, mockFilter);
 
-      expect(mockGrpcTableService.queryTable).toHaveBeenCalledWith({
+      expect(mockQueryTable).toHaveBeenCalledWith({
         serverUrl: 'https://localhost:3000',
         query: {
           limit: 10,
@@ -134,7 +146,7 @@ describe('tableDataFetcher', () => {
         row_count: 2,
         total_rows: 100,
       };
-      mockGrpcTableService.queryTable.mockResolvedValue(mockResult);
+      mockQueryTable.mockResolvedValue(mockResult);
       mockArrow.tableFromIPC.mockReturnValue({} as arrow.Table);
       mockConvertArrowTableToData.mockReturnValue({
         columns: mockColumns,
@@ -144,7 +156,7 @@ describe('tableDataFetcher', () => {
 
       await fetchTableData(mockConnection, 0, 10, null, mockSort);
 
-      expect(mockGrpcTableService.queryTable).toHaveBeenCalledWith({
+      expect(mockQueryTable).toHaveBeenCalledWith({
         serverUrl: 'https://localhost:3000',
         query: {
           limit: 10,
@@ -172,7 +184,7 @@ describe('tableDataFetcher', () => {
         row_count: 2,
         total_rows: 100,
       };
-      mockGrpcTableService.queryTable.mockResolvedValue(mockResult);
+      mockQueryTable.mockResolvedValue(mockResult);
       mockArrow.tableFromIPC.mockReturnValue({} as arrow.Table);
       mockConvertArrowTableToData.mockReturnValue({
         columns: mockColumns,
@@ -182,7 +194,7 @@ describe('tableDataFetcher', () => {
 
       await fetchTableData(mockConnection, 5, 20, mockFilter, mockSort);
 
-      expect(mockGrpcTableService.queryTable).toHaveBeenCalledWith({
+      expect(mockQueryTable).toHaveBeenCalledWith({
         serverUrl: 'https://localhost:3000',
         query: {
           limit: 20,
@@ -203,7 +215,7 @@ describe('tableDataFetcher', () => {
         row_count: 0,
         total_rows: 0,
       };
-      mockGrpcTableService.queryTable.mockResolvedValue(mockResult);
+      mockQueryTable.mockResolvedValue(mockResult);
 
       const result = await fetchTableData(mockConnection, 0, 10);
 
@@ -227,7 +239,7 @@ describe('tableDataFetcher', () => {
         row_count: 2,
         total_rows: 100,
       };
-      mockGrpcTableService.queryTable.mockResolvedValue(mockResult);
+      mockQueryTable.mockResolvedValue(mockResult);
       mockArrow.tableFromIPC.mockReturnValue({} as arrow.Table);
       mockConvertArrowTableToData.mockReturnValue({
         columns: mockColumns,
@@ -237,7 +249,7 @@ describe('tableDataFetcher', () => {
 
       await fetchTableData(mockConnection, 0, 10);
 
-      expect(mockGrpcTableService.queryTable).toHaveBeenCalledWith({
+      expect(mockQueryTable).toHaveBeenCalledWith({
         serverUrl: 'http://example.com:9000/path',
         query: expect.any(Object),
       });
@@ -245,7 +257,7 @@ describe('tableDataFetcher', () => {
 
     it('should throw error when grpcTableService fails', async () => {
       const mockError = new Error('gRPC service failed');
-      mockGrpcTableService.queryTable.mockRejectedValue(mockError);
+      mockQueryTable.mockRejectedValue(mockError);
 
       const consoleSpy = vi
         .spyOn(console, 'error')
@@ -275,7 +287,7 @@ describe('tableDataFetcher', () => {
         row_count: 2,
         total_rows: 100,
       };
-      mockGrpcTableService.queryTable.mockResolvedValue(mockResult);
+      mockQueryTable.mockResolvedValue(mockResult);
       mockArrow.tableFromIPC.mockReturnValue({} as arrow.Table);
       mockConvertArrowTableToData.mockReturnValue({
         columns: mockColumns,
@@ -286,7 +298,7 @@ describe('tableDataFetcher', () => {
       await fetchTableData(customConnection, 0, 10);
 
       // Should use getIvyHost() return value, not connection.port
-      expect(mockGrpcTableService.queryTable).toHaveBeenCalledWith({
+      expect(mockQueryTable).toHaveBeenCalledWith({
         serverUrl: 'https://localhost:3000',
         query: expect.any(Object),
       });
@@ -299,7 +311,7 @@ describe('tableDataFetcher', () => {
         row_count: 2,
         total_rows: 100,
       };
-      mockGrpcTableService.queryTable.mockResolvedValue(mockResult);
+      mockQueryTable.mockResolvedValue(mockResult);
       mockArrow.tableFromIPC.mockReturnValue({} as arrow.Table);
       mockConvertArrowTableToData.mockReturnValue({
         columns: mockColumns,
@@ -309,7 +321,7 @@ describe('tableDataFetcher', () => {
 
       await fetchTableData(mockConnection, 0, 10, null, null);
 
-      expect(mockGrpcTableService.queryTable).toHaveBeenCalledWith({
+      expect(mockQueryTable).toHaveBeenCalledWith({
         serverUrl: 'https://localhost:3000',
         query: {
           limit: 10,
@@ -330,7 +342,7 @@ describe('tableDataFetcher', () => {
         row_count: 2,
         total_rows: 100,
       };
-      mockGrpcTableService.queryTable.mockResolvedValue(mockResult);
+      mockQueryTable.mockResolvedValue(mockResult);
       mockArrow.tableFromIPC.mockReturnValue({} as arrow.Table);
       mockConvertArrowTableToData.mockReturnValue({
         columns: mockColumns,
@@ -341,7 +353,7 @@ describe('tableDataFetcher', () => {
       await fetchTableData(mockConnection, 0, 10);
 
       // Should use getIvyHost() return value, NODE_ENV should not affect it
-      expect(mockGrpcTableService.queryTable).toHaveBeenCalledWith({
+      expect(mockQueryTable).toHaveBeenCalledWith({
         serverUrl: 'https://localhost:3000',
         query: {
           limit: 10,
