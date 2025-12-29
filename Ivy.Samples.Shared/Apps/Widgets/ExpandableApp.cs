@@ -37,12 +37,12 @@ public class ExpandableApp : SampleBase
                 "Generous spacing gives the content breathing room and improves readability.")
         ).Large();
 
+        var notificationSwitch = UseState(false);
         var toggleableExpandable1 = new Expandable(
             Layout.Horizontal()
-            | Text.Block("Apps")
-            | new Icon(Icons.ChevronRight)
-            | new Icon(Icons.Paperclip)
-            | Text.Block("Attachments"),
+            | Text.Block("Attachments")
+            | notificationSwitch.ToSwitchInput()
+            | Text.Block("Enable notifications"),
             Text.Block("This is the content for Attachments")
         ).Disabled(true);
 

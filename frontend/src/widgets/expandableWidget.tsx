@@ -17,7 +17,6 @@ import { Scales } from '@/types/scale';
 import { cn } from '@/lib/utils';
 
 interface ExpandableWidgetProps {
-  id: string;
   disabled?: boolean;
   toggleable?: boolean;
   open?: boolean;
@@ -29,7 +28,6 @@ interface ExpandableWidgetProps {
 }
 
 export const ExpandableWidget: React.FC<ExpandableWidgetProps> = ({
-  id,
   disabled = false,
   toggleable = false,
   open = false,
@@ -65,7 +63,17 @@ export const ExpandableWidget: React.FC<ExpandableWidgetProps> = ({
   const handleTriggerClick = (e: React.MouseEvent) => {
     const target = e.target as HTMLElement;
 
-    if (target.closest('[role="switch"]')) {
+    // Check for interactive elements in the header (like in main)
+    const isInteractiveElement =
+      target.closest('button:not([data-collapsible-trigger])') ||
+      target.closest('input') ||
+      target.closest('select') ||
+      target.closest('[role="button"]:not([data-collapsible-trigger])') ||
+      target.closest('[role="switch"]') ||
+      target.closest('[role="checkbox"]') ||
+      target.closest('a[href]');
+
+    if (isInteractiveElement) {
       e.stopPropagation();
       return;
     }
@@ -78,19 +86,16 @@ export const ExpandableWidget: React.FC<ExpandableWidgetProps> = ({
 
   return (
     <Collapsible
-      key={id}
       open={isOpen}
       onOpenChange={handleOpenChange}
       className={cn(
-        'w-full rounded-md border border-border shadow-sm',
-        isDisabled && 'cursor-not-allowed',
-        'p-0'
+        'w-full rounded-md border border-border shadow-sm p-0',
+        isDisabled && 'cursor-not-allowed'
       )}
       data-disabled={isDisabled}
       role="details"
     >
       <CollapsibleTrigger
-        disabled={false}
         className={cn(
           expandableTriggerVariants({ scale }),
           'relative',
@@ -115,7 +120,9 @@ export const ExpandableWidget: React.FC<ExpandableWidgetProps> = ({
           className={cn(
             expandableHeaderVariants({ scale }),
             isDisabled &&
-              '[&>*:not(:has([role=switch],[role=checkbox],input))]:opacity-50'
+              '[&>*:not(:has([role=switch],[role=checkbox],input))]:opacity-50',
+            isDisabled &&
+              '[&_[role=switch]]:pointer-events-none [&_[role=switch]]:opacity-50'
           )}
           role="summary"
         >
