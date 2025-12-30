@@ -40,7 +40,10 @@ const CopyToClipboardButton: React.FC<CopyToClipboardButtonProps> = ({
           (copied
             ? 'bg-primary text-primary-foreground'
             : 'bg-transparent text-muted-foreground hover:text-foreground'),
-        copied && isIconOnly && 'bg-primary text-primary-foreground'
+        isIconOnly && !copied && 'bg-background hover:bg-accent',
+        copied &&
+          isIconOnly &&
+          'bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus-visible:ring-primary'
       )}
     >
       <span className="relative w-4 h-4">
